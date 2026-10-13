@@ -37,4 +37,5 @@ Durable state for the multi-day autonomous build. Update after every completed s
 
 ## Log
 
-- 2026-10-13: kickoff. Decisions: TS in-browser engine, MusicXML + library + MIDI, public MIT repo, name digitus2. Spec written. Five research agents launched. Repo scaffolded.
+- 2026-10-13: kickoff. Decisions: TS in-browser engine, MusicXML + library + MIDI, public MIT repo, name digitus2. Spec written. Five research agents launched. Repo scaffolded. GitHub repo created: https://github.com/MarchalMaxim/digitus2.
+- 2026-10-13 (later): the Claude Code session restarted and stopped all five research agents mid-flight; they were resumed from their transcripts. Their partial output is on disk (research/, content/) but no reports in docs/research/ yet. M1 plan written and committed. M1 execution started as an ultracode workflow. Early result from the baselines agent, before the restart: Nakamura CHMM on the official PIG test split (30 pieces) scores M_gen 62.1, M_high 68.7, M_soft 82.6, M_rec 74.7 (macro, percent), and the Python scorer matches the official C++ evaluator to within 5e-7, so the metrics pipeline is trustworthy. The user asked that ultracode workflows be used whenever work can be parallelized.

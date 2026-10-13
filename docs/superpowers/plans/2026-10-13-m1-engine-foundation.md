@@ -1963,7 +1963,7 @@ export function fingerSeq(score: Score, assignment: Assignment): FingerSeq      
 export function alignScores(pred: Score, gold: Score): Array<[string, string]>  // [predId, goldId] pairs in gold order
 export function metricsForScores(pred: { score: Score; assignment: Assignment }, golds: Array<{ score: Score; assignment: Assignment }>): PigMetrics
 ```
-Definitions (Nakamura, Saito, Yoshii 2020, section on evaluation measures): with N notes and K ground truths, `M_k` is the fraction of notes whose predicted finger equals ground truth k. General match rate `gen` = mean of `M_k`; highest match rate `high` = max of `M_k`; soft match rate `soft` = fraction of notes whose predicted finger equals at least one ground truth at that note; recombination match rate `rec` = the best match rate against any recombined ground truth, where a recombined ground truth picks one annotator per note and may switch from annotator k' to k between note t-1 and t only when both agree on note t-1 (so every consecutive finger pair in the recombined sequence occurs in some single ground truth). Recombination runs along each hand's own note sequence when `hands` is given. Substitutions compare the first finger only. A ground-truth note without a finger never matches. When `research/fingering_eval/metrics.py` exists (built by the datasets agent and cross-checked with the official evaluation code), compare with it on a real PIG piece; the Python implementation wins any disagreement, and the TypeScript tests are updated to match.
+Definitions (Nakamura, Saito, Yoshii 2020, section on evaluation measures): with N notes and K ground truths, `M_k` is the fraction of notes whose predicted finger equals ground truth k. General match rate `gen` = mean of `M_k`; highest match rate `high` = max of `M_k`; soft match rate `soft` = fraction of notes whose predicted finger equals at least one ground truth at that note; recombination match rate `rec` (Nakamura et al. 2020, Appendix A) = `(N - E) / N` where `E` is the minimum edit cost of a recombined ground truth: pick one annotator per note; every note where the chosen annotator's finger differs from the prediction costs 1; every switch from one annotator to another costs 1 and is allowed only where the two annotators' fingers coincide at the switch point (otherwise infinite). The switch cost is what makes `rec` smaller than `soft`. Recombination runs along each hand's own note sequence when `hands` is given. Substitutions compare the first finger only. A ground-truth note without a finger never matches. The exact index convention for "coincide at the switch point" (note t-1 or note t) is fixed by the reference implementation: read `research/fingering_eval/metrics.py` (built by the datasets agent and cross-checked with the official C++ evaluator to 5e-7) and replicate its convention; then run both on one real PIG piece (`research/data/pig/FingeringFiles`, one annotator as prediction, the others as gold) and confirm identical numbers. The Python implementation wins any disagreement, and the TypeScript tests are updated to match.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2000,11 +2000,13 @@ describe('pigMetrics', () => {
     expect(m.gen).toBe(0.5);
     expect(m.high).toBe(0.5);
   });
-  it('allows switching where annotators agree', () => {
-    // A and B agree on note 1 (finger 2), so A at notes 0-1 and B at notes 2-3 is a legal recombination.
+  it('charges one point per annotator switch, allowed only where they agree', () => {
+    // A and B agree on note 1 (finger 2). Staying with B costs 1 (note 0); A then B costs 1 (the switch).
     const m = pigMetrics([1, 2, 4, 5], [[1, 2, 3, 3], [5, 2, 4, 5]]);
-    expect(m.rec).toBe(1);
+    expect(m.rec).toBe(0.75);
     expect(m.high).toBe(0.75);
+    // With the switch made free, this would be 1; the edit cost is what distinguishes rec from soft.
+    expect(m.soft).toBe(1);
   });
   it('recombines per hand when hands are given', () => {
     // Right-hand notes at indices 0 and 2, left-hand at 1 and 3.
@@ -2128,28 +2130,39 @@ export function pigMetrics(pred: FingerSeq, golds: FingerSeq[], hands?: Hand[]):
   return { gen, high, soft, rec, notes: n, annotators: golds.length };
 }
 
-/** Best number of matches along the note indices `idx` for a recombined ground truth (see Task 9 definition). */
+/**
+ * Recombination hits along the note indices `idx`: N minus the minimum edit cost of a recombined
+ * ground truth (Nakamura et al. 2020, App. A). A mismatch costs C_SUB = 1; switching annotators
+ * costs C_REC = 1 and is only allowed where the two annotators agree at the switch point.
+ * The switch-point index convention below (note t-1) must be checked against
+ * research/fingering_eval/metrics.py, which matches the official evaluator; change it if they differ.
+ */
 function recombinationHits(pred: FingerSeq, golds: FingerSeq[], idx: number[]): number {
   if (idx.length === 0) return 0;
   const K = golds.length;
-  const hit = (k: number, t: number): number => {
+  const C_SUB = 1;
+  const C_REC = 1;
+  const miss = (k: number, t: number): number => {
     const g = golds[k]![idx[t]!];
-    return g !== undefined && g === pred[idx[t]!] ? 1 : 0;
+    return g !== undefined && g === pred[idx[t]!] ? 0 : C_SUB;
   };
-  let best = Array.from({ length: K }, (_, k) => hit(k, 0));
+  let cost = Array.from({ length: K }, (_, k) => miss(k, 0));
   for (let t = 1; t < idx.length; t++) {
-    const next = new Array<number>(K).fill(Number.NEGATIVE_INFINITY);
+    const next = new Array<number>(K).fill(Number.POSITIVE_INFINITY);
     for (let k = 0; k < K; k++) {
-      let incoming = Number.NEGATIVE_INFINITY;
       for (let kp = 0; kp < K; kp++) {
-        const allowed = kp === k || golds[kp]![idx[t - 1]!] === golds[k]![idx[t - 1]!];
-        if (allowed && best[kp]! > incoming) incoming = best[kp]!;
+        let trans = 0;
+        if (kp !== k) {
+          trans = golds[kp]![idx[t - 1]!] === golds[k]![idx[t - 1]!] ? C_REC : Number.POSITIVE_INFINITY;
+        }
+        const v = cost[kp]! + trans;
+        if (v < next[k]!) next[k] = v;
       }
-      next[k] = incoming + hit(k, t);
+      next[k] = next[k]! + miss(k, t);
     }
-    best = next;
+    cost = next;
   }
-  return Math.max(...best);
+  return idx.length - Math.min(...cost);
 }
 ```
 

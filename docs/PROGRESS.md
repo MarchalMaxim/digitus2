@@ -36,6 +36,12 @@ Durable state for the multi-day autonomous build. Update after every completed s
 | `benchmarks/textbook/`, `docs/research/textbook-oracle.md` | textbook oracle agent | canonical scale, arpeggio and chromatic fingerings for all keys, cited |
 | everything else | coordinator | scaffold, spec, plan, commits |
 
+## Standing findings
+
+- Licensing (literature report §6.9): PIG is for non-profit academic use; weights trained on it cannot ship without the maintainers' permission. Plan: Engine A (rules only, no data) ships unconditionally; shipped learned weights come from permissive data (textbook oracle, Beringer corpus from pydactyl (MIT), Mutopia editorial fingerings after per-piece license checks); PIG is used for evaluation and for research-only weight comparisons. Asking the PIG maintainers for permission is a decision for the user.
+- Literature leaderboard (PIG test, M_gen): human ceiling 71.4; ArGNN 66.84 (best published); HMM3 64.5; an unverified exact rule-based Viterbi (chirality project) 64.9. Nothing new on the benchmark since 2022.
+- The recombination metric charges one point per annotator switch (Nakamura 2020 App. A); the M1 plan's Task 9 was corrected accordingly on 2026-10-13 before lane A reached it.
+
 ## Log
 
 - 2026-10-13: kickoff. Decisions: TS in-browser engine, MusicXML + library + MIDI, public MIT repo, name digitus2. Spec written. Five research agents launched. Repo scaffolded. GitHub repo created: https://github.com/MarchalMaxim/digitus2.

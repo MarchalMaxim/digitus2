@@ -33,6 +33,7 @@ Durable state for the multi-day autonomous build. Update after every completed s
 | `research/baselines/`, `research/.venv-baselines/`, `docs/research/baselines.md` | baselines agent | third-party implementations wrapped and scored |
 | `content/`, `docs/research/content-library.md` | content agent | built-in library with manifest |
 | `research/spikes/render/`, `docs/research/rendering-spike.md` | rendering spike agent | renderer, player, parser recommendation |
+| `benchmarks/textbook/`, `docs/research/textbook-oracle.md` | textbook oracle agent | canonical scale, arpeggio and chromatic fingerings for all keys, cited |
 | everything else | coordinator | scaffold, spec, plan, commits |
 
 ## Log

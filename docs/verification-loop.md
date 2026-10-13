@@ -1,6 +1,6 @@
 # Verification loop
 
-The project is built autonomously for days, so every change must be judged by machines, not by a person watching. This document defines the loop. `CLAUDE.md` points here.
+The project is built autonomously for days, so every change must be judged by machines, not by a person watching. This document is the operator's guide to the loop; the goals, oracles and checks themselves are specified in `docs/superpowers/specs/2026-10-13-verification-design.md`, and experiments are logged in `docs/experiments.md`. `CLAUDE.md` points here.
 
 ## One command
 

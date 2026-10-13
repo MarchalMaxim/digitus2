@@ -1,0 +1,4 @@
+# Makes this throwaway prototype its own pnpm workspace root, so pnpm never walks up to the repo's
+# workspace (pnpm does not honor ignore-workspace from .npmrc). Keeps the root lockfile and node_modules untouched.
+packages:
+  - '.'

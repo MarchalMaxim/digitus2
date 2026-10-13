@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="4.0">
+  <work><work-title>Digitus Spike Etude (short)</work-title></work>
+  <identification><creator type="composer">digitus2 spike (generated)</creator><encoding><software>digitus2 gen-fixtures.mjs</software></encoding></identification>
+  <part-list>
+    <score-part id="P1"><part-name>Piano</part-name>
+      <score-instrument id="P1-I1"><instrument-name>Piano</instrument-name></score-instrument>
+      <midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>1</midi-program></midi-instrument>
+    </score-part>
+  </part-list>
+  <part id="P1">
+  <measure number="1">
+    <attributes><divisions>12</divisions><key><fifths>1</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes>
+    <direction placement="above"><direction-type><metronome parentheses="no"><beat-unit>quarter</beat-unit><per-minute>96</per-minute></metronome></direction-type><staff>1</staff><sound tempo="96"/></direction>
+    <direction placement="below"><direction-type><dynamics><p/></dynamics></direction-type><staff>1</staff></direction>
+    <note id="n1"><pitch><step>G</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="start" number="1" placement="above"/><technical><fingering placement="above">1</fingering></technical></notations></note>
+    <note id="n2"><pitch><step>A</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">begin</beam><notations><technical><fingering placement="above">2</fingering></technical></notations></note>
+    <note id="n3"><pitch><step>B</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">end</beam><notations><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n4"><pitch><step>C</step><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><technical><fingering placement="above">4</fingering></technical></notations></note>
+    <note id="n5"><pitch><step>D</step><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="stop" number="1"/><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n6"><pitch><step>G</step><octave>2</octave></pitch><duration>48</duration><tie type="start"/><voice>5</voice><type>whole</type><staff>2</staff><notations><tied type="start"/><technical><fingering placement="below">5</fingering></technical></notations></note>
+    <note id="n7"><chord/><pitch><step>B</step><octave>2</octave></pitch><duration>48</duration><tie type="start"/><voice>5</voice><type>whole</type><staff>2</staff><notations><tied type="start"/><technical><fingering placement="below">3</fingering></technical></notations></note>
+    <note id="n8"><chord/><pitch><step>D</step><octave>3</octave></pitch><duration>48</duration><tie type="start"/><voice>5</voice><type>whole</type><staff>2</staff><notations><tied type="start"/><technical><fingering placement="below">1</fingering></technical></notations></note>
+  </measure>
+  <measure number="2">
+    <note id="n9"><grace slash="yes"/><pitch><step>C</step><octave>5</octave></pitch><voice>1</voice><type>eighth</type><staff>1</staff><notations><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <note id="n10"><pitch><step>B</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="start" number="1" placement="above"/><technical><fingering placement="above">4</fingering></technical></notations></note>
+    <note id="n11"><pitch><step>A</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="stop" number="1"/><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n12"><pitch><step>D</step><octave>4</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">1</fingering></technical></notations></note>
+    <note id="n13"><chord/><pitch><step>F</step><alter>1</alter><octave>4</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n14"><chord/><pitch><step>A</step><octave>4</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n15"><pitch><step>G</step><octave>2</octave></pitch><duration>24</duration><tie type="stop"/><voice>5</voice><type>half</type><staff>2</staff><notations><tied type="stop"/></notations></note>
+    <note id="n16"><chord/><pitch><step>B</step><octave>2</octave></pitch><duration>24</duration><tie type="stop"/><voice>5</voice><type>half</type><staff>2</staff><notations><tied type="stop"/></notations></note>
+    <note id="n17"><chord/><pitch><step>D</step><octave>3</octave></pitch><duration>24</duration><tie type="stop"/><voice>5</voice><type>half</type><staff>2</staff><notations><tied type="stop"/></notations></note>
+    <note id="n18"><pitch><step>D</step><octave>2</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">5</fingering></technical></notations></note>
+    <note id="n19"><chord/><pitch><step>A</step><octave>2</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">2</fingering></technical></notations></note>
+    <note id="n20"><chord/><pitch><step>C</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+  </measure>
+  <measure number="3">
+    <note id="n21"><pitch><step>B</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><stem>up</stem><staff>1</staff><notations><slur type="start" number="1" placement="above"/><technical><fingering placement="above">2</fingering></technical></notations></note>
+    <note id="n22"><pitch><step>C</step><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><stem>up</stem><staff>1</staff><notations><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n23"><pitch><step>D</step><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><stem>up</stem><staff>1</staff><notations><technical><fingering placement="above">4</fingering></technical></notations></note>
+    <note id="n24"><pitch><step>E</step><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><stem>up</stem><staff>1</staff><notations><slur type="stop" number="1"/><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n25"><pitch><step>G</step><octave>4</octave></pitch><duration>24</duration><voice>2</voice><type>half</type><stem>down</stem><staff>1</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+    <note id="n26"><pitch><step>G</step><octave>4</octave></pitch><duration>24</duration><voice>2</voice><type>half</type><stem>down</stem><staff>1</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n27"><pitch><step>E</step><octave>3</octave></pitch><duration>18</duration><voice>5</voice><type>quarter</type><dot/><staff>2</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+    <note id="n28"><pitch><step>D</step><octave>3</octave></pitch><duration>6</duration><voice>5</voice><type>eighth</type><staff>2</staff><notations><technical><fingering placement="below">2</fingering></technical></notations></note>
+    <note id="n29"><pitch><step>C</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">3</fingering></technical></notations></note>
+  </measure>
+  <measure number="4">
+    <note id="n30"><pitch><step>D</step><octave>5</octave></pitch><duration>4</duration><voice>1</voice><type>eighth</type><time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification><staff>1</staff><beam number="1">begin</beam><notations><slur type="start" number="1" placement="above"/><tuplet type="start" bracket="no"/><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <note id="n31"><pitch><step>C</step><octave>5</octave></pitch><duration>4</duration><voice>1</voice><type>eighth</type><time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification><staff>1</staff><beam number="1">continue</beam><notations><technical><fingering placement="above">4</fingering></technical></notations></note>
+    <note id="n32"><pitch><step>B</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>eighth</type><time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification><staff>1</staff><beam number="1">end</beam><notations><tuplet type="stop" bracket="no"/><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n33"><pitch><step>A</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="stop" number="1"/><technical><fingering placement="above">2</fingering></technical></notations></note>
+    <note id="n34"><pitch><step>F</step><alter>1</alter><octave>4</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">1</fingering></technical></notations></note>
+    <note id="n35"><chord/><pitch><step>A</step><octave>4</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">2</fingering></technical></notations></note>
+    <note id="n36"><chord/><pitch><step>D</step><octave>5</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n37"><pitch><step>D</step><octave>2</octave></pitch><duration>12</duration><voice>5</voice><type>quarter</type><staff>2</staff><notations><technical><fingering placement="below">5</fingering></technical></notations></note>
+    <note id="n38"><pitch><step>A</step><octave>2</octave></pitch><duration>12</duration><voice>5</voice><type>quarter</type><staff>2</staff><notations><technical><fingering placement="below">2</fingering></technical></notations></note>
+    <note id="n39"><pitch><step>D</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+  </measure>
+  <measure number="5">
+    <note id="n40"><pitch><step>B</step><octave>4</octave></pitch><duration>24</duration><voice>1</voice><type>half</type><staff>1</staff><notations><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n41"><pitch><step>D</step><octave>5</octave></pitch><duration>24</duration><tie type="start"/><voice>1</voice><type>half</type><staff>1</staff><notations><tied type="start"/><technical><fingering placement="above">5</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n42"><pitch><step>G</step><octave>2</octave></pitch><duration>48</duration><voice>5</voice><type>whole</type><staff>2</staff><notations><technical><fingering placement="below">5</fingering></technical></notations></note>
+    <note id="n43"><chord/><pitch><step>G</step><octave>3</octave></pitch><duration>48</duration><voice>5</voice><type>whole</type><staff>2</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+  </measure>
+  <measure number="6">
+    <note id="n44"><pitch><step>D</step><octave>5</octave></pitch><duration>12</duration><tie type="stop"/><voice>1</voice><type>quarter</type><staff>1</staff><notations><tied type="stop"/></notations></note>
+    <note id="n45"><pitch><step>C</step><octave>5</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">begin</beam><notations><slur type="start" number="1" placement="above"/><technical><fingering placement="above">4</fingering></technical></notations></note>
+    <note id="n46"><pitch><step>B</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">end</beam><notations><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n47"><grace/><pitch><step>B</step><octave>4</octave></pitch><voice>1</voice><type>eighth</type><staff>1</staff><notations><technical><fingering placement="above">3</fingering></technical></notations></note>
+    <note id="n48"><pitch><step>A</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><technical><fingering placement="above">2</fingering></technical></notations></note>
+    <note id="n49"><pitch><step>G</step><octave>4</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="stop" number="1"/><technical><fingering placement="above">1</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n50"><pitch><step>C</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">5</fingering></technical></notations></note>
+    <note id="n51"><chord/><pitch><step>E</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">3</fingering></technical></notations></note>
+    <note id="n52"><chord/><pitch><step>G</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+    <note id="n53"><pitch><step>A</step><octave>2</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">5</fingering></technical></notations></note>
+    <note id="n54"><chord/><pitch><step>C</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">3</fingering></technical></notations></note>
+    <note id="n55"><chord/><pitch><step>E</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering placement="below">1</fingering></technical></notations></note>
+  </measure>
+  <measure number="7">
+    <note id="n56"><pitch><step>A</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">begin</beam><notations><slur type="start" number="1" placement="above"/><technical><fingering>1</fingering></technical></notations></note>
+    <note id="n57"><pitch><step>B</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">continue</beam><notations><technical><fingering>2</fingering></technical></notations></note>
+    <note id="n58"><pitch><step>C</step><alter>1</alter><octave>5</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><accidental>sharp</accidental><staff>1</staff><beam number="1">continue</beam><notations><technical><fingering>3</fingering></technical></notations></note>
+    <note id="n59"><pitch><step>D</step><octave>5</octave></pitch><duration>6</duration><voice>1</voice><type>eighth</type><staff>1</staff><beam number="1">end</beam><notations><slur type="stop" number="1"/><technical><fingering>1</fingering></technical></notations></note>
+    <note id="n60"><pitch><step>E</step><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="start" number="1" placement="above"/><technical><fingering>2</fingering></technical></notations></note>
+    <note id="n61"><pitch><step>F</step><alter>1</alter><octave>5</octave></pitch><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff><notations><slur type="stop" number="1"/><technical><fingering>3</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n62"><pitch><step>D</step><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering>5</fingering></technical></notations></note>
+    <note id="n63"><chord/><pitch><step>F</step><alter>1</alter><octave>3</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering>3</fingering></technical></notations></note>
+    <note id="n64"><chord/><pitch><step>C</step><octave>4</octave></pitch><duration>24</duration><voice>5</voice><type>half</type><staff>2</staff><notations><technical><fingering>1</fingering></technical></notations></note>
+    <note id="n65"><pitch><step>D</step><octave>3</octave></pitch><duration>12</duration><voice>5</voice><type>quarter</type><staff>2</staff><notations><technical><fingering>5</fingering></technical></notations></note>
+    <note id="n66"><rest/><duration>12</duration><voice>5</voice><type>quarter</type><staff>2</staff></note>
+  </measure>
+  <measure number="8">
+    <note id="n67"><pitch><step>G</step><octave>4</octave></pitch><duration>48</duration><voice>1</voice><type>whole</type><staff>1</staff><notations><technical><fingering>1</fingering></technical><fermata type="upright"/></notations></note>
+    <note id="n68"><chord/><pitch><step>B</step><octave>4</octave></pitch><duration>48</duration><voice>1</voice><type>whole</type><staff>1</staff><notations><technical><fingering>2</fingering></technical></notations></note>
+    <note id="n69"><chord/><pitch><step>D</step><octave>5</octave></pitch><duration>48</duration><voice>1</voice><type>whole</type><staff>1</staff><notations><technical><fingering>3</fingering></technical></notations></note>
+    <note id="n70"><chord/><pitch><step>G</step><octave>5</octave></pitch><duration>48</duration><voice>1</voice><type>whole</type><staff>1</staff><notations><technical><fingering>5</fingering></technical></notations></note>
+    <backup><duration>48</duration></backup>
+    <note id="n71"><pitch><step>G</step><octave>2</octave></pitch><duration>48</duration><voice>5</voice><type>whole</type><staff>2</staff><notations><technical><fingering>5</fingering></technical><fermata type="inverted"/></notations></note>
+    <note id="n72"><chord/><pitch><step>G</step><octave>3</octave></pitch><duration>48</duration><voice>5</voice><type>whole</type><staff>2</staff><notations><technical><fingering>1</fingering></technical></notations></note>
+    <barline location="right"><bar-style>light-heavy</bar-style></barline>
+  </measure>
+  </part>
+</score-partwise>

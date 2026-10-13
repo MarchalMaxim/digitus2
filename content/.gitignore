@@ -1,0 +1,10 @@
+# Raw downloads (untrusted data, re-fetched by tools/fetch_mutopia.py)
+_raw/
+# LilyPond build directories (tools/build.py)
+_build/
+# Rendered previews and validation report (tools/validate.py); regenerate with `build.py --png`
+_preview/
+# Local virtual environment and caches
+.venv/
+__pycache__/
+.pytest_cache/

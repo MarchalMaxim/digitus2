@@ -1,0 +1,2135 @@
+{
+  "twinkle-twinkle-little-star": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "twinkle-twinkle-little-star.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 12,
+      "measureElements": 12,
+      "firstMeasure": "1",
+      "lastMeasure": "12",
+      "notes": 64,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 48.0,
+      "unfoldedQuarters": 48.0,
+      "tempoQpm": 100.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 18276,
+      "pitchRange": [
+        48,
+        69
+      ],
+      "staffAvgPitch": {
+        "1": 64.5,
+        "2": 50.6
+      },
+      "approxDurationSec": 29,
+      "music21": {
+        "parts": 2,
+        "measures": 12,
+        "noteOrChord": 64,
+        "highestTime": 48.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "mary-had-a-little-lamb": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "mary-had-a-little-lamb.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 8,
+      "measureElements": 8,
+      "firstMeasure": "1",
+      "lastMeasure": "8",
+      "notes": 34,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 32.0,
+      "unfoldedQuarters": 32.0,
+      "tempoQpm": 104.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 11703,
+      "pitchRange": [
+        48,
+        67
+      ],
+      "staffAvgPitch": {
+        "1": 63.0,
+        "2": 50.8
+      },
+      "approxDurationSec": 18,
+      "music21": {
+        "parts": 2,
+        "measures": 8,
+        "noteOrChord": 34,
+        "highestTime": 32.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "ode-to-joy": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "ode-to-joy.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 83,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 64.0,
+      "unfoldedQuarters": 64.0,
+      "tempoQpm": 108.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 24071,
+      "pitchRange": [
+        48,
+        67
+      ],
+      "staffAvgPitch": {
+        "1": 63.1,
+        "2": 51.3
+      },
+      "approxDurationSec": 36,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 83,
+        "highestTime": 64.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "frere-jacques": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "frere-jacques.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 8,
+      "measureElements": 8,
+      "firstMeasure": "1",
+      "lastMeasure": "8",
+      "notes": 46,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 32.0,
+      "unfoldedQuarters": 32.0,
+      "tempoQpm": 108.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 15521,
+      "pitchRange": [
+        48,
+        69
+      ],
+      "staffAvgPitch": {
+        "1": 63.1,
+        "2": 51.0
+      },
+      "approxDurationSec": 18,
+      "music21": {
+        "parts": 2,
+        "measures": 8,
+        "noteOrChord": 46,
+        "highestTime": 32.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "jingle-bells": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "jingle-bells.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 82,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 64.0,
+      "unfoldedQuarters": 64.0,
+      "tempoQpm": 120.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 23119,
+      "pitchRange": [
+        48,
+        67
+      ],
+      "staffAvgPitch": {
+        "1": 64.0,
+        "2": 51.5
+      },
+      "approxDurationSec": 32,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 82,
+        "highestTime": 64.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "happy-birthday": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "happy-birthday.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 8,
+      "measureElements": 9,
+      "firstMeasure": "0",
+      "lastMeasure": "8",
+      "notes": 43,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 25.0,
+      "unfoldedQuarters": 25.0,
+      "tempoQpm": 100.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 14674,
+      "pitchRange": [
+        43,
+        74
+      ],
+      "staffAvgPitch": {
+        "1": 66.1,
+        "2": 49.4
+      },
+      "approxDurationSec": 15,
+      "music21": {
+        "parts": 2,
+        "measures": 9,
+        "noteOrChord": 34,
+        "highestTime": 25.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "amazing-grace": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "amazing-grace.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 14,
+      "measureElements": 15,
+      "firstMeasure": "0",
+      "lastMeasure": "14",
+      "notes": 69,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 43.0,
+      "unfoldedQuarters": 43.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 23035,
+      "pitchRange": [
+        43,
+        74
+      ],
+      "staffAvgPitch": {
+        "1": 67.7,
+        "2": 48.7
+      },
+      "approxDurationSec": 32,
+      "music21": {
+        "parts": 2,
+        "measures": 15,
+        "noteOrChord": 52,
+        "highestTime": 43.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "scarborough-fair": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "scarborough-fair.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 68,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 48.0,
+      "unfoldedQuarters": 48.0,
+      "tempoQpm": 96.0,
+      "key": [
+        "0",
+        "dorian"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 21319,
+      "pitchRange": [
+        43,
+        74
+      ],
+      "staffAvgPitch": {
+        "1": 67.3,
+        "2": 51.3
+      },
+      "approxDurationSec": 30,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 51,
+        "highestTime": 48.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "greensleeves": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "greensleeves.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 17,
+      "firstMeasure": "0",
+      "lastMeasure": "16",
+      "notes": 106,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 48.5,
+      "unfoldedQuarters": 48.5,
+      "tempoQpm": 96.0,
+      "key": [
+        "0",
+        "minor"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 33837,
+      "pitchRange": [
+        40,
+        79
+      ],
+      "staffAvgPitch": {
+        "1": 71.2,
+        "2": 47.3
+      },
+      "approxDurationSec": 30,
+      "music21": {
+        "parts": 2,
+        "measures": 17,
+        "noteOrChord": 88,
+        "highestTime": 48.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "pachelbel-canon-in-d": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pachelbel-canon-in-d.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 13,
+      "measureElements": 13,
+      "firstMeasure": "1",
+      "lastMeasure": "13",
+      "notes": 42,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 52.0,
+      "unfoldedQuarters": 52.0,
+      "tempoQpm": 84.0,
+      "key": [
+        "2",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 14470,
+      "pitchRange": [
+        42,
+        78
+      ],
+      "staffAvgPitch": {
+        "2": 45.8,
+        "1": 70.5
+      },
+      "approxDurationSec": 37,
+      "music21": {
+        "parts": 2,
+        "measures": 13,
+        "noteOrChord": 42,
+        "highestTime": 52.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "bach-minuet-g-major-bwv-anh-114": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "anna-magdalena-04.mid",
+        "exact": true,
+        "xml": 203,
+        "midi": 204,
+        "matched": 203,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 1
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "anna-magdalena-04.mid",
+        "exact": true,
+        "xml": 203,
+        "midi": 204,
+        "matched": 203,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 1
+      }
+    },
+    "validation": {
+      "bach-minuet-g-major-bwv-anh-114.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 32,
+      "measureElements": 32,
+      "firstMeasure": "1",
+      "lastMeasure": "32",
+      "notes": 204,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 96.0,
+      "unfoldedQuarters": 192.0,
+      "tempoQpm": 120.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 57660,
+      "pitchRange": [
+        43,
+        83
+      ],
+      "staffAvgPitch": {
+        "1": 71.4,
+        "2": 56.4
+      },
+      "approxDurationSec": 96,
+      "music21": {
+        "parts": 2,
+        "measures": 32,
+        "noteOrChord": 202,
+        "highestTime": 96.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "bach-minuet-g-minor-bwv-anh-115": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "anna-magdalena-05.mid",
+        "exact": true,
+        "xml": 199,
+        "midi": 199,
+        "matched": 199,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "anna-magdalena-05.mid",
+        "exact": true,
+        "xml": 199,
+        "midi": 199,
+        "matched": 199,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bach-minuet-g-minor-bwv-anh-115.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 32,
+      "measureElements": 32,
+      "firstMeasure": "1",
+      "lastMeasure": "32",
+      "notes": 199,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 96.0,
+      "unfoldedQuarters": 192.0,
+      "tempoQpm": 112.0,
+      "key": [
+        "-2",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 57111,
+      "pitchRange": [
+        43,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 72.9,
+        "2": 54.9
+      },
+      "approxDurationSec": 103,
+      "music21": {
+        "parts": 2,
+        "measures": 32,
+        "noteOrChord": 193,
+        "highestTime": 96.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "mozart-minuet-f-major-k2": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "menuet_k2.mid",
+        "exact": true,
+        "xml": 130,
+        "midi": 130,
+        "matched": 130,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "menuet_k2.mid",
+        "exact": true,
+        "xml": 130,
+        "midi": 130,
+        "matched": 130,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "mozart-minuet-f-major-k2.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 24,
+      "measureElements": 24,
+      "firstMeasure": "1",
+      "lastMeasure": "24",
+      "notes": 130,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 72.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 120.0,
+      "key": [
+        "-1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 40656,
+      "pitchRange": [
+        41,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 69.1,
+        "2": 52.6
+      },
+      "approxDurationSec": 48,
+      "music21": {
+        "parts": 2,
+        "measures": 24,
+        "noteOrChord": 130,
+        "highestTime": 72.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "schumann-op68-no1-melody": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-01-melodie.mid",
+        "exact": true,
+        "xml": 303,
+        "midi": 303,
+        "matched": 303,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-01-melodie.mid",
+        "exact": true,
+        "xml": 303,
+        "midi": 303,
+        "matched": 303,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "schumann-op68-no1-melody.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "schumann-op68-no1-melody.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 20,
+      "measureElements": 20,
+      "firstMeasure": "1",
+      "lastMeasure": "20",
+      "notes": 256,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 80.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 96.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 79457,
+      "pitchRange": [
+        55,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 73.8,
+        "2": 64.5
+      },
+      "approxDurationSec": 60,
+      "music21": {
+        "parts": 2,
+        "measures": 20,
+        "noteOrChord": 249,
+        "highestTime": 80.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "burgmuller-op100-no1-la-candeur": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "25EF-01.mid",
+        "exact": true,
+        "xml": 241,
+        "midi": 241,
+        "matched": 241,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "25EF-01.mid",
+        "exact": true,
+        "xml": 241,
+        "midi": 241,
+        "matched": 241,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "burgmuller-op100-no1-la-candeur.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "burgmuller-op100-no1-la-candeur.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 23,
+      "measureElements": 23,
+      "firstMeasure": "1",
+      "lastMeasure": "23",
+      "notes": 245,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 92.0,
+      "unfoldedQuarters": 152.0,
+      "tempoQpm": 152.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 81791,
+      "pitchRange": [
+        47,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 74.1,
+        "2": 58.0
+      },
+      "approxDurationSec": 60,
+      "music21": {
+        "parts": 2,
+        "measures": 23,
+        "noteOrChord": 206,
+        "highestTime": 92.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "burgmuller-op100-no2-arabesque": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "25EF-02.mid",
+        "exact": true,
+        "xml": 283,
+        "midi": 283,
+        "matched": 283,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 38
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "25EF-02.mid",
+        "exact": true,
+        "xml": 283,
+        "midi": 283,
+        "matched": 283,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "burgmuller-op100-no2-arabesque.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "burgmuller-op100-no2-arabesque.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 33,
+      "measureElements": 33,
+      "firstMeasure": "1",
+      "lastMeasure": "33",
+      "notes": 285,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 66.0,
+      "unfoldedQuarters": 110.0,
+      "tempoQpm": 152.0,
+      "key": [
+        "0",
+        "minor"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 95926,
+      "pitchRange": [
+        45,
+        93
+      ],
+      "staffAvgPitch": {
+        "2": 60.3,
+        "1": 75.2
+      },
+      "approxDurationSec": 43,
+      "music21": {
+        "parts": 2,
+        "measures": 33,
+        "noteOrChord": 197,
+        "highestTime": 66.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "burgmuller-op100-no3-pastorale": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "25EF-03.mid",
+        "exact": true,
+        "xml": 346,
+        "midi": 355,
+        "matched": 346,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 14
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "25EF-03.mid",
+        "exact": true,
+        "xml": 346,
+        "midi": 355,
+        "matched": 346,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 7
+      }
+    },
+    "validation": {
+      "burgmuller-op100-no3-pastorale.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "burgmuller-op100-no3-pastorale.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 29,
+      "measureElements": 29,
+      "firstMeasure": "1",
+      "lastMeasure": "29",
+      "notes": 356,
+      "graceNotes": 9,
+      "fingerings": 0,
+      "writtenQuarters": 87.0,
+      "unfoldedQuarters": 111.0,
+      "tempoQpm": 100.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 109571,
+      "pitchRange": [
+        43,
+        91
+      ],
+      "staffAvgPitch": {
+        "1": 73.3,
+        "2": 59.2
+      },
+      "approxDurationSec": 67,
+      "music21": {
+        "parts": 2,
+        "measures": 29,
+        "noteOrChord": 230,
+        "highestTime": 87.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "burgmuller-op100-no5-innocence": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "25EF-05.mid",
+        "exact": true,
+        "xml": 215,
+        "midi": 215,
+        "matched": 215,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 13
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "25EF-05.mid",
+        "exact": true,
+        "xml": 215,
+        "midi": 215,
+        "matched": 215,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "burgmuller-op100-no5-innocence.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "burgmuller-op100-no5-innocence.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 17,
+      "measureElements": 17,
+      "firstMeasure": "1",
+      "lastMeasure": "17",
+      "notes": 215,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 51.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 112.0,
+      "key": [
+        "-1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 75169,
+      "pitchRange": [
+        41,
+        96
+      ],
+      "staffAvgPitch": {
+        "1": 78.5,
+        "2": 57.9
+      },
+      "approxDurationSec": 51,
+      "music21": {
+        "parts": 2,
+        "measures": 17,
+        "noteOrChord": 178,
+        "highestTime": 51.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "schumann-op68-no8-wild-rider": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-08-cavalier-sauvage.mid",
+        "exact": true,
+        "xml": 417,
+        "midi": 417,
+        "matched": 417,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 247
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-08-cavalier-sauvage.mid",
+        "exact": true,
+        "xml": 417,
+        "midi": 417,
+        "matched": 417,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "schumann-op68-no8-wild-rider.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 8: 5/2 of 3 quarters (partial bar, e.g. 1st ending)",
+          "measure 16: 5/2 of 3 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 24,
+      "measureElements": 27,
+      "firstMeasure": "0",
+      "lastMeasure": "24",
+      "notes": 312,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 72.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 152.0,
+      "key": [
+        "0",
+        "minor"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 117871,
+      "pitchRange": [
+        48,
+        77
+      ],
+      "staffAvgPitch": {
+        "1": 68.6,
+        "2": 57.1
+      },
+      "approxDurationSec": 38,
+      "music21": {
+        "parts": 2,
+        "measures": 27,
+        "noteOrChord": 205,
+        "highestTime": 72.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "clementi-sonatina-op36-no1-mvt1": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "sonatina-1.mid",
+        "exact": true,
+        "xml": 333,
+        "midi": 333,
+        "matched": 333,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "sonatina-1.mid",
+        "exact": true,
+        "xml": 333,
+        "midi": 333,
+        "matched": 333,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "clementi-sonatina-op36-no1-mvt1.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 38,
+      "measureElements": 38,
+      "firstMeasure": "1",
+      "lastMeasure": "38",
+      "notes": 333,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 152.0,
+      "unfoldedQuarters": 304.0,
+      "tempoQpm": 132.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        2,
+        2
+      ],
+      "bytes": 98664,
+      "pitchRange": [
+        36,
+        86
+      ],
+      "staffAvgPitch": {
+        "1": 70.9,
+        "2": 52.0
+      },
+      "approxDurationSec": 138,
+      "music21": {
+        "parts": 2,
+        "measures": 38,
+        "noteOrChord": 328,
+        "highestTime": 152.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    }
+  },
+  "bach-prelude-c-major-bwv-846": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "wtk1-prelude1.mid",
+        "exact": true,
+        "xml": 549,
+        "midi": 549,
+        "matched": 549,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "wtk1-prelude1.mid",
+        "exact": true,
+        "xml": 549,
+        "midi": 549,
+        "matched": 549,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bach-prelude-c-major-bwv-846.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 35,
+      "measureElements": 35,
+      "firstMeasure": "1",
+      "lastMeasure": "35",
+      "notes": 617,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 140.0,
+      "unfoldedQuarters": 140.0,
+      "tempoQpm": 60.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 218422,
+      "pitchRange": [
+        36,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 64.4,
+        "2": 53.2
+      },
+      "approxDurationSec": 140,
+      "music21": {
+        "parts": 2,
+        "measures": 35,
+        "noteOrChord": 615,
+        "highestTime": 140.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    }
+  },
+  "satie-gymnopedie-no1": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "gymnopedie_1.mid",
+        "exact": true,
+        "xml": 282,
+        "midi": 282,
+        "matched": 282,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "gymnopedie_1.mid",
+        "exact": true,
+        "xml": 282,
+        "midi": 282,
+        "matched": 282,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      }
+    },
+    "validation": {
+      "satie-gymnopedie-no1.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 47,
+      "measureElements": 47,
+      "firstMeasure": "1",
+      "lastMeasure": "47",
+      "notes": 289,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 141.0,
+      "unfoldedQuarters": 234.0,
+      "tempoQpm": 66.0,
+      "key": [
+        "2",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 103187,
+      "pitchRange": [
+        33,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 67.0,
+        "2": 48.4
+      },
+      "approxDurationSec": 213,
+      "music21": {
+        "parts": 2,
+        "measures": 47,
+        "noteOrChord": 175,
+        "highestTime": 141.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    }
+  },
+  "beethoven-fur-elise-woo-59": {
+    "ok": true,
+    "conversionWarnings": [
+      "LilyPond bar numbers are not consecutive (alternatives/partial bars); MusicXML measures are numbered consecutively"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "fur_Elise_WoO59.mid",
+        "exact": true,
+        "xml": 902,
+        "midi": 905,
+        "matched": 902,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "fur_Elise_WoO59.mid",
+        "exact": true,
+        "xml": 902,
+        "midi": 905,
+        "matched": 902,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      }
+    },
+    "validation": {
+      "beethoven-fur-elise-woo-59.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 8: 1 of 3/2 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 105,
+      "measureElements": 106,
+      "firstMeasure": "0",
+      "lastMeasure": "105",
+      "notes": 905,
+      "graceNotes": 3,
+      "fingerings": 0,
+      "writtenQuarters": 157.0,
+      "unfoldedQuarters": 187.5,
+      "tempoQpm": 72.0,
+      "key": [
+        "0",
+        "minor"
+      ],
+      "time": [
+        3,
+        8
+      ],
+      "bytes": 341200,
+      "pitchRange": [
+        33,
+        100
+      ],
+      "staffAvgPitch": {
+        "1": 72.6,
+        "2": 52.3
+      },
+      "approxDurationSec": 156,
+      "music21": {
+        "parts": 2,
+        "measures": 106,
+        "noteOrChord": 794,
+        "highestTime": 157.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    }
+  },
+  "mozart-sonata-k545-mvt1": {
+    "ok": true,
+    "conversionWarnings": [
+      "LilyPond voice 1 has overlapping notes; split into 2 MusicXML voices"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "K545-1.mid",
+        "exact": true,
+        "xml": 1271,
+        "midi": 1288,
+        "matched": 1271,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 191
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "K545-1.mid",
+        "exact": true,
+        "xml": 1271,
+        "midi": 1288,
+        "matched": 1271,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 15
+      }
+    },
+    "validation": {
+      "mozart-sonata-k545-mvt1.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "mozart-sonata-k545-mvt1.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 73,
+      "measureElements": 73,
+      "firstMeasure": "1",
+      "lastMeasure": "73",
+      "notes": 1288,
+      "graceNotes": 17,
+      "fingerings": 0,
+      "writtenQuarters": 292.0,
+      "unfoldedQuarters": 584.0,
+      "tempoQpm": 132.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 448435,
+      "pitchRange": [
+        36,
+        89
+      ],
+      "staffAvgPitch": {
+        "1": 75.5,
+        "2": 60.9
+      },
+      "approxDurationSec": 265,
+      "music21": {
+        "parts": 2,
+        "measures": 73,
+        "noteOrChord": 1188,
+        "highestTime": 292.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    }
+  },
+  "chopin-prelude-op28-no7": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "chopin_prelude_op28_no7.mid",
+        "exact": true,
+        "xml": 167,
+        "midi": 168,
+        "matched": 167,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 1
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "Chop-28-7.mid",
+        "exact": true,
+        "xml": 167,
+        "midi": 168,
+        "matched": 167,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 1
+      }
+    },
+    "validation": {
+      "chopin-prelude-op28-no7.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 17,
+      "firstMeasure": "0",
+      "lastMeasure": "16",
+      "notes": 174,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 49.0,
+      "unfoldedQuarters": 49.0,
+      "tempoQpm": 72.0,
+      "key": [
+        "3",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 59309,
+      "pitchRange": [
+        33,
+        85
+      ],
+      "staffAvgPitch": {
+        "1": 70.9,
+        "2": 56.5
+      },
+      "approxDurationSec": 41,
+      "music21": {
+        "parts": 2,
+        "measures": 17,
+        "noteOrChord": 88,
+        "highestTime": 49.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "chopin-prelude-op28-no4": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "Chop-28-4.mid",
+        "exact": true,
+        "xml": 598,
+        "midi": 600,
+        "matched": 598,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "Chop-28-4.mid",
+        "exact": true,
+        "xml": 598,
+        "midi": 600,
+        "matched": 598,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "chopin-prelude-op28-no4.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 25,
+      "measureElements": 26,
+      "firstMeasure": "0",
+      "lastMeasure": "25",
+      "notes": 602,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 101.0,
+      "unfoldedQuarters": 101.0,
+      "tempoQpm": 56.0,
+      "key": [
+        "1",
+        "minor"
+      ],
+      "time": [
+        2,
+        2
+      ],
+      "bytes": 182297,
+      "pitchRange": [
+        28,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 69.7,
+        "2": 55.0
+      },
+      "approxDurationSec": 108,
+      "music21": {
+        "parts": 2,
+        "measures": 26,
+        "noteOrChord": 257,
+        "highestTime": 101.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    }
+  },
+  "bach-invention-no1-bwv-772": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "bach-invention-01.mid",
+        "exact": true,
+        "xml": 458,
+        "midi": 458,
+        "matched": 458,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "bach-invention-01.mid",
+        "exact": true,
+        "xml": 458,
+        "midi": 458,
+        "matched": 458,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bach-invention-no1-bwv-772.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 22,
+      "measureElements": 22,
+      "firstMeasure": "1",
+      "lastMeasure": "22",
+      "notes": 467,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 88.0,
+      "unfoldedQuarters": 88.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 147256,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 72.9,
+        "2": 57.7
+      },
+      "approxDurationSec": 66,
+      "music21": {
+        "parts": 2,
+        "measures": 22,
+        "noteOrChord": 464,
+        "highestTime": 88.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  },
+  "joplin-the-entertainer": {
+    "ok": true,
+    "conversionWarnings": [
+      "hidden note at 547/16 merged into the visible note of the same pitch (cross-voice tie)",
+      "tie into ending at measure 92 added (as in the 1st ending)",
+      "hairpin from inside the ending at measure 20 closed at the end of that ending",
+      "hairpin from inside the ending at measure 38 closed at the end of that ending"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "entertainer.mid",
+        "exact": true,
+        "xml": 2621,
+        "midi": 2621,
+        "matched": 2621,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 223
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "entertainer.mid",
+        "exact": true,
+        "xml": 2621,
+        "midi": 2621,
+        "matched": 2621,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 223
+      }
+    },
+    "validation": {
+      "joplin-the-entertainer.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 92,
+      "measureElements": 92,
+      "firstMeasure": "1",
+      "lastMeasure": "92",
+      "notes": 1716,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 184.0,
+      "unfoldedQuarters": 304.0,
+      "tempoQpm": 72.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 518468,
+      "pitchRange": [
+        29,
+        90
+      ],
+      "staffAvgPitch": {
+        "1": 74.6,
+        "2": 54.1
+      },
+      "approxDurationSec": 253,
+      "music21": {
+        "parts": 2,
+        "measures": 92,
+        "noteOrChord": 901,
+        "highestTime": 184.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    }
+  },
+  "beethoven-moonlight-sonata-mvt1": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written (excerpt)",
+        "midiFile": "moonlight1-a4.mid",
+        "exact": true,
+        "xml": 476,
+        "midi": 476,
+        "matched": 476,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 1
+      },
+      "mutopiaMidi": {
+        "mode": "written (excerpt)",
+        "midiFile": "moonlight1.mid",
+        "exact": false,
+        "xml": 476,
+        "midi": 475,
+        "matched": 475,
+        "only_xml_count": 1,
+        "only_midi_count": 0,
+        "only_xml": [
+          [
+            "1",
+            32.666666666666664,
+            64
+          ]
+        ],
+        "only_midi": [],
+        "duration_mismatches": 321
+      }
+    },
+    "validation": {
+      "beethoven-moonlight-sonata-mvt1.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "beethoven-moonlight-sonata-mvt1.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 27,
+      "measureElements": 27,
+      "firstMeasure": "1",
+      "lastMeasure": "27",
+      "notes": 482,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 108.0,
+      "unfoldedQuarters": 108.0,
+      "tempoQpm": 54.0,
+      "key": [
+        "4",
+        "minor"
+      ],
+      "time": [
+        2,
+        2
+      ],
+      "bytes": 219778,
+      "pitchRange": [
+        29,
+        76
+      ],
+      "staffAvgPitch": {
+        "1": 63.2,
+        "2": 47.3
+      },
+      "approxDurationSec": 120,
+      "music21": {
+        "parts": 2,
+        "measures": 27,
+        "noteOrChord": 429,
+        "highestTime": 108.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    }
+  },
+  "chopin-waltz-op69-no2": {
+    "ok": true,
+    "conversionWarnings": [
+      "LilyPond bar numbers are not consecutive (alternatives/partial bars); MusicXML measures are numbered consecutively",
+      "slur starting on a rest at 98 moved to the next note"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written (excerpt)",
+        "midiFile": "w10-h-moll-cfi.mid",
+        "exact": true,
+        "xml": 341,
+        "midi": 341,
+        "matched": 341,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 5
+      },
+      "mutopiaMidi": {
+        "mode": "written (excerpt)",
+        "midiFile": "w10-h-moll-cfi.mid",
+        "exact": true,
+        "xml": 341,
+        "midi": 341,
+        "matched": 341,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "chopin-waltz-op69-no2.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "chopin-waltz-op69-no2.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 32,
+      "measureElements": 33,
+      "firstMeasure": "0",
+      "lastMeasure": "32",
+      "notes": 353,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 97.0,
+      "unfoldedQuarters": 97.0,
+      "tempoQpm": 152.0,
+      "key": [
+        "2",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 121395,
+      "pitchRange": [
+        42,
+        90
+      ],
+      "staffAvgPitch": {
+        "1": 76.9,
+        "2": 57.2
+      },
+      "approxDurationSec": 38,
+      "music21": {
+        "parts": 2,
+        "measures": 33,
+        "noteOrChord": 240,
+        "highestTime": 97.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    }
+  }
+}

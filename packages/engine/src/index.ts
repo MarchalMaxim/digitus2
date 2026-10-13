@@ -1,0 +1,14 @@
+export { ENGINE_VERSION } from './version.js';
+export * from './score/types.js';
+export * from './score/pitch.js';
+export * from './score/build.js';
+export { parsePig, parseFingerField, PIG_HEADER, PIG_DIVISIONS, PIG_QPM } from './io/pig/read.js';
+export type { ParsedPig } from './io/pig/read.js';
+export { writePig } from './io/pig/write.js';
+export { parseMusicXml } from './io/musicxml/read.js';
+export type { ParsedMusicXml } from './io/musicxml/read.js';
+export { unpackMusicXml } from './io/musicxml/unpack.js';
+export { injectFingerings } from './io/musicxml/write.js';
+export { matchRate, pigMetrics } from './eval/metrics.js';
+export type { FingerSeq, PigMetrics } from './eval/metrics.js';
+export { alignScores, fingerSeq, metricsForScores } from './eval/align.js';

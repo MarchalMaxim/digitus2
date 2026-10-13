@@ -1,0 +1,21 @@
+{
+  "_comment": "Benchmark floors for the verification loop. `pnpm verify` fails when the engine's PIG test-split scores drop below `engine`. Raise the floor when a milestone improves the numbers; never lower it without a dated note in docs/PROGRESS.md. All numbers are percent, macro-averaged over the test pieces.",
+  "goldDir": "research/data/pig",
+  "split": "research/data/splits/pig_official.json",
+  "splitName": "nakamura2020",
+  "metricPrimary": "gen",
+  "engine": null,
+  "references": {
+    "nakamura_chmm": {
+      "gen": 62.1,
+      "high": 68.7,
+      "soft": 82.6,
+      "rec": 74.7,
+      "note": "Nakamura's released combined HMM on the official PIG test split (30 pieces), measured by the baselines agent on 2026-10-13 with the Python scorer that matches the official C++ evaluator to 5e-7"
+    },
+    "human_agreement_ceiling": {
+      "gen": 71,
+      "note": "inter-annotator general match rate reported by Nakamura et al. 2020; re-measured in docs/research/datasets.md"
+    }
+  }
+}

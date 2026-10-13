@@ -75,7 +75,10 @@ Confidence buckets against actual error rates give the expected calibration erro
 ### 3.9 Application checks
 Playwright end-to-end flows for: open a library piece, see printed fingerings, play with the cursor moving, edit a finger and watch the re-solve, toggle editor's fingering, export. In every captured state a DOM check asserts exactly one element carries the red token (the design brief as a test). Axe runs on each page; screenshots are compared against stored baselines for the score view and the library.
 
-### 3.10 Cross-implementation agreement
+### 3.10 Qualitative UI review (periodic, by a subagent)
+Once a day while the app exists, an independent Opus subagent opens the deployed or locally served app in a browser, uses it as a beginner would (open a library piece, read the fingering, play, edit a finger, import a file, export), and writes `docs/reviews/ui-YYYY-MM-DD.md`: is it clear what to do next, do the main features work, is anything cluttered or confusing, does the black-and-white-plus-one-red brief hold on every screen, what would a piano teacher object to. Each review ends with a ranked list of concrete fixes; the top items become tasks. The reviewer never edits product code. The user asked for this on 2026-10-13; it starts once M4 ships a usable app.
+
+### 3.11 Cross-implementation agreement
 The TypeScript metrics and the Python metrics are run on the same prediction files in CI-like fashion inside `pnpm verify`; a disagreement above 1e-6 fails.
 
 ## 4. The iteration protocol (how autonomy stays honest)

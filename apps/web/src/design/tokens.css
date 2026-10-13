@@ -1,0 +1,49 @@
+:root {
+  --ink: #000000;
+  --paper: #ffffff;
+  --gray-1: #f2f2f2; /* surfaces: hover rows, pressed keys, drop zone */
+  --gray-2: #cccccc; /* rules and disabled controls */
+  --gray-3: #767676; /* secondary text; 4.5:1 on white */
+  --accent: #e3000f; /* the single red; referenced only by .is-red below */
+  --dur-fast: 120ms;
+  --dur: 160ms;
+  --dur-slow: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --font-ui: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+/* The one red. Exactly one element carries this class at any time. */
+.is-red {
+  color: var(--accent);
+}
+button.is-red,
+a.is-red {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+svg .is-red,
+svg .is-red * {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}
+
+@media print {
+  .is-red,
+  svg .is-red,
+  svg .is-red * {
+    color: var(--ink);
+    fill: var(--ink);
+    stroke: var(--ink);
+    background: none;
+  }
+}

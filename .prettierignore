@@ -10,3 +10,6 @@ docs/research/
 *.musicxml
 *.mxl
 *.xml
+apps/web/playwright-report
+apps/web/test-results
+apps/web/e2e/**/*-snapshots

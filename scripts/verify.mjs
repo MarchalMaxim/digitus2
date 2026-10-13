@@ -2,7 +2,8 @@
 // digitus2 verification loop: one command that says whether the project is healthy.
 //
 //   pnpm verify            run every step
-//   pnpm verify unit       run only the named steps (typecheck, lint, unit, build, e2e, benchmark)
+//   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
+//                          e2e, benchmark)
 //
 // Exit code is non-zero if any step fails. The benchmark step compares the engine's PIG
 // test-split scores with benchmarks/floor.json and fails on a regression; it is skipped
@@ -28,6 +29,7 @@ function skip(name, why) {
 }
 
 if (want('hygiene')) run('hygiene', 'node', ['scripts/check-repo-size.mjs']);
+if (want('design')) run('design', 'node', ['scripts/check-colors.mjs']);
 if (want('typecheck')) run('typecheck', 'pnpm', ['typecheck']);
 if (want('lint')) run('lint', 'pnpm', ['lint']);
 if (want('unit')) run('unit', 'pnpm', ['test']);

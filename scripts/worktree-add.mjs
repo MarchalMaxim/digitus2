@@ -3,12 +3,14 @@
 //   node scripts/worktree-add.mjs <name> [--from <ref>]
 // - worktree at ../thingamajig-wt/<name> on branch wt/<name> (created from <ref>, default main)
 // - directory junctions (Windows) or symlinks to the gitignored datasets and venvs, so
-//   benchmarks, learning and research scripts find their data without copying gigabytes
+//   benchmarks, learning and research scripts find their data without copying gigabytes;
+//   when a directory is partly tracked (research/data has tracked manifests and splits next
+//   to gitignored downloads), each untracked child is linked individually
 // - pnpm install (uses the shared content-addressable store, so it is fast)
-// Remove with: git worktree remove ../thingamajig-wt/<name> && git branch -d wt/<name>
+// Remove with: node scripts/worktree-remove.mjs <name>   (never rm -rf: it would follow the links)
 import { execSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, symlinkSync } from 'node:fs';
-import { resolve, dirname, basename } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, statSync, symlinkSync } from 'node:fs';
+import { basename, dirname, resolve } from 'node:path';
 
 const args = process.argv.slice(2);
 const name = args[0];
@@ -48,7 +50,7 @@ sh(
     : `git worktree add -b ${branch} "${dir}" ${from}`,
 );
 
-// Gitignored data that scripts expect at fixed relative paths.
+// Gitignored data that scripts expect at fixed relative paths (directories only).
 const LINKS = [
   'research/data',
   'research/.venv',
@@ -62,18 +64,30 @@ const LINKS = [
   'content/_raw',
   'content/.venv',
 ];
-for (const rel of LINKS) {
+
+function link(rel) {
   const target = resolve(root, rel);
-  const link = resolve(dir, rel);
-  if (!existsSync(target) || existsSync(link)) continue;
-  mkdirSync(dirname(link), { recursive: true });
-  try {
-    symlinkSync(target, link, process.platform === 'win32' ? 'junction' : 'dir');
-    console.log(`linked ${rel}`);
-  } catch (e) {
-    console.warn(`could not link ${rel}: ${e.message}`);
+  const at = resolve(dir, rel);
+  if (!existsSync(target) || !statSync(target).isDirectory()) return;
+  if (!existsSync(at)) {
+    mkdirSync(dirname(at), { recursive: true });
+    try {
+      symlinkSync(target, at, process.platform === 'win32' ? 'junction' : 'dir');
+      console.log(`linked ${rel}`);
+    } catch (e) {
+      console.warn(`could not link ${rel}: ${e.message}`);
+    }
+    return;
+  }
+  // Partly tracked directory: link each child that git does not track in the worktree.
+  for (const child of readdirSync(target)) {
+    const childRel = `${rel}/${child}`;
+    if (existsSync(resolve(dir, childRel))) continue;
+    if (!statSync(resolve(target, childRel.slice(rel.length + 1))).isDirectory()) continue;
+    link(childRel);
   }
 }
+for (const rel of LINKS) link(rel);
 
 sh('pnpm install --frozen-lockfile', dir);
 console.log(`\nworktree ready: ${dir} (branch ${branch})`);

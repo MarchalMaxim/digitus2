@@ -1,0 +1,530 @@
+{
+ "_doc": "Metadata for every implementation found. 'outputs' lists the wrapper output dirs (outputs/<name>) that belong to it; 'ran' is yes / partial / no. 'mit_reuse': ok = license permits copying code into an MIT project (with notice), no = it does not (copyleft, non-commercial or no license = all rights reserved). 'trained_on' says what PIG data the evaluated weights saw; 'contaminated' = the official test pieces 001-030 were in its training data.",
+ "implementations": [
+  {
+   "id": "nakamura_hmm",
+   "name": "Nakamura, Saito & Yoshii 2020 fingering HMMs (C++)",
+   "url": "https://statpianofingering.github.io/data/SourceCode_v190921.zip",
+   "commit": "SourceCode_v190921.zip sha256 e2c15638...66f0",
+   "license": "none stated (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "1st/2nd/3rd-order HMM over finger states, emission = keyboard-position interval (dx in white keys, dy black/white), -5 log-penalty for wrong-direction fingers within 30 ms, each hand separately; chord HMM (CHMM) with vertical+horizontal models",
+   "family": "statistical",
+   "trained_on": "PIG miscellaneous set 031-150 (shipped params)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_nakamura_hmm.py, build_nakamura_hmm.sh",
+   "outputs": [
+    "nakamura_fhmm1",
+    "nakamura_fhmm2",
+    "nakamura_fhmm3",
+    "nakamura_chmm",
+    "nakamura_fhmm1_released_files",
+    "nakamura_fhmm2_released_files",
+    "nakamura_fhmm3_released_files"
+   ],
+   "notes": "Builds with MinGW g++ 9.2 unchanged. Our scorer reproduces the paper's Table 2 exactly from the authors' released outputs (Result_FHMM*.zip). Re-running the binaries on PIG v1.2 gives +0.6..0.9 points because 64 test notes changed hand between dataset versions. HMM2/3 read the hand from the SIGN of the input finger column, not the channel (the wrapper writes +1/-1 blanks)."
+  },
+  {
+   "id": "statpf_js",
+   "name": "Nakamura web demo FHMM1 (JavaScript)",
+   "url": "https://github.com/statpianofingering/statpianofingering.github.io",
+   "commit": "8950a16d7d8b3509e2a39d8e5967fedfa89d61ee",
+   "license": "none stated",
+   "mit_reuse": "no",
+   "approach": "JS port of FHMM1 with parameters embedded in myfunctions.js (w1 = 1) + a hand-separation HMM for MIDI input",
+   "family": "statistical",
+   "trained_on": "PIG (embedded parameters, presumably 031-150)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_statpf_js.py + js/statpf_fhmm1.cjs (Node 22)",
+   "outputs": [
+    "nakamura_fhmm1_webdemo_js"
+   ],
+   "notes": "Scores within 0.1 of the C++ FHMM1. The hand-separation HMM (HandSepModel) is reusable for MIDI input without hands."
+  },
+  {
+   "id": "pianoplayer",
+   "name": "marcomusy/pianoplayer 3.0.2",
+   "url": "https://github.com/marcomusy/pianoplayer",
+   "commit": "6fb0e2114d7b21f75c0be5208172e1243a57323e",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "physical hand model (finger rest positions in cm, hand size), exhaustive search over the next 5-9 notes minimising average finger speed; chords staggered into short runs",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_pianoplayer.py",
+   "outputs": [
+    "pianoplayer",
+    "pianoplayer_pigreader_nostagger"
+   ],
+   "notes": "Bug: its PIG reader never sets the key position INote.x (every note at x=0 -> all thumbs, and the search never finishes on real pieces); we set x with models.keypos like its MusicXML reader. 'pianoplayer' additionally staggers chord notes low->high by 0.05 s like the MusicXML/MIDI readers (= its main use case); 'pianoplayer_pigreader_nostagger' is the PIG reader as shipped (+ x fix). Its PIG reader also treats any finger already in the file as a fixed anchor (GT leak if fed a PIG file)."
+  },
+  {
+   "id": "ramoneda_ar",
+   "name": "Ramoneda et al. 2022 ArGNN / ArLSTM (ACM MM)",
+   "url": "https://github.com/PRamoneda/Automatic-Piano-Fingering",
+   "commit": "d0d2f433c926be5e89540cbafe38bf43820ad2d2",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "autoregressive seq2seq: pitch embedding -> 3 gated graph layers over onset/next edges (ArGNN) or 3-layer BiLSTM (ArLSTM) -> AR LSTM decoder; pretrained on ThumbSet (2523 crowd-annotated MuseScore pieces, partial labels), finetuned per hand on PIG; LH mirrored to RH",
+   "family": "neural",
+   "trained_on": "ThumbSet + PIG official train split (031-150 minus their val)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_ramoneda_ar.py",
+   "outputs": [
+    "ramoneda_argnn",
+    "ramoneda_argnn_beam10",
+    "ramoneda_arlstm",
+    "ramoneda_arlstm_beam10"
+   ],
+   "notes": "Pretrained weights ship in models/. Repository contains file names with ':' (invalid on Windows) -> sparse checkout. Inference re-uses their loader/edge code; M_gen within 0.1 of their table_beam_k.json for greedy (ArGNN 64.65 vs 64.70, ArLSTM 64.17 vs 64.25) and within 0.4 for beam 10 (66.73 vs 66.82, 65.13 vs 65.48). ThumbSet itself is 'available upon request' (Zenodo)."
+  },
+  {
+   "id": "pydactyl",
+   "name": "dvdrndlph/pydactyl (Randolph)",
+   "url": "https://github.com/dvdrndlph/pydactyl",
+   "commit": "0ad656db9b778508453a7275dc698b9129ca765e",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "classic monophonic models: Parncutt et al. 1997 (12 rules), Jacobs 2001, Badgerow 2009, Balliauw 2017 rules (in Parncutt's DP/k-best framework), Hart et al. 2000 cost table DP, random; chords arpeggiated low->high",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_pydactyl.py",
+   "outputs": [
+    "pydactyl_parncutt",
+    "pydactyl_jacobs",
+    "pydactyl_badgerow",
+    "pydactyl_balliauw",
+    "pydactyl_hart",
+    "pydactyl_random"
+   ],
+   "notes": "Patches: '/tmp' + ':' log path (Windows), Balliauw rule 15 AttributeError (handed_finger_* typo); python-magic stubbed. Parncutt-family raises 'No solution' when a leap exceeds every finger pair's MaxPrac and Hart's table stops at 12 semitones, so the wrapper splits the hand at large leaps (15,12,11,9,... semitones) only when needed (~12 splits/piece). Its CRF/Sayegh experiments are tied to the author's local corpus DB and were not run."
+  },
+  {
+   "id": "kanma",
+   "name": "Kanma/piano_fingering (PyPI piano_fingering 1.0.0; port of blakewest/performer)",
+   "url": "https://github.com/Kanma/piano_fingering",
+   "commit": "88963cad52bb3c16438d69f600830a6d43d923ce",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "Viterbi over per-onset chord layers with a hand-made pairwise (note1, note2, finger1, finger2) cost table per hand",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_kanma.py",
+   "outputs": [
+    "kanma_piano_fingering"
+   ],
+   "notes": "Runs unchanged; 0.01 s per piece."
+  },
+  {
+   "id": "autofingering",
+   "name": "thegreatkwanghyeon/autofingering",
+   "url": "https://github.com/thegreatkwanghyeon/autofingering",
+   "commit": "b9b7f1081550ac29e6dd677802569cc7d65f979a",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "Python re-implementation of Nakamura's 1st-order HMM (finger pair transitions, white/black key-distance emission)",
+   "family": "statistical",
+   "trained_on": "PIG 031-150 (trained by our wrapper)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_autofingering.py",
+   "outputs": [
+    "autofingering_hmm"
+   ],
+   "notes": "Patch: DataFrame.append -> pd.concat (pandas 2). MusicXML-only CLI, so the Hand class is called directly."
+  },
+  {
+   "id": "lumikey",
+   "name": "lumikey/piano-fingering-model",
+   "url": "https://github.com/lumikey/piano-fingering-model",
+   "commit": "e03c0da6bfe6b4299dbdacb421bd5792f1721631",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "~100k-parameter Transformer encoder per hand over 26 tokens (last note of each finger, current note, 20-note lookahead with optional finger hints), greedy autoregressive decoding; ONNX + TS package for the browser",
+   "family": "neural",
+   "trained_on": "pretrained: ALL 309 PIG files (54239 RH + 45801 LH samples = every PIG note) + other data; retrained: PIG train split only",
+   "contaminated": true,
+   "ran": "yes",
+   "wrapper": "run_lumikey.py, train_lumikey_pig.py",
+   "outputs": [
+    "lumikey_pretrained",
+    "lumikey_retrained_pigtrain"
+   ],
+   "notes": "The released checkpoints saw the test pieces (score 74.1 > human agreement 71.4). Retrained on 031-150 with the repository's own train() it gets 66.2, competitive with ArGNN. Same ONNX weights are reused by JeffreyZhou798/Piano-Fingering-Generator-A09."
+  },
+  {
+   "id": "apfgen",
+   "name": "chrsztz/APF-Gen",
+   "url": "https://github.com/chrsztz/APF-Gen",
+   "commit": "1078ee6f3a4b44c35c714490cfdcf9756be1e5d2",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "CNN-BiLSTM + local attention + AR finger embedding + auxiliary 'physical' head over hand-crafted features (beats, intervals, chord rank, hand position), 11-class signed finger output, beam search with physical transition costs",
+   "family": "neural",
+   "trained_on": "pretrained: random 70% of the 309 PIG files (seed 42) = most test-piece annotations; retrained: PIG train split",
+   "contaminated": true,
+   "ran": "yes",
+   "wrapper": "run_apfgen.py, train_apfgen_official.py",
+   "outputs": [
+    "apfgen_pretrained",
+    "apfgen_pretrained_nobeam",
+    "apfgen_retrained_official",
+    "apfgen_retrained_official_nobeam"
+   ],
+   "notes": "Their reported 'test' M_gen ~82% comes from a random file-level split (other annotators of the same piece in training). Only best.pt matches the released feature code; the 26 ablation checkpoints next to it have an older feature size. infer.py hard-codes device 'mps' from the config. Retrained on the official split it drops to 58.4 (beam) / 59.1 (argmax)."
+  },
+  {
+   "id": "fingerflow",
+   "name": "MarcAlKareh/fingerflow (FingerFlow engine)",
+   "url": "https://github.com/MarcAlKareh/fingerflow",
+   "commit": "85f89ad39f8ac68c6e732f5c047d22b2190d2f63",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "99-feature biomechanical cost (physical key geometry, spans scaled to hand, legato coupling, speed factor, Fitts-law relocation, finger-pair indicators) + second-order Viterbi over chord-aware assignments; weights learned by averaged passive-aggressive structured perceptron with Hamming-augmented decoding",
+   "family": "learned cost (structured prediction)",
+   "trained_on": "PIG 031-150 (trained by our wrapper; repository default hyper-parameters)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_fingerflow.py",
+   "outputs": [
+    "fingerflow_default",
+    "fingerflow_learned"
+   ],
+   "notes": "Best fair result. Its own benchmark claims 70.00 M_gen on the same 30 pieces (their metric code; ours gives 68.6). Their docs claim PIG timings come from real performances; PIG's README says they are synthesized from score-editing software."
+  },
+  {
+   "id": "chirality",
+   "name": "vibetuned/chirality",
+   "url": "https://github.com/vibetuned/chirality",
+   "commit": "cd9c54e0dcdfaf0677690f03978cd23ecd90da22",
+   "license": "AGPL-3.0-or-later",
+   "mit_reuse": "no",
+   "approach": "exact second-order Viterbi over the 12 Parncutt rule point-sums; weights uniform or learned by path-difference learning (averaged structured perceptron); also Nakamura HMM port, Jacobs/Balliauw/Al Kasimi rule sets, VNS, PPO agents",
+   "family": "learned cost (structured prediction)",
+   "trained_on": "PIG 031-150 (learned variant, trained by our wrapper with its own perceptron)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_chirality.py",
+   "outputs": [
+    "chirality_parncutt_viterbi_uniform",
+    "chirality_parncutt_viterbi_learned"
+   ],
+   "notes": "Declares Python >= 3.14 / numpy >= 2.4 but the modules used run unchanged on 3.11. Exact Viterbi lifts plain Parncutt rules from 62.9 (pydactyl's pruned Dijkstra) to 65.4; learned weights 66.0. PPO agents (RH-only, 42-45%) not run."
+  },
+  {
+   "id": "handthesia",
+   "name": "V9011N/pygame-piano-animator (Hand-thesia) fingering planner",
+   "url": "https://github.com/V9011N/pygame-piano-animator",
+   "commit": "f8189c021d9235005fb35faa2c8cfbc09a3768a0",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "beam search over chord fingerings with a physical cost model (stretch, cramp, crossings, weak fingers, black keys, shifts vs. time, finger speed) + figure templates (scales, arpeggios, octaves, thirds, trills); ~30 weights fitted by coordinate search on PIG 031-150",
+   "family": "learned cost (search)",
+   "trained_on": "PIG 031-150 (weights shipped)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_handthesia.py",
+   "outputs": [
+    "handthesia_planner"
+   ],
+   "notes": "Its MIDI/PIG loader re-orders notes; map back by (onset, pitch, channel). Strong (65.8) and fast (~0.1 s/piece)."
+  },
+  {
+   "id": "smart_piano_fingering",
+   "name": "emanuelemerlo/smart-piano-fingering (MuseScore 4 plugin)",
+   "url": "https://github.com/emanuelemerlo/smart-piano-fingering",
+   "commit": "15828ee9c85a06f632d9f001456ce2c44cf2d80c",
+   "license": "GPL-3.0",
+   "mit_reuse": "no",
+   "approach": "QML/JavaScript port + extension of pianoplayer's hand model (chord & multi-voice handling, held-note constraints, exact DP when feasible)",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_smart_piano_fingering.py + js/smart_piano_fingering.cjs",
+   "outputs": [
+    "smart_piano_fingering_musescore"
+   ],
+   "notes": "Core sliced out of the .qml and run in Node exactly like its own tests (MuseScore not needed). Beat = 0.5 s assumed. Clearly better than pianoplayer itself (58.8 vs 57.2)."
+  },
+  {
+   "id": "bshakhovsky",
+   "name": "BShakhovsky/PianoFingering_CalcModule (of PianoTranscription_Windows)",
+   "url": "https://github.com/BShakhovsky/PianoFingering_CalcModule",
+   "commit": "52dd07c81d8e27804cfc15be8be0714e3f9c0dcf",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "trellis graph over chord fingering combinations with vertical (in-chord) and horizontal (1-3 chord) cost rules, keeping all min-cost paths",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_bshakhovsky.py + cpp/bshakhovsky/driver.cpp",
+   "outputs": [
+    "bshakhovsky_trellis"
+   ],
+   "notes": "MSVC-only C++; built with MinGW g++ 9.2 via a force-included compat header ('abstract' keyword), a 5-line boost::noncopyable stand-in and patches/bshakhovsky.patch (i16 literal, pure-virtual destructor with body, #pragma comment)."
+  },
+  {
+   "id": "opennote",
+   "name": "carlosrmz009/OpenNote (Rust)",
+   "url": "https://github.com/carlosrmz009/OpenNote",
+   "commit": "ed79e489aff3c766b5b42a0779537cc41c8bdb8e",
+   "license": "PolyForm-Noncommercial-1.0.0",
+   "mit_reuse": "no",
+   "approach": "Viterbi over a biomechanical hand model + union of published rule sets (Parncutt, Jacobs, Balliauw, Badgerow; 'consensus' weighting) + optional learned n-gram prior",
+   "family": "rule/cost",
+   "trained_on": "none (rules only; the learned prior is not distributed)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_opennote.py + rust/opennote_pig (driver crate)",
+   "outputs": [
+    "opennote_rules_consensus",
+    "opennote_rules_parncutt",
+    "opennote_rules_jacobs"
+   ],
+   "notes": "Official builds embed models/helios-beta1.8.json (absent from the repo); published models are sealed for official builds. No MSVC linker -> built with the GNU Rust toolchain. Repo is 1.4 GB (videos) -> sparse checkout."
+  },
+  {
+   "id": "huukhang",
+   "name": "huukhangapcs/AutomaticPianoFingering",
+   "url": "https://github.com/huukhangapcs/AutomaticPianoFingering",
+   "commit": "2ea024321f320971ac4269ea0e92da6acca17bf2",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "phrase detection + motif/pattern library (Alberti, arpeggios hard-locked) + phrase-scoped Viterbi over 5-finger hand states with 3-D key geometry; 'simple' pipeline = plain physics DP",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_huukhang.py",
+   "outputs": [
+    "huukhang_simple",
+    "huukhang_phraseaware"
+   ],
+   "notes": "README claims 85.53% accuracy (own metric, first 20 PIG files); on the PIG test protocol the full phrase-aware pipeline scores 45.7 and the simple DP 59.9."
+  },
+  {
+   "id": "valhala",
+   "name": "jpsmith8488/valhala-fingering-solver (ValHaLA)",
+   "url": "https://github.com/jpsmith8488/valhala-fingering-solver",
+   "commit": "16735999f071510015bd170ab781f06c30e5f2d4",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "first-order Viterbi over a 14-term physical 'action' (kinetic, topographic, gravity, collision, coupling, key action, adhesion, tempo, rotation, tradition, ...), monophonic and isochronous",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_valhala.py",
+   "outputs": [
+    "valhala_bilateral",
+    "valhala_mirrored"
+   ],
+   "notes": "Its BilateralSolver fingers the left hand with the right-hand model (no mirroring) -> 31.5. Mirroring LH pitches (our modification) -> 52.3."
+  },
+  {
+   "id": "pianofingering_jl",
+   "name": "JuliaMusic/PianoFingering.jl (Gao et al. 2023, Applied Sciences)",
+   "url": "https://github.com/JuliaMusic/PianoFingering.jl",
+   "commit": "d16a9d1bac0d4b752a27dce4421ce2c323af61cb",
+   "license": "GPL-3.0",
+   "mit_reuse": "no",
+   "approach": "model-based RL: each hand split into segments, each segment an MDP with rule-based rewards, solved with Dyna-Q (10,000 episodes) in parallel threads; greedy policy = fingering",
+   "family": "RL (per piece)",
+   "trained_on": "none (per-piece optimisation)",
+   "contaminated": false,
+   "ran": "partial",
+   "wrapper": "run_pianofingering_jl.py + jl/run_pianofingering.jl",
+   "outputs": [
+    "pianofingering_jl"
+   ],
+   "notes": "Portable Julia 1.10.5, PyCall bound to the baselines venv (music21). Its PIG reader takes the hand from the finger SIGN. Crashes on 4/30 test pieces (022, 026, 028, 030: states without any legal action). Score is over the 26 pieces it finished."
+  },
+  {
+   "id": "balliauw_vns",
+   "name": "Balliauw, Herremans et al. 2017 VNS (C++)",
+   "url": "https://bitbucket.org/mballiauw/piano-fingering-vns",
+   "commit": "ad84ad89f99b07f114a56697dfcb6aaf958abde1",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "variable neighbourhood search (swap/change/split-part moves, tabu list, perturbations) over a 15-rule polyphonic cost (Parncutt-derived + chord rules)",
+   "family": "search",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "partial (runs, does not optimise)",
+   "wrapper": "run_balliauw_vns.py",
+   "outputs": [
+    "balliauw_vns"
+   ],
+   "notes": "Fragile MusicXML importer (start times recomputed from voice durations, ties ignored); we generate a compatible single-measure MusicXML on a rank time axis (one 'slice' per division, so an absolute grid is very slow). Patch: -seed for reproducibility. The released code (HEAD 2014-11-06, default parameters) does not reach good solutions: on its own bundled example piece2.xml the returned fingering repeats fingers on consecutive different notes (right-hand cost 60877); on PIG 008 the search plateaus after a 7% cost reduction from its random start; with the 'events' time axis rest slices break the slice-adjacency rules (right-hand cost 0). Stopped after 12/30 test pieces (5 min/piece on average), M_gen below random. Nakamura et al. 2020 report 56.7 M_gen for the authors' own run on 14 pieces."
+  },
+  {
+   "id": "timkoornstra",
+   "name": "TimKoornstra/automatic-piano-fingering",
+   "url": "https://github.com/TimKoornstra/automatic-piano-fingering",
+   "commit": "88cd37f8fa50cfef4794c97e1dad79e30007d26c",
+   "license": "GPL-3.0",
+   "mit_reuse": "no",
+   "approach": "tabular Q-learning over (prev, current, next note) with a toy reward (distance to the finger's slot in a rigid hand frame)",
+   "family": "RL (per piece)",
+   "trained_on": "none (trained per piece on itself)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_timkoornstra.py",
+   "outputs": [
+    "timkoornstra_qlearning"
+   ],
+   "notes": "RH-only upstream; LH mirrored by us; notes clipped into its Q-table range."
+  },
+  {
+   "id": "ackyedy",
+   "name": "ackyedy/piano-fingering-analysis",
+   "url": "https://github.com/ackyedy/piano-fingering-analysis",
+   "commit": "ea6f852c9f7d3453776cf81b7f97b16d02deccb0",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "semitone-interval HMMs (order 1, interpolated order 2) + baselines (most frequent finger, direction rule)",
+   "family": "statistical",
+   "trained_on": "PIG 031-150 (trained by our wrapper)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_ackyedy.py",
+   "outputs": [
+    "ackyedy_h1",
+    "ackyedy_h2",
+    "ackyedy_b0",
+    "ackyedy_b1"
+   ],
+   "notes": "Semitone intervals (no black/white key geometry) lose ~2-5 points vs Nakamura's key-position HMMs."
+  },
+  {
+   "id": "chowmhalvin",
+   "name": "CHOWMHALVIN/Piano-Fingering-Suggestion-Model-with-Intuitive-UI",
+   "url": "https://github.com/CHOWMHALVIN/Piano-Fingering-Suggestion-Model-with-Intuitive-UI",
+   "commit": "0aebdd3b29db1f71d2d2708c298b051727363d91",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "first-order HMM (white/black key distance emission) + hand-size leap limits, chord penalties, scale thumb rules in the Viterbi pass",
+   "family": "statistical",
+   "trained_on": "PIG 031-150 (trained by our wrapper; repo uses a random 80/20 piece split)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_chowmhalvin.py",
+   "outputs": [
+    "chowmhalvin_hmm"
+   ],
+   "notes": "The repository also redistributes PIG v1.2 (used by the datasets agent as a mirror)."
+  },
+  {
+   "id": "eer",
+   "name": "anandaphan/EER-piano-fingering (Iman & Ahn 2025, Mathematics)",
+   "url": "https://github.com/anandaphan/EER-piano-fingering",
+   "commit": "60298201bf2985f41048e68fe6e0e1b657d87027",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "per-piece model-free RL: factored dueling DQN with Elite Episode Replay, reward = Parncutt-style rules (3,4,12,...)",
+   "family": "RL (per piece)",
+   "trained_on": "none, but the first chord of each hand is fixed to annotator 1's ground truth (piece_details.npy)",
+   "contaminated": false,
+   "ran": "partial",
+   "wrapper": "(attempted in outputs/_eer_work)",
+   "outputs": [],
+   "notes": "Runs (gym 0.26.2 + torch 2.5.1) but ~28 s per episode on piece 002 -> the default 500 episodes x 2 hands is ~8 h per piece; only 5 test pieces (002,016,017,025,026) are in its bundled table. Stopped after 32 episodes; not scored."
+  }
+ ],
+ "not_run": [
+  {
+   "name": "Srivatsan & Berg-Kirkpatrick 2022, 'Checklist models for improved output fluency in piano fingering prediction' (ISMIR)",
+   "url": "https://arxiv.org/abs/2209.05622",
+   "reason": "No code release found (arXiv, Papers with Code, GitHub search for title/authors)."
+  },
+  {
+   "name": "Moryossef, Elazar & Goldberg 2023, 'At Your Fingertips: Extracting Piano Fingering Instructions from Videos'",
+   "url": "https://arxiv.org/abs/2303.03745",
+   "reason": "No fingering-model code or data link in the paper; the authors' GitHub (AmitMY) only has piano-hands (hand bounding boxes) and meta-scholar (dataset metadata)."
+  },
+  {
+   "name": "JeffreyZhou798/Piano-Fingering-Generator-A09 (and A03-A08)",
+   "url": "https://github.com/JeffreyZhou798/Piano-Fingering-Generator-A09",
+   "license": "GPL-3.0",
+   "reason": "TypeScript/Next.js browser app = Dyna-Q port of PianoFingering.jl + lumikey's Transformer as prior; its ONNX file is byte-identical (git blob 11ed03b5...) to lumikey's, which was trained on all PIG files, so any PIG test score would be contaminated; both components are benchmarked separately."
+  },
+  {
+   "name": "monde-lointain/piano-fingering (C++20, ILS + beam search, MusicXML)",
+   "url": "https://github.com/monde-lointain/piano-fingering",
+   "reason": "Needs a C++20 compiler (defaulted comparisons, <filesystem>, <thread>) and CMake FetchContent; only MinGW.org g++ 9.2 is available and MSVC has no VC toolset. Same family as the Balliauw VNS."
+  },
+  {
+   "name": "dlegs/Optimal-Piano-Fingering-Algorithm (C, Hart et al. DP)",
+   "url": "https://github.com/dlegs/Optimal-Piano-Fingering-Algorithm",
+   "reason": "Prints only the optimal cost, never the fingering (trace code commented out); intervals > 12 index out of bounds; Hart's model is benchmarked via pydactyl."
+  },
+  {
+   "name": "guwalgiya/Piano-Fingering-Generators",
+   "url": "https://github.com/guwalgiya/Piano-Fingering-Generators",
+   "reason": "Experimental TensorFlow 2.0 / Python 3.7 windowed BiLSTM scripts with the pipeline commented out and hard-coded dataset paths; no weights. Same idea as Nakamura's LSTM baseline (61.3 in the paper)."
+  },
+  {
+   "name": "quadpixels/fingeringyonebayashiijcai07 (Yonebayashi et al. 2007 HMM replication)",
+   "url": "https://github.com/quadpixels/fingeringyonebayashiijcai07",
+   "reason": "Python 2 course-project script, right hand only, trains on passages embedded in the code."
+  },
+  {
+   "name": "PRamoneda/RL_PianoFingering (NeurIPS 2020 workshop)",
+   "url": "https://github.com/PRamoneda/RL_PianoFingering",
+   "license": "MIT",
+   "reason": "Five hard-coded toy experiments (tabular Q-learning on single test .mxl files), no general input path."
+  },
+  {
+   "name": "PRamoneda/APF_eval",
+   "url": "https://github.com/PRamoneda/APF_eval",
+   "reason": "pybind11 wrapper of Nakamura's evaluation code, not a fingering model."
+  },
+  {
+   "name": "PRamoneda/difficulty-prediction-CIPI, CIPI_ismir, Mikrokosmos-difficulty, PianoVAM-Code",
+   "url": "https://github.com/PRamoneda",
+   "reason": "Difficulty / video work that consumes ArGNN fingering features or video-derived fingering; the fingering model itself is Automatic-Piano-Fingering (benchmarked)."
+  },
+  {
+   "name": "pianoplayer derivatives: tiefenb/piano-vision-automatic-fingering-assignment (JS), OclefInc/piano-fingering-web (hard fork), Yannxinn/piano-score-fingering (agent skill), JuliaMusic/PianoFingering.jl's predecessor ports",
+   "url": "https://github.com/tiefenb/piano-vision-automatic-fingering-assignment",
+   "reason": "Ports of pianoplayer's hand model for other inputs (Piano Vision JSON, Flask app, OMR pipeline); represented by pianoplayer and the MuseScore plugin."
+  },
+  {
+   "name": "blakewest/performer (JavaScript original of Kanma's port)",
+   "url": "https://github.com/blakewest/performer",
+   "reason": "Same algorithm and cost table as Kanma/piano_fingering (benchmarked); no license."
+  },
+  {
+   "name": "pudelos/piano-fingering-solver",
+   "url": "https://github.com/pudelos/piano-fingering-solver",
+   "license": "MIT",
+   "reason": "Solver not implemented yet (README checklist: 'Fingering solver [ ]'), only MusicXML import/export."
+  },
+  {
+   "name": "Notebook / student projects trained on PIG with their own splits: sutkucanverdi/piano-fingering-ml, LunaticGhoulPiano/AutomaticPianoFingeringEstimationbasedonMachineLearning (MIT), ilsotn/piano-fingering-estimation, Anastasia1707/piano-fingering, HACkerrr121/KeyGenius, chrsztz/xlpro-model, m4cy/finger-finagler, OrigamiDream/piano-fingering-classifier, to-osaki/survey_piano_fingering, Jerschow/PianoFingeringGenerator",
+   "url": "https://github.com/search?q=piano+fingering",
+   "reason": "Jupyter notebooks without a reusable inference entry point and/or unknown train/test splits over PIG; same model families (BiLSTM/CNN/HMM) as benchmarked repos."
+  },
+  {
+   "name": "Small rule/DP scripts: amackenzie1/PianoFingering, boramarasli/piano-fingering-suggester, IrinaLee521/Piano-Fingering, Traelx/Piano-Fingering-Suggestor, serenado/PianoFingeringProject, mpg/pypiano-fingers (WTFPL), Kheops411/piano_fingering, neewamp/AutomaticPianoFingerings, Kobe972/piano_fingering_generator, kashizui/fingerings (2012, Python 2 + LilyPond), Lteins/Piano-Fingering-Computation, hanrodz/fingoptim (empty), akench/PianoFingeringGenerator & Blanel/Piano-Fingering (Java), Optimal-Piano-MQP/OptimalFingeringGenerator (Parncutt DP via MuseScore 4), ExxLiang193/MusicMark (RNN, GPL-3.0), ririanbo/thesis-Fingering-Estimation-Algorithm",
+   "url": "https://github.com/search?q=piano+fingering",
+   "reason": "Right-hand-only or monophonic toy DPs, MusicXML/GUI-bound apps or unfinished code; their ideas are subsumed by the Parncutt/Hart/Kanma/pianoplayer baselines that were run."
+  },
+  {
+   "name": "Not fingering estimators: lemonadedw/BACHprop (hand separation), miguelcarballo/MusicXML2PIG (converter), Edisondiaz19831/monophonic-piano-fingering-dataset (data), kanex02/piano_fingering_detector & sjcantor/piano-hands-technique-extraction (video), xupei0610/music & hshi74/piano_dexterity & robopianist forks (robot/hand control using PIG fingerings), matthewliuswims/povnet (transcription data incl. Nakamura's fingering engine headers), HugoCheung1210 (tutoring app), nomu224/piano-fingering-checker, TomMeyer & BapiGso & apsjohn (Piano Vision tooling), Ap13Crow/piano-fingering (no code)",
+   "url": "https://github.com/search?q=piano+fingering",
+   "reason": "Out of scope (no score-to-fingering model) or no code."
+  }
+ ]
+}

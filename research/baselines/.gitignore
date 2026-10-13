@@ -1,0 +1,24 @@
+# Third-party clones, downloaded archives, weights and the PIG copy are never committed.
+third_party/
+# Per-piece prediction outputs (regenerable with the run_*.py wrappers).
+outputs/
+# Training checkpoints / logs produced by baseline (re)training.
+checkpoints/
+logs/
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.pkl
+*.zip
+# Python caches
+__pycache__/
+*.pyc
+# Built binaries of third-party C/C++ code
+bin/
+*.exe
+*.o
+# Rust build output of the small driver crates under rust/
+rust/*/target/
+# Background-job logs
+logs/

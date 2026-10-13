@@ -1,0 +1,5924 @@
+{
+ "baselines": {
+  "nakamura_chmm": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 62.07,
+     "micro_m_gen": 63.2,
+     "macro_m_high": 68.69,
+     "micro_m_high": 69.39,
+     "macro_m_soft": 82.64,
+     "micro_m_soft": 82.76,
+     "macro_m_rec": 74.74,
+     "micro_m_rec": 75.14
+    },
+    "official": {
+     "macro_m_gen": 61.98,
+     "micro_m_gen": 63.11,
+     "macro_m_high": 68.69,
+     "micro_m_high": 69.39,
+     "macro_m_soft": 82.64,
+     "micro_m_soft": 82.76,
+     "macro_m_rec": 74.74,
+     "micro_m_rec": 75.14
+    },
+    "cpp_crosscheck_max_abs_dev": 4.957698815921674e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0518,
+     "max_seconds_per_piece": 0.1443,
+     "total_seconds": 1.553,
+     "notes_per_second": 6582.8,
+     "meta": {
+      "model": "chmm",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\CHMM_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_CHMM1.txt",
+      "hyper": [
+       "0.94",
+       "4.70",
+       "7.53",
+       "5.29",
+       "0.10"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.84,
+     "micro_m_gen": 67.75,
+     "macro_m_high": 69.26,
+     "micro_m_high": 70.01,
+     "macro_m_soft": 73.93,
+     "micro_m_soft": 74.5,
+     "macro_m_rec": 71.23,
+     "micro_m_rec": 71.96
+    },
+    "official": {
+     "macro_m_gen": 66.72,
+     "micro_m_gen": 67.67,
+     "macro_m_high": 69.26,
+     "micro_m_high": 70.01,
+     "macro_m_soft": 73.93,
+     "micro_m_soft": 74.5,
+     "macro_m_rec": 71.23,
+     "micro_m_rec": 71.96
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0479,
+     "max_seconds_per_piece": 0.1443,
+     "total_seconds": 7.179,
+     "notes_per_second": 6787.2,
+     "meta": {
+      "model": "chmm",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\CHMM_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_CHMM1.txt",
+      "hyper": [
+       "0.94",
+       "4.70",
+       "7.53",
+       "5.29",
+       "0.10"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm1": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 62.43,
+     "micro_m_gen": 63.43,
+     "macro_m_high": 68.97,
+     "micro_m_high": 69.27,
+     "macro_m_soft": 83.7,
+     "micro_m_soft": 83.79,
+     "macro_m_rec": 74.86,
+     "micro_m_rec": 75.23
+    },
+    "official": {
+     "macro_m_gen": 62.32,
+     "micro_m_gen": 63.33,
+     "macro_m_high": 68.97,
+     "micro_m_high": 69.27,
+     "macro_m_soft": 83.7,
+     "micro_m_soft": 83.79,
+     "macro_m_rec": 74.86,
+     "micro_m_rec": 75.23
+    },
+    "cpp_crosscheck_max_abs_dev": 4.966442952447636e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0393,
+     "max_seconds_per_piece": 0.0536,
+     "total_seconds": 1.178,
+     "notes_per_second": 8683.7,
+     "meta": {
+      "model": "fhmm1",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\FingeringHMM1_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_FHMM1.txt",
+      "hyper": [
+       "0.964",
+       "-5"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 68.14,
+     "micro_m_gen": 69.38,
+     "macro_m_high": 70.44,
+     "micro_m_high": 71.48,
+     "macro_m_soft": 75.37,
+     "micro_m_soft": 76.31,
+     "macro_m_rec": 72.32,
+     "micro_m_rec": 73.44
+    },
+    "official": {
+     "macro_m_gen": 67.93,
+     "micro_m_gen": 69.23,
+     "macro_m_high": 70.44,
+     "micro_m_high": 71.48,
+     "macro_m_soft": 75.37,
+     "micro_m_soft": 76.31,
+     "macro_m_rec": 72.32,
+     "micro_m_rec": 73.44
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.038,
+     "max_seconds_per_piece": 0.0873,
+     "total_seconds": 5.7,
+     "notes_per_second": 8547.9,
+     "meta": {
+      "model": "fhmm1",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\FingeringHMM1_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_FHMM1.txt",
+      "hyper": [
+       "0.964",
+       "-5"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm2": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.01,
+     "micro_m_gen": 66.05,
+     "macro_m_high": 71.45,
+     "micro_m_high": 72.0,
+     "macro_m_soft": 86.09,
+     "micro_m_soft": 86.22,
+     "macro_m_rec": 78.24,
+     "micro_m_rec": 78.69
+    },
+    "official": {
+     "macro_m_gen": 64.88,
+     "micro_m_gen": 65.92,
+     "macro_m_high": 71.45,
+     "micro_m_high": 72.0,
+     "macro_m_soft": 86.09,
+     "micro_m_soft": 86.22,
+     "macro_m_rec": 78.24,
+     "micro_m_rec": 78.69
+    },
+    "cpp_crosscheck_max_abs_dev": 4.748201438697919e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0518,
+     "max_seconds_per_piece": 0.0869,
+     "total_seconds": 1.554,
+     "notes_per_second": 6578.1,
+     "meta": {
+      "model": "fhmm2",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\FingeringHMM2_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_FHMM2.txt",
+      "hyper": [
+       "0.556",
+       "0.407",
+       "0.474",
+       "-5"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 71.87,
+     "micro_m_gen": 73.04,
+     "macro_m_high": 74.22,
+     "micro_m_high": 75.19,
+     "macro_m_soft": 79.2,
+     "micro_m_soft": 80.01,
+     "macro_m_rec": 76.47,
+     "micro_m_rec": 77.46
+    },
+    "official": {
+     "macro_m_gen": 71.65,
+     "micro_m_gen": 72.9,
+     "macro_m_high": 74.22,
+     "micro_m_high": 75.19,
+     "macro_m_soft": 79.2,
+     "micro_m_soft": 80.01,
+     "macro_m_rec": 76.47,
+     "micro_m_rec": 77.46
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0471,
+     "max_seconds_per_piece": 0.1083,
+     "total_seconds": 7.066,
+     "notes_per_second": 6895.7,
+     "meta": {
+      "model": "fhmm2",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\FingeringHMM2_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_FHMM2.txt",
+      "hyper": [
+       "0.556",
+       "0.407",
+       "0.474",
+       "-5"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm3": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.15,
+     "micro_m_gen": 66.3,
+     "macro_m_high": 71.57,
+     "micro_m_high": 72.19,
+     "macro_m_soft": 86.29,
+     "micro_m_soft": 86.6,
+     "macro_m_rec": 78.58,
+     "micro_m_rec": 79.19
+    },
+    "official": {
+     "macro_m_gen": 65.01,
+     "micro_m_gen": 66.17,
+     "macro_m_high": 71.57,
+     "micro_m_high": 72.19,
+     "macro_m_soft": 86.29,
+     "micro_m_soft": 86.6,
+     "macro_m_rec": 78.58,
+     "micro_m_rec": 79.19
+    },
+    "cpp_crosscheck_max_abs_dev": 4.871794870853208e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0644,
+     "max_seconds_per_piece": 0.1268,
+     "total_seconds": 1.932,
+     "notes_per_second": 5293.3,
+     "meta": {
+      "model": "fhmm3",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\FingeringHMM3_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_FHMM3.txt",
+      "hyper": [
+       "0.448",
+       "0.292",
+       "0.194",
+       "0.470",
+       "0.504",
+       "-5"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 72.23,
+     "micro_m_gen": 73.23,
+     "macro_m_high": 74.52,
+     "micro_m_high": 75.33,
+     "macro_m_soft": 79.58,
+     "micro_m_soft": 80.26,
+     "macro_m_rec": 76.85,
+     "micro_m_rec": 77.71
+    },
+    "official": {
+     "macro_m_gen": 72.0,
+     "micro_m_gen": 73.08,
+     "macro_m_high": 74.52,
+     "micro_m_high": 75.33,
+     "macro_m_soft": 79.58,
+     "micro_m_soft": 80.26,
+     "macro_m_rec": 76.85,
+     "micro_m_rec": 77.71
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0608,
+     "max_seconds_per_piece": 0.1268,
+     "total_seconds": 9.113,
+     "notes_per_second": 5346.9,
+     "meta": {
+      "model": "fhmm3",
+      "binary": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Binary\\FingeringHMM3_Run.exe",
+      "param": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\nakamura_hmm\\SourceCode\\Code\\param_FHMM3.txt",
+      "hyper": [
+       "0.448",
+       "0.292",
+       "0.194",
+       "0.470",
+       "0.504",
+       "-5"
+      ],
+      "source": "https://statpianofingering.github.io/data/SourceCode_v190921.zip"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm1_released_files": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 61.76,
+     "micro_m_gen": 62.79,
+     "macro_m_high": 68.34,
+     "micro_m_high": 68.67,
+     "macro_m_soft": 82.75,
+     "micro_m_soft": 82.85,
+     "macro_m_rec": 74.02,
+     "micro_m_rec": 74.41
+    },
+    "official": {
+     "macro_m_gen": 61.65,
+     "micro_m_gen": 62.7,
+     "macro_m_high": 68.34,
+     "micro_m_high": 68.67,
+     "macro_m_soft": 82.75,
+     "micro_m_soft": 82.85,
+     "macro_m_rec": 74.02,
+     "micro_m_rec": 74.41
+    },
+    "cpp_crosscheck_max_abs_dev": 4.966442952447636e-07,
+    "runtime": {},
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm2_released_files": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.4,
+     "micro_m_gen": 65.49,
+     "macro_m_high": 70.81,
+     "micro_m_high": 71.39,
+     "macro_m_soft": 85.26,
+     "micro_m_soft": 85.42,
+     "macro_m_rec": 77.57,
+     "micro_m_rec": 78.07
+    },
+    "official": {
+     "macro_m_gen": 64.27,
+     "micro_m_gen": 65.37,
+     "macro_m_high": 70.81,
+     "micro_m_high": 71.39,
+     "macro_m_soft": 85.26,
+     "micro_m_soft": 85.42,
+     "macro_m_rec": 77.57,
+     "micro_m_rec": 78.07
+    },
+    "cpp_crosscheck_max_abs_dev": 4.961832061889382e-07,
+    "runtime": {},
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm3_released_files": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.62,
+     "micro_m_gen": 65.81,
+     "macro_m_high": 71.0,
+     "micro_m_high": 71.65,
+     "macro_m_soft": 85.49,
+     "micro_m_soft": 85.85,
+     "macro_m_rec": 77.78,
+     "micro_m_rec": 78.44
+    },
+    "official": {
+     "macro_m_gen": 64.48,
+     "micro_m_gen": 65.69,
+     "macro_m_high": 71.0,
+     "micro_m_high": 71.65,
+     "macro_m_soft": 85.49,
+     "micro_m_soft": 85.85,
+     "macro_m_rec": 77.78,
+     "micro_m_rec": 78.44
+    },
+    "cpp_crosscheck_max_abs_dev": 4.974093263943047e-07,
+    "runtime": {},
+    "scorer": "fingering_eval"
+   }
+  },
+  "ramoneda_argnn": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.79,
+     "micro_m_gen": 65.57,
+     "macro_m_high": 70.68,
+     "micro_m_high": 71.21,
+     "macro_m_soft": 86.67,
+     "micro_m_soft": 86.43,
+     "macro_m_rec": 76.73,
+     "micro_m_rec": 76.89
+    },
+    "official": {
+     "macro_m_gen": 64.65,
+     "micro_m_gen": 65.43,
+     "macro_m_high": 70.68,
+     "micro_m_high": 71.21,
+     "macro_m_soft": 86.67,
+     "micro_m_soft": 86.43,
+     "macro_m_rec": 76.73,
+     "micro_m_rec": 76.89
+    },
+    "cpp_crosscheck_max_abs_dev": 4.976525821431821e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1584,
+     "max_seconds_per_piece": 0.3366,
+     "total_seconds": 4.753,
+     "notes_per_second": 2151.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\PRamoneda__Automatic-Piano-Fingering",
+      "model": "ArGNN",
+      "beam": 1,
+      "device": "cuda:0",
+      "weights": [
+       "models/right_ArGNN.pth",
+       "models/left_ArGNN.pth"
+      ]
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ramoneda_argnn_beam10": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.87,
+     "micro_m_gen": 67.67,
+     "macro_m_high": 73.48,
+     "micro_m_high": 73.89,
+     "macro_m_soft": 88.29,
+     "micro_m_soft": 88.12,
+     "macro_m_rec": 79.32,
+     "micro_m_rec": 79.55
+    },
+    "official": {
+     "macro_m_gen": 66.73,
+     "micro_m_gen": 67.53,
+     "macro_m_high": 73.48,
+     "micro_m_high": 73.89,
+     "macro_m_soft": 88.29,
+     "micro_m_soft": 88.12,
+     "macro_m_rec": 79.32,
+     "micro_m_rec": 79.55
+    },
+    "cpp_crosscheck_max_abs_dev": 4.957698814811451e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.5102,
+     "max_seconds_per_piece": 1.0663,
+     "total_seconds": 15.305,
+     "notes_per_second": 668.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\PRamoneda__Automatic-Piano-Fingering",
+      "model": "ArGNN",
+      "beam": 10,
+      "device": "cuda:0",
+      "weights": [
+       "models/right_ArGNN.pth",
+       "models/left_ArGNN.pth"
+      ]
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ramoneda_arlstm": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.31,
+     "micro_m_gen": 65.12,
+     "macro_m_high": 71.24,
+     "micro_m_high": 71.68,
+     "macro_m_soft": 86.41,
+     "micro_m_soft": 86.32,
+     "macro_m_rec": 77.65,
+     "micro_m_rec": 77.89
+    },
+    "official": {
+     "macro_m_gen": 64.17,
+     "micro_m_gen": 64.99,
+     "macro_m_high": 71.24,
+     "micro_m_high": 71.68,
+     "macro_m_soft": 86.41,
+     "micro_m_soft": 86.32,
+     "macro_m_rec": 77.65,
+     "micro_m_rec": 77.89
+    },
+    "cpp_crosscheck_max_abs_dev": 4.909560723520556e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.2106,
+     "max_seconds_per_piece": 0.3933,
+     "total_seconds": 6.317,
+     "notes_per_second": 1618.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\PRamoneda__Automatic-Piano-Fingering",
+      "model": "ArLSTM",
+      "beam": 1,
+      "device": "cuda:0",
+      "weights": [
+       "models/right_ArLSTM.pth",
+       "models/left_ArLSTM.pth"
+      ]
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ramoneda_arlstm_beam10": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.24,
+     "micro_m_gen": 66.09,
+     "macro_m_high": 72.44,
+     "micro_m_high": 73.11,
+     "macro_m_soft": 86.86,
+     "micro_m_soft": 86.88,
+     "macro_m_rec": 78.84,
+     "micro_m_rec": 79.23
+    },
+    "official": {
+     "macro_m_gen": 65.13,
+     "micro_m_gen": 65.98,
+     "macro_m_high": 72.44,
+     "micro_m_high": 73.11,
+     "macro_m_soft": 86.86,
+     "micro_m_soft": 86.88,
+     "macro_m_rec": 78.84,
+     "micro_m_rec": 79.23
+    },
+    "cpp_crosscheck_max_abs_dev": 4.883720929882429e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.5842,
+     "max_seconds_per_piece": 1.0002,
+     "total_seconds": 17.526,
+     "notes_per_second": 583.4,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\PRamoneda__Automatic-Piano-Fingering",
+      "model": "ArLSTM",
+      "beam": 10,
+      "device": "cuda:0",
+      "weights": [
+       "models/right_ArLSTM.pth",
+       "models/left_ArLSTM.pth"
+      ]
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "kanma_piano_fingering": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 61.76,
+     "micro_m_gen": 62.85,
+     "macro_m_high": 68.24,
+     "micro_m_high": 68.87,
+     "macro_m_soft": 83.29,
+     "micro_m_soft": 83.51,
+     "macro_m_rec": 74.84,
+     "micro_m_rec": 75.38
+    },
+    "official": {
+     "macro_m_gen": 61.62,
+     "micro_m_gen": 62.73,
+     "macro_m_high": 68.24,
+     "micro_m_high": 68.87,
+     "macro_m_soft": 83.29,
+     "micro_m_soft": 83.51,
+     "macro_m_rec": 74.84,
+     "micro_m_rec": 75.38
+    },
+    "cpp_crosscheck_max_abs_dev": 4.989339019711991e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.016,
+     "max_seconds_per_piece": 0.0436,
+     "total_seconds": 0.479,
+     "notes_per_second": 21364.4,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\Kanma__piano_fingering"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 61.17,
+     "micro_m_gen": 62.37,
+     "macro_m_high": 63.44,
+     "micro_m_high": 64.53,
+     "macro_m_soft": 68.4,
+     "micro_m_soft": 69.31,
+     "macro_m_rec": 65.42,
+     "micro_m_rec": 66.5
+    },
+    "official": {
+     "macro_m_gen": 61.02,
+     "micro_m_gen": 62.27,
+     "macro_m_high": 63.44,
+     "micro_m_high": 64.53,
+     "macro_m_soft": 68.4,
+     "micro_m_soft": 69.31,
+     "macro_m_rec": 65.42,
+     "micro_m_rec": 66.5
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.016,
+     "max_seconds_per_piece": 0.1095,
+     "total_seconds": 2.405,
+     "notes_per_second": 20262.8,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\Kanma__piano_fingering"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "autofingering_hmm": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 62.22,
+     "micro_m_gen": 63.2,
+     "macro_m_high": 68.82,
+     "micro_m_high": 69.02,
+     "macro_m_soft": 83.2,
+     "micro_m_soft": 83.29,
+     "macro_m_rec": 74.44,
+     "micro_m_rec": 74.74
+    },
+    "official": {
+     "macro_m_gen": 62.11,
+     "micro_m_gen": 63.1,
+     "macro_m_high": 68.82,
+     "micro_m_high": 69.02,
+     "macro_m_soft": 83.2,
+     "micro_m_soft": 83.29,
+     "macro_m_rec": 74.44,
+     "micro_m_rec": 74.74
+    },
+    "cpp_crosscheck_max_abs_dev": 4.9253731337906e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0067,
+     "max_seconds_per_piece": 0.014,
+     "total_seconds": 0.201,
+     "notes_per_second": 50946.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\thegreatkwanghyeon__autofingering",
+      "train_pieces": "120 pieces (split train+val)"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pianoplayer": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 57.29,
+     "micro_m_gen": 57.67,
+     "macro_m_high": 64.24,
+     "micro_m_high": 64.27,
+     "macro_m_soft": 78.23,
+     "micro_m_soft": 77.78,
+     "macro_m_rec": 69.29,
+     "micro_m_rec": 69.33
+    },
+    "official": {
+     "macro_m_gen": 57.17,
+     "micro_m_gen": 57.55,
+     "macro_m_high": 64.24,
+     "micro_m_high": 64.27,
+     "macro_m_soft": 78.23,
+     "micro_m_soft": 77.78,
+     "macro_m_rec": 69.29,
+     "micro_m_rec": 69.33
+    },
+    "cpp_crosscheck_max_abs_dev": 4.961240309686588e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 19.3186,
+     "max_seconds_per_piece": 55.1019,
+     "total_seconds": 579.559,
+     "notes_per_second": 17.6,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\marcomusy__pianoplayer",
+      "hand_size": "M",
+      "depth": 0,
+      "x_mode": "keypos",
+      "chord_stagger_s": 0.05
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 58.95,
+     "micro_m_gen": 59.67,
+     "macro_m_high": 61.21,
+     "micro_m_high": 61.83,
+     "macro_m_soft": 65.85,
+     "micro_m_soft": 66.3,
+     "macro_m_rec": 62.84,
+     "micro_m_rec": 63.48
+    },
+    "official": {
+     "macro_m_gen": 58.76,
+     "micro_m_gen": 59.55,
+     "macro_m_high": 61.21,
+     "micro_m_high": 61.83,
+     "macro_m_soft": 65.85,
+     "micro_m_soft": 66.3,
+     "macro_m_rec": 62.84,
+     "micro_m_rec": 63.48
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 13.5165,
+     "max_seconds_per_piece": 86.3732,
+     "total_seconds": 2027.468,
+     "notes_per_second": 24.0,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\marcomusy__pianoplayer",
+      "hand_size": "M",
+      "depth": 0,
+      "x_mode": "keypos",
+      "chord_stagger_s": 0.05
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pydactyl_parncutt": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 63.03,
+     "micro_m_gen": 63.41,
+     "macro_m_high": 69.67,
+     "micro_m_high": 69.76,
+     "macro_m_soft": 84.51,
+     "micro_m_soft": 84.15,
+     "macro_m_rec": 76.84,
+     "micro_m_rec": 76.65
+    },
+    "official": {
+     "macro_m_gen": 62.91,
+     "micro_m_gen": 63.3,
+     "macro_m_high": 69.67,
+     "micro_m_high": 69.76,
+     "macro_m_soft": 84.51,
+     "micro_m_soft": 84.15,
+     "macro_m_rec": 76.84,
+     "micro_m_rec": 76.65
+    },
+    "cpp_crosscheck_max_abs_dev": 4.907063196890604e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 1.148,
+     "max_seconds_per_piece": 3.0647,
+     "total_seconds": 34.441,
+     "notes_per_second": 296.9,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "parncutt",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2502,
+       "forced_splits": 1775
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.91,
+     "micro_m_gen": 65.74,
+     "macro_m_high": 67.24,
+     "micro_m_high": 67.97,
+     "macro_m_soft": 72.13,
+     "micro_m_soft": 72.71,
+     "macro_m_rec": 69.39,
+     "micro_m_rec": 70.12
+    },
+    "official": {
+     "macro_m_gen": 64.72,
+     "micro_m_gen": 65.61,
+     "macro_m_high": 67.24,
+     "micro_m_high": 67.97,
+     "macro_m_soft": 72.13,
+     "micro_m_soft": 72.71,
+     "macro_m_rec": 69.39,
+     "micro_m_rec": 70.12
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.8328,
+     "max_seconds_per_piece": 10.3525,
+     "total_seconds": 124.917,
+     "notes_per_second": 390.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "parncutt",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2502,
+       "forced_splits": 1775
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pydactyl_jacobs": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 63.7,
+     "micro_m_gen": 64.27,
+     "macro_m_high": 70.51,
+     "micro_m_high": 70.68,
+     "macro_m_soft": 84.88,
+     "micro_m_soft": 84.6,
+     "macro_m_rec": 77.0,
+     "micro_m_rec": 76.86
+    },
+    "official": {
+     "macro_m_gen": 63.58,
+     "micro_m_gen": 64.17,
+     "macro_m_high": 70.51,
+     "micro_m_high": 70.68,
+     "macro_m_soft": 84.88,
+     "micro_m_soft": 84.6,
+     "macro_m_rec": 77.0,
+     "micro_m_rec": 76.86
+    },
+    "cpp_crosscheck_max_abs_dev": 4.906937394189015e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 1.1623,
+     "max_seconds_per_piece": 3.1949,
+     "total_seconds": 34.868,
+     "notes_per_second": 293.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "jacobs",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2502,
+       "forced_splits": 1775
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.4,
+     "micro_m_gen": 66.47,
+     "macro_m_high": 67.79,
+     "micro_m_high": 68.77,
+     "macro_m_soft": 72.56,
+     "micro_m_soft": 73.34,
+     "macro_m_rec": 69.78,
+     "micro_m_rec": 70.71
+    },
+    "official": {
+     "macro_m_gen": 65.2,
+     "micro_m_gen": 66.34,
+     "macro_m_high": 67.79,
+     "micro_m_high": 68.77,
+     "macro_m_soft": 72.56,
+     "micro_m_soft": 73.34,
+     "macro_m_rec": 69.78,
+     "micro_m_rec": 70.71
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.8576,
+     "max_seconds_per_piece": 10.3569,
+     "total_seconds": 128.633,
+     "notes_per_second": 378.8,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "jacobs",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2502,
+       "forced_splits": 1775
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pydactyl_badgerow": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 61.47,
+     "micro_m_gen": 61.71,
+     "macro_m_high": 68.61,
+     "micro_m_high": 68.4,
+     "macro_m_soft": 82.85,
+     "micro_m_soft": 82.34,
+     "macro_m_rec": 74.82,
+     "micro_m_rec": 74.49
+    },
+    "official": {
+     "macro_m_gen": 61.35,
+     "micro_m_gen": 61.61,
+     "macro_m_high": 68.61,
+     "micro_m_high": 68.4,
+     "macro_m_soft": 82.85,
+     "micro_m_soft": 82.34,
+     "macro_m_rec": 74.82,
+     "micro_m_rec": 74.49
+    },
+    "cpp_crosscheck_max_abs_dev": 4.893617020496066e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 1.0039,
+     "max_seconds_per_piece": 2.4648,
+     "total_seconds": 30.116,
+     "notes_per_second": 339.5,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "badgerow",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2502,
+       "forced_splits": 1775
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 63.12,
+     "micro_m_gen": 63.92,
+     "macro_m_high": 65.51,
+     "micro_m_high": 66.18,
+     "macro_m_soft": 70.26,
+     "micro_m_soft": 70.8,
+     "macro_m_rec": 67.46,
+     "micro_m_rec": 68.15
+    },
+    "official": {
+     "macro_m_gen": 62.94,
+     "micro_m_gen": 63.8,
+     "macro_m_high": 65.51,
+     "micro_m_high": 66.18,
+     "macro_m_soft": 70.26,
+     "micro_m_soft": 70.8,
+     "macro_m_rec": 67.46,
+     "micro_m_rec": 68.15
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.8778,
+     "max_seconds_per_piece": 11.0634,
+     "total_seconds": 131.67,
+     "notes_per_second": 370.0,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "badgerow",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2502,
+       "forced_splits": 1775
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pydactyl_balliauw": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 61.79,
+     "micro_m_gen": 62.37,
+     "macro_m_high": 68.26,
+     "micro_m_high": 68.55,
+     "macro_m_soft": 83.38,
+     "micro_m_soft": 82.98,
+     "macro_m_rec": 74.26,
+     "micro_m_rec": 74.2
+    },
+    "official": {
+     "macro_m_gen": 61.67,
+     "micro_m_gen": 62.27,
+     "macro_m_high": 68.26,
+     "micro_m_high": 68.55,
+     "macro_m_soft": 83.38,
+     "micro_m_soft": 82.98,
+     "macro_m_rec": 74.26,
+     "micro_m_rec": 74.2
+    },
+    "cpp_crosscheck_max_abs_dev": 4.972375690082131e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 1.0993,
+     "max_seconds_per_piece": 2.6635,
+     "total_seconds": 32.978,
+     "notes_per_second": 310.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "balliauw",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 1587,
+       "forced_splits": 1164
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 63.31,
+     "micro_m_gen": 64.19,
+     "macro_m_high": 65.42,
+     "micro_m_high": 66.24,
+     "macro_m_soft": 70.43,
+     "micro_m_soft": 71.02,
+     "macro_m_rec": 67.33,
+     "micro_m_rec": 68.11
+    },
+    "official": {
+     "macro_m_gen": 63.12,
+     "micro_m_gen": 64.07,
+     "macro_m_high": 65.42,
+     "micro_m_high": 66.24,
+     "macro_m_soft": 70.43,
+     "micro_m_soft": 71.02,
+     "macro_m_rec": 67.33,
+     "micro_m_rec": 68.11
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.9398,
+     "max_seconds_per_piece": 11.1563,
+     "total_seconds": 140.965,
+     "notes_per_second": 345.6,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "balliauw",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 1587,
+       "forced_splits": 1164
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pydactyl_hart": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 47.31,
+     "micro_m_gen": 47.98,
+     "macro_m_high": 52.22,
+     "micro_m_high": 52.47,
+     "macro_m_soft": 65.56,
+     "micro_m_soft": 65.36,
+     "macro_m_rec": 56.84,
+     "micro_m_rec": 57.01
+    },
+    "official": {
+     "macro_m_gen": 47.17,
+     "micro_m_gen": 47.85,
+     "macro_m_high": 52.22,
+     "micro_m_high": 52.47,
+     "macro_m_soft": 65.56,
+     "micro_m_soft": 65.36,
+     "macro_m_rec": 56.84,
+     "micro_m_rec": 57.01
+    },
+    "cpp_crosscheck_max_abs_dev": 4.991539763743447e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.3621,
+     "max_seconds_per_piece": 0.9584,
+     "total_seconds": 10.864,
+     "notes_per_second": 941.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "hart",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2988,
+       "forced_splits": 2142
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 50.73,
+     "micro_m_gen": 51.4,
+     "macro_m_high": 52.44,
+     "micro_m_high": 52.99,
+     "macro_m_soft": 56.81,
+     "micro_m_soft": 57.17,
+     "macro_m_rec": 53.95,
+     "micro_m_rec": 54.5
+    },
+    "official": {
+     "macro_m_gen": 50.55,
+     "micro_m_gen": 51.28,
+     "macro_m_high": 52.44,
+     "micro_m_high": 52.99,
+     "macro_m_soft": 56.81,
+     "micro_m_soft": 57.17,
+     "macro_m_rec": 53.95,
+     "micro_m_rec": 54.5
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.3792,
+     "max_seconds_per_piece": 6.0157,
+     "total_seconds": 56.873,
+     "notes_per_second": 856.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "hart",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 2988,
+       "forced_splits": 2142
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pydactyl_random": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 20.27,
+     "micro_m_gen": 20.16,
+     "macro_m_high": 22.55,
+     "micro_m_high": 22.18,
+     "macro_m_soft": 33.27,
+     "micro_m_soft": 32.4,
+     "macro_m_rec": 24.18,
+     "micro_m_rec": 23.82
+    },
+    "official": {
+     "macro_m_gen": 20.2,
+     "micro_m_gen": 20.1,
+     "macro_m_high": 22.55,
+     "micro_m_high": 22.18,
+     "macro_m_soft": 33.27,
+     "micro_m_soft": 32.4,
+     "macro_m_rec": 24.18,
+     "micro_m_rec": 23.82
+    },
+    "cpp_crosscheck_max_abs_dev": 4.982206405490519e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1535,
+     "max_seconds_per_piece": 0.5054,
+     "total_seconds": 4.606,
+     "notes_per_second": 2220.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "random",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 240,
+       "forced_splits": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 19.67,
+     "micro_m_gen": 19.74,
+     "macro_m_high": 20.41,
+     "micro_m_high": 20.42,
+     "macro_m_soft": 23.76,
+     "micro_m_soft": 23.64,
+     "macro_m_rec": 20.92,
+     "micro_m_rec": 20.93
+    },
+    "official": {
+     "macro_m_gen": 19.57,
+     "micro_m_gen": 19.67,
+     "macro_m_high": 20.41,
+     "micro_m_high": 20.42,
+     "macro_m_soft": 23.76,
+     "micro_m_soft": 23.64,
+     "macro_m_rec": 20.92,
+     "micro_m_rec": 20.93
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1648,
+     "max_seconds_per_piece": 4.0514,
+     "total_seconds": 24.713,
+     "notes_per_second": 1971.6,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\dvdrndlph__pydactyl",
+      "model": "random",
+      "ql_per_second": 2.0,
+      "segmentation": "whole hand; if unsolvable split at leaps > 15,12,11,9,... semitones",
+      "split_stats": {
+       "segments": 240,
+       "forced_splits": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "lumikey_pretrained": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 74.33,
+     "micro_m_gen": 75.04,
+     "macro_m_high": 81.91,
+     "micro_m_high": 82.25,
+     "macro_m_soft": 94.97,
+     "micro_m_soft": 94.93,
+     "macro_m_rec": 88.85,
+     "micro_m_rec": 89.15
+    },
+    "official": {
+     "macro_m_gen": 74.14,
+     "micro_m_gen": 74.87,
+     "macro_m_high": 81.91,
+     "micro_m_high": 82.25,
+     "macro_m_soft": 94.97,
+     "micro_m_soft": 94.93,
+     "macro_m_rec": 88.85,
+     "micro_m_rec": 89.15
+    },
+    "cpp_crosscheck_max_abs_dev": 4.970760234535021e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1679,
+     "max_seconds_per_piece": 0.2891,
+     "total_seconds": 5.037,
+     "notes_per_second": 2030.0,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\lumikey__piano-fingering-model",
+      "checkpoint_dir": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\lumikey__piano-fingering-model\\checkpoints",
+      "warning": "pretrained checkpoints were trained on all PIG files incl. the test pieces"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 74.92,
+     "micro_m_gen": 76.3,
+     "macro_m_high": 77.48,
+     "micro_m_high": 78.74,
+     "macro_m_soft": 82.25,
+     "micro_m_soft": 83.31,
+     "macro_m_rec": 79.83,
+     "micro_m_rec": 81.1
+    },
+    "official": {
+     "macro_m_gen": 74.67,
+     "micro_m_gen": 76.12,
+     "macro_m_high": 77.48,
+     "micro_m_high": 78.74,
+     "macro_m_soft": 82.25,
+     "micro_m_soft": 83.31,
+     "macro_m_rec": 79.83,
+     "micro_m_rec": 81.1
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.19,
+     "max_seconds_per_piece": 1.2281,
+     "total_seconds": 28.506,
+     "notes_per_second": 1709.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\lumikey__piano-fingering-model",
+      "checkpoint_dir": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\lumikey__piano-fingering-model\\checkpoints",
+      "warning": "pretrained checkpoints were trained on all PIG files incl. the test pieces"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "nakamura_fhmm1_webdemo_js": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 62.3,
+     "micro_m_gen": 63.27,
+     "macro_m_high": 68.95,
+     "micro_m_high": 69.18,
+     "macro_m_soft": 83.56,
+     "micro_m_soft": 83.63,
+     "macro_m_rec": 74.91,
+     "micro_m_rec": 75.26
+    },
+    "official": {
+     "macro_m_gen": 62.19,
+     "micro_m_gen": 63.17,
+     "macro_m_high": 68.95,
+     "micro_m_high": 69.18,
+     "macro_m_soft": 83.56,
+     "micro_m_soft": 83.63,
+     "macro_m_rec": 74.91,
+     "micro_m_rec": 75.26
+    },
+    "cpp_crosscheck_max_abs_dev": 4.987080103324715e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0551,
+     "max_seconds_per_piece": 0.0609,
+     "total_seconds": 1.653,
+     "notes_per_second": 6186.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\statpianofingering_js\\repo",
+      "node": "v22.22.2",
+      "runner": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\js\\statpf_fhmm1.js"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 68.11,
+     "micro_m_gen": 69.29,
+     "macro_m_high": 70.44,
+     "micro_m_high": 71.44,
+     "macro_m_soft": 75.34,
+     "micro_m_soft": 76.23,
+     "macro_m_rec": 72.33,
+     "micro_m_rec": 73.41
+    },
+    "official": {
+     "macro_m_gen": 67.89,
+     "micro_m_gen": 69.15,
+     "macro_m_high": 70.44,
+     "micro_m_high": 71.44,
+     "macro_m_soft": 75.34,
+     "micro_m_soft": 76.23,
+     "macro_m_rec": 72.33,
+     "micro_m_rec": 73.41
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.057,
+     "max_seconds_per_piece": 0.1254,
+     "total_seconds": 8.557,
+     "notes_per_second": 5694.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\statpianofingering_js\\repo",
+      "node": "v22.22.2",
+      "runner": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\js\\statpf_fhmm1.js"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "apfgen_pretrained": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 68.95,
+     "micro_m_gen": 70.04,
+     "macro_m_high": 74.9,
+     "micro_m_high": 75.76,
+     "macro_m_soft": 90.09,
+     "micro_m_soft": 90.31,
+     "macro_m_rec": 78.33,
+     "micro_m_rec": 79.1
+    },
+    "official": {
+     "macro_m_gen": 68.82,
+     "micro_m_gen": 69.91,
+     "macro_m_high": 74.9,
+     "micro_m_high": 75.76,
+     "macro_m_soft": 90.09,
+     "micro_m_soft": 90.31,
+     "macro_m_rec": 78.33,
+     "micro_m_rec": 79.1
+    },
+    "cpp_crosscheck_max_abs_dev": 4.964028776921481e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1694,
+     "max_seconds_per_piece": 0.5289,
+     "total_seconds": 5.081,
+     "notes_per_second": 2012.4,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen\\outputs\\checkpoints\\best.pt",
+      "beam": true,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 0,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 69.31,
+     "micro_m_gen": 70.09,
+     "macro_m_high": 71.26,
+     "micro_m_high": 71.97,
+     "macro_m_soft": 76.47,
+     "micro_m_soft": 76.93,
+     "macro_m_rec": 72.38,
+     "micro_m_rec": 73.07
+    },
+    "official": {
+     "macro_m_gen": 69.13,
+     "micro_m_gen": 69.97,
+     "macro_m_high": 71.26,
+     "micro_m_high": 71.97,
+     "macro_m_soft": 76.47,
+     "micro_m_soft": 76.93,
+     "macro_m_rec": 72.38,
+     "micro_m_rec": 73.07
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1638,
+     "max_seconds_per_piece": 1.4981,
+     "total_seconds": 24.563,
+     "notes_per_second": 1983.6,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen\\outputs\\checkpoints\\best.pt",
+      "beam": true,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 0,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "apfgen_pretrained_nobeam": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 70.6,
+     "micro_m_gen": 71.57,
+     "macro_m_high": 77.04,
+     "micro_m_high": 77.83,
+     "macro_m_soft": 91.77,
+     "micro_m_soft": 91.84,
+     "macro_m_rec": 80.65,
+     "micro_m_rec": 81.21
+    },
+    "official": {
+     "macro_m_gen": 70.46,
+     "micro_m_gen": 71.44,
+     "macro_m_high": 77.04,
+     "micro_m_high": 77.83,
+     "macro_m_soft": 91.77,
+     "micro_m_soft": 91.84,
+     "macro_m_rec": 80.65,
+     "micro_m_rec": 81.21
+    },
+    "cpp_crosscheck_max_abs_dev": 4.96021220097731e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1153,
+     "max_seconds_per_piece": 0.4575,
+     "total_seconds": 3.458,
+     "notes_per_second": 2957.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen\\outputs\\checkpoints\\best.pt",
+      "beam": false,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 0,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "fingerflow_default": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.42,
+     "micro_m_gen": 65.11,
+     "macro_m_high": 71.43,
+     "micro_m_high": 71.65,
+     "macro_m_soft": 85.76,
+     "micro_m_soft": 85.6,
+     "macro_m_rec": 77.92,
+     "micro_m_rec": 77.95
+    },
+    "official": {
+     "macro_m_gen": 64.33,
+     "micro_m_gen": 65.02,
+     "macro_m_high": 71.43,
+     "micro_m_high": 71.65,
+     "macro_m_soft": 85.76,
+     "micro_m_soft": 85.6,
+     "macro_m_rec": 77.92,
+     "micro_m_rec": 77.95
+    },
+    "cpp_crosscheck_max_abs_dev": 4.964028776921481e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 1.1596,
+     "max_seconds_per_piece": 2.3071,
+     "total_seconds": 34.787,
+     "notes_per_second": 293.9,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\MarcAlKareh__fingerflow",
+      "variant": "default",
+      "span_cm": 21.0,
+      "weights": "Weights.default()",
+      "stats": {
+       "unfingered_notes": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.39,
+     "micro_m_gen": 66.14,
+     "macro_m_high": 68.71,
+     "micro_m_high": 68.3,
+     "macro_m_soft": 73.64,
+     "micro_m_soft": 73.09,
+     "macro_m_rec": 70.82,
+     "micro_m_rec": 70.39
+    },
+    "official": {
+     "macro_m_gen": 66.24,
+     "micro_m_gen": 66.04,
+     "macro_m_high": 68.71,
+     "micro_m_high": 68.3,
+     "macro_m_soft": 73.64,
+     "micro_m_soft": 73.09,
+     "macro_m_rec": 70.82,
+     "micro_m_rec": 70.39
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 1.1706,
+     "max_seconds_per_piece": 6.6372,
+     "total_seconds": 175.595,
+     "notes_per_second": 277.5,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\MarcAlKareh__fingerflow",
+      "variant": "default",
+      "span_cm": 21.0,
+      "weights": "Weights.default()",
+      "stats": {
+       "unfingered_notes": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "handthesia_planner": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.87,
+     "micro_m_gen": 66.52,
+     "macro_m_high": 73.11,
+     "micro_m_high": 73.39,
+     "macro_m_soft": 87.55,
+     "micro_m_soft": 87.38,
+     "macro_m_rec": 79.14,
+     "micro_m_rec": 79.22
+    },
+    "official": {
+     "macro_m_gen": 65.76,
+     "micro_m_gen": 66.42,
+     "macro_m_high": 73.11,
+     "micro_m_high": 73.39,
+     "macro_m_soft": 87.55,
+     "micro_m_soft": 87.38,
+     "macro_m_rec": 79.14,
+     "micro_m_rec": 79.22
+    },
+    "cpp_crosscheck_max_abs_dev": 4.801381692232098e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1166,
+     "max_seconds_per_piece": 0.251,
+     "total_seconds": 3.499,
+     "notes_per_second": 2921.9,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\V9011N__pygame-piano-animator"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 69.24,
+     "micro_m_gen": 69.63,
+     "macro_m_high": 71.65,
+     "micro_m_high": 71.9,
+     "macro_m_soft": 76.54,
+     "micro_m_soft": 76.65,
+     "macro_m_rec": 73.6,
+     "micro_m_rec": 73.87
+    },
+    "official": {
+     "macro_m_gen": 69.09,
+     "micro_m_gen": 69.53,
+     "macro_m_high": 71.65,
+     "micro_m_high": 71.9,
+     "macro_m_soft": 76.54,
+     "micro_m_soft": 76.65,
+     "macro_m_rec": 73.6,
+     "micro_m_rec": 73.87
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1203,
+     "max_seconds_per_piece": 0.7844,
+     "total_seconds": 18.048,
+     "notes_per_second": 2699.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\V9011N__pygame-piano-animator"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "fingerflow_learned": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 68.72,
+     "micro_m_gen": 69.4,
+     "macro_m_high": 76.28,
+     "micro_m_high": 76.4,
+     "macro_m_soft": 90.28,
+     "micro_m_soft": 90.13,
+     "macro_m_rec": 82.29,
+     "micro_m_rec": 82.4
+    },
+    "official": {
+     "macro_m_gen": 68.63,
+     "micro_m_gen": 69.31,
+     "macro_m_high": 76.28,
+     "micro_m_high": 76.4,
+     "macro_m_soft": 90.28,
+     "micro_m_soft": 90.13,
+     "macro_m_rec": 82.29,
+     "micro_m_rec": 82.4
+    },
+    "cpp_crosscheck_max_abs_dev": 4.892086331587109e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 1.242,
+     "max_seconds_per_piece": 2.4291,
+     "total_seconds": 37.26,
+     "notes_per_second": 274.4,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\MarcAlKareh__fingerflow",
+      "variant": "learned",
+      "span_cm": 21.0,
+      "weights": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\outputs\\_fingerflow\\weights_learned.json",
+      "stats": {
+       "unfingered_notes": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 70.14,
+     "micro_m_gen": 69.83,
+     "macro_m_high": 72.74,
+     "micro_m_high": 72.26,
+     "macro_m_soft": 77.54,
+     "micro_m_soft": 76.92,
+     "macro_m_rec": 74.68,
+     "micro_m_rec": 74.21
+    },
+    "official": {
+     "macro_m_gen": 69.98,
+     "micro_m_gen": 69.73,
+     "macro_m_high": 72.74,
+     "micro_m_high": 72.26,
+     "macro_m_soft": 77.54,
+     "micro_m_soft": 76.92,
+     "macro_m_rec": 74.68,
+     "micro_m_rec": 74.21
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 1.2204,
+     "max_seconds_per_piece": 6.406,
+     "total_seconds": 183.061,
+     "notes_per_second": 266.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\MarcAlKareh__fingerflow",
+      "variant": "learned",
+      "span_cm": 21.0,
+      "weights": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\outputs\\_fingerflow\\weights_learned.json",
+      "stats": {
+       "unfingered_notes": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "chirality_parncutt_viterbi_uniform": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.5,
+     "micro_m_gen": 66.17,
+     "macro_m_high": 72.18,
+     "micro_m_high": 72.49,
+     "macro_m_soft": 86.71,
+     "micro_m_soft": 86.65,
+     "macro_m_rec": 78.76,
+     "micro_m_rec": 78.87
+    },
+    "official": {
+     "macro_m_gen": 65.38,
+     "micro_m_gen": 66.05,
+     "macro_m_high": 72.18,
+     "micro_m_high": 72.49,
+     "macro_m_soft": 86.71,
+     "micro_m_soft": 86.65,
+     "macro_m_rec": 78.76,
+     "micro_m_rec": 78.87
+    },
+    "cpp_crosscheck_max_abs_dev": 4.944237917969829e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1067,
+     "max_seconds_per_piece": 0.1973,
+     "total_seconds": 3.2,
+     "notes_per_second": 3195.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\vibetuned__chirality",
+      "variant": "uniform",
+      "weights": {
+       "str": 1.0,
+       "sma": 1.0,
+       "lar": 1.0,
+       "pcc": 1.0,
+       "pcs": 1.0,
+       "wea": 1.0,
+       "345": 1.0,
+       "3t4": 1.0,
+       "bl4": 1.0,
+       "bl1": 1.0,
+       "bl5": 1.0,
+       "pa1": 1.0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 67.97,
+     "micro_m_gen": 69.25,
+     "macro_m_high": 70.36,
+     "micro_m_high": 71.52,
+     "macro_m_soft": 75.18,
+     "micro_m_soft": 76.21,
+     "macro_m_rec": 72.39,
+     "micro_m_rec": 73.57
+    },
+    "official": {
+     "macro_m_gen": 67.76,
+     "micro_m_gen": 69.12,
+     "macro_m_high": 70.36,
+     "micro_m_high": 71.52,
+     "macro_m_soft": 75.18,
+     "micro_m_soft": 76.21,
+     "macro_m_rec": 72.39,
+     "micro_m_rec": 73.57
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1088,
+     "max_seconds_per_piece": 0.7151,
+     "total_seconds": 16.325,
+     "notes_per_second": 2984.6,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\vibetuned__chirality",
+      "variant": "uniform",
+      "weights": {
+       "str": 1.0,
+       "sma": 1.0,
+       "lar": 1.0,
+       "pcc": 1.0,
+       "pcs": 1.0,
+       "wea": 1.0,
+       "345": 1.0,
+       "3t4": 1.0,
+       "bl4": 1.0,
+       "bl1": 1.0,
+       "bl5": 1.0,
+       "pa1": 1.0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "chirality_parncutt_viterbi_learned": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.11,
+     "micro_m_gen": 66.75,
+     "macro_m_high": 72.06,
+     "micro_m_high": 72.51,
+     "macro_m_soft": 87.16,
+     "micro_m_soft": 87.19,
+     "macro_m_rec": 79.45,
+     "micro_m_rec": 79.57
+    },
+    "official": {
+     "macro_m_gen": 66.0,
+     "micro_m_gen": 66.64,
+     "macro_m_high": 72.06,
+     "micro_m_high": 72.51,
+     "macro_m_soft": 87.16,
+     "micro_m_soft": 87.19,
+     "macro_m_rec": 79.45,
+     "micro_m_rec": 79.57
+    },
+    "cpp_crosscheck_max_abs_dev": 4.9781659394732e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1129,
+     "max_seconds_per_piece": 0.1938,
+     "total_seconds": 3.386,
+     "notes_per_second": 3019.9,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\vibetuned__chirality",
+      "variant": "learned",
+      "weights": {
+       "str": 0.6003,
+       "sma": 1.5466,
+       "lar": 1.0416,
+       "pcc": 0.6321,
+       "pcs": 0.637,
+       "wea": 0.1328,
+       "345": 0.3534,
+       "3t4": 0.1013,
+       "bl4": 0.587,
+       "bl1": 0.607,
+       "bl5": 0.3232,
+       "pa1": 4.0985
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 68.84,
+     "micro_m_gen": 70.08,
+     "macro_m_high": 70.95,
+     "micro_m_high": 72.12,
+     "macro_m_soft": 76.03,
+     "micro_m_soft": 77.03,
+     "macro_m_rec": 73.32,
+     "micro_m_rec": 74.43
+    },
+    "official": {
+     "macro_m_gen": 68.64,
+     "micro_m_gen": 69.95,
+     "macro_m_high": 70.95,
+     "micro_m_high": 72.12,
+     "macro_m_soft": 76.03,
+     "micro_m_soft": 77.03,
+     "macro_m_rec": 73.32,
+     "micro_m_rec": 74.43
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1102,
+     "max_seconds_per_piece": 0.7062,
+     "total_seconds": 16.535,
+     "notes_per_second": 2946.6,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\vibetuned__chirality",
+      "variant": "learned",
+      "weights": {
+       "str": 0.6003,
+       "sma": 1.5466,
+       "lar": 1.0416,
+       "pcc": 0.6321,
+       "pcs": 0.637,
+       "wea": 0.1328,
+       "345": 0.3534,
+       "3t4": 0.1013,
+       "bl4": 0.587,
+       "bl1": 0.607,
+       "bl5": 0.3232,
+       "pa1": 4.0985
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "apfgen_retrained_official": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 58.49,
+     "micro_m_gen": 59.42,
+     "macro_m_high": 64.09,
+     "micro_m_high": 64.8,
+     "macro_m_soft": 80.12,
+     "micro_m_soft": 80.19,
+     "macro_m_rec": 67.72,
+     "micro_m_rec": 68.22
+    },
+    "official": {
+     "macro_m_gen": 58.38,
+     "micro_m_gen": 59.32,
+     "macro_m_high": 64.09,
+     "micro_m_high": 64.8,
+     "macro_m_soft": 80.12,
+     "micro_m_soft": 80.19,
+     "macro_m_rec": 67.72,
+     "micro_m_rec": 68.22
+    },
+    "cpp_crosscheck_max_abs_dev": 4.980237154894596e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1679,
+     "max_seconds_per_piece": 0.489,
+     "total_seconds": 5.038,
+     "notes_per_second": 2029.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "outputs\\_apfgen_retrained\\outputs\\checkpoints\\best.pt",
+      "beam": true,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 0,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 69.69,
+     "micro_m_gen": 70.82,
+     "macro_m_high": 71.62,
+     "micro_m_high": 72.64,
+     "macro_m_soft": 77.07,
+     "micro_m_soft": 77.87,
+     "macro_m_rec": 72.87,
+     "micro_m_rec": 73.85
+    },
+    "official": {
+     "macro_m_gen": 69.47,
+     "micro_m_gen": 70.67,
+     "macro_m_high": 71.62,
+     "micro_m_high": 72.64,
+     "macro_m_soft": 77.07,
+     "micro_m_soft": 77.87,
+     "macro_m_rec": 72.87,
+     "micro_m_rec": 73.85
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1638,
+     "max_seconds_per_piece": 1.4058,
+     "total_seconds": 24.571,
+     "notes_per_second": 1983.0,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "outputs\\_apfgen_retrained\\outputs\\checkpoints\\best.pt",
+      "beam": true,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 0,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "apfgen_retrained_official_nobeam": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 59.28,
+     "micro_m_gen": 60.16,
+     "macro_m_high": 64.81,
+     "micro_m_high": 65.41,
+     "macro_m_soft": 81.06,
+     "micro_m_soft": 81.09,
+     "macro_m_rec": 69.16,
+     "micro_m_rec": 69.54
+    },
+    "official": {
+     "macro_m_gen": 59.15,
+     "micro_m_gen": 60.05,
+     "macro_m_high": 64.81,
+     "micro_m_high": 65.41,
+     "macro_m_soft": 81.06,
+     "micro_m_soft": 81.09,
+     "macro_m_rec": 69.16,
+     "micro_m_rec": 69.54
+    },
+    "cpp_crosscheck_max_abs_dev": 4.883720930992652e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.114,
+     "max_seconds_per_piece": 0.4454,
+     "total_seconds": 3.42,
+     "notes_per_second": 2989.9,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "outputs\\_apfgen_retrained\\outputs\\checkpoints\\best.pt",
+      "beam": false,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 7,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 70.45,
+     "micro_m_gen": 71.61,
+     "macro_m_high": 72.35,
+     "micro_m_high": 73.38,
+     "macro_m_soft": 77.91,
+     "micro_m_soft": 78.73,
+     "macro_m_rec": 73.87,
+     "micro_m_rec": 74.84
+    },
+    "official": {
+     "macro_m_gen": 70.19,
+     "micro_m_gen": 71.44,
+     "macro_m_high": 72.35,
+     "micro_m_high": 73.38,
+     "macro_m_soft": 77.91,
+     "micro_m_soft": 78.73,
+     "macro_m_rec": 73.87,
+     "micro_m_rec": 74.84
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1038,
+     "max_seconds_per_piece": 1.0047,
+     "total_seconds": 15.576,
+     "notes_per_second": 3128.1,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\chrsztz__APF-Gen",
+      "checkpoint": "outputs\\_apfgen_retrained\\outputs\\checkpoints\\best.pt",
+      "beam": false,
+      "device": "cuda",
+      "prediction_stats": {
+       "sign_disagrees_with_channel": 7,
+       "zero_finger": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "smart_piano_fingering_musescore": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 58.95,
+     "micro_m_gen": 60.01,
+     "macro_m_high": 66.41,
+     "micro_m_high": 67.12,
+     "macro_m_soft": 80.11,
+     "micro_m_soft": 80.44,
+     "macro_m_rec": 71.37,
+     "micro_m_rec": 72.08
+    },
+    "official": {
+     "macro_m_gen": 58.81,
+     "micro_m_gen": 59.88,
+     "macro_m_high": 66.41,
+     "micro_m_high": 67.12,
+     "macro_m_soft": 80.11,
+     "micro_m_soft": 80.44,
+     "macro_m_rec": 71.37,
+     "micro_m_rec": 72.08
+    },
+    "cpp_crosscheck_max_abs_dev": 4.974093263943047e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0816,
+     "max_seconds_per_piece": 0.0998,
+     "total_seconds": 2.449,
+     "notes_per_second": 4175.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\emanuelemerlo__smart-piano-fingering",
+      "beat_seconds": 0.5,
+      "hand_size": "M"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 60.6,
+     "micro_m_gen": 61.46,
+     "macro_m_high": 62.94,
+     "micro_m_high": 63.74,
+     "macro_m_soft": 67.62,
+     "micro_m_soft": 68.22,
+     "macro_m_rec": 64.63,
+     "micro_m_rec": 65.42
+    },
+    "official": {
+     "macro_m_gen": 60.44,
+     "micro_m_gen": 61.35,
+     "macro_m_high": 62.94,
+     "micro_m_high": 63.74,
+     "macro_m_soft": 67.62,
+     "micro_m_soft": 68.22,
+     "macro_m_rec": 64.63,
+     "micro_m_rec": 65.42
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0808,
+     "max_seconds_per_piece": 0.1847,
+     "total_seconds": 12.117,
+     "notes_per_second": 4021.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\emanuelemerlo__smart-piano-fingering",
+      "beat_seconds": 0.5,
+      "hand_size": "M"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "huukhang_phraseaware": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 45.85,
+     "micro_m_gen": 45.91,
+     "macro_m_high": 51.43,
+     "micro_m_high": 51.4,
+     "macro_m_soft": 64.35,
+     "micro_m_soft": 63.7,
+     "macro_m_rec": 55.24,
+     "micro_m_rec": 55.08
+    },
+    "official": {
+     "macro_m_gen": 45.73,
+     "micro_m_gen": 45.81,
+     "macro_m_high": 51.43,
+     "micro_m_high": 51.4,
+     "macro_m_soft": 64.35,
+     "micro_m_soft": 63.7,
+     "macro_m_rec": 55.24,
+     "micro_m_rec": 55.08
+    },
+    "cpp_crosscheck_max_abs_dev": 4.982206405768075e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.1934,
+     "max_seconds_per_piece": 0.7049,
+     "total_seconds": 5.802,
+     "notes_per_second": 1762.4,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\huukhangapcs__AutomaticPianoFingering",
+      "pipeline": "phrase",
+      "assumed_bpm": 120
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 46.86,
+     "micro_m_gen": 47.8,
+     "macro_m_high": 48.64,
+     "micro_m_high": 49.56,
+     "macro_m_soft": 52.85,
+     "micro_m_soft": 53.59,
+     "macro_m_rec": 49.91,
+     "micro_m_rec": 50.83
+    },
+    "official": {
+     "macro_m_gen": 46.7,
+     "micro_m_gen": 47.7,
+     "macro_m_high": 48.64,
+     "micro_m_high": 49.56,
+     "macro_m_soft": 52.85,
+     "micro_m_soft": 53.59,
+     "macro_m_rec": 49.91,
+     "micro_m_rec": 50.83
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.2086,
+     "max_seconds_per_piece": 3.4626,
+     "total_seconds": 31.284,
+     "notes_per_second": 1557.5,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\huukhangapcs__AutomaticPianoFingering",
+      "pipeline": "phrase",
+      "assumed_bpm": 120
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "huukhang_simple": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 60.01,
+     "micro_m_gen": 60.64,
+     "macro_m_high": 65.47,
+     "micro_m_high": 65.89,
+     "macro_m_soft": 80.29,
+     "micro_m_soft": 80.24,
+     "macro_m_rec": 70.56,
+     "micro_m_rec": 70.8
+    },
+    "official": {
+     "macro_m_gen": 59.9,
+     "micro_m_gen": 60.55,
+     "macro_m_high": 65.47,
+     "micro_m_high": 65.89,
+     "macro_m_soft": 80.29,
+     "micro_m_soft": 80.24,
+     "macro_m_rec": 70.56,
+     "micro_m_rec": 70.8
+    },
+    "cpp_crosscheck_max_abs_dev": 4.976525821431821e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0156,
+     "max_seconds_per_piece": 0.0345,
+     "total_seconds": 0.467,
+     "notes_per_second": 21885.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\huukhangapcs__AutomaticPianoFingering",
+      "pipeline": "simple",
+      "assumed_bpm": 120
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 61.62,
+     "micro_m_gen": 62.19,
+     "macro_m_high": 63.61,
+     "micro_m_high": 64.08,
+     "macro_m_soft": 68.42,
+     "micro_m_soft": 68.74,
+     "macro_m_rec": 65.18,
+     "micro_m_rec": 65.63
+    },
+    "official": {
+     "macro_m_gen": 61.45,
+     "micro_m_gen": 62.08,
+     "macro_m_high": 63.61,
+     "micro_m_high": 64.08,
+     "macro_m_soft": 68.42,
+     "micro_m_soft": 68.74,
+     "macro_m_rec": 65.18,
+     "micro_m_rec": 65.63
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0134,
+     "max_seconds_per_piece": 0.0785,
+     "total_seconds": 2.011,
+     "notes_per_second": 24231.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\huukhangapcs__AutomaticPianoFingering",
+      "pipeline": "simple",
+      "assumed_bpm": 120
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "lumikey_retrained_pigtrain": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.34,
+     "micro_m_gen": 67.01,
+     "macro_m_high": 72.62,
+     "micro_m_high": 72.94,
+     "macro_m_soft": 87.93,
+     "micro_m_soft": 87.78,
+     "macro_m_rec": 79.29,
+     "micro_m_rec": 79.52
+    },
+    "official": {
+     "macro_m_gen": 66.15,
+     "micro_m_gen": 66.83,
+     "macro_m_high": 72.62,
+     "micro_m_high": 72.94,
+     "macro_m_soft": 87.93,
+     "micro_m_soft": 87.78,
+     "macro_m_rec": 79.29,
+     "micro_m_rec": 79.52
+    },
+    "cpp_crosscheck_max_abs_dev": 4.942528735174534e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.2297,
+     "max_seconds_per_piece": 0.4066,
+     "total_seconds": 6.892,
+     "notes_per_second": 1483.5,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\lumikey__piano-fingering-model",
+      "checkpoint_dir": "outputs/_lumikey_retrained/checkpoints",
+      "warning": null
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 75.07,
+     "micro_m_gen": 76.06,
+     "macro_m_high": 77.49,
+     "micro_m_high": 78.33,
+     "macro_m_soft": 82.62,
+     "micro_m_soft": 83.28,
+     "macro_m_rec": 79.8,
+     "micro_m_rec": 80.62
+    },
+    "official": {
+     "macro_m_gen": 74.76,
+     "micro_m_gen": 75.85,
+     "macro_m_high": 77.49,
+     "micro_m_high": 78.33,
+     "macro_m_soft": 82.62,
+     "micro_m_soft": 83.28,
+     "macro_m_rec": 79.8,
+     "micro_m_rec": 80.62
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.1906,
+     "max_seconds_per_piece": 1.3026,
+     "total_seconds": 28.589,
+     "notes_per_second": 1704.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\lumikey__piano-fingering-model",
+      "checkpoint_dir": "outputs/_lumikey_retrained/checkpoints",
+      "warning": null
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "opennote_rules_consensus": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.28,
+     "micro_m_gen": 65.55,
+     "macro_m_high": 71.68,
+     "micro_m_high": 72.54,
+     "macro_m_soft": 85.63,
+     "micro_m_soft": 86.18,
+     "macro_m_rec": 77.3,
+     "micro_m_rec": 78.18
+    },
+    "official": {
+     "macro_m_gen": 64.17,
+     "micro_m_gen": 65.45,
+     "macro_m_high": 71.68,
+     "micro_m_high": 72.54,
+     "macro_m_soft": 85.63,
+     "micro_m_soft": 86.18,
+     "macro_m_rec": 77.3,
+     "micro_m_rec": 78.18
+    },
+    "cpp_crosscheck_max_abs_dev": 4.970760234535021e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.4061,
+     "max_seconds_per_piece": 0.8317,
+     "total_seconds": 12.184,
+     "notes_per_second": 839.2,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\rust\\opennote_pig\\target\\release\\opennote_pig.exe",
+      "rules": "consensus",
+      "prior": "none (rules only)",
+      "solver_seconds_per_piece": {
+       "001": 0.0877672,
+       "002": 0.0645015,
+       "003": 0.6792361,
+       "004": 0.515691,
+       "005": 0.6005179,
+       "006": 0.0566905,
+       "007": 0.6779615,
+       "008": 0.4086558,
+       "009": 0.5030911,
+       "010": 0.4419631,
+       "011": 0.283647,
+       "012": 0.2259148,
+       "013": 0.1334308,
+       "014": 0.429003,
+       "015": 0.1512975,
+       "016": 0.1261017,
+       "017": 0.1163067,
+       "018": 0.1149361,
+       "019": 0.2293351,
+       "020": 0.3467489,
+       "021": 0.4123615,
+       "022": 0.7875554,
+       "023": 0.5454606,
+       "024": 0.1134602,
+       "025": 0.2612505,
+       "026": 0.731578,
+       "027": 0.3139251,
+       "028": 0.6726386,
+       "029": 0.8027075,
+       "030": 0.5810687,
+       "031": 1.2428918,
+       "032": 0.064652,
+       "033": 0.0609426,
+       "034": 1.2055916,
+       "035": 0.1090573,
+       "036": 0.1948157,
+       "037": 0.2396013,
+       "038": 0.2940228,
+       "039": 0.6158097,
+       "040": 0.3614832,
+       "041": 0.4668523,
+       "042": 0.0620928,
+       "043": 0.5045549,
+       "044": 0.7741825,
+       "045": 0.4351633,
+       "046": 0.0407798,
+       "047": 0.4538856,
+       "048": 0.0744294,
+       "049": 0.4149222,
+       "050": 0.575977,
+       "051": 0.1937189,
+       "052": 0.0572285,
+       "053": 0.1673785,
+       "054": 0.3519659,
+       "055": 0.3713432,
+       "056": 0.2743642,
+       "057": 0.2115553,
+       "058": 0.3734589,
+       "059": 0.266919,
+       "060": 0.2489708,
+       "061": 0.075883,
+       "062": 0.3233295,
+       "063": 0.8360819,
+       "064": 0.3305709,
+       "065": 0.4802608,
+       "066": 0.4039511,
+       "067": 0.5232275,
+       "068": 0.1218234,
+       "069": 0.3778809,
+       "070": 0.1632089,
+       "071": 0.3291512,
+       "072": 0.3496204,
+       "073": 0.446357,
+       "074": 0.2963964,
+       "075": 0.3348287,
+       "076": 0.2070898,
+       "077": 0.2993703,
+       "078": 0.349387,
+       "079": 0.3249817,
+       "080": 0.0731454,
+       "081": 0.4427784,
+       "082": 0.2435866,
+       "083": 0.4457924,
+       "084": 0.354408,
+       "085": 0.3722303,
+       "086": 0.4689765,
+       "087": 0.1926653,
+       "088": 0.1774748,
+       "089": 0.1165947,
+       "090": 0.2172221,
+       "091": 0.335548,
+       "092": 0.2913305,
+       "093": 0.2909712,
+       "094": 0.3552326,
+       "095": 0.5947551,
+       "096": 0.2937209,
+       "097": 0.4052711,
+       "098": 0.474818,
+       "099": 0.0831484,
+       "100": 0.6400071,
+       "101": 0.5999791,
+       "102": 0.3984594,
+       "103": 0.3212939,
+       "104": 0.6221399,
+       "105": 0.5498839,
+       "106": 0.6510674,
+       "107": 0.1015814,
+       "108": 0.4237881,
+       "109": 0.4095545,
+       "110": 0.6694202,
+       "111": 0.5122877,
+       "112": 0.1950411,
+       "113": 0.4820791,
+       "114": 0.4619718,
+       "115": 0.348336,
+       "116": 0.6907082,
+       "117": 0.5862442,
+       "118": 0.4114362,
+       "119": 0.2228259,
+       "120": 0.4775982,
+       "121": 0.4031069,
+       "122": 0.4689719,
+       "123": 0.1695488,
+       "124": 0.2146733,
+       "125": 0.2706222,
+       "126": 0.4956429,
+       "127": 0.4639775,
+       "128": 0.7071477,
+       "129": 0.2484383,
+       "130": 0.3608093,
+       "131": 0.5606348,
+       "132": 0.4300603,
+       "133": 0.2717583,
+       "134": 0.5856443,
+       "135": 0.4152626,
+       "136": 0.2071662,
+       "137": 0.6405439,
+       "138": 0.582142,
+       "139": 1.207896,
+       "140": 0.1177492,
+       "141": 0.4712271,
+       "142": 0.4906657,
+       "143": 0.0974014,
+       "144": 0.2055977,
+       "145": 0.3015303,
+       "146": 0.3060931,
+       "147": 0.2843074,
+       "148": 0.2252596,
+       "149": 0.3852294,
+       "150": 0.4762996
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.94,
+     "micro_m_gen": 68.36,
+     "macro_m_high": 69.37,
+     "micro_m_high": 70.67,
+     "macro_m_soft": 74.15,
+     "micro_m_soft": 75.31,
+     "macro_m_rec": 71.27,
+     "micro_m_rec": 72.61
+    },
+    "official": {
+     "macro_m_gen": 66.75,
+     "micro_m_gen": 68.24,
+     "macro_m_high": 69.37,
+     "micro_m_high": 70.67,
+     "macro_m_soft": 74.15,
+     "micro_m_soft": 75.31,
+     "macro_m_rec": 71.27,
+     "micro_m_rec": 72.61
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.4066,
+     "max_seconds_per_piece": 1.2979,
+     "total_seconds": 60.996,
+     "notes_per_second": 798.8,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\rust\\opennote_pig\\target\\release\\opennote_pig.exe",
+      "rules": "consensus",
+      "prior": "none (rules only)",
+      "solver_seconds_per_piece": {
+       "001": 0.0877672,
+       "002": 0.0645015,
+       "003": 0.6792361,
+       "004": 0.515691,
+       "005": 0.6005179,
+       "006": 0.0566905,
+       "007": 0.6779615,
+       "008": 0.4086558,
+       "009": 0.5030911,
+       "010": 0.4419631,
+       "011": 0.283647,
+       "012": 0.2259148,
+       "013": 0.1334308,
+       "014": 0.429003,
+       "015": 0.1512975,
+       "016": 0.1261017,
+       "017": 0.1163067,
+       "018": 0.1149361,
+       "019": 0.2293351,
+       "020": 0.3467489,
+       "021": 0.4123615,
+       "022": 0.7875554,
+       "023": 0.5454606,
+       "024": 0.1134602,
+       "025": 0.2612505,
+       "026": 0.731578,
+       "027": 0.3139251,
+       "028": 0.6726386,
+       "029": 0.8027075,
+       "030": 0.5810687,
+       "031": 1.2428918,
+       "032": 0.064652,
+       "033": 0.0609426,
+       "034": 1.2055916,
+       "035": 0.1090573,
+       "036": 0.1948157,
+       "037": 0.2396013,
+       "038": 0.2940228,
+       "039": 0.6158097,
+       "040": 0.3614832,
+       "041": 0.4668523,
+       "042": 0.0620928,
+       "043": 0.5045549,
+       "044": 0.7741825,
+       "045": 0.4351633,
+       "046": 0.0407798,
+       "047": 0.4538856,
+       "048": 0.0744294,
+       "049": 0.4149222,
+       "050": 0.575977,
+       "051": 0.1937189,
+       "052": 0.0572285,
+       "053": 0.1673785,
+       "054": 0.3519659,
+       "055": 0.3713432,
+       "056": 0.2743642,
+       "057": 0.2115553,
+       "058": 0.3734589,
+       "059": 0.266919,
+       "060": 0.2489708,
+       "061": 0.075883,
+       "062": 0.3233295,
+       "063": 0.8360819,
+       "064": 0.3305709,
+       "065": 0.4802608,
+       "066": 0.4039511,
+       "067": 0.5232275,
+       "068": 0.1218234,
+       "069": 0.3778809,
+       "070": 0.1632089,
+       "071": 0.3291512,
+       "072": 0.3496204,
+       "073": 0.446357,
+       "074": 0.2963964,
+       "075": 0.3348287,
+       "076": 0.2070898,
+       "077": 0.2993703,
+       "078": 0.349387,
+       "079": 0.3249817,
+       "080": 0.0731454,
+       "081": 0.4427784,
+       "082": 0.2435866,
+       "083": 0.4457924,
+       "084": 0.354408,
+       "085": 0.3722303,
+       "086": 0.4689765,
+       "087": 0.1926653,
+       "088": 0.1774748,
+       "089": 0.1165947,
+       "090": 0.2172221,
+       "091": 0.335548,
+       "092": 0.2913305,
+       "093": 0.2909712,
+       "094": 0.3552326,
+       "095": 0.5947551,
+       "096": 0.2937209,
+       "097": 0.4052711,
+       "098": 0.474818,
+       "099": 0.0831484,
+       "100": 0.6400071,
+       "101": 0.5999791,
+       "102": 0.3984594,
+       "103": 0.3212939,
+       "104": 0.6221399,
+       "105": 0.5498839,
+       "106": 0.6510674,
+       "107": 0.1015814,
+       "108": 0.4237881,
+       "109": 0.4095545,
+       "110": 0.6694202,
+       "111": 0.5122877,
+       "112": 0.1950411,
+       "113": 0.4820791,
+       "114": 0.4619718,
+       "115": 0.348336,
+       "116": 0.6907082,
+       "117": 0.5862442,
+       "118": 0.4114362,
+       "119": 0.2228259,
+       "120": 0.4775982,
+       "121": 0.4031069,
+       "122": 0.4689719,
+       "123": 0.1695488,
+       "124": 0.2146733,
+       "125": 0.2706222,
+       "126": 0.4956429,
+       "127": 0.4639775,
+       "128": 0.7071477,
+       "129": 0.2484383,
+       "130": 0.3608093,
+       "131": 0.5606348,
+       "132": 0.4300603,
+       "133": 0.2717583,
+       "134": 0.5856443,
+       "135": 0.4152626,
+       "136": 0.2071662,
+       "137": 0.6405439,
+       "138": 0.582142,
+       "139": 1.207896,
+       "140": 0.1177492,
+       "141": 0.4712271,
+       "142": 0.4906657,
+       "143": 0.0974014,
+       "144": 0.2055977,
+       "145": 0.3015303,
+       "146": 0.3060931,
+       "147": 0.2843074,
+       "148": 0.2252596,
+       "149": 0.3852294,
+       "150": 0.4762996
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "opennote_rules_parncutt": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.53,
+     "micro_m_gen": 65.77,
+     "macro_m_high": 72.17,
+     "micro_m_high": 73.05,
+     "macro_m_soft": 85.96,
+     "micro_m_soft": 86.47,
+     "macro_m_rec": 77.67,
+     "micro_m_rec": 78.52
+    },
+    "official": {
+     "macro_m_gen": 64.43,
+     "micro_m_gen": 65.67,
+     "macro_m_high": 72.17,
+     "micro_m_high": 73.05,
+     "macro_m_soft": 85.96,
+     "micro_m_soft": 86.47,
+     "macro_m_rec": 77.67,
+     "micro_m_rec": 78.52
+    },
+    "cpp_crosscheck_max_abs_dev": 4.988009593143161e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.3518,
+     "max_seconds_per_piece": 0.73,
+     "total_seconds": 10.553,
+     "notes_per_second": 968.9,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\rust\\opennote_pig\\target\\release\\opennote_pig.exe",
+      "rules": "parncutt",
+      "prior": "none (rules only)",
+      "solver_seconds_per_piece": {
+       "001": 0.0776278,
+       "002": 0.0508456,
+       "003": 0.6554048,
+       "004": 0.4906002,
+       "005": 0.5498578,
+       "006": 0.0402987,
+       "007": 0.6184031,
+       "008": 0.3796117,
+       "009": 0.4267138,
+       "010": 0.3993608,
+       "011": 0.2558924,
+       "012": 0.1951306,
+       "013": 0.1168259,
+       "014": 0.388384,
+       "015": 0.1112827,
+       "016": 0.1018374,
+       "017": 0.1011016,
+       "018": 0.1029824,
+       "019": 0.1713787,
+       "020": 0.3160892,
+       "021": 0.3468615,
+       "022": 0.700345,
+       "023": 0.4855008,
+       "024": 0.0911626,
+       "025": 0.2226061,
+       "026": 0.5519319,
+       "027": 0.2217711,
+       "028": 0.5213573,
+       "029": 0.5999734,
+       "030": 0.4715388,
+       "031": 1.1143349,
+       "032": 0.0402727,
+       "033": 0.0372158,
+       "034": 1.0071414,
+       "035": 0.0932062,
+       "036": 0.1686818,
+       "037": 0.2102145,
+       "038": 0.2668031,
+       "039": 0.5659078,
+       "040": 0.3071566,
+       "041": 0.4122601,
+       "042": 0.0377732,
+       "043": 0.3856718,
+       "044": 0.5909745,
+       "045": 0.3423154,
+       "046": 0.0239377,
+       "047": 0.3479207,
+       "048": 0.0380603,
+       "049": 0.2699027,
+       "050": 0.3798752,
+       "051": 0.1246675,
+       "052": 0.0299687,
+       "053": 0.1106578,
+       "054": 0.2400524,
+       "055": 0.2609945,
+       "056": 0.1900192,
+       "057": 0.1354852,
+       "058": 0.2707735,
+       "059": 0.1740205,
+       "060": 0.177107,
+       "061": 0.0455022,
+       "062": 0.2301034,
+       "063": 0.5952224,
+       "064": 0.2543942,
+       "065": 0.3698455,
+       "066": 0.3398226,
+       "067": 0.4182874,
+       "068": 0.0947332,
+       "069": 0.3084603,
+       "070": 0.1273522,
+       "071": 0.2715787,
+       "072": 0.2704051,
+       "073": 0.4060194,
+       "074": 0.2418359,
+       "075": 0.2626158,
+       "076": 0.1503907,
+       "077": 0.2210869,
+       "078": 0.265577,
+       "079": 0.239463,
+       "080": 0.0409289,
+       "081": 0.3108355,
+       "082": 0.1698392,
+       "083": 0.3367805,
+       "084": 0.2555256,
+       "085": 0.287719,
+       "086": 0.3643779,
+       "087": 0.1681132,
+       "088": 0.1301041,
+       "089": 0.0974531,
+       "090": 0.1781669,
+       "091": 0.2488827,
+       "092": 0.2274636,
+       "093": 0.2501142,
+       "094": 0.2946255,
+       "095": 0.518049,
+       "096": 0.2152715,
+       "097": 0.3338781,
+       "098": 0.4197088,
+       "099": 0.0652264,
+       "100": 0.4561757,
+       "101": 0.4796299,
+       "102": 0.2893048,
+       "103": 0.2249328,
+       "104": 0.4687406,
+       "105": 0.409191,
+       "106": 0.4894285,
+       "107": 0.0794988,
+       "108": 0.3117373,
+       "109": 0.2826545,
+       "110": 0.4977504,
+       "111": 0.4084337,
+       "112": 0.1794826,
+       "113": 0.3861532,
+       "114": 0.3398663,
+       "115": 0.2551133,
+       "116": 0.5110116,
+       "117": 0.4308721,
+       "118": 0.3088363,
+       "119": 0.1597746,
+       "120": 0.3364625,
+       "121": 0.2849539,
+       "122": 0.3399757,
+       "123": 0.1390869,
+       "124": 0.1459055,
+       "125": 0.213962,
+       "126": 0.4030207,
+       "127": 0.4153458,
+       "128": 0.632651,
+       "129": 0.146022,
+       "130": 0.2707442,
+       "131": 0.4979472,
+       "132": 0.3738231,
+       "133": 0.177617,
+       "134": 0.4280981,
+       "135": 0.3184941,
+       "136": 0.1495884,
+       "137": 0.4575786,
+       "138": 0.4020061,
+       "139": 0.8456505,
+       "140": 0.0974081,
+       "141": 0.3637416,
+       "142": 0.3623197,
+       "143": 0.078421,
+       "144": 0.1792907,
+       "145": 0.2560388,
+       "146": 0.2558707,
+       "147": 0.2633738,
+       "148": 0.2044709,
+       "149": 0.3050822,
+       "150": 0.3697678
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 67.03,
+     "micro_m_gen": 68.45,
+     "macro_m_high": 69.53,
+     "micro_m_high": 70.83,
+     "macro_m_soft": 74.27,
+     "micro_m_soft": 75.43,
+     "macro_m_rec": 71.38,
+     "micro_m_rec": 72.72
+    },
+    "official": {
+     "macro_m_gen": 66.83,
+     "micro_m_gen": 68.32,
+     "macro_m_high": 69.53,
+     "micro_m_high": 70.83,
+     "macro_m_soft": 74.27,
+     "micro_m_soft": 75.43,
+     "macro_m_rec": 71.38,
+     "micro_m_rec": 72.72
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.3234,
+     "max_seconds_per_piece": 1.1692,
+     "total_seconds": 48.512,
+     "notes_per_second": 1004.4,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\rust\\opennote_pig\\target\\release\\opennote_pig.exe",
+      "rules": "parncutt",
+      "prior": "none (rules only)",
+      "solver_seconds_per_piece": {
+       "001": 0.0776278,
+       "002": 0.0508456,
+       "003": 0.6554048,
+       "004": 0.4906002,
+       "005": 0.5498578,
+       "006": 0.0402987,
+       "007": 0.6184031,
+       "008": 0.3796117,
+       "009": 0.4267138,
+       "010": 0.3993608,
+       "011": 0.2558924,
+       "012": 0.1951306,
+       "013": 0.1168259,
+       "014": 0.388384,
+       "015": 0.1112827,
+       "016": 0.1018374,
+       "017": 0.1011016,
+       "018": 0.1029824,
+       "019": 0.1713787,
+       "020": 0.3160892,
+       "021": 0.3468615,
+       "022": 0.700345,
+       "023": 0.4855008,
+       "024": 0.0911626,
+       "025": 0.2226061,
+       "026": 0.5519319,
+       "027": 0.2217711,
+       "028": 0.5213573,
+       "029": 0.5999734,
+       "030": 0.4715388,
+       "031": 1.1143349,
+       "032": 0.0402727,
+       "033": 0.0372158,
+       "034": 1.0071414,
+       "035": 0.0932062,
+       "036": 0.1686818,
+       "037": 0.2102145,
+       "038": 0.2668031,
+       "039": 0.5659078,
+       "040": 0.3071566,
+       "041": 0.4122601,
+       "042": 0.0377732,
+       "043": 0.3856718,
+       "044": 0.5909745,
+       "045": 0.3423154,
+       "046": 0.0239377,
+       "047": 0.3479207,
+       "048": 0.0380603,
+       "049": 0.2699027,
+       "050": 0.3798752,
+       "051": 0.1246675,
+       "052": 0.0299687,
+       "053": 0.1106578,
+       "054": 0.2400524,
+       "055": 0.2609945,
+       "056": 0.1900192,
+       "057": 0.1354852,
+       "058": 0.2707735,
+       "059": 0.1740205,
+       "060": 0.177107,
+       "061": 0.0455022,
+       "062": 0.2301034,
+       "063": 0.5952224,
+       "064": 0.2543942,
+       "065": 0.3698455,
+       "066": 0.3398226,
+       "067": 0.4182874,
+       "068": 0.0947332,
+       "069": 0.3084603,
+       "070": 0.1273522,
+       "071": 0.2715787,
+       "072": 0.2704051,
+       "073": 0.4060194,
+       "074": 0.2418359,
+       "075": 0.2626158,
+       "076": 0.1503907,
+       "077": 0.2210869,
+       "078": 0.265577,
+       "079": 0.239463,
+       "080": 0.0409289,
+       "081": 0.3108355,
+       "082": 0.1698392,
+       "083": 0.3367805,
+       "084": 0.2555256,
+       "085": 0.287719,
+       "086": 0.3643779,
+       "087": 0.1681132,
+       "088": 0.1301041,
+       "089": 0.0974531,
+       "090": 0.1781669,
+       "091": 0.2488827,
+       "092": 0.2274636,
+       "093": 0.2501142,
+       "094": 0.2946255,
+       "095": 0.518049,
+       "096": 0.2152715,
+       "097": 0.3338781,
+       "098": 0.4197088,
+       "099": 0.0652264,
+       "100": 0.4561757,
+       "101": 0.4796299,
+       "102": 0.2893048,
+       "103": 0.2249328,
+       "104": 0.4687406,
+       "105": 0.409191,
+       "106": 0.4894285,
+       "107": 0.0794988,
+       "108": 0.3117373,
+       "109": 0.2826545,
+       "110": 0.4977504,
+       "111": 0.4084337,
+       "112": 0.1794826,
+       "113": 0.3861532,
+       "114": 0.3398663,
+       "115": 0.2551133,
+       "116": 0.5110116,
+       "117": 0.4308721,
+       "118": 0.3088363,
+       "119": 0.1597746,
+       "120": 0.3364625,
+       "121": 0.2849539,
+       "122": 0.3399757,
+       "123": 0.1390869,
+       "124": 0.1459055,
+       "125": 0.213962,
+       "126": 0.4030207,
+       "127": 0.4153458,
+       "128": 0.632651,
+       "129": 0.146022,
+       "130": 0.2707442,
+       "131": 0.4979472,
+       "132": 0.3738231,
+       "133": 0.177617,
+       "134": 0.4280981,
+       "135": 0.3184941,
+       "136": 0.1495884,
+       "137": 0.4575786,
+       "138": 0.4020061,
+       "139": 0.8456505,
+       "140": 0.0974081,
+       "141": 0.3637416,
+       "142": 0.3623197,
+       "143": 0.078421,
+       "144": 0.1792907,
+       "145": 0.2560388,
+       "146": 0.2558707,
+       "147": 0.2633738,
+       "148": 0.2044709,
+       "149": 0.3050822,
+       "150": 0.3697678
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "opennote_rules_jacobs": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 64.61,
+     "micro_m_gen": 65.88,
+     "macro_m_high": 71.75,
+     "micro_m_high": 72.86,
+     "macro_m_soft": 85.91,
+     "micro_m_soft": 86.45,
+     "macro_m_rec": 77.62,
+     "micro_m_rec": 78.58
+    },
+    "official": {
+     "macro_m_gen": 64.51,
+     "micro_m_gen": 65.79,
+     "macro_m_high": 71.75,
+     "micro_m_high": 72.86,
+     "macro_m_soft": 85.91,
+     "micro_m_soft": 86.45,
+     "macro_m_rec": 77.62,
+     "micro_m_rec": 78.58
+    },
+    "cpp_crosscheck_max_abs_dev": 4.940778342010788e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.3456,
+     "max_seconds_per_piece": 0.7248,
+     "total_seconds": 10.368,
+     "notes_per_second": 986.2,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\rust\\opennote_pig\\target\\release\\opennote_pig.exe",
+      "rules": "jacobs",
+      "prior": "none (rules only)",
+      "solver_seconds_per_piece": {
+       "001": 0.0649535,
+       "002": 0.0447448,
+       "003": 0.5786365,
+       "004": 0.4549062,
+       "005": 0.5376853,
+       "006": 0.0386688,
+       "007": 0.5883241,
+       "008": 0.3742788,
+       "009": 0.4225277,
+       "010": 0.3933637,
+       "011": 0.2523625,
+       "012": 0.1925982,
+       "013": 0.1154982,
+       "014": 0.374696,
+       "015": 0.1156869,
+       "016": 0.1050658,
+       "017": 0.1043576,
+       "018": 0.1028586,
+       "019": 0.2030506,
+       "020": 0.342835,
+       "021": 0.3456354,
+       "022": 0.6961178,
+       "023": 0.4774217,
+       "024": 0.0961943,
+       "025": 0.221567,
+       "026": 0.5391108,
+       "027": 0.24552,
+       "028": 0.5338147,
+       "029": 0.5959965,
+       "030": 0.4643781,
+       "031": 1.1184413,
+       "032": 0.0398793,
+       "033": 0.037295,
+       "034": 1.0307932,
+       "035": 0.1030434,
+       "036": 0.1798541,
+       "037": 0.2128609,
+       "038": 0.2619403,
+       "039": 0.5694861,
+       "040": 0.3097922,
+       "041": 0.3969541,
+       "042": 0.0368786,
+       "043": 0.3834731,
+       "044": 0.5608381,
+       "045": 0.33456,
+       "046": 0.0243238,
+       "047": 0.3412036,
+       "048": 0.0376969,
+       "049": 0.2973599,
+       "050": 0.3899558,
+       "051": 0.1350286,
+       "052": 0.0319512,
+       "053": 0.1165295,
+       "054": 0.2456153,
+       "055": 0.260338,
+       "056": 0.1886028,
+       "057": 0.1374537,
+       "058": 0.2603233,
+       "059": 0.1699173,
+       "060": 0.1784345,
+       "061": 0.0448608,
+       "062": 0.2267712,
+       "063": 0.5799593,
+       "064": 0.2506367,
+       "065": 0.3613422,
+       "066": 0.3363339,
+       "067": 0.4171457,
+       "068": 0.0926818,
+       "069": 0.3036348,
+       "070": 0.1254752,
+       "071": 0.2678932,
+       "072": 0.2656052,
+       "073": 0.4013718,
+       "074": 0.2381764,
+       "075": 0.2449058,
+       "076": 0.1461028,
+       "077": 0.2173815,
+       "078": 0.261732,
+       "079": 0.2450706,
+       "080": 0.0399808,
+       "081": 0.3094066,
+       "082": 0.1681021,
+       "083": 0.3311681,
+       "084": 0.237995,
+       "085": 0.2652343,
+       "086": 0.320543,
+       "087": 0.1690998,
+       "088": 0.1374269,
+       "089": 0.0924524,
+       "090": 0.1742774,
+       "091": 0.2444945,
+       "092": 0.2214701,
+       "093": 0.2502347,
+       "094": 0.2869295,
+       "095": 0.5128916,
+       "096": 0.2119532,
+       "097": 0.3291995,
+       "098": 0.414608,
+       "099": 0.063866,
+       "100": 0.4580255,
+       "101": 0.4616001,
+       "102": 0.2811928,
+       "103": 0.2142545,
+       "104": 0.4360933,
+       "105": 0.3938149,
+       "106": 0.4838035,
+       "107": 0.0798634,
+       "108": 0.3133726,
+       "109": 0.2911933,
+       "110": 0.4846413,
+       "111": 0.4053394,
+       "112": 0.1708148,
+       "113": 0.3864809,
+       "114": 0.3361641,
+       "115": 0.2662962,
+       "116": 0.5076348,
+       "117": 0.4640172,
+       "118": 0.3089354,
+       "119": 0.1382632,
+       "120": 0.3321249,
+       "121": 0.2818584,
+       "122": 0.3337489,
+       "123": 0.1369522,
+       "124": 0.1462392,
+       "125": 0.2204693,
+       "126": 0.4038796,
+       "127": 0.4071662,
+       "128": 0.6153359,
+       "129": 0.1505778,
+       "130": 0.2720831,
+       "131": 0.4910084,
+       "132": 0.3745433,
+       "133": 0.1744229,
+       "134": 0.4265633,
+       "135": 0.3117569,
+       "136": 0.1585072,
+       "137": 0.4592202,
+       "138": 0.4021783,
+       "139": 0.8413131,
+       "140": 0.0972332,
+       "141": 0.3647774,
+       "142": 0.3596085,
+       "143": 0.0790831,
+       "144": 0.1794491,
+       "145": 0.2573703,
+       "146": 0.2507627,
+       "147": 0.2599977,
+       "148": 0.2123907,
+       "149": 0.2988898,
+       "150": 0.3665598
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 67.47,
+     "micro_m_gen": 68.89,
+     "macro_m_high": 69.91,
+     "micro_m_high": 71.29,
+     "macro_m_soft": 74.68,
+     "micro_m_soft": 75.85,
+     "macro_m_rec": 71.78,
+     "micro_m_rec": 73.15
+    },
+    "official": {
+     "macro_m_gen": 67.29,
+     "micro_m_gen": 68.78,
+     "macro_m_high": 69.91,
+     "micro_m_high": 71.29,
+     "macro_m_soft": 74.68,
+     "micro_m_soft": 75.85,
+     "macro_m_rec": 71.78,
+     "micro_m_rec": 73.15
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.3194,
+     "max_seconds_per_piece": 1.1745,
+     "total_seconds": 47.914,
+     "notes_per_second": 1016.9,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\rust\\opennote_pig\\target\\release\\opennote_pig.exe",
+      "rules": "jacobs",
+      "prior": "none (rules only)",
+      "solver_seconds_per_piece": {
+       "001": 0.0649535,
+       "002": 0.0447448,
+       "003": 0.5786365,
+       "004": 0.4549062,
+       "005": 0.5376853,
+       "006": 0.0386688,
+       "007": 0.5883241,
+       "008": 0.3742788,
+       "009": 0.4225277,
+       "010": 0.3933637,
+       "011": 0.2523625,
+       "012": 0.1925982,
+       "013": 0.1154982,
+       "014": 0.374696,
+       "015": 0.1156869,
+       "016": 0.1050658,
+       "017": 0.1043576,
+       "018": 0.1028586,
+       "019": 0.2030506,
+       "020": 0.342835,
+       "021": 0.3456354,
+       "022": 0.6961178,
+       "023": 0.4774217,
+       "024": 0.0961943,
+       "025": 0.221567,
+       "026": 0.5391108,
+       "027": 0.24552,
+       "028": 0.5338147,
+       "029": 0.5959965,
+       "030": 0.4643781,
+       "031": 1.1184413,
+       "032": 0.0398793,
+       "033": 0.037295,
+       "034": 1.0307932,
+       "035": 0.1030434,
+       "036": 0.1798541,
+       "037": 0.2128609,
+       "038": 0.2619403,
+       "039": 0.5694861,
+       "040": 0.3097922,
+       "041": 0.3969541,
+       "042": 0.0368786,
+       "043": 0.3834731,
+       "044": 0.5608381,
+       "045": 0.33456,
+       "046": 0.0243238,
+       "047": 0.3412036,
+       "048": 0.0376969,
+       "049": 0.2973599,
+       "050": 0.3899558,
+       "051": 0.1350286,
+       "052": 0.0319512,
+       "053": 0.1165295,
+       "054": 0.2456153,
+       "055": 0.260338,
+       "056": 0.1886028,
+       "057": 0.1374537,
+       "058": 0.2603233,
+       "059": 0.1699173,
+       "060": 0.1784345,
+       "061": 0.0448608,
+       "062": 0.2267712,
+       "063": 0.5799593,
+       "064": 0.2506367,
+       "065": 0.3613422,
+       "066": 0.3363339,
+       "067": 0.4171457,
+       "068": 0.0926818,
+       "069": 0.3036348,
+       "070": 0.1254752,
+       "071": 0.2678932,
+       "072": 0.2656052,
+       "073": 0.4013718,
+       "074": 0.2381764,
+       "075": 0.2449058,
+       "076": 0.1461028,
+       "077": 0.2173815,
+       "078": 0.261732,
+       "079": 0.2450706,
+       "080": 0.0399808,
+       "081": 0.3094066,
+       "082": 0.1681021,
+       "083": 0.3311681,
+       "084": 0.237995,
+       "085": 0.2652343,
+       "086": 0.320543,
+       "087": 0.1690998,
+       "088": 0.1374269,
+       "089": 0.0924524,
+       "090": 0.1742774,
+       "091": 0.2444945,
+       "092": 0.2214701,
+       "093": 0.2502347,
+       "094": 0.2869295,
+       "095": 0.5128916,
+       "096": 0.2119532,
+       "097": 0.3291995,
+       "098": 0.414608,
+       "099": 0.063866,
+       "100": 0.4580255,
+       "101": 0.4616001,
+       "102": 0.2811928,
+       "103": 0.2142545,
+       "104": 0.4360933,
+       "105": 0.3938149,
+       "106": 0.4838035,
+       "107": 0.0798634,
+       "108": 0.3133726,
+       "109": 0.2911933,
+       "110": 0.4846413,
+       "111": 0.4053394,
+       "112": 0.1708148,
+       "113": 0.3864809,
+       "114": 0.3361641,
+       "115": 0.2662962,
+       "116": 0.5076348,
+       "117": 0.4640172,
+       "118": 0.3089354,
+       "119": 0.1382632,
+       "120": 0.3321249,
+       "121": 0.2818584,
+       "122": 0.3337489,
+       "123": 0.1369522,
+       "124": 0.1462392,
+       "125": 0.2204693,
+       "126": 0.4038796,
+       "127": 0.4071662,
+       "128": 0.6153359,
+       "129": 0.1505778,
+       "130": 0.2720831,
+       "131": 0.4910084,
+       "132": 0.3745433,
+       "133": 0.1744229,
+       "134": 0.4265633,
+       "135": 0.3117569,
+       "136": 0.1585072,
+       "137": 0.4592202,
+       "138": 0.4021783,
+       "139": 0.8413131,
+       "140": 0.0972332,
+       "141": 0.3647774,
+       "142": 0.3596085,
+       "143": 0.0790831,
+       "144": 0.1794491,
+       "145": 0.2573703,
+       "146": 0.2507627,
+       "147": 0.2599977,
+       "148": 0.2123907,
+       "149": 0.2988898,
+       "150": 0.3665598
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "valhala_bilateral": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 31.61,
+     "micro_m_gen": 32.01,
+     "macro_m_high": 36.31,
+     "micro_m_high": 36.17,
+     "macro_m_soft": 47.41,
+     "micro_m_soft": 46.99,
+     "macro_m_rec": 40.08,
+     "micro_m_rec": 39.79
+    },
+    "official": {
+     "macro_m_gen": 31.51,
+     "micro_m_gen": 31.92,
+     "macro_m_high": 36.31,
+     "micro_m_high": 36.17,
+     "macro_m_soft": 47.41,
+     "micro_m_soft": 46.99,
+     "macro_m_rec": 40.08,
+     "micro_m_rec": 39.79
+    },
+    "cpp_crosscheck_max_abs_dev": 4.925028835311984e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0735,
+     "max_seconds_per_piece": 0.1305,
+     "total_seconds": 2.204,
+     "notes_per_second": 4639.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\jpsmith8488__valhala-fingering-solver",
+      "variant": "bilateral",
+      "tradition": "modern",
+      "tempo_nps": 6.0
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 35.05,
+     "micro_m_gen": 34.49,
+     "macro_m_high": 36.53,
+     "micro_m_high": 35.85,
+     "macro_m_soft": 40.07,
+     "micro_m_soft": 39.25,
+     "macro_m_rec": 37.71,
+     "micro_m_rec": 36.99
+    },
+    "official": {
+     "macro_m_gen": 34.9,
+     "micro_m_gen": 34.4,
+     "macro_m_high": 36.53,
+     "micro_m_high": 35.85,
+     "macro_m_soft": 40.07,
+     "micro_m_soft": 39.25,
+     "macro_m_rec": 37.71,
+     "micro_m_rec": 36.99
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0855,
+     "max_seconds_per_piece": 0.7995,
+     "total_seconds": 12.829,
+     "notes_per_second": 3798.0,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\jpsmith8488__valhala-fingering-solver",
+      "variant": "bilateral",
+      "tradition": "modern",
+      "tempo_nps": 6.0
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "valhala_mirrored": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 52.38,
+     "micro_m_gen": 53.13,
+     "macro_m_high": 58.6,
+     "micro_m_high": 58.79,
+     "macro_m_soft": 71.41,
+     "micro_m_soft": 71.05,
+     "macro_m_rec": 63.31,
+     "micro_m_rec": 63.33
+    },
+    "official": {
+     "macro_m_gen": 52.27,
+     "micro_m_gen": 53.03,
+     "macro_m_high": 58.6,
+     "micro_m_high": 58.79,
+     "macro_m_soft": 71.41,
+     "micro_m_soft": 71.05,
+     "macro_m_rec": 63.31,
+     "micro_m_rec": 63.33
+    },
+    "cpp_crosscheck_max_abs_dev": 4.965034964277137e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0704,
+     "max_seconds_per_piece": 0.1197,
+     "total_seconds": 2.111,
+     "notes_per_second": 4843.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\jpsmith8488__valhala-fingering-solver",
+      "variant": "mirrored",
+      "tradition": "modern",
+      "tempo_nps": 6.0
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 53.25,
+     "micro_m_gen": 53.87,
+     "macro_m_high": 55.3,
+     "micro_m_high": 55.77,
+     "macro_m_soft": 59.48,
+     "micro_m_soft": 59.81,
+     "macro_m_rec": 56.83,
+     "micro_m_rec": 57.28
+    },
+    "official": {
+     "macro_m_gen": 53.07,
+     "micro_m_gen": 53.76,
+     "macro_m_high": 55.3,
+     "micro_m_high": 55.77,
+     "macro_m_soft": 59.48,
+     "micro_m_soft": 59.81,
+     "macro_m_rec": 56.83,
+     "micro_m_rec": 57.28
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.077,
+     "max_seconds_per_piece": 0.5501,
+     "total_seconds": 11.556,
+     "notes_per_second": 4216.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\jpsmith8488__valhala-fingering-solver",
+      "variant": "mirrored",
+      "tradition": "modern",
+      "tempo_nps": 6.0
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pianofingering_jl": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 26,
+    "coverage": 0.8667,
+    "missing": [
+     "022",
+     "026",
+     "028",
+     "030"
+    ],
+    "press": {
+     "macro_m_gen": 58.59,
+     "micro_m_gen": 58.8,
+     "macro_m_high": 65.58,
+     "micro_m_high": 65.52,
+     "macro_m_soft": 80.49,
+     "micro_m_soft": 80.35,
+     "macro_m_rec": 72.26,
+     "micro_m_rec": 72.17
+    },
+    "official": {
+     "macro_m_gen": 58.42,
+     "micro_m_gen": 58.63,
+     "macro_m_high": 65.58,
+     "micro_m_high": 65.52,
+     "macro_m_soft": 80.49,
+     "micro_m_soft": 80.35,
+     "macro_m_rec": 72.26,
+     "micro_m_rec": 72.17
+    },
+    "cpp_crosscheck_max_abs_dev": 4.974093263943047e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 16.0826,
+     "max_seconds_per_piece": 64.174,
+     "total_seconds": 418.148,
+     "notes_per_second": 20.0,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\JuliaMusic__PianoFingering.jl",
+      "julia": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\_tools\\julia-1.10.5\\bin\\julia.exe",
+      "threads": "12",
+      "note": "seconds measured inside Julia; first piece includes JIT"
+     },
+     "failed_pieces": [
+      "022",
+      "026",
+      "028",
+      "030"
+     ]
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "pianoplayer_pigreader_nostagger": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 48.84,
+     "micro_m_gen": 48.74,
+     "macro_m_high": 55.45,
+     "micro_m_high": 54.99,
+     "macro_m_soft": 68.87,
+     "micro_m_soft": 67.82,
+     "macro_m_rec": 60.09,
+     "micro_m_rec": 59.58
+    },
+    "official": {
+     "macro_m_gen": 48.72,
+     "micro_m_gen": 48.63,
+     "macro_m_high": 55.45,
+     "micro_m_high": 54.99,
+     "macro_m_soft": 68.87,
+     "micro_m_soft": 67.82,
+     "macro_m_rec": 60.09,
+     "micro_m_rec": 59.58
+    },
+    "cpp_crosscheck_max_abs_dev": 4.942528735174534e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 14.0151,
+     "max_seconds_per_piece": 37.4501,
+     "total_seconds": 420.454,
+     "notes_per_second": 24.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\marcomusy__pianoplayer",
+      "hand_size": "M",
+      "depth": 0,
+      "x_mode": "keypos",
+      "chord_stagger_s": 0.0
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ackyedy_b0": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 27.65,
+     "micro_m_gen": 27.99,
+     "macro_m_high": 30.18,
+     "micro_m_high": 30.39,
+     "macro_m_soft": 37.06,
+     "micro_m_soft": 36.81,
+     "macro_m_rec": 30.95,
+     "micro_m_rec": 31.13
+    },
+    "official": {
+     "macro_m_gen": 27.6,
+     "micro_m_gen": 27.94,
+     "macro_m_high": 30.18,
+     "micro_m_high": 30.39,
+     "macro_m_soft": 37.06,
+     "micro_m_soft": 36.81,
+     "macro_m_rec": 30.95,
+     "micro_m_rec": 31.13
+    },
+    "cpp_crosscheck_max_abs_dev": 4.964028776921481e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0002,
+     "max_seconds_per_piece": 0.0004,
+     "total_seconds": 0.007,
+     "notes_per_second": 1440140.8,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "B0",
+      "hyperparameters": {
+       "smoothing": 1.0
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 29.11,
+     "micro_m_gen": 29.48,
+     "macro_m_high": 29.99,
+     "micro_m_high": 30.29,
+     "macro_m_soft": 31.96,
+     "micro_m_soft": 32.18,
+     "macro_m_rec": 30.21,
+     "micro_m_rec": 30.52
+    },
+    "official": {
+     "macro_m_gen": 29.03,
+     "micro_m_gen": 29.43,
+     "macro_m_high": 29.99,
+     "micro_m_high": 30.29,
+     "macro_m_soft": 31.96,
+     "micro_m_soft": 32.18,
+     "macro_m_rec": 30.21,
+     "micro_m_rec": 30.52
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0002,
+     "max_seconds_per_piece": 0.0013,
+     "total_seconds": 0.036,
+     "notes_per_second": 1368651.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "B0",
+      "hyperparameters": {
+       "smoothing": 1.0
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ackyedy_b1": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 27.86,
+     "micro_m_gen": 27.6,
+     "macro_m_high": 31.69,
+     "micro_m_high": 31.11,
+     "macro_m_soft": 41.86,
+     "micro_m_soft": 40.76,
+     "macro_m_rec": 34.45,
+     "micro_m_rec": 33.81
+    },
+    "official": {
+     "macro_m_gen": 27.77,
+     "micro_m_gen": 27.52,
+     "macro_m_high": 31.69,
+     "micro_m_high": 31.11,
+     "macro_m_soft": 41.86,
+     "micro_m_soft": 40.76,
+     "macro_m_rec": 34.45,
+     "micro_m_rec": 33.81
+    },
+    "cpp_crosscheck_max_abs_dev": 4.933687002828258e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0005,
+     "max_seconds_per_piece": 0.0012,
+     "total_seconds": 0.016,
+     "notes_per_second": 631172.8,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "B1",
+      "hyperparameters": {
+       "initial_finger": 1
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 30.16,
+     "micro_m_gen": 30.07,
+     "macro_m_high": 31.49,
+     "micro_m_high": 31.28,
+     "macro_m_soft": 34.62,
+     "micro_m_soft": 34.29,
+     "macro_m_rec": 32.35,
+     "micro_m_rec": 32.14
+    },
+    "official": {
+     "macro_m_gen": 30.05,
+     "micro_m_gen": 30.0,
+     "macro_m_high": 31.49,
+     "micro_m_high": 31.28,
+     "macro_m_soft": 34.62,
+     "micro_m_soft": 34.29,
+     "macro_m_rec": 32.35,
+     "micro_m_rec": 32.14
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0005,
+     "max_seconds_per_piece": 0.0035,
+     "total_seconds": 0.075,
+     "notes_per_second": 648788.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "B1",
+      "hyperparameters": {
+       "initial_finger": 1
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ackyedy_h1": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 59.71,
+     "micro_m_gen": 60.52,
+     "macro_m_high": 66.08,
+     "micro_m_high": 66.38,
+     "macro_m_soft": 80.74,
+     "micro_m_soft": 80.75,
+     "macro_m_rec": 72.62,
+     "micro_m_rec": 72.79
+    },
+    "official": {
+     "macro_m_gen": 59.6,
+     "micro_m_gen": 60.42,
+     "macro_m_high": 66.08,
+     "micro_m_high": 66.38,
+     "macro_m_soft": 80.74,
+     "micro_m_soft": 80.75,
+     "macro_m_rec": 72.62,
+     "micro_m_rec": 72.79
+    },
+    "cpp_crosscheck_max_abs_dev": 4.944237917969829e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0017,
+     "max_seconds_per_piece": 0.0032,
+     "total_seconds": 0.052,
+     "notes_per_second": 195881.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "H1",
+      "hyperparameters": {
+       "clip": 15,
+       "alpha": 1.0
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.67,
+     "micro_m_gen": 66.55,
+     "macro_m_high": 67.92,
+     "micro_m_high": 68.6,
+     "macro_m_soft": 72.78,
+     "micro_m_soft": 73.37,
+     "macro_m_rec": 70.04,
+     "micro_m_rec": 70.74
+    },
+    "official": {
+     "macro_m_gen": 65.47,
+     "micro_m_gen": 66.42,
+     "macro_m_high": 67.92,
+     "micro_m_high": 68.6,
+     "macro_m_soft": 72.78,
+     "micro_m_soft": 73.37,
+     "macro_m_rec": 70.04,
+     "micro_m_rec": 70.74
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0016,
+     "max_seconds_per_piece": 0.0098,
+     "total_seconds": 0.243,
+     "notes_per_second": 200510.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "H1",
+      "hyperparameters": {
+       "clip": 15,
+       "alpha": 1.0
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "ackyedy_h2": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 59.96,
+     "micro_m_gen": 60.77,
+     "macro_m_high": 66.59,
+     "micro_m_high": 66.97,
+     "macro_m_soft": 80.75,
+     "micro_m_soft": 80.75,
+     "macro_m_rec": 73.07,
+     "micro_m_rec": 73.33
+    },
+    "official": {
+     "macro_m_gen": 59.84,
+     "micro_m_gen": 60.64,
+     "macro_m_high": 66.59,
+     "micro_m_high": 66.97,
+     "macro_m_soft": 80.75,
+     "micro_m_soft": 80.75,
+     "macro_m_rec": 73.07,
+     "micro_m_rec": 73.33
+    },
+    "cpp_crosscheck_max_abs_dev": 4.986737400791696e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0021,
+     "max_seconds_per_piece": 0.0037,
+     "total_seconds": 0.064,
+     "notes_per_second": 158773.3,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "H2",
+      "hyperparameters": {
+       "clip": 15,
+       "alpha": 1.0,
+       "lam": 0.5
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 66.13,
+     "micro_m_gen": 66.92,
+     "macro_m_high": 68.47,
+     "micro_m_high": 69.1,
+     "macro_m_soft": 73.15,
+     "micro_m_soft": 73.68,
+     "macro_m_rec": 70.51,
+     "micro_m_rec": 71.16
+    },
+    "official": {
+     "macro_m_gen": 65.92,
+     "micro_m_gen": 66.79,
+     "macro_m_high": 68.47,
+     "micro_m_high": 69.1,
+     "macro_m_soft": 73.15,
+     "micro_m_soft": 73.68,
+     "macro_m_rec": 70.51,
+     "micro_m_rec": 71.16
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0022,
+     "max_seconds_per_piece": 0.0129,
+     "total_seconds": 0.325,
+     "notes_per_second": 149735.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\ackyedy__piano-fingering-analysis",
+      "model": "H2",
+      "hyperparameters": {
+       "clip": 15,
+       "alpha": 1.0,
+       "lam": 0.5
+      },
+      "train_sequences": 318
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "chowmhalvin_hmm": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 62.23,
+     "micro_m_gen": 63.36,
+     "macro_m_high": 68.8,
+     "micro_m_high": 69.18,
+     "macro_m_soft": 83.28,
+     "micro_m_soft": 83.49,
+     "macro_m_rec": 74.52,
+     "micro_m_rec": 74.97
+    },
+    "official": {
+     "macro_m_gen": 62.11,
+     "micro_m_gen": 63.25,
+     "macro_m_high": 68.8,
+     "micro_m_high": 69.18,
+     "macro_m_soft": 83.28,
+     "micro_m_soft": 83.49,
+     "macro_m_rec": 74.52,
+     "micro_m_rec": 74.97
+    },
+    "cpp_crosscheck_max_abs_dev": 4.976525821431821e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0425,
+     "max_seconds_per_piece": 0.0808,
+     "total_seconds": 1.276,
+     "notes_per_second": 8012.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\CHOWMHALVIN__PFSM",
+      "hand_size": "M",
+      "train_files": 159
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 67.87,
+     "micro_m_gen": 69.06,
+     "macro_m_high": 70.12,
+     "micro_m_high": 71.12,
+     "macro_m_soft": 75.03,
+     "micro_m_soft": 75.93,
+     "macro_m_rec": 71.97,
+     "micro_m_rec": 73.05
+    },
+    "official": {
+     "macro_m_gen": 67.65,
+     "micro_m_gen": 68.92,
+     "macro_m_high": 70.12,
+     "micro_m_high": 71.12,
+     "macro_m_soft": 75.03,
+     "micro_m_soft": 75.93,
+     "macro_m_rec": 71.97,
+     "micro_m_rec": 73.05
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.055,
+     "max_seconds_per_piece": 0.4145,
+     "total_seconds": 8.249,
+     "notes_per_second": 5906.9,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\CHOWMHALVIN__PFSM",
+      "hand_size": "M",
+      "train_files": 159
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "timkoornstra_qlearning": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 46.93,
+     "micro_m_gen": 47.84,
+     "macro_m_high": 51.95,
+     "micro_m_high": 52.49,
+     "macro_m_soft": 63.5,
+     "micro_m_soft": 63.46,
+     "macro_m_rec": 54.17,
+     "micro_m_rec": 54.69
+    },
+    "official": {
+     "macro_m_gen": 46.78,
+     "micro_m_gen": 47.71,
+     "macro_m_high": 51.95,
+     "micro_m_high": 52.49,
+     "macro_m_soft": 63.5,
+     "micro_m_soft": 63.46,
+     "macro_m_rec": 54.17,
+     "micro_m_rec": 54.69
+    },
+    "cpp_crosscheck_max_abs_dev": 4.965034964277137e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 2.5494,
+     "max_seconds_per_piece": 4.8552,
+     "total_seconds": 76.483,
+     "notes_per_second": 133.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\TimKoornstra__automatic-piano-fingering",
+      "seed": 0,
+      "episodes": 1000,
+      "lh": "mirrored around D4"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 48.13,
+     "micro_m_gen": 48.52,
+     "macro_m_high": 49.84,
+     "micro_m_high": 50.12,
+     "macro_m_soft": 53.53,
+     "micro_m_soft": 53.63,
+     "macro_m_rec": 50.58,
+     "micro_m_rec": 50.87
+    },
+    "official": {
+     "macro_m_gen": 47.95,
+     "micro_m_gen": 48.4,
+     "macro_m_high": 49.84,
+     "micro_m_high": 50.12,
+     "macro_m_soft": 53.53,
+     "micro_m_soft": 53.63,
+     "macro_m_rec": 50.58,
+     "micro_m_rec": 50.87
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 2.3422,
+     "max_seconds_per_piece": 16.2086,
+     "total_seconds": 351.334,
+     "notes_per_second": 138.7,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\TimKoornstra__automatic-piano-fingering",
+      "seed": 0,
+      "episodes": 1000,
+      "lh": "mirrored around D4"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "bshakhovsky_trellis": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 30,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 62.75,
+     "micro_m_gen": 63.95,
+     "macro_m_high": 69.28,
+     "micro_m_high": 70.07,
+     "macro_m_soft": 83.39,
+     "micro_m_soft": 83.9,
+     "macro_m_rec": 75.7,
+     "micro_m_rec": 76.45
+    },
+    "official": {
+     "macro_m_gen": 62.63,
+     "micro_m_gen": 63.84,
+     "macro_m_high": 69.28,
+     "micro_m_high": 70.07,
+     "macro_m_soft": 83.39,
+     "micro_m_soft": 83.9,
+     "macro_m_rec": 75.7,
+     "micro_m_rec": 76.45
+    },
+    "cpp_crosscheck_max_abs_dev": 4.982206405212963e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 0.0164,
+     "max_seconds_per_piece": 0.0449,
+     "total_seconds": 0.491,
+     "notes_per_second": 20824.8,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\cpp\\bshakhovsky\\build\\bshakhovsky_driver.exe",
+      "stats": {
+       "unresolved_notes": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   },
+   "all": {
+    "split": "all",
+    "n_pieces_in_split": 150,
+    "n_scored": 150,
+    "coverage": 1.0,
+    "missing": [],
+    "press": {
+     "macro_m_gen": 65.99,
+     "micro_m_gen": 66.84,
+     "macro_m_high": 68.24,
+     "micro_m_high": 68.95,
+     "macro_m_soft": 73.1,
+     "micro_m_soft": 73.67,
+     "macro_m_rec": 70.38,
+     "micro_m_rec": 71.09
+    },
+    "official": {
+     "macro_m_gen": 65.78,
+     "micro_m_gen": 66.7,
+     "macro_m_high": 68.24,
+     "micro_m_high": 68.95,
+     "macro_m_soft": 73.1,
+     "micro_m_soft": 73.67,
+     "macro_m_rec": 70.38,
+     "micro_m_rec": 71.09
+    },
+    "runtime": {
+     "mean_seconds_per_piece": 0.0151,
+     "max_seconds_per_piece": 0.0781,
+     "total_seconds": 2.272,
+     "notes_per_second": 21448.3,
+     "meta": {
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\cpp\\bshakhovsky\\build\\bshakhovsky_driver.exe",
+      "stats": {
+       "unresolved_notes": 0
+      }
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  },
+  "balliauw_vns": {
+   "test": {
+    "split": "test",
+    "n_pieces_in_split": 30,
+    "n_scored": 12,
+    "coverage": 0.4,
+    "missing": [
+     "013",
+     "014",
+     "015",
+     "016",
+     "017",
+     "018",
+     "019",
+     "020",
+     "021",
+     "022",
+     "023",
+     "024",
+     "025",
+     "026",
+     "027",
+     "028",
+     "029",
+     "030"
+    ],
+    "press": {
+     "macro_m_gen": 17.0,
+     "micro_m_gen": 17.31,
+     "macro_m_high": 19.19,
+     "micro_m_high": 19.5,
+     "macro_m_soft": 29.64,
+     "micro_m_soft": 29.92,
+     "macro_m_rec": 21.16,
+     "micro_m_rec": 21.47
+    },
+    "official": {
+     "macro_m_gen": 16.93,
+     "micro_m_gen": 17.24,
+     "macro_m_high": 19.19,
+     "micro_m_high": 19.5,
+     "macro_m_soft": 29.64,
+     "micro_m_soft": 29.92,
+     "macro_m_rec": 21.16,
+     "micro_m_rec": 21.47
+    },
+    "cpp_crosscheck_max_abs_dev": 4.899328858998242e-07,
+    "runtime": {
+     "mean_seconds_per_piece": 294.1868,
+     "max_seconds_per_piece": 738.2017,
+     "total_seconds": 3530.242,
+     "notes_per_second": 1.2,
+     "meta": {
+      "repo": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\mballiauw__piano-fingering-vns",
+      "exe": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\baselines\\third_party\\mballiauw__piano-fingering-vns\\bin\\apf.exe",
+      "seed": 1,
+      "timeout_s": 1200.0,
+      "conversion": "PIG -> MusicXML, time = rank of distinct onset/offset times, single measure"
+     },
+     "failed_pieces": []
+    },
+    "scorer": "fingering_eval"
+   }
+  }
+ },
+ "_meta": {
+  "generated": "2026-10-13 22:23:29",
+  "pig_dir": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\pig\\FingeringFiles",
+  "split_source": [
+   "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\splits\\pig_official.json#nakamura2020"
+  ],
+  "primary_mode": "official",
+  "note": "metrics in percent; macro = mean over pieces (paper Table 2), micro = over notes"
+ },
+ "human_reference_test": {
+  "official": {
+   "macro_m_gen": 71.37,
+   "macro_m_high": 79.13,
+   "macro_m_soft": 90.8,
+   "macro_m_rec": 84.26
+  },
+  "press": {
+   "macro_m_gen": 71.6,
+   "macro_m_high": 79.13,
+   "macro_m_soft": 90.8,
+   "macro_m_rec": 84.26
+  }
+ },
+ "paper_table2_reference": {
+  "1st-order HMM": [
+   61.7,
+   68.3,
+   82.8,
+   74.0
+  ],
+  "2nd-order HMM": [
+   64.3,
+   70.8,
+   85.3,
+   77.6
+  ],
+  "3rd-order HMM": [
+   64.5,
+   71.0,
+   85.5,
+   77.8
+  ],
+  "Chord HMM": [
+   61.2,
+   67.7,
+   81.7,
+   73.8
+  ],
+  "DNN (FF)": [
+   61.5,
+   66.2,
+   82.5,
+   69.5
+  ],
+  "DNN (LSTM)": [
+   61.3,
+   66.1,
+   82.8,
+   69.5
+  ],
+  "Human (leave-one-out)": [
+   71.4,
+   79.1,
+   90.8,
+   84.3
+  ]
+ },
+ "implementations": [
+  {
+   "id": "nakamura_hmm",
+   "name": "Nakamura, Saito & Yoshii 2020 fingering HMMs (C++)",
+   "url": "https://statpianofingering.github.io/data/SourceCode_v190921.zip",
+   "commit": "SourceCode_v190921.zip sha256 e2c15638...66f0",
+   "license": "none stated (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "1st/2nd/3rd-order HMM over finger states, emission = keyboard-position interval (dx in white keys, dy black/white), -5 log-penalty for wrong-direction fingers within 30 ms, each hand separately; chord HMM (CHMM) with vertical+horizontal models",
+   "family": "statistical",
+   "trained_on": "PIG miscellaneous set 031-150 (shipped params)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_nakamura_hmm.py, build_nakamura_hmm.sh",
+   "outputs": [
+    "nakamura_fhmm1",
+    "nakamura_fhmm2",
+    "nakamura_fhmm3",
+    "nakamura_chmm",
+    "nakamura_fhmm1_released_files",
+    "nakamura_fhmm2_released_files",
+    "nakamura_fhmm3_released_files"
+   ],
+   "notes": "Builds with MinGW g++ 9.2 unchanged. Our scorer reproduces the paper's Table 2 exactly from the authors' released outputs (Result_FHMM*.zip). Re-running the binaries on PIG v1.2 gives +0.6..0.9 points because 64 test notes changed hand between dataset versions. HMM2/3 read the hand from the SIGN of the input finger column, not the channel (the wrapper writes +1/-1 blanks).",
+   "scores_test": {
+    "nakamura_fhmm1": {
+     "m_gen": 62.32,
+     "m_high": 68.97,
+     "m_soft": 83.7,
+     "m_rec": 74.86,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0393
+    },
+    "nakamura_fhmm2": {
+     "m_gen": 64.88,
+     "m_high": 71.45,
+     "m_soft": 86.09,
+     "m_rec": 78.24,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0518
+    },
+    "nakamura_fhmm3": {
+     "m_gen": 65.01,
+     "m_high": 71.57,
+     "m_soft": 86.29,
+     "m_rec": 78.58,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0644
+    },
+    "nakamura_chmm": {
+     "m_gen": 61.98,
+     "m_high": 68.69,
+     "m_soft": 82.64,
+     "m_rec": 74.74,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0518
+    },
+    "nakamura_fhmm1_released_files": {
+     "m_gen": 61.65,
+     "m_high": 68.34,
+     "m_soft": 82.75,
+     "m_rec": 74.02,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": null
+    },
+    "nakamura_fhmm2_released_files": {
+     "m_gen": 64.27,
+     "m_high": 70.81,
+     "m_soft": 85.26,
+     "m_rec": 77.57,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": null
+    },
+    "nakamura_fhmm3_released_files": {
+     "m_gen": 64.48,
+     "m_high": 71.0,
+     "m_soft": 85.49,
+     "m_rec": 77.78,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": null
+    }
+   }
+  },
+  {
+   "id": "statpf_js",
+   "name": "Nakamura web demo FHMM1 (JavaScript)",
+   "url": "https://github.com/statpianofingering/statpianofingering.github.io",
+   "commit": "8950a16d7d8b3509e2a39d8e5967fedfa89d61ee",
+   "license": "none stated",
+   "mit_reuse": "no",
+   "approach": "JS port of FHMM1 with parameters embedded in myfunctions.js (w1 = 1) + a hand-separation HMM for MIDI input",
+   "family": "statistical",
+   "trained_on": "PIG (embedded parameters, presumably 031-150)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_statpf_js.py + js/statpf_fhmm1.cjs (Node 22)",
+   "outputs": [
+    "nakamura_fhmm1_webdemo_js"
+   ],
+   "notes": "Scores within 0.1 of the C++ FHMM1. The hand-separation HMM (HandSepModel) is reusable for MIDI input without hands.",
+   "scores_test": {
+    "nakamura_fhmm1_webdemo_js": {
+     "m_gen": 62.19,
+     "m_high": 68.95,
+     "m_soft": 83.56,
+     "m_rec": 74.91,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0551
+    }
+   }
+  },
+  {
+   "id": "pianoplayer",
+   "name": "marcomusy/pianoplayer 3.0.2",
+   "url": "https://github.com/marcomusy/pianoplayer",
+   "commit": "6fb0e2114d7b21f75c0be5208172e1243a57323e",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "physical hand model (finger rest positions in cm, hand size), exhaustive search over the next 5-9 notes minimising average finger speed; chords staggered into short runs",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_pianoplayer.py",
+   "outputs": [
+    "pianoplayer",
+    "pianoplayer_pigreader_nostagger"
+   ],
+   "notes": "Bug: its PIG reader never sets the key position INote.x (every note at x=0 -> all thumbs, and the search never finishes on real pieces); we set x with models.keypos like its MusicXML reader. 'pianoplayer' additionally staggers chord notes low->high by 0.05 s like the MusicXML/MIDI readers (= its main use case); 'pianoplayer_pigreader_nostagger' is the PIG reader as shipped (+ x fix). Its PIG reader also treats any finger already in the file as a fixed anchor (GT leak if fed a PIG file).",
+   "scores_test": {
+    "pianoplayer": {
+     "m_gen": 57.17,
+     "m_high": 64.24,
+     "m_soft": 78.23,
+     "m_rec": 69.29,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 19.3186
+    },
+    "pianoplayer_pigreader_nostagger": {
+     "m_gen": 48.72,
+     "m_high": 55.45,
+     "m_soft": 68.87,
+     "m_rec": 60.09,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 14.0151
+    }
+   }
+  },
+  {
+   "id": "ramoneda_ar",
+   "name": "Ramoneda et al. 2022 ArGNN / ArLSTM (ACM MM)",
+   "url": "https://github.com/PRamoneda/Automatic-Piano-Fingering",
+   "commit": "d0d2f433c926be5e89540cbafe38bf43820ad2d2",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "autoregressive seq2seq: pitch embedding -> 3 gated graph layers over onset/next edges (ArGNN) or 3-layer BiLSTM (ArLSTM) -> AR LSTM decoder; pretrained on ThumbSet (2523 crowd-annotated MuseScore pieces, partial labels), finetuned per hand on PIG; LH mirrored to RH",
+   "family": "neural",
+   "trained_on": "ThumbSet + PIG official train split (031-150 minus their val)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_ramoneda_ar.py",
+   "outputs": [
+    "ramoneda_argnn",
+    "ramoneda_argnn_beam10",
+    "ramoneda_arlstm",
+    "ramoneda_arlstm_beam10"
+   ],
+   "notes": "Pretrained weights ship in models/. Repository contains file names with ':' (invalid on Windows) -> sparse checkout. Inference re-uses their loader/edge code; M_gen within 0.1 of their table_beam_k.json for greedy (ArGNN 64.65 vs 64.70, ArLSTM 64.17 vs 64.25) and within 0.4 for beam 10 (66.73 vs 66.82, 65.13 vs 65.48). ThumbSet itself is 'available upon request' (Zenodo).",
+   "scores_test": {
+    "ramoneda_argnn": {
+     "m_gen": 64.65,
+     "m_high": 70.68,
+     "m_soft": 86.67,
+     "m_rec": 76.73,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1584
+    },
+    "ramoneda_argnn_beam10": {
+     "m_gen": 66.73,
+     "m_high": 73.48,
+     "m_soft": 88.29,
+     "m_rec": 79.32,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.5102
+    },
+    "ramoneda_arlstm": {
+     "m_gen": 64.17,
+     "m_high": 71.24,
+     "m_soft": 86.41,
+     "m_rec": 77.65,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.2106
+    },
+    "ramoneda_arlstm_beam10": {
+     "m_gen": 65.13,
+     "m_high": 72.44,
+     "m_soft": 86.86,
+     "m_rec": 78.84,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.5842
+    }
+   }
+  },
+  {
+   "id": "pydactyl",
+   "name": "dvdrndlph/pydactyl (Randolph)",
+   "url": "https://github.com/dvdrndlph/pydactyl",
+   "commit": "0ad656db9b778508453a7275dc698b9129ca765e",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "classic monophonic models: Parncutt et al. 1997 (12 rules), Jacobs 2001, Badgerow 2009, Balliauw 2017 rules (in Parncutt's DP/k-best framework), Hart et al. 2000 cost table DP, random; chords arpeggiated low->high",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_pydactyl.py",
+   "outputs": [
+    "pydactyl_parncutt",
+    "pydactyl_jacobs",
+    "pydactyl_badgerow",
+    "pydactyl_balliauw",
+    "pydactyl_hart",
+    "pydactyl_random"
+   ],
+   "notes": "Patches: '/tmp' + ':' log path (Windows), Balliauw rule 15 AttributeError (handed_finger_* typo); python-magic stubbed. Parncutt-family raises 'No solution' when a leap exceeds every finger pair's MaxPrac and Hart's table stops at 12 semitones, so the wrapper splits the hand at large leaps (15,12,11,9,... semitones) only when needed (~12 splits/piece). Its CRF/Sayegh experiments are tied to the author's local corpus DB and were not run.",
+   "scores_test": {
+    "pydactyl_parncutt": {
+     "m_gen": 62.91,
+     "m_high": 69.67,
+     "m_soft": 84.51,
+     "m_rec": 76.84,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 1.148
+    },
+    "pydactyl_jacobs": {
+     "m_gen": 63.58,
+     "m_high": 70.51,
+     "m_soft": 84.88,
+     "m_rec": 77.0,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 1.1623
+    },
+    "pydactyl_badgerow": {
+     "m_gen": 61.35,
+     "m_high": 68.61,
+     "m_soft": 82.85,
+     "m_rec": 74.82,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 1.0039
+    },
+    "pydactyl_balliauw": {
+     "m_gen": 61.67,
+     "m_high": 68.26,
+     "m_soft": 83.38,
+     "m_rec": 74.26,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 1.0993
+    },
+    "pydactyl_hart": {
+     "m_gen": 47.17,
+     "m_high": 52.22,
+     "m_soft": 65.56,
+     "m_rec": 56.84,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.3621
+    },
+    "pydactyl_random": {
+     "m_gen": 20.2,
+     "m_high": 22.55,
+     "m_soft": 33.27,
+     "m_rec": 24.18,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1535
+    }
+   }
+  },
+  {
+   "id": "kanma",
+   "name": "Kanma/piano_fingering (PyPI piano_fingering 1.0.0; port of blakewest/performer)",
+   "url": "https://github.com/Kanma/piano_fingering",
+   "commit": "88963cad52bb3c16438d69f600830a6d43d923ce",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "Viterbi over per-onset chord layers with a hand-made pairwise (note1, note2, finger1, finger2) cost table per hand",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_kanma.py",
+   "outputs": [
+    "kanma_piano_fingering"
+   ],
+   "notes": "Runs unchanged; 0.01 s per piece.",
+   "scores_test": {
+    "kanma_piano_fingering": {
+     "m_gen": 61.62,
+     "m_high": 68.24,
+     "m_soft": 83.29,
+     "m_rec": 74.84,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.016
+    }
+   }
+  },
+  {
+   "id": "autofingering",
+   "name": "thegreatkwanghyeon/autofingering",
+   "url": "https://github.com/thegreatkwanghyeon/autofingering",
+   "commit": "b9b7f1081550ac29e6dd677802569cc7d65f979a",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "Python re-implementation of Nakamura's 1st-order HMM (finger pair transitions, white/black key-distance emission)",
+   "family": "statistical",
+   "trained_on": "PIG 031-150 (trained by our wrapper)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_autofingering.py",
+   "outputs": [
+    "autofingering_hmm"
+   ],
+   "notes": "Patch: DataFrame.append -> pd.concat (pandas 2). MusicXML-only CLI, so the Hand class is called directly.",
+   "scores_test": {
+    "autofingering_hmm": {
+     "m_gen": 62.11,
+     "m_high": 68.82,
+     "m_soft": 83.2,
+     "m_rec": 74.44,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0067
+    }
+   }
+  },
+  {
+   "id": "lumikey",
+   "name": "lumikey/piano-fingering-model",
+   "url": "https://github.com/lumikey/piano-fingering-model",
+   "commit": "e03c0da6bfe6b4299dbdacb421bd5792f1721631",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "~100k-parameter Transformer encoder per hand over 26 tokens (last note of each finger, current note, 20-note lookahead with optional finger hints), greedy autoregressive decoding; ONNX + TS package for the browser",
+   "family": "neural",
+   "trained_on": "pretrained: ALL 309 PIG files (54239 RH + 45801 LH samples = every PIG note) + other data; retrained: PIG train split only",
+   "contaminated": true,
+   "ran": "yes",
+   "wrapper": "run_lumikey.py, train_lumikey_pig.py",
+   "outputs": [
+    "lumikey_pretrained",
+    "lumikey_retrained_pigtrain"
+   ],
+   "notes": "The released checkpoints saw the test pieces (score 74.1 > human agreement 71.4). Retrained on 031-150 with the repository's own train() it gets 66.2, competitive with ArGNN. Same ONNX weights are reused by JeffreyZhou798/Piano-Fingering-Generator-A09.",
+   "scores_test": {
+    "lumikey_pretrained": {
+     "m_gen": 74.14,
+     "m_high": 81.91,
+     "m_soft": 94.97,
+     "m_rec": 88.85,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1679
+    },
+    "lumikey_retrained_pigtrain": {
+     "m_gen": 66.15,
+     "m_high": 72.62,
+     "m_soft": 87.93,
+     "m_rec": 79.29,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.2297
+    }
+   }
+  },
+  {
+   "id": "apfgen",
+   "name": "chrsztz/APF-Gen",
+   "url": "https://github.com/chrsztz/APF-Gen",
+   "commit": "1078ee6f3a4b44c35c714490cfdcf9756be1e5d2",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "CNN-BiLSTM + local attention + AR finger embedding + auxiliary 'physical' head over hand-crafted features (beats, intervals, chord rank, hand position), 11-class signed finger output, beam search with physical transition costs",
+   "family": "neural",
+   "trained_on": "pretrained: random 70% of the 309 PIG files (seed 42) = most test-piece annotations; retrained: PIG train split",
+   "contaminated": true,
+   "ran": "yes",
+   "wrapper": "run_apfgen.py, train_apfgen_official.py",
+   "outputs": [
+    "apfgen_pretrained",
+    "apfgen_pretrained_nobeam",
+    "apfgen_retrained_official",
+    "apfgen_retrained_official_nobeam"
+   ],
+   "notes": "Their reported 'test' M_gen ~82% comes from a random file-level split (other annotators of the same piece in training). Only best.pt matches the released feature code; the 26 ablation checkpoints next to it have an older feature size. infer.py hard-codes device 'mps' from the config. Retrained on the official split it drops to 58.4 (beam) / 59.1 (argmax).",
+   "scores_test": {
+    "apfgen_pretrained": {
+     "m_gen": 68.82,
+     "m_high": 74.9,
+     "m_soft": 90.09,
+     "m_rec": 78.33,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1694
+    },
+    "apfgen_pretrained_nobeam": {
+     "m_gen": 70.46,
+     "m_high": 77.04,
+     "m_soft": 91.77,
+     "m_rec": 80.65,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1153
+    },
+    "apfgen_retrained_official": {
+     "m_gen": 58.38,
+     "m_high": 64.09,
+     "m_soft": 80.12,
+     "m_rec": 67.72,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1679
+    },
+    "apfgen_retrained_official_nobeam": {
+     "m_gen": 59.15,
+     "m_high": 64.81,
+     "m_soft": 81.06,
+     "m_rec": 69.16,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.114
+    }
+   }
+  },
+  {
+   "id": "fingerflow",
+   "name": "MarcAlKareh/fingerflow (FingerFlow engine)",
+   "url": "https://github.com/MarcAlKareh/fingerflow",
+   "commit": "85f89ad39f8ac68c6e732f5c047d22b2190d2f63",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "99-feature biomechanical cost (physical key geometry, spans scaled to hand, legato coupling, speed factor, Fitts-law relocation, finger-pair indicators) + second-order Viterbi over chord-aware assignments; weights learned by averaged passive-aggressive structured perceptron with Hamming-augmented decoding",
+   "family": "learned cost (structured prediction)",
+   "trained_on": "PIG 031-150 (trained by our wrapper; repository default hyper-parameters)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_fingerflow.py",
+   "outputs": [
+    "fingerflow_default",
+    "fingerflow_learned"
+   ],
+   "notes": "Best fair result. Its own benchmark claims 70.00 M_gen on the same 30 pieces (their metric code; ours gives 68.6). Their docs claim PIG timings come from real performances; PIG's README says they are synthesized from score-editing software.",
+   "scores_test": {
+    "fingerflow_default": {
+     "m_gen": 64.33,
+     "m_high": 71.43,
+     "m_soft": 85.76,
+     "m_rec": 77.92,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 1.1596
+    },
+    "fingerflow_learned": {
+     "m_gen": 68.63,
+     "m_high": 76.28,
+     "m_soft": 90.28,
+     "m_rec": 82.29,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 1.242
+    }
+   }
+  },
+  {
+   "id": "chirality",
+   "name": "vibetuned/chirality",
+   "url": "https://github.com/vibetuned/chirality",
+   "commit": "cd9c54e0dcdfaf0677690f03978cd23ecd90da22",
+   "license": "AGPL-3.0-or-later",
+   "mit_reuse": "no",
+   "approach": "exact second-order Viterbi over the 12 Parncutt rule point-sums; weights uniform or learned by path-difference learning (averaged structured perceptron); also Nakamura HMM port, Jacobs/Balliauw/Al Kasimi rule sets, VNS, PPO agents",
+   "family": "learned cost (structured prediction)",
+   "trained_on": "PIG 031-150 (learned variant, trained by our wrapper with its own perceptron)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_chirality.py",
+   "outputs": [
+    "chirality_parncutt_viterbi_uniform",
+    "chirality_parncutt_viterbi_learned"
+   ],
+   "notes": "Declares Python >= 3.14 / numpy >= 2.4 but the modules used run unchanged on 3.11. Exact Viterbi lifts plain Parncutt rules from 62.9 (pydactyl's pruned Dijkstra) to 65.4; learned weights 66.0. PPO agents (RH-only, 42-45%) not run.",
+   "scores_test": {
+    "chirality_parncutt_viterbi_uniform": {
+     "m_gen": 65.38,
+     "m_high": 72.18,
+     "m_soft": 86.71,
+     "m_rec": 78.76,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1067
+    },
+    "chirality_parncutt_viterbi_learned": {
+     "m_gen": 66.0,
+     "m_high": 72.06,
+     "m_soft": 87.16,
+     "m_rec": 79.45,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1129
+    }
+   }
+  },
+  {
+   "id": "handthesia",
+   "name": "V9011N/pygame-piano-animator (Hand-thesia) fingering planner",
+   "url": "https://github.com/V9011N/pygame-piano-animator",
+   "commit": "f8189c021d9235005fb35faa2c8cfbc09a3768a0",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "beam search over chord fingerings with a physical cost model (stretch, cramp, crossings, weak fingers, black keys, shifts vs. time, finger speed) + figure templates (scales, arpeggios, octaves, thirds, trills); ~30 weights fitted by coordinate search on PIG 031-150",
+   "family": "learned cost (search)",
+   "trained_on": "PIG 031-150 (weights shipped)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_handthesia.py",
+   "outputs": [
+    "handthesia_planner"
+   ],
+   "notes": "Its MIDI/PIG loader re-orders notes; map back by (onset, pitch, channel). Strong (65.8) and fast (~0.1 s/piece).",
+   "scores_test": {
+    "handthesia_planner": {
+     "m_gen": 65.76,
+     "m_high": 73.11,
+     "m_soft": 87.55,
+     "m_rec": 79.14,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1166
+    }
+   }
+  },
+  {
+   "id": "smart_piano_fingering",
+   "name": "emanuelemerlo/smart-piano-fingering (MuseScore 4 plugin)",
+   "url": "https://github.com/emanuelemerlo/smart-piano-fingering",
+   "commit": "15828ee9c85a06f632d9f001456ce2c44cf2d80c",
+   "license": "GPL-3.0",
+   "mit_reuse": "no",
+   "approach": "QML/JavaScript port + extension of pianoplayer's hand model (chord & multi-voice handling, held-note constraints, exact DP when feasible)",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_smart_piano_fingering.py + js/smart_piano_fingering.cjs",
+   "outputs": [
+    "smart_piano_fingering_musescore"
+   ],
+   "notes": "Core sliced out of the .qml and run in Node exactly like its own tests (MuseScore not needed). Beat = 0.5 s assumed. Clearly better than pianoplayer itself (58.8 vs 57.2).",
+   "scores_test": {
+    "smart_piano_fingering_musescore": {
+     "m_gen": 58.81,
+     "m_high": 66.41,
+     "m_soft": 80.11,
+     "m_rec": 71.37,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0816
+    }
+   }
+  },
+  {
+   "id": "bshakhovsky",
+   "name": "BShakhovsky/PianoFingering_CalcModule (of PianoTranscription_Windows)",
+   "url": "https://github.com/BShakhovsky/PianoFingering_CalcModule",
+   "commit": "52dd07c81d8e27804cfc15be8be0714e3f9c0dcf",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "trellis graph over chord fingering combinations with vertical (in-chord) and horizontal (1-3 chord) cost rules, keeping all min-cost paths",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_bshakhovsky.py + cpp/bshakhovsky/driver.cpp",
+   "outputs": [
+    "bshakhovsky_trellis"
+   ],
+   "notes": "MSVC-only C++; built with MinGW g++ 9.2 via a force-included compat header ('abstract' keyword), a 5-line boost::noncopyable stand-in and patches/bshakhovsky.patch (i16 literal, pure-virtual destructor with body, #pragma comment).",
+   "scores_test": {
+    "bshakhovsky_trellis": {
+     "m_gen": 62.63,
+     "m_high": 69.28,
+     "m_soft": 83.39,
+     "m_rec": 75.7,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0164
+    }
+   }
+  },
+  {
+   "id": "opennote",
+   "name": "carlosrmz009/OpenNote (Rust)",
+   "url": "https://github.com/carlosrmz009/OpenNote",
+   "commit": "ed79e489aff3c766b5b42a0779537cc41c8bdb8e",
+   "license": "PolyForm-Noncommercial-1.0.0",
+   "mit_reuse": "no",
+   "approach": "Viterbi over a biomechanical hand model + union of published rule sets (Parncutt, Jacobs, Balliauw, Badgerow; 'consensus' weighting) + optional learned n-gram prior",
+   "family": "rule/cost",
+   "trained_on": "none (rules only; the learned prior is not distributed)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_opennote.py + rust/opennote_pig (driver crate)",
+   "outputs": [
+    "opennote_rules_consensus",
+    "opennote_rules_parncutt",
+    "opennote_rules_jacobs"
+   ],
+   "notes": "Official builds embed models/helios-beta1.8.json (absent from the repo); published models are sealed for official builds. No MSVC linker -> built with the GNU Rust toolchain. Repo is 1.4 GB (videos) -> sparse checkout.",
+   "scores_test": {
+    "opennote_rules_consensus": {
+     "m_gen": 64.17,
+     "m_high": 71.68,
+     "m_soft": 85.63,
+     "m_rec": 77.3,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.4061
+    },
+    "opennote_rules_parncutt": {
+     "m_gen": 64.43,
+     "m_high": 72.17,
+     "m_soft": 85.96,
+     "m_rec": 77.67,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.3518
+    },
+    "opennote_rules_jacobs": {
+     "m_gen": 64.51,
+     "m_high": 71.75,
+     "m_soft": 85.91,
+     "m_rec": 77.62,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.3456
+    }
+   }
+  },
+  {
+   "id": "huukhang",
+   "name": "huukhangapcs/AutomaticPianoFingering",
+   "url": "https://github.com/huukhangapcs/AutomaticPianoFingering",
+   "commit": "2ea024321f320971ac4269ea0e92da6acca17bf2",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "phrase detection + motif/pattern library (Alberti, arpeggios hard-locked) + phrase-scoped Viterbi over 5-finger hand states with 3-D key geometry; 'simple' pipeline = plain physics DP",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_huukhang.py",
+   "outputs": [
+    "huukhang_simple",
+    "huukhang_phraseaware"
+   ],
+   "notes": "README claims 85.53% accuracy (own metric, first 20 PIG files); on the PIG test protocol the full phrase-aware pipeline scores 45.7 and the simple DP 59.9.",
+   "scores_test": {
+    "huukhang_simple": {
+     "m_gen": 59.9,
+     "m_high": 65.47,
+     "m_soft": 80.29,
+     "m_rec": 70.56,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0156
+    },
+    "huukhang_phraseaware": {
+     "m_gen": 45.73,
+     "m_high": 51.43,
+     "m_soft": 64.35,
+     "m_rec": 55.24,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.1934
+    }
+   }
+  },
+  {
+   "id": "valhala",
+   "name": "jpsmith8488/valhala-fingering-solver (ValHaLA)",
+   "url": "https://github.com/jpsmith8488/valhala-fingering-solver",
+   "commit": "16735999f071510015bd170ab781f06c30e5f2d4",
+   "license": "MIT",
+   "mit_reuse": "ok",
+   "approach": "first-order Viterbi over a 14-term physical 'action' (kinetic, topographic, gravity, collision, coupling, key action, adhesion, tempo, rotation, tradition, ...), monophonic and isochronous",
+   "family": "rule/cost",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_valhala.py",
+   "outputs": [
+    "valhala_bilateral",
+    "valhala_mirrored"
+   ],
+   "notes": "Its BilateralSolver fingers the left hand with the right-hand model (no mirroring) -> 31.5. Mirroring LH pitches (our modification) -> 52.3.",
+   "scores_test": {
+    "valhala_bilateral": {
+     "m_gen": 31.51,
+     "m_high": 36.31,
+     "m_soft": 47.41,
+     "m_rec": 40.08,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0735
+    },
+    "valhala_mirrored": {
+     "m_gen": 52.27,
+     "m_high": 58.6,
+     "m_soft": 71.41,
+     "m_rec": 63.31,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0704
+    }
+   }
+  },
+  {
+   "id": "pianofingering_jl",
+   "name": "JuliaMusic/PianoFingering.jl (Gao et al. 2023, Applied Sciences)",
+   "url": "https://github.com/JuliaMusic/PianoFingering.jl",
+   "commit": "d16a9d1bac0d4b752a27dce4421ce2c323af61cb",
+   "license": "GPL-3.0",
+   "mit_reuse": "no",
+   "approach": "model-based RL: each hand split into segments, each segment an MDP with rule-based rewards, solved with Dyna-Q (10,000 episodes) in parallel threads; greedy policy = fingering",
+   "family": "RL (per piece)",
+   "trained_on": "none (per-piece optimisation)",
+   "contaminated": false,
+   "ran": "partial",
+   "wrapper": "run_pianofingering_jl.py + jl/run_pianofingering.jl",
+   "outputs": [
+    "pianofingering_jl"
+   ],
+   "notes": "Portable Julia 1.10.5, PyCall bound to the baselines venv (music21). Its PIG reader takes the hand from the finger SIGN. Crashes on 4/30 test pieces (022, 026, 028, 030: states without any legal action). Score is over the 26 pieces it finished.",
+   "scores_test": {
+    "pianofingering_jl": {
+     "m_gen": 58.42,
+     "m_high": 65.58,
+     "m_soft": 80.49,
+     "m_rec": 72.26,
+     "coverage": "26/30",
+     "mean_seconds_per_piece": 16.0826,
+     "nakamura_fhmm3_on_same_pieces": {
+      "m_gen": 63.11,
+      "m_high": 70.05,
+      "m_soft": 85.67,
+      "m_rec": 77.67
+     },
+     "fingerflow_learned_on_same_pieces": {
+      "m_gen": 67.19,
+      "m_high": 75.37,
+      "m_soft": 90.09,
+      "m_rec": 81.65
+     }
+    }
+   }
+  },
+  {
+   "id": "balliauw_vns",
+   "name": "Balliauw, Herremans et al. 2017 VNS (C++)",
+   "url": "https://bitbucket.org/mballiauw/piano-fingering-vns",
+   "commit": "ad84ad89f99b07f114a56697dfcb6aaf958abde1",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "variable neighbourhood search (swap/change/split-part moves, tabu list, perturbations) over a 15-rule polyphonic cost (Parncutt-derived + chord rules)",
+   "family": "search",
+   "trained_on": "none",
+   "contaminated": false,
+   "ran": "partial (runs, does not optimise)",
+   "wrapper": "run_balliauw_vns.py",
+   "outputs": [
+    "balliauw_vns"
+   ],
+   "notes": "Fragile MusicXML importer (start times recomputed from voice durations, ties ignored); we generate a compatible single-measure MusicXML on a rank time axis (one 'slice' per division, so an absolute grid is very slow). Patch: -seed for reproducibility. The released code (HEAD 2014-11-06, default parameters) does not reach good solutions: on its own bundled example piece2.xml the returned fingering repeats fingers on consecutive different notes (right-hand cost 60877); on PIG 008 the search plateaus after a 7% cost reduction from its random start; with the 'events' time axis rest slices break the slice-adjacency rules (right-hand cost 0). Stopped after 12/30 test pieces (5 min/piece on average), M_gen below random. Nakamura et al. 2020 report 56.7 M_gen for the authors' own run on 14 pieces.",
+   "scores_test": {
+    "balliauw_vns": {
+     "m_gen": 16.93,
+     "m_high": 19.19,
+     "m_soft": 29.64,
+     "m_rec": 21.16,
+     "coverage": "12/30",
+     "mean_seconds_per_piece": 294.1868,
+     "nakamura_fhmm3_on_same_pieces": {
+      "m_gen": 60.11,
+      "m_high": 66.03,
+      "m_soft": 84.5,
+      "m_rec": 75.28
+     },
+     "fingerflow_learned_on_same_pieces": {
+      "m_gen": 64.73,
+      "m_high": 73.06,
+      "m_soft": 89.8,
+      "m_rec": 80.64
+     }
+    }
+   }
+  },
+  {
+   "id": "timkoornstra",
+   "name": "TimKoornstra/automatic-piano-fingering",
+   "url": "https://github.com/TimKoornstra/automatic-piano-fingering",
+   "commit": "88cd37f8fa50cfef4794c97e1dad79e30007d26c",
+   "license": "GPL-3.0",
+   "mit_reuse": "no",
+   "approach": "tabular Q-learning over (prev, current, next note) with a toy reward (distance to the finger's slot in a rigid hand frame)",
+   "family": "RL (per piece)",
+   "trained_on": "none (trained per piece on itself)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_timkoornstra.py",
+   "outputs": [
+    "timkoornstra_qlearning"
+   ],
+   "notes": "RH-only upstream; LH mirrored by us; notes clipped into its Q-table range.",
+   "scores_test": {
+    "timkoornstra_qlearning": {
+     "m_gen": 46.78,
+     "m_high": 51.95,
+     "m_soft": 63.5,
+     "m_rec": 54.17,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 2.5494
+    }
+   }
+  },
+  {
+   "id": "ackyedy",
+   "name": "ackyedy/piano-fingering-analysis",
+   "url": "https://github.com/ackyedy/piano-fingering-analysis",
+   "commit": "ea6f852c9f7d3453776cf81b7f97b16d02deccb0",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "semitone-interval HMMs (order 1, interpolated order 2) + baselines (most frequent finger, direction rule)",
+   "family": "statistical",
+   "trained_on": "PIG 031-150 (trained by our wrapper)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_ackyedy.py",
+   "outputs": [
+    "ackyedy_h1",
+    "ackyedy_h2",
+    "ackyedy_b0",
+    "ackyedy_b1"
+   ],
+   "notes": "Semitone intervals (no black/white key geometry) lose ~2-5 points vs Nakamura's key-position HMMs.",
+   "scores_test": {
+    "ackyedy_h1": {
+     "m_gen": 59.6,
+     "m_high": 66.08,
+     "m_soft": 80.74,
+     "m_rec": 72.62,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0017
+    },
+    "ackyedy_h2": {
+     "m_gen": 59.84,
+     "m_high": 66.59,
+     "m_soft": 80.75,
+     "m_rec": 73.07,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0021
+    },
+    "ackyedy_b0": {
+     "m_gen": 27.6,
+     "m_high": 30.18,
+     "m_soft": 37.06,
+     "m_rec": 30.95,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0002
+    },
+    "ackyedy_b1": {
+     "m_gen": 27.77,
+     "m_high": 31.69,
+     "m_soft": 41.86,
+     "m_rec": 34.45,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0005
+    }
+   }
+  },
+  {
+   "id": "chowmhalvin",
+   "name": "CHOWMHALVIN/Piano-Fingering-Suggestion-Model-with-Intuitive-UI",
+   "url": "https://github.com/CHOWMHALVIN/Piano-Fingering-Suggestion-Model-with-Intuitive-UI",
+   "commit": "0aebdd3b29db1f71d2d2708c298b051727363d91",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "first-order HMM (white/black key distance emission) + hand-size leap limits, chord penalties, scale thumb rules in the Viterbi pass",
+   "family": "statistical",
+   "trained_on": "PIG 031-150 (trained by our wrapper; repo uses a random 80/20 piece split)",
+   "contaminated": false,
+   "ran": "yes",
+   "wrapper": "run_chowmhalvin.py",
+   "outputs": [
+    "chowmhalvin_hmm"
+   ],
+   "notes": "The repository also redistributes PIG v1.2 (used by the datasets agent as a mirror).",
+   "scores_test": {
+    "chowmhalvin_hmm": {
+     "m_gen": 62.11,
+     "m_high": 68.8,
+     "m_soft": 83.28,
+     "m_rec": 74.52,
+     "coverage": "30/30",
+     "mean_seconds_per_piece": 0.0425
+    }
+   }
+  },
+  {
+   "id": "eer",
+   "name": "anandaphan/EER-piano-fingering (Iman & Ahn 2025, Mathematics)",
+   "url": "https://github.com/anandaphan/EER-piano-fingering",
+   "commit": "60298201bf2985f41048e68fe6e0e1b657d87027",
+   "license": "none (all rights reserved)",
+   "mit_reuse": "no",
+   "approach": "per-piece model-free RL: factored dueling DQN with Elite Episode Replay, reward = Parncutt-style rules (3,4,12,...)",
+   "family": "RL (per piece)",
+   "trained_on": "none, but the first chord of each hand is fixed to annotator 1's ground truth (piece_details.npy)",
+   "contaminated": false,
+   "ran": "partial",
+   "wrapper": "(attempted in outputs/_eer_work)",
+   "outputs": [],
+   "notes": "Runs (gym 0.26.2 + torch 2.5.1) but ~28 s per episode on piece 002 -> the default 500 episodes x 2 hands is ~8 h per piece; only 5 test pieces (002,016,017,025,026) are in its bundled table. Stopped after 32 episodes; not scored.",
+   "scores_test": {}
+  }
+ ],
+ "not_run": [
+  {
+   "name": "Srivatsan & Berg-Kirkpatrick 2022, 'Checklist models for improved output fluency in piano fingering prediction' (ISMIR)",
+   "url": "https://arxiv.org/abs/2209.05622",
+   "reason": "No code release found (arXiv, Papers with Code, GitHub search for title/authors)."
+  },
+  {
+   "name": "Moryossef, Elazar & Goldberg 2023, 'At Your Fingertips: Extracting Piano Fingering Instructions from Videos'",
+   "url": "https://arxiv.org/abs/2303.03745",
+   "reason": "No fingering-model code or data link in the paper; the authors' GitHub (AmitMY) only has piano-hands (hand bounding boxes) and meta-scholar (dataset metadata)."
+  },
+  {
+   "name": "JeffreyZhou798/Piano-Fingering-Generator-A09 (and A03-A08)",
+   "url": "https://github.com/JeffreyZhou798/Piano-Fingering-Generator-A09",
+   "license": "GPL-3.0",
+   "reason": "TypeScript/Next.js browser app = Dyna-Q port of PianoFingering.jl + lumikey's Transformer as prior; its ONNX file is byte-identical (git blob 11ed03b5...) to lumikey's, which was trained on all PIG files, so any PIG test score would be contaminated; both components are benchmarked separately."
+  },
+  {
+   "name": "monde-lointain/piano-fingering (C++20, ILS + beam search, MusicXML)",
+   "url": "https://github.com/monde-lointain/piano-fingering",
+   "reason": "Needs a C++20 compiler (defaulted comparisons, <filesystem>, <thread>) and CMake FetchContent; only MinGW.org g++ 9.2 is available and MSVC has no VC toolset. Same family as the Balliauw VNS."
+  },
+  {
+   "name": "dlegs/Optimal-Piano-Fingering-Algorithm (C, Hart et al. DP)",
+   "url": "https://github.com/dlegs/Optimal-Piano-Fingering-Algorithm",
+   "reason": "Prints only the optimal cost, never the fingering (trace code commented out); intervals > 12 index out of bounds; Hart's model is benchmarked via pydactyl."
+  },
+  {
+   "name": "guwalgiya/Piano-Fingering-Generators",
+   "url": "https://github.com/guwalgiya/Piano-Fingering-Generators",
+   "reason": "Experimental TensorFlow 2.0 / Python 3.7 windowed BiLSTM scripts with the pipeline commented out and hard-coded dataset paths; no weights. Same idea as Nakamura's LSTM baseline (61.3 in the paper)."
+  },
+  {
+   "name": "quadpixels/fingeringyonebayashiijcai07 (Yonebayashi et al. 2007 HMM replication)",
+   "url": "https://github.com/quadpixels/fingeringyonebayashiijcai07",
+   "reason": "Python 2 course-project script, right hand only, trains on passages embedded in the code."
+  },
+  {
+   "name": "PRamoneda/RL_PianoFingering (NeurIPS 2020 workshop)",
+   "url": "https://github.com/PRamoneda/RL_PianoFingering",
+   "license": "MIT",
+   "reason": "Five hard-coded toy experiments (tabular Q-learning on single test .mxl files), no general input path."
+  },
+  {
+   "name": "PRamoneda/APF_eval",
+   "url": "https://github.com/PRamoneda/APF_eval",
+   "reason": "pybind11 wrapper of Nakamura's evaluation code, not a fingering model."
+  },
+  {
+   "name": "PRamoneda/difficulty-prediction-CIPI, CIPI_ismir, Mikrokosmos-difficulty, PianoVAM-Code",
+   "url": "https://github.com/PRamoneda",
+   "reason": "Difficulty / video work that consumes ArGNN fingering features or video-derived fingering; the fingering model itself is Automatic-Piano-Fingering (benchmarked)."
+  },
+  {
+   "name": "pianoplayer derivatives: tiefenb/piano-vision-automatic-fingering-assignment (JS), OclefInc/piano-fingering-web (hard fork), Yannxinn/piano-score-fingering (agent skill), JuliaMusic/PianoFingering.jl's predecessor ports",
+   "url": "https://github.com/tiefenb/piano-vision-automatic-fingering-assignment",
+   "reason": "Ports of pianoplayer's hand model for other inputs (Piano Vision JSON, Flask app, OMR pipeline); represented by pianoplayer and the MuseScore plugin."
+  },
+  {
+   "name": "blakewest/performer (JavaScript original of Kanma's port)",
+   "url": "https://github.com/blakewest/performer",
+   "reason": "Same algorithm and cost table as Kanma/piano_fingering (benchmarked); no license."
+  },
+  {
+   "name": "pudelos/piano-fingering-solver",
+   "url": "https://github.com/pudelos/piano-fingering-solver",
+   "license": "MIT",
+   "reason": "Solver not implemented yet (README checklist: 'Fingering solver [ ]'), only MusicXML import/export."
+  },
+  {
+   "name": "Notebook / student projects trained on PIG with their own splits: sutkucanverdi/piano-fingering-ml, LunaticGhoulPiano/AutomaticPianoFingeringEstimationbasedonMachineLearning (MIT), ilsotn/piano-fingering-estimation, Anastasia1707/piano-fingering, HACkerrr121/KeyGenius, chrsztz/xlpro-model, m4cy/finger-finagler, OrigamiDream/piano-fingering-classifier, to-osaki/survey_piano_fingering, Jerschow/PianoFingeringGenerator",
+   "url": "https://github.com/search?q=piano+fingering",
+   "reason": "Jupyter notebooks without a reusable inference entry point and/or unknown train/test splits over PIG; same model families (BiLSTM/CNN/HMM) as benchmarked repos."
+  },
+  {
+   "name": "Small rule/DP scripts: amackenzie1/PianoFingering, boramarasli/piano-fingering-suggester, IrinaLee521/Piano-Fingering, Traelx/Piano-Fingering-Suggestor, serenado/PianoFingeringProject, mpg/pypiano-fingers (WTFPL), Kheops411/piano_fingering, neewamp/AutomaticPianoFingerings, Kobe972/piano_fingering_generator, kashizui/fingerings (2012, Python 2 + LilyPond), Lteins/Piano-Fingering-Computation, hanrodz/fingoptim (empty), akench/PianoFingeringGenerator & Blanel/Piano-Fingering (Java), Optimal-Piano-MQP/OptimalFingeringGenerator (Parncutt DP via MuseScore 4), ExxLiang193/MusicMark (RNN, GPL-3.0), ririanbo/thesis-Fingering-Estimation-Algorithm",
+   "url": "https://github.com/search?q=piano+fingering",
+   "reason": "Right-hand-only or monophonic toy DPs, MusicXML/GUI-bound apps or unfinished code; their ideas are subsumed by the Parncutt/Hart/Kanma/pianoplayer baselines that were run."
+  },
+  {
+   "name": "Not fingering estimators: lemonadedw/BACHprop (hand separation), miguelcarballo/MusicXML2PIG (converter), Edisondiaz19831/monophonic-piano-fingering-dataset (data), kanex02/piano_fingering_detector & sjcantor/piano-hands-technique-extraction (video), xupei0610/music & hshi74/piano_dexterity & robopianist forks (robot/hand control using PIG fingerings), matthewliuswims/povnet (transcription data incl. Nakamura's fingering engine headers), HugoCheung1210 (tutoring app), nomu224/piano-fingering-checker, TomMeyer & BapiGso & apsjohn (Piano Vision tooling), Ap13Crow/piano-fingering (no code)",
+   "url": "https://github.com/search?q=piano+fingering",
+   "reason": "Out of scope (no score-to-fingering model) or no code."
+  }
+ ]
+}

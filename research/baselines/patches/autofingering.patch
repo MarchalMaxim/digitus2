@@ -1,0 +1,23 @@
+diff --git a/autofingering/hand.py b/autofingering/hand.py
+index 9e160e9..a769f14 100644
+--- a/autofingering/hand.py
++++ b/autofingering/hand.py
+@@ -164,15 +164,15 @@ class Hand:
+             if (i, -1) not in count_df.index:
+                 print((i, -1))
+                 row = pd.Series(0, index=count_df.columns, name=(i, -1))
+-                count_df = count_df.append(row)
++                count_df = pd.concat([count_df, row.to_frame().T])  # digitus2 patch: DataFrame.append removed in pandas 2
+             if (i, 0) not in count_df.index:
+                 print((i, 0))
+                 row = pd.Series(0, index=count_df.columns, name=(i, 0))
+-                count_df = count_df.append(row)
++                count_df = pd.concat([count_df, row.to_frame().T])  # digitus2 patch: DataFrame.append removed in pandas 2
+             if (i, 1) not in count_df.index:
+                 print((i, 1))
+                 row = pd.Series(0, index=count_df.columns, name=(i, 1))
+-                count_df = count_df.append(row)
++                count_df = pd.concat([count_df, row.to_frame().T])  # digitus2 patch: DataFrame.append removed in pandas 2
+ 
+         prob_df = (count_df + 1).apply(self._normalize, axis=0)
+ 

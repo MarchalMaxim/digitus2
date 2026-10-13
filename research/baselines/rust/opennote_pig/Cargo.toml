@@ -1,0 +1,18 @@
+[package]
+name = "opennote_pig"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Batch PIG driver for the OpenNote fingering engine (rules only; benchmarking)."
+# OpenNote is PolyForm-Noncommercial-1.0.0: this driver only links it for benchmarking.
+
+[dependencies]
+on-train = { path = "../../third_party/carlosrmz009__OpenNote/crates/on-train" }
+on-fingering = { path = "../../third_party/carlosrmz009__OpenNote/crates/on-fingering" }
+on-hand = { path = "../../third_party/carlosrmz009__OpenNote/crates/on-hand" }
+anyhow = "1.0"
+
+[workspace]
+
+[profile.release]
+opt-level = 3

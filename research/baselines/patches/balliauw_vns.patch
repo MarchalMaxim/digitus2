@@ -1,0 +1,30 @@
+diff --git a/main.cpp b/main.cpp
+index ec7a24c..611f0a2 100644
+--- a/main.cpp
++++ b/main.cpp
+@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
+ 	int firstdescent = 0; // First descend on (1) or off (0), using steepest descend then
+ 	string bestand = "piece2.xml"; // contains file name
+ 	bool experimentmode = false; // if true: then no cout print
++	int fixedseed = -1; // digitus2 patch: -seed N makes the random restarts reproducible
+ 	int allowedworsen = 200; // number of iterations as % of tabu size //number of iterations in tabu with worse result (MINIMAL = 1! ANDERS STEEDS JUMPEN!!)
+ 
+ 	int tabupercent = tabupercentage * 5;
+@@ -98,6 +99,9 @@ int main(int argc, char *argv[]) {
+ 				else if (argument == "-allowedworsener") {
+ 					allowedworsen = atoi(nextargument.c_str());
+ 				}
++				else if (argument == "-seed") { // digitus2 patch: reproducible runs
++					fixedseed = atoi(nextargument.c_str());
++				}
+ 		}
+ 		numarg++;
+ 	}
+@@ -113,6 +117,7 @@ int main(int argc, char *argv[]) {
+ 	timeval t1;
+ 	gettimeofday(&t1, NULL);
+ 	srand(t1.tv_usec * t1.tv_sec);
++	if (fixedseed >= 0) srand(fixedseed); // digitus2 patch
+ 
+ 
+ 	// probleem: todo divspermaat maatverandering.

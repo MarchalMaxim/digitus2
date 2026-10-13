@@ -1,0 +1,30 @@
+diff --git a/pydactyl/dactyler/Dactyler.py b/pydactyl/dactyler/Dactyler.py
+index 92b9d0e..afbc4b8 100644
+--- a/pydactyl/dactyler/Dactyler.py
++++ b/pydactyl/dactyler/Dactyler.py
+@@ -46,8 +46,10 @@ class Dactyler(ABC):
+     def __init__(self, segmenter=None, segment_combiner="normal", staff_combiner="naive", version=None):
+         self._version = version
+         self._d_corpus = None
+-        timestamp = datetime.now().isoformat()
+-        self._log_file_path = '/tmp/dactyler_' + self.__class__.__name__ + '_' + timestamp + '.log'
++        timestamp = datetime.now().isoformat().replace(':', '-')  # digitus2 patch: ':' is invalid on Windows
++        import tempfile, uuid  # digitus2 patch: '/tmp' does not exist on Windows; unique name per instance
++        self._log_file_path = os.path.join(tempfile.gettempdir(), 'dactyler_' + self.__class__.__name__ + '_' +
++                                           timestamp + '_' + uuid.uuid4().hex[:8] + '.log')
+         self._log = open(self._log_file_path, 'a')
+         self._segmenter = segmenter
+         #_ self._key_positions = Dactyler.horizontal_key_positions()
+diff --git a/pydactyl/dactyler/Parncutt.py b/pydactyl/dactyler/Parncutt.py
+index f2520d4..12f5298 100644
+--- a/pydactyl/dactyler/Parncutt.py
++++ b/pydactyl/dactyler/Parncutt.py
+@@ -1445,7 +1445,7 @@ class Parncutt(D.TrainedDactyler):
+         cost = 0
+         if not trigram.midi_1:
+             return 0
+-        if trigram.midi_1 == trigram.midi_2 and trigram.handed_finger_1 != trigram.handed_finger_2:
++        if trigram.midi_1 == trigram.midi_2 and trigram.handed_digit_1 != trigram.handed_digit_2:  # digitus2 patch: was handed_finger_* (AttributeError)
+             cost = 1
+         return cost
+ 

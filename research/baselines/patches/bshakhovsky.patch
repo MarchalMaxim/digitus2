@@ -1,0 +1,30 @@
+diff --git a/PianoFingering/ICostsCalculator.h b/PianoFingering/ICostsCalculator.h
+index 8663513..2dd409e 100644
+--- a/PianoFingering/ICostsCalculator.h
++++ b/PianoFingering/ICostsCalculator.h
+@@ -12,7 +12,7 @@ public:
+ 		const std::pair<int16_t, char>& note2,
+ 		const std::pair<int16_t, char>& note3) const = 0;
+ 
+-	virtual ~ICostsCalculator() = 0 {}
++	virtual ~ICostsCalculator() {} // digitus2 patch: "= 0 {}" (pure virtual with inline body) is MSVC-only
+ protected:
+ 	ICostsCalculator() = default;
+ };
+\ No newline at end of file
+diff --git a/TrellisGraph_Facade.h b/TrellisGraph_Facade.h
+index 072c5d8..55e7d12 100644
+--- a/TrellisGraph_Facade.h
++++ b/TrellisGraph_Facade.h
+@@ -1,9 +1,9 @@
+ # pragma once
+-# pragma comment(lib, "PianoFingering.lib")
++// digitus2 patch: (MSVC-only) # pragma comment(lib, "PianoFingering.lib")
+ 
+ class TrellisGraph
+ {
+-	static constexpr auto NOTE_MI = 136i16;
++	static constexpr int16_t NOTE_MI = 136; // digitus2 patch: MSVC-only literal suffix i16
+ 					// note "mi" for left hand is mirrow-equivalent to note "do" for right hand
+ 	TrellisGraph() = delete;
+ public:

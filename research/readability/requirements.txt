@@ -1,0 +1,9 @@
+# digitus2 readability study (Python 3.11). Install into research/.venv-readability:
+#   python -m venv research/.venv-readability
+#   research/.venv-readability/Scripts/python.exe -m pip install -r research/readability/requirements.txt
+#   echo <abs path to research/> > research/.venv-readability/Lib/site-packages/digitus2_research.pth
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.8.0
+python-ly==0.9.10      # only for enrich_mutopia.py (re-runs fingering_eval's LilyPond interpreter)
+pytest==9.1.1

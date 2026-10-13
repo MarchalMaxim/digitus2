@@ -1,0 +1,1340 @@
+{
+ "command": "OMP_NUM_THREADS=2 research/.venv-readability/Scripts/python.exe -X utf8 research/readability/eval_player.py",
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "hide_fraction": 0.2,
+ "hidden_per_hand": "int(frac * n_printed_in_hand + 0.5), sampled with random.Random(seed).sample over sorted printed idx, parts in corpus.load_all() order, RH then LH",
+ "corpus": {
+  "teaching": {
+   "parts": 203,
+   "notes": 66353,
+   "printed": 21460
+  },
+  "concert": {
+   "parts": 18,
+   "notes": 31790,
+   "printed": 6581
+  },
+  "other": {
+   "parts": 65,
+   "notes": 94916,
+   "printed": 8142
+  },
+  "library": {
+   "parts": 8,
+   "notes": 3457,
+   "printed": 751
+  },
+  "all": {
+   "parts": 294,
+   "notes": 196516,
+   "printed": 36934
+  }
+ },
+ "models": {
+  "copy_previous": "every unprinted note gets the finger of the last visible digit of the hand",
+  "rules": "forward reader R1 repeat, R2 step, R3 position from last visible digit, R4 chord fill (steps = round_half_away_from_zero(semitones / 2))",
+  "rules_plus_textbook": "rules, with confirmed textbook scale/arpeggio/chromatic runs taking precedence over R1-R3 for notes inside a matched run (>= 4 single-note events)",
+  "rules_column_steps": "sensitivity only: rules with steps = rounded white-key column difference"
+ },
+ "metric_definitions": {
+  "coverage": "inferred / hidden",
+  "accuracy": "correct / inferred",
+  "reconstruction": "correct / hidden"
+ },
+ "hide20": {
+  "copy_previous": {
+   "teaching": {
+    "n_hidden": {
+     "mean": 4295.0,
+     "min": 4295,
+     "max": 4295
+    },
+    "coverage": {
+     "mean": 0.9771,
+     "min": 0.9744,
+     "max": 0.9802
+    },
+    "accuracy": {
+     "mean": 0.0927,
+     "min": 0.0872,
+     "max": 0.0962
+    },
+    "reconstruction": {
+     "mean": 0.0906,
+     "min": 0.0854,
+     "max": 0.0941
+    }
+   },
+   "concert": {
+    "n_hidden": {
+     "mean": 1316.0,
+     "min": 1316,
+     "max": 1316
+    },
+    "coverage": {
+     "mean": 0.9941,
+     "min": 0.9916,
+     "max": 0.9962
+    },
+    "accuracy": {
+     "mean": 0.1267,
+     "min": 0.1183,
+     "max": 0.1341
+    },
+    "reconstruction": {
+     "mean": 0.126,
+     "min": 0.1178,
+     "max": 0.133
+    }
+   },
+   "other": {
+    "n_hidden": {
+     "mean": 1625.0,
+     "min": 1625,
+     "max": 1625
+    },
+    "coverage": {
+     "mean": 0.983,
+     "min": 0.9809,
+     "max": 0.9865
+    },
+    "accuracy": {
+     "mean": 0.1527,
+     "min": 0.1443,
+     "max": 0.1589
+    },
+    "reconstruction": {
+     "mean": 0.1502,
+     "min": 0.1415,
+     "max": 0.1563
+    }
+   },
+   "library": {
+    "n_hidden": {
+     "mean": 149.0,
+     "min": 149,
+     "max": 149
+    },
+    "coverage": {
+     "mean": 0.9732,
+     "min": 0.9463,
+     "max": 0.9866
+    },
+    "accuracy": {
+     "mean": 0.1645,
+     "min": 0.1224,
+     "max": 0.2128
+    },
+    "reconstruction": {
+     "mean": 0.1597,
+     "min": 0.1208,
+     "max": 0.2013
+    }
+   },
+   "all": {
+    "n_hidden": {
+     "mean": 7385.0,
+     "min": 7385,
+     "max": 7385
+    },
+    "coverage": {
+     "mean": 0.9813,
+     "min": 0.9805,
+     "max": 0.9823
+    },
+    "accuracy": {
+     "mean": 0.1135,
+     "min": 0.1112,
+     "max": 0.1155
+    },
+    "reconstruction": {
+     "mean": 0.1114,
+     "min": 0.1091,
+     "max": 0.1133
+    }
+   }
+  },
+  "rules": {
+   "teaching": {
+    "n_hidden": {
+     "mean": 4295.0,
+     "min": 4295,
+     "max": 4295
+    },
+    "coverage": {
+     "mean": 0.8003,
+     "min": 0.797,
+     "max": 0.8063
+    },
+    "accuracy": {
+     "mean": 0.7139,
+     "min": 0.7093,
+     "max": 0.7167
+    },
+    "reconstruction": {
+     "mean": 0.5714,
+     "min": 0.5653,
+     "max": 0.5763
+    }
+   },
+   "concert": {
+    "n_hidden": {
+     "mean": 1316.0,
+     "min": 1316,
+     "max": 1316
+    },
+    "coverage": {
+     "mean": 0.685,
+     "min": 0.6733,
+     "max": 0.6938
+    },
+    "accuracy": {
+     "mean": 0.4348,
+     "min": 0.4142,
+     "max": 0.4604
+    },
+    "reconstruction": {
+     "mean": 0.2979,
+     "min": 0.2789,
+     "max": 0.3184
+    }
+   },
+   "other": {
+    "n_hidden": {
+     "mean": 1625.0,
+     "min": 1625,
+     "max": 1625
+    },
+    "coverage": {
+     "mean": 0.6816,
+     "min": 0.6695,
+     "max": 0.7046
+    },
+    "accuracy": {
+     "mean": 0.4938,
+     "min": 0.4836,
+     "max": 0.5074
+    },
+    "reconstruction": {
+     "mean": 0.3366,
+     "min": 0.3262,
+     "max": 0.3575
+    }
+   },
+   "library": {
+    "n_hidden": {
+     "mean": 149.0,
+     "min": 149,
+     "max": 149
+    },
+    "coverage": {
+     "mean": 0.6886,
+     "min": 0.6577,
+     "max": 0.7248
+    },
+    "accuracy": {
+     "mean": 0.4638,
+     "min": 0.4206,
+     "max": 0.5093
+    },
+    "reconstruction": {
+     "mean": 0.3195,
+     "min": 0.302,
+     "max": 0.3691
+    }
+   },
+   "all": {
+    "n_hidden": {
+     "mean": 7385.0,
+     "min": 7385,
+     "max": 7385
+    },
+    "coverage": {
+     "mean": 0.7514,
+     "min": 0.7466,
+     "max": 0.7555
+    },
+    "accuracy": {
+     "mean": 0.62,
+     "min": 0.6139,
+     "max": 0.626
+    },
+    "reconstruction": {
+     "mean": 0.4659,
+     "min": 0.4596,
+     "max": 0.4722
+    }
+   }
+  },
+  "rules_plus_textbook": {
+   "teaching": {
+    "n_hidden": {
+     "mean": 4295.0,
+     "min": 4295,
+     "max": 4295
+    },
+    "coverage": {
+     "mean": 0.822,
+     "min": 0.8163,
+     "max": 0.8291
+    },
+    "accuracy": {
+     "mean": 0.718,
+     "min": 0.7139,
+     "max": 0.7207
+    },
+    "reconstruction": {
+     "mean": 0.5902,
+     "min": 0.5828,
+     "max": 0.5965
+    }
+   },
+   "concert": {
+    "n_hidden": {
+     "mean": 1316.0,
+     "min": 1316,
+     "max": 1316
+    },
+    "coverage": {
+     "mean": 0.6992,
+     "min": 0.69,
+     "max": 0.7059
+    },
+    "accuracy": {
+     "mean": 0.4442,
+     "min": 0.4218,
+     "max": 0.4672
+    },
+    "reconstruction": {
+     "mean": 0.3106,
+     "min": 0.291,
+     "max": 0.3298
+    }
+   },
+   "other": {
+    "n_hidden": {
+     "mean": 1625.0,
+     "min": 1625,
+     "max": 1625
+    },
+    "coverage": {
+     "mean": 0.7106,
+     "min": 0.6978,
+     "max": 0.7397
+    },
+    "accuracy": {
+     "mean": 0.5077,
+     "min": 0.5009,
+     "max": 0.5141
+    },
+    "reconstruction": {
+     "mean": 0.3609,
+     "min": 0.3495,
+     "max": 0.3803
+    }
+   },
+   "library": {
+    "n_hidden": {
+     "mean": 149.0,
+     "min": 149,
+     "max": 149
+    },
+    "coverage": {
+     "mean": 0.7221,
+     "min": 0.6913,
+     "max": 0.745
+    },
+    "accuracy": {
+     "mean": 0.5505,
+     "min": 0.5045,
+     "max": 0.5818
+    },
+    "reconstruction": {
+     "mean": 0.3973,
+     "min": 0.3758,
+     "max": 0.4295
+    }
+   },
+   "all": {
+    "n_hidden": {
+     "mean": 7385.0,
+     "min": 7385,
+     "max": 7385
+    },
+    "coverage": {
+     "mean": 0.7736,
+     "min": 0.768,
+     "max": 0.7797
+    },
+    "accuracy": {
+     "mean": 0.6282,
+     "min": 0.6225,
+     "max": 0.6316
+    },
+    "reconstruction": {
+     "mean": 0.486,
+     "min": 0.4792,
+     "max": 0.4925
+    }
+   }
+  },
+  "rules_column_steps": {
+   "teaching": {
+    "n_hidden": {
+     "mean": 4295.0,
+     "min": 4295,
+     "max": 4295
+    },
+    "coverage": {
+     "mean": 0.7548,
+     "min": 0.7502,
+     "max": 0.7607
+    },
+    "accuracy": {
+     "mean": 0.6826,
+     "min": 0.6787,
+     "max": 0.6859
+    },
+    "reconstruction": {
+     "mean": 0.5153,
+     "min": 0.5122,
+     "max": 0.5204
+    }
+   },
+   "concert": {
+    "n_hidden": {
+     "mean": 1316.0,
+     "min": 1316,
+     "max": 1316
+    },
+    "coverage": {
+     "mean": 0.6362,
+     "min": 0.6269,
+     "max": 0.6444
+    },
+    "accuracy": {
+     "mean": 0.4095,
+     "min": 0.3917,
+     "max": 0.4335
+    },
+    "reconstruction": {
+     "mean": 0.2605,
+     "min": 0.25,
+     "max": 0.2751
+    }
+   },
+   "other": {
+    "n_hidden": {
+     "mean": 1625.0,
+     "min": 1625,
+     "max": 1625
+    },
+    "coverage": {
+     "mean": 0.6278,
+     "min": 0.6092,
+     "max": 0.6468
+    },
+    "accuracy": {
+     "mean": 0.4442,
+     "min": 0.4341,
+     "max": 0.4539
+    },
+    "reconstruction": {
+     "mean": 0.2789,
+     "min": 0.272,
+     "max": 0.2935
+    }
+   },
+   "library": {
+    "n_hidden": {
+     "mean": 149.0,
+     "min": 149,
+     "max": 149
+    },
+    "coverage": {
+     "mean": 0.6443,
+     "min": 0.5973,
+     "max": 0.7047
+    },
+    "accuracy": {
+     "mean": 0.4558,
+     "min": 0.3939,
+     "max": 0.5048
+    },
+    "reconstruction": {
+     "mean": 0.294,
+     "min": 0.2617,
+     "max": 0.3557
+    }
+   },
+   "all": {
+    "n_hidden": {
+     "mean": 7385.0,
+     "min": 7385,
+     "max": 7385
+    },
+    "coverage": {
+     "mean": 0.7035,
+     "min": 0.6979,
+     "max": 0.7083
+    },
+    "accuracy": {
+     "mean": 0.5876,
+     "min": 0.5827,
+     "max": 0.5946
+    },
+    "reconstruction": {
+     "mean": 0.4134,
+     "min": 0.4102,
+     "max": 0.4184
+    }
+   }
+  }
+ },
+ "hide20_by_rule_all_groups": {
+  "copy_previous": {
+   "copy": {
+    "n": 36236,
+    "correct": 4114,
+    "share": 0.9813,
+    "accuracy": 0.1135
+   },
+   "none": {
+    "n": 689,
+    "correct": 0,
+    "share": 0.0187,
+    "accuracy": null
+   }
+  },
+  "rules": {
+   "R1": {
+    "n": 1613,
+    "correct": 677,
+    "share": 0.0437,
+    "accuracy": 0.4197
+   },
+   "R2": {
+    "n": 8556,
+    "correct": 6056,
+    "share": 0.2317,
+    "accuracy": 0.7078
+   },
+   "R3": {
+    "n": 10406,
+    "correct": 5625,
+    "share": 0.2818,
+    "accuracy": 0.5406
+   },
+   "R4": {
+    "n": 5260,
+    "correct": 3821,
+    "share": 0.1425,
+    "accuracy": 0.7264
+   },
+   "R4_ref": {
+    "n": 1910,
+    "correct": 1024,
+    "share": 0.0517,
+    "accuracy": 0.5361
+   },
+   "none": {
+    "n": 9180,
+    "correct": 0,
+    "share": 0.2486,
+    "accuracy": null
+   }
+  },
+  "rules_plus_textbook": {
+   "textbook": {
+    "n": 2940,
+    "correct": 2094,
+    "share": 0.0796,
+    "accuracy": 0.7122
+   },
+   "R1": {
+    "n": 1533,
+    "correct": 632,
+    "share": 0.0415,
+    "accuracy": 0.4123
+   },
+   "R2": {
+    "n": 7072,
+    "correct": 4994,
+    "share": 0.1915,
+    "accuracy": 0.7062
+   },
+   "R3": {
+    "n": 9850,
+    "correct": 5381,
+    "share": 0.2668,
+    "accuracy": 0.5463
+   },
+   "R4": {
+    "n": 5260,
+    "correct": 3821,
+    "share": 0.1425,
+    "accuracy": 0.7264
+   },
+   "R4_ref": {
+    "n": 1910,
+    "correct": 1024,
+    "share": 0.0517,
+    "accuracy": 0.5361
+   },
+   "none": {
+    "n": 8360,
+    "correct": 0,
+    "share": 0.2264,
+    "accuracy": null
+   }
+  }
+ },
+ "hide20_by_distance_since_visible": {
+  "copy_previous": {
+   "0": {
+    "n": 6891,
+    "inferred": 6781,
+    "correct": 360,
+    "coverage": 0.984,
+    "accuracy": 0.0531
+   },
+   "1": {
+    "n": 15100,
+    "inferred": 15100,
+    "correct": 510,
+    "coverage": 1.0,
+    "accuracy": 0.0338
+   },
+   "2": {
+    "n": 4510,
+    "inferred": 4510,
+    "correct": 846,
+    "coverage": 1.0,
+    "accuracy": 0.1876
+   },
+   "3": {
+    "n": 2612,
+    "inferred": 2612,
+    "correct": 564,
+    "coverage": 1.0,
+    "accuracy": 0.2159
+   },
+   "4": {
+    "n": 2020,
+    "inferred": 2020,
+    "correct": 566,
+    "coverage": 1.0,
+    "accuracy": 0.2802
+   },
+   "5-8": {
+    "n": 3191,
+    "inferred": 3191,
+    "correct": 764,
+    "coverage": 1.0,
+    "accuracy": 0.2394
+   },
+   "9-16": {
+    "n": 1203,
+    "inferred": 1203,
+    "correct": 297,
+    "coverage": 1.0,
+    "accuracy": 0.2469
+   },
+   "17+": {
+    "n": 819,
+    "inferred": 819,
+    "correct": 207,
+    "coverage": 1.0,
+    "accuracy": 0.2527
+   },
+   "none": {
+    "n": 579,
+    "inferred": 0,
+    "correct": 0,
+    "coverage": 0.0,
+    "accuracy": null
+   }
+  },
+  "rules": {
+   "0": {
+    "n": 6891,
+    "inferred": 5260,
+    "correct": 3821,
+    "coverage": 0.7633,
+    "accuracy": 0.7264
+   },
+   "1": {
+    "n": 15100,
+    "inferred": 12173,
+    "correct": 7657,
+    "coverage": 0.8062,
+    "accuracy": 0.629
+   },
+   "2": {
+    "n": 4510,
+    "inferred": 3474,
+    "correct": 2031,
+    "coverage": 0.7703,
+    "accuracy": 0.5846
+   },
+   "3": {
+    "n": 2612,
+    "inferred": 2005,
+    "correct": 1101,
+    "coverage": 0.7676,
+    "accuracy": 0.5491
+   },
+   "4": {
+    "n": 2020,
+    "inferred": 1449,
+    "correct": 877,
+    "coverage": 0.7173,
+    "accuracy": 0.6052
+   },
+   "5-8": {
+    "n": 3191,
+    "inferred": 2239,
+    "correct": 1180,
+    "coverage": 0.7017,
+    "accuracy": 0.527
+   },
+   "9-16": {
+    "n": 1203,
+    "inferred": 744,
+    "correct": 357,
+    "coverage": 0.6185,
+    "accuracy": 0.4798
+   },
+   "17+": {
+    "n": 819,
+    "inferred": 401,
+    "correct": 179,
+    "coverage": 0.4896,
+    "accuracy": 0.4464
+   },
+   "none": {
+    "n": 579,
+    "inferred": 0,
+    "correct": 0,
+    "coverage": 0.0,
+    "accuracy": null
+   }
+  },
+  "rules_plus_textbook": {
+   "0": {
+    "n": 6891,
+    "inferred": 5260,
+    "correct": 3821,
+    "coverage": 0.7633,
+    "accuracy": 0.7264
+   },
+   "1": {
+    "n": 15100,
+    "inferred": 12503,
+    "correct": 7961,
+    "coverage": 0.828,
+    "accuracy": 0.6367
+   },
+   "2": {
+    "n": 4510,
+    "inferred": 3576,
+    "correct": 2115,
+    "coverage": 0.7929,
+    "accuracy": 0.5914
+   },
+   "3": {
+    "n": 2612,
+    "inferred": 2123,
+    "correct": 1214,
+    "coverage": 0.8128,
+    "accuracy": 0.5718
+   },
+   "4": {
+    "n": 2020,
+    "inferred": 1524,
+    "correct": 944,
+    "coverage": 0.7545,
+    "accuracy": 0.6194
+   },
+   "5-8": {
+    "n": 3191,
+    "inferred": 2349,
+    "correct": 1289,
+    "coverage": 0.7361,
+    "accuracy": 0.5487
+   },
+   "9-16": {
+    "n": 1203,
+    "inferred": 771,
+    "correct": 382,
+    "coverage": 0.6409,
+    "accuracy": 0.4955
+   },
+   "17+": {
+    "n": 819,
+    "inferred": 429,
+    "correct": 194,
+    "coverage": 0.5238,
+    "accuracy": 0.4522
+   },
+   "none": {
+    "n": 579,
+    "inferred": 30,
+    "correct": 26,
+    "coverage": 0.0518,
+    "accuracy": 0.8667
+   }
+  }
+ },
+ "hide20_confusion_rules": {
+  "rows": "editor finger 1..5",
+  "cols": "inferred finger 1..5",
+  "counts": [
+   [
+    2907,
+    770,
+    689,
+    455,
+    243
+   ],
+   [
+    1323,
+    3737,
+    1097,
+    326,
+    156
+   ],
+   [
+    277,
+    759,
+    4040,
+    1055,
+    424
+   ],
+   [
+    108,
+    318,
+    833,
+    3577,
+    722
+   ],
+   [
+    62,
+    133,
+    316,
+    476,
+    2942
+   ]
+  ]
+ },
+ "hide20_confusion_rules_plus_textbook": {
+  "rows": "editor finger 1..5",
+  "cols": "inferred finger 1..5",
+  "counts": [
+   [
+    3304,
+    761,
+    661,
+    313,
+    206
+   ],
+   [
+    1267,
+    3793,
+    1174,
+    420,
+    152
+   ],
+   [
+    262,
+    745,
+    4302,
+    1045,
+    423
+   ],
+   [
+    214,
+    331,
+    837,
+    3612,
+    689
+   ],
+   [
+    119,
+    209,
+    314,
+    477,
+    2935
+   ]
+  ]
+ },
+ "hide20_worst_contexts_rules_by_accuracy": [
+  {
+   "context": "leap_bin",
+   "value": "over_octave",
+   "n": 425,
+   "inferred": 101,
+   "correct": 46,
+   "coverage": 0.2376,
+   "accuracy": 0.4554
+  },
+  {
+   "context": "leap_bin",
+   "value": "fourth_fifth",
+   "n": 6622,
+   "inferred": 4700,
+   "correct": 2448,
+   "coverage": 0.7098,
+   "accuracy": 0.5209
+  },
+  {
+   "context": "leap_bin",
+   "value": "repeat",
+   "n": 3413,
+   "inferred": 2904,
+   "correct": 1548,
+   "coverage": 0.8509,
+   "accuracy": 0.5331
+  },
+  {
+   "context": "repeated",
+   "value": "1",
+   "n": 3413,
+   "inferred": 2904,
+   "correct": 1548,
+   "coverage": 0.8509,
+   "accuracy": 0.5331
+  },
+  {
+   "context": "leap_bin",
+   "value": "sixth_octave",
+   "n": 3277,
+   "inferred": 1173,
+   "correct": 631,
+   "coverage": 0.3579,
+   "accuracy": 0.5379
+  },
+  {
+   "context": "since_printed",
+   "value": "9+",
+   "n": 1856,
+   "inferred": 1092,
+   "correct": 596,
+   "coverage": 0.5884,
+   "accuracy": 0.5458
+  },
+  {
+   "context": "density_bin",
+   "value": "ge8",
+   "n": 5615,
+   "inferred": 4178,
+   "correct": 2324,
+   "coverage": 0.7441,
+   "accuracy": 0.5562
+  },
+  {
+   "context": "black",
+   "value": "1",
+   "n": 10463,
+   "inferred": 7347,
+   "correct": 4115,
+   "coverage": 0.7022,
+   "accuracy": 0.5601
+  },
+  {
+   "context": "since_printed",
+   "value": "5-8",
+   "n": 3046,
+   "inferred": 2187,
+   "correct": 1261,
+   "coverage": 0.718,
+   "accuracy": 0.5766
+  },
+  {
+   "context": "density_bin",
+   "value": "4to8",
+   "n": 15946,
+   "inferred": 11781,
+   "correct": 6801,
+   "coverage": 0.7388,
+   "accuracy": 0.5773
+  }
+ ],
+ "hide20_worst_contexts_rules_by_coverage": [
+  {
+   "context": "leap_bin",
+   "value": "over_octave",
+   "n": 425,
+   "inferred": 101,
+   "correct": 46,
+   "coverage": 0.2376,
+   "accuracy": 0.4554
+  },
+  {
+   "context": "leap_bin",
+   "value": "none",
+   "n": 494,
+   "inferred": 127,
+   "correct": 98,
+   "coverage": 0.2571,
+   "accuracy": 0.7717
+  },
+  {
+   "context": "since_printed",
+   "value": "none",
+   "n": 718,
+   "inferred": 188,
+   "correct": 145,
+   "coverage": 0.2618,
+   "accuracy": 0.7713
+  },
+  {
+   "context": "leap_bin",
+   "value": "sixth_octave",
+   "n": 3277,
+   "inferred": 1173,
+   "correct": 631,
+   "coverage": 0.3579,
+   "accuracy": 0.5379
+  },
+  {
+   "context": "since_printed",
+   "value": "9+",
+   "n": 1856,
+   "inferred": 1092,
+   "correct": 596,
+   "coverage": 0.5884,
+   "accuracy": 0.5458
+  },
+  {
+   "context": "run_pos",
+   "value": "start",
+   "n": 1431,
+   "inferred": 974,
+   "correct": 637,
+   "coverage": 0.6806,
+   "accuracy": 0.654
+  },
+  {
+   "context": "chord_pos",
+   "value": "bottom",
+   "n": 4021,
+   "inferred": 2816,
+   "correct": 1881,
+   "coverage": 0.7003,
+   "accuracy": 0.668
+  },
+  {
+   "context": "black",
+   "value": "1",
+   "n": 10463,
+   "inferred": 7347,
+   "correct": 4115,
+   "coverage": 0.7022,
+   "accuracy": 0.5601
+  },
+  {
+   "context": "leap_bin",
+   "value": "fourth_fifth",
+   "n": 6622,
+   "inferred": 4700,
+   "correct": 2448,
+   "coverage": 0.7098,
+   "accuracy": 0.5209
+  },
+  {
+   "context": "hand",
+   "value": "L",
+   "n": 11620,
+   "inferred": 8316,
+   "correct": 5217,
+   "coverage": 0.7157,
+   "accuracy": 0.6273
+  }
+ ],
+ "loo": {
+  "copy_previous": {
+   "teaching": {
+    "n_hidden": 21460,
+    "inferred": 21066,
+    "correct": 1387,
+    "coverage": 0.9816,
+    "accuracy": 0.0658,
+    "reconstruction": 0.0646
+   },
+   "concert": {
+    "n_hidden": 6581,
+    "inferred": 6548,
+    "correct": 624,
+    "coverage": 0.995,
+    "accuracy": 0.0953,
+    "reconstruction": 0.0948
+   },
+   "other": {
+    "n_hidden": 8142,
+    "inferred": 8027,
+    "correct": 1050,
+    "coverage": 0.9859,
+    "accuracy": 0.1308,
+    "reconstruction": 0.129
+   },
+   "library": {
+    "n_hidden": 751,
+    "inferred": 735,
+    "correct": 129,
+    "coverage": 0.9787,
+    "accuracy": 0.1755,
+    "reconstruction": 0.1718
+   },
+   "all": {
+    "n_hidden": 36934,
+    "inferred": 36376,
+    "correct": 3190,
+    "coverage": 0.9849,
+    "accuracy": 0.0877,
+    "reconstruction": 0.0864
+   }
+  },
+  "rules": {
+   "teaching": {
+    "n_hidden": 21460,
+    "inferred": 17459,
+    "correct": 12729,
+    "coverage": 0.8136,
+    "accuracy": 0.7291,
+    "reconstruction": 0.5932
+   },
+   "concert": {
+    "n_hidden": 6581,
+    "inferred": 4619,
+    "correct": 2137,
+    "coverage": 0.7019,
+    "accuracy": 0.4627,
+    "reconstruction": 0.3247
+   },
+   "other": {
+    "n_hidden": 8142,
+    "inferred": 5688,
+    "correct": 2922,
+    "coverage": 0.6986,
+    "accuracy": 0.5137,
+    "reconstruction": 0.3589
+   },
+   "library": {
+    "n_hidden": 751,
+    "inferred": 547,
+    "correct": 263,
+    "coverage": 0.7284,
+    "accuracy": 0.4808,
+    "reconstruction": 0.3502
+   },
+   "all": {
+    "n_hidden": 36934,
+    "inferred": 28313,
+    "correct": 18051,
+    "coverage": 0.7666,
+    "accuracy": 0.6376,
+    "reconstruction": 0.4887
+   }
+  },
+  "rules_plus_textbook": {
+   "teaching": {
+    "n_hidden": 21460,
+    "inferred": 17877,
+    "correct": 13120,
+    "coverage": 0.833,
+    "accuracy": 0.7339,
+    "reconstruction": 0.6114
+   },
+   "concert": {
+    "n_hidden": 6581,
+    "inferred": 4714,
+    "correct": 2246,
+    "coverage": 0.7163,
+    "accuracy": 0.4765,
+    "reconstruction": 0.3413
+   },
+   "other": {
+    "n_hidden": 8142,
+    "inferred": 5916,
+    "correct": 3112,
+    "coverage": 0.7266,
+    "accuracy": 0.526,
+    "reconstruction": 0.3822
+   },
+   "library": {
+    "n_hidden": 751,
+    "inferred": 573,
+    "correct": 318,
+    "coverage": 0.763,
+    "accuracy": 0.555,
+    "reconstruction": 0.4234
+   },
+   "all": {
+    "n_hidden": 36934,
+    "inferred": 29080,
+    "correct": 18796,
+    "coverage": 0.7874,
+    "accuracy": 0.6464,
+    "reconstruction": 0.5089
+   }
+  },
+  "rules_column_steps": {
+   "teaching": {
+    "n_hidden": 21460,
+    "inferred": 16457,
+    "correct": 11473,
+    "coverage": 0.7669,
+    "accuracy": 0.6972,
+    "reconstruction": 0.5346
+   },
+   "concert": {
+    "n_hidden": 6581,
+    "inferred": 4294,
+    "correct": 1847,
+    "coverage": 0.6525,
+    "accuracy": 0.4301,
+    "reconstruction": 0.2807
+   },
+   "other": {
+    "n_hidden": 8142,
+    "inferred": 5262,
+    "correct": 2469,
+    "coverage": 0.6463,
+    "accuracy": 0.4692,
+    "reconstruction": 0.3032
+   },
+   "library": {
+    "n_hidden": 751,
+    "inferred": 516,
+    "correct": 234,
+    "coverage": 0.6871,
+    "accuracy": 0.4535,
+    "reconstruction": 0.3116
+   },
+   "all": {
+    "n_hidden": 36934,
+    "inferred": 26529,
+    "correct": 16023,
+    "coverage": 0.7183,
+    "accuracy": 0.604,
+    "reconstruction": 0.4338
+   }
+  }
+ },
+ "loo_by_rule_all_groups": {
+  "copy_previous": {
+   "copy": {
+    "n": 36376,
+    "correct": 3190,
+    "share": 0.9849,
+    "accuracy": 0.0877
+   },
+   "none": {
+    "n": 558,
+    "correct": 0,
+    "share": 0.0151,
+    "accuracy": null
+   }
+  },
+  "rules": {
+   "R1": {
+    "n": 1587,
+    "correct": 665,
+    "share": 0.043,
+    "accuracy": 0.419
+   },
+   "R2": {
+    "n": 8905,
+    "correct": 6473,
+    "share": 0.2411,
+    "accuracy": 0.7269
+   },
+   "R3": {
+    "n": 10575,
+    "correct": 5829,
+    "share": 0.2863,
+    "accuracy": 0.5512
+   },
+   "R4": {
+    "n": 6182,
+    "correct": 4498,
+    "share": 0.1674,
+    "accuracy": 0.7276
+   },
+   "R4_ref": {
+    "n": 1064,
+    "correct": 586,
+    "share": 0.0288,
+    "accuracy": 0.5508
+   },
+   "none": {
+    "n": 8621,
+    "correct": 0,
+    "share": 0.2334,
+    "accuracy": null
+   }
+  },
+  "rules_plus_textbook": {
+   "textbook": {
+    "n": 2926,
+    "correct": 2126,
+    "share": 0.0792,
+    "accuracy": 0.7266
+   },
+   "R1": {
+    "n": 1513,
+    "correct": 618,
+    "share": 0.041,
+    "accuracy": 0.4085
+   },
+   "R2": {
+    "n": 7405,
+    "correct": 5400,
+    "share": 0.2005,
+    "accuracy": 0.7292
+   },
+   "R3": {
+    "n": 9990,
+    "correct": 5568,
+    "share": 0.2705,
+    "accuracy": 0.5574
+   },
+   "R4": {
+    "n": 6182,
+    "correct": 4498,
+    "share": 0.1674,
+    "accuracy": 0.7276
+   },
+   "R4_ref": {
+    "n": 1064,
+    "correct": 586,
+    "share": 0.0288,
+    "accuracy": 0.5508
+   },
+   "none": {
+    "n": 7854,
+    "correct": 0,
+    "share": 0.2126,
+    "accuracy": null
+   }
+  }
+ },
+ "notes": [
+  "Hide-20 headline numbers: mean over seeds, with min and max across seeds.",
+  "Tables by rule, context, distance and the confusion matrices sum counts over all seeds.",
+  "since_printed is the score's own distance (events) to the previous printed event; the distance table uses the reader's view (previous event with a visible digit after hiding)."
+ ],
+ "runtime_sec": {
+  "prepare": 3.0,
+  "hide20": 4.3,
+  "loo": 1.2,
+  "total": 9.8
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "rows": 196516,
+ "parts": 294,
+ "parts_by_group": {
+  "other": 65,
+  "teaching": 203,
+  "concert": 18,
+  "library": 8
+ },
+ "notes_by_group": {
+  "teaching": 66353,
+  "concert": 31790,
+  "other": 94916,
+  "library": 3457
+ },
+ "printed_by_group": {
+  "teaching": 21460,
+  "concert": 6581,
+  "other": 8142,
+  "library": 751
+ },
+ "parts_with_beats": 294,
+ "seconds": 5.5,
+ "command": "research/.venv-readability/Scripts/python.exe -X utf8 research/readability/build_features.py"
+}

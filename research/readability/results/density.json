@@ -1,0 +1,625 @@
+{
+ "by_group": {
+  "teaching": {
+   "parts": 203,
+   "notes": 66353,
+   "printed": 21460,
+   "density_note_weighted": 0.3234,
+   "part_density": {
+    "n": 203,
+    "mean": 0.4143,
+    "min": 0.008,
+    "p10": 0.1698,
+    "p25": 0.2423,
+    "median": 0.354,
+    "p75": 0.5334,
+    "p90": 0.7784,
+    "max": 1.0
+   },
+   "parts_density_ge_90pct": 14,
+   "parts_density_lt_5pct": 3
+  },
+  "concert": {
+   "parts": 18,
+   "notes": 31790,
+   "printed": 6581,
+   "density_note_weighted": 0.207,
+   "part_density": {
+    "n": 18,
+    "mean": 0.2369,
+    "min": 0.0034,
+    "p10": 0.0053,
+    "p25": 0.0926,
+    "median": 0.1781,
+    "p75": 0.4177,
+    "p90": 0.4732,
+    "max": 0.5727
+   },
+   "parts_density_ge_90pct": 0,
+   "parts_density_lt_5pct": 4
+  },
+  "other": {
+   "parts": 65,
+   "notes": 94916,
+   "printed": 8142,
+   "density_note_weighted": 0.0858,
+   "part_density": {
+    "n": 65,
+    "mean": 0.1435,
+    "min": 0.0009,
+    "p10": 0.0125,
+    "p25": 0.0377,
+    "median": 0.1024,
+    "p75": 0.2129,
+    "p90": 0.3029,
+    "max": 1.0
+   },
+   "parts_density_ge_90pct": 1,
+   "parts_density_lt_5pct": 21
+  },
+  "library": {
+   "parts": 8,
+   "notes": 3457,
+   "printed": 751,
+   "density_note_weighted": 0.2172,
+   "part_density": {
+    "n": 8,
+    "mean": 0.182,
+    "min": 0.0919,
+    "p10": 0.1014,
+    "p25": 0.1362,
+    "median": 0.1834,
+    "p75": 0.2152,
+    "p90": 0.2608,
+    "max": 0.2935
+   },
+   "parts_density_ge_90pct": 0,
+   "parts_density_lt_5pct": 0
+  },
+  "teaching_excl_clementi": {
+   "parts": 132,
+   "notes": 46562,
+   "printed": 11805,
+   "density_note_weighted": 0.2535,
+   "part_density": {
+    "n": 132,
+    "mean": 0.3037,
+    "min": 0.008,
+    "p10": 0.166,
+    "p25": 0.22,
+    "median": 0.3032,
+    "p75": 0.3847,
+    "p90": 0.4584,
+    "max": 0.7835
+   },
+   "parts_density_ge_90pct": 0,
+   "parts_density_lt_5pct": 2
+  }
+ },
+ "by_composer": {
+  "VerdiG": {
+   "group": "other",
+   "parts": 20,
+   "notes": 55842,
+   "printed": 3373,
+   "density_note_weighted": 0.0604,
+   "part_density_median": 0.0541,
+   "part_density_min": 0.0111,
+   "part_density_max": 0.2143
+  },
+  "DiabelliA": {
+   "group": "teaching",
+   "parts": 80,
+   "notes": 22931,
+   "printed": 7829,
+   "density_note_weighted": 0.3414,
+   "part_density_median": 0.3506,
+   "part_density_min": 0.1695,
+   "part_density_max": 0.7835
+  },
+  "ClementiM": {
+   "group": "teaching",
+   "parts": 71,
+   "notes": 19791,
+   "printed": 9655,
+   "density_note_weighted": 0.4878,
+   "part_density_median": 0.6546,
+   "part_density_min": 0.0226,
+   "part_density_max": 1.0
+  },
+  "ChopinFF": {
+   "group": "concert",
+   "parts": 14,
+   "notes": 19581,
+   "printed": 6166,
+   "density_note_weighted": 0.3149,
+   "part_density_median": 0.2623,
+   "part_density_min": 0.006,
+   "part_density_max": 0.5727
+  },
+  "MozartWA": {
+   "group": "other/teaching",
+   "parts": 8,
+   "notes": 11144,
+   "printed": 1977,
+   "density_note_weighted": 0.1774,
+   "part_density_median": 0.2175,
+   "part_density_min": 0.0046,
+   "part_density_max": 0.3249
+  },
+  "BurgmullerJFF": {
+   "group": "teaching",
+   "parts": 19,
+   "notes": 9508,
+   "printed": 1145,
+   "density_note_weighted": 0.1204,
+   "part_density_median": 0.1657,
+   "part_density_min": 0.0177,
+   "part_density_max": 0.4085
+  },
+  "BeethovenLv": {
+   "group": "other",
+   "parts": 5,
+   "notes": 8716,
+   "printed": 1383,
+   "density_note_weighted": 0.1587,
+   "part_density_median": 0.2142,
+   "part_density_min": 0.1013,
+   "part_density_max": 0.2649
+  },
+  "LisztF": {
+   "group": "concert",
+   "parts": 2,
+   "notes": 7986,
+   "printed": 61,
+   "density_note_weighted": 0.0076,
+   "part_density_median": 0.006,
+   "part_density_min": 0.0039,
+   "part_density_max": 0.0082
+  },
+  "CzernyC": {
+   "group": "teaching",
+   "parts": 28,
+   "notes": 7821,
+   "printed": 1809,
+   "density_note_weighted": 0.2313,
+   "part_density_median": 0.2408,
+   "part_density_min": 0.0976,
+   "part_density_max": 0.5245
+  },
+  "TchaikovskyPI": {
+   "group": "other",
+   "parts": 2,
+   "notes": 4398,
+   "printed": 57,
+   "density_note_weighted": 0.013,
+   "part_density_median": 0.1455,
+   "part_density_min": 0.0054,
+   "part_density_max": 0.2857
+  },
+  "RachmaninoffS": {
+   "group": "concert",
+   "parts": 2,
+   "notes": 4223,
+   "printed": 354,
+   "density_note_weighted": 0.0838,
+   "part_density_median": 0.0933,
+   "part_density_min": 0.0034,
+   "part_density_max": 0.1833
+  },
+  "GriegE": {
+   "group": "other",
+   "parts": 1,
+   "notes": 3610,
+   "printed": 613,
+   "density_note_weighted": 0.1698,
+   "part_density_median": 0.1698,
+   "part_density_min": 0.1698,
+   "part_density_max": 0.1698
+  },
+  "RiedingO": {
+   "group": "other",
+   "parts": 5,
+   "notes": 3005,
+   "printed": 47,
+   "density_note_weighted": 0.0156,
+   "part_density_median": 0.0261,
+   "part_density_min": 0.0043,
+   "part_density_max": 0.0393
+  },
+  "SchumannR": {
+   "group": "other",
+   "parts": 8,
+   "notes": 2954,
+   "printed": 608,
+   "density_note_weighted": 0.2058,
+   "part_density_median": 0.189,
+   "part_density_min": 0.0192,
+   "part_density_max": 0.5591
+  },
+  "KuhlauF": {
+   "group": "teaching",
+   "parts": 2,
+   "notes": 2816,
+   "printed": 72,
+   "density_note_weighted": 0.0256,
+   "part_density_median": 0.0311,
+   "part_density_min": 0.008,
+   "part_density_max": 0.0543
+  },
+  "JoplinS": {
+   "group": "other",
+   "parts": 1,
+   "notes": 1535,
+   "printed": 22,
+   "density_note_weighted": 0.0143,
+   "part_density_median": 0.0143,
+   "part_density_min": 0.0143,
+   "part_density_max": 0.0143
+  },
+  "BachJS": {
+   "group": "other",
+   "parts": 3,
+   "notes": 1358,
+   "printed": 382,
+   "density_note_weighted": 0.2813,
+   "part_density_median": 0.2019,
+   "part_density_min": 0.1853,
+   "part_density_max": 0.3735
+  },
+  "library:Wolfgang Amadeus Mozart": {
+   "group": "library",
+   "parts": 1,
+   "notes": 1288,
+   "printed": 378,
+   "density_note_weighted": 0.2935,
+   "part_density_median": 0.2935,
+   "part_density_min": 0.2935,
+   "part_density_max": 0.2935
+  },
+  "library:Friedrich Burgm\u00fcller": {
+   "group": "library",
+   "parts": 4,
+   "notes": 1094,
+   "printed": 168,
+   "density_note_weighted": 0.1536,
+   "part_density_median": 0.1687,
+   "part_density_min": 0.0919,
+   "part_density_max": 0.2047
+  },
+  "FieldJ": {
+   "group": "other",
+   "parts": 1,
+   "notes": 1076,
+   "printed": 1,
+   "density_note_weighted": 0.0009,
+   "part_density_median": 0.0009,
+   "part_density_min": 0.0009,
+   "part_density_max": 0.0009
+  },
+  "Fran\u00e7ois Couperin": {
+   "group": "other",
+   "parts": 4,
+   "notes": 938,
+   "printed": 84,
+   "density_note_weighted": 0.0896,
+   "part_density_median": 0.1431,
+   "part_density_min": 0.0195,
+   "part_density_max": 1.0
+  },
+  "MartiniGB": {
+   "group": "other",
+   "parts": 1,
+   "notes": 554,
+   "printed": 62,
+   "density_note_weighted": 0.1119,
+   "part_density_median": 0.1119,
+   "part_density_min": 0.1119,
+   "part_density_max": 0.1119
+  },
+  "library:Ludwig van Beethoven": {
+   "group": "library",
+   "parts": 1,
+   "notes": 478,
+   "printed": 118,
+   "density_note_weighted": 0.2469,
+   "part_density_median": 0.2469,
+   "part_density_min": 0.2469,
+   "part_density_max": 0.2469
+  },
+  "ScriabinA": {
+   "group": "other",
+   "parts": 1,
+   "notes": 472,
+   "printed": 53,
+   "density_note_weighted": 0.1123,
+   "part_density_median": 0.1123,
+   "part_density_min": 0.1123,
+   "part_density_max": 0.1123
+  },
+  "PachelbelJ": {
+   "group": "other",
+   "parts": 1,
+   "notes": 468,
+   "printed": 68,
+   "density_note_weighted": 0.1453,
+   "part_density_median": 0.1453,
+   "part_density_min": 0.1453,
+   "part_density_max": 0.1453
+  },
+  "HanonCL": {
+   "group": "other",
+   "parts": 1,
+   "notes": 466,
+   "printed": 122,
+   "density_note_weighted": 0.2618,
+   "part_density_median": 0.2618,
+   "part_density_min": 0.2618,
+   "part_density_max": 0.2618
+  },
+  "BendaJA": {
+   "group": "other",
+   "parts": 1,
+   "notes": 463,
+   "printed": 80,
+   "density_note_weighted": 0.1728,
+   "part_density_median": 0.1728,
+   "part_density_min": 0.1728,
+   "part_density_max": 0.1728
+  },
+  "SatieE": {
+   "group": "other",
+   "parts": 1,
+   "notes": 447,
+   "printed": 22,
+   "density_note_weighted": 0.0492,
+   "part_density_median": 0.0492,
+   "part_density_min": 0.0492,
+   "part_density_max": 0.0492
+  },
+  "AlkanCV": {
+   "group": "other",
+   "parts": 1,
+   "notes": 379,
+   "printed": 16,
+   "density_note_weighted": 0.0422,
+   "part_density_median": 0.0422,
+   "part_density_min": 0.0422,
+   "part_density_max": 0.0422
+  },
+  "GobbaertsL": {
+   "group": "other",
+   "parts": 1,
+   "notes": 347,
+   "printed": 44,
+   "density_note_weighted": 0.1268,
+   "part_density_median": 0.1268,
+   "part_density_min": 0.1268,
+   "part_density_max": 0.1268
+  },
+  "library:Fr\u00e9d\u00e9ric Chopin": {
+   "group": "library",
+   "parts": 1,
+   "notes": 341,
+   "printed": 60,
+   "density_note_weighted": 0.176,
+   "part_density_median": 0.176,
+   "part_density_min": 0.176,
+   "part_density_max": 0.176
+  },
+  "library:Robert Schumann": {
+   "group": "library",
+   "parts": 1,
+   "notes": 256,
+   "printed": 27,
+   "density_note_weighted": 0.1055,
+   "part_density_median": 0.1055,
+   "part_density_min": 0.1055,
+   "part_density_max": 0.1055
+  },
+  "GounodC": {
+   "group": "other",
+   "parts": 2,
+   "notes": 230,
+   "printed": 78,
+   "density_note_weighted": 0.3391,
+   "part_density_median": 0.3404,
+   "part_density_min": 0.3197,
+   "part_density_max": 0.3611
+  }
+ },
+ "by_hand": {
+  "teaching/R": {
+   "notes": 38219,
+   "printed": 14290,
+   "density": 0.3739
+  },
+  "teaching/L": {
+   "notes": 28134,
+   "printed": 7170,
+   "density": 0.2549
+  },
+  "concert/R": {
+   "notes": 17594,
+   "printed": 4942,
+   "density": 0.2809
+  },
+  "concert/L": {
+   "notes": 14196,
+   "printed": 1639,
+   "density": 0.1155
+  },
+  "other/R": {
+   "notes": 44206,
+   "printed": 5551,
+   "density": 0.1256
+  },
+  "other/L": {
+   "notes": 50710,
+   "printed": 2591,
+   "density": 0.0511
+  },
+  "library/R": {
+   "notes": 1671,
+   "printed": 467,
+   "density": 0.2795
+  },
+  "library/L": {
+   "notes": 1786,
+   "printed": 284,
+   "density": 0.159
+  }
+ },
+ "library_by_piece": [
+  {
+   "id": "lib:beethoven-moonlight-sonata-mvt1",
+   "level": 5,
+   "notes": 478,
+   "printed": 118,
+   "density": 0.2469,
+   "density_rh": 0.2075,
+   "density_lh": 0.325,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:burgmuller-op100-no1-la-candeur",
+   "level": 2,
+   "notes": 241,
+   "printed": 46,
+   "density": 0.1909,
+   "density_rh": 0.2361,
+   "density_lh": 0.1237,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:burgmuller-op100-no2-arabesque",
+   "level": 3,
+   "notes": 283,
+   "printed": 26,
+   "density": 0.0919,
+   "density_rh": 0.1509,
+   "density_lh": 0.0565,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:burgmuller-op100-no3-pastorale",
+   "level": 3,
+   "notes": 355,
+   "printed": 52,
+   "density": 0.1465,
+   "density_rh": 0.3516,
+   "density_lh": 0.0308,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:burgmuller-op100-no5-innocence",
+   "level": 3,
+   "notes": 215,
+   "printed": 44,
+   "density": 0.2047,
+   "density_rh": 0.2422,
+   "density_lh": 0.1494,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:chopin-waltz-op69-no2",
+   "level": 5,
+   "notes": 341,
+   "printed": 60,
+   "density": 0.176,
+   "density_rh": 0.437,
+   "density_lh": 0.0049,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:mozart-sonata-k545-mvt1",
+   "level": 4,
+   "notes": 1288,
+   "printed": 378,
+   "density": 0.2935,
+   "density_rh": 0.3197,
+   "density_lh": 0.2699,
+   "edition": "The Mutopia Project"
+  },
+  {
+   "id": "lib:schumann-op68-no1-melody",
+   "level": 2,
+   "notes": 256,
+   "printed": 27,
+   "density": 0.1055,
+   "density_rh": 0.2059,
+   "density_lh": 0.039,
+   "edition": "The Mutopia Project"
+  }
+ ],
+ "library_by_level": {
+  "2": {
+   "pieces": 2,
+   "notes": 497,
+   "printed": 73,
+   "density_note_weighted": 0.1469,
+   "part_density": {
+    "n": 2,
+    "mean": 0.1482,
+    "min": 0.1055,
+    "p10": 0.114,
+    "p25": 0.1268,
+    "median": 0.1482,
+    "p75": 0.1695,
+    "p90": 0.1823,
+    "max": 0.1909
+   }
+  },
+  "3": {
+   "pieces": 3,
+   "notes": 853,
+   "printed": 122,
+   "density_note_weighted": 0.143,
+   "part_density": {
+    "n": 3,
+    "mean": 0.1477,
+    "min": 0.0919,
+    "p10": 0.1028,
+    "p25": 0.1192,
+    "median": 0.1465,
+    "p75": 0.1756,
+    "p90": 0.193,
+    "max": 0.2047
+   }
+  },
+  "4": {
+   "pieces": 1,
+   "notes": 1288,
+   "printed": 378,
+   "density_note_weighted": 0.2935,
+   "part_density": {
+    "n": 1,
+    "mean": 0.2935,
+    "min": 0.2935,
+    "p10": 0.2935,
+    "p25": 0.2935,
+    "median": 0.2935,
+    "p75": 0.2935,
+    "p90": 0.2935,
+    "max": 0.2935
+   }
+  },
+  "5": {
+   "pieces": 2,
+   "notes": 819,
+   "printed": 178,
+   "density_note_weighted": 0.2173,
+   "part_density": {
+    "n": 2,
+    "mean": 0.2114,
+    "min": 0.176,
+    "p10": 0.183,
+    "p25": 0.1937,
+    "median": 0.2114,
+    "p75": 0.2291,
+    "p90": 0.2398,
+    "max": 0.2469
+   }
+  }
+ }
+}

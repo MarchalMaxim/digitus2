@@ -1,0 +1,1140 @@
+{
+ "command": "research/.venv-readability/Scripts/python.exe -X utf8 research/readability/reduce.py",
+ "models": {
+  "rules": {
+   "all": {
+    "parts": 294,
+    "notes": 196516,
+    "printed": 36934,
+    "kept": 19747,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.1879,
+    "kept_density": 0.1005,
+    "kept_share_of_printed": 0.5347,
+    "part_kept_density_median": 0.1275,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 8698,
+     "R3_wrong": 4848,
+     "R2_wrong": 2418,
+     "R4_ref_wrong": 1884,
+     "R4_wrong": 978,
+     "R1_wrong": 921
+    }
+   },
+   "density_ge_90": {
+    "parts": 15,
+    "notes": 1910,
+    "printed": 1795,
+    "kept": 743,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.9398,
+    "kept_density": 0.389,
+    "kept_share_of_printed": 0.4139,
+    "part_kept_density_median": 0.461,
+    "part_kept_density_min": 0.1807,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 369,
+     "R3_wrong": 163,
+     "R2_wrong": 106,
+     "R4_ref_wrong": 44,
+     "R4_wrong": 42,
+     "R1_wrong": 19
+    }
+   },
+   "density_ge_70": {
+    "parts": 32,
+    "notes": 6030,
+    "printed": 5002,
+    "kept": 2151,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.8295,
+    "kept_density": 0.3567,
+    "kept_share_of_printed": 0.43,
+    "part_kept_density_median": 0.3922,
+    "part_kept_density_min": 0.0444,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 1078,
+     "R3_wrong": 511,
+     "R2_wrong": 207,
+     "R4_ref_wrong": 169,
+     "R4_wrong": 142,
+     "R1_wrong": 44
+    }
+   },
+   "teaching": {
+    "parts": 203,
+    "notes": 66353,
+    "printed": 21460,
+    "kept": 9278,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.3234,
+    "kept_density": 0.1398,
+    "kept_share_of_printed": 0.4323,
+    "part_kept_density_median": 0.1455,
+    "part_kept_density_min": 0.0049,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 4129,
+     "R3_wrong": 2322,
+     "R2_wrong": 984,
+     "R4_ref_wrong": 855,
+     "R4_wrong": 528,
+     "R1_wrong": 460
+    }
+   },
+   "concert": {
+    "parts": 18,
+    "notes": 31790,
+    "printed": 6581,
+    "kept": 4527,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.207,
+    "kept_density": 0.1424,
+    "kept_share_of_printed": 0.6879,
+    "part_kept_density_median": 0.1244,
+    "part_kept_density_min": 0.0019,
+    "part_kept_density_max": 0.4929,
+    "why_kept": {
+     "none": 1866,
+     "R3_wrong": 1287,
+     "R2_wrong": 748,
+     "R4_ref_wrong": 386,
+     "R4_wrong": 159,
+     "R1_wrong": 81
+    }
+   },
+   "other": {
+    "parts": 65,
+    "notes": 94916,
+    "printed": 8142,
+    "kept": 5450,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.0858,
+    "kept_density": 0.0574,
+    "kept_share_of_printed": 0.6694,
+    "part_kept_density_median": 0.0597,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.4236,
+    "why_kept": {
+     "none": 2492,
+     "R3_wrong": 1100,
+     "R4_ref_wrong": 615,
+     "R2_wrong": 607,
+     "R1_wrong": 352,
+     "R4_wrong": 284
+    }
+   },
+   "library": {
+    "parts": 8,
+    "notes": 3457,
+    "printed": 751,
+    "kept": 492,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.2172,
+    "kept_density": 0.1423,
+    "kept_share_of_printed": 0.6551,
+    "part_kept_density_median": 0.1226,
+    "part_kept_density_min": 0.0586,
+    "part_kept_density_max": 0.1801,
+    "why_kept": {
+     "none": 211,
+     "R3_wrong": 139,
+     "R2_wrong": 79,
+     "R4_ref_wrong": 28,
+     "R1_wrong": 28,
+     "R4_wrong": 7
+    }
+   },
+   "kept_by_context_density_ge_90": {
+    "leap_bin": {
+     "fourth_fifth": {
+      "kept": 193,
+      "dropped": 142,
+      "kept_rate": 0.5761
+     },
+     "none": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     },
+     "over_octave": {
+      "kept": 10,
+      "dropped": 0,
+      "kept_rate": 1.0
+     },
+     "repeat": {
+      "kept": 48,
+      "dropped": 46,
+      "kept_rate": 0.5106
+     },
+     "sixth_octave": {
+      "kept": 121,
+      "dropped": 11,
+      "kept_rate": 0.9167
+     },
+     "step": {
+      "kept": 226,
+      "dropped": 651,
+      "kept_rate": 0.2577
+     },
+     "third": {
+      "kept": 110,
+      "dropped": 202,
+      "kept_rate": 0.3526
+     }
+    },
+    "chord_pos": {
+     "bottom": {
+      "kept": 88,
+      "dropped": 19,
+      "kept_rate": 0.8224
+     },
+     "inner": {
+      "kept": 5,
+      "dropped": 2,
+      "kept_rate": 0.7143
+     },
+     "single": {
+      "kept": 570,
+      "dropped": 1000,
+      "kept_rate": 0.3631
+     },
+     "top": {
+      "kept": 80,
+      "dropped": 31,
+      "kept_rate": 0.7207
+     }
+    },
+    "run_pos": {
+     "end": {
+      "kept": 14,
+      "dropped": 57,
+      "kept_rate": 0.1972
+     },
+     "mid": {
+      "kept": 60,
+      "dropped": 198,
+      "kept_rate": 0.2326
+     },
+     "none": {
+      "kept": 623,
+      "dropped": 761,
+      "kept_rate": 0.4501
+     },
+     "start": {
+      "kept": 46,
+      "dropped": 36,
+      "kept_rate": 0.561
+     }
+    },
+    "after_rest_beat": {
+     "0": {
+      "kept": 728,
+      "dropped": 1045,
+      "kept_rate": 0.4106
+     },
+     "1": {
+      "kept": 15,
+      "dropped": 7,
+      "kept_rate": 0.6818
+     }
+    },
+    "first_of_hand": {
+     "0": {
+      "kept": 708,
+      "dropped": 1052,
+      "kept_rate": 0.4023
+     },
+     "1": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     }
+    },
+    "hand": {
+     "L": {
+      "kept": 321,
+      "dropped": 384,
+      "kept_rate": 0.4553
+     },
+     "R": {
+      "kept": 422,
+      "dropped": 668,
+      "kept_rate": 0.3872
+     }
+    },
+    "black": {
+     "0": {
+      "kept": 594,
+      "dropped": 897,
+      "kept_rate": 0.3984
+     },
+     "1": {
+      "kept": 149,
+      "dropped": 155,
+      "kept_rate": 0.4901
+     }
+    }
+   }
+  },
+  "rules_plus_textbook": {
+   "all": {
+    "parts": 294,
+    "notes": 196516,
+    "printed": 36934,
+    "kept": 19269,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.1879,
+    "kept_density": 0.0981,
+    "kept_share_of_printed": 0.5217,
+    "part_kept_density_median": 0.123,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 8332,
+     "R3_wrong": 4620,
+     "R2_wrong": 2099,
+     "R4_ref_wrong": 1887,
+     "R4_wrong": 978,
+     "R1_wrong": 922,
+     "textbook_wrong": 431
+    }
+   },
+   "density_ge_90": {
+    "parts": 15,
+    "notes": 1910,
+    "printed": 1795,
+    "kept": 725,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.9398,
+    "kept_density": 0.3796,
+    "kept_share_of_printed": 0.4039,
+    "part_kept_density_median": 0.4423,
+    "part_kept_density_min": 0.1687,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 362,
+     "R3_wrong": 154,
+     "R2_wrong": 79,
+     "R4_ref_wrong": 44,
+     "R4_wrong": 42,
+     "textbook_wrong": 25,
+     "R1_wrong": 19
+    }
+   },
+   "density_ge_70": {
+    "parts": 32,
+    "notes": 6030,
+    "printed": 5002,
+    "kept": 2094,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.8295,
+    "kept_density": 0.3473,
+    "kept_share_of_printed": 0.4186,
+    "part_kept_density_median": 0.3846,
+    "part_kept_density_min": 0.0444,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 1046,
+     "R3_wrong": 469,
+     "R2_wrong": 176,
+     "R4_ref_wrong": 169,
+     "R4_wrong": 142,
+     "textbook_wrong": 48,
+     "R1_wrong": 44
+    }
+   },
+   "teaching": {
+    "parts": 203,
+    "notes": 66353,
+    "printed": 21460,
+    "kept": 9036,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.3234,
+    "kept_density": 0.1362,
+    "kept_share_of_printed": 0.4211,
+    "part_kept_density_median": 0.1445,
+    "part_kept_density_min": 0.0038,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 3932,
+     "R3_wrong": 2193,
+     "R4_ref_wrong": 859,
+     "R2_wrong": 824,
+     "R4_wrong": 528,
+     "R1_wrong": 459,
+     "textbook_wrong": 241
+    }
+   },
+   "concert": {
+    "parts": 18,
+    "notes": 31790,
+    "printed": 6581,
+    "kept": 4457,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.207,
+    "kept_density": 0.1402,
+    "kept_share_of_printed": 0.6773,
+    "part_kept_density_median": 0.1217,
+    "part_kept_density_min": 0.0019,
+    "part_kept_density_max": 0.4929,
+    "why_kept": {
+     "none": 1824,
+     "R3_wrong": 1260,
+     "R2_wrong": 691,
+     "R4_ref_wrong": 386,
+     "R4_wrong": 159,
+     "R1_wrong": 81,
+     "textbook_wrong": 56
+    }
+   },
+   "other": {
+    "parts": 65,
+    "notes": 94916,
+    "printed": 8142,
+    "kept": 5312,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.0858,
+    "kept_density": 0.056,
+    "kept_share_of_printed": 0.6524,
+    "part_kept_density_median": 0.0592,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.4265,
+    "why_kept": {
+     "none": 2375,
+     "R3_wrong": 1038,
+     "R4_ref_wrong": 613,
+     "R2_wrong": 517,
+     "R1_wrong": 354,
+     "R4_wrong": 284,
+     "textbook_wrong": 131
+    }
+   },
+   "library": {
+    "parts": 8,
+    "notes": 3457,
+    "printed": 751,
+    "kept": 464,
+    "recovered_by_repeat_memory": 0,
+    "editorial_density": 0.2172,
+    "kept_density": 0.1342,
+    "kept_share_of_printed": 0.6178,
+    "part_kept_density_median": 0.1197,
+    "part_kept_density_min": 0.0586,
+    "part_kept_density_max": 0.1778,
+    "why_kept": {
+     "none": 201,
+     "R3_wrong": 129,
+     "R2_wrong": 67,
+     "R4_ref_wrong": 29,
+     "R1_wrong": 28,
+     "R4_wrong": 7,
+     "textbook_wrong": 3
+    }
+   },
+   "kept_by_context_density_ge_90": {
+    "leap_bin": {
+     "fourth_fifth": {
+      "kept": 192,
+      "dropped": 143,
+      "kept_rate": 0.5731
+     },
+     "none": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     },
+     "over_octave": {
+      "kept": 10,
+      "dropped": 0,
+      "kept_rate": 1.0
+     },
+     "repeat": {
+      "kept": 48,
+      "dropped": 46,
+      "kept_rate": 0.5106
+     },
+     "sixth_octave": {
+      "kept": 122,
+      "dropped": 10,
+      "kept_rate": 0.9242
+     },
+     "step": {
+      "kept": 211,
+      "dropped": 666,
+      "kept_rate": 0.2406
+     },
+     "third": {
+      "kept": 107,
+      "dropped": 205,
+      "kept_rate": 0.3429
+     }
+    },
+    "chord_pos": {
+     "bottom": {
+      "kept": 88,
+      "dropped": 19,
+      "kept_rate": 0.8224
+     },
+     "inner": {
+      "kept": 5,
+      "dropped": 2,
+      "kept_rate": 0.7143
+     },
+     "single": {
+      "kept": 552,
+      "dropped": 1018,
+      "kept_rate": 0.3516
+     },
+     "top": {
+      "kept": 80,
+      "dropped": 31,
+      "kept_rate": 0.7207
+     }
+    },
+    "run_pos": {
+     "end": {
+      "kept": 9,
+      "dropped": 62,
+      "kept_rate": 0.1268
+     },
+     "mid": {
+      "kept": 48,
+      "dropped": 210,
+      "kept_rate": 0.186
+     },
+     "none": {
+      "kept": 619,
+      "dropped": 765,
+      "kept_rate": 0.4473
+     },
+     "start": {
+      "kept": 49,
+      "dropped": 33,
+      "kept_rate": 0.5976
+     }
+    },
+    "after_rest_beat": {
+     "0": {
+      "kept": 709,
+      "dropped": 1064,
+      "kept_rate": 0.3999
+     },
+     "1": {
+      "kept": 16,
+      "dropped": 6,
+      "kept_rate": 0.7273
+     }
+    },
+    "first_of_hand": {
+     "0": {
+      "kept": 690,
+      "dropped": 1070,
+      "kept_rate": 0.392
+     },
+     "1": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     }
+    },
+    "hand": {
+     "L": {
+      "kept": 316,
+      "dropped": 389,
+      "kept_rate": 0.4482
+     },
+     "R": {
+      "kept": 409,
+      "dropped": 681,
+      "kept_rate": 0.3752
+     }
+    },
+    "black": {
+     "0": {
+      "kept": 576,
+      "dropped": 915,
+      "kept_rate": 0.3863
+     },
+     "1": {
+      "kept": 149,
+      "dropped": 155,
+      "kept_rate": 0.4901
+     }
+    }
+   }
+  },
+  "rules_plus_repeats": {
+   "all": {
+    "parts": 294,
+    "notes": 196516,
+    "printed": 36934,
+    "kept": 14836,
+    "recovered_by_repeat_memory": 4911,
+    "editorial_density": 0.1879,
+    "kept_density": 0.0755,
+    "kept_share_of_printed": 0.4017,
+    "part_kept_density_median": 0.0977,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 6620,
+     "R3_wrong": 3425,
+     "R2_wrong": 1792,
+     "R4_ref_wrong": 1493,
+     "R4_wrong": 828,
+     "R1_wrong": 678
+    }
+   },
+   "density_ge_90": {
+    "parts": 15,
+    "notes": 1910,
+    "printed": 1795,
+    "kept": 626,
+    "recovered_by_repeat_memory": 117,
+    "editorial_density": 0.9398,
+    "kept_density": 0.3277,
+    "kept_share_of_printed": 0.3487,
+    "part_kept_density_median": 0.4326,
+    "part_kept_density_min": 0.1325,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 317,
+     "R3_wrong": 127,
+     "R2_wrong": 82,
+     "R4_wrong": 42,
+     "R4_ref_wrong": 42,
+     "R1_wrong": 16
+    }
+   },
+   "density_ge_70": {
+    "parts": 32,
+    "notes": 6030,
+    "printed": 5002,
+    "kept": 1723,
+    "recovered_by_repeat_memory": 428,
+    "editorial_density": 0.8295,
+    "kept_density": 0.2857,
+    "kept_share_of_printed": 0.3445,
+    "part_kept_density_median": 0.3022,
+    "part_kept_density_min": 0.0444,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 845,
+     "R3_wrong": 386,
+     "R2_wrong": 165,
+     "R4_ref_wrong": 153,
+     "R4_wrong": 134,
+     "R1_wrong": 40
+    }
+   },
+   "teaching": {
+    "parts": 203,
+    "notes": 66353,
+    "printed": 21460,
+    "kept": 7357,
+    "recovered_by_repeat_memory": 1921,
+    "editorial_density": 0.3234,
+    "kept_density": 0.1109,
+    "kept_share_of_printed": 0.3428,
+    "part_kept_density_median": 0.115,
+    "part_kept_density_min": 0.0049,
+    "part_kept_density_max": 0.6897,
+    "why_kept": {
+     "none": 3327,
+     "R3_wrong": 1739,
+     "R2_wrong": 747,
+     "R4_ref_wrong": 735,
+     "R4_wrong": 475,
+     "R1_wrong": 334
+    }
+   },
+   "concert": {
+    "parts": 18,
+    "notes": 31790,
+    "printed": 6581,
+    "kept": 2811,
+    "recovered_by_repeat_memory": 1716,
+    "editorial_density": 0.207,
+    "kept_density": 0.0884,
+    "kept_share_of_printed": 0.4271,
+    "part_kept_density_median": 0.0857,
+    "part_kept_density_min": 0.0019,
+    "part_kept_density_max": 0.2173,
+    "why_kept": {
+     "none": 1144,
+     "R3_wrong": 727,
+     "R2_wrong": 486,
+     "R4_ref_wrong": 260,
+     "R4_wrong": 135,
+     "R1_wrong": 59
+    }
+   },
+   "other": {
+    "parts": 65,
+    "notes": 94916,
+    "printed": 8142,
+    "kept": 4325,
+    "recovered_by_repeat_memory": 1125,
+    "editorial_density": 0.0858,
+    "kept_density": 0.0456,
+    "kept_share_of_printed": 0.5312,
+    "part_kept_density_median": 0.0447,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.2939,
+    "why_kept": {
+     "none": 1998,
+     "R3_wrong": 870,
+     "R2_wrong": 500,
+     "R4_ref_wrong": 473,
+     "R1_wrong": 272,
+     "R4_wrong": 212
+    }
+   },
+   "library": {
+    "parts": 8,
+    "notes": 3457,
+    "printed": 751,
+    "kept": 343,
+    "recovered_by_repeat_memory": 149,
+    "editorial_density": 0.2172,
+    "kept_density": 0.0992,
+    "kept_share_of_printed": 0.4567,
+    "part_kept_density_median": 0.0837,
+    "part_kept_density_min": 0.0547,
+    "part_kept_density_max": 0.1695,
+    "why_kept": {
+     "none": 151,
+     "R3_wrong": 89,
+     "R2_wrong": 59,
+     "R4_ref_wrong": 25,
+     "R1_wrong": 13,
+     "R4_wrong": 6
+    }
+   },
+   "kept_by_context_density_ge_90": {
+    "leap_bin": {
+     "fourth_fifth": {
+      "kept": 154,
+      "dropped": 181,
+      "kept_rate": 0.4597
+     },
+     "none": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     },
+     "over_octave": {
+      "kept": 9,
+      "dropped": 1,
+      "kept_rate": 0.9
+     },
+     "repeat": {
+      "kept": 44,
+      "dropped": 50,
+      "kept_rate": 0.4681
+     },
+     "sixth_octave": {
+      "kept": 99,
+      "dropped": 33,
+      "kept_rate": 0.75
+     },
+     "step": {
+      "kept": 192,
+      "dropped": 685,
+      "kept_rate": 0.2189
+     },
+     "third": {
+      "kept": 93,
+      "dropped": 219,
+      "kept_rate": 0.2981
+     }
+    },
+    "chord_pos": {
+     "bottom": {
+      "kept": 85,
+      "dropped": 22,
+      "kept_rate": 0.7944
+     },
+     "inner": {
+      "kept": 5,
+      "dropped": 2,
+      "kept_rate": 0.7143
+     },
+     "single": {
+      "kept": 457,
+      "dropped": 1113,
+      "kept_rate": 0.2911
+     },
+     "top": {
+      "kept": 79,
+      "dropped": 32,
+      "kept_rate": 0.7117
+     }
+    },
+    "run_pos": {
+     "end": {
+      "kept": 10,
+      "dropped": 61,
+      "kept_rate": 0.1408
+     },
+     "mid": {
+      "kept": 49,
+      "dropped": 209,
+      "kept_rate": 0.1899
+     },
+     "none": {
+      "kept": 531,
+      "dropped": 853,
+      "kept_rate": 0.3837
+     },
+     "start": {
+      "kept": 36,
+      "dropped": 46,
+      "kept_rate": 0.439
+     }
+    },
+    "after_rest_beat": {
+     "0": {
+      "kept": 611,
+      "dropped": 1162,
+      "kept_rate": 0.3446
+     },
+     "1": {
+      "kept": 15,
+      "dropped": 7,
+      "kept_rate": 0.6818
+     }
+    },
+    "first_of_hand": {
+     "0": {
+      "kept": 591,
+      "dropped": 1169,
+      "kept_rate": 0.3358
+     },
+     "1": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     }
+    },
+    "hand": {
+     "L": {
+      "kept": 281,
+      "dropped": 424,
+      "kept_rate": 0.3986
+     },
+     "R": {
+      "kept": 345,
+      "dropped": 745,
+      "kept_rate": 0.3165
+     }
+    },
+    "black": {
+     "0": {
+      "kept": 498,
+      "dropped": 993,
+      "kept_rate": 0.334
+     },
+     "1": {
+      "kept": 128,
+      "dropped": 176,
+      "kept_rate": 0.4211
+     }
+    }
+   }
+  },
+  "rules_plus_textbook_plus_repeats": {
+   "all": {
+    "parts": 294,
+    "notes": 196516,
+    "printed": 36934,
+    "kept": 14493,
+    "recovered_by_repeat_memory": 4776,
+    "editorial_density": 0.1879,
+    "kept_density": 0.0737,
+    "kept_share_of_printed": 0.3924,
+    "part_kept_density_median": 0.0938,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 6341,
+     "R3_wrong": 3255,
+     "R2_wrong": 1556,
+     "R4_ref_wrong": 1493,
+     "R4_wrong": 828,
+     "R1_wrong": 679,
+     "textbook_wrong": 341
+    }
+   },
+   "density_ge_90": {
+    "parts": 15,
+    "notes": 1910,
+    "printed": 1795,
+    "kept": 610,
+    "recovered_by_repeat_memory": 115,
+    "editorial_density": 0.9398,
+    "kept_density": 0.3194,
+    "kept_share_of_printed": 0.3398,
+    "part_kept_density_median": 0.4167,
+    "part_kept_density_min": 0.1205,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 310,
+     "R3_wrong": 117,
+     "R2_wrong": 64,
+     "R4_wrong": 42,
+     "R4_ref_wrong": 42,
+     "textbook_wrong": 19,
+     "R1_wrong": 16
+    }
+   },
+   "density_ge_70": {
+    "parts": 32,
+    "notes": 6030,
+    "printed": 5002,
+    "kept": 1686,
+    "recovered_by_repeat_memory": 408,
+    "editorial_density": 0.8295,
+    "kept_density": 0.2796,
+    "kept_share_of_printed": 0.3371,
+    "part_kept_density_median": 0.2938,
+    "part_kept_density_min": 0.0444,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 821,
+     "R3_wrong": 358,
+     "R4_ref_wrong": 153,
+     "R2_wrong": 145,
+     "R4_wrong": 134,
+     "R1_wrong": 40,
+     "textbook_wrong": 35
+    }
+   },
+   "teaching": {
+    "parts": 203,
+    "notes": 66353,
+    "printed": 21460,
+    "kept": 7181,
+    "recovered_by_repeat_memory": 1855,
+    "editorial_density": 0.3234,
+    "kept_density": 0.1082,
+    "kept_share_of_printed": 0.3346,
+    "part_kept_density_median": 0.1111,
+    "part_kept_density_min": 0.0038,
+    "part_kept_density_max": 0.5862,
+    "why_kept": {
+     "none": 3173,
+     "R3_wrong": 1645,
+     "R4_ref_wrong": 736,
+     "R2_wrong": 635,
+     "R4_wrong": 475,
+     "R1_wrong": 333,
+     "textbook_wrong": 184
+    }
+   },
+   "concert": {
+    "parts": 18,
+    "notes": 31790,
+    "printed": 6581,
+    "kept": 2772,
+    "recovered_by_repeat_memory": 1685,
+    "editorial_density": 0.207,
+    "kept_density": 0.0872,
+    "kept_share_of_printed": 0.4212,
+    "part_kept_density_median": 0.0835,
+    "part_kept_density_min": 0.0019,
+    "part_kept_density_max": 0.2173,
+    "why_kept": {
+     "none": 1117,
+     "R3_wrong": 708,
+     "R2_wrong": 445,
+     "R4_ref_wrong": 260,
+     "R4_wrong": 135,
+     "R1_wrong": 59,
+     "textbook_wrong": 48
+    }
+   },
+   "other": {
+    "parts": 65,
+    "notes": 94916,
+    "printed": 8142,
+    "kept": 4216,
+    "recovered_by_repeat_memory": 1096,
+    "editorial_density": 0.0858,
+    "kept_density": 0.0444,
+    "kept_share_of_printed": 0.5178,
+    "part_kept_density_median": 0.0432,
+    "part_kept_density_min": 0.0009,
+    "part_kept_density_max": 0.2968,
+    "why_kept": {
+     "none": 1907,
+     "R3_wrong": 817,
+     "R4_ref_wrong": 472,
+     "R2_wrong": 427,
+     "R1_wrong": 274,
+     "R4_wrong": 212,
+     "textbook_wrong": 107
+    }
+   },
+   "library": {
+    "parts": 8,
+    "notes": 3457,
+    "printed": 751,
+    "kept": 324,
+    "recovered_by_repeat_memory": 140,
+    "editorial_density": 0.2172,
+    "kept_density": 0.0937,
+    "kept_share_of_printed": 0.4314,
+    "part_kept_density_median": 0.0794,
+    "part_kept_density_min": 0.0547,
+    "part_kept_density_max": 0.1695,
+    "why_kept": {
+     "none": 144,
+     "R3_wrong": 85,
+     "R2_wrong": 49,
+     "R4_ref_wrong": 25,
+     "R1_wrong": 13,
+     "R4_wrong": 6,
+     "textbook_wrong": 2
+    }
+   },
+   "kept_by_context_density_ge_90": {
+    "leap_bin": {
+     "fourth_fifth": {
+      "kept": 153,
+      "dropped": 182,
+      "kept_rate": 0.4567
+     },
+     "none": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     },
+     "over_octave": {
+      "kept": 9,
+      "dropped": 1,
+      "kept_rate": 0.9
+     },
+     "repeat": {
+      "kept": 44,
+      "dropped": 50,
+      "kept_rate": 0.4681
+     },
+     "sixth_octave": {
+      "kept": 100,
+      "dropped": 32,
+      "kept_rate": 0.7576
+     },
+     "step": {
+      "kept": 182,
+      "dropped": 695,
+      "kept_rate": 0.2075
+     },
+     "third": {
+      "kept": 87,
+      "dropped": 225,
+      "kept_rate": 0.2788
+     }
+    },
+    "chord_pos": {
+     "bottom": {
+      "kept": 85,
+      "dropped": 22,
+      "kept_rate": 0.7944
+     },
+     "inner": {
+      "kept": 5,
+      "dropped": 2,
+      "kept_rate": 0.7143
+     },
+     "single": {
+      "kept": 441,
+      "dropped": 1129,
+      "kept_rate": 0.2809
+     },
+     "top": {
+      "kept": 79,
+      "dropped": 32,
+      "kept_rate": 0.7117
+     }
+    },
+    "run_pos": {
+     "end": {
+      "kept": 7,
+      "dropped": 64,
+      "kept_rate": 0.0986
+     },
+     "mid": {
+      "kept": 41,
+      "dropped": 217,
+      "kept_rate": 0.1589
+     },
+     "none": {
+      "kept": 524,
+      "dropped": 860,
+      "kept_rate": 0.3786
+     },
+     "start": {
+      "kept": 38,
+      "dropped": 44,
+      "kept_rate": 0.4634
+     }
+    },
+    "after_rest_beat": {
+     "0": {
+      "kept": 594,
+      "dropped": 1179,
+      "kept_rate": 0.335
+     },
+     "1": {
+      "kept": 16,
+      "dropped": 6,
+      "kept_rate": 0.7273
+     }
+    },
+    "first_of_hand": {
+     "0": {
+      "kept": 575,
+      "dropped": 1185,
+      "kept_rate": 0.3267
+     },
+     "1": {
+      "kept": 35,
+      "dropped": 0,
+      "kept_rate": 1.0
+     }
+    },
+    "hand": {
+     "L": {
+      "kept": 276,
+      "dropped": 429,
+      "kept_rate": 0.3915
+     },
+     "R": {
+      "kept": 334,
+      "dropped": 756,
+      "kept_rate": 0.3064
+     }
+    },
+    "black": {
+     "0": {
+      "kept": 482,
+      "dropped": 1009,
+      "kept_rate": 0.3233
+     },
+     "1": {
+      "kept": 128,
+      "dropped": 176,
+      "kept_rate": 0.4211
+     }
+    }
+   }
+  }
+ },
+ "seconds": 5.7
+}

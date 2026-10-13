@@ -1,0 +1,646 @@
+{
+ "teaching": {
+  "isolated_digits": {
+   "n": 7830,
+   "share_of_printed": 0.3649,
+   "contexts": {
+    "after_long_note": {
+     "n": 302,
+     "share": 0.0386,
+     "share_among_all_notes": 0.0481
+    },
+    "after_rest_beat": {
+     "n": 758,
+     "share": 0.0968,
+     "share_among_all_notes": 0.0469
+    },
+    "chord_outer": {
+     "n": 2088,
+     "share": 0.2667,
+     "share_among_all_notes": 0.3113
+    },
+    "first_of_hand": {
+     "n": 405,
+     "share": 0.0517,
+     "share_among_all_notes": 0.0088
+    },
+    "leap_ge_fourth": {
+     "n": 2147,
+     "share": 0.2742,
+     "share_among_all_notes": 0.2291
+    },
+    "run_start": {
+     "n": 398,
+     "share": 0.0508,
+     "share_among_all_notes": 0.0257
+    }
+   },
+   "covered_by_score_only_context": {
+    "n": 4640,
+    "share": 0.5926
+   }
+  },
+  "printed": 21460,
+  "printed_with_printed_previous_event": 13525,
+  "share_adjacent_pairs": 0.6302,
+  "crossing_among_adjacent": {
+   "finger_over": {
+    "n": 431,
+    "share": 0.0319
+   },
+   "none": {
+    "n": 12741,
+    "share": 0.942
+   },
+   "thumb_under": {
+    "n": 353,
+    "share": 0.0261
+   }
+  },
+  "anchor_delta_among_adjacent": {
+   "0": {
+    "n": 5260,
+    "share": 0.3889
+   },
+   "0.5": {
+    "n": 3035,
+    "share": 0.2244
+   },
+   "1": {
+    "n": 2431,
+    "share": 0.1797
+   },
+   "1.5": {
+    "n": 842,
+    "share": 0.0623
+   },
+   "2": {
+    "n": 799,
+    "share": 0.0591
+   },
+   "2.5-3.5": {
+    "n": 854,
+    "share": 0.0631
+   },
+   "4+": {
+    "n": 304,
+    "share": 0.0225
+   }
+  },
+  "position_change_among_adjacent": {
+   "n": 5230,
+   "share": 0.3867
+  },
+  "events_since_previous_digit": {
+   "n": 20945,
+   "mean": 2.4895,
+   "min": 1.0,
+   "p10": 1.0,
+   "p25": 1.0,
+   "median": 1.0,
+   "p75": 2.0,
+   "p90": 5.0,
+   "max": 735.0,
+   "hist": {
+    "1": 13630,
+    "2": 2233,
+    "3-4": 2878,
+    "5-8": 1531,
+    "9+": 673
+   }
+  },
+  "unprinted_notes_by_events_since_digit": {
+   "1": 8204,
+   "2": 5637,
+   "3-4": 6359,
+   "5-8": 5184,
+   "9+": 14498,
+   "none": 5011
+  },
+  "spec_context_counts_among_printed": {
+   "after_long_note": {
+    "n": 1242,
+    "share": 0.0579
+   },
+   "after_rest_beat": {
+    "n": 1117,
+    "share": 0.0521
+   },
+   "chord_outer": {
+    "n": 4765,
+    "share": 0.222
+   },
+   "crossing": {
+    "n": 784,
+    "share": 0.0365
+   },
+   "first_of_hand": {
+    "n": 405,
+    "share": 0.0189
+   },
+   "leap_ge_fourth": {
+    "n": 5409,
+    "share": 0.2521
+   },
+   "position_change": {
+    "n": 5230,
+    "share": 0.2437
+   },
+   "run_start": {
+    "n": 883,
+    "share": 0.0411
+   }
+  },
+  "printed_covered_by_any_spec_context": {
+   "n": 12989,
+   "share": 0.6053
+  },
+  "printed_covered_by_score_only_context": {
+   "n": 11031,
+   "share": 0.514
+  }
+ },
+ "concert": {
+  "isolated_digits": {
+   "n": 2352,
+   "share_of_printed": 0.3574,
+   "contexts": {
+    "after_long_note": {
+     "n": 83,
+     "share": 0.0353,
+     "share_among_all_notes": 0.041
+    },
+    "after_rest_beat": {
+     "n": 49,
+     "share": 0.0208,
+     "share_among_all_notes": 0.0209
+    },
+    "chord_outer": {
+     "n": 392,
+     "share": 0.1667,
+     "share_among_all_notes": 0.2993
+    },
+    "first_of_hand": {
+     "n": 22,
+     "share": 0.0094,
+     "share_among_all_notes": 0.0014
+    },
+    "leap_ge_fourth": {
+     "n": 1129,
+     "share": 0.48,
+     "share_among_all_notes": 0.4159
+    },
+    "run_start": {
+     "n": 78,
+     "share": 0.0332,
+     "share_among_all_notes": 0.0119
+    }
+   },
+   "covered_by_score_only_context": {
+    "n": 1483,
+    "share": 0.6305
+   }
+  },
+  "printed": 6581,
+  "printed_with_printed_previous_event": 4198,
+  "share_adjacent_pairs": 0.6379,
+  "crossing_among_adjacent": {
+   "finger_over": {
+    "n": 192,
+    "share": 0.0457
+   },
+   "none": {
+    "n": 3855,
+    "share": 0.9183
+   },
+   "thumb_under": {
+    "n": 151,
+    "share": 0.036
+   }
+  },
+  "anchor_delta_among_adjacent": {
+   "0": {
+    "n": 681,
+    "share": 0.1622
+   },
+   "0.5": {
+    "n": 1111,
+    "share": 0.2646
+   },
+   "1": {
+    "n": 680,
+    "share": 0.162
+   },
+   "1.5": {
+    "n": 632,
+    "share": 0.1505
+   },
+   "2": {
+    "n": 347,
+    "share": 0.0827
+   },
+   "2.5-3.5": {
+    "n": 503,
+    "share": 0.1198
+   },
+   "4+": {
+    "n": 244,
+    "share": 0.0581
+   }
+  },
+  "position_change_among_adjacent": {
+   "n": 2406,
+   "share": 0.5731
+  },
+  "events_since_previous_digit": {
+   "n": 6543,
+   "mean": 3.0694,
+   "min": 1.0,
+   "p10": 1.0,
+   "p25": 1.0,
+   "median": 1.0,
+   "p75": 3.0,
+   "p90": 4.0,
+   "max": 1472.0,
+   "hist": {
+    "1": 4229,
+    "2": 647,
+    "3-4": 1025,
+    "5-8": 424,
+    "9+": 218
+   }
+  },
+  "unprinted_notes_by_events_since_digit": {
+   "1": 2948,
+   "2": 1886,
+   "3-4": 1997,
+   "5-8": 1528,
+   "9+": 11433,
+   "none": 5417
+  },
+  "spec_context_counts_among_printed": {
+   "after_long_note": {
+    "n": 135,
+    "share": 0.0205
+   },
+   "after_rest_beat": {
+    "n": 68,
+    "share": 0.0103
+   },
+   "chord_outer": {
+    "n": 1289,
+    "share": 0.1959
+   },
+   "crossing": {
+    "n": 343,
+    "share": 0.0521
+   },
+   "first_of_hand": {
+    "n": 22,
+    "share": 0.0033
+   },
+   "leap_ge_fourth": {
+    "n": 2228,
+    "share": 0.3386
+   },
+   "position_change": {
+    "n": 2406,
+    "share": 0.3656
+   },
+   "run_start": {
+    "n": 166,
+    "share": 0.0252
+   }
+  },
+  "printed_covered_by_any_spec_context": {
+   "n": 4515,
+   "share": 0.6861
+  },
+  "printed_covered_by_score_only_context": {
+   "n": 3428,
+   "share": 0.5209
+  }
+ },
+ "other": {
+  "isolated_digits": {
+   "n": 4200,
+   "share_of_printed": 0.5158,
+   "contexts": {
+    "after_long_note": {
+     "n": 179,
+     "share": 0.0426,
+     "share_among_all_notes": 0.0319
+    },
+    "after_rest_beat": {
+     "n": 281,
+     "share": 0.0669,
+     "share_among_all_notes": 0.03
+    },
+    "chord_outer": {
+     "n": 1395,
+     "share": 0.3321,
+     "share_among_all_notes": 0.4677
+    },
+    "first_of_hand": {
+     "n": 57,
+     "share": 0.0136,
+     "share_among_all_notes": 0.002
+    },
+    "leap_ge_fourth": {
+     "n": 1547,
+     "share": 0.3683,
+     "share_among_all_notes": 0.2843
+    },
+    "run_start": {
+     "n": 182,
+     "share": 0.0433,
+     "share_among_all_notes": 0.0135
+    }
+   },
+   "covered_by_score_only_context": {
+    "n": 2713,
+    "share": 0.646
+   }
+  },
+  "printed": 8142,
+  "printed_with_printed_previous_event": 3831,
+  "share_adjacent_pairs": 0.4705,
+  "crossing_among_adjacent": {
+   "finger_over": {
+    "n": 207,
+    "share": 0.054
+   },
+   "none": {
+    "n": 3455,
+    "share": 0.9019
+   },
+   "thumb_under": {
+    "n": 169,
+    "share": 0.0441
+   }
+  },
+  "anchor_delta_among_adjacent": {
+   "0": {
+    "n": 801,
+    "share": 0.2091
+   },
+   "0.5": {
+    "n": 971,
+    "share": 0.2535
+   },
+   "1": {
+    "n": 756,
+    "share": 0.1973
+   },
+   "1.5": {
+    "n": 425,
+    "share": 0.1109
+   },
+   "2": {
+    "n": 263,
+    "share": 0.0687
+   },
+   "2.5-3.5": {
+    "n": 377,
+    "share": 0.0984
+   },
+   "4+": {
+    "n": 238,
+    "share": 0.0621
+   }
+  },
+  "position_change_among_adjacent": {
+   "n": 2059,
+   "share": 0.5375
+  },
+  "events_since_previous_digit": {
+   "n": 8003,
+   "mean": 6.3736,
+   "min": 1.0,
+   "p10": 1.0,
+   "p25": 1.0,
+   "median": 2.0,
+   "p75": 4.0,
+   "p90": 11.0,
+   "max": 476.0,
+   "hist": {
+    "1": 3942,
+    "2": 851,
+    "3-4": 1369,
+    "5-8": 864,
+    "9+": 977
+   }
+  },
+  "unprinted_notes_by_events_since_digit": {
+   "1": 5145,
+   "2": 3941,
+   "3-4": 5490,
+   "5-8": 6730,
+   "9+": 54120,
+   "none": 11348
+  },
+  "spec_context_counts_among_printed": {
+   "after_long_note": {
+    "n": 395,
+    "share": 0.0485
+   },
+   "after_rest_beat": {
+    "n": 346,
+    "share": 0.0425
+   },
+   "chord_outer": {
+    "n": 2529,
+    "share": 0.3106
+   },
+   "crossing": {
+    "n": 376,
+    "share": 0.0462
+   },
+   "first_of_hand": {
+    "n": 57,
+    "share": 0.007
+   },
+   "leap_ge_fourth": {
+    "n": 2442,
+    "share": 0.2999
+   },
+   "position_change": {
+    "n": 2059,
+    "share": 0.2529
+   },
+   "run_start": {
+    "n": 326,
+    "share": 0.04
+   }
+  },
+  "printed_covered_by_any_spec_context": {
+   "n": 5605,
+   "share": 0.6884
+  },
+  "printed_covered_by_score_only_context": {
+   "n": 4708,
+   "share": 0.5782
+  }
+ },
+ "library": {
+  "isolated_digits": {
+   "n": 450,
+   "share_of_printed": 0.5992,
+   "contexts": {
+    "after_long_note": {
+     "n": 17,
+     "share": 0.0378,
+     "share_among_all_notes": 0.0544
+    },
+    "after_rest_beat": {
+     "n": 43,
+     "share": 0.0956,
+     "share_among_all_notes": 0.0324
+    },
+    "chord_outer": {
+     "n": 77,
+     "share": 0.1711,
+     "share_among_all_notes": 0.2262
+    },
+    "first_of_hand": {
+     "n": 14,
+     "share": 0.0311,
+     "share_among_all_notes": 0.0072
+    },
+    "leap_ge_fourth": {
+     "n": 150,
+     "share": 0.3333,
+     "share_among_all_notes": 0.2476
+    },
+    "run_start": {
+     "n": 34,
+     "share": 0.0756,
+     "share_among_all_notes": 0.0312
+    }
+   },
+   "covered_by_score_only_context": {
+    "n": 249,
+    "share": 0.5533
+   }
+  },
+  "printed": 751,
+  "printed_with_printed_previous_event": 297,
+  "share_adjacent_pairs": 0.3955,
+  "crossing_among_adjacent": {
+   "finger_over": {
+    "n": 17,
+    "share": 0.0572
+   },
+   "none": {
+    "n": 266,
+    "share": 0.8956
+   },
+   "thumb_under": {
+    "n": 14,
+    "share": 0.0471
+   }
+  },
+  "anchor_delta_among_adjacent": {
+   "0": {
+    "n": 87,
+    "share": 0.2929
+   },
+   "0.5": {
+    "n": 39,
+    "share": 0.1313
+   },
+   "1": {
+    "n": 107,
+    "share": 0.3603
+   },
+   "1.5": {
+    "n": 19,
+    "share": 0.064
+   },
+   "2": {
+    "n": 12,
+    "share": 0.0404
+   },
+   "2.5-3.5": {
+    "n": 24,
+    "share": 0.0808
+   },
+   "4+": {
+    "n": 9,
+    "share": 0.0303
+   }
+  },
+  "position_change_among_adjacent": {
+   "n": 171,
+   "share": 0.5758
+  },
+  "events_since_previous_digit": {
+   "n": 729,
+   "mean": 3.4979,
+   "min": 1.0,
+   "p10": 1.0,
+   "p25": 1.0,
+   "median": 2.0,
+   "p75": 4.0,
+   "p90": 8.0,
+   "max": 50.0,
+   "hist": {
+    "1": 301,
+    "2": 134,
+    "3-4": 128,
+    "5-8": 106,
+    "9+": 60
+   }
+  },
+  "unprinted_notes_by_events_since_digit": {
+   "1": 500,
+   "2": 322,
+   "3-4": 443,
+   "5-8": 443,
+   "9+": 721,
+   "none": 277
+  },
+  "spec_context_counts_among_printed": {
+   "after_long_note": {
+    "n": 50,
+    "share": 0.0666
+   },
+   "after_rest_beat": {
+    "n": 49,
+    "share": 0.0652
+   },
+   "chord_outer": {
+    "n": 118,
+    "share": 0.1571
+   },
+   "crossing": {
+    "n": 31,
+    "share": 0.0413
+   },
+   "first_of_hand": {
+    "n": 14,
+    "share": 0.0186
+   },
+   "leap_ge_fourth": {
+    "n": 227,
+    "share": 0.3023
+   },
+   "position_change": {
+    "n": 171,
+    "share": 0.2277
+   },
+   "run_start": {
+    "n": 44,
+    "share": 0.0586
+   }
+  },
+  "printed_covered_by_any_spec_context": {
+   "n": 467,
+   "share": 0.6218
+  },
+  "printed_covered_by_score_only_context": {
+   "n": 371,
+   "share": 0.494
+  }
+ }
+}

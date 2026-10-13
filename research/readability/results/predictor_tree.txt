@@ -1,0 +1,35 @@
+DecisionTreeClassifier(max_depth=3, min_samples_leaf=200, random_state=0), fitted on all 193059 Mutopia rows; weights = [unprinted, printed]
+
+|--- is_chord <= 0.500
+|   |--- downbeat <= 0.500
+|   |   |--- hand_R <= 0.500
+|   |   |   |--- weights: [26072.000, 6287.000] class: 0
+|   |   |--- hand_R >  0.500
+|   |   |   |--- weights: [37689.000, 14308.000] class: 0
+|   |--- downbeat >  0.500
+|   |   |--- direction <= -0.500
+|   |   |   |--- weights: [5911.000, 2581.000] class: 0
+|   |   |--- direction >  -0.500
+|   |   |   |--- weights: [4445.000, 3516.000] class: 0
+|--- is_chord >  0.500
+|   |--- hand_R <= 0.500
+|   |   |--- chord_size <= 2.500
+|   |   |   |--- weights: [20412.000, 2082.000] class: 0
+|   |   |--- chord_size >  2.500
+|   |   |   |--- weights: [29976.000, 694.000] class: 0
+|   |--- hand_R >  0.500
+|   |   |--- leap_bin=repeat <= 0.500
+|   |   |   |--- weights: [20771.000, 5500.000] class: 0
+|   |   |--- leap_bin=repeat >  0.500
+|   |   |   |--- weights: [11600.000, 1215.000] class: 0
+
+Leaves (sorted by print rate):
+ leaf       n  printed   rate  path
+    7    7961     3516  0.442  is_chord <= 0.500 AND downbeat > 0.500 AND direction > -0.500
+    6    8492     2581  0.304  is_chord <= 0.500 AND downbeat > 0.500 AND direction <= -0.500
+    4   51997    14308  0.275  is_chord <= 0.500 AND downbeat <= 0.500 AND hand_R > 0.500
+   13   26271     5500  0.209  is_chord > 0.500 AND hand_R > 0.500 AND leap_bin=repeat <= 0.500
+    3   32359     6287  0.194  is_chord <= 0.500 AND downbeat <= 0.500 AND hand_R <= 0.500
+   14   12815     1215  0.095  is_chord > 0.500 AND hand_R > 0.500 AND leap_bin=repeat > 0.500
+   10   22494     2082  0.093  is_chord > 0.500 AND hand_R <= 0.500 AND chord_size <= 2.500
+   11   30670      694  0.023  is_chord > 0.500 AND hand_R <= 0.500 AND chord_size > 2.500

@@ -1,0 +1,2200 @@
+{
+ "command": "cd research && OMP_NUM_THREADS=2 .venv-readability/Scripts/python.exe -X utf8 -m readability.predictor",
+ "feature_table": "research/data/readability/features.csv",
+ "features": [
+  "first_of_hand",
+  "first_of_piece",
+  "after_rest",
+  "after_rest_beat",
+  "gap_beats",
+  "after_long_note",
+  "prev_dur_beats",
+  "leap_abs",
+  "leap_bin=none",
+  "leap_bin=repeat",
+  "leap_bin=step",
+  "leap_bin=third",
+  "leap_bin=fourth_fifth",
+  "leap_bin=sixth_octave",
+  "leap_bin=over_octave",
+  "direction",
+  "black",
+  "prev_black",
+  "is_chord",
+  "chord_outer",
+  "chord_pos=single",
+  "chord_pos=bottom",
+  "chord_pos=inner",
+  "chord_pos=top",
+  "chord_size",
+  "repeated",
+  "in_run",
+  "run_pos=none",
+  "run_pos=start",
+  "run_pos=mid",
+  "run_pos=end",
+  "run_len",
+  "notes_per_sec",
+  "dur_beats",
+  "downbeat",
+  "on_beat",
+  "hand_R",
+  "grace",
+  "rel_pos"
+ ],
+ "feature_preprocessing": {
+  "clipped": {
+   "gap_beats": [
+    0,
+    8.0
+   ],
+   "prev_dur_beats": [
+    0,
+    8.0
+   ],
+   "leap_abs": [
+    0,
+    24.0
+   ],
+   "chord_size": [
+    0,
+    6.0
+   ],
+   "run_len": [
+    0,
+    16.0
+   ],
+   "notes_per_sec": [
+    0,
+    16.0
+   ],
+   "dur_beats": [
+    0,
+    8.0
+   ]
+  },
+  "none_to_zero": "every numeric input (gap_beats, prev_dur_beats, leap_abs, prev_black, ...)",
+  "one_hot": {
+   "leap_bin": [
+    "none",
+    "repeat",
+    "step",
+    "third",
+    "fourth_fifth",
+    "sixth_octave",
+    "over_octave"
+   ],
+   "chord_pos": [
+    "single",
+    "bottom",
+    "inner",
+    "top"
+   ],
+   "run_pos": [
+    "none",
+    "start",
+    "mid",
+    "end"
+   ]
+  },
+  "hand_R": "1 = right hand",
+  "excluded_leaky_columns": [
+   "prev_printed",
+   "prev_finger",
+   "anchor",
+   "prev_anchor",
+   "anchor_delta",
+   "crossing",
+   "since_printed",
+   "until_printed",
+   "finger",
+   "substitution"
+  ],
+  "collinearity": "exact linear dependencies exist by construction (is_chord = 1 - chord_pos=single, chord_outer = chord_pos=bottom + chord_pos=top, in_run = 1 - run_pos=none, leap_bin=none = first_of_hand, repeated = leap_bin=repeat); the L2 penalty splits such effects among the columns, so read a group's coefficients together"
+ },
+ "validation": {
+  "scheme": "5-fold GroupKFold by part_id; part ids permuted with numpy.random.default_rng(0) and encoded as their permuted rank before sklearn's size-balanced assignment",
+  "density_matched_threshold": "per fold, the threshold on the training-fold in-sample scores of the group (overall for 'overall') that makes the predicted density equal the group's editorial density on the training folds; applied to the test fold",
+  "fold_sizes": [
+   {
+    "fold": 0,
+    "rows": 38618,
+    "parts": 57,
+    "printed": 8593,
+    "rows_teaching": 16134,
+    "parts_teaching": 43,
+    "rows_concert": 13463,
+    "parts_concert": 5,
+    "rows_other": 9021,
+    "parts_other": 9
+   },
+   {
+    "fold": 1,
+    "rows": 38604,
+    "parts": 57,
+    "printed": 6883,
+    "rows_teaching": 12014,
+    "parts_teaching": 41,
+    "rows_concert": 4733,
+    "parts_concert": 3,
+    "rows_other": 21857,
+    "parts_other": 13
+   },
+   {
+    "fold": 2,
+    "rows": 38613,
+    "parts": 58,
+    "printed": 6910,
+    "rows_teaching": 16006,
+    "parts_teaching": 41,
+    "rows_concert": 5797,
+    "parts_concert": 5,
+    "rows_other": 16810,
+    "parts_other": 12
+   },
+   {
+    "fold": 3,
+    "rows": 38615,
+    "parts": 57,
+    "printed": 6262,
+    "rows_teaching": 11162,
+    "parts_teaching": 38,
+    "rows_concert": 3593,
+    "parts_concert": 3,
+    "rows_other": 23860,
+    "parts_other": 16
+   },
+   {
+    "fold": 4,
+    "rows": 38609,
+    "parts": 57,
+    "printed": 7535,
+    "rows_teaching": 11037,
+    "parts_teaching": 40,
+    "rows_concert": 4204,
+    "parts_concert": 2,
+    "rows_other": 23368,
+    "parts_other": 15
+   }
+  ]
+ },
+ "model_params": {
+  "logistic": "make_pipeline(StandardScaler(), LogisticRegression(C=1.0, max_iter=1000, class_weight=None)); n_jobs not passed because scikit-learn 1.8 ignores it for LogisticRegression (FutureWarning); threads capped with OMP_NUM_THREADS=2",
+  "tree": "DecisionTreeClassifier(max_depth=3, min_samples_leaf=200, random_state=0)",
+  "rules": {
+   "rule_spec": [
+    "first_of_hand",
+    "after_rest_beat",
+    "leap_ge_5",
+    "chord_outer",
+    "run_start"
+   ],
+   "rule_spec_plus_after_long_note": [
+    "first_of_hand",
+    "after_rest_beat",
+    "leap_ge_5",
+    "chord_outer",
+    "run_start",
+    "after_long_note"
+   ],
+   "rule_spec_minus_chord_outer": [
+    "first_of_hand",
+    "after_rest_beat",
+    "leap_ge_5",
+    "run_start"
+   ]
+  },
+  "sklearn_version": "1.8.0",
+  "numpy_version": "2.4.6"
+ },
+ "n_rows": 193059,
+ "n_parts": 286,
+ "n_printed": 36183,
+ "models": {
+  "logistic": {
+   "overall": {
+    "n": 193059,
+    "n_printed": 36183,
+    "density": 0.1874,
+    "auc": 0.7244,
+    "ap": 0.3505,
+    "at_0_5": {
+     "precision": 0.4989,
+     "recall": 0.0517,
+     "f1": 0.0936,
+     "pred_density": 0.0194
+    },
+    "density_matched": {
+     "precision": 0.3635,
+     "recall": 0.3643,
+     "f1": 0.3639,
+     "pred_density": 0.1878
+    }
+   },
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.6867,
+    "ap": 0.497,
+    "at_0_5": {
+     "precision": 0.672,
+     "recall": 0.0649,
+     "f1": 0.1184,
+     "pred_density": 0.0312
+    },
+    "density_matched": {
+     "precision": 0.481,
+     "recall": 0.4755,
+     "f1": 0.4783,
+     "pred_density": 0.3197
+    }
+   },
+   "concert": {
+    "n": 31790,
+    "n_printed": 6581,
+    "density": 0.207,
+    "auc": 0.6788,
+    "ap": 0.3364,
+    "at_0_5": {
+     "precision": 0.4403,
+     "recall": 0.0163,
+     "f1": 0.0314,
+     "pred_density": 0.0076
+    },
+    "density_matched": {
+     "precision": 0.3407,
+     "recall": 0.3636,
+     "f1": 0.3518,
+     "pred_density": 0.2209
+    }
+   },
+   "other": {
+    "n": 94916,
+    "n_printed": 8142,
+    "density": 0.0858,
+    "auc": 0.7254,
+    "ap": 0.1763,
+    "at_0_5": {
+     "precision": 0.258,
+     "recall": 0.0453,
+     "f1": 0.0771,
+     "pred_density": 0.0151
+    },
+    "density_matched": {
+     "precision": 0.1998,
+     "recall": 0.2044,
+     "f1": 0.2021,
+     "pred_density": 0.0878
+    }
+   },
+   "fold_thresholds": [
+    {
+     "overall": 0.2908,
+     "teaching": 0.2787,
+     "concert": 0.2343,
+     "other": 0.3295
+    },
+    {
+     "overall": 0.3057,
+     "teaching": 0.2894,
+     "concert": 0.2716,
+     "other": 0.352
+    },
+    {
+     "overall": 0.3039,
+     "teaching": 0.2864,
+     "concert": 0.257,
+     "other": 0.3511
+    },
+    {
+     "overall": 0.3086,
+     "teaching": 0.294,
+     "concert": 0.2732,
+     "other": 0.3547
+    },
+    {
+     "overall": 0.3015,
+     "teaching": 0.2859,
+     "concert": 0.2686,
+     "other": 0.3506
+    }
+   ]
+  },
+  "tree_depth3": {
+   "overall": {
+    "n": 193059,
+    "n_printed": 36183,
+    "density": 0.1874,
+    "auc": 0.6826,
+    "ap": 0.2971,
+    "at_0_5": {
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "pred_density": 0.0
+    },
+    "density_matched": {
+     "precision": 0.3375,
+     "recall": 0.195,
+     "f1": 0.2472,
+     "pred_density": 0.1083
+    }
+   },
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.6483,
+    "ap": 0.4432,
+    "at_0_5": {
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "pred_density": 0.0
+    },
+    "density_matched": {
+     "precision": 0.4225,
+     "recall": 0.5464,
+     "f1": 0.4765,
+     "pred_density": 0.4183
+    }
+   },
+   "concert": {
+    "n": 31790,
+    "n_printed": 6581,
+    "density": 0.207,
+    "auc": 0.6416,
+    "ap": 0.2957,
+    "at_0_5": {
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "pred_density": 0.0
+    },
+    "density_matched": {
+     "precision": 0.283,
+     "recall": 0.3841,
+     "f1": 0.3259,
+     "pred_density": 0.281
+    }
+   },
+   "other": {
+    "n": 94916,
+    "n_printed": 8142,
+    "density": 0.0858,
+    "auc": 0.6959,
+    "ap": 0.1505,
+    "at_0_5": {
+     "precision": null,
+     "recall": 0.0,
+     "f1": null,
+     "pred_density": 0.0
+    },
+    "density_matched": {
+     "precision": 0.1608,
+     "recall": 0.1835,
+     "f1": 0.1714,
+     "pred_density": 0.0979
+    }
+   },
+   "fold_thresholds": [
+    {
+     "overall": 0.2879,
+     "teaching": 0.2587,
+     "concert": 0.2587,
+     "other": 0.2879
+    },
+    {
+     "overall": 0.3021,
+     "teaching": 0.2815,
+     "concert": 0.3021,
+     "other": 0.3021
+    },
+    {
+     "overall": 0.4012,
+     "teaching": 0.2763,
+     "concert": 0.2763,
+     "other": 0.4012
+    },
+    {
+     "overall": 0.3433,
+     "teaching": 0.3433,
+     "concert": 0.3433,
+     "other": 0.3433
+    },
+    {
+     "overall": 0.2971,
+     "teaching": 0.275,
+     "concert": 0.2971,
+     "other": 0.2971
+    }
+   ]
+  },
+  "rule_spec": {
+   "overall": {
+    "n": 193059,
+    "n_printed": 36183,
+    "density": 0.1874,
+    "auc": 0.4444,
+    "ap": 0.173,
+    "at_0_5": {
+     "precision": 0.1591,
+     "recall": 0.5082,
+     "f1": 0.2424,
+     "pred_density": 0.5987
+    }
+   },
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.4793,
+    "ap": 0.3149,
+    "at_0_5": {
+     "precision": 0.3059,
+     "recall": 0.4877,
+     "f1": 0.3759,
+     "pred_density": 0.5156
+    }
+   },
+   "concert": {
+    "n": 31790,
+    "n_printed": 6581,
+    "density": 0.207,
+    "auc": 0.4261,
+    "ap": 0.1872,
+    "at_0_5": {
+     "precision": 0.1686,
+     "recall": 0.5142,
+     "f1": 0.2539,
+     "pred_density": 0.6315
+    }
+   },
+   "other": {
+    "n": 94916,
+    "n_printed": 8142,
+    "density": 0.0858,
+    "auc": 0.4519,
+    "ap": 0.0793,
+    "at_0_5": {
+     "precision": 0.0741,
+     "recall": 0.5577,
+     "f1": 0.1308,
+     "pred_density": 0.6457
+    }
+   },
+   "note": "binary predictor, no fitting; AUC of a 0/1 score = (TPR + TNR) / 2"
+  },
+  "rule_spec_plus_after_long_note": {
+   "overall": {
+    "n": 193059,
+    "n_printed": 36183,
+    "density": 0.1874,
+    "auc": 0.4497,
+    "ap": 0.1742,
+    "at_0_5": {
+     "precision": 0.1624,
+     "recall": 0.5297,
+     "f1": 0.2486,
+     "pred_density": 0.6114
+    }
+   },
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.4864,
+    "ap": 0.3177,
+    "at_0_5": {
+     "precision": 0.3123,
+     "recall": 0.514,
+     "f1": 0.3885,
+     "pred_density": 0.5324
+    }
+   },
+   "concert": {
+    "n": 31790,
+    "n_printed": 6581,
+    "density": 0.207,
+    "auc": 0.4223,
+    "ap": 0.1864,
+    "at_0_5": {
+     "precision": 0.1674,
+     "recall": 0.5209,
+     "f1": 0.2534,
+     "pred_density": 0.6442
+    }
+   },
+   "other": {
+    "n": 94916,
+    "n_printed": 8142,
+    "density": 0.0858,
+    "auc": 0.4576,
+    "ap": 0.0799,
+    "at_0_5": {
+     "precision": 0.0756,
+     "recall": 0.5782,
+     "f1": 0.1338,
+     "pred_density": 0.6558
+    }
+   },
+   "note": "binary predictor, no fitting; AUC of a 0/1 score = (TPR + TNR) / 2"
+  },
+  "rule_spec_minus_chord_outer": {
+   "overall": {
+    "n": 193059,
+    "n_printed": 36183,
+    "density": 0.1874,
+    "auc": 0.5113,
+    "ap": 0.191,
+    "at_0_5": {
+     "precision": 0.198,
+     "recall": 0.3417,
+     "f1": 0.2508,
+     "pred_density": 0.3234
+    }
+   },
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.5353,
+    "ap": 0.3415,
+    "at_0_5": {
+     "precision": 0.3775,
+     "recall": 0.3336,
+     "f1": 0.3542,
+     "pred_density": 0.2858
+    }
+   },
+   "concert": {
+    "n": 31790,
+    "n_printed": 6581,
+    "density": 0.207,
+    "auc": 0.4527,
+    "ap": 0.1942,
+    "at_0_5": {
+     "precision": 0.171,
+     "recall": 0.3568,
+     "f1": 0.2312,
+     "pred_density": 0.4319
+    }
+   },
+   "other": {
+    "n": 94916,
+    "n_printed": 8142,
+    "density": 0.0858,
+    "auc": 0.5205,
+    "ap": 0.0894,
+    "at_0_5": {
+     "precision": 0.096,
+     "recall": 0.3509,
+     "f1": 0.1508,
+     "pred_density": 0.3134
+    }
+   },
+   "note": "binary predictor, no fitting; AUC of a 0/1 score = (TPR + TNR) / 2"
+  }
+ },
+ "teaching_only": {
+  "logistic": {
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.686,
+    "ap": 0.4888,
+    "at_0_5": {
+     "precision": 0.5418,
+     "recall": 0.2519,
+     "f1": 0.3439,
+     "pred_density": 0.1504
+    },
+    "density_matched": {
+     "precision": 0.4813,
+     "recall": 0.498,
+     "f1": 0.4895,
+     "pred_density": 0.3346
+    }
+   },
+   "fold_thresholds": [
+    {
+     "overall": 0.3886,
+     "teaching": 0.3886
+    },
+    {
+     "overall": 0.3942,
+     "teaching": 0.3942
+    },
+    {
+     "overall": 0.4052,
+     "teaching": 0.4052
+    },
+    {
+     "overall": 0.397,
+     "teaching": 0.397
+    },
+    {
+     "overall": 0.3915,
+     "teaching": 0.3915
+    }
+   ]
+  },
+  "tree_depth3": {
+   "teaching": {
+    "n": 66353,
+    "n_printed": 21460,
+    "density": 0.3234,
+    "auc": 0.6476,
+    "ap": 0.4292,
+    "at_0_5": {
+     "precision": 0.4593,
+     "recall": 0.1396,
+     "f1": 0.2141,
+     "pred_density": 0.0983
+    },
+    "density_matched": {
+     "precision": 0.441,
+     "recall": 0.515,
+     "f1": 0.4751,
+     "pred_density": 0.3776
+    }
+   },
+   "fold_thresholds": [
+    {
+     "overall": 0.3687,
+     "teaching": 0.3687
+    },
+    {
+     "overall": 0.4807,
+     "teaching": 0.4807
+    },
+    {
+     "overall": 0.4827,
+     "teaching": 0.4827
+    },
+    {
+     "overall": 0.4398,
+     "teaching": 0.4398
+    },
+    {
+     "overall": 0.4033,
+     "teaching": 0.4033
+    }
+   ]
+  },
+  "global_logistic_on_teaching": {
+   "n": 66353,
+   "n_printed": 21460,
+   "density": 0.3234,
+   "auc": 0.6867,
+   "ap": 0.497,
+   "at_0_5": {
+    "precision": 0.672,
+    "recall": 0.0649,
+    "f1": 0.1184,
+    "pred_density": 0.0312
+   },
+   "density_matched": {
+    "precision": 0.481,
+    "recall": 0.4755,
+    "f1": 0.4783,
+    "pred_density": 0.3197
+   }
+  },
+  "global_tree_on_teaching": {
+   "n": 66353,
+   "n_printed": 21460,
+   "density": 0.3234,
+   "auc": 0.6483,
+   "ap": 0.4432,
+   "at_0_5": {
+    "precision": null,
+    "recall": 0.0,
+    "f1": null,
+    "pred_density": 0.0
+   },
+   "density_matched": {
+    "precision": 0.4225,
+    "recall": 0.5464,
+    "f1": 0.4765,
+    "pred_density": 0.4183
+   }
+  },
+  "note": "teaching-only models are trained and tested on teaching rows with the same part folds; density-matched thresholds use the teaching density of the training folds for both"
+ },
+ "rule_clauses": {
+  "first_of_hand": {
+   "fires_share": 0.0042,
+   "precision": 0.5946,
+   "recall": 0.0134
+  },
+  "after_rest_beat": {
+   "fires_share": 0.0343,
+   "precision": 0.2313,
+   "recall": 0.0423
+  },
+  "leap_ge_5": {
+   "fires_share": 0.287,
+   "precision": 0.1819,
+   "recall": 0.2786
+  },
+  "chord_outer": {
+   "fires_share": 0.3862,
+   "precision": 0.1151,
+   "recall": 0.2372
+  },
+  "run_start": {
+   "fires_share": 0.0174,
+   "precision": 0.4095,
+   "recall": 0.038
+  },
+  "after_long_note": {
+   "fires_share": 0.039,
+   "precision": 0.2354,
+   "recall": 0.049
+  }
+ },
+ "rule_clauses_by_stratum": {
+  "RH_single": {
+   "n": 60933,
+   "editor_density": 0.2965,
+   "rule_spec": {
+    "pred_density": 0.2846,
+    "precision": 0.3362,
+    "recall": 0.3226
+   },
+   "first_of_hand": {
+    "fires_share": 0.0034,
+    "print_rate_when_fires": 0.7951,
+    "print_rate_otherwise": 0.2948
+   },
+   "after_rest_beat": {
+    "fires_share": 0.017,
+    "print_rate_when_fires": 0.4531,
+    "print_rate_otherwise": 0.2938
+   },
+   "leap_ge_5": {
+    "fires_share": 0.2439,
+    "print_rate_when_fires": 0.3224,
+    "print_rate_otherwise": 0.2882
+   },
+   "chord_outer": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.2965
+   },
+   "run_start": {
+    "fires_share": 0.0396,
+    "print_rate_when_fires": 0.3943,
+    "print_rate_otherwise": 0.2925
+   },
+   "after_long_note": {
+    "fires_share": 0.0254,
+    "print_rate_when_fires": 0.3553,
+    "print_rate_otherwise": 0.295
+   }
+  },
+  "RH_chord": {
+   "n": 39086,
+   "editor_density": 0.1718,
+   "rule_spec": {
+    "pred_density": 0.871,
+    "precision": 0.1824,
+    "recall": 0.9246
+   },
+   "first_of_hand": {
+    "fires_share": 0.0049,
+    "print_rate_when_fires": 0.6406,
+    "print_rate_otherwise": 0.1695
+   },
+   "after_rest_beat": {
+    "fires_share": 0.0373,
+    "print_rate_when_fires": 0.2651,
+    "print_rate_otherwise": 0.1682
+   },
+   "leap_ge_5": {
+    "fires_share": 0.1819,
+    "print_rate_when_fires": 0.1873,
+    "print_rate_otherwise": 0.1683
+   },
+   "chord_outer": {
+    "fires_share": 0.8392,
+    "print_rate_when_fires": 0.184,
+    "print_rate_otherwise": 0.108
+   },
+   "run_start": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.1718
+   },
+   "after_long_note": {
+    "fires_share": 0.0475,
+    "print_rate_when_fires": 0.215,
+    "print_rate_otherwise": 0.1696
+   }
+  },
+  "LH_single": {
+   "n": 39876,
+   "editor_density": 0.2163,
+   "rule_spec": {
+    "pred_density": 0.4718,
+    "precision": 0.1978,
+    "recall": 0.4315
+   },
+   "first_of_hand": {
+    "fires_share": 0.0045,
+    "print_rate_when_fires": 0.648,
+    "print_rate_otherwise": 0.2143
+   },
+   "after_rest_beat": {
+    "fires_share": 0.0281,
+    "print_rate_when_fires": 0.3886,
+    "print_rate_otherwise": 0.2113
+   },
+   "leap_ge_5": {
+    "fires_share": 0.4397,
+    "print_rate_when_fires": 0.1779,
+    "print_rate_otherwise": 0.2464
+   },
+   "chord_outer": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.2163
+   },
+   "run_start": {
+    "fires_share": 0.0237,
+    "print_rate_when_fires": 0.4482,
+    "print_rate_otherwise": 0.2106
+   },
+   "after_long_note": {
+    "fires_share": 0.0413,
+    "print_rate_when_fires": 0.338,
+    "print_rate_otherwise": 0.211
+   }
+  },
+  "LH_chord": {
+   "n": 53164,
+   "editor_density": 0.0522,
+   "rule_spec": {
+    "pred_density": 0.8536,
+    "precision": 0.058,
+    "recall": 0.9478
+   },
+   "first_of_hand": {
+    "fires_share": 0.0045,
+    "print_rate_when_fires": 0.3445,
+    "print_rate_otherwise": 0.0509
+   },
+   "after_rest_beat": {
+    "fires_share": 0.0565,
+    "print_rate_when_fires": 0.0799,
+    "print_rate_otherwise": 0.0506
+   },
+   "leap_ge_5": {
+    "fires_share": 0.2992,
+    "print_rate_when_fires": 0.0526,
+    "print_rate_otherwise": 0.052
+   },
+   "chord_outer": {
+    "fires_share": 0.7856,
+    "print_rate_when_fires": 0.061,
+    "print_rate_otherwise": 0.0201
+   },
+   "run_start": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.0522
+   },
+   "after_long_note": {
+    "fires_share": 0.0466,
+    "print_rate_when_fires": 0.1075,
+    "print_rate_otherwise": 0.0495
+   }
+  },
+  "RH_single_teaching": {
+   "n": 26006,
+   "editor_density": 0.3975,
+   "rule_spec": {
+    "pred_density": 0.2596,
+    "precision": 0.4815,
+    "recall": 0.3145
+   },
+   "first_of_hand": {
+    "fires_share": 0.0055,
+    "print_rate_when_fires": 0.8958,
+    "print_rate_otherwise": 0.3947
+   },
+   "after_rest_beat": {
+    "fires_share": 0.0167,
+    "print_rate_when_fires": 0.5954,
+    "print_rate_otherwise": 0.3941
+   },
+   "leap_ge_5": {
+    "fires_share": 0.2106,
+    "print_rate_when_fires": 0.4684,
+    "print_rate_otherwise": 0.3786
+   },
+   "chord_outer": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.3975
+   },
+   "run_start": {
+    "fires_share": 0.0453,
+    "print_rate_when_fires": 0.4805,
+    "print_rate_otherwise": 0.3935
+   },
+   "after_long_note": {
+    "fires_share": 0.0234,
+    "print_rate_when_fires": 0.5641,
+    "print_rate_otherwise": 0.3935
+   }
+  },
+  "RH_single_concert": {
+   "n": 11018,
+   "editor_density": 0.3501,
+   "rule_spec": {
+    "pred_density": 0.3975,
+    "precision": 0.2979,
+    "recall": 0.3383
+   },
+   "first_of_hand": {
+    "fires_share": 0.0015,
+    "print_rate_when_fires": 0.6875,
+    "print_rate_otherwise": 0.3496
+   },
+   "after_rest_beat": {
+    "fires_share": 0.0098,
+    "print_rate_when_fires": 0.4259,
+    "print_rate_otherwise": 0.3493
+   },
+   "leap_ge_5": {
+    "fires_share": 0.3814,
+    "print_rate_when_fires": 0.288,
+    "print_rate_otherwise": 0.3884
+   },
+   "chord_outer": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.3501
+   },
+   "run_start": {
+    "fires_share": 0.0193,
+    "print_rate_when_fires": 0.5915,
+    "print_rate_otherwise": 0.3453
+   },
+   "after_long_note": {
+    "fires_share": 0.0222,
+    "print_rate_when_fires": 0.2082,
+    "print_rate_otherwise": 0.3533
+   }
+  },
+  "RH_single_other": {
+   "n": 23909,
+   "editor_density": 0.162,
+   "rule_spec": {
+    "pred_density": 0.2597,
+    "precision": 0.2051,
+    "recall": 0.3286
+   },
+   "first_of_hand": {
+    "fires_share": 0.0019,
+    "print_rate_when_fires": 0.5111,
+    "print_rate_otherwise": 0.1614
+   },
+   "after_rest_beat": {
+    "fires_share": 0.0206,
+    "print_rate_when_fires": 0.3333,
+    "print_rate_otherwise": 0.1584
+   },
+   "leap_ge_5": {
+    "fires_share": 0.2167,
+    "print_rate_when_fires": 0.1961,
+    "print_rate_otherwise": 0.1526
+   },
+   "chord_outer": {
+    "fires_share": 0.0,
+    "print_rate_when_fires": null,
+    "print_rate_otherwise": 0.162
+   },
+   "run_start": {
+    "fires_share": 0.0427,
+    "print_rate_when_fires": 0.2537,
+    "print_rate_otherwise": 0.1579
+   },
+   "after_long_note": {
+    "fires_share": 0.0291,
+    "print_rate_when_fires": 0.2245,
+    "print_rate_otherwise": 0.1602
+   }
+  }
+ },
+ "logistic_coefficients": {
+  "intercept": -1.7714,
+  "intercept_teaching_model": -0.8687,
+  "sorted_by_abs": [
+   {
+    "rank": 1,
+    "feature": "chord_size",
+    "coef_std": -0.629,
+    "odds_ratio_per_sd": 0.5331,
+    "coef_std_teaching_model": -0.2838,
+    "mean": 1.7803,
+    "std": 0.9437,
+    "print_rate_when_nonzero": 0.1874,
+    "share_nonzero": 1.0
+   },
+   {
+    "rank": 2,
+    "feature": "leap_abs",
+    "coef_std": -0.5386,
+    "odds_ratio_per_sd": 0.5836,
+    "coef_std_teaching_model": -0.3955,
+    "mean": 3.5141,
+    "std": 3.992,
+    "print_rate_when_nonzero": 0.218,
+    "share_nonzero": 0.769
+   },
+   {
+    "rank": 3,
+    "feature": "hand_R",
+    "coef_std": 0.359,
+    "odds_ratio_per_sd": 1.4319,
+    "coef_std_teaching_model": 0.3587,
+    "mean": 0.5181,
+    "std": 0.4997,
+    "print_rate_when_nonzero": 0.2478,
+    "share_nonzero": 0.5181
+   },
+   {
+    "rank": 4,
+    "feature": "repeated",
+    "coef_std": -0.243,
+    "odds_ratio_per_sd": 0.7843,
+    "coef_std_teaching_model": -0.2835,
+    "mean": 0.2268,
+    "std": 0.4188,
+    "print_rate_when_nonzero": 0.0762,
+    "share_nonzero": 0.2268
+   },
+   {
+    "rank": 5,
+    "feature": "leap_bin=repeat",
+    "coef_std": -0.243,
+    "odds_ratio_per_sd": 0.7843,
+    "coef_std_teaching_model": -0.2835,
+    "mean": 0.2268,
+    "std": 0.4188,
+    "print_rate_when_nonzero": 0.0762,
+    "share_nonzero": 0.2268
+   },
+   {
+    "rank": 6,
+    "feature": "downbeat",
+    "coef_std": 0.1789,
+    "odds_ratio_per_sd": 1.1959,
+    "coef_std_teaching_model": 0.2038,
+    "mean": 0.1895,
+    "std": 0.3919,
+    "print_rate_when_nonzero": 0.2606,
+    "share_nonzero": 0.1895
+   },
+   {
+    "rank": 7,
+    "feature": "leap_bin=sixth_octave",
+    "coef_std": 0.1707,
+    "odds_ratio_per_sd": 1.1861,
+    "coef_std_teaching_model": 0.1705,
+    "mean": 0.111,
+    "std": 0.3141,
+    "print_rate_when_nonzero": 0.1482,
+    "share_nonzero": 0.111
+   },
+   {
+    "rank": 8,
+    "feature": "leap_bin=over_octave",
+    "coef_std": 0.1681,
+    "odds_ratio_per_sd": 1.1831,
+    "coef_std_teaching_model": 0.0978,
+    "mean": 0.0264,
+    "std": 0.1603,
+    "print_rate_when_nonzero": 0.0853,
+    "share_nonzero": 0.0264
+   },
+   {
+    "rank": 9,
+    "feature": "after_rest",
+    "coef_std": 0.1362,
+    "odds_ratio_per_sd": 1.1459,
+    "coef_std_teaching_model": 0.166,
+    "mean": 0.109,
+    "std": 0.3116,
+    "print_rate_when_nonzero": 0.1866,
+    "share_nonzero": 0.109
+   },
+   {
+    "rank": 10,
+    "feature": "leap_bin=fourth_fifth",
+    "coef_std": 0.1287,
+    "odds_ratio_per_sd": 1.1373,
+    "coef_std_teaching_model": 0.1492,
+    "mean": 0.1496,
+    "std": 0.3567,
+    "print_rate_when_nonzero": 0.2239,
+    "share_nonzero": 0.1496
+   },
+   {
+    "rank": 11,
+    "feature": "on_beat",
+    "coef_std": 0.1258,
+    "odds_ratio_per_sd": 1.1341,
+    "coef_std_teaching_model": 0.1864,
+    "mean": 0.5137,
+    "std": 0.4998,
+    "print_rate_when_nonzero": 0.2064,
+    "share_nonzero": 0.5137
+   },
+   {
+    "rank": 12,
+    "feature": "leap_bin=step",
+    "coef_std": -0.105,
+    "odds_ratio_per_sd": 0.9003,
+    "coef_std_teaching_model": -0.0845,
+    "mean": 0.3202,
+    "std": 0.4665,
+    "print_rate_when_nonzero": 0.2334,
+    "share_nonzero": 0.3202
+   },
+   {
+    "rank": 13,
+    "feature": "prev_black",
+    "coef_std": -0.1012,
+    "odds_ratio_per_sd": 0.9038,
+    "coef_std_teaching_model": -0.0182,
+    "mean": 0.3287,
+    "std": 0.4697,
+    "print_rate_when_nonzero": 0.1556,
+    "share_nonzero": 0.3287
+   },
+   {
+    "rank": 14,
+    "feature": "grace",
+    "coef_std": -0.0932,
+    "odds_ratio_per_sd": 0.911,
+    "coef_std_teaching_model": -0.0483,
+    "mean": 0.01,
+    "std": 0.0997,
+    "print_rate_when_nonzero": 0.1861,
+    "share_nonzero": 0.01
+   },
+   {
+    "rank": 15,
+    "feature": "run_pos=mid",
+    "coef_std": -0.0728,
+    "odds_ratio_per_sd": 0.9297,
+    "coef_std_teaching_model": -0.093,
+    "mean": 0.0597,
+    "std": 0.237,
+    "print_rate_when_nonzero": 0.2163,
+    "share_nonzero": 0.0597
+   },
+   {
+    "rank": 16,
+    "feature": "notes_per_sec",
+    "coef_std": -0.0706,
+    "odds_ratio_per_sd": 0.9318,
+    "coef_std_teaching_model": -0.0859,
+    "mean": 5.8457,
+    "std": 3.5651,
+    "print_rate_when_nonzero": 0.1874,
+    "share_nonzero": 1.0
+   },
+   {
+    "rank": 17,
+    "feature": "run_pos=start",
+    "coef_std": 0.0705,
+    "odds_ratio_per_sd": 1.0731,
+    "coef_std_teaching_model": 0.0818,
+    "mean": 0.0174,
+    "std": 0.1307,
+    "print_rate_when_nonzero": 0.4095,
+    "share_nonzero": 0.0174
+   },
+   {
+    "rank": 18,
+    "feature": "direction",
+    "coef_std": 0.0677,
+    "odds_ratio_per_sd": 1.07,
+    "coef_std_teaching_model": 0.0806,
+    "mean": 0.02,
+    "std": 0.8767,
+    "print_rate_when_nonzero": 0.218,
+    "share_nonzero": 0.769
+   },
+   {
+    "rank": 19,
+    "feature": "rel_pos",
+    "coef_std": -0.0638,
+    "odds_ratio_per_sd": 0.9382,
+    "coef_std_teaching_model": -0.0731,
+    "mean": 0.5073,
+    "std": 0.2918,
+    "print_rate_when_nonzero": 0.1857,
+    "share_nonzero": 0.9958
+   },
+   {
+    "rank": 20,
+    "feature": "leap_bin=third",
+    "coef_std": 0.0597,
+    "odds_ratio_per_sd": 1.0615,
+    "coef_std_teaching_model": 0.1241,
+    "mean": 0.1618,
+    "std": 0.3682,
+    "print_rate_when_nonzero": 0.2514,
+    "share_nonzero": 0.1618
+   },
+   {
+    "rank": 21,
+    "feature": "prev_dur_beats",
+    "coef_std": 0.0549,
+    "odds_ratio_per_sd": 1.0564,
+    "coef_std_teaching_model": 0.1597,
+    "mean": 0.5869,
+    "std": 0.5505,
+    "print_rate_when_nonzero": 0.1856,
+    "share_nonzero": 0.9835
+   },
+   {
+    "rank": 22,
+    "feature": "gap_beats",
+    "coef_std": -0.0539,
+    "odds_ratio_per_sd": 0.9475,
+    "coef_std_teaching_model": -0.0713,
+    "mean": 0.0951,
+    "std": 0.4338,
+    "print_rate_when_nonzero": 0.1866,
+    "share_nonzero": 0.109
+   },
+   {
+    "rank": 23,
+    "feature": "black",
+    "coef_std": -0.0538,
+    "odds_ratio_per_sd": 0.9477,
+    "coef_std_teaching_model": 0.0513,
+    "mean": 0.3263,
+    "std": 0.4689,
+    "print_rate_when_nonzero": 0.1642,
+    "share_nonzero": 0.3263
+   },
+   {
+    "rank": 24,
+    "feature": "after_rest_beat",
+    "coef_std": 0.0536,
+    "odds_ratio_per_sd": 1.0551,
+    "coef_std_teaching_model": 0.0258,
+    "mean": 0.0343,
+    "std": 0.1819,
+    "print_rate_when_nonzero": 0.2313,
+    "share_nonzero": 0.0343
+   },
+   {
+    "rank": 25,
+    "feature": "run_len",
+    "coef_std": 0.0455,
+    "odds_ratio_per_sd": 1.0465,
+    "coef_std_teaching_model": 0.0901,
+    "mean": 0.5854,
+    "std": 2.039,
+    "print_rate_when_nonzero": 0.2708,
+    "share_nonzero": 0.0925
+   },
+   {
+    "rank": 26,
+    "feature": "chord_pos=top",
+    "coef_std": 0.038,
+    "odds_ratio_per_sd": 1.0388,
+    "coef_std_teaching_model": 0.0202,
+    "mean": 0.1931,
+    "std": 0.3947,
+    "print_rate_when_nonzero": 0.1248,
+    "share_nonzero": 0.1931
+   },
+   {
+    "rank": 27,
+    "feature": "leap_bin=none",
+    "coef_std": 0.0351,
+    "odds_ratio_per_sd": 1.0357,
+    "coef_std_teaching_model": 0.0557,
+    "mean": 0.0042,
+    "std": 0.0648,
+    "print_rate_when_nonzero": 0.5946,
+    "share_nonzero": 0.0042
+   },
+   {
+    "rank": 28,
+    "feature": "first_of_hand",
+    "coef_std": 0.0351,
+    "odds_ratio_per_sd": 1.0357,
+    "coef_std_teaching_model": 0.0557,
+    "mean": 0.0042,
+    "std": 0.0648,
+    "print_rate_when_nonzero": 0.5946,
+    "share_nonzero": 0.0042
+   },
+   {
+    "rank": 29,
+    "feature": "chord_pos=bottom",
+    "coef_std": -0.034,
+    "odds_ratio_per_sd": 0.9665,
+    "coef_std_teaching_model": -0.0503,
+    "mean": 0.1931,
+    "std": 0.3947,
+    "print_rate_when_nonzero": 0.1054,
+    "share_nonzero": 0.1931
+   },
+   {
+    "rank": 30,
+    "feature": "chord_pos=inner",
+    "coef_std": -0.0263,
+    "odds_ratio_per_sd": 0.9741,
+    "coef_std_teaching_model": -0.006,
+    "mean": 0.0916,
+    "std": 0.2884,
+    "print_rate_when_nonzero": 0.0514,
+    "share_nonzero": 0.0916
+   },
+   {
+    "rank": 31,
+    "feature": "run_pos=none",
+    "coef_std": 0.0239,
+    "odds_ratio_per_sd": 1.0242,
+    "coef_std_teaching_model": 0.0326,
+    "mean": 0.9075,
+    "std": 0.2898,
+    "print_rate_when_nonzero": 0.1789,
+    "share_nonzero": 0.9075
+   },
+   {
+    "rank": 32,
+    "feature": "in_run",
+    "coef_std": -0.0239,
+    "odds_ratio_per_sd": 0.9764,
+    "coef_std_teaching_model": -0.0326,
+    "mean": 0.0925,
+    "std": 0.2898,
+    "print_rate_when_nonzero": 0.2708,
+    "share_nonzero": 0.0925
+   },
+   {
+    "rank": 33,
+    "feature": "after_long_note",
+    "coef_std": 0.0221,
+    "odds_ratio_per_sd": 1.0224,
+    "coef_std_teaching_model": -0.0332,
+    "mean": 0.039,
+    "std": 0.1936,
+    "print_rate_when_nonzero": 0.2354,
+    "share_nonzero": 0.039
+   },
+   {
+    "rank": 34,
+    "feature": "is_chord",
+    "coef_std": -0.012,
+    "odds_ratio_per_sd": 0.9881,
+    "coef_std_teaching_model": -0.0255,
+    "mean": 0.4778,
+    "std": 0.4995,
+    "print_rate_when_nonzero": 0.1029,
+    "share_nonzero": 0.4778
+   },
+   {
+    "rank": 35,
+    "feature": "chord_pos=single",
+    "coef_std": 0.012,
+    "odds_ratio_per_sd": 1.0121,
+    "coef_std_teaching_model": 0.0255,
+    "mean": 0.5222,
+    "std": 0.4995,
+    "print_rate_when_nonzero": 0.2648,
+    "share_nonzero": 0.5222
+   },
+   {
+    "rank": 36,
+    "feature": "dur_beats",
+    "coef_std": 0.0095,
+    "odds_ratio_per_sd": 1.0095,
+    "coef_std_teaching_model": 0.002,
+    "mean": 0.6032,
+    "std": 0.5726,
+    "print_rate_when_nonzero": 0.1874,
+    "share_nonzero": 0.99
+   },
+   {
+    "rank": 37,
+    "feature": "run_pos=end",
+    "coef_std": 0.0091,
+    "odds_ratio_per_sd": 1.0092,
+    "coef_std_teaching_model": 0.0112,
+    "mean": 0.0154,
+    "std": 0.1232,
+    "print_rate_when_nonzero": 0.3254,
+    "share_nonzero": 0.0154
+   },
+   {
+    "rank": 38,
+    "feature": "chord_outer",
+    "coef_std": 0.0032,
+    "odds_ratio_per_sd": 1.0032,
+    "coef_std_teaching_model": -0.0236,
+    "mean": 0.3862,
+    "std": 0.4869,
+    "print_rate_when_nonzero": 0.1151,
+    "share_nonzero": 0.3862
+   },
+   {
+    "rank": 39,
+    "feature": "first_of_piece",
+    "coef_std": -0.0016,
+    "odds_ratio_per_sd": 0.9984,
+    "coef_std_teaching_model": -0.0172,
+    "mean": 0.0033,
+    "std": 0.0576,
+    "print_rate_when_nonzero": 0.6174,
+    "share_nonzero": 0.0033
+   }
+  ]
+ },
+ "tree": {
+  "text": "|--- is_chord <= 0.500\n|   |--- downbeat <= 0.500\n|   |   |--- hand_R <= 0.500\n|   |   |   |--- weights: [26072.000, 6287.000] class: 0\n|   |   |--- hand_R >  0.500\n|   |   |   |--- weights: [37689.000, 14308.000] class: 0\n|   |--- downbeat >  0.500\n|   |   |--- direction <= -0.500\n|   |   |   |--- weights: [5911.000, 2581.000] class: 0\n|   |   |--- direction >  -0.500\n|   |   |   |--- weights: [4445.000, 3516.000] class: 0\n|--- is_chord >  0.500\n|   |--- hand_R <= 0.500\n|   |   |--- chord_size <= 2.500\n|   |   |   |--- weights: [20412.000, 2082.000] class: 0\n|   |   |--- chord_size >  2.500\n|   |   |   |--- weights: [29976.000, 694.000] class: 0\n|   |--- hand_R >  0.500\n|   |   |--- leap_bin=repeat <= 0.500\n|   |   |   |--- weights: [20771.000, 5500.000] class: 0\n|   |   |--- leap_bin=repeat >  0.500\n|   |   |   |--- weights: [11600.000, 1215.000] class: 0\n",
+  "leaves": [
+   {
+    "leaf": 7,
+    "path": "is_chord <= 0.500 AND downbeat > 0.500 AND direction > -0.500",
+    "n": 7961,
+    "n_printed": 3516,
+    "print_rate": 0.4417
+   },
+   {
+    "leaf": 6,
+    "path": "is_chord <= 0.500 AND downbeat > 0.500 AND direction <= -0.500",
+    "n": 8492,
+    "n_printed": 2581,
+    "print_rate": 0.3039
+   },
+   {
+    "leaf": 4,
+    "path": "is_chord <= 0.500 AND downbeat <= 0.500 AND hand_R > 0.500",
+    "n": 51997,
+    "n_printed": 14308,
+    "print_rate": 0.2752
+   },
+   {
+    "leaf": 13,
+    "path": "is_chord > 0.500 AND hand_R > 0.500 AND leap_bin=repeat <= 0.500",
+    "n": 26271,
+    "n_printed": 5500,
+    "print_rate": 0.2094
+   },
+   {
+    "leaf": 3,
+    "path": "is_chord <= 0.500 AND downbeat <= 0.500 AND hand_R <= 0.500",
+    "n": 32359,
+    "n_printed": 6287,
+    "print_rate": 0.1943
+   },
+   {
+    "leaf": 14,
+    "path": "is_chord > 0.500 AND hand_R > 0.500 AND leap_bin=repeat > 0.500",
+    "n": 12815,
+    "n_printed": 1215,
+    "print_rate": 0.0948
+   },
+   {
+    "leaf": 10,
+    "path": "is_chord > 0.500 AND hand_R <= 0.500 AND chord_size <= 2.500",
+    "n": 22494,
+    "n_printed": 2082,
+    "print_rate": 0.0926
+   },
+   {
+    "leaf": 11,
+    "path": "is_chord > 0.500 AND hand_R <= 0.500 AND chord_size > 2.500",
+    "n": 30670,
+    "n_printed": 694,
+    "print_rate": 0.0226
+   }
+  ],
+  "fit": "all Mutopia rows; class weights shown by export_text are [unprinted, printed]"
+ },
+ "library_check": {
+  "overlap_note": "The eight library pieces (Burgmuller Op. 100 Nos. 1/2/3/5, Schumann Op. 68/1, Mozart K545 i, Moonlight i, Chopin Op. 69/2) are also in the Mutopia corpus, so models fitted on all Mutopia rows have seen the same music (with Mutopia's fingerings, which may come from the same or a different edition). This is not a clean hold-out; the *_excl_overlap models are refitted without the matching Mutopia parts.",
+  "excluded_mutopia_parts": {
+   "burgmuller-op100-no1-la-candeur": [
+    "MP0202_s00_p0"
+   ],
+   "burgmuller-op100-no2-arabesque": [
+    "MP0203_s00_p0"
+   ],
+   "burgmuller-op100-no3-pastorale": [
+    "MP0218_s00_p0"
+   ],
+   "burgmuller-op100-no5-innocence": [
+    "MP0214_s00_p0"
+   ],
+   "schumann-op68-no1-melody": [
+    "MP0647_s00_p0"
+   ],
+   "mozart-sonata-k545-mvt1": [
+    "MP0998_s00_p0"
+   ],
+   "beethoven-moonlight-sonata-mvt1": [
+    "MP0276f0_s00_p0"
+   ],
+   "chopin-waltz-op69-no2": [
+    "MP0511_s00_p0"
+   ]
+  },
+  "n_excluded_parts": 8,
+  "n_excluded_rows": 5383,
+  "teaching_density_matched_threshold": "threshold on the model's own training rows of the teaching group that makes the predicted density equal the teaching density",
+  "rows": [
+   {
+    "piece": "lib:beethoven-moonlight-sonata-mvt1",
+    "level": 5,
+    "n_notes": 478,
+    "n_printed": 118,
+    "editor_density": 0.2469,
+    "model": "logistic_global",
+    "mean_prob": 0.2469,
+    "pred_density_0_5": 0.0042,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.4331,
+    "auc": 0.4743,
+    "ap": 0.2888
+   },
+   {
+    "piece": "lib:beethoven-moonlight-sonata-mvt1",
+    "level": 5,
+    "n_notes": 478,
+    "n_printed": 118,
+    "editor_density": 0.2469,
+    "model": "logistic_teaching",
+    "mean_prob": 0.384,
+    "pred_density_0_5": 0.1297,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.5711,
+    "auc": 0.5119,
+    "ap": 0.3075
+   },
+   {
+    "piece": "lib:beethoven-moonlight-sonata-mvt1",
+    "level": 5,
+    "n_notes": 478,
+    "n_printed": 118,
+    "editor_density": 0.2469,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.244,
+    "pred_density_0_5": 0.0042,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.4184,
+    "auc": 0.4742,
+    "ap": 0.2872
+   },
+   {
+    "piece": "lib:beethoven-moonlight-sonata-mvt1",
+    "level": 5,
+    "n_notes": 478,
+    "n_printed": 118,
+    "editor_density": 0.2469,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.383,
+    "pred_density_0_5": 0.1109,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.5586,
+    "auc": 0.5224,
+    "ap": 0.319
+   },
+   {
+    "piece": "lib:beethoven-moonlight-sonata-mvt1",
+    "level": 5,
+    "n_notes": 478,
+    "n_printed": 118,
+    "editor_density": 0.2469,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.6715,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.5211,
+    "ap": 0.2551
+   },
+   {
+    "piece": "lib:burgmuller-op100-no1-la-candeur",
+    "level": 2,
+    "n_notes": 241,
+    "n_printed": 46,
+    "editor_density": 0.1909,
+    "model": "logistic_global",
+    "mean_prob": 0.2868,
+    "pred_density_0_5": 0.0581,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.5353,
+    "auc": 0.7757,
+    "ap": 0.5196
+   },
+   {
+    "piece": "lib:burgmuller-op100-no1-la-candeur",
+    "level": 2,
+    "n_notes": 241,
+    "n_printed": 46,
+    "editor_density": 0.1909,
+    "model": "logistic_teaching",
+    "mean_prob": 0.3903,
+    "pred_density_0_5": 0.2033,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.4689,
+    "auc": 0.7423,
+    "ap": 0.4739
+   },
+   {
+    "piece": "lib:burgmuller-op100-no1-la-candeur",
+    "level": 2,
+    "n_notes": 241,
+    "n_printed": 46,
+    "editor_density": 0.1909,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.2895,
+    "pred_density_0_5": 0.0581,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.5353,
+    "auc": 0.7735,
+    "ap": 0.521
+   },
+   {
+    "piece": "lib:burgmuller-op100-no1-la-candeur",
+    "level": 2,
+    "n_notes": 241,
+    "n_printed": 46,
+    "editor_density": 0.1909,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.3997,
+    "pred_density_0_5": 0.2282,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.4813,
+    "auc": 0.7323,
+    "ap": 0.4556
+   },
+   {
+    "piece": "lib:burgmuller-op100-no1-la-candeur",
+    "level": 2,
+    "n_notes": 241,
+    "n_printed": 46,
+    "editor_density": 0.1909,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.3651,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.5833,
+    "ap": 0.2261
+   },
+   {
+    "piece": "lib:burgmuller-op100-no2-arabesque",
+    "level": 3,
+    "n_notes": 283,
+    "n_printed": 26,
+    "editor_density": 0.0919,
+    "model": "logistic_global",
+    "mean_prob": 0.1901,
+    "pred_density_0_5": 0.053,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.2756,
+    "auc": 0.8245,
+    "ap": 0.451
+   },
+   {
+    "piece": "lib:burgmuller-op100-no2-arabesque",
+    "level": 3,
+    "n_notes": 283,
+    "n_printed": 26,
+    "editor_density": 0.0919,
+    "model": "logistic_teaching",
+    "mean_prob": 0.2566,
+    "pred_density_0_5": 0.1237,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.2226,
+    "auc": 0.8426,
+    "ap": 0.4805
+   },
+   {
+    "piece": "lib:burgmuller-op100-no2-arabesque",
+    "level": 3,
+    "n_notes": 283,
+    "n_printed": 26,
+    "editor_density": 0.0919,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.1916,
+    "pred_density_0_5": 0.053,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.2862,
+    "auc": 0.8194,
+    "ap": 0.4432
+   },
+   {
+    "piece": "lib:burgmuller-op100-no2-arabesque",
+    "level": 3,
+    "n_notes": 283,
+    "n_printed": 26,
+    "editor_density": 0.0919,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.2615,
+    "pred_density_0_5": 0.1307,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.2297,
+    "auc": 0.8346,
+    "ap": 0.4592
+   },
+   {
+    "piece": "lib:burgmuller-op100-no2-arabesque",
+    "level": 3,
+    "n_notes": 283,
+    "n_printed": 26,
+    "editor_density": 0.0919,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.4452,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.5937,
+    "ap": 0.1135
+   },
+   {
+    "piece": "lib:burgmuller-op100-no3-pastorale",
+    "level": 3,
+    "n_notes": 355,
+    "n_printed": 52,
+    "editor_density": 0.1465,
+    "model": "logistic_global",
+    "mean_prob": 0.1745,
+    "pred_density_0_5": 0.0254,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.3127,
+    "auc": 0.8593,
+    "ap": 0.4173
+   },
+   {
+    "piece": "lib:burgmuller-op100-no3-pastorale",
+    "level": 3,
+    "n_notes": 355,
+    "n_printed": 52,
+    "editor_density": 0.1465,
+    "model": "logistic_teaching",
+    "mean_prob": 0.2452,
+    "pred_density_0_5": 0.1718,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.2958,
+    "auc": 0.8578,
+    "ap": 0.4155
+   },
+   {
+    "piece": "lib:burgmuller-op100-no3-pastorale",
+    "level": 3,
+    "n_notes": 355,
+    "n_printed": 52,
+    "editor_density": 0.1465,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.1749,
+    "pred_density_0_5": 0.0254,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.3127,
+    "auc": 0.8574,
+    "ap": 0.4148
+   },
+   {
+    "piece": "lib:burgmuller-op100-no3-pastorale",
+    "level": 3,
+    "n_notes": 355,
+    "n_printed": 52,
+    "editor_density": 0.1465,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.2483,
+    "pred_density_0_5": 0.1803,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.3014,
+    "auc": 0.8538,
+    "ap": 0.4092
+   },
+   {
+    "piece": "lib:burgmuller-op100-no3-pastorale",
+    "level": 3,
+    "n_notes": 355,
+    "n_printed": 52,
+    "editor_density": 0.1465,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.4394,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.389,
+    "ap": 0.1307
+   },
+   {
+    "piece": "lib:burgmuller-op100-no5-innocence",
+    "level": 3,
+    "n_notes": 215,
+    "n_printed": 44,
+    "editor_density": 0.2047,
+    "model": "logistic_global",
+    "mean_prob": 0.2366,
+    "pred_density_0_5": 0.0419,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.3023,
+    "auc": 0.5372,
+    "ap": 0.4021
+   },
+   {
+    "piece": "lib:burgmuller-op100-no5-innocence",
+    "level": 3,
+    "n_notes": 215,
+    "n_printed": 44,
+    "editor_density": 0.2047,
+    "model": "logistic_teaching",
+    "mean_prob": 0.3169,
+    "pred_density_0_5": 0.0977,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.2558,
+    "auc": 0.5556,
+    "ap": 0.385
+   },
+   {
+    "piece": "lib:burgmuller-op100-no5-innocence",
+    "level": 3,
+    "n_notes": 215,
+    "n_printed": 44,
+    "editor_density": 0.2047,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.2382,
+    "pred_density_0_5": 0.0419,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.3163,
+    "auc": 0.5354,
+    "ap": 0.4031
+   },
+   {
+    "piece": "lib:burgmuller-op100-no5-innocence",
+    "level": 3,
+    "n_notes": 215,
+    "n_printed": 44,
+    "editor_density": 0.2047,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.3245,
+    "pred_density_0_5": 0.1023,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.2791,
+    "auc": 0.5634,
+    "ap": 0.392
+   },
+   {
+    "piece": "lib:burgmuller-op100-no5-innocence",
+    "level": 3,
+    "n_notes": 215,
+    "n_printed": 44,
+    "editor_density": 0.2047,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.293,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.6158,
+    "ap": 0.2661
+   },
+   {
+    "piece": "lib:chopin-waltz-op69-no2",
+    "level": 5,
+    "n_notes": 341,
+    "n_printed": 60,
+    "editor_density": 0.176,
+    "model": "logistic_global",
+    "mean_prob": 0.1823,
+    "pred_density_0_5": 0.0205,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.3079,
+    "auc": 0.8666,
+    "ap": 0.5015
+   },
+   {
+    "piece": "lib:chopin-waltz-op69-no2",
+    "level": 5,
+    "n_notes": 341,
+    "n_printed": 60,
+    "editor_density": 0.176,
+    "model": "logistic_teaching",
+    "mean_prob": 0.2876,
+    "pred_density_0_5": 0.1584,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.349,
+    "auc": 0.8622,
+    "ap": 0.5263
+   },
+   {
+    "piece": "lib:chopin-waltz-op69-no2",
+    "level": 5,
+    "n_notes": 341,
+    "n_printed": 60,
+    "editor_density": 0.176,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.1818,
+    "pred_density_0_5": 0.0176,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.3138,
+    "auc": 0.8622,
+    "ap": 0.4923
+   },
+   {
+    "piece": "lib:chopin-waltz-op69-no2",
+    "level": 5,
+    "n_notes": 341,
+    "n_printed": 60,
+    "editor_density": 0.176,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.2885,
+    "pred_density_0_5": 0.1613,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.346,
+    "auc": 0.8609,
+    "ap": 0.5182
+   },
+   {
+    "piece": "lib:chopin-waltz-op69-no2",
+    "level": 5,
+    "n_notes": 341,
+    "n_printed": 60,
+    "editor_density": 0.176,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.6569,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.4048,
+    "ap": 0.1549
+   },
+   {
+    "piece": "lib:mozart-sonata-k545-mvt1",
+    "level": 4,
+    "n_notes": 1288,
+    "n_printed": 378,
+    "editor_density": 0.2935,
+    "model": "logistic_global",
+    "mean_prob": 0.232,
+    "pred_density_0_5": 0.0217,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.2663,
+    "auc": 0.6164,
+    "ap": 0.3775
+   },
+   {
+    "piece": "lib:mozart-sonata-k545-mvt1",
+    "level": 4,
+    "n_notes": 1288,
+    "n_printed": 378,
+    "editor_density": 0.2935,
+    "model": "logistic_teaching",
+    "mean_prob": 0.3027,
+    "pred_density_0_5": 0.0784,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.2228,
+    "auc": 0.6346,
+    "ap": 0.3956
+   },
+   {
+    "piece": "lib:mozart-sonata-k545-mvt1",
+    "level": 4,
+    "n_notes": 1288,
+    "n_printed": 378,
+    "editor_density": 0.2935,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.2335,
+    "pred_density_0_5": 0.0217,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.271,
+    "auc": 0.6126,
+    "ap": 0.374
+   },
+   {
+    "piece": "lib:mozart-sonata-k545-mvt1",
+    "level": 4,
+    "n_notes": 1288,
+    "n_printed": 378,
+    "editor_density": 0.2935,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.3075,
+    "pred_density_0_5": 0.0854,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.2236,
+    "auc": 0.6256,
+    "ap": 0.387
+   },
+   {
+    "piece": "lib:mozart-sonata-k545-mvt1",
+    "level": 4,
+    "n_notes": 1288,
+    "n_printed": 378,
+    "editor_density": 0.2935,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.3478,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.5384,
+    "ap": 0.3119
+   },
+   {
+    "piece": "lib:schumann-op68-no1-melody",
+    "level": 2,
+    "n_notes": 256,
+    "n_printed": 27,
+    "editor_density": 0.1055,
+    "model": "logistic_global",
+    "mean_prob": 0.2802,
+    "pred_density_0_5": 0.043,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.3555,
+    "auc": 0.8355,
+    "ap": 0.544
+   },
+   {
+    "piece": "lib:schumann-op68-no1-melody",
+    "level": 2,
+    "n_notes": 256,
+    "n_printed": 27,
+    "editor_density": 0.1055,
+    "model": "logistic_teaching",
+    "mean_prob": 0.3741,
+    "pred_density_0_5": 0.1484,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.3711,
+    "auc": 0.8578,
+    "ap": 0.5618
+   },
+   {
+    "piece": "lib:schumann-op68-no1-melody",
+    "level": 2,
+    "n_notes": 256,
+    "n_printed": 27,
+    "editor_density": 0.1055,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.2817,
+    "pred_density_0_5": 0.0508,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.3711,
+    "auc": 0.8336,
+    "ap": 0.5428
+   },
+   {
+    "piece": "lib:schumann-op68-no1-melody",
+    "level": 2,
+    "n_notes": 256,
+    "n_printed": 27,
+    "editor_density": 0.1055,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.3787,
+    "pred_density_0_5": 0.1523,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.3906,
+    "auc": 0.8559,
+    "ap": 0.5551
+   },
+   {
+    "piece": "lib:schumann-op68-no1-melody",
+    "level": 2,
+    "n_notes": 256,
+    "n_printed": 27,
+    "editor_density": 0.1055,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.4375,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.6281,
+    "ap": 0.1423
+   },
+   {
+    "piece": "ALL",
+    "level": null,
+    "n_notes": 3457,
+    "n_printed": 751,
+    "editor_density": 0.2172,
+    "model": "logistic_global",
+    "mean_prob": 0.2275,
+    "pred_density_0_5": 0.0275,
+    "teach_dm_threshold": 0.2867,
+    "pred_density_teach_dm": 0.3266,
+    "auc": 0.668,
+    "ap": 0.3685
+   },
+   {
+    "piece": "ALL",
+    "level": null,
+    "n_notes": 3457,
+    "n_printed": 751,
+    "editor_density": 0.2172,
+    "model": "logistic_teaching",
+    "mean_prob": 0.315,
+    "pred_density_0_5": 0.1218,
+    "teach_dm_threshold": 0.3952,
+    "pred_density_teach_dm": 0.3211,
+    "auc": 0.6727,
+    "ap": 0.3767
+   },
+   {
+    "piece": "ALL",
+    "level": null,
+    "n_notes": 3457,
+    "n_printed": 751,
+    "editor_density": 0.2172,
+    "model": "logistic_global_excl_overlap",
+    "mean_prob": 0.2282,
+    "pred_density_0_5": 0.0278,
+    "teach_dm_threshold": 0.2855,
+    "pred_density_teach_dm": 0.3298,
+    "auc": 0.665,
+    "ap": 0.3652
+   },
+   {
+    "piece": "ALL",
+    "level": null,
+    "n_notes": 3457,
+    "n_printed": 751,
+    "editor_density": 0.2172,
+    "model": "logistic_teaching_excl_overlap",
+    "mean_prob": 0.319,
+    "pred_density_0_5": 0.1258,
+    "teach_dm_threshold": 0.3979,
+    "pred_density_teach_dm": 0.3243,
+    "auc": 0.6682,
+    "ap": 0.3704
+   },
+   {
+    "piece": "ALL",
+    "level": null,
+    "n_notes": 3457,
+    "n_printed": 751,
+    "editor_density": 0.2172,
+    "model": "rule_spec",
+    "mean_prob": null,
+    "pred_density_0_5": 0.4449,
+    "teach_dm_threshold": null,
+    "pred_density_teach_dm": null,
+    "auc": 0.5186,
+    "ap": 0.224
+   }
+  ]
+ },
+ "runtime_sec": {
+  "load": 5.2,
+  "cv": 6.0,
+  "total": 13.9
+ }
+}

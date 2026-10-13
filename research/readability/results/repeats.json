@@ -1,0 +1,2257 @@
+{
+ "command": "cd research && OMP_NUM_THREADS=2 .venv-readability/Scripts/python.exe -X utf8 -m readability.repeats",
+ "params": {
+  "min_events": 4,
+  "beat_grid": "1/48 quarter",
+  "max_candidates": 64,
+  "match": "same pitch tuple up to one constant semitone shift, same per-note durations, same IOIs between consecutive events (IOI after the last event not compared)",
+  "search": "greedy left to right; longest non-overlapping extension of any earlier window with the same 4-event key (earliest on ties); later occurrences are disjoint",
+  "alignment": "each later note is paired with the note of the same chord rank in its root event (earliest statement, through chains of matches)"
+ },
+ "n_parts": 294,
+ "runtime_sec": 1.9,
+ "load_sec": 0.9,
+ "groups": {
+  "overall": {
+   "n_parts": 294,
+   "notes": {
+    "n": 196516,
+    "k": 36934,
+    "p": 0.1879
+   },
+   "baseline_no_repeat": {
+    "n": 51816,
+    "k": 13100,
+    "p": 0.2528
+   },
+   "categories": {
+    "all": {
+     "n_later_occurrences": 8672,
+     "length_events": {
+      "n": 8672,
+      "median": 5.0,
+      "p90": 16,
+      "max": 386,
+      "mean": 9.07
+     },
+     "length_notes": {
+      "n": 8672,
+      "median": 6.0,
+      "p90": 22,
+      "max": 877,
+      "mean": 12.14
+     },
+     "first_occurrence_notes": {
+      "n": 39391,
+      "k": 9572,
+      "p": 0.243
+     },
+     "later_occurrence_notes": {
+      "n": 105309,
+      "k": 14262,
+      "p": 0.1354
+     },
+     "aligned_pairs": 105309,
+     "p_later_printed_given_first_printed": {
+      "n": 26600,
+      "k": 11722,
+      "p": 0.4407
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 78709,
+      "k": 2540,
+      "p": 0.0323
+     },
+     "same_digit_given_both_printed": {
+      "n": 11722,
+      "k": 9011,
+      "p": 0.7687
+     }
+    },
+    "exact": {
+     "n_later_occurrences": 4124,
+     "length_events": {
+      "n": 4124,
+      "median": 6.0,
+      "p90": 16,
+      "max": 169,
+      "mean": 8.72
+     },
+     "length_notes": {
+      "n": 4124,
+      "median": 8.0,
+      "p90": 24,
+      "max": 459,
+      "mean": 12.73
+     },
+     "first_occurrence_notes": {
+      "n": 25983,
+      "k": 6013,
+      "p": 0.2314
+     },
+     "later_occurrence_notes": {
+      "n": 52496,
+      "k": 5228,
+      "p": 0.0996
+     },
+     "aligned_pairs": 52496,
+     "p_later_printed_given_first_printed": {
+      "n": 12252,
+      "k": 4504,
+      "p": 0.3676
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 40244,
+      "k": 724,
+      "p": 0.018
+     },
+     "same_digit_given_both_printed": {
+      "n": 4504,
+      "k": 3893,
+      "p": 0.8643
+     }
+    },
+    "transposed_same_pattern": {
+     "n_later_occurrences": 1239,
+     "length_events": {
+      "n": 1239,
+      "median": 4.0,
+      "p90": 8,
+      "max": 112,
+      "mean": 5.82
+     },
+     "length_notes": {
+      "n": 1239,
+      "median": 5.0,
+      "p90": 12,
+      "max": 112,
+      "mean": 6.98
+     },
+     "first_occurrence_notes": {
+      "n": 5337,
+      "k": 1538,
+      "p": 0.2882
+     },
+     "later_occurrence_notes": {
+      "n": 8648,
+      "k": 1725,
+      "p": 0.1995
+     },
+     "aligned_pairs": 8648,
+     "p_later_printed_given_first_printed": {
+      "n": 2354,
+      "k": 1355,
+      "p": 0.5756
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 6294,
+      "k": 370,
+      "p": 0.0588
+     },
+     "same_digit_given_both_printed": {
+      "n": 1355,
+      "k": 966,
+      "p": 0.7129
+     }
+    },
+    "transposed_diff_pattern": {
+     "n_later_occurrences": 1781,
+     "length_events": {
+      "n": 1781,
+      "median": 4.0,
+      "p90": 8,
+      "max": 96,
+      "mean": 5.94
+     },
+     "length_notes": {
+      "n": 1781,
+      "median": 5.0,
+      "p90": 13,
+      "max": 96,
+      "mean": 7.36
+     },
+     "first_occurrence_notes": {
+      "n": 7780,
+      "k": 2192,
+      "p": 0.2817
+     },
+     "later_occurrence_notes": {
+      "n": 13104,
+      "k": 2922,
+      "p": 0.223
+     },
+     "aligned_pairs": 13104,
+     "p_later_printed_given_first_printed": {
+      "n": 3825,
+      "k": 2262,
+      "p": 0.5914
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 9279,
+      "k": 660,
+      "p": 0.0711
+     },
+     "same_digit_given_both_printed": {
+      "n": 2262,
+      "k": 1376,
+      "p": 0.6083
+     }
+    },
+    "mixed_shift": {
+     "n_later_occurrences": 1528,
+     "length_events": {
+      "n": 1528,
+      "median": 8.0,
+      "p90": 33,
+      "max": 386,
+      "mean": 16.3
+     },
+     "length_notes": {
+      "n": 1528,
+      "median": 8.0,
+      "p90": 40,
+      "max": 877,
+      "mean": 20.33
+     },
+     "first_occurrence_notes": {
+      "n": 11970,
+      "k": 3004,
+      "p": 0.251
+     },
+     "later_occurrence_notes": {
+      "n": 31061,
+      "k": 4387,
+      "p": 0.1412
+     },
+     "aligned_pairs": 31061,
+     "p_later_printed_given_first_printed": {
+      "n": 8169,
+      "k": 3601,
+      "p": 0.4408
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 22892,
+      "k": 786,
+      "p": 0.0343
+     },
+     "same_digit_given_both_printed": {
+      "n": 3601,
+      "k": 2776,
+      "p": 0.7709
+     }
+    },
+    "adjacent": {
+     "n_later_occurrences": 1947,
+     "length_events": {
+      "n": 1947,
+      "median": 5.0,
+      "p90": 15,
+      "max": 377,
+      "mean": 8.29
+     },
+     "length_notes": {
+      "n": 1947,
+      "median": 8.0,
+      "p90": 21,
+      "max": 459,
+      "mean": 11.91
+     },
+     "first_occurrence_notes": {
+      "n": 15715,
+      "k": 3318,
+      "p": 0.2111
+     },
+     "later_occurrence_notes": {
+      "n": 23195,
+      "k": 1718,
+      "p": 0.0741
+     },
+     "aligned_pairs": 23195,
+     "p_later_printed_given_first_printed": {
+      "n": 4835,
+      "k": 1514,
+      "p": 0.3131
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 18360,
+      "k": 204,
+      "p": 0.0111
+     },
+     "same_digit_given_both_printed": {
+      "n": 1514,
+      "k": 1242,
+      "p": 0.8203
+     }
+    },
+    "distant": {
+     "n_later_occurrences": 6725,
+     "length_events": {
+      "n": 6725,
+      "median": 5.0,
+      "p90": 16,
+      "max": 386,
+      "mean": 9.3
+     },
+     "length_notes": {
+      "n": 6725,
+      "median": 6.0,
+      "p90": 23,
+      "max": 877,
+      "mean": 12.21
+     },
+     "first_occurrence_notes": {
+      "n": 31575,
+      "k": 8106,
+      "p": 0.2567
+     },
+     "later_occurrence_notes": {
+      "n": 82114,
+      "k": 12544,
+      "p": 0.1528
+     },
+     "aligned_pairs": 82114,
+     "p_later_printed_given_first_printed": {
+      "n": 21765,
+      "k": 10208,
+      "p": 0.469
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 60349,
+      "k": 2336,
+      "p": 0.0387
+     },
+     "same_digit_given_both_printed": {
+      "n": 10208,
+      "k": 7769,
+      "p": 0.7611
+     }
+    },
+    "len_ge_8": {
+     "n_later_occurrences": 2679,
+     "length_events": {
+      "n": 2679,
+      "median": 12.0,
+      "p90": 35,
+      "max": 386,
+      "mean": 18.79
+     },
+     "length_notes": {
+      "n": 2679,
+      "median": 16.0,
+      "p90": 48,
+      "max": 877,
+      "mean": 25.7
+     },
+     "first_occurrence_notes": {
+      "n": 28502,
+      "k": 6888,
+      "p": 0.2417
+     },
+     "later_occurrence_notes": {
+      "n": 68857,
+      "k": 7630,
+      "p": 0.1108
+     },
+     "aligned_pairs": 68857,
+     "p_later_printed_given_first_printed": {
+      "n": 16803,
+      "k": 6670,
+      "p": 0.397
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 52054,
+      "k": 960,
+      "p": 0.0184
+     },
+     "same_digit_given_both_printed": {
+      "n": 6670,
+      "k": 5716,
+      "p": 0.857
+     }
+    },
+    "len_ge_16": {
+     "n_later_occurrences": 914,
+     "length_events": {
+      "n": 914,
+      "median": 24.0,
+      "p90": 65,
+      "max": 386,
+      "mean": 35.74
+     },
+     "length_notes": {
+      "n": 914,
+      "median": 32.0,
+      "p90": 93,
+      "max": 877,
+      "mean": 49.23
+     },
+     "first_occurrence_notes": {
+      "n": 19258,
+      "k": 4455,
+      "p": 0.2313
+     },
+     "later_occurrence_notes": {
+      "n": 44995,
+      "k": 4459,
+      "p": 0.0991
+     },
+     "aligned_pairs": 44995,
+     "p_later_printed_given_first_printed": {
+      "n": 10905,
+      "k": 3901,
+      "p": 0.3577
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 34090,
+      "k": 558,
+      "p": 0.0164
+     },
+     "same_digit_given_both_printed": {
+      "n": 3901,
+      "k": 3443,
+      "p": 0.8826
+     }
+    },
+    "exact_len_ge_8": {
+     "n_later_occurrences": 1449,
+     "length_events": {
+      "n": 1449,
+      "median": 12.0,
+      "p90": 29,
+      "max": 169,
+      "mean": 16.0
+     },
+     "length_notes": {
+      "n": 1449,
+      "median": 16.0,
+      "p90": 46,
+      "max": 459,
+      "mean": 23.75
+     },
+     "first_occurrence_notes": {
+      "n": 17469,
+      "k": 4026,
+      "p": 0.2305
+     },
+     "later_occurrence_notes": {
+      "n": 34418,
+      "k": 2932,
+      "p": 0.0852
+     },
+     "aligned_pairs": 34418,
+     "p_later_printed_given_first_printed": {
+      "n": 7977,
+      "k": 2685,
+      "p": 0.3366
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 26441,
+      "k": 247,
+      "p": 0.0093
+     },
+     "same_digit_given_both_printed": {
+      "n": 2685,
+      "k": 2446,
+      "p": 0.911
+     }
+    }
+   }
+  },
+  "teaching": {
+   "n_parts": 203,
+   "notes": {
+    "n": 66353,
+    "k": 21460,
+    "p": 0.3234
+   },
+   "baseline_no_repeat": {
+    "n": 23301,
+    "k": 8891,
+    "p": 0.3816
+   },
+   "categories": {
+    "all": {
+     "n_later_occurrences": 3172,
+     "length_events": {
+      "n": 3172,
+      "median": 5.0,
+      "p90": 13,
+      "max": 288,
+      "mean": 7.87
+     },
+     "length_notes": {
+      "n": 3172,
+      "median": 6.0,
+      "p90": 16,
+      "max": 312,
+      "mean": 9.44
+     },
+     "first_occurrence_notes": {
+      "n": 13103,
+      "k": 5287,
+      "p": 0.4035
+     },
+     "later_occurrence_notes": {
+      "n": 29949,
+      "k": 7282,
+      "p": 0.2431
+     },
+     "aligned_pairs": 29949,
+     "p_later_printed_given_first_printed": {
+      "n": 12152,
+      "k": 6277,
+      "p": 0.5165
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 17797,
+      "k": 1005,
+      "p": 0.0565
+     },
+     "same_digit_given_both_printed": {
+      "n": 6277,
+      "k": 4691,
+      "p": 0.7473
+     }
+    },
+    "exact": {
+     "n_later_occurrences": 1730,
+     "length_events": {
+      "n": 1730,
+      "median": 5.0,
+      "p90": 14,
+      "max": 82,
+      "mean": 7.73
+     },
+     "length_notes": {
+      "n": 1730,
+      "median": 6.0,
+      "p90": 18,
+      "max": 195,
+      "mean": 9.93
+     },
+     "first_occurrence_notes": {
+      "n": 9585,
+      "k": 3777,
+      "p": 0.3941
+     },
+     "later_occurrence_notes": {
+      "n": 17174,
+      "k": 3662,
+      "p": 0.2132
+     },
+     "aligned_pairs": 17174,
+     "p_later_printed_given_first_printed": {
+      "n": 6612,
+      "k": 3228,
+      "p": 0.4882
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 10562,
+      "k": 434,
+      "p": 0.0411
+     },
+     "same_digit_given_both_printed": {
+      "n": 3228,
+      "k": 2829,
+      "p": 0.8764
+     }
+    },
+    "transposed_same_pattern": {
+     "n_later_occurrences": 467,
+     "length_events": {
+      "n": 467,
+      "median": 4.0,
+      "p90": 8,
+      "max": 80,
+      "mean": 5.39
+     },
+     "length_notes": {
+      "n": 467,
+      "median": 4.0,
+      "p90": 8,
+      "max": 80,
+      "mean": 6.04
+     },
+     "first_occurrence_notes": {
+      "n": 1799,
+      "k": 774,
+      "p": 0.4302
+     },
+     "later_occurrence_notes": {
+      "n": 2822,
+      "k": 903,
+      "p": 0.32
+     },
+     "aligned_pairs": 2822,
+     "p_later_printed_given_first_printed": {
+      "n": 1225,
+      "k": 735,
+      "p": 0.6
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 1597,
+      "k": 168,
+      "p": 0.1052
+     },
+     "same_digit_given_both_printed": {
+      "n": 735,
+      "k": 463,
+      "p": 0.6299
+     }
+    },
+    "transposed_diff_pattern": {
+     "n_later_occurrences": 580,
+     "length_events": {
+      "n": 580,
+      "median": 4.0,
+      "p90": 8,
+      "max": 39,
+      "mean": 5.62
+     },
+     "length_notes": {
+      "n": 580,
+      "median": 5.0,
+      "p90": 9,
+      "max": 45,
+      "mean": 6.13
+     },
+     "first_occurrence_notes": {
+      "n": 2245,
+      "k": 1059,
+      "p": 0.4717
+     },
+     "later_occurrence_notes": {
+      "n": 3554,
+      "k": 1476,
+      "p": 0.4153
+     },
+     "aligned_pairs": 3554,
+     "p_later_printed_given_first_printed": {
+      "n": 1737,
+      "k": 1255,
+      "p": 0.7225
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 1817,
+      "k": 221,
+      "p": 0.1216
+     },
+     "same_digit_given_both_printed": {
+      "n": 1255,
+      "k": 698,
+      "p": 0.5562
+     }
+    },
+    "mixed_shift": {
+     "n_later_occurrences": 395,
+     "length_events": {
+      "n": 395,
+      "median": 7.0,
+      "p90": 31,
+      "max": 288,
+      "mean": 14.71
+     },
+     "length_notes": {
+      "n": 395,
+      "median": 8.0,
+      "p90": 35,
+      "max": 312,
+      "mean": 16.2
+     },
+     "first_occurrence_notes": {
+      "n": 2658,
+      "k": 1099,
+      "p": 0.4135
+     },
+     "later_occurrence_notes": {
+      "n": 6399,
+      "k": 1241,
+      "p": 0.1939
+     },
+     "aligned_pairs": 6399,
+     "p_later_printed_given_first_printed": {
+      "n": 2578,
+      "k": 1059,
+      "p": 0.4108
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 3821,
+      "k": 182,
+      "p": 0.0476
+     },
+     "same_digit_given_both_printed": {
+      "n": 1059,
+      "k": 701,
+      "p": 0.6619
+     }
+    },
+    "adjacent": {
+     "n_later_occurrences": 683,
+     "length_events": {
+      "n": 683,
+      "median": 4.0,
+      "p90": 12,
+      "max": 61,
+      "mean": 6.61
+     },
+     "length_notes": {
+      "n": 683,
+      "median": 6.0,
+      "p90": 16,
+      "max": 88,
+      "mean": 8.24
+     },
+     "first_occurrence_notes": {
+      "n": 4452,
+      "k": 1706,
+      "p": 0.3832
+     },
+     "later_occurrence_notes": {
+      "n": 5631,
+      "k": 877,
+      "p": 0.1557
+     },
+     "aligned_pairs": 5631,
+     "p_later_printed_given_first_printed": {
+      "n": 2148,
+      "k": 795,
+      "p": 0.3701
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 3483,
+      "k": 82,
+      "p": 0.0235
+     },
+     "same_digit_given_both_printed": {
+      "n": 795,
+      "k": 652,
+      "p": 0.8201
+     }
+    },
+    "distant": {
+     "n_later_occurrences": 2489,
+     "length_events": {
+      "n": 2489,
+      "median": 5.0,
+      "p90": 14,
+      "max": 288,
+      "mean": 8.22
+     },
+     "length_notes": {
+      "n": 2489,
+      "median": 5.0,
+      "p90": 18,
+      "max": 312,
+      "mean": 9.77
+     },
+     "first_occurrence_notes": {
+      "n": 10842,
+      "k": 4429,
+      "p": 0.4085
+     },
+     "later_occurrence_notes": {
+      "n": 24318,
+      "k": 6405,
+      "p": 0.2634
+     },
+     "aligned_pairs": 24318,
+     "p_later_printed_given_first_printed": {
+      "n": 10004,
+      "k": 5482,
+      "p": 0.548
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 14314,
+      "k": 923,
+      "p": 0.0645
+     },
+     "same_digit_given_both_printed": {
+      "n": 5482,
+      "k": 4039,
+      "p": 0.7368
+     }
+    },
+    "len_ge_8": {
+     "n_later_occurrences": 828,
+     "length_events": {
+      "n": 828,
+      "median": 11.5,
+      "p90": 32,
+      "max": 288,
+      "mean": 16.85
+     },
+     "length_notes": {
+      "n": 828,
+      "median": 13.0,
+      "p90": 42,
+      "max": 312,
+      "mean": 20.71
+     },
+     "first_occurrence_notes": {
+      "n": 8507,
+      "k": 3513,
+      "p": 0.413
+     },
+     "later_occurrence_notes": {
+      "n": 17146,
+      "k": 3457,
+      "p": 0.2016
+     },
+     "aligned_pairs": 17146,
+     "p_later_printed_given_first_printed": {
+      "n": 6761,
+      "k": 3162,
+      "p": 0.4677
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 10385,
+      "k": 295,
+      "p": 0.0284
+     },
+     "same_digit_given_both_printed": {
+      "n": 3162,
+      "k": 2730,
+      "p": 0.8634
+     }
+    },
+    "len_ge_16": {
+     "n_later_occurrences": 248,
+     "length_events": {
+      "n": 248,
+      "median": 23.0,
+      "p90": 55,
+      "max": 288,
+      "mean": 32.85
+     },
+     "length_notes": {
+      "n": 248,
+      "median": 28.0,
+      "p90": 69,
+      "max": 312,
+      "mean": 39.82
+     },
+     "first_occurrence_notes": {
+      "n": 4823,
+      "k": 1918,
+      "p": 0.3977
+     },
+     "later_occurrence_notes": {
+      "n": 9876,
+      "k": 1574,
+      "p": 0.1594
+     },
+     "aligned_pairs": 9876,
+     "p_later_printed_given_first_printed": {
+      "n": 3769,
+      "k": 1445,
+      "p": 0.3834
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 6107,
+      "k": 129,
+      "p": 0.0211
+     },
+     "same_digit_given_both_printed": {
+      "n": 1445,
+      "k": 1318,
+      "p": 0.9121
+     }
+    },
+    "exact_len_ge_8": {
+     "n_later_occurrences": 517,
+     "length_events": {
+      "n": 517,
+      "median": 11.0,
+      "p90": 28,
+      "max": 82,
+      "mean": 14.78
+     },
+     "length_notes": {
+      "n": 517,
+      "median": 14.0,
+      "p90": 39,
+      "max": 195,
+      "mean": 19.54
+     },
+     "first_occurrence_notes": {
+      "n": 5834,
+      "k": 2341,
+      "p": 0.4013
+     },
+     "later_occurrence_notes": {
+      "n": 10101,
+      "k": 2009,
+      "p": 0.1989
+     },
+     "aligned_pairs": 10101,
+     "p_later_printed_given_first_printed": {
+      "n": 3862,
+      "k": 1872,
+      "p": 0.4847
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 6239,
+      "k": 137,
+      "p": 0.022
+     },
+     "same_digit_given_both_printed": {
+      "n": 1872,
+      "k": 1735,
+      "p": 0.9268
+     }
+    }
+   }
+  },
+  "concert": {
+   "n_parts": 18,
+   "notes": {
+    "n": 31790,
+    "k": 6581,
+    "p": 0.207
+   },
+   "baseline_no_repeat": {
+    "n": 6678,
+    "k": 1297,
+    "p": 0.1942
+   },
+   "categories": {
+    "all": {
+     "n_later_occurrences": 1821,
+     "length_events": {
+      "n": 1821,
+      "median": 5.0,
+      "p90": 15,
+      "max": 377,
+      "mean": 9.1
+     },
+     "length_notes": {
+      "n": 1821,
+      "median": 6.0,
+      "p90": 20,
+      "max": 392,
+      "mean": 10.75
+     },
+     "first_occurrence_notes": {
+      "n": 5536,
+      "k": 1470,
+      "p": 0.2655
+     },
+     "later_occurrence_notes": {
+      "n": 19576,
+      "k": 3814,
+      "p": 0.1948
+     },
+     "aligned_pairs": 19576,
+     "p_later_printed_given_first_printed": {
+      "n": 6125,
+      "k": 3125,
+      "p": 0.5102
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 13451,
+      "k": 689,
+      "p": 0.0512
+     },
+     "same_digit_given_both_printed": {
+      "n": 3125,
+      "k": 2418,
+      "p": 0.7738
+     }
+    },
+    "exact": {
+     "n_later_occurrences": 497,
+     "length_events": {
+      "n": 497,
+      "median": 6.0,
+      "p90": 20,
+      "max": 95,
+      "mean": 9.76
+     },
+     "length_notes": {
+      "n": 497,
+      "median": 8.0,
+      "p90": 26,
+      "max": 99,
+      "mean": 12.74
+     },
+     "first_occurrence_notes": {
+      "n": 2752,
+      "k": 627,
+      "p": 0.2278
+     },
+     "later_occurrence_notes": {
+      "n": 6330,
+      "k": 753,
+      "p": 0.119
+     },
+     "aligned_pairs": 6330,
+     "p_later_printed_given_first_printed": {
+      "n": 1715,
+      "k": 644,
+      "p": 0.3755
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 4615,
+      "k": 109,
+      "p": 0.0236
+     },
+     "same_digit_given_both_printed": {
+      "n": 644,
+      "k": 529,
+      "p": 0.8214
+     }
+    },
+    "transposed_same_pattern": {
+     "n_later_occurrences": 270,
+     "length_events": {
+      "n": 270,
+      "median": 4.0,
+      "p90": 7,
+      "max": 19,
+      "mean": 4.97
+     },
+     "length_notes": {
+      "n": 270,
+      "median": 4.0,
+      "p90": 10,
+      "max": 28,
+      "mean": 5.79
+     },
+     "first_occurrence_notes": {
+      "n": 1017,
+      "k": 351,
+      "p": 0.3451
+     },
+     "later_occurrence_notes": {
+      "n": 1564,
+      "k": 372,
+      "p": 0.2379
+     },
+     "aligned_pairs": 1564,
+     "p_later_printed_given_first_printed": {
+      "n": 506,
+      "k": 311,
+      "p": 0.6146
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 1058,
+      "k": 61,
+      "p": 0.0577
+     },
+     "same_digit_given_both_printed": {
+      "n": 311,
+      "k": 266,
+      "p": 0.8553
+     }
+    },
+    "transposed_diff_pattern": {
+     "n_later_occurrences": 451,
+     "length_events": {
+      "n": 451,
+      "median": 4.0,
+      "p90": 8,
+      "max": 22,
+      "mean": 5.34
+     },
+     "length_notes": {
+      "n": 451,
+      "median": 5.0,
+      "p90": 12,
+      "max": 28,
+      "mean": 6.43
+     },
+     "first_occurrence_notes": {
+      "n": 1494,
+      "k": 439,
+      "p": 0.2938
+     },
+     "later_occurrence_notes": {
+      "n": 2900,
+      "k": 655,
+      "p": 0.2259
+     },
+     "aligned_pairs": 2900,
+     "p_later_printed_given_first_printed": {
+      "n": 898,
+      "k": 491,
+      "p": 0.5468
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 2002,
+      "k": 164,
+      "p": 0.0819
+     },
+     "same_digit_given_both_printed": {
+      "n": 491,
+      "k": 312,
+      "p": 0.6354
+     }
+    },
+    "mixed_shift": {
+     "n_later_occurrences": 603,
+     "length_events": {
+      "n": 603,
+      "median": 7.0,
+      "p90": 25,
+      "max": 377,
+      "mean": 13.23
+     },
+     "length_notes": {
+      "n": 603,
+      "median": 8.0,
+      "p90": 30,
+      "max": 392,
+      "mean": 14.56
+     },
+     "first_occurrence_notes": {
+      "n": 2531,
+      "k": 840,
+      "p": 0.3319
+     },
+     "later_occurrence_notes": {
+      "n": 8782,
+      "k": 2034,
+      "p": 0.2316
+     },
+     "aligned_pairs": 8782,
+     "p_later_printed_given_first_printed": {
+      "n": 3006,
+      "k": 1679,
+      "p": 0.5585
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 5776,
+      "k": 355,
+      "p": 0.0615
+     },
+     "same_digit_given_both_printed": {
+      "n": 1679,
+      "k": 1311,
+      "p": 0.7808
+     }
+    },
+    "adjacent": {
+     "n_later_occurrences": 269,
+     "length_events": {
+      "n": 269,
+      "median": 6.0,
+      "p90": 12,
+      "max": 377,
+      "mean": 9.4
+     },
+     "length_notes": {
+      "n": 269,
+      "median": 6.0,
+      "p90": 16,
+      "max": 392,
+      "mean": 11.25
+     },
+     "first_occurrence_notes": {
+      "n": 1843,
+      "k": 522,
+      "p": 0.2832
+     },
+     "later_occurrence_notes": {
+      "n": 3026,
+      "k": 405,
+      "p": 0.1338
+     },
+     "aligned_pairs": 3026,
+     "p_later_printed_given_first_printed": {
+      "n": 775,
+      "k": 350,
+      "p": 0.4516
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 2251,
+      "k": 55,
+      "p": 0.0244
+     },
+     "same_digit_given_both_printed": {
+      "n": 350,
+      "k": 292,
+      "p": 0.8343
+     }
+    },
+    "distant": {
+     "n_later_occurrences": 1552,
+     "length_events": {
+      "n": 1552,
+      "median": 5.0,
+      "p90": 15,
+      "max": 215,
+      "mean": 9.05
+     },
+     "length_notes": {
+      "n": 1552,
+      "median": 6.0,
+      "p90": 20,
+      "max": 215,
+      "mean": 10.66
+     },
+     "first_occurrence_notes": {
+      "n": 4676,
+      "k": 1302,
+      "p": 0.2784
+     },
+     "later_occurrence_notes": {
+      "n": 16550,
+      "k": 3409,
+      "p": 0.206
+     },
+     "aligned_pairs": 16550,
+     "p_later_printed_given_first_printed": {
+      "n": 5350,
+      "k": 2775,
+      "p": 0.5187
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 11200,
+      "k": 634,
+      "p": 0.0566
+     },
+     "same_digit_given_both_printed": {
+      "n": 2775,
+      "k": 2126,
+      "p": 0.7661
+     }
+    },
+    "len_ge_8": {
+     "n_later_occurrences": 576,
+     "length_events": {
+      "n": 576,
+      "median": 11.0,
+      "p90": 34,
+      "max": 377,
+      "mean": 18.43
+     },
+     "length_notes": {
+      "n": 576,
+      "median": 12.0,
+      "p90": 40,
+      "max": 392,
+      "mean": 21.86
+     },
+     "first_occurrence_notes": {
+      "n": 4157,
+      "k": 1097,
+      "p": 0.2639
+     },
+     "later_occurrence_notes": {
+      "n": 12590,
+      "k": 2179,
+      "p": 0.1731
+     },
+     "aligned_pairs": 12590,
+     "p_later_printed_given_first_printed": {
+      "n": 3763,
+      "k": 1879,
+      "p": 0.4993
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 8827,
+      "k": 300,
+      "p": 0.034
+     },
+     "same_digit_given_both_printed": {
+      "n": 1879,
+      "k": 1541,
+      "p": 0.8201
+     }
+    },
+    "len_ge_16": {
+     "n_later_occurrences": 175,
+     "length_events": {
+      "n": 175,
+      "median": 25.0,
+      "p90": 72,
+      "max": 377,
+      "mean": 38.06
+     },
+     "length_notes": {
+      "n": 175,
+      "median": 33.0,
+      "p90": 87,
+      "max": 392,
+      "mean": 45.18
+     },
+     "first_occurrence_notes": {
+      "n": 2923,
+      "k": 780,
+      "p": 0.2668
+     },
+     "later_occurrence_notes": {
+      "n": 7907,
+      "k": 1480,
+      "p": 0.1872
+     },
+     "aligned_pairs": 7907,
+     "p_later_printed_given_first_printed": {
+      "n": 2611,
+      "k": 1296,
+      "p": 0.4964
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 5296,
+      "k": 184,
+      "p": 0.0347
+     },
+     "same_digit_given_both_printed": {
+      "n": 1296,
+      "k": 1063,
+      "p": 0.8202
+     }
+    },
+    "exact_len_ge_8": {
+     "n_later_occurrences": 204,
+     "length_events": {
+      "n": 204,
+      "median": 12.0,
+      "p90": 30,
+      "max": 95,
+      "mean": 16.57
+     },
+     "length_notes": {
+      "n": 204,
+      "median": 16.0,
+      "p90": 43,
+      "max": 99,
+      "mean": 21.9
+     },
+     "first_occurrence_notes": {
+      "n": 2015,
+      "k": 444,
+      "p": 0.2203
+     },
+     "later_occurrence_notes": {
+      "n": 4467,
+      "k": 440,
+      "p": 0.0985
+     },
+     "aligned_pairs": 4467,
+     "p_later_printed_given_first_printed": {
+      "n": 1171,
+      "k": 381,
+      "p": 0.3254
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 3296,
+      "k": 59,
+      "p": 0.0179
+     },
+     "same_digit_given_both_printed": {
+      "n": 381,
+      "k": 324,
+      "p": 0.8504
+     }
+    }
+   }
+  },
+  "other": {
+   "n_parts": 65,
+   "notes": {
+    "n": 94916,
+    "k": 8142,
+    "p": 0.0858
+   },
+   "baseline_no_repeat": {
+    "n": 21025,
+    "k": 2718,
+    "p": 0.1293
+   },
+   "categories": {
+    "all": {
+     "n_later_occurrences": 3498,
+     "length_events": {
+      "n": 3498,
+      "median": 6.0,
+      "p90": 18,
+      "max": 386,
+      "mean": 10.14
+     },
+     "length_notes": {
+      "n": 3498,
+      "median": 8.0,
+      "p90": 28,
+      "max": 877,
+      "mean": 15.4
+     },
+     "first_occurrence_notes": {
+      "n": 20015,
+      "k": 2623,
+      "p": 0.1311
+     },
+     "later_occurrence_notes": {
+      "n": 53876,
+      "k": 2801,
+      "p": 0.052
+     },
+     "aligned_pairs": 53876,
+     "p_later_printed_given_first_printed": {
+      "n": 7805,
+      "k": 2041,
+      "p": 0.2615
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 46071,
+      "k": 760,
+      "p": 0.0165
+     },
+     "same_digit_given_both_printed": {
+      "n": 2041,
+      "k": 1654,
+      "p": 0.8104
+     }
+    },
+    "exact": {
+     "n_later_occurrences": 1802,
+     "length_events": {
+      "n": 1802,
+      "median": 6.0,
+      "p90": 16,
+      "max": 169,
+      "mean": 9.44
+     },
+     "length_notes": {
+      "n": 1802,
+      "median": 10.0,
+      "p90": 29,
+      "max": 459,
+      "mean": 15.57
+     },
+     "first_occurrence_notes": {
+      "n": 13178,
+      "k": 1520,
+      "p": 0.1153
+     },
+     "later_occurrence_notes": {
+      "n": 28056,
+      "k": 704,
+      "p": 0.0251
+     },
+     "aligned_pairs": 28056,
+     "p_later_printed_given_first_printed": {
+      "n": 3726,
+      "k": 556,
+      "p": 0.1492
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 24330,
+      "k": 148,
+      "p": 0.0061
+     },
+     "same_digit_given_both_printed": {
+      "n": 556,
+      "k": 474,
+      "p": 0.8525
+     }
+    },
+    "transposed_same_pattern": {
+     "n_later_occurrences": 466,
+     "length_events": {
+      "n": 466,
+      "median": 5.0,
+      "p90": 10,
+      "max": 112,
+      "mean": 6.59
+     },
+     "length_notes": {
+      "n": 466,
+      "median": 6.0,
+      "p90": 16,
+      "max": 112,
+      "mean": 8.52
+     },
+     "first_occurrence_notes": {
+      "n": 2387,
+      "k": 375,
+      "p": 0.1571
+     },
+     "later_occurrence_notes": {
+      "n": 3971,
+      "k": 391,
+      "p": 0.0985
+     },
+     "aligned_pairs": 3971,
+     "p_later_printed_given_first_printed": {
+      "n": 543,
+      "k": 269,
+      "p": 0.4954
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 3428,
+      "k": 122,
+      "p": 0.0356
+     },
+     "same_digit_given_both_printed": {
+      "n": 269,
+      "k": 199,
+      "p": 0.7398
+     }
+    },
+    "transposed_diff_pattern": {
+     "n_later_occurrences": 718,
+     "length_events": {
+      "n": 718,
+      "median": 4.0,
+      "p90": 10,
+      "max": 96,
+      "mean": 6.42
+     },
+     "length_notes": {
+      "n": 718,
+      "median": 6.0,
+      "p90": 16,
+      "max": 96,
+      "mean": 8.81
+     },
+     "first_occurrence_notes": {
+      "n": 3839,
+      "k": 626,
+      "p": 0.1631
+     },
+     "later_occurrence_notes": {
+      "n": 6329,
+      "k": 694,
+      "p": 0.1097
+     },
+     "aligned_pairs": 6329,
+     "p_later_printed_given_first_printed": {
+      "n": 1074,
+      "k": 432,
+      "p": 0.4022
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 5255,
+      "k": 262,
+      "p": 0.0499
+     },
+     "same_digit_given_both_printed": {
+      "n": 432,
+      "k": 289,
+      "p": 0.669
+     }
+    },
+    "mixed_shift": {
+     "n_later_occurrences": 512,
+     "length_events": {
+      "n": 512,
+      "median": 9.0,
+      "p90": 44,
+      "max": 386,
+      "mean": 21.03
+     },
+     "length_notes": {
+      "n": 512,
+      "median": 10.5,
+      "p90": 64,
+      "max": 877,
+      "mean": 30.31
+     },
+     "first_occurrence_notes": {
+      "n": 6577,
+      "k": 990,
+      "p": 0.1505
+     },
+     "later_occurrence_notes": {
+      "n": 15520,
+      "k": 1012,
+      "p": 0.0652
+     },
+     "aligned_pairs": 15520,
+     "p_later_printed_given_first_printed": {
+      "n": 2462,
+      "k": 784,
+      "p": 0.3184
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 13058,
+      "k": 228,
+      "p": 0.0175
+     },
+     "same_digit_given_both_printed": {
+      "n": 784,
+      "k": 692,
+      "p": 0.8827
+     }
+    },
+    "adjacent": {
+     "n_later_occurrences": 955,
+     "length_events": {
+      "n": 955,
+      "median": 6.0,
+      "p90": 16,
+      "max": 190,
+      "mean": 9.21
+     },
+     "length_notes": {
+      "n": 955,
+      "median": 8.0,
+      "p90": 29,
+      "max": 459,
+      "mean": 14.85
+     },
+     "first_occurrence_notes": {
+      "n": 9172,
+      "k": 1015,
+      "p": 0.1107
+     },
+     "later_occurrence_notes": {
+      "n": 14185,
+      "k": 396,
+      "p": 0.0279
+     },
+     "aligned_pairs": 14185,
+     "p_later_printed_given_first_printed": {
+      "n": 1807,
+      "k": 331,
+      "p": 0.1832
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 12378,
+      "k": 65,
+      "p": 0.0053
+     },
+     "same_digit_given_both_printed": {
+      "n": 331,
+      "k": 262,
+      "p": 0.7915
+     }
+    },
+    "distant": {
+     "n_later_occurrences": 2543,
+     "length_events": {
+      "n": 2543,
+      "median": 5.0,
+      "p90": 19,
+      "max": 386,
+      "mean": 10.48
+     },
+     "length_notes": {
+      "n": 2543,
+      "median": 8.0,
+      "p90": 28,
+      "max": 877,
+      "mean": 15.61
+     },
+     "first_occurrence_notes": {
+      "n": 15411,
+      "k": 2211,
+      "p": 0.1435
+     },
+     "later_occurrence_notes": {
+      "n": 39691,
+      "k": 2405,
+      "p": 0.0606
+     },
+     "aligned_pairs": 39691,
+     "p_later_printed_given_first_printed": {
+      "n": 5998,
+      "k": 1710,
+      "p": 0.2851
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 33693,
+      "k": 695,
+      "p": 0.0206
+     },
+     "same_digit_given_both_printed": {
+      "n": 1710,
+      "k": 1392,
+      "p": 0.814
+     }
+    },
+    "len_ge_8": {
+     "n_later_occurrences": 1218,
+     "length_events": {
+      "n": 1218,
+      "median": 12.0,
+      "p90": 36,
+      "max": 386,
+      "mean": 20.26
+     },
+     "length_notes": {
+      "n": 1218,
+      "median": 18.0,
+      "p90": 58,
+      "max": 877,
+      "mean": 31.11
+     },
+     "first_occurrence_notes": {
+      "n": 15251,
+      "k": 2122,
+      "p": 0.1391
+     },
+     "later_occurrence_notes": {
+      "n": 37897,
+      "k": 1744,
+      "p": 0.046
+     },
+     "aligned_pairs": 37897,
+     "p_later_printed_given_first_printed": {
+      "n": 5915,
+      "k": 1410,
+      "p": 0.2384
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 31982,
+      "k": 334,
+      "p": 0.0104
+     },
+     "same_digit_given_both_printed": {
+      "n": 1410,
+      "k": 1239,
+      "p": 0.8787
+     }
+    },
+    "len_ge_16": {
+     "n_later_occurrences": 468,
+     "length_events": {
+      "n": 468,
+      "median": 24.0,
+      "p90": 69,
+      "max": 386,
+      "mean": 36.54
+     },
+     "length_notes": {
+      "n": 468,
+      "median": 35.0,
+      "p90": 118,
+      "max": 877,
+      "mean": 56.3
+     },
+     "first_occurrence_notes": {
+      "n": 11013,
+      "k": 1622,
+      "p": 0.1473
+     },
+     "later_occurrence_notes": {
+      "n": 26350,
+      "k": 1224,
+      "p": 0.0465
+     },
+     "aligned_pairs": 26350,
+     "p_later_printed_given_first_printed": {
+      "n": 4276,
+      "k": 1002,
+      "p": 0.2343
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 22074,
+      "k": 222,
+      "p": 0.0101
+     },
+     "same_digit_given_both_printed": {
+      "n": 1002,
+      "k": 915,
+      "p": 0.9132
+     }
+    },
+    "exact_len_ge_8": {
+     "n_later_occurrences": 701,
+     "length_events": {
+      "n": 701,
+      "median": 12.0,
+      "p90": 28,
+      "max": 169,
+      "mean": 16.74
+     },
+     "length_notes": {
+      "n": 701,
+      "median": 19.0,
+      "p90": 51,
+      "max": 459,
+      "mean": 27.54
+     },
+     "first_occurrence_notes": {
+      "n": 9302,
+      "k": 1187,
+      "p": 0.1276
+     },
+     "later_occurrence_notes": {
+      "n": 19308,
+      "k": 425,
+      "p": 0.022
+     },
+     "aligned_pairs": 19308,
+     "p_later_printed_given_first_printed": {
+      "n": 2834,
+      "k": 386,
+      "p": 0.1362
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 16474,
+      "k": 39,
+      "p": 0.0024
+     },
+     "same_digit_given_both_printed": {
+      "n": 386,
+      "k": 343,
+      "p": 0.8886
+     }
+    }
+   }
+  },
+  "library": {
+   "n_parts": 8,
+   "notes": {
+    "n": 3457,
+    "k": 751,
+    "p": 0.2172
+   },
+   "baseline_no_repeat": {
+    "n": 812,
+    "k": 194,
+    "p": 0.2389
+   },
+   "categories": {
+    "all": {
+     "n_later_occurrences": 181,
+     "length_events": {
+      "n": 181,
+      "median": 5.0,
+      "p90": 16,
+      "max": 80,
+      "mean": 9.24
+     },
+     "length_notes": {
+      "n": 181,
+      "median": 5.0,
+      "p90": 20,
+      "max": 92,
+      "mean": 10.54
+     },
+     "first_occurrence_notes": {
+      "n": 737,
+      "k": 192,
+      "p": 0.2605
+     },
+     "later_occurrence_notes": {
+      "n": 1908,
+      "k": 365,
+      "p": 0.1913
+     },
+     "aligned_pairs": 1908,
+     "p_later_printed_given_first_printed": {
+      "n": 518,
+      "k": 279,
+      "p": 0.5386
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 1390,
+      "k": 86,
+      "p": 0.0619
+     },
+     "same_digit_given_both_printed": {
+      "n": 279,
+      "k": 248,
+      "p": 0.8889
+     }
+    },
+    "exact": {
+     "n_later_occurrences": 95,
+     "length_events": {
+      "n": 95,
+      "median": 5.0,
+      "p90": 15,
+      "max": 54,
+      "mean": 7.82
+     },
+     "length_notes": {
+      "n": 95,
+      "median": 5.0,
+      "p90": 16,
+      "max": 92,
+      "mean": 9.85
+     },
+     "first_occurrence_notes": {
+      "n": 468,
+      "k": 89,
+      "p": 0.1902
+     },
+     "later_occurrence_notes": {
+      "n": 936,
+      "k": 109,
+      "p": 0.1165
+     },
+     "aligned_pairs": 936,
+     "p_later_printed_given_first_printed": {
+      "n": 199,
+      "k": 76,
+      "p": 0.3819
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 737,
+      "k": 33,
+      "p": 0.0448
+     },
+     "same_digit_given_both_printed": {
+      "n": 76,
+      "k": 61,
+      "p": 0.8026
+     }
+    },
+    "transposed_same_pattern": {
+     "n_later_occurrences": 36,
+     "length_events": {
+      "n": 36,
+      "median": 5.0,
+      "p90": 10,
+      "max": 80,
+      "mean": 7.86
+     },
+     "length_notes": {
+      "n": 36,
+      "median": 5.0,
+      "p90": 11,
+      "max": 80,
+      "mean": 8.08
+     },
+     "first_occurrence_notes": {
+      "n": 134,
+      "k": 38,
+      "p": 0.2836
+     },
+     "later_occurrence_notes": {
+      "n": 291,
+      "k": 59,
+      "p": 0.2027
+     },
+     "aligned_pairs": 291,
+     "p_later_printed_given_first_printed": {
+      "n": 80,
+      "k": 40,
+      "p": 0.5
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 211,
+      "k": 19,
+      "p": 0.09
+     },
+     "same_digit_given_both_printed": {
+      "n": 40,
+      "k": 38,
+      "p": 0.95
+     }
+    },
+    "transposed_diff_pattern": {
+     "n_later_occurrences": 32,
+     "length_events": {
+      "n": 32,
+      "median": 5.5,
+      "p90": 23,
+      "max": 39,
+      "mean": 9.28
+     },
+     "length_notes": {
+      "n": 32,
+      "median": 6.0,
+      "p90": 27,
+      "max": 45,
+      "mean": 10.03
+     },
+     "first_occurrence_notes": {
+      "n": 202,
+      "k": 68,
+      "p": 0.3366
+     },
+     "later_occurrence_notes": {
+      "n": 321,
+      "k": 97,
+      "p": 0.3022
+     },
+     "aligned_pairs": 321,
+     "p_later_printed_given_first_printed": {
+      "n": 116,
+      "k": 84,
+      "p": 0.7241
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 205,
+      "k": 13,
+      "p": 0.0634
+     },
+     "same_digit_given_both_printed": {
+      "n": 84,
+      "k": 77,
+      "p": 0.9167
+     }
+    },
+    "mixed_shift": {
+     "n_later_occurrences": 18,
+     "length_events": {
+      "n": 18,
+      "median": 15.0,
+      "p90": 37,
+      "max": 75,
+      "mean": 19.44
+     },
+     "length_notes": {
+      "n": 18,
+      "median": 15.5,
+      "p90": 42,
+      "max": 75,
+      "mean": 20.0
+     },
+     "first_occurrence_notes": {
+      "n": 204,
+      "k": 75,
+      "p": 0.3676
+     },
+     "later_occurrence_notes": {
+      "n": 360,
+      "k": 100,
+      "p": 0.2778
+     },
+     "aligned_pairs": 360,
+     "p_later_printed_given_first_printed": {
+      "n": 123,
+      "k": 79,
+      "p": 0.6423
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 237,
+      "k": 21,
+      "p": 0.0886
+     },
+     "same_digit_given_both_printed": {
+      "n": 79,
+      "k": 72,
+      "p": 0.9114
+     }
+    },
+    "adjacent": {
+     "n_later_occurrences": 40,
+     "length_events": {
+      "n": 40,
+      "median": 5.5,
+      "p90": 14,
+      "max": 37,
+      "mean": 7.62
+     },
+     "length_notes": {
+      "n": 40,
+      "median": 8.0,
+      "p90": 16,
+      "max": 42,
+      "mean": 8.82
+     },
+     "first_occurrence_notes": {
+      "n": 248,
+      "k": 75,
+      "p": 0.3024
+     },
+     "later_occurrence_notes": {
+      "n": 353,
+      "k": 40,
+      "p": 0.1133
+     },
+     "aligned_pairs": 353,
+     "p_later_printed_given_first_printed": {
+      "n": 105,
+      "k": 38,
+      "p": 0.3619
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 248,
+      "k": 2,
+      "p": 0.0081
+     },
+     "same_digit_given_both_printed": {
+      "n": 38,
+      "k": 36,
+      "p": 0.9474
+     }
+    },
+    "distant": {
+     "n_later_occurrences": 141,
+     "length_events": {
+      "n": 141,
+      "median": 5.0,
+      "p90": 23,
+      "max": 80,
+      "mean": 9.7
+     },
+     "length_notes": {
+      "n": 141,
+      "median": 5.0,
+      "p90": 25,
+      "max": 92,
+      "mean": 11.03
+     },
+     "first_occurrence_notes": {
+      "n": 646,
+      "k": 164,
+      "p": 0.2539
+     },
+     "later_occurrence_notes": {
+      "n": 1555,
+      "k": 325,
+      "p": 0.209
+     },
+     "aligned_pairs": 1555,
+     "p_later_printed_given_first_printed": {
+      "n": 413,
+      "k": 241,
+      "p": 0.5835
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 1142,
+      "k": 84,
+      "p": 0.0736
+     },
+     "same_digit_given_both_printed": {
+      "n": 241,
+      "k": 212,
+      "p": 0.8797
+     }
+    },
+    "len_ge_8": {
+     "n_later_occurrences": 57,
+     "length_events": {
+      "n": 57,
+      "median": 13.0,
+      "p90": 39,
+      "max": 80,
+      "mean": 19.04
+     },
+     "length_notes": {
+      "n": 57,
+      "median": 14.0,
+      "p90": 45,
+      "max": 92,
+      "mean": 21.47
+     },
+     "first_occurrence_notes": {
+      "n": 587,
+      "k": 156,
+      "p": 0.2658
+     },
+     "later_occurrence_notes": {
+      "n": 1224,
+      "k": 250,
+      "p": 0.2042
+     },
+     "aligned_pairs": 1224,
+     "p_later_printed_given_first_printed": {
+      "n": 364,
+      "k": 219,
+      "p": 0.6016
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 860,
+      "k": 31,
+      "p": 0.036
+     },
+     "same_digit_given_both_printed": {
+      "n": 219,
+      "k": 206,
+      "p": 0.9406
+     }
+    },
+    "len_ge_16": {
+     "n_later_occurrences": 23,
+     "length_events": {
+      "n": 23,
+      "median": 30.0,
+      "p90": 54,
+      "max": 80,
+      "mean": 32.74
+     },
+     "length_notes": {
+      "n": 23,
+      "median": 31.0,
+      "p90": 75,
+      "max": 92,
+      "mean": 37.48
+     },
+     "first_occurrence_notes": {
+      "n": 499,
+      "k": 135,
+      "p": 0.2705
+     },
+     "later_occurrence_notes": {
+      "n": 862,
+      "k": 181,
+      "p": 0.21
+     },
+     "aligned_pairs": 862,
+     "p_later_printed_given_first_printed": {
+      "n": 249,
+      "k": 158,
+      "p": 0.6345
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 613,
+      "k": 23,
+      "p": 0.0375
+     },
+     "same_digit_given_both_printed": {
+      "n": 158,
+      "k": 147,
+      "p": 0.9304
+     }
+    },
+    "exact_len_ge_8": {
+     "n_later_occurrences": 27,
+     "length_events": {
+      "n": 27,
+      "median": 10.0,
+      "p90": 40,
+      "max": 54,
+      "mean": 15.93
+     },
+     "length_notes": {
+      "n": 27,
+      "median": 12.0,
+      "p90": 48,
+      "max": 92,
+      "mean": 20.07
+     },
+     "first_occurrence_notes": {
+      "n": 318,
+      "k": 54,
+      "p": 0.1698
+     },
+     "later_occurrence_notes": {
+      "n": 542,
+      "k": 58,
+      "p": 0.107
+     },
+     "aligned_pairs": 542,
+     "p_later_printed_given_first_printed": {
+      "n": 110,
+      "k": 46,
+      "p": 0.4182
+     },
+     "p_later_printed_given_first_unprinted": {
+      "n": 432,
+      "k": 12,
+      "p": 0.0278
+     },
+     "same_digit_given_both_printed": {
+      "n": 46,
+      "k": 44,
+      "p": 0.9565
+     }
+    }
+   }
+  }
+ },
+ "column_legend": {
+  "first_occurrence_notes": "distinct root notes (earliest statements) that later notes of this category are aligned with; k = printed",
+  "later_occurrence_notes": "notes in later occurrences of this category; k = printed",
+  "p_later_printed_given_first_printed": "aligned note pairs; n = pairs whose root note is printed, k = of those, later note printed",
+  "p_later_printed_given_first_unprinted": "n = pairs whose root note is unprinted, k = later printed",
+  "same_digit_given_both_printed": "share of pairs with both printed whose digits are equal",
+  "baseline_no_repeat": "notes in no repeated segment (neither a later note nor a root of one)",
+  "categories": "kinds (exact, transposed_*, mixed_shift) are relative to the root events; adjacent/distant relative to the direct first occurrence; len_* by occurrence length in events"
+ },
+ "caveats": [
+  "The Mutopia converter keeps volta/segno repeats in written order (printed once) and expands \\repeat unfold; a passage written with repeat signs is therefore not a repeat here, and an unfolded block carries the editor's digits on every copy by construction (LilyPond engraves them on every copy too, so that is what the reader sees).",
+  "Matching is chromatic (constant semitone shift); diatonic sequences whose interval qualities change are not detected.",
+  "Four-event matches include generic figuration (Alberti cells, scale fragments, repeated chords); the len_ge_8 / len_ge_16 / exact_len_ge_8 rows are closer to 'repeated passage' in the musical sense. Periodic figuration produces doubling segments (4, 8, 16, ... events), so long segments are not always phrases.",
+  "Greedy left-to-right search: a short match at j can pre-empt a longer one starting at j+1.",
+  "Library pieces are excerpts of pieces also present in the Mutopia corpus."
+ ]
+}

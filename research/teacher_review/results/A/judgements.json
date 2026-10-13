@@ -1,0 +1,5881 @@
+{
+ "it-a700": {
+  "item": "it-a700",
+  "passage": "p06",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Clean five-finger positions (D3 and C3) with the shift at the bar line; the leaps E4-D3 and G2-C2 come from the music and are taken with the natural fingers.",
+  "readback": {
+   "L": {
+    "n": 23,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-6efc": {
+  "item": "it-6efc",
+  "passage": "p36",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L5",
+     "L6"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 3 and 2 cannot span the major sixth C3-A3; the same chord is taken 5+1 just before and after.",
+    "fix": {
+     "L5": 5,
+     "L6": 1
+    }
+   },
+   {
+    "notes": [
+     "L13",
+     "L14"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 3 is assigned to both A2 and E3 of one chord; the thumb should keep E3 from the octave before.",
+    "fix": {
+     "L14": 1
+    }
+   }
+  ],
+  "comment": "Two impossible chords: the repeated C3+A3 must stay 5+1 throughout, and the closing A2+E3 wants 3+1 with the thumb holding its place on E3.",
+  "readback": {
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-c75c": {
+  "item": "it-c75c",
+  "passage": "p04",
+  "condition": "expert",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3",
+     "R4"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "Thumb and 2 cross back and forth on D5-C#5-D5 at ornament speed, then 3 crosses again; 4-3-4-3 keeps the turn in place.",
+    "fix": {
+     "R1": 4,
+     "R2": 3,
+     "R3": 4
+    }
+   }
+  ],
+  "comment": "Sound apart from the opening ornament; fingered 4-3-4-3, the descent continues naturally with 2 and 1 to A4.",
+  "readback": {
+   "R": {
+    "n": 20,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-fc5d": {
+  "item": "it-fc5d",
+  "passage": "p25",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R9",
+     "R10"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 5 hops from G5 to C6 at sixteenth speed, breaking the legato at the top of the rising broken chord.",
+    "fix": {
+     "R9": 1
+    }
+   }
+  ],
+  "comment": "The thumb-under start in bar 5 neatly fits that arpeggio into one octave; bar 6 only needs the hop removed. The 4-5 trill in bar 7 is weak but tolerable for so short an ornament.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-47bb": {
+  "item": "it-47bb",
+  "passage": "p05",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "warning",
+    "problem": "Thumb on Eb5 between two E5s, then 5 lands a semitone above it at sixteenth speed: cramped, and thumb on a black key.",
+    "fix": {
+     "R1": 4,
+     "R2": 3
+    }
+   },
+   {
+    "notes": [
+     "R11",
+     "R13",
+     "R14",
+     "R15"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "Rising C#5-Eb5-E5 fingered 5-4-3: 5 takes C#5 while still holding E5, then 4 and 3 land above the held 5.",
+    "fix": {
+     "R13": 3,
+     "R15": 5
+    }
+   }
+  ],
+  "comment": "Holding the upper voice with 5 while the lower voice moves is well planned, but bar 7 beat 4 cannot be played as written; reuse the 4-5 from R10-R11 for the Eb5-E5 figure.",
+  "readback": {
+   "R": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-fcb3": {
+  "item": "it-fcb3",
+  "passage": "p09",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R6",
+     "R7",
+     "R8",
+     "R9"
+    ],
+    "kind": "thumb_pass_onto_black",
+    "severity": "warning",
+    "problem": "Thumb passes under 3 onto black F#5 inside a 32nd-note turn, then 3 crosses back; R2-R4 already shows the in-place 4-3-4.",
+    "fix": {
+     "R8": 4
+    }
+   },
+   {
+    "notes": [
+     "R12",
+     "R13",
+     "R14"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "C5-B4-C5 fingered 3-5-4: 5 must pass under 3 and 4 back over 5 at 32nd-note speed.",
+    "fix": {
+     "R12": 2,
+     "R13": 1,
+     "R14": 2
+    }
+   }
+  ],
+  "comment": "Both ornaments should be fingered in one position; as written the second turn is clumsy and the mordent in bar 6 cannot be played.",
+  "readback": {
+   "R": {
+    "n": 16,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-366b": {
+  "item": "it-366b",
+  "passage": "p02",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R4",
+     "R5",
+     "R6"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "Rising G4-G#4-Bb4 fingered 5-4-3 against the held thumb reverses finger order; the sequence in bar 13 uses 2-3-4.",
+    "fix": {
+     "R4": 2,
+     "R5": 3,
+     "R6": 4
+    }
+   },
+   {
+    "notes": [
+     "R17",
+     "R18",
+     "R19"
+    ],
+    "kind": "crossed_chord",
+    "severity": "error",
+    "problem": "Thumb holds Bb4 while 2 plays G4 below it, then the thumb must take Eb4 before Bb4 ends.",
+    "fix": {
+     "R17": 3
+    }
+   },
+   {
+    "notes": [
+     "R31",
+     "R32"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Thumb assigned to both notes of the octave G3+G4.",
+    "fix": {
+     "R32": 5
+    }
+   }
+  ],
+  "comment": "Bar 13 is a sequence of bar 12 a tone higher and should share its fingering (3 2 1 2 3 4 2 1); the final octave needs 1+5.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-75dd": {
+  "item": "it-75dd",
+  "passage": "p28",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R16",
+     "R18",
+     "R20"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "With F5 held by 5, taking C#5 with 4 forces a major-third 4-5 spread twice; 3 sits there naturally.",
+    "fix": {
+     "R18": 3,
+     "R20": 3
+    }
+   }
+  ],
+  "comment": "The melody fingering (4-5 for Eb5-F5) is well chosen; the G#4+Bb5 ninth is a stretch imposed by the music, not by the fingering.",
+  "readback": {
+   "R": {
+    "n": 20,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-01"
+ },
+ "it-ff11": {
+  "item": "it-ff11",
+  "passage": "p40",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L12",
+     "L13",
+     "L14"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 4 is given to both Eb3 and G#3 in the same chord; one finger cannot cover a fourth.",
+    "fix": {
+     "L13": 2
+    }
+   },
+   {
+    "notes": [
+     "R2",
+     "R3"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 3 plays G#5 then Eb5 in consecutive eighths, a hop of a fourth; finger 2 on Eb5 keeps the line connected.",
+    "fix": {
+     "R3": 2
+    }
+   },
+   {
+    "notes": [
+     "L2",
+     "L3",
+     "L4",
+     "L5",
+     "L6",
+     "L7"
+    ],
+    "kind": "inconsistent",
+    "severity": "warning",
+    "problem": "Same chord on beats 2 and 3 fingered 4-3-2 then 4-2-1; 4-3-2 stretches 3-2 across a fourth. Use 4-2-1 both times.",
+    "fix": {
+     "L3": 2,
+     "L4": 1
+    }
+   }
+  ],
+  "comment": "The waltz layout and the 3-2-1 repeated-note fingering on Eb5 are good, but the bar 25 beat 3 chord is impossible and the two bar 24 chords should match.",
+  "readback": {
+   "R": {
+    "n": 10,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-f0a3": {
+  "item": "it-f0a3",
+  "passage": "p24",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R8",
+     "R10"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "G4 is held as a dotted half on finger 3 while the same finger must play F4 in the turn below it.",
+    "fix": {
+     "R8": 4
+    }
+   },
+   {
+    "notes": [
+     "R15",
+     "R16"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "A4 is still held by finger 4 when Bb4, a semitone higher, is taken by finger 3: a long finger crossing a long finger.",
+    "fix": {
+     "R15": 2
+    }
+   }
+  ],
+  "comment": "Bars 5-7 are clean. Bars 8 and 9 overlook the sustained G4 and A4: the fingers holding them cannot be reused for the moving notes.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-c031": {
+  "item": "it-c031",
+  "passage": "p34",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "R13",
+     "R14",
+     "R15",
+     "R17"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "info",
+    "problem": "Root-position triad G#4-C5-Eb5 on 1-3-4; standard 1-3-5 also lets the top line move Eb5-C#5 legato with 5-4.",
+    "fix": {
+     "R15": 5
+    }
+   }
+  ],
+  "comment": "Sound chordal fingering: the thumb anchors each sonority, 2 on G#4 gives a legato lower line where it matters, and the octaves are uniformly 1-2-5 around the repeated Bb4.",
+  "readback": {
+   "R": {
+    "n": 41,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-5d7f": {
+  "item": "it-5d7f",
+  "passage": "p11",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Both hands stay in natural five-finger positions, shifting only at the octave leaps, the rest and the held notes; usable as is.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-9bba": {
+  "item": "it-9bba",
+  "passage": "p08",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "R5",
+     "R6"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "The third falling third switches from 2-1 to 3-2; keeping 2-1 puts the thumb on G4, ready for the bar 30 position.",
+    "fix": {
+     "R5": 2,
+     "R6": 1
+    }
+   }
+  ],
+  "comment": "Sound and idiomatic; the 3-over-thumb crossing onto F4 in bar 30 is well placed.",
+  "readback": {
+   "R": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-1269": {
+  "item": "it-1269",
+  "passage": "p17",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard first-inversion arpeggio and triad shapes in both hands; the jump down to E4-G4 at bar 18 beat 3.5 is unavoidable and sensibly placed.",
+  "readback": {
+   "R": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 10,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-4654": {
+  "item": "it-4654",
+  "passage": "p05",
+  "condition": "expert",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "position_change",
+    "severity": "warning",
+    "problem": "E5-Eb5 on 3-2 then E5 on 5 forces a jump of the hand within three sixteenths; 5-4-5 stays put and matches later Eb5-E5.",
+    "fix": {
+     "R1": 5,
+     "R2": 4
+    }
+   },
+   {
+    "notes": [
+     "R17",
+     "R18",
+     "R20",
+     "R21",
+     "R22",
+     "R24"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "Finger 4 holds D5 and C#5 a minor seventh above the thumb on E4 and Eb4; finger the bar-8 sighs 4-5 as in bar 7.",
+    "fix": {
+     "R17": 4,
+     "R18": 5,
+     "R21": 4,
+     "R22": 5
+    }
+   }
+  ],
+  "comment": "Thoughtful two-voice fingering overall, and thumb slides in the lower voice are acceptable here, but the opening shift and the bar 8 stretches should be fixed.",
+  "readback": {
+   "R": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-0df4": {
+  "item": "it-0df4",
+  "passage": "p30",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L2",
+     "L3"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 2 holds G#3 for the whole bar yet must also play A3 on beat 2; bar 23 correctly uses 3 on G#3.",
+    "fix": {
+     "L2": 3
+    }
+   }
+  ],
+  "comment": "Bar 23 shows the right solution and bar 21 should match it; otherwise the positions are economical.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-02"
+ },
+ "it-e31b": {
+  "item": "it-e31b",
+  "passage": "p30",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Sound and economical: each bar sits in one hand frame and the repeated bars match. Using 5+3 in bar 24 sensibly keeps the thumb off C#4.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-a4b6": {
+  "item": "it-a4b6",
+  "passage": "p23",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Practical throughout: the unavoidable shift to the descending arpeggio falls on the leap, and the E3-G#3-B3 frame on 5-3-1 under the thirds is standard. The 5-to-5 bass leap into bar 9 is normal at this tempo.",
+  "readback": {
+   "L": {
+    "n": 21,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-f224": {
+  "item": "it-f224",
+  "passage": "p33",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "L15",
+     "L16",
+     "L17"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "3-2-1 on G#3-C#4-F4 puts a perfect fourth between fingers 3 and 2; 4-2-1, as in bar 26, is comfortable.",
+    "fix": {
+     "L15": 4,
+     "L16": 2,
+     "L17": 1
+    }
+   }
+  ],
+  "comment": "Good waltz-bass fingering overall, with the 5 kept for the bass and the chords placed without hops. Only the bar-28 chord needs the easier 4-2-1 shape.",
+  "readback": {
+   "L": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-0c9e": {
+  "item": "it-0c9e",
+  "passage": "p16",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 4 plays F5 then E5 in consecutive sixteenths; the descending run F5-C5 is simply 4-3-2-1.",
+    "fix": {
+     "R2": 3
+    }
+   },
+   {
+    "notes": [
+     "R5",
+     "R6"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 3 cannot play G#4 and B4 at once; 2+4 crosses over the thumb from C5 and leaves the thumb free for E4.",
+    "fix": {
+     "R5": 2,
+     "R6": 4
+    }
+   }
+  ],
+  "comment": "The G#4+B4 dyad on one finger is impossible and the 4-4 on F5-E5 is a slip. The thirds in bar 15 follow the standard 2/4, 3/5, 1/3 pattern and are fine.",
+  "readback": {
+   "R": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-4ba8": {
+  "item": "it-4ba8",
+  "passage": "p38",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Well judged: the descent crosses 4 onto the long F#4, which already places the thumb for B3, and the chords use standard 1-2-4-5 and 1-2-5 shapes. The black-key thumbs and fifths are forced by the octaves.",
+  "readback": {
+   "R": {
+    "n": 27,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-7c98": {
+  "item": "it-7c98",
+  "passage": "p14",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2"
+    ],
+    "kind": "fifth_on_black",
+    "severity": "info",
+    "problem": "Fifth finger on Bb4 in a plain quarter-note line; 2-4 on G4-Bb4 keeps the fifth off the black key.",
+    "fix": {
+     "R1": 2,
+     "R2": 4
+    }
+   },
+   {
+    "notes": [
+     "R3",
+     "R5"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb plays Bb3 then A3 consecutively, breaking the lower-voice legato and putting the thumb on a black key; 2 on Bb3 avoids both.",
+    "fix": {
+     "R3": 2
+    }
+   },
+   {
+    "notes": [
+     "R7",
+     "R8",
+     "R9",
+     "R10",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "kind": "repeated_note",
+    "severity": "warning",
+    "problem": "Shifting 2-3-4 across the repeated A5s walks the hand for nothing; the F5-C6 five-finger position, 5-4-3-3-3-2-1, needs no shift.",
+    "fix": {
+     "R7": 5,
+     "R8": 4,
+     "R9": 3,
+     "R10": 3,
+     "R11": 3,
+     "R12": 2,
+     "R13": 1
+    }
+   },
+   {
+    "notes": [
+     "R13",
+     "R14",
+     "R15"
+    ],
+    "kind": "repeated_note",
+    "severity": "warning",
+    "problem": "Repeated F5 quarters fingered 2-1-2 swap fingers back and forth for no gain at this tempo; keep the thumb.",
+    "fix": {
+     "R13": 1,
+     "R14": 1,
+     "R15": 1
+    }
+   }
+  ],
+  "comment": "Bar 11 needs only small edits, but bars 12-14 juggle fingers on repeated quarter notes, and the A5 and F5 repeats are treated differently. The whole melody from C6 down fits one five-finger position.",
+  "readback": {
+   "R": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-36c5": {
+  "item": "it-36c5",
+  "passage": "p11",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Both hands sit in five-finger positions (RH D5-A5 after the octave leap, LH A3-E4) with moves only at the rest and the long notes. Nothing to change.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-eca0": {
+  "item": "it-eca0",
+  "passage": "p08",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R8",
+     "R9"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Fifth finger plays D5 then C5 in consecutive sixteenths; the neighbour-note turn C5-D5-C5-Bb4 is 4-5-4-3.",
+    "fix": {
+     "R9": 4
+    }
+   },
+   {
+    "notes": [
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "kind": "thumb_pass_onto_black",
+    "severity": "warning",
+    "problem": "Thumb passes under 2 onto Bb4 between two A4s and 2 crosses straight back; 2-3-2-1 keeps the turn in one position.",
+    "fix": {
+     "R12": 3
+    }
+   },
+   {
+    "notes": [
+     "R15",
+     "R16",
+     "R17"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "G4 on 2 between two F4s on 3 makes fingers 2 and 3 cross twice in sixteenths; 3-4-3-2 is natural.",
+    "fix": {
+     "R16": 4
+    }
+   }
+  ],
+  "comment": "Bar 29 is fine, but each of the three turn figures in bar 30 is mis-fingered in a different way. With 4-5-4-3, 2-3-2-1, 3-4-3-2 the sequence gets one consistent shape.",
+  "readback": {
+   "R": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-03"
+ },
+ "it-1ca6": {
+  "item": "it-1ca6",
+  "passage": "p01",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "R29",
+     "R30",
+     "R31",
+     "R32"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "The sequence is fingered 2-4-3-5 three times, then 2-3-2-4 here, so finger 2 creeps from F#4 to G4.",
+    "fix": {
+     "R30": 4,
+     "R31": 3,
+     "R32": 5
+    }
+   }
+  ],
+  "comment": "Clean, position-based fingering with standard 2-over-thumb turns at D5-C5, B4-A4 and G4-F#4. The last group breaks the sequence pattern, which is fine only if bar 5 needs B4 on 4.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-1e1c": {
+  "item": "it-1e1c",
+  "passage": "p28",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 0
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R7",
+     "R8"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave G#4-G#5 is given to fingers 2 and 3; 2-3 cannot span more than a fourth.",
+    "fix": {
+     "R7": 1,
+     "R8": 5
+    }
+   },
+   {
+    "notes": [
+     "R12",
+     "R13"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Thumb is assigned to both Eb4 and Bb4 of one dyad; one finger cannot play two keys a fifth apart.",
+    "fix": {
+     "R12": 1,
+     "R13": 3
+    }
+   },
+   {
+    "notes": [
+     "R11",
+     "R14",
+     "R15"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Eb5 is held by 4 through the beat while 3 plays Bb4, a fourth between 3 and 4. Take Eb5 with 5.",
+    "fix": {
+     "R11": 5
+    }
+   },
+   {
+    "notes": [
+     "R16",
+     "R18",
+     "R20"
+    ],
+    "kind": "stretch",
+    "severity": "info",
+    "problem": "With 5 holding F5, finger 4 on C#5 sits at the 4-5 limit; 3 is more relaxed and matches beat 1.",
+    "fix": {
+     "R18": 3,
+     "R20": 3
+    }
+   }
+  ],
+  "comment": "Keep the thumb on the repeated G#4 throughout bar 5 and give each bar-6 beat the same 1-3-5 shape under the held melody note. The repeated 5 on the top notes G#5-F5-Eb5 is acceptable here because the afterbeat dyads are detached and pedalled.",
+  "readback": {
+   "R": {
+    "n": 20,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-d598": {
+  "item": "it-d598",
+  "passage": "p18",
+  "condition": "expert",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R14",
+     "R19",
+     "R20",
+     "R21"
+    ],
+    "kind": "other",
+    "severity": "error",
+    "problem": "The thumb must play D5 while still holding the dotted-half Bb4, and then hops from D5 to Eb5.",
+    "fix": {
+     "R19": 2,
+     "R20": 3
+    }
+   }
+  ],
+  "comment": "Bar 2 is well fingered, including 3-4-5 over the held D4-F4. In bar 3, either mark an early release of the lower Bb4 or take D5+F5 with 2+3, sliding 2 off Eb5; 3 on F5 sits a comfortable fourth below the held Bb5.",
+  "readback": {
+   "R": {
+    "n": 23,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-15a2": {
+  "item": "it-15a2",
+  "passage": "p12",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L15",
+     "L16"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "The A2 octave takes 4+1 here but 5+1 at L19 and L23; in this all-white bar keep 5 throughout.",
+    "fix": {
+     "L15": 5
+    }
+   }
+  ],
+  "comment": "The RH sequence fingering is textbook, with the one shift at the bar line where the figure moves up. The LH sensibly uses 4 on the F# octaves in bar 20.",
+  "readback": {
+   "R": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-146f": {
+  "item": "it-146f",
+  "passage": "p11",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R10",
+     "R11",
+     "R12"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "Rising E5-F5-G5 is fingered 5-4-3, so 4 crosses over 5 and then 3 over 4, in sixteenths.",
+    "fix": {
+     "R10": 2,
+     "R11": 3,
+     "R12": 4
+    }
+   },
+   {
+    "notes": [
+     "R16",
+     "R17"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "E5 on 3 rising to F5 on 2 forces 2 over 3, a long-over-long crossing.",
+    "fix": {
+     "R16": 2,
+     "R17": 3
+    }
+   }
+  ],
+  "comment": "The LH and RH bar 15 are sound and stay in one position. RH bar 16 should keep the position the G5 on 4 already sets up: E2 F3 G4 A5 F3 G4 E2 F3.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-a592": {
+  "item": "it-a592",
+  "passage": "p39",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard octave fingering: 4 on Bb and Eb gives a legato link down to 5 on G# and C#, and every sequential repeat is fingered the same way.",
+  "readback": {
+   "L": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-14c1": {
+  "item": "it-14c1",
+  "passage": "p23",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 0
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "The sixth E4-C#5 is given to fingers 3 and 2; 2-3 cannot span more than a fourth.",
+    "fix": {
+     "L1": 5,
+     "L2": 2
+    }
+   },
+   {
+    "notes": [
+     "L5",
+     "L6"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 4 is assigned to both A3 and D4 of the same dyad.",
+    "fix": {
+     "L5": 4,
+     "L6": 1
+    }
+   },
+   {
+    "notes": [
+     "L9",
+     "L10",
+     "L11"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "Descending from C#3 on 3 to A2 on 2 crosses 2 over 3, then 5 must jump back above it to E3.",
+    "fix": {
+     "L10": 5
+    }
+   }
+  ],
+  "comment": "The bar 9 accompaniment is fine. With the fixes, the thumb keeps D4 from E3+D4 into bar 8, 2 fits C#4 between the held A3 and D4, and A2 on 5 leads to the E3 bass with an ordinary bass leap.",
+  "readback": {
+   "L": {
+    "n": 21,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-4129": {
+  "item": "it-4129",
+  "passage": "p36",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "The thumb anchors A3 and then E3 while 5 takes the bass notes; this is economical and comfortable, and the repeated C3+A3 dyads keep one shape.",
+  "readback": {
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-04"
+ },
+ "it-d39a": {
+  "item": "it-d39a",
+  "passage": "p15",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "L4",
+     "L6"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb plays E4 then D4 in the falling upper line; with 5 holding G3, 1-2-3-4 keeps the line legato.",
+    "fix": {
+     "L6": 2,
+     "L8": 3,
+     "L10": 4
+    }
+   },
+   {
+    "notes": [
+     "L13",
+     "L15"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Same thumb hop E4 to D4 in the repeated figure; use 1-2-3-4 over the G3 pedal as in bar 13.",
+    "fix": {
+     "L15": 2,
+     "L17": 3,
+     "L19": 4
+    }
+   }
+  ],
+  "comment": "Sound hand position over the G3 pedal and identical in both bars; only the repeated thumb on the descending upper voice needs changing.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-58b4": {
+  "item": "it-58b4",
+  "passage": "p03",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R8",
+     "R9",
+     "R10"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "1-2 must span the minor sixth A4-F5, then the thumb jumps to D5; an A4-A5 octave position covers the whole figure.",
+    "fix": {
+     "R9": 4,
+     "R10": 2,
+     "R11": 5,
+     "R12": 3
+    }
+   },
+   {
+    "notes": [
+     "L9",
+     "L21"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "Here 5 takes G3 (F3 in bar 20) although 4 does elsewhere, so 5 shuffles across three keys; 4 keeps the octave position.",
+    "fix": {
+     "L9": 4,
+     "L21": 4
+    }
+   }
+  ],
+  "comment": "The LH pedal figures are well set and treated identically in both bars; the RH broken D-minor chord should stay in one octave position instead of shifting the thumb.",
+  "readback": {
+   "R": {
+    "n": 12,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-7550": {
+  "item": "it-7550",
+  "passage": "p30",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both C#3 and G#3 of the held fifth; one finger cannot hold two keys a fifth apart.",
+    "fix": {
+     "L2": 3
+    }
+   },
+   {
+    "notes": [
+     "L6",
+     "L7"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "With 2 holding A3, B3 on 3 makes a long finger cross over 2; the held fingers end up out of pitch order.",
+    "fix": {
+     "L7": 1
+    }
+   },
+   {
+    "notes": [
+     "L11",
+     "L12"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 2 plays A3 then B3 back to back while the thumb is free; the identical figure in bar 21 uses 2-1.",
+    "fix": {
+     "L12": 1
+    }
+   }
+  ],
+  "comment": "The opening chord is impossible and bar 22 crosses 3 over a held 2; once fixed, bars 21 and 23 should share 5+3, 2, 1.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-6878": {
+  "item": "it-6878",
+  "passage": "p27",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R15",
+     "R17"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 5 plays D5 then C5 in the falling top line; 4 on C5 keeps the melody legato above the thumb.",
+    "fix": {
+     "R17": 4
+    }
+   },
+   {
+    "notes": [
+     "L13",
+     "L14"
+    ],
+    "kind": "position_change",
+    "severity": "info",
+    "problem": "Thumb passes under 3 to take A3 although 4 already lies over it in the F3-C4 position; 3-4 is simpler.",
+    "fix": {
+     "L14": 4
+    }
+   }
+  ],
+  "comment": "Chord fingerings in both hands are clear and repeated consistently; only the D5-C5 connection at the end deserves an edit.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-828c": {
+  "item": "it-828c",
+  "passage": "p02",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Careful fingering that respects the held voices and fingers both sequential figures identically; the thumbs on black keys are forced by the chromatic lines.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-e293": {
+  "item": "it-e293",
+  "passage": "p17",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2",
+     "L3",
+     "L4",
+     "L5"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "4-5 spans the perfect fourth F3-Bb3, beyond a third; 5-3-1 then 4-2 keeps each resolving voice legato.",
+    "fix": {
+     "L2": 3,
+     "L3": 1,
+     "L4": 4,
+     "L5": 2
+    }
+   }
+  ],
+  "comment": "The RH is idiomatic, including the 4-over-thumb crossing into the closing chord; the opening LH chord exceeds the 4-5 span and should be 5-3-1.",
+  "readback": {
+   "R": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 10,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-a505": {
+  "item": "it-a505",
+  "passage": "p33",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L11",
+     "L12"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 3 on both F#3 and G#3 in one chord; the same dyad on beat 2 already uses 3+2.",
+    "fix": {
+     "L12": 2
+    }
+   },
+   {
+    "notes": [
+     "L15",
+     "L16",
+     "L17"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "4-3 spans the perfect fourth G#3-C#4, beyond a third; 4-2-1 fits this second-inversion shape.",
+    "fix": {
+     "L16": 2,
+     "L17": 1
+    }
+   }
+  ],
+  "comment": "Two chords are impossible as written; the remaining bass-and-chord shapes are fine for a waltz.",
+  "readback": {
+   "L": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-06b9": {
+  "item": "it-06b9",
+  "passage": "p20",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R2",
+     "R3"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "warning",
+    "problem": "The repeated G#4 is retaken by the thumb on a black key; keeping 2 and taking D5 with 3 avoids it.",
+    "fix": {
+     "R3": 2,
+     "R4": 3
+    }
+   },
+   {
+    "notes": [
+     "R6",
+     "R7",
+     "R8",
+     "R9",
+     "R10",
+     "R11"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "info",
+    "problem": "Thirds on 2+5 and 1+2 cramp the hand; 3+5 and 1+3 are standard and match the thirds on beats 3-4.",
+    "fix": {
+     "R6": 3,
+     "R9": 3,
+     "R10": 3
+    }
+   },
+   {
+    "notes": [
+     "R16",
+     "R17"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 3 on both C5 and E5 of the third; continue the 1-3, 2-4 sequence with 3-5.",
+    "fix": {
+     "R17": 5
+    }
+   },
+   {
+    "notes": [
+     "L37",
+     "L38"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 2 plays E3 then C3 in the falling A-minor arpeggio; standard 1-2-4-5 keeps it connected.",
+    "fix": {
+     "L38": 4
+    }
+   }
+  ],
+  "comment": "The LH repeated chords are well fingered, but the closing RH third is impossible and the RH thirds and LH arpeggio need standard patterns.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 39,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-05"
+ },
+ "it-efd1": {
+  "item": "it-efd1",
+  "passage": "p09",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Each ornament stays in one hand position and the two F#-E turns are fingered alike. 4-3-4 on the turns is fine, though 3-2-3 would be a slightly stronger alternative.",
+  "readback": {
+   "R": {
+    "n": 16,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-68c4": {
+  "item": "it-68c4",
+  "passage": "p14",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "warning",
+    "problem": "Rising G4 to Bb4 with 3 then 2 makes the index cross over the middle finger, or forces a jump.",
+    "fix": {
+     "R1": 1,
+     "R2": 3
+    }
+   },
+   {
+    "notes": [
+     "R3"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "info",
+    "problem": "Thumb on Bb3 where 2 fits; 2 on Bb3 also frees the thumb to take A3 next without a hop.",
+    "fix": {
+     "R3": 2
+    }
+   },
+   {
+    "notes": [
+     "R5",
+     "R6"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 2 and 3 cannot hold the minor sixth A3-F4 together.",
+    "fix": {
+     "R5": 1,
+     "R6": 5
+    }
+   },
+   {
+    "notes": [
+     "R12",
+     "R13"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 3 plays G5 and then F5 straight after the sixteenth, breaking the descending line.",
+    "fix": {
+     "R13": 2
+    }
+   },
+   {
+    "notes": [
+     "R13",
+     "R14",
+     "R15"
+    ],
+    "kind": "repeated_note",
+    "severity": "info",
+    "problem": "Repeated F5 quarters at this tempo need no 3-1-2 changes; jumping to the thumb mid-bar is restless.",
+    "fix": {
+     "R13": 2,
+     "R14": 2,
+     "R15": 2
+    }
+   }
+  ],
+  "comment": "The 2+3 sixth in bar 12 is impossible and must be replaced; the opening crossing and the 3-3 hop into F5 also need fixing before this goes to a student.",
+  "readback": {
+   "R": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-8dfd": {
+  "item": "it-8dfd",
+  "passage": "p22",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "L12",
+     "L13",
+     "L14",
+     "L15"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Both fingers hop from A3+C4 to G3+B3 with 2+1 twice; 3+2 on the second third keeps the pair legato.",
+    "fix": {
+     "L14": 3,
+     "L15": 2
+    }
+   },
+   {
+    "notes": [
+     "L10",
+     "L11"
+    ],
+    "kind": "stretch",
+    "severity": "info",
+    "problem": "3+1 on the minor sixth B3-G4 is a stretch for a medium hand; after the rest 4+1 sits easier.",
+    "fix": {
+     "L10": 4
+    }
+   }
+  ],
+  "comment": "Sound overall; give the descending thirds in bar 7 a legato fingering and consider a less stretched choice for the sixth in bar 6.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-2b0f": {
+  "item": "it-2b0f",
+  "passage": "p16",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard 1-3-5 on the E-G#-B shape and a textbook double-third fingering with the thumb passing under at B-C; the jump after the descending run is unavoidable.",
+  "readback": {
+   "R": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-78dd": {
+  "item": "it-78dd",
+  "passage": "p37",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "The right thumb on the repeated C4 is the sensible choice with the left thumb on Eb4 just above it; the hands interlock, but the fingering itself is sound and the black-key thumbs and fifths in the left hand are unavoidable.",
+  "readback": {
+   "R": {
+    "n": 12,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 36,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-a6ae": {
+  "item": "it-a6ae",
+  "passage": "p10",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "L6",
+     "L7"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "Going from Eb4 down to B3 with 3 then 2 crosses the index over the middle finger at sixteenth speed.",
+    "fix": {
+     "L7": 5
+    }
+   },
+   {
+    "notes": [
+     "L12"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "info",
+    "problem": "Thumb on C#4 where 2 fits; 3-2-4 on B3-C#4-A3 also matches the 3-2-4 of the next sequence step.",
+    "fix": {
+     "L12": 2
+    }
+   },
+   {
+    "notes": [
+     "L17",
+     "L18"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 4 plays G#3 and then C#4 with no break; 2 on C#4 leads smoothly to the thumb on D4.",
+    "fix": {
+     "L18": 2
+    }
+   }
+  ],
+  "comment": "The 2-over-3 crossing in bar 3 must go; with 5 on B3 there and 2 on both C#4s in bar 4, the sequence fingers identically and the hop disappears.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-6cdf": {
+  "item": "it-6cdf",
+  "passage": "p26",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Clear bass-and-chord fingering; the thumb's step from B3 to A3 is the cheapest way into the repeated E3 chords and the closing octave.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-4617": {
+  "item": "it-4617",
+  "passage": "p31",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L23",
+     "L24"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "3 on G#3 and 2 on D4 span a diminished fifth, wider than 2-3 allow; the repeat of this chord already uses 4.",
+    "fix": {
+     "L23": 4
+    }
+   },
+   {
+    "notes": [
+     "L15",
+     "L17"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "4 on F#3 against the thumb on E4 stretches 1-4 across a minor seventh; 5 on F#3 costs only a small bass hop.",
+    "fix": {
+     "L15": 5
+    }
+   }
+  ],
+  "comment": "The right hand uses standard octave and chord fingerings. The left hand has one impossible 2-3 span in the four-note E chord and a stretched 1-4 seventh; both are one-finger fixes.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 31,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-06"
+ },
+ "it-77b6": {
+  "item": "it-77b6",
+  "passage": "p07",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R3",
+     "R4"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "B4 taken by 4 below finger 3, which still holds Eb5: a long finger crossing under another long finger.",
+    "fix": {
+     "R1": 2,
+     "R4": 1,
+     "R5": 2
+    }
+   },
+   {
+    "notes": [
+     "R3",
+     "R5"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "C5 is struck with 3 while 3 is still holding the dotted-eighth Eb5.",
+    "fix": {
+     "R1": 2,
+     "R4": 1,
+     "R5": 2
+    }
+   },
+   {
+    "notes": [
+     "R5",
+     "R6"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "C5 held on 3 under F5 on 4: a fourth between fingers 3 and 4 is beyond reach.",
+    "fix": {
+     "R5": 2
+    }
+   },
+   {
+    "notes": [
+     "R29",
+     "R30"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "F4 and G#4 struck together, both on finger 2; the matching third in bar 8 (R14-15) uses 2+4.",
+    "fix": {
+     "R30": 4
+    }
+   }
+  ],
+  "comment": "Bar 8 beats 1-2 collide with the held Eb5; 2 on D5 and 1-2 on the inner B4-C5 keep the hand in one place and match the later B4 1 / C5 2. The rest of the sequence is sound once bar 9 ends with 2+4 like bar 8.",
+  "readback": {
+   "R": {
+    "n": 30,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-f2b2": {
+  "item": "it-f2b2",
+  "passage": "p13",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L8",
+     "L9"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "G#4 and D5 struck together on finger 5; the identical dyads either side use 5+1.",
+    "fix": {
+     "L9": 1
+    }
+   },
+   {
+    "notes": [
+     "L14",
+     "L15"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave D4-D5 on fingers 3 and 2; fingers 2-3 reach only about a fourth.",
+    "fix": {
+     "L14": 5,
+     "L15": 1
+    }
+   }
+  ],
+  "comment": "Bar 1, the held fifth with the inner line on 4-3-2, is well fingered. The two dyad errors in bars 2-3 are the only problems.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-c9e1": {
+  "item": "it-c9e1",
+  "passage": "p20",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "warning",
+    "problem": "2 crosses over the thumb onto G#4, then the thumb retakes G#4 for the half note; 3-2-2 keeps the thumb off it.",
+    "fix": {
+     "R1": 3,
+     "R2": 2,
+     "R3": 2
+    }
+   },
+   {
+    "notes": [
+     "R12",
+     "R13",
+     "R14",
+     "R15",
+     "R16",
+     "R17"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Rising thirds fingered 1/2, 1/3, 2/4 make the thumb hop A4 to B4; standard 1/3, 2/4, 3/5 keeps both voices legato.",
+    "fix": {
+     "R13": 3,
+     "R14": 2,
+     "R15": 4,
+     "R16": 3,
+     "R17": 5
+    }
+   },
+   {
+    "notes": [
+     "L36",
+     "L37",
+     "L38",
+     "L39"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "Descending arpeggio A3-E3-C3-A2 on 4-1-2-4 passes the thumb under a fourth, then 2 over; 1-2-4-5 needs no crossing.",
+    "fix": {
+     "L36": 1,
+     "L37": 2,
+     "L38": 4,
+     "L39": 5
+    }
+   }
+  ],
+  "comment": "The LH repeated chords are fine. The descending arpeggio and the RH thirds want their standard fingerings, and the held G#4 should not sit on the thumb.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 39,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-7496": {
+  "item": "it-7496",
+  "passage": "p06",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "L6",
+     "L7",
+     "L8",
+     "L9"
+    ],
+    "kind": "position_change",
+    "severity": "warning",
+    "problem": "D3 on 5 forces a mid-run shift at L10; with D3 on 4 the C3-G3 position covers L6-L21 unchanged.",
+    "fix": {
+     "L6": 4,
+     "L7": 3,
+     "L8": 2,
+     "L9": 1
+    }
+   }
+  ],
+  "comment": "Clean, position-based fingering. Only the entry into the sixteenth figure in bar 20 should be set one step lower to avoid the shift inside the run.",
+  "readback": {
+   "L": {
+    "n": 23,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-312f": {
+  "item": "it-312f",
+  "passage": "p04",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "Thumb on D5, then 3 crossing over to C#5 and 4 back on D5 makes the ornament clumsy; 4-3-4-3 stays in one position.",
+    "fix": {
+     "R1": 4
+    }
+   }
+  ],
+  "comment": "Bars 13-14 are well planned, including the 2-1-2-1 turn and the matching 5-4-3 figures in bar 14. Only the opening ornament needs changing.",
+  "readback": {
+   "R": {
+    "n": 20,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-c303": {
+  "item": "it-c303",
+  "passage": "p35",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "Bb4 on 3 then D5 on 2: finger 2 must cross over 3 to a higher note at thirty-second speed.",
+    "fix": {
+     "R1": 2,
+     "R2": 3
+    }
+   },
+   {
+    "notes": [
+     "R10",
+     "R11",
+     "R12"
+    ],
+    "kind": "thumb_pass_onto_black",
+    "severity": "warning",
+    "problem": "In the turn the thumb passes under 2 onto Eb5; keeping Eb5 on 3, as at R9, stays in one position.",
+    "fix": {
+     "R11": 3
+    }
+   }
+  ],
+  "comment": "The LH is standard mazurka fingering. In the RH, fix the opening Bb-D crossing and keep Eb5 on 3 throughout the turn.",
+  "readback": {
+   "R": {
+    "n": 13,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 13,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-0562": {
+  "item": "it-0562",
+  "passage": "p09",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "One position (D5 on 2 to G5 on 5) carries all of bar 5's ornaments and the line into bar 6, and the two F#-E-F# ornaments are fingered alike. A student may need slow practice to make the 4-3 ornaments even.",
+  "readback": {
+   "R": {
+    "n": 16,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-86b2": {
+  "item": "it-86b2",
+  "passage": "p34",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R20",
+     "R21"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "E4 and C5 struck together, both on the thumb, a sixth apart.",
+    "fix": {
+     "R21": 4
+    }
+   },
+   {
+    "notes": [
+     "R24",
+     "R25",
+     "R26"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave E4-E5 on 2 and 4, with a tritone on 3-4, is out of reach; the identical chord at R33-35 uses 1+2+5.",
+    "fix": {
+     "R24": 1,
+     "R25": 2,
+     "R26": 5
+    }
+   }
+  ],
+  "comment": "Apart from two broken chords in bar 16 the shapes are sensible; the thumb taking the bottom of each chord is normal in slow, pedalled chordal writing. With R21 on 4, bar 16 opens with the same 1+4 / 2+5 pairing as bar 15.",
+  "readback": {
+   "R": {
+    "n": 41,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-07"
+ },
+ "it-09f3": {
+  "item": "it-09f3",
+  "passage": "p37",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L28",
+     "L29",
+     "L30"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "4-3 spans a fourth (Eb3-G#3) and 4-2 a full octave; a medium hand cannot hold this chord.",
+    "fix": {
+     "L28": 5,
+     "L29": 3,
+     "L30": 1
+    }
+   },
+   {
+    "notes": [
+     "L34",
+     "L35",
+     "L36"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both Eb3 and G#3 in the same chord.",
+    "fix": {
+     "L34": 5,
+     "L35": 3,
+     "L36": 1
+    }
+   }
+  ],
+  "comment": "The repeated LH chord should simply keep 5+3+1 throughout; two chords break this, one with an impossible stretch and one with a doubled finger. The RH thumb on the repeated C4 is the right choice where the hands overlap.",
+  "readback": {
+   "R": {
+    "n": 12,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 36,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-7430": {
+  "item": "it-7430",
+  "passage": "p38",
+  "condition": "expert",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R11",
+     "R12",
+     "R13",
+     "R14"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "Octave C#4-C#5 on 1-4 with 2 on G4 is a full stretch for a medium hand; 1-2-3-5 is the usual shape.",
+    "fix": {
+     "R14": 5
+    }
+   },
+   {
+    "notes": [
+     "R22",
+     "R23",
+     "R24"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "Octave F#3-F#4 on 1-4 with 1-2 spanning a fifth; 1-3-5 is the natural shape for octave plus fifth.",
+    "fix": {
+     "R23": 3,
+     "R24": 5
+    }
+   }
+  ],
+  "comment": "The descending arpeggio and the 3 crossing over the thumb onto F#4 are good, as are the chords around the held F#4. Only the two 1-4 octave chords are too stretched for this student.",
+  "readback": {
+   "R": {
+    "n": 27,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-5541": {
+  "item": "it-5541",
+  "passage": "p27",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "The RH double notes are fingered naturally, with 5 to 4 legato in the falling sixths. The LH stays in one F position, so Bb3 and A3 fall under 2 and 3 without a shift.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-d587": {
+  "item": "it-d587",
+  "passage": "p16",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R8",
+     "R9",
+     "R10",
+     "R11",
+     "R12",
+     "R13",
+     "R14",
+     "R15"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb hops A4 to B4 inside a rising chain of thirds; the standard 1+3, 2+4, 3+5 keeps both voices legato.",
+    "fix": {
+     "R8": 1,
+     "R9": 3,
+     "R10": 2,
+     "R11": 4,
+     "R12": 3,
+     "R13": 5,
+     "R14": 3,
+     "R15": 5
+    }
+   }
+  ],
+  "comment": "The descending run and the 2+3 crossing over the thumb onto G#4+B4 are fine. The thirds in bar 15 should use the textbook fingering.",
+  "readback": {
+   "R": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-4c52": {
+  "item": "it-4c52",
+  "passage": "p26",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L8",
+     "L10",
+     "L12"
+    ],
+    "kind": "hop",
+    "severity": "info",
+    "problem": "Finger 2 moves F3 to E3 between consecutive chords; 3 already sits over E3 after D3 on 4, so 3+1 needs no move.",
+    "fix": {
+     "L10": 3,
+     "L12": 3
+    }
+   }
+  ],
+  "comment": "Natural bass-and-chord fingering ending on a clean 5+1 octave. Bar 23 refingers the bar-22 opening as 4 / 2+1 because different chords follow, which is reasonable.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-8928": {
+  "item": "it-8928",
+  "passage": "p07",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R4"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb leaves held D5 straight for B4 in the same voice, breaking the legato; 2 on D5 hands over to the thumb.",
+    "fix": {
+     "R1": 2
+    }
+   },
+   {
+    "notes": [
+     "R17",
+     "R19",
+     "R23"
+    ],
+    "kind": "hop",
+    "severity": "info",
+    "problem": "Thumb leaves held G4 straight for E4 in the lower voice; 2 on G4, with 3 on G#4, keeps it legato.",
+    "fix": {
+     "R17": 3,
+     "R19": 2
+    }
+   }
+  ],
+  "comment": "Careful two-voice fingering, and the bar-9 sequence repeats the bar-8 fingering exactly. Only the two thumb leaps in the lower voice break the legato.",
+  "readback": {
+   "R": {
+    "n": 30,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-d0f8": {
+  "item": "it-d0f8",
+  "passage": "p21",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "The same Bb3+D4 third is 3+1 here but 4+2 at its two repeats; 4+2 from the start keeps 4 on Bb3 throughout.",
+    "fix": {
+     "L1": 4,
+     "L2": 2
+    }
+   }
+  ],
+  "comment": "Economical: 4 stays on Bb3 and the thumb is free for F4. The 4-2-1 Eb triad keeps the fifth off the black key and is acceptable here.",
+  "readback": {
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-cc4b": {
+  "item": "it-cc4b",
+  "passage": "p13",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L6",
+     "L8",
+     "L10",
+     "L12"
+    ],
+    "kind": "fifth_on_black",
+    "severity": "info",
+    "problem": "Fifth finger on black G#4 for the repeated tritone; 4+1 suits the tritone and leads 4 to 3 into A4.",
+    "fix": {
+     "L6": 4,
+     "L8": 4,
+     "L10": 4,
+     "L12": 3
+    }
+   }
+  ],
+  "comment": "Bar 1 sits in a clean A five-finger position under the held fifth, and the shift up comes at the rest. The 5 on G#4 works, though 4 is kinder for a beginner.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-08"
+ },
+ "it-ba6c": {
+  "item": "it-ba6c",
+  "passage": "p18",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3",
+     "R5"
+    ],
+    "kind": "other",
+    "severity": "error",
+    "problem": "G4 is a half note on 5, yet 3 plays G#4 above it and 5 is reused on C5 while G4 sounds.",
+    "fix": {
+     "R1": 1,
+     "R2": 2
+    }
+   },
+   {
+    "notes": [
+     "R10",
+     "R11",
+     "R12",
+     "R13",
+     "R14"
+    ],
+    "kind": "hop",
+    "severity": "error",
+    "problem": "Finger 2 slides F4 to G4 while F4 still sounds; thumb then leaves held D4 for A4 and slides to Bb4.",
+    "fix": {
+     "R11": 3,
+     "R12": 4,
+     "R13": 5
+    }
+   },
+   {
+    "notes": [
+     "R19",
+     "R21",
+     "R22",
+     "R23"
+    ],
+    "kind": "hop",
+    "severity": "info",
+    "problem": "Thumb moves D5 straight to black-key Eb5 between chords, breaking the legato; 2+4 then 5 connects.",
+    "fix": {
+     "R21": 2,
+     "R22": 4,
+     "R23": 5
+    }
+   }
+  ],
+  "comment": "As notated, the held lower notes in bar 2 cannot be sustained with this fingering; taking the chords 1+2 and the rising line 3-4-5 fixes both spots. Bar 3 works once the thumb hop is smoothed.",
+  "readback": {
+   "R": {
+    "n": 23,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-ab75": {
+  "item": "it-ab75",
+  "passage": "p05",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3",
+     "R5",
+     "R6",
+     "R7"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "E5 is held for a dotted quarter by 3 while 2 plays G#4 and A4 below and 3 is reused on B4.",
+    "fix": {
+     "R1": 5,
+     "R2": 4,
+     "R3": 5
+    }
+   }
+  ],
+  "comment": "Sound fugue fingering except the opening: E5 is held over a moving inner voice, so it needs 5 (with 4 on D#5) to free 1-2-3 below it.",
+  "readback": {
+   "R": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-c25c": {
+  "item": "it-c25c",
+  "passage": "p08",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Clean, economical fingering; the thumb shift to E4 and the 3-over-1 crossing onto F4 are well placed.",
+  "readback": {
+   "R": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-a13d": {
+  "item": "it-a13d",
+  "passage": "p35",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R5",
+     "R6"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb slides from the held E4 to F4 with no rest, breaking the legato resolution into bar 23.",
+    "fix": {
+     "R6": 2,
+     "R7": 3
+    }
+   },
+   {
+    "notes": [
+     "L2",
+     "L3",
+     "L4",
+     "L5",
+     "L6",
+     "L7"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "info",
+    "problem": "Six-four chord F3-Bb3-D4 taken 4-2-1; the standard 5-2-1 avoids a sixth between 1 and 4.",
+    "fix": {
+     "L2": 5,
+     "L5": 5
+    }
+   }
+  ],
+  "comment": "Playable and mostly natural; avoid the thumb hop into bar 23 and use the standard 5-2-1 for the six-four chords.",
+  "readback": {
+   "R": {
+    "n": 13,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 13,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-724b": {
+  "item": "it-724b",
+  "passage": "p39",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 1,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both notes of the C2-C3 octave.",
+    "fix": {
+     "L1": 5,
+     "L2": 1
+    }
+   },
+   {
+    "notes": [
+     "L15",
+     "L16"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave Bb1-Bb2 on fingers 3 and 2; 2-3 cannot span an octave. Bar 13 uses 4+1 here.",
+    "fix": {
+     "L15": 4,
+     "L16": 1
+    }
+   }
+  ],
+  "comment": "Standard 5-1 / 4-1 octave fingering apart from two impossible octaves; bar 15 should simply repeat bar 13.",
+  "readback": {
+   "L": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-2d68": {
+  "item": "it-2d68",
+  "passage": "p36",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Comfortable and consistent; the repeated C3+A3 sixths on 5+1 and the E2-E3 octave are standard.",
+  "readback": {
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-2fa5": {
+  "item": "it-2fa5",
+  "passage": "p22",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L10",
+     "L11"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Minor sixth B3-G4 on fingers 3 and 2; 2-3 cannot span more than a fourth.",
+    "fix": {
+     "L10": 5,
+     "L11": 1
+    }
+   },
+   {
+    "notes": [
+     "L14",
+     "L15"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 4 is assigned to both G3 and B3 of the same chord.",
+    "fix": {
+     "L14": 4,
+     "L15": 2
+    }
+   },
+   {
+    "notes": [
+     "L7",
+     "L8"
+    ],
+    "kind": "hop",
+    "severity": "info",
+    "problem": "Finger 5 leaves G3 for C4 with no rest; 4 on C4 keeps the bass line connected.",
+    "fix": {
+     "L8": 4
+    }
+   }
+  ],
+  "comment": "The bar 4 broken-chord figure is fine; the chords in bars 6-7 contain two impossible assignments.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-23db": {
+  "item": "it-23db",
+  "passage": "p25",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R16",
+     "R17"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "Thumb on E5 then 4 on F5 a semitone above cramps the hand; the turn ending sits naturally on 2-3.",
+    "fix": {
+     "R16": 2,
+     "R17": 3
+    }
+   }
+  ],
+  "comment": "Consistent arpeggio fingering in bars 5-6; only the turn ending in bar 7 needs a more natural 2-3.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-09"
+ },
+ "it-c1c5": {
+  "item": "it-c1c5",
+  "passage": "p24",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R15",
+     "R16",
+     "R17"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "Finger 2 still holds the A4 when asked to play D5, and it would have to cross over 3 on Bb4.",
+    "fix": {
+     "R17": 5
+    }
+   },
+   {
+    "notes": [
+     "R12",
+     "R13",
+     "R14"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb plays D4, E4 and F4 in succession, two hops in a row; take E4 with 2 and pass the thumb under.",
+    "fix": {
+     "R13": 2
+    }
+   }
+  ],
+  "comment": "Bars 5-7 are well fingered and the sequential figures are treated alike. The problems are the thumb slides at the end of bar 8 and the D5 on 2 in bar 9, which collides with the held A4.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-08ef": {
+  "item": "it-08ef",
+  "passage": "p40",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "stretch",
+    "severity": "info",
+    "problem": "4-3-2 on Bb5-G#5-Eb5 opens a full fourth between 3 and 2 at eighth speed; 5-4-2-1 sits naturally.",
+    "fix": {
+     "R1": 5,
+     "R2": 4
+    }
+   },
+   {
+    "notes": [
+     "L2",
+     "L5",
+     "L6",
+     "L7"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "The repeated chord C4+Eb4+G#4 switches from 3+2+1 to 4+2+1 for no reason; 3+2+1 suits the position over G#3.",
+    "fix": {
+     "L5": 3
+    }
+   }
+  ],
+  "comment": "Sound overall, and changing fingers on the repeated Eb5 is right. Prefer the standard 5-4-2-1 shape for the opening descent and finger the two bar-24 chords alike.",
+  "readback": {
+   "R": {
+    "n": 10,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-f57f": {
+  "item": "it-f57f",
+  "passage": "p37",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Fine as written: the thumb repeats the C4 pedal and the LH keeps one stable 5-3-1 octave shape. The thumbs interlock around C4-Eb4, but that comes from the music, not the fingering.",
+  "readback": {
+   "R": {
+    "n": 12,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 36,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-4694": {
+  "item": "it-4694",
+  "passage": "p21",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L3",
+     "L4"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 4 is assigned to both Bb3 and D4 of the same dyad.",
+    "fix": {
+     "L3": 3,
+     "L4": 1
+    }
+   },
+   {
+    "notes": [
+     "L7",
+     "L8"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "Same Bb3+D4 dyad as L1-2 is fingered 4+2 here; 3+1 every time keeps one hand shape.",
+    "fix": {
+     "L7": 3,
+     "L8": 1
+    }
+   },
+   {
+    "notes": [
+     "L12",
+     "L13",
+     "L14"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "4+3+2 on D3+F3+Bb3 stretches both 4-3 and 3-2 to their limits; standard 5-3-1 keeps the thumb on the common Bb3.",
+    "fix": {
+     "L12": 5,
+     "L13": 3,
+     "L14": 1
+    }
+   }
+  ],
+  "comment": "The 4+4 dyad is impossible, the repeated Bb3+D4 should keep one fingering, and the closing first-inversion chord wants 5-3-1 with the thumb staying on Bb3.",
+  "readback": {
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-258f": {
+  "item": "it-258f",
+  "passage": "p33",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Clean waltz fingering: 5 on each bass note, a consistent 3-2-1 or 4-2-1 chord shape chosen by the bottom interval, thumb on top. The black-key thumbs and fifths cannot be avoided here.",
+  "readback": {
+   "L": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-66b4": {
+  "item": "it-66b4",
+  "passage": "p15",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "L3",
+     "L4",
+     "L5",
+     "L6",
+     "L7",
+     "L8",
+     "L9",
+     "L10"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Thumb slides E4, D4, C4 in succession over the repeated G3, breaking the upper line; keep 5 on G3 and walk down 1-2-3-4.",
+    "fix": {
+     "L3": 5,
+     "L5": 5,
+     "L6": 2,
+     "L7": 5,
+     "L8": 3,
+     "L9": 5,
+     "L10": 4
+    }
+   },
+   {
+    "notes": [
+     "L12",
+     "L13",
+     "L14",
+     "L15",
+     "L16",
+     "L17"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Same thumb slides E4, D4, C4 in bar 15; use the one-position fingering proposed for bar 13.",
+    "fix": {
+     "L12": 5,
+     "L14": 5,
+     "L15": 2,
+     "L16": 5,
+     "L17": 3
+    }
+   },
+   {
+    "notes": [
+     "L18",
+     "L19"
+    ],
+    "kind": "inconsistent",
+    "severity": "info",
+    "problem": "Bar 15 ends G3+B3 on 2+1, while the identical bar 13 uses 4+2; finger both bars alike.",
+    "fix": {
+     "L18": 5,
+     "L19": 4
+    }
+   }
+  ],
+  "comment": "Over the G3 pedal, keep 5 on G3 and let 1-2-3-4 walk down the upper line in a single position; that removes every thumb slide and makes bars 13 and 15 identical.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-9014": {
+  "item": "it-9014",
+  "passage": "p19",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "L9",
+     "L10",
+     "L11"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "After 4 on D4, finger 3 stretches a fourth to G4, then 2 must cross 3 to reach F4; the thumb belongs on G4.",
+    "fix": {
+     "L10": 1
+    }
+   },
+   {
+    "notes": [
+     "L15",
+     "L16"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 3 plays E4 then G4 on consecutive eighths; the Alberti pattern returns the thumb to G4 as in bar 1.",
+    "fix": {
+     "L16": 1
+    }
+   }
+  ],
+  "comment": "Bar 1 is textbook Alberti 5-1-3-1; bar 2 breaks the pattern twice. With the thumb on every G4 the hand never leaves the C five-finger position.",
+  "readback": {
+   "L": {
+    "n": 16,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-71ef": {
+  "item": "it-71ef",
+  "passage": "p29",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard 5-1 octaves throughout and a sensible 5-4-2-1 for the four-note chord, with the thumb kept on B2 for the last two dyads. Nothing to change for a student who can manage the octave leaps.",
+  "readback": {
+   "L": {
+    "n": 22,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-10"
+ },
+ "it-67bc": {
+  "item": "it-67bc",
+  "passage": "p01",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard sequential fingering: every descending run ends with 2 crossing over the thumb at the same point, so each unit of the sequence sits in a fresh five-finger position.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-6b3b": {
+  "item": "it-6b3b",
+  "passage": "p34",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Sound double-note fingering: the thumb re-strikes the lower voice, the top line alternates 4 and 5, and 2 stays on the common Bb4 through the octave chords. The black-key thumbs are forced by the harmony.",
+  "readback": {
+   "R": {
+    "n": 41,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-24a5": {
+  "item": "it-24a5",
+  "passage": "p19",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L3",
+     "L5",
+     "L7",
+     "L13",
+     "L15"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "C-G-E-G Alberti on 4-1-2-1 stretches 4-1 across a fifth; the standard 5-1-3-1 sits in the natural C4-G4 position.",
+    "fix": {
+     "L1": 5,
+     "L3": 3,
+     "L5": 5,
+     "L7": 3,
+     "L13": 5,
+     "L15": 3
+    }
+   },
+   {
+    "notes": [
+     "L9",
+     "L11"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "Finger 2 takes D4 and then F4 around the thumb; in the C4-G4 position D4 belongs to 4.",
+    "fix": {
+     "L9": 4
+    }
+   }
+  ],
+  "comment": "Playable, but the whole figure fits one five-finger position (C=5, D=4, E=3, F=2, G=1), which is what a student should learn here.",
+  "readback": {
+   "L": {
+    "n": 16,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-db9c": {
+  "item": "it-db9c",
+  "passage": "p40",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Clean: 4-3-2-1 down the broken chord, the usual 3-2-1 finger change on the repeated Eb5, and compact 4-2-1 waltz chords after the 5 in the bass.",
+  "readback": {
+   "R": {
+    "n": 10,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-9c7d": {
+  "item": "it-9c7d",
+  "passage": "p38",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "warning",
+    "problem": "Thumb on F#5 a semitone under 4 cramps the hand and adds a 2-over-1 crossing; 4-3-2-1-3 is the standard B-minor arpeggio descent.",
+    "fix": {
+     "R2": 3
+    }
+   },
+   {
+    "notes": [
+     "R15",
+     "R16",
+     "R17",
+     "R18"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "D4-F#4-B4-D5 on 2-3-4-5 puts a fourth between 3 and 4 inside a 2-5 octave; too wide for a medium hand.",
+    "fix": {
+     "R15": 1,
+     "R16": 2,
+     "R17": 4,
+     "R18": 5
+    }
+   },
+   {
+    "notes": [
+     "R26",
+     "R27"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "C#4 and G#4 are both given finger 2 in the same chord.",
+    "fix": {
+     "R27": 5
+    }
+   },
+   {
+    "notes": [
+     "R11",
+     "R14",
+     "R22",
+     "R24"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "Octaves C#4-C#5 and F#3-F#4 held 1-4 with inner notes; a strain for a medium hand, 5 on top is safer.",
+    "fix": {
+     "R14": 5,
+     "R24": 5
+    }
+   }
+  ],
+  "comment": "The last chord assigns finger 2 twice and the D4-D5 chord on 2-3-4-5 cannot be held; the chords want 1 on the bottom and 5 on the top octave throughout.",
+  "readback": {
+   "R": {
+    "n": 27,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-f624": {
+  "item": "it-f624",
+  "passage": "p13",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L2",
+     "L4"
+    ],
+    "kind": "other",
+    "severity": "error",
+    "problem": "The thumb holds E4 (whole note) when it must play D4 on beat 3; with 5 on A3 the hand keeps both.",
+    "fix": {
+     "L1": 5,
+     "L3": 4,
+     "L4": 2,
+     "L5": 3
+    }
+   }
+  ],
+  "comment": "Taking the open fifth 5-1 instead of 3-1 gives a held position (5-4-2-1, then 5-3-1 on A-C#-E); the repeated dyads and the octave after the rest are fine.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-f7d3": {
+  "item": "it-f7d3",
+  "passage": "p02",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R25",
+     "R26"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "While 3 holds G4, finger 2 must strike C4 a fifth below; 2-3 cannot span a fifth.",
+    "fix": {
+     "R25": 5
+    }
+   },
+   {
+    "notes": [
+     "R17",
+     "R20",
+     "R21",
+     "R22"
+    ],
+    "kind": "inconsistent",
+    "severity": "warning",
+    "problem": "R17-R24 repeat R1-R8 a step higher, but 3-4-5 replaces 2-3-4, so 3 slides from Bb4 straight to A4.",
+    "fix": {
+     "R20": 2,
+     "R21": 3,
+     "R22": 4
+    }
+   }
+  ],
+  "comment": "The two-voice handling in the first bar is good; carry it into the sequence and put 5 on the G4 that is held over the descending bass line.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-a20b": {
+  "item": "it-a20b",
+  "passage": "p18",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R4",
+     "R5"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "C5 on 3 right after Bb4 on 4 forces 3 over 4 while 1-2 hold the dyad; 5 is free.",
+    "fix": {
+     "R5": 5
+    }
+   },
+   {
+    "notes": [
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "Rising G4-G#4-A4 on 5-4-3 while 2 holds F4: two long-over-long crossings in sixteenths. 3-4-5 fits the position.",
+    "fix": {
+     "R11": 3,
+     "R12": 4,
+     "R13": 5
+    }
+   },
+   {
+    "notes": [
+     "R14",
+     "R19"
+    ],
+    "kind": "other",
+    "severity": "error",
+    "problem": "Thumb still holds Bb4 (dotted half to beat 4) when it must strike D5 at beat 3.5.",
+    "fix": {
+     "R19": 2
+    }
+   }
+  ],
+  "comment": "Three spots need rework; with them fixed the passage lies well, with the octave held by 1-5 and the inner descent on 4-3-2.",
+  "readback": {
+   "R": {
+    "n": 23,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-11"
+ },
+ "it-78a7": {
+  "item": "it-78a7",
+  "passage": "p29",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L3",
+     "L4"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both F#2 and F#3 of a simultaneous octave.",
+    "fix": {
+     "L3": 5,
+     "L4": 1
+    }
+   },
+   {
+    "notes": [
+     "L7",
+     "L8"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 3 and 2 cannot hold the octave E2-E3; a 2-3 span reaches only a fourth.",
+    "fix": {
+     "L7": 5,
+     "L8": 1
+    }
+   }
+  ],
+  "comment": "The other octaves and the four-note chord in bar 10 are fingered soundly; the octaves at L3-4 and L7-8 must be 5+1 like the rest.",
+  "readback": {
+   "L": {
+    "n": 22,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-36b7": {
+  "item": "it-36b7",
+  "passage": "p32",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Sound and idiomatic: the thumb anchors C#5 under the repeated G-Bb dyads and holds it through the 4-5-4 neighbour figure in bar 13.",
+  "readback": {
+   "R": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-42ad": {
+  "item": "it-42ad",
+  "passage": "p24",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "The leaps in bars 5-6 are fingered consistently (1-4 twice), the turn in bar 8 sits in a natural D-to-G position, and F-A on 1+2 sets up Bb on 3 and D on 5.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-3e24": {
+  "item": "it-3e24",
+  "passage": "p12",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R10",
+     "R11"
+    ],
+    "kind": "thumb_pass_onto_black",
+    "severity": "warning",
+    "problem": "Thumb passes under 3 onto F#4, breaking the 1-3-2-4 cell used for the identical figure at R1-R4.",
+    "fix": {
+     "R11": 2
+    }
+   },
+   {
+    "notes": [
+     "L15",
+     "L16"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 3 and 2 cannot hold the octave A2-A3; a 2-3 span reaches only a fourth.",
+    "fix": {
+     "L15": 5,
+     "L16": 1
+    }
+   },
+   {
+    "notes": [
+     "L23",
+     "L24"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both A2 and A3 of a simultaneous octave.",
+    "fix": {
+     "L23": 5,
+     "L24": 1
+    }
+   }
+  ],
+  "comment": "The right-hand sequence is otherwise consistent across both bars; the left-hand octaves should stay 5+1 on white keys and 4+1 on F# throughout.",
+  "readback": {
+   "R": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-ce72": {
+  "item": "it-ce72",
+  "passage": "p27",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R10",
+     "R11"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 2 is assigned to both Bb4 and C5; the same dyad is fingered 2+3 earlier in bar 3.",
+    "fix": {
+     "R10": 2,
+     "R11": 3
+    }
+   },
+   {
+    "notes": [
+     "R14",
+     "R15"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 2 and 3 cannot span the sixth F4-D5; a 2-3 span reaches only a fourth.",
+    "fix": {
+     "R14": 1,
+     "R15": 5
+    }
+   }
+  ],
+  "comment": "The left hand is fine. With the two right-hand fixes the sixths move 1+5, 1+5, 1+4 and F4 keeps the thumb.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-bff4": {
+  "item": "it-bff4",
+  "passage": "p31",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R14",
+     "R15",
+     "R16"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "On E5-A5-E6, 3-4 cannot span a fifth and 2-4 cannot hold an octave; use the 1-2-5 shape used for B-E-B.",
+    "fix": {
+     "R14": 1,
+     "R15": 2,
+     "R16": 5
+    }
+   },
+   {
+    "notes": [
+     "L12",
+     "L13",
+     "L14"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both E3 and G#3 in the same chord.",
+    "fix": {
+     "L12": 5,
+     "L13": 3,
+     "L14": 2
+    }
+   }
+  ],
+  "comment": "Octave and chord fingerings are otherwise standard, with 4 on the black-key octaves for connection; two chords need correcting.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 31,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-0ab2": {
+  "item": "it-0ab2",
+  "passage": "p17",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 4 plays G5 then F5 in succession, breaking the legato descent; 4-3-2-1 down to D5 is natural.",
+    "fix": {
+     "R2": 3
+    }
+   },
+   {
+    "notes": [
+     "R16",
+     "R17"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 2 is assigned to both E4 and G4 of the dyad.",
+    "fix": {
+     "R16": 2,
+     "R17": 3
+    }
+   },
+   {
+    "notes": [
+     "L9",
+     "L10"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 3 and 2 cannot hold the octave Bb2-Bb3; a 2-3 span reaches only a fourth.",
+    "fix": {
+     "L9": 5,
+     "L10": 1
+    }
+   }
+  ],
+  "comment": "The 5-4-2-1 arpeggio in bar 18 and the left-hand chord shapes are good; three spots need correction before this goes to a student.",
+  "readback": {
+   "R": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 10,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-c984": {
+  "item": "it-c984",
+  "passage": "p15",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L3",
+     "L4"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Fingers 3 and 2 cannot span the sixth G3-E4; the identical dyad in bar 15 is correctly 5+1.",
+    "fix": {
+     "L3": 5,
+     "L4": 1
+    }
+   },
+   {
+    "notes": [
+     "L14",
+     "L15"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 5 is assigned to both G3 and D4; the identical dyad in bar 13 is 5+1.",
+    "fix": {
+     "L14": 5,
+     "L15": 1
+    }
+   }
+  ],
+  "comment": "Bars 13 and 15 repeat exactly and should share 5+1, 5+1, 5+2, 5+3 over the repeated G3.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-12"
+ },
+ "it-1ff1": {
+  "item": "it-1ff1",
+  "passage": "p19",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard Alberti-bass fingering in a fixed C five-finger position; 4-1-2-1 on D-G-F-G keeps the hand still and the repeated G on the thumb.",
+  "readback": {
+   "L": {
+    "n": 16,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-c8b0": {
+  "item": "it-c8b0",
+  "passage": "p28",
+  "condition": "expert",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R11",
+     "R13",
+     "R15"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Eb5 held by 4 while 3 plays Bb4 below: a perfect fourth between 3 and 4, beyond their third limit.",
+    "fix": {
+     "R13": 2,
+     "R15": 2
+    }
+   }
+  ],
+  "comment": "Sound for this texture otherwise; the thumb on G#4 and the ninth at R5-6 are forced by the writing. Under the held Eb5 use 1-2-4 (or 5 on Eb5 if a 1-4 octave is too wide).",
+  "readback": {
+   "R": {
+    "n": 20,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-b5ca": {
+  "item": "it-b5ca",
+  "passage": "p12",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R14",
+     "R15",
+     "R16",
+     "R17",
+     "R18",
+     "R19",
+     "R20",
+     "R22",
+     "R23",
+     "R24"
+    ],
+    "kind": "inconsistent",
+    "severity": "warning",
+    "problem": "Bar 21 sequences bar 20 a third higher but drops its 1-3-2-4 shape; the thumb shuttles G4-A4, forcing three needless shifts.",
+    "fix": {
+     "R14": 3,
+     "R15": 2,
+     "R16": 4,
+     "R17": 3,
+     "R18": 4,
+     "R19": 2,
+     "R20": 3,
+     "R22": 3,
+     "R23": 2,
+     "R24": 4
+    }
+   }
+  ],
+  "comment": "Bar 20 and the LH octaves are fine. Bar 21 should copy bar 20's 1-3-2-4 shape from G4, with the thumb tucking under 4 at the barline.",
+  "readback": {
+   "R": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-05f7": {
+  "item": "it-05f7",
+  "passage": "p29",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 2,
+   "consistent": 1,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L5",
+     "L6"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave B1-B2 fingered 5-4; the 4-5 pair cannot span more than a third.",
+    "fix": {
+     "L6": 1
+    }
+   },
+   {
+    "notes": [
+     "L9",
+     "L10"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "Octave C2-C3 taken 5-2 is a needless full stretch; plain 5-1 is the standard octave fingering.",
+    "fix": {
+     "L10": 1
+    }
+   },
+   {
+    "notes": [
+     "L11",
+     "L12"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave A1-A2 fingered 5-3 is beyond a medium hand; it also differs from the repeated A octave at L13-14.",
+    "fix": {
+     "L12": 1
+    }
+   }
+  ],
+  "comment": "Every octave should be 5-1, as at L1-4 and L13-14. The closing chords L15-22 are well fingered.",
+  "readback": {
+   "L": {
+    "n": 22,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-14ad": {
+  "item": "it-14ad",
+  "passage": "p25",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "Rising A4-C5-F5 fingered 4-3-2 crosses 3 over 4 and 2 over 3; long fingers must not cross.",
+    "fix": {
+     "R1": 2,
+     "R2": 1
+    }
+   },
+   {
+    "notes": [
+     "R14",
+     "R15"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Grace notes G5 then F5 both on 5: a same-finger hop inside a quick turn.",
+    "fix": {
+     "R15": 3
+    }
+   },
+   {
+    "notes": [
+     "R16",
+     "R17"
+    ],
+    "kind": "position_change",
+    "severity": "warning",
+    "problem": "Thumb jumps up to E5 after the turn and 4 squeezes onto adjacent F5; 2-3 finishes the turn in place.",
+    "fix": {
+     "R16": 2,
+     "R17": 3
+    }
+   }
+  ],
+  "comment": "Bar 6 (2-1-2-3-5) is the model and bar 5 should match it. The bar 7 ornament wants 3-5-3-2-3 under the G5.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-65d1": {
+  "item": "it-65d1",
+  "passage": "p03",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R6",
+     "R7"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "C#5 on 3 then D5 on 2 upward makes 2 cross over 3; keep 2 on C#5 as in R2 and R4.",
+    "fix": {
+     "R6": 2,
+     "R7": 3
+    }
+   },
+   {
+    "notes": [
+     "L2",
+     "L3"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "F3 then G3 both on 5 in sixteenths; bar 20's identical figure uses 5-4 here.",
+    "fix": {
+     "L3": 4
+    }
+   }
+  ],
+  "comment": "Otherwise sound: the LH thumb pedal on E4/D4 with 5-4-3 below is the right shape, and bar 20 is the model for bar 19.",
+  "readback": {
+   "R": {
+    "n": 12,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-b9c8": {
+  "item": "it-b9c8",
+  "passage": "p32",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Sensible: 1-2-4 chords leave 5 free for C6, and the held thumb on C#5 under 4-5-4 is comfortable. Thumb on black keys is forced by the chord shapes.",
+  "readback": {
+   "R": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-3883": {
+  "item": "it-3883",
+  "passage": "p22",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L2",
+     "L3"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "info",
+    "problem": "A3 on 3 leaves 3 and 5 on adjacent keys G3-A3; in this G five-finger position A3 naturally takes 4.",
+    "fix": {
+     "L2": 4
+    }
+   }
+  ],
+  "comment": "Clean and economical; the shifts fall at the rests and the parallel thirds in bar 7 use the standard 3-1 to 4-2.",
+  "readback": {
+   "L": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-13"
+ },
+ "it-e1dc": {
+  "item": "it-e1dc",
+  "passage": "p03",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2",
+     "L3",
+     "L13",
+     "L14",
+     "L15"
+    ],
+    "kind": "weak_finger",
+    "severity": "info",
+    "problem": "Opening turn G3-F3-G3 (and F3-E3-F3) on weak 4-5-4, then G3 is re-fingered 3; 3-4-3 keeps one octave position all bar.",
+    "fix": {
+     "L1": 3,
+     "L2": 4,
+     "L3": 3,
+     "L13": 3,
+     "L14": 4,
+     "L15": 3
+    }
+   }
+  ],
+  "comment": "Sound and consistent across the two sequential bars; the right-hand leaps sit well. Only the opening turn of each left-hand bar could use stronger fingers inside a single octave position.",
+  "readback": {
+   "R": {
+    "n": 12,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 24,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-3466": {
+  "item": "it-3466",
+  "passage": "p10",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2",
+     "L3"
+    ],
+    "kind": "position_change",
+    "severity": "info",
+    "problem": "4-1 on B3-E4 forces the hand up a step at C#4; 5-2 sets the B3-F#4 five-finger position held through L7.",
+    "fix": {
+     "L1": 5,
+     "L2": 2
+    }
+   }
+  ],
+  "comment": "Solid fugue fingering; the later thumb moves fall on the quarter and dotted-eighth notes. Starting with 5-2 removes the only unforced shift.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-2895": {
+  "item": "it-2895",
+  "passage": "p14",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R11",
+     "R12",
+     "R13",
+     "R14",
+     "R15"
+    ],
+    "kind": "repeated_note",
+    "severity": "warning",
+    "problem": "Repeated A5 and F5 fingered 3-3-4 and 2-1-2: needless finger changes and a shift; the F5-C6 five-finger position covers everything.",
+    "fix": {
+     "R11": 3,
+     "R12": 2,
+     "R13": 1,
+     "R14": 1,
+     "R15": 1
+    }
+   }
+  ],
+  "comment": "The cadence chords and the leap to C6 after the rest are well handled. The repeated-note fingerings in bars 13-14 are fussy and should be simplified to one position.",
+  "readback": {
+   "R": {
+    "n": 15,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-9d32": {
+  "item": "it-9d32",
+  "passage": "p35",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Clean: the opening arpeggio keeps the thumb off Bb, the turn sits on 3-4, and the left-hand chords use one shape throughout. The thumb move E4 to F4 comes after a half note, which is the right place for it.",
+  "readback": {
+   "R": {
+    "n": 13,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 13,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-fd7a": {
+  "item": "it-fd7a",
+  "passage": "p39",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Standard 5-1 octaves throughout; nothing to change.",
+  "readback": {
+   "L": {
+    "n": 18,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-381a": {
+  "item": "it-381a",
+  "passage": "p01",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 1,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R4",
+     "R5",
+     "R6",
+     "R7"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "4 on E5 crosses over 3, then 2 crosses back over 4 to G5: illegal long-finger crossings. The sequence elsewhere uses 2-4-3-5.",
+    "fix": {
+     "R5": 2,
+     "R6": 4
+    }
+   },
+   {
+    "notes": [
+     "R31",
+     "R32"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 3 on G4 then B4 in sixteenths is a hop and breaks the 2-4-3-5 pattern of the other statements.",
+    "fix": {
+     "R32": 5
+    }
+   }
+  ],
+  "comment": "The sequence is well fingered in two of its four statements and the 2-over-thumb descents are fine. Bar 3 beat 2 and the last note need correcting before print.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-207b": {
+  "item": "it-207b",
+  "passage": "p23",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "L5",
+     "L6",
+     "L7"
+    ],
+    "kind": "other",
+    "severity": "error",
+    "problem": "Thumb must strike C#4 at beat 2 while still holding the dotted-quarter D4; 3 on A3 frees 2 for a legato 4-3 resolution.",
+    "fix": {
+     "L5": 3,
+     "L7": 2
+    }
+   }
+  ],
+  "comment": "The descending arpeggio and the bar 9 dyads over the held E3 are well fingered. The only real problem is the suspension in bar 8, which as written asks the thumb to do two things at once.",
+  "readback": {
+   "L": {
+    "n": 21,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-429f": {
+  "item": "it-429f",
+  "passage": "p20",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 2,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R6",
+     "R7",
+     "R8",
+     "R9",
+     "R10",
+     "R11"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "2+5 on the third C5-E5 cramps the hand and differs from the 1+3 and 3+5 thirds used at R12-R17.",
+    "fix": {
+     "R6": 3,
+     "R9": 3,
+     "R10": 3
+    }
+   },
+   {
+    "notes": [
+     "R2",
+     "R3",
+     "R4",
+     "R5"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "info",
+    "problem": "Re-striking G#4 with the thumb puts it on a black key for a half note; keeping 2 is simpler for a student.",
+    "fix": {
+     "R3": 2,
+     "R4": 3,
+     "R5": 1
+    }
+   }
+  ],
+  "comment": "Left hand is standard throughout. In the right hand the thirds of bar 5 should share one fingering, and the thumb on G#4 is unnecessary.",
+  "readback": {
+   "R": {
+    "n": 17,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 39,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-14"
+ },
+ "it-57e1": {
+  "item": "it-57e1",
+  "passage": "p32",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R14",
+     "R15"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Thumb still holds the half-note C#5 when it is asked to strike Bb5; one finger cannot hold both.",
+    "fix": {
+     "R15": 4
+    }
+   },
+   {
+    "notes": [
+     "R6",
+     "R7",
+     "R8"
+    ],
+    "kind": "stretch",
+    "severity": "warning",
+    "problem": "2-3 across the tritone C#5-G5 strains on a held chord; 1+3+5 matches the C#5=1, G5+Bb5=3+5 pattern that follows.",
+    "fix": {
+     "R6": 1,
+     "R7": 3,
+     "R8": 5
+    }
+   }
+  ],
+  "comment": "The waltz figure lies well once the bar-12 chord matches the following C#5=1, G5+Bb5=3+5 pattern. The thumb on Bb5 in bar 13 is impossible while it holds C#5; 4 there gives Bb5-C6-Bb5 as 4-5-4.",
+  "readback": {
+   "R": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-53b9": {
+  "item": "it-53b9",
+  "passage": "p07",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 1,
+   "idiomatic": 2,
+   "economical": 2,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R3"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "Finger 3 still holds the dotted-eighth D5 when it must strike Eb5; D5 on 2 lets both voices sound full value.",
+    "fix": {
+     "R1": 2
+    }
+   },
+   {
+    "notes": [
+     "R12",
+     "R13",
+     "R14",
+     "R15"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 2 moves straight from D5 to C5 at the dyad; 4-3 on Eb5-D5 then 2+4 keeps both voices legato.",
+    "fix": {
+     "R12": 4,
+     "R13": 3,
+     "R15": 4
+    }
+   },
+   {
+    "notes": [
+     "R27",
+     "R28",
+     "R29",
+     "R30"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Same 2-2 hop from G4 to F4 in the sequence a fifth lower; fix it the same way.",
+    "fix": {
+     "R27": 4,
+     "R28": 3,
+     "R30": 4
+    }
+   }
+  ],
+  "comment": "A well-planned two-voice fingering with consistent sequence fingering and the thumb always on white keys. Fix the opening D5 so it can be held under Eb5, and remove the 2-2 hop into each beat-4 dyad.",
+  "readback": {
+   "R": {
+    "n": 30,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-bb8c": {
+  "item": "it-bb8c",
+  "passage": "p21",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 3
+  },
+  "verdict": "good",
+  "verdict_rank": 3,
+  "objections": [],
+  "comment": "Sound and simple: 3+1 on the repeated staccato dyads with the thumb moving only during rests, and 5+3+2 keeps the thumb off Bb3 in both chords.",
+  "readback": {
+   "L": {
+    "n": 14,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-3a6d": {
+  "item": "it-3a6d",
+  "passage": "p10",
+  "condition": "fhmm3",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 1,
+   "economical": 0,
+   "consistent": 3,
+   "beginner_friendly": 0
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2",
+     "L3",
+     "L4",
+     "L5",
+     "L6",
+     "L7"
+    ],
+    "kind": "position_change",
+    "severity": "warning",
+    "problem": "Alternating 2-1 makes the hand shift on nearly every sixteenth; bar 3 sits in one B3-F#4 five-finger position.",
+    "fix": {
+     "L1": 5,
+     "L2": 2,
+     "L3": 4,
+     "L5": 4,
+     "L6": 3,
+     "L7": 5
+    }
+   },
+   {
+    "notes": [
+     "L11",
+     "L12",
+     "L13",
+     "L14",
+     "L15",
+     "L16",
+     "L17"
+    ],
+    "kind": "position_change",
+    "severity": "warning",
+    "problem": "The same 2-1 seesaw in bar 4; 4 on A3 and G#3, 3 on B3, 2 on C#4, 1 on D4 needs no shift.",
+    "fix": {
+     "L11": 3,
+     "L12": 2,
+     "L13": 4,
+     "L15": 4,
+     "L16": 3,
+     "L17": 4
+    }
+   },
+   {
+    "notes": [
+     "L6",
+     "L12"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "warning",
+    "problem": "Thumb lands on black Eb4 and C#4 in fast sixteenths where 3 and 2 fall on them naturally.",
+    "fix": {
+     "L6": 3,
+     "L12": 2
+    }
+   }
+  ],
+  "comment": "Fingered almost entirely 2-1, so the hand seesaws on every sixteenth at a fast tempo. Both bars sit in compact positions that need no shifts at all.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-03e4": {
+  "item": "it-03e4",
+  "passage": "p06",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "L1",
+     "L2",
+     "L3",
+     "L4"
+    ],
+    "kind": "reversed_run",
+    "severity": "error",
+    "problem": "LH 4-5-4-3 on A3-F4-E4-D4 runs the fingers backwards: 5 crosses over 4, then 4 and 3 cross leftward.",
+    "fix": {
+     "L2": 1,
+     "L3": 2,
+     "L4": 3
+    }
+   },
+   {
+    "notes": [
+     "L10",
+     "L11"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 4 plays E3 then F3 in consecutive sixteenths, a hop; 3 on F3 keeps the line legato.",
+    "fix": {
+     "L11": 3
+    }
+   }
+  ],
+  "comment": "From the ninth leap onward the fingering is good, and the 5-5 bass leap at the cadence is fine. The opening of bar 20 runs the fingers backwards and the 4-4 hop should go.",
+  "readback": {
+   "L": {
+    "n": 23,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-352b": {
+  "item": "it-352b",
+  "passage": "p04",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 2,
+   "idiomatic": 1,
+   "economical": 1,
+   "consistent": 3,
+   "beginner_friendly": 1
+  },
+  "verdict": "flawed",
+  "verdict_rank": 1,
+  "objections": [
+   {
+    "notes": [
+     "R1",
+     "R2",
+     "R3",
+     "R4"
+    ],
+    "kind": "nonstandard_pattern",
+    "severity": "warning",
+    "problem": "Ornament D5-C#5-D5-C#5 taken 1-2-1-3 crosses over the thumb twice at 32nd speed; 4-3-4-3 lies naturally.",
+    "fix": {
+     "R1": 4,
+     "R2": 3,
+     "R3": 4
+    }
+   },
+   {
+    "notes": [
+     "R8",
+     "R9",
+     "R10"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "4 on F#4 has to cross over 3 on G4 inside the quick turn: a long-finger crossing.",
+    "fix": {
+     "R9": 2,
+     "R10": 1
+    }
+   },
+   {
+    "notes": [
+     "R13"
+    ],
+    "kind": "thumb_on_black",
+    "severity": "warning",
+    "problem": "Thumb on C#5 is avoidable; 2 takes it and 2-5 easily spans the tritone to G5.",
+    "fix": {
+     "R13": 2
+    }
+   },
+   {
+    "notes": [
+     "R16",
+     "R17"
+    ],
+    "kind": "hop",
+    "severity": "warning",
+    "problem": "Finger 2 plays E5 then jumps a fourth to A5 with no break.",
+    "fix": {
+     "R17": 5
+    }
+   },
+   {
+    "notes": [
+     "R17",
+     "R18"
+    ],
+    "kind": "nonthumb_crossing",
+    "severity": "error",
+    "problem": "3 on F#5 must cross over 2 on A5, a long-finger crossing.",
+    "fix": {
+     "R17": 5
+    }
+   }
+  ],
+  "comment": "Several spots work against the hand: the ornament on the thumb, two long-finger crossings and a hop. Each fix is local, and the rest of the line (C#5-B4-A4 as 3-2-1, E5 on 5) is fine.",
+  "readback": {
+   "R": {
+    "n": 20,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-2377": {
+  "item": "it-2377",
+  "passage": "p26",
+  "condition": "corrupted",
+  "scores": {
+   "possible": 0,
+   "idiomatic": 1,
+   "economical": 3,
+   "consistent": 2,
+   "beginner_friendly": 1
+  },
+  "verdict": "unplayable",
+  "verdict_rank": 0,
+  "objections": [
+   {
+    "notes": [
+     "L5",
+     "L6"
+    ],
+    "kind": "same_finger_chord",
+    "severity": "error",
+    "problem": "E3 and A3 are struck together with finger 3; one finger cannot play two non-adjacent keys.",
+    "fix": {
+     "L6": 1
+    }
+   },
+   {
+    "notes": [
+     "L18",
+     "L19"
+    ],
+    "kind": "impossible_span",
+    "severity": "error",
+    "problem": "Octave A2-A3 on 3 and 2 is far beyond any 2-3 span; take it 5+1.",
+    "fix": {
+     "L18": 5,
+     "L19": 1
+    }
+   }
+  ],
+  "comment": "The bass-plus-chord pattern (5, then 3+1) and the 4+1, 4+2 dyads are sensible. Two spots are impossible: the 3+3 dyad in bar 22 and the 3+2 octave at the end.",
+  "readback": {
+   "L": {
+    "n": 19,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ },
+ "it-a805": {
+  "item": "it-a805",
+  "passage": "p31",
+  "condition": "expert",
+  "scores": {
+   "possible": 3,
+   "idiomatic": 3,
+   "economical": 3,
+   "consistent": 3,
+   "beginner_friendly": 2
+  },
+  "verdict": "acceptable",
+  "verdict_rank": 2,
+  "objections": [
+   {
+    "notes": [
+     "R12",
+     "R13",
+     "R19",
+     "R20",
+     "R26",
+     "R27"
+    ],
+    "kind": "stretch",
+    "severity": "info",
+    "problem": "1-4 octaves on C# are good legato technique but a stretch for a medium hand; a student can play them 1-5.",
+    "fix": {
+     "R13": 5,
+     "R20": 5,
+     "R27": 5
+    }
+   },
+   {
+    "notes": [
+     "L19",
+     "L20",
+     "L21",
+     "L22",
+     "L23",
+     "L24",
+     "L25"
+    ],
+    "kind": "position_change",
+    "severity": "info",
+    "problem": "Re-fingering E3+G#3+D4 from 5+3+1 to 5+4+2+1 one eighth later shifts the hand; take it 5+4+2 from the start.",
+    "fix": {
+     "L20": 4,
+     "L21": 2
+    }
+   }
+  ],
+  "comment": "Idiomatic octave-and-chord fingering in both hands; the LH inner D4 on the free 2 under the held chord is well judged. Only small preferences for a student with a medium hand.",
+  "readback": {
+   "R": {
+    "n": 32,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   },
+   "L": {
+    "n": 31,
+    "errors": 0,
+    "exact": true,
+    "length_ok": true
+   }
+  },
+  "batch": "A-15"
+ }
+}

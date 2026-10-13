@@ -1,0 +1,81 @@
+{
+ "note": "per-batch usage reported by the Agent tool's completion notification (subagent_tokens = all tokens the reviewer consumed, including its reasoning and tool round-trips; duration_ms = wall time from launch to hand-back)",
+ "batches": {
+  "A-02": {
+   "subagent_tokens": 126441,
+   "duration_ms": 578057,
+   "tool_uses": 6
+  },
+  "A-03": {
+   "subagent_tokens": 122410,
+   "duration_ms": 548265,
+   "tool_uses": 6
+  },
+  "A-04": {
+   "subagent_tokens": 122992,
+   "duration_ms": 567359,
+   "tool_uses": 6
+  },
+  "A-07": {
+   "subagent_tokens": null,
+   "duration_ms": null,
+   "tool_uses": null,
+   "note": "usage block not captured"
+  },
+  "A-08": {
+   "subagent_tokens": 127945,
+   "duration_ms": 599561,
+   "tool_uses": 6
+  },
+  "A-06": {
+   "subagent_tokens": 130125,
+   "duration_ms": 622745,
+   "tool_uses": 6
+  },
+  "B-06": {
+   "subagent_tokens": 119699,
+   "duration_ms": 510301,
+   "tool_uses": 6
+  },
+  "A-15": {
+   "subagent_tokens": 155785,
+   "duration_ms": 827364,
+   "tool_uses": 6
+  },
+  "B-02": {
+   "subagent_tokens": 132151,
+   "duration_ms": 629608,
+   "tool_uses": 6
+  },
+  "B-10": {
+   "subagent_tokens": 116477,
+   "duration_ms": 488010,
+   "tool_uses": 6
+  },
+  "B-13": {
+   "subagent_tokens": 103152,
+   "duration_ms": 368867,
+   "tool_uses": 6
+  },
+  "B-14": {
+   "subagent_tokens": 108060,
+   "duration_ms": 421884,
+   "tool_uses": 6
+  },
+  "B-15": {
+   "subagent_tokens": 103052,
+   "duration_ms": 370156,
+   "tool_uses": 6
+  },
+  "B-11": {
+   "subagent_tokens": 127527,
+   "duration_ms": 594553,
+   "tool_uses": 6
+  },
+  "B-12": {
+   "subagent_tokens": 142578,
+   "duration_ms": 748376,
+   "tool_uses": 6
+  }
+ }
+}

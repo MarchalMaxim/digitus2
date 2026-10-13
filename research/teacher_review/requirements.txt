@@ -1,0 +1,4 @@
+# research/teacher_review: pure standard library except the test runner.
+# Use research/.venv (see research/requirements.txt) or:
+#   python -m venv research/.venv-review && research/.venv-review/Scripts/python.exe -m pip install -r research/teacher_review/requirements.txt
+pytest==9.1.1

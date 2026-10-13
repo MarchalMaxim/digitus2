@@ -1,0 +1,820 @@
+{
+ "runs": {
+  "A": {
+   "fault_detection": {
+    "per_kind": {
+     "chord_same_finger": {
+      "planted": 24,
+      "detected_pos": 24,
+      "detected_kind": 24,
+      "detected_error": 24,
+      "fix_restores_expert": 20,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 1.0
+     },
+     "impossible_span": {
+      "planted": 21,
+      "detected_pos": 21,
+      "detected_kind": 20,
+      "detected_error": 18,
+      "fix_restores_expert": 19,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.9523809523809523
+     },
+     "nonthumb_crossing": {
+      "planted": 16,
+      "detected_pos": 15,
+      "detected_kind": 15,
+      "detected_error": 14,
+      "fix_restores_expert": 15,
+      "sensitivity_pos": 0.9375,
+      "sensitivity_kind": 0.9375
+     },
+     "hop_at_speed": {
+      "planted": 16,
+      "detected_pos": 16,
+      "detected_kind": 15,
+      "detected_error": 2,
+      "fix_restores_expert": 15,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.9375
+     },
+     "run_345_reversed": {
+      "planted": 6,
+      "detected_pos": 6,
+      "detected_kind": 6,
+      "detected_error": 6,
+      "fix_restores_expert": 5,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 1.0
+     },
+     "thumb_on_black_between_whites": {
+      "planted": 9,
+      "detected_pos": 9,
+      "detected_kind": 8,
+      "detected_error": 1,
+      "fix_restores_expert": 8,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.8888888888888888
+     }
+    },
+    "total": {
+     "planted": 92,
+     "detected_pos": 91,
+     "detected_kind": 88,
+     "detected_error": 65,
+     "fix_restores_expert": 82,
+     "sensitivity_pos": 0.9891304347826086,
+     "sensitivity_kind": 0.9565217391304348
+    }
+   },
+   "false_positives": {
+    "expert": {
+     "items": 40,
+     "notes": 1007,
+     "objections": 28,
+     "by_severity": {
+      "warning": 14,
+      "info": 12,
+      "error": 2
+     },
+     "by_kind": {
+      "nonstandard_pattern": 5,
+      "position_change": 3,
+      "stretch": 4,
+      "fifth_on_black": 2,
+      "hop": 6,
+      "repeated_note": 2,
+      "other": 1,
+      "inconsistent": 2,
+      "impossible_span": 1,
+      "weak_finger": 1,
+      "thumb_on_black": 1
+     },
+     "per_item": 0.7,
+     "per_100_notes": 2.7805362462760677,
+     "share_items_with_error": 0.05,
+     "share_items_with_any": 0.45
+    },
+    "fhmm3": {
+     "items": 40,
+     "notes": 1007,
+     "objections": 51,
+     "by_severity": {
+      "warning": 26,
+      "error": 14,
+      "info": 11
+     },
+     "by_kind": {
+      "hop": 12,
+      "stretch": 8,
+      "same_finger_chord": 3,
+      "nonthumb_crossing": 1,
+      "nonstandard_pattern": 4,
+      "inconsistent": 7,
+      "position_change": 4,
+      "impossible_span": 6,
+      "thumb_on_black": 2,
+      "other": 3,
+      "repeated_note": 1
+     },
+     "per_item": 1.275,
+     "per_100_notes": 5.06454816285998,
+     "share_items_with_error": 0.275,
+     "share_items_with_any": 0.775
+    },
+    "corrupted": {
+     "items": 40,
+     "notes": 1007,
+     "objections": 6,
+     "by_severity": {
+      "info": 4,
+      "warning": 2
+     },
+     "by_kind": {
+      "stretch": 1,
+      "thumb_on_black": 1,
+      "nonstandard_pattern": 2,
+      "hop": 1,
+      "inconsistent": 1
+     },
+     "per_item": 0.15,
+     "per_100_notes": 0.5958291956305859,
+     "share_items_with_error": 0.0,
+     "share_items_with_any": 0.125
+    }
+   },
+   "per_kind_fp": {
+    "chord_same_finger": {
+     "objections": 1,
+     "per_100_notes": 0.09930486593843098
+    },
+    "impossible_span": {
+     "objections": 5,
+     "per_100_notes": 0.49652432969215493
+    },
+    "nonthumb_crossing": {
+     "objections": 0,
+     "per_100_notes": 0.0
+    },
+    "hop_at_speed": {
+     "objections": 8,
+     "per_100_notes": 0.7944389275074478
+    },
+    "run_345_reversed": {
+     "objections": 0,
+     "per_100_notes": 0.0
+    },
+    "thumb_on_black_between_whites": {
+     "objections": 1,
+     "per_100_notes": 0.09930486593843098
+    }
+   },
+   "ranking": {
+    "passages": 40,
+    "pairs": {
+     "expert>=corrupted": {
+      "count": 40,
+      "share": 1.0
+     },
+     "expert>=fhmm3": {
+      "count": 33,
+      "share": 0.825
+     },
+     "expert>=fhmm3>corrupted": {
+      "count": 28,
+      "share": 0.7
+     },
+     "expert>corrupted": {
+      "count": 40,
+      "share": 1.0
+     },
+     "expert>fhmm3": {
+      "count": 25,
+      "share": 0.625
+     },
+     "expert>fhmm3>corrupted": {
+      "count": 20,
+      "share": 0.5
+     },
+     "fhmm3>=corrupted": {
+      "count": 37,
+      "share": 0.925
+     },
+     "fhmm3>corrupted": {
+      "count": 35,
+      "share": 0.875
+     },
+     "verdict expert>=fhmm3": {
+      "count": 36,
+      "share": 0.9
+     },
+     "verdict expert>corrupted": {
+      "count": 39,
+      "share": 0.975
+     },
+     "verdict fhmm3>corrupted": {
+      "count": 29,
+      "share": 0.725
+     }
+    },
+    "mean_scores": {
+     "expert": {
+      "possible": 2.825,
+      "idiomatic": 2.75,
+      "economical": 2.725,
+      "consistent": 2.875,
+      "beginner_friendly": 2.7,
+      "overall": 13.875
+     },
+     "fhmm3": {
+      "possible": 2.35,
+      "idiomatic": 2.375,
+      "economical": 2.25,
+      "consistent": 2.675,
+      "beginner_friendly": 2.275,
+      "overall": 11.925
+     },
+     "corrupted": {
+      "possible": 0.725,
+      "idiomatic": 1.125,
+      "economical": 2.0,
+      "consistent": 1.975,
+      "beginner_friendly": 1.15,
+      "overall": 6.975
+     }
+    },
+    "verdicts": {
+     "expert": {
+      "good": 28,
+      "acceptable": 9,
+      "unplayable": 1,
+      "flawed": 2
+     },
+     "fhmm3": {
+      "acceptable": 12,
+      "good": 13,
+      "unplayable": 10,
+      "flawed": 5
+     },
+     "corrupted": {
+      "flawed": 9,
+      "unplayable": 31
+     }
+    }
+   },
+   "disagreement": {
+    "agreed": {
+     "notes": 557,
+     "flagged": 39,
+     "rate": 0.07001795332136446
+    },
+    "disputed": {
+     "notes": 450,
+     "flagged": 62,
+     "rate": 0.13777777777777778
+    },
+    "fixes": {
+     "fixes": 70,
+     "fix_matches_other_expert": 50,
+     "fix_on_disputed_note": 56
+    },
+    "fix_matches_other_expert_share": 0.7142857142857143
+   },
+   "readback": {
+    "hands": 150,
+    "exact": 150,
+    "exact_share": 1.0,
+    "digits": 3021,
+    "digit_errors": 0,
+    "digit_error_rate": 0.0
+   },
+   "cost": {
+    "batches": 15,
+    "items": 120,
+    "wall_s_per_batch_median": 572.0,
+    "wall_s_per_item_mean": 71.65,
+    "chars_in_per_item": 2402.5,
+    "chars_out_per_item": 848.7083333333334,
+    "est_tokens_in_per_item": 600.625,
+    "est_tokens_out_per_item": 212.17708333333334,
+    "note": "tokens are estimated as characters / 4 of the batch file and the JSON output; reasoning tokens inside the reviewer are not observable from here"
+   },
+   "n_items": 120
+  },
+  "B": {
+   "fault_detection": {
+    "per_kind": {
+     "chord_same_finger": {
+      "planted": 24,
+      "detected_pos": 24,
+      "detected_kind": 24,
+      "detected_error": 24,
+      "fix_restores_expert": 22,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 1.0
+     },
+     "impossible_span": {
+      "planted": 21,
+      "detected_pos": 21,
+      "detected_kind": 19,
+      "detected_error": 19,
+      "fix_restores_expert": 18,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.9047619047619048
+     },
+     "nonthumb_crossing": {
+      "planted": 16,
+      "detected_pos": 16,
+      "detected_kind": 16,
+      "detected_error": 9,
+      "fix_restores_expert": 15,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 1.0
+     },
+     "hop_at_speed": {
+      "planted": 16,
+      "detected_pos": 16,
+      "detected_kind": 15,
+      "detected_error": 1,
+      "fix_restores_expert": 15,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.9375
+     },
+     "run_345_reversed": {
+      "planted": 6,
+      "detected_pos": 6,
+      "detected_kind": 4,
+      "detected_error": 5,
+      "fix_restores_expert": 5,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.6666666666666666
+     },
+     "thumb_on_black_between_whites": {
+      "planted": 9,
+      "detected_pos": 9,
+      "detected_kind": 8,
+      "detected_error": 1,
+      "fix_restores_expert": 8,
+      "sensitivity_pos": 1.0,
+      "sensitivity_kind": 0.8888888888888888
+     }
+    },
+    "total": {
+     "planted": 92,
+     "detected_pos": 92,
+     "detected_kind": 86,
+     "detected_error": 59,
+     "fix_restores_expert": 83,
+     "sensitivity_pos": 1.0,
+     "sensitivity_kind": 0.9347826086956522
+    }
+   },
+   "false_positives": {
+    "expert": {
+     "items": 40,
+     "notes": 1007,
+     "objections": 23,
+     "by_severity": {
+      "info": 8,
+      "warning": 14,
+      "error": 1
+     },
+     "by_kind": {
+      "inconsistent": 4,
+      "nonstandard_pattern": 2,
+      "thumb_on_black": 1,
+      "position_change": 3,
+      "hop": 7,
+      "other": 1,
+      "repeated_note": 1,
+      "stretch": 3,
+      "impossible_span": 1
+     },
+     "per_item": 0.575,
+     "per_100_notes": 2.284011916583913,
+     "share_items_with_error": 0.025,
+     "share_items_with_any": 0.45
+    },
+    "fhmm3": {
+     "items": 40,
+     "notes": 1007,
+     "objections": 49,
+     "by_severity": {
+      "warning": 28,
+      "error": 11,
+      "info": 10
+     },
+     "by_kind": {
+      "position_change": 7,
+      "thumb_on_black": 1,
+      "hop": 11,
+      "other": 1,
+      "inconsistent": 6,
+      "impossible_span": 6,
+      "nonstandard_pattern": 4,
+      "same_finger_chord": 2,
+      "stretch": 7,
+      "weak_finger": 1,
+      "nonthumb_crossing": 2,
+      "repeated_note": 1
+     },
+     "per_item": 1.225,
+     "per_100_notes": 4.865938430983118,
+     "share_items_with_error": 0.225,
+     "share_items_with_any": 0.775
+    },
+    "corrupted": {
+     "items": 40,
+     "notes": 1007,
+     "objections": 10,
+     "by_severity": {
+      "warning": 6,
+      "info": 4
+     },
+     "by_kind": {
+      "nonstandard_pattern": 2,
+      "stretch": 3,
+      "hop": 2,
+      "inconsistent": 2,
+      "thumb_on_black": 1
+     },
+     "per_item": 0.25,
+     "per_100_notes": 0.9930486593843099,
+     "share_items_with_error": 0.0,
+     "share_items_with_any": 0.225
+    }
+   },
+   "per_kind_fp": {
+    "chord_same_finger": {
+     "objections": 1,
+     "per_100_notes": 0.09930486593843098
+    },
+    "impossible_span": {
+     "objections": 4,
+     "per_100_notes": 0.3972194637537239
+    },
+    "nonthumb_crossing": {
+     "objections": 0,
+     "per_100_notes": 0.0
+    },
+    "hop_at_speed": {
+     "objections": 8,
+     "per_100_notes": 0.7944389275074478
+    },
+    "run_345_reversed": {
+     "objections": 0,
+     "per_100_notes": 0.0
+    },
+    "thumb_on_black_between_whites": {
+     "objections": 1,
+     "per_100_notes": 0.09930486593843098
+    }
+   },
+   "ranking": {
+    "passages": 40,
+    "pairs": {
+     "expert>=corrupted": {
+      "count": 40,
+      "share": 1.0
+     },
+     "expert>=fhmm3": {
+      "count": 34,
+      "share": 0.85
+     },
+     "expert>=fhmm3>corrupted": {
+      "count": 30,
+      "share": 0.75
+     },
+     "expert>corrupted": {
+      "count": 40,
+      "share": 1.0
+     },
+     "expert>fhmm3": {
+      "count": 25,
+      "share": 0.625
+     },
+     "expert>fhmm3>corrupted": {
+      "count": 21,
+      "share": 0.525
+     },
+     "fhmm3>=corrupted": {
+      "count": 37,
+      "share": 0.925
+     },
+     "fhmm3>corrupted": {
+      "count": 36,
+      "share": 0.9
+     },
+     "verdict expert>=fhmm3": {
+      "count": 38,
+      "share": 0.95
+     },
+     "verdict expert>corrupted": {
+      "count": 38,
+      "share": 0.95
+     },
+     "verdict fhmm3>corrupted": {
+      "count": 29,
+      "share": 0.725
+     }
+    },
+    "mean_scores": {
+     "expert": {
+      "possible": 2.875,
+      "idiomatic": 2.85,
+      "economical": 2.725,
+      "consistent": 2.9,
+      "beginner_friendly": 2.75,
+      "overall": 14.1
+     },
+     "fhmm3": {
+      "possible": 2.425,
+      "idiomatic": 2.35,
+      "economical": 2.375,
+      "consistent": 2.7,
+      "beginner_friendly": 2.3,
+      "overall": 12.15
+     },
+     "corrupted": {
+      "possible": 0.675,
+      "idiomatic": 1.25,
+      "economical": 1.975,
+      "consistent": 1.9,
+      "beginner_friendly": 1.175,
+      "overall": 6.975
+     }
+    },
+    "verdicts": {
+     "expert": {
+      "acceptable": 9,
+      "good": 29,
+      "unplayable": 1,
+      "flawed": 1
+     },
+     "fhmm3": {
+      "acceptable": 15,
+      "flawed": 2,
+      "unplayable": 9,
+      "good": 14
+     },
+     "corrupted": {
+      "acceptable": 3,
+      "unplayable": 35,
+      "flawed": 2
+     }
+    }
+   },
+   "disagreement": {
+    "agreed": {
+     "notes": 557,
+     "flagged": 17,
+     "rate": 0.03052064631956912
+    },
+    "disputed": {
+     "notes": 450,
+     "flagged": 75,
+     "rate": 0.16666666666666666
+    },
+    "fixes": {
+     "fixes": 73,
+     "fix_matches_other_expert": 64,
+     "fix_on_disputed_note": 67
+    },
+    "fix_matches_other_expert_share": 0.8767123287671232
+   },
+   "readback": {
+    "hands": 150,
+    "exact": 150,
+    "exact_share": 1.0,
+    "digits": 3021,
+    "digit_errors": 0,
+    "digit_error_rate": 0.0
+   },
+   "cost": {
+    "batches": 15,
+    "items": 120,
+    "wall_s_per_batch_median": 499.0,
+    "wall_s_per_item_mean": 64.49166666666666,
+    "chars_in_per_item": 2420.0,
+    "chars_out_per_item": 854.4,
+    "est_tokens_in_per_item": 605.0,
+    "est_tokens_out_per_item": 213.6,
+    "note": "tokens are estimated as characters / 4 of the batch file and the JSON output; reasoning tokens inside the reviewer are not observable from here"
+   },
+   "n_items": 120
+  }
+ },
+ "pooled": {
+  "fault_detection": {
+   "per_kind": {
+    "chord_same_finger": {
+     "planted": 48,
+     "detected_pos": 48,
+     "detected_kind": 48,
+     "detected_error": 48,
+     "fix_restores_expert": 42,
+     "sensitivity_pos": 1.0,
+     "sensitivity_kind": 1.0
+    },
+    "impossible_span": {
+     "planted": 42,
+     "detected_pos": 42,
+     "detected_kind": 39,
+     "detected_error": 37,
+     "fix_restores_expert": 37,
+     "sensitivity_pos": 1.0,
+     "sensitivity_kind": 0.9285714285714286
+    },
+    "nonthumb_crossing": {
+     "planted": 32,
+     "detected_pos": 31,
+     "detected_kind": 31,
+     "detected_error": 23,
+     "fix_restores_expert": 30,
+     "sensitivity_pos": 0.96875,
+     "sensitivity_kind": 0.96875
+    },
+    "hop_at_speed": {
+     "planted": 32,
+     "detected_pos": 32,
+     "detected_kind": 30,
+     "detected_error": 3,
+     "fix_restores_expert": 30,
+     "sensitivity_pos": 1.0,
+     "sensitivity_kind": 0.9375
+    },
+    "run_345_reversed": {
+     "planted": 12,
+     "detected_pos": 12,
+     "detected_kind": 10,
+     "detected_error": 11,
+     "fix_restores_expert": 10,
+     "sensitivity_pos": 1.0,
+     "sensitivity_kind": 0.8333333333333334
+    },
+    "thumb_on_black_between_whites": {
+     "planted": 18,
+     "detected_pos": 18,
+     "detected_kind": 16,
+     "detected_error": 2,
+     "fix_restores_expert": 16,
+     "sensitivity_pos": 1.0,
+     "sensitivity_kind": 0.8888888888888888
+    }
+   },
+   "total": {
+    "planted": 184,
+    "detected_pos": 183,
+    "detected_kind": 174,
+    "detected_error": 124,
+    "fix_restores_expert": 165,
+    "sensitivity_pos": 0.9945652173913043,
+    "sensitivity_kind": 0.9456521739130435
+   }
+  },
+  "false_positives": {
+   "expert": {
+    "items": 80,
+    "notes": 2014,
+    "objections": 51,
+    "by_severity": {
+     "warning": 28,
+     "info": 20,
+     "error": 3
+    },
+    "by_kind": {
+     "nonstandard_pattern": 7,
+     "position_change": 6,
+     "stretch": 7,
+     "fifth_on_black": 2,
+     "hop": 13,
+     "repeated_note": 3,
+     "other": 2,
+     "inconsistent": 6,
+     "impossible_span": 2,
+     "weak_finger": 1,
+     "thumb_on_black": 2
+    },
+    "per_item": 0.6375,
+    "per_100_notes": 2.53227408142999,
+    "share_items_with_error": 0.0375,
+    "share_items_with_any": 0.45
+   },
+   "fhmm3": {
+    "items": 80,
+    "notes": 2014,
+    "objections": 100,
+    "by_severity": {
+     "warning": 54,
+     "error": 25,
+     "info": 21
+    },
+    "by_kind": {
+     "hop": 23,
+     "stretch": 15,
+     "same_finger_chord": 5,
+     "nonthumb_crossing": 3,
+     "nonstandard_pattern": 8,
+     "inconsistent": 13,
+     "position_change": 11,
+     "impossible_span": 12,
+     "thumb_on_black": 3,
+     "other": 4,
+     "repeated_note": 2,
+     "weak_finger": 1
+    },
+    "per_item": 1.25,
+    "per_100_notes": 4.965243296921549,
+    "share_items_with_error": 0.25,
+    "share_items_with_any": 0.775
+   },
+   "corrupted": {
+    "items": 80,
+    "notes": 2014,
+    "objections": 16,
+    "by_severity": {
+     "info": 8,
+     "warning": 8
+    },
+    "by_kind": {
+     "stretch": 4,
+     "thumb_on_black": 2,
+     "nonstandard_pattern": 4,
+     "hop": 3,
+     "inconsistent": 3
+    },
+    "per_item": 0.2,
+    "per_100_notes": 0.7944389275074478,
+    "share_items_with_error": 0.0,
+    "share_items_with_any": 0.175
+   }
+  },
+  "per_kind_fp": {
+   "chord_same_finger": {
+    "objections": 2,
+    "per_100_notes": 0.09930486593843098
+   },
+   "impossible_span": {
+    "objections": 9,
+    "per_100_notes": 0.4468718967229394
+   },
+   "nonthumb_crossing": {
+    "objections": 0,
+    "per_100_notes": 0.0
+   },
+   "hop_at_speed": {
+    "objections": 16,
+    "per_100_notes": 0.7944389275074478
+   },
+   "run_345_reversed": {
+    "objections": 0,
+    "per_100_notes": 0.0
+   },
+   "thumb_on_black_between_whites": {
+    "objections": 2,
+    "per_100_notes": 0.09930486593843098
+   }
+  },
+  "disagreement": {
+   "agreed": {
+    "notes": 1114,
+    "flagged": 56,
+    "rate": 0.05026929982046679
+   },
+   "disputed": {
+    "notes": 900,
+    "flagged": 137,
+    "rate": 0.15222222222222223
+   },
+   "fixes": {
+    "fixes": 143,
+    "fix_matches_other_expert": 114,
+    "fix_on_disputed_note": 123
+   },
+   "fix_matches_other_expert_share": 0.7972027972027972
+  },
+  "readback": {
+   "hands": 300,
+   "exact": 300,
+   "exact_share": 1.0,
+   "digits": 6042,
+   "digit_errors": 0,
+   "digit_error_rate": 0.0
+  }
+ },
+ "consistency": {
+  "items": 120,
+  "overall_pearson": 0.9541273882046301,
+  "overall_spearman": 0.9506759309992399,
+  "mean_abs_diff_overall": 0.6666666666666666,
+  "share_abs_diff_le_2": 0.95,
+  "verdict_agreement": 0.8083333333333333,
+  "objection_note_jaccard_mean": 0.6463564522852447,
+  "faults": {
+   "both_runs_detect": 91,
+   "one_run_detects": 1,
+   "neither": 0
+  }
+ }
+}

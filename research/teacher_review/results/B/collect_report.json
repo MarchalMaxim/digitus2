@@ -1,0 +1,128 @@
+{
+ "run": "B",
+ "batches": {
+  "B-01": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-01.json",
+   "present": true,
+   "wall_s": 638.0,
+   "chars_in": 17294,
+   "chars_out": 8027,
+   "n_items": 8
+  },
+  "B-02": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-02.json",
+   "present": true,
+   "wall_s": 623.0,
+   "chars_in": 19959,
+   "chars_out": 7588,
+   "n_items": 8
+  },
+  "B-03": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-03.json",
+   "present": true,
+   "wall_s": 461.0,
+   "chars_in": 22247,
+   "chars_out": 6809,
+   "n_items": 8
+  },
+  "B-04": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-04.json",
+   "present": true,
+   "wall_s": 521.0,
+   "chars_in": 17149,
+   "chars_out": 5254,
+   "n_items": 8
+  },
+  "B-05": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-05.json",
+   "present": true,
+   "wall_s": 597.0,
+   "chars_in": 19811,
+   "chars_out": 6311,
+   "n_items": 8
+  },
+  "B-06": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-06.json",
+   "present": true,
+   "wall_s": 504.0,
+   "chars_in": 19034,
+   "chars_out": 7618,
+   "n_items": 8
+  },
+  "B-07": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-07.json",
+   "present": true,
+   "wall_s": 499.0,
+   "chars_in": 20580,
+   "chars_out": 8141,
+   "n_items": 8
+  },
+  "B-08": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-08.json",
+   "present": true,
+   "wall_s": 480.0,
+   "chars_in": 21273,
+   "chars_out": 6286,
+   "n_items": 8
+  },
+  "B-09": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-09.json",
+   "present": true,
+   "wall_s": 462.0,
+   "chars_in": 20198,
+   "chars_out": 7610,
+   "n_items": 8
+  },
+  "B-10": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-10.json",
+   "present": true,
+   "wall_s": 482.0,
+   "chars_in": 18655,
+   "chars_out": 7398,
+   "n_items": 8
+  },
+  "B-11": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-11.json",
+   "present": true,
+   "wall_s": 588.0,
+   "chars_in": 18513,
+   "chars_out": 6880,
+   "n_items": 8
+  },
+  "B-12": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-12.json",
+   "present": true,
+   "wall_s": 741.0,
+   "chars_in": 18457,
+   "chars_out": 5980,
+   "n_items": 8
+  },
+  "B-13": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-13.json",
+   "present": true,
+   "wall_s": 363.0,
+   "chars_in": 18192,
+   "chars_out": 6123,
+   "n_items": 8
+  },
+  "B-14": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-14.json",
+   "present": true,
+   "wall_s": 416.0,
+   "chars_in": 18749,
+   "chars_out": 6550,
+   "n_items": 8
+  },
+  "B-15": {
+   "file": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\teacher_review\\runs\\B\\out\\batch-15.json",
+   "present": true,
+   "wall_s": 364.0,
+   "chars_in": 20289,
+   "chars_out": 5953,
+   "n_items": 8
+  }
+ },
+ "problems": [],
+ "missing_items": [],
+ "n_items": 120
+}

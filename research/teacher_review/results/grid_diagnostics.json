@@ -1,0 +1,619 @@
+{
+ "001": {
+  "composer": "Bach",
+  "title": "Two-part invention in C major",
+  "bars": 22,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.625,
+  "tempo_qpm": 96,
+  "bar1_s": -0.013,
+  "residual_16ths": 0.024,
+  "align": 0.994,
+  "mode_ioi": 0.155,
+  "quarter_from_bars": 0.6252,
+  "implied_bars": 22.0,
+  "flags": [],
+  "n_notes": 469,
+  "fhmm3_other_hand": 0
+ },
+ "002": {
+  "composer": "Bach",
+  "title": "Two-part invention in F major",
+  "bars": 34,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.625,
+  "tempo_qpm": 96,
+  "bar1_s": 0.0,
+  "residual_16ths": 0.0,
+  "align": 1.0,
+  "mode_ioi": 0.155,
+  "quarter_from_bars": 0.6128,
+  "implied_bars": 33.33,
+  "flags": [],
+  "n_notes": 596,
+  "fhmm3_other_hand": 0
+ },
+ "003": {
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book I, Prelude No. 23 in B major",
+  "bars": 19,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.6,
+  "tempo_qpm": 100,
+  "bar1_s": 0.018,
+  "residual_16ths": 0.031,
+  "align": 0.657,
+  "mode_ioi": 0.15,
+  "quarter_from_bars": 0.6124,
+  "implied_bars": 19.38,
+  "flags": [
+   "only 66% of onsets sit on the 16th/triplet grid (jitter or tempo drift)"
+  ],
+  "n_notes": 417,
+  "fhmm3_other_hand": 4
+ },
+ "004": {
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book II, Fugue No. 2 in C minor",
+  "bars": 14,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 1.0025,
+  "tempo_qpm": 60,
+  "bar1_s": 0.507,
+  "residual_16ths": 0.034,
+  "align": 1.0,
+  "mode_ioi": 0.255,
+  "quarter_from_bars": 0.9303,
+  "implied_bars": 13.0,
+  "flags": [
+   "mode-based quarter 1.0200 differs from bar-based 0.9303 by more than 6%"
+  ],
+  "n_notes": 282,
+  "fhmm3_other_hand": 15
+ },
+ "005": {
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book II, Fugue No. 19 in A major",
+  "bars": 14,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.5001,
+  "tempo_qpm": 120,
+  "bar1_s": 0.267,
+  "residual_16ths": 0.031,
+  "align": 1.0,
+  "mode_ioi": 0.12,
+  "quarter_from_bars": 0.4801,
+  "implied_bars": 13.44,
+  "flags": [],
+  "n_notes": 313,
+  "fhmm3_other_hand": 4
+ },
+ "006": {
+  "composer": "Bach",
+  "title": "Partita No. 6 Corrente",
+  "bars": 38,
+  "meter": [
+   3,
+   8
+  ],
+  "quarter_s": 0.8871,
+  "tempo_qpm": 68,
+  "bar1_s": 0.614,
+  "residual_16ths": 0.276,
+  "align": 0.631,
+  "mode_ioi": 0.11,
+  "quarter_from_bars": 0.911,
+  "implied_bars": 39.0,
+  "flags": [
+   "only 63% of onsets sit on the 16th/triplet grid (jitter or tempo drift)"
+  ],
+  "n_notes": 348,
+  "fhmm3_other_hand": 0
+ },
+ "007": {
+  "composer": "Bach",
+  "title": "French Suite No. 1 Allemande",
+  "bars": 12,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.4921,
+  "tempo_qpm": 122,
+  "bar1_s": 2.02,
+  "residual_16ths": 0.101,
+  "align": 0.692,
+  "mode_ioi": 0.12,
+  "quarter_from_bars": 0.4962,
+  "implied_bars": 12.08,
+  "flags": [
+   "only 69% of onsets sit on the 16th/triplet grid (jitter or tempo drift)"
+  ],
+  "n_notes": 281,
+  "fhmm3_other_hand": 2
+ },
+ "008": {
+  "composer": "Bach",
+  "title": "French Suite No. 5 Sarabande",
+  "bars": 16,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 1.0019,
+  "tempo_qpm": 60,
+  "bar1_s": 0.036,
+  "residual_16ths": 0.136,
+  "align": 0.906,
+  "mode_ioi": 0.495,
+  "quarter_from_bars": 1.0018,
+  "implied_bars": 16.0,
+  "flags": [],
+  "n_notes": 171,
+  "fhmm3_other_hand": 0
+ },
+ "009": {
+  "composer": "Bach",
+  "title": "English Suite No. 3 Prelude",
+  "bars": 33,
+  "meter": [
+   3,
+   8
+  ],
+  "quarter_s": 0.6719,
+  "tempo_qpm": 89,
+  "bar1_s": 0.293,
+  "residual_16ths": 0.071,
+  "align": 0.649,
+  "mode_ioi": 0.17,
+  "quarter_from_bars": 0.6849,
+  "implied_bars": 33.72,
+  "flags": [
+   "only 65% of onsets sit on the 16th/triplet grid (jitter or tempo drift)"
+  ],
+  "n_notes": 393,
+  "fhmm3_other_hand": 6
+ },
+ "010": {
+  "composer": "Bach",
+  "title": "Goldberg Variations, Variation 13",
+  "bars": 16,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 1.1568,
+  "tempo_qpm": 52,
+  "bar1_s": -0.03,
+  "residual_16ths": 0.348,
+  "align": 0.617,
+  "mode_ioi": 0.155,
+  "quarter_from_bars": 1.2534,
+  "implied_bars": 17.33,
+  "flags": [
+   "only 62% of onsets sit on the 16th/triplet grid (jitter or tempo drift)"
+  ],
+  "n_notes": 387,
+  "fhmm3_other_hand": 0
+ },
+ "011": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 283 in G major, 1st mov.",
+  "bars": 22,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.5,
+  "tempo_qpm": 120,
+  "bar1_s": 0.008,
+  "residual_16ths": 0.019,
+  "align": 0.988,
+  "mode_ioi": 0.125,
+  "quarter_from_bars": 0.5056,
+  "implied_bars": 22.25,
+  "flags": [],
+  "n_notes": 272,
+  "fhmm3_other_hand": 0
+ },
+ "012": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 310 in A minor, 1st mov.",
+  "bars": 16,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.4995,
+  "tempo_qpm": 120,
+  "bar1_s": 0.013,
+  "residual_16ths": 0.011,
+  "align": 1.0,
+  "mode_ioi": 0.125,
+  "quarter_from_bars": 0.4991,
+  "implied_bars": 15.98,
+  "flags": [],
+  "n_notes": 440,
+  "fhmm3_other_hand": 0
+ },
+ "013": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 330 in C major, 1st mov.",
+  "bars": 18,
+  "meter": [
+   2,
+   4
+  ],
+  "quarter_s": 0.8576,
+  "tempo_qpm": 70,
+  "bar1_s": 0.004,
+  "residual_16ths": 0.287,
+  "align": 0.86,
+  "mode_ioi": 0.105,
+  "quarter_from_bars": 0.8522,
+  "implied_bars": 17.88,
+  "flags": [],
+  "n_notes": 286,
+  "fhmm3_other_hand": 0
+ },
+ "014": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 330 in C major, 2nd mov.",
+  "bars": 19,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 1.0721,
+  "tempo_qpm": 56,
+  "bar1_s": 0.013,
+  "residual_16ths": 0.081,
+  "align": 0.939,
+  "mode_ioi": 0.535,
+  "quarter_from_bars": 1.1123,
+  "implied_bars": 19.72,
+  "flags": [],
+  "n_notes": 289,
+  "fhmm3_other_hand": 0
+ },
+ "015": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 331 in A major, 3rd mov.",
+  "bars": 26,
+  "meter": [
+   2,
+   4
+  ],
+  "quarter_s": 0.4995,
+  "tempo_qpm": 120,
+  "bar1_s": 0.021,
+  "residual_16ths": 0.053,
+  "align": 0.962,
+  "mode_ioi": 0.125,
+  "quarter_from_bars": 0.4624,
+  "implied_bars": 24.06,
+  "flags": [
+   "mode-based quarter 0.5000 differs from bar-based 0.4624 by more than 6%",
+   "quantised length covers 24.1 bars, List.csv says 26"
+  ],
+  "n_notes": 269,
+  "fhmm3_other_hand": 0
+ },
+ "016": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 332 in F major, 1st mov.",
+  "bars": 22,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.4995,
+  "tempo_qpm": 120,
+  "bar1_s": 0.01,
+  "residual_16ths": 0.027,
+  "align": 0.989,
+  "mode_ioi": 0.25,
+  "quarter_from_bars": 0.4901,
+  "implied_bars": 21.58,
+  "flags": [],
+  "n_notes": 181,
+  "fhmm3_other_hand": 0
+ },
+ "017": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 545 in C major, 1st mov.",
+  "bars": 12,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.499,
+  "tempo_qpm": 120,
+  "bar1_s": 0.028,
+  "residual_16ths": 0.018,
+  "align": 0.993,
+  "mode_ioi": 0.125,
+  "quarter_from_bars": 0.4895,
+  "implied_bars": 11.75,
+  "flags": [],
+  "n_notes": 193,
+  "fhmm3_other_hand": 0
+ },
+ "018": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 570 in Bb major, 1st mov.",
+  "bars": 22,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.5,
+  "tempo_qpm": 120,
+  "bar1_s": 0.023,
+  "residual_16ths": 0.026,
+  "align": 1.0,
+  "mode_ioi": 0.125,
+  "quarter_from_bars": 0.4924,
+  "implied_bars": 21.67,
+  "flags": [],
+  "n_notes": 150,
+  "fhmm3_other_hand": 0
+ },
+ "019": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 570 in Bb major, 2nd mov.",
+  "bars": 12,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 1.0,
+  "tempo_qpm": 60,
+  "bar1_s": -0.005,
+  "residual_16ths": 0.092,
+  "align": 0.991,
+  "mode_ioi": 0.5,
+  "quarter_from_bars": 0.9896,
+  "implied_bars": 11.88,
+  "flags": [],
+  "n_notes": 213,
+  "fhmm3_other_hand": 0
+ },
+ "020": {
+  "composer": "Mozart",
+  "title": "Piano Sonata K 576 in D major, 2nd mov.",
+  "bars": 16,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 1.0,
+  "tempo_qpm": 60,
+  "bar1_s": 0.005,
+  "residual_16ths": 0.209,
+  "align": 0.924,
+  "mode_ioi": 0.125,
+  "quarter_from_bars": 0.9992,
+  "implied_bars": 16.0,
+  "flags": [],
+  "n_notes": 253,
+  "fhmm3_other_hand": 0
+ },
+ "021": {
+  "composer": "Chopin",
+  "title": "Ballade No. 2",
+  "bars": 20,
+  "meter": [
+   6,
+   8
+  ],
+  "quarter_s": 0.6673,
+  "tempo_qpm": 90,
+  "bar1_s": 0.681,
+  "residual_16ths": 0.055,
+  "align": 1.0,
+  "mode_ioi": 0.335,
+  "quarter_from_bars": 0.6561,
+  "implied_bars": 19.67,
+  "flags": [],
+  "n_notes": 312,
+  "fhmm3_other_hand": 0
+ },
+ "022": {
+  "composer": "Chopin",
+  "title": "Etude Op. 10 No. 3",
+  "bars": 21,
+  "meter": [
+   2,
+   4
+  ],
+  "quarter_s": 1.6184,
+  "tempo_qpm": 37,
+  "bar1_s": 2.491,
+  "residual_16ths": 0.013,
+  "align": 0.988,
+  "mode_ioi": 0.405,
+  "quarter_from_bars": 1.6023,
+  "implied_bars": 20.75,
+  "flags": [],
+  "n_notes": 455,
+  "fhmm3_other_hand": 0
+ },
+ "023": {
+  "composer": "Chopin",
+  "title": "Nocturne Op.9 No. 2",
+  "bars": 13,
+  "meter": [
+   12,
+   8
+  ],
+  "quarter_s": 0.5005,
+  "tempo_qpm": 120,
+  "bar1_s": 0.023,
+  "residual_16ths": 0.137,
+  "align": 0.767,
+  "mode_ioi": 0.25,
+  "quarter_from_bars": 0.4929,
+  "implied_bars": 12.79,
+  "flags": [
+   "only 77% of onsets sit on the 16th/triplet grid (jitter or tempo drift)"
+  ],
+  "n_notes": 430,
+  "fhmm3_other_hand": 0
+ },
+ "024": {
+  "composer": "Chopin",
+  "title": "Mazurka Op.7 No. 1",
+  "bars": 24,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.5999,
+  "tempo_qpm": 100,
+  "bar1_s": 0.022,
+  "residual_16ths": 0.087,
+  "align": 0.963,
+  "mode_ioi": 0.15,
+  "quarter_from_bars": 0.5918,
+  "implied_bars": 23.67,
+  "flags": [],
+  "n_notes": 278,
+  "fhmm3_other_hand": 0
+ },
+ "025": {
+  "composer": "Chopin",
+  "title": "Waltz Op. 64 No. 1",
+  "bars": 36,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.5013,
+  "tempo_qpm": 120,
+  "bar1_s": -0.006,
+  "residual_16ths": 0.076,
+  "align": 0.909,
+  "mode_ioi": 0.245,
+  "quarter_from_bars": 0.4992,
+  "implied_bars": 35.86,
+  "flags": [],
+  "n_notes": 393,
+  "fhmm3_other_hand": 0
+ },
+ "026": {
+  "composer": "Chopin",
+  "title": "Polonaise Op. 40 No. 1",
+  "bars": 15,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.625,
+  "tempo_qpm": 96,
+  "bar1_s": -0.029,
+  "residual_16ths": 0.092,
+  "align": 1.0,
+  "mode_ioi": 0.31,
+  "quarter_from_bars": 0.625,
+  "implied_bars": 15.0,
+  "flags": [],
+  "n_notes": 591,
+  "fhmm3_other_hand": 18
+ },
+ "027": {
+  "composer": "Chopin",
+  "title": "Grande Valse Brillante Op. 18",
+  "bars": 32,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.4995,
+  "tempo_qpm": 120,
+  "bar1_s": 0.023,
+  "residual_16ths": 0.0,
+  "align": 1.0,
+  "mode_ioi": 0.25,
+  "quarter_from_bars": 0.5,
+  "implied_bars": 32.0,
+  "flags": [],
+  "n_notes": 380,
+  "fhmm3_other_hand": 0
+ },
+ "028": {
+  "composer": "Chopin",
+  "title": "Prelude Op. 28 No. 17",
+  "bars": 18,
+  "meter": [
+   6,
+   8
+  ],
+  "quarter_s": 0.5231,
+  "tempo_qpm": 115,
+  "bar1_s": 0.005,
+  "residual_16ths": 0.042,
+  "align": 1.0,
+  "mode_ioi": 0.26,
+  "quarter_from_bars": 0.5232,
+  "implied_bars": 18.0,
+  "flags": [],
+  "n_notes": 458,
+  "fhmm3_other_hand": 0
+ },
+ "029": {
+  "composer": "Chopin",
+  "title": "Scherzo No. 3",
+  "bars": 49,
+  "meter": [
+   3,
+   4
+  ],
+  "quarter_s": 0.2349,
+  "tempo_qpm": 255,
+  "bar1_s": -0.001,
+  "residual_16ths": 0.05,
+  "align": 1.0,
+  "mode_ioi": 0.24,
+  "quarter_from_bars": 0.2316,
+  "implied_bars": 48.33,
+  "flags": [],
+  "n_notes": 377,
+  "fhmm3_other_hand": 0
+ },
+ "030": {
+  "composer": "Chopin",
+  "title": "Piano Sonata No. 3, 1st mov.",
+  "bars": 16,
+  "meter": [
+   4,
+   4
+  ],
+  "quarter_s": 0.4294,
+  "tempo_qpm": 140,
+  "bar1_s": 0.013,
+  "residual_16ths": 0.032,
+  "align": 1.0,
+  "mode_ioi": 0.11,
+  "quarter_from_bars": 0.4361,
+  "implied_bars": 16.25,
+  "flags": [],
+  "n_notes": 348,
+  "fhmm3_other_hand": 15
+ }
+}

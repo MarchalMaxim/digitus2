@@ -1,0 +1,612 @@
+[
+ {
+  "passage": "p01",
+  "piece": "001",
+  "composer": "Bach",
+  "title": "Two-part invention in C major",
+  "slot": "2",
+  "annotator": "ES",
+  "bars": [
+   3,
+   4
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p02",
+  "piece": "004",
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book II, Fugue No. 2 in C minor",
+  "slot": "8",
+  "annotator": "NH",
+  "bars": [
+   12,
+   13
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p03",
+  "piece": "002",
+  "composer": "Bach",
+  "title": "Two-part invention in F major",
+  "slot": "8",
+  "annotator": "NH",
+  "bars": [
+   19,
+   20
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p04",
+  "piece": "008",
+  "composer": "Bach",
+  "title": "French Suite No. 5 Sarabande",
+  "slot": "8",
+  "annotator": "NH",
+  "bars": [
+   12,
+   14
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p05",
+  "piece": "005",
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book II, Fugue No. 19 in A major",
+  "slot": "2",
+  "annotator": "ES",
+  "bars": [
+   7,
+   8
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p06",
+  "piece": "001",
+  "composer": "Bach",
+  "title": "Two-part invention in C major",
+  "slot": "2",
+  "annotator": "ES",
+  "bars": [
+   20,
+   21
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p07",
+  "piece": "004",
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book II, Fugue No. 2 in C minor",
+  "slot": "1",
+  "annotator": "YI",
+  "bars": [
+   8,
+   9
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p08",
+  "piece": "002",
+  "composer": "Bach",
+  "title": "Two-part invention in F major",
+  "slot": "1",
+  "annotator": "YI",
+  "bars": [
+   29,
+   30
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p09",
+  "piece": "008",
+  "composer": "Bach",
+  "title": "French Suite No. 5 Sarabande",
+  "slot": "2",
+  "annotator": "ES",
+  "bars": [
+   4,
+   6
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p10",
+  "piece": "005",
+  "composer": "Bach",
+  "title": "Well-Tempered Clavier, Book II, Fugue No. 19 in A major",
+  "slot": "1",
+  "annotator": "YI",
+  "bars": [
+   3,
+   4
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p11",
+  "piece": "001",
+  "composer": "Bach",
+  "title": "Two-part invention in C major",
+  "slot": "1",
+  "annotator": "YI",
+  "bars": [
+   15,
+   16
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p12",
+  "piece": "011",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 283 in G major, 1st mov.",
+  "slot": "3",
+  "annotator": "HI",
+  "bars": [
+   20,
+   21
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p13",
+  "piece": "020",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 576 in D major, 2nd mov.",
+  "slot": "4",
+  "annotator": "HK",
+  "bars": [
+   1,
+   3
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p14",
+  "piece": "016",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 332 in F major, 1st mov.",
+  "slot": "7",
+  "annotator": "EF",
+  "bars": [
+   11,
+   14
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p15",
+  "piece": "013",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 330 in C major, 1st mov.",
+  "slot": "5",
+  "annotator": "YI",
+  "bars": [
+   12,
+   15
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p16",
+  "piece": "015",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 331 in A major, 3rd mov.",
+  "slot": "3",
+  "annotator": "HI",
+  "bars": [
+   14,
+   15
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p17",
+  "piece": "014",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 330 in C major, 2nd mov.",
+  "slot": "1",
+  "annotator": "ES",
+  "bars": [
+   17,
+   18
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p18",
+  "piece": "019",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 570 in Bb major, 2nd mov.",
+  "slot": "1",
+  "annotator": "ES",
+  "bars": [
+   2,
+   3
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p19",
+  "piece": "017",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 545 in C major, 1st mov.",
+  "slot": "7",
+  "annotator": "EF",
+  "bars": [
+   1,
+   2
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p20",
+  "piece": "012",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 310 in A minor, 1st mov.",
+  "slot": "4",
+  "annotator": "HK",
+  "bars": [
+   4,
+   5
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p21",
+  "piece": "018",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 570 in Bb major, 1st mov.",
+  "slot": "4",
+  "annotator": "HK",
+  "bars": [
+   11,
+   14
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p22",
+  "piece": "011",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 283 in G major, 1st mov.",
+  "slot": "3",
+  "annotator": "HI",
+  "bars": [
+   4,
+   7
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p23",
+  "piece": "020",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 576 in D major, 2nd mov.",
+  "slot": "1",
+  "annotator": "ES",
+  "bars": [
+   7,
+   9
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p24",
+  "piece": "016",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 332 in F major, 1st mov.",
+  "slot": "3",
+  "annotator": "HI",
+  "bars": [
+   5,
+   9
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p25",
+  "piece": "013",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 330 in C major, 1st mov.",
+  "slot": "4",
+  "annotator": "HK",
+  "bars": [
+   5,
+   7
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p26",
+  "piece": "015",
+  "composer": "Mozart",
+  "title": "Piano Sonata K 331 in A major, 3rd mov.",
+  "slot": "6",
+  "annotator": "YS",
+  "bars": [
+   22,
+   24
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p27",
+  "piece": "021",
+  "composer": "Chopin",
+  "title": "Ballade No. 2",
+  "slot": "4",
+  "annotator": "YoI",
+  "bars": [
+   3,
+   4
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p28",
+  "piece": "028",
+  "composer": "Chopin",
+  "title": "Prelude Op. 28 No. 17",
+  "slot": "1",
+  "annotator": "HI",
+  "bars": [
+   5,
+   6
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p29",
+  "piece": "030",
+  "composer": "Chopin",
+  "title": "Piano Sonata No. 3, 1st mov.",
+  "slot": "4",
+  "annotator": "YoI",
+  "bars": [
+   8,
+   10
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p30",
+  "piece": "029",
+  "composer": "Chopin",
+  "title": "Scherzo No. 3",
+  "slot": "4",
+  "annotator": "YoI",
+  "bars": [
+   21,
+   24
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p31",
+  "piece": "026",
+  "composer": "Chopin",
+  "title": "Polonaise Op. 40 No. 1",
+  "slot": "3",
+  "annotator": "EF",
+  "bars": [
+   7,
+   8
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p32",
+  "piece": "027",
+  "composer": "Chopin",
+  "title": "Grande Valse Brillante Op. 18",
+  "slot": "1",
+  "annotator": "HI",
+  "bars": [
+   11,
+   13
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p33",
+  "piece": "025",
+  "composer": "Chopin",
+  "title": "Waltz Op. 64 No. 1",
+  "slot": "5",
+  "annotator": "EN",
+  "bars": [
+   25,
+   28
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p34",
+  "piece": "022",
+  "composer": "Chopin",
+  "title": "Etude Op. 10 No. 3",
+  "slot": "1",
+  "annotator": "HI",
+  "bars": [
+   15,
+   16
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p35",
+  "piece": "024",
+  "composer": "Chopin",
+  "title": "Mazurka Op.7 No. 1",
+  "slot": "5",
+  "annotator": "EN",
+  "bars": [
+   22,
+   23
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p36",
+  "piece": "021",
+  "composer": "Chopin",
+  "title": "Ballade No. 2",
+  "slot": "4",
+  "annotator": "YoI",
+  "bars": [
+   18,
+   19
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p37",
+  "piece": "028",
+  "composer": "Chopin",
+  "title": "Prelude Op. 28 No. 17",
+  "slot": "4",
+  "annotator": "YoI",
+  "bars": [
+   1,
+   2
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ },
+ {
+  "passage": "p38",
+  "piece": "030",
+  "composer": "Chopin",
+  "title": "Piano Sonata No. 3, 1st mov.",
+  "slot": "3",
+  "annotator": "EF",
+  "bars": [
+   5,
+   6
+  ],
+  "hands": [
+   "R"
+  ]
+ },
+ {
+  "passage": "p39",
+  "piece": "029",
+  "composer": "Chopin",
+  "title": "Scherzo No. 3",
+  "slot": "4",
+  "annotator": "YoI",
+  "bars": [
+   13,
+   15
+  ],
+  "hands": [
+   "L"
+  ]
+ },
+ {
+  "passage": "p40",
+  "piece": "027",
+  "composer": "Chopin",
+  "title": "Grande Valse Brillante Op. 18",
+  "slot": "6",
+  "annotator": "ES",
+  "bars": [
+   24,
+   25
+  ],
+  "hands": [
+   "R",
+   "L"
+  ]
+ }
+]

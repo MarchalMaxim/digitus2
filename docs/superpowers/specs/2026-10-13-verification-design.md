@@ -95,6 +95,10 @@ Once a day while the app exists, an independent Opus subagent opens the deployed
 
 The TypeScript metrics and the Python metrics are run on the same prediction files in CI-like fashion inside `pnpm verify`; a disagreement above 1e-6 fails.
 
+### 3.12 Teacher review (weekly, qualitative; added 2026-10-14)
+
+Piloted in `docs/research/teacher-review.md`: a blinded Opus reviewer reads a two-to-eight-bar passage rendered as text with a candidate fingering and returns a structured judgement against a rubric (physically possible, idiomatic, economical, consistent, beginner-friendly) with objections located by bar and note. On 40 PIG test passages in three conditions (expert, FHMM3, expert with planted faults; 240 blinded reviews) it found 99 percent of planted faults within one note, raised 2.5 objections per 100 notes on expert fingerings (0.64 per passage), ranked expert above corrupted in every case, flagged disputed notes three times more often than unanimous ones, and agreed with itself across two runs (Pearson 0.95 on scores). It is used as a weekly job next to `pnpm verify`, never inside it: the 20 lowest-confidence passages, every hard-error gallery entry, 10 random level 1 to 3 library passages as control, and user-edited passages are rendered, dispatched in blinded batches of eight, and objections that two reviewers share (or any error-severity objection) become dated hypotheses in `docs/experiments.md` for the quantitative loop. No floor depends on it, it is never a number to tune on, and it never runs on PIG data in any shipped artefact. Two fixes precede the first production run: the legend states that `dur` is sounding length (early release and pedal are normal), and a composer-hidden or transposed control checks that the reviewer reads rather than recalls. The reviewer brief and wrapper are in `research/teacher_review/README.md`.
+
 ## 4. The iteration protocol (how autonomy stays honest)
 
 1. State a hypothesis in `docs/experiments.md` (lab notebook): what changes, which metric should move, by how much.
@@ -110,4 +114,4 @@ The TypeScript metrics and the Python metrics are run on the same prediction fil
 - M2 (solver v1 with verification core): `digitus2 bench` with scorecards and error galleries, lint with base rates, textbook oracle, metamorphic suite, floors raised to the solver's first real numbers.
 - M3 (learning): train-split parameter fitting, calibration, ablation, Mutopia oracle wired in, baseline consensus in the gallery.
 - M4 and M5 (app): readability reduction, one-red-element check, axe, Playwright flows, visual baselines.
-- M7 (verification complete): everything in section 3 running under `pnpm verify` and CI, goals table filled with measured values.
+- M7 (verification complete): everything in section 3 running under `pnpm verify` and CI (3.10 and 3.12 as scheduled jobs beside it), goals table filled with measured values.

@@ -14,7 +14,7 @@ Durable state for the multi-day autonomous build. Update after every completed s
 | Milestone | Status | Notes |
 |---|---|---|
 | M0 Research | in flight | five Opus agents launched 2026-10-13 (datasets, literature, baselines, content, rendering spike) |
-| M1 Foundation | not started | |
+| M1 Foundation | in flight | plan `docs/superpowers/plans/2026-10-13-m1-engine-foundation.md`; executed by an ultracode workflow (implementer + reviewer per task, lanes A: PIG→metrics, B: MusicXML) started 2026-10-13 |
 | M2 Solver v1 | not started | |
 | M3 Learning | not started | |
 | M4 App MVP | not started | |

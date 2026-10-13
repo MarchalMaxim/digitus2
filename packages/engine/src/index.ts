@@ -9,6 +9,10 @@ export { parseMusicXml } from './io/musicxml/read.js';
 export type { ParsedMusicXml } from './io/musicxml/read.js';
 export { unpackMusicXml } from './io/musicxml/unpack.js';
 export { injectFingerings } from './io/musicxml/write.js';
+// The xmldom helpers in io/musicxml/dom.ts (parseXml, serializeXml, childElements, ...) stay
+// internal so the public API does not grow around one XML library; timewiseToPartwise takes and
+// returns an @xmldom/xmldom Document for callers that already hold one.
+export { timewiseToPartwise } from './io/musicxml/timewise.js';
 export { matchRate, pigMetrics } from './eval/metrics.js';
 export type { FingerSeq, PigMetrics } from './eval/metrics.js';
 export { alignScores, fingerSeq, metricsForScores } from './eval/align.js';

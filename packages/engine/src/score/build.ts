@@ -4,7 +4,10 @@ import type { Hand, HandEvent, Note, Score, TempoEvent } from './types.js';
 const DEFAULT_QPM = 120;
 
 export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number {
-  const map = tempoMap.length > 0 ? [...tempoMap].sort((a, b) => a.tick - b.tick) : [{ tick: 0, qpm: DEFAULT_QPM }];
+  const map =
+    tempoMap.length > 0
+      ? [...tempoMap].sort((a, b) => a.tick - b.tick)
+      : [{ tick: 0, qpm: DEFAULT_QPM }];
   let seconds = 0;
   let cursor = 0;
   let qpm = map[0]!.tick <= 0 ? map[0]!.qpm : DEFAULT_QPM;
@@ -22,7 +25,11 @@ export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: 
 
 export function sortNotes(notes: Note[]): Note[] {
   return [...notes].sort(
-    (a, b) => a.onsetTick - b.onsetTick || handRank(a.hand) - handRank(b.hand) || a.midi - b.midi || a.id.localeCompare(b.id),
+    (a, b) =>
+      a.onsetTick - b.onsetTick ||
+      handRank(a.hand) - handRank(b.hand) ||
+      a.midi - b.midi ||
+      a.id.localeCompare(b.id),
   );
 }
 
@@ -66,8 +73,11 @@ export function validateScore(score: Score): string[] {
   for (const n of score.notes) {
     if (seen.has(n.id)) problems.push(`duplicate note id ${n.id}`);
     seen.add(n.id);
-    if (n.midi < PIANO_MIN || n.midi > PIANO_MAX) problems.push(`note ${n.id}: midi ${n.midi} outside piano range`);
-    if (!n.isGrace && n.offsetTick < n.onsetTick) problems.push(`note ${n.id}: offset ${n.offsetTick} before onset ${n.onsetTick}`);
+    if (!Number.isInteger(n.midi)) problems.push(`note ${n.id}: midi ${n.midi} is not an integer`);
+    else if (n.midi < PIANO_MIN || n.midi > PIANO_MAX)
+      problems.push(`note ${n.id}: midi ${n.midi} outside piano range`);
+    if (!n.isGrace && n.offsetTick < n.onsetTick)
+      problems.push(`note ${n.id}: offset ${n.offsetTick} before onset ${n.onsetTick}`);
   }
   return problems;
 }

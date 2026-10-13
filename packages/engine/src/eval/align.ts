@@ -13,20 +13,25 @@ export function fingerSeq(score: Score, assignment: Assignment): FingerSeq {
  */
 export function alignScores(pred: Score, gold: Score): Array<[string, string]> {
   if (pred.notes.length !== gold.notes.length) {
-    throw new Error(`note count mismatch: prediction has ${pred.notes.length}, gold has ${gold.notes.length}`);
+    throw new Error(
+      `note count mismatch: prediction has ${pred.notes.length}, gold has ${gold.notes.length}`,
+    );
   }
   const predIds = new Set(pred.notes.map((n) => n.id));
   if (gold.notes.every((n) => predIds.has(n.id))) return gold.notes.map((n) => [n.id, n.id]);
   const byPosition = (s: Score): Note[] =>
     [...s.notes].sort(
       (a, b) =>
-        a.onsetSec - b.onsetSec || (a.hand === b.hand ? 0 : a.hand === 'R' ? -1 : 1) || a.midi - b.midi,
+        a.onsetSec - b.onsetSec ||
+        (a.hand === b.hand ? 0 : a.hand === 'R' ? -1 : 1) ||
+        a.midi - b.midi,
     );
   const p = byPosition(pred);
   const g = byPosition(gold);
   const pairs: Array<[string, string]> = [];
   for (let i = 0; i < g.length; i++) {
-    if (p[i]!.midi !== g[i]!.midi) throw new Error(`pitch mismatch at gold note ${g[i]!.id}: ${p[i]!.midi} vs ${g[i]!.midi}`);
+    if (p[i]!.midi !== g[i]!.midi)
+      throw new Error(`pitch mismatch at gold note ${g[i]!.id}: ${p[i]!.midi} vs ${g[i]!.midi}`);
     pairs.push([p[i]!.id, g[i]!.id]);
   }
   const order = new Map(gold.notes.map((n, i) => [n.id, i]));

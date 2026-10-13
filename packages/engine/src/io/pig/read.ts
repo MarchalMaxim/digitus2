@@ -20,7 +20,9 @@ export function parseFingerField(
   const parts = text.trim().split('_');
   const first = toFinger(parts[0] ?? '');
   if (first === undefined) return {};
-  const result: { finger: Finger; substitution?: Finger; warning?: string } = { finger: first.finger };
+  const result: { finger: Finger; substitution?: Finger; warning?: string } = {
+    finger: first.finger,
+  };
   const second = parts.length > 1 ? toFinger(parts[1]!) : undefined;
   if (second) result.substitution = second.finger;
   const expectedSign = hand === 'L' ? -1 : 1;
@@ -49,7 +51,8 @@ export function parsePig(text: string, opts: { source?: string } = {}): ParsedPi
     const raw = lines[i]!.trim();
     if (raw === '' || raw.startsWith('//')) continue;
     const cols = raw.split(/\s+/);
-    if (cols.length < 8) throw new Error(`PIG line ${i + 1}: expected 8 columns, got ${cols.length}`);
+    if (cols.length < 8)
+      throw new Error(`PIG line ${i + 1}: expected 8 columns, got ${cols.length}`);
     // Column 6 (offset velocity) has no place in the Note model and is skipped.
     const [id, onset, offset, pitch, onVel, , channel, fingerText] = cols as [
       string,
@@ -63,7 +66,8 @@ export function parsePig(text: string, opts: { source?: string } = {}): ParsedPi
     ];
     const onsetSec = Number(onset);
     const offsetSec = Number(offset);
-    if (!Number.isFinite(onsetSec) || !Number.isFinite(offsetSec)) throw new Error(`PIG line ${i + 1}: bad times`);
+    if (!Number.isFinite(onsetSec) || !Number.isFinite(offsetSec))
+      throw new Error(`PIG line ${i + 1}: bad times`);
     const hand: Hand = channel === '1' ? 'L' : 'R';
     const spelling = parsePigPitch(pitch);
     const note: Note = {

@@ -1,5 +1,6 @@
 import { zipSync, strToU8 } from 'fflate';
 import { describe, expect, it } from 'vitest';
+import * as api from '../../index.js';
 import { childElements, childText, parseXml, serializeXml } from './dom.js';
 import { timewiseToPartwise } from './timewise.js';
 import { unpackMusicXml } from './unpack.js';
@@ -48,6 +49,64 @@ describe('unpackMusicXml', () => {
   it('falls back to the first xml entry without a container', () => {
     const zip = zipSync({ 'piece.musicxml': strToU8(PARTWISE) });
     expect(unpackMusicXml(zip)).toBe(PARTWISE);
+  });
+});
+
+describe('unpackMusicXml encodings', () => {
+  const TEXT = PARTWISE.replace('UTF-8', 'UTF-16').replace('Piano', 'Klavier für Anfänger');
+  const utf16 = (text: string, littleEndian: boolean, bom = true) => {
+    const offset = bom ? 2 : 0;
+    const bytes = new Uint8Array(offset + text.length * 2);
+    if (bom) bytes.set(littleEndian ? [0xff, 0xfe] : [0xfe, 0xff]);
+    for (let i = 0; i < text.length; i++) {
+      const lo = text.charCodeAt(i) & 0xff;
+      const hi = text.charCodeAt(i) >> 8;
+      bytes[offset + 2 * i] = littleEndian ? lo : hi;
+      bytes[offset + 2 * i + 1] = littleEndian ? hi : lo;
+    }
+    return bytes;
+  };
+  const latin1 = (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0));
+
+  it('decodes UTF-16LE with a byte-order mark', () => {
+    expect(unpackMusicXml(utf16(TEXT, true))).toBe(TEXT);
+  });
+  it('decodes UTF-16BE with a byte-order mark', () => {
+    expect(unpackMusicXml(utf16(TEXT, false))).toBe(TEXT);
+  });
+  it('decodes UTF-16 without a byte-order mark from its first character', () => {
+    expect(unpackMusicXml(utf16(TEXT, true, false))).toBe(TEXT);
+    expect(unpackMusicXml(utf16(TEXT, false, false))).toBe(TEXT);
+  });
+  it('uses the encoding named in the XML declaration', () => {
+    const text = PARTWISE.replace('UTF-8', 'ISO-8859-1').replace('Piano', 'Klavier für Anfänger');
+    expect(unpackMusicXml(latin1(text))).toBe(text);
+  });
+  it('reads an ASCII-compatible file as UTF-8 when its declaration wrongly names UTF-16', () => {
+    const text = PARTWISE.replace('UTF-8', 'UTF-16').replace('Piano', 'Klavier für Anfänger');
+    expect(unpackMusicXml(new TextEncoder().encode(text))).toBe(text);
+  });
+  it('falls back to UTF-8 for an unknown declared encoding', () => {
+    const text = PARTWISE.replace('UTF-8', 'x-no-such-encoding').replace(
+      'Piano',
+      'Klavier für Anfänger',
+    );
+    expect(unpackMusicXml(new TextEncoder().encode(text))).toBe(text);
+  });
+  it('decodes the rootfile of an mxl archive by its own encoding', () => {
+    const zip = zipSync({ 'piece.musicxml': utf16(TEXT, true) });
+    expect(unpackMusicXml(zip)).toBe(TEXT);
+  });
+});
+
+describe('package exports', () => {
+  it('exports timewiseToPartwise from the package entry point', () => {
+    expect(api.timewiseToPartwise).toBe(timewiseToPartwise);
+  });
+  it('keeps the xmldom helpers internal', () => {
+    expect('parseXml' in api).toBe(false);
+    expect('serializeXml' in api).toBe(false);
+    expect('childElements' in api).toBe(false);
   });
 });
 

@@ -23,7 +23,8 @@ const SWITCH_COST = 1;
 type Key = number | undefined;
 
 export function matchRate(pred: FingerSeq, gold: FingerSeq): number {
-  if (pred.length !== gold.length) throw new Error(`length mismatch: ${pred.length} vs ${gold.length}`);
+  if (pred.length !== gold.length)
+    throw new Error(`length mismatch: ${pred.length} vs ${gold.length}`);
   if (pred.length === 0) return 0;
   let hits = 0;
   for (let i = 0; i < pred.length; i++) if (isHit(pred[i], gold[i])) hits++;
@@ -48,20 +49,27 @@ export function pigMetrics(
 ): PigMetrics {
   if (golds.length === 0) throw new Error('at least one ground truth is required');
   const n = pred.length;
-  for (const g of golds) if (g.length !== n) throw new Error(`length mismatch: ${n} vs ${g.length}`);
-  if (hands && hands.length !== n) throw new Error(`length mismatch: ${n} notes vs ${hands.length} hands`);
+  for (const g of golds)
+    if (g.length !== n) throw new Error(`length mismatch: ${n} vs ${g.length}`);
+  if (hands && hands.length !== n)
+    throw new Error(`length mismatch: ${n} notes vs ${hands.length} hands`);
   if (goldHands) {
     if (goldHands.length !== golds.length) {
-      throw new Error(`length mismatch: ${golds.length} ground truths vs ${goldHands.length} hand lists`);
+      throw new Error(
+        `length mismatch: ${golds.length} ground truths vs ${goldHands.length} hand lists`,
+      );
     }
-    for (const h of goldHands) if (h && h.length !== n) throw new Error(`length mismatch: ${n} notes vs ${h.length} hands`);
+    for (const h of goldHands)
+      if (h && h.length !== n) throw new Error(`length mismatch: ${n} notes vs ${h.length} hands`);
   }
   const annotators = golds.length;
   if (n === 0) return { gen: 0, high: 0, soft: 0, rec: 0, notes: 0, annotators };
 
   const predKeys = signed(pred, hands);
   const goldKeys = golds.map((g, k) => signed(g, goldHands?.[k] ?? hands));
-  const hitsPer = goldKeys.map((g) => g.reduce<number>((s, key, i) => s + (isHit(predKeys[i], key) ? 1 : 0), 0));
+  const hitsPer = goldKeys.map((g) =>
+    g.reduce<number>((s, key, i) => s + (isHit(predKeys[i], key) ? 1 : 0), 0),
+  );
   const gen = hitsPer.reduce((a, b) => a + b, 0) / (n * annotators);
   let softHits = 0;
   for (let i = 0; i < n; i++) if (goldKeys.some((g) => isHit(predKeys[i], g[i]))) softHits++;
@@ -69,10 +77,19 @@ export function pigMetrics(
   let highErrors = 0;
   let recErrors = 0;
   for (const idx of handGroups(n, hands)) {
-    highErrors += Math.min(...goldKeys.map((g) => idx.reduce((e, i) => e + (isHit(predKeys[i], g[i]) ? 0 : 1), 0)));
+    highErrors += Math.min(
+      ...goldKeys.map((g) => idx.reduce((e, i) => e + (isHit(predKeys[i], g[i]) ? 0 : 1), 0)),
+    );
     recErrors += recombinationCost(predKeys, goldKeys, idx);
   }
-  return { gen, high: (n - highErrors) / n, soft: softHits / n, rec: (n - recErrors) / n, notes: n, annotators };
+  return {
+    gen,
+    high: (n - highErrors) / n,
+    soft: softHits / n,
+    rec: (n - recErrors) / n,
+    notes: n,
+    annotators,
+  };
 }
 
 function signed(seq: FingerSeq, hands: Hand[] | undefined): Key[] {

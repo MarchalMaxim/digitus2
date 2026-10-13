@@ -4,7 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from './read.js';
 import { injectFingerings } from './write.js';
 
-const xml = readFileSync(fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)), 'utf8');
+const xml = readFileSync(
+  fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)),
+  'utf8',
+);
 
 describe('injectFingerings', () => {
   const { score } = parseMusicXml(xml);
@@ -30,12 +33,21 @@ describe('injectFingerings', () => {
     const replaced = injectFingerings(xml, score, { n0: { finger: 3, source: 'user' } });
     expect(parseMusicXml(replaced).editorial['n0']!.finger).toBe(3);
     expect((replaced.match(/<fingering[^>]*>/g) ?? []).length).toBe(1);
-    const kept = injectFingerings(xml, score, { n0: { finger: 3, source: 'user' } }, { replace: false });
+    const kept = injectFingerings(
+      xml,
+      score,
+      { n0: { finger: 3, source: 'user' } },
+      { replace: false },
+    );
     expect((kept.match(/<fingering[^>]*>/g) ?? []).length).toBe(2);
   });
   it('writes substitutions as a second fingering element', () => {
-    const out = injectFingerings(xml, score, { n1: { finger: 3, substitution: 1, source: 'engine' } });
-    expect(out).toContain('<fingering placement="above">3</fingering><fingering placement="above" substitution="yes">1</fingering>');
+    const out = injectFingerings(xml, score, {
+      n1: { finger: 3, substitution: 1, source: 'engine' },
+    });
+    expect(out).toContain(
+      '<fingering placement="above">3</fingering><fingering placement="above" substitution="yes">1</fingering>',
+    );
   });
   it('preserves the rest of the document and the declaration', () => {
     const out = injectFingerings(xml, score, { n1: { finger: 2, source: 'engine' } });

@@ -68,15 +68,18 @@ Test files sit next to the code as `*.test.ts`.
 ### Task 1: Monorepo scaffold, engine package, CI
 
 **Files:**
+
 - Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `eslint.config.js`, `.prettierrc`, `.github/workflows/ci.yml`
 - Create: `packages/engine/package.json`, `packages/engine/tsconfig.json`, `packages/engine/vitest.config.ts`, `packages/engine/src/index.ts`, `packages/engine/src/version.ts`, `packages/engine/src/version.test.ts`
 
 **Interfaces:**
+
 - Produces: workspace scripts `pnpm test`, `pnpm typecheck`, `pnpm lint`, `pnpm build`; package name `@digitus2/engine`; `ENGINE_VERSION` constant.
 
 - [ ] **Step 1: Write the root workspace files**
 
 `pnpm-workspace.yaml`:
+
 ```yaml
 packages:
   - 'apps/*'
@@ -84,6 +87,7 @@ packages:
 ```
 
 `package.json`:
+
 ```json
 {
   "name": "digitus2-monorepo",
@@ -108,9 +112,11 @@ packages:
   }
 }
 ```
+
 (After `pnpm install`, replace `"packageManager"` with the exact installed pnpm version printed by `pnpm --version`.)
 
 `tsconfig.base.json`:
+
 ```json
 {
   "compilerOptions": {
@@ -133,6 +139,7 @@ packages:
 ```
 
 `eslint.config.js`:
+
 ```js
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
@@ -151,11 +158,13 @@ export default tseslint.config(
 ```
 
 `.prettierrc`:
+
 ```json
 { "singleQuote": true, "printWidth": 100, "trailingComma": "all" }
 ```
 
 `.github/workflows/ci.yml`:
+
 ```yaml
 name: ci
 on:
@@ -181,6 +190,7 @@ jobs:
 - [ ] **Step 2: Write the engine package files**
 
 `packages/engine/package.json`:
+
 ```json
 {
   "name": "@digitus2/engine",
@@ -208,6 +218,7 @@ jobs:
 ```
 
 `packages/engine/tsconfig.json`:
+
 ```json
 {
   "extends": "../../tsconfig.base.json",
@@ -216,9 +227,11 @@ jobs:
   "exclude": ["**/*.test.ts", "dist"]
 }
 ```
+
 Add `@types/node` to the engine devDependencies so `types: ["node"]` resolves (`pnpm add -D @types/node --filter @digitus2/engine`).
 
 `packages/engine/vitest.config.ts`:
+
 ```ts
 import { defineConfig } from 'vitest/config';
 
@@ -228,11 +241,13 @@ export default defineConfig({
 ```
 
 `packages/engine/src/version.ts`:
+
 ```ts
 export const ENGINE_VERSION = '0.1.0';
 ```
 
 `packages/engine/src/index.ts`:
+
 ```ts
 export { ENGINE_VERSION } from './version.js';
 ```
@@ -240,6 +255,7 @@ export { ENGINE_VERSION } from './version.js';
 - [ ] **Step 3: Write the first failing test**
 
 `packages/engine/src/version.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { ENGINE_VERSION } from './index.js';
@@ -254,11 +270,13 @@ describe('engine package', () => {
 - [ ] **Step 4: Install and run**
 
 Run from the repo root (in the background if it exceeds a minute):
+
 ```bash
 pnpm install
 pnpm add -D @types/node --filter @digitus2/engine
 pnpm typecheck && pnpm lint && pnpm test
 ```
+
 Expected: install succeeds, typecheck clean, lint clean, 1 test passes.
 
 - [ ] **Step 5: Commit**
@@ -273,9 +291,11 @@ git commit -m "feat: monorepo scaffold with engine package and CI"
 ### Task 2: Pitch utilities
 
 **Files:**
+
 - Create: `packages/engine/src/score/pitch.ts`, `packages/engine/src/score/pitch.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type Step = 'A'|'B'|'C'|'D'|'E'|'F'|'G'`
   - `interface Spelling { step: Step; alter: -2|-1|0|1|2; octave: number }`
@@ -289,6 +309,7 @@ git commit -m "feat: monorepo scaffold with engine package and CI"
 - [ ] **Step 1: Write the failing tests**
 
 `packages/engine/src/score/pitch.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import {
@@ -356,6 +377,7 @@ Expected: FAIL, module `./pitch.js` not found.
 - [ ] **Step 3: Implement**
 
 `packages/engine/src/score/pitch.ts`:
+
 ```ts
 export type Step = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 export type Alter = -2 | -1 | 0 | 1 | 2;
@@ -370,12 +392,32 @@ export const PIANO_MAX = 108;
 
 const STEP_SEMITONE: Record<Step, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const SHARP_NAMES: ReadonlyArray<[Step, Alter]> = [
-  ['C', 0], ['C', 1], ['D', 0], ['D', 1], ['E', 0], ['F', 0],
-  ['F', 1], ['G', 0], ['G', 1], ['A', 0], ['A', 1], ['B', 0],
+  ['C', 0],
+  ['C', 1],
+  ['D', 0],
+  ['D', 1],
+  ['E', 0],
+  ['F', 0],
+  ['F', 1],
+  ['G', 0],
+  ['G', 1],
+  ['A', 0],
+  ['A', 1],
+  ['B', 0],
 ];
 const FLAT_NAMES: ReadonlyArray<[Step, Alter]> = [
-  ['C', 0], ['D', -1], ['D', 0], ['E', -1], ['E', 0], ['F', 0],
-  ['G', -1], ['G', 0], ['A', -1], ['A', 0], ['B', -1], ['B', 0],
+  ['C', 0],
+  ['D', -1],
+  ['D', 0],
+  ['E', -1],
+  ['E', 0],
+  ['F', 0],
+  ['G', -1],
+  ['G', 0],
+  ['A', -1],
+  ['A', 0],
+  ['B', -1],
+  ['B', 0],
 ];
 const BLACK = new Set([1, 3, 6, 8, 10]);
 
@@ -429,65 +471,127 @@ git commit -m "feat(engine): pitch spelling, midi and PIG pitch string utilities
 ### Task 3: Score types and builders
 
 **Files:**
+
 - Create: `packages/engine/src/score/types.ts`, `packages/engine/src/score/build.ts`, `packages/engine/src/score/build.test.ts`
 - Modify: `packages/engine/src/index.ts`
 
 **Interfaces:**
+
 - Consumes: `Spelling`, `spellingToMidi`, `PIANO_MIN`, `PIANO_MAX` from Task 2.
 - Produces (exact):
 
 ```ts
 export type Hand = 'L' | 'R';
 export type Finger = 1 | 2 | 3 | 4 | 5;
-export interface TempoEvent { tick: number; qpm: number }          // quarter notes per minute from tick on
-export interface TimeSigEvent { tick: number; beats: number; beatType: number }
-export interface KeySigEvent { tick: number; fifths: number; mode?: 'major' | 'minor' }
-export interface MeasureInfo { index: number; startTick: number; lengthTicks: number; number: string }
+export interface TempoEvent {
+  tick: number;
+  qpm: number;
+} // quarter notes per minute from tick on
+export interface TimeSigEvent {
+  tick: number;
+  beats: number;
+  beatType: number;
+}
+export interface KeySigEvent {
+  tick: number;
+  fifths: number;
+  mode?: 'major' | 'minor';
+}
+export interface MeasureInfo {
+  index: number;
+  startTick: number;
+  lengthTicks: number;
+  number: string;
+}
 export interface Note {
-  id: string; onsetTick: number; offsetTick: number; onsetSec: number; offsetSec: number;
-  midi: number; spelling: Spelling; hand: Hand; staff: number; voice: number; measureIndex: number;
-  isGrace: boolean; chordId: string; sourceIndices: number[]; velocity?: number;   // velocity: MIDI 0..127 when known
+  id: string;
+  onsetTick: number;
+  offsetTick: number;
+  onsetSec: number;
+  offsetSec: number;
+  midi: number;
+  spelling: Spelling;
+  hand: Hand;
+  staff: number;
+  voice: number;
+  measureIndex: number;
+  isGrace: boolean;
+  chordId: string;
+  sourceIndices: number[];
+  velocity?: number; // velocity: MIDI 0..127 when known
 }
 export interface Score {
   meta: { title?: string; composer?: string; source?: string };
-  divisions: number; tempoMap: TempoEvent[]; timeSignatures: TimeSigEvent[]; keySignatures: KeySigEvent[];
-  measures: MeasureInfo[]; notes: Note[];
+  divisions: number;
+  tempoMap: TempoEvent[];
+  timeSignatures: TimeSigEvent[];
+  keySignatures: KeySigEvent[];
+  measures: MeasureInfo[];
+  notes: Note[];
 }
 export interface FingerAssignment {
-  finger: Finger; substitution?: Finger; confidence?: number;
-  alternatives?: Array<{ finger: Finger; cost: number }>; pinned?: boolean;
+  finger: Finger;
+  substitution?: Finger;
+  confidence?: number;
+  alternatives?: Array<{ finger: Finger; cost: number }>;
+  pinned?: boolean;
   source: 'engine' | 'user' | 'editorial';
 }
 export type Assignment = Record<string, FingerAssignment>;
-export interface HandEvent { onsetTick: number; notes: Note[] }      // notes sorted by midi ascending
+export interface HandEvent {
+  onsetTick: number;
+  notes: Note[];
+} // notes sorted by midi ascending
 
-export function sortNotes(notes: Note[]): Note[]                      // by onsetTick, then hand (R before L), then midi
-export function assignChordIds(notes: Note[]): void                   // chordId = `${hand}@${onsetTick}`
-export function handEvents(score: Score, hand: Hand): HandEvent[]
-export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number
-export function finalizeScore(partial: Omit<Score, 'notes'> & { notes: Note[] }): Score   // sorts, assigns chord ids, fills onsetSec/offsetSec, validates
-export function validateScore(score: Score): string[]                 // list of problems; empty when valid
+export function sortNotes(notes: Note[]): Note[]; // by onsetTick, then hand (R before L), then midi
+export function assignChordIds(notes: Note[]): void; // chordId = `${hand}@${onsetTick}`
+export function handEvents(score: Score, hand: Hand): HandEvent[];
+export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number;
+export function finalizeScore(partial: Omit<Score, 'notes'> & { notes: Note[] }): Score; // sorts, assigns chord ids, fills onsetSec/offsetSec, validates
+export function validateScore(score: Score): string[]; // list of problems; empty when valid
 ```
+
 `sourceIndices` replaces the spec's `tiedFrom`: it holds the document-order indices of the source elements (XML `<note>` elements or PIG lines) merged into this sounding note; the first entry is the tie start.
 
 - [ ] **Step 1: Write the failing tests**
 
 `packages/engine/src/score/build.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
-import { assignChordIds, finalizeScore, handEvents, sortNotes, ticksToSeconds, validateScore } from './build.js';
+import {
+  assignChordIds,
+  finalizeScore,
+  handEvents,
+  sortNotes,
+  ticksToSeconds,
+  validateScore,
+} from './build.js';
 import type { Note, Score } from './types.js';
 
 function note(p: Partial<Note> & { id: string; midi: number; onsetTick: number }): Note {
   return {
-    offsetTick: p.onsetTick + 480, onsetSec: 0, offsetSec: 0,
-    spelling: { step: 'C', alter: 0, octave: 4 }, hand: 'R', staff: 1, voice: 1,
-    measureIndex: 0, isGrace: false, chordId: '', sourceIndices: [], ...p,
+    offsetTick: p.onsetTick + 480,
+    onsetSec: 0,
+    offsetSec: 0,
+    spelling: { step: 'C', alter: 0, octave: 4 },
+    hand: 'R',
+    staff: 1,
+    voice: 1,
+    measureIndex: 0,
+    isGrace: false,
+    chordId: '',
+    sourceIndices: [],
+    ...p,
   };
 }
 
 const base: Omit<Score, 'notes'> = {
-  meta: {}, divisions: 480, tempoMap: [{ tick: 0, qpm: 120 }], timeSignatures: [], keySignatures: [],
+  meta: {},
+  divisions: 480,
+  tempoMap: [{ tick: 0, qpm: 120 }],
+  timeSignatures: [],
+  keySignatures: [],
   measures: [{ index: 0, startTick: 0, lengthTicks: 1920, number: '1' }],
 };
 
@@ -497,7 +601,10 @@ describe('ticksToSeconds', () => {
     expect(ticksToSeconds([{ tick: 0, qpm: 60 }], 480, 960)).toBeCloseTo(2);
   });
   it('integrates across tempo changes', () => {
-    const map = [{ tick: 0, qpm: 120 }, { tick: 960, qpm: 60 }];
+    const map = [
+      { tick: 0, qpm: 120 },
+      { tick: 960, qpm: 60 },
+    ];
     expect(ticksToSeconds(map, 480, 960)).toBeCloseTo(1);
     expect(ticksToSeconds(map, 480, 1440)).toBeCloseTo(2);
   });
@@ -542,13 +649,19 @@ describe('finalizeScore and handEvents', () => {
     expect(handEvents(score, 'L')).toHaveLength(1);
   });
   it('rejects pitches outside the piano and duplicate ids', () => {
-    const bad = finalizeScore({ ...base, notes: [note({ id: 'a', midi: 20, onsetTick: 0 }), note({ id: 'a', midi: 60, onsetTick: 0 })] });
+    const bad = finalizeScore({
+      ...base,
+      notes: [note({ id: 'a', midi: 20, onsetTick: 0 }), note({ id: 'a', midi: 60, onsetTick: 0 })],
+    });
     const problems = validateScore(bad);
     expect(problems.some((p) => p.includes('midi'))).toBe(true);
     expect(problems.some((p) => p.includes('duplicate'))).toBe(true);
   });
   it('rejects offsets before onsets for non-grace notes', () => {
-    const bad = finalizeScore({ ...base, notes: [note({ id: 'a', midi: 60, onsetTick: 480, offsetTick: 240 })] });
+    const bad = finalizeScore({
+      ...base,
+      notes: [note({ id: 'a', midi: 60, onsetTick: 480, offsetTick: 240 })],
+    });
     expect(validateScore(bad).some((p) => p.includes('offset'))).toBe(true);
   });
 });
@@ -562,16 +675,33 @@ Expected: FAIL, modules not found.
 - [ ] **Step 3: Implement types and builders**
 
 `packages/engine/src/score/types.ts`:
+
 ```ts
 import type { Spelling } from './pitch.js';
 
 export type Hand = 'L' | 'R';
 export type Finger = 1 | 2 | 3 | 4 | 5;
 
-export interface TempoEvent { tick: number; qpm: number }
-export interface TimeSigEvent { tick: number; beats: number; beatType: number }
-export interface KeySigEvent { tick: number; fifths: number; mode?: 'major' | 'minor' }
-export interface MeasureInfo { index: number; startTick: number; lengthTicks: number; number: string }
+export interface TempoEvent {
+  tick: number;
+  qpm: number;
+}
+export interface TimeSigEvent {
+  tick: number;
+  beats: number;
+  beatType: number;
+}
+export interface KeySigEvent {
+  tick: number;
+  fifths: number;
+  mode?: 'major' | 'minor';
+}
+export interface MeasureInfo {
+  index: number;
+  startTick: number;
+  lengthTicks: number;
+  number: string;
+}
 
 export interface Note {
   id: string;
@@ -613,10 +743,14 @@ export interface FingerAssignment {
 }
 export type Assignment = Record<string, FingerAssignment>;
 
-export interface HandEvent { onsetTick: number; notes: Note[] }
+export interface HandEvent {
+  onsetTick: number;
+  notes: Note[];
+}
 ```
 
 `packages/engine/src/score/build.ts`:
+
 ```ts
 import { PIANO_MAX, PIANO_MIN } from './pitch.js';
 import type { Hand, HandEvent, Note, Score, TempoEvent } from './types.js';
@@ -624,7 +758,10 @@ import type { Hand, HandEvent, Note, Score, TempoEvent } from './types.js';
 const DEFAULT_QPM = 120;
 
 export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number {
-  const map = tempoMap.length > 0 ? [...tempoMap].sort((a, b) => a.tick - b.tick) : [{ tick: 0, qpm: DEFAULT_QPM }];
+  const map =
+    tempoMap.length > 0
+      ? [...tempoMap].sort((a, b) => a.tick - b.tick)
+      : [{ tick: 0, qpm: DEFAULT_QPM }];
   let seconds = 0;
   let cursor = 0;
   let qpm = map[0]!.tick <= 0 ? map[0]!.qpm : DEFAULT_QPM;
@@ -642,7 +779,11 @@ export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: 
 
 export function sortNotes(notes: Note[]): Note[] {
   return [...notes].sort(
-    (a, b) => a.onsetTick - b.onsetTick || handRank(a.hand) - handRank(b.hand) || a.midi - b.midi || a.id.localeCompare(b.id),
+    (a, b) =>
+      a.onsetTick - b.onsetTick ||
+      handRank(a.hand) - handRank(b.hand) ||
+      a.midi - b.midi ||
+      a.id.localeCompare(b.id),
   );
 }
 
@@ -686,14 +827,17 @@ export function validateScore(score: Score): string[] {
   for (const n of score.notes) {
     if (seen.has(n.id)) problems.push(`duplicate note id ${n.id}`);
     seen.add(n.id);
-    if (n.midi < PIANO_MIN || n.midi > PIANO_MAX) problems.push(`note ${n.id}: midi ${n.midi} outside piano range`);
-    if (!n.isGrace && n.offsetTick < n.onsetTick) problems.push(`note ${n.id}: offset ${n.offsetTick} before onset ${n.onsetTick}`);
+    if (n.midi < PIANO_MIN || n.midi > PIANO_MAX)
+      problems.push(`note ${n.id}: midi ${n.midi} outside piano range`);
+    if (!n.isGrace && n.offsetTick < n.onsetTick)
+      problems.push(`note ${n.id}: offset ${n.offsetTick} before onset ${n.onsetTick}`);
   }
   return problems;
 }
 ```
 
 Update `packages/engine/src/index.ts`:
+
 ```ts
 export { ENGINE_VERSION } from './version.js';
 export * from './score/types.js';
@@ -718,10 +862,12 @@ git commit -m "feat(engine): score model types, sorting, chord grouping, tempo m
 ### Task 4: PIG reader and writer
 
 **Files:**
+
 - Create: `packages/engine/src/io/pig/read.ts`, `packages/engine/src/io/pig/write.ts`, `packages/engine/src/io/pig/pig.test.ts`, `packages/engine/fixtures/pig-sample.txt`
 - Modify: `packages/engine/src/index.ts`
 
 **Interfaces:**
+
 - Consumes: `parsePigPitch`, `formatPigPitch`, `spellingToMidi` (Task 2); `Note`, `Score`, `Assignment`, `Finger`, `finalizeScore`, `validateScore` (Task 3).
 - Produces:
   - `parsePig(text: string, opts?: { source?: string }): { score: Score; assignment: Assignment; warnings: string[] }`
@@ -735,6 +881,7 @@ PIG format (Nakamura, Saito, Yoshii 2020): one header line starting with `//`, t
 - [ ] **Step 1: Write the fixture and the failing tests**
 
 `packages/engine/fixtures/pig-sample.txt` (tab separated; the editor must keep real tabs):
+
 ```
 //Version: PianoFingering_v170101
 0	0.000000	0.500000	C4	80	80	0	1
@@ -746,6 +893,7 @@ PIG format (Nakamura, Saito, Yoshii 2020): one header line starting with `//`, t
 ```
 
 `packages/engine/src/io/pig/pig.test.ts`:
+
 ```ts
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -753,7 +901,10 @@ import { describe, expect, it } from 'vitest';
 import { parseFingerField, parsePig } from './read.js';
 import { writePig } from './write.js';
 
-const fixture = readFileSync(fileURLToPath(new URL('../../../fixtures/pig-sample.txt', import.meta.url)), 'utf8');
+const fixture = readFileSync(
+  fileURLToPath(new URL('../../../fixtures/pig-sample.txt', import.meta.url)),
+  'utf8',
+);
 
 describe('parsePig', () => {
   it('reads notes, hands, fingers and substitutions', () => {
@@ -814,8 +965,11 @@ describe('writePig', () => {
     const first = parsePig(fixture);
     const text = writePig(first.score, first.assignment);
     const second = parsePig(text);
-    expect(second.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]))
-      .toEqual(first.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]));
+    expect(
+      second.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]),
+    ).toEqual(
+      first.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]),
+    );
     expect(second.assignment).toEqual(first.assignment);
     expect(text.startsWith('//Version: PianoFingering_v170101\n')).toBe(true);
     expect(text.split('\n')[3]).toMatch(/^2\t1(\.0+)?\t1\.5(0+)?\tE4\t80\t80\t0\t3_1$/);
@@ -829,7 +983,11 @@ describe('writePig', () => {
   });
   it('keeps the original line order', () => {
     const { score, assignment } = parsePig(fixture);
-    const ids = writePig(score, assignment).trim().split('\n').slice(1).map((l) => l.split('\t')[0]);
+    const ids = writePig(score, assignment)
+      .trim()
+      .split('\n')
+      .slice(1)
+      .map((l) => l.split('\t')[0]);
     expect(ids).toEqual(['0', '1', '2', '3', '4', '5']);
   });
 });
@@ -843,6 +1001,7 @@ Expected: FAIL, modules not found.
 - [ ] **Step 3: Implement the reader**
 
 `packages/engine/src/io/pig/read.ts`:
+
 ```ts
 import { finalizeScore, validateScore } from '../../score/build.js';
 import { parsePigPitch, spellingToMidi } from '../../score/pitch.js';
@@ -866,7 +1025,9 @@ export function parseFingerField(
   const parts = text.trim().split('_');
   const first = toFinger(parts[0] ?? '');
   if (first === undefined) return {};
-  const result: { finger: Finger; substitution?: Finger; warning?: string } = { finger: first.finger };
+  const result: { finger: Finger; substitution?: Finger; warning?: string } = {
+    finger: first.finger,
+  };
   const second = parts.length > 1 ? toFinger(parts[1]!) : undefined;
   if (second) result.substitution = second.finger;
   const expectedSign = hand === 'L' ? -1 : 1;
@@ -892,11 +1053,22 @@ export function parsePig(text: string, opts: { source?: string } = {}): ParsedPi
     const raw = lines[i]!.trim();
     if (raw === '' || raw.startsWith('//')) continue;
     const cols = raw.split(/\s+/);
-    if (cols.length < 8) throw new Error(`PIG line ${i + 1}: expected 8 columns, got ${cols.length}`);
-    const [id, onset, offset, pitch, onVel, offVel, channel, fingerText] = cols as [string, string, string, string, string, string, string, string];
+    if (cols.length < 8)
+      throw new Error(`PIG line ${i + 1}: expected 8 columns, got ${cols.length}`);
+    const [id, onset, offset, pitch, onVel, offVel, channel, fingerText] = cols as [
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+    ];
     const onsetSec = Number(onset);
     const offsetSec = Number(offset);
-    if (!Number.isFinite(onsetSec) || !Number.isFinite(offsetSec)) throw new Error(`PIG line ${i + 1}: bad times`);
+    if (!Number.isFinite(onsetSec) || !Number.isFinite(offsetSec))
+      throw new Error(`PIG line ${i + 1}: bad times`);
     const hand: Hand = channel === '1' ? 'L' : 'R';
     const spelling = parsePigPitch(pitch);
     const note: Note = {
@@ -921,9 +1093,10 @@ export function parsePig(text: string, opts: { source?: string } = {}): ParsedPi
     const f = parseFingerField(fingerText, hand);
     if (f.warning) warnings.push(`PIG line ${i + 1}: ${f.warning}`);
     if (f.finger !== undefined) {
-      assignment[id] = f.substitution !== undefined
-        ? { finger: f.finger, substitution: f.substitution, source: 'editorial' }
-        : { finger: f.finger, source: 'editorial' };
+      assignment[id] =
+        f.substitution !== undefined
+          ? { finger: f.finger, substitution: f.substitution, source: 'editorial' }
+          : { finger: f.finger, source: 'editorial' };
     }
     lineIndex++;
   }
@@ -947,11 +1120,13 @@ export function parsePig(text: string, opts: { source?: string } = {}): ParsedPi
   return { score, assignment, warnings };
 }
 ```
+
 Note: `finalizeScore` returns new sorted array entries that are the same objects, so the seconds fix-up could also be done before finalizing; keep the explicit loop so intent is visible.
 
 - [ ] **Step 4: Implement the writer**
 
 `packages/engine/src/io/pig/write.ts`:
+
 ```ts
 import { formatPigPitch } from '../../score/pitch.js';
 import type { Assignment, Score } from '../../score/types.js';
@@ -963,7 +1138,10 @@ function seconds(x: number): string {
 
 export function writePig(score: Score, assignment: Assignment = {}): string {
   const ordered = [...score.notes].sort(
-    (a, b) => (a.sourceIndices[0] ?? 0) - (b.sourceIndices[0] ?? 0) || a.onsetTick - b.onsetTick || a.midi - b.midi,
+    (a, b) =>
+      (a.sourceIndices[0] ?? 0) - (b.sourceIndices[0] ?? 0) ||
+      a.onsetTick - b.onsetTick ||
+      a.midi - b.midi,
   );
   const lines = [PIG_HEADER];
   for (const n of ordered) {
@@ -976,7 +1154,16 @@ export function writePig(score: Score, assignment: Assignment = {}): string {
       : '0';
     const vel = n.velocity ?? 80;
     lines.push(
-      [n.id, seconds(n.onsetSec), seconds(n.offsetSec), formatPigPitch(n.spelling), vel, vel, n.hand === 'L' ? 1 : 0, finger].join('\t'),
+      [
+        n.id,
+        seconds(n.onsetSec),
+        seconds(n.offsetSec),
+        formatPigPitch(n.spelling),
+        vel,
+        vel,
+        n.hand === 'L' ? 1 : 0,
+        finger,
+      ].join('\t'),
     );
   }
   return lines.join('\n') + '\n';
@@ -984,6 +1171,7 @@ export function writePig(score: Score, assignment: Assignment = {}): string {
 ```
 
 Add to `packages/engine/src/index.ts`:
+
 ```ts
 export { parsePig, parseFingerField, PIG_HEADER, PIG_DIVISIONS, PIG_QPM } from './io/pig/read.js';
 export type { ParsedPig } from './io/pig/read.js';
@@ -1007,9 +1195,11 @@ git commit -m "feat(engine): PIG format reader and writer with substitutions"
 ### Task 5: MusicXML infrastructure: XML DOM, .mxl unpacking, timewise conversion
 
 **Files:**
+
 - Create: `packages/engine/src/io/musicxml/dom.ts`, `packages/engine/src/io/musicxml/unpack.ts`, `packages/engine/src/io/musicxml/timewise.ts`, `packages/engine/src/io/musicxml/infra.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `parseXml(text: string): Document` and `serializeXml(doc: Document): string` using `@xmldom/xmldom` (import `DOMParser`, `XMLSerializer` from it; use its exported `Document`/`Element` types. If those types are not exported by the installed version, add `"DOM"` to `lib` in `packages/engine/tsconfig.json` for type-checking only; no runtime DOM global may be referenced).
   - `childElements(el: Element, name?: string): Element[]`, `childText(el: Element, name: string): string | undefined`, `firstChild(el: Element, name: string): Element | undefined`
@@ -1019,6 +1209,7 @@ git commit -m "feat(engine): PIG format reader and writer with substitutions"
 - [ ] **Step 1: Write the failing tests**
 
 `packages/engine/src/io/musicxml/infra.test.ts`:
+
 ```ts
 import { zipSync, strToU8 } from 'fflate';
 import { describe, expect, it } from 'vitest';
@@ -1100,6 +1291,7 @@ Expected: FAIL, modules not found.
 - [ ] **Step 3: Implement**
 
 `packages/engine/src/io/musicxml/dom.ts`:
+
 ```ts
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import type { Document, Element, Node } from '@xmldom/xmldom';
@@ -1114,7 +1306,8 @@ export function parseXml(text: string): Document {
     },
   });
   const doc = parser.parseFromString(text, 'text/xml');
-  if (errors.length > 0 || !doc.documentElement) throw new Error(`XML parse error: ${errors[0] ?? 'no document element'}`);
+  if (errors.length > 0 || !doc.documentElement)
+    throw new Error(`XML parse error: ${errors[0] ?? 'no document element'}`);
   return doc;
 }
 
@@ -1125,7 +1318,8 @@ export function serializeXml(doc: Document): string {
 export function childElements(el: Element, name?: string): Element[] {
   const out: Element[] = [];
   for (let c = el.firstChild; c; c = c.nextSibling) {
-    if (c.nodeType === 1 && (name === undefined || (c as Element).tagName === name)) out.push(c as Element);
+    if (c.nodeType === 1 && (name === undefined || (c as Element).tagName === name))
+      out.push(c as Element);
   }
   return out;
 }
@@ -1139,9 +1333,11 @@ export function childText(el: Element, name: string): string | undefined {
   return c ? (c.textContent ?? '').trim() : undefined;
 }
 ```
+
 If the installed `@xmldom/xmldom` version's `DOMParser` options do not accept `onError` (versions before 0.9 use `errorHandler`), use `errorHandler: { error: (m) => errors.push(String(m)), fatalError: (m) => errors.push(String(m)) }` instead; check `node_modules/@xmldom/xmldom/index.d.ts`.
 
 `packages/engine/src/io/musicxml/unpack.ts`:
+
 ```ts
 import { unzipSync } from 'fflate';
 
@@ -1153,7 +1349,8 @@ function stripBom(text: string): string {
 
 export function unpackMusicXml(input: string | Uint8Array): string {
   if (typeof input === 'string') return stripBom(input);
-  if (input.length >= 2 && input[0] === 0x50 && input[1] === 0x4b) return stripBom(unpackMxl(input));
+  if (input.length >= 2 && input[0] === 0x50 && input[1] === 0x4b)
+    return stripBom(unpackMxl(input));
   return stripBom(decoder.decode(input));
 }
 
@@ -1174,6 +1371,7 @@ function unpackMxl(bytes: Uint8Array): string {
 ```
 
 `packages/engine/src/io/musicxml/timewise.ts`:
+
 ```ts
 import { childElements, parseXml } from './dom.js';
 import type { Document, Element } from './dom.js';
@@ -1205,7 +1403,8 @@ export function timewiseToPartwise(doc: Document): Document {
       }
       const measure = out.createElement('measure');
       for (const attr of Array.from(child.attributes)) measure.setAttribute(attr.name, attr.value);
-      for (const node of Array.from(part.childNodes)) measure.appendChild(out.importNode(node, true));
+      for (const node of Array.from(part.childNodes))
+        measure.appendChild(out.importNode(node, true));
       outPart.appendChild(measure);
     }
   }
@@ -1230,9 +1429,11 @@ git commit -m "feat(engine): MusicXML DOM helpers, mxl unpacking, timewise conve
 ### Task 6: MusicXML reader: notes, chords, ties, grace notes, voices, staves, divisions
 
 **Files:**
+
 - Create: `packages/engine/src/io/musicxml/read.ts`, `packages/engine/src/io/musicxml/read.test.ts`, `packages/engine/fixtures/two-staff.musicxml`
 
 **Interfaces:**
+
 - Consumes: Task 5 helpers; `finalizeScore`, `validateScore`, `spellingToMidi` and types from Tasks 2 and 3.
 - Produces:
   - `parseMusicXml(input: string | Uint8Array, opts?: { source?: string }): { score: Score; editorial: Assignment; warnings: string[] }`
@@ -1244,6 +1445,7 @@ git commit -m "feat(engine): MusicXML DOM helpers, mxl unpacking, timewise conve
 - [ ] **Step 1: Write the fixture**
 
 `packages/engine/fixtures/two-staff.musicxml` — one piano part, two staves, three measures in 4/4, with: a right-hand scale fragment, a left-hand chord, a tie across the barline (measure 1 to 2), a chord of two notes, a grace note, a divisions change in measure 3, a cross-staff note, two voices in measure 2, a fingering on the first note, and a metronome marking of 90.
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <score-partwise version="4.0">
@@ -1293,22 +1495,28 @@ git commit -m "feat(engine): MusicXML DOM helpers, mxl unpacking, timewise conve
   </part>
 </score-partwise>
 ```
+
 In measure 3 the note B3 in voice 5 carries `<staff>1</staff>` while its voice otherwise lives on staff 2: it is the cross-staff case and must be assigned to the right hand because the note's own staff wins.
 
 - [ ] **Step 2: Write the failing tests**
 
 `packages/engine/src/io/musicxml/read.test.ts`:
+
 ```ts
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from './read.js';
 
-const xml = readFileSync(fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)), 'utf8');
+const xml = readFileSync(
+  fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)),
+  'utf8',
+);
 
 describe('parseMusicXml notes', () => {
   const { score, editorial, warnings } = parseMusicXml(xml);
-  const byMidiHand = (midi: number, hand: 'L' | 'R') => score.notes.filter((n) => n.midi === midi && n.hand === hand);
+  const byMidiHand = (midi: number, hand: 'L' | 'R') =>
+    score.notes.filter((n) => n.midi === midi && n.hand === hand);
 
   it('parses without warnings and uses the lcm of divisions', () => {
     expect(warnings).toEqual([]);
@@ -1381,7 +1589,10 @@ describe('parseMusicXml edge cases', () => {
       <part id="P1"><measure number="1"><attributes><divisions>1</divisions></attributes><note><pitch><step>C</step><octave>5</octave></pitch><duration>1</duration></note></measure></part>
       <part id="P2"><measure number="1"><attributes><divisions>1</divisions></attributes><note><pitch><step>C</step><octave>3</octave></pitch><duration>1</duration></note></measure></part></score-partwise>`;
     const { score } = parseMusicXml(two);
-    expect(score.notes.map((n) => [n.midi, n.hand])).toEqual([[72, 'R'], [48, 'L']]);
+    expect(score.notes.map((n) => [n.midi, n.hand])).toEqual([
+      [72, 'R'],
+      [48, 'L'],
+    ]);
   });
   it('rejects a pitch outside the piano', () => {
     const bad = `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions></attributes><note><pitch><step>C</step><octave>9</octave></pitch><duration>1</duration></note></measure></part></score-partwise>`;
@@ -1404,11 +1615,22 @@ Expected: FAIL, module not found.
 - [ ] **Step 4: Implement the reader**
 
 `packages/engine/src/io/musicxml/read.ts`:
+
 ```ts
 import { finalizeScore, validateScore } from '../../score/build.js';
 import { spellingToMidi } from '../../score/pitch.js';
 import type { Alter, Spelling, Step } from '../../score/pitch.js';
-import type { Assignment, Finger, Hand, KeySigEvent, MeasureInfo, Note, Score, TempoEvent, TimeSigEvent } from '../../score/types.js';
+import type {
+  Assignment,
+  Finger,
+  Hand,
+  KeySigEvent,
+  MeasureInfo,
+  Note,
+  Score,
+  TempoEvent,
+  TimeSigEvent,
+} from '../../score/types.js';
 import { childElements, childText, firstChild, parseXml } from './dom.js';
 import type { Element } from './dom.js';
 import { timewiseToPartwise } from './timewise.js';
@@ -1425,7 +1647,12 @@ interface PendingTie {
 }
 
 const BEAT_UNIT_QUARTERS: Record<string, number> = {
-  whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25, '32nd': 0.125,
+  whole: 4,
+  half: 2,
+  quarter: 1,
+  eighth: 0.5,
+  '16th': 0.25,
+  '32nd': 0.125,
 };
 
 function gcd(a: number, b: number): number {
@@ -1435,7 +1662,10 @@ function lcm(a: number, b: number): number {
   return (a * b) / gcd(a, b);
 }
 
-export function parseMusicXml(input: string | Uint8Array, opts: { source?: string } = {}): ParsedMusicXml {
+export function parseMusicXml(
+  input: string | Uint8Array,
+  opts: { source?: string } = {},
+): ParsedMusicXml {
   const doc = timewiseToPartwise(parseXml(unpackMusicXml(input)));
   const root = doc.documentElement!;
   if (root.tagName !== 'score-partwise') throw new Error('not a MusicXML score');
@@ -1466,7 +1696,8 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
     let measureStart = 0;
     childElements(part, 'measure').forEach((measure, mIndex) => {
       if (measureStarts[mIndex] === undefined) {
-        measureStarts[mIndex] = mIndex === 0 ? 0 : measureStarts[mIndex - 1]! + (measureLengths[mIndex - 1] ?? 0);
+        measureStarts[mIndex] =
+          mIndex === 0 ? 0 : measureStarts[mIndex - 1]! + (measureLengths[mIndex - 1] ?? 0);
         measureNumbers[mIndex] = measure.getAttribute('number') ?? String(mIndex + 1);
       }
       measureStart = measureStarts[mIndex]!;
@@ -1485,11 +1716,19 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
             if (key && partIndex === 0) {
               const fifths = Number(childText(key, 'fifths') ?? '0');
               const mode = childText(key, 'mode');
-              keySignatures.push(mode === 'major' || mode === 'minor' ? { tick: cursor, fifths, mode } : { tick: cursor, fifths });
+              keySignatures.push(
+                mode === 'major' || mode === 'minor'
+                  ? { tick: cursor, fifths, mode }
+                  : { tick: cursor, fifths },
+              );
             }
             const time = firstChild(el, 'time');
             if (time && partIndex === 0) {
-              timeSignatures.push({ tick: cursor, beats: Number(childText(time, 'beats') ?? '4'), beatType: Number(childText(time, 'beat-type') ?? '4') });
+              timeSignatures.push({
+                tick: cursor,
+                beats: Number(childText(time, 'beats') ?? '4'),
+                beatType: Number(childText(time, 'beat-type') ?? '4'),
+              });
             }
             break;
           }
@@ -1513,7 +1752,9 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
             const isChord = firstChild(el, 'chord') !== undefined;
             const isGrace = firstChild(el, 'grace') !== undefined;
             const isRest = firstChild(el, 'rest') !== undefined;
-            const duration = isGrace ? 0 : scaled(childText(el, 'duration'), currentDivisions, divisions);
+            const duration = isGrace
+              ? 0
+              : scaled(childText(el, 'duration'), currentDivisions, divisions);
             const onset = isChord && lastNote ? lastNote.onsetTick : cursor;
             if (!isChord && !isGrace) {
               cursor += duration;
@@ -1535,13 +1776,17 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
               octave: Number(childText(pitch, 'octave') ?? '4'),
             };
             const staff = Number(childText(el, 'staff') ?? '1');
-            const hand: Hand = staves >= 2 ? (staff === 1 ? 'R' : 'L') : partIndex === 0 ? 'R' : 'L';
+            const hand: Hand =
+              staves >= 2 ? (staff === 1 ? 'R' : 'L') : partIndex === 0 ? 'R' : 'L';
             const voice = Number(childText(el, 'voice') ?? '1');
             const midi = spellingToMidi(spelling);
             const ties = childElements(el, 'tie').map((t) => t.getAttribute('type'));
-            const tied = childElements(firstChild(el, 'notations') ?? el, 'tied').map((t) => t.getAttribute('type'));
+            const tied = childElements(firstChild(el, 'notations') ?? el, 'tied').map((t) =>
+              t.getAttribute('type'),
+            );
             const tieStop = ties.includes('stop') || (ties.length === 0 && tied.includes('stop'));
-            const tieStart = ties.includes('start') || (ties.length === 0 && tied.includes('start'));
+            const tieStart =
+              ties.includes('start') || (ties.length === 0 && tied.includes('start'));
             const tieKey = `${staff}:${midi}`;
             const offset = isGrace ? onset : onset + (isChord ? lastAdvance : duration);
 
@@ -1592,7 +1837,12 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
   const measures: MeasureInfo[] = [];
   let start = 0;
   for (let i = 0; i < measureLengths.length; i++) {
-    measures.push({ index: i, startTick: start, lengthTicks: measureLengths[i] ?? 0, number: measureNumbers[i] ?? String(i + 1) });
+    measures.push({
+      index: i,
+      startTick: start,
+      lengthTicks: measureLengths[i] ?? 0,
+      number: measureNumbers[i] ?? String(i + 1),
+    });
     start += measureLengths[i] ?? 0;
   }
   for (const n of notes) {
@@ -1655,7 +1905,9 @@ function readMeta(root: Element, source?: string): Score['meta'] {
   if (title) meta.title = title;
   const ident = firstChild(root, 'identification');
   if (ident) {
-    const composer = childElements(ident, 'creator').find((c) => c.getAttribute('type') === 'composer');
+    const composer = childElements(ident, 'creator').find(
+      (c) => c.getAttribute('type') === 'composer',
+    );
     if (composer?.textContent?.trim()) meta.composer = composer.textContent.trim();
   }
   if (source !== undefined) meta.source = source;
@@ -1687,37 +1939,51 @@ git commit -m "feat(engine): MusicXML reader with ties, chords, grace notes, voi
 ### Task 7: MusicXML reader: tempo map, seconds, repeats ignored, public export, real-file smoke test
 
 **Files:**
+
 - Modify: `packages/engine/src/io/musicxml/read.test.ts`, `packages/engine/src/index.ts`
 - Create: `packages/engine/src/io/musicxml/smoke.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 6 `parseMusicXml`.
 - Produces: `parseMusicXml` exported from the package index; `ParsedMusicXml` type exported.
 
 - [ ] **Step 1: Add tempo and timing tests to `read.test.ts`**
 
 Append inside the `parseMusicXml notes` describe block:
+
 ```ts
-  it('reads the metronome tempo and derives seconds', () => {
-    expect(score.tempoMap).toEqual([{ tick: 0, qpm: 90 }]);
-    const a4 = score.notes.find((n) => n.midi === 69 && n.hand === 'R')!;
-    expect(a4.onsetSec).toBeCloseTo((4 / 4) * (60 / 90));
-  });
-  it('reads key and time signatures', () => {
-    expect(score.keySignatures).toEqual([{ tick: 0, fifths: 1, mode: 'major' }]);
-    expect(score.timeSignatures).toEqual([{ tick: 0, beats: 4, beatType: 4 }]);
-  });
+it('reads the metronome tempo and derives seconds', () => {
+  expect(score.tempoMap).toEqual([{ tick: 0, qpm: 90 }]);
+  const a4 = score.notes.find((n) => n.midi === 69 && n.hand === 'R')!;
+  expect(a4.onsetSec).toBeCloseTo((4 / 4) * (60 / 90));
+});
+it('reads key and time signatures', () => {
+  expect(score.keySignatures).toEqual([{ tick: 0, fifths: 1, mode: 'major' }]);
+  expect(score.timeSignatures).toEqual([{ tick: 0, beats: 4, beatType: 4 }]);
+});
 ```
+
 Add a new describe block:
+
 ```ts
 describe('parseMusicXml tempo variants', () => {
-  const wrap = (direction: string) => `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions></attributes>${direction}<note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration></note></measure></part></score-partwise>`;
+  const wrap = (direction: string) =>
+    `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions></attributes>${direction}<note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration></note></measure></part></score-partwise>`;
   it('converts a dotted-quarter metronome to quarters per minute', () => {
-    const { score } = parseMusicXml(wrap('<direction><direction-type><metronome><beat-unit>quarter</beat-unit><beat-unit-dot/><per-minute>60</per-minute></metronome></direction-type></direction>'));
+    const { score } = parseMusicXml(
+      wrap(
+        '<direction><direction-type><metronome><beat-unit>quarter</beat-unit><beat-unit-dot/><per-minute>60</per-minute></metronome></direction-type></direction>',
+      ),
+    );
     expect(score.tempoMap[0]!.qpm).toBeCloseTo(90);
   });
   it('prefers sound tempo over the metronome text', () => {
-    const { score } = parseMusicXml(wrap('<direction><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>100</per-minute></metronome></direction-type><sound tempo="120"/></direction>'));
+    const { score } = parseMusicXml(
+      wrap(
+        '<direction><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>100</per-minute></metronome></direction-type><sound tempo="120"/></direction>',
+      ),
+    );
     expect(score.tempoMap[0]!.qpm).toBe(120);
   });
   it('defaults to 120 when nothing is marked', () => {
@@ -1730,6 +1996,7 @@ describe('parseMusicXml tempo variants', () => {
 - [ ] **Step 2: Write the smoke test over real files**
 
 `packages/engine/src/io/musicxml/smoke.test.ts` parses every `.musicxml`/`.xml`/`.mxl` under `content/scores/` if that directory exists (another agent is filling it); it must not fail when the directory is absent or empty.
+
 ```ts
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -1738,15 +2005,23 @@ import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from './read.js';
 
 const dir = fileURLToPath(new URL('../../../../../content/scores/', import.meta.url));
-const files = existsSync(dir) ? readdirSync(dir).filter((f) => /\.(musicxml|xml|mxl)$/i.test(f)) : [];
+const files = existsSync(dir)
+  ? readdirSync(dir).filter((f) => /\.(musicxml|xml|mxl)$/i.test(f))
+  : [];
 
 describe('content library smoke test', () => {
   it.skipIf(files.length === 0)('parses every built-in score', () => {
     for (const f of files) {
       const { score } = parseMusicXml(readFileSync(join(dir, f)));
       expect(score.notes.length, f).toBeGreaterThan(0);
-      expect(score.notes.some((n) => n.hand === 'L'), f).toBe(true);
-      expect(score.notes.some((n) => n.hand === 'R'), f).toBe(true);
+      expect(
+        score.notes.some((n) => n.hand === 'L'),
+        f,
+      ).toBe(true);
+      expect(
+        score.notes.some((n) => n.hand === 'R'),
+        f,
+      ).toBe(true);
     }
   });
 });
@@ -1755,6 +2030,7 @@ describe('content library smoke test', () => {
 - [ ] **Step 3: Export from the index**
 
 Add to `packages/engine/src/index.ts`:
+
 ```ts
 export { parseMusicXml } from './io/musicxml/read.js';
 export type { ParsedMusicXml } from './io/musicxml/read.js';
@@ -1778,10 +2054,12 @@ git commit -m "feat(engine): MusicXML tempo handling, exports and content smoke 
 ### Task 8: MusicXML writer: inject fingerings into the original document
 
 **Files:**
+
 - Create: `packages/engine/src/io/musicxml/write.ts`, `packages/engine/src/io/musicxml/write.test.ts`
 - Modify: `packages/engine/src/index.ts`
 
 **Interfaces:**
+
 - Consumes: `parseXml`, `serializeXml`, `childElements`, `firstChild` (Task 5); `unpackMusicXml` (Task 5); `timewiseToPartwise` (Task 5); `parseMusicXml` (Task 6, in tests); `Score`, `Assignment` (Task 3).
 - Produces: `injectFingerings(xml: string | Uint8Array, score: Score, assignment: Assignment, opts?: { replace?: boolean }): string`
   - Walks every `<note>` element in document order; the element at index `note.sourceIndices[0]` receives `<notations><technical><fingering placement="above|below">F</fingering></technical></notations>` (above for the right hand, below for the left). A substitution adds a second `<fingering substitution="yes">`.
@@ -1791,6 +2069,7 @@ git commit -m "feat(engine): MusicXML tempo handling, exports and content smoke 
 - [ ] **Step 1: Write the failing tests**
 
 `packages/engine/src/io/musicxml/write.test.ts`:
+
 ```ts
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -1798,7 +2077,10 @@ import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from './read.js';
 import { injectFingerings } from './write.js';
 
-const xml = readFileSync(fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)), 'utf8');
+const xml = readFileSync(
+  fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)),
+  'utf8',
+);
 
 describe('injectFingerings', () => {
   const { score } = parseMusicXml(xml);
@@ -1824,12 +2106,21 @@ describe('injectFingerings', () => {
     const replaced = injectFingerings(xml, score, { n0: { finger: 3, source: 'user' } });
     expect(parseMusicXml(replaced).editorial['n0']!.finger).toBe(3);
     expect((replaced.match(/<fingering[^>]*>/g) ?? []).length).toBe(1);
-    const kept = injectFingerings(xml, score, { n0: { finger: 3, source: 'user' } }, { replace: false });
+    const kept = injectFingerings(
+      xml,
+      score,
+      { n0: { finger: 3, source: 'user' } },
+      { replace: false },
+    );
     expect((kept.match(/<fingering[^>]*>/g) ?? []).length).toBe(2);
   });
   it('writes substitutions as a second fingering element', () => {
-    const out = injectFingerings(xml, score, { n1: { finger: 3, substitution: 1, source: 'engine' } });
-    expect(out).toContain('<fingering placement="above">3</fingering><fingering placement="above" substitution="yes">1</fingering>');
+    const out = injectFingerings(xml, score, {
+      n1: { finger: 3, substitution: 1, source: 'engine' },
+    });
+    expect(out).toContain(
+      '<fingering placement="above">3</fingering><fingering placement="above" substitution="yes">1</fingering>',
+    );
   });
   it('preserves the rest of the document and the declaration', () => {
     const out = injectFingerings(xml, score, { n1: { finger: 2, source: 'engine' } });
@@ -1855,6 +2146,7 @@ Expected: FAIL, module not found.
 - [ ] **Step 3: Implement**
 
 `packages/engine/src/io/musicxml/write.ts`:
+
 ```ts
 import type { Assignment, Score } from '../../score/types.js';
 import { childElements, firstChild, parseXml, serializeXml } from './dom.js';
@@ -1926,7 +2218,9 @@ function ensureTechnical(doc: Document, noteEl: Element): Element {
   return technical;
 }
 ```
+
 Add to `packages/engine/src/index.ts`:
+
 ```ts
 export { injectFingerings } from './io/musicxml/write.js';
 ```
@@ -1948,26 +2242,41 @@ git commit -m "feat(engine): inject fingerings into MusicXML preserving the docu
 ### Task 9: PIG metrics and score alignment
 
 **Files:**
+
 - Create: `packages/engine/src/eval/metrics.ts`, `packages/engine/src/eval/metrics.test.ts`, `packages/engine/src/eval/align.ts`, `packages/engine/src/eval/align.test.ts`
 - Modify: `packages/engine/src/index.ts`
 
 **Interfaces:**
+
 - Consumes: `Finger`, `Hand`, `Score`, `Assignment` (Task 3); `parsePig` (Task 4, in tests).
 - Produces:
+
 ```ts
 export type FingerSeq = Array<Finger | undefined>;
-export interface PigMetrics { gen: number; high: number; soft: number; rec: number; notes: number; annotators: number }
-export function matchRate(pred: FingerSeq, gold: FingerSeq): number
-export function pigMetrics(pred: FingerSeq, golds: FingerSeq[], hands?: Hand[]): PigMetrics
-export function fingerSeq(score: Score, assignment: Assignment): FingerSeq      // in score.notes order, first finger only
-export function alignScores(pred: Score, gold: Score): Array<[string, string]>  // [predId, goldId] pairs in gold order
-export function metricsForScores(pred: { score: Score; assignment: Assignment }, golds: Array<{ score: Score; assignment: Assignment }>): PigMetrics
+export interface PigMetrics {
+  gen: number;
+  high: number;
+  soft: number;
+  rec: number;
+  notes: number;
+  annotators: number;
+}
+export function matchRate(pred: FingerSeq, gold: FingerSeq): number;
+export function pigMetrics(pred: FingerSeq, golds: FingerSeq[], hands?: Hand[]): PigMetrics;
+export function fingerSeq(score: Score, assignment: Assignment): FingerSeq; // in score.notes order, first finger only
+export function alignScores(pred: Score, gold: Score): Array<[string, string]>; // [predId, goldId] pairs in gold order
+export function metricsForScores(
+  pred: { score: Score; assignment: Assignment },
+  golds: Array<{ score: Score; assignment: Assignment }>,
+): PigMetrics;
 ```
+
 Definitions (Nakamura, Saito, Yoshii 2020, section on evaluation measures): with N notes and K ground truths, `M_k` is the fraction of notes whose predicted finger equals ground truth k. General match rate `gen` = mean of `M_k`; highest match rate `high` = max of `M_k`; soft match rate `soft` = fraction of notes whose predicted finger equals at least one ground truth at that note; recombination match rate `rec` (Nakamura et al. 2020, Appendix A) = `(N - E) / N` where `E` is the minimum edit cost of a recombined ground truth: pick one annotator per note; every note where the chosen annotator's finger differs from the prediction costs 1; every switch from one annotator to another costs 1 and is allowed only where the two annotators' fingers coincide at the switch point (otherwise infinite). The switch cost is what makes `rec` smaller than `soft`. Recombination runs along each hand's own note sequence when `hands` is given. Substitutions compare the first finger only. A ground-truth note without a finger never matches. The exact index convention for "coincide at the switch point" (note t-1 or note t) is fixed by the reference implementation: read `research/fingering_eval/metrics.py` (built by the datasets agent and cross-checked with the official C++ evaluator to 5e-7) and replicate its convention; then run both on one real PIG piece (`research/data/pig/FingeringFiles`, one annotator as prediction, the others as gold) and confirm identical numbers. The Python implementation wins any disagreement, and the TypeScript tests are updated to match.
 
 - [ ] **Step 1: Write the failing tests**
 
 `packages/engine/src/eval/metrics.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { matchRate, pigMetrics } from './metrics.js';
@@ -1994,7 +2303,13 @@ describe('pigMetrics', () => {
     expect(m.annotators).toBe(2);
   });
   it('soft exceeds rec when pairs are not from one annotator', () => {
-    const m = pigMetrics([1, 1], [[1, 2], [2, 1]]);
+    const m = pigMetrics(
+      [1, 1],
+      [
+        [1, 2],
+        [2, 1],
+      ],
+    );
     expect(m.soft).toBe(1);
     expect(m.rec).toBe(0.5);
     expect(m.gen).toBe(0.5);
@@ -2002,7 +2317,13 @@ describe('pigMetrics', () => {
   });
   it('charges one point per annotator switch, allowed only where they agree', () => {
     // A and B agree on note 1 (finger 2). Staying with B costs 1 (note 0); A then B costs 1 (the switch).
-    const m = pigMetrics([1, 2, 4, 5], [[1, 2, 3, 3], [5, 2, 4, 5]]);
+    const m = pigMetrics(
+      [1, 2, 4, 5],
+      [
+        [1, 2, 3, 3],
+        [5, 2, 4, 5],
+      ],
+    );
     expect(m.rec).toBe(0.75);
     expect(m.high).toBe(0.75);
     // With the switch made free, this would be 1; the edit cost is what distinguishes rec from soft.
@@ -2010,7 +2331,10 @@ describe('pigMetrics', () => {
   });
   it('recombines per hand when hands are given', () => {
     // Right-hand notes at indices 0 and 2, left-hand at 1 and 3.
-    const golds: FingerSeq[] = [[1, 5, 2, 4], [3, 1, 2, 2]];
+    const golds: FingerSeq[] = [
+      [1, 5, 2, 4],
+      [3, 1, 2, 2],
+    ];
     const hands = ['R', 'L', 'R', 'L'] as const;
     const m = pigMetrics([1, 1, 2, 2], golds, [...hands]);
     // R sequence: pred [1,2]; A gives [1,2] -> both match. L sequence: pred [1,2]; B gives [1,2] -> both match.
@@ -2029,6 +2353,7 @@ describe('pigMetrics', () => {
 ```
 
 `packages/engine/src/eval/align.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest';
 import { parsePig } from '../io/pig/read.js';
@@ -2044,12 +2369,20 @@ describe('alignScores', () => {
   it('pairs notes by id when ids match', () => {
     const g = parsePig(gold);
     const p = parsePig(gold.replace('\t1\n', '\t3\n'));
-    expect(alignScores(p.score, g.score)).toEqual([['0', '0'], ['2', '2'], ['1', '1']]);
+    expect(alignScores(p.score, g.score)).toEqual([
+      ['0', '0'],
+      ['2', '2'],
+      ['1', '1'],
+    ]);
   });
   it('falls back to onset, hand and pitch order when ids differ', () => {
     const g = parsePig(gold);
     const p = parsePig(gold.replace(/^(\d)\t/gm, (_m, d: string) => `${Number(d) + 10}\t`));
-    expect(alignScores(p.score, g.score)).toEqual([['10', '0'], ['12', '2'], ['11', '1']]);
+    expect(alignScores(p.score, g.score)).toEqual([
+      ['10', '0'],
+      ['12', '2'],
+      ['11', '1'],
+    ]);
   });
   it('throws when note counts differ', () => {
     const g = parsePig(gold);
@@ -2080,6 +2413,7 @@ Expected: FAIL, modules not found.
 - [ ] **Step 3: Implement metrics**
 
 `packages/engine/src/eval/metrics.ts`:
+
 ```ts
 import type { Finger, Hand } from '../score/types.js';
 
@@ -2095,7 +2429,8 @@ export interface PigMetrics {
 }
 
 export function matchRate(pred: FingerSeq, gold: FingerSeq): number {
-  if (pred.length !== gold.length) throw new Error(`length mismatch: ${pred.length} vs ${gold.length}`);
+  if (pred.length !== gold.length)
+    throw new Error(`length mismatch: ${pred.length} vs ${gold.length}`);
   if (pred.length === 0) return 0;
   let hits = 0;
   for (let i = 0; i < pred.length; i++) if (gold[i] !== undefined && pred[i] === gold[i]) hits++;
@@ -2104,13 +2439,15 @@ export function matchRate(pred: FingerSeq, gold: FingerSeq): number {
 
 export function pigMetrics(pred: FingerSeq, golds: FingerSeq[], hands?: Hand[]): PigMetrics {
   if (golds.length === 0) throw new Error('at least one ground truth is required');
-  for (const g of golds) if (g.length !== pred.length) throw new Error(`length mismatch: ${pred.length} vs ${g.length}`);
+  for (const g of golds)
+    if (g.length !== pred.length) throw new Error(`length mismatch: ${pred.length} vs ${g.length}`);
   const n = pred.length;
   const rates = golds.map((g) => matchRate(pred, g));
   const gen = rates.reduce((a, b) => a + b, 0) / rates.length;
   const high = Math.max(...rates);
   let softHits = 0;
-  for (let i = 0; i < n; i++) if (golds.some((g) => g[i] !== undefined && g[i] === pred[i])) softHits++;
+  for (let i = 0; i < n; i++)
+    if (golds.some((g) => g[i] !== undefined && g[i] === pred[i])) softHits++;
   const soft = n === 0 ? 0 : softHits / n;
 
   const groups: number[][] = [];
@@ -2153,7 +2490,8 @@ function recombinationHits(pred: FingerSeq, golds: FingerSeq[], idx: number[]): 
       for (let kp = 0; kp < K; kp++) {
         let trans = 0;
         if (kp !== k) {
-          trans = golds[kp]![idx[t - 1]!] === golds[k]![idx[t - 1]!] ? C_REC : Number.POSITIVE_INFINITY;
+          trans =
+            golds[kp]![idx[t - 1]!] === golds[k]![idx[t - 1]!] ? C_REC : Number.POSITIVE_INFINITY;
         }
         const v = cost[kp]! + trans;
         if (v < next[k]!) next[k] = v;
@@ -2169,6 +2507,7 @@ function recombinationHits(pred: FingerSeq, golds: FingerSeq[], idx: number[]): 
 - [ ] **Step 4: Implement alignment**
 
 `packages/engine/src/eval/align.ts`:
+
 ```ts
 import type { Assignment, Score } from '../score/types.js';
 import { pigMetrics } from './metrics.js';
@@ -2181,16 +2520,25 @@ export function fingerSeq(score: Score, assignment: Assignment): FingerSeq {
 /** Pairs each gold note with a predicted note: by id when every gold id exists in pred, else by (onsetSec, hand, midi) order. */
 export function alignScores(pred: Score, gold: Score): Array<[string, string]> {
   if (pred.notes.length !== gold.notes.length) {
-    throw new Error(`note count mismatch: prediction has ${pred.notes.length}, gold has ${gold.notes.length}`);
+    throw new Error(
+      `note count mismatch: prediction has ${pred.notes.length}, gold has ${gold.notes.length}`,
+    );
   }
   const predIds = new Set(pred.notes.map((n) => n.id));
   if (gold.notes.every((n) => predIds.has(n.id))) return gold.notes.map((n) => [n.id, n.id]);
-  const key = (s: Score) => [...s.notes].sort((a, b) => a.onsetSec - b.onsetSec || (a.hand === b.hand ? 0 : a.hand === 'R' ? -1 : 1) || a.midi - b.midi);
+  const key = (s: Score) =>
+    [...s.notes].sort(
+      (a, b) =>
+        a.onsetSec - b.onsetSec ||
+        (a.hand === b.hand ? 0 : a.hand === 'R' ? -1 : 1) ||
+        a.midi - b.midi,
+    );
   const p = key(pred);
   const g = key(gold);
   const pairs: Array<[string, string]> = [];
   for (let i = 0; i < g.length; i++) {
-    if (p[i]!.midi !== g[i]!.midi) throw new Error(`pitch mismatch at gold note ${g[i]!.id}: ${p[i]!.midi} vs ${g[i]!.midi}`);
+    if (p[i]!.midi !== g[i]!.midi)
+      throw new Error(`pitch mismatch at gold note ${g[i]!.id}: ${p[i]!.midi} vs ${g[i]!.midi}`);
     pairs.push([p[i]!.id, g[i]!.id]);
   }
   const order = new Map(gold.notes.map((n, i) => [n.id, i]));
@@ -2214,7 +2562,9 @@ export function metricsForScores(
   return pigMetrics(predSeq, goldSeqs, hands);
 }
 ```
+
 Add to `packages/engine/src/index.ts`:
+
 ```ts
 export { matchRate, pigMetrics } from './eval/metrics.js';
 export type { FingerSeq, PigMetrics } from './eval/metrics.js';
@@ -2238,10 +2588,12 @@ git commit -m "feat(engine): PIG metrics (gen, high, soft, rec) and score alignm
 ### Task 10: CLI: inspect and eval
 
 **Files:**
+
 - Create: `packages/engine/cli/main.ts`, `packages/engine/cli/inspect.ts`, `packages/engine/cli/evaluate.ts`, `packages/engine/cli/evaluate.test.ts`
 - Modify: `packages/engine/package.json` (add script `"cli": "tsx cli/main.ts"`)
 
 **Interfaces:**
+
 - Consumes: `parseMusicXml`, `parsePig`, `metricsForScores`, `Score` from earlier tasks.
 - Produces:
   - `digitus2 inspect <file>` prints title, composer, notes per hand, measures, duration in seconds, tempo, and the first five notes.
@@ -2253,6 +2605,7 @@ git commit -m "feat(engine): PIG metrics (gen, high, soft, rec) and score alignm
 - [ ] **Step 1: Write the failing test**
 
 `packages/engine/cli/evaluate.test.ts`:
+
 ```ts
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -2261,7 +2614,8 @@ import { describe, expect, it } from 'vitest';
 import { evaluateDirs } from './evaluate.js';
 
 const H = '//Version: PianoFingering_v170101\n';
-const notes = (f: string[]) => H + f.map((x, i) => `${i}\t${i * 0.5}\t${i * 0.5 + 0.5}\tC4\t80\t80\t0\t${x}`).join('\n') + '\n';
+const notes = (f: string[]) =>
+  H + f.map((x, i) => `${i}\t${i * 0.5}\t${i * 0.5 + 0.5}\tC4\t80\t80\t0\t${x}`).join('\n') + '\n';
 
 describe('evaluateDirs', () => {
   it('matches predictions to gold files by piece id and averages', () => {
@@ -2288,6 +2642,7 @@ describe('evaluateDirs', () => {
   });
 });
 ```
+
 (Add `skipped: string[]` to `EvalReport`.)
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -2298,6 +2653,7 @@ Expected: FAIL, module not found.
 - [ ] **Step 3: Implement**
 
 `packages/engine/cli/evaluate.ts`:
+
 ```ts
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -2316,7 +2672,10 @@ const GOLD_NAME = /^(\d+)-(\d+)_fingering\.txt$/;
 
 function listFiles(path: string): string[] {
   if (statSync(path).isFile()) return [path];
-  return readdirSync(path).filter((f) => f.endsWith('.txt')).map((f) => join(path, f)).sort();
+  return readdirSync(path)
+    .filter((f) => f.endsWith('.txt'))
+    .map((f) => join(path, f))
+    .sort();
 }
 
 function pieceId(file: string): string | undefined {
@@ -2325,7 +2684,9 @@ function pieceId(file: string): string | undefined {
 }
 
 export function evaluateDirs(predPath: string, goldPath: string): EvalReport {
-  const goldDir = existsSync(join(goldPath, 'FingeringFiles')) ? join(goldPath, 'FingeringFiles') : goldPath;
+  const goldDir = existsSync(join(goldPath, 'FingeringFiles'))
+    ? join(goldPath, 'FingeringFiles')
+    : goldPath;
   const goldFiles = listFiles(goldDir);
   const goldByPiece = new Map<string, string[]>();
   for (const f of goldFiles) {
@@ -2345,7 +2706,10 @@ export function evaluateDirs(predPath: string, goldPath: string): EvalReport {
       continue;
     }
     const pred = parsePig(readFileSync(predFile, 'utf8'));
-    const metrics = metricsForScores(pred, golds.map((g) => parsePig(readFileSync(g, 'utf8'))));
+    const metrics = metricsForScores(
+      pred,
+      golds.map((g) => parsePig(readFileSync(g, 'utf8'))),
+    );
     report.pieces.push({ id: id!, predFile, goldFiles: golds, metrics });
     for (const k of ['gen', 'high', 'soft', 'rec'] as const) {
       report.mean[k] += metrics[k];
@@ -2369,16 +2733,23 @@ export function formatReport(r: EvalReport): string {
   const pct = (x: number) => (100 * x).toFixed(2).padStart(6);
   const lines = ['piece    gen    high   soft   rec    notes'];
   for (const p of r.pieces) {
-    lines.push(`${p.id.padEnd(6)} ${pct(p.metrics.gen)} ${pct(p.metrics.high)} ${pct(p.metrics.soft)} ${pct(p.metrics.rec)} ${String(p.metrics.notes).padStart(6)}`);
+    lines.push(
+      `${p.id.padEnd(6)} ${pct(p.metrics.gen)} ${pct(p.metrics.high)} ${pct(p.metrics.soft)} ${pct(p.metrics.rec)} ${String(p.metrics.notes).padStart(6)}`,
+    );
   }
-  lines.push(`mean   ${pct(r.mean.gen)} ${pct(r.mean.high)} ${pct(r.mean.soft)} ${pct(r.mean.rec)}`);
-  lines.push(`notes  ${pct(r.noteWeighted.gen)} ${pct(r.noteWeighted.high)} ${pct(r.noteWeighted.soft)} ${pct(r.noteWeighted.rec)}`);
+  lines.push(
+    `mean   ${pct(r.mean.gen)} ${pct(r.mean.high)} ${pct(r.mean.soft)} ${pct(r.mean.rec)}`,
+  );
+  lines.push(
+    `notes  ${pct(r.noteWeighted.gen)} ${pct(r.noteWeighted.high)} ${pct(r.noteWeighted.soft)} ${pct(r.noteWeighted.rec)}`,
+  );
   if (r.skipped.length) lines.push(`skipped (no gold): ${r.skipped.join(', ')}`);
   return lines.join('\n');
 }
 ```
 
 `packages/engine/cli/inspect.ts`:
+
 ```ts
 import { readFileSync } from 'node:fs';
 import { parseMusicXml } from '../src/io/musicxml/read.js';
@@ -2404,13 +2775,16 @@ export function describeScore(score: Score): string {
     'first notes:',
   ];
   for (const n of score.notes.slice(0, 5)) {
-    lines.push(`  ${n.id.padEnd(6)} ${n.hand} midi ${n.midi} tick ${n.onsetTick}-${n.offsetTick} (${n.onsetSec.toFixed(3)} s)`);
+    lines.push(
+      `  ${n.id.padEnd(6)} ${n.hand} midi ${n.midi} tick ${n.onsetTick}-${n.offsetTick} (${n.onsetSec.toFixed(3)} s)`,
+    );
   }
   return lines.join('\n');
 }
 ```
 
 `packages/engine/cli/main.ts`:
+
 ```ts
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
@@ -2435,13 +2809,18 @@ function main(argv: string[]): number {
     return 0;
   }
   if (command === 'eval') {
-    const { values } = parseArgs({ args: rest, options: { pred: { type: 'string' }, gold: { type: 'string' }, json: { type: 'boolean' } } });
+    const { values } = parseArgs({
+      args: rest,
+      options: { pred: { type: 'string' }, gold: { type: 'string' }, json: { type: 'boolean' } },
+    });
     if (!values.pred || !values.gold) {
       process.stderr.write(USAGE);
       return 2;
     }
     const report = evaluateDirs(values.pred, values.gold);
-    process.stdout.write((values.json ? JSON.stringify(report, null, 2) : formatReport(report)) + '\n');
+    process.stdout.write(
+      (values.json ? JSON.stringify(report, null, 2) : formatReport(report)) + '\n',
+    );
     return 0;
   }
   process.stderr.write(USAGE);
@@ -2450,17 +2829,20 @@ function main(argv: string[]): number {
 
 process.exitCode = main(process.argv.slice(2));
 ```
+
 Add to `packages/engine/package.json` scripts: `"cli": "tsx cli/main.ts"`.
 
 - [ ] **Step 4: Run the tests and try the CLI**
 
 Run:
+
 ```bash
 pnpm --filter @digitus2/engine test -- evaluate
 pnpm --filter @digitus2/engine cli inspect packages/engine/fixtures/two-staff.musicxml
 pnpm --filter @digitus2/engine cli inspect packages/engine/fixtures/pig-sample.txt
 pnpm typecheck && pnpm lint && pnpm build
 ```
+
 Expected: test passes; both inspect commands print summaries; build emits `packages/engine/dist/cli/main.js`. (Paths given to the CLI are relative to the package directory when run through `pnpm --filter`; adjust to `fixtures/...` if needed.)
 
 - [ ] **Step 5: Commit**
@@ -2475,13 +2857,15 @@ git commit -m "feat(engine): CLI with inspect and PIG eval commands"
 ### Task 11: Package documentation and foundation wrap-up
 
 **Files:**
+
 - Create: `packages/engine/README.md`
 - Modify: `docs/PROGRESS.md` (M1 row and log entry), `README.md` (root: add the CLI example)
 
 - [ ] **Step 1: Write the engine README**
 
 `packages/engine/README.md`:
-```markdown
+
+````markdown
 # @digitus2/engine
 
 Pure TypeScript piano-fingering engine: score model, MusicXML and PIG readers and writers, PIG metrics, and a CLI. No DOM dependency; runs in Node 22 and in the browser.
@@ -2500,11 +2884,13 @@ Pure TypeScript piano-fingering engine: score model, MusicXML and PIG readers an
 pnpm --filter @digitus2/engine cli inspect fixtures/two-staff.musicxml
 pnpm --filter @digitus2/engine cli eval --pred ../../research/baselines/outputs/<name> --gold ../../research/data/pig
 ```
+````
 
 ## Tests
 
 `pnpm --filter @digitus2/engine test`
-```
+
+````
 
 - [ ] **Step 2: Update the journal**
 
@@ -2520,7 +2906,7 @@ Expected: all green.
 ```bash
 git add packages/engine/README.md docs/PROGRESS.md README.md
 git commit -m "docs: engine README and M1 progress"
-```
+````
 
 ---
 

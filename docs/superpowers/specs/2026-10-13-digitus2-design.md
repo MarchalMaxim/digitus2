@@ -80,34 +80,42 @@ Boundaries:
 ```ts
 interface Score {
   meta: { title?: string; composer?: string; source?: string };
-  divisions: number;                 // ticks per quarter note
-  tempoMap: TempoEvent[];            // tick -> quarter notes per minute
+  divisions: number; // ticks per quarter note
+  tempoMap: TempoEvent[]; // tick -> quarter notes per minute
   timeSignatures: TimeSigEvent[];
   keySignatures: KeySigEvent[];
-  measures: MeasureInfo[];           // index, start tick, length, number label
-  notes: Note[];                     // all sounding notes, both hands, sorted by onset then pitch
+  measures: MeasureInfo[]; // index, start tick, length, number label
+  notes: Note[]; // all sounding notes, both hands, sorted by onset then pitch
 }
 
 interface Note {
-  id: string;                        // stable within a Score; survives round trips
-  onsetTick: number; offsetTick: number;
-  onsetSec: number; offsetSec: number;
-  midi: number;                      // 21..108
-  spelling: { step: 'A'|'B'|'C'|'D'|'E'|'F'|'G'; alter: -2|-1|0|1|2; octave: number };
+  id: string; // stable within a Score; survives round trips
+  onsetTick: number;
+  offsetTick: number;
+  onsetSec: number;
+  offsetSec: number;
+  midi: number; // 21..108
+  spelling: {
+    step: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+    alter: -2 | -1 | 0 | 1 | 2;
+    octave: number;
+  };
   hand: 'L' | 'R';
-  staff: number; voice: number; measureIndex: number;
+  staff: number;
+  voice: number;
+  measureIndex: number;
   isGrace: boolean;
-  chordId: string;                   // notes with the same hand and onset share a chordId
-  tiedFrom?: string[];               // original note ids merged into this sounding note
+  chordId: string; // notes with the same hand and onset share a chordId
+  tiedFrom?: string[]; // original note ids merged into this sounding note
 }
 
 interface Assignment {
   [noteId: string]: {
-    finger: 1|2|3|4|5;
-    substitution?: 1|2|3|4|5;        // finger after a silent change on the held key
-    confidence?: number;             // posterior probability of this finger, 0..1
-    alternatives?: Array<{ finger: 1|2|3|4|5; cost: number }>;
-    pinned?: boolean;                // set by the user; the solver must respect it
+    finger: 1 | 2 | 3 | 4 | 5;
+    substitution?: 1 | 2 | 3 | 4 | 5; // finger after a silent change on the held key
+    confidence?: number; // posterior probability of this finger, 0..1
+    alternatives?: Array<{ finger: 1 | 2 | 3 | 4 | 5; cost: number }>;
+    pinned?: boolean; // set by the user; the solver must respect it
     source: 'engine' | 'user' | 'editorial';
   };
 }

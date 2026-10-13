@@ -1,7 +1,17 @@
 import { finalizeScore, validateScore } from '../../score/build.js';
 import { spellingToMidi } from '../../score/pitch.js';
 import type { Alter, Spelling, Step } from '../../score/pitch.js';
-import type { Assignment, Finger, Hand, KeySigEvent, MeasureInfo, Note, Score, TempoEvent, TimeSigEvent } from '../../score/types.js';
+import type {
+  Assignment,
+  Finger,
+  Hand,
+  KeySigEvent,
+  MeasureInfo,
+  Note,
+  Score,
+  TempoEvent,
+  TimeSigEvent,
+} from '../../score/types.js';
 import { childElements, childText, firstChild, parseXml } from './dom.js';
 import type { Element } from './dom.js';
 import { timewiseToPartwise } from './timewise.js';
@@ -15,10 +25,30 @@ export interface ParsedMusicXml {
 
 interface PendingTie {
   note: Note;
+  staff: number;
+  midi: number;
 }
 
+/**
+ * A tempo, time or key event located by measure and offset within it. Measure start ticks are
+ * only final after every part has been read (a later part can make a measure longer), so these
+ * become absolute ticks in the second pass.
+ */
+type Located<T extends { tick: number }> = {
+  measureIndex: number;
+  offset: number;
+  event: Omit<T, 'tick'>;
+};
+
+const DEFAULT_QPM = 120;
+
 const BEAT_UNIT_QUARTERS: Record<string, number> = {
-  whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25, '32nd': 0.125,
+  whole: 4,
+  half: 2,
+  quarter: 1,
+  eighth: 0.5,
+  '16th': 0.25,
+  '32nd': 0.125,
 };
 
 function gcd(a: number, b: number): number {
@@ -28,7 +58,10 @@ function lcm(a: number, b: number): number {
   return (a * b) / gcd(a, b);
 }
 
-export function parseMusicXml(input: string | Uint8Array, opts: { source?: string } = {}): ParsedMusicXml {
+export function parseMusicXml(
+  input: string | Uint8Array,
+  opts: { source?: string } = {},
+): ParsedMusicXml {
   const doc = timewiseToPartwise(parseXml(unpackMusicXml(input)));
   const root = doc.documentElement!;
   if (root.tagName !== 'score-partwise') throw new Error('not a MusicXML score');
@@ -47,19 +80,21 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
   const measureLengths: number[] = [];
   const measureNumbers: string[] = [];
   const notes: Note[] = [];
-  const tempoMap: TempoEvent[] = [];
-  const timeSignatures: TimeSigEvent[] = [];
-  const keySignatures: KeySigEvent[] = [];
+  const tempos: Located<TempoEvent>[] = [];
+  const times: Located<TimeSigEvent>[] = [];
+  const keys: Located<KeySigEvent>[] = [];
   let noteIndex = 0;
 
   parts.forEach((part, partIndex) => {
     let currentDivisions = 1;
     let staves = 1;
+    // Open ties keyed by `${staff}:${voice}:${midi}`.
     const pending = new Map<string, PendingTie>();
     let measureStart = 0;
     childElements(part, 'measure').forEach((measure, mIndex) => {
       if (measureStarts[mIndex] === undefined) {
-        measureStarts[mIndex] = mIndex === 0 ? 0 : measureStarts[mIndex - 1]! + (measureLengths[mIndex - 1] ?? 0);
+        measureStarts[mIndex] =
+          mIndex === 0 ? 0 : measureStarts[mIndex - 1]! + (measureLengths[mIndex - 1] ?? 0);
         measureNumbers[mIndex] = measure.getAttribute('number') ?? String(mIndex + 1);
       }
       measureStart = measureStarts[mIndex]!;
@@ -70,6 +105,11 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
       // to the tie start's onset.
       let chordOnset = measureStart;
       let lastAdvance = 0;
+      const at = <T extends { tick: number }>(event: Omit<T, 'tick'>): Located<T> => ({
+        measureIndex: mIndex,
+        offset: cursor - measureStart,
+        event,
+      });
       for (const el of childElements(measure)) {
         switch (el.tagName) {
           case 'attributes': {
@@ -81,18 +121,27 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
             if (key && partIndex === 0) {
               const fifths = Number(childText(key, 'fifths') ?? '0');
               const mode = childText(key, 'mode');
-              keySignatures.push(mode === 'major' || mode === 'minor' ? { tick: cursor, fifths, mode } : { tick: cursor, fifths });
+              keys.push(
+                at<KeySigEvent>(
+                  mode === 'major' || mode === 'minor' ? { fifths, mode } : { fifths },
+                ),
+              );
             }
             const time = firstChild(el, 'time');
             if (time && partIndex === 0) {
-              timeSignatures.push({ tick: cursor, beats: Number(childText(time, 'beats') ?? '4'), beatType: Number(childText(time, 'beat-type') ?? '4') });
+              times.push(
+                at<TimeSigEvent>({
+                  beats: Number(childText(time, 'beats') ?? '4'),
+                  beatType: Number(childText(time, 'beat-type') ?? '4'),
+                }),
+              );
             }
             break;
           }
           case 'direction':
           case 'sound': {
             const qpm = readTempo(el);
-            if (qpm !== undefined && partIndex === 0) tempoMap.push({ tick: cursor, qpm });
+            if (qpm !== undefined && partIndex === 0) tempos.push(at<TempoEvent>({ qpm }));
             break;
           }
           case 'backup': {
@@ -109,7 +158,11 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
             const isChord = firstChild(el, 'chord') !== undefined;
             const isGrace = firstChild(el, 'grace') !== undefined;
             const isRest = firstChild(el, 'rest') !== undefined;
-            const duration = isGrace ? 0 : scaled(childText(el, 'duration'), currentDivisions, divisions);
+            // Cue notes are printed small for another player; they take time but are not played.
+            const isCue = firstChild(el, 'cue') !== undefined;
+            const duration = isGrace
+              ? 0
+              : scaled(childText(el, 'duration'), currentDivisions, divisions);
             const onset = isChord ? chordOnset : cursor;
             if (!isChord) chordOnset = cursor;
             if (!isChord && !isGrace) {
@@ -117,34 +170,43 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
               lastAdvance = duration;
               maxCursor = Math.max(maxCursor, cursor);
             }
-            if (isRest) break;
+            if (isRest || isCue) break;
             const pitch = firstChild(el, 'pitch');
             if (!pitch) {
               warnings.push(`note ${index}: no pitch and no rest, skipped`);
               break;
             }
+            const alter = readAlter(childText(pitch, 'alter'), index, warnings);
+            if (alter === undefined) break;
             const spelling: Spelling = {
               step: (childText(pitch, 'step') ?? 'C') as Step,
-              alter: Number(childText(pitch, 'alter') ?? '0') as Alter,
+              alter,
               octave: Number(childText(pitch, 'octave') ?? '4'),
             };
             const staff = Number(childText(el, 'staff') ?? '1');
-            const hand: Hand = staves >= 2 ? (staff === 1 ? 'R' : 'L') : partIndex === 0 ? 'R' : 'L';
+            const hand: Hand =
+              staves >= 2 ? (staff === 1 ? 'R' : 'L') : partIndex === 0 ? 'R' : 'L';
             const voice = Number(childText(el, 'voice') ?? '1');
             const midi = spellingToMidi(spelling);
             const ties = childElements(el, 'tie').map((t) => t.getAttribute('type'));
-            const tied = childElements(firstChild(el, 'notations') ?? el, 'tied').map((t) => t.getAttribute('type'));
+            const tied = childElements(firstChild(el, 'notations') ?? el, 'tied').map((t) =>
+              t.getAttribute('type'),
+            );
             const tieStop = ties.includes('stop') || (ties.length === 0 && tied.includes('stop'));
-            const tieStart = ties.includes('start') || (ties.length === 0 && tied.includes('start'));
-            const tieKey = `${staff}:${midi}`;
+            const tieStart =
+              ties.includes('start') || (ties.length === 0 && tied.includes('start'));
+            const tieKey = `${staff}:${voice}:${midi}`;
             const offset = isGrace ? onset : onset + (isChord ? lastAdvance : duration);
 
             if (tieStop) {
-              const prev = pending.get(tieKey);
-              if (prev) {
+              const open = findPendingTie(pending, tieKey, staff, midi);
+              if (open) {
+                const [openKey, prev] = open;
                 prev.note.offsetTick = Math.max(prev.note.offsetTick, offset);
                 prev.note.sourceIndices.push(index);
-                if (!tieStart) pending.delete(tieKey);
+                pending.delete(openKey);
+                // A continuation (stop and start) stays open, now under this note's voice.
+                if (tieStart) pending.set(tieKey, prev);
                 break;
               }
               warnings.push(`note ${index}: tie stop without a start`);
@@ -166,7 +228,7 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
               sourceIndices: [index],
             };
             notes.push(note);
-            if (tieStart) pending.set(tieKey, { note });
+            if (tieStart) pending.set(tieKey, { note, staff, midi });
             const finger = readFingering(el);
             if (finger !== undefined) editorial[note.id] = { finger, source: 'editorial' };
             break;
@@ -180,11 +242,17 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
     if (pending.size > 0) warnings.push(`part ${partIndex}: ${pending.size} tie(s) never closed`);
   });
 
-  // Second pass: measure starts must reflect lengths from all parts; recompute and remap notes.
+  // Second pass: measure starts must reflect lengths from all parts; recompute and remap notes
+  // and events.
   const measures: MeasureInfo[] = [];
   let start = 0;
   for (let i = 0; i < measureLengths.length; i++) {
-    measures.push({ index: i, startTick: start, lengthTicks: measureLengths[i] ?? 0, number: measureNumbers[i] ?? String(i + 1) });
+    measures.push({
+      index: i,
+      startTick: start,
+      lengthTicks: measureLengths[i] ?? 0,
+      number: measureNumbers[i] ?? String(i + 1),
+    });
     start += measureLengths[i] ?? 0;
   }
   for (const n of notes) {
@@ -194,19 +262,82 @@ export function parseMusicXml(input: string | Uint8Array, opts: { source?: strin
       n.offsetTick += delta;
     }
   }
+  const absolute = <T extends { tick: number }>(located: Located<T>[]): T[] =>
+    located
+      .map((l) => ({ tick: measures[l.measureIndex]!.startTick + l.offset, ...l.event }) as T)
+      .sort((a, b) => a.tick - b.tick);
+  const tempoMap = absolute<TempoEvent>(tempos);
+  if (tempoMap.length === 0 || tempoMap[0]!.tick > 0)
+    tempoMap.unshift({ tick: 0, qpm: DEFAULT_QPM });
 
   const score = finalizeScore({
     meta: readMeta(root, opts.source),
     divisions,
-    tempoMap: tempoMap.length > 0 ? tempoMap : [{ tick: 0, qpm: 120 }],
-    timeSignatures,
-    keySignatures,
+    tempoMap,
+    timeSignatures: absolute<TimeSigEvent>(times),
+    keySignatures: absolute<KeySigEvent>(keys),
     measures,
-    notes,
+    notes: dropDuplicates(notes, editorial, warnings),
   });
   const problems = validateScore(score);
   if (problems.length > 0) throw new Error(`invalid score: ${problems.join('; ')}`);
   return { score, editorial, warnings };
+}
+
+/** The open tie in the same voice, else one on the same staff and pitch in another voice. */
+function findPendingTie(
+  pending: Map<string, PendingTie>,
+  key: string,
+  staff: number,
+  midi: number,
+): [string, PendingTie] | undefined {
+  const same = pending.get(key);
+  if (same) return [key, same];
+  for (const entry of pending) {
+    if (entry[1].staff === staff && entry[1].midi === midi) return entry;
+  }
+  return undefined;
+}
+
+/**
+ * Keeps the first of several non-grace notes with the same hand, onset and pitch (a unison
+ * written in two voices is one key press). Grace notes share their main note's onset, so a
+ * grace figure that repeats a pitch is not a duplicate.
+ */
+function dropDuplicates(notes: Note[], editorial: Assignment, warnings: string[]): Note[] {
+  const seen = new Map<string, Note>();
+  return notes.filter((n) => {
+    if (n.isGrace) return true;
+    const key = `${n.hand}:${n.onsetTick}:${n.midi}`;
+    const first = seen.get(key);
+    if (!first) {
+      seen.set(key, n);
+      return true;
+    }
+    warnings.push(
+      `note ${n.sourceIndices[0]}: duplicate of note ${first.sourceIndices[0]} (same hand, onset and pitch), dropped`,
+    );
+    delete editorial[n.id];
+    return false;
+  });
+}
+
+/** `<alter>` as a semitone count in -2..2; microtones are rounded, anything else skips the note. */
+function readAlter(text: string | undefined, index: number, warnings: string[]): Alter | undefined {
+  if (text === undefined || text === '') return 0;
+  const value = Number(text);
+  if (!Number.isFinite(value)) {
+    warnings.push(`note ${index}: alter "${text}" is not a number, skipped`);
+    return undefined;
+  }
+  const rounded = Math.round(value) || 0; // `|| 0` turns -0 into 0
+  if (rounded < -2 || rounded > 2) {
+    warnings.push(`note ${index}: alter ${text} outside -2..2, skipped`);
+    return undefined;
+  }
+  if (rounded !== value)
+    warnings.push(`note ${index}: microtonal alter ${text} rounded to ${rounded}`);
+  return rounded as Alter;
 }
 
 function scaled(text: string | undefined, current: number, global: number): number {
@@ -224,7 +355,8 @@ function readTempo(el: Element): number | undefined {
   const dots = childElements(metronome, 'beat-unit-dot').length;
   const perMinute = Number(childText(metronome, 'per-minute') ?? '0');
   if (!(perMinute > 0)) return undefined;
-  const quarters = (BEAT_UNIT_QUARTERS[unit] ?? 1) * (dots > 0 ? 1.5 : 1);
+  // Each dot adds half the previous value: 1, 1.5, 1.75, ... times the undotted unit.
+  const quarters = (BEAT_UNIT_QUARTERS[unit] ?? 1) * (2 - 0.5 ** dots);
   return perMinute * quarters;
 }
 
@@ -247,7 +379,9 @@ function readMeta(root: Element, source?: string): Score['meta'] {
   if (title) meta.title = title;
   const ident = firstChild(root, 'identification');
   if (ident) {
-    const composer = childElements(ident, 'creator').find((c) => c.getAttribute('type') === 'composer');
+    const composer = childElements(ident, 'creator').find(
+      (c) => c.getAttribute('type') === 'composer',
+    );
     if (composer?.textContent?.trim()) meta.composer = composer.textContent.trim();
   }
   if (source !== undefined) meta.source = source;

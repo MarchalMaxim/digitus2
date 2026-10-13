@@ -1,17 +1,37 @@
 import { describe, expect, it } from 'vitest';
-import { assignChordIds, finalizeScore, handEvents, sortNotes, ticksToSeconds, validateScore } from './build.js';
+import {
+  assignChordIds,
+  finalizeScore,
+  handEvents,
+  sortNotes,
+  ticksToSeconds,
+  validateScore,
+} from './build.js';
 import type { Note, Score } from './types.js';
 
 function note(p: Partial<Note> & { id: string; midi: number; onsetTick: number }): Note {
   return {
-    offsetTick: p.onsetTick + 480, onsetSec: 0, offsetSec: 0,
-    spelling: { step: 'C', alter: 0, octave: 4 }, hand: 'R', staff: 1, voice: 1,
-    measureIndex: 0, isGrace: false, chordId: '', sourceIndices: [], ...p,
+    offsetTick: p.onsetTick + 480,
+    onsetSec: 0,
+    offsetSec: 0,
+    spelling: { step: 'C', alter: 0, octave: 4 },
+    hand: 'R',
+    staff: 1,
+    voice: 1,
+    measureIndex: 0,
+    isGrace: false,
+    chordId: '',
+    sourceIndices: [],
+    ...p,
   };
 }
 
 const base: Omit<Score, 'notes'> = {
-  meta: {}, divisions: 480, tempoMap: [{ tick: 0, qpm: 120 }], timeSignatures: [], keySignatures: [],
+  meta: {},
+  divisions: 480,
+  tempoMap: [{ tick: 0, qpm: 120 }],
+  timeSignatures: [],
+  keySignatures: [],
   measures: [{ index: 0, startTick: 0, lengthTicks: 1920, number: '1' }],
 };
 
@@ -21,7 +41,10 @@ describe('ticksToSeconds', () => {
     expect(ticksToSeconds([{ tick: 0, qpm: 60 }], 480, 960)).toBeCloseTo(2);
   });
   it('integrates across tempo changes', () => {
-    const map = [{ tick: 0, qpm: 120 }, { tick: 960, qpm: 60 }];
+    const map = [
+      { tick: 0, qpm: 120 },
+      { tick: 960, qpm: 60 },
+    ];
     expect(ticksToSeconds(map, 480, 960)).toBeCloseTo(1);
     expect(ticksToSeconds(map, 480, 1440)).toBeCloseTo(2);
   });
@@ -66,13 +89,28 @@ describe('finalizeScore and handEvents', () => {
     expect(handEvents(score, 'L')).toHaveLength(1);
   });
   it('rejects pitches outside the piano and duplicate ids', () => {
-    const bad = finalizeScore({ ...base, notes: [note({ id: 'a', midi: 20, onsetTick: 0 }), note({ id: 'a', midi: 60, onsetTick: 0 })] });
+    const bad = finalizeScore({
+      ...base,
+      notes: [note({ id: 'a', midi: 20, onsetTick: 0 }), note({ id: 'a', midi: 60, onsetTick: 0 })],
+    });
     const problems = validateScore(bad);
     expect(problems.some((p) => p.includes('midi'))).toBe(true);
     expect(problems.some((p) => p.includes('duplicate'))).toBe(true);
   });
+  it('rejects a non-integer or non-numeric midi', () => {
+    for (const midi of [60.5, Number.NaN]) {
+      const bad = finalizeScore({ ...base, notes: [note({ id: 'a', midi, onsetTick: 0 })] });
+      expect(
+        validateScore(bad).some((p) => p.includes('integer')),
+        String(midi),
+      ).toBe(true);
+    }
+  });
   it('rejects offsets before onsets for non-grace notes', () => {
-    const bad = finalizeScore({ ...base, notes: [note({ id: 'a', midi: 60, onsetTick: 480, offsetTick: 240 })] });
+    const bad = finalizeScore({
+      ...base,
+      notes: [note({ id: 'a', midi: 60, onsetTick: 480, offsetTick: 240 })],
+    });
     expect(validateScore(bad).some((p) => p.includes('offset'))).toBe(true);
   });
 });

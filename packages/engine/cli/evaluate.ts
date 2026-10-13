@@ -82,7 +82,9 @@ export function formatReport(r: EvalReport): string {
       `${p.id.padEnd(6)} ${pct(m.gen)} ${pct(m.high)} ${pct(m.soft)} ${pct(m.rec)} ${String(m.notes).padStart(6)}`,
     );
   }
-  lines.push(`mean   ${pct(r.mean.gen)} ${pct(r.mean.high)} ${pct(r.mean.soft)} ${pct(r.mean.rec)}`);
+  lines.push(
+    `mean   ${pct(r.mean.gen)} ${pct(r.mean.high)} ${pct(r.mean.soft)} ${pct(r.mean.rec)}`,
+  );
   const w = r.noteWeighted;
   lines.push(`notes  ${pct(w.gen)} ${pct(w.high)} ${pct(w.soft)} ${pct(w.rec)}`);
   if (r.skipped.length) lines.push(`skipped (no gold): ${r.skipped.join(', ')}`);

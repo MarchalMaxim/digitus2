@@ -4,7 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { parseFingerField, parsePig } from './read.js';
 import { writePig } from './write.js';
 
-const fixture = readFileSync(fileURLToPath(new URL('../../../fixtures/pig-sample.txt', import.meta.url)), 'utf8');
+const fixture = readFileSync(
+  fileURLToPath(new URL('../../../fixtures/pig-sample.txt', import.meta.url)),
+  'utf8',
+);
 
 describe('parsePig', () => {
   it('reads notes, hands, fingers and substitutions', () => {
@@ -72,8 +75,11 @@ describe('writePig', () => {
     const first = parsePig(fixture);
     const text = writePig(first.score, first.assignment);
     const second = parsePig(text);
-    expect(second.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]))
-      .toEqual(first.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]));
+    expect(
+      second.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]),
+    ).toEqual(
+      first.score.notes.map((n) => [n.id, n.midi, n.hand, n.onsetSec, n.offsetSec, n.velocity]),
+    );
     expect(second.assignment).toEqual(first.assignment);
     expect(text.startsWith('//Version: PianoFingering_v170101\n')).toBe(true);
     expect(text.split('\n')[3]).toMatch(/^2\t1(\.0+)?\t1\.5(0+)?\tE4\t80\t80\t0\t3_1$/);
@@ -93,7 +99,11 @@ describe('writePig', () => {
   });
   it('keeps the original line order', () => {
     const { score, assignment } = parsePig(fixture);
-    const ids = writePig(score, assignment).trim().split('\n').slice(1).map((l) => l.split('\t')[0]);
+    const ids = writePig(score, assignment)
+      .trim()
+      .split('\n')
+      .slice(1)
+      .map((l) => l.split('\t')[0]);
     expect(ids).toEqual(['0', '1', '2', '3', '4', '5']);
   });
 });

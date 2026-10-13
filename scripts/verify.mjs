@@ -34,7 +34,8 @@ if (want('unit')) run('unit', 'pnpm', ['test']);
 if (want('build')) run('build', 'pnpm', ['build']);
 
 if (want('e2e')) {
-  if (existsSync('apps/web/playwright.config.ts')) run('e2e', 'pnpm', ['--filter', '@digitus2/web', 'e2e']);
+  if (existsSync('apps/web/playwright.config.ts'))
+    run('e2e', 'pnpm', ['--filter', '@digitus2/web', 'e2e']);
   else skip('e2e', 'no apps/web/playwright.config.ts yet');
 }
 
@@ -44,17 +45,33 @@ if (want('benchmark')) {
   if (!existsSync(floorPath)) skip('benchmark', 'no benchmarks/floor.json');
   else {
     const floor = JSON.parse(readFileSync(floorPath, 'utf8'));
-    const usage = existsSync(cli) ? spawnSync('node', [cli], { encoding: 'utf8', shell: true }) : null;
+    const usage = existsSync(cli)
+      ? spawnSync('node', [cli], { encoding: 'utf8', shell: true })
+      : null;
     const hasBench = usage && /\bbench\b/.test(`${usage.stdout}${usage.stderr}`);
     if (!hasBench) skip('benchmark', 'engine CLI has no bench command yet');
     else if (!existsSync(floor.goldDir)) skip('benchmark', `dataset missing: ${floor.goldDir}`);
-    else if (floor.engine === null) run('benchmark', 'node', [cli, 'bench', '--gold', floor.goldDir, '--split', floor.split]);
-    else run('benchmark', 'node', [cli, 'bench', '--gold', floor.goldDir, '--split', floor.split, '--floor', floorPath]);
+    else if (floor.engine === null)
+      run('benchmark', 'node', [cli, 'bench', '--gold', floor.goldDir, '--split', floor.split]);
+    else
+      run('benchmark', 'node', [
+        cli,
+        'bench',
+        '--gold',
+        floor.goldDir,
+        '--split',
+        floor.split,
+        '--floor',
+        floorPath,
+      ]);
   }
 }
 
 process.stdout.write('\n=== verify summary\n');
-for (const r of results) process.stdout.write(`${r.status.padEnd(5)} ${r.name.padEnd(10)} ${r.detail}\n`);
+for (const r of results)
+  process.stdout.write(`${r.status.padEnd(5)} ${r.name.padEnd(10)} ${r.detail}\n`);
 const failed = results.filter((r) => r.status === 'FAIL');
-process.stdout.write(failed.length ? `\n${failed.length} step(s) failed\n` : '\nall steps passed\n');
+process.stdout.write(
+  failed.length ? `\n${failed.length} step(s) failed\n` : '\nall steps passed\n',
+);
 process.exitCode = failed.length ? 1 : 0;

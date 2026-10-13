@@ -16,7 +16,10 @@ function seconds(x: number): string {
 
 export function writePig(score: Score, assignment: Assignment = {}): string {
   const ordered = [...score.notes].sort(
-    (a, b) => (a.sourceIndices[0] ?? 0) - (b.sourceIndices[0] ?? 0) || a.onsetTick - b.onsetTick || a.midi - b.midi,
+    (a, b) =>
+      (a.sourceIndices[0] ?? 0) - (b.sourceIndices[0] ?? 0) ||
+      a.onsetTick - b.onsetTick ||
+      a.midi - b.midi,
   );
   const lines = [PIG_HEADER];
   for (const n of ordered) {
@@ -29,9 +32,16 @@ export function writePig(score: Score, assignment: Assignment = {}): string {
       : '0';
     const vel = n.velocity ?? 80;
     lines.push(
-      [n.id, seconds(n.onsetSec), seconds(n.offsetSec), formatPigPitch(n.spelling), vel, vel, n.hand === 'L' ? 1 : 0, finger].join(
-        '\t',
-      ),
+      [
+        n.id,
+        seconds(n.onsetSec),
+        seconds(n.offsetSec),
+        formatPigPitch(n.spelling),
+        vel,
+        vel,
+        n.hand === 'L' ? 1 : 0,
+        finger,
+      ].join('\t'),
     );
   }
   return lines.join('\n') + '\n';

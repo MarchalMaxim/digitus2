@@ -3,10 +3,26 @@ import type { Spelling } from './pitch.js';
 export type Hand = 'L' | 'R';
 export type Finger = 1 | 2 | 3 | 4 | 5;
 
-export interface TempoEvent { tick: number; qpm: number }
-export interface TimeSigEvent { tick: number; beats: number; beatType: number }
-export interface KeySigEvent { tick: number; fifths: number; mode?: 'major' | 'minor' }
-export interface MeasureInfo { index: number; startTick: number; lengthTicks: number; number: string }
+export interface TempoEvent {
+  tick: number;
+  qpm: number;
+}
+export interface TimeSigEvent {
+  tick: number;
+  beats: number;
+  beatType: number;
+}
+export interface KeySigEvent {
+  tick: number;
+  fifths: number;
+  mode?: 'major' | 'minor';
+}
+export interface MeasureInfo {
+  index: number;
+  startTick: number;
+  lengthTicks: number;
+  number: string;
+}
 
 export interface Note {
   id: string;
@@ -48,4 +64,7 @@ export interface FingerAssignment {
 }
 export type Assignment = Record<string, FingerAssignment>;
 
-export interface HandEvent { onsetTick: number; notes: Note[] }
+export interface HandEvent {
+  onsetTick: number;
+  notes: Note[];
+}

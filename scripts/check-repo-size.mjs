@@ -46,7 +46,10 @@ for (const { f, kb } of sized) {
   const limit = isScore ? SCORE_MAX_KB : MAX_FILE_KB;
   if (kb > limit) problems.push(`${f} is ${kb.toFixed(0)} KB (limit ${limit} KB)`);
 }
-if (totalKb / 1024 > MAX_TOTAL_MB) problems.push(`trackable files total ${(totalKb / 1024).toFixed(1)} MB (limit ${MAX_TOTAL_MB} MB)`);
+if (totalKb / 1024 > MAX_TOTAL_MB)
+  problems.push(
+    `trackable files total ${(totalKb / 1024).toFixed(1)} MB (limit ${MAX_TOTAL_MB} MB)`,
+  );
 
 for (const dir of MUST_BE_IGNORED) {
   try {
@@ -65,8 +68,11 @@ for (const dir of MUST_BE_IGNORED) {
   if (!ignored) problems.push(`${dir} exists but is not ignored by git`);
 }
 
-process.stdout.write(`trackable files: ${sized.length}, total ${(totalKb / 1024).toFixed(1)} MB\nlargest:\n`);
-for (const { f, kb } of sized.slice(0, 10)) process.stdout.write(`  ${kb.toFixed(0).padStart(6)} KB  ${f}\n`);
+process.stdout.write(
+  `trackable files: ${sized.length}, total ${(totalKb / 1024).toFixed(1)} MB\nlargest:\n`,
+);
+for (const { f, kb } of sized.slice(0, 10))
+  process.stdout.write(`  ${kb.toFixed(0).padStart(6)} KB  ${f}\n`);
 if (problems.length) {
   process.stdout.write(`\nrepo hygiene problems:\n${problems.map((p) => `  - ${p}`).join('\n')}\n`);
   process.exitCode = 1;

@@ -41,7 +41,8 @@ export function alignScores(pred: Score, gold: Score): Array<[string, string]> {
 /**
  * PIG metrics of a prediction against one or more annotated scores of the same piece. Notes are
  * aligned to the first gold score; hands come from the prediction (the official tool takes them
- * from the sign of the estimated finger).
+ * from the sign of the estimated finger). Substitution fingers are passed on, so `gen` compares
+ * whole finger fields as the official tool does (see `pigMetrics`).
  */
 export function metricsForScores(
   pred: { score: Score; assignment: Assignment },
@@ -63,15 +64,18 @@ export function metricsForScores(
   });
   const predNotes = new Map(pred.score.notes.map((n) => [n.id, n]));
   const predSeq: FingerSeq = pairs.map(([p]) => pred.assignment[p]?.finger);
+  const predSubs: FingerSeq = pairs.map(([p]) => pred.assignment[p]?.substitution);
   const hands = pairs.map(([p]) => predNotes.get(p)!.hand);
   const goldSeqs: FingerSeq[] = [];
+  const goldSubs: FingerSeq[] = [];
   const goldHands: Hand[][] = [];
   for (const g of golds) {
     const toGold = new Map(alignScores(g.score, reference.score).map(([a, b]) => [b, a]));
     const notes = new Map(g.score.notes.map((n) => [n.id, n]));
     const ids = pairs.map(([, refId]) => toGold.get(refId)!);
     goldSeqs.push(ids.map((id) => g.assignment[id]?.finger));
+    goldSubs.push(ids.map((id) => g.assignment[id]?.substitution));
     goldHands.push(ids.map((id) => notes.get(id)!.hand));
   }
-  return pigMetrics(predSeq, goldSeqs, hands, goldHands);
+  return pigMetrics(predSeq, goldSeqs, hands, goldHands, { pred: predSubs, golds: goldSubs });
 }

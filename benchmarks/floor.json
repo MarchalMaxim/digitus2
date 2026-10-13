@@ -1,10 +1,33 @@
 {
-  "_comment": "Benchmark floors for the verification loop. `pnpm verify` fails when the engine's PIG test-split scores drop below `engine`. Raise the floor when a milestone improves the numbers; never lower it without a dated note in docs/PROGRESS.md. All numbers are percent, macro-averaged over the test pieces.",
+  "_comment": "Benchmark floors for the verification loop. `pnpm verify` fails when the engine's PIG test-split scores drop below `engine`, when its lint errors per 1000 notes rise above `lint.errorsPer1000Max`, or when a gated run skips a piece. Raise the floor when a milestone improves the numbers; never lower it without a dated note in docs/PROGRESS.md. All numbers are percent, macro-averaged over the test pieces. 2026-10-14: `engine`, `textbook` and `lint` are the M2 rule-based floors (Parncutt + Jacobs + Balliauw rules, hand-position term, textbook templates, literature-default weights, profile large), first set from the m2-rules scorecard (macro gen 59.74, high 66.02, soft 80.28, rec 70.05). 2026-10-14 (M2 review fixes: held-note loop that keeps one side of each conflict, doubled-finger cost for chords of more than five notes, hop weight 10 with 2 points for a hop within a fourth at any tempo, chordBeyondPractical 30, lint L05 a law only on keys held together): raised from the m2-rules-fixed scorecard on 42c24fc plus the uncommitted fix tree (macro gen 60.91, high 66.84, soft 81.65, rec 71.46 over 30 test pieces, 0 skipped) minus 0.5 and rounded down to one decimal. Still below nakamura_chmm: the verification spec's gen gate (the best runnable baseline, 62.1) is not met by the rules alone; see docs/experiments.md and benchmarks/history.md.",
   "goldDir": "research/data/pig",
   "split": "research/data/splits/pig_official.json",
   "splitName": "nakamura2020",
   "metricPrimary": "gen",
-  "engine": null,
+  "engine": {
+    "gen": 60.4,
+    "high": 66.3,
+    "soft": 81.1,
+    "rec": 70.9
+  },
+  "textbook": {
+    "noteAccuracy": 0.83,
+    "scaleNoteAccuracy": 0.9,
+    "quarter": { "arpeggio": 0.72, "chromatic": 0.61, "R": 0.86, "L": 0.8 },
+    "sixteenths": {
+      "note": 0.83,
+      "scale": 0.9,
+      "arpeggio": 0.72,
+      "chromatic": 0.61,
+      "R": 0.86,
+      "L": 0.8
+    },
+    "note": "Fractions, not percent: textbook oracle (benchmarks/textbook, 672 entries) note accuracy, measured minus 0.01 and rounded down to two decimals. noteAccuracy, scaleNoteAccuracy and quarter are at quarter = 120 (IOI 0.5 s, the evaluateTextbook default); sixteenths at qpm 480 (IOI 0.125 s); R and L are each hand's entries alone, which guard the left-hand mirror. packages/engine/src/eval/textbook.test.ts reads these values and enforces them in the unit step. 2026-10-14 m2-rules: quarter note 0.527, scale 0.552 (exact 29 of 672). 2026-10-14 m2-rules-fixed: quarter note 0.8422, scale 0.9143, arpeggio 0.7334, chromatic 0.6283, right hand 0.8731, left hand 0.8112 (exact 410 of 672: scales 330 of 432, arpeggios 80 of 192, chromatic 0 of 48); sixteenths identical, since a hop within a fourth now costs the same at any tempo."
+  },
+  "lint": {
+    "errorsPer1000Max": 8.32,
+    "note": "Lint errors per 1000 notes of the solver's output on the 30 test pieces; bench gates it. 2026-10-14 m2-rules: 22.11 (226 errors; most were L05 leaps between notes that do not overlap, which lint then called a law, and L03 in piece 029, whose hard decode became infeasible). 2026-10-14 m2-rules-fixed: 85 errors in 10,225 notes (8.313 per 1000, rounded up), 0 relaxed hands. L05 74: 68 chord spans whose notes all lie within 15 semitones and 6 spans between a held note and the next one (5 of them under a legato overlap below 60 ms); L03 11: 6 where more than five keys sound at once and 5 under legato overlaps below 60 ms. Not 0 yet because the solver and lint treat a note as held 1 ms after its onset, so a performance overlap of 10 to 60 ms in PIG blocks a finger: on PIG train a 60 ms tolerance in the solver alone cuts these chord-span errors from 301 to 188 (and makes lint report 440 L03 instead, since lint keeps 1 ms). M3 Task 7 tests that tolerance in both. The experts' own fingerings of the test pieces score 6.68 errors per 1000 notes under the same lint (L03 4.58, L05 1.58, L01 0.48, L02 0.04; 47.4 under the m2-rules lint)."
+  },
   "references": {
     "nakamura_chmm": {
       "gen": 62.1,

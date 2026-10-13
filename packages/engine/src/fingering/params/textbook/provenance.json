@@ -1,0 +1,32 @@
+{
+  "description": "Standard textbook fingerings used as templates for scale, arpeggio and chromatic runs (M2 Task 8). Copies of the textbook oracle in benchmarks/textbook/.",
+  "copied": "2026-10-13",
+  "generatedBy": "benchmarks/textbook/generate.py (oracle committed in 7b43c09; see benchmarks/textbook/README.md and docs/research/textbook-oracle.md)",
+  "formatting": "The copies were reformatted with prettier (the repository checks formatting under packages/); the parsed JSON is identical to the source (deep-equal, checked by templates.test.ts while benchmarks/textbook/ exists). sha256 values are for the bytes on disk.",
+  "loadTimeFilter": "templates.ts keeps only entries with octaves <= 2; the files are not edited.",
+  "hashAlgorithm": "sha256",
+  "files": [
+    {
+      "file": "scales.json",
+      "source": "benchmarks/textbook/scales.json",
+      "sourceSha256": "b4eaed27f718ff7426744df4b04991fcdf00c872a5672a93e936031977b00343",
+      "copySha256": "82a340a6ef229fbbc86cb8131887b8093c2766ad2b995495c551fb29f02b6bdd",
+      "entries": 432
+    },
+    {
+      "file": "arpeggios.json",
+      "source": "benchmarks/textbook/arpeggios.json",
+      "sourceSha256": "bdfe6d8def6626d7c0518c8fae3b3a63b5b19a0b6e47b0fbb42e152ffeecd2b9",
+      "copySha256": "5a46c42f4be12e41c77434d5fb02dab96fc16aa4819bb1336c9f97040fa19275",
+      "entries": 192
+    },
+    {
+      "file": "chromatic.json",
+      "source": "benchmarks/textbook/chromatic.json",
+      "sourceSha256": "ad172e6686fbba0a4e25bb66292239993657976a547b442b7b995b43788a3a54",
+      "copySha256": "af3beefc1c7a4fa986f4802246e0a44c9a3072533fc965acf4c3bef5459ef98f",
+      "entries": 48
+    }
+  ],
+  "sources": "Each entry cites its sources (source, sources, alternatives); each file lists every source consulted under sourcesUsed."
+}

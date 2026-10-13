@@ -1,0 +1,9 @@
+{
+  "provenance": "Parncutt et al. 1997 Table 1 semitone spans (adult male pianist). Scale factors: Parncutt suggests about 0.9 for smaller hands; 'small' and 'child' are placeholders to calibrate with teachers (literature 4.4). Written 2026-10-13.",
+  "profiles": {
+    "large": { "label": "Large hand (over 22 cm thumb to fifth)", "scale": 1.0 },
+    "medium": { "label": "Medium hand (20 to 22 cm)", "scale": 0.9 },
+    "small": { "label": "Small hand (under 20 cm)", "scale": 0.8 },
+    "child": { "label": "Child (roughly ages 6 to 10)", "scale": 0.7 }
+  }
+}

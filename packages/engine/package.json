@@ -19,7 +19,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.src.json",
     "build": "tsc",
     "cli": "tsx cli/main.ts"
   },

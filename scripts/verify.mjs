@@ -3,9 +3,11 @@
 //
 //   pnpm verify            run every step
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
-//                          e2e, benchmark)
+//                          bundle, e2e, benchmark)
 //
-// Exit code is non-zero if any step fails. The benchmark step compares the engine's PIG
+// Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
+// page's initial JavaScript and CSS exceed 150 KB gzip or Verovio is statically imported
+// (scripts/check-bundle-size.mjs). The benchmark step compares the engine's PIG
 // test-split scores with benchmarks/floor.json and fails on a regression; it is skipped
 // (and says so) while the engine has no `bench` command or the dataset is absent.
 import { spawnSync } from 'node:child_process';
@@ -34,6 +36,7 @@ if (want('typecheck')) run('typecheck', 'pnpm', ['typecheck']);
 if (want('lint')) run('lint', 'pnpm', ['lint']);
 if (want('unit')) run('unit', 'pnpm', ['test']);
 if (want('build')) run('build', 'pnpm', ['build']);
+if (want('bundle')) run('bundle', 'node', ['scripts/check-bundle-size.mjs']);
 
 if (want('e2e')) {
   if (existsSync('apps/web/playwright.config.ts'))

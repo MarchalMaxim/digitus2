@@ -29,7 +29,8 @@ export function sortNotes(notes: Note[]): Note[] {
       a.onsetTick - b.onsetTick ||
       handRank(a.hand) - handRank(b.hand) ||
       a.midi - b.midi ||
-      a.id.localeCompare(b.id),
+      // By code unit, not localeCompare, whose order depends on the runtime's locale.
+      (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
   );
 }
 

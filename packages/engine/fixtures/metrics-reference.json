@@ -1,0 +1,14 @@
+{
+  "piece": "001",
+  "predAnnotation": "1",
+  "goldAnnotations": ["2", "5", "8"],
+  "mode": "official",
+  "notes": 469,
+  "python": {
+    "gen": 0.7128642501776831,
+    "high": 0.7910447761194029,
+    "soft": 0.8848614072494669,
+    "rec": 0.8294243070362474
+  },
+  "command": "PYTHONPATH=research research/.venv/Scripts/python -m fingering_eval.evaluate --gold research/data/pig --split test --pred research/data/pig --pred-annotation 1 --gold-annotations 2,5,8 --per-piece --json <tmp>/eval.json (run from the repo root; --mode defaults to official; values are m_gen, m_high, m_soft, m_rec of piece 001 in the JSON, identical to fingering_eval.metrics.evaluate_piece(gts=[001-2, 001-5, 001-8], est=001-1, mode='official'))"
+}

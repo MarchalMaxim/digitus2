@@ -1,0 +1,29 @@
+{
+  "provenance": "Parncutt et al. 1997 rule weights (rules 1-12), Balliauw et al. 2017 chord rules (2x span terms, 10 beyond practical), hop and repeated-note terms from literature.md 6.4. Jacobs variant: weakFifth 0, threeFourFive 0. Written 2026-10-13, not fitted to data. Template bonus added with Task 8; to be tuned in M3. 2026-10-14 (M2 review fix): hop 3 -> 10 with 2 points for any hop within a perfect fourth (hopStepMax 5 semitones, rules.ts) instead of 0.5 when slow, chosen on the textbook oracle and PIG train (pieces 031-150) only, never on test: train gen 62.05 -> 63.61, textbook note accuracy at quarter = 120 0.527 -> 0.842; chordBeyondPractical 10 -> 30, the smallest round weight at which one semitone beyond the practical span in a chord (a physical law, lint L05) costs more than a hop within a fourth (2 x 10 = 20), which keeps the engine's fingering of fixtures/two-staff.musicxml free of lint errors under the new hop rule; train gen 63.61 -> 63.91. Sweeps in docs/experiments.md.",
+  "weights": {
+    "weakFinger": 1,
+    "weakFifth": 1,
+    "thumbOnBlack": 1,
+    "fiveOnBlack": 1,
+    "stretch": 2,
+    "smallSpan": 1,
+    "largeSpan": 1,
+    "beyondPractical": 10,
+    "threeToFour": 1,
+    "fourOnBlack": 1,
+    "thumbPassing": 1,
+    "hop": 10,
+    "repeatedNoteSameFinger": 1,
+    "repeatedNoteFingerChange": 1,
+    "chordStretch": 2,
+    "chordSmallSpan": 2,
+    "chordLargeSpan": 2,
+    "chordBeyondPractical": 30,
+    "handPositionShift": 1,
+    "positionChangeCount": 1,
+    "positionChangeSize": 1,
+    "threeFourFive": 1,
+    "sameFingerPivot": 1,
+    "template": 2
+  }
+}

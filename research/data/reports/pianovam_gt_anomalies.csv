@@ -1,0 +1,29 @@
+dataset,piece,annotation,note_id,line,severity,check,message
+pianovam_gt,2024-02-15_20-07-54,0,75,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-1, F4=-3"
+pianovam_gt,2024-02-15_20-07-54,0,82,0,info,held_key_finger_reuse,finger 4 strikes G#5 while note 81 (G5) is still held for 0.041s
+pianovam_gt,2024-02-15_20-07-54,0,101,0,info,held_key_finger_reuse,finger 4 strikes G5 while note 100 (F#5) is still held for 0.032s
+pianovam_gt,2024-02-15_20-07-54,0,105,0,info,held_key_finger_reuse,finger 4 strikes E5 while note 104 (F5) is still held for 0.098s
+pianovam_gt,2024-02-15_21-40-43,0,13,0,info,held_key_finger_reuse,finger 4 strikes Eb5 while note 12 (F5) is still held for 0.057s
+pianovam_gt,2024-02-15_21-40-43,0,33,0,info,held_key_finger_reuse,finger 4 strikes C5 while note 32 (C#5) is still held for 0.001s
+pianovam_gt,2024-02-15_21-40-43,0,128,0,info,held_key_finger_reuse,finger 1 strikes C#4 while note 122 (F#4) is still held for 3.203s
+pianovam_gt,2024-02-15_21-57-38,0,143,0,info,held_key_finger_reuse,finger 1 strikes G6 while note 142 (F6) is still held for 0.019s
+pianovam_gt,2024-02-15_21-57-38,0,146,0,info,held_key_finger_reuse,finger 1 strikes C6 while note 145 (C#6) is still held for 0.096s
+pianovam_gt,2024-02-15_21-57-38,0,147,0,info,held_key_finger_reuse,finger 1 strikes B5 while note 145 (C#6) is still held for 0.081s
+pianovam_gt,2024-02-17_21-44-37,0,32,0,info,held_key_finger_reuse,finger 5 strikes D6 while note 31 (C6) is still held for 0.159s
+pianovam_gt,2024-02-17_22-33-45,0,85,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#3=-1, F#3=-2"
+pianovam_gt,2024-02-17_22-33-45,0,154,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#3=5, G#4=1"
+pianovam_gt,2024-02-17_22-33-45,0,269,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=5, C5=4"
+pianovam_gt,2024-02-17_22-33-45,0,295,0,info,held_key_finger_reuse,finger 1 strikes C#4 while note 294 (Eb4) is still held for 0.408s
+pianovam_gt,2024-02-22_11-58-09,0,92,0,info,held_key_finger_reuse,finger 5 strikes G2 while note 91 (F2) is still held for 0.062s
+pianovam_gt,2024-02-22_11-58-09,0,135,0,info,held_key_finger_reuse,finger 1 strikes B3 while note 134 (A3) is still held for 0.049s
+pianovam_gt,2024-02-22_11-58-09,0,144,0,info,held_key_finger_reuse,finger 1 strikes A3 while note 143 (B3) is still held for 0.104s
+pianovam_gt,2024-02-22_11-58-09,0,34,0,info,held_key_finger_reuse,finger 5 strikes G5 while note 31 (A5) is still held for 0.515s
+pianovam_gt,2024-04-08_22-49-18,0,27,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B3=5, E4=3"
+pianovam_gt,2024-09-02_14-10-41,0,124,0,info,held_key_finger_reuse,finger 4 strikes F3 while note 123 (E3) is still held for 0.208s
+pianovam_gt,2024-09-04_19-52-57,0,109,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G3=-1, F4=-5"
+pianovam_gt,2024-09-04_19-52-57,0,59,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_gt,2024-09-04_19-52-57,0,77,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_gt,2024-09-04_19-52-57,0,122,0,info,held_key_finger_reuse,finger 4 strikes G5 while note 121 (G#5) is still held for 0.015s
+pianovam_gt,2024-09-04_19-52-57,0,139,0,info,held_key_finger_reuse,finger 1 strikes F4 while note 138 (G4) is still held for 0.113s
+pianovam_gt,2024-09-05_13-25-10,0,107,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D4=-1, F#4=-3"
+pianovam_gt,2024-09-05_13-25-10,0,108,0,info,held_key_finger_reuse,finger 5 strikes B3 while note 105 (Bb3) is still held for 0.362s

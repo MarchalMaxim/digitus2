@@ -1,0 +1,101 @@
+{
+ "table2": {
+  "ours": {
+   "Result_FHMM1/official": [
+    61.653,
+    68.336,
+    82.754,
+    74.016
+   ],
+   "Result_FHMM1/press": [
+    61.758,
+    68.336,
+    82.754,
+    74.016
+   ],
+   "Result_FHMM2/official": [
+    64.269,
+    70.809,
+    85.258,
+    77.574
+   ],
+   "Result_FHMM2/press": [
+    64.395,
+    70.809,
+    85.258,
+    77.574
+   ],
+   "Result_FHMM3/official": [
+    64.479,
+    71.003,
+    85.49,
+    77.779
+   ],
+   "Result_FHMM3/press": [
+    64.615,
+    71.003,
+    85.49,
+    77.779
+   ],
+   "Human/official": [
+    71.369,
+    79.133,
+    90.8,
+    84.258
+   ],
+   "Human/press": [
+    71.596,
+    79.133,
+    90.8,
+    84.258
+   ]
+  },
+  "paper": {
+   "Result_FHMM1": [
+    61.7,
+    68.3,
+    82.8,
+    74.0
+   ],
+   "Result_FHMM2": [
+    64.3,
+    70.8,
+    85.3,
+    77.6
+   ],
+   "Result_FHMM3": [
+    64.5,
+    71.0,
+    85.5,
+    77.8
+   ],
+   "Human": [
+    71.4,
+    79.1,
+    90.8,
+    84.3
+   ]
+  },
+  "rounds_to_paper": {
+   "Result_FHMM1/official": true,
+   "Result_FHMM1/press": false,
+   "Result_FHMM2/official": true,
+   "Result_FHMM2/press": false,
+   "Result_FHMM3/official": true,
+   "Result_FHMM3/press": false,
+   "Human/official": true,
+   "Human/press": false
+  }
+ },
+ "official_binary": {
+  "compiler": "C:/MinGW/bin/g++.exe",
+  "build_dir": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\data\\_build\\official_eval",
+  "cases": 408,
+  "compared": 408,
+  "max_abs_diff_4metrics": 4.988009592032938e-07,
+  "disagreements": [],
+  "n_disagreements": 0,
+  "simple_match_rate_compared": 408,
+  "simple_match_rate_max_abs_diff": 0.0
+ }
+}

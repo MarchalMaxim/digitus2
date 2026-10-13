@@ -1,0 +1,20 @@
+{
+ "files": {
+  "LICENSE": {
+   "git_blob_sha1": "4cffb6dfd8c53d50b3d3b6b76eab1ef6a36f9266",
+   "sha256": "3ffef0d8d1a3f2bb7d055f165da64d3ca82fb28999737a2b9f48673ba411ed40",
+   "size": 1072
+  },
+  "README.md": {
+   "git_blob_sha1": "36dd8c70bb0907c8d2b360ba3759aeb5b5d23c3b",
+   "sha256": "92d338ef79e72043c216ca58f0be740dc99e027d3a0d99cb6abf88a84dc0cd03",
+   "size": 2743
+  },
+  "official_split.json": {
+   "git_blob_sha1": "166ce146717a281794703fa706b09b8b8f042198",
+   "sha256": "03fb58e464482abbd21278ae0c76a71374c98151fe797365291dc88f52ee3831",
+   "size": 9977
+  }
+ },
+ "source": "ramoneda"
+}

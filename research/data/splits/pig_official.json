@@ -1,0 +1,1425 @@
+{
+ "dataset": "PIG Dataset v1.2 (Nakamura, Saito & Yoshii; README.pdf dated 2022/5/12)",
+ "file_naming": "<piece>-<annotation slot>_fingering.txt; annotator initials per slot in List.csv",
+ "default_split": "nakamura2020",
+ "splits": {
+  "nakamura2020": {
+   "provenance": "E. Nakamura, Y. Saito, K. Yoshii, 'Statistical learning and estimation of piano fingering', Information Sciences 517 (2020) 68-85, arXiv:1904.10237, Sec. 6.1: 'We used the miscellaneous subset for training and used the three composer-specific subsets for testing. In the testing stage, we used the musical notes in the upper and lower staves as the RH and LH parts, respectively.' Table 2: 'The match rates are averaged over the 30 pieces in the test data.'",
+   "verification": "Using the authors' published HMM outputs (statpianofingering.github.io Result_FHMM1-3.zip) against these test files, fingering_eval.metrics (mode='official') reproduces every entry of Table 2 for 1st/2nd/3rd-order HMM and the Human row to the printed precision.",
+   "test": {
+    "pieces": [
+     "001",
+     "002",
+     "003",
+     "004",
+     "005",
+     "006",
+     "007",
+     "008",
+     "009",
+     "010",
+     "011",
+     "012",
+     "013",
+     "014",
+     "015",
+     "016",
+     "017",
+     "018",
+     "019",
+     "020",
+     "021",
+     "022",
+     "023",
+     "024",
+     "025",
+     "026",
+     "027",
+     "028",
+     "029",
+     "030"
+    ],
+    "files": [
+     "001-1_fingering.txt",
+     "001-2_fingering.txt",
+     "001-5_fingering.txt",
+     "001-8_fingering.txt",
+     "002-1_fingering.txt",
+     "002-2_fingering.txt",
+     "002-5_fingering.txt",
+     "002-8_fingering.txt",
+     "003-1_fingering.txt",
+     "003-2_fingering.txt",
+     "003-5_fingering.txt",
+     "003-8_fingering.txt",
+     "004-1_fingering.txt",
+     "004-2_fingering.txt",
+     "004-5_fingering.txt",
+     "004-8_fingering.txt",
+     "005-1_fingering.txt",
+     "005-2_fingering.txt",
+     "005-5_fingering.txt",
+     "005-8_fingering.txt",
+     "006-1_fingering.txt",
+     "006-2_fingering.txt",
+     "006-5_fingering.txt",
+     "006-8_fingering.txt",
+     "007-1_fingering.txt",
+     "007-2_fingering.txt",
+     "007-5_fingering.txt",
+     "007-8_fingering.txt",
+     "008-1_fingering.txt",
+     "008-2_fingering.txt",
+     "008-5_fingering.txt",
+     "008-8_fingering.txt",
+     "009-1_fingering.txt",
+     "009-2_fingering.txt",
+     "009-5_fingering.txt",
+     "009-8_fingering.txt",
+     "010-1_fingering.txt",
+     "010-2_fingering.txt",
+     "010-5_fingering.txt",
+     "010-8_fingering.txt",
+     "011-1_fingering.txt",
+     "011-3_fingering.txt",
+     "011-4_fingering.txt",
+     "011-5_fingering.txt",
+     "011-6_fingering.txt",
+     "011-7_fingering.txt",
+     "012-1_fingering.txt",
+     "012-3_fingering.txt",
+     "012-4_fingering.txt",
+     "012-5_fingering.txt",
+     "012-6_fingering.txt",
+     "012-7_fingering.txt",
+     "013-1_fingering.txt",
+     "013-3_fingering.txt",
+     "013-4_fingering.txt",
+     "013-5_fingering.txt",
+     "013-6_fingering.txt",
+     "013-7_fingering.txt",
+     "014-1_fingering.txt",
+     "014-3_fingering.txt",
+     "014-4_fingering.txt",
+     "014-5_fingering.txt",
+     "014-6_fingering.txt",
+     "014-7_fingering.txt",
+     "015-1_fingering.txt",
+     "015-3_fingering.txt",
+     "015-4_fingering.txt",
+     "015-5_fingering.txt",
+     "015-6_fingering.txt",
+     "015-7_fingering.txt",
+     "016-1_fingering.txt",
+     "016-3_fingering.txt",
+     "016-4_fingering.txt",
+     "016-5_fingering.txt",
+     "016-6_fingering.txt",
+     "016-7_fingering.txt",
+     "017-1_fingering.txt",
+     "017-3_fingering.txt",
+     "017-4_fingering.txt",
+     "017-5_fingering.txt",
+     "017-6_fingering.txt",
+     "017-7_fingering.txt",
+     "018-1_fingering.txt",
+     "018-3_fingering.txt",
+     "018-4_fingering.txt",
+     "018-5_fingering.txt",
+     "018-6_fingering.txt",
+     "018-7_fingering.txt",
+     "019-1_fingering.txt",
+     "019-3_fingering.txt",
+     "019-4_fingering.txt",
+     "019-5_fingering.txt",
+     "019-6_fingering.txt",
+     "019-7_fingering.txt",
+     "020-1_fingering.txt",
+     "020-3_fingering.txt",
+     "020-4_fingering.txt",
+     "020-5_fingering.txt",
+     "020-6_fingering.txt",
+     "020-7_fingering.txt",
+     "021-1_fingering.txt",
+     "021-3_fingering.txt",
+     "021-4_fingering.txt",
+     "021-5_fingering.txt",
+     "021-6_fingering.txt",
+     "022-1_fingering.txt",
+     "022-3_fingering.txt",
+     "022-4_fingering.txt",
+     "022-5_fingering.txt",
+     "022-6_fingering.txt",
+     "023-1_fingering.txt",
+     "023-3_fingering.txt",
+     "023-4_fingering.txt",
+     "023-5_fingering.txt",
+     "023-6_fingering.txt",
+     "024-1_fingering.txt",
+     "024-3_fingering.txt",
+     "024-4_fingering.txt",
+     "024-5_fingering.txt",
+     "024-6_fingering.txt",
+     "025-1_fingering.txt",
+     "025-3_fingering.txt",
+     "025-4_fingering.txt",
+     "025-5_fingering.txt",
+     "025-6_fingering.txt",
+     "026-1_fingering.txt",
+     "026-3_fingering.txt",
+     "026-4_fingering.txt",
+     "026-5_fingering.txt",
+     "026-6_fingering.txt",
+     "027-1_fingering.txt",
+     "027-3_fingering.txt",
+     "027-4_fingering.txt",
+     "027-5_fingering.txt",
+     "027-6_fingering.txt",
+     "028-1_fingering.txt",
+     "028-3_fingering.txt",
+     "028-4_fingering.txt",
+     "028-5_fingering.txt",
+     "028-6_fingering.txt",
+     "029-1_fingering.txt",
+     "029-3_fingering.txt",
+     "029-4_fingering.txt",
+     "029-5_fingering.txt",
+     "029-6_fingering.txt",
+     "030-1_fingering.txt",
+     "030-3_fingering.txt",
+     "030-4_fingering.txt",
+     "030-5_fingering.txt",
+     "030-6_fingering.txt"
+    ],
+    "description": "composer-specific subsets: Bach 001-010 (4 fingerings each), Mozart 011-020 (6 each), Chopin 021-030 (5 each) = 150 fingerings"
+   },
+   "train": {
+    "pieces": [
+     "031",
+     "032",
+     "033",
+     "034",
+     "035",
+     "036",
+     "037",
+     "038",
+     "039",
+     "040",
+     "041",
+     "042",
+     "043",
+     "044",
+     "045",
+     "046",
+     "047",
+     "048",
+     "049",
+     "050",
+     "051",
+     "052",
+     "053",
+     "054",
+     "055",
+     "056",
+     "057",
+     "058",
+     "059",
+     "060",
+     "061",
+     "062",
+     "063",
+     "064",
+     "065",
+     "066",
+     "067",
+     "068",
+     "069",
+     "070",
+     "071",
+     "072",
+     "073",
+     "074",
+     "075",
+     "076",
+     "077",
+     "078",
+     "079",
+     "080",
+     "081",
+     "082",
+     "083",
+     "084",
+     "085",
+     "086",
+     "087",
+     "088",
+     "089",
+     "090",
+     "091",
+     "092",
+     "093",
+     "094",
+     "095",
+     "096",
+     "097",
+     "098",
+     "099",
+     "100",
+     "101",
+     "102",
+     "103",
+     "104",
+     "105",
+     "106",
+     "107",
+     "108",
+     "109",
+     "110",
+     "111",
+     "112",
+     "113",
+     "114",
+     "115",
+     "116",
+     "117",
+     "118",
+     "119",
+     "120",
+     "121",
+     "122",
+     "123",
+     "124",
+     "125",
+     "126",
+     "127",
+     "128",
+     "129",
+     "130",
+     "131",
+     "132",
+     "133",
+     "134",
+     "135",
+     "136",
+     "137",
+     "138",
+     "139",
+     "140",
+     "141",
+     "142",
+     "143",
+     "144",
+     "145",
+     "146",
+     "147",
+     "148",
+     "149",
+     "150"
+    ],
+    "files": [
+     "031-1_fingering.txt",
+     "032-2_fingering.txt",
+     "032-3_fingering.txt",
+     "033-1_fingering.txt",
+     "034-4_fingering.txt",
+     "035-1_fingering.txt",
+     "036-1_fingering.txt",
+     "037-1_fingering.txt",
+     "038-1_fingering.txt",
+     "039-1_fingering.txt",
+     "040-1_fingering.txt",
+     "041-1_fingering.txt",
+     "042-1_fingering.txt",
+     "043-1_fingering.txt",
+     "043-2_fingering.txt",
+     "044-1_fingering.txt",
+     "045-1_fingering.txt",
+     "045-2_fingering.txt",
+     "046-1_fingering.txt",
+     "046-2_fingering.txt",
+     "047-1_fingering.txt",
+     "047-2_fingering.txt",
+     "048-1_fingering.txt",
+     "048-2_fingering.txt",
+     "049-1_fingering.txt",
+     "049-2_fingering.txt",
+     "050-1_fingering.txt",
+     "050-2_fingering.txt",
+     "051-1_fingering.txt",
+     "052-1_fingering.txt",
+     "053-1_fingering.txt",
+     "054-1_fingering.txt",
+     "055-1_fingering.txt",
+     "056-1_fingering.txt",
+     "057-1_fingering.txt",
+     "058-1_fingering.txt",
+     "059-1_fingering.txt",
+     "060-1_fingering.txt",
+     "061-1_fingering.txt",
+     "061-2_fingering.txt",
+     "062-1_fingering.txt",
+     "062-2_fingering.txt",
+     "063-1_fingering.txt",
+     "063-2_fingering.txt",
+     "064-1_fingering.txt",
+     "064-2_fingering.txt",
+     "065-1_fingering.txt",
+     "065-2_fingering.txt",
+     "066-1_fingering.txt",
+     "066-2_fingering.txt",
+     "067-1_fingering.txt",
+     "067-2_fingering.txt",
+     "068-1_fingering.txt",
+     "068-2_fingering.txt",
+     "069-1_fingering.txt",
+     "069-2_fingering.txt",
+     "070-1_fingering.txt",
+     "070-2_fingering.txt",
+     "071-1_fingering.txt",
+     "071-2_fingering.txt",
+     "072-1_fingering.txt",
+     "073-1_fingering.txt",
+     "074-1_fingering.txt",
+     "074-2_fingering.txt",
+     "075-1_fingering.txt",
+     "076-1_fingering.txt",
+     "076-2_fingering.txt",
+     "077-1_fingering.txt",
+     "077-2_fingering.txt",
+     "078-1_fingering.txt",
+     "079-1_fingering.txt",
+     "079-2_fingering.txt",
+     "080-1_fingering.txt",
+     "081-1_fingering.txt",
+     "082-1_fingering.txt",
+     "083-1_fingering.txt",
+     "084-1_fingering.txt",
+     "085-1_fingering.txt",
+     "086-1_fingering.txt",
+     "087-1_fingering.txt",
+     "088-1_fingering.txt",
+     "089-1_fingering.txt",
+     "090-1_fingering.txt",
+     "091-1_fingering.txt",
+     "092-1_fingering.txt",
+     "093-1_fingering.txt",
+     "094-1_fingering.txt",
+     "095-1_fingering.txt",
+     "096-1_fingering.txt",
+     "097-1_fingering.txt",
+     "098-1_fingering.txt",
+     "099-1_fingering.txt",
+     "100-1_fingering.txt",
+     "101-1_fingering.txt",
+     "102-1_fingering.txt",
+     "103-1_fingering.txt",
+     "104-1_fingering.txt",
+     "105-1_fingering.txt",
+     "106-1_fingering.txt",
+     "107-1_fingering.txt",
+     "108-1_fingering.txt",
+     "109-1_fingering.txt",
+     "110-1_fingering.txt",
+     "111-1_fingering.txt",
+     "112-1_fingering.txt",
+     "113-1_fingering.txt",
+     "113-2_fingering.txt",
+     "114-1_fingering.txt",
+     "115-1_fingering.txt",
+     "115-2_fingering.txt",
+     "116-1_fingering.txt",
+     "117-1_fingering.txt",
+     "118-1_fingering.txt",
+     "119-1_fingering.txt",
+     "120-1_fingering.txt",
+     "121-1_fingering.txt",
+     "121-2_fingering.txt",
+     "122-1_fingering.txt",
+     "122-2_fingering.txt",
+     "123-1_fingering.txt",
+     "123-2_fingering.txt",
+     "124-1_fingering.txt",
+     "124-2_fingering.txt",
+     "125-1_fingering.txt",
+     "125-2_fingering.txt",
+     "126-1_fingering.txt",
+     "126-2_fingering.txt",
+     "127-1_fingering.txt",
+     "127-2_fingering.txt",
+     "128-1_fingering.txt",
+     "128-2_fingering.txt",
+     "129-1_fingering.txt",
+     "129-2_fingering.txt",
+     "130-1_fingering.txt",
+     "130-2_fingering.txt",
+     "131-1_fingering.txt",
+     "131-2_fingering.txt",
+     "132-1_fingering.txt",
+     "132-2_fingering.txt",
+     "133-1_fingering.txt",
+     "134-1_fingering.txt",
+     "135-1_fingering.txt",
+     "136-1_fingering.txt",
+     "137-1_fingering.txt",
+     "138-1_fingering.txt",
+     "139-1_fingering.txt",
+     "140-1_fingering.txt",
+     "140-2_fingering.txt",
+     "141-1_fingering.txt",
+     "142-1_fingering.txt",
+     "142-2_fingering.txt",
+     "143-1_fingering.txt",
+     "144-1_fingering.txt",
+     "145-1_fingering.txt",
+     "146-1_fingering.txt",
+     "147-1_fingering.txt",
+     "148-1_fingering.txt",
+     "149-1_fingering.txt",
+     "150-1_fingering.txt"
+    ],
+    "description": "miscellaneous subset 031-150 = 159 fingerings (no validation set is defined by the paper)"
+   }
+  },
+  "ramoneda2022": {
+   "provenance": "P. Ramoneda, D. Jeong, E. Nakamura, X. Serra, M. Miron, 'Automatic Piano Fingering from Partially Annotated Scores using Autoregressive Neural Networks', ACM Multimedia 2022 (ArGNN/ArLSTM). File PianoFingeringDataset_v1.02/official_split.json in https://github.com/PRamoneda/Automatic-Piano-Fingering at commit d0d2f433c926be5e89540cbafe38bf43820ad2d2 (MIT).",
+   "notes": "train+val = the 159 miscellaneous-subset files (130 train / 29 val, val is one annotation of 29 pieces); test = 130 of the 150 composer-subset files: the 20 annotations by annotator 'EF' (Mozart slot 7, Chopin slot 3) are omitted (reason undocumented). 'test_input' lists 30 '<piece>-0' input files that are not part of PIG.",
+   "train": {
+    "files": [
+     "031-1_fingering.txt",
+     "032-2_fingering.txt",
+     "032-3_fingering.txt",
+     "033-1_fingering.txt",
+     "034-4_fingering.txt",
+     "035-1_fingering.txt",
+     "036-1_fingering.txt",
+     "037-1_fingering.txt",
+     "038-1_fingering.txt",
+     "039-1_fingering.txt",
+     "040-1_fingering.txt",
+     "041-1_fingering.txt",
+     "042-1_fingering.txt",
+     "043-1_fingering.txt",
+     "043-2_fingering.txt",
+     "044-1_fingering.txt",
+     "045-1_fingering.txt",
+     "045-2_fingering.txt",
+     "046-1_fingering.txt",
+     "046-2_fingering.txt",
+     "047-1_fingering.txt",
+     "047-2_fingering.txt",
+     "048-1_fingering.txt",
+     "048-2_fingering.txt",
+     "049-1_fingering.txt",
+     "050-1_fingering.txt",
+     "050-2_fingering.txt",
+     "051-1_fingering.txt",
+     "052-1_fingering.txt",
+     "053-1_fingering.txt",
+     "054-1_fingering.txt",
+     "055-1_fingering.txt",
+     "056-1_fingering.txt",
+     "057-1_fingering.txt",
+     "058-1_fingering.txt",
+     "059-1_fingering.txt",
+     "060-1_fingering.txt",
+     "061-1_fingering.txt",
+     "061-2_fingering.txt",
+     "062-1_fingering.txt",
+     "062-2_fingering.txt",
+     "063-1_fingering.txt",
+     "063-2_fingering.txt",
+     "064-1_fingering.txt",
+     "064-2_fingering.txt",
+     "065-1_fingering.txt",
+     "065-2_fingering.txt",
+     "066-1_fingering.txt",
+     "066-2_fingering.txt",
+     "067-1_fingering.txt",
+     "067-2_fingering.txt",
+     "068-1_fingering.txt",
+     "068-2_fingering.txt",
+     "069-1_fingering.txt",
+     "069-2_fingering.txt",
+     "070-1_fingering.txt",
+     "070-2_fingering.txt",
+     "071-1_fingering.txt",
+     "071-2_fingering.txt",
+     "072-1_fingering.txt",
+     "074-1_fingering.txt",
+     "075-1_fingering.txt",
+     "076-1_fingering.txt",
+     "077-1_fingering.txt",
+     "078-1_fingering.txt",
+     "079-1_fingering.txt",
+     "081-1_fingering.txt",
+     "082-1_fingering.txt",
+     "085-1_fingering.txt",
+     "086-1_fingering.txt",
+     "087-1_fingering.txt",
+     "088-1_fingering.txt",
+     "089-1_fingering.txt",
+     "090-1_fingering.txt",
+     "091-1_fingering.txt",
+     "092-1_fingering.txt",
+     "093-1_fingering.txt",
+     "094-1_fingering.txt",
+     "095-1_fingering.txt",
+     "096-1_fingering.txt",
+     "097-1_fingering.txt",
+     "098-1_fingering.txt",
+     "099-1_fingering.txt",
+     "100-1_fingering.txt",
+     "101-1_fingering.txt",
+     "102-1_fingering.txt",
+     "104-1_fingering.txt",
+     "106-1_fingering.txt",
+     "107-1_fingering.txt",
+     "112-1_fingering.txt",
+     "113-1_fingering.txt",
+     "114-1_fingering.txt",
+     "115-1_fingering.txt",
+     "118-1_fingering.txt",
+     "120-1_fingering.txt",
+     "121-1_fingering.txt",
+     "121-2_fingering.txt",
+     "122-1_fingering.txt",
+     "122-2_fingering.txt",
+     "123-1_fingering.txt",
+     "123-2_fingering.txt",
+     "124-1_fingering.txt",
+     "124-2_fingering.txt",
+     "125-1_fingering.txt",
+     "125-2_fingering.txt",
+     "126-1_fingering.txt",
+     "126-2_fingering.txt",
+     "127-1_fingering.txt",
+     "127-2_fingering.txt",
+     "128-1_fingering.txt",
+     "128-2_fingering.txt",
+     "129-1_fingering.txt",
+     "129-2_fingering.txt",
+     "130-1_fingering.txt",
+     "130-2_fingering.txt",
+     "131-1_fingering.txt",
+     "132-1_fingering.txt",
+     "133-1_fingering.txt",
+     "134-1_fingering.txt",
+     "135-1_fingering.txt",
+     "138-1_fingering.txt",
+     "139-1_fingering.txt",
+     "140-1_fingering.txt",
+     "140-2_fingering.txt",
+     "141-1_fingering.txt",
+     "142-1_fingering.txt",
+     "142-2_fingering.txt",
+     "143-1_fingering.txt",
+     "146-1_fingering.txt",
+     "147-1_fingering.txt"
+    ]
+   },
+   "val": {
+    "files": [
+     "049-2_fingering.txt",
+     "073-1_fingering.txt",
+     "074-2_fingering.txt",
+     "076-2_fingering.txt",
+     "077-2_fingering.txt",
+     "079-2_fingering.txt",
+     "080-1_fingering.txt",
+     "083-1_fingering.txt",
+     "084-1_fingering.txt",
+     "103-1_fingering.txt",
+     "105-1_fingering.txt",
+     "108-1_fingering.txt",
+     "109-1_fingering.txt",
+     "110-1_fingering.txt",
+     "111-1_fingering.txt",
+     "113-2_fingering.txt",
+     "115-2_fingering.txt",
+     "116-1_fingering.txt",
+     "117-1_fingering.txt",
+     "119-1_fingering.txt",
+     "131-2_fingering.txt",
+     "132-2_fingering.txt",
+     "136-1_fingering.txt",
+     "137-1_fingering.txt",
+     "144-1_fingering.txt",
+     "145-1_fingering.txt",
+     "148-1_fingering.txt",
+     "149-1_fingering.txt",
+     "150-1_fingering.txt"
+    ]
+   },
+   "test": {
+    "files": [
+     "001-1_fingering.txt",
+     "001-2_fingering.txt",
+     "001-5_fingering.txt",
+     "001-8_fingering.txt",
+     "002-1_fingering.txt",
+     "002-2_fingering.txt",
+     "002-5_fingering.txt",
+     "002-8_fingering.txt",
+     "003-1_fingering.txt",
+     "003-2_fingering.txt",
+     "003-5_fingering.txt",
+     "003-8_fingering.txt",
+     "004-1_fingering.txt",
+     "004-2_fingering.txt",
+     "004-5_fingering.txt",
+     "004-8_fingering.txt",
+     "005-1_fingering.txt",
+     "005-2_fingering.txt",
+     "005-5_fingering.txt",
+     "005-8_fingering.txt",
+     "006-1_fingering.txt",
+     "006-2_fingering.txt",
+     "006-5_fingering.txt",
+     "006-8_fingering.txt",
+     "007-1_fingering.txt",
+     "007-2_fingering.txt",
+     "007-5_fingering.txt",
+     "007-8_fingering.txt",
+     "008-1_fingering.txt",
+     "008-2_fingering.txt",
+     "008-5_fingering.txt",
+     "008-8_fingering.txt",
+     "009-1_fingering.txt",
+     "009-2_fingering.txt",
+     "009-5_fingering.txt",
+     "009-8_fingering.txt",
+     "010-1_fingering.txt",
+     "010-2_fingering.txt",
+     "010-5_fingering.txt",
+     "010-8_fingering.txt",
+     "011-1_fingering.txt",
+     "011-3_fingering.txt",
+     "011-4_fingering.txt",
+     "011-5_fingering.txt",
+     "011-6_fingering.txt",
+     "012-1_fingering.txt",
+     "012-3_fingering.txt",
+     "012-4_fingering.txt",
+     "012-5_fingering.txt",
+     "012-6_fingering.txt",
+     "013-1_fingering.txt",
+     "013-3_fingering.txt",
+     "013-4_fingering.txt",
+     "013-5_fingering.txt",
+     "013-6_fingering.txt",
+     "014-1_fingering.txt",
+     "014-3_fingering.txt",
+     "014-4_fingering.txt",
+     "014-5_fingering.txt",
+     "014-6_fingering.txt",
+     "015-1_fingering.txt",
+     "015-3_fingering.txt",
+     "015-4_fingering.txt",
+     "015-5_fingering.txt",
+     "015-6_fingering.txt",
+     "016-1_fingering.txt",
+     "016-3_fingering.txt",
+     "016-4_fingering.txt",
+     "016-5_fingering.txt",
+     "016-6_fingering.txt",
+     "017-1_fingering.txt",
+     "017-3_fingering.txt",
+     "017-4_fingering.txt",
+     "017-5_fingering.txt",
+     "017-6_fingering.txt",
+     "018-1_fingering.txt",
+     "018-3_fingering.txt",
+     "018-4_fingering.txt",
+     "018-5_fingering.txt",
+     "018-6_fingering.txt",
+     "019-1_fingering.txt",
+     "019-3_fingering.txt",
+     "019-4_fingering.txt",
+     "019-5_fingering.txt",
+     "019-6_fingering.txt",
+     "020-1_fingering.txt",
+     "020-3_fingering.txt",
+     "020-4_fingering.txt",
+     "020-5_fingering.txt",
+     "020-6_fingering.txt",
+     "021-1_fingering.txt",
+     "021-4_fingering.txt",
+     "021-5_fingering.txt",
+     "021-6_fingering.txt",
+     "022-1_fingering.txt",
+     "022-4_fingering.txt",
+     "022-5_fingering.txt",
+     "022-6_fingering.txt",
+     "023-1_fingering.txt",
+     "023-4_fingering.txt",
+     "023-5_fingering.txt",
+     "023-6_fingering.txt",
+     "024-1_fingering.txt",
+     "024-4_fingering.txt",
+     "024-5_fingering.txt",
+     "024-6_fingering.txt",
+     "025-1_fingering.txt",
+     "025-4_fingering.txt",
+     "025-5_fingering.txt",
+     "025-6_fingering.txt",
+     "026-1_fingering.txt",
+     "026-4_fingering.txt",
+     "026-5_fingering.txt",
+     "026-6_fingering.txt",
+     "027-1_fingering.txt",
+     "027-4_fingering.txt",
+     "027-5_fingering.txt",
+     "027-6_fingering.txt",
+     "028-1_fingering.txt",
+     "028-4_fingering.txt",
+     "028-5_fingering.txt",
+     "028-6_fingering.txt",
+     "029-1_fingering.txt",
+     "029-4_fingering.txt",
+     "029-5_fingering.txt",
+     "029-6_fingering.txt",
+     "030-1_fingering.txt",
+     "030-4_fingering.txt",
+     "030-5_fingering.txt",
+     "030-6_fingering.txt"
+    ]
+   },
+   "test_omitted_vs_nakamura2020": [
+    "011-7_fingering.txt",
+    "012-7_fingering.txt",
+    "013-7_fingering.txt",
+    "014-7_fingering.txt",
+    "015-7_fingering.txt",
+    "016-7_fingering.txt",
+    "017-7_fingering.txt",
+    "018-7_fingering.txt",
+    "019-7_fingering.txt",
+    "020-7_fingering.txt",
+    "021-3_fingering.txt",
+    "022-3_fingering.txt",
+    "023-3_fingering.txt",
+    "024-3_fingering.txt",
+    "025-3_fingering.txt",
+    "026-3_fingering.txt",
+    "027-3_fingering.txt",
+    "028-3_fingering.txt",
+    "029-3_fingering.txt",
+    "030-3_fingering.txt"
+   ]
+  }
+ },
+ "annotators": {
+  "001": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "002": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "003": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "004": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "005": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "006": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "007": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "008": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "009": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "010": {
+   "1": "YI",
+   "2": "ES",
+   "5": "HI",
+   "8": "NH"
+  },
+  "011": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "012": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "013": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "014": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "015": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "016": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "017": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "018": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "019": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "020": {
+   "1": "ES",
+   "3": "HI",
+   "4": "HK",
+   "5": "YI",
+   "6": "YS",
+   "7": "EF"
+  },
+  "021": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "022": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "023": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "024": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "025": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "026": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "027": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "028": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "029": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "030": {
+   "1": "HI",
+   "3": "EF",
+   "4": "YoI",
+   "5": "EN",
+   "6": "ES"
+  },
+  "031": {
+   "1": "TH"
+  },
+  "032": {
+   "2": "EN",
+   "3": "YoI"
+  },
+  "033": {
+   "1": "EN"
+  },
+  "034": {
+   "4": "YI"
+  },
+  "035": {
+   "1": "EN"
+  },
+  "036": {
+   "1": "YoI"
+  },
+  "037": {
+   "1": "YoI"
+  },
+  "038": {
+   "1": "YoI"
+  },
+  "039": {
+   "1": "YoI"
+  },
+  "040": {
+   "1": "YoI"
+  },
+  "041": {
+   "1": "AiY"
+  },
+  "042": {
+   "1": "AiY"
+  },
+  "043": {
+   "1": "YoI",
+   "2": "AiY"
+  },
+  "044": {
+   "1": "EN"
+  },
+  "045": {
+   "1": "YS",
+   "2": "AiY"
+  },
+  "046": {
+   "1": "YS",
+   "2": "AiY"
+  },
+  "047": {
+   "1": "YS",
+   "2": "AiY"
+  },
+  "048": {
+   "1": "YS",
+   "2": "AiY"
+  },
+  "049": {
+   "1": "YS",
+   "2": "EF"
+  },
+  "050": {
+   "1": "YS",
+   "2": "AiY"
+  },
+  "051": {
+   "1": "YS"
+  },
+  "052": {
+   "1": "YS"
+  },
+  "053": {
+   "1": "YS"
+  },
+  "054": {
+   "1": "YS"
+  },
+  "055": {
+   "1": "YS"
+  },
+  "056": {
+   "1": "YS"
+  },
+  "057": {
+   "1": "YS"
+  },
+  "058": {
+   "1": "YS"
+  },
+  "059": {
+   "1": "YS"
+  },
+  "060": {
+   "1": "YS"
+  },
+  "061": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "062": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "063": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "064": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "065": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "066": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "067": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "068": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "069": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "070": {
+   "1": "HI",
+   "2": "YI"
+  },
+  "071": {
+   "1": "HI",
+   "2": "YS"
+  },
+  "072": {
+   "1": "HI"
+  },
+  "073": {
+   "1": "EF"
+  },
+  "074": {
+   "1": "HI",
+   "2": "EF"
+  },
+  "075": {
+   "1": "HI"
+  },
+  "076": {
+   "1": "HI",
+   "2": "EF"
+  },
+  "077": {
+   "1": "HI",
+   "2": "EF"
+  },
+  "078": {
+   "1": "HI"
+  },
+  "079": {
+   "1": "HI",
+   "2": "EF"
+  },
+  "080": {
+   "1": "EF"
+  },
+  "081": {
+   "1": "AiY"
+  },
+  "082": {
+   "1": "HI"
+  },
+  "083": {
+   "1": "EF"
+  },
+  "084": {
+   "1": "EF"
+  },
+  "085": {
+   "1": "AiY"
+  },
+  "086": {
+   "1": "HI"
+  },
+  "087": {
+   "1": "HI"
+  },
+  "088": {
+   "1": "HK"
+  },
+  "089": {
+   "1": "HI"
+  },
+  "090": {
+   "1": "HK"
+  },
+  "091": {
+   "1": "YI"
+  },
+  "092": {
+   "1": "YI"
+  },
+  "093": {
+   "1": "YI"
+  },
+  "094": {
+   "1": "YI"
+  },
+  "095": {
+   "1": "YI"
+  },
+  "096": {
+   "1": "YI"
+  },
+  "097": {
+   "1": "YI"
+  },
+  "098": {
+   "1": "YI"
+  },
+  "099": {
+   "1": "YI"
+  },
+  "100": {
+   "1": "YI"
+  },
+  "101": {
+   "1": "YS"
+  },
+  "102": {
+   "1": "HI"
+  },
+  "103": {
+   "1": "EF"
+  },
+  "104": {
+   "1": "EN"
+  },
+  "105": {
+   "1": "EF"
+  },
+  "106": {
+   "1": "HI"
+  },
+  "107": {
+   "1": "HI"
+  },
+  "108": {
+   "1": "EF"
+  },
+  "109": {
+   "1": "EF"
+  },
+  "110": {
+   "1": "EF"
+  },
+  "111": {
+   "1": "EF"
+  },
+  "112": {
+   "1": "HI"
+  },
+  "113": {
+   "1": "YoI",
+   "2": "EF"
+  },
+  "114": {
+   "1": "HI"
+  },
+  "115": {
+   "1": "YoI",
+   "2": "EF"
+  },
+  "116": {
+   "1": "EF"
+  },
+  "117": {
+   "1": "EF"
+  },
+  "118": {
+   "1": "HK"
+  },
+  "119": {
+   "1": "EF"
+  },
+  "120": {
+   "1": "HI"
+  },
+  "121": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "122": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "123": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "124": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "125": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "126": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "127": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "128": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "129": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "130": {
+   "1": "HK",
+   "2": "YI"
+  },
+  "131": {
+   "1": "YoI",
+   "2": "EF"
+  },
+  "132": {
+   "1": "YoI",
+   "2": "EF"
+  },
+  "133": {
+   "1": "YS"
+  },
+  "134": {
+   "1": "YS"
+  },
+  "135": {
+   "1": "YoI"
+  },
+  "136": {
+   "1": "EF"
+  },
+  "137": {
+   "1": "EF"
+  },
+  "138": {
+   "1": "HI"
+  },
+  "139": {
+   "1": "HI"
+  },
+  "140": {
+   "1": "HI",
+   "2": "YS"
+  },
+  "141": {
+   "1": "HI"
+  },
+  "142": {
+   "1": "HI",
+   "2": "YS"
+  },
+  "143": {
+   "1": "YS"
+  },
+  "144": {
+   "1": "EF"
+  },
+  "145": {
+   "1": "EF"
+  },
+  "146": {
+   "1": "HI"
+  },
+  "147": {
+   "1": "HI"
+  },
+  "148": {
+   "1": "EF"
+  },
+  "149": {
+   "1": "EF"
+  },
+  "150": {
+   "1": "EF"
+  }
+ },
+ "splits_not_obtainable": {
+  "moryossef2019_srivatsan2022": "Srivatsan & Berg-Kirkpatrick, 'Checklist Models for Improved Output Fluency in Piano Fingering Prediction' (ISMIR 2022) state they 'use alternate splits created by [Moryossef et al. 2019] which increase the relative size of the train and validation sets'. Neither paper publishes the file lists and the referenced code (github.com/AmitMY/piano-fingering-extraction) is gone (HTTP 404). Moryossef et al. 2023 (arXiv:2303.03745) instead keep Nakamura's split and move one (unnamed) training piece to a development set."
+ }
+}

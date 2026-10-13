@@ -1,0 +1,2320 @@
+{
+ "files": {
+  "FingeringFiles/001-1_fingering.txt": {
+   "git_blob_sha1": "2f8e8da715bc5403cb2e76b31b6f9b6a3090bf02",
+   "sha256": "cb5c1abd4df8f850f2219ab197c7aeb1d3c5006e579df204e51e81ea279235e2",
+   "size": 15569
+  },
+  "FingeringFiles/001-2_fingering.txt": {
+   "git_blob_sha1": "d66761933e987438894f0b2cd9bc738f5841490d",
+   "sha256": "30567a983597faa16c2c471cf5e549eb53eff1f4197f434fdd312dd8c8a40404",
+   "size": 15559
+  },
+  "FingeringFiles/001-5_fingering.txt": {
+   "git_blob_sha1": "ae9beba761a9426d59fc9046f0e09ee206cabe63",
+   "sha256": "498b423ed3dc902de95e38de7c212c9273bc930392e85ea945e024fccd85a198",
+   "size": 15559
+  },
+  "FingeringFiles/001-8_fingering.txt": {
+   "git_blob_sha1": "28618bd5cf200d82fbabdde982dcee1d3c4a26e8",
+   "sha256": "241544abe3f0f15b7e0afc627137c9dd15b9368585badffb33b884b83b2ae121",
+   "size": 15567
+  },
+  "FingeringFiles/002-1_fingering.txt": {
+   "git_blob_sha1": "018c9133a662f2e769c24acd9869c0a578e1f802",
+   "sha256": "2e43e35c33e0b09070818001cd8fba7cbcc450bee15a08d3e9e570b040f3837b",
+   "size": 19867
+  },
+  "FingeringFiles/002-2_fingering.txt": {
+   "git_blob_sha1": "1cfddc8df281f1398782375ea6203970f0f6a607",
+   "sha256": "da67a90b62d40ec692d21026c317fb45374ce1e1e744c0501761d7ba56b774b7",
+   "size": 19867
+  },
+  "FingeringFiles/002-5_fingering.txt": {
+   "git_blob_sha1": "b1b2b645a7e8eeab55b665ae258eb7b194abfe6d",
+   "sha256": "2b6c126930bd5a6e4cfe169b652025583b78de30bf48b79fb9497c65956547c1",
+   "size": 19867
+  },
+  "FingeringFiles/002-8_fingering.txt": {
+   "git_blob_sha1": "b562b9f44dd48fbb63f9419141f568812367f126",
+   "sha256": "099d5968023be8271c14f4cb30889168b1c07db4a1def6ae139bdb438779f7ef",
+   "size": 19867
+  },
+  "FingeringFiles/003-1_fingering.txt": {
+   "git_blob_sha1": "3a29843218406c446f23dee97b777f2b4761f54d",
+   "sha256": "5fe9a1309d92935b3049e0ab6a0b191e6274ae909a245369d0ebfae8bf4b772b",
+   "size": 14099
+  },
+  "FingeringFiles/003-2_fingering.txt": {
+   "git_blob_sha1": "d8e6de7452487a5f0f6121e17f31c1fe4efd0fe4",
+   "sha256": "510d9eaf18844b9d3a2088193a7e7ae19ab5e833b70c10b8dd31fcb448b3e857",
+   "size": 14069
+  },
+  "FingeringFiles/003-5_fingering.txt": {
+   "git_blob_sha1": "5a480cc203a4a9abbe904ca535ba32449690a0ec",
+   "sha256": "9e3b45cdc20c8777ddb0f357918d8bab2f8e518e3b57b7f7cc5467be5512b8cc",
+   "size": 14074
+  },
+  "FingeringFiles/003-8_fingering.txt": {
+   "git_blob_sha1": "e7ac291bf38456b90467d9a4f4cae4a349363eb0",
+   "sha256": "1679223f54d18fb6c0eda607d15c23f5e953adec609225329d4f504b81ba0f3f",
+   "size": 14080
+  },
+  "FingeringFiles/004-1_fingering.txt": {
+   "git_blob_sha1": "3974388837cbbe1a6dabc93bfe8c3881f6a3f608",
+   "sha256": "7009ba6fbad20d8c66f551b387e1ddc2f96730763923334ddb8d23673fd745eb",
+   "size": 9383
+  },
+  "FingeringFiles/004-2_fingering.txt": {
+   "git_blob_sha1": "5504bc997456e3f51745d7f27470214efd68ecac",
+   "sha256": "80e9c315d4ef4e06a6426a5f95d2de7ea8618796f29bf360e7015e70dad152a3",
+   "size": 9387
+  },
+  "FingeringFiles/004-5_fingering.txt": {
+   "git_blob_sha1": "7c2fa031e8643c1956b48e1f2fa41365b81efd5d",
+   "sha256": "7d6827269484f96cbf9aea8c050c0d083e6618c0c8008c55bc51482adfea5835",
+   "size": 9386
+  },
+  "FingeringFiles/004-8_fingering.txt": {
+   "git_blob_sha1": "4f6e3bbc4317afd8cb41cbaaaefdf3c1b1dde028",
+   "sha256": "6c467270590c65acdeaf3f9e357910f28f64cb7dc1d5df6fc4b39183f32c4203",
+   "size": 9392
+  },
+  "FingeringFiles/005-1_fingering.txt": {
+   "git_blob_sha1": "eebe3a0be88015e9e0695ea5a248531ebce7f7d4",
+   "sha256": "76fa173d47769fa66a4341f52b0f029b78900a9d6846b8ee854877398acaf08d",
+   "size": 10515
+  },
+  "FingeringFiles/005-2_fingering.txt": {
+   "git_blob_sha1": "2d32a0b367702eb0f637ae7c045a83916b69bd56",
+   "sha256": "7cf7ea135d22b06949da754a9cc891535ae8147792e1e5c123a391bdc885ecaf",
+   "size": 10484
+  },
+  "FingeringFiles/005-5_fingering.txt": {
+   "git_blob_sha1": "5b3a23526f30bb102b00aa63e34ca3789b83d57f",
+   "sha256": "6ab1b272922661cff155699e630128b37928dc15ae69dafb97fd4d483223602d",
+   "size": 10495
+  },
+  "FingeringFiles/005-8_fingering.txt": {
+   "git_blob_sha1": "89dd9db9dfd5885253a76adf816e67233940af24",
+   "sha256": "3089867af9d64aa30bec9cc2a5b8f20c2a44f96d14ca90179f9f24b28df45146",
+   "size": 10493
+  },
+  "FingeringFiles/006-1_fingering.txt": {
+   "git_blob_sha1": "ceca64fecbf6a4149bc15a7642e7713a8a2ec91e",
+   "sha256": "c7405cd27f638a4851d0f5a43a05565c225be70694074973b0b63c17b44e30ce",
+   "size": 11535
+  },
+  "FingeringFiles/006-2_fingering.txt": {
+   "git_blob_sha1": "e24b105e566b656ef8a85da5b2f7c570f328a500",
+   "sha256": "408f8ef1315401298cb3f19431b7bc08efdff3627ce8664e630fa3024533eb3c",
+   "size": 11540
+  },
+  "FingeringFiles/006-5_fingering.txt": {
+   "git_blob_sha1": "78e44e2c03f9b2a000f5857d30564219ab81035d",
+   "sha256": "fb44da2c26934e85328baba74fb9751dd2a2d81012e55d2858c2a8afa620996e",
+   "size": 11539
+  },
+  "FingeringFiles/006-8_fingering.txt": {
+   "git_blob_sha1": "0ac44f1f14b9c2b7a7462d2322d74e897deec485",
+   "sha256": "16fa92b5f072afbb8d578e5d8e52209c4190483681e95dd51b94e2fb7b459028",
+   "size": 11535
+  },
+  "FingeringFiles/007-1_fingering.txt": {
+   "git_blob_sha1": "62d30fbc2ef64f339c8bae943728480b081f2550",
+   "sha256": "e67a71013f917b92b97c294578b71fe0e6698aa9ebc2d9255b98c5e9aa326be0",
+   "size": 9298
+  },
+  "FingeringFiles/007-2_fingering.txt": {
+   "git_blob_sha1": "2cbcb516e8c8ccfa57035a108c8debf9b2cb4fe8",
+   "sha256": "af28a9739d6e0d0f9b5077eb8d589ea5d73f1da87abce43ce35d68a42340c0ac",
+   "size": 9292
+  },
+  "FingeringFiles/007-5_fingering.txt": {
+   "git_blob_sha1": "f73c7ee6d4c617adc73369b9fb108fd23e08e28d",
+   "sha256": "a46efc0441d30b8ed94d940f3cd402c35eff4da0e3518cacf9ed5c3a29fc3f9b",
+   "size": 9303
+  },
+  "FingeringFiles/007-8_fingering.txt": {
+   "git_blob_sha1": "95b2b367e85485df9642fca98a0605d99dcd7789",
+   "sha256": "c0d5bfec1cd52ce97dee9a0c128c017c381775ea52618a51e78c5d1f4470677c",
+   "size": 9303
+  },
+  "FingeringFiles/008-1_fingering.txt": {
+   "git_blob_sha1": "fc8e2ae920c4e972d8f6a135cbbe74355801b1d6",
+   "sha256": "db62e81df49a8b878ddfb3f0adaf61586e860cd91056e58f9275d2f88fc470a0",
+   "size": 5667
+  },
+  "FingeringFiles/008-2_fingering.txt": {
+   "git_blob_sha1": "73c435745136fb3c8a26d4f532b050add08cb1e3",
+   "sha256": "fe1ff43c60bf0ee4f203cc694acc46b56b1a87c7e54f5b7e1b024b29ba062044",
+   "size": 5652
+  },
+  "FingeringFiles/008-5_fingering.txt": {
+   "git_blob_sha1": "cb904cf4355a526511fdbbd6ff7a2fa0afede314",
+   "sha256": "577e0c56459f576d73ca6f3c30f75276eef46f25b3de72e630fb08869311a407",
+   "size": 5657
+  },
+  "FingeringFiles/008-8_fingering.txt": {
+   "git_blob_sha1": "26827dd56eb0f51c5a8200b515306eb0bd6e681b",
+   "sha256": "85fd8826f27c8f810475dfa9aa8e494ff5d714cf2bcd10137553187d6f65f760",
+   "size": 5652
+  },
+  "FingeringFiles/009-1_fingering.txt": {
+   "git_blob_sha1": "884cad83d72f7b5e70e91f05242f3daaeaa508c8",
+   "sha256": "6820c20e692cb68843af299ec8647347605b015baadca3bcb91bda39b80e4ef1",
+   "size": 13076
+  },
+  "FingeringFiles/009-2_fingering.txt": {
+   "git_blob_sha1": "212ca3af8ceed0514ff696213970aa60f15ba56a",
+   "sha256": "c45ffea7d0a889facfe4b1412324d2de72734a691b498990f026e96cfb51acd1",
+   "size": 13075
+  },
+  "FingeringFiles/009-5_fingering.txt": {
+   "git_blob_sha1": "5264b695775bc4fd47207c15d86530fe6209bd5f",
+   "sha256": "0660030bc2ce623b01b2c6fd3fb4abcd214a1138b4cedbcacdb82c97b3e21f0d",
+   "size": 13072
+  },
+  "FingeringFiles/009-8_fingering.txt": {
+   "git_blob_sha1": "ed6b17deaafe041a479d2dee786e6ed17c038005",
+   "sha256": "9ce41751790a1954e5f86d6b2d3b543c9985784b26a1880dd469ca1c5cac2314",
+   "size": 13071
+  },
+  "FingeringFiles/010-1_fingering.txt": {
+   "git_blob_sha1": "ab88406168d81a89f9cab2dbb78267791864b8ab",
+   "sha256": "2e72f08ea1527d185fa2a53eb7ec6fbf9be3936252d0676ab7429be9e1ec9dd4",
+   "size": 12827
+  },
+  "FingeringFiles/010-2_fingering.txt": {
+   "git_blob_sha1": "ba24b9a8ad203b046a9403cc7933f489afb5d681",
+   "sha256": "dd867fb0975f5689d4e4145bc5dc6e7bec961f5d06568d2188e46a5299785659",
+   "size": 12821
+  },
+  "FingeringFiles/010-5_fingering.txt": {
+   "git_blob_sha1": "3a8bf027a99b542b4bb7a4f373fc6164d2b35627",
+   "sha256": "1192aff3afed4756637c1425ab2a167fb3ae070420f0155bb422711b3814b666",
+   "size": 12824
+  },
+  "FingeringFiles/010-8_fingering.txt": {
+   "git_blob_sha1": "ee59e75762cd74f8322974098fe7b625eb5ea58b",
+   "sha256": "4bf66f5deef94b072a866fc9a4af5e73ba278f0b365482707ca824df865ae712",
+   "size": 12821
+  },
+  "FingeringFiles/011-1_fingering.txt": {
+   "git_blob_sha1": "0b5db1e521281686aa1476a9010d6f95abd12f84",
+   "sha256": "57979a36950a52eba43c336291bbdd06b72c98768469c55bf830c79e0be53a7e",
+   "size": 8997
+  },
+  "FingeringFiles/011-3_fingering.txt": {
+   "git_blob_sha1": "a7004c39086859a790a8f5ef1ad6e2d3cf461918",
+   "sha256": "bafb8fe6c2ec6cc23d82b462a109adc64ce32f5390822a1cb825a1c9ee4cb571",
+   "size": 8997
+  },
+  "FingeringFiles/011-4_fingering.txt": {
+   "git_blob_sha1": "d19f32aacbb1bf3c59ce44829b49ea1235c5dc39",
+   "sha256": "112e90ae71c16f13f8102f17d4568ddaa10306abadfe75586748b01299f8907d",
+   "size": 8997
+  },
+  "FingeringFiles/011-5_fingering.txt": {
+   "git_blob_sha1": "fb68db0486b6b15288c98dd81c539e313b2318ae",
+   "sha256": "04c18258a9c76294cce0f3df623b31ab6b1fadca7a2093b349fb17c064b063f9",
+   "size": 8997
+  },
+  "FingeringFiles/011-6_fingering.txt": {
+   "git_blob_sha1": "0baba9d3cbdc971908a2afa8220c25eb8956e980",
+   "sha256": "3f0b7c399e71200123e943082380deaa052f60d759ed0967a80453219928a1f0",
+   "size": 8997
+  },
+  "FingeringFiles/011-7_fingering.txt": {
+   "git_blob_sha1": "9732a01977badf6d0ffe64a7bb841810d74d81c6",
+   "sha256": "32d2185083add31aa2609fecd940116f95e88876158035b57f6bf4a3d3b2d967",
+   "size": 8997
+  },
+  "FingeringFiles/012-1_fingering.txt": {
+   "git_blob_sha1": "9b0884993f59cd5c14bea782bdc9c8a6c8722824",
+   "sha256": "aa4e363aaf7777039c7f61395233b23c3e78213c8a136c5797369ffe680afb03",
+   "size": 14661
+  },
+  "FingeringFiles/012-3_fingering.txt": {
+   "git_blob_sha1": "e25d6234574bb4572cd0f353b4abcf7d73414754",
+   "sha256": "4e5a3791771c6df6b5baedb2d039cd4caa33fb5641122c42945d32238db394aa",
+   "size": 14661
+  },
+  "FingeringFiles/012-4_fingering.txt": {
+   "git_blob_sha1": "10c40b1b21d1f670b7c22cb07f3afb8e640cf016",
+   "sha256": "ce8d7f72bb2c4edf38f6486509564380096f4fe97e22158429df91f8749dcebb",
+   "size": 14661
+  },
+  "FingeringFiles/012-5_fingering.txt": {
+   "git_blob_sha1": "2c7f5b36c97e95c01da3dd4137d2d790457f5c51",
+   "sha256": "7dd5a46c4071a8b375430eee6cab9084b83997e0b1b45d634a25f26b2b97d719",
+   "size": 14661
+  },
+  "FingeringFiles/012-6_fingering.txt": {
+   "git_blob_sha1": "97599fbd31dfcffeddcc9c41a1e1bf53aec8e7f3",
+   "sha256": "f8e22e698e5a05aeb61dd95721ef5b3ef6fb7f96158575cd43fd1e2adc9f065a",
+   "size": 14663
+  },
+  "FingeringFiles/012-7_fingering.txt": {
+   "git_blob_sha1": "43ea15d46f67a9b5b4f3d7c35f52f794a151ca81",
+   "sha256": "422103da632f32afae58e53726a6c93a1aea3043f712f2448184b48ae5c4c22b",
+   "size": 14661
+  },
+  "FingeringFiles/013-1_fingering.txt": {
+   "git_blob_sha1": "f988b0e0fc936935609d6a1674d9757b47fd930e",
+   "sha256": "7cb6f613ebc24086e98a04f19d9ac759931d12b80c9a67526a32775f0826f31f",
+   "size": 9454
+  },
+  "FingeringFiles/013-3_fingering.txt": {
+   "git_blob_sha1": "8c0b95b451397e966cb4585d6ed4d132996b9ba2",
+   "sha256": "7a45c78496583cd97b55cfa7930102d6bdcf290d05499e398f8edf2485ff7b0c",
+   "size": 9454
+  },
+  "FingeringFiles/013-4_fingering.txt": {
+   "git_blob_sha1": "d4e2607ba2fd27613caae5631c9618da6687fd5f",
+   "sha256": "5dbef857ba0baf68fd7a03bf907be1d081fecc8d0dffd173d13db6166b00e39c",
+   "size": 9454
+  },
+  "FingeringFiles/013-5_fingering.txt": {
+   "git_blob_sha1": "0192bf377930f51c2adde006a5e9b7cfa71dbd74",
+   "sha256": "f4e2fe228746a738478d7820ec509d4a73e2c7b4d56f423ae5bcc73a5ca61cc8",
+   "size": 9454
+  },
+  "FingeringFiles/013-6_fingering.txt": {
+   "git_blob_sha1": "216714df19207cb0f66a8a401e97a03e91ab7e9d",
+   "sha256": "370a2687c82a16637192e9c20f7878f6264be87ad63bd2f7c3cc5a9bf794a4df",
+   "size": 9458
+  },
+  "FingeringFiles/013-7_fingering.txt": {
+   "git_blob_sha1": "d59cfef9eba3b2e840bd363f9814abf67effc50b",
+   "sha256": "4da9c2242320218d3e8193cb5d8188f82cbb5d0bc21742810aa4ecf8b5241d62",
+   "size": 9456
+  },
+  "FingeringFiles/014-1_fingering.txt": {
+   "git_blob_sha1": "3e512e3f3710adacdd583f185f7cdfed6ddbf0a8",
+   "sha256": "74006d7255acafb0ee073f08c31b219c81b6abb4616b0109ba3852a508978c94",
+   "size": 9569
+  },
+  "FingeringFiles/014-3_fingering.txt": {
+   "git_blob_sha1": "1e16373093efc60f8c67bd553b9d162e12eef2c9",
+   "sha256": "7a221ee1a72b7de7bc30d5a5b20d1c392cf69d9f50bb7c28873b180953af1d94",
+   "size": 9566
+  },
+  "FingeringFiles/014-4_fingering.txt": {
+   "git_blob_sha1": "877a94e0e30f867fd42fd60c529871be9f07ea35",
+   "sha256": "c4919a63e3f2fbf270a045d259b5e9d16bfb9f1694b4774ef6777dff335c1152",
+   "size": 9584
+  },
+  "FingeringFiles/014-5_fingering.txt": {
+   "git_blob_sha1": "6a252018712b514021a36ccc2e91f4893026d02f",
+   "sha256": "1dc14f6cdea337bd632baf064cfe5ad379a82e2b0f268163930744dfb28c811f",
+   "size": 9566
+  },
+  "FingeringFiles/014-6_fingering.txt": {
+   "git_blob_sha1": "6afa741e0cbd9b3e290cd6e7c4e2b3dd501960e7",
+   "sha256": "6212b8d5b3deba803a2d227e1c3d8398fbf17853de4ff319229fd59baa07c7b1",
+   "size": 9570
+  },
+  "FingeringFiles/014-7_fingering.txt": {
+   "git_blob_sha1": "ccaea10722c1cfec29736daf280bc38dcda9b04f",
+   "sha256": "0127215a0335b842c811208b5730d45bbf6fc0ffed5098746b1ebf4abac3a009",
+   "size": 9566
+  },
+  "FingeringFiles/015-1_fingering.txt": {
+   "git_blob_sha1": "2eabc0af6f0c35f7d6c8bdde549c9b14ec72d9c6",
+   "sha256": "cf42d8b19ca796c70b3616d6cd890230e6df25f653538940d151be64bc82b823",
+   "size": 8840
+  },
+  "FingeringFiles/015-3_fingering.txt": {
+   "git_blob_sha1": "faddb65a2df9b70f56849dd3908730cdac951592",
+   "sha256": "77567504f924be06392e8871cc4bcca6b58e65d448d64dd89c27bb1d4899d9b1",
+   "size": 8840
+  },
+  "FingeringFiles/015-4_fingering.txt": {
+   "git_blob_sha1": "4ebd1943b61dbb6a628e6ea2e4c2d5e2e25ab599",
+   "sha256": "49e5e9b02da4fd49d93680cbae70dce92230a9049be9fff86766e28aceb33ae2",
+   "size": 8840
+  },
+  "FingeringFiles/015-5_fingering.txt": {
+   "git_blob_sha1": "2b122af64d5e6e8f9993bcb8cf36f8c94f8a87db",
+   "sha256": "2363fbc88db79050e201597bde4740333bdc9c84bea1de6737fdabec76fbecb5",
+   "size": 8840
+  },
+  "FingeringFiles/015-6_fingering.txt": {
+   "git_blob_sha1": "1f27822af06cb8cd35d67708aa08a5f4f51a94c4",
+   "sha256": "c0031863a824074720149f60d0343ace2ba16c0601bcbbe01b9fdf0ce2c0d410",
+   "size": 8840
+  },
+  "FingeringFiles/015-7_fingering.txt": {
+   "git_blob_sha1": "d38994191d1fdb88982f6887ffba2ebbd8487210",
+   "sha256": "feb97d22eb17885706e159a12f73bb3d9363fa03ecab6078596399b8e1386e01",
+   "size": 8840
+  },
+  "FingeringFiles/016-1_fingering.txt": {
+   "git_blob_sha1": "b68602871a5f987542cfa3af74c49d6c7b43a49b",
+   "sha256": "48ea15880c67ac2ec1257b7a1842f8ee0ea235f1e41ea20180924b4b07cf6685",
+   "size": 5993
+  },
+  "FingeringFiles/016-3_fingering.txt": {
+   "git_blob_sha1": "6fc8db381406a88fcc8b00c4f6a2a311819d198f",
+   "sha256": "74041574e32bc857f0b92e10728573aece7b88ecb4ec2c60415c3964db18890c",
+   "size": 5993
+  },
+  "FingeringFiles/016-4_fingering.txt": {
+   "git_blob_sha1": "cfd9d6271d76f18ad177e0dc461e4cb2f2cf16c3",
+   "sha256": "49b82ef17c551cc2c7c336d7c15d6d302c6aaa8b3cb329e63b5363eb39532881",
+   "size": 5993
+  },
+  "FingeringFiles/016-5_fingering.txt": {
+   "git_blob_sha1": "7d9b4d3052c6b7f365c170262fe22852bd338774",
+   "sha256": "197d3b9e3ab2f335905db956915a2f4b76601129d3fbd3c5defeb85414840926",
+   "size": 5993
+  },
+  "FingeringFiles/016-6_fingering.txt": {
+   "git_blob_sha1": "43b96c8d9df8de3093e3d47f653441184e142cbf",
+   "sha256": "2269e50c926d4f692ce31348fc808e15070d4bed1d793a6c9d61f4d26f3f283c",
+   "size": 5993
+  },
+  "FingeringFiles/016-7_fingering.txt": {
+   "git_blob_sha1": "0417353b215e3a44b33d6d7e4af8b5f544e80402",
+   "sha256": "2a74e869fd0ebde682f07ca8722a5d57ebabb1cc49ac15ec505816ebf4a7dbdf",
+   "size": 5993
+  },
+  "FingeringFiles/017-1_fingering.txt": {
+   "git_blob_sha1": "64755aac628d058c132b7ba8f21dd0f94594a269",
+   "sha256": "ed9b13b07392d853426294f5b50a2283878f11779bc4e68ddebbbcbbf1f2c1e6",
+   "size": 6319
+  },
+  "FingeringFiles/017-3_fingering.txt": {
+   "git_blob_sha1": "a4ea2b64f0cf25c4c3d55fabd122fe1c0640a4fe",
+   "sha256": "78cb6b932b14d4f2a7906a780241b3c3311a81ffbd8b0f331be807d8ceeacfdb",
+   "size": 6319
+  },
+  "FingeringFiles/017-4_fingering.txt": {
+   "git_blob_sha1": "15f28dec244a536877e4bdc8526bb894eadc12d3",
+   "sha256": "44851c8eab296a819d30bcb159b13071de00e8e703741651e12ab4b18675e505",
+   "size": 6319
+  },
+  "FingeringFiles/017-5_fingering.txt": {
+   "git_blob_sha1": "8dd7c712d7900017c2f46fee1ef162577a638eb7",
+   "sha256": "fa107035f7ac73b16744277775eed606fbe8aa2254d81ee0cb5ed06541c05ce1",
+   "size": 6319
+  },
+  "FingeringFiles/017-6_fingering.txt": {
+   "git_blob_sha1": "87c255acd3d88e20c5c4ce75274fb1c6faf9a19b",
+   "sha256": "7263092572311566d60f0642ae8815a2e8375792fccc2528d24e5e1ab92805e2",
+   "size": 6319
+  },
+  "FingeringFiles/017-7_fingering.txt": {
+   "git_blob_sha1": "f4a9362d3e1a4288cf890535002997e6ff1d202b",
+   "sha256": "76a9df6595ed096f674de4c5a5f344606295ff3fa98b1955c8404696f83292f0",
+   "size": 6319
+  },
+  "FingeringFiles/018-1_fingering.txt": {
+   "git_blob_sha1": "cff91227655e0d3280617a1ece4842d626b30788",
+   "sha256": "d1093616ece50ecf5a70b0fdf0f9cd25d6e2b1c0510f4966db66ed050a485997",
+   "size": 4955
+  },
+  "FingeringFiles/018-3_fingering.txt": {
+   "git_blob_sha1": "ee0b1e39869ca44c317503c1ca2506699ca4f889",
+   "sha256": "1e66a0cd8a38f6ba9dd2ef5372e1dccbbfe5240e542b4754f6d4a7cbc4f659c3",
+   "size": 4955
+  },
+  "FingeringFiles/018-4_fingering.txt": {
+   "git_blob_sha1": "13c98404cddd600ccb646a066ac043cec7a8c064",
+   "sha256": "c18a46e595f7d8d33867f1ff4ca350ae63f9309cd0c89958d5ec39a127e4e292",
+   "size": 4957
+  },
+  "FingeringFiles/018-5_fingering.txt": {
+   "git_blob_sha1": "aed12158f575b6b8e51f9a3c7eba797df7492d47",
+   "sha256": "b009754477fa7fbe1fa527d4ae315272940e99e16a44784f54410dc62cd21339",
+   "size": 4955
+  },
+  "FingeringFiles/018-6_fingering.txt": {
+   "git_blob_sha1": "e10dbc7614ac891cfa6c482b35477b97f69e768d",
+   "sha256": "949c8fbff37aa438ae62067e0f6be8ab4fed717b1428a670ef83b94944df150f",
+   "size": 4960
+  },
+  "FingeringFiles/018-7_fingering.txt": {
+   "git_blob_sha1": "616551ff4d149e8c6c86782a8f694491b2e7caa8",
+   "sha256": "f4bfd1be522d88281d37f408185d9b80bdc7b450fed8c22f78b6025099b7f521",
+   "size": 4955
+  },
+  "FingeringFiles/019-1_fingering.txt": {
+   "git_blob_sha1": "17cd7f693040e8cebef8836f67cc5ef87be98b80",
+   "sha256": "520798813e2c1cf733c8fe8bc84d4eb745a0b905196ed3de66597b773487aa69",
+   "size": 6539
+  },
+  "FingeringFiles/019-3_fingering.txt": {
+   "git_blob_sha1": "209144ea5a9cbe0c1a15a6f04964b8a4096ac5d2",
+   "sha256": "f7c457f08a280123f4276f98a9b8bf931550abfacd464c1d3723f934638b5ab0",
+   "size": 6539
+  },
+  "FingeringFiles/019-4_fingering.txt": {
+   "git_blob_sha1": "3e911474f76653f82a83032cea8cf208c64fcfee",
+   "sha256": "01bdb23f2e89ec5b4de3b1f97364cac455bcd703d9a0618e73fc6a2ce8b9a770",
+   "size": 6546
+  },
+  "FingeringFiles/019-5_fingering.txt": {
+   "git_blob_sha1": "a913a9e306f2cb7189aaaa62cc1e85430c73dee5",
+   "sha256": "f8a707148617ac5208437c66916061ce5ce9b2d8478c26cb622023d99d187a64",
+   "size": 6539
+  },
+  "FingeringFiles/019-6_fingering.txt": {
+   "git_blob_sha1": "2f2daf10c670674cf54b4a4578a75460e3b9f271",
+   "sha256": "f08f05a6c8d19614e2ed14c1e631b33ea74543813558dc6dfc0d4f5205b63281",
+   "size": 6547
+  },
+  "FingeringFiles/019-7_fingering.txt": {
+   "git_blob_sha1": "8d537b770082815dacfa7708648e73a319a2ecad",
+   "sha256": "7433b6f4408a9cb44472a798fab30f14aaf61d181890ffb02bf8c53aa01c5b67",
+   "size": 6539
+  },
+  "FingeringFiles/020-1_fingering.txt": {
+   "git_blob_sha1": "1ae35dabbc55c669e23ebd44d1b16be2659535ef",
+   "sha256": "2de3de90117f661d186cd0c96f7e2cd23c466bba03b801bea41409cda2a18a4f",
+   "size": 8433
+  },
+  "FingeringFiles/020-3_fingering.txt": {
+   "git_blob_sha1": "9ec8dbd758bc0c61a8606722d40fe9fb006645bb",
+   "sha256": "2165e8bfae3a6f1100cd4481831fd4c1c01810f55e71611d68f0efe6a2eb728a",
+   "size": 8431
+  },
+  "FingeringFiles/020-4_fingering.txt": {
+   "git_blob_sha1": "a7c0a4a3f486dab6b698cf14a835b4343ff77702",
+   "sha256": "a345299445bccbc1e35b3792c524029debdd2a4b8ed5b58c8e8de65992c98876",
+   "size": 8435
+  },
+  "FingeringFiles/020-5_fingering.txt": {
+   "git_blob_sha1": "e6b3f91d089eeedbc6a848e9afb46b26280aade8",
+   "sha256": "78a3d8e851bb09856fc763cd6943e861cb0ce99b4b0998a9973e5c7eac7ce213",
+   "size": 8429
+  },
+  "FingeringFiles/020-6_fingering.txt": {
+   "git_blob_sha1": "3d11a53bdbd0263bb0594ca9e7f328b6b6f8010f",
+   "sha256": "b715b25487f95d916ca4a7a08740b70559cc36b14e75d8c1e36079d3bf4bf924",
+   "size": 8433
+  },
+  "FingeringFiles/020-7_fingering.txt": {
+   "git_blob_sha1": "0ef9393f76d7e895e457c769d04f7d15027cd4da",
+   "sha256": "e1507f7d68b33b42d6280e3554604a7eb5a1685f99bfe180d54e4f491fb543fe",
+   "size": 8436
+  },
+  "FingeringFiles/021-1_fingering.txt": {
+   "git_blob_sha1": "3031b44c427ddd67a9dd3e93f8d06eaa2b4d5a5f",
+   "sha256": "6230a10db2bc6308f838cf0367a71b0d9a81098b265a2f6d4d4387131b4b4f14",
+   "size": 10367
+  },
+  "FingeringFiles/021-3_fingering.txt": {
+   "git_blob_sha1": "3558962a1c33702bf3e210ed63ea3a795b8d484d",
+   "sha256": "1d1cb9bd2108f5666bed9cf128c3155f3245947b5afc317abaf58013557f90f1",
+   "size": 10373
+  },
+  "FingeringFiles/021-4_fingering.txt": {
+   "git_blob_sha1": "4a680919720d454d3e170e2b7c9d0df7c50d2c65",
+   "sha256": "89b1d7ce2a914b7c9d5eb8b41dca483e9144148b0504f2c46d36235e1e5a87a5",
+   "size": 10367
+  },
+  "FingeringFiles/021-5_fingering.txt": {
+   "git_blob_sha1": "d36ac76a83accc42675a6545933121b5a474b5e9",
+   "sha256": "fd216b96c42a8d99723d0156a04ce975dcd4cf41af6c76d78c52576bf47e334e",
+   "size": 10367
+  },
+  "FingeringFiles/021-6_fingering.txt": {
+   "git_blob_sha1": "532cf4439009b1f96c14a36cfc16b3f33c2ba4cf",
+   "sha256": "277f8fc51276a24f9820c315c20bbe21dea4076eec95b3d2791150861d73b665",
+   "size": 10381
+  },
+  "FingeringFiles/022-1_fingering.txt": {
+   "git_blob_sha1": "f1e785b8fa8db5df7bc90c7683795503897c2515",
+   "sha256": "b86ac52d426c0eceabd2c0490a9947215f567cff4c007fd2c1a8febd9524b1b8",
+   "size": 15218
+  },
+  "FingeringFiles/022-3_fingering.txt": {
+   "git_blob_sha1": "30c4841e842cfcc5e4be6db01b6399e086290e4a",
+   "sha256": "ffef4e8603c6fecff3e441c239af7770941d624de5e1dea14f76097ed1273171",
+   "size": 15225
+  },
+  "FingeringFiles/022-4_fingering.txt": {
+   "git_blob_sha1": "2b496a68a94f761b1baf43d4f293e3518371d1ca",
+   "sha256": "5a9a6058895820f8589472d4e18978e433c7abcb014ccff1d3b9d7c64b4846d7",
+   "size": 15218
+  },
+  "FingeringFiles/022-5_fingering.txt": {
+   "git_blob_sha1": "beebe856a62cd63fae298ed5f7dbc4c5860b2f61",
+   "sha256": "33bca71bdb0afc621b8c27291fc928ddadbeb5909baf3a491d54df2068f23e3a",
+   "size": 15218
+  },
+  "FingeringFiles/022-6_fingering.txt": {
+   "git_blob_sha1": "987af84444f5dbb912b6eab9cb4718ed0b8f78ca",
+   "sha256": "79d59421beb03787896d84b9619a3ef65d7752a613c6fee7b6b7c764d804e21e",
+   "size": 15218
+  },
+  "FingeringFiles/023-1_fingering.txt": {
+   "git_blob_sha1": "5aa3f0720106c05b80db816b514b2ae99e46caf9",
+   "sha256": "4db0495964ec7bb4658d13a71890569ed63c3657885d82776c62538e6daa1c53",
+   "size": 14478
+  },
+  "FingeringFiles/023-3_fingering.txt": {
+   "git_blob_sha1": "7e2329aed148779ce16e512b5d41eefc86194da8",
+   "sha256": "91c818ed177d63d0e8db1fa5542d18da80761ccd3b4dcbd8edfd7281a281eb51",
+   "size": 14480
+  },
+  "FingeringFiles/023-4_fingering.txt": {
+   "git_blob_sha1": "cb1faaf2c60416e91118ad78e44ed40c2cec3128",
+   "sha256": "a7b423196b152c504c13ebaf5561b57ba2cb5105d23af889b71bf318fadb320b",
+   "size": 14478
+  },
+  "FingeringFiles/023-5_fingering.txt": {
+   "git_blob_sha1": "dcb6c8aa005af1d62259486cc0246173f80b9788",
+   "sha256": "cfda83b94d50a34e2d51c1d2bb0572e817dd6d9e5ab6a2f901ade8b4f0d28308",
+   "size": 14478
+  },
+  "FingeringFiles/023-6_fingering.txt": {
+   "git_blob_sha1": "3401c4e3afd8be4399685794cac47b93983e18de",
+   "sha256": "1ef6f70a0d8268c546f48dd64f777ed039f4b37a91a4975a9da6eaf4ed5064ad",
+   "size": 14482
+  },
+  "FingeringFiles/024-1_fingering.txt": {
+   "git_blob_sha1": "17f175c2814d9bf8015ada01abd6c15630ea8f4e",
+   "sha256": "e001011bb66d521ad0740fa745d68981f846fcdb537b06c15ab8c39ad05ee0fa",
+   "size": 9510
+  },
+  "FingeringFiles/024-3_fingering.txt": {
+   "git_blob_sha1": "af7f8d36704c62c803ccf41918ee23880b24a2fc",
+   "sha256": "0ee0d85c0f4654476c26ee33ab5f056b20b7aecda57fb4f9301b8675dac44afd",
+   "size": 9510
+  },
+  "FingeringFiles/024-4_fingering.txt": {
+   "git_blob_sha1": "fde16b22a11b640cb16c596222f521185a4e68a1",
+   "sha256": "57c03583befd486f8dde25ef1dd6b5d8a2e823ecf8423084abbcd25faf84c30c",
+   "size": 9510
+  },
+  "FingeringFiles/024-5_fingering.txt": {
+   "git_blob_sha1": "457e67be6d4314dd6eedb67aab8141be938a8b6d",
+   "sha256": "71f95e49fb98949c1dfd5c0850f2cc3043a72ce9a3486b0a8fb8963c39803a0e",
+   "size": 9510
+  },
+  "FingeringFiles/024-6_fingering.txt": {
+   "git_blob_sha1": "3d298cd0fa912c98d4d6562bdafc060101c39e96",
+   "sha256": "285dede70227535b234804270fbaa33f741b21a96c3f287b0e6d813022d4143e",
+   "size": 9510
+  },
+  "FingeringFiles/025-1_fingering.txt": {
+   "git_blob_sha1": "1370582a01865e6f602c8dcdb049e1560604b851",
+   "sha256": "9dca308f3fb641f0093da35a8c13155737b49b7debeb3901bc0175d442242e27",
+   "size": 13270
+  },
+  "FingeringFiles/025-3_fingering.txt": {
+   "git_blob_sha1": "04683db62dfc888ba10e1573819b922e5e32cbd2",
+   "sha256": "5f51ff072bf57b9cea3678aab0ff1dcd8ae6e9942ad3d597d4469d0af4d8fdfa",
+   "size": 13270
+  },
+  "FingeringFiles/025-4_fingering.txt": {
+   "git_blob_sha1": "b63e02e4ed1fb72f4dacb91218dd079f1cef0458",
+   "sha256": "67556531569cbf345c6cac78330e0892be0b9f1a442a0331a341a6c4ed4e7ae4",
+   "size": 13270
+  },
+  "FingeringFiles/025-5_fingering.txt": {
+   "git_blob_sha1": "bf10359b693028ab264d9ce60f063d5d0ec01fd5",
+   "sha256": "b2ff3e7fd2c86836e8a6f9b81231fbeba5365243a1ba51d165757406ef63b35d",
+   "size": 13270
+  },
+  "FingeringFiles/025-6_fingering.txt": {
+   "git_blob_sha1": "12443acbb12d0542eb92983000314c49ba69a014",
+   "sha256": "9fdf0fbafe89e950bb33a2ab5c5b4f3019c519e19706f7caeaa5337d12c70a4f",
+   "size": 13270
+  },
+  "FingeringFiles/026-1_fingering.txt": {
+   "git_blob_sha1": "0a2c45b9a462e8cb2908045fc538e7a51fc6305c",
+   "sha256": "70026549138f9b0afbb97d9d462a8fe788f0d7a7c4fe2e6cd474c141f300e792",
+   "size": 19278
+  },
+  "FingeringFiles/026-3_fingering.txt": {
+   "git_blob_sha1": "603515644cbb37a182d106319ca98b8356ee37ad",
+   "sha256": "6ae2bf2efb76ebbb7b3e5f4b8be075ad768079b993cbbf7bfb7055f2fd7130fa",
+   "size": 19278
+  },
+  "FingeringFiles/026-4_fingering.txt": {
+   "git_blob_sha1": "cc8f52ca658a3331e68536df677d88bbb9f61d02",
+   "sha256": "81a35a93ad605bbc667b13ac82c542c9413a50eff96811c516b49b8307fe2fb2",
+   "size": 19278
+  },
+  "FingeringFiles/026-5_fingering.txt": {
+   "git_blob_sha1": "ee1c9c817523de35160a6bf9288307d9f6579939",
+   "sha256": "02b813c0060b78dbc5a4951c8dca53b224bf044521a595d90ef115e869209045",
+   "size": 19278
+  },
+  "FingeringFiles/026-6_fingering.txt": {
+   "git_blob_sha1": "1d3248e0debb41c3239048155f660f1b84866efb",
+   "sha256": "a5ac3b63a7b8857f186cd977278a5447e3e248c31c4e5a1e1e9dce46c1009e23",
+   "size": 19278
+  },
+  "FingeringFiles/027-1_fingering.txt": {
+   "git_blob_sha1": "1654ed3eb8f0343f87693d1e21a46d8f3d73a29f",
+   "sha256": "536a6989f3a3647fd7165eb159484343d43b9482af2821cbe6a3e5c2c853dbcd",
+   "size": 11926
+  },
+  "FingeringFiles/027-3_fingering.txt": {
+   "git_blob_sha1": "f829f568f705c916b6e8cec43e3fb26580080eb0",
+   "sha256": "92fc8506ae3d2c140b039a0e4466a657b13e490b5750c46d587ca37c6a0caa7f",
+   "size": 11926
+  },
+  "FingeringFiles/027-4_fingering.txt": {
+   "git_blob_sha1": "3fe4c6dbfba06a42007a5574da65d81d54e4910f",
+   "sha256": "6fd20db37335d69c9724ac7f36f40fbc8831d4adddb3e6d9b3c6d519a3e05242",
+   "size": 11926
+  },
+  "FingeringFiles/027-5_fingering.txt": {
+   "git_blob_sha1": "dfa07e5957f8b219621e2173053c275ed38638a9",
+   "sha256": "63f285a07dd232fa7c3164da09809056d9a12c89962686d3c0d1cc2b758f8fcc",
+   "size": 11926
+  },
+  "FingeringFiles/027-6_fingering.txt": {
+   "git_blob_sha1": "80d148f820df7ed80d64f7588516b96b2e0f2d15",
+   "sha256": "dcf63e5514ddb5882525ff4031c84b78072b6c4e07c8eca9f20675531371f59f",
+   "size": 11926
+  },
+  "FingeringFiles/028-1_fingering.txt": {
+   "git_blob_sha1": "9136154654043f47656be1f4868e007448a0188d",
+   "sha256": "12917bee97080c41d252c80775430f0301cbfd1e63aeb2101c9f692938eac483",
+   "size": 15607
+  },
+  "FingeringFiles/028-3_fingering.txt": {
+   "git_blob_sha1": "9ffcf6d08529f915251d01d60f459b45e2faec46",
+   "sha256": "3b055fd9b9e1cbfd22637ed484fabec65d4ac5262767aac8b9cc9cc9c4c41c0d",
+   "size": 15605
+  },
+  "FingeringFiles/028-4_fingering.txt": {
+   "git_blob_sha1": "c958ea0fb9b30facce648b79214d17e7e467814c",
+   "sha256": "5e60d0f3e458495bb5d36c4903d763514eae18af48c83fbfaa44c0a7a5daecce",
+   "size": 15608
+  },
+  "FingeringFiles/028-5_fingering.txt": {
+   "git_blob_sha1": "1ac8b6ee78401901678f1838e1ea893358a4f37a",
+   "sha256": "2e920b63f00dbdfb26b17e91401ec17af6204e30d1cc69cea3d551f5c765e1ca",
+   "size": 15606
+  },
+  "FingeringFiles/028-6_fingering.txt": {
+   "git_blob_sha1": "1721b0b977696f4a34fe78fb21ff01b13e297086",
+   "sha256": "bd6b76b1f098aa58eac894582b56e74c1e8925da4cbe58ac2f8004b92f7c9de6",
+   "size": 15607
+  },
+  "FingeringFiles/029-1_fingering.txt": {
+   "git_blob_sha1": "f1fb68b123b32b2cc22a448fe5c28d864c65289b",
+   "sha256": "0f27d897e88e59329dd18f6923c411fdd093f4a92cfd9834f94a2c90daf051dd",
+   "size": 12833
+  },
+  "FingeringFiles/029-3_fingering.txt": {
+   "git_blob_sha1": "bf95ca65549bad7c75bc590df2e76bade6afd865",
+   "sha256": "e8870de1bf2d763ad675cd2e83908805ebba96eaa77b2218e4e07241f0adc95e",
+   "size": 12836
+  },
+  "FingeringFiles/029-4_fingering.txt": {
+   "git_blob_sha1": "2588d0e3496c862c7c0c6f37217cf15fc5236868",
+   "sha256": "2e1bcab3100d9344055b941118ebf0503d03b22e9f327d10727b30189d6ab1aa",
+   "size": 12831
+  },
+  "FingeringFiles/029-5_fingering.txt": {
+   "git_blob_sha1": "6f061d9b1c3b1977fb2331eb0554e69a933acc38",
+   "sha256": "41ed3100048b5431135ef4be621355593017124c215d44a44cd1d87c04d648a2",
+   "size": 12833
+  },
+  "FingeringFiles/029-6_fingering.txt": {
+   "git_blob_sha1": "e427120e0231ce2ef2736d63b671ec1f974b75ec",
+   "sha256": "65f44cdfb81ef7e01204eb027b810a3ae88cbb3943f4c80fad0287af23a74e68",
+   "size": 12838
+  },
+  "FingeringFiles/030-1_fingering.txt": {
+   "git_blob_sha1": "df6c33389934f1b4aabb131eedfecea436c6ceab",
+   "sha256": "17660cb3dc35754ab8d7d3376c11154f8a99a2907a3be4e71046775e3d7ba0c2",
+   "size": 11964
+  },
+  "FingeringFiles/030-3_fingering.txt": {
+   "git_blob_sha1": "d2cd1e5d70d977e6bdfef1e7cc1d9a7b9da2f5df",
+   "sha256": "f8a0cf30cd02a455e92cb5ccc9e544c1ef8f6a0a010e1304fcaebb1af71a5226",
+   "size": 11964
+  },
+  "FingeringFiles/030-4_fingering.txt": {
+   "git_blob_sha1": "7ad136a095cf03a6cbbaff03602502120bb1ca34",
+   "sha256": "a052467c79f5774be82445a0a70b9ad7522474c8a94925edafaffffa46ea8cef",
+   "size": 11983
+  },
+  "FingeringFiles/030-5_fingering.txt": {
+   "git_blob_sha1": "90747a2bc56e8d64bd67047d9fd4653565f30dfc",
+   "sha256": "8a6ae935f1c11f5980ada1c16f97f748e3cae169a89dd30be10d4ad11095fad1",
+   "size": 11961
+  },
+  "FingeringFiles/030-6_fingering.txt": {
+   "git_blob_sha1": "7ed988393c1a914ba5e2c22712eb0793d686b6bf",
+   "sha256": "d52acfd731d8bc307da1c656cadaaa0d67f034910ec77b15ae2a829bd7592fa3",
+   "size": 11961
+  },
+  "FingeringFiles/031-1_fingering.txt": {
+   "git_blob_sha1": "db0c2d50f5b06e597cdd6080e188d7ce23cf9a3e",
+   "sha256": "1b759eb404b11d9741ca6849d9548e3547562bfae239b7208b632fca26ecdd8c",
+   "size": 71842
+  },
+  "FingeringFiles/032-2_fingering.txt": {
+   "git_blob_sha1": "806ebaabea128e3bffc32239ca6f5ffca94e6830",
+   "sha256": "686ef750a911569f2a171f4f34d0894619ccf3ed5660b788f25a6ae88a0f9683",
+   "size": 25741
+  },
+  "FingeringFiles/032-3_fingering.txt": {
+   "git_blob_sha1": "b4f8debf235446c68a393a10860c52b00d99abff",
+   "sha256": "5b5fd5bee7678c49740f94b6a6a3610610179ffa8b50780944ee41762112d152",
+   "size": 25744
+  },
+  "FingeringFiles/033-1_fingering.txt": {
+   "git_blob_sha1": "c6f3737082e6e6c1d11974866139fb8f6ae635d0",
+   "sha256": "3d149fb92c2e276d9a5d58ff545905cb99441db87e2141bbb5a27e25a8cbfd54",
+   "size": 17556
+  },
+  "FingeringFiles/034-4_fingering.txt": {
+   "git_blob_sha1": "e46dea02fd3257631825e780dac84e88a5602538",
+   "sha256": "dea742b74becf3c21529e62b59b4639f46222902b7a0b87898d7d4fbc67006cf",
+   "size": 70569
+  },
+  "FingeringFiles/035-1_fingering.txt": {
+   "git_blob_sha1": "9b5215bf6fd6c7466ba2578c65cd556eae355e6c",
+   "sha256": "71aad687cfccc5b41dfc432532e12896fe297f69c40708693ad8e0dcbf3084a4",
+   "size": 7348
+  },
+  "FingeringFiles/036-1_fingering.txt": {
+   "git_blob_sha1": "b200a3cd3cda9f10dfeefb3568a4f113dade1bea",
+   "sha256": "db19ac023a69aca66fddad8308e469300c3dd32d0005f26af76512e5c3455008",
+   "size": 10779
+  },
+  "FingeringFiles/037-1_fingering.txt": {
+   "git_blob_sha1": "496bc62393267d1cc6e6765bf6a45be55fe512a1",
+   "sha256": "4d47102ad19b1c051d09083f8ed64d2f0f18cf032bd4ae6d2c855d79e1560d01",
+   "size": 2624
+  },
+  "FingeringFiles/038-1_fingering.txt": {
+   "git_blob_sha1": "0d5572aefc057edef4d4413fe68c8254334b5749",
+   "sha256": "0de68a9b6e6c0caad95af9da7fb660528c6da9aa669f6cdecc1d08f26f6d8746",
+   "size": 3811
+  },
+  "FingeringFiles/039-1_fingering.txt": {
+   "git_blob_sha1": "451f5b10f1072ad757a2142d1993b59faaced068",
+   "sha256": "35fbacda9a8befdc629f338a07ff96c3c25fad0c470727d74c0a5764fe59f9a0",
+   "size": 6150
+  },
+  "FingeringFiles/040-1_fingering.txt": {
+   "git_blob_sha1": "5fc2513b6e8b6ee1656270805ccee977120a4b5d",
+   "sha256": "c48cdbb506faf0e93b2cf2eb149526ee5193afad94bee8f6378eb8e56b4db5d2",
+   "size": 9298
+  },
+  "FingeringFiles/041-1_fingering.txt": {
+   "git_blob_sha1": "906d1d2800d0edb9d1e71922fc564b669499d7b8",
+   "sha256": "917b4c9a9f0a63d947b8d382452897f9f938b05b14d20aa806b4b45ea9197b02",
+   "size": 11195
+  },
+  "FingeringFiles/042-1_fingering.txt": {
+   "git_blob_sha1": "5491ebf11b240dbde293e419f7ee0c7a7e8314c2",
+   "sha256": "bad309bbd051b2ac856364756f73458637f9f78fd44b94e77969c2c9eab9e9be",
+   "size": 19311
+  },
+  "FingeringFiles/043-1_fingering.txt": {
+   "git_blob_sha1": "9442bc899bed869b221a203b2add7b5a50bd51a9",
+   "sha256": "0ca5aa35f3ba8e52aa9382bcb4b42b2beb96143316d15550cc6857fe568e5bb7",
+   "size": 5815
+  },
+  "FingeringFiles/043-2_fingering.txt": {
+   "git_blob_sha1": "250b413d8261b8c373ee1842022ce1087e3a58cb",
+   "sha256": "323a95d063a6792fe5b0fcfef24fe77143d881755ae2004d27676e0899ce43ac",
+   "size": 5842
+  },
+  "FingeringFiles/044-1_fingering.txt": {
+   "git_blob_sha1": "fe9f78f8fdf34c066daea9fd4c01f41beb6071c0",
+   "sha256": "a817721617c7eb808d2f5dbf5ffba012b4523b5b127474c7e52a96eec17c2d89",
+   "size": 8332
+  },
+  "FingeringFiles/045-1_fingering.txt": {
+   "git_blob_sha1": "e830ace6d158776066537c49969be1badca671ba",
+   "sha256": "45a24935c7538c8b8c79e204f852cd212c837dc02b9bb0a7c1cc133e7c128f85",
+   "size": 10979
+  },
+  "FingeringFiles/045-2_fingering.txt": {
+   "git_blob_sha1": "2911b23833fe1ff8c7507c7e88cd361c1ce38ac2",
+   "sha256": "f30a07d8f49158a3b354e45527f7db854348338e85223ffe43fca9bc9a053344",
+   "size": 10979
+  },
+  "FingeringFiles/046-1_fingering.txt": {
+   "git_blob_sha1": "d4eeb92cf5875d9b6620c1083ad0284beaa9fb5f",
+   "sha256": "b115c98e068fa27ed7fb14702647c3d36f7b7753ff2a8c68dfb01adcb088c2c1",
+   "size": 4822
+  },
+  "FingeringFiles/046-2_fingering.txt": {
+   "git_blob_sha1": "5ddd021c5284093dc5626c02c63cc858c23fbcb1",
+   "sha256": "00f161d688018bf83795a68aa018b7a24cf1cefc5f5559cb18a5cc4d6da72488",
+   "size": 4822
+  },
+  "FingeringFiles/047-1_fingering.txt": {
+   "git_blob_sha1": "8f0abd61d8869a590c6eca76600d389bb3ba34ba",
+   "sha256": "535928e5e92234078e0a3e3ec159a522d99dd1b52a08db7ea2ce64b80bd2177b",
+   "size": 10884
+  },
+  "FingeringFiles/047-2_fingering.txt": {
+   "git_blob_sha1": "8d1a4b6a456f95e40a9458c633c8b127f97e75af",
+   "sha256": "665ff63444b7825678eb2ef5dc2d64290a587f6cfff11dfe903278964688404a",
+   "size": 10885
+  },
+  "FingeringFiles/048-1_fingering.txt": {
+   "git_blob_sha1": "45cf8741acdced1356088ba3f7cf06b9425469e0",
+   "sha256": "17108a65e179374a2247e95899822eb21dde0bc09b51d910547cf6e17cae1303",
+   "size": 10656
+  },
+  "FingeringFiles/048-2_fingering.txt": {
+   "git_blob_sha1": "b4933e5f7aa6eb66b1648f71c7fc602b40a3015a",
+   "sha256": "d20caa68fb67044a0f420302b15b44970e9166fe17c3dd10aef9f1c18cb6b4de",
+   "size": 10656
+  },
+  "FingeringFiles/049-1_fingering.txt": {
+   "git_blob_sha1": "127721f6be709f5fb83d3729ad194b29b60697a3",
+   "sha256": "fa7767cad66e76ef6ba739296e756fbbab05cd4ac083469d3d4c769c042b0dde",
+   "size": 8415
+  },
+  "FingeringFiles/049-2_fingering.txt": {
+   "git_blob_sha1": "cbd38e3e00c1302f52bca38fb4a7a3ea2be12525",
+   "sha256": "2ae6e2762bfe1ef308a6d76ea4879c21881f1a4dca516e21120602936dc58f18",
+   "size": 8414
+  },
+  "FingeringFiles/050-1_fingering.txt": {
+   "git_blob_sha1": "21c7c3ee9c38c390f0f9ebf22c98ca1d067bbc57",
+   "sha256": "bde1335c8f20f43f92d727fc94d48bef1a7129ddb52edf4304478bcc787c08ef",
+   "size": 6899
+  },
+  "FingeringFiles/050-2_fingering.txt": {
+   "git_blob_sha1": "cfbfd3940c15c3af7b84d77912e27b5ab530627e",
+   "sha256": "af0a6952bcf45121c98661e1e64ff248737ec9cd8ae1505d30bec1b5d979af61",
+   "size": 6901
+  },
+  "FingeringFiles/051-1_fingering.txt": {
+   "git_blob_sha1": "9833a7fd93c70dda0a79e843abda704fcdb6c003",
+   "sha256": "b0ff390102ecd309431dbb61a9636d4843355ae362c0aae1b9a83ba7088b3e79",
+   "size": 9124
+  },
+  "FingeringFiles/052-1_fingering.txt": {
+   "git_blob_sha1": "bfc3eb74f92ddeb345eab6c32d4d982ecf4e012c",
+   "sha256": "6d6f55c07daca9e3b5b5390b89903144ed7171654f0e3b8c2bc9de5a685e09a4",
+   "size": 5140
+  },
+  "FingeringFiles/053-1_fingering.txt": {
+   "git_blob_sha1": "08ee87a0d5ecd8cb4439d67705ce62004965e8ad",
+   "sha256": "1ba0ad7d70b4cfa2bd8929303497ed840051049f24868036f1167c3247aab741",
+   "size": 7610
+  },
+  "FingeringFiles/054-1_fingering.txt": {
+   "git_blob_sha1": "91b4e10bd0c30dd07707b000f8044d6b40e855ad",
+   "sha256": "46642d83cf516dc62c20ff14c8592498e765b08478fdaf3edbd11c17605941cc",
+   "size": 8379
+  },
+  "FingeringFiles/055-1_fingering.txt": {
+   "git_blob_sha1": "29d0873ce2d64a194213ae58462704dd996481fb",
+   "sha256": "632167c6af7d3c8262bfb70bc212928e76a9a80b9b85c6c6a06f85b4cef53e38",
+   "size": 14556
+  },
+  "FingeringFiles/056-1_fingering.txt": {
+   "git_blob_sha1": "ec0528aa3cb01b3d72e9bfe1b05fea68ca8c99c9",
+   "sha256": "3a0b54a508bea531d564ac3e3845de60490d50fd51a9641ea8fa604e0c28cf6f",
+   "size": 6444
+  },
+  "FingeringFiles/057-1_fingering.txt": {
+   "git_blob_sha1": "b21178f8e1969bed90aa89a55933514d78c01729",
+   "sha256": "a2f82849af1fbe4f6b113af9b1eaaa6d21fb98dcb5cd28f183c9b12525902509",
+   "size": 13060
+  },
+  "FingeringFiles/058-1_fingering.txt": {
+   "git_blob_sha1": "266766f734a6b03f1f616343e0bc8fc5474d3753",
+   "sha256": "41866c57868ca8a872261e819d52c2732b317de331a33923027fb4adf6cdc480",
+   "size": 6320
+  },
+  "FingeringFiles/059-1_fingering.txt": {
+   "git_blob_sha1": "4a2d95ce9ed7cf0b7b0c308be4642ff1ba9f8f7b",
+   "sha256": "94a29bf88718676627b5b442ef78e8abdaea00ecc2edbd52eb89bf763f849da3",
+   "size": 11137
+  },
+  "FingeringFiles/060-1_fingering.txt": {
+   "git_blob_sha1": "5e12be06712020a970007aa4fe9006de6d362ac5",
+   "sha256": "c40b1efb9d4456c57fd84b02545718ad7f49737101525e5ac62fe54a6a7b6c69",
+   "size": 8598
+  },
+  "FingeringFiles/061-1_fingering.txt": {
+   "git_blob_sha1": "f13a1e885d07e1c1e57a0e2c92fa64282e00a96c",
+   "sha256": "9ce41a99fcc32295a708d40e5a007fc834e09ad6551fcc773215d6cce8a75662",
+   "size": 6883
+  },
+  "FingeringFiles/061-2_fingering.txt": {
+   "git_blob_sha1": "a7c747b0965211097a50c1baebd8a0cd3cc789c6",
+   "sha256": "7134265fa94c257dabfcf63cd42f7789c3542e777d2f4567df4c214294ca391a",
+   "size": 6880
+  },
+  "FingeringFiles/062-1_fingering.txt": {
+   "git_blob_sha1": "e44538816d10bc531a640f7a015b172708bfef3d",
+   "sha256": "23d32b60955ef91eaf5b2108937cb795eed6d586e22eaeb0d5fff5010d1655d7",
+   "size": 5264
+  },
+  "FingeringFiles/062-2_fingering.txt": {
+   "git_blob_sha1": "fa87f1a131a12ec639f033be8f777536d098ca0a",
+   "sha256": "70fcd0f835d898d96f1516e3d80c2849339fe5d1fcb5f0419732f05c4df4a23a",
+   "size": 5264
+  },
+  "FingeringFiles/063-1_fingering.txt": {
+   "git_blob_sha1": "3f28b7307f24a0d9e6cb36d2093301338c494735",
+   "sha256": "238cb769e32bfc2c76d6537adff5ee8639c31705df031d97dea45d906b9f8cef",
+   "size": 8903
+  },
+  "FingeringFiles/063-2_fingering.txt": {
+   "git_blob_sha1": "5871c63c4afd2bc940fe249229ca81acb2444004",
+   "sha256": "fe91b3c1dcb7f6459b506b55cdfdd805943d9770bd077b3e95af911b3112ddbf",
+   "size": 8934
+  },
+  "FingeringFiles/064-1_fingering.txt": {
+   "git_blob_sha1": "5d36ab6686cbac06c5e63d7906b7495e7fe70ffa",
+   "sha256": "db40eb20cb7cc21ec2446b8f9dd9453296c56dc93bb14aa32bed9e3988c81792",
+   "size": 7184
+  },
+  "FingeringFiles/064-2_fingering.txt": {
+   "git_blob_sha1": "aac271d2a1604a7120e58eab576c9ff17b65bd47",
+   "sha256": "8ff87b97ed3a6e8d547334a090b331511cb20bbe9be9c909f76cf4bd14feea7c",
+   "size": 7178
+  },
+  "FingeringFiles/065-1_fingering.txt": {
+   "git_blob_sha1": "941b827cb19d913e4233dec697c756c9023bdebe",
+   "sha256": "0d5241612ef5bad448d266dc276e6e2bc0a2a442ffb3e034489d2ef7ffc285b1",
+   "size": 7846
+  },
+  "FingeringFiles/065-2_fingering.txt": {
+   "git_blob_sha1": "0f0460bfea9b36510dd16cd6a76ad7289f03e81a",
+   "sha256": "a86276e6843e8286bacfea8119b39c3bfad4f0464f3332eaf82c03e419b7ff88",
+   "size": 7846
+  },
+  "FingeringFiles/066-1_fingering.txt": {
+   "git_blob_sha1": "4321210cf7951b91796f7c3648f59053a2c51b45",
+   "sha256": "814542032a005afd1bc9f61c0235700d36180b9d6b0086c432fd0dd25b8150f7",
+   "size": 8961
+  },
+  "FingeringFiles/066-2_fingering.txt": {
+   "git_blob_sha1": "96257a1b3f834444ad2534fb20c2e8eb2918433c",
+   "sha256": "305aae710157a4464b071d11d3993b02296bb1f3732060ad0bb7a6f3cecee397",
+   "size": 8961
+  },
+  "FingeringFiles/067-1_fingering.txt": {
+   "git_blob_sha1": "fa21f3baa4f7ba8f31b089776df2e6aab2bf1ff0",
+   "sha256": "87fa11670556308b858dd374fc37bb2ab0261fac70767f4e28ff5125e2d11020",
+   "size": 18151
+  },
+  "FingeringFiles/067-2_fingering.txt": {
+   "git_blob_sha1": "3f9ebc42450cc97272c104ccc3d424687597995b",
+   "sha256": "e4646383a9c37f94cf531024ff6750d3055155451f4d190f9226c160f96e6996",
+   "size": 18151
+  },
+  "FingeringFiles/068-1_fingering.txt": {
+   "git_blob_sha1": "6947b7503ef12ab9ba63a0127fe269bc6932a09f",
+   "sha256": "2a27ea1fad187149f63b39f7d2e97d0138610db81fc1f1f5e33a4eb4885db092",
+   "size": 15901
+  },
+  "FingeringFiles/068-2_fingering.txt": {
+   "git_blob_sha1": "1f3cfffc480d406220127d3fea0715b17d3e0b9c",
+   "sha256": "be95213adea951ab4b1a2d7a7d834e4032bde5f35d053e04bdbd17d25ac46578",
+   "size": 15901
+  },
+  "FingeringFiles/069-1_fingering.txt": {
+   "git_blob_sha1": "93805c6b7e484d0ebcc801918fd5d641ee0bd767",
+   "sha256": "74ebcda63e5b555143dbfcbe78b02fcaa6c0dbcf32feb37dc6c88a08887ff950",
+   "size": 12794
+  },
+  "FingeringFiles/069-2_fingering.txt": {
+   "git_blob_sha1": "cf6a261b67eed642844d1b438911ad1a2131a5ea",
+   "sha256": "c6171a592ce0364d19ec5c65f96918a0cf46cdf7dda5c441d2b5e08cd8bf2c15",
+   "size": 12794
+  },
+  "FingeringFiles/070-1_fingering.txt": {
+   "git_blob_sha1": "0a397ad3df391d98d4071b437e0d90ba6b790749",
+   "sha256": "6078535dc2d8c691f095a37667278abcccd2efe333766435f351f6a7f35b7ca4",
+   "size": 6243
+  },
+  "FingeringFiles/070-2_fingering.txt": {
+   "git_blob_sha1": "4096ac6459812a5a4faec0a25f6a6543c9ce666e",
+   "sha256": "7b6687c1bb814e05103b8cee7738b6f46de52675de7364102417f259000ed24b",
+   "size": 6243
+  },
+  "FingeringFiles/071-1_fingering.txt": {
+   "git_blob_sha1": "c779d60e5a08056d176f5fefced8e18f9cbc16fe",
+   "sha256": "aa4ddc9cda61a015eab3a727e38df80826d0b70c6a265b557397eec1f6222e22",
+   "size": 8143
+  },
+  "FingeringFiles/071-2_fingering.txt": {
+   "git_blob_sha1": "68cc88ac1a5e7cc3a18305ecee522e59993465f5",
+   "sha256": "61f8b0de63fbd9e877b24cb494e125b7f59ef451c644d7c13404f1834afb3a53",
+   "size": 8175
+  },
+  "FingeringFiles/072-1_fingering.txt": {
+   "git_blob_sha1": "8e46973102a79eb5bb0e959bc6b9cd69592650ad",
+   "sha256": "91ac20e8f65fa68ed660689f7f9514687c0bdc38ada1092c1d5366dba5113957",
+   "size": 5773
+  },
+  "FingeringFiles/073-1_fingering.txt": {
+   "git_blob_sha1": "e4dd8fe78da132bebbe3a43fdece91cfc2ba92d7",
+   "sha256": "4c73200393f1f4c082590b44fc89a55d11f7aa9a6aa60f6d29f7204a451f0fe0",
+   "size": 6538
+  },
+  "FingeringFiles/074-1_fingering.txt": {
+   "git_blob_sha1": "fb84107e2ea8b22580c40653a20da0e37256da0f",
+   "sha256": "dd465d3cbd8d959f602bdebf7380250b306259b02f58251120231f09becd2e91",
+   "size": 18046
+  },
+  "FingeringFiles/074-2_fingering.txt": {
+   "git_blob_sha1": "2162e4d8294862fc744ee52c006d9b56abc141c2",
+   "sha256": "aa38ef981078727f48ebf358e40251308e1ef1533dadfb05f5d8301440a7b3c2",
+   "size": 18046
+  },
+  "FingeringFiles/075-1_fingering.txt": {
+   "git_blob_sha1": "1b6fc3da89d5a555939555f7623aa1e62e84f736",
+   "sha256": "5df7daeacbcf38be8cf93e420a9322ac015a841acbdc1534fb08e547e9a25096",
+   "size": 6002
+  },
+  "FingeringFiles/076-1_fingering.txt": {
+   "git_blob_sha1": "dc5cf6bff5c27a9c9fe57a2bdf91b7343230438d",
+   "sha256": "2df4a2924970fb5a729552d4ed880ee8cc3cb65b2976b4fca76241e08730db80",
+   "size": 5166
+  },
+  "FingeringFiles/076-2_fingering.txt": {
+   "git_blob_sha1": "8f7403725f43b248028a492d278af3793ee25291",
+   "sha256": "1d56d86ddb99c4c5896adae5f969ede7cd0939c6e60f0b75947113e2a5b4897d",
+   "size": 5166
+  },
+  "FingeringFiles/077-1_fingering.txt": {
+   "git_blob_sha1": "3fe6c9592847498c792a6cc9743f712045b1f071",
+   "sha256": "c514aa554049cf76e69152f500bae383a3f66acc5050ea70088ca32bf5ca0146",
+   "size": 10656
+  },
+  "FingeringFiles/077-2_fingering.txt": {
+   "git_blob_sha1": "cb46f84d41fcf544014558a6f51ebc6f85dc2457",
+   "sha256": "fab717b9a77059e666af27b99e0604ad1dcb879fede8c4b74c5b55caed804e9d",
+   "size": 10656
+  },
+  "FingeringFiles/078-1_fingering.txt": {
+   "git_blob_sha1": "85dd7d9e608fed154728bc2f00db306b9e3135fd",
+   "sha256": "cc3d12a204df68ffea538020668f5d2918349adbb255729b835058c15e2fd8b1",
+   "size": 8658
+  },
+  "FingeringFiles/079-1_fingering.txt": {
+   "git_blob_sha1": "798fd1fae0b5e4ad2cca4d58a39ab2c7a2ea4788",
+   "sha256": "7841e0398fb649def1385e4cbf025528e9928a2ba76c10872ba4e01c7172a2bd",
+   "size": 5509
+  },
+  "FingeringFiles/079-2_fingering.txt": {
+   "git_blob_sha1": "1b9f29ffe3a1140ba157dfd94db36f2146f933bd",
+   "sha256": "6f4623cb04fe38dd434bf302c4b8d5a378469f6b6f462decb883274b9a4c5df4",
+   "size": 5507
+  },
+  "FingeringFiles/080-1_fingering.txt": {
+   "git_blob_sha1": "a66e5509eb3aaf4749dc61a90229af54c03d75a2",
+   "sha256": "a7e1a645d30b14eecb35ab2be4bcd2343049bd0f6ddea3f609aaebfbc01f6f0e",
+   "size": 19240
+  },
+  "FingeringFiles/081-1_fingering.txt": {
+   "git_blob_sha1": "522d5fa32f78881f94c8acbbbd9ea77676d2d6aa",
+   "sha256": "120c23b26030bc000572b61d757a983b137d742759b2240c1f1ef33f544a4626",
+   "size": 6751
+  },
+  "FingeringFiles/082-1_fingering.txt": {
+   "git_blob_sha1": "4095021445a0f3f4497093d104cd33e40c3f4117",
+   "sha256": "11a35c7b18920ad7ba4db62816dbf7a820bd15825be0266e169d801e6b139b01",
+   "size": 7270
+  },
+  "FingeringFiles/083-1_fingering.txt": {
+   "git_blob_sha1": "2975c336d29d3e37970a62d4bb9a81ab0714e861",
+   "sha256": "0ef297835546c5786de7dc1b9b541054dd7d549b933120b508d011d654ade06d",
+   "size": 9002
+  },
+  "FingeringFiles/084-1_fingering.txt": {
+   "git_blob_sha1": "1c455b4d00caca34daad3988a24096fec925f1ea",
+   "sha256": "716326da0d06caf35dbd2381fa10f3775d8a75654f9fd19913367ab9112cd3b7",
+   "size": 11150
+  },
+  "FingeringFiles/085-1_fingering.txt": {
+   "git_blob_sha1": "b60c6d676b9fee2d5af7307a8869b17b42f79c84",
+   "sha256": "dd2be09a0dd3e57466bc22143a518ee8e0acd2978a9d504c159f9a4dfe48b65d",
+   "size": 17085
+  },
+  "FingeringFiles/086-1_fingering.txt": {
+   "git_blob_sha1": "cc18116604b6c26185bc90c598196ded01496b6c",
+   "sha256": "9dbb745c1954148f2112c7e0442a23cf968b4fabaa8bf8eba873185f51e6c6bc",
+   "size": 7468
+  },
+  "FingeringFiles/087-1_fingering.txt": {
+   "git_blob_sha1": "ab2a7d5bbe9bd0cdc6e76c2f1c3296f5a350af68",
+   "sha256": "b302483b01041b1b32f3040b777abd308086559fadbc05679e714ed69e15a458",
+   "size": 7195
+  },
+  "FingeringFiles/088-1_fingering.txt": {
+   "git_blob_sha1": "ab589a173299c8955d0785a4d068d544cd62f8bc",
+   "sha256": "7524aa0f1794478f537fc426ce12eb1e7c7ac814a735a44c043bb9a1a96b84f6",
+   "size": 7114
+  },
+  "FingeringFiles/089-1_fingering.txt": {
+   "git_blob_sha1": "a0bdd8c7a1c320f373a15457301ad82d31d8173b",
+   "sha256": "b4ee900620485ee2568f873b1b1d014cc33028f24f264997d3742a2afe20dece",
+   "size": 5913
+  },
+  "FingeringFiles/090-1_fingering.txt": {
+   "git_blob_sha1": "2cc81954d04f03fa5f7a6079e7407daf288fee6f",
+   "sha256": "35dd4f0cc0e2ece2e4b42ae6ede4e420fd6de169d914d5612eb71b8775358725",
+   "size": 10060
+  },
+  "FingeringFiles/091-1_fingering.txt": {
+   "git_blob_sha1": "7a9f5dc3c17b7ec4b5a3ada03f47e477bb19befa",
+   "sha256": "74effa9dedeeb7ce8a5cc49c8dc1f68bff435ab4c79238c11b1699e4533f95e8",
+   "size": 4365
+  },
+  "FingeringFiles/092-1_fingering.txt": {
+   "git_blob_sha1": "00a8eaa7e4413c4080b3c760ab26a134ab81e8dd",
+   "sha256": "ce8105edd7eb2c54924d8257721b2e8e3318b6ce13438f13c24ddaee594dc6d1",
+   "size": 5117
+  },
+  "FingeringFiles/093-1_fingering.txt": {
+   "git_blob_sha1": "fddeb3a283bca316136af2d10d1f47713e38b939",
+   "sha256": "2a95370cdb676a8442ee3831ba9f152be14d63ce6549a129f5bbdd2c9db58f26",
+   "size": 10248
+  },
+  "FingeringFiles/094-1_fingering.txt": {
+   "git_blob_sha1": "b4d3300cec30aafe1b7a0f0b9a0b6d0d1fdcc090",
+   "sha256": "f5de80e0704479e6a9a27c398b72cc7d6863d1a953f697f31d6c517a54c6a711",
+   "size": 11065
+  },
+  "FingeringFiles/095-1_fingering.txt": {
+   "git_blob_sha1": "7c73790b48725b805646c6779b574e4bc25c8028",
+   "sha256": "0d5b38a8e48b99832733b434943e5c9d6d1f0fa60ce6d850a8e792381ceea8e2",
+   "size": 4403
+  },
+  "FingeringFiles/096-1_fingering.txt": {
+   "git_blob_sha1": "98614efe8b9d79c2374c5af4a27a6f1c3a90333d",
+   "sha256": "49a945a0e642394f760fdc4192a18ce5a3b3ea077d5ad4bbd2d804edebd986c1",
+   "size": 19655
+  },
+  "FingeringFiles/097-1_fingering.txt": {
+   "git_blob_sha1": "aac1406d1a0304b938b5ba76d3021deb36e3b2ab",
+   "sha256": "6e6fee1eb89f95612b55241bb14d2b1f63594df10ba486b446e01c50349399b6",
+   "size": 16269
+  },
+  "FingeringFiles/098-1_fingering.txt": {
+   "git_blob_sha1": "3d50ea3583b7e1d1f4101359780e00f8923a4cce",
+   "sha256": "74c3edb7a8f3f23e11516ddd651383753183d678c3d54ad67df0804d23790852",
+   "size": 8023
+  },
+  "FingeringFiles/099-1_fingering.txt": {
+   "git_blob_sha1": "9cfbefb158e75fae10a83ab5bdac93704add35a8",
+   "sha256": "b500944aac449689f1f051fdeb1a66b4f9eba697bac41ca402cbef8a73827312",
+   "size": 11931
+  },
+  "FingeringFiles/100-1_fingering.txt": {
+   "git_blob_sha1": "96b986a28b5556debd6188b9b4003b56ad7726e6",
+   "sha256": "6a3d3b730a5c241a9d4d8a044efcc77c16a8297cfc024857959761751b641468",
+   "size": 15833
+  },
+  "FingeringFiles/101-1_fingering.txt": {
+   "git_blob_sha1": "94f26936d24ed31f04801d42f763cdf742d5bc23",
+   "sha256": "84accffe27d15c3c32bb2be3c930b5759f2527254f07f8cdc566f5b4ba2c8db5",
+   "size": 7826
+  },
+  "FingeringFiles/102-1_fingering.txt": {
+   "git_blob_sha1": "fe3d3f7be354c1234455906b9498fdc2af4af7b2",
+   "sha256": "f359a426e4fbbc4d24bef382f33451c8f7a6366a221ca407141f87198b2d760c",
+   "size": 8819
+  },
+  "FingeringFiles/103-1_fingering.txt": {
+   "git_blob_sha1": "af765c9cfeba39c4bafea03715968f14120cc177",
+   "sha256": "16a926ef51ef7cd4cc19f6db7acee041a49f0d863f42707632c4b4298395a205",
+   "size": 9255
+  },
+  "FingeringFiles/104-1_fingering.txt": {
+   "git_blob_sha1": "c9a7b929caef591b54a38df55479316f50cb0e0c",
+   "sha256": "bf8f43533478569b1b70ee4297e6443f242220342b15c54174bbe3dade94e4d7",
+   "size": 7803
+  },
+  "FingeringFiles/105-1_fingering.txt": {
+   "git_blob_sha1": "ffd15d9ec13615049ea101fa642e630d4ed74e2f",
+   "sha256": "441ea5feec7c392cea978c4d6aa4f7fcdfed3bb07af3beca8f451e47e0070447",
+   "size": 7732
+  },
+  "FingeringFiles/106-1_fingering.txt": {
+   "git_blob_sha1": "e5ba3b7bff11578b4f001797fc2a066fc6120c59",
+   "sha256": "da7d92a3f7fd60cb3894ce0188793837c520f1adedd20fabad1d0bf7b4ecb231",
+   "size": 13774
+  },
+  "FingeringFiles/107-1_fingering.txt": {
+   "git_blob_sha1": "fcd4b165c9c5c5448fce37ae7802af86ad9e756e",
+   "sha256": "3f0b208c2146d7bde5aa49b24da566a5370b766eb859cd679cf6e41befd9be96",
+   "size": 10019
+  },
+  "FingeringFiles/108-1_fingering.txt": {
+   "git_blob_sha1": "18f397a35fe30a6fccbff99fe51c164d1be30c1a",
+   "sha256": "d30944397ee142f9199d3976308e8342083a61b309131883ef6ef53f3a4f0457",
+   "size": 9978
+  },
+  "FingeringFiles/109-1_fingering.txt": {
+   "git_blob_sha1": "3bd412fa7ce4243b8730cc7aa52c31d174e225cc",
+   "sha256": "a013618e90f7401d03224e2a2e54dd34baf231f8d0cb1170a687657c38fed06d",
+   "size": 11454
+  },
+  "FingeringFiles/110-1_fingering.txt": {
+   "git_blob_sha1": "b1d0bedf5923e915dbc5fabf53693304688d4ee7",
+   "sha256": "d7a3469e8cebd5d53b1ef6637d7e64dd753a953f896c26d281fa938b65bca868",
+   "size": 15197
+  },
+  "FingeringFiles/111-1_fingering.txt": {
+   "git_blob_sha1": "890dcc9ed60077940c975704287c659781b3ce46",
+   "sha256": "34edb5bc27047b3b99701dd3368a58583be04264947f93b03db3b173453812f6",
+   "size": 7780
+  },
+  "FingeringFiles/112-1_fingering.txt": {
+   "git_blob_sha1": "4775403fc1f079abe5e0bb4a3ccd0e24360f7788",
+   "sha256": "bbde5c5d15117d98baf979f32ad2327f2664deb59ba8b717432894859f947c24",
+   "size": 8225
+  },
+  "FingeringFiles/113-1_fingering.txt": {
+   "git_blob_sha1": "25717bf87e623d04091b6584fb15994d181ae15d",
+   "sha256": "1df697805c9e39b56b77d65ccaa63c58930c4d19f0fe4d8fa35098ca7425f157",
+   "size": 23619
+  },
+  "FingeringFiles/113-2_fingering.txt": {
+   "git_blob_sha1": "3e430adec3456f06b15a6338eb1d42d86e3dd4f0",
+   "sha256": "f6373ea441d24d29749aeacea7cd48ae09a10fb5b29f806ffb3c848fe3c6b444",
+   "size": 23630
+  },
+  "FingeringFiles/114-1_fingering.txt": {
+   "git_blob_sha1": "dd71adeaeaab83bcce4075fd322beb86420ebeeb",
+   "sha256": "dc169f644ea9fb36976359cf5c18a80b306ff7088787e210473f138914a679b9",
+   "size": 8405
+  },
+  "FingeringFiles/115-1_fingering.txt": {
+   "git_blob_sha1": "4ba84bdf4acc5a9e0ed821c0a0eadcc03ed8366d",
+   "sha256": "be25a7be936efb14c03094c4b35c56cec13924dcdd49fec003229f6f0fe91d2c",
+   "size": 7832
+  },
+  "FingeringFiles/115-2_fingering.txt": {
+   "git_blob_sha1": "9dfebe77a1b9599870614160596eafef9afda0ae",
+   "sha256": "cb2024509242bab20a9ff15fb8cdbbf8027a622fee21eee295240d628fb9d627",
+   "size": 7836
+  },
+  "FingeringFiles/116-1_fingering.txt": {
+   "git_blob_sha1": "b1e21fedb1ec7c5d413573376e4a11c83bc0f680",
+   "sha256": "47461b15959f142d26833c3e36a5458466c4ea9e24934f750c424d45681d8863",
+   "size": 7416
+  },
+  "FingeringFiles/117-1_fingering.txt": {
+   "git_blob_sha1": "d4129e493e038ee1a8352dae6b9d8416afd82cea",
+   "sha256": "256de1c74cf60ffad3f34cec8fdf3108797bed5de79d1641e6e77d5dc624cc25",
+   "size": 8985
+  },
+  "FingeringFiles/118-1_fingering.txt": {
+   "git_blob_sha1": "48d391aaf14ecbe0f940cce1ab76360fc30ecbaf",
+   "sha256": "d23603dfbc789ca4d5268630c7dedbbe53a042cacd4ac92767725e1c640ee916",
+   "size": 11498
+  },
+  "FingeringFiles/119-1_fingering.txt": {
+   "git_blob_sha1": "4d4f16cf0df36356cb50c90c97e49e1297781558",
+   "sha256": "56b8582b8c6707a6735667638795a28ca8d3f3266ebc34ae808d25fec64636da",
+   "size": 9032
+  },
+  "FingeringFiles/120-1_fingering.txt": {
+   "git_blob_sha1": "7ca2b57088302200747699198ad31ac9b0379772",
+   "sha256": "3040669c6b5dc351cfcab5b2cc0e3e22c7ad703aa1fd75f9f31f4c1da92fb067",
+   "size": 10756
+  },
+  "FingeringFiles/121-1_fingering.txt": {
+   "git_blob_sha1": "d8515a00578af20c94a4acbecf7eb1dc39ae69b4",
+   "sha256": "9499127727f4e33f87ce00412abcda3fb0b7481c88d24426e98e313bb10a42d7",
+   "size": 10628
+  },
+  "FingeringFiles/121-2_fingering.txt": {
+   "git_blob_sha1": "090129989dd8a20e16a70618802f2fc77a81371e",
+   "sha256": "a328c8dd89ae4e0c07f5a9c8220bad3565af7ed7a1f637404d29e4c21a746aa1",
+   "size": 10628
+  },
+  "FingeringFiles/122-1_fingering.txt": {
+   "git_blob_sha1": "69112fa89f069346b364fe175f772f4f96d313aa",
+   "sha256": "6fbe56fae75cf7d6ed8ad3a2e790c5d17f5b11b2f69609bc3c61dae8dec9bb00",
+   "size": 5820
+  },
+  "FingeringFiles/122-2_fingering.txt": {
+   "git_blob_sha1": "38de1662c0540f75cb7f790996fb4a4bdc08431d",
+   "sha256": "d8cc4e38f3bbafca47d6bfa645703b031404e3ae1864d9a40679692810c8331a",
+   "size": 5821
+  },
+  "FingeringFiles/123-1_fingering.txt": {
+   "git_blob_sha1": "87143d2cefffab2adbbfd6e94f86456681ed778d",
+   "sha256": "7024d144800cfce98018dca0e1e75b2d50eed9c24e9960c54bc08c4ff4e76893",
+   "size": 4698
+  },
+  "FingeringFiles/123-2_fingering.txt": {
+   "git_blob_sha1": "afeb1ec59f604dcc6580ea9eb41e38ab1d03c0db",
+   "sha256": "fee4cd53f95e499f410bcc895994f6e331a11e8b9cc4af6ae1ade0306f43b233",
+   "size": 4698
+  },
+  "FingeringFiles/124-1_fingering.txt": {
+   "git_blob_sha1": "203d0c15b370ae23af05afefc4dd9fa6ecd2d4c8",
+   "sha256": "0b9c0d60d09690c97f8ffe17afad7994b38a35b8107eb00a1f8ce3ab387492ac",
+   "size": 6924
+  },
+  "FingeringFiles/124-2_fingering.txt": {
+   "git_blob_sha1": "c638d0c13337fdb782a780c6eba043b42f246ca7",
+   "sha256": "2ca0ee4e7c39541c9132d6121a60e4bca5879e481a49463cb63783f4862c25d2",
+   "size": 6921
+  },
+  "FingeringFiles/125-1_fingering.txt": {
+   "git_blob_sha1": "87350414185c29cabc48de2251705722d01cc604",
+   "sha256": "a9ee89be7c3259f1f910a856a8ebe1843958af642f2532b31ca9fc946397bc9a",
+   "size": 7262
+  },
+  "FingeringFiles/125-2_fingering.txt": {
+   "git_blob_sha1": "26330a023ee391f8973792da314446d3442e9461",
+   "sha256": "8f5e3479535a693f63d7dbea9a7763af877e226f0024db413aefd562b4fb0987",
+   "size": 7262
+  },
+  "FingeringFiles/126-1_fingering.txt": {
+   "git_blob_sha1": "b1b50045d5fd0bfdd56917b4ed8727aa1ed9dd72",
+   "sha256": "804ca7adb0cba9c463f66a7cf99ed9574494e0730c5a9ebe621518ce29f2b2ab",
+   "size": 4264
+  },
+  "FingeringFiles/126-2_fingering.txt": {
+   "git_blob_sha1": "f2b452101862da0d4b85ab06477d2cd24a26e913",
+   "sha256": "97c2f8b799b01a955678f2fffa9fb5d6c2f53ed13e3550986a0ad8677e93701c",
+   "size": 4294
+  },
+  "FingeringFiles/127-1_fingering.txt": {
+   "git_blob_sha1": "0b115fccd170e8a135e1a24b4abb8abb81199e15",
+   "sha256": "011e339011556b2cd0a2163bade90b0944647110aacae73089f560fded9840b1",
+   "size": 7217
+  },
+  "FingeringFiles/127-2_fingering.txt": {
+   "git_blob_sha1": "1f4665beeb964c3b64d9aafeb7ad61cbffd0bcbf",
+   "sha256": "0b1b3dade82c8ae20c050c78a7083e2b54b6e1c6eb070fcf1acdefba5c73c56d",
+   "size": 7219
+  },
+  "FingeringFiles/128-1_fingering.txt": {
+   "git_blob_sha1": "92bc85e06daa3cf0a2b6084724149e20137783f3",
+   "sha256": "2e99aa0707a1b1aa84b6cc98b907fa5a1af3852e0f8accd02810e2311f0b6881",
+   "size": 10780
+  },
+  "FingeringFiles/128-2_fingering.txt": {
+   "git_blob_sha1": "61264bb1ab6fd7d11da0e75df7a0399ab6773a4f",
+   "sha256": "a9d0eaff79ff5e24a4cbd537ee3fba8471b3636b289c44504df05d127c946207",
+   "size": 10776
+  },
+  "FingeringFiles/129-1_fingering.txt": {
+   "git_blob_sha1": "ea5f65d500bbd76521f57ad5b5d8b5ded2dafbc1",
+   "sha256": "050e872e0c7d7fc4de9bc5ef84177017fee1b4750d598cf8599813589f069ad6",
+   "size": 13969
+  },
+  "FingeringFiles/129-2_fingering.txt": {
+   "git_blob_sha1": "51035f92abc84caaea650e01c029bce30ec06bae",
+   "sha256": "85d8f145531c83c4c2989fe90bfda3e60e3ed8cabc493c7cbbe74acf55f846f3",
+   "size": 13969
+  },
+  "FingeringFiles/130-1_fingering.txt": {
+   "git_blob_sha1": "51d0c013144cd5d978e506605c47148c6bcae685",
+   "sha256": "f6282bd5f96a68d14814047421fa0a0504de1623e98d70112a76391aa93f5957",
+   "size": 5709
+  },
+  "FingeringFiles/130-2_fingering.txt": {
+   "git_blob_sha1": "782efd020d4d984cd12d69f158b6eef79c0e0da5",
+   "sha256": "a6525fd386eb674892aad1f695339f4dfc1f99998c5c2e1dd7e2ef484c7b5997",
+   "size": 5713
+  },
+  "FingeringFiles/131-1_fingering.txt": {
+   "git_blob_sha1": "27d22c40008f9632c93aca09603815a8f8f2a58c",
+   "sha256": "5a4ded8fe9ec21c160bf787ce493073e7663d6e94e5bd59f1bc88f1e9061ff9c",
+   "size": 9637
+  },
+  "FingeringFiles/131-2_fingering.txt": {
+   "git_blob_sha1": "b5bc0df06e21bd53386aaeb49ed314f744e7c22c",
+   "sha256": "bf78cb6fa5ac2b8f38ae450a5858dbabb7a4615bb2ee91da7acaf1ceef9e8cf7",
+   "size": 9634
+  },
+  "FingeringFiles/132-1_fingering.txt": {
+   "git_blob_sha1": "698a35f560e186365f50e4c411184e2e67efbe07",
+   "sha256": "f88d27d207d1935cf44c26e9b1f5e09c66c569bf21636be4c9bcd19f26da2fe8",
+   "size": 18679
+  },
+  "FingeringFiles/132-2_fingering.txt": {
+   "git_blob_sha1": "05ec2ffa94c315c0a8f90bea54b14778b82a363b",
+   "sha256": "3d5c4f50286b0047f6deea397e1624034ea628d37fd553d043b0cc86fe0ab5a6",
+   "size": 18679
+  },
+  "FingeringFiles/133-1_fingering.txt": {
+   "git_blob_sha1": "686c56921155d25c0d130d40ddfd990d1952f377",
+   "sha256": "8380b9f3b141ca0afae81f8fd8670e52dda072b1b57d372ed98ea400041edc4c",
+   "size": 7631
+  },
+  "FingeringFiles/134-1_fingering.txt": {
+   "git_blob_sha1": "11fba06a5e011a89421b8350002c3de5fe5449df",
+   "sha256": "4cf62581d6a956c520c8f2e9a49f097581178843bce7a812a241856c2cedf3c0",
+   "size": 10929
+  },
+  "FingeringFiles/135-1_fingering.txt": {
+   "git_blob_sha1": "9bef73d2945e8c2db458a7e8bc0663cfa80cdd03",
+   "sha256": "d2553fbefd25280690918c7e6347ff9862f84bab96ae0c509299126d743c4d93",
+   "size": 6914
+  },
+  "FingeringFiles/136-1_fingering.txt": {
+   "git_blob_sha1": "5598fdf90f4276f6018b52ba9a06f63ee81fb19e",
+   "sha256": "537d0c3ef2e0b7ea3f21a3bae768cea1d9a41ec940787dfcebb20f0015e93844",
+   "size": 9384
+  },
+  "FingeringFiles/137-1_fingering.txt": {
+   "git_blob_sha1": "da784a7d271251d2e5a1082edb735fa3af4d8275",
+   "sha256": "f1f4e901e5976379a12b576292cf44b5489711ca8920ed8da2ab1330afad76bd",
+   "size": 9656
+  },
+  "FingeringFiles/138-1_fingering.txt": {
+   "git_blob_sha1": "b0a83449b8a2a2a34ceaae243df1ec445b065760",
+   "sha256": "b00adba8191917e2dcf64972910b342004723cc5ca8f26d81892b3837aa2f9cd",
+   "size": 8368
+  },
+  "FingeringFiles/139-1_fingering.txt": {
+   "git_blob_sha1": "187b85865d4485d66fd317ceb749a0b5c5f0b4f6",
+   "sha256": "d0cf8c05ec4c92e8a1c03b9ff87b7bea08c52851e226b593b893f9dc44c49ae0",
+   "size": 11287
+  },
+  "FingeringFiles/140-1_fingering.txt": {
+   "git_blob_sha1": "d9691daaf76a3f791ec3872a4856cbc6580c6666",
+   "sha256": "55a918adc3f6865b4f88711c882c5a00514c74ff4c3b64ecca7e32214509a531",
+   "size": 3703
+  },
+  "FingeringFiles/140-2_fingering.txt": {
+   "git_blob_sha1": "71c1a293cf6acf95f338edeae5687bbf9ad3238f",
+   "sha256": "703351f67c0921604098931f63d2a3a7a1d1243fe798cb14cdec26af6f2f8e5e",
+   "size": 3701
+  },
+  "FingeringFiles/141-1_fingering.txt": {
+   "git_blob_sha1": "73ae443ed39aba86a24f8441b5aa091d6a9b306a",
+   "sha256": "a57f01cf3fe9d196fbdd6f34ec4063bf4e5e2b5a8166f04afe54a625ee8e9aaa",
+   "size": 7364
+  },
+  "FingeringFiles/142-1_fingering.txt": {
+   "git_blob_sha1": "2a100a3443904ee8c7ed7df410ba75847837193e",
+   "sha256": "2f822cb7a50d2830e6fbcadba7bf18e1c5e35707c9b3554db384c2c08fab6b2f",
+   "size": 8194
+  },
+  "FingeringFiles/142-2_fingering.txt": {
+   "git_blob_sha1": "351afdfaa5a9f3777fbdde3fb6d41238223f7bf7",
+   "sha256": "ed01dcd8529a6c864b27a1b5de80841a7f807fdd678ac3555a4692e37ff9eb9e",
+   "size": 8187
+  },
+  "FingeringFiles/143-1_fingering.txt": {
+   "git_blob_sha1": "483bb258062e58a79366f8a6b0b03e4bab53cdfd",
+   "sha256": "4bf5a5dd11143bd7b8d0c894cd808b8a35467dee43824296dce5097aa43a3d05",
+   "size": 1928
+  },
+  "FingeringFiles/144-1_fingering.txt": {
+   "git_blob_sha1": "0f40d173684c228ac37a7e5939794ed563c47eaf",
+   "sha256": "f77f55b34654a30639cd6132826fed0685f66d57dd81384775516364d3100e28",
+   "size": 4178
+  },
+  "FingeringFiles/145-1_fingering.txt": {
+   "git_blob_sha1": "edaae003ee0b1dbe934206bf4edfda40b07b6502",
+   "sha256": "312da14b7ee088858aecd661ca0045fe5f54480673138bd4f6b0d7d7d9fd7344",
+   "size": 12934
+  },
+  "FingeringFiles/146-1_fingering.txt": {
+   "git_blob_sha1": "6f8c61847dbf8d5edd499c5c5c98f58fadd17d90",
+   "sha256": "838fe987eb36b5b9f2dc061aff1684a9317cfa47c980685eaf2fd7daa5a44142",
+   "size": 14274
+  },
+  "FingeringFiles/147-1_fingering.txt": {
+   "git_blob_sha1": "5a1c33cffacf6e7c77cbfb738c196e2ab96a69a9",
+   "sha256": "6a5929cad302a722a58b6437ddabdc1c0cc654cc2b9b9be56f046b6ae5ba7ea9",
+   "size": 8258
+  },
+  "FingeringFiles/148-1_fingering.txt": {
+   "git_blob_sha1": "fd44bfe3240e1256f7366ede6ca26744fa95319c",
+   "sha256": "f6d66b0d51e5d9e4170a3476d66ad578560c7c3688fad15a686fed41477460fd",
+   "size": 4151
+  },
+  "FingeringFiles/149-1_fingering.txt": {
+   "git_blob_sha1": "d1c08aefb74c2d896991ee3b966aae24a27a5510",
+   "sha256": "e8453ccb27087d7b5ea9e667faec761d51985ac4b84290ae0ac223072bf7f77f",
+   "size": 11698
+  },
+  "FingeringFiles/150-1_fingering.txt": {
+   "git_blob_sha1": "d217044b6d39536d96c0a8ea2d379a1bc9625b6e",
+   "sha256": "e0469ae2f513a949d86266cdec4c234f6523818824cd7117eb658cda24b3ec2d",
+   "size": 10332
+  },
+  "List.csv": {
+   "git_blob_sha1": "166aab4ba94b7f76c88a489f71fb706996d67b40",
+   "sha256": "3b08e6cc3bef18e6d036a43cfa38586ef7499adaccd2f75c47f3b58dacdce86d",
+   "size": 9346
+  },
+  "List.pdf": {
+   "git_blob_sha1": "d3e5098009e8a6d01d70f8d00659622ef3dc9ecd",
+   "sha256": "4f979533c2dcef65dcea776db5ef4dda347dde7ff78eeb28a4d341a0cebdcc0e",
+   "size": 52017
+  },
+  "README-ja.pdf": {
+   "git_blob_sha1": "a198aa25b7445a14fb8458e32206274153d976f3",
+   "sha256": "c302d666df33ce58404552ce1452d955149c5788763e48ca891e73552f3b6dec",
+   "size": 87273
+  },
+  "README.pdf": {
+   "git_blob_sha1": "b1cae3d52398f2c1c83761e330b2fdaa33191a8f",
+   "sha256": "c5d12491be75785b1a8201c94704ccf536a97df95057c83700841f1902818827",
+   "size": 42977
+  },
+  "ScorePDF/001_Bach_Invention_No1_C.pdf": {
+   "git_blob_sha1": "7321c64ce19a1595524ec196230829ff6646df36",
+   "sha256": "3541ed356a16c3017f93fe7cc0277e9f215975d578e769f34e2faa8a42c5245d",
+   "size": 46392
+  },
+  "ScorePDF/002_Bach_Invention_No8_F.pdf": {
+   "git_blob_sha1": "87f96f09ddccd8b5ded6c0572e9286f78db95d72",
+   "sha256": "2d3b4853845c341dfbd7e32031459cdfbfff2d4e3ddae9657a30321c6287eeaf",
+   "size": 51526
+  },
+  "ScorePDF/003_Bach_WTC_I_No23_B_Prelude.pdf": {
+   "git_blob_sha1": "460b871f076eae96c164f0a60cdff20b4f7b75c8",
+   "sha256": "bb8b479117cc9069b2f7b458544bd8218488a24a291a691648cc5b0d426a4d59",
+   "size": 51612
+  },
+  "ScorePDF/004_Bach_WTC_II_No2_c_Fuga_B1-14.pdf": {
+   "git_blob_sha1": "2f67c0ccf84411eb4eb09968a00ec0793f5a4618",
+   "sha256": "18fd31f3b285fd8f10a245d3d036316cef1f38d9fee45e238a6abce6f0f2195a",
+   "size": 45459
+  },
+  "ScorePDF/005_Bach_WTC_II_No19_A_Fuga_B1-14.pdf": {
+   "git_blob_sha1": "85180e78bf290a3ccc5aa9168b5d0d86be863a68",
+   "sha256": "7cadd40ef638a5b4db89f51edeb5c648f27b7115a5e67a6cc45cb1cf0ce19b57",
+   "size": 46705
+  },
+  "ScorePDF/006_Bach_Partita_No6_Corrente_B1-38.pdf": {
+   "git_blob_sha1": "a48e39d7c0176706f1ff181ab10026d00ddd9790",
+   "sha256": "b6f920175d81336fc253ae49e325e73393abbcc5219a45c54c4d78d28a10ae0c",
+   "size": 46007
+  },
+  "ScorePDF/007_Bach_FrenchSuite_No1_Allemande_B1-12.pdf": {
+   "git_blob_sha1": "2a99621aeb5914e5e98a839798727ba15cf9266a",
+   "sha256": "27d9009c6d4a2b13a1e93c3d859c7b07313576b8e03f1a9c2334e2655cc94bc3",
+   "size": 40081
+  },
+  "ScorePDF/008_Bach_FrenchSuite_No5_Sarabande_B1-16.pdf": {
+   "git_blob_sha1": "9706d057a375ea6378c7e23d65d3616f14e6b1c6",
+   "sha256": "37b736fb01c0eaed56794636601e4705b5730575d8900017fd5fb3904e0b6652",
+   "size": 29555
+  },
+  "ScorePDF/009_Bach_EnglishSuite_No3_Prelude_B1-33.pdf": {
+   "git_blob_sha1": "d6c52505d443013fe621d291f7134bf4ec22b09d",
+   "sha256": "8066a2ec2ae246fc00c18ca107f9ba9aac5bb93470cbeffe18cea9a42a35a4bd",
+   "size": 39175
+  },
+  "ScorePDF/010_Bach_GoldbergVariations_Var13_B1-16.pdf": {
+   "git_blob_sha1": "7dfc178eba8e345f84eea9e72830a970ee05e8d0",
+   "sha256": "0fab964fa324de86b01f10cd1ce89831f2e4f890b61c031537b0026eb20e4d9f",
+   "size": 43021
+  },
+  "ScorePDF/011_Mozart_PSon_K283_G_i_B0-22.pdf": {
+   "git_blob_sha1": "31fc79ae1c7d890ce07bbf9ffafe0ed51a308354",
+   "sha256": "ec71e508d418ade75444271924defdd9a48b35ec5eb3b2d52e5ea0db0e890a1b",
+   "size": 46477
+  },
+  "ScorePDF/012_Mozart_PSon_K310_a_i_B1-16.pdf": {
+   "git_blob_sha1": "ef6ffb59980b1f3353ceba9012a9a7444534628a",
+   "sha256": "7ddea5da62c9d772610b739bc20ddc6e6d87a24e2e7285c5b73dced3497f68cc",
+   "size": 31004
+  },
+  "ScorePDF/013_Mozart_PSon_K330_C_i_B1-18.pdf": {
+   "git_blob_sha1": "746cd61b10d72bdb242e50da739ccead1bd3ba8c",
+   "sha256": "fa9d149ec9eed956ed8b868493dfd06b50fdfa7a660729b98ed63fd5ee166ac5",
+   "size": 35765
+  },
+  "ScorePDF/014_Mozart_PSon_K330_C_ii_B0-20.pdf": {
+   "git_blob_sha1": "365ff3c60548b40d9560a856475db19685fadc99",
+   "sha256": "a521e31a9d5f437b18545321d3662a6e1e572c424d06889ab229675adc6af205",
+   "size": 32457
+  },
+  "ScorePDF/015_Mozart_PSon_K331_A_iii_B0-24.pdf": {
+   "git_blob_sha1": "a613b473631ec41d4f36578b003c2f4776a50ce0",
+   "sha256": "ba26251da93128292e3b7e6ea52d189758a34ab24c0b3f8cfcc243bf694caa87",
+   "size": 29882
+  },
+  "ScorePDF/016_Mozart_PSon_K332_F_i_B1-22.pdf": {
+   "git_blob_sha1": "beffb0864b39b62bc8fea166509a6c0bb46b6411",
+   "sha256": "dc5905cea73fe6edeb5fce64da7e574998bda285a68f3d7cc583e539c254f23e",
+   "size": 27430
+  },
+  "ScorePDF/017_Mozart_PSon_K545_C_i_B1-12.pdf": {
+   "git_blob_sha1": "a94c7552c24a1cb203dfb001b2880bfc79424f42",
+   "sha256": "4e76da6454c9e611a30436a2ed4d7c46462f58a16e4a454a673825b908a0d87c",
+   "size": 26595
+  },
+  "ScorePDF/018_Mozart_PSon_K570_Bb_i_B1-22.pdf": {
+   "git_blob_sha1": "bbbde8757a42a777d91fcec6bf7a1dba18dd5ffa",
+   "sha256": "d3ca9ffb6d7b903662aad35731479a0d83bbd51666abf9dc373e5e163a83b546",
+   "size": 28412
+  },
+  "ScorePDF/019_Mozart_PSon_K570_Bb_ii_B1-12.pdf": {
+   "git_blob_sha1": "c7196363b9a4fa8b911ca0cdb8de1f5483de0db1",
+   "sha256": "ca0565d3d04dc24495980394c285d3f0c5a1a4fb2a00eef0eea95175fbde829a",
+   "size": 29661
+  },
+  "ScorePDF/020_Mozart_PSon_K576_D_ii_B1-16.pdf": {
+   "git_blob_sha1": "361c29b727b64fe03945306d4297b904ce35bf46",
+   "sha256": "47ee9756781cdcf169a6965270b04f4cec3116506673ec303263ca1bd82006e9",
+   "size": 32291
+  },
+  "ScorePDF/021_Chopin_Ballade_No2_B1-18.pdf": {
+   "git_blob_sha1": "51f634190b4cd01a9156449001b59efd4fe93ff1",
+   "sha256": "50a80fba6e57323087ba07fd0ad30cfcf3d80d6efd765e45a6ff1901ea7113d6",
+   "size": 38758
+  },
+  "ScorePDF/022_Chopin_Etude_Op10-3_B0-21.pdf": {
+   "git_blob_sha1": "65c31e3860e5b5e40728c7378dd729642df91a12",
+   "sha256": "2cee154acc9f9ae37eed5805f790ec5f2f6bf81d4467938966a38deff3254009",
+   "size": 42433
+  },
+  "ScorePDF/023_Chopin_Nocturne_Op9-2_B0-12.pdf": {
+   "git_blob_sha1": "8c28e2694dfdaba7a58b34a2c15edafcc310ded7",
+   "sha256": "50d84406e9844f92e6305effdd6731cb9c1d4f007b393b4d792f23cdc36587a7",
+   "size": 60827
+  },
+  "ScorePDF/024_Chopin_Mazurka_Op7-1_B1-24.pdf": {
+   "git_blob_sha1": "8417631390bb8accd89265c61e868bc7d047f1fa",
+   "sha256": "6eab0fee38faaf8277c655d9b52effbc90c7b27eeb169971e13f146c4e940548",
+   "size": 44025
+  },
+  "ScorePDF/025_Chopin_Waltz_Op64-1_B1-36.pdf": {
+   "git_blob_sha1": "0e70824c7f65bb44cb8b843f8497386384dbcd43",
+   "sha256": "0022f337f1f4a9db15796dc2e80fa95687f5109b4f819ba0e07e0772d104849d",
+   "size": 49984
+  },
+  "ScorePDF/026_Chopin_Polonaise_Op40-1_B1-15.pdf": {
+   "git_blob_sha1": "35366deef10325433aa8831dd610f9a447d12237",
+   "sha256": "633302a088347e5b4cf3896c2ac2668f35cf51c7228cf3ff1b3e5442376f357e",
+   "size": 67223
+  },
+  "ScorePDF/027_Chopin_GrandeValseBrillante_Op18_B5-37.pdf": {
+   "git_blob_sha1": "378dafc5fc18af2ffa42bdc166d4b00c7fc3e057",
+   "sha256": "d36c097a3b32f67e4d26f4b5320a036fed18ba932d0eaaa945719c96d4f70817",
+   "size": 50096
+  },
+  "ScorePDF/028_Chopin_Prelude_Op28-17_B1-18.pdf": {
+   "git_blob_sha1": "6420144ca3b430509e82ca59059cc349b8603f2b",
+   "sha256": "2352e2c5f7c55893df9cb26119010a773f06137a7c6d9015a47b5ced98838f2c",
+   "size": 42532
+  },
+  "ScorePDF/029_Chopin_Scherzo_No3_B57-105.pdf": {
+   "git_blob_sha1": "0713e110234bdd5add0c8a96b61ba5b528eea387",
+   "sha256": "a58e0f4f3e8b9a761ac8416fa55c41fbffcc9af63cd1076b64aba201a16cf695",
+   "size": 41862
+  },
+  "ScorePDF/030_Chopin_PSon_No3_i_B0-16.pdf": {
+   "git_blob_sha1": "5e272c69261b6eae84c81833e01946a86767a5de",
+   "sha256": "630266f1a75e33a9314928183100005d720e27e5dd1f123cc2675da2567d495c",
+   "size": 37254
+  },
+  "ScorePDF/031_Chopin_Etude_Op10-12_c.pdf": {
+   "git_blob_sha1": "371d8319c05204e47445171d79de10561f89c78e",
+   "sha256": "34a49f8982820b37796146fbbb288e2dbee064f36da9725e3f8f0e8a9e965d50",
+   "size": 192572
+  },
+  "ScorePDF/032_Bach_Invention_No2_c.pdf": {
+   "git_blob_sha1": "d9fd7d3ec0facecf22865dde1dcded07fee46050",
+   "sha256": "627ede0f7a1a9b4241144ca55e281aa0c9f3ff204ffd3f2639aa343f49eeef10",
+   "size": 60514
+  },
+  "ScorePDF/033_Bach_Invention_No3_D.pdf": {
+   "git_blob_sha1": "d2ad8c66c0e5f85c6f4802ee746f57f224410827",
+   "sha256": "d4cecf3f63df73ad42ccd656db4580a1466ae32bd3f50d125229aca38840c237",
+   "size": 54868
+  },
+  "ScorePDF/034_Beethoven_PianoSonata_N8_Mov1_B1-134.pdf": {
+   "git_blob_sha1": "81bc8dee75fd5037a099e6d08cdad0082feba568",
+   "sha256": "583abde31250b7d3e340695034fcfe752eb38f27636d336e83d9c0301ebb6cf7",
+   "size": 165493
+  },
+  "ScorePDF/035_Debussy_Arabesque_No1_B1-16.pdf": {
+   "git_blob_sha1": "0ff3d1737565671404024fff2ed26bb42cabaf82",
+   "sha256": "c10b2b5a37953b2444017729b28faa0e093f93be1d86199a3d8ec69b2d60b521",
+   "size": 40400
+  },
+  "ScorePDF/036_Debussy_Arabesque_No2_B19-37.pdf": {
+   "git_blob_sha1": "0594f3ff6888cecdfd48881cf2424f3a9fe6ddda",
+   "sha256": "1d7dfc1f4044a5377d2d223b6bf048105edd64e6ae2c76016fd2174cccd5ba97",
+   "size": 56958
+  },
+  "ScorePDF/037_Debussy_ClairDeLune_B1-8.pdf": {
+   "git_blob_sha1": "9170878e378de6f49c4c5c88b9bc0abecfe2d661",
+   "sha256": "fa759a1179c218347d27a0eb67a74e689b6950a8eeb4c1ba8fd0c241bed3ea1f",
+   "size": 51339
+  },
+  "ScorePDF/038_Debussy_LaFilleAuxCheveuxDeLin_B1-10.pdf": {
+   "git_blob_sha1": "5ea7525b37a3e8555102b72878125794c6caf18c",
+   "sha256": "fc3a51da622fb43afa110ee475b0ca915bd2027fa867026cb210ee506023445c",
+   "size": 52796
+  },
+  "ScorePDF/039_Ravel_PavanePourUneInfanteDefunte_B1-12.pdf": {
+   "git_blob_sha1": "06af9a97c2c7f376ca668b5d02567a1933445562",
+   "sha256": "aa9587c04181081c033d5962202be4a18754197274316d760b3a6601cda24152",
+   "size": 57393
+  },
+  "ScorePDF/040_Schumann_Kreisleriana_op16-8_B0-24.pdf": {
+   "git_blob_sha1": "994e3cd1300b9cc1cde40438572654a34eb527e3",
+   "sha256": "1efe239616f63f46e6332f42eb0b8fcf23b07ff774f74ee1d3a9fefbb427ddb8",
+   "size": 73061
+  },
+  "ScorePDF/041_Bach_Sinfonia_No12_A_B1-14.pdf": {
+   "git_blob_sha1": "815b3eefd6df8fe469d4858089294abe0fda113a",
+   "sha256": "c511ad51d5c6c86aa312fb372897416cf681a0a634b61197069c04986ebe8d97",
+   "size": 50077
+  },
+  "ScorePDF/042_Bach_WTC_I_No2_Cm_Prelude_B1-18.pdf": {
+   "git_blob_sha1": "b8be9fcb976cef5ff3e019f0fe4eb2b6b6736c87",
+   "sha256": "2f12893ca98d3a1dfdd1786ca6a6493a2adf470ca29020684d80ef07ba2d522c",
+   "size": 49962
+  },
+  "ScorePDF/043_Bach_WTC_I_No7_Eb_Prelude_B10-25.pdf": {
+   "git_blob_sha1": "68673d7f330566caeb64c0595d1385339e80b12e",
+   "sha256": "4fe55be74e74dd26bc1caf8e2be0a9d68d699c992749bff82f98776c0c735c69",
+   "size": 36553
+  },
+  "ScorePDF/044_Bach_WTC_II_No11_F_Prelude_B1-16.pdf": {
+   "git_blob_sha1": "3a3ffe05f1fb6c532c18e8012cc38bf81b7e1683",
+   "sha256": "156d39dfc413dcc3ede973dde5d12f349b401fdd080c4f84679912b72bae9e65",
+   "size": 48575
+  },
+  "ScorePDF/045_Bach_FrenchSuite_No3_Minuet_B1-16.pdf": {
+   "git_blob_sha1": "0372322041b8aff8250f669f1df29d7891977ba7",
+   "sha256": "5d3d32c661fed7e7c419e0b422511f5acbabaf1b8af97269a4d63132f67f64f4",
+   "size": 36609
+  },
+  "ScorePDF/046_Bach_FrenchSuite_No3_Minuet_B1-16.pdf": {
+   "git_blob_sha1": "46c128b2c7f4587e5414196956d1f3fa401d7bca",
+   "sha256": "5a560879f63f2549eb17d6a108fbbefbd106efdf96ffed763dac523bac2dac42",
+   "size": 34061
+  },
+  "ScorePDF/047_Bach_FrenchSuite_No5_Gavotte_B1-18.pdf": {
+   "git_blob_sha1": "0de8117a1806fda5e00d4bb579656bbb488519f5",
+   "sha256": "deebb69259a73b279c2cd1c107176f8f3a7dc3d34c9b8beba1f46f2cbbe110dc",
+   "size": 32981
+  },
+  "ScorePDF/048_Bach_EnglishSuite_No2_Prelude_B1-19.pdf": {
+   "git_blob_sha1": "dfe0bb359b258c591a04ed964339a750c8b2b4a9",
+   "sha256": "14c62ce2288ec8b3069140809717ddfe8364186381b4975f696a995dfdcaad26",
+   "size": 36414
+  },
+  "ScorePDF/049_Bach_Partita_No2-6_B1-22.pdf": {
+   "git_blob_sha1": "4ef9c29e62c263c66f2d2e41cd01d4a5291a9c9b",
+   "sha256": "6ff9de25b2becbeb95ebc0422ffb0f992737b76c7076d1a13f3eed485b08ea65",
+   "size": 36764
+  },
+  "ScorePDF/050_Bach_Partita_No4-2_B1-11.pdf": {
+   "git_blob_sha1": "ea0865d0243b640f875cf413dd19b60178aa13f4",
+   "sha256": "cbc2ec84a5548ef6e7c769f88086997e3c405767f814b1178ade6cbd1269d090",
+   "size": 41072
+  },
+  "ScorePDF/051_Mozart_PSon_K279_C_i_B31-45.pdf": {
+   "git_blob_sha1": "78b2efa9326074e0d0b8529e48bbf761e49d7c2e",
+   "sha256": "c34085a03237936901be6f87fe224a728a4845d2027d51ffc6b720d4795db7e3",
+   "size": 39805
+  },
+  "ScorePDF/052_Mozart_PSon_K280_F_ii_B9-19.pdf": {
+   "git_blob_sha1": "3bf16edeb5817b79025af21fdcef996f3544ee6f",
+   "sha256": "e161de29dcc6d908d22ac20440288792c43ca340c3042673cc5a451b473fc48f",
+   "size": 33592
+  },
+  "ScorePDF/053_Mozart_PSon_K281_Bb_i_B8-21.pdf": {
+   "git_blob_sha1": "5835919d6b8040e775c7f67faf65886fb1a75138",
+   "sha256": "9b5fdb3e7b037b22d5177a55874c0be31f0859d8b5000ab0c5666f0951d2005e",
+   "size": 40882
+  },
+  "ScorePDF/054_Mozart_PSon_K282_Eb_Minuet1.pdf": {
+   "git_blob_sha1": "db81f24f137b26070ea2309b1448163a666769b3",
+   "sha256": "5cb24c911b403b89137dd122ed7e7aaa8b4995286db969b98afa61ed5d3c1f86",
+   "size": 40727
+  },
+  "ScorePDF/055_Mozart_PSon_K284_D_i_B1-21.pdf": {
+   "git_blob_sha1": "7bbc5392740cf193ed814908ce768e1781563d04",
+   "sha256": "f5d8fd999b6ed723742a85df2e35c5bf2a003d0136bf2cce8737661bc2e32183",
+   "size": 53970
+  },
+  "ScorePDF/056_Mozart_PSon_K284_D_iii_B0-17.pdf": {
+   "git_blob_sha1": "87e08ce99839f6b51f4adb32d2a1799e55279a58",
+   "sha256": "d7ad31273d9f601064953e7443391e436b944212fb48fc6eae64406bb13e5a09",
+   "size": 47272
+  },
+  "ScorePDF/057_Mozart_PSon_K332_F_iii_B1-32.pdf": {
+   "git_blob_sha1": "cab051deea5c2fd251104dc049494f76c5364029",
+   "sha256": "b9427eb3b794b07ffc326bf83db4abedb25ea41720447511bbc51afefc7607b7",
+   "size": 47801
+  },
+  "ScorePDF/058_Mozart_PSon_K457_c_iii_B0-30.pdf": {
+   "git_blob_sha1": "09f21bc0f7602bab9c02d066e4de012971da4e76",
+   "sha256": "75a364459fb309919ad5d472039b2f4d7ff51dba637acac6430145b828baaa56",
+   "size": 41294
+  },
+  "ScorePDF/059_Mozart_Fantasie_K475_B5-15.pdf": {
+   "git_blob_sha1": "dddba48f2d108aa002a9dc6ecf9f80501aaf5cf8",
+   "sha256": "9a6eea7fbee1e0367919f16b64fa050837576ec672196f470abad23084824742",
+   "size": 31734
+  },
+  "ScorePDF/060_Mozart_PSon_K576_D_i_B8-27.pdf": {
+   "git_blob_sha1": "240a0cd9d52717953957ee2beeb01758349810b9",
+   "sha256": "ae89d148d818f7be98123e45cc90f3f79130bd27a249becb276acd9600c234e2",
+   "size": 37057
+  },
+  "ScorePDF/061_Beethoven_ForElise_B77-103.pdf": {
+   "git_blob_sha1": "aedd5a54c16ddf62ab1a86690001a9bafde849f8",
+   "sha256": "a724a65ca64f7a30990cd371d4750904f258bda2019edba5173cf846c32cce7a",
+   "size": 45469
+  },
+  "ScorePDF/062_Beethoven_Minuet_G_WoO10-2_B0-16.pdf": {
+   "git_blob_sha1": "9257faff0f6ad468c530d7734d501599f2d7634b",
+   "sha256": "d9d3716eb3a0279458358d09f87c04f9a8c98b9f8cc07d8d7b3e6071c8a8e793",
+   "size": 30476
+  },
+  "ScorePDF/063_Beethoven_PSon_No8_ii_B1-16.pdf": {
+   "git_blob_sha1": "2cc5959468f2ddbf8759308a72b1d948522e9f13",
+   "sha256": "ac6de51d95d275aee218a2b9c47c5b1ff32bb1d9977a8df366bc3935177c6a65",
+   "size": 57383
+  },
+  "ScorePDF/064_Beethoven_PSon_No8_iii_B78-106.pdf": {
+   "git_blob_sha1": "576397afa2bedac2e4c29e341b3f656afd277913",
+   "sha256": "80f9529e137e49d92a93dd10da9e2ccb0968b4125d9d85ff9161b21441fbd785",
+   "size": 41133
+  },
+  "ScorePDF/065_Beethoven_PSon_No14_i_B1-15.pdf": {
+   "git_blob_sha1": "d79cef3b64f756d44dece8e351e658cd2ef624de",
+   "sha256": "46452d824d7c7e3a1e49d5b8cf0bc2169fc510b0957cd2cd7ecc8cd3491458fa",
+   "size": 59946
+  },
+  "ScorePDF/066_Beethoven_PSon_No14_ii_B0-36.pdf": {
+   "git_blob_sha1": "258d5e543de4ca44d56068f436791e99db019144",
+   "sha256": "9545520a801484245cdbf047342fba40ec6df92a5f388e53c0aa68abb1da44fa",
+   "size": 37944
+  },
+  "ScorePDF/067_Beethoven_PSon_No14_iii_B37-57.pdf": {
+   "git_blob_sha1": "9d4ac9f16344922666facc9e372254bf9ee0826c",
+   "sha256": "12d5fe17ffbe888563da590ac893790d89692a6e6677520370364d6a7479f095",
+   "size": 48970
+  },
+  "ScorePDF/068_Beethoven_PSon_No21_i_B50-67.pdf": {
+   "git_blob_sha1": "9db6913bbc51158162bbb668203e0625625b0b7c",
+   "sha256": "9783a5562ff9f8d6d963785f843f78178d0fef3e9485c3015c42a0789a63814b",
+   "size": 48890
+  },
+  "ScorePDF/069_Beethoven_PSon_No21_iii_B175-199.pdf": {
+   "git_blob_sha1": "0141177ba1ae387eef5d18dd22ae8c3efe02fc91",
+   "sha256": "af4d3d8e17fa418e65f2ee4effb9cbb4899310a7ec55db15f098309d5881da64",
+   "size": 49136
+  },
+  "ScorePDF/070_Beethoven_PSon_No23_ii_B36-53.pdf": {
+   "git_blob_sha1": "09ad590993f1312234f32e960066481ae02f7326",
+   "sha256": "a4674cab5d7cded26ee1006406385f70f4705003f2e312a0d8e04346a13c3135",
+   "size": 40510
+  },
+  "ScorePDF/071_Chopin_Ballade_No1_B8-23.pdf": {
+   "git_blob_sha1": "bdf017f05d19789df451ddbc219e4336296a8fdb",
+   "sha256": "3e9c7a4a95869286553efad71d9b509abd3368424264adb3a2f25190b6aaea1b",
+   "size": 51908
+  },
+  "ScorePDF/072_Chopin_Scherzo_No2_B304-328.pdf": {
+   "git_blob_sha1": "2f4fa0778d5e392438b513b5e3b6418b3ad5ed70",
+   "sha256": "88bca602e0a1fa894b97f3b2752ad502b8ae33bec79b9052ce69d0c7b39c3f57",
+   "size": 45769
+  },
+  "ScorePDF/073_Chopin_Berceuse_B1-14.pdf": {
+   "git_blob_sha1": "876552747fb3b9f50a123b79568c65bed9838664",
+   "sha256": "e0cd0b59c49ee2438a1e1999ab6573a401b2b4bfec6f52989a351b82929f2051",
+   "size": 49564
+  },
+  "ScorePDF/074_Chopin_FantaisieImpromptu_B5-24.pdf": {
+   "git_blob_sha1": "6762758e85f5013b018341a85b8841d44951995d",
+   "sha256": "97f38d6ad074d639704f35b18228706e1397d6e294ce9484c59f12b32946f41c",
+   "size": 66848
+  },
+  "ScorePDF/075_Chopin_Waltz_Op64-2_B0-19.pdf": {
+   "git_blob_sha1": "22747b8ae22993b90647b2e95dd6c59b4407f4b3",
+   "sha256": "f1246a2dc896218e3360f99fdeff97c115d73661c95ec7cabeac09ff7194337c",
+   "size": 46387
+  },
+  "ScorePDF/076_Chopin_Waltz_Op69-1_B0-16.pdf": {
+   "git_blob_sha1": "9dd1ffbdc3fc2304c32efb8543164f3cedc15e67",
+   "sha256": "ddda19d5010bdc91774de48d092ca3ec7e453104b9d3f7c514b1bdaabde27931",
+   "size": 54566
+  },
+  "ScorePDF/077_Chopin_Waltz_Op69-2_B33-65.pdf": {
+   "git_blob_sha1": "15d702f540e8c5d30c93d06514e4c275bd6209a4",
+   "sha256": "8c72359f41d3b23bcdc9a670038164ba4d073886bbd50cae83477efcdfeb97d1",
+   "size": 45439
+  },
+  "ScorePDF/078_Chopin_Etude_Op25-11_B5-12.pdf": {
+   "git_blob_sha1": "87b6d2ea97b97c1d495cd0134df8c7df586fbf2a",
+   "sha256": "a4db20e4c6fd2e2deee66bdd57f4f0d5bfd824ab3bae529956fa2ea977bd6081",
+   "size": 64372
+  },
+  "ScorePDF/079_Chopin_Prelude_Op28-7.pdf": {
+   "git_blob_sha1": "6b10dc55361d8d80a344951115f7f6ba7f4bf2d8",
+   "sha256": "e87fd32742833597ad087b512a58dafbae95df1147b971758fbb884c9b035e1c",
+   "size": 38449
+  },
+  "ScorePDF/080_Chopin_Prelude_Op28-19_B0-32.pdf": {
+   "git_blob_sha1": "03168ea3742dc60fdc4822bb3f97e418c9726f0e",
+   "sha256": "5e4cf0e83469dcd37986a3fd18711818564512b0d72a294fad3f48d90f839afd",
+   "size": 71027
+  },
+  "ScorePDF/081_Schumann_Kinderszenen_Op15-1.pdf": {
+   "git_blob_sha1": "88522be36f4e3b7b9707a8b6cdd7afa27872b29a",
+   "sha256": "aab8a38ed9cc1d35ff87e4532414e1672330dfb312d0ee1bbb037684586ca478",
+   "size": 44793
+  },
+  "ScorePDF/082_Schumann_FrohlicherLandmann_Op68-10_B0-15.pdf": {
+   "git_blob_sha1": "fbcc903945edc13cd1b8df22150575cb657e9769",
+   "sha256": "4bd3b0d8d98c95ac665c8decbdb15e82b9ff539b99c69e2b349ace5182d5491c",
+   "size": 29848
+  },
+  "ScorePDF/083_Schumann_Kreisleriana_Op16-1_B0-17.pdf": {
+   "git_blob_sha1": "750418cd18e2be9cec0cb622bc7090cb9d91fc55",
+   "sha256": "0c91ba554dee9f3d517d8530edc6d0043149ef660220dab665ecf2c16036f1ea",
+   "size": 55990
+  },
+  "ScorePDF/084_Schumann_Kreisleriana_Op16-3_B0-32.pdf": {
+   "git_blob_sha1": "7cdcd6fac53d4886fccf8f9541840eef7b81607a",
+   "sha256": "a06748acd3b27f996d72fb0130eab42a9cd42e4abb1b066c5b8a1df7e763444f",
+   "size": 73596
+  },
+  "ScorePDF/085_Schumann_FantasieStucke_Op12-7_B1-38.pdf": {
+   "git_blob_sha1": "43f6655811c1f010c0b9abff58c19c0a4ca04ebd",
+   "sha256": "2d461875520ea8be804e0aed2cbcc5b8d72d9f31af02407aed4b4b337a4b60fc",
+   "size": 55639
+  },
+  "ScorePDF/086_Debussy_SuiteBergamasque_Prelude_B1-12.pdf": {
+   "git_blob_sha1": "738150024def712d654d68daa48b0a76ec83f3a1",
+   "sha256": "53dbd3659d0766d9cb8b943fd261073c517475daab38c7d2f6af6879cba1ebb1",
+   "size": 54340
+  },
+  "ScorePDF/087_Debussy_SuiteBergamasque_Passpied_B1-19.pdf": {
+   "git_blob_sha1": "8d104b91d404a2515907b6485fd0405d5e224c62",
+   "sha256": "e94476ae0425ce618ad60696b3b98ea46313c0f2583b6f8f739dafd17654a50f",
+   "size": 53403
+  },
+  "ScorePDF/088_Debussy_Prelude_Book1_No2_B1-22.pdf": {
+   "git_blob_sha1": "11eb6e550ceca75c7660e2d6f72d4f72293b6778",
+   "sha256": "4bf2b837ffad33e1973a6a9c52d8ccb9f9d05d2388996b8486fa6da178287995",
+   "size": 40937
+  },
+  "ScorePDF/089_Debussy_Reverie_B1-18.pdf": {
+   "git_blob_sha1": "30b62a2e5a08ac6e8be3bfbb79c2b43ff2b6af82",
+   "sha256": "c0477ec4f234bf8c1a254641fc0038193ac5a56605d698dc8820e8670aac82f9",
+   "size": 56559
+  },
+  "ScorePDF/090_Debussy_GolliwoggsCakewalk_B1-25.pdf": {
+   "git_blob_sha1": "487de1f16c45c32d4809cf99db152d7d492a0924",
+   "sha256": "f032a1bc71bb2f6e1970d772ed82d450e498f8c05393aca8e8df66fe957185ea",
+   "size": 60362
+  },
+  "ScorePDF/091_Grieg_LyricPieces_Op12-1_B1-12.pdf": {
+   "git_blob_sha1": "2ece796657d5760e7ad80014dd106c3ede988bc4",
+   "sha256": "2b66313e94a18856ada1e26534348ec31e279c6dcd5dc4fcc615a686a93748d4",
+   "size": 32287
+  },
+  "ScorePDF/092_Grieg_LyricPieces_Op38-1_B1-16.pdf": {
+   "git_blob_sha1": "5b09f34d182c6237e8b26c60f278ef39d7044945",
+   "sha256": "80020ac6ae59d06fc1dc5685b4cd042ff5d4f615faadadf4b7a19bb421a9f06b",
+   "size": 36969
+  },
+  "ScorePDF/093_Grieg_LyricPieces_Op43-1_B1-16.pdf": {
+   "git_blob_sha1": "de1352623c1b143fae6fee59795676cfbf03d110",
+   "sha256": "6a5e1926dd253c628b5c2d8136ab2dcc25d101789cd4762684696e397c01263d",
+   "size": 56168
+  },
+  "ScorePDF/094_Grieg_LyricPieces_Op54-3_B1-29.pdf": {
+   "git_blob_sha1": "7aa9b09e782a130a4516623e0e6add604fb9f770",
+   "sha256": "f6e5d3994543d03abe78a92e77f9bce9a7b05b3da6a20027f8052c3002cfaf84",
+   "size": 58262
+  },
+  "ScorePDF/095_Grieg_LyricPieces_Op62-2_B0-12.pdf": {
+   "git_blob_sha1": "891d45145637601230663461bf63f5a2308cf8f4",
+   "sha256": "f5de9d13a8c89a07b884cf3be54bf4c5d755ad51db6318b590449f556a38b588",
+   "size": 40756
+  },
+  "ScorePDF/096_Grieg_LyricPieces_Op62-4_B1-29.pdf": {
+   "git_blob_sha1": "0b3f07077fa1c0b093e70a73f193959684881d95",
+   "sha256": "7ebb5df23ef99f318a15ba767dfb3c7696e78c79a92c7bc86f96500c6126ccee",
+   "size": 70855
+  },
+  "ScorePDF/097_Grieg_NorwegianDance_Op35-3_B1-32.pdf": {
+   "git_blob_sha1": "945c73916d0d895efc2a6f0c437ebb1bfa46c999",
+   "sha256": "3bdab2db7df686225f0bec52e888a67b272efad611c069d62b675fe6f7e227e9",
+   "size": 75165
+  },
+  "ScorePDF/098_Grieg_PeerGynt_Op46-2_B1-16.pdf": {
+   "git_blob_sha1": "2c39ae88604374992ac93098d1179f376b684806",
+   "sha256": "a244e700633615ac80afd9f9d8b81f88c41c081ab115c657a72a0fc8889bcc54",
+   "size": 37762
+  },
+  "ScorePDF/099_Grieg_HolborgSuite_Op40-5_B0-30.pdf": {
+   "git_blob_sha1": "ad1127833b7ef468e74d3e44e29b4ef6bb11b5b7",
+   "sha256": "70d2f2abb90105b3f311d0c386538d6486f694f20dc807627f5cf0a87812f62d",
+   "size": 47333
+  },
+  "ScorePDF/100_Grieg_PSon_Mov1_B1-36.pdf": {
+   "git_blob_sha1": "5a3e3480469669b39116a58ec71f682a464050d7",
+   "sha256": "f761cf19d3d0d8cebc523ca164807acc218c616a1a76d869fe3a1d1e22460dfa",
+   "size": 64103
+  },
+  "ScorePDF/101_Mussorgsky_PicturesAtAnExhibition_Promenade_B1-12.pdf": {
+   "git_blob_sha1": "bdd794fa50285c2ec8dfb4857ae9e068bd40d1bc",
+   "sha256": "e7bfa757ce30cfa46632650be97377f0f192024bb70fb4912f891cef7821af33",
+   "size": 35343
+  },
+  "ScorePDF/102_Mussorgsky_PicturesAtAnExhibition_Bydlo_B1-20.pdf": {
+   "git_blob_sha1": "a6c7916ff5abc90680b20ed6156d079ad54ff340",
+   "sha256": "a9ff7456a36c5fc96b23a19b0e42e78669653983d067f32f2d64652ac7b4c05e",
+   "size": 34584
+  },
+  "ScorePDF/103_Mussorgsky_PicturesAtAnExhibition_GreatKiev_part.pdf": {
+   "git_blob_sha1": "122ef5c03640449b08d29fa581b159384162f824",
+   "sha256": "97df101ff1629ebb4d3dea5f83131bb8304619fbf0b75e97e0836b08bd0f8be8",
+   "size": 37258
+  },
+  "ScorePDF/104_Liszt_Liebestraum_No3_B25-37.pdf": {
+   "git_blob_sha1": "979ab2a37da3f6e6edac77f49ef96068abd2cb35",
+   "sha256": "a4271b0e014dacb31bdfbaaad34d937ad51961f77cfe0649b1fbd6c2b2c6976b",
+   "size": 33509
+  },
+  "ScorePDF/105_Liszt_HungarianRhapsody_No2_B9-26.pdf": {
+   "git_blob_sha1": "65e75601454214dae43cda1e6c3856a750a9d724",
+   "sha256": "42c392a8f8fc2e8eacdac82d31124ff6e1ba4d8cf8cc2ab9f9f3df1826f60a6d",
+   "size": 43826
+  },
+  "ScorePDF/106_Liszt_LaCampanella_B22-41.pdf": {
+   "git_blob_sha1": "e3fbb4fb8757a4ca42b88a7e1b26ff9c549bf572",
+   "sha256": "7b5780fdaaf5cfba839fa6d49489141006c6f322971c1f2c6cabb191ba114698",
+   "size": 45041
+  },
+  "ScorePDF/107_Rachmaninoff_MusicalMoment_Op16-4_B1-9.pdf": {
+   "git_blob_sha1": "7f555ec4fff1997541a164a60cedd76729633e41",
+   "sha256": "483b5719df89692782077a6d32390649c9cf72da5a2a2d0948660f0692a72267",
+   "size": 47191
+  },
+  "ScorePDF/108_Rachmaninoff_Prelude_Op3-2_B0-8.pdf": {
+   "git_blob_sha1": "9625c20fcca84b80dc4256e695ee02e8f550618c",
+   "sha256": "ee7ef0d57508e99df408f9c1108dd59630352450ff3dc99b431825b3e51551f9",
+   "size": 48846
+  },
+  "ScorePDF/109_Rachmaninoff_Prelude_Op23-5_B1-9.pdf": {
+   "git_blob_sha1": "3feaa11df86ef38bb16e07fb0de1c2623c160671",
+   "sha256": "0e04fc2c1c0fa73e198893e10a5aa29b708d57d080b7f875d4bcb8d3c9a253c2",
+   "size": 51478
+  },
+  "ScorePDF/110_Rachmaninoff_Prelude_Op23-9_B1-11.pdf": {
+   "git_blob_sha1": "272d4944de226f5de80989b42911d2dc992edf75",
+   "sha256": "89cdb9f1375424f255f14618d39210c6b5b46efe974d2245279820d5aa0738f9",
+   "size": 46142
+  },
+  "ScorePDF/111_Schubert_Impromptu_Op90-3_B1-8.pdf": {
+   "git_blob_sha1": "3f375e23e3d3f9ee817534ffd2a0d46444246140",
+   "sha256": "d7803e51ff927203afeb471119cee6bc99225131fe6ffd801b00422d7253dd6c",
+   "size": 50643
+  },
+  "ScorePDF/112_Schubert_Impromptu_Op90-4_B31-50.pdf": {
+   "git_blob_sha1": "afed0d3010aaf0bd91ea342cf0a45a3e4ee35450",
+   "sha256": "a5df03464d734f78e0e821fc1d3bb318eb66afbfffdad5587d5963199fe36ba7",
+   "size": 42421
+  },
+  "ScorePDF/113_Schubert_WandererFantasy_B18-46.pdf": {
+   "git_blob_sha1": "cdf5ac64cebe2d7a92e7c6b7438f7f6bc70a6db5",
+   "sha256": "2bc47dec843fb3bafcdf08ff58aadbd1e961b9f71043f4346d4cac49e6135de6",
+   "size": 59394
+  },
+  "ScorePDF/114_Schubert_PSon_No16_D845_Mov3_B0-28.pdf": {
+   "git_blob_sha1": "af1b8f5aedcb40e2d19982a1486d14152805b3eb",
+   "sha256": "7e2ff8529f41bf86b4874c208414a12a6fa9abccc118d365773b7006a420f1a6",
+   "size": 54846
+  },
+  "ScorePDF/115_Brahms_Waltz_Op39-15_B1-23.pdf": {
+   "git_blob_sha1": "4cbe4d7be9683410c224bf2fffabdc85863e1131",
+   "sha256": "ce729fc052bc947cc9b03210583133e3c8ffc94fbcbc7b83eba0318baf75277c",
+   "size": 33433
+  },
+  "ScorePDF/116_Brahms_Intermezzo_Op118-2_B8-25.pdf": {
+   "git_blob_sha1": "ac664036e509d0446500dcb04212f4afd5ed17c7",
+   "sha256": "c25586933afc8d4614a8941111f878c259bd8746fa5c767bec949f551f3579f3",
+   "size": 38365
+  },
+  "ScorePDF/117_Brahms_Rhapsodie_Op79-2_B14-25.pdf": {
+   "git_blob_sha1": "8b89a6d62f91fceea3bff1d1598477ec9d9cf72f",
+   "sha256": "957f6e0715edf2b2d4552af38a6ee1eba6811f916b6fa3130bc81ab8d34e32c8",
+   "size": 50964
+  },
+  "ScorePDF/118_Joplin_TheEntertainer_B1-21.pdf": {
+   "git_blob_sha1": "3c3b126340fc7231cb068792578b4823bd220b96",
+   "sha256": "35675024e1a0d66051fdcc3e2e967e0c46c417948ee7299431607cd47137baf4",
+   "size": 52214
+  },
+  "ScorePDF/119_Joplin_MapleLeafRag_B0-18.pdf": {
+   "git_blob_sha1": "245331ba4946cd2d4f82cb02ed132709d52030a0",
+   "sha256": "7a91a1283255461f68ae62ebe6f9ffbe0727cf27bb0ace123e91e38f2bc8d00a",
+   "size": 49269
+  },
+  "ScorePDF/120_Joplin_ScottJoplin'sNewRag_B1-21.pdf": {
+   "git_blob_sha1": "31704478d80574cf8b178c939576553e490f941e",
+   "sha256": "1ed3c52bfeb9e898693929f3af07022e58849084d18de25c3b779744d15b1bdc",
+   "size": 51030
+  },
+  "ScorePDF/121_Beethoven_PSon_No4_Mov1_B1-32.pdf": {
+   "git_blob_sha1": "b1980408ba42cc5e1228df5e9abe3f1f4a17b1c9",
+   "sha256": "43259552cabb56f6c38e1b4ea1adc648205b954d4e70020dd342f02d056352ed",
+   "size": 47133
+  },
+  "ScorePDF/122_Beethoven_PSon_No5_Mov1_B17-48.pdf": {
+   "git_blob_sha1": "8076b93677f2f1e08ad8b182279ecfe98b3018a2",
+   "sha256": "569ae06d22396f4c637dd4b6fb6ac3da3049bea71587f44761c6c601b8bc0d99",
+   "size": 41903
+  },
+  "ScorePDF/123_Beethoven_PSon_No3_Mov2_B11-18.pdf": {
+   "git_blob_sha1": "04631e22aeccac2707258386f89b2d729fd2ae34",
+   "sha256": "ed07441dd03aedb86e5b00c65b7276a5080a720bb84960c7c8bf1666bef478e5",
+   "size": 31794
+  },
+  "ScorePDF/124_Beethoven_PSon_No24_Mov1_B29-42.pdf": {
+   "git_blob_sha1": "07a6370bb3b61d667f7005eae2a8218d59c74226",
+   "sha256": "7bdfc5a58c804dfebaf6bb3d2234774cb0e8296ae948128211d9ccfa90ee5288",
+   "size": 38401
+  },
+  "ScorePDF/125_Beethoven_PSon_No24_Mov2_B1-22.pdf": {
+   "git_blob_sha1": "b2dc662d194ea07a458a065872edc5be9d320c81",
+   "sha256": "6f2d88893a560167b7a8952c9b41df02ab0c071090cd45d2609148506725972f",
+   "size": 39209
+  },
+  "ScorePDF/126_Beethoven_PSon_No28_Mov1_B1-10.pdf": {
+   "git_blob_sha1": "83c421d90aeb8e149b522b2f48ec092a344b999a",
+   "sha256": "836a972a73ec74b4c8aa1d6ceac523c6a353e45e2951b45841df6c2f2701ec57",
+   "size": 28319
+  },
+  "ScorePDF/127_Beethoven_PSon_No28_Mov2_B0-12.pdf": {
+   "git_blob_sha1": "50b3779e0c27c6360864aad5806074cb114d130b",
+   "sha256": "07bdb6c5e98c670b5f62cc3b4fa24c7c157fc1901963987c7514b512c139ae6c",
+   "size": 37135
+  },
+  "ScorePDF/128_Beethoven_PSon_No30_Mov1_B16-44.pdf": {
+   "git_blob_sha1": "14cea76cf29e7f4c8952e5f5071bc834901cb35d",
+   "sha256": "1bce02f0edd4a5817b2fff02a40649dcc4835490eeb7a44087e99075b560c3f8",
+   "size": 52053
+  },
+  "ScorePDF/129_Beethoven_PSon_No30_Mov3_B68-99(Var3).pdf": {
+   "git_blob_sha1": "e086969ed8031a269eb6b4b0c21dae2463d2520b",
+   "sha256": "08c7de180eb3240389d38e8fcc723fdff71ffffedb2d2df745f61a222396c499",
+   "size": 41202
+  },
+  "ScorePDF/130_Beethoven_PSon_No4_Mov3_B1-23.pdf": {
+   "git_blob_sha1": "7ba19bb784b774e71be10ab4032ddfc3aebc919d",
+   "sha256": "98f4508ee713749cd00df9dbefb054519acaec112540e99dadbce8517f77006e",
+   "size": 32164
+  },
+  "ScorePDF/131_Dvorak_Humoreske_Op101-7_B25-40.pdf": {
+   "git_blob_sha1": "3398a846a086686bc345189a93335660b0d8ec53",
+   "sha256": "94082d43fe39f074d9f43591fc29d5a6bb22edaf3c32d756f76c23100d1eb44b",
+   "size": 31786
+  },
+  "ScorePDF/132_Mendelssohn_LaChasse_Op19-3_B1-29.pdf": {
+   "git_blob_sha1": "6cfe1ed7484a97cdddab9207d1261e5b1b2e6432",
+   "sha256": "5f7a00faafda2094cf8c226a0da209b5e69474f64c5df2d50d0a9c4829af81d7",
+   "size": 46380
+  },
+  "ScorePDF/133_Mendelssohn_VenetianischesGondellied_Op30-6_B0-21.pdf": {
+   "git_blob_sha1": "b3db478b47667bddc5f6f579e788c7220ebe86d9",
+   "sha256": "12a26f2542e2706219bd052e3212520eb0a924c4eac9ac20d6223e97d1dfe136",
+   "size": 38483
+  },
+  "ScorePDF/134_Mendelssohn_SongWithoutWords_Op19-1_B0-16.pdf": {
+   "git_blob_sha1": "538b9f42cf543989120ce1ce8f37153a21682848",
+   "sha256": "04a17a6b48d7e25a1c89a633504f0db1fa4e79d46dc750464eee6014fb681c4d",
+   "size": 39628
+  },
+  "ScorePDF/135_Faure_Sicilienne_B9-25.pdf": {
+   "git_blob_sha1": "24a72f0badd2892977fc7c7e0a2c3b5f9d3aba7c",
+   "sha256": "9ba263331ed487472b3a29efac604e2f2b02ca962dee76505f87329d1f64a9aa",
+   "size": 35851
+  },
+  "ScorePDF/136_Faure_Impromptu_No3_B1-27.pdf": {
+   "git_blob_sha1": "4f090660d575d9c1ddfbad9073a1996d0fc755f0",
+   "sha256": "da01d645c2b8c8a8fae08fec702ff00bd9b5a241ca5b8f3a5c2e9f4e85cb4241",
+   "size": 38712
+  },
+  "ScorePDF/137_Tchaikovsky_Carnival_Op37a-2_B1-26.pdf": {
+   "git_blob_sha1": "22736e56a333cf0abf03b14669187b4c8fc90abe",
+   "sha256": "8f6e627a004d14430e5c7362f124e220c459dcbefebb7af323c88cc56ff69c2c",
+   "size": 46200
+  },
+  "ScorePDF/138_Ravel_Sonatine_Mov1_B1-12.pdf": {
+   "git_blob_sha1": "02638adacfbc1f32ffe665d27848fffd985146e4",
+   "sha256": "66ecef7ce5661e75d57336547d1af9a485b6657e5ab6937964d52d2993dd2a12",
+   "size": 37017
+  },
+  "ScorePDF/139_Ravel_JeuxDEau_B38-44.pdf": {
+   "git_blob_sha1": "04b484cbf97f3d3c9bbeff3d92f797756ab8d42d",
+   "sha256": "b6c1df49af9cf9a08b4eea66efecc2fac0fd02801a0d0fb0d9fbc5d3b483854d",
+   "size": 56072
+  },
+  "ScorePDF/140_Scarlatti_Sonata_A_K208_B1-8.pdf": {
+   "git_blob_sha1": "78d01a1c26756abbb974f2c8de851102e26517f1",
+   "sha256": "667866c1756d38110c03abb4f35cd940cbf13bc62eb78ef58f26cd4753c0f0ac",
+   "size": 25898
+  },
+  "ScorePDF/141_Saint-Saens_Bagetelle_Op3-4_B0-18.pdf": {
+   "git_blob_sha1": "2d6833c9bc1e8de91cdf6a410398684d27818e32",
+   "sha256": "3f201d28bcd713a4274da5ca41478a037e5dbb269a2d03cdf649e42dbe5a832a",
+   "size": 32088
+  },
+  "ScorePDF/142_Satie_JeTeVeux_B1-37.pdf": {
+   "git_blob_sha1": "8d497637e42243a1f1079e8f9082f9ed4dd598c4",
+   "sha256": "d753071a952d701fd3d2b83a50a44bf6777aec4dc3d5202ced5d51aaa676ccea",
+   "size": 33284
+  },
+  "ScorePDF/143_Satie_Gymnopedie_No1_B1-12.pdf": {
+   "git_blob_sha1": "068b193479b6342419785e71c06d49120926f378",
+   "sha256": "62da0d4cb31b82664383cf8ad83b2887013d37b7878e4976fd8e81ff75b4029c",
+   "size": 33605
+  },
+  "ScorePDF/144_Scriabin_PSon_No2_Mov1_B97-104.pdf": {
+   "git_blob_sha1": "6c459e369fdbf9a5e855847a0fb48ccf7cac10df",
+   "sha256": "ecb0826c88a226ae4eaf819bb9f761b51fc637a0dc95b72f3e4cad0239858d08",
+   "size": 40147
+  },
+  "ScorePDF/145_Scriabin_PSon_No5_B47-67.pdf": {
+   "git_blob_sha1": "5e16801832f5a9efba03a834d6c9dc5c94a063df",
+   "sha256": "440e02d7e5f2472934961d80157e8566e93a85fb9a46f0fa3373ce3481bd232a",
+   "size": 47808
+  },
+  "ScorePDF/146_Schubert_PSon_No16_D845_Mov1_B26-50.pdf": {
+   "git_blob_sha1": "b590b2385888b66890ef5339c3e6cb88bcd8d6fc",
+   "sha256": "9361b15efd1d6d7dda294c9181a2d34adb4151013c6977d6662a65e76923b778",
+   "size": 43767
+  },
+  "ScorePDF/147_Bartok_RomanianDance_No1_B0-33.pdf": {
+   "git_blob_sha1": "135774e0260d239afbcfdbdad78e017e748a37c6",
+   "sha256": "9b625ddff3c06ae41e1c8818a44401788dac9091c261e3c3a1d7bd71d864a0b7",
+   "size": 61562
+  },
+  "ScorePDF/148_Albeniz_SuiteEspanola_Op45-1_Mov2_B1-15.pdf": {
+   "git_blob_sha1": "1ad63dadbad723464928e6c0b4b7fefe91623f72",
+   "sha256": "3919833ff984dd91955435cdee5fdeba5e6382909be08d53c63caf463aed8fee",
+   "size": 25093
+  },
+  "ScorePDF/149_Chopin_Polonaise_Op53_B1-16.pdf": {
+   "git_blob_sha1": "0e1fb45d9fcc65ef10ebfb67b57b5f248ecac957",
+   "sha256": "259ddefd14ab160b330a4d4511c2d7398a2fc5319e7c1c3cae4172c4b6b2edb5",
+   "size": 53962
+  },
+  "ScorePDF/150_Chopin_PolonaiseFantaisie_Op61_B66-80.pdf": {
+   "git_blob_sha1": "d10e42c417d701e2fbc98e139ca1bcbfda4329ac",
+   "sha256": "6069d793ac978721ccd1513f9d6a960177cb0b4edc1df779e8a332d799fdd671",
+   "size": 51837
+  }
+ },
+ "source": "pig"
+}

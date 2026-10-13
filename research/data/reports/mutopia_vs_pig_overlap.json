@@ -1,0 +1,81 @@
+{
+ "017": {
+  "piece": "Mozart K545 i",
+  "mutopia_part": "MP0998_s00_p0",
+  "pig_notes": 193,
+  "aligned_notes": 191,
+  "aligned_fraction_of_pig": 0.9896,
+  "compared_fingered_notes": 53,
+  "pianists": 6,
+  "mutopia_vs_each_pianist": {
+   "1": 0.9057,
+   "3": 0.7925,
+   "4": 0.9623,
+   "5": 0.8868,
+   "6": 0.9811,
+   "7": 0.9245
+  },
+  "mutopia_vs_pianists_mean (M_gen)": 0.9088,
+  "mutopia_matches_any_pianist (M_soft)": 0.9811,
+  "mutopia_vs_pianists_mean_ignoring_hand": 0.9088,
+  "pianist_pairwise_mean_same_notes": 0.8981
+ },
+ "023": {
+  "piece": "Chopin Nocturne Op.9/2",
+  "mutopia_part": "MP1590_s00_p0",
+  "pig_notes": 430,
+  "aligned_notes": 418,
+  "aligned_fraction_of_pig": 0.9721,
+  "compared_fingered_notes": 71,
+  "pianists": 5,
+  "mutopia_vs_each_pianist": {
+   "1": 0.3662,
+   "3": 0.5915,
+   "4": 0.5634,
+   "5": 0.5352,
+   "6": 0.5915
+  },
+  "mutopia_vs_pianists_mean (M_gen)": 0.5296,
+  "mutopia_matches_any_pianist (M_soft)": 0.8028,
+  "mutopia_vs_pianists_mean_ignoring_hand": 0.5296,
+  "pianist_pairwise_mean_same_notes": 0.6648
+ },
+ "077": {
+  "piece": "Chopin Waltz Op.69/2",
+  "mutopia_part": "MP0511_s00_p0",
+  "pig_notes": 341,
+  "aligned_notes": 341,
+  "aligned_fraction_of_pig": 1.0,
+  "compared_fingered_notes": 73,
+  "pianists": 2,
+  "mutopia_vs_each_pianist": {
+   "1": 0.5342,
+   "2": 0.7808
+  },
+  "mutopia_vs_pianists_mean (M_gen)": 0.6575,
+  "mutopia_matches_any_pianist (M_soft)": 0.8904,
+  "mutopia_vs_pianists_mean_ignoring_hand": 0.6575,
+  "pianist_pairwise_mean_same_notes": 0.4658
+ },
+ "110": {
+  "piece": "Rachmaninoff Op.23/9",
+  "mutopia_part": "MP2052_s00_p0",
+  "pig_notes": 453,
+  "aligned_notes": 452,
+  "aligned_fraction_of_pig": 0.9978,
+  "compared_fingered_notes": 123,
+  "pianists": 1,
+  "mutopia_vs_each_pianist": {
+   "1": 0.8049
+  },
+  "mutopia_vs_pianists_mean (M_gen)": 0.8049,
+  "mutopia_matches_any_pianist (M_soft)": 0.8049,
+  "mutopia_vs_pianists_mean_ignoring_hand": 0.8049,
+  "pianist_pairwise_mean_same_notes": null
+ },
+ "_overall_note_weighted": {
+  "compared_fingered_notes": 320,
+  "M_gen": 0.7274,
+  "M_soft": 0.8531
+ }
+}

@@ -1,0 +1,11 @@
+dataset,piece,annotation,note_id,line,severity,check,message
+beringer,ArpeggiosDom7A,1,119,124,warning,pitch_range_hand,LH note D6 (86) above C6
+beringer,ArpeggiosDom7Aflat,1,119,124,warning,pitch_range_hand,LH note C#6 (85) above C6
+beringer,ArpeggiosDom7B,1,85,90,warning,pitch_range_hand,LH note C#6 (85) above C6
+beringer,ArpeggiosDom7B,1,117,122,warning,pitch_range_hand,LH note C#6 (85) above C6
+beringer,ArpeggiosDom7B,1,119,124,warning,pitch_range_hand,LH note E6 (88) above C6
+beringer,ArpeggiosDom7B,1,121,126,warning,pitch_range_hand,LH note C#6 (85) above C6
+beringer,ArpeggiosDom7B,2,85,90,warning,pitch_range_hand,LH note C#6 (85) above C6
+beringer,ArpeggiosDom7B,2,117,122,warning,pitch_range_hand,LH note C#6 (85) above C6
+beringer,ArpeggiosDom7B,2,119,124,warning,pitch_range_hand,LH note E6 (88) above C6
+beringer,ArpeggiosDom7B,2,121,126,warning,pitch_range_hand,LH note C#6 (85) above C6

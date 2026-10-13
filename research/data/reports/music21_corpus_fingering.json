@@ -1,0 +1,127 @@
+{
+ "music21_version": "10.5.0",
+ "corpus_root": "C:\\Users\\maxim\\Desktop\\projects\\github\\thingamajig\\research\\.venv\\Lib\\site-packages\\music21\\corpus",
+ "n_files": 3219,
+ "extensions": {
+  ".krn": 1326,
+  ".abc": 1146,
+  ".mxl": 535,
+  ".xml": 118,
+  ".rntxt": 68,
+  ".py": 7,
+  ".pyc": 7,
+  ".mus": 3,
+  ".png": 3,
+  ".txt": 2,
+  ".musicxml": 1,
+  ".musx": 1,
+  ".psd": 1,
+  ".gz": 1
+ },
+ "files_with_fingering": [
+  {
+   "file": "ryansMammoth/CarmichaelsStrathspey.abc",
+   "kind": "abc !n!",
+   "raw_count": 12,
+   "parsed_parts": [
+    {
+     "part": "1699647135696",
+     "notes": 116,
+     "fingerings": 0
+    }
+   ],
+   "title": "CARMICHAEL'S -- STRATHSPEY",
+   "composer": null
+  },
+  {
+   "file": "ryansMammoth/LochNaGarStrathspey.abc",
+   "kind": "abc !n!",
+   "raw_count": 10,
+   "parsed_parts": [
+    {
+     "part": "1699652385232",
+     "notes": 124,
+     "fingerings": 0
+    }
+   ],
+   "title": "LOCH-NA GAR -- STRATHSPEY",
+   "composer": null
+  },
+  {
+   "file": "schumann_clara/polonaise_op1n1.mxl",
+   "kind": "musicxml <fingering>",
+   "raw_count": 14,
+   "parsed_parts": [
+    {
+     "part": "Piano",
+     "notes": 300,
+     "fingerings": 14
+    },
+    {
+     "part": "Piano",
+     "notes": 241,
+     "fingerings": 0
+    }
+   ],
+   "title": null,
+   "composer": null
+  },
+  {
+   "file": "schumann_clara/polonaise_op1n2.mxl",
+   "kind": "musicxml <fingering>",
+   "raw_count": 5,
+   "parsed_parts": [
+    {
+     "part": "Piano",
+     "notes": 277,
+     "fingerings": 5
+    },
+    {
+     "part": "Piano",
+     "notes": 185,
+     "fingerings": 0
+    }
+   ],
+   "title": null,
+   "composer": null
+  },
+  {
+   "file": "schumann_clara/polonaise_op1n3.mxl",
+   "kind": "musicxml <fingering>",
+   "raw_count": 29,
+   "parsed_parts": [
+    {
+     "part": "Piano",
+     "notes": 357,
+     "fingerings": 29
+    },
+    {
+     "part": "Piano",
+     "notes": 319,
+     "fingerings": 0
+    }
+   ],
+   "title": null,
+   "composer": null
+  },
+  {
+   "file": "schumann_clara/polonaise_op1n4.mxl",
+   "kind": "musicxml <fingering>",
+   "raw_count": 9,
+   "parsed_parts": [
+    {
+     "part": "Piano",
+     "notes": 189,
+     "fingerings": 2
+    },
+    {
+     "part": "Piano",
+     "notes": 138,
+     "fingerings": 7
+    }
+   ],
+   "title": null,
+   "composer": null
+  }
+ ]
+}

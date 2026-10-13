@@ -1,0 +1,46 @@
+piece_dir,file,stage,error
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-allemande.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-bourree.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-courante.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-gavotte.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-gigue.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-menuet.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV817/french-suite-6,BachJS/BWV817/french-suite-6/french-suite-6-lys/bach-french-suite-6-sarabande.ly,fingering,parts found but no fingering could be attached
+BachJS/BWV870/wtk2prelude1,BachJS/BWV870/wtk2prelude1/wtk2prelude1.ly,fingering,parts found but no fingering could be attached
+BeethovenLv/O27/moonlight,BeethovenLv/O27/moonlight/moonlight-lys/moonlight1-let.ly,duplicate,part MP0276f1_s00_p0 identical to MP0276f0_s00_p0 (skipped)
+BeethovenLv/O27/moonlight,BeethovenLv/O27/moonlight/moonlight-lys/moonlight2-let.ly,duplicate,part MP0276f3_s00_p0 identical to MP0276f2_s00_p0 (skipped)
+BeethovenLv/O27/moonlight,BeethovenLv/O27/moonlight/moonlight-lys/moonlight3-let.ly,duplicate,part MP0276f5_s00_p0 identical to MP0276f4_s00_p0 (skipped)
+ChopinFF/B130/TroisNouvellesEtudes_Chopin_n1,ChopinFF/B130/TroisNouvellesEtudes_Chopin_n1/TroisNouvellesEtudes_Chopin_n1.ly,parts,no two-hand part found (1 layout scores)
+ChopinFF/O10/chp-10-01,ChopinFF/O10/chp-10-01/chp-10-01-lys/chp-10-01-let.ly,duplicate,part MP0914f1_s00_p0 identical to MP0914f0_s00_p0 (skipped)
+ChopinFF/O10/chp-10-05,ChopinFF/O10/chp-10-05/chp-10-05-lys/chp-10-05-let.ly,duplicate,part MP0926f1_s00_p0 identical to MP0926f0_s00_p0 (skipped)
+ChopinFF/O25/PS-chopin-25-02,ChopinFF/O25/PS-chopin-25-02/PS-chopin-25-02-lys/a4-chopin-25-02-wfp.ly,fingering,parts found but no fingering could be attached
+ChopinFF/O25/PS-chopin-25-02,ChopinFF/O25/PS-chopin-25-02/PS-chopin-25-02-lys/letter-chopin-25-02-wfp.ly,fingering,parts found but no fingering could be attached
+ChopinFF/O25/PS-chopin-25-02,ChopinFF/O25/PS-chopin-25-02/PS-chopin-25-02-lys/letter-PS-chopin-25-02-i.ly,duplicate,part MP0757f3_s00_p0 identical to MP0757f1_s00_p0 (skipped)
+ChopinFF/O28/Chop-28-4a,ChopinFF/O28/Chop-28-4a/Chop-28-4a-lys/chp-28-04-a4.ly,fingering,parts found but no fingering could be attached
+ChopinFF/O28/Chop-28-4a,ChopinFF/O28/Chop-28-4a/Chop-28-4a-lys/chp-28-04-let.ly,fingering,parts found but no fingering could be attached
+ChopinFF/O35/chp-op-35-4-scholz-fi,ChopinFF/O35/chp-op-35-4-scholz-fi/chp-op-35-4-scholz-fi-lys/chp-op-35-4-scholz-fi-let.ly,duplicate,part MP1727f1_s00_p0 identical to MP1727f0_s00_p0 (skipped)
+ClementiM/O42/clementi-op42,ClementiM/O42/clementi-op42/clementi-op42-lys/clementi-op42-midi.ly,parts,no two-hand part found (0 layout scores)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/allemande.ly,fingering,parts found but no fingering could be attached
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude1.ly,duplicate,part MP0907f2_s00_p0 identical to MP0907f1_s24_p11 (skipped)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude2.ly,duplicate,part MP0907f3_s00_p0 identical to MP0907f1_s25_p12 (skipped)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude3.ly,duplicate,part MP0907f4_s00_p0 identical to MP0907f1_s26_p13 (skipped)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude4.ly,duplicate,part MP0907f5_s00_p0 identical to MP0907f1_s27_p14 (skipped)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude5.ly,duplicate,part MP0907f6_s00_p0 identical to MP0907f1_s28_p15 (skipped)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude6.ly,duplicate,part MP0907f7_s00_p0 identical to MP0907f1_s29_p16 (skipped)
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude7.ly,fingering,parts found but no fingering could be attached
+CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys,CouperinF/ArtDeToucherLeClavecin/ArtDeToucherLeClavecin-lys/prelude8.ly,fingering,parts found but no fingering could be attached
+HanonCL/virtuoso-pianist-pt1/virtuoso-pianist-pt1-lys,HanonCL/virtuoso-pianist-pt1/virtuoso-pianist-pt1-lys/hanon-book-midi.ly,parts,no two-hand part found (0 layout scores)
+MartiniGB/Gavotte/Gavotte.ly,MartiniGB/Gavotte/Gavotte.ly,duplicate,part MP1785_s02_p1 identical to MP1785_s00_p0 (skipped)
+MozartWA/KV379/k379,MozartWA/KV379/k379/k379-lys/k379-score.ly,duplicate,part MP0571f1_s00_p0 identical to MP0571f0_s00_p0 (skipped)
+MozartWA/KV379/k379,MozartWA/KV379/k379/k379-lys/k379-score.ly,duplicate,part MP0571f1_s01_p1 identical to MP0571f0_s01_p1 (skipped)
+MozartWA/KV379/k379,MozartWA/KV379/k379/k379-lys/k379-score.ly,duplicate,part MP0571f1_s02_p2 identical to MP0571f0_s02_p2 (skipped)
+MozartWA/KV379/k379,MozartWA/KV379/k379/k379-lys/k379-violin.ly,fingering,parts found but no fingering could be attached
+RachmaninoffS/O23/rach-prelude23-05,RachmaninoffS/O23/rach-prelude23-05/rach-prelude23-05.ly,fingering,parts found but no fingering could be attached
+RachmaninoffS/O23/rach-prelude23-06,RachmaninoffS/O23/rach-prelude23-06/rach-prelude23-06.ly,fingering,parts found but no fingering could be attached
+RiedingO/O35/rieding_opus_35,RiedingO/O35/rieding_opus_35/rieding_opus_35-lys/rieding_opus_35_violin_score.ly,duplicate,part MP1781f1_s00_p0 identical to MP1781f0_s00_p0 (skipped)
+RiedingO/O35/rieding_opus_35,RiedingO/O35/rieding_opus_35/rieding_opus_35-lys/rieding_opus_35_violin_score.ly,duplicate,part MP1781f1_s01_p1 identical to MP1781f0_s01_p2 (skipped)
+RiedingO/O35/rieding_opus_35,RiedingO/O35/rieding_opus_35/rieding_opus_35-lys/rieding_opus_35_violin_score.ly,duplicate,part MP1781f1_s02_p2 identical to MP1781f0_s02_p4 (skipped)
+SchumannR/O28/romanze-op28-2,SchumannR/O28/romanze-op28-2/romanze-op28-2-lys/schumann-romanze-op28-2-a4.ly,parts,no two-hand part found (1 layout scores)
+SchumannR/O28/romanze-op28-2,SchumannR/O28/romanze-op28-2/romanze-op28-2-lys/schumann-romanze-op28-2-letter.ly,parts,no two-hand part found (1 layout scores)
+Traditional/no11Noring/no11Noring.ly,Traditional/no11Noring/no11Noring.ly,fingering,parts found but no fingering could be attached
+Traditional/no1Halling/no1Halling.ly,Traditional/no1Halling/no1Halling.ly,fingering,parts found but no fingering could be attached

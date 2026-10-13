@@ -1,0 +1,967 @@
+{
+ "sampled": 150,
+ "index_size": 978,
+ "converted": 134,
+ "notes": 121335,
+ "fingered": 8617,
+ "no_two_staff_part": 16,
+ "fingered_fraction": 0.071,
+ "anomaly_counts": {
+  "error": {
+   "chord_span_impossible": 791,
+   "pitch_out_of_piano_range": 1,
+   "same_finger_simultaneous": 8
+  },
+  "info": {
+   "held_key_finger_reuse": 10
+  },
+  "warning": {
+   "chord_finger_order": 50,
+   "chord_span_large": 783,
+   "duplicate_note": 4857,
+   "pitch_range_hand": 770,
+   "same_finger_simultaneous": 1
+  }
+ },
+ "errors_per_1000_fingered": 92.84,
+ "files": [
+  {
+   "path": "12/10/QmUAiXTz5sw6aVRxfmGcXaFEAUFy6fS3rsaRKT58wKVZAK.mxl",
+   "piece": "pdmx0000",
+   "notes": 1311,
+   "fingered": 0,
+   "errors": 124
+  },
+  {
+   "path": "4/22/QmeG8fUdaVZj36xHhvFpi174CPnFBsDNZAwWnVKMFAC9zG.mxl",
+   "piece": "pdmx0001",
+   "notes": 119,
+   "fingered": 12,
+   "errors": 0
+  },
+  {
+   "path": "5/51/QmfW5m5NKMT1J9PQisFwwJFXc9JmrGDEitCshq77HXMvzE.mxl",
+   "piece": "pdmx0002",
+   "notes": 393,
+   "fingered": 101,
+   "errors": 0
+  },
+  {
+   "path": "12/51/QmUWtrL4ATkDA3zqNEZ3MmvyTc4pVAyk5EE5FTssLVsG9r.mxl",
+   "piece": "pdmx0003",
+   "notes": 572,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "4/20/QmeFYRx5u1xapE9u7t4HmvbYWFK67wdhMRQDKcKsRraxeW.mxl",
+   "piece": "pdmx0004",
+   "notes": 574,
+   "fingered": 9,
+   "errors": 0
+  },
+  {
+   "path": "8/36/QmQpYnSgWdZyuqx7dsdwh9DQo7or7f1agVLjqsoK6UyNfo.mxl",
+   "piece": "pdmx0005",
+   "notes": 256,
+   "fingered": 53,
+   "errors": 0
+  },
+  {
+   "path": "14/41/QmWRmbHPfLzyWCuPghYb4XdPDoBGbFRFLMMxHTsfJy92FW.mxl",
+   "piece": "pdmx0006",
+   "notes": 1211,
+   "fingered": 34,
+   "errors": 2
+  },
+  {
+   "path": "0/33/Qmanb7t1S9RSRSt7Yy9zWzzLfsMBdaVvMEJMoDwJuUvNLu.mxl",
+   "piece": "pdmx0007",
+   "notes": 267,
+   "fingered": 72,
+   "errors": 0
+  },
+  {
+   "path": "13/26/QmVj4CHULzWYy4x88tDbVJ188av6hDrZepHoD4dbdRxwU5.mxl",
+   "piece": "pdmx0008",
+   "notes": 1096,
+   "fingered": 1,
+   "errors": 0
+  },
+  {
+   "path": "3/25/QmdigAknHjXZxFNeFGiLHkLPTem7oQYZ8UxSdFCtRGMq1V.mxl",
+   "piece": "pdmx0011",
+   "notes": 115,
+   "fingered": 41,
+   "errors": 0
+  },
+  {
+   "path": "3/54/QmdyztkJXnUF9AxrHW9bV2pyXAH1EtbvpGydvGU5b2w4eq.mxl",
+   "piece": "pdmx0012",
+   "notes": 457,
+   "fingered": 115,
+   "errors": 0
+  },
+  {
+   "path": "1/19/QmbfyiJud1qMHTrUYSMq6dwgouNxVWTjkg9ViBSLLYQGTz.mxl",
+   "piece": "pdmx0013",
+   "notes": 279,
+   "fingered": 44,
+   "errors": 0
+  },
+  {
+   "path": "13/0/QmV1DeQT23B5EFXy8Hygr2qExNCkn6Pn3PSoHx7TPDNWJ2.mxl",
+   "piece": "pdmx0014",
+   "notes": 339,
+   "fingered": 2,
+   "errors": 0
+  },
+  {
+   "path": "16/46/QmYuu8RmRq8UNA1Tmd9wLHhhG8aNvTQ55dKMNUKTg51CcA.mxl",
+   "piece": "pdmx0015",
+   "notes": 660,
+   "fingered": 307,
+   "errors": 0
+  },
+  {
+   "path": "10/38/QmSqWWFJQcYBo3The4vsCZmcbNGEPEVTMioSSMsQSPaKQF.mxl",
+   "piece": "pdmx0016",
+   "notes": 272,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "2/43/QmcSzDxZAQU5JqQMLWRooMFN9TGHwUj3iTeJSmvTECH6eS.mxl",
+   "piece": "pdmx0018",
+   "notes": 816,
+   "fingered": 30,
+   "errors": 0
+  },
+  {
+   "path": "14/7/QmW8MbAEGHVQmLCj6DmYdDEjPb7dHpYQX1d45v4rM1MUtv.mxl",
+   "piece": "pdmx0019",
+   "notes": 2198,
+   "fingered": 6,
+   "errors": 85
+  },
+  {
+   "path": "11/8/QmT9dsYHXujDY8weVjYBiKd4717hbqK2FDRc8UjrnNKsbK.mxl",
+   "piece": "pdmx0021",
+   "notes": 473,
+   "fingered": 197,
+   "errors": 0
+  },
+  {
+   "path": "1/23/Qmbhy4BWyBfGFHR1Py8a1xMvvyHd9fUZAuDt4JRrQJA1At.mxl",
+   "piece": "pdmx0022",
+   "notes": 1108,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "11/8/QmT9i6abwCJHsJFBvfMvEyLtz9Aka5m1dPAH3f8EUeU4nC.mxl",
+   "piece": "pdmx0023",
+   "notes": 265,
+   "fingered": 66,
+   "errors": 0
+  },
+  {
+   "path": "5/30/QmfL1siYD5WvGF3ovrcDKFDUNAJZV6oWsGRUCdMFeEYRAg.mxl",
+   "piece": "pdmx0024",
+   "notes": 2486,
+   "fingered": 1,
+   "errors": 7
+  },
+  {
+   "path": "17/20/QmZFtYAn8stnhQakYosMMNujsRDb1KaR8zVAeQVQMuj9Wa.mxl",
+   "piece": "pdmx0025",
+   "notes": 236,
+   "fingered": 85,
+   "errors": 0
+  },
+  {
+   "path": "6/35/QmNoPrsFAHT9uMtiXNbdcffXapk8f47fUDhA81Du8pnjRX.mxl",
+   "piece": "pdmx0026",
+   "notes": 1479,
+   "fingered": 0,
+   "errors": 71
+  },
+  {
+   "path": "3/18/QmdE9gDzNjsgAvwtF4vd6ddcceBHSspZCM79gqwGQuiBYC.mxl",
+   "piece": "pdmx0027",
+   "notes": 186,
+   "fingered": 37,
+   "errors": 0
+  },
+  {
+   "path": "14/44/QmWtAZy9s5fcVwL2rqfT1Nio5HENPme2v684VbnkaRv33X.mxl",
+   "piece": "pdmx0028",
+   "notes": 1556,
+   "fingered": 54,
+   "errors": 104
+  },
+  {
+   "path": "2/54/QmcyFqqjwK6uym8uhtivrruBtiAjpTqk1VtUJNYNwTywaF.mxl",
+   "piece": "pdmx0029",
+   "notes": 246,
+   "fingered": 6,
+   "errors": 27
+  },
+  {
+   "path": "0/40/Qmar1uRoS21zVKS2nGBRBvctmRxBXP5hv3pUNUaY2pzArM.mxl",
+   "piece": "pdmx0030",
+   "notes": 273,
+   "fingered": 36,
+   "errors": 0
+  },
+  {
+   "path": "15/52/QmXxPNVhzjDWGTix5u8ZCnXN4HAo7d8CsPKKwvqWQgmFnB.mxl",
+   "piece": "pdmx0031",
+   "notes": 86,
+   "fingered": 10,
+   "errors": 0
+  },
+  {
+   "path": "3/44/QmdtHTM5ezYirknXMW19bu7nDt5ckKKMFYQ463AmhZiKpe.mxl",
+   "piece": "pdmx0032",
+   "notes": 855,
+   "fingered": 259,
+   "errors": 0
+  },
+  {
+   "path": "10/11/QmSbAW8wLQqvwuUWyDa9Z78kJXGsjoLLQ6CGHR3SJmv5sb.mxl",
+   "piece": "pdmx0033",
+   "notes": 3343,
+   "fingered": 0,
+   "errors": 16
+  },
+  {
+   "path": "12/33/QmUny47gQHfTufjAS5aqi2gTJxSF3CzcksTubecgQUGLwp.mxl",
+   "piece": "pdmx0034",
+   "notes": 3543,
+   "fingered": 100,
+   "errors": 0
+  },
+  {
+   "path": "11/41/QmTRvYRkU55jbL9B9XanWPGtXLtXnSGPSbDXSL6jCVqXuV.mxl",
+   "piece": "pdmx0035",
+   "notes": 541,
+   "fingered": 15,
+   "errors": 3
+  },
+  {
+   "path": "1/15/Qmbd8MQPitJkHFXRd5S9goAB5Kgz2hNziaHxFQpzh1eFNp.mxl",
+   "piece": "pdmx0036",
+   "notes": 143,
+   "fingered": 75,
+   "errors": 0
+  },
+  {
+   "path": "17/10/QmZA9fRdBCdSXzhgiAaRVGNwSziyfDY4fFWZzEFCRn5AW8.mxl",
+   "piece": "pdmx0037",
+   "notes": 421,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "15/50/QmXwK7dMGDUGzPN8EyBH9udVtfYZw8eAYXctnSaThPT589.mxl",
+   "piece": "pdmx0038",
+   "notes": 208,
+   "fingered": 35,
+   "errors": 0
+  },
+  {
+   "path": "17/4/QmZ5rtmTmZV8UhoeP3tdAYHgf9upUTS4LpVHw6ZsYA4Qza.mxl",
+   "piece": "pdmx0039",
+   "notes": 1245,
+   "fingered": 29,
+   "errors": 0
+  },
+  {
+   "path": "12/36/QmUpUCmZ5GkPexJ6UddsXkaWmi1CA8aoWCF4ACmyZpYWM7.mxl",
+   "piece": "pdmx0040",
+   "notes": 12146,
+   "fingered": 2,
+   "errors": 2
+  },
+  {
+   "path": "12/7/QmU88c1Yu45MGWE7m4mYxg3S88immBThoWUoW1atvANnKc.mxl",
+   "piece": "pdmx0041",
+   "notes": 107,
+   "fingered": 78,
+   "errors": 0
+  },
+  {
+   "path": "9/13/QmRc8S5cLLCNC7WQPcGJzN9W5qh7K77gtGDGkYNrnNboKh.mxl",
+   "piece": "pdmx0042",
+   "notes": 634,
+   "fingered": 632,
+   "errors": 0
+  },
+  {
+   "path": "16/14/QmYCud6XX53aHDuABfvddJyLp8Qr69dFWQiBhLbhecAsuK.mxl",
+   "piece": "pdmx0043",
+   "notes": 319,
+   "fingered": 86,
+   "errors": 0
+  },
+  {
+   "path": "13/9/QmVaKZEqnHWpXC8r1Nemn9txeaLRGEVBnCGaqQVAtq1Bqt.mxl",
+   "piece": "pdmx0044",
+   "notes": 148,
+   "fingered": 48,
+   "errors": 0
+  },
+  {
+   "path": "10/49/QmSV3vgQ4JYj6obwcTgB9XRxd8fAn3jTQnyBEFzB6sXaTh.mxl",
+   "piece": "pdmx0045",
+   "notes": 994,
+   "fingered": 85,
+   "errors": 0
+  },
+  {
+   "path": "17/28/QmZknK4YHz3SjCitLxm48Sb9ttCfVvi6rfNi6UPm6stan7.mxl",
+   "piece": "pdmx0046",
+   "notes": 28,
+   "fingered": 23,
+   "errors": 0
+  },
+  {
+   "path": "16/51/QmYWmqjhw1vaJ4Y2o7zmrJ4vHRTr7zzA1xhevx8X3NJBAH.mxl",
+   "piece": "pdmx0047",
+   "notes": 246,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "4/52/Qmexwm3cnC667DJRPmZUFXaRA5s7J59WnMSFP6ZxK6vxRC.mxl",
+   "piece": "pdmx0048",
+   "notes": 236,
+   "fingered": 52,
+   "errors": 0
+  },
+  {
+   "path": "1/31/QmbmNksBY2GBsosKGefQhdABY91dsJRuqcm6ts6i2Tnfsd.mxl",
+   "piece": "pdmx0049",
+   "notes": 535,
+   "fingered": 64,
+   "errors": 0
+  },
+  {
+   "path": "6/33/QmNnWqzNzoJUmiAEnqfwoZM23Mv6jDf7VAQf3ve699sK8q.mxl",
+   "piece": "pdmx0051",
+   "notes": 342,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "7/34/QmPNQGRtZE5ACCJwWkVE1dUBjATXsSS1fEwV4XH2HoTHu7.mxl",
+   "piece": "pdmx0052",
+   "notes": 138,
+   "fingered": 29,
+   "errors": 0
+  },
+  {
+   "path": "0/10/QmaAugxvs7E3L6aV2h7vk15TWay7dkdCbNL3dbqpvYHWPF.mxl",
+   "piece": "pdmx0053",
+   "notes": 450,
+   "fingered": 421,
+   "errors": 0
+  },
+  {
+   "path": "2/38/QmcqrVYCW1QaEdDFTAJ4PK5YWfPnRhVrr3gbm8orourU8X.mxl",
+   "piece": "pdmx0054",
+   "notes": 2011,
+   "fingered": 8,
+   "errors": 9
+  },
+  {
+   "path": "4/23/QmehfxKmagAUes7CGojrhYeWmDZJr89mp6WtJAcZLhHrJi.mxl",
+   "piece": "pdmx0055",
+   "notes": 886,
+   "fingered": 17,
+   "errors": 0
+  },
+  {
+   "path": "12/0/QmU1sKRoq7yaaDDxKQ84bqAZMob7ir8weQNBaHSykSEwWP.mxl",
+   "piece": "pdmx0056",
+   "notes": 725,
+   "fingered": 4,
+   "errors": 0
+  },
+  {
+   "path": "14/41/QmWR9LYsfXgZrGv6jRuCJWVh57mzmaVQm2HYkxsetQMERx.mxl",
+   "piece": "pdmx0058",
+   "notes": 1218,
+   "fingered": 21,
+   "errors": 5
+  },
+  {
+   "path": "17/25/QmZiG6D2ggj6RJdLc4KGPmvk2zfYzg5kLX2MjAkJhtLV1i.mxl",
+   "piece": "pdmx0059",
+   "notes": 106,
+   "fingered": 92,
+   "errors": 0
+  },
+  {
+   "path": "3/17/QmdeQ7dcPwGSNFXgLDNgJoie4VYyyMwGJiMHB2tdTLL3EK.mxl",
+   "piece": "pdmx0060",
+   "notes": 338,
+   "fingered": 10,
+   "errors": 0
+  },
+  {
+   "path": "8/54/QmQyfzoG5RkJiwjvL1kTaAYYvjwDdZuYexd5GNPcZuLhuC.mxl",
+   "piece": "pdmx0062",
+   "notes": 92,
+   "fingered": 34,
+   "errors": 0
+  },
+  {
+   "path": "17/3/QmZ4QaNsYt51FC9x74bSJa7vgUzPsmGxrvw2Rt21xT8C39.mxl",
+   "piece": "pdmx0063",
+   "notes": 184,
+   "fingered": 52,
+   "errors": 0
+  },
+  {
+   "path": "3/1/Qmd2v1H9NVLuA8QKShDea83XvQT5zqV1NVCcNYiL1CQdCX.mxl",
+   "piece": "pdmx0065",
+   "notes": 1072,
+   "fingered": 37,
+   "errors": 1
+  },
+  {
+   "path": "4/42/QmeswnMFsq7kKrfJU2KHcucQ55D1psa3djU7BiYUptXPPR.mxl",
+   "piece": "pdmx0066",
+   "notes": 55,
+   "fingered": 55,
+   "errors": 0
+  },
+  {
+   "path": "15/16/QmXDXrpGtS2Qqd3THCYxcjaBrU53rHRfMMXLSLtN9wVhU1.mxl",
+   "piece": "pdmx0067",
+   "notes": 993,
+   "fingered": 257,
+   "errors": 1
+  },
+  {
+   "path": "3/4/Qmd5EaCsaRFf1yav7r4K3cNgzXchDxjGWmmwFUhfQRwnfx.mxl",
+   "piece": "pdmx0068",
+   "notes": 120,
+   "fingered": 0,
+   "errors": 3
+  },
+  {
+   "path": "3/38/QmdquDJrTzfk24NYofF5dLz8Sckca1ixr1t7fLNYqR7LwT.mxl",
+   "piece": "pdmx0069",
+   "notes": 546,
+   "fingered": 176,
+   "errors": 0
+  },
+  {
+   "path": "9/46/QmRuQTvR1ejRCZY7oVso8toMroeBvwBYBUAd6HyFgJbG3L.mxl",
+   "piece": "pdmx0070",
+   "notes": 387,
+   "fingered": 113,
+   "errors": 0
+  },
+  {
+   "path": "6/25/QmNiYbVVDkcismEp4CJytwuVrJUagR6Mp3DHsTfHJ5qQqK.mxl",
+   "piece": "pdmx0071",
+   "notes": 176,
+   "fingered": 16,
+   "errors": 0
+  },
+  {
+   "path": "8/32/QmQMb5aUbNngoE3ZeQxVsVFea7wbntNpxq1Ukzka53N2X9.mxl",
+   "piece": "pdmx0072",
+   "notes": 135,
+   "fingered": 40,
+   "errors": 0
+  },
+  {
+   "path": "10/53/QmSXYCbTLLAFvAqMoKhiUbZgozYYXHoee6DcLXkLY8L8vd.mxl",
+   "piece": "pdmx0073",
+   "notes": 328,
+   "fingered": 52,
+   "errors": 0
+  },
+  {
+   "path": "13/13/QmVcTJtm4y12CUByxJjVMnahC4YpxXGGzVJ1jLUwzj9hCt.mxl",
+   "piece": "pdmx0074",
+   "notes": 1415,
+   "fingered": 12,
+   "errors": 17
+  },
+  {
+   "path": "3/22/QmdGCGRyU5GT5J9XuCTG6F9wcoaPQ5p1HQMZX3JegF8r5z.mxl",
+   "piece": "pdmx0075",
+   "notes": 136,
+   "fingered": 60,
+   "errors": 5
+  },
+  {
+   "path": "12/11/QmUbrKfC41MXcCtgFtcMArp6tCtf8WS3i5K3UC8UTptirA.mxl",
+   "piece": "pdmx0076",
+   "notes": 1372,
+   "fingered": 5,
+   "errors": 0
+  },
+  {
+   "path": "16/14/QmYCVuH72X4ppKygTq29m2yAJDezzXA22JfkSvmHoxzLGm.mxl",
+   "piece": "pdmx0077",
+   "notes": 750,
+   "fingered": 6,
+   "errors": 110
+  },
+  {
+   "path": "14/55/QmWYkgTutTBAvDcTTabyYXHEPWc9xQ47dBpiXoH5afCJPF.mxl",
+   "piece": "pdmx0078",
+   "notes": 8534,
+   "fingered": 131,
+   "errors": 10
+  },
+  {
+   "path": "2/31/QmcmPtY7yU2SuvFawoyPFEUqR43MfU1dvUVFBviftUkp5v.mxl",
+   "piece": "pdmx0079",
+   "notes": 330,
+   "fingered": 85,
+   "errors": 0
+  },
+  {
+   "path": "16/57/QmYZF4eh2JpsLcQnZn5vxzKWyBJzZMz1iYus5PKpjDPAZd.mxl",
+   "piece": "pdmx0080",
+   "notes": 673,
+   "fingered": 162,
+   "errors": 0
+  },
+  {
+   "path": "12/39/QmUQJUZN1dxxZ2VN875kE1VUcgD6jnnCK2QxsowZfzCEoC.mxl",
+   "piece": "pdmx0082",
+   "notes": 2713,
+   "fingered": 160,
+   "errors": 8
+  },
+  {
+   "path": "17/41/QmZRJLxi3jPzRBFPPNVZUAzUvZUoXKWiDuG84JLLRcUxS6.mxl",
+   "piece": "pdmx0083",
+   "notes": 135,
+   "fingered": 21,
+   "errors": 1
+  },
+  {
+   "path": "7/43/QmPSKLAdBJCCe2hViogqxeAcSttYVc8Xf6cWPKhXFobt2n.mxl",
+   "piece": "pdmx0084",
+   "notes": 432,
+   "fingered": 23,
+   "errors": 0
+  },
+  {
+   "path": "10/32/QmSMriKRtw7T6aZ7J5YPNAHkAhGKWgu2WM6zaJJfgTGy1k.mxl",
+   "piece": "pdmx0085",
+   "notes": 567,
+   "fingered": 51,
+   "errors": 1
+  },
+  {
+   "path": "14/38/QmWqKRcyiCbZLk5oS6wehqRcVfhY9JtPdmupAcmacTwLKK.mxl",
+   "piece": "pdmx0086",
+   "notes": 258,
+   "fingered": 81,
+   "errors": 0
+  },
+  {
+   "path": "14/25/QmWiYmyGdR57srpmX1LC6NQMGmvqrAhCZzxmkxQ43rKSkJ.mxl",
+   "piece": "pdmx0087",
+   "notes": 49,
+   "fingered": 3,
+   "errors": 0
+  },
+  {
+   "path": "11/57/QmTZwZbs21er1ona2DF3BvSqV5wpJbWUTqVSx48BfCUtrA.mxl",
+   "piece": "pdmx0089",
+   "notes": 374,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "12/39/QmUQt4qzDzNobPjZERVt9RZwGqH5RFKeYhjaqrthvXXivj.mxl",
+   "piece": "pdmx0090",
+   "notes": 967,
+   "fingered": 2,
+   "errors": 1
+  },
+  {
+   "path": "0/27/QmaJVzwsZoiZXMABECC7PXPsHn6HHYPcdbJUULpZmPMcav.mxl",
+   "piece": "pdmx0091",
+   "notes": 156,
+   "fingered": 18,
+   "errors": 0
+  },
+  {
+   "path": "13/39/QmVQyh9RoqtJyT3t21pQ8c3Fxyqm2V6X71Mn5bKZndFiER.mxl",
+   "piece": "pdmx0092",
+   "notes": 384,
+   "fingered": 20,
+   "errors": 0
+  },
+  {
+   "path": "17/49/QmZV43PJZQ2iJU5V6EVtd8wmsCMJL3EQgtFDDonLrpTtdB.mxl",
+   "piece": "pdmx0094",
+   "notes": 345,
+   "fingered": 170,
+   "errors": 0
+  },
+  {
+   "path": "1/16/QmbDyTPWVnp5RwWvJvgMC6iKifH7qndgjbHwo3iSUgY5zm.mxl",
+   "piece": "pdmx0095",
+   "notes": 1409,
+   "fingered": 9,
+   "errors": 0
+  },
+  {
+   "path": "13/28/QmVksrwa8dvy8BbpLvoEDkxZ5KE5y4KVa5URqrogUztTXt.mxl",
+   "piece": "pdmx0097",
+   "notes": 1068,
+   "fingered": 47,
+   "errors": 0
+  },
+  {
+   "path": "17/22/QmZGR1mgMb71egn1WJixPSkzSnfMpTQw7t9zNLNBJjWSZ2.mxl",
+   "piece": "pdmx0098",
+   "notes": 81,
+   "fingered": 2,
+   "errors": 0
+  },
+  {
+   "path": "1/10/QmbADpewjNXvTNkohiZACiSfk7pGv6a5ADAqy3y4BLCQJt.mxl",
+   "piece": "pdmx0099",
+   "notes": 562,
+   "fingered": 2,
+   "errors": 24
+  },
+  {
+   "path": "0/13/QmacRUvugXM4ARuvKy3w2Mwttj7MFjWE9ezrc9SJTYuW9S.mxl",
+   "piece": "pdmx0100",
+   "notes": 2056,
+   "fingered": 162,
+   "errors": 0
+  },
+  {
+   "path": "1/17/QmbexjT9TEzYRtZXJmX7Mhczie2MESkvdCrSYgHyG31rkS.mxl",
+   "piece": "pdmx0101",
+   "notes": 393,
+   "fingered": 0,
+   "errors": 2
+  },
+  {
+   "path": "15/52/QmXxiWKxr3uQFjqFGwthDhtV3nRsARV2XxGK3QdT2j4FmL.mxl",
+   "piece": "pdmx0102",
+   "notes": 116,
+   "fingered": 1,
+   "errors": 0
+  },
+  {
+   "path": "11/49/QmTV3rvR1SkPBV1RLK56Cci1RWvjfxrB33PfR5BZPXbb2P.mxl",
+   "piece": "pdmx0103",
+   "notes": 450,
+   "fingered": 1,
+   "errors": 0
+  },
+  {
+   "path": "16/14/QmYCLDXeG1pN2pPmKXkQuaQgxpfNECaDUvjmtAF5wN8jAs.mxl",
+   "piece": "pdmx0105",
+   "notes": 434,
+   "fingered": 145,
+   "errors": 0
+  },
+  {
+   "path": "3/51/QmdW7voGooa8aQgtnVTjhpK148FU3dms84nQA9M9JUNWCQ.mxl",
+   "piece": "pdmx0106",
+   "notes": 767,
+   "fingered": 56,
+   "errors": 0
+  },
+  {
+   "path": "0/45/QmaTurv3QtTh42vQFbZ24Kda8vfbTK8BWWC2KRKLCugurP.mxl",
+   "piece": "pdmx0107",
+   "notes": 175,
+   "fingered": 36,
+   "errors": 0
+  },
+  {
+   "path": "7/13/QmPc9x7WthTNjxC142zVrEju8DJQezfZBDskmyqvvFAyTo.mxl",
+   "piece": "pdmx0108",
+   "notes": 937,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "2/42/Qmcs7JRPs1PRhksfrKDH2SxY9Eq4HEr7HkEvEn4hXVkmUu.mxl",
+   "piece": "pdmx0109",
+   "notes": 284,
+   "fingered": 37,
+   "errors": 0
+  },
+  {
+   "path": "10/23/QmShZjqEGhJ7ehVM5mcPQhHUwT9jRioyVeBKSp8TXw1NQN.mxl",
+   "piece": "pdmx0110",
+   "notes": 212,
+   "fingered": 36,
+   "errors": 0
+  },
+  {
+   "path": "12/50/QmUwya1u9YbDA6PUNRE3pJXZB1KiS2oYChKnFsrVDV2h67.mxl",
+   "piece": "pdmx0111",
+   "notes": 1131,
+   "fingered": 8,
+   "errors": 0
+  },
+  {
+   "path": "10/54/QmSyodLkPUFGtnQwYZk41mHh3HkaLCbdceZ2LFKvvLXKBL.mxl",
+   "piece": "pdmx0112",
+   "notes": 4620,
+   "fingered": 106,
+   "errors": 0
+  },
+  {
+   "path": "1/52/Qmbx2G4kGQ45oPi4qVqSYnGQ1s1LgVwhfYsCDhbPpDSUpN.mxl",
+   "piece": "pdmx0113",
+   "notes": 209,
+   "fingered": 55,
+   "errors": 0
+  },
+  {
+   "path": "4/21/Qmeg8fGoMJbCenUT2DpwGjCPWzUzUnEWyDFnPAk8AYwHQi.mxl",
+   "piece": "pdmx0114",
+   "notes": 360,
+   "fingered": 34,
+   "errors": 0
+  },
+  {
+   "path": "12/38/QmUqpXPiWtipxAxRqoKwn1PxKvY4LeFm35iajCE9jvZt9M.mxl",
+   "piece": "pdmx0115",
+   "notes": 322,
+   "fingered": 38,
+   "errors": 0
+  },
+  {
+   "path": "10/2/QmS3rtTJuR6ghcRTQDEt6M3X2FUxYGUKxi6XMkTnJKNqzR.mxl",
+   "piece": "pdmx0116",
+   "notes": 535,
+   "fingered": 17,
+   "errors": 0
+  },
+  {
+   "path": "3/18/QmdEJeZ8uKyfTeVZcg87NoPFa4pyqrUNww2uoM2mEfZwYg.mxl",
+   "piece": "pdmx0117",
+   "notes": 232,
+   "fingered": 127,
+   "errors": 0
+  },
+  {
+   "path": "2/48/QmcvjWXvkPvixdMuwivGURTtPgE778KSZBLEYJhkCA2ao9.mxl",
+   "piece": "pdmx0118",
+   "notes": 374,
+   "fingered": 127,
+   "errors": 1
+  },
+  {
+   "path": "1/31/QmbmR96p9f28p14fxPigKWzdZwjm2S1c4VjtGBJ6z4NsdV.mxl",
+   "piece": "pdmx0119",
+   "notes": 243,
+   "fingered": 29,
+   "errors": 0
+  },
+  {
+   "path": "10/35/QmSoW2soMix6TooiYobUWxLUcKRWLtkrRCWAvXaHjeo5AL.mxl",
+   "piece": "pdmx0120",
+   "notes": 310,
+   "fingered": 123,
+   "errors": 0
+  },
+  {
+   "path": "14/55/QmWY3BgRzTFXy4psYT7pXp6MY4qmg8Ck1u7NCSpAYdmQn7.mxl",
+   "piece": "pdmx0121",
+   "notes": 350,
+   "fingered": 133,
+   "errors": 0
+  },
+  {
+   "path": "1/17/QmbeTPuLm3FqX4JNzC8Wc78rKLb2iFU7g8AKgtWFPkSCAZ.mxl",
+   "piece": "pdmx0122",
+   "notes": 1557,
+   "fingered": 22,
+   "errors": 1
+  },
+  {
+   "path": "7/51/QmPWfzQnVxdpJD4jdRfARBz8wWTZxmKDGnfu2CSveJ37wa.mxl",
+   "piece": "pdmx0123",
+   "notes": 720,
+   "fingered": 0,
+   "errors": 2
+  },
+  {
+   "path": "3/45/QmdT1dspPqBfB8n9PVmBHSRbbHkUugZ5Uo2kprLZFtqJw3.mxl",
+   "piece": "pdmx0125",
+   "notes": 741,
+   "fingered": 10,
+   "errors": 0
+  },
+  {
+   "path": "7/54/QmPy4hMrAEkCY9X6LaR7EKn4PhhccY5Va2XchRnTEGQpc3.mxl",
+   "piece": "pdmx0126",
+   "notes": 6078,
+   "fingered": 4,
+   "errors": 15
+  },
+  {
+   "path": "8/16/QmQDuR571nyBz1C73S4G58Zi6nPXSfgdJ3rA35gXJVqmXS.mxl",
+   "piece": "pdmx0127",
+   "notes": 656,
+   "fingered": 6,
+   "errors": 4
+  },
+  {
+   "path": "9/1/QmR2S4ewuJMo2RXj7w6jVetMtCvDGskxJKmjSYRNZ1882a.mxl",
+   "piece": "pdmx0129",
+   "notes": 703,
+   "fingered": 15,
+   "errors": 4
+  },
+  {
+   "path": "12/36/QmUpPUidopUhkhFTUhazKh6cjwmdNgfjXKwnbEpjitf9kK.mxl",
+   "piece": "pdmx0130",
+   "notes": 1290,
+   "fingered": 1,
+   "errors": 18
+  },
+  {
+   "path": "17/53/QmZXUyvoeP6yx1PHQSmuYBZM2byqbohx8oLKixWjUUh7uU.mxl",
+   "piece": "pdmx0132",
+   "notes": 495,
+   "fingered": 73,
+   "errors": 0
+  },
+  {
+   "path": "17/15/QmZdCAPv5TJshahGMxm9Agrg8gaqRsfcxAAxYBua71u5Tr.mxl",
+   "piece": "pdmx0133",
+   "notes": 203,
+   "fingered": 14,
+   "errors": 0
+  },
+  {
+   "path": "9/8/QmR9qkc7iS6jhYcJBamXYEgeaqxPjbsdsTWm5Hh6emgBxe.mxl",
+   "piece": "pdmx0134",
+   "notes": 200,
+   "fingered": 27,
+   "errors": 0
+  },
+  {
+   "path": "5/41/QmfRT6VEv7sYow5NHEkgq4FFW9wJEK3ZQSkyW4vw4csGjd.mxl",
+   "piece": "pdmx0135",
+   "notes": 6262,
+   "fingered": 46,
+   "errors": 5
+  },
+  {
+   "path": "11/14/QmTCqDvn2p1Vban5TAKHPmEbmR2SJutHamT2W6pcqymQ2Y.mxl",
+   "piece": "pdmx0136",
+   "notes": 129,
+   "fingered": 0,
+   "errors": 0
+  },
+  {
+   "path": "11/50/QmTweH6fqVhz4zYvL7uDEj1Lj4vGcSsuG8E2ou1swGDHo2.mxl",
+   "piece": "pdmx0137",
+   "notes": 288,
+   "fingered": 29,
+   "errors": 1
+  },
+  {
+   "path": "8/36/QmQpGh1MfDus4hp2pnx99wLvSvhLPjLTsc5un4K5QVT9T4.mxl",
+   "piece": "pdmx0138",
+   "notes": 1268,
+   "fingered": 67,
+   "errors": 4
+  },
+  {
+   "path": "12/27/QmUJv3BAQRQ6AMAkVmth5vGTrZXeVZMUHrPWxJrcw27eem.mxl",
+   "piece": "pdmx0139",
+   "notes": 406,
+   "fingered": 3,
+   "errors": 0
+  },
+  {
+   "path": "15/36/QmXpYwysx9k8jRT62qFtSeBoDUd1ij4rpkzfSvTy9M8g7V.mxl",
+   "piece": "pdmx0140",
+   "notes": 136,
+   "fingered": 51,
+   "errors": 0
+  },
+  {
+   "path": "2/39/QmcQsnnzorLzs1YRpa5YCzEWxHvxNEKLiF9Rih3C67Yo75.mxl",
+   "piece": "pdmx0141",
+   "notes": 315,
+   "fingered": 142,
+   "errors": 0
+  },
+  {
+   "path": "9/22/QmRGA2Zf9fYKQ1fUVXT569xs5cyv2332BLzXNzv3TcaZYU.mxl",
+   "piece": "pdmx0142",
+   "notes": 969,
+   "fingered": 572,
+   "errors": 2
+  },
+  {
+   "path": "4/56/QmezyzNgJSEG4rf67DnoYqbL1EeTDGBKTtCr5gPR68DGQz.mxl",
+   "piece": "pdmx0143",
+   "notes": 1384,
+   "fingered": 22,
+   "errors": 104
+  },
+  {
+   "path": "2/25/QmciYjkeJXrMHAaaAAbfiUo9RCGJbw8paprJ5shUGMj4PY.mxl",
+   "piece": "pdmx0144",
+   "notes": 1220,
+   "fingered": 40,
+   "errors": 0
+  },
+  {
+   "path": "0/4/Qma5A6ADxDQzq9Mg8EoF4XNaQFAxdiov9udiLu44kpDhBz.mxl",
+   "piece": "pdmx0145",
+   "notes": 293,
+   "fingered": 151,
+   "errors": 0
+  },
+  {
+   "path": "1/40/QmbrdXPYHECGyFgbkL8adrnPH8qec9VqGVxxjjTPDyXzGS.mxl",
+   "piece": "pdmx0146",
+   "notes": 1464,
+   "fingered": 396,
+   "errors": 0
+  },
+  {
+   "path": "0/16/QmaDct1x6hnFgV8BFMLGzUKCd7DkNHm96Udwix7AW3pDva.mxl",
+   "piece": "pdmx0147",
+   "notes": 313,
+   "fingered": 61,
+   "errors": 0
+  },
+  {
+   "path": "14/57/QmWZup6ktoRQb3rZCBgY3StrCXq43SshF2QLekRb6SquRs.mxl",
+   "piece": "pdmx0148",
+   "notes": 1260,
+   "fingered": 121,
+   "errors": 0
+  },
+  {
+   "path": "14/26/QmWjbVXhMRhcyo9d3Gknc8rTNB543TgNwAC4teG3iMNKKW.mxl",
+   "piece": "pdmx0149",
+   "notes": 442,
+   "fingered": 67,
+   "errors": 0
+  }
+ ]
+}

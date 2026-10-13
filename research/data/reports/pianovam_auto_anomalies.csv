@@ -1,0 +1,789 @@
+dataset,piece,annotation,note_id,line,severity,check,message
+pianovam_auto,2024-02-14_19-10-09,0,82,0,error,chord_span_impossible,"LH simultaneous span 30 semitones (F#5, C3)"
+pianovam_auto,2024-02-14_19-10-09,0,3989,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (E5, B3)"
+pianovam_auto,2024-02-14_19-10-09,0,6652,0,error,chord_span_impossible,"RH simultaneous span 27 semitones (C#4, E6)"
+pianovam_auto,2024-02-14_19-10-09,0,6726,0,error,chord_span_impossible,"LH simultaneous span 20 semitones (C4, E2)"
+pianovam_auto,2024-02-14_19-10-09,0,366,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, E5=3"
+pianovam_auto,2024-02-14_19-10-09,0,662,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D5=-1, F5=-2"
+pianovam_auto,2024-02-14_19-10-09,0,983,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G6=3, Bb6=1"
+pianovam_auto,2024-02-14_19-10-09,0,1234,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B4=-1, G5=-5"
+pianovam_auto,2024-02-14_19-10-09,0,1294,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, C6=1"
+pianovam_auto,2024-02-14_19-10-09,0,1446,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C3=-1, C4=-5"
+pianovam_auto,2024-02-14_19-10-09,0,1887,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B3=-1, A4=-5"
+pianovam_auto,2024-02-14_19-10-09,0,2650,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B2=-1, B3=-5"
+pianovam_auto,2024-02-14_19-10-09,0,4152,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-3, C4=-5"
+pianovam_auto,2024-02-14_19-10-09,0,4646,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E2=-1, C3=-3"
+pianovam_auto,2024-02-14_19-10-09,0,5145,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=5, A6=2"
+pianovam_auto,2024-02-14_19-10-09,0,5182,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=3, F6=2"
+pianovam_auto,2024-02-14_19-10-09,0,5197,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D5=-1, F5=-2"
+pianovam_auto,2024-02-14_19-10-09,0,5241,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=5, A6=2"
+pianovam_auto,2024-02-14_19-10-09,0,5541,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C4=-1, E4=-2"
+pianovam_auto,2024-02-14_19-10-09,0,5679,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F4=-1, A4=-2"
+pianovam_auto,2024-02-14_19-10-09,0,5706,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G3=-3, C4=-5"
+pianovam_auto,2024-02-14_19-10-09,0,6364,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F5=2, G#5=1"
+pianovam_auto,2024-02-14_19-10-09,0,6772,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A2=-2, E3=-5"
+pianovam_auto,2024-02-14_19-10-09,0,18,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_19-10-09,0,64,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-10-09,0,624,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-10-09,0,632,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-10-09,0,777,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-10-09,0,787,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-10-09,0,969,0,warning,pitch_range_hand,LH note Eb7 (99) above C6
+pianovam_auto,2024-02-14_19-10-09,0,2578,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-10-09,0,3069,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-10-09,0,5186,0,warning,pitch_range_hand,LH note G#6 (92) above C6
+pianovam_auto,2024-02-14_19-10-09,0,5430,0,warning,pitch_range_hand,RH note A0 (21) below C2
+pianovam_auto,2024-02-14_19-10-09,0,5431,0,warning,pitch_range_hand,RH note A1 (33) below C2
+pianovam_auto,2024-02-14_19-10-09,0,5972,0,warning,pitch_range_hand,RH note D1 (26) below C2
+pianovam_auto,2024-02-14_19-10-09,0,6134,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-10-09,0,6563,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_19-10-09,0,6564,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-10-09,0,6634,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-10-09,0,6646,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_19-10-09,0,6669,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-44-26,0,268,0,error,chord_span_impossible,"RH simultaneous span 38 semitones (F2, G5)"
+pianovam_auto,2024-02-14_19-44-26,0,142,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=5, D5=3"
+pianovam_auto,2024-02-14_19-44-26,0,646,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb3=2, Eb4=1"
+pianovam_auto,2024-02-14_19-44-26,0,845,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G4=5, B4=3"
+pianovam_auto,2024-02-14_19-44-26,0,1783,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb5=5, F6=2"
+pianovam_auto,2024-02-14_19-44-26,0,4314,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb5=5, F6=2"
+pianovam_auto,2024-02-14_19-44-26,0,4542,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=3, Bb5=1"
+pianovam_auto,2024-02-14_19-44-26,0,4672,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#5=5, D6=2"
+pianovam_auto,2024-02-14_19-44-26,0,5005,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb5=5, Eb6=3"
+pianovam_auto,2024-02-14_19-44-26,0,267,0,warning,pitch_range_hand,RH note Bb1 (34) below C2
+pianovam_auto,2024-02-14_19-44-26,0,270,0,warning,pitch_range_hand,RH note Bb1 (34) below C2
+pianovam_auto,2024-02-14_19-44-26,0,1521,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_19-44-26,0,4396,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-55-17,0,532,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (G4, G6)"
+pianovam_auto,2024-02-14_19-55-17,0,1224,0,error,chord_span_impossible,"LH simultaneous span 32 semitones (C6, E3)"
+pianovam_auto,2024-02-14_19-55-17,0,5599,0,error,same_finger_simultaneous,"finger 1 on 2 simultaneous pitches 15 semitones apart (5598:Eb4, 5599:C3)"
+pianovam_auto,2024-02-14_19-55-17,0,473,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F5=5, D6=2"
+pianovam_auto,2024-02-14_19-55-17,0,544,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb4=-2, C#5=-3"
+pianovam_auto,2024-02-14_19-55-17,0,964,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A1=-1, A2=-5"
+pianovam_auto,2024-02-14_19-55-17,0,1831,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F4=4, C5=1"
+pianovam_auto,2024-02-14_19-55-17,0,2732,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G6=5, A7=1"
+pianovam_auto,2024-02-14_19-55-17,0,3460,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A2=-1, G3=-5"
+pianovam_auto,2024-02-14_19-55-17,0,4513,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E5=3, Eb6=1"
+pianovam_auto,2024-02-14_19-55-17,0,5623,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=3, D5=2"
+pianovam_auto,2024-02-14_19-55-17,0,5598,0,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, C3)"
+pianovam_auto,2024-02-14_19-55-17,0,107,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_19-55-17,0,112,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-55-17,0,116,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-55-17,0,120,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_19-55-17,0,121,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_19-55-17,0,124,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-55-17,0,126,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,288,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,289,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_19-55-17,0,321,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,322,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_19-55-17,0,354,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,355,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_19-55-17,0,405,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_19-55-17,0,407,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-55-17,0,409,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_19-55-17,0,415,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,471,0,warning,pitch_range_hand,RH note G1 (31) below C2
+pianovam_auto,2024-02-14_19-55-17,0,489,0,warning,pitch_range_hand,RH note A1 (33) below C2
+pianovam_auto,2024-02-14_19-55-17,0,1067,0,warning,pitch_range_hand,RH note Eb1 (27) below C2
+pianovam_auto,2024-02-14_19-55-17,0,2735,0,warning,pitch_range_hand,RH note D1 (26) below C2
+pianovam_auto,2024-02-14_19-55-17,0,3427,0,warning,pitch_range_hand,RH note F1 (29) below C2
+pianovam_auto,2024-02-14_19-55-17,0,3519,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,4022,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_19-55-17,0,4024,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_19-55-17,0,4028,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5208,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5209,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5213,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5215,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5217,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5284,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5285,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5317,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5318,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5348,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5352,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5353,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5493,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_19-55-17,0,5571,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-10-08,0,849,0,error,chord_span_impossible,"LH simultaneous span 21 semitones (Eb4, F#2)"
+pianovam_auto,2024-02-14_20-10-08,0,5301,0,error,chord_span_impossible,"RH simultaneous span 57 semitones (C2, A6)"
+pianovam_auto,2024-02-14_20-10-08,0,555,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=4, B5=1"
+pianovam_auto,2024-02-14_20-10-08,0,3299,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-1, C4=-3"
+pianovam_auto,2024-02-14_20-10-08,0,3746,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#5=2, G5=1"
+pianovam_auto,2024-02-14_20-10-08,0,5739,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=5, F5=2"
+pianovam_auto,2024-02-14_20-10-08,0,6722,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb3=-1, D4=-2"
+pianovam_auto,2024-02-14_20-10-08,0,6803,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B4=3, E5=1"
+pianovam_auto,2024-02-14_20-10-08,0,7009,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#5=3, G#5=1"
+pianovam_auto,2024-02-14_20-10-08,0,8229,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#4=-1, F4=-3"
+pianovam_auto,2024-02-14_20-10-08,0,8616,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A5=2, C#6=1"
+pianovam_auto,2024-02-14_20-10-08,0,8677,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb5=5, E6=2"
+pianovam_auto,2024-02-14_20-10-08,0,1091,0,warning,chord_span_large,"LH simultaneous span 16 semitones (C4, G#2)"
+pianovam_auto,2024-02-14_20-10-08,0,2745,0,warning,pitch_range_hand,RH note F1 (29) below C2
+pianovam_auto,2024-02-14_20-10-08,0,3685,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-10-08,0,5765,0,warning,pitch_range_hand,RH note F1 (29) below C2
+pianovam_auto,2024-02-14_20-10-08,0,7053,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-10-08,0,7054,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-10-08,0,7103,0,warning,pitch_range_hand,LH note G#6 (92) above C6
+pianovam_auto,2024-02-14_20-37-55,0,537,0,error,chord_span_impossible,"RH simultaneous span 17 semitones (C6, G4)"
+pianovam_auto,2024-02-14_20-37-55,0,6350,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (D4, A2)"
+pianovam_auto,2024-02-14_20-37-55,0,7159,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (F#6, A3)"
+pianovam_auto,2024-02-14_20-37-55,0,1309,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E5=5, G#5=3"
+pianovam_auto,2024-02-14_20-37-55,0,2437,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A5=4, C6=2"
+pianovam_auto,2024-02-14_20-37-55,0,2443,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=5, G6=3"
+pianovam_auto,2024-02-14_20-37-55,0,5673,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-1, A3=-3"
+pianovam_auto,2024-02-14_20-37-55,0,6056,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-1, D4=-4"
+pianovam_auto,2024-02-14_20-37-55,0,6104,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B3=5, G#4=1"
+pianovam_auto,2024-02-14_20-37-55,0,7024,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-1, Eb4=-3"
+pianovam_auto,2024-02-14_20-37-55,0,7597,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-2, C#4=-4"
+pianovam_auto,2024-02-14_20-37-55,0,499,0,warning,chord_span_large,"LH simultaneous span 15 semitones (D3, B1)"
+pianovam_auto,2024-02-14_20-37-55,0,31,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,43,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,55,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,115,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,127,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,138,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,151,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,163,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,175,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,187,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,247,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,284,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,408,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-37-55,0,414,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_20-37-55,0,748,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,754,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,1522,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2240,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2611,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2614,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2616,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2718,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2721,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2762,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2764,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2766,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,2898,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-37-55,0,4463,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-37-55,0,4465,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-37-55,0,4468,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-37-55,0,4470,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-37-55,0,4537,0,warning,pitch_range_hand,RH note Bb1 (34) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4545,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4555,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4587,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4589,0,warning,pitch_range_hand,RH note A1 (33) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4595,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4596,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4603,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4605,0,warning,pitch_range_hand,RH note B1 (35) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4635,0,warning,pitch_range_hand,RH note Bb1 (34) below C2
+pianovam_auto,2024-02-14_20-37-55,0,4645,0,warning,pitch_range_hand,RH note Bb1 (34) below C2
+pianovam_auto,2024-02-14_20-37-55,0,6749,0,warning,pitch_range_hand,RH note G1 (31) below C2
+pianovam_auto,2024-02-14_20-37-55,0,7159,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-37-55,0,7171,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,5721,0,error,same_finger_simultaneous,"finger 5 on 2 simultaneous pitches 2 semitones apart (5720:C1, 5721:D1)"
+pianovam_auto,2024-02-14_20-58-43,0,35,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, A4=-2"
+pianovam_auto,2024-02-14_20-58-43,0,56,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D3=-1, D4=-5"
+pianovam_auto,2024-02-14_20-58-43,0,606,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C4=-1, G4=-3"
+pianovam_auto,2024-02-14_20-58-43,0,747,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G4=-1, G5=-5"
+pianovam_auto,2024-02-14_20-58-43,0,762,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B3=-2, D4=-3"
+pianovam_auto,2024-02-14_20-58-43,0,2057,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-1, C4=-3"
+pianovam_auto,2024-02-14_20-58-43,0,3292,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A6=-1, E7=-5"
+pianovam_auto,2024-02-14_20-58-43,0,3588,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F3=-2, G3=-3"
+pianovam_auto,2024-02-14_20-58-43,0,5089,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb4=-1, C#5=-2"
+pianovam_auto,2024-02-14_20-58-43,0,162,0,warning,pitch_range_hand,RH note G1 (31) below C2
+pianovam_auto,2024-02-14_20-58-43,0,221,0,warning,pitch_range_hand,RH note A0 (21) below C2
+pianovam_auto,2024-02-14_20-58-43,0,222,0,warning,pitch_range_hand,RH note A1 (33) below C2
+pianovam_auto,2024-02-14_20-58-43,0,439,0,warning,pitch_range_hand,RH note D1 (26) below C2
+pianovam_auto,2024-02-14_20-58-43,0,807,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,811,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,819,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,821,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,835,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,836,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,837,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,838,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,839,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,843,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,844,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,846,0,warning,pitch_range_hand,LH note G#6 (92) above C6
+pianovam_auto,2024-02-14_20-58-43,0,847,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1114,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1199,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1305,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1307,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1308,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1310,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1311,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1312,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1319,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1327,0,warning,pitch_range_hand,LH note G#6 (92) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1335,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1453,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1519,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1520,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1617,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1635,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1644,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1645,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1668,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1680,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1682,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1683,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1691,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1692,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1698,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1703,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1705,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1706,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1707,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1708,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1715,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1716,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1722,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1723,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1729,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1730,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1735,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1736,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,1737,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2064,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2065,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2066,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2068,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2214,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2355,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2356,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2358,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2468,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2474,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2516,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2522,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2528,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2558,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2577,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2583,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2589,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2595,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2603,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2610,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2631,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2643,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2650,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2651,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2671,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2684,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2690,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2691,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2709,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2716,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2760,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2761,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2762,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2763,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2765,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2766,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2769,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2770,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2771,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2772,0,warning,pitch_range_hand,LH note F#7 (102) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2773,0,warning,pitch_range_hand,LH note F#7 (102) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2774,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2775,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2777,0,warning,pitch_range_hand,LH note F#7 (102) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2778,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2779,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2781,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2782,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2783,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2784,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2785,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2786,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2787,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2788,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2790,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2791,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2794,0,warning,pitch_range_hand,LH note D7 (98) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2795,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2796,0,warning,pitch_range_hand,LH note Bb6 (94) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2797,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2799,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2800,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2801,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2821,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2824,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2826,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2828,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2830,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2833,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2839,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2853,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2854,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2857,0,warning,pitch_range_hand,LH note Eb7 (99) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2858,0,warning,pitch_range_hand,LH note C#7 (97) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2859,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2860,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2861,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2862,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2863,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2864,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2896,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2898,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2899,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2900,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2901,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2902,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2905,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2937,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2940,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2941,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2942,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,2943,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3116,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3118,0,warning,pitch_range_hand,LH note C#6 (85) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3119,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3134,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3135,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3136,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3149,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3150,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3151,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3152,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3153,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3166,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3167,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3168,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3169,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3170,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3171,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3183,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3184,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3185,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3186,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3187,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3191,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3192,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3225,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3241,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3243,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3245,0,warning,pitch_range_hand,LH note B6 (95) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3254,0,warning,pitch_range_hand,LH note G6 (91) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3255,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3256,0,warning,pitch_range_hand,LH note A6 (93) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3257,0,warning,pitch_range_hand,LH note D6 (86) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3258,0,warning,pitch_range_hand,LH note F6 (89) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3261,0,warning,pitch_range_hand,LH note E6 (88) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3264,0,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3265,0,warning,pitch_range_hand,LH note F#6 (90) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3266,0,warning,pitch_range_hand,LH note C7 (96) above C6
+pianovam_auto,2024-02-14_20-58-43,0,3267,0,warning,pitch_range_hand,LH note E7 (100) above C6
+pianovam_auto,2024-02-14_21-30-04,0,5132,0,error,chord_span_impossible,"RH simultaneous span 18 semitones (G#4, D6)"
+pianovam_auto,2024-02-14_21-30-04,0,5365,0,error,chord_span_impossible,"RH simultaneous span 17 semitones (G#4, C#6)"
+pianovam_auto,2024-02-14_21-30-04,0,13054,0,error,chord_span_impossible,"LH simultaneous span 27 semitones (A5, F#3)"
+pianovam_auto,2024-02-14_21-30-04,0,15483,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (F4, F6)"
+pianovam_auto,2024-02-14_21-30-04,0,16813,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (A5, A3)"
+pianovam_auto,2024-02-14_21-30-04,0,16931,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (E6, G3)"
+pianovam_auto,2024-02-14_21-30-04,0,23437,0,error,chord_span_impossible,"RH simultaneous span 21 semitones (D2, B3)"
+pianovam_auto,2024-02-14_21-30-04,0,24799,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (Bb4, Bb6)"
+pianovam_auto,2024-02-14_21-30-04,0,23438,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 21 semitones apart (23437:D2, 23438:B3)"
+pianovam_auto,2024-02-14_21-30-04,0,2080,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=3, E5=2"
+pianovam_auto,2024-02-14_21-30-04,0,2162,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F4=3, C5=1"
+pianovam_auto,2024-02-14_21-30-04,0,4730,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, G4=-2"
+pianovam_auto,2024-02-14_21-30-04,0,5217,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C6=5, Eb6=3"
+pianovam_auto,2024-02-14_21-30-04,0,5560,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-2, D4=-5"
+pianovam_auto,2024-02-14_21-30-04,0,5702,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#4=-1, A4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,5766,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=5, D7=1"
+pianovam_auto,2024-02-14_21-30-04,0,5840,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-1, G4=-5"
+pianovam_auto,2024-02-14_21-30-04,0,6226,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=5, D6=1"
+pianovam_auto,2024-02-14_21-30-04,0,7848,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#5=4, F#6=1"
+pianovam_auto,2024-02-14_21-30-04,0,7853,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B2=-1, B3=-5"
+pianovam_auto,2024-02-14_21-30-04,0,7933,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-1, G#4=-5"
+pianovam_auto,2024-02-14_21-30-04,0,7987,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-1, A4=-5"
+pianovam_auto,2024-02-14_21-30-04,0,8104,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#4=-1, A4=-2"
+pianovam_auto,2024-02-14_21-30-04,0,8182,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#6=5, A6=3"
+pianovam_auto,2024-02-14_21-30-04,0,8211,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A5=2, D6=1"
+pianovam_auto,2024-02-14_21-30-04,0,8255,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#4=-1, C5=-2"
+pianovam_auto,2024-02-14_21-30-04,0,8367,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#4=-2, E4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,8483,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D4=-2, F#4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,8535,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A2=-1, A3=-5"
+pianovam_auto,2024-02-14_21-30-04,0,10415,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E3=-1, G3=-2"
+pianovam_auto,2024-02-14_21-30-04,0,11166,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#4=-1, G#4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,12107,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=5, C#5=3"
+pianovam_auto,2024-02-14_21-30-04,0,12894,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G5=5, C6=3"
+pianovam_auto,2024-02-14_21-30-04,0,13161,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D4=2, A4=1"
+pianovam_auto,2024-02-14_21-30-04,0,13181,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=3, F#5=2"
+pianovam_auto,2024-02-14_21-30-04,0,13184,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A4=5, A5=1"
+pianovam_auto,2024-02-14_21-30-04,0,13188,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#4=3, D5=1"
+pianovam_auto,2024-02-14_21-30-04,0,13261,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=3, Bb4=2"
+pianovam_auto,2024-02-14_21-30-04,0,13297,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb2=-2, F3=-5"
+pianovam_auto,2024-02-14_21-30-04,0,13401,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb5=5, C6=2"
+pianovam_auto,2024-02-14_21-30-04,0,13587,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F4=3, C5=1"
+pianovam_auto,2024-02-14_21-30-04,0,13847,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#4=2, F4=1"
+pianovam_auto,2024-02-14_21-30-04,0,15340,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G6=5, C7=2"
+pianovam_auto,2024-02-14_21-30-04,0,16536,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=5, D5=3"
+pianovam_auto,2024-02-14_21-30-04,0,16796,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A4=-2, F5=-5"
+pianovam_auto,2024-02-14_21-30-04,0,16915,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A4=-3, C5=-5"
+pianovam_auto,2024-02-14_21-30-04,0,16938,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=3, G5=1"
+pianovam_auto,2024-02-14_21-30-04,0,17470,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B4=5, B5=1"
+pianovam_auto,2024-02-14_21-30-04,0,17488,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E5=5, A5=3"
+pianovam_auto,2024-02-14_21-30-04,0,17844,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B2=-1, G3=-5"
+pianovam_auto,2024-02-14_21-30-04,0,17955,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-3, C4=-5"
+pianovam_auto,2024-02-14_21-30-04,0,18021,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B4=5, G5=2"
+pianovam_auto,2024-02-14_21-30-04,0,18906,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D5=-2, F#5=-4"
+pianovam_auto,2024-02-14_21-30-04,0,19745,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#5=4, C#6=2"
+pianovam_auto,2024-02-14_21-30-04,0,21393,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C6=5, F#6=2"
+pianovam_auto,2024-02-14_21-30-04,0,22487,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E5=-1, A5=-2"
+pianovam_auto,2024-02-14_21-30-04,0,22816,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G4=3, Bb4=1"
+pianovam_auto,2024-02-14_21-30-04,0,22906,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb2=-1, C3=-2"
+pianovam_auto,2024-02-14_21-30-04,0,22927,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F4=-1, A4=-2"
+pianovam_auto,2024-02-14_21-30-04,0,23265,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F5=-1, A5=-2"
+pianovam_auto,2024-02-14_21-30-04,0,23386,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F4=-1, E5=-5"
+pianovam_auto,2024-02-14_21-30-04,0,23591,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A5=2, C#6=1"
+pianovam_auto,2024-02-14_21-30-04,0,23991,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=5, F5=2"
+pianovam_auto,2024-02-14_21-30-04,0,24243,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=5, A5=2"
+pianovam_auto,2024-02-14_21-30-04,0,24357,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, F5=2"
+pianovam_auto,2024-02-14_21-30-04,0,24521,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb3=-1, E4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,24875,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, E5=-5"
+pianovam_auto,2024-02-14_21-30-04,0,24893,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E6=3, C7=1"
+pianovam_auto,2024-02-14_21-30-04,0,24915,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb6=5, D7=3"
+pianovam_auto,2024-02-14_21-30-04,0,24919,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb4=-1, D5=-2"
+pianovam_auto,2024-02-14_21-30-04,0,24962,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=4, G6=2"
+pianovam_auto,2024-02-14_21-30-04,0,25119,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb3=-1, D4=-2"
+pianovam_auto,2024-02-14_21-30-04,0,25966,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#4=-1, B4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,26217,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#5=-1, E6=-5"
+pianovam_auto,2024-02-14_21-30-04,0,26278,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G4=-1, B4=-2"
+pianovam_auto,2024-02-14_21-30-04,0,26560,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#4=-2, A4=-3"
+pianovam_auto,2024-02-14_21-30-04,0,26829,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#6=5, D7=2"
+pianovam_auto,2024-02-14_21-30-04,0,26992,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A6=3, B6=2"
+pianovam_auto,2024-02-14_21-30-04,0,27034,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb4=-1, A5=-4"
+pianovam_auto,2024-02-14_21-30-04,0,27164,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Eb5=-1, B5=-3"
+pianovam_auto,2024-02-14_21-30-04,0,27187,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B6=4, E7=2"
+pianovam_auto,2024-02-14_21-30-04,0,27280,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#6=5, F#7=1"
+pianovam_auto,2024-02-14_21-30-04,0,27300,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G6=2, B6=1"
+pianovam_auto,2024-02-14_21-30-04,0,27356,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#6=5, C#7=3"
+pianovam_auto,2024-02-14_21-30-04,0,27388,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C6=5, C7=1"
+pianovam_auto,2024-02-14_21-30-04,0,27394,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=5, A6=2"
+pianovam_auto,2024-02-14_21-30-04,0,27644,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B3=-1, B4=-5"
+pianovam_auto,2024-02-14_21-30-04,0,28057,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=3, A6=1"
+pianovam_auto,2024-02-14_21-30-04,0,21252,0,warning,chord_span_large,"LH simultaneous span 16 semitones (C5, G#3)"
+pianovam_auto,2024-02-15_15-13-10,0,523,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (G4, D3)"
+pianovam_auto,2024-02-15_15-13-10,0,133,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B4=5, D5=3"
+pianovam_auto,2024-02-15_15-13-10,0,298,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G4=3, D5=1"
+pianovam_auto,2024-02-15_15-13-10,0,363,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, F5=3"
+pianovam_auto,2024-02-15_15-13-10,0,985,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A4=3, C5=2"
+pianovam_auto,2024-02-15_15-13-10,0,2109,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=5, F5=3"
+pianovam_auto,2024-02-15_15-13-10,0,3556,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D4=-1, G4=-2"
+pianovam_auto,2024-02-15_15-13-10,0,4681,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F4=5, G4=4"
+pianovam_auto,2024-02-15_15-13-10,0,4960,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=2, D5=1"
+pianovam_auto,2024-02-15_15-13-10,0,5112,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=5, F5=3"
+pianovam_auto,2024-02-15_15-13-10,0,6263,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-2, A3=-3"
+pianovam_auto,2024-02-15_20-07-54,0,3113,0,error,chord_span_impossible,"RH simultaneous span 28 semitones (C#2, F4)"
+pianovam_auto,2024-02-15_20-07-54,0,4201,0,error,chord_span_impossible,"LH simultaneous span 27 semitones (G5, E3)"
+pianovam_auto,2024-02-15_20-07-54,0,4655,0,error,chord_span_impossible,"LH simultaneous span 41 semitones (Bb2, Eb6)"
+pianovam_auto,2024-02-15_20-07-54,0,529,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-1, C4=-2"
+pianovam_auto,2024-02-15_20-07-54,0,1673,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb5=5, F5=4"
+pianovam_auto,2024-02-15_20-07-54,0,2536,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F3=-1, C#4=-5"
+pianovam_auto,2024-02-15_20-07-54,0,2705,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=5, F#5=1"
+pianovam_auto,2024-02-15_20-07-54,0,3113,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#2=4, F4=1"
+pianovam_auto,2024-02-15_20-07-54,0,4518,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B3=-1, D4=-2"
+pianovam_auto,2024-02-15_20-07-54,0,4646,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Eb3=-2, B3=-5"
+pianovam_auto,2024-02-15_20-07-54,0,5444,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G5=-1, Eb6=-3"
+pianovam_auto,2024-02-15_20-17-26,0,2494,0,error,chord_span_impossible,"LH simultaneous span 27 semitones (B4, G#2)"
+pianovam_auto,2024-02-15_20-17-26,0,2854,0,error,chord_span_impossible,"RH simultaneous span 28 semitones (B4, G2)"
+pianovam_auto,2024-02-15_20-17-26,0,2983,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (G2, G4)"
+pianovam_auto,2024-02-15_20-17-26,0,2855,0,error,same_finger_simultaneous,"finger 1 on 2 simultaneous pitches 28 semitones apart (2854:B4, 2855:G2)"
+pianovam_auto,2024-02-15_20-17-26,0,93,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G4=5, G5=1"
+pianovam_auto,2024-02-15_20-17-26,0,2733,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#4=5, F#5=1"
+pianovam_auto,2024-02-15_20-17-26,0,3757,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb4=4, Eb5=1"
+pianovam_auto,2024-02-15_20-17-26,0,4340,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-1, C#4=-3"
+pianovam_auto,2024-02-15_20-17-26,0,4799,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B4=-1, B5=-5"
+pianovam_auto,2024-02-15_20-17-26,0,4812,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A4=-1, A5=-5"
+pianovam_auto,2024-02-15_20-17-26,0,4927,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D2=-1, Bb2=-5"
+pianovam_auto,2024-02-15_20-17-26,0,175,0,warning,chord_span_large,"LH simultaneous span 16 semitones (C5, G#3)"
+pianovam_auto,2024-02-15_20-28-13,0,815,0,error,chord_span_impossible,"LH simultaneous span 29 semitones (C#6, G#3)"
+pianovam_auto,2024-02-15_20-28-13,0,3036,0,error,chord_span_impossible,"RH simultaneous span 26 semitones (G6, F4)"
+pianovam_auto,2024-02-15_20-28-13,0,3482,0,error,chord_span_impossible,"LH simultaneous span 22 semitones (A4, B2)"
+pianovam_auto,2024-02-15_20-28-13,0,649,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#3=-1, Bb3=-3"
+pianovam_auto,2024-02-15_20-28-13,0,2405,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D6=5, G6=3"
+pianovam_auto,2024-02-15_20-38-23,0,230,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (G#5, G#3)"
+pianovam_auto,2024-02-15_20-38-23,0,10,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=5, D6=1"
+pianovam_auto,2024-02-15_20-38-23,0,557,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-1, D4=-3"
+pianovam_auto,2024-02-15_20-38-23,0,1321,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#3=-1, F4=-5"
+pianovam_auto,2024-02-15_20-38-23,0,2683,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb3=-1, D4=-2"
+pianovam_auto,2024-02-15_20-38-23,0,3330,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G4=-1, G5=-5"
+pianovam_auto,2024-02-15_20-38-23,0,3415,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C4=-1, F4=-3"
+pianovam_auto,2024-02-15_20-54-38,0,1385,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C4=-1, B4=-4"
+pianovam_auto,2024-02-15_21-01-11,0,46,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (C5, G3)"
+pianovam_auto,2024-02-15_21-01-11,0,216,0,error,chord_span_impossible,"RH simultaneous span 20 semitones (F2, C#4)"
+pianovam_auto,2024-02-15_21-01-11,0,3084,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (F#5, F#3)"
+pianovam_auto,2024-02-15_21-01-11,0,415,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (414:B1, 415:C2)"
+pianovam_auto,2024-02-15_21-01-11,0,3085,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-1, F#5=-5"
+pianovam_auto,2024-02-15_21-01-11,0,3223,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G4=-1, C5=-2"
+pianovam_auto,2024-02-15_21-01-11,0,4081,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A1=-2, C2=-3"
+pianovam_auto,2024-02-15_21-01-11,0,4864,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-1, A4=-5"
+pianovam_auto,2024-02-15_21-01-11,0,6595,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E5=-1, E6=-5"
+pianovam_auto,2024-02-15_21-01-11,0,7020,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F4=-1, Bb4=-2"
+pianovam_auto,2024-02-15_21-01-11,0,7726,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#5=4, Eb6=2"
+pianovam_auto,2024-02-15_21-01-11,0,8594,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C2=5, F2=3"
+pianovam_auto,2024-02-15_21-18-14,0,5036,0,error,chord_span_impossible,"LH simultaneous span 45 semitones (Eb6, F#2)"
+pianovam_auto,2024-02-15_21-18-14,0,7187,0,error,chord_span_impossible,"LH simultaneous span 36 semitones (C6, C3)"
+pianovam_auto,2024-02-15_21-18-14,0,7973,0,error,chord_span_impossible,"RH simultaneous span 19 semitones (F2, C4)"
+pianovam_auto,2024-02-15_21-18-14,0,1739,0,error,same_finger_simultaneous,"finger 3 on 2 simultaneous pitches 2 semitones apart (1738:F6, 1739:G6)"
+pianovam_auto,2024-02-15_21-18-14,0,4130,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (4129:C2, 4130:B1)"
+pianovam_auto,2024-02-15_21-18-14,0,2095,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-1, F#4=-5"
+pianovam_auto,2024-02-15_21-18-14,0,2271,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E5=3, G5=1"
+pianovam_auto,2024-02-15_21-18-14,0,2604,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G1=-1, G2=-5"
+pianovam_auto,2024-02-15_21-18-14,0,2769,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F1=-3, A1=-5"
+pianovam_auto,2024-02-15_21-18-14,0,3096,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C4=2, E4=1"
+pianovam_auto,2024-02-15_21-18-14,0,5362,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, G#4=-2"
+pianovam_auto,2024-02-15_21-18-14,0,6852,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#1=-1, G#2=-5"
+pianovam_auto,2024-02-15_21-18-14,0,6918,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F2=-1, G#2=-2"
+pianovam_auto,2024-02-15_21-18-14,0,7772,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G#2=-1, C3=-2"
+pianovam_auto,2024-02-15_21-18-14,0,7968,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E5=3, G5=2"
+pianovam_auto,2024-02-15_21-33-36,0,3392,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (3391:B4, 3392:C5)"
+pianovam_auto,2024-02-15_21-33-36,0,76,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb2=-1, G3=-5"
+pianovam_auto,2024-02-15_21-33-36,0,1425,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F5=5, F6=1"
+pianovam_auto,2024-02-15_21-33-36,0,1669,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D3=-1, B3=-5"
+pianovam_auto,2024-02-15_21-33-36,0,2650,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb2=3, C3=1"
+pianovam_auto,2024-02-15_21-33-36,0,3173,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F5=5, G5=4"
+pianovam_auto,2024-02-15_21-33-36,0,3208,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, G5=2"
+pianovam_auto,2024-02-15_21-33-36,0,3212,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G4=5, G5=1"
+pianovam_auto,2024-02-15_21-33-36,0,3444,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, C6=1"
+pianovam_auto,2024-02-15_21-33-36,0,3451,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F5=5, C6=2"
+pianovam_auto,2024-02-15_21-33-36,0,3550,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb4=4, A4=2"
+pianovam_auto,2024-02-15_21-40-43,0,4362,0,error,chord_span_impossible,"RH simultaneous span 28 semitones (G#2, C5)"
+pianovam_auto,2024-02-15_21-40-43,0,4812,0,error,chord_span_impossible,"RH simultaneous span 17 semitones (Bb4, F3)"
+pianovam_auto,2024-02-15_21-40-43,0,4363,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 28 semitones apart (4362:G#2, 4363:C5)"
+pianovam_auto,2024-02-15_21-40-43,0,340,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=3, Eb5=1"
+pianovam_auto,2024-02-15_21-40-43,0,2068,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb4=5, G#4=3"
+pianovam_auto,2024-02-15_21-40-43,0,4754,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb3=3, F#3=2"
+pianovam_auto,2024-02-15_21-57-38,0,797,0,error,chord_span_impossible,"RH simultaneous span 22 semitones (Eb4, C#6)"
+pianovam_auto,2024-02-15_21-57-38,0,990,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb5=3, Bb5=1"
+pianovam_auto,2024-02-15_22-02-16,0,881,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (A5, F3)"
+pianovam_auto,2024-02-15_22-02-16,0,4774,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (E4, E2)"
+pianovam_auto,2024-02-15_22-02-16,0,1758,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (1757:E5, 1758:F5)"
+pianovam_auto,2024-02-15_22-02-16,0,2243,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (2242:B2, 2243:Bb2)"
+pianovam_auto,2024-02-15_22-02-16,0,1328,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C3=-1, E3=-2"
+pianovam_auto,2024-02-15_22-02-16,0,1382,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F4=-1, A4=-2"
+pianovam_auto,2024-02-15_22-02-16,0,1589,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A5=5, B5=4"
+pianovam_auto,2024-02-15_22-02-16,0,2684,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#5=5, C6=3"
+pianovam_auto,2024-02-15_22-02-16,0,3233,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E2=-1, E3=-5"
+pianovam_auto,2024-02-15_22-02-16,0,3977,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, A4=-2"
+pianovam_auto,2024-02-15_22-02-16,0,4500,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Eb4=-1, G4=-3"
+pianovam_auto,2024-02-15_22-02-16,0,4690,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, E5=-5"
+pianovam_auto,2024-02-15_22-02-16,0,4893,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E7=5, F7=4"
+pianovam_auto,2024-02-15_22-02-16,0,5000,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D4=-1, D5=-5"
+pianovam_auto,2024-02-15_22-02-16,0,5515,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#6=5, D7=2"
+pianovam_auto,2024-02-15_22-02-16,0,5723,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, E5=3"
+pianovam_auto,2024-02-15_22-02-16,0,6452,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#4=3, D5=1"
+pianovam_auto,2024-02-15_22-02-16,0,6549,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-2, C#4=-3"
+pianovam_auto,2024-02-15_22-02-16,0,6684,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#6=3, E6=2"
+pianovam_auto,2024-02-15_22-02-16,0,6767,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A4=2, D5=1"
+pianovam_auto,2024-02-15_22-18-32,0,1895,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (Eb5, Eb3)"
+pianovam_auto,2024-02-15_22-18-32,0,12489,0,error,chord_span_impossible,"RH simultaneous span 19 semitones (G3, D5)"
+pianovam_auto,2024-02-15_22-18-32,0,186,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A2=-1, G3=-5"
+pianovam_auto,2024-02-15_22-18-32,0,345,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D5=3, G5=2"
+pianovam_auto,2024-02-15_22-18-32,0,3175,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=3, F5=1"
+pianovam_auto,2024-02-15_22-18-32,0,4348,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Eb3=-1, C4=-3"
+pianovam_auto,2024-02-15_22-18-32,0,4423,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Bb2=-1, Bb3=-5"
+pianovam_auto,2024-02-15_22-18-32,0,5090,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G5=4, C#6=1"
+pianovam_auto,2024-02-15_22-18-32,0,12195,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=5, F5=3"
+pianovam_auto,2024-02-15_22-18-32,0,12734,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D4=-1, C5=-5"
+pianovam_auto,2024-02-15_22-18-32,0,12749,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D4=-1, C5=-5"
+pianovam_auto,2024-02-15_22-18-32,0,13214,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C4=-1, E4=-2"
+pianovam_auto,2024-02-15_22-18-32,0,13224,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C4=-1, E4=-2"
+pianovam_auto,2024-02-15_22-18-32,0,13934,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G4=-2, Bb4=-4"
+pianovam_auto,2024-02-15_22-18-32,0,14333,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E6=5, F6=4"
+pianovam_auto,2024-02-15_22-18-32,0,15084,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C5=-1, E5=-2"
+pianovam_auto,2024-02-15_22-18-32,0,16422,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C5=-1, Eb5=-2"
+pianovam_auto,2024-02-15_22-18-32,0,12538,0,warning,chord_span_large,"LH simultaneous span 15 semitones (C5, A3)"
+pianovam_auto,2024-02-15_22-57-11,0,2132,0,error,chord_span_impossible,"LH simultaneous span 21 semitones (F4, G#2)"
+pianovam_auto,2024-02-15_22-57-11,0,2488,0,error,chord_span_impossible,"RH simultaneous span 19 semitones (G#4, C#3)"
+pianovam_auto,2024-02-15_22-57-11,0,5570,0,error,chord_span_impossible,"LH simultaneous span 21 semitones (F#3, A1)"
+pianovam_auto,2024-02-15_22-57-11,0,6199,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (C#5, A2)"
+pianovam_auto,2024-02-15_22-57-11,0,4378,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#5=5, F5=3"
+pianovam_auto,2024-02-15_22-57-11,0,4438,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C6=5, G6=2"
+pianovam_auto,2024-02-15_22-57-11,0,4572,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B4=5, B5=1"
+pianovam_auto,2024-02-15_22-57-11,0,5105,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#5=4, Bb5=3"
+pianovam_auto,2024-02-15_22-57-11,0,6014,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#3=-1, Bb3=-3"
+pianovam_auto,2024-02-15_22-57-11,0,6136,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F3=-1, D4=-5"
+pianovam_auto,2024-02-15_22-57-11,0,6826,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D4=5, G4=2"
+pianovam_auto,2024-02-15_22-57-11,0,5860,0,warning,chord_span_large,"LH simultaneous span 16 semitones (G3, Eb2)"
+pianovam_auto,2024-02-15_23-14-13,0,1149,0,error,chord_span_impossible,"LH simultaneous span 29 semitones (F5, C3)"
+pianovam_auto,2024-02-15_23-14-13,0,1209,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (G3, G5)"
+pianovam_auto,2024-02-15_23-14-13,0,3573,0,error,chord_span_impossible,"RH simultaneous span 36 semitones (Eb3, Eb6)"
+pianovam_auto,2024-02-15_23-14-13,0,4133,0,error,chord_span_impossible,"LH simultaneous span 21 semitones (Eb5, F#3)"
+pianovam_auto,2024-02-15_23-14-13,0,4206,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (F#6, A3)"
+pianovam_auto,2024-02-15_23-14-13,0,5036,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (F4, F6)"
+pianovam_auto,2024-02-15_23-14-13,0,5439,0,error,chord_span_impossible,"RH simultaneous span 37 semitones (G2, G#5)"
+pianovam_auto,2024-02-15_23-14-13,0,11478,0,error,chord_span_impossible,"RH simultaneous span 23 semitones (C3, B4)"
+pianovam_auto,2024-02-15_23-14-13,0,11822,0,error,chord_span_impossible,"RH simultaneous span 32 semitones (C6, E3)"
+pianovam_auto,2024-02-15_23-14-13,0,2252,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C3=-1, F3=-2"
+pianovam_auto,2024-02-15_23-14-13,0,2615,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=3, D5=2"
+pianovam_auto,2024-02-15_23-14-13,0,3224,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E5=5, E6=1"
+pianovam_auto,2024-02-15_23-14-13,0,3573,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb3=5, Eb6=2"
+pianovam_auto,2024-02-15_23-14-13,0,4607,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G2=5, G3=1"
+pianovam_auto,2024-02-15_23-14-13,0,4956,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: G3=-1, F4=-5"
+pianovam_auto,2024-02-15_23-14-13,0,5439,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G2=5, G#5=4"
+pianovam_auto,2024-02-15_23-14-13,0,11823,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: E3=5, C6=1"
+pianovam_auto,2024-02-15_23-14-13,0,13007,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C5=-1, C6=-5"
+pianovam_auto,2024-02-15_23-14-13,0,13272,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E5=-1, E6=-5"
+pianovam_auto,2024-02-15_23-14-13,0,820,0,warning,chord_span_large,"LH simultaneous span 16 semitones (D5, Bb3)"
+pianovam_auto,2024-02-16_14-41-07,0,7514,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (F4, Bb2)"
+pianovam_auto,2024-02-16_14-41-07,0,461,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G5=5, G6=1"
+pianovam_auto,2024-02-16_14-41-07,0,600,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D4=5, G#4=2"
+pianovam_auto,2024-02-16_14-41-07,0,613,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb3=5, D4=3"
+pianovam_auto,2024-02-16_14-41-07,0,4937,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#5=3, Bb5=2"
+pianovam_auto,2024-02-16_14-41-07,0,5201,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Bb4=4, Bb5=1"
+pianovam_auto,2024-02-16_14-41-07,0,5448,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb3=5, Eb4=1"
+pianovam_auto,2024-02-16_14-41-07,0,7900,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C6=5, Eb6=3"
+pianovam_auto,2024-02-16_14-41-07,0,9867,0,warning,chord_span_large,"LH simultaneous span 16 semitones (Bb4, F#3)"
+pianovam_auto,2024-02-16_23-19-03,0,3091,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (F2, Bb3)"
+pianovam_auto,2024-02-16_23-19-03,0,5134,0,error,chord_span_impossible,"RH simultaneous span 22 semitones (F6, G4)"
+pianovam_auto,2024-02-16_23-19-03,0,469,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb4=4, G4=2"
+pianovam_auto,2024-02-16_23-19-03,0,1669,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: B5=5, E6=2"
+pianovam_auto,2024-02-16_23-19-03,0,2426,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E3=-1, F3=-2"
+pianovam_auto,2024-02-16_23-19-03,0,2664,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E4=-1, A4=-2"
+pianovam_auto,2024-02-16_23-19-03,0,3100,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#3=3, B3=2"
+pianovam_auto,2024-02-16_23-19-03,0,3376,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: Eb3=-1, B3=-2"
+pianovam_auto,2024-02-16_23-19-03,0,5322,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#6=5, E6=3"
+pianovam_auto,2024-02-16_23-19-03,0,5654,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#2=-1, A2=-3"
+pianovam_auto,2024-02-16_23-19-03,0,6419,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D4=2, F#4=1"
+pianovam_auto,2024-02-17_00-12-50,0,7008,0,error,chord_span_impossible,"LH simultaneous span 40 semitones (B4, G1)"
+pianovam_auto,2024-02-17_00-12-50,0,128,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C5=3, E5=2"
+pianovam_auto,2024-02-17_00-12-50,0,163,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F4=5, E5=1"
+pianovam_auto,2024-02-17_00-12-50,0,4893,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: D2=-1, D3=-5"
+pianovam_auto,2024-02-17_00-12-50,0,7053,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A1=-1, A2=-5"
+pianovam_auto,2024-02-17_00-12-50,0,7578,0,warning,chord_span_large,"LH simultaneous span 15 semitones (C5, A3)"
+pianovam_auto,2024-02-17_22-12-41,0,3294,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (D4, D2)"
+pianovam_auto,2024-02-17_22-12-41,0,3505,0,error,chord_span_impossible,"LH simultaneous span 39 semitones (C5, A1)"
+pianovam_auto,2024-02-17_22-12-41,0,4654,0,error,chord_span_impossible,"LH simultaneous span 23 semitones (C#5, D3)"
+pianovam_auto,2024-02-17_22-12-41,0,19,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F3=-1, G#3=-2"
+pianovam_auto,2024-02-17_22-12-41,0,102,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#3=-1, G3=-3"
+pianovam_auto,2024-02-17_22-12-41,0,411,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: E2=-1, E3=-5"
+pianovam_auto,2024-02-17_22-12-41,0,1063,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: F#3=-1, A3=-3"
+pianovam_auto,2024-02-17_22-12-41,0,2923,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#4=5, G#4=2"
+pianovam_auto,2024-02-17_22-12-41,0,4316,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#4=5, G#4=2"
+pianovam_auto,2024-02-17_22-12-41,0,4334,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#3=-1, C4=-5"
+pianovam_auto,2024-02-17_22-12-41,0,1267,0,warning,chord_span_large,"LH simultaneous span 16 semitones (F#4, D3)"
+pianovam_auto,2024-02-17_22-33-45,0,622,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (C#4, F#2)"
+pianovam_auto,2024-02-17_22-33-45,0,1046,0,error,chord_span_impossible,"RH simultaneous span 27 semitones (C#5, Bb2)"
+pianovam_auto,2024-02-17_22-33-45,0,85,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#3=-1, F#3=-2"
+pianovam_auto,2024-02-17_22-33-45,0,154,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#3=5, G#4=1"
+pianovam_auto,2024-02-17_22-33-45,0,269,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=5, C5=4"
+pianovam_auto,2024-02-17_22-33-45,0,1138,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#4=-1, F#4=-3"
+pianovam_auto,2024-02-17_22-33-45,0,1055,0,warning,chord_span_large,"RH simultaneous span 15 semitones (G#4, F3)"
+pianovam_auto,2024-02-20_18-08-35,0,1785,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#4=5, A4=4"
+pianovam_auto,2024-02-20_18-23-30,0,8795,0,error,chord_span_impossible,"RH simultaneous span 29 semitones (F4, C2)"
+pianovam_auto,2024-02-20_18-23-30,0,2589,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: A3=-1, C4=-2"
+pianovam_auto,2024-02-20_18-23-30,0,2922,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: Eb4=5, F4=3"
+pianovam_auto,2024-02-20_18-23-30,0,7031,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: B3=-1, D4=-2"
+pianovam_auto,2024-02-20_18-23-30,0,7960,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#5=3, C6=2"
+pianovam_auto,2024-02-20_18-23-30,0,12616,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: D4=5, G4=2"
+pianovam_auto,2024-02-20_18-23-30,0,13974,0,warning,chord_finger_order,"LH chord fingers not ordered by pitch: C#4=-1, F4=-2"
+pianovam_auto,2024-02-20_18-23-30,0,3837,0,warning,chord_span_large,"RH simultaneous span 15 semitones (G2, Bb3)"
+pianovam_auto,2024-02-22_11-58-09,0,656,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=3, Bb4=2"
+pianovam_auto,2024-02-22_11-58-09,0,733,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=3, Bb4=2"
+pianovam_auto,2024-02-22_11-58-09,0,2929,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A3=5, A4=1"
+pianovam_auto,2024-02-22_11-58-09,0,4012,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G4=4, Bb4=2"
+pianovam_auto,2024-02-22_11-58-09,0,4910,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=5, C5=4"
+pianovam_auto,2024-02-22_14-11-52,0,2226,0,error,chord_span_impossible,"RH simultaneous span 17 semitones (C#4, F#5)"
+pianovam_auto,2024-02-22_14-11-52,0,10459,0,error,chord_span_impossible,"LH simultaneous span 22 semitones (D5, E3)"
+pianovam_auto,2024-02-22_14-11-52,0,1520,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C#4=5, C#5=1"
+pianovam_auto,2024-02-22_14-11-52,0,1596,0,warning,chord_finger_order,"RH chord fingers not ordered by pitch: G#4=4, C5=2"
+pianovam_auto,2024-03-04_04-14-36,0,707,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (B3, E2)"
+pianovam_auto,2024-03-04_04-32-11,0,556,0,error,chord_span_impossible,"RH simultaneous span 20 semitones (G4, B2)"
+pianovam_auto,2024-03-04_04-36-26,0,947,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (F#3, C#2)"
+pianovam_auto,2024-03-04_04-36-26,0,4804,0,warning,chord_span_large,"LH simultaneous span 16 semitones (B3, G2)"
+pianovam_auto,2024-03-04_22-38-33,0,851,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (G6, Bb3)"
+pianovam_auto,2024-03-04_22-38-33,0,1624,0,error,chord_span_impossible,"LH simultaneous span 57 semitones (Eb7, F#2)"
+pianovam_auto,2024-03-04_22-38-33,0,3391,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (3390:B4, 3391:C5)"
+pianovam_auto,2024-03-11_22-23-29,0,3607,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (Eb4, G#2)"
+pianovam_auto,2024-03-11_22-23-29,0,4035,0,error,chord_span_impossible,"RH simultaneous span 19 semitones (Eb4, Bb5)"
+pianovam_auto,2024-03-11_22-23-29,0,4836,0,error,chord_span_impossible,"RH simultaneous span 26 semitones (Bb5, G#3)"
+pianovam_auto,2024-03-11_22-23-29,0,5115,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (D5, D3)"
+pianovam_auto,2024-03-11_22-23-29,0,2138,0,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, F#5)"
+pianovam_auto,2024-03-11_22-23-29,0,5028,0,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, F#5)"
+pianovam_auto,2024-03-12_15-43-01,0,5276,0,error,chord_span_impossible,"LH simultaneous span 18 semitones (C5, F#3)"
+pianovam_auto,2024-03-12_15-43-01,0,7123,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 2 semitones apart (7122:D4, 7123:E4)"
+pianovam_auto,2024-03-13_11-32-42,0,726,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (Eb4, Bb2)"
+pianovam_auto,2024-03-13_11-32-42,0,7976,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (G5, G3)"
+pianovam_auto,2024-03-13_11-32-42,0,11476,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (G5, G3)"
+pianovam_auto,2024-03-13_11-32-42,0,11124,0,warning,chord_span_large,"RH simultaneous span 15 semitones (F#6, Eb5, Eb6)"
+pianovam_auto,2024-03-13_11-54-57,0,1204,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (F#5, D3)"
+pianovam_auto,2024-03-13_11-54-57,0,8835,0,error,chord_span_impossible,"LH simultaneous span 18 semitones (C#4, G2)"
+pianovam_auto,2024-03-13_11-54-57,0,9812,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (D4, D6)"
+pianovam_auto,2024-03-13_11-54-57,0,11328,0,error,chord_span_impossible,"LH simultaneous span 20 semitones (C#5, F3)"
+pianovam_auto,2024-03-13_11-54-57,0,14127,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (Eb4, Eb6)"
+pianovam_auto,2024-03-13_11-54-57,0,4780,0,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 1 semitones apart (4779:B4, 4780:C5)"
+pianovam_auto,2024-03-13_11-54-57,0,9212,0,warning,chord_span_large,"RH simultaneous span 16 semitones (C5, E6)"
+pianovam_auto,2024-03-13_11-54-57,0,9699,0,warning,chord_span_large,"RH simultaneous span 16 semitones (C6, G#4)"
+pianovam_auto,2024-03-15_22-54-26,0,1214,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (G5, Bb2)"
+pianovam_auto,2024-03-15_22-54-26,0,5016,0,error,chord_span_impossible,"LH simultaneous span 18 semitones (C#5, G3)"
+pianovam_auto,2024-03-15_22-54-26,0,6188,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (C6, Eb3)"
+pianovam_auto,2024-03-17_18-54-44,0,2992,0,error,chord_span_impossible,"LH simultaneous span 36 semitones (Eb5, Eb2)"
+pianovam_auto,2024-03-17_18-54-44,0,3091,0,error,chord_span_impossible,"RH simultaneous span 27 semitones (C#5, Bb2)"
+pianovam_auto,2024-03-17_18-54-44,0,4268,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (G5, G3)"
+pianovam_auto,2024-03-18_04-15-06,0,633,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (A3, E2)"
+pianovam_auto,2024-03-18_04-15-06,0,1086,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (G3, C2)"
+pianovam_auto,2024-03-18_04-15-06,0,1872,0,error,chord_span_impossible,"RH simultaneous span 39 semitones (B5, G#2)"
+pianovam_auto,2024-03-18_04-15-06,0,4575,0,error,chord_span_impossible,"LH simultaneous span 29 semitones (C5, G2)"
+pianovam_auto,2024-03-18_04-15-06,0,5577,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (D5, Bb2)"
+pianovam_auto,2024-03-18_04-15-06,0,10678,0,error,chord_span_impossible,"LH simultaneous span 22 semitones (C5, D3)"
+pianovam_auto,2024-03-18_04-15-06,0,12040,0,error,chord_span_impossible,"LH simultaneous span 33 semitones (G#5, B2)"
+pianovam_auto,2024-03-18_04-15-06,0,13100,0,error,chord_span_impossible,"RH simultaneous span 34 semitones (B4, C#2)"
+pianovam_auto,2024-03-18_04-15-06,0,13681,0,error,chord_span_impossible,"LH simultaneous span 23 semitones (E5, F3)"
+pianovam_auto,2024-03-18_04-15-06,0,14040,0,error,chord_span_impossible,"LH simultaneous span 36 semitones (A4, A1)"
+pianovam_auto,2024-03-18_04-15-06,0,15998,0,error,chord_span_impossible,"LH simultaneous span 43 semitones (E6, A2)"
+pianovam_auto,2024-03-18_04-15-06,0,5519,0,warning,chord_span_large,"LH simultaneous span 16 semitones (G#3, E2)"
+pianovam_auto,2024-03-18_04-15-06,0,9158,0,warning,chord_span_large,"RH simultaneous span 16 semitones (E5, C4)"
+pianovam_auto,2024-03-27_11-49-04,0,824,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (F#4, B2)"
+pianovam_auto,2024-04-08_23-10-23,0,2114,0,error,chord_span_impossible,"LH simultaneous span 38 semitones (A5, G2)"
+pianovam_auto,2024-04-08_23-10-23,0,111,0,warning,chord_span_large,"LH simultaneous span 15 semitones (Bb4, G3)"
+pianovam_auto,2024-04-08_23-42-45,0,877,0,error,chord_span_impossible,"LH simultaneous span 21 semitones (G5, Bb3)"
+pianovam_auto,2024-04-08_23-50-57,0,1970,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (Eb5, Bb3)"
+pianovam_auto,2024-04-08_23-50-57,0,3488,0,error,chord_span_impossible,"LH simultaneous span 20 semitones (C#5, F3)"
+pianovam_auto,2024-04-09_03-42-36,0,3057,0,error,chord_span_impossible,"LH simultaneous span 45 semitones (G6, Bb2)"
+pianovam_auto,2024-04-09_03-42-36,0,772,0,warning,chord_span_large,"LH simultaneous span 15 semitones (Bb3, G2)"
+pianovam_auto,2024-04-09_04-09-27,0,1448,0,error,chord_span_impossible,"RH simultaneous span 24 semitones (C5, C3)"
+pianovam_auto,2024-04-09_04-09-27,0,4315,0,error,chord_span_impossible,"LH simultaneous span 36 semitones (G#6, G#3)"
+pianovam_auto,2024-09-02_13-19-32,0,1985,0,error,chord_span_impossible,"LH simultaneous span 40 semitones (B6, G3)"
+pianovam_auto,2024-09-02_14-10-41,0,363,0,warning,chord_span_large,"LH simultaneous span 15 semitones (B4, G#3)"
+pianovam_auto,2024-09-02_15-05-42,0,2583,0,error,chord_span_impossible,"LH simultaneous span 23 semitones (C5, C#3)"
+pianovam_auto,2024-09-02_15-15-09,0,646,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (Bb4, Bb2)"
+pianovam_auto,2024-09-02_15-15-09,0,1076,0,error,chord_span_impossible,"RH simultaneous span 28 semitones (Bb4, F#2)"
+pianovam_auto,2024-09-02_15-15-09,0,1306,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (F4, Bb2)"
+pianovam_auto,2024-09-02_15-15-09,0,1610,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (G5, G3)"
+pianovam_auto,2024-09-02_15-26-39,0,1866,0,error,chord_span_impossible,"LH simultaneous span 27 semitones (C5, A2)"
+pianovam_auto,2024-09-02_18-29-40,0,1037,0,error,chord_span_impossible,"LH simultaneous span 40 semitones (A5, F2)"
+pianovam_auto,2024-09-02_18-42-47,0,1239,0,error,chord_span_impossible,"RH simultaneous span 46 semitones (C6, D2)"
+pianovam_auto,2024-09-02_18-42-47,0,2029,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (G#4, E2)"
+pianovam_auto,2024-09-02_18-42-47,0,7031,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (E5, E3)"
+pianovam_auto,2024-09-02_21-04-45,0,965,0,error,chord_span_impossible,"RH simultaneous span 45 semitones (C#6, E2)"
+pianovam_auto,2024-09-02_21-04-45,0,1206,0,error,chord_span_impossible,"LH simultaneous span 40 semitones (A5, F2)"
+pianovam_auto,2024-09-02_21-04-45,0,2165,0,error,chord_span_impossible,"LH simultaneous span 46 semitones (E6, F#2)"
+pianovam_auto,2024-09-03_00-07-46,0,1931,0,error,chord_span_impossible,"LH simultaneous span 25 semitones (F5, E3)"
+pianovam_auto,2024-09-03_00-07-46,0,2110,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (A5, F3)"
+pianovam_auto,2024-09-03_00-07-46,0,6423,0,error,chord_span_impossible,"LH simultaneous span 21 semitones (E5, G3)"
+pianovam_auto,2024-09-03_00-07-46,0,9387,0,error,chord_span_impossible,"RH simultaneous span 29 semitones (A5, E3)"
+pianovam_auto,2024-09-04_17-12-33,0,2221,0,error,chord_span_impossible,"LH simultaneous span 50 semitones (Bb7, G#3)"
+pianovam_auto,2024-09-04_17-12-33,0,3740,0,warning,chord_span_large,"LH simultaneous span 16 semitones (B4, G3)"
+pianovam_auto,2024-09-04_19-09-38,0,528,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (A4, E3)"
+pianovam_auto,2024-09-04_20-09-07,0,982,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (G3, D2)"
+pianovam_auto,2024-09-04_20-20-07,0,1080,0,error,chord_span_impossible,"LH simultaneous span 24 semitones (B4, B2)"
+pianovam_auto,2024-09-04_20-20-07,0,1892,0,warning,chord_span_large,"LH simultaneous span 16 semitones (G#3, E2)"
+pianovam_auto,2024-09-04_20-30-34,0,11142,0,error,chord_span_impossible,"LH simultaneous span 19 semitones (C#2, G#3)"
+pianovam_auto,2024-09-04_20-59-20,0,4301,0,error,chord_span_impossible,"RH simultaneous span 30 semitones (D4, G#1)"
+pianovam_auto,2024-09-04_21-09-37,0,2333,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (C5, G3)"
+pianovam_auto,2024-09-04_22-19-28,0,293,0,error,chord_span_impossible,"RH simultaneous span 26 semitones (G4, F2)"
+pianovam_auto,2024-09-04_22-19-28,0,4163,0,error,chord_span_impossible,"RH simultaneous span 19 semitones (F4, C6)"
+pianovam_auto,2024-09-04_22-19-28,0,406,0,warning,chord_span_large,"LH simultaneous span 16 semitones (B3, G2)"
+pianovam_auto,2024-09-04_22-19-28,0,1714,0,warning,chord_span_large,"LH simultaneous span 16 semitones (Eb4, B2)"
+pianovam_auto,2024-09-05_21-07-35,0,209,0,error,chord_span_impossible,"LH simultaneous span 17 semitones (G#4, Eb3)"
+pianovam_auto,2024-09-05_21-07-35,0,803,0,error,chord_span_impossible,"LH simultaneous span 36 semitones (E5, E2)"
+pianovam_auto,2024-09-05_21-37-08,0,1656,0,error,chord_span_impossible,"LH simultaneous span 28 semitones (D6, Bb3)"
+pianovam_auto,2024-09-05_21-37-08,0,2227,0,error,chord_span_impossible,"RH simultaneous span 17 semitones (A4, E3)"
+pianovam_auto,2024-09-05_21-37-08,0,2486,0,error,chord_span_impossible,"LH simultaneous span 22 semitones (F4, G2)"
+pianovam_auto,2024-09-05_21-37-08,0,3210,0,error,chord_span_impossible,"RH simultaneous span 19 semitones (F5, Bb3)"
+pianovam_auto,2024-09-05_22-11-07,0,2966,0,error,chord_span_impossible,"LH simultaneous span 36 semitones (C6, C3)"

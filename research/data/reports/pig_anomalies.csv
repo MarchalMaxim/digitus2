@@ -1,0 +1,980 @@
+dataset,piece,annotation,note_id,line,severity,check,message
+pig,001,1,465,467,info,held_key_finger_reuse,finger 5 strikes C2 while note 462 (G2) is still held for 0.059s
+pig,001,2,465,467,info,held_key_finger_reuse,finger 5 strikes C2 while note 462 (G2) is still held for 0.059s
+pig,001,5,465,467,info,held_key_finger_reuse,finger 5 strikes C2 while note 462 (G2) is still held for 0.059s
+pig,001,8,465,467,info,held_key_finger_reuse,finger 5 strikes C2 while note 462 (G2) is still held for 0.059s
+pig,003,1,154,156,info,held_key_finger_reuse,finger 1 strikes B2 while note 151 (G3) is still held for 0.148s
+pig,003,1,367,369,info,held_key_finger_reuse,finger 4 strikes B3 while note 350 (F#3) is still held for 0.782s
+pig,003,2,137,139,info,hand_assignment_differs,2 notes assigned to the other hand than in annotation 1
+pig,003,5,0,2,info,hand_assignment_differs,13 notes assigned to the other hand than in annotation 1
+pig,003,5,47,49,info,held_key_finger_reuse,finger 2 strikes G#4 while note 40 (F#4) is still held for 0.907s
+pig,003,5,51,53,info,held_key_finger_reuse,finger 2 strikes G#4 while note 40 (F#4) is still held for 0.451s
+pig,003,5,269,271,info,held_key_finger_reuse,finger 1 strikes C#5 while note 265 (Bb4) is still held for 0.154s
+pig,003,5,321,323,info,held_key_finger_reuse,finger 1 strikes F#4 while note 317 (E4) is still held for 0.606s
+pig,003,5,357,359,info,held_key_finger_reuse,finger 3 strikes F#4 while note 355 (G#4) is still held for 0.452s
+pig,003,8,0,2,info,hand_assignment_differs,5 notes assigned to the other hand than in annotation 1
+pig,003,8,6,8,info,held_key_finger_reuse,finger 1 strikes E4 while note 1 (B3) is still held for 4.437s
+pig,003,8,19,21,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 1 (B3) is still held for 2.615s
+pig,004,5,32,34,info,hand_assignment_differs,1 notes assigned to the other hand than in annotation 1
+pig,004,8,0,2,info,hand_assignment_differs,9 notes assigned to the other hand than in annotation 1
+pig,004,8,44,46,info,held_key_finger_reuse,finger 3 strikes D4 while note 41 (Eb4) is still held for 0.011s
+pig,005,1,233,235,warning,finger_irregular,'2_4_5': chained substitution (more than two fingers)
+pig,005,1,257,259,warning,finger_irregular,'3_4_5': chained substitution (more than two fingers)
+pig,005,8,109,111,info,hand_assignment_differs,4 notes assigned to the other hand than in annotation 1
+pig,007,1,14,16,info,held_key_finger_reuse,finger 1 strikes A4 while note 10 (C#4) is still held for 0.501s
+pig,007,1,229,231,info,held_key_finger_reuse,finger 1 strikes F5 while note 222 (D5) is still held for 0.105s
+pig,007,1,278,280,info,held_key_finger_reuse,finger 3 strikes E5 while note 276 (D5) is still held for 0.034s
+pig,007,2,10,12,info,hand_assignment_differs,4 notes assigned to the other hand than in annotation 1
+pig,007,2,23,25,info,held_key_finger_reuse,finger 1 strikes D5 while note 14 (A4) is still held for 0.126s
+pig,007,2,61,63,info,held_key_finger_reuse,finger 1 strikes A4 while note 50 (G4) is still held for 0.125s
+pig,007,2,131,133,info,held_key_finger_reuse,finger 1 strikes A4 while note 128 (F4) is still held for 0.367s
+pig,007,2,278,280,info,held_key_finger_reuse,finger 3 strikes E5 while note 276 (D5) is still held for 0.034s
+pig,007,5,10,12,info,hand_assignment_differs,2 notes assigned to the other hand than in annotation 1
+pig,007,5,77,79,info,held_key_finger_reuse,finger 4 strikes G4 while note 70 (Bb4) is still held for 0.490s
+pig,007,5,276,278,info,held_key_finger_reuse,finger 2 strikes D5 while note 273 (G#4) is still held for 0.127s
+pig,007,5,277,279,info,held_key_finger_reuse,finger 2 strikes C#5 while note 273 (G#4) is still held for 0.082s
+pig,007,8,10,12,info,hand_assignment_differs,6 notes assigned to the other hand than in annotation 1
+pig,007,8,278,280,info,held_key_finger_reuse,finger 3 strikes E5 while note 276 (D5) is still held for 0.034s
+pig,008,5,105,107,info,held_key_finger_reuse,finger 1 strikes D3 while note 100 (G3) is still held for 1.979s
+pig,009,2,304,306,error,same_finger_simultaneous,"finger 1 on 2 simultaneous pitches 4 semitones apart (303:A4, 304:C#5)"
+pig,009,2,8,10,info,hand_assignment_differs,3 notes assigned to the other hand than in annotation 1
+pig,009,8,19,21,info,hand_assignment_differs,1 notes assigned to the other hand than in annotation 1
+pig,010,2,286,288,info,held_key_finger_reuse,finger 1 strikes A3 while note 280 (D4) is still held for 1.230s
+pig,014,3,191,193,info,held_key_finger_reuse,finger 1 strikes A4 while note 177 (C5) is still held for 2.685s
+pig,014,3,195,197,info,held_key_finger_reuse,finger 1 strikes G4 while note 177 (C5) is still held for 2.150s
+pig,014,4,50,52,info,hand_assignment_differs,2 notes assigned to the other hand than in annotation 1
+pig,014,6,28,30,info,held_key_finger_reuse,finger 1 strikes E4 while note 25 (C4) is still held for 0.530s
+pig,014,7,191,193,info,held_key_finger_reuse,finger 1 strikes A4 while note 177 (C5) is still held for 2.685s
+pig,019,4,34,36,info,held_key_finger_reuse,finger 1 strikes A4 while note 31 (D4) is still held for 0.250s
+pig,019,4,172,174,info,held_key_finger_reuse,finger 1 strikes A4 while note 169 (D4) is still held for 0.250s
+pig,022,1,12,14,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A3=1, Eb4=5, F#4=4"
+pig,022,1,176,178,warning,chord_finger_order,"RH chord fingers not ordered by pitch: A3=1, Eb4=5, F#4=4"
+pig,022,1,22,24,info,held_key_finger_reuse,finger 5 strikes G#4 while note 13 (Eb4) is still held for 0.405s
+pig,022,1,159,161,info,held_key_finger_reuse,finger 2 strikes B3 while note 155 (Eb4) is still held for 1.216s
+pig,022,1,162,164,info,held_key_finger_reuse,finger 2 strikes B3 while note 155 (Eb4) is still held for 0.405s
+pig,022,1,186,188,info,held_key_finger_reuse,finger 5 strikes G#4 while note 177 (Eb4) is still held for 0.405s
+pig,022,3,162,164,info,hand_assignment_differs,1 notes assigned to the other hand than in annotation 1
+pig,022,3,355,357,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (354:G#4, 355:Bb4)"
+pig,022,4,159,161,info,held_key_finger_reuse,finger 2 strikes B3 while note 155 (Eb4) is still held for 1.216s
+pig,022,4,162,164,info,held_key_finger_reuse,finger 2 strikes B3 while note 155 (Eb4) is still held for 0.405s
+pig,023,1,321,323,info,held_key_finger_reuse,finger 5 strikes G#3 while note 318 (Eb3) is still held for 0.029s
+pig,023,1,331,333,info,held_key_finger_reuse,finger 5 strikes G#3 while note 327 (Eb3) is still held for 0.029s
+pig,023,1,365,367,info,held_key_finger_reuse,finger 3 strikes F5 while note 360 (G5) is still held for 0.029s
+pig,023,3,190,192,info,held_key_finger_reuse,finger 4 strikes C6 while note 189 (C#6) is still held for 0.014s
+pig,023,3,356,358,info,held_key_finger_reuse,finger 5 strikes A5 while note 349 (Bb5) is still held for 0.029s
+pig,023,4,5,7,info,held_key_finger_reuse,finger 5 strikes Bb3 while note 3 (G3) is still held for 0.029s
+pig,023,4,20,22,info,held_key_finger_reuse,finger 5 strikes Bb3 while note 18 (G3) is still held for 0.029s
+pig,023,4,28,30,info,held_key_finger_reuse,finger 5 strikes Bb3 while note 25 (G3) is still held for 0.029s
+pig,023,4,36,38,info,held_key_finger_reuse,finger 5 strikes Bb3 while note 33 (G3) is still held for 0.029s
+pig,023,4,48,50,info,held_key_finger_reuse,finger 5 strikes C4 while note 45 (G3) is still held for 0.029s
+pig,023,4,346,348,info,held_key_finger_reuse,finger 4 strikes Bb3 while note 344 (G3) is still held for 0.034s
+pig,023,5,356,358,info,held_key_finger_reuse,finger 5 strikes A5 while note 349 (Bb5) is still held for 0.029s
+pig,024,4,32,34,info,held_key_finger_reuse,finger 4 strikes A5 while note 31 (Bb5) is still held for 0.035s
+pig,024,4,172,174,info,held_key_finger_reuse,finger 4 strikes A5 while note 171 (Bb5) is still held for 0.035s
+pig,025,4,327,329,info,held_key_finger_reuse,finger 5 strikes Bb3 while note 315 (A3) is still held for 0.056s
+pig,025,4,338,340,info,held_key_finger_reuse,finger 5 strikes C4 while note 327 (Bb3) is still held for 0.056s
+pig,025,4,391,393,info,held_key_finger_reuse,finger 5 strikes G#3 while note 390 (C#3) is still held for 0.023s
+pig,025,5,350,352,info,held_key_finger_reuse,finger 5 strikes C#4 while note 338 (C4) is still held for 0.056s
+pig,025,6,327,329,info,held_key_finger_reuse,finger 5 strikes Bb3 while note 315 (A3) is still held for 0.056s
+pig,025,6,338,340,info,held_key_finger_reuse,finger 5 strikes C4 while note 327 (Bb3) is still held for 0.056s
+pig,025,6,350,352,info,held_key_finger_reuse,finger 5 strikes C#4 while note 338 (C4) is still held for 0.056s
+pig,026,1,107,109,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, A4, F#5)"
+pig,026,1,110,112,warning,chord_span_large,"LH simultaneous span 15 semitones (A2, Eb3, F#3, C4)"
+pig,026,1,293,295,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (292:A4, 293:B4)"
+pig,026,1,325,327,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (324:A4, 325:B4)"
+pig,026,1,402,404,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (401:F#4, 402:G#4)"
+pig,026,1,415,417,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (414:C#4, 415:Eb4)"
+pig,026,1,453,455,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (452:C#5, 453:Eb5)"
+pig,026,1,492,494,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (491:C#5, 492:Eb5)"
+pig,026,3,107,109,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, A4, F#5)"
+pig,026,3,110,112,warning,chord_span_large,"LH simultaneous span 15 semitones (A2, Eb3, F#3, C4)"
+pig,026,3,293,295,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (292:A4, 293:B4)"
+pig,026,3,300,302,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (299:A4, 300:B4)"
+pig,026,3,306,308,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (305:A4, 306:B4)"
+pig,026,3,325,327,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (324:A4, 325:B4)"
+pig,026,3,332,334,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (331:A4, 332:B4)"
+pig,026,3,338,340,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (337:A4, 338:B4)"
+pig,026,3,344,346,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (343:A4, 344:B4)"
+pig,026,3,350,352,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (349:A4, 350:B4)"
+pig,026,3,402,404,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (401:F#4, 402:G#4)"
+pig,026,3,415,417,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (414:C#4, 415:Eb4)"
+pig,026,3,453,455,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (452:C#5, 453:Eb5)"
+pig,026,3,492,494,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (491:C#5, 492:Eb5)"
+pig,026,3,586,588,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (585:A4, 586:B4)"
+pig,026,4,107,109,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, A4, F#5)"
+pig,026,4,110,112,warning,chord_span_large,"LH simultaneous span 15 semitones (A2, Eb3, F#3, C4)"
+pig,026,4,278,280,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (277:D4, 278:E4)"
+pig,026,4,287,289,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (286:D4, 287:E4)"
+pig,026,4,293,295,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (292:A4, 293:B4)"
+pig,026,4,325,327,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (324:A4, 325:B4)"
+pig,026,4,402,404,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (401:F#4, 402:G#4)"
+pig,026,4,415,417,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (414:C#4, 415:Eb4)"
+pig,026,4,453,455,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (452:C#5, 453:Eb5)"
+pig,026,4,492,494,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (491:C#5, 492:Eb5)"
+pig,026,4,586,588,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (585:A4, 586:B4)"
+pig,026,5,107,109,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, A4, F#5)"
+pig,026,5,110,112,warning,chord_span_large,"LH simultaneous span 15 semitones (A2, Eb3, F#3, C4)"
+pig,026,5,278,280,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (277:D4, 278:E4)"
+pig,026,5,287,289,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (286:D4, 287:E4)"
+pig,026,5,293,295,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (292:A4, 293:B4)"
+pig,026,5,300,302,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (299:A4, 300:B4)"
+pig,026,5,306,308,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (305:A4, 306:B4)"
+pig,026,5,325,327,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (324:A4, 325:B4)"
+pig,026,5,332,334,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (331:A4, 332:B4)"
+pig,026,5,338,340,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (337:A4, 338:B4)"
+pig,026,5,344,346,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (343:A4, 344:B4)"
+pig,026,5,350,352,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (349:A4, 350:B4)"
+pig,026,5,402,404,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (401:F#4, 402:G#4)"
+pig,026,5,415,417,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (414:C#4, 415:Eb4)"
+pig,026,5,453,455,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (452:C#5, 453:Eb5)"
+pig,026,5,492,494,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (491:C#5, 492:Eb5)"
+pig,026,5,586,588,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (585:A4, 586:B4)"
+pig,026,6,107,109,warning,chord_span_large,"RH simultaneous span 15 semitones (Eb4, A4, F#5)"
+pig,026,6,110,112,warning,chord_span_large,"LH simultaneous span 15 semitones (A2, Eb3, F#3, C4)"
+pig,026,6,278,280,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (277:D4, 278:E4)"
+pig,026,6,287,289,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (286:D4, 287:E4)"
+pig,026,6,293,295,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (292:A4, 293:B4)"
+pig,026,6,300,302,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (299:A4, 300:B4)"
+pig,026,6,306,308,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (305:A4, 306:B4)"
+pig,026,6,325,327,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (324:A4, 325:B4)"
+pig,026,6,332,334,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (331:A4, 332:B4)"
+pig,026,6,338,340,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (337:A4, 338:B4)"
+pig,026,6,344,346,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (343:A4, 344:B4)"
+pig,026,6,350,352,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (349:A4, 350:B4)"
+pig,026,6,402,404,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (401:F#4, 402:G#4)"
+pig,026,6,415,417,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (414:C#4, 415:Eb4)"
+pig,026,6,453,455,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (452:C#5, 453:Eb5)"
+pig,026,6,492,494,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (491:C#5, 492:Eb5)"
+pig,026,6,586,588,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (585:A4, 586:B4)"
+pig,028,1,136,138,info,held_key_finger_reuse,finger 5 strikes F5 while note 124 (Eb5) is still held for 0.031s
+pig,028,1,159,161,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 153 (Eb4) is still held for 0.031s
+pig,028,1,210,212,info,held_key_finger_reuse,finger 5 strikes C5 while note 206 (C#5) is still held for 0.031s
+pig,028,1,346,348,info,held_key_finger_reuse,finger 5 strikes F5 while note 334 (Eb5) is still held for 0.031s
+pig,028,1,439,441,info,held_key_finger_reuse,finger 5 strikes Eb3 while note 437 (G#2) is still held for 0.015s
+pig,028,3,135,137,error,same_finger_simultaneous,"finger 1 on 2 simultaneous pitches 6 semitones apart (134:C#4, 135:G4)"
+pig,028,3,159,161,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 153 (Eb4) is still held for 0.031s
+pig,028,3,210,212,info,held_key_finger_reuse,finger 5 strikes C5 while note 206 (C#5) is still held for 0.031s
+pig,028,3,262,264,info,held_key_finger_reuse,finger 2 strikes F4 while note 256 (G4) is still held for 0.031s
+pig,028,3,400,402,info,held_key_finger_reuse,finger 5 strikes C#5 while note 388 (C5) is still held for 0.031s
+pig,028,4,321,323,error,same_finger_simultaneous,"finger 2 on 2 simultaneous pitches 5 semitones apart (320:G#4, 321:C#5)"
+pig,028,4,85,87,warning,finger_irregular,'4_': empty substitution part
+pig,028,4,48,50,info,held_key_finger_reuse,finger 1 strikes C#4 while note 44 (C4) is still held for 0.031s
+pig,028,4,136,138,info,held_key_finger_reuse,finger 5 strikes F5 while note 124 (Eb5) is still held for 0.031s
+pig,028,4,159,161,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 153 (Eb4) is still held for 0.031s
+pig,028,4,210,212,info,held_key_finger_reuse,finger 5 strikes C5 while note 206 (C#5) is still held for 0.031s
+pig,028,4,262,264,info,held_key_finger_reuse,finger 2 strikes F4 while note 256 (G4) is still held for 0.031s
+pig,028,4,289,291,info,held_key_finger_reuse,finger 1 strikes C4 while note 283 (G#4) is still held for 0.806s
+pig,028,4,294,296,info,held_key_finger_reuse,finger 1 strikes C4 while note 283 (G#4) is still held for 0.550s
+pig,028,4,346,348,info,held_key_finger_reuse,finger 5 strikes F5 while note 334 (Eb5) is still held for 0.031s
+pig,028,4,439,441,info,held_key_finger_reuse,finger 5 strikes Eb3 while note 437 (G#2) is still held for 0.015s
+pig,028,5,176,178,info,hand_assignment_differs,5 notes assigned to the other hand than in annotation 1
+pig,028,5,48,50,info,held_key_finger_reuse,finger 1 strikes C#4 while note 44 (C4) is still held for 0.031s
+pig,028,5,136,138,info,held_key_finger_reuse,finger 5 strikes F5 while note 124 (Eb5) is still held for 0.031s
+pig,028,5,159,161,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 153 (Eb4) is still held for 0.031s
+pig,028,5,184,186,info,held_key_finger_reuse,finger 5 strikes C#5 while note 174 (C5) is still held for 0.031s
+pig,028,5,210,212,info,held_key_finger_reuse,finger 5 strikes C5 while note 206 (C#5) is still held for 0.031s
+pig,028,5,262,264,info,held_key_finger_reuse,finger 2 strikes F4 while note 256 (G4) is still held for 0.031s
+pig,028,5,346,348,info,held_key_finger_reuse,finger 5 strikes F5 while note 334 (Eb5) is still held for 0.031s
+pig,028,5,439,441,info,held_key_finger_reuse,finger 5 strikes Eb3 while note 437 (G#2) is still held for 0.015s
+pig,028,6,159,161,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 153 (Eb4) is still held for 0.031s
+pig,028,6,210,212,info,held_key_finger_reuse,finger 5 strikes C5 while note 206 (C#5) is still held for 0.031s
+pig,028,6,262,264,info,held_key_finger_reuse,finger 2 strikes F4 while note 256 (G4) is still held for 0.031s
+pig,028,6,439,441,info,held_key_finger_reuse,finger 5 strikes Eb3 while note 437 (G#2) is still held for 0.015s
+pig,029,1,12,14,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 6 (G#3) is still held for 0.027s
+pig,029,1,19,21,info,held_key_finger_reuse,finger 2 strikes Eb4 while note 16 (E4) is still held for 0.008s
+pig,029,1,24,26,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 18 (G#3) is still held for 0.027s
+pig,029,1,127,129,info,held_key_finger_reuse,finger 1 strikes F4 while note 122 (C#4) is still held for 0.008s
+pig,029,1,168,170,info,held_key_finger_reuse,finger 5 strikes F#5 while note 163 (C#5) is still held for 0.018s
+pig,029,1,231,233,info,held_key_finger_reuse,finger 5 strikes C#6 while note 226 (G#5) is still held for 0.018s
+pig,029,1,239,241,info,held_key_finger_reuse,finger 4 strikes F#5 while note 234 (C6) is still held for 0.258s
+pig,029,1,263,265,info,held_key_finger_reuse,finger 2 strikes F#5 while note 262 (Eb5) is still held for 0.008s
+pig,029,1,292,294,info,held_key_finger_reuse,finger 2 strikes E5 while note 289 (C#5) is still held for 0.008s
+pig,029,1,293,295,info,held_key_finger_reuse,finger 4 strikes G#5 while note 282 (A5) is still held for 0.027s
+pig,029,1,299,301,info,held_key_finger_reuse,finger 2 strikes E5 while note 298 (B4) is still held for 0.008s
+pig,029,1,300,302,info,held_key_finger_reuse,finger 4 strikes G5 while note 293 (G#5) is still held for 0.027s
+pig,029,1,305,307,info,held_key_finger_reuse,finger 1 strikes G#4 while note 304 (Bb4) is still held for 0.009s
+pig,029,1,306,308,info,held_key_finger_reuse,finger 2 strikes B4 while note 299 (E5) is still held for 0.018s
+pig,029,1,307,309,info,held_key_finger_reuse,finger 4 strikes F5 while note 300 (G5) is still held for 0.018s
+pig,029,1,311,313,info,held_key_finger_reuse,finger 1 strikes G4 while note 305 (G#4) is still held for 0.008s
+pig,029,1,312,314,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 306 (B4) is still held for 0.008s
+pig,029,1,313,315,info,held_key_finger_reuse,finger 4 strikes Eb5 while note 307 (F5) is still held for 0.008s
+pig,029,1,314,316,info,held_key_finger_reuse,finger 5 strikes G5 while note 308 (G#5) is still held for 0.008s
+pig,029,1,337,339,info,held_key_finger_reuse,finger 2 strikes E5 while note 327 (G#5) is still held for 0.027s
+pig,029,1,347,349,info,held_key_finger_reuse,finger 2 strikes C#5 while note 337 (E5) is still held for 0.027s
+pig,029,1,356,358,info,held_key_finger_reuse,finger 1 strikes C5 while note 346 (A4) is still held for 0.027s
+pig,029,1,357,359,info,held_key_finger_reuse,finger 2 strikes Eb5 while note 347 (C#5) is still held for 0.027s
+pig,029,1,371,373,info,held_key_finger_reuse,finger 1 strikes G#3 while note 361 (A3) is still held for 0.027s
+pig,029,1,372,374,info,held_key_finger_reuse,finger 2 strikes C4 while note 362 (C#4) is still held for 0.027s
+pig,029,3,12,14,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 6 (G#3) is still held for 0.027s
+pig,029,3,24,26,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 18 (G#3) is still held for 0.027s
+pig,029,3,163,165,info,held_key_finger_reuse,finger 4 strikes C#5 while note 154 (B4) is still held for 0.027s
+pig,029,3,171,173,info,held_key_finger_reuse,finger 5 strikes F5 while note 168 (F#5) is still held for 0.008s
+pig,029,3,176,178,info,held_key_finger_reuse,finger 5 strikes F#5 while note 171 (F5) is still held for 0.027s
+pig,029,3,226,228,info,held_key_finger_reuse,finger 4 strikes G#5 while note 218 (F#5) is still held for 0.027s
+pig,029,3,234,236,info,held_key_finger_reuse,finger 5 strikes C6 while note 231 (C#6) is still held for 0.008s
+pig,029,3,240,242,info,held_key_finger_reuse,finger 5 strikes C#6 while note 234 (C6) is still held for 0.027s
+pig,029,3,253,255,info,held_key_finger_reuse,finger 1 strikes E5 while note 250 (F#5) is still held for 0.009s
+pig,029,3,262,264,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 261 (E5) is still held for 0.009s
+pig,029,3,271,273,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 268 (E5) is still held for 0.009s
+pig,029,3,280,282,info,held_key_finger_reuse,finger 1 strikes C#5 while note 279 (Eb5) is still held for 0.009s
+pig,029,3,289,291,info,held_key_finger_reuse,finger 1 strikes C#5 while note 286 (D5) is still held for 0.009s
+pig,029,3,298,300,info,held_key_finger_reuse,finger 1 strikes B4 while note 297 (C#5) is still held for 0.009s
+pig,029,3,300,302,info,held_key_finger_reuse,finger 3 strikes G5 while note 293 (G#5) is still held for 0.027s
+pig,029,3,305,307,info,held_key_finger_reuse,finger 1 strikes G#4 while note 304 (Bb4) is still held for 0.009s
+pig,029,3,306,308,info,held_key_finger_reuse,finger 2 strikes B4 while note 299 (E5) is still held for 0.018s
+pig,029,3,311,313,info,held_key_finger_reuse,finger 1 strikes G4 while note 305 (G#4) is still held for 0.008s
+pig,029,3,312,314,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 306 (B4) is still held for 0.008s
+pig,029,3,313,315,info,held_key_finger_reuse,finger 4 strikes Eb5 while note 307 (F5) is still held for 0.008s
+pig,029,3,314,316,info,held_key_finger_reuse,finger 5 strikes G5 while note 308 (G#5) is still held for 0.008s
+pig,029,3,337,339,info,held_key_finger_reuse,finger 2 strikes E5 while note 327 (G#5) is still held for 0.027s
+pig,029,3,347,349,info,held_key_finger_reuse,finger 2 strikes C#5 while note 337 (E5) is still held for 0.027s
+pig,029,3,356,358,info,held_key_finger_reuse,finger 1 strikes C5 while note 346 (A4) is still held for 0.027s
+pig,029,3,357,359,info,held_key_finger_reuse,finger 2 strikes Eb5 while note 347 (C#5) is still held for 0.027s
+pig,029,3,371,373,info,held_key_finger_reuse,finger 1 strikes G#3 while note 361 (A3) is still held for 0.027s
+pig,029,3,372,374,info,held_key_finger_reuse,finger 2 strikes C4 while note 362 (C#4) is still held for 0.027s
+pig,029,4,130,132,info,hand_assignment_differs,1 notes assigned to the other hand than in annotation 1
+pig,029,4,12,14,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 6 (G#3) is still held for 0.027s
+pig,029,4,24,26,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 18 (G#3) is still held for 0.027s
+pig,029,4,37,39,info,held_key_finger_reuse,finger 2 strikes C#4 while note 32 (Eb4) is still held for 0.027s
+pig,029,4,130,132,info,held_key_finger_reuse,finger 1 strikes C#4 while note 125 (C#3) is still held for 0.233s
+pig,029,4,226,228,info,held_key_finger_reuse,finger 4 strikes G#5 while note 218 (F#5) is still held for 0.027s
+pig,029,4,234,236,info,held_key_finger_reuse,finger 5 strikes C6 while note 231 (C#6) is still held for 0.008s
+pig,029,4,240,242,info,held_key_finger_reuse,finger 5 strikes C#6 while note 234 (C6) is still held for 0.027s
+pig,029,4,253,255,info,held_key_finger_reuse,finger 1 strikes E5 while note 250 (F#5) is still held for 0.009s
+pig,029,4,257,259,info,held_key_finger_reuse,finger 4 strikes B5 while note 246 (C#6) is still held for 0.027s
+pig,029,4,262,264,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 261 (E5) is still held for 0.009s
+pig,029,4,271,273,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 268 (E5) is still held for 0.009s
+pig,029,4,275,277,info,held_key_finger_reuse,finger 4 strikes Bb5 while note 264 (B5) is still held for 0.027s
+pig,029,4,280,282,info,held_key_finger_reuse,finger 1 strikes C#5 while note 279 (Eb5) is still held for 0.009s
+pig,029,4,282,284,info,held_key_finger_reuse,finger 4 strikes A5 while note 275 (Bb5) is still held for 0.027s
+pig,029,4,289,291,info,held_key_finger_reuse,finger 1 strikes C#5 while note 286 (D5) is still held for 0.009s
+pig,029,4,293,295,info,held_key_finger_reuse,finger 4 strikes G#5 while note 282 (A5) is still held for 0.027s
+pig,029,4,298,300,info,held_key_finger_reuse,finger 1 strikes B4 while note 297 (C#5) is still held for 0.009s
+pig,029,4,300,302,info,held_key_finger_reuse,finger 4 strikes G5 while note 293 (G#5) is still held for 0.027s
+pig,029,4,305,307,info,held_key_finger_reuse,finger 1 strikes G#4 while note 304 (Bb4) is still held for 0.009s
+pig,029,4,306,308,info,held_key_finger_reuse,finger 2 strikes B4 while note 299 (E5) is still held for 0.018s
+pig,029,4,307,309,info,held_key_finger_reuse,finger 4 strikes F5 while note 300 (G5) is still held for 0.018s
+pig,029,4,309,311,info,held_key_finger_reuse,finger 5 strikes D3 while note 302 (C#3) is still held for 0.018s
+pig,029,4,311,313,info,held_key_finger_reuse,finger 1 strikes G4 while note 305 (G#4) is still held for 0.008s
+pig,029,4,312,314,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 306 (B4) is still held for 0.008s
+pig,029,4,313,315,info,held_key_finger_reuse,finger 4 strikes Eb5 while note 307 (F5) is still held for 0.008s
+pig,029,4,314,316,info,held_key_finger_reuse,finger 5 strikes G5 while note 308 (G#5) is still held for 0.008s
+pig,029,4,337,339,info,held_key_finger_reuse,finger 2 strikes E5 while note 327 (G#5) is still held for 0.027s
+pig,029,4,347,349,info,held_key_finger_reuse,finger 2 strikes C#5 while note 337 (E5) is still held for 0.027s
+pig,029,4,356,358,info,held_key_finger_reuse,finger 2 strikes C5 while note 347 (C#5) is still held for 0.027s
+pig,029,4,371,373,info,held_key_finger_reuse,finger 1 strikes G#3 while note 361 (A3) is still held for 0.027s
+pig,029,4,372,374,info,held_key_finger_reuse,finger 2 strikes C4 while note 362 (C#4) is still held for 0.027s
+pig,029,5,12,14,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 6 (G#3) is still held for 0.027s
+pig,029,5,24,26,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 18 (G#3) is still held for 0.027s
+pig,029,5,168,170,info,held_key_finger_reuse,finger 5 strikes F#5 while note 163 (C#5) is still held for 0.018s
+pig,029,5,171,173,info,held_key_finger_reuse,finger 5 strikes F5 while note 168 (F#5) is still held for 0.008s
+pig,029,5,176,178,info,held_key_finger_reuse,finger 5 strikes F#5 while note 171 (F5) is still held for 0.027s
+pig,029,5,231,233,info,held_key_finger_reuse,finger 5 strikes C#6 while note 226 (G#5) is still held for 0.018s
+pig,029,5,234,236,info,held_key_finger_reuse,finger 5 strikes C6 while note 231 (C#6) is still held for 0.008s
+pig,029,5,240,242,info,held_key_finger_reuse,finger 5 strikes C#6 while note 234 (C6) is still held for 0.027s
+pig,029,5,253,255,info,held_key_finger_reuse,finger 1 strikes E5 while note 250 (F#5) is still held for 0.009s
+pig,029,5,257,259,info,held_key_finger_reuse,finger 4 strikes B5 while note 246 (C#6) is still held for 0.027s
+pig,029,5,262,264,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 261 (E5) is still held for 0.009s
+pig,029,5,271,273,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 268 (E5) is still held for 0.009s
+pig,029,5,275,277,info,held_key_finger_reuse,finger 4 strikes Bb5 while note 264 (B5) is still held for 0.027s
+pig,029,5,280,282,info,held_key_finger_reuse,finger 1 strikes C#5 while note 279 (Eb5) is still held for 0.009s
+pig,029,5,282,284,info,held_key_finger_reuse,finger 4 strikes A5 while note 275 (Bb5) is still held for 0.027s
+pig,029,5,289,291,info,held_key_finger_reuse,finger 1 strikes C#5 while note 286 (D5) is still held for 0.009s
+pig,029,5,293,295,info,held_key_finger_reuse,finger 4 strikes G#5 while note 282 (A5) is still held for 0.027s
+pig,029,5,298,300,info,held_key_finger_reuse,finger 1 strikes B4 while note 297 (C#5) is still held for 0.009s
+pig,029,5,300,302,info,held_key_finger_reuse,finger 4 strikes G5 while note 293 (G#5) is still held for 0.027s
+pig,029,5,305,307,info,held_key_finger_reuse,finger 1 strikes G#4 while note 304 (Bb4) is still held for 0.009s
+pig,029,5,306,308,info,held_key_finger_reuse,finger 2 strikes B4 while note 299 (E5) is still held for 0.018s
+pig,029,5,307,309,info,held_key_finger_reuse,finger 4 strikes F5 while note 300 (G5) is still held for 0.018s
+pig,029,5,309,311,info,held_key_finger_reuse,finger 5 strikes D3 while note 302 (C#3) is still held for 0.018s
+pig,029,5,311,313,info,held_key_finger_reuse,finger 1 strikes G4 while note 305 (G#4) is still held for 0.008s
+pig,029,5,312,314,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 306 (B4) is still held for 0.008s
+pig,029,5,314,316,info,held_key_finger_reuse,finger 5 strikes G5 while note 308 (G#5) is still held for 0.008s
+pig,029,5,315,317,info,held_key_finger_reuse,finger 5 strikes Eb3 while note 309 (D3) is still held for 0.008s
+pig,029,5,337,339,info,held_key_finger_reuse,finger 2 strikes E5 while note 327 (G#5) is still held for 0.027s
+pig,029,5,347,349,info,held_key_finger_reuse,finger 2 strikes C#5 while note 337 (E5) is still held for 0.027s
+pig,029,5,356,358,info,held_key_finger_reuse,finger 1 strikes C5 while note 346 (A4) is still held for 0.027s
+pig,029,5,357,359,info,held_key_finger_reuse,finger 2 strikes Eb5 while note 347 (C#5) is still held for 0.027s
+pig,029,5,371,373,info,held_key_finger_reuse,finger 1 strikes G#3 while note 361 (A3) is still held for 0.027s
+pig,029,5,372,374,info,held_key_finger_reuse,finger 2 strikes C4 while note 362 (C#4) is still held for 0.027s
+pig,029,6,12,14,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 6 (G#3) is still held for 0.027s
+pig,029,6,24,26,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 18 (G#3) is still held for 0.027s
+pig,029,6,37,39,info,held_key_finger_reuse,finger 2 strikes C#4 while note 32 (Eb4) is still held for 0.027s
+pig,029,6,163,165,info,held_key_finger_reuse,finger 4 strikes C#5 while note 154 (B4) is still held for 0.027s
+pig,029,6,171,173,info,held_key_finger_reuse,finger 5 strikes F5 while note 168 (F#5) is still held for 0.008s
+pig,029,6,231,233,info,held_key_finger_reuse,finger 5 strikes C#6 while note 226 (G#5) is still held for 0.018s
+pig,029,6,253,255,info,held_key_finger_reuse,finger 1 strikes E5 while note 250 (F#5) is still held for 0.009s
+pig,029,6,262,264,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 261 (E5) is still held for 0.009s
+pig,029,6,271,273,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 268 (E5) is still held for 0.009s
+pig,029,6,280,282,info,held_key_finger_reuse,finger 1 strikes C#5 while note 279 (Eb5) is still held for 0.009s
+pig,029,6,289,291,info,held_key_finger_reuse,finger 1 strikes C#5 while note 286 (D5) is still held for 0.009s
+pig,029,6,298,300,info,held_key_finger_reuse,finger 1 strikes B4 while note 297 (C#5) is still held for 0.009s
+pig,029,6,300,302,info,held_key_finger_reuse,finger 3 strikes G5 while note 293 (G#5) is still held for 0.027s
+pig,029,6,305,307,info,held_key_finger_reuse,finger 1 strikes G#4 while note 304 (Bb4) is still held for 0.009s
+pig,029,6,306,308,info,held_key_finger_reuse,finger 2 strikes B4 while note 299 (E5) is still held for 0.018s
+pig,029,6,309,311,info,held_key_finger_reuse,finger 5 strikes D3 while note 302 (C#3) is still held for 0.018s
+pig,029,6,311,313,info,held_key_finger_reuse,finger 1 strikes G4 while note 305 (G#4) is still held for 0.008s
+pig,029,6,312,314,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 306 (B4) is still held for 0.008s
+pig,029,6,313,315,info,held_key_finger_reuse,finger 4 strikes Eb5 while note 307 (F5) is still held for 0.008s
+pig,029,6,314,316,info,held_key_finger_reuse,finger 5 strikes G5 while note 308 (G#5) is still held for 0.008s
+pig,029,6,315,317,info,held_key_finger_reuse,finger 5 strikes Eb3 while note 309 (D3) is still held for 0.008s
+pig,029,6,327,329,info,held_key_finger_reuse,finger 2 strikes G#5 while note 318 (Eb6) is still held for 0.027s
+pig,029,6,337,339,info,held_key_finger_reuse,finger 2 strikes E5 while note 327 (G#5) is still held for 0.027s
+pig,029,6,347,349,info,held_key_finger_reuse,finger 2 strikes C#5 while note 337 (E5) is still held for 0.027s
+pig,029,6,356,358,info,held_key_finger_reuse,finger 1 strikes C5 while note 346 (A4) is still held for 0.027s
+pig,029,6,357,359,info,held_key_finger_reuse,finger 2 strikes Eb5 while note 347 (C#5) is still held for 0.027s
+pig,029,6,371,373,info,held_key_finger_reuse,finger 1 strikes G#3 while note 361 (A3) is still held for 0.027s
+pig,029,6,372,374,info,held_key_finger_reuse,finger 2 strikes C4 while note 362 (C#4) is still held for 0.027s
+pig,030,1,84,86,warning,chord_span_large,"LH simultaneous span 15 semitones (B2, F#3, D4)"
+pig,030,1,227,229,warning,chord_span_large,"LH simultaneous span 15 semitones (E2, B2, G3)"
+pig,030,1,65,67,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (64:A4, 65:B4)"
+pig,030,1,235,237,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (234:D4, 235:E4)"
+pig,030,3,84,86,warning,chord_span_large,"LH simultaneous span 15 semitones (B2, F#3, D4)"
+pig,030,3,227,229,warning,chord_span_large,"LH simultaneous span 15 semitones (E2, B2, G3)"
+pig,030,3,65,67,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (64:A4, 65:B4)"
+pig,030,3,235,237,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (234:D4, 235:E4)"
+pig,030,4,84,86,warning,chord_span_large,"LH simultaneous span 15 semitones (B2, F#3, D4)"
+pig,030,4,227,229,warning,chord_span_large,"LH simultaneous span 15 semitones (E2, B2, G3)"
+pig,030,4,295,297,info,hand_assignment_differs,7 notes assigned to the other hand than in annotation 1
+pig,030,4,65,67,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (64:A4, 65:B4)"
+pig,030,4,235,237,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (234:D4, 235:E4)"
+pig,030,5,84,86,warning,chord_span_large,"LH simultaneous span 15 semitones (B2, F#3, D4)"
+pig,030,5,227,229,warning,chord_span_large,"LH simultaneous span 15 semitones (E2, B2, G3)"
+pig,030,5,198,200,info,hand_assignment_differs,3 notes assigned to the other hand than in annotation 1
+pig,030,6,84,86,warning,chord_span_large,"LH simultaneous span 15 semitones (B2, F#3, D4)"
+pig,030,6,227,229,warning,chord_span_large,"LH simultaneous span 15 semitones (E2, B2, G3)"
+pig,030,6,177,179,info,hand_assignment_differs,3 notes assigned to the other hand than in annotation 1
+pig,030,6,65,67,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (64:A4, 65:B4)"
+pig,030,6,235,237,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (234:D4, 235:E4)"
+pig,031,1,38,40,info,held_key_finger_reuse,finger 1 strikes G4 while note 31 (G#4) is still held for 0.014s
+pig,031,1,79,81,info,held_key_finger_reuse,finger 1 strikes G4 while note 72 (G#4) is still held for 0.014s
+pig,031,1,242,244,info,held_key_finger_reuse,finger 1 strikes D5 while note 239 (C5) is still held for 0.014s
+pig,031,1,247,249,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 242 (D5) is still held for 0.014s
+pig,031,1,292,294,info,held_key_finger_reuse,finger 1 strikes G4 while note 280 (G#4) is still held for 0.039s
+pig,031,1,300,302,info,held_key_finger_reuse,finger 1 strikes D5 while note 297 (C5) is still held for 0.014s
+pig,031,1,305,307,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 300 (D5) is still held for 0.014s
+pig,031,1,358,360,info,held_key_finger_reuse,finger 1 strikes D5 while note 338 (A4) is still held for 0.075s
+pig,031,1,379,381,info,held_key_finger_reuse,finger 1 strikes G#4 while note 375 (G4) is still held for 0.014s
+pig,031,1,385,387,info,held_key_finger_reuse,finger 1 strikes G4 while note 379 (G#4) is still held for 0.014s
+pig,031,1,394,396,info,held_key_finger_reuse,finger 1 strikes C5 while note 389 (G4) is still held for 0.029s
+pig,031,1,412,414,info,held_key_finger_reuse,finger 1 strikes G4 while note 408 (F4) is still held for 0.014s
+pig,031,1,418,420,info,held_key_finger_reuse,finger 1 strikes F4 while note 412 (G4) is still held for 0.014s
+pig,031,1,450,452,info,held_key_finger_reuse,finger 1 strikes D4 while note 444 (Eb4) is still held for 0.019s
+pig,031,1,494,496,info,held_key_finger_reuse,finger 1 strikes D5 while note 491 (C5) is still held for 0.014s
+pig,031,1,499,501,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 494 (D5) is still held for 0.014s
+pig,031,1,544,546,info,held_key_finger_reuse,finger 1 strikes G4 while note 532 (G#4) is still held for 0.039s
+pig,031,1,552,554,info,held_key_finger_reuse,finger 1 strikes D5 while note 549 (C5) is still held for 0.014s
+pig,031,1,557,559,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 552 (D5) is still held for 0.014s
+pig,031,1,740,742,info,held_key_finger_reuse,finger 1 strikes F4 while note 733 (Eb4) is still held for 0.014s
+pig,031,1,764,766,info,held_key_finger_reuse,finger 1 strikes G#4 while note 759 (F#4) is still held for 0.014s
+pig,031,1,789,791,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 782 (C#4) is still held for 0.014s
+pig,031,1,813,815,info,held_key_finger_reuse,finger 1 strikes F#4 while note 808 (E4) is still held for 0.014s
+pig,031,1,839,841,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 832 (G#4) is still held for 0.014s
+pig,031,1,842,844,info,held_key_finger_reuse,finger 1 strikes B4 while note 839 (Bb4) is still held for 0.010s
+pig,031,1,869,871,info,held_key_finger_reuse,finger 1 strikes C5 while note 862 (Bb4) is still held for 0.014s
+pig,031,1,872,874,info,held_key_finger_reuse,finger 1 strikes C#5 while note 869 (C5) is still held for 0.010s
+pig,031,1,924,926,info,held_key_finger_reuse,finger 1 strikes F5 while note 912 (G#5) is still held for 0.037s
+pig,031,1,949,951,info,held_key_finger_reuse,finger 1 strikes G#4 while note 938 (Bb4) is still held for 0.037s
+pig,031,1,971,973,info,held_key_finger_reuse,finger 1 strikes F5 while note 959 (G#5) is still held for 0.037s
+pig,031,1,1006,1008,info,held_key_finger_reuse,finger 1 strikes C5 while note 1000 (B4) is still held for 0.013s
+pig,031,1,1048,1050,info,held_key_finger_reuse,finger 1 strikes G4 while note 1041 (G#4) is still held for 0.013s
+pig,031,1,1089,1091,info,held_key_finger_reuse,finger 1 strikes G4 while note 1082 (G#4) is still held for 0.013s
+pig,031,1,1252,1254,info,held_key_finger_reuse,finger 1 strikes C#5 while note 1249 (C5) is still held for 0.013s
+pig,031,1,1255,1257,info,held_key_finger_reuse,finger 2 strikes D3 while note 1254 (Eb3) is still held for 0.013s
+pig,031,1,1256,1258,info,held_key_finger_reuse,finger 1 strikes D5 while note 1252 (C#5) is still held for 0.017s
+pig,031,1,1260,1262,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 1256 (D5) is still held for 0.026s
+pig,031,1,1304,1306,info,held_key_finger_reuse,finger 1 strikes G4 while note 1292 (G#4) is still held for 0.034s
+pig,031,1,1311,1313,info,held_key_finger_reuse,finger 1 strikes C5 while note 1308 (B4) is still held for 0.018s
+pig,031,1,1314,1316,info,held_key_finger_reuse,finger 1 strikes C#5 while note 1311 (C5) is still held for 0.017s
+pig,031,1,1318,1320,info,held_key_finger_reuse,finger 1 strikes D5 while note 1314 (C#5) is still held for 0.017s
+pig,031,1,1375,1377,info,held_key_finger_reuse,finger 2 strikes D5 while note 1355 (C5) is still held for 0.119s
+pig,031,1,1376,1378,info,held_key_finger_reuse,finger 3 strikes A5 while note 1356 (Eb5) is still held for 0.023s
+pig,031,1,1404,1406,info,held_key_finger_reuse,finger 1 strikes G#4 while note 1399 (G4) is still held for 0.016s
+pig,031,1,1416,1418,info,held_key_finger_reuse,finger 1 strikes C5 while note 1412 (G4) is still held for 0.013s
+pig,031,1,1442,1444,info,held_key_finger_reuse,finger 1 strikes F4 while note 1438 (E4) is still held for 0.012s
+pig,031,1,1446,1448,info,held_key_finger_reuse,finger 1 strikes G4 while note 1442 (F4) is still held for 0.012s
+pig,031,1,1485,1487,info,held_key_finger_reuse,finger 1 strikes D4 while note 1478 (Eb4) is still held for 0.016s
+pig,031,1,1528,1530,info,held_key_finger_reuse,finger 1 strikes C5 while note 1525 (B4) is still held for 0.016s
+pig,031,1,1531,1533,info,held_key_finger_reuse,finger 1 strikes C#5 while note 1528 (C5) is still held for 0.016s
+pig,031,1,1535,1537,info,held_key_finger_reuse,finger 1 strikes D5 while note 1531 (C#5) is still held for 0.016s
+pig,031,1,1583,1585,info,held_key_finger_reuse,finger 1 strikes G4 while note 1571 (G#4) is still held for 0.033s
+pig,031,1,1596,1598,info,held_key_finger_reuse,finger 1 strikes D5 while note 1593 (C#5) is still held for 0.012s
+pig,031,1,1599,1601,info,held_key_finger_reuse,finger 1 strikes F5 while note 1596 (D5) is still held for 0.012s
+pig,031,1,1673,1675,info,held_key_finger_reuse,finger 1 strikes F#4 while note 1665 (G#4) is still held for 0.015s
+pig,031,1,1680,1682,info,held_key_finger_reuse,finger 1 strikes F4 while note 1673 (F#4) is still held for 0.012s
+pig,031,1,1697,1699,info,held_key_finger_reuse,finger 1 strikes E4 while note 1685 (F4) is still held for 0.032s
+pig,031,1,1727,1729,info,held_key_finger_reuse,finger 1 strikes E4 while note 1719 (F#4) is still held for 0.015s
+pig,031,1,1734,1736,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 1727 (E4) is still held for 0.012s
+pig,031,1,1751,1753,info,held_key_finger_reuse,finger 1 strikes D4 while note 1739 (Eb4) is still held for 0.032s
+pig,031,1,1943,1945,info,held_key_finger_reuse,finger 5 strikes D5 while note 1916 (C5) is still held for 0.031s
+pig,031,1,1954,1956,info,held_key_finger_reuse,finger 5 strikes E5 while note 1943 (D5) is still held for 0.028s
+pig,034,4,22,24,info,held_key_finger_reuse,finger 1 strikes B3 while note 18 (A3) is still held for 0.071s
+pig,034,4,46,48,info,held_key_finger_reuse,finger 1 strikes C4 while note 42 (B3) is still held for 0.072s
+pig,034,4,71,73,info,held_key_finger_reuse,finger 2 strikes G4 while note 66 (F#4) is still held for 0.071s
+pig,034,4,90,92,info,held_key_finger_reuse,finger 1 strikes D4 while note 86 (F#4) is still held for 0.071s
+pig,034,4,99,101,info,held_key_finger_reuse,finger 1 strikes E4 while note 90 (D4) is still held for 0.110s
+pig,034,4,100,102,info,held_key_finger_reuse,finger 2 strikes G#4 while note 94 (G4) is still held for 0.110s
+pig,034,4,103,105,info,held_key_finger_reuse,finger 3 strikes G#3 while note 97 (Bb3) is still held for 0.110s
+pig,034,4,168,170,info,held_key_finger_reuse,finger 1 strikes F4 while note 160 (G4) is still held for 0.110s
+pig,034,4,253,255,info,held_key_finger_reuse,finger 1 strikes G4 while note 243 (G#4) is still held for 0.110s
+pig,034,4,334,336,info,held_key_finger_reuse,finger 1 strikes B4 while note 326 (C5) is still held for 0.110s
+pig,034,4,366,368,info,held_key_finger_reuse,finger 1 strikes D5 while note 358 (C#5) is still held for 0.110s
+pig,034,4,398,400,info,held_key_finger_reuse,finger 1 strikes F5 while note 390 (E5) is still held for 0.110s
+pig,034,4,607,609,info,held_key_finger_reuse,finger 1 strikes D4 while note 589 (Eb4) is still held for 0.018s
+pig,034,4,728,730,info,held_key_finger_reuse,finger 1 strikes G3 while note 723 (F#3) is still held for 0.028s
+pig,034,4,858,860,info,held_key_finger_reuse,finger 1 strikes C4 while note 847 (Bb3) is still held for 0.036s
+pig,034,4,1397,1399,info,held_key_finger_reuse,finger 5 strikes B3 while note 1388 (Bb3) is still held for 0.018s
+pig,034,4,1402,1404,info,held_key_finger_reuse,finger 5 strikes C4 while note 1397 (B3) is still held for 0.018s
+pig,034,4,2053,2055,info,held_key_finger_reuse,finger 1 strikes F#2 while note 2048 (G2) is still held for 0.028s
+pig,036,1,204,206,info,held_key_finger_reuse,finger 2 strikes E4 while note 199 (A3) is still held for 0.039s
+pig,036,1,176,178,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (175:C4, 176:D4)"
+pig,037,1,8,10,info,held_key_finger_reuse,finger 1 strikes C5 while note 4 (C#5) is still held for 0.049s
+pig,037,1,10,12,info,held_key_finger_reuse,finger 1 strikes C#5 while note 8 (C5) is still held for 0.049s
+pig,037,1,12,14,info,held_key_finger_reuse,finger 1 strikes C5 while note 10 (C#5) is still held for 0.049s
+pig,037,1,16,18,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 12 (C5) is still held for 0.049s
+pig,037,1,18,20,info,held_key_finger_reuse,finger 1 strikes C5 while note 16 (Bb4) is still held for 0.049s
+pig,037,1,21,23,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 18 (C5) is still held for 0.049s
+pig,037,1,27,29,info,held_key_finger_reuse,finger 3 strikes C5 while note 23 (C#5) is still held for 0.049s
+pig,037,1,49,51,info,held_key_finger_reuse,finger 3 strikes F#4 while note 45 (G#4) is still held for 0.049s
+pig,037,1,71,73,info,held_key_finger_reuse,finger 3 strikes C#4 while note 67 (Eb4) is still held for 0.049s
+pig,038,1,65,67,error,chord_span_impossible,"LH simultaneous span 19 semitones (Eb2, Bb2, G3, Bb3)"
+pig,038,1,24,26,info,held_key_finger_reuse,finger 5 strikes F4 while note 19 (F#4) is still held for 0.053s
+pig,038,1,40,42,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 34 (C#4) is still held for 0.053s
+pig,038,1,41,43,info,held_key_finger_reuse,finger 2 strikes F#4 while note 35 (F4) is still held for 0.053s
+pig,038,1,45,47,info,held_key_finger_reuse,finger 1 strikes C#4 while note 40 (Eb4) is still held for 0.053s
+pig,038,1,62,64,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 56 (D4) is still held for 0.035s
+pig,038,1,67,69,info,held_key_finger_reuse,finger 2 strikes G3 while note 60 (F3) is still held for 0.035s
+pig,038,1,109,111,info,held_key_finger_reuse,finger 1 strikes C#3 while note 100 (Eb3) is still held for 0.039s
+pig,038,1,113,115,info,held_key_finger_reuse,finger 2 strikes C#4 while note 108 (Bb3) is still held for 1.029s
+pig,039,1,169,171,warning,chord_span_large,"LH simultaneous span 16 semitones (G#3, E2, B2)"
+pig,039,1,174,176,warning,chord_span_large,"LH simultaneous span 16 semitones (F#3, D2, A2)"
+pig,039,1,184,186,warning,chord_span_large,"LH simultaneous span 15 semitones (B1, F#2, D3)"
+pig,039,1,8,10,info,held_key_finger_reuse,finger 5 strikes A4 while note 0 (G4) is still held for 0.059s
+pig,039,1,14,16,info,held_key_finger_reuse,finger 3 strikes D4 while note 13 (E4) is still held for 0.056s
+pig,039,1,40,42,info,held_key_finger_reuse,finger 5 strikes C5 while note 32 (B4) is still held for 0.059s
+pig,039,1,47,49,info,held_key_finger_reuse,finger 3 strikes F#4 while note 45 (G4) is still held for 0.056s
+pig,039,1,57,59,info,held_key_finger_reuse,finger 5 strikes B4 while note 53 (A4) is still held for 0.061s
+pig,039,1,62,64,info,held_key_finger_reuse,finger 4 strikes F#4 while note 59 (G4) is still held for 0.064s
+pig,039,1,74,76,info,held_key_finger_reuse,finger 5 strikes A4 while note 70 (G4) is still held for 0.061s
+pig,039,1,79,81,info,held_key_finger_reuse,finger 4 strikes E4 while note 76 (F#4) is still held for 0.064s
+pig,039,1,129,131,info,held_key_finger_reuse,finger 5 strikes A4 while note 122 (B4) is still held for 0.038s
+pig,039,1,137,139,info,held_key_finger_reuse,finger 2 strikes A3 while note 128 (A2) is still held for 1.070s
+pig,039,1,165,167,info,held_key_finger_reuse,finger 1 strikes B3 while note 164 (E3) is still held for 0.542s
+pig,039,1,174,176,info,held_key_finger_reuse,finger 1 strikes F#3 while note 169 (G#3) is still held for 0.045s
+pig,043,1,151,153,info,held_key_finger_reuse,finger 1 strikes G#3 while note 148 (C4) is still held for 0.991s
+pig,043,1,153,155,info,held_key_finger_reuse,finger 1 strikes G3 while note 148 (C4) is still held for 0.744s
+pig,043,1,155,157,info,held_key_finger_reuse,finger 1 strikes F3 while note 148 (C4) is still held for 0.495s
+pig,043,2,4,6,info,hand_assignment_differs,10 notes assigned to the other hand than in annotation 1
+pig,044,1,131,133,info,held_key_finger_reuse,finger 2 strikes C5 while note 124 (F4) is still held for 0.484s
+pig,047,1,266,268,warning,chord_finger_order,"RH chord fingers not ordered by pitch: F#4=2, A4=1"
+pig,047,2,166,168,info,hand_assignment_differs,1 notes assigned to the other hand than in annotation 1
+pig,050,1,21,23,info,held_key_finger_reuse,finger 1 strikes E4 while note 15 (D4) is still held for 0.127s
+pig,050,2,87,89,info,held_key_finger_reuse,finger 5 strikes A3 while note 79 (D3) is still held for 0.250s
+pig,050,2,130,132,info,held_key_finger_reuse,finger 5 strikes B3 while note 115 (E3) is still held for 0.250s
+pig,063,1,28,30,info,held_key_finger_reuse,finger 5 strikes Eb4 while note 24 (C4) is still held for 0.098s
+pig,063,1,32,34,info,held_key_finger_reuse,finger 5 strikes G#4 while note 28 (Eb4) is still held for 0.098s
+pig,063,1,36,38,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 32 (G#4) is still held for 0.098s
+pig,063,1,49,51,info,held_key_finger_reuse,finger 5 strikes E4 while note 40 (Eb4) is still held for 0.098s
+pig,063,1,52,54,info,held_key_finger_reuse,finger 5 strikes F4 while note 49 (E4) is still held for 0.098s
+pig,063,1,54,56,info,held_key_finger_reuse,finger 5 strikes C#2 while note 47 (Eb2) is still held for 0.063s
+pig,063,1,72,74,info,held_key_finger_reuse,finger 5 strikes A3 while note 66 (Eb4) is still held for 0.064s
+pig,063,1,78,80,info,held_key_finger_reuse,finger 5 strikes C#4 while note 72 (A3) is still held for 0.063s
+pig,063,1,119,121,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 109 (C5) is still held for 0.064s
+pig,063,1,129,131,info,held_key_finger_reuse,finger 5 strikes Eb5 while note 119 (Bb4) is still held for 0.064s
+pig,063,1,141,143,info,held_key_finger_reuse,finger 5 strikes G2 while note 132 (C3) is still held for 0.064s
+pig,063,1,144,146,info,held_key_finger_reuse,finger 5 strikes C#5 while note 129 (Eb5) is still held for 0.098s
+pig,063,1,155,157,info,held_key_finger_reuse,finger 5 strikes Eb5 while note 149 (C5) is still held for 0.098s
+pig,063,1,158,160,info,held_key_finger_reuse,finger 5 strikes G2 while note 152 (G#2) is still held for 0.098s
+pig,063,1,161,163,info,held_key_finger_reuse,finger 5 strikes G#5 while note 155 (Eb5) is still held for 0.098s
+pig,063,1,164,166,info,held_key_finger_reuse,finger 5 strikes F2 while note 158 (G2) is still held for 0.098s
+pig,063,1,167,169,info,held_key_finger_reuse,finger 5 strikes Bb5 while note 161 (G#5) is still held for 0.098s
+pig,063,1,186,188,info,held_key_finger_reuse,finger 5 strikes E5 while note 173 (Eb5) is still held for 0.098s
+pig,063,1,191,193,info,held_key_finger_reuse,finger 5 strikes F5 while note 186 (E5) is still held for 0.098s
+pig,063,1,220,222,info,held_key_finger_reuse,finger 5 strikes A4 while note 211 (Eb5) is still held for 0.064s
+pig,063,1,230,232,info,held_key_finger_reuse,finger 5 strikes C#5 while note 220 (A4) is still held for 0.063s
+pig,063,1,233,235,info,held_key_finger_reuse,finger 5 strikes Bb2 while note 223 (F2) is still held for 0.063s
+pig,063,2,18,20,warning,chord_span_large,"LH simultaneous span 15 semitones (Bb3, G2)"
+pig,063,2,1,3,info,hand_assignment_differs,28 notes assigned to the other hand than in annotation 1
+pig,063,2,14,16,info,held_key_finger_reuse,finger 4 strikes C3 while note 8 (C#3) is still held for 0.064s
+pig,063,2,30,32,info,held_key_finger_reuse,finger 5 strikes G2 while note 26 (G#2) is still held for 0.098s
+pig,063,2,34,36,info,held_key_finger_reuse,finger 5 strikes F2 while note 30 (G2) is still held for 0.098s
+pig,063,2,36,38,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 32 (G#4) is still held for 0.098s
+pig,063,2,49,51,info,held_key_finger_reuse,finger 4 strikes E4 while note 40 (Eb4) is still held for 0.098s
+pig,063,2,80,82,info,held_key_finger_reuse,finger 5 strikes Bb1 while note 74 (F2) is still held for 0.063s
+pig,063,2,119,121,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 109 (C5) is still held for 0.064s
+pig,063,2,129,131,info,held_key_finger_reuse,finger 5 strikes Eb5 while note 119 (Bb4) is still held for 0.064s
+pig,063,2,158,160,info,held_key_finger_reuse,finger 5 strikes G2 while note 152 (G#2) is still held for 0.098s
+pig,063,2,161,163,info,held_key_finger_reuse,finger 5 strikes G#5 while note 155 (Eb5) is still held for 0.098s
+pig,063,2,164,166,info,held_key_finger_reuse,finger 5 strikes F2 while note 158 (G2) is still held for 0.098s
+pig,063,2,167,169,info,held_key_finger_reuse,finger 5 strikes Bb5 while note 161 (G#5) is still held for 0.098s
+pig,063,2,191,193,info,held_key_finger_reuse,finger 5 strikes F5 while note 186 (E5) is still held for 0.098s
+pig,063,2,262,264,info,held_key_finger_reuse,finger 5 strikes G#4 while note 253 (Bb4) is still held for 0.085s
+pig,065,1,127,129,info,held_key_finger_reuse,finger 3 strikes Eb4 while note 122 (F#4) is still held for 0.384s
+pig,067,1,337,339,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (336:C#3, 337:Eb3)"
+pig,067,1,418,420,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (417:C#3, 418:Eb3)"
+pig,071,1,223,225,info,held_key_finger_reuse,finger 5 strikes D5 while note 213 (G5) is still held for 0.049s
+pig,071,1,231,233,info,held_key_finger_reuse,finger 5 strikes C5 while note 223 (D5) is still held for 0.049s
+pig,071,2,52,54,info,held_key_finger_reuse,finger 5 strikes F#4 while note 43 (E4) is still held for 0.049s
+pig,071,2,108,110,info,held_key_finger_reuse,finger 5 strikes D5 while note 99 (C#5) is still held for 0.049s
+pig,071,2,117,119,info,held_key_finger_reuse,finger 5 strikes C5 while note 108 (D5) is still held for 0.049s
+pig,071,2,145,147,info,held_key_finger_reuse,finger 5 strikes C5 while note 138 (D5) is still held for 0.049s
+pig,071,2,177,179,info,held_key_finger_reuse,finger 5 strikes F#4 while note 168 (E4) is still held for 0.049s
+pig,071,2,223,225,info,held_key_finger_reuse,finger 5 strikes D5 while note 213 (G5) is still held for 0.049s
+pig,071,2,231,233,info,held_key_finger_reuse,finger 5 strikes C5 while note 223 (D5) is still held for 0.049s
+pig,072,1,77,79,info,held_key_finger_reuse,finger 2 strikes B3 while note 72 (C#4) is still held for 0.500s
+pig,072,1,81,83,info,held_key_finger_reuse,finger 2 strikes C#4 while note 77 (B3) is still held for 0.500s
+pig,072,1,109,111,info,held_key_finger_reuse,finger 2 strikes B3 while note 104 (C#4) is still held for 0.500s
+pig,072,1,136,138,info,held_key_finger_reuse,finger 2 strikes F#3 while note 130 (Eb3) is still held for 0.500s
+pig,072,1,149,151,info,held_key_finger_reuse,finger 1 strikes C4 while note 146 (F#3) is still held for 1.000s
+pig,072,1,168,170,info,held_key_finger_reuse,finger 2 strikes G#3 while note 162 (Eb3) is still held for 0.500s
+pig,078,1,201,203,info,held_key_finger_reuse,finger 5 strikes B1 while note 193 (A1) is still held for 0.020s
+pig,078,1,238,240,info,held_key_finger_reuse,finger 5 strikes E2 while note 230 (B2) is still held for 0.020s
+pig,078,1,223,225,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (222:A4, 223:B4)"
+pig,079,1,116,118,warning,chord_span_large,"RH simultaneous span 15 semitones (Bb4, C#5, E5, Bb5, C#6)"
+pig,079,2,116,118,warning,chord_span_large,"RH simultaneous span 15 semitones (Bb4, C#5, E5, Bb5, C#6)"
+pig,079,2,117,119,warning,same_finger_simultaneous,"finger 1 on 2 simultaneous pitches 3 semitones apart (116:Bb4, 117:C#5)"
+pig,081,1,58,60,warning,nonpositive_duration,offset 5.49999 <= onset 5.49999
+pig,081,1,201,203,warning,nonpositive_duration,offset 19.5 <= onset 19.5
+pig,086,1,28,30,warning,chord_span_large,"LH simultaneous span 16 semitones (A3, F2, C3)"
+pig,086,1,150,152,warning,chord_span_large,"LH simultaneous span 16 semitones (F2, C3, A3)"
+pig,086,1,11,13,info,held_key_finger_reuse,finger 2 strikes A5 while note 6 (Bb4) is still held for 0.511s
+pig,086,1,13,15,info,held_key_finger_reuse,finger 2 strikes A5 while note 6 (Bb4) is still held for 0.170s
+pig,086,1,37,39,info,held_key_finger_reuse,finger 1 strikes F3 while note 28 (A3) is still held for 1.364s
+pig,086,1,94,96,info,held_key_finger_reuse,finger 1 strikes F4 while note 90 (Bb4) is still held for 0.682s
+pig,086,1,97,99,info,held_key_finger_reuse,finger 1 strikes E4 while note 90 (Bb4) is still held for 0.341s
+pig,086,1,111,113,info,held_key_finger_reuse,finger 4 strikes Bb5 while note 106 (D5) is still held for 0.341s
+pig,086,1,159,161,info,held_key_finger_reuse,finger 1 strikes F4 while note 149 (Eb4) is still held for 0.171s
+pig,088,1,60,61,warning,note_id_sequence,note id 60 at position 59 (expected 59)
+pig,088,1,60,61,info,held_key_finger_reuse,finger 5 strikes Bb1 while note 57 (D3) is still held for 0.493s
+pig,088,1,69,70,info,held_key_finger_reuse,finger 5 strikes Bb1 while note 57 (D3) is still held for 0.248s
+pig,088,1,207,208,info,held_key_finger_reuse,finger 5 strikes D4 while note 206 (Bb1) is still held for 1.488s
+pig,094,1,286,288,warning,chord_finger_order,"RH chord fingers not ordered by pitch: C4=2, C#4=1, E4=4"
+pig,094,1,67,69,info,held_key_finger_reuse,finger 2 strikes G4 while note 63 (E4) is still held for 0.024s
+pig,095,1,92,94,warning,chord_span_large,"LH simultaneous span 15 semitones (G3, E2)"
+pig,095,1,121,123,warning,chord_span_large,"LH simultaneous span 15 semitones (G3, E2)"
+pig,095,1,97,99,info,held_key_finger_reuse,finger 1 strikes B3 while note 96 (C#4) is still held for 0.276s
+pig,097,1,402,404,warning,chord_span_large,"LH simultaneous span 16 semitones (C2, G2, E3)"
+pig,097,1,439,441,warning,chord_span_large,"LH simultaneous span 15 semitones (C4, A2, E3)"
+pig,097,1,171,173,info,held_key_finger_reuse,finger 1 strikes F#5 while note 165 (F#4) is still held for 0.023s
+pig,097,1,282,284,info,held_key_finger_reuse,finger 5 strikes D2 while note 280 (C#2) is still held for 0.028s
+pig,097,1,286,288,info,held_key_finger_reuse,finger 1 strikes D3 while note 284 (C#3) is still held for 0.028s
+pig,097,1,290,292,info,held_key_finger_reuse,finger 5 strikes D2 while note 288 (C#2) is still held for 0.028s
+pig,097,1,294,296,info,held_key_finger_reuse,finger 1 strikes D3 while note 292 (C#3) is still held for 0.028s
+pig,097,1,300,302,info,held_key_finger_reuse,finger 5 strikes D2 while note 297 (C#2) is still held for 0.028s
+pig,097,1,306,308,info,held_key_finger_reuse,finger 5 strikes D2 while note 303 (C#2) is still held for 0.028s
+pig,097,1,312,314,info,held_key_finger_reuse,finger 5 strikes D2 while note 309 (C#2) is still held for 0.028s
+pig,097,1,318,320,info,held_key_finger_reuse,finger 5 strikes D2 while note 315 (C#2) is still held for 0.028s
+pig,098,1,27,29,info,held_key_finger_reuse,finger 1 strikes D3 while note 21 (F#3) is still held for 0.039s
+pig,098,1,69,71,info,held_key_finger_reuse,finger 1 strikes D3 while note 64 (F3) is still held for 0.039s
+pig,098,1,84,86,info,held_key_finger_reuse,finger 1 strikes E3 while note 77 (F3) is still held for 0.038s
+pig,098,1,90,92,info,held_key_finger_reuse,finger 5 strikes D2 while note 85 (C#2) is still held for 0.019s
+pig,098,1,93,95,info,held_key_finger_reuse,finger 5 strikes E2 while note 90 (D2) is still held for 0.029s
+pig,098,1,97,99,info,held_key_finger_reuse,finger 3 strikes Bb3 while note 87 (B3) is still held for 0.019s
+pig,098,1,98,100,info,held_key_finger_reuse,finger 5 strikes F#2 while note 93 (E2) is still held for 0.029s
+pig,098,1,103,105,info,held_key_finger_reuse,finger 5 strikes E2 while note 98 (F#2) is still held for 0.019s
+pig,098,1,110,112,info,held_key_finger_reuse,finger 5 strikes D2 while note 103 (E2) is still held for 0.018s
+pig,098,1,113,115,info,held_key_finger_reuse,finger 5 strikes C#2 while note 110 (D2) is still held for 0.029s
+pig,098,1,118,120,info,held_key_finger_reuse,finger 5 strikes B1 while note 113 (C#2) is still held for 0.029s
+pig,098,1,147,149,info,held_key_finger_reuse,finger 1 strikes A3 while note 141 (C#4) is still held for 0.039s
+pig,098,1,167,169,info,held_key_finger_reuse,finger 5 strikes A4 while note 163 (B4) is still held for 0.019s
+pig,098,1,172,174,info,held_key_finger_reuse,finger 5 strikes G#4 while note 167 (A4) is still held for 0.019s
+pig,098,1,189,191,info,held_key_finger_reuse,finger 1 strikes A3 while note 184 (C4) is still held for 0.039s
+pig,098,1,204,206,info,held_key_finger_reuse,finger 1 strikes B3 while note 197 (C4) is still held for 0.039s
+pig,098,1,210,212,info,held_key_finger_reuse,finger 5 strikes A2 while note 205 (G#2) is still held for 0.019s
+pig,098,1,213,215,info,held_key_finger_reuse,finger 5 strikes B2 while note 210 (A2) is still held for 0.029s
+pig,098,1,215,217,info,held_key_finger_reuse,finger 3 strikes F4 while note 207 (F#4) is still held for 0.019s
+pig,098,1,218,220,info,held_key_finger_reuse,finger 5 strikes C#3 while note 213 (B2) is still held for 0.029s
+pig,098,1,223,225,info,held_key_finger_reuse,finger 5 strikes B2 while note 218 (C#3) is still held for 0.019s
+pig,098,1,230,232,info,held_key_finger_reuse,finger 5 strikes A2 while note 223 (B2) is still held for 0.019s
+pig,098,1,233,235,info,held_key_finger_reuse,finger 5 strikes G#2 while note 230 (A2) is still held for 0.029s
+pig,098,1,238,240,info,held_key_finger_reuse,finger 5 strikes F#2 while note 233 (G#2) is still held for 0.029s
+pig,101,1,52,54,warning,nonpositive_duration,offset 8.99998 <= onset 8.99998
+pig,101,1,92,94,warning,nonpositive_duration,offset 16.0 <= onset 16.0
+pig,101,1,117,119,warning,nonpositive_duration,offset 21.5 <= onset 21.5
+pig,104,1,247,249,warning,chord_span_large,"LH simultaneous span 16 semitones (G2, F3, B3)"
+pig,104,1,255,257,warning,chord_span_large,"LH simultaneous span 16 semitones (C2, E3)"
+pig,104,1,75,77,info,held_key_finger_reuse,finger 5 strikes F3 while note 73 (C#2) is still held for 2.750s
+pig,104,1,83,85,info,held_key_finger_reuse,finger 5 strikes F3 while note 73 (C#2) is still held for 1.750s
+pig,104,1,99,101,info,held_key_finger_reuse,finger 5 strikes E3 while note 97 (F#2) is still held for 2.750s
+pig,104,1,109,111,info,held_key_finger_reuse,finger 5 strikes E3 while note 97 (F#2) is still held for 1.750s
+pig,104,1,219,221,info,held_key_finger_reuse,finger 5 strikes A3 while note 217 (G2) is still held for 2.750s
+pig,104,1,229,231,info,held_key_finger_reuse,finger 5 strikes A3 while note 217 (G2) is still held for 1.750s
+pig,105,1,82,84,warning,chord_span_large,"LH simultaneous span 16 semitones (C3, G#1)"
+pig,105,1,82,84,info,held_key_finger_reuse,finger 1 strikes C3 while note 76 (B2) is still held for 0.032s
+pig,105,1,84,86,info,held_key_finger_reuse,finger 4 strikes Eb4 while note 81 (E4) is still held for 0.031s
+pig,105,1,85,87,info,held_key_finger_reuse,finger 1 strikes G#3 while note 77 (F#3) is still held for 0.042s
+pig,105,1,101,103,info,held_key_finger_reuse,finger 1 strikes C4 while note 92 (C#4) is still held for 0.032s
+pig,105,1,103,105,info,held_key_finger_reuse,finger 1 strikes C#4 while note 101 (C4) is still held for 0.032s
+pig,105,1,105,107,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 103 (C#4) is still held for 0.032s
+pig,105,1,108,110,info,held_key_finger_reuse,finger 1 strikes E4 while note 105 (Eb4) is still held for 0.032s
+pig,105,1,115,117,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 113 (E4) is still held for 0.032s
+pig,105,1,117,119,info,held_key_finger_reuse,finger 1 strikes C#4 while note 115 (Eb4) is still held for 0.031s
+pig,105,1,138,140,info,held_key_finger_reuse,finger 1 strikes E4 while note 130 (C#4) is still held for 0.076s
+pig,105,1,59,61,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (58:A3, 59:B3)"
+pig,105,1,78,80,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (77:F#3, 78:G#3)"
+pig,106,1,21,23,warning,chord_span_large,"LH simultaneous span 15 semitones (Eb3, Eb4, F#4)"
+pig,106,1,135,137,warning,chord_span_large,"LH simultaneous span 16 semitones (Bb5, F#4)"
+pig,106,1,148,150,warning,chord_span_large,"LH simultaneous span 16 semitones (Eb5, B3)"
+pig,106,1,183,185,warning,chord_span_large,"LH simultaneous span 16 semitones (F#3, Bb4)"
+pig,106,1,212,214,warning,chord_span_large,"LH simultaneous span 16 semitones (G#3, C5)"
+pig,106,1,251,253,warning,chord_span_large,"LH simultaneous span 16 semitones (F#3, Bb4)"
+pig,106,1,318,320,warning,pitch_range_hand,LH note D6 (86) above C6
+pig,106,1,364,366,warning,pitch_range_hand,LH note D6 (86) above C6
+pig,106,1,366,368,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pig,106,1,370,372,warning,pitch_range_hand,LH note Eb6 (87) above C6
+pig,106,1,372,374,warning,pitch_range_hand,LH note E6 (88) above C6
+pig,106,1,376,378,warning,pitch_range_hand,LH note E6 (88) above C6
+pig,106,1,378,380,warning,pitch_range_hand,LH note F6 (89) above C6
+pig,106,1,382,384,warning,pitch_range_hand,LH note F6 (89) above C6
+pig,106,1,386,388,warning,pitch_range_hand,LH note F6 (89) above C6
+pig,106,1,390,392,warning,pitch_range_hand,LH note F6 (89) above C6
+pig,107,1,172,174,info,held_key_finger_reuse,finger 1 strikes F#3 while note 171 (G3) is still held for 0.011s
+pig,108,1,54,56,warning,nonpositive_duration,offset 18.3335 <= onset 18.3335
+pig,108,1,144,146,warning,nonpositive_duration,offset 33.3336 <= onset 33.3336
+pig,108,1,178,180,warning,nonpositive_duration,offset 39.167 <= onset 39.167
+pig,108,1,190,192,warning,nonpositive_duration,offset 40.8337 <= onset 40.8337
+pig,108,1,202,204,warning,nonpositive_duration,offset 42.5003 <= onset 42.5003
+pig,108,1,226,228,warning,nonpositive_duration,offset 45.8337 <= onset 45.8337
+pig,108,1,238,240,warning,nonpositive_duration,offset 47.5004 <= onset 47.5004
+pig,108,1,250,252,warning,nonpositive_duration,offset 49.1671 <= onset 49.1671
+pig,108,1,267,269,warning,nonpositive_duration,offset 51.6671 <= onset 51.6671
+pig,108,1,9,11,info,held_key_finger_reuse,finger 1 strikes C#4 while note 6 (C#3) is still held for 2.500s
+pig,108,1,12,14,info,held_key_finger_reuse,finger 5 strikes E3 while note 7 (C#1) is still held for 2.500s
+pig,108,1,14,16,info,held_key_finger_reuse,finger 1 strikes E4 while note 8 (C#2) is still held for 2.500s
+pig,108,1,15,17,info,held_key_finger_reuse,finger 1 strikes E4 while note 6 (C#3) is still held for 1.667s
+pig,108,1,18,20,info,held_key_finger_reuse,finger 5 strikes G#3 while note 7 (C#1) is still held for 1.667s
+pig,108,1,20,22,info,held_key_finger_reuse,finger 1 strikes G#4 while note 8 (C#2) is still held for 1.667s
+pig,108,1,21,23,info,held_key_finger_reuse,finger 1 strikes Eb4 while note 6 (C#3) is still held for 0.833s
+pig,108,1,24,26,info,held_key_finger_reuse,finger 5 strikes G3 while note 7 (C#1) is still held for 0.833s
+pig,108,1,26,28,info,held_key_finger_reuse,finger 1 strikes G4 while note 8 (C#2) is still held for 0.833s
+pig,108,1,49,51,info,held_key_finger_reuse,finger 2 strikes G#4 while note 45 (C#3) is still held for 2.500s
+pig,108,1,51,53,info,held_key_finger_reuse,finger 5 strikes E3 while note 46 (C#1) is still held for 2.500s
+pig,108,1,53,55,info,held_key_finger_reuse,finger 1 strikes E4 while note 47 (C#2) is still held for 2.500s
+pig,108,1,57,59,info,held_key_finger_reuse,finger 5 strikes G#3 while note 46 (C#1) is still held for 1.667s
+pig,108,1,59,61,info,held_key_finger_reuse,finger 1 strikes G#4 while note 47 (C#2) is still held for 1.667s
+pig,108,1,61,63,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 45 (C#3) is still held for 0.833s
+pig,108,1,63,65,info,held_key_finger_reuse,finger 5 strikes G3 while note 46 (C#1) is still held for 0.833s
+pig,108,1,65,67,info,held_key_finger_reuse,finger 1 strikes G4 while note 47 (C#2) is still held for 0.833s
+pig,108,1,88,90,info,held_key_finger_reuse,finger 2 strikes G#4 while note 84 (C#3) is still held for 2.500s
+pig,108,1,90,92,info,held_key_finger_reuse,finger 5 strikes E3 while note 85 (C#1) is still held for 2.500s
+pig,108,1,92,94,info,held_key_finger_reuse,finger 1 strikes E4 while note 86 (C#2) is still held for 2.500s
+pig,108,1,94,96,info,held_key_finger_reuse,finger 2 strikes C#5 while note 84 (C#3) is still held for 1.667s
+pig,108,1,98,100,info,held_key_finger_reuse,finger 1 strikes B4 while note 86 (C#2) is still held for 1.667s
+pig,108,1,100,102,info,held_key_finger_reuse,finger 2 strikes C#5 while note 84 (C#3) is still held for 0.833s
+pig,108,1,102,104,info,held_key_finger_reuse,finger 5 strikes A3 while note 85 (C#1) is still held for 0.833s
+pig,108,1,104,106,info,held_key_finger_reuse,finger 1 strikes A4 while note 86 (C#2) is still held for 0.833s
+pig,108,1,127,129,info,held_key_finger_reuse,finger 2 strikes B4 while note 123 (E3) is still held for 2.500s
+pig,108,1,129,131,info,held_key_finger_reuse,finger 5 strikes G#3 while note 124 (E1) is still held for 2.500s
+pig,108,1,131,133,info,held_key_finger_reuse,finger 1 strikes G#4 while note 125 (E2) is still held for 2.500s
+pig,108,1,133,135,info,held_key_finger_reuse,finger 2 strikes E5 while note 123 (E3) is still held for 1.667s
+pig,108,1,135,137,info,held_key_finger_reuse,finger 5 strikes Eb4 while note 124 (E1) is still held for 1.667s
+pig,108,1,137,139,info,held_key_finger_reuse,finger 1 strikes Eb5 while note 125 (E2) is still held for 1.667s
+pig,108,1,139,141,info,held_key_finger_reuse,finger 2 strikes E5 while note 123 (E3) is still held for 0.833s
+pig,108,1,141,143,info,held_key_finger_reuse,finger 5 strikes C#4 while note 124 (E1) is still held for 0.833s
+pig,108,1,143,145,info,held_key_finger_reuse,finger 1 strikes C#5 while note 125 (E2) is still held for 0.833s
+pig,108,1,165,167,info,held_key_finger_reuse,finger 1 strikes G#4 while note 162 (G#3) is still held for 3.333s
+pig,108,1,168,170,info,held_key_finger_reuse,finger 5 strikes B3 while note 163 (G#1) is still held for 6.667s
+pig,108,1,170,172,info,held_key_finger_reuse,finger 1 strikes B4 while note 164 (G#2) is still held for 6.667s
+pig,108,1,171,173,info,held_key_finger_reuse,finger 1 strikes A4 while note 162 (G#3) is still held for 2.500s
+pig,108,1,174,176,info,held_key_finger_reuse,finger 5 strikes C#4 while note 163 (G#1) is still held for 5.833s
+pig,108,1,176,178,info,held_key_finger_reuse,finger 1 strikes C#5 while note 164 (G#2) is still held for 5.833s
+pig,108,1,177,179,info,held_key_finger_reuse,finger 1 strikes F#4 while note 162 (G#3) is still held for 1.667s
+pig,108,1,180,182,info,held_key_finger_reuse,finger 5 strikes A3 while note 163 (G#1) is still held for 5.000s
+pig,108,1,182,184,info,held_key_finger_reuse,finger 1 strikes A4 while note 164 (G#2) is still held for 5.000s
+pig,108,1,183,185,info,held_key_finger_reuse,finger 1 strikes G#4 while note 162 (G#3) is still held for 0.833s
+pig,108,1,186,188,info,held_key_finger_reuse,finger 5 strikes B3 while note 163 (G#1) is still held for 4.167s
+pig,108,1,188,190,info,held_key_finger_reuse,finger 1 strikes B4 while note 164 (G#2) is still held for 4.167s
+pig,108,1,192,194,info,held_key_finger_reuse,finger 5 strikes G#3 while note 163 (G#1) is still held for 3.333s
+pig,108,1,194,196,info,held_key_finger_reuse,finger 1 strikes G#4 while note 164 (G#2) is still held for 3.333s
+pig,108,1,198,200,info,held_key_finger_reuse,finger 5 strikes A3 while note 163 (G#1) is still held for 2.500s
+pig,108,1,200,202,info,held_key_finger_reuse,finger 1 strikes A4 while note 164 (G#2) is still held for 2.500s
+pig,108,1,204,206,info,held_key_finger_reuse,finger 5 strikes F#3 while note 163 (G#1) is still held for 1.667s
+pig,108,1,206,208,info,held_key_finger_reuse,finger 1 strikes F#4 while note 164 (G#2) is still held for 1.667s
+pig,108,1,210,212,info,held_key_finger_reuse,finger 5 strikes G#3 while note 163 (G#1) is still held for 0.833s
+pig,108,1,212,214,info,held_key_finger_reuse,finger 1 strikes G#4 while note 164 (G#2) is still held for 0.833s
+pig,109,1,86,88,info,held_key_finger_reuse,finger 5 strikes D3 while note 82 (G2) is still held for 0.526s
+pig,109,1,88,90,info,held_key_finger_reuse,finger 1 strikes D4 while note 83 (G3) is still held for 0.547s
+pig,109,1,91,93,info,held_key_finger_reuse,finger 5 strikes D3 while note 82 (G2) is still held for 0.391s
+pig,109,1,93,95,info,held_key_finger_reuse,finger 1 strikes D4 while note 83 (G3) is still held for 0.413s
+pig,109,1,96,98,info,held_key_finger_reuse,finger 5 strikes D3 while note 82 (G2) is still held for 0.252s
+pig,109,1,98,100,info,held_key_finger_reuse,finger 1 strikes D4 while note 83 (G3) is still held for 0.273s
+pig,109,1,108,110,info,held_key_finger_reuse,finger 5 strikes D3 while note 104 (F2) is still held for 0.527s
+pig,109,1,110,112,info,held_key_finger_reuse,finger 1 strikes D4 while note 105 (F3) is still held for 0.549s
+pig,109,1,113,115,info,held_key_finger_reuse,finger 5 strikes D3 while note 104 (F2) is still held for 0.392s
+pig,109,1,115,117,info,held_key_finger_reuse,finger 1 strikes D4 while note 105 (F3) is still held for 0.414s
+pig,109,1,118,120,info,held_key_finger_reuse,finger 5 strikes D3 while note 104 (F2) is still held for 0.252s
+pig,109,1,120,122,info,held_key_finger_reuse,finger 1 strikes D4 while note 105 (F3) is still held for 0.273s
+pig,109,1,130,132,info,held_key_finger_reuse,finger 5 strikes G5 while note 125 (Eb4) is still held for 0.526s
+pig,109,1,133,135,info,held_key_finger_reuse,finger 1 strikes C4 while note 127 (Eb3) is still held for 0.547s
+pig,109,1,136,138,info,held_key_finger_reuse,finger 5 strikes G5 while note 125 (Eb4) is still held for 0.391s
+pig,109,1,139,141,info,held_key_finger_reuse,finger 1 strikes C4 while note 127 (Eb3) is still held for 0.413s
+pig,109,1,142,144,info,held_key_finger_reuse,finger 5 strikes G5 while note 125 (Eb4) is still held for 0.252s
+pig,109,1,145,147,info,held_key_finger_reuse,finger 1 strikes C4 while note 127 (Eb3) is still held for 0.273s
+pig,109,1,158,160,info,held_key_finger_reuse,finger 1 strikes D4 while note 152 (D3) is still held for 0.549s
+pig,109,1,164,166,info,held_key_finger_reuse,finger 1 strikes D4 while note 152 (D3) is still held for 0.414s
+pig,109,1,170,172,info,held_key_finger_reuse,finger 1 strikes D4 while note 152 (D3) is still held for 0.273s
+pig,109,1,193,195,info,held_key_finger_reuse,finger 1 strikes D4 while note 190 (D3) is still held for 0.549s
+pig,109,1,196,198,info,held_key_finger_reuse,finger 5 strikes A2 while note 191 (D1) is still held for 0.549s
+pig,109,1,198,200,info,held_key_finger_reuse,finger 1 strikes A3 while note 192 (D2) is still held for 0.549s
+pig,109,1,199,201,info,held_key_finger_reuse,finger 1 strikes D4 while note 190 (D3) is still held for 0.414s
+pig,109,1,202,204,info,held_key_finger_reuse,finger 5 strikes A2 while note 191 (D1) is still held for 0.414s
+pig,109,1,204,206,info,held_key_finger_reuse,finger 1 strikes A3 while note 192 (D2) is still held for 0.414s
+pig,109,1,205,207,info,held_key_finger_reuse,finger 1 strikes D4 while note 190 (D3) is still held for 0.274s
+pig,109,1,208,210,info,held_key_finger_reuse,finger 5 strikes A2 while note 191 (D1) is still held for 0.274s
+pig,109,1,210,212,info,held_key_finger_reuse,finger 1 strikes A3 while note 192 (D2) is still held for 0.274s
+pig,109,1,233,235,info,held_key_finger_reuse,finger 1 strikes D4 while note 230 (D3) is still held for 0.549s
+pig,109,1,236,238,info,held_key_finger_reuse,finger 5 strikes A2 while note 231 (D1) is still held for 0.549s
+pig,109,1,238,240,info,held_key_finger_reuse,finger 1 strikes A3 while note 232 (D2) is still held for 0.549s
+pig,109,1,239,241,info,held_key_finger_reuse,finger 1 strikes D4 while note 230 (D3) is still held for 0.414s
+pig,109,1,242,244,info,held_key_finger_reuse,finger 5 strikes A2 while note 231 (D1) is still held for 0.414s
+pig,109,1,244,246,info,held_key_finger_reuse,finger 1 strikes A3 while note 232 (D2) is still held for 0.414s
+pig,109,1,245,247,info,held_key_finger_reuse,finger 1 strikes D4 while note 230 (D3) is still held for 0.273s
+pig,109,1,248,250,info,held_key_finger_reuse,finger 5 strikes A2 while note 231 (D1) is still held for 0.273s
+pig,109,1,250,252,info,held_key_finger_reuse,finger 1 strikes A3 while note 232 (D2) is still held for 0.273s
+pig,109,1,297,299,info,held_key_finger_reuse,finger 1 strikes Bb3 while note 294 (C4) is still held for 0.016s
+pig,110,1,306,308,info,held_key_finger_reuse,finger 2 strikes Eb6 while note 303 (B5) is still held for 0.014s
+pig,111,1,103,105,warning,chord_span_large,"LH simultaneous span 16 semitones (C#2, F3)"
+pig,111,1,44,46,info,held_key_finger_reuse,finger 5 strikes F#4 while note 30 (Bb4) is still held for 0.079s
+pig,111,1,94,96,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 86 (F#4) is still held for 0.039s
+pig,111,1,102,104,info,held_key_finger_reuse,finger 5 strikes G#4 while note 94 (Bb4) is still held for 0.039s
+pig,111,1,103,105,info,held_key_finger_reuse,finger 5 strikes C#2 while note 95 (F#2) is still held for 0.039s
+pig,111,1,113,115,info,held_key_finger_reuse,finger 5 strikes A4 while note 102 (G#4) is still held for 0.059s
+pig,111,1,117,119,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 113 (A4) is still held for 0.019s
+pig,111,1,161,163,info,held_key_finger_reuse,finger 5 strikes F#4 while note 147 (Bb4) is still held for 0.079s
+pig,111,1,167,169,info,held_key_finger_reuse,finger 5 strikes F4 while note 161 (F#4) is still held for 0.039s
+pig,111,1,175,177,info,held_key_finger_reuse,finger 5 strikes Eb4 while note 167 (F4) is still held for 0.039s
+pig,111,1,183,185,info,held_key_finger_reuse,finger 5 strikes G#4 while note 175 (Eb4) is still held for 0.017s
+pig,111,1,202,204,info,held_key_finger_reuse,finger 4 strikes F4 while note 199 (Eb4) is still held for 0.019s
+pig,111,1,219,221,info,held_key_finger_reuse,finger 5 strikes F#4 while note 205 (G#4) is still held for 0.079s
+pig,112,1,185,187,error,same_finger_simultaneous,"finger 1 on 2 simultaneous pitches 8 semitones apart (183:F3, 185:C#4)"
+pig,113,1,289,291,info,held_key_finger_reuse,finger 1 strikes G4 while note 280 (G5) is still held for 1.165s
+pig,113,1,290,292,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 281 (Bb5) is still held for 1.044s
+pig,113,1,291,293,info,held_key_finger_reuse,finger 3 strikes C#5 while note 282 (C#6) is still held for 0.916s
+pig,113,1,292,294,info,held_key_finger_reuse,finger 5 strikes E5 while note 283 (G6) is still held for 0.788s
+pig,113,1,293,295,info,held_key_finger_reuse,finger 3 strikes C#5 while note 282 (C#6) is still held for 0.666s
+pig,113,1,294,296,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 281 (Bb5) is still held for 0.544s
+pig,113,1,295,297,info,held_key_finger_reuse,finger 1 strikes G4 while note 280 (G5) is still held for 0.418s
+pig,113,1,457,459,info,held_key_finger_reuse,finger 1 strikes D4 while note 451 (C4) is still held for 0.128s
+pig,113,1,468,470,info,held_key_finger_reuse,finger 1 strikes G4 while note 459 (G5) is still held for 1.249s
+pig,113,1,469,471,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 460 (Bb5) is still held for 1.127s
+pig,113,1,470,472,info,held_key_finger_reuse,finger 3 strikes C#5 while note 461 (C#6) is still held for 0.999s
+pig,113,1,471,473,info,held_key_finger_reuse,finger 5 strikes E5 while note 462 (G6) is still held for 0.871s
+pig,113,1,472,474,info,held_key_finger_reuse,finger 3 strikes C#5 while note 461 (C#6) is still held for 0.750s
+pig,113,1,473,475,info,held_key_finger_reuse,finger 2 strikes Bb4 while note 460 (Bb5) is still held for 0.628s
+pig,113,1,474,476,info,held_key_finger_reuse,finger 1 strikes G4 while note 459 (G5) is still held for 0.501s
+pig,113,2,122,124,info,hand_assignment_differs,17 notes assigned to the other hand than in annotation 1
+pig,113,2,62,64,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (61:F4, 62:G4)"
+pig,113,2,68,70,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (67:F4, 68:G4)"
+pig,114,1,157,159,info,held_key_finger_reuse,finger 1 strikes B4 while note 151 (C5) is still held for 0.028s
+pig,114,1,159,161,info,held_key_finger_reuse,finger 2 strikes D5 while note 152 (Eb5) is still held for 0.028s
+pig,114,1,162,164,info,held_key_finger_reuse,finger 4 strikes D4 while note 154 (C4) is still held for 0.028s
+pig,115,1,7,9,warning,nonpositive_duration,offset 0.999998 <= onset 0.999998
+pig,115,1,20,22,warning,nonpositive_duration,offset 2.5 <= onset 2.5
+pig,115,1,35,37,warning,nonpositive_duration,offset 3.99999 <= onset 3.99999
+pig,115,1,181,183,warning,nonpositive_duration,offset 22.0 <= onset 22.0
+pig,115,1,194,196,warning,nonpositive_duration,offset 23.5 <= onset 23.5
+pig,115,1,209,211,warning,nonpositive_duration,offset 25.0 <= onset 25.0
+pig,115,2,7,9,warning,nonpositive_duration,offset 0.999998 <= onset 0.999998
+pig,115,2,20,22,warning,nonpositive_duration,offset 2.5 <= onset 2.5
+pig,115,2,35,37,warning,nonpositive_duration,offset 3.99999 <= onset 3.99999
+pig,115,2,181,183,warning,nonpositive_duration,offset 22.0 <= onset 22.0
+pig,115,2,194,196,warning,nonpositive_duration,offset 23.5 <= onset 23.5
+pig,115,2,209,211,warning,nonpositive_duration,offset 25.0 <= onset 25.0
+pig,116,1,17,19,warning,chord_span_large,"RH simultaneous span 15 semitones (F#4, A5)"
+pig,116,1,36,38,info,held_key_finger_reuse,finger 1 strikes E4 while note 29 (F4) is still held for 0.014s
+pig,116,1,117,119,info,held_key_finger_reuse,finger 1 strikes G#3 while note 112 (A3) is still held for 0.019s
+pig,116,1,75,77,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (74:A4, 75:B4)"
+pig,121,2,46,48,info,held_key_finger_reuse,finger 5 strikes F3 while note 41 (Eb3) is still held for 0.019s
+pig,121,2,65,67,info,held_key_finger_reuse,finger 5 strikes C4 while note 60 (Bb3) is still held for 0.019s
+pig,121,2,101,103,info,held_key_finger_reuse,finger 5 strikes G#4 while note 94 (G4) is still held for 0.020s
+pig,122,2,11,13,info,held_key_finger_reuse,finger 5 strikes C3 while note 4 (B2) is still held for 0.017s
+pig,122,2,24,26,info,held_key_finger_reuse,finger 5 strikes G2 while note 18 (F2) is still held for 0.017s
+pig,123,1,101,103,warning,pitch_range_hand,LH note D6 (86) above C6
+pig,123,1,123,125,warning,pitch_range_hand,LH note E6 (88) above C6
+pig,123,1,126,128,warning,pitch_range_hand,LH note D6 (86) above C6
+pig,123,2,101,103,warning,pitch_range_hand,LH note D6 (86) above C6
+pig,123,2,123,125,warning,pitch_range_hand,LH note E6 (88) above C6
+pig,123,2,126,128,warning,pitch_range_hand,LH note D6 (86) above C6
+pig,124,1,63,65,info,held_key_finger_reuse,finger 1 strikes F#4 while note 59 (G#4) is still held for 0.019s
+pig,124,1,96,98,info,held_key_finger_reuse,finger 1 strikes F#5 while note 92 (G#5) is still held for 0.019s
+pig,125,1,19,21,info,held_key_finger_reuse,finger 1 strikes C#4 while note 16 (Eb4) is still held for 0.014s
+pig,125,2,19,21,info,held_key_finger_reuse,finger 1 strikes C#4 while note 16 (Eb4) is still held for 0.014s
+pig,126,1,20,22,warning,nonpositive_duration,offset 2.25 <= onset 2.25
+pig,126,1,87,89,warning,nonpositive_duration,offset 9.74998 <= onset 9.74998
+pig,126,2,20,22,warning,nonpositive_duration,offset 2.25 <= onset 2.25
+pig,126,2,87,89,warning,nonpositive_duration,offset 9.74998 <= onset 9.74998
+pig,127,1,48,50,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 39 (F4) is still held for 0.125s
+pig,127,1,68,70,info,held_key_finger_reuse,finger 5 strikes G5 while note 66 (C6) is still held for 0.012s
+pig,127,1,138,140,info,held_key_finger_reuse,finger 1 strikes B3 while note 133 (C4) is still held for 0.019s
+pig,127,2,31,33,info,held_key_finger_reuse,finger 1 strikes A4 while note 29 (F#4) is still held for 0.125s
+pig,127,2,48,50,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 39 (F4) is still held for 0.125s
+pig,127,2,68,70,info,held_key_finger_reuse,finger 5 strikes G5 while note 66 (C6) is still held for 0.012s
+pig,127,2,138,140,info,held_key_finger_reuse,finger 1 strikes B3 while note 133 (C4) is still held for 0.019s
+pig,127,2,162,164,info,held_key_finger_reuse,finger 3 strikes D5 while note 160 (Eb5) is still held for 0.014s
+pig,127,2,205,207,info,held_key_finger_reuse,finger 3 strikes G5 while note 203 (G#5) is still held for 0.014s
+pig,128,1,85,87,info,held_key_finger_reuse,finger 3 strikes G#4 while note 79 (G4) is still held for 0.020s
+pig,128,2,69,71,info,held_key_finger_reuse,finger 5 strikes C#5 while note 64 (Eb5) is still held for 0.019s
+pig,128,2,74,76,info,held_key_finger_reuse,finger 5 strikes B4 while note 69 (C#5) is still held for 0.019s
+pig,128,2,80,82,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 74 (B4) is still held for 0.019s
+pig,130,1,71,73,info,held_key_finger_reuse,finger 5 strikes F5 while note 70 (G5) is still held for 0.019s
+pig,130,1,74,76,info,held_key_finger_reuse,finger 1 strikes B3 while note 63 (Bb3) is still held for 0.039s
+pig,130,1,80,82,info,held_key_finger_reuse,finger 1 strikes C4 while note 74 (B3) is still held for 0.017s
+pig,130,2,71,73,info,held_key_finger_reuse,finger 5 strikes F5 while note 70 (G5) is still held for 0.019s
+pig,130,2,74,76,info,held_key_finger_reuse,finger 1 strikes B3 while note 63 (Bb3) is still held for 0.039s
+pig,130,2,80,82,info,held_key_finger_reuse,finger 1 strikes C4 while note 74 (B3) is still held for 0.017s
+pig,130,2,90,92,info,held_key_finger_reuse,finger 5 strikes Bb2 while note 85 (A2) is still held for 0.017s
+pig,131,1,175,177,warning,chord_span_large,"LH simultaneous span 16 semitones (C#4, A2, E3)"
+pig,131,1,267,269,warning,chord_span_large,"LH simultaneous span 15 semitones (G#2, B3)"
+pig,131,1,280,282,warning,chord_span_large,"LH simultaneous span 16 semitones (C#3, G#3, B3, F4)"
+pig,131,1,47,49,info,held_key_finger_reuse,finger 1 strikes G#3 while note 44 (A3) is still held for 0.046s
+pig,131,1,143,145,info,held_key_finger_reuse,finger 3 strikes F#4 while note 140 (E4) is still held for 0.022s
+pig,131,1,174,176,info,held_key_finger_reuse,finger 1 strikes E4 while note 168 (D4) is still held for 0.042s
+pig,131,1,181,183,info,held_key_finger_reuse,finger 2 strikes A3 while note 177 (E3) is still held for 0.206s
+pig,131,1,187,189,info,held_key_finger_reuse,finger 1 strikes G#4 while note 182 (F#4) is still held for 0.022s
+pig,131,1,190,192,info,held_key_finger_reuse,finger 1 strikes A4 while note 187 (G#4) is still held for 0.022s
+pig,131,1,194,196,info,held_key_finger_reuse,finger 1 strikes G#4 while note 190 (A4) is still held for 0.022s
+pig,131,1,197,199,info,held_key_finger_reuse,finger 1 strikes B4 while note 194 (G#4) is still held for 0.022s
+pig,131,1,198,200,info,held_key_finger_reuse,finger 2 strikes F#5 while note 195 (C#5) is still held for 0.022s
+pig,131,1,202,204,info,held_key_finger_reuse,finger 1 strikes A4 while note 197 (B4) is still held for 0.022s
+pig,131,1,209,211,info,held_key_finger_reuse,finger 1 strikes F#4 while note 205 (G#4) is still held for 0.022s
+pig,131,1,212,214,info,held_key_finger_reuse,finger 1 strikes E4 while note 209 (F#4) is still held for 0.022s
+pig,131,1,213,215,info,held_key_finger_reuse,finger 2 strikes G#4 while note 210 (A4) is still held for 0.022s
+pig,131,1,217,219,info,held_key_finger_reuse,finger 1 strikes F#4 while note 212 (E4) is still held for 0.022s
+pig,131,1,219,221,info,held_key_finger_reuse,finger 1 strikes E4 while note 217 (F#4) is still held for 0.022s
+pig,131,1,224,226,info,held_key_finger_reuse,finger 1 strikes B3 while note 219 (E4) is still held for 0.022s
+pig,131,1,226,228,info,held_key_finger_reuse,finger 1 strikes C#4 while note 224 (B3) is still held for 0.022s
+pig,131,1,231,233,info,held_key_finger_reuse,finger 1 strikes E4 while note 226 (C#4) is still held for 0.022s
+pig,131,1,235,237,info,held_key_finger_reuse,finger 1 strikes F#4 while note 231 (E4) is still held for 0.022s
+pig,131,1,243,245,info,held_key_finger_reuse,finger 1 strikes A4 while note 240 (G#4) is still held for 0.022s
+pig,131,1,247,249,info,held_key_finger_reuse,finger 1 strikes G#4 while note 243 (A4) is still held for 0.022s
+pig,131,1,251,253,info,held_key_finger_reuse,finger 1 strikes A4 while note 247 (G#4) is still held for 0.022s
+pig,131,1,256,258,info,held_key_finger_reuse,finger 1 strikes G#4 while note 251 (A4) is still held for 0.046s
+pig,131,1,257,259,info,held_key_finger_reuse,finger 3 strikes E5 while note 252 (F#5) is still held for 0.046s
+pig,131,1,260,262,info,held_key_finger_reuse,finger 1 strikes F#4 while note 256 (G#4) is still held for 0.022s
+pig,131,1,269,271,info,held_key_finger_reuse,finger 1 strikes E5 while note 264 (F#4) is still held for 0.046s
+pig,131,1,274,276,info,held_key_finger_reuse,finger 1 strikes D5 while note 269 (E5) is still held for 0.020s
+pig,131,1,277,279,info,held_key_finger_reuse,finger 1 strikes C#5 while note 274 (D5) is still held for 0.020s
+pig,131,1,278,280,info,held_key_finger_reuse,finger 2 strikes F5 while note 275 (F#5) is still held for 0.020s
+pig,131,1,223,225,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (222:D3, 223:E3)"
+pig,131,2,267,269,warning,chord_span_large,"LH simultaneous span 15 semitones (G#2, B3)"
+pig,131,2,280,282,warning,chord_span_large,"LH simultaneous span 16 semitones (C#3, G#3, B3, F4)"
+pig,131,2,121,123,info,hand_assignment_differs,3 notes assigned to the other hand than in annotation 1
+pig,131,2,124,126,info,held_key_finger_reuse,finger 3 strikes E4 while note 119 (F#4) is still held for 0.046s
+pig,131,2,143,145,info,held_key_finger_reuse,finger 3 strikes F#4 while note 140 (E4) is still held for 0.022s
+pig,131,2,158,160,info,held_key_finger_reuse,finger 3 strikes E4 while note 156 (F#4) is still held for 0.022s
+pig,131,2,175,177,info,held_key_finger_reuse,finger 1 strikes C#4 while note 168 (D4) is still held for 0.042s
+pig,131,2,180,182,info,held_key_finger_reuse,finger 1 strikes C#4 while note 177 (E3) is still held for 0.401s
+pig,131,2,187,189,info,held_key_finger_reuse,finger 1 strikes G#4 while note 182 (F#4) is still held for 0.022s
+pig,131,2,190,192,info,held_key_finger_reuse,finger 1 strikes A4 while note 187 (G#4) is still held for 0.022s
+pig,131,2,194,196,info,held_key_finger_reuse,finger 1 strikes G#4 while note 190 (A4) is still held for 0.022s
+pig,131,2,197,199,info,held_key_finger_reuse,finger 1 strikes B4 while note 194 (G#4) is still held for 0.022s
+pig,131,2,202,204,info,held_key_finger_reuse,finger 1 strikes A4 while note 197 (B4) is still held for 0.022s
+pig,131,2,209,211,info,held_key_finger_reuse,finger 1 strikes F#4 while note 205 (G#4) is still held for 0.022s
+pig,131,2,212,214,info,held_key_finger_reuse,finger 1 strikes E4 while note 209 (F#4) is still held for 0.022s
+pig,131,2,213,215,info,held_key_finger_reuse,finger 2 strikes G#4 while note 210 (A4) is still held for 0.022s
+pig,131,2,217,219,info,held_key_finger_reuse,finger 1 strikes F#4 while note 212 (E4) is still held for 0.022s
+pig,131,2,219,221,info,held_key_finger_reuse,finger 1 strikes E4 while note 217 (F#4) is still held for 0.022s
+pig,131,2,224,226,info,held_key_finger_reuse,finger 1 strikes B3 while note 219 (E4) is still held for 0.022s
+pig,131,2,226,228,info,held_key_finger_reuse,finger 1 strikes C#4 while note 224 (B3) is still held for 0.022s
+pig,131,2,231,233,info,held_key_finger_reuse,finger 1 strikes E4 while note 226 (C#4) is still held for 0.022s
+pig,131,2,235,237,info,held_key_finger_reuse,finger 1 strikes F#4 while note 231 (E4) is still held for 0.022s
+pig,131,2,243,245,info,held_key_finger_reuse,finger 1 strikes A4 while note 240 (G#4) is still held for 0.022s
+pig,131,2,247,249,info,held_key_finger_reuse,finger 1 strikes G#4 while note 243 (A4) is still held for 0.022s
+pig,131,2,251,253,info,held_key_finger_reuse,finger 1 strikes A4 while note 247 (G#4) is still held for 0.022s
+pig,131,2,256,258,info,held_key_finger_reuse,finger 1 strikes G#4 while note 251 (A4) is still held for 0.046s
+pig,131,2,260,262,info,held_key_finger_reuse,finger 1 strikes F#4 while note 256 (G#4) is still held for 0.022s
+pig,131,2,261,263,info,held_key_finger_reuse,finger 2 strikes C#5 while note 257 (E5) is still held for 0.022s
+pig,131,2,265,267,info,held_key_finger_reuse,finger 2 strikes D5 while note 261 (C#5) is still held for 0.022s
+pig,131,2,269,271,info,held_key_finger_reuse,finger 1 strikes E5 while note 264 (F#4) is still held for 0.046s
+pig,131,2,270,272,info,held_key_finger_reuse,finger 2 strikes F#5 while note 265 (D5) is still held for 0.046s
+pig,131,2,274,276,info,held_key_finger_reuse,finger 1 strikes D5 while note 269 (E5) is still held for 0.020s
+pig,131,2,277,279,info,held_key_finger_reuse,finger 1 strikes C#5 while note 274 (D5) is still held for 0.020s
+pig,131,2,278,280,info,held_key_finger_reuse,finger 2 strikes F5 while note 275 (F#5) is still held for 0.020s
+pig,131,2,164,166,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (163:D4, 164:E4)"
+pig,131,2,169,171,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (168:D4, 169:E4)"
+pig,131,2,223,225,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (222:D3, 223:E3)"
+pig,133,1,44,46,info,held_key_finger_reuse,finger 2 strikes G#3 while note 42 (A3) is still held for 0.033s
+pig,133,1,50,52,info,held_key_finger_reuse,finger 2 strikes G#3 while note 47 (F#3) is still held for 0.033s
+pig,133,1,115,117,info,held_key_finger_reuse,finger 1 strikes A3 while note 113 (C#3) is still held for 0.033s
+pig,133,1,132,134,info,held_key_finger_reuse,finger 2 strikes G#3 while note 130 (A3) is still held for 0.033s
+pig,133,1,138,140,info,held_key_finger_reuse,finger 2 strikes G#3 while note 135 (F#3) is still held for 0.033s
+pig,134,1,290,292,warning,chord_span_large,"LH simultaneous span 15 semitones (C#2, E3)"
+pig,134,1,5,7,info,held_key_finger_reuse,finger 5 strikes B2 while note 0 (E2) is still held for 0.495s
+pig,134,1,14,16,info,held_key_finger_reuse,finger 5 strikes B2 while note 9 (G#2) is still held for 0.494s
+pig,134,1,23,25,info,held_key_finger_reuse,finger 5 strikes B2 while note 19 (F#2) is still held for 0.495s
+pig,135,1,141,143,warning,chord_span_large,"LH simultaneous span 16 semitones (D4, Bb2, Bb3)"
+pig,135,1,172,174,warning,chord_span_large,"LH simultaneous span 15 semitones (G2, D3, Bb3)"
+pig,135,1,196,198,warning,chord_span_large,"LH simultaneous span 16 semitones (D4, Bb2, G#3)"
+pig,135,1,227,229,warning,chord_span_large,"LH simultaneous span 15 semitones (G2, D3, Bb3)"
+pig,135,1,105,107,warning,nonpositive_duration,offset 11.75 <= onset 11.75
+pig,135,1,111,113,warning,nonpositive_duration,offset 12.375 <= onset 12.375
+pig,135,1,117,119,warning,nonpositive_duration,offset 13.125 <= onset 13.125
+pig,135,1,173,175,warning,nonpositive_duration,offset 18.75 <= onset 18.75
+pig,135,1,228,230,warning,nonpositive_duration,offset 24.75 <= onset 24.75
+pig,135,1,39,41,info,held_key_finger_reuse,finger 5 strikes G3 while note 32 (Bb2) is still held for 0.250s
+pig,135,1,49,51,info,held_key_finger_reuse,finger 5 strikes G3 while note 42 (Bb2) is still held for 0.250s
+pig,136,1,244,246,info,held_key_finger_reuse,finger 1 strikes G#4 while note 234 (Bb4) is still held for 0.039s
+pig,136,1,265,267,info,held_key_finger_reuse,finger 1 strikes Bb4 while note 255 (C5) is still held for 0.039s
+pig,137,1,156,158,info,held_key_finger_reuse,finger 2 strikes G4 while note 153 (Eb4) is still held for 0.250s
+pig,139,1,313,315,warning,pitch_range_hand,LH note C#6 (85) above C6
+pig,139,1,6,8,info,held_key_finger_reuse,finger 5 strikes C#6 while note 0 (D6) is still held for 0.059s
+pig,139,1,11,13,info,held_key_finger_reuse,finger 5 strikes G5 while note 6 (C#6) is still held for 0.059s
+pig,139,1,16,18,info,held_key_finger_reuse,finger 5 strikes G#5 while note 11 (G5) is still held for 0.059s
+pig,139,1,49,51,info,held_key_finger_reuse,finger 5 strikes C#6 while note 43 (D6) is still held for 0.059s
+pig,139,1,54,56,info,held_key_finger_reuse,finger 5 strikes G5 while note 49 (C#6) is still held for 0.059s
+pig,139,1,59,61,info,held_key_finger_reuse,finger 5 strikes G#5 while note 54 (G5) is still held for 0.059s
+pig,139,1,91,93,info,held_key_finger_reuse,finger 5 strikes C#6 while note 86 (D6) is still held for 0.059s
+pig,139,1,94,96,info,held_key_finger_reuse,finger 5 strikes C#4 while note 87 (C#3) is still held for 1.224s
+pig,139,1,98,100,info,held_key_finger_reuse,finger 5 strikes E6 while note 91 (C#6) is still held for 0.059s
+pig,139,1,117,119,info,held_key_finger_reuse,finger 5 strikes C#6 while note 112 (D6) is still held for 0.059s
+pig,139,1,118,120,info,held_key_finger_reuse,finger 5 strikes C#4 while note 113 (C#3) is still held for 1.461s
+pig,139,1,124,126,info,held_key_finger_reuse,finger 5 strikes D6 while note 117 (C#6) is still held for 0.059s
+pig,139,1,131,133,info,held_key_finger_reuse,finger 5 strikes E6 while note 124 (D6) is still held for 0.059s
+pig,139,1,144,146,info,held_key_finger_reuse,finger 5 strikes F#6 while note 138 (G6) is still held for 0.059s
+pig,139,1,149,151,info,held_key_finger_reuse,finger 5 strikes C6 while note 144 (F#6) is still held for 0.059s
+pig,139,1,154,156,info,held_key_finger_reuse,finger 5 strikes C#6 while note 149 (C6) is still held for 0.059s
+pig,139,1,159,161,info,held_key_finger_reuse,finger 5 strikes E6 while note 154 (C#6) is still held for 0.059s
+pig,139,1,208,210,info,held_key_finger_reuse,finger 3 strikes Bb4 while note 200 (A4) is still held for 0.059s
+pig,139,1,219,221,info,held_key_finger_reuse,finger 5 strikes F#4 while note 214 (F#3) is still held for 1.461s
+pig,139,1,232,234,info,held_key_finger_reuse,finger 5 strikes A6 while note 225 (G6) is still held for 0.059s
+pig,139,1,256,258,info,held_key_finger_reuse,finger 5 strikes E6 while note 251 (Eb6) is still held for 0.059s
+pig,139,1,263,265,info,held_key_finger_reuse,finger 5 strikes G6 while note 256 (E6) is still held for 0.059s
+pig,139,1,280,282,info,held_key_finger_reuse,finger 1 strikes D6 while note 274 (B5) is still held for 0.241s
+pig,139,1,304,306,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 290 (G3) is still held for 0.038s
+pig,139,1,316,318,info,held_key_finger_reuse,finger 5 strikes G4 while note 304 (Bb4) is still held for 0.038s
+pig,139,1,321,323,info,held_key_finger_reuse,finger 5 strikes Bb6 while note 315 (C7) is still held for 0.059s
+pig,139,1,327,329,info,held_key_finger_reuse,finger 5 strikes Bb4 while note 316 (G4) is still held for 0.038s
+pig,141,1,175,177,warning,chord_span_large,"LH simultaneous span 16 semitones (C4, G4, Bb4, E5)"
+pig,141,1,186,188,warning,chord_span_large,"LH simultaneous span 16 semitones (C4, G4, Bb4, E5)"
+pig,141,1,234,236,info,held_key_finger_reuse,finger 2 strikes F4 while note 231 (G#4) is still held for 0.188s
+pig,141,1,235,237,info,held_key_finger_reuse,finger 3 strikes A4 while note 232 (B4) is still held for 0.125s
+pig,142,1,21,23,info,held_key_finger_reuse,finger 5 strikes G1 while note 18 (G2) is still held for 0.600s
+pig,142,1,106,108,info,held_key_finger_reuse,finger 2 strikes B3 while note 105 (G3) is still held for 0.600s
+pig,142,1,247,249,info,held_key_finger_reuse,finger 1 strikes F3 while note 243 (D3) is still held for 0.600s
+pig,142,2,23,25,info,hand_assignment_differs,7 notes assigned to the other hand than in annotation 1
+pig,142,2,21,23,info,held_key_finger_reuse,finger 5 strikes G1 while note 18 (G2) is still held for 0.600s
+pig,142,2,128,130,info,held_key_finger_reuse,finger 1 strikes E4 while note 124 (D4) is still held for 1.200s
+pig,142,2,130,132,info,held_key_finger_reuse,finger 1 strikes E4 while note 124 (D4) is still held for 0.600s
+pig,142,2,247,249,info,held_key_finger_reuse,finger 1 strikes F3 while note 243 (D3) is still held for 0.600s
+pig,142,2,253,255,info,held_key_finger_reuse,finger 1 strikes D4 while note 249 (C3) is still held for 1.800s
+pig,144,1,124,126,warning,pitch_range_hand,LH note C#6 (85) above C6
+pig,144,1,47,49,info,held_key_finger_reuse,finger 3 strikes C#4 while note 45 (F#4) is still held for 0.250s
+pig,144,1,90,92,info,held_key_finger_reuse,finger 1 strikes D4 while note 82 (A4) is still held for 0.750s
+pig,144,1,93,95,info,held_key_finger_reuse,finger 1 strikes E4 while note 82 (A4) is still held for 0.250s
+pig,144,1,99,101,info,held_key_finger_reuse,finger 5 strikes E3 while note 95 (C#4) is still held for 0.500s
+pig,144,1,112,114,info,held_key_finger_reuse,finger 1 strikes E4 while note 107 (B4) is still held for 0.250s
+pig,144,1,118,120,info,held_key_finger_reuse,finger 5 strikes E3 while note 114 (C#4) is still held for 0.500s
+pig,144,1,83,85,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (82:A4, 83:B4)"
+pig,147,1,54,56,info,held_key_finger_reuse,finger 2 strikes C#4 while note 49 (B3) is still held for 0.019s
+pig,147,1,111,113,info,held_key_finger_reuse,finger 2 strikes A3 while note 106 (G3) is still held for 0.019s
+pig,147,1,116,118,info,held_key_finger_reuse,finger 3 strikes B3 while note 108 (E3) is still held for 0.488s
+pig,147,1,121,123,info,held_key_finger_reuse,finger 3 strikes A3 while note 116 (B3) is still held for 0.019s
+pig,147,1,138,140,info,held_key_finger_reuse,finger 4 strikes G3 while note 131 (A3) is still held for 0.019s
+pig,147,1,139,141,info,held_key_finger_reuse,finger 2 strikes C4 while note 132 (D4) is still held for 0.019s
+pig,147,1,144,146,info,held_key_finger_reuse,finger 2 strikes B3 while note 139 (C4) is still held for 0.019s
+pig,147,1,148,150,info,held_key_finger_reuse,finger 5 strikes E3 while note 143 (F#3) is still held for 0.019s
+pig,149,1,204,206,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (203:G#3, 204:Bb3)"
+pig,149,1,245,247,info,thumb_two_keys,"finger 1 on 2 simultaneous pitches 2 semitones apart (244:C#4, 245:Eb4)"
+pig,150,1,102,104,error,chord_span_impossible,"RH simultaneous span 17 semitones (G3, E4, C5)"
+pig,150,1,25,27,warning,finger_irregular,'-2_1': substitution changes hand sign
+pig,150,1,42,44,warning,finger_irregular,'-1_1': substitution changes hand sign

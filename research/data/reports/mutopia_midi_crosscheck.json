@@ -1,0 +1,2282 @@
+{
+ "parts": 310,
+ "with_midi": 308,
+ "midi_ok": 293,
+ "midi_mismatch": 15,
+ "midi_version_skew": 2,
+ "website_version_checks": {
+  "1958": [
+   1.0,
+   0.8644
+  ],
+  "202": [
+   1.0,
+   1.0
+  ],
+  "571": [
+   0.9835,
+   0.9971,
+   0.9955,
+   1.0,
+   0.9766,
+   0.8862,
+   0.9764,
+   0.9835,
+   0.9971,
+   1.0,
+   0.9955,
+   1.0,
+   0.9982,
+   0.9766,
+   0.8862,
+   0.9764,
+   1.0,
+   0.9982
+  ],
+  "69": [
+   1.0,
+   1.0
+  ],
+  "907": [
+   1.0,
+   1.0,
+   0.7838,
+   0.875,
+   0.9032,
+   0.7273,
+   0.8158,
+   0.7955,
+   0.6852,
+   0.9375,
+   1.0,
+   0.7368,
+   0.7368,
+   0.7447,
+   0.6204,
+   0.5484,
+   0.6207,
+   0.4565,
+   0.6701,
+   1.0,
+   1.0,
+   0.9286,
+   1.0,
+   0.8333,
+   0.9333,
+   0.9429,
+   0.9048,
+   0.9565,
+   0.8148,
+   0.8636,
+   0.7054,
+   1.0,
+   1.0,
+   0.939,
+   1.0,
+   0.9888,
+   1.0,
+   0.9235,
+   1.0,
+   0.9042,
+   0.9586,
+   0.9896,
+   1.0,
+   0.8375,
+   0.9769,
+   0.9969,
+   0.9959,
+   1.0,
+   1.0,
+   0.939,
+   1.0,
+   0.9888,
+   1.0,
+   0.9235,
+   1.0,
+   0.9042,
+   0.9586,
+   0.9896,
+   1.0,
+   0.8375,
+   0.9769,
+   0.9969,
+   0.9959
+  ]
+ },
+ "no_midi": 0,
+ "recall_threshold": 0.95,
+ "parts_ok_after_midi_check": 286,
+ "fingered_notes_ok_after_midi_check": 36183,
+ "results": [
+  {
+   "piece_id": "MP1731_s00_p0",
+   "mutopia_id": "1731",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1935f6_s00_p0",
+   "mutopia_id": "1935",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0069_s00_p0",
+   "mutopia_id": "69",
+   "midi_recall_rh": 0.1544,
+   "midi_recall_lh": 0.9653,
+   "midi_status": "version_skew"
+  },
+  {
+   "piece_id": "MP0493_s00_p0",
+   "mutopia_id": "493",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0295_s00_p0",
+   "mutopia_id": "295",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2070_s00_p0",
+   "mutopia_id": "2070",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0276f0_s00_p0",
+   "mutopia_id": "276",
+   "midi_recall_rh": 0.9975,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0276f2_s00_p0",
+   "mutopia_id": "276",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0276f4_s00_p0",
+   "mutopia_id": "276",
+   "midi_recall_rh": 0.9904,
+   "midi_recall_lh": 0.9921,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0045_s00_p0",
+   "mutopia_id": "45",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0202_s00_p0",
+   "mutopia_id": "202",
+   "midi_recall_rh": 0.7083,
+   "midi_recall_lh": 1.0,
+   "midi_status": "version_skew"
+  },
+  {
+   "piece_id": "MP0203_s00_p0",
+   "mutopia_id": "203",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0218_s00_p0",
+   "mutopia_id": "218",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0219_s00_p0",
+   "mutopia_id": "219",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0214_s00_p0",
+   "mutopia_id": "214",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0215_s00_p0",
+   "mutopia_id": "215",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0216_s00_p0",
+   "mutopia_id": "216",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0217_s00_p0",
+   "mutopia_id": "217",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0220_s00_p0",
+   "mutopia_id": "220",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0221_s00_p0",
+   "mutopia_id": "221",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0222_s00_p0",
+   "mutopia_id": "222",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0223_s00_p0",
+   "mutopia_id": "223",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0224_s00_p0",
+   "mutopia_id": "224",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0225_s00_p0",
+   "mutopia_id": "225",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0227_s00_p0",
+   "mutopia_id": "227",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0228_s00_p0",
+   "mutopia_id": "228",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0229_s00_p0",
+   "mutopia_id": "229",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0230_s00_p0",
+   "mutopia_id": "230",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0972_s00_p0",
+   "mutopia_id": "972",
+   "midi_recall_rh": 0.9994,
+   "midi_recall_lh": 0.9967,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0508_s00_p0",
+   "mutopia_id": "508",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0914f0_s00_p0",
+   "mutopia_id": "914",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9942,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0926f0_s00_p0",
+   "mutopia_id": "926",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0489_s00_p0",
+   "mutopia_id": "489",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0757f1_s00_p0",
+   "mutopia_id": "757",
+   "midi_recall_rh": 0.9988,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0486_s00_p0",
+   "mutopia_id": "486",
+   "midi_recall_rh": 0.989,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0470_s00_p0",
+   "mutopia_id": "470",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1682_s00_p0",
+   "mutopia_id": "1682",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.995,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1727f0_s00_p0",
+   "mutopia_id": "1727",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1776_s00_p0",
+   "mutopia_id": "1776",
+   "midi_recall_rh": 0.9819,
+   "midi_recall_lh": 0.9751,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1687_s00_p0",
+   "mutopia_id": "1687",
+   "midi_recall_rh": 0.9941,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0511_s00_p0",
+   "mutopia_id": "511",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1590_s00_p0",
+   "mutopia_id": "1590",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9987,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1955_s00_p0",
+   "mutopia_id": "1955",
+   "midi_recall_rh": 0.9958,
+   "midi_recall_lh": 0.9975,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s00_p0",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s01_p1",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s02_p2",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s03_p3",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s04_p4",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s05_p5",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s06_p6",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s07_p7",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s08_p8",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s09_p9",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s10_p10",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s11_p11",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s12_p12",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s13_p13",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s14_p14",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s15_p15",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s16_p16",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s17_p17",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s18_p18",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s19_p19",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s20_p20",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s21_p21",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s22_p22",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s23_p23",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s24_p24",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s25_p25",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s26_p26",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s27_p27",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s28_p28",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s29_p29",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s30_p30",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s31_p31",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s32_p32",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s33_p33",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s34_p34",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s35_p35",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s36_p36",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s37_p37",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s38_p38",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s39_p39",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s40_p40",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s41_p41",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s42_p42",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s43_p43",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s44_p44",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s45_p45",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s46_p46",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s47_p47",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s48_p48",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s49_p49",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s50_p50",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s51_p51",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s52_p52",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s53_p53",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s54_p54",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s55_p55",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s56_p56",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s57_p57",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s58_p58",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s59_p59",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s60_p60",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s61_p61",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s62_p62",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s63_p63",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s64_p64",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s65_p65",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s66_p66",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 0.9798,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s67_p67",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 0.9851,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s68_p68",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s69_p69",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s70_p70",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s71_p71",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s72_p72",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s73_p73",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s74_p74",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s75_p75",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 0.9762,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1938f1_s76_p76",
+   "mutopia_id": "1938",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0907f1_s07_p0",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9375,
+   "midi_recall_lh": null,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s08_p1",
+   "mutopia_id": "907",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0907f1_s09_p2",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.7368,
+   "midi_recall_lh": null,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s10_p3",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.7368,
+   "midi_recall_lh": null,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s11_p4",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.7447,
+   "midi_recall_lh": null,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s18_p5",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9286,
+   "midi_recall_lh": 1.0,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s19_p6",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.8333,
+   "midi_recall_lh": 0.9333,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s20_p7",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9429,
+   "midi_recall_lh": 0.9048,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s21_p8",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9565,
+   "midi_recall_lh": 0.8148,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s22_p9",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.8636,
+   "midi_recall_lh": null,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s23_p10",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.7054,
+   "midi_recall_lh": null,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s24_p11",
+   "mutopia_id": "907",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0907f1_s25_p12",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.939,
+   "midi_recall_lh": 1.0,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s26_p13",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9888,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0907f1_s27_p14",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9235,
+   "midi_recall_lh": 1.0,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s28_p15",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9042,
+   "midi_recall_lh": 0.9586,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP0907f1_s29_p16",
+   "mutopia_id": "907",
+   "midi_recall_rh": 0.9896,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2146_s00_p0",
+   "mutopia_id": "2146",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2177_s00_p0",
+   "mutopia_id": "2177",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9971,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2147_s00_p0",
+   "mutopia_id": "2147",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9956,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2148_s00_p0",
+   "mutopia_id": "2148",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2149_s00_p0",
+   "mutopia_id": "2149",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9968,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2150_s00_p0",
+   "mutopia_id": "2150",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.996,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2151_s00_p0",
+   "mutopia_id": "2151",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9959,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2152_s00_p0",
+   "mutopia_id": "2152",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2153_s00_p0",
+   "mutopia_id": "2153",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9943,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2154_s00_p0",
+   "mutopia_id": "2154",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9959,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2060_s00_p0",
+   "mutopia_id": "2060",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2061_s00_p0",
+   "mutopia_id": "2061",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2062_s00_p0",
+   "mutopia_id": "2062",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2063_s00_p0",
+   "mutopia_id": "2063",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2066_s00_p0",
+   "mutopia_id": "2066",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2067_s00_p0",
+   "mutopia_id": "2067",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2068_s00_p0",
+   "mutopia_id": "2068",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2069_s00_p0",
+   "mutopia_id": "2069",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2072_s00_p0",
+   "mutopia_id": "2072",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2073_s00_p0",
+   "mutopia_id": "2073",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2076_s00_p0",
+   "mutopia_id": "2076",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2077_s00_p0",
+   "mutopia_id": "2077",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2078_s00_p0",
+   "mutopia_id": "2078",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2079_s00_p0",
+   "mutopia_id": "2079",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2081_s00_p0",
+   "mutopia_id": "2081",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2082_s00_p0",
+   "mutopia_id": "2082",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2083_s00_p0",
+   "mutopia_id": "2083",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2084_s00_p0",
+   "mutopia_id": "2084",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2085_s00_p0",
+   "mutopia_id": "2085",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0389_s00_p0",
+   "mutopia_id": "389",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0389_s01_p1",
+   "mutopia_id": "389",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0402_s00_p0",
+   "mutopia_id": "402",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0402_s01_p1",
+   "mutopia_id": "402",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0416_s00_p0",
+   "mutopia_id": "416",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0416_s01_p1",
+   "mutopia_id": "416",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0417_s00_p0",
+   "mutopia_id": "417",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0417_s01_p1",
+   "mutopia_id": "417",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0418_s00_p0",
+   "mutopia_id": "418",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0418_s01_p1",
+   "mutopia_id": "418",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0419_s00_p0",
+   "mutopia_id": "419",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0419_s01_p1",
+   "mutopia_id": "419",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0462_s00_p0",
+   "mutopia_id": "462",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0462_s01_p1",
+   "mutopia_id": "462",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0462_s03_p2",
+   "mutopia_id": "462",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0462_s04_p3",
+   "mutopia_id": "462",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0464_s00_p0",
+   "mutopia_id": "464",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0464_s01_p1",
+   "mutopia_id": "464",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0520_s00_p0",
+   "mutopia_id": "520",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0520_s01_p1",
+   "mutopia_id": "520",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0520_s03_p2",
+   "mutopia_id": "520",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0520_s04_p3",
+   "mutopia_id": "520",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0530_s00_p0",
+   "mutopia_id": "530",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0530_s01_p1",
+   "mutopia_id": "530",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0531_s00_p0",
+   "mutopia_id": "531",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0531_s01_p1",
+   "mutopia_id": "531",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0533_s00_p0",
+   "mutopia_id": "533",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0533_s01_p1",
+   "mutopia_id": "533",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0541_s00_p0",
+   "mutopia_id": "541",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0541_s01_p1",
+   "mutopia_id": "541",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0554_s00_p0",
+   "mutopia_id": "554",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0554_s01_p1",
+   "mutopia_id": "554",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0555_s00_p0",
+   "mutopia_id": "555",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0555_s01_p1",
+   "mutopia_id": "555",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0556_s00_p0",
+   "mutopia_id": "556",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0556_s01_p1",
+   "mutopia_id": "556",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0557_s00_p0",
+   "mutopia_id": "557",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0557_s01_p1",
+   "mutopia_id": "557",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0558_s00_p0",
+   "mutopia_id": "558",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0558_s01_p1",
+   "mutopia_id": "558",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0559_s00_p0",
+   "mutopia_id": "559",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0559_s01_p1",
+   "mutopia_id": "559",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0560_s00_p0",
+   "mutopia_id": "560",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0560_s01_p1",
+   "mutopia_id": "560",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0564_s00_p0",
+   "mutopia_id": "564",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0564_s01_p1",
+   "mutopia_id": "564",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0403_s00_p0",
+   "mutopia_id": "403",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0403_s01_p1",
+   "mutopia_id": "403",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0404_s00_p0",
+   "mutopia_id": "404",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0404_s01_p1",
+   "mutopia_id": "404",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0405_s00_p0",
+   "mutopia_id": "405",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0405_s01_p1",
+   "mutopia_id": "405",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0408_s00_p0",
+   "mutopia_id": "408",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0408_s01_p1",
+   "mutopia_id": "408",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0408_s03_p2",
+   "mutopia_id": "408",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0408_s04_p3",
+   "mutopia_id": "408",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0409_s00_p0",
+   "mutopia_id": "409",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0409_s01_p1",
+   "mutopia_id": "409",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0409_s03_p2",
+   "mutopia_id": "409",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0409_s04_p3",
+   "mutopia_id": "409",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0410_s00_p0",
+   "mutopia_id": "410",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0410_s01_p1",
+   "mutopia_id": "410",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0415_s00_p0",
+   "mutopia_id": "415",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0415_s01_p1",
+   "mutopia_id": "415",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1564_s00_p0",
+   "mutopia_id": "1564",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1564_s01_p1",
+   "mutopia_id": "1564",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1565_s00_p0",
+   "mutopia_id": "1565",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1565_s01_p1",
+   "mutopia_id": "1565",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1566_s00_p0",
+   "mutopia_id": "1566",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1566_s01_p1",
+   "mutopia_id": "1566",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1567_s00_p0",
+   "mutopia_id": "1567",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1567_s01_p1",
+   "mutopia_id": "1567",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1568_s00_p0",
+   "mutopia_id": "1568",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1568_s01_p1",
+   "mutopia_id": "1568",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1569_s00_p0",
+   "mutopia_id": "1569",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1569_s01_p1",
+   "mutopia_id": "1569",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1570_s00_p0",
+   "mutopia_id": "1570",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1570_s01_p1",
+   "mutopia_id": "1570",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1571_s00_p0",
+   "mutopia_id": "1571",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1571_s01_p1",
+   "mutopia_id": "1571",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2137_s00_p0",
+   "mutopia_id": "2137",
+   "midi_recall_rh": 0.9954,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2092_s00_p0",
+   "mutopia_id": "2092",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2167_s00_p0",
+   "mutopia_id": "2167",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2167_s01_p1",
+   "mutopia_id": "2167",
+   "midi_recall_rh": 0.9918,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0781_s00_p0",
+   "mutopia_id": "781",
+   "midi_recall_rh": 0.9963,
+   "midi_recall_lh": 0.998,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2037f1_s00_p0",
+   "mutopia_id": "2037",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0352_s00_p0",
+   "mutopia_id": "352",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0232_s00_p0",
+   "mutopia_id": "232",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0234_s00_p0",
+   "mutopia_id": "234",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0236_s00_p0",
+   "mutopia_id": "236",
+   "midi_recall_rh": 0.9991,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1647_s00_p0",
+   "mutopia_id": "1647",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1785_s00_p0",
+   "mutopia_id": "1785",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0108_s00_p0",
+   "mutopia_id": "108",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0571f0_s00_p0",
+   "mutopia_id": "571",
+   "midi_recall_rh": 0.9835,
+   "midi_recall_lh": 0.9971,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0571f0_s01_p1",
+   "mutopia_id": "571",
+   "midi_recall_rh": 0.9955,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0571f0_s02_p2",
+   "mutopia_id": "571",
+   "midi_recall_rh": 0.9766,
+   "midi_recall_lh": 0.8862,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP2034_s00_p0",
+   "mutopia_id": "2034",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0356_s00_p0",
+   "mutopia_id": "356",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0998_s00_p0",
+   "mutopia_id": "998",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1007_s00_p0",
+   "mutopia_id": "1007",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1027_s00_p0",
+   "mutopia_id": "1027",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0420_s00_p0",
+   "mutopia_id": "420",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1958_s00_p0",
+   "mutopia_id": "1958",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.8644,
+   "midi_status": "mismatch"
+  },
+  {
+   "piece_id": "MP1960_s00_p0",
+   "mutopia_id": "1960",
+   "midi_recall_rh": 0.9946,
+   "midi_recall_lh": 0.9904,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1993_s00_p0",
+   "mutopia_id": "1993",
+   "midi_recall_rh": 0.9873,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2057_s00_p0",
+   "mutopia_id": "2057",
+   "midi_recall_rh": 0.9976,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2052_s00_p0",
+   "mutopia_id": "2052",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1781f0_s00_p0",
+   "mutopia_id": "1781",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1781f0_s00_p1",
+   "mutopia_id": "1781",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1781f0_s01_p2",
+   "mutopia_id": "1781",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1781f0_s01_p3",
+   "mutopia_id": "1781",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1781f0_s02_p4",
+   "mutopia_id": "1781",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2025_s00_p0",
+   "mutopia_id": "2025",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0354_s00_p0",
+   "mutopia_id": "354",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9836,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0372_s00_p0",
+   "mutopia_id": "372",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.9839,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0374_s00_p0",
+   "mutopia_id": "374",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0504_s00_p0",
+   "mutopia_id": "504",
+   "midi_recall_rh": 0.9795,
+   "midi_recall_lh": 0.9737,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0647_s00_p0",
+   "mutopia_id": "647",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0651_s00_p0",
+   "mutopia_id": "651",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0653_s00_p0",
+   "mutopia_id": "653",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0688_s00_p0",
+   "mutopia_id": "688",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1779_s00_p0",
+   "mutopia_id": "1779",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP2032_s00_p0",
+   "mutopia_id": "2032",
+   "midi_recall_rh": null,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP0341_s00_p0",
+   "mutopia_id": "341",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1214_s00_p0",
+   "mutopia_id": "1214",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1215_s00_p0",
+   "mutopia_id": "1215",
+   "midi_recall_rh": 0.9972,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1216_s00_p0",
+   "mutopia_id": "1216",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": null,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1216_s00_p1",
+   "mutopia_id": "1216",
+   "midi_recall_rh": 0.9967,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1217_s00_p0",
+   "mutopia_id": "1217",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1218_s00_p0",
+   "mutopia_id": "1218",
+   "midi_recall_rh": 0.9946,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1399_s00_p0",
+   "mutopia_id": "1399",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1400_s00_p0",
+   "mutopia_id": "1400",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 0.999,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1401_s00_p0",
+   "mutopia_id": "1401",
+   "midi_recall_rh": 0.9944,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1402_s00_p0",
+   "mutopia_id": "1402",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1511_s00_p0",
+   "mutopia_id": "1511",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1512_s00_p0",
+   "mutopia_id": "1512",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1513_s00_p0",
+   "mutopia_id": "1513",
+   "midi_recall_rh": 0.9968,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1514_s00_p0",
+   "mutopia_id": "1514",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1515_s00_p0",
+   "mutopia_id": "1515",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1516_s00_p0",
+   "mutopia_id": "1516",
+   "midi_recall_rh": 0.9958,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1517_s00_p0",
+   "mutopia_id": "1517",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1518_s00_p0",
+   "mutopia_id": "1518",
+   "midi_recall_rh": 0.9975,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1519_s00_p0",
+   "mutopia_id": "1519",
+   "midi_recall_rh": 0.999,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  },
+  {
+   "piece_id": "MP1213_s00_p0",
+   "mutopia_id": "1213",
+   "midi_recall_rh": 1.0,
+   "midi_recall_lh": 1.0,
+   "midi_status": "ok"
+  }
+ ]
+}

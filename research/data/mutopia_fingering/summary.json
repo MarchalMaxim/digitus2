@@ -1,0 +1,33 @@
+{
+ "piece_units": 827,
+ "piece_units_with_fingering_marks": 172,
+ "source_fingering_marks": 50076,
+ "files": 206,
+ "files_converted": 181,
+ "duplicate_parts_skipped": 20,
+ "parts_without_fingering": 23,
+ "parts_written": 310,
+ "parts_ok": 284,
+ "parts_suspect": 26,
+ "pieces_written": 164,
+ "pieces_ok": 151,
+ "notes_total": 203931,
+ "notes_fingered": 38131,
+ "notes_total_ok": 183377,
+ "notes_fingered_ok": 34368,
+ "failures_by_stage": {
+  "fingering": 20,
+  "duplicate": 20,
+  "parts": 5
+ },
+ "licenses": {
+  "Public Domain": 100,
+  "Creative Commons Attribution-ShareAlike 4.0": 89,
+  "Creative Commons Attribution-ShareAlike 3.0": 88,
+  "Creative Commons Attribution 2.5": 17,
+  "Creative Commons Attribution 3.0": 9,
+  "Creative Commons Attribution-ShareAlike 2.5": 6,
+  "Creative Commons Attribution 4.0": 1
+ },
+ "seconds": 34.9
+}

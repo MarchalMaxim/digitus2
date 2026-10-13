@@ -1,0 +1,1467 @@
+{
+ "schemaVersion": 1,
+ "oracle": "digitus2 textbook fingering oracle",
+ "description": "Chromatic scales starting on every pitch class, both hands, ascending and descending, two octaves.",
+ "generatedBy": "benchmarks/textbook/generate.py",
+ "conventions": {
+  "fingers": "1 = thumb ... 5 = little finger, positive for both hands",
+  "anchor": "lowest note = tonic/root nearest middle C (MIDI 60; F-sharp ties go down to 54) for RH, one octave lower for LH; descending entries cover the same range from the top",
+  "startMidi": "always equal to midi[0] (the top note for descending entries)",
+  "descending": "exact reverse of the ascending entry (notes, fingers, alternatives), except melodic minor, whose descending entry uses the natural-minor notes and fingering",
+  "confidence": "agreed = all consulted sources give this fingering; majority = sources disagree and the primary has more of them; tie = equal support, broken by the rule stated in the entry note; rule = derived from a documented fingering rule rather than a per-key printed table",
+  "alternatives": "other fingerings printed by at least one cited source; a scorer should accept them"
+ },
+ "count": 48,
+ "sourcesUsed": [
+  {
+   "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+   "url": "https://www.piano-keyboard-guide.com/?p=254"
+  },
+  {
+   "name": "Hoffman Academy lesson: chromatic scale",
+   "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+  }
+ ],
+ "entries": [
+  {
+   "id": "chromatic.chromatic.C.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "C",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 60,
+   "midi": [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84],
+   "fingers": [1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "C",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 84,
+   "midi": [84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60],
+   "fingers": [2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "C",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 48,
+   "midi": [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72],
+   "fingers": [1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "C",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 72,
+   "midi": [72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48],
+   "fingers": [1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C#.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "C#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 61,
+   "midi": [61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85],
+   "fingers": [3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C#.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "C#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 85,
+   "midi": [85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61],
+   "fingers": [3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C#.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "C#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 49,
+   "midi": [49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73],
+   "fingers": [3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.C#.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "C#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 73,
+   "midi": [73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49],
+   "fingers": [3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.D.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "D",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 62,
+   "midi": [62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86],
+   "fingers": [1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.D.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "D",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 86,
+   "midi": [86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62],
+   "fingers": [1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.D.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "D",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 50,
+   "midi": [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74],
+   "fingers": [1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.D.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "D",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 74,
+   "midi": [74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50],
+   "fingers": [1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Eb.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "Eb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 63,
+   "midi": [63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87],
+   "fingers": [3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Eb.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "Eb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 87,
+   "midi": [87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63],
+   "fingers": [3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Eb.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "Eb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 51,
+   "midi": [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75],
+   "fingers": [3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Eb.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "Eb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 75,
+   "midi": [75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51],
+   "fingers": [3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.E.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "E",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 64,
+   "midi": [64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88],
+   "fingers": [1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.E.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "E",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 88,
+   "midi": [88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64],
+   "fingers": [1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.E.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "E",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 52,
+   "midi": [52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76],
+   "fingers": [2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.E.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "E",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 76,
+   "midi": [76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52],
+   "fingers": [1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "F",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 65,
+   "midi": [65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89],
+   "fingers": [1, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "F",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 89,
+   "midi": [89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65],
+   "fingers": [2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "F",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 53,
+   "midi": [53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77],
+   "fingers": [1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "F",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 77,
+   "midi": [77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53],
+   "fingers": [1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F#.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "F#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 54,
+   "midi": [54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78],
+   "fingers": [3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F#.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "F#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 78,
+   "midi": [78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54],
+   "fingers": [3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F#.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "F#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 42,
+   "midi": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66],
+   "fingers": [3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.F#.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "F#",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 66,
+   "midi": [66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42],
+   "fingers": [3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.G.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "G",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 55,
+   "midi": [55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79],
+   "fingers": [1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.G.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "G",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 79,
+   "midi": [79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55],
+   "fingers": [1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.G.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "G",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 43,
+   "midi": [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67],
+   "fingers": [1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.G.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "G",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 67,
+   "midi": [67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43],
+   "fingers": [1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Ab.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "Ab",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 56,
+   "midi": [56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80],
+   "fingers": [3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Ab.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "Ab",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 80,
+   "midi": [80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56],
+   "fingers": [3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Ab.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "Ab",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 44,
+   "midi": [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68],
+   "fingers": [3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Ab.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "Ab",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 68,
+   "midi": [68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44],
+   "fingers": [3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.A.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "A",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 57,
+   "midi": [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81],
+   "fingers": [1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.A.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "A",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 81,
+   "midi": [81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57],
+   "fingers": [1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.A.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "A",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 45,
+   "midi": [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69],
+   "fingers": [1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.A.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "A",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 69,
+   "midi": [69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45],
+   "fingers": [1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Bb.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "Bb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 58,
+   "midi": [58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82],
+   "fingers": [3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Bb.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "Bb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 82,
+   "midi": [82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58],
+   "fingers": [3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Bb.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "Bb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 46,
+   "midi": [46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70],
+   "fingers": [3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.Bb.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "Bb",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 70,
+   "midi": [70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46],
+   "fingers": [3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.B.rh.asc.2oct",
+   "family": "chromatic",
+   "key": "B",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 59,
+   "midi": [59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83],
+   "fingers": [1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.B.rh.desc.2oct",
+   "family": "chromatic",
+   "key": "B",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "rh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 83,
+   "midi": [83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59],
+   "fingers": [1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.B.lh.asc.2oct",
+   "family": "chromatic",
+   "key": "B",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "ascending",
+   "octaves": 2,
+   "startMidi": 47,
+   "midi": [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
+   "fingers": [2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 2, 1, 3, 1, 3, 2, 1, 3, 1, 3, 1, 3, 1],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  },
+  {
+   "id": "chromatic.chromatic.B.lh.desc.2oct",
+   "family": "chromatic",
+   "key": "B",
+   "mode": "chromatic",
+   "chord": null,
+   "hand": "lh",
+   "direction": "descending",
+   "octaves": 2,
+   "startMidi": 71,
+   "midi": [71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47],
+   "fingers": [1, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2],
+   "source": {
+    "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+    "url": "https://www.piano-keyboard-guide.com/?p=254"
+   },
+   "sources": [
+    {
+     "name": "piano-keyboard-guide.com, How to play the chromatic scale (RH 1313 123 1313 12, LH 1313 213 1313 21 from C)",
+     "url": "https://www.piano-keyboard-guide.com/?p=254"
+    },
+    {
+     "name": "Hoffman Academy lesson: chromatic scale",
+     "url": "https://app.hoffmanacademy.com/lessons/piano/chromatic-scale/video/"
+    }
+   ],
+   "alternatives": [],
+   "confidence": "agreed",
+   "note": null
+  }
+ ]
+}

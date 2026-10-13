@@ -39,14 +39,17 @@ Conventions that hold for every entry:
   every minor form.
 - **B major and all forms of B minor**: RH as above; LH `4 3 2 1 4 3 2 1` (4 on F-sharp).
 - **F major and all forms of F minor**: RH `1 2 3 4 1 2 3 4` (4 on B-flat, top F on 4); LH as for C.
-- **Black-key majors**: the RH 4th finger is always on B-flat (A-sharp), and the LH 4th finger is on the
-  first flat met going up. G-flat/F-sharp is the exception, with LH 4 on F-sharp. Thumbs always fall on white
-  keys. For example, the LH thumbs of F-sharp major fall on B and E-sharp, and those of B major on E and B.
-  So no standard scale fingering puts the thumb on a black key, and the gate allows no exception for scales.
+- **Black-key majors**: the RH 4th finger is always on B-flat (A-sharp). The LH 4th finger is on E-flat in
+  B-flat major, A-flat in E-flat major, D-flat in A-flat major, and G-flat (F-sharp) in D-flat and
+  G-flat/F-sharp major. Escadon summarises this as "the first flat encountered ascending".
+  Thumbs always fall on white keys. For example, the LH thumbs of F-sharp major fall on B and E-sharp, and
+  those of B major on E and B. So no standard scale fingering puts the thumb on a black key, and the gate
+  allows no exception for scales.
 - **Harmonic minor** uses the natural-minor fingering, except that G-sharp minor LH moves its 4th finger from
   F-sharp to C-sharp, because the raised 7th (F double sharp) is a white key the thumb can take.
-- **Melodic minor ascending** keeps the natural-minor fingering, except where the raised 6th or 7th would fall
-  under the thumb on a black key:
+- **Melodic minor ascending** keeps the natural-minor fingering, except where raising the 6th and 7th changes
+  which notes are white keys. Either a thumb would land on a new black key (F-sharp, C-sharp RH), or a new
+  white key frees the thumb (G-sharp LH):
   - F-sharp RH `2 3 1 2 3 4 1 2` (4 on D-sharp).
   - C-sharp RH 4 on A-sharp (`2 3 1 2 3 4 1 2`).
   - G-sharp LH 4 on C-sharp, as in the harmonic form.
@@ -58,8 +61,9 @@ Conventions that hold for every entry:
 
 - RH `1 2 3 1 2 3 5` whenever the root is white, and also for the all-black triads F-sharp major and
   E-flat minor.
-- LH `5 4 2 1 4 2 1` when the root and third are both white (C, F, G major; A, D, E minor), and for every
-  minor triad on a white root. LH `5 3 2 1 3 2 1` when the third is black and the root white (D, A, E, B major).
+- LH `5 4 2 1 4 2 1` when the root and third are both white (C, F, G major; A, D, E minor), for every
+  minor triad on a white root, and for the all-black triads (E-flat minor; F-sharp major by tie-break).
+  LH `5 3 2 1 3 2 1` when the third is black and the root white (D, A, E, B major).
 - Black root with a white third (A-flat, D-flat, E-flat major; C-sharp, F-sharp, G-sharp minor): thumb on the
   third. LH `2 1 4 2 1 4 2`; RH `4 1 2 4 1 2 4` with a disputed first finger (see below).
 - B-flat major: RH thumb on D, LH `3 2 1 3 2 1 3`.
@@ -103,7 +107,8 @@ A scorer should accept the primary or any alternative. A stricter scorer can gra
 | G-sharp minor RH | Natural: 3 4 (pianoscales.org, Hoffman, MasterPiano) vs 2 3 (oktav). Harmonic: 3 4 (Hoffman, MasterPiano) vs 2 3 (pianoscales.org, Beauchamp), a tie. | 3 4 in every form (harmonic by tie-break) |
 | E-flat minor RH (harmonic) | 3: pianoscales.org, MasterPiano. 2: Beauchamp. | 3 |
 | C-sharp melodic minor RH ascending | 2 3 (octave pattern with 4 on A-sharp, per Escadon) vs 3 4 (MasterPiano). | 2 3 (tie-break) |
-| LH top note of black-key scales (B-flat, E-flat, A-flat, D-flat, F-sharp major; C-sharp, F-sharp, G-sharp minor) | Octave-pattern finger (3, or 4 for F-sharp): pianoscales.org, Commonwealth, Hoffman. 2: Beauchamp ("nearest available finger"), Musicnotes (B-flat). | Octave-pattern finger |
+| LH top note, B-flat, E-flat, A-flat major; C-sharp, F-sharp, G-sharp minor | Octave-pattern finger (3, or 4 for F-sharp minor): pianoscales.org, Commonwealth (B-flat, E-flat, A-flat), Hoffman (B-flat, E-flat). 2: Beauchamp ("nearest available finger"), Musicnotes (B-flat). | Octave-pattern finger |
+| LH top note, D-flat and F-sharp major | 3 or 4: pianoscales.org, MasterPiano (one octave). 2: Beauchamp, Commonwealth (two octaves). | Octave-pattern finger (tie-break) |
 | C, F, G major arpeggio LH | 5 4 2 1: Escadon, Kelley, Hoffman (F), Beauchamp's broken-chord argument. 5 3 2 1: Commonwealth. | 5 4 2 1 |
 | A, D, E minor arpeggio LH | 5 4 2 1: Escadon, Kelley, Commonwealth, Hoffman. 5 3 2 1: "some technique books" (Commonwealth footnote). | 5 4 2 1 |
 | F-sharp major arpeggio LH | 5 4 2 1: Escadon. 5 3 2 1: Kelley. | 5 4 2 1 (tie, same shape as C major) |
@@ -182,8 +187,8 @@ One octave ascending, then two octaves ascending. Descending is the exact revers
 | A | A B C# D E F# G# A | 1 2 3 1 2 3 4 5 | 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 | 5 4 3 2 1 3 2 1 | 5 4 3 2 1 3 2 1 4 3 2 1 3 2 1 | ps_major, cwu, mh_cgdae, escadon / ps_major, cwu, mh_cgdae, escadon |  |
 | E | E F# G# A B C# D# E | 1 2 3 1 2 3 4 5 | 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 | 5 4 3 2 1 3 2 1 | 5 4 3 2 1 3 2 1 4 3 2 1 3 2 1 | ps_major, cwu, mh_cgdae, escadon, hoffman_e / ps_major, cwu, mh_cgdae, escadon, hoffman_e |  |
 | B | B C# D# E F# G# A# B | 1 2 3 1 2 3 4 5 | 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 | 4 3 2 1 4 3 2 1 | 4 3 2 1 4 3 2 1 3 2 1 4 3 2 1 | ps_major, cwu, mh_bfscs, escadon / ps_major, cwu, mh_bfscs, escadon |  |
-| F# | F# G# A# B C# D# E# F# | 2 3 4 1 2 3 1 2 | 2 3 4 1 2 3 1 2 3 4 1 2 3 1 2 | 4 3 2 1 3 2 1 4 (majority) | 4 3 2 1 3 2 1 4 3 2 1 3 2 1 4 | ps_major, cwu, mh_bfscs, masterpiano, escadon / ps_major, cwu, masterpiano, escadon | LH 4 3 2 1 3 2 1 2 [mh_bfscs] |
-| Db | Db Eb F Gb Ab Bb C Db | 2 3 1 2 3 4 1 2 | 2 3 1 2 3 4 1 2 3 1 2 3 4 1 2 | 3 2 1 4 3 2 1 3 (majority) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | ps_major, cwu, mh_bfscs, masterpiano, escadon / ps_major, cwu, masterpiano, escadon | LH 3 2 1 4 3 2 1 2 [mh_bfscs] |
+| F# | F# G# A# B C# D# E# F# | 2 3 4 1 2 3 1 2 | 2 3 4 1 2 3 1 2 3 4 1 2 3 1 2 | 4 3 2 1 3 2 1 4 (tie) | 4 3 2 1 3 2 1 4 3 2 1 3 2 1 4 | ps_major, cwu, mh_bfscs, masterpiano, escadon / ps_major, masterpiano, escadon | LH 4 3 2 1 3 2 1 2 [mh_bfscs, cwu] |
+| Db | Db Eb F Gb Ab Bb C Db | 2 3 1 2 3 4 1 2 | 2 3 1 2 3 4 1 2 3 1 2 3 4 1 2 | 3 2 1 4 3 2 1 3 (tie) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | ps_major, cwu, mh_bfscs, masterpiano, escadon / ps_major, masterpiano, escadon | LH 3 2 1 4 3 2 1 2 [mh_bfscs, cwu] |
 | Ab | Ab Bb C Db Eb F G Ab | 3 4 1 2 3 1 2 3 (majority) | 3 4 1 2 3 1 2 3 4 1 2 3 1 2 3 | 3 2 1 4 3 2 1 3 (majority) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | ps_major, pkg_ab, cwu, masterpiano, escadon / ps_major, pkg_ab, cwu, escadon | RH 2 3 1 2 3 1 2 3 [oktav_ab, mh_abgscs] ; LH 3 2 1 4 3 2 1 2 [mh_abgscs] |
 | Eb | Eb F G Ab Bb C D Eb | 3 1 2 3 4 1 2 3 (majority) | 3 1 2 3 4 1 2 3 1 2 3 4 1 2 3 | 3 2 1 4 3 2 1 3 (majority) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | ps_major, cwu, hoffman_ebmaj, hoffman_eb2, masterpiano, escadon / ps_major, cwu, hoffman_ebmaj, hoffman_eb2, escadon | RH 2 1 2 3 4 1 2 3 [mh_ebfsbb] ; LH 3 2 1 4 3 2 1 2 [mh_ebfsbb] |
 | Bb | Bb C D Eb F G A Bb | 2 1 2 3 1 2 3 4 (majority) | 4 1 2 3 1 2 3 4 1 2 3 1 2 3 4 | 3 2 1 4 3 2 1 3 (majority) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | ps_major, musicnotes_bb, oktav_bb, masterpiano, mh_ebfsbb / ps_major, cwu, hoffman_bb2, escadon | RH 4 1 2 3 1 2 3 4 [cwu, hoffman_bb2, oktav_bb, pkg_bb, ps_fingerings, escadon] ; RH 2 oct 2 1 2 3 1 2 3 4 1 2 3 1 2 3 4 [ps_major, musicnotes_bb, oktav_bb, masterpiano, mh_ebfsbb] ; LH 3 2 1 4 3 2 1 2 [mh_ebfsbb, musicnotes_bb] |
@@ -198,7 +203,7 @@ One octave ascending, then two octaves ascending. Descending is the exact revers
 | A | A B C D E F G# A | 1 2 3 1 2 3 4 5 | 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 | 5 4 3 2 1 3 2 1 | 5 4 3 2 1 3 2 1 4 3 2 1 3 2 1 | ps_harmonic, cwu, mh_cgdae, escadon, hoffman_adg / ps_harmonic, cwu, mh_cgdae, escadon, hoffman_adg |  |
 | E | E F# G A B C D# E | 1 2 3 1 2 3 4 5 | 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 | 5 4 3 2 1 3 2 1 | 5 4 3 2 1 3 2 1 4 3 2 1 3 2 1 | ps_harmonic, cwu, mh_cgdae, escadon / ps_harmonic, cwu, mh_cgdae, escadon |  |
 | B | B C# D E F# G A# B | 1 2 3 1 2 3 4 5 | 1 2 3 1 2 3 4 1 2 3 1 2 3 4 5 | 4 3 2 1 4 3 2 1 | 4 3 2 1 4 3 2 1 3 2 1 4 3 2 1 | ps_harmonic, cwu, mh_bf, hoffman_bm, escadon / ps_harmonic, cwu, mh_bf, hoffman_bm, escadon |  |
-| F# | F# G# A B C# D E# F# | 2 3 1 2 3 1 2 3 (majority) | 2 3 1 2 3 1 2 3 4 1 2 3 1 2 3 | 4 3 2 1 3 2 1 4 (majority) | 4 3 2 1 3 2 1 4 3 2 1 3 2 1 4 | ps_harmonic, mh_ebfsbb / ps_harmonic, escadon | RH 3 4 1 2 3 1 2 3 [hoffman_fsm, escadon] ; LH 4 3 2 1 3 2 1 2 [mh_ebfsbb] |
+| F# | F# G# A B C# D E# F# | 2 3 1 2 3 1 2 3 (majority) | 2 3 1 2 3 1 2 3 4 1 2 3 1 2 3 | 4 3 2 1 3 2 1 4 (majority) | 4 3 2 1 3 2 1 4 3 2 1 3 2 1 4 | ps_harmonic, mh_ebfsbb, masterpiano / ps_harmonic, masterpiano, escadon | RH 3 4 1 2 3 1 2 3 [hoffman_fsm, escadon] ; LH 4 3 2 1 3 2 1 2 [mh_ebfsbb] |
 | C# | C# D# E F# G# A B# C# | 3 4 1 2 3 1 2 3 (majority) | 3 4 1 2 3 1 2 3 4 1 2 3 1 2 3 | 3 2 1 4 3 2 1 3 (majority) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | ps_harmonic, masterpiano, escadon / ps_harmonic, masterpiano, escadon | RH 2 3 1 2 3 1 2 3 [mh_abgscs] ; LH 3 2 1 4 3 2 1 2 [mh_abgscs] |
 | G# | G# A# B C# D# E Fx G# | 3 4 1 2 3 1 2 3 (tie) | 3 4 1 2 3 1 2 3 4 1 2 3 1 2 3 | 3 2 1 4 3 2 1 3 (majority) | 3 2 1 4 3 2 1 3 2 1 4 3 2 1 3 | hoffman_gsm, masterpiano, escadon / ps_harmonic, hoffman_gsm, masterpiano, escadon | RH 2 3 1 2 3 1 2 3 [ps_harmonic, mh_abgscs] ; LH 3 2 1 4 3 2 1 2 [mh_abgscs] |
 | Eb | Eb F Gb Ab Bb Cb D Eb | 3 1 2 3 4 1 2 3 (majority) | 3 1 2 3 4 1 2 3 1 2 3 4 1 2 3 | 2 1 4 3 2 1 3 2 | 2 1 4 3 2 1 3 2 1 4 3 2 1 3 2 | ps_harmonic, masterpiano, escadon / ps_harmonic, mh_bf, masterpiano, escadon | RH 2 1 2 3 4 1 2 3 [mh_bf] |
@@ -290,18 +295,18 @@ Two octaves ascending; descending is the exact reverse.
 
 | Key | Chord | RH | LH | Sources (RH / LH) | Alternatives |
 |---|---|---|---|---|---|
-| C | G7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
-| G | D7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
-| D | A7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
-| A | E7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
-| E | B7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
+| C | G7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
+| G | D7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
+| D | A7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
+| A | E7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
+| E | B7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
 | B | F#7 | 2 3 4 1 2 3 4 1 2 (rule) | 4 3 2 1 4 3 2 1 4 (rule) | roskell_dom7, fergus_black / roskell_dom7, fergus_black |  |
 | F# | C#7 | 2 3 4 1 2 3 4 1 2 (rule) | 4 3 2 1 4 3 2 1 4 (rule) | roskell_dom7, fergus_black / roskell_dom7, fergus_black | RH 4 1 2 3 4 1 2 3 4 [roskell_dom7] ; LH 2 1 4 3 2 1 4 3 2 [roskell_dom7] |
 | Db | Ab7 | 4 1 2 3 4 1 2 3 4 (rule) | 2 1 4 3 2 1 4 3 2 (rule) | roskell_dom7, fergus_black / roskell_dom7, fergus_black |  |
 | Ab | Eb7 | 4 1 2 3 4 1 2 3 4 (rule) | 2 1 4 3 2 1 4 3 2 (rule) | roskell_dom7, fergus_black / roskell_dom7, fergus_black |  |
 | Eb | Bb7 | 4 1 2 3 4 1 2 3 4 (rule) | 3 2 1 4 3 2 1 4 3 (rule) | roskell_dom7, fergus_black / roskell_dom7, fergus_black |  |
-| Bb | F7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
-| F | C7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7, hanon / roskell_dom7, hanon |  |
+| Bb | F7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
+| F | C7 | 1 2 3 4 1 2 3 4 5 | 5 4 3 2 1 4 3 2 1 | roskell_dom7 / roskell_dom7 |  |
 
 ### Diminished seventh arpeggios (by starting note)
 

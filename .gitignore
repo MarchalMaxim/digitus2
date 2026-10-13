@@ -52,3 +52,6 @@ Thumbs.db
 research/spikes/**/bundle/
 research/spikes/**/results/
 research/spikes/**/playwright-report/
+
+# Claude Code session state
+.claude/

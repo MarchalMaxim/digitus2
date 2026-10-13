@@ -1,0 +1,3472 @@
+{
+ "files": {
+  "research/data/pig/FingeringFiles/030-1_fingering.txt": {
+   "notes": 348,
+   "hands": {
+    "R": {
+     "notes": 205,
+     "agree": 205,
+     "python_cost": 946.25,
+     "engine_cost": 946.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 143,
+     "agree": 143,
+     "python_cost": 1187.0,
+     "engine_cost": 1187,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/031-1_fingering.txt": {
+   "notes": 2082,
+   "hands": {
+    "R": {
+     "notes": 774,
+     "agree": 774,
+     "python_cost": 10984.25,
+     "engine_cost": 10984.25,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 1308,
+     "agree": 1308,
+     "python_cost": 8014.0,
+     "engine_cost": 8014,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/033-1_fingering.txt": {
+   "notes": 525,
+   "hands": {
+    "R": {
+     "notes": 277,
+     "agree": 277,
+     "python_cost": 300.5,
+     "engine_cost": 300.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 248,
+     "agree": 248,
+     "python_cost": 164.75,
+     "engine_cost": 164.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/035-1_fingering.txt": {
+   "notes": 218,
+   "hands": {
+    "R": {
+     "notes": 94,
+     "agree": 94,
+     "python_cost": 178.75,
+     "engine_cost": 178.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 124,
+     "agree": 124,
+     "python_cost": 535.25,
+     "engine_cost": 535.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/036-1_fingering.txt": {
+   "notes": 323,
+   "hands": {
+    "R": {
+     "notes": 177,
+     "agree": 177,
+     "python_cost": 467.5,
+     "engine_cost": 467.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 146,
+     "agree": 146,
+     "python_cost": 1062.0,
+     "engine_cost": 1062,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/037-1_fingering.txt": {
+   "notes": 79,
+   "hands": {
+    "R": {
+     "notes": 55,
+     "agree": 55,
+     "python_cost": 84.5,
+     "engine_cost": 84.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 24,
+     "agree": 24,
+     "python_cost": 30.5,
+     "engine_cost": 30.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/038-1_fingering.txt": {
+   "notes": 114,
+   "hands": {
+    "R": {
+     "notes": 76,
+     "agree": 76,
+     "python_cost": 506.25,
+     "engine_cost": 506.25,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 38,
+     "agree": 38,
+     "python_cost": 418.25,
+     "engine_cost": 418.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/039-1_fingering.txt": {
+   "notes": 187,
+   "hands": {
+    "R": {
+     "notes": 131,
+     "agree": 131,
+     "python_cost": 327.75,
+     "engine_cost": 327.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 56,
+     "agree": 56,
+     "python_cost": 996.0,
+     "engine_cost": 996,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/040-1_fingering.txt": {
+   "notes": 289,
+   "hands": {
+    "R": {
+     "notes": 234,
+     "agree": 234,
+     "python_cost": 393.0,
+     "engine_cost": 393,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 55,
+     "agree": 55,
+     "python_cost": 399.0,
+     "engine_cost": 399,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/041-1_fingering.txt": {
+   "notes": 334,
+   "hands": {
+    "R": {
+     "notes": 180,
+     "agree": 180,
+     "python_cost": 348.5,
+     "engine_cost": 348.5,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 154,
+     "agree": 154,
+     "python_cost": 246.0,
+     "engine_cost": 246,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/042-1_fingering.txt": {
+   "notes": 576,
+   "hands": {
+    "R": {
+     "notes": 288,
+     "agree": 288,
+     "python_cost": 255.5,
+     "engine_cost": 255.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 288,
+     "agree": 288,
+     "python_cost": 324.75,
+     "engine_cost": 324.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/043-1_fingering.txt": {
+   "notes": 174,
+   "hands": {
+    "R": {
+     "notes": 88,
+     "agree": 88,
+     "python_cost": 230.75,
+     "engine_cost": 230.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 86,
+     "agree": 86,
+     "python_cost": 182.75,
+     "engine_cost": 182.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/044-1_fingering.txt": {
+   "notes": 251,
+   "hands": {
+    "R": {
+     "notes": 139,
+     "agree": 139,
+     "python_cost": 242.25,
+     "engine_cost": 242.25,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 112,
+     "agree": 112,
+     "python_cost": 306.25,
+     "engine_cost": 306.25,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/045-1_fingering.txt": {
+   "notes": 331,
+   "hands": {
+    "R": {
+     "notes": 204,
+     "agree": 204,
+     "python_cost": 238.0,
+     "engine_cost": 238,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 127,
+     "agree": 127,
+     "python_cost": 416.0,
+     "engine_cost": 416,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/046-1_fingering.txt": {
+   "notes": 145,
+   "hands": {
+    "R": {
+     "notes": 91,
+     "agree": 91,
+     "python_cost": 78.0,
+     "engine_cost": 78,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 54,
+     "agree": 54,
+     "python_cost": 146.25,
+     "engine_cost": 146.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/047-1_fingering.txt": {
+   "notes": 327,
+   "hands": {
+    "R": {
+     "notes": 186,
+     "agree": 186,
+     "python_cost": 311.25,
+     "engine_cost": 311.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 141,
+     "agree": 141,
+     "python_cost": 197.5,
+     "engine_cost": 197.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/048-1_fingering.txt": {
+   "notes": 322,
+   "hands": {
+    "R": {
+     "notes": 200,
+     "agree": 200,
+     "python_cost": 200.0,
+     "engine_cost": 200,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 122,
+     "agree": 122,
+     "python_cost": 116.0,
+     "engine_cost": 116,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/049-1_fingering.txt": {
+   "notes": 253,
+   "hands": {
+    "R": {
+     "notes": 155,
+     "agree": 155,
+     "python_cost": 204.0,
+     "engine_cost": 204,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 98,
+     "agree": 98,
+     "python_cost": 444.75,
+     "engine_cost": 444.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/050-1_fingering.txt": {
+   "notes": 208,
+   "hands": {
+    "R": {
+     "notes": 135,
+     "agree": 135,
+     "python_cost": 101.5,
+     "engine_cost": 101.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 73,
+     "agree": 73,
+     "python_cost": 215.0,
+     "engine_cost": 215,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/051-1_fingering.txt": {
+   "notes": 276,
+   "hands": {
+    "R": {
+     "notes": 184,
+     "agree": 184,
+     "python_cost": 357.0,
+     "engine_cost": 357,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 92,
+     "agree": 92,
+     "python_cost": 258.5,
+     "engine_cost": 258.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/052-1_fingering.txt": {
+   "notes": 152,
+   "hands": {
+    "R": {
+     "notes": 31,
+     "agree": 31,
+     "python_cost": 59.0,
+     "engine_cost": 59,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 121,
+     "agree": 121,
+     "python_cost": 192.25,
+     "engine_cost": 192.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/053-1_fingering.txt": {
+   "notes": 245,
+   "hands": {
+    "R": {
+     "notes": 125,
+     "agree": 125,
+     "python_cost": 201.25,
+     "engine_cost": 201.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 120,
+     "agree": 120,
+     "python_cost": 273.25,
+     "engine_cost": 273.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/054-1_fingering.txt": {
+   "notes": 272,
+   "hands": {
+    "R": {
+     "notes": 169,
+     "agree": 169,
+     "python_cost": 287.0,
+     "engine_cost": 287,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 103,
+     "agree": 103,
+     "python_cost": 307.0,
+     "engine_cost": 307,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/055-1_fingering.txt": {
+   "notes": 435,
+   "hands": {
+    "R": {
+     "notes": 236,
+     "agree": 236,
+     "python_cost": 421.0,
+     "engine_cost": 421,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 199,
+     "agree": 199,
+     "python_cost": 803.25,
+     "engine_cost": 803.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/056-1_fingering.txt": {
+   "notes": 216,
+   "hands": {
+    "R": {
+     "notes": 111,
+     "agree": 111,
+     "python_cost": 226.5,
+     "engine_cost": 226.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 105,
+     "agree": 105,
+     "python_cost": 298.25,
+     "engine_cost": 298.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/057-1_fingering.txt": {
+   "notes": 393,
+   "hands": {
+    "R": {
+     "notes": 221,
+     "agree": 221,
+     "python_cost": 647.0,
+     "engine_cost": 647,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 172,
+     "agree": 172,
+     "python_cost": 391.5,
+     "engine_cost": 391.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/058-1_fingering.txt": {
+   "notes": 190,
+   "hands": {
+    "R": {
+     "notes": 92,
+     "agree": 92,
+     "python_cost": 243.0,
+     "engine_cost": 243,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 98,
+     "agree": 98,
+     "python_cost": 483.0,
+     "engine_cost": 483,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/059-1_fingering.txt": {
+   "notes": 368,
+   "hands": {
+    "R": {
+     "notes": 253,
+     "agree": 253,
+     "python_cost": 371.5,
+     "engine_cost": 371.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 115,
+     "agree": 115,
+     "python_cost": 663.5,
+     "engine_cost": 663.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/060-1_fingering.txt": {
+   "notes": 282,
+   "hands": {
+    "R": {
+     "notes": 172,
+     "agree": 172,
+     "python_cost": 423.5,
+     "engine_cost": 423.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 110,
+     "agree": 110,
+     "python_cost": 194.0,
+     "engine_cost": 194,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/061-1_fingering.txt": {
+   "notes": 208,
+   "hands": {
+    "R": {
+     "notes": 136,
+     "agree": 136,
+     "python_cost": 251.0,
+     "engine_cost": 251,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 72,
+     "agree": 72,
+     "python_cost": 496.5,
+     "engine_cost": 496.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/062-1_fingering.txt": {
+   "notes": 171,
+   "hands": {
+    "R": {
+     "notes": 121,
+     "agree": 121,
+     "python_cost": 191.0,
+     "engine_cost": 191,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 50,
+     "agree": 50,
+     "python_cost": 298.0,
+     "engine_cost": 298,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/063-1_fingering.txt": {
+   "notes": 265,
+   "hands": {
+    "R": {
+     "notes": 174,
+     "agree": 174,
+     "python_cost": 1776.5,
+     "engine_cost": 1776.5,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 91,
+     "agree": 91,
+     "python_cost": 492.0,
+     "engine_cost": 492,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/064-1_fingering.txt": {
+   "notes": 232,
+   "hands": {
+    "R": {
+     "notes": 121,
+     "agree": 121,
+     "python_cost": 443.5,
+     "engine_cost": 443.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 111,
+     "agree": 111,
+     "python_cost": 327.5,
+     "engine_cost": 327.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/065-1_fingering.txt": {
+   "notes": 239,
+   "hands": {
+    "R": {
+     "notes": 192,
+     "agree": 192,
+     "python_cost": 574.5,
+     "engine_cost": 574.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 47,
+     "agree": 47,
+     "python_cost": 427.5,
+     "engine_cost": 427.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/066-1_fingering.txt": {
+   "notes": 268,
+   "hands": {
+    "R": {
+     "notes": 142,
+     "agree": 142,
+     "python_cost": 572.75,
+     "engine_cost": 572.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 126,
+     "agree": 126,
+     "python_cost": 459.5,
+     "engine_cost": 459.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/067-1_fingering.txt": {
+   "notes": 572,
+   "hands": {
+    "R": {
+     "notes": 307,
+     "agree": 307,
+     "python_cost": 1415.25,
+     "engine_cost": 1415.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 265,
+     "agree": 265,
+     "python_cost": 1284.0,
+     "engine_cost": 1284,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/068-1_fingering.txt": {
+   "notes": 492,
+   "hands": {
+    "R": {
+     "notes": 238,
+     "agree": 238,
+     "python_cost": 684.75,
+     "engine_cost": 684.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 254,
+     "agree": 254,
+     "python_cost": 559.75,
+     "engine_cost": 559.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/069-1_fingering.txt": {
+   "notes": 414,
+   "hands": {
+    "R": {
+     "notes": 206,
+     "agree": 206,
+     "python_cost": 762.25,
+     "engine_cost": 762.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 208,
+     "agree": 208,
+     "python_cost": 1471.0,
+     "engine_cost": 1471,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/070-1_fingering.txt": {
+   "notes": 200,
+   "hands": {
+    "R": {
+     "notes": 126,
+     "agree": 126,
+     "python_cost": 334.25,
+     "engine_cost": 334.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 74,
+     "agree": 74,
+     "python_cost": 162.5,
+     "engine_cost": 162.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/071-1_fingering.txt": {
+   "notes": 247,
+   "hands": {
+    "R": {
+     "notes": 182,
+     "agree": 182,
+     "python_cost": 2565.25,
+     "engine_cost": 2565.25,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 65,
+     "agree": 65,
+     "python_cost": 505.75,
+     "engine_cost": 505.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/072-1_fingering.txt": {
+   "notes": 189,
+   "hands": {
+    "R": {
+     "notes": 109,
+     "agree": 109,
+     "python_cost": 279.5,
+     "engine_cost": 279.5,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 80,
+     "agree": 80,
+     "python_cost": 511.25,
+     "engine_cost": 511.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/073-1_fingering.txt": {
+   "notes": 212,
+   "hands": {
+    "R": {
+     "notes": 118,
+     "agree": 118,
+     "python_cost": 416.5,
+     "engine_cost": 416.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 94,
+     "agree": 94,
+     "python_cost": 981.0,
+     "engine_cost": 981,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/074-1_fingering.txt": {
+   "notes": 555,
+   "hands": {
+    "R": {
+     "notes": 315,
+     "agree": 315,
+     "python_cost": 1162.75,
+     "engine_cost": 1162.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 240,
+     "agree": 240,
+     "python_cost": 1037.0,
+     "engine_cost": 1037,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/075-1_fingering.txt": {
+   "notes": 180,
+   "hands": {
+    "R": {
+     "notes": 93,
+     "agree": 93,
+     "python_cost": 170.0,
+     "engine_cost": 170,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 87,
+     "agree": 87,
+     "python_cost": 779.5,
+     "engine_cost": 779.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/076-1_fingering.txt": {
+   "notes": 155,
+   "hands": {
+    "R": {
+     "notes": 69,
+     "agree": 69,
+     "python_cost": 164.75,
+     "engine_cost": 164.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 86,
+     "agree": 86,
+     "python_cost": 443.5,
+     "engine_cost": 443.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/077-1_fingering.txt": {
+   "notes": 341,
+   "hands": {
+    "R": {
+     "notes": 134,
+     "agree": 134,
+     "python_cost": 292.25,
+     "engine_cost": 292.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 207,
+     "agree": 207,
+     "python_cost": 1740.75,
+     "engine_cost": 1740.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/078-1_fingering.txt": {
+   "notes": 261,
+   "hands": {
+    "R": {
+     "notes": 181,
+     "agree": 181,
+     "python_cost": 805.5,
+     "engine_cost": 805.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 80,
+     "agree": 80,
+     "python_cost": 596.25,
+     "engine_cost": 596.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/079-1_fingering.txt": {
+   "notes": 168,
+   "hands": {
+    "R": {
+     "notes": 102,
+     "agree": 102,
+     "python_cost": 483.0,
+     "engine_cost": 483,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 66,
+     "agree": 66,
+     "python_cost": 905.25,
+     "engine_cost": 905.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/080-1_fingering.txt": {
+   "notes": 573,
+   "hands": {
+    "R": {
+     "notes": 287,
+     "agree": 287,
+     "python_cost": 2203.25,
+     "engine_cost": 2203.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 286,
+     "agree": 286,
+     "python_cost": 3368.5,
+     "engine_cost": 3368.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/081-1_fingering.txt": {
+   "notes": 222,
+   "hands": {
+    "R": {
+     "notes": 102,
+     "agree": 102,
+     "python_cost": 275.0,
+     "engine_cost": 275,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 120,
+     "agree": 120,
+     "python_cost": 530.0,
+     "engine_cost": 530,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/082-1_fingering.txt": {
+   "notes": 244,
+   "hands": {
+    "R": {
+     "notes": 166,
+     "agree": 166,
+     "python_cost": 192.25,
+     "engine_cost": 192.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 78,
+     "agree": 78,
+     "python_cost": 139.0,
+     "engine_cost": 139,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/083-1_fingering.txt": {
+   "notes": 284,
+   "hands": {
+    "R": {
+     "notes": 194,
+     "agree": 194,
+     "python_cost": 650.25,
+     "engine_cost": 650.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 90,
+     "agree": 90,
+     "python_cost": 424.0,
+     "engine_cost": 424,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/084-1_fingering.txt": {
+   "notes": 352,
+   "hands": {
+    "R": {
+     "notes": 241,
+     "agree": 241,
+     "python_cost": 819.0,
+     "engine_cost": 819,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 111,
+     "agree": 111,
+     "python_cost": 825.5,
+     "engine_cost": 825.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/085-1_fingering.txt": {
+   "notes": 510,
+   "hands": {
+    "R": {
+     "notes": 290,
+     "agree": 290,
+     "python_cost": 643.5,
+     "engine_cost": 643.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 220,
+     "agree": 220,
+     "python_cost": 1195.75,
+     "engine_cost": 1195.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/086-1_fingering.txt": {
+   "notes": 227,
+   "hands": {
+    "R": {
+     "notes": 147,
+     "agree": 147,
+     "python_cost": 544.0,
+     "engine_cost": 544,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 80,
+     "agree": 80,
+     "python_cost": 487.0,
+     "engine_cost": 487,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/087-1_fingering.txt": {
+   "notes": 214,
+   "hands": {
+    "R": {
+     "notes": 66,
+     "agree": 66,
+     "python_cost": 179.5,
+     "engine_cost": 179.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 148,
+     "agree": 148,
+     "python_cost": 965.25,
+     "engine_cost": 965.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/088-1_fingering.txt": {
+   "notes": 212,
+   "hands": {
+    "R": {
+     "notes": 120,
+     "agree": 120,
+     "python_cost": 250.25,
+     "engine_cost": 250.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 92,
+     "agree": 92,
+     "python_cost": 1446.75,
+     "engine_cost": 1446.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/089-1_fingering.txt": {
+   "notes": 182,
+   "hands": {
+    "R": {
+     "notes": 61,
+     "agree": 61,
+     "python_cost": 147.5,
+     "engine_cost": 147.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 121,
+     "agree": 121,
+     "python_cost": 566.5,
+     "engine_cost": 566.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/090-1_fingering.txt": {
+   "notes": 295,
+   "hands": {
+    "R": {
+     "notes": 123,
+     "agree": 123,
+     "python_cost": 351.0,
+     "engine_cost": 351,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 172,
+     "agree": 172,
+     "python_cost": 1235.25,
+     "engine_cost": 1235.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/091-1_fingering.txt": {
+   "notes": 138,
+   "hands": {
+    "R": {
+     "notes": 86,
+     "agree": 86,
+     "python_cost": 328.5,
+     "engine_cost": 328.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 52,
+     "agree": 52,
+     "python_cost": 146.5,
+     "engine_cost": 146.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/092-1_fingering.txt": {
+   "notes": 170,
+   "hands": {
+    "R": {
+     "notes": 84,
+     "agree": 84,
+     "python_cost": 231.0,
+     "engine_cost": 231,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 86,
+     "agree": 86,
+     "python_cost": 930.0,
+     "engine_cost": 930,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/093-1_fingering.txt": {
+   "notes": 327,
+   "hands": {
+    "R": {
+     "notes": 215,
+     "agree": 215,
+     "python_cost": 739.0,
+     "engine_cost": 739,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 112,
+     "agree": 112,
+     "python_cost": 1584.75,
+     "engine_cost": 1584.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/094-1_fingering.txt": {
+   "notes": 335,
+   "hands": {
+    "R": {
+     "notes": 219,
+     "agree": 219,
+     "python_cost": 639.75,
+     "engine_cost": 639.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 116,
+     "agree": 116,
+     "python_cost": 218.5,
+     "engine_cost": 218.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/095-1_fingering.txt": {
+   "notes": 134,
+   "hands": {
+    "R": {
+     "notes": 92,
+     "agree": 92,
+     "python_cost": 345.0,
+     "engine_cost": 345,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 42,
+     "agree": 42,
+     "python_cost": 89.75,
+     "engine_cost": 89.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/096-1_fingering.txt": {
+   "notes": 608,
+   "hands": {
+    "R": {
+     "notes": 269,
+     "agree": 269,
+     "python_cost": 399.0,
+     "engine_cost": 399,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 339,
+     "agree": 339,
+     "python_cost": 715.25,
+     "engine_cost": 715.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/097-1_fingering.txt": {
+   "notes": 483,
+   "hands": {
+    "R": {
+     "notes": 224,
+     "agree": 224,
+     "python_cost": 734.0,
+     "engine_cost": 734,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 259,
+     "agree": 259,
+     "python_cost": 2006.25,
+     "engine_cost": 2006.25,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/098-1_fingering.txt": {
+   "notes": 240,
+   "hands": {
+    "R": {
+     "notes": 136,
+     "agree": 136,
+     "python_cost": 721.75,
+     "engine_cost": 721.75,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 104,
+     "agree": 104,
+     "python_cost": 630.5,
+     "engine_cost": 630.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/099-1_fingering.txt": {
+   "notes": 374,
+   "hands": {
+    "R": {
+     "notes": 193,
+     "agree": 193,
+     "python_cost": 350.25,
+     "engine_cost": 350.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 181,
+     "agree": 181,
+     "python_cost": 427.0,
+     "engine_cost": 427,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/100-1_fingering.txt": {
+   "notes": 507,
+   "hands": {
+    "R": {
+     "notes": 259,
+     "agree": 259,
+     "python_cost": 1764.0,
+     "engine_cost": 1764,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 248,
+     "agree": 248,
+     "python_cost": 2269.5,
+     "engine_cost": 2269.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/101-1_fingering.txt": {
+   "notes": 253,
+   "hands": {
+    "R": {
+     "notes": 171,
+     "agree": 171,
+     "python_cost": 914.75,
+     "engine_cost": 914.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 82,
+     "agree": 82,
+     "python_cost": 1014.75,
+     "engine_cost": 1014.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/102-1_fingering.txt": {
+   "notes": 289,
+   "hands": {
+    "R": {
+     "notes": 49,
+     "agree": 49,
+     "python_cost": 81.25,
+     "engine_cost": 81.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 240,
+     "agree": 240,
+     "python_cost": 1675.5,
+     "engine_cost": 1675.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/103-1_fingering.txt": {
+   "notes": 302,
+   "hands": {
+    "R": {
+     "notes": 260,
+     "agree": 260,
+     "python_cost": 1191.5,
+     "engine_cost": 1191.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 42,
+     "agree": 42,
+     "python_cost": 3916.5,
+     "engine_cost": 3916.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/104-1_fingering.txt": {
+   "notes": 257,
+   "hands": {
+    "R": {
+     "notes": 135,
+     "agree": 135,
+     "python_cost": 558.5,
+     "engine_cost": 558.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 122,
+     "agree": 122,
+     "python_cost": 882.75,
+     "engine_cost": 882.75,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/105-1_fingering.txt": {
+   "notes": 231,
+   "hands": {
+    "R": {
+     "notes": 158,
+     "agree": 158,
+     "python_cost": 1797.75,
+     "engine_cost": 1797.75,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 73,
+     "agree": 73,
+     "python_cost": 1071.25,
+     "engine_cost": 1071.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/106-1_fingering.txt": {
+   "notes": 409,
+   "hands": {
+    "R": {
+     "notes": 247,
+     "agree": 247,
+     "python_cost": 1636.0,
+     "engine_cost": 1636,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 162,
+     "agree": 162,
+     "python_cost": 904.0,
+     "engine_cost": 904,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/107-1_fingering.txt": {
+   "notes": 290,
+   "hands": {
+    "R": {
+     "notes": 72,
+     "agree": 72,
+     "python_cost": 105.75,
+     "engine_cost": 105.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 218,
+     "agree": 218,
+     "python_cost": 727.5,
+     "engine_cost": 727.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/108-1_fingering.txt": {
+   "notes": 297,
+   "hands": {
+    "R": {
+     "notes": 140,
+     "agree": 140,
+     "python_cost": 1897.5,
+     "engine_cost": 1897.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 157,
+     "agree": 157,
+     "python_cost": 5908.5,
+     "engine_cost": 5908.5,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/109-1_fingering.txt": {
+   "notes": 341,
+   "hands": {
+    "R": {
+     "notes": 170,
+     "agree": 170,
+     "python_cost": 1394.0,
+     "engine_cost": 1394,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 171,
+     "agree": 171,
+     "python_cost": 3443.5,
+     "engine_cost": 3443.5,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/110-1_fingering.txt": {
+   "notes": 453,
+   "hands": {
+    "R": {
+     "notes": 333,
+     "agree": 333,
+     "python_cost": 687.0,
+     "engine_cost": 687,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 120,
+     "agree": 120,
+     "python_cost": 1040.75,
+     "engine_cost": 1040.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/111-1_fingering.txt": {
+   "notes": 231,
+   "hands": {
+    "R": {
+     "notes": 193,
+     "agree": 193,
+     "python_cost": 1141.25,
+     "engine_cost": 1141.25,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 38,
+     "agree": 38,
+     "python_cost": 228.0,
+     "engine_cost": 228,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/112-1_fingering.txt": {
+   "notes": 267,
+   "hands": {
+    "R": {
+     "notes": 196,
+     "agree": 196,
+     "python_cost": 455.5,
+     "engine_cost": 455.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 71,
+     "agree": 71,
+     "python_cost": 565.0,
+     "engine_cost": 565,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/113-1_fingering.txt": {
+   "notes": 705,
+   "hands": {
+    "R": {
+     "notes": 402,
+     "agree": 402,
+     "python_cost": 2843.0,
+     "engine_cost": 2843,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 303,
+     "agree": 303,
+     "python_cost": 1343.5,
+     "engine_cost": 1343.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/114-1_fingering.txt": {
+   "notes": 253,
+   "hands": {
+    "R": {
+     "notes": 140,
+     "agree": 140,
+     "python_cost": 381.25,
+     "engine_cost": 381.25,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 113,
+     "agree": 113,
+     "python_cost": 393.75,
+     "engine_cost": 393.75,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/115-1_fingering.txt": {
+   "notes": 262,
+   "hands": {
+    "R": {
+     "notes": 152,
+     "agree": 152,
+     "python_cost": 422.5,
+     "engine_cost": 422.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 110,
+     "agree": 110,
+     "python_cost": 664.5,
+     "engine_cost": 664.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/116-1_fingering.txt": {
+   "notes": 223,
+   "hands": {
+    "R": {
+     "notes": 117,
+     "agree": 117,
+     "python_cost": 639.25,
+     "engine_cost": 639.25,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 106,
+     "agree": 106,
+     "python_cost": 743.75,
+     "engine_cost": 743.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/117-1_fingering.txt": {
+   "notes": 293,
+   "hands": {
+    "R": {
+     "notes": 163,
+     "agree": 163,
+     "python_cost": 598.0,
+     "engine_cost": 598,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 130,
+     "agree": 130,
+     "python_cost": 1658.5,
+     "engine_cost": 1658.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/118-1_fingering.txt": {
+   "notes": 345,
+   "hands": {
+    "R": {
+     "notes": 185,
+     "agree": 185,
+     "python_cost": 1452.5,
+     "engine_cost": 1452.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 160,
+     "agree": 160,
+     "python_cost": 1467.0,
+     "engine_cost": 1467,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/119-1_fingering.txt": {
+   "notes": 275,
+   "hands": {
+    "R": {
+     "notes": 123,
+     "agree": 123,
+     "python_cost": 599.0,
+     "engine_cost": 599,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 152,
+     "agree": 152,
+     "python_cost": 662.5,
+     "engine_cost": 662.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/120-1_fingering.txt": {
+   "notes": 319,
+   "hands": {
+    "R": {
+     "notes": 163,
+     "agree": 163,
+     "python_cost": 401.25,
+     "engine_cost": 401.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 156,
+     "agree": 156,
+     "python_cost": 1669.5,
+     "engine_cost": 1669.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/121-1_fingering.txt": {
+   "notes": 317,
+   "hands": {
+    "R": {
+     "notes": 160,
+     "agree": 160,
+     "python_cost": 785.5,
+     "engine_cost": 785.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 157,
+     "agree": 157,
+     "python_cost": 490.25,
+     "engine_cost": 490.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/122-1_fingering.txt": {
+   "notes": 175,
+   "hands": {
+    "R": {
+     "notes": 105,
+     "agree": 105,
+     "python_cost": 509.25,
+     "engine_cost": 509.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 70,
+     "agree": 70,
+     "python_cost": 268.75,
+     "engine_cost": 268.75,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/123-1_fingering.txt": {
+   "notes": 154,
+   "hands": {
+    "R": {
+     "notes": 114,
+     "agree": 114,
+     "python_cost": 238.5,
+     "engine_cost": 238.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 40,
+     "agree": 40,
+     "python_cost": 526.0,
+     "engine_cost": 526,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/124-1_fingering.txt": {
+   "notes": 206,
+   "hands": {
+    "R": {
+     "notes": 112,
+     "agree": 112,
+     "python_cost": 253.75,
+     "engine_cost": 253.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 94,
+     "agree": 94,
+     "python_cost": 240.5,
+     "engine_cost": 240.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/125-1_fingering.txt": {
+   "notes": 215,
+   "hands": {
+    "R": {
+     "notes": 135,
+     "agree": 135,
+     "python_cost": 234.25,
+     "engine_cost": 234.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 80,
+     "agree": 80,
+     "python_cost": 368.75,
+     "engine_cost": 368.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/126-1_fingering.txt": {
+   "notes": 140,
+   "hands": {
+    "R": {
+     "notes": 86,
+     "agree": 86,
+     "python_cost": 288.0,
+     "engine_cost": 288,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 54,
+     "agree": 54,
+     "python_cost": 347.5,
+     "engine_cost": 347.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/127-1_fingering.txt": {
+   "notes": 217,
+   "hands": {
+    "R": {
+     "notes": 116,
+     "agree": 116,
+     "python_cost": 380.75,
+     "engine_cost": 380.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 101,
+     "agree": 101,
+     "python_cost": 861.25,
+     "engine_cost": 861.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/128-1_fingering.txt": {
+   "notes": 321,
+   "hands": {
+    "R": {
+     "notes": 202,
+     "agree": 202,
+     "python_cost": 3561.0,
+     "engine_cost": 3561,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 119,
+     "agree": 119,
+     "python_cost": 1067.5,
+     "engine_cost": 1067.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/129-1_fingering.txt": {
+   "notes": 414,
+   "hands": {
+    "R": {
+     "notes": 200,
+     "agree": 200,
+     "python_cost": 395.25,
+     "engine_cost": 395.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 214,
+     "agree": 214,
+     "python_cost": 750.0,
+     "engine_cost": 750,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/130-1_fingering.txt": {
+   "notes": 172,
+   "hands": {
+    "R": {
+     "notes": 99,
+     "agree": 99,
+     "python_cost": 334.25,
+     "engine_cost": 334.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 73,
+     "agree": 73,
+     "python_cost": 420.75,
+     "engine_cost": 420.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/131-1_fingering.txt": {
+   "notes": 284,
+   "hands": {
+    "R": {
+     "notes": 180,
+     "agree": 180,
+     "python_cost": 4836.25,
+     "engine_cost": 4836.25,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 104,
+     "agree": 104,
+     "python_cost": 678.75,
+     "engine_cost": 678.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/132-1_fingering.txt": {
+   "notes": 588,
+   "hands": {
+    "R": {
+     "notes": 260,
+     "agree": 260,
+     "python_cost": 823.0,
+     "engine_cost": 823,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 328,
+     "agree": 328,
+     "python_cost": 2588.25,
+     "engine_cost": 2588.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/133-1_fingering.txt": {
+   "notes": 225,
+   "hands": {
+    "R": {
+     "notes": 48,
+     "agree": 48,
+     "python_cost": 86.5,
+     "engine_cost": 86.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 177,
+     "agree": 177,
+     "python_cost": 1624.75,
+     "engine_cost": 1624.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/134-1_fingering.txt": {
+   "notes": 324,
+   "hands": {
+    "R": {
+     "notes": 155,
+     "agree": 155,
+     "python_cost": 554.5,
+     "engine_cost": 554.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 169,
+     "agree": 169,
+     "python_cost": 803.5,
+     "engine_cost": 803.5,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/135-1_fingering.txt": {
+   "notes": 230,
+   "hands": {
+    "R": {
+     "notes": 114,
+     "agree": 114,
+     "python_cost": 373.75,
+     "engine_cost": 373.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 116,
+     "agree": 116,
+     "python_cost": 789.75,
+     "engine_cost": 789.75,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/136-1_fingering.txt": {
+   "notes": 276,
+   "hands": {
+    "R": {
+     "notes": 60,
+     "agree": 60,
+     "python_cost": 268.75,
+     "engine_cost": 268.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 216,
+     "agree": 216,
+     "python_cost": 987.0,
+     "engine_cost": 987,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/137-1_fingering.txt": {
+   "notes": 325,
+   "hands": {
+    "R": {
+     "notes": 167,
+     "agree": 167,
+     "python_cost": 856.75,
+     "engine_cost": 856.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 158,
+     "agree": 158,
+     "python_cost": 765.25,
+     "engine_cost": 765.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/138-1_fingering.txt": {
+   "notes": 281,
+   "hands": {
+    "R": {
+     "notes": 187,
+     "agree": 187,
+     "python_cost": 1026.25,
+     "engine_cost": 1026.25,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 94,
+     "agree": 94,
+     "python_cost": 295.5,
+     "engine_cost": 295.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/139-1_fingering.txt": {
+   "notes": 338,
+   "hands": {
+    "R": {
+     "notes": 223,
+     "agree": 223,
+     "python_cost": 2210.0,
+     "engine_cost": 2210,
+     "cost_equal": true,
+     "python_iterations": 5,
+     "engine_iterations": 5,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 115,
+     "agree": 115,
+     "python_cost": 4150.75,
+     "engine_cost": 4150.75,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/140-1_fingering.txt": {
+   "notes": 119,
+   "hands": {
+    "R": {
+     "notes": 68,
+     "agree": 68,
+     "python_cost": 141.5,
+     "engine_cost": 141.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 51,
+     "agree": 51,
+     "python_cost": 74.5,
+     "engine_cost": 74.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/141-1_fingering.txt": {
+   "notes": 254,
+   "hands": {
+    "R": {
+     "notes": 163,
+     "agree": 163,
+     "python_cost": 553.0,
+     "engine_cost": 553,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 91,
+     "agree": 91,
+     "python_cost": 1078.0,
+     "engine_cost": 1078,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/142-1_fingering.txt": {
+   "notes": 262,
+   "hands": {
+    "R": {
+     "notes": 162,
+     "agree": 162,
+     "python_cost": 822.0,
+     "engine_cost": 822,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 100,
+     "agree": 100,
+     "python_cost": 1185.0,
+     "engine_cost": 1185,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/143-1_fingering.txt": {
+   "notes": 58,
+   "hands": {
+    "R": {
+     "notes": 22,
+     "agree": 22,
+     "python_cost": 66.5,
+     "engine_cost": 66.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 36,
+     "agree": 36,
+     "python_cost": 7432.5,
+     "engine_cost": 7432.5,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": true,
+     "engine_relaxed": true,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/144-1_fingering.txt": {
+   "notes": 125,
+   "hands": {
+    "R": {
+     "notes": 50,
+     "agree": 50,
+     "python_cost": 137.25,
+     "engine_cost": 137.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 75,
+     "agree": 75,
+     "python_cost": 781.5,
+     "engine_cost": 781.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/145-1_fingering.txt": {
+   "notes": 385,
+   "hands": {
+    "R": {
+     "notes": 270,
+     "agree": 270,
+     "python_cost": 1189.0,
+     "engine_cost": 1189,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 115,
+     "agree": 115,
+     "python_cost": 1350.75,
+     "engine_cost": 1350.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/146-1_fingering.txt": {
+   "notes": 452,
+   "hands": {
+    "R": {
+     "notes": 275,
+     "agree": 275,
+     "python_cost": 592.25,
+     "engine_cost": 592.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 177,
+     "agree": 177,
+     "python_cost": 932.5,
+     "engine_cost": 932.5,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/147-1_fingering.txt": {
+   "notes": 248,
+   "hands": {
+    "R": {
+     "notes": 119,
+     "agree": 119,
+     "python_cost": 176.75,
+     "engine_cost": 176.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 129,
+     "agree": 129,
+     "python_cost": 1143.0,
+     "engine_cost": 1143,
+     "cost_equal": true,
+     "python_iterations": 3,
+     "engine_iterations": 3,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/148-1_fingering.txt": {
+   "notes": 126,
+   "hands": {
+    "R": {
+     "notes": 82,
+     "agree": 82,
+     "python_cost": 140.0,
+     "engine_cost": 140,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 44,
+     "agree": 44,
+     "python_cost": 169.0,
+     "engine_cost": 169,
+     "cost_equal": true,
+     "python_iterations": 4,
+     "engine_iterations": 4,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/149-1_fingering.txt": {
+   "notes": 349,
+   "hands": {
+    "R": {
+     "notes": 201,
+     "agree": 201,
+     "python_cost": 788.25,
+     "engine_cost": 788.25,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 148,
+     "agree": 148,
+     "python_cost": 1533.75,
+     "engine_cost": 1533.75,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  },
+  "research/data/pig/FingeringFiles/150-1_fingering.txt": {
+   "notes": 309,
+   "hands": {
+    "R": {
+     "notes": 175,
+     "agree": 175,
+     "python_cost": 433.75,
+     "engine_cost": 433.75,
+     "cost_equal": true,
+     "python_iterations": 2,
+     "engine_iterations": 2,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    },
+    "L": {
+     "notes": 134,
+     "agree": 134,
+     "python_cost": 851.0,
+     "engine_cost": 851,
+     "cost_equal": true,
+     "python_iterations": 1,
+     "engine_iterations": 1,
+     "python_relaxed": false,
+     "engine_relaxed": false,
+     "sequence_identical": true
+    }
+   }
+  }
+ },
+ "engine_sources": {
+  "packages/engine/src/fingering/geometry.ts": "c1f4a6c35bd2d6c8",
+  "packages/engine/src/fingering/spans.ts": "5a323a901e3ffc51",
+  "packages/engine/src/fingering/rules.ts": "7e2754523fac52f1",
+  "packages/engine/src/fingering/sequence.ts": "9a84c7fa69ef04c3",
+  "packages/engine/src/fingering/viterbi.ts": "a3956007eecdb656",
+  "packages/engine/src/fingering/solve.ts": "152a41889fa43320",
+  "packages/engine/src/fingering/params/weights-parncutt.json": "a65f10f41028d727",
+  "packages/engine/src/score/build.ts": "1fa852986f7c8a32",
+  "packages/engine/src/io/pig/read.ts": "5362147329f880e4"
+ },
+ "summary": {
+  "notes": 36099,
+  "agree": 36099,
+  "agreement": 1.0,
+  "sequences_identical": true
+ }
+}

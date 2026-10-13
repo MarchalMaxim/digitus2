@@ -1,0 +1,51 @@
+# Node
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.venv-*/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Research data and third-party code (downloaded, not redistributed)
+research/data/*
+!research/data/README.md
+!research/data/.gitignore
+!research/data/splits/
+!research/data/**/manifest.json
+research/baselines/third_party/
+research/baselines/outputs/
+research/baselines/weights/
+research/spikes/**/node_modules/
+research/spikes/**/dist/
+research/**/*.ckpt
+research/**/*.pt
+research/**/*.pth
+research/**/*.onnx
+research/**/*.zip
+
+# Content pipeline scratch
+content/_raw/
+content/.venv/
+content/_preview/*.png
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+.env
+.env.*

@@ -166,7 +166,7 @@ First version: a windowed split-point tracker (choose a split pitch per time win
 
 ## 8. Verification
 
-The verification suite is a first-class deliverable and runs in CI.
+The verification suite is a first-class deliverable and runs in CI. The binding detail (numeric goals, oracles, checks, iteration protocol, milestone placement) is in `2026-10-13-verification-design.md`; the list below is the summary it expands.
 
 1. Benchmark metrics. General, highest, soft, and recombination match rates on the official PIG test split, computed by the Python metrics library (cross-checked against the dataset's official evaluation code) and by a TypeScript port used in engine tests. CI fails if the general match rate drops below a stored floor.
 2. Independent editorial oracle. Fingerings extracted from public-domain Mutopia editions are a second ground truth with a different provenance (editors, pedagogical repertoire). Match rate is reported separately; disagreement patterns are analyzed, not hidden.
@@ -206,8 +206,8 @@ Deployment: static build to GitHub Pages through GitHub Actions on every push to
 
 - M0 Research (running): datasets and validation, literature survey, baselines, content library, rendering spike.
 - M1 Foundation: repo scaffold, engine score model, MusicXML and PIG readers and writers, TS metrics, CLI, CI skeleton.
-- M2 Solver v1: rule-based cost model with exact DP, lint, tests; benchmark on PIG test at or above the rule-based baselines.
-- M3 Learning: Python parameter fitting, hybrid model; benchmark at or above the best HMM; hard-error analysis; Mutopia oracle.
+- M2 Solver v1 with the verification core: rule-based cost model with exact DP, lint with expert base rates, `digitus2 bench` with scorecards and error galleries, textbook oracle, metamorphic suite; benchmark on PIG test at or above the rule-based baselines.
+- M3 Learning: Python parameter fitting, hybrid model; benchmark at or above the best HMM; hard-error analysis; calibration and ablation; Mutopia oracle.
 - M4 App MVP: library, score rendering with fingerings, playback with cursor and keyboard, design system.
 - M5 Interaction: editing with pins, confidence display, alternatives, explanations, editorial comparison, export, persistence.
 - M6 MIDI import with hand separation and generated engraving.

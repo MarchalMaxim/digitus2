@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+coverage
+pnpm-lock.yaml
+content/
+research/
+benchmarks/
+docs/research/
+*.musicxml
+*.mxl
+*.xml

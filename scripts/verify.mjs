@@ -27,6 +27,7 @@ function skip(name, why) {
   results.push({ name, status: 'SKIP', detail: why });
 }
 
+if (want('hygiene')) run('hygiene', 'node', ['scripts/check-repo-size.mjs']);
 if (want('typecheck')) run('typecheck', 'pnpm', ['typecheck']);
 if (want('lint')) run('lint', 'pnpm', ['lint']);
 if (want('unit')) run('unit', 'pnpm', ['test']);

@@ -1,0 +1,24 @@
+# Normalize line endings for text; keep generated or bulky music files out of diffs.
+* text=auto eol=lf
+
+# Engraved scores: text (so git stores them efficiently) but no diffs or language stats.
+*.musicxml text eol=lf -diff linguist-generated
+*.mxl binary
+*.mid binary
+*.midi binary
+
+# Derived fingering datasets (PIG-format text) and manifests: diffable but marked generated.
+research/data/**/*.txt linguist-generated
+research/data/**/*.json linguist-generated
+benchmarks/runs/*.json linguist-generated
+
+# Lockfile diffs are noise.
+pnpm-lock.yaml -diff linguist-generated
+
+# Images and audio are binary.
+*.png binary
+*.jpg binary
+*.svg text
+*.wav binary
+*.mp3 binary
+*.ogg binary

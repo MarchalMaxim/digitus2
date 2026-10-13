@@ -16,6 +16,18 @@ Early development. See [docs/PROGRESS.md](docs/PROGRESS.md) for the current stat
 - `research` — Python harness: datasets, metrics, baselines, parameter learning
 - `docs` — specs, plans, research reports
 
+## Engine CLI
+
+```bash
+pnpm install
+pnpm --filter @digitus2/engine cli inspect fixtures/two-staff.musicxml
+pnpm --filter @digitus2/engine cli eval --pred ../../research/baselines/outputs/<name> --gold ../../research/data/pig
+```
+
+CLI paths are relative to `packages/engine`, because pnpm runs the script there.
+
+See [packages/engine/README.md](packages/engine/README.md) for the engine API.
+
 ## License
 
 MIT. Built-in scores are public domain or original arrangements released under CC0; see `content/manifest.json` for per-piece provenance. Research datasets are downloaded by scripts and are not redistributed here; their licenses are recorded in `research/data/README.md`.

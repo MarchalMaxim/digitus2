@@ -126,3 +126,11 @@ describe('the hand size', () => {
     expect(select).toHaveAccessibleDescription(HELP);
   });
 });
+
+// UI batch, spec section 12: one level name everywhere, with no number before it.
+describe('the level', () => {
+  it('reads the level name alone', () => {
+    renderPanel(readyDoc()); // Melody, a level-2 piece
+    expect(screen.getByText('Level').nextElementSibling).toHaveTextContent(/^Easy$/);
+  });
+});

@@ -105,9 +105,7 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
             <>
               <div>
                 <dt>Level</dt>
-                <dd>
-                  {piece.level} · {LEVEL_NAMES[piece.level]}
-                </dd>
+                <dd>{LEVEL_NAMES[piece.level]}</dd>
               </div>
               <div>
                 <dt>Key</dt>

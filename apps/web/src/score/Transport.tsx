@@ -58,6 +58,8 @@ export interface TransportProps {
    * Play and Rewind are unavailable. A playing transport can still be paused.
    */
   disabled?: boolean;
+  /** Paused with the last group heard marked (T10): the cursor is the red element, Play is plain. */
+  resumeShown?: boolean;
 }
 
 export interface PracticeControlsProps {
@@ -69,12 +71,8 @@ export interface PracticeControlsProps {
    * the factor makes; null (the default) while the score is not read yet.
    */
   qpm?: number | null;
-  /**
-   * Folds the controls into a disclosure titled "Practice", closed until the reader opens it.
-   * The score view does this below 480 px, in the same place above the score, so a phone opens
-   * a score with the music on its first screen and the controls one tap away.
-   */
-  collapsible?: boolean;
+  /** The bar the cursor is in, 1-based (1 when nothing is marked): where "Loop bars" starts. */
+  currentBar: number;
 }
 
 /**
@@ -148,23 +146,37 @@ export function loopFromInputs(
   return { from: clamp(bars[0]) - 1, to: clamp(bars[1]) - 1 };
 }
 
+/** The loop fields' first values: the cursor's bar and the next, both within the piece. */
+export function loopPrefill(currentBar: number, measureCount: number): [string, string] {
+  const last = Math.max(1, measureCount);
+  const clamp = (bar: number) => Math.min(last, Math.max(1, bar));
+  const from = clamp(currentBar);
+  return [String(from), String(clamp(from + 1))];
+}
+
 /**
  * The transport: Play or Pause, and Rewind, in the score view's dock (always on screen while the
  * score is). The play state lives in usePlayback. Play is the screen's one red element while the
- * score is stopped; while playing the same button reads Pause and is plain, because the cursor
- * is the red element then. In the lead-in (`playback.waiting`: the count-in, and anything before
- * the first note of the hands played, such as the other hand's pickup) nothing is marked in the
- * score yet, so Pause keeps the red until that note sounds and the cursor takes it.
+ * score is stopped with nothing to resume (ready, rewound, at the end, or paused before any note
+ * was heard); while playing the same button reads Pause and is plain, because the cursor is the
+ * red element then. In the lead-in (`playback.waiting`: the count-in, and anything before the
+ * first note of the hands played, such as the other hand's pickup) nothing is marked in the
+ * score yet, so Pause keeps the red until that note sounds and the cursor takes it. Paused after
+ * a note was heard (`resumeShown`, T10), the cursor keeps the last group heard red and Play is
+ * plain.
  *
  * Space plays and pauses from anywhere while the transport is mounted, unless the focus is in a
  * control that takes Space itself (TAKES_SPACE). Its default, scrolling the page, is cancelled,
  * so the score stays where the cursor put it; a held Space toggles once.
  */
-export function Transport({ playback, disabled = false }: TransportProps) {
+export function Transport({ playback, disabled = false, resumeShown = false }: TransportProps) {
   const playing = playback.playing;
   const loading = playback.loading;
-  /** The button is the red element unless the cursor is: stopped, or playing its lead-in. */
-  const red = !playing || playback.waiting;
+  /**
+   * The button is the red element unless the cursor is: stopped with no resume point marked, or
+   * playing its lead-in.
+   */
+  const red = playing ? playback.waiting : !resumeShown;
   /** Play cannot start now (the score is not ready, or the samples are loading); Pause always works. */
   const playBlocked = !playing && (disabled || loading);
   const toggle = () => {
@@ -213,13 +225,15 @@ export function Transport({ playback, disabled = false }: TransportProps) {
 
 /**
  * The practice controls: tempo, hands, metronome, count-in and the bar loop. Settings live in
- * the store; the loop lives in usePlayback. The loop inputs start from the loop already set, so
- * they show it whenever the controls mount. Folding them into the disclosure (or unfolding them)
- * keeps this component and what was typed: only the elements around the controls change.
+ * the store; the loop lives in usePlayback. The score view keeps them in the dock's Practice
+ * panel at every width (UI batch, spec 13); the panel's toggle names them, so they are no group
+ * of their own (a screen reader would announce "Practice" twice). The panel only hides them, so
+ * what was typed survives closing and opening it.
  *
- * Standing open they are a group named "Practice". Folded, the disclosure is that group and its
- * summary says "Practice", so the controls inside carry no second name (a screen reader would
- * announce "Practice" twice).
+ * The loop is one checkbox, "Loop bars": its two bar fields show only while it is ticked. Ticking
+ * it fills them with the bar the cursor is in and the next (`loopPrefill`) and loops at once;
+ * unticking hides them and turns the loop off, and the bars typed come back when it is ticked
+ * again. The controls start from the loop already set, so they show it whenever they mount.
  *
  * They say what they mean (polish plan Task 6): the tempo shows the tempo it makes ("70 % · ♩ =
  * 70") and is the open piece's own, so a different piece opens at 100 %; a loop typed in reverse
@@ -229,7 +243,7 @@ export function PracticeControls({
   playback,
   measureCount,
   qpm = null,
-  collapsible = false,
+  currentBar,
 }: PracticeControlsProps) {
   const settings = useAppStore((s) => s.settings);
   const setSettings = useAppStore((s) => s.setSettings);
@@ -239,6 +253,7 @@ export function PracticeControls({
     playback.loop ? String(playback.loop.from + 1) : '',
   );
   const [loopTo, setLoopTo] = useState(() => (playback.loop ? String(playback.loop.to + 1) : ''));
+  const [looping, setLooping] = useState(() => playback.loop !== null);
   const tempoPercent = Math.round(tempoFactor * 100);
   const reversed = loopIsReversed(loopFrom, loopTo);
   const loopMessageId = useId();
@@ -249,12 +264,19 @@ export function PracticeControls({
     playback.setLoop(loopFromInputs(fromText, toText, measureCount));
   };
 
-  const controls = (
-    <div
-      className="transport no-print"
-      role={collapsible ? undefined : 'group'}
-      aria-label={collapsible ? undefined : 'Practice'}
-    >
+  const toggleLoop = (on: boolean) => {
+    setLooping(on);
+    if (!on) {
+      playback.setLoop(null);
+      return;
+    }
+    const [from, to] =
+      loopFrom === '' && loopTo === '' ? loopPrefill(currentBar, measureCount) : [loopFrom, loopTo];
+    changeLoop(from, to);
+  };
+
+  return (
+    <div className="transport no-print">
       <label className="tempo">
         Tempo
         <input
@@ -306,59 +328,53 @@ export function PracticeControls({
         Count-in
       </label>
 
-      <fieldset className="loop">
-        <legend>Loop bars</legend>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={measureCount > 0 ? measureCount : undefined}
-          aria-label="Loop from bar"
-          placeholder="from"
-          value={loopFrom}
-          aria-invalid={reversed || undefined}
-          aria-describedby={reversed ? loopMessageId : undefined}
-          onChange={(e) => changeLoop(e.currentTarget.value, loopTo)}
-        />
-        <span aria-hidden="true">–</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={measureCount > 0 ? measureCount : undefined}
-          aria-label="Loop to bar"
-          placeholder="to"
-          value={loopTo}
-          aria-invalid={reversed || undefined}
-          aria-describedby={reversed ? loopMessageId : undefined}
-          onChange={(e) => changeLoop(loopFrom, e.currentTarget.value)}
-        />
-        <button
-          type="button"
-          className="text-button"
-          disabled={loopFrom === '' && loopTo === ''}
-          onClick={() => changeLoop('', '')}
-        >
-          Clear loop
-        </button>
-        {/* Says why a reversed range plays no loop (review S11: it was ignored without a word).
-            It describes both inputs, which say they are invalid, rather than being a live region:
-            the dock's status line must be the page's only one, and an alert on every keystroke of
-            "12" after "6" would interrupt the typing. In ink, never red: the accent is Play. */}
-        {reversed && (
-          <p id={loopMessageId} className="loop-message small">
-            {LOOP_REVERSED_TEXT}
-          </p>
+      <div className="loop">
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={looping}
+            onChange={(e) => toggleLoop(e.currentTarget.checked)}
+          />{' '}
+          Loop bars
+        </label>
+        {looping && (
+          <>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={measureCount > 0 ? measureCount : undefined}
+              aria-label="Loop from bar"
+              value={loopFrom}
+              aria-invalid={reversed || undefined}
+              aria-describedby={reversed ? loopMessageId : undefined}
+              onChange={(e) => changeLoop(e.currentTarget.value, loopTo)}
+            />
+            <span>to</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={measureCount > 0 ? measureCount : undefined}
+              aria-label="Loop to bar"
+              value={loopTo}
+              aria-invalid={reversed || undefined}
+              aria-describedby={reversed ? loopMessageId : undefined}
+              onChange={(e) => changeLoop(loopFrom, e.currentTarget.value)}
+            />
+            {/* Says why a reversed range plays no loop (review S11: it was ignored without a
+                word). It describes both inputs, which say they are invalid, rather than being a
+                live region: the dock's status line must be the page's only one, and an alert on
+                every keystroke of "12" after "6" would interrupt the typing. In ink, never red:
+                the accent is Play. */}
+            {reversed && (
+              <p id={loopMessageId} className="loop-message small">
+                {LOOP_REVERSED_TEXT}
+              </p>
+            )}
+          </>
         )}
-      </fieldset>
+      </div>
     </div>
-  );
-  if (!collapsible) return controls;
-  // Uncontrolled: closed when it mounts, then the reader's to open and close.
-  return (
-    <details className="practice no-print">
-      <summary>Practice</summary>
-      {controls}
-    </details>
   );
 }

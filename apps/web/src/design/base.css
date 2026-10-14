@@ -166,133 +166,6 @@ h1[tabindex='-1']:focus {
   min-width: 0;
 }
 
-/* Library */
-.library {
-  --gap: 1.75rem;
-}
-
-.library .welcome,
-.library .card {
-  --gap: 0.5rem;
-}
-
-.card {
-  border: 1px solid var(--ink);
-  padding: 1rem;
-}
-
-.card > button {
-  margin-top: 1rem;
-}
-
-.piece-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 0.5rem;
-  border-top: 1px solid var(--gray-2);
-}
-
-.piece-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.25rem 1rem;
-  width: 100%;
-  text-align: left;
-  border: 0;
-  border-bottom: 1px solid var(--gray-2);
-  padding: 0.75rem 0.5rem;
-}
-
-.piece-row:hover,
-.piece-row:focus-visible {
-  background: var(--gray-1);
-}
-
-.piece-row:focus-visible {
-  outline-offset: -2px;
-}
-
-/* Gray-3 on gray-1 is about 4.06:1, under WCAG AA, so the secondary text turns ink on hover and focus. */
-.piece-row:hover :is(.muted, .duration, .tag),
-.piece-row:focus-visible :is(.muted, .duration, .tag) {
-  color: var(--ink);
-}
-
-.piece-row .title {
-  font-weight: 600;
-}
-
-.piece-row .composer {
-  grid-column: 1;
-}
-
-.piece-row .duration {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  color: var(--gray-3);
-}
-
-.tag {
-  display: inline-block;
-  margin-left: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 400;
-  vertical-align: 0.1em;
-  border: 1px solid var(--gray-2);
-  padding: 0 0.375rem;
-  color: var(--gray-3);
-}
-
-.drop-zone {
-  border: 1px dashed var(--gray-3);
-  padding: 1.5rem;
-  text-align: center;
-  transition: background var(--dur) var(--ease);
-}
-
-.drop-zone.is-over {
-  background: var(--gray-1);
-}
-
-.file-choose {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 0.25rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  cursor: pointer;
-}
-
-.file-choose:has(:focus-visible) {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-/* The welcome's "Open your own MusicXML file" (LibraryView.tsx): a plain ink link to the drop
-   zone at the end of the list, on a 44 px touch target. */
-.file-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-@media (max-width: 479.98px) {
-  .piece-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .piece-row .duration {
-    grid-column: 1;
-    grid-row: auto;
-    text-align: left;
-  }
-}
-
 /* Links: ink and underlined, never the browser's default link colors. */
 a {
   color: inherit;
@@ -446,7 +319,7 @@ fieldset {
 }
 
 /* What the finger numbers mean (FingerLegend.tsx): one line in ink, a step smaller than the text
-   around it, under the library's welcome and at the top of the score's side panel. */
+   around it, under the score's header until the first Play, and at the top of the side panel. */
 .finger-legend {
   font-size: 0.875rem;
   max-width: 40rem;
@@ -570,13 +443,8 @@ fieldset {
   gap: 0.5rem;
 }
 
-.loop legend {
-  float: left;
-  padding: 0;
-  margin-right: 0.25rem;
-}
-
-.loop input {
+/* The bar fields only: the "Loop bars" tick box beside them keeps a tick box's size. */
+.loop input[type='number'] {
   width: 5rem;
   padding: 0.5rem 0.625rem;
 }
@@ -604,12 +472,13 @@ fieldset {
   cursor: progress;
 }
 
-/* The dock: Play or Pause, Rewind and the on-screen keyboard. It stays at the bottom of the
-   window while the score column is on screen, so the music can always be stopped and the fingers
-   are visible during playback. It is sticky inside the score column: at the end of the column it
-   sits in its own place below the last system, so it never hides the music or the side panel
-   for good. Wider than 480 px the buttons stand stacked beside the keys; narrower, in a row above
-   them, so the keys keep the full width. */
+/* The dock: the Practice toggle, the status line, Play or Pause, Rewind and the on-screen
+   keyboard. It stays at the bottom of the window while the score column is on screen, so the
+   music can always be stopped and the fingers are visible during playback. It is sticky inside
+   the score column: at the end of the column it sits in its own place below the last system, so
+   it never hides the music or the side panel for good. The practice controls live in its
+   Practice panel at every width (UI batch, spec 13), closed on every page load: when it opens,
+   the dock grows upward and the music keeps its place. */
 .dock {
   position: sticky;
   bottom: 0;
@@ -619,25 +488,110 @@ fieldset {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 0.75rem 1rem;
+  gap: 0.5rem 1rem;
   background: var(--paper);
   border-top: 1px solid var(--gray-2);
-  padding: 0.75rem 0;
+  padding: 0.25rem 0 0.75rem;
 }
 
-.dock .transport-group {
+/* From 480 px: row 1 is the toggle and, at its right, the status line (so a status no longer adds
+   a row); the open panel spans the next row; then Play and Rewind stacked beside the keyboard.
+   Every child names its column: the status line leaves the grid while it is empty (visually
+   hidden) and the panel while it is closed, and auto-placement alone would then move Play and
+   Rewind up into the toggle's row. */
+.dock > .practice-toggle {
+  grid-column: 1;
+  justify-self: start;
+}
+
+/* The status line says what the score or the player is busy with (loading the score, loading the
+   piano, the count-in): next to Play wherever the reader is, and it comes and goes without moving
+   the music. While it has nothing to say it stays in the page, visually hidden (out of the grid),
+   so screen readers announce its first words. The count-in's beat number is the cue to get
+   ready: large, bold and in ink, on the same 1.45rem line box as the other statuses (secondary,
+   in gray), so the dock keeps its height when the count follows "Loading the piano…". */
+.dock > .score-status {
+  grid-row: 1;
+  grid-column: 2;
+  justify-self: end;
+  text-align: right;
+}
+
+.dock > .practice-panel {
+  grid-column: 1 / -1;
+}
+
+.dock > .transport-group {
+  grid-column: 1;
   flex-direction: column;
 }
 
-/* The status line is the dock's first row, across it, when there is something to say (loading
-   the score, loading the piano, the count-in): next to Play wherever the reader is, and the dock
-   grows upward without moving the music. While it has nothing to say it stays in the page,
-   visually hidden (out of the grid), so screen readers announce its first words. The count-in's
-   beat number is the cue to get ready: large, bold and in ink, on the same 1.45rem line box as
-   the other statuses (secondary, in gray), so the dock keeps its height when the count follows
-   "Loading the piano…". */
-.dock > .score-status {
-  grid-column: 1 / -1;
+.dock > .keyboard {
+  grid-column: 2;
+}
+
+.practice-panel:not([hidden]) {
+  animation: practice-in var(--dur) var(--ease);
+}
+
+@keyframes practice-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* A disclosure, like the side panel's Details: a 44 px text button with a CSS triangle that turns. */
+.practice-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  font-weight: 600;
+}
+
+.practice-toggle::before {
+  content: '';
+  border-style: solid;
+  border-width: 0.3em 0 0.3em 0.5em;
+  border-color: transparent transparent transparent currentColor;
+  transition: transform var(--dur) var(--ease);
+}
+
+.practice-toggle[aria-expanded='true']::before {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 479.98px) {
+  /* Below 480 px: the status line on its own row, the open panel, then Play, Rewind and Practice
+     in one row, then the keyboard at full width. */
+  .dock > .score-status {
+    order: -2;
+    grid-column: 1 / -1;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .dock > .practice-panel {
+    order: -1;
+  }
+
+  .dock > .transport-group {
+    flex-direction: row;
+  }
+
+  .dock > .practice-toggle {
+    order: 1;
+    grid-column: 2;
+  }
+
+  .dock > .keyboard {
+    order: 2;
+    grid-column: 1 / -1;
+  }
 }
 
 .score-status.is-count {
@@ -655,27 +609,11 @@ html:has(.dock) {
 
 /* Except the dock's own controls: while the dock is stuck to the bottom of the window they are
    on screen already, and that padding would scroll the page by up to a dock's height each time
-   one takes the focus (Tab to Play, Rewind, the keyboard). A negative scroll margin of the same
-   height gives the padding back. */
+   one takes the focus (Tab to Practice, a control in its panel, Play, Rewind, the keyboard). A
+   negative scroll margin of the same height gives the padding back. */
 .dock,
 .dock * {
   scroll-margin-bottom: calc(-1 * var(--dock-h, 0px));
-}
-
-/* Below 480 px the practice controls fold into a closed "Practice" disclosure, in their place
-   above the score (ScoreView.tsx), so a phone opens a score with the music on its first screen
-   and the controls one tap away. The summary is a 44 px touch target and keeps the browser's
-   disclosure triangle, drawn in ink. */
-.practice > summary {
-  display: list-item;
-  min-height: 44px;
-  padding: 0.625rem 0;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.practice[open] > summary {
-  margin-bottom: 0.5rem;
 }
 
 /* On-screen keyboard: paper keys outlined in ink, and ink keys. A pressed key turns gray and
@@ -739,7 +677,7 @@ html:has(.dock) {
   font-size: 11px;
 }
 
-/* L or R over a pressed key: the hand that plays it. */
+/* L or R over a pressed key, only in bars where the hands come within a fifth (T11). */
 .key-hand {
   font: 600 10px var(--font-ui);
   fill: var(--ink);
@@ -755,16 +693,6 @@ html:has(.dock) {
 .key.is-muted,
 .key-hand.is-muted {
   opacity: 0.4;
-}
-
-@media (max-width: 479.98px) {
-  .dock {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .dock .transport-group {
-    flex-direction: row;
-  }
 }
 
 @media (max-width: 899.98px) {

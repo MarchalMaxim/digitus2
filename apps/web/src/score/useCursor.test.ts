@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { parseMusicXml, type Hand } from '@digitus2/engine';
+import { parseMusicXml, type Assignment, type Hand } from '@digitus2/engine';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildOnsetGroups, type OnsetGroup } from './onsetGroups.js';
@@ -26,10 +26,15 @@ const PICKUP = groupsOf(PICKUP_PIANO);
 /** A host holding one `g.note` per note of `groups`, as the rendered score has them. */
 function hostFor(groups: OnsetGroup[]): HTMLDivElement {
   const host = document.createElement('div');
-  const notes = groups.flatMap((g) => g.noteIds.map((id) => `<g class="note" id="${id}"></g>`));
-  host.innerHTML = `<svg><g class="system">${notes.join('')}</g></svg>`;
+  host.innerHTML = pagesFor(groups);
   document.body.append(host);
   return host;
+}
+
+/** Freshly laid-out pages for `groups`: one `g.note` per note, none of them marked. */
+function pagesFor(groups: OnsetGroup[]): string {
+  const notes = groups.flatMap((g) => g.noteIds.map((id) => `<g class="note" id="${id}"></g>`));
+  return `<svg><g class="system">${notes.join('')}</g></svg>`;
 }
 
 /**
@@ -52,6 +57,7 @@ function playing({
     loading: false,
     countIn,
     waiting,
+    atStart: false,
     play: vi.fn(),
     pause: vi.fn(),
     rewind: vi.fn(),
@@ -60,6 +66,11 @@ function playing({
     loop: null,
     setLoop: vi.fn(),
   };
+}
+
+/** A stopped transport: paused away from the start, or at the start (`atStart`). */
+function stopped({ atStart = false, sec = 0 }: { atStart?: boolean; sec?: number } = {}): Playback {
+  return { ...playing({ sec }), playing: false, waiting: false, atStart };
 }
 
 const marked = (host: Element) => [...host.querySelectorAll('.is-red')].map((el) => el.id);
@@ -234,8 +245,9 @@ describe('the muted hand at the cursor', () => {
       expect(byMidi(result.current.muted)).toEqual(leftAt(groups[held]!.tick));
       expect(result.current.pressed.every((k) => k.hand === 'R')).toBe(true);
 
-      // Stopped: nothing pressed, nothing muted.
-      rerender({ ...playing({ clock }), playing: false });
+      // Stopped at the start (Rewind, or the end of the piece): nothing pressed, nothing muted.
+      // Paused away from the start keeps them (T10, 'the cursor while paused').
+      rerender({ ...playing({ clock }), playing: false, atStart: true });
       expect(result.current.pressed).toEqual([]);
       expect(result.current.muted).toEqual([]);
       host.remove();
@@ -321,6 +333,242 @@ describe('the muted hand at the cursor', () => {
     );
     expect(result.current.pressed).toHaveLength(groups[0]!.notes.length);
     expect(result.current.muted).toEqual([]);
+    host.remove();
+  });
+});
+
+// T10 (spec 14): a pause keeps the last group heard red and its keys pressed; Rewind clears them.
+describe('the cursor while paused', () => {
+  it('keeps the last group heard marked and its keys pressed, until a rewind', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 3);
+    const host = hostFor(groups);
+    const sec = groups[1]!.sec + 0.01;
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: playing({ sec }) },
+    );
+    const heard = marked(host);
+    expect(heard).toEqual(groups[1]!.noteIds);
+    const keys = result.current.pressed;
+    rerender(stopped({ sec }));
+    expect(marked(host)).toEqual(heard);
+    expect(result.current.pressed).toEqual(keys);
+    expect(result.current.currentGroup).toBe(1);
+    rerender(stopped({ atStart: true }));
+    expect(marked(host)).toEqual([]);
+    expect(result.current.pressed).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    host.remove();
+  });
+  it("keeps the muted hand's keys dimmed while paused", () => {
+    const groups = BOTH_AT_ONCE.slice(0, 2);
+    const host = hostFor(groups);
+    const mutedHands: Hand[] = ['L'];
+    const { result, rerender } = renderHook(
+      (playback: Playback) => useCursor({ host, groups, playback, assignment: null, mutedHands }),
+      { initialProps: playing({ sec: 0.01 }) },
+    );
+    const dimmed = result.current.muted;
+    expect(dimmed.length).toBeGreaterThan(0);
+    rerender(stopped({ sec: 0.01 }));
+    expect(result.current.muted).toEqual(dimmed);
+    expect(result.current.pressed.every((k) => k.hand === 'R')).toBe(true);
+    rerender(stopped({ atStart: true }));
+    expect(result.current.muted).toEqual([]);
+    host.remove();
+  });
+  it('pause in the lead-in marks nothing', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 2);
+    const host = hostFor(groups);
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: playing({ countIn: { beat: 1, beats: 4, beatInBar: 2 } }) },
+    );
+    rerender(stopped());
+    expect(marked(host)).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    host.remove();
+  });
+  it('a hand switch while paused re-marks the last group of the hands now played, or clears', () => {
+    const groups = PICKUP; // the right hand's pickup alone at 0 s, then both hands at 0.6 s
+    const host = hostFor(groups);
+    const { result, rerender } = renderHook(
+      ({ playback, muted }: { playback: Playback; muted: Hand[] }) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: muted }),
+      { initialProps: { playback: playing({ sec: 0.05 }), muted: [] as Hand[] } },
+    );
+    rerender({ playback: stopped({ sec: 0.05 }), muted: [] });
+    expect(result.current.currentGroup).toBe(0);
+    rerender({ playback: stopped({ sec: 0.05 }), muted: ['R'] }); // the left hand has no note yet
+    expect(marked(host)).toEqual([]);
+    expect(result.current.pressed).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    // Task 5 review (the blocker): switching back keeps the resume point; the pickup is marked again.
+    rerender({ playback: stopped({ sec: 0.05 }), muted: [] });
+    expect(marked(host)).toEqual(groups[0]!.noteIds);
+    expect(result.current.pressed.map((k) => k.hand)).toEqual(['R']);
+    expect(result.current.currentGroup).toBe(0);
+    host.remove();
+  });
+  // Task 5 review: the switch moves the mark to the notes of the hands now played, and back.
+  it("a hand switch while paused marks the same group's notes of the hands now played, and back", () => {
+    const groups = BOTH_AT_ONCE.slice(0, 2);
+    const g0 = groups[0]!; // both hands strike on the first beat
+    const left = g0.notes.filter((n) => n.hand === 'L');
+    expect(left.length).toBeGreaterThan(0);
+    expect(left.length).toBeLessThan(g0.notes.length);
+    const host = hostFor(groups);
+    const sec = g0.sec + 0.01;
+    const { result, rerender } = renderHook(
+      ({ playback, muted }: { playback: Playback; muted: Hand[] }) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: muted }),
+      { initialProps: { playback: playing({ sec }), muted: [] as Hand[] } },
+    );
+    rerender({ playback: stopped({ sec }), muted: [] });
+    expect(marked(host)).toEqual(g0.noteIds);
+    rerender({ playback: stopped({ sec }), muted: ['R'] });
+    expect(marked(host)).toEqual(left.map((n) => n.id));
+    expect(result.current.pressed.length).toBeGreaterThan(0);
+    expect(result.current.pressed.every((k) => k.hand === 'L')).toBe(true);
+    expect(result.current.muted.every((k) => k.hand === 'R')).toBe(true);
+    expect(result.current.currentGroup).toBe(0);
+    rerender({ playback: stopped({ sec }), muted: [] });
+    expect(marked(host)).toEqual(g0.noteIds);
+    expect(result.current.currentGroup).toBe(0);
+    host.remove();
+  });
+  // Task 5 review (the blocker, c): the switch searches at or before the pause position, not at
+  // or before the old hands' last group: the other hand may have struck since.
+  it("a hand switch while paused marks the new hands' last group at or before the pause position", () => {
+    const groups = BOTH_AT_ONCE;
+    // The first onset after the start where the right hand strikes alone, while the left hand
+    // (the one played) last struck earlier.
+    const alone = groups.findIndex((g, i) => i > 0 && g.notes.every((n) => n.hand === 'R'));
+    expect(alone).toBeGreaterThan(0);
+    const played = groups
+      .slice(0, alone)
+      .map((g, i) => (g.notes.some((n) => n.hand === 'L') ? i : -1))
+      .reduce((a, b) => Math.max(a, b), -1);
+    expect(played).toBeGreaterThanOrEqual(0);
+    const host = hostFor(groups);
+    const sec = groups[alone]!.sec + 0.01;
+    const { result, rerender } = renderHook(
+      ({ playback, muted }: { playback: Playback; muted: Hand[] }) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: muted }),
+      { initialProps: { playback: playing({ sec }), muted: ['R'] as Hand[] } },
+    );
+    rerender({ playback: stopped({ sec }), muted: ['R'] });
+    expect(result.current.currentGroup).toBe(played);
+    rerender({ playback: stopped({ sec }), muted: ['L'] });
+    expect(marked(host)).toEqual(groups[alone]!.noteIds);
+    expect(result.current.currentGroup).toBe(alone);
+    rerender({ playback: stopped({ sec }), muted: [] });
+    expect(result.current.currentGroup).toBe(alone);
+    host.remove();
+  });
+  // Task 5 review: a re-solve while paused presses the same keys with the new fingers.
+  it('a re-solve while paused keeps the marks and presses the keys with the new fingers', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 2);
+    const host = hostFor(groups);
+    const g0 = groups[0]!;
+    const { result, rerender } = renderHook(
+      ({ playback, assignment }: { playback: Playback; assignment: Assignment | null }) =>
+        useCursor({ host, groups, playback, assignment, mutedHands: [] }),
+      { initialProps: { playback: playing({ sec: 0.01 }), assignment: null as Assignment | null } },
+    );
+    rerender({ playback: stopped({ sec: 0.01 }), assignment: null });
+    expect(result.current.pressed.every((k) => k.finger === null)).toBe(true);
+    const first = g0.notes[0]!;
+    rerender({
+      playback: stopped({ sec: 0.01 }),
+      assignment: { [first.id]: { finger: 3, source: 'engine' } },
+    });
+    expect(marked(host)).toEqual(g0.noteIds);
+    const key = result.current.pressed.find((k) => k.midi === first.midi && k.hand === first.hand);
+    expect(key?.finger).toBe(3);
+    host.remove();
+  });
+  // Task 5 review (the blocker, a): Play from the pause starts a lead-in at the pause position
+  // (one-hand practice can wait 2.4 s for the next note); a pause in that lead-in has still heard
+  // the group before it, so the group is marked again and Play stays plain.
+  it("a pause in a resume's lead-in marks the last group heard again", () => {
+    const groups = BOTH_AT_ONCE.slice(0, 3);
+    const host = hostFor(groups);
+    const sec = groups[1]!.sec + 0.01;
+    const later = (groups[1]!.sec + groups[2]!.sec) / 2;
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: playing({ sec }) },
+    );
+    rerender(stopped({ sec }));
+    const keys = result.current.pressed;
+    rerender(playing({ waiting: true, sec })); // Play: the lead-in to the next note
+    expect(marked(host)).toEqual([]);
+    rerender(playing({ waiting: true, sec: later })); // the clock runs on in the lead-in
+    rerender(stopped({ sec: later }));
+    expect(marked(host)).toEqual(groups[1]!.noteIds);
+    expect(result.current.pressed).toEqual(keys);
+    expect(result.current.currentGroup).toBe(1);
+    host.remove();
+  });
+  it('a pause in a lead-in after a jump back (Rewind while playing) marks nothing', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 3);
+    const host = hostFor(groups);
+    const sec = groups[1]!.sec + 0.01;
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: playing({ sec }) },
+    );
+    rerender(playing({ waiting: true, sec: 0 })); // Rewind while playing: a lead-in at the start
+    rerender(stopped({ sec: 0 }));
+    expect(marked(host)).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    // ...and from a resume's lead-in, where `waiting` does not change.
+    rerender(playing({ sec }));
+    rerender(stopped({ sec }));
+    rerender(playing({ waiting: true, sec }));
+    rerender(playing({ waiting: true, sec: 0 }));
+    rerender(stopped({ sec: 0 }));
+    expect(marked(host)).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    host.remove();
+  });
+  it('a pause in the count-in after a jump forward (a loop set later) marks nothing', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 3);
+    const host = hostFor(groups);
+    const sec = groups[0]!.sec + 0.01;
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: playing({ sec }) },
+    );
+    rerender(stopped({ sec }));
+    expect(result.current.currentGroup).toBe(0);
+    // Play from the loop's start, two groups on: the count-in holds the clock there.
+    const loopStart = groups[2]!.sec;
+    rerender(playing({ countIn: { beat: 0, beats: 4, beatInBar: 1 }, sec: loopStart }));
+    rerender(stopped({ sec: loopStart }));
+    expect(marked(host)).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    host.remove();
+  });
+  it('re-marks the same group when the pages are laid out again while paused', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 2);
+    const host = hostFor(groups);
+    const { rerender } = renderHook(
+      ({ playback, layoutKey }: { playback: Playback; layoutKey: number }) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [], layoutKey }),
+      { initialProps: { playback: playing({ sec: 0.01 }), layoutKey: 1 } },
+    );
+    rerender({ playback: stopped({ sec: 0.01 }), layoutKey: 1 });
+    host.innerHTML = pagesFor(groups); // new pages: the old marks are gone
+    expect(marked(host)).toEqual([]);
+    rerender({ playback: stopped({ sec: 0.01 }), layoutKey: 2 });
+    expect(marked(host)).toEqual(groups[0]!.noteIds);
     host.remove();
   });
 });

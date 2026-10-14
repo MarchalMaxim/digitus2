@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { libraryScore, mxlOf, utf16leOf } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
-import { LIBRARY_COUNT } from './helpers/library.js';
+import { libraryReady, showLevelOf } from './helpers/library.js';
 
 test('opens Twinkle from the library: every note gets a digit, one red element, hash set', async ({
   page,
@@ -163,6 +163,7 @@ test("a line above the score says when the editor's fingering is shown, and only
 
 test('opens K.545: status appears first, score within 8 s', async ({ page }) => {
   await page.goto('/');
+  await showLevelOf(page, 'mozart-sonata-k545-mvt1');
   const t0 = Date.now();
   await page
     .getByRole('button', {
@@ -177,7 +178,7 @@ test('opens K.545: status appears first, score within 8 s', async ({ page }) => 
 
 test('shows an error state with a way back when the file is not a score', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('choose a file').setInputFiles({
+  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
     name: 'bad.musicxml',
     mimeType: 'application/xml',
     buffer: Buffer.from('<nope/>'),
@@ -185,7 +186,7 @@ test('shows an error state with a way back when the file is not a score', async 
   await expect(page.getByRole('alert')).toContainText(/could not open/i);
   await expectOneRed(page, 'score error');
   await page.getByRole('button', { name: 'Back to the library' }).click();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+  await libraryReady(page);
 });
 
 // Review Focus 1: what MuseScore and other editors export must open as well as plain MusicXML.
@@ -196,7 +197,7 @@ test('opens a compressed .mxl archive chosen from the library: a digit on every 
   page,
 }) => {
   await page.goto('/');
-  await page.getByLabel('choose a file').setInputFiles({
+  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
     name: 'ode-to-joy.mxl',
     mimeType: 'application/vnd.recordare.musicxml',
     buffer: mxlOf(libraryScore('ode-to-joy')),
@@ -210,7 +211,7 @@ test('opens a UTF-16 MusicXML file with a byte-order mark: a digit on every note
   page,
 }) => {
   await page.goto('/');
-  await page.getByLabel('choose a file').setInputFiles({
+  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
     name: 'twinkle-utf16.musicxml',
     mimeType: 'application/xml',
     buffer: utf16leOf(libraryScore('twinkle-twinkle-little-star')),
@@ -258,7 +259,7 @@ test('back to the library and browser back both work', async ({ page }) => {
   await page.getByRole('button', { name: /^Open Ode to Joy/ }).click();
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await page.goBack();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+  await libraryReady(page);
   await page.goForward();
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: 'Back to the library' }).click();

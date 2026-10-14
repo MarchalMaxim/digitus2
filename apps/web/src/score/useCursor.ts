@@ -24,6 +24,17 @@
  * Pause is the screen's one red element meanwhile (Transport.tsx), so the screen keeps exactly
  * one while playing. With no note in an unmuted hand at all there is nothing to mark: the score
  * view does not let such a selection play (`hasNotesFor`).
+ *
+ * Stopped at the start (a fresh score, Rewind while stopped, the end: `playback.atStart`) it
+ * marks nothing and Play is the red element. Paused away from the start after a note was heard
+ * (T10, spec 14) it marks the last group of the hands played at or before the pause position,
+ * with its keys pressed and the muted hand's keys dimmed, so the reader sees where Play resumes
+ * and the cursor stays the one red element. A hand switch, a re-solve or a re-layout
+ * (`layoutKey`) while paused marks that moment again, or clears the marks when the hands now
+ * played had no note yet (switching back marks it again). A pause in the lead-in of a resume
+ * (Play after a pause, before the next note) still has the group heard before it to show; a
+ * pause in any other lead-in (the count-in from the start, after Rewind while playing, a loop
+ * wrap, a Play from a loop's start elsewhere) heard nothing of its pass, so nothing is marked.
  */
 import type { Assignment, Hand, Note } from '@digitus2/engine';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -41,6 +52,11 @@ export interface CursorOptions {
   playback: Playback;
   assignment: Assignment | null;
   mutedHands: Hand[];
+  /**
+   * Changes when the score's pages are laid out again (ScoreView passes doc.pages): a paused
+   * cursor re-marks its group.
+   */
+  layoutKey?: unknown;
 }
 
 /** An onset group restricted to the unmuted hands; `index` is its place in the full list. */
@@ -126,7 +142,14 @@ function isSilentRun(): boolean {
   );
 }
 
-export function useCursor({ host, groups, playback, assignment, mutedHands }: CursorOptions): {
+export function useCursor({
+  host,
+  groups,
+  playback,
+  assignment,
+  mutedHands,
+  layoutKey,
+}: CursorOptions): {
   pressed: PressedKey[];
   /** The muted hands' keys at the cursor (one-hand practice), for the keyboard to dim. */
   muted: PressedKey[];
@@ -144,12 +167,24 @@ export function useCursor({ host, groups, playback, assignment, mutedHands }: Cu
 
   const playing = playback.playing;
   const waiting = playback.waiting;
+  const atStart = playback.atStart;
   const playbackRef = useRef(playback);
   const activeRef = useRef(active);
   /** The cursor's page scroll (followCursor). */
   const followRef = useRef<Follow>({ system: null, target: null, until: 0 });
   /** The `sec` of the group currently marked, NaN when nothing is. */
   const markedSecRef = useRef(Number.NaN);
+  /**
+   * The `sec` of the last group the cursor marked while playing: a note heard, kept through a
+   * pause, a hand switch and a resume's lead-in. NaN when nothing has been heard since the start
+   * or since a jump (Rewind while playing, a loop wrap, a Play that starts elsewhere).
+   */
+  const heardSecRef = useRef(Number.NaN);
+  /**
+   * Where the transport last stopped, until a group is marked again: a lead-in that starts there
+   * is a resume (Play after a pause), not a jump.
+   */
+  const stopSecRef = useRef(Number.NaN);
   useLayoutEffect(() => {
     playbackRef.current = playback;
     activeRef.current = active;
@@ -160,9 +195,51 @@ export function useCursor({ host, groups, playback, assignment, mutedHands }: Cu
   // or with red notes over unpressed keys between them.
   useLayoutEffect(() => {
     if (!host) return;
-    // Stopped, in the lead-in (nothing to mark sounds yet), or nothing in the unmuted hands to
-    // mark (a hand switch while playing): no marks left behind, no keys held.
+    // T10: paused after a note was heard. The last group of the hands played at or before the
+    // pause position keeps the red and its keys stay pressed. A hand switch, a re-solve or a
+    // re-layout while paused marks it again, or clears the marks when the hands now played had
+    // no note yet; switching back marks it again, since the position to resume is unchanged. A
+    // group heard after the position (a jump back in a lead-in, such as Rewind) was not heard in
+    // this pass: nothing to resume.
+    const pos = playbackRef.current.positionSec();
+    if (!playing && !atStart && heardSecRef.current < pos) {
+      stopSecRef.current = pos;
+      clearCurrent(host);
+      const i = groupIndexAt(active, pos);
+      if (i < 0) {
+        markedSecRef.current = Number.NaN;
+        setPressed((prev) => (prev.length > 0 ? [] : prev));
+        setMuted((prev) => (prev.length > 0 ? [] : prev));
+        setCurrentGroup(-1);
+        return;
+      }
+      const g = active[i]!;
+      setCurrent(host, g.noteIds, g.tick);
+      markedSecRef.current = g.sec;
+      setPressed(pressedKeys(g.sounding, assignment));
+      const mutedNotes = mutedAt[groupIndexAt(mutedAt, pos)]?.notes ?? NO_NOTES;
+      setMuted((prev) =>
+        prev.length === 0 && mutedNotes.length === 0 ? prev : pressedKeys(mutedNotes, assignment),
+      );
+      setCurrentGroup(g.index);
+      return;
+    }
+    // Stopped at the start, in the lead-in (nothing to mark sounds yet), or nothing in the
+    // unmuted hands to mark (a hand switch while playing): no marks left behind, no keys held.
     if (!playing || waiting || active.length === 0) {
+      if (!playing) {
+        // At the start, or paused before any note of this pass was heard: nothing to resume.
+        heardSecRef.current = Number.NaN;
+        stopSecRef.current = pos;
+      } else if (waiting) {
+        // A lead-in from where the transport stopped resumes there (Play after a pause): what
+        // was heard stays the resume point if it pauses again before the next note. A lead-in
+        // anywhere else is a jump (Rewind while playing, a loop wrap, a Play from a loop's start
+        // elsewhere): nothing of the new pass has been heard yet.
+        const stop = stopSecRef.current;
+        const resumes = pos >= stop && groupIndexAt(active, pos) === groupIndexAt(active, stop);
+        if (!resumes) heardSecRef.current = Number.NaN;
+      }
       clearCurrent(host);
       markedSecRef.current = Number.NaN;
       followRef.current = { system: null, target: null, until: 0 };
@@ -209,6 +286,8 @@ export function useCursor({ host, groups, playback, assignment, mutedHands }: Cu
       marked = setCurrent(host, g.noteIds, g.tick);
       page = host.firstElementChild;
       markedSecRef.current = g.sec;
+      heardSecRef.current = g.sec;
+      stopSecRef.current = Number.NaN; // the music has moved on: a later lead-in is a jump
       if (i === last) return;
       last = i;
       followCursor(marked, followRef.current);
@@ -217,7 +296,7 @@ export function useCursor({ host, groups, playback, assignment, mutedHands }: Cu
     };
     frame();
     return () => cancelAnimationFrame(raf);
-  }, [host, playing, waiting, active, mutedAt, assignment]);
+  }, [host, playing, waiting, atStart, active, mutedAt, assignment, layoutKey]);
 
   // Playwright's sync check: the transport clock and the group the cursor shows.
   useEffect(() => {

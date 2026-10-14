@@ -1,9 +1,9 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
-import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
 import { flash } from '../design/motion.js';
 import { pieceBySlug } from '../library/manifest.js';
+import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
 import { dimNotes, setDigits } from './render/dom.js';
@@ -152,7 +152,6 @@ export function ScoreView({ source }: { source: PieceSource }) {
   const openLibrary = useAppStore((s) => s.openLibrary);
   const [measureRef, width] = useElementWidth<HTMLElement>();
   const dockRef = useDockHeight<HTMLDivElement>();
-  const narrow = useMediaQuery(NARROW_QUERY);
   const doc = useScoreDocument(source, width);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
 
@@ -178,13 +177,25 @@ export function ScoreView({ source }: { source: PieceSource }) {
   useLayoutEffect(() => {
     if (host) dimNotes(host, mutedIds);
   }, [host, doc.pages, mutedIds]);
-  const { pressed, muted } = useCursor({
+  const { pressed, muted, currentGroup } = useCursor({
     host,
     groups,
     playback,
     assignment: doc.assignment,
     mutedHands,
+    layoutKey: doc.pages,
   });
+  // T11: the hand letters show only in bars where the hands come within a fifth. Decided from
+  // the full groups (both hands, whatever is muted), never from the cursor's filtered ones.
+  const lettered = useMemo(() => letteredBars(groups), [groups]);
+  // The bar the cursor is in (1-based; 1 when nothing is marked): where "Loop bars" starts.
+  const currentBar =
+    currentGroup >= 0 ? (groups[currentGroup]?.notes[0]?.measureIndex ?? 0) + 1 : 1;
+  // The dock's Practice panel: open or closed for the visit (store), closed on every page load.
+  const practiceOpen = useAppStore((s) => s.practiceOpen);
+  const setPracticeOpen = useAppStore((s) => s.setPracticeOpen);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
   // A selection with no notes (a one-hand piece, the other hand chosen) has nothing to hear and
   // nothing for the cursor to mark: Play stays the red element, unavailable, and a running
   // playback stops.
@@ -205,7 +216,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
     // One plain sentence first; the engine's own words follow as the detail.
     return (
       <div className="page score-view">
-        <ScoreHeader title={doc.title} composer={doc.composer} piece={piece} onBack={null} />
+        <ScoreHeader
+          title={doc.title}
+          composer={doc.composer}
+          piece={piece}
+          onBack={null}
+          legend={false}
+        />
         <main className="score-error stack">
           <p role="alert">
             Could not open {name}. {source.kind === 'file' ? FILE_ERROR_TEXT : PIECE_ERROR_TEXT}
@@ -231,17 +248,6 @@ export function ScoreView({ source }: { source: PieceSource }) {
       <ScoreHeader title={doc.title} composer={doc.composer} piece={piece} onBack={openLibrary} />
       <div className="score-layout">
         <main className="score-main" ref={measureRef}>
-          {/* Above the score at every width, one element in one place (so what it holds, such
-              as a loop being typed, survives the window crossing 480 px). Wider than 480 px the
-              controls stand open; narrower they fold into a closed "Practice" disclosure, one
-              line above the music, so a phone's first screen shows the title, Practice, a whole
-              system and the dock (the title and the open controls used to fill it). */}
-          <PracticeControls
-            playback={playback}
-            measureCount={doc.score?.measures.length ?? 0}
-            qpm={qpm}
-            collapsible={narrow}
-          />
           {/* Says whose digits the score shows when they are the editor's, right above the music
               (the toggle sits in the side panel, off screen on a phone or once scrolled). */}
           {showsEditorial(doc) && (
@@ -249,17 +255,55 @@ export function ScoreView({ source }: { source: PieceSource }) {
           )}
           <ScoreSheet pages={doc.pages} label={doc.title} onHost={setHost} />
           {/* The dock: sticky at the bottom of the window while the score column is on screen,
-              so Pause and the fingers stay in view wherever the cursor scrolls the score. The
-              status line is its first row, next to Play: what the score or the player is busy
-              with shows wherever the reader is (deep in a score the top of the page is far
-              away), and it comes and goes without moving the music. It is always in the page
+              so Pause and the fingers stay in view wherever the cursor scrolls the score. Its
+              DOM order is the tab order (spec 13): the Practice toggle, the status line, the
+              Practice panel, Play and Rewind, the keyboard. From 480 px the toggle and the
+              status line share the first row (toggle left, status right), so a status adds no
+              row; below 480 px the status line keeps a row of its own above, and the toggle sits
+              after Rewind. The panel opens between them and Play, and the dock grows upward,
+              so nothing stands between the title and the music. The status line says what the
+              score or the player is busy with wherever the reader is; it is always in the page
               (only its text changes, hidden while empty), so screen readers announce its first
               words too: a live region inserted with its text often goes unannounced. */}
           <div className="dock no-print" ref={dockRef}>
+            <button
+              ref={toggleRef}
+              type="button"
+              className="practice-toggle"
+              aria-expanded={practiceOpen}
+              aria-controls={panelId}
+              onClick={() => setPracticeOpen(!practiceOpen)}
+            >
+              Practice
+            </button>
             <p role="status" className={statusClass(status)}>
               {status?.text}
             </p>
-            <Transport playback={playback} disabled={doc.status !== 'ready' || !playable} />
+            {/* Only hidden while closed, so the controls (and a loop being typed) live on. */}
+            <div
+              id={panelId}
+              className="practice-panel"
+              hidden={!practiceOpen}
+              onKeyDown={(e) => {
+                if (e.key !== 'Escape') return;
+                e.stopPropagation();
+                setPracticeOpen(false);
+                toggleRef.current?.focus();
+              }}
+            >
+              <PracticeControls
+                playback={playback}
+                measureCount={doc.score?.measures.length ?? 0}
+                qpm={qpm}
+                currentBar={currentBar}
+              />
+            </div>
+            {/* Paused with the last group heard marked (T10): the cursor keeps the red. */}
+            <Transport
+              playback={playback}
+              disabled={doc.status !== 'ready' || !playable}
+              resumeShown={!playback.playing && currentGroup >= 0}
+            />
             {range && (
               <div className="keyboard">
                 <Keyboard
@@ -267,6 +311,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   highMidi={range.highMidi}
                   pressed={pressed}
                   muted={muted}
+                  handLetters={lettersShown(groups, currentGroup, lettered)}
                 />
               </div>
             )}

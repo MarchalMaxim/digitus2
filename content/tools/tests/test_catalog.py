@@ -132,3 +132,49 @@ def test_manifest_only_needs_a_built_entry(tmp_path, monkeypatch):
     _scratch_library(tmp_path, monkeypatch, [], {})
     with pytest.raises(SystemExit, match="build it first"):
         build.manifest_only()
+
+
+GENRE_OF = {
+    "children-songs": "songs", "folk-songs": "songs", "christmas": "carols", "hymns": "carols",
+    "anthems": "songs", "songs-before-1929": "songs", "easy-rags": "songs", "classical-themes": "songs",
+    "anna-magdalena": "baroque", "handel-aylesford": "baroque", "bach-little-preludes": "baroque",
+    "dances": "classical", "swedish-folk-dances": "songs", "burgmuller-op100": "romantic",
+    "schumann-op68": "romantic", "tchaikovsky-op39": "romantic", "sonatinas": "classical",
+    "bach-inventions": "baroque", "bach-wtc": "baroque", "schumann-op15": "romantic",
+    "chopin-op28": "romantic", "character-pieces": "romantic", "ragtime": "ragtime",
+}
+
+
+# UI batch (spec section 4.2): seven genres in display order, one per collection.
+def test_every_collection_has_a_known_genre():
+    assert [g["id"] for g in build.load_genres()] == [
+        "songs", "carols", "baroque", "classical", "romantic", "ragtime", "modern"]
+    assert build.collection_genres() == GENRE_OF
+
+
+def test_a_piece_genre_overrides_its_collection():
+    genres = build.collection_genres()
+    fur = next(p for p in CAT if p["slug"] == "beethoven-fur-elise-woo-59")
+    assert genres["character-pieces"] == "romantic"
+    assert build.piece_genre(fur, genres) == "classical"
+    assert [p["slug"] for p in CAT if "genre" in p] == ["beethoven-fur-elise-woo-59"]
+
+
+def _catalog_copy(tmp_path, monkeypatch, edit):
+    cat = json.loads(build.CATALOG.read_text(encoding="utf-8"))
+    edit(cat)
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps(cat), encoding="utf-8")
+    monkeypatch.setattr(build, "CATALOG", path)
+
+
+def test_build_refuses_a_collection_without_a_known_genre(tmp_path, monkeypatch):
+    _catalog_copy(tmp_path, monkeypatch, lambda c: c["collections"][0].update(genre="jazz"))
+    with pytest.raises(SystemExit, match="children-songs"):
+        build.collection_genres()
+
+
+def test_build_refuses_an_unknown_piece_genre(tmp_path, monkeypatch):
+    _catalog_copy(tmp_path, monkeypatch, lambda c: c["pieces"][0].update(genre="jazz"))
+    with pytest.raises(SystemExit, match="unknown genre"):
+        build.load_catalog()

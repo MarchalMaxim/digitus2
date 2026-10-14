@@ -37,6 +37,7 @@ describe('Keyboard', () => {
           { midi: 61, finger: 2, hand: 'L' },
           { midi: 50, finger: null, hand: 'L' },
         ]}
+        handLetters
       />,
     );
     const marks = [...container.querySelectorAll('.key-hand')];
@@ -61,6 +62,20 @@ describe('Keyboard', () => {
     expect(container.querySelector('[data-midi="50"] text')).toBeNull();
     expect(container.querySelectorAll('.is-red')).toHaveLength(0);
   });
+  it('shows no letters unless told to (T11)', () => {
+    const { container } = render(
+      <Keyboard
+        lowMidi={48}
+        highMidi={71}
+        pressed={[
+          { midi: 64, finger: 3, hand: 'R' },
+          { midi: 52, finger: 1, hand: 'L' },
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll('.key-hand')).toHaveLength(0);
+    expect(container.querySelector('[data-midi="64"] text')).toHaveTextContent('3');
+  });
   // Polish plan Task 4 (review S10): one-hand practice showed nothing of the muted hand.
   it("draws the muted hand's keys dimmed, not pressed, with their finger and hand", () => {
     const { container } = render(
@@ -74,6 +89,7 @@ describe('Keyboard', () => {
           // A unison with the hand played: that key is pressed, not dimmed.
           { midi: 64, finger: 1, hand: 'L' },
         ]}
+        handLetters
       />,
     );
     const c3 = container.querySelector('[data-midi="48"]')!;

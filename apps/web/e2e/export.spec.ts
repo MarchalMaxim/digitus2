@@ -17,7 +17,7 @@ test('export downloads the fingered MusicXML with one fingering per note', async
 
 test('a dropped UTF-16 file exports as UTF-8 text that says so', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('choose a file').setInputFiles({
+  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
     name: 'twinkle-utf16.musicxml',
     mimeType: 'application/xml',
     buffer: utf16leOf(libraryScore('twinkle-twinkle-little-star')),

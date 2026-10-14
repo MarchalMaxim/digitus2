@@ -22,6 +22,11 @@ export interface KeyboardProps {
    * the other hand would play. A key also in `pressed` (a unison of both hands) is pressed.
    */
   muted?: PressedKey[];
+  /**
+   * Letter each pressed and dimmed key with its hand (T11: the cursor is in a bar where the hands
+   * come close). Default false.
+   */
+  handLetters?: boolean;
 }
 
 /** A horizontal stretch of the drawn keyboard, in CSS pixels from its left edge. */
@@ -131,8 +136,9 @@ const NO_KEYS: PressedKey[] = [];
 
 /**
  * The on-screen keyboard: white keys white with an ink outline, black keys ink. A pressed key
- * turns gray (`--gray-2`, white or black) and shows the finger number that plays it, with an L
- * or R above it for the hand. With one hand muted, that hand's keys at the cursor show the same
+ * turns gray (`--gray-2`, white or black) and shows the finger number that plays it. An L or R
+ * above it says the hand only while the hands come close (`handLetters`, T11); elsewhere the
+ * numbers stand alone. With one hand muted, that hand's keys at the cursor show the same
  * way, dimmed (`.is-muted`), never pressed. Class names only; the colors come from base.css, and
  * nothing here is ever red.
  *
@@ -146,6 +152,7 @@ export function Keyboard({
   highMidi,
   pressed,
   muted = NO_KEYS,
+  handLetters = false,
 }: KeyboardProps): JSX.Element {
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
   const shapeOf = useMemo(() => new Map(keys.map((k) => [k.midi, k])), [keys]);
@@ -221,8 +228,9 @@ export function Keyboard({
     );
   };
 
-  // The hand over each pressed or dimmed key, the played hand's first. A layer of its own above
-  // the keys, so a key's own text stays its finger number alone.
+  // The hand over each pressed or dimmed key, the played hand's first, drawn only while
+  // `handLetters` (T11). A layer of its own above the keys, so a key's own text stays its finger
+  // number alone. The keyboard's scroll position decides nothing here (spec 15, rule 5).
   const handMark = (p: PressedKey, dimmed: boolean) => {
     const k = shapeOf.get(p.midi);
     if (!k) return null;
@@ -255,8 +263,8 @@ export function Keyboard({
       >
         {keys.filter((k) => !k.black).map(key)}
         {keys.filter((k) => k.black).map(key)}
-        {[...byMidi.values()].map((p) => handMark(p, false))}
-        {[...mutedByMidi.values()].map((p) => handMark(p, true))}
+        {handLetters && [...byMidi.values()].map((p) => handMark(p, false))}
+        {handLetters && [...mutedByMidi.values()].map((p) => handMark(p, true))}
       </svg>
     </div>
   );

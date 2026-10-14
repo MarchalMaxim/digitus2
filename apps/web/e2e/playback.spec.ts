@@ -1,10 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { openPractice } from './helpers/practice.js';
+import { closePractice, openPractice, setLoopBars } from './helpers/practice.js';
 import { accentAreas, type AccentArea, type Box } from './helpers/pixels.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples } from './helpers/samples.js';
-import { LIBRARY_COUNT } from './helpers/library.js';
+import { libraryReady, showLevelOf } from './helpers/library.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
 const LOADING_THE_PIANO = 'Loading the piano…';
@@ -55,8 +55,10 @@ async function expectDockKeepsPause(page: Page): Promise<void> {
   await openPractice(page);
   await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
   // A loop from bar 10 starts playback there: the cursor scrolls the page down to it.
-  await page.getByLabel('Loop from bar').fill('10');
-  await page.getByLabel('Loop to bar').fill('11');
+  await setLoopBars(page, '10', '11');
+  // Practice set, the panel closes: open, it is half a phone's window, and the cursor would then
+  // scroll the page at every system while the checks below wait for it to settle.
+  await closePractice(page);
   await page.getByRole('button', { name: 'Play' }).click();
   await expect(page.locator('.score-sheet .is-red').first()).toBeInViewport({ timeout: 5_000 });
   expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
@@ -87,9 +89,10 @@ async function expectDockKeepsPause(page: Page): Promise<void> {
     .toBe(true);
   await page.keyboard.press('Space');
   await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
-  await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
+  // T10: the pause keeps the last group heard red, and Play plain.
   const paused = await expectOneRed(page, 'paused with Space');
-  expect(paused[0]!.tag).toBe('button');
+  expect(paused.every((r) => r.inSheet)).toBe(true);
+  await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => window.scrollY)).toBe(settled); // Space did not scroll
   await page.keyboard.press('Space');
@@ -343,12 +346,15 @@ async function expectScoreDimmed(page: Page, left: boolean, label: string): Prom
 }
 
 test.describe('playback with the silent instrument', () => {
-  test('play moves a red cursor through the score and lights keys with finger numbers; pause returns the red to Play', async ({
+  // T10 (spec 14): a pause keeps the last group heard red and its keys pressed, Play plain; Rewind
+  // clears them and gives the red back to Play.
+  test('play moves a red cursor through the score and lights keys with finger numbers; pause keeps the last group heard red; Rewind gives the red to Play', async ({
     page,
   }) => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     // The count-in (one 2.4 s bar here) holds the first red note back; the next test covers it.
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
@@ -363,9 +369,145 @@ test.describe('playback with the silent instrument', () => {
     await expect(pressed.first().locator('text')).toHaveText(/^[1-5]$/);
     await page.getByRole('button', { name: 'Pause' }).click();
     const paused = await expectOneRed(page, 'paused');
-    expect(paused[0]!.tag).toBe('button');
+    expect(paused.every((r) => r.inSheet)).toBe(true);
+    expect(Number(paused[0]!.onsetTick)).toBeGreaterThanOrEqual(Number(roots2[0]!.onsetTick));
+    await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+    expect(await page.locator('.keyboard .is-pressed').count()).toBeGreaterThan(0);
+    await page.getByRole('button', { name: 'Rewind' }).click();
+    const rewound = await expectOneRed(page, 'rewound');
+    expect(rewound[0]!.tag).toBe('button');
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
     await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
     await expect(page.locator('.keyboard .is-pressed')).toHaveCount(0);
+  });
+
+  // T10 (spec 14): a pause in the count-in heard nothing, so nothing is marked and Play is red.
+  test('paused in the count-in: nothing marked, Play red', async ({ page }) => {
+    await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
+    await page.getByRole('slider', { name: 'Tempo' }).fill('50');
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect(page.getByRole('status')).toHaveText('1');
+    await page.getByRole('button', { name: 'Pause' }).click();
+    const roots = await expectOneRed(page, 'paused in the count-in');
+    expect(roots[0]!.tag).toBe('button');
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
+    await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
+  });
+
+  // T10 (spec 14) and Review Focus 4, Task 5 review: paused on Happy Birthday's pickup (the
+  // right hand alone), the left hand has no note yet, so switching to it clears the marks and
+  // Play turns red; switching back to both hands marks the pickup again, since the position to
+  // resume is unchanged; Rewind gives the red to Play. One red root at every step.
+  test('a hand switch while paused clears or marks again; Rewind gives the red to Play', async ({
+    page,
+  }) => {
+    await page.goto(`/?audio=silent#/piece/${HAPPY_BIRTHDAY}`);
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(HAPPY_BIRTHDAY_DIGITS, {
+      timeout: 20_000,
+    });
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    // At 50 % the pickup lasts 1.2 s before the left hand's first note.
+    await page.getByRole('slider', { name: 'Tempo' }).fill('50');
+    await page.getByRole('button', { name: 'Play' }).click();
+    await page.waitForFunction(
+      () => {
+        const hook = (window as unknown as { __digitus2?: TestHook }).__digitus2;
+        return hook !== undefined && hook.cursorSec() === 0 && hook.positionSec() > 0.05;
+      },
+      undefined,
+      { polling: 'raf', timeout: 10_000 },
+    );
+    await page.getByRole('button', { name: 'Pause' }).click();
+    expect(await position(page)).toBeLessThan(0.6); // still on the pickup
+    const pickup = await expectOneRed(page, 'paused on the pickup');
+    expect(pickup.every((r) => r.inSheet)).toBe(true);
+    await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+
+    await page.getByRole('radio', { name: 'Left hand' }).check();
+    const left = await expectOneRed(page, 'paused, left hand');
+    expect(left[0]!.tag).toBe('button');
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
+    await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
+
+    await page.getByRole('radio', { name: 'Both hands' }).check();
+    const both = await expectOneRed(page, 'paused, both hands again');
+    expect(both.every((r) => r.inSheet)).toBe(true);
+    expect(both[0]!.onsetTick).toBe(pickup[0]!.onsetTick);
+    await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+
+    await page.getByRole('button', { name: 'Rewind' }).click();
+    const rewound = await expectOneRed(page, 'rewound');
+    expect(rewound[0]!.tag).toBe('button');
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
+  });
+
+  // T10, Task 5 review (the blocker): with one hand practised, Play after a pause leads in to
+  // that hand's next note, which can be bars away. A pause in that lead-in still has the group
+  // heard before it to resume from: it stays red and Play stays plain.
+  test("paused again in a resume's lead-in: the last group heard is marked, Play plain", async ({
+    page,
+  }) => {
+    await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await page.getByRole('radio', { name: 'Left hand' }).check();
+    await page.getByRole('slider', { name: 'Tempo' }).fill('50');
+    // A left-hand onset after the first second with at least 0.6 s (1.2 s at 50 %) to the next.
+    const secs = await page.evaluate(() =>
+      (window as unknown as { __digitus2: TestHook }).__digitus2.groupSecs(),
+    );
+    const at = secs.findIndex((s, i) => s >= 1 && (secs[i + 1] ?? Infinity) - s >= 0.6);
+    expect(at).toBeGreaterThanOrEqual(0);
+    const target = secs[at]!;
+    const next = secs[at + 1]!;
+    await page.getByRole('button', { name: 'Play' }).click();
+    await page.waitForFunction(
+      (sec) => (window as unknown as { __digitus2: TestHook }).__digitus2.cursorSec() === sec,
+      target,
+      { polling: 'raf', timeout: 15_000 },
+    );
+    await page.getByRole('button', { name: 'Pause' }).click();
+    const paused = await expectOneRed(page, 'paused');
+    expect(paused.every((r) => r.inSheet)).toBe(true);
+
+    await page.getByRole('button', { name: 'Play' }).click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: 'Pause' }).click();
+    expect(await position(page)).toBeLessThan(next); // paused in the lead-in
+    const again = await expectOneRed(page, "paused in the resume's lead-in");
+    expect(again.every((r) => r.inSheet)).toBe(true);
+    expect(again[0]!.onsetTick).toBe(paused[0]!.onsetTick);
+    await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+  });
+
+  // T10 with Task 4's loop prefill: the paused cursor's bar is where "Loop bars" starts.
+  // Twinkle is 100 qpm in 4/4: bar 2 runs from 2.4 s to 4.8 s.
+  test('paused in the second bar, "Loop bars" starts there: bars 2 to 3', async ({ page }) => {
+    await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() =>
+            (
+              window as unknown as { __digitus2: { positionSec(): number } }
+            ).__digitus2.positionSec(),
+          ),
+        { timeout: 10_000 },
+      )
+      .toBeGreaterThan(2.7);
+    await page.getByRole('button', { name: 'Pause' }).click();
+    await page.getByRole('checkbox', { name: 'Loop bars' }).check();
+    await expect(page.getByLabel('Loop from bar')).toHaveValue('2');
+    await expect(page.getByLabel('Loop to bar')).toHaveValue('3');
+    await expectOneRed(page, 'paused, loop set');
   });
 
   // Polish plan Task 3 and Review Focus 3 (review S3): the count-in used to light the first notes
@@ -374,6 +516,7 @@ test.describe('playback with the silent instrument', () => {
   test('no note is red during the count-in; the status line counts', async ({ page }) => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await expect(page.getByRole('checkbox', { name: 'Count-in' })).toBeChecked();
     const sampled = sampleUntilFirstRedNote(page, 10_000);
     await page.getByRole('button', { name: 'Play' }).click();
@@ -433,6 +576,7 @@ test.describe('playback with the silent instrument', () => {
     const requested = await delayPianoSamples(page, 1_000);
     await page.goto('/#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // The status line is a live region that is always in the dock, empty until there is something
     // to say, so a screen reader announces its first words ("Loading the piano…", the first "1").
@@ -489,6 +633,7 @@ test.describe('playback with the silent instrument', () => {
       await expect(page.locator('.score-sheet g.fing')).toHaveCount(HAPPY_BIRTHDAY_DIGITS, {
         timeout: 20_000,
       });
+      await openPractice(page);
       await page.getByRole('radio', { name: 'Left hand' }).check();
       const countInBox = page.getByRole('checkbox', { name: 'Count-in' });
       await expect(countInBox).toBeChecked(); // the default
@@ -587,8 +732,7 @@ test.describe('playback with the silent instrument', () => {
     await openPractice(page);
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
-    await page.getByLabel('Loop from bar').fill('1');
-    await page.getByLabel('Loop to bar').fill('2');
+    await setLoopBars(page, '1', '2');
     const groupSecs = () =>
       page.evaluate(() => (window as unknown as { __digitus2: TestHook }).__digitus2.groupSecs());
     await expect.poll(async () => (await groupSecs())[0]).toBeCloseTo(0.6, 3);
@@ -663,6 +807,7 @@ test.describe('playback with the silent instrument', () => {
   test('left hand only: no right-hand keys light up', async ({ page }) => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('radio', { name: 'Left hand' }).click();
     // The count-in (2.4 s here) presses no key until the first note sounds: play through it.
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
@@ -679,6 +824,7 @@ test.describe('playback with the silent instrument', () => {
     // Twinkle's left hand holds whole and half notes under a quarter-note melody.
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     for (let i = 0; i < 6; i++) {
@@ -693,8 +839,11 @@ test.describe('playback with the silent instrument', () => {
   // Polish plan Task 4 (review S5, S4 and S10): a pressed white key was --gray-1 (#f2f2f2) on
   // white, almost invisible; no key said which hand plays it; and with one hand muted the
   // keyboard showed nothing of that hand. Pressed keys, white and black, are now --gray-2 with
-  // the finger and an L or R, and the muted hand's keys show dimmed (40 % opacity), not pressed.
-  test('pressed keys are gray with the finger and the hand; the muted hand shows dimmed', async ({
+  // the finger, and the muted hand's keys show dimmed (40 % opacity), not pressed. T11 (spec 15):
+  // the L or R shows only in bars where the hands come within a fifth, Happy Birthday's bars 2
+  // and 3 (0-based, from about 2 s), on both hands' keys together or on none; each phase must
+  // see letters, so the dimmed letter's opacity is checked on a real one.
+  test('pressed keys are gray with the finger, lettered only where the hands come close; the muted hand shows dimmed', async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' }); // the keys' fill transition is instant
@@ -702,6 +851,7 @@ test.describe('playback with the silent instrument', () => {
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(HAPPY_BIRTHDAY_DIGITS, {
       timeout: 20_000,
     });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const keys = () =>
       page.locator('.keyboard .key.is-pressed, .keyboard .key.is-muted').evaluateAll((els) =>
@@ -723,26 +873,45 @@ test.describe('playback with the silent instrument', () => {
         }),
       );
     type Key = Awaited<ReturnType<typeof keys>>[number];
+    const lettered = (s: Key[]) => s.some((k) => k.mark !== null);
+    /** Both hands lettered together or not at all (spec 15, rule 4). */
+    const allOrNone = (samples: Key[][]) => {
+      for (const s of samples) {
+        const marks = s.filter((k) => k.mark !== null).length;
+        expect(marks === 0 || marks === s.length, JSON.stringify(s)).toBe(true);
+      }
+    };
 
-    // Both hands, sampled every 100 ms until a black key (F#4, bar 2) and a white key were down.
-    const both: Key[] = [];
+    // Both hands, sampled every 100 ms until a black key (F#4, bar 2) and a white key were down
+    // and a sample was lettered.
+    const bothSamples: Key[][] = [];
     await page.getByRole('button', { name: 'Play' }).click();
     await expect
       .poll(
         async () => {
-          both.push(...(await keys()));
-          return both.some((k) => k.black) && both.some((k) => !k.black);
+          bothSamples.push(await keys());
+          return (
+            bothSamples.some((s) => s.some((k) => k.black)) &&
+            bothSamples.some((s) => s.some((k) => !k.black)) &&
+            bothSamples.some(lettered)
+          );
         },
         { timeout: 15_000, intervals: [100] },
       )
       .toBe(true);
+    allOrNone(bothSamples);
+    expect(
+      bothSamples.some((s) => s.length > 0 && !lettered(s)),
+      'bars 0 and 1 carry no letter',
+    ).toBe(true);
+    const both = bothSamples.flat();
     for (const k of both) {
       const at = JSON.stringify(k);
       expect(k.pressed && !k.muted, at).toBe(true);
       expect(k.fill, at).toBe('rgb(204, 204, 204)'); // --gray-2
       expect(k.opacity, at).toBe('1');
       expect(['L', 'R'], at).toContain(k.hand);
-      expect(k.mark, at).toBe(k.hand);
+      expect(k.mark === null || k.mark === k.hand, at).toBe(true);
       expect(k.finger, at).toMatch(/^[1-5]$/);
     }
     expect(new Set(both.map((k) => k.hand))).toEqual(new Set(['L', 'R']));
@@ -752,23 +921,31 @@ test.describe('playback with the silent instrument', () => {
     // The right hand alone: the left hand's keys show dimmed under the right hand's pressed keys.
     await page.getByRole('radio', { name: 'Right hand' }).check();
     await expect(page.locator('.keyboard .key.is-muted').first()).toBeAttached({ timeout: 10_000 });
-    const one: Key[] = [];
+    // From the start again, with the right hand alone, so the samples cross bars 2 and 3.
+    await page.getByRole('button', { name: 'Rewind' }).click();
+    const oneSamples: Key[][] = [];
     await expect
       .poll(
         async () => {
-          one.push(...(await keys()));
-          return one.some((k) => k.muted) && one.some((k) => k.pressed);
+          oneSamples.push(await keys());
+          return (
+            oneSamples.some((s) => s.some((k) => k.muted)) &&
+            oneSamples.some((s) => s.some((k) => k.pressed)) &&
+            oneSamples.some((s) => s.some((k) => k.muted && k.mark !== null))
+          );
         },
         { timeout: 15_000, intervals: [100] },
       )
       .toBe(true);
+    allOrNone(oneSamples);
+    const one = oneSamples.flat();
     for (const k of one) {
       const at = JSON.stringify(k);
       expect(k.pressed !== k.muted, at).toBe(true);
       expect(k.hand, at).toBe(k.muted ? 'L' : 'R');
       expect(k.opacity, at).toBe(k.muted ? '0.4' : '1');
-      expect(k.mark, at).toBe(k.hand);
-      expect(k.markOpacity, at).toBe(k.muted ? '0.4' : '1');
+      expect(k.mark === null || k.mark === k.hand, at).toBe(true);
+      if (k.mark !== null) expect(k.markOpacity, at).toBe(k.muted ? '0.4' : '1');
       expect(k.fill, at).toBe('rgb(204, 204, 204)');
       expect(k.finger, at).toMatch(/^[1-5]$/);
     }
@@ -787,6 +964,7 @@ test.describe('playback with the silent instrument', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const groupSecs = () =>
@@ -842,6 +1020,7 @@ test.describe('playback with the silent instrument', () => {
     await expect(sheetDims).toHaveCount(0); // both hands: nothing dimmed
 
     // The left hand selected, stopped: the right hand's staff and digits at 40 %.
+    await openPractice(page);
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await expect(sheetDims.first()).toBeAttached();
     await expectScoreDimmed(page, true, 'left hand, stopped');
@@ -895,6 +1074,7 @@ test.describe('playback with the silent instrument', () => {
   test('the cursor is in sync with the transport clock within one frame', async ({ page }) => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await page.waitForTimeout(2000);
@@ -948,6 +1128,7 @@ test.describe('playback with the silent instrument', () => {
   }) => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const play = page.getByRole('button', { name: 'Play' });
     await expect(play).toBeEnabled();
@@ -957,7 +1138,9 @@ test.describe('playback with the silent instrument', () => {
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('button', { name: 'Play' })).toBeFocused();
-    await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
+    // T10: the pause keeps the last group heard red; Play is plain.
+    const paused = await expectOneRed(page, 'paused from the keyboard');
+    expect(paused.every((r) => r.inSheet)).toBe(true);
     await page.keyboard.press('Space');
     await expect(page.getByRole('button', { name: 'Pause' })).toBeFocused();
     await expectOneRed(page, 'playing again from the keyboard');
@@ -980,10 +1163,15 @@ test.describe('playback with the silent instrument', () => {
   }) => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     // Twinkle's bars last 2.4 s: wait until bar 3.
     await expect.poll(() => position(page), { timeout: 10_000 }).toBeGreaterThan(5);
+    // "Loop bars" fills in the cursor's bar and the next (the playhead's own, so it stays); the
+    // "to" field is emptied so the loop is typed from scratch, as a reader retyping it would.
+    await page.getByRole('checkbox', { name: 'Loop bars' }).check();
+    await page.getByLabel('Loop to bar').fill('');
     await page.getByLabel('Loop from bar').fill('1');
     const before = await position(page);
     // Bars 1 to 12 hold the playhead, but the first keystroke alone means bars 1 to 1.
@@ -1001,9 +1189,11 @@ test.describe('playback with the silent instrument', () => {
     const REVERSED = 'The loop needs "from" before "to".';
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const from = page.getByLabel('Loop from bar');
     const to = page.getByLabel('Loop to bar');
+    await page.getByRole('checkbox', { name: 'Loop bars' }).check();
     await from.fill('6');
     await to.fill('2');
     const message = page.getByText(REVERSED, { exact: true });
@@ -1075,6 +1265,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await expect(tempo).toHaveText('100 % · ♩ = 100');
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await slider.fill('70');
     await expect(tempo).toHaveText('70 % · ♩ = 70');
@@ -1107,17 +1298,17 @@ test.describe('playback with the silent instrument', () => {
     page,
   }) => {
     await page.goto('/?audio=silent');
-    await page.getByLabel('choose a file').setInputFiles({
+    await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
       name: 'melody.musicxml',
       mimeType: 'application/xml',
       buffer: Buffer.from(melodyXml()),
     });
     const play = page.getByRole('button', { name: 'Play' });
     await expect(play).toBeEnabled({ timeout: 20_000 });
+    await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // A loop keeps the short piece playing, so only the hand switch can stop it.
-    await page.getByLabel('Loop from bar').fill('1');
-    await page.getByLabel('Loop to bar').fill('2');
+    await setLoopBars(page, '1', '2');
     await play.click();
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
     // Switching to the empty hand stops playback: Play is the red element again, unavailable.
@@ -1205,13 +1396,12 @@ test.describe('the dock on a phone', () => {
     await expect(page.getByRole('checkbox', { name: 'Count-in' })).toBeChecked();
     // At 50 % K.545 counts in four beats of 0.91 s: time to check the count-in at leisure.
     await page.getByRole('slider', { name: 'Tempo' }).fill('50');
-    await page.getByLabel('Loop from bar').fill('10');
-    await page.getByLabel('Loop to bar').fill('11');
+    await setLoopBars(page, '10', '11');
     const dock = page.locator('.dock');
     await dock.getByRole('button', { name: 'Play' }).click();
     // After the count-in the cursor scrolls the page down to bar 10, away from the top.
     await expect(page.locator('.score-sheet .is-red').first()).toBeInViewport({ timeout: 10_000 });
-    await expect(page.locator('details.practice')).not.toBeInViewport();
+    await expect(page.locator('.dock .practice-toggle')).toBeInViewport();
     // Pause, back to the loop's first bar, and Play again: a new count-in, deep in the score.
     await dock.getByRole('button', { name: 'Pause' }).click();
     await dock.getByRole('button', { name: 'Rewind' }).click();
@@ -1239,14 +1429,16 @@ test.describe('the dock on a phone', () => {
   test('playback scroll still follows the cursor after a view change', async ({ page }) => {
     const scrollY = () => page.evaluate(() => window.scrollY);
     await page.goto('/?audio=silent');
-    await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+    await libraryReady(page);
+    await showLevelOf(page, 'mozart-sonata-k545-mvt1');
     // The view change: K.545 opened from far down the library.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     const row = page.getByRole('button', {
       name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
     });
     await row.scrollIntoViewIfNeeded();
-    expect(await scrollY()).toBeGreaterThan(1000);
+    // One level is a shorter page than the whole library was (UI batch): far down is past 300 px.
+    expect(await scrollY()).toBeGreaterThan(300);
     await row.click();
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
     expect(await scrollY(), 'the score opens at the top').toBe(0);
@@ -1428,8 +1620,7 @@ test.describe('the cursor on a phone', () => {
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // The review's run of sixteenths, at half speed (each look holds the cursor still anyway).
     await page.getByRole('slider', { name: 'Tempo' }).fill('50');
-    await page.getByLabel('Loop from bar').fill('30');
-    await page.getByLabel('Loop to bar').fill('31');
+    await setLoopBars(page, '30', '31');
     await page.getByRole('button', { name: 'Play' }).click();
     await expect(page.locator('.score-sheet .is-red').first()).toBeInViewport({ timeout: 10_000 });
 

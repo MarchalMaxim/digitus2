@@ -8,7 +8,9 @@
  * loop; unmounting also closes the context. A loop changed while playing reaches the transport
  * once the typing settles (LOOP_SETTLE_MS). The transport's count-in reports become `countIn`,
  * which the status line counts, and its lead-in reports become `waiting`, which the cursor waits
- * for (no note is marked before it sounds) while Pause keeps the red.
+ * for (no note is marked before it sounds) while Pause keeps the red. `atStart` says whether a
+ * stop left the position at the start (Rewind while stopped, the end) or away from it (a pause),
+ * where the cursor keeps the last group heard marked (T10).
  *
  * The transport module is a lazy chunk, fetched as soon as a score is open: it reads the beat
  * grid through the engine's public API, and any runtime import of the engine brings
@@ -72,6 +74,12 @@ export interface Playback {
    * Pause stays the red element. `countIn` is never set while this is false.
    */
   waiting: boolean;
+  /**
+   * True while the position is at the start: a fresh score, after Rewind while stopped, and at
+   * the end of the piece. False from Play on. The cursor keeps the last group heard marked
+   * while paused away from the start (T10) and clears it here.
+   */
+  atStart: boolean;
   play(): void;
   pause(): void;
   rewind(): void;
@@ -125,6 +133,7 @@ export function usePlayback(score: Score | null): Playback {
   const [loading, setLoading] = useState(false);
   const [countIn, setCountIn] = useState<CountIn | null>(null);
   const [waiting, setWaiting] = useState(false);
+  const [atStart, setAtStart] = useState(true);
   const [loop, setLoopState] = useState<LoopRange | null>(null);
 
   const ctxRef = useRef<AudioContext | null>(null);
@@ -162,6 +171,7 @@ export function usePlayback(score: Score | null): Playback {
     setLoading(false);
     setCountIn(null);
     setWaiting(false);
+    setAtStart(true);
     setLoopState(null);
   }, [cancelLoopPush]);
 
@@ -231,6 +241,7 @@ export function usePlayback(score: Score | null): Playback {
         transport.onEnd = () => {
           transport.rewind();
           setPlaying(false);
+          setAtStart(true);
         };
         // The count-in, for the status line, and the lead-in, which the cursor waits for (it
         // marks nothing until the first note of the hands played is heard). A tick that ends
@@ -247,6 +258,10 @@ export function usePlayback(score: Score | null): Playback {
       // in the same render as playing: Pause takes the red from Play, and no note is marked.
       t.play();
       setPlaying(true);
+      setAtStart(false);
+      // Every Play marks the legend as seen and, for a library piece, makes it the one the
+      // library offers to continue (spec 12 and 16).
+      useAppStore.getState().markPlayed();
     };
 
     // Everything at hand (every Play after the first): start in the click itself.
@@ -292,8 +307,12 @@ export function usePlayback(score: Score | null): Playback {
     setWaiting(false);
   }, [pushLoop]);
 
+  // Rewind while stopped puts the position back at the start: nothing to resume, so the paused
+  // cursor clears (T10). While playing, the transport seeks and plays on from the start.
   const rewind = useCallback(() => {
-    transportRef.current?.rewind();
+    const t = transportRef.current;
+    t?.rewind();
+    if (!t?.state.playing) setAtStart(true);
   }, []);
 
   const positionSec = useCallback(() => transportRef.current?.positionSec() ?? 0, []);
@@ -323,6 +342,7 @@ export function usePlayback(score: Score | null): Playback {
       loading,
       countIn,
       waiting,
+      atStart,
       loop,
       play,
       pause,
@@ -336,6 +356,7 @@ export function usePlayback(score: Score | null): Playback {
       loading,
       countIn,
       waiting,
+      atStart,
       loop,
       play,
       pause,

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
+import type { Level } from '../library/levels.js';
 
 export type HandSize = 'large' | 'medium' | 'small' | 'child';
 export type HandsMode = 'both' | 'R' | 'L';
@@ -17,6 +18,10 @@ export interface Settings {
   metronome: boolean;
   countIn: boolean;
   showEditorial: boolean;
+  /** The slug of the library piece played last (set on every Play of a library piece, Task 4), or null. */
+  lastPlayed: string | null;
+  /** True once the reader has pressed Play in any piece: the finger legend then lives in the side panel only. */
+  legendSeen: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +31,8 @@ export const DEFAULT_SETTINGS: Settings = {
   metronome: false,
   countIn: true,
   showEditorial: false,
+  lastPlayed: null,
+  legendSeen: false,
 };
 
 export type PieceSource =
@@ -42,6 +49,12 @@ export interface AppState {
    * (App.tsx). Not persisted.
    */
   libraryScrollY: number;
+  /** The level pill chosen in this visit; null until the reader chooses one. Not persisted. */
+  libraryLevel: Level | null;
+  /** The library's search text in this visit; not persisted. */
+  libraryQuery: string;
+  /** The dock's Practice panel is open; lasts for the visit, every page load starts closed. */
+  practiceOpen: boolean;
   openLibrary(): void;
   openAbout(): void;
   openPiece(source: PieceSource): void;
@@ -53,6 +66,11 @@ export interface AppState {
   setTempoFactor(factor: number): void;
   setNotice(message: string | null): void;
   setLibraryScrollY(y: number): void;
+  setLibraryLevel(level: Level): void;
+  setLibraryQuery(query: string): void;
+  /** Called on Play: the legend has been seen, and a library piece becomes the one to continue. */
+  markPlayed(): void;
+  setPracticeOpen(open: boolean): void;
 }
 
 export const SETTINGS_STORAGE_KEY = 'digitus2.settings.v1';
@@ -156,6 +174,9 @@ function pickSettings(value: unknown): Partial<Settings> {
   if (typeof raw.metronome === 'boolean') out.metronome = raw.metronome;
   if (typeof raw.countIn === 'boolean') out.countIn = raw.countIn;
   if (typeof raw.showEditorial === 'boolean') out.showEditorial = raw.showEditorial;
+  if (typeof raw.lastPlayed === 'string' || raw.lastPlayed === null)
+    out.lastPlayed = raw.lastPlayed;
+  if (typeof raw.legendSeen === 'boolean') out.legendSeen = raw.legendSeen;
   return out;
 }
 
@@ -220,6 +241,9 @@ export const useAppStore = create<AppState>()(
       settings: { ...DEFAULT_SETTINGS },
       notice: null,
       libraryScrollY: 0,
+      libraryLevel: null,
+      libraryQuery: '',
+      practiceOpen: false,
       openLibrary: () => set({ view: { name: 'library' } }),
       openAbout: () => set({ view: { name: 'about' } }),
       openPiece: (source) => set({ view: { name: 'score', source } }),
@@ -233,6 +257,16 @@ export const useAppStore = create<AppState>()(
         }),
       setNotice: (message) => set({ notice: message }),
       setLibraryScrollY: (y) => set({ libraryScrollY: y }),
+      setLibraryLevel: (level) => set({ libraryLevel: level }),
+      setLibraryQuery: (query) => set({ libraryQuery: query }),
+      markPlayed: () =>
+        set((s) => {
+          if (s.view.name !== 'score') return {};
+          const source = s.view.source;
+          const lastPlayed = source.kind === 'library' ? source.slug : s.settings.lastPlayed;
+          return { settings: { ...s.settings, legendSeen: true, lastPlayed } };
+        }),
+      setPracticeOpen: (open) => set({ practiceOpen: open }),
     }),
     {
       name: SETTINGS_STORAGE_KEY,

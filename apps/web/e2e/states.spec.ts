@@ -1,7 +1,8 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { openPractice } from './helpers/practice.js';
+import { openPractice, setLoopBars } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
+import { holdPianoSamples } from './helpers/samples.js';
 import { STATES } from './helpers/states.js';
 
 // The design brief and accessibility in every application state (verification spec 3.9): one
@@ -12,6 +13,7 @@ for (const s of STATES) {
     await s.go(page);
     const roots = await expectOneRed(page, s.name);
     if (s.expectTag === 'cursor') expect(roots.every((r) => r.inSheet)).toBe(true);
+    else if (s.expectTag === 'frame') expect(roots[0]!.className).toContain('drop-frame');
     else expect(roots[0]!.tag).toBe('button');
     await expectNoSeriousA11y(page, s.name);
     const overflow = await page.evaluate(
@@ -105,102 +107,118 @@ async function openTwinkle(page: Page): Promise<void> {
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
 }
 
-/**
- * The closed Practice disclosure on the first screen of a score, at the top of the page: in the
- * score column, before the sheet; its summary wholly on screen above the first system; and the
- * whole first system above the dock.
- */
-async function expectPracticeAboveTheMusic(page: Page, label: string): Promise<void> {
-  const layout = await page.evaluate(() => {
-    const precedes = (a: Element, b: Element) =>
-      (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
-    const dock = document.querySelector('.dock')!;
-    const details = document.querySelector('details.practice')!;
-    const sheet = document.querySelector('.score-sheet')!;
-    const summary = details.querySelector('summary')!.getBoundingClientRect();
-    const system = sheet.querySelector('svg g.system')!.getBoundingClientRect();
-    return {
-      beforeSheet: precedes(details, sheet),
-      inColumn: details.parentElement === dock.parentElement,
-      summaryTop: summary.top,
-      summaryBottom: summary.bottom,
-      systemTop: system.top,
-      systemBottom: system.bottom,
-      dockTop: dock.getBoundingClientRect().top,
-      scrollY: window.scrollY,
-    };
+/** The settings of a reader who has pressed Play before: no finger legend under the header. */
+const legendSeen = (page: Page) =>
+  page.addInitScript(() =>
+    localStorage.setItem(
+      'digitus2.settings.v1',
+      JSON.stringify({ state: { settings: { legendSeen: true } }, version: 1 }),
+    ),
+  );
+
+// T1 (UI batch, spec 13): the practice controls fold into one "Practice" toggle in the dock at
+// every width, closed on every page load, so nothing stands between the title and the music. The
+// first system's top is measured with the legend already seen (spec 17).
+for (const [width, height, firstSystemMax] of [
+  [360, 740, 240],
+  [768, 1024, 220],
+  [1280, 900, 220],
+] as const) {
+  test.describe(`the dock at ${width} px`, () => {
+    test.use({ viewport: { width, height } });
+
+    test('Practice is one closed toggle in the dock; the music starts high; opened, the controls sit above Play', async ({
+      page,
+    }) => {
+      await legendSeen(page);
+      await openTwinkle(page);
+      const toggle = page.locator('.dock .practice-toggle');
+      await expect(toggle).toHaveText('Practice');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.getByRole('slider', { name: 'Tempo' })).toBeHidden();
+      const top = await page.evaluate(
+        () => document.querySelector('.score-sheet svg g.system')!.getBoundingClientRect().top,
+      );
+      test
+        .info()
+        .annotations.push({ type: `first system top at ${width} (px)`, description: `${top}` });
+      expect(top).toBeLessThanOrEqual(firstSystemMax);
+      await toggle.click();
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      for (const c of practiceControls(page).slice(0, 6)) await expect(c).toBeVisible();
+      const g = await page.evaluate(() => ({
+        panelBottom: document.querySelector('.practice-panel')!.getBoundingClientRect().bottom,
+        playTop: document.querySelector('.dock .play-button')!.getBoundingClientRect().top,
+        dockBottom: document.querySelector('.dock')!.getBoundingClientRect().bottom,
+        columnBottom: document.querySelector('.score-main')!.getBoundingClientRect().bottom,
+        systemTop: document.querySelector('.score-sheet svg g.system')!.getBoundingClientRect().top,
+        height: window.innerHeight,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }));
+      expect(g.panelBottom).toBeLessThanOrEqual(g.playTop + 0.5);
+      // The dock grows upward and the music keeps its place. When the column runs past the
+      // window, the dock is stuck to the window's bottom; when the whole column is shorter than
+      // the window (Twinkle at 768 x 1024 with the legend seen), it sits in its own place at the
+      // column's end, wholly on screen.
+      expect(g.systemTop).toBeCloseTo(top, 0);
+      expect(g.dockBottom).toBeLessThanOrEqual(g.height + 0.5);
+      if (g.columnBottom > g.height + 0.5) {
+        expect(Math.abs(g.dockBottom - g.height), JSON.stringify(g)).toBeLessThanOrEqual(0.5);
+      } else {
+        expect(Math.abs(g.dockBottom - g.columnBottom), JSON.stringify(g)).toBeLessThanOrEqual(0.5);
+      }
+      expect(g.overflow).toBeLessThanOrEqual(0);
+      const roots = await expectOneRed(page, `Practice open at ${width}`);
+      expect(roots[0]!.tag).toBe('button');
+      await expectNoSeriousA11y(page, `Practice open at ${width}`);
+      await page.getByRole('slider', { name: 'Tempo' }).focus();
+      await page.keyboard.press('Escape');
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expect(toggle).toBeFocused();
+    });
   });
-  const at = `${label}: ${JSON.stringify(layout)}`;
-  expect(layout.beforeSheet, at).toBe(true);
-  expect(layout.inColumn, at).toBe(true);
-  expect(layout.scrollY, at).toBe(0);
-  // Practice is on the first screen, above the music...
-  expect(layout.summaryTop, at).toBeGreaterThanOrEqual(0);
-  expect(layout.summaryBottom, at).toBeLessThanOrEqual(layout.systemTop);
-  // ...and the first screen still shows a whole system above the dock.
-  expect(layout.systemBottom, at).toBeLessThanOrEqual(layout.dockTop);
 }
 
-// Review S2: on a phone the title and the practice controls filled the first screen and K.545
-// showed no staff at all. Below 480 px the practice controls fold into a closed "Practice"
-// disclosure in their place above the score: one line, so the first screen shows the music, and
-// the controls stay next to the title on any piece (under the dock, the review of Task 2 found
-// them 14,190 px down K.545's 14,690 px page).
-test.describe('the practice section on a phone', () => {
-  test.use({ viewport: { width: 360, height: 740 } });
+test.describe('the dock from 480 px', () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
 
-  test('the practice controls sit in a closed Practice disclosure above the score', async ({
+  test('the status line shares the first row: the dock keeps its height, the keyboard its width', async ({
     page,
   }) => {
+    await holdPianoSamples(page);
     await openTwinkle(page);
-    const practice = page.locator('details.practice');
-    await expect(practice).toHaveCount(1);
-    await expect(practice).not.toHaveAttribute('open');
-    const summary = practice.locator('summary');
-    await expect(summary).toHaveText('Practice');
-    await expect(summary).toBeVisible();
-    for (const control of practiceControls(page)) await expect(control).toBeHidden();
-    await expectPracticeAboveTheMusic(page, 'Twinkle');
-
-    // Opened: every control shows, with one red element, no serious axe issue and no overflow.
-    await summary.click();
-    await expect(practice).toHaveAttribute('open', '');
-    for (const control of practiceControls(page)) await expect(control).toBeVisible();
-    const roots = await expectOneRed(page, 'practice open on a phone');
-    expect(roots[0]!.tag).toBe('button');
-    await expectNoSeriousA11y(page, 'practice open on a phone');
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
-    expect(overflow, 'horizontal overflow with the practice section open').toBeLessThanOrEqual(0);
-
-    // The controls work from there, and the disclosure closes again.
-    await page.getByRole('radio', { name: 'Left hand' }).check();
-    await expect(page.getByRole('radio', { name: 'Left hand' })).toBeChecked();
-    await summary.click();
-    await expect(practice).not.toHaveAttribute('open');
-    await expect(page.getByRole('radio', { name: 'Left hand' })).toBeHidden();
+    const box = () =>
+      page.evaluate(() => ({
+        dock: document.querySelector('.dock')!.getBoundingClientRect().height,
+        keys: document.querySelector('.dock .keyboard')!.getBoundingClientRect().width,
+        dockWidth: document.querySelector('.dock')!.getBoundingClientRect().width,
+        buttons: document.querySelector('.dock .transport-group')!.getBoundingClientRect().width,
+      }));
+    const before = await box();
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect(page.getByRole('status')).toHaveText('Loading the piano…');
+    const after = await box();
+    expect(Math.abs(after.dock - before.dock)).toBeLessThanOrEqual(1);
+    expect(before.keys).toBeGreaterThanOrEqual(before.dockWidth - before.buttons - 32);
   });
 
-  test('on a long piece too: K.545 opens with Practice above a whole system, one Tab after its credit', async ({
-    page,
-  }) => {
-    await page.goto('/#/piece/mozart-sonata-k545-mvt1');
-    await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
-    await expectPracticeAboveTheMusic(page, 'K.545');
-    // From the title the keyboard reaches Practice in place, without scrolling the page.
-    await page.getByRole('heading', { level: 1 }).focus();
-    const summary = page.locator('details.practice > summary');
-    for (let tabs = 0; tabs < 3; tabs++) {
-      if (await summary.evaluate((el) => el === document.activeElement)) break;
-      await page.keyboard.press('Tab');
-    }
-    await expect(summary).toBeFocused();
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
-    const roots = await expectOneRed(page, 'K.545 on a phone');
-    expect(roots[0]!.tag).toBe('button');
-    await expectNoSeriousA11y(page, 'K.545 on a phone');
+  test('Practice stays open from piece to piece within the visit', async ({ page }) => {
+    await openTwinkle(page);
+    await openPractice(page);
+    await page.getByRole('button', { name: 'Back to the library' }).click();
+    await page.getByRole('button', { name: /^Open Mary Had a Little Lamb/ }).click();
+    await expect(page.locator('.dock .practice-toggle')).toHaveAttribute('aria-expanded', 'true');
+    // For the visit only (spec 13 and 16): a reload closes it.
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
+    await expect(page.locator('.dock .practice-toggle')).toHaveAttribute('aria-expanded', 'false');
   });
+});
+
+// The Practice panel on a phone: what it holds survives the window crossing 480 px (the dock's
+// layout changes there), and its longest copy fits at 360 px.
+test.describe('the Practice panel on a phone', () => {
+  test.use({ viewport: { width: 360, height: 740 } });
 
   test('what was typed in the practice controls stays when the window crosses 480 px', async ({
     page,
@@ -208,14 +226,11 @@ test.describe('the practice section on a phone', () => {
     await openTwinkle(page);
     await openPractice(page);
     // Not a loop yet (from is after to), so nothing but the inputs holds it.
-    await page.getByLabel('Loop from bar').fill('6');
-    await page.getByLabel('Loop to bar').fill('2');
+    await setLoopBars(page, '6', '2');
     await page.setViewportSize({ width: 600, height: 740 });
-    await expect(page.locator('details.practice')).toHaveCount(0);
     await expect(page.getByLabel('Loop from bar')).toHaveValue('6');
     await expect(page.getByLabel('Loop to bar')).toHaveValue('2');
     await page.setViewportSize({ width: 360, height: 740 });
-    await expect(page.locator('details.practice')).toHaveCount(1);
     await expect(page.getByLabel('Loop from bar')).toHaveValue('6');
     await expect(page.getByLabel('Loop to bar')).toHaveValue('2');
     await expectOneRed(page, 'practice after crossing 480 px');
@@ -233,10 +248,32 @@ test.describe('the practice section on a phone', () => {
     await expect(tempo).toHaveText('100 % · ♩ = 152');
     await page.getByRole('slider', { name: 'Tempo' }).fill('150');
     await expect(tempo).toHaveText('150 % · ♩ = 228');
-    await page.getByLabel('Loop from bar').fill('6');
-    await page.getByLabel('Loop to bar').fill('2');
+    await setLoopBars(page, '6', '2');
     const message = page.getByText('The loop needs "from" before "to".', { exact: true });
     await expect(message).toBeVisible();
+    // Review of Task 4: the "Loop bars" tick box is a tick box like its neighbours (the bar
+    // fields' width once spilled onto it, 80 px against 18), and the two bar fields share a row.
+    const loopGeometry = await page.evaluate(() => {
+      const box = (sel: string) => document.querySelector(sel)!.getBoundingClientRect();
+      const check = (name: string) =>
+        [...document.querySelectorAll<HTMLInputElement>('.practice-panel input[type="checkbox"]')]
+          .find((i) => i.closest('label')!.textContent!.trim() === name)!
+          .getBoundingClientRect();
+      return {
+        loopBars: check('Loop bars').width,
+        metronome: check('Metronome').width,
+        fromTop: box('[aria-label="Loop from bar"]').top,
+        toTop: box('[aria-label="Loop to bar"]').top,
+      };
+    });
+    expect(
+      Math.abs(loopGeometry.loopBars - loopGeometry.metronome),
+      JSON.stringify(loopGeometry),
+    ).toBeLessThanOrEqual(0.5);
+    expect(
+      Math.abs(loopGeometry.fromTop - loopGeometry.toTop),
+      JSON.stringify(loopGeometry),
+    ).toBeLessThanOrEqual(1);
     const help = page.getByText(
       'Hand size changes the stretches the fingering allows. Choose child or small for small hands.',
       { exact: true },
@@ -246,7 +283,7 @@ test.describe('the practice section on a phone', () => {
     // Every control and every new line inside the window, none cut off at either edge.
     const shown = [
       ...practiceControls(page),
-      page.getByRole('button', { name: 'Clear loop' }),
+      page.getByRole('checkbox', { name: 'Loop bars' }),
       tempo,
       message,
       help,
@@ -313,21 +350,4 @@ test('a control in the dock takes the focus, or a click, where the page is', asy
   expect(await scrollY(), 'Play focused deep in the score').toBe(3000);
   const roots = await expectOneRed(page, 'a dock control focused');
   expect(roots[0]!.tag).toBe('button');
-});
-
-test.describe('the practice section at 480 px', () => {
-  test.use({ viewport: { width: 480, height: 800 } });
-
-  test('the practice controls stand open above the score, with no disclosure', async ({ page }) => {
-    await openTwinkle(page);
-    await expect(page.locator('details.practice')).toHaveCount(0);
-    for (const control of practiceControls(page)) await expect(control).toBeVisible();
-    const above = await page.evaluate(() => {
-      const group = document.querySelector('[role="group"][aria-label="Practice"]')!;
-      const sheet = document.querySelector('.score-sheet')!;
-      return (group.compareDocumentPosition(sheet) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
-    });
-    expect(above).toBe(true);
-    await expectOneRed(page, 'practice at 480 px');
-  });
 });

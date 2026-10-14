@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { LIBRARY_COUNT } from './helpers/library.js';
+import { LEVEL_COUNTS, libraryReady, showLevelOf } from './helpers/library.js';
+import { libraryScore } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
+import { dropFrameShown, pieceRows } from './helpers/states.js';
+import { FINGER_LEGEND } from '../src/score/FingerLegend.js';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -13,23 +16,71 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('library: every piece, one red element, no serious a11y issues, LCP under 2 s', async ({
+test('library: one level at a time, one red element, no serious a11y issues, LCP under 2 s', async ({
   page,
 }) => {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
-  await expectOneRed(page, 'library');
+  await libraryReady(page);
+  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[1]!);
+  await expect(page.getByRole('radio', { name: 'First steps', exact: true })).toBeChecked();
+  await expect(page.getByText(FINGER_LEGEND)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Start here' })).toHaveCount(0);
+  const roots = await expectOneRed(page, 'library');
+  expect(roots[0]!.tag).toBe('button');
   await expectNoSeriousA11y(page, 'library');
   const lcp = await page.evaluate(() => (window as unknown as { __lcp: number }).__lcp);
   expect(lcp, `LCP ${lcp} ms`).toBeLessThan(2000);
 });
 
+// Spec section 17: the red button and the first row on the first screen, every pill inside the
+// viewport (they wrap at 360 px), no horizontal scroll. Runs at 1280 (desktop) and 360 (mobile).
+test('library: the first screen at this width (spec 17)', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  const g = await page.evaluate(() => ({
+    width: window.innerWidth,
+    red: document.querySelector('.library .is-red')!.getBoundingClientRect().top,
+    row: document.querySelector('.piece-row')!.getBoundingClientRect().top,
+    pills: [...document.querySelectorAll('.pill')].map((p) => {
+      const r = p.getBoundingClientRect();
+      return { left: r.left, right: r.right };
+    }),
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  }));
+  const phone = g.width < 480;
+  const at = JSON.stringify(g);
+  expect(g.red, at).toBeLessThanOrEqual(phone ? 160 : 130);
+  expect(g.row, at).toBeLessThanOrEqual(phone ? 470 : 330);
+  expect(g.pills).toHaveLength(5);
+  for (const p of g.pills) {
+    expect(p.left, at).toBeGreaterThanOrEqual(0);
+    expect(p.right, at).toBeLessThanOrEqual(g.width);
+  }
+  expect(g.overflow, at).toBeLessThanOrEqual(0);
+});
+
+test('library: the arrow keys choose a level; the list follows and the pill keeps the focus', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('radio', { name: 'First steps', exact: true }).focus();
+  await page.keyboard.press('ArrowRight');
+  const easy = page.getByRole('radio', { name: 'Easy', exact: true });
+  await expect(easy).toBeChecked();
+  await expect(easy).toBeFocused();
+  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[2]!);
+  await expect(page.getByText('The hands begin to move.')).toBeVisible();
+  await expectOneRed(page, 'Easy chosen');
+});
+
 test('library: an unsupported file shows a notice and keeps one red element', async ({ page }) => {
   await page.goto('/');
-  // The drop zone sits at the bottom of a long page; the notice must still land on screen there.
-  await page.getByTestId('drop-zone').scrollIntoViewIfNeeded();
+  // The end line sits at the bottom of a long page; the notice (sticky at the top) must still
+  // land on screen there.
+  await page.getByText('Open your own MusicXML or MIDI file').scrollIntoViewIfNeeded();
   await page
-    .getByLabel('choose a file')
+    .getByLabel('Open your own MusicXML or MIDI file')
     .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
   await expect(page.getByRole('status')).toBeInViewport();
   await expect(
@@ -50,46 +101,23 @@ test('library: the layout has no horizontal overflow', async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-// Polish plan Task 5, review S4: no screen said that 1 is the thumb and 5 the little finger, or
-// which staff is which hand. The welcome says it, on the first screen with the red start button,
-// at 1280 (desktop) and 360 px (mobile).
-test('library: the welcome explains the finger numbers on the first screen', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
-  const legend = page
-    .locator('.welcome')
-    .getByText(
-      'Finger numbers: 1 is the thumb and 5 the little finger, in both hands. The upper staff is the right hand, the lower staff the left.',
-      { exact: true },
-    );
-  await expect(legend).toBeVisible();
-  await expect(legend).toBeInViewport({ ratio: 1 });
-  await expect(page.getByRole('button', { name: /^Start with/ })).toBeInViewport({ ratio: 1 });
-  const roots = await expectOneRed(page, 'library with the finger legend');
-  expect(roots[0]!.tag).toBe('button');
-  await expectNoSeriousA11y(page, 'library with the finger legend');
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
-});
-
 // Review S2 and L2: a piece opened from far down the list kept a clamped scroll offset (scrollY
 // 578 for K.545 on a phone, its title and Play above the viewport), and going back always
 // landed at the top of the library. Runs at 1280 (desktop) and 360 px (mobile).
-test('library: a piece opened from far down opens at the top; going back restores the list position', async ({
+test('library: a piece opened from far down opens at the top; going back restores the level and the list position', async ({
   page,
 }) => {
   const scrollY = () => page.evaluate(() => window.scrollY);
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+  await libraryReady(page);
+  await showLevelOf(page, 'mozart-sonata-k545-mvt1');
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const row = page.getByRole('button', {
     name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
   });
   await row.scrollIntoViewIfNeeded();
   const listY = await scrollY();
-  expect(listY, 'the list is scrolled far down').toBeGreaterThan(1000);
+  expect(listY, 'the list is scrolled far down').toBeGreaterThan(300);
 
   const expectArrivalAtTop = async (label: string) => {
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
@@ -108,7 +136,7 @@ test('library: a piece opened from far down opens at the top; going back restore
     expect(roots[0]!.tag).toBe('button');
   };
   const expectListAt = async (label: string, leftAt: number) => {
-    await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+    await expect(page.getByRole('radio', { name: 'Intermediate', exact: true })).toBeChecked();
     const y = await scrollY();
     expect(Math.abs(y - leftAt), `${label}: scrollY ${y}, left at ${leftAt}`).toBeLessThanOrEqual(
       50,
@@ -144,71 +172,16 @@ test('library: a piece opened from far down opens at the top; going back restore
   await expectListAt('back after forward', 500);
 });
 
-// Polish plan Task 6, review L1: the drop zone sat after all 30 rows (y = 2883 of 3065 px at
-// 1280, 3884 of 4089 px at 360), and nothing near the top said a reader can open their own
-// score. A link under the welcome brings the drop zone into view and puts the focus on its file
-// chooser. Runs at 1280 (desktop) and 360 px (mobile).
-test('library: "Open your own MusicXML file" under the welcome brings the drop zone into view and focuses its chooser', async ({
+// The list grows with the library (L1: about 150 pieces, 45 rows at level 2); the last row must
+// stay reachable and the long page must not scroll sideways. The mobile project runs it at 360 px.
+test('library: the last piece of the last level is reachable and nothing overflows', async ({
   page,
 }) => {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
-  const link = page
-    .locator('.welcome')
-    .getByRole('link', { name: 'Open your own MusicXML file', exact: true });
-  const zone = page.getByTestId('drop-zone');
-  const chooser = page.getByLabel('choose a file');
-  // On the first screen, with the red start button.
-  await expect(link).toBeInViewport({ ratio: 1 });
-  await expect(page.getByRole('button', { name: /^Start with/ })).toBeInViewport({ ratio: 1 });
-  await expect(zone).not.toBeInViewport();
-
-  await link.click();
-  await expect(zone).toBeInViewport({ ratio: 1 });
-  await expect(chooser).toBeFocused();
-  // The library stays: no piece opened, the address unchanged.
-  await expect(page).toHaveURL(/\/#\/$/);
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
-  const roots = await expectOneRed(page, 'library at the drop zone');
-  expect(roots[0]!.tag).toBe('button');
-  await expectNoSeriousA11y(page, 'library at the drop zone');
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
-
-  // From the keyboard too, on a fresh page: the first Tab reaches the link, Enter follows it, and
-  // the chooser shows its focus ring.
-  await page.reload();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await expect(zone).not.toBeInViewport();
-  await page.keyboard.press('Tab');
-  await expect(link).toBeFocused();
-  await page.keyboard.press('Enter');
-  await expect(zone).toBeInViewport({ ratio: 1 });
-  await expect(chooser).toBeFocused();
-  await expect(page.locator('.file-choose')).toHaveCSS('outline-style', 'solid');
-
-  // And the chooser opens a file from there.
-  await chooser.setInputFiles({
-    name: 'notes.txt',
-    mimeType: 'text/plain',
-    buffer: Buffer.from('x'),
-  });
-  await expect(
-    page.getByText(
-      'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',
-    ),
-  ).toBeInViewport();
-});
-
-// The list grows with the library (L1: about 150 pieces, 45 rows at level 2); the last row must
-// stay reachable and the long page must not scroll sideways. The mobile project runs it at 360 px.
-test('library: the last piece is reachable and nothing overflows', async ({ page }) => {
-  await page.goto('/');
-  const open = page.getByRole('button', { name: /^Open / });
-  await expect(open).toHaveCount(LIBRARY_COUNT);
+  await libraryReady(page);
+  await page.getByRole('radio', { name: 'Challenging', exact: true }).check();
+  const open = pieceRows(page);
+  await expect(open).toHaveCount(LEVEL_COUNTS[5]!);
   const last = open.last();
   await last.scrollIntoViewIfNeeded();
   await expect(last).toBeInViewport();
@@ -219,4 +192,107 @@ test('library: the last piece is reachable and nothing overflows', async ({ page
   }));
   expect(overflow, 'horizontal page overflow').toBeLessThanOrEqual(0);
   expect(right, 'last row inside the viewport width').toBeLessThanOrEqual(clientWidth);
+});
+
+test('library: the red button, then the search field, in the tab order', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('heading', { level: 1 }).focus();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: /^Start with/ })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('searchbox', { name: 'Search the library' })).toBeFocused();
+});
+
+test('library: "fur elise" finds Für Elise; Escape brings back the level and its pills', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('radio', { name: 'Easy', exact: true }).check();
+  const field = page.getByRole('searchbox', { name: 'Search the library' });
+  await field.fill('fur elise');
+  await expect(pieceRows(page)).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 2, name: 'Intermediate' })).toBeVisible();
+  await expect(page.getByRole('radio')).toHaveCount(0);
+  await expectOneRed(page, 'search');
+  await field.press('Escape');
+  await expect(field).toHaveValue('');
+  await expect(page.getByRole('radio', { name: 'Easy', exact: true })).toBeChecked();
+});
+
+test('library: no match says so; Clear brings the list back', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('searchbox', { name: 'Search the library' }).fill('fur elize');
+  await expect(page.getByText('No piece matches “fur elize”.')).toBeVisible();
+  await expect(page.getByText('Search looks in titles, composers and collections.')).toBeVisible();
+  await expectOneRed(page, 'empty result');
+  await page.getByRole('button', { name: 'Clear the search' }).click();
+  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[1]!);
+});
+
+test('library: back from a piece found by search shows the same search', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('searchbox', { name: 'Search the library' }).fill('minuet');
+  await page.getByRole('button', { name: /^Open Minuet in G minor/ }).click();
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await expect(page.getByRole('searchbox', { name: 'Search the library' })).toHaveValue('minuet');
+  await expect(pieceRows(page)).toHaveCount(9);
+});
+
+test('library: a file dropped on the window opens it; a drag that leaves hides the frame', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  const xml = libraryScore('twinkle-twinkle-little-star').toString('utf8');
+  const dt = await page.evaluateHandle((text) => {
+    const d = new DataTransfer();
+    d.items.add(new File([text], 'twinkle.musicxml'));
+    return d;
+  }, xml);
+  await page.dispatchEvent('main', 'dragenter', { dataTransfer: dt });
+  await dropFrameShown(page);
+  const roots = await expectOneRed(page, 'drag');
+  expect(roots[0]!.className).toContain('drop-frame');
+  await page.dispatchEvent('main', 'dragleave', { dataTransfer: dt });
+  await expect(page.locator('.drop-frame')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Start with/ })).toBeVisible();
+  await page.dispatchEvent('main', 'dragenter', { dataTransfer: dt });
+  await page.dispatchEvent('main', 'drop', { dataTransfer: dt });
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+});
+
+test('library: a drag without files shows no frame', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  const dt = await page.evaluateHandle(() => {
+    const d = new DataTransfer();
+    d.setData('text/plain', 'Twinkle');
+    return d;
+  });
+  await page.dispatchEvent('main', 'dragenter', { dataTransfer: dt });
+  await expect(page.locator('.drop-frame')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Start with/ })).toBeVisible();
+});
+
+test('library: a piece played becomes the one to continue, on its level, across a reload', async ({
+  page,
+}) => {
+  await page.goto('/?audio=silent#/piece/bach-minuet-g-major-bwv-anh-114');
+  await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
+  await expect(page.locator('.score-header .finger-legend')).toBeVisible(); // a first score view: the legend under the header
+  await page.getByRole('button', { name: 'Play' }).click();
+  await page.getByRole('button', { name: 'Pause' }).click();
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await expect(page.getByRole('button', { name: 'Continue with Minuet in G major' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Easy', exact: true })).toBeChecked();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Continue with Minuet in G major' })).toBeVisible();
+  await expectOneRed(page, 'returning');
+  await page.getByRole('button', { name: 'Continue with Minuet in G major' }).click();
+  await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
+  await expect(page.locator('.score-header .finger-legend')).toHaveCount(0); // seen: the side panel keeps it
 });

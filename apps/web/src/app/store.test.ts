@@ -193,3 +193,96 @@ describe('the tempo factor, per piece', () => {
     expect(tempoFactorOf(S())).toBe(0.7);
   });
 });
+
+describe('what the library remembers (UI batch, spec section 16)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({
+      view: { name: 'library' },
+      settings: { ...DEFAULT_SETTINGS },
+      libraryLevel: null,
+      libraryQuery: '',
+    });
+  });
+  it('loads older settings with lastPlayed at its default, keeps a valid one, and drops an invalid one', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { handSize: 'small' } }, version: 1 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(useAppStore.getState().settings).toMatchObject({ handSize: 'small', lastPlayed: null });
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { lastPlayed: 'amazing-grace' } }, version: 1 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(useAppStore.getState().settings.lastPlayed).toBe('amazing-grace');
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { lastPlayed: 5 } }, version: 1 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(useAppStore.getState().settings.lastPlayed).toBeNull();
+  });
+  it('keeps the chosen level for the visit only', () => {
+    useAppStore.getState().setLibraryLevel(3);
+    expect(useAppStore.getState().libraryLevel).toBe(3);
+    expect(
+      JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.libraryLevel,
+    ).toBeUndefined();
+  });
+  it('keeps the search text for the visit only', () => {
+    expect(useAppStore.getState().libraryQuery).toBe('');
+    useAppStore.getState().setLibraryQuery('bach');
+    expect(useAppStore.getState().libraryQuery).toBe('bach');
+    expect(
+      JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.libraryQuery,
+    ).toBeUndefined();
+  });
+});
+
+describe('the first Play (UI batch, spec sections 12 and 16)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({ view: { name: 'library' }, settings: { ...DEFAULT_SETTINGS } });
+  });
+  it('remembers the library piece played last and that the legend was seen', () => {
+    useAppStore.getState().openPiece({ kind: 'library', slug: 'beethoven-fur-elise-woo-59' });
+    useAppStore.getState().markPlayed();
+    expect(useAppStore.getState().settings).toMatchObject({
+      lastPlayed: 'beethoven-fur-elise-woo-59',
+      legendSeen: true,
+    });
+    expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)!).state.settings.lastPlayed).toBe(
+      'beethoven-fur-elise-woo-59',
+    );
+  });
+  it('never remembers a dropped file, but still counts its Play for the legend', () => {
+    useAppStore
+      .getState()
+      .openPiece({ kind: 'file', name: 'x.musicxml', bytes: new Uint8Array([1]) });
+    useAppStore.getState().markPlayed();
+    expect(useAppStore.getState().settings).toMatchObject({ lastPlayed: null, legendSeen: true });
+  });
+  it('does nothing outside the score view', () => {
+    useAppStore.getState().markPlayed();
+    expect(useAppStore.getState().settings).toMatchObject({ lastPlayed: null, legendSeen: false });
+  });
+  it('loads legendSeen from older settings at its default and drops an invalid value', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { handSize: 'small', legendSeen: 'yes' } }, version: 1 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(useAppStore.getState().settings).toMatchObject({ handSize: 'small', legendSeen: false });
+  });
+  it('keeps Practice open for the visit only', () => {
+    useAppStore.setState({ practiceOpen: false });
+    expect(useAppStore.getState().practiceOpen).toBe(false);
+    useAppStore.getState().setPracticeOpen(true);
+    expect(useAppStore.getState().practiceOpen).toBe(true);
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state;
+    expect(stored.practiceOpen).toBeUndefined();
+    expect(stored.settings?.practiceOpen).toBeUndefined();
+  });
+});

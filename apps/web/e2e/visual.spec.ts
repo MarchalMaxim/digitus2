@@ -1,6 +1,7 @@
 import { readdirSync, statSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+import { openPractice } from './helpers/practice.js';
 import { STATES } from './helpers/states.js';
 
 // Screenshot baselines for every state except the two that change over time: playing (its
@@ -44,6 +45,46 @@ for (const s of SCREENSHOT_STATES) {
   });
 }
 
+/** Paused at a known score time with the tempo at 50 %, so the pause lands inside one onset group. */
+async function pausedTwinkleAt(page: Page, sec: number): Promise<void> {
+  await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+  await openPractice(page);
+  await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+  await page.getByRole('slider', { name: 'Tempo' }).fill('50');
+  await page.locator('.dock .practice-toggle').click(); // closed again: only the keyboard is shot
+  await page.getByRole('button', { name: 'Play' }).click();
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() =>
+          (window as unknown as { __digitus2: { positionSec(): number } }).__digitus2.positionSec(),
+        ),
+      { timeout: 30_000, intervals: [50] },
+    )
+    .toBeGreaterThan(sec);
+  await page.getByRole('button', { name: 'Pause' }).click();
+}
+
+/**
+ * Two crops of the dock's keyboard, paused (T10) in Twinkle (T11): where the hands are an octave
+ * apart the pressed keys carry their finger numbers alone; where they come within a fifth, every
+ * pressed key also carries its L or R.
+ */
+const KEYBOARD_CROPS = [
+  { name: 'keyboard-unlettered', sec: 1.25 }, // bar 1, the third note: hands an octave apart
+  { name: 'keyboard-lettered', sec: 7.25 }, // bar 4, its first group: hands within a fifth
+];
+
+for (const crop of KEYBOARD_CROPS) {
+  test(`visual ${crop.name}`, async ({ page }) => {
+    await pausedTwinkleAt(page, crop.sec);
+    await expect(page.locator('.dock .keyboard')).toHaveScreenshot(`${crop.name}.png`, {
+      animations: 'disabled',
+    });
+  });
+}
+
 // What is committed for this platform: one baseline per state screenshotted, none for a state
 // that is gone, and each under 900 KB. A run that rewrites the baselines writes them while this
 // test would read them, so it is skipped there; the next plain run checks what was written.
@@ -53,9 +94,10 @@ test('visual baselines: one per state, none left over, each under 900 KB', () =>
     info.config.updateSnapshots === 'all' || info.config.updateSnapshots === 'changed',
     'the baselines are being rewritten in this run',
   );
-  const expected = SCREENSHOT_STATES.map((s) =>
-    info.snapshotPath(`${s.name}.png`, { kind: 'screenshot' }),
-  );
+  const expected = [
+    ...SCREENSHOT_STATES.map((s) => s.name),
+    ...KEYBOARD_CROPS.map((c) => c.name),
+  ].map((n) => info.snapshotPath(`${n}.png`, { kind: 'screenshot' }));
   const dir = dirname(expected[0]!);
   // `<state>-visual-win32.png` on Windows: the suffix after the state's name names the platform.
   const suffix = basename(expected[0]!).slice(SCREENSHOT_STATES[0]!.name.length);

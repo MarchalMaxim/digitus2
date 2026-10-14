@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import manifestJson from '../../../../content/manifest.json';
+import { GENRES } from './levels.js';
 import {
   attribution,
   formatDuration,
@@ -21,7 +22,14 @@ describe('manifest', () => {
     expect(pieces.map((p) => p.level)).toEqual(
       [...pieces.map((p) => p.level)].sort((a, b) => a - b),
     );
-    expect(Object.keys(LEVEL_NAMES)).toHaveLength(5);
+    expect(LEVEL_NAMES).toEqual({
+      1: 'First steps',
+      2: 'Easy',
+      3: 'Moderate',
+      4: 'Intermediate',
+      5: 'Challenging',
+      6: 'Advanced',
+    });
   });
   it('keeps the 30 pieces of the first library as the benchmark set and gives every piece a collection', () => {
     expect(pieces.filter((p) => p.benchmarkSet === 'core30')).toHaveLength(30);
@@ -29,6 +37,10 @@ describe('manifest', () => {
       expect(p.collection.length, p.slug).toBeGreaterThan(0);
       expect(p.collectionId, p.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
     }
+  });
+  it('gives every piece a known genre', () => {
+    const ids = new Set(GENRES.map((g) => g.id));
+    for (const p of pieces) expect(ids.has(p.genre), p.slug).toBe(true);
   });
   it('recommends the first level-1 piece', () => {
     expect(recommendedPiece().slug).toBe('twinkle-twinkle-little-star');

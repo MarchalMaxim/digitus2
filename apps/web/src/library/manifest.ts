@@ -1,6 +1,10 @@
 import manifestJson from '../../../../content/manifest.json';
+import type { GenreId, Level } from './levels.js';
 
-export type Level = 1 | 2 | 3 | 4 | 5;
+export type { GenreId, Level } from './levels.js';
+export { LEVEL_NAMES } from './levels.js';
+export { formatDuration } from './model.js';
+
 export interface PieceSourceInfo {
   name: string;
   url: string;
@@ -25,6 +29,8 @@ export interface LibraryPiece {
   collection: string;
   /** A stable kebab-case id for the collection, e.g. "children-songs". */
   collectionId: string;
+  /** The genre id (catalog.json `genres`): the collection's, or the piece's own override. */
+  genre: GenreId;
   /** "core30" for the 30 pieces of the first library (the engine's benchmark set); null otherwise. */
   benchmarkSet: string | null;
   measures: number;
@@ -39,14 +45,6 @@ export interface LibraryPiece {
   notes: string;
   files: { score: string; fingered: string | null };
 }
-
-export const LEVEL_NAMES: Record<Level, string> = {
-  1: 'First steps',
-  2: 'Easy',
-  3: 'Early intermediate',
-  4: 'Intermediate',
-  5: 'Stretch',
-};
 
 export const pieces: LibraryPiece[] = manifestJson as LibraryPiece[];
 
@@ -72,14 +70,6 @@ export function scoreUrl(relativePath: string): Promise<string> {
   const loader = scoreFiles[key];
   if (!loader) return Promise.reject(new Error(`no score file ${relativePath}`));
   return loader();
-}
-
-/** 29 -> '0:29', 132.3 -> '2:12' (whole seconds, truncated). */
-export function formatDuration(sec: number): string {
-  const total = Math.max(0, Math.floor(sec));
-  const minutes = Math.floor(total / 60);
-  const seconds = total % 60;
-  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 export function isShareAlike(p: LibraryPiece): boolean {

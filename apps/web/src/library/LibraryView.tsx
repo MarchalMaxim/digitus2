@@ -1,30 +1,56 @@
-import { useEffect, useLayoutEffect, useRef, type MouseEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { hashToView } from '../app/routes.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
-import { FingerLegend } from '../score/FingerLegend.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
-import { DropZone } from './DropZone.js';
+import { showsSearch } from './disclosure.js';
+import { LevelPills } from './LevelPills.js';
+import { LEVEL_LINES, LEVEL_NAMES } from './levels.js';
+import { pieces } from './manifest.js';
 import {
-  formatDuration,
-  LEVEL_NAMES,
-  pieces,
-  recommendedPiece,
-  type LibraryPiece,
-  type Level,
-} from './manifest.js';
+  arrivalLevel,
+  countText,
+  libraryLayout,
+  startLabel,
+  startTarget,
+  type LibraryLayout,
+} from './model.js';
+import { useWindowFileDrop } from './ownFile.js';
+import { DropFrame, OwnFileLine } from './OwnFileLine.js';
+import { PieceList } from './PieceList.js';
+import { SearchField } from './SearchField.js';
+import './library.css';
 
-/** Pieces grouped by level, levels ascending, pieces in manifest order within a level. */
-const piecesByLevel: [Level, LibraryPiece[]][] = (() => {
-  const groups = pieces.reduce((acc, p) => {
-    const group = acc.get(p.level);
-    if (group) group.push(p);
-    else acc.set(p.level, [p]);
-    return acc;
-  }, new Map<Level, LibraryPiece[]>());
-  return [...groups.entries()].sort(([a], [b]) => a - b);
-})();
+const LEVEL_LINE_ID = 'library-level-line';
+/** The announcement waits for the reader to stop changing the list (arrowing through the pills). */
+export const ANNOUNCE_DELAY_MS = 500;
+
+function announcementFor(layout: LibraryLayout): string {
+  if (layout.kind === 'search')
+    return layout.count === 0 ? `No piece matches “${layout.query}”.` : countText(layout.count);
+  return layout.kind === 'level' ? `${LEVEL_NAMES[layout.level]}: ${countText(layout.count)}` : '';
+}
+
+/** True once `key` has differed from its first value: the list fades in on changes, never on arrival. */
+function useChanged(key: string): boolean {
+  const first = useRef(key);
+  const changed = useRef(false);
+  if (key !== first.current) changed.current = true;
+  return changed.current;
+}
+
+/** What the polite live region says: the text, once, a moment after the last change, never on arrival. */
+function useAnnouncement(text: string): string {
+  const [said, setSaid] = useState('');
+  const changed = useChanged(text);
+  useEffect(() => {
+    if (!changed) return;
+    const timer = setTimeout(() => setSaid(text), ANNOUNCE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [text, changed]);
+  return said;
+}
 
 /**
  * Starts the engine worker and compiles the Verovio WASM while the reader looks at the list, so
@@ -70,10 +96,11 @@ function useRememberLibraryScroll(): () => void {
       if (latest.current !== null) setLibraryScrollY(latest.current);
     };
   }, [setLibraryScrollY]);
-  return () => {
+  // Stable, so the window's drop listener (useWindowFileDrop) is not added again on every render.
+  return useCallback(() => {
     latest.current = window.scrollY;
     setLibraryScrollY(window.scrollY);
-  };
+  }, [setLibraryScrollY]);
 }
 
 export function LibraryView() {
@@ -81,112 +108,99 @@ export function LibraryView() {
   const openPiece = useAppStore((s) => s.openPiece);
   const openAbout = useAppStore((s) => s.openAbout);
   const setNotice = useAppStore((s) => s.setNotice);
-  const start = recommendedPiece();
+  const lastPlayed = useAppStore((s) => s.settings.lastPlayed);
+  const chosenLevel = useAppStore((s) => s.libraryLevel);
+  const setLibraryLevel = useAppStore((s) => s.setLibraryLevel);
+  const query = useAppStore((s) => s.libraryQuery);
+  const setLibraryQuery = useAppStore((s) => s.setLibraryQuery);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const rememberScroll = useRememberLibraryScroll();
+  const level = arrivalLevel(pieces, chosenLevel, lastPlayed);
+  const layout = useMemo(() => libraryLayout(pieces, { level, query }), [level, query]);
+  const start = startTarget(pieces, lastPlayed);
+  // Every search result list shares the key 'search': keystrokes after the first swap the rows
+  // without a fade (spec 6.4).
+  const listKey = layout.kind === 'level' ? `level-${layout.level}` : layout.kind;
+  const fade = useChanged(listKey);
+  const announcement = useAnnouncement(announcementFor(layout));
   // A refusal still showing would be stale in the score view, so opening anything clears it.
   const open = (source: PieceSource) => {
     rememberScroll();
     setNotice(null);
     openPiece(source);
   };
+  // Stable, so the window's drop listener stays put across renders.
+  const openFile = useCallback(
+    (name: string, bytes: Uint8Array) => {
+      rememberScroll();
+      setNotice(null);
+      openPiece({ kind: 'file', name, bytes });
+    },
+    [rememberScroll, setNotice, openPiece],
+  );
+  const dragging = useWindowFileDrop(openFile, setNotice);
   const about = () => {
     rememberScroll();
     openAbout();
   };
-  // The drop zone sits after all 30 rows (review L1): the welcome's link brings it into view,
-  // at once (motion stays under 200 ms), and puts the focus on its file chooser.
-  const dropZone = useRef<HTMLDivElement>(null);
-  const chooser = useRef<HTMLInputElement>(null);
-  const showDropZone = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    dropZone.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
-    chooser.current?.focus({ preventScroll: true });
-  };
+  const listClass = [
+    'library-list',
+    layout.kind === 'level' ? 'is-level' : '',
+    fade ? 'is-fresh' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <main className="page stack library">
-      <header className="stack welcome">
+    <main className={dragging ? 'page stack library is-dragging' : 'page stack library'}>
+      <header className="welcome">
         <h1 ref={heading} tabIndex={-1}>
           digitus2
         </h1>
         <p className="muted">
           Finger numbers for piano music. Pick a piece, press play, and follow the red note.
         </p>
-        <FingerLegend />
-        {/* An in-page link. Its address is the library's own: the hash is the router, so an
-            anchor to the drop zone would change the view; the click scrolls instead. */}
-        <p>
-          <a href="#/" className="file-link" onClick={showDropZone}>
-            Open your own MusicXML file
-          </a>
-        </p>
+        <div className="start-row">
+          <Button primary onClick={() => open({ kind: 'library', slug: start.piece.slug })}>
+            {startLabel(start)}
+          </Button>
+          {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
+        </div>
       </header>
-
-      <section className="card stack" aria-labelledby="start-here">
-        <h2 id="start-here">Start here</h2>
-        <p>
-          <strong>{start.title}</strong> by {start.composer}
-        </p>
-        <p className="muted">
-          {LEVEL_NAMES[start.level]} · {formatDuration(start.approxDurationSec)}
-        </p>
-        <Button primary onClick={() => open({ kind: 'library', slug: start.slug })}>
-          Start with {start.title}
-        </Button>
-      </section>
-
-      {piecesByLevel.map(([level, group]) => (
-        <section key={level} className="level" aria-labelledby={`level-${level}`}>
-          <h2 id={`level-${level}`}>
-            Level {level}: {LEVEL_NAMES[level]}
-          </h2>
-          <ul className="piece-list">
-            {group.map((p) => (
-              <li key={p.slug}>
-                <button
-                  type="button"
-                  className="piece-row"
-                  aria-label={`Open ${p.title} by ${p.composer}`}
-                  aria-describedby={
-                    p.hasEditorialFingering
-                      ? `${p.slug}-duration ${p.slug}-tag`
-                      : `${p.slug}-duration`
-                  }
-                  onClick={() => open({ kind: 'library', slug: p.slug })}
-                >
-                  <span className="title">
-                    {p.title}
-                    {p.hasEditorialFingering && (
-                      <span id={`${p.slug}-tag`} className="tag">
-                        editor's fingering
-                      </span>
-                    )}
-                  </span>
-                  <span className="composer muted">{p.composer}</span>
-                  <span id={`${p.slug}-duration`} className="duration">
-                    {formatDuration(p.approxDurationSec)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-
-      <DropZone
-        onFile={(name, bytes) => open({ kind: 'file', name, bytes })}
-        onRefuse={setNotice}
-        zoneRef={dropZone}
-        chooserRef={chooser}
-      />
-
+      {layout.kind === 'level' && (
+        <div className="level-choice">
+          <LevelPills
+            levels={layout.levels}
+            level={layout.level}
+            describedBy={LEVEL_LINE_ID}
+            onChange={setLibraryLevel}
+          />
+          <p id={LEVEL_LINE_ID} className="level-line muted">
+            {LEVEL_LINES[layout.level]}
+          </p>
+        </div>
+      )}
+      <div key={listKey} className={listClass}>
+        {layout.kind === 'search' && layout.count === 0 ? (
+          <div className="empty-result">
+            <p>No piece matches “{layout.query}”.</p>
+            <p className="muted">Search looks in titles, composers and collections.</p>
+          </div>
+        ) : (
+          <PieceList layout={layout} onOpen={(slug) => open({ kind: 'library', slug })} />
+        )}
+      </div>
+      <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
+        {announcement}
+      </p>
+      <OwnFileLine onFile={openFile} onRefuse={setNotice} />
       <footer className="library-footer">
         <button type="button" className="text-button" onClick={about}>
           About and licences
         </button>
       </footer>
+      {dragging && <DropFrame />}
     </main>
   );
 }

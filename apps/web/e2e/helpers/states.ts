@@ -1,8 +1,8 @@
 import { fileURLToPath } from 'node:url';
-import { expect, type Page } from '@playwright/test';
-import { openPractice } from './practice.js';
+import { expect, type Locator, type Page } from '@playwright/test';
+import { openPractice, setLoopBars } from './practice.js';
 import { holdPianoSamples } from './samples.js';
-import { LIBRARY_COUNT } from './library.js';
+import { LEVEL_COUNTS, libraryReady } from './library.js';
 
 /**
  * The application states the design brief is checked in (M4 plan, Task 10): each a name, a way
@@ -13,8 +13,11 @@ import { LIBRARY_COUNT } from './library.js';
 export interface AppState {
   name: string;
   go: (page: Page) => Promise<void>;
-  /** 'button': a single red button. 'cursor': the playback cursor's note groups in the sheet. */
-  expectTag: 'button' | 'cursor';
+  /**
+   * 'button': a single red button. 'cursor': the playback cursor's note groups in the sheet.
+   * 'frame': the drop frame while a file is dragged.
+   */
+  expectTag: 'button' | 'cursor' | 'frame';
 }
 
 const TWINKLE = 'twinkle-twinkle-little-star';
@@ -27,9 +30,28 @@ const SCORE_TIMEOUT = 20_000;
 /** The library's Twinkle as a two-track MIDI file (M6), dropped through the file chooser. */
 const TWINKLE_MIDI = fileURLToPath(new URL('../../fixtures/twinkle.mid', import.meta.url));
 
+/**
+ * The library's rows: the buttons in the list's items. Not every button named "Open …": the end
+ * line's file input is a button too, named "Open your own MusicXML or MIDI file".
+ */
+export function pieceRows(page: Page): Locator {
+  return page.getByRole('listitem').getByRole('button', { name: /^Open / });
+}
+
+/**
+ * The drop frame is on screen and its 120 ms fade is over. While it fades in from opacity 0 the
+ * frame is not yet a red root (the red rule skips opacity 0), so the red is counted after it.
+ */
+export async function dropFrameShown(page: Page): Promise<void> {
+  const frame = page.locator('.drop-frame');
+  await expect(frame).toBeVisible();
+  await frame.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+}
+
 async function library(page: Page): Promise<void> {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+  await libraryReady(page);
+  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[1]!);
 }
 
 /** Twinkle with every note fingered; `query` adds e.g. `?audio=silent` before the hash. */
@@ -59,6 +81,38 @@ async function playing(page: Page): Promise<void> {
   await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
 }
 
+/** Twinkle's third note (G4 over C3, 1.2 s, tick 20160): the paused state's fixed point. */
+const PAUSE_SEC = 1.2;
+const PAUSE_TICK = '20160';
+
+/**
+ * Twinkle paused on its third note, at the same point on every run (Task 5 review): the cursor
+ * is watched on every frame until it marks that note, and the next onset is 0.6 s later, ample
+ * time for the click. The marked group, the pressed keys and the dock are then the same each
+ * time, which a screenshot baseline needs.
+ */
+async function pausedOnThirdNote(page: Page): Promise<void> {
+  await twinkleReady(page, '?audio=silent');
+  await openPractice(page);
+  await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+  await page.getByRole('button', { name: 'Play' }).click();
+  await page.waitForFunction(
+    (sec) => {
+      const hook = (window as unknown as { __digitus2?: { cursorSec(): number } }).__digitus2;
+      return hook !== undefined && Math.abs(hook.cursorSec() - sec) < 1e-6;
+    },
+    PAUSE_SEC,
+    { polling: 'raf', timeout: 10_000 },
+  );
+  await page.getByRole('button', { name: 'Pause' }).click();
+  await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
+  await expect(page.locator('.score-sheet .is-red').first()).toHaveAttribute(
+    'data-onset-tick',
+    PAUSE_TICK,
+  );
+  await expect(page.locator('.keyboard .is-pressed').first()).toBeVisible();
+}
+
 export const STATES: AppState[] = [
   { name: 'library', go: library, expectTag: 'button' },
   {
@@ -66,7 +120,7 @@ export const STATES: AppState[] = [
     go: async (page) => {
       await library(page);
       await page
-        .getByLabel('choose a file')
+        .getByLabel('Open your own MusicXML or MIDI file')
         .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
       await expect(
         page.getByText(
@@ -75,6 +129,68 @@ export const STATES: AppState[] = [
       ).toBeVisible();
     },
     expectTag: 'button',
+  },
+  {
+    name: 'library-level',
+    go: async (page) => {
+      await library(page);
+      await page.getByRole('radio', { name: 'Moderate', exact: true }).check();
+      await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[3]!);
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'library-returning',
+    go: async (page) => {
+      await page.addInitScript(() =>
+        localStorage.setItem(
+          'digitus2.settings.v1',
+          JSON.stringify({
+            state: { settings: { lastPlayed: 'bach-minuet-g-major-bwv-anh-114' } },
+            version: 1,
+          }),
+        ),
+      );
+      await page.goto('/');
+      await expect(
+        page.getByRole('button', { name: 'Continue with Minuet in G major' }),
+      ).toBeVisible();
+      await expect(page.getByRole('radio', { name: 'Easy', exact: true })).toBeChecked();
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'library-search',
+    go: async (page) => {
+      await library(page);
+      await page.getByRole('searchbox', { name: 'Search the library' }).fill('minuet');
+      await expect(pieceRows(page)).toHaveCount(9);
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'library-empty',
+    go: async (page) => {
+      await library(page);
+      await page.getByRole('searchbox', { name: 'Search the library' }).fill('fur elize');
+      await expect(page.getByText('No piece matches “fur elize”.')).toBeVisible();
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'library-drag',
+    go: async (page) => {
+      await library(page);
+      const dt = await page.evaluateHandle(() => {
+        const d = new DataTransfer();
+        d.items.add(new File(['<score-partwise/>'], 'song.musicxml'));
+        return d;
+      });
+      await page.dispatchEvent('main', 'dragenter', { dataTransfer: dt });
+      await dropFrameShown(page);
+      await expect(page.getByRole('button', { name: /^Start with/ })).toBeHidden();
+    },
+    expectTag: 'frame',
   },
   {
     name: 'about',
@@ -175,13 +291,19 @@ export const STATES: AppState[] = [
   },
   { name: 'score-playing', go: playing, expectTag: 'cursor' },
   {
+    // T10 (spec 14): paused after a note was heard, the last group heard keeps the red and its
+    // keys stay pressed; Play is plain.
     name: 'score-paused',
+    go: pausedOnThirdNote,
+    expectTag: 'cursor',
+  },
+  {
+    // Rewind while paused: nothing to resume, the marks and the keys clear and Play is red.
+    name: 'score-rewound',
     go: async (page) => {
-      await playing(page);
-      await page.getByRole('button', { name: 'Pause' }).click();
-      await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
+      await pausedOnThirdNote(page);
+      await page.getByRole('button', { name: 'Rewind' }).click();
       await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
-      await expect(page.locator('.keyboard .is-pressed')).toHaveCount(0);
     },
     expectTag: 'button',
   },
@@ -189,10 +311,17 @@ export const STATES: AppState[] = [
     name: 'score-loop',
     go: async (page) => {
       await twinkleReady(page);
+      await setLoopBars(page, '2', '3');
+      await expect(page.getByRole('checkbox', { name: 'Loop bars' })).toBeChecked();
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'score-practice-open',
+    go: async (page) => {
+      await twinkleReady(page);
       await openPractice(page);
-      await page.getByLabel('Loop from bar').fill('2');
-      await page.getByLabel('Loop to bar').fill('3');
-      await expect(page.getByRole('button', { name: 'Clear loop' })).toBeEnabled();
+      await expect(page.getByRole('slider', { name: 'Tempo' })).toBeVisible();
     },
     expectTag: 'button',
   },
@@ -200,7 +329,7 @@ export const STATES: AppState[] = [
     name: 'score-error',
     go: async (page) => {
       await library(page);
-      await page.getByLabel('choose a file').setInputFiles({
+      await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
         name: 'bad.musicxml',
         mimeType: 'application/xml',
         buffer: Buffer.from('<nope/>'),
@@ -214,7 +343,7 @@ export const STATES: AppState[] = [
     name: 'score-midi',
     go: async (page) => {
       await page.goto('/');
-      await page.getByLabel('choose a file').setInputFiles(TWINKLE_MIDI);
+      await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles(TWINKLE_MIDI);
       await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
         timeout: SCORE_TIMEOUT,
       });

@@ -3,14 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
-import { LIBRARY_COUNT } from './helpers/library.js';
+import { libraryReady } from './helpers/library.js';
 
 const twinkle = fileURLToPath(new URL('../fixtures/twinkle.mid', import.meta.url));
 const counts = /^Right hand: \d+ notes · left hand: \d+ notes$/;
 
 async function openTwinkleMidi(page: Page) {
   await page.goto('/');
-  await page.getByLabel('choose a file').setInputFiles(twinkle);
+  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles(twinkle);
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
 }
 
@@ -93,7 +93,7 @@ test('export of a MIDI source downloads the generated MusicXML with a fingering 
 test('a broken MIDI file shows the error state with a way back', async ({ page }) => {
   await page.goto('/');
   await page
-    .getByLabel('choose a file')
+    .getByLabel('Open your own MusicXML or MIDI file')
     .setInputFiles({ name: 'broken.mid', mimeType: 'audio/midi', buffer: Buffer.from('MThd') });
   // The error state says which file failed in its alert and gives the engine's reason as the
   // detail below it (M4's error layout).
@@ -101,5 +101,5 @@ test('a broken MIDI file shows the error state with a way back', async ({ page }
   await expect(page.getByText(/^Details: not a MIDI file/)).toBeVisible();
   await expectOneRed(page, 'broken MIDI');
   await page.getByRole('button', { name: 'Back to the library' }).click();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
+  await libraryReady(page);
 });

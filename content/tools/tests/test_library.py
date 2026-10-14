@@ -1,6 +1,7 @@
 """Consistency checks on the built library (content/manifest.json + content/scores/)."""
 from __future__ import annotations
 
+import collections
 import json
 import re
 import sys
@@ -18,7 +19,7 @@ MANIFEST = json.loads((CONTENT / "manifest.json").read_text(encoding="utf-8"))
 CATALOG = build.load_catalog()  # catalog.json, then the catalog.d/ fragments
 REQUIRED = ["slug", "title", "composer", "composerDates", "catalogue", "year", "level", "measures",
             "approxDurationSec", "timeSignature", "key", "tempoBpm", "source", "arranger",
-            "hasEditorialFingering", "excerpt", "notes", "collection", "collectionId", "benchmarkSet"]
+            "hasEditorialFingering", "excerpt", "notes", "collection", "collectionId", "benchmarkSet", "genre"]
 LICENSES = ("Public Domain", "CC0-1.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0",
             "CC-BY-SA-4.0")
 # Pieces per level: the L1 targets (25, 45, 40, 25, 15) with some slack (L1 plan, Task 19).
@@ -97,3 +98,17 @@ def test_no_stray_files():
         if e["hasEditorialFingering"]:
             expected.add(f"{e['slug']}.fingered.musicxml")
     assert names == expected
+
+
+def test_every_entry_carries_its_genre():
+    genres = build.collection_genres()
+    by_slug = {p["slug"]: p for p in CATALOG}
+    for e in MANIFEST:
+        assert e["genre"] == build.piece_genre(by_slug[e["slug"]], genres), e["slug"]
+    assert list(MANIFEST[0])[list(MANIFEST[0]).index("collectionId") + 1] == "genre"
+
+
+def test_genre_counts_match_the_design():
+    # spec section 4.2 at 149 pieces; arrangements and folk tunes are songs
+    counts = collections.Counter(e["genre"] for e in MANIFEST)
+    assert counts == {"songs": 42, "carols": 15, "baroque": 27, "classical": 18, "romantic": 44, "ragtime": 3}

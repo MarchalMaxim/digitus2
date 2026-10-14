@@ -115,22 +115,52 @@ def collection_titles() -> dict[str, str]:
     return {c["id"]: c["title"] for c in load_collections()}
 
 
+def load_genres() -> list[dict]:
+    """[{id, title}] in display order (catalog.json's genres table)."""
+    return _read_catalog_file(CATALOG)["genres"]
+
+
+def collection_genres() -> dict[str, str]:
+    """collection id -> genre id; refuses a collection without a known genre."""
+    known = {g["id"] for g in load_genres()}
+    out: dict[str, str] = {}
+    bad = []
+    for c in load_collections():
+        if c.get("genre") in known:
+            out[c["id"]] = c["genre"]
+        else:
+            bad.append(f"{c['id']} ({c.get('genre')!r})")
+    if bad:
+        raise SystemExit(f"collection(s) without a known genre: {', '.join(bad)}")
+    return out
+
+
+def piece_genre(piece: dict, genres: dict[str, str]) -> str:
+    """The piece's own genre when the catalog sets one, else its collection's."""
+    return piece.get("genre") or genres[piece["collection"]]
+
+
 def load_catalog() -> list[dict]:
     """catalog.json's pieces, then the fragments' pieces; unique slugs and known collection ids."""
     pieces = _read_catalog_file(CATALOG)["pieces"] + load_fragments()
     known = {c["id"] for c in load_collections()}
+    genre_ids = {g["id"] for g in load_genres()}
     seen: set[str] = set()
-    dupes, unknown = [], []
+    dupes, unknown, bad_genre = [], [], []
     for p in pieces:
         if p["slug"] in seen:
             dupes.append(p["slug"])
         seen.add(p["slug"])
         if p.get("collection") not in known:
             unknown.append(f"{p['slug']} ({p.get('collection')!r})")
+        if "genre" in p and p["genre"] not in genre_ids:
+            bad_genre.append(f"{p['slug']} ({p['genre']!r})")
     if dupes:
         raise SystemExit(f"duplicate slug(s) in the catalog: {', '.join(dupes)}")
     if unknown:
         raise SystemExit(f"unknown collection id(s): {', '.join(unknown)}")
+    if bad_genre:
+        raise SystemExit(f"unknown genre(s): {', '.join(bad_genre)}")
     return pieces
 
 
@@ -324,10 +354,13 @@ def key_name(fifths: int, mode: str | None) -> str:
     return f"{tonic} {mode or 'major'}"
 
 
-def manifest_entry(piece: dict, built: dict, stats: dict, collections: dict[str, str] | None = None) -> dict:
+def manifest_entry(piece: dict, built: dict, stats: dict, collections: dict[str, str] | None = None,
+                   genres: dict[str, str] | None = None) -> dict:
     """The manifest entry of a piece. `built` needs `source` and `hasEditorialFingering`;
-    `collections` maps collection id -> title (read from catalog.json when omitted)."""
+    `collections` maps collection id -> title and `genres` collection id -> genre id (both read
+    from catalog.json when omitted)."""
     titles = collections if collections is not None else collection_titles()
+    kinds = genres if genres is not None else collection_genres()
     key = stats.get("key")
     fifths = int(key[0]) if key and key[0] is not None else 0
     mode = key[1] if key else None
@@ -342,6 +375,7 @@ def manifest_entry(piece: dict, built: dict, stats: dict, collections: dict[str,
         "level": piece["level"],
         "collection": titles[piece["collection"]],
         "collectionId": piece["collection"],
+        "genre": piece_genre(piece, kinds),
         "benchmarkSet": piece.get("benchmarkSet"),
         "measures": stats.get("measures"),
         "approxDurationSec": stats.get("approxDurationSec"),
@@ -416,6 +450,7 @@ def manifest_only() -> int:
         catalog = load_catalog()
         catalog_index, collection_index = catalog_indexes(catalog)
         titles = collection_titles()
+        genres = collection_genres()
         old = {e["slug"]: e for e in jsonio.read_json(MANIFEST, list)}
         verification = jsonio.read_json(VERIFICATION, dict)
         missing = [p["slug"] for p in catalog
@@ -424,7 +459,7 @@ def manifest_only() -> int:
             raise SystemExit(f"build it first: no manifest entry or verification stats for {', '.join(missing)}")
         manifest = [manifest_entry(p, {"source": old[p["slug"]]["source"],
                                        "hasEditorialFingering": old[p["slug"]]["hasEditorialFingering"]},
-                                   verification[p["slug"]]["stats"], titles)
+                                   verification[p["slug"]]["stats"], titles, genres=genres)
                     for p in catalog]
         manifest.sort(key=lambda e: sort_key(e, catalog_index, collection_index))
         jsonio.write_json(MANIFEST, manifest)
@@ -460,6 +495,7 @@ def main(argv=None) -> int:
     out_dir = a.out_dir.resolve() if a.out_dir else SCORES
     out_dir.mkdir(parents=True, exist_ok=True)
     titles = collection_titles()
+    genres = collection_genres()
     log = fetch_log()
     import validate
 
@@ -494,7 +530,7 @@ def main(argv=None) -> int:
                 if not r["ok"]:
                     failures += 1
         stats = vres.get(f"{slug}.musicxml", {}).get("stats", {})
-        results[slug] = (manifest_entry(piece, built, stats, titles), {
+        results[slug] = (manifest_entry(piece, built, stats, titles, genres=genres), {
             "ok": all(r["ok"] for r in vres.values()) if vres else None,
             "conversionWarnings": built["warnings"],
             "midiChecks": built["midiChecks"],

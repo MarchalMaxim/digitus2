@@ -9,7 +9,7 @@ TOOLS = Path(__file__).resolve().parents[1]
 CONTENT = TOOLS.parent
 FIX = json.loads((TOOLS / "tests" / "fixtures" / "core30.json").read_text(encoding="utf-8"))
 MANIFEST = json.loads((CONTENT / "manifest.json").read_text(encoding="utf-8"))
-NEW_KEYS = {"collection", "collectionId", "benchmarkSet"}
+NEW_KEYS = {"collection", "collectionId", "benchmarkSet", "genre"}
 
 
 def test_core30_scores_are_byte_identical():

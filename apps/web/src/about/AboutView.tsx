@@ -74,6 +74,17 @@ export function AboutView() {
         </p>
       </section>
 
+      <section className="stack" aria-labelledby="about-who">
+        <h2 id="about-who">Who made it</h2>
+        <p>
+          Created by Claude, Anthropic&apos;s AI model, in an autonomous multi-day build directed by
+          Maxim Marchal. To our knowledge, nothing like this exists yet: a fingering engine that
+          runs entirely in the browser and is verified against expert annotations. The code, the
+          research notes and the verification results are in the{' '}
+          <ExternalLink href={REPOSITORY_URL}>repository</ExternalLink>.
+        </p>
+      </section>
+
       <section className="stack" aria-labelledby="about-licences">
         <h2 id="about-licences">Licences</h2>
         <ul className="about-list">

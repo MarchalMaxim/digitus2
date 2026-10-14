@@ -2131,5 +2131,315 @@
       },
       "verovioPages": 1
     }
-  }
+  },
+  "spanFlags": [
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "5",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "B3",
+        "D4",
+        "F#4",
+        "F#5"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "6",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "A3",
+        "C#4",
+        "F#4",
+        "F#5"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "7",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "B3",
+        "D4",
+        "F#4",
+        "C#5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "13",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "B3",
+        "D4",
+        "F#4",
+        "F#5"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "14",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "A3",
+        "C#4",
+        "F#4",
+        "F#5"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "15",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "B3",
+        "D4",
+        "F#4",
+        "C#5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "36",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "A3",
+        "C#4",
+        "F#4",
+        "A4",
+        "D5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "42",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "A3",
+        "C4",
+        "F4",
+        "C5"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "satie-gymnopedie-no1",
+      "bar": "44",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "A3",
+        "C4",
+        "F4",
+        "A4",
+        "D5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "chopin-prelude-op28-no7",
+      "bar": "12",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "A#4",
+        "C#5",
+        "E5",
+        "A#5",
+        "C#6"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "chopin-prelude-op28-no4",
+      "bar": "24",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "B1",
+        "B2",
+        "E3",
+        "F#3",
+        "B3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "chopin-prelude-op28-no4",
+      "bar": "24",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "B1",
+        "F#2",
+        "B2",
+        "D#3",
+        "F#3",
+        "B3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span",
+        "notes"
+      ]
+    },
+    {
+      "piece": "chopin-prelude-op28-no4",
+      "bar": "25",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E1",
+        "E2",
+        "E3",
+        "G3",
+        "B3"
+      ],
+      "span": 31,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "beethoven-moonlight-sonata-mvt1",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C#2",
+        "G#2",
+        "C#3",
+        "E3"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "beethoven-moonlight-sonata-mvt1",
+      "bar": "13",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "B1",
+        "B2",
+        "F#3"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "beethoven-moonlight-sonata-mvt1",
+      "bar": "14",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "F#1",
+        "F#2",
+        "F#3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "beethoven-moonlight-sonata-mvt1",
+      "bar": "21",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "B1",
+        "B2",
+        "G3"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "beethoven-moonlight-sonata-mvt1",
+      "bar": "21",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "C2",
+        "C3",
+        "F#3"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "beethoven-moonlight-sonata-mvt1",
+      "bar": "23",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F#1",
+        "C#2",
+        "F#2",
+        "F#3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    }
+  ]
 }

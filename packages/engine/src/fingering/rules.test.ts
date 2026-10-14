@@ -3,7 +3,9 @@ import type { Finger } from '../score/types.js';
 import { isBlack } from './geometry.js';
 import {
   PARNCUTT_WEIGHTS,
+  RULE_IDS,
   chordSpanTerms,
+  isPenaltyRule,
   isReleased,
   makeContext,
   pairTerms,
@@ -11,7 +13,7 @@ import {
   unaryTerms,
   weightedSum,
 } from './rules.js';
-import type { NoteView, RuleId, Term } from './rules.js';
+import type { IndicatorRuleId, NoteView, RuleId, Term } from './rules.js';
 import { HAND_PROFILES } from './spans.js';
 
 const ctx = makeContext(HAND_PROFILES.large);
@@ -27,6 +29,11 @@ const note = (pitch: number, slice: number, extra: Partial<NoteView> = {}): Note
 });
 const pts = (terms: Term[], rule: string) =>
   terms.filter((t) => t.rule === rule).reduce((s, t) => s + t.points, 0);
+/** The M3 indicator and timing features (M3 Task 1; weight 0 in the Parncutt set). */
+const M3_NAMED = ['latticeStep', 'levelChange', 'stretchFast', 'shiftFast', 'repeatFast'];
+const isM3Feature = (rule: string): boolean => /^(on|tr|ch):/.test(rule) || M3_NAMED.includes(rule);
+/** The M2 rule terms of a list: the exact term lists below pin the M2 terms, not the M3 features. */
+const m2Only = (terms: Term[]) => terms.filter((t) => !isM3Feature(t.rule));
 const parncuttOnly = (terms: Term[]) => terms.filter((t) => t.rule !== 'handPositionShift');
 // Parncutt Table 2 tabulates rules 1 to 3 only (stretch, small span, large span).
 const table2Only = (terms: Term[]) =>
@@ -54,7 +61,7 @@ describe('pair terms', () => {
     expect(pts(pairTerms(ctx, note(60, 0), 1, note(62, 1), 2), 'thumbPassing')).toBe(0); // no crossing
   });
   it('treats same finger on a different key as a hop, with no span terms', () => {
-    const noShift = (t: Term[]) => t.filter((x) => x.rule !== 'handPositionShift');
+    const noShift = (t: Term[]) => m2Only(t).filter((x) => x.rule !== 'handPositionShift');
     expect(noShift(pairTerms(ctx, note(60, 0), 2, note(62, 1, { ioi: 0.1 }), 2))).toEqual([
       { rule: 'hop', points: 2 },
     ]);
@@ -78,7 +85,7 @@ describe('pair terms', () => {
     );
   });
   it('handles repeated keys', () => {
-    const noShift = (t: Term[]) => t.filter((x) => x.rule !== 'handPositionShift');
+    const noShift = (t: Term[]) => m2Only(t).filter((x) => x.rule !== 'handPositionShift');
     expect(noShift(pairTerms(ctx, note(60, 0), 2, note(60, 1, { ioi: 0.1 }), 2))).toEqual([
       { rule: 'repeatedNoteSameFinger', points: 2 },
     ]);
@@ -93,7 +100,7 @@ describe('pair terms', () => {
   });
   it('doubles span terms inside a chord', () => {
     const t = pairTerms(ctx, note(60, 0), 1, note(72, 0), 5); // octave with 1-5: maxRel 10 -> large 2 (theta 1), maxComf 13 -> 0
-    expect(t.filter((x) => x.rule !== 'handPositionShift')).toEqual([
+    expect(m2Only(t).filter((x) => x.rule !== 'handPositionShift')).toEqual([
       { rule: 'chordLargeSpan', points: 2 },
     ]);
     expect(pts(t, 'handPositionShift')).toBe(3); // 1 on C4 anchors at 35, 5 on C5 at 42 - 4 = 38
@@ -178,7 +185,7 @@ describe('chord span terms', () => {
     ]);
     // Same chord terms as pairTerms gives a chord pair, without handPositionShift.
     expect(chordSpanTerms(ctx, c4, 1, c5, 3)).toEqual(
-      pairTerms(ctx, c4, 1, c5, 3).filter((t) => t.rule !== 'handPositionShift'),
+      m2Only(pairTerms(ctx, c4, 1, c5, 3)).filter((t) => t.rule !== 'handPositionShift'),
     );
   });
   it('charges doubledFinger for two chord notes on one finger: 1 for the thumb on adjacent white keys, else 2', () => {
@@ -200,19 +207,19 @@ describe('chord span terms', () => {
 
 describe('unary terms', () => {
   it('weak fingers, thumb on black, five on black', () => {
-    expect(unaryTerms(ctx, note(60, 1), 4, note(59, 0), note(62, 2))).toEqual([
+    expect(m2Only(unaryTerms(ctx, note(60, 1), 4, note(59, 0), note(62, 2)))).toEqual([
       { rule: 'weakFinger', points: 1 },
     ]);
-    expect(unaryTerms(ctx, note(60, 1), 5, undefined, undefined)).toEqual([
+    expect(m2Only(unaryTerms(ctx, note(60, 1), 5, undefined, undefined))).toEqual([
       { rule: 'weakFifth', points: 1 },
     ]);
-    expect(unaryTerms(ctx, note(61, 1), 1, note(60, 0), note(62, 2))).toEqual([
+    expect(m2Only(unaryTerms(ctx, note(61, 1), 1, note(60, 0), note(62, 2)))).toEqual([
       { rule: 'thumbOnBlack', points: 5 },
     ]);
-    expect(unaryTerms(ctx, note(61, 1), 1, note(63, 0), undefined)).toEqual([
+    expect(m2Only(unaryTerms(ctx, note(61, 1), 1, note(63, 0), undefined))).toEqual([
       { rule: 'thumbOnBlack', points: 1 },
     ]);
-    expect(unaryTerms(ctx, note(61, 1), 5, note(60, 0), note(63, 2))).toEqual([
+    expect(m2Only(unaryTerms(ctx, note(61, 1), 5, note(60, 0), note(63, 2)))).toEqual([
       { rule: 'weakFifth', points: 1 },
       { rule: 'fiveOnBlack', points: 2 },
     ]);
@@ -268,7 +275,9 @@ describe('weights', () => {
     expect(weightedSum(offToo, pairTerms(offToo, note(65, 0), 1, note(60, 1), 2))).toBe(4);
   });
   it('gives every rule a finite weight in the JSON parameter file', () => {
-    const every: Record<RuleId, true> = {
+    // M3 Task 1: the named rules (M2's and the five M3 features) are listed here so the compiler
+    // checks the list against RuleId; the 70 indicator ids are enumerated independently below.
+    const every: Record<Exclude<RuleId, IndicatorRuleId>, true> = {
       weakFinger: true,
       weakFifth: true,
       thumbOnBlack: true,
@@ -294,8 +303,192 @@ describe('weights', () => {
       threeFourFive: true,
       sameFingerPivot: true,
       template: true,
+      latticeStep: true,
+      levelChange: true,
+      stretchFast: true,
+      shiftFast: true,
+      repeatFast: true,
     };
-    expect(Object.keys(PARNCUTT_WEIGHTS).sort()).toEqual(Object.keys(every).sort());
+    const indicators: string[] = [];
+    for (let f = 1; f <= 5; f++)
+      for (const c of ['black', 'white']) indicators.push(`on:${f}:${c}`);
+    for (let g = 1; g <= 5; g++)
+      for (let f = 1; f <= 5; f++) {
+        for (const d of ['up', 'down']) indicators.push(`tr:${g}${f}:${d}`);
+        if (g < f) indicators.push(`ch:${g}${f}`);
+      }
+    expect(indicators).toHaveLength(70);
+    expect(Object.keys(PARNCUTT_WEIGHTS).sort()).toEqual(
+      [...Object.keys(every), ...indicators].sort(),
+    );
     for (const w of Object.values(PARNCUTT_WEIGHTS)) expect(Number.isFinite(w)).toBe(true);
+  });
+});
+
+describe('indicator and timing features', () => {
+  const ctx = makeContext(HAND_PROFILES.large);
+  const note = (pitch: number, slice: number, ioi = 0.5, restBefore = false): NoteView => ({
+    pitch,
+    black: isBlack(pitch),
+    onsetSec: slice * ioi,
+    offsetSec: slice * ioi + ioi,
+    slice,
+    restBefore,
+    ioi,
+  });
+  const points = (terms: Term[], rule: string) =>
+    terms.filter((t) => t.rule === rule).reduce((s, t) => s + t.points, 0);
+
+  it('unary indicators fire for the finger and key colour', () => {
+    const t = unaryTerms(ctx, note(61, 0), 2, undefined, undefined);
+    expect(points(t, 'on:2:black')).toBe(1);
+    expect(points(t, 'on:2:white')).toBe(0);
+    expect(points(unaryTerms(ctx, note(60, 0), 5, undefined, undefined), 'on:5:white')).toBe(1);
+  });
+  it('transition indicators fire by direction and never on repeated keys or inside a slice', () => {
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(64, 1), 3), 'tr:13:up')).toBe(1);
+    expect(points(pairTerms(ctx, note(64, 0), 3, note(60, 1), 1), 'tr:31:down')).toBe(1);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(60, 1), 1), 'tr:11:up')).toBe(0);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(64, 0), 3), 'tr:13:up')).toBe(0);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(64, 0), 3), 'ch:13')).toBe(1);
+  });
+  it('lattice and level features', () => {
+    // C4 (x14 column c) to E4 with 1-3: one white key per finger -> latticeStep 0; with 1-2 -> 1
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(64, 1), 3), 'latticeStep')).toBe(0);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(64, 1), 2), 'latticeStep')).toBe(1);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(61, 1), 2), 'levelChange')).toBe(1);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(62, 1), 2), 'levelChange')).toBe(0);
+  });
+  it('timing features scale with the inter-onset interval', () => {
+    const slow = pairTerms(ctx, note(60, 0), 1, note(72, 1, 1.0), 2);
+    const fast = pairTerms(ctx, note(60, 0), 1, note(72, 1, 0.1), 2);
+    expect(points(slow, 'stretchFast')).toBe(0);
+    expect(points(fast, 'stretchFast')).toBe(points(fast, 'stretch'));
+    expect(points(fast, 'shiftFast')).toBeCloseTo(points(fast, 'handPositionShift') * 1, 9);
+    expect(points(slow, 'shiftFast')).toBeCloseTo(points(slow, 'handPositionShift') * 0.25, 9);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(60, 1, 0.1), 2), 'repeatFast')).toBe(1);
+    expect(points(pairTerms(ctx, note(60, 0), 1, note(60, 1, 0.5), 2), 'repeatFast')).toBe(0);
+  });
+});
+
+// Additional tests (beyond the plan's Step 1): the corrections from the learning prototype
+// (plan section "Corrections", item 2) and the properties the Parncutt-unchanged claim rests on.
+describe('indicator and timing features: prototype corrections and invariants', () => {
+  const ctx = makeContext(HAND_PROFILES.large);
+  const at = (pitch: number, slice: number, extra: Partial<NoteView> = {}): NoteView =>
+    note(pitch, slice, extra);
+
+  it('a hop (same finger, another key) fires its transition indicator, lattice and level terms', () => {
+    const t = pairTerms(ctx, at(60, 0), 2, at(62, 1, { ioi: 0.1 }), 2);
+    expect(pts(t, 'tr:22:up')).toBe(1);
+    expect(pts(t, 'hop')).toBe(2);
+    expect(pts(t, 'latticeStep')).toBe(1); // one white key with no finger step
+    expect(pts(pairTerms(ctx, at(63, 0), 3, at(60, 1), 3), 'tr:33:down')).toBe(1);
+    expect(pts(pairTerms(ctx, at(63, 0), 3, at(60, 1), 3), 'levelChange')).toBe(1);
+    // stretchFast follows stretch, which a hop does not have.
+    expect(pts(t, 'stretchFast')).toBe(0);
+  });
+  it('repeatFast fires on a fast repeated key with any fingers, and nothing else of M3 there', () => {
+    for (const [g, f] of [
+      [2, 2],
+      [2, 3],
+    ] as const) {
+      const t = pairTerms(ctx, at(60, 0), g, at(60, 1, { ioi: 0.1 }), f);
+      expect(pts(t, 'repeatFast')).toBe(1);
+      expect(t.filter((x) => /^(tr|ch):/.test(x.rule) || x.rule === 'latticeStep')).toEqual([]);
+    }
+  });
+  it('shiftFast is a different-slice term only, and follows the halved shift after a rest', () => {
+    // Inside a chord the hand-position shift is charged, shiftFast is not.
+    const chord = pairTerms(ctx, at(60, 0), 1, at(72, 0), 2);
+    expect(pts(chord, 'handPositionShift')).toBeGreaterThan(0);
+    expect(pts(chord, 'shiftFast')).toBe(0);
+    const rest = pairTerms(ctx, at(60, 0), 1, at(72, 1, { ioi: 0.1, restBefore: true }), 2);
+    expect(pts(rest, 'shiftFast')).toBeCloseTo(pts(rest, 'handPositionShift'), 12);
+    // A repeated key and a hop shift the hand too, so they carry shiftFast.
+    // 1 to 3 on one key: anchors 35 and 33, a shift of 2, times 0.25 / 0.5.
+    expect(pts(pairTerms(ctx, at(60, 0), 1, at(60, 1, { ioi: 0.5 }), 3), 'shiftFast')).toBe(1);
+    // Below 10 ms the factor saturates at 1.
+    expect(pts(pairTerms(ctx, at(60, 0), 1, at(72, 1, { ioi: 0 }), 2), 'shiftFast')).toBe(
+      pts(pairTerms(ctx, at(60, 0), 1, at(72, 1, { ioi: 0 }), 2), 'handPositionShift'),
+    );
+  });
+  it('chord pair indicators fire for g < f only (a doubled or crossed chord pair has none)', () => {
+    expect(pts(pairTerms(ctx, at(60, 0), 2, at(64, 0), 4), 'ch:24')).toBe(1);
+    for (const [g, f] of [
+      [2, 2],
+      [4, 2],
+    ] as const)
+      expect(
+        pairTerms(ctx, at(60, 0), g, at(64, 0), f).filter((x) => x.rule.startsWith('ch:')),
+      ).toEqual([]);
+    // The outer pair of a three-note chord (tripleTerms) gets no indicator.
+    expect(
+      tripleTerms(ctx, at(60, 0), 1, at(64, 0), 3, at(67, 0), 5).filter((x) => isM3Feature(x.rule)),
+    ).toEqual([]);
+  });
+  it('emits only ids of RULE_IDS, never a zero term, and adds exactly 0 to every Parncutt sum', () => {
+    const ids = new Set<string>(RULE_IDS);
+    const pitches = [55, 59, 60, 61, 62, 64, 66, 67, 70, 72, 76, 79];
+    const views: NoteView[] = [];
+    for (const [k, p] of pitches.entries())
+      for (const ioi of [0, 0.05, 0.15, 0.2, 0.3, 1])
+        for (const restBefore of [false, true])
+          views.push(at(p, 1 + (k % 2), { ioi, restBefore, onsetSec: 1, offsetSec: 1 + ioi }));
+    const a = at(60, 1, { onsetSec: 0.5, offsetSec: 1 });
+    const check = (terms: Term[]): void => {
+      for (const t of terms) {
+        expect(ids.has(t.rule)).toBe(true);
+        expect(Number.isFinite(t.points) && t.points !== 0).toBe(true);
+      }
+      expect(weightedSum(ctx, terms)).toBe(weightedSum(ctx, m2Only(terms)));
+    };
+    let seen = 0;
+    for (const b of views)
+      for (let g = 1; g <= 5; g++)
+        for (let f = 1; f <= 5; f++) {
+          const pair = pairTerms(ctx, a, g as Finger, b, f as Finger);
+          check(pair);
+          check(unaryTerms(ctx, b, f as Finger, a, undefined));
+          check(tripleTerms(ctx, at(57, 0), 3, a, g as Finger, b, f as Finger));
+          seen += pair.filter((t) => isM3Feature(t.rule)).length;
+        }
+    expect(seen).toBeGreaterThan(0);
+  });
+  it('lists RULE_IDS sorted and unique, and marks the physical penalty rules', () => {
+    expect([...RULE_IDS]).toEqual([...RULE_IDS].sort());
+    expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
+    expect(RULE_IDS).toHaveLength(25 + 5 + 70);
+    expect(RULE_IDS.filter((id) => isPenaltyRule(id)).sort()).toEqual(
+      [
+        'stretch',
+        'smallSpan',
+        'largeSpan',
+        'beyondPractical',
+        'chordStretch',
+        'chordSmallSpan',
+        'chordLargeSpan',
+        'chordBeyondPractical',
+        'doubledFinger',
+        'hop',
+        'repeatedNoteSameFinger',
+        'handPositionShift',
+        'positionChangeSize',
+        'stretchFast',
+        'shiftFast',
+      ].sort(),
+    );
+    // Correction 7: the learned weight of repeatedNoteFingerChange is negative; not a penalty.
+    expect(isPenaltyRule('repeatedNoteFingerChange')).toBe(false);
+    expect(isPenaltyRule('on:1:black')).toBe(false);
+    expect(isPenaltyRule('repeatFast')).toBe(false);
+  });
+  it('makeContext fills every id a partial weight set leaves out with the Parncutt value', () => {
+    const c = makeContext(HAND_PROFILES.large, { 'tr:13:up': 0.5 });
+    expect(c.weights['tr:13:up']).toBe(0.5);
+    expect(c.weights.stretch).toBe(PARNCUTT_WEIGHTS.stretch);
+    expect(Object.keys(c.weights).sort()).toEqual([...RULE_IDS]);
+    const t = pairTerms(c, at(60, 0), 1, at(64, 1), 3);
+    expect(weightedSum(c, t)).toBe(weightedSum(ctx, t) + 0.5);
   });
 });

@@ -119,10 +119,13 @@ describe('pigMetrics', () => {
       ).rec,
     ).toBe(0.75);
   });
-  it('treats unassigned ground truth as a mismatch', () => {
+  it('masks unassigned ground truth instead of counting it as a mismatch (M3 Task 2)', () => {
+    // An unassigned gold note is an unknown finger (PIG finger 0), not a miss: it leaves every
+    // metric's numerator and denominator, as research/fingering_eval/evaluate.py does.
     const m = pigMetrics([1, 2], [[1, undefined]]);
-    expect(m.gen).toBe(0.5);
-    expect(m.soft).toBe(0.5);
+    expect(m.notes).toBe(1);
+    expect(m.gen).toBe(1);
+    expect(m.soft).toBe(1);
   });
   it('rejects length mismatches', () => {
     expect(() => pigMetrics([1], [[1, 2]])).toThrow(/length/);
@@ -204,5 +207,95 @@ describe('substitutions follow the official evaluator', () => {
     expect(m.high).toBe(1);
     expect(m.soft).toBe(1);
     expect(m.rec).toBe(1);
+  });
+});
+
+describe('gold notes without a finger are masked (M3 Task 2)', () => {
+  it('masks gold notes without a finger out of every metric', () => {
+    // gold A: 1 2 0 4 ; gold B: 1 3 0 4 ; pred: 1 2 5 5 -> on the 3 fingered notes: note 0 matches
+    // both annotators, note 1 one of two, note 3 neither.
+    const m = pigMetrics(
+      [1, 2, 5, 5],
+      [
+        [1, 2, 0, 4],
+        [1, 3, 0, 4],
+      ],
+    );
+    expect(m.notes).toBe(3);
+    expect(m.gen).toBeCloseTo((1 + 0.5 + 0) / 3, 9);
+    expect(m.high).toBeCloseTo(2 / 3, 9);
+    expect(m.soft).toBeCloseTo(2 / 3, 9);
+    // Recombination runs over the kept notes only: A then a miss on note 3 (no switch possible,
+    // A and B disagree on note 1), so one error.
+    expect(m.rec).toBeCloseTo(2 / 3, 9);
+    expect(pigMetrics([1, 2], [[0, 0]]).notes).toBe(0);
+  });
+  it('returns NaN-free zeros for a fully unfingered gold', () => {
+    const m = pigMetrics([1, 2, 3], [[0, undefined, 0]], ['R', 'L', 'R']);
+    expect(m).toEqual({ gen: 0, high: 0, soft: 0, rec: 0, notes: 0, annotators: 1 });
+  });
+  it('masks a note that any ground truth leaves unfingered, as the Python evaluator does', () => {
+    // research/fingering_eval/evaluate.py keeps a note only when every ground truth labels it.
+    const m = pigMetrics(
+      [1, 2, 3],
+      [
+        [1, 0, 3],
+        [1, 2, 4],
+      ],
+    );
+    expect(m.notes).toBe(2);
+    expect(m.gen).toBeCloseTo((1 + 0.5) / 2, 12);
+    expect(m.soft).toBe(1);
+  });
+  it('keeps hands, substitutions and per-hand recombination aligned with the kept notes', () => {
+    // Note 1 (L) is masked; the remaining L note 3 and R notes 0 and 2 keep their own hands.
+    const hands: Hand[] = ['R', 'L', 'R', 'L'];
+    const m = pigMetrics(
+      [1, 4, 2, 2],
+      [
+        [1, 0, 2, 2],
+        [3, 1, 2, 2],
+      ],
+      hands,
+      undefined,
+      {
+        pred: [undefined, 1, 1, undefined],
+        golds: [[undefined, undefined, 1, undefined], undefined],
+      },
+    );
+    expect(m.notes).toBe(3);
+    // gen: A matches notes 0, 2 (with the substitution) and 3; B matches note 3 only (note 2 has
+    // pred "2_1" against "2").
+    expect(m.gen).toBeCloseTo((3 / 3 + 1 / 3) / 2, 12);
+    expect(m.high).toBe(1);
+    expect(m.rec).toBe(1);
+  });
+  it('matchRate ignores gold notes without a finger', () => {
+    expect(matchRate([1, 2, 3], [1, 0, 4])).toBe(0.5);
+    expect(matchRate([1, 2], [0, undefined])).toBe(0);
+  });
+  it('metricsForScores masks PIG finger 0 in any annotation', () => {
+    const pig = (f: [string, string, string]) =>
+      parsePig(
+        [
+          '//Version: PianoFingering_v170101',
+          `0\t0\t0.5\tC4\t80\t80\t0\t${f[0]}`,
+          `1\t0.5\t1\tD4\t80\t80\t0\t${f[1]}`,
+          `2\t0\t1\tC3\t80\t80\t1\t${f[2]}`,
+          '',
+        ].join('\n'),
+      );
+    const m = metricsForScores(pig(['1', '3', '-5']), [
+      pig(['1', '0', '-5']),
+      pig(['1', '2', '-5']),
+    ]);
+    expect(m.notes).toBe(2);
+    expect(m.gen).toBe(1);
+    expect(m.high).toBe(1);
+    expect(m.soft).toBe(1);
+    expect(m.rec).toBe(1);
+    const none = metricsForScores(pig(['1', '3', '-5']), [pig(['0', '0', '-0'])]);
+    expect(none.notes).toBe(0);
+    expect(none.gen).toBe(0);
   });
 });

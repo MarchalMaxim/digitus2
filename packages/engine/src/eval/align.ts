@@ -2,7 +2,10 @@ import type { Assignment, Hand, Note, Score } from '../score/types.js';
 import { pigMetrics } from './metrics.js';
 import type { FingerSeq, PigMetrics } from './metrics.js';
 
-/** First finger of each note in `score.notes` order; `undefined` for unassigned notes. */
+/**
+ * First finger of each note in `score.notes` order; `undefined` for unassigned notes. Used as a
+ * ground truth, `undefined` is an unfingered note (PIG finger `0`), which the metrics mask out.
+ */
 export function fingerSeq(score: Score, assignment: Assignment): FingerSeq {
   return score.notes.map((n) => assignment[n.id]?.finger);
 }
@@ -42,7 +45,10 @@ export function alignScores(pred: Score, gold: Score): Array<[string, string]> {
  * PIG metrics of a prediction against one or more annotated scores of the same piece. Notes are
  * aligned to the first gold score; hands come from the prediction (the official tool takes them
  * from the sign of the estimated finger). Substitution fingers are passed on, so `gen` compares
- * whole finger fields as the official tool does (see `pigMetrics`).
+ * whole finger fields as the official tool does (see `pigMetrics`). A gold note without a finger
+ * (PIG finger `0`: `parsePig` leaves it unassigned) is unknown; when any annotation leaves a note
+ * unfingered, the note is masked out of every rate and of `notes`, as
+ * `research/fingering_eval/evaluate.py` masks gold `0`.
  */
 export function metricsForScores(
   pred: { score: Score; assignment: Assignment },

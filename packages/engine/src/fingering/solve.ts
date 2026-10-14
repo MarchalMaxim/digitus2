@@ -1,17 +1,46 @@
 import type { Assignment, Finger, FingerAssignment, Hand, Score } from '../score/types.js';
+import levelProfilesJson from './params/profiles-weights.json' with { type: 'json' };
+import { loadWeightSet } from './params/weightSets.js';
+import type { WeightSetFile, WeightSetId } from './params/weightSets.js';
 import { heldPairs } from './reach.js';
-import { makeContext, pairTerms, tripleTerms, unaryTerms, weightedSum } from './rules.js';
-import type { RuleContext, RuleWeights, Term } from './rules.js';
-import { buildHandSequence } from './sequence.js';
+import {
+  isPenaltyRule,
+  makeContext,
+  pairTerms,
+  RULE_IDS,
+  tripleTerms,
+  unaryTerms,
+  weightedSum,
+} from './rules.js';
+import type { RuleContext, RuleId, RuleWeights, Term } from './rules.js';
+import {
+  buildHandSequence,
+  FIVE_FINGER_SPAN,
+  isCrossing,
+  isThumbCrossing,
+  pairWindows,
+} from './sequence.js';
 import type { HandSequence, SeqNote } from './sequence.js';
 import { resolveProfile, span } from './spans.js';
 import type { HandProfile, HandProfileId, SpanTables } from './spans.js';
+import { barPositions, identicalPassages } from './repeats.js';
 import { detectRuns, matchTemplates, TEXTBOOK_TEMPLATES } from './templates.js';
 import type { TemplateMatch } from './templates.js';
 import { decode } from './viterbi.js';
+import type { DecodeProblem } from './viterbi.js';
 
 export interface SolveOptions {
   profile?: HandProfileId | HandProfile;
+  /**
+   * The rule weights and the confidence temperature (`params/weightSets.ts`): a set id or a
+   * weight-set file. Default `parncutt` (M2's behaviour); the CLI's `finger` and `bench` default
+   * to `RECOMMENDED_WEIGHT_SET` (`--weights`), the set the app is to pass too (M3 Task 9).
+   */
+  weightSet?: WeightSetId | WeightSetFile;
+  /**
+   * Weights that override the set's, id by id (ablation, experiments), before the `level` scales
+   * them.
+   */
   weights?: Partial<RuleWeights>;
   pins?: Assignment;
   respectEditorial?: boolean;
@@ -25,15 +54,184 @@ export interface SolveOptions {
    * so these are pairs three or more apart) and decodes again.
    */
   maxChordIterations?: number;
+  /** Softmax temperature of the per-note confidences; default: the weight set's. */
   confidenceTemperature?: number;
+  /**
+   * Hold tolerance of the held-note law in seconds (`RuleContext.holdEpsSec`, default 1 ms): a key
+   * released at most this long after a later onset is not held under that note (M3 Task 7 H1, not
+   * kept at 50 ms; docs/experiments.md). Lint must be given the same tolerance (`LintOptions`).
+   */
+  holdEpsSec?: number;
   /** Textbook template bonus for scale, arpeggio and chromatic runs (default true). */
   templates?: boolean;
+  /**
+   * Finger repeated passages alike (default true; M3 Task 7, H4): after the decode, every passage
+   * of at least four events that comes back identical, the same keys with the same durations and
+   * rhythm at the same place in the bar (`identicalPassages`, `barPositions`), gets the copies'
+   * fingering that costs least over every copy's context, the notes it ties are pinned, and the
+   * hand is decoded again (`consistentRepeats` here). A passage nested in or overlapping a longer
+   * repeated passage is tied to it.
+   */
+  consistentRepeats?: boolean;
   /**
    * Forbid from the start (HELD_PENALTY) every finger that no fingering keeping the laws between
    * two notes can give a note (`lawDomains`; default true). false leaves the holds more than two
    * steps back to the held-note loop alone, as before the pass existed.
    */
   lawDomains?: boolean;
+  /**
+   * The player's level (M3 Task 8; `params/profiles-weights.json`), default `expert`: the weight
+   * set as it is. `beginner` scales the set's penalties for position changes and spans
+   * (`applyLevel`, after `weights` has overridden the set's) and adds the level's cost to every
+   * pair of neighbouring notes that the beginner lint flags with one of the rules the level lists
+   * (`LevelProfile.lintCosts`: a thumb crossing inside one five-finger position, a non-thumb
+   * crossing, a fast hop).
+   */
+  level?: Level;
+}
+
+/** Fingering levels (M3 Task 8, product spec 7.2): `expert` is the weight set as it is. */
+export type Level = 'beginner' | 'expert';
+export const LEVELS: readonly Level[] = ['beginner', 'expert'];
+export const LEVEL_PROFILES_SCHEMA = 'digitus2.level-profiles/1';
+
+/** One level of `params/profiles-weights.json`. */
+export interface LevelProfile {
+  /**
+   * Weight multipliers by rule id: penalty rules (`isPenaltyRule`) and the count rules of
+   * LEVEL_COUNT_RULES only, never an indicator, the template bonus or a signed M3 feature. A
+   * multiplier scales a positive weight; a weight of 0 or below (no penalty in that set, such as a
+   * learned negative positionChangeCount) is kept, so a level never turns a reward into a larger one.
+   */
+  multipliers: Partial<Record<RuleId, number>>;
+  /**
+   * Cost the decode adds to each pair of neighbouring notes (different slices) that lint
+   * `--beginner` flags with the rule (`HandConstraints.lintCosts`, LEVEL_LINT_RULES): L15 a thumb
+   * crossing inside one five-finger position, L06 a crossing of two fingers without the thumb (an
+   * error for beginners; not after a rest), L11 a fast hop. Pricing L15 alone moved the crossings
+   * to other fingers and to hops. Absent or 0: none. It is a constraint of the level, like the
+   * held-note law, not a rule weight: the weight sets and the trainer never see it, so the
+   * solver's cost stays the weights times the path features at the expert level.
+   */
+  lintCosts?: LevelLintCosts;
+  rationale?: string;
+  note?: string;
+}
+
+/** The lint rules on a pair of neighbouring notes that a level may price (`LevelProfile.lintCosts`). */
+export type LevelLintRule = 'L06' | 'L11' | 'L15';
+export const LEVEL_LINT_RULES: readonly LevelLintRule[] = ['L06', 'L11', 'L15'];
+export type LevelLintCosts = Partial<Record<LevelLintRule, number>>;
+
+/**
+ * Count-style Parncutt rules a level may scale besides the penalty rules: each counts a strain (a
+ * weak or crossed finger, a finger on a black key, a position change).
+ */
+const LEVEL_COUNT_RULES: ReadonlySet<string> = new Set<RuleId>([
+  'weakFinger',
+  'weakFifth',
+  'thumbOnBlack',
+  'fiveOnBlack',
+  'threeToFour',
+  'fourOnBlack',
+  'thumbPassing',
+  'positionChangeCount',
+  'threeFourFive',
+  'sameFingerPivot',
+]);
+const RULE_ID_SET: ReadonlySet<string> = new Set(RULE_IDS);
+/** The keys of a level in `params/profiles-weights.json` (`LevelProfile`). */
+const LEVEL_KEYS: ReadonlySet<string> = new Set<keyof LevelProfile>([
+  'multipliers',
+  'lintCosts',
+  'rationale',
+  'note',
+]);
+const isObject = (x: unknown): x is Record<string, unknown> =>
+  typeof x === 'object' && x !== null && !Array.isArray(x);
+
+/**
+ * Checks a level-profiles file (`params/profiles-weights.json`) and returns its levels: the schema,
+ * every level of LEVELS and no other key, and for each level only the keys of LevelProfile: a
+ * multiplier map whose ids are rule ids a level may scale (a penalty rule or a count rule, never an
+ * indicator) with finite positive multipliers, `lintCosts` with rules of LEVEL_LINT_RULES and finite
+ * non-negative costs, and text `rationale` and `note`. Throws with `label` and the offending entry,
+ * so a misspelt key cannot silently drop a cost.
+ */
+export function validateLevelProfiles(
+  x: unknown,
+  label = 'level profiles',
+): Readonly<Record<Level, LevelProfile>> {
+  if (!isObject(x)) throw new Error(`${label}: not a JSON object`);
+  if (x.schema !== LEVEL_PROFILES_SCHEMA)
+    throw new Error(`${label}: schema must be ${LEVEL_PROFILES_SCHEMA}, got ${String(x.schema)}`);
+  const out = {} as Record<Level, LevelProfile>;
+  for (const level of LEVELS) {
+    const p = x[level];
+    if (!isObject(p) || !isObject(p.multipliers))
+      throw new Error(`${label}: ${level} needs a multipliers object`);
+    const multipliers: Partial<Record<RuleId, number>> = {};
+    for (const [id, m] of Object.entries(p.multipliers)) {
+      if (!RULE_ID_SET.has(id)) throw new Error(`${label}: ${level}: unknown rule id ${id}`);
+      if (!isPenaltyRule(id) && !LEVEL_COUNT_RULES.has(id))
+        throw new Error(`${label}: ${level}: ${id} is not a penalty or count rule`);
+      if (typeof m !== 'number' || !Number.isFinite(m) || m <= 0)
+        throw new Error(`${label}: ${level}: multiplier of ${id} must be a positive number`);
+      multipliers[id as RuleId] = m;
+    }
+    for (const key of Object.keys(p))
+      if (!LEVEL_KEYS.has(key))
+        throw new Error(
+          `${label}: ${level}: unknown key ${key} (known: ${[...LEVEL_KEYS].join(', ')})`,
+        );
+    const profile: LevelProfile = { multipliers: Object.freeze(multipliers) };
+    if (p.lintCosts !== undefined) {
+      if (!isObject(p.lintCosts))
+        throw new Error(`${label}: ${level}: lintCosts must be an object`);
+      const costs: LevelLintCosts = {};
+      for (const [rule, c] of Object.entries(p.lintCosts)) {
+        if (!(LEVEL_LINT_RULES as readonly string[]).includes(rule))
+          throw new Error(
+            `${label}: ${level}: lintCosts: ${rule} is not one of ${LEVEL_LINT_RULES.join(', ')}`,
+          );
+        if (typeof c !== 'number' || !Number.isFinite(c) || c < 0)
+          throw new Error(`${label}: ${level}: lintCosts: cost of ${rule} must be a number >= 0`);
+        costs[rule as LevelLintRule] = c;
+      }
+      profile.lintCosts = Object.freeze(costs);
+    }
+    for (const key of ['rationale', 'note'] as const) {
+      const s = p[key];
+      if (s === undefined) continue;
+      if (typeof s !== 'string') throw new Error(`${label}: ${level}: ${key} must be a string`);
+      profile[key] = s;
+    }
+    out[level] = Object.freeze(profile);
+  }
+  for (const key of Object.keys(x))
+    if (key !== 'schema' && !(LEVELS as readonly string[]).includes(key))
+      throw new Error(`${label}: unknown key ${key} (known: schema, ${LEVELS.join(', ')})`);
+  return Object.freeze(out);
+}
+
+/** The shipped levels (`params/profiles-weights.json`). */
+export const LEVEL_PROFILES: Readonly<Record<Level, LevelProfile>> = validateLevelProfiles(
+  levelProfilesJson,
+  'profiles-weights.json',
+);
+
+/**
+ * The weights of a set at a level: each rule the level lists has its weight multiplied, when the
+ * weight is positive (`LevelProfile.multipliers`); every other weight is returned as it is. The
+ * expert level returns an equal copy.
+ */
+export function applyLevel(weights: RuleWeights, level: Level): RuleWeights {
+  const profile = LEVEL_PROFILES[level];
+  if (!profile) throw new Error(`unknown level ${String(level)} (known: ${LEVELS.join(', ')})`);
+  const out: RuleWeights = { ...weights };
+  for (const [id, m] of Object.entries(profile.multipliers) as Array<[RuleId, number]>)
+    if (out[id] > 0) out[id] *= m;
+  return out;
 }
 /**
  * A rule term with its weighted cost (`points * weight`). A rule whose weight is 0 still appears,
@@ -53,6 +251,16 @@ export interface NoteExplanation {
    */
   gaps?: number[];
   /**
+   * The level's cost on the pair that ends at this note (`LevelProfile.lintCosts`, the beginner
+   * level): present when the level charges one, that is when lint `--beginner` flags the previous
+   * note and this one with a rule the level prices (L06 only without a rest before this note;
+   * `levelPairCosts`). The decoded cost and the marginals include it,
+   * so it is part of `gaps` (as for `terms`, the pair after the note shows up in its gaps too); it
+   * is no rule term, so `terms` and `total` leave it out and stay the weights times the path
+   * features.
+   */
+  levelCost?: number;
+  /**
    * Earlier notes of the hand whose keys are still down at this note's onset (`forEachHold`), with
    * their fingers: this note cannot take those fingers, nor one that cannot span the interval to
    * a held key.
@@ -63,7 +271,10 @@ export interface HandSolution {
   hand: Hand;
   /** Decoded cost: the weighted rule terms plus any penalty the decode had to pay. */
   cost: number;
-  /** Decodes run: 1, plus one per round of the chord loop and of the held-note loop. */
+  /**
+   * Decodes run: 1, plus one per round of the chord loop and of the held-note loop, plus those of
+   * the second decode when the consistency pass pins repeated passages (`consistentRepeats`).
+   */
   iterations: number;
   /** The hard decode had no finite path (pins against the chord rules), so a soft decode ran. */
   relaxed: boolean;
@@ -101,6 +312,18 @@ export interface HandConstraints {
    */
   forbiddenConfigs?: Map<number, Finger[][]>;
   soft: boolean;
+  /**
+   * Cost of each pair of neighbouring notes that lint `--beginner` flags with the rule (the
+   * level's `LevelProfile.lintCosts`; `levelPairCosts`), part of the decode and of the returned
+   * cost. Absent, or a rule absent or 0: none.
+   */
+  lintCosts?: LevelLintCosts;
+  /**
+   * Added to the unary cost of finger f on sequence note i (M3: loss-augmented decoding). It must
+   * be finite. It steers the decode and is part of the marginals, but not of the returned cost,
+   * which is the path's cost without it. Absent, the decode is unchanged.
+   */
+  unaryExtra?: (i: number, f: Finger) => number;
 }
 
 const INF = Number.POSITIVE_INFINITY;
@@ -276,7 +499,10 @@ export function templateBonus(
  * (`forEachHold`) pays HELD_PENALTY when its finger breaks the held-note law with that key (the
  * same finger, or a span beyond practical; `holdable`), as does a finger in `forbidden` or another
  * finger than the one `kept` keeps, in both modes. A note inside a template match earns the
- * template term for the template's finger (`templateBonus`).
+ * template term for the template's finger (`templateBonus`). A pair of notes that lint
+ * `--beginner` flags with a rule of `lintCosts` costs that rule's cost (the beginner level;
+ * `levelPairCosts`). `unaryExtra` is added to every unary cost during the decode and left out of
+ * the returned cost.
  */
 export function solveHand(
   seq: HandSequence,
@@ -284,6 +510,60 @@ export function solveHand(
   constraints: HandConstraints = { pinned: new Map(), forbidden: new Map(), soft: false },
   templates: TemplateMatch[] = [],
 ): { fingers: Finger[]; cost: number; marginals: number[][] } {
+  const { problem, unary } = handProblem(seq, ctx, constraints, templates);
+  const result = decode(problem);
+  return {
+    fingers: result.fingers.map((f) => (f + 1) as Finger),
+    cost: constraints.unaryExtra ? pathCost({ ...problem, unary }, result.fingers) : result.cost,
+    marginals: result.marginals,
+  };
+}
+
+/**
+ * The level's cost on the pair of sequence notes k - 1 and k with fingers g then f
+ * (`HandConstraints.lintCosts`, the beginner level), or undefined when it charges nothing. A pair
+ * pays the cost of the rule lint `--beginner` flags it with (`lintHand`, the same tests on the
+ * same neighbours when every note is fingered), and only notes of different slices pay: L15, a
+ * thumb crossing (`isThumbCrossing`) inside a run that one five-finger position plays
+ * (`pairWindows` within FIVE_FINGER_SPAN); L06, a crossing (`isCrossing`) of two fingers without
+ * the thumb, anywhere but after a rest; L11, the same finger on another key less than
+ * `ctx.hopFastSec` after the previous onset without a rest (a fast hop). Lint flags L06 after a
+ * rest too, but the hand is lifted there: charging it made Burgmuller's Arabesque move the left
+ * hand once more to avoid a 4 then 5 across a rest. The decode and `NoteExplanation.levelCost`
+ * both read it.
+ */
+function levelPairCosts(
+  v: SeqNote[],
+  ctx: RuleContext,
+  costs: LevelLintCosts | undefined,
+): ((k: number, g: Finger, f: Finger) => number) | undefined {
+  const l06 = costs?.L06 ?? 0;
+  const l11 = costs?.L11 ?? 0;
+  const l15 = costs?.L15 ?? 0;
+  if (l06 <= 0 && l11 <= 0 && l15 <= 0) return undefined;
+  const inPosition = pairWindows(v).map((w) => w !== undefined && w <= FIVE_FINGER_SPAN);
+  return (k, g, f) => {
+    const a = v[k - 1];
+    const b = v[k]!;
+    if (a === undefined || a.slice === b.slice) return 0;
+    const i = b.pitch - a.pitch;
+    if (g === f) return i !== 0 && !b.restBefore && b.ioi < ctx.hopFastSec ? l11 : 0;
+    if (!isCrossing(g, f, i)) return 0;
+    if (isThumbCrossing(g, f, i)) return inPosition[k] ? l15 : 0;
+    return b.restBefore ? 0 : l06;
+  };
+}
+
+/**
+ * The decode problem `solveHand` solves (`problem`, with `unaryExtra`) and its unary cost without
+ * `unaryExtra` (`unary`).
+ */
+function handProblem(
+  seq: HandSequence,
+  ctx: RuleContext,
+  constraints: HandConstraints,
+  templates: TemplateMatch[],
+): { problem: DecodeProblem; unary: DecodeProblem['unary'] } {
   const v = seq.notes;
   const t = ctx.tables;
   const penalty = constraints.soft ? SOFT_PENALTY : INF;
@@ -291,22 +571,25 @@ export function solveHand(
   const windows = forbiddenWindows(shapes, constraints.forbiddenConfigs);
   const bonus = templateBonus(seq, ctx, templates);
   // heldBack[k][i]: note i - k - 1 still holds its key at note i's onset (k = 0, 1).
-  const holds = heldPairs(v, t);
+  const holds = heldPairs(v, t, ctx.holdEpsSec);
   const heldBack = [1, 2].map((k) => holds.map((ms, i) => ms.includes(i - k)));
-  const result = decode({
+  const levelCost = levelPairCosts(v, ctx, constraints.lintCosts);
+  const unary = (i: number, f0: number): number => {
+    const f = (f0 + 1) as Finger;
+    const pin = constraints.pinned.get(i);
+    if (pin !== undefined && pin !== f) return INF;
+    let cost = weightedSum(ctx, unaryTerms(ctx, v[i]!, f, v[i - 1], v[i + 1]));
+    if (constraints.forbidden.get(i)?.has(f)) cost += HELD_PENALTY;
+    const keep = constraints.kept?.get(i);
+    if (keep !== undefined && keep !== f) cost += HELD_PENALTY;
+    const tb = bonus[i];
+    if (tb?.finger === f) cost -= ctx.weights.template * tb.points;
+    return cost;
+  };
+  const extra = constraints.unaryExtra;
+  const problem: DecodeProblem = {
     n: v.length,
-    unary: (i, f0) => {
-      const f = (f0 + 1) as Finger;
-      const pin = constraints.pinned.get(i);
-      if (pin !== undefined && pin !== f) return INF;
-      let cost = weightedSum(ctx, unaryTerms(ctx, v[i]!, f, v[i - 1], v[i + 1]));
-      if (constraints.forbidden.get(i)?.has(f)) cost += HELD_PENALTY;
-      const keep = constraints.kept?.get(i);
-      if (keep !== undefined && keep !== f) cost += HELD_PENALTY;
-      const tb = bonus[i];
-      if (tb?.finger === f) cost -= ctx.weights.template * tb.points;
-      return cost;
-    },
+    unary: extra ? (i, f0) => unary(i, f0) + extra(i, (f0 + 1) as Finger) : unary,
     pair: (i, g0, f0) => {
       const g = (g0 + 1) as Finger;
       const f = (f0 + 1) as Finger;
@@ -322,9 +605,8 @@ export function solveHand(
         if (windows.pair.get(i)?.has(g0 * 5 + f0)) return penalty + terms;
         return terms;
       }
-      return heldBack[0]![i] && !holdable(t, b.pitch - a.pitch, g, f)
-        ? HELD_PENALTY + terms
-        : terms;
+      const cost = levelCost ? terms + levelCost(i, g, f) : terms;
+      return heldBack[0]![i] && !holdable(t, b.pitch - a.pitch, g, f) ? HELD_PENALTY + cost : cost;
     },
     triple: (i, h0, g0, f0) => {
       const h = (h0 + 1) as Finger;
@@ -348,12 +630,39 @@ export function solveHand(
         ? HELD_PENALTY + terms
         : terms;
     },
-  });
-  return {
-    fingers: result.fingers.map((f) => (f + 1) as Finger),
-    cost: result.cost,
-    marginals: result.marginals,
   };
+  return { problem, unary };
+}
+
+/**
+ * The cost of a path (fingers 0..4) under a decode problem, summed in the order of `decode`'s
+ * read-out, so that it is the cost a decode of that problem returns for the path.
+ */
+function pathCost(p: DecodeProblem, fingers: number[]): number {
+  if (fingers.length === 0) return 0;
+  let cost = p.unary(0, fingers[0]!);
+  for (let i = 1; i < fingers.length; i++) {
+    let c = p.unary(i, fingers[i]!) + p.pair(i, fingers[i - 1]!, fingers[i]!);
+    if (i >= 2) c += p.triple(i, fingers[i - 2]!, fingers[i - 1]!, fingers[i]!);
+    cost += c;
+  }
+  return cost;
+}
+
+/**
+ * The part of a path's cost (fingers 1..5) that notes `from` to `to` take part in: their unary
+ * terms and every pair and triple term that reads one of them. Two paths that differ only on
+ * `from..to` differ in cost by exactly the difference of this sum.
+ */
+function localCost(p: DecodeProblem, fingers: readonly Finger[], from: number, to: number): number {
+  let cost = 0;
+  const f0 = (i: number): number => fingers[i]! - 1;
+  for (let i = from; i <= Math.min(p.n - 1, to + 2); i++) {
+    if (i <= to) cost += p.unary(i, f0(i));
+    if (i >= 1 && i - 1 <= to) cost += p.pair(i, f0(i - 1), f0(i));
+    if (i >= 2) cost += p.triple(i, f0(i - 2), f0(i - 1), f0(i));
+  }
+  return cost;
 }
 
 /**
@@ -641,11 +950,286 @@ function resolveHeldConflicts(
   return added;
 }
 
+interface LoopSettings {
+  maxHeld: number;
+  maxChord: number;
+  lawDomains: boolean;
+  /** `HandConstraints.lintCosts` of every decode (the level's; absent for none). */
+  lintCosts: LevelLintCosts | undefined;
+}
+
+interface HandDecode {
+  solved: { fingers: Finger[]; cost: number; marginals: number[][] };
+  constraints: HandConstraints;
+  shapes: SliceShape[];
+  holds: number[][];
+  iterations: number;
+  relaxed: boolean;
+}
+
+/**
+ * One hand's full decode: the law domains, the hard decode (soft when it has no finite path), the
+ * chord loop and the held-note loop, with `pinned` as hard pins.
+ */
+function decodeHandFully(
+  seq: HandSequence,
+  ctx: RuleContext,
+  pinned: Map<number, Finger>,
+  templates: TemplateMatch[],
+  loops: LoopSettings,
+): HandDecode {
+  const v = seq.notes;
+  const constraints: HandConstraints = {
+    pinned,
+    forbidden: new Map(),
+    kept: new Map(),
+    forbiddenConfigs: new Map(),
+    soft: false,
+  };
+  if (loops.lintCosts) constraints.lintCosts = loops.lintCosts;
+  const shapes = sliceShapes(v, ctx.tables, pinned);
+  const holds = heldPairs(v, ctx.tables, ctx.holdEpsSec);
+  // A finger no law-keeping fingering can give a note is forbidden from the start, so the
+  // decoder sees the held-note laws of holds more than two steps back before the loop has to.
+  if (loops.lawDomains)
+    lawDomains(v, ctx.tables, shapes, holds, pinned).forEach((d, k) => {
+      if (pinned.has(k) || d === ALL_FINGERS) return;
+      constraints.forbidden.set(k, new Set(FINGERS.filter((f) => (d & bit(f)) === 0)));
+    });
+  let solved = solveHand(seq, ctx, constraints, templates);
+  // Held-note rules are finite and the chord law is a penalty only where a configuration
+  // keeps the pins, so only pins against the chord order make the hard decode infinite; the soft
+  // decode then keeps the pins and breaks the fewest chord rules.
+  let relaxed = false;
+  const relax = (): void => {
+    constraints.soft = true;
+    relaxed = true;
+    solved = solveHand(seq, ctx, constraints, templates);
+  };
+  if (!Number.isFinite(solved.cost)) relax();
+  // Chord loop first (a forbidden configuration is never one that breaks the fewest pairs, so
+  // the decode stays finite), then the held-note loop on a decode without chord violations; each
+  // has its own budget of decodes.
+  let iterations = 1;
+  let chordRounds = 1;
+  let heldRounds = 1;
+  for (;;) {
+    if (
+      chordRounds < loops.maxChord &&
+      forbidChordViolations(v, ctx.tables, shapes, solved.fingers, constraints)
+    )
+      chordRounds++;
+    else if (
+      heldRounds < loops.maxHeld &&
+      resolveHeldConflicts(
+        v,
+        ctx.tables,
+        heldConflicts(v, ctx.tables, holds, solved.fingers),
+        solved.fingers,
+        solved.marginals,
+        constraints,
+      )
+    )
+      heldRounds++;
+    else break;
+    solved = solveHand(seq, ctx, constraints, templates);
+    iterations++;
+  }
+  if (!Number.isFinite(solved.cost) && !relaxed) {
+    relax();
+    iterations++;
+  }
+  return { solved, constraints, shapes, holds, iterations, relaxed };
+}
+
+/**
+ * Broken laws of a hand's fingering, as lint counts them between two notes: held pairs on one
+ * finger or beyond the practical span (L03, L05), and chord pairs of a slice of at most five notes
+ * that share a finger, cross (L01, L02) or exceed the practical span (L05).
+ */
+function lawBreaks(v: SeqNote[], t: SpanTables, holds: number[][], fingers: Finger[]): number {
+  let n = 0;
+  holds.forEach((ms, i) => {
+    for (const m of ms) if (!holdable(t, v[i]!.pitch - v[m]!.pitch, fingers[m]!, fingers[i]!)) n++;
+  });
+  for (let a = 0; a < v.length; a++) {
+    let size = 1;
+    while (a + size < v.length && v[a + size]!.slice === v[a]!.slice) size++;
+    if (size <= 5)
+      for (let x = a; x < a + size; x++)
+        for (let y = x + 1; y < a + size; y++)
+          if (
+            fingers[y]! <= fingers[x]! ||
+            !practical(t, v[y]!.pitch - v[x]!.pitch, fingers[x]!, fingers[y]!)
+          )
+            n++;
+    a += size - 1;
+  }
+  return n;
+}
+
+/**
+ * The consistency pass (M3 Task 7, H4; literature 6.6 item 3): identical passages take one
+ * fingering. The passages (`identicalPassages`: every passage of at least four events that comes
+ * back with the same keys, durations and rhythm at the same place in the bar, with all of its
+ * copies; copies of two passages may overlap) are taken in turn, most repeated events first. A
+ * passage ties together the notes at the same place in each of its copies, and a tie is kept for
+ * the rest of the pass, so a passage nested in a longer repeated passage, or overlapping one, ends
+ * up fingered like it (Ode to Joy's bars 1-3 like bars 5-7 and 13-15, which belong to the repeat
+ * of bars 5-8 as bars 13-16).
+ *
+ * For a passage, every distinct fingering of its copies (as tied so far) is a candidate. A
+ * candidate gives its finger at each place to every note tied to that place, here or by an earlier
+ * passage, and is priced by the change of the path's cost on the notes it changes (`localCost`
+ * under the first decode's final constraints). The cheapest is taken unless it pays a penalty (a law, a chord
+ * rule, a forbidden finger), contradicts a user pin, or would give one tied class two fingers
+ * (copies that overlap, as in a run of repeated notes); then the passage is left untied. The tied
+ * notes are pinned and the hand decoded again. The new decode is kept only when it breaks no more
+ * laws between two notes (`lawBreaks`) than the first, with the first decode's marginals (the
+ * confidences and cost gaps of the notes as decoded without the pass's pins). Returns it, or
+ * undefined when nothing changed.
+ */
+function consistentRepeats(
+  seq: HandSequence,
+  ctx: RuleContext,
+  pinned: Map<number, Finger>,
+  templates: TemplateMatch[],
+  loops: LoopSettings,
+  first: HandDecode,
+  positions: ReadonlyArray<number | undefined>,
+): HandDecode | undefined {
+  const v = seq.notes;
+  const passages = identicalPassages(seq, { positions });
+  if (passages.length === 0) return undefined;
+  const { problem } = handProblem(seq, ctx, first.constraints, templates);
+  const fingers = first.solved.fingers.slice();
+  // The tied classes: a union-find over the notes; `members` lists each class of two or more notes
+  // by its root. Every note of a class has the same finger in `fingers`.
+  const parent = v.map((_, i) => i);
+  const find = (i: number): number => {
+    while (parent[i] !== i) i = parent[i] = parent[parent[i]!]!;
+    return i;
+  };
+  const members = new Map<number, number[]>();
+  const classOf = (r: number): number[] => members.get(r) ?? [r];
+  for (const p of passages) {
+    // The classes at each place of the copies, joined into the classes the passage would make
+    // (`up`, a union-find over class roots).
+    const up = new Map<number, number>();
+    const top = (r: number): number => {
+      for (let u = up.get(r); u !== undefined && u !== r; u = up.get(r)) r = u;
+      return r;
+    };
+    for (let k = 0; k < p.length; k++) {
+      const roots = p.starts.map((s) => find(s + k));
+      for (const r of roots) if (!up.has(r)) up.set(r, r);
+      const t0 = top(roots[0]!);
+      for (const r of roots) {
+        const t = top(r);
+        if (t !== t0) up.set(t, t0);
+      }
+    }
+    const place = Array.from({ length: p.length }, (_, k) => top(find(p.starts[0]! + k)));
+    const candidates = [
+      ...new Map(
+        p.starts.map((s) => {
+          const c = fingers.slice(s, s + p.length);
+          return [c.join(''), c];
+        }),
+      ).values(),
+    ];
+    let best: { changes: Array<[number, Finger]>; delta: number } | undefined;
+    for (const c of candidates) {
+      const fingerOf = new Map<number, Finger>();
+      let fits = true;
+      c.forEach((f, k) => {
+        if ((fingerOf.get(place[k]!) ?? f) !== f) fits = false;
+        fingerOf.set(place[k]!, f);
+      });
+      if (!fits) continue;
+      const changes: Array<[number, Finger]> = [];
+      let keepsPins = true;
+      for (const r of up.keys()) {
+        const f = fingerOf.get(top(r))!;
+        for (const i of classOf(r)) {
+          if ((pinned.get(i) ?? f) !== f) keepsPins = false;
+          if (fingers[i] !== f) changes.push([i, f]);
+        }
+      }
+      if (!keepsPins) continue;
+      const delta = costChange(problem, fingers, changes);
+      if (best === undefined || delta < best.delta) best = { changes, delta };
+    }
+    // A candidate that pays a penalty somewhere breaks a law or a chord rule there.
+    if (best === undefined || !(best.delta < HELD_PENALTY / 2)) continue;
+    for (const [i, f] of best.changes) fingers[i] = f;
+    for (const r of up.keys()) {
+      const t = top(r);
+      if (t === r) continue;
+      members.set(t, [...classOf(t), ...classOf(r)]);
+      members.delete(r);
+      parent[r] = t;
+    }
+  }
+  if (fingers.every((f, i) => f === first.solved.fingers[i])) return undefined;
+  const pins = new Map(pinned);
+  for (const notes of members.values()) for (const i of notes) pins.set(i, fingers[i]!);
+  const again = decodeHandFully(seq, ctx, pins, templates, loops);
+  if (!Number.isFinite(again.solved.cost)) return undefined;
+  const t = ctx.tables;
+  const before = lawBreaks(v, t, first.holds, first.solved.fingers);
+  if (lawBreaks(v, t, again.holds, again.solved.fingers) > before) return undefined;
+  // The pass's pins are the engine's choice, not the user's: `solveFingering` reports a note as
+  // pinned only from its own map of the user's pins, and the slice shapes are the first decode's,
+  // so a slice's feasibility is judged with the user's pins. The confidences and the cost gaps
+  // come from the first decode's marginals: under the pass's pins every other finger of a pinned
+  // note is impossible, which would read as certainty; a finger the pass chose for consistency
+  // keeps the gap it had on its own.
+  return {
+    ...again,
+    shapes: first.shapes,
+    solved: { ...again.solved, marginals: first.solved.marginals },
+  };
+}
+
+/**
+ * The change of a path's cost (fingers 1..5) when the notes in `changes` take their new fingers:
+ * `localCost` over each stretch of changed notes (stretches closer than three notes are one, since
+ * a term reads at most three consecutive notes), after minus before. `fingers` is left as it was.
+ */
+function costChange(
+  p: DecodeProblem,
+  fingers: Finger[],
+  changes: ReadonlyArray<readonly [number, Finger]>,
+): number {
+  if (changes.length === 0) return 0;
+  const at = changes.map(([i]) => i).sort((a, b) => a - b);
+  const spans: Array<[number, number]> = [];
+  for (const i of at) {
+    const last = spans[spans.length - 1];
+    if (last && i - last[1] <= 3) last[1] = i;
+    else spans.push([i, i]);
+  }
+  const old = changes.map(([i]) => fingers[i]!);
+  let delta = 0;
+  for (const [a, b] of spans) delta -= localCost(p, fingers, a, b);
+  for (const [i, f] of changes) fingers[i] = f;
+  for (const [a, b] of spans) delta += localCost(p, fingers, a, b);
+  changes.forEach(([i], k) => (fingers[i] = old[k]!));
+  return delta;
+}
+
 export function solveFingering(score: Score, opts: SolveOptions = {}): SolveResult {
   const profile = resolveProfile(opts.profile);
-  const ctx = makeContext(profile, opts.weights);
+  const set = loadWeightSet(opts.weightSet ?? 'parncutt');
+  const level = opts.level ?? 'expert';
+  const ctx = makeContext(
+    profile,
+    applyLevel({ ...set.weights, ...opts.weights }, level),
+    opts.holdEpsSec !== undefined ? { holdEpsSec: opts.holdEpsSec } : {},
+  );
   const hands = opts.hands ?? ['R', 'L'];
-  const T = opts.confidenceTemperature ?? 2;
+  const T = opts.confidenceTemperature ?? set.confidenceTemperature;
   const maxHeld = opts.maxHeldIterations ?? 8;
   const maxChord = opts.maxChordIterations ?? 8;
   const assignment: Assignment = {};
@@ -665,65 +1249,23 @@ export function solveFingering(score: Score, opts: SolveOptions = {}): SolveResu
       opts.templates === false
         ? []
         : matchTemplates(seq, detectRuns(seq), TEXTBOOK_TEMPLATES[hand]);
-    const constraints: HandConstraints = {
-      pinned,
-      forbidden: new Map(),
-      kept: new Map(),
-      forbiddenConfigs: new Map(),
-      soft: false,
+    const loops: LoopSettings = {
+      maxHeld,
+      maxChord,
+      lawDomains: opts.lawDomains !== false,
+      lintCosts: LEVEL_PROFILES[level].lintCosts,
     };
-    const shapes = sliceShapes(v, ctx.tables, pinned);
-    const holds = heldPairs(v, ctx.tables);
-    // A finger no law-keeping fingering can give a note is forbidden from the start, so the
-    // decoder sees the held-note laws of holds more than two steps back before the loop has to.
-    if (opts.lawDomains !== false)
-      lawDomains(v, ctx.tables, shapes, holds, pinned).forEach((d, k) => {
-        if (pinned.has(k) || d === ALL_FINGERS) return;
-        constraints.forbidden.set(k, new Set(FINGERS.filter((f) => (d & bit(f)) === 0)));
-      });
-    let solved = solveHand(seq, ctx, constraints, templates);
-    // Held-note rules are finite and the chord law is a penalty only where a configuration
-    // keeps the pins, so only pins against the chord order make the hard decode infinite; the soft
-    // decode then keeps the pins and breaks the fewest chord rules.
-    let relaxed = false;
-    const relax = (): void => {
-      constraints.soft = true;
-      relaxed = true;
-      solved = solveHand(seq, ctx, constraints, templates);
-    };
-    if (!Number.isFinite(solved.cost)) relax();
-    // Chord loop first (a forbidden configuration is never one that breaks the fewest pairs, so
-    // the decode stays finite), then the held-note loop on a decode without chord violations; each
-    // has its own budget of decodes.
-    let iterations = 1;
-    let chordRounds = 1;
-    let heldRounds = 1;
-    for (;;) {
-      if (
-        chordRounds < maxChord &&
-        forbidChordViolations(v, ctx.tables, shapes, solved.fingers, constraints)
-      )
-        chordRounds++;
-      else if (
-        heldRounds < maxHeld &&
-        resolveHeldConflicts(
-          v,
-          ctx.tables,
-          heldConflicts(v, ctx.tables, holds, solved.fingers),
-          solved.fingers,
-          solved.marginals,
-          constraints,
-        )
-      )
-        heldRounds++;
-      else break;
-      solved = solveHand(seq, ctx, constraints, templates);
-      iterations++;
+    let decoded = decodeHandFully(seq, ctx, pinned, templates, loops);
+    let iterations = decoded.iterations;
+    if (opts.consistentRepeats !== false) {
+      const positions = barPositions(score, seq);
+      const again = consistentRepeats(seq, ctx, pinned, templates, loops, decoded, positions);
+      if (again) {
+        iterations += again.iterations;
+        decoded = again;
+      }
     }
-    if (!Number.isFinite(solved.cost) && !relaxed) {
-      relax();
-      iterations++;
-    }
+    const { solved, shapes, holds, relaxed } = decoded;
     const infeasibleSlices = shapes.flatMap(({ start, size, feasible }, slice) =>
       size > 1 && !feasible
         ? [{ slice, noteIds: v.slice(start, start + size).map((n) => n.noteId) }]
@@ -731,6 +1273,7 @@ export function solveFingering(score: Score, opts: SolveOptions = {}): SolveResu
     );
     const fingers = solved.fingers;
     const bonus = templateBonus(seq, ctx, templates);
+    const levelCost = levelPairCosts(v, ctx, loops.lintCosts);
     for (let i = 0; i < v.length; i++) {
       const n = v[i]!;
       const m = solved.marginals[i]!;
@@ -770,6 +1313,8 @@ export function solveFingering(score: Score, opts: SolveOptions = {}): SolveResu
         total: explained.reduce((s, t) => s + t.weighted, 0),
         gaps: m.map((x) => (Number.isFinite(x) ? x - best : INF)),
       };
+      const charged = levelCost && i >= 1 ? levelCost(i, fingers[i - 1]!, f) : 0;
+      if (charged > 0) explanation.levelCost = charged;
       if (holds[i]!.length > 0)
         explanation.heldBy = holds[i]!.map((k) => ({ finger: fingers[k]!, noteId: v[k]!.noteId }));
       explanations[n.noteId] = explanation;

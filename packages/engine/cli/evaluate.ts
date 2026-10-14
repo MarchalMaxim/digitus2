@@ -6,7 +6,12 @@ import { parsePig } from '../src/io/pig/read.js';
 
 export interface EvalReport {
   pieces: Array<{ id: string; predFile: string; goldFiles: string[]; metrics: PigMetrics }>;
-  skipped: string[];
+  /**
+   * Prediction files not scored, with the reason: no gold file for the piece, or a gold that
+   * fingers none of its notes (`no annotated gold notes`, as `research/fingering_eval/evaluate.py`
+   * does), which would otherwise enter the mean as a piece scoring 0.
+   */
+  skipped: Array<{ file: string; reason: string }>;
   mean: { gen: number; high: number; soft: number; rec: number };
   noteWeighted: { gen: number; high: number; soft: number; rec: number };
 }
@@ -46,7 +51,7 @@ export function evaluateDirs(predPath: string, goldPath: string): EvalReport {
     const id = pieceId(predFile);
     const golds = id !== undefined ? goldByPiece.get(id) : undefined;
     if (id === undefined || !golds || golds.length === 0) {
-      report.skipped.push(basename(predFile));
+      report.skipped.push({ file: basename(predFile), reason: 'no gold file' });
       continue;
     }
     const pred = parsePig(readFileSync(predFile, 'utf8'));
@@ -54,6 +59,10 @@ export function evaluateDirs(predPath: string, goldPath: string): EvalReport {
       pred,
       golds.map((g) => parsePig(readFileSync(g, 'utf8'))),
     );
+    if (metrics.notes === 0) {
+      report.skipped.push({ file: basename(predFile), reason: 'no annotated gold notes' });
+      continue;
+    }
     report.pieces.push({ id, predFile, goldFiles: golds, metrics });
     for (const k of KEYS) {
       report.mean[k] += metrics[k];
@@ -87,6 +96,7 @@ export function formatReport(r: EvalReport): string {
   );
   const w = r.noteWeighted;
   lines.push(`notes  ${pct(w.gen)} ${pct(w.high)} ${pct(w.soft)} ${pct(w.rec)}`);
-  if (r.skipped.length) lines.push(`skipped (no gold): ${r.skipped.join(', ')}`);
+  if (r.skipped.length)
+    lines.push(`skipped: ${r.skipped.map((s) => `${s.file} (${s.reason})`).join(', ')}`);
   return lines.join('\n');
 }

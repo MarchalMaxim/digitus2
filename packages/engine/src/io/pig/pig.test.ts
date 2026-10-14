@@ -49,6 +49,16 @@ describe('parsePig', () => {
     const { assignment } = parsePig(text);
     expect(assignment['0']).toBeUndefined();
   });
+  it('treats finger 0 as unfingered: the note exists, the assignment has no entry', () => {
+    const text =
+      '//Version: PianoFingering_v170101\n0\t0\t0.5\tC4\t80\t80\t0\t0\n1\t0.5\t1\tD4\t80\t80\t0\t2\n2\t1\t1.5\tC3\t80\t80\t1\t-0\n';
+    const { score, assignment, warnings } = parsePig(text);
+    expect(score.notes).toHaveLength(3);
+    expect(Object.keys(assignment)).toHaveLength(1);
+    expect(assignment[score.notes.find((n) => n.midi === 62)!.id]!.finger).toBe(2);
+    // An unfingered note carries no sign, so it never triggers the wrong-sign warning.
+    expect(warnings).toEqual([]);
+  });
   it('rejects malformed lines with the line number', () => {
     expect(() => parsePig('//h\n0\t0\t0.5\tC4\n')).toThrow(/line 2/);
   });
@@ -67,6 +77,13 @@ describe('parseFingerField', () => {
     expect(parseFingerField('-3', 'L')).toEqual({ finger: 3 });
     expect(parseFingerField('3_1', 'R')).toEqual({ finger: 3, substitution: 1 });
     expect(parseFingerField('-5_-4', 'L')).toEqual({ finger: 5, substitution: 4 });
+  });
+  it('reads 0, -0 and the unlabeled marks of the Python reference as no finger', () => {
+    // research/fingering_eval/validate.py UNLABELED = {"0", "x", "X", "?", "-0"}.
+    for (const t of ['0', '-0', 'x', 'X', '?', '0_2', '-0_-2']) {
+      expect(parseFingerField(t, 'R')).toEqual({});
+      expect(parseFingerField(t, 'L')).toEqual({});
+    }
   });
 });
 

@@ -1,7 +1,7 @@
 import type { Finger } from '../score/types.js';
 import { x14 } from './geometry.js';
 import weightsJson from './params/weights-parncutt.json' with { type: 'json' };
-import { outOfReach } from './reach.js';
+import { HOLD_EPS, outOfReach } from './reach.js';
 import { span } from './spans.js';
 import type { HandProfile, SpanTables } from './spans.js';
 
@@ -44,7 +44,26 @@ export type RuleId =
   | 'positionChangeSize'
   | 'threeFourFive'
   | 'sameFingerPivot' // triple
-  | 'template'; // Task 8 (unary bonus)
+  | 'template' // Task 8 (unary bonus)
+  // M3 features (weight 0 in the Parncutt set; the learned sets give them weights):
+  | 'latticeStep'
+  | 'levelChange' // pair, melodic, not a repeated key
+  | 'stretchFast' // pair, melodic, two fingers
+  | 'shiftFast' // pair, across slices
+  | 'repeatFast' // pair, repeated key
+  | IndicatorRuleId;
+
+type Digit = 1 | 2 | 3 | 4 | 5;
+/** Two fingers rising with pitch inside a chord (the chord order): g < f. */
+type ChordPair = '12' | '13' | '14' | '15' | '23' | '24' | '25' | '34' | '35' | '45';
+/**
+ * The M3 indicator features (1 point each): `on:<f>:<colour>` (finger f on a black or white key,
+ * unary), `tr:<g><f>:<up|down>` (finger g then f on two notes of different slices, the second
+ * higher or lower in mirrored pitch; g = f is a hop), `ch:<g><f>` (neighbouring notes of a slice
+ * on fingers g < f).
+ */
+export type IndicatorRuleId =
+  `on:${Digit}:${'black' | 'white'}` | `tr:${Digit}${Digit}:${'up' | 'down'}` | `ch:${ChordPair}`;
 export type RuleWeights = Record<RuleId, number>;
 export interface Term {
   rule: RuleId;
@@ -71,11 +90,119 @@ export interface RuleContext {
    */
   chromaticTemplatePoints: number;
   repeatFastSec: number;
+  /**
+   * The hold tolerance of the solver's held-note law (`reach.ts` `forEachHold`): a key whose
+   * notated offset is at most this many seconds after a later onset is released, not held under
+   * that note. Default `HOLD_EPS` (1 ms). M3 Task 7 H1 tried 50 ms (a legato overlap) and was not
+   * kept (docs/experiments.md); the parameter stays for experiments.
+   */
+  holdEpsSec: number;
 }
 
 export const PARNCUTT_WEIGHTS: RuleWeights = (weightsJson as { weights: RuleWeights }).weights;
 
-export function makeContext(profile: HandProfile, weights: Partial<RuleWeights> = {}): RuleContext {
+/** The named rules; a `Record` so the compiler checks the list against `RuleId`. */
+const NAMED_RULES: Record<Exclude<RuleId, IndicatorRuleId>, true> = {
+  weakFinger: true,
+  weakFifth: true,
+  thumbOnBlack: true,
+  fiveOnBlack: true,
+  stretch: true,
+  smallSpan: true,
+  largeSpan: true,
+  beyondPractical: true,
+  threeToFour: true,
+  fourOnBlack: true,
+  thumbPassing: true,
+  hop: true,
+  repeatedNoteSameFinger: true,
+  repeatedNoteFingerChange: true,
+  chordStretch: true,
+  chordSmallSpan: true,
+  chordLargeSpan: true,
+  chordBeyondPractical: true,
+  doubledFinger: true,
+  handPositionShift: true,
+  positionChangeCount: true,
+  positionChangeSize: true,
+  threeFourFive: true,
+  sameFingerPivot: true,
+  template: true,
+  latticeStep: true,
+  levelChange: true,
+  stretchFast: true,
+  shiftFast: true,
+  repeatFast: true,
+};
+
+// The indicator ids, built once so the term functions look them up instead of building strings in
+// the decoder's inner loop. Indexed by finger - 1.
+const DIGITS: readonly Digit[] = [1, 2, 3, 4, 5];
+/** ON_IDS[f - 1]: `[on:<f>:black, on:<f>:white]`. */
+const ON_IDS = DIGITS.map((f) => [`on:${f}:black`, `on:${f}:white`] as const);
+/** TR_IDS[g - 1][f - 1]: `[tr:<g><f>:up, tr:<g><f>:down]`. */
+const TR_IDS = DIGITS.map((g) =>
+  DIGITS.map((f) => [`tr:${g}${f}:up`, `tr:${g}${f}:down`] as const),
+);
+/** CH_IDS[g - 1][f - 1]: `ch:<g><f>` for g < f, undefined otherwise. */
+const CH_IDS = DIGITS.map((g) =>
+  DIGITS.map((f) => (g < f ? (`ch:${g}${f}` as `ch:${ChordPair}`) : undefined)),
+);
+
+/** Every rule id, sorted by code unit (the order of `featureIds` and of `Array.prototype.sort`). */
+export const RULE_IDS: readonly RuleId[] = Object.freeze(
+  [
+    ...(Object.keys(NAMED_RULES) as RuleId[]),
+    ...ON_IDS.flat(),
+    ...TR_IDS.flat(2),
+    ...CH_IDS.flat().filter((id) => id !== undefined),
+  ].sort(),
+);
+
+/**
+ * The physical rule terms whose weights must stay non-negative during learning (a negative weight
+ * would reward the strain the term measures). doubledFinger (the M2 hardening's price of each
+ * finger a slice of more than five notes must double) is one of them; repeatedNoteFingerChange is
+ * not (its learned weight is negative, plan correction 7).
+ */
+const PENALTY_RULES: ReadonlySet<string> = new Set<RuleId>([
+  'stretch',
+  'smallSpan',
+  'largeSpan',
+  'beyondPractical',
+  'chordStretch',
+  'chordSmallSpan',
+  'chordLargeSpan',
+  'chordBeyondPractical',
+  'doubledFinger',
+  'hop',
+  'repeatedNoteSameFinger',
+  'handPositionShift',
+  'positionChangeSize',
+  'stretchFast',
+  'shiftFast',
+]);
+
+/**
+ * True for a physical penalty rule (its learned weight is projected to be non-negative); false for
+ * the indicators, `template` and the count-style rules.
+ */
+export function isPenaltyRule(id: string): boolean {
+  return PENALTY_RULES.has(id);
+}
+
+/** Solver settings that are not weights (`makeContext`). */
+export interface ContextSettings {
+  /** `RuleContext.holdEpsSec` (default `HOLD_EPS`). */
+  holdEpsSec?: number;
+}
+
+/** A partial weight set is completed with the Parncutt value of every id it leaves out. */
+export function makeContext(
+  profile: HandProfile,
+  weights: Partial<RuleWeights> = {},
+  settings: ContextSettings = {},
+): RuleContext {
   return {
     tables: profile.tables,
     weights: { ...PARNCUTT_WEIGHTS, ...weights },
@@ -84,6 +211,7 @@ export function makeContext(profile: HandProfile, weights: Partial<RuleWeights> 
     thumbCrossingMax: 5,
     chromaticTemplatePoints: 8,
     repeatFastSec: 0.18,
+    holdEpsSec: settings.holdEpsSec ?? HOLD_EPS,
   };
 }
 
@@ -107,7 +235,10 @@ function push(terms: Term[], rule: RuleId, points: number): void {
   if (points !== 0) terms.push({ rule, points });
 }
 
-/** Unary terms (Parncutt rules 6, 10, 11). `prev` and `next` are the sequence neighbours. */
+/**
+ * Unary terms (Parncutt rules 6, 10, 11) and the key-colour indicator `on:<f>:<colour>`. `prev`
+ * and `next` are the sequence neighbours.
+ */
 export function unaryTerms(
   ctx: RuleContext,
   n: NoteView,
@@ -121,6 +252,7 @@ export function unaryTerms(
   if (f === 1 && n.black)
     push(terms, 'thumbOnBlack', 1 + (white(prev) ? 2 : 0) + (white(next) ? 2 : 0));
   if (f === 5 && n.black) push(terms, 'fiveOnBlack', (white(prev) ? 2 : 0) + (white(next) ? 2 : 0));
+  push(terms, ON_IDS[f - 1]![n.black ? 0 : 1], 1);
   return terms;
 }
 
@@ -169,6 +301,11 @@ export function chordSpanTerms(
   return terms;
 }
 
+/** IOI (s) at and below which a hand-position shift counts in full in `shiftFast`. */
+const SHIFT_FAST_SEC = 0.25;
+/** Floor on the IOI in `shiftFast`, so a zero IOI (a grace note) gives a finite factor. */
+const MIN_IOI_SEC = 0.01;
+
 /**
  * Pair terms for note `a` played by finger `g` followed by note `b` played by finger `f`
  * (a before b in sequence order). Chord pairs (same slice) get Balliauw's doubled span terms, and
@@ -181,6 +318,14 @@ export function chordSpanTerms(
  * is skipped when the hand is free to move (a rest before `b`, `a` released before `b`, or `a`
  * out of any hand's reach of `b`) and on a thumb crossing by finger 2, 3 or 4 of at most
  * `thumbCrossingMax` semitones.
+ *
+ * The M3 features (weight 0 in the Parncutt set) ride along: `ch:<g><f>` on a chord pair with
+ * g < f; on a melodic pair of two keys (a hop included) the transition indicator
+ * `tr:<g><f>:<up|down>`, `latticeStep` (how far the pair is from one white key per finger:
+ * |dx - (f - g)| with dx the x14 distance in white keys) and `levelChange` (one key black, the
+ * other white); `stretchFast` (the stretch points when `b.ioi < hopFastSec`); `repeatFast` on a
+ * repeated key faster than `repeatFastSec`, whatever the fingers; and on every pair across slices
+ * `shiftFast`, the hand-position shift times min(1, 0.25 s / IOI) (relocation at speed).
  */
 export function pairTerms(
   ctx: RuleContext,
@@ -191,7 +336,10 @@ export function pairTerms(
 ): Term[] {
   const terms = pairTermsWithoutPosition(ctx, a, g, b, f);
   const shift = Math.abs(anchor(b, f) - anchor(a, g));
-  push(terms, 'handPositionShift', b.restBefore ? shift / 2 : shift);
+  const points = b.restBefore ? shift / 2 : shift;
+  push(terms, 'handPositionShift', points);
+  if (a.slice !== b.slice)
+    push(terms, 'shiftFast', points * Math.min(1, SHIFT_FAST_SEC / Math.max(b.ioi, MIN_IOI_SEC)));
   return terms;
 }
 
@@ -206,14 +354,20 @@ function pairTermsWithoutPosition(
   if (a.slice === b.slice) {
     const chord = chordSpanTerms(ctx, a, g, b, f);
     if (g === f) push(chord, 'doubledFinger', g === 1 && !a.black && !b.black && i <= 2 ? 1 : 2);
+    const ch = CH_IDS[g - 1]![f - 1];
+    if (ch !== undefined) push(chord, ch, 1);
     return chord;
   }
   const terms: Term[] = [];
   if (i === 0) {
     if (g === f && b.ioi < ctx.repeatFastSec) push(terms, 'repeatedNoteSameFinger', 2);
     if (g !== f && b.ioi >= ctx.repeatFastSec) push(terms, 'repeatedNoteFingerChange', 1);
+    if (b.ioi < ctx.repeatFastSec) push(terms, 'repeatFast', 1);
     return terms;
   }
+  push(terms, TR_IDS[g - 1]![f - 1]![i > 0 ? 0 : 1], 1);
+  push(terms, 'latticeStep', Math.abs((x14(b.pitch) - x14(a.pitch)) / 2 - (f - g)));
+  push(terms, 'levelChange', a.black !== b.black ? 1 : 0);
   if (g === f) {
     // A hop within a fourth costs as much at any tempo: another finger or a thumb crossing reaches
     // the key, so the hop only breaks the legato (it must cost more than a thumb crossing, or
@@ -236,6 +390,7 @@ function pairTermsWithoutPosition(
   push(terms, 'smallSpan', s.small);
   push(terms, 'largeSpan', s.large);
   if (!handFree && !shortCrossing) push(terms, 'beyondPractical', s.beyond);
+  if (b.ioi < ctx.hopFastSec) push(terms, 'stretchFast', s.stretch);
   if (g === 3 && f === 4) push(terms, 'threeToFour', 1);
   if ((g === 3 && f === 4) || (g === 4 && f === 3)) {
     const noteOf3 = g === 3 ? a : b;

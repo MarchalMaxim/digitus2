@@ -1,5 +1,6 @@
 import type { Finger, Hand } from '../score/types.js';
-import { forEachHold, HOLD_EPS } from '../fingering/reach.js';
+import { forEachHold } from '../fingering/reach.js';
+import { FIVE_FINGER_SPAN, isThumbCrossing, pairWindows } from '../fingering/sequence.js';
 import type { SeqNote } from '../fingering/sequence.js';
 import { span } from '../fingering/spans.js';
 import type { SpanTables } from '../fingering/spans.js';
@@ -18,7 +19,9 @@ export type LintRuleId =
   | 'L11'
   | 'L12'
   | 'L13'
-  | 'L14';
+  | 'L14'
+  | 'L15'
+  | 'L24';
 export type LintSeverity = 'error' | 'warning' | 'info';
 export interface LintIssue {
   rule: LintRuleId;
@@ -28,7 +31,14 @@ export interface LintIssue {
   message: string;
 }
 
-/** `law` is true for the physical laws L01..L05; L06 and L10 also become errors for beginners. */
+/**
+ * `law` is true for the physical laws L01..L05; L06 and L10 also become errors for beginners, and
+ * L15 and L24 are checked for beginners only. L01..L14 are the rules of the same ids in the
+ * literature's catalogue (docs/research/literature.md section 4.3). L15 is M3 plan addition 14's
+ * rule, not the catalogue's L15 (a position change near a rest); L24, the info that shows a
+ * beginner the other thumb crossings, takes an id after the catalogue's L01..L23 so that it
+ * collides with none of them.
+ */
 export const LINT_RULES: Record<LintRuleId, { title: string; law: boolean }> = {
   L01: { title: 'Two simultaneous notes share a finger', law: true },
   L02: { title: 'Crossed fingers inside a chord', law: true },
@@ -47,6 +57,8 @@ export const LINT_RULES: Record<LintRuleId, { title: string; law: boolean }> = {
   L12: { title: 'Fast repeated key with the same finger', law: false },
   L13: { title: 'Slow repeated key with a finger change', law: false },
   L14: { title: 'Agility: 3 to 4, 3-4-5 run, or 3 white with 4 black', law: false },
+  L15: { title: 'Thumb crossing inside one five-finger position (beginner)', law: false },
+  L24: { title: 'Thumb crossing that moves the hand, shown to a beginner', law: false },
 };
 
 export interface LintContext {
@@ -54,6 +66,8 @@ export interface LintContext {
   hopFastSec: number;
   repeatFastSec: number;
   beginner: boolean;
+  /** Hold tolerance of the held-key laws (`forEachHold`); `HOLD_EPS` unless the caller says. */
+  holdEpsSec: number;
 }
 interface Fingered {
   note: SeqNote;
@@ -165,6 +179,7 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
         [notes[m]!.note.noteId, notes[far]!.note.noteId],
         'notated hold beyond reach: pedal or release',
       ),
+    ctx.holdEpsSec,
   );
 
   // Consecutive notes in different slices.
@@ -192,7 +207,7 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
         // hand must stretch over both keys at once, and the held-key loop above reports it (L05,
         // or L07 when the hold is beyond reach) with every other held key. After a release it is
         // a hand shift, which experts make all the time, so it is an L07 warning.
-        const held = a.note.offsetSec > b.note.onsetSec + HOLD_EPS;
+        const held = a.note.offsetSec > b.note.onsetSec + ctx.holdEpsSec;
         if (!practical(i, g, f)) {
           if (!held)
             add(
@@ -236,6 +251,34 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
         trio.map((x) => x.note.noteId),
         '3, 4 and 5 on three consecutive notes',
       );
+  }
+
+  // Beginners only (M3 plan addition 14). L15: a thumb crossing between two single notes of a run
+  // whose surrounding notes fit one five-finger position (`pairWindows`), so one position would
+  // play them without it (Twinkle's F F E E D D C with 2 2 1 1 2 2 1). L24: every other thumb
+  // crossing between notes of different slices, an info: the crossing carries the hand beyond one
+  // position, as in a scale or Happy Birthday's D5 B4 G4 F#4 E4 C5 with 5 3 1 2 1 5, which the UI
+  // review of 2026-10-14 keeps but would point out to a level 2 student. Only L15 is a fault the
+  // beginner level removes; L24 stays wherever the passage needs the crossing. The beginner level
+  // of the solver prices L15, L06 and L11 with these same tests (`levelPairCosts` in solve.ts).
+  if (ctx.beginner) {
+    const windows = pairWindows(notes.map((x) => x.note));
+    for (let k = 1; k < notes.length; k++) {
+      const a = notes[k - 1]!;
+      const b = notes[k]!;
+      if (a.note.slice === b.note.slice) continue;
+      if (!isThumbCrossing(a.finger, b.finger, b.note.pitch - a.note.pitch)) continue;
+      const w = windows[k];
+      const ids = [a.note.noteId, b.note.noteId];
+      if (w !== undefined && w <= FIVE_FINGER_SPAN)
+        add(
+          'L15',
+          'warning',
+          ids,
+          `${a.finger} to ${b.finger} crosses the thumb inside one five-finger position`,
+        );
+      else add('L24', 'info', ids, `${a.finger} to ${b.finger} crosses the thumb to move the hand`);
+    }
   }
 
   // Unary black-key rules.

@@ -13,6 +13,14 @@ export interface ParsedPig {
   warnings: string[];
 }
 
+/**
+ * One PIG finger field: `3`, `-3` (left hand), `3_1` (substitution). `0` and `-0` mean "no
+ * fingering printed" in partially fingered corpora (Mutopia, research/data/README.md), as do the
+ * other unlabeled marks of the Python reference (`x`, `?`; `research/fingering_eval/validate.py`
+ * `UNLABELED`): they, and a substitution whose key-press finger is `0`, return no finger, so
+ * `parsePig` keeps the note in the score and gives it no assignment entry (an unknown finger, never
+ * "finger 0"). Unfingered fields carry no sign and never raise the wrong-sign warning.
+ */
 export function parseFingerField(
   text: string,
   hand: Hand,
@@ -33,6 +41,7 @@ export function parseFingerField(
 }
 
 function toFinger(raw: string): { finger: Finger; sign: -1 | 0 | 1 } | undefined {
+  // `Number('-0')` is -0, which equals 0: both are "unfingered". Non-numbers (x, ?) are NaN.
   const n = Number(raw);
   if (!Number.isInteger(n) || n === 0 || Math.abs(n) > 5) return undefined;
   return { finger: Math.abs(n) as Finger, sign: n < 0 ? -1 : 1 };

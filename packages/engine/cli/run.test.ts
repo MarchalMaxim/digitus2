@@ -138,6 +138,97 @@ describe('cli finger', () => {
   });
 });
 
+describe('cli finger --level and lint --beginner (M3 Task 8)', () => {
+  const library = (slug: string) =>
+    fileURLToPath(new URL(`../../../content/scores/${slug}.musicxml`, import.meta.url));
+  /**
+   * `finger` the piece as PIG with `args`, then the issues of `rule` (L15 by default) that
+   * `lint --beginner` reports on it, as bar index : MIDI key per note.
+   */
+  const crossings = (file: string, args: string[], rule = 'L15') => {
+    const score = loadScore(file);
+    const where = (id: string) => {
+      const n = score.notes.find((x) => x.id === id)!;
+      return `${n.measureIndex}:${n.midi}`;
+    };
+    const pred = join(tmp(), 'pred.txt');
+    expect(main(['finger', file, '--format', 'pig', '--out', pred, ...args], capture().io)).toBe(0);
+    const c = capture();
+    expect(main(['lint', file, '--fingering', pred, '--beginner', '--json'], c.io)).not.toBe(2);
+    const report = JSON.parse(c.out.join('')) as {
+      issues: Array<{ rule: string; noteIds: string[] }>;
+    };
+    return report.issues.filter((i) => i.rule === rule).map((i) => i.noteIds.map(where));
+  };
+  /** The PIG text `finger` writes for the piece with `args`. */
+  const fingered = (file: string, args: string[]) => {
+    const c = capture();
+    expect(main(['finger', file, '--format', 'pig', ...args], c.io)).toBe(0);
+    return c.out.join('');
+  };
+  it('lists --level and --weights in the usage and rejects an unknown level or weight set', () => {
+    const c = capture();
+    expect(main([], c.io)).toBe(2);
+    const usage = c.err.join('');
+    expect(usage).toMatch(/finger <file>.*\[--level beginner\|expert\]/);
+    expect(usage).toMatch(
+      /\[--weights parncutt\|learned-open\|<file\.json>\] +\(--weights defaults to learned-open\)/,
+    );
+    expect(main(['finger', fixture, '--level', 'novice'], capture().io)).toBe(2);
+    const bad = capture();
+    expect(main(['finger', fixture, '--weights', 'nope'], bad.io)).toBe(1);
+    expect(bad.err.join('')).toContain('--weights nope: neither a weight set id');
+  });
+  it('finger solves with the recommended weight set unless --weights names another', () => {
+    // RECOMMENDED_WEIGHT_SET (learned-open), the set the beginner level is tuned on; the review
+    // below read the app's fingering, which was the parncutt set's.
+    const twinkle = library('twinkle-twinkle-little-star');
+    expect(fingered(twinkle, [])).toBe(fingered(twinkle, ['--weights', 'learned-open']));
+    expect(fingered(twinkle, [])).not.toBe(fingered(twinkle, ['--weights', 'parncutt']));
+  });
+  it('lint --beginner reports the Twinkle crossings of the UI review until the beginner level removes them', () => {
+    // docs/reviews/ui-2026-10-14.md: "F4 2 2, E4 1 1, D4 2 2, C4 1" in bars 3-4 and 11-12 (bar
+    // indices 2-3 and 10-11): finger 2 crosses over the thumb from E4 (64) to D4 (62). The review
+    // read the parncutt set's fingering (the app's); the recommended set does not cross there.
+    const twinkle = library('twinkle-twinkle-little-star');
+    const parncutt = ['--weights', 'parncutt'];
+    expect(crossings(twinkle, parncutt)).toEqual([
+      ['2:64', '3:62'],
+      ['10:64', '11:62'],
+    ]);
+    expect(crossings(twinkle, [...parncutt, '--level', 'beginner'])).toEqual([]);
+    expect(crossings(twinkle, [...parncutt, '--level', 'expert'])).toEqual(
+      crossings(twinkle, parncutt),
+    );
+    expect(crossings(twinkle, [])).toEqual([]);
+    expect(crossings(twinkle, ['--level', 'beginner'])).toEqual([]);
+    expect(crossings(twinkle, ['--level', 'beginner'], 'L24')).toEqual([]);
+  });
+  it('lint --beginner points out the Happy Birthday crossing the review keeps as L24, not L15', () => {
+    // The review: "D5 5, B4 3, G4 1, then F#4 2, E4 1, C5 5 5" (bars 5-6), "acceptable ... keep,
+    // and point out the crossing". The passage around the crossing runs from D5 down to E4 and up
+    // to C5: more than one five-finger position, so the crossing carries the hand. It is no L15
+    // (the beginner level keeps it, and plan addition 14 wants 0 L15 on level 1 and 2 pieces) but
+    // an L24 info, the crossing shown to the student: G4 (67, bar 5) to F#4 (66, bar 6).
+    const hb = library('happy-birthday');
+    const fingers = fingered(hb, ['--weights', 'parncutt'])
+      .trim()
+      .split('\n')
+      .slice(1)
+      .map((line) => line.split('\t'))
+      .filter((cols) => cols[6] === '0')
+      .map((cols) => `${cols[3]}${cols[7]}`);
+    expect(fingers.join(' ')).toContain('D55 B43 G41 F#42 E41 C55');
+    for (const args of [
+      ['--weights', 'parncutt'],
+      ['--level', 'beginner'],
+    ]) {
+      expect(crossings(hb, args), args.join(' ')).toEqual([]);
+      expect(crossings(hb, args, 'L24'), args.join(' ')).toEqual([['5:67', '6:66']]);
+    }
+  });
+});
+
 describe('cli lint', () => {
   it('lints a file and exits 1 on an error-severity issue', () => {
     const file = join(tmp(), 'chord.txt');
@@ -219,12 +310,15 @@ describe('cli bench', () => {
   it('--ablate prints a delta row per non-zero rule and writes the table as JSON', () => {
     const { root, args } = toyBench(null);
     const c = capture();
-    expect(main([...args, '--ablate'], c.io)).toBe(0);
+    // M2's ablation: the 25 non-zero rules of the Parncutt set (the recommended learned set has
+    // about 100, which would only slow this test down).
+    expect(main([...args, '--weights', 'parncutt', '--ablate'], c.io)).toBe(0);
     expect(c.out.join('')).toMatch(/^ablation/m);
     const rows = JSON.parse(readFileSync(join(root, 'ablation-toy.json'), 'utf8')) as Array<{
       rule: string;
       gen: number;
     }>;
+    expect(rows).toHaveLength(25);
     expect(rows.map((r) => r.rule)).toContain('template');
     expect(c.out.join('')).toMatch(/^template +-?\d+\.\d\d/m);
   });

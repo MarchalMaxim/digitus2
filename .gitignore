@@ -27,6 +27,8 @@ research/data/*
 research/baselines/third_party/
 research/baselines/outputs/
 research/baselines/weights/
+# Weight sets fitted on PIG (non-profit academic licence) and training logs: research only (M3)
+research/weights/
 research/spikes/**/node_modules/
 research/spikes/**/dist/
 research/**/*.ckpt
@@ -56,7 +58,8 @@ research/spikes/**/playwright-report/
 # Claude Code session state
 .claude/
 
-# Benchmark output (bench writes these; benchmarks/latest.json, floor.json, history.md and
-# textbook/ stay tracked)
+# Benchmark output (bench writes these; pnpm verify's scorecards are benchmarks/runs/verify-pig.json,
+# verify-mutopia.json and verify-hands.json; the milestone scorecards benchmarks/latest.json,
+# latest-mutopia.json and latest-hands.json, floor.json, history.md and textbook/ stay tracked)
 benchmarks/runs/
 benchmarks/errors/

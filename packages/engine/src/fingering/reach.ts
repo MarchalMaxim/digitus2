@@ -14,7 +14,11 @@ export function outOfReach(tables: SpanTables, heldPitch: number, newPitch: numb
   return Math.abs(newPitch - heldPitch) > span(tables, 'maxPrac', 1, 5);
 }
 
-/** Seconds a key must outlast a later onset to count as held at it (as in the sequence). */
+/**
+ * Seconds a key must outlast a later onset to count as held at it (as in the sequence): the default
+ * hold tolerance. A caller may pass a larger one (M3 Task 7 H1, tried at 50 ms and not kept): a key
+ * released within it of the next onset is a legato overlap, not a key held under the next note.
+ */
 export const HOLD_EPS = 1e-3;
 
 /** What the hold walk reads of a note: (mirrored) pitch, slice and notated onset and offset. */
@@ -29,8 +33,8 @@ export interface HoldView {
  * The held keys of one hand, decided once for the solver and lint alike. Walks `notes` in sequence
  * order (onsets never decrease along a hand's sequence) and keeps the notes whose key is still
  * down: note m holds its key at note i's onset when m comes earlier, in another slice, and its
- * notated offset is more than HOLD_EPS after that onset. For every such pair, in order of i and
- * then of m:
+ * notated offset is more than the hold tolerance `eps` (default HOLD_EPS) after that onset. For
+ * every such pair, in order of i and then of m:
  *
  * - a hold that no hand can span together with some note of i's slice (`outOfReach`) is a pedal or
  *   a release: `release(m, far)` is called once, `far` being the first note of the slice out of
@@ -46,6 +50,7 @@ export function forEachHold(
   tables: SpanTables,
   held: (m: number, i: number) => void,
   release?: (m: number, far: number) => void,
+  eps: number = HOLD_EPS,
 ): void {
   const sliceNotes = new Map<number, number[]>();
   notes.forEach((n, k) => {
@@ -57,9 +62,7 @@ export function forEachHold(
   const released = new Set<number>();
   for (let i = 0; i < notes.length; i++) {
     const cur = notes[i]!;
-    active = active.filter(
-      (m) => notes[m]!.offsetSec > cur.onsetSec + HOLD_EPS && !released.has(m),
-    );
+    active = active.filter((m) => notes[m]!.offsetSec > cur.onsetSec + eps && !released.has(m));
     for (const m of active) {
       const h = notes[m]!;
       if (h.slice === cur.slice) continue;
@@ -77,9 +80,16 @@ export function forEachHold(
   }
 }
 
-/** The held pairs of `notes` (`forEachHold`): for each note, the earlier notes it sounds with. */
-export function heldPairs(notes: readonly HoldView[], tables: SpanTables): number[][] {
+/**
+ * The held pairs of `notes` (`forEachHold` with the hold tolerance `eps`): for each note, the
+ * earlier notes it sounds with.
+ */
+export function heldPairs(
+  notes: readonly HoldView[],
+  tables: SpanTables,
+  eps: number = HOLD_EPS,
+): number[][] {
   const out: number[][] = notes.map(() => []);
-  forEachHold(notes, tables, (m, i) => out[i]!.push(m));
+  forEachHold(notes, tables, (m, i) => out[i]!.push(m), undefined, eps);
   return out;
 }

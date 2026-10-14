@@ -3,16 +3,27 @@
 //
 //   pnpm verify            run every step
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
-//                          bundle, e2e, benchmark, hands)
+//                          bundle, e2e, benchmark, benchmark:mutopia, hands)
 //
 // Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
 // page's initial JavaScript and CSS exceed 150 KB gzip or Verovio is statically imported
 // (scripts/check-bundle-size.mjs). The benchmark step compares the engine's PIG
-// test-split scores with benchmarks/floor.json and fails on a regression; it is skipped
-// (and says so) while the engine has no `bench` command or the dataset is absent. The hands step
-// scores MIDI hand separation (`digitus2 evalhands`) on the PIG test split and the library, writes
-// benchmarks/latest-hands.json, and fails when the PIG macro accuracy drops below
-// hands.accuracyMin in benchmarks/floor.json; while that is null it only reports.
+// test-split scores, solved with the weight set named by `weightSet` in benchmarks/floor.json,
+// with the floors there (agreement, lint errors, calibration ECE, and the set's weights hash) and
+// fails on a regression, and reports the repeat consistency of that set on the library
+// (content/manifest.json); it is skipped (and says so) while the engine has no `bench` command or
+// the dataset is absent. It also runs benchmark:mutopia (also named on its own): the held-out
+// Mutopia test half (floor.json `mutopia`) with the same weight set, gated once `mutopia.gen` is a
+// number and reported with "no floor set" while it is null; skipped without the Mutopia data. The
+// hands step scores MIDI hand separation (`digitus2 evalhands`) on the PIG test split and the
+// library and fails when the PIG macro accuracy drops below hands.accuracyMin in
+// benchmarks/floor.json; while that is null it only reports.
+//
+// verify never rewrites a tracked file (M3 Task 9): its scorecards go to the gitignored
+// benchmarks/runs/verify-pig.json, verify-mutopia.json and verify-hands.json. The tracked
+// benchmarks/latest.json, latest-mutopia.json and latest-hands.json are milestone scorecards,
+// written only by labelled runs (`bench --label m3-open ...`; `evalhands --label m6-hands --out
+// benchmarks/latest-hands.json`); see docs/verification-loop.md.
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -20,12 +31,13 @@ const only = new Set(process.argv.slice(2));
 const want = (name) => only.size === 0 || only.has(name);
 const results = [];
 
-function run(name, cmd, args) {
+function run(name, cmd, args, note) {
   const started = Date.now();
   process.stdout.write(`\n=== ${name}: ${cmd} ${args.join(' ')}\n`);
   const r = spawnSync(cmd, args, { stdio: 'inherit', shell: true });
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
-  results.push({ name, status: r.status === 0 ? 'PASS' : 'FAIL', detail: `${seconds}s` });
+  const detail = note ? `${seconds}s, ${note}` : `${seconds}s`;
+  results.push({ name, status: r.status === 0 ? 'PASS' : 'FAIL', detail });
   return r.status === 0;
 }
 
@@ -47,20 +59,25 @@ if (want('e2e')) {
   else skip('e2e', 'no apps/web/playwright.config.ts yet');
 }
 
-if (want('benchmark')) {
+// `benchmark` runs the PIG gate and the Mutopia oracle; `benchmark:mutopia` the latter alone.
+const LIBRARY_MANIFEST = 'content/manifest.json';
+// Gitignored scorecards of the verify runs (.gitignore: benchmarks/runs/).
+const RUNS = 'benchmarks/runs';
+const wantPig = want('benchmark');
+const wantMutopia = want('benchmark') || only.has('benchmark:mutopia');
+if (wantPig || wantMutopia) {
   const floorPath = 'benchmarks/floor.json';
   const cli = 'packages/engine/dist/cli/main.js';
-  if (!existsSync(floorPath)) skip('benchmark', 'no benchmarks/floor.json');
-  else {
-    const floor = JSON.parse(readFileSync(floorPath, 'utf8'));
-    const usage = existsSync(cli)
-      ? spawnSync('node', [cli], { encoding: 'utf8', shell: true })
-      : null;
-    const hasBench = usage && /\bbench\b/.test(`${usage.stdout}${usage.stderr}`);
-    if (!hasBench) skip('benchmark', 'engine CLI has no bench command yet');
+  const floor = existsSync(floorPath) ? JSON.parse(readFileSync(floorPath, 'utf8')) : null;
+  const usage =
+    floor && existsSync(cli) ? spawnSync('node', [cli], { encoding: 'utf8', shell: true }) : null;
+  const hasBench = usage && /\bbench\b/.test(`${usage.stdout}${usage.stderr}`);
+  // The weight set the floors were measured with; bench refuses to gate another set against them.
+  const weights = floor?.weightSet ? ['--weights', floor.weightSet] : [];
+  if (wantPig) {
+    if (!floor) skip('benchmark', 'no benchmarks/floor.json');
+    else if (!hasBench) skip('benchmark', 'engine CLI has no bench command yet');
     else if (!existsSync(floor.goldDir)) skip('benchmark', `dataset missing: ${floor.goldDir}`);
-    else if (floor.engine === null)
-      run('benchmark', 'node', [cli, 'bench', '--gold', floor.goldDir, '--split', floor.split]);
     else
       run('benchmark', 'node', [
         cli,
@@ -69,9 +86,49 @@ if (want('benchmark')) {
         floor.goldDir,
         '--split',
         floor.split,
-        '--floor',
-        floorPath,
+        '--label',
+        'verify-pig',
+        '--scorecard',
+        `${RUNS}/verify-pig.json`,
+        ...weights,
+        ...(floor.engine === null ? [] : ['--floor', floorPath]),
+        // Repeat consistency on the library (M3 Task 7, H4): reported, not gated.
+        ...(existsSync(LIBRARY_MANIFEST) ? ['--library', LIBRARY_MANIFEST] : []),
       ]);
+  }
+  if (wantMutopia) {
+    // The held-out Mutopia oracle (M3 Task 5): scored with the floor's weight set, gated once
+    // mutopia.gen is set; deltas against the milestone benchmarks/latest-mutopia.json.
+    const m = floor?.mutopia;
+    if (!floor) skip('benchmark:mutopia', 'no benchmarks/floor.json');
+    else if (!m) skip('benchmark:mutopia', 'no mutopia block in benchmarks/floor.json');
+    else if (!hasBench) skip('benchmark:mutopia', 'engine CLI has no bench command yet');
+    else if (!existsSync(m.goldDir) || !existsSync(m.split))
+      skip('benchmark:mutopia', `dataset missing: ${existsSync(m.goldDir) ? m.split : m.goldDir}`);
+    else {
+      const gated = typeof m.gen === 'number';
+      run(
+        'benchmark:mutopia',
+        'node',
+        [
+          cli,
+          'bench',
+          '--gold',
+          m.goldDir,
+          '--split',
+          m.split,
+          '--subset',
+          m.subset ?? 'test',
+          '--label',
+          'verify-mutopia',
+          '--scorecard',
+          `${RUNS}/verify-mutopia.json`,
+          ...weights,
+          ...(gated ? ['--floor', floorPath] : []),
+        ],
+        gated ? undefined : 'no floor set',
+      );
+    }
   }
 }
 
@@ -99,7 +156,7 @@ if (want('hands')) {
       '--library',
       'content/manifest.json',
       '--out',
-      'benchmarks/latest-hands.json',
+      `${RUNS}/verify-hands.json`,
       '--label',
       'verify',
     ];
@@ -110,7 +167,7 @@ if (want('hands')) {
 
 process.stdout.write('\n=== verify summary\n');
 for (const r of results)
-  process.stdout.write(`${r.status.padEnd(5)} ${r.name.padEnd(10)} ${r.detail}\n`);
+  process.stdout.write(`${r.status.padEnd(5)} ${r.name.padEnd(17)} ${r.detail}\n`);
 const failed = results.filter((r) => r.status === 'FAIL');
 process.stdout.write(
   failed.length ? `\n${failed.length} step(s) failed\n` : '\nall steps passed\n',

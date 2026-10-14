@@ -16,7 +16,16 @@ export { timewiseToPartwise } from './io/musicxml/timewise.js';
 export { matchRate, pigMetrics } from './eval/metrics.js';
 export type { FingerSeq, PigMetrics } from './eval/metrics.js';
 export { alignScores, fingerSeq, metricsForScores } from './eval/align.js';
-export { solveFingering, solveHand } from './fingering/solve.js';
+export {
+  applyLevel,
+  LEVEL_LINT_RULES,
+  LEVEL_PROFILES,
+  LEVEL_PROFILES_SCHEMA,
+  LEVELS,
+  solveFingering,
+  solveHand,
+  validateLevelProfiles,
+} from './fingering/solve.js';
 export type {
   SolveOptions,
   SolveResult,
@@ -24,9 +33,62 @@ export type {
   NoteExplanation,
   ExplainedTerm,
   HandConstraints,
+  Level,
+  LevelLintCosts,
+  LevelLintRule,
+  LevelProfile,
 } from './fingering/solve.js';
-export { buildHandSequence, GRACE_IOI_SEC } from './fingering/sequence.js';
+export {
+  loadWeightSet,
+  RECOMMENDED_WEIGHT_SET,
+  validateWeightSet,
+  WEIGHT_SET_SCHEMA,
+  WEIGHT_SETS,
+} from './fingering/params/weightSets.js';
+export type {
+  WeightSetCorpus,
+  WeightSetFile,
+  WeightSetId,
+  WeightSetProvenance,
+  WeightSetValidation,
+} from './fingering/params/weightSets.js';
+export {
+  buildHandSequence,
+  FIVE_FINGER_KEYS,
+  FIVE_FINGER_SPAN,
+  GRACE_IOI_SEC,
+  isThumbCrossing,
+  pairWindows,
+  POSITION_WINDOW,
+} from './fingering/sequence.js';
 export type { HandSequence, SeqNote } from './fingering/sequence.js';
+export { dot, featureIds, pathFeatures } from './learn/features.js';
+export type { FeatureVector } from './learn/features.js';
+export { Lcg } from './learn/lcg.js';
+export { evaluateExamples, train } from './learn/perceptron.js';
+export type {
+  EpochInfo,
+  ExampleEvaluation,
+  TrainOptions,
+  TrainResult,
+} from './learn/perceptron.js';
+export {
+  calibrate,
+  confidenceOf,
+  confidenceSample,
+  confidenceSamples,
+  expectedCalibrationError,
+  fitTemperature,
+  negativeLogLikelihood,
+  PENALTY_MARGIN,
+  targetOf,
+} from './learn/calibration.js';
+export type {
+  CalibrationBucket,
+  CalibrationReport,
+  ConfidenceSample,
+  LikelihoodOptions,
+} from './learn/calibration.js';
 export {
   HAND_PROFILES,
   PARNCUTT_TABLES,
@@ -60,8 +122,15 @@ export {
   TEXTBOOK_TEMPLATES,
 } from './fingering/templates.js';
 export type { Run, TemplateMatch } from './fingering/templates.js';
-export { lintFingering, LINT_RULES } from './lint/index.js';
-export type { LintReport, LintOptions, LintIssue, LintRuleId, LintSeverity } from './lint/index.js';
+export { lintFingering, LINT_RULES, positionChanges, wideStretches } from './lint/index.js';
+export type {
+  LintReport,
+  LintOptions,
+  LintIssue,
+  LintRuleId,
+  LintSeverity,
+  WideStretch,
+} from './lint/index.js';
 export {
   evaluateTextbook,
   normalizeTextbookEntries,

@@ -15,8 +15,16 @@ import {
   unaryTerms,
   weightedSum,
 } from './rules.js';
+import {
+  barPositions,
+  findRepeats,
+  pairConsistency,
+  repeatConsistency,
+  repeatPairs,
+} from './repeats.js';
 import { buildHandSequence } from './sequence.js';
 import type { SeqNote } from './sequence.js';
+import { loadWeightSet, RECOMMENDED_WEIGHT_SET } from './params/weightSets.js';
 import { solveFingering, solveHand } from './solve.js';
 import { HAND_PROFILES, span } from './spans.js';
 
@@ -335,13 +343,25 @@ describe('outputs', () => {
       rows.push(line(i, i * 0.25, (i + 1) * 0.25, name, 0));
     }
     const { score } = parsePig(H + rows.join('\n') + '\n');
-    const t0 = performance.now();
-    const a = solveFingering(score, { hands: ['R'] });
-    const ms = performance.now() - t0;
-    const b = solveFingering(score, { hands: ['R'] });
-    expect(JSON.stringify(a.assignment)).toBe(JSON.stringify(b.assignment));
-    expect(ms).toBeLessThan(500);
-  });
+    // The budget is for a warm solve: the first call also pays for the JIT. The walk has repeated
+    // passages, so the consistency pass runs (75 repeated passages, about twice the work). The
+    // time is the fastest of three warm solves (about 130 ms alone): a single one measured up to
+    // 1,028 ms while `pnpm test` ran the other suites beside it (M3 Task 9), which times the
+    // machine, not the solver. Every solve must give the same fingering. The budget holds for the
+    // solver's default set (parncutt) and for RECOMMENDED_WEIGHT_SET, the set the CLI and the gate
+    // solve with (learned-open, M3 Task 9).
+    for (const weightSet of ['parncutt', RECOMMENDED_WEIGHT_SET] as const) {
+      const a = solveFingering(score, { hands: ['R'], weightSet });
+      let ms = Infinity;
+      for (let k = 0; k < 3; k++) {
+        const t0 = performance.now();
+        const b = solveFingering(score, { hands: ['R'], weightSet });
+        ms = Math.min(ms, performance.now() - t0);
+        expect(JSON.stringify(b.assignment), weightSet).toBe(JSON.stringify(a.assignment));
+      }
+      expect(ms, weightSet).toBeLessThan(500);
+    }
+  }, 20_000);
 });
 
 // M2 hardening (docs/superpowers/plans/2026-10-14-m2-hardening.md, Task 1).
@@ -769,4 +789,267 @@ describe('held keys are laws at any distance (M2 hardening re-review)', () => {
     expect(pairTerms(ctx, v[0]!, 1, v[1]!, 1)).toContainEqual({ rule: 'doubledFinger', points: 1 });
     expect(pairTerms(ctx, v[1]!, 2, v[2]!, 2)).toContainEqual({ rule: 'doubledFinger', points: 2 });
   });
+});
+
+describe('weight sets (M3 Task 4)', () => {
+  it('weightSet selects the weights and keeps the Parncutt default', () => {
+    const { score } = parsePig(melody(['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'], 0));
+    const def = solveFingering(score, { hands: ['R'] });
+    const par = solveFingering(score, { hands: ['R'], weightSet: 'parncutt' });
+    const open = solveFingering(score, { hands: ['R'], weightSet: 'learned-open' });
+    expect(def.assignment).toEqual(par.assignment);
+    expect(score.notes.map((n) => open.assignment[n.id]!.finger)).toEqual([1, 2, 3, 1, 2, 3, 4, 5]);
+  });
+  it('weights override the set, and the temperature comes from the set unless given', () => {
+    const { score } = parsePig(melody(['C4', 'E4', 'D4', 'F4', 'E4', 'G4'], 0));
+    const set = loadWeightSet('parncutt');
+    // An override on top of a set is the same as the merged weights.
+    const merged = solveFingering(score, {
+      hands: ['R'],
+      weightSet: { ...set, weights: { ...set.weights, hop: 0, weakFinger: 3 } },
+    });
+    const over = solveFingering(score, {
+      hands: ['R'],
+      weightSet: 'parncutt',
+      weights: { hop: 0, weakFinger: 3 },
+    });
+    expect(over.assignment).toEqual(merged.assignment);
+    expect(over.hands[0]!.cost).toBe(merged.hands[0]!.cost);
+    const conf = (r: ReturnType<typeof solveFingering>) =>
+      score.notes.map((n) => r.assignment[n.id]!.confidence);
+    const cold = solveFingering(score, {
+      hands: ['R'],
+      weightSet: { ...set, confidenceTemperature: 0.5 },
+    });
+    expect(conf(cold)).toEqual(
+      conf(solveFingering(score, { hands: ['R'], confidenceTemperature: 0.5 })),
+    );
+    expect(conf(cold)).not.toEqual(conf(solveFingering(score, { hands: ['R'] })));
+    const explicit = solveFingering(score, {
+      hands: ['R'],
+      weightSet: { ...set, confidenceTemperature: 0.5 },
+      confidenceTemperature: 2,
+    });
+    expect(conf(explicit)).toEqual(conf(solveFingering(score, { hands: ['R'] })));
+  });
+});
+
+describe('hold tolerance (M3 Task 7, H1: a legato overlap is not a held key)', () => {
+  // C4 sounds 30 ms into D4, both pinned to finger 2: a held key under the same finger (lint L03)
+  // at the default tolerance of 1 ms, a legato overlap at 50 ms.
+  const text = H + [line(0, 0, 0.53, 'C4', 0), line(1, 0.5, 1, 'D4', 0)].join('\n') + '\n';
+  const { score } = parsePig(text);
+  const pins = Object.fromEntries(
+    score.notes.map((n) => [n.id, { finger: 2 as Finger, source: 'user' as const, pinned: true }]),
+  );
+  it('makeContext defaults to the 1 ms tolerance of the hold walk and takes another', () => {
+    expect(makeContext(HAND_PROFILES.large).holdEpsSec).toBe(1e-3);
+    expect(makeContext(HAND_PROFILES.large, {}, { holdEpsSec: 0.05 }).holdEpsSec).toBe(0.05);
+  });
+  it('solveHand charges the held-note law only for an overlap beyond the tolerance', () => {
+    const seq = buildHandSequence(score, 'R');
+    const pinned = new Map<number, Finger>([
+      [0, 2],
+      [1, 2],
+    ]);
+    const c = () => ({ pinned, forbidden: new Map(), soft: false });
+    const strict = solveHand(seq, makeContext(HAND_PROFILES.large), c());
+    const legato = solveHand(seq, makeContext(HAND_PROFILES.large, {}, { holdEpsSec: 0.05 }), c());
+    expect(strict.cost).toBeGreaterThanOrEqual(1000);
+    expect(legato.cost).toBeLessThan(1000);
+    expect(strict.cost - legato.cost).toBe(1000);
+  });
+  it('solveFingering takes holdEpsSec: no held note, no penalty, the same finger is free', () => {
+    const strict = solveFingering(score, { hands: ['R'], pins });
+    const legato = solveFingering(score, { hands: ['R'], pins, holdEpsSec: 0.05 });
+    const second = score.notes[1]!.id;
+    expect(strict.explanations[second]!.heldBy).toEqual([
+      { finger: 2, noteId: score.notes[0]!.id },
+    ]);
+    expect(legato.explanations[second]!.heldBy).toBeUndefined();
+    expect(strict.hands[0]!.cost - legato.hands[0]!.cost).toBe(1000);
+  });
+});
+
+describe('consistent repeats (M3 Task 7, H4: the copies of a passage take one fingering)', () => {
+  // C4 C5 C4 A4 twice, after C4 F4 and after F4 E4: decoded on their own the copies take 1 5 1 5
+  // and 1 5 1 4; the pass prices both in both contexts and pins the cheaper total on both.
+  const text = melody(['C4', 'F4', 'C4', 'C5', 'C4', 'A4', 'F4', 'E4', 'C4', 'C5', 'C4', 'A4'], 0);
+  const copies = (fingers: number[]) => [
+    fingers.slice(2, 6).join(''),
+    fingers.slice(8, 12).join(''),
+  ];
+  it('fingers both copies alike by default and differently with consistentRepeats false', () => {
+    const on = copies(fingersOf(text, 'R'));
+    const off = copies(fingersOf(text, 'R', { consistentRepeats: false }));
+    expect(off[0]).not.toBe(off[1]);
+    expect(on[0]).toBe(on[1]);
+    expect(off).toContain(on[0]);
+    // The pins are the engine's: no note is reported as pinned.
+    const { score } = parsePig(text);
+    const r = solveFingering(score, { hands: ['R'] });
+    expect(score.notes.some((n) => r.assignment[n.id]!.pinned)).toBe(false);
+  });
+  it('gives a note the pass moved the confidence and cost gaps of the decode without the pass', () => {
+    // The pass moves the last A4 from 4 to 5. Under its own pins every other finger of a pinned note
+    // is impossible, which would read as certainty; the reported confidence and gaps are those of
+    // the decode before the pass, where 4 is the cheapest finger and 5 costs 3 more.
+    const { score } = parsePig(text);
+    const last = score.notes[11]!.id;
+    const on = solveFingering(score, { hands: ['R'] });
+    const off = solveFingering(score, { hands: ['R'], consistentRepeats: false });
+    expect(on.assignment[last]!.finger).toBe(5);
+    expect(off.assignment[last]!.finger).toBe(4);
+    expect(on.explanations[last]!.gaps).toEqual(off.explanations[last]!.gaps);
+    expect(on.explanations[last]!.gaps![4]).toBeGreaterThan(0);
+    expect(on.assignment[last]!.confidence).toBeLessThan(0.5);
+    // The hand's cost is the consistent path's, which costs more than the free decode.
+    expect(on.hands[0]!.cost).toBeGreaterThan(off.hands[0]!.cost);
+    expect(on.hands[0]!.iterations).toBeGreaterThan(off.hands[0]!.iterations);
+  });
+  it('fingers a passage nested in a longer repeated passage like it (the Ode to Joy shape)', () => {
+    // P (12 events: E E F G G F E D C C D E in quarters) three times: on its own before ending 1,
+    // then twice as the start of a 15-event passage (P and ending 2) that repeats as a whole, with
+    // a bridge between. A grouping that gives each note one group puts the first P in none
+    // (`findRepeats`); the pass ties it to the copies inside the longer passage.
+    type N = [string, number];
+    const q = (p: string): N => [p, 1];
+    const P = ['E4', 'E4', 'F4', 'G4', 'G4', 'F4', 'E4', 'D4', 'C4', 'C4', 'D4', 'E4'].map(q);
+    const end1: N[] = [
+      ['E4', 1.5],
+      ['D4', 0.5],
+      ['D4', 2],
+    ];
+    const end2: N[] = [
+      ['D4', 1.5],
+      ['C4', 0.5],
+      ['C4', 2],
+    ];
+    const bridge: N[] = [
+      ...['D4', 'D4', 'E4', 'C4', 'D4'].map(q),
+      ['E4', 0.5],
+      ['F4', 0.5],
+      ...['E4', 'C4', 'D4'].map(q),
+      ['E4', 0.5],
+      ['F4', 0.5],
+      ...['E4', 'D4', 'C4', 'D4'].map(q),
+      ['G3', 2],
+    ];
+    let beat = 0;
+    const rows = [...P, ...end1, ...P, ...end2, ...bridge, ...P, ...end2].map(([p, d], i) => {
+      const row = line(i, beat * 0.5, (beat + d) * 0.5, p, 0);
+      beat += d;
+      return row;
+    });
+    const text = H + rows.join('\n') + '\n';
+    const seq = buildHandSequence(parsePig(text).score, 'R');
+    expect(findRepeats(seq).some((g) => g.starts.includes(0))).toBe(false);
+    const copiesOfP = (f: number[]) => [0, 15, 47].map((s) => f.slice(s, s + 12).join(''));
+    // Measured 2026-10-14 with the default (parncutt) set: 223554321123, 334554321123 and
+    // 434554321123 without the pass.
+    const off = fingersOf(text, 'R', { consistentRepeats: false });
+    expect(new Set(copiesOfP(off)).size).toBe(3);
+    for (const opts of [{}, { profile: 'small' }, { weightSet: RECOMMENDED_WEIGHT_SET }]) {
+      const on = fingersOf(text, 'R', opts);
+      expect(new Set(copiesOfP(on)).size, JSON.stringify(opts)).toBe(1);
+      expect(on.slice(15, 30)).toEqual(on.slice(47, 62));
+      expect(pairConsistency(repeatPairs(seq), on as Finger[])).toEqual({ pairs: 4, alike: 4 });
+    }
+  });
+  it('fingers Ode to Joy bars 1 to 3 like bars 5 to 7 and 13 to 15 (binding addition 13)', () => {
+    // The teacher note of the first UI review: bar 1 took 2 2 3 5 against 3 3 4 5 in bars 5 and 13
+    // with the app's call (profile medium, the solver's default set).
+    const { score } = parseMusicXml(readFileSync(join(LIBRARY, 'ode-to-joy.musicxml')));
+    const bar = (r: ReturnType<typeof solveFingering>, b: number) =>
+      score.notes
+        .filter((n) => n.hand === 'R' && score.measures[n.measureIndex]!.number === String(b))
+        .sort((x, y) => x.onsetTick - y.onsetTick || x.midi - y.midi)
+        .map((n) => r.assignment[n.id]!.finger)
+        .join('');
+    const off = solveFingering(score, { profile: 'medium', consistentRepeats: false });
+    expect(bar(off, 1)).not.toBe(bar(off, 5));
+    for (const opts of [
+      { profile: 'medium' as const },
+      { profile: 'medium' as const, weightSet: RECOMMENDED_WEIGHT_SET },
+      { profile: 'large' as const },
+      { profile: 'small' as const, weightSet: RECOMMENDED_WEIGHT_SET },
+    ]) {
+      const r = solveFingering(score, opts);
+      for (const b of [1, 2, 3]) {
+        expect(bar(r, b), `bar ${b} ${JSON.stringify(opts)}`).toBe(bar(r, b + 4));
+        expect(bar(r, b), `bar ${b} ${JSON.stringify(opts)}`).toBe(bar(r, b + 12));
+      }
+    }
+  });
+  it('ties only passages at the same place in the bar: Twinkle keeps its fingering', () => {
+    // Bar 3's F F E E recurs from beat 3 of bar 5 into bar 6 (and bars 7-8). Tied, bar 3's 2 2 1 1
+    // was carried into bars 5 to 8 (5 5 2 2 1 1 2 instead of 5 5 4 4 3 3 2) with the app's call
+    // (profile medium, the default set). Twinkle is also the piece of the app's visual baselines.
+    const { score } = parseMusicXml(
+      readFileSync(join(LIBRARY, 'twinkle-twinkle-little-star.musicxml')),
+    );
+    for (const opts of [{ profile: 'medium' as const }, { weightSet: RECOMMENDED_WEIGHT_SET }]) {
+      const on = solveFingering(score, opts);
+      const off = solveFingering(score, { ...opts, consistentRepeats: false });
+      expect(fingersIn(score, on.assignment), JSON.stringify(opts)).toEqual(
+        fingersIn(score, off.assignment),
+      );
+    }
+  });
+  it('keeps a user pin: a copy pinned to another finger stays as pinned', () => {
+    const { score } = parsePig(text);
+    const last = score.notes[11]!.id;
+    const pins = { [last]: { finger: 4 as Finger, source: 'user' as const, pinned: true } };
+    const r = solveFingering(score, { hands: ['R'], pins });
+    expect(r.assignment[last]!.finger).toBe(4);
+    expect(r.assignment[last]!.pinned).toBe(true);
+  });
+  // Solves the 30 library pieces twice: a longer timeout.
+  it('on the library, repeated passages are fingered alike and no hand breaks more laws', () => {
+    const files = readdirSync(LIBRARY).filter(
+      (f) => f.endsWith('.musicxml') && !f.includes('.fingered.'),
+    );
+    let groups = 0;
+    let consistentOn = 0;
+    let consistentOff = 0;
+    let pairs = 0;
+    let alikeOn = 0;
+    let alikeOff = 0;
+    for (const file of files) {
+      const { score } = parseMusicXml(readFileSync(join(LIBRARY, file)));
+      const on = solveFingering(score, { weightSet: 'learned-open' });
+      const off = solveFingering(score, { weightSet: 'learned-open', consistentRepeats: false });
+      expect(lintFingering(score, on.assignment).errors, file).toBeLessThanOrEqual(
+        lintFingering(score, off.assignment).errors,
+      );
+      for (const hand of ['R', 'L'] as Hand[]) {
+        const seq = buildHandSequence(score, hand);
+        const positions = barPositions(score, seq);
+        const g = findRepeats(seq, { positions });
+        const fingers = (r: typeof on) => seq.notes.map((n) => r.assignment[n.noteId]!.finger);
+        groups += g.length;
+        consistentOn += repeatConsistency(g, fingers(on)).consistent;
+        consistentOff += repeatConsistency(g, fingers(off)).consistent;
+        const p = repeatPairs(seq, { positions });
+        pairs += p.length;
+        alikeOn += pairConsistency(p, fingers(on)).alike;
+        alikeOff += pairConsistency(p, fingers(off)).alike;
+      }
+    }
+    // The measure: every pair of identical passages at the same place in the bar (`repeatPairs`),
+    // whatever the pass grouped. Measured 2026-10-14 (learned-open, profile large): 520 of 520
+    // pairs alike with the pass, 270 without. The pass leaves a pair when no candidate fits: a
+    // cheapest candidate that pays a law or chord penalty in another copy's context (the
+    // literature's 'except at the boundaries'), or copies that overlap other copies of the same
+    // notes so that no candidate gives every tied note one finger (two pairs of Jingle Bells'
+    // repeated E's with learned-pig).
+    expect(pairs).toBeGreaterThan(400);
+    expect(alikeOn / pairs).toBeGreaterThanOrEqual(0.98);
+    expect(alikeOff / pairs).toBeLessThan(0.6);
+    // The repeated passages as a reader counts them (`findRepeats`): 135 of 135 with the pass,
+    // 73 without.
+    expect(groups).toBeGreaterThan(100);
+    expect(consistentOn / groups).toBeGreaterThanOrEqual(0.98);
+    expect(consistentOff / groups).toBeLessThan(0.7);
+  }, 20_000);
 });

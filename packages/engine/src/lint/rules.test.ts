@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { forEachHold, heldPairs, outOfReach } from '../fingering/reach.js';
+import { forEachHold, heldPairs, HOLD_EPS, outOfReach } from '../fingering/reach.js';
 import { HAND_PROFILES } from '../fingering/spans.js';
 import { parsePig } from '../io/pig/read.js';
 import { lintFingering } from './index.js';
@@ -236,5 +236,26 @@ describe('forEachHold (reach.ts), the hold walk lint and solver share', () => {
     const r = walk([note(60, 0, 0, 3), note(71, 1, 1, 2), note(76, 1, 1, 2)]);
     expect(r.held).toEqual([]);
     expect(r.released).toEqual([[0, 2]]);
+  });
+  it('takes the hold tolerance: a legato overlap within it is no hold (M3 Task 7, H1)', () => {
+    const legato = [note(60, 0, 0, 0.53), note(62, 1, 0.5, 1)]; // C4 overlaps D4 by 30 ms
+    expect(HOLD_EPS).toBe(1e-3);
+    expect(heldPairs(legato, t)).toEqual([[], [0]]);
+    expect(heldPairs(legato, t, HOLD_EPS)).toEqual([[], [0]]);
+    expect(heldPairs(legato, t, 0.05)).toEqual([[], []]);
+    // 100 ms is a held key at either tolerance.
+    expect(heldPairs([note(60, 0, 0, 0.6), note(62, 1, 0.5, 1)], t, 0.05)).toEqual([[], [0]]);
+    const seen: number[][] = [];
+    forEachHold(legato, t, (m, i) => seen.push([m, i]), undefined, 0.05);
+    expect(seen).toEqual([]);
+  });
+  it('lint takes the same tolerance (holdEpsSec): a 30 ms overlap on one finger is L03 only below it', () => {
+    const rows: Row[] = [
+      [0, 0.53, 'C4', 0, 2],
+      [0.5, 1, 'D4', 0, 2],
+    ];
+    expect(lint(rows).counts.L03).toBe(1);
+    expect(lint(rows, { holdEpsSec: 0.05 }).counts.L03 ?? 0).toBe(0);
+    expect(lint(rows, { holdEpsSec: 0.05 }).errors).toBe(0);
   });
 });

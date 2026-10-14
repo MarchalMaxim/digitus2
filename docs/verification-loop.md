@@ -8,7 +8,31 @@ The project is built autonomously for days, so every change must be judged by ma
 pnpm verify
 ```
 
-`scripts/verify.mjs` runs, in order: hygiene (repository size), design (the color guard), typecheck, lint, unit tests (vitest for TypeScript), build, bundle (the app's first-load budget), end-to-end tests (Playwright), the benchmark gate, and the hand-separation gate (`hands`). It prints a summary table and exits non-zero on any failure. `pnpm verify unit` runs one step; several names run several (`pnpm verify build bundle`).
+`scripts/verify.mjs` runs, in order: hygiene (repository size), design (the color guard), typecheck, lint, unit tests (vitest for TypeScript), build, bundle (the app's first-load budget), end-to-end tests (Playwright), the benchmark gate (`benchmark`, which also runs `benchmark:mutopia`), and the hand-separation gate (`hands`). It prints a summary table and exits non-zero on any failure. `pnpm verify unit` runs one step; several names run several (`pnpm verify build bundle`; `pnpm verify benchmark:mutopia` runs the Mutopia oracle alone).
+
+### Scorecards: what verify writes and what a milestone writes
+
+`pnpm verify` never rewrites a tracked file. Its benchmark and hands steps write their scorecards to gitignored paths: `benchmarks/runs/verify-pig.json`, `benchmarks/runs/verify-mutopia.json` and `benchmarks/runs/verify-hands.json` (`.gitignore` covers `benchmarks/runs/` and the error galleries under `benchmarks/errors/`). The tracked `benchmarks/latest.json` (PIG test split), `benchmarks/latest-mutopia.json` (Mutopia test half) and `benchmarks/latest-hands.json` are milestone scorecards: only a labelled run replaces them, and it is committed with the floors and the `benchmarks/history.md` row it backs. A `bench` run is a milestone run when it has `--label` and neither `--limit` nor `--scorecard`; it then replaces `latest.json` for PIG or `latest-<corpus>.json` for another corpus. The M3 milestone runs, from the repository root after `pnpm build`:
+
+```bash
+node packages/engine/dist/cli/main.js bench --gold research/data/pig --split research/data/splits/pig_official.json --label m3-open --weights learned-open --compare research/baselines/results_per_piece_test.csv --floor benchmarks/floor.json
+node packages/engine/dist/cli/main.js bench --gold research/data/mutopia_fingering --split research/data/splits/mutopia_split.json --subset test --label mutopia-open --weights learned-open --floor benchmarks/floor.json
+node packages/engine/dist/cli/main.js evalhands --gold research/data/pig --split research/data/splits/pig_official.json --subset test --library content/manifest.json --label m6-hands --out benchmarks/latest-hands.json
+```
+
+A research set (PIG-fitted, never shipped) writes its scorecards under `research/weights/` with `--out research/weights/pig/runs`, so its milestone file is `research/weights/pig/latest.json`, never a tracked one. Every run prints its deltas against the milestone scorecard of its corpus, but only when both were solved with the same weights (`weightSet.hash`); otherwise the deltas read `-` and a line names the previous run and its weight set.
+
+### What the benchmark steps gate
+
+Both benchmark steps solve with the weight set named by `weightSet` in `benchmarks/floor.json` (`--weights`; since M3 `learned-open`, the engine's `RECOMMENDED_WEIGHT_SET`) and gate against that file. `bench` picks the floor block by the run's split file: the block whose `split` is that file (`mutopia` for the Mutopia split), else the PIG block (`engine`, `lint`, `calibration`) when floor.json's own `split` is that file; only when no block names the file does the first word of the split's `dataset` field decide. A run with another weight set than `weightSet`, or with weights whose hash differs from `weightSetHash` (the set was retrained without re-measuring the floors), is a breach, and so is an explicit `--floor` whose block for the split sets no metric.
+
+| Step              | Corpus                                                           | Fails when                                                                                                                                                                                       |
+| ----------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| benchmark         | PIG official test split (30 pieces)                              | gen, high, soft or rec below `engine`; lint errors per 1000 notes above `lint.errorsPer1000Max`; calibration ECE above `calibration.eceMax`; a piece skipped; the weight set or its hash differs |
+| benchmark:mutopia | Mutopia test half (62 parts, gold notes without a finger masked) | gen below `mutopia.gen` (reported with "no floor set" while it is null); a part skipped; the weight set or its hash differs                                                                      |
+| hands             | PIG test split and the library                                   | PIG macro hand accuracy below `hands.accuracyMin`                                                                                                                                                |
+
+The textbook floors (`textbook` in floor.json) are enforced by the unit step (`packages/engine/src/eval/textbook.test.ts`), with the solver's own default weights (parncutt).
 
 ### What the app steps gate
 
@@ -28,9 +52,9 @@ Definition of done for any change, by a person or an agent: `pnpm verify` is gre
 
 1. Unit tests next to the code (`*.test.ts`), written before the implementation. Readers and writers have round-trip tests; the solver has hand-constructed cases with known answers (scales, arpeggios, chords, repeated notes, crossings) and metamorphic property tests (octave transposition, mirror symmetry, repeated-passage consistency, pin idempotence).
 2. Integration: the engine CLI parses every built-in score in `content/scores/` (smoke test) and round-trips PIG files; the app's Playwright flow opens a piece, sees fingerings, plays, edits a finger, exports.
-3. Benchmark gate: `digitus2 bench` runs the solver over the official PIG test split and compares general, highest, soft and recombination match rates with `benchmarks/floor.json`. A drop below the floor fails `pnpm verify`. When a milestone improves the numbers, the floor is raised in the same commit. The floor file also records the baselines we must beat and the human ceiling.
+3. Benchmark gate: `digitus2 bench` runs the solver, with the weight set named by `weightSet` in `benchmarks/floor.json`, over the official PIG test split and compares general, highest, soft and recombination match rates, lint errors and the calibration ECE with `benchmarks/floor.json`; `benchmark:mutopia` does the same for the held-out Mutopia test half. A drop below the floor fails `pnpm verify`. When a milestone improves the numbers, the floor is raised in the same commit. The floor file also records the baselines we must beat and the human ceiling.
 
-3b. Hand-separation gate: `digitus2 evalhands` scores the MIDI hand separation on the PIG test split (first annotation per piece, channel = truth) and on the 30 library pieces (staff = truth), writes `benchmarks/latest-hands.json`, and fails `pnpm verify` (step `hands`) when the PIG macro accuracy drops below `hands.accuracyMin` in `benchmarks/floor.json`.
+3b. Hand-separation gate: `digitus2 evalhands` scores the MIDI hand separation on the PIG test split (first annotation per piece, channel = truth) and on the 30 library pieces (staff = truth), writes its scorecard (`benchmarks/runs/verify-hands.json` under verify, `benchmarks/latest-hands.json` for a milestone), and fails `pnpm verify` (step `hands`) when the PIG macro accuracy drops below `hands.accuracyMin` in `benchmarks/floor.json`.
 
 4. Research cross-check: the Python scorer in `research/fingering_eval/` matches the official PIG evaluator; the TypeScript metrics are checked against it on real files, so both sides agree before any number is trusted.
 5. CI: `.github/workflows/ci.yml` runs the same steps on every push to `main`, minus the benchmark when the dataset is not available in CI. As of M4 it runs typecheck, lint, the format check, unit, build and e2e (without the local-only `visual` project); the hygiene, design and bundle steps run under `pnpm verify` only until the workflow calls them too.

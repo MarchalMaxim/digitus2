@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { evaluateDirs } from './evaluate.js';
+import { evaluateDirs, formatReport } from './evaluate.js';
 
 const H = '//Version: PianoFingering_v170101\n';
 const notes = (f: string[]) =>
@@ -29,6 +29,24 @@ describe('evaluateDirs', () => {
     expect(report.pieces[1]!.metrics.gen).toBe(0.5);
     expect(report.mean.gen).toBeCloseTo((0.875 + 0.5) / 2);
     expect(report.noteWeighted.gen).toBeCloseTo((0.875 * 4 + 0.5 * 2) / 6);
-    expect(report.skipped).toEqual(['003.txt']);
+    expect(report.skipped).toEqual([{ file: '003.txt', reason: 'no gold file' }]);
+  });
+  it('skips a piece whose gold fingers no note and leaves it out of the mean (M3 Task 9)', () => {
+    // research/fingering_eval/evaluate.py: "no annotated gold notes" (finger 0 = unfingered).
+    const root = mkdtempSync(join(tmpdir(), 'digitus2-eval-'));
+    const gold = join(root, 'gold');
+    const pred = join(root, 'pred');
+    mkdirSync(gold, { recursive: true });
+    mkdirSync(pred, { recursive: true });
+    writeFileSync(join(gold, '001-1_fingering.txt'), notes(['1', '2', '3', '4']));
+    writeFileSync(join(gold, '002-1_fingering.txt'), notes(['0', '0', '0']));
+    writeFileSync(join(pred, '001.txt'), notes(['1', '2', '1', '4']));
+    writeFileSync(join(pred, '002.txt'), notes(['1', '2', '3']));
+    const report = evaluateDirs(pred, gold);
+    expect(report.pieces.map((p) => p.id)).toEqual(['1']);
+    expect(report.skipped).toEqual([{ file: '002.txt', reason: 'no annotated gold notes' }]);
+    expect(report.mean.gen).toBeCloseTo(0.75, 12);
+    expect(report.noteWeighted.gen).toBeCloseTo(0.75, 12);
+    expect(formatReport(report)).toMatch(/^skipped: 002\.txt \(no annotated gold notes\)$/m);
   });
 });

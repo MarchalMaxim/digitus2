@@ -6,6 +6,7 @@ import {
   importMidi,
   injectFingerings,
   parseMusicXml,
+  RECOMMENDED_WEIGHT_SET,
   solveFingering,
   unpackMusicXml,
 } from '@digitus2/engine';
@@ -67,9 +68,11 @@ export function handle(req: EngineRequest): EngineResponse {
       }
       case 'solve': {
         const t0 = performance.now();
+        // The app fingers with the shipped learned set (M3), like the CLI and the benchmark gate.
+        const options = { profile: req.profile, weightSet: RECOMMENDED_WEIGHT_SET };
         const { assignment } = solveFingering(
           req.score,
-          req.pins ? { profile: req.profile, pins: req.pins } : { profile: req.profile },
+          req.pins ? { ...options, pins: req.pins } : options,
         );
         return { id: req.id, ok: true, type: 'solve', assignment, ms: performance.now() - t0 };
       }

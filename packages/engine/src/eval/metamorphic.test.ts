@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -22,11 +22,17 @@ const fixture = readFileSync(
   'utf8',
 );
 const scoresDir = fileURLToPath(new URL('../../../../content/scores/', import.meta.url));
-const library = existsSync(scoresDir)
-  ? readdirSync(scoresDir)
-      .filter((f) => f.endsWith('.musicxml') && !f.includes('.fingered.'))
-      .slice(0, 6)
-  : [];
+// The six library pieces of the M2 run, pinned: the library grows (L1) and directory order is
+// not sorted on Linux.
+const METAMORPHIC_PIECES = [
+  'amazing-grace',
+  'bach-invention-no1-bwv-772',
+  'bach-minuet-g-major-bwv-anh-114',
+  'bach-minuet-g-minor-bwv-anh-115',
+  'bach-prelude-c-major-bwv-846',
+  'beethoven-fur-elise-woo-59',
+];
+const library = existsSync(scoresDir) ? METAMORPHIC_PIECES.map((s) => `${s}.musicxml`) : [];
 
 describe('transforms', () => {
   it('transposes, mirrors, duplicates and perturbs', () => {

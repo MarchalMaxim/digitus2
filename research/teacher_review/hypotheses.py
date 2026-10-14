@@ -1,0 +1,230 @@
+"""Consistent objections -> dated hypotheses for docs/experiments.md (verification spec 3.12, teacher-review.md 6.1).
+
+A member is a pair of objections the two reviewers share on a low-confidence or hard-error passage (same
+kind, within one note, one-to-one: score.match_objections), or any error-severity objection of one reviewer
+(the only kind a single-reviewer control passage contributes). Planted and recall twins are instrument checks
+and never feed hypotheses. Kind groups of three or more become entries K1..; lint groups of three or more
+that span two kinds or more become entries L1.. ('none' = no related lint rule fires: a candidate new rule).
+The job only writes rows; the coordinator appends them to docs/experiments.md.
+"""
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass
+
+from .score import match_objections
+
+MIN_GROUP = 3
+SEVERITY_RANK = {"error": 0, "warning": 1, "info": 2}
+PAIR_SETS = ("lowconf", "harderr")
+SINGLE_SETS = ("control",)
+
+KIND_LINT: dict[str, list[str]] = {
+    "same_finger_chord": ["L01", "L03"], "crossed_chord": ["L02"], "impossible_span": ["L05", "L07"],
+    "nonthumb_crossing": ["L06"], "thumb_pass_onto_black": ["L10"], "hop": ["L11"], "reversed_run": ["L14", "L06"],
+    "thumb_on_black": ["L08"], "fifth_on_black": ["L09"], "stretch": ["L07", "L05"], "position_change": [],
+    "inconsistent": [], "weak_finger": ["L14"], "repeated_note": ["L12", "L13"], "nonstandard_pattern": [], "other": [],
+}
+
+# kind -> (hypothesis, proposed change, metrics to watch)
+KIND_TEXT: dict[str, tuple[str, str, str]] = {
+    "hop": ("the hop penalty is too weak at the inter-onset intervals of these passages",
+            "raise the hop weight below 300 ms or price hops by inter-onset interval", "PIG train macro gen and lint L11 per 1000 notes"),
+    "position_change": ("the position-change cost lets the hand shift inside phrases where one position suffices",
+                        "re-weight handPositionShift and positionChangeSize so shifts fall at rests and long notes",
+                        "PIG train macro gen and position changes per 100 notes (spec 3.7)"),
+    "inconsistent": ("repeated or sequential figures receive different fingerings",
+                     "the consistent-repeats post-pass (M3 plan addition 13)",
+                     "metamorphic repeated-passage check and PIG train macro gen"),
+    "impossible_span": ("chord or held-note spans exceed what a medium hand can hold",
+                        "check the medium profile's practical spans and the held-note law", "lint L05 per 1000 notes and PIG train macro gen"),
+    "stretch": ("the solver accepts uncomfortable stretches where a closer finger is free",
+                "raise the stretch weight for the medium profile", "lint L07 per 1000 notes and PIG train macro gen"),
+    "same_finger_chord": ("a finger is reused while it still holds a key, or doubled inside a chord",
+                          "check the chord law and the held-note law (L01, L03)", "lint L01 and L03 per 1000 notes"),
+    "crossed_chord": ("chord fingers are not in pitch order", "check the chord law (L02)", "lint L02 per 1000 notes"),
+    "nonthumb_crossing": ("long fingers cross each other", "raise the cost of non-thumb crossings (L06)",
+                          "lint L06 per 1000 notes and PIG train macro gen"),
+    "thumb_pass_onto_black": ("the thumb passes onto black keys", "raise the cost of a thumb pass onto a black key (L10)",
+                              "lint L10 per 1000 notes"),
+    "thumb_on_black": ("the thumb lands on black keys where a white-key finger is free",
+                       "raise thumbOnBlack for the medium and beginner profiles", "lint L08 per 1000 notes and PIG train macro gen"),
+    "fifth_on_black": ("the fifth finger lands on black keys next to white keys", "raise the fifth-on-black cost (L09)",
+                       "lint L09 per 1000 notes"),
+    "reversed_run": ("runs are fingered against the direction of motion", "check the crossing and agility terms (L06, L14)",
+                     "lint L14 and L06 per 1000 notes"),
+    "weak_finger": ("the weak fingers carry notes a stronger finger could take", "raise the agility cost (L14)",
+                    "lint L14 per 1000 notes"),
+    "repeated_note": ("repeated keys get finger changes, or same-finger repeats, against the tempo",
+                      "check the repeated-note rules (L12, L13)", "lint L12 and L13 per 1000 notes"),
+    "nonstandard_pattern": ("scale or arpeggio fragments do not follow the textbook fingering",
+                            "extend the textbook templates to the fragments the reviewer names",
+                            "textbook oracle exact matches and PIG train macro gen"),
+    "other": ("the reviewer objects to something no rule names", "read the objections in the report and name the rule",
+              "none until a rule is named"),
+}
+
+OUTCOME = "Open. Generated by the weekly teacher review; not a gate and not a tuning target (verification spec 3.12)."
+TESTED = "To be tested on PIG train, the textbook oracle and the library, never on the test split (verification spec section 4)."
+
+
+@dataclass
+class Member:
+    passage: str
+    set: str
+    source: str
+    kind: str
+    severity: str
+    notes: list[str]
+    basis: str                  # "both" | "error"
+    reviewers: list[str]
+    problems: list[str]
+    fix: dict
+    lint: list[str] | None      # lint rules at the notes; None when the key has no engine info (pilot)
+    lint_key: str               # related rule that fires, "none", or "n/a"
+
+
+def _set(ki: dict) -> str:
+    return ki.get("set") or ki["condition"]
+
+
+def _note_key(n: str) -> tuple:
+    return (n[0] != "R", int(n[1:]))
+
+
+def lint_key(kind: str, lint: list[str] | None) -> str:
+    if lint is None:
+        return "n/a"
+    for rule in KIND_LINT.get(kind, []):
+        if rule in lint:
+            return rule
+    return "none"
+
+
+def _member(ki: dict, obs: list[dict], basis: str, reviewers: list[str]) -> Member:
+    notes = sorted({n for o in obs for n in o["notes"]}, key=_note_key)
+    engine = ki.get("engine")
+    lint = None if engine is None else sorted({r for n in notes for r in (engine.get(n) or {}).get("lint", [])})
+    fix: dict = {}
+    for o in obs:
+        fix.update(o["fix"])
+    kind = obs[0]["kind"]
+    return Member(passage=ki["passage"], set=_set(ki), source=ki.get("source", "pig"), kind=kind,
+                  severity=min((o["severity"] for o in obs), key=SEVERITY_RANK.__getitem__), notes=notes, basis=basis,
+                  reviewers=reviewers, problems=[o["problem"] for o in obs], fix=fix, lint=lint, lint_key=lint_key(kind, lint))
+
+
+def members_from_pair(key_a: dict, j_a: dict, key_b: dict, j_b: dict, include=None, tol: int = 1) -> list[Member]:
+    def index(key, js):
+        return {(key[i]["passage"], key[i]["condition"]): (key[i], js[i]) for i in js if include is None or include(key[i])}
+    a, b = index(key_a, j_a), index(key_b, j_b)
+    out: list[Member] = []
+    for k in sorted(set(a) | set(b)):
+        if k in a and k in b:
+            (ka, ja), (kb, jb) = a[k], b[k]
+            pairs = match_objections(ja["objections"], jb["objections"], tol)
+            used_a, used_b = {i for i, _ in pairs}, {j for _, j in pairs}
+            out += [_member(ka, [ja["objections"][i], jb["objections"][j]], "both", ["a", "b"]) for i, j in pairs]
+            out += [_member(ka, [o], "error", ["a"]) for i, o in enumerate(ja["objections"])
+                    if i not in used_a and o["severity"] == "error"]
+            out += [_member(kb, [o], "error", ["b"]) for j, o in enumerate(jb["objections"])
+                    if j not in used_b and o["severity"] == "error"]
+        else:
+            side = "a" if k in a else "b"
+            ki, js = a[k] if k in a else b[k]
+            out += [_member(ki, [o], "error", [side]) for o in js["objections"] if o["severity"] == "error"]
+    return out
+
+
+def members_single(key_items: dict, judgements: dict, include=None) -> list[Member]:
+    out = []
+    for iid in sorted(judgements):
+        ki = key_items[iid]
+        if include is not None and not include(ki):
+            continue
+        out += [_member(ki, [o], "error", [ki.get("reviewer", "a")]) for o in judgements[iid]["objections"]
+                if o["severity"] == "error"]
+    return out
+
+
+def weekly_members(key_items: dict, judgements: dict, tol: int = 1) -> list[Member]:
+    def side(r):
+        ks = {i: k for i, k in key_items.items() if k.get("reviewer") == r and i in judgements}
+        return ks, {i: judgements[i] for i in ks}
+    (ka, ja), (kb, jb) = side("a"), side("b")
+    ms = members_from_pair(ka, ja, kb, jb, include=lambda ki: _set(ki) in PAIR_SETS, tol=tol)
+    ms += members_single(key_items, judgements, include=lambda ki: _set(ki) in SINGLE_SETS)
+    return sorted(ms, key=lambda m: (m.passage, m.kind, _note_key(m.notes[0]) if m.notes else (False, 0)))
+
+
+def group_by(members: list[Member], attr: str) -> dict[str, list[Member]]:
+    out: dict[str, list[Member]] = {}
+    for m in members:
+        out.setdefault(getattr(m, attr), []).append(m)
+    return dict(sorted(out.items()))
+
+
+def _counts(c: Counter) -> str:
+    return ", ".join(f"{k} {v}" for k, v in sorted(c.items(), key=lambda kv: (-kv[1], kv[0])))
+
+
+def _entry(gid: str, basis: str, key: str, ms: list[Member], date: str, report_name: str, titles: dict) -> dict:
+    passages = sorted({m.passage for m in ms})
+    sets = ", ".join(f"{k} {v}" for k, v in sorted(Counter(m.set for m in ms).items()))
+    sev = ", ".join(f"{s} {c}" for s, c in sorted(Counter(m.severity for m in ms).items(), key=lambda x: SEVERITY_RANK[x[0]]))
+    both = sum(m.basis == "both" for m in ms)
+    evidence = (f"Evidence: docs/reviews/{report_name}, group {gid}: {both} raised by both reviewers, {len(ms) - both} "
+                f"error-only; severities: {sev}; passages: {', '.join(passages)}.")
+    if basis == "kind":
+        hyp, change, metric = KIND_TEXT[key]
+        if all(m.lint is None for m in ms):
+            lint_phrase = "lint was not recorded"
+        elif not KIND_LINT[key]:
+            lint_phrase = "no lint rule covers this kind"
+        else:
+            fires = sum(m.lint_key not in ("none", "n/a") for m in ms)
+            lint_phrase = f"lint {'/'.join(KIND_LINT[key])} fires at {fires} of them"
+        cells = [f"Teacher review {date} ({gid}): {len(ms)} consistent objections of kind {key} in {len(passages)} "
+                 f"passages ({sets}); {lint_phrase}. Hypothesis: {hyp}.",
+                 f"None yet; proposed: {change}. {TESTED}", f"{metric}: current value → not run", evidence, OUTCOME]
+    elif key == "none":
+        kinds = Counter(m.kind for m in ms)
+        cells = [f"Teacher review {date} ({gid}): no related lint rule fires at {len(ms)} consistent objections of "
+                 f"{len(kinds)} kinds ({_counts(kinds)}) in {len(passages)} passages. Hypothesis: lint lacks a rule "
+                 f"for what the reviewer objects to here.",
+                 "None yet; proposed: draft a lint rule for the largest kind and measure its expert base rate on PIG "
+                 f"before deciding law or preference (verification spec section 2, oracle 4). {TESTED}",
+                 "expert base rate of the new rule on PIG: not measured → not run", evidence, OUTCOME]
+    else:
+        kinds = Counter(m.kind for m in ms)
+        title = titles.get(key, key)
+        cells = [f"Teacher review {date} ({gid}): lint {key} ({title}) also fires at {len(ms)} consistent objections of "
+                 f"{len(kinds)} kinds ({_counts(kinds)}) in {len(passages)} passages. Hypothesis: the solver's cost behind "
+                 f"{key} is too low where lint already flags the fingering.",
+                 f"None yet; proposed: raise the solver terms that correspond to {key} and check the expert base rate of "
+                 f"{key} on PIG. {TESTED}", f"lint {key} per 1000 notes on the library and PIG train macro gen: current "
+                 "value → not run", evidence, OUTCOME]
+    return {"id": gid, "basis": basis, "key": key, "members": len(ms), "both": both, "passages": passages,
+            "sets": dict(Counter(m.set for m in ms)), "kinds": dict(Counter(m.kind for m in ms)),
+            "severity": dict(Counter(m.severity for m in ms)), "date": date, "cells": cells}
+
+
+def hypotheses(members: list[Member], date: str, report_name: str, lint_titles: dict | None = None) -> list[dict]:
+    titles = {k: (v["title"] if isinstance(v, dict) else v) for k, v in (lint_titles or {}).items()}
+    out = []
+    kinds = sorted(((k, ms) for k, ms in group_by(members, "kind").items() if len(ms) >= MIN_GROUP),
+                   key=lambda kv: (-len(kv[1]), kv[0]))
+    for n, (kind, ms) in enumerate(kinds, 1):
+        out.append(_entry(f"K{n}", "kind", kind, ms, date, report_name, titles))
+    lints = sorted(((k, ms) for k, ms in group_by(members, "lint_key").items()
+                    if k != "n/a" and len(ms) >= MIN_GROUP and len({m.kind for m in ms}) >= 2),
+                   key=lambda kv: (-len(kv[1]), kv[0]))
+    for n, (key, ms) in enumerate(lints, 1):
+        out.append(_entry(f"L{n}", "lint", key, ms, date, report_name, titles))
+    return out
+
+
+def experiments_rows(hyps: list[dict]) -> str:
+    """Rows in docs/experiments.md's format: | Date | Hypothesis | Change | Primary metric before → after |
+    Other effects | Outcome |."""
+    return "".join("| " + " | ".join([h["date"]] + [c.replace("|", "/") for c in h["cells"]]) + " |\n" for h in hyps)

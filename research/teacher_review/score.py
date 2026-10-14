@@ -359,6 +359,139 @@ def qualitative(key_items: dict, judgements: dict, run: str) -> dict:
 
 
 # ---------------------------------------------------------------------------------------
+# 7. weekly-run measurements (M7-A): rates per set, recall control, hard errors, seeds
+# ---------------------------------------------------------------------------------------
+
+def match_objections(obs_a: list[dict], obs_b: list[dict], tol: int = 1) -> list[tuple[int, int]]:
+    """One-to-one matches between two reviewers' objections on one passage: same kind and a note of one
+    within ``tol`` of a note of the other in the same hand. Greedy in the order of ``obs_a``; each takes
+    the first unmatched objection of ``obs_b`` that matches."""
+    used: set[int] = set()
+    out = []
+    for i, oa in enumerate(obs_a):
+        for j, ob in enumerate(obs_b):
+            if j in used or oa["kind"] != ob["kind"]:
+                continue
+            if any(_near(n, ob["notes"], tol) for n in oa["notes"]):
+                used.add(j)
+                out.append((i, j))
+                break
+    return out
+
+
+def rates_by(key_items: dict, judgements: dict, field: str = "set", tol: int = 1) -> dict:
+    """Objection rates per value of key_items[iid][field] (falling back to the condition). Objections
+    within ``tol`` of a planted fault are left out, as in false_positives."""
+    groups: dict[str, dict] = {}
+    for iid, j in judgements.items():
+        ki = key_items[iid]
+        g = groups.setdefault(ki.get(field) or ki["condition"], {
+            "items": 0, "notes": 0, "objections": 0, "by_severity": Counter(), "by_kind": Counter(),
+            "items_with_error": 0, "overall": [], "verdicts": Counter()})
+        g["items"] += 1
+        g["notes"] += sum(ki["n_notes"][h] for h in ki["hands"])
+        planted = [n for f in ki.get("faults", []) for n in f["notes"]]
+        err = False
+        for ob in j["objections"]:
+            if ki["condition"] == "corrupted" and any(_near(n, planted, tol) for n in ob["notes"]):
+                continue
+            g["objections"] += 1
+            g["by_severity"][ob["severity"]] += 1
+            g["by_kind"][ob["kind"]] += 1
+            err = err or ob["severity"] == "error"
+        g["items_with_error"] += err
+        o = overall(j)
+        if o is not None:
+            g["overall"].append(o)
+        if j["verdict"]:
+            g["verdicts"][j["verdict"]] += 1
+    out = {}
+    for name, g in sorted(groups.items()):
+        n, notes = g["items"], g["notes"]
+        out[name] = {"items": n, "notes": notes, "objections": g["objections"], "by_severity": dict(g["by_severity"]),
+                     "by_kind": dict(g["by_kind"]), "per_item": g["objections"] / n if n else None,
+                     "per_100_notes": 100 * g["objections"] / notes if notes else None,
+                     "share_items_with_error": g["items_with_error"] / n if n else None,
+                     "mean_overall": sum(g["overall"]) / len(g["overall"]) if g["overall"] else None,
+                     "verdicts": dict(g["verdicts"])}
+    return out
+
+
+def _mean(xs: list) -> float | None:
+    xs = [x for x in xs if x is not None]
+    return sum(xs) / len(xs) if xs else None
+
+
+def recall_comparison(key_items: dict, judgements: dict, tol: int = 1) -> dict:
+    """Each recall twin (set 'recall', 'twin_of' = its control) against its control: the share of notes
+    fingered alike in both keys, objections, scores, verdicts, and matched objections (Dice)."""
+    by_passage: dict[str, list] = {}
+    for iid, j in judgements.items():
+        by_passage.setdefault(key_items[iid]["passage"], []).append((key_items[iid], j))
+    pairs = []
+    for pid in sorted(by_passage):
+        for ki, j in by_passage[pid]:
+            if ki.get("set") != "recall" or not by_passage.get(ki.get("twin_of")):
+                continue
+            ko, jo = by_passage[ki["twin_of"]][0]
+            notes = sum(ki["n_notes"][h] for h in ki["hands"])
+            fo = " ".join(ko["fingers"][h] for h in ko["hands"]).split()
+            ft = " ".join(ki["fingers"][h] for h in ki["hands"]).split()
+            matched = match_objections(jo["objections"], j["objections"], tol)
+            no, nt = len(jo["objections"]), len(j["objections"])
+            pairs.append({"control": ki["twin_of"], "recall": pid, "notes": notes,
+                          "finger_agreement": sum(a == b for a, b in zip(fo, ft)) / len(fo) if fo else None,
+                          "objections": [no, nt],
+                          "per_100_notes": [100 * no / notes, 100 * nt / notes] if notes else [None, None],
+                          "overall": [overall(jo), overall(j)], "verdict": [jo["verdict"], j["verdict"]],
+                          "matched": len(matched), "dice": 2 * len(matched) / (no + nt) if no + nt else None})
+    return {"pairs": pairs, "n": len(pairs),
+            "mean_overall_diff": _mean([p["overall"][1] - p["overall"][0] for p in pairs if None not in p["overall"]]),
+            "mean_per_100_diff": _mean([p["per_100_notes"][1] - p["per_100_notes"][0] for p in pairs
+                                        if None not in p["per_100_notes"]]),
+            "verdict_agreement": _mean([float(p["verdict"][0] == p["verdict"][1]) for p in pairs if None not in p["verdict"]]),
+            "mean_dice": _mean([p["dice"] for p in pairs]),
+            "mean_finger_agreement": _mean([p["finger_agreement"] for p in pairs])}
+
+
+def hard_error_agreement(key_items: dict, judgements: dict, tol: int = 1) -> dict:
+    """On hard-error passages ('hard': note id -> the annotators' unanimous finger): how often an objection
+    lands within ``tol`` of a hard-error note, and how often a fix gives the annotators' finger."""
+    items = hard_notes = hit = fix_on = fix_match = 0
+    for iid, j in judgements.items():
+        ki = key_items[iid]
+        hard = ki.get("hard") or {}
+        if ki.get("set") != "harderr" or not hard:
+            continue
+        items += 1
+        named = [n for ob in j["objections"] for n in ob["notes"]]
+        fixes: dict = {}
+        for ob in j["objections"]:
+            fixes.update(ob["fix"])
+        for nid, finger in sorted(hard.items()):
+            hard_notes += 1
+            hit += any(_near(n, [nid], tol) for n in named)
+            if nid in fixes:
+                fix_on += 1
+                fix_match += fixes[nid] == finger
+    return {"items": items, "hard_notes": hard_notes, "hit": hit, "hit_share": hit / hard_notes if hard_notes else None,
+            "fix_on_hard": fix_on, "fix_match": fix_match, "fix_match_share": fix_match / fix_on if fix_on else None}
+
+
+def seed_hits(key_items: dict, judgements: dict, tol: int = 1) -> dict:
+    """On low-confidence passages: reviews with an objection within ``tol`` of the seed note."""
+    n = hit = 0
+    for iid, j in judgements.items():
+        ki = key_items[iid]
+        seed = ki.get("seed_note")
+        if ki.get("set") != "lowconf" or not seed:
+            continue
+        n += 1
+        hit += any(_near(x, [seed], tol) for ob in j["objections"] for x in ob["notes"])
+    return {"reviews": n, "hit": hit, "share": hit / n if n else None}
+
+
+# ---------------------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------------------
 

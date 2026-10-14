@@ -86,3 +86,46 @@ See the module docstring of `render.py` and `LEGEND`. One line per note, chord o
 Bars and beats of PIG passages are estimated from the synthesised timing (the pieces whose grid
 could not be recovered are excluded, see `results/grid_diagnostics.json`); with MusicXML input
 they are exact.
+
+## Weekly review (verification spec 3.12)
+
+The pilot's harness runs every week on the current engine. Plan:
+`docs/superpowers/plans/2026-10-14-m7a-teacher-review-job.md`. Run it by path from the repository
+root, not with `-m` (in a worktree the shared venv would import the main checkout's harness;
+`weekly.py where` prints the harness directory actually imported):
+
+```bash
+PY=research/.venv/Scripts/python.exe
+pnpm --filter @digitus2/engine build
+$PY -I research/teacher_review/weekly.py build --date 2026-10-21      # bench, dump, select, batches, launches
+# the coordinator launches one Opus reviewer per row of research/data/teacher_review/weekly/<date>/launches.json
+$PY -I research/teacher_review/weekly.py collect --date 2026-10-21
+$PY -I research/teacher_review/weekly.py report --date 2026-10-21     # docs/reviews/teacher-<date>.md
+```
+
+| Module | What |
+|---|---|
+| `engine_dump.mjs` | per-note engine output through the built engine's public API (library, tritone copies, PIG pieces) |
+| `musicxml_passages.py` | library windows with exact bars, beats, chords, grace notes and rests |
+| `gallery.py` | bench error galleries; PIG passages with the engine's fingers |
+| `select.py` | the five sets: low-confidence, hard-error, control, planted-fault control, recall control |
+| `dispatch.py` | weekly legend, blinded batches (two framings for engine sets), key, launches, collection |
+| `hypotheses.py` | consistent objections, groups by kind and lint rule, rows for `docs/experiments.md` |
+| `report.py` | the report, `results/weekly/<date>/summary.json`, the PIG audit |
+| `weekly.py` | the entry point: `build`, `collect`, `report`, `where` |
+
+`build` runs `bench --profile medium` into `research/data/teacher_review/weekly/<date>/bench/`
+(never `benchmarks/`) on the PIG validation pieces of `research/data/splits/pig_validation.json`,
+through a split file it writes there (`bench/validation-split.json`), because the hard-error set
+must never come from the official test pieces 001 to 030. Only the validation pieces with two
+annotations (046, 066, 076, 077) can carry a hard error; the set takes at most 16 windows and at
+most 4 per piece. `--gallery DIR` reuses a gallery (refused if it holds a test piece), `--dump FILE`
+reuses a dump; the gallery and the dump must describe the same engine, or the build refuses.
+`build` refuses to overwrite reviewer outputs without `--force`. `collect` exits 1 while any item
+is missing: relaunch a missing or invalid batch once with the same row of `launches.json`; if it
+fails again, `report --allow-missing` writes the report without it and names the missing batches
+in the section "Limits of this run".
+
+Data: `research/data/teacher_review/weekly/<date>/` (gitignored: bench, dump, batches, key, outputs).
+Committed: `results/weekly/<date>/summary.json`, `hypotheses.md` and the library-only batch files
+under `library/`. PIG passages appear in tracked files only by opaque id and counts.

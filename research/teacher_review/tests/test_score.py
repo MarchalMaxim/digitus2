@@ -123,3 +123,68 @@ def test_normalise_item_validates_and_checks_readback():
     assert any("out of range" in p for p in problems) and any("unknown notes" in p for p in problems)
     rb = readback({"e": j})
     assert rb["digit_errors"] == 1 and rb["exact"] == 0
+
+
+import json
+from pathlib import Path
+
+from teacher_review.score import hard_error_agreement, match_objections, rates_by, recall_comparison, seed_hits
+
+_RESULTS = Path(__file__).resolve().parents[1] / "results"
+
+
+def _pilot(run):
+    base = _RESULTS / run
+    return (json.loads((base / "key.json").read_text(encoding="utf-8"))["items"],
+            json.loads((base / "judgements.json").read_text(encoding="utf-8")))
+
+
+def test_rates_by_condition_reproduces_the_pilot_false_positive_table():
+    k, j = _pilot("A")
+    r = rates_by(k, j, field="condition")
+    fp = false_positives(k, j)
+    for c in ("expert", "fhmm3", "corrupted"):
+        for f in ("items", "notes", "objections", "by_severity", "per_100_notes", "share_items_with_error"):
+            assert r[c][f] == fp[c][f], (c, f)
+    assert (r["expert"]["objections"], r["expert"]["by_severity"]) == (28, {"warning": 14, "info": 12, "error": 2})
+    assert r["corrupted"]["objections"] == 6
+
+
+def test_match_objections_is_one_to_one_and_ordered():
+    a = [_ob(["R3"], "hop"), _ob(["R4"], "hop"), _ob(["L2"], "stretch")]
+    b = [_ob(["R4"], "hop"), _ob(["R9"], "hop"), _ob(["R2"], "stretch")]
+    assert match_objections(a, b) == [(0, 0)]
+    assert match_objections(b, a) == [(0, 0)]
+
+
+def test_recall_comparison_pairs_each_twin_with_its_control():
+    key = {"c": {"passage": "ct01", "set": "control", "condition": "engine", "hands": ["R"], "n_notes": {"R": 8},
+                 "fingers": {"R": "1 2 3 4 5 1 2 3"}},
+           "r": {"passage": "rc01", "set": "recall", "condition": "engine", "twin_of": "ct01", "hands": ["R"],
+                 "n_notes": {"R": 8}, "fingers": {"R": "1 2 3 4 5 1 2 4"}}}
+    js = {"c": _j("c", "engine", [3, 3, 2, 3, 2], "acceptable", [_ob(["R3"], "hop"), _ob(["R7"], "stretch", "error")]),
+          "r": _j("r", "engine", [3, 3, 3, 3, 2], "good", [_ob(["R4"], "hop")])}
+    out = recall_comparison(key, js)
+    (p,) = out["pairs"]
+    assert (p["control"], p["recall"], p["notes"], p["finger_agreement"]) == ("ct01", "rc01", 8, 0.875)
+    assert p["objections"] == [2, 1] and p["per_100_notes"] == [25.0, 12.5]
+    assert p["overall"] == [13.0, 14.0] and p["verdict"] == ["acceptable", "good"]
+    assert p["matched"] == 1 and abs(p["dice"] - 2 / 3) < 1e-9
+    assert (out["n"], out["mean_overall_diff"], out["verdict_agreement"]) == (1, 1.0, 0.0)
+
+
+def test_hard_error_agreement_counts_hits_and_fixes():
+    key = {"h": {"passage": "he01", "set": "harderr", "condition": "engine", "hands": ["R"], "n_notes": {"R": 10},
+                 "hard": {"R3": 2, "R8": 4}}}
+    js = {"h": _j("h", "engine", [3, 3, 3, 3, 3], "good", [_ob(["R4"], "hop", fix={"R3": 2}),
+                                                            _ob(["R8"], "stretch", fix={"R8": 5})])}
+    assert hard_error_agreement(key, js) == {"items": 1, "hard_notes": 2, "hit": 2, "hit_share": 1.0, "fix_on_hard": 2,
+                                             "fix_match": 1, "fix_match_share": 0.5}
+
+
+def test_seed_hits():
+    base = {"condition": "engine", "set": "lowconf", "hands": ["R"], "n_notes": {"R": 10}}
+    key = {"x": dict(base, passage="lc01", seed_note="R5"), "y": dict(base, passage="lc02", seed_note="L2")}
+    js = {"x": _j("x", "engine", [3] * 5, "good", [_ob(["R6"], "hop")]),
+          "y": _j("y", "engine", [3] * 5, "good", [_ob(["R2"], "hop")])}
+    assert seed_hits(key, js) == {"reviews": 2, "hit": 1, "share": 0.5}

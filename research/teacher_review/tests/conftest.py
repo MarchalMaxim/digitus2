@@ -5,8 +5,18 @@ from pathlib import Path
 import pytest
 
 RESEARCH = Path(__file__).resolve().parents[2]
-if str(RESEARCH) not in sys.path:
-    sys.path.insert(0, str(RESEARCH))
+# This checkout's research/ goes first, always: research/.venv may be a junction to the main
+# checkout's venv, whose digitus2_research.pth puts the MAIN checkout's research/ on sys.path, so
+# in a git worktree "teacher_review" could otherwise resolve to the other checkout's harness.
+while str(RESEARCH) in sys.path:
+    sys.path.remove(str(RESEARCH))
+sys.path.insert(0, str(RESEARCH))
+
+import teacher_review  # noqa: E402
+
+if Path(teacher_review.__file__).resolve().parent != RESEARCH / "teacher_review":
+    raise RuntimeError(f"teacher_review imported from {teacher_review.__file__}, not from this checkout "
+                       f"({RESEARCH / 'teacher_review'}); run pytest from this checkout's root")
 
 from teacher_review.model import Event, Passage, number_events  # noqa: E402
 

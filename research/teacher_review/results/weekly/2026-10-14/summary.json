@@ -1,0 +1,1458 @@
+{
+ "date": "2026-10-14",
+ "meta": {
+  "engineVersion": "0.1.0",
+  "profile": "medium",
+  "weightSet": "parncutt-defaults",
+  "weightsHash": "52ae8d0d464a7aa1",
+  "lintRules": {
+   "L01": {
+    "title": "Two simultaneous notes share a finger",
+    "law": true
+   },
+   "L02": {
+    "title": "Crossed fingers inside a chord",
+    "law": true
+   },
+   "L03": {
+    "title": "Finger reused while it holds a key",
+    "law": true
+   },
+   "L04": {
+    "title": "More than five simultaneous notes in one hand",
+    "law": true
+   },
+   "L05": {
+    "title": "Span beyond the practical maximum on keys held together",
+    "law": true
+   },
+   "L06": {
+    "title": "Non-thumb crossing",
+    "law": false
+   },
+   "L07": {
+    "title": "Uncomfortable span, a shift beyond the practical span, or a notated hold beyond reach",
+    "law": false
+   },
+   "L08": {
+    "title": "Thumb on a black key",
+    "law": false
+   },
+   "L09": {
+    "title": "Fifth finger on a black key next to a white key",
+    "law": false
+   },
+   "L10": {
+    "title": "Thumb passes onto a black key from a white key",
+    "law": false
+   },
+   "L11": {
+    "title": "Fast hop with the same finger",
+    "law": false
+   },
+   "L12": {
+    "title": "Fast repeated key with the same finger",
+    "law": false
+   },
+   "L13": {
+    "title": "Slow repeated key with a finger change",
+    "law": false
+   },
+   "L14": {
+    "title": "Agility: 3 to 4, 3-4-5 run, or 3 white with 4 black",
+    "law": false
+   }
+  },
+  "bench": {
+   "label": "teacher-2026-10-14",
+   "gitSha": "5d61c4e7752532ae7d08b9e677e6be8fa5e57f2f",
+   "profile": "medium",
+   "gen": 67.88432963199574,
+   "hardErrorRate": 4.362862787935258,
+   "weightsHash": "52ae8d0d464a7aa1",
+   "split": "research/data/splits/pig_validation.json",
+   "pieces": 20,
+   "skipped": []
+  },
+  "seed": 20261014,
+  "dump": "research/data/teacher_review/weekly/2026-10-14/dump.json",
+  "skipped": {
+   "unusable grid": 0,
+   "not in the quantised piece": 0,
+   "not covered": 15
+  },
+  "counts": {
+   "lowconf": 20,
+   "harderr": 15,
+   "control": 10,
+   "planted": 4,
+   "recall": 4
+  }
+ },
+ "sets": {
+  "lowconf": {
+   "passages": 20,
+   "item_reviews": 40
+  },
+  "harderr": {
+   "passages": 15,
+   "item_reviews": 30
+  },
+  "control": {
+   "passages": 10,
+   "item_reviews": 10
+  },
+  "recall": {
+   "passages": 4,
+   "item_reviews": 4
+  },
+  "planted": {
+   "passages": 4,
+   "item_reviews": 4
+  }
+ },
+ "rates": {
+  "control": {
+   "items": 10,
+   "notes": 225,
+   "objections": 7,
+   "by_severity": {
+    "warning": 6,
+    "info": 1
+   },
+   "by_kind": {
+    "inconsistent": 4,
+    "fifth_on_black": 1,
+    "position_change": 1,
+    "nonstandard_pattern": 1
+   },
+   "per_item": 0.7,
+   "per_100_notes": 3.111111111111111,
+   "share_items_with_error": 0.0,
+   "mean_overall": 13.6,
+   "verdicts": {
+    "good": 6,
+    "acceptable": 4
+   }
+  },
+  "harderr": {
+   "items": 30,
+   "notes": 884,
+   "objections": 60,
+   "by_severity": {
+    "warning": 49,
+    "info": 11
+   },
+   "by_kind": {
+    "hop": 37,
+    "inconsistent": 13,
+    "thumb_on_black": 3,
+    "nonstandard_pattern": 3,
+    "weak_finger": 1,
+    "thumb_pass_onto_black": 1,
+    "position_change": 1,
+    "nonthumb_crossing": 1
+   },
+   "per_item": 2.0,
+   "per_100_notes": 6.787330316742081,
+   "share_items_with_error": 0.0,
+   "mean_overall": 11.6,
+   "verdicts": {
+    "acceptable": 21,
+    "flawed": 6,
+    "good": 3
+   }
+  },
+  "lowconf": {
+   "items": 40,
+   "notes": 716,
+   "objections": 32,
+   "by_severity": {
+    "warning": 24,
+    "info": 8
+   },
+   "by_kind": {
+    "position_change": 9,
+    "hop": 3,
+    "inconsistent": 11,
+    "nonstandard_pattern": 8,
+    "weak_finger": 1
+   },
+   "per_item": 0.8,
+   "per_100_notes": 4.4692737430167595,
+   "share_items_with_error": 0.0,
+   "mean_overall": 13.25,
+   "verdicts": {
+    "acceptable": 21,
+    "good": 18,
+    "flawed": 1
+   }
+  },
+  "planted": {
+   "items": 4,
+   "notes": 126,
+   "objections": 3,
+   "by_severity": {
+    "warning": 3
+   },
+   "by_kind": {
+    "fifth_on_black": 2,
+    "inconsistent": 1
+   },
+   "per_item": 0.75,
+   "per_100_notes": 2.380952380952381,
+   "share_items_with_error": 0.0,
+   "mean_overall": 6.0,
+   "verdicts": {
+    "unplayable": 2,
+    "flawed": 2
+   }
+  },
+  "recall": {
+   "items": 4,
+   "notes": 75,
+   "objections": 2,
+   "by_severity": {
+    "warning": 2
+   },
+   "by_kind": {
+    "inconsistent": 2
+   },
+   "per_item": 0.5,
+   "per_100_notes": 2.6666666666666665,
+   "share_items_with_error": 0.0,
+   "mean_overall": 14.0,
+   "verdicts": {
+    "good": 3,
+    "acceptable": 1
+   }
+  }
+ },
+ "planted": {
+  "per_kind": {
+   "chord_same_finger": {
+    "planted": 1,
+    "detected_pos": 1,
+    "detected_kind": 1,
+    "detected_error": 1,
+    "fix_restores_expert": 1,
+    "sensitivity_pos": 1.0,
+    "sensitivity_kind": 1.0
+   },
+   "impossible_span": {
+    "planted": 1,
+    "detected_pos": 1,
+    "detected_kind": 1,
+    "detected_error": 1,
+    "fix_restores_expert": 1,
+    "sensitivity_pos": 1.0,
+    "sensitivity_kind": 1.0
+   },
+   "nonthumb_crossing": {
+    "planted": 2,
+    "detected_pos": 2,
+    "detected_kind": 2,
+    "detected_error": 2,
+    "fix_restores_expert": 2,
+    "sensitivity_pos": 1.0,
+    "sensitivity_kind": 1.0
+   },
+   "hop_at_speed": {
+    "planted": 2,
+    "detected_pos": 2,
+    "detected_kind": 2,
+    "detected_error": 0,
+    "fix_restores_expert": 1,
+    "sensitivity_pos": 1.0,
+    "sensitivity_kind": 1.0
+   },
+   "run_345_reversed": {
+    "planted": 2,
+    "detected_pos": 2,
+    "detected_kind": 2,
+    "detected_error": 2,
+    "fix_restores_expert": 1,
+    "sensitivity_pos": 1.0,
+    "sensitivity_kind": 1.0
+   },
+   "thumb_on_black_between_whites": {
+    "sensitivity_pos": null,
+    "sensitivity_kind": null
+   }
+  },
+  "total": {
+   "planted": 8,
+   "detected_pos": 8,
+   "detected_kind": 8,
+   "detected_error": 6,
+   "fix_restores_expert": 6,
+   "sensitivity_pos": 1.0,
+   "sensitivity_kind": 1.0
+  }
+ },
+ "agreement": {
+  "items": 35,
+  "overall_pearson": 0.7443255337810736,
+  "overall_spearman": 0.5600289136421807,
+  "mean_abs_diff_overall": 1.0285714285714285,
+  "share_abs_diff_le_2": 0.9142857142857143,
+  "verdict_agreement": 0.6285714285714286,
+  "objection_note_jaccard_mean": 0.5951138519924098,
+  "faults": {
+   "both_runs_detect": 0,
+   "one_run_detects": 0,
+   "neither": 0
+  }
+ },
+ "readback": {
+  "hands": 110,
+  "exact": 110,
+  "exact_share": 1.0,
+  "digits": 2026,
+  "digit_errors": 0,
+  "digit_error_rate": 0.0
+ },
+ "drift": {
+  "planted_pos": 1.0,
+  "planted_kind": 1.0,
+  "control_per_100": 3.111111111111111,
+  "readback": 1.0,
+  "verdict_agreement": 0.6285714285714286
+ },
+ "seed_hits": {
+  "reviews": 40,
+  "hit": 19,
+  "share": 0.475
+ },
+ "recall": {
+  "pairs": [
+   {
+    "control": "ct03",
+    "recall": "rc01",
+    "notes": 28,
+    "finger_agreement": 1.0,
+    "objections": [
+     0,
+     0
+    ],
+    "per_100_notes": [
+     0.0,
+     0.0
+    ],
+    "overall": [
+     15.0,
+     15.0
+    ],
+    "verdict": [
+     "good",
+     "good"
+    ],
+    "matched": 0,
+    "dice": null
+   },
+   {
+    "control": "ct07",
+    "recall": "rc02",
+    "notes": 20,
+    "finger_agreement": 0.85,
+    "objections": [
+     3,
+     2
+    ],
+    "per_100_notes": [
+     15.0,
+     10.0
+    ],
+    "overall": [
+     12.0,
+     11.0
+    ],
+    "verdict": [
+     "acceptable",
+     "acceptable"
+    ],
+    "matched": 2,
+    "dice": 0.8
+   },
+   {
+    "control": "ct08",
+    "recall": "rc03",
+    "notes": 10,
+    "finger_agreement": 1.0,
+    "objections": [
+     0,
+     0
+    ],
+    "per_100_notes": [
+     0.0,
+     0.0
+    ],
+    "overall": [
+     15.0,
+     15.0
+    ],
+    "verdict": [
+     "good",
+     "good"
+    ],
+    "matched": 0,
+    "dice": null
+   },
+   {
+    "control": "ct10",
+    "recall": "rc04",
+    "notes": 17,
+    "finger_agreement": 1.0,
+    "objections": [
+     0,
+     0
+    ],
+    "per_100_notes": [
+     0.0,
+     0.0
+    ],
+    "overall": [
+     15.0,
+     15.0
+    ],
+    "verdict": [
+     "good",
+     "good"
+    ],
+    "matched": 0,
+    "dice": null
+   }
+  ],
+  "n": 4,
+  "mean_overall_diff": -0.25,
+  "mean_per_100_diff": -1.25,
+  "verdict_agreement": 1.0,
+  "mean_dice": 0.8,
+  "mean_finger_agreement": 0.9625
+ },
+ "hard_errors": {
+  "items": 30,
+  "hard_notes": 206,
+  "hit": 77,
+  "hit_share": 0.3737864077669903,
+  "fix_on_hard": 51,
+  "fix_match": 39,
+  "fix_match_share": 0.7647058823529411
+ },
+ "hypotheses": [
+  {
+   "id": "K1",
+   "basis": "kind",
+   "key": "hop",
+   "members": 16,
+   "both": 16,
+   "passages": [
+    "he01",
+    "he06",
+    "he09",
+    "he10",
+    "he11",
+    "he13",
+    "he15",
+    "lc05"
+   ],
+   "sets": {
+    "harderr": 15,
+    "lowconf": 1
+   },
+   "kinds": {
+    "hop": 16
+   },
+   "severity": {
+    "warning": 16
+   },
+   "date": "2026-10-14",
+   "cells": [
+    "Teacher review 2026-10-14 (K1): 16 consistent objections of kind hop in 8 passages (harderr 15, lowconf 1); lint L11 fires at 0 of them. Hypothesis: the hop penalty is too weak at the inter-onset intervals of these passages.",
+    "None yet; proposed: raise the hop weight below 300 ms or price hops by inter-onset interval. To be tested on PIG train, the textbook oracle and the library, never on the test split (verification spec section 4).",
+    "PIG train macro gen and lint L11 per 1000 notes: current value → not run",
+    "Evidence: docs/reviews/teacher-2026-10-14.md, group K1: 16 raised by both reviewers, 0 error-only; severities: warning 16; passages: he01, he06, he09, he10, he11, he13, he15, lc05.",
+    "Open. Generated by the weekly teacher review; not a gate and not a tuning target (verification spec 3.12)."
+   ]
+  },
+  {
+   "id": "K2",
+   "basis": "kind",
+   "key": "inconsistent",
+   "members": 10,
+   "both": 10,
+   "passages": [
+    "he02",
+    "he03",
+    "he04",
+    "he05",
+    "he08",
+    "he12",
+    "lc01",
+    "lc12",
+    "lc15",
+    "lc17"
+   ],
+   "sets": {
+    "harderr": 6,
+    "lowconf": 4
+   },
+   "kinds": {
+    "inconsistent": 10
+   },
+   "severity": {
+    "warning": 8,
+    "info": 2
+   },
+   "date": "2026-10-14",
+   "cells": [
+    "Teacher review 2026-10-14 (K2): 10 consistent objections of kind inconsistent in 10 passages (harderr 6, lowconf 4); no lint rule covers this kind. Hypothesis: repeated or sequential figures receive different fingerings.",
+    "None yet; proposed: the consistent-repeats post-pass (M3 plan addition 13). To be tested on PIG train, the textbook oracle and the library, never on the test split (verification spec section 4).",
+    "metamorphic repeated-passage check and PIG train macro gen: current value → not run",
+    "Evidence: docs/reviews/teacher-2026-10-14.md, group K2: 10 raised by both reviewers, 0 error-only; severities: warning 8, info 2; passages: he02, he03, he04, he05, he08, he12, lc01, lc12, lc15, lc17.",
+    "Open. Generated by the weekly teacher review; not a gate and not a tuning target (verification spec 3.12)."
+   ]
+  },
+  {
+   "id": "K3",
+   "basis": "kind",
+   "key": "nonstandard_pattern",
+   "members": 3,
+   "both": 3,
+   "passages": [
+    "lc02",
+    "lc14",
+    "lc18"
+   ],
+   "sets": {
+    "lowconf": 3
+   },
+   "kinds": {
+    "nonstandard_pattern": 3
+   },
+   "severity": {
+    "warning": 3
+   },
+   "date": "2026-10-14",
+   "cells": [
+    "Teacher review 2026-10-14 (K3): 3 consistent objections of kind nonstandard_pattern in 3 passages (lowconf 3); no lint rule covers this kind. Hypothesis: scale or arpeggio fragments do not follow the textbook fingering.",
+    "None yet; proposed: extend the textbook templates to the fragments the reviewer names. To be tested on PIG train, the textbook oracle and the library, never on the test split (verification spec section 4).",
+    "textbook oracle exact matches and PIG train macro gen: current value → not run",
+    "Evidence: docs/reviews/teacher-2026-10-14.md, group K3: 3 raised by both reviewers, 0 error-only; severities: warning 3; passages: lc02, lc14, lc18.",
+    "Open. Generated by the weekly teacher review; not a gate and not a tuning target (verification spec 3.12)."
+   ]
+  },
+  {
+   "id": "K4",
+   "basis": "kind",
+   "key": "position_change",
+   "members": 3,
+   "both": 3,
+   "passages": [
+    "lc07",
+    "lc08",
+    "lc18"
+   ],
+   "sets": {
+    "lowconf": 3
+   },
+   "kinds": {
+    "position_change": 3
+   },
+   "severity": {
+    "warning": 3
+   },
+   "date": "2026-10-14",
+   "cells": [
+    "Teacher review 2026-10-14 (K4): 3 consistent objections of kind position_change in 3 passages (lowconf 3); no lint rule covers this kind. Hypothesis: the position-change cost lets the hand shift inside phrases where one position suffices.",
+    "None yet; proposed: re-weight handPositionShift and positionChangeSize so shifts fall at rests and long notes. To be tested on PIG train, the textbook oracle and the library, never on the test split (verification spec section 4).",
+    "PIG train macro gen and position changes per 100 notes (spec 3.7): current value → not run",
+    "Evidence: docs/reviews/teacher-2026-10-14.md, group K4: 3 raised by both reviewers, 0 error-only; severities: warning 3; passages: lc07, lc08, lc18.",
+    "Open. Generated by the weekly teacher review; not a gate and not a tuning target (verification spec 3.12)."
+   ]
+  },
+  {
+   "id": "L1",
+   "basis": "lint",
+   "key": "none",
+   "members": 32,
+   "both": 32,
+   "passages": [
+    "he01",
+    "he02",
+    "he03",
+    "he04",
+    "he05",
+    "he06",
+    "he08",
+    "he09",
+    "he10",
+    "he11",
+    "he12",
+    "he13",
+    "he15",
+    "lc01",
+    "lc02",
+    "lc05",
+    "lc07",
+    "lc08",
+    "lc12",
+    "lc14",
+    "lc15",
+    "lc17",
+    "lc18"
+   ],
+   "sets": {
+    "harderr": 21,
+    "lowconf": 11
+   },
+   "kinds": {
+    "hop": 16,
+    "inconsistent": 10,
+    "nonstandard_pattern": 3,
+    "position_change": 3
+   },
+   "severity": {
+    "warning": 30,
+    "info": 2
+   },
+   "date": "2026-10-14",
+   "cells": [
+    "Teacher review 2026-10-14 (L1): no related lint rule fires at 32 consistent objections of 4 kinds (hop 16, inconsistent 10, nonstandard_pattern 3, position_change 3) in 23 passages. Hypothesis: lint lacks a rule for what the reviewer objects to here.",
+    "None yet; proposed: draft a lint rule for the largest kind and measure its expert base rate on PIG before deciding law or preference (verification spec section 2, oracle 4). To be tested on PIG train, the textbook oracle and the library, never on the test split (verification spec section 4).",
+    "expert base rate of the new rule on PIG: not measured → not run",
+    "Evidence: docs/reviews/teacher-2026-10-14.md, group L1: 32 raised by both reviewers, 0 error-only; severities: warning 30, info 2; passages: he01, he02, he03, he04, he05, he06, he08, he09, he10, he11, he12, he13, he15, lc01, lc02, lc05, lc07, lc08, lc12, lc14, lc15, lc17, lc18.",
+    "Open. Generated by the weekly teacher review; not a gate and not a tuning target (verification spec 3.12)."
+   ]
+  }
+ ],
+ "instructive": [
+  {
+   "rank": 1,
+   "passage": "lc01",
+   "set": "lowconf",
+   "piece": "frere-jacques",
+   "title": "Frère Jacques",
+   "bars": [
+    5,
+    8
+   ],
+   "hands": [
+    "R"
+   ],
+   "kind": "inconsistent",
+   "severity": "warning",
+   "basis": "both",
+   "notes": [
+    "R13",
+    "R15",
+    "R16"
+   ],
+   "lines": [
+    "id     bar beat  dur   pitch           f",
+    "R13    7   1     q     C4              2",
+    "R15    7   3     h     C4              3",
+    "R16    8   1     q     C4              3"
+   ],
+   "engine": {
+    "R13": {
+     "finger": 2,
+     "confidence": 0.2611197301896514
+    },
+    "R15": {
+     "finger": 3,
+     "confidence": 0.29692184937773414
+    },
+    "R16": {
+     "finger": 3,
+     "confidence": 0.29692184937773414
+    }
+   },
+   "lint": [
+    "L13"
+   ],
+   "lint_titles": {
+    "L13": "Slow repeated key with a finger change"
+   },
+   "problems": [
+    {
+     "reviewer": "a",
+     "problem": "Identical C4-G3-C4 figure in bars 7 and 8 is fingered 2-1-3 then 3-1-3; use 3-1-3 both times."
+    },
+    {
+     "reviewer": "b",
+     "problem": "C4 takes 2 at R13 but 3 at R15 and in bar 8; the 1-2 fourth G3-C4 is a needless stretch."
+    }
+   ],
+   "fix": {
+    "R13": 3
+   }
+  },
+  {
+   "rank": 2,
+   "passage": "lc02",
+   "set": "lowconf",
+   "piece": "mozart-sonata-k545-mvt1",
+   "title": "Piano Sonata in C major ('Sonata facile'), 1st movement (Allegro)",
+   "bars": [
+    53,
+    54
+   ],
+   "hands": [
+    "R"
+   ],
+   "kind": "nonstandard_pattern",
+   "severity": "warning",
+   "basis": "both",
+   "notes": [
+    "R17",
+    "R18",
+    "R19",
+    "R20"
+   ],
+   "lines": [
+    "id     bar beat  dur   pitch           f",
+    "R17    54  4     s     D5              1",
+    "R18    54  4.25  s     E5              2",
+    "R19    54  4.5   s     F5              1",
+    "R20    54  4.75  s     G5              2"
+   ],
+   "engine": {
+    "R17": {
+     "finger": 1,
+     "confidence": 0.6827904352770948
+    },
+    "R18": {
+     "finger": 2,
+     "confidence": 0.6514304612660771
+    },
+    "R19": {
+     "finger": 1,
+     "confidence": 0.6182929858095593
+    },
+    "R20": {
+     "finger": 2,
+     "confidence": 0.619308359356716
+    }
+   },
+   "lint": [],
+   "lint_titles": {},
+   "problems": [
+    {
+     "reviewer": "a",
+     "problem": "Thumb on D5 and again on F5 two notes later: needless extra thumb-under at sixteenth speed; continue 1-2-3-4."
+    },
+    {
+     "reviewer": "b",
+     "problem": "Thumb passes under 2 twice in four sixteenths (D5 and F5); D5-E5-F5-G5 fits 1-2-3-4 with no extra crossing."
+    }
+   ],
+   "fix": {
+    "R19": 3,
+    "R20": 4
+   }
+  },
+  {
+   "rank": 3,
+   "passage": "lc05",
+   "set": "lowconf",
+   "piece": "chopin-prelude-op28-no7",
+   "title": "Prelude in A major",
+   "bars": [
+    2,
+    4
+   ],
+   "hands": [
+    "R"
+   ],
+   "kind": "hop",
+   "severity": "warning",
+   "basis": "both",
+   "notes": [
+    "R6",
+    "R7",
+    "R8",
+    "R9"
+   ],
+   "lines": [
+    "id     bar beat  dur   pitch           f",
+    "R6-7   3   1     e.    C5+Eb5          1+2",
+    "R8-9   3   1.75  s     C#5+E5          1+2"
+   ],
+   "engine": {
+    "R6": {
+     "finger": 1,
+     "confidence": 0.9955806813046666
+    },
+    "R7": {
+     "finger": 2,
+     "confidence": 0.49248156805007776
+    },
+    "R8": {
+     "finger": 1,
+     "confidence": 0.49253300430957464
+    },
+    "R9": {
+     "finger": 2,
+     "confidence": 0.3300115053464258
+    }
+   },
+   "lint": [
+    "L08"
+   ],
+   "lint_titles": {
+    "L08": "Thumb on a black key"
+   },
+   "problems": [
+    {
+     "reviewer": "a",
+     "problem": "Both fingers slide a semitone into the sixteenth (1+2 to 1+2); the dotted figure then relies on pedal to connect."
+    },
+    {
+     "reviewer": "b",
+     "problem": "Thumb and 2 both hop a semitone from C5+Eb5 to C#5+E5 in the dotted figure; 1+3 then 2+4 connects legato."
+    }
+   ],
+   "fix": {
+    "R7": 3,
+    "R8": 2,
+    "R9": 4
+   }
+  }
+ ],
+ "library_passages": [
+  {
+   "passage": "ct01",
+   "set": "control",
+   "slug": "ode-to-joy",
+   "title": "Ode to Joy (simplified)",
+   "bars": [
+    3,
+    9
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "ct02",
+   "set": "control",
+   "slug": "burgmuller-op100-no2-arabesque",
+   "title": "Arabesque",
+   "bars": [
+    11,
+    17
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "ct03",
+   "set": "control",
+   "slug": "burgmuller-op100-no1-la-candeur",
+   "title": "La Candeur (Frankness)",
+   "bars": [
+    10,
+    14
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "ct04",
+   "set": "control",
+   "slug": "mozart-minuet-f-major-k2",
+   "title": "Minuet in F major",
+   "bars": [
+    13,
+    18
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "ct05",
+   "set": "control",
+   "slug": "jingle-bells",
+   "title": "Jingle Bells (chorus)",
+   "bars": [
+    8,
+    14
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "ct06",
+   "set": "control",
+   "slug": "schumann-op68-no8-wild-rider",
+   "title": "The Wild Rider (Album for the Young, No. 8)",
+   "bars": [
+    19,
+    24
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "ct07",
+   "set": "control",
+   "slug": "bach-prelude-c-major-bwv-846",
+   "title": "Prelude in C major (Well-Tempered Clavier, Book I, No. 1)",
+   "bars": [
+    8,
+    12
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "ct08",
+   "set": "control",
+   "slug": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "bars": [
+    11,
+    15
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "ct09",
+   "set": "control",
+   "slug": "pachelbel-canon-in-d",
+   "title": "Canon in D (simplified)",
+   "bars": [
+    6,
+    10
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "ct10",
+   "set": "control",
+   "slug": "mary-had-a-little-lamb",
+   "title": "Mary Had a Little Lamb",
+   "bars": [
+    1,
+    5
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc01",
+   "set": "lowconf",
+   "slug": "frere-jacques",
+   "title": "Frère Jacques",
+   "bars": [
+    5,
+    8
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc02",
+   "set": "lowconf",
+   "slug": "mozart-sonata-k545-mvt1",
+   "title": "Piano Sonata in C major ('Sonata facile'), 1st movement (Allegro)",
+   "bars": [
+    53,
+    54
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc03",
+   "set": "lowconf",
+   "slug": "joplin-the-entertainer",
+   "title": "The Entertainer",
+   "bars": [
+    78,
+    79
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc04",
+   "set": "lowconf",
+   "slug": "joplin-the-entertainer",
+   "title": "The Entertainer",
+   "bars": [
+    86,
+    87
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc05",
+   "set": "lowconf",
+   "slug": "chopin-prelude-op28-no7",
+   "title": "Prelude in A major",
+   "bars": [
+    2,
+    4
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc06",
+   "set": "lowconf",
+   "slug": "twinkle-twinkle-little-star",
+   "title": "Twinkle, Twinkle, Little Star",
+   "bars": [
+    8,
+    12
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc07",
+   "set": "lowconf",
+   "slug": "bach-invention-no1-bwv-772",
+   "title": "Invention No. 1 in C major",
+   "bars": [
+    2,
+    3
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc08",
+   "set": "lowconf",
+   "slug": "clementi-sonatina-op36-no1-mvt1",
+   "title": "Sonatina in C major, 1st movement (Spiritoso)",
+   "bars": [
+    7,
+    8
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc09",
+   "set": "lowconf",
+   "slug": "amazing-grace",
+   "title": "Amazing Grace",
+   "bars": [
+    1,
+    6
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc10",
+   "set": "lowconf",
+   "slug": "greensleeves",
+   "title": "Greensleeves",
+   "bars": [
+    10,
+    16
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc11",
+   "set": "lowconf",
+   "slug": "greensleeves",
+   "title": "Greensleeves",
+   "bars": [
+    3,
+    9
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc12",
+   "set": "lowconf",
+   "slug": "bach-prelude-c-major-bwv-846",
+   "title": "Prelude in C major (Well-Tempered Clavier, Book I, No. 1)",
+   "bars": [
+    29,
+    32
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc13",
+   "set": "lowconf",
+   "slug": "mozart-sonata-k545-mvt1",
+   "title": "Piano Sonata in C major ('Sonata facile'), 1st movement (Allegro)",
+   "bars": [
+    49,
+    52
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc14",
+   "set": "lowconf",
+   "slug": "clementi-sonatina-op36-no1-mvt1",
+   "title": "Sonatina in C major, 1st movement (Spiritoso)",
+   "bars": [
+    23,
+    28
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc15",
+   "set": "lowconf",
+   "slug": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "bars": [
+    4,
+    10
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc16",
+   "set": "lowconf",
+   "slug": "amazing-grace",
+   "title": "Amazing Grace",
+   "bars": [
+    8,
+    14
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc17",
+   "set": "lowconf",
+   "slug": "happy-birthday",
+   "title": "Happy Birthday to You",
+   "bars": [
+    2,
+    8
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc18",
+   "set": "lowconf",
+   "slug": "bach-invention-no1-bwv-772",
+   "title": "Invention No. 1 in C major",
+   "bars": [
+    6,
+    7
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "lc19",
+   "set": "lowconf",
+   "slug": "beethoven-fur-elise-woo-59",
+   "title": "Für Elise (Bagatelle in A minor)",
+   "bars": [
+    74,
+    76
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "lc20",
+   "set": "lowconf",
+   "slug": "schumann-op68-no8-wild-rider",
+   "title": "The Wild Rider (Album for the Young, No. 8)",
+   "bars": [
+    13,
+    15
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "pf01",
+   "set": "planted",
+   "slug": "schumann-op68-no8-wild-rider",
+   "title": "The Wild Rider (Album for the Young, No. 8)",
+   "bars": [
+    19,
+    24
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "pf02",
+   "set": "planted",
+   "slug": "mozart-minuet-f-major-k2",
+   "title": "Minuet in F major",
+   "bars": [
+    13,
+    18
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "pf03",
+   "set": "planted",
+   "slug": "ode-to-joy",
+   "title": "Ode to Joy (simplified)",
+   "bars": [
+    3,
+    9
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "pf04",
+   "set": "planted",
+   "slug": "burgmuller-op100-no2-arabesque",
+   "title": "Arabesque",
+   "bars": [
+    11,
+    17
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "rc01",
+   "set": "recall",
+   "slug": "burgmuller-op100-no1-la-candeur",
+   "title": "La Candeur (Frankness)",
+   "bars": [
+    1,
+    5
+   ],
+   "hands": [
+    "R"
+   ]
+  },
+  {
+   "passage": "rc02",
+   "set": "recall",
+   "slug": "bach-prelude-c-major-bwv-846",
+   "title": "Prelude in C major (Well-Tempered Clavier, Book I, No. 1)",
+   "bars": [
+    1,
+    5
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "rc03",
+   "set": "recall",
+   "slug": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "bars": [
+    1,
+    5
+   ],
+   "hands": [
+    "L"
+   ]
+  },
+  {
+   "passage": "rc04",
+   "set": "recall",
+   "slug": "mary-had-a-little-lamb",
+   "title": "Mary Had a Little Lamb",
+   "bars": [
+    1,
+    5
+   ],
+   "hands": [
+    "R"
+   ]
+  }
+ ],
+ "pig_passages": [
+  {
+   "passage": "he01",
+   "notes": 39,
+   "hard_errors": 13,
+   "objections": 14,
+   "errors": 0,
+   "consistent": 6
+  },
+  {
+   "passage": "he02",
+   "notes": 41,
+   "hard_errors": 12,
+   "objections": 3,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he03",
+   "notes": 38,
+   "hard_errors": 9,
+   "objections": 4,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he04",
+   "notes": 42,
+   "hard_errors": 9,
+   "objections": 5,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he05",
+   "notes": 44,
+   "hard_errors": 9,
+   "objections": 3,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he06",
+   "notes": 34,
+   "hard_errors": 7,
+   "objections": 9,
+   "errors": 0,
+   "consistent": 3
+  },
+  {
+   "passage": "he07",
+   "notes": 27,
+   "hard_errors": 7,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 0
+  },
+  {
+   "passage": "he08",
+   "notes": 28,
+   "hard_errors": 7,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he09",
+   "notes": 22,
+   "hard_errors": 6,
+   "objections": 4,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he10",
+   "notes": 34,
+   "hard_errors": 6,
+   "objections": 4,
+   "errors": 0,
+   "consistent": 2
+  },
+  {
+   "passage": "he11",
+   "notes": 18,
+   "hard_errors": 5,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he12",
+   "notes": 14,
+   "hard_errors": 4,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he13",
+   "notes": 18,
+   "hard_errors": 4,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 1
+  },
+  {
+   "passage": "he14",
+   "notes": 23,
+   "hard_errors": 3,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 0
+  },
+  {
+   "passage": "he15",
+   "notes": 20,
+   "hard_errors": 2,
+   "objections": 2,
+   "errors": 0,
+   "consistent": 1
+  }
+ ],
+ "cost": {
+  "batches": 13,
+  "items": 88,
+  "wall_s_per_batch_median": 396.0,
+  "wall_s_per_item_mean": 60.94318181818182,
+  "chars_in_per_item": 2656.3636363636365,
+  "chars_out_per_item": 789.2613636363636,
+  "est_tokens_in_per_item": 664.0909090909091,
+  "est_tokens_out_per_item": 197.3153409090909,
+  "note": "tokens are estimated as characters / 4 of the batch file and the JSON output; reasoning tokens inside the reviewer are not observable from here",
+  "dispatch": {
+   "batches_with_usage": 0,
+   "batches_without_usage": 13,
+   "subagent_tokens_total": null,
+   "subagent_tokens_median_per_batch": null
+  }
+ }
+}

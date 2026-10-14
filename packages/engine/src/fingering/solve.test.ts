@@ -350,7 +350,10 @@ describe('outputs', () => {
     // 1,028 ms while `pnpm test` ran the other suites beside it (M3 Task 9), which times the
     // machine, not the solver. Every solve must give the same fingering. The budget holds for the
     // solver's default set (parncutt) and for RECOMMENDED_WEIGHT_SET, the set the CLI and the gate
-    // solve with (learned-open, M3 Task 9).
+    // solve with (learned-open, M3 Task 9). The GitHub runner is slower and shares its two cores
+    // with the other suites: it measured 542 ms for parncutt on a docs-only commit (2026-10-14),
+    // so under CI the budget is 1,200 ms; the 500 ms budget stays the local one.
+    const budgetMs = process.env.CI ? 1200 : 500;
     for (const weightSet of ['parncutt', RECOMMENDED_WEIGHT_SET] as const) {
       const a = solveFingering(score, { hands: ['R'], weightSet });
       let ms = Infinity;
@@ -360,7 +363,7 @@ describe('outputs', () => {
         ms = Math.min(ms, performance.now() - t0);
         expect(JSON.stringify(b.assignment), weightSet).toBe(JSON.stringify(a.assignment));
       }
-      expect(ms, weightSet).toBeLessThan(500);
+      expect(ms, weightSet).toBeLessThan(budgetMs);
     }
   }, 20_000);
 });

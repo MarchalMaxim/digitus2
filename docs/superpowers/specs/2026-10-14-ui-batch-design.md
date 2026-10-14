@@ -17,69 +17,69 @@ A first-time visitor reads the name, one sentence ("Finger numbers for piano mus
 
 ## 2. Where each decision comes from
 
-| Decision                                                                                                                                      | From                                                     |
-| --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Name, sentence, red button as the whole welcome; Start or Continue                                                                            | all three; Continue set on the first Play: beginner-first |
-| Level names First steps, Easy, Moderate, Intermediate, Challenging, Advanced                                                                  | beginner-first (both judges)                             |
-| Thresholds: pills above 40 pieces, search from 100, headings above 12 in view, "Other pieces" below 3                                          | beginner-first, with the "below 3" rule (judge 2)        |
-| Genre vocabulary of seven, "Carols and hymns" apart from "Songs", a reserved "Modern"; a per-piece override in the catalog                      | beginner-first; the override from library-at-scale       |
-| Pills wrap onto a second row instead of scrolling sideways                                                                                    | least-interface (judge 1)                                |
-| A min-height on the list so a shorter level never pulls the page up                                                                           | least-interface (both judges)                            |
-| The level line only when the pills show; no grade numbers on screen                                                                           | least-interface (judge 1)                                |
-| While a file is dragged: a red frame over a page set to `visibility: hidden`                                                                  | least-interface (judge 1)                                |
-| "Clear" as a text button in the search, no glyph                                                                                              | least-interface (both judges)                            |
-| The search field after the red button, in reading and tab order                                                                              | both judges' concern about focus order                   |
-| The dock: Practice shares the first row with the status line from 480 px; the keyboard keeps its width                                        | library-at-scale (both judges)                           |
-| Title shortening and composer hiding pinned by a test over the whole L1 manifest                                                              | library-at-scale (both judges)                           |
-| The slim library index and the lazy manifest left for L2                                                                                      | library-at-scale (judge 1)                               |
-| Genre pills and folded collections specified now, built when a level first passes 60 pieces (L2), unless the user asks to see them now (open question 2 in the plan) | the judges' budget concern; the critique's section 7.3    |
-| T11: letters for a whole bar when the hands come within a fifth; a lone unlettered bar between two lettered bars is lettered too               | the critique's replay (section 8.3), all three proposals; the bridge is this design's hysteresis |
-| T11: no exception for a hand scrolled out of a phone's keyboard; the letters keep today's size                                                | the design review (section 15)                           |
+| Decision                                                                                                                                                             | From                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Name, sentence, red button as the whole welcome; Start or Continue                                                                                                   | all three; Continue set on the first Play: beginner-first                                        |
+| Level names First steps, Easy, Moderate, Intermediate, Challenging, Advanced                                                                                         | beginner-first (both judges)                                                                     |
+| Thresholds: pills above 40 pieces, search from 100, headings above 12 in view, "Other pieces" below 3                                                                | beginner-first, with the "below 3" rule (judge 2)                                                |
+| Genre vocabulary of seven, "Carols and hymns" apart from "Songs", a reserved "Modern"; a per-piece override in the catalog                                           | beginner-first; the override from library-at-scale                                               |
+| Pills wrap onto a second row instead of scrolling sideways                                                                                                           | least-interface (judge 1)                                                                        |
+| A min-height on the list so a shorter level never pulls the page up                                                                                                  | least-interface (both judges)                                                                    |
+| The level line only when the pills show; no grade numbers on screen                                                                                                  | least-interface (judge 1)                                                                        |
+| While a file is dragged: a red frame over a page set to `visibility: hidden`                                                                                         | least-interface (judge 1)                                                                        |
+| "Clear" as a text button in the search, no glyph                                                                                                                     | least-interface (both judges)                                                                    |
+| The search field after the red button, in reading and tab order                                                                                                      | both judges' concern about focus order                                                           |
+| The dock: Practice shares the first row with the status line from 480 px; the keyboard keeps its width                                                               | library-at-scale (both judges)                                                                   |
+| Title shortening and composer hiding pinned by a test over the whole L1 manifest                                                                                     | library-at-scale (both judges)                                                                   |
+| The slim library index and the lazy manifest left for L2                                                                                                             | library-at-scale (judge 1)                                                                       |
+| Genre pills and folded collections specified now, built when a level first passes 60 pieces (L2), unless the user asks to see them now (open question 2 in the plan) | the judges' budget concern; the critique's section 7.3                                           |
+| T11: letters for a whole bar when the hands come within a fifth; a lone unlettered bar between two lettered bars is lettered too                                     | the critique's replay (section 8.3), all three proposals; the bridge is this design's hysteresis |
+| T11: no exception for a hand scrolled out of a phone's keyboard; the letters keep today's size                                                                       | the design review (section 15)                                                                   |
 
 ## 3. Units
 
 ### 3.1 In reading order
 
-| #   | Unit                                    | What it is for                                                       | Shown when                                                                       |
-| --- | --------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| 1   | The name `digitus2` and the sentence    | What this is, and how it works in one line; it teaches the red rule  | Always                                                                           |
-| 2   | The start row: the red button, then the search field | The one next step; finding a piece one already has in mind | The button always; the field when the library holds 100 pieces or more           |
-| 3   | Level pills and the level line          | Choosing difficulty; the line says what the chosen level asks         | The library holds more than 40 pieces, and no search text is typed               |
-| 4   | The list                                | The pieces                                                           | Always; its shape follows section 6                                              |
-| 5   | The end line and the footer             | "Open your own MusicXML or MIDI file"; "About and licences"          | Always                                                                           |
-| -   | The empty result                        | Says nothing matched and where search looks                           | Search text matches nothing                                                       |
-| -   | The drop frame                          | Says the window takes the file                                        | Only while a file is dragged over the window                                     |
-| -   | The notice                              | Says why a file was refused (existing, unchanged)                     | After a refusal, until dismissed                                                 |
+| #   | Unit                                                 | What it is for                                                      | Shown when                                                             |
+| --- | ---------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1   | The name `digitus2` and the sentence                 | What this is, and how it works in one line; it teaches the red rule | Always                                                                 |
+| 2   | The start row: the red button, then the search field | The one next step; finding a piece one already has in mind          | The button always; the field when the library holds 100 pieces or more |
+| 3   | Level pills and the level line                       | Choosing difficulty; the line says what the chosen level asks       | The library holds more than 40 pieces, and no search text is typed     |
+| 4   | The list                                             | The pieces                                                          | Always; its shape follows section 6                                    |
+| 5   | The end line and the footer                          | "Open your own MusicXML or MIDI file"; "About and licences"         | Always                                                                 |
+| -   | The empty result                                     | Says nothing matched and where search looks                         | Search text matches nothing                                            |
+| -   | The drop frame                                       | Says the window takes the file                                      | Only while a file is dragged over the window                           |
+| -   | The notice                                           | Says why a file was refused (existing, unchanged)                   | After a refusal, until dismissed                                       |
 
 ### 3.2 What leaves today's page
 
-| Today (critique 1.1)                                                                     | Where it goes                                                                                                     |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Finger legend, 26 words, under the welcome                                               | The score view: above the music on the score views opened before the reader's first Play; always in the side panel |
-| "Open your own MusicXML file" link above the red button                                  | Gone; the end line replaces it                                                                                    |
-| Start-here box: "Start here", "Twinkle, Twinkle, Little Star by Traditional", "First steps · 0:29" | Gone; the red button stays, unboxed                                                                     |
-| "Level 1: First steps" headings; "2 · Easy" in the side panel                            | One name everywhere: "First steps", "Easy"                                                                        |
-| A composer line on every row, "Traditional (English street cry)" and the like            | A composer line only when it tells something (section 5)                                                          |
-| The length on its own line below 480 px                                                  | At the right of the title line at every width                                                                     |
-| Rows 1,120 px wide at 1280                                                               | A 44rem (704 px) reading column, left-aligned with the score view's edge                                         |
-| "editor's fingering" tags                                                                | Gone from the list; the score view already says when it shows the editor's digits                               |
-| One flat list of 149 rows (17,477 px at 360)                                             | One level at a time                                                                                               |
-| The dashed drop zone listing five extensions, "Drop" wording on phones                   | Gone; the window takes a dropped file, and the end line opens the file chooser                                    |
-| Score view: 9 practice controls standing open from 480 px, "Clear loop" disabled before any loop | One "Practice" toggle in the dock at every width; the loop fields only after "Loop bars" is ticked; "Clear loop" gone |
-| Score view: L and R over every pressed key                                               | Only in bars where the hands come within a fifth (section 15)                                                    |
+| Today (critique 1.1)                                                                               | Where it goes                                                                                                         |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Finger legend, 26 words, under the welcome                                                         | The score view: above the music on the score views opened before the reader's first Play; always in the side panel    |
+| "Open your own MusicXML file" link above the red button                                            | Gone; the end line replaces it                                                                                        |
+| Start-here box: "Start here", "Twinkle, Twinkle, Little Star by Traditional", "First steps · 0:29" | Gone; the red button stays, unboxed                                                                                   |
+| "Level 1: First steps" headings; "2 · Easy" in the side panel                                      | One name everywhere: "First steps", "Easy"                                                                            |
+| A composer line on every row, "Traditional (English street cry)" and the like                      | A composer line only when it tells something (section 5)                                                              |
+| The length on its own line below 480 px                                                            | At the right of the title line at every width                                                                         |
+| Rows 1,120 px wide at 1280                                                                         | A 44rem (704 px) reading column, left-aligned with the score view's edge                                              |
+| "editor's fingering" tags                                                                          | Gone from the list; the score view already says when it shows the editor's digits                                     |
+| One flat list of 149 rows (17,477 px at 360)                                                       | One level at a time                                                                                                   |
+| The dashed drop zone listing five extensions, "Drop" wording on phones                             | Gone; the window takes a dropped file, and the end line opens the file chooser                                        |
+| Score view: 9 practice controls standing open from 480 px, "Clear loop" disabled before any loop   | One "Practice" toggle in the dock at every width; the loop fields only after "Loop bars" is ticked; "Clear loop" gone |
+| Score view: L and R over every pressed key                                                         | Only in bars where the hands come within a fifth (section 15)                                                         |
 
 ## 4. Levels and genres
 
 ### 4.1 Level pills (one name everywhere: pill, heading, search result heading, side panel)
 
-| Level | Name         | Was                | The level line (gray, under the pills)       | Pieces at 149 |
-| ----: | ------------ | ------------------ | -------------------------------------------- | ------------: |
-|     1 | First steps  | First steps        | Each hand stays in one place.                |            24 |
-|     2 | Easy         | Easy               | The hands begin to move.                     |            43 |
-|     3 | Moderate     | Early intermediate | More notes and wider reaches.                |            41 |
-|     4 | Intermediate | Intermediate       | Faster runs and reaches of an octave.        |            27 |
-|     5 | Challenging  | Stretch            | Fast passages, leaps and full chords.        |            14 |
-|     6 | Advanced     | (arrives with L2)  | Concert pieces for a complete technique.     |             0 |
+| Level | Name         | Was                | The level line (gray, under the pills)   | Pieces at 149 |
+| ----: | ------------ | ------------------ | ---------------------------------------- | ------------: |
+|     1 | First steps  | First steps        | Each hand stays in one place.            |            24 |
+|     2 | Easy         | Easy               | The hands begin to move.                 |            43 |
+|     3 | Moderate     | Early intermediate | More notes and wider reaches.            |            41 |
+|     4 | Intermediate | Intermediate       | Faster runs and reaches of an octave.    |            27 |
+|     5 | Challenging  | Stretch            | Fast passages, leaps and full chords.    |            14 |
+|     6 | Advanced     | (arrives with L2)  | Concert pieces for a complete technique. |             0 |
 
 - Why: each is a plain word a beginner already uses, no two share a stem (critique C5: "Early intermediate" and "Intermediate" differ by a prefix a skimming eye drops), and level 6 stays "Advanced" as T5 says.
 - A pill exists only for a level that holds a piece: no pill ever leads to an empty list. At 149 there are five pills.
@@ -89,43 +89,43 @@ A first-time visitor reads the name, one sentence ("Finger numbers for piano mus
 
 Seven genres. Two hold tunes: traditional tunes and arrangements for beginners. Five are periods of original piano music. A genre belongs to a collection; a catalog piece may override it.
 
-| Genre id    | Pill             | The line when chosen                    | Pieces at 149 (by level)             |
-| ----------- | ---------------- | --------------------------------------- | ------------------------------------ |
-| `songs`     | Songs            | Well-known tunes, arranged for the piano. | 42 (L1 20, L2 21, L3 1)            |
-| `carols`    | Carols and hymns | Christmas carols, hymns and spirituals. | 15 (L1 4, L2 11)                     |
-| `baroque`   | Baroque          | Bach, Handel and others, 1600–1750.     | 27 (L2 4, L3 11, L4 8, L5 4)         |
-| `classical` | Classical        | Mozart, Clementi and others, 1750–1820. | 18 (L2 1, L3 6, L4 8, L5 3)          |
-| `romantic`  | Romantic         | Schumann, Chopin and others, 1820–1900. | 44 (L2 6, L3 23, L4 11, L5 4)        |
-| `ragtime`   | Ragtime          | Scott Joplin and others, around 1900.   | 3 (L5 3)                             |
-| `modern`    | Modern           | Music written since 1900.               | 0 (L2: Debussy, Bartók, the CC lane) |
+| Genre id    | Pill             | The line when chosen                      | Pieces at 149 (by level)             |
+| ----------- | ---------------- | ----------------------------------------- | ------------------------------------ |
+| `songs`     | Songs            | Well-known tunes, arranged for the piano. | 42 (L1 20, L2 21, L3 1)              |
+| `carols`    | Carols and hymns | Christmas carols, hymns and spirituals.   | 15 (L1 4, L2 11)                     |
+| `baroque`   | Baroque          | Bach, Handel and others, 1600–1750.       | 27 (L2 4, L3 11, L4 8, L5 4)         |
+| `classical` | Classical        | Mozart, Clementi and others, 1750–1820.   | 18 (L2 1, L3 6, L4 8, L5 3)          |
+| `romantic`  | Romantic         | Schumann, Chopin and others, 1820–1900.   | 44 (L2 6, L3 23, L4 11, L5 4)        |
+| `ragtime`   | Ragtime          | Scott Joplin and others, around 1900.     | 3 (L5 3)                             |
+| `modern`    | Modern           | Music written since 1900.                 | 0 (L2: Debussy, Bartók, the CC lane) |
 
 Total 149. The mapping by collection id, in `catalog.json` display order:
 
-| Collection id          | Collection                                                     | Pieces | Genre            |
-| ---------------------- | -------------------------------------------------------------- | -----: | ---------------- |
-| `children-songs`       | Children's songs                                               |     16 | songs            |
-| `folk-songs`           | Folk songs                                                     |      9 | songs            |
-| `christmas`            | Christmas carols and songs                                     |      9 | carols           |
-| `hymns`                | Hymns and spirituals                                           |      6 | carols           |
-| `anthems`              | National anthems                                               |      3 | songs            |
-| `songs-before-1929`    | Songs before 1929                                              |      7 | songs            |
-| `easy-rags`            | Ragtime, simplified                                            |      1 | songs            |
-| `classical-themes`     | Classical themes, simplified                                   |      5 | songs            |
-| `anna-magdalena`       | Notebook for Anna Magdalena Bach (1725)                        |     11 | baroque          |
-| `handel-aylesford`     | Handel, Aylesford Pieces                                       |      1 | baroque          |
-| `bach-little-preludes` | Bach, Little Preludes                                          |      7 | baroque          |
-| `dances`               | Minuets, dances and rondos                                     |      2 | classical        |
-| `swedish-folk-dances`  | Swedish folk dances (Traditioner af Swenska Folk-Dansar, 1814) |      1 | songs            |
-| `burgmuller-op100`     | Burgmüller, 25 Easy and Progressive Studies, Op. 100           |     18 | romantic         |
-| `schumann-op68`        | Schumann, Album for the Young, Op. 68                          |     12 | romantic         |
-| `tchaikovsky-op39`     | Tchaikovsky, Album for the Young, Op. 39                       |      3 | romantic         |
-| `sonatinas`            | Sonatinas and sonatas                                          |     15 | classical        |
-| `bach-inventions`      | Bach, Inventions, BWV 772–786                                  |      7 | baroque          |
-| `bach-wtc`             | Bach, The Well-Tempered Clavier                                |      1 | baroque          |
-| `schumann-op15`        | Schumann, Scenes from Childhood, Op. 15                        |      3 | romantic         |
-| `chopin-op28`          | Chopin, Preludes, Op. 28                                       |      3 | romantic         |
-| `character-pieces`     | Romantic character pieces                                      |      6 | romantic         |
-| `ragtime`              | Ragtime                                                        |      3 | ragtime          |
+| Collection id          | Collection                                                     | Pieces | Genre     |
+| ---------------------- | -------------------------------------------------------------- | -----: | --------- |
+| `children-songs`       | Children's songs                                               |     16 | songs     |
+| `folk-songs`           | Folk songs                                                     |      9 | songs     |
+| `christmas`            | Christmas carols and songs                                     |      9 | carols    |
+| `hymns`                | Hymns and spirituals                                           |      6 | carols    |
+| `anthems`              | National anthems                                               |      3 | songs     |
+| `songs-before-1929`    | Songs before 1929                                              |      7 | songs     |
+| `easy-rags`            | Ragtime, simplified                                            |      1 | songs     |
+| `classical-themes`     | Classical themes, simplified                                   |      5 | songs     |
+| `anna-magdalena`       | Notebook for Anna Magdalena Bach (1725)                        |     11 | baroque   |
+| `handel-aylesford`     | Handel, Aylesford Pieces                                       |      1 | baroque   |
+| `bach-little-preludes` | Bach, Little Preludes                                          |      7 | baroque   |
+| `dances`               | Minuets, dances and rondos                                     |      2 | classical |
+| `swedish-folk-dances`  | Swedish folk dances (Traditioner af Swenska Folk-Dansar, 1814) |      1 | songs     |
+| `burgmuller-op100`     | Burgmüller, 25 Easy and Progressive Studies, Op. 100           |     18 | romantic  |
+| `schumann-op68`        | Schumann, Album for the Young, Op. 68                          |     12 | romantic  |
+| `tchaikovsky-op39`     | Tchaikovsky, Album for the Young, Op. 39                       |      3 | romantic  |
+| `sonatinas`            | Sonatinas and sonatas                                          |     15 | classical |
+| `bach-inventions`      | Bach, Inventions, BWV 772–786                                  |      7 | baroque   |
+| `bach-wtc`             | Bach, The Well-Tempered Clavier                                |      1 | baroque   |
+| `schumann-op15`        | Schumann, Scenes from Childhood, Op. 15                        |      3 | romantic  |
+| `chopin-op28`          | Chopin, Preludes, Op. 28                                       |      3 | romantic  |
+| `character-pieces`     | Romantic character pieces                                      |      6 | romantic  |
+| `ragtime`              | Ragtime                                                        |      3 | ragtime   |
 
 One per-piece override: `beethoven-fur-elise-woo-59` (in `character-pieces`, written 1810) is `classical`, so the Romantic line's dates hold for every piece.
 
@@ -135,13 +135,13 @@ One rule for arrangements: a simplified arrangement is Songs, whatever its sourc
 
 ## 5. Rows
 
-| Part           | Rule                                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Line 1         | The title (16 px, 600) at the left; the length (`m:ss`, gray, tabular figures) at the right of the first line at every width, also when the title wraps. No tags.                                                                                                                                                                                                                                         |
-| Line 2         | The composer (16 px, gray), cut at the first " (" ("Lowell Mason (tune Antioch)" reads "Lowell Mason"). Left out when the composer is "Traditional…" or "Anonymous". Left out under a collection heading when every row of that group has the same composer and the heading names that composer's last name ("Schumann, Album for the Young, Op. 68"). Shown in full (cut at " (") whenever two rows in view would otherwise read the same title, "Anonymous" included. |
-| Short title    | Under its own collection heading only, a title that ends in a parenthesis whose first comma-separated part is made of words that all appear in the heading loses that part: "Melody (Album for the Young, No. 1)" reads "Melody (No. 1)"; "Canon in D (simplified)" under "Classical themes, simplified" reads "Canon in D". "Progrès (Progress)" keeps its parenthesis. Flat lists, "Other pieces" and search results show full titles. |
-| Accessible name | Unchanged: `Open {full title} by {full composer}`, described by the length.                                                                                                                                                                                                                                                                                                                             |
-| Target         | The whole row is one button, at least 44 px tall.                                                                                                                                                                                                                                                                                                                                                         |
+| Part            | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Line 1          | The title (16 px, 600) at the left; the length (`m:ss`, gray, tabular figures) at the right of the first line at every width, also when the title wraps. No tags.                                                                                                                                                                                                                                                                                                       |
+| Line 2          | The composer (16 px, gray), cut at the first " (" ("Lowell Mason (tune Antioch)" reads "Lowell Mason"). Left out when the composer is "Traditional…" or "Anonymous". Left out under a collection heading when every row of that group has the same composer and the heading names that composer's last name ("Schumann, Album for the Young, Op. 68"). Shown in full (cut at " (") whenever two rows in view would otherwise read the same title, "Anonymous" included. |
+| Short title     | Under its own collection heading only, a title that ends in a parenthesis whose first comma-separated part is made of words that all appear in the heading loses that part: "Melody (Album for the Young, No. 1)" reads "Melody (No. 1)"; "Canon in D (simplified)" under "Classical themes, simplified" reads "Canon in D". "Progrès (Progress)" keeps its parenthesis. Flat lists, "Other pieces" and search results show full titles.                                |
+| Accessible name | Unchanged: `Open {full title} by {full composer}`, described by the length.                                                                                                                                                                                                                                                                                                                                                                                             |
+| Target          | The whole row is one button, at least 44 px tall.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 At 149 pieces exactly 13 titles shorten (all under their own heading): "Canon in D"; Schumann's "Melody (No. 1)", "Humming Song (No. 3)", "Little Piece (No. 5)", "Soldiers' March (No. 2)" (Easy); "The Wild Rider (No. 8)", "Poor Orphan (No. 6)", "Little Folk Song (No. 9)", "The Happy Farmer (No. 10)", "Little Study (No. 14)" (Moderate); "First Loss (No. 16)", "Knecht Ruprecht (No. 12)", "Echoes from the Theatre (No. 25)" (Intermediate). Groups whose rows drop the composer: Schumann Op. 68 (Easy, Moderate, Intermediate), Bach Little Preludes (Moderate, Intermediate), Burgmüller Op. 100 (Moderate), Bach Inventions (Intermediate, Challenging), Chopin Op. 28 (Intermediate). The three colliding title pairs stay apart: the two "Sonatina in C major, 2nd movement (Andante)" rows keep "Muzio Clementi" and "Friedrich Kuhlau"; the "Minuet in G major" and "Minuet in F major" pairs sit in different levels and, when a search shows both, both rows show their composer.
 
@@ -149,27 +149,27 @@ At 149 pieces exactly 13 titles shorten (all under their own heading): "Canon in
 
 ### 6.1 Thresholds (constants in `apps/web/src/library/disclosure.ts`, each unit-tested at its boundary)
 
-| Constant              | Rule                                                                                                                                  | 30 pieces       | 149 pieces                            | 1,000 pieces (L2)                    |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------- | ------------------------------------ |
-| `PILLS_ABOVE = 40`    | Level pills replace the all-levels list when the library holds more than 40 pieces                                                    | no: all levels  | yes, 5 pills                          | yes, 6 pills                         |
-| `SEARCH_FROM = 100`   | The search field stands in the start row when the library holds 100 pieces or more                                                   | no              | yes                                   | yes                                  |
-| `HEADINGS_ABOVE = 12` | A list section (a level, or one level of search results) of more than 12 pieces groups its rows under collection headings            | no (3 to 10)    | every level (14 to 43)                | every level                          |
-| `OTHER_BELOW = 3`     | With headings, collections with fewer than 3 pieces in the section gather in a last group, "Other pieces"; if no collection has 3 or more, the section stays flat | -  | 5, 6, 6, 7 and 1 pieces in levels 1 to 5 | most levels                       |
-| `GENRES_ABOVE = 60`   | The genre row appears when the chosen level holds more than 60 pieces and at least 2 genres hold `GENRE_MIN` pieces of it             | no              | no (largest level 43)                 | yes                                  |
-| `GENRE_MIN = 3`       | A genre gets a pill in a level only with 3 or more pieces there                                                                       | -               | -                                     | -                                    |
-| `FOLD_ABOVE = 60`     | Collections fold to one line each while the list in view holds more than 60 pieces (built in L2, section 8)                            | no              | no                                    | yes                                  |
-| Counts                | Only for what is not on screen: the screen-reader status, and in L2 a folded collection's "{n} pieces". Never on pills or headings     | none visible    | none visible                          | on folded lines                      |
+| Constant              | Rule                                                                                                                                                              | 30 pieces      | 149 pieces                               | 1,000 pieces (L2) |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------- | ----------------- |
+| `PILLS_ABOVE = 40`    | Level pills replace the all-levels list when the library holds more than 40 pieces                                                                                | no: all levels | yes, 5 pills                             | yes, 6 pills      |
+| `SEARCH_FROM = 100`   | The search field stands in the start row when the library holds 100 pieces or more                                                                                | no             | yes                                      | yes               |
+| `HEADINGS_ABOVE = 12` | A list section (a level, or one level of search results) of more than 12 pieces groups its rows under collection headings                                         | no (3 to 10)   | every level (14 to 43)                   | every level       |
+| `OTHER_BELOW = 3`     | With headings, collections with fewer than 3 pieces in the section gather in a last group, "Other pieces"; if no collection has 3 or more, the section stays flat | -              | 5, 6, 6, 7 and 1 pieces in levels 1 to 5 | most levels       |
+| `GENRES_ABOVE = 60`   | The genre row appears when the chosen level holds more than 60 pieces and at least 2 genres hold `GENRE_MIN` pieces of it                                         | no             | no (largest level 43)                    | yes               |
+| `GENRE_MIN = 3`       | A genre gets a pill in a level only with 3 or more pieces there                                                                                                   | -              | -                                        | -                 |
+| `FOLD_ABOVE = 60`     | Collections fold to one line each while the list in view holds more than 60 pieces (built in L2, section 8)                                                       | no             | no                                       | yes               |
+| Counts                | Only for what is not on screen: the screen-reader status, and in L2 a folded collection's "{n} pieces". Never on pills or headings                                | none visible   | none visible                             | on folded lines   |
 
 A threshold is crossed only by a new build of the library or by the reader's own choice. Nothing appears or vanishes while the reader looks, except the Clear button when the field gets text, the empty result, and the drop frame during a drag.
 
 ### 6.2 The list's shapes
 
-| Shape            | When                                    | Looks like                                                                                                                 |
-| ---------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| All levels       | the library holds 40 pieces or fewer    | each level a visible `h2` ("First steps") with its rows (flat, or grouped when that level has more than 12); no level line |
-| One level        | more than 40 pieces, no search text     | the chosen level only: visually hidden `h2` with the level name, collection `h3`s with rows, "Other pieces" last           |
-| Search results   | search text typed                       | every level with a match, in level order, each a visible `h2`, then flat or grouped by the same rule                       |
-| Empty result     | search text matches nothing             | "No piece matches “{query}”." and the gray line                                                                             |
+| Shape          | When                                 | Looks like                                                                                                                 |
+| -------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| All levels     | the library holds 40 pieces or fewer | each level a visible `h2` ("First steps") with its rows (flat, or grouped when that level has more than 12); no level line |
+| One level      | more than 40 pieces, no search text  | the chosen level only: visually hidden `h2` with the level name, collection `h3`s with rows, "Other pieces" last           |
+| Search results | search text typed                    | every level with a match, in level order, each a visible `h2`, then flat or grouped by the same rule                       |
+| Empty result   | search text matches nothing          | "No piece matches “{query}”." and the gray line                                                                            |
 
 The list region has `min-height: 100vh` in the one-level shape, so a shorter level never shortens the page under the reader's finger (the scroll position is kept on a level change).
 
@@ -181,14 +181,14 @@ The list region has `min-height: 100vh` in the one-level shape, so a shorter lev
 
 ### 6.4 Motion (existing tokens: 120 ms `--dur-fast`, 160 ms `--dur`, `--ease`; all 0 under reduced motion; heights never animate)
 
-| Change                                    | Motion                                                                                     |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
-| A level is chosen                         | The pill's fill and text color change over 120 ms; the line and the list swap in one frame and the list fades in over 120 ms (opacity) |
-| The first character of a search           | The pills and the line leave in one frame; the results fade in over 120 ms; later keystrokes swap without motion |
-| The search is emptied                     | The level view returns, faded in over 120 ms                                               |
-| A file is dragged over the window         | The frame fades in over 120 ms; it leaves in one frame on leave or drop                    |
-| Practice opens in the dock (T1)           | The panel fades in over 160 ms with a 4 px rise; the dock grows upward in one frame; the toggle's marker turns 90° in 160 ms |
-| Hand letters appear or leave (T11)        | No motion, like the pressed keys                                                           |
+| Change                             | Motion                                                                                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A level is chosen                  | The pill's fill and text color change over 120 ms; the line and the list swap in one frame and the list fades in over 120 ms (opacity) |
+| The first character of a search    | The pills and the line leave in one frame; the results fade in over 120 ms; later keystrokes swap without motion                       |
+| The search is emptied              | The level view returns, faded in over 120 ms                                                                                           |
+| A file is dragged over the window  | The frame fades in over 120 ms; it leaves in one frame on leave or drop                                                                |
+| Practice opens in the dock (T1)    | The panel fades in over 160 ms with a 4 px rise; the dock grows upward in one frame; the toggle's marker turns 90° in 160 ms           |
+| Hand letters appear or leave (T11) | No motion, like the pressed keys                                                                                                       |
 
 ## 7. Wireframes
 
@@ -449,22 +449,22 @@ At 360 the frame looks the same (a tablet or a split-screen phone); a phone reac
 
 ## 9. The one red element, in every state
 
-| State                                                      | The red element                                                    |
-| ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| Library, first visit, any size                             | "Start with Twinkle, Twinkle, Little Star"                         |
-| Library, returning (a library piece played before)         | "Continue with {title}"                                            |
-| A level chosen; search results; empty result              | The same button                                                    |
-| The list scrolled past the button                         | None in view; the DOM still holds exactly one (needs the user's approval for the spec wording, plan open question 1) |
-| A file dragged over the window                             | The drop frame; the page beneath, start button included, is `visibility: hidden` |
-| A refused file                                             | The start button; the notice is gray                               |
-| Score, ready or rewound or at the end                      | Play                                                               |
-| Score, loading the piano                                   | Play (busy)                                                        |
-| Score, count-in and lead-in                                | Pause                                                              |
-| Score, playing                                             | The cursor's notes                                                 |
-| Score, paused after a note was heard (T10)                 | The cursor's notes of the last group heard; Play is plain          |
-| Score, paused before any note was heard (in the lead-in)   | Play                                                               |
-| Score, Practice open or closed (T1)                        | Unchanged by Practice; the toggle is a disclosure (a marker that turns), never red |
-| About; error states                                        | "Back to the library"                                              |
+| State                                                    | The red element                                                                                                      |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Library, first visit, any size                           | "Start with Twinkle, Twinkle, Little Star"                                                                           |
+| Library, returning (a library piece played before)       | "Continue with {title}"                                                                                              |
+| A level chosen; search results; empty result             | The same button                                                                                                      |
+| The list scrolled past the button                        | None in view; the DOM still holds exactly one (needs the user's approval for the spec wording, plan open question 1) |
+| A file dragged over the window                           | The drop frame; the page beneath, start button included, is `visibility: hidden`                                     |
+| A refused file                                           | The start button; the notice is gray                                                                                 |
+| Score, ready or rewound or at the end                    | Play                                                                                                                 |
+| Score, loading the piano                                 | Play (busy)                                                                                                          |
+| Score, count-in and lead-in                              | Pause                                                                                                                |
+| Score, playing                                           | The cursor's notes                                                                                                   |
+| Score, paused after a note was heard (T10)               | The cursor's notes of the last group heard; Play is plain                                                            |
+| Score, paused before any note was heard (in the lead-in) | Play                                                                                                                 |
+| Score, Practice open or closed (T1)                      | Unchanged by Practice; the toggle is a disclosure (a marker that turns), never red                                   |
+| About; error states                                      | "Back to the library"                                                                                                |
 
 Chosen pills are ink-filled, never red. The hand letters, the Clear button, the search field, the notice and the end line are never red.
 
@@ -472,37 +472,37 @@ Chosen pills are ink-filled, never red. The hand letters, the Clear button, the 
 
 ## 10. Exact copy
 
-| Element                                       | Text                                                                                     |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Document title, `h1`                          | digitus2                                                                                 |
-| Sentence                                      | Finger numbers for piano music. Pick a piece, press play, and follow the red note.       |
-| Red button, first visit                       | Start with {title} (the first piece of the lowest level, in manifest order: Twinkle, Twinkle, Little Star) |
-| Red button, returning                         | Continue with {title without a trailing parenthesis} ("Continue with Für Elise")          |
-| Search field                                  | placeholder "Search pieces and composers"; accessible name "Search the library"          |
-| Clear button                                  | "Clear"; accessible name "Clear the search"                                              |
-| Level group (visually hidden legend)          | Level                                                                                    |
-| Level pills                                   | First steps, Easy, Moderate, Intermediate, Challenging, Advanced                         |
-| Level lines                                   | section 4.1                                                                              |
-| List heading, one-level shape (visually hidden h2) | {level name}                                                                        |
-| Level headings, all-levels shape and search results (visible h2) | {level name}                                                       |
-| Collection heading (h3)                       | the collection's title from the manifest                                                 |
-| Leftover group (h3)                           | Other pieces                                                                             |
-| Row                                           | {title}, {m:ss}, the composer line when shown; accessible name "Open {full title} by {full composer}" |
-| Library announcement (visually hidden `aria-live="polite"` paragraph, not `role="status"`, which the notice uses; 500 ms after the last change) | "{level name}: {n} pieces" on a level change; "{n} pieces" or "1 piece" for a search; "No piece matches “{query}”." |
-| Empty result, line 1 (ink)                    | No piece matches “{query}”.                                                              |
-| Empty result, line 2 (gray)                   | Search looks in titles, composers and collections.                                       |
-| End line                                      | Open your own MusicXML or MIDI file                                                      |
-| Footer                                        | About and licences                                                                       |
-| Drop frame, line 1 (ink, 18 px, 600)          | Drop to open this file                                                                   |
-| Drop frame, line 2 (gray)                     | MusicXML or MIDI                                                                         |
-| Refusal notice                                | That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi). (unchanged) |
-| Score, finger legend                          | Finger numbers: 1 is the thumb and 5 the little finger, in both hands. The upper staff is the right hand, the lower staff the left. (unchanged) |
-| Score side panel, level                       | the level name alone ("Easy", was "2 · Easy")                                           |
-| Dock toggle                                   | Practice                                                                                 |
-| Loop                                          | checkbox "Loop bars"; then two fields named "Loop from bar" and "Loop to bar" with "to" between them |
-| Reversed loop                                 | The loop needs "from" before "to". (unchanged)                                           |
-| Genre group (L2, visually hidden)             | Kind of music                                                                            |
-| Genre pills and lines (L2)                    | section 4.2                                                                              |
+| Element                                                                                                                                         | Text                                                                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Document title, `h1`                                                                                                                            | digitus2                                                                                                                                        |
+| Sentence                                                                                                                                        | Finger numbers for piano music. Pick a piece, press play, and follow the red note.                                                              |
+| Red button, first visit                                                                                                                         | Start with {title} (the first piece of the lowest level, in manifest order: Twinkle, Twinkle, Little Star)                                      |
+| Red button, returning                                                                                                                           | Continue with {title without a trailing parenthesis} ("Continue with Für Elise")                                                                |
+| Search field                                                                                                                                    | placeholder "Search pieces and composers"; accessible name "Search the library"                                                                 |
+| Clear button                                                                                                                                    | "Clear"; accessible name "Clear the search"                                                                                                     |
+| Level group (visually hidden legend)                                                                                                            | Level                                                                                                                                           |
+| Level pills                                                                                                                                     | First steps, Easy, Moderate, Intermediate, Challenging, Advanced                                                                                |
+| Level lines                                                                                                                                     | section 4.1                                                                                                                                     |
+| List heading, one-level shape (visually hidden h2)                                                                                              | {level name}                                                                                                                                    |
+| Level headings, all-levels shape and search results (visible h2)                                                                                | {level name}                                                                                                                                    |
+| Collection heading (h3)                                                                                                                         | the collection's title from the manifest                                                                                                        |
+| Leftover group (h3)                                                                                                                             | Other pieces                                                                                                                                    |
+| Row                                                                                                                                             | {title}, {m:ss}, the composer line when shown; accessible name "Open {full title} by {full composer}"                                           |
+| Library announcement (visually hidden `aria-live="polite"` paragraph, not `role="status"`, which the notice uses; 500 ms after the last change) | "{level name}: {n} pieces" on a level change; "{n} pieces" or "1 piece" for a search; "No piece matches “{query}”."                             |
+| Empty result, line 1 (ink)                                                                                                                      | No piece matches “{query}”.                                                                                                                     |
+| Empty result, line 2 (gray)                                                                                                                     | Search looks in titles, composers and collections.                                                                                              |
+| End line                                                                                                                                        | Open your own MusicXML or MIDI file                                                                                                             |
+| Footer                                                                                                                                          | About and licences                                                                                                                              |
+| Drop frame, line 1 (ink, 18 px, 600)                                                                                                            | Drop to open this file                                                                                                                          |
+| Drop frame, line 2 (gray)                                                                                                                       | MusicXML or MIDI                                                                                                                                |
+| Refusal notice                                                                                                                                  | That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi). (unchanged)                                             |
+| Score, finger legend                                                                                                                            | Finger numbers: 1 is the thumb and 5 the little finger, in both hands. The upper staff is the right hand, the lower staff the left. (unchanged) |
+| Score side panel, level                                                                                                                         | the level name alone ("Easy", was "2 · Easy")                                                                                                   |
+| Dock toggle                                                                                                                                     | Practice                                                                                                                                        |
+| Loop                                                                                                                                            | checkbox "Loop bars"; then two fields named "Loop from bar" and "Loop to bar" with "to" between them                                            |
+| Reversed loop                                                                                                                                   | The loop needs "from" before "to". (unchanged)                                                                                                  |
+| Genre group (L2, visually hidden)                                                                                                               | Kind of music                                                                                                                                   |
+| Genre pills and lines (L2)                                                                                                                      | section 4.2                                                                                                                                     |
 
 "Clear loop" is gone. Every other score-view text is unchanged.
 
@@ -561,11 +561,11 @@ One "Practice" toggle in the dock at every width; nothing stands between the tit
   the status line keeps its own row below 480 px, as today
 ```
 
-| Width | Practice                                   | Status line                         | Keyboard            | Score's first system (estimate)  |
-| ----: | ------------------------------------------ | ----------------------------------- | ------------------- | -------------------------------- |
-|   360 | in the Play and Rewind row                 | its own row above, when it has text | full width, as today | about 200 px (260 today)        |
-|   768 | first row of the dock, at the left         | first row, at the right             | as today            | about 180 px (292 today)         |
-|  1280 | first row of the dock, at the left         | first row, at the right             | as today            | about 180 px (292 today)         |
+| Width | Practice                           | Status line                         | Keyboard             | Score's first system (estimate) |
+| ----: | ---------------------------------- | ----------------------------------- | -------------------- | ------------------------------- |
+|   360 | in the Play and Rewind row         | its own row above, when it has text | full width, as today | about 200 px (260 today)        |
+|   768 | first row of the dock, at the left | first row, at the right             | as today             | about 180 px (292 today)        |
+|  1280 | first row of the dock, at the left | first row, at the right             | as today             | about 180 px (292 today)        |
 
 - **Loop.** Ticking "Loop bars" shows the two fields, filled with the bar the cursor is in (bar 1 when nothing is marked) and the next bar, both clamped to the piece's last bar, and the loop applies at once. Unticking hides the fields and turns the loop off; the bars typed come back if it is ticked again in the same score view. A range typed in reverse says "The loop needs "from" before "to"." and is not applied, as today.
 - **The toggle's look.** A 44 px text button in ink, 600 weight, with a small triangle marker drawn in CSS before the word (pointing right when closed, turned 90° down when open), the look of the side panel's "Details" summary. It is a disclosure, not a state: it is never filled and never red.
@@ -603,46 +603,46 @@ A bar-stable latch would have fixed the flicker but kept the first problem, so t
 
 **Replayed on the library (engine parse of `content/scores/`, this design's rule):**
 
-| Piece                                   | Bars | Bars lettered (0-based measure index)                     | Onset groups lettered | Switches |
-| --------------------------------------- | ---: | --------------------------------------------------------- | --------------------: | -------: |
-| Twinkle, Twinkle, Little Star           |   12 | 3 to 7, 11                                                |            20 of 42   |        3 |
-| Amazing Grace                           |   15 | none                                                      |             0 of 35   |        0 |
-| Happy Birthday                          |    9 | 2, 3                                                      |             6 of 25   |        2 |
-| Ode to Joy                              |   16 | 1 to 10, 13 to 15                                         |            51 of 62   |        3 |
-| Minuet in G major (BWV Anh. 114)        |   32 | 0, 6, 7, 11, 14, 24 to 27, 31                             |           44 of 137   |       11 |
-| Arabesque (Burgmüller)                  |   33 | 2, 3, 17 to 20, 23 to 27                                  |           45 of 140   |        6 |
-| Mozart, K. 545, 1st movement            |   73 | 36 bars close, 38 lettered                                |          514 of 990   |       20 |
+| Piece                            | Bars | Bars lettered (0-based measure index) | Onset groups lettered | Switches |
+| -------------------------------- | ---: | ------------------------------------- | --------------------: | -------: |
+| Twinkle, Twinkle, Little Star    |   12 | 3 to 7, 11                            |              20 of 42 |        3 |
+| Amazing Grace                    |   15 | none                                  |               0 of 35 |        0 |
+| Happy Birthday                   |    9 | 2, 3                                  |               6 of 25 |        2 |
+| Ode to Joy                       |   16 | 1 to 10, 13 to 15                     |              51 of 62 |        3 |
+| Minuet in G major (BWV Anh. 114) |   32 | 0, 6, 7, 11, 14, 24 to 27, 31         |             44 of 137 |       11 |
+| Arabesque (Burgmüller)           |   33 | 2, 3, 17 to 20, 23 to 27              |             45 of 140 |        6 |
+| Mozart, K. 545, 1st movement     |   73 | 36 bars close, 38 lettered            |            514 of 990 |       20 |
 
 Without the bridge (rule 3) Twinkle switches 7 times and Ode to Joy 11 times in 36 s; with it, 3 and 3. Today every one of these pieces shows letters on every pressed key. The table holds at every width, phones included, because rule 5 adds nothing on a phone.
 
 ## 16. Persisted and visit state
 
-| Field           | Kept                                   | Set by                                                         | Fallback                                                       |
-| --------------- | -------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
-| `lastPlayed`    | persisted in the settings (`digitus2.settings.v1`, validated on load) | every Play of a library piece (`markPlayed`); never a dropped file | a slug no longer in the library acts as none: "Start with …", the lowest level |
-| `legendSeen`    | persisted in the settings              | the first Play anywhere                                        | false                                                          |
-| `libraryLevel`  | the visit                              | a level pill                                                   | `lastPlayed`'s level, else the lowest level                    |
-| `libraryQuery`  | the visit                              | the search field                                               | empty                                                          |
-| `practiceOpen`  | the visit                              | the Practice toggle                                            | closed                                                         |
-| `libraryScrollY`| the visit (exists)                     | leaving the library                                            | 0                                                              |
+| Field            | Kept                                                                  | Set by                                                             | Fallback                                                                       |
+| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `lastPlayed`     | persisted in the settings (`digitus2.settings.v1`, validated on load) | every Play of a library piece (`markPlayed`); never a dropped file | a slug no longer in the library acts as none: "Start with …", the lowest level |
+| `legendSeen`     | persisted in the settings                                             | the first Play anywhere                                            | false                                                                          |
+| `libraryLevel`   | the visit                                                             | a level pill                                                       | `lastPlayed`'s level, else the lowest level                                    |
+| `libraryQuery`   | the visit                                                             | the search field                                                   | empty                                                                          |
+| `practiceOpen`   | the visit                                                             | the Practice toggle                                                | closed                                                                         |
+| `libraryScrollY` | the visit (exists)                                                    | leaving the library                                                | 0                                                                              |
 
 Back from a score restores the level, the query and then the scroll (within 50 px, the existing test). The settings keep their storage key and version; the existing merge validates every field, so older payloads load with the new fields at their defaults.
 
 ## 17. Acceptance gates (measured on the React build, desktop 1280 x 900 and mobile 360 x 740 Playwright projects)
 
-| Gate                                                                                                   | Where it is tested               |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------- |
-| Exactly one red root in every library state: first visit, a level chosen, returning, search, empty, drag, notice | `e2e/states.spec.ts`     |
-| No horizontal page scroll at 360, 768 and 1280 in every library state                                  | `e2e/states.spec.ts`, `library.spec.ts` |
-| First visit at 149: the red button's top at most 160 px at 360 and 130 px at 1280; the first row's top at most 470 px at 360 and 330 px at 1280 | `e2e/library.spec.ts` |
-| Every level pill wholly inside the viewport at 360 (they wrap; none cut off)                           | `e2e/library.spec.ts`            |
-| The red button comes before the search field in the tab order                                          | `e2e/library.spec.ts`            |
-| Back restores the level and the scroll within 50 px                                                    | `e2e/library.spec.ts`            |
-| Library LCP under 2 s; the entry chunk under 150 KB gzip                                                | existing gates                   |
-| Zero serious or critical axe violations in every state                                                 | existing helper                  |
-| Score view, with the legend already seen: the first system's top at most 240 px at 360 and 220 px at 768 and 1280; from 480 px the dock's height does not change when the status line gets text; the keyboard as wide as before | `e2e/states.spec.ts` (Task 4) |
-| Paused: one red root, the cursor's group; keys still pressed; Rewind gives Play the red                | `e2e/playback.spec.ts` (Task 5)  |
-| Letters, on the desktop and mobile projects: none in Amazing Grace from its first bar to its last (sampled past 19 s, through bars 7 and 8); none in Twinkle's bars 1 to 3, both L and R in its bar 4 | `e2e/hand-letters.spec.ts` (Task 6) |
+| Gate                                                                                                                                                                                                                            | Where it is tested                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Exactly one red root in every library state: first visit, a level chosen, returning, search, empty, drag, notice                                                                                                                | `e2e/states.spec.ts`                    |
+| No horizontal page scroll at 360, 768 and 1280 in every library state                                                                                                                                                           | `e2e/states.spec.ts`, `library.spec.ts` |
+| First visit at 149: the red button's top at most 160 px at 360 and 130 px at 1280; the first row's top at most 470 px at 360 and 330 px at 1280                                                                                 | `e2e/library.spec.ts`                   |
+| Every level pill wholly inside the viewport at 360 (they wrap; none cut off)                                                                                                                                                    | `e2e/library.spec.ts`                   |
+| The red button comes before the search field in the tab order                                                                                                                                                                   | `e2e/library.spec.ts`                   |
+| Back restores the level and the scroll within 50 px                                                                                                                                                                             | `e2e/library.spec.ts`                   |
+| Library LCP under 2 s; the entry chunk under 150 KB gzip                                                                                                                                                                        | existing gates                          |
+| Zero serious or critical axe violations in every state                                                                                                                                                                          | existing helper                         |
+| Score view, with the legend already seen: the first system's top at most 240 px at 360 and 220 px at 768 and 1280; from 480 px the dock's height does not change when the status line gets text; the keyboard as wide as before | `e2e/states.spec.ts` (Task 4)           |
+| Paused: one red root, the cursor's group; keys still pressed; Rewind gives Play the red                                                                                                                                         | `e2e/playback.spec.ts` (Task 5)         |
+| Letters, on the desktop and mobile projects: none in Amazing Grace from its first bar to its last (sampled past 19 s, through bars 7 and 8); none in Twinkle's bars 1 to 3, both L and R in its bar 4                           | `e2e/hand-letters.spec.ts` (Task 6)     |
 
 ## 18. Changes to the product spec (coordinator, after the batch)
 

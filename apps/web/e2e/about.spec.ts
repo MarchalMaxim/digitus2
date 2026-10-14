@@ -23,6 +23,7 @@ test('about: keeps its text', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 2 })).toHaveText([
     'What this is',
     'How the fingerings are chosen',
+    'Who made it',
     'Licences',
     'The built-in pieces',
   ]);

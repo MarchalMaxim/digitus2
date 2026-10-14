@@ -8,7 +8,7 @@ The project is built autonomously for days, so every change must be judged by ma
 pnpm verify
 ```
 
-`scripts/verify.mjs` runs, in order: hygiene (repository size), design (the color guard), typecheck, lint, unit tests (vitest for TypeScript), build, bundle (the app's first-load budget), end-to-end tests (Playwright), and the benchmark gate. It prints a summary table and exits non-zero on any failure. `pnpm verify unit` runs one step; several names run several (`pnpm verify build bundle`).
+`scripts/verify.mjs` runs, in order: hygiene (repository size), design (the color guard), typecheck, lint, unit tests (vitest for TypeScript), build, bundle (the app's first-load budget), end-to-end tests (Playwright), the benchmark gate, and the hand-separation gate (`hands`). It prints a summary table and exits non-zero on any failure. `pnpm verify unit` runs one step; several names run several (`pnpm verify build bundle`).
 
 ### What the app steps gate
 
@@ -29,6 +29,9 @@ Definition of done for any change, by a person or an agent: `pnpm verify` is gre
 1. Unit tests next to the code (`*.test.ts`), written before the implementation. Readers and writers have round-trip tests; the solver has hand-constructed cases with known answers (scales, arpeggios, chords, repeated notes, crossings) and metamorphic property tests (octave transposition, mirror symmetry, repeated-passage consistency, pin idempotence).
 2. Integration: the engine CLI parses every built-in score in `content/scores/` (smoke test) and round-trips PIG files; the app's Playwright flow opens a piece, sees fingerings, plays, edits a finger, exports.
 3. Benchmark gate: `digitus2 bench` runs the solver over the official PIG test split and compares general, highest, soft and recombination match rates with `benchmarks/floor.json`. A drop below the floor fails `pnpm verify`. When a milestone improves the numbers, the floor is raised in the same commit. The floor file also records the baselines we must beat and the human ceiling.
+
+3b. Hand-separation gate: `digitus2 evalhands` scores the MIDI hand separation on the PIG test split (first annotation per piece, channel = truth) and on the 30 library pieces (staff = truth), writes `benchmarks/latest-hands.json`, and fails `pnpm verify` (step `hands`) when the PIG macro accuracy drops below `hands.accuracyMin` in `benchmarks/floor.json`.
+
 4. Research cross-check: the Python scorer in `research/fingering_eval/` matches the official PIG evaluator; the TypeScript metrics are checked against it on real files, so both sides agree before any number is trusted.
 5. CI: `.github/workflows/ci.yml` runs the same steps on every push to `main`, minus the benchmark when the dataset is not available in CI. As of M4 it runs typecheck, lint, the format check, unit, build and e2e (without the local-only `visual` project); the hygiene, design and bundle steps run under `pnpm verify` only until the workflow calls them too.
 

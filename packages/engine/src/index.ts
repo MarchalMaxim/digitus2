@@ -77,3 +77,6 @@ export {
 } from './eval/metamorphic.js';
 export type { MetamorphicCheck, MetamorphicId, MetamorphicReport } from './eval/metamorphic.js';
 export { hardErrors } from './eval/hardErrors.js';
+export * from './io/midi/index.js';
+export { evaluateHands, scoreToMidiData } from './eval/hands.js';
+export type { HandEval } from './eval/hands.js';

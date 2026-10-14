@@ -6,9 +6,11 @@ import type { HandProfileId } from '../src/fingering/spans.js';
 import { benchRoot, formatAblation, formatScorecard, runAblation, runBench } from './bench.js';
 import type { BenchOptions, FloorFile, Scorecard } from './bench.js';
 import { evaluateDirs, formatReport } from './evaluate.js';
+import { formatHandsScorecard, runEvalHands } from './evalhands.js';
 import { fingerFile } from './finger.js';
 import type { FingerOptions } from './finger.js';
 import { describeScore, loadScore } from './inspect.js';
+import { importFile } from './import.js';
 import { formatLint, lintFile } from './lint.js';
 
 export interface CliIo {
@@ -29,6 +31,8 @@ const USAGE = `digitus2 <command>
   lint <file> [--fingering pig.txt] [--beginner] [--json]
   bench --gold <dir> --split <json> [--split-name n] [--subset test|train] [--floor f.json] [--out dir] [--label l] [--profile p] [--ablate] [--limit n]
                                         (a --label run without --limit is a milestone run: it also replaces latest.json)
+  import <file.mid> [--out f.musicxml] [--split <midi 21..108>] [--title t]
+  evalhands [--gold <dir> --split <json> [--split-name n] [--subset test|train]] [--library manifest.json] [--params hand-motion.json] [--out f.json] [--label l] [--floor floor.json] [--json]
 `;
 
 /** Thrown for a bad option value; reported with the usage text and exit code 2. */
@@ -89,6 +93,8 @@ function dispatch(argv: string[], io: CliIo): number {
   if (command === 'finger') return finger(rest, io);
   if (command === 'lint') return lint(rest, io);
   if (command === 'bench') return bench(rest, io);
+  if (command === 'import') return importMidiFile(rest, io);
+  if (command === 'evalhands') return evalHands(rest, io);
   io.stderr(USAGE);
   return 2;
 }
@@ -196,6 +202,72 @@ function bench(args: string[], io: CliIo): number {
     io.stdout(formatAblation(rows) + '\n');
     writeFileSync(join(root, `ablation-${scorecard.label}.json`), JSON.stringify(rows, null, 2));
   }
+  for (const b of floorBreaches) io.stderr(`floor breach: ${b}\n`);
+  return floorBreaches.length > 0 ? 1 : 0;
+}
+
+function importMidiFile(args: string[], io: CliIo): number {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: { out: { type: 'string' }, split: { type: 'string' }, title: { type: 'string' } },
+  });
+  const file = positionals[0];
+  if (!file || positionals.length > 1) throw new UsageError('import takes exactly one file');
+  const split = values.split === undefined ? undefined : Number(values.split);
+  if (split !== undefined && !(Number.isInteger(split) && split >= 21 && split <= 108))
+    throw new UsageError('--split must be a MIDI note number from 21 to 108');
+  const r = importFile({
+    file,
+    ...(values.out ? { out: values.out } : {}),
+    ...(split !== undefined ? { split } : {}),
+    ...(values.title ? { title: values.title } : {}),
+  });
+  const report = [r.summary, ...r.warnings.map((w) => `warning: ${w}`)].join('\n') + '\n';
+  if (values.out) io.stdout(report);
+  else {
+    io.stdout(r.xml);
+    io.stderr(report);
+  }
+  return 0;
+}
+
+function evalHands(args: string[], io: CliIo): number {
+  const { values } = parseArgs({
+    args,
+    options: {
+      gold: { type: 'string' },
+      split: { type: 'string' },
+      'split-name': { type: 'string' },
+      subset: { type: 'string' },
+      library: { type: 'string' },
+      params: { type: 'string' },
+      out: { type: 'string' },
+      label: { type: 'string' },
+      floor: { type: 'string' },
+      json: { type: 'boolean' },
+    },
+  });
+  if (!values.library && !(values.gold && values.split))
+    throw new UsageError('evalhands needs --library, or --gold and --split');
+  const subset = oneOf('subset', values.subset, ['test', 'train'] as const);
+  // As in bench: an explicitly named floor file that is missing is an error, not a pass.
+  if (values.floor && !existsSync(values.floor))
+    throw new Error(`floor file not found: ${values.floor}`);
+  const { scorecard, floorBreaches } = runEvalHands({
+    ...(values.gold ? { gold: values.gold } : {}),
+    ...(values.split ? { split: values.split } : {}),
+    ...(values['split-name'] ? { splitName: values['split-name'] } : {}),
+    ...(subset ? { subset } : {}),
+    ...(values.library ? { library: values.library } : {}),
+    ...(values.params ? { params: values.params } : {}),
+    ...(values.out ? { out: values.out } : {}),
+    ...(values.label ? { label: values.label } : {}),
+    ...(values.floor ? { floor: values.floor } : {}),
+  });
+  io.stdout(
+    (values.json ? JSON.stringify(scorecard, null, 2) : formatHandsScorecard(scorecard)) + '\n',
+  );
   for (const b of floorBreaches) io.stderr(`floor breach: ${b}\n`);
   return floorBreaches.length > 0 ? 1 : 0;
 }

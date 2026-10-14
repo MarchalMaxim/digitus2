@@ -1,8 +1,9 @@
-import { useState, type ChangeEvent } from 'react';
+import { useMemo, useState, type ChangeEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandSize, type PieceSource } from '../app/store.js';
 import { downloadText, exportFilename } from '../export/download.js';
 import { formatDuration, LEVEL_NAMES, type LibraryPiece } from '../library/manifest.js';
+import { MidiImportPanel } from './MidiImportPanel.js';
 import { services, type ScoreDocument } from './useScoreDocument.js';
 
 const HAND_SIZES: { value: HandSize; label: string }[] = [
@@ -18,10 +19,15 @@ export interface SidePanelProps {
   source: PieceSource;
   /** The library piece, for its facts and its editorial file; null for a dropped file. */
   piece: LibraryPiece | null;
+  /** Re-imports a MIDI file with a fixed hand split (null: the automatic separation). */
+  setSplitMidi(value: number | null): void;
 }
 
-/** Piece facts, the hand size, the editor's fingering toggle, timings, export and print. */
-export function SidePanel({ doc, source, piece }: SidePanelProps) {
+/**
+ * The MIDI import facts and hand split (MIDI files only), piece facts, the hand size, the
+ * editor's fingering toggle, timings, export and print.
+ */
+export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) {
   const handSize = useAppStore((s) => s.settings.handSize);
   const showEditorial = useAppStore((s) => s.settings.showEditorial);
   const setSettings = useAppStore((s) => s.setSettings);
@@ -34,6 +40,13 @@ export function SidePanel({ doc, source, piece }: SidePanelProps) {
     (piece?.files.fingered ?? null) !== null ||
     (doc.editorial !== null && Object.keys(doc.editorial).length > 0);
   const measures = piece?.measures ?? doc.score?.measures.length ?? null;
+  const hands = useMemo(() => {
+    const notes = doc.score?.notes ?? [];
+    return {
+      right: notes.filter((n) => n.hand === 'R').length,
+      left: notes.filter((n) => n.hand === 'L').length,
+    };
+  }, [doc.score]);
 
   const onHandSize = (e: ChangeEvent<HTMLSelectElement>) =>
     setSettings({ handSize: e.currentTarget.value as HandSize });
@@ -60,6 +73,15 @@ export function SidePanel({ doc, source, piece }: SidePanelProps) {
   return (
     <aside className="side-panel stack no-print" aria-label="Piece and fingering">
       <h2 className="visually-hidden">Piece and fingering</h2>
+      {doc.midiInfo && doc.score && (
+        <MidiImportPanel
+          info={doc.midiInfo}
+          right={hands.right}
+          left={hands.left}
+          splitMidi={doc.splitMidi}
+          onSplitChange={setSplitMidi}
+        />
+      )}
       {(piece || measures !== null) && (
         <dl className="facts">
           {piece && (

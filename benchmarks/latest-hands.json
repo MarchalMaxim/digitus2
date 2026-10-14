@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "engineVersion": "0.1.0",
+  "gitSha": "86ea92419e4c725ae1ebbc3c811fb201ec47ea76",
+  "label": "verify",
+  "timestamp": "2026-10-14T01:46:37.546Z",
+  "params": {
+    "file": "packages/engine/src/io/midi/params/hand-motion.json",
+    "sha256": "bbff0eb2c15d1efb"
+  },
+  "handSeparation": {
+    "accuracy": 92.04992960876615
+  },
+  "pig": {
+    "macro": 92.04992960876615,
+    "noteWeighted": 91.89242053789731,
+    "pieces": [
+      {
+        "id": "001",
+        "notes": 469,
+        "accuracy": 91.04477611940298,
+        "ms": 13.005499999999998
+      },
+      {
+        "id": "002",
+        "notes": 596,
+        "accuracy": 89.93288590604027,
+        "ms": 5.701300000000003
+      },
+      {
+        "id": "003",
+        "notes": 417,
+        "accuracy": 91.12709832134293,
+        "ms": 6.988100000000003
+      },
+      {
+        "id": "004",
+        "notes": 282,
+        "accuracy": 90.78014184397163,
+        "ms": 2.256299999999996
+      },
+      {
+        "id": "005",
+        "notes": 313,
+        "accuracy": 85.94249201277955,
+        "ms": 6.506
+      },
+      {
+        "id": "006",
+        "notes": 348,
+        "accuracy": 93.96551724137932,
+        "ms": 4.369900000000015
+      },
+      {
+        "id": "007",
+        "notes": 281,
+        "accuracy": 94.30604982206405,
+        "ms": 2.0555999999999983
+      },
+      {
+        "id": "008",
+        "notes": 171,
+        "accuracy": 98.83040935672514,
+        "ms": 0.9281000000000006
+      },
+      {
+        "id": "009",
+        "notes": 393,
+        "accuracy": 92.36641221374046,
+        "ms": 3.854600000000005
+      },
+      {
+        "id": "010",
+        "notes": 387,
+        "accuracy": 95.8656330749354,
+        "ms": 2.049900000000008
+      },
+      {
+        "id": "011",
+        "notes": 272,
+        "accuracy": 97.05882352941177,
+        "ms": 1.6802000000000135
+      },
+      {
+        "id": "012",
+        "notes": 440,
+        "accuracy": 97.72727272727273,
+        "ms": 3.783900000000017
+      },
+      {
+        "id": "013",
+        "notes": 286,
+        "accuracy": 89.16083916083916,
+        "ms": 2.872399999999999
+      },
+      {
+        "id": "014",
+        "notes": 289,
+        "accuracy": 85.46712802768167,
+        "ms": 3.1337000000000046
+      },
+      {
+        "id": "015",
+        "notes": 269,
+        "accuracy": 100,
+        "ms": 0.7813999999999908
+      },
+      {
+        "id": "016",
+        "notes": 181,
+        "accuracy": 86.74033149171271,
+        "ms": 0.9292000000000087
+      },
+      {
+        "id": "017",
+        "notes": 193,
+        "accuracy": 93.26424870466322,
+        "ms": 1.3134000000000015
+      },
+      {
+        "id": "018",
+        "notes": 150,
+        "accuracy": 90.66666666666667,
+        "ms": 2.4795999999999765
+      },
+      {
+        "id": "019",
+        "notes": 213,
+        "accuracy": 95.30516431924883,
+        "ms": 1.2656000000000063
+      },
+      {
+        "id": "020",
+        "notes": 253,
+        "accuracy": 92.4901185770751,
+        "ms": 5.051199999999994
+      },
+      {
+        "id": "021",
+        "notes": 312,
+        "accuracy": 79.48717948717949,
+        "ms": 0.9010000000000105
+      },
+      {
+        "id": "022",
+        "notes": 455,
+        "accuracy": 92.74725274725274,
+        "ms": 1.380899999999997
+      },
+      {
+        "id": "023",
+        "notes": 430,
+        "accuracy": 90.93023255813954,
+        "ms": 1.3943000000000154
+      },
+      {
+        "id": "024",
+        "notes": 278,
+        "accuracy": 94.24460431654676,
+        "ms": 0.8130000000000166
+      },
+      {
+        "id": "025",
+        "notes": 393,
+        "accuracy": 96.43765903307889,
+        "ms": 2.193000000000012
+      },
+      {
+        "id": "026",
+        "notes": 591,
+        "accuracy": 93.4010152284264,
+        "ms": 1.0938999999999908
+      },
+      {
+        "id": "027",
+        "notes": 380,
+        "accuracy": 96.3157894736842,
+        "ms": 1.153899999999993
+      },
+      {
+        "id": "028",
+        "notes": 458,
+        "accuracy": 76.85589519650655,
+        "ms": 1.7171999999999912
+      },
+      {
+        "id": "029",
+        "notes": 377,
+        "accuracy": 97.08222811671088,
+        "ms": 1.2385000000000161
+      },
+      {
+        "id": "030",
+        "notes": 348,
+        "accuracy": 91.95402298850574,
+        "ms": 1.2357000000000085
+      }
+    ],
+    "skipped": [],
+    "split": "research/data/splits/pig_official.json",
+    "splitName": "nakamura2020",
+    "subset": "test"
+  },
+  "library": {
+    "macro": 92.96276862676694,
+    "noteWeighted": 90.45092838196287,
+    "pieces": [
+      {
+        "id": "twinkle-twinkle-little-star",
+        "notes": 64,
+        "accuracy": 100,
+        "ms": 0.9496000000000038
+      },
+      {
+        "id": "mary-had-a-little-lamb",
+        "notes": 34,
+        "accuracy": 100,
+        "ms": 0.3546000000000049
+      },
+      {
+        "id": "ode-to-joy",
+        "notes": 83,
+        "accuracy": 93.97590361445783,
+        "ms": 1.238299999999981
+      },
+      {
+        "id": "frere-jacques",
+        "notes": 46,
+        "accuracy": 89.1304347826087,
+        "ms": 0.8970999999999947
+      },
+      {
+        "id": "jingle-bells",
+        "notes": 82,
+        "accuracy": 95.1219512195122,
+        "ms": 1.2255999999999858
+      },
+      {
+        "id": "happy-birthday",
+        "notes": 43,
+        "accuracy": 100,
+        "ms": 0.21019999999998618
+      },
+      {
+        "id": "amazing-grace",
+        "notes": 69,
+        "accuracy": 100,
+        "ms": 0.2376000000000147
+      },
+      {
+        "id": "scarborough-fair",
+        "notes": 68,
+        "accuracy": 95.58823529411765,
+        "ms": 0.2668000000000177
+      },
+      {
+        "id": "greensleeves",
+        "notes": 106,
+        "accuracy": 100,
+        "ms": 0.3463000000000136
+      },
+      {
+        "id": "pachelbel-canon-in-d",
+        "notes": 42,
+        "accuracy": 100,
+        "ms": 0.14999999999997726
+      },
+      {
+        "id": "bach-minuet-g-major-bwv-anh-114",
+        "notes": 204,
+        "accuracy": 94.6078431372549,
+        "ms": 2.3488000000000113
+      },
+      {
+        "id": "bach-minuet-g-minor-bwv-anh-115",
+        "notes": 199,
+        "accuracy": 92.96482412060301,
+        "ms": 1.1589999999999918
+      },
+      {
+        "id": "mozart-minuet-f-major-k2",
+        "notes": 130,
+        "accuracy": 97.6923076923077,
+        "ms": 1.0892000000000053
+      },
+      {
+        "id": "schumann-op68-no1-melody",
+        "notes": 254,
+        "accuracy": 75.98425196850394,
+        "ms": 6.217800000000011
+      },
+      {
+        "id": "burgmuller-op100-no1-la-candeur",
+        "notes": 241,
+        "accuracy": 92.11618257261411,
+        "ms": 2.2164000000000215
+      },
+      {
+        "id": "burgmuller-op100-no2-arabesque",
+        "notes": 283,
+        "accuracy": 88.69257950530036,
+        "ms": 2.037300000000016
+      },
+      {
+        "id": "burgmuller-op100-no3-pastorale",
+        "notes": 355,
+        "accuracy": 92.67605633802818,
+        "ms": 2.585399999999993
+      },
+      {
+        "id": "burgmuller-op100-no5-innocence",
+        "notes": 215,
+        "accuracy": 98.6046511627907,
+        "ms": 1.3985000000000127
+      },
+      {
+        "id": "schumann-op68-no8-wild-rider",
+        "notes": 312,
+        "accuracy": 88.78205128205128,
+        "ms": 2.851500000000044
+      },
+      {
+        "id": "clementi-sonatina-op36-no1-mvt1",
+        "notes": 333,
+        "accuracy": 96.996996996997,
+        "ms": 1.8408999999999764
+      },
+      {
+        "id": "bach-prelude-c-major-bwv-846",
+        "notes": 549,
+        "accuracy": 78.32422586520947,
+        "ms": 15.351499999999987
+      },
+      {
+        "id": "satie-gymnopedie-no1",
+        "notes": 282,
+        "accuracy": 87.58865248226951,
+        "ms": 0.799699999999973
+      },
+      {
+        "id": "beethoven-fur-elise-woo-59",
+        "notes": 905,
+        "accuracy": 92.81767955801105,
+        "ms": 4.823399999999992
+      },
+      {
+        "id": "mozart-sonata-k545-mvt1",
+        "notes": 1288,
+        "accuracy": 80.90062111801242,
+        "ms": 18.801000000000045
+      },
+      {
+        "id": "chopin-prelude-op28-no7",
+        "notes": 168,
+        "accuracy": 89.88095238095238,
+        "ms": 0.362700000000018
+      },
+      {
+        "id": "chopin-prelude-op28-no4",
+        "notes": 600,
+        "accuracy": 98.33333333333333,
+        "ms": 3.253600000000006
+      },
+      {
+        "id": "bach-invention-no1-bwv-772",
+        "notes": 458,
+        "accuracy": 91.04803493449782,
+        "ms": 4.171699999999987
+      },
+      {
+        "id": "joplin-the-entertainer",
+        "notes": 1572,
+        "accuracy": 93.76590330788804,
+        "ms": 5.927199999999971
+      },
+      {
+        "id": "beethoven-moonlight-sonata-mvt1",
+        "notes": 476,
+        "accuracy": 87.39495798319328,
+        "ms": 2.181500000000028
+      },
+      {
+        "id": "chopin-waltz-op69-no2",
+        "notes": 341,
+        "accuracy": 95.89442815249267,
+        "ms": 0.8307999999999538
+      }
+    ],
+    "skipped": [],
+    "manifest": "content/manifest.json"
+  }
+}

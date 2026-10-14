@@ -86,4 +86,21 @@ describe('engine client', () => {
     expect('pins' in sent[0]!).toBe(false);
     expect(sent[1]).toEqual({ id: 2, type: 'solve', score, profile: 'child', pins });
   });
+  it('sends the source kind and the hand split with a load', async () => {
+    const sent: EngineRequest[] = [];
+    const c = createEngineClient(
+      fakeWorker((req) => {
+        sent.push(req);
+        return { id: req.id, ok: false, error: 'stop' };
+      }),
+    );
+    await expect(c.load(new Uint8Array([1]), 'tune.mid', { splitMidi: 60 })).rejects.toThrow(
+      'stop',
+    );
+    await expect(c.load('<x/>', 'a.musicxml')).rejects.toThrow('stop');
+    expect(sent.map((r) => (r.type === 'load' ? [r.kind, r.splitMidi] : null))).toEqual([
+      ['midi', 60],
+      ['musicxml', undefined],
+    ]);
+  });
 });

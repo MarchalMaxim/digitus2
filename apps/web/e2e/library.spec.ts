@@ -23,20 +23,22 @@ test('library: 30 pieces, one red element, no serious a11y issues, LCP under 2 s
   expect(lcp, `LCP ${lcp} ms`).toBeLessThan(2000);
 });
 
-test('library: a refused MIDI drop shows a notice and keeps one red element', async ({ page }) => {
+test('library: an unsupported file shows a notice and keeps one red element', async ({ page }) => {
   await page.goto('/');
   // The drop zone sits at the bottom of a long page; the notice must still land on screen there.
   await page.getByTestId('drop-zone').scrollIntoViewIfNeeded();
   await page
     .getByLabel('choose a file')
-    .setInputFiles({ name: 'x.mid', mimeType: 'audio/midi', buffer: Buffer.from('MThd') });
+    .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
   await expect(page.getByRole('status')).toBeInViewport();
   await expect(
-    page.getByText('MIDI import arrives in a later version. MusicXML files work today.'),
+    page.getByText(
+      'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',
+    ),
   ).toBeVisible();
   await expectOneRed(page, 'library with notice');
   await page.getByRole('button', { name: 'Dismiss' }).click();
-  await expect(page.getByText(/MIDI import arrives/)).toHaveCount(0);
+  await expect(page.getByText(/does not look like/)).toHaveCount(0);
 });
 
 test('library: the layout has no horizontal overflow', async ({ page }) => {

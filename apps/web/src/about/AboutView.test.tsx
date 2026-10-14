@@ -15,6 +15,10 @@ describe('AboutView', () => {
     );
     expect(screen.getByText(/LGPL-3\.0-or-later/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /smplr/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'midi-file' })).toHaveAttribute(
+      'href',
+      'https://github.com/carter-thaxton/midi-file',
+    );
     expect(screen.getAllByRole('row')).toHaveLength(pieces.length + 1);
     expect(
       screen.getAllByRole('link', { name: 'CC BY-SA 2.5' }).length +

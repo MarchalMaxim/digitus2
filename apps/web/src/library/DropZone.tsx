@@ -1,11 +1,9 @@
 import { useState, type ChangeEvent, type DragEvent } from 'react';
 
-export const MIDI_REFUSAL = 'MIDI import arrives in a later version. MusicXML files work today.';
-export const NOT_MUSICXML_REFUSAL =
-  'That does not look like a MusicXML file (.musicxml, .xml or .mxl).';
+export const NOT_A_SCORE_REFUSAL =
+  'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).';
 
-const MUSICXML_EXTENSIONS = ['.musicxml', '.xml', '.mxl'];
-const MIDI_EXTENSIONS = ['.mid', '.midi'];
+const SCORE_EXTENSIONS = ['.musicxml', '.xml', '.mxl', '.mid', '.midi'];
 
 export interface DropZoneProps {
   onFile(name: string, bytes: Uint8Array): void;
@@ -17,25 +15,23 @@ function extensionOf(name: string): string {
   return dot < 0 ? '' : name.slice(dot).toLowerCase();
 }
 
-/** Drag and drop plus a file chooser. Only MusicXML gets through; MIDI is refused with a notice. */
+/**
+ * Drag and drop plus a file chooser. Only MusicXML and MIDI get through (by extension, in any
+ * case); anything else is refused with a notice.
+ */
 export function DropZone({ onFile, onRefuse }: DropZoneProps) {
   const [over, setOver] = useState(false);
 
   const accept = (file: File | undefined) => {
     if (!file) return;
-    const ext = extensionOf(file.name);
-    if (MIDI_EXTENSIONS.includes(ext)) {
-      onRefuse(MIDI_REFUSAL);
-      return;
-    }
-    if (!MUSICXML_EXTENSIONS.includes(ext)) {
-      onRefuse(NOT_MUSICXML_REFUSAL);
+    if (!SCORE_EXTENSIONS.includes(extensionOf(file.name))) {
+      onRefuse(NOT_A_SCORE_REFUSAL);
       return;
     }
     // A failed read (the file moved, or permission was lost) still ends in a notice, never silence.
     void file.arrayBuffer().then(
       (buffer) => onFile(file.name, new Uint8Array(buffer)),
-      () => onRefuse(NOT_MUSICXML_REFUSAL),
+      () => onRefuse(NOT_A_SCORE_REFUSAL),
     );
   };
 
@@ -69,12 +65,12 @@ export function DropZone({ onFile, onRefuse }: DropZoneProps) {
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      Drop a MusicXML file here (.musicxml, .xml or .mxl), or{' '}
+      Drop a MusicXML or MIDI file here (.musicxml, .xml, .mxl, .mid or .midi), or{' '}
       <label className="file-choose">
         choose a file
         <input
           type="file"
-          accept=".musicxml,.xml,.mxl"
+          accept=".musicxml,.xml,.mxl,.mid,.midi"
           className="visually-hidden"
           onChange={onChange}
         />

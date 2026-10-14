@@ -78,6 +78,29 @@ def test_smoothing_adds_one_half_and_normalises():
         assert row["L"] == pytest.approx(1 / 3)
 
 
+def test_sources_are_weighted_equally_whatever_their_size():
+    small, large = mhm.empty_counts(), mhm.empty_counts()
+    small["moveLeft"][24] = 3
+    small["pattern"]["LR"]["R"] = 2
+    large["moveLeft"][0] = 300
+    large["pattern"]["LR"]["L"] = 600
+    a, b = mhm.smooth(small, frozenset()), mhm.smooth(large, frozenset())
+    mixed = mhm.mix({"small": small, "large": large}, frozenset())
+    for name in mhm.TABLES:
+        assert mixed[name] == pytest.approx([(x + y) / 2 for x, y in zip(a[name], b[name])])
+        assert sum(mixed[name]) == pytest.approx(1.0)
+    assert mixed["moveLeft"][24] == pytest.approx((3.5 / (3 + 0.5 * 49) + 0.5 / (300 + 0.5 * 49)) / 2)
+    assert mixed["moveLeft"][0] == pytest.approx((0.5 / (3 + 0.5 * 49) + 300.5 / (300 + 0.5 * 49)) / 2)
+    for p in mhm.PATTERNS:
+        assert sum(mixed["pattern"][p].values()) == pytest.approx(1.0)
+    assert mixed["pattern"]["LR"]["R"] == pytest.approx((2.5 / 3.5 + 0.5 / 601.5) / 2)
+    assert mixed["pattern"]["LR"]["L"] == pytest.approx((0.5 / 3.5 + 600.5 / 601.5) / 2)
+    assert mhm.mix({"small": small}, frozenset()) == a  # one source: plain smoothing
+    flat = mhm.mix({"small": small, "large": large}, frozenset({"move", "pattern"}))
+    assert flat["moveLeft"] == pytest.approx([1 / 49] * 49)
+    assert flat["pattern"]["LR"]["L"] == pytest.approx(1 / 3)
+
+
 def test_the_script_is_deterministic_and_refuses_to_ship_pig_statistics(tmp_path):
     a, b = tmp_path / "a.json", tmp_path / "b.json"
     args = ["--library", str(REPO / "content/manifest.json"), "--date", "2026-10-14"]
@@ -104,3 +127,42 @@ def test_uniform_flattens_tables_for_ablations(tmp_path):
     assert data["spanLeft"][0] == pytest.approx(1 / 25)
     assert data["provenance"]["uniform"] == ["pattern", "span"]
     assert data["moveLeft"][24] != pytest.approx(1 / 49)
+
+
+def test_the_shipped_tables_average_the_library_and_mutopia_with_equal_weight(tmp_path):
+    folder = tmp_path / "mutopia" / "FingeringFiles"
+    folder.mkdir(parents=True)
+    lines = ["//Version: PianoFingering_v170101"]
+    for i in range(16):
+        right = ("C5", "E5", "G5", "E5")[i % 4]
+        lines.append(f"{2 * i}\t{i * 0.25:.2f}\t{i * 0.25 + 0.25:.2f}\t{right}\t64\t64\t0\t1")
+        if i % 2 == 0:
+            lines.append(f"{2 * i + 1}\t{i * 0.25:.2f}\t{i * 0.25 + 0.5:.2f}\tC2\t64\t64\t1\t-5")
+    (folder / "m1-0_fingering.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    split = tmp_path / "split.json"
+    split.write_text(json.dumps({"default_split": "s", "splits": {"s": {"train": {"pieces": ["m1"]},
+                                                                         "test": {"pieces": []}}}}),
+                     encoding="utf-8")
+    out = tmp_path / "mixed.json"
+    assert mhm.main(["--library", str(REPO / "content/manifest.json"), "--mutopia", str(tmp_path / "mutopia"),
+                     "--mutopia-split", str(split), "--date", "2026-10-14", "--out", str(out)]) == 0
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert [(s["name"], s["files"]) for s in data["provenance"]["sources"]] == [("library", 30), ("mutopia-train", 1)]
+    assert "equal weight" in data["provenance"]["smoothing"]
+    lib = mhm.smooth(data["counts"]["library"], frozenset())
+    mut = mhm.smooth(data["counts"]["mutopia-train"], frozenset())
+    pooled_counts = mhm.empty_counts()
+    for counts in data["counts"].values():
+        mhm.add_counts(pooled_counts, counts)
+    pooled = mhm.smooth(pooled_counts, frozenset())
+    for name in mhm.TABLES:
+        assert data[name] == pytest.approx([(x + y) / 2 for x, y in zip(lib[name], mut[name])])
+    for p in mhm.PATTERNS:
+        for q in mhm.PATTERNS:
+            assert data["pattern"][p][q] == pytest.approx((lib["pattern"][p][q] + mut["pattern"][p][q]) / 2)
+    # One small Mutopia part weighs as much as the 30 library pieces; pooling the counts would hide it.
+    def l1(x, y):
+        return sum(abs(u - v) for u, v in zip(x, y))
+
+    assert l1(data["moveRight"], mut["moveRight"]) == pytest.approx(l1(data["moveRight"], lib["moveRight"]))
+    assert l1(pooled["moveRight"], lib["moveRight"]) < 0.1 * l1(pooled["moveRight"], mut["moveRight"])

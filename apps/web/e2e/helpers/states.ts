@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 
 /**
@@ -18,6 +19,8 @@ const TWINKLE_NOTES = 64;
 const ARABESQUE = 'burgmuller-op100-no2-arabesque';
 const ARABESQUE_EDITORIAL_DIGITS = 26;
 const SCORE_TIMEOUT = 20_000;
+/** The library's Twinkle as a two-track MIDI file (M6), dropped through the file chooser. */
+const TWINKLE_MIDI = fileURLToPath(new URL('../../fixtures/twinkle.mid', import.meta.url));
 
 async function library(page: Page): Promise<void> {
   await page.goto('/');
@@ -58,9 +61,11 @@ export const STATES: AppState[] = [
       await library(page);
       await page
         .getByLabel('choose a file')
-        .setInputFiles({ name: 'x.mid', mimeType: 'audio/midi', buffer: Buffer.from('MThd') });
+        .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
       await expect(
-        page.getByText('MIDI import arrives in a later version. MusicXML files work today.'),
+        page.getByText(
+          'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',
+        ),
       ).toBeVisible();
     },
     expectTag: 'button',
@@ -146,6 +151,17 @@ export const STATES: AppState[] = [
       });
       await expect(page.getByRole('alert')).toContainText(/could not open/i);
       await expect(page.getByRole('button', { name: 'Back to the library' })).toBeVisible();
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'score-midi',
+    go: async (page) => {
+      await page.goto('/');
+      await page.getByLabel('choose a file').setInputFiles(TWINKLE_MIDI);
+      await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
+        timeout: SCORE_TIMEOUT,
+      });
     },
     expectTag: 'button',
   },

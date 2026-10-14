@@ -21,31 +21,41 @@ describe('DropZone', () => {
     expect(name).toBe('song.musicxml');
     expect(new TextDecoder().decode(bytes)).toBe('<score-partwise/>');
   });
-  it('refuses a MIDI file with a notice', async () => {
+  it('hands a chosen MIDI file to onFile as bytes, whatever the case of its extension', async () => {
     const onFile = vi.fn();
     const onRefuse = vi.fn();
     render(<DropZone onFile={onFile} onRefuse={onRefuse} />);
-    // user-event 14 filters by the accept attribute by default; a drop (or a browser's "All
-    // files" option) bypasses it, so the component's own extension check must refuse the file.
     await userEvent
       .setup({ applyAccept: false })
       .upload(
         screen.getByLabelText('choose a file'),
-        new File([new Uint8Array([77, 84, 104, 100])], 'tune.mid'),
+        new File([new Uint8Array([77, 84, 104, 100])], 'Tune.MID'),
       );
-    expect(onFile).not.toHaveBeenCalled();
-    expect(onRefuse).toHaveBeenCalledWith(
-      'MIDI import arrives in a later version. MusicXML files work today.',
-    );
+    await vi.waitFor(() => expect(onFile).toHaveBeenCalledTimes(1));
+    expect(onRefuse).not.toHaveBeenCalled();
+    expect(onFile.mock.calls[0]![0]).toBe('Tune.MID');
+    expect(Array.from(onFile.mock.calls[0]![1] as Uint8Array)).toEqual([77, 84, 104, 100]);
   });
   it('refuses other extensions', async () => {
     const onRefuse = vi.fn();
     render(<DropZone onFile={vi.fn()} onRefuse={onRefuse} />);
+    // user-event 14 filters by the accept attribute by default; a drop (or a browser's "All
+    // files" option) bypasses it, so the component's own extension check must refuse the file.
     await userEvent
       .setup({ applyAccept: false })
       .upload(screen.getByLabelText('choose a file'), new File(['x'], 'notes.txt'));
     expect(onRefuse).toHaveBeenCalledWith(
-      'That does not look like a MusicXML file (.musicxml, .xml or .mxl).',
+      'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',
+    );
+  });
+  it('says which files it takes', () => {
+    render(<DropZone onFile={vi.fn()} onRefuse={vi.fn()} />);
+    expect(screen.getByTestId('drop-zone')).toHaveTextContent(
+      'Drop a MusicXML or MIDI file here (.musicxml, .xml, .mxl, .mid or .midi), or choose a file',
+    );
+    expect(screen.getByLabelText('choose a file')).toHaveAttribute(
+      'accept',
+      '.musicxml,.xml,.mxl,.mid,.midi',
     );
   });
   it('accepts a drop', () => {
@@ -68,7 +78,7 @@ describe('DropZone', () => {
     await userEvent.upload(screen.getByLabelText('choose a file'), file);
     await vi.waitFor(() =>
       expect(onRefuse).toHaveBeenCalledWith(
-        'That does not look like a MusicXML file (.musicxml, .xml or .mxl).',
+        'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',
       ),
     );
     expect(onFile).not.toHaveBeenCalled();

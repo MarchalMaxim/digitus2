@@ -7,7 +7,10 @@ pattern LR; at each onset count the transition from the previous onset's pattern
 which hands play). For each hand that plays: centre = (lowest + highest) / 2; span = highest -
 lowest, capped at 24; position = centre rounded half up, clamped to MIDI 21..108; and, when the
 hand played before, move = (centre - previous centre) rounded half up, clamped to [-24, 24].
-Probabilities: (count + 0.5) / (total + 0.5 * buckets), each pattern row separately.
+Probabilities, per source: (count + 0.5) / (total + 0.5 * buckets), each pattern row separately.
+The written tables are the equal-weight average of the sources' tables, not the smoothing of the
+pooled counts: the Mutopia train half has about twelve times the library's onsets, and pooling let
+it drown the beginner textures the app opens most (M6 plan, deviation recorded in Task 3).
 
 Sources: the built-in library (content/manifest.json; staff 1 = right hand), the Mutopia train
 half (channel = hand) and, for research only, the PIG train split. PIG statistics never go under
@@ -115,6 +118,16 @@ def smooth(counts: dict, uniform: frozenset) -> dict:
         else:
             total = sum(row.values()) + 0.5 * len(PATTERNS)
             out["pattern"][a] = {b: (row[b] + 0.5) / total for b in PATTERNS}
+    return out
+
+
+def mix(per_source: dict, uniform: frozenset) -> dict:
+    """Smooth each source's counts on its own, then average the tables with equal weight per source
+    (in the given source order, so the output is deterministic). One source gives smooth() exactly."""
+    tables = [smooth(counts, uniform) for counts in per_source.values()]
+    n = len(tables)
+    out: dict = {name: [sum(t[name][i] for t in tables) / n for i in range(size)] for name, size in TABLES.items()}
+    out["pattern"] = {a: {b: sum(t["pattern"][a][b] for t in tables) / n for b in PATTERNS} for a in PATTERNS}
     return out
 
 
@@ -278,12 +291,11 @@ def main(argv: list[str] | None = None) -> int:
         sources.append(("pig-train", split_files(a.pig, a.pig_split), pig_notes))
     if not sources:
         raise SystemExit("give at least one of --library, --mutopia, --pig")
-    total, per_source, described, every_file = empty_counts(), {}, [], []
+    per_source, described, every_file = {}, [], []
     for name, files, reader in sources:
         counts = empty_counts()
         for f in files:
             add_counts(counts, motion_counts(reader(f)))
-        add_counts(total, counts)
         per_source[name] = counts
         described.append({"name": name, "files": len(files), "fileListSha256": file_list_sha(files)})
         every_file += files
@@ -294,7 +306,8 @@ def main(argv: list[str] | None = None) -> int:
             "script": "research/scripts/make_hand_motion.py",
             "date": a.date,
             "definition": "see the script docstring; shared with motionCounts in packages/engine/src/io/midi/motion.ts",
-            "smoothing": "add 0.5 to every count, then normalise; each pattern row separately",
+            "smoothing": ("per source: add 0.5 to every count, then normalise, each pattern row separately; "
+                          "the tables are the average of the sources' tables with equal weight per source"),
             "uniform": uniform,
             "sources": described,
             "fileListSha256": file_list_sha(every_file),
@@ -306,7 +319,7 @@ def main(argv: list[str] | None = None) -> int:
         "mu": a.mu,
         "nu": a.nu,
         "idleSec": a.idle_sec,
-        **smooth(total, frozenset(uniform)),
+        **mix(per_source, frozenset(uniform)),
         "counts": per_source,
     }
     out.parent.mkdir(parents=True, exist_ok=True)

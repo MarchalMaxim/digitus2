@@ -3,15 +3,26 @@
  * so the main thread never parses MusicXML or runs the solver (spec section 4). Requests carry
  * an incrementing id and responses are matched by it, so answers may arrive in any order.
  */
-import type { Assignment, Score } from '@digitus2/engine';
+import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
 import type { HandSize } from '../app/store.js';
-import type { EngineRequest, EngineResponse } from './protocol.js';
+import { sourceKind, type EngineRequest, type EngineResponse } from './protocol.js';
 
 export interface EngineClient {
+  /**
+   * Parses a MusicXML file, or imports a MIDI file (decided by `sourceKind(source)`); for MIDI,
+   * `opts.splitMidi` replaces the learned hand separation with a fixed split point.
+   */
   load(
     input: string | Uint8Array,
     source: string,
-  ): Promise<{ score: Score; editorial: Assignment; warnings: string[]; xml: string }>;
+    opts?: { splitMidi?: number },
+  ): Promise<{
+    score: Score;
+    editorial: Assignment;
+    warnings: string[];
+    xml: string;
+    midiInfo: MidiInfo | null;
+  }>;
   solve(
     score: Score,
     profile: HandSize,
@@ -109,12 +120,20 @@ export function createEngineClient(
   }
 
   return {
-    load(input, source) {
-      return call({ type: 'load', input, source }).then(({ score, editorial, warnings, xml }) => ({
+    load(input, source, opts) {
+      // exactOptionalPropertyTypes: leave `splitMidi` out rather than send `splitMidi: undefined`.
+      return call({
+        type: 'load',
+        kind: sourceKind(source),
+        input,
+        source,
+        ...(opts?.splitMidi !== undefined ? { splitMidi: opts.splitMidi } : {}),
+      }).then(({ score, editorial, warnings, xml, midiInfo }) => ({
         score,
         editorial,
         warnings,
         xml,
+        midiInfo,
       }));
     },
     solve(score, profile, pins) {

@@ -7,6 +7,7 @@ import { isShareAlike, licenseLabel, pieces, type LibraryPiece } from '../librar
 
 const REPOSITORY_URL = 'https://github.com/MarchalMaxim/digitus2';
 const VEROVIO_URL = 'https://github.com/rism-digital/verovio';
+const MIDI_FILE_URL = 'https://github.com/carter-thaxton/midi-file';
 const SMPLR_URL = 'https://github.com/danigb/smplr';
 const SAMPLES_URL = 'https://github.com/sfzinstruments/SplendidGrandPiano';
 
@@ -83,6 +84,10 @@ export function AboutView() {
           <li>
             Music engraving by <ExternalLink href={VEROVIO_URL}>Verovio</ExternalLink>,
             LGPL-3.0-or-later, used as an unmodified library.
+          </li>
+          <li>
+            MIDI files are read with <ExternalLink href={MIDI_FILE_URL}>midi-file</ExternalLink>{' '}
+            (MIT).
           </li>
           <li>
             Piano sound: <ExternalLink href={SMPLR_URL}>smplr</ExternalLink> (MIT) playing the{' '}

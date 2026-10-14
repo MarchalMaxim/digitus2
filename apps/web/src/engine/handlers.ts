@@ -2,8 +2,19 @@
  * The engine worker's request handler, kept pure so it runs under Node in tests. It never
  * throws: every failure becomes `{ ok: false, error }` with the request's id.
  */
-import { injectFingerings, parseMusicXml, solveFingering, unpackMusicXml } from '@digitus2/engine';
+import {
+  importMidi,
+  injectFingerings,
+  parseMusicXml,
+  solveFingering,
+  unpackMusicXml,
+} from '@digitus2/engine';
 import type { EngineRequest, EngineResponse } from './protocol.js';
+
+/** 'folder/Twinkle.mid' -> 'Twinkle': the title of a MIDI import. */
+function titleOf(source: string): string {
+  return source.replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '');
+}
 
 const DECLARED_ENCODING = /^(<\?xml[^>]*?\sencoding\s*=\s*)(["'])[^"']*\2/;
 
@@ -20,11 +31,39 @@ export function handle(req: EngineRequest): EngineResponse {
   try {
     switch (req.type) {
       case 'load': {
+        if (req.kind === 'midi') {
+          // The generated MusicXML is what the renderer draws and the exporter saves; the score
+          // was read back from it, so its ids are the `id` attributes of the <note> elements.
+          if (typeof req.input === 'string') throw new Error('a MIDI file must be passed as bytes');
+          const { xml, score, info } = importMidi(req.input, {
+            title: titleOf(req.source),
+            ...(req.splitMidi !== undefined ? { splitMidi: req.splitMidi } : {}),
+          });
+          return {
+            id: req.id,
+            ok: true,
+            type: 'load',
+            score,
+            editorial: {},
+            warnings: info.warnings,
+            xml,
+            midiInfo: info,
+          };
+        }
         // Plain text for the renderer and the exporter: an .mxl archive or a UTF-16 file is
         // decoded once here, and parseMusicXml then reads the same text, which declares UTF-8.
         const xml = declareUtf8(unpackMusicXml(req.input));
         const { score, editorial, warnings } = parseMusicXml(xml, { source: req.source });
-        return { id: req.id, ok: true, type: 'load', score, editorial, warnings, xml };
+        return {
+          id: req.id,
+          ok: true,
+          type: 'load',
+          score,
+          editorial,
+          warnings,
+          xml,
+          midiInfo: null,
+        };
       }
       case 'solve': {
         const t0 = performance.now();

@@ -23,7 +23,7 @@ const STATUS_TEXT: Partial<Record<DocStatus, string>> = {
 
 /** What the error state says first, before the engine's message. */
 const FILE_ERROR_TEXT =
-  'This file could not be read as sheet music. digitus2 opens MusicXML files (.musicxml, .xml or .mxl).';
+  'This file could not be read as sheet music. digitus2 opens MusicXML and MIDI files (.musicxml, .xml, .mxl, .mid or .midi).';
 const PIECE_ERROR_TEXT = 'Something went wrong while preparing this piece. Please try again.';
 
 /** The status line when the selected hands have no notes in this piece. */
@@ -136,7 +136,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
             </div>
           )}
         </main>
-        <SidePanel doc={doc} source={source} piece={piece} />
+        <SidePanel doc={doc} source={source} piece={piece} setSplitMidi={doc.setSplitMidi} />
       </div>
     </div>
   );

@@ -172,6 +172,8 @@ Neural approaches (ArGNN, checklist transformers, newer work) are benchmarked in
 
 First version: a windowed split-point tracker (choose a split pitch per time window minimizing a cost that rewards contiguous ranges and penalizes crossings), with a user-adjustable split in the UI. Second version, if needed: joint assignment using the fingering cost itself, in the spirit of the merged-output HMM of Nakamura, Ono, Sagayama 2014.
 
+M6 (2026-10-14): implemented as a beam-searched pitch-trajectory DP (one split point per onset) with learned movement, chord-span, position and hand-pattern tables (plan 2026-10-14-m6-midi-import.md, decision 1); measured 92.05 percent on the PIG test split (85.10 on the held-out Mutopia test half). The user-adjustable split is the "Hand split" control.
+
 ## 8. Verification
 
 The verification suite is a first-class deliverable and runs in CI. The binding detail (numeric goals, oracles, checks, iteration protocol, milestone placement) is in `2026-10-13-verification-design.md`; the list below is the summary it expands.

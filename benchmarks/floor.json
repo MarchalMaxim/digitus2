@@ -28,6 +28,10 @@
     "errorsPer1000Max": 8.32,
     "note": "Lint errors per 1000 notes of the solver's output on the 30 test pieces; bench gates it. 2026-10-14 m2-rules: 22.11 (226 errors; most were L05 leaps between notes that do not overlap, which lint then called a law, and L03 in piece 029, whose hard decode became infeasible). 2026-10-14 m2-rules-fixed: 85 errors in 10,225 notes (8.313 per 1000, rounded up), 0 relaxed hands. L05 74: 68 chord spans whose notes all lie within 15 semitones and 6 spans between a held note and the next one (5 of them under a legato overlap below 60 ms); L03 11: 6 where more than five keys sound at once and 5 under legato overlaps below 60 ms. Not 0 yet because the solver and lint treat a note as held 1 ms after its onset, so a performance overlap of 10 to 60 ms in PIG blocks a finger: on PIG train a 60 ms tolerance in the solver alone cuts these chord-span errors from 301 to 188 (and makes lint report 440 L03 instead, since lint keeps 1 ms). M3 Task 7 tests that tolerance in both. The experts' own fingerings of the test pieces score 6.68 errors per 1000 notes under the same lint (L03 4.58, L05 1.58, L01 0.48, L02 0.04; 47.4 under the m2-rules lint)."
   },
+  "hands": {
+    "accuracyMin": 91.0,
+    "note": "Hand separation (digitus2 evalhands): macro accuracy in percent on the PIG test split, first annotation of each piece, channel = truth. Set by M6 Task 9 to the measured value minus 1.0. Set 2026-10-14 by M6 Task 9 from 92.05 (commit 86ea924, measured on the uncommitted M6 Tasks 3-6 tree over it; label m6-hands; macro 92.0499 minus 1.0, rounded down to one decimal; note-weighted 91.89; shipped tables from the library and the Mutopia train half, no PIG data)."
+  },
   "references": {
     "nakamura_chmm": {
       "gen": 62.1,

@@ -23,5 +23,8 @@ describe('download', () => {
     expect(exportFilename({ kind: 'file', name: 'My Song.mxl', bytes: new Uint8Array() })).toBe(
       'My Song.fingered.musicxml',
     );
+    expect(exportFilename({ kind: 'file', name: 'twinkle.mid', bytes: new Uint8Array() })).toBe(
+      'twinkle.fingered.musicxml',
+    );
   });
 });

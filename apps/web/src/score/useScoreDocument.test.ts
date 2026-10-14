@@ -5,6 +5,7 @@ import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import { handle } from '../engine/handlers.js';
 import type { Assignment, Score } from '@digitus2/engine';
 import type { EngineClient } from '../engine/client.js';
+import { sourceKind } from '../engine/protocol.js';
 import { SupersededError, type ScoreRenderer } from './render/renderer.js';
 import { bucket, diffDigits, rekeyByIndex, useScoreDocument } from './useScoreDocument.js';
 
@@ -24,7 +25,15 @@ function inlineEngine(): EngineClient & { calls: string[] } {
   };
   return {
     calls,
-    load: (input, source) => run({ id: ++id, type: 'load', input, source }).then((r) => r as never),
+    load: (input, source, opts) =>
+      run({
+        id: ++id,
+        type: 'load',
+        kind: sourceKind(source),
+        input,
+        source,
+        ...(opts?.splitMidi !== undefined ? { splitMidi: opts.splitMidi } : {}),
+      }).then((r) => r as never),
     solve: (score, profile, pins) =>
       run({ id: ++id, type: 'solve', score, profile, ...(pins ? { pins } : {}) }).then(
         (r) => r as never,
@@ -138,8 +147,13 @@ describe('useScoreDocument', () => {
     await waitFor(() => expect(result.current.status).toBe('ready'));
     rerender({ w: 810 }); // same bucket
     rerender({ w: 500 }); // new bucket
-    await waitFor(() => expect(renderer.renders).toBe(2));
-    expect(result.current.pages[0]).toContain('data-w="500"');
+    // The fake renderer counts a call before its result reaches the state, so wait for both:
+    // checking the pages right after the count raced React's commit (about 1 run in 7).
+    await waitFor(() => {
+      expect(renderer.renders).toBe(2);
+      expect(result.current.pages[0]).toContain('data-w="500"');
+    });
+    expect(renderer.renders).toBe(2);
   });
   it('lays the same fingered text out again for a new width: no second write of the fingering', async () => {
     const engine = inlineEngine();

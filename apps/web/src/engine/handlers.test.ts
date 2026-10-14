@@ -2,13 +2,20 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { declareUtf8, handle } from './handlers.js';
+import { sourceKind } from './protocol.js';
 
 const bytes = new Uint8Array(
   readFileSync(new URL('../../fixtures/short-piano.musicxml', import.meta.url)),
 );
 
 function load() {
-  const r = handle({ id: 1, type: 'load', input: bytes, source: 'short-piano.musicxml' });
+  const r = handle({
+    id: 1,
+    type: 'load',
+    kind: 'musicxml',
+    input: bytes,
+    source: 'short-piano.musicxml',
+  });
   if (!r.ok || r.type !== 'load') throw new Error('load failed');
   return r;
 }
@@ -61,7 +68,13 @@ describe('engine handlers', () => {
       ['le.musicxml', le],
       ['be.musicxml', be],
     ] as const) {
-      const r = handle({ id: 8, type: 'load', input: new Uint8Array(input), source: name });
+      const r = handle({
+        id: 8,
+        type: 'load',
+        kind: 'musicxml',
+        input: new Uint8Array(input),
+        source: name,
+      });
       if (!r.ok || r.type !== 'load') throw new Error(`${name}: load failed`);
       expect(r.score.notes, name).toHaveLength(67);
       expect(r.xml.startsWith('<?xml version="1.0" encoding="UTF-8" standalone="no"?>'), name).toBe(
@@ -91,9 +104,87 @@ describe('engine handlers', () => {
     expect(declareUtf8('<score-partwise/>')).toBe('<score-partwise/>');
   });
   it('turns a bad input into an error response with the request id', () => {
-    const r = handle({ id: 7, type: 'load', input: 'this is not xml', source: 'bad.xml' });
+    const r = handle({
+      id: 7,
+      type: 'load',
+      kind: 'musicxml',
+      input: 'this is not xml',
+      source: 'bad.xml',
+    });
     expect(r.ok).toBe(false);
     expect(r.id).toBe(7);
     if (!r.ok) expect(r.error.length).toBeGreaterThan(0);
+  });
+});
+
+const midi = new Uint8Array(readFileSync(new URL('../../fixtures/twinkle.mid', import.meta.url)));
+
+describe('engine handlers: MIDI', () => {
+  it('loads a MIDI file as generated MusicXML with two hands and 64 notes', () => {
+    const r = handle({ id: 11, type: 'load', kind: 'midi', input: midi, source: 'twinkle.mid' });
+    if (!r.ok || r.type !== 'load') throw new Error(r.ok ? 'wrong response type' : r.error);
+    expect(r.score.notes).toHaveLength(64);
+    const right = r.score.notes.filter((n) => n.hand === 'R').length;
+    expect(right).toBeGreaterThan(0);
+    expect(64 - right).toBeGreaterThan(0);
+    expect(Math.abs(right - 42)).toBeLessThanOrEqual(2);
+    expect(r.xml).toContain('<work-title>twinkle</work-title>');
+    for (const n of r.score.notes) expect(r.xml).toContain(`<note id="${n.id}">`);
+    expect(r.editorial).toEqual({});
+    expect(r.midiInfo).toMatchObject({ quantizedMovedShare: 0, splitMidi: null });
+  });
+  it('honours a fixed hand split and runs the rest of the pipeline unchanged', () => {
+    const r = handle({
+      id: 12,
+      type: 'load',
+      kind: 'midi',
+      input: midi,
+      source: 'twinkle.mid',
+      splitMidi: 60,
+    });
+    if (!r.ok || r.type !== 'load') throw new Error(r.ok ? 'wrong response type' : r.error);
+    expect(r.score.notes.filter((n) => n.hand === 'R')).toHaveLength(42);
+    expect(r.midiInfo?.splitMidi).toBe(60);
+    expect(r.warnings).toEqual([]);
+    const solved = handle({ id: 13, type: 'solve', score: r.score, profile: 'medium' });
+    if (!solved.ok || solved.type !== 'solve') throw new Error('solve failed');
+    expect(Object.keys(solved.assignment)).toHaveLength(64);
+    const out = handle({
+      id: 14,
+      type: 'fingeredXml',
+      xml: r.xml,
+      score: r.score,
+      assignment: solved.assignment,
+    });
+    if (!out.ok || out.type !== 'fingeredXml') throw new Error('inject failed');
+    expect(out.xml.match(/<fingering/g)).toHaveLength(64);
+  });
+  it('answers a MusicXML load with midiInfo null', () => {
+    const r = handle({
+      id: 15,
+      type: 'load',
+      kind: 'musicxml',
+      input: bytes,
+      source: 'short-piano.musicxml',
+    });
+    if (!r.ok || r.type !== 'load') throw new Error('load failed');
+    expect(r.midiInfo).toBeNull();
+  });
+  it('reports a broken MIDI file as an error response', () => {
+    const r = handle({
+      id: 16,
+      type: 'load',
+      kind: 'midi',
+      input: new TextEncoder().encode('MThd'),
+      source: 'broken.mid',
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/^not a MIDI file/);
+  });
+  it('decides the kind from the file name', () => {
+    expect(sourceKind('Tune.MID')).toBe('midi');
+    expect(sourceKind('a.midi')).toBe('midi');
+    expect(sourceKind('a.musicxml')).toBe('musicxml');
+    expect(sourceKind('a.mxl')).toBe('musicxml');
   });
 });

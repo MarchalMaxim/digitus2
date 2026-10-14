@@ -8,8 +8,12 @@
  * view to patch in place (no re-layout); a change of the editor's-fingering setting or of the
  * width bucket lays the score out again. Every async step checks that it still belongs to the
  * current document and the newest request, so a late answer never overwrites a newer one.
+ *
+ * A MIDI file is imported by the engine worker into generated MusicXML; a change of its hand
+ * split opens the same bytes again with the split (loading -> fingering -> rendering -> ready),
+ * while the previous import stays on screen until the new one replaces it.
  */
-import type { Assignment, Score } from '@digitus2/engine';
+import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
@@ -42,7 +46,17 @@ export interface ScoreDocument {
    * each time, so the view applies it once per change. Null when the pages are up to date.
    */
   digitChanges: Map<string, string> | null;
+  /** What the MIDI import did; null for MusicXML files and library pieces. */
+  midiInfo: MidiInfo | null;
+  /**
+   * The fixed hand split asked for (the lowest right-hand key), or null for the automatic
+   * separation. Per document, not persisted; meaningful for MIDI files only.
+   */
+  splitMidi: number | null;
 }
+
+/** The state the pipeline keeps; `splitMidi` is the user's request and lives beside it. */
+type DocState = Omit<ScoreDocument, 'splitMidi'>;
 
 export interface ScoreServices {
   engine: EngineClient;
@@ -165,7 +179,7 @@ interface OpenDoc {
   laidOut: WeakMap<Assignment, string>;
 }
 
-function initialDoc(slug: string | null, fileName: string | null): ScoreDocument {
+function initialDoc(slug: string | null, fileName: string | null): DocState {
   const piece = slug === null ? undefined : pieceBySlug(slug);
   return {
     status: 'loading',
@@ -181,6 +195,7 @@ function initialDoc(slug: string | null, fileName: string | null): ScoreDocument
     composer: piece?.composer ?? '',
     warnings: [],
     digitChanges: null,
+    midiInfo: null,
   };
 }
 
@@ -210,19 +225,32 @@ export function useScoreDocument(
   source: PieceSource,
   widthPx: number,
   servicesArg?: ScoreServices,
-): ScoreDocument & { reRender(): void } {
+): ScoreDocument & { reRender(): void; setSplitMidi(value: number | null): void } {
   // The source's identity: the slug, or the dropped file's name and content.
   const slug = source.kind === 'library' ? source.slug : null;
   const fileName = source.kind === 'file' ? source.name : null;
   const fileBytes = source.kind === 'file' ? source.bytes : null;
   const fileKey = fileBytes ? fileIdentity(fileBytes) : null;
+  const sourceKey = JSON.stringify([slug, fileName, fileKey]);
 
   const handSize = useAppStore((s) => s.settings.handSize);
   const showEditorial = useAppStore((s) => s.settings.showEditorial);
 
-  const [state, setState] = useState<ScoreDocument>(() => initialDoc(slug, fileName));
+  const [state, setState] = useState<DocState>(() => initialDoc(slug, fileName));
   const [nonce, setNonce] = useState(0);
   const reRender = useCallback(() => setNonce((n) => n + 1), []);
+
+  // The hand split asked for, tied to the source it was asked for: another source starts with
+  // the automatic separation.
+  const [split, setSplit] = useState<{ source: string; value: number | null }>({
+    source: sourceKey,
+    value: null,
+  });
+  const splitMidi = split.source === sourceKey ? split.value : null;
+  const setSplitMidi = useCallback(
+    (value: number | null) => setSplit({ source: sourceKey, value }),
+    [sourceKey],
+  );
 
   // Latest values for async work, which must not restart when these change. Declared before the
   // other effects so they see this commit's values.
@@ -235,7 +263,8 @@ export function useScoreDocument(
     bytesRef.current = fileBytes;
   });
 
-  // The open document's session: cancelled when the source changes or the hook unmounts.
+  // The open document's session: cancelled when the source or its hand split changes, or the
+  // hook unmounts.
   const sessionRef = useRef<Session>({ cancelled: true });
   const docRef = useRef<OpenDoc | null>(null);
   const shownRef = useRef<Assignment | null>(null); // the fingering the current pages show
@@ -243,12 +272,15 @@ export function useScoreDocument(
   const solveSeqRef = useRef(0);
   const renderKeyRef = useRef<string | null>(null); // the layout last asked for
   const renderSeqRef = useRef(0);
+  const openedRef = useRef<string | null>(null); // the source the last open was for
 
   // Each stage starts in an effect, after React has committed the previous status, so the status
   // line is on screen before the next stage's work is posted to a worker.
   const status = state.status;
 
-  // 1. Load: bytes -> engine.load -> 'fingering'.
+  // 1. Load: bytes -> engine.load -> 'fingering'. Also when the hand split of a MIDI file
+  //    changes: the same source is opened again, and what it showed (the pages, the import facts
+  //    and the Hand split control with its focus) stays until the new import replaces it.
   useEffect(() => {
     const session: Session = { cancelled: false };
     sessionRef.current = session;
@@ -257,7 +289,13 @@ export function useScoreDocument(
     shownRef.current = null;
     solvedForRef.current = null;
     renderKeyRef.current = null;
-    setState(initialDoc(slug, fileName));
+    const reopen = openedRef.current === sourceKey;
+    openedRef.current = sourceKey;
+    setState(
+      reopen
+        ? (s) => ({ ...s, status: 'loading', error: null, digitChanges: null })
+        : initialDoc(slug, fileName),
+    );
     const svc = svcRef.current;
     const bytes = bytesRef.current;
     void (async () => {
@@ -275,7 +313,10 @@ export function useScoreDocument(
           input = bytes ?? new Uint8Array();
           sourceName = fileName ?? 'score.musicxml';
         }
-        const loaded = await svc.engine.load(input, sourceName);
+        const loaded =
+          splitMidi === null
+            ? await svc.engine.load(input, sourceName)
+            : await svc.engine.load(input, sourceName, { splitMidi });
         if (!live()) return;
         const editorial = nonEmpty(loaded.editorial);
         docRef.current = {
@@ -296,6 +337,7 @@ export function useScoreDocument(
           xml: loaded.xml,
           editorial,
           warnings: loaded.warnings,
+          midiInfo: loaded.midiInfo ?? null,
           title: slug === null && metaTitle ? metaTitle : s.title,
           composer: slug === null && metaComposer ? metaComposer : s.composer,
         }));
@@ -306,7 +348,7 @@ export function useScoreDocument(
     return () => {
       session.cancelled = true;
     };
-  }, [slug, fileName, fileKey]);
+  }, [slug, fileName, fileKey, sourceKey, splitMidi]);
 
   // 2. First solve: 'fingering' -> engine.solve -> 'rendering'.
   useEffect(() => {
@@ -444,7 +486,7 @@ export function useScoreDocument(
     })();
   }, [status, handSize]);
 
-  return { ...state, reRender };
+  return { ...state, splitMidi, reRender, setSplitMidi };
 }
 
 /** The editorial fingering, loading a library piece's `.fingered` file on first use. */

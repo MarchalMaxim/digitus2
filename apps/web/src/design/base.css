@@ -402,6 +402,17 @@ fieldset {
   padding-left: 1rem;
 }
 
+/* The MIDI import facts and the Hand split control (MIDI files only) */
+.midi-import {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.midi-import select {
+  justify-self: start;
+}
+
 /* Transport */
 .transport {
   display: flex;

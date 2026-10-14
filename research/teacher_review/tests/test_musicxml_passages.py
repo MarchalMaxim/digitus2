@@ -114,9 +114,13 @@ def test_measure_at_and_rests_follow_ticks():
         ("1", 1.0, 2.0), ("2", 0.0, 1.0), ("2", 1.25, 0.5)]
 
 
-def test_style_table_covers_the_manifest_and_parses():
+def test_style_table_covers_the_core30_and_parses():
+    # The table names composer and style for the core30 pieces; the pieces added by L1 fall back to
+    # _fallback_composer and the hidden style (library_window) until the table is extended.
     manifest = json.loads((REPO / "content" / "manifest.json").read_text(encoding="utf-8"))
-    assert {e["slug"] for e in manifest} <= set(LIBRARY_STYLE)
+    core30 = {e["slug"] for e in manifest if e.get("benchmarkSet", "core30") == "core30"}
+    assert len(core30) == 30
+    assert core30 <= set(LIBRARY_STYLE)
     for composer, style in list(LIBRARY_STYLE.values()) + [HIDDEN]:
         assert composer and style and "(" not in composer and ")" not in style
 

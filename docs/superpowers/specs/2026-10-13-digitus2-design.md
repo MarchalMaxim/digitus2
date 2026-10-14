@@ -201,7 +201,7 @@ State: a single store (zustand or equivalent) holding the current Score, Assignm
 
 Deployment: static build to GitHub Pages through GitHub Actions on every push to main.
 
-Minimalism rule (user, 2026-10-14): the UI stays pristine and uncluttered, and the project is brutal about it. A feature gets a visible control only when a beginner needs it at that moment; everything else is folded away (progressive disclosure), made automatic, or left out. Each UI change is reviewed for what it removes as well as what it adds, and the daily UI review (verification spec 3.10) flags any control that could go.
+Minimalism rule (user, 2026-10-14): the UI stays pristine and uncluttered, and the project is brutal about it. A feature gets a visible control only when a beginner needs it at that moment; everything else is folded away (progressive disclosure), made automatic, or left out. Each UI change is reviewed for what it removes as well as what it adds, and the daily UI review (verification spec 3.10) flags any control that could go. Progressive disclosure (user, 2026-10-14 evening): a control appears only in the context that needs it (an editor's-fingering toggle only on pieces that have one, loop fields only after a loop is chosen); the library's filters (pills for level and for collection or genre) and its search appear only once the list is long enough to need them, and the landing page reads as a few clear units with the Start-here card as the one red element.
 
 ## 10. Research harness
 

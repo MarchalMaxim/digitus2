@@ -8,6 +8,7 @@ Durable state for the multi-day autonomous build. Update after every completed s
 - Verification spec (binding goals, oracles, checks, iteration protocol): `docs/superpowers/specs/2026-10-13-verification-design.md`
 - Plans: `docs/superpowers/plans/` (M1 foundation, M2 solver and verification core, M3 learning, M4 app MVP, M5 interaction and readability, M6 MIDI import)
 - Research reports: `docs/research/` (literature, rendering-spike, content-library, textbook-oracle, datasets, baselines)
+- User requests and bug reports with the coordinator's judgement: `docs/TODO.md` (every request the user posts lands there; rule of 2026-10-14)
 - Lab notebook: `docs/experiments.md`; benchmark history: `benchmarks/history.md` (created by M2 Task 11)
 - Repo: public GitHub repo https://github.com/MarchalMaxim/digitus2 (MIT); local folder is still named `thingamajig`.
 - Workflow journals (session-local): `~/.claude/projects/C--Users-maxim-Desktop-projects-github-thingamajig/<session>/subagents/workflows/<run>/journal.jsonl`; saved scripts under `<session>/workflows/scripts/`.
@@ -123,3 +124,4 @@ In flight right now (2026-10-14 03:00): M2 engine workflow (run wf_171d24a1-e90,
 - 2026-10-14 11:20: user rules added: UI stays pristine and uncluttered (be brutal; CLAUDE.md, spec section 9, this file); photo input (OMR) goes on the roadmap as M10 with a verification-first spike (spec sections 3 and 12). M5's brief and the daily UI review will carry the minimalism rule.
 - 2026-10-14 11:30: user asked to keep the weekly limit in mind, not only the 5-hour one; pacing rule recorded under User rules. No new launches until the four running workflows finish; M5 is planned for 2026-10-15 if the weekly allows, L2 after it.
 - 2026-10-14 11:45: roadmap items from the user: M11 demo videos (a reusable skill that records the app with Playwright and fills the homepage: README and Pages landing) and M12 VPS deployment (static files only on a shared VPS, subdomain and DNS by the user, no heavy computation). Both in spec section 12.
+- 2026-10-14 13:15: about page gained a "Who made it" section (50602e4). docs/TODO.md created at the user's request: every bug report or feature request they post gets a row with my judgement; T1 sticky transport (agree on reachability; the polish dock lands it, follow-up folds the practice controls into the dock at every width).

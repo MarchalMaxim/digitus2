@@ -27,8 +27,11 @@ const PLAYBACK_STATES = new Set(['score-count-in', 'score-playing']);
 /** The states with a baseline. */
 const SCREENSHOT_STATES = STATES.filter((x) => !PLAYBACK_STATES.has(x.name));
 
-/** The baselines are committed, so each stays under 300 KB (M4 plan Task 10, polish plan Task 7). */
-const BASELINE_MAX_BYTES = 300 * 1024;
+/**
+ * The baselines are committed, so each stays under 900 KB (M4 plan Task 10, polish plan Task 7:
+ * 300 KB with 30 pieces; the full-page library baseline grew to about 500 KB with L1's 149 rows).
+ */
+const BASELINE_MAX_BYTES = 900 * 1024;
 
 for (const s of SCREENSHOT_STATES) {
   test(`visual ${s.name}`, async ({ page }) => {
@@ -42,9 +45,9 @@ for (const s of SCREENSHOT_STATES) {
 }
 
 // What is committed for this platform: one baseline per state screenshotted, none for a state
-// that is gone, and each under 300 KB. A run that rewrites the baselines writes them while this
+// that is gone, and each under 900 KB. A run that rewrites the baselines writes them while this
 // test would read them, so it is skipped there; the next plain run checks what was written.
-test('visual baselines: one per state, none left over, each under 300 KB', () => {
+test('visual baselines: one per state, none left over, each under 900 KB', () => {
   const info = test.info();
   test.skip(
     info.config.updateSnapshots === 'all' || info.config.updateSnapshots === 'changed',

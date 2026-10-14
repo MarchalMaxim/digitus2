@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { LIBRARY_COUNT } from './helpers/library.js';
+import { LIBRARY_COUNT, LICENSE_COUNTS } from './helpers/library.js';
 import { expectOneRed } from './helpers/red.js';
 
 test('about: attributions, one red element, no serious a11y issues, back works', async ({
@@ -39,12 +39,13 @@ test('about: keeps its text', async ({ page }) => {
       /^The engine scores every possible fingering with ergonomic rules from the piano-fingering literature \(finger spans, thumb crossings, weak fingers, black keys, hand position changes\) and picks the cheapest one for the whole piece with an exact search\. Your hand size changes the spans it allows\. The engine version is \S+\.$/,
     ),
   ).toBeVisible();
-  await expect(
-    page.getByText(
-      'All compositions are in the public domain. Five engravings are shared under CC BY-SA and are credited here and on their score pages.',
-      { exact: true },
-    ),
-  ).toBeVisible();
+  // The credit sentence counts the CC BY-SA and CC BY engravings of the manifest (the unit test
+  // pins the exact number words); the form with CC BY appears once the library has such a piece.
+  const credit =
+    LICENSE_COUNTS.attributionOnly > 0
+      ? /^All compositions are in the public domain\. \S+ engravings are shared under CC BY-SA and \S+ under CC BY; all are credited here and on their score pages\.$/
+      : /^All compositions are in the public domain\. \S+ engravings are shared under CC BY-SA and are credited here and on their score pages\.$/;
+  await expect(page.getByText(credit)).toBeVisible();
   await expectOneRed(page, 'about');
   await expectNoSeriousA11y(page, 'about');
 });

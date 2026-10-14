@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const port = 4173;
+// DIGITUS2_E2E_PORT lets two checkouts (worktrees) run the e2e suite at the same time; each needs its own preview server.
+const port = Number(process.env.DIGITUS2_E2E_PORT ?? 4173);
 const desktop = { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } };
 
 export default defineConfig({

@@ -3,14 +3,19 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from '../io/musicxml/read.js';
 import { parsePig } from '../io/pig/read.js';
+import { benchmarkEntries } from '../library/benchmarkSet.js';
 import { evaluateHands, scoreToMidiData } from './hands.js';
 
 const repo = new URL('../../../../', import.meta.url);
 const read = (path: string) => readFileSync(fileURLToPath(new URL(path, repo)));
-const manifest = JSON.parse(read('content/manifest.json').toString('utf8')) as Array<{
-  slug: string;
-  files: { score: string };
-}>;
+/** The core30 benchmark set: the library measurement never moves when the library grows. */
+const manifest = benchmarkEntries(
+  JSON.parse(read('content/manifest.json').toString('utf8')) as Array<{
+    slug: string;
+    files: { score: string };
+    benchmarkSet?: string | null;
+  }>,
+);
 const pigSample = () =>
   parsePig(read('packages/engine/fixtures/pig-sample.txt').toString('utf8')).score;
 

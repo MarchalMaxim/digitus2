@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import re
 from fractions import Fraction
 
@@ -155,7 +156,13 @@ def test_render_round_trips_flags_column_overflow():
 @pytest.fixture(scope="module")
 def library(tmp_path_factory):
     out = tmp_path_factory.mktemp("lib") / "library.json"
-    r = run_dump(out, "--manifest", "content/manifest.json")
+    # The core30 benchmark set: the round-trip counts below were measured on the first 30 pieces
+    # and must not move when the library grows (L1 plan, deferred item l).
+    root = Path(__file__).resolve().parents[3]
+    entries = json.loads((root / "content" / "manifest.json").read_text(encoding="utf-8"))
+    core30 = [e["slug"] for e in entries if e.get("benchmarkSet", "core30") == "core30"]
+    assert len(core30) == 30, len(core30)
+    r = run_dump(out, "--manifest", "content/manifest.json", "--slugs", ",".join(core30))
     assert r.returncode == 0, r.stderr
     return {p["id"]: p for p in json.loads(out.read_text(encoding="utf-8"))["pieces"]}
 

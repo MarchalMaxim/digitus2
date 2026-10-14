@@ -1,0 +1,262 @@
+{
+  "task": 12,
+  "_comment": "Songs before 1929, easy rags and classical themes, own arrangements (L1 plan, Task 12). Specs and references: tools/arrangements/songs.py. One main candidate was rejected (see 'rejected') and replaced by the spare in-the-good-old-summertime.",
+  "pieces": [
+    {
+      "slug": "camptown-races",
+      "source": "own",
+      "level": 1,
+      "collection": "songs-before-1929",
+      "title": "Camptown Races",
+      "composer": "Stephen Foster",
+      "composerDates": "1826-1864",
+      "catalogue": null,
+      "year": "1850",
+      "tempoBpm": 100,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: the 1852 Benteen edition marks Moderato without a metronome mark; with the note values doubled, quarter = 100 (eighth = 100 in the original 2/4)",
+      "levelNote": "Level 1: right hand in C position (C4 to G4) with the A as its one extension, single notes; left hand whole and half notes on C, F and G in one position (C3 to G3), open fifths at the cadences; no published syllabus placement exists for this arrangement; heuristic proposes 1 (score 1.24)",
+      "notes": "Original title 'Gwine to Run All Night' (F. D. Benteen, Baltimore, 1850). The verse only, arranged in C major (the source is in D major) with the note values doubled; the chorus climbs to the upper octave and is left out.",
+      "melody": {
+        "authors": [{"name": "Stephen Foster", "died": 1864}],
+        "firstPublished": 1850,
+        "reference": {
+          "url": "https://en.wikisource.org/wiki/Camptown_Races",
+          "retrieved": "2026-10-14",
+          "description": "Wikisource transcription of the first edition (Benteen, 1850), solo voice of the verse, D major; checked against the 1852 Benteen guitar edition (Library of Congress scan on Wikimedia Commons, File:Camptownraces.gif)"
+        }
+      }
+    },
+    {
+      "slug": "oh-susanna",
+      "source": "own",
+      "level": 1,
+      "collection": "songs-before-1929",
+      "title": "Oh! Susanna",
+      "composer": "Stephen Foster",
+      "composerDates": "1826-1864",
+      "catalogue": null,
+      "year": "1848",
+      "tempoBpm": 108,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: the 1848 edition marks Allegretto without a metronome mark; with the note values doubled, quarter = 108 is about half the song's usual speed, a beginner pace",
+      "levelNote": "Level 1: right hand in G position (G4 to D5) with the E as its one extension, single notes; left hand whole and half notes on G, C and D (G2 to D3) with open fifths; no published syllabus placement exists for this arrangement; heuristic proposes 2 (score 2.21), just over the first cut (1.76) because of the 24 bars and the open fifths",
+      "notes": "Verse 1 and the chorus, played once, in the source's key of G major with the note values doubled; the dotted eighth-sixteenth pairs are straightened.",
+      "melody": {
+        "authors": [{"name": "Stephen Foster", "died": 1864}],
+        "firstPublished": 1848,
+        "reference": {
+          "url": "https://en.wikisource.org/wiki/Oh!_Susanna_(1848)",
+          "retrieved": "2026-10-14",
+          "description": "Wikisource transcription of an 1848 edition (plate 1427), voice and chorus Air, G major; checked against Duke University's copy of the same plate (Historic American Sheet Music n1329)"
+        }
+      }
+    },
+    {
+      "slug": "long-long-ago",
+      "source": "own",
+      "level": 1,
+      "collection": "songs-before-1929",
+      "title": "Long, Long Ago",
+      "composer": "Thomas Haynes Bayly",
+      "composerDates": "1797-1839",
+      "catalogue": null,
+      "year": "1833",
+      "tempoBpm": 84,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: the 1839 Cramer edition marks 'With feeling' without a metronome mark; quarter = 84",
+      "levelNote": "Level 1: right hand in F position (F4 to C5) with the D as its one extension, single notes; left hand open fifths and single notes from F2 to C3; no published syllabus placement exists for this arrangement; heuristic proposes 2 (score 2.46), raised by the open fifths in the left hand",
+      "notes": "Written in 1833; the earliest edition found is Cramer, Addison & Beale's (London), advertised in February 1839, a few weeks before Bayly's death. The first eight bars only (the A section, ending on the tonic), in the source's key of F major; the middle section drops to C4 and is left out.",
+      "melody": {
+        "authors": [{"name": "Thomas Haynes Bayly", "died": 1839}],
+        "firstPublished": 1839,
+        "reference": {
+          "url": "https://commons.wikimedia.org/wiki/File:Thomas_Haynes_Bayly_-_Long,_Long_Ago!_A_Ballad,_Cramer,_Addison_%26_Beale,_London,_n._d._(1839)_(IA_BaylyLongLongAgo1839Sheetmusic).pdf",
+          "retrieved": "2026-10-14",
+          "description": "Scan of the Cramer, Addison & Beale edition (London, 1839; Internet Archive BaylyLongLongAgo1839Sheetmusic), voice, bars 1-8, F major"
+        }
+      }
+    },
+    {
+      "slug": "little-brown-jug",
+      "source": "own",
+      "level": 1,
+      "collection": "songs-before-1929",
+      "title": "Little Brown Jug",
+      "composer": "Joseph Eastburn Winner",
+      "composerDates": "1837-1918",
+      "catalogue": null,
+      "year": "1869",
+      "tempoBpm": 108,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: the 1869 edition marks Allegretto without a metronome mark; with the note values doubled, quarter = 108",
+      "levelNote": "Level 1: right hand in G position (G4 to D5) with the E as its one extension, single notes; left hand whole and half notes from C3 to G3; no published syllabus placement exists for this arrangement; heuristic proposes 1 (score 1.27)",
+      "notes": "Published under the pen name 'Eastburn'. The chorus only ('Ha, ha, ha, you and me'), in the source's key of C major with the note values doubled; the verse reaches down to E4 and is left out.",
+      "melody": {
+        "authors": [{"name": "Joseph Eastburn Winner", "died": 1918}],
+        "firstPublished": 1869,
+        "reference": {
+          "url": "https://webapp1.dlib.indiana.edu/inharmony/detail.do?action=detail&fullItemID=/lilly/starr/LL-SSM-2-086-0041",
+          "retrieved": "2026-10-14",
+          "description": "Scan of the J. E. Winner edition (Philadelphia, 1869; Lilly Library, Indiana University), Air of the chorus, C major"
+        }
+      }
+    },
+    {
+      "slug": "daisy-bell",
+      "source": "own",
+      "level": 2,
+      "collection": "songs-before-1929",
+      "title": "Daisy Bell (A Bicycle Built for Two)",
+      "composer": "Harry Dacre",
+      "composerDates": "1857-1922",
+      "catalogue": null,
+      "year": "1892",
+      "tempoBpm": 120,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: the 1893 edition marks the chorus 'A little faster' without a metronome mark; quarter = 120 follows the playback tempo of the Wikisource transcription of that edition",
+      "levelNote": "Level 2: right hand single notes moving between D4 and D5 in G major; left hand waltz bass, a bass note and a two-note chord; no published syllabus placement exists for this arrangement; heuristic proposes 3 (score 4.73), raised by the waltz chords (chord share 0.67), which the heuristic overrates as it does for the core arrangements of Amazing Grace and Greensleeves",
+      "notes": "Harry Dacre was the pen name of Frank Dean. The chorus only ('Daisy, Daisy, give me your answer do'), in the source's key of G major, with a waltz bass.",
+      "melody": {
+        "authors": [{"name": "Harry Dacre", "died": 1922}],
+        "firstPublished": 1892,
+        "reference": {
+          "url": "https://en.wikisource.org/wiki/Daisy_Bell",
+          "retrieved": "2026-10-14",
+          "description": "Wikisource transcription of the 1893 New York printing (Internet Archive daisybell00harr), voice of the chorus, G major"
+        }
+      }
+    },
+    {
+      "slug": "in-the-good-old-summertime",
+      "source": "own",
+      "level": 2,
+      "collection": "songs-before-1929",
+      "title": "In the Good Old Summer Time",
+      "composer": "George Evans",
+      "composerDates": "1870-1915",
+      "catalogue": null,
+      "year": "1902",
+      "tempoBpm": 120,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: the 1902 edition gives no metronome mark; quarter = 120, an easy waltz",
+      "levelNote": "Level 2: right hand single notes moving between D4 and D5 in B-flat major; left hand waltz bass, a bass note and a two-note chord; no published syllabus placement exists for this arrangement; heuristic proposes 3 (score 5.07), raised by the waltz chords (chord share 0.67) and the two flats",
+      "notes": "A spare of the L1 plan, used in place of maple-leaf-rag-easy (see 'rejected'). Words by Ren Shields (1868-1913), which are not printed. The chorus only, once with its second ending, in the source's key of B-flat major, with a waltz bass.",
+      "melody": {
+        "authors": [{"name": "George Evans", "died": 1915}],
+        "firstPublished": 1902,
+        "reference": {
+          "url": "https://digital.library.uic.edu/view/ark:/81984/d3g73735b",
+          "retrieved": "2026-10-14",
+          "description": "Scan of the Howley, Haviland & Dresser edition (New York, 1902; University of Illinois Chicago Library, SMC_0016_0080), voice of the chorus, B-flat major"
+        }
+      }
+    },
+    {
+      "slug": "the-entertainer-easy",
+      "source": "own",
+      "level": 2,
+      "collection": "easy-rags",
+      "title": "The Entertainer, A strain (simplified)",
+      "composer": "Scott Joplin",
+      "composerDates": "1868-1917",
+      "catalogue": null,
+      "year": "1902",
+      "tempoBpm": 100,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: Joplin marks 'Not fast'; the library's engraving plays quarter = 72 in 2/4, and with the note values doubled quarter = 100 is a little slower, for a level-2 player",
+      "levelNote": "Level 2: right hand the single-line melody from D4 to E5 with Joplin's chromatic pickups; left hand a bass note and a two-note chord on alternate beats; no published syllabus placement exists for this arrangement; heuristic proposes 3 (score 7.84), raised by the stride bass's leaps and position shifts; kept at 2 because each hand repeats a few shapes at a slow tempo",
+      "notes": "The first strain (A strain) of The Entertainer as a single melody line over a simplified stride bass, in the original key of C major with the note values doubled. The library also has the complete rag (joplin-the-entertainer).",
+      "melody": {
+        "authors": [{"name": "Scott Joplin", "died": 1917}],
+        "firstPublished": 1902,
+        "reference": {
+          "url": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=263",
+          "retrieved": "2026-10-14",
+          "description": "The library's core engraving (content/scores/joplin-the-entertainer.musicxml, Mutopia 263, after the 1902 edition): melody line of the A strain, bars 4-20, C major"
+        }
+      }
+    },
+    {
+      "slug": "surprise-symphony-theme",
+      "source": "own",
+      "level": 2,
+      "collection": "classical-themes",
+      "title": "Theme from the \"Surprise\" Symphony",
+      "composer": "Joseph Haydn",
+      "composerDates": "1732-1809",
+      "catalogue": "Symphony No. 94, Hob. I:94, 2nd movement (theme)",
+      "year": "1791",
+      "tempoBpm": 55,
+      "arranger": "digitus2 project",
+      "tempoSource": "the reference score's Andante mark, eighth = 110, that is quarter = 55",
+      "levelNote": "Level 2: right hand the violin theme from G3 to C5 in C major, single notes with two octave drops; left hand a bass note and a two-note chord per bar; no published syllabus placement exists for this arrangement; heuristic proposes 3 (score 4.475), raised by the left hand's chords",
+      "notes": "The first violins' theme (bars 1-16), played softly the second time and ending with the famous fortissimo chord, here in the left hand. First published in 1795 (Offenbach: André, according to IMSLP).",
+      "melody": {
+        "authors": [{"name": "Joseph Haydn", "died": 1809}],
+        "firstPublished": 1795,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Symphony_No._94_(Haydn)",
+          "retrieved": "2026-10-14",
+          "description": "Score in the article, section 'II. Andante', first violins bars 1-16, C major"
+        }
+      }
+    },
+    {
+      "slug": "brahms-lullaby",
+      "source": "own",
+      "level": 2,
+      "collection": "classical-themes",
+      "title": "Lullaby (Wiegenlied)",
+      "composer": "Johannes Brahms",
+      "composerDates": "1833-1897",
+      "catalogue": "Op. 49 No. 4",
+      "year": "1868",
+      "tempoBpm": 72,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: Brahms marks 'Zart bewegt' (tenderly moving) without a metronome mark; quarter = 72",
+      "levelNote": "Level 2: right hand single notes moving between F4 and F5 in F major; left hand waltz bass, a bass note and a two-note chord; no published syllabus placement exists for this arrangement; heuristic proposes 3 (score 4.81), raised by the waltz chords (chord share 0.67)",
+      "notes": "Arranged in F major (the song is in E-flat major). First published by Simrock in November 1868 (IMSLP).",
+      "melody": {
+        "authors": [{"name": "Johannes Brahms", "died": 1897}],
+        "firstPublished": 1868,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Wiegenlied_(Brahms)",
+          "retrieved": "2026-10-14",
+          "description": "Score in the article (section 'Melody'), E-flat major; matches the voice of the Mutopia engraving BrahmsJ/O49/Wiegenlied (Mutopia 1037)"
+        }
+      }
+    },
+    {
+      "slug": "eine-kleine-nachtmusik-theme",
+      "source": "own",
+      "level": 2,
+      "collection": "classical-themes",
+      "title": "Eine kleine Nachtmusik, opening theme",
+      "composer": "Wolfgang Amadeus Mozart",
+      "composerDates": "1756-1791",
+      "catalogue": "Serenade in G major, K. 525, 1st movement (opening)",
+      "year": "1787",
+      "tempoBpm": 120,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: Mozart marks Allegro; quarter = 120, a little slower than the usual concert tempo",
+      "levelNote": "Level 2: right hand the broken-chord theme from D4 to D5 in G major, moving positions; left hand half notes; no published syllabus placement exists for this arrangement; heuristic proposes 2 (score 2.06)",
+      "notes": "The four opening bars of the first movement, an octave lower than the violins. First published about 1827 (Offenbach: André, according to IMSLP).",
+      "melody": {
+        "authors": [{"name": "Wolfgang Amadeus Mozart", "died": 1791}],
+        "firstPublished": 1827,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Eine_kleine_Nachtmusik",
+          "retrieved": "2026-10-14",
+          "description": "First score in the article, section 'I. Allegro', bars 1-4, G major"
+        }
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "maple-leaf-rag-easy",
+      "reason": "A level-rule failure that a simpler accompaniment cannot fix: the top line of the right hand in the A strain (Mutopia JoplinS/maple, id 23, the reference the plan names; bars 1-16 read from the mirror's LilyPond source) spans 25 semitones, G4 in bar 1 to A-flat 6 in bars 8 to 10, and a level-2 right hand may span 19. The other reading of the melody line, the lowest right-hand note per onset, spans 29 semitones (E-flat 4 to A-flat 6), and an 8-bar half of the strain is either the opening without its answer or the answer without the opening. Replaced by the spare in-the-good-old-summertime."
+    }
+  ]
+}

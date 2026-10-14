@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
+import { LIBRARY_COUNT } from './helpers/library.js';
 
 const twinkle = fileURLToPath(new URL('../fixtures/twinkle.mid', import.meta.url));
 const counts = /^Right hand: \d+ notes · left hand: \d+ notes$/;
@@ -100,5 +101,5 @@ test('a broken MIDI file shows the error state with a way back', async ({ page }
   await expect(page.getByText(/^Details: not a MIDI file/)).toBeVisible();
   await expectOneRed(page, 'broken MIDI');
   await page.getByRole('button', { name: 'Back to the library' }).click();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
 });

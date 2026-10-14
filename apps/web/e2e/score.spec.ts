@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { libraryScore, mxlOf, utf16leOf } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
+import { LIBRARY_COUNT } from './helpers/library.js';
 
 test('opens Twinkle from the library: every note gets a digit, one red element, hash set', async ({
   page,
@@ -163,7 +164,11 @@ test("a line above the score says when the editor's fingering is shown, and only
 test('opens K.545: status appears first, score within 8 s', async ({ page }) => {
   await page.goto('/');
   const t0 = Date.now();
-  await page.getByRole('button', { name: /^Open Piano Sonata in C major/ }).click();
+  await page
+    .getByRole('button', {
+      name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
+    })
+    .click();
   await expect(page.getByRole('status')).toContainText(/Loading|Fingering|Preparing/);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 8_000 });
   expect(Date.now() - t0).toBeLessThan(8_000);
@@ -180,7 +185,7 @@ test('shows an error state with a way back when the file is not a score', async 
   await expect(page.getByRole('alert')).toContainText(/could not open/i);
   await expectOneRed(page, 'score error');
   await page.getByRole('button', { name: 'Back to the library' }).click();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
 });
 
 // Review Focus 1: what MuseScore and other editors export must open as well as plain MusicXML.
@@ -253,7 +258,7 @@ test('back to the library and browser back both work', async ({ page }) => {
   await page.getByRole('button', { name: /^Open Ode to Joy/ }).click();
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await page.goBack();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   await page.goForward();
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: 'Back to the library' }).click();

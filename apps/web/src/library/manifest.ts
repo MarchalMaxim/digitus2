@@ -21,6 +21,12 @@ export interface LibraryPiece {
   catalogue: string | null;
   year: string | null;
   level: Level;
+  /** The collection's title, e.g. "Children's songs" (catalog.json `collections`). */
+  collection: string;
+  /** A stable kebab-case id for the collection, e.g. "children-songs". */
+  collectionId: string;
+  /** "core30" for the 30 pieces of the first library (the engine's benchmark set); null otherwise. */
+  benchmarkSet: string | null;
   measures: number;
   approxDurationSec: number;
   timeSignature: string;
@@ -80,6 +86,11 @@ export function isShareAlike(p: LibraryPiece): boolean {
   return p.source.license.startsWith('CC-BY-SA');
 }
 
+/** CC BY and CC BY-SA engravings: their licences require the typesetter and licence credited. */
+export function requiresCredit(p: LibraryPiece): boolean {
+  return p.source.license.startsWith('CC-BY');
+}
+
 /** 'CC-BY-SA-2.5' -> 'CC BY-SA 2.5', 'CC0-1.0' -> 'CC0 1.0'. */
 export function licenseLabel(id: string): string {
   return id.replace(/^CC-/, 'CC ').replace(/-(\d)/, ' $1');
@@ -99,7 +110,7 @@ export function attribution(p: LibraryPiece): { text: string; url: string | null
   }
   if (isMutopia(p)) {
     const by = p.source.typesetter ?? 'an unnamed typesetter';
-    if (isShareAlike(p)) {
+    if (requiresCredit(p)) {
       return {
         text: `Engraving by ${by} for the Mutopia Project, ${licenseLabel(p.source.license)}`,
         url: p.source.licenseUrl,

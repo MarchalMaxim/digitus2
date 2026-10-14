@@ -4,6 +4,7 @@ import { openPractice } from './helpers/practice.js';
 import { accentAreas, type AccentArea, type Box } from './helpers/pixels.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples } from './helpers/samples.js';
+import { LIBRARY_COUNT } from './helpers/library.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
 const LOADING_THE_PIANO = 'Loading the piano…';
@@ -1238,10 +1239,12 @@ test.describe('the dock on a phone', () => {
   test('playback scroll still follows the cursor after a view change', async ({ page }) => {
     const scrollY = () => page.evaluate(() => window.scrollY);
     await page.goto('/?audio=silent');
-    await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+    await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
     // The view change: K.545 opened from far down the library.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const row = page.getByRole('button', { name: /^Open Piano Sonata in C major/ });
+    const row = page.getByRole('button', {
+      name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
+    });
     await row.scrollIntoViewIfNeeded();
     expect(await scrollY()).toBeGreaterThan(1000);
     await row.click();

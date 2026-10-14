@@ -112,4 +112,21 @@ describe('digitus2 evalhands', () => {
     );
     expect(err.join('')).toContain('floor file not found');
   });
+  it('scores only the core benchmark set of a tagged manifest unless asked for all', () => {
+    const f = fixtureDir();
+    const tagged = join(f.root, 'library', 'tagged.json');
+    writeFileSync(
+      tagged,
+      JSON.stringify([
+        { slug: 'twinkle', benchmarkSet: 'core30', files: { score: 'scores/twinkle.musicxml' } },
+        { slug: 'twinkle-again', benchmarkSet: null, files: { score: 'scores/twinkle.musicxml' } },
+      ]),
+    );
+    const core = runEvalHands({ library: tagged }).scorecard.library!;
+    expect(core.pieces.map((p) => p.id)).toEqual(['twinkle']);
+    expect(core.set).toBe('core30');
+    const all = runEvalHands({ library: tagged, librarySet: 'all' }).scorecard.library!;
+    expect(all.pieces.map((p) => p.id)).toEqual(['twinkle', 'twinkle-again']);
+    expect(all.set).toBe('all');
+  });
 });

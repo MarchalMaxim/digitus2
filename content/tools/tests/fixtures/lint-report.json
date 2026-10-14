@@ -1,0 +1,430 @@
+{
+  "issues": [
+    {
+      "rule": "L05",
+      "severity": "error",
+      "hand": "R",
+      "noteIds": [
+        "n133",
+        "n128"
+      ],
+      "message": "chord span 9 semitones with 2-4"
+    },
+    {
+      "rule": "L05",
+      "severity": "error",
+      "hand": "R",
+      "noteIds": [
+        "n133",
+        "n129"
+      ],
+      "message": "chord span 12 semitones with 2-5"
+    },
+    {
+      "rule": "L05",
+      "severity": "error",
+      "hand": "R",
+      "noteIds": [
+        "n127",
+        "n128"
+      ],
+      "message": "chord span 6 semitones with 3-4"
+    },
+    {
+      "rule": "L05",
+      "severity": "error",
+      "hand": "R",
+      "noteIds": [
+        "n127",
+        "n129"
+      ],
+      "message": "chord span 9 semitones with 3-5"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n17",
+        "n18"
+      ],
+      "message": "3 semitones with 4-1 is uncomfortable"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n37",
+        "n38"
+      ],
+      "message": "-17 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n104",
+        "n105"
+      ],
+      "message": "3 semitones with 4-1 is uncomfortable"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n113",
+        "n116"
+      ],
+      "message": "5 semitones with 2-3 is uncomfortable"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n119",
+        "n132"
+      ],
+      "message": "-15 semitones with 5-1 is uncomfortable"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n129",
+        "n130"
+      ],
+      "message": "-15 semitones with 5-1 is uncomfortable"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n154",
+        "n155"
+      ],
+      "message": "-16 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L13",
+      "severity": "info",
+      "hand": "R",
+      "noteIds": [
+        "n164",
+        "n169"
+      ],
+      "message": "slow repeated key changes finger 4 to 2"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n25"
+      ],
+      "message": "thumb on a black key (3 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n27"
+      ],
+      "message": "thumb on a black key (5 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n29"
+      ],
+      "message": "thumb on a black key (5 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n36"
+      ],
+      "message": "thumb on a black key (5 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n39"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n47"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n48"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n67"
+      ],
+      "message": "thumb on a black key (3 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n69"
+      ],
+      "message": "thumb on a black key (3 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n71"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n80"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n81"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n112"
+      ],
+      "message": "thumb on a black key (3 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n117"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n119"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n132"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n130"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n139"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n146"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n153"
+      ],
+      "message": "thumb on a black key (1 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n154"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "R",
+      "noteIds": [
+        "n163"
+      ],
+      "message": "thumb on a black key (5 points)"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n31",
+        "n33"
+      ],
+      "message": "-19 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n52",
+        "n54"
+      ],
+      "message": "-19 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n73",
+        "n76"
+      ],
+      "message": "-31 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n97",
+        "n99"
+      ],
+      "message": "-24 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n120",
+        "n123"
+      ],
+      "message": "-24 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n147",
+        "n149"
+      ],
+      "message": "-27 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L07",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n171",
+        "n174"
+      ],
+      "message": "-31 semitones with 5-1 is beyond practical: a hand shift"
+    },
+    {
+      "rule": "L08",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n137"
+      ],
+      "message": "thumb on a black key (5 points)"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n134"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    },
+    {
+      "rule": "L09",
+      "severity": "warning",
+      "hand": "L",
+      "noteIds": [
+        "n150"
+      ],
+      "message": "fifth finger on a black key next to a white key"
+    }
+  ],
+  "counts": {
+    "L05": 4,
+    "L07": 14,
+    "L13": 1,
+    "L08": 16,
+    "L09": 9
+  },
+  "errors": 4,
+  "warnings": 39,
+  "infos": 1,
+  "notes": 168
+}

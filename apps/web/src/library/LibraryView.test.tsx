@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import { LibraryView } from './LibraryView.js';
+import { pieces } from './manifest.js';
 
 beforeEach(() =>
   useAppStore.setState({
@@ -16,7 +17,7 @@ beforeEach(() =>
 afterEach(cleanup);
 
 describe('LibraryView', () => {
-  it('shows the welcome, five level sections and 30 piece rows', () => {
+  it('shows the welcome, five level sections and a row per piece', () => {
     render(<LibraryView />);
     expect(screen.getByRole('heading', { level: 1, name: 'digitus2' })).toBeInTheDocument();
     expect(screen.getByText(/Pick a piece, press play/)).toBeInTheDocument();
@@ -24,7 +25,7 @@ describe('LibraryView', () => {
       expect(
         screen.getByRole('heading', { level: 2, name: new RegExp(`^Level ${n}:`) }),
       ).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(30);
+    expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(pieces.length);
   });
   // Polish plan Task 5, review S4: no screen said what the numbers mean or which hand they are for.
   it('explains the finger numbers under the welcome', () => {
@@ -51,7 +52,7 @@ describe('LibraryView', () => {
       expect(link.closest('header')).toHaveClass('welcome');
       expect(link).not.toHaveClass('is-red');
       // A link, not one more "Open …" button among the 30 piece rows.
-      expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(30);
+      expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(pieces.length);
       await userEvent.click(link);
       expect(scrolled).toEqual([screen.getByTestId('drop-zone')]);
       expect(screen.getByLabelText('choose a file')).toHaveFocus();

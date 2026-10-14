@@ -13,9 +13,17 @@ LilyPond.  The right hand (rh) and left hand (lh) are separate strings with the
 same number of bars; an optional pickup bar comes first.  build(slug) returns
 MusicXML bytes (one part, two staves); build.py writes them to content/scores/.
 
-The melodies are traditional or long in the public domain (see catalog.json);
-the arrangements are original work of the digitus2 project, dedicated to the
-public domain under CC0 1.0.  License of this script: MIT.
+CORE_PIECES below are the ten arrangements of the first library; their scores
+must never change.  New arrangements live in arrangements/<collection>.py, one
+module per collection, each with a reference per piece: the published melody
+the built score must reproduce note for note (arrangements/__init__.py, checked
+by tests/test_arrangements.py).  PIECES is CORE_PIECES followed by the pieces
+of every collection module present.
+
+The melodies are traditional or long in the public domain (see catalog.json
+and the catalog.d/ fragments); the arrangements are original work of the
+digitus2 project, dedicated to the public domain under CC0 1.0.  License of
+this script: MIT.
 """
 from __future__ import annotations
 
@@ -28,9 +36,9 @@ from pathlib import Path
 ENCODING_DATE = "2026-10-13"  # fixed so that rebuilding gives byte-identical files
 
 # ---------------------------------------------------------------------------
-# The arrangements
+# The arrangements of the first library (new ones go to arrangements/<collection>.py)
 # ---------------------------------------------------------------------------
-PIECES: dict[str, dict] = {
+CORE_PIECES: dict[str, dict] = {
     "twinkle-twinkle-little-star": dict(
         key="C", time="4/4", dynamic="mf",
         rh="""c'4 c' g' g' | a' a' g'2 | f'4 f' e' e' | d' d' c'2 |
@@ -134,6 +142,15 @@ PIECES: dict[str, dict] = {
               d a, | b, fis, | g, d | g, a, | d1 |""",
     ),
 }
+
+# The new arrangements, one module per collection. arrange.py may run as a script under -I, which
+# leaves this directory off sys.path.
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
+import arrangements  # noqa: E402
+
+PIECES: dict[str, dict] = {**CORE_PIECES, **arrangements.load(core=CORE_PIECES)[0]}
 
 STEPS = "cdefgab"
 DUR = {"1": F(4), "2": F(2), "4": F(1), "8": F(1, 2), "16": F(1, 4), "32": F(1, 8)}
@@ -379,10 +396,11 @@ def build(slug: str, meta: dict) -> bytes:
 
 
 if __name__ == "__main__":
-    import json
+    from build import load_catalog  # catalog.json, then the catalog.d/ fragments
 
+    sys.stdout.reconfigure(encoding="utf-8")
     here = Path(__file__).resolve().parent
-    cat = {p["slug"]: p for p in json.loads((here / "catalog.json").read_text(encoding="utf-8"))["pieces"]}
+    cat = {p["slug"]: p for p in load_catalog()}
     outdir = Path(sys.argv[1]) if len(sys.argv) > 1 else here.parent / "scores"
     for slug in (sys.argv[2:] or PIECES):
         data = build(slug, cat[slug])

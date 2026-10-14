@@ -3,7 +3,13 @@ import { useRef } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
-import { isShareAlike, licenseLabel, pieces, type LibraryPiece } from '../library/manifest.js';
+import {
+  isShareAlike,
+  licenseLabel,
+  pieces,
+  requiresCredit,
+  type LibraryPiece,
+} from '../library/manifest.js';
 
 const REPOSITORY_URL = 'https://github.com/MarchalMaxim/digitus2';
 const VEROVIO_URL = 'https://github.com/rism-digital/verovio';
@@ -14,11 +20,21 @@ const SAMPLES_URL = 'https://github.com/sfzinstruments/SplendidGrandPiano';
 const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
 
 /** 5 -> 'Five'; numbers past nine stay digits. */
-function countWord(n: number): string {
+export function countWord(n: number): string {
   return NUMBER_WORDS[n] ?? String(n);
 }
 
 const shareAlikeCount = pieces.filter(isShareAlike).length;
+/** CC BY engravings: credited like the share-alike ones, without a share-alike term. */
+const attributionOnlyCount = pieces.filter((p) => requiresCredit(p) && !isShareAlike(p)).length;
+
+/** The sentence above the table; it names CC BY only once the library has such an engraving. */
+const CREDITED = 'credited here and on their score pages.';
+const creditSentence =
+  attributionOnlyCount === 0
+    ? `${countWord(shareAlikeCount)} engravings are shared under CC BY-SA and are ${CREDITED}`
+    : `${countWord(shareAlikeCount)} engravings are shared under CC BY-SA and ` +
+      `${countWord(attributionOnlyCount).toLowerCase()} under CC BY; all are ${CREDITED}`;
 
 /** Who engraved a piece: the Mutopia typesetter, or our own arrangement. */
 function engraving(p: LibraryPiece): { text: string; url: string | null } {
@@ -110,10 +126,7 @@ export function AboutView() {
 
       <section className="stack" aria-labelledby="about-pieces">
         <h2 id="about-pieces">The built-in pieces</h2>
-        <p>
-          All compositions are in the public domain. {countWord(shareAlikeCount)} engravings are
-          shared under CC BY-SA and are credited here and on their score pages.
-        </p>
+        <p>All compositions are in the public domain. {creditSentence}</p>
         <table className="about-pieces">
           <thead>
             <tr>

@@ -229,7 +229,7 @@ def library_files(manifest: Path, benchmark_set: str = "core30") -> list[Path]:
     return [
         manifest.parent / e["files"]["score"]
         for e in entries
-        if (e.get("benchmarkSet") or "core30") == benchmark_set
+        if e.get("benchmarkSet", "core30") == benchmark_set
     ]
 
 

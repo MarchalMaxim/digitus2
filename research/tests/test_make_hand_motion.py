@@ -166,3 +166,19 @@ def test_the_shipped_tables_average_the_library_and_mutopia_with_equal_weight(tm
 
     assert l1(data["moveRight"], mut["moveRight"]) == pytest.approx(l1(data["moveRight"], lib["moveRight"]))
     assert l1(pooled["moveRight"], lib["moveRight"]) < 0.1 * l1(pooled["moveRight"], mut["moveRight"])
+
+
+def test_library_files_treat_a_missing_benchmark_set_as_core30_and_null_as_none(tmp_path):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            [
+                {"slug": "a", "files": {"score": "scores/a.musicxml"}},
+                {"slug": "b", "files": {"score": "scores/b.musicxml"}, "benchmarkSet": "core30"},
+                {"slug": "c", "files": {"score": "scores/c.musicxml"}, "benchmarkSet": None},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    assert [p.name for p in mhm.library_files(manifest)] == ["a.musicxml", "b.musicxml"]
+    assert mhm.library_files(manifest, benchmark_set="other") == []

@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 import { openPractice } from './practice.js';
 import { holdPianoSamples } from './samples.js';
+import { LIBRARY_COUNT } from './library.js';
 
 /**
  * The application states the design brief is checked in (M4 plan, Task 10): each a name, a way
@@ -28,7 +29,7 @@ const TWINKLE_MIDI = fileURLToPath(new URL('../../fixtures/twinkle.mid', import.
 
 async function library(page: Page): Promise<void> {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
 }
 
 /** Twinkle with every note fingered; `query` adds e.g. `?audio=silent` before the hash. */

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { benchmarkEntries } from '../../library/benchmarkSet.js';
 import { parseMusicXml } from '../musicxml/read.js';
 import raw from './params/hand-motion.json' with { type: 'json' };
 import {
@@ -17,9 +18,13 @@ import {
 } from './motion.js';
 
 const repo = new URL('../../../../../', import.meta.url);
-const manifest = JSON.parse(
-  readFileSync(fileURLToPath(new URL('content/manifest.json', repo)), 'utf8'),
-) as Array<{ slug: string; files: { score: string } }>;
+const manifest = benchmarkEntries(
+  JSON.parse(readFileSync(fileURLToPath(new URL('content/manifest.json', repo)), 'utf8')) as Array<{
+    slug: string;
+    benchmarkSet?: string | null;
+    files: { score: string };
+  }>,
+);
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
 describe('hand-motion statistics', () => {

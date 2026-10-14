@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
+import { LIBRARY_COUNT } from './helpers/library.js';
 import { expectOneRed } from './helpers/red.js';
 
 test.beforeEach(async ({ page }) => {
@@ -12,11 +13,11 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('library: 30 pieces, one red element, no serious a11y issues, LCP under 2 s', async ({
+test('library: every piece, one red element, no serious a11y issues, LCP under 2 s', async ({
   page,
 }) => {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   await expectOneRed(page, 'library');
   await expectNoSeriousA11y(page, 'library');
   const lcp = await page.evaluate(() => (window as unknown as { __lcp: number }).__lcp);
@@ -54,7 +55,7 @@ test('library: the layout has no horizontal overflow', async ({ page }) => {
 // at 1280 (desktop) and 360 px (mobile).
 test('library: the welcome explains the finger numbers on the first screen', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   const legend = page
     .locator('.welcome')
     .getByText(
@@ -81,9 +82,11 @@ test('library: a piece opened from far down opens at the top; going back restore
 }) => {
   const scrollY = () => page.evaluate(() => window.scrollY);
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const row = page.getByRole('button', { name: /^Open Piano Sonata in C major/ });
+  const row = page.getByRole('button', {
+    name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
+  });
   await row.scrollIntoViewIfNeeded();
   const listY = await scrollY();
   expect(listY, 'the list is scrolled far down').toBeGreaterThan(1000);
@@ -105,7 +108,7 @@ test('library: a piece opened from far down opens at the top; going back restore
     expect(roots[0]!.tag).toBe('button');
   };
   const expectListAt = async (label: string, leftAt: number) => {
-    await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+    await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
     const y = await scrollY();
     expect(Math.abs(y - leftAt), `${label}: scrollY ${y}, left at ${leftAt}`).toBeLessThanOrEqual(
       50,
@@ -149,7 +152,7 @@ test('library: "Open your own MusicXML file" under the welcome brings the drop z
   page,
 }) => {
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   const link = page
     .locator('.welcome')
     .getByRole('link', { name: 'Open your own MusicXML file', exact: true });
@@ -165,7 +168,7 @@ test('library: "Open your own MusicXML file" under the welcome brings the drop z
   await expect(chooser).toBeFocused();
   // The library stays: no piece opened, the address unchanged.
   await expect(page).toHaveURL(/\/#\/$/);
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   const roots = await expectOneRed(page, 'library at the drop zone');
   expect(roots[0]!.tag).toBe('button');
   await expectNoSeriousA11y(page, 'library at the drop zone');
@@ -177,7 +180,7 @@ test('library: "Open your own MusicXML file" under the welcome brings the drop z
   // From the keyboard too, on a fresh page: the first Tab reaches the link, Enter follows it, and
   // the chooser shows its focus ring.
   await page.reload();
-  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(LIBRARY_COUNT);
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(zone).not.toBeInViewport();
   await page.keyboard.press('Tab');
@@ -198,4 +201,22 @@ test('library: "Open your own MusicXML file" under the welcome brings the drop z
       'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',
     ),
   ).toBeInViewport();
+});
+
+// The list grows with the library (L1: about 150 pieces, 45 rows at level 2); the last row must
+// stay reachable and the long page must not scroll sideways. The mobile project runs it at 360 px.
+test('library: the last piece is reachable and nothing overflows', async ({ page }) => {
+  await page.goto('/');
+  const open = page.getByRole('button', { name: /^Open / });
+  await expect(open).toHaveCount(LIBRARY_COUNT);
+  const last = open.last();
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toBeInViewport();
+  const { overflow, right, clientWidth } = await last.evaluate((el) => ({
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    right: el.getBoundingClientRect().right,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(overflow, 'horizontal page overflow').toBeLessThanOrEqual(0);
+  expect(right, 'last row inside the viewport width').toBeLessThanOrEqual(clientWidth);
 });

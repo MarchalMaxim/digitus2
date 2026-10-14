@@ -1,0 +1,128 @@
+{
+  "task": 10,
+  "_comment": "Hymns, spirituals and national anthems, own arrangements (L1 plan, Task 10). Specs and references: tools/arrangements/hymns.py. Retrieved sources: content/_raw/references/ (gitignored). simple-gifts and swing-low-sweet-chariot are replaced by the plan's two spares for this task, austrian-hymn and a-mighty-fortress (see rejected).",
+  "pieces": [
+    {
+      "slug": "when-the-saints-go-marching-in", "source": "own", "level": 1, "collection": "hymns",
+      "title": "When the Saints Go Marching In", "composer": "Traditional (African-American spiritual)", "composerDates": null,
+      "catalogue": null, "year": "early 20th century (first recorded 1923)", "tempoBpm": 112,
+      "tempoSource": "editorial: a beginner's march tempo; the reference's score is in 2/4 at quarter = 120, which in the doubled note values used here would be quarter = 240",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in C position (C4 to G4) throughout, left hand single notes and open fifths C3 to G3; heuristic proposes 1 (score 1.23)",
+      "notes": "The traditional tune, not the similarly titled 1896 hymn 'When the Saints Are Marching In' (Katharine Purvis and James M. Black). Written in 4/4 with the reference's 2/4 values doubled, so the beginner reads quarter and half notes. Left hand on C and G, with F under the IV chord.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://de.wikipedia.org/wiki/When_the_Saints_Go_Marching_In", "retrieved": "2026-10-14",
+                      "description": "ABC score in the German article (section Melodie), C major, 2/4; the English article has no notation"}
+      }
+    },
+    {
+      "slug": "michael-row-the-boat-ashore", "source": "own", "level": 1, "collection": "hymns",
+      "title": "Michael, Row the Boat Ashore", "composer": "Traditional (African-American spiritual)", "composerDates": null,
+      "catalogue": null, "year": "printed 1867 (Slave Songs of the United States)", "tempoBpm": 96,
+      "tempoSource": "editorial: comfortable beginner tempo (the reference score has no tempo mark)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in C position with the A as a small stretch (C4 to A4, as in Twinkle), left hand single notes and open fifths C3 to G3; heuristic proposes 1 (score 1.13)",
+      "notes": "The spiritual first printed in Slave Songs of the United States (1867), in the familiar version of the Wikipedia score, one verse. Right hand C4 to A4; left hand plays I, IV and V roots in whole and half notes.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1867,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Michael,_Row_the_Boat_Ashore", "retrieved": "2026-10-14",
+                      "description": "Score in the article, C major, 4/4"}
+      }
+    },
+    {
+      "slug": "old-hundredth", "source": "own", "level": 2, "collection": "hymns",
+      "title": "Old Hundredth", "composer": "Louis Bourgeois (attributed)", "composerDates": "c. 1510-c. 1560",
+      "catalogue": "Genevan Psalter, Psalm 134", "year": "1551", "tempoBpm": 104,
+      "tempoSource": "reference: the Wikipedia score plays at half note = 52, that is quarter = 104",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: the melody spans D4 to D5 and moves position, left hand root-position and inverted triads within a ninth in G major; heuristic proposes 3 (score 6.76; it overrates held left-hand triads, as for Amazing Grace)",
+      "notes": "The psalm tune of the Genevan Psalter in its original rhythm (long first and last notes in each line), sung in English to 'All people that on earth do dwell' and the Doxology. Barred in 4/4; the left hand gives one triad per half bar.",
+      "melody": {
+        "authors": [{"name": "Louis Bourgeois", "died": 1560}], "firstPublished": 1551,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Old_100th", "retrieved": "2026-10-14",
+                      "description": "First score in the article: Genevan Psalter rhythm, G major"}
+      }
+    },
+    {
+      "slug": "holy-holy-holy", "source": "own", "level": 2, "collection": "hymns",
+      "title": "Holy, Holy, Holy (tune Nicaea)", "composer": "John Bacchus Dykes", "composerDates": "1823-1876",
+      "catalogue": "tune Nicaea", "year": "1861 (Hymns Ancient and Modern)", "tempoBpm": 90,
+      "tempoSource": "reference: the Wikipedia score's \\midi block plays half note = 90 in 4/2; with the values halved here that is quarter = 90",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: melody D4 to D5 in D major (two sharps), left hand triads within a ninth following the New English Hymnal's harmony; heuristic proposes 3 (score 7.20; it overrates held left-hand triads, as for Amazing Grace)",
+      "notes": "Dykes's tune for Reginald Heber's hymn, after the New English Hymnal setting, with the 4/2 values halved into 4/4. The left hand simplifies the hymnal's lower three voices to one triad per half bar.",
+      "melody": {
+        "authors": [{"name": "John Bacchus Dykes", "died": 1876}], "firstPublished": 1861,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Holy,_Holy,_Holy!_Lord_God_Almighty", "retrieved": "2026-10-14",
+                      "description": "Score in the article (The New English Hymnal setting), soprano, D major"}
+      }
+    },
+    {
+      "slug": "a-mighty-fortress", "source": "own", "level": 2, "collection": "hymns",
+      "title": "A Mighty Fortress Is Our God (Ein feste Burg)", "composer": "Martin Luther", "composerDates": "1483-1546",
+      "catalogue": "chorale melody, as set by J. S. Bach in BWV 80", "year": "1529", "tempoBpm": 80,
+      "tempoSource": "editorial: a broad chorale tempo, quarter = 80",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: melody D4 to D5 in D major (two sharps), left hand triads within a ninth; heuristic proposes 3 (score 7.37; it overrates held left-hand triads, as for Amazing Grace)",
+      "notes": "Spare for this task, replacing Swing Low, Sweet Chariot (no reliable notated source). Luther's chorale in the even rhythm of Bach's closing chorale of the cantata BWV 80, with the repeat of the first two lines written out and the fermatas left out.",
+      "melody": {
+        "authors": [{"name": "Martin Luther", "died": 1546}], "firstPublished": 1529,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Ein_feste_Burg_ist_unser_Gott,_BWV_80", "retrieved": "2026-10-14",
+                      "description": "Score of the closing chorale in the article on BWV 80: the soprano, D major"}
+      }
+    },
+    {
+      "slug": "la-marseillaise", "source": "own", "level": 2, "collection": "anthems",
+      "title": "La Marseillaise", "composer": "Claude-Joseph Rouget de Lisle", "composerDates": "1760-1836",
+      "catalogue": "Chant de guerre pour l'Armée du Rhin", "year": "1792", "tempoBpm": 100,
+      "tempoSource": "editorial: a steady march for level 2; the 1792 source's \\midi block plays quarter = 120 ('Temps de marche animée')",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: melody G4 to A5 with dotted rhythms and the minor-key colour of the middle section, left hand triads and bass notes in C major; heuristic proposes 3 (score 6.48; it overrates held left-hand triads, as for Amazing Grace)",
+      "notes": "The melody of the first edition (Bignon, 1792) as typeset for Mutopia, with the sixteenth-note pickups straightened to eighths and the closing ritornello left out. Left hand: half-bar triads and single bass notes.",
+      "melody": {
+        "authors": [{"name": "Claude-Joseph Rouget de Lisle", "died": 1836}], "firstPublished": 1792,
+        "reference": {"url": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1891", "retrieved": "2026-10-14",
+                      "description": "Mutopia 1891, first edition (Bignon 1792), public domain: the voice part, C major"}
+      }
+    },
+    {
+      "slug": "god-save-the-king", "source": "own", "level": 2, "collection": "anthems",
+      "title": "God Save the King", "composer": "Traditional (English)", "composerDates": null,
+      "catalogue": null, "year": "printed 1744 (Thesaurus Musicus)", "tempoBpm": 84,
+      "tempoSource": "editorial: a stately anthem tempo, quarter = 84",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: melody E4 to D5 in F major, left hand triads within a ninth, mostly one per bar; heuristic proposes 3 (score 6.30; it overrates held left-hand triads, as for Amazing Grace)",
+      "notes": "The British national anthem (the same tune as 'My Country, 'Tis of Thee'), in F major. Left hand one triad per bar, two or three in the cadences.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1744,
+        "reference": {"url": "https://hymnary.org/tune/america_carey", "retrieved": "2026-10-14",
+                      "description": "Tune AMERICA on hymnary.org: the soprano of The Cyber Hymnal's score #49 linked there, F major"}
+      }
+    },
+    {
+      "slug": "austrian-hymn", "source": "own", "level": 2, "collection": "anthems",
+      "title": "Austrian Hymn (Gott erhalte Franz den Kaiser)", "composer": "Joseph Haydn", "composerDates": "1732-1809",
+      "catalogue": null, "year": "1797", "tempoBpm": 90,
+      "tempoSource": "reference: the Wikipedia score's \\midi block plays quarter = 90",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: melody D4 to G5 in G major, several position changes, left hand triads within a ninth; heuristic proposes 3 (score 7.53; it overrates held left-hand triads, as for Amazing Grace)",
+      "notes": "Spare for this task, replacing Simple Gifts (no readable notated source). Haydn's hymn for Emperor Francis II, first performed on 12 February 1797; the tune of the hymn 'Austria' and of 'Das Lied der Deutschen'. Both repeats written out.",
+      "melody": {
+        "authors": [{"name": "Joseph Haydn", "died": 1809}], "firstPublished": 1797,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Gott_erhalte_Franz_den_Kaiser", "retrieved": "2026-10-14",
+                      "description": "Score in the article, G major"}
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "simple-gifts", "level": 2, "collection": "hymns",
+      "reason": "No notated text source could be read: the English, German and French Wikipedia articles have no score (only an image of the 1848 manuscript transcription on Commons); the hymnary.org melody score is behind a publisher's licence gate and its Cyber Hymnal entry is the copyrighted 'Lord of the Dance'; cpdl.org refused the request. Replaced by the spare austrian-hymn."
+    },
+    {
+      "slug": "swing-low-sweet-chariot", "level": 2, "collection": "hymns",
+      "reason": "Sources disagree: the Wikipedia articles (en, de, fr, it) have no score; the only text score, The Cyber Hymnal's MusicXML on hymnary.org, read twice gave measures that do not fill the metre and an opening that differs from the page's own incipit. Replaced by the spare a-mighty-fortress."
+    }
+  ]
+}

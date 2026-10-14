@@ -1,14 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { benchmarkEntries } from '../../library/benchmarkSet.js';
 import type { Note } from '../../score/types.js';
 import { parseMusicXml } from '../musicxml/read.js';
 import { scoreToMusicXml } from './engrave.js';
 
 const repo = new URL('../../../../../', import.meta.url);
-const manifest = JSON.parse(
-  readFileSync(fileURLToPath(new URL('content/manifest.json', repo)), 'utf8'),
-) as Array<{ slug: string; files: { score: string } }>;
+// The engraver supports the rhythms of the first 30 pieces, so the round trip runs on the core
+// benchmark set (L1 plan, decision 12).
+const manifest = benchmarkEntries(
+  JSON.parse(readFileSync(fileURLToPath(new URL('content/manifest.json', repo)), 'utf8')) as Array<{
+    slug: string;
+    benchmarkSet?: string | null;
+    files: { score: string };
+  }>,
+);
 const noteKey = (n: Note) => `${n.onsetTick}:${n.offsetTick}:${n.midi}:${n.hand}`;
 
 describe('engraving round trip on the built-in library', () => {

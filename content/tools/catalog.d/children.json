@@ -1,0 +1,203 @@
+{
+  "task": 8,
+  "_comment": "Children's songs, own arrangements (L1 plan, Task 8). Specs and references: tools/arrangements/children.py. Retrieved sources: content/_raw/references/ (gitignored).",
+  "pieces": [
+    {
+      "slug": "hot-cross-buns", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Hot Cross Buns", "composer": "Traditional (English street cry)", "composerDates": null,
+      "catalogue": null, "year": "18th century", "tempoBpm": 100,
+      "tempoSource": "editorial: comfortable beginner tempo (the reference score plays at quarter = 120)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand E-D-C in C position, left hand single C, E and G notes; heuristic proposes 1 (score 0.85)",
+      "notes": "The mi-re-do tune that method books teach first, in C position for both hands. Four bars.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Hot_Cross_Buns_(song)", "retrieved": "2026-10-14",
+                      "description": "Score in the article, the version marked 'Alternative' (in G); compared by intervals. The B-A-G tune's first printing is undocumented: the article dates the street cry to 1733 and the words to 1767, but no source in hand ties a date to this tune."}
+      }
+    },
+    {
+      "slug": "alle-meine-entchen", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Alle meine Entchen (All My Little Ducklings)", "composer": "Traditional (German)", "composerDates": null,
+      "catalogue": null, "year": "19th century", "tempoBpm": 100,
+      "tempoSource": "editorial: comfortable beginner tempo (the reference score has no tempo mark)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in C position with the A as a small stretch, left hand single C, F and G notes; heuristic proposes 1 (score 1.332)",
+      "notes": "The German counting-up children's song, five bars as the reference notates it. Right hand C4 to A4; left hand plays I, IV and V roots in half and whole notes.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://de.wikipedia.org/wiki/Alle_meine_Entchen", "retrieved": "2026-10-14",
+                      "description": "Score in the German article, C major"}
+      }
+    },
+    {
+      "slug": "lightly-row", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Lightly Row (Hänschen klein)", "composer": "Traditional (German)", "composerDates": null,
+      "catalogue": null, "year": "19th century", "tempoBpm": 100,
+      "tempoSource": "reference: the German article's score plays at quarter = 100",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand stays in C position (C4 to G4), left hand single notes C to G; heuristic proposes 1 (score 1.281)",
+      "notes": "The German folk tune 'Hänschen klein', known in English method books as 'Lightly Row', in C. The repeat of the first strain is written out with both endings.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://de.wikipedia.org/wiki/H%C3%A4nschen_klein", "retrieved": "2026-10-14",
+                      "description": "Score of 'Hänschen klein' in the German article, F major; compared by intervals"}
+      }
+    },
+    {
+      "slug": "au-clair-de-la-lune", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Au clair de la lune", "composer": "Traditional (French)", "composerDates": null,
+      "catalogue": null, "year": "18th century", "tempoBpm": 112,
+      "tempoSource": "editorial: the French article's score plays at half = 62 (quarter = 124); 112 keeps it under the level-1 limit of 120",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in A position (A3 to E4) with G3 as the one extension, so it never moves; left hand single G2, C3 and D3 notes; heuristic proposes 1 (score 0.982)",
+      "notes": "First verse in quarter and half notes. The right hand stays in one position, A3 to E4, and reaches down to G3 at the end of the middle phrase ('Ma chandelle est morte'); the left hand sits below it.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Au_clair_de_la_lune", "retrieved": "2026-10-14",
+                      "description": "The article's score image (C major, middle C); the French article's score has the same pitches"}
+      }
+    },
+    {
+      "slug": "london-bridge", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "London Bridge Is Falling Down", "composer": "Traditional (English)", "composerDates": null,
+      "catalogue": null, "year": "18th century", "tempoBpm": 102,
+      "tempoSource": "reference: the article's score plays at quarter = 102",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in C position with the A as a small stretch, left hand C and G; heuristic proposes 1 (score 1.362)",
+      "notes": "The first verse in C, 2/4, with its dotted opening figure; the left hand holds C and G.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://en.wikipedia.org/wiki/London_Bridge_Is_Falling_Down", "retrieved": "2026-10-14",
+                      "description": "Score in the article, F major, repeat unfolded; compared by intervals"}
+      }
+    },
+    {
+      "slug": "old-macdonald-had-a-farm", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Old MacDonald Had a Farm", "composer": "Traditional", "composerDates": null,
+      "catalogue": null, "year": "early 20th century", "tempoBpm": 112,
+      "tempoSource": "editorial: the reference plays at quarter = 180, too fast for level 1 (at most 120)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in D position (D4 to A4) with B4 as the one extension, left hand single G, C and D notes and open fifths; heuristic proposes 2 (score 1.907)",
+      "notes": "One verse in G major. The 'here a moo, there a moo' bars repeat one note in the right hand over open fifths in the left.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://fr.wikipedia.org/wiki/Old_MacDonald_Had_a_Farm", "retrieved": "2026-10-14",
+                      "description": "Score in the French article (also in the Spanish, Swedish, Japanese and Chinese articles; the English article has none), G major. The standard tune's first printing is undocumented: the 1917 printing (Tommy's Tunes) is the 'Ohio' variant, and the English article names the 1925 Edison recording by the Sam Patterson Trio as possibly the first known use of the standard tune."}
+      }
+    },
+    {
+      "slug": "kuckuck", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Kuckuck, Kuckuck, ruft's aus dem Wald (Cuckoo)", "composer": "Traditional (Austrian)", "composerDates": null,
+      "catalogue": null, "year": "19th century", "tempoBpm": 112,
+      "tempoSource": "editorial: the German article's score (marked 'Heiter') plays at quarter = 152, too fast for level 1",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in G position (G4 to D5), left hand single notes G2 to D3; heuristic proposes 1 (score 1.054)",
+      "notes": "The cuckoo-call spring song in G major, 3/4: the upper voice of the reference's two-part setting, over single bass notes.",
+      "melody": {
+        "authors": "traditional", "firstPublished": null,
+        "reference": {"url": "https://de.wikipedia.org/wiki/Kuckuck,_Kuckuck,_ruft%E2%80%99s_aus_dem_Wald", "retrieved": "2026-10-14",
+                      "description": "Score in the German article, G major, upper voice"}
+      }
+    },
+    {
+      "slug": "little-jack-horner", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Little Jack Horner", "composer": "Traditional (English)", "composerDates": null,
+      "catalogue": null, "year": "printed 1877", "tempoBpm": 112,
+      "tempoSource": "editorial: quarter = 112 (dotted quarter = 75), the tempo of the Project Gutenberg MusicXML transcription of Moffat's 1911 printing (eBook 61009); the 1877 reference has no tempo mark",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in F position (F4 to C5) with E4 as the one extension, left hand single C, F and G notes; heuristic proposes 1 (score 1.546)",
+      "addedBy": "Task 8: replacement (L1 plan, Candidate list) for go-tell-aunt-rhody, which has no notated source in any Wikipedia edition, and IMSLP's only score sits behind a CAPTCHA; the tune is the score in the English Wikipedia article ('The original melody, 1877', The Baby's Opera)",
+      "notes": "The nursery-rhyme tune as Walter Crane's The Baby's Opera printed it in 1877, a semitone higher (F instead of E major), 6/8, eight bars. Alfred Moffat printed the same tune in F in 1911. The tune now commonly associated with the rhyme, first printed by J. W. Elliott in 1870, is a different one.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1877,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Little_Jack_Horner", "retrieved": "2026-10-14",
+                      "description": "The article's score image 'The original melody, 1877' (The Baby's Opera, Walter Crane), E major; compared by intervals. The same tune in F: Our Old Nursery Rhymes (Moffat, 1911), Project Gutenberg eBook 61009. Not J. W. Elliott's 1870 tune, which the article calls the commonly associated melody."}
+      }
+    },
+    {
+      "slug": "see-saw-margery-daw", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "See-Saw, Margery Daw", "composer": "Traditional (English)", "composerDates": null,
+      "catalogue": null, "year": "printed 1878", "tempoBpm": 120,
+      "tempoSource": "reference: the Project Gutenberg MusicXML transcription plays at quarter = 120 (dotted quarter = 80)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in F position with the D as a small stretch (F4 to D5), left hand single C, F and G notes; heuristic proposes 1 (score 1.735)",
+      "addedBy": "Task 8: replacement (L1 plan, Candidate list) for this-old-man, which has no notated source in any Wikipedia edition or in the Gutenberg nursery-song books; the tune comes from The Baby's Bouquet (1878) with a Project Gutenberg MusicXML transcription",
+      "notes": "The see-saw rhyme as Lucy Crane set it in The Baby's Bouquet (1878), F major, 6/8, eight bars. This is Crane's tune, not the one commonly sung, which J. W. Elliott first printed in 1870.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1878,
+        "reference": {"url": "https://www.gutenberg.org/cache/epub/25432/music/margerydaw.xml", "retrieved": "2026-10-14",
+                      "description": "The Baby's Bouquet (Walter and Lucy Crane, 1878), Project Gutenberg eBook 25432, MusicXML, F major. Crane's 1878 tune, not the commonly sung tune that the English article credits to J. W. Elliott's National Nursery Rhymes (1870): Elliott's tune (archive.org mothergoosesnurs00elli, p. 24) differs from the first bar on."}
+      }
+    },
+    {
+      "slug": "schlaf-kindlein-schlaf", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Schlaf, Kindlein, schlaf (Sleep, Baby, Sleep)", "composer": "Johann Friedrich Reichardt (after a folk tune)", "composerDates": "1752-1814",
+      "catalogue": null, "year": "1781", "tempoBpm": 80,
+      "tempoSource": "reference: the German article's score plays at quarter = 80 (\\tempo 4 = 80)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in C position (C4 to G4), left hand single C, F and G notes; heuristic proposes 1 (score 1.055)",
+      "addedBy": "Task 8: replacement (L1 plan, Candidate list) for skip-to-my-lou, which has no notated source in any Wikipedia edition or in the Gutenberg nursery-song books; the tune is Reichardt's 1781 melody from the score in the German Wikipedia article",
+      "notes": "The German lullaby in Johann Friedrich Reichardt's melody of 1781, as the German Wikipedia article prints it, in C instead of F, 2/4, ten bars. The English article's version differs in bars 2 to 4.",
+      "melody": {
+        "authors": [{"name": "Johann Friedrich Reichardt", "died": 1814}], "firstPublished": 1781,
+        "reference": {"url": "https://de.wikipedia.org/wiki/Schlaf,_Kindlein,_schlaf", "retrieved": "2026-10-14",
+                      "description": "Score in the German article, section 'Melodie' (Reichardt, 1781), F major, 2/4; compared by intervals. The English article's score differs in bars 2 to 4; Lucy Crane's 1878 setting is a different tune and is not used."}
+      }
+    },
+    {
+      "slug": "little-bo-peep", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "Little Bo-Peep", "composer": "Traditional (English)", "composerDates": null,
+      "catalogue": null, "year": "printed 1911", "tempoBpm": 108,
+      "tempoSource": "editorial: the Project Gutenberg MusicXML transcription of Moffat's 1911 printing plays at quarter = 138 (dotted quarter = 92), too fast for level 1 (at most 120); quarter = 108 (dotted quarter = 72)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in F position (F4 to C5) with no extension, left hand single F3, C3 and G3 notes; heuristic proposes 1 (score 1.472)",
+      "addedBy": "Task 21, review round 2: not in the plan's candidate lists; added to bring level 1 to the floor of Task 19's gate (24 to 28) once behr-in-may went back to level 2 (level 1 then had 22 pieces, and no level-2 arrangement keeps the level-1 rules). The plan's Task 19 says never to invent candidates there, so this is a recorded deviation for the coordinator; the tune comes from a dated source Task 8 had already saved (Our Old Nursery Rhymes, Moffat 1911, Project Gutenberg eBook 61009, MusicXML).",
+      "notes": "The nursery-rhyme tune as Alfred Moffat printed it in Our Old Nursery Rhymes (1911), F major, 6/8, eight bars, one verse. The right hand stays in F position throughout; bar 4's thirds in the source are played as their top notes.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1911,
+        "reference": {"url": "https://www.gutenberg.org/cache/epub/61009/music/bopeep.mxl", "retrieved": "2026-10-14",
+                      "description": "Our Old Nursery Rhymes ('The original tunes harmonized by Alfred Moffat', Augener, copyright 1911), Project Gutenberg eBook 61009, MusicXML, F major: the top line of the right hand, which carries the tune (bar 4's thirds give their top notes). Moffat (1863-1950) only harmonized the tune."}
+      }
+    },
+    {
+      "slug": "three-little-kittens", "source": "own", "level": 1, "collection": "children-songs",
+      "title": "The Three Little Kittens", "composer": "Traditional", "composerDates": null,
+      "catalogue": null, "year": "printed 1878", "tempoBpm": 96,
+      "tempoSource": "editorial: the Project Gutenberg MusicXML transcription plays at quarter = 120 (dotted quarter = 80); quarter = 96 (dotted quarter = 64) leaves room for the sixteenth notes",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 1: right hand in C position with the A as the one extension (C4 to A4), left hand single F3 and C3 notes; the sixteenth-note pickup and the two sixteenths of bar 1 are its only quick notes; heuristic proposes 1 (score 1.464)",
+      "addedBy": "Task 21, review round 2: not in the plan's candidate lists; added to bring level 1 to the floor of Task 19's gate (24 to 28) once behr-in-may went back to level 2 (level 1 then had 22 pieces, and no level-2 arrangement keeps the level-1 rules). The plan's Task 19 says never to invent candidates there, so this is a recorded deviation for the coordinator; the tune comes from a dated source Task 8 had already saved (The Baby's Bouquet, 1878, Project Gutenberg eBook 25432, MusicXML).",
+      "notes": "The tune Lucy Crane collected and arranged for The Baby's Bouquet (1878), a fourth lower (F instead of B-flat major), 6/8 with a sixteenth-note pickup, eight bars, one verse with its 'Mew, mew' refrain. The right hand stays in C position with the A as its one extension.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1878,
+        "reference": {"url": "https://www.gutenberg.org/cache/epub/25432/music/threelittlekittens.xml", "retrieved": "2026-10-14",
+                      "description": "The Baby's Bouquet ('The tunes collected & arranged by L.C.', Lucy Crane, 1842-1882; first published 1878), Project Gutenberg eBook 25432, MusicXML, B-flat major, the sung melody of verse 1; compared by intervals. Either way the melody is public domain: traditional, or Crane's, who died in 1882."}
+      }
+    },
+    {
+      "slug": "pease-porridge-hot", "source": "own", "level": 2, "collection": "children-songs",
+      "title": "Pease Porridge Hot", "composer": "Traditional (English)", "composerDates": null,
+      "catalogue": null, "year": "c. 1760 (rhyme)", "tempoBpm": 104,
+      "tempoSource": "editorial: moderate clapping-game tempo (the 1922 reference has no tempo mark)",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: the melody spans an octave (D4 to D5), beyond level 1's ten semitones, so the plan's level rule moves it from 1 to 2; left hand open fifths and two-note chords; heuristic proposes 3 (score 5.104)",
+      "notes": "The clapping game as printed in The Song Play Book (1922), G major: the claps on beat 4 are rests.",
+      "melody": {
+        "authors": "traditional", "firstPublished": 1922,
+        "reference": {"url": "https://en.wikipedia.org/wiki/Pease_Porridge_Hot", "retrieved": "2026-10-14",
+                      "description": "The article's infobox score (The Song Play Book, 1922), G major"}
+      }
+    }
+  ],
+  "rejected": [
+    {"slug": "go-tell-aunt-rhody", "reason": "No notated source reachable: no score in any Wikipedia edition (English, Bengali), none on Wikimedia Commons or Project Gutenberg, and IMSLP's one score (E. Riley, n.d.) sits behind a CAPTCHA bot check. Replaced by little-jack-horner."},
+    {"slug": "this-old-man", "reason": "No notated source reachable: no score in any Wikipedia edition (English, Bengali, Finnish, Russian, Chinese), none on Commons or in the Gutenberg nursery-song books (eBooks 25432, 55107, 61009). Replaced by see-saw-margery-daw."},
+    {"slug": "skip-to-my-lou", "reason": "No notated source reachable: no score in any Wikipedia edition (English, Spanish, French, Italian); Commons has only recordings. Replaced by schlaf-kindlein-schlaf."},
+    {"slug": "the-muffin-man", "reason": "No notated source reachable: no score in any Wikipedia edition; the English article's image is the cover of Harry King's 1889 song sheet, without notes. Not replaced: the spare lucy-locket was dropped (see its entry) and the task's three replacements are used."},
+    {"slug": "lucy-locket", "reason": "Spare dropped after review. In both dated sources (Our Old Nursery Rhymes, Moffat 1911, Project Gutenberg eBook 61009; The Baby's Bouquet, 1878, eBook 25432) the tune is the Yankee Doodle tune, which Task 11 ships as yankee-doodle (level 2), so the library would list one tune twice. Its right hand also spans G4 to F5, seven white keys, which no five-finger position with one extension covers (bar 6 F5 E5 D5 C5 and bar 7 B4 G4 A4 B4 cannot share a frame), so it breaks the level-1 position rule; the heuristic proposed 2 (score 2.153)."},
+    {"slug": "hush-little-baby", "reason": "Only two notations, both on Wikimedia Commons and neither in an article or a dated print: the score image File:Hush, Little Baby.jpg (source unknown) and Peter Gerloff's MIDI setting (2023). They disagree ('don't say a word' has four notes in one and three in the other), so by the plan's rule the tune is dropped; no spare was left (love-somebody has no source)."},
+    {"slug": "sur-le-pont-d-avignon", "reason": "Spare not used: the melody in both sources (English Wikipedia, Weckerlin 1870; The Baby's Bouquet 1878) spans an octave, D4 to D5, beyond level 1's ten semitones, so it cannot replace a level-1 piece."},
+    {"slug": "love-somebody", "reason": "Spare not used: no notated source found; the English Wikipedia title is a disambiguation page of modern songs."}
+  ]
+}

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -27,6 +27,7 @@ import type { SeqNote } from './sequence.js';
 import { loadWeightSet, RECOMMENDED_WEIGHT_SET } from './params/weightSets.js';
 import { solveFingering, solveHand } from './solve.js';
 import { HAND_PROFILES, span } from './spans.js';
+import { benchmarkEntries } from '../library/benchmarkSet.js';
 
 const H = '//Version: PianoFingering_v170101\n';
 const line = (i: number, on: number, off: number, p: string, ch: number) =>
@@ -597,6 +598,15 @@ describe('chord laws and holds beyond reach (M2 hardening)', () => {
 // partner is), holds are walked once for solver and lint (reach.ts `forEachHold`), a chord with no
 // legal configuration breaks the fewest pairs, and every finite charge is a named weighted rule.
 const LIBRARY = fileURLToPath(new URL('../../../../content/scores/', import.meta.url));
+/** The core30 benchmark set as file names under content/scores (the library tests never grow with the library). */
+const LIBRARY_FILES = benchmarkEntries(
+  JSON.parse(
+    readFileSync(
+      fileURLToPath(new URL('../../../../content/manifest.json', import.meta.url)),
+      'utf8',
+    ),
+  ) as Array<{ slug: string; files: { score: string }; benchmarkSet?: string | null }>,
+).map((e) => e.files.score.replace(/^scores\//, ''));
 
 /**
  * Exact search (the oracle): does a fingering of this hand keep every law lint checks (L01 to
@@ -648,9 +658,7 @@ describe('held keys are laws at any distance (M2 hardening re-review)', () => {
     // The re-review found held pairs broken where a legal fingering exists: Joplin, The Entertainer,
     // right hand bars 56 and 64 (16 law errors), Chopin Op. 69/2 left hand (3), Moonlight right
     // hand bar 19 (1), Satie left hand bar 37 (1).
-    const files = readdirSync(LIBRARY).filter(
-      (f) => f.endsWith('.musicxml') && !f.includes('.fingered.'),
-    );
+    const files = LIBRARY_FILES;
     const legal: string[] = [];
     for (const file of files) {
       const { score } = parseMusicXml(readFileSync(join(LIBRARY, file)));
@@ -1006,9 +1014,7 @@ describe('consistent repeats (M3 Task 7, H4: the copies of a passage take one fi
   });
   // Solves the 30 library pieces twice: a longer timeout.
   it('on the library, repeated passages are fingered alike and no hand breaks more laws', () => {
-    const files = readdirSync(LIBRARY).filter(
-      (f) => f.endsWith('.musicxml') && !f.includes('.fingered.'),
-    );
+    const files = LIBRARY_FILES;
     let groups = 0;
     let consistentOn = 0;
     let consistentOff = 0;

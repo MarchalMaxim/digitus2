@@ -9,19 +9,13 @@ const files = existsSync(dir)
   ? readdirSync(dir).filter((f) => /\.(musicxml|xml|mxl)$/i.test(f))
   : [];
 
-describe('content library smoke test', () => {
-  it.skipIf(files.length === 0)('parses every built-in score', () => {
-    for (const f of files) {
-      const { score } = parseMusicXml(readFileSync(join(dir, f)));
-      expect(score.notes.length, f).toBeGreaterThan(0);
-      expect(
-        score.notes.some((n) => n.hand === 'L'),
-        f,
-      ).toBe(true);
-      expect(
-        score.notes.some((n) => n.hand === 'R'),
-        f,
-      ).toBe(true);
-    }
+// One test per file: the smoke test stays on every score, also those outside the benchmark set,
+// and a growing library must not run into vitest's per-test timeout (L1 plan, decision 12).
+describe.skipIf(files.length === 0)('content library smoke test', () => {
+  it.each(files)('parses %s', (f) => {
+    const { score } = parseMusicXml(readFileSync(join(dir, f)));
+    expect(score.notes.length).toBeGreaterThan(0);
+    expect(score.notes.some((n) => n.hand === 'L')).toBe(true);
+    expect(score.notes.some((n) => n.hand === 'R')).toBe(true);
   });
 });

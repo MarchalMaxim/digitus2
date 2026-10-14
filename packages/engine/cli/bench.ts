@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { hardErrors } from '../src/eval/hardErrors.js';
+import { benchmarkEntries, CORE_BENCHMARK_SET } from '../src/library/benchmarkSet.js';
 import { alignScores, fingerSeq, metricsForScores } from '../src/eval/align.js';
 import { formatPigPitch } from '../src/score/pitch.js';
 import {
@@ -846,8 +847,19 @@ export function runBench(opts: BenchOptions): {
  * alike (`repeatPairs` and `pairConsistency` per hand), and its repeated passages as a reader
  * counts them (`findRepeats` and `repeatConsistency`).
  */
-export function libraryRepeats(manifest: string, solveOpts: SolveOptions): LibraryReport {
-  const entries = JSON.parse(readFileSync(manifest, 'utf8')) as Array<{ files: { score: string } }>;
+export function libraryRepeats(
+  manifest: string,
+  solveOpts: SolveOptions,
+  set: string = CORE_BENCHMARK_SET,
+): LibraryReport {
+  const entries = benchmarkEntries(
+    JSON.parse(readFileSync(manifest, 'utf8')) as Array<{
+      slug: string;
+      files: { score: string };
+      benchmarkSet?: string | null;
+    }>,
+    set,
+  );
   let pairs = 0;
   let alike = 0;
   let groups = 0;

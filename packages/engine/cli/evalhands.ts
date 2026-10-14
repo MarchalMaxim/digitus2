@@ -6,6 +6,7 @@ import { evaluateHands } from '../src/eval/hands.js';
 import { HAND_MOTION, loadHandMotion } from '../src/io/midi/motion.js';
 import { parseMusicXml } from '../src/io/musicxml/read.js';
 import { parsePig } from '../src/io/pig/read.js';
+import { benchmarkEntries, CORE_BENCHMARK_SET } from '../src/library/benchmarkSet.js';
 import type { Score } from '../src/score/types.js';
 import { ENGINE_VERSION } from '../src/version.js';
 
@@ -15,6 +16,8 @@ export interface EvalHandsOptions {
   splitName?: string;
   subset?: 'test' | 'train';
   library?: string;
+  /** Benchmark set of the library manifest, default core30; 'all' scores every piece. */
+  librarySet?: string;
   params?: string;
   out?: string;
   label?: string;
@@ -41,7 +44,7 @@ export interface HandsScorecard {
   params: { file: string; sha256: string };
   handSeparation: { accuracy: number | null };
   pig: (HandSetResult & { split: string; splitName: string; subset: string }) | null;
-  library: (HandSetResult & { manifest: string }) | null;
+  library: (HandSetResult & { manifest: string; set: string }) | null;
 }
 
 function gitSha(): string {
@@ -131,17 +134,19 @@ export function runEvalHands(o: EvalHandsOptions): {
     const manifestPath = o.library;
     const entries = JSON.parse(readFileSync(manifestPath, 'utf8')) as Array<{
       slug: string;
+      benchmarkSet?: string | null;
       files: { score: string };
     }>;
+    const librarySet = o.librarySet ?? CORE_BENCHMARK_SET;
     const set = scoreSet(
-      entries.map((e) => ({
+      benchmarkEntries(entries, librarySet).map((e) => ({
         id: e.slug,
         load: () =>
           parseMusicXml(readFileSync(resolve(dirname(manifestPath), e.files.score))).score,
       })),
       params,
     );
-    library = { ...set, manifest: manifestPath };
+    library = { ...set, manifest: manifestPath, set: librarySet };
   }
   const scorecard: HandsScorecard = {
     version: 1,

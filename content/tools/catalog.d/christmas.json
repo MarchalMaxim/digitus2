@@ -1,0 +1,160 @@
+{
+  "task": 9,
+  "_comment": "Christmas carols and songs, own arrangements (L1 plan, Task 9). Specs and references: tools/arrangements/christmas.py. Two main candidates were rejected (see 'rejected') and replaced by the two spares of the task, o-christmas-tree and the-first-noel.",
+  "pieces": [
+    {
+      "slug": "jolly-old-saint-nicholas", "source": "own", "level": 1, "collection": "christmas",
+      "title": "Jolly Old Saint Nicholas", "composer": "James R. Murray (attributed)", "composerDates": "1841-1905",
+      "catalogue": null, "year": "1874", "tempoBpm": 96,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: 96, a steady beginner pace for the source's 'Lively' (the 1881 printing has no metronome mark)",
+      "levelNote": "Level 1: right hand in one position on D (D to A, the B as the one extension, like Twinkle's A), single notes; left hand single notes and three open fifths in G position (G2 to D3); heuristic proposes 2 (score 2.14); no published syllabus placement exists for this arrangement, and the eighth-note density raises the score just over the first cut (1.76)",
+      "notes": "Arranged in G major (the 1881 source is in A major). Right hand single notes from D4 to B4; left hand half notes on G, A, B, C and D with open fifths at the start, the middle and the end. The words are Emily Huntington Miller's 1865 poem; the music is generally attributed to James R. Murray (School Chimes, 1874).",
+      "melody": {
+        "authors": [{"name": "James Ramsey Murray (attributed)", "died": 1905}],
+        "firstPublished": 1874,
+        "reference": {
+          "url": "https://archive.org/details/franklinsquares04mccagoog/page/n84/mode/1up",
+          "retrieved": "2026-10-14",
+          "description": "Franklin Square Song Collection [No. 1], ed. J. P. McCaskey (Harper & Brothers, 1881), p. 80, soprano line, A major; same page on Wikimedia Commons (File:Jolly_old.gif)"
+        }
+      }
+    },
+    {
+      "slug": "silent-night", "source": "own", "level": 2, "collection": "christmas",
+      "title": "Silent Night (Stille Nacht)", "composer": "Franz Xaver Gruber", "composerDates": "1787-1863",
+      "catalogue": null, "year": "1818", "tempoBpm": 84,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: dotted quarter = 56 (quarter = 84), a calm lullaby pace; the reference score plays quarter = 60",
+      "levelNote": "Level 2: the melody spans C4 to F5 in 6/8 with dotted rhythms, so the right hand changes position; left hand open fifths in four positions; heuristic proposes 3 (score 5.81); no published syllabus placement exists for this arrangement, and the proposal is the heuristic's known overrating of held left-hand fifths (the core arrangements of Amazing Grace, Greensleeves and Happy Birthday are also proposed at 3 and catalogued at 2)",
+      "notes": "The contemporary melody in C major over open fifths on C, G and F, with a fifth on D under 'sleep in heavenly peace'.",
+      "melody": {
+        "authors": [{"name": "Franz Xaver Gruber", "died": 1863}],
+        "firstPublished": 1833,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Silent_Night",
+          "retrieved": "2026-10-14",
+          "description": "Score 'Contemporary' in the article (sounds in D major, 6/8)"
+        }
+      }
+    },
+    {
+      "slug": "joy-to-the-world", "source": "own", "level": 2, "collection": "christmas",
+      "title": "Joy to the World", "composer": "Lowell Mason (tune Antioch)", "composerDates": "1792-1872",
+      "catalogue": null, "year": "1836 (tune), 1719 (words, Isaac Watts)", "tempoBpm": 96,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: 96, a little under the \\midi tempo of the reference score (quarter = 102)",
+      "levelNote": "Level 2: D major (two sharps), the right hand descends a full octave and returns; left hand open fifths and single notes in D position; heuristic proposes 2 (score 3.44); no published syllabus placement exists for this arrangement",
+      "notes": "Lowell Mason's tune Antioch in D major; the left hand stays around D3 to A3 with open fifths on D.",
+      "melody": {
+        "authors": [{"name": "Lowell Mason", "died": 1872}, {"name": "George Frideric Handel (attributed phrases)", "died": 1759}],
+        "firstPublished": 1836,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Joy_to_the_World",
+          "retrieved": "2026-10-14",
+          "description": "Score in the article (Lowell Mason, The Modern Psalmist, 1839, No. 144), soprano, D major"
+        }
+      }
+    },
+    {
+      "slug": "o-come-all-ye-faithful", "source": "own", "level": 2, "collection": "christmas",
+      "title": "O Come, All Ye Faithful (Adeste Fideles)", "composer": "John Francis Wade", "composerDates": "1711-1786",
+      "catalogue": null, "year": "c. 1751", "tempoBpm": 90,
+      "arranger": "digitus2 project",
+      "tempoSource": "reference: the \\midi tempo of the Wikipedia score (quarter = 90)",
+      "levelNote": "Level 2: G major, the melody moves between D4 and D5 with position changes; left hand open fifths changing on beats 1 and 3; heuristic proposes 3 (score 5.43); no published syllabus placement exists for this arrangement, and the proposal is the heuristic's known overrating of held left-hand fifths (the core arrangements of Amazing Grace, Greensleeves and Happy Birthday are also proposed at 3 and catalogued at 2)",
+      "notes": "The hymn tune in G major; the left hand plays open fifths and single notes, changing harmony at most twice a bar.",
+      "melody": {
+        "authors": [{"name": "John Francis Wade", "died": 1786}],
+        "firstPublished": 1751,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/O_Come,_All_Ye_Faithful",
+          "retrieved": "2026-10-14",
+          "description": "Score in the article (four-part organ setting), upper voice, G major"
+        }
+      }
+    },
+    {
+      "slug": "deck-the-halls", "source": "own", "level": 2, "collection": "christmas",
+      "title": "Deck the Halls", "composer": "Traditional (Welsh, 'Nos Galan')", "composerDates": null,
+      "catalogue": null, "year": "1794 (melody), 1862 (English words)", "tempoBpm": 108,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: 108, lively but manageable; the 1881 source gives no tempo",
+      "levelNote": "Level 2: F major with dotted rhythms and running eighths in the fa-la-la refrains; left hand open fifths in four positions; heuristic proposes 3 (score 4.99); no published syllabus placement exists for this arrangement, and the proposal is the heuristic's known overrating of held left-hand fifths (the core arrangements of Amazing Grace, Greensleeves and Happy Birthday are also proposed at 3 and catalogued at 2)",
+      "notes": "The 1881 version (without the middle fa-la-la of later versions), with its repeated second half written out. Left hand open fifths on F, C, G and B-flat.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1794,
+        "reference": {
+          "url": "https://archive.org/details/franklinsquares04mccagoog/page/n124/mode/1up",
+          "retrieved": "2026-10-14",
+          "description": "Franklin Square Song Collection [No. 1], ed. J. P. McCaskey (Harper & Brothers, 1881), p. 120, soprano line, F major"
+        }
+      }
+    },
+    {
+      "slug": "good-king-wenceslas", "source": "own", "level": 2, "collection": "christmas",
+      "title": "Good King Wenceslas", "composer": "Traditional (Piae Cantiones, 1582)", "composerDates": null,
+      "catalogue": null, "year": "1582 (melody), 1853 (words, J. M. Neale)", "tempoBpm": 100,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: 100 (half note = 50), a walking carol pace; the source gives only a dynamic",
+      "levelNote": "Level 2: G major, quarter-note melody over an octave (D4 to D5); left hand open fifths in several positions; heuristic proposes 3 (score 5.11); no published syllabus placement exists for this arrangement, and the proposal is the heuristic's known overrating of held left-hand fifths (the core arrangements of Amazing Grace, Greensleeves and Happy Birthday are also proposed at 3 and catalogued at 2)",
+      "notes": "Arranged in G major (the source is in A major) in 4/4; the left hand plays open fifths on G, C, D, A and E.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1582,
+        "reference": {
+          "url": "https://archive.org/details/christmascarolsn00bramuoft/page/n21/mode/1up",
+          "retrieved": "2026-10-14",
+          "description": "Christmas Carols New and Old, first series, ed. Bramley and Stainer (Novello), No. 10, p. 20, soprano line, A major"
+        }
+      }
+    },
+    {
+      "slug": "o-christmas-tree", "source": "own", "level": 2, "collection": "christmas",
+      "title": "O Christmas Tree (O Tannenbaum)", "composer": "Traditional (German)", "composerDates": null,
+      "catalogue": null, "year": "1824 (Ernst Anschütz)", "tempoBpm": 90,
+      "arranger": "digitus2 project",
+      "tempoSource": "reference: the \\midi tempo of the Wikipedia score (quarter = 90)",
+      "levelNote": "Level 2: G major in 3/4 with dotted rhythms, the melody spans D4 to E5; left hand open fifths and single notes; heuristic proposes 3 (score 4.81); no published syllabus placement exists for this arrangement, and the proposal is the heuristic's known overrating of held left-hand fifths (the core arrangements of Amazing Grace, Greensleeves and Happy Birthday are also proposed at 3 and catalogued at 2)",
+      "notes": "Anschütz's 1824 tune with its middle section and the da capo written out; open fifths on G, A, C and D in the left hand.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1824,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/O_Tannenbaum",
+          "retrieved": "2026-10-14",
+          "description": "Score in the article's section on the melody (sung line, D.C. al fine), G major"
+        }
+      }
+    },
+    {
+      "slug": "the-first-noel", "source": "own", "level": 2, "collection": "christmas",
+      "title": "The First Noel", "composer": "Traditional (English, Cornish)", "composerDates": null,
+      "catalogue": null, "year": "1823 (first printed)", "tempoBpm": 96,
+      "arranger": "digitus2 project",
+      "tempoSource": "editorial: 96, a moderate hymn pace; the source gives only a dynamic",
+      "levelNote": "Level 2: D major (two sharps) in 3/4, verse and chorus, the melody spans D4 to D5; left hand open fifths in several positions; heuristic proposes 3 (score 6.19); no published syllabus placement exists for this arrangement, and the proposal is the heuristic's known overrating of held left-hand fifths (the core arrangements of Amazing Grace, Greensleeves and Happy Birthday are also proposed at 3 and catalogued at 2)",
+      "notes": "Verse 1 and the chorus as printed by Bramley and Stainer, over open fifths on D, G, A and B.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1823,
+        "reference": {
+          "url": "https://archive.org/details/christmascarolsn00bramuoft/page/n13/mode/1up",
+          "retrieved": "2026-10-14",
+          "description": "Christmas Carols New and Old, first series, ed. Bramley and Stainer (Novello), No. 6, pp. 12 and 13, soprano line, D major"
+        }
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "we-wish-you-a-merry-christmas",
+      "reason": "The tune as it is known today was first printed in 1935 (Arthur Warrell's arrangement, Oxford University Press); the 19th-century versions documented in the Wikipedia article and the Vaughan Williams Memorial Library use different tunes. That fails the 1928 publication cut-off for melodies, and no notated source from 1928 or earlier was found (no score on any of the 27 Wikipedia language editions). Replaced by the spare o-christmas-tree."
+    },
+    {
+      "slug": "up-on-the-housetop",
+      "reason": "No notated public-domain source from 1928 or earlier was found: no score on the English Wikipedia or its 5 other language editions, the Internet Archive's full-text search finds the song only in books from 1948 onwards, and IMSLP has only a 2010 CC BY 3.0 arrangement. Hanby's first printing (1866, The Dove) is not online. Replaced by the spare the-first-noel."
+    }
+  ]
+}

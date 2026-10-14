@@ -1,0 +1,179 @@
+{
+  "task": 17,
+  "_comment": "L1 plan Task 17: Mutopia engravings, sonatinas and sonatas (docs/superpowers/plans/2026-10-14-l1-curated-library.md). Facts from content/tools/candidates.json and the fetched RDF; retrievedAt is the fetch log's date. Syllabus sources: Henle levels of difficulty https://www.henle.de/Levels-of-Difficulty/ (level 3 is Beethoven Op. 49 No. 2), HN 848 https://www.henle.de/Six-Piano-Sonatinas-op.-36/HN-848, HN 1391 https://www.henle.de/en/Five-Easy-Piano-Sonatas/HN-1391, HN 1392 https://www.henle.de/en/Five-Famous-Piano-Sonatas/HN-1392, HN 1300 https://www.henle.de/en/Piano-Sonata-A-major-K.-331-Alla-Turca/HN-1300, ABRSM 2023-2024 Grade 6 list as given by https://www.online-academy.informance.biz/courses/10-a-guide-to-the-abrsm-syllabus-2023-2024-intermediate/132 (all retrieved 2026-10-14).",
+  "pieces": [
+    {
+      "slug": "clementi-sonatina-op36-no1-mvt2", "source": "mutopia", "level": 3,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "ClementiM/O36/sonatina-1", "main": "sonatina-1.ly",
+      "publishedMidi": "sonatina-1-mids/sonatina-1-1.mid", "sourceSha256": "788160d26cfc5d637bd531124607d3136df105004ece2c2b1154629226751e04",
+      "title": "Sonatina in C major, 2nd movement (Andante)", "composer": "Muzio Clementi", "composerDates": "1752-1832",
+      "catalogue": "Op. 36 No. 1", "year": "1797", "tempoBpm": 92,
+      "convert": {"score": 2},
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 92, inside the usual Andante range); the engraving prints Andante without a metronome mark",
+      "levelNote": "Henle rates Sonatina Op. 36 No. 1 as a whole at 3, easy (HN 848; the plan maps Henle 3 near our 4); kept at 3 like the core 1st movement, the Andante being the sonatina's gentlest movement. Heuristic proposes 3.",
+      "notes": "Second movement, in F major (the Mutopia file holds all three movements; the core library has the first). Engraved from the G. Schirmer Sonatina Album (1893)."
+    },
+    {
+      "slug": "clementi-sonatina-op36-no1-mvt3", "source": "mutopia", "level": 3,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "ClementiM/O36/sonatina-1", "main": "sonatina-1.ly",
+      "publishedMidi": "sonatina-1-mids/sonatina-1-2.mid", "sourceSha256": "788160d26cfc5d637bd531124607d3136df105004ece2c2b1154629226751e04",
+      "title": "Sonatina in C major, 3rd movement (Vivace)", "composer": "Muzio Clementi", "composerDates": "1752-1832",
+      "catalogue": "Op. 36 No. 1", "year": "1797", "tempoBpm": 80,
+      "convert": {"score": 3},
+      "tempoSource": "LilyPond \\midi block of the source (eighth = 160, that is quarter = 80: Vivace counted in eighths, a moderate study tempo); the engraving prints Vivace without a metronome mark",
+      "levelNote": "Henle rates Sonatina Op. 36 No. 1 as a whole at 3, easy (HN 848; the plan maps Henle 3 near our 4); kept at 3 like the core 1st movement. Heuristic proposes 2 at the source's moderate tempo.",
+      "notes": "Third movement (the Mutopia file holds all three movements; the core library has the first). Engraved from the G. Schirmer Sonatina Album (1893)."
+    },
+    {
+      "slug": "kuhlau-sonatina-op20-no1-mvt2", "source": "mutopia", "level": 3,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "KuhlauF/O20/sonatine-1-andante", "main": "sonatine-1-andante.ly",
+      "publishedMidi": "sonatine-1-andante.mid", "sourceSha256": "585365c825d5b2cb11eec50d386406ab390586ca1a6887d83780311dfd7d4888",
+      "title": "Sonatina in C major, 2nd movement (Andante)", "composer": "Friedrich Kuhlau", "composerDates": "1786-1832",
+      "catalogue": "Op. 20 No. 1", "year": "1820", "tempoBpm": 72,
+      "convert": {
+        "patches": [
+          {
+            "file": "sonatine-1-andante.ly",
+            "find": "\\\\bar \"\\|\\.\"(?=\\s*\\\\repeat volta 2)",
+            "replace": "",
+            "count": 1
+          }
+        ]
+      },
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 72, dotted quarter = 48 in 6/8, a usual Andante); the engraving prints Andante without a metronome mark",
+      "levelNote": "No published placement found for the Andante; the sonatina's 1st movement is ABRSM Grade 6 (2023-2024, list A), and this 16-bar slow movement is far shorter and slower. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonatine I - Andante'; in F major. Engraved from a 19th-century B. Schott's Söhne edition (Drei Sonatinen, Op. 20). The source's explicit end bar line (\\bar \"|.\") at the start of the repeated second part, bar 8, is removed before conversion: it hid the repeat start, so the MusicXML had a repeat back to bar 1 instead of to the upbeat of bar 9; LilyPond now draws the start-repeat bar line there. Notes and MIDI are unchanged."
+    },
+    {
+      "slug": "kuhlau-sonatina-op20-no1-mvt1", "source": "mutopia", "level": 4,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "KuhlauF/O20/sonatine-1-allegro", "main": "sonatine-1-allegro.ly",
+      "publishedMidi": "sonatine-1-allegro.mid", "sourceSha256": "655189a5bf1ca33d681cf98e6b342706e1a0d201e43a4c0b3a4128472b9be592",
+      "title": "Sonatina in C major, 1st movement (Allegro)", "composer": "Friedrich Kuhlau", "composerDates": "1786-1832",
+      "catalogue": "Op. 20 No. 1", "year": "1820", "tempoBpm": 120,
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 120, a usual Allegro); the engraving prints Allegro without a metronome mark",
+      "levelNote": "ABRSM Grade 6 (2023-2024 syllabus, list A: 'Allegro, 1st mvt from Sonatina in C, Op. 20 No. 1'), about our 4. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonatine I - Allegro'. Engraved from a 19th-century B. Schott's Söhne edition (Drei Sonatinen, Op. 20), including its fingerings."
+    },
+    {
+      "slug": "kuhlau-sonatina-op20-no1-mvt3", "source": "mutopia", "level": 4,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "KuhlauF/O20/sonatine-1-rondo", "main": "sonatine-1-rondo.ly",
+      "publishedMidi": "sonatine-1-rondo.mid", "sourceSha256": "918e76fe1618a5b0a99ca1ac47502cb587b041d6d8fad480ee443794c3ee556e",
+      "title": "Sonatina in C major, 3rd movement (Rondo: Allegro)", "composer": "Friedrich Kuhlau", "composerDates": "1786-1832",
+      "catalogue": "Op. 20 No. 1", "year": "1820", "tempoBpm": 120,
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 120, a usual Allegro in 2/4); the engraving prints Allegro without a metronome mark",
+      "levelNote": "No published placement found for the Rondo; the same sonatina's 1st movement is ABRSM Grade 6 (2023-2024, list A), about our 4, and the Rondo is as fast and longer. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonatine I - Rondo'. Engraved from a 19th-century B. Schott's Söhne edition (Drei Sonatinen, Op. 20), including its fingerings."
+    },
+    {
+      "slug": "mozart-sonata-k545-mvt2", "source": "mutopia", "level": 4,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "MozartWA/KV545/K545-2", "main": "K545-2.ly",
+      "publishedMidi": "K545-2.mid", "sourceSha256": "a0803833e41cc261aa9b0d7aec8f5256e97894bb7eac7bbc2457c7efd42ba9fe",
+      "title": "Piano Sonata in C major ('Sonata facile'), 2nd movement (Andante, theme)", "composer": "Wolfgang Amadeus Mozart", "composerDates": "1756-1791",
+      "catalogue": "K. 545", "year": "1788", "tempoBpm": 60,
+      "convert": {"barTo": 32},
+      "excerpt": "Bars 1-32 of 74: the theme section, two repeated halves that both end on the tonic (G major); the G minor middle section, the return and the coda are left out. The whole movement plays 5:18 with its repeats at the default tempo, over the 4:15 limit.",
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 60, a usual Andante); the engraving prints Andante without a metronome mark",
+      "levelNote": "No per-movement placement verified; same sonata as the core 1st movement (level 4), with the same Alberti left hand under a decorated cantabile line. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonata Facile - Second movement'. Engraved from an IMSLP scan (edition not named), including its fingerings. The engraving is CC BY-SA 3.0 (attribution: Alejandro Sierra / Mutopia Project); this MusicXML is shared under the same license."
+    },
+    {
+      "slug": "mozart-sonata-k545-mvt3", "source": "mutopia", "level": 4,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "MozartWA/KV545/K545-3", "main": "K545-3.ly",
+      "publishedMidi": "K545-3.mid", "sourceSha256": "d3c06608dc1a1433f0328aa77986cf01834c24dc67d91e421f1da5fe1b10a9fc",
+      "title": "Piano Sonata in C major ('Sonata facile'), 3rd movement (Rondo: Allegretto)", "composer": "Wolfgang Amadeus Mozart", "composerDates": "1756-1791",
+      "catalogue": "K. 545", "year": "1788", "tempoBpm": 104,
+      "convert": {
+        "patches": [
+          {
+            "file": "K545-3.ly",
+            "find": "g4\\.-1\\\\\\( fis8-2(.*?)g8\\\\\\) g,",
+            "replace": "g4.-1 fis8-2\\1g8 g,",
+            "dotall": true,
+            "count": 1
+          },
+          {
+            "file": "K545-3.ly",
+            "find": "d8_4\\( e f e(.*?)<d,-4 f-2>4\\)",
+            "replace": "d8_4 e f e\\1<d,-4 f-2>4",
+            "dotall": true,
+            "count": 1
+          }
+        ]
+      },
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 104, a usual Allegretto in 2/4); the engraving prints no metronome mark",
+      "levelNote": "No per-movement placement verified; same sonata as the core 1st movement (level 4), with sixteenth-note passage work in both hands. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonata Facile - Third movement'. Engraved from an IMSLP scan (edition not named), including its fingerings. The engraving is CC BY-SA 3.0 (attribution: Alejandro Sierra / Mutopia Project); this MusicXML is shared under the same license. Two left-hand slurs that start inside a two-voice passage and end in the main voice (a phrasing slur in bars 15-16 and a slur in bars 46-47) were removed before conversion: LilyPond 2.24 cannot end such a slur and drops it from its own engraving ('unterminated slur'), and the killed slur crashed the converter's dump engraver. Notes and MIDI are unchanged."
+    },
+    {
+      "slug": "beethoven-sonata-op49-no2-mvt2", "source": "mutopia", "level": 4,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "BeethovenLv/O49/LVB_Sonate_49no2_2", "main": "LVB_Sonate_49no2_2.ly",
+      "publishedMidi": "LVB_Sonate_49no2_2.mid", "sourceSha256": "235b676a2f96e17db771d83275081b574e848efe4f38eecaec62ce0fa3541c5b",
+      "title": "Sonata in G major, 2nd movement (Tempo di Menuetto)", "composer": "Ludwig van Beethoven", "composerDates": "1770-1827",
+      "catalogue": "Op. 49 No. 2", "year": "1795-96", "tempoBpm": 134,
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 134, a brisk but usual Tempo di Menuetto); the engraving prints Tempo di Menuetto without a metronome mark",
+      "levelNote": "Henle 3 (easy) for Sonata Op. 49 No. 2 (HN 1391; Henle's own example of level 3), which the plan maps to our 4. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonata No. 20 (2nd Movement: Tempo di Menuetto)'. Composed 1795-96, published 1805. Engraved from the Breitkopf & Härtel complete edition (1862-1865)."
+    },
+    {
+      "slug": "beethoven-sonata-op49-no1-mvt1", "source": "mutopia", "level": 4,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "BeethovenLv/O49/LVB_Sonate_49no1_1", "main": "LVB_Sonate_49no1_1.ly",
+      "publishedMidi": "LVB_Sonate_49no1_1.mid", "sourceSha256": "6d621bcddc86087d03fabba3b501a219227ee63667a553fd7e7263c091836a68",
+      "title": "Sonata in G minor, 1st movement (Andante)", "composer": "Ludwig van Beethoven", "composerDates": "1770-1827",
+      "catalogue": "Op. 49 No. 1", "year": "1796-98", "tempoBpm": 98,
+      "convert": {"dropText": ["^scripts\\.turn$"]},
+      "tempoSource": "the source's own \\tempo 4 = 98, not printed (quarter = 98, inside the usual Andante range); the engraving prints Andante without a metronome mark",
+      "levelNote": "Henle 3 (easy) for Sonata Op. 49 No. 1 (HN 1391), which the plan maps to our 4. Heuristic proposes 3.",
+      "notes": "Mutopia title 'Sonata No. 19 (1st Movement: Andante)'. Composed 1796-98, published 1805. Engraved from the Breitkopf & Härtel complete edition (1862-1865). The plan's first level-4 spare, used in place of haydn-sonata-hob-xvi-27-mvt2 (rejected below). The six delayed turns, which the engraving draws as a turn glyph in a text markup between a dotted eighth and its sixteenth (bars 17, 19, 21, 22, 25 and 88), are left out: the converter would print them as the words 'scripts.turn' and has no delayed-turn ornament. The notes and the MIDI are unaffected."
+    },
+    {
+      "slug": "mozart-sonata-k331-mvt3-rondo-alla-turca", "source": "mutopia", "level": 5,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "MozartWA/KV331/KV331_3_RondoAllaTurca", "main": "KV331_3_RondoAllaTurca.ly",
+      "subdir": "KV331_3_RondoAllaTurca-lys/KV331_3_RondoAllaTurca-lys",
+      "publishedMidi": "KV331_3_RondoAllaTurca.mid", "sourceSha256": "eb5aeab7ca2cd4299e7a99f95dee9c8d2d52d73c8327474b6249c1ee4d5a20d9",
+      "title": "Rondo alla Turca (Piano Sonata in A major, 3rd movement)", "composer": "Wolfgang Amadeus Mozart", "composerDates": "1756-1791",
+      "catalogue": "K. 331", "year": "1783", "tempoBpm": 120,
+      "tempoSource": "editorial: quarter = 120, the lower end of usual Allegretto tempos for this rondo; the source has no tempo (its empty \\midi block plays LilyPond's default quarter = 60), and the engraving prints Allegretto without a metronome mark",
+      "levelNote": "Henle 6 (medium) and ABRSM Grade 8 for Sonata K. 331 (HN 1300), above the Henle 4 that the plan maps to our 5. Heuristic proposes 3 (score 8.92, just under the level-4 cut).",
+      "levelOverride": "The heuristic proposes 3, but Henle rates the sonata 6 and ABRSM sets it at Grade 8 (HN 1300). Note density is measured at the moderate default tempo, and the heuristic has no feature for the right hand's octaves and broken octaves in the A major refrain.",
+      "notes": "Mutopia title 'Sonate Opus KV 331 - Rondo Alla Turca'. Complete movement (3:28 with its repeats at the default tempo). Engraved from an IMSLP scan (edition not named), including its fingerings. The source is a zip of two files: KV331_3_RondoAllaTurca.ly includes KV331_3_RondoAllaTurcaNotes.ly (SHA-256 281da85484e82f2c874d8ab6d710868b70b54d44b3a01b5b7d396b4086125d89); sourceSha256 is that of the main .ly, and the zip's is ac2eba084c584b5e820e8a4554efdf630fa63e661b61ad064a85c041ce92fb24."
+    },
+    {
+      "slug": "beethoven-sonata-op13-mvt2", "source": "mutopia", "level": 5,
+      "collection": "sonatinas", "retrievedAt": "2026-10-14",
+      "ftpDir": "BeethovenLv/O13/pathetique-2", "main": "pathetique-2.ly",
+      "publishedMidi": "pathetique-2.mid", "sourceSha256": "7d7c233230bc558d6275119b1ca9af1b4f5ebe762e29855698fc1e08032acc7a",
+      "title": "Piano Sonata No. 8 'Pathétique', 2nd movement (Adagio cantabile, opening)", "composer": "Ludwig van Beethoven", "composerDates": "1770-1827",
+      "catalogue": "Op. 13", "year": "1798", "tempoBpm": 36,
+      "convert": {"barTo": 16},
+      "excerpt": "Bars 1-16 of 73: the theme and its restatement an octave higher, ending on the tonic (A-flat major); the last bar keeps its run-up into the first episode.",
+      "tempoSource": "the source's own hidden \\tempo 4 = 36 (eighth = 72, a usual Adagio); the engraving prints Adagio cantabile without a metronome mark",
+      "levelNote": "Henle 7 (difficult) for Sonata Op. 13 (HN 1392); an opening of its slow movement, like the core Moonlight opening (also a Henle 7 sonata) at level 5. Heuristic proposes 3.",
+      "levelOverride": "The heuristic proposes 3 because the Adagio is slow (5 notes per second), but Henle rates the sonata 7 (HN 1392), and in bars 1-8 the right hand sings the melody over its own semiquaver accompaniment, voicing the heuristic does not measure; the core Moonlight opening is level 5 for the same reason.",
+      "notes": "Mutopia title 'Sonata No. 8 “Pathétique” (2nd Movement: Adagio cantabile)'. Engraved by Chris Sawer from the Berners edition (1908, ed. A. Winterberger), with fingerings and dynamics added by Javier Ruiz-Alma from the Köhler and Ruthardt Peters edition (1910), including those fingerings."
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "haydn-sonata-hob-xvi-27-mvt2", "ftpDir": "HaydnFJ/HOB-XVI-27/hob-xvi-27-ii-menuet-trio", "mutopiaId": "186", "level": 4,
+      "reason": "Converted exactly (LilyPond 2.24 MIDI 637/637), but fails the span and lint gates: two span-flagged slices (bar 29 left hand G2 G3 B3 and bar 31 right hand G4 G5 B5, 16 semitones: cross-staff passages, where the staff-based hand assignment gives notes of both hands to one hand) and L05 law errors (9 at medium, 7 at large) in bars 29, 31, 44, 46, 60 and 62. The Menuetto's first part ends in D major at bar 16, so no section of at least 16 bars ends on the tonic before bar 29; it also plays 4:18 with its repeats at the source's tempo. Dropped; replaced by the spare beethoven-sonata-op49-no1-mvt1."
+    },
+    {
+      "slug": "mozart-sonata-k331-mvt1-theme", "ftpDir": "MozartWA/KV331/KV331_1_1_tema", "mutopiaId": "614", "level": 4, "spare": true,
+      "reason": "Spare, trial-built only (not needed after beethoven-sonata-op49-no1-mvt1 passed): the LilyPond 2.24 MIDI check is not exact (2 notes only in the MIDI)."
+    },
+    {
+      "slug": "beethoven-minuet-woo-82", "ftpDir": "BeethovenLv/WoO82/menuett_WoO82", "mutopiaId": "904", "level": 4, "spare": true,
+      "reason": "Spare, trial-built only (not needed): one L03 law error at medium and a LilyPond 2.24 MIDI check that is not exact (1 note only in the MIDI)."
+    }
+  ]
+}

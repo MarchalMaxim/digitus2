@@ -1,0 +1,198 @@
+{
+  "task": 11,
+  "_comment": "L1 plan Task 11 (docs/superpowers/plans/2026-10-14-l1-curated-library.md): own arrangements for the collection 'Folk songs', built by tools/arrange.py from tools/arrangements/folk.py, CC0. Fields as documented in catalog.json's _comment. Every melody is traditional or by an author who died in 1955 or earlier (Korobeiniki: the 1898 setting attributed to Yakov Prigozhy, died 1920); melody.reference names the notated source the arrangement reproduces (tests/test_arrangements.py), whose notation is kept in content/_raw/references/<slug>.txt. No syllabus lists these arrangements, so each levelNote gives the hand shapes and the heuristic's proposal (level.py, the score in brackets). yankee-doodle is at level 2, not the planned 1: its verse needs seven different right-hand notes, more than one five-finger position with one extension covers, so it is arranged with its chorus at level 2 and, as the plan's remedy for a level-rule failure says, one level-2 piece is dropped (home-on-the-range, not arranged). Spares used: red-river-valley for shenandoah, loch-lomond for londonderry-air. Not arranged: see 'rejected'.",
+  "pieces": [
+    {
+      "slug": "yankee-doodle",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "Yankee Doodle",
+      "composer": "Traditional (American)",
+      "composerDates": null,
+      "catalogue": null,
+      "year": "18th century (the tune appears in the ballad opera The Disappointment, 1762)",
+      "tempoBpm": 112,
+      "tempoSource": "editorial: an easy march for beginners; the note values of the 2/4 reference are doubled, so quarter = 112 here is its eighth = 112",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand single notes B3-C5 (13 semitones) that move positions within every phrase (the verse alone needs seven different notes, D4 to C5, more than one five-finger position with one extension covers), left hand G and D half notes in the verse, C, G and D major triads in the chorus; no syllabus lists this arrangement; heuristic proposes 2 (3.73)",
+      "notes": "Verse and chorus as in the reference, transposed from A to G major with the note values doubled; the chorus is louder. Left hand: G and D half notes under the verse, C, G and D major triads under the chorus.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": null,
+        "reference": {
+          "url": "https://zh.wikipedia.org/wiki/%E6%B4%8B%E5%9F%BA%E6%AD%8C",
+          "retrieved": "2026-10-14",
+          "description": "Score in the Chinese Wikipedia article (revision 87230830), A major, 2/4: verse and chorus. The English article has only an image; the verse agrees with the version in Grove's Dictionary (vol. 4, 1889, p. 510) except bar 4."
+        }
+      }
+    },
+    {
+      "slug": "auld-lang-syne",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "Auld Lang Syne",
+      "composer": "Traditional (Scottish)",
+      "composerDates": null,
+      "catalogue": null,
+      "year": "tune first printed 1799 (George Thomson, Select Songs of Scotland); words Robert Burns, 1788",
+      "tempoBpm": 80,
+      "tempoSource": "editorial: a moderate song tempo; the reference gives none",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand C4-D5 with dotted rhythms and position changes, left hand open fifths held a bar or half a bar; no syllabus lists this arrangement; heuristic proposes 3 (6.30), which overrates held left-hand fifths (as for the core Amazing Grace and Greensleeves)",
+      "notes": "The whole tune in F major over open fifths (F, C, B-flat and G minor), one per bar or half bar.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1799,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Auld_Lang_Syne",
+          "retrieved": "2026-10-14",
+          "description": "Score in the English Wikipedia article (revision 1380084234), F major, 4/4, the whole tune."
+        }
+      }
+    },
+    {
+      "slug": "sakura-sakura",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "Sakura, Sakura",
+      "composer": "Traditional (Japanese)",
+      "composerDates": null,
+      "catalogue": null,
+      "year": "first printed 1888 (Sokyokushu, Japanese Ministry of Education)",
+      "tempoBpm": 72,
+      "tempoSource": "editorial: slow, as the song is usually sung; the reference gives none",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand B3-C5 in the Japanese miyako-bushi scale, slow, left hand open fifths on A, E and D; no syllabus lists this arrangement; heuristic proposes 3 (5.32), which overrates held left-hand fifths (as for the core Amazing Grace and Greensleeves)",
+      "notes": "The whole song as first printed in 1888, without key signature (A minor), over open fifths; it ends on an open fifth on E, the tune's final.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1888,
+        "reference": {
+          "url": "https://zh.wikipedia.org/wiki/%E6%A8%B1%E8%8A%B1_(%E6%B0%91%E8%B0%A3)",
+          "retrieved": "2026-10-14",
+          "description": "Score in the Chinese Wikipedia article (revision 91594626), A minor, 4/4, the whole song, set to the text of the first print (Sokyokushu, 1888). Its pitches equal that print's (National Diet Library, https://dl.ndl.go.jp/pid/857651, frames 22-23, No. 2); in bars 13-14 the score has the later 1941 rhythm, the arrangement the 1888 one. The English article has only an image."
+        }
+      }
+    },
+    {
+      "slug": "korobeiniki",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "Korobeiniki (The Peddlers)",
+      "composer": "Traditional (Russian), in the setting attributed to Yakov Prigozhy",
+      "composerDates": "1840-1920",
+      "catalogue": null,
+      "year": "1898 (music; words Nikolay Nekrasov, 1861)",
+      "tempoBpm": 96,
+      "tempoSource": "editorial: a moderate tempo for the dotted rhythms; the reference gives none",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand E4-A5 with dotted rhythms, left hand root-position triads (A minor, D minor, E major) held a bar or half a bar; no syllabus lists this arrangement; heuristic proposes 3 (5.63), which overrates held left-hand chords (as for the core Amazing Grace and Greensleeves)",
+      "notes": "The folk song (not the 1989 video-game arrangement), with the repeat of the second strain written out, over A minor, D minor and E major triads. The music was first printed in 1898; the Russian Wikipedia names Yakov Prigozhy's setting as the most popular version.",
+      "melody": {
+        "authors": [{"name": "Yakov Prigozhy (attributed: the popular 1898 setting of the folk song)", "died": 1920}],
+        "firstPublished": 1898,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Korobeiniki",
+          "retrieved": "2026-10-14",
+          "description": "Score in the 'Melody' section of the English Wikipedia article (revision 1373187891), A minor, 4/4, with the second strain's repeat. Authorship: the Russian article (Korobushka, revision 154398704) dates the music to 1898 and calls Yakov Prigozhy's setting (Prigozhy 1840-1920) the most popular; it also names settings by A. N. Chernyavsky (1898), A. Dagmarov (1903) and V. S. Ruzhitsky (1905)."
+        }
+      }
+    },
+    {
+      "slug": "la-cucaracha",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "La Cucaracha",
+      "composer": "Traditional (Spanish and Mexican)",
+      "composerDates": null,
+      "catalogue": null,
+      "year": "19th century (verses documented from 1819; popular in the 1910s)",
+      "tempoBpm": 120,
+      "tempoSource": "editorial: a little below the quarter = 132 of the reference score's MIDI block",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand C4-D5 in eighth notes with an upbeat, left hand open fifths held a bar; no syllabus lists this arrangement; heuristic proposes 3 (5.57), which overrates held left-hand fifths (as for the core Amazing Grace and Greensleeves)",
+      "notes": "Chorus, verse and chorus again in F major (3/4), over open fifths on F, C and G.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": null,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/La_Cucaracha",
+          "retrieved": "2026-10-14",
+          "description": "Score in the 'Melody' section of the English Wikipedia article (revision 1376650501), F major, 3/4: chorus, verse, chorus."
+        }
+      }
+    },
+    {
+      "slug": "red-river-valley",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "Red River Valley",
+      "composer": "Traditional (North American)",
+      "composerDates": null,
+      "catalogue": null,
+      "year": "first sheet music 1896 (as 'In the Bright Mohawk Valley', credited to James J. Kerrigan); words printed 1887",
+      "tempoBpm": 90,
+      "tempoSource": "the reference score's tempo mark, quarter = 90",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand D4-D5 in eighth notes with an upbeat and one tie, left hand open fifths, then broken fifths; no syllabus lists this arrangement; heuristic proposes 2 (4.05)",
+      "notes": "Spare used in place of Shenandoah (no notated source). The tune twice, as verse and refrain, in G major: open fifths in the first stanza, broken fifths in the second. The first sheet music (New York, 1896) names James J. Kerrigan as writer, but the song circulated before: a lyric manuscript annotated 'Nemaha 1879' and 'Harlan 1885', and a readers' request for the words in The Weekly Wisconsin in June 1887, printed there that September; the English Wikipedia gives the writer as 'Traditional'.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1896,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/Red_River_Valley_(song)",
+          "retrieved": "2026-10-14",
+          "description": "Score in the English Wikipedia article (revision 1378721571), G major, 4/4: one stanza, sung twice. The article names James J. Kerrigan (dates unknown) as the writer on the 1896 sheet music 'In the Bright Mohawk Valley', cites the earlier circulation of the words (manuscript 'Nemaha 1879', 'Harlan 1885'; The Weekly Wisconsin, 1887) and gives the writer as 'Traditional'."
+        }
+      }
+    },
+    {
+      "slug": "loch-lomond",
+      "source": "own",
+      "level": 2,
+      "collection": "folk-songs",
+      "title": "Loch Lomond",
+      "composer": "Traditional (Scottish)",
+      "composerDates": null,
+      "catalogue": null,
+      "year": "earliest known sheet music 1840 or 1841 (Paterson and Sons, Edinburgh)",
+      "tempoBpm": 80,
+      "tempoSource": "editorial: a moderate song tempo; the reference gives none",
+      "arranger": "digitus2 project",
+      "levelNote": "Level 2: right hand C4-D5 (14 semitones) in quarters and eighths with position changes, left hand triads within a fifth (F, G minor, B-flat, D minor, C), then root and fifth in half notes; no syllabus lists this arrangement; heuristic proposes 3 (4.34), just above the 2/3 cut (4.09), because held left-hand triads raise the score (as for the core Amazing Grace and Greensleeves)",
+      "notes": "Spare used in place of the Londonderry Air (its melody is too wide for level 2). Verse and chorus in F major as edited by Robert Ford: held triads under the verse, root and fifth under the chorus. The Scotch snaps and dotted pairs are played as even eighths. Lady John Scott (1810-1900), sometimes credited, only noted down the song she heard sung, per the English Wikipedia; the composer is unknown.",
+      "melody": {
+        "authors": "traditional",
+        "firstPublished": 1841,
+        "reference": {
+          "url": "https://en.wikipedia.org/wiki/The_Bonnie_Banks_o%27_Loch_Lomond",
+          "retrieved": "2026-10-14",
+          "description": "Score image in the English Wikipedia article (revision 1378516938), Wikimedia Commons 'File:The Bonnie Banks o' Loch Lomond.png' (file page revision 1120198809, image SHA-1 c24fdc64a6a44f8b421f7248fb3f4a62342cd1cc), read from the image: the song as edited by Robert Ford (caption 1904, Commons description 1909), F major, C time, verse and chorus."
+        }
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "londonderry-air",
+      "plannedLevel": 2,
+      "reason": "The melody spans 20 semitones: B3 (bar 6) to G5 (bar 13) in the first edition (Petrie, 1855, E-flat major), as transcribed in the English Wikipedia article (https://en.wikipedia.org/wiki/Londonderry_Air, revision 1379606583, read 2026-10-14). The level-2 rule allows the right hand 19 (tests/test_arrangements.py, test_level_two_rules) and the arrangements are level 1 or 2 only, so no arrangement keeps the melody exact; transposition does not change the span. Replaced by the spare loch-lomond."
+    },
+    {
+      "slug": "shenandoah",
+      "plannedLevel": 2,
+      "reason": "No notated source in text: the English Wikipedia article (Oh Shenandoah) and the German, Swedish, Japanese, Portuguese and Chinese ones have no score, and Wikisource and Wikiversity have none. The two text transcriptions found (folkinfo.org 'Shenandoah (b)' and musicaviva.com, both mirrored at abcnotation.com) cite no printed edition and disagree (bar 1 has an extra F in one; bar 7 reads A F A D in one, A G A D in the other), and the plan replaces a tune whose only sources disagree. A printed public-domain version exists as a scan (King's Book of Chanties, 1918, on Wikimedia Commons); it was not read for this task, and whether to use it is the coordinator's decision (review of Task 11). Replaced by the spare red-river-valley."
+    },
+    {
+      "slug": "home-on-the-range",
+      "plannedLevel": 2,
+      "reason": "Not arranged. No Wikipedia article (English, Simple English, German, French, Spanish, Polish, Portuguese, Japanese, Korean) has a score, and Wikisource has none. The one notated source found is Project Gutenberg eBook #21300 (John A. Lomax, Cowboy Songs and Other Frontier Ballads), which has the tune as MIDI, Finale and PDF files (https://www.gutenberg.org/files/21300/21300-h/music/homeontherange.midi); it was not read for this task, and whether to use it is the coordinator's decision (review of Task 11). yankee-doodle moved from level 1 to level 2, and the plan's remedy for that drops one level-2 piece, so the task keeps seven level-2 pieces without it. To reinstate: read that file as the reference, arrange at level 2 and drop the spare loch-lomond."
+    }
+  ]
+}

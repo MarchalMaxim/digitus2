@@ -31,8 +31,9 @@ arpeggiation).
 The list goes under the top-level key "spanFlags" of content/verification.json, one entry per
 slice in library order: piece (slug), bar (MusicXML measure number), hand ("R" or "L"), quarter
 (onset within the bar in quarter notes), pitches (lowest first, sharps), span (semitones) and
-reasons. build.py rewrites verification.json with the piece keys only, so run this script again
-after it.
+reasons. build.py keeps spanFlags when it merges its pieces but does not recompute it, so run this
+script again after a build. The file is rewritten under jsonio.library_lock(), with the flags
+computed inside the lock, so a concurrent build cannot slip a piece in between.
 License: MIT.
 """
 from __future__ import annotations
@@ -46,6 +47,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import jsonio  # noqa: E402
 import xmlcheck as xc  # noqa: E402
 
 CONTENT = HERE.parent
@@ -153,17 +155,24 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-write", action="store_true", help="print the flags without writing verification.json")
     a = ap.parse_args(argv)
-    flags = library_flags()
+    getattr(sys.stdout, "reconfigure", lambda **_: None)(encoding="utf-8")
+    path = CONTENT / "verification.json"
+    if a.no_write:
+        flags = library_flags()
+    else:
+        flags = []
+
+        def put_flags(verification: dict) -> dict:
+            # computed under the lock: the manifest cannot change between reading it and writing
+            flags.extend(library_flags())
+            return {**verification, "spanFlags": flags}
+
+        jsonio.update_json(path, put_flags)
     for f in flags:
         print(format_flag(f))
     pieces = len({f["piece"] for f in flags})
     print(f"{len(flags)} slice(s) in {pieces} piece(s) cannot be played by one hand as written")
     if not a.no_write:
-        path = CONTENT / "verification.json"
-        verification = json.loads(path.read_text(encoding="utf-8"))
-        verification["spanFlags"] = flags
-        path.write_text(json.dumps(verification, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
-                        newline="\n")
         print(f"wrote {len(flags)} spanFlags to {path.relative_to(CONTENT.parent).as_posix()}")
     return 0
 

@@ -1,0 +1,174 @@
+{
+  "task": 18,
+  "_comment": "L1 plan Task 18 (docs/superpowers/plans/2026-10-14-l1-curated-library.md): Romantic character pieces, Kinderszenen, Chopin Op. 28 and ragtime from Mutopia. Facts from tools/candidates.json and the fetched RDF. Of the nine main candidates four pass and five are rejected, among them The Easy Winners, whose excerpt waits for a change to the shared MIDI check (see its reinstate); the level-5 spare Elite Syncopations passes, and three replacements from the mirror carry addedBy. The level-3 spares Gobbaerts (Les étoiles d'or No. 1) and Czerny (Op. 821 No. 1) were not used: no level-3 candidate of this task failed.",
+  "pieces": [
+    {
+      "slug": "schumann-op15-no1-of-foreign-lands", "source": "mutopia", "level": 4,
+      "collection": "schumann-op15", "retrievedAt": "2026-10-14",
+      "ftpDir": "SchumannR/O15/SchumannOp15No01", "main": "SchumannOp15No01.ly",
+      "publishedMidi": "SchumannOp15No01.mid", "sourceSha256": "b8f84c1b53f5aa150c54cd685f6f38fbbe3f76796f22add412620498adf2ac0a",
+      "title": "Of Foreign Lands and Peoples (Scenes from Childhood, No. 1)", "composer": "Robert Schumann", "composerDates": "1810-1856",
+      "catalogue": "Op. 15 No. 1", "year": "1838", "tempoBpm": 72,
+      "convert": {
+        "patches": [
+          {"file": "SchumannOp15No01.ly", "find": "\\\\repeat volta 1\\b", "replace": "\\\\repeat volta 2", "count": 2},
+          {"file": "SchumannOp15No01.ly", "find": "\\\\bar \"\\|\\.\"", "replace": "\\\\bar \":|.\"", "count": 1}
+        ]
+      },
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 72); the engraving prints no tempo word or metronome mark",
+      "levelNote": "Henle level 4 of 9 (HN 46, https://henle.de/Scenes-from-Childhood-op.-15-and-Album-for-the-Young-op.-68/HN-46), the Henle level of Chopin's Op. 28 Nos. 4 and 7, which the library places at 4; heuristic proposes 3 (score 7.86 at quarter = 72). The plan had 5.",
+      "notes": "Mutopia title 'Kinderscenen - Von fremden Ländern und Menschen'. Engraved from 'Leichte Stücke' (1900), including its fingerings (kept in the .fingered copy). The MIDI Mutopia published in 2006 (LilyPond 2.6) lacks two left-hand G3 re-strikes (bars 6 and 20), where the triplet voice strikes a G3 that another voice is holding; the LilyPond 2.24 MIDI of the same source matches the MusicXML exactly. The source writes its repeats as \\repeat volta 1 (printed, played once), which LilyPond 2.24 no longer prints; a catalog patch makes them volta 2, so the repeat sign after bar 8 appears as in the Mutopia engraving. A second patch turns the source's final \\bar \"|.\" into \\bar \":|.\": the Mutopia engraving ends on a plain final bar line, which leaves its start-repeat sign at bar 9 without an end, while Schumann repeats bars 9 to 22 as well (form A A B A B A, https://harmony.org.uk/book/schumann_analysis/schumann_formal_analysis.htm)."
+    },
+    {
+      "slug": "schumann-op15-no2-a-curious-story", "source": "mutopia", "level": 4,
+      "collection": "schumann-op15", "retrievedAt": "2026-10-14",
+      "ftpDir": "SchumannR/O15/SchumannOp15No02", "main": "SchumannOp15No02.ly",
+      "publishedMidi": "SchumannOp15No02.mid", "sourceSha256": "db2e9def9ed46d3552e69edc43a967cea1cf94893d70faaeb3aeaf937b1851e7",
+      "title": "A Curious Story (Scenes from Childhood, No. 2)", "composer": "Robert Schumann", "composerDates": "1810-1856",
+      "catalogue": "Op. 15 No. 2", "year": "1838", "tempoBpm": 112,
+      "addedBy": "Task 18: replacement from the mirror (Mutopia 355) for Grieg's Album Leaf, Op. 12 No. 7, which cannot pass the LilyPond 2.24 MIDI check (see rejected); same set, edition and typesetter as No. 1, Henle level 4.",
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 112); the engraving prints no tempo word or metronome mark",
+      "levelNote": "Henle level 4 of 9 (HN 46, https://henle.de/Scenes-from-Childhood-op.-15-and-Album-for-the-Young-op.-68/HN-46), placed at 4 as No. 1; heuristic proposes 3 (score 8.60 at quarter = 112).",
+      "notes": "Mutopia title 'Kinderscenen - Curiose Geschichte'. Engraved from 'Leichte Stücke' (1900). The engraving is CC BY 3.0 (attribution: Ying-Chun Liu / Mutopia Project); this MusicXML is shared under the same license. The source has only four fingerings, so no .fingered copy is provided."
+    },
+    {
+      "slug": "chopin-prelude-op28-no6", "source": "mutopia", "level": 4,
+      "collection": "chopin-op28", "retrievedAt": "2026-10-14",
+      "ftpDir": "ChopinFF/O28/Chop-28-6", "main": "chopin_prelude_op28_no6.ly",
+      "publishedMidi": "Chop-28-6.mid", "sourceSha256": "b1d3c2d2b6553e60ac192c1a07eb60007431641fd0270aed7fc273e293cc9b67",
+      "title": "Prelude in B minor", "composer": "Frédéric Chopin", "composerDates": "1810-1849",
+      "catalogue": "Op. 28 No. 6", "year": "1839", "tempoBpm": 45,
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 45), plausible for the printed Assai Lento; the engraving has no metronome mark",
+      "levelNote": "Henle level 4 of 9 (HN 883, https://www.henle.de/en/Preludes/HN-883), the same as Nos. 4 and 7, which the library places at 4; heuristic proposes 3 (score 7.18 at quarter = 45). The plan had 5.",
+      "notes": "Engraved from Edition Peters, like Nos. 4 and 7; the engraving's subtitle 'Tolling Bells' is a nickname, not Chopin's. Multi-file source (Chop-28-6-lys.zip: this file with header.ly and paper-defs.ily): as for No. 7, main is the .ly inside the zip and sourceSha256 is that file's hash."
+    },
+    {
+      "slug": "schumann-op15-no6-an-important-event", "source": "mutopia", "level": 5,
+      "collection": "schumann-op15", "retrievedAt": "2026-10-14",
+      "ftpDir": "SchumannR/O15/SchumannOp15No06", "main": "SchumannOp15No06.ly",
+      "publishedMidi": "SchumannOp15No06.mid", "sourceSha256": "943b26118a6c68a31db06c1848cea9efb3d36243d8bd1e9bb79ab2d742578fcd",
+      "title": "An Important Event (Scenes from Childhood, No. 6)", "composer": "Robert Schumann", "composerDates": "1810-1856",
+      "catalogue": "Op. 15 No. 6", "year": "1838", "tempoBpm": 120,
+      "convert": {
+        "patches": [
+          {"file": "SchumannOp15No06.ly", "find": "\\\\repeat volta 1\\b", "replace": "\\\\repeat volta 2", "count": 1}
+        ]
+      },
+      "addedBy": "Task 18: replacement from the mirror (Mutopia 374) for Träumerei, Op. 15 No. 7, which fails the span and lint gates from bar 6 (see rejected); same set, edition and typesetter.",
+      "tempoSource": "LilyPond \\midi block of the source (quarter = 120); the engraving prints no tempo word or metronome mark",
+      "levelNote": "Henle level 4 of 9 (HN 46, https://henle.de/Scenes-from-Childhood-op.-15-and-Album-for-the-Young-op.-68/HN-46); heuristic proposes 5 (score 14.18 at quarter = 120): full chords in both hands on almost every beat.",
+      "notes": "Mutopia title 'Kinderscenen - Wichtige Begebenheit'. Engraved from 'Leichte Stücke' (1900), including its fingerings (kept in the .fingered copy). The engraving is CC BY 3.0 (attribution: Ying-Chun Liu / Mutopia Project); this MusicXML is shared under the same license. The source writes its repeat as \\repeat volta 1 (printed, played once), which LilyPond 2.24 no longer prints; a catalog patch makes it volta 2, so the repeat of bars 8 to 16, which starts and ends mid-bar, appears as in the Mutopia engraving (bars 8/8a and 16/16a)."
+    },
+    {
+      "slug": "schubert-moment-musical-d780-no3", "source": "mutopia", "level": 5,
+      "collection": "character-pieces", "retrievedAt": "2026-10-14",
+      "ftpDir": "SchubertF/D780/MomentsNo3", "main": "MomentsNo3.ly",
+      "publishedMidi": "MomentsNo3.mid", "sourceSha256": "edc8e740710aa93c6ef3fc1cd1a833899cfd7eece196c2f6f9de2d4591c75c9d",
+      "title": "Moment musical in F minor ('Air russe')", "composer": "Franz Schubert", "composerDates": "1797-1828",
+      "catalogue": "D. 780 No. 3 (Op. 94 No. 3)", "year": "1823", "tempoBpm": 80, "keyName": "F minor",
+      "convert": {
+        "patches": [
+          {"file": "MomentsNo3.ly", "find": "\\\\override Score\\.MetronomeMark\\.transparent = ##t(\\s*)\\\\tempo 4 = 80", "replace": "\\\\set Score.tempoHideNote = ##t\\1\\\\tempo \"Allegro moderato\" 4 = 80", "count": 1},
+          {"file": "MomentsNo3.ly", "find": "R2\\^\\\\markup \\{ \\\\bold \"Allegro moderato\" \\} R2", "replace": "R2 R2", "count": 1}
+        ]
+      },
+      "tempoSource": "printed: Allegro moderato, no metronome mark; 80 from the source's hidden \\tempo mark, which also sets its \\midi tempo",
+      "levelNote": "Henle level 5 of 9 and ABRSM Grade 6 (HN 375, https://www.henle.de/en/Moments-musicaux-op.-94-D-780/HN-375); heuristic proposes 5 (score 13.01 at quarter = 80).",
+      "notes": "Mutopia title 'Moments Musicaux No. 3 in F Minor'. Engraved from the Sauer & Leidersdorf edition (Vienna, dated 1827 in the engraving). The key signature is that of A-flat major: the piece is in F minor and ends in F major. The printed 'Allegro moderato' is a markup on the right hand's opening multi-measure rest, which the converter does not export; two catalog patches move it into the source's hidden \\tempo mark (the words show, the metronome mark stays hidden) and remove the markup. The 'dim.' texts of bars 65 and 69 (text dynamics in the source) appear as short diminuendo hairpins."
+    },
+    {
+      "slug": "mendelssohn-op30-no6-venetian-boat-song", "source": "mutopia", "level": 5,
+      "collection": "character-pieces", "retrievedAt": "2026-10-14",
+      "ftpDir": "Mendelssohn-BartholdyF/O30/LiederOhneWorte_-_Op30_No6", "main": "LiederOhneWorte_-_Op30_No6.ly",
+      "publishedMidi": "LiederOhneWorte_-_Op30_No6.mid", "sourceSha256": "473e170a12e5654982a7288afcd6835d206106871b51dd8815c74f662ca22be7",
+      "title": "Venetian Boat Song (Songs without Words, Op. 30 No. 6)", "composer": "Felix Mendelssohn", "composerDates": "1809-1847",
+      "catalogue": "Op. 30 No. 6", "year": "1835", "tempoBpm": 84,
+      "convert": {
+        "patches": [
+          {"file": "LiederOhneWorte_-_Op30_No6.ly", "find": "\\\\startTextSpan", "replace": "_\\\\markup { \\\\italic \"cresc.\" }", "count": 3},
+          {"file": "LiederOhneWorte_-_Op30_No6.ly", "find": "\\s*\\\\stopTextSpan", "replace": "", "count": 3}
+        ]
+      },
+      "levelOverride": "Henle rates it 5 of 9 (HN 1669), the Henle level of Schubert's D. 780 No. 3, which the heuristic does propose at 5. The heuristic underrates this piece: at the moderate quarter = 84 its note density is low, but the right hand voices a cantabile melody above its own accompaniment throughout.",
+      "tempoSource": "editorial: dotted quarter = 56 (quarter = 84) for the printed Allegretto tranquillo. The engraving has no metronome mark and its \\midi block sets no tempo (LilyPond's default, quarter = 60, would be a dotted quarter of 40). No teaching edition or published metronome suggestion for this piece was found (searched: the editions IMSLP lists, https://imslp.org/wiki/Lieder_ohne_Worte,_Op.30_(Mendelssohn,_Felix), and publisher listings), so the tempo follows recording practice: Daniel Barenboim's Deutsche Grammophon recording takes 2:56 (https://classical.music.apple.com/mo/album/1863444471), which with the repeat (154 dotted quarters) is an average of about dotted quarter = 52, ritardandi and the closing fermata included.",
+      "levelNote": "Henle level 5 of 9 (HN 1669, https://www.henle.de/cn/Piano-works-Volume-III-Songs-without-Words/HN-1669); heuristic proposes 3 (score 8.57 at quarter = 84), see levelOverride.",
+      "notes": "Mutopia title 'Lieder ohne Worte: Venetianisches Gondellied, Op.30 No.6'. Engraved from the Breitkopf & Härtel complete edition (1874-1877). One fermata of the source has no note to attach to and is not exported (a converter warning). The 'cresc.' of bars 24, 44 and 48 is a text spanner (a dashed line) in the source, which the converter does not export; two catalog patches turn each into a plain 'cresc.' text below the right hand, as Task 15 did for Schumann's Op. 68 No. 25."
+    },
+    {
+      "slug": "joplin-elite-syncopations", "source": "mutopia", "level": 5,
+      "collection": "ragtime", "retrievedAt": "2026-10-14",
+      "ftpDir": "JoplinS/EliteSyncopations", "main": "EliteSyncopations.ly",
+      "publishedMidi": "EliteSyncopations.mid", "sourceSha256": "d060d0567e563df78f8d7acd9cb5e8ea4682de90c9ffa86ef1c76792bcb3b8a3",
+      "title": "Elite Syncopations", "composer": "Scott Joplin", "composerDates": "1868-1917",
+      "catalogue": null, "year": "1902", "tempoBpm": 72,
+      "tempoSource": "printed: Not Fast., no metronome mark; 72 as for The Entertainer; the source's \\midi block sets no tempo",
+      "levelNote": "No published per-piece syllabus placement found; level 5 as The Entertainer; heuristic proposes 4 (score 12.03 at quarter = 72).",
+      "notes": "Complete rag. Engraved from the John Stark & Son edition (1902). A spare of the L1 plan, used because three level-5 candidates of this task failed their gates."
+    },
+    {
+      "slug": "joplin-sun-flower-slow-drag", "source": "mutopia", "level": 5,
+      "collection": "ragtime", "retrievedAt": "2026-10-14",
+      "ftpDir": "JoplinS/sun-flower-slow-drag", "main": "sun-flower-slow-drag.ly",
+      "publishedMidi": "sun-flower-slow-drag.mid", "sourceSha256": "3c3d6579ff8e7d12a3874142351b03dfd51d60c5d2a338b52a345742b145be62",
+      "title": "Sun Flower Slow Drag", "composer": "Scott Joplin and Scott Hayden", "composerDates": "1868-1917 / 1882-1915",
+      "catalogue": null, "year": "1901", "tempoBpm": 72,
+      "convert": {
+        "patches": [
+          {"file": "sun-flower-slow-drag.ly", "find": "(upper = +\\\\relative c'' \\{\\s*\\\\clef treble\\s*\\\\key bes \\\\major\\s*\\\\time 2/4)", "replace": "\\1 \\\\tempo \"Not Fast\"", "count": 1}
+        ]
+      },
+      "addedBy": "Task 18: replacement from the mirror (Mutopia 465) for Peacherine Rag, which has law errors from bar 16, inside its first strain (see rejected).",
+      "tempoSource": "printed: Not Fast, no metronome mark; 72 from the source's \\midi block, the tempo of The Entertainer",
+      "levelNote": "No published per-piece syllabus placement found; heuristic proposes 5 (score 14.08 at quarter = 72), the level of The Entertainer.",
+      "notes": "Complete rag, written with Scott Hayden. Engraved from a reproduction of the original edition (1901). The printed 'Not Fast' is header text (piece) in the source, which the converter does not export; a catalog patch adds it as a \\tempo text at the start of the right hand."
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "joplin-the-easy-winners", "mutopiaId": "352", "ftpDir": "JoplinS/winners", "level": 5,
+      "reason": "Blocked by a limit of the shared MIDI check, not by the score. The whole rag (94 bars, 4 min 13 s) fails the span gate in bar 36, at the end of the second strain (A-flat 4, E-flat 5 and C 6 struck by the right hand, also a law error at both profiles), so only the introduction and the first strain can ship. That strain repeats with two endings. An excerpt to bar 20 (convert.barTo 20) ends on the first ending, with its backward repeat to bar 5 and no second ending: the performance (xmlcheck.unfold_order: bars 1-20, 5-19) then ends on bar 19's E-flat 7 dominant, not on the tonic, and the notation is incomplete (rejected in review). The musical whole is bars 1-21 (barTo 21), whose second ending ends on the tonic. build.midi_check's excerpt mode compares the written notes with the MIDI notes before the written length, while LilyPond's MIDI plays the repeat, so barTo 21 gives 327/338 against the LilyPond 2.24 MIDI (11 only in the MusicXML, 11 only in the MIDI) and the same against the published MIDI. Unfolded with xmlcheck.unfold_order (bars 1-20, 5-19, 21) and compared with the MIDI notes before the unfolded length (72 quarters), the barTo 21 excerpt is exact against both: 611/611, nothing only in either.",
+      "reinstate": "after the coordinator changes build.midi_check's excerpt mode to compare xmlcheck.unfolded_notes with the MIDI notes before the unfolded length: move 'piece' back into 'pieces', then build.py --only, gates.py --only and level.py --report this slug, and update the heuristic numbers in its levelNote",
+      "piece": {
+        "slug": "joplin-the-easy-winners", "source": "mutopia", "level": 5,
+        "collection": "ragtime", "retrievedAt": "2026-10-14",
+        "ftpDir": "JoplinS/winners", "main": "winners.ly",
+        "publishedMidi": "winners.mid", "sourceSha256": "5e678dff2eb666c63fff42227bc107e0b31919aed190bae3422375a91dbd964c",
+        "title": "The Easy Winners (introduction and first strain)", "composer": "Scott Joplin", "composerDates": "1868-1917",
+        "catalogue": null, "year": "1901", "tempoBpm": 72,
+        "convert": {"barTo": 21},
+        "excerpt": "Introduction and first strain with its repeat and both endings (bars 1-21 of 94). The second ending closes on the tonic chord, with the two-note run-up into the second strain; the later strains are left out.",
+        "tempoSource": "printed: Not fast., no metronome mark; 72 as for The Entertainer, also marked Not fast; the source's \\midi block sets no tempo",
+        "levelNote": "No published per-piece syllabus placement found; level 5 as The Entertainer; heuristic proposes 4 for the bars 1-20 excerpt (score 11.86 at quarter = 72; recompute for bars 1-21) and 5 for the whole rag (13.65).",
+        "notes": "Joplin's subtitle 'A Rag Time Two Step'. Engraved from a reproduction of the original edition (1901). The whole rag (94 bars, 4 min 13 s) fails the span gate in bar 36, at the end of the second strain (A-flat 4, E-flat 5 and C 6 struck by the right hand, also a law error at both profiles), so the excerpt keeps the introduction and the first strain. The printed 'Not fast.' is header text (piece) in the source, which the converter does not export."
+      }
+    },
+    {
+      "slug": "grieg-lyric-pieces-op12-no7-album-leaf", "mutopiaId": "2194", "ftpDir": "GriegE/O12/No03_Albumblatt", "level": 4,
+      "reason": "LilyPond 2.24 MIDI check not exact, through a limit of the shared checker: all 586 sounding notes match, but the 14 grace notes of the repeated second section sound twice in the unfolded MIDI while xmlcheck.grace_pitches counts each written grace note once. Span check and lint pass (0 law errors at medium and large), 69 s, 133 KB. It would pass if best_midi_match counted grace notes per unfolded pass (reported to the coordinator). The source is Op. 12 No. 7 (E minor, Allegretto) despite the directory name No03."
+    },
+    {
+      "slug": "schumann-op15-no7-traumerei", "mutopiaId": "504", "ftpDir": "SchumannR/O15/SchumannOp15No07", "level": 5,
+      "reason": "Span gate: right-hand G4-A4-A5 in bar 6 and 16-semitone slices in both hands in bar 22; law errors L05 at medium (9) and large (8) from bar 6. No excerpt of at least 16 bars ends before bar 6."
+    },
+    {
+      "slug": "chopin-prelude-op28-no20", "mutopiaId": "472", "ftpDir": "ChopinFF/O28/Chop-28-20", "level": 5,
+      "reason": "Span gate: right-hand chords in bars 2, 6 and 10 (C#3-D#3-G3-C4-D#4, C4-D4-F#4-D5); 8 law errors (L05) at medium and at large from bar 2. No excerpt is possible."
+    },
+    {
+      "slug": "joplin-peacherine-rag", "mutopiaId": "335", "ftpDir": "JoplinS/peacherine", "level": 5,
+      "reason": "Lint gate: 14 law errors at medium (L05 12, L03 2) and 13 at large, in bars 16, 29 and 50; bar 16 is inside the first strain, so no excerpt of at least 16 bars ends on the tonic before it."
+    },
+    {
+      "slug": "satie-gymnopedie-no3", "mutopiaId": "39", "ftpDir": "SatieE/gymnopedie_3", "level": 4, "spare": true,
+      "reason": "Span gate: 7 right-hand slices of 17 to 20 semitones from bar 6 (the right hand's chord under the melody note); 40 law errors at medium, 33 at large. No excerpt is possible."
+    },
+    {
+      "slug": "grieg-op46-no4-in-the-hall-of-the-mountain-king", "mutopiaId": "1888", "ftpDir": "GriegE/O46/Dans_l_antre_du_roi_de_la_montagne", "level": 5, "spare": true,
+      "reason": "Conversion fails in the shared converter (ly2musicxml build_measures: TypeError on multi-measure rests of length None, which \\partcombine of the skip voices produces); the MIDI score also applies \\articulate. A fix belongs in the shared tool, not in a catalog patch."
+    },
+    {
+      "slug": "debussy-clair-de-lune", "mutopiaId": "1778", "ftpDir": "DebussyC/L75/debussy_Ste_Bergamesq_Clair", "level": 5, "spare": true,
+      "reason": "Too long (324 s at quarter = 60) and fails the span gate (bars 17, 26, 72) and the lint gate (45 law errors at medium, 37 at large, the first in bar 8): no excerpt of at least 16 bars ends before bar 8."
+    }
+  ]
+}

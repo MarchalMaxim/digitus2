@@ -8,6 +8,7 @@ import {
 } from '../eval/textbook.js';
 import { parseMusicXml } from '../io/musicxml/read.js';
 import { parsePig } from '../io/pig/read.js';
+import { benchmarkEntries } from '../library/benchmarkSet.js';
 import { dot, pathFeatures } from '../learn/features.js';
 import { lintFingering, positionChanges, wideStretches } from '../lint/index.js';
 import type { LintReport, LintRuleId } from '../lint/index.js';
@@ -36,9 +37,10 @@ const manifest = JSON.parse(read('content/manifest.json').toString('utf8')) as A
   slug: string;
   level: number;
   files: { score: string };
+  benchmarkSet?: string | null;
 }>;
-/** The library pieces of level 1 to 3, parsed once. */
-const LIBRARY = manifest
+/** The core30 library pieces of level 1 to 3, parsed once (22 pieces; the set never grows with the library). */
+const LIBRARY = benchmarkEntries(manifest)
   .filter((p) => p.level <= 3)
   .map((p) => ({
     slug: p.slug,

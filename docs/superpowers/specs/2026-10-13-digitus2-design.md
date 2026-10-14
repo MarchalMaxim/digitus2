@@ -37,7 +37,7 @@ Assumed (correct me if wrong):
 
 ## 3. Non-goals
 
-- Optical music recognition (PDF or image input).
+- Optical music recognition (PDF or image input) before M8. Photo input is roadmap item M10 (section 12), added 2026-10-14 at the user's request.
 - Instruments other than piano; organ pedals; harpsichord-specific fingering.
 - Pedaling, dynamics interpretation, or performance rendering beyond straightforward playback.
 - Accounts, cloud sync, or a server. All state is local.
@@ -201,6 +201,8 @@ State: a single store (zustand or equivalent) holding the current Score, Assignm
 
 Deployment: static build to GitHub Pages through GitHub Actions on every push to main.
 
+Minimalism rule (user, 2026-10-14): the UI stays pristine and uncluttered, and the project is brutal about it. A feature gets a visible control only when a beginner needs it at that moment; everything else is folded away (progressive disclosure), made automatic, or left out. Each UI change is reviewed for what it removes as well as what it adds, and the daily UI review (verification spec 3.10) flags any control that could go.
+
 ## 10. Research harness
 
 `research/` is a Python 3.11 project with a venv, pinned requirements, and these parts: `data/` (downloaded datasets, gitignored, with manifests and the official split committed), `fingering_eval/` (loaders, validators, metrics, evaluate CLI), `baselines/` (third-party implementations and wrappers), `learn/` (parameter fitting and export), `spikes/` (throwaway prototypes). Reports live in `docs/research/`.
@@ -224,6 +226,7 @@ Deployment: static build to GitHub Pages through GitHub Actions on every push to
 - M7 Verification suite complete: metamorphic tests, lint validation against humans, calibration, CI gates, published results.
 - M8 Polish: motion, accessibility, performance, mobile layout, Pages deployment, documentation.
 - M9 Neural model evaluation and optional ONNX integration.
+- M10 Photo input (added 2026-10-14, advanced): photograph printed sheet music on a phone, recognise it into a Score, finger it and show it annotated like any other piece. Verification first: the library gives ground truth, so the spike renders library pages, photographs or perturbs them (phone camera, skew, shadow, low light) and scores candidate OMR engines note by note against the MusicXML (pitch, duration, voice, staff accuracy per bar; the whole pipeline must reach the hand-separation and fingering floors on recognised scores before it ships). Candidates to compare in the spike: oemer and homr (Python, deep learning, MusicXML output), Audiveris (Java), and a browser route through ONNX Runtime Web so the no-server constraint holds. UI: one entry point beside the file drop, nothing else visible; recognition errors are corrected in the existing score editor.
 
 ## 13. Alternatives considered
 

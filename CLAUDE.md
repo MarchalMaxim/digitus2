@@ -8,6 +8,7 @@ Read `docs/PROGRESS.md` first in every new session or after a context compaction
 - Stack: pnpm monorepo, TypeScript everywhere in the product, engine runs in the browser with no server. Python 3.11 only under `research/` and `content/tools/`.
 - Inputs: MusicXML (primary), built-in library, MIDI import.
 - UI: black and white, exactly one red element on screen at a time, snappy 120–200 ms ease-out motion, no other chromatic color.
+- UI minimalism (user, 2026-10-14): the UI stays pristine and uncluttered; be brutal. A feature earns a visible control only if a beginner needs it at that moment; otherwise it is folded away, made automatic, or not built. Every UI change is judged on what it removes as much as on what it adds.
 - License: MIT; project is non-commercial; never commit datasets whose license forbids redistribution.
 
 ## Working rules

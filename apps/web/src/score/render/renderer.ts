@@ -2,17 +2,13 @@
  * The renderer adapter: lays out MusicXML to SVG pages in the Verovio worker. Only the newest
  * render request counts: a newer `render()` rejects every older pending one with
  * `SupersededError`, and their late results are dropped, so a resize never shows a stale layout.
+ * A worker that fails (its script did not load, it crashed) rejects every pending and later
+ * request, so the score view shows an error instead of waiting forever.
  */
+import type { WorkerLike } from '../../engine/client.js';
 
-/**
- * The part of `Worker` the adapter uses. Structurally the same as the engine client's
- * `WorkerLike` (Task 4), so one fake worker type serves both.
- */
-export interface WorkerLike {
-  postMessage(m: unknown): void;
-  onmessage: ((e: MessageEvent) => void) | null;
-  terminate(): void;
-}
+/** The part of `Worker` the adapter uses: the engine client's type, so one fake serves both. */
+export type { WorkerLike } from '../../engine/client.js';
 
 export interface RenderRequest {
   xml: string;
@@ -57,13 +53,26 @@ function defaultWorker(): WorkerLike {
   return new Worker(new URL('./verovio.worker.ts', import.meta.url), { type: 'module' });
 }
 
-export function createRenderer(worker: WorkerLike = defaultWorker()): ScoreRenderer {
+/**
+ * `onFail` is told once when the worker fails, so the owner can make a fresh renderer for the
+ * next piece (this one stays closed).
+ */
+export function createRenderer(
+  worker: WorkerLike = defaultWorker(),
+  onFail?: (e: Error) => void,
+): ScoreRenderer {
   const pending = new Map<number, Pending>();
   let nextId = 0;
   let warmed = false;
   let disposed = false;
+  // Set once the worker has failed: every request after that rejects with it.
+  let failure: Error | undefined;
 
   const post = (m: RenderWorkerRequest) => worker.postMessage(m);
+  const rejectAll = (e: Error) => {
+    for (const p of pending.values()) p.reject(e);
+    pending.clear();
+  };
 
   worker.onmessage = (e: MessageEvent) => {
     const res = e.data as RenderWorkerResponse;
@@ -74,9 +83,20 @@ export function createRenderer(worker: WorkerLike = defaultWorker()): ScoreRende
     else p.reject(new Error(res.error));
   };
 
+  worker.onerror = (e: ErrorEvent) => {
+    if (disposed) return;
+    // A failed module load reports a plain Event, without a message.
+    const message = typeof e.message === 'string' && e.message ? `: ${e.message}` : '';
+    failure = new Error(`the score renderer failed${message}`);
+    disposed = true;
+    worker.terminate();
+    rejectAll(failure);
+    onFail?.(failure);
+  };
+
   return {
     render({ xml, widthPx }) {
-      if (disposed) return Promise.reject(new Error('renderer disposed'));
+      if (disposed) return Promise.reject(failure ?? new Error('renderer disposed'));
       const id = ++nextId;
       for (const [older, p] of pending) {
         if (older < id) {
@@ -99,8 +119,7 @@ export function createRenderer(worker: WorkerLike = defaultWorker()): ScoreRende
       if (disposed) return;
       disposed = true;
       worker.terminate();
-      for (const p of pending.values()) p.reject(new Error('renderer disposed'));
-      pending.clear();
+      rejectAll(new Error('renderer disposed'));
     },
   };
 }

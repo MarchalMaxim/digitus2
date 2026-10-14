@@ -1,5 +1,8 @@
+import { useEffect, useRef } from 'react';
+import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { warmUpServices } from '../score/useScoreDocument.js';
 import { DropZone } from './DropZone.js';
 import {
   formatDuration,
@@ -21,11 +24,30 @@ const piecesByLevel: [Level, LibraryPiece[]][] = (() => {
   return [...groups.entries()].sort(([a], [b]) => a - b);
 })();
 
+/**
+ * Starts the engine worker and compiles the Verovio WASM while the reader looks at the list, so
+ * the first piece opens faster. Runs when the browser is idle; nothing happens without Workers.
+ */
+function useWarmUpWhenIdle() {
+  useEffect(() => {
+    if (typeof Worker === 'undefined') return;
+    if (typeof requestIdleCallback === 'function') {
+      const handle = requestIdleCallback(warmUpServices, { timeout: 2000 });
+      return () => cancelIdleCallback(handle);
+    }
+    const timer = setTimeout(warmUpServices, 200);
+    return () => clearTimeout(timer);
+  }, []);
+}
+
 export function LibraryView() {
+  useWarmUpWhenIdle();
   const openPiece = useAppStore((s) => s.openPiece);
   const openAbout = useAppStore((s) => s.openAbout);
   const setNotice = useAppStore((s) => s.setNotice);
   const start = recommendedPiece();
+  const heading = useRef<HTMLHeadingElement>(null);
+  useFocusOnArrival(heading);
   // A refusal still showing would be stale in the score view, so opening anything clears it.
   const open = (source: PieceSource) => {
     setNotice(null);
@@ -35,7 +57,9 @@ export function LibraryView() {
   return (
     <main className="page stack library">
       <header className="stack welcome">
-        <h1>digitus2</h1>
+        <h1 ref={heading} tabIndex={-1}>
+          digitus2
+        </h1>
         <p className="muted">
           Finger numbers for piano music. Pick a piece, press play, and follow the red note.
         </p>

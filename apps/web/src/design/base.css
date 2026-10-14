@@ -97,6 +97,12 @@ button:not(.is-red):disabled {
   outline-offset: 2px;
 }
 
+/* A view's heading takes the focus when the view opens (app/focus.ts) so the next Tab starts
+   there; it is not a control and is not a tab stop, so it draws no ring. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
 /* Layout primitives */
 .stack > * + * {
   margin-top: var(--gap, 0.75rem);
@@ -279,13 +285,437 @@ button:not(.is-red):disabled {
   }
 }
 
+/* Links: ink and underlined, never the browser's default link colors. */
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+/* Checkboxes, radios and sliders are not boxed fields: no border or padding, ink accents. */
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'] {
+  accent-color: var(--ink);
+  border: 0;
+  padding: 0;
+  min-height: 0;
+  background: none;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+}
+
+::placeholder {
+  color: var(--gray-3);
+  opacity: 1;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+/* A label around a checkbox: the whole line is the 44 px touch target. */
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+/* Score view */
+.score-header {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.score-header .back-button {
+  justify-self: start;
+  margin-bottom: 0.5rem;
+}
+
+.score-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  gap: 2rem;
+  align-items: start;
+}
+
+.score-main {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.score-sheet {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.score-sheet:empty {
+  min-height: 40vh;
+}
+
+.score-sheet svg {
+  width: 100%;
+  height: auto;
+}
+
+.score-error {
+  --gap: 1rem;
+}
+
+.side-panel {
+  --gap: 1rem;
+  border-left: 1px solid var(--gray-2);
+  padding-left: 1.5rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.25rem 1rem;
+}
+
+.facts > div {
+  display: contents;
+}
+
+.facts dt {
+  color: var(--gray-3);
+}
+
+.warnings {
+  padding-left: 1rem;
+}
+
+/* Transport */
+.transport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+}
+
+.transport-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tempo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+
+.tempo input {
+  width: 7.5rem;
+}
+
+.tempo-value {
+  min-width: 3.25em;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmented {
+  display: inline-flex;
+}
+
+.segmented label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.segmented label + label {
+  margin-left: -1px;
+}
+
+/* The radio covers its label, transparent: the label is the visible button, the radio still
+   takes the clicks, the keyboard and the screen reader. */
+.segmented input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented label:hover {
+  background: var(--gray-1);
+}
+
+.segmented label:has(:checked) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.segmented label:has(:focus-visible) {
+  z-index: 1;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.loop {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loop legend {
+  float: left;
+  padding: 0;
+  margin-right: 0.25rem;
+}
+
+.loop input {
+  width: 5rem;
+  padding: 0.5rem 0.625rem;
+}
+
+/* Play and Pause share one button: a fixed width keeps the bar from shifting when it flips, and
+   no transition, so the accent passes between Play and the cursor within one frame (a fade
+   would leave a moment with no accent element at all). */
+.play-button {
+  min-width: 6rem;
+  transition: none;
+}
+
+/* Play stays focusable while it cannot start (aria-disabled, see Transport.tsx). */
+.play-button[aria-disabled='true'] {
+  cursor: default;
+}
+
+.play-button[aria-busy='true'] {
+  cursor: progress;
+}
+
+/* On-screen keyboard: paper keys outlined in ink, and ink keys. A pressed key turns gray and
+   shows the finger that plays it; keys never carry the accent. It stays at the bottom of the
+   window while the score column is on screen, so the fingers are visible during playback. */
+.keyboard {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  /* A grid item: without this the keys' minimum width would widen the score column itself. */
+  min-width: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--gray-2);
+  padding: 0.75rem 0;
+}
+
+/* What scrolling brings into view (the cursor, a focused control) stops above the keyboard. */
+html:has(.keyboard) {
+  scroll-padding-bottom: 10rem;
+}
+
+/* The keys keep a minimum width (set on the SVG by Keyboard.tsx); a range wider than the column
+   scrolls sideways inside the keyboard, never the page. */
+.keyboard-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.keyboard-scroll:focus-visible {
+  outline-offset: -2px;
+}
+
+.keyboard-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 8rem;
+}
+
+.key rect {
+  stroke: var(--ink);
+  stroke-width: 1;
+  transition: fill var(--dur-fast) var(--ease);
+}
+
+.key.is-white rect {
+  fill: var(--paper);
+}
+
+.key.is-black rect {
+  fill: var(--ink);
+}
+
+.key.is-white.is-pressed rect {
+  fill: var(--gray-1);
+}
+
+.key.is-black.is-pressed rect {
+  fill: var(--gray-3);
+}
+
+.key text {
+  font: 600 14px var(--font-ui);
+  fill: var(--ink);
+}
+
+.key.is-black text {
+  font-size: 11px;
+  fill: var(--paper);
+}
+
+@media (max-width: 899.98px) {
+  .score-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side-panel {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--gray-2);
+    padding-top: 1rem;
+  }
+}
+
+/* Side panel actions: export and print */
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* About */
+.about {
+  --gap: 1.75rem;
+  max-width: 48rem;
+}
+
+.about-header {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.about-header > button {
+  justify-self: start;
+}
+
+.about section > * + * {
+  margin-top: 0.5rem;
+}
+
+.about section > table {
+  margin-top: 0.75rem;
+}
+
+.about-list {
+  padding-left: 1.25rem;
+}
+
+.about-list > li + li {
+  margin-top: 0.25rem;
+}
+
+.about table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.about th,
+.about td {
+  text-align: left;
+  border-bottom: 1px solid var(--gray-2);
+  padding: 0.375rem 0.5rem;
+  vertical-align: top;
+}
+
+.about th {
+  font-weight: 600;
+  border-bottom-color: var(--ink);
+}
+
+.about .composer-inline {
+  display: none;
+}
+
+/* Narrow screens: three columns, the composer under the piece, so no word is split. */
+@media (max-width: 479.98px) {
+  .about th,
+  .about td {
+    padding: 0.375rem 0.25rem;
+    overflow-wrap: break-word;
+  }
+
+  .about th:nth-child(2),
+  .about td:nth-child(2) {
+    display: none;
+  }
+
+  .about .composer-inline {
+    display: block;
+  }
+}
+
+/* Print: the title, the composer and the credit, then the pages at full width. Controls, the
+   transport, the keyboard, the side panel, the notice and the status line stay on screen only. */
 @media print {
-  .no-print {
+  .no-print,
+  .transport,
+  .keyboard,
+  .side-panel,
+  .notice-wrap,
+  .score-status {
     display: none !important;
   }
 
   .page {
     max-width: none;
     padding: 0;
+  }
+
+  .score-layout,
+  .score-main {
+    display: block;
+  }
+
+  .score-header {
+    margin-bottom: 0.5rem;
+    break-after: avoid;
+  }
+
+  /* One SVG per laid-out page: the printer breaks between them, never through one. */
+  .score-sheet svg {
+    width: 100%;
+    height: auto;
+    break-inside: avoid;
+  }
+
+  /* The accent prints in ink (tokens.css). A primary button or link also needs its fill and
+     border reset here: button.is-red outranks the plain .is-red print rule over there. */
+  button.is-red,
+  a.is-red {
+    color: var(--ink);
+    background: none;
+    border-color: var(--ink);
   }
 }

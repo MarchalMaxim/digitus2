@@ -9,7 +9,9 @@ export default defineConfig({
   expect: { timeout: 10_000, toHaveScreenshot: { maxDiffPixelRatio: 0.002 } },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // Under CI also an HTML report (with the traces of failed tests) in playwright-report/, which
+  // the workflow uploads when a test fails; the 'github' reporter alone writes no files.
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${port}`,
     trace: 'retain-on-failure',

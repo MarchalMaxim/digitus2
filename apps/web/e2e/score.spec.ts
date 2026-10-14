@@ -1,0 +1,141 @@
+import { expect, test } from '@playwright/test';
+import { expectNoSeriousA11y } from './helpers/axe.js';
+import { libraryScore, mxlOf, utf16leOf } from './helpers/files.js';
+import { expectOneRed } from './helpers/red.js';
+
+test('opens Twinkle from the library: every note gets a digit, one red element, hash set', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Open Twinkle/ }).click();
+  await expect(page).toHaveURL(/#\/piece\/twinkle-twinkle-little-star$/);
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Twinkle, Twinkle, Little Star' }),
+  ).toBeVisible();
+  const roots = await expectOneRed(page, 'score ready');
+  expect(roots[0]!.tag).toBe('button');
+  await expectNoSeriousA11y(page, 'score ready');
+});
+
+test('hand size change re-solves in place and keeps one red element', async ({ page }) => {
+  await page.goto('/#/piece/twinkle-twinkle-little-star');
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+  await page.getByLabel('Hand size').selectOption('child');
+  await expect(page.getByText(/Fingered in \d+ ms/)).toBeVisible();
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64);
+  await expectOneRed(page, 'score after re-solve');
+});
+
+test("editor's fingering toggle shows the editorial digits for a piece that has them", async ({
+  page,
+}) => {
+  await page.goto('/#/piece/burgmuller-op100-no2-arabesque');
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
+  const engineCount = await page.locator('.score-sheet g.fing').count();
+  await page.getByLabel("Show the editor's fingering").check();
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(26, { timeout: 20_000 });
+  await page.getByLabel("Show the editor's fingering").uncheck();
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(engineCount, { timeout: 20_000 });
+});
+
+test('opens K.545: status appears first, score within 8 s', async ({ page }) => {
+  await page.goto('/');
+  const t0 = Date.now();
+  await page.getByRole('button', { name: /^Open Piano Sonata in C major/ }).click();
+  await expect(page.getByRole('status')).toContainText(/Loading|Fingering|Preparing/);
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 8_000 });
+  expect(Date.now() - t0).toBeLessThan(8_000);
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288);
+});
+
+test('shows an error state with a way back when the file is not a score', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('choose a file').setInputFiles({
+    name: 'bad.musicxml',
+    mimeType: 'application/xml',
+    buffer: Buffer.from('<nope/>'),
+  });
+  await expect(page.getByRole('alert')).toContainText(/could not open/i);
+  await expectOneRed(page, 'score error');
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+});
+
+// Review Focus 1: what MuseScore and other editors export must open as well as plain MusicXML.
+const ODE_NOTES = 83;
+const TWINKLE_NOTES = 64;
+
+test('opens a compressed .mxl archive chosen from the library: a digit on every note', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByLabel('choose a file').setInputFiles({
+    name: 'ode-to-joy.mxl',
+    mimeType: 'application/vnd.recordare.musicxml',
+    buffer: mxlOf(libraryScore('ode-to-joy')),
+  });
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(ODE_NOTES, { timeout: 20_000 });
+  const roots = await expectOneRed(page, 'dropped .mxl ready');
+  expect(roots[0]!.tag).toBe('button');
+});
+
+test('opens a UTF-16 MusicXML file with a byte-order mark: a digit on every note', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByLabel('choose a file').setInputFiles({
+    name: 'twinkle-utf16.musicxml',
+    mimeType: 'application/xml',
+    buffer: utf16leOf(libraryScore('twinkle-twinkle-little-star')),
+  });
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
+    timeout: 20_000,
+  });
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Twinkle, Twinkle, Little Star');
+  const roots = await expectOneRed(page, 'dropped UTF-16 file ready');
+  expect(roots[0]!.tag).toBe('button');
+});
+
+test('the focus follows the view: the heading of a piece opened with Enter, then the library', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const heading = () => page.evaluate(() => document.activeElement?.closest('h1')?.textContent);
+  await page.getByRole('button', { name: /^Open Twinkle/ }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#\/piece\/twinkle-twinkle-little-star$/);
+  await expect.poll(heading).toBe('Twinkle, Twinkle, Little Star');
+  // The next Tab starts inside the score view, not at the top of the document.
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
+    timeout: 20_000,
+  });
+  await page.keyboard.press('Tab');
+  const afterHeading = await page.evaluate(() => {
+    const h1 = document.querySelector('h1')!;
+    const active = document.activeElement;
+    return (
+      active !== null &&
+      active !== document.body &&
+      (h1.compareDocumentPosition(active) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+    );
+  });
+  expect(afterHeading).toBe(true);
+  await page.getByRole('button', { name: 'Back to the library' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#\/$/);
+  await expect.poll(heading).toBe('digitus2');
+});
+
+test('back to the library and browser back both work', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Open Ode to Joy/ }).click();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
+  await page.goBack();
+  await expect(page.getByRole('button', { name: /^Open / })).toHaveCount(30);
+  await page.goForward();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await expect(page).toHaveURL(/#\/$/);
+});

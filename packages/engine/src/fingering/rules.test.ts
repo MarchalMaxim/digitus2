@@ -3,6 +3,8 @@ import type { Finger } from '../score/types.js';
 import { isBlack } from './geometry.js';
 import {
   PARNCUTT_WEIGHTS,
+  chordSpanTerms,
+  isReleased,
   makeContext,
   pairTerms,
   tripleTerms,
@@ -125,6 +127,75 @@ describe('pair terms', () => {
     expect(pts(pairTerms(ctx, note(61, 0), 4, note(60, 1), 3), 'fourOnBlack')).toBe(1);
     expect(pts(pairTerms(ctx, note(61, 0), 3, note(62, 1), 4), 'fourOnBlack')).toBe(0);
   });
+  it('a leap after a rest is not a stretch: beyondPractical absent when restBefore', () => {
+    // M2 hardening: C4 to C5 (12 semitones) with 1-2 is 2 beyond the practical span (10).
+    const legato = pairTerms(ctx, note(60, 0), 1, note(72, 1), 2);
+    expect(pts(legato, 'beyondPractical')).toBe(2);
+    const afterRest = pairTerms(ctx, note(60, 0), 1, note(72, 1, { restBefore: true }), 2);
+    expect(pts(afterRest, 'beyondPractical')).toBe(0);
+    // The other span terms stay: the hand still moves.
+    expect(pts(afterRest, 'stretch')).toBe(pts(legato, 'stretch'));
+    expect(pts(afterRest, 'largeSpan')).toBe(pts(legato, 'largeSpan'));
+    // A key released before the next onset (staccato, no rest for the hand as a whole) counts too.
+    const released = note(60, 0, { offsetSec: 0.3 });
+    expect(isReleased(released, note(72, 1))).toBe(true);
+    expect(isReleased(note(60, 0), note(72, 1))).toBe(false);
+    expect(pts(pairTerms(ctx, released, 1, note(72, 1), 2), 'beyondPractical')).toBe(0);
+    // So does a held key beyond any hand's reach (C4 to G#5, 20 semitones > maxPrac(1, 5) = 15),
+    // which the solver treats as released (reach.ts).
+    const far = pairTerms(ctx, note(60, 0), 1, note(80, 1), 5);
+    expect(pts(far, 'beyondPractical')).toBe(0);
+    expect(pts(far, 'stretch')).toBe(7);
+  });
+  it('a thumb crossing over a fourth pays no beyondPractical', () => {
+    // 3 to 1 up a fourth (G4 to C5, thumb under): maxPrac(3, 1) is 4 semitones.
+    const under = pairTerms(ctx, note(67, 0), 3, note(72, 1), 1);
+    expect(pts(under, 'beyondPractical')).toBe(0);
+    expect(pts(under, 'thumbPassing')).toBe(1);
+    // 1 to 3 down a fourth (C5 to G4, finger 3 over the thumb) and 4 to 1 up a fourth.
+    expect(pts(pairTerms(ctx, note(72, 0), 1, note(67, 1), 3), 'beyondPractical')).toBe(0);
+    expect(pts(pairTerms(ctx, note(64, 0), 4, note(69, 1), 1), 'beyondPractical')).toBe(0);
+    // A crossing wider than a fourth, a leap without a crossing, or the thumb passing under the
+    // fifth finger (not a scale crossing; maxPrac(5, 1) is 1) still pays.
+    expect(pts(pairTerms(ctx, note(66, 0), 3, note(72, 1), 1), 'beyondPractical')).toBe(2);
+    expect(pts(pairTerms(ctx, note(60, 0), 2, note(72, 1), 3), 'beyondPractical')).toBe(7);
+    expect(pts(pairTerms(ctx, note(72, 0), 5, note(76, 1), 1), 'beyondPractical')).toBe(3);
+  });
+});
+
+describe('chord span terms', () => {
+  it('tripleTerms prices the outer pair of a chord (notes two apart in one slice)', () => {
+    const c4 = note(60, 0);
+    const e4 = note(64, 0);
+    const c5 = note(72, 0);
+    // C4 to C5 with 1-5: maxRel 10, so 2 large-span points (theta 1); no position shift term.
+    expect(chordSpanTerms(ctx, c4, 1, c5, 5)).toEqual([{ rule: 'chordLargeSpan', points: 2 }]);
+    expect(tripleTerms(ctx, c4, 1, e4, 2, c5, 5)).toEqual(chordSpanTerms(ctx, c4, 1, c5, 5));
+    // With 1-3 the octave is at the practical limit (12): stretch 2, large span 5.
+    expect(tripleTerms(ctx, c4, 1, e4, 2, c5, 3)).toEqual([
+      { rule: 'chordStretch', points: 2 },
+      { rule: 'chordLargeSpan', points: 5 },
+    ]);
+    // Same chord terms as pairTerms gives a chord pair, without handPositionShift.
+    expect(chordSpanTerms(ctx, c4, 1, c5, 3)).toEqual(
+      pairTerms(ctx, c4, 1, c5, 3).filter((t) => t.rule !== 'handPositionShift'),
+    );
+  });
+  it('charges doubledFinger for two chord notes on one finger: 1 for the thumb on adjacent white keys, else 2', () => {
+    // M2 hardening re-review: the price of a slice of more than five notes, which must double a
+    // finger, is a named weighted rule (weight 50), not a constant inside the solver.
+    expect(pts(pairTerms(ctx, note(60, 0), 1, note(62, 0), 1), 'doubledFinger')).toBe(1);
+    expect(pts(pairTerms(ctx, note(60, 0), 1, note(64, 0), 1), 'doubledFinger')).toBe(2); // a third
+    expect(pts(pairTerms(ctx, note(61, 0), 1, note(63, 0), 1), 'doubledFinger')).toBe(2); // black
+    expect(pts(pairTerms(ctx, note(60, 0), 2, note(62, 0), 2), 'doubledFinger')).toBe(2);
+    expect(pts(pairTerms(ctx, note(60, 0), 1, note(62, 0), 2), 'doubledFinger')).toBe(0);
+    expect(pts(pairTerms(ctx, note(60, 0), 2, note(62, 1), 2), 'doubledFinger')).toBe(0); // a hop
+    // Only neighbouring chord notes carry it; the outer pair of a triple does not double count.
+    expect(
+      pts(tripleTerms(ctx, note(60, 0), 1, note(61, 0), 1, note(62, 0), 1), 'doubledFinger'),
+    ).toBe(0);
+    expect(PARNCUTT_WEIGHTS.doubledFinger).toBe(50);
+  });
 });
 
 describe('unary terms', () => {
@@ -216,6 +287,7 @@ describe('weights', () => {
       chordSmallSpan: true,
       chordLargeSpan: true,
       chordBeyondPractical: true,
+      doubledFinger: true,
       handPositionShift: true,
       positionChangeCount: true,
       positionChangeSize: true,

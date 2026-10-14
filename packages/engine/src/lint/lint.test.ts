@@ -91,9 +91,17 @@ describe('lint laws', () => {
     expect(
       rules([
         [0, 1.5, 'C4', 0, 1],
-        [1, 2, 'E5', 0, 5],
+        [1, 2, 'D#5', 0, 4],
       ]),
-    ).toContain('L05'); // 16 semitones with 1-5, maxPrac 15
+    ).toContain('L05'); // 15 semitones with 1-4, maxPrac 14
+    // M2 hardening Task 2: 16 semitones (C4 to E5 with 1-5, maxPrac 15) is beyond any hand's reach
+    // (`outOfReach`, the solver's test), so the notated hold is a pedal or a release: a warning.
+    const beyondReach = lint([
+      [0, 1.5, 'C4', 0, 1],
+      [1, 2, 'E5', 0, 5],
+    ]);
+    expect(beyondReach.issues.map((i) => [i.rule, i.severity])).toEqual([['L07', 'warning']]);
+    expect(beyondReach.errors).toBe(0);
     expect(
       rules([
         [0, 1.5, 'C4', 0, 1],

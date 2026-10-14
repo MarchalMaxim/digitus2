@@ -1,6 +1,7 @@
 import type { Finger } from '../score/types.js';
 import { x14 } from './geometry.js';
 import weightsJson from './params/weights-parncutt.json' with { type: 'json' };
+import { outOfReach } from './reach.js';
 import { span } from './spans.js';
 import type { HandProfile, SpanTables } from './spans.js';
 
@@ -36,7 +37,8 @@ export type RuleId =
   | 'chordStretch'
   | 'chordSmallSpan'
   | 'chordLargeSpan'
-  | 'chordBeyondPractical' // pair, within a slice
+  | 'chordBeyondPractical'
+  | 'doubledFinger' // pair, within a slice
   | 'handPositionShift' // pair, every case (five-finger-position model)
   | 'positionChangeCount'
   | 'positionChangeSize'
@@ -54,6 +56,20 @@ export interface RuleContext {
   hopFastSec: number;
   /** Widest interval (semitones) at which a same-finger hop costs the fast-hop points at any IOI. */
   hopStepMax: number;
+  /**
+   * Widest thumb crossing (semitones) by finger 2, 3 or 4 that pays no beyondPractical: passing
+   * the thumb under (or a finger over it) up to a perfect fourth is the standard scale and arpeggio
+   * motion, although Parncutt's practical spans for the crossed pairs (3-1: 4, 4-1: 3) are narrower.
+   */
+  thumbCrossingMax: number;
+  /**
+   * Points of the template term (times the `template` weight) on a note of a chromatic run that
+   * takes the textbook finger; 1 on a scale or arpeggio run. The ergonomic rules price the standard
+   * chromatic fingering (3 on black keys, the thumb on white) as a position change at every pivot,
+   * so a scale-sized bonus never wins: 6 is the smallest integer at which all 48 chromatic oracle
+   * entries come out exact (5.5 gives none), and 8 leaves a margin.
+   */
+  chromaticTemplatePoints: number;
   repeatFastSec: number;
 }
 
@@ -65,8 +81,21 @@ export function makeContext(profile: HandProfile, weights: Partial<RuleWeights> 
     weights: { ...PARNCUTT_WEIGHTS, ...weights },
     hopFastSec: 0.25,
     hopStepMax: 5,
+    thumbCrossingMax: 5,
+    chromaticTemplatePoints: 8,
     repeatFastSec: 0.18,
   };
+}
+
+/** Seconds a key must be up before the next onset to count as released (as in the sequence). */
+const RELEASE_EPS = 1e-3;
+
+/**
+ * True when note `a` was released before note `b` starts (`a.offsetSec <= b.onsetSec - 1 ms`):
+ * the hand is free to move, so a leap from `a` to `b` is a shift, not a stretch over both keys.
+ */
+export function isReleased(a: NoteView, b: NoteView): boolean {
+  return a.offsetSec <= b.onsetSec - RELEASE_EPS;
 }
 
 const over = (v: number, max: number): number => Math.max(0, v - max);
@@ -118,10 +147,40 @@ function anchor(n: NoteView, f: Finger): number {
 }
 
 /**
+ * Balliauw's chord span terms (rule 14: Parncutt rules 1 to 3 and the beyond-practical rule, as
+ * chordStretch, chordSmallSpan, chordLargeSpan, chordBeyondPractical) for two notes of one slice,
+ * `a` below `b` in (mirrored) pitch, played by fingers g and f. pairTerms charges them for
+ * neighbouring chord notes and tripleTerms for notes two apart, so every pair of a chord of up to
+ * three notes, and every pair at most two apart in a larger one, is priced (product spec 7.1).
+ */
+export function chordSpanTerms(
+  ctx: RuleContext,
+  a: NoteView,
+  g: Finger,
+  b: NoteView,
+  f: Finger,
+): Term[] {
+  const terms: Term[] = [];
+  const s = spanPoints(ctx, b.pitch - a.pitch, g, f);
+  push(terms, 'chordStretch', s.stretch);
+  push(terms, 'chordSmallSpan', s.small);
+  push(terms, 'chordLargeSpan', s.large);
+  push(terms, 'chordBeyondPractical', s.beyond);
+  return terms;
+}
+
+/**
  * Pair terms for note `a` played by finger `g` followed by note `b` played by finger `f`
- * (a before b in sequence order). Chord pairs (same slice) get Balliauw's doubled span terms;
- * melodic pairs get Parncutt rules 1-3, 8, 9, 12, the soft beyond-practical rule, or the hop and
- * repeated-note terms; every pair gets the hand-position shift.
+ * (a before b in sequence order). Chord pairs (same slice) get Balliauw's doubled span terms, and
+ * `doubledFinger` when they share a finger (1 point for the thumb on two adjacent white keys, the
+ * one double lint L01 accepts, 2 otherwise: the price a slice of more than five notes pays for
+ * each finger it must double; in a slice of at most five notes the chord law forbids a double, so
+ * the term only adds to that penalty); melodic pairs get Parncutt rules 1-3, 8, 9, 12, the soft
+ * beyond-practical rule, or the hop and repeated-note terms; every pair gets the hand-position
+ * shift. The melodic beyond-practical rule
+ * is skipped when the hand is free to move (a rest before `b`, `a` released before `b`, or `a`
+ * out of any hand's reach of `b`) and on a thumb crossing by finger 2, 3 or 4 of at most
+ * `thumbCrossingMax` semitones.
  */
 export function pairTerms(
   ctx: RuleContext,
@@ -143,16 +202,13 @@ function pairTermsWithoutPosition(
   b: NoteView,
   f: Finger,
 ): Term[] {
-  const terms: Term[] = [];
   const i = b.pitch - a.pitch;
   if (a.slice === b.slice) {
-    const s = spanPoints(ctx, i, g, f);
-    push(terms, 'chordStretch', s.stretch);
-    push(terms, 'chordSmallSpan', s.small);
-    push(terms, 'chordLargeSpan', s.large);
-    push(terms, 'chordBeyondPractical', s.beyond);
-    return terms;
+    const chord = chordSpanTerms(ctx, a, g, b, f);
+    if (g === f) push(chord, 'doubledFinger', g === 1 && !a.black && !b.black && i <= 2 ? 1 : 2);
+    return chord;
   }
+  const terms: Term[] = [];
   if (i === 0) {
     if (g === f && b.ioi < ctx.repeatFastSec) push(terms, 'repeatedNoteSameFinger', 2);
     if (g !== f && b.ioi >= ctx.repeatFastSec) push(terms, 'repeatedNoteFingerChange', 1);
@@ -168,17 +224,25 @@ function pairTermsWithoutPosition(
     return terms;
   }
   const s = spanPoints(ctx, i, g, f);
+  // A thumb crossing: the thumb passes under a finger, or a finger over the thumb. Fingers 2 to 4
+  // cross the thumb in scales and arpeggios; the fifth finger does not (maxPrac(5, 1) is 1).
+  const crossing = (g === 1 || f === 1) && (f - g) * i < 0;
+  const shortCrossing = crossing && g !== 5 && f !== 5 && Math.abs(i) <= ctx.thumbCrossingMax;
+  // Beyond the practical span is a stretch over both keys only while the hand holds `a`; after a
+  // rest or a release it is a hand shift, which stretch and the relaxed-span terms already price.
+  // A hold beyond any hand's reach (`outOfReach`) is a release too, as in the solver's held notes.
+  const handFree = b.restBefore || isReleased(a, b) || outOfReach(ctx.tables, a.pitch, b.pitch);
   push(terms, 'stretch', s.stretch);
   push(terms, 'smallSpan', s.small);
   push(terms, 'largeSpan', s.large);
-  push(terms, 'beyondPractical', s.beyond);
+  if (!handFree && !shortCrossing) push(terms, 'beyondPractical', s.beyond);
   if (g === 3 && f === 4) push(terms, 'threeToFour', 1);
   if ((g === 3 && f === 4) || (g === 4 && f === 3)) {
     const noteOf3 = g === 3 ? a : b;
     const noteOf4 = g === 4 ? a : b;
     if (!noteOf3.black && noteOf4.black) push(terms, 'fourOnBlack', 1);
   }
-  if ((g === 1 || f === 1) && (f - g) * i < 0) {
+  if (crossing) {
     const lower = i < 0 ? b : a;
     const upper = i < 0 ? a : b;
     const lowerFinger = i < 0 ? f : g;
@@ -191,8 +255,10 @@ function pairTermsWithoutPosition(
 }
 
 /**
- * Triple terms (Parncutt rules 4, 5, 7 and Balliauw's same-finger pivot) for fingers h, g, f on
- * notes a, b, c. Only emitted when the three notes are in three different slices.
+ * Triple terms for fingers h, g, f on notes a, b, c (consecutive in sequence order). Three notes
+ * of one slice get the chord span terms of the outer pair a-c (`chordSpanTerms`, M2 hardening:
+ * without them a chord's outer pair had no cost at all). Three notes in three different slices get
+ * Parncutt rules 4, 5, 7 and Balliauw's same-finger pivot. Any other mix gets nothing.
  */
 export function tripleTerms(
   ctx: RuleContext,
@@ -203,6 +269,7 @@ export function tripleTerms(
   c: NoteView,
   f: Finger,
 ): Term[] {
+  if (a.slice === b.slice && b.slice === c.slice) return chordSpanTerms(ctx, a, h, c, f);
   const terms: Term[] = [];
   if (a.slice === b.slice || b.slice === c.slice || a.slice === c.slice) return terms;
   const t = ctx.tables;

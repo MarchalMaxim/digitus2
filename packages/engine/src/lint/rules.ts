@@ -1,4 +1,5 @@
 import type { Finger, Hand } from '../score/types.js';
+import { forEachHold, HOLD_EPS } from '../fingering/reach.js';
 import type { SeqNote } from '../fingering/sequence.js';
 import { span } from '../fingering/spans.js';
 import type { SpanTables } from '../fingering/spans.js';
@@ -35,7 +36,10 @@ export const LINT_RULES: Record<LintRuleId, { title: string; law: boolean }> = {
   L04: { title: 'More than five simultaneous notes in one hand', law: true },
   L05: { title: 'Span beyond the practical maximum on keys held together', law: true },
   L06: { title: 'Non-thumb crossing', law: false },
-  L07: { title: 'Uncomfortable span, or a shift beyond the practical span', law: false },
+  L07: {
+    title: 'Uncomfortable span, a shift beyond the practical span, or a notated hold beyond reach',
+    law: false,
+  },
   L08: { title: 'Thumb on a black key', law: false },
   L09: { title: 'Fifth finger on a black key next to a white key', law: false },
   L10: { title: 'Thumb passes onto a black key from a white key', law: false },
@@ -57,8 +61,6 @@ interface Fingered {
   substitution: Finger | undefined;
 }
 
-const EPS = 1e-3;
-
 /**
  * Lints one hand. `notes` are the fingered notes of the hand's sequence in sequence order
  * (slices in arpeggiated order, mirrored pitch for the left hand); unfingered notes are absent.
@@ -71,6 +73,9 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
   // L06 and L10 are preferences that become errors for beginners.
   const beginnerSeverity: LintSeverity = ctx.beginner ? 'error' : 'warning';
   const t = ctx.tables;
+  /** Interval `i` from the key of finger g to the key of finger f is within their practical span. */
+  const practical = (i: number, g: Finger, f: Finger): boolean =>
+    i <= span(t, 'maxPrac', g, f) && i >= span(t, 'minPrac', g, f);
 
   // Slices.
   const slices = new Map<number, Fingered[]>();
@@ -108,10 +113,7 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
             [lo.note.noteId, hi.note.noteId],
             `fingers ${lo.finger} and ${hi.finger} crossed in a chord`,
           );
-        if (
-          i > span(t, 'maxPrac', lo.finger, hi.finger) ||
-          i < span(t, 'minPrac', lo.finger, hi.finger)
-        ) {
+        if (!practical(i, lo.finger, hi.finger)) {
           add(
             'L05',
             'error',
@@ -123,28 +125,47 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
     }
   }
 
-  // Held keys (L03). Onsets never decrease along the sequence, so a note that has stopped sounding
-  // leaves the active list for good.
-  let active: Fingered[] = [];
-  for (const cur of notes) {
-    active = active.filter((x) => x.note.offsetSec > cur.note.onsetSec + EPS);
-    for (const held of active) {
-      if (held.note.slice === cur.note.slice) continue;
-      if (
-        held.finger === cur.finger &&
-        held.note.pitch !== cur.note.pitch &&
-        held.substitution === undefined
-      ) {
-        add(
-          'L03',
-          'error',
-          [held.note.noteId, cur.note.noteId],
-          `finger ${cur.finger} moves to a new key while holding another`,
-        );
+  // Held keys, walked by `forEachHold` (reach.ts), the solver's own walk: every earlier note
+  // (another slice) that still holds its key at this note's onset is down together with it,
+  // whether or not it is the sequence neighbour: the same finger on a new key is L03, and two
+  // different fingers must span the interval (L05). A notated hold that no hand can span
+  // (`outOfReach`) is a pedal or a release: one L07 warning, and from then on the key is released
+  // for the rest of its notated length, so no later note is checked against it (decided per slice,
+  // before any of the slice's notes). A repeated key cannot be held under its own repetition, so a
+  // pair on one pitch has no span.
+  forEachHold(
+    notes.map((x) => x.note),
+    t,
+    (m, k) => {
+      const held = notes[m]!;
+      const cur = notes[k]!;
+      const ids = [held.note.noteId, cur.note.noteId];
+      const i = cur.note.pitch - held.note.pitch;
+      if (held.finger === cur.finger && held.substitution === undefined) {
+        add('L03', 'error', ids, `finger ${cur.finger} moves to a new key while holding another`);
+        return;
       }
-    }
-    active.push(cur);
-  }
+      // With a substitution ("2_1") the key passes to the second finger while it sounds; whichever
+      // of the two is not playing this note holds it, and the hold is legal if either can span it.
+      const holders = (
+        held.substitution === undefined ? [held.finger] : [held.finger, held.substitution]
+      ).filter((g) => g !== cur.finger);
+      if (holders.length > 0 && holders.every((g) => !practical(i, g, cur.finger)))
+        add(
+          'L05',
+          'error',
+          ids,
+          `${i} semitones with ${holders[0]}-${cur.finger} is beyond practical while the key is held`,
+        );
+    },
+    (m, far) =>
+      add(
+        'L07',
+        'warning',
+        [notes[m]!.note.noteId, notes[far]!.note.noteId],
+        'notated hold beyond reach: pedal or release',
+      ),
+  );
 
   // Consecutive notes in different slices.
   const consecutive: Array<[Fingered, Fingered]> = [];
@@ -168,12 +189,12 @@ export function lintHand(hand: Hand, notes: Fingered[], ctx: LintContext): LintI
         add('L13', 'info', ids, `slow repeated key changes finger ${g} to ${f}`);
       if (i !== 0) {
         // Beyond the practical span is a law only while the earlier key is still held: then the
-        // hand must stretch over both keys at once. After a release it is a hand shift, which
-        // experts make all the time, so it is an L07 warning.
-        const held = a.note.offsetSec > b.note.onsetSec + EPS;
-        if (i > span(t, 'maxPrac', g, f) || i < span(t, 'minPrac', g, f)) {
-          if (held) add('L05', 'error', ids, `${i} semitones with ${g}-${f} is beyond practical`);
-          else
+        // hand must stretch over both keys at once, and the held-key loop above reports it (L05,
+        // or L07 when the hold is beyond reach) with every other held key. After a release it is
+        // a hand shift, which experts make all the time, so it is an L07 warning.
+        const held = a.note.offsetSec > b.note.onsetSec + HOLD_EPS;
+        if (!practical(i, g, f)) {
+          if (!held)
             add(
               'L07',
               'warning',

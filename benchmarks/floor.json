@@ -1,32 +1,37 @@
 {
-  "_comment": "Benchmark floors for the verification loop. `pnpm verify` fails when the engine's PIG test-split scores drop below `engine`, when its lint errors per 1000 notes rise above `lint.errorsPer1000Max`, or when a gated run skips a piece. Raise the floor when a milestone improves the numbers; never lower it without a dated note in docs/PROGRESS.md. All numbers are percent, macro-averaged over the test pieces. 2026-10-14: `engine`, `textbook` and `lint` are the M2 rule-based floors (Parncutt + Jacobs + Balliauw rules, hand-position term, textbook templates, literature-default weights, profile large), first set from the m2-rules scorecard (macro gen 59.74, high 66.02, soft 80.28, rec 70.05). 2026-10-14 (M2 review fixes: held-note loop that keeps one side of each conflict, doubled-finger cost for chords of more than five notes, hop weight 10 with 2 points for a hop within a fourth at any tempo, chordBeyondPractical 30, lint L05 a law only on keys held together): raised from the m2-rules-fixed scorecard on 42c24fc plus the uncommitted fix tree (macro gen 60.91, high 66.84, soft 81.65, rec 71.46 over 30 test pieces, 0 skipped) minus 0.5 and rounded down to one decimal. Still below nakamura_chmm: the verification spec's gen gate (the best runnable baseline, 62.1) is not met by the rules alone; see docs/experiments.md and benchmarks/history.md.",
+  "_comment": "Benchmark floors for the verification loop. `pnpm verify` fails when the engine's PIG test-split scores drop below `engine`, when its lint errors per 1000 notes rise above `lint.errorsPer1000Max`, or when a gated run skips a piece. Raise the floor when a milestone improves the numbers; never lower it without a dated note in docs/PROGRESS.md. All numbers are percent, macro-averaged over the test pieces. 2026-10-14: `engine`, `textbook` and `lint` are the M2 rule-based floors (Parncutt + Jacobs + Balliauw rules, hand-position term, textbook templates, literature-default weights, profile large), first set from the m2-rules scorecard (macro gen 59.74, high 66.02, soft 80.28, rec 70.05). 2026-10-14 (M2 review fixes: held-note loop that keeps one side of each conflict, doubled-finger cost for chords of more than five notes, hop weight 10 with 2 points for a hop within a fourth at any tempo, chordBeyondPractical 30, lint L05 a law only on keys held together): raised from the m2-rules-fixed scorecard on 42c24fc plus the uncommitted fix tree (macro gen 60.91, high 66.84, soft 81.65, rec 71.46 over 30 test pieces, 0 skipped) minus 0.5 and rounded down to one decimal. 2026-10-14 (M2 hardening, docs/superpowers/plans/2026-10-14-m2-hardening.md: every pair of a chord priced and the chord law infinite where a slice has a legal configuration, notated holds beyond reach released, melodic beyondPractical waived after a rest or a release and on thumb crossings within a fourth, chromatic runs templated; lint checks every held pair): `engine` raised from the m2-hardened scorecard on 4dbf87b plus the uncommitted hardening tree (macro gen 61.60, high 67.59, soft 82.38, rec 72.26 over 30 test pieces, 0 skipped) minus 0.5 and rounded down to one decimal; `textbook` raised; `lint` re-based on the stricter lint (see its note). Still 0.5 below nakamura_chmm on gen: the verification spec's gen gate (the best runnable baseline, 62.1) is not met by the rules alone; see docs/experiments.md and benchmarks/history.md. 2026-10-14 (M2 hardening re-review fixes, label m2-hardened-fixed: a key held under a later note is a law at any distance, priced like a chord partner by the decoder for the two nearest notes, by a law-domain pass (arc consistency) and the held-note loop beyond; solver and lint walk the same holds (reach.ts forEachHold); a chord with no legal configuration breaks the fewest pairs; the doubled finger of a slice of more than five notes is the named rule doubledFinger): `engine` raised from the m2-hardened-fixed scorecard on 4dbf87b plus the uncommitted tree (macro gen 61.89, high 67.93, soft 82.62, rec 72.56 over 30 test pieces, 0 skipped) minus 0.5 and rounded down to one decimal; `textbook` unchanged (same measurement); `lint.errorsPer1000Max` lowered from 12.43 to 3.82, the new measurement rounded up, below the 8.32 it had before the hardening re-based it (see its note). Still 0.2 below nakamura_chmm on gen (62.1).",
   "goldDir": "research/data/pig",
   "split": "research/data/splits/pig_official.json",
   "splitName": "nakamura2020",
   "metricPrimary": "gen",
   "engine": {
-    "gen": 60.4,
-    "high": 66.3,
-    "soft": 81.1,
-    "rec": 70.9
+    "gen": 61.3,
+    "high": 67.4,
+    "soft": 82.1,
+    "rec": 72.0
   },
   "textbook": {
-    "noteAccuracy": 0.83,
+    "noteAccuracy": 0.87,
     "scaleNoteAccuracy": 0.9,
-    "quarter": { "arpeggio": 0.72, "chromatic": 0.61, "R": 0.86, "L": 0.8 },
-    "sixteenths": {
-      "note": 0.83,
-      "scale": 0.9,
-      "arpeggio": 0.72,
-      "chromatic": 0.61,
-      "R": 0.86,
-      "L": 0.8
+    "quarter": {
+      "arpeggio": 0.76,
+      "chromatic": 0.99,
+      "R": 0.91,
+      "L": 0.82
     },
-    "note": "Fractions, not percent: textbook oracle (benchmarks/textbook, 672 entries) note accuracy, measured minus 0.01 and rounded down to two decimals. noteAccuracy, scaleNoteAccuracy and quarter are at quarter = 120 (IOI 0.5 s, the evaluateTextbook default); sixteenths at qpm 480 (IOI 0.125 s); R and L are each hand's entries alone, which guard the left-hand mirror. packages/engine/src/eval/textbook.test.ts reads these values and enforces them in the unit step. 2026-10-14 m2-rules: quarter note 0.527, scale 0.552 (exact 29 of 672). 2026-10-14 m2-rules-fixed: quarter note 0.8422, scale 0.9143, arpeggio 0.7334, chromatic 0.6283, right hand 0.8731, left hand 0.8112 (exact 410 of 672: scales 330 of 432, arpeggios 80 of 192, chromatic 0 of 48); sixteenths identical, since a hop within a fourth now costs the same at any tempo."
+    "sixteenths": {
+      "note": 0.87,
+      "scale": 0.9,
+      "arpeggio": 0.76,
+      "chromatic": 0.99,
+      "R": 0.91,
+      "L": 0.82
+    },
+    "note": "Fractions, not percent: textbook oracle (benchmarks/textbook, 672 entries) note accuracy, measured minus 0.01 and rounded down to two decimals. noteAccuracy, scaleNoteAccuracy and quarter are at quarter = 120 (IOI 0.5 s, the evaluateTextbook default); sixteenths at qpm 480 (IOI 0.125 s); R and L are each hand's entries alone, which guard the left-hand mirror. packages/engine/src/eval/textbook.test.ts reads these values and enforces them in the unit step. 2026-10-14 m2-rules: quarter note 0.527, scale 0.552 (exact 29 of 672). 2026-10-14 m2-rules-fixed: quarter note 0.8422, scale 0.9143, arpeggio 0.7334, chromatic 0.6283, right hand 0.8731, left hand 0.8112 (exact 410 of 672: scales 330 of 432, arpeggios 80 of 192, chromatic 0 of 48); sixteenths identical, since a hop within a fourth now costs the same at any tempo. 2026-10-14 m2-hardened: quarter note 0.8802, scale 0.9143, arpeggio 0.7737, chromatic 1.0000, right hand 0.9227, left hand 0.8377 (exact 486 of 672: scales 330 of 432, arpeggios 108 of 192, chromatic 48 of 48; right hand 257 of 336, left hand 229 of 336, left-hand arpeggios 46 of 96 the weakest group at note accuracy 0.6505); sixteenths identical. 2026-10-14 m2-hardened-fixed: unchanged at both tempos (exact 486 of 672, note accuracy 0.8802); the oracle's melodies never hold a key under a later note, so the held-pair law does not touch them."
   },
   "lint": {
-    "errorsPer1000Max": 8.32,
-    "note": "Lint errors per 1000 notes of the solver's output on the 30 test pieces; bench gates it. 2026-10-14 m2-rules: 22.11 (226 errors; most were L05 leaps between notes that do not overlap, which lint then called a law, and L03 in piece 029, whose hard decode became infeasible). 2026-10-14 m2-rules-fixed: 85 errors in 10,225 notes (8.313 per 1000, rounded up), 0 relaxed hands. L05 74: 68 chord spans whose notes all lie within 15 semitones and 6 spans between a held note and the next one (5 of them under a legato overlap below 60 ms); L03 11: 6 where more than five keys sound at once and 5 under legato overlaps below 60 ms. Not 0 yet because the solver and lint treat a note as held 1 ms after its onset, so a performance overlap of 10 to 60 ms in PIG blocks a finger: on PIG train a 60 ms tolerance in the solver alone cuts these chord-span errors from 301 to 188 (and makes lint report 440 L03 instead, since lint keeps 1 ms). M3 Task 7 tests that tolerance in both. The experts' own fingerings of the test pieces score 6.68 errors per 1000 notes under the same lint (L03 4.58, L05 1.58, L01 0.48, L02 0.04; 47.4 under the m2-rules lint)."
+    "errorsPer1000Max": 3.82,
+    "note": "Lint errors per 1000 notes of the solver's output on the 30 test pieces; bench gates it. History: 2026-10-14 m2-rules 22.11 (226 errors, mostly L05 leaps between notes that do not overlap, which lint then called a law); m2-rules-fixed 8.313 (85 errors: L05 74, of them 68 chord spans, and L03 11; that note blamed the chord spans on PIG legato overlaps, the M2 review found the cause in the solver, which priced chord spans only between neighbouring notes of a slice). m2-hardened 12.42 (127 errors) under a stricter lint that checks every key still held against every later note it sounds with: 0 chord-span L05 where a legal configuration exists, but 98 held-pair L05, because the solver had no span law between a held key and a note other than its sequence neighbour; the gate was re-based to 12.43 for that run, which the re-review rejected (it hid avoidable solver errors). 2026-10-14 m2-hardened-fixed (gate 3.82, the measurement rounded up, under the same stricter lint): 39 errors in 10,225 notes, 3.81 per 1000; 0 relaxed hands; 7 slices with no legal configuration. The solver now treats a held key like a chord partner: the decoder charges the held-note penalty for a span beyond practical (or the same finger) between a note and a key held one or two steps back, a law-domain pass (arc consistency over every held pair and chord pair) forbids from the start the fingers no law-keeping fingering can use, and the held-note loop mends the rest. Breakdown: L05 22 = 14 chord spans, all inside the 7 infeasible slices, and 8 held pairs (98 before); L03 17 (15 before), 11 of them on a note of a chord, where more keys sound than the hand has fingers within reach. The experts' own fingerings of the test pieces (every annotator, 4 to 6 per piece, 50,014 notes) score 8.00 errors per 1000 notes under this lint (L03 4.36, L05 3.12, L01 0.48, L02 0.04; 6.68 under the m2-rules-fixed lint, 47.4 under the m2-rules lint)."
   },
   "hands": {
     "accuracyMin": 91.0,

@@ -1,7 +1,24 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parseMusicXml } from '../io/musicxml/read.js';
 import { parsePig } from '../io/pig/read.js';
 import { lintFingering } from '../lint/index.js';
-import { solveFingering } from './solve.js';
+import type { Finger, Hand, Score } from '../score/types.js';
+import { forEachHold } from './reach.js';
+import {
+  chordSpanTerms,
+  makeContext,
+  pairTerms,
+  tripleTerms,
+  unaryTerms,
+  weightedSum,
+} from './rules.js';
+import { buildHandSequence } from './sequence.js';
+import type { SeqNote } from './sequence.js';
+import { solveFingering, solveHand } from './solve.js';
+import { HAND_PROFILES, span } from './spans.js';
 
 const H = '//Version: PianoFingering_v170101\n';
 const line = (i: number, on: number, off: number, p: string, ch: number) =>
@@ -122,12 +139,19 @@ describe('constraints', () => {
     const heldId = score.notes[0]!.id;
     const reuses = (a: Record<string, { finger: number }>) =>
       score.notes.slice(1).filter((n) => a[n.id]!.finger === a[heldId]!.finger).length;
-    const noLoop = solveFingering(score, { hands: ['R'], maxHeldIterations: 1 });
+    // `lawDomains: false` turns off the pass that forbids from the start the fingers no
+    // law-keeping fingering can use (M2 hardening fix), so the loop alone has to find this.
+    const loopOnly = { hands: ['R'] as Hand[], lawDomains: false };
+    const noLoop = solveFingering(score, { ...loopOnly, maxHeldIterations: 1 });
     expect(reuses(noLoop.assignment)).toBeGreaterThan(0); // the fixture really needs the loop
-    const { assignment, hands } = solveFingering(score, { hands: ['R'] });
+    const { assignment, hands } = solveFingering(score, loopOnly);
     expect(reuses(assignment)).toBe(0);
     expect(hands[0]!.iterations).toBeGreaterThan(1);
     expect(hands[0]!.relaxed).toBe(false);
+    // With the pass on (the default) the first decode already keeps the thumb off C5.
+    const prepass = solveFingering(score, { hands: ['R'], maxHeldIterations: 1 });
+    expect(reuses(prepass.assignment)).toBe(0);
+    expect(prepass.hands[0]!.relaxed).toBe(false);
   });
   it('a pin on a later note moves the held note off the pinned finger instead of relaxing', () => {
     // Same held C4; the thumb is pinned on B4, four steps later, while C4 still sounds.
@@ -317,5 +341,432 @@ describe('outputs', () => {
     const b = solveFingering(score, { hands: ['R'] });
     expect(JSON.stringify(a.assignment)).toBe(JSON.stringify(b.assignment));
     expect(ms).toBeLessThan(500);
+  });
+});
+
+// M2 hardening (docs/superpowers/plans/2026-10-14-m2-hardening.md, Task 1).
+const LARGE = HAND_PROFILES.large.tables;
+const fingersIn = (score: Score, assignment: Record<string, { finger: Finger }>) =>
+  score.notes.map((n) => assignment[n.id]!.finger);
+const chord = (pitches: string[], ch: number, on = 0, off = 1, first = 0) =>
+  pitches.map((p, k) => line(first + k, on, off, p, ch));
+/** True when every pair of the slice (pitches ascending, mirrored for the left hand) is practical. */
+const legalShape = (pitches: number[], fingers: number[]): boolean =>
+  pitches.every((p, a) =>
+    pitches.every((q, b) => {
+      if (b <= a) return true;
+      const i = q - p;
+      const g = fingers[a] as Finger;
+      const f = fingers[b] as Finger;
+      return i <= span(LARGE, 'maxPrac', g, f) && i >= span(LARGE, 'minPrac', g, f);
+    }),
+  );
+const increasing = (k: number, from = 1): number[][] =>
+  k === 0
+    ? [[]]
+    : [1, 2, 3, 4, 5]
+        .filter((f) => f >= from)
+        .flatMap((f) => increasing(k - 1, f + 1).map((rest) => [f, ...rest]));
+const hasLegalShape = (pitches: number[]): boolean =>
+  pitches.length <= 5 && increasing(pitches.length).some((c) => legalShape(pitches, c));
+
+describe('chord laws and holds beyond reach (M2 hardening)', () => {
+  it('outer pairs of a chord are priced: C4 E4 C5 gets 1 2 5, never 1 2 3', () => {
+    // Right hand, and the mirrored left-hand chord E3 C4 E4 (5 2 1 from the bottom).
+    for (const [hand, ch, pitches, want] of [
+      ['R', 0, ['C4', 'E4', 'C5'], [1, 2, 5]],
+      ['L', 1, ['E3', 'C4', 'E4'], [5, 2, 1]],
+    ] as const) {
+      const { score } = parsePig(H + chord([...pitches], ch).join('\n') + '\n');
+      const { assignment, hands } = solveFingering(score, { hands: [hand] });
+      expect(fingersIn(score, assignment), hand).toEqual(want);
+      // The hand cost includes the outer pair (1-5 over an octave: chordLargeSpan 2 points x 2),
+      // not only the neighbouring pairs: weakFifth 1 + shifts 1 + 2 + chordLargeSpan (2-5 over a
+      // minor sixth) 4 x 2 + outer 2 x 2 = 16.
+      const ctx = makeContext(HAND_PROFILES.large);
+      const v = buildHandSequence(score, hand).notes;
+      const f = v.map((n) => assignment[n.noteId]!.finger);
+      let expected = weightedSum(ctx, chordSpanTerms(ctx, v[0]!, f[0]!, v[2]!, f[2]!));
+      for (let i = 0; i < 3; i++) {
+        expected += weightedSum(ctx, unaryTerms(ctx, v[i]!, f[i]!, v[i - 1], v[i + 1]));
+        if (i > 0) expected += weightedSum(ctx, pairTerms(ctx, v[i - 1]!, f[i - 1]!, v[i]!, f[i]!));
+      }
+      expect(hands[0]!.cost, hand).toBe(expected);
+      expect(hands[0]!.cost, hand).toBe(16);
+    }
+  });
+  it('outer pairs of a chord obey the practical span in context (Joplin, The Entertainer, left hand)', () => {
+    // Stride bass: octave, chord, octave, chord. Pricing only neighbouring chord notes gave the
+    // G3 C4 E4 chord 5 4 3, whose outer pair (3-5 over a major sixth) is beyond practical (7).
+    const steps: string[][] = [
+      ['G#2', 'G#3'],
+      ['G#3', 'C4', 'F4'],
+      ['G2', 'G3'],
+      ['G3', 'C4', 'E4'],
+      ['G2'],
+      ['G3', 'B3'],
+    ];
+    const rows: string[] = [];
+    steps.forEach((ps, k) => rows.push(...chord(ps, 1, 0.4 * k, 0.4 * (k + 1), rows.length)));
+    const { score } = parsePig(H + rows.join('\n') + '\n');
+    const { assignment, hands } = solveFingering(score, { hands: ['L'] });
+    const seq = buildHandSequence(score, 'L');
+    for (let s = 0; s < seq.sliceCount; s++) {
+      const notes = seq.notes.filter((n) => n.slice === s);
+      const fs = notes.map((n) => assignment[n.noteId]!.finger);
+      expect(
+        legalShape(
+          notes.map((n) => n.pitch),
+          fs,
+        ),
+        `${notes.map((n) => n.midi).join(' ')}: ${fs.join(' ')}`,
+      ).toBe(true);
+    }
+    expect(hands[0]!.infeasibleSlices).toEqual([]);
+  });
+  it('a five-note chord with a legal configuration never gets an impossible span', () => {
+    // Library pieces whose solver output broke a chord law although the slice had a legal
+    // configuration (Joplin left hand G3 C4 E4 on 3 4 5, Satie left hand on 1 2 3 4, ...). Lint
+    // L05 inside a slice is allowed only on the slices the solver reports as infeasible (no legal
+    // configuration at all, such as Chopin Op. 28 No. 4's final chords), and those must really be.
+    const dir = fileURLToPath(new URL('../../../../content/scores/', import.meta.url));
+    for (const slug of [
+      'joplin-the-entertainer',
+      'satie-gymnopedie-no1',
+      'chopin-prelude-op28-no4',
+      'chopin-prelude-op28-no7',
+      'mozart-sonata-k545-mvt1',
+      'beethoven-moonlight-sonata-mvt1',
+    ]) {
+      const { score } = parseMusicXml(readFileSync(join(dir, `${slug}.musicxml`)));
+      const { assignment, hands } = solveFingering(score);
+      const lint = lintFingering(score, assignment);
+      for (const hand of ['R', 'L'] as Hand[]) {
+        const seq = buildHandSequence(score, hand);
+        const sliceOf = new Map(seq.notes.map((n) => [n.noteId, n.slice]));
+        const solution = hands.find((h) => h.hand === hand)!;
+        const infeasible = new Set(solution.infeasibleSlices.map((s) => s.slice));
+        for (const s of infeasible) {
+          const pitches = seq.notes.filter((n) => n.slice === s).map((n) => n.pitch);
+          expect(hasLegalShape(pitches), `${slug} ${hand} slice ${s}`).toBe(false);
+        }
+        const chordBreaks = lint.issues.filter(
+          (x) =>
+            x.rule === 'L05' &&
+            x.hand === hand &&
+            x.noteIds.length === 2 &&
+            sliceOf.get(x.noteIds[0]!) === sliceOf.get(x.noteIds[1]!) &&
+            !infeasible.has(sliceOf.get(x.noteIds[0]!)!),
+        );
+        expect(
+          chordBreaks.map((x) => x.message),
+          `${slug} ${hand}`,
+        ).toEqual([]);
+      }
+    }
+  });
+  it('chord loop terminates on a six-note slice and on an infeasible chord', () => {
+    // Six notes: no configuration of distinct fingers exists.
+    const six = parsePig(H + chord(['C4', 'D4', 'E4', 'F4', 'G4', 'A4'], 0).join('\n') + '\n');
+    const r6 = solveFingering(six.score, { hands: ['R'] });
+    expect(Number.isFinite(r6.hands[0]!.cost)).toBe(true);
+    expect(r6.hands[0]!.relaxed).toBe(false);
+    expect(r6.hands[0]!.infeasibleSlices).toEqual([
+      { slice: 0, noteIds: six.score.notes.map((n) => n.id) },
+    ]);
+    // A chord spanning 24 semitones in one hand, then a melody that must still be solved.
+    const rows = [
+      ...chord(['C3', 'C4', 'C5'], 0),
+      line(3, 1, 1.5, 'D5', 0),
+      line(4, 1.5, 2, 'E5', 0),
+    ];
+    const wide = parsePig(H + rows.join('\n') + '\n');
+    const rw = solveFingering(wide.score, { hands: ['R'] });
+    expect(Number.isFinite(rw.hands[0]!.cost)).toBe(true);
+    expect(rw.hands[0]!.relaxed).toBe(false);
+    expect(rw.hands[0]!.infeasibleSlices).toEqual([
+      { slice: 0, noteIds: wide.score.notes.slice(0, 3).map((n) => n.id) },
+    ]);
+    expect(rw.hands[0]!.iterations).toBeLessThanOrEqual(8);
+    // Left-hand mirror of the same chord.
+    const lw = parsePig(H + chord(['C2', 'C3', 'C4'], 1).join('\n') + '\n');
+    const rl = solveFingering(lw.score, { hands: ['L'] });
+    expect(Number.isFinite(rl.hands[0]!.cost)).toBe(true);
+    expect(rl.hands[0]!.infeasibleSlices).toHaveLength(1);
+  });
+  it('the chord loop forbids a configuration that breaks the span only between notes three apart', () => {
+    // A3 pinned to the thumb and held under C4 F4 G4 C5. Without the loop the decode keeps the
+    // thumb on A3 and plays the chord 2 3 4 5, whose outer pair (2-5 over an octave, practical
+    // 10) the second-order decoder cannot see; the loop forbids it and the chord gets a legal
+    // configuration (paying for the reused thumb instead, a finite held-note cost).
+    const rows = [line(0, 0, 2, 'A3', 0), ...chord(['C4', 'F4', 'G4', 'C5'], 0, 1, 2, 1)];
+    const { score } = parsePig(H + rows.join('\n') + '\n');
+    const pins = {
+      [score.notes[0]!.id]: { finger: 1 as const, source: 'user' as const, pinned: true },
+    };
+    const pitches = [60, 65, 67, 72];
+    // Without the law-domain pass (which forbids the thumb on the chord from the start), so the
+    // chord loop has to find it.
+    const loopOnly = { hands: ['R'] as Hand[], pins, lawDomains: false };
+    const noLoop = solveFingering(score, { ...loopOnly, maxChordIterations: 1 });
+    expect(fingersIn(score, noLoop.assignment).slice(1)).toEqual([2, 3, 4, 5]);
+    expect(legalShape(pitches, [2, 3, 4, 5])).toBe(false);
+    const { assignment, hands } = solveFingering(score, loopOnly);
+    expect(legalShape(pitches, fingersIn(score, assignment).slice(1))).toBe(true);
+    expect(hands[0]!.iterations).toBeGreaterThan(1);
+    expect(hands[0]!.relaxed).toBe(false);
+    expect(hands[0]!.infeasibleSlices).toEqual([]);
+    expect(Number.isFinite(hands[0]!.cost)).toBe(true);
+    // The default solve gives the chord a legal shape too.
+    const full = solveFingering(score, { hands: ['R'], pins });
+    expect(legalShape(pitches, fingersIn(score, full.assignment).slice(1))).toBe(true);
+    expect(full.hands[0]!.relaxed).toBe(false);
+  });
+  it('a chord with a single legal configuration gets it (the loop never forbids a legal one)', () => {
+    // Satie, Gymnopedie No. 1, left hand C3 F#3 A3 D4: only 5 3 2 1 keeps every pair practical.
+    const { score } = parsePig(H + chord(['C3', 'F#3', 'A3', 'D4'], 1).join('\n') + '\n');
+    const { assignment, hands } = solveFingering(score, { hands: ['L'] });
+    expect(fingersIn(score, assignment)).toEqual([5, 3, 2, 1]);
+    expect(hands[0]!.infeasibleSlices).toEqual([]);
+    expect(hands[0]!.relaxed).toBe(false);
+  });
+  it('a notated hold beyond reach is released: a bass held a bar under a chord two octaves up leaves finger 5 free', () => {
+    // C2 held for a bar of 1.5 s; C4 E4 G4 on the second beat, two octaves up: no hand spans C2 to
+    // C4 (24 semitones, maxPrac(1, 5) = 15), so the bass is pedalled or released and its finger is
+    // free. With the bass on 5 (pinned, as a player would take it) the chord still gets 5 3 1;
+    // before the fix the held 5 pushed the chord to 4 2 1.
+    const rows = [line(0, 0, 1.5, 'C2', 1), ...chord(['C4', 'E4', 'G4'], 1, 0.5, 1.5, 1)];
+    const { score } = parsePig(H + rows.join('\n') + '\n');
+    const bass = score.notes[0]!.id;
+    const pins = { [bass]: { finger: 5 as const, source: 'user' as const, pinned: true } };
+    const { assignment, explanations, hands } = solveFingering(score, { hands: ['L'], pins });
+    expect(fingersIn(score, assignment)).toEqual([5, 5, 3, 1]);
+    expect(explanations[score.notes[1]!.id]!.heldBy).toBeUndefined();
+    expect(hands[0]!.relaxed).toBe(false);
+    expect(hands[0]!.cost).toBeLessThan(1000); // no held-note penalty
+    // Unpinned, the chord keeps its natural shape too.
+    const free = solveFingering(score, { hands: ['L'] });
+    expect(fingersIn(score, free.assignment).slice(1)).toEqual([5, 3, 1]);
+    // Within reach (G3 under the same chord, at most an octave) the hold keeps its finger.
+    const near = parsePig(
+      H +
+        [line(0, 0, 1.5, 'G3', 1), ...chord(['C4', 'E4', 'G4'], 1, 0.5, 1.5, 1)].join('\n') +
+        '\n',
+    );
+    const r = solveFingering(near.score, { hands: ['L'] });
+    const f = fingersIn(near.score, r.assignment);
+    expect(f.slice(1)).not.toContain(f[0]);
+    expect(lintFingering(near.score, r.assignment).counts.L03 ?? 0).toBe(0);
+  });
+  it('right-hand two-octave C major arpeggio: 1231235 up and 5321321 down at quarter = 120', () => {
+    const up = ['C4', 'E4', 'G4', 'C5', 'E5', 'G5', 'C6'];
+    expect(fingersOf(melody(up, 0), 'R')).toEqual([1, 2, 3, 1, 2, 3, 5]);
+    expect(fingersOf(melody([...up].reverse(), 0), 'R')).toEqual([5, 3, 2, 1, 3, 2, 1]);
+  });
+  it('chromatic scale from C, right hand, two octaves, standard fingering', () => {
+    // 3 on every black key, 1 on the other white keys, 2 on F and C after E and B (going up).
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const up = Array.from({ length: 25 }, (_, k) => `${names[k % 12]}${4 + Math.floor(k / 12)}`);
+    const standard = [1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 3, 1, 3, 1, 2];
+    expect(fingersOf(melody(up, 0), 'R')).toEqual(standard);
+    expect(fingersOf(melody([...up].reverse(), 0), 'R')).toEqual([...standard].reverse());
+  });
+});
+
+// M2 hardening re-review: a key held under a later note is a law at any distance (as a chord
+// partner is), holds are walked once for solver and lint (reach.ts `forEachHold`), a chord with no
+// legal configuration breaks the fewest pairs, and every finite charge is a named weighted rule.
+const LIBRARY = fileURLToPath(new URL('../../../../content/scores/', import.meta.url));
+
+/**
+ * Exact search (the oracle): does a fingering of this hand keep every law lint checks (L01 to
+ * L05)? Walks the sequence keeping, as state, the fingers of the notes that still share a law with
+ * a later note: chord pairs (any distance in a slice) and held pairs (`forEachHold`). Only states
+ * without a broken law survive, so the answer is exact and the search stays small.
+ */
+function legalFingeringExists(v: SeqNote[]): boolean {
+  const laws: Array<Array<{ m: number; chord: boolean }>> = v.map(() => []);
+  forEachHold(v, LARGE, (m, i) => laws[i]!.push({ m, chord: false }));
+  const bySlice = new Map<number, number[]>();
+  v.forEach((n, k) => bySlice.set(n.slice, [...(bySlice.get(n.slice) ?? []), k]));
+  for (const ks of bySlice.values()) {
+    if (ks.length > 5) return false; // L04
+    for (let x = 0; x < ks.length; x++)
+      for (let y = x + 1; y < ks.length; y++) laws[ks[y]!]!.push({ m: ks[x]!, chord: true });
+  }
+  const lastUse = v.map((_, k) => k);
+  laws.forEach((list, i) => list.forEach(({ m }) => (lastUse[m] = Math.max(lastUse[m]!, i))));
+  let open: number[] = [];
+  let states = new Set<string>(['']);
+  for (let i = 0; i < v.length; i++) {
+    const pos = new Map(open.map((m, k) => [m, k]));
+    const nextOpen = [...open, i].filter((m) => lastUse[m]! > i);
+    const next = new Set<string>();
+    for (const state of states)
+      for (const f of [1, 2, 3, 4, 5] as Finger[]) {
+        const lawful = laws[i]!.every(({ m, chord }) => {
+          const g = Number(state[pos.get(m)!]) as Finger;
+          const iv = v[i]!.pitch - v[m]!.pitch;
+          // Lint accepts one double only: the thumb on two adjacent white keys of a chord.
+          if (g === f) return chord && g === 1 && !v[m]!.black && !v[i]!.black && iv <= 2;
+          if (chord && f < g) return false; // L02
+          return iv <= span(LARGE, 'maxPrac', g, f) && iv >= span(LARGE, 'minPrac', g, f);
+        });
+        if (!lawful) continue;
+        const full = state + String(f);
+        next.add(nextOpen.map((m) => (m === i ? f : full[pos.get(m)!])).join(''));
+      }
+    if (next.size === 0) return false;
+    states = next;
+    open = nextOpen;
+  }
+  return true;
+}
+
+describe('held keys are laws at any distance (M2 hardening re-review)', () => {
+  it('every library hand that has a fully legal fingering gets one (exact search oracle)', () => {
+    // The re-review found held pairs broken where a legal fingering exists: Joplin, The Entertainer,
+    // right hand bars 56 and 64 (16 law errors), Chopin Op. 69/2 left hand (3), Moonlight right
+    // hand bar 19 (1), Satie left hand bar 37 (1).
+    const files = readdirSync(LIBRARY).filter(
+      (f) => f.endsWith('.musicxml') && !f.includes('.fingered.'),
+    );
+    const legal: string[] = [];
+    for (const file of files) {
+      const { score } = parseMusicXml(readFileSync(join(LIBRARY, file)));
+      const { assignment } = solveFingering(score);
+      const issues = lintFingering(score, assignment).issues;
+      for (const hand of ['R', 'L'] as Hand[]) {
+        if (!legalFingeringExists(buildHandSequence(score, hand).notes)) continue;
+        const name = `${file.replace('.musicxml', '')} ${hand}`;
+        legal.push(name);
+        const errors = issues.filter((x) => x.hand === hand && x.severity === 'error');
+        expect(
+          errors.map((x) => `${x.rule} ${x.message}`),
+          name,
+        ).toEqual([]);
+      }
+    }
+    for (const name of [
+      'joplin-the-entertainer R',
+      'chopin-waltz-op69-no2 L',
+      'beethoven-moonlight-sonata-mvt1 R',
+      'satie-gymnopedie-no1 L',
+    ])
+      expect(legal, name).toContain(name);
+    // 30 pieces: every hand but five (Moonlight L, Chopin Op. 28/4 L and 28/7 R, Joplin L, Satie R).
+    expect(legal).toHaveLength(2 * files.length - 5);
+  });
+  it('a melody under a held chord keeps every span to the held keys (Joplin bar 56 shape)', () => {
+    // F5 A#5 D6 held for two seconds over A#4 A4 A#4 C5 D5: D6 is beyond reach of A#4 (16
+    // semitones), so it is released, but F5 and A#5 stay down. With A#5 on 3 no finger reaches
+    // A4 (13 below, minPrac(3, 1) = -12), so the chord must put 4 or 5 on A#5. The holds are three
+    // to seven steps back, beyond the decoder's view.
+    const rows = [
+      ...chord(['F5', 'A#5', 'D6'], 0, 0, 2),
+      ...['A#4', 'A4', 'A#4', 'C5', 'D5'].map((p, k) =>
+        line(3 + k, 0.5 + 0.25 * k, 0.75 + 0.25 * k, p, 0),
+      ),
+    ];
+    const { score } = parsePig(H + rows.join('\n') + '\n');
+    const { assignment, hands } = solveFingering(score, { hands: ['R'] });
+    expect(lintFingering(score, assignment).errors).toBe(0);
+    expect(hands[0]!.relaxed).toBe(false);
+    expect(hands[0]!.cost).toBeLessThan(1000);
+    expect([4, 5]).toContain(assignment[score.notes[1]!.id]!.finger);
+  });
+  it('solver and lint walk the same holds: a hold released beyond reach frees its finger for good', () => {
+    // C4 notated 0-3 s on the thumb; E5 at 1 s is 16 semitones away, beyond any hand, so the hold
+    // is a pedal or a release from then on (lint: one L07 warning). G4 at 2 s may then take the
+    // thumb: before the walk was shared the solver re-tested reach per pair (G4 is 7 semitones
+    // from C4) and charged the held-note penalty.
+    const rows = [line(0, 0, 3, 'C4', 0), line(1, 1, 1.5, 'E5', 0), line(2, 2, 2.5, 'G4', 0)];
+    const { score } = parsePig(H + rows.join('\n') + '\n');
+    const [c4, , g4] = score.notes.map((n) => n.id);
+    const pins = {
+      [c4!]: { finger: 1 as const, source: 'user' as const, pinned: true },
+      [g4!]: { finger: 1 as const, source: 'user' as const, pinned: true },
+    };
+    const { assignment, explanations, hands } = solveFingering(score, { hands: ['R'], pins });
+    expect(hands[0]!.cost).toBeLessThan(1000);
+    expect(explanations[g4!]!.heldBy).toBeUndefined();
+    const lint = lintFingering(score, assignment);
+    expect(lint.errors).toBe(0);
+    expect(lint.counts.L07).toBe(1);
+    // A repeated key under a legato overlap is no hold (lint skips it): the same finger may play it
+    // again, at no held-note penalty.
+    const rep = parsePig(
+      H + [line(0, 0, 0.6, 'E4', 0), line(1, 0.5, 1, 'E4', 0)].join('\n') + '\n',
+    );
+    const r = solveFingering(rep.score, { hands: ['R'] });
+    const fr = fingersIn(rep.score, r.assignment);
+    expect(fr[1]).toBe(fr[0]);
+    expect(r.hands[0]!.cost).toBeLessThan(1000);
+  });
+  it('a chord with no legal configuration gets one that breaks the fewest pairs', () => {
+    // G#3 G4 G#5: no fingering keeps all three pairs (1-5 over two octaves). 1 3 5 breaks two
+    // (3-5 over 13 semitones, and 1-5), 1 2 5 three (1-2 over 11 too); chordBeyondPractical alone,
+    // which counts the semitones beyond the spans (13 against 15), took 1 2 5.
+    const { score } = parsePig(H + chord(['G#3', 'G4', 'G#5'], 0).join('\n') + '\n');
+    const { assignment, hands } = solveFingering(score, { hands: ['R'] });
+    expect(fingersIn(score, assignment)).toEqual([1, 3, 5]);
+    expect(hands[0]!.infeasibleSlices).toHaveLength(1);
+    expect(lintFingering(score, assignment).counts.L05).toBe(2);
+    const once = solveFingering(score, { hands: ['R'], maxChordIterations: 1 });
+    expect(fingersIn(score, once.assignment)).toEqual([1, 2, 5]);
+  });
+  it('a forbidden three-note window never charges a pair of fingers that shares its code', () => {
+    // E4 F4 G4 A4 as one slice. Forbidding 1 3 4 5 charges its window 1 3 4 (code 13) at G4; the
+    // pair 3 4 has code 13 too, and before the window codes were kept apart by width it made the
+    // legal 2 3 4 5 cost +Infinity.
+    const { score } = parsePig(H + chord(['E4', 'F4', 'G4', 'A4'], 0).join('\n') + '\n');
+    const seq = buildHandSequence(score, 'R');
+    const ctx = makeContext(HAND_PROFILES.large);
+    const solve = (forbidden: Finger[][], pinned: Map<number, Finger>) =>
+      solveHand(seq, ctx, {
+        pinned,
+        forbidden: new Map(),
+        forbiddenConfigs: new Map([[0, forbidden]]),
+        soft: false,
+      });
+    const pinnedTwo = solve([[1, 3, 4, 5]], new Map([[0, 2]]));
+    expect(pinnedTwo.fingers).toEqual([2, 3, 4, 5]);
+    expect(Number.isFinite(pinnedTwo.cost)).toBe(true);
+    const thumbless = solve(
+      [
+        [1, 2, 3, 4],
+        [1, 2, 3, 5],
+        [1, 2, 4, 5],
+        [1, 3, 4, 5],
+      ],
+      new Map(),
+    );
+    expect(thumbless.fingers).toEqual([2, 3, 4, 5]);
+    expect(Number.isFinite(thumbless.cost)).toBe(true);
+  });
+  it('a six-note chord costs exactly its weighted terms: the double is the named rule doubledFinger', () => {
+    // The M3 identity (solver cost = weights x path features) on a slice of more than five notes:
+    // the doubled finger used to be an unweighted constant (50, or 100 off the thumb) in solve.ts.
+    const { score } = parsePig(
+      H + chord(['C4', 'D4', 'E4', 'F4', 'G4', 'A4'], 0).join('\n') + '\n',
+    );
+    const { assignment, hands } = solveFingering(score, { hands: ['R'] });
+    const ctx = makeContext(HAND_PROFILES.large);
+    const v = buildHandSequence(score, 'R').notes;
+    const f = v.map((n) => assignment[n.noteId]!.finger);
+    expect(f).toEqual([1, 1, 2, 3, 4, 5]);
+    let sum = 0;
+    for (let i = 0; i < v.length; i++) {
+      sum += weightedSum(ctx, unaryTerms(ctx, v[i]!, f[i]!, v[i - 1], v[i + 1]));
+      if (i >= 1) sum += weightedSum(ctx, pairTerms(ctx, v[i - 1]!, f[i - 1]!, v[i]!, f[i]!));
+      if (i >= 2)
+        sum += weightedSum(
+          ctx,
+          tripleTerms(ctx, v[i - 2]!, f[i - 2]!, v[i - 1]!, f[i - 1]!, v[i]!, f[i]!),
+        );
+    }
+    expect(hands[0]!.cost).toBeCloseTo(sum, 9);
+    expect(pairTerms(ctx, v[0]!, 1, v[1]!, 1)).toContainEqual({ rule: 'doubledFinger', points: 1 });
+    expect(pairTerms(ctx, v[1]!, 2, v[2]!, 2)).toContainEqual({ rule: 'doubledFinger', points: 2 });
   });
 });

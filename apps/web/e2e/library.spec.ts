@@ -59,6 +59,38 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
   expect(g.overflow, at).toBeLessThanOrEqual(0);
 });
 
+// UI batch review and design section 17: the words a first visit reads before the first piece.
+// At 149 pieces, at 1280 and 360, they are 36: the name 1, the sentence 15, the red button 5, the
+// five pills 6, the level line 6 and the first collection heading 2 (the search field's
+// 4-word placeholder is not text in the page and is not counted). The budget may not grow.
+test('library: at most 36 visible words before the first piece (design section 17)', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  const words = await page.evaluate(() => {
+    const first = document.querySelector('.piece-row')!;
+    const seen: string[] = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (first.compareDocumentPosition(n) & Node.DOCUMENT_POSITION_FOLLOWING) break;
+      const el = n.parentElement!;
+      const r = el.getBoundingClientRect();
+      const shown =
+        el.closest('.visually-hidden') === null &&
+        el.checkVisibility({ opacityProperty: true, visibilityProperty: true }) &&
+        r.width > 1 &&
+        r.height > 1;
+      if (shown) seen.push(...n.textContent!.split(/\s+/).filter(Boolean));
+    }
+    return seen;
+  });
+  test
+    .info()
+    .annotations.push({ type: 'words before the first piece', description: `${words.length}` });
+  expect(words.length, words.join(' ')).toBeLessThanOrEqual(36);
+});
+
 test('library: the arrow keys choose a level; the list follows and the pill keeps the focus', async ({
   page,
 }) => {
@@ -283,7 +315,13 @@ test('library: a piece played becomes the one to continue, on its level, across 
 }) => {
   await page.goto('/?audio=silent#/piece/bach-minuet-g-major-bwv-anh-114');
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
-  await expect(page.locator('.score-header .finger-legend')).toBeVisible(); // a first score view: the legend under the header
+  // A first score view: the legend under the header, shown once on a screen (UI batch review):
+  // from 900 px the side panel's copy beside the score, below 900 px the header's.
+  const legends = page.getByText(FINGER_LEGEND, { exact: true });
+  await expect(legends).toHaveCount(2);
+  const wide = page.viewportSize()!.width >= 900;
+  await expect(page.locator('.score-header .finger-legend')).toBeVisible({ visible: !wide });
+  await expect(page.locator('.side-panel .finger-legend')).toBeVisible({ visible: wide });
   await page.getByRole('button', { name: 'Play' }).click();
   await page.getByRole('button', { name: 'Pause' }).click();
   await page.getByRole('button', { name: 'Back to the library' }).click();
@@ -295,4 +333,5 @@ test('library: a piece played becomes the one to continue, on its level, across 
   await page.getByRole('button', { name: 'Continue with Minuet in G major' }).click();
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
   await expect(page.locator('.score-header .finger-legend')).toHaveCount(0); // seen: the side panel keeps it
+  await expect(page.locator('.side-panel .finger-legend')).toBeVisible();
 });

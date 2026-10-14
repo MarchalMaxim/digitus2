@@ -59,11 +59,6 @@ export function pieceBySlug(slug: string): LibraryPiece | undefined {
   return bySlug.get(slug);
 }
 
-/** The piece the start-here card suggests: the first level-1 piece in manifest order. */
-export function recommendedPiece(): LibraryPiece {
-  return pieces.find((p) => p.level === 1)!;
-}
-
 /** Resolves a manifest path such as 'scores/x.musicxml' to its asset URL (lazy, per file). */
 export function scoreUrl(relativePath: string): Promise<string> {
   const key = `../../../../content/${relativePath}`;

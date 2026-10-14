@@ -510,6 +510,44 @@ test.describe('playback with the silent instrument', () => {
     await expectOneRed(page, 'paused, loop set');
   });
 
+  // UI batch review: a loop set while paused that leaves the pause position outside it makes
+  // Play start at the loop's first bar, so the marked group is not where Play resumes: the marks
+  // clear and Play takes the red. Unticking the loop brings the resume point back.
+  test('paused in bar 1, a loop of bars 6 to 7 gives the red to Play; unticking marks bar 1 again', async ({
+    page,
+  }) => {
+    await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await page.getByRole('button', { name: 'Play' }).click();
+    await page.waitForFunction(
+      () => {
+        const hook = (window as unknown as { __digitus2?: TestHook }).__digitus2;
+        return hook !== undefined && hook.positionSec() > 1;
+      },
+      undefined,
+      { polling: 'raf', timeout: 10_000 },
+    );
+    await page.getByRole('button', { name: 'Pause' }).click();
+    expect(await position(page)).toBeLessThan(2.4); // still in bar 1
+    const paused = await expectOneRed(page, 'paused in bar 1');
+    expect(paused.every((r) => r.inSheet)).toBe(true);
+
+    await setLoopBars(page, '6', '7');
+    const looped = await expectOneRed(page, 'paused in bar 1, loop 6 to 7');
+    expect(looped[0]!.tag).toBe('button');
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
+    await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
+    await expect(page.locator('.keyboard .is-pressed')).toHaveCount(0);
+
+    await page.getByRole('checkbox', { name: 'Loop bars' }).uncheck();
+    const back = await expectOneRed(page, 'paused in bar 1, loop unticked');
+    expect(back.every((r) => r.inSheet)).toBe(true);
+    expect(back[0]!.onsetTick).toBe(paused[0]!.onsetTick);
+    await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+  });
+
   // Polish plan Task 3 and Review Focus 3 (review S3): the count-in used to light the first notes
   // and their keys 2.4 s before they sounded. It now counts the beats in the status line, Pause
   // stays the screen's one red element, and the first note turns red when it is heard.

@@ -31,7 +31,10 @@
  * with its keys pressed and the muted hand's keys dimmed, so the reader sees where Play resumes
  * and the cursor stays the one red element. A hand switch, a re-solve or a re-layout
  * (`layoutKey`) while paused marks that moment again, or clears the marks when the hands now
- * played had no note yet (switching back marks it again). A pause in the lead-in of a resume
+ * played had no note yet (switching back marks it again). A loop set while paused that leaves
+ * the pause position outside it moves where Play starts (`playback.startSec()`): nothing to
+ * resume, so the marks clear and Play is red, until a loop round the position or none brings
+ * them back. A pause in the lead-in of a resume
  * (Play after a pause, before the next note) still has the group heard before it to show; a
  * pause in any other lead-in (the count-in from the start, after Rewind while playing, a loop
  * wrap, a Play from a loop's start elsewhere) heard nothing of its pass, so nothing is marked.
@@ -168,6 +171,8 @@ export function useCursor({
   const playing = playback.playing;
   const waiting = playback.waiting;
   const atStart = playback.atStart;
+  // A loop set while paused can move where Play starts (T10): the paused marks follow it.
+  const loop = playback.loop;
   const playbackRef = useRef(playback);
   const activeRef = useRef(active);
   /** The cursor's page scroll (followCursor). */
@@ -200,12 +205,16 @@ export function useCursor({
     // re-layout while paused marks it again, or clears the marks when the hands now played had
     // no note yet; switching back marks it again, since the position to resume is unchanged. A
     // group heard after the position (a jump back in a lead-in, such as Rewind) was not heard in
-    // this pass: nothing to resume.
+    // this pass: nothing to resume. A loop set while paused that leaves the position outside it
+    // makes Play start at the loop's first bar instead (`startSec`): nothing to resume there
+    // either, so the marks clear and Play takes the red; a loop round the position, or none,
+    // marks it again, since the position is unchanged.
     const pos = playbackRef.current.positionSec();
     if (!playing && !atStart && heardSecRef.current < pos) {
       stopSecRef.current = pos;
       clearCurrent(host);
-      const i = groupIndexAt(active, pos);
+      const resumes = Math.abs(playbackRef.current.startSec() - pos) < 1e-9;
+      const i = resumes ? groupIndexAt(active, pos) : -1;
       if (i < 0) {
         markedSecRef.current = Number.NaN;
         setPressed((prev) => (prev.length > 0 ? [] : prev));
@@ -296,7 +305,7 @@ export function useCursor({
     };
     frame();
     return () => cancelAnimationFrame(raf);
-  }, [host, playing, waiting, atStart, active, mutedAt, assignment, layoutKey]);
+  }, [host, playing, waiting, atStart, loop, active, mutedAt, assignment, layoutKey]);
 
   // Playwright's sync check: the transport clock and the group the cursor shows.
   useEffect(() => {

@@ -55,6 +55,7 @@ const playback: Playback = {
   pause: () => {},
   rewind: () => {},
   positionSec: () => heard,
+  startSec: () => heard,
   leadingIn: () => false,
   loop: null,
   setLoop: () => {},

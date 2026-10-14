@@ -29,6 +29,12 @@ export interface SidePanelProps {
   piece: LibraryPiece | null;
   /** Re-imports a MIDI file with a fixed hand split (null: the automatic separation). */
   setSplitMidi(value: number | null): void;
+  /**
+   * The score header shows the finger legend too (before the reader's first Play, `useLegendAbove`):
+   * the panel's copy then shows only from 900 px, beside the score, where the header's is hidden,
+   * so the legend shows once on a screen. Default false: the panel's copy shows at every width.
+   */
+  legendAbove?: boolean;
 }
 
 /**
@@ -38,7 +44,13 @@ export interface SidePanelProps {
  * disclosure with what only a developer can act on: the solve and layout timings and the
  * reader's warnings (polish plan Task 5, review S7).
  */
-export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) {
+export function SidePanel({
+  doc,
+  source,
+  piece,
+  setSplitMidi,
+  legendAbove = false,
+}: SidePanelProps) {
   const handSize = useAppStore((s) => s.settings.handSize);
   const showEditorial = useAppStore((s) => s.settings.showEditorial);
   const setSettings = useAppStore((s) => s.setSettings);
@@ -89,7 +101,7 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
   return (
     <aside className="side-panel stack no-print" aria-label="Piece and fingering">
       <h2 className="visually-hidden">Piece and fingering</h2>
-      <FingerLegend />
+      <FingerLegend className={legendAbove ? 'wide-only' : undefined} />
       {doc.midiInfo && doc.score && (
         <MidiImportPanel
           info={doc.midiInfo}

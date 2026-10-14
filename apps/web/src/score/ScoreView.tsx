@@ -1,13 +1,14 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
 import { flash } from '../design/motion.js';
 import { pieceBySlug } from '../library/manifest.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
 import { dimNotes, setDigits } from './render/dom.js';
-import { ScoreHeader } from './ScoreHeader.js';
+import { ScoreHeader, useLegendAbove } from './ScoreHeader.js';
 import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
@@ -154,6 +155,12 @@ export function ScoreView({ source }: { source: PieceSource }) {
   const dockRef = useDockHeight<HTMLDivElement>();
   const doc = useScoreDocument(source, width);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
+  // The finger legend under the header until the first Play (spec 12), decided once for the view
+  // and handed to the side panel too, so the legend shows once on a screen.
+  const legendAbove = useLegendAbove();
+  // Below 480 px the Practice toggle sits after Rewind (spec 13): it is rendered there, so the
+  // DOM order, and with it the tab order, is the order on screen at every width.
+  const narrow = useMediaQuery(NARROW_QUERY);
 
   // A re-solve publishes only the digits that changed: patch them into the pages in place.
   useEffect(() => {
@@ -243,9 +250,29 @@ export function ScoreView({ source }: { source: PieceSource }) {
     loading: playback.loading,
     countIn: playback.countIn,
   });
+  // One toggle, rendered where it stands on screen: first in the dock from 480 px, after Rewind
+  // below (the dock's comment).
+  const practiceToggle = (
+    <button
+      ref={toggleRef}
+      type="button"
+      className="practice-toggle"
+      aria-expanded={practiceOpen}
+      aria-controls={panelId}
+      onClick={() => setPracticeOpen(!practiceOpen)}
+    >
+      Practice
+    </button>
+  );
   return (
     <div className="page score-view">
-      <ScoreHeader title={doc.title} composer={doc.composer} piece={piece} onBack={openLibrary} />
+      <ScoreHeader
+        title={doc.title}
+        composer={doc.composer}
+        piece={piece}
+        onBack={openLibrary}
+        legend={legendAbove}
+      />
       <div className="score-layout">
         <main className="score-main" ref={measureRef}>
           {/* Says whose digits the score shows when they are the editor's, right above the music
@@ -256,26 +283,18 @@ export function ScoreView({ source }: { source: PieceSource }) {
           <ScoreSheet pages={doc.pages} label={doc.title} onHost={setHost} />
           {/* The dock: sticky at the bottom of the window while the score column is on screen,
               so Pause and the fingers stay in view wherever the cursor scrolls the score. Its
-              DOM order is the tab order (spec 13): the Practice toggle, the status line, the
-              Practice panel, Play and Rewind, the keyboard. From 480 px the toggle and the
-              status line share the first row (toggle left, status right), so a status adds no
-              row; below 480 px the status line keeps a row of its own above, and the toggle sits
-              after Rewind. The panel opens between them and Play, and the dock grows upward,
-              so nothing stands between the title and the music. The status line says what the
-              score or the player is busy with wherever the reader is; it is always in the page
-              (only its text changes, hidden while empty), so screen readers announce its first
-              words too: a live region inserted with its text often goes unannounced. */}
+              DOM order is the order on screen, and so the tab order, at every width (spec 13; no
+              CSS `order`). From 480 px: the Practice toggle, the status line, the Practice panel,
+              Play and Rewind, the keyboard; the toggle and the status line share the first row
+              (toggle left, status right), so a status adds no row. Below 480 px: the status line
+              on a row of its own, the panel, Play, Rewind and then the toggle in one row, the
+              keyboard. The panel opens above Play, and the dock grows upward, so nothing stands
+              between the title and the music. The status line says what the score or the player
+              is busy with wherever the reader is; it is always in the page (only its text
+              changes, hidden while empty), so screen readers announce its first words too: a
+              live region inserted with its text often goes unannounced. */}
           <div className="dock no-print" ref={dockRef}>
-            <button
-              ref={toggleRef}
-              type="button"
-              className="practice-toggle"
-              aria-expanded={practiceOpen}
-              aria-controls={panelId}
-              onClick={() => setPracticeOpen(!practiceOpen)}
-            >
-              Practice
-            </button>
+            {!narrow && practiceToggle}
             <p role="status" className={statusClass(status)}>
               {status?.text}
             </p>
@@ -304,6 +323,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
               disabled={doc.status !== 'ready' || !playable}
               resumeShown={!playback.playing && currentGroup >= 0}
             />
+            {narrow && practiceToggle}
             {range && (
               <div className="keyboard">
                 <Keyboard
@@ -317,7 +337,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
             )}
           </div>
         </main>
-        <SidePanel doc={doc} source={source} piece={piece} setSplitMidi={doc.setSplitMidi} />
+        <SidePanel
+          doc={doc}
+          source={source}
+          piece={piece}
+          setSplitMidi={doc.setSplitMidi}
+          legendAbove={legendAbove}
+        />
       </div>
     </div>
   );

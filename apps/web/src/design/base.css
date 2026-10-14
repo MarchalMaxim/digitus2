@@ -86,10 +86,14 @@ button:disabled {
   cursor: default;
 }
 
-button:not(.is-red):disabled {
+/* Rewind at the start is unavailable but stays focusable (aria-disabled, see Transport.tsx): it
+   looks disabled. Play keeps its own look while it cannot start (.play-button below). */
+button:not(.is-red):disabled,
+button:not(.is-red, .play-button)[aria-disabled='true'] {
   color: var(--gray-3);
   border-color: var(--gray-2);
   background: var(--paper);
+  cursor: default;
 }
 
 :focus-visible {
@@ -319,10 +323,25 @@ fieldset {
 }
 
 /* What the finger numbers mean (FingerLegend.tsx): one line in ink, a step smaller than the text
-   around it, under the score's header until the first Play, and at the top of the side panel. */
+   around it, under the score's header until the first Play, and at the top of the side panel.
+   It shows once on a screen (UI batch review): from 900 px, where the side panel stands beside
+   the score, only the panel's copy; below 900 px, while the header has it, only the header's
+   (the panel's then carries `wide-only`). */
 .finger-legend {
   font-size: 0.875rem;
   max-width: 40rem;
+}
+
+@media (min-width: 900px) {
+  .score-header > .finger-legend {
+    display: none;
+  }
+}
+
+@media (max-width: 899.98px) {
+  .finger-legend.wide-only {
+    display: none;
+  }
 }
 
 /* The side panel's Details (SidePanel.tsx, review S7): the timings and the reader's warnings,
@@ -567,16 +586,12 @@ fieldset {
 
 @media (max-width: 479.98px) {
   /* Below 480 px: the status line on its own row, the open panel, then Play, Rewind and Practice
-     in one row, then the keyboard at full width. */
+     in one row, then the keyboard at full width. ScoreView.tsx renders the toggle after Rewind
+     here, so the DOM order (the tab order) is the order on screen without CSS `order`. */
   .dock > .score-status {
-    order: -2;
     grid-column: 1 / -1;
     justify-self: start;
     text-align: left;
-  }
-
-  .dock > .practice-panel {
-    order: -1;
   }
 
   .dock > .transport-group {
@@ -584,12 +599,10 @@ fieldset {
   }
 
   .dock > .practice-toggle {
-    order: 1;
     grid-column: 2;
   }
 
   .dock > .keyboard {
-    order: 2;
     grid-column: 1 / -1;
   }
 }

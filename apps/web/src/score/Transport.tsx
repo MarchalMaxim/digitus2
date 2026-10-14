@@ -179,6 +179,8 @@ export function Transport({ playback, disabled = false, resumeShown = false }: T
   const red = playing ? playback.waiting : !resumeShown;
   /** Play cannot start now (the score is not ready, or the samples are loading); Pause always works. */
   const playBlocked = !playing && (disabled || loading);
+  /** Stopped at the start (fresh, rewound, at the end): there is nothing to rewind. */
+  const rewindIdle = !playing && playback.atStart;
   const toggle = () => {
     if (playing) playback.pause();
     else if (!playBlocked) playback.play();
@@ -216,7 +218,17 @@ export function Transport({ playback, disabled = false, resumeShown = false }: T
       >
         {playing ? 'Pause' : 'Play'}
       </Button>
-      <button type="button" disabled={disabled} onClick={() => playback.rewind()}>
+      {/* Rewind is unavailable at the start, where it has nothing to do. Like Play it says so
+          with aria-disabled rather than natively: Rewind while paused brings the start, and a
+          natively disabled button would then drop the focus that pressed it. */}
+      <button
+        type="button"
+        disabled={disabled}
+        aria-disabled={rewindIdle || undefined}
+        onClick={() => {
+          if (!rewindIdle) playback.rewind();
+        }}
+      >
         Rewind
       </button>
     </div>

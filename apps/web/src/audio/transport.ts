@@ -227,11 +227,20 @@ export class Transport {
     };
   }
 
+  /**
+   * Where play() starts, in score seconds, read while stopped: the position (the top once it has
+   * reached the end), or the loop's start when the position lies outside the loop. The paused
+   * cursor compares it with the position: only a position Play resumes from is marked.
+   */
+  startSec(): number {
+    const start = this.position >= this.endSec ? 0 : this.position;
+    const range = this.loopRange();
+    return range && (start < range.from || start >= range.to) ? range.from : start;
+  }
+
   play(): void {
     if (this.playing) return;
-    let start = this.position >= this.endSec ? 0 : this.position;
-    const range = this.loopRange();
-    if (range && (start < range.from || start >= range.to)) start = range.from;
+    const start = this.startSec();
     const factor = this.tempoFactor;
     let t0 = this.ctx.currentTime + this.startDelaySec;
     this.countInClicks = [];

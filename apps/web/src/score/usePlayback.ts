@@ -86,6 +86,12 @@ export interface Playback {
   /** The score time being heard now, in seconds (0 before the first play). */
   positionSec(): number;
   /**
+   * While stopped, the score time Play starts from, in seconds: the position, or the loop's
+   * first bar when the position lies outside the loop (0 before the first play). The paused
+   * cursor marks the last group heard only when Play resumes at the position (T10).
+   */
+  startSec(): number;
+  /**
    * Whether the transport is in a lead-in at the time being heard now, read on every frame:
    * `waiting` follows it on the transport's next scheduler tick, so after a loop wrap to a start
    * where the hands played rest, the cursor keeps its marks until then rather than mark a note
@@ -317,6 +323,8 @@ export function usePlayback(score: Score | null): Playback {
 
   const positionSec = useCallback(() => transportRef.current?.positionSec() ?? 0, []);
 
+  const startSec = useCallback(() => transportRef.current?.startSec() ?? 0, []);
+
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);
 
   // The loop state changes at once; a playing transport gets a new range once the typing settles
@@ -348,6 +356,7 @@ export function usePlayback(score: Score | null): Playback {
       pause,
       rewind,
       positionSec,
+      startSec,
       leadingIn,
       setLoop,
     }),
@@ -362,6 +371,7 @@ export function usePlayback(score: Score | null): Playback {
       pause,
       rewind,
       positionSec,
+      startSec,
       leadingIn,
       setLoop,
     ],

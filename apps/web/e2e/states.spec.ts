@@ -176,6 +176,38 @@ for (const [width, height, firstSystemMax] of [
       await expect(toggle).toHaveAttribute('aria-expanded', 'false');
       await expect(toggle).toBeFocused();
     });
+
+    // UI batch review (WCAG 2.4.3): below 480 px the toggle stood after Rewind on screen but
+    // first in the DOM, so Tab went Practice, Play, Rewind against the eye's Play, Rewind,
+    // Practice. The toggle is now rendered where it stands: Tab follows the order on screen.
+    test('Tab goes through the dock in its order on screen', async ({ page }) => {
+      await legendSeen(page);
+      await openTwinkle(page);
+      await page.locator('.dock button').first().focus();
+      const stops: { name: string; top: number; left: number; bottom: number }[] = [];
+      for (let i = 0; i < 3; i++) {
+        if (i > 0) await page.keyboard.press('Tab');
+        stops.push(
+          await page.evaluate(() => {
+            const el = document.activeElement as HTMLElement;
+            const r = el.getBoundingClientRect();
+            const name = el.getAttribute('aria-label') ?? el.textContent!.trim();
+            return { name, top: r.top, left: r.left, bottom: r.bottom };
+          }),
+        );
+      }
+      expect(stops.map((s) => s.name)).toEqual(
+        width < 480 ? ['Play', 'Rewind', 'Practice'] : ['Practice', 'Play', 'Rewind'],
+      );
+      // Each stop is on a later row than the one before, or on the same row to its right.
+      for (let i = 1; i < stops.length; i++) {
+        const [a, b] = [stops[i - 1]!, stops[i]!];
+        const sameRow = b.top < a.bottom && a.top < b.bottom;
+        expect(sameRow ? b.left > a.left : b.top >= a.bottom - 0.5, JSON.stringify(stops)).toBe(
+          true,
+        );
+      }
+    });
   });
 }
 
@@ -337,11 +369,19 @@ test('a control in the dock takes the focus, or a click, where the page is', asy
   await play.focus();
   await page.keyboard.press('Tab');
   await expect(rewind).toBeFocused();
+  if (page.viewportSize()!.width < 480) {
+    // Below 480 px the Practice toggle stands after Rewind, in the DOM as on screen.
+    await page.keyboard.press('Tab');
+    await expect(dock.locator('.practice-toggle')).toBeFocused();
+  }
   await page.keyboard.press('Tab');
   await expect(dock.locator('.keyboard-scroll')).toBeFocused();
   await page.waitForTimeout(200);
   expect(await scrollY(), 'Tab through the dock at the top of the page').toBe(0);
-  await rewind.click(); // a locator click scrolls its target into view first
+  // A locator click scrolls its target into view first. Rewind is unavailable at the start
+  // (aria-disabled, which Playwright's actionability check waits on) yet still takes the click.
+  await expect(rewind).toHaveAttribute('aria-disabled', 'true');
+  await rewind.click({ force: true });
   await page.waitForTimeout(200);
   expect(await scrollY(), 'a click on Rewind at the top of the page').toBe(0);
   await page.evaluate(() => window.scrollTo(0, 3000));

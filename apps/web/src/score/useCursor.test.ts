@@ -4,7 +4,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildOnsetGroups, type OnsetGroup } from './onsetGroups.js';
 import { cursorScrollDelta, useCursor } from './useCursor.js';
-import type { CountIn, Playback } from './usePlayback.js';
+import type { CountIn, LoopRange, Playback } from './usePlayback.js';
 
 afterEach(cleanup);
 
@@ -62,15 +62,36 @@ function playing({
     pause: vi.fn(),
     rewind: vi.fn(),
     positionSec: () => clock?.sec ?? sec,
+    startSec: () => clock?.sec ?? sec,
     leadingIn: () => clock?.leadingIn ?? waiting,
     loop: null,
     setLoop: vi.fn(),
   };
 }
 
-/** A stopped transport: paused away from the start, or at the start (`atStart`). */
-function stopped({ atStart = false, sec = 0 }: { atStart?: boolean; sec?: number } = {}): Playback {
-  return { ...playing({ sec }), playing: false, waiting: false, atStart };
+/**
+ * A stopped transport: paused away from the start, or at the start (`atStart`). With `loop`,
+ * Play starts at `loopStart` when `sec` lies outside the loop (the transport's rule).
+ */
+function stopped({
+  atStart = false,
+  sec = 0,
+  loop = null,
+  loopStart = sec,
+}: {
+  atStart?: boolean;
+  sec?: number;
+  loop?: LoopRange | null;
+  loopStart?: number;
+} = {}): Playback {
+  return {
+    ...playing({ sec }),
+    playing: false,
+    waiting: false,
+    atStart,
+    loop,
+    startSec: () => (loop ? loopStart : sec),
+  };
 }
 
 const marked = (host: Element) => [...host.querySelectorAll('.is-red')].map((el) => el.id);
@@ -554,6 +575,41 @@ describe('the cursor while paused', () => {
     rerender(stopped({ sec: loopStart }));
     expect(marked(host)).toEqual([]);
     expect(result.current.currentGroup).toBe(-1);
+    host.remove();
+  });
+  // UI batch review: a loop set while paused that leaves the pause position outside it makes
+  // Play start at the loop's first bar, so the position marked is not where Play resumes.
+  it('a loop set while paused that leaves the pause position outside it clears the marks, and back', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 3);
+    const host = hostFor(groups);
+    const sec = groups[0]!.sec + 0.01;
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: playing({ sec }) },
+    );
+    rerender(stopped({ sec }));
+    expect(marked(host)).toEqual(groups[0]!.noteIds);
+    const keys = result.current.pressed;
+    expect(keys.length).toBeGreaterThan(0);
+    // A loop two groups on: Play would start at its first bar, not at the pause position.
+    const outside = { from: 3, to: 4 };
+    rerender(stopped({ sec, loop: outside, loopStart: groups[2]!.sec }));
+    expect(marked(host)).toEqual([]);
+    expect(result.current.pressed).toEqual([]);
+    expect(result.current.muted).toEqual([]);
+    expect(result.current.currentGroup).toBe(-1);
+    // A loop round the pause position: Play resumes there, so it is marked again.
+    rerender(stopped({ sec, loop: { from: 0, to: 4 }, loopStart: sec }));
+    expect(marked(host)).toEqual(groups[0]!.noteIds);
+    expect(result.current.currentGroup).toBe(0);
+    // Out again, then the loop unticked: the position to resume is unchanged, marked again.
+    rerender(stopped({ sec, loop: outside, loopStart: groups[2]!.sec }));
+    expect(result.current.currentGroup).toBe(-1);
+    rerender(stopped({ sec }));
+    expect(marked(host)).toEqual(groups[0]!.noteIds);
+    expect(result.current.pressed).toEqual(keys);
+    expect(result.current.currentGroup).toBe(0);
     host.remove();
   });
   it('re-marks the same group when the pages are laid out again while paused', () => {

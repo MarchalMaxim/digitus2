@@ -9,10 +9,13 @@ import {
   licenseLabel,
   pieceBySlug,
   pieces,
-  recommendedPiece,
   requiresCredit,
   scoreUrl,
 } from './manifest.js';
+import { startTarget } from './model.js';
+
+/** The piece a first visit starts with (the red button, model.ts), as a library piece. */
+const firstPiece = () => pieceBySlug(startTarget(pieces, null).piece.slug)!;
 
 describe('manifest', () => {
   it('lists every manifest piece across five levels, sorted by level, with unique slugs', () => {
@@ -42,8 +45,8 @@ describe('manifest', () => {
     const ids = new Set(GENRES.map((g) => g.id));
     for (const p of pieces) expect(ids.has(p.genre), p.slug).toBe(true);
   });
-  it('recommends the first level-1 piece', () => {
-    expect(recommendedPiece().slug).toBe('twinkle-twinkle-little-star');
+  it('starts a first visit with the first level-1 piece', () => {
+    expect(firstPiece().slug).toBe('twinkle-twinkle-little-star');
   });
   it('resolves a score path to a URL', async () => {
     const url = await scoreUrl(pieceBySlug('twinkle-twinkle-little-star')!.files.score);
@@ -92,6 +95,6 @@ describe('manifest', () => {
     expect(formatDuration(132.3)).toBe('2:12');
     expect(licenseLabel('CC-BY-SA-2.5')).toBe('CC BY-SA 2.5');
     expect(licenseLabel('CC0-1.0')).toBe('CC0 1.0');
-    expect(attribution(recommendedPiece()).text).toBe('digitus2 arrangement, CC0 (public domain)');
+    expect(attribution(firstPiece()).text).toBe('digitus2 arrangement, CC0 (public domain)');
   });
 });

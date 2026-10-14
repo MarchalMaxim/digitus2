@@ -41,6 +41,7 @@ function playback(
     pause: vi.fn<() => void>(),
     rewind: vi.fn(),
     positionSec: () => 0,
+    startSec: () => 0,
     leadingIn: () => false,
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),
@@ -94,6 +95,31 @@ describe('Transport', () => {
     expect(screen.getByRole('button', { name: 'Play' })).not.toHaveClass('is-red');
     rerender(<Transport playback={playback(false)} resumeShown={false} />);
     expect(screen.getByRole('button', { name: 'Play' })).toHaveClass('is-red');
+  });
+  // UI batch review: at the start there is nothing to rewind. Rewind says it is unavailable
+  // (aria-disabled, like Play, so a reader who rewinds keeps the focus on it) and ignores a
+  // click, until Play or a pause away from the start gives it something to do.
+  it('keeps Rewind unavailable while stopped at the start, focusable, and ignores it then', async () => {
+    const rewind = vi.fn();
+    const atStart = { ...playback(false), rewind };
+    const { rerender } = render(<Transport playback={atStart} />);
+    const button = screen.getByRole('button', { name: 'Rewind' });
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(button);
+    expect(rewind).not.toHaveBeenCalled();
+    rerender(<Transport playback={{ ...playback(true), rewind }} />);
+    expect(button).not.toHaveAttribute('aria-disabled');
+    await userEvent.click(button);
+    expect(rewind).toHaveBeenCalledTimes(1);
+    rerender(<Transport playback={{ ...playback(false), atStart: false, rewind }} resumeShown />);
+    expect(button).not.toHaveAttribute('aria-disabled');
+    await userEvent.click(button);
+    expect(rewind).toHaveBeenCalledTimes(2);
+    // Rewound: at the start again, and the focus stays on the button.
+    rerender(<Transport playback={{ ...playback(false), rewind }} />);
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button).toHaveFocus();
   });
   it('wires play, pause, hands, tempo, metronome, count-in and loop', async () => {
     const pb = playback(false);

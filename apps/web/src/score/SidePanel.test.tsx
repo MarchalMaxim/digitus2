@@ -47,20 +47,36 @@ function readyDoc(over: Partial<ScoreDocument> = {}): ScoreDocument {
   };
 }
 
-function renderPanel(doc: ScoreDocument) {
+function renderPanel(doc: ScoreDocument, legendAbove = false) {
   return render(
-    <SidePanel doc={doc} source={source} piece={pieceBySlug(MELODY)!} setSplitMidi={vi.fn()} />,
+    <SidePanel
+      doc={doc}
+      source={source}
+      piece={pieceBySlug(MELODY)!}
+      setSplitMidi={vi.fn()}
+      legendAbove={legendAbove}
+    />,
   );
 }
 
 // Polish plan Task 5 (review S4 and S7): the panel says what the numbers mean, and the developer
 // text (the solve and layout timings, the reader's warnings) waits behind a closed "Details".
 describe('SidePanel', () => {
-  it('explains the finger numbers with the same line as the library', () => {
+  it('explains the finger numbers with the same line as the score header', () => {
     renderPanel(readyDoc());
     const legend = screen.getByText(LEGEND);
     expect(legend.tagName).toBe('P');
     expect(legend).toBeVisible();
+    expect(legend).toHaveClass('finger-legend');
+    expect(legend).not.toHaveClass('wide-only');
+  });
+
+  // UI batch review: the legend shows once. While the header has it too (before the first Play),
+  // the panel's copy is the one beside the score from 900 px only (`wide-only`, base.css), where
+  // the header's is hidden; below 900 px the header's copy is the one.
+  it('keeps its legend to wide screens while the header shows one', () => {
+    renderPanel(readyDoc(), true);
+    expect(screen.getByText(LEGEND)).toHaveClass('finger-legend', 'wide-only');
   });
 
   it('keeps the timings and the reader warnings behind a closed Details toggle', async () => {

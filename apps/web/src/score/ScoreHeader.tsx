@@ -11,23 +11,36 @@ export interface ScoreHeaderProps {
   piece: LibraryPiece | null;
   /** The back action; null hides the button (the error state shows its own, primary one). */
   onBack: (() => void) | null;
-  /** False where there is no score to read (the error state): no finger legend. Default true. */
+  /**
+   * Whether the header ends with the finger legend: the score view's once-per-view decision
+   * (`useLegendAbove`); false where there is no score to read (the error state). Default false.
+   */
   legend?: boolean;
 }
 
 /**
- * The score view's header. Its heading takes the focus when the score view replaces the library
- * (it is mounted once per piece, in the error state too). Until the reader's first Play anywhere it
- * ends with the finger legend, under the credit line (UI batch, spec 12), except in the error
- * state, which has no score to read; the side panel always has it.
+ * Whether a score view shows the finger legend under its header: until the reader's first Play
+ * anywhere (UI batch, spec 12). Decided once, when the view mounts: the first Play sets
+ * legendSeen, and the legend must not vanish from above the music while the cursor plays it.
+ * Read once, not subscribed. The score view hands the same answer to the side panel, so the
+ * legend shows once on a screen (base.css: from 900 px the side panel's copy, beside the score;
+ * below 900 px the header's).
  */
-export function ScoreHeader({ title, composer, piece, onBack, legend = true }: ScoreHeaderProps) {
+export function useLegendAbove(): boolean {
+  const [shown] = useState(() => !useAppStore.getState().settings.legendSeen);
+  return shown;
+}
+
+/**
+ * The score view's header. Its heading takes the focus when the score view replaces the library
+ * (it is mounted once per piece, in the error state too). With `legend` it ends with the finger
+ * legend, under the credit line (UI batch, spec 12); from 900 px that copy is hidden, and the
+ * side panel's, beside the score, is the one shown.
+ */
+export function ScoreHeader({ title, composer, piece, onBack, legend = false }: ScoreHeaderProps) {
   const credit = piece ? attribution(piece) : null;
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
-  // Decided once per score view (spec 12): the first Play sets legendSeen, and the legend must
-  // not vanish from above the music while the cursor plays it. Read once, not subscribed.
-  const [showLegend] = useState(() => !useAppStore.getState().settings.legendSeen);
   return (
     <header className="score-header">
       {onBack && (
@@ -50,7 +63,7 @@ export function ScoreHeader({ title, composer, piece, onBack, legend = true }: S
           )}
         </p>
       )}
-      {legend && showLegend && <FingerLegend />}
+      {legend && <FingerLegend />}
     </header>
   );
 }

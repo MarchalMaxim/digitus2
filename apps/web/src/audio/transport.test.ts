@@ -211,6 +211,26 @@ describe('Transport', () => {
     expect(t.positionSec()).toBeGreaterThanOrEqual(2.5);
     expect(t.positionSec()).toBeLessThan(7.5);
   });
+  // UI batch review: the paused cursor shows where Play resumes, so it asks where play() starts.
+  it('startSec, while stopped, is where play() starts: the position, or the loop start when the position lies outside the loop', () => {
+    const t = make();
+    t.seek(1);
+    expect(t.startSec()).toBe(1);
+    t.setLoop({ from: 1, to: 2 }); // 2.5 s to 7.5 s
+    expect(t.startSec()).toBeCloseTo(2.5, 9);
+    t.seek(3);
+    expect(t.startSec()).toBe(3);
+    t.seek(7.5);
+    expect(t.startSec()).toBeCloseTo(2.5, 9);
+    t.setLoop(null);
+    t.seek(1e6); // the end: play() starts again from the top
+    expect(t.startSec()).toBe(0);
+    t.setCountIn(false);
+    t.setLoop({ from: 1, to: 2 });
+    t.seek(1);
+    t.play();
+    expect(t.positionSec()).toBeCloseTo(2.5, 9);
+  });
   it('a tempo change while playing keeps the scheduled notes and the position continuous', () => {
     const t = make();
     t.setCountIn(false);

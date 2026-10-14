@@ -45,7 +45,24 @@ function unlinkLinks(d, depth = 0) {
   return count;
 }
 
+/**
+ * Stops the processes started inside the worktree (workflow agents leave `vite preview` servers
+ * behind), so the delete does not fail with EBUSY on apps/web. Windows only; the match is on the
+ * command line, so this never touches a process of another worktree or of the main checkout.
+ */
+function stopProcessesIn(d) {
+  if (process.platform !== 'win32') return;
+  const needle = d.replace(/\//g, '\\').replace(/'/g, "''");
+  const ps =
+    "Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*" +
+    needle +
+    "*' -and $_.ProcessId -ne $PID } | ForEach-Object { Write-Output ('stopping ' + $_.ProcessId + ' ' + $_.Name); Stop-Process -Id $_.ProcessId -Force }";
+  const r = spawnSync('powershell', ['-NoProfile', '-Command', ps], { encoding: 'utf8' });
+  if (r.stdout && r.stdout.trim()) console.log(r.stdout.trim());
+}
+
 if (existsSync(dir)) {
+  stopProcessesIn(dir);
   unlinkLinks(dir);
   if (unlinkLinks(dir) !== 0) {
     console.error('links remain after unlinking; refusing to delete');

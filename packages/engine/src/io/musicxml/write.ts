@@ -33,12 +33,17 @@ export function injectFingerings(
     const first = n.sourceIndices[0];
     if (first !== undefined && assignment[n.id]) byIndex.set(first, n);
   }
-  const noteEls = doc.getElementsByTagName('note');
+  // Snapshot the live list before mutating: @xmldom/xmldom re-walks the whole document on every
+  // `.length` or `.item()` after a change, which made this loop quadratic (about 2 s on a
+  // 1300-note piece); with a plain array it is linear.
+  const live = doc.getElementsByTagName('note');
+  const noteEls: Element[] = [];
+  for (let i = 0, n = live.length; i < n; i++) noteEls.push(live.item(i) as Element);
   for (let i = 0; i < noteEls.length; i++) {
     const note = byIndex.get(i);
     if (note === undefined) continue;
     const a = assignment[note.id]!;
-    const el = noteEls.item(i) as Element;
+    const el = noteEls[i]!;
     const technical = ensureTechnical(doc, el);
     if (replace) {
       for (const f of childElements(technical, 'fingering')) technical.removeChild(f);

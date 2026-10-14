@@ -218,9 +218,19 @@ def pig_notes(path: Path) -> list[tuple[int, int, str]]:
     return notes
 
 
-def library_files(manifest: Path) -> list[Path]:
+def library_files(manifest: Path, benchmark_set: str = "core30") -> list[Path]:
+    """The library pieces of one benchmark set (default core30, the original 30).
+
+    Entries without a ``benchmarkSet`` field belong to core30; pieces added later (L1 onwards)
+    carry another value or null and are left out, so the shipped hand-motion fit and the
+    research tests keep measuring the same 30 scores.
+    """
     entries = json.loads(manifest.read_text(encoding="utf-8"))
-    return [manifest.parent / e["files"]["score"] for e in entries]
+    return [
+        manifest.parent / e["files"]["score"]
+        for e in entries
+        if (e.get("benchmarkSet") or "core30") == benchmark_set
+    ]
 
 
 def split_files(gold: Path, split: Path, subset: str = "train") -> list[Path]:

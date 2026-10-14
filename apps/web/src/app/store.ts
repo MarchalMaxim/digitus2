@@ -5,7 +5,14 @@ export type HandSize = 'large' | 'medium' | 'small' | 'child';
 export type HandsMode = 'both' | 'R' | 'L';
 export interface Settings {
   handSize: HandSize;
-  tempoFactor: number; // 0.5 .. 1.5
+  /**
+   * Each piece's own tempo factor (0.5 .. 1.5; 1 is the written tempo), by `pieceKey`. A piece
+   * opens at the tempo it was last set to, and a piece never set at 100 %: one factor for every
+   * piece made every piece slow once a hard one was slowed (polish plan Task 6, review S8). Only
+   * factors other than 1 are kept, for the TEMPO_PIECES_MAX pieces changed last, oldest first.
+   * (The M5 per-piece store is not here yet, so this small map lives with the settings.)
+   */
+  tempoByPiece: Record<string, number>;
   hands: HandsMode;
   metronome: boolean;
   countIn: boolean;
@@ -14,7 +21,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   handSize: 'medium',
-  tempoFactor: 1,
+  tempoByPiece: {},
   hands: 'both',
   metronome: false,
   countIn: true,
@@ -29,24 +36,103 @@ export interface AppState {
   view: View;
   settings: Settings;
   notice: string | null;
+  /**
+   * How far the library was scrolled (`window.scrollY`) when the reader last left it, by opening
+   * a piece, a file or the about page, or through the history; the library comes back there
+   * (App.tsx). Not persisted.
+   */
+  libraryScrollY: number;
   openLibrary(): void;
   openAbout(): void;
   openPiece(source: PieceSource): void;
   setSettings(patch: Partial<Settings>): void;
+  /**
+   * Sets the open piece's own tempo factor, clamped to TEMPO_FACTOR_MIN..MAX; a value that is
+   * not a number, or no piece open, changes nothing. Read it back with `tempoFactorOf`.
+   */
+  setTempoFactor(factor: number): void;
   setNotice(message: string | null): void;
+  setLibraryScrollY(y: number): void;
 }
 
 export const SETTINGS_STORAGE_KEY = 'digitus2.settings.v1';
 
 export const TEMPO_FACTOR_MIN = 0.5;
 export const TEMPO_FACTOR_MAX = 1.5;
+/** How many pieces keep a tempo of their own (`Settings.tempoByPiece`): the ones changed last. */
+export const TEMPO_PIECES_MAX = 50;
 
 const HAND_SIZES: readonly HandSize[] = ['large', 'medium', 'small', 'child'];
 const HANDS_MODES: readonly HandsMode[] = ['both', 'R', 'L'];
 
-function clampTempoFactor(value: number): number {
-  if (!Number.isFinite(value)) return DEFAULT_SETTINGS.tempoFactor;
-  return Math.min(TEMPO_FACTOR_MAX, Math.max(TEMPO_FACTOR_MIN, value));
+const fileIds = new WeakMap<Uint8Array, string>();
+
+/**
+ * A dropped file's identity: its length and an FNV-1a hash of its bytes, computed once per bytes
+ * object. A caller that hands over equal bytes in a new array does not reopen the piece; a
+ * different file under the same name does. The app keys its score view on it too (through
+ * `pieceKey`), so a new file also starts with fresh playback and loop inputs.
+ */
+export function fileIdentity(bytes: Uint8Array): string {
+  let id = fileIds.get(bytes);
+  if (id === undefined) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < bytes.length; i++) {
+      h ^= bytes[i]!;
+      h = Math.imul(h, 0x01000193);
+    }
+    id = `${bytes.length}:${(h >>> 0).toString(36)}`;
+    fileIds.set(bytes, id);
+  }
+  return id;
+}
+
+/**
+ * A piece's identity: `piece:<slug>` for a library piece, `file:<name>:<fileIdentity>` for a
+ * dropped file (two files of the same name are two pieces). The key of its own settings (its
+ * tempo) and of its score view (App.tsx).
+ */
+export function pieceKey(source: PieceSource): string {
+  return source.kind === 'library'
+    ? `piece:${source.slug}`
+    : `file:${source.name}:${fileIdentity(source.bytes)}`;
+}
+
+/**
+ * The open piece's tempo factor: its own, else 1 (the written tempo); 1 while no piece is open.
+ * A store selector: `useAppStore(tempoFactorOf)`.
+ */
+export function tempoFactorOf(state: Pick<AppState, 'view' | 'settings'>): number {
+  if (state.view.name !== 'score') return 1;
+  return state.settings.tempoByPiece[pieceKey(state.view.source)] ?? 1;
+}
+
+function isTempoFactor(value: unknown): value is number {
+  return typeof value === 'number' && value >= TEMPO_FACTOR_MIN && value <= TEMPO_FACTOR_MAX;
+}
+
+/**
+ * The tempo map with `key` set to `factor` as its newest entry (or removed, at 1), keeping the
+ * TEMPO_PIECES_MAX newest entries. Keys are prefixed (`piece:`, `file:`), never integer-like, so
+ * the object keeps the order the entries were set in.
+ */
+function withTempo(
+  tempos: Record<string, number>,
+  key: string,
+  factor: number,
+): Record<string, number> {
+  const entries = Object.entries(tempos).filter(([k]) => k !== key);
+  if (factor !== 1) entries.push([key, factor]);
+  return Object.fromEntries(entries.slice(-TEMPO_PIECES_MAX));
+}
+
+/** A stored tempo map's valid entries (factors in range, other than 1), the newest kept. */
+function pickTempos(value: unknown): Record<string, number> | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+  const entries = Object.entries(value as Record<string, unknown>).filter(
+    (entry): entry is [string, number] => isTempoFactor(entry[1]) && entry[1] !== 1,
+  );
+  return Object.fromEntries(entries.slice(-TEMPO_PIECES_MAX));
 }
 
 function isOneOf<T extends string>(allowed: readonly T[], value: unknown): value is T {
@@ -55,7 +141,9 @@ function isOneOf<T extends string>(allowed: readonly T[], value: unknown): value
 
 /**
  * Keeps only the known settings fields that carry a valid value, so settings written by an older
- * (or newer) version of the app can never put the store in an invalid state.
+ * (or newer) version of the app can never put the store in an invalid state. The one tempo
+ * factor for every piece that M4 stored (`tempoFactor`) is dropped on purpose: it is what slowed
+ * every piece, so every piece starts at 100 % again.
  */
 function pickSettings(value: unknown): Partial<Settings> {
   if (typeof value !== 'object' || value === null) return {};
@@ -63,13 +151,8 @@ function pickSettings(value: unknown): Partial<Settings> {
   const out: Partial<Settings> = {};
   if (isOneOf(HAND_SIZES, raw.handSize)) out.handSize = raw.handSize;
   if (isOneOf(HANDS_MODES, raw.hands)) out.hands = raw.hands;
-  if (
-    typeof raw.tempoFactor === 'number' &&
-    raw.tempoFactor >= TEMPO_FACTOR_MIN &&
-    raw.tempoFactor <= TEMPO_FACTOR_MAX
-  ) {
-    out.tempoFactor = raw.tempoFactor;
-  }
+  const tempos = pickTempos(raw.tempoByPiece);
+  if (tempos) out.tempoByPiece = tempos;
   if (typeof raw.metronome === 'boolean') out.metronome = raw.metronome;
   if (typeof raw.countIn === 'boolean') out.countIn = raw.countIn;
   if (typeof raw.showEditorial === 'boolean') out.showEditorial = raw.showEditorial;
@@ -136,16 +219,20 @@ export const useAppStore = create<AppState>()(
       view: { name: 'library' },
       settings: { ...DEFAULT_SETTINGS },
       notice: null,
+      libraryScrollY: 0,
       openLibrary: () => set({ view: { name: 'library' } }),
       openAbout: () => set({ view: { name: 'about' } }),
       openPiece: (source) => set({ view: { name: 'score', source } }),
-      setSettings: (patch) =>
+      setSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
+      setTempoFactor: (factor) =>
         set((s) => {
-          const next: Settings = { ...s.settings, ...patch };
-          next.tempoFactor = clampTempoFactor(next.tempoFactor);
-          return { settings: next };
+          if (s.view.name !== 'score' || !Number.isFinite(factor)) return {};
+          const clamped = Math.min(TEMPO_FACTOR_MAX, Math.max(TEMPO_FACTOR_MIN, factor));
+          const tempoByPiece = withTempo(s.settings.tempoByPiece, pieceKey(s.view.source), clamped);
+          return { settings: { ...s.settings, tempoByPiece } };
         }),
       setNotice: (message) => set({ notice: message }),
+      setLibraryScrollY: (y) => set({ libraryScrollY: y }),
     }),
     {
       name: SETTINGS_STORAGE_KEY,

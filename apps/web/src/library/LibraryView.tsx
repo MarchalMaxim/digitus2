@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, type MouseEvent } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
+import { hashToView } from '../app/routes.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { FingerLegend } from '../score/FingerLegend.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { DropZone } from './DropZone.js';
 import {
@@ -40,6 +42,40 @@ function useWarmUpWhenIdle() {
   }, []);
 }
 
+/**
+ * Remembers how far the list is scrolled, so the way back to it (the score's Back button or the
+ * browser's) lands on the same rows (App.tsx restores `libraryScrollY`). However the reader
+ * leaves: a library control (it calls the function this returns before it opens something), or
+ * the history (the browser's Forward, an edited address), which no control sees.
+ *
+ * The scroll is followed while the list is mounted and written to the store once, when the list
+ * unmounts (not per scroll event: every store write also rewrites the persisted settings). That
+ * cleanup runs in the commit that removes the list, before App's layout effect scrolls for the
+ * next view and before the next view's shorter page clamps the offset. Only scrolls while the
+ * address still names the library count: a step through the history changes the address first
+ * and may then restore the next entry's offset on this page before it goes.
+ */
+function useRememberLibraryScroll(): () => void {
+  const setLibraryScrollY = useAppStore((s) => s.setLibraryScrollY);
+  /** The offset to write when the list goes; null until the list scrolls or opens something. */
+  const latest = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    latest.current = null;
+    const onScroll = () => {
+      if (hashToView(location.hash)?.name === 'library') latest.current = window.scrollY;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (latest.current !== null) setLibraryScrollY(latest.current);
+    };
+  }, [setLibraryScrollY]);
+  return () => {
+    latest.current = window.scrollY;
+    setLibraryScrollY(window.scrollY);
+  };
+}
+
 export function LibraryView() {
   useWarmUpWhenIdle();
   const openPiece = useAppStore((s) => s.openPiece);
@@ -48,10 +84,25 @@ export function LibraryView() {
   const start = recommendedPiece();
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
+  const rememberScroll = useRememberLibraryScroll();
   // A refusal still showing would be stale in the score view, so opening anything clears it.
   const open = (source: PieceSource) => {
+    rememberScroll();
     setNotice(null);
     openPiece(source);
+  };
+  const about = () => {
+    rememberScroll();
+    openAbout();
+  };
+  // The drop zone sits after all 30 rows (review L1): the welcome's link brings it into view,
+  // at once (motion stays under 200 ms), and puts the focus on its file chooser.
+  const dropZone = useRef<HTMLDivElement>(null);
+  const chooser = useRef<HTMLInputElement>(null);
+  const showDropZone = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    dropZone.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    chooser.current?.focus({ preventScroll: true });
   };
 
   return (
@@ -62,6 +113,14 @@ export function LibraryView() {
         </h1>
         <p className="muted">
           Finger numbers for piano music. Pick a piece, press play, and follow the red note.
+        </p>
+        <FingerLegend />
+        {/* An in-page link. Its address is the library's own: the hash is the router, so an
+            anchor to the drop zone would change the view; the click scrolls instead. */}
+        <p>
+          <a href="#/" className="file-link" onClick={showDropZone}>
+            Open your own MusicXML file
+          </a>
         </p>
       </header>
 
@@ -119,10 +178,12 @@ export function LibraryView() {
       <DropZone
         onFile={(name, bytes) => open({ kind: 'file', name, bytes })}
         onRefuse={setNotice}
+        zoneRef={dropZone}
+        chooserRef={chooser}
       />
 
       <footer className="library-footer">
-        <button type="button" className="text-button" onClick={openAbout}>
+        <button type="button" className="text-button" onClick={about}>
           About and licences
         </button>
       </footer>

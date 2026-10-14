@@ -1,8 +1,8 @@
 :root {
   --ink: #000000;
   --paper: #ffffff;
-  --gray-1: #f2f2f2; /* surfaces: hover rows, pressed keys, drop zone */
-  --gray-2: #cccccc; /* rules and disabled controls */
+  --gray-1: #f2f2f2; /* surfaces: hover rows, drop zone */
+  --gray-2: #cccccc; /* rules, disabled controls, pressed and dimmed keys */
   --gray-3: #767676; /* secondary text; 4.5:1 on white */
   --accent: #e3000f; /* the single red; referenced only by .is-red below */
   --dur-fast: 120ms;

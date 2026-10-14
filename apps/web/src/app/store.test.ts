@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, SETTINGS_STORAGE_KEY, useAppStore } from './store.js';
+import {
+  DEFAULT_SETTINGS,
+  pieceKey,
+  SETTINGS_STORAGE_KEY,
+  TEMPO_PIECES_MAX,
+  tempoFactorOf,
+  useAppStore,
+  type PieceSource,
+} from './store.js';
 
 beforeEach(() => {
   localStorage.clear();
@@ -7,6 +15,7 @@ beforeEach(() => {
     view: { name: 'library' },
     settings: { ...DEFAULT_SETTINGS },
     notice: null,
+    libraryScrollY: 0,
   });
 });
 
@@ -27,10 +36,14 @@ describe('store', () => {
     expect(useAppStore.getState().view.name).toBe('library');
   });
   it('persists settings to localStorage and clamps the tempo factor', () => {
-    useAppStore.getState().setSettings({ handSize: 'small', tempoFactor: 9 });
+    // The tempo factor is the open piece's own (polish plan Task 6).
+    useAppStore.getState().setSettings({ handSize: 'small' });
+    useAppStore.getState().openPiece({ kind: 'library', slug: 'ode-to-joy' });
+    useAppStore.getState().setTempoFactor(9);
     const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)!);
     expect(stored.state.settings.handSize).toBe('small');
-    expect(useAppStore.getState().settings.tempoFactor).toBe(1.5);
+    expect(tempoFactorOf(useAppStore.getState())).toBe(1.5);
+    expect(stored.state.settings.tempoByPiece).toEqual({ 'piece:ode-to-joy': 1.5 });
     expect(stored.state).not.toHaveProperty('view');
   });
   it('merges a partial stored settings object with the defaults', async () => {
@@ -46,5 +59,137 @@ describe('store', () => {
     expect(useAppStore.getState().notice).toBe('hello');
     useAppStore.getState().setNotice(null);
     expect(useAppStore.getState().notice).toBeNull();
+  });
+  it('keeps the library scroll position for the way back, without persisting it', () => {
+    expect(useAppStore.getState().libraryScrollY).toBe(0);
+    useAppStore.getState().setLibraryScrollY(1852);
+    expect(useAppStore.getState().libraryScrollY).toBe(1852);
+    useAppStore.getState().setSettings({ metronome: true });
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)!);
+    expect(stored.state).toEqual({ settings: { ...DEFAULT_SETTINGS, metronome: true } });
+  });
+});
+
+// Polish plan Task 6, review S8: a tempo set for one hard piece persisted and carried to every
+// other piece, so a beginner who slowed one piece found every piece slow. Each piece now keeps
+// its own tempo factor, and a piece never slowed or sped up plays at 100 %.
+describe('the tempo factor, per piece', () => {
+  const S = () => useAppStore.getState();
+  const twinkle: PieceSource = { kind: 'library', slug: 'twinkle-twinkle-little-star' };
+  const ode: PieceSource = { kind: 'library', slug: 'ode-to-joy' };
+  const enc = (s: string) => new TextEncoder().encode(s);
+  const stored = () =>
+    JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)!).state.settings.tempoByPiece as Record<
+      string,
+      number
+    >;
+
+  it('keys a library piece by its slug and a dropped file by its name and content', () => {
+    expect(pieceKey(twinkle)).toBe('piece:twinkle-twinkle-little-star');
+    const a = pieceKey({ kind: 'file', name: 'etude.musicxml', bytes: enc('<a/>') });
+    const b = pieceKey({ kind: 'file', name: 'etude.musicxml', bytes: enc('<b/>') });
+    expect(a.startsWith('file:etude.musicxml:4:')).toBe(true);
+    expect(a).not.toBe(b);
+    expect(pieceKey({ kind: 'file', name: 'etude.musicxml', bytes: enc('<a/>') })).toBe(a);
+  });
+
+  it('opens every piece at 100 % until its own tempo changes, and keeps each piece its own', () => {
+    expect(tempoFactorOf(S())).toBe(1);
+    S().openPiece(twinkle);
+    expect(tempoFactorOf(S())).toBe(1);
+    S().setTempoFactor(0.7);
+    expect(tempoFactorOf(S())).toBe(0.7);
+    // A different piece opens at 100 %, whatever the piece before it was set to.
+    S().openPiece(ode);
+    expect(tempoFactorOf(S())).toBe(1);
+    S().setTempoFactor(1.25);
+    S().openLibrary();
+    expect(tempoFactorOf(S())).toBe(1);
+    S().openPiece(twinkle);
+    expect(tempoFactorOf(S())).toBe(0.7);
+    S().openPiece(ode);
+    expect(tempoFactorOf(S())).toBe(1.25);
+    expect(stored()).toEqual({
+      'piece:twinkle-twinkle-little-star': 0.7,
+      'piece:ode-to-joy': 1.25,
+    });
+  });
+
+  it('forgets a piece set back to 100 %, and ignores a change with no piece open', () => {
+    S().openPiece(twinkle);
+    S().setTempoFactor(0.5);
+    S().setTempoFactor(1);
+    expect(tempoFactorOf(S())).toBe(1);
+    expect(S().settings.tempoByPiece).toEqual({});
+    S().openLibrary();
+    S().setTempoFactor(0.6);
+    expect(S().settings.tempoByPiece).toEqual({});
+    S().openPiece(twinkle);
+    expect(tempoFactorOf(S())).toBe(1);
+  });
+
+  it('clamps to 50 to 150 % and ignores a value that is not a number', () => {
+    S().openPiece(twinkle);
+    S().setTempoFactor(0.1);
+    expect(tempoFactorOf(S())).toBe(0.5);
+    S().setTempoFactor(Number.NaN);
+    expect(tempoFactorOf(S())).toBe(0.5);
+  });
+
+  it('keeps a dropped file apart from another file of the same name', () => {
+    const first: PieceSource = { kind: 'file', name: 'song.musicxml', bytes: enc('<one/>') };
+    const second: PieceSource = { kind: 'file', name: 'song.musicxml', bytes: enc('<two/>') };
+    S().openPiece(first);
+    S().setTempoFactor(0.8);
+    S().openPiece(second);
+    expect(tempoFactorOf(S())).toBe(1);
+    S().openPiece({ kind: 'file', name: 'song.musicxml', bytes: enc('<one/>') });
+    expect(tempoFactorOf(S())).toBe(0.8);
+  });
+
+  it(`keeps the tempos of the ${TEMPO_PIECES_MAX} pieces changed last`, () => {
+    for (let i = 0; i <= TEMPO_PIECES_MAX; i++) {
+      S().openPiece({ kind: 'library', slug: `piece-${i}` });
+      S().setTempoFactor(0.75);
+    }
+    const keys = Object.keys(S().settings.tempoByPiece);
+    expect(keys).toHaveLength(TEMPO_PIECES_MAX);
+    expect(keys).not.toContain('piece:piece-0');
+    expect(keys.at(-1)).toBe(`piece:piece-${TEMPO_PIECES_MAX}`);
+    // Changing an older piece again makes it the newest.
+    S().openPiece({ kind: 'library', slug: 'piece-1' });
+    S().setTempoFactor(0.6);
+    expect(Object.keys(S().settings.tempoByPiece).at(-1)).toBe('piece:piece-1');
+    expect(Object.keys(stored())).toHaveLength(TEMPO_PIECES_MAX);
+  });
+
+  it('drops the global tempo an older version stored, and every invalid entry', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          settings: {
+            tempoFactor: 1.5,
+            tempoByPiece: {
+              'piece:ode-to-joy': 0.7,
+              'piece:too-fast': 9,
+              'piece:not-a-number': 'slow',
+              'piece:written-tempo': 1,
+            },
+          },
+        },
+        version: 1,
+      }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings).toEqual({
+      ...DEFAULT_SETTINGS,
+      tempoByPiece: { 'piece:ode-to-joy': 0.7 },
+    });
+    expect(S().settings).not.toHaveProperty('tempoFactor');
+    S().openPiece(twinkle);
+    expect(tempoFactorOf(S())).toBe(1);
+    S().openPiece(ode);
+    expect(tempoFactorOf(S())).toBe(0.7);
   });
 });

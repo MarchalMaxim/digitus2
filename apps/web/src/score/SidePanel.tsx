@@ -1,8 +1,9 @@
-import { useMemo, useState, type ChangeEvent } from 'react';
+import { useId, useMemo, useState, type ChangeEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandSize, type PieceSource } from '../app/store.js';
 import { downloadText, exportFilename } from '../export/download.js';
 import { formatDuration, LEVEL_NAMES, type LibraryPiece } from '../library/manifest.js';
+import { FingerLegend } from './FingerLegend.js';
 import { MidiImportPanel } from './MidiImportPanel.js';
 import { services, type ScoreDocument } from './useScoreDocument.js';
 
@@ -12,6 +13,13 @@ const HAND_SIZES: { value: HandSize; label: string }[] = [
   { value: 'small', label: 'Small' },
   { value: 'child', label: 'Child' },
 ];
+
+/**
+ * What the hand size changes, under its select (polish plan Task 6, review S9: nothing said it,
+ * and a beginner may read "Child" as an easier mode).
+ */
+export const HAND_SIZE_HELP =
+  'Hand size changes the stretches the fingering allows. Choose child or small for small hands.';
 
 export interface SidePanelProps {
   doc: ScoreDocument;
@@ -24,8 +32,11 @@ export interface SidePanelProps {
 }
 
 /**
- * The MIDI import facts and hand split (MIDI files only), piece facts, the hand size, the
- * editor's fingering toggle, timings, export and print.
+ * What the finger numbers mean, the MIDI import facts and hand split (MIDI files only), piece
+ * facts, the hand size with a line on what it changes, the editor's fingering toggle, export and
+ * print, and a closed `Details`
+ * disclosure with what only a developer can act on: the solve and layout timings and the
+ * reader's warnings (polish plan Task 5, review S7).
  */
 export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) {
   const handSize = useAppStore((s) => s.settings.handSize);
@@ -33,6 +44,7 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
   const setSettings = useAppStore((s) => s.setSettings);
   const setNotice = useAppStore((s) => s.setNotice);
   const [exporting, setExporting] = useState(false);
+  const handSizeHelpId = useId();
 
   // A library piece's editorial file loads only when the toggle is first switched on, so the
   // manifest says whether there is one; a dropped file says so through its own <fingering>s.
@@ -52,6 +64,10 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
     setSettings({ handSize: e.currentTarget.value as HandSize });
 
   const ready = doc.status === 'ready';
+  const timings =
+    doc.solveMs !== null && doc.renderMs !== null
+      ? { solve: Math.round(doc.solveMs), render: Math.round(doc.renderMs) }
+      : null;
   const { xml, score, assignment } = doc;
   const canExport = ready && !exporting && xml !== null && score !== null && assignment !== null;
 
@@ -73,6 +89,7 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
   return (
     <aside className="side-panel stack no-print" aria-label="Piece and fingering">
       <h2 className="visually-hidden">Piece and fingering</h2>
+      <FingerLegend />
       {doc.midiInfo && doc.score && (
         <MidiImportPanel
           info={doc.midiInfo}
@@ -115,16 +132,21 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
         </dl>
       )}
 
-      <label className="field">
-        Hand size
-        <select value={handSize} onChange={onHandSize}>
-          {HAND_SIZES.map((h) => (
-            <option key={h.value} value={h.value}>
-              {h.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="hand-size">
+        <label className="field">
+          Hand size
+          <select value={handSize} onChange={onHandSize} aria-describedby={handSizeHelpId}>
+            {HAND_SIZES.map((h) => (
+              <option key={h.value} value={h.value}>
+                {h.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p id={handSizeHelpId} className="field-help muted small">
+          {HAND_SIZE_HELP}
+        </p>
+      </div>
 
       {hasEditorial && (
         <label className="check">
@@ -137,12 +159,6 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
         </label>
       )}
 
-      {doc.solveMs !== null && doc.renderMs !== null && (
-        <p className="muted small">
-          Fingered in {Math.round(doc.solveMs)} ms · laid out in {Math.round(doc.renderMs)} ms
-        </p>
-      )}
-
       <div className="panel-actions">
         <button type="button" disabled={!canExport} onClick={() => void onExport()}>
           Export MusicXML
@@ -152,12 +168,24 @@ export function SidePanel({ doc, source, piece, setSplitMidi }: SidePanelProps) 
         </button>
       </div>
 
-      {doc.warnings.length > 0 && (
-        <ul className="warnings muted small">
-          {doc.warnings.map((w, i) => (
-            <li key={i}>{w}</li>
-          ))}
-        </ul>
+      {/* A beginner can act on neither the timings nor the reader's warnings (review S7), so
+          they wait behind a disclosure, closed by default; it is there once there is either. */}
+      {(timings || doc.warnings.length > 0) && (
+        <details className="panel-details">
+          <summary>Details</summary>
+          {timings && (
+            <p className="timings muted small">
+              Fingered in {timings.solve} ms · laid out in {timings.render} ms
+            </p>
+          )}
+          {doc.warnings.length > 0 && (
+            <ul className="warnings muted small">
+              {doc.warnings.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+          )}
+        </details>
       )}
     </aside>
   );

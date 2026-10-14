@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 export interface ScoreSheetProps {
   /** SVG pages from the Verovio worker, in order. */
@@ -18,7 +18,9 @@ export interface ScoreSheetProps {
 export function ScoreSheet({ pages, label, onHost }: ScoreSheetProps) {
   const hostRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // A layout effect: the pages are in before the parent's layout effects run (the dimming of a
+  // hand left out, ScoreView.tsx) and before the paint, so they never show undimmed for a frame.
+  useLayoutEffect(() => {
     const host = hostRef.current;
     if (host) host.innerHTML = pages.join('');
   }, [pages]);

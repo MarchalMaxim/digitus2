@@ -23,9 +23,34 @@ test('hand size change re-solves in place and keeps one red element', async ({ p
   await page.goto('/#/piece/twinkle-twinkle-little-star');
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
   await page.getByLabel('Hand size').selectOption('child');
+  // The timing line lives behind the side panel's Details toggle (polish plan Task 5).
+  await page
+    .locator('.side-panel summary')
+    .filter({ hasText: /^Details$/ })
+    .click();
   await expect(page.getByText(/Fingered in \d+ ms/)).toBeVisible();
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64);
   await expectOneRed(page, 'score after re-solve');
+});
+
+// Polish plan Task 6, review S9: the hand sizes had no word on what they change, and "Child"
+// can read as an easier mode. One line under the select says it, and describes the select.
+test('the hand size says what it changes, right under the select', async ({ page }) => {
+  const HELP =
+    'Hand size changes the stretches the fingering allows. Choose child or small for small hands.';
+  await page.goto('/#/piece/twinkle-twinkle-little-star');
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+  const select = page.getByLabel('Hand size');
+  const help = page.locator('.side-panel').getByText(HELP, { exact: true });
+  await expect(help).toBeVisible();
+  await expect(select).toHaveAccessibleDescription(HELP);
+  const s = (await select.boundingBox())!;
+  const h = (await help.boundingBox())!;
+  expect(h.y, 'under the select').toBeGreaterThanOrEqual(s.y + s.height);
+  expect(h.y - (s.y + s.height), 'right under it').toBeLessThan(16);
+  const roots = await expectOneRed(page, 'score with the hand size help');
+  expect(roots[0]!.tag).toBe('button');
+  await expectNoSeriousA11y(page, 'score with the hand size help');
 });
 
 test("editor's fingering toggle shows the editorial digits for a piece that has them", async ({
@@ -38,6 +63,101 @@ test("editor's fingering toggle shows the editorial digits for a piece that has 
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(26, { timeout: 20_000 });
   await page.getByLabel("Show the editor's fingering").uncheck();
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(engineCount, { timeout: 20_000 });
+});
+
+// Polish plan Task 5 (review S4, S7 and S12): the score view says what the numbers mean, keeps the
+// developer text out of the way, and says whose fingering the score shows.
+const FINGER_LEGEND =
+  'Finger numbers: 1 is the thumb and 5 the little finger, in both hands. The upper staff is the right hand, the lower staff the left.';
+const EDITORIAL_LINE = "Showing the editor's fingering";
+const MELODY = 'schumann-op68-no1-melody';
+/** Melody's reader warnings: two duplicates the engine's reader drops (the review saw them). */
+const MELODY_WARNING = /^note \d+: duplicate of note \d+ \(same hand, onset and pitch\), dropped$/;
+
+test('the side panel explains the finger numbers and keeps timings and reader warnings behind Details', async ({
+  page,
+}) => {
+  await page.goto(`/#/piece/${MELODY}`);
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
+  const panel = page.locator('.side-panel');
+  await expect(panel.getByText(FINGER_LEGEND, { exact: true })).toBeVisible();
+
+  // Closed by default: the toggle is there, the timing line and the warnings are not shown.
+  const details = panel.locator('details');
+  const summary = details.locator('summary');
+  await expect(summary).toHaveText('Details');
+  await expect(summary).toBeVisible();
+  await expect(details).not.toHaveAttribute('open');
+  const timing = panel.getByText(/^Fingered in \d+ ms · laid out in \d+ ms$/);
+  const warnings = panel.getByText(MELODY_WARNING);
+  await expect(timing).toHaveCount(1);
+  await expect(timing).toBeHidden();
+  await expect(warnings).toHaveCount(2);
+  for (const w of await warnings.all()) await expect(w).toBeHidden();
+  let roots = await expectOneRed(page, 'score with Details closed');
+  expect(roots[0]!.tag).toBe('button');
+  await expectNoSeriousA11y(page, 'score with Details closed');
+
+  // Opened: both show, inside the disclosure.
+  await summary.click();
+  await expect(details).toHaveAttribute('open', '');
+  await expect(timing).toBeVisible();
+  for (const w of await warnings.all()) await expect(w).toBeVisible();
+  roots = await expectOneRed(page, 'score with Details open');
+  expect(roots[0]!.tag).toBe('button');
+  await expectNoSeriousA11y(page, 'score with Details open');
+
+  // And closed again.
+  await summary.click();
+  await expect(details).not.toHaveAttribute('open');
+  await expect(timing).toBeHidden();
+});
+
+test("a line above the score says when the editor's fingering is shown, and only then", async ({
+  page,
+}) => {
+  await page.goto('/#/piece/burgmuller-op100-no2-arabesque');
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
+  const digits = page.locator('.score-sheet g.fing');
+  const engineCount = await digits.count();
+  expect(engineCount).toBeGreaterThan(26);
+  const line = page.getByText(EDITORIAL_LINE, { exact: true });
+  await expect(line).toHaveCount(0);
+
+  await page.getByLabel("Show the editor's fingering").check();
+  await expect(line).toBeVisible({ timeout: 20_000 });
+  // It follows the pages, not the checkbox: when it shows, the editor's 26 digits are on screen.
+  expect(await digits.count()).toBe(26);
+  // Above the score: in the score column, right before the sheet, wholly above it.
+  const place = await page.evaluate((text) => {
+    const el = [...document.querySelectorAll('.score-main p')].find((p) => p.textContent === text)!;
+    const sheet = document.querySelector('.score-sheet')!;
+    return {
+      beforeSheet: el.nextElementSibling === sheet,
+      bottom: el.getBoundingClientRect().bottom,
+      sheetTop: sheet.getBoundingClientRect().top,
+    };
+  }, EDITORIAL_LINE);
+  expect(place.beforeSheet).toBe(true);
+  expect(place.bottom).toBeLessThanOrEqual(place.sheetTop);
+  const roots = await expectOneRed(page, "editor's fingering shown");
+  expect(roots[0]!.tag).toBe('button');
+  await expectNoSeriousA11y(page, "editor's fingering shown");
+
+  // Switched off, it goes with the editor's digits.
+  await page.getByLabel("Show the editor's fingering").uncheck();
+  await expect(line).toHaveCount(0, { timeout: 20_000 });
+  expect(await digits.count()).toBe(engineCount);
+
+  // The setting is kept across pieces; a piece without an editor's fingering shows the engine's
+  // digits, and the line does not claim otherwise.
+  await page.getByLabel("Show the editor's fingering").check();
+  await expect(line).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await page.getByRole('button', { name: /^Open Twinkle/ }).click();
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+  await expect(page.getByLabel("Show the editor's fingering")).toHaveCount(0);
+  await expect(line).toHaveCount(0);
 });
 
 test('opens K.545: status appears first, score within 8 s', async ({ page }) => {

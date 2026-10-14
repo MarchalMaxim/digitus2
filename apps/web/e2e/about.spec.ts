@@ -15,3 +15,34 @@ test('about: attributions, one red element, no serious a11y issues, back works',
   await page.getByRole('button', { name: 'Back to the library' }).click();
   await expect(page).toHaveURL(/#\/$/);
 });
+
+// Polish plan Task 5: the finger numbers are explained on the library and the score view; the
+// about page keeps its text as it was.
+test('about: keeps its text', async ({ page }) => {
+  await page.goto('/#/about');
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText([
+    'What this is',
+    'How the fingerings are chosen',
+    'Licences',
+    'The built-in pieces',
+  ]);
+  await expect(
+    page.getByText(
+      'digitus2 writes finger numbers on piano music for beginning and intermediate players. Everything runs in your browser; nothing you open leaves your computer.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      /^The engine scores every possible fingering with ergonomic rules from the piano-fingering literature \(finger spans, thumb crossings, weak fingers, black keys, hand position changes\) and picks the cheapest one for the whole piece with an exact search\. Your hand size changes the spans it allows\. The engine version is \S+\.$/,
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      'All compositions are in the public domain. Five engravings are shared under CC BY-SA and are credited here and on their score pages.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expectOneRed(page, 'about');
+  await expectNoSeriousA11y(page, 'about');
+});

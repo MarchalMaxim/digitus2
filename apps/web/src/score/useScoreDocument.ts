@@ -16,7 +16,7 @@
 import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
-import { useAppStore, type PieceSource } from '../app/store.js';
+import { fileIdentity, useAppStore, type PieceSource } from '../app/store.js';
 import { createEngineClient, type EngineClient } from '../engine/client.js';
 import { pieceBySlug, scoreUrl } from '../library/manifest.js';
 import { injectNoteIds } from './render/injectIds.js';
@@ -199,27 +199,9 @@ function initialDoc(slug: string | null, fileName: string | null): DocState {
   };
 }
 
-const fileIds = new WeakMap<Uint8Array, string>();
-
-/**
- * A dropped file's identity: its length and an FNV-1a hash of its bytes, computed once per bytes
- * object. A caller that hands over equal bytes in a new array does not reopen the piece; a
- * different file under the same name does. The app keys its score view on it too, so a new
- * file also starts with fresh playback and loop inputs.
- */
-export function fileIdentity(bytes: Uint8Array): string {
-  let id = fileIds.get(bytes);
-  if (id === undefined) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < bytes.length; i++) {
-      h ^= bytes[i]!;
-      h = Math.imul(h, 0x01000193);
-    }
-    id = `${bytes.length}:${(h >>> 0).toString(36)}`;
-    fileIds.set(bytes, id);
-  }
-  return id;
-}
+// A dropped file's identity lives with the store since polish plan Task 6 (its tempo is kept per
+// piece, by `pieceKey`); re-exported here, where it was.
+export { fileIdentity };
 
 export function useScoreDocument(
   source: PieceSource,

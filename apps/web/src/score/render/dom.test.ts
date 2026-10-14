@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { clearCurrent, noteIdAt, setCurrent, setDigits } from './dom.js';
+import { clearCurrent, dimNotes, noteIdAt, setCurrent, setDigits } from './dom.js';
 
 const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
@@ -47,5 +47,81 @@ describe('render dom helpers', () => {
     expect(noteIdAt(h.querySelector('#n3 use'))).toBe('n3');
     expect(noteIdAt(h.querySelector('g.fing'))).toBeNull();
     expect(noteIdAt(null)).toBeNull();
+  });
+});
+
+/**
+ * Two bars of two staves as Verovio draws them (`g.measure > g.staff > g.layer`): the right hand
+ * on top with a chord shared with the left hand (r2 and l9), the left hand's beamed pair below,
+ * then a bar where the left hand rests.
+ */
+const bars = `
+<svg xmlns="http://www.w3.org/2000/svg"><g class="system">
+  <g class="measure" id="m1">
+    <g class="staff" id="s1a"><path/><g class="clef" id="clef1"></g>
+      <g class="layer" id="l1a"><g class="note" id="r1"></g>
+        <g class="chord" id="cx"><g class="note" id="r2"></g><g class="note" id="l9"></g></g></g>
+    </g>
+    <g class="staff" id="s1b"><path/>
+      <g class="layer" id="l1b"><g class="beam" id="b1"><polygon/>
+        <g class="note" id="l1"></g><g class="note" id="l2"></g></g></g>
+    </g>
+    <g class="slur" id="slur1"></g>
+    <g class="fing" data-startid="#r1"><text>1</text></g>
+    <g class="fing" data-startid="#l1"><text>5</text></g>
+    <g class="fing" data-startid="#l9"><text>1</text></g>
+  </g>
+  <g class="measure" id="m2">
+    <g class="staff" id="s2a"><g class="layer" id="l2a"><g class="note" id="r3"></g></g></g>
+    <g class="staff" id="s2b"><g class="layer" id="l2b"><g class="rest" id="rest1"></g></g></g>
+  </g>
+</g></svg>`;
+
+// Polish plan Task 4 review (S10): one-hand practice dimmed only the keyboard, so the score did
+// not show which hand is being played.
+describe('dimming the hand left out', () => {
+  function bars2() {
+    const div = document.createElement('div');
+    div.innerHTML = bars;
+    return div;
+  }
+  const dimmed = (h: Element) =>
+    [...h.querySelectorAll('.is-muted')]
+      .map((el) => el.id || el.getAttribute('data-startid'))
+      .sort();
+
+  it("dims the left hand's staff whole, its rests included, and its digits; a shared chord keeps the right hand's note", () => {
+    const h = bars2();
+    expect(dimNotes(h, new Set(['l1', 'l2', 'l9']))).toBe(5);
+    // The beamed layer and the rest-only layer below; l9 alone in the shared chord; its digits.
+    expect(dimmed(h)).toEqual(['#l1', '#l9', 'l1b', 'l2b', 'l9']);
+    expect(h.querySelector('#clef1')).not.toHaveClass('is-muted');
+    expect(h.querySelector('#slur1')).not.toHaveClass('is-muted');
+    // Nothing dimmed inside something dimmed.
+    expect(h.querySelectorAll('.is-muted .is-muted')).toHaveLength(0);
+  });
+
+  it('dims the right hand note by note where the layer is shared, and a layer of its own whole', () => {
+    const h = bars2();
+    expect(dimNotes(h, new Set(['r1', 'r2', 'r3']))).toBe(4);
+    expect(dimmed(h)).toEqual(['#r1', 'l2a', 'r1', 'r2']);
+  });
+
+  it('dims a chord whole when all its notes are dimmed, and clears the earlier dimming first', () => {
+    const h = bars2();
+    dimNotes(h, new Set(['l1', 'l2', 'l9']));
+    expect(dimNotes(h, new Set(['r2', 'l9']))).toBe(2);
+    expect(dimmed(h)).toEqual(['#l9', 'cx']);
+    expect(dimNotes(h, new Set())).toBe(0);
+    expect(h.querySelectorAll('.is-muted')).toHaveLength(0);
+  });
+
+  it('never touches the cursor marks', () => {
+    const h = bars2();
+    setCurrent(h, ['r1', 'r2'], 0);
+    dimNotes(h, new Set(['l1', 'l2', 'l9']));
+    expect(h.querySelectorAll('.is-red').length).toBe(2);
+    dimNotes(h, new Set());
+    expect(h.querySelectorAll('.is-red').length).toBe(2);
   });
 });

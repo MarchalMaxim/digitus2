@@ -1,5 +1,5 @@
 import type { Finger, Hand, Score } from '@digitus2/engine';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 /**
  * A key held down at the cursor, with the finger that plays it. `finger` is null when the
@@ -17,6 +17,11 @@ export interface KeyboardProps {
   highMidi: number;
   /** The keys struck at the cursor first, then the ones still held from earlier. */
   pressed: PressedKey[];
+  /**
+   * The muted hand's keys at the cursor (one-hand practice), drawn dimmed and never pressed: what
+   * the other hand would play. A key also in `pressed` (a unison of both hands) is pressed.
+   */
+  muted?: PressedKey[];
 }
 
 /** A horizontal stretch of the drawn keyboard, in CSS pixels from its left edge. */
@@ -112,27 +117,43 @@ function layout(lowMidi: number, highMidi: number): { keys: KeyShape[]; whiteCou
   return { keys, whiteCount: whites };
 }
 
+/** One note per key: of several (a unison), the first one that has a finger. */
+function oneByKey(keys: readonly PressedKey[]): Map<number, PressedKey> {
+  const byMidi = new Map<number, PressedKey>();
+  for (const p of keys) {
+    const seen = byMidi.get(p.midi);
+    if (!seen || (seen.finger === null && p.finger !== null)) byMidi.set(p.midi, p);
+  }
+  return byMidi;
+}
+
+const NO_KEYS: PressedKey[] = [];
+
 /**
  * The on-screen keyboard: white keys white with an ink outline, black keys ink. A pressed key
- * turns gray and shows the finger number that plays it. Class names only; the colors come from
- * base.css, and nothing here is ever red.
+ * turns gray (`--gray-2`, white or black) and shows the finger number that plays it, with an L
+ * or R above it for the hand. With one hand muted, that hand's keys at the cursor show the same
+ * way, dimmed (`.is-muted`), never pressed. Class names only; the colors come from base.css, and
+ * nothing here is ever red.
  *
  * The SVG sits in its own sideways scroller: it never draws a white key narrower than
  * MIN_WHITE_PX, so a wide piece on a phone scrolls instead of shrinking the digits away. A
  * scrolling keyboard follows the pressed keys when they leave its visible part, and is a tab
  * stop so it can also be scrolled from the keyboard.
  */
-export function Keyboard({ lowMidi, highMidi, pressed }: KeyboardProps): JSX.Element {
+export function Keyboard({
+  lowMidi,
+  highMidi,
+  pressed,
+  muted = NO_KEYS,
+}: KeyboardProps): JSX.Element {
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
+  const shapeOf = useMemo(() => new Map(keys.map((k) => [k.midi, k])), [keys]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [scrollable, setScrollable] = useState(false);
-  const byMidi = new Map<number, PressedKey>();
-  // One key, two notes (a unison of both hands): show the first one that has a finger.
-  for (const p of pressed) {
-    const seen = byMidi.get(p.midi);
-    if (!seen || (seen.finger === null && p.finger !== null)) byMidi.set(p.midi, p);
-  }
+  const byMidi = oneByKey(pressed);
+  const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
   const width = Math.max(1, whiteCount) * WHITE_W;
 
   useEffect(() => {
@@ -163,7 +184,7 @@ export function Keyboard({ lowMidi, highMidi, pressed }: KeyboardProps): JSX.Ele
     const offset = (box.width - (width + 1) * scale) / 2;
     const spans: Span[] = [];
     for (const p of pressed) {
-      const k = keys.find((shape) => shape.midi === p.midi);
+      const k = shapeOf.get(p.midi);
       if (!k) continue;
       const w = k.black ? BLACK_W : WHITE_W;
       spans.push({ left: offset + (k.x + 0.5) * scale, right: offset + (k.x + w + 0.5) * scale });
@@ -173,22 +194,52 @@ export function Keyboard({ lowMidi, highMidi, pressed }: KeyboardProps): JSX.Ele
       return;
     }
     el.scrollLeft = (show.left + show.right) / 2 - el.clientWidth / 2;
-  }, [pressed, keys, width]);
+  }, [pressed, shapeOf, width]);
 
   const key = (k: KeyShape) => {
     const p = byMidi.get(k.midi);
+    const m = p ? undefined : mutedByMidi.get(k.midi);
+    const shown = p ?? m;
     const w = k.black ? BLACK_W : WHITE_W;
     const h = k.black ? BLACK_H : WHITE_H;
-    const cls = `key ${k.black ? 'is-black' : 'is-white'}${p ? ' is-pressed' : ''}`;
+    const state = p ? ' is-pressed' : m ? ' is-muted' : '';
+    const cls = `key ${k.black ? 'is-black' : 'is-white'}${state}`;
     return (
-      <g key={k.midi} className={cls} data-midi={k.midi} data-hand={p?.hand}>
-        <rect x={k.x} y={0} width={w} height={h} />
-        {p && p.finger !== null && (
-          <text x={k.x + w / 2} y={h - (k.black ? 9 : 12)} textAnchor="middle">
-            {p.finger}
-          </text>
-        )}
-      </g>
+      <Fragment key={k.midi}>
+        {/* A dimmed black key is see-through: an opaque backing under it keeps the white keys'
+            outlines from striking through it, so it reads as a pale key, not a hole. */}
+        {m && k.black && <rect className="key-backing" x={k.x} y={0} width={w} height={h} />}
+        <g className={cls} data-midi={k.midi} data-hand={shown?.hand}>
+          <rect x={k.x} y={0} width={w} height={h} />
+          {shown && shown.finger !== null && (
+            <text x={k.x + w / 2} y={h - (k.black ? 9 : 12)} textAnchor="middle">
+              {shown.finger}
+            </text>
+          )}
+        </g>
+      </Fragment>
+    );
+  };
+
+  // The hand over each pressed or dimmed key, the played hand's first. A layer of its own above
+  // the keys, so a key's own text stays its finger number alone.
+  const handMark = (p: PressedKey, dimmed: boolean) => {
+    const k = shapeOf.get(p.midi);
+    if (!k) return null;
+    const w = k.black ? BLACK_W : WHITE_W;
+    const h = k.black ? BLACK_H : WHITE_H;
+    const cls = `key-hand${k.black ? ' is-on-black' : ''}${dimmed ? ' is-muted' : ''}`;
+    return (
+      <text
+        key={`hand-${p.midi}`}
+        className={cls}
+        data-for-midi={p.midi}
+        x={k.x + w / 2}
+        y={h - (k.black ? 23 : 30)}
+        textAnchor="middle"
+      >
+        {p.hand}
+      </text>
     );
   };
 
@@ -204,6 +255,8 @@ export function Keyboard({ lowMidi, highMidi, pressed }: KeyboardProps): JSX.Ele
       >
         {keys.filter((k) => !k.black).map(key)}
         {keys.filter((k) => k.black).map(key)}
+        {[...byMidi.values()].map((p) => handMark(p, false))}
+        {[...mutedByMidi.values()].map((p) => handMark(p, true))}
       </svg>
     </div>
   );

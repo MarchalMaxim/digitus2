@@ -273,6 +273,14 @@ h1[tabindex='-1']:focus {
   outline-offset: 2px;
 }
 
+/* The welcome's "Open your own MusicXML file" (LibraryView.tsx): a plain ink link to the drop
+   zone at the end of the list, on a 44 px touch target. */
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 @media (max-width: 479.98px) {
   .piece-row {
     grid-template-columns: minmax(0, 1fr);
@@ -335,6 +343,11 @@ fieldset {
   gap: 0.25rem;
 }
 
+/* A line under a field that says what it changes (the hand size, SidePanel.tsx). */
+.field-help {
+  margin-top: 0.25rem;
+}
+
 /* Score view */
 .score-header {
   display: grid;
@@ -374,6 +387,36 @@ fieldset {
   height: auto;
 }
 
+/* The playback cursor draws the current notes bold, so they can be followed through a run of
+   small notes (the review found a 9 x 8 px notehead easy to lose): the accent (tokens.css) also
+   fills the stem and the flag, and these widths make them read. The notehead and the flag are
+   glyphs, so their outline is in the glyph's own units: the sheet draws 25 Verovio units per CSS
+   pixel and a glyph at 0.72 of its size, so 69 units are 2 px. The stem is a line, 4 px wide
+   whatever the scale. Only the marked notes change: still one cursor per onset. */
+.score-sheet svg .is-red .notehead,
+.score-sheet svg .is-red .flag {
+  stroke-width: 69px;
+  stroke-linejoin: round;
+}
+
+.score-sheet svg .is-red .stem > path {
+  stroke-width: 4px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* One hand practised alone: the other hand's notes, with their beams and rests, and its digits
+   are dimmed as its keys are (render/dom.ts, dimNotes); the staff lines and clefs stay. A note
+   of that hand inside a chord the cursor marks (one chord shared by both hands) is never pale:
+   the accent is drawn whole or not at all. */
+.score-sheet svg .is-muted {
+  opacity: 0.4;
+}
+
+.score-sheet svg .is-red .is-muted,
+.score-sheet svg .is-red.is-muted {
+  opacity: 1;
+}
+
 .score-error {
   --gap: 1rem;
 }
@@ -400,6 +443,32 @@ fieldset {
 
 .warnings {
   padding-left: 1rem;
+}
+
+/* What the finger numbers mean (FingerLegend.tsx): one line in ink, a step smaller than the text
+   around it, under the library's welcome and at the top of the score's side panel. */
+.finger-legend {
+  font-size: 0.875rem;
+  max-width: 40rem;
+}
+
+/* The side panel's Details (SidePanel.tsx, review S7): the timings and the reader's warnings,
+   closed by default. The summary is a 44 px touch target in the secondary gray, with the
+   browser's disclosure triangle; a long warning wraps inside the panel. */
+.panel-details {
+  overflow-wrap: break-word;
+}
+
+.panel-details > summary {
+  display: list-item;
+  min-height: 44px;
+  padding: 0.625rem 0;
+  color: var(--gray-3);
+  cursor: pointer;
+}
+
+.panel-details > * + * {
+  margin-top: 0.5rem;
 }
 
 /* The MIDI import facts and the Hand split control (MIDI files only) */
@@ -437,8 +506,11 @@ fieldset {
   width: 7.5rem;
 }
 
+/* The percentage and the tempo it makes ("70 % · ♩ = 70", Transport.tsx), on one line. Wide
+   enough for the longest ("150 % · ♩ = 228"), so the slider never moves while it is dragged. */
 .tempo-value {
-  min-width: 3.25em;
+  min-width: 7.5em;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -509,6 +581,12 @@ fieldset {
   padding: 0.5rem 0.625rem;
 }
 
+/* Why a loop typed in reverse plays no loop (Transport.tsx): its own line under the inputs, in
+   ink (a message the reader must act on, not secondary text), never the accent. */
+.loop-message {
+  flex-basis: 100%;
+}
+
 /* Play and Pause share one button: a fixed width keeps the bar from shifting when it flips, and
    no transition, so the accent passes between Play and the cursor within one frame (a fade
    would leave a moment with no accent element at all). */
@@ -526,23 +604,84 @@ fieldset {
   cursor: progress;
 }
 
-/* On-screen keyboard: paper keys outlined in ink, and ink keys. A pressed key turns gray and
-   shows the finger that plays it; keys never carry the accent. It stays at the bottom of the
-   window while the score column is on screen, so the fingers are visible during playback. */
-.keyboard {
+/* The dock: Play or Pause, Rewind and the on-screen keyboard. It stays at the bottom of the
+   window while the score column is on screen, so the music can always be stopped and the fingers
+   are visible during playback. It is sticky inside the score column: at the end of the column it
+   sits in its own place below the last system, so it never hides the music or the side panel
+   for good. Wider than 480 px the buttons stand stacked beside the keys; narrower, in a row above
+   them, so the keys keep the full width. */
+.dock {
   position: sticky;
   bottom: 0;
   z-index: 1;
   /* A grid item: without this the keys' minimum width would widen the score column itself. */
   min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem 1rem;
   background: var(--paper);
   border-top: 1px solid var(--gray-2);
   padding: 0.75rem 0;
 }
 
-/* What scrolling brings into view (the cursor, a focused control) stops above the keyboard. */
-html:has(.keyboard) {
-  scroll-padding-bottom: 10rem;
+.dock .transport-group {
+  flex-direction: column;
+}
+
+/* The status line is the dock's first row, across it, when there is something to say (loading
+   the score, loading the piano, the count-in): next to Play wherever the reader is, and the dock
+   grows upward without moving the music. While it has nothing to say it stays in the page,
+   visually hidden (out of the grid), so screen readers announce its first words. The count-in's
+   beat number is the cue to get ready: large, bold and in ink, on the same 1.45rem line box as
+   the other statuses (secondary, in gray), so the dock keeps its height when the count follows
+   "Loading the piano…". */
+.dock > .score-status {
+  grid-column: 1 / -1;
+}
+
+.score-status.is-count {
+  font-size: 1.5rem;
+  line-height: 1.45rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* What scrolling brings into view (the cursor, a focused control) stops above the dock: its
+   height, measured by ScoreView.tsx, is published on the root as --dock-h. */
+html:has(.dock) {
+  scroll-padding-bottom: var(--dock-h, 10rem);
+}
+
+/* Except the dock's own controls: while the dock is stuck to the bottom of the window they are
+   on screen already, and that padding would scroll the page by up to a dock's height each time
+   one takes the focus (Tab to Play, Rewind, the keyboard). A negative scroll margin of the same
+   height gives the padding back. */
+.dock,
+.dock * {
+  scroll-margin-bottom: calc(-1 * var(--dock-h, 0px));
+}
+
+/* Below 480 px the practice controls fold into a closed "Practice" disclosure, in their place
+   above the score (ScoreView.tsx), so a phone opens a score with the music on its first screen
+   and the controls one tap away. The summary is a 44 px touch target and keeps the browser's
+   disclosure triangle, drawn in ink. */
+.practice > summary {
+  display: list-item;
+  min-height: 44px;
+  padding: 0.625rem 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.practice[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+/* On-screen keyboard: paper keys outlined in ink, and ink keys. A pressed key turns gray and
+   shows the finger that plays it; keys never carry the accent. */
+.keyboard {
+  min-width: 0;
 }
 
 /* The keys keep a minimum width (set on the SVG by Keyboard.tsx); a range wider than the column
@@ -577,12 +716,18 @@ html:has(.keyboard) {
   fill: var(--ink);
 }
 
-.key.is-white.is-pressed rect {
-  fill: var(--gray-1);
+/* Under a dimmed black key (Keyboard.tsx): paper, so the see-through key reads as a pale key and
+   the white keys' outlines do not run through its digit. */
+.key-backing {
+  fill: var(--paper);
+  stroke: none;
 }
 
-.key.is-black.is-pressed rect {
-  fill: var(--gray-3);
+/* Pressed, white or black, a key turns --gray-2: --gray-1 on a white key was almost invisible.
+   A black key shows a number only when pressed, so its number is ink on the gray too. */
+.keyboard-svg .key.is-pressed rect,
+.keyboard-svg .key.is-muted rect {
+  fill: var(--gray-2);
 }
 
 .key text {
@@ -592,7 +737,34 @@ html:has(.keyboard) {
 
 .key.is-black text {
   font-size: 11px;
-  fill: var(--paper);
+}
+
+/* L or R over a pressed key: the hand that plays it. */
+.key-hand {
+  font: 600 10px var(--font-ui);
+  fill: var(--ink);
+  pointer-events: none;
+}
+
+.key-hand.is-on-black {
+  font-size: 9px;
+}
+
+/* One hand practised alone: the other hand's keys at the cursor, shown as pressed but dimmed,
+   so the reader sees what that hand would play. */
+.key.is-muted,
+.key-hand.is-muted {
+  opacity: 0.4;
+}
+
+@media (max-width: 479.98px) {
+  .dock {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dock .transport-group {
+    flex-direction: row;
+  }
 }
 
 @media (max-width: 899.98px) {
@@ -719,6 +891,11 @@ html:has(.keyboard) {
     width: 100%;
     height: auto;
     break-inside: avoid;
+  }
+
+  /* Both hands print in full ink, whichever hand is being practised. */
+  .score-sheet svg .is-muted {
+    opacity: 1;
   }
 
   /* The accent prints in ink (tokens.css). A primary button or link also needs its fill and

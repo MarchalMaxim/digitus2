@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type DragEvent } from 'react';
+import { useState, type ChangeEvent, type DragEvent, type Ref } from 'react';
 
 export const NOT_A_SCORE_REFUSAL =
   'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).';
@@ -8,6 +8,10 @@ const SCORE_EXTENSIONS = ['.musicxml', '.xml', '.mxl', '.mid', '.midi'];
 export interface DropZoneProps {
   onFile(name: string, bytes: Uint8Array): void;
   onRefuse(message: string): void;
+  /** The zone, for the library's link that brings it into view (polish plan Task 6). */
+  zoneRef?: Ref<HTMLDivElement>;
+  /** The file chooser's input, for the same link to put the focus on. */
+  chooserRef?: Ref<HTMLInputElement>;
 }
 
 function extensionOf(name: string): string {
@@ -19,7 +23,7 @@ function extensionOf(name: string): string {
  * Drag and drop plus a file chooser. Only MusicXML and MIDI get through (by extension, in any
  * case); anything else is refused with a notice.
  */
-export function DropZone({ onFile, onRefuse }: DropZoneProps) {
+export function DropZone({ onFile, onRefuse, zoneRef, chooserRef }: DropZoneProps) {
   const [over, setOver] = useState(false);
 
   const accept = (file: File | undefined) => {
@@ -59,6 +63,7 @@ export function DropZone({ onFile, onRefuse }: DropZoneProps) {
 
   return (
     <div
+      ref={zoneRef}
       data-testid="drop-zone"
       className={over ? 'drop-zone is-over' : 'drop-zone'}
       onDragOver={onDragOver}
@@ -69,6 +74,7 @@ export function DropZone({ onFile, onRefuse }: DropZoneProps) {
       <label className="file-choose">
         choose a file
         <input
+          ref={chooserRef}
           type="file"
           accept=".musicxml,.xml,.mxl,.mid,.midi"
           className="visually-hidden"

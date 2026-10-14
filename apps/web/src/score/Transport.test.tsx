@@ -1,9 +1,26 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
-import { Transport } from './Transport.js';
+import { DEFAULT_SETTINGS, tempoFactorOf, useAppStore } from '../app/store.js';
+import {
+  LOOP_REVERSED_TEXT,
+  loopFromInputs,
+  PracticeControls,
+  startQpm,
+  tempoText,
+  Transport,
+} from './Transport.js';
 import type { Playback } from './usePlayback.js';
+
+/** The practice controls and the transport (the dock's buttons), as the score view shows them. */
+function Controls({ playback: pb, disabled = false }: { playback: Playback; disabled?: boolean }) {
+  return (
+    <>
+      <PracticeControls playback={pb} measureCount={12} />
+      <Transport playback={pb} disabled={disabled} />
+    </>
+  );
+}
 
 function playback(
   playing = false,
@@ -16,18 +33,22 @@ function playback(
   return {
     playing,
     loading,
+    countIn: null,
+    waiting: false,
     play: vi.fn<() => void>(),
     pause: vi.fn<() => void>(),
     rewind: vi.fn(),
     positionSec: () => 0,
+    leadingIn: () => false,
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),
   };
 }
 afterEach(cleanup);
+// The controls belong to the score view, and the tempo factor is the open piece's own.
 beforeEach(() =>
   useAppStore.setState({
-    view: { name: 'library' },
+    view: { name: 'score', source: { kind: 'library', slug: 'twinkle-twinkle-little-star' } },
     settings: { ...DEFAULT_SETTINGS },
     notice: null,
   }),
@@ -35,15 +56,40 @@ beforeEach(() =>
 
 describe('Transport', () => {
   it('shows a red Play when stopped and a plain Pause when playing', () => {
-    const { rerender } = render(<Transport playback={playback(false)} measureCount={12} />);
+    const { rerender } = render(<Controls playback={playback(false)} />);
     expect(screen.getByRole('button', { name: 'Play' })).toHaveClass('is-red');
-    rerender(<Transport playback={playback(true)} measureCount={12} />);
+    rerender(<Controls playback={playback(true)} />);
     expect(screen.getByRole('button', { name: 'Pause' })).not.toHaveClass('is-red');
     expect(screen.queryByRole('button', { name: 'Play' })).toBeNull();
   });
+  it('keeps Pause the red element during the count-in (no note is red yet), and it still pauses', async () => {
+    // The count-in is the first part of the lead-in: usePlayback reports both.
+    const counting = {
+      ...playback(true),
+      countIn: { beat: 1, beats: 4, beatInBar: 2 },
+      waiting: true,
+    };
+    const { rerender } = render(<Controls playback={counting} />);
+    const pause = screen.getByRole('button', { name: 'Pause' });
+    expect(pause).toHaveClass('is-red');
+    expect(pause).not.toHaveAttribute('aria-disabled');
+    await userEvent.click(pause);
+    expect(counting.pause).toHaveBeenCalledTimes(1);
+    // The music starts: the cursor takes the red, Pause turns plain.
+    rerender(<Controls playback={playback(true)} />);
+    expect(screen.getByRole('button', { name: 'Pause' })).not.toHaveClass('is-red');
+  });
+  it('keeps Pause the red element until the first note of the hands played sounds, after the count-in or without one', () => {
+    // The left hand alone after the right hand's pickup: nothing the cursor marks sounds yet.
+    const leadIn = { ...playback(true), waiting: true };
+    const { rerender } = render(<Controls playback={leadIn} />);
+    expect(screen.getByRole('button', { name: 'Pause' })).toHaveClass('is-red');
+    rerender(<Controls playback={playback(true)} />);
+    expect(screen.getByRole('button', { name: 'Pause' })).not.toHaveClass('is-red');
+  });
   it('wires play, pause, hands, tempo, metronome, count-in and loop', async () => {
     const pb = playback(false);
-    render(<Transport playback={pb} measureCount={12} />);
+    render(<Controls playback={pb} />);
     await userEvent.click(screen.getByRole('button', { name: 'Play' }));
     expect(pb.play).toHaveBeenCalled();
     await userEvent.click(screen.getByRole('radio', { name: 'Left hand' }));
@@ -65,7 +111,7 @@ describe('Transport', () => {
   it('keeps Play focusable while it cannot start, and ignores it then', async () => {
     // A natively disabled button would drop the focus to <body> while the samples load.
     const loading = playback(false, true);
-    const { rerender } = render(<Transport playback={loading} measureCount={12} />);
+    const { rerender } = render(<Controls playback={loading} />);
     const play = screen.getByRole('button', { name: 'Play' });
     expect(play).not.toBeDisabled();
     expect(play).toHaveAttribute('aria-disabled', 'true');
@@ -77,13 +123,13 @@ describe('Transport', () => {
     expect(play).toHaveFocus();
 
     const notReady = playback(false);
-    rerender(<Transport playback={notReady} measureCount={12} disabled />);
+    rerender(<Controls playback={notReady} disabled />);
     expect(play).toHaveAttribute('aria-disabled', 'true');
     await userEvent.click(play);
     expect(notReady.play).not.toHaveBeenCalled();
 
     const ready = playback(false);
-    rerender(<Transport playback={ready} measureCount={12} />);
+    rerender(<Controls playback={ready} />);
     expect(play).not.toHaveAttribute('aria-disabled');
     expect(play).not.toHaveAttribute('aria-busy');
     await userEvent.keyboard('{Enter}');
@@ -91,9 +137,297 @@ describe('Transport', () => {
 
     // Playing while the score re-lays out (disabled): Pause still works.
     const relayout = playback(true);
-    rerender(<Transport playback={relayout} measureCount={12} disabled />);
+    rerender(<Controls playback={relayout} disabled />);
     expect(screen.getByRole('button', { name: 'Pause' })).not.toHaveAttribute('aria-disabled');
     await userEvent.keyboard('{Enter}');
     expect(relayout.pause).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Space plays and pauses', () => {
+  // fireEvent returns false when a listener cancelled the default action (scrolling the page).
+  const space = (target: Element, init: KeyboardEventInit = {}) =>
+    fireEvent.keyDown(target, { key: ' ', code: 'Space', ...init });
+
+  it('while no control has the focus, without scrolling the page', () => {
+    const stopped = playback(false);
+    const { rerender } = render(<Controls playback={stopped} />);
+    expect(document.activeElement).toBe(document.body);
+    expect(space(document.body)).toBe(false);
+    expect(stopped.play).toHaveBeenCalledTimes(1);
+
+    const playing = playback(true);
+    rerender(<Controls playback={playing} />);
+    expect(space(document.body)).toBe(false);
+    expect(playing.pause).toHaveBeenCalledTimes(1);
+    expect(playing.play).not.toHaveBeenCalled();
+  });
+
+  it('leaves Space to a focused control: a field types it, a button or a checkbox takes it once', async () => {
+    const pb = playback(false);
+    render(
+      <>
+        <input aria-label="Note" />
+        <select aria-label="Size">
+          <option>Medium</option>
+        </select>
+        <details>
+          <summary>More</summary>
+        </details>
+        <Controls playback={pb} />
+      </>,
+    );
+    const field = screen.getByLabelText('Note');
+    field.focus();
+    await userEvent.keyboard(' ');
+    expect(field).toHaveValue(' ');
+    expect(space(screen.getByLabelText('Size'))).toBe(true);
+    expect(space(screen.getByText('More'))).toBe(true);
+    expect(pb.play).not.toHaveBeenCalled();
+    // On the Play button Space is the button's own: one press, one play, never two toggles.
+    screen.getByRole('button', { name: 'Play' }).focus();
+    await userEvent.keyboard(' ');
+    expect(pb.play).toHaveBeenCalledTimes(1);
+    // A checkbox toggles, and playback is left alone.
+    screen.getByRole('checkbox', { name: 'Metronome' }).focus();
+    await userEvent.keyboard(' ');
+    expect(useAppStore.getState().settings.metronome).toBe(true);
+    expect(pb.play).toHaveBeenCalledTimes(1);
+  });
+
+  it('plays from a focused link: a link takes Enter, and its Space would only scroll the page', () => {
+    const pb = playback(false);
+    render(
+      <>
+        <a href="#/about">About</a>
+        <Controls playback={pb} />
+      </>,
+    );
+    const link = screen.getByRole('link', { name: 'About' });
+    link.focus();
+    expect(document.activeElement).toBe(link);
+    expect(space(link)).toBe(false);
+    expect(pb.play).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores Space with a modifier, held down, or while Play cannot start', () => {
+    const pb = playback(false);
+    const { rerender } = render(<Controls playback={pb} />);
+    expect(space(document.body, { shiftKey: true })).toBe(true);
+    expect(space(document.body, { ctrlKey: true })).toBe(true);
+    // Held down: the repeats keep the page still but do not toggle again.
+    expect(space(document.body, { repeat: true })).toBe(false);
+    expect(pb.play).not.toHaveBeenCalled();
+
+    const loading = playback(false, true);
+    rerender(<Controls playback={loading} />);
+    expect(space(document.body)).toBe(false);
+    expect(loading.play).not.toHaveBeenCalled();
+
+    const notReady = playback(false);
+    rerender(<Controls playback={notReady} disabled />);
+    expect(space(document.body)).toBe(false);
+    expect(notReady.play).not.toHaveBeenCalled();
+  });
+
+  it('stops listening when the transport goes', () => {
+    const pb = playback(false);
+    const { unmount } = render(<Controls playback={pb} />);
+    unmount();
+    expect(space(document.body)).toBe(true);
+    expect(pb.play).not.toHaveBeenCalled();
+  });
+});
+
+// Below 480 px the score view folds the practice controls into a closed disclosure above the
+// score, so a phone opens a score with music on its first screen (review S2).
+describe('PracticeControls', () => {
+  /** Every practice control, found whether or not a closed disclosure hides it. */
+  const controls = () => [
+    screen.getByRole('slider', { name: 'Tempo', hidden: true }),
+    screen.getByRole('radio', { name: 'Both hands', hidden: true }),
+    screen.getByRole('radio', { name: 'Right hand', hidden: true }),
+    screen.getByRole('radio', { name: 'Left hand', hidden: true }),
+    screen.getByRole('checkbox', { name: 'Metronome', hidden: true }),
+    screen.getByRole('checkbox', { name: 'Count-in', hidden: true }),
+    screen.getByRole('spinbutton', { name: 'Loop from bar', hidden: true }),
+    screen.getByRole('spinbutton', { name: 'Loop to bar', hidden: true }),
+    screen.getByRole('button', { name: 'Clear loop', hidden: true }),
+  ];
+
+  it('folds every practice control into a closed "Practice" disclosure when collapsible', () => {
+    const { container } = render(
+      <PracticeControls playback={playback()} measureCount={12} collapsible />,
+    );
+    const details = container.querySelectorAll('details');
+    expect(details).toHaveLength(1);
+    const disclosure = details[0]!;
+    expect(disclosure.open).toBe(false);
+    expect(disclosure).toHaveClass('practice', 'no-print');
+    const summary = disclosure.firstElementChild;
+    expect(summary?.tagName).toBe('SUMMARY');
+    expect(summary).toHaveTextContent(/^Practice$/);
+    for (const control of controls()) expect(disclosure).toContainElement(control);
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+    // The summary names the section; nothing inside names it again (announced twice).
+    expect(disclosure.querySelector('[role="group"]')).toBeNull();
+    expect(disclosure.querySelector('[aria-label="Practice"]')).toBeNull();
+  });
+
+  it('stands open, with no disclosure, otherwise', () => {
+    const { container } = render(<PracticeControls playback={playback()} measureCount={12} />);
+    expect(container.querySelector('details')).toBeNull();
+    expect(controls()).toHaveLength(9);
+    const group = screen.getByRole('group', { name: 'Practice' });
+    for (const control of controls()) expect(group).toContainElement(control);
+  });
+
+  it('keeps what was typed when it folds or unfolds (the window crossing 480 px)', () => {
+    const pb = playback();
+    const { container, rerender } = render(<PracticeControls playback={pb} measureCount={12} />);
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Loop from bar' }), {
+      target: { value: '5' },
+    });
+    fireEvent.change(screen.getByRole('slider', { name: 'Tempo' }), { target: { value: '70' } });
+    rerender(<PracticeControls playback={pb} measureCount={12} collapsible />);
+    expect(container.querySelector('details')).not.toBeNull();
+    expect(screen.getByRole('spinbutton', { name: 'Loop from bar', hidden: true })).toHaveValue(5);
+    expect(screen.getByRole('spinbutton', { name: 'Loop to bar', hidden: true })).toHaveValue(null);
+    expect(screen.getByRole('slider', { name: 'Tempo', hidden: true })).toHaveValue('70');
+    rerender(<PracticeControls playback={pb} measureCount={12} />);
+    expect(container.querySelector('details')).toBeNull();
+    expect(screen.getByRole('spinbutton', { name: 'Loop from bar' })).toHaveValue(5);
+    expect(screen.getByRole('button', { name: 'Clear loop' })).toBeEnabled();
+  });
+
+  it('shows the loop that is set when it mounts', () => {
+    const pb = { ...playback(), loop: { from: 1, to: 2 } };
+    render(<PracticeControls playback={pb} measureCount={12} collapsible />);
+    expect(screen.getByRole('spinbutton', { name: 'Loop from bar', hidden: true })).toHaveValue(2);
+    expect(screen.getByRole('spinbutton', { name: 'Loop to bar', hidden: true })).toHaveValue(3);
+    expect(screen.getByRole('button', { name: 'Clear loop', hidden: true })).toBeEnabled();
+    expect(pb.setLoop).not.toHaveBeenCalled();
+  });
+});
+
+// Polish plan Task 6, review S8: the tempo control read "70 %" while the score still printed
+// "♩ = 100". It now says the tempo the percentage makes, and the factor is the piece's own.
+describe('the tempo control', () => {
+  it('writes the percentage and the tempo it makes, in quarter notes per minute', () => {
+    expect(tempoText(0.7, 100)).toBe('70 % · ♩ = 70');
+    expect(tempoText(1, 108)).toBe('100 % · ♩ = 108');
+    expect(tempoText(0.7, 108)).toBe('70 % · ♩ = 76');
+    expect(tempoText(1.5, 152)).toBe('150 % · ♩ = 228');
+    // Before the score is read there is no tempo to show yet.
+    expect(tempoText(0.5, null)).toBe('50 %');
+  });
+
+  it("reads the piece's tempo where it starts, as the transport plays it", () => {
+    expect(startQpm([{ tick: 0, qpm: 100 }])).toBe(100);
+    expect(
+      startQpm([
+        { tick: 960, qpm: 60 },
+        { tick: 0, qpm: 90 },
+      ]),
+    ).toBe(90);
+    // Several marks at the start: the last one is in force (ticksToSeconds does the same).
+    expect(
+      startQpm([
+        { tick: 0, qpm: 90 },
+        { tick: 0, qpm: 100 },
+      ]),
+    ).toBe(100);
+    // No tempo before the first mark (or none at all): the engine's default, 120.
+    expect(startQpm([{ tick: 480, qpm: 60 }])).toBe(120);
+    expect(startQpm([])).toBe(120);
+  });
+
+  it("shows 70 % · ♩ = 70 for Twinkle (100 qpm) at 70 %, and follows the piece's tempo", () => {
+    useAppStore.getState().setTempoFactor(0.7);
+    const pb = playback();
+    const { container, rerender } = render(
+      <PracticeControls playback={pb} measureCount={12} qpm={100} />,
+    );
+    const slider = screen.getByRole('slider', { name: 'Tempo' });
+    expect(slider).toHaveValue('70');
+    expect(container.querySelector('.tempo-value')).toHaveTextContent(/^70 % · ♩ = 70$/);
+    expect(slider).toHaveAttribute('aria-valuetext', '70 %, 70 quarter notes per minute');
+
+    // Another tempo (Ode to Joy is written at 108): the same percentage makes another tempo.
+    rerender(<PracticeControls playback={pb} measureCount={12} qpm={108} />);
+    expect(container.querySelector('.tempo-value')).toHaveTextContent(/^70 % · ♩ = 76$/);
+    expect(slider).toHaveAttribute('aria-valuetext', '70 %, 76 quarter notes per minute');
+
+    // Moving the slider sets the open piece's factor and updates both.
+    fireEvent.change(slider, { target: { value: '50' } });
+    expect(tempoFactorOf(useAppStore.getState())).toBe(0.5);
+    expect(container.querySelector('.tempo-value')).toHaveTextContent(/^50 % · ♩ = 54$/);
+
+    // While the score is not read yet, the percentage alone.
+    rerender(<PracticeControls playback={pb} measureCount={12} qpm={null} />);
+    expect(container.querySelector('.tempo-value')).toHaveTextContent(/^50 %$/);
+    expect(slider).toHaveAttribute('aria-valuetext', '50 %');
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+  });
+
+  it('opens a different piece at 100 %', () => {
+    useAppStore.getState().setTempoFactor(0.7);
+    useAppStore.getState().openPiece({ kind: 'library', slug: 'ode-to-joy' });
+    const { container } = render(
+      <PracticeControls playback={playback()} measureCount={16} qpm={108} />,
+    );
+    expect(screen.getByRole('slider', { name: 'Tempo' })).toHaveValue('100');
+    expect(container.querySelector('.tempo-value')).toHaveTextContent(/^100 % · ♩ = 108$/);
+  });
+});
+
+// Polish plan Task 6, review S11: a reversed range (from 6, to 2) was ignored without a word.
+describe('a loop whose "from" is after "to"', () => {
+  it('is not a loop: the bars typed in reverse, before or after clamping to the piece', () => {
+    expect(LOOP_REVERSED_TEXT).toBe('The loop needs "from" before "to".');
+    expect(loopFromInputs('6', '2', 12)).toBeNull();
+    expect(loopFromInputs('20', '15', 12)).toBeNull();
+    expect(loopFromInputs('15', '20', 12)).toEqual({ from: 11, to: 11 });
+    expect(loopFromInputs('2', '6', 12)).toEqual({ from: 1, to: 5 });
+  });
+
+  it('says so under the loop inputs and is not applied; a range in order clears the message', () => {
+    const pb = playback();
+    const { container } = render(<PracticeControls playback={pb} measureCount={12} />);
+    const from = screen.getByRole('spinbutton', { name: 'Loop from bar' });
+    const to = screen.getByRole('spinbutton', { name: 'Loop to bar' });
+    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(from).not.toHaveAttribute('aria-invalid');
+
+    fireEvent.change(from, { target: { value: '6' } });
+    // Half typed is not reversed: nothing to say yet.
+    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    fireEvent.change(to, { target: { value: '2' } });
+    const message = screen.getByText(LOOP_REVERSED_TEXT);
+    expect(message).toBeVisible();
+    expect(pb.setLoop).toHaveBeenLastCalledWith(null);
+    for (const input of [from, to]) {
+      expect(input).toHaveAttribute('aria-invalid', 'true');
+      expect(input).toHaveAccessibleDescription(LOOP_REVERSED_TEXT);
+    }
+    expect(screen.getByRole('group', { name: 'Loop bars' })).toContainElement(message);
+    expect(screen.getByRole('button', { name: 'Clear loop' })).toBeEnabled();
+    // Never red: the brief's one red stays Play, and an error is not the next action.
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+
+    fireEvent.change(to, { target: { value: '8' } });
+    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(pb.setLoop).toHaveBeenLastCalledWith({ from: 5, to: 7 });
+    for (const input of [from, to]) {
+      expect(input).not.toHaveAttribute('aria-invalid');
+      expect(input).not.toHaveAccessibleDescription(LOOP_REVERSED_TEXT);
+    }
+
+    // Reversed again, then cleared: the message goes with the inputs.
+    fireEvent.change(from, { target: { value: '9' } });
+    expect(screen.getByText(LOOP_REVERSED_TEXT)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear loop' }));
+    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(pb.setLoop).toHaveBeenLastCalledWith(null);
   });
 });

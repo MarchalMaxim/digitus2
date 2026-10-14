@@ -6,7 +6,9 @@
  * browser lets it start. The instrument loads the piece's pitches once per score; Play is
  * unavailable and busy while it does. A new score stops playback and drops the transport and the
  * loop; unmounting also closes the context. A loop changed while playing reaches the transport
- * once the typing settles (LOOP_SETTLE_MS).
+ * once the typing settles (LOOP_SETTLE_MS). The transport's count-in reports become `countIn`,
+ * which the status line counts, and its lead-in reports become `waiting`, which the cursor waits
+ * for (no note is marked before it sounds) while Pause keeps the red.
  *
  * The transport module is a lazy chunk, fetched as soon as a score is open: it reads the beat
  * grid through the engine's public API, and any runtime import of the engine brings
@@ -15,7 +17,7 @@
  */
 import type { Hand, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAppStore, type HandsMode } from '../app/store.js';
+import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { instrumentFromLocation, type Instrument } from '../audio/instrument.js';
 import { scheduleClick } from '../audio/metronome.js';
 import type * as TransportExports from '../audio/transport.js';
@@ -43,15 +45,45 @@ export interface LoopRange {
   to: number;
 }
 
+/**
+ * The count-in being heard: click `beat` (0-based) of `beats`, on beat `beatInBar` of its bar
+ * (from 1), the number the status line shows: "1 2" before Happy Birthday's 3/4 pickup, "1 2 3
+ * 4 1" before a three-beat pickup in 4/4.
+ */
+export interface CountIn {
+  beat: number;
+  beats: number;
+  beatInBar: number;
+}
+
 export interface Playback {
   playing: boolean;
   /** True while the instrument fetches the piece's samples after Play (Play is unavailable, busy). */
   loading: boolean;
+  /**
+   * While playing, the count-in before the music, from Play until the start position is heard;
+   * null otherwise. The status line counts it.
+   */
+  countIn: CountIn | null;
+  /**
+   * While playing, true from Play (or a seek, such as Rewind) until the first note of the hands
+   * played is heard: the start delay, the count-in, and whatever comes before that note (a rest,
+   * the other hand's pickup). Nothing in the score is marked and no key pressed meanwhile, so
+   * Pause stays the red element. `countIn` is never set while this is false.
+   */
+  waiting: boolean;
   play(): void;
   pause(): void;
   rewind(): void;
   /** The score time being heard now, in seconds (0 before the first play). */
   positionSec(): number;
+  /**
+   * Whether the transport is in a lead-in at the time being heard now, read on every frame:
+   * `waiting` follows it on the transport's next scheduler tick, so after a loop wrap to a start
+   * where the hands played rest, the cursor keeps its marks until then rather than mark a note
+   * of the new pass before it sounds. False when stopped.
+   */
+  leadingIn(): boolean;
   loop: LoopRange | null;
   setLoop(r: LoopRange | null): void;
 }
@@ -83,13 +115,16 @@ function uniqueMidis(score: Score): number[] {
 }
 
 export function usePlayback(score: Score | null): Playback {
-  const tempoFactor = useAppStore((s) => s.settings.tempoFactor);
+  // The open piece's own tempo factor (polish plan Task 6): a different piece opens at 100 %.
+  const tempoFactor = useAppStore(tempoFactorOf);
   const hands = useAppStore((s) => s.settings.hands);
   const metronome = useAppStore((s) => s.settings.metronome);
-  const countIn = useAppStore((s) => s.settings.countIn);
+  const countInOn = useAppStore((s) => s.settings.countIn);
 
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [countIn, setCountIn] = useState<CountIn | null>(null);
+  const [waiting, setWaiting] = useState(false);
   const [loop, setLoopState] = useState<LoopRange | null>(null);
 
   const ctxRef = useRef<AudioContext | null>(null);
@@ -125,6 +160,8 @@ export function usePlayback(score: Score | null): Playback {
     loopRef.current = null;
     setPlaying(false);
     setLoading(false);
+    setCountIn(null);
+    setWaiting(false);
     setLoopState(null);
   }, [cancelLoopPush]);
 
@@ -156,8 +193,8 @@ export function usePlayback(score: Score | null): Playback {
     t.setTempoFactor(tempoFactor);
     t.setMuted(mutedHandsFor(hands));
     t.setMetronome(metronome);
-    t.setCountIn(countIn);
-  }, [tempoFactor, hands, metronome, countIn]);
+    t.setCountIn(countInOn);
+  }, [tempoFactor, hands, metronome, countInOn]);
 
   const play = useCallback(() => {
     const s = scoreRef.current;
@@ -184,8 +221,9 @@ export function usePlayback(score: Score | null): Playback {
           score: s,
           click: (time, accent) => scheduleClick(audio, time, accent),
         });
-        const settings = useAppStore.getState().settings;
-        transport.setTempoFactor(settings.tempoFactor);
+        const state = useAppStore.getState();
+        const settings = state.settings;
+        transport.setTempoFactor(tempoFactorOf(state));
         transport.setMuted(mutedHandsFor(settings.hands));
         transport.setMetronome(settings.metronome);
         transport.setCountIn(settings.countIn);
@@ -194,10 +232,19 @@ export function usePlayback(score: Score | null): Playback {
           transport.rewind();
           setPlaying(false);
         };
+        // The count-in, for the status line, and the lead-in, which the cursor waits for (it
+        // marks nothing until the first note of the hands played is heard). A tick that ends
+        // both reports both, so they reach the screen in one render.
+        transport.onCountInBeat = (beat, beats, beatInBar) =>
+          setCountIn({ beat, beats, beatInBar });
+        transport.onCountInEnd = () => setCountIn(null);
+        transport.onLeadInChange = setWaiting;
         transportRef.current = transport;
         t = transport;
       }
       pushLoop(); // stopped: the loop only sets where play() starts
+      // play() reports a count-in's first beat and the lead-in at once, so they reach the screen
+      // in the same render as playing: Pause takes the red from Play, and no note is marked.
       t.play();
       setPlaying(true);
     };
@@ -241,6 +288,8 @@ export function usePlayback(score: Score | null): Playback {
     pushLoop(); // after the pause: a stopped transport takes a loop without seeking
     setPlaying(false);
     setLoading(false);
+    setCountIn(null);
+    setWaiting(false);
   }, [pushLoop]);
 
   const rewind = useCallback(() => {
@@ -248,6 +297,8 @@ export function usePlayback(score: Score | null): Playback {
   }, []);
 
   const positionSec = useCallback(() => transportRef.current?.positionSec() ?? 0, []);
+
+  const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);
 
   // The loop state changes at once; a playing transport gets a new range once the typing settles
   // (clearing the loop never seeks, so it applies at once).
@@ -267,7 +318,31 @@ export function usePlayback(score: Score | null): Playback {
   );
 
   return useMemo(
-    () => ({ playing, loading, loop, play, pause, rewind, positionSec, setLoop }),
-    [playing, loading, loop, play, pause, rewind, positionSec, setLoop],
+    () => ({
+      playing,
+      loading,
+      countIn,
+      waiting,
+      loop,
+      play,
+      pause,
+      rewind,
+      positionSec,
+      leadingIn,
+      setLoop,
+    }),
+    [
+      playing,
+      loading,
+      countIn,
+      waiting,
+      loop,
+      play,
+      pause,
+      rewind,
+      positionSec,
+      leadingIn,
+      setLoop,
+    ],
   );
 }

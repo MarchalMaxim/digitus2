@@ -1,5 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
+import { openPractice } from './practice.js';
+import { holdPianoSamples } from './samples.js';
 
 /**
  * The application states the design brief is checked in (M4 plan, Task 10): each a name, a way
@@ -18,6 +20,8 @@ const TWINKLE = 'twinkle-twinkle-little-star';
 const TWINKLE_NOTES = 64;
 const ARABESQUE = 'burgmuller-op100-no2-arabesque';
 const ARABESQUE_EDITORIAL_DIGITS = 26;
+/** Schumann's Melody: the engine's reader warns about two duplicate notes. */
+const MELODY = 'schumann-op68-no1-melody';
 const SCORE_TIMEOUT = 20_000;
 /** The library's Twinkle as a two-track MIDI file (M6), dropped through the file chooser. */
 const TWINKLE_MIDI = fileURLToPath(new URL('../../fixtures/twinkle.mid', import.meta.url));
@@ -45,7 +49,8 @@ function digits(page: Page): Promise<string> {
 
 async function playing(page: Page): Promise<void> {
   await twinkleReady(page, '?audio=silent');
-  // The count-in holds the cursor on the first notes (playback.spec covers it); play through.
+  // The count-in holds the first red note back (playback.spec covers it); play through.
+  await openPractice(page);
   await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
   await page.getByRole('button', { name: 'Play' }).click();
   await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
@@ -115,6 +120,55 @@ export const STATES: AppState[] = [
       await expect(page.locator('.score-sheet g.fing')).toHaveCount(ARABESQUE_EDITORIAL_DIGITS, {
         timeout: SCORE_TIMEOUT,
       });
+      // The line above the score says whose digits these are (polish plan, Task 5).
+      await expect(page.getByText("Showing the editor's fingering", { exact: true })).toBeVisible();
+    },
+    expectTag: 'button',
+  },
+  {
+    // The side panel's Details open: the solve and layout timings and the reader's warnings,
+    // hidden by default (polish plan, Task 5). Melody has two warnings, long lines at 360 px.
+    name: 'score-details',
+    go: async (page) => {
+      await page.goto(`/#/piece/${MELODY}`);
+      await expect(page.locator('.score-sheet svg').first()).toBeVisible({
+        timeout: SCORE_TIMEOUT,
+      });
+      const details = page.locator('.side-panel details');
+      await details.locator('summary').click();
+      await expect(details).toHaveAttribute('open', '');
+      await expect(page.getByText(/^Fingered in \d+ ms · laid out in \d+ ms$/)).toBeVisible();
+      await expect(details.getByText(/^note \d+: duplicate of note \d+/)).toHaveCount(2);
+    },
+    expectTag: 'button',
+  },
+  {
+    // The first Play with the real instrument, its samples held back: Play stays red and busy,
+    // and the status line in the dock says what is happening (polish plan, Task 3).
+    name: 'score-loading-piano',
+    go: async (page) => {
+      await holdPianoSamples(page);
+      await twinkleReady(page);
+      await page.getByRole('button', { name: 'Play' }).click();
+      await expect(page.getByRole('status')).toHaveText('Loading the piano…');
+      await expect(page.getByRole('button', { name: 'Play' })).toHaveAttribute('aria-busy', 'true');
+    },
+    expectTag: 'button',
+  },
+  {
+    // The count-in: Pause is the red element and the status line counts; no note is red until
+    // the first one sounds (polish plan, Task 3). At 50 % Twinkle counts four beats of 1.2 s,
+    // which leaves the checks time to run inside the count-in.
+    name: 'score-count-in',
+    go: async (page) => {
+      await twinkleReady(page, '?audio=silent');
+      await openPractice(page);
+      await expect(page.getByRole('checkbox', { name: 'Count-in' })).toBeChecked();
+      await page.getByRole('slider', { name: 'Tempo' }).fill('50');
+      await page.getByRole('button', { name: 'Play' }).click();
+      await expect(page.getByRole('status')).toHaveText('1');
+      await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+      await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
     },
     expectTag: 'button',
   },
@@ -134,6 +188,7 @@ export const STATES: AppState[] = [
     name: 'score-loop',
     go: async (page) => {
       await twinkleReady(page);
+      await openPractice(page);
       await page.getByLabel('Loop from bar').fill('2');
       await page.getByLabel('Loop to bar').fill('3');
       await expect(page.getByRole('button', { name: 'Clear loop' })).toBeEnabled();

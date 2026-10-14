@@ -1,11 +1,13 @@
 /**
  * Main-thread helpers over the Verovio SVG: the playback cursor (the `.is-red` class on the
- * notes that start at one instant), in-place digit patching, and hit testing. The SVG ids are
+ * notes that start at one instant), the hand left out of one-hand practice (`.is-muted`),
+ * in-place digit patching, and hit testing. The SVG ids are
  * the engine's note ids (see injectIds.ts), and each `g.fing` carries `data-startid="#<noteId>"`.
  */
 
 const RED = 'is-red';
 const ONSET = 'data-onset-tick';
+const MUTED = 'is-muted';
 
 function escapeId(id: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return `#${CSS.escape(id)}`;
@@ -43,6 +45,75 @@ export function clearCurrent(host: Element): void {
     el.classList.remove(RED);
     el.removeAttribute(ONSET);
   }
+}
+
+/** The place of a `g.staff` among the staves of its bar (0 for the top one). */
+function staffPlace(staff: Element): number {
+  let place = 0;
+  for (let s = staff.previousElementSibling; s; s = s.previousElementSibling) {
+    if (s.matches('g.staff')) place++;
+  }
+  return place;
+}
+
+/**
+ * Dims the notes `mutedIds` (the hand left out of one-hand practice) and their digits with
+ * `.is-muted`, after clearing any earlier dimming; an empty set only clears. Verovio draws a bar
+ * as `g.measure > g.staff > g.layer` (one voice), and the layer holds the notes, their beams and
+ * the rests. A staff place (the left hand's staff, say) whose notes are all dimmed, across the
+ * pages, has every layer dimmed, rests alone included; any other layer whose notes are all
+ * dimmed is dimmed whole, beams and rests with it; otherwise each dimmed note is dimmed on its
+ * own, or its `g.chord` when the whole chord is. The staff lines, clefs and bar lines stay, and
+ * so do slurs, ties and dynamics. A digit (`g.fing`, in its bar) is dimmed by `data-startid`.
+ * Nothing is dimmed twice over (no dimmed element inside another). Returns how many elements
+ * were dimmed.
+ */
+export function dimNotes(host: Element, mutedIds: ReadonlySet<string>): number {
+  for (const el of Array.from(host.querySelectorAll(`.${MUTED}`))) el.classList.remove(MUTED);
+  if (mutedIds.size === 0) return 0;
+  let count = 0;
+  const dim = (el: Element) => {
+    el.classList.add(MUTED);
+    count++;
+  };
+  const muted = (note: Element) => mutedIds.has(note.id);
+
+  const staves = Array.from(host.querySelectorAll('g.measure > g.staff')).map((staff) => ({
+    staff,
+    place: staffPlace(staff),
+    notes: Array.from(staff.querySelectorAll('g.note')),
+  }));
+  /** Per staff place, whether it has notes and all of them are dimmed. */
+  const quiet = new Map<number, boolean>();
+  for (const { place, notes } of staves) {
+    if (notes.length > 0) quiet.set(place, (quiet.get(place) ?? true) && notes.every(muted));
+  }
+  for (const { staff, place } of staves) {
+    const wholeStaff = quiet.get(place) === true;
+    for (const layer of Array.from(staff.querySelectorAll('g.layer'))) {
+      const notes = Array.from(layer.querySelectorAll('g.note'));
+      if (wholeStaff || (notes.length > 0 && notes.every(muted))) {
+        dim(layer);
+        continue;
+      }
+      const chords = new Set<Element>();
+      for (const note of notes.filter(muted)) {
+        const chord = note.closest('g.chord');
+        if (chord) chords.add(chord);
+        else dim(note);
+      }
+      for (const chord of chords) {
+        const own = Array.from(chord.querySelectorAll('g.note'));
+        if (own.every(muted)) dim(chord);
+        else own.filter(muted).forEach(dim);
+      }
+    }
+  }
+  for (const fing of Array.from(host.querySelectorAll('g.fing'))) {
+    const id = fing.getAttribute('data-startid')?.replace(/^#/, '');
+    if (id && mutedIds.has(id)) dim(fing);
+  }
+  return count;
 }
 
 /**

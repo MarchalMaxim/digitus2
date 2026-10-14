@@ -1,9 +1,8 @@
-import { lazy, Suspense } from 'react';
-import { useAppStore, type PieceSource } from './store.js';
+import { lazy, Suspense, useLayoutEffect, useRef } from 'react';
+import { pieceKey, useAppStore, type View } from './store.js';
 import { Notice } from './Notice.js';
 import { LibraryView } from '../library/LibraryView.js';
 import { ScoreView } from '../score/ScoreView.js';
-import { fileIdentity } from '../score/useScoreDocument.js';
 
 // A lazy chunk: the About view reads ENGINE_VERSION from the engine's public API, and that import
 // keeps @xmldom/xmldom (CommonJS, so the bundler cannot drop it) in whatever chunk holds the view.
@@ -13,23 +12,48 @@ const AboutView = lazy(() =>
 );
 
 /**
- * A fresh score view per piece: the slug, or the dropped file's name and content (the same
- * identity the score document uses), so a different file never inherits the playback and loop
- * inputs of the one before it.
+ * A view's identity: the same piece (or file) set again is the same view, the same score view.
+ * A fresh score view per piece (`pieceKey`: the slug, or the dropped file's name and content, the
+ * same identity the score document uses), so a different file never inherits the playback and
+ * loop inputs of the one before it.
  */
-function sourceKey(source: PieceSource): string {
-  return source.kind === 'library'
-    ? `piece:${source.slug}`
-    : `file:${source.name}:${fileIdentity(source.bytes)}`;
+function viewKey(view: View): string {
+  return view.name === 'score' ? pieceKey(view.source) : view.name;
+}
+
+/**
+ * Where the window scrolls when a view replaces another. A new view opens at its top, with its
+ * heading (and, in the score view, Play and the first system) on the first screen: the old
+ * view's offset, clamped to the new page, used to hide both on a phone. The library comes back
+ * where the reader left it, by a control or through the history (LibraryView writes the offset
+ * when it unmounts, in the same commit, before this runs). Instant, in a layout effect, so the
+ * new view never paints at the old offset.
+ *
+ * The view the page loads with leaves the scroll to the browser, and the same view set again
+ * does not move the page. That also keeps this from ever fighting the cursor's own scroll: a
+ * playback lives in one score view, and every change of key mounts a new view (the score view
+ * is keyed the same way), which stops the old playback.
+ */
+function useScrollOnViewChange(key: string): void {
+  const shown = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const previous = shown.current;
+    shown.current = key;
+    if (previous === null || previous === key) return;
+    const top = key === 'library' ? useAppStore.getState().libraryScrollY : 0;
+    window.scrollTo({ top, left: 0, behavior: 'instant' });
+  }, [key]);
 }
 
 export function App() {
   const view = useAppStore((s) => s.view);
+  const key = viewKey(view);
+  useScrollOnViewChange(key);
   return (
     <>
       <Notice />
       {view.name === 'library' && <LibraryView />}
-      {view.name === 'score' && <ScoreView key={sourceKey(view.source)} source={view.source} />}
+      {view.name === 'score' && <ScoreView key={key} source={view.source} />}
       {view.name === 'about' && (
         <Suspense fallback={null}>
           <AboutView />

@@ -271,7 +271,7 @@ test('library: back from a piece found by search shows the same search', async (
   await page.getByRole('button', { name: /^Open Minuet in G minor/ }).click();
   await page.getByRole('button', { name: 'Back to the library' }).click();
   await expect(page.getByRole('searchbox', { name: 'Search the library' })).toHaveValue('minuet');
-  await expect(pieceRows(page)).toHaveCount(9);
+  await expect(pieceRows(page)).toHaveCount(14);
 });
 
 test('library: a file dropped on the window opens it; a drag that leaves hides the frame', async ({

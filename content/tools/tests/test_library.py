@@ -22,8 +22,8 @@ REQUIRED = ["slug", "title", "composer", "composerDates", "catalogue", "year", "
             "hasEditorialFingering", "excerpt", "notes", "collection", "collectionId", "benchmarkSet", "genre"]
 LICENSES = ("Public Domain", "CC0-1.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0",
             "CC-BY-SA-4.0")
-# Pieces per level: the L1 targets (25, 45, 40, 25, 15) with some slack (L1 plan, Task 19).
-LEVEL_RANGES = {1: (24, 28), 2: (42, 48), 3: (37, 43), 4: (22, 28), 5: (13, 17)}
+# Reviewed corpus after the 2026-10-15 expansion (13 additions; core30 unchanged).
+LEVEL_COUNTS = {1: 24, 2: 44, 3: 46, 4: 34, 5: 14}
 
 
 def test_manifest_matches_catalog():
@@ -47,10 +47,10 @@ def test_verification_follows_the_manifest_order():
 
 
 def test_level_counts_are_weighted_to_beginners():
-    counts = {lvl: sum(1 for e in MANIFEST if e["level"] == lvl) for lvl in LEVEL_RANGES}
-    for lvl, (lo, hi) in LEVEL_RANGES.items():
-        assert lo <= counts[lvl] <= hi, counts
-    assert 145 <= len(MANIFEST) <= 156
+    counts = {lvl: sum(1 for e in MANIFEST if e["level"] == lvl) for lvl in LEVEL_COUNTS}
+    assert counts == LEVEL_COUNTS
+    assert len(MANIFEST) == 162
+    assert sum(counts[lvl] for lvl in (1, 2, 3)) > sum(counts[lvl] for lvl in (4, 5))
 
 
 @pytest.mark.parametrize("entry", MANIFEST, ids=lambda e: e["slug"])
@@ -109,6 +109,6 @@ def test_every_entry_carries_its_genre():
 
 
 def test_genre_counts_match_the_design():
-    # spec section 4.2 at 149 pieces; arrangements and folk tunes are songs
+    # Ten baroque, two classical and one folk-song addition; no UI category added.
     counts = collections.Counter(e["genre"] for e in MANIFEST)
-    assert counts == {"songs": 42, "carols": 15, "baroque": 27, "classical": 18, "romantic": 44, "ragtime": 3}
+    assert counts == {"songs": 43, "carols": 15, "baroque": 37, "classical": 20, "romantic": 44, "ragtime": 3}

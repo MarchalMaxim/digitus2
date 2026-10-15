@@ -164,7 +164,7 @@ export const STATES: AppState[] = [
     go: async (page) => {
       await library(page);
       await page.getByRole('searchbox', { name: 'Search the library' }).fill('minuet');
-      await expect(pieceRows(page)).toHaveCount(9);
+      await expect(pieceRows(page)).toHaveCount(14);
     },
     expectTag: 'button',
   },

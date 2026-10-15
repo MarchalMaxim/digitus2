@@ -1,5 +1,23 @@
 # digitus2 — progress journal
 
+## Active Codex session (2026-10-15)
+
+- User requested library expansion from online MusicXML and MIDI in a separate worktree: `codex/library-expansion`, `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig`.
+- Coordinator owns integration, documentation, git, root/test expectations, and final verification. `sol_library_audit` owns the new `content/tools/catalog.d/expansion-bach.json` and scores/previews for the eight missing Inventions; `sol_midi_sources` owns the new `content/tools/catalog.d/expansion-teaching.json` and scores/previews for unused beginner/intermediate teaching pieces. Both may run the existing build/gate scripts, whose library lock serializes writes to manifest/verification. Historical catalog fragments, pipeline code and tests remain coordinator-owned unless reassigned. `sol_musicxml_sources` is a read-only source/provenance scout. Agents never run git.
+- Current user preference supersedes historical model/workflow guidance: use `gpt-6.1-sol` agents, bounded independent tasks, and independent verification of actual output. The coordinator maintains durable handoffs; compaction is controlled by the host and no manual compaction tool is exposed.
+- No feature branch may merge into main without explicit user confirmation. The separate scanning evaluation branch `codex/omr-spike` is verified and committed; production scanning remains future work.
+
+### Library verification handoff
+
+- Scanning foundation is committed as `b9cc2f9` on `codex/omr-spike`, all verification steps passed; unmerged. The main checkout still contains only the user's untracked AGENTS.md.
+- Library batch currently accepts 13 pieces (162 total): Inventions 2/3/6/7/11 and eight teaching pieces. Inventions 5/12 were rejected for unsupported directional mordents and 9 for a delayed turn rendered as literal markup. Rejection records retain provenance.
+- Source/license audit passed after correcting copied attribution prose. An independent comparison of every accepted piece against source PDFs found two terminal fermata omissions (Invention 6, Anh. 118); `sol_midi_sources` normalized those two source markups into existing supported note articulations, then rebuilt and gated both. Independent source and real-app re-review approved the correction. The shared pipeline is unchanged.
+- `sol_library_integration_qa` owns corpus expectation updates in the two library unit tests, `apps/web/e2e/library.spec.ts` and `helpers/states.ts`, plus ignored browser evidence under `content/_build/ui-qa`. Initial browser review: all 13 scores rendered at desktop and phone widths; two published MIDI files imported. Rerender the two corrected scores after the fermata fix.
+- Complete content tests: 1,141 passed; complete reproducibility: 195/195 score files byte-identical. Independent final review confirmed all 149 pre-existing manifest/verification records and score files are unchanged. Four content-dependent screenshot baselines were individually reviewed and refreshed; their saved PNGs are pixel-identical to the reviewed captures. Final `pnpm verify` passed every step: 747 engine tests, 298 web tests, 175 browser tests, and all benchmark gates (`content/_build/library-verify-reviewed.log`). The user authorized committing and pushing both feature branches; no merge authorized.
+- User-requested preview is running at `http://localhost:4191/` from this worktree (Vite preview bound to 127.0.0.1, exec session 42316). Keep it running for the user. Verification uses port 4189 separately.
+
+Session credit: Codex — Astra orchestration, Sol 6.1 implementation and independent reviews, 2026-10-15.
+
 Durable state for the multi-day autonomous build. Update after every completed step. Newest entries at the bottom of each section. After a restart or a context compaction: read this file, run `pnpm verify`, check running agents and the latest workflow journal (see "Recovery" in `docs/verification-loop.md`), then continue with "Next".
 
 ## Where things are

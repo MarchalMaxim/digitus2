@@ -4,7 +4,10 @@ These scripts produce everything in `content/scores/`, `content/manifest.json`
 and `content/verification.json`. Provenance, licences and the reasons behind
 each choice are in `docs/research/content-library.md`: the first 30 pieces,
 then the section "L1 curated library (2026-10-14)" for the 119 pieces the L1
-plan added (`docs/superpowers/plans/2026-10-14-l1-curated-library.md`).
+plan added (`docs/superpowers/plans/2026-10-14-l1-curated-library.md`). The
+13-piece expansion (162 total), its source decisions and verification are
+recorded in `docs/research/library-expansion-2026-10-15.md`; its reproducible
+entries are in `catalog.d/expansion-bach.json` and `expansion-teaching.json`.
 
 ## Environment
 

@@ -12,7 +12,7 @@ Early development. See [docs/PROGRESS.md](docs/PROGRESS.md) for the current stat
 
 - `apps/web` — the web app (Vite, React, TypeScript)
 - `packages/engine` — the fingering engine (pure TypeScript, no DOM)
-- `content` — built-in public-domain score library
+- `content` — built-in score library (public domain and Creative Commons editions)
 - `research` — Python harness: datasets, metrics, baselines, parameter learning
 - `docs` — specs, plans, research reports
 

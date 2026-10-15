@@ -28,7 +28,7 @@ const rowsOf = (layout: LibraryLayout): Row[] =>
     ? layout.groups.flatMap((g) => g.rows)
     : layout.sections.flatMap((s) => s.groups.flatMap((g) => g.rows));
 
-describe('the L1 library at 149 pieces (spec sections 5, 6, 7)', () => {
+describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
   it('shows one level at a time, First steps first', () => {
     const layout = libraryLayout(pieces, { level: null, query: '' });
     expect(layout.kind).toBe('level');
@@ -57,25 +57,26 @@ describe('the L1 library at 149 pieces (spec sections 5, 6, 7)', () => {
       ['National anthems', 3],
       ['Songs before 1929', 3],
       ['Classical themes, simplified', 4],
-      ['Notebook for Anna Magdalena Bach (1725)', 3],
+      ['Notebook for Anna Magdalena Bach (1725)', 4],
       ['Schumann, Album for the Young, Op. 68', 4],
       ['Other pieces', 6],
     ]);
     expect(headings(level(3).groups)).toEqual([
       ['Notebook for Anna Magdalena Bach (1725)', 7],
       ['Bach, Little Preludes', 3],
+      ['Minuets, dances and rondos', 3],
       ['Burgmüller, 25 Easy and Progressive Studies, Op. 100', 15],
       ['Schumann, Album for the Young, Op. 68', 5],
       ['Sonatinas and sonatas', 5],
-      ['Other pieces', 6],
+      ['Other pieces', 8],
     ]);
     expect(headings(level(4).groups)).toEqual([
-      ['Bach, Little Preludes', 4],
+      ['Bach, Little Preludes', 5],
       ['Schumann, Album for the Young, Op. 68', 3],
       ['Sonatinas and sonatas', 7],
-      ['Bach, Inventions, BWV 772–786', 3],
+      ['Bach, Inventions, BWV 772–786', 8],
       ['Chopin, Preludes, Op. 28', 3],
-      ['Other pieces', 7],
+      ['Other pieces', 8],
     ]);
     expect(headings(level(5).groups)).toEqual([
       ['Sonatinas and sonatas', 3],
@@ -115,7 +116,7 @@ describe('the L1 library at 149 pieces (spec sections 5, 6, 7)', () => {
       (r) =>
         r.composerLine === null && !/^(Traditional|Anonymous)\b/.test(bySlug.get(r.slug)!.composer),
     );
-    expect(hiddenNamed).toHaveLength(44);
+    expect(hiddenNamed).toHaveLength(50);
     expect(new Set(hiddenNamed.map((r) => bySlug.get(r.slug)!.collectionId))).toEqual(
       new Set([
         'schumann-op68',
@@ -139,14 +140,17 @@ describe('the L1 library at 149 pieces (spec sections 5, 6, 7)', () => {
     const minuet = libraryLayout(pieces, { level: 4, query: 'minuet' });
     expect(minuet.kind).toBe('search');
     if (minuet.kind !== 'search') return;
-    expect(minuet.count).toBe(9);
-    expect(minuet.sections.map((s) => s.level)).toEqual([2, 3]);
+    expect(minuet.count).toBe(14);
+    expect(minuet.sections.map((s) => s.level)).toEqual([2, 3, 4]);
     expect(minuet.sections[1]!.groups[0]!.rows.map((r) => [r.title, r.composerLine])).toEqual([
       ['Minuet in F major', 'Anonymous'],
       ['Minuet in G major', 'Anonymous'],
       ['Minuet in A minor', null],
       ['Minuet in C minor', null],
+      ['Minuet in D major', 'George Frideric Handel'],
       ['Rondo in C major', 'Johann Baptist Wanhal'],
+      ['Minuet in C major', 'Ignaz Pleyel'],
+      ['Siciliano in A minor', 'August Eberhard Müller'],
     ]);
     const fur = libraryLayout(pieces, { level: null, query: 'fur elise' });
     expect(rowsOf(fur).map((r) => r.title)).toEqual(['Für Elise (Bagatelle in A minor)']);
@@ -193,7 +197,7 @@ describe('the L1 library at 149 pieces (spec sections 5, 6, 7)', () => {
     expect(arrivalLevel(pieces, 6, null)).toBe(1);
     expect(arrivalLevel(pieces, null, 'no-such-piece')).toBe(1);
   });
-  it('shows no genre row at 149 pieces: no level holds more than 60', () => {
+  it('shows no genre row at 162 pieces: no level holds more than 60', () => {
     for (const n of [1, 2, 3, 4, 5])
       expect(genrePills(pieces.filter((p) => p.level === n))).toEqual([]);
   });

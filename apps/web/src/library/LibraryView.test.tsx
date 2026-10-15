@@ -74,17 +74,17 @@ describe('LibraryView: the level pills (spec 4.1, 6.3, 11)', () => {
     );
     expect(group.querySelectorAll('.is-red')).toHaveLength(0);
   });
-  it('choosing Moderate shows its 41 pieces under their collections and says so once', async () => {
+  it('choosing Moderate shows its 46 pieces under their collections and says so once', async () => {
     render(<LibraryView />);
     await userEvent.click(screen.getByRole('radio', { name: 'Moderate' }));
     expect(screen.getByRole('radio', { name: 'Moderate' })).toBeChecked();
-    expect(rows()).toHaveLength(41);
+    expect(rows()).toHaveLength(46);
     expect(h3s()[0]).toBe('Notebook for Anna Magdalena Bach (1725)');
     expect(screen.getByText('More notes and wider reaches.')).toBeInTheDocument();
     expect(useAppStore.getState().libraryLevel).toBe(3);
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Moderate: 41 pieces'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Moderate: 46 pieces'),
       { timeout: 2000 },
     );
   });
@@ -97,7 +97,7 @@ describe('LibraryView: the level pills (spec 4.1, 6.3, 11)', () => {
     useAppStore.setState({ libraryLevel: 4 });
     render(<LibraryView />);
     expect(screen.getByRole('radio', { name: 'Intermediate' })).toBeChecked();
-    expect(rows()).toHaveLength(27);
+    expect(rows()).toHaveLength(34);
   });
 });
 
@@ -219,11 +219,12 @@ describe('LibraryView: search (spec 6.3, 7.4, 7.5)', () => {
     expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
       'Easy',
       'Moderate',
+      'Intermediate',
     ]);
-    expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(9);
+    expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(14);
     expect(container.querySelectorAll('.is-red')).toHaveLength(1);
     await waitFor(
-      () => expect(screen.getByTestId('library-announcement')).toHaveTextContent('9 pieces'),
+      () => expect(screen.getByTestId('library-announcement')).toHaveTextContent('14 pieces'),
       { timeout: 2000 },
     );
     await userEvent.click(screen.getByRole('button', { name: 'Clear the search' }));

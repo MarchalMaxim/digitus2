@@ -1,0 +1,216 @@
+{
+  "task": 101,
+  "_comment": "Library expansion: eight remaining Bach Two-Part Inventions. Sources are pinned to online Mutopia downloads and validated against published MIDI.",
+  "pieces": [
+    {
+      "slug": "bach-invention-no2-bwv-773",
+      "source": "mutopia",
+      "level": 4,
+      "collection": "bach-inventions",
+      "retrievedAt": "2026-10-15",
+      "ftpDir": "BachJS/BWV773/bach-invention-02",
+      "main": "bach-invention-02.ly",
+      "publishedMidi": "bach-invention-02.mid",
+      "sourceSha256": "e0620dcc2b529283b7e84e60fe12e19e940f95e690ca252d7e70b656b737e003",
+      "title": "Invention No. 2 in C minor",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": "1685-1750",
+      "catalogue": "BWV 773",
+      "year": "1723",
+      "tempoBpm": 64,
+      "tempoSource": "LilyPond MIDI block of the source, quarter = 64; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+      "levelNote": "Level 4: intermediate independent two-part counterpoint, consistent with the existing Inventions 1, 4 and 8 in this collection (Henle HN 1591 / RCM syllabus anchors documented in bach.json). The heuristic proposes 3 (score 4.996); sustained hand independence justifies intermediate placement.",
+      "notes": "Engraved by Allen Garvin from the Bach-Gesellschaft edition and placed in the public domain. Online RDF and published MIDI checked during the expansion build."
+    },
+    {
+      "slug": "bach-invention-no3-bwv-774",
+      "source": "mutopia",
+      "level": 4,
+      "collection": "bach-inventions",
+      "retrievedAt": "2026-10-15",
+      "ftpDir": "BachJS/BWV774/bach-invention-03",
+      "main": "bach-invention-03.ly",
+      "publishedMidi": "bach-invention-03.mid",
+      "sourceSha256": "812b4c29b122cc9a20ebba96305072f378bb1a177cb1adaee3f74cb53d455551",
+      "title": "Invention No. 3 in D major",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": "1685-1750",
+      "catalogue": "BWV 774",
+      "year": "1723",
+      "tempoBpm": 80,
+      "tempoSource": "LilyPond MIDI block of the source, quarter = 80; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+      "levelNote": "Level 4: intermediate independent two-part counterpoint, consistent with the existing Inventions 1, 4 and 8 in this collection (Henle HN 1591 / RCM syllabus anchors documented in bach.json). The heuristic proposes 3 (score 4.695); sustained hand independence justifies intermediate placement.",
+      "notes": "Engraved by Allen Garvin from the Bach-Gesellschaft edition and placed in the public domain. Online RDF and published MIDI checked during the expansion build. The obsolete old-relative option is removed before convert-ly; the published MIDI independently checks the resulting pitches. A second syntax patch quotes the obsolete empty-list grace-flag style value; engraving only, with pitches checked against both MIDI files.",
+      "convert": {
+        "patches": [
+          {
+            "replace": "% digitus2: removed obsolete old-relative option; MIDI cross-check verifies pitches",
+            "stage": "pre",
+            "count": 1,
+            "file": "bach-invention-03.ly",
+            "find": "^#\\(ly:set-option 'old-relative\\)"
+          },
+          {
+            "find": "#\\(\\)",
+            "replace": "#'()",
+            "count": 1,
+            "file": "bach-invention-03.ly",
+            "stage": "post"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "bach-invention-no6-bwv-777",
+      "source": "mutopia",
+      "level": 4,
+      "collection": "bach-inventions",
+      "retrievedAt": "2026-10-15",
+      "ftpDir": "BachJS/BWV777/bach-invention-06",
+      "main": "bach-invention-06.ly",
+      "publishedMidi": "bach-invention-06.mid",
+      "sourceSha256": "3c974260a4f38c98bffe9a7e0db49cf215123a24e496d4cf4901d5afc5466651",
+      "title": "Invention No. 6 in E major",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": "1685-1750",
+      "catalogue": "BWV 777",
+      "year": "1723",
+      "tempoBpm": 40,
+      "tempoSource": "LilyPond MIDI block of the source, quarter = 40; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+      "levelNote": "Level 4: intermediate independent two-part counterpoint, consistent with the existing Inventions 1, 4 and 8 in this collection (Henle HN 1591 / RCM syllabus anchors documented in bach.json). The heuristic proposes 3 (score 4.906); sustained hand independence justifies intermediate placement.",
+      "notes": "Engraved by jeff covey from the Bach-Gesellschaft edition, licensed CC BY-SA 3.0. Attribution: jeff covey / Mutopia Project; this MusicXML adaptation uses the same license. Online RDF and published MIDI checked during the expansion build. Two syntax-only catalog patches replace terminal rehearsal-mark fermata glyphs with directed fermatas at the same bar-62 events: upright on the right-hand final eighth rest, inverted on the left-hand final E eighth note. Original markup marks are removed; all note/rest timings and MIDI remain unchanged.",
+      "convert": {
+        "patches": [
+          {
+            "file": "bach-invention-06.ly",
+            "stage": "pre",
+            "find": "(e16\\[ b gis e\\] r8)(\\s+\\| % 62\\s*)\\\\override Score\\.RehearsalMark[^\\n]*\\n\\s*\\\\mark \\\\markup \\{ \\\\musicglyph #\"scripts\\.ufermata\" \\}",
+            "replace": "\\1^\\\\fermata\\2",
+            "count": 1
+          },
+          {
+            "file": "bach-invention-06.ly",
+            "stage": "pre",
+            "find": "(e4 e\\x278)(\\s+\\| % 62\\s*)\\\\override Staff\\.RehearsalMark[^\\n]*\\n\\s*\\\\mark \\\\markup \\{ \\\\musicglyph #\"scripts\\.dfermata\" \\}",
+            "replace": "\\1_\\\\fermata\\2",
+            "count": 1
+          }
+        ]
+      }
+    },
+    {
+      "slug": "bach-invention-no7-bwv-778",
+      "source": "mutopia",
+      "level": 4,
+      "collection": "bach-inventions",
+      "retrievedAt": "2026-10-15",
+      "ftpDir": "BachJS/BWV778/bach-invention-07",
+      "main": "bach-invention-07.ly",
+      "publishedMidi": "bach-invention-07.mid",
+      "sourceSha256": "87b3a05f14adba1d7113d00b06f7634043e00fb2f660c7b1e698d49c73476248",
+      "title": "Invention No. 7 in E minor",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": "1685-1750",
+      "catalogue": "BWV 778",
+      "year": "1723",
+      "tempoBpm": 90,
+      "tempoSource": "LilyPond MIDI block of the source, quarter = 90; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+      "levelNote": "Level 4: intermediate independent two-part counterpoint, consistent with the existing Inventions 1, 4 and 8 in this collection (Henle HN 1591 / RCM syllabus anchors documented in bach.json). The heuristic proposes 3 (score 5.086); sustained hand independence justifies intermediate placement.",
+      "notes": "Engraved by Allen Garvin from the Bach-Gesellschaft edition and placed in the public domain. Online RDF and published MIDI checked during the expansion build."
+    },
+    {
+      "slug": "bach-invention-no11-bwv-782",
+      "source": "mutopia",
+      "level": 4,
+      "collection": "bach-inventions",
+      "retrievedAt": "2026-10-15",
+      "ftpDir": "BachJS/BWV782/bach-invention-11",
+      "main": "bach-invention-11.ly",
+      "publishedMidi": "bach-invention-11.mid",
+      "sourceSha256": "02689b8760752b9490598de3683c8b7064b6d13d2019561fa0b0ee4c2a569bee",
+      "title": "Invention No. 11 in G minor",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": "1685-1750",
+      "catalogue": "BWV 782",
+      "year": "1723",
+      "tempoBpm": 85,
+      "tempoSource": "LilyPond MIDI block of the source, quarter = 85; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+      "levelNote": "Level 4: intermediate independent two-part counterpoint, consistent with the existing Inventions 1, 4 and 8 in this collection (Henle HN 1591 / RCM syllabus anchors documented in bach.json). The heuristic proposes 3 (score 5.682); sustained hand independence justifies intermediate placement.",
+      "notes": "Engraved by Allen Garvin from the Bach-Gesellschaft edition and placed in the public domain. Online RDF and published MIDI checked during the expansion build."
+    }
+  ],
+  "rejected": [
+    {
+      "piece": {
+        "slug": "bach-invention-no5-bwv-776",
+        "source": "mutopia",
+        "level": 4,
+        "collection": "bach-inventions",
+        "retrievedAt": "2026-10-15",
+        "ftpDir": "BachJS/BWV776/bach-invention-05",
+        "main": "bach-invention-05.ly",
+        "publishedMidi": "bach-invention-05.mid",
+        "sourceSha256": "c3487a5f27cad0b03903ec6087ad5ad60df31bddf5d3300b4d0370937d9e743c",
+        "title": "Invention No. 5 in E-flat major",
+        "composer": "Johann Sebastian Bach",
+        "composerDates": "1685-1750",
+        "catalogue": "BWV 776",
+        "year": "1723",
+        "tempoBpm": 105,
+        "tempoSource": "LilyPond MIDI block of the source, quarter = 105; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+        "levelNote": "Level 4: intermediate two-part counterpoint and continuous independent hand motion, consistent with the existing Inventions collection. Heuristic proposal pending gate report.",
+        "notes": "Engraved by Allen Garvin from the Bach-Gesellschaft edition and placed in the public domain. Online RDF and published MIDI checked during the expansion build."
+      },
+      "reason": "Exact against both source MIDIs and valid MusicXML, but the converter omits directional upmordent/downmordent ornament notation. Substitution with prallmordent would lose approach direction and is not accepted for this expansion. Requires faithful shared-converter ornament support before reinstatement.",
+      "slug": "bach-invention-no5-bwv-776"
+    },
+    {
+      "piece": {
+        "slug": "bach-invention-no12-bwv-783",
+        "source": "mutopia",
+        "level": 4,
+        "collection": "bach-inventions",
+        "retrievedAt": "2026-10-15",
+        "ftpDir": "BachJS/BWV783/bach-invention-12",
+        "main": "bach-invention-12.ly",
+        "publishedMidi": "bach-invention-12.mid",
+        "sourceSha256": "5a710e0718d8dddef60fdb4419d058c25a3d92173f253418c0aa35d04cf5ebfb",
+        "title": "Invention No. 12 in A major",
+        "composer": "Johann Sebastian Bach",
+        "composerDates": "1685-1750",
+        "catalogue": "BWV 783",
+        "year": "1723",
+        "tempoBpm": 108,
+        "tempoSource": "LilyPond MIDI block of the source, quarter = 108; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+        "levelNote": "Level 4: intermediate two-part counterpoint and continuous independent hand motion, consistent with the existing Inventions collection. Heuristic proposal pending gate report.",
+        "notes": "Engraved by jeff covey from the Bach-Gesellschaft edition, licensed CC BY-SA 3.0. Attribution: jeff covey / Mutopia Project; this MusicXML adaptation uses the same license. Online RDF and published MIDI checked during the expansion build."
+      },
+      "reason": "Exact against both source MIDIs and valid MusicXML, but the converter omits directional upmordent/downmordent ornament notation. Substitution with prallmordent would lose approach direction and is not accepted for this expansion. Requires faithful shared-converter ornament support before reinstatement.",
+      "slug": "bach-invention-no12-bwv-783"
+    },
+    {
+      "slug": "bach-invention-no9-bwv-780",
+      "piece": {
+        "slug": "bach-invention-no9-bwv-780",
+        "source": "mutopia",
+        "level": 4,
+        "collection": "bach-inventions",
+        "retrievedAt": "2026-10-15",
+        "ftpDir": "BachJS/BWV780/bach-invention-09",
+        "main": "bach-invention-09.ly",
+        "publishedMidi": "bach-invention-09.mid",
+        "sourceSha256": "03112c4d080bb0dafe1ec79d7f1729c6f065e9f334dd2468a84d30c84eaede1a",
+        "title": "Invention No. 9 in F minor",
+        "composer": "Johann Sebastian Bach",
+        "composerDates": "1685-1750",
+        "catalogue": "BWV 780",
+        "year": "1723",
+        "tempoBpm": 94,
+        "tempoSource": "LilyPond MIDI block of the source, quarter = 94; no printed metronome mark. A measured study tempo for independent two-part counterpoint.",
+        "levelNote": "Level 4: intermediate independent two-part counterpoint, consistent with the existing Inventions 1, 4 and 8 in this collection (Henle HN 1591 / RCM syllabus anchors documented in bach.json). The heuristic proposes 3 (score 6.448); sustained hand independence justifies intermediate placement.",
+        "notes": "Engraved by jeff covey from the Bach-Gesellschaft edition, licensed CC BY-SA 3.0. Attribution: jeff covey / Mutopia Project; this MusicXML adaptation uses the same license. Online RDF and published MIDI checked during the expansion build."
+      },
+      "reason": "Both MIDI cross-checks exact (558/558), XSD valid, and zero span/law errors, but visual review finds literal scripts.turn text in bar 16. Delayed turn and combined mordent/turn LilyPond markups have no faithful converter mapping; dropping or moving these ornaments is not accepted."
+    }
+  ]
+}

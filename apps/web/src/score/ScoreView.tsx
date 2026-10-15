@@ -1,13 +1,14 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
-import { flash } from '../design/motion.js';
+import { flash, prefersReducedMotion } from '../design/motion.js';
 import { pieceBySlug } from '../library/manifest.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
-import { dimNotes, setDigits } from './render/dom.js';
+import { RedGhost, useRedFlight } from './RedFlight.js';
+import { dimNotes, setDigits, sweepDimming } from './render/dom.js';
 import { ScoreHeader, useLegendAbove } from './ScoreHeader.js';
 import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
@@ -22,6 +23,9 @@ const STATUS_TEXT: Partial<Record<DocStatus, string>> = {
   fingering: 'Fingering…',
   rendering: 'Preparing the score…',
 };
+
+/** How long a hand switch takes to sweep from the first bar of a system to the last (ms). */
+export const HAND_SWEEP_MS = 140;
 
 /** The status line while the first Play of a score fetches the piano's samples. */
 export const LOADING_PIANO_TEXT = 'Loading the piano…';
@@ -152,7 +156,16 @@ function useDockHeight<T extends HTMLElement>(): (el: T | null) => void {
 export function ScoreView({ source }: { source: PieceSource }) {
   const openLibrary = useAppStore((s) => s.openLibrary);
   const [measureRef, width] = useElementWidth<HTMLElement>();
-  const dockRef = useDockHeight<HTMLDivElement>();
+  const dockHeightRef = useDockHeight<HTMLDivElement>();
+  // The dock is also where the red's flights start and end (Play, RedFlight.tsx).
+  const [dock, setDock] = useState<HTMLDivElement | null>(null);
+  const dockRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      dockHeightRef(el);
+      setDock(el);
+    },
+    [dockHeightRef],
+  );
   const doc = useScoreDocument(source, width);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   // The finger legend under the header until the first Play (spec 12), decided once for the view
@@ -181,10 +194,21 @@ export function ScoreView({ source }: { source: PieceSource }) {
     () => new Set(score?.notes.filter((n) => mutedHands.includes(n.hand)).map((n) => n.id)),
     [score, mutedHands],
   );
+  // A hand switch on the same pages fades the hand left out (or back in) bar by bar, from the first
+  // bar of each system to the last (`sweepDimming`); new pages arrive already dimmed, at once.
+  const dimmedRef = useRef<{ host: Element; pages: string[] } | null>(null);
   useLayoutEffect(() => {
-    if (host) dimNotes(host, mutedIds);
+    if (!host) return;
+    const last = dimmedRef.current;
+    const switched = last !== null && last.host === host && last.pages === doc.pages;
+    const before = switched ? [...host.querySelectorAll('.is-muted')] : [];
+    dimNotes(host, mutedIds);
+    dimmedRef.current = { host, pages: doc.pages };
+    if (!switched) return;
+    const changed = new Set([...before, ...host.querySelectorAll('.is-muted')]);
+    sweepDimming(changed, prefersReducedMotion() ? 0 : HAND_SWEEP_MS);
   }, [host, doc.pages, mutedIds]);
-  const { pressed, muted, currentGroup } = useCursor({
+  const { pressed, muted, currentGroup, struckCount } = useCursor({
     host,
     groups,
     playback,
@@ -192,6 +216,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
     mutedHands,
     layoutKey: doc.pages,
   });
+  // The red travels between Play and the cursor instead of jumping (RedFlight.tsx). Called after
+  // useCursor, so its layout effects see the marks the cursor has just made or cleared.
+  const playButton = useCallback(
+    () => dock?.querySelector<HTMLElement>('.play-button') ?? null,
+    [dock],
+  );
+  const red = useRedFlight({ host, playButton, playback, groups, mutedHands, currentGroup });
   // T11: the hand letters show only in bars where the hands come within a fifth. Decided from
   // the full groups (both hands, whatever is muted), never from the cursor's filtered ones.
   const lettered = useMemo(() => letteredBars(groups), [groups]);
@@ -280,7 +311,14 @@ export function ScoreView({ source }: { source: PieceSource }) {
           {showsEditorial(doc) && (
             <p className="editorial-shown muted small no-print">{EDITORIAL_SHOWN_TEXT}</p>
           )}
-          <ScoreSheet pages={doc.pages} label={doc.title} onHost={setHost} />
+          {/* Paused with the last group heard marked (T10), the red notes breathe for a moment
+              (base.css, `.is-resting`): where Play resumes. */}
+          <ScoreSheet
+            pages={doc.pages}
+            label={doc.title}
+            onHost={setHost}
+            resting={!playback.playing && currentGroup >= 0}
+          />
           {/* The dock: sticky at the bottom of the window while the score column is on screen,
               so Pause and the fingers stay in view wherever the cursor scrolls the score. Its
               DOM order is the order on screen, and so the tab order, at every width (spec 13; no
@@ -322,6 +360,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
               playback={playback}
               disabled={doc.status !== 'ready' || !playable}
               resumeShown={!playback.playing && currentGroup >= 0}
+              redAway={red.redAway}
             />
             {narrow && practiceToggle}
             {range && (
@@ -330,12 +369,14 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   lowMidi={range.lowMidi}
                   highMidi={range.highMidi}
                   pressed={pressed}
+                  struckCount={struckCount}
                   muted={muted}
                   handLetters={lettersShown(groups, currentGroup, lettered)}
                 />
               </div>
             )}
           </div>
+          {red.flight && <RedGhost plan={red.flight} onLanded={red.landed} />}
         </main>
         <SidePanel
           doc={doc}

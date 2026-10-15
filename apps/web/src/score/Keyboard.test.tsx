@@ -1,10 +1,53 @@
 import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Keyboard, keyboardRange, keysToShow } from './Keyboard.js';
 
 afterEach(cleanup);
+afterEach(() => vi.restoreAllMocks());
 
 describe('Keyboard', () => {
+  // Key travel (motion study 06): a repeated note on a held key strikes it again, so the reader
+  // sees the second strike; a key that is only held, or newly pressed, does not.
+  it('strikes a held key again when its note repeats, never a key only held', () => {
+    const struck: string[] = [];
+    const proto = Element.prototype as unknown as { animate?: unknown };
+    const original = proto.animate;
+    proto.animate = function (this: Element) {
+      struck.push(this.getAttribute('data-midi') ?? '');
+      return {} as Animation;
+    };
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+    try {
+      const { rerender } = render(
+        <Keyboard
+          lowMidi={48}
+          highMidi={71}
+          pressed={[
+            { midi: 60, finger: 1, hand: 'R' },
+            { midi: 48, finger: 5, hand: 'L' },
+          ]}
+          struckCount={2}
+        />,
+      );
+      expect(struck).toEqual([]);
+      // C4 struck again and D4 struck for the first time; C3 still held from before.
+      rerender(
+        <Keyboard
+          lowMidi={48}
+          highMidi={71}
+          pressed={[
+            { midi: 60, finger: 1, hand: 'R' },
+            { midi: 62, finger: 2, hand: 'R' },
+            { midi: 48, finger: 5, hand: 'L' },
+          ]}
+          struckCount={2}
+        />,
+      );
+      expect(struck).toEqual(['60']);
+    } finally {
+      proto.animate = original;
+    }
+  });
   it('draws the range and shows finger numbers on pressed keys', () => {
     const { container } = render(
       <Keyboard

@@ -57,6 +57,7 @@ const playback: Playback = {
   positionSec: () => heard,
   startSec: () => heard,
   leadingIn: () => false,
+  leadInRemainingSec: () => null,
   loop: null,
   setLoop: () => {},
 };

@@ -1,5 +1,6 @@
 import type { Finger, Hand, Score } from '@digitus2/engine';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
+import { restrike } from '../design/motion.js';
 
 /**
  * A key held down at the cursor, with the finger that plays it. `finger` is null when the
@@ -17,6 +18,12 @@ export interface KeyboardProps {
   highMidi: number;
   /** The keys struck at the cursor first, then the ones still held from earlier. */
   pressed: PressedKey[];
+  /**
+   * How many of `pressed`, from the first, were struck at the cursor's onset (the rest are held
+   * from earlier). A struck key that was already down strikes again: it lifts and goes down
+   * (a repeated note). Default 0: no key strikes again.
+   */
+  struckCount?: number;
   /**
    * The muted hand's keys at the cursor (one-hand practice), drawn dimmed and never pressed: what
    * the other hand would play. A key also in `pressed` (a unison of both hands) is pressed.
@@ -140,7 +147,8 @@ const NO_KEYS: PressedKey[] = [];
  * above it says the hand only while the hands come close (`handLetters`, T11); elsewhere the
  * numbers stand alone. With one hand muted, that hand's keys at the cursor show the same
  * way, dimmed (`.is-muted`), never pressed. Class names only; the colors come from base.css, and
- * nothing here is ever red.
+ * nothing here is ever red. A pressed key goes down fast and comes up slowly (key travel, base.css);
+ * a key struck again while held lifts and goes down again (`struckCount`).
  *
  * The SVG sits in its own sideways scroller: it never draws a white key narrower than
  * MIN_WHITE_PX, so a wide piece on a phone scrolls instead of shrinking the digits away. A
@@ -151,6 +159,7 @@ export function Keyboard({
   lowMidi,
   highMidi,
   pressed,
+  struckCount = 0,
   muted = NO_KEYS,
   handLetters = false,
 }: KeyboardProps): JSX.Element {
@@ -159,6 +168,8 @@ export function Keyboard({
   const scrollRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [scrollable, setScrollable] = useState(false);
+  /** The keys down before the latest change of `pressed`. */
+  const downRef = useRef<ReadonlySet<number>>(new Set());
   const byMidi = oneByKey(pressed);
   const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
   const width = Math.max(1, whiteCount) * WHITE_W;
@@ -175,6 +186,19 @@ export function Keyboard({
     observer.observe(svg);
     return () => observer.disconnect();
   }, [whiteCount]);
+
+  // A repeated note: a key struck at this onset that was already down lifts and goes down again,
+  // so the reader sees the second strike (a held key alone would not move). A layout effect, so
+  // the strike starts with the paint that shows the new group.
+  useLayoutEffect(() => {
+    const before = downRef.current;
+    downRef.current = new Set(pressed.map((p) => p.midi));
+    const svg = svgRef.current;
+    if (!svg) return;
+    for (const p of pressed.slice(0, struckCount)) {
+      if (before.has(p.midi)) restrike(svg.querySelector(`g.key[data-midi="${p.midi}"]`));
+    }
+  }, [pressed, struckCount]);
 
   // Runs when the cursor moves to another group (the only time `pressed` changes). The jump is
   // instant: the keys on screen are the ones being heard, and a smooth scroll would lag them. A

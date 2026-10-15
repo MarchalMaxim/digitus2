@@ -157,8 +157,15 @@ export function useCursor({
   /** The muted hands' keys at the cursor (one-hand practice), for the keyboard to dim. */
   muted: PressedKey[];
   currentGroup: number;
+  /**
+   * How many of `pressed`, from the first, were struck at the group marked while playing (the
+   * rest are held from earlier); 0 when paused or stopped. The keyboard strikes a key again when
+   * it is struck while already down (a repeated note).
+   */
+  struckCount: number;
 } {
   const [pressed, setPressed] = useState<PressedKey[]>([]);
+  const [struckCount, setStruckCount] = useState(0);
   const [muted, setMuted] = useState<PressedKey[]>([]);
   const [currentGroup, setCurrentGroup] = useState(-1);
 
@@ -218,6 +225,7 @@ export function useCursor({
       if (i < 0) {
         markedSecRef.current = Number.NaN;
         setPressed((prev) => (prev.length > 0 ? [] : prev));
+        setStruckCount(0);
         setMuted((prev) => (prev.length > 0 ? [] : prev));
         setCurrentGroup(-1);
         return;
@@ -226,6 +234,7 @@ export function useCursor({
       setCurrent(host, g.noteIds, g.tick);
       markedSecRef.current = g.sec;
       setPressed(pressedKeys(g.sounding, assignment));
+      setStruckCount(0);
       const mutedNotes = mutedAt[groupIndexAt(mutedAt, pos)]?.notes ?? NO_NOTES;
       setMuted((prev) =>
         prev.length === 0 && mutedNotes.length === 0 ? prev : pressedKeys(mutedNotes, assignment),
@@ -253,6 +262,7 @@ export function useCursor({
       markedSecRef.current = Number.NaN;
       followRef.current = { system: null, target: null, until: 0 };
       setPressed((prev) => (prev.length > 0 ? [] : prev));
+      setStruckCount(0);
       setMuted((prev) => (prev.length > 0 ? [] : prev));
       setCurrentGroup(-1);
       return;
@@ -301,6 +311,7 @@ export function useCursor({
       last = i;
       followCursor(marked, followRef.current);
       setPressed(pressedKeys(g.sounding, assignment));
+      setStruckCount(g.noteIds.length);
       setCurrentGroup(g.index);
     };
     frame();
@@ -322,7 +333,7 @@ export function useCursor({
     };
   }, []);
 
-  return { pressed, muted, currentGroup };
+  return { pressed, muted, currentGroup, struckCount };
 }
 
 /** A vertical extent in viewport pixels. */

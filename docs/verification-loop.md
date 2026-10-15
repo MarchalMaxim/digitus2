@@ -8,7 +8,9 @@ The project is built autonomously for days, so every change must be judged by ma
 pnpm verify
 ```
 
-`scripts/verify.mjs` runs, in order: hygiene (repository size), design (the color guard), typecheck, lint, unit tests (vitest for TypeScript), build, bundle (the app's first-load budget), end-to-end tests (Playwright), the benchmark gate (`benchmark`, which also runs `benchmark:mutopia`), and the hand-separation gate (`hands`). It prints a summary table and exits non-zero on any failure. `pnpm verify unit` runs one step; several names run several (`pnpm verify build bundle`; `pnpm verify benchmark:mutopia` runs the Mutopia oracle alone).
+`scripts/verify.mjs` runs, in order: hygiene (repository size), design (the color guard), typecheck, lint, unit tests (vitest for TypeScript), build, OMR harness tests (`omr`), bundle (the app's first-load budget), end-to-end tests (Playwright), the benchmark gate (`benchmark`, which also runs `benchmark:mutopia`), and the hand-separation gate (`hands`). It prints a summary table and exits non-zero on any failure. `pnpm verify unit` runs one step; several names run several (`pnpm verify build bundle`; `pnpm verify benchmark:mutopia` runs the Mutopia oracle alone).
+
+The `omr` step runs `pnpm test:omr` against the built engine: fixture validation, pinned ground truth, whole-score export handling, and missing/invalid-result penalties. Run `pnpm verify build omr` when testing it alone after engine changes. It does not download or execute recognition models and is not a recognition-accuracy shipping gate; experiment instructions and limitations are in `docs/research/omr-spike.md`.
 
 ### Scorecards: what verify writes and what a milestone writes
 

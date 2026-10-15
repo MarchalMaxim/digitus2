@@ -32,6 +32,8 @@ Start with CLAUDE.md, then this file's Next list and docs/TODO.md; the plans und
 
 ## User rules (standing)
 
+- Current Codex instructions (2026-10-15): use `gpt-6.1-sol` subagents for economy; the user authorizes parallel subagents and explicitly prioritizes deliberate independent verification, adversarial review, and seeing actual output in action. Explicit user confirmation is required before any merge to main (current AGENTS.md overrides the historical automatic-merge permission below).
+
 - Opus 5.5 for substantive subagent work (design, implementation, the reviews that gate merges); Sonnet 5.5 for trivial and mechanical work (user, 2026-10-14 evening: web searches, pnpm verify and Playwright runs that only report results, screenshot capture, baseline regeneration); Fable coordinates and plans. Sonnet 5.5 is priced at half of Opus 5.5 per token, so it draws the weekly limit at about half the rate. Use ultracode workflows for anything parallelizable.
 - Verification loop is paramount; `pnpm verify` is the definition of done. Readability for intermediate players is a first-class metric.
 - Once the app exists: a daily qualitative UI review by an Opus subagent (verification spec 3.10).
@@ -64,6 +66,14 @@ Start with CLAUDE.md, then this file's Next list and docs/TODO.md; the plans und
 | L2 Broad library + browsing UI   | planned                                                 | after polish merges: PDMX (254k CC0/PD MuseScore scores, 178k single-track piano, MIDI per score) ingested through automatic gates and a level estimator, capped by rating; library UI with search, level and composer filters and collections; scores stored compressed if the repo grows past about 15 MB                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## Directory ownership (concurrent agents)
+
+Current Codex scanning spike (2026-10-15), isolated on `codex/omr-spike`:
+
+- Coordinator: `research/omr/**`, root test wiring, `docs/**`, and integration/verification. No merge to main without fresh explicit user confirmation.
+- OMR evaluator agent (`gpt-6.1-sol`, user preference): `packages/engine/src/eval/omr.ts`, `packages/engine/src/eval/omr.test.ts`, plus opt-in evaluation parsing in `packages/engine/src/io/musicxml/read.ts` and `read.omr.test.ts`. Parser follow-up ownership passed to the independent metric adversary for its confirmed tie/staff fixes; all code agents finished before final verification.
+- Access audit agent (then fixture preparation): `research/omr/prepare.mjs`, `research/omr/prepare.test.mjs` after its read-only audit. OMR feasibility agent: read-only research. Claude-specific workflow/model instructions are historical; this session uses the available Codex subagents authorized by the user.
+
+The user selected scanning as the next task. This advances the M10 evaluation spike; the production UI remains gated on recognition quality and browser feasibility.
 
 Worktrees since 2026-10-14: each workflow works in its own worktree under `../thingamajig-wt/<name>` on branch `wt/<name>`; the paths below are what its agents may touch there. Ownership is current as of 2026-10-14 10:45.
 
@@ -101,6 +111,8 @@ Worktrees since 2026-10-14: each workflow works in its own worktree under `../th
 - Repo hygiene: `pnpm verify` fails on any tracked file over 1 MB (scores 1.5 MB); the datasets agent was asked to keep `research/data/reports/` files under 1 MB (one 1035 KB CSV outstanding at 22:00).
 
 ## Next
+
+2026-10-15 update: the user selected scanning. The M10 evaluation foundation is verified in the isolated `codex/omr-spike` worktree; see `docs/research/omr-spike.md`. Explicit confirmation is required before merging. Next scanning step is actual candidate execution and a browser feasibility check, including the newly identified CrispEmbed/SMT++ route. No recognition engine has yet been benchmarked by this spike. The user subsequently requested library expansion; that work is isolated separately on `codex/library-expansion`.
 
 Current as of 2026-10-14 18:00 (weekly budget 78 percent, reset Sunday 2026-10-18 19:00Z; the user allows the rest of the week's budget for the UI batch).
 
@@ -172,3 +184,5 @@ Current as of 2026-10-14 18:00 (weekly budget 78 percent, reset Sunday 2026-10-1
 - 2026-10-15 00:10: T12 cause found: the MIDI importer's one-voice-per-hand rule shortens held notes (the user's Chopin Op. 48 No. 1 import: 369 notes), and the player plays the shortened lengths; MusicXML is unaffected. Fix scheduled in M8: engrave held notes as ties across the following onsets and keep the MIDI durations for playback.
 - 2026-10-15 00:20: user feature T13 (wind back in a track): agree; the score is the timeline (click a bar or its number to go there, Left/Right move a bar, Shift for four, Home rewinds), no scrub bar; first task of M5 before note editing.
 - 2026-10-15 00:30: user experimental feature T14 (embellish simple songs with notes in between): agree, it is diminution with passing, neighbour and anticipation notes under the key and chord-tone rules; research spike on the level 1 and 2 songs with a teacher-review listening test first, app option in the Practice panel only if it sounds good; after M8.
+
+- 2026-10-15: scanning evaluation foundation completed on codex/omr-spike. Sol 6.1 implementation, adversarial parser/metric review, independent CLI checks and PDF/image review corrected duplicate-note masking, chord duration normalization, fractional tick rounding, tie continuity/final-coordinate handling, multipart staff collisions, and page proportions. Final pnpm verify passed every step: engine 812, web 298, OMR harness 16 and browser 175 tests; all benchmark gates passed. Final three-piece identity control scored all six metrics at 1.0 over 436 notes, with no bar mismatches; this is a harness control, not recognition accuracy. Evidence is under ignored research/omr/results/verify-reviewed.log and identity-reviewed.json. No recognizer or model was run. Branch remains unmerged; production scanning is pending. Claude skill/memory/workflow files and repo jobs were readable, but no Claude live orchestrator or scheduler API was connected or migrated. Library expansion proceeds independently in codex/library-expansion.

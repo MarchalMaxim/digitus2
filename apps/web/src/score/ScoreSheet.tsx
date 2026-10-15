@@ -7,6 +7,11 @@ export interface ScoreSheetProps {
   label: string;
   /** Receives the host element on mount (and null on unmount) for digit patching and the cursor. */
   onHost?: (host: HTMLDivElement | null) => void;
+  /**
+   * Paused with the last group heard marked (T10): the red notes breathe three times, then rest
+   * (base.css, `.score-sheet.is-resting`), so the eye finds where Play resumes. Default false.
+   */
+  resting?: boolean;
 }
 
 /**
@@ -15,7 +20,7 @@ export interface ScoreSheetProps {
  * the old ones, never append. Each SVG scales to the column width (`.score-sheet svg` in
  * base.css), so the layout only has to be redone when the width bucket changes.
  */
-export function ScoreSheet({ pages, label, onHost }: ScoreSheetProps) {
+export function ScoreSheet({ pages, label, onHost, resting = false }: ScoreSheetProps) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   // A layout effect: the pages are in before the parent's layout effects run (the dimming of a
@@ -30,5 +35,12 @@ export function ScoreSheet({ pages, label, onHost }: ScoreSheetProps) {
     return () => onHost?.(null);
   }, [onHost]);
 
-  return <div className="score-sheet" role="img" aria-label={`Score of ${label}`} ref={hostRef} />;
+  return (
+    <div
+      className={resting ? 'score-sheet is-resting' : 'score-sheet'}
+      role="img"
+      aria-label={`Score of ${label}`}
+      ref={hostRef}
+    />
+  );
 }

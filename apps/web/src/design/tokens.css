@@ -5,9 +5,11 @@
   --gray-2: #cccccc; /* rules, disabled controls, pressed and dimmed keys */
   --gray-3: #767676; /* secondary text; 4.5:1 on white */
   --accent: #e3000f; /* the single red; referenced only by .is-red below */
+  --dur-press: 50ms; /* a key going down: quick, like a hammer (base.css, .keyboard-svg .key) */
   --dur-fast: 120ms;
   --dur: 160ms;
   --dur-slow: 200ms;
+  --dur-flourish: 520ms; /* the easter egg's notes, the one motion meant to be noticed (NoteBurst.tsx) */
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --font-ui: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
@@ -31,9 +33,11 @@ svg .is-red * {
 
 @media (prefers-reduced-motion: reduce) {
   :root {
+    --dur-press: 0ms;
     --dur-fast: 0ms;
     --dur: 0ms;
     --dur-slow: 0ms;
+    --dur-flourish: 0ms;
   }
 }
 

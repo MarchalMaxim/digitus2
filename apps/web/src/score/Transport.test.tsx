@@ -43,6 +43,7 @@ function playback(
     positionSec: () => 0,
     startSec: () => 0,
     leadingIn: () => false,
+    leadInRemainingSec: () => null,
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),
   };
@@ -95,6 +96,17 @@ describe('Transport', () => {
     expect(screen.getByRole('button', { name: 'Play' })).not.toHaveClass('is-red');
     rerender(<Transport playback={playback(false)} resumeShown={false} />);
     expect(screen.getByRole('button', { name: 'Play' })).toHaveClass('is-red');
+  });
+  // Motion study 05: while the red travels between Play and the cursor, the traveling shape is the
+  // one red element, so the button is plain wherever it would be red.
+  it('is plain while the red travels (redAway), red again once it has arrived', () => {
+    const { rerender } = render(<Transport playback={playback(false)} redAway />);
+    expect(screen.getByRole('button', { name: 'Play' })).not.toHaveClass('is-red');
+    rerender(<Transport playback={playback(false)} />);
+    expect(screen.getByRole('button', { name: 'Play' })).toHaveClass('is-red');
+    const leadIn = { ...playback(true), waiting: true };
+    rerender(<Transport playback={leadIn} redAway />);
+    expect(screen.getByRole('button', { name: 'Pause' })).not.toHaveClass('is-red');
   });
   // UI batch review: at the start there is nothing to rewind. Rewind says it is unavailable
   // (aria-disabled, like Play, so a reader who rewinds keeps the focus on it) and ignores a

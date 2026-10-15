@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { clearCurrent, dimNotes, noteIdAt, setCurrent, setDigits } from './dom.js';
+import { clearCurrent, dimNotes, noteIdAt, setCurrent, setDigits, sweepDimming } from './dom.js';
 
 const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
@@ -123,5 +123,19 @@ describe('dimming the hand left out', () => {
     expect(h.querySelectorAll('.is-red').length).toBe(2);
     dimNotes(h, new Set());
     expect(h.querySelectorAll('.is-red').length).toBe(2);
+  });
+
+  // Motion study 08: a hand switch fades bar by bar, from the first bar of a system to the last.
+  it('sweeps a hand switch bar by bar, from the markup alone; a spread of 0 clears the delays', () => {
+    const h = bars2();
+    dimNotes(h, new Set(['l1', 'l2', 'l9']));
+    const changed = [...h.querySelectorAll('.is-muted')];
+    expect(sweepDimming(changed, 140)).toBe(changed.length);
+    const sweep = (id: string) =>
+      (h.querySelector(`#${id}`) as SVGElement).style.getPropertyValue('--sweep');
+    expect(sweep('l1b')).toBe('0ms'); // bar 1 of 2
+    expect(sweep('l2b')).toBe('140ms'); // bar 2 of 2, the last
+    sweepDimming(changed, 0);
+    expect(sweep('l2b')).toBe('0ms');
   });
 });

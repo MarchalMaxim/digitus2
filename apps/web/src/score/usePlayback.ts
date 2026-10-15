@@ -18,8 +18,9 @@
  * statically it would push the library page's initial JavaScript past its 150 KB gzip budget.
  */
 import type { Hand, Score } from '@digitus2/engine';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
+import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, type Instrument } from '../audio/instrument.js';
 import { scheduleClick } from '../audio/metronome.js';
 import type * as TransportExports from '../audio/transport.js';
@@ -98,6 +99,11 @@ export interface Playback {
    * of the new pass before it sounds. False when stopped.
    */
   leadingIn(): boolean;
+  /**
+   * While a lead-in runs, how long until its first note is heard, in seconds; null otherwise.
+   * Read on every frame by the red's flight from Play to that note (RedFlight.tsx).
+   */
+  leadInRemainingSec(): number | null;
   loop: LoopRange | null;
   setLoop(r: LoopRange | null): void;
 }
@@ -141,6 +147,11 @@ export function usePlayback(score: Score | null): Playback {
   const [waiting, setWaiting] = useState(false);
   const [atStart, setAtStart] = useState(true);
   const [loop, setLoopState] = useState<LoopRange | null>(null);
+  /** `atStart` for play(), which runs in a click: a Play from the start lets the red travel. */
+  const atStartRef = useRef(atStart);
+  useLayoutEffect(() => {
+    atStartRef.current = atStart;
+  }, [atStart]);
 
   const ctxRef = useRef<AudioContext | null>(null);
   const instrumentRef = useRef<Instrument | null>(null);
@@ -260,9 +271,13 @@ export function usePlayback(score: Score | null): Playback {
         t = transport;
       }
       pushLoop(); // stopped: the loop only sets where play() starts
+      // From the start without a count-in, the first note waits for the red to travel to it from
+      // Play (RedFlight.tsx), so it sounds as the red lands; never under prefers-reduced-motion.
+      const travels =
+        atStartRef.current && !useAppStore.getState().settings.countIn && !prefersReducedMotion();
       // play() reports a count-in's first beat and the lead-in at once, so they reach the screen
       // in the same render as playing: Pause takes the red from Play, and no note is marked.
-      t.play();
+      t.play(travels ? { leadSec: RED_FLIGHT_MS / 1000 } : {});
       setPlaying(true);
       setAtStart(false);
       // Every Play marks the legend as seen and, for a library piece, makes it the one the
@@ -327,6 +342,11 @@ export function usePlayback(score: Score | null): Playback {
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);
 
+  const leadInRemainingSec = useCallback(
+    () => transportRef.current?.leadInRemainingSec() ?? null,
+    [],
+  );
+
   // The loop state changes at once; a playing transport gets a new range once the typing settles
   // (clearing the loop never seeks, so it applies at once).
   const setLoop = useCallback(
@@ -358,6 +378,7 @@ export function usePlayback(score: Score | null): Playback {
       positionSec,
       startSec,
       leadingIn,
+      leadInRemainingSec,
       setLoop,
     }),
     [
@@ -373,6 +394,7 @@ export function usePlayback(score: Score | null): Playback {
       positionSec,
       startSec,
       leadingIn,
+      leadInRemainingSec,
       setLoop,
     ],
   );

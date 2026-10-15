@@ -1,5 +1,5 @@
 import type { TempoEvent } from '@digitus2/engine';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import type { LoopRange, Playback } from './usePlayback.js';
@@ -60,6 +60,11 @@ export interface TransportProps {
   disabled?: boolean;
   /** Paused with the last group heard marked (T10): the cursor is the red element, Play is plain. */
   resumeShown?: boolean;
+  /**
+   * The red is on its way between Play and the cursor (RedFlight.tsx): the traveling shape is the
+   * red element meanwhile, so the button is plain even where it would be red.
+   */
+  redAway?: boolean;
 }
 
 export interface PracticeControlsProps {
@@ -163,20 +168,26 @@ export function loopPrefill(currentBar: number, measureCount: number): [string, 
  * first note of the hands played, such as the other hand's pickup) nothing is marked in the
  * score yet, so Pause keeps the red until that note sounds and the cursor takes it. Paused after
  * a note was heard (`resumeShown`, T10), the cursor keeps the last group heard red and Play is
- * plain.
+ * plain. Where the red travels between the button and the cursor (`redAway`, RedFlight.tsx), the
+ * button is plain while the traveling shape carries it.
  *
  * Space plays and pauses from anywhere while the transport is mounted, unless the focus is in a
  * control that takes Space itself (TAKES_SPACE). Its default, scrolling the page, is cancelled,
  * so the score stays where the cursor put it; a held Space toggles once.
  */
-export function Transport({ playback, disabled = false, resumeShown = false }: TransportProps) {
+export function Transport({
+  playback,
+  disabled = false,
+  resumeShown = false,
+  redAway = false,
+}: TransportProps) {
   const playing = playback.playing;
   const loading = playback.loading;
   /**
    * The button is the red element unless the cursor is: stopped with no resume point marked, or
    * playing its lead-in.
    */
-  const red = playing ? playback.waiting : !resumeShown;
+  const red = (playing ? playback.waiting : !resumeShown) && !redAway;
   /** Play cannot start now (the score is not ready, or the samples are loading); Pause always works. */
   const playBlocked = !playing && (disabled || loading);
   /** Stopped at the start (fresh, rewound, at the end): there is nothing to rewind. */
@@ -236,6 +247,61 @@ export function Transport({ playback, disabled = false, resumeShown = false }: T
 }
 
 /**
+ * The sliding thumb of a segmented control (base.css, `.segmented-thumb`): put over the checked
+ * label before the paint on every change of `value`, its leading edge first. It is placed without
+ * a transition the first time and whenever the control's size changes (the Practice panel opening
+ * from hidden, a font arriving), so it never slides in from a stale place. While the control is
+ * hidden (no size) the checked label paints its own fill. The classes are set here, not through
+ * React: the fieldset's className prop never changes, so a render never undoes them.
+ */
+function useSegmentedThumb(value: string) {
+  const ref = useRef<HTMLFieldSetElement>(null);
+  /** The index of the label the thumb was last put over; null while it is not placed. */
+  const lastRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    if (ref.current) placeThumb(ref.current, lastRef, true);
+  }, [value]);
+
+  useEffect(() => {
+    const box = ref.current;
+    if (!box || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => placeThumb(box, lastRef, false));
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, []);
+
+  return ref;
+}
+
+/** Puts the thumb over the checked label; `moving` slides it there when it is already placed. */
+function placeThumb(
+  box: HTMLFieldSetElement,
+  lastRef: { current: number | null },
+  moving: boolean,
+): void {
+  const thumb = box.querySelector<HTMLElement>('.segmented-thumb');
+  const labels = [...box.querySelectorAll('label')];
+  const index = labels.findIndex((l) => l.querySelector('input:checked') !== null);
+  const label = labels[index];
+  const last = lastRef.current;
+  if (!thumb || !label || box.clientWidth === 0) {
+    box.classList.remove('has-thumb', 'is-ready');
+    lastRef.current = null;
+    return;
+  }
+  const slides = moving && last !== null && box.classList.contains('is-ready');
+  if (!slides) box.classList.remove('is-ready');
+  box.classList.toggle('to-right', slides && last !== null && index > last);
+  box.classList.toggle('to-left', slides && last !== null && index < last);
+  thumb.style.left = `${label.offsetLeft + 1}px`;
+  thumb.style.right = `${box.clientWidth - label.offsetLeft - label.offsetWidth + 1}px`;
+  box.classList.add('has-thumb');
+  lastRef.current = index;
+  if (!slides) requestAnimationFrame(() => box.classList.add('is-ready'));
+}
+
+/**
  * The practice controls: tempo, hands, metronome, count-in and the bar loop. Settings live in
  * the store; the loop lives in usePlayback. The score view keeps them in the dock's Practice
  * panel at every width (UI batch, spec 13); the panel's toggle names them, so they are no group
@@ -267,6 +333,7 @@ export function PracticeControls({
   const [loopTo, setLoopTo] = useState(() => (playback.loop ? String(playback.loop.to + 1) : ''));
   const [looping, setLooping] = useState(() => playback.loop !== null);
   const tempoPercent = Math.round(tempoFactor * 100);
+  const handsRef = useSegmentedThumb(settings.hands);
   const reversed = loopIsReversed(loopFrom, loopTo);
   const loopMessageId = useId();
 
@@ -307,8 +374,9 @@ export function PracticeControls({
         </span>
       </label>
 
-      <fieldset className="segmented">
+      <fieldset className="segmented" ref={handsRef}>
         <legend className="visually-hidden">Hands</legend>
+        <span className="segmented-thumb" aria-hidden="true" />
         {HANDS.map((h) => (
           <label key={h.value}>
             <input

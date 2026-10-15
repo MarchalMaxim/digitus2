@@ -138,6 +138,69 @@ h1[tabindex='-1']:focus {
   border: 0;
 }
 
+/* The easter egg (NoteBurst.tsx): a few small notes in ink rise from a click on nothing in
+   particular and fade, no two bursts alike. Each note animates from the click to its own resting
+   translate, rotate and scale (set inline), over its own share of --dur-flourish (--note-time,
+   after --note-wait), while a second box drifts it sideways on another easing, so every path
+   curves its own way. Transform and opacity only, on a layer the pointer passes through. */
+.note-burst-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--ink);
+}
+
+.note-burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.note-burst-note {
+  position: absolute;
+  left: -5px;
+  top: -17px;
+  opacity: 0;
+  animation: burst-rise calc(var(--dur-flourish) * var(--note-time, 1)) var(--ease)
+    calc(var(--dur-flourish) * var(--note-wait, 0)) both;
+}
+
+.note-burst-drift {
+  display: block;
+  animation: burst-drift calc(var(--dur-flourish) * var(--note-time, 1))
+    cubic-bezier(0.5, 0, 0.75, 0.4) calc(var(--dur-flourish) * var(--note-wait, 0)) both;
+}
+
+.note-burst-drift svg {
+  display: block;
+  fill: currentColor;
+}
+
+@keyframes burst-rise {
+  from {
+    opacity: 0;
+    translate: 0 0;
+    rotate: 0deg;
+    scale: 0.5;
+  }
+
+  22% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes burst-drift {
+  from {
+    translate: 0 0;
+  }
+}
+
 /* Text buttons: a plain underlined word, for secondary actions such as "About and licences". */
 .text-button {
   border: 0;
@@ -281,6 +344,42 @@ fieldset {
   vector-effect: non-scaling-stroke;
 }
 
+/* Paused with the last group heard marked (T10, ScoreSheet.tsx `resting`): the cursor's notes breathe
+   three times, slowly, then rest, the way a text caret shows where typing resumes. None under
+   reduced motion (--dur is 0 there). */
+.score-sheet.is-resting svg .is-red {
+  animation: cursor-rest calc(var(--dur) * 10) ease-in-out 3;
+}
+
+@keyframes cursor-rest {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* The accent on its way between Play and the cursor (RedFlight.tsx): nested boxes on a fixed layer,
+   moved along X, then Y, and the shape itself, the screen's one accent element while it flies. */
+.red-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.red-ghost-y,
+.red-ghost-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.red-ghost-shape {
+  background: currentColor;
+}
+
 /* One hand practised alone: the other hand's notes, with their beams and rests, and its digits
    are dimmed as its keys are (render/dom.ts, dimNotes); the staff lines and clefs stay. A note
    of that hand inside a chord the cursor marks (one chord shared by both hands) is never pale:
@@ -292,6 +391,18 @@ fieldset {
 .score-sheet svg .is-red .is-muted,
 .score-sheet svg .is-red.is-muted {
   opacity: 1;
+}
+
+/* A hand switch fades the hand left out (or brings it back) bar by bar, from the first bar of each
+   system to the last: each element waits its `--sweep` (ScoreView.tsx, `sweepDimming`). The
+   cursor's notes never fade: the accent is drawn whole or not at all. */
+.score-sheet svg :is(g.note, g.chord, g.layer, g.fing) {
+  transition: opacity var(--dur) var(--ease) var(--sweep, 0ms);
+}
+
+.score-sheet svg .is-red,
+.score-sheet svg .is-red * {
+  transition: none;
 }
 
 .score-error {
@@ -407,7 +518,51 @@ fieldset {
 }
 
 .segmented {
+  position: relative;
   display: inline-flex;
+  /* The thumb's difference blend inverts what lies under it in this box only. */
+  isolation: isolate;
+  background: var(--paper);
+}
+
+/* The chosen hand's fill is one thumb that slides from choice to choice (Transport.tsx): paper
+   with a difference blend, so the label under it turns paper on ink exactly where it passes. It
+   sits inside the ink borders; its leading edge moves first and the trailing edge follows. Until
+   it is placed (`has-thumb`), the chosen label paints its own fill. */
+.segmented-thumb {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  right: 0;
+  /* Above a focused label (z-index 1): its outline lies outside the thumb, its fill under it. */
+  z-index: 2;
+  display: none;
+  background: var(--paper);
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.segmented.has-thumb .segmented-thumb {
+  display: block;
+}
+
+.segmented.has-thumb label:has(:checked) {
+  background: var(--paper);
+  color: var(--ink);
+  transition: none;
+}
+
+.segmented.is-ready.to-right .segmented-thumb {
+  transition:
+    right var(--dur) var(--ease),
+    left var(--dur-slow) var(--ease);
+}
+
+.segmented.is-ready.to-left .segmented-thumb {
+  transition:
+    left var(--dur) var(--ease),
+    right var(--dur-slow) var(--ease);
 }
 
 .segmented label {
@@ -656,7 +811,43 @@ html:has(.dock) {
 .key rect {
   stroke: var(--ink);
   stroke-width: 1;
-  transition: fill var(--dur-fast) var(--ease);
+  /* Released, the fill goes back slowly, like a damper settling (the press is quick, below). */
+  transition: fill var(--dur-slow) var(--ease);
+}
+
+/* Key travel: a struck key goes down fast and comes back up slowly, the way a hammer strikes and
+   a damper settles. It shortens from its back edge (the top here), 2.4 % for a white key and
+   4 % for a black one; only the transform moves, never the layout. A repeated note on a held
+   key strikes it again (Keyboard.tsx, `restrike`). */
+.keyboard-svg .key {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+.keyboard-svg .key.is-pressed {
+  transform: scaleY(0.976);
+  transition-duration: var(--dur-press);
+}
+
+.keyboard-svg .key.is-black.is-pressed {
+  transform: scaleY(0.96);
+}
+
+.keyboard-svg .key.is-pressed rect {
+  transition-duration: var(--dur-press);
+}
+
+/* The finger number comes up with the key: 2 px and a fade. */
+.keyboard-svg .key.is-pressed text {
+  animation: key-digit var(--dur-fast) var(--ease);
+}
+
+@keyframes key-digit {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
 }
 
 .key.is-white rect {

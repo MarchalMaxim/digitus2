@@ -180,6 +180,8 @@ interface PlayFrame {
   /** The dock's play button: its label, and whether it carries the red class. */
   button: string | null;
   buttonRed: boolean;
+  /** Whether the red is on its way between the button and the cursor (RedFlight.tsx). */
+  ghostRed: boolean;
   /** Elements with the red class inside the sheet (the cursor), and the first one's onset tick. */
   redNotes: number;
   tick: string | null;
@@ -228,6 +230,7 @@ function recordFrames(page: Page, ms: number, untilFirstRed: boolean): Promise<P
             statusInDock: status?.closest('.dock') != null,
             button: button?.textContent ?? null,
             buttonRed: button?.classList.contains('is-red') ?? false,
+            ghostRed: document.querySelector('.red-ghost-shape.is-red') !== null,
             redNotes: reds.length,
             tick: reds[0]?.getAttribute('data-onset-tick') ?? null,
             pressed: document.querySelectorAll('.keyboard .is-pressed').length,
@@ -374,9 +377,10 @@ test.describe('playback with the silent instrument', () => {
     await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
     expect(await page.locator('.keyboard .is-pressed').count()).toBeGreaterThan(0);
     await page.getByRole('button', { name: 'Rewind' }).click();
+    // The red flies home from the last note heard to Play (motion study 05), then Play has it.
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
     const rewound = await expectOneRed(page, 'rewound');
     expect(rewound[0]!.tag).toBe('button');
-    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
     await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
     await expect(page.locator('.keyboard .is-pressed')).toHaveCount(0);
   });
@@ -439,9 +443,10 @@ test.describe('playback with the silent instrument', () => {
     await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
 
     await page.getByRole('button', { name: 'Rewind' }).click();
+    // The red flies home to Play first (motion study 05).
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
     const rewound = await expectOneRed(page, 'rewound');
     expect(rewound[0]!.tag).toBe('button');
-    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
   });
 
   // T10, Task 5 review (the blocker): with one hand practised, Play after a pause leads in to
@@ -574,13 +579,20 @@ test.describe('playback with the silent instrument', () => {
     // The status line, in the dock, counts the beats in turn: 1, 2, 3, 4, and nothing else.
     expect(runs(countIn.map((f) => f.status))).toEqual(['1', '2', '3', '4']);
     expect(countIn.every((f) => f.statusInDock)).toBe(true);
-    // Before the music starts no note is red and no key is pressed; Pause stays the red element.
+    // Before the music starts no note is red and no key is pressed; Pause is the red element
+    // until, on the last beat, the red leaves it to travel to the first note (motion study 05):
+    // in every frame exactly one of the two.
     for (const f of countIn) {
       const at = JSON.stringify(f);
       expect(f.redNotes, at).toBe(0);
       expect(f.pressed, at).toBe(0);
-      expect(f.buttonRed, at).toBe(true);
+      expect(f.buttonRed !== f.ghostRed, at).toBe(true);
     }
+    // The red travels only in the last moment before the note: a 200 ms flight (and a frame).
+    const flying = countIn.filter((f) => f.ghostRed);
+    expect(flying.length, 'the red travelled to the first note').toBeGreaterThan(0);
+    expect(frames[firstRed]!.t - flying[0]!.t).toBeLessThan(300);
+    expect(countIn.slice(countIn.indexOf(flying[0]!)).every((f) => f.ghostRed)).toBe(true);
     // The first note turns red once it is heard: the clock has passed its onset (0 s), the count
     // is gone, Pause is plain, and the first notes' keys are pressed with it.
     const first = frames[firstRed]!;
@@ -589,6 +601,7 @@ test.describe('playback with the silent instrument', () => {
     expect(first.position, at).toBeGreaterThan(0);
     expect(first.status, at).toBe('');
     expect(first.buttonRed, at).toBe(false);
+    expect(first.ghostRed, at).toBe(false);
     expect(first.pressed, at).toBeGreaterThan(0);
     // ...and promptly: the transport notices the start on its next tick (25 ms), and the cursor
     // marks the notes in the render that follows.
@@ -701,11 +714,12 @@ test.describe('playback with the silent instrument', () => {
         const at = JSON.stringify(f);
         expect(f.redNotes, at).toBe(0);
         expect(f.pressed, at).toBe(0);
-        expect(f.buttonRed, at).toBe(true);
+        // Pause, or in the last moment the red on its way to the note (motion study 05).
+        expect(f.buttonRed !== f.ghostRed, at).toBe(true);
       }
-      // In every frame, one red element: Play, then Pause, then the cursor.
+      // In every frame, one red element: Play, then Pause, the red on its way, then the cursor.
       for (const f of frames) {
-        const reds = (f.buttonRed ? 1 : 0) + (f.redNotes > 0 ? 1 : 0);
+        const reds = (f.buttonRed ? 1 : 0) + (f.ghostRed ? 1 : 0) + (f.redNotes > 0 ? 1 : 0);
         expect(reds, JSON.stringify(f)).toBe(1);
       }
       // The count keeps the bar grid (polish plan Task 3 review): the pickup is beat 3 of a 3/4
@@ -733,6 +747,7 @@ test.describe('playback with the silent instrument', () => {
       const at = JSON.stringify(first);
       expect(first.position, at).toBeGreaterThanOrEqual(firstLeft);
       expect(first.buttonRed, at).toBe(false);
+      expect(first.ghostRed, at).toBe(false);
       expect(first.status, at).toBe('');
       expect(first.pressed, at).toBeGreaterThan(0);
       expect(new Set(first.pressedHands), at).toEqual(new Set(['L']));
@@ -783,9 +798,10 @@ test.describe('playback with the silent instrument', () => {
     expect(start, 'Play turned into Pause').toBeGreaterThanOrEqual(0);
     const playing = frames.slice(start);
 
-    // In every frame, one red element: Pause, or the cursor.
+    // In every frame, one red element: Pause, the red on its way to the first note (from Play
+    // only, motion study 05), or the cursor.
     for (const f of playing) {
-      const reds = (f.buttonRed ? 1 : 0) + (f.redNotes > 0 ? 1 : 0);
+      const reds = (f.buttonRed ? 1 : 0) + (f.ghostRed ? 1 : 0) + (f.redNotes > 0 ? 1 : 0);
       expect(reds, JSON.stringify(f)).toBe(1);
     }
     // A note turns red only once it is heard: whenever the cursor marks a new group, the clock

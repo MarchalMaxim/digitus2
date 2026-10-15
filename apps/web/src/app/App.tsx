@@ -1,5 +1,6 @@
 import { lazy, Suspense, useLayoutEffect, useRef } from 'react';
 import { pieceKey, useAppStore, type View } from './store.js';
+import { NoteBurst } from './NoteBurst.js';
 import { Notice } from './Notice.js';
 import { LibraryView } from '../library/LibraryView.js';
 import { ScoreView } from '../score/ScoreView.js';
@@ -59,6 +60,7 @@ export function App() {
           <AboutView />
         </Suspense>
       )}
+      <NoteBurst />
     </>
   );
 }

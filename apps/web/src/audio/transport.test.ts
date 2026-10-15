@@ -425,6 +425,39 @@ describe('Transport', () => {
     expect(metronome[0]!.time).toBeCloseTo(101.2, 6);
     expect(metronome[1]!.time).toBeCloseTo(101.8, 6);
   });
+  // Motion study 05: the red travels from Play to the first note and lands as the note sounds.
+  describe('the lead before the first note (the red travels meanwhile)', () => {
+    it('holds the start back by leadSec when that is longer than the start delay', () => {
+      const t = make({ startDelaySec: 0.05 });
+      t.setCountIn(false);
+      t.play({ leadSec: 0.2 });
+      run(t, 0.3);
+      expect(instrument.events[0]!.time).toBeCloseTo(100.2, 6);
+    });
+
+    it('counts down to the first note of the hands played, then reports null', () => {
+      const t = make({ score: pickup });
+      t.setCountIn(false);
+      t.setMuted(['R']);
+      expect(t.leadInRemainingSec()).toBeNull(); // stopped
+      t.play();
+      expect(t.leadInRemainingSec()).toBeCloseTo(0.6, 6); // the left hand's G2, at 0.6 s
+      run(t, 0.25);
+      expect(t.leadInRemainingSec()).toBeCloseTo(0.35, 6);
+      run(t, 0.4);
+      expect(t.leadInRemainingSec()).toBeNull(); // heard: the lead-in is over
+    });
+
+    it('counts the count-in in', () => {
+      const t = make({ score: pickup });
+      t.setCountIn(true);
+      t.setMuted(['R']);
+      t.play();
+      // Two counted beats (1.2 s), then the muted pickup (0.6 s) before the left hand enters.
+      expect(t.leadInRemainingSec()).toBeCloseTo(1.8, 6);
+    });
+  });
+
   describe('the lead-in (the cursor waits for it; polish plan Task 3 review)', () => {
     const TICK = 0.025;
 

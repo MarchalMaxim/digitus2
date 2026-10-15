@@ -238,11 +238,16 @@ export class Transport {
     return range && (start < range.from || start >= range.to) ? range.from : start;
   }
 
-  play(): void {
+  /**
+   * Plays from `startSec()`. `leadSec` holds the start back for that long when it is longer than
+   * the start delay: the score view's red travels from Play to the first note meanwhile, and the
+   * note sounds as it lands (useRedFlight.ts). A count-in starts after it too.
+   */
+  play(opts: { leadSec?: number } = {}): void {
     if (this.playing) return;
     const start = this.startSec();
     const factor = this.tempoFactor;
-    let t0 = this.ctx.currentTime + this.startDelaySec;
+    let t0 = this.ctx.currentTime + Math.max(this.startDelaySec, opts.leadSec ?? 0);
     this.countInClicks = [];
     this.countInBeats = [];
     if (this.countIn) {
@@ -358,6 +363,27 @@ export class Transport {
   leadingIn(now?: number): boolean {
     if (!this.playing) return false;
     return this.leadIn !== null || this.wrapLeadIn(audibleTime(this.ctx, now)) !== null;
+  }
+
+  /**
+   * How long until the running lead-in ends, in seconds from the audible time now (`now` as in
+   * `audibleTime`): until the first note of a hand not muted, at or after where this pass started,
+   * is heard. Null when no lead-in runs (stopped, or the music is under way) or no such note is
+   * left. The score view starts the red's flight from Play this long before that note sounds
+   * (useRedFlight.ts).
+   */
+  leadInRemainingSec(now?: number): number | null {
+    if (!this.playing || this.leadIn === null || this.segments.length === 0) return null;
+    const first = this.segments[0]!;
+    for (let i = lowerBound(this.events, first.score); i < this.events.length; i++) {
+      const e = this.events[i]!;
+      if (this.muted.has(e.hand)) continue;
+      // The segment in force at the note: the last one that starts at or before it.
+      let seg = first;
+      for (const s of this.segments) if (s.ctx >= seg.ctx && s.score <= e.onset) seg = s;
+      return Math.max(0, toCtx(seg, e.onset) - audibleTime(this.ctx, now));
+    }
+    return null;
   }
 
   step(): void {

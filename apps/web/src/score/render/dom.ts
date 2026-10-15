@@ -117,6 +117,34 @@ export function dimNotes(host: Element, mutedIds: ReadonlySet<string>): number {
 }
 
 /**
+ * Staggers a hand switch: each of `elements` (what one-hand practice dimmed or undimmed) gets a
+ * `--sweep` delay in proportion to where its bar stands in its system, from 0 for the first bar to
+ * `spreadMs` for the last, so the hand fades out (or back in) from left to right
+ * (base.css, `.score-sheet svg` opacity transition). Read from the markup alone (each bar's place
+ * among its system's bars), never from layout, so it adds no style or layout pass between the
+ * class change and its transition. `spreadMs` 0 clears the delays. Returns how many it set.
+ */
+export function sweepDimming(elements: Iterable<Element>, spreadMs: number): number {
+  const place = new Map<Element, number>();
+  const placeOf = (measure: Element): number => {
+    const known = place.get(measure);
+    if (known !== undefined) return known;
+    const system = measure.closest('g.system');
+    const bars = system ? [...system.querySelectorAll('g.measure')] : [measure];
+    bars.forEach((bar, i) => place.set(bar, bars.length > 1 ? i / (bars.length - 1) : 0));
+    return place.get(measure) ?? 0;
+  };
+  let count = 0;
+  for (const el of elements) {
+    const measure = el.closest('g.measure');
+    const at = measure && spreadMs > 0 ? placeOf(measure) : 0;
+    (el as SVGElement).style.setProperty('--sweep', `${Math.round(at * spreadMs)}ms`);
+    count++;
+  }
+  return count;
+}
+
+/**
  * Writes the digits `changes` (note id -> digit text) into the existing `g.fing` elements and
  * calls `flashFn` on each one whose text changed. Unknown ids and unchanged digits are skipped.
  * Returns how many digits changed.

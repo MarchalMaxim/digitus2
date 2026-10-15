@@ -64,6 +64,7 @@ function playing({
     positionSec: () => clock?.sec ?? sec,
     startSec: () => clock?.sec ?? sec,
     leadingIn: () => clock?.leadingIn ?? waiting,
+    leadInRemainingSec: () => null,
     loop: null,
     setLoop: vi.fn(),
   };

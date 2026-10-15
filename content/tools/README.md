@@ -9,6 +9,14 @@ plan added (`docs/superpowers/plans/2026-10-14-l1-curated-library.md`). The
 recorded in `docs/research/library-expansion-2026-10-15.md`; its reproducible
 entries are in `catalog.d/expansion-bach.json` and `expansion-teaching.json`.
 
+The subsequent bulk wave adds 91 full editions (253 pieces total), including
+the first Advanced level entries. See `docs/research/library-bulk-expansion-2026-10-15.md`
+and `library-bulk-review-2026-10-15.md`; accepted entries and explicit holds
+are in `catalog.d/expansion-bulk.json`. `bulk_sources.py --download` inventories
+the existing Mutopia mirror and caches canonical RDF and published MIDI with
+four workers. `bulk-candidates.json` distinguishes acquired files from app
+admission. The committed index retains source/RDF hashes and admission; complete download URLs, MIDI hashes and cache paths live in ignored `content/_raw/bulk/inventory.json`. Both a fresh acquisition and offline `bulk_sources.py --refresh` regenerate admission from the current catalog fragment, so refresh cannot erase release decisions. The same ordinary build and gate commands reproduce accepted pieces. The optional catalog field `compactXml: true` removes only intertag indentation in generated XML; this batch uses it to stay within existing storage budgets. Musical text and attributes are preserved.
+
 ## Environment
 
 - **Python 3.11** in `content/.venv`, with the packages pinned in

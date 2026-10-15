@@ -126,7 +126,7 @@ export function AboutView() {
 
       <section className="stack" aria-labelledby="about-pieces">
         <h2 id="about-pieces">The built-in pieces</h2>
-        <p>All compositions are in the public domain. {creditSentence}</p>
+        <p>The pieces use public-domain or Creative Commons editions. {creditSentence}</p>
         <table className="about-pieces">
           <thead>
             <tr>

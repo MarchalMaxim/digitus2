@@ -14,7 +14,7 @@ import { AboutView, countWord } from './AboutView.js';
 // Testing Library only cleans up automatically when vitest globals are on; they are off here.
 afterEach(cleanup);
 
-const PREFIX = 'All compositions are in the public domain.';
+const PREFIX = 'The pieces use public-domain or Creative Commons editions.';
 
 /** The sentence above the table, as the plan words it for a given library. */
 function expectedCredit(library: readonly LibraryPiece[]): string {
@@ -26,7 +26,7 @@ function expectedCredit(library: readonly LibraryPiece[]): string {
 }
 
 function creditParagraph(): HTMLElement {
-  return screen.getByText(/^All compositions are in the public domain\./);
+  return screen.getByText(/^The pieces use public-domain or Creative Commons editions\./);
 }
 
 describe('AboutView', () => {

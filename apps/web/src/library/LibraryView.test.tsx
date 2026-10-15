@@ -27,7 +27,7 @@ describe('LibraryView: the units (spec section 3)', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'digitus2' })).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Finger numbers for piano music. Pick a piece, press play, and follow the red note.',
+        'Finger numbers for piano. Pick a piece, press play, and follow the red note.',
       ),
     ).toBeInTheDocument();
     const start = screen.getByRole('button', { name: 'Start with Twinkle, Twinkle, Little Star' });
@@ -67,6 +67,7 @@ describe('LibraryView: the level pills (spec 4.1, 6.3, 11)', () => {
       'Moderate',
       'Intermediate',
       'Challenging',
+      'Advanced',
     ]);
     expect(within(group).getByRole('radio', { name: 'First steps' })).toBeChecked();
     expect(within(group).getByRole('radio', { name: 'First steps' })).toHaveAccessibleDescription(
@@ -74,19 +75,27 @@ describe('LibraryView: the level pills (spec 4.1, 6.3, 11)', () => {
     );
     expect(group.querySelectorAll('.is-red')).toHaveLength(0);
   });
-  it('choosing Moderate shows its 46 pieces under their collections and says so once', async () => {
+  it('choosing Moderate shows its 83 pieces under their collections and says so once', async () => {
     render(<LibraryView />);
     await userEvent.click(screen.getByRole('radio', { name: 'Moderate' }));
     expect(screen.getByRole('radio', { name: 'Moderate' })).toBeChecked();
-    expect(rows()).toHaveLength(46);
+    expect(rows()).toHaveLength(83);
     expect(h3s()[0]).toBe('Notebook for Anna Magdalena Bach (1725)');
     expect(screen.getByText('More notes and wider reaches.')).toBeInTheDocument();
     expect(useAppStore.getState().libraryLevel).toBe(3);
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Moderate: 46 pieces'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Moderate: 83 pieces'),
       { timeout: 2000 },
     );
+  });
+  it('choosing Advanced shows its 50 pieces and hides unneeded genre filters', async () => {
+    render(<LibraryView />);
+    await userEvent.click(screen.getByRole('radio', { name: 'Advanced' }));
+    expect(rows()).toHaveLength(50);
+    expect(h3s()[0]).toBe('Bach, The Well-Tempered Clavier');
+    expect(useAppStore.getState().libraryLevel).toBe(6);
+    expect(screen.queryByRole('group', { name: 'Genre' })).toBeNull();
   });
   it('says nothing on arrival', async () => {
     render(<LibraryView />);
@@ -97,7 +106,7 @@ describe('LibraryView: the level pills (spec 4.1, 6.3, 11)', () => {
     useAppStore.setState({ libraryLevel: 4 });
     render(<LibraryView />);
     expect(screen.getByRole('radio', { name: 'Intermediate' })).toBeChecked();
-    expect(rows()).toHaveLength(34);
+    expect(rows()).toHaveLength(37);
   });
 });
 

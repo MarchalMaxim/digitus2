@@ -51,7 +51,7 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
   const at = JSON.stringify(g);
   expect(g.red, at).toBeLessThanOrEqual(phone ? 160 : 130);
   expect(g.row, at).toBeLessThanOrEqual(phone ? 470 : 330);
-  expect(g.pills).toHaveLength(5);
+  expect(g.pills).toHaveLength(6);
   for (const p of g.pills) {
     expect(p.left, at).toBeGreaterThanOrEqual(0);
     expect(p.right, at).toBeLessThanOrEqual(g.width);
@@ -60,8 +60,8 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
 });
 
 // UI batch review and design section 17: the words a first visit reads before the first piece.
-// At 149 pieces, at 1280 and 360, they are 36: the name 1, the sentence 15, the red button 5, the
-// five pills 6, the level line 6 and the first collection heading 2 (the search field's
+// At 253 pieces, at 1280 and 360, they are 36: the name 1, the sentence 14, the red button 5, the
+// six pills 7, the level line 6 and the first collection heading 2 (the search field's
 // 4-word placeholder is not text in the page and is not counted). The budget may not grow.
 test('library: at most 36 visible words before the first piece (design section 17)', async ({
   page,
@@ -104,6 +104,24 @@ test('library: the arrow keys choose a level; the list follows and the pill keep
   await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[2]!);
   await expect(page.getByText('The hands begin to move.')).toBeVisible();
   await expectOneRed(page, 'Easy chosen');
+});
+
+test('library: Advanced opens all 50 pieces with one red element and no overflow', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('radio', { name: 'Advanced', exact: true }).check();
+  await expect(pieceRows(page)).toHaveCount(50);
+  await expect(
+    page.getByRole('heading', { name: 'Bach, The Well-Tempered Clavier', exact: true }),
+  ).toBeVisible();
+  await expectOneRed(page, 'Advanced');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    ),
+  ).toBeLessThanOrEqual(0);
 });
 
 test('library: an unsupported file shows a notice and keeps one red element', async ({ page }) => {

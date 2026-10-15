@@ -142,6 +142,9 @@ GENRE_OF = {
     "schumann-op68": "romantic", "tchaikovsky-op39": "romantic", "sonatinas": "classical",
     "bach-inventions": "baroque", "bach-wtc": "baroque", "schumann-op15": "romantic",
     "chopin-op28": "romantic", "character-pieces": "romantic", "ragtime": "ragtime",
+    "beethoven-originals": "classical", "chopin-originals": "romantic",
+    "bach-keyboard": "baroque", "baroque-keyboard": "baroque",
+    "classical-keyboard": "classical", "modern-keyboard": "modern",
 }
 
 

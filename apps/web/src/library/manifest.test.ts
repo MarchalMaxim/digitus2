@@ -18,10 +18,10 @@ import { startTarget } from './model.js';
 const firstPiece = () => pieceBySlug(startTarget(pieces, null).piece.slug)!;
 
 describe('manifest', () => {
-  it('lists every manifest piece across five levels, sorted by level, with unique slugs', () => {
+  it('lists every manifest piece across six levels, sorted by level, with unique slugs', () => {
     expect(pieces).toHaveLength((manifestJson as unknown[]).length);
     expect(new Set(pieces.map((p) => p.slug)).size).toBe(pieces.length);
-    expect(new Set(pieces.map((p) => p.level))).toEqual(new Set([1, 2, 3, 4, 5]));
+    expect(new Set(pieces.map((p) => p.level))).toEqual(new Set([1, 2, 3, 4, 5, 6]));
     expect(pieces.map((p) => p.level)).toEqual(
       [...pieces.map((p) => p.level)].sort((a, b) => a - b),
     );

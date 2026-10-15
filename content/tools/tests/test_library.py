@@ -22,8 +22,8 @@ REQUIRED = ["slug", "title", "composer", "composerDates", "catalogue", "year", "
             "hasEditorialFingering", "excerpt", "notes", "collection", "collectionId", "benchmarkSet", "genre"]
 LICENSES = ("Public Domain", "CC0-1.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0",
             "CC-BY-SA-4.0")
-# Reviewed corpus after the 2026-10-15 expansion (13 additions; core30 unchanged).
-LEVEL_COUNTS = {1: 24, 2: 44, 3: 46, 4: 34, 5: 14}
+# Reviewed corpus after the 2026-10-15 bulk expansion; core30 unchanged.
+LEVEL_COUNTS = {1: 24, 2: 44, 3: 83, 4: 37, 5: 15, 6: 50}
 
 
 def test_manifest_matches_catalog():
@@ -49,8 +49,8 @@ def test_verification_follows_the_manifest_order():
 def test_level_counts_are_weighted_to_beginners():
     counts = {lvl: sum(1 for e in MANIFEST if e["level"] == lvl) for lvl in LEVEL_COUNTS}
     assert counts == LEVEL_COUNTS
-    assert len(MANIFEST) == 162
-    assert sum(counts[lvl] for lvl in (1, 2, 3)) > sum(counts[lvl] for lvl in (4, 5))
+    assert len(MANIFEST) == 253
+    assert sum(counts[lvl] for lvl in (1, 2, 3)) > sum(counts[lvl] for lvl in (4, 5, 6))
 
 
 @pytest.mark.parametrize("entry", MANIFEST, ids=lambda e: e["slug"])
@@ -58,7 +58,7 @@ def test_manifest_entry(entry):
     for k in REQUIRED:
         assert k in entry, k
     assert re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", entry["slug"])
-    assert entry["level"] in (1, 2, 3, 4, 5)
+    assert entry["level"] in (1, 2, 3, 4, 5, 6)
     assert entry["measures"] > 0 and entry["approxDurationSec"] > 0 and entry["tempoBpm"] > 0
     src = entry["source"]
     for k in ("name", "url", "license", "retrievedAt"):
@@ -109,6 +109,7 @@ def test_every_entry_carries_its_genre():
 
 
 def test_genre_counts_match_the_design():
-    # Ten baroque, two classical and one folk-song addition; no UI category added.
+    # Reviewed bulk corpus; modern repertoire now occupies an existing genre.
     counts = collections.Counter(e["genre"] for e in MANIFEST)
-    assert counts == {"songs": 43, "carols": 15, "baroque": 37, "classical": 20, "romantic": 44, "ragtime": 3}
+    assert counts == {"songs": 65, "carols": 15, "baroque": 68, "classical": 29,
+                      "romantic": 70, "ragtime": 5, "modern": 1}

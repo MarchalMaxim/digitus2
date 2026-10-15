@@ -43,8 +43,8 @@ test('about: keeps its text', async ({ page }) => {
   // pins the exact number words); the form with CC BY appears once the library has such a piece.
   const credit =
     LICENSE_COUNTS.attributionOnly > 0
-      ? /^All compositions are in the public domain\. \S+ engravings are shared under CC BY-SA and \S+ under CC BY; all are credited here and on their score pages\.$/
-      : /^All compositions are in the public domain\. \S+ engravings are shared under CC BY-SA and are credited here and on their score pages\.$/;
+      ? /^The pieces use public-domain or Creative Commons editions\. \S+ engravings are shared under CC BY-SA and \S+ under CC BY; all are credited here and on their score pages\.$/
+      : /^The pieces use public-domain or Creative Commons editions\. \S+ engravings are shared under CC BY-SA and are credited here and on their score pages\.$/;
   await expect(page.getByText(credit)).toBeVisible();
   await expectOneRed(page, 'about');
   await expectNoSeriousA11y(page, 'about');

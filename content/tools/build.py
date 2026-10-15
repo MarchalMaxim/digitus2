@@ -231,9 +231,16 @@ def rights_text(piece: dict, src: dict) -> str:
         return (f"Composition in the public domain. Engraving by {who}, placed in the public domain. "
                 f"MusicXML conversion by the digitus2 project, dedicated to the public domain (CC0 1.0).")
     attribution = " (attribution required)" if is_cc_by(src["license"]) else ""
-    return (f"Composition in the public domain. Engraving (c) {who}, licensed {src['license']}{attribution} "
+    prefix = ("Composition and engraving (c) " if src.get("edition", "").casefold() == "original work"
+              else "Composition in the public domain. Engraving (c) ")
+    return (f"{prefix}{who}, licensed {src['license']}{attribution} "
             f"({src['licenseUrl']}). This MusicXML adaptation by the digitus2 project is licensed "
             f"{src['license']} as well.")
+
+
+def compact_xml(data: bytes) -> bytes:
+    """Remove indentation between tags, retaining text and attribute bytes."""
+    return re.sub(rb">[ \r\n\t]+<", b"><", data)
 
 
 def source_files(piece: dict) -> tuple[list[Path], str]:
@@ -273,11 +280,15 @@ def build_mutopia(piece: dict, log: dict, out_dir: Path = SCORES) -> dict:
         first_key_mode=(piece["keyName"].split()[-1] if piece.get("keyName") else None),
     )
     data, warns = L.convert_dump(res["dump"], score, opts)
+    if piece.get("compactXml"):
+        data = compact_xml(data)
     out = out_dir / f"{slug}.musicxml"
     jsonio.write_atomic(out, data)
     fingered = out_dir / f"{slug}.fingered.musicxml"
     opts.include_fingering = True
     fdata, _ = L.convert_dump(res["dump"], score, opts)
+    if piece.get("compactXml"):
+        fdata = compact_xml(fdata)
     # a handful of stray digits is not an "editor's fingering": require at least 5
     has_fing = fdata.count(b"<fingering") >= conv.get("minFingerings", 5)
     if has_fing:

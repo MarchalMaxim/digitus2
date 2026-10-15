@@ -17,7 +17,7 @@ import {
 import { syntheticLibrary } from './testing/syntheticLibrary.js';
 import catalog from '../../../../content/tools/catalog.json';
 
-const level = (n: 1 | 2 | 3 | 4 | 5) => {
+const level = (n: 1 | 2 | 3 | 4 | 5 | 6) => {
   const layout = libraryLayout(pieces, { level: n, query: '' });
   if (layout.kind !== 'level') throw new Error(layout.kind);
   return layout;
@@ -28,12 +28,12 @@ const rowsOf = (layout: LibraryLayout): Row[] =>
     ? layout.groups.flatMap((g) => g.rows)
     : layout.sections.flatMap((s) => s.groups.flatMap((g) => g.rows));
 
-describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
+describe('the expanded library at 253 pieces (spec sections 5, 6, 7)', () => {
   it('shows one level at a time, First steps first', () => {
     const layout = libraryLayout(pieces, { level: null, query: '' });
     expect(layout.kind).toBe('level');
     if (layout.kind !== 'level') return;
-    expect(layout.levels).toEqual([1, 2, 3, 4, 5]);
+    expect(layout.levels).toEqual([1, 2, 3, 4, 5, 6]);
     expect(layout.level).toBe(1);
     expect(layout.count).toBe(24);
     expect(layout.groups[0]!.rows[0]).toMatchObject({
@@ -65,10 +65,12 @@ describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
       ['Notebook for Anna Magdalena Bach (1725)', 7],
       ['Bach, Little Preludes', 3],
       ['Minuets, dances and rondos', 3],
+      ['Swedish folk dances (Traditioner af Swenska Folk-Dansar, 1814)', 24],
       ['Burgmüller, 25 Easy and Progressive Studies, Op. 100', 15],
-      ['Schumann, Album for the Young, Op. 68', 5],
+      ['Schumann, Album for the Young, Op. 68', 6],
       ['Sonatinas and sonatas', 5],
-      ['Other pieces', 8],
+      ['Romantic character pieces', 13],
+      ['Other pieces', 7],
     ]);
     expect(headings(level(4).groups)).toEqual([
       ['Bach, Little Preludes', 5],
@@ -76,19 +78,31 @@ describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
       ['Sonatinas and sonatas', 7],
       ['Bach, Inventions, BWV 772–786', 8],
       ['Chopin, Preludes, Op. 28', 3],
-      ['Other pieces', 8],
+      ['Romantic character pieces', 4],
+      ['Other pieces', 7],
     ]);
     expect(headings(level(5).groups)).toEqual([
       ['Sonatinas and sonatas', 3],
       ['Bach, Inventions, BWV 772–786', 4],
       ['Romantic character pieces', 3],
       ['Ragtime', 3],
-      ['Other pieces', 1],
+      ['Other pieces', 2],
+    ]);
+  });
+  it('groups Advanced pieces under their collections', () => {
+    expect(headings(level(6).groups)).toEqual([
+      ['Bach, The Well-Tempered Clavier', 4],
+      ['Romantic character pieces', 8],
+      ['Beethoven', 3],
+      ['Bach keyboard works', 21],
+      ['Baroque keyboard works', 4],
+      ['Classical keyboard works', 5],
+      ['Other pieces', 5],
     ]);
   });
   it('shortens exactly these 13 titles under their own heading (reviewed once; spec section 5)', () => {
     const shortened = Object.fromEntries(
-      ([1, 2, 3, 4, 5] as const)
+      ([1, 2, 3, 4, 5, 6] as const)
         .flatMap((n) => rowsOf(level(n)))
         .filter((r) => r.title !== pieces.find((p) => p.slug === r.slug)!.title)
         .map((r) => [r.slug, r.title]),
@@ -110,13 +124,13 @@ describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
     });
   });
   it('drops the composer line only under a heading that names the one composer, and for Traditional and Anonymous', () => {
-    const rows = ([1, 2, 3, 4, 5] as const).flatMap((n) => rowsOf(level(n)));
+    const rows = ([1, 2, 3, 4, 5, 6] as const).flatMap((n) => rowsOf(level(n)));
     const bySlug = new Map(pieces.map((p) => [p.slug, p]));
     const hiddenNamed = rows.filter(
       (r) =>
         r.composerLine === null && !/^(Traditional|Anonymous)\b/.test(bySlug.get(r.slug)!.composer),
     );
-    expect(hiddenNamed).toHaveLength(50);
+    expect(hiddenNamed).toHaveLength(79);
     expect(new Set(hiddenNamed.map((r) => bySlug.get(r.slug)!.collectionId))).toEqual(
       new Set([
         'schumann-op68',
@@ -124,6 +138,9 @@ describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
         'burgmuller-op100',
         'bach-inventions',
         'chopin-op28',
+        'bach-wtc',
+        'beethoven-originals',
+        'bach-keyboard',
       ]),
     );
     const sonatinas = level(3).groups.find((g) => g.heading === 'Sonatinas and sonatas')!;
@@ -194,12 +211,21 @@ describe('the expanded library at 162 pieces (spec sections 5, 6, 7)', () => {
     expect(arrivalLevel(pieces, null, null)).toBe(1);
     expect(arrivalLevel(pieces, null, 'bach-minuet-g-major-bwv-anh-114')).toBe(2);
     expect(arrivalLevel(pieces, 3, 'bach-minuet-g-major-bwv-anh-114')).toBe(3);
-    expect(arrivalLevel(pieces, 6, null)).toBe(1);
+    expect(arrivalLevel(pieces, 6, null)).toBe(6);
     expect(arrivalLevel(pieces, null, 'no-such-piece')).toBe(1);
   });
-  it('shows no genre row at 162 pieces: no level holds more than 60', () => {
-    for (const n of [1, 2, 3, 4, 5])
+  it('shows genres only in Moderate, the only level above 60 pieces', () => {
+    expect(genrePills(pieces.filter((p) => p.level === 3))).toEqual([
+      'songs',
+      'baroque',
+      'classical',
+      'romantic',
+    ]);
+    for (const n of [1, 2, 4, 5, 6])
       expect(genrePills(pieces.filter((p) => p.level === n))).toEqual([]);
+    expect([1, 2, 3, 4, 5, 6].map((n) => pieces.filter((p) => p.level === n).length)).toEqual([
+      24, 44, 83, 37, 15, 50,
+    ]);
   });
   it('writes counts as words', () => {
     expect([countText(1), countText(24)]).toEqual(['1 piece', '24 pieces']);

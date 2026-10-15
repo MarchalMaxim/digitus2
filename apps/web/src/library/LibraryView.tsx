@@ -159,7 +159,7 @@ export function LibraryView() {
           digitus2
         </h1>
         <p className="muted">
-          Finger numbers for piano music. Pick a piece, press play, and follow the red note.
+          Finger numbers for piano. Pick a piece, press play, and follow the red note.
         </p>
         <div className="start-row">
           <Button primary onClick={() => open({ kind: 'library', slug: start.piece.slug })}>

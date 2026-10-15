@@ -79,6 +79,22 @@ const KEYBOARD_CROPS = [
 for (const crop of KEYBOARD_CROPS) {
   test(`visual ${crop.name}`, async ({ page }) => {
     await pausedTwinkleAt(page, crop.sec);
+    // Capture the intentional final key travel, never an in-flight press/restrike frame.
+    await page.locator('.keyboard-svg').evaluate(async (svg) => {
+      await Promise.all(
+        svg.getAnimations({ subtree: true }).map((animation) => animation.finished.catch(() => {})),
+      );
+    });
+    if (crop.name === 'keyboard-unlettered') {
+      const pressed = page.locator('.keyboard-svg .key.is-pressed');
+      expect(
+        await pressed.evaluateAll((keys) =>
+          keys.map((key) => Number(key.getAttribute('data-midi'))),
+        ),
+      ).toEqual([48, 67]);
+      await expect(pressed.locator('text')).toHaveText(['5', '4']);
+      await expect(page.locator('.keyboard-svg .key-hand')).toHaveCount(0);
+    }
     await expect(page.locator('.dock .keyboard')).toHaveScreenshot(`${crop.name}.png`, {
       animations: 'disabled',
     });

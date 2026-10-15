@@ -1352,7 +1352,7 @@ test.describe('playback with the silent instrument', () => {
     page,
   }) => {
     await page.goto('/?audio=silent');
-    await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+    await page.getByLabel('Open your own score').setInputFiles({
       name: 'melody.musicxml',
       mimeType: 'application/xml',
       buffer: Buffer.from(melodyXml()),

@@ -17,7 +17,7 @@ describe('own files (spec 3, 7.6)', () => {
       true,
     ]);
     expect(['notes.txt', 'song', 'x.pdf'].map(isScoreFileName)).toEqual([false, false, false]);
-    expect(SCORE_ACCEPT).toBe('.musicxml,.xml,.mxl,.mid,.midi');
+    expect(SCORE_ACCEPT).toBe('.musicxml,.xml,.mxl,.mid,.midi,.png,.jpg,.jpeg,.pdf');
   });
   it('hands a score over as bytes, refuses anything else with the notice', async () => {
     const onFile = vi.fn();

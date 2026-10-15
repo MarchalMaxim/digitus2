@@ -8,6 +8,8 @@ import { ScoreView } from '../score/ScoreView.js';
 // A lazy chunk: the About view reads ENGINE_VERSION from the engine's public API, and that import
 // keeps @xmldom/xmldom (CommonJS, so the bundler cannot drop it) in whatever chunk holds the view.
 // Imported eagerly it pushed the library page's initial JavaScript from 85 to 151 KB gzip.
+const ScanView = lazy(() => import('../scan/ScanView.js').then((m) => ({ default: m.ScanView })));
+
 const AboutView = lazy(() =>
   import('../about/AboutView.js').then((m) => ({ default: m.AboutView })),
 );
@@ -19,7 +21,11 @@ const AboutView = lazy(() =>
  * loop inputs of the one before it.
  */
 function viewKey(view: View): string {
-  return view.name === 'score' ? pieceKey(view.source) : view.name;
+  return view.name === 'score'
+    ? pieceKey(view.source)
+    : view.name === 'scan'
+      ? 'scan:' + view.session.id
+      : view.name;
 }
 
 /**
@@ -55,6 +61,11 @@ export function App() {
       <Notice />
       {view.name === 'library' && <LibraryView />}
       {view.name === 'score' && <ScoreView key={key} source={view.source} />}
+      {view.name === 'scan' && (
+        <Suspense fallback={<p className="page">Opening scan...</p>}>
+          <ScanView key={key} session={view.session} />
+        </Suspense>
+      )}
       {view.name === 'about' && (
         <Suspense fallback={null}>
           <AboutView />

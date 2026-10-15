@@ -149,3 +149,5 @@ export { hardErrors } from './eval/hardErrors.js';
 export * from './io/midi/index.js';
 export { evaluateHands, scoreToMidiData } from './eval/hands.js';
 export type { HandEval } from './eval/hands.js';
+export { evaluateOmr } from './eval/omr.js';
+export type { OmrMetric, OmrMetrics, OmrBarEvaluation, OmrEvaluation } from './eval/omr.js';

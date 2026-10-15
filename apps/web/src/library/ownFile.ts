@@ -1,3 +1,4 @@
+import { scanMime, validateScan } from '../scan/model.js';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export const NOT_A_SCORE_REFUSAL =
@@ -6,7 +7,7 @@ export const NOT_A_SCORE_REFUSAL =
 const SCORE_EXTENSIONS = ['.musicxml', '.xml', '.mxl', '.mid', '.midi'];
 
 /** The file chooser's `accept` list. */
-export const SCORE_ACCEPT = SCORE_EXTENSIONS.join(',');
+export const SCORE_ACCEPT = [...SCORE_EXTENSIONS, '.png', '.jpg', '.jpeg', '.pdf'].join(',');
 
 export function isScoreFileName(name: string): boolean {
   const dot = name.lastIndexOf('.');
@@ -18,8 +19,15 @@ export function acceptScoreFile(
   file: File | undefined,
   onFile: (name: string, bytes: Uint8Array) => void,
   onRefuse: (message: string) => void,
+  onScan?: (file: File) => void,
 ): void {
   if (!file) return;
+  if (onScan && scanMime(file.name)) {
+    void validateScan(file).then(onScan, (error: unknown) =>
+      onRefuse(error instanceof Error ? error.message : 'Could not read this file.'),
+    );
+    return;
+  }
   if (!isScoreFileName(file.name)) {
     onRefuse(NOT_A_SCORE_REFUSAL);
     return;
@@ -47,11 +55,12 @@ export function carriesFiles(dt: DataTransfer | null | undefined): boolean {
 export function useWindowFileDrop(
   onFile: (name: string, bytes: Uint8Array) => void,
   onRefuse: (message: string) => void,
+  onScan?: (file: File) => void,
 ): boolean {
   const [dragging, setDragging] = useState(false);
-  const latest = useRef({ onFile, onRefuse });
+  const latest = useRef({ onFile, onRefuse, onScan });
   useLayoutEffect(() => {
-    latest.current = { onFile, onRefuse };
+    latest.current = { onFile, onRefuse, onScan };
   });
   useEffect(() => {
     let depth = 0;
@@ -74,8 +83,8 @@ export function useWindowFileDrop(
       e.preventDefault();
       depth = 0;
       setDragging(false);
-      const { onFile, onRefuse } = latest.current;
-      acceptScoreFile(e.dataTransfer?.files?.[0], onFile, onRefuse);
+      const { onFile, onRefuse, onScan } = latest.current;
+      acceptScoreFile(e.dataTransfer?.files?.[0], onFile, onRefuse, onScan);
     };
     window.addEventListener('dragenter', enter);
     window.addEventListener('dragover', over);

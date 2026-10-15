@@ -105,6 +105,12 @@ function useRememberLibraryScroll(): () => void {
 
 export function LibraryView() {
   useWarmUpWhenIdle();
+  const openScan = useAppStore((s) => s.openScan);
+  const scan = (file: File) => {
+    rememberScroll();
+    setNotice(null);
+    openScan({ id: crypto.randomUUID(), file });
+  };
   const openPiece = useAppStore((s) => s.openPiece);
   const openAbout = useAppStore((s) => s.openAbout);
   const setNotice = useAppStore((s) => s.setNotice);
@@ -139,7 +145,7 @@ export function LibraryView() {
     },
     [rememberScroll, setNotice, openPiece],
   );
-  const dragging = useWindowFileDrop(openFile, setNotice);
+  const dragging = useWindowFileDrop(openFile, setNotice, scan);
   const about = () => {
     rememberScroll();
     openAbout();
@@ -194,7 +200,7 @@ export function LibraryView() {
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
         {announcement}
       </p>
-      <OwnFileLine onFile={openFile} onRefuse={setNotice} />
+      <OwnFileLine onFile={openFile} onRefuse={setNotice} onScan={scan} />
       <footer className="library-footer">
         <button type="button" className="text-button" onClick={about}>
           About and licences

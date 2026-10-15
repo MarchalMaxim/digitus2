@@ -27,6 +27,8 @@ interface PendingTie {
   note: Note;
   staff: number;
   midi: number;
+  endMeasureIndex: number;
+  endOffset: number;
 }
 
 /**
@@ -60,7 +62,18 @@ function lcm(a: number, b: number): number {
 
 export function parseMusicXml(
   input: string | Uint8Array,
-  opts: { source?: string } = {},
+  opts: {
+    source?: string;
+    /**
+     * Evaluation only: retain duplicate note events and each chord member's
+     * declared duration, so application import normalization cannot hide OMR
+     * errors. Staves are numbered globally in part order. Contiguous ties still
+     * merge into sounding notes; this is not a lossless XML AST.
+     * Missing/invalid pitch or nongrace duration and any parser warning fail
+     * closed instead of silently repairing the material being measured.
+     */
+    preserveNotation?: boolean;
+  } = {},
 ): ParsedMusicXml {
   const doc = timewiseToPartwise(parseXml(unpackMusicXml(input)));
   const root = doc.documentElement!;
@@ -72,10 +85,17 @@ export function parseMusicXml(
   let divisions = 1;
   for (const d of allDescendants(root, 'divisions')) {
     const v = Number((d.textContent ?? '').trim());
+    if (opts.preserveNotation && (!Number.isSafeInteger(v) || v <= 0)) {
+      throw new Error('cannot preserve notation: divisions must be a positive safe integer');
+    }
     if (Number.isInteger(v) && v > 0) divisions = lcm(divisions, v);
+  }
+  if (opts.preserveNotation && !Number.isSafeInteger(divisions)) {
+    throw new Error('cannot preserve notation: combined divisions exceed safe integer range');
   }
 
   const parts = childElements(root, 'part');
+  const staffOffsets = opts.preserveNotation ? preservedStaffOffsets(parts) : [];
   const measureStarts: number[] = [];
   const measureLengths: number[] = [];
   const measureNumbers: string[] = [];
@@ -83,6 +103,13 @@ export function parseMusicXml(
   const tempos: Located<TempoEvent>[] = [];
   const times: Located<TimeSigEvent>[] = [];
   const keys: Located<KeySigEvent>[] = [];
+  const tiedEnds = new Map<Note, { measureIndex: number; offset: number }>();
+  const tieJoins: {
+    previousMeasure: number;
+    previousEnd: number;
+    nextMeasure: number;
+    nextOnset: number;
+  }[] = [];
   let noteIndex = 0;
 
   parts.forEach((part, partIndex) => {
@@ -145,10 +172,26 @@ export function parseMusicXml(
             break;
           }
           case 'backup': {
+            if (opts.preserveNotation) {
+              validatePreservedDuration(
+                childText(el, 'duration'),
+                currentDivisions,
+                divisions,
+                'backup',
+              );
+            }
             cursor -= scaled(childText(el, 'duration'), currentDivisions, divisions);
             break;
           }
           case 'forward': {
+            if (opts.preserveNotation) {
+              validatePreservedDuration(
+                childText(el, 'duration'),
+                currentDivisions,
+                divisions,
+                'forward',
+              );
+            }
             cursor += scaled(childText(el, 'duration'), currentDivisions, divisions);
             maxCursor = Math.max(maxCursor, cursor);
             break;
@@ -160,6 +203,14 @@ export function parseMusicXml(
             const isRest = firstChild(el, 'rest') !== undefined;
             // Cue notes are printed small for another player; they take time but are not played.
             const isCue = firstChild(el, 'cue') !== undefined;
+            if (opts.preserveNotation && !isGrace) {
+              validatePreservedDuration(
+                childText(el, 'duration'),
+                currentDivisions,
+                divisions,
+                `note ${index}`,
+              );
+            }
             const duration = isGrace
               ? 0
               : scaled(childText(el, 'duration'), currentDivisions, divisions);
@@ -170,11 +221,31 @@ export function parseMusicXml(
               lastAdvance = duration;
               maxCursor = Math.max(maxCursor, cursor);
             }
+            // A chord member never advances the document cursor. Evaluation
+            // nevertheless preserves its declared end, including an overlong
+            // member that extends beyond the leading note or the current bar.
+            if (opts.preserveNotation && isChord && !isGrace) {
+              maxCursor = Math.max(maxCursor, onset + duration);
+            }
             if (isRest || isCue) break;
             const pitch = firstChild(el, 'pitch');
             if (!pitch) {
               warnings.push(`note ${index}: no pitch and no rest, skipped`);
               break;
+            }
+            if (opts.preserveNotation) {
+              const step = childText(pitch, 'step');
+              const octave = childText(pitch, 'octave');
+              if (
+                !step ||
+                !/^[A-G]$/.test(step) ||
+                !octave?.trim() ||
+                !Number.isSafeInteger(Number(octave))
+              ) {
+                throw new Error(
+                  `cannot preserve notation: note ${index}: invalid or missing pitch step/octave`,
+                );
+              }
             }
             const alter = readAlter(childText(pitch, 'alter'), index, warnings);
             if (alter === undefined) break;
@@ -183,9 +254,12 @@ export function parseMusicXml(
               alter,
               octave: Number(childText(pitch, 'octave') ?? '4'),
             };
-            const staff = Number(childText(el, 'staff') ?? '1');
+            const localStaff = Number(childText(el, 'staff') ?? '1');
+            const staff = opts.preserveNotation
+              ? localStaff + staffOffsets[partIndex]!
+              : localStaff;
             const hand: Hand =
-              staves >= 2 ? (staff === 1 ? 'R' : 'L') : partIndex === 0 ? 'R' : 'L';
+              staves >= 2 ? (localStaff === 1 ? 'R' : 'L') : partIndex === 0 ? 'R' : 'L';
             const voice = Number(childText(el, 'voice') ?? '1');
             const midi = spellingToMidi(spelling);
             const ties = childElements(el, 'tie').map((t) => t.getAttribute('type'));
@@ -196,20 +270,39 @@ export function parseMusicXml(
             const tieStart =
               ties.includes('start') || (ties.length === 0 && tied.includes('start'));
             const tieKey = `${staff}:${voice}:${midi}`;
-            const offset = isGrace ? onset : onset + (isChord ? lastAdvance : duration);
+            const offset = isGrace
+              ? onset
+              : onset + (isChord && !opts.preserveNotation ? lastAdvance : duration);
 
             if (tieStop) {
               const open = findPendingTie(pending, tieKey, staff, midi);
               if (open) {
                 const [openKey, prev] = open;
-                prev.note.offsetTick = Math.max(prev.note.offsetTick, offset);
+                if (opts.preserveNotation) {
+                  tieJoins.push({
+                    previousMeasure: prev.endMeasureIndex,
+                    previousEnd: prev.endOffset,
+                    nextMeasure: mIndex,
+                    nextOnset: onset - measureStart,
+                  });
+                  tiedEnds.set(prev.note, { measureIndex: mIndex, offset: offset - measureStart });
+                } else {
+                  prev.note.offsetTick = Math.max(prev.note.offsetTick, offset);
+                }
                 prev.note.sourceIndices.push(index);
+                prev.endMeasureIndex = mIndex;
+                prev.endOffset = offset - measureStart;
                 pending.delete(openKey);
                 // A continuation (stop and start) stays open, now under this note's voice.
                 if (tieStart) pending.set(tieKey, prev);
                 break;
               }
               warnings.push(`note ${index}: tie stop without a start`);
+            }
+            if (opts.preserveNotation && tieStart && pending.has(tieKey)) {
+              throw new Error(
+                `cannot preserve notation: note ${index}: tie already open for this staff, voice and pitch`,
+              );
             }
             const note: Note = {
               id: `n${index}`,
@@ -228,7 +321,18 @@ export function parseMusicXml(
               sourceIndices: [index],
             };
             notes.push(note);
-            if (tieStart) pending.set(tieKey, { note, staff, midi });
+            if (tieStart) {
+              if (opts.preserveNotation) {
+                tiedEnds.set(note, { measureIndex: mIndex, offset: offset - measureStart });
+              }
+              pending.set(tieKey, {
+                note,
+                staff,
+                midi,
+                endMeasureIndex: mIndex,
+                endOffset: offset - measureStart,
+              });
+            }
             const finger = readFingering(el);
             if (finger !== undefined) editorial[note.id] = { finger, source: 'editorial' };
             break;
@@ -255,11 +359,27 @@ export function parseMusicXml(
     });
     start += measureLengths[i] ?? 0;
   }
+  // A later part can lengthen a bar after its ties were read. Only final
+  // coordinates distinguish a genuine tie gap from provisional bar overlap.
+  for (const join of tieJoins) {
+    if (
+      measures[join.previousMeasure]!.startTick + join.previousEnd !==
+      measures[join.nextMeasure]!.startTick + join.nextOnset
+    ) {
+      throw new Error(
+        'cannot preserve notation: tie segments must be contiguous across final measure boundaries',
+      );
+    }
+  }
   for (const n of notes) {
     const delta = measures[n.measureIndex]!.startTick - measureStarts[n.measureIndex]!;
     if (delta !== 0) {
       n.onsetTick += delta;
       n.offsetTick += delta;
+    }
+    const tiedEnd = tiedEnds.get(n);
+    if (tiedEnd) {
+      n.offsetTick = measures[tiedEnd.measureIndex]!.startTick + tiedEnd.offset;
     }
   }
   const absolute = <T extends { tick: number }>(located: Located<T>[]): T[] =>
@@ -270,6 +390,9 @@ export function parseMusicXml(
   if (tempoMap.length === 0 || tempoMap[0]!.tick > 0)
     tempoMap.unshift({ tick: 0, qpm: DEFAULT_QPM });
 
+  if (opts.preserveNotation && warnings.length > 0) {
+    throw new Error(`cannot preserve notation: ${warnings.join('; ')}`);
+  }
   const score = finalizeScore({
     meta: readMeta(root, opts.source),
     divisions,
@@ -277,11 +400,34 @@ export function parseMusicXml(
     timeSignatures: absolute<TimeSigEvent>(times),
     keySignatures: absolute<KeySigEvent>(keys),
     measures,
-    notes: dropDuplicates(notes, editorial, warnings),
+    notes: opts.preserveNotation ? notes : dropDuplicates(notes, editorial, warnings),
   });
   const problems = validateScore(score);
   if (problems.length > 0) throw new Error(`invalid score: ${problems.join('; ')}`);
   return { score, editorial, warnings };
+}
+
+/** Reserve each part's complete staff range before assigning global staff IDs. */
+function preservedStaffOffsets(parts: Element[]): number[] {
+  let total = 0;
+  return parts.map((part) => {
+    const offset = total;
+    let count = 1;
+    for (const tag of ['staves', 'staff']) {
+      for (const element of allDescendants(part, tag)) {
+        const value = Number((element.textContent ?? '').trim());
+        if (!Number.isSafeInteger(value) || value <= 0) {
+          throw new Error(`cannot preserve notation: ${tag} must be a positive safe integer`);
+        }
+        count = Math.max(count, value);
+      }
+    }
+    total += count;
+    if (!Number.isSafeInteger(total)) {
+      throw new Error('cannot preserve notation: combined staff count exceeds safe integer range');
+    }
+    return offset;
+  });
 }
 
 /** The open tie in the same voice, else one on the same staff and pitch in another voice. */
@@ -343,6 +489,20 @@ function readAlter(text: string | undefined, index: number, warnings: string[]):
 function scaled(text: string | undefined, current: number, global: number): number {
   const d = Number(text ?? '0');
   return Math.round((d * global) / current);
+}
+
+/** Evaluation must reject timing that application import would round or default. */
+function validatePreservedDuration(
+  text: string | undefined,
+  current: number,
+  global: number,
+  location: string,
+): void {
+  const declared = Number(text);
+  const exactTicks = (declared * global) / current;
+  if (!(declared > 0) || !Number.isSafeInteger(exactTicks) || exactTicks <= 0) {
+    throw new Error(`cannot preserve notation: ${location}: invalid or missing duration`);
+  }
 }
 
 function readTempo(el: Element): number | undefined {

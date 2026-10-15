@@ -209,11 +209,12 @@ export function useScoreDocument(
   servicesArg?: ScoreServices,
 ): ScoreDocument & { reRender(): void; setSplitMidi(value: number | null): void } {
   // The source's identity: the slug, or the dropped file's name and content.
+  const scanImport = source.kind === 'file' && !!source.scan;
   const slug = source.kind === 'library' ? source.slug : null;
   const fileName = source.kind === 'file' ? source.name : null;
   const fileBytes = source.kind === 'file' ? source.bytes : null;
   const fileKey = fileBytes ? fileIdentity(fileBytes) : null;
-  const sourceKey = JSON.stringify([slug, fileName, fileKey]);
+  const sourceKey = JSON.stringify([slug, fileName, fileKey, scanImport]);
 
   const handSize = useAppStore((s) => s.settings.handSize);
   const showEditorial = useAppStore((s) => s.settings.showEditorial);
@@ -295,8 +296,9 @@ export function useScoreDocument(
           input = bytes ?? new Uint8Array();
           sourceName = fileName ?? 'score.musicxml';
         }
-        const loaded =
-          splitMidi === null
+        const loaded = scanImport
+          ? await svc.engine.load(input, sourceName, { preserveNotation: true })
+          : splitMidi === null
             ? await svc.engine.load(input, sourceName)
             : await svc.engine.load(input, sourceName, { splitMidi });
         if (!live()) return;
@@ -330,7 +332,7 @@ export function useScoreDocument(
     return () => {
       session.cancelled = true;
     };
-  }, [slug, fileName, fileKey, sourceKey, splitMidi]);
+  }, [slug, fileName, fileKey, sourceKey, splitMidi, scanImport]);
 
   // 2. First solve: 'fingering' -> engine.solve -> 'rendering'.
   useEffect(() => {

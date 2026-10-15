@@ -1,0 +1,84 @@
+.scan-view {
+  max-width: 1440px;
+  --gap: 1.5rem;
+}
+.scan-view header {
+  --gap: 0.5rem;
+}
+.scan-view header > button {
+  justify-self: start;
+}
+.scan-filename {
+  overflow-wrap: anywhere;
+}
+.scan-intro,
+.scan-review {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+.scan-intro > *,
+.scan-review > * {
+  min-width: 0;
+}
+.scan-intro > section:first-child {
+  max-width: 36rem;
+}
+.scan-source img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--gray-2);
+}
+.pdf-preview canvas {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--gray-2);
+}
+.scan-download {
+  display: block;
+  text-align: left;
+}
+.scan-setup {
+  border-top: 1px solid var(--gray-2);
+  padding-top: 0.75rem;
+}
+.scan-view summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 0.6rem;
+}
+.scan-view pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  background: var(--gray-1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
+}
+.scan-decision {
+  border-top: 1px solid var(--gray-2);
+  padding-top: 1.5rem;
+  max-width: 52rem;
+}
+.scan-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.scan-confirm input {
+  width: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  accent-color: var(--ink);
+}
+@media (max-width: 700px) {
+  .scan-intro,
+  .scan-review {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .scan-view {
+    --gap: 1rem;
+  }
+}

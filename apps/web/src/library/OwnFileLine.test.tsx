@@ -16,9 +16,9 @@ describe('the end line', () => {
   it('is one quiet line whose file input is named by it, and opens a chosen score', async () => {
     const onFile = vi.fn();
     render(<OwnFileLine onFile={onFile} onRefuse={vi.fn()} />);
-    const input = screen.getByLabelText('Open your own MusicXML or MIDI file');
+    const input = screen.getByLabelText('Open your own score');
     expect(input).toHaveAttribute('type', 'file');
-    expect(input).toHaveAttribute('accept', '.musicxml,.xml,.mxl,.mid,.midi');
+    expect(input).toHaveAttribute('accept', '.musicxml,.xml,.mxl,.mid,.midi,.png,.jpg,.jpeg,.pdf');
     await userEvent.upload(input, new File(['<score-partwise/>'], 'song.musicxml'));
     await vi.waitFor(() => expect(onFile).toHaveBeenCalledTimes(1));
     expect(document.querySelectorAll('.is-red')).toHaveLength(0);

@@ -1,3 +1,4 @@
+import type { ScanSession } from '../scan/model.js';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import type { Level } from '../library/levels.js';
@@ -36,8 +37,13 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export type PieceSource =
-  { kind: 'library'; slug: string } | { kind: 'file'; name: string; bytes: Uint8Array };
-export type View = { name: 'library' } | { name: 'about' } | { name: 'score'; source: PieceSource };
+  | { kind: 'library'; slug: string }
+  | { kind: 'file'; name: string; bytes: Uint8Array; scan?: ScanSession };
+export type View =
+  | { name: 'library' }
+  | { name: 'about' }
+  | { name: 'scan'; session: ScanSession }
+  | { name: 'score'; source: PieceSource };
 
 export interface AppState {
   view: View;
@@ -58,6 +64,7 @@ export interface AppState {
   openLibrary(): void;
   openAbout(): void;
   openPiece(source: PieceSource): void;
+  openScan(session: ScanSession): void;
   setSettings(patch: Partial<Settings>): void;
   /**
    * Sets the open piece's own tempo factor, clamped to TEMPO_FACTOR_MIN..MAX; a value that is
@@ -246,6 +253,7 @@ export const useAppStore = create<AppState>()(
       practiceOpen: false,
       openLibrary: () => set({ view: { name: 'library' } }),
       openAbout: () => set({ view: { name: 'about' } }),
+      openScan: (session) => set({ view: { name: 'scan', session } }),
       openPiece: (source) => set({ view: { name: 'score', source } }),
       setSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
       setTempoFactor: (factor) =>

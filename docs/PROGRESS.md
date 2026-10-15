@@ -1,5 +1,11 @@
 # digitus2 — progress journal
 
+## Library deployment (2026-10-15)
+
+The user explicitly approved merging and deploying the library. Main was fast-forwarded from `5a39676` to the verified library commit `337b71c` and pushed. [GitHub Pages deployment 38804060936](https://github.com/MarchalMaxim/digitus2/actions/runs/38804060936) succeeded; the published app is [digitus2](https://marchalmaxim.github.io/digitus2/), with 253 pieces including 50 Advanced pieces. This release includes both expansion waves (104 additions since the former 149-piece main). Independent live-site checks at 1280 px and 360 px confirmed all level counts, Beethoven Op. 79/I and Chopin Op. 28/3 notation/fingerings, correct `/digitus2/assets/` requests, no horizontal overflow and zero console/page/network errors. Evidence and reviewed screenshots are in the library worktree's ignored `content/_build/bulk-review/live-pages-smoke.json` and adjacent PNGs. The local preview remains at http://localhost:4191/. Earlier statements below that merging was unapproved describe the historical state and are superseded by this entry.
+
+Scanning research is separately committed and pushed as `d8ef89e` on `codex/omr-spike`; it is not merged or deployed. The real browser-only oemer prototype completed Twinkle in 21 min 08 s with native label parity, but rhythm/bar errors, missing meter/beam export and latency still block production. All 12 verification gates and explicit formatting checks passed. See the [measured research report](https://github.com/MarchalMaxim/digitus2/blob/d8ef89e/docs/research/browser-omr-next-2026-10-15.md). The user requires recognition within the application, without an external recognition service. Codex — Astra integration, Sol 6.1 implementation and independent verification.
+
 ## Bulk library wave (2026-10-15)
 
 ### Final release owner and current evidence

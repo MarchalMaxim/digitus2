@@ -67,6 +67,8 @@ Start with CLAUDE.md, then this file's Next list and docs/TODO.md; the plans und
 
 ## Directory ownership (concurrent agents)
 
+New user direction (2026-10-15): proceed with the actual scanning feature now, using a parallel Sol 6.1 fleet. This overrides the historical requirement to wait until M8. The verified evaluation harness remains the accuracy oracle. Initial assignments are read-only feasibility and design until the coordinator records exact implementation paths: browser recognizer execution, output conversion/validation, and minimal app import flow. Codex — Astra orchestration, Sol 6.1 agents. Commit and push authorized; no merge to main authorized.
+
 Current Codex scanning spike (2026-10-15), isolated on `codex/omr-spike`:
 
 - Coordinator: `research/omr/**`, root test wiring, `docs/**`, and integration/verification. No merge to main without fresh explicit user confirmation.

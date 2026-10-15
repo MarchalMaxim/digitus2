@@ -1,5 +1,7 @@
 # Scanning spike: reproducible recognition evaluation
 
+_Codex · Astra orchestration · Sol 6.1 implementation and independent reviews · 2026-10-15._
+
 2026-10-15. T9 / M10. This change prepares the experiment and scores recognition exports; it does not add PDF/photo import to the application. No recognizer has yet been measured on these fixtures. The public app stays browser-only.
 
 ## What is implemented

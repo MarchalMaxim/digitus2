@@ -2,6 +2,8 @@
 
 ## Latest scanning scope (2026-10-16)
 
+Both supplied real-photo acceptance cases fail. The second, sharper 1200 × 1600 image got past scale detection but produced internal export errors and only two small fragments; independent source/render review rejected them. T9 remains blocked on musical recognition quality. See the second-photo evidence in docs/reviews/scanning-2026-10-15.md.
+
 The user's real book-page JPEG failed in the live preview on 2026-10-16: native recognition rejected six-pixel staff spacing before producing XML. Three bounded image-preparation controls and one existing oemer dewarping control were independently rejected for missing music, wrong rhythm or wrong hand assignment. No failed preprocessing/fallback is shipped. Specific resolution, incomplete-export and timeout guidance is now implemented and independently checked, but the supplied photo is still not usable. Preserve the original and keep user photo/results ignored. Tested original-PDF and clean-scan workflows can be reviewed in a draft PR; ordinary book-photo recognition remains blocked.
 
 - T9: user accepts an experimental first release for clear photos of printed music, with future recognition improvements. Preserve original PDFs, show the source beside the recognized score for review, and expose the optional PC connection only in the import context. Python is allowed; GitHub Pages stays the frontend. Recognition errors remain and must be visible rather than silently corrected or labeled perfect.

@@ -1,5 +1,11 @@
 # digitus2 — progress journal
 
+## Second real-photo confirmation (2026-10-16)
+
+The user supplied a sharper second image of the same book page (1200 × 1600, 178089 bytes). Its exact bytes matched an earlier preserved user job and were submitted once through the current app/worker. Audiveris exited zero after 7.172 seconds but hit an internal wedge/export error and produced two tiny, incomplete exports; the worker reported incomplete-recognition and withheld fingering use. Independent rendering found only a 14-note single-staff fragment and a nine-note partial/alternative fragment, not the four main piano systems. This is a reconstruction failure beyond the first image's six-pixel scale rejection. Both real-photo acceptance cases remain failed; neither readable input is evidence that the current recognizer can transcribe it.
+
+Private proof remains under ignored research/omr/results/connector-wave/real-photo-2-2026-10-16/final-ui/ and independent renders under app-scan-review/private-photo/second-photo/. No source photo or recognized private excerpt is published. PR #2 remains draft. Sol 6.1 fixed a separate GitHub CI playback-test race by selecting and sampling keys in one browser task; product behavior and assertions are unchanged. A deterministic control reproduced the stale sample, and all 12 focused CI-mode checks plus scoped lint/format passed. The full GitHub rerun is pending. This is not a recognition-quality fix. Codex — Astra documentation/review/git; Sol 6.1 reproduction and independent musical review.
+
 ## Draft scanning handoff (2026-10-16)
 
 The implementation is frozen for a draft PR to main on codex/scanning-pc, including origin/main 3efe787 and its motion work. The user's actual book-photo transcription problem remains unresolved. Three bounded Audiveris preparation controls and one existing native oemer/dewarping run produced failures or musically unusable output; independent review rejected them. No failed preprocessing, alternative recognizer or hand-written replacement XML is shipped. Specific six-pixel staff-resolution, incomplete-export and timeout errors now explain failures and preserve retry. Actual original-photo error handling was exercised in the production preview; the original bytes are unchanged. Private photo/results remain ignored. This supersedes earlier clear-photo readiness claims below.

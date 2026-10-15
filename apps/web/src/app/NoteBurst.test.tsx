@@ -75,6 +75,21 @@ describe('the note burst', () => {
     expect(shapes.size).toBe(50); // no two alike
   });
 
+  it('draws half as many notes again for a double-click, exactly one of them in the accent', () => {
+    expect(drawBurst(() => 0, true)).toHaveLength(3);
+    expect(drawBurst(() => 0.9999, true)).toHaveLength(6);
+    let seed = 11;
+    const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    for (let k = 0; k < 50; k++) {
+      const double = drawBurst(random, true);
+      expect(double.length).toBeGreaterThanOrEqual(3);
+      expect(double.length).toBeLessThanOrEqual(6);
+      expect(double.filter((n) => n.accent)).toHaveLength(1);
+      for (const n of double) expect(n.dy).toBeLessThan(0);
+      expect(drawBurst(random).some((n) => n.accent)).toBe(false);
+    }
+  });
+
   it('draws its notes where the click was, hidden from assistive technology', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
@@ -91,6 +106,22 @@ describe('the note burst', () => {
     expect(burst.querySelector<HTMLElement>('.note-burst-note')!.style.translate).toMatch(/px/);
     expect(container.querySelectorAll('.is-red')).toHaveLength(0);
     expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    p.remove();
+  });
+
+  it('lets a double-click send up a bigger burst with one note in the accent', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+    const { container } = render(<NoteBurst />);
+    const p = document.createElement('p');
+    document.body.append(p);
+    act(() => {
+      p.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, clientX: 40, clientY: 40, detail: 2 }),
+      );
+    });
+    expect(container.querySelectorAll('.note-burst-note')).toHaveLength(5);
+    expect(container.querySelectorAll('.note-burst-note.is-red')).toHaveLength(1);
     p.remove();
   });
 

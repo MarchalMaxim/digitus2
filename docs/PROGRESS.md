@@ -24,6 +24,10 @@ Everything built so far is on `main` and pushed; the site deploys from it (https
 - `.claude/launch.json`: the desktop app's dev-server entries (web-dev on 5173, web-preview on 4173); nothing else depends on it.
 - The coordinator's private memory (user preferences): everything that matters is restated in CLAUDE.md (fixed decisions), this file (user rules, milestones, Next) and docs/TODO.md (every user request with the judgement and status).
 
+**The verification loop, in plain words.** `pnpm verify` is the definition of done: one command, eleven checks in a row, and a change counts only when all pass. The ordinary ones are typecheck, lint, formatting, unit tests, a production build, a bundle-size budget and the Playwright end-to-end tests that drive the app in a browser at desktop and phone widths. The project-specific ones are a repository hygiene check, a colour guard (black, white, one red and nothing else) and three benchmark gates that score the fingering engine against the floors in `benchmarks/floor.json`: a change that makes the fingerings worse than the recorded floor fails the loop even when every test passes. CI runs the same checks on GitHub. Details and the recovery steps after a restart: docs/verification-loop.md.
+
+**PIG, in plain words.** The Piano Fingering Dataset (Nakamura, Saito and Yoshii, Kyoto University): 150 classical piano pieces where professional pianists wrote the fingering of every note, several pianists per piece; the standard benchmark of the fingering literature. The engine's main scorecard is how often its chosen finger matches the human one on PIG's test pieces, and its learned weights were trained on PIG's training pieces. Its licence allows research use but not redistribution, so it is never committed: download it from the PIG site (search "PIG dataset piano fingering Nakamura"; the verification spec records the URL used) into `research/data/pig/`. Until then the benchmark step fails and the other checks run.
+
 Start with CLAUDE.md, then this file's Next list and docs/TODO.md; the plans under docs/superpowers/plans/ carry the task-level detail for M5 and L2.
 
 ## User rules (standing)

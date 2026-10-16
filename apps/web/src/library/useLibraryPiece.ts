@@ -6,7 +6,9 @@ import { loadPiece, type LibraryPiece } from './manifest.js';
  * slug, and for a slug the library does not hold.
  */
 export function useLibraryPiece(slug: string | null): LibraryPiece | null {
-  const [loaded, setLoaded] = useState<{ slug: string; piece: LibraryPiece | undefined } | null>(null);
+  const [loaded, setLoaded] = useState<{ slug: string; piece: LibraryPiece | undefined } | null>(
+    null,
+  );
   useEffect(() => {
     if (slug === null) return;
     let live = true;

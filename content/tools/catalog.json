@@ -207,6 +207,12 @@
     "title": "Folk tunes from the MuseScore archive",
     "kind": "genre",
     "genre": "folk"
+  },
+  {
+    "id": "pdmx-advanced",
+    "title": "Advanced piano from the MuseScore archive",
+    "kind": "genre",
+    "genre": "classical"
   }
 ],
   "pieces": [

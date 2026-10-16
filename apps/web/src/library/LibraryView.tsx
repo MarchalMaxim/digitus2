@@ -118,7 +118,7 @@ export function LibraryView() {
   const rememberScroll = useRememberLibraryScroll();
   const pieces = libraryPieces();
   const level = arrivalLevel(pieces, chosenLevel, lastPlayed);
-  const layout = useMemo(() => libraryLayout(pieces, { level, query }), [level, query]);
+  const layout = useMemo(() => libraryLayout(pieces, { level, query }), [pieces, level, query]);
   const start = startTarget(pieces, lastPlayed);
   // Every search result list shares the key 'search': keystrokes after the first swap the rows
   // without a fade (spec 6.4).

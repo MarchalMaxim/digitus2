@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { LEVEL_COUNTS, libraryReady, showLevelOf } from './helpers/library.js';
+import { LEVEL_COUNTS, libraryReady, searchCount, showLevelOf } from './helpers/library.js';
 import { libraryScore } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
 import { dropFrameShown, pieceRows } from './helpers/states.js';
@@ -106,13 +106,13 @@ test('library: the arrow keys choose a level; the list follows and the pill keep
   await expectOneRed(page, 'Easy chosen');
 });
 
-test('library: Advanced opens all 50 pieces with one red element and no overflow', async ({
+test('library: Advanced opens all its pieces with one red element and no overflow', async ({
   page,
 }) => {
   await page.goto('/');
   await libraryReady(page);
   await page.getByRole('radio', { name: 'Advanced', exact: true }).check();
-  await expect(pieceRows(page)).toHaveCount(50);
+  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[6]!);
   await expect(
     page.getByRole('heading', { name: 'Bach, The Well-Tempered Clavier', exact: true }),
   ).toBeVisible();
@@ -262,7 +262,10 @@ test('library: "fur elise" finds Für Elise; Escape brings back the level and it
   await page.getByRole('radio', { name: 'Easy', exact: true }).check();
   const field = page.getByRole('searchbox', { name: 'Search the library' });
   await field.fill('fur elise');
-  await expect(pieceRows(page)).toHaveCount(1);
+  await expect(pieceRows(page)).toHaveCount(searchCount('fur elise'));
+  await expect(
+    page.getByRole('button', { name: /^Open Für Elise \(Bagatelle in A minor\)/ }),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Intermediate' })).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(0);
   await expectOneRed(page, 'search');
@@ -289,7 +292,7 @@ test('library: back from a piece found by search shows the same search', async (
   await page.getByRole('button', { name: /^Open Minuet in G minor/ }).click();
   await page.getByRole('button', { name: 'Back to the library' }).click();
   await expect(page.getByRole('searchbox', { name: 'Search the library' })).toHaveValue('minuet');
-  await expect(pieceRows(page)).toHaveCount(14);
+  await expect(pieceRows(page)).toHaveCount(searchCount('minuet'));
 });
 
 test('library: a file dropped on the window opens it; a drag that leaves hides the frame', async ({

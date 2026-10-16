@@ -240,11 +240,13 @@ describe('the expanded library at 253 pieces (spec sections 5, 6, 7)', () => {
 
 describe('the library with the MuseScore archive (2026-10-16)', () => {
   const archive = allPieces.filter((p) => p.collectionId.startsWith('pdmx-'));
-  it('holds the archive pieces in two collections, each with a known genre', () => {
+  it('holds the archive pieces in three collections, each with a known genre', () => {
     expect(archive.length).toBeGreaterThanOrEqual(1000);
     expect(new Set(archive.map((p) => p.collectionId))).toEqual(
-      new Set(['pdmx-classical', 'pdmx-folk']),
+      new Set(['pdmx-classical', 'pdmx-folk', 'pdmx-advanced']),
     );
+    // the advanced collection is the archive's level 6, and only that
+    for (const p of archive) expect(p.collectionId === 'pdmx-advanced', p.slug).toBe(p.level === 6);
     const ids = new Set(GENRES.map((g) => g.id));
     for (const p of archive) expect(ids.has(p.genre), p.slug).toBe(true);
   });
@@ -257,7 +259,9 @@ describe('the library with the MuseScore archive (2026-10-16)', () => {
 
 describe('the core 30 (a library of 40 pieces or fewer)', () => {
   it('shows every level, each flat', async () => {
-    const core = [...(await loadPieceDetails()).values()].filter((p) => p.benchmarkSet === 'core30');
+    const core = [...(await loadPieceDetails()).values()].filter(
+      (p) => p.benchmarkSet === 'core30',
+    );
     const layout = libraryLayout(core, { level: 3, query: 'minuet' });
     expect(layout.kind).toBe('all'); // no search under 100 pieces: the query is ignored
     if (layout.kind !== 'all') return;

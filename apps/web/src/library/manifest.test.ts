@@ -67,11 +67,9 @@ describe('manifest', () => {
     }
   });
   it('finds a piece by its slug in the index and its full entry on demand', async () => {
-    expect(pieceBySlug('twinkle-twinkle-little-star')?.title).toBe(
-      'Twinkle, Twinkle, Little Star',
-    );
+    expect(pieceBySlug('twinkle-twinkle-little-star')?.title).toBe('Twinkle, Twinkle, Little Star');
     expect(pieceBySlug('no-such-piece')).toBeUndefined();
-    expect((await loadPiece('no-such-piece'))).toBeUndefined();
+    expect(await loadPiece('no-such-piece')).toBeUndefined();
   });
   it('resolves a score path to a URL', async () => {
     const piece = (await loadPiece('twinkle-twinkle-little-star'))!;

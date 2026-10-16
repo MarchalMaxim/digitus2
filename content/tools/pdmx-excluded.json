@@ -53,11 +53,13 @@
   "pdmx-chopin-nocturne-op27-no2-d-flat-major-bb4f9a44": "measure 75: voice 1 lasts 721/240 quarters, time signature allows 3",
   "pdmx-chopin-prelude-op-28-no-24-6654d318": "measure 58: voice 1 lasts 1441/480 quarters, time signature allows 3",
   "pdmx-chopin-waltz-in-a-minor-piano-solo-e76b6003": "54 <fingering> elements in a stripped file",
+  "pdmx-clementi-sonatina-op-36-no-1-retrograde-0ed52aa9": "measure numbers not unique",
   "pdmx-cornelius-gurlitt-op-82-92e0f093": "28 <fingering> elements in a stripped file",
   "pdmx-csuda-j-l-l-nk-034af589": "1 <fingering> elements in a stripped file",
   "pdmx-czerny-160-kurze-bungen-op-821-no-11-287d5788": "29 <fingering> elements in a stripped file",
   "pdmx-czerny-160-kurze-bungen-op-821-no-2-10a17643": "29 <fingering> elements in a stripped file",
   "pdmx-czerny-160-kurze-bungen-op-821-no-4-38ff7014": "46 <fingering> elements in a stripped file",
+  "pdmx-czerny-air-napolitain-santa-lucia-b08d3364": "56 <fingering> elements in a stripped file",
   "pdmx-czerny-op-599-n-63-ebbe336e": "64 <fingering> elements in a stripped file",
   "pdmx-czerny-school-of-velocity-op-299-no-1-79c61772": "music21: 28 notes with zero duration",
   "pdmx-czerny-the-art-of-finger-dexterity-op-74-03030181": "music21: 140 notes with zero duration",
@@ -73,8 +75,10 @@
   "pdmx-elementary-studies-op-176-etude-3-by-jea-95eb4bab": "19 <fingering> elements in a stripped file",
   "pdmx-elementary-studies-op-176-etude-7-by-jea-df65c88b": "92 <fingering> elements in a stripped file",
   "pdmx-elisabeth-jacquet-de-la-guerre-suite-en-236d779a": "measure 1: voice 1 lasts 221/2 quarters, time signature allows 8",
+  "pdmx-erik-satie-enfantillages-pittoresques-be-639ad423": "197 <fingering> elements in a stripped file",
   "pdmx-f-couperin-les-tambourins-fa6705d3": "measure numbers not unique",
   "pdmx-f-r-elise-c292b667": "no time signature",
+  "pdmx-fr-d-ric-chopin-prelude-in-d-minor-op-28-abdac1f6": "measure 14: backup before measure start",
   "pdmx-fr-d-ric-chopin-prelude-in-f-minor-op-28-cadda07c": "measure 8: backup before measure start",
   "pdmx-georg-friedrich-h-ndel-sarabande-dfb4b1c2": "37 <fingering> elements in a stripped file",
   "pdmx-gnossienne-no-1-32750f86": "no time signature",
@@ -86,6 +90,7 @@
   "pdmx-haydn-sonata-in-g-major-hob-xvi-8-a684ee5f": "measure numbers not unique",
   "pdmx-home-on-the-range-secondary-dominants-c3f6eb73": "music21: 112 notes with zero duration",
   "pdmx-how-great-thou-art-f-c0d8c404": "music21: 128 notes with zero duration",
+  "pdmx-hungarian-dance-no-5-in-f-minor-7ab00fd7": "music21: 12 notes with zero duration",
   "pdmx-inventio-1-c-major-bwv-772-43258728": "116 <fingering> elements in a stripped file",
   "pdmx-inventio-2-c-minor-bwv-773-2eaae4eb": "166 <fingering> elements in a stripped file",
   "pdmx-j-s-bach-invention-no-5-in-eb-major-bwv-e9b6f4e3": "156 <fingering> elements in a stripped file",
@@ -130,6 +135,7 @@
   "pdmx-mozart-minuet-in-f-major-k2-easy-54a6cacf": "measure 7: voice 1 lasts 11/3 quarters, time signature allows 3",
   "pdmx-nocturne-no-20-in-c-sharp-minor-b-49-0a320de1": "158 <fingering> elements in a stripped file",
   "pdmx-oh-canada-08b84e0e": "37 <fingering> elements in a stripped file",
+  "pdmx-old-french-song-0bfc7f02": "23 <fingering> elements in a stripped file",
   "pdmx-op-299-22-8bf2b553": "17 <fingering> elements in a stripped file",
   "pdmx-peio-09-2-8e6a8fed": "no time signature",
   "pdmx-piano-24-la-coronaci-n-5d24a01c": "88 <fingering> elements in a stripped file",
@@ -143,6 +149,7 @@
   "pdmx-sarabande-pachelbel-0d456f15": "measure 16: backup before measure start",
   "pdmx-scandinavian-vals-medley-0e50e07e": "music21: 136 notes with zero duration",
   "pdmx-scarlatti-sonata-k-208-7318622d": "143 <fingering> elements in a stripped file",
+  "pdmx-scarlatti-sonate-en-mi-majeur-k531-l430-3af738bc": "270 <fingering> elements in a stripped file",
   "pdmx-schubert-s-serenade-piano-solo-5676763d": "measure 26: voice 1 lasts 321/80 quarters, time signature allows 4",
   "pdmx-schumann-album-for-the-young-op-68-no-1-591fa5b9": "53 <fingering> elements in a stripped file",
   "pdmx-schumann-album-for-the-young-op-68-no-10-9dd09332": "50 <fingering> elements in a stripped file",
@@ -162,6 +169,7 @@
   "pdmx-schumann-album-for-the-young-op-68-no-6-bbff92a3": "52 <fingering> elements in a stripped file",
   "pdmx-schumann-album-for-the-young-op-68-no-7-3de76791": "105 <fingering> elements in a stripped file",
   "pdmx-schumann-album-for-the-young-op-68-no-8-d93a343a": "50 <fingering> elements in a stripped file",
+  "pdmx-sheeran-shape-of-you-3768c39e": "music21: 6 notes with zero duration",
   "pdmx-six-unison-melodies-3bf25da6": "measure numbers not unique",
   "pdmx-sleep-df242a9d": "measure 24: voice 1 lasts 9/2 quarters, time signature allows 4",
   "pdmx-sonatina-in-g-major-ahn-5-c44662fc": "99 <fingering> elements in a stripped file",
@@ -177,14 +185,858 @@
   "pdmx-tchaikovsky-april-9f329b47": "measure 2: voice 1 lasts 4 quarters, time signature allows 3",
   "pdmx-th-me-du-1er-mouvement-de-la-sonate-k-33-30916241": "55 <fingering> elements in a stripped file",
   "pdmx-the-art-of-preluding-op-300-n-10-by-carl-072954de": "44 <fingering> elements in a stripped file",
+  "pdmx-the-entertainer-0af422e7": "music21: 48 notes with zero duration",
   "pdmx-the-star-spangled-banner-easy-5119b7be": "no time signature",
   "pdmx-unfailing-love-jw-original-105416aa": "measure 4: voice 1 lasts 39/8 quarters, time signature allows 4",
   "pdmx-variation-ber-einen-walzer-von-diabelli-9d2700fa": "measure numbers not unique",
   "pdmx-w-a-mozart-menuet-e6c5e17d": "13 <fingering> elements in a stripped file",
   "pdmx-waltz-a-minor-w-live-recording-opus-post-788bea3a": "26 <fingering> elements in a stripped file",
+  "pdmx-warschauer-mazurka-4b97cb79": "17 <fingering> elements in a stripped file",
   "pdmx-we-wish-you-a-marry-christmas-piano-ab1c1b31": "music21: 48 notes with zero duration",
   "pdmx-xml-swan-song-serenaded957no4-dminor-01-808504d7": "54 <fingering> elements in a stripped file",
   "pdmx-zarabanda-sarabande-f907ae41": "94 <fingering> elements in a stripped file"
  },
- "duplicates": {}
+ "duplicates": {
+  "02c443732c3847a4868eed5de7021c41fc00ca19b26d98a0595c46ce65de5552": {
+   "of": "7337c1bed9db6f991ad0a13a909860bcc934c44f3d001ba96a5e9b062bc5b051",
+   "kind": "near",
+   "similarity": 0.966
+  },
+  "03d95ea1601fd009f98e235322b864147fd43bc43a02829270ff5ef653bebb68": {
+   "of": "1fe58298fb6c621d25cf13fde82ed65c1bbf86af6ba28c424c688f70b216d239",
+   "kind": "near",
+   "similarity": 0.964
+  },
+  "055b17309b1954680e3d98df5f39007e11b77c7543a5a503e912168afa52a03c": {
+   "of": "mozart-sonata-k545-mvt1",
+   "kind": "near",
+   "similarity": 0.995
+  },
+  "05b024dd2a23a3185fe6e3a06a451bf38b04ec1ea965f185e4e3035800367d41": {
+   "of": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
+   "kind": "same tune, same level",
+   "similarity": 0.887
+  },
+  "05e2903c9a05a21db134dc7e42dc99e77f73bb0f52d62f46e8bacccb6d888f11": {
+   "of": "90a82889581f04756c97e7e2f7089420f27ad048030f0aa2e814caf97da7a418",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "062e7d027347ef3c2c20791a5f6e488799e52a37fe227f054e6b4cceaad6ec0d": {
+   "of": "bach-minuet-g-minor-bwv-anh-115",
+   "kind": "near",
+   "similarity": 0.98
+  },
+  "06bb19bcc3217e831cbe905dafa5600420b33aa97f5e93cb8d9382f7110de6c0": {
+   "of": "twinkle-twinkle-little-star",
+   "kind": "same tune, same level",
+   "similarity": 0.963
+  },
+  "0796a5f386fe5e978afaf14fee3f1b8f9e4ddd10e300c5788e3e842de74c0797": {
+   "of": "schumann-op68-no14-little-study",
+   "kind": "near",
+   "similarity": 0.995
+  },
+  "0a5d1f4bdd00f7910a0976a8ae6f78db9877f37c4d9e80cdda3aba31f40a0e29": {
+   "of": "bach-minuet-g-major-bwv-anh-114",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "0d00e3404cefb12e47a986efd3597ccee75054e006653f73c0131887b867d2f2": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "0d59ddb326a5f0a2fa726c11616c70bc9cc3c854dc855c76427dc4dbe0e93635": {
+   "of": "645fae41953b0e2ad99be9c5eb8ec1f4b109d1a79fb1d65678bc6f29063be642",
+   "kind": "same tune, same level",
+   "similarity": 0.831
+  },
+  "0e27efa883a94526662102d61618ef9baf5f64b908bbc4d5067f560d2e74bec3": {
+   "of": "eb8e5d47349296d60983ee027bfe260d5eea54f5ce367adf53eb1581bfa0cd91",
+   "kind": "same tune, same level",
+   "similarity": 0.89
+  },
+  "0e5c27b3c5d8147c5df0a85897ed67dc082468310070192b1233fde7c9ed6ad5": {
+   "of": "bach-minuet-g-major-bwv-anh-116",
+   "kind": "near",
+   "similarity": 0.987
+  },
+  "0fd3fd7a3242c5f0697abc357c0593d8313fca2e7f91f2bb09fe58c1a5a3d53d": {
+   "of": "bach-minuet-c-minor-bwv-anh-121",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "1002b52a592948dd08c548e54a21f47942ee3937eaf85e50992fd73581ecf8fa": {
+   "of": "mozart-sonata-k545-mvt1",
+   "kind": "near",
+   "similarity": 0.975
+  },
+  "10a17643b675a40d918b451f242d2ccc41a3b4e7871159575c1f0100255cbd9b": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-002-czerny-op-821-no-002-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "112172581500b9dc294938c4b362c3ff1739ba0e22997483a1c9def0e88a241b": {
+   "of": "schumann-op68-no5-little-piece",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "13f79691edd075f6d4e234bb772198b9150e78fb051493739942bc64a945d56a": {
+   "of": "aa05358e867b49b9248b343a91bc974268e96b2a1de52889b75d1b7ea3d4370e",
+   "kind": "near",
+   "similarity": 0.932
+  },
+  "145c7d66a09a1c279227c1a48c8362fde8d8c26533a4beedf939489add092075": {
+   "of": "bach-minuet-g-major-bwv-anh-114",
+   "kind": "near",
+   "similarity": 0.99
+  },
+  "171dadf0ddc41d83ef114967b74700a51e43b95f27aa018410a121fbd3585bda": {
+   "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
+   "kind": "same tune, same level",
+   "similarity": 0.938
+  },
+  "1e86be17f98213bd481592fa539a9272c7fa71c74cda057fe1659092ffbaff8e": {
+   "of": "bach-minuet-g-minor-bwv-anh-115",
+   "kind": "near",
+   "similarity": 0.97
+  },
+  "2061724cdd0956e85ce9f91bccd1783c38c80ceac3b73bab504da17a9c9bd30e": {
+   "of": "bulk-bachjs-bwv515-anna-magdalena-20a-anna-magdalena-20a-ly",
+   "kind": "near",
+   "similarity": 0.959
+  },
+  "20d9654533193e878f58fceedf7bd23799d988f7ea4308dcd9b119e3ce9381c2": {
+   "of": "burgmuller-op100-no2-arabesque",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "227b7fe66caa70cb8856ab471581d05b8a73ff409e50fffee48d89405216e0ea": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "287d578834c042d1c2f6d658a7c1372aa6f19c5d578eb6d3be05a9231f2f8a4e": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-011-czerny-op-821-no-011-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "2b6fad31aeff0abf8dd041cf0c8ac48f2c2231d2bbadb85905fb4ecb8331187d": {
+   "of": "07c49c7d42d4a218a3caa996af1e0b0dc12b20abea6e5aa0cb4902e7dccce090",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "2b9c609b04ce9417524d7fff199835042f6089d88fd6770939dbce5055c09a62": {
+   "of": "schumann-op68-no10-the-happy-farmer",
+   "kind": "near",
+   "similarity": 0.978
+  },
+  "2eaae4eb8e6b1bd04da8a725bdccb717dd8e47dc4bea58dda917e9e6c2ca45bf": {
+   "of": "bach-invention-no2-bwv-773",
+   "kind": "near",
+   "similarity": 0.969
+  },
+  "2ec021a67483c282a85c5d74bc640bc899332a207d5de750b68930010c0c29f4": {
+   "of": "f774683f5592f44441681fac229483a309fea60013e9b272f29414eed6e7f4ec",
+   "kind": "near",
+   "similarity": 0.975
+  },
+  "32750f86dc5730f31e4557c3ec504852c92b52dc4444248879a8e35e742daf09": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "32e92e76443a8da41d4b3a3b5f970d484f49b2b73e7bb8627d0278eb262be63b": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "33fdd088a47044316808f62db1a13de222c21c2276503696685720a37f8e70bc": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "34625e0a35700a26d1132eea54de6a9d1c8d7f57ca08f1c58e364f829d965a3a": {
+   "of": "schumann-op68-no3-humming-song",
+   "kind": "near",
+   "similarity": 0.982
+  },
+  "38ff7014b1a8a5061c5f0ede023cb748dc4118b42ab24db63b5cecae1b876ed0": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-004-czerny-op-821-no-004-ly",
+   "kind": "near",
+   "similarity": 0.986
+  },
+  "395495e1f28da6d7e0783d44e71b574a5f36599d048fe8c5aedcc750930cff68": {
+   "of": "bach-prelude-c-major-bwv-846",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "3ab718ad7e1b84fa338863733eb1f7bbd2f2be697e8f8c1cc2ab3dfb44c5127f": {
+   "of": "668d5efa59ca432f823e81ece28aacac7de57c00f88bef9a9526efc736bdbf86",
+   "kind": "near",
+   "similarity": 0.918
+  },
+  "3cdc2665ce0beb505dd264c76748d2ffab4369d838af067171f68532e367ba70": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "3e3e04e6db8f173f21320410470faf0d95cac20c18ebd226113313b5eedeb64f": {
+   "of": "bach-invention-no1-bwv-772",
+   "kind": "near",
+   "similarity": 0.96
+  },
+  "401c1a27d47daf544ab4532e2ddb6efc05fef28498d9d51bcb708c90bb5143fa": {
+   "of": "schumann-op68-no2-soldiers-march",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "424183bb58c9342a340a6c451c4ca6141d863463caaa4799547041f3c6a72188": {
+   "of": "burgmuller-op100-no7-le-courant-limpide",
+   "kind": "same tune, same level",
+   "similarity": 0.827
+  },
+  "42ed0195e65b9d735a060b1cf1f536d843d825d69aa472a53f6095eed36c77f9": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-005-czerny-op-821-no-005-ly",
+   "kind": "near",
+   "similarity": 0.971
+  },
+  "43258728797b234036168521a3bd9d02d01d50e69379a69e03c53e225b7ccc21": {
+   "of": "bach-invention-no1-bwv-772",
+   "kind": "near",
+   "similarity": 0.998
+  },
+  "48b9d4f1fe67e4a1ebd67ea3ad3594705b0a1a6cbd6f6101f009b88aee60f8af": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "49f6cacd2dc22f276e9683699f1ba08b8a0a9b4d3814ee2b845fd637924c1d4c": {
+   "of": "chopin-prelude-op28-no4",
+   "kind": "same tune, same level",
+   "similarity": 0.987
+  },
+  "4bffd4804e7e5a3a7ad62b6d66be04e36ea54bd47ce32a3e1dc61a633d8c92bb": {
+   "of": "beethoven-fur-elise-woo-59",
+   "kind": "near",
+   "similarity": 0.997
+  },
+  "54a6cacf9b319f2e384794a751e54c4cb4f4dc8d65e65d6169725f2fd8116be9": {
+   "of": "mozart-minuet-f-major-k2",
+   "kind": "same tune, same level",
+   "similarity": 0.841
+  },
+  "558c7e5f1d22b5213af092931085827d730ab36613019b924b0284f75a059ba4": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "55cfd74464ac9d31bfd0888a38aaad7dcb56f7cd447d6ef04047fb63659c7f7e": {
+   "of": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
+   "kind": "same tune, same level",
+   "similarity": 0.885
+  },
+  "591fa5b9b853fb12d3bce9e9213b829275ee325bbdebcb2a4707f9310fa1bad4": {
+   "of": "schumann-op68-no1-melody",
+   "kind": "near",
+   "similarity": 0.984
+  },
+  "5a7fa6b04811406a3cc312b86868f1a051df88db1876bd58b325bff63247b513": {
+   "of": "bach-invention-no1-bwv-772",
+   "kind": "near",
+   "similarity": 0.991
+  },
+  "5b0d5058d1d898a6fdd10e52556499273a8e5f9faaddaae9d7254765f7b69256": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-003-czerny-op-821-no-003-ly",
+   "kind": "same tune, same level",
+   "similarity": 0.974
+  },
+  "5b1c3de2ab1aceb142d578de5069ccae732020685efb544f5f159c8d68b21afc": {
+   "of": "63104cdfdddd8552f6db2c091bcfc46affba3e3b0297de86ddc076613c454db7",
+   "kind": "same tune, same level",
+   "similarity": 0.922
+  },
+  "5b27e901fb2b580b820cffe5632596aede7e88ba3698c724c59e7e1afa0eb68d": {
+   "of": "bach-minuet-g-major-bwv-anh-114",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "5cbd69812774e0902fb33b051e0645c122de8d8a000e14af13f2f440b6e7e313": {
+   "of": "1402b6fb6ca055b2b58cd30130f64630e9d7cc38818588ec0d02a07e4a2b4220",
+   "kind": "near",
+   "similarity": 0.993
+  },
+  "5dc31e6ee6095a52fd45108dd2ca2c928adb2388442f81a494582ebef173f538": {
+   "of": "128216c0e39ca306233809cc9e4ac0b131742dd3f79965fd590ece4dcd1a0d30",
+   "kind": "near",
+   "similarity": 0.92
+  },
+  "5ef1a5c7e3c1cd641a9e039c0b11ec2d93a979a624eec03a908a1be51f63b528": {
+   "of": "bach-minuet-g-major-bwv-anh-116",
+   "kind": "near",
+   "similarity": 0.987
+  },
+  "5f47c11ad8e7bb15a0415f6250c27bb3ec40420e8559bb0e7b8699a93816e3e7": {
+   "of": "2e181b4ee0908550930848999c971bfe31a710686f54ee86603ee77bdde3dcb0",
+   "kind": "near",
+   "similarity": 0.995
+  },
+  "5f8d83e0b6817d1361759e8b22945efeae2d53ed48dc4fba106f618f6390af09": {
+   "of": "mozart-minuet-f-major-k2",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "5fb9729a6c3119b590af24b6d937f5f78ff12cffb9348b2c37bb8a57ffafdeb7": {
+   "of": "bach-minuet-c-minor-bwv-anh-121",
+   "kind": "near",
+   "similarity": 0.967
+  },
+  "616b7fb329e5c6415a10c9db60eb4dd2df1b541c84424c986513490eeacb2139": {
+   "of": "bach-prelude-c-major-bwv-846",
+   "kind": "same tune, same level",
+   "similarity": 0.951
+  },
+  "664518971e6d4379d2f10dcd02cd0b2121bd24dd68953017473ad33cea2e4b61": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "6a59d6d185f6cf28034d68dabf5a7654b7c4f710d2526810aab3037104eb60cf": {
+   "of": "90a82889581f04756c97e7e2f7089420f27ad048030f0aa2e814caf97da7a418",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "6fece3c3ded9c72391b52086cb473b3f9e24fd0f0ad07fc7579b89027d413da5": {
+   "of": "bach-prelude-c-major-bwv-846",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "73bef227a30b983ac95cbe89d6acaf8473edd68fff971bd8d49118b65ac2856c": {
+   "of": "schubert-moment-musical-d780-no3",
+   "kind": "near",
+   "similarity": 0.939
+  },
+  "73f2f5117d5686a545000f870110b5d6c9ea2220fa0d602ebe07493cb0cabd16": {
+   "of": "bach-minuet-g-major-bwv-anh-114",
+   "kind": "near",
+   "similarity": 0.985
+  },
+  "740d8f8eaa8cc5f7c8e54dbb931367c26fd8379e6518a752fa3ebfc4bf686439": {
+   "of": "bulk-beethovenlv-o2-lvb-sonate-02no1-1-lvb-sonate-02no1-1-ly",
+   "kind": "near",
+   "similarity": 0.998
+  },
+  "798cc684ad3206b65e70027409a7282f68f3cdcd35239ab7359fb971838b11dd": {
+   "of": "1f1da18fdc00d048768a98aa5bacb1301ac40292f796a18db4e9c2591dc56344",
+   "kind": "near",
+   "similarity": 0.951
+  },
+  "7b13df1a1428d89177f03578737bc7c86d6f0ae3792df8ceb1d92aab2561e5f9": {
+   "of": "2f02c5236bcf5bcddaf6827242220122fa1f346d943b2e1bb7f79014ec28a751",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "7d312e5fdda696798d8a0b9b38fcb55a7986f4bc38a2e3fcc9a13c49676b70c6": {
+   "of": "schumann-op68-no8-wild-rider",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "7e2e564d51c308e542585c299678eda9c4e5f13e6bea9bb20676a258d3bfe010": {
+   "of": "1fe58298fb6c621d25cf13fde82ed65c1bbf86af6ba28c424c688f70b216d239",
+   "kind": "near",
+   "similarity": 0.991
+  },
+  "8a2db435c191719e59a043ddd502d20ec6cb841a6e37e468e583549e0e2f98f9": {
+   "of": "16b768aedd0cae70a440ff684b493c25ffe1b234cd80ccbb26c97112051742f2",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "8aa67e3e427592d78ebdf7b7d67017d87d351bb086f4ba98c35ecfde3ae08a44": {
+   "of": "tchaikovsky-op39-no5-march-of-the-wooden-soldiers",
+   "kind": "near",
+   "similarity": 0.991
+  },
+  "8c97041ef637a8ff1fc5a3fb8215297b8c4d782c3645cd6281de59e63f18590c": {
+   "of": "dd09bd65c4c08bb46f25c2ccbb15af666975754a179154ef789326c633a67487",
+   "kind": "same tune, same level",
+   "similarity": 0.801
+  },
+  "8d3edcc75db75e297d95e784639ba558d41eb1ca2bb08552fa8a8140afc1f2a6": {
+   "of": "chopin-prelude-op28-no4",
+   "kind": "near",
+   "similarity": 0.99
+  },
+  "8d4f42aa67bf51b0b7f465def7c4acdedf1e350dba7585929eed5ef10bd66f6f": {
+   "of": "bach-minuet-g-major-bwv-anh-114",
+   "kind": "near",
+   "similarity": 0.99
+  },
+  "8dab1080e9668cb3049b65de2316cbbc5d788311a117a43b70bde5d9b4c48db1": {
+   "of": "bach-prelude-c-major-bwv-939",
+   "kind": "near",
+   "similarity": 0.983
+  },
+  "8e11488b20c49e4b3d59da7d1383eca5516441c0e6436fbbb7ab3bf9b9d39fc1": {
+   "of": "mozart-sonata-k545-mvt3",
+   "kind": "near",
+   "similarity": 0.971
+  },
+  "8f0e161c3398e3b0a3b44b02402bbbca03276c8deb0bc2daabf667f9b68aa17f": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-008-czerny-op-821-no-008-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "910a692143925240a4cfa47c7d1683cb014bab28bbb9cd8427cb10078bc1337c": {
+   "of": "schumann-op68-no16-first-loss",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "93331502345b673e7f8dba65e83497b9d35c54ca605700fccb0bd877ba127808": {
+   "of": "594921f70825b7b1d77bdad962d4fa52514b2001abe2e1923df08d2211695246",
+   "kind": "near",
+   "similarity": 0.95
+  },
+  "948acae8648a9aab12280fb8f45359324d8d60c42126ba12c53c4ba3e5dcb810": {
+   "of": "2e181b4ee0908550930848999c971bfe31a710686f54ee86603ee77bdde3dcb0",
+   "kind": "near",
+   "similarity": 0.938
+  },
+  "9580e8d1f2898c013f7d217be8c34e1359f8e8d4b2b8d92e670881c341af7c67": {
+   "of": "05835d12cc74484491c0e1ee5b4b6a2de0e02495f2b876225c33cb58d2bfa095",
+   "kind": "same tune, same level",
+   "similarity": 0.969
+  },
+  "96b1daa9e2004437518548437beffd1b976917d09c8dbb2941cfcf53601a7192": {
+   "of": "bach-prelude-c-major-bwv-846",
+   "kind": "same tune, same level",
+   "similarity": 0.989
+  },
+  "984178a9b729a3e147b3e5b4714f5c423f13bfd6b1e19e90866932411b12cbbe": {
+   "of": "3ba220143884373236ce90dc4b6a3fc2c5fd2a2e6aa437ae7c4c724f931dc384",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "9b49fa0d17d9902960188d251c9e8fbd4a313244e2f4d7a552ae1d42c623f65d": {
+   "of": "79c61772d06fcf780af9928711d5f349f4105695fbeb97f8ffb7b1c2b7fdf993",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "9cb9d4f01b91180309f65e319905e0dcbab233529896a8d88596b6e8d4e5402d": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "9d44eea2fce8e3398c5e52a9795197a92ce45c33d579a12b3d1db790253dcd1e": {
+   "of": "0bfc7f02d69811253bcb1efa0c0f82cfd4eb3198fd9dd01c60fdc7f0fed034a5",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "9d487bfb65991fcc1bf07e68dc5df7d61af0984d6e60cfb7daf54f830931d0c3": {
+   "of": "8f0c4059fdb65dbb53630f77e9bc832bc665c3bcfe611355342c3888317fa742",
+   "kind": "same tune, same level",
+   "similarity": 0.814
+  },
+  "9dd09332b88c2330bf11f63fe4f601533186817c74b5c70051b448f6be9906df": {
+   "of": "schumann-op68-no10-the-happy-farmer",
+   "kind": "near",
+   "similarity": 0.978
+  },
+  "9e9d609066b09c4cfa9cefdb30b577edaaef0dc1ae2eae6d4711f9a93f65ebb4": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "9f9c74c12e3b721e93a1f117b0245ef8e11075e1b4b025d821355aad9d890ea0": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-010-czerny-op-821-no-010-ly",
+   "kind": "near",
+   "similarity": 0.976
+  },
+  "a0a94bb9a9ac663c821513986a9f347b96ccee6eaab79b0f4710f61ba025b72c": {
+   "of": "mozart-sonata-k545-mvt1",
+   "kind": "near",
+   "similarity": 0.969
+  },
+  "a161adcc98d9660ef0cd634eb0a646afa6bd6a6181558e952358bb180e8b0841": {
+   "of": "bach-invention-no15-bwv-786",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "a2ea33b21e461d72ca750f07eb098ff268933754cac3409ea1be11565c6547e6": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "a2f311ed73dde838b878e832c0d0ab1803f3f521482baa9d5100d5b88050ecbf": {
+   "of": "1f1da18fdc00d048768a98aa5bacb1301ac40292f796a18db4e9c2591dc56344",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "a332555c663d64cf879cfd30ddf0fe741c18835e0f80cbc1628ff1a081257dd8": {
+   "of": "02c5111636f8b6885c196d168da0303026b61988293a58bb11e439d3e71842da",
+   "kind": "same tune, same level",
+   "similarity": 0.905
+  },
+  "a354a177f9bc8935d59e17c02ab54a256d30ae8f53a2db7cf8e6d16dc247210e": {
+   "of": "3aafaa3a7a5113fb522a8a4b75c65fe425a6ad999f1208f14c78892ca611ccca",
+   "kind": "near",
+   "similarity": 0.964
+  },
+  "a7cfaf96b7058a8ce32ef3ddfa2991500b5f309619c879828a48f78272d8526a": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "a86e3482b847bb71e048cf9425e92347a73116cdfe637fb0196cced20d7369ac": {
+   "of": "mozart-minuet-f-major-k2",
+   "kind": "near",
+   "similarity": 0.992
+  },
+  "a8e77477903944d5f4976b0f074b493700c58e0e9546ced58ff814dd5def2d0d": {
+   "of": "bach-invention-no13-bwv-784",
+   "kind": "near",
+   "similarity": 0.974
+  },
+  "a933d05950c5d5afad8953bdb3848c621a63f6fc5224d23c217eb6d1bb0eeecc": {
+   "of": "bulk-schumannr-o68-schumann-op68-04-choral-schumann-op68-04-choral-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "a950bef8426b1e1de8ef4df763ea76f12a0f0c617acc7e758ecb595e9bf83a64": {
+   "of": "bach-musette-d-major-bwv-anh-126",
+   "kind": "same tune, same level",
+   "similarity": 0.973
+  },
+  "aa7a5323dae8ffde2ab5d27b6fd6da966f05ed9cc6da71ec72c030cef31b20d6": {
+   "of": "dfb4b1c26037c4ea6a1ac20278b1f4c4b5937008ec5071ccc2648238d9df00e5",
+   "kind": "same tune, same level",
+   "similarity": 0.872
+  },
+  "aba25e594e5e636e3e4f5616fd8ff5fbaa70c02afdfbcc770b7c36e087d75dca": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "ae6a440b2e6c4c5ea6d02e0a1e6f35bcaa5245ccbbb6beaf30dc05bac3f37a4f": {
+   "of": "7fb2ecd9cc46261e854fd434db06755a02625c4703f1fa0c219b6db89ee18166",
+   "kind": "near",
+   "similarity": 0.983
+  },
+  "af54f5c7928ec3414bfe6244fe0862f72dd13844c9c7f9a45fe166510aba3b20": {
+   "of": "b19a6c9714992523d5e7b8f47d8a4700d4c403c961bd1fa080ba977c625ed040",
+   "kind": "same tune, same level",
+   "similarity": 0.819
+  },
+  "afe241bd6ee1223b9c69795f64f890e8da3ab2e8723e208efaa537a3ecebcc0f": {
+   "of": "d8c1282c3f55c57bfb882b6ca4be1e9bcb6f0786521efeb863bae17b5eec5bb3",
+   "kind": "near",
+   "similarity": 0.919
+  },
+  "b0ad3dffcbe5cc52d36a383cc18166f17b62277a01271afb4a390373f7fc5c4e": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "b11bdb7fe924ab82e29dcf9b91ed92bb203d0159f50019e61c0a5527cbb082af": {
+   "of": "bach-prelude-c-major-bwv-846",
+   "kind": "same tune, same level",
+   "similarity": 0.992
+  },
+  "b25b39ac78d694e5d369412ab595210ff9168bcdad78d9367869231406c0ca3d": {
+   "of": "cfa9c2d81c4e114e37ecffdf62e5badb6682279bb584aebb90bddb67ee609ad7",
+   "kind": "same tune, same level",
+   "similarity": 0.942
+  },
+  "b3588a5498a7975d6eb579410a9eba6f5ea529c373708c9003cd14c0cde21d83": {
+   "of": "kuhlau-sonatina-op20-no1-mvt1",
+   "kind": "near",
+   "similarity": 0.999
+  },
+  "b469d4924494d13298df593515ec8d5b317acb3a25081ad7f647164228278b53": {
+   "of": "7be646511705d0ffa9f8594078b5c45b19eb4cdd4be56e6de01f170db41c4600",
+   "kind": "same tune, same level",
+   "similarity": 0.912
+  },
+  "b78188eede6bf2819720c1dd3475aa319f276549885cb4ed11736eefbc78ee4b": {
+   "of": "schumann-op68-no12-knecht-ruprecht",
+   "kind": "near",
+   "similarity": 0.964
+  },
+  "bb10af5a7df65a53ae18bff4593c955337cafe0c9ae6b08d343cd2f171d069f8": {
+   "of": "b56a42f1fec40ba27ea6176ec931aee3280b6dbf36d1a99b7fc2072b64b92cd6",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "bba8ef623b35d07e347a80d124211b7179ee0a35511257459c822d40b7245eaf": {
+   "of": "08a0f1a4c9c17bb7c1cdcf7fa04a9b918b79afd653bc85a8292ce18c990071b6",
+   "kind": "same tune, same level",
+   "similarity": 0.926
+  },
+  "bbff92a364ba6f6cba0618bfd94213e1ba6a9cb91fdfdb160a8a08ec17a6aa47": {
+   "of": "schumann-op68-no6-poor-orphan",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "bc40a10c873661753f276c561781bf60df25afde688cd0f06d6acd43f5c0db18": {
+   "of": "bach-minuet-f-major-bwv-anh-113",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "bcb3aeb456cf6e42bc2b13c08c0787de0861034249bd522fd41d2bcdd4f5c130": {
+   "of": "satie-gymnopedie-no1",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "bd59e06171db38068428fa620263d6be3c1e2809ab0340f2ae73330b676419cc": {
+   "of": "bulk-chopinff-o28-chop-28-3-chop-28-3-ly",
+   "kind": "near",
+   "similarity": 0.976
+  },
+  "bf729577429ff2865ed9ec852f1991a8ceb54bf2b54e48dbb275b216666f7a86": {
+   "of": "2e181b4ee0908550930848999c971bfe31a710686f54ee86603ee77bdde3dcb0",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "c0a0358382d0ab7321bf5ad7f7b8a3dcf706de461dd50e1bc517562f90078e0c": {
+   "of": "bulk-bachjs-bwv928-prelude-9-prelude-9-ly",
+   "kind": "near",
+   "similarity": 0.976
+  },
+  "c2546f248f10dfc902dc2fe86fc6cb86313035ab5f5efb072523803b78100deb": {
+   "of": "bach-minuet-f-major-bwv-anh-113",
+   "kind": "near",
+   "similarity": 0.947
+  },
+  "c76052f13d8dbaa25b71aec172460ead15c619647b1dbefe47adf0e9de6be137": {
+   "of": "bach-prelude-c-major-bwv-939",
+   "kind": "near",
+   "similarity": 0.967
+  },
+  "cae33a3f3bb0e4897b20d6deefc2026e362a844e7e993a49e89d4cda167d83d4": {
+   "of": "clementi-sonatina-op36-no1-mvt1",
+   "kind": "near",
+   "similarity": 0.988
+  },
+  "cc7ba364730d213a244909a9d79f95cde7fd4d8f6bfcf2068810b6a67df25467": {
+   "of": "e1bbe39756f79daf44b67cd55c363f76d04306a0327d35aed157da27ba5587eb",
+   "kind": "near",
+   "similarity": 0.953
+  },
+  "cd47764f16c65e2c774a24aeb0b94aec273c240781265168531fbca2dec32e49": {
+   "of": "90e9e183d3a09f7bad0869a51dd6d8109676c1d886143b5726a569bd456fa651",
+   "kind": "near",
+   "similarity": 0.978
+  },
+  "cd751edd9be0b63e02ccdbca41e1c6e21130d9256225dc5455ce22a9b0f2bb86": {
+   "of": "bach-minuet-g-minor-bwv-anh-115",
+   "kind": "near",
+   "similarity": 0.99
+  },
+  "d12f9c22b2eab82481e1b1a5aac3da49ebba26ddf2d0883c8502195e7ed3effb": {
+   "of": "greensleeves",
+   "kind": "same tune, same level",
+   "similarity": 0.875
+  },
+  "d244d8c518d0ca1c52fcc539dfca89e824583ca1473d35664def3344cd1f0161": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "d28c7e14c89f2f958797f074fad0736565dca216f94c7335401d8534220236e6": {
+   "of": "kuhlau-sonatina-op20-no1-mvt1",
+   "kind": "near",
+   "similarity": 0.953
+  },
+  "d645554b487d36d57f4ba36e7ec81c6220a0b3e6103674d97e211ff7ccfa52f8": {
+   "of": "788bea3a62af9cb43e9055cde206f829aae5d88dcf01d7de0e93170b11c9f40c",
+   "kind": "near",
+   "similarity": 0.98
+  },
+  "d681a3c65fc35d400fea3e57b2521d1dcc36edfad9053ca5a1d54a4bfed1f25b": {
+   "of": "d645554b487d36d57f4ba36e7ec81c6220a0b3e6103674d97e211ff7ccfa52f8",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "d93a343abfa7c8f543f3e7bb8574e0869ea2f05987ae4e25ebb383d0a0a5873d": {
+   "of": "schumann-op68-no8-wild-rider",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "dab4f14fe111b35c36a00652be584899f83087df0eec2ab678952533e1a471d5": {
+   "of": "bach-invention-no2-bwv-773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "db5e394c971ca5ab9fb151d6a65570c228deed18405f4bffa3721f80190c5305": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "dca5f51bacb61ec302ba4d93c29d26c3b1abfc2f04b5886c85f16ed5a58f2e79": {
+   "of": "burgmuller-op100-no3-pastorale",
+   "kind": "near",
+   "similarity": 0.958
+  },
+  "de2dfd6b51752fc02cf6b4eb225eee292b2e5f4acd87cb37b41bdf3351eb9dc3": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "decbd6b29fad338811120effc40730b87819c79e2cef4c50a8f9f530a235b15b": {
+   "of": "72ced5fe54c3d9426491c48470f1ce3498d74451fc1467e6b74dbcba1755941c",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "e495b9cf91f3feceff762709903783910d37fab7e21e61d871af7b91c7ca891e": {
+   "of": "bach-minuet-f-major-bwv-anh-113",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "e50cd8652ad9448771109550ee642a590c3d6b67276b2aa86192f2e8e335d0aa": {
+   "of": "c0266a914b34058e8145af9f5781c011871a63e5542b162ed1007ef7a8fad225",
+   "kind": "near",
+   "similarity": 0.996
+  },
+  "e6c5e17d14fa9007c1ab2ca6e81d5d6f4dc49480d350945fbcdae037452f97cb": {
+   "of": "mozart-minuet-f-major-k2",
+   "kind": "near",
+   "similarity": 0.97
+  },
+  "e94925e3a5906cc1f19040ef399668f063b8dd7896e669d981f1230c25625212": {
+   "of": "bach-invention-no8-bwv-779",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "ea4acc0331f9115e5808a006a416368614cfe9161d8fcffe7b76c0faabd62e8b": {
+   "of": "bach-prelude-c-major-bwv-933",
+   "kind": "near",
+   "similarity": 0.983
+  },
+  "eb3a5dcecc38abd534a3f1101a208697e75feb5b6c893385252805b1709134bf": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "ed7cc4e717204973a032ad84595c339fe491f7964164d68309ea824697270498": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-001-czerny-op-821-no-001-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "ef86d2152c8713b55624c6df41b61d177aebed301dd2e167e49499e2f44863e4": {
+   "of": "bulk-czernyc-op-821-czerny-op-821-no-009-czerny-op-821-no-009-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "f44ca27f1322558058a620394aef0c6f362ba901017095e91fe9e30a3040d793": {
+   "of": "25358239509d106cc6020a115bf846fc140a4622a7624ad134a883fe7c1a5e23",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30": {
+   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "f857802b06007d54ce5c12624ff85b68fef693b1532a81c1a36323b826830a87": {
+   "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "f907ae41694aa0cb4bae6c3295a3f2cee6a7cbeef2ab1f016952db3fa134c61f": {
+   "of": "dfb4b1c26037c4ea6a1ac20278b1f4c4b5937008ec5071ccc2648238d9df00e5",
+   "kind": "near",
+   "similarity": 0.952
+  },
+  "fa3181df566983ebc76877e26b89a78294568c911107693868fe5e5d359a2be7": {
+   "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
+   "kind": "same tune, same level",
+   "similarity": 0.938
+  },
+  "fad61269ad155bf08dc6eb799542b1daff0b550626be139c0938557708c29f5d": {
+   "of": "schumann-op68-no8-wild-rider",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "fcfc60c73df5f9d3c626ce80eb56b60fe9e66e59b738b7ab58ea50e988170bae": {
+   "of": "4bffd4804e7e5a3a7ad62b6d66be04e36ea54bd47ce32a3e1dc61a633d8c92bb",
+   "kind": "exact",
+   "similarity": 1.0
+  },
+  "fd4ecc354a202034f2624f4f960195e400945de5e1e3fb828169e09fced4651d": {
+   "of": "bf52952be9fb1c99c08ed5709dd7377d456295d15e2b8c33c316aa6a2cfb41b5",
+   "kind": "near",
+   "similarity": 0.959
+  },
+  "fd7fb851d2935516b272453f8cf86bb5f13969ae3131ffbf9108411313acd2ed": {
+   "of": "burgmuller-op100-no2-arabesque",
+   "kind": "near",
+   "similarity": 0.979
+  },
+  "ff37785f2febcda2017d28e224503115a7c4b3f9e3a0c2aa5ca797ac98a045e6": {
+   "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
+   "kind": "same tune, same level",
+   "similarity": 0.938
+  }
+ },
+ "outOfScope": {
+  "00adeaf43fe1f658b0dc75137ab1364d9943c09fc966135879b9dc89be3e90a9": "modern-music: Cartoon TV theme; scope-judge: Cartoon theme; content-safety: Amphibia cartoon theme",
+  "094cc2c4bee7b0c662756e56899fa4d4a011a26dfd7ef785afb6096a21deed29": "modern-music: Contemporary worship song; scope-judge: Modern worship song; content-safety: Modern worship song, Matt Redman",
+  "097e70dfb552d4a8764351a1374b19df500e523d3a8a705f145947748eea5df4": "modern-music: Modern political march; scope-judge: Political tribute, not traditional repertoire; content-safety: Pinochet propaganda",
+  "11e6db99d8801a3c0eae3d7f1fdd1ce76dc0f1a744cab66084efdd688b347fab": "scope-judge: Modern original, not classical; content-safety: Modern composer James Spiteri",
+  "1aaae12082e8bfb380f48a6c160ea0a2a5bea05794e90477596f5cc15ce35c2c": "modern-music: Modern LDS song by Janice Kapp Perry; scope-judge: Modern LDS song by Janice Kapp Perry; content-safety: Janice Kapp Perry modern copyrighted LDS song",
+  "1adea15797fd657f316bb1439186c65abde67781019a0da7b8544e117740fc2c": "modern-music: Identity V game music; scope-judge: Video game music; content-safety: Identity V video game",
+  "1cbd4b5ab0f56d1432d59eeac44f5ccdeaa7696f0cfd3472147fb405b9ee13ef": "scope-judge: Amateur fan piano-adventure arrangement",
+  "1e552ec521deb4d08d36e4e7a48b85f43b4658eb3bae889c98d74f891a5a8005": "scope-judge: Likely Ed Sheeran Perfect cover",
+  "233d6491c378d692e741a3bfd094cbd4e985fd947ec51b106ebda6f1f082badd": "modern-music: Hillsong modern worship song; scope-judge: Modern worship band song; content-safety: Hillsong modern worship song",
+  "287be700906306cf71d8414648ee5beb6a2341356eddec558c7754b712516188": "modern-music: Simon and Garfunkel song; scope-judge: Pop song, Simon and Garfunkel; content-safety: Simon and Garfunkel modern song",
+  "29384e355210f6ec9f9cd63486049aa30243ba048166b5751ac095c0113febf7": "modern-music: Minecraft game theme (C418); scope-judge: Minecraft game music (C418); content-safety: Minecraft video-game theme (C418)",
+  "30b24b623461812307c437a9be834344a155b12bdc5a182455650d97207fce14": "modern-music: Paterlini modern pop-piano piece; scope-judge: Modern neo-classical pop composer; content-safety: Modern composer Paterlini",
+  "30cb5c0725129090034a26ee4aff0e8a4a40bc22119d2f49e9afd442e291dce2": "modern-music: Ed Sheeran pop song Perfect; scope-judge: Ed Sheeran pop song; content-safety: Ed Sheeran modern pop song",
+  "321ae371e57ae9be608fc250eb6277dc97ba9267d5a77e9629c7fdcd9b79e3d4": "scope-judge: 1950s pop song; content-safety: Modern 1950s copyrighted song",
+  "3301b16198b4b754ec8ab053657c0ecdb6877b1a17b9fb99c2d833b737a419b0": "modern-music: Ed Sheeran song; scope-judge: Pop song; content-safety: Ed Sheeran modern pop song",
+  "35e48df140cef54c775a4b34f9c4538f068ca1f7af8db35bfb4866858bf4f5e6": "scope-judge: Modern original blues by hobbyist",
+  "3875c12364ff81e316f9939b18643d1109ac281c28b807afe48e4ca90214454d": "modern-music: 1939 swing standard; scope-judge: Swing standard, 1939; content-safety: Glenn Miller 1939 jazz standard",
+  "3887dc474303d00eafa7396f835d0dfdf5aee7ba183156960ed6324fcbf3572f": "scope-judge: Joke novelty arrangement",
+  "3ada6c3194a0fd6235cabd1c699451aa33182d79bd788dca23c7d13775fe34cd": "modern-music: Video game theme piano cover; scope-judge: Video game theme cover; content-safety: Video game theme piano cover",
+  "3f58da2cdf335ced903b21f7ebea03eb4ed4a9f6e377ba46f486ec80c77ba0dc": "modern-music: Wartime military song, modern arrangement; scope-judge: Fan arrangement of a Nazi-era song; content-safety: Nazi-era Wehrmacht song",
+  "433c436357b6c923705afb66ed4c1c6d42d1af2cb5a9ce73e454c448b8efc03e": "modern-music: Einaudi modern composition; scope-judge: Modern pop-classical Einaudi; content-safety: Modern composer Einaudi",
+  "4362feda69f35f43b0b247b8e6e0995d4679be4cb855180f3a260226775cd0b4": "modern-music: Film K-PAX score; scope-judge: Film score; content-safety: K-PAX film score",
+  "47d797156f5993ec4da70a3160ea5a37c5e40b0f9d66efba0ad852e9c2f4fab3": "modern-music: Phantom of the Opera musical number, 1986; scope-judge: Phantom of the Opera, 1986 musical; content-safety: Phantom of the Opera musical song, 1986",
+  "4827a7a2cb1782665061f163814783c9de73ed03363eda4f5af9137064d2de9d": "modern-music: Video game track; scope-judge: Video game boss music; content-safety: Video game theme",
+  "4925f04bdacc937d42563b18a1694f8cc8e447f349285c13b48f79d0199c7342": "modern-music: Lumineers band song; scope-judge: Band song, The Lumineers; content-safety: The Lumineers modern band song",
+  "4abac2d800e4ea220053e1f32486423dbff5599bc9667d6885797d7137813269": "modern-music: TV series theme arrangement",
+  "4c55e9c828d1ccc9fdd3b25a3ec9544a3b06feb62db3c86495698cea567a7cae": "modern-music: Ed Sheeran pop song; scope-judge: Modern pop song by Ed Sheeran; content-safety: Ed Sheeran modern pop song",
+  "528efbb3e17ac96b6dc2958d7dd9eb02421ebcd842ee4401de004af09e8cd4c2": "modern-music: Piano cover of modern piece; scope-judge: Modern cover arrangement; content-safety: Modern piano cover",
+  "533bd65f2d67e816df6752f3367dc5d24aae5401452ddd529a759ef7fa8c8626": "modern-music: Poshlaya Molly band song; scope-judge: Modern band cover; content-safety: Poshlaya Molly modern band",
+  "5516a58afe33384465699fa976261592b6c253e4308d2a415d1e66612b6d4b76": "modern-music: Modern worship song, 1986; scope-judge: Modern worship song, 1980s; content-safety: Modern 1986 copyrighted worship song",
+  "5d68b400379cb537a8351584579fe179ec16652709207b3e209f91908ec5ecd5": "modern-music: Elevation Worship modern song; scope-judge: Modern worship band song; content-safety: Elevation Worship modern song",
+  "5fece012c722308c4208d74014bb57db842eac439d25224d274f0c947b354c11": "modern-music: 1938 Soviet song Katyusha",
+  "62b627d15bba5840d7be63bb7be627efc8f5242d2673bca93dbe07176ffa792f": "modern-music: Video game boss track; scope-judge: Video game boss music",
+  "6809b358d2f565aa3110a2deb0595833e8d7990c5c1641501c6a3f25bc11da5c": "modern-music: Jazz version of classical piece",
+  "722506248bae0fb9044b151596fc27422827b72025610f31691a50f7d8dfc3d7": "modern-music: Jules Gaia modern piece; scope-judge: Modern fan arrangement; content-safety: Modern fan arrangement, Jules Gaia",
+  "745eaa57ea30c609e4e3266f0cbe524f353c199a651900cd699a6fb00005d337": "modern-music: Cohen pop song Hallelujah; scope-judge: Modern pop song; content-safety: Leonard Cohen modern song",
+  "77e01354a1023409fd6f3220cc8f98694857982f1782ae8eeab922b4ca7049c8": "modern-music: Jazz arrangement of Chopin",
+  "7b5a9788465a3692baae420267d0b7d9ccb330a1e246700533b30dd78dedcb84": "content-safety: Modern copyrighted hymn",
+  "7e2e9230353453c9b6a2048a43aa3c62950dd6d7e34d96a657e16245eb1bc6e4": "modern-music: Modern online composer piece; scope-judge: Modern fan composition; content-safety: Modern game-style piece by Mrest",
+  "7ed760308522b4bbccd65148da68e17198ed0ee64e736e8f8b1acd346dddce6f": "modern-music: Wim Mertens modern composition; scope-judge: Modern composer, not classical repertoire; content-safety: Modern composer Wim Mertens",
+  "897202414217062c26217791ebb45a10d9bde44e01571f77e3a86dd4e0e1b3cc": "modern-music: Simon and Garfunkel song; scope-judge: Pop song, Simon and Garfunkel; content-safety: Simon and Garfunkel modern song",
+  "8afed0825e36f735570b13cfc42942a65109bf8c17c011b75599f9839dd13951": "scope-judge: Modern pop song",
+  "96a4ab219a2cb5cd1579717396df9b05e2a5c873df6a1278fad00d5e1a78e476": "modern-music: Soviet anthem, 1944; scope-judge: 1944 Soviet anthem, after 1929",
+  "984e0f10520c70f68a81d3a3fb59e44558c4c0194672825495198263676834d3": "modern-music: Paul de Senneville pop instrumental; scope-judge: Modern pop instrumental; content-safety: Modern composer Paul de Senneville",
+  "99ee7f2e68e341a09c92e169e0a8588dfb26b92549d2943a630acc2c56533abf": "modern-music: Game of Thrones TV theme; scope-judge: TV theme; content-safety: Game of Thrones TV theme",
+  "9a54d839c6c251eaa31e0dbad6b4cf130d10cab64f4f3193078bcddde5d91984": "scope-judge: Meme piece",
+  "9b217467706e5d57a7b616a6fc382634e17c1f9e05cf1d36fbec8110cc0c169c": "modern-music: 1938 Soviet song Katyusha",
+  "ad47da6f71a5d96572f289fef8924fd2785d90284a0ea9e16285bc12ab2f1fb7": "modern-music: Ed Sheeran song; scope-judge: Pop song, Ed Sheeran; content-safety: Ed Sheeran modern pop song",
+  "ad50a7ad3255bd197645381407eba58333b7273119459ff15e4ca3619e9e7ac1": "modern-music: Paterlini modern pop-piano piece; scope-judge: Modern neo-classical pop composer; content-safety: Modern composer Paterlini",
+  "c115d5a3d5fb41df80450838a0f8baa7811db0890118243e8c988e9f13a7699b": "modern-music: Bethel modern worship song; scope-judge: Modern worship band song; content-safety: Bethel Music modern worship",
+  "ca3f1befa4b910e1d002f6cb9bfed85c8de68893ba2eb5e8b8c21c719d45c348": "modern-music: Modern game or anime arrangement; scope-judge: Fan arrangement, likely game or anime; content-safety: Modern arrangement of modern song",
+  "d34d259bc181e029b6fe45dc5c601a37916a51024797f99512053ac3c307a5f5": "modern-music: Lumineers band song; scope-judge: Band song, The Lumineers; content-safety: The Lumineers modern band song",
+  "da1ad8d9b70a499b19ead5bf3de7b4d89628b8d5d9a6d967d7fe493bc9c2adb0": "modern-music: Football club anthem; scope-judge: Football club anthem; content-safety: Modern football club anthem",
+  "dc21058f929f8d154d2545302f96586bd90c87f75d4c43daa6f2f4511094b917": "modern-music: Hardstyle electronic track; scope-judge: Modern electronic track; content-safety: Modern electronic dance act",
+  "e12f33428302e179537c5c4c06a5fb51b878b1049072f7a3778d1a462f0d8ae1": "modern-music: Modern album track, 2012; scope-judge: Modern album piece; content-safety: Modern 2012 album track",
+  "e204aa172fc07e547bfee95b403f4b1c79a4ad676f059d0396f71de868817d19": "modern-music: Nazi party song; scope-judge: Nazi party song; content-safety: Nazi anthem Horst Wessel",
+  "eab902b70948569fafbec331e0f5cdd1f52723c268ac0d08d86539c61f30f543": "modern-music: Video game or anime arrangement; scope-judge: Video game music; content-safety: Video game theme transcription",
+  "f8dc1646616f5db870c404df2e067cf371033bb5a5616bbe619ed24110a22cf6": "modern-music: Musical Cats, 1981; scope-judge: Stage musical after 1929; content-safety: Cats musical, 1981 Lloyd Webber",
+  "fba0b1034bfd08d524b698bbf30309611d826ef93f1e2c93533f552a27cc6d2c": "modern-music: 1930s military march; scope-judge: Nazi-era march, after 1929; content-safety: Nazi-era march"
+ }
 }

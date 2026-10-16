@@ -210,6 +210,8 @@ def main(argv=None) -> int:
     mode.add_argument("--only", nargs="+", metavar="SLUG", help="gate these pieces")
     mode.add_argument("--new", action="store_true", help="gate every piece outside the core30 benchmark set")
     mode.add_argument("--all", action="store_true", help="gate every manifest piece")
+    mode.add_argument("--pending", action="store_true",
+                      help="gate the pieces outside core30 that have no lint record yet (a new batch)")
     ap.add_argument("--no-lint", action="store_true", help="skip the engine lint gate")
     a = ap.parse_args(argv)
     lint = not a.no_lint
@@ -221,6 +223,10 @@ def main(argv=None) -> int:
                   file=sys.stderr)
 
     selection = select(jsonio.read_json(MANIFEST, list), a.only, a.new)  # unknown slugs fail before any work
+    if a.pending:
+        recorded = jsonio.read_json(VERIFICATION, dict)
+        selection = [e for e in selection if e.get("benchmarkSet") is None
+                     and not (recorded.get(e["slug"]) or {}).get("lint")]
 
     print("== 1. span check (whole library)")
     check_spans.main([])

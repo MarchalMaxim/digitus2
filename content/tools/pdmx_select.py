@@ -53,11 +53,31 @@ def composer_ok(name: str | None) -> bool:
     return bool(re.search(r"[a-z]{2}", low))
 
 
+# An unlabelled score (genre NA) is in scope only when its composer is a classical one: 216 of the
+# two-staff scores. The names are surnames of composers of the repertoire, matched anywhere in the field.
+CLASSICAL_COMPOSERS = re.compile(
+    r"\b(bach|h[aä]e?ndel|haydn|mozart|beethoven|schubert|schumann|chopin|liszt|mendelssohn|brahms|"
+    r"clementi|czerny|kuhlau|diabelli|burgm[uü]ller|heller|tchaikovsk|chaikovsk|czajkowsk|rachmanin|"
+    r"scriabin|skryabin|debussy|ravel|satie|grieg|dvo[rř][aá]k|smetana|mussorgsk|moussorgsk|"
+    r"borodin|rimsky|glinka|balakirev|prokofiev|bart[oó]k|kod[aá]ly|alb[eé]niz|granados|"
+    r"falla|faur[eé]|saint-sa|franck|bizet|gounod|massenet|chaminade|scarlatti|couperin|rameau|"
+    r"purcell|vivaldi|pachelbel|telemann|buxtehude|byrd|hummel|weber|moszkowski|godowsky|paderewski|"
+    r"thalberg|alkan|medtner|glazunov|lyadov|arensky|rubinstein|joplin|gottschalk|macdowell|sibelius|"
+    r"nielsen|jan[aá][cč]ek|enescu|poulenc|milhaud|paganini|rossini|mahler|elgar|holst|"
+    r"scharwenka|reinecke|gade|gurlitt|lemoine|bertini|streabbog|beyer|k[oö]hler|schytte)",
+    re.I,
+)
+
+
 def is_eligible(record: dict) -> bool:
     if not record.get("accepted"):
         return False
     tokens = set((record.get("genres") or "").split("-"))
-    if not tokens or not tokens <= GENRE_TOKENS:
+    unlabelled = tokens <= {"", "NA"}
+    if unlabelled:
+        if not CLASSICAL_COMPOSERS.search(record.get("composer") or ""):
+            return False
+    elif not tokens <= GENRE_TOKENS:
         return False
     return MIN_NOTES <= (record.get("notes") or 0) <= MAX_NOTES
 

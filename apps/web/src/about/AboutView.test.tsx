@@ -72,7 +72,9 @@ describe('AboutView', () => {
     render(<AboutView />);
     if (archive === 0) return;
     expect(
-      await screen.findByText(new RegExp(`${archive.toLocaleString('en-US')} more scores come from`)),
+      await screen.findByText(
+        new RegExp(`${archive.toLocaleString('en-US')} more scores come from`),
+      ),
     ).toHaveTextContent('public domain or CC0 as its uploader declared it');
   });
   it('names the CC BY engravings in that sentence once the library has one', async () => {

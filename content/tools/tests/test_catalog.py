@@ -135,7 +135,7 @@ def test_manifest_only_needs_a_built_entry(tmp_path, monkeypatch):
 
 
 GENRE_OF = {
-    "pdmx-classical": "classical", "pdmx-folk": "folk",
+    "pdmx-classical": "classical", "pdmx-folk": "folk", "pdmx-advanced": "classical",
     "children-songs": "songs", "folk-songs": "songs", "christmas": "carols", "hymns": "carols",
     "anthems": "songs", "songs-before-1929": "songs", "easy-rags": "songs", "classical-themes": "songs",
     "anna-magdalena": "baroque", "handel-aylesford": "baroque", "bach-little-preludes": "baroque",

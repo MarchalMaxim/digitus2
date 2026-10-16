@@ -146,7 +146,10 @@ export function AboutView() {
 
       <section className="stack" aria-labelledby="about-pieces">
         <h2 id="about-pieces">The built-in pieces</h2>
-        <p>The pieces use public-domain or Creative Commons editions. {details !== null && creditSentence(curated)}</p>
+        <p>
+          The pieces use public-domain or Creative Commons editions.{' '}
+          {details !== null && creditSentence(curated)}
+        </p>
         <table className="about-pieces">
           <thead>
             <tr>
@@ -181,9 +184,9 @@ export function AboutView() {
         </table>
         {archiveCount > 0 && (
           <p>
-            {archiveCount.toLocaleString('en-US')} more scores come from the MuseScore archive (the PDMX
-            dataset). Each is public domain or CC0 as its uploader declared it, and each names its source
-            and licence on its score page.
+            {archiveCount.toLocaleString('en-US')} more scores come from the MuseScore archive (the
+            PDMX dataset). Each is public domain or CC0 as its uploader declared it, and each names
+            its source and licence on its score page.
           </p>
         )}
       </section>

@@ -66,7 +66,8 @@ export function setLibraryIndex(entries: readonly LibraryEntry[]): void {
 export async function loadLibraryIndex(): Promise<void> {
   if (index) return;
   const response = await fetch(indexUrl);
-  if (!response.ok) throw new Error(`the library list could not be loaded (HTTP ${response.status})`);
+  if (!response.ok)
+    throw new Error(`the library list could not be loaded (HTTP ${response.status})`);
   setLibraryIndex((await response.json()) as LibraryEntry[]);
 }
 
@@ -125,7 +126,9 @@ export async function readScoreFile(
 ): Promise<Uint8Array> {
   const bytes = await fetchBytes(await scoreUrl(relativePath));
   if (!relativePath.endsWith('.gz')) return bytes;
-  const stream = new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const stream = new Blob([bytes as BlobPart])
+    .stream()
+    .pipeThrough(new DecompressionStream('gzip'));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 

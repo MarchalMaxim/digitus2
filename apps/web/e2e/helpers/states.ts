@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { openPractice, setLoopBars } from './practice.js';
 import { holdPianoSamples } from './samples.js';
-import { LEVEL_COUNTS, libraryReady } from './library.js';
+import { LEVEL_COUNTS, libraryReady, searchCount } from './library.js';
 
 /**
  * The application states the design brief is checked in (M4 plan, Task 10): each a name, a way
@@ -134,8 +134,9 @@ export const STATES: AppState[] = [
     name: 'library-level',
     go: async (page) => {
       await library(page);
-      await page.getByRole('radio', { name: 'Moderate', exact: true }).check();
-      await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[3]!);
+      // Easy, not Moderate: with the MuseScore archive Moderate holds about 750 rows, a 50,000 px page.
+      await page.getByRole('radio', { name: 'Easy', exact: true }).check();
+      await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[2]!);
     },
     expectTag: 'button',
   },
@@ -164,7 +165,7 @@ export const STATES: AppState[] = [
     go: async (page) => {
       await library(page);
       await page.getByRole('searchbox', { name: 'Search the library' }).fill('minuet');
-      await expect(pieceRows(page)).toHaveCount(14);
+      await expect(pieceRows(page)).toHaveCount(searchCount('minuet'));
     },
     expectTag: 'button',
   },

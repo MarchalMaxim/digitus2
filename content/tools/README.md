@@ -186,46 +186,71 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 
 ## MuseScore archive scores (PDMX, 2026-10-16)
 
-1,300 further pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
+1,330 further pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
 files whose uploaders declared them public domain or CC0, and which PDMX found free of licence conflicts
 (`license_conflict` false). Every one is a solo piano score on two staves with notes on both; the
-library's own gates decide the rest. Their fragment is `catalog.d/pdmx-library.json`, their scores are
+library's own gates decide the rest. Their fragments are `catalog.d/pdmx-library.json` (1,300 pieces at
+levels 1 to 5) and `catalog.d/pdmx-advanced.json` (30 pieces at level 6); their scores are
 `scores/<slug>.musicxml.gz` (gzip, mtime 0, byte-identical on a rebuild; the app decompresses them with
 the browser's DecompressionStream), and `content/library-index.json` lists every piece for the library
 page. The steps, in order (run with `content/.venv/Scripts/python.exe -I`; the inputs are the PDMX
 download in `research/data/_downloads/pdmx/`, and every output is under the ignored `content/_raw/pdmx/`
-and `content/_build/pdmx/`):
+and `content/_build/`, except the committed `pdmx-excluded.json`):
 
 1. `pdmx_screen.py --csv PDMX.csv --archive mxl.tar.gz`: streams the archive once, keeps the
    public-domain or CC0 rows without a licence conflict, genres classical, folk or religious (MuseScore's
-   own tags; unlabelled scores are left out), 30 to 6,000 notes, and tests every file for a solo piano
-   score. `screen.jsonl` has a reason for every rejection.
+   own tags) or unlabelled, 30 to 6,000 notes, and tests every file for a solo piano score.
+   `screen.jsonl` has a reason for every rejection.
 2. `pdmx_select.py --archive mxl.tar.gz`: keeps 40 to 2,500 notes and the two-staff rule (`grand_staff`:
-   one sounding part, two staves), removes duplicates (one score per normalised title and composer, and
-   identical XML), and copies the chosen files to `_raw/pdmx/selected/`. An unnamed composer is kept and
-   shown as "Unknown": the licence rule is the uploader's declaration, not the author's date (the user's
-   broad reading, 2026-10-16).
+   one sounding part, two staves), admits an unlabelled score only when its composer is a classical one
+   (`CLASSICAL_COMPOSERS`), removes duplicates by title and by identical XML, and copies the chosen files to
+   `_raw/pdmx/selected/`. An unnamed composer is kept and shown as "Unknown": the licence rule is the
+   uploader's declaration, not the author's date (the user's broad reading, 2026-10-16). The 2,500-note
+   ceiling leaves out 164 longer candidates.
 3. `pdmx_gate.py --grand-staff [--resume] [--limit N]`: for each candidate, the XSD of its own MusicXML
    version (3.1 or 4.0), the span check, notes on both staves, zero lint law errors at the medium and the
    large profile, and the level proposal of the frozen heuristic. `gate.jsonl` holds the results.
-4. `pdmx_fragments.py [--limit 1300]`: writes the fragment. It ships the best-rated passing candidates
-   (rating order, so the cap is a quality order, not a random cut) and skips every candidate the build has
-   refused (`_raw/pdmx/build-failed.json`, and `verification.json`'s failed records). The fragment's
-   `_comment` counts what was not shipped.
-5. `build.py --source pdmx [--only SLUG...]`: converts nothing (the MusicXML is the archive's own file).
+4. `dedupe.py [--apply]`: compares notes, not titles. Exact copies (the same notes at the same onsets)
+   and near copies (Jaccard 0.9 or more of the (onset, pitch) sets, note counts within 10 percent) are
+   removed among the archive pieces, and so is the same tune at the same level (top-line shingles: three
+   Mozart minuets in F at level 2 are one piece to a learner); the copy that stays is a curated piece
+   first, then a named composer, then the more rated. A curated piece is never removed, and curated
+   copies of each other are only listed. The same tune at another level (an easy and a fuller arrangement)
+   is reported and kept. `--apply` writes `duplicates` into `pdmx-excluded.json`.
+5. `pdmx_scope.py export` and `apply`: MuseScore's genre tags are the uploader's, so a pop song can carry
+   "classical". The candidates (best rated first, 2,037 of them) were read by three differently framed
+   reviewers (a workflow, 2026-10-16); a candidate any of them flagged as modern popular music, film,
+   game or musical themes, or Nazi-era marches is out of scope (59 of 2,037) and recorded in
+   `outOfScope`.
+6. `pdmx_advanced.py` is the rule for level 6 (below). `pdmx_fragments.py [--limit 1300]` writes the two
+   fragments: the best-rated passing candidates (a cap in rating order, not a random cut), the advanced
+   ones apart and uncapped, skipping every candidate in `pdmx-excluded.json` (build failures, duplicates,
+   out of scope). `--record-failures LOG` first adds the pieces a `build.py` log reports as refused.
+7. `build.py --source pdmx [--only SLUG...]`: converts nothing (the MusicXML is the archive's own file).
    Each piece is validated as a plain copy (`validate.check_file`: XSD, the two-staff rule, measure
    arithmetic and the other library checks), then written gzip-compressed. A failed piece gets no score and
-   no manifest entry.
-6. `build.py` also writes `library-index.json` (the eight fields the library list reads), and
-   `gates.py --new` writes the verification records (span check, lint, level). For a MuseScore piece the
-   LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to cross-check); the other
-   gates do.
+   no manifest entry; repeat steps 6 and 7 until a build refuses nothing. `build.py --manifest-only` then
+   re-renders every manifest entry, and `build.py` writes `library-index.json` (the eight fields the
+   library list reads).
+8. `gates.py --pending` (or `--new`) writes the verification records (span check, lint, level). For a
+   MuseScore piece the LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to
+   cross-check); the other gates do.
 
-Result of the run (2026-10-16): 175,905 candidates screened, 8,421 two-staff classical, folk or religious
-candidates after de-duplication, 4,188 gated (2,591 pass), 1,300 shipped (rating order), 184 refused by the
-build. Composer: the archive names a composer for 300 of the 1,300 pieces (23 percent); the other 1,000
-read "Unknown". Levels from the frozen heuristic, archive only: 7, 59, 669, 554, 11, 0; the whole library
-(253 curated and 1,300 archive): 31, 103, 752, 591, 26, 50.
+**Level 6.** The heuristic has four cut points, so it never proposes 6; the 50 curated Advanced pieces
+were placed by hand. An archive piece is placed at 6 by the rule in `pdmx_advanced.py`: a proposal of 5,
+or of 4 with a score of 10.9 or more (the middle of that band); at least 60 seconds and 300 notes; and
+both sustained fast notes (6 a second) and a stretch of 12 semitones. A placement from proposal 4 carries
+a `levelOverride`. The rule's thresholds were fixed before the yield was known and are not tuned to a
+count; its first form (any one demand) picked five pieces that were not advanced, so it now needs speed and
+stretch together. Every library gate still applies. Result: 30 pieces. Another 205 candidates meet the
+rule but fail the span or lint gate, so even without those gates the archive holds about 235, not 1,000.
+
+Result of the run (2026-10-16): 175,905 candidates screened, 8,607 two-staff candidates after
+de-duplication, all gated (5,449 pass), 1,330 shipped, 194 refused by the build, 156 archive copies
+removed by `dedupe.py`, 59 out of scope. The archive names a composer for 260 of the 1,330 pieces (20
+percent); the other 1,070 read "Unknown". Levels, archive only: 8, 56, 669, 564, 3, 30 (the frozen
+heuristic's proposals, and 30 placed at 6 by the rule); the whole library (253 curated and 1,330
+archive): 32, 100, 752, 601, 18, 80.
 
 ## Generated and ignored directories
 

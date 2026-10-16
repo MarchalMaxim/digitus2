@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 import { LEVEL_NAMES, type Level } from '../../src/library/levels.js';
+import { searchPieces } from '../../src/library/search.js';
 
 /** Pieces in the built-in library (content/manifest.json), so the flows follow its growth. */
 const manifest = JSON.parse(
@@ -13,8 +14,23 @@ const manifest = JSON.parse(
 
 export const LIBRARY_COUNT = manifest.length;
 
+/** The library list as the app loads it (content/library-index.json). */
+const index = JSON.parse(
+  readFileSync(
+    fileURLToPath(new URL('../../../../content/library-index.json', import.meta.url)),
+    'utf8',
+  ),
+) as Array<{ title: string; composer: string; collection: string }>;
+
+/** How many pieces a search finds, by the app's own matching (src/library/search.ts), so a count follows the library. */
+export function searchCount(query: string): number {
+  return searchPieces(index, query).length;
+}
+
 /** The pieces the About table lists: the MuseScore archive pieces are counted in a sentence instead. */
-export const CURATED_COUNT = manifest.filter((p) => !(p.source?.name ?? '').startsWith('MuseScore')).length;
+export const CURATED_COUNT = manifest.filter(
+  (p) => !(p.source?.name ?? '').startsWith('MuseScore'),
+).length;
 
 /** Engravings that owe a credit: share-alike (CC BY-SA) and attribution-only (CC BY), as the About page counts them. */
 export const LICENSE_COUNTS = {

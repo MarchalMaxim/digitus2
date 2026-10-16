@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { ThemeToggle } from '../design/ThemeToggle.js';
 import {
   isShareAlike,
   licenseLabel,
@@ -67,6 +68,7 @@ export function AboutView() {
         <Button primary className="no-print" onClick={openLibrary}>
           Back to the library
         </Button>
+        <ThemeToggle />
         <h1 ref={heading} tabIndex={-1}>
           About digitus2
         </h1>

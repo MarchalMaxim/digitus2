@@ -125,6 +125,84 @@ h1[tabindex='-1']:focus {
   padding: 1rem;
 }
 
+/* The light and dark switch (ThemeToggle.tsx, T7): in every view's header, at the page's top
+   right, on the row of the view's first line (the library's name, Back to the library). A round
+   44 px button with no border; its hover fill is the buttons' own. */
+.page:has(.theme-toggle) {
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+
+/* The switch comes first in a header whose heading is its first row (the library, a score that
+   could not open); the heading keeps clear of it. Elsewhere it follows Back, so the tab order is
+   the order on screen. */
+.page > header > .theme-toggle:first-child + h1 {
+  padding-right: 3.25rem;
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+  max-width: none;
+}
+
+/* Light: a sun, a small disc and eight rays. Dark (pressed): the disc grows, the bite (a mask)
+   slides in from the top right and cuts a crescent, and the rays turn 45 degrees, shrink and fade.
+   Under reduced motion the durations are 0 (tokens.css): the icon simply changes. */
+.theme-rays,
+.theme-core,
+.theme-bite {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+.theme-rays {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  transition:
+    transform var(--dur-slow) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+}
+
+.theme-core {
+  fill: currentColor;
+  transform: scale(0.6);
+}
+
+.theme-bite {
+  transform: translate(10px, -10px);
+}
+
+.theme-toggle[aria-pressed='true'] .theme-rays {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.6);
+}
+
+.theme-toggle[aria-pressed='true'] .theme-core {
+  transform: scale(1);
+}
+
+.theme-toggle[aria-pressed='true'] .theme-bite {
+  transform: translate(0, 0);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -333,6 +411,15 @@ fieldset {
   height: auto;
 }
 
+/* Verovio draws in black: its inner svg carries color="black" and leaves fill at its initial
+   black. Both follow --score-ink here (the ink in light, a softer gray in dark), so the engraving
+   turns with the theme (T7); an element's own fill attribute (fill="none") still wins over the
+   inherited one. */
+.score-sheet svg .definition-scale {
+  color: var(--score-ink);
+  fill: currentColor;
+}
+
 /* The playback cursor draws the current notes bold, so they can be followed through a run of
    small notes (the review found a 9 x 8 px notehead easy to lose): the accent (tokens.css) also
    fills the stem and the flag, and these widths make them read. The notehead and the flag are
@@ -531,8 +618,9 @@ fieldset {
   background: var(--paper);
 }
 
-/* The chosen hand's fill is one thumb that slides from choice to choice (Transport.tsx): paper
-   with a difference blend, so the label under it turns paper on ink exactly where it passes. It
+/* The chosen hand's fill is one thumb that slides from choice to choice (Transport.tsx): white
+   (--invert, also in the dark theme, where paper is near black and would blend to nothing) with a
+   difference blend, so the label under it turns paper on ink exactly where it passes. It
    sits inside the ink borders; its leading edge moves first and the trailing edge follows. Until
    it is placed (`has-thumb`), the chosen label paints its own fill. */
 .segmented-thumb {
@@ -544,7 +632,7 @@ fieldset {
   /* Above a focused label (z-index 1): its outline lies outside the thumb, its fill under it. */
   z-index: 2;
   display: none;
-  background: var(--paper);
+  background: var(--invert);
   mix-blend-mode: difference;
   pointer-events: none;
 }
@@ -790,8 +878,9 @@ html:has(.dock) {
   scroll-margin-bottom: calc(-1 * var(--dock-h, 0px));
 }
 
-/* On-screen keyboard: paper keys outlined in ink, and ink keys. A pressed key turns gray and
-   shows the finger that plays it; keys never carry the accent. */
+/* On-screen keyboard: white keys outlined, and black keys, in both themes (the --key-* tokens: a
+   real keyboard does not invert in the dark). A pressed key turns gray and shows the finger that
+   plays it; keys never carry the accent. */
 .keyboard {
   min-width: 0;
 }
@@ -815,7 +904,7 @@ html:has(.dock) {
 }
 
 .key rect {
-  stroke: var(--ink);
+  stroke: var(--key-line);
   stroke-width: 1;
   /* Released, the fill goes back slowly, like a damper settling (the press is quick, below). */
   transition: fill var(--dur-slow) var(--ease);
@@ -857,30 +946,31 @@ html:has(.dock) {
 }
 
 .key.is-white rect {
-  fill: var(--paper);
+  fill: var(--key-white);
 }
 
 .key.is-black rect {
-  fill: var(--ink);
+  fill: var(--key-black);
 }
 
-/* Under a dimmed black key (Keyboard.tsx): paper, so the see-through key reads as a pale key and
-   the white keys' outlines do not run through its digit. */
+/* Under a dimmed black key (Keyboard.tsx): a white key's fill, so the see-through key reads as a
+   pale key and the white keys' outlines do not run through its digit. */
 .key-backing {
-  fill: var(--paper);
+  fill: var(--key-white);
   stroke: none;
 }
 
-/* Pressed, white or black, a key turns --gray-2: --gray-1 on a white key was almost invisible.
-   A black key shows a number only when pressed, so its number is ink on the gray too. */
+/* Pressed, white or black, a key turns --key-down (light: the --gray-2 of the rules; --gray-1 on
+   a white key was almost invisible). A black key shows a number only when pressed, so its number
+   is the keys' dark digit on the gray too. */
 .keyboard-svg .key.is-pressed rect,
 .keyboard-svg .key.is-muted rect {
-  fill: var(--gray-2);
+  fill: var(--key-down);
 }
 
 .key text {
   font: 600 14px var(--font-ui);
-  fill: var(--ink);
+  fill: var(--key-digit);
 }
 
 .key.is-black text {
@@ -890,7 +980,7 @@ html:has(.dock) {
 /* L or R over a pressed key, only in bars where the hands come within a fifth (T11). */
 .key-hand {
   font: 600 10px var(--font-ui);
-  fill: var(--ink);
+  fill: var(--key-digit);
   pointer-events: none;
 }
 

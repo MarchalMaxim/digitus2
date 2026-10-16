@@ -61,16 +61,29 @@ const CHANGING = 'theme-changing';
 /** The switch whose cross-fade is on screen; an earlier one's end leaves the root alone. */
 let latestSwitch = 0;
 
+/** Where the new theme's circle starts and how far it must grow to cover the viewport. */
+const RIPPLE = ['--ripple-x', '--ripple-y', '--ripple-r'] as const;
+
+function rippleFrom(from: Element): [number, number, number] {
+  const box = from.getBoundingClientRect();
+  const x = box.left + box.width / 2;
+  const y = box.top + box.height / 2;
+  const width = document.documentElement.clientWidth;
+  const height = document.documentElement.clientHeight;
+  return [x, y, Math.hypot(Math.max(x, width - x), Math.max(y, height - y))];
+}
+
 /**
  * Shows `theme` and keeps it, or forgets the choice when `theme` is the system's own. Where site
  * data is blocked the page still switches; the choice then lasts as long as the page.
  *
- * Where the browser has view transitions the whole page cross-fades from one theme to the other
- * as a single picture (base.css sets the length, 0 under reduced motion); elsewhere it simply
- * changes. The page and its subscribers change inside the transition, after the browser has the
- * old picture, so the icon on the switch turns in the new one.
+ * Where the browser has view transitions the new theme spreads over the old one as a growing
+ * circle, from the centre of `from` (the switch) to the farthest corner of the viewport; without
+ * `from` it grows from the centre of the viewport. base.css draws it (0 ms under reduced motion);
+ * elsewhere the page simply changes. The page and its subscribers change inside the transition,
+ * after the browser has the old picture, so the icon on the switch turns in the new one.
  */
-export function chooseTheme(theme: Theme): void {
+export function chooseTheme(theme: Theme, from?: Element): void {
   const own = theme === systemTheme() ? null : theme;
   try {
     if (own) localStorage.setItem(THEME_STORAGE_KEY, own);
@@ -89,8 +102,12 @@ export function chooseTheme(theme: Theme): void {
   const root = document.documentElement;
   const mine = ++latestSwitch;
   root.classList.add(CHANGING);
+  if (from) rippleFrom(from).forEach((px, i) => root.style.setProperty(RIPPLE[i]!, `${px}px`));
+  else for (const name of RIPPLE) root.style.removeProperty(name);
   const done = () => {
-    if (mine === latestSwitch) root.classList.remove(CHANGING);
+    if (mine !== latestSwitch) return;
+    root.classList.remove(CHANGING);
+    for (const name of RIPPLE) root.style.removeProperty(name);
   };
   // flushSync: React draws the switch's new state before the browser takes the new picture.
   document.startViewTransition(() => flushSync(apply)).finished.then(done, done);
@@ -119,6 +136,6 @@ export function subscribeTheme(onChange: () => void): () => void {
 }
 
 /** The theme on screen, kept current, and the way to choose another. */
-export function useTheme(): [Theme, (theme: Theme) => void] {
+export function useTheme(): [Theme, (theme: Theme, from?: Element) => void] {
   return [useSyncExternalStore(subscribeTheme, themeOnScreen), chooseTheme];
 }

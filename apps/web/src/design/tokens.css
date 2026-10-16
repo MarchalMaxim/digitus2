@@ -22,6 +22,8 @@
   --dur: 160ms;
   --dur-slow: 200ms;
   --dur-flourish: 520ms; /* the easter egg's notes, the one motion meant to be noticed (NoteBurst.tsx) */
+  --dur-reveal: 400ms; /* the new theme spreading from the switch (base.css): long enough to read as
+                          a ripple, not a wipe (the user, 2026-10-16, issue #11) */
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --font-ui: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
@@ -93,6 +95,7 @@ svg .is-red * {
     --dur: 0ms;
     --dur-slow: 0ms;
     --dur-flourish: 0ms;
+    --dur-reveal: 0ms;
   }
 }
 

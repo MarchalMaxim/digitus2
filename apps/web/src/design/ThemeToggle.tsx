@@ -20,7 +20,7 @@ export function ThemeToggle() {
       className="theme-toggle no-print"
       aria-label="Dark theme"
       aria-pressed={dark}
-      onClick={() => choose(dark ? 'light' : 'dark')}
+      onClick={(event) => choose(dark ? 'light' : 'dark', event.currentTarget)}
     >
       <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
         {/* A mask's own luminance, not a color on screen: white keeps the disc, black cuts it. */}

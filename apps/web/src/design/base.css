@@ -160,6 +160,41 @@ h1[tabindex='-1']:focus {
   max-width: none;
 }
 
+/* Switching the theme (design/theme.ts): the new theme spreads over the old one as a circle
+   growing from the switch (a view transition; theme.ts sets the --ripple-* centre and radius,
+   else it grows from the middle). It takes --dur-reveal, longer than the other motion so it reads
+   as a ripple, not a wipe; under reduced motion that is 0 and the page simply changes. Meanwhile
+   the controls' own color transitions are held, or they would still be fading from the old theme
+   when the circle has passed; the icon turns as before. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-reveal);
+  animation-timing-function: var(--ease);
+}
+
+::view-transition-old(root) {
+  animation-name: none;
+}
+
+::view-transition-new(root) {
+  animation-name: theme-ripple;
+  mix-blend-mode: normal;
+}
+
+@keyframes theme-ripple {
+  from {
+    clip-path: circle(0 at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+  to {
+    clip-path: circle(var(--ripple-r, 75vmax) at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+}
+
+:root.theme-changing :not(.theme-toggle svg *) {
+  transition: none;
+}
+
 /* Light: a sun, a small disc and eight rays. Dark (pressed): the disc grows, the bite (a mask)
    slides in from the top right and cuts a crescent, and the rays turn 45 degrees, shrink and fade.
    Under reduced motion the durations are 0 (tokens.css): the icon simply changes. */

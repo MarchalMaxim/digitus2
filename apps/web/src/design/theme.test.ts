@@ -117,6 +117,96 @@ describe('chooseTheme', () => {
     chooseTheme('light');
     expect(onChange).toHaveBeenCalledTimes(1);
   });
+
+  describe('where the browser has view transitions', () => {
+    /** A startViewTransition that runs the update when the test says, as the browser does
+     *  once it has the old picture of the page. */
+    function fakeTransitions() {
+      const updates: Array<() => void> = [];
+      const ends: Array<() => void> = [];
+      const start = vi.fn((update: () => void) => {
+        updates.push(update);
+        return { finished: new Promise<void>((resolve) => ends.push(resolve)) };
+      });
+      Object.defineProperty(document, 'startViewTransition', { value: start, configurable: true });
+      return { start, updates, ends };
+    }
+
+    afterEach(() => {
+      delete (document as { startViewTransition?: unknown }).startViewTransition;
+      root().classList.remove('theme-changing');
+    });
+
+    it('changes the page inside the transition, after its old picture', async () => {
+      fakeSystem(false);
+      const transitions = fakeTransitions();
+      const onChange = vi.fn();
+      const stop = subscribeTheme(onChange);
+      chooseTheme('dark');
+      expect(transitions.start).toHaveBeenCalledTimes(1);
+      // The old picture still shows the light page and the sun.
+      expect(root().hasAttribute('data-theme')).toBe(false);
+      expect(onChange).not.toHaveBeenCalled();
+      expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
+      // The controls' own color transitions are held while the page cross-fades.
+      expect(root().classList.contains('theme-changing')).toBe(true);
+      transitions.updates[0]!();
+      expect(root().getAttribute('data-theme')).toBe('dark');
+      expect(onChange).toHaveBeenCalledTimes(1);
+      transitions.ends[0]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root().classList.contains('theme-changing')).toBe(false);
+      stop();
+    });
+
+    it('spreads the new theme from the switch to the farthest corner, then forgets where', async () => {
+      fakeSystem(false);
+      const transitions = fakeTransitions();
+      vi.spyOn(root(), 'clientWidth', 'get').mockReturnValue(1000);
+      vi.spyOn(root(), 'clientHeight', 'get').mockReturnValue(600);
+      const button = document.createElement('button');
+      vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(940, 16, 44, 44));
+      chooseTheme('dark', button);
+      const ripple = (name: string) => root().style.getPropertyValue(name);
+      expect([ripple('--ripple-x'), ripple('--ripple-y')]).toEqual(['962px', '38px']);
+      // The farthest corner is the bottom left one: 962 px across and 562 px down.
+      expect(parseFloat(ripple('--ripple-r'))).toBeCloseTo(Math.hypot(962, 562), 3);
+      transitions.updates[0]!();
+      transitions.ends[0]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(ripple('--ripple-x')).toBe('');
+      expect(ripple('--ripple-r')).toBe('');
+    });
+
+    it('spreads from the middle when no switch is named', () => {
+      fakeSystem(false);
+      fakeTransitions();
+      root().style.setProperty('--ripple-x', '1px');
+      chooseTheme('dark');
+      expect(root().style.getPropertyValue('--ripple-x')).toBe('');
+    });
+
+    it('keeps holding the transitions while a second switch is still spreading', async () => {
+      fakeSystem(false);
+      const transitions = fakeTransitions();
+      chooseTheme('dark');
+      transitions.updates[0]!();
+      chooseTheme('light');
+      // The browser skips the first transition for the second; its end must not cut the second.
+      transitions.ends[0]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root().classList.contains('theme-changing')).toBe(true);
+      transitions.updates[1]!();
+      transitions.ends[1]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root().classList.contains('theme-changing')).toBe(false);
+      expect(root().hasAttribute('data-theme')).toBe(false);
+    });
+  });
 });
 
 describe('subscribeTheme', () => {

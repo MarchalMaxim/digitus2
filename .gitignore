@@ -53,6 +53,7 @@ Thumbs.db
 .env.*
 research/spikes/**/bundle/
 research/spikes/**/results/
+research/omr/results/
 research/spikes/**/playwright-report/
 
 # Claude Code session state

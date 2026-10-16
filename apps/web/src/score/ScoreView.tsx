@@ -304,6 +304,18 @@ export function ScoreView({ source }: { source: PieceSource }) {
         onBack={openLibrary}
         legend={legendAbove}
       />
+      {source.kind === 'file' && source.scan && (
+        <p className="no-print">
+          <button
+            className="text-button"
+            onClick={() => {
+              if (source.scan) useAppStore.getState().openScan(source.scan);
+            }}
+          >
+            Scan source and recognition
+          </button>
+        </p>
+      )}
       <div className="score-layout">
         <main className="score-main" ref={measureRef}>
           {/* Says whose digits the score shows when they are the editor's, right above the music

@@ -30,7 +30,7 @@ test('about: keeps its text', async ({ page }) => {
   ]);
   await expect(
     page.getByText(
-      'digitus2 writes finger numbers on piano music for beginning and intermediate players. Everything runs in your browser; nothing you open leaves your computer.',
+      'digitus2 writes finger numbers on piano music for beginning and intermediate players. Fingerings and playback run in your browser. Experimental photo and PDF recognition uses an optional worker on this PC, without an external recognition service.',
       { exact: true },
     ),
   ).toBeVisible();

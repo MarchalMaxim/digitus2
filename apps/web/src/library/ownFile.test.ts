@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   acceptScoreFile,
+  acceptScoreFiles,
   carriesFiles,
   isScoreFileName,
   NOT_A_SCORE_REFUSAL,
@@ -8,6 +9,36 @@ import {
 } from './ownFile.js';
 
 describe('own files (spec 3, 7.6)', () => {
+  it('accepts image batches in selection order and rejects mixed batches atomically', async () => {
+    const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+    const photos = [new File([png], 'second.png'), new File([png], 'first.png')];
+    const scans: File[][] = [];
+    const refused: string[] = [];
+    acceptScoreFiles(
+      photos,
+      () => {},
+      (m) => refused.push(m),
+      (files) => scans.push(files),
+    );
+    await vi.waitFor(() => expect(scans).toHaveLength(1));
+    expect(scans[0]!.map((f) => f.name)).toEqual(['second.png', 'first.png']);
+    acceptScoreFiles(
+      [...photos, new File(['%PDF-1.7'], 'x.pdf')],
+      () => {},
+      (m) => refused.push(m),
+      (files) => scans.push(files),
+    );
+    await vi.waitFor(() => expect(refused).toHaveLength(1));
+    expect(scans).toHaveLength(1);
+    acceptScoreFiles(
+      [...photos, new File(['fake'], 'bad.png')],
+      () => {},
+      (m) => refused.push(m),
+      (files) => scans.push(files),
+    );
+    await vi.waitFor(() => expect(refused).toHaveLength(2));
+    expect(scans).toHaveLength(1);
+  });
   it('takes MusicXML and MIDI by extension, in any case', () => {
     expect(['a.musicxml', 'b.XML', 'c.mxl', 'd.MID', 'e.midi'].map(isScoreFileName)).toEqual([
       true,
@@ -17,7 +48,7 @@ describe('own files (spec 3, 7.6)', () => {
       true,
     ]);
     expect(['notes.txt', 'song', 'x.pdf'].map(isScoreFileName)).toEqual([false, false, false]);
-    expect(SCORE_ACCEPT).toBe('.musicxml,.xml,.mxl,.mid,.midi');
+    expect(SCORE_ACCEPT).toBe('.musicxml,.xml,.mxl,.mid,.midi,.png,.jpg,.jpeg,.pdf');
   });
   it('hands a score over as bytes, refuses anything else with the notice', async () => {
     const onFile = vi.fn();

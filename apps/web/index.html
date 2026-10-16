@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
     <title>digitus2</title>
+    <script>
+      // A theme chosen with the switch (src/design/theme.ts), applied before the first paint so
+      // the page never shows the system's theme first. Without one the stylesheet follows the
+      // system. Blocked site data leaves the page to the system too.
+      try {
+        var theme = localStorage.getItem('digitus2.theme');
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

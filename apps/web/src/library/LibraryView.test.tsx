@@ -174,7 +174,7 @@ describe('LibraryView: leaving the list (M4, polish plan)', () => {
     expect(useAppStore.getState().libraryScrollY).toBe(1200);
     window.scrollTo({ top: 2400 });
     await userEvent.upload(
-      screen.getByLabelText('Open your own MusicXML or MIDI file'),
+      screen.getByLabelText('Open your own score'),
       new File(['<score-partwise/>'], 'mine.musicxml', { type: 'application/xml' }),
     );
     await vi.waitFor(() =>

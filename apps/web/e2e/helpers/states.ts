@@ -32,7 +32,7 @@ const TWINKLE_MIDI = fileURLToPath(new URL('../../fixtures/twinkle.mid', import.
 
 /**
  * The library's rows: the buttons in the list's items. Not every button named "Open …": the end
- * line's file input is a button too, named "Open your own MusicXML or MIDI file".
+ * line's file input is a button too, named "Open your own score".
  */
 export function pieceRows(page: Page): Locator {
   return page.getByRole('listitem').getByRole('button', { name: /^Open / });
@@ -120,7 +120,7 @@ export const STATES: AppState[] = [
     go: async (page) => {
       await library(page);
       await page
-        .getByLabel('Open your own MusicXML or MIDI file')
+        .getByLabel('Open your own score')
         .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
       await expect(
         page.getByText(
@@ -333,7 +333,7 @@ export const STATES: AppState[] = [
     name: 'score-error',
     go: async (page) => {
       await library(page);
-      await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+      await page.getByLabel('Open your own score').setInputFiles({
         name: 'bad.musicxml',
         mimeType: 'application/xml',
         buffer: Buffer.from('<nope/>'),
@@ -347,7 +347,7 @@ export const STATES: AppState[] = [
     name: 'score-midi',
     go: async (page) => {
       await page.goto('/');
-      await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles(TWINKLE_MIDI);
+      await page.getByLabel('Open your own score').setInputFiles(TWINKLE_MIDI);
       await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
         timeout: SCORE_TIMEOUT,
       });

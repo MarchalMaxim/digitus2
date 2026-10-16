@@ -40,6 +40,7 @@
  * wrap, a Play from a loop's start elsewhere) heard nothing of its pass, so nothing is marked.
  */
 import type { Assignment, Hand, Note } from '@digitus2/engine';
+import { ornamentAttacks, type OrnamentAttack } from '@digitus2/engine/ornaments';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { prefersReducedMotion } from '../design/motion.js';
 import type { PressedKey } from './Keyboard.js';
@@ -130,12 +131,41 @@ function mutedGroups(groups: readonly OnsetGroup[], muted: ReadonlySet<string>):
   return out;
 }
 
-function pressedKeys(notes: Note[], assignment: Assignment | null): PressedKey[] {
-  return notes.map((n) => ({
-    midi: n.midi,
-    finger: assignment?.[n.id]?.finger ?? null,
-    hand: n.hand,
-  }));
+type Performances = ReadonlyMap<Note, OrnamentAttack[]>;
+
+function phaseAt(n: Note, sec: number, performances: Performances): number {
+  const attacks = performances.get(n);
+  if (!attacks) return -2;
+  let lo = 0;
+  let hi = attacks.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (attacks[mid]!.onsetSec <= sec) lo = mid + 1;
+    else hi = mid;
+  }
+  const i = lo - 1;
+  return i >= 0 && sec < attacks[i]!.offsetSec ? i : -1;
+}
+
+function keyboardPhase(notes: Note[], sec: number, performances: Performances): string {
+  if (performances.size === 0) return '';
+  return notes.map((n) => phaseAt(n, sec, performances)).join(',');
+}
+
+function pressedKeys(
+  notes: Note[],
+  assignment: Assignment | null,
+  sec: number,
+  performances: Performances,
+): PressedKey[] {
+  return notes.flatMap((n) => {
+    const phase = phaseAt(n, sec, performances);
+    if (phase === -1) return [];
+    const midi = phase >= 0 ? performances.get(n)![phase]!.midi : n.midi;
+    return [
+      { midi, finger: midi === n.midi ? (assignment?.[n.id]?.finger ?? null) : null, hand: n.hand },
+    ];
+  });
 }
 
 function isSilentRun(): boolean {
@@ -170,6 +200,15 @@ export function useCursor({
   const [currentGroup, setCurrentGroup] = useState(-1);
 
   const muteKey = [...new Set(mutedHands)].sort().join(',');
+  const performances = useMemo(
+    () =>
+      new Map(
+        groups.flatMap((g) =>
+          g.notes.filter((n) => n.ornament).map((n) => [n, ornamentAttacks(n)] as const),
+        ),
+      ),
+    [groups],
+  );
   const { active, mutedAt } = useMemo(() => {
     const muteSet = new Set(muteKey ? muteKey.split(',') : []);
     return { active: activeGroups(groups, muteSet), mutedAt: mutedGroups(groups, muteSet) };
@@ -233,11 +272,13 @@ export function useCursor({
       const g = active[i]!;
       setCurrent(host, g.noteIds, g.tick);
       markedSecRef.current = g.sec;
-      setPressed(pressedKeys(g.sounding, assignment));
+      setPressed(pressedKeys(g.sounding, assignment, pos, performances));
       setStruckCount(0);
       const mutedNotes = mutedAt[groupIndexAt(mutedAt, pos)]?.notes ?? NO_NOTES;
       setMuted((prev) =>
-        prev.length === 0 && mutedNotes.length === 0 ? prev : pressedKeys(mutedNotes, assignment),
+        prev.length === 0 && mutedNotes.length === 0
+          ? prev
+          : pressedKeys(mutedNotes, assignment, pos, performances),
       );
       setCurrentGroup(g.index);
       return;
@@ -269,6 +310,8 @@ export function useCursor({
     }
     let last = -2; // forces the first frame to mark
     let shownMuted: Note[] | null = null; // forces the first frame to report the muted keys
+    let shownMutedPhase = '';
+    let shownPhase = '';
     let marked: Element[] = [];
     let page: Element | null = null; // the first page the marks were made on
     let raf = 0;
@@ -283,10 +326,14 @@ export function useCursor({
       // The muted hands' keys at the time heard, at their own onsets as well as the played
       // hands' (`mutedGroups`): a new array only when they change.
       const mutedNotes = mutedAt[groupIndexAt(mutedAt, sec)]?.notes ?? NO_NOTES;
-      if (mutedNotes !== shownMuted) {
+      const mutedPhase = keyboardPhase(mutedNotes, sec, performances);
+      if (mutedNotes !== shownMuted || mutedPhase !== shownMutedPhase) {
         shownMuted = mutedNotes;
+        shownMutedPhase = mutedPhase;
         setMuted((prev) =>
-          prev.length === 0 && mutedNotes.length === 0 ? prev : pressedKeys(mutedNotes, assignment),
+          prev.length === 0 && mutedNotes.length === 0
+            ? prev
+            : pressedKeys(mutedNotes, assignment, sec, performances),
         );
       }
       // Out of a lead-in (from Play, a seek or a loop wrap) a note of the hands played has been
@@ -299,8 +346,20 @@ export function useCursor({
       // New pages (a re-layout while playing) drop the marks: put them back on the same group.
       const stale =
         page !== host.firstElementChild || (marked.length > 0 && !marked[0]!.isConnected);
-      if (i === last && !stale) return;
       const g = active[i]!;
+      const phase = keyboardPhase(g.sounding, sec, performances);
+      if (phase !== shownPhase && i === last && !stale) {
+        const previousPhases = shownPhase.split(',');
+        const phases = phase.split(',');
+        const struck = g.sounding.filter(
+          (_n, k) => phases[k] !== previousPhases[k] && Number(phases[k]) >= 0,
+        );
+        const held = g.sounding.filter((n) => !struck.includes(n));
+        shownPhase = phase;
+        setPressed(pressedKeys([...struck, ...held], assignment, sec, performances));
+        setStruckCount(struck.length);
+      }
+      if (i === last && !stale) return;
       clearCurrent(host);
       marked = setCurrent(host, g.noteIds, g.tick);
       page = host.firstElementChild;
@@ -309,14 +368,15 @@ export function useCursor({
       stopSecRef.current = Number.NaN; // the music has moved on: a later lead-in is a jump
       if (i === last) return;
       last = i;
+      shownPhase = phase;
       followCursor(marked, followRef.current);
-      setPressed(pressedKeys(g.sounding, assignment));
+      setPressed(pressedKeys(g.sounding, assignment, sec, performances));
       setStruckCount(g.noteIds.length);
       setCurrentGroup(g.index);
     };
     frame();
     return () => cancelAnimationFrame(raf);
-  }, [host, playing, waiting, atStart, loop, active, mutedAt, assignment, layoutKey]);
+  }, [host, playing, waiting, atStart, loop, active, mutedAt, assignment, layoutKey, performances]);
 
   // Playwright's sync check: the transport clock and the group the cursor shows.
   useEffect(() => {

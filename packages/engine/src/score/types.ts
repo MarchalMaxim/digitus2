@@ -24,6 +24,19 @@ export interface MeasureInfo {
   number: string;
 }
 
+/** Playback interpretation of a source sign; the written note remains the solver's input. */
+export interface Ornament {
+  kind: 'trill-mark' | 'mordent' | 'inverted-mordent';
+  long: boolean;
+  upperMidi: number;
+  lowerMidi: number;
+  startNote: 'main' | 'upper' | 'below';
+  beats?: number;
+  /** End of the first written segment, before any tied continuation. */
+  endTick: number;
+  endSec: number;
+}
+
 export interface Note {
   id: string;
   onsetTick: number;
@@ -42,6 +55,7 @@ export interface Note {
   sourceIndices: number[];
   /** MIDI velocity 0..127 when the source carries one (PIG, MIDI). */
   velocity?: number;
+  ornament?: Ornament;
 }
 
 export interface Score {

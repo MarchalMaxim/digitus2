@@ -47,11 +47,30 @@ describe('routes', () => {
     });
     uninstall();
   });
+  it('restores the available scan review on browser Back without loading a new job', () => {
+    const uninstall = installHashSync(useAppStore);
+    const session = {
+      id: 'visit-scan',
+      file: new File(['%PDF-1.4'], 'piano.pdf'),
+      xml: '<score-partwise/>',
+    };
+    useAppStore.getState().openScan(session);
+    useAppStore.getState().openPiece({
+      kind: 'file',
+      name: 'piano.musicxml',
+      bytes: new TextEncoder().encode(session.xml),
+      scan: session,
+    });
+    location.hash = '#/scan';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    expect(useAppStore.getState().view).toEqual({ name: 'scan', session });
+    uninstall();
+  });
   it('falls back to the library with a notice when the hash cannot be restored', () => {
     location.hash = '#/piece/file';
     const uninstall = installHashSync(useAppStore);
     expect(useAppStore.getState().view).toEqual({ name: 'library' });
-    expect(useAppStore.getState().notice).toBe('Drop the file again to continue.');
+    expect(useAppStore.getState().notice).toBe('Open it from My scores, or choose the file again.');
     uninstall();
   });
 });

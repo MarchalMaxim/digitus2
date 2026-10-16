@@ -7,19 +7,27 @@ import { STATES } from './helpers/states.js';
 
 // The design brief and accessibility in every application state (verification spec 3.9): one
 // red element (or one playback cursor), zero serious or critical axe violations, and no
-// horizontal page scroll. Runs on the desktop and the 360 px mobile project.
-for (const s of STATES) {
-  test(`state ${s.name}: one red element and no serious a11y issues`, async ({ page }) => {
-    await s.go(page);
-    const roots = await expectOneRed(page, s.name);
-    if (s.expectTag === 'cursor') expect(roots.every((r) => r.inSheet)).toBe(true);
-    else if (s.expectTag === 'frame') expect(roots[0]!.className).toContain('drop-frame');
-    else expect(roots[0]!.tag).toBe('button');
-    await expectNoSeriousA11y(page, s.name);
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
-    expect(overflow, `${s.name} horizontal overflow`).toBeLessThanOrEqual(0);
+// horizontal page scroll. Runs on the desktop and the 360 px mobile project, in the light theme
+// and again with the system in dark (T7: the dark tokens must keep the contrasts and the one red).
+for (const scheme of ['light', 'dark'] as const) {
+  test.describe(scheme === 'light' ? 'light' : 'dark', () => {
+    test.use({ colorScheme: scheme });
+
+    for (const s of STATES) {
+      const name = scheme === 'light' ? s.name : `${s.name} (dark)`;
+      test(`state ${name}: one red element and no serious a11y issues`, async ({ page }) => {
+        await s.go(page);
+        const roots = await expectOneRed(page, name);
+        if (s.expectTag === 'cursor') expect(roots.every((r) => r.inSheet)).toBe(true);
+        else if (s.expectTag === 'frame') expect(roots[0]!.className).toContain('drop-frame');
+        else expect(roots[0]!.tag).toBe('button');
+        await expectNoSeriousA11y(page, name);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, `${name} horizontal overflow`).toBeLessThanOrEqual(0);
+      });
+    }
   });
 }
 

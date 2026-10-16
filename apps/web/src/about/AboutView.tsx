@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { ThemeToggle } from '../design/ThemeToggle.js';
 import {
   isShareAlike,
   licenseLabel,
@@ -87,6 +88,7 @@ export function AboutView() {
         <Button primary className="no-print" onClick={openLibrary}>
           Back to the library
         </Button>
+        <ThemeToggle />
         <h1 ref={heading} tabIndex={-1}>
           About digitus2
         </h1>
@@ -96,7 +98,8 @@ export function AboutView() {
         <h2 id="about-what">What this is</h2>
         <p>
           digitus2 writes finger numbers on piano music for beginning and intermediate players.
-          Everything runs in your browser; nothing you open leaves your computer.
+          Fingerings and playback run in your browser. Experimental photo and PDF recognition uses
+          an optional worker on this PC, without an external recognition service.
         </p>
       </section>
 
@@ -131,6 +134,18 @@ export function AboutView() {
           <li>
             Music engraving by <ExternalLink href={VEROVIO_URL}>Verovio</ExternalLink>,
             LGPL-3.0-or-later, used as an unmodified library.
+          </li>
+          <li>
+            PDF previews use{' '}
+            <ExternalLink href="https://mozilla.github.io/pdf.js/">PDF.js</ExternalLink> (
+            <a
+              href={import.meta.env.BASE_URL + 'licenses/pdfjs.txt'}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Apache-2.0
+            </a>
+            ), locally in your browser.
           </li>
           <li>
             MIDI files are read with <ExternalLink href={MIDI_FILE_URL}>midi-file</ExternalLink>{' '}

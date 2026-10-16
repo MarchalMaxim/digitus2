@@ -113,7 +113,8 @@ interface OutsideBand {
 }
 
 /**
- * Samples every animation frame inside the page for `ms` while the score plays. A frame counts
+ * Samples animation frames for at least `minimumMs`, extending up to 45 s until more than 200
+ * eligible frames cover four checked systems. A frame counts
  * when the dock is stuck to the bottom of the window, the page has not scrolled for three frames
  * and the cursor has marked the same notes for three frames: a scroll the cursor asks for moves
  * the page within a frame of the notes that asked for it, so only a cursor left behind the dock
@@ -122,21 +123,34 @@ interface OutsideBand {
  */
 function sampleCursorAgainstDock(
   page: Page,
-  ms: number,
-): Promise<{ frames: number; groups: number; systems: number; outside: OutsideBand[] }> {
-  return page.evaluate(async (duration) => {
+  minimumMs: number,
+): Promise<{
+  frames: number;
+  groups: number;
+  systems: number;
+  checkedSystems: number;
+  elapsedMs: number;
+  outside: OutsideBand[];
+}> {
+  return page.evaluate(async (minimumDuration) => {
     const outside: OutsideBand[] = [];
     const groups = new Set<string | null>();
     const systems = new Set<Element>();
+    const checkedSystems = new Set<Element>();
     let frames = 0;
     let lastY = window.scrollY;
     let lastTick: string | null = null;
     let still = 0;
     let same = 0;
-    const end = performance.now() + duration;
+    const start = performance.now();
+    const deadline = start + 45_000;
     await new Promise<void>((resolve) => {
       const frame = () => {
-        if (performance.now() > end) {
+        const now = performance.now();
+        if (
+          now >= deadline ||
+          (now - start >= minimumDuration && frames > 200 && checkedSystems.size >= 4)
+        ) {
           resolve();
           return;
         }
@@ -154,6 +168,7 @@ function sampleCursorAgainstDock(
           if (system) systems.add(system);
           if (stuck && still >= 3 && same >= 2) {
             frames++;
+            if (system) checkedSystems.add(system);
             const rects = reds.map((r) => r.getBoundingClientRect());
             const top = Math.min(...rects.map((r) => r.top));
             const bottom = Math.max(...rects.map((r) => r.bottom));
@@ -165,8 +180,15 @@ function sampleCursorAgainstDock(
       };
       requestAnimationFrame(frame);
     });
-    return { frames, groups: groups.size, systems: systems.size, outside };
-  }, ms);
+    return {
+      frames,
+      groups: groups.size,
+      systems: systems.size,
+      checkedSystems: checkedSystems.size,
+      elapsedMs: performance.now() - start,
+      outside,
+    };
+  }, minimumMs);
 }
 
 /** One animation frame of the score view, as `sampleUntilFirstRedNote` records it. */
@@ -263,10 +285,12 @@ function runs<T>(values: T[]): T[] {
 }
 
 /**
- * Plays K.545 from the start at 150 % for 18 s (several systems at both widths) and checks that
+ * Plays K.545 from the start at 150 % for at least 18 s, waiting for more than 200 eligible
+ * frames across four checked systems (up to 45 s), and checks that
  * the red cursor is never left under the dock or above the window while the page is still.
  */
 async function expectCursorAboveDock(page: Page): Promise<void> {
+  test.setTimeout(90_000); // Includes score setup plus the sampler's 45 s hard deadline at either width.
   await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
   await openPractice(page);
@@ -275,11 +299,16 @@ async function expectCursorAboveDock(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Play' }).click();
   await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
   const seen = await sampleCursorAgainstDock(page, 18_000);
-  expect(seen.systems, 'the cursor crossed several systems').toBeGreaterThanOrEqual(4);
-  expect(seen.frames, 'frames counted').toBeGreaterThan(200);
+  const coverage = `${seen.frames} frames, ${seen.groups} groups, ${seen.systems} observed systems, ${seen.checkedSystems} checked systems in ${Math.round(seen.elapsedMs)} ms`;
+  expect(seen.systems, `the cursor crossed several systems: ${coverage}`).toBeGreaterThanOrEqual(4);
+  expect(
+    seen.checkedSystems,
+    `several systems checked against the dock: ${coverage}`,
+  ).toBeGreaterThanOrEqual(4);
+  expect(seen.frames, `frames counted: ${coverage}`).toBeGreaterThan(200);
   expect(
     seen.outside.length,
-    `frames with a red note outside the band above the dock (of ${seen.frames}), first: ` +
+    `frames with a red note outside the band above the dock (${coverage}), first: ` +
       JSON.stringify(seen.outside.slice(0, 3)),
   ).toBe(0);
   await expectOneRed(page, 'playing after the sampling');
@@ -346,6 +375,17 @@ async function expectScoreDimmed(page: Page, left: boolean, label: string): Prom
     expect(d.opacity, at).toBe(d.staff === out ? '0.4' : '1');
     expect(d.shown, at).toBe(d.staff === out ? 0.4 : 1);
   }
+}
+
+/**
+ * The hand of every key pressed now, found and read in one evaluate: a locator's evaluateAll
+ * resolves the elements and reads them in two steps, and under a loaded run the cursor could move
+ * between the two (a key found pressed was read released, with no hand).
+ */
+function pressedHands(page: Page): Promise<(string | null)[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.keyboard .is-pressed')].map((e) => e.getAttribute('data-hand')),
+  );
 }
 
 test.describe('playback with the silent instrument', () => {
@@ -867,9 +907,7 @@ test.describe('playback with the silent instrument', () => {
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await page.waitForTimeout(1200);
-    const hands = await page
-      .locator('.keyboard .is-pressed')
-      .evaluateAll((els) => els.map((e) => e.getAttribute('data-hand')));
+    const hands = await pressedHands(page);
     expect(hands.length).toBeGreaterThan(0);
     expect(new Set(hands)).toEqual(new Set(['L']));
   });
@@ -883,9 +921,7 @@ test.describe('playback with the silent instrument', () => {
     await page.getByRole('button', { name: 'Play' }).click();
     for (let i = 0; i < 6; i++) {
       await page.waitForTimeout(400);
-      const hands = await page
-        .locator('.keyboard .is-pressed')
-        .evaluateAll((els) => els.map((e) => e.getAttribute('data-hand')));
+      const hands = await pressedHands(page);
       expect(new Set(hands), `sample ${i}`).toEqual(new Set(['L', 'R']));
     }
   });
@@ -907,24 +943,28 @@ test.describe('playback with the silent instrument', () => {
     });
     await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    // Select and read in one browser task: playback can release a key between
+    // Playwright's selector lookup and evaluateAll callback on a busy CI runner.
     const keys = () =>
-      page.locator('.keyboard .key.is-pressed, .keyboard .key.is-muted').evaluateAll((els) =>
-        els.map((k) => {
-          const midi = k.getAttribute('data-midi');
-          const mark = document.querySelector(`.keyboard .key-hand[data-for-midi="${midi}"]`);
-          return {
-            midi,
-            black: k.classList.contains('is-black'),
-            pressed: k.classList.contains('is-pressed'),
-            muted: k.classList.contains('is-muted'),
-            hand: k.getAttribute('data-hand'),
-            fill: getComputedStyle(k.querySelector('rect')!).fill,
-            opacity: getComputedStyle(k).opacity,
-            finger: k.querySelector('text')?.textContent ?? null,
-            mark: mark?.textContent ?? null,
-            markOpacity: mark ? getComputedStyle(mark).opacity : null,
-          };
-        }),
+      page.evaluate(() =>
+        [...document.querySelectorAll('.keyboard .key.is-pressed, .keyboard .key.is-muted')].map(
+          (k) => {
+            const midi = k.getAttribute('data-midi');
+            const mark = document.querySelector(`.keyboard .key-hand[data-for-midi="${midi}"]`);
+            return {
+              midi,
+              black: k.classList.contains('is-black'),
+              pressed: k.classList.contains('is-pressed'),
+              muted: k.classList.contains('is-muted'),
+              hand: k.getAttribute('data-hand'),
+              fill: getComputedStyle(k.querySelector('rect')!).fill,
+              opacity: getComputedStyle(k).opacity,
+              finger: k.querySelector('text')?.textContent ?? null,
+              mark: mark?.textContent ?? null,
+              markOpacity: mark ? getComputedStyle(mark).opacity : null,
+            };
+          },
+        ),
       );
     type Key = Awaited<ReturnType<typeof keys>>[number];
     const lettered = (s: Key[]) => s.some((k) => k.mark !== null);
@@ -1352,7 +1392,7 @@ test.describe('playback with the silent instrument', () => {
     page,
   }) => {
     await page.goto('/?audio=silent');
-    await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+    await page.getByLabel('Open your own score').setInputFiles({
       name: 'melody.musicxml',
       mimeType: 'application/xml',
       buffer: Buffer.from(melodyXml()),

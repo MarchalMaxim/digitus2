@@ -54,7 +54,10 @@ export function handle(req: EngineRequest): EngineResponse {
         // Plain text for the renderer and the exporter: an .mxl archive or a UTF-16 file is
         // decoded once here, and parseMusicXml then reads the same text, which declares UTF-8.
         const xml = declareUtf8(unpackMusicXml(req.input));
-        const { score, editorial, warnings } = parseMusicXml(xml, { source: req.source });
+        const { score, editorial, warnings } = parseMusicXml(xml, {
+          source: req.source,
+          ...(req.preserveNotation ? { preserveNotation: true } : {}),
+        });
         return {
           id: req.id,
           ok: true,

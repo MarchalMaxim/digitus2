@@ -23,6 +23,8 @@ export type EngineRequest =
       source: string;
       /** MIDI only: every note at or above this pitch goes to the right hand. */
       splitMidi?: number;
+      /** Scan imports must not repair invalid recognition silently. */
+      preserveNotation?: boolean;
     }
   | { id: number; type: 'solve'; score: Score; profile: HandSize; pins?: Assignment }
   | { id: number; type: 'fingeredXml'; xml: string; score: Score; assignment: Assignment };

@@ -18,7 +18,8 @@
     {"id": "classical", "title": "Classical"},
     {"id": "romantic", "title": "Romantic"},
     {"id": "ragtime", "title": "Ragtime"},
-    {"id": "modern", "title": "Modern"}
+    {"id": "modern", "title": "Modern"},
+    {"id": "folk", "title": "Folk and traditional"}
   ],
   "collections": [
   {
@@ -193,6 +194,36 @@
     "id": "modern-keyboard",
     "title": "Modern keyboard works",
     "kind": "set",
+    "genre": "modern"
+  },
+  {
+    "id": "pdmx-classical",
+    "title": "Classical piano from the MuseScore archive",
+    "kind": "genre",
+    "genre": "classical"
+  },
+  {
+    "id": "pdmx-folk",
+    "title": "Folk tunes from the MuseScore archive",
+    "kind": "genre",
+    "genre": "folk"
+  },
+  {
+    "id": "pdmx-advanced",
+    "title": "Advanced piano from the MuseScore archive",
+    "kind": "genre",
+    "genre": "classical"
+  },
+  {
+    "id": "pdmx-songs",
+    "title": "Songs from the MuseScore archive",
+    "kind": "genre",
+    "genre": "songs"
+  },
+  {
+    "id": "pdmx-modern",
+    "title": "Jazz and blues from the MuseScore archive",
+    "kind": "genre",
     "genre": "modern"
   }
 ],

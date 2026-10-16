@@ -40,6 +40,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 CONTENT = HERE.parent
 ROOT = CONTENT.parent
+sys.path.insert(0, str(HERE))
+import scoreio  # noqa: E402
 SCORES = CONTENT / "scores"
 ENGINE_SRC = ROOT / "packages" / "engine" / "src"
 CLI: Path = ROOT / "packages" / "engine" / "dist" / "cli" / "main.js"
@@ -93,7 +95,7 @@ def lint_piece(score: Path, profile: str) -> dict:
     if profile not in ALL_PROFILES:
         raise ValueError(f"profile must be one of {ALL_PROFILES}, not {profile!r}")
     require_cli()
-    score = Path(score).resolve()
+    score = scoreio.plain_path(score).resolve()
     slug = score.name.removesuffix(".musicxml")
     OUT.mkdir(parents=True, exist_ok=True)
     pig = OUT / f"{slug}.{profile}.pig.txt"
@@ -133,10 +135,17 @@ def dist_is_older_than_src(src: Path = ENGINE_SRC) -> bool:
     return newest > built.stat().st_mtime
 
 
+def score_file(slug: str) -> Path:
+    """The library score of a piece: content/scores/<slug>.musicxml, or the .gz of a PDMX piece."""
+    plain = SCORES / f"{slug}.musicxml"
+    return plain if plain.exists() else SCORES / f"{slug}.musicxml.gz"
+
+
 def gate(slugs: list[str]) -> dict[str, dict]:
-    """{slug: {profiles: {medium, large}, scoreSha256, engineSrcSha256, cli}} for content/scores/<slug>.musicxml."""
+    """{slug: {profiles: {medium, large}, scoreSha256, engineSrcSha256, cli}} for content/scores/<slug>.musicxml
+    (or <slug>.musicxml.gz, the PDMX scores)."""
     require_cli()
-    scores = {s: SCORES / f"{s}.musicxml" for s in slugs}
+    scores = {s: score_file(s) for s in slugs}
     missing = [s for s, p in scores.items() if not p.exists()]
     if missing:
         raise SystemExit(f"no score (build it first): {', '.join(missing)}")

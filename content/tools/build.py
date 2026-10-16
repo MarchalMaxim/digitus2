@@ -26,6 +26,7 @@ License: MIT.
 from __future__ import annotations
 
 import argparse
+import gzip
 import html
 import json
 import re
@@ -50,6 +51,9 @@ SCORES = CONTENT / "scores"
 BUILD = CONTENT / "_build"
 PREVIEW = CONTENT / "_preview"
 MANIFEST = CONTENT / "manifest.json"
+LIBRARY_INDEX = CONTENT / "library-index.json"  # the slim list the library page loads at once (see write_library_index)
+PDMX_SELECTED = CONTENT / "_raw" / "pdmx" / "selected"  # pdmx_select.py copies the chosen archive files here
+PDMX_BUILD = BUILD / "pdmx"
 VERIFICATION = CONTENT / "verification.json"
 MUTOPIA_FTP = "https://www.mutopiaproject.org/ftp/"
 MUTOPIA_PIECE = "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id={id}"
@@ -353,6 +357,58 @@ def build_own(piece: dict, out_dir: Path = SCORES) -> dict:
     }
 
 
+PDMX_URL = "https://zenodo.org/records/15571083"  # PDMX v9 (Long et al. 2025), the MuseScore archive
+PDMX_RETRIEVED = "2026-10-13"  # the day the archive was downloaded into research/data/_downloads/pdmx
+PDMX_LICENCES = {  # PDMX's own licence field (PDMX.csv) -> the name and URL the manifest records
+    "publicdomain": ("Public Domain", "https://creativecommons.org/publicdomain/mark/1.0/"),
+    "cc-zero": ("CC0-1.0", "https://creativecommons.org/publicdomain/zero/1.0/"),
+}
+
+
+_FINGERING = re.compile(rb"[ \t]*<fingering(?=[\s>/])[^>]*?(?:/>|>.*?</fingering>)[ \t]*\r?\n?", re.S)
+_EMPTY_TECHNICAL = re.compile(rb"[ \t]*<technical(?:\s[^>]*)?>\s*</technical>[ \t]*\r?\n?")
+_EMPTY_NOTATIONS = re.compile(rb"[ \t]*<notations(?:\s[^>]*)?>\s*</notations>[ \t]*\r?\n?")
+
+
+def strip_fingerings(data: bytes) -> bytes:
+    """The score without its `<fingering>` elements, and without the `<technical>` and `<notations>` they
+    leave empty. The library stores scores stripped (the app fingers them itself), as the Mutopia
+    converter does. A score without fingerings comes back as the same bytes."""
+    if b"<fingering" not in data:
+        return data
+    data = _FINGERING.sub(b"", data)
+    return _EMPTY_NOTATIONS.sub(b"", _EMPTY_TECHNICAL.sub(b"", data))
+
+
+def build_pdmx(piece: dict, out_dir: Path = SCORES) -> dict:
+    """A score from the PDMX archive (content/tools/pdmx_select.py). The MusicXML is the archive's own
+    file, less any `<fingering>` digits (`strip_fingerings`). It is checked as a plain copy in
+    content/_build/pdmx and, when it passes, stored gzip-compressed as scores/<slug>.musicxml.gz
+    (mtime 0, so a rebuild is byte-identical). A failed check leaves no score file and no manifest entry
+    (`files` empty, `scorePath` None)."""
+    import pdmx_screen
+    import validate
+
+    slug = piece["slug"]
+    info = piece["pdmx"]
+    data = strip_fingerings(pdmx_screen.xml_from_mxl((PDMX_SELECTED / f"{info['sha256']}.mxl").read_bytes()))
+    work = PDMX_BUILD / slug
+    work.mkdir(parents=True, exist_ok=True)
+    plain = work / f"{slug}.musicxml"
+    jsonio.write_atomic(plain, data)
+    checks = validate.check_file(plain, PREVIEW, False, tempo=piece.get("tempoBpm"))
+    licence_name, licence_url = PDMX_LICENCES[info["license"]]
+    source = {"name": "MuseScore, via the PDMX dataset", "url": PDMX_URL, "license": licence_name,
+              "licenseUrl": licence_url, "retrievedAt": PDMX_RETRIEVED}
+    base = {"slug": slug, "source": source, "hasEditorialFingering": False, "fingerings": info.get("fingerings", 0),
+            "warnings": [], "midiChecks": {}, "checks": checks}
+    if not checks["ok"]:
+        return {**base, "files": [], "scorePath": None}
+    out = out_dir / f"{slug}.musicxml.gz"
+    jsonio.write_atomic(out, gzip.compress(data, compresslevel=9, mtime=0))
+    return {**base, "files": [out.name], "scorePath": f"scores/{out.name}"}
+
+
 CIRCLE = ["Fb", "Cb", "Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#",
           "D#", "A#", "E#", "B#"]  # index 8 = C (0 fifths)
 MODE_OFFSET = {None: 0, "major": 0, "ionian": 0, "lydian": -1, "mixolydian": 1, "dorian": 2, "minor": 3,
@@ -400,11 +456,22 @@ def manifest_entry(piece: dict, built: dict, stats: dict, collections: dict[str,
         "excerpt": piece.get("excerpt"),
         "notes": piece.get("notes"),
         "files": {
-            "score": f"scores/{piece['slug']}.musicxml",
+            "score": built.get("scorePath") or f"scores/{piece['slug']}.musicxml",
             "fingered": f"scores/{piece['slug']}.fingered.musicxml" if built["hasEditorialFingering"] else None,
         },
     }
     return entry
+
+
+INDEX_FIELDS = ("slug", "title", "composer", "level", "collection", "collectionId", "genre", "approxDurationSec")
+
+
+def write_library_index(manifest: list[dict]) -> None:
+    """content/library-index.json: the eight fields the library list reads (apps/web LibraryEntry), one
+    compact record per piece in manifest order. It is bundled, so it stays small; the full manifest
+    (sources, notes, file paths) loads only when a piece opens or the About page is shown."""
+    slim = [{k: e.get(k) for k in INDEX_FIELDS} for e in manifest]
+    jsonio.write_atomic(LIBRARY_INDEX, json.dumps(slim, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
 
 
 def is_piece_record(value) -> bool:
@@ -447,6 +514,7 @@ def merge_results(results: dict[str, tuple[dict | None, dict]]) -> list[dict]:
         manifest = sorted((e for s, e in by_slug.items() if s in catalog_index),
                           key=lambda e: sort_key(e, catalog_index, collection_index))
         jsonio.write_json(MANIFEST, manifest)
+        write_library_index(manifest)
         jsonio.write_json(VERIFICATION, ordered_verification(verification, manifest, catalog, catalog_index,
                                                              collection_index))
     return manifest
@@ -469,11 +537,13 @@ def manifest_only() -> int:
         if missing:
             raise SystemExit(f"build it first: no manifest entry or verification stats for {', '.join(missing)}")
         manifest = [manifest_entry(p, {"source": old[p["slug"]]["source"],
-                                       "hasEditorialFingering": old[p["slug"]]["hasEditorialFingering"]},
+                                       "hasEditorialFingering": old[p["slug"]]["hasEditorialFingering"],
+                                       "scorePath": old[p["slug"]]["files"]["score"]},
                                    verification[p["slug"]]["stats"], titles, genres=genres)
                     for p in catalog]
         manifest.sort(key=lambda e: sort_key(e, catalog_index, collection_index))
         jsonio.write_json(MANIFEST, manifest)
+        write_library_index(manifest)
         jsonio.write_json(VERIFICATION, ordered_verification(verification, manifest, catalog, catalog_index,
                                                              collection_index))
     print(f"manifest: {len(manifest)} pieces")
@@ -486,6 +556,8 @@ def main(argv=None) -> int:
     ap.add_argument("--only", nargs="*", default=[])
     ap.add_argument("--png", action="store_true", help="also write PNG previews")
     ap.add_argument("--no-validate", action="store_true")
+    ap.add_argument("--source", choices=("mutopia", "own", "pdmx"),
+                    help="only the pieces of one source (with --only, the pieces named that also have it)")
     ap.add_argument("--manifest-only", action="store_true",
                     help="re-render every manifest entry from the catalog, the existing entry and the "
                          "verification stats; converts nothing")
@@ -502,7 +574,8 @@ def main(argv=None) -> int:
     unknown = sorted(set(a.only) - {p["slug"] for p in catalog})
     if unknown:
         ap.error(f"not in the catalog: {', '.join(unknown)}")
-    selected = [p for p in catalog if not a.only or p["slug"] in a.only]
+    selected = [p for p in catalog if (not a.only or p["slug"] in a.only)
+                and (a.source is None or p["source"] == a.source)]
     out_dir = a.out_dir.resolve() if a.out_dir else SCORES
     out_dir.mkdir(parents=True, exist_ok=True)
     titles = collection_titles()
@@ -516,7 +589,12 @@ def main(argv=None) -> int:
         slug = piece["slug"]
         print(f"== {slug}")
         try:
-            built = build_mutopia(piece, log, out_dir) if piece["source"] == "mutopia" else build_own(piece, out_dir)
+            if piece["source"] == "mutopia":
+                built = build_mutopia(piece, log, out_dir)
+            elif piece["source"] == "pdmx":
+                built = build_pdmx(piece, out_dir)
+            else:
+                built = build_own(piece, out_dir)
         except Exception as exc:  # noqa: BLE001
             failures += 1
             print(f"   BUILD FAILED: {type(exc).__name__}: {exc}")
@@ -530,7 +608,14 @@ def main(argv=None) -> int:
         if a.out_dir:
             continue
         vres = {}
-        if not a.no_validate:
+        if "checks" in built:  # pdmx: validated as a plain copy inside build_pdmx
+            vres = {f"{slug}.musicxml": built["checks"]}
+            print(f"   validate {slug}.musicxml: {'OK' if built['checks']['ok'] else 'FAIL'}"
+                  + "".join(f"\n      error: {e}" for e in built["checks"]["errors"])
+                  + "".join(f"\n      warn: {w}" for w in built["checks"]["warnings"]))
+            if not built["checks"]["ok"]:
+                failures += 1
+        elif not a.no_validate:
             for fname in built["files"]:
                 r = validate.check_file(SCORES / fname, PREVIEW if not fname.endswith(".fingered.musicxml") else None,
                                         a.png, tempo=piece.get("tempoBpm"))
@@ -541,7 +626,8 @@ def main(argv=None) -> int:
                 if not r["ok"]:
                     failures += 1
         stats = vres.get(f"{slug}.musicxml", {}).get("stats", {})
-        results[slug] = (manifest_entry(piece, built, stats, titles, genres=genres), {
+        pdmx_failed = "checks" in built and not built["checks"]["ok"]
+        results[slug] = (None if pdmx_failed else manifest_entry(piece, built, stats, titles, genres=genres), {
             "ok": all(r["ok"] for r in vres.values()) if vres else None,
             "conversionWarnings": built["warnings"],
             "midiChecks": built["midiChecks"],

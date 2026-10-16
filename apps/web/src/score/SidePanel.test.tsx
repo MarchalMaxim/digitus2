@@ -2,7 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore, type PieceSource } from '../app/store.js';
-import { pieceBySlug } from '../library/manifest.js';
+import { loadPiece } from '../library/manifest.js';
 import { SidePanel } from './SidePanel.js';
 import type { ScoreDocument } from './useScoreDocument.js';
 
@@ -23,6 +23,8 @@ const TIMING = 'Fingered in 6 ms · laid out in 63 ms';
 const WARNING = 'note 95: duplicate of note 91 (same hand, onset and pitch), dropped';
 
 const MELODY = 'schumann-op68-no1-melody';
+/** The full entry of the melody piece (its source and file paths), loaded once for the module. */
+const melody = (await loadPiece(MELODY))!;
 const source: PieceSource = { kind: 'library', slug: MELODY };
 
 /** A ready document as the panel sees it: the timings and one reader warning. */
@@ -52,7 +54,7 @@ function renderPanel(doc: ScoreDocument, legendAbove = false) {
     <SidePanel
       doc={doc}
       source={source}
-      piece={pieceBySlug(MELODY)!}
+      piece={melody}
       setSplitMidi={vi.fn()}
       legendAbove={legendAbove}
     />,

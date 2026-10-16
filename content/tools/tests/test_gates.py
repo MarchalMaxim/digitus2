@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+from collections import Counter
 import itertools
 import json
 import sys
@@ -31,10 +32,15 @@ def test_new_piece_passes_every_gate(entry):
     assert 21 <= st["pitchRange"][0] and st["pitchRange"][1] <= 108
     if cat["source"] == "own":
         assert v["melody"]["exact"] is True, v["melody"]
+    elif cat["source"] == "pdmx":
+        pass  # a MuseScore archive score has no Mutopia engraving to cross-check with LilyPond (gates.py)
     else:
         assert v["midiChecks"]["lilypond224Midi"]["exact"] is True
+    relaxed = cat.get("relaxedGates")  # level 6 only (pdmx_advanced.py): the flags are recorded, not zero
+    assert relaxed is None or entry["level"] == 6
     for profile in ("medium", "large"):
-        assert v["lint"]["profiles"][profile]["errors"] == 0, (profile, v["lint"]["profiles"][profile]["counts"])
+        want = relaxed["lint"][profile] if relaxed else 0
+        assert v["lint"]["profiles"][profile]["errors"] == want, (profile, v["lint"]["profiles"][profile]["counts"])
     score = CONTENT / entry["files"]["score"]
     assert v["lint"]["scoreSha256"] == hashlib.sha256(score.read_bytes()).hexdigest(), "stale lint: run gates.py"
     for f in filter(None, entry["files"].values()):
@@ -76,9 +82,13 @@ def test_every_cc_engraving_is_credited_in_rights(entry):
     assert_credited_in_rights(entry)
 
 
-def test_span_flags_only_on_core30():
+def test_span_flags_only_on_core30_and_the_relaxed_level_6_pieces():
     core = {e["slug"] for e in MANIFEST if e["benchmarkSet"] == "core30"}
-    assert {f["piece"] for f in VER["spanFlags"]} <= core
+    relaxed = {s: p["relaxedGates"]["spans"] for s, p in CAT.items() if p.get("relaxedGates")}
+    flags = Counter(f["piece"] for f in VER["spanFlags"])
+    assert set(flags) <= core | set(relaxed)
+    for slug, spans in relaxed.items():  # what the catalog recorded is what the span check finds
+        assert flags.get(slug, 0) == spans, slug
 
 
 # ---------------------------------------------------------------------------

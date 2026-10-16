@@ -45,6 +45,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import scoreio  # noqa: E402
 import xmlcheck as xc  # noqa: E402
 
 CONTENT = HERE.parent
@@ -67,7 +68,7 @@ FEATURES = ("nps", "shifts", "span", "chord", "fifths", "accidentals", "seconds"
 
 
 def features(path: Path, tempo: float) -> dict[str, float]:
-    xs = xc.parse_musicxml(path)
+    xs = xc.parse_musicxml(scoreio.plain_path(path))
     fifths = int(xs.keys[0][1]) if xs.keys and xs.keys[0][1] else 0
     tonic = (7 * fifths) % 12
     scale = {(tonic + d) % 12 for d in MAJOR}

@@ -135,6 +135,8 @@ def test_manifest_only_needs_a_built_entry(tmp_path, monkeypatch):
 
 
 GENRE_OF = {
+    "pdmx-classical": "classical", "pdmx-folk": "folk", "pdmx-advanced": "classical",
+    "pdmx-songs": "songs", "pdmx-modern": "modern",
     "children-songs": "songs", "folk-songs": "songs", "christmas": "carols", "hymns": "carols",
     "anthems": "songs", "songs-before-1929": "songs", "easy-rags": "songs", "classical-themes": "songs",
     "anna-magdalena": "baroque", "handel-aylesford": "baroque", "bach-little-preludes": "baroque",
@@ -148,10 +150,11 @@ GENRE_OF = {
 }
 
 
-# UI batch (spec section 4.2): seven genres in display order, one per collection.
+# UI batch (spec section 4.2): genres in display order, one per collection. Folk was added with the
+# MuseScore archive pieces (2026-10-16).
 def test_every_collection_has_a_known_genre():
     assert [g["id"] for g in build.load_genres()] == [
-        "songs", "carols", "baroque", "classical", "romantic", "ragtime", "modern"]
+        "songs", "carols", "baroque", "classical", "romantic", "ragtime", "modern", "folk"]
     assert build.collection_genres() == GENRE_OF
 
 

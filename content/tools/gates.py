@@ -126,6 +126,10 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
         elif mel.get("exact") is not True:
             out.append(f"melody differs from the reference ({mel.get('compare')}): first difference "
                        f"{mel.get('firstDifference')}")
+    elif piece.get("source") == "pdmx":
+        # a MuseScore archive score (2026-10-16) has no Mutopia engraving to cross-check against
+        # LilyPond: its MusicXML is the source, and the span, lint and XSD gates stand for it
+        pass
     else:
         chk = (record.get("midiChecks") or {}).get("lilypond224Midi")
         if not chk:
@@ -133,7 +137,13 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
         elif chk.get("exact") is not True:
             out.append(f"LilyPond 2.24 MIDI check not exact (only in the MusicXML {chk.get('only_xml_count')}, "
                        f"only in the MIDI {chk.get('only_midi_count')})")
-    if slug in flagged:
+    relaxed = piece.get("relaxedGates")  # level 6 only: a MuseScore piece admitted with its flags recorded
+    if relaxed and entry["level"] != 6:
+        out.append("relaxedGates is allowed for level 6 only")
+    if relaxed:
+        if (slug in flagged) != (relaxed["spans"] > 0):
+            out.append(f"span flags differ from the catalog's relaxedGates ({relaxed['spans']} recorded)")
+    elif slug in flagged:
         out.append("span flags: a slice one hand cannot play (spanFlags in verification.json)")
     score = content / entry["files"]["score"]
     if lint:
@@ -145,6 +155,10 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
                 r = (rec.get("profiles") or {}).get(profile)
                 if r is None:
                     out.append(f"no lint at the {profile} profile")
+                elif relaxed:
+                    if r.get("errors") != relaxed["lint"][profile]:
+                        out.append(f"{r.get('errors')} lint law error(s) at the {profile} profile, the catalog's "
+                                   f"relaxedGates records {relaxed['lint'][profile]}")
                 elif r.get("errors"):
                     out.append(f"{r['errors']} lint law error(s) at the {profile} profile "
                                f"(rule counts, every severity: {r.get('counts')})")
@@ -206,6 +220,8 @@ def main(argv=None) -> int:
     mode.add_argument("--only", nargs="+", metavar="SLUG", help="gate these pieces")
     mode.add_argument("--new", action="store_true", help="gate every piece outside the core30 benchmark set")
     mode.add_argument("--all", action="store_true", help="gate every manifest piece")
+    mode.add_argument("--pending", action="store_true",
+                      help="gate the pieces outside core30 that have no lint record yet (a new batch)")
     ap.add_argument("--no-lint", action="store_true", help="skip the engine lint gate")
     a = ap.parse_args(argv)
     lint = not a.no_lint
@@ -217,6 +233,10 @@ def main(argv=None) -> int:
                   file=sys.stderr)
 
     selection = select(jsonio.read_json(MANIFEST, list), a.only, a.new)  # unknown slugs fail before any work
+    if a.pending:
+        recorded = jsonio.read_json(VERIFICATION, dict)
+        selection = [e for e in selection if e.get("benchmarkSet") is None
+                     and not (recorded.get(e["slug"]) or {}).get("lint")]
 
     print("== 1. span check (whole library)")
     check_spans.main([])

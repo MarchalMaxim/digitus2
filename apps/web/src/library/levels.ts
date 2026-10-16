@@ -27,7 +27,7 @@ export const LEVEL_LINES: Record<Level, string> = {
 };
 
 export type GenreId =
-  'songs' | 'carols' | 'baroque' | 'classical' | 'romantic' | 'ragtime' | 'modern';
+  'songs' | 'carols' | 'baroque' | 'classical' | 'romantic' | 'ragtime' | 'modern' | 'folk';
 
 export interface Genre {
   id: GenreId;
@@ -44,6 +44,7 @@ export const GENRES: readonly Genre[] = [
   { id: 'romantic', label: 'Romantic', line: 'Schumann, Chopin and others, 1820–1900.' },
   { id: 'ragtime', label: 'Ragtime', line: 'Scott Joplin and others, around 1900.' },
   { id: 'modern', label: 'Modern', line: 'Music written since 1900.' },
+  { id: 'folk', label: 'Folk and traditional', line: 'Folk tunes and dances, mostly traditional.' },
 ];
 
 export function isLevel(value: unknown): value is Level {

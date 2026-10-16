@@ -8,7 +8,7 @@ import { warmUpServices } from '../score/useScoreDocument.js';
 import { showsSearch } from './disclosure.js';
 import { LevelPills } from './LevelPills.js';
 import { LEVEL_LINES, LEVEL_NAMES } from './levels.js';
-import { pieces } from './manifest.js';
+import { libraryPieces } from './manifest.js';
 import {
   arrivalLevel,
   countText,
@@ -128,8 +128,9 @@ export function LibraryView() {
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const rememberScroll = useRememberLibraryScroll();
+  const pieces = libraryPieces();
   const level = arrivalLevel(pieces, chosenLevel, lastPlayed);
-  const layout = useMemo(() => libraryLayout(pieces, { level, query }), [level, query]);
+  const layout = useMemo(() => libraryLayout(pieces, { level, query }), [pieces, level, query]);
   const start = startTarget(pieces, lastPlayed);
   // Every search result list shares the key 'search': keystrokes after the first swap the rows
   // without a fade (spec 6.4).

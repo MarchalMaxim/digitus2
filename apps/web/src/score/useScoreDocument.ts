@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
 import { fileIdentity, useAppStore, type PieceSource } from '../app/store.js';
 import { createEngineClient, type EngineClient } from '../engine/client.js';
-import { pieceBySlug, scoreUrl } from '../library/manifest.js';
+import { loadPiece, pieceBySlug, readScoreFile } from '../library/manifest.js';
 import { injectNoteIds } from './render/injectIds.js';
 import { createRenderer, SupersededError, type ScoreRenderer } from './render/renderer.js';
 
@@ -287,9 +287,9 @@ export function useScoreDocument(
         let sourceName: string;
         let fingeredPath: string | null = null;
         if (slug !== null) {
-          const piece = pieceBySlug(slug);
+          const piece = await loadPiece(slug);
           if (!piece) throw new Error(`there is no piece called "${slug}"`);
-          input = await (svc.fetchText ?? fetchBytes)(await scoreUrl(piece.files.score));
+          input = await readScoreFile(piece.files.score, svc.fetchText ?? fetchBytes);
           sourceName = piece.files.score;
           fingeredPath = piece.files.fingered;
         } else {
@@ -478,7 +478,7 @@ async function loadEditorial(doc: OpenDoc, svc: ScoreServices): Promise<Assignme
   if (doc.editorial || !doc.fingeredPath) return doc.editorial;
   const path = doc.fingeredPath;
   doc.editorialLoad ??= (async () => {
-    const bytes = await (svc.fetchText ?? fetchBytes)(await scoreUrl(path));
+    const bytes = await readScoreFile(path, svc.fetchText ?? fetchBytes);
     const loaded = await svc.engine.load(bytes, path);
     return rekeyByIndex(loaded.score, loaded.editorial, doc.score);
   })();

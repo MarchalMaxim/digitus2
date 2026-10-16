@@ -1,3 +1,4 @@
+import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import manifestJson from '../../../../content/manifest.json';
 import { GENRES } from './levels.js';
@@ -6,16 +7,26 @@ import {
   formatDuration,
   isShareAlike,
   LEVEL_NAMES,
+  libraryPieces,
+  type LibraryPiece,
   licenseLabel,
+  loadPiece,
+  loadPieceDetails,
   pieceBySlug,
-  pieces,
+  readScoreFile,
   requiresCredit,
   scoreUrl,
 } from './manifest.js';
 import { startTarget } from './model.js';
 
-/** The piece a first visit starts with (the red button, model.ts), as a library piece. */
-const firstPiece = () => pieceBySlug(startTarget(pieces, null).piece.slug)!;
+/** The library list (test/setup.ts sets it). */
+const pieces = libraryPieces();
+
+/** The piece a first visit starts with (the red button, model.ts), as a full library piece. */
+const firstPiece = async () => (await loadPiece(startTarget(pieces, null).piece.slug))!;
+
+/** Every piece's full entry (content/manifest.json), in manifest order. */
+const allDetails = async (): Promise<LibraryPiece[]> => [...(await loadPieceDetails()).values()];
 
 describe('manifest', () => {
   it('lists every manifest piece across six levels, sorted by level, with unique slugs', () => {
@@ -34,8 +45,9 @@ describe('manifest', () => {
       6: 'Advanced',
     });
   });
-  it('keeps the 30 pieces of the first library as the benchmark set and gives every piece a collection', () => {
-    expect(pieces.filter((p) => p.benchmarkSet === 'core30')).toHaveLength(30);
+  it('keeps the 30 pieces of the first library as the benchmark set and gives every piece a collection', async () => {
+    const details = await allDetails();
+    expect(details.filter((p) => p.benchmarkSet === 'core30')).toHaveLength(30);
     for (const p of pieces) {
       expect(p.collection.length, p.slug).toBeGreaterThan(0);
       expect(p.collectionId, p.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
@@ -45,23 +57,48 @@ describe('manifest', () => {
     const ids = new Set(GENRES.map((g) => g.id));
     for (const p of pieces) expect(ids.has(p.genre), p.slug).toBe(true);
   });
-  it('starts a first visit with the first level-1 piece', () => {
-    expect(firstPiece().slug).toBe('twinkle-twinkle-little-star');
+  it('starts a first visit with the first level-1 piece', async () => {
+    expect((await firstPiece()).slug).toBe('twinkle-twinkle-little-star');
+  });
+  it('the library index matches the manifest, piece for piece', async () => {
+    const details = await allDetails();
+    expect(pieces.map((p) => p.slug)).toEqual(details.map((p) => p.slug));
+    for (const [i, p] of pieces.entries()) {
+      expect(p.title, p.slug).toBe(details[i]!.title);
+      expect(p.level, p.slug).toBe(details[i]!.level);
+    }
+  });
+  it('finds a piece by its slug in the index and its full entry on demand', async () => {
+    expect(pieceBySlug('twinkle-twinkle-little-star')?.title).toBe('Twinkle, Twinkle, Little Star');
+    expect(pieceBySlug('no-such-piece')).toBeUndefined();
+    expect(await loadPiece('no-such-piece')).toBeUndefined();
   });
   it('resolves a score path to a URL', async () => {
-    const url = await scoreUrl(pieceBySlug('twinkle-twinkle-little-star')!.files.score);
+    const piece = (await loadPiece('twinkle-twinkle-little-star'))!;
+    const url = await scoreUrl(piece.files.score);
     expect(url).toMatch(/twinkle-twinkle-little-star/);
   });
-  it('credits every CC BY and CC BY-SA engraving with its typesetter and licence', () => {
-    for (const p of pieces.filter(requiresCredit)) {
+  it('reads an archive score whichever way the server answers: gzip bytes are decompressed, bytes it already decoded pass through', async () => {
+    // The Vite servers send a .gz file with Content-Encoding: gzip, so the browser hands over plain
+    // XML; a server that does not send that header hands over the gzip bytes.
+    const xml = '<?xml version="1.0"?><score-partwise version="3.1"/>';
+    const slug = pieces.find((p) => p.collectionId.startsWith('pdmx-'))!.slug;
+    const path = `scores/${slug}.musicxml.gz`;
+    const read = async (bytes: Uint8Array) =>
+      new TextDecoder().decode(await readScoreFile(path, async () => bytes));
+    expect(await read(new Uint8Array(gzipSync(Buffer.from(xml))))).toBe(xml);
+    expect(await read(new TextEncoder().encode(xml))).toBe(xml);
+  });
+  it('credits every CC BY and CC BY-SA engraving with its typesetter and licence', async () => {
+    for (const p of (await allDetails()).filter(requiresCredit)) {
       const a = attribution(p);
       expect(a.text).toContain(p.source.typesetter);
       expect(a.text).toContain(licenseLabel(p.source.license));
       expect(a.url).toBe(p.source.licenseUrl);
     }
   });
-  it('calls only public-domain engravings public domain', () => {
-    const k2 = pieceBySlug('mozart-minuet-f-major-k2')!;
+  it('calls only public-domain engravings public domain', async () => {
+    const k2 = (await loadPiece('mozart-minuet-f-major-k2'))!;
     const byOnly = {
       ...k2,
       source: {
@@ -76,9 +113,9 @@ describe('manifest', () => {
     );
     expect(attribution(byOnly).url).toBe('https://creativecommons.org/licenses/by/2.5/');
   });
-  it('still marks the five share-alike engravings of the first library', () => {
+  it('still marks the five share-alike engravings of the first library', async () => {
     expect(
-      pieces
+      (await allDetails())
         .filter((p) => isShareAlike(p) && p.benchmarkSet === 'core30')
         .map((p) => p.slug)
         .sort(),
@@ -90,11 +127,11 @@ describe('manifest', () => {
       'schumann-op68-no8-wild-rider',
     ]);
   });
-  it('formats durations and licence ids', () => {
+  it('formats durations and licence ids', async () => {
     expect(formatDuration(29)).toBe('0:29');
     expect(formatDuration(132.3)).toBe('2:12');
     expect(licenseLabel('CC-BY-SA-2.5')).toBe('CC BY-SA 2.5');
     expect(licenseLabel('CC0-1.0')).toBe('CC0 1.0');
-    expect(attribution(firstPiece()).text).toBe('digitus2 arrangement, CC0 (public domain)');
+    expect(attribution(await firstPiece()).text).toBe('digitus2 arrangement, CC0 (public domain)');
   });
 });

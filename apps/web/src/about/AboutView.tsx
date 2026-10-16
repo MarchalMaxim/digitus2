@@ -1,5 +1,5 @@
 import { ENGINE_VERSION } from '@digitus2/engine';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
@@ -7,7 +7,7 @@ import { ThemeToggle } from '../design/ThemeToggle.js';
 import {
   isShareAlike,
   licenseLabel,
-  pieces,
+  loadPieceDetails,
   requiresCredit,
   type LibraryPiece,
 } from '../library/manifest.js';
@@ -25,17 +25,25 @@ export function countWord(n: number): string {
   return NUMBER_WORDS[n] ?? String(n);
 }
 
-const shareAlikeCount = pieces.filter(isShareAlike).length;
-/** CC BY engravings: credited like the share-alike ones, without a share-alike term. */
-const attributionOnlyCount = pieces.filter((p) => requiresCredit(p) && !isShareAlike(p)).length;
+/**
+ * The MuseScore archive pieces (PDMX, content/tools/build.py build_pdmx) are counted in one sentence
+ * rather than listed row by row: there are more than a thousand of them.
+ */
+export function isArchivePiece(p: LibraryPiece): boolean {
+  return p.source.name.startsWith('MuseScore');
+}
 
 /** The sentence above the table; it names CC BY only once the library has such an engraving. */
 const CREDITED = 'credited here and on their score pages.';
-const creditSentence =
-  attributionOnlyCount === 0
+function creditSentence(curated: readonly LibraryPiece[]): string {
+  const shareAlikeCount = curated.filter(isShareAlike).length;
+  /** CC BY engravings: credited like the share-alike ones, without a share-alike term. */
+  const attributionOnlyCount = curated.filter((p) => requiresCredit(p) && !isShareAlike(p)).length;
+  return attributionOnlyCount === 0
     ? `${countWord(shareAlikeCount)} engravings are shared under CC BY-SA and are ${CREDITED}`
     : `${countWord(shareAlikeCount)} engravings are shared under CC BY-SA and ` +
-      `${countWord(attributionOnlyCount).toLowerCase()} under CC BY; all are ${CREDITED}`;
+        `${countWord(attributionOnlyCount).toLowerCase()} under CC BY; all are ${CREDITED}`;
+}
 
 /** Who engraved a piece: the Mutopia typesetter, or our own arrangement. */
 function engraving(p: LibraryPiece): { text: string; url: string | null } {
@@ -59,6 +67,18 @@ function ExternalLink({ href, children }: { href: string; children: string }) {
 
 /** What digitus2 is, how it chooses fingerings, and every licence and attribution it owes. */
 export function AboutView() {
+  const [details, setDetails] = useState<LibraryPiece[] | null>(null);
+  useEffect(() => {
+    let live = true;
+    void loadPieceDetails().then((map) => {
+      if (live) setDetails([...map.values()]);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  const curated = (details ?? []).filter((p) => !isArchivePiece(p));
+  const archiveCount = (details ?? []).length - curated.length;
   const openLibrary = useAppStore((s) => s.openLibrary);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
@@ -141,7 +161,10 @@ export function AboutView() {
 
       <section className="stack" aria-labelledby="about-pieces">
         <h2 id="about-pieces">The built-in pieces</h2>
-        <p>The pieces use public-domain or Creative Commons editions. {creditSentence}</p>
+        <p>
+          The pieces use public-domain or Creative Commons editions.{' '}
+          {details !== null && creditSentence(curated)}
+        </p>
         <table className="about-pieces">
           <thead>
             <tr>
@@ -152,7 +175,7 @@ export function AboutView() {
             </tr>
           </thead>
           <tbody>
-            {pieces.map((p) => {
+            {curated.map((p) => {
               const by = engraving(p);
               return (
                 <tr key={p.slug}>
@@ -174,6 +197,13 @@ export function AboutView() {
             })}
           </tbody>
         </table>
+        {archiveCount > 0 && (
+          <p>
+            {archiveCount.toLocaleString('en-US')} more scores come from the MuseScore archive (the
+            PDMX dataset). Each is public domain or CC0 as its uploader declared it, and each names
+            its source and licence on its score page.
+          </p>
+        )}
       </section>
     </main>
   );

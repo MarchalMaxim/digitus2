@@ -1,9 +1,11 @@
-import manifestJson from '../../../../content/manifest.json';
+import indexUrl from '../../../../content/library-index.json?url';
 import type { GenreId, Level } from './levels.js';
+import type { LibraryEntry } from './model.js';
 
 export type { GenreId, Level } from './levels.js';
 export { LEVEL_NAMES } from './levels.js';
 export { formatDuration } from './model.js';
+export type { LibraryEntry } from './model.js';
 
 export interface PieceSourceInfo {
   name: string;
@@ -46,25 +48,86 @@ export interface LibraryPiece {
   files: { score: string; fingered: string | null };
 }
 
-export const pieces: LibraryPiece[] = manifestJson as LibraryPiece[];
+/**
+ * The library list: content/library-index.json, the eight fields the list reads, in manifest order.
+ * It is fetched once before the app renders (main.tsx), not bundled: a 1,550-piece index is about
+ * 100 KB gzip, over the start-up bundle budget. The full entries load on demand (loadPieceDetails).
+ */
+let index: readonly LibraryEntry[] | null = null;
+let indexBySlug = new Map<string, LibraryEntry>();
 
-const bySlug = new Map(pieces.map((p) => [p.slug, p]));
-
-const scoreFiles = import.meta.glob('../../../../content/scores/*.musicxml', {
-  query: '?url',
-  import: 'default',
-}) as Record<string, () => Promise<string>>;
-
-export function pieceBySlug(slug: string): LibraryPiece | undefined {
-  return bySlug.get(slug);
+/** Sets the library list (the tests inject theirs; loadLibraryIndex fetches it). */
+export function setLibraryIndex(entries: readonly LibraryEntry[]): void {
+  index = entries;
+  indexBySlug = new Map(entries.map((p) => [p.slug, p]));
 }
 
-/** Resolves a manifest path such as 'scores/x.musicxml' to its asset URL (lazy, per file). */
-export function scoreUrl(relativePath: string): Promise<string> {
-  const key = `../../../../content/${relativePath}`;
-  const loader = scoreFiles[key];
-  if (!loader) return Promise.reject(new Error(`no score file ${relativePath}`));
+/** Fetches the library list once; the app waits for it before it renders. */
+export async function loadLibraryIndex(): Promise<void> {
+  if (index) return;
+  const response = await fetch(indexUrl);
+  if (!response.ok)
+    throw new Error(`the library list could not be loaded (HTTP ${response.status})`);
+  setLibraryIndex((await response.json()) as LibraryEntry[]);
+}
+
+/** The library's pieces in manifest order. Only after loadLibraryIndex has resolved. */
+export function libraryPieces(): readonly LibraryEntry[] {
+  if (!index) throw new Error('the library list has not loaded yet (loadLibraryIndex)');
+  return index;
+}
+
+let details: Promise<Map<string, LibraryPiece>> | null = null;
+
+/**
+ * Every piece's full entry (content/manifest.json), loaded once on first use. The manifest is a
+ * separate chunk, so the start-up bundle does not carry it.
+ */
+export function loadPieceDetails(): Promise<Map<string, LibraryPiece>> {
+  details ??= import('../../../../content/manifest.json').then(
+    (module) => new Map((module.default as LibraryPiece[]).map((p) => [p.slug, p])),
+  );
+  return details;
+}
+
+/** A piece's library entry by slug: the URL and the list need no more than this. */
+export function pieceBySlug(slug: string): LibraryEntry | undefined {
+  return indexBySlug.get(slug);
+}
+
+/** A piece's full entry (sources, notes, file paths), loaded on demand. */
+export async function loadPiece(slug: string): Promise<LibraryPiece | undefined> {
+  return (await loadPieceDetails()).get(slug);
+}
+
+/**
+ * Resolves a manifest path such as 'scores/x.musicxml' (or 'scores/x.musicxml.gz', a PDMX piece) to
+ * its asset URL (lazy, per file). A .gz file holds gzip bytes: see readScoreFile.
+ */
+export async function scoreUrl(relativePath: string): Promise<string> {
+  const { scoreFiles } = await import('./scoreFiles.js');
+  const loader = scoreFiles[`../../../../content/${relativePath}`];
+  if (!loader) throw new Error(`no score file ${relativePath}`);
   return loader();
+}
+
+/**
+ * The bytes of a score file. A PDMX piece is stored as gzip (`.musicxml.gz`), but a server may send
+ * such a file with `Content-Encoding: gzip` (the Vite servers do), and then the browser has already
+ * decompressed it. So the bytes decide, not the extension: bytes that start with the gzip signature
+ * are decompressed with the browser's gzip stream, anything else is returned as it is.
+ * `fetchBytes` fetches the asset URL (the tests inject their own).
+ */
+export async function readScoreFile(
+  relativePath: string,
+  fetchBytes: (url: string) => Promise<Uint8Array>,
+): Promise<Uint8Array> {
+  const bytes = await fetchBytes(await scoreUrl(relativePath));
+  if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return bytes;
+  const stream = new Blob([bytes as BlobPart])
+    .stream()
+    .pipeThrough(new DecompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
 export function isShareAlike(p: LibraryPiece): boolean {

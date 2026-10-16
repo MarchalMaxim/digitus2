@@ -23,7 +23,7 @@ REQUIRED = ["slug", "title", "composer", "composerDates", "catalogue", "year", "
 LICENSES = ("Public Domain", "CC0-1.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0",
             "CC-BY-SA-4.0")
 # Reviewed corpus after the 2026-10-15 bulk expansion; core30 unchanged.
-LEVEL_COUNTS = {1: 24, 2: 44, 3: 83, 4: 37, 5: 15, 6: 50}
+LEVEL_COUNTS = {1: 47, 2: 212, 3: 1415, 4: 784, 5: 45, 6: 199}  # 253 curated + 2,449 MuseScore archive (2026-10-16)
 
 
 def test_manifest_matches_catalog():
@@ -49,7 +49,7 @@ def test_verification_follows_the_manifest_order():
 def test_level_counts_are_weighted_to_beginners():
     counts = {lvl: sum(1 for e in MANIFEST if e["level"] == lvl) for lvl in LEVEL_COUNTS}
     assert counts == LEVEL_COUNTS
-    assert len(MANIFEST) == 253
+    assert len(MANIFEST) == 2702
     assert sum(counts[lvl] for lvl in (1, 2, 3)) > sum(counts[lvl] for lvl in (4, 5, 6))
 
 
@@ -70,6 +70,10 @@ def test_manifest_entry(entry):
     assert fingered.exists() == entry["hasEditorialFingering"]
     if src["name"].startswith("digitus2"):
         assert entry["arranger"] and src["license"] == "CC0-1.0"
+    elif src["name"].startswith("MuseScore"):
+        # the PDMX archive (2026-10-16): public domain or CC0 as declared, a gzip-compressed score
+        assert src["url"] == "https://zenodo.org/records/15571083" and src["license"] in ("Public Domain", "CC0-1.0")
+        assert entry["files"]["score"].endswith(".musicxml.gz") and not entry["arranger"]
     else:
         assert src["url"].startswith("https://www.mutopiaproject.org/")
 
@@ -94,7 +98,7 @@ def test_no_stray_files():
     names = {p.name for p in (CONTENT / "scores").iterdir()}
     expected = set()
     for e in MANIFEST:
-        expected.add(f"{e['slug']}.musicxml")
+        expected.add(e["files"]["score"].removeprefix("scores/"))  # .musicxml, or .musicxml.gz (PDMX)
         if e["hasEditorialFingering"]:
             expected.add(f"{e['slug']}.fingered.musicxml")
     assert names == expected
@@ -110,6 +114,17 @@ def test_every_entry_carries_its_genre():
 
 def test_genre_counts_match_the_design():
     # Reviewed bulk corpus; modern repertoire now occupies an existing genre.
-    counts = collections.Counter(e["genre"] for e in MANIFEST)
+    # The curated 253 (the archive pieces have their own genres: see test_archive_genres below).
+    counts = collections.Counter(e["genre"] for e in MANIFEST if not e["collectionId"].startswith("pdmx-"))
     assert counts == {"songs": 65, "carols": 15, "baroque": 68, "classical": 29,
                       "romantic": 70, "ragtime": 5, "modern": 1}
+
+
+def test_archive_genres():
+    # MuseScore archive pieces (2026-10-16): the classical lane gives classical and folk, the songs lane
+    # songs and, for jazz and blues, modern
+    counts = collections.Counter(e["genre"] for e in MANIFEST if e["collectionId"].startswith("pdmx-"))
+    assert set(counts) == {"classical", "folk", "songs", "modern"}
+    assert counts["songs"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-songs")
+    assert counts["modern"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-modern")
+    assert counts["folk"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-folk")

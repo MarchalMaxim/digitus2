@@ -24,48 +24,58 @@ CONTENT = HERE.parent
 MAX_BYTES = 1_500_000
 PIANO_LOW, PIANO_HIGH = 21, 108
 SCHEMA_DIR = CONTENT / "_raw" / "schema"
-SCHEMA_BASE = "https://raw.githubusercontent.com/w3c/musicxml/v4.0/schema/"
-_SCHEMA = None
+SCHEMA_BASE = "https://raw.githubusercontent.com/w3c/musicxml/v{version}/schema/"
+SCHEMA_VERSIONS = ("3.1", "4.0")  # PDMX scores are 3.1; the library's own engravings are 4.0
+_SCHEMAS: dict[str, object] = {}
 
 
-def load_schema(download: bool = True):
-    """MusicXML 4.0 XSD (W3C), cached in content/_raw/schema (gitignored)."""
-    global _SCHEMA
-    if _SCHEMA is not None:
-        return _SCHEMA or None
+def _schema_dir(version: str) -> Path:
+    # 4.0 keeps the original folder, so an existing download is reused without a fetch
+    return SCHEMA_DIR if version == "4.0" else SCHEMA_DIR / f"v{version}"
+
+
+def load_schema(version: str = "4.0", download: bool = True):
+    """MusicXML XSD (W3C) of one version, cached in content/_raw/schema (gitignored)."""
+    if version in _SCHEMAS:
+        return _SCHEMAS[version] or None
     try:
         from lxml import etree
     except ImportError:
-        _SCHEMA = False
+        _SCHEMAS[version] = False
         return None
-    SCHEMA_DIR.mkdir(parents=True, exist_ok=True)
+    folder = _schema_dir(version)
+    folder.mkdir(parents=True, exist_ok=True)
     for name in ("musicxml.xsd", "xml.xsd", "xlink.xsd"):
-        p = SCHEMA_DIR / name
+        p = folder / name
         if not p.exists() and download:
             import urllib.request
 
-            with urllib.request.urlopen(SCHEMA_BASE + name, timeout=60) as r:
+            with urllib.request.urlopen(SCHEMA_BASE.format(version=version) + name, timeout=60) as r:
                 p.write_bytes(r.read())
-    main = SCHEMA_DIR / "musicxml.xsd"
+    main = folder / "musicxml.xsd"
     if not main.exists():
-        _SCHEMA = False
+        _SCHEMAS[version] = False
         return None
     text = main.read_text(encoding="utf-8")
     text = text.replace("http://www.musicxml.org/xsd/xml.xsd", "xml.xsd")
     text = text.replace("http://www.musicxml.org/xsd/xlink.xsd", "xlink.xsd")
     doc = etree.fromstring(text.encode("utf-8"), base_url=main.as_uri())
-    _SCHEMA = etree.XMLSchema(doc)
-    return _SCHEMA
+    _SCHEMAS[version] = etree.XMLSchema(doc)
+    return _SCHEMAS[version]
 
 
 def xsd_errors(path: Path) -> list[str] | None:
-    schema = load_schema()
-    if schema is None:
-        return None
+    """XSD errors of one file against the schema of its own MusicXML version (None when unavailable)."""
     from lxml import etree
 
     parser = etree.XMLParser(resolve_entities=False, no_network=True, load_dtd=False)
     doc = etree.parse(str(path), parser)
+    version = doc.getroot().get("version") or "4.0"
+    if version not in SCHEMA_VERSIONS:
+        return [f"no schema for MusicXML version {version!r}"]
+    schema = load_schema(version)
+    if schema is None:
+        return None
     if schema.validate(doc):
         return []
     return [f"line {e.line}: {e.message}" for e in list(schema.error_log)[:10]]
@@ -207,7 +217,7 @@ def check_file(path: Path, preview_dir: Path | None, png: bool = False, tempo: f
 
     # --- reader 2: music21
     try:
-        from music21 import converter
+        from music21 import converter, harmony
         import music21
 
         music21.environment.set("warnings", 0)
@@ -216,7 +226,9 @@ def check_file(path: Path, preview_dir: Path | None, png: bool = False, tempo: f
         m21_measures = len(m21_parts[0].getElementsByClass("Measure")) if m21_parts else 0
         flat = sc.flatten()
         m21_notes = [n for n in flat.notes]
-        bad = [n for n in m21_notes if n.duration.quarterLength == 0 and not n.duration.isGrace]
+        # music21 lists a <harmony> chord symbol among .notes with a length of 0 by design: not a note
+        bad = [n for n in m21_notes if n.duration.quarterLength == 0 and not n.duration.isGrace
+               and not isinstance(n, harmony.Harmony)]
         if bad:
             err(f"music21: {len(bad)} notes with zero duration")
         res["stats"]["music21"] = {

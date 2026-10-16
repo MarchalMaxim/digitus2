@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 import { LEVEL_NAMES, type Level } from '../../src/library/levels.js';
+import { searchPieces } from '../../src/library/search.js';
 
 /** Pieces in the built-in library (content/manifest.json), so the flows follow its growth. */
 const manifest = JSON.parse(
@@ -9,9 +10,47 @@ const manifest = JSON.parse(
     fileURLToPath(new URL('../../../../content/manifest.json', import.meta.url)),
     'utf8',
   ),
-) as Array<{ source?: { license?: string } }>;
+) as Array<{ source?: { license?: string; name?: string } }>;
 
 export const LIBRARY_COUNT = manifest.length;
+
+/** The library list as the app loads it (content/library-index.json). */
+const index = JSON.parse(
+  readFileSync(
+    fileURLToPath(new URL('../../../../content/library-index.json', import.meta.url)),
+    'utf8',
+  ),
+) as Array<{ title: string; composer: string; collection: string }>;
+
+/**
+ * A MuseScore archive piece of one level (collection ids pdmx-*), the first one in the list that
+ * names its composer: its score is a gzip file, which the app must read whichever way a server sends it.
+ */
+export function archiveSample(level: number): { slug: string; title: string } {
+  const piece = (
+    index as unknown as Array<{
+      slug: string;
+      title: string;
+      composer: string;
+      level: number;
+      collectionId: string;
+    }>
+  ).find(
+    (p) => p.collectionId.startsWith('pdmx-') && p.level === level && p.composer !== 'Unknown',
+  );
+  if (!piece) throw new Error(`no archive piece at level ${level}`);
+  return piece;
+}
+
+/** How many pieces a search finds, by the app's own matching (src/library/search.ts), so a count follows the library. */
+export function searchCount(query: string): number {
+  return searchPieces(index, query).length;
+}
+
+/** The pieces the About table lists: the MuseScore archive pieces are counted in a sentence instead. */
+export const CURATED_COUNT = manifest.filter(
+  (p) => !(p.source?.name ?? '').startsWith('MuseScore'),
+).length;
 
 /** Engravings that owe a credit: share-alike (CC BY-SA) and attribution-only (CC BY), as the About page counts them. */
 export const LICENSE_COUNTS = {

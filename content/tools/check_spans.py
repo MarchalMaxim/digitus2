@@ -48,6 +48,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import jsonio  # noqa: E402
+import scoreio  # noqa: E402
 import xmlcheck as xc  # noqa: E402
 
 CONTENT = HERE.parent
@@ -106,7 +107,7 @@ def reasons_of(pitches: list[int], hand: str) -> list[str]:
 
 def span_flags(path: Path, piece: str) -> list[dict]:
     """The slices of one score that no single hand can play, in onset order (right hand first)."""
-    xs = xc.parse_musicxml(path)
+    xs = xc.parse_musicxml(scoreio.plain_path(path))
     if xs.parts != 1:
         # xmlcheck reads only the first part, while the engine gives every other part to the left
         # hand: a report on the first part alone would miss notes or put them in the wrong hand.

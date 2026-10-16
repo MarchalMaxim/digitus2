@@ -3,7 +3,7 @@ import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
 import { flash, prefersReducedMotion } from '../design/motion.js';
-import { pieceBySlug } from '../library/manifest.js';
+import { useLibraryPiece } from '../library/useLibraryPiece.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
@@ -243,7 +243,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
     if (playing && !playable) pause();
   }, [playing, playable, pause]);
 
-  const piece = source.kind === 'library' ? (pieceBySlug(source.slug) ?? null) : null;
+  const piece = useLibraryPiece(source.kind === 'library' ? source.slug : null);
   const name = source.kind === 'library' ? (piece?.title ?? source.slug) : source.name;
   // The piece's tempo where it starts, for the tempo control's "♩ = …" (polish plan Task 6).
   const tempoMap = doc.score?.tempoMap;

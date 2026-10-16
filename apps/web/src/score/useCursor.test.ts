@@ -97,6 +97,77 @@ function stopped({
 
 const marked = (host: Element) => [...host.querySelectorAll('.is-red')].map((el) => el.id);
 
+describe('ornament keyboard playback', () => {
+  it('reports another strike for explicit unison ornaments', () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb));
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    try {
+      const groups = structuredClone(BOTH_AT_ONCE);
+      const n = groups[0]!.notes.find((note) => note.hand === 'R')!;
+      n.ornament = {
+        kind: 'inverted-mordent',
+        long: false,
+        upperMidi: n.midi,
+        lowerMidi: n.midi,
+        startNote: 'main',
+        endTick: n.offsetTick,
+        endSec: n.offsetSec,
+      };
+      const host = hostFor(groups);
+      const clock = { sec: 0, leadingIn: false };
+      const { result } = renderHook(() =>
+        useCursor({ host, groups, playback: playing({ clock }), assignment: null, mutedHands: [] }),
+      );
+      clock.sec = 0.09;
+      act(() => frames.splice(0).forEach((cb) => cb(0)));
+      expect(result.current.struckCount).toBe(1);
+      expect(result.current.pressed[0]?.midi).toBe(n.midi);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it('follows auxiliary attacks with no invented finger while keeping the written cursor', () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb));
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    try {
+      const groups = structuredClone(BOTH_AT_ONCE);
+      const n = groups[0]!.notes.find((note) => note.hand === 'R')!;
+      n.ornament = {
+        kind: 'inverted-mordent',
+        long: false,
+        upperMidi: n.midi + 2,
+        lowerMidi: n.midi - 1,
+        startNote: 'main',
+        endTick: n.offsetTick,
+        endSec: n.offsetSec,
+      };
+      const host = hostFor(groups);
+      const clock = { sec: 0, leadingIn: false };
+      const assignment: Assignment = { [n.id]: { finger: 2, source: 'user' } };
+      const { result } = renderHook(() =>
+        useCursor({ host, groups, playback: playing({ clock }), assignment, mutedHands: [] }),
+      );
+      expect(result.current.pressed.find((k) => k.midi === n.midi)?.finger).toBe(2);
+      const originalMarks = marked(host);
+      clock.sec = 0.09;
+      act(() => frames.splice(0).forEach((cb) => cb(0)));
+      expect(result.current.pressed.find((k) => k.midi === n.midi + 2)).toEqual({
+        midi: n.midi + 2,
+        hand: 'R',
+        finger: null,
+      });
+      expect(marked(host)).toEqual(originalMarks);
+      clock.sec = 0.18;
+      act(() => frames.splice(0).forEach((cb) => cb(0)));
+      expect(result.current.pressed.find((k) => k.midi === n.midi)?.finger).toBe(2);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 // Polish plan Task 3 (review S3): the count-in lit the first notes and their keys 2.4 s before
 // they sounded. During the count-in the cursor now marks nothing; Pause is the red element.
 describe('the cursor during the count-in', () => {

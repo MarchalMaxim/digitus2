@@ -16,6 +16,7 @@ import { childElements, childText, firstChild, parseXml } from './dom.js';
 import type { Element } from './dom.js';
 import { timewiseToPartwise } from './timewise.js';
 import { unpackMusicXml } from './unpack.js';
+import { OrnamentReader } from './ornaments.js';
 
 export interface ParsedMusicXml {
   score: Score;
@@ -80,6 +81,7 @@ export function parseMusicXml(
   const measureLengths: number[] = [];
   const measureNumbers: string[] = [];
   const notes: Note[] = [];
+  const ornaments = new OrnamentReader();
   const tempos: Located<TempoEvent>[] = [];
   const times: Located<TimeSigEvent>[] = [];
   const keys: Located<KeySigEvent>[] = [];
@@ -118,6 +120,9 @@ export function parseMusicXml(
             const st = childText(el, 'staves');
             if (st) staves = Number(st);
             const key = firstChild(el, 'key');
+            for (const ornamentKey of childElements(el, 'key')) {
+              ornaments.key(ornamentKey, partIndex, mIndex, cursor - measureStart);
+            }
             if (key && partIndex === 0) {
               const fifths = Number(childText(key, 'fifths') ?? '0');
               const mode = childText(key, 'mode');
@@ -195,6 +200,15 @@ export function parseMusicXml(
             const tieStop = ties.includes('stop') || (ties.length === 0 && tied.includes('stop'));
             const tieStart =
               ties.includes('start') || (ties.length === 0 && tied.includes('start'));
+            const ornamentContext = {
+              lane: `${partIndex}:${staff}`,
+              measure: mIndex,
+              offset: onset - measureStart,
+              spelling,
+              part: partIndex,
+              staff,
+            };
+            if (!tieStop || firstChild(el, 'accidental')) ornaments.pitch(ornamentContext);
             const tieKey = `${staff}:${voice}:${midi}`;
             const offset = isGrace ? onset : onset + (isChord ? lastAdvance : duration);
 
@@ -228,6 +242,7 @@ export function parseMusicXml(
               sourceIndices: [index],
             };
             notes.push(note);
+            if (!isGrace) ornaments.note(el, note, ornamentContext, offset - onset);
             if (tieStart) pending.set(tieKey, { note, staff, midi });
             const finger = readFingering(el);
             if (finger !== undefined) editorial[note.id] = { finger, source: 'editorial' };
@@ -270,6 +285,7 @@ export function parseMusicXml(
   if (tempoMap.length === 0 || tempoMap[0]!.tick > 0)
     tempoMap.unshift({ tick: 0, qpm: DEFAULT_QPM });
 
+  ornaments.resolve({ divisions, tempoMap });
   const score = finalizeScore({
     meta: readMeta(root, opts.source),
     divisions,
@@ -317,6 +333,7 @@ function dropDuplicates(notes: Note[], editorial: Assignment, warnings: string[]
     warnings.push(
       `note ${n.sourceIndices[0]}: duplicate of note ${first.sourceIndices[0]} (same hand, onset and pitch), dropped`,
     );
+    if (!first.ornament && n.ornament) first.ornament = n.ornament;
     delete editorial[n.id];
     return false;
   });

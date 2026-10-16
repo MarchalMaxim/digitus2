@@ -6,7 +6,10 @@
     "noEmit": true,
     "declaration": false,
     "types": ["vite/client", "node"],
-    "paths": { "@digitus2/engine": ["../../packages/engine/src/index.ts"] }
+    "paths": {
+      "@digitus2/engine": ["../../packages/engine/src/index.ts"],
+      "@digitus2/engine/ornaments": ["../../packages/engine/src/score/ornaments.ts"]
+    }
   },
   "include": ["src", "e2e", "vite.config.ts", "playwright.config.ts"]
 }

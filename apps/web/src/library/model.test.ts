@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GENRES } from './levels.js';
-import { pieces } from './manifest.js';
+import { libraryPieces, loadPieceDetails } from './manifest.js';
 import {
   arrivalLevel,
   countText,
@@ -16,6 +16,12 @@ import {
 } from './model.js';
 import { syntheticLibrary } from './testing/syntheticLibrary.js';
 import catalog from '../../../../content/tools/catalog.json';
+
+const allPieces = libraryPieces();
+
+// The 253 curated pieces: the layout pins below describe them. The MuseScore archive pieces (collection
+// ids pdmx-*, 2026-10-16) are checked in their own block at the end.
+const pieces = allPieces.filter((p) => !p.collectionId.startsWith('pdmx-'));
 
 const level = (n: 1 | 2 | 3 | 4 | 5 | 6) => {
   const layout = libraryLayout(pieces, { level: n, query: '' });
@@ -232,9 +238,26 @@ describe('the expanded library at 253 pieces (spec sections 5, 6, 7)', () => {
   });
 });
 
+describe('the library with the MuseScore archive (2026-10-16)', () => {
+  const archive = allPieces.filter((p) => p.collectionId.startsWith('pdmx-'));
+  it('holds the archive pieces in two collections, each with a known genre', () => {
+    expect(archive.length).toBeGreaterThanOrEqual(1000);
+    expect(new Set(archive.map((p) => p.collectionId))).toEqual(
+      new Set(['pdmx-classical', 'pdmx-folk']),
+    );
+    const ids = new Set(GENRES.map((g) => g.id));
+    for (const p of archive) expect(ids.has(p.genre), p.slug).toBe(true);
+  });
+  it('counts every level, and the levels add up to the whole library', () => {
+    const counts = [1, 2, 3, 4, 5, 6].map((n) => allPieces.filter((p) => p.level === n).length);
+    expect(counts.reduce((sum, c) => sum + c, 0)).toBe(allPieces.length);
+    expect(counts.every((c) => c > 0)).toBe(true);
+  });
+});
+
 describe('the core 30 (a library of 40 pieces or fewer)', () => {
-  it('shows every level, each flat', () => {
-    const core = pieces.filter((p) => p.benchmarkSet === 'core30');
+  it('shows every level, each flat', async () => {
+    const core = [...(await loadPieceDetails()).values()].filter((p) => p.benchmarkSet === 'core30');
     const layout = libraryLayout(core, { level: 3, query: 'minuet' });
     expect(layout.kind).toBe('all'); // no search under 100 pieces: the query is ignored
     if (layout.kind !== 'all') return;

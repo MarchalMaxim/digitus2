@@ -31,6 +31,8 @@ def test_new_piece_passes_every_gate(entry):
     assert 21 <= st["pitchRange"][0] and st["pitchRange"][1] <= 108
     if cat["source"] == "own":
         assert v["melody"]["exact"] is True, v["melody"]
+    elif cat["source"] == "pdmx":
+        pass  # a MuseScore archive score has no Mutopia engraving to cross-check with LilyPond (gates.py)
     else:
         assert v["midiChecks"]["lilypond224Midi"]["exact"] is True
     for profile in ("medium", "large"):

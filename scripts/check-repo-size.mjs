@@ -11,7 +11,14 @@ import { execSync } from 'node:child_process';
 import { statSync } from 'node:fs';
 
 const MAX_FILE_KB = 1024;
-const MAX_TOTAL_MB = 60;
+const MAX_TOTAL_MB = 100; // 60 until the MuseScore archive pieces (2026-10-16): ~1,250 gzipped scores and the records below
+// The library's generated records grow with every piece (about 1 KB of manifest and 3 KB of verification per
+// piece, and the archive fragment about 1.2 KB a piece), so they carry their own limits instead of the general one.
+const ALLOW_LARGE_KB = {
+  'content/manifest.json': 4096,
+  'content/verification.json': 8192,
+  'content/tools/catalog.d/pdmx-library.json': 2048, // 1,300 archive pieces, each with its own provenance note
+};
 const ALLOW_PREFIX = ['content/scores/']; // engraved scores may be up to 1.5 MB (checked below)
 const SCORE_MAX_KB = 1536;
 const MUST_BE_IGNORED = [
@@ -43,7 +50,7 @@ let totalKb = 0;
 for (const { f, kb } of sized) {
   totalKb += kb;
   const isScore = ALLOW_PREFIX.some((p) => f.startsWith(p));
-  const limit = isScore ? SCORE_MAX_KB : MAX_FILE_KB;
+  const limit = ALLOW_LARGE_KB[f] ?? (isScore ? SCORE_MAX_KB : MAX_FILE_KB);
   if (kb > limit) problems.push(`${f} is ${kb.toFixed(0)} KB (limit ${limit} KB)`);
 }
 if (totalKb / 1024 > MAX_TOTAL_MB)

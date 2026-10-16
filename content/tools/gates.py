@@ -126,6 +126,10 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
         elif mel.get("exact") is not True:
             out.append(f"melody differs from the reference ({mel.get('compare')}): first difference "
                        f"{mel.get('firstDifference')}")
+    elif piece.get("source") == "pdmx":
+        # a MuseScore archive score (2026-10-16) has no Mutopia engraving to cross-check against
+        # LilyPond: its MusicXML is the source, and the span, lint and XSD gates stand for it
+        pass
     else:
         chk = (record.get("midiChecks") or {}).get("lilypond224Midi")
         if not chk:

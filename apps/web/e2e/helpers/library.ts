@@ -9,9 +9,12 @@ const manifest = JSON.parse(
     fileURLToPath(new URL('../../../../content/manifest.json', import.meta.url)),
     'utf8',
   ),
-) as Array<{ source?: { license?: string } }>;
+) as Array<{ source?: { license?: string; name?: string } }>;
 
 export const LIBRARY_COUNT = manifest.length;
+
+/** The pieces the About table lists: the MuseScore archive pieces are counted in a sentence instead. */
+export const CURATED_COUNT = manifest.filter((p) => !(p.source?.name ?? '').startsWith('MuseScore')).length;
 
 /** Engravings that owe a credit: share-alike (CC BY-SA) and attribution-only (CC BY), as the About page counts them. */
 export const LICENSE_COUNTS = {

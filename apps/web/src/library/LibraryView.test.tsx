@@ -5,6 +5,16 @@ import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import { FINGER_LEGEND } from '../score/FingerLegend.js';
 import { LibraryView } from './LibraryView.js';
 
+// These layout pins describe the 253 curated pieces. The MuseScore archive pieces (collection ids
+// pdmx-*) are counted in model.test.ts; the browser tests show the whole library.
+vi.mock('./manifest.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./manifest.js')>();
+  return {
+    ...actual,
+    libraryPieces: () => actual.libraryPieces().filter((p) => !p.collectionId.startsWith('pdmx-')),
+  };
+});
+
 beforeEach(() =>
   useAppStore.setState({
     view: { name: 'library' },

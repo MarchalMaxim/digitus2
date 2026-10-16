@@ -184,6 +184,49 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
    attribution is required (`gates.py`,
    `test_every_cc_engraving_is_credited_in_rights`).
 
+## MuseScore archive scores (PDMX, 2026-10-16)
+
+1,300 further pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
+files whose uploaders declared them public domain or CC0, and which PDMX found free of licence conflicts
+(`license_conflict` false). Every one is a solo piano score on two staves with notes on both; the
+library's own gates decide the rest. Their fragment is `catalog.d/pdmx-library.json`, their scores are
+`scores/<slug>.musicxml.gz` (gzip, mtime 0, byte-identical on a rebuild; the app decompresses them with
+the browser's DecompressionStream), and `content/library-index.json` lists every piece for the library
+page. The steps, in order (run with `content/.venv/Scripts/python.exe -I`; the inputs are the PDMX
+download in `research/data/_downloads/pdmx/`, and every output is under the ignored `content/_raw/pdmx/`
+and `content/_build/pdmx/`):
+
+1. `pdmx_screen.py --csv PDMX.csv --archive mxl.tar.gz`: streams the archive once, keeps the
+   public-domain or CC0 rows without a licence conflict, genres classical, folk or religious (MuseScore's
+   own tags; unlabelled scores are left out), 30 to 6,000 notes, and tests every file for a solo piano
+   score. `screen.jsonl` has a reason for every rejection.
+2. `pdmx_select.py --archive mxl.tar.gz`: keeps 40 to 2,500 notes and the two-staff rule (`grand_staff`:
+   one sounding part, two staves), removes duplicates (one score per normalised title and composer, and
+   identical XML), and copies the chosen files to `_raw/pdmx/selected/`. An unnamed composer is kept and
+   shown as "Unknown": the licence rule is the uploader's declaration, not the author's date (the user's
+   broad reading, 2026-10-16).
+3. `pdmx_gate.py --grand-staff [--resume] [--limit N]`: for each candidate, the XSD of its own MusicXML
+   version (3.1 or 4.0), the span check, notes on both staves, zero lint law errors at the medium and the
+   large profile, and the level proposal of the frozen heuristic. `gate.jsonl` holds the results.
+4. `pdmx_fragments.py [--limit 1300]`: writes the fragment. It ships the best-rated passing candidates
+   (rating order, so the cap is a quality order, not a random cut) and skips every candidate the build has
+   refused (`_raw/pdmx/build-failed.json`, and `verification.json`'s failed records). The fragment's
+   `_comment` counts what was not shipped.
+5. `build.py --source pdmx [--only SLUG...]`: converts nothing (the MusicXML is the archive's own file).
+   Each piece is validated as a plain copy (`validate.check_file`: XSD, the two-staff rule, measure
+   arithmetic and the other library checks), then written gzip-compressed. A failed piece gets no score and
+   no manifest entry.
+6. `build.py` also writes `library-index.json` (the eight fields the library list reads), and
+   `gates.py --new` writes the verification records (span check, lint, level). For a MuseScore piece the
+   LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to cross-check); the other
+   gates do.
+
+Result of the run (2026-10-16): 175,905 candidates screened, 8,421 two-staff classical, folk or religious
+candidates after de-duplication, 4,188 gated (2,591 pass), 1,300 shipped (rating order), 184 refused by the
+build. Composer: the archive names a composer for 300 of the 1,300 pieces (23 percent); the other 1,000
+read "Unknown". Levels from the frozen heuristic, archive only: 7, 59, 669, 554, 11, 0; the whole library
+(253 curated and 1,300 archive): 31, 103, 752, 591, 26, 50.
+
 ## Generated and ignored directories
 
 | Path | Content | In git? |

@@ -1,10 +1,29 @@
-import { scanMime, validateScan } from '../scan/model.js';
+import { scanMime, validateScan, validateScanImages } from '../scan/model.js';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export const NOT_A_SCORE_REFUSAL =
   'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).';
 
 const SCORE_EXTENSIONS = ['.musicxml', '.xml', '.mxl', '.mid', '.midi'];
+
+export function acceptScoreFiles(
+  files: readonly File[],
+  onFile: (name: string, bytes: Uint8Array) => void,
+  onRefuse: (message: string) => void,
+  onScan?: (files: File[]) => void,
+): void {
+  if (files.length > 1) {
+    if (!onScan) {
+      onRefuse('Open one MusicXML or MIDI file at a time.');
+      return;
+    }
+    void validateScanImages(files).then(onScan, (cause: unknown) =>
+      onRefuse(cause instanceof Error ? cause.message : 'Could not read these files.'),
+    );
+    return;
+  }
+  acceptScoreFile(files[0], onFile, onRefuse, onScan ? (file) => onScan([file]) : undefined);
+}
 
 /** The file chooser's `accept` list. */
 export const SCORE_ACCEPT = [...SCORE_EXTENSIONS, '.png', '.jpg', '.jpeg', '.pdf'].join(',');
@@ -55,7 +74,7 @@ export function carriesFiles(dt: DataTransfer | null | undefined): boolean {
 export function useWindowFileDrop(
   onFile: (name: string, bytes: Uint8Array) => void,
   onRefuse: (message: string) => void,
-  onScan?: (file: File) => void,
+  onScan?: (files: File[]) => void,
 ): boolean {
   const [dragging, setDragging] = useState(false);
   const latest = useRef({ onFile, onRefuse, onScan });
@@ -84,7 +103,7 @@ export function useWindowFileDrop(
       depth = 0;
       setDragging(false);
       const { onFile, onRefuse, onScan } = latest.current;
-      acceptScoreFile(e.dataTransfer?.files?.[0], onFile, onRefuse, onScan);
+      acceptScoreFiles(Array.from(e.dataTransfer?.files ?? []), onFile, onRefuse, onScan);
     };
     window.addEventListener('dragenter', enter);
     window.addEventListener('dragover', over);

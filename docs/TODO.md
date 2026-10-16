@@ -1,5 +1,12 @@
 # User requests and bug reports
 
+## Image batches, rendering and ornaments (2026-10-16)
+
+- [x] Multi-image scanning: upload/order/add/remove, sequential progress, retry unfinished pages, individual review and safe combined score. Verified through the actual browser/worker and full suite on codex/scanning-pc.
+- [x] Correct HOMR voice interleaving in the display and supply conservative missing beam grouping without changing raw notation. Focused/independent review and all12 full verification gates pass.
+- [ ] Trill and mordent playback with matching keyboard highlights, approved default realization and no invented auxiliary fingerings. Separate codex/ornament-playback worktree/PR.
+- [ ] Retain source-versus-recognition checks for wrong notes/ties/hands; engraving improvements do not establish OMR accuracy.
+
 ## Latest scanning scope (2026-10-16)
 
 Both supplied photos now produce 13 main piano bars through the app using the optional local homr image profile. The complete failure is resolved for review/correction; T9 remains experimental because musical errors remain: two missed chord ties in both files, and a duplicate note plus wrong hand assignment in the smaller file. Keep these as explicit remaining acceptance failures; do not call scanning perfect. Source comparison and raw MusicXML correction are still required. See docs/reviews/scanning-2026-10-15.md for actual-browser verification and independent checks.

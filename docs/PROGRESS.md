@@ -1,5 +1,17 @@
 # digitus2 — progress journal
 
+## Image-batch verification complete (2026-10-16)
+
+Multi-image queue and HOMR render-only beam/voice fixes are frozen and independently reviewed. Root exercised real multi-select, drag order,2native jobs, exact per-page raw hashes, combined26bar import and visible beams in the actual browser. The two inputs are different photos of the same page, not a new accuracy corpus. All12 pnpm verify gates pass (363web/191browser tests); existing musical recognition errors remain. Evidence/limits in docs/reviews/scanning-2026-10-15.md and docs/scanning.md; private captures remain outside git.
+
+New stable preview http://127.0.0.1:4196/digitus2/ PID39840 uses .vite/scan-batch-preview; old4198 and worker8996 are untouched. Root owns final commit/push to draftPR2. Separate approved ornament worktree C:/Users/maxim/.codex/worktrees/ornament-playback/thingamajig on codex/ornament-playback has its own Sol6.1 implementer/reviewer and will receive a separate PR to main. No merge authorized. Codex — Astra coordination; Sol6.1 implementation/review.
+
+## Multi-image extension and beam/order diagnosis (2026-10-16)
+
+User approved the bounded multi-image design: multiple image selection, numbered thumbnails with drag/keyboard order, add/remove, ordered sequential recognition, per-page progress/retry, source review and one combined score. Sol 6.1 multi_image_scan owns apps/web/src/scan/** and required upload/store integration plus focused tests. Sol 6.1 scan_beam_fix owns apps/web/src/score/render/** for a conservative HOMR-only display fallback: exact current two.jpeg raw export has zero beam elements despite eighth-note durations; raw XML and all musical timing must remain unchanged. Sol 6.1 scan_playback_diagnosis is read-only for the earlier 19-bar photo's suspected reversed note order and will independently compare XML/parser/render timing. Root owns shared docs, integration, final verification and git. Beam agent is now frozen (33 render checks passed); playback diagnosis owns its isolated normalizeVoices helper/tests and renderer integration. A four-note fixture proves a Verovio interleaved-voice timing mismatch; semantic-preserving grouping fixes all145 earlier-photo notes and all but two intentional arpeggio spreads in the second photo. Sol6.1 high ornaments_support owns read-only trill/mordent design and will report its scoped proposal before implementation. No agent runs git; no overlapping product edits.
+
+Keep existing preview4198 and worker8996 running while the user tests; use separate preview for changes. Private images and recognition outputs stay ignored. No merge/deployment authorized. Draft PR2 currently eb7d315. Codex — Astra coordination; Sol 6.1 implementation and independent diagnosis.
+
 ## Photo recovery available for testing (2026-10-16)
 
 Both exact user photos now reach source/recognition review through the actual browser and recover 13 main piano bars. The local image path uses pinned homr with generic geometry/accidental export fixes; PDFs retain Audiveris. Source bytes are preserved, jobs run offline in bounded subprocesses, and possible example omissions/key/time assumptions are disclosed. Independent musical review accepts correction/review recovery only: both photos miss two chord ties; the smaller additionally duplicates C5 and assigns one bass E3 to the right hand. No perfect-transcription claim.

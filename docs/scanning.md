@@ -8,13 +8,21 @@ MusicXML, compressed MusicXML and MIDI still open directly, without the PC worke
 
 ## Open and review a score
 
-1. At the end of the library, choose **Open your own score**, or drop a file onto the library. Choose PNG, JPEG or PDF, up to 10 MB.
+1. At the end of the library, choose **Open your own score**, or drop a file onto the library. Choose up to 20 PNG/JPEG page images together (up to 10 MB each), or one PDF. Arrange image thumbnails in reading order by dragging; selecting a page reveals keyboard-accessible move/remove controls. Add page images before recognition.
 2. On the computer running the worker below, press **Connect to this PC**. If the browser asks, allow this site to connect to the local computer. The app never probes this permission automatically.
-3. Press **Scan this score**. You can cancel while uploading or recognizing; leaving the scan also cancels a pending job. Recognition normally takes seconds, but difficult pages can take minutes.
-4. Compare the original with **Recognized notation**, including every page, pitches, rhythms, bar count, clefs, signatures and hands. For a multipage PDF, use the original's Previous/Next controls. The recognized pages may reflow differently. Text and tempo may be incomplete.
+3. Press **Scan this score**. You can cancel while uploading or recognizing; leaving the scan also cancels a pending job. Recognition follows the selected image order, one page at a time. Successful pages are retained when another fails; Retry unfinished pages submits only pages without a result. Recognition normally takes seconds, but difficult pages can take minutes.
+4. Compare the original with **Recognized notation**, including every page, pitches, rhythms, bar count, clefs, signatures and hands. For an image batch, select each original thumbnail and compare its individual recognition; Combined score shows the joined notation. Raw page downloads remain available. For a multipage PDF, use the original's Previous/Next controls. The recognized pages may reflow differently. Text and tempo may be incomplete.
 5. If it looks usable, check **I compared the recognition with my original**, then choose **Use for fingerings**. This opens the existing fingering and playback view. **Scan source and recognition** returns to the original and raw result during this visit.
 
 **Download raw MusicXML** saves the untouched recognized file, without digitus2 fingerings. Use a notation editor to correct it, then open the corrected MusicXML normally. If strict scan parsing refuses malformed notation, the raw download remains available and **Use for fingerings** stays disabled. There is no guessed repair. A technically readable result is not certified accurate.
+
+## Image batches and notation display
+
+Combining images appends the recognized measures in the order you chose, retaining each page's time units, signatures and source notation. It requires compatible parts/instruments/staves and explicit starting context. Unsupported repeat/jump navigation, incompatible layouts or invalid sounding ties block combined use while individual page review/download remains available. This does not repair recognition errors or infer missing notes at page boundaries.
+
+Graphical span numbers (such as slurs) are scoped to their source page in the combined copy; compare continuations at page edges. Original endpoint patterns and separate raw files are retained. MusicXML provides only 16 number levels per span type, so a batch can be refused if disjoint span numbering would exceed that limit even when it is within the 20-image upload limit.
+
+HOMR currently omits beam markings. The display infers conservative conventional beat groups for supported simple/compound meters, preserving explicit beams and skipping ambiguous cases. These are not recovered photographic beam groups. A render-only voice normalization also avoids a Verovio interleaving issue that displaced some simultaneous notes and stretched displayed bars. Neither display preparation changes recognized pitches, source timing, note IDs or raw downloads. The fingering/playback engine continues to consume the source notation.
 
 ## Prepare the optional Windows PC worker
 

@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import { acceptScoreFile, SCORE_ACCEPT } from './ownFile.js';
+import { acceptScoreFiles, SCORE_ACCEPT } from './ownFile.js';
 
 // The plan names this module OwnFile.tsx. On Windows' case-insensitive file system an import of
 // './OwnFile.js' resolves to ownFile.ts (TypeScript and Vite try .ts before .tsx), so it is
@@ -8,21 +8,27 @@ import { acceptScoreFile, SCORE_ACCEPT } from './ownFile.js';
 export interface OwnFileProps {
   onFile(name: string, bytes: Uint8Array): void;
   onRefuse(message: string): void;
-  onScan?(file: File): void;
+  onScan?(files: File[]): void;
 }
 
 /** The end line (spec 3): a text button that opens the file chooser; the page never mentions dropping. */
 export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
-    acceptScoreFile(input.files?.[0], onFile, onRefuse, onScan);
+    acceptScoreFiles(Array.from(input.files ?? []), onFile, onRefuse, onScan);
     input.value = ''; // choosing the same file again still fires a change
   };
   return (
     <p className="library-end">
       <label className="text-button own-file">
         Open your own score
-        <input type="file" accept={SCORE_ACCEPT} className="visually-hidden" onChange={onChange} />
+        <input
+          type="file"
+          multiple
+          accept={SCORE_ACCEPT}
+          className="visually-hidden"
+          onChange={onChange}
+        />
       </label>
     </p>
   );

@@ -22,6 +22,84 @@ async function choose(page: Page) {
   await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
 }
 
+test('scan: ordered image pages, accessible moves, partial retry and combined review', async ({
+  page,
+}, testInfo) => {
+  const uploads: Buffer[] = [];
+  const firstPhoto = Buffer.concat([png, Buffer.from('first')]);
+  const secondPhoto = Buffer.concat([png, Buffer.from('second')]);
+  const firstId = 'b'.repeat(32);
+  const secondId = 'c'.repeat(32);
+  let secondAttempts = 0;
+  const xml = (step: string) =>
+    `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes><note id="n1"><pitch><step>${step}</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note></measure></part></score-partwise>`;
+  await page.route('http://127.0.0.1:8996/**', async (route) => {
+    const request = route.request();
+    const url = request.url();
+    if (url.endsWith('/health')) await route.fulfill({ json: health });
+    else if (request.method() === 'POST') {
+      uploads.push(request.postDataBuffer()!);
+      const next = uploads.length === 1 ? firstId : secondId;
+      if (next === secondId) secondAttempts++;
+      await route.fulfill({ status: 202, json: { id: next } });
+    } else if (url.endsWith('/result'))
+      await route.fulfill({ body: xml(url.includes(firstId) ? 'C' : 'D') });
+    else if (request.method() === 'DELETE') await route.fulfill({ json: { state: 'cancelled' } });
+    else if (url.endsWith(secondId) && secondAttempts === 1)
+      await route.fulfill({ json: { state: 'failed', failure: { message: 'Page too blurry.' } } });
+    else await route.fulfill({ json: { state: 'ready', ...health } });
+  });
+  await page.goto('/');
+  await page.locator('input[type=file]').setInputFiles([
+    { name: 'second.png', mimeType: 'image/png', buffer: secondPhoto },
+    { name: 'first.png', mimeType: 'image/png', buffer: firstPhoto },
+  ]);
+  await page
+    .getByLabel('Add page images')
+    .setInputFiles({ name: 'extra.png', mimeType: 'image/png', buffer: png });
+  await expect(page.locator('.scan-page-list li')).toHaveCount(3);
+  await page.getByRole('button', { name: 'Select page 3: extra.png' }).click();
+  await page.getByRole('button', { name: 'Remove page 3' }).click();
+  await expect(page.locator('.scan-page-list li')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Select page 2: first.png' }).click();
+  await page.getByRole('button', { name: 'Move page 2 earlier' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.scan-page-list li').first()).toContainText('first.png');
+  if (testInfo.project.name === 'desktop') {
+    await page
+      .locator('.scan-page-list li')
+      .first()
+      .dragTo(page.locator('.scan-page-list li').nth(1));
+    await expect(page.locator('.scan-page-list li').first()).toContainText('second.png');
+    await page.getByRole('button', { name: 'Move page 2 earlier' }).click();
+  }
+  await expectOneRed(page, 'image page ordering');
+  await expectNoSeriousA11y(page, 'image page ordering');
+  await page.screenshot({ path: testInfo.outputPath('image-ordering.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Connect to this PC' }).click();
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByText('Page too blurry.', { exact: false })).toBeVisible();
+  await expect(page.locator('.scan-page-list li').first()).toContainText('Recognized');
+  await expect(page.getByRole('button', { name: 'Retry failed pages' })).toBeVisible();
+  await page.getByRole('button', { name: 'Retry failed pages' }).click();
+  await expect(page.locator('.scan-review svg').first()).toBeVisible();
+  await expect(page.getByRole('checkbox')).toBeEnabled();
+  expect(uploads).toEqual([firstPhoto, secondPhoto, secondPhoto]);
+  await page.getByRole('button', { name: 'Select page 1: first.png' }).click();
+  await page.getByRole('button', { name: 'Next original page' }).click();
+  await expect(page.getByRole('img', { name: 'Original printed score, page 2' })).toBeVisible();
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download combined MusicXML' }).click();
+  const download = await downloading;
+  const content = readFileSync((await download.path())!, 'utf8');
+  expect(content.match(/<measure /g) ?? []).toHaveLength(2);
+  expect(content.indexOf('<step>C</step>')).toBeLessThan(content.indexOf('<step>D</step>'));
+  await expectOneRed(page, 'combined scan review');
+  await expectNoSeriousA11y(page, 'combined scan review');
+  await page.screenshot({ path: testInfo.outputPath('combined-review.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+});
+
 test('scan: deliberate connection, raw review, explicit use and retained provenance', async ({
   page,
 }) => {

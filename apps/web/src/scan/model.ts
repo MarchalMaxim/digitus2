@@ -2,10 +2,27 @@
 export interface ScanSession {
   id: string;
   file: File;
+  pages?: ScanPage[] | undefined;
   xml?: string | undefined;
   recognizedAt?: string | undefined;
   recognizer?: string | undefined;
   warnings?: string[] | undefined;
+}
+export interface ScanPage {
+  id: string;
+  file: File;
+  xml?: string | undefined;
+  error?: string | undefined;
+  warnings?: string[] | undefined;
+  recognizer?: string | undefined;
+}
+export const SCAN_PAGE_LIMIT = 20;
+export async function validateScanImages(files: readonly File[]): Promise<File[]> {
+  if (!files.length || files.length > SCAN_PAGE_LIMIT)
+    throw new Error('Choose up to 20 page images at a time.');
+  if (files.some((file) => !scanMime(file.name)?.startsWith('image/')))
+    throw new Error('Choose page images together, or open one PDF, MusicXML or MIDI file.');
+  return Promise.all(files.map(validateScan));
 }
 export const SCAN_LIMIT = 10 * 1024 * 1024;
 export function scanMime(name: string): string | null {

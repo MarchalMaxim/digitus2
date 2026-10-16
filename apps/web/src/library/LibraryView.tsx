@@ -106,10 +106,14 @@ function useRememberLibraryScroll(): () => void {
 export function LibraryView() {
   useWarmUpWhenIdle();
   const openScan = useAppStore((s) => s.openScan);
-  const scan = (file: File) => {
+  const scan = (files: File[]) => {
     rememberScroll();
     setNotice(null);
-    openScan({ id: crypto.randomUUID(), file });
+    openScan({
+      id: crypto.randomUUID(),
+      file: files[0]!,
+      pages: files.map((file) => ({ id: crypto.randomUUID(), file })),
+    });
   };
   const openPiece = useAppStore((s) => s.openPiece);
   const openAbout = useAppStore((s) => s.openAbout);

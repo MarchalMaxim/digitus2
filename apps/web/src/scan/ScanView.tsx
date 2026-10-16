@@ -8,26 +8,14 @@ import { createEngineClient } from '../engine/client.js';
 import { createRenderer } from '../score/render/renderer.js';
 import { ScoreSheet } from '../score/ScoreSheet.js';
 import { createScanClient, type WorkerMetadata } from './client.js';
-import type { ScanSession } from './model.js';
+import { ImagePages, useBlobUrl } from './ImagePages.js';
+import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
+import type { ScanPage, ScanSession } from './model.js';
 import './scan.css';
 
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
 
 const delay = () => new Promise<void>((resolve) => setTimeout(resolve, 350));
-
-function useBlobUrl(blob: Blob | undefined): string | undefined {
-  const [url, setUrl] = useState<string>();
-  useEffect(() => {
-    if (!blob) {
-      setUrl(undefined);
-      return;
-    }
-    const next = URL.createObjectURL(blob);
-    setUrl(next);
-    return () => URL.revokeObjectURL(next);
-  }, [blob]);
-  return url;
-}
 
 /** Review renders raw XML, never calls solve or exports replacement XML. */
 export function ScanView({ session: initial }: { session: ScanSession }) {
@@ -42,6 +30,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [reviewReady, setReviewReady] = useState(false);
   const [checked, setChecked] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [selected, setSelected] = useState(0);
+  const [reviewMode, setReviewMode] = useState<'combined' | 'page'>('combined');
+  const [scanningPage, setScanningPage] = useState(1);
   const [width, setWidth] = useState(640);
   const resultHost = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -52,6 +43,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   });
   const alive = useRef(true);
   const sourceUrl = useBlobUrl(session.file);
+  const sourcePages = session.pages ?? [{ id: session.id, file: session.file, xml: session.xml }];
+  const batch = sourcePages.length > 1;
+  const isImage = session.file.type !== 'application/pdf';
+  const reviewXml = batch && reviewMode === 'page' ? sourcePages[selected]?.xml : session.xml;
   const openLibrary = useAppStore((s) => s.openLibrary);
   const busy = phase === 'connecting' || phase === 'scanning' || phase === 'cancelling';
 
@@ -73,7 +68,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     return () => observer.disconnect();
   }, [phase]);
   useEffect(() => {
-    if (!session.xml) return;
+    if (!reviewXml || phase !== 'review') return;
     let current = true;
     const engine = createEngineClient();
     const renderer = createRenderer();
@@ -83,7 +78,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     void (async () => {
       // Render independently of import: an importer refusal must not erase the raw result.
       const rendered = renderer
-        .render({ xml: session.xml!, widthPx: width })
+        .render({ xml: reviewXml, widthPx: width })
         .then((result) => {
           if (current) setPages(result.pages);
         })
@@ -91,7 +86,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           if (current) setReviewError('Notation could not be displayed: ' + messageOf(cause));
         });
       try {
-        const result = await engine.load(session.xml!, 'scan.musicxml', { preserveNotation: true });
+        const result = await engine.load(reviewXml, 'scan.musicxml', { preserveNotation: true });
         if (current) {
           setWarnings(result.warnings);
           if (!result.score.notes.length) setReviewError('No playable notes were recognized.');
@@ -108,7 +103,19 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       engine.dispose();
       renderer.dispose();
     };
-  }, [session.xml, width]);
+  }, [reviewXml, width, phase]);
+
+  const retain = (next: ScanSession) => {
+    // Visit-only source provenance: never persisted to localStorage.
+    useAppStore.setState({ view: { name: 'scan', session: next } });
+    setSession(next);
+  };
+  const arrange = (next: ScanPage[]) => {
+    if (busy) return;
+    setChecked(false);
+    setError('');
+    retain({ ...session, file: next[0]!.file, pages: next, xml: undefined });
+  };
 
   const connect = async () => {
     setError('');
@@ -148,51 +155,95 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     };
     active.current = run;
     setError('');
+    setChecked(false);
     setPhase('scanning');
-    try {
-      run.started = client.start(session.file);
-      run.id = await run.started;
-      if (run.cancelled || !alive.current) {
-        await client.cancel(run.id);
-        return;
-      }
-      const deadline = performance.now() + 190000;
-      while (!run.cancelled && alive.current) {
-        if (performance.now() > deadline)
-          throw new Error('Recognition timed out. Try a smaller, clearer page.');
-        const status = await client.status(run.id);
-        if (status.state === 'ready') {
-          const xml = await client.result(run.id);
-          if (run.cancelled || !alive.current) return;
-          const next: ScanSession = {
-            ...session,
-            xml,
-            recognizedAt: new Date().toISOString(),
-            recognizer: status.recognizer ?? health?.recognizer,
-            warnings: status.warnings ?? health?.warnings ?? [],
-          };
-          // Persist in the visit-only navigation record, never localStorage.
-          useAppStore.setState({ view: { name: 'scan', session: next } });
-          setSession(next);
-          setPhase('review');
-          active.current = { cancelled: false };
+    const results = sourcePages.map((page) => ({ ...page }));
+    for (const [index, page] of results.entries()) {
+      if (page.xml) continue;
+      if (run.cancelled || !alive.current) return;
+      setScanningPage(index + 1);
+      page.error = undefined;
+      delete run.id;
+      try {
+        run.started = client.start(page.file);
+        run.id = await run.started;
+        if (run.cancelled || !alive.current) {
+          await client.cancel(run.id);
           return;
         }
-        if (['failed', 'cancelled', 'timed_out'].includes(status.state ?? ''))
-          throw new Error(
-            typeof status.failure?.message === 'string'
-              ? status.failure.message
-              : 'The PC could not recognize a complete score from this page. Try the original PDF or a flatter, higher-resolution image.',
-          );
-        await delay();
-      }
-    } catch (cause) {
-      if (run.id) await client.cancel(run.id).catch(() => {});
-      if (alive.current && !run.cancelled) {
-        setError(messageOf(cause));
-        setPhase('connected');
+        const deadline = performance.now() + 190000;
+        while (!run.cancelled && alive.current) {
+          if (performance.now() > deadline)
+            throw new Error('Recognition timed out. Try a smaller, clearer page.');
+          const status = await client.status(run.id);
+          if (status.state === 'ready') {
+            const xml = await client.result(run.id);
+            if (run.cancelled || !alive.current) return;
+            page.xml = xml;
+            page.recognizer = status.recognizer ?? health?.recognizer;
+            page.warnings = status.warnings ?? health?.warnings ?? [];
+            retain({ ...session, pages: results.map((p) => ({ ...p })) });
+            break;
+          }
+          if (['failed', 'cancelled', 'timed_out'].includes(status.state ?? ''))
+            throw new Error(
+              typeof status.failure?.message === 'string'
+                ? status.failure.message
+                : 'The PC could not recognize a complete score from this page. Try the original PDF or a flatter, higher-resolution image.',
+            );
+          await delay();
+        }
+      } catch (cause) {
+        if (run.id) await client.cancel(run.id).catch(() => {});
+        if (alive.current && !run.cancelled) {
+          page.error = messageOf(cause);
+          retain({ ...session, pages: results.map((p) => ({ ...p })) });
+        }
       }
     }
+    if (run.cancelled || !alive.current) return;
+    active.current = { cancelled: false };
+    if (results.some((page) => !page.xml)) {
+      setSelected(
+        Math.max(
+          0,
+          results.findIndex((page) => !page.xml),
+        ),
+      );
+      setError(
+        batch
+          ? 'Some pages need another scan. Recognized pages are kept.'
+          : (results[0]!.error ?? 'Recognition failed.'),
+      );
+      setPhase('connected');
+      return;
+    }
+    let xml: string | undefined;
+    try {
+      xml = joinScanPages(results.map((page) => page.xml!));
+    } catch (cause) {
+      setError(messageOf(cause));
+      setReviewMode('page');
+    }
+    retain({
+      ...session,
+      pages: results,
+      xml,
+      recognizedAt: new Date().toISOString(),
+      recognizer: [...new Set(results.map((p) => p.recognizer).filter(Boolean))].join(', '),
+      warnings: [
+        ...new Set([
+          ...results.flatMap((p) => p.warnings ?? []),
+          ...(batch &&
+          results.some((p) =>
+            new DOMParser().parseFromString(p.xml!, 'text/xml').querySelector(GRAPHIC_SPAN_TAGS),
+          )
+            ? [GRAPHIC_SPAN_WARNING]
+            : []),
+        ]),
+      ],
+    });
+    setPhase('review');
   };
   const useResult = () => {
     if (!session.xml || !reviewReady || !pages.length || reviewError || !checked) return;
@@ -213,7 +264,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         <h1 ref={heading} tabIndex={-1}>
           {phase === 'review' ? 'Review the recognition' : 'From paper to piano'}
         </h1>
-        <p className="scan-filename">{session.file.name}</p>
+        <p className="scan-filename">
+          {batch ? `${sourcePages.length} page images` : session.file.name}
+        </p>
       </header>
       {phase !== 'review' ? (
         <div className="scan-intro">
@@ -256,13 +309,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     void scan();
                   }}
                 >
-                  Scan this score
+                  {batch && sourcePages.some((p) => p.error)
+                    ? 'Retry failed pages'
+                    : 'Scan this score'}
                 </Button>
               )}
             </div>
             <p role="status">
               {phase === 'scanning'
-                ? 'Recognizing on this PC… Usually a few seconds; longer pages can take a few minutes.'
+                ? `${batch ? `Page ${scanningPage} of ${sourcePages.length} · ` : ''}Recognizing on this PC… Usually a few seconds; longer pages can take a few minutes.`
                 : phase === 'connected'
                   ? 'PC connected.'
                   : ''}
@@ -314,7 +369,17 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           </section>
           <section className="stack scan-source">
             <h2>Original</h2>
-            {sourceUrl &&
+            {isImage ? (
+              <ImagePages
+                pages={sourcePages}
+                selected={selected}
+                onSelect={setSelected}
+                editable
+                busy={busy}
+                onChange={arrange}
+              />
+            ) : (
+              sourceUrl &&
               (session.file.type === 'application/pdf' ? (
                 <>
                   <a href={sourceUrl} target="_blank" rel="noreferrer">
@@ -326,7 +391,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </>
               ) : (
                 <img src={sourceUrl} alt="Original printed score" />
-              ))}
+              ))
+            )}
           </section>
         </div>
       ) : (
@@ -335,26 +401,68 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             Compare every page: pitches, rhythms, ties, missing bars, hands and key/time signatures.
             Text and tempo may be incomplete. No fingerings have been added yet.
           </p>
+          {error && <p role="alert">{error}</p>}
           <div className="scan-review">
             <section className="scan-source stack">
               <h2>Original</h2>
-              {sourceUrl && (
-                <>
-                  <a href={sourceUrl} target="_blank" rel="noreferrer">
-                    Open original {session.file.type === 'application/pdf' ? 'PDF' : 'image'}
-                  </a>
-                  {session.file.type === 'application/pdf' ? (
-                    <Suspense fallback={<p>Preparing original PDF…</p>}>
-                      <PdfPreview file={session.file} />
-                    </Suspense>
-                  ) : (
-                    <img src={sourceUrl} alt="Original printed score" />
-                  )}
-                </>
+              {isImage ? (
+                <ImagePages
+                  pages={sourcePages}
+                  selected={selected}
+                  onSelect={setSelected}
+                  editable={false}
+                  busy={false}
+                  onChange={arrange}
+                />
+              ) : (
+                sourceUrl && (
+                  <>
+                    <a href={sourceUrl} target="_blank" rel="noreferrer">
+                      Open original {session.file.type === 'application/pdf' ? 'PDF' : 'image'}
+                    </a>
+                    {session.file.type === 'application/pdf' ? (
+                      <Suspense fallback={<p>Preparing original PDF…</p>}>
+                        <PdfPreview file={session.file} />
+                      </Suspense>
+                    ) : (
+                      <img src={sourceUrl} alt="Original printed score" />
+                    )}
+                  </>
+                )
               )}
             </section>
             <section className="stack" ref={resultHost}>
               <h2>Recognized notation</h2>
+              {batch && (
+                <div className="row" aria-label="Recognition view">
+                  <button
+                    aria-pressed={reviewMode === 'page'}
+                    onClick={() => {
+                      setReviewMode('page');
+                      setChecked(false);
+                    }}
+                  >
+                    Page recognition
+                  </button>
+                  <button
+                    disabled={!session.xml}
+                    aria-pressed={reviewMode === 'combined'}
+                    onClick={() => {
+                      setReviewMode('combined');
+                      setChecked(false);
+                    }}
+                  >
+                    Combined score
+                  </button>
+                </div>
+              )}
+              {batch && (
+                <p className="small muted">
+                  {reviewMode === 'page'
+                    ? `Recognition of page ${selected + 1}`
+                    : 'All pages in reading order'}
+                </p>
+              )}
               {pages.length ? (
                 <ScoreSheet pages={pages} label="raw scan recognition" />
               ) : (
@@ -381,11 +489,35 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   Reloading clears them. Recognition is not certified accurate; playback tempo may
                   use an app default.
                 </p>
+                {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
+                  <p>Beam grouping is inferred and may differ from the original.</p>
+                )}
                 {[...(session.warnings ?? []), ...warnings].map((warning, i) => (
                   <p key={i}>{warning}</p>
                 ))}
               </div>
             </details>
+            {batch && (
+              <details>
+                <summary>Download individual page files</summary>
+                <div className="stack">
+                  {sourcePages.map(
+                    (p, index) =>
+                      p.xml && (
+                        <button
+                          key={p.id}
+                          className="text-button scan-download"
+                          onClick={() =>
+                            downloadText(`page-${index + 1}-recognized.musicxml`, p.xml!)
+                          }
+                        >
+                          Download page {index + 1} MusicXML
+                        </button>
+                      ),
+                  )}
+                </div>
+              </details>
+            )}
             {session.xml && (
               <button
                 className="text-button scan-download"
@@ -396,7 +528,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   )
                 }
               >
-                Download raw MusicXML
+                {batch ? 'Download combined MusicXML' : 'Download raw MusicXML'}
               </button>
             )}
             <label className="scan-confirm">
@@ -404,14 +536,27 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 type="checkbox"
                 checked={checked}
                 onChange={(event) => setChecked(event.currentTarget.checked)}
-                disabled={!reviewReady || !pages.length || !!reviewError}
+                disabled={
+                  !session.xml ||
+                  reviewMode !== 'combined' ||
+                  !reviewReady ||
+                  !pages.length ||
+                  !!reviewError
+                }
               />
               I compared the recognition with my original.
             </label>
             <div className="row">
               <Button
                 primary
-                disabled={!checked || !reviewReady || !pages.length || !!reviewError}
+                disabled={
+                  !session.xml ||
+                  reviewMode !== 'combined' ||
+                  !checked ||
+                  !reviewReady ||
+                  !pages.length ||
+                  !!reviewError
+                }
                 onClick={useResult}
               >
                 Use for fingerings
@@ -421,6 +566,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   setPhase('connect');
                   setError('');
                   setChecked(false);
+                  setReviewMode('combined');
+                  retain({
+                    ...session,
+                    xml: undefined,
+                    pages: sourcePages.map((p) => ({ ...p, xml: undefined, error: undefined })),
+                  });
                 }}
               >
                 Scan again

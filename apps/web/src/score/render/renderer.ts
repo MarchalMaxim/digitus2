@@ -6,6 +6,8 @@
  * request, so the score view shows an error instead of waiting forever.
  */
 import type { WorkerLike } from '../../engine/client.js';
+import { normalizeVoices } from './normalizeVoices.js';
+import { prepareScanBeams } from './scanBeams.js';
 
 /** The part of `Worker` the adapter uses: the engine client's type, so one fake serves both. */
 export type { WorkerLike } from '../../engine/client.js';
@@ -107,7 +109,7 @@ export function createRenderer(
       warmed = true;
       return new Promise<RenderResult>((resolve, reject) => {
         pending.set(id, { resolve, reject });
-        post({ id, type: 'render', xml, widthPx });
+        post({ id, type: 'render', xml: prepareScanBeams(normalizeVoices(xml)), widthPx });
       });
     },
     warmUp() {

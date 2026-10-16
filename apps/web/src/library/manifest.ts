@@ -1,4 +1,5 @@
 import indexUrl from '../../../../content/library-index.json?url';
+import manifestUrl from '../../../../content/manifest.json?url';
 import type { GenreId, Grade } from './levels.js';
 import type { LibraryEntry } from './model.js';
 
@@ -136,15 +137,29 @@ export function libraryPieces(): readonly LibraryEntry[] {
 
 let details: Promise<Map<string, LibraryPiece>> | null = null;
 
+/** Sets every piece's full entry (the tests inject theirs; loadPieceDetails fetches it). */
+export function setPieceDetails(entries: readonly LibraryPiece[]): void {
+  details = Promise.resolve(new Map(entries.map((p) => [p.slug, p])));
+}
+
 /**
- * Every piece's full entry (content/manifest.json), loaded once on first use. The manifest is a
- * separate chunk, so the start-up bundle does not carry it.
+ * Every piece's full entry (content/manifest.json), fetched once on first use. Fetched as JSON,
+ * not imported as a module: a 3 MB JSON module keeps its source text and the string it parses
+ * alive for the page's lifetime (about 12 MB of heap); a fetched file keeps only the entries.
+ * A failed fetch is forgotten, so the next use tries again.
  */
 export function loadPieceDetails(): Promise<Map<string, LibraryPiece>> {
-  details ??= import('../../../../content/manifest.json').then(
-    (module) => new Map((module.default as LibraryPiece[]).map((p) => [p.slug, p])),
-  );
-  return details;
+  if (details) return details;
+  const loading = fetch(manifestUrl).then(async (response) => {
+    if (!response.ok)
+      throw new Error(`the library details could not be loaded (HTTP ${response.status})`);
+    const entries = (await response.json()) as LibraryPiece[];
+    return new Map(entries.map((p) => [p.slug, p]));
+  });
+  loading.catch(() => {
+    if (details === loading) details = null;
+  });
+  return (details = loading);
 }
 
 /** A piece's library entry by slug: the URL and the list need no more than this. */

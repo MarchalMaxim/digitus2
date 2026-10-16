@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
+import { ThemeToggle } from '../design/ThemeToggle.js';
 import { attribution, type LibraryPiece } from '../library/manifest.js';
 import { FingerLegend } from './FingerLegend.js';
 
@@ -48,6 +49,7 @@ export function ScoreHeader({ title, composer, piece, onBack, legend = false }: 
           Back to the library
         </button>
       )}
+      <ThemeToggle />
       <h1 ref={heading} tabIndex={-1}>
         {title}
       </h1>

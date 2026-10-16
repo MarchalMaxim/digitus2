@@ -3,6 +3,7 @@ import { messageOf } from '../app/errors.js';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { ThemeToggle } from '../design/ThemeToggle.js';
 import { downloadText } from '../export/download.js';
 import { createEngineClient } from '../engine/client.js';
 import { createRenderer } from '../score/render/renderer.js';
@@ -280,6 +281,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         <button className="text-button" onClick={openLibrary}>
           Back to library
         </button>
+        <ThemeToggle />
         <p className="small muted">Experimental scan</p>
         <h1 ref={heading} tabIndex={-1}>
           {phase === 'review' ? 'Review the recognition' : 'From paper to piano'}

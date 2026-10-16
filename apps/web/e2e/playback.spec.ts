@@ -377,6 +377,17 @@ async function expectScoreDimmed(page: Page, left: boolean, label: string): Prom
   }
 }
 
+/**
+ * The hand of every key pressed now, found and read in one evaluate: a locator's evaluateAll
+ * resolves the elements and reads them in two steps, and under a loaded run the cursor could move
+ * between the two (a key found pressed was read released, with no hand).
+ */
+function pressedHands(page: Page): Promise<(string | null)[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.keyboard .is-pressed')].map((e) => e.getAttribute('data-hand')),
+  );
+}
+
 test.describe('playback with the silent instrument', () => {
   // T10 (spec 14): a pause keeps the last group heard red and its keys pressed, Play plain; Rewind
   // clears them and gives the red back to Play.
@@ -896,9 +907,7 @@ test.describe('playback with the silent instrument', () => {
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await page.waitForTimeout(1200);
-    const hands = await page
-      .locator('.keyboard .is-pressed')
-      .evaluateAll((els) => els.map((e) => e.getAttribute('data-hand')));
+    const hands = await pressedHands(page);
     expect(hands.length).toBeGreaterThan(0);
     expect(new Set(hands)).toEqual(new Set(['L']));
   });
@@ -912,9 +921,7 @@ test.describe('playback with the silent instrument', () => {
     await page.getByRole('button', { name: 'Play' }).click();
     for (let i = 0; i < 6; i++) {
       await page.waitForTimeout(400);
-      const hands = await page
-        .locator('.keyboard .is-pressed')
-        .evaluateAll((els) => els.map((e) => e.getAttribute('data-hand')));
+      const hands = await pressedHands(page);
       expect(new Set(hands), `sample ${i}`).toEqual(new Set(['L', 'R']));
     }
   });

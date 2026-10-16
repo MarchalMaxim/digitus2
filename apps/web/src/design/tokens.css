@@ -1,10 +1,22 @@
 :root {
+  color-scheme: light;
   --ink: #000000;
   --paper: #ffffff;
   --gray-1: #f2f2f2; /* surfaces: hover rows, drop zone */
-  --gray-2: #cccccc; /* rules, disabled controls, pressed and dimmed keys */
+  --gray-2: #cccccc; /* rules, disabled controls */
   --gray-3: #767676; /* secondary text; 4.5:1 on white */
+  --score-ink: #000000; /* the engraving (base.css, .score-sheet): ink in light, softer in dark */
   --accent: #e3000f; /* the single red; referenced only by .is-red below */
+  --on-accent: #ffffff; /* a label on the red fill: white in both themes (4.9:1) */
+  /* The on-screen keyboard keeps a real piano's colors in both themes (base.css, .key). */
+  --key-white: #ffffff;
+  --key-black: #000000;
+  --key-line: #000000; /* the outlines between the keys */
+  --key-digit: #000000; /* the finger numbers and hand letters on the keys */
+  --key-down: #cccccc; /* a pressed or dimmed key */
+  /* What the Hands thumb blends with (base.css, .segmented-thumb): a difference with white
+     inverts what lies under it, in either theme. */
+  --invert: #ffffff;
   --dur-press: 50ms; /* a key going down: quick, like a hammer (base.css, .keyboard-svg .key) */
   --dur-fast: 120ms;
   --dur: 160ms;
@@ -15,6 +27,49 @@
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
 }
 
+/* Dark (T7): the system's preference unless the reader chose a theme with the switch, which sets
+   data-theme on the root (design/theme.ts; index.html before the first paint). Paper near black,
+   ink near white, grays re-derived for the same contrasts, the one red unchanged, the keys a real
+   keyboard's. Screens only: a print is ink on paper. The two blocks are the same set
+   (tokens.test.ts keeps them so). */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --ink: #f2f2f2;
+    --paper: #111111;
+    --gray-1: #222222;
+    --gray-2: #3d3d3d;
+    --gray-3: #8c8c8c; /* 5.6:1 on the dark paper */
+    /* A page of notes in near-white glares: the engraving and the white keys are softer than
+       the text (13:1 and 14:1, the user, 2026-10-16). */
+    --score-ink: #d4d4d4;
+    --key-white: #dadada;
+    --key-black: #111111;
+    --key-line: #111111;
+    --key-digit: #111111;
+    --key-down: #8f8f8f;
+  }
+}
+
+@media screen {
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --ink: #f2f2f2;
+    --paper: #111111;
+    --gray-1: #222222;
+    --gray-2: #3d3d3d;
+    --gray-3: #8c8c8c; /* 5.6:1 on the dark paper */
+    /* A page of notes in near-white glares: the engraving and the white keys are softer than
+       the text (13:1 and 14:1, the user, 2026-10-16). */
+    --score-ink: #d4d4d4;
+    --key-white: #dadada;
+    --key-black: #111111;
+    --key-line: #111111;
+    --key-digit: #111111;
+    --key-down: #8f8f8f;
+  }
+}
+
 /* The one red. Exactly one element carries this class at any time. */
 .is-red {
   color: var(--accent);
@@ -22,7 +77,7 @@
 button.is-red,
 a.is-red {
   background: var(--accent);
-  color: var(--paper);
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 svg .is-red,

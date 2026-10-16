@@ -3,6 +3,7 @@ import { useFocusOnArrival } from '../app/focus.js';
 import { hashToView } from '../app/routes.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { ThemeToggle } from '../design/ThemeToggle.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { showsSearch } from './disclosure.js';
 import { LevelPills } from './LevelPills.js';
@@ -166,6 +167,7 @@ export function LibraryView() {
   return (
     <main className={dragging ? 'page stack library is-dragging' : 'page stack library'}>
       <header className="welcome">
+        <ThemeToggle />
         <h1 ref={heading} tabIndex={-1}>
           digitus2
         </h1>

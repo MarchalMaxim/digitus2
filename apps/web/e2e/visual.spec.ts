@@ -56,12 +56,24 @@ const SCREENSHOT_STATES = STATES.filter((x) => !PLAYBACK_STATES.has(x.name));
  */
 const BASELINE_MAX_BYTES = 900 * 1024;
 
-for (const s of SCREENSHOT_STATES) {
-  test(`visual ${s.name}`, async ({ page }) => {
+/**
+ * The main states again with the system in dark (T7): the library, the score ready and paused,
+ * and the about page. Every state's one red and contrast are checked in the dark by states.spec.ts.
+ */
+const DARK_STATE_NAMES = new Set(['library', 'score-ready', 'score-paused', 'about']);
+const DARK_STATES = SCREENSHOT_STATES.filter((x) => DARK_STATE_NAMES.has(x.name));
+
+for (const [s, dark] of [
+  ...SCREENSHOT_STATES.map((x) => [x, false] as const),
+  ...DARK_STATES.map((x) => [x, true] as const),
+]) {
+  const name = dark ? `${s.name}-dark` : s.name;
+  test(`visual ${name}`, async ({ page }) => {
+    if (dark) await page.emulateMedia({ colorScheme: 'dark' });
     await s.go(page);
     await page.addStyleTag({ content: HIDE_TIMINGS });
     if (s.name === 'score-rewound') await dockScreenshotReady(page);
-    await expect(page).toHaveScreenshot(`${s.name}.png`, {
+    await expect(page).toHaveScreenshot(`${name}.png`, {
       fullPage: true,
       animations: 'disabled',
     });
@@ -95,12 +107,15 @@ async function pausedTwinkleAt(page: Page, sec: number): Promise<void> {
  * pressed key also carries its L or R.
  */
 const KEYBOARD_CROPS = [
-  { name: 'keyboard-unlettered', sec: 1.25 }, // bar 1, the third note: hands an octave apart
-  { name: 'keyboard-lettered', sec: 7.25 }, // bar 4, its first group: hands within a fifth
+  { name: 'keyboard-unlettered', sec: 1.25, dark: false }, // bar 1, the third note: hands an octave apart
+  { name: 'keyboard-lettered', sec: 7.25, dark: false }, // bar 4, its first group: hands within a fifth
+  // The same keys in the dark (T7): a real keyboard's colors, pressed keys and letters readable.
+  { name: 'keyboard-lettered-dark', sec: 7.25, dark: true },
 ];
 
 for (const crop of KEYBOARD_CROPS) {
   test(`visual ${crop.name}`, async ({ page }) => {
+    if (crop.dark) await page.emulateMedia({ colorScheme: 'dark' });
     await pausedTwinkleAt(page, crop.sec);
     // Capture the intentional final key travel, never an in-flight press/restrike frame.
     await page.locator('.keyboard-svg').evaluate(async (svg) => {
@@ -136,6 +151,7 @@ test('visual baselines: one per state, none left over, each under 900 KB', () =>
   );
   const expected = [
     ...SCREENSHOT_STATES.map((s) => s.name),
+    ...DARK_STATES.map((s) => `${s.name}-dark`),
     ...KEYBOARD_CROPS.map((c) => c.name),
   ].map((n) => info.snapshotPath(`${n}.png`, { kind: 'screenshot' }));
   const dir = dirname(expected[0]!);

@@ -70,7 +70,7 @@ describe('routes', () => {
     location.hash = '#/piece/file';
     const uninstall = installHashSync(useAppStore);
     expect(useAppStore.getState().view).toEqual({ name: 'library' });
-    expect(useAppStore.getState().notice).toBe('Drop the file again to continue.');
+    expect(useAppStore.getState().notice).toBe('Open it from My scores, or choose the file again.');
     uninstall();
   });
 });

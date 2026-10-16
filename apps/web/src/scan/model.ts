@@ -1,6 +1,7 @@
-/** Visit-only provenance; original bytes are never persisted. */
+/** Source provenance, also retained by the browser's local score library. */
 export interface ScanSession {
   id: string;
+  localId?: string | undefined;
   file: File;
   pages?: ScanPage[] | undefined;
   xml?: string | undefined;
@@ -10,7 +11,12 @@ export interface ScanSession {
 }
 export interface ScanPage {
   id: string;
+  /** Effective bytes shown in source comparison and sent to the recognizer. */
   file: File;
+  /** Unchanged source retained while a nonzero rotation is applied. */
+  originalFile?: File | undefined;
+  /** Clockwise turns from the browser's EXIF-oriented original. Absent means zero. */
+  quarterTurns?: 0 | 1 | 2 | 3 | undefined;
   xml?: string | undefined;
   error?: string | undefined;
   warnings?: string[] | undefined;

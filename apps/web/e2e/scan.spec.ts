@@ -83,7 +83,7 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await expect(page.getByRole('button', { name: 'Retry failed pages' })).toBeVisible();
   await page.getByRole('button', { name: 'Retry failed pages' }).click();
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
-  await expect(page.getByRole('checkbox')).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   expect(uploads).toEqual([firstPhoto, secondPhoto, secondPhoto]);
   await page.getByRole('button', { name: 'Select page 1: first.png' }).click();
   await page.getByRole('button', { name: 'Next original page' }).click();
@@ -102,7 +102,7 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
 
 test('scan: deliberate connection, raw review, explicit use and retained provenance', async ({
   page,
-}) => {
+}, testInfo) => {
   let requests = 0;
   let uploaded: Buffer | null = null;
   await page.route('http://127.0.0.1:8996/**', async (route) => {
@@ -127,22 +127,26 @@ test('scan: deliberate connection, raw review, explicit use and retained provena
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
   expect(uploaded).toEqual(png);
   await expect(page.locator('.scan-review g.fing')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  if (testInfo.project.name === 'desktop')
+    await page.screenshot({
+      path: '../../research/omr/results/multi-image/review-without-checkbox.png',
+      fullPage: true,
+    });
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download raw MusicXML' }).click();
   const download = await downloading;
   expect(download.suggestedFilename()).toBe('printed-score-recognized.musicxml');
   await expectOneRed(page, 'scan review');
   await expectNoSeriousA11y(page, 'scan review');
-  await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Use for fingerings' }).click();
   await expect(page.locator('.score-sheet g.fing').first()).toBeVisible();
   const workerRequests = requests;
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
   expect(requests).toBe(workerRequests);
-  await expect(page.getByRole('checkbox')).toBeEnabled();
-  await page.getByRole('checkbox').check();
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   await page.getByRole('button', { name: 'Use for fingerings' }).click();
   await expect(page.locator('.score-sheet g.fing').first()).toBeVisible();
   await page.getByRole('button', { name: 'Scan source and recognition' }).click();
@@ -186,7 +190,7 @@ test('scan: importer refusal retains raw output and blocks fingering use', async
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('alert')).toContainText('cannot be used');
   await expect(page.getByRole('button', { name: 'Download raw MusicXML' })).toBeVisible();
-  await expect(page.getByRole('checkbox')).toBeDisabled();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
 });
 
@@ -261,7 +265,7 @@ test('scan: local multipage PDF preview, original upload and exact raw export', 
   await expect(page.getByRole('img', { name: 'Original PDF, page 2' })).toBeVisible();
   await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByRole('checkbox')).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   expect(uploaded).toEqual(pdf);
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download raw MusicXML' }).click();

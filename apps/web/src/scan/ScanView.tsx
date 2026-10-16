@@ -20,19 +20,26 @@ const delay = () => new Promise<void>((resolve) => setTimeout(resolve, 350));
 /** Review renders raw XML, never calls solve or exports replacement XML. */
 export function ScanView({ session: initial }: { session: ScanSession }) {
   const [session, setSession] = useState(initial);
+  const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
   const [phase, setPhase] = useState<
     'connect' | 'connected' | 'connecting' | 'scanning' | 'cancelling' | 'review'
-  >(initial.xml ? 'review' : 'connect');
-  const [error, setError] = useState('');
+  >(initial.xml || hasPageRecognition ? 'review' : 'connect');
+  const [error, setError] = useState(
+    hasPageRecognition && !initial.xml && initial.pages!.length > 1
+      ? 'The pages were recognized, but their notation could not be combined. Individual page files are available below.'
+      : '',
+  );
   const [health, setHealth] = useState<WorkerMetadata>();
   const [pages, setPages] = useState<string[]>([]);
   const [reviewError, setReviewError] = useState('');
   const [reviewReady, setReviewReady] = useState(false);
-  const [checked, setChecked] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selected, setSelected] = useState(0);
-  const [reviewMode, setReviewMode] = useState<'combined' | 'page'>('combined');
+  const [reviewMode, setReviewMode] = useState<'combined' | 'page'>(
+    hasPageRecognition && !initial.xml ? 'page' : 'combined',
+  );
   const [scanningPage, setScanningPage] = useState(1);
+  const [rotating, setRotating] = useState(false);
   const [width, setWidth] = useState(640);
   const resultHost = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -49,6 +56,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const reviewXml = batch && reviewMode === 'page' ? sourcePages[selected]?.xml : session.xml;
   const openLibrary = useAppStore((s) => s.openLibrary);
   const busy = phase === 'connecting' || phase === 'scanning' || phase === 'cancelling';
+  const canUseResult =
+    !!session.xml && reviewMode === 'combined' && reviewReady && pages.length > 0 && !reviewError;
 
   useEffect(() => {
     alive.current = true;
@@ -106,15 +115,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   }, [reviewXml, width, phase]);
 
   const retain = (next: ScanSession) => {
-    // Visit-only source provenance: never persisted to localStorage.
+    // The local score library retains completed source/recognition snapshots in IndexedDB.
     useAppStore.setState({ view: { name: 'scan', session: next } });
     setSession(next);
   };
   const arrange = (next: ScanPage[]) => {
     if (busy) return;
-    setChecked(false);
     setError('');
-    retain({ ...session, file: next[0]!.file, pages: next, xml: undefined });
+    retain({
+      ...session,
+      file: next[0]!.file,
+      pages: next,
+      xml: undefined,
+      recognizedAt: undefined,
+      recognizer: undefined,
+      warnings: undefined,
+    });
   };
 
   const connect = async () => {
@@ -155,7 +171,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     };
     active.current = run;
     setError('');
-    setChecked(false);
     setPhase('scanning');
     const results = sourcePages.map((page) => ({ ...page }));
     for (const [index, page] of results.entries()) {
@@ -222,7 +237,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     try {
       xml = joinScanPages(results.map((page) => page.xml!));
     } catch (cause) {
-      setError(messageOf(cause));
+      setError(
+        batch
+          ? 'The pages were recognized, but their notation could not be combined. ' +
+              messageOf(cause)
+          : messageOf(cause),
+      );
       setReviewMode('page');
     }
     retain({
@@ -246,7 +266,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setPhase('review');
   };
   const useResult = () => {
-    if (!session.xml || !reviewReady || !pages.length || reviewError || !checked) return;
+    if (!canUseResult) return;
     useAppStore.getState().openPiece({
       kind: 'file',
       name: session.file.name.replace(/\.[^.]+$/, '') + '.musicxml',
@@ -273,8 +293,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           <section className="stack">
             <p>
               Original PDFs and flat, high-resolution scans work best. Book photos are experimental
-              and can fail, even when well lit. You’ll check any result before adding finger
-              numbers.
+              and can fail, even when well lit. Results open beside the original for review.
             </p>
             <p className="small muted">
               This experimental option needs the PC worker on this computer. Your score goes to that
@@ -285,7 +304,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               {phase === 'connect' || phase === 'connecting' ? (
                 <Button
                   primary
-                  disabled={busy}
+                  disabled={busy || rotating}
                   onClick={() => {
                     void connect();
                   }}
@@ -305,6 +324,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               ) : (
                 <Button
                   primary
+                  disabled={rotating}
                   onClick={() => {
                     void scan();
                   }}
@@ -377,6 +397,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 editable
                 busy={busy}
                 onChange={arrange}
+                onRotating={setRotating}
               />
             ) : (
               sourceUrl &&
@@ -398,8 +419,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ) : (
         <>
           <p>
-            Compare every page: pitches, rhythms, ties, missing bars, hands and key/time signatures.
-            Text and tempo may be incomplete. No fingerings have been added yet.
+            Recognition may contain errors in notes, rhythms, ties or hands. Text and tempo may be
+            incomplete. No fingerings have been added yet.
           </p>
           {error && <p role="alert">{error}</p>}
           <div className="scan-review">
@@ -439,7 +460,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     aria-pressed={reviewMode === 'page'}
                     onClick={() => {
                       setReviewMode('page');
-                      setChecked(false);
                     }}
                   >
                     Page recognition
@@ -449,7 +469,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     aria-pressed={reviewMode === 'combined'}
                     onClick={() => {
                       setReviewMode('combined');
-                      setChecked(false);
                     }}
                   >
                     Combined score
@@ -485,9 +504,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   {session.recognizedAt ? new Date(session.recognizedAt).toLocaleString() : ''}
                 </p>
                 <p>
-                  Original document and unmodified recognition are retained only during this visit.
-                  Reloading clears them. Recognition is not certified accurate; playback tempo may
-                  use an app default.
+                  Find retained originals and recognition in My scores in this browser. Keep your
+                  own original files; browser storage can be cleared. Recognition is not certified
+                  accurate; playback tempo may use an app default.
                 </p>
                 {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
                   <p>Beam grouping is inferred and may differ from the original.</p>
@@ -531,41 +550,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 {batch ? 'Download combined MusicXML' : 'Download raw MusicXML'}
               </button>
             )}
-            <label className="scan-confirm">
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={(event) => setChecked(event.currentTarget.checked)}
-                disabled={
-                  !session.xml ||
-                  reviewMode !== 'combined' ||
-                  !reviewReady ||
-                  !pages.length ||
-                  !!reviewError
-                }
-              />
-              I compared the recognition with my original.
-            </label>
             <div className="row">
-              <Button
-                primary
-                disabled={
-                  !session.xml ||
-                  reviewMode !== 'combined' ||
-                  !checked ||
-                  !reviewReady ||
-                  !pages.length ||
-                  !!reviewError
-                }
-                onClick={useResult}
-              >
+              <Button primary disabled={!canUseResult} onClick={useResult}>
                 Use for fingerings
               </Button>
               <button
                 onClick={() => {
                   setPhase('connect');
                   setError('');
-                  setChecked(false);
                   setReviewMode('combined');
                   retain({
                     ...session,

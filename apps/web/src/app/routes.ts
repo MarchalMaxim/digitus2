@@ -4,8 +4,8 @@ import type { useAppStore, View } from './store.js';
 const FILE_HASH = '#/piece/file';
 const PIECE_PREFIX = '#/piece/';
 
-/** Shown when the URL points at a dropped file whose bytes are gone (reload, Back, Forward). */
-export const FILE_NOT_RESTORABLE_NOTICE = 'Drop the file again to continue.';
+/** Uploaded scores reopen explicitly from the local collection, without starting a scan. */
+export const FILE_NOT_RESTORABLE_NOTICE = 'Open it from My scores, or choose the file again.';
 
 export function viewToHash(view: View): string {
   switch (view.name) {
@@ -46,8 +46,8 @@ export function installHashSync(store: typeof useAppStore): () => void {
     const hash = location.hash;
     const { view } = store.getState();
     if (viewToHash(view) === hash) return;
-    // A scan-derived score retains its visit-only source. Back can restore that review;
-    // a reload still falls through to the ordinary non-restorable-file notice.
+    // A scan-derived score retains its source. Back restores that review; after a reload
+    // the reader chooses the saved item explicitly from My scores.
     if (
       hash === '#/scan' &&
       view.name === 'score' &&

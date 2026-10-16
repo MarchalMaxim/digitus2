@@ -115,17 +115,6 @@
   padding-top: 1.5rem;
   max-width: 52rem;
 }
-.scan-confirm {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.scan-confirm input {
-  width: 20px;
-  min-width: 20px;
-  min-height: 20px;
-  accent-color: var(--ink);
-}
 @media (max-width: 700px) {
   .scan-intro,
   .scan-review {

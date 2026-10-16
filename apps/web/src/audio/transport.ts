@@ -1,4 +1,5 @@
 import type { Hand, Score } from '@digitus2/engine';
+import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import type { Beat } from './beats.js';
 import { buildBeats, countInBar, measureEndSec, measureStartSec } from './beats.js';
 import type { AudioClock } from './clock.js';
@@ -33,6 +34,8 @@ interface PlayEvent {
   midi: number;
   hand: Hand;
   velocity: number;
+  /** The source ornament segment limits a tempo transition; tied principal tails are ordinary holds. */
+  ornamentEnd?: number;
 }
 
 /**
@@ -55,6 +58,7 @@ interface HeardNote {
 const GRACE_LEAD_SEC = 0.05;
 const GRACE_DURATION_SEC = 0.1;
 const MIN_DURATION_SEC = 0.05;
+const MAX_TEMPO_DEFERRAL_SEC = 0.25;
 /**
  * The accompaniment is slightly softer than the melody. Both lie inside the piano's loaded
  * velocity layer (`PIANO_LAYER`, 85 to 100): smplr plays nothing for a velocity outside it.
@@ -80,14 +84,23 @@ function buildEvents(score: Score): PlayEvent[] {
       graceSec.set(n.id, Math.max(0, n.onsetSec - GRACE_LEAD_SEC * (group.length - k)));
     });
   }
-  const events = score.notes.map((n) => ({
-    sec: graceSec.get(n.id) ?? n.onsetSec,
-    onset: n.onsetSec,
-    duration: n.isGrace ? GRACE_DURATION_SEC : Math.max(MIN_DURATION_SEC, n.offsetSec - n.onsetSec),
-    midi: n.midi,
-    hand: n.hand,
-    velocity: VELOCITY[n.hand],
-  }));
+  const events = score.notes.flatMap((n) =>
+    ornamentAttacks(n).map((attack, index, attacks) => ({
+      sec: graceSec.get(n.id) ?? attack.onsetSec,
+      onset: attack.onsetSec,
+      duration: n.isGrace
+        ? GRACE_DURATION_SEC
+        : n.ornament
+          ? attack.offsetSec - attack.onsetSec
+          : Math.max(MIN_DURATION_SEC, n.offsetSec - n.onsetSec),
+      midi: attack.midi,
+      hand: n.hand,
+      velocity: VELOCITY[n.hand],
+      ...(n.ornament && (index + 1 < attacks.length || attack.midi !== n.midi)
+        ? { ornamentEnd: Math.min(attack.offsetSec, n.ornament.endSec) }
+        : {}),
+    })),
+  );
   return events.sort((a, b) => a.sec - b.sec); // stable: simultaneous notes keep score order
 }
 
@@ -312,10 +325,50 @@ export class Transport {
     if (!(f > 0) || !Number.isFinite(f) || f === this.tempoFactor) return;
     this.tempoFactor = f;
     if (!this.playing) return;
-    // Re-anchor where the scheduled audio ends: what is scheduled keeps its time, the next note
-    // follows at the new speed, and the position runs on without a jump.
+    // Never split an already scheduled ornament attack. The next attack must meet its release
+    // at the same clock time as the keyboard's phase change. Interleaved grids may have no
+    // shared edge soon: cap responsiveness at 250 ms, then use a seek and rearticulate holds.
     const seg = this.current();
+    const loopEnd = this.loopRange()?.to ?? Infinity;
+    const limit =
+      seg.score + (this.ctx.currentTime + MAX_TEMPO_DEFERRAL_SEC - seg.ctx) * seg.factor;
+    let boundary = this.scheduledTo;
+    for (let i = lowerBound(this.events, seg.score); i < this.events.length; i++) {
+      const event = this.events[i]!;
+      if (event.sec >= boundary) break;
+      if (this.muted.has(event.hand)) continue;
+      if (event.ornamentEnd !== undefined && event.ornamentEnd > boundary) {
+        boundary = Math.min(event.ornamentEnd, loopEnd);
+        if (boundary > limit) {
+          this.resyncTempo();
+          return;
+        }
+      }
+    }
+    this.schedule(seg, this.scheduledTo, boundary);
+    this.scheduledTo = boundary;
     this.segments.push({ ctx: toCtx(seg, this.scheduledTo), score: this.scheduledTo, factor: f });
+  }
+
+  /** Rare off-grid fallback: a brief rearticulation is preferable to a long stale tempo. */
+  private resyncTempo(): void {
+    const position = this.positionSec();
+    this.seek(position);
+    const seg = this.current();
+    const end = this.loopRange()?.to ?? Infinity;
+    for (const event of this.events) {
+      if (event.sec >= position) break;
+      const offset = Math.min(event.sec + event.duration, end);
+      if (offset <= position || this.muted.has(event.hand)) continue;
+      this.instrument.start({
+        midi: event.midi,
+        hand: event.hand,
+        velocity: event.velocity,
+        time: seg.ctx,
+        duration: (offset - position) / seg.factor,
+      });
+      this.leadIn?.push({ ctx: seg.ctx, hand: event.hand });
+    }
   }
 
   setMuted(hands: Hand[]): void {
@@ -445,6 +498,7 @@ export class Transport {
   /** Schedules the notes and metronome beats whose score time lies in `[from, to)`. */
   private schedule(seg: Segment, from: number, to: number): void {
     if (!(to > from)) return;
+    const loopEnd = this.loopRange()?.to ?? Infinity;
     for (let i = lowerBound(this.events, from); i < this.events.length; i++) {
       const e = this.events[i]!;
       if (e.sec >= to) break;
@@ -452,7 +506,7 @@ export class Transport {
       this.instrument.start({
         midi: e.midi,
         time: toCtx(seg, e.sec),
-        duration: e.duration / seg.factor,
+        duration: Math.min(e.duration, loopEnd - e.sec) / seg.factor,
         velocity: e.velocity,
         hand: e.hand,
       });

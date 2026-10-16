@@ -1,4 +1,5 @@
 import type { Finger, Hand, Score } from '@digitus2/engine';
+import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { restrike } from '../design/motion.js';
 
@@ -95,8 +96,10 @@ export function keyboardRange(score: Score): { lowMidi: number; highMidi: number
   let lo = Infinity;
   let hi = -Infinity;
   for (const n of score.notes) {
-    if (n.midi < lo) lo = n.midi;
-    if (n.midi > hi) hi = n.midi;
+    for (const attack of ornamentAttacks(n)) {
+      if (attack.midi < lo) lo = attack.midi;
+      if (attack.midi > hi) hi = attack.midi;
+    }
   }
   if (!Number.isFinite(lo)) return { lowMidi: 48, highMidi: 71 };
   let lowMidi = lo - (((lo % 12) + 12) % 12);

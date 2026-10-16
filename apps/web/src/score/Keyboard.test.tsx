@@ -214,4 +214,20 @@ describe('Keyboard', () => {
       highMidi: 95,
     });
   });
+  it('includes an ornament auxiliary that crosses the highest written octave boundary', () => {
+    const note = {
+      midi: 71,
+      onsetSec: 0,
+      offsetSec: 1,
+      ornament: {
+        kind: 'inverted-mordent',
+        long: false,
+        upperMidi: 72,
+        lowerMidi: 69,
+        startNote: 'main',
+        endSec: 1,
+      },
+    };
+    expect(keyboardRange({ notes: [note] } as never)).toEqual({ lowMidi: 60, highMidi: 83 });
+  });
 });

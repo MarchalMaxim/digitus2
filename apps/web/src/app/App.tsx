@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
 import { pieceKey, useAppStore, type View } from './store.js';
 import { NoteBurst } from './NoteBurst.js';
 import { Notice } from './Notice.js';
@@ -53,6 +53,9 @@ function useScrollOnViewChange(key: string): void {
 }
 
 export function App() {
+  useEffect(() => {
+    void import('../library/local/library.js').then((m) => m.installLocalLibrary());
+  }, []);
   const view = useAppStore((s) => s.view);
   const key = viewKey(view);
   useScrollOnViewChange(key);

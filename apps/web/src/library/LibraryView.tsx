@@ -20,6 +20,7 @@ import { useWindowFileDrop } from './ownFile.js';
 import { DropFrame, OwnFileLine } from './OwnFileLine.js';
 import { PieceList } from './PieceList.js';
 import { SearchField } from './SearchField.js';
+import { MyScores } from './local/MyScores.js';
 import './library.css';
 
 const LEVEL_LINE_ID = 'library-level-line';
@@ -178,6 +179,7 @@ export function LibraryView() {
           {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
         </div>
       </header>
+      <MyScores onOpen={rememberScroll} />
       {layout.kind === 'level' && (
         <div className="level-choice">
           <LevelPills

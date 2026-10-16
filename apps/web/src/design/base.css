@@ -125,6 +125,15 @@ h1[tabindex='-1']:focus {
   padding: 1rem;
 }
 
+/* The score view grows with a wide window instead of stopping at 72rem: the music reflows into
+   longer systems and the dock's keyboard gets the room to show a wide piece without scrolling
+   (issue #14; at 72rem a five-octave piece scrolled with a third of the window empty). It keeps
+   the 4rem side margins it has at 1280 px, so up to there nothing moves, and stops at 120rem so
+   a line of music stays readable on an ultra-wide screen. */
+.page.score-view {
+  max-width: clamp(72rem, 100% - 8rem, 120rem);
+}
+
 /* The light and dark switch (ThemeToggle.tsx, T7): in every view's header, at the page's top
    right, on the row of the view's first line (the library's name, Back to the library). A round
    44 px button with no border; its hover fill is the buttons' own. */

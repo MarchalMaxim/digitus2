@@ -1,5 +1,9 @@
 # digitus2 — progress journal
 
+## Wider score view on wide windows (issue #14, 2026-10-16)
+
+The user found the keyboard scrolling sideways on a wide screen with a third of the window empty. Cause: every page, the score view included, stopped at 72rem (1152 px), so at a 1716 px window the dock's keyboard got 720 px, and any piece spanning five octaves (35 white keys at the 22 px minimum, 770 px) scrolled. The score view now takes `max-width: clamp(72rem, 100% - 8rem, 120rem)`: the same 4rem side margins it already had at 1280 px, so up to 1280 px nothing moves (the 1280 x 900 visual baselines stay valid), growing with the window up to 120rem so a line of music stays readable on an ultra-wide screen. The music reflows into longer systems (it is laid out to the column's width) and the keyboard shows a five-octave piece whole: K545 at 1716 px has 1156 px for its 770. New browser check in e2e/playback.spec.ts ('the keyboard on a wide window'), failing before the fix and passing after. Files: apps/web/src/design/base.css, e2e/playback.spec.ts, docs/app.md. Claude Code.
+
 ## RAM usage (issue #7, 2026-10-16)
 
 Measured where the tab's memory goes (`docs/research/ram-usage-2026-10-16.md`). Fixed two page-side costs: the piece details are fetched as JSON instead of imported as a 3 MB module, and `beats.ts` uses the new `@digitus2/engine/score-build` subpath so the engine chunk stays off the main thread (page heap with a score open 15.1 → 7.9 MB). The largest cost, Verovio's fixed 128 MB WASM heap, is left as is by the user's decision and recorded in docs/app.md, Known limitations. Claude Code, branch claude/ram-usage-issue-7.

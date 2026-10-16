@@ -2,6 +2,8 @@ export { ENGINE_VERSION } from './version.js';
 export * from './score/types.js';
 export * from './score/pitch.js';
 export * from './score/build.js';
+export { ornamentAttacks } from './score/ornaments.js';
+export type { OrnamentAttack } from './score/ornaments.js';
 export { parsePig, parseFingerField, PIG_HEADER, PIG_DIVISIONS, PIG_QPM } from './io/pig/read.js';
 export type { ParsedPig } from './io/pig/read.js';
 export { writePig } from './io/pig/write.js';

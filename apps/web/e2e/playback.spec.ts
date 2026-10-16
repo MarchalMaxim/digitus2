@@ -907,24 +907,28 @@ test.describe('playback with the silent instrument', () => {
     });
     await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    // Select and read in one browser task: playback can release a key between
+    // Playwright's selector lookup and evaluateAll callback on a busy CI runner.
     const keys = () =>
-      page.locator('.keyboard .key.is-pressed, .keyboard .key.is-muted').evaluateAll((els) =>
-        els.map((k) => {
-          const midi = k.getAttribute('data-midi');
-          const mark = document.querySelector(`.keyboard .key-hand[data-for-midi="${midi}"]`);
-          return {
-            midi,
-            black: k.classList.contains('is-black'),
-            pressed: k.classList.contains('is-pressed'),
-            muted: k.classList.contains('is-muted'),
-            hand: k.getAttribute('data-hand'),
-            fill: getComputedStyle(k.querySelector('rect')!).fill,
-            opacity: getComputedStyle(k).opacity,
-            finger: k.querySelector('text')?.textContent ?? null,
-            mark: mark?.textContent ?? null,
-            markOpacity: mark ? getComputedStyle(mark).opacity : null,
-          };
-        }),
+      page.evaluate(() =>
+        [...document.querySelectorAll('.keyboard .key.is-pressed, .keyboard .key.is-muted')].map(
+          (k) => {
+            const midi = k.getAttribute('data-midi');
+            const mark = document.querySelector(`.keyboard .key-hand[data-for-midi="${midi}"]`);
+            return {
+              midi,
+              black: k.classList.contains('is-black'),
+              pressed: k.classList.contains('is-pressed'),
+              muted: k.classList.contains('is-muted'),
+              hand: k.getAttribute('data-hand'),
+              fill: getComputedStyle(k.querySelector('rect')!).fill,
+              opacity: getComputedStyle(k).opacity,
+              finger: k.querySelector('text')?.textContent ?? null,
+              mark: mark?.textContent ?? null,
+              markOpacity: mark ? getComputedStyle(mark).opacity : null,
+            };
+          },
+        ),
       );
     type Key = Awaited<ReturnType<typeof keys>>[number];
     const lettered = (s: Key[]) => s.some((k) => k.mark !== null);

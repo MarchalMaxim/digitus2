@@ -18,6 +18,7 @@
  * statically it would push the library page's initial JavaScript past its 150 KB gzip budget.
  */
 import type { Hand, Score } from '@digitus2/engine';
+import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
@@ -131,7 +132,7 @@ export function mutedHandsFor(hands: HandsMode): Hand[] {
 }
 
 function uniqueMidis(score: Score): number[] {
-  return [...new Set(score.notes.map((n) => n.midi))];
+  return [...new Set(score.notes.flatMap((n) => ornamentAttacks(n).map((attack) => attack.midi)))];
 }
 
 export function usePlayback(score: Score | null): Playback {

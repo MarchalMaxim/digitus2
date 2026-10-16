@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
+import { openLibraryPiece } from './helpers/library.js';
 import { expectOneRed } from './helpers/red.js';
 
 // Light and dark (T7): the page follows the system's color scheme until the reader chooses a
@@ -97,7 +98,7 @@ test('the switch overrides the system, is kept, and gives the page back to the s
   await page.reload();
   await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
   expect(await paper(page)).toBe(DARK_PAPER);
-  await page.getByRole('button', { name: /^Open Twinkle/ }).click();
+  await openLibraryPiece(page, 'twinkle-twinkle-little-star');
   await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
   expect(await paper(page)).toBe(DARK_PAPER);
 

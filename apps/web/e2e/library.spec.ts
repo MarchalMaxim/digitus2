@@ -1,6 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { LEVEL_COUNTS, libraryReady, searchCount, showLevelOf } from './helpers/library.js';
+import {
+  arrivalRows,
+  libraryReady,
+  searchRows,
+  shelfButton,
+  shelvesOf,
+  showMoreButton,
+  showPiece,
+  tierPill,
+} from './helpers/library.js';
 import { libraryScore } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
 import { dropFrameShown, pieceRows } from './helpers/states.js';
@@ -16,13 +25,14 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('library: one level at a time, one red element, no serious a11y issues, LCP under 2 s', async ({
+test('library: three levels, six shelves at most, one red element, no serious a11y issues, LCP under 2 s', async ({
   page,
 }) => {
   await page.goto('/');
   await libraryReady(page);
-  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[1]!);
-  await expect(page.getByRole('radio', { name: 'First steps', exact: true })).toBeChecked();
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
+  await expect(tierPill(page, 'easy')).toBeChecked();
+  await expect(page.getByRole('radio')).toHaveCount(3);
   await expect(page.getByText(FINGER_LEGEND)).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Start here' })).toHaveCount(0);
   const roots = await expectOneRed(page, 'library');
@@ -32,13 +42,50 @@ test('library: one level at a time, one red element, no serious a11y issues, LCP
   expect(lcp, `LCP ${lcp} ms`).toBeLessThan(2000);
 });
 
-// Spec section 17: the red button and the first row on the first screen, every pill inside the
-// viewport (they wrap at 360 px), no horizontal scroll. Runs at 1280 (desktop) and 360 (mobile).
+// Shelves spec 2 and 4.1, the rule of 7: on arrival a level shows at most 6 shelves of at most
+// 5 rows, 30 rows in all, and the library never lists more than a page of rows at once.
+test('library: the arrival page of each level keeps to the rule of 7', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  for (const tier of ['easy', 'medium', 'challenging'] as const) {
+    await tierPill(page, tier).check();
+    const shelves = shelvesOf(tier);
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText(shelves.map((s) => s.name));
+    await expect(pieceRows(page)).toHaveCount(arrivalRows(tier));
+    expect(arrivalRows(tier)).toBeLessThanOrEqual(30);
+    for (const shelf of shelves) {
+      const section = page
+        .getByRole('heading', { level: 2, name: shelf.name })
+        .locator('xpath=ancestor::section');
+      await expect(section.getByRole('button', { name: /^Open / })).toHaveCount(
+        Math.min(5, shelf.count),
+      );
+      await expect(
+        section.getByText(
+          `${shelf.count.toLocaleString('en-US')} ${shelf.count === 1 ? 'piece' : 'pieces'}`,
+        ),
+      ).toBeVisible();
+      if (shelf.count > 5)
+        await expect(
+          section.getByRole('button', {
+            name: `All ${shelf.count.toLocaleString('en-US')} ${shelf.noun}`,
+          }),
+        ).toBeVisible();
+      else await expect(section.getByRole('button', { name: /^All / })).toHaveCount(0);
+    }
+    await expectOneRed(page, `${tier} arrival`);
+  }
+  await expect(page.getByRole('group', { name: 'Length' })).toHaveCount(0);
+});
+
+// The red button and the first shelf on the first screen, every pill inside the viewport (they
+// wrap at 360 px), no horizontal scroll. Runs at 1280 (desktop) and 360 (mobile).
 test('library: the first screen at this width (spec 17)', async ({ page }) => {
   await page.goto('/');
   await libraryReady(page);
   const g = await page.evaluate(() => ({
     width: window.innerWidth,
+    height: window.innerHeight,
     red: document.querySelector('.library .is-red')!.getBoundingClientRect().top,
     row: document.querySelector('.piece-row')!.getBoundingClientRect().top,
     pills: [...document.querySelectorAll('.pill')].map((p) => {
@@ -50,8 +97,9 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
   const phone = g.width < 480;
   const at = JSON.stringify(g);
   expect(g.red, at).toBeLessThanOrEqual(phone ? 160 : 130);
-  expect(g.row, at).toBeLessThanOrEqual(phone ? 470 : 330);
-  expect(g.pills).toHaveLength(6);
+  expect(g.row, at).toBeLessThanOrEqual(phone ? 600 : 420);
+  expect(g.row, `the first row is on the first screen: ${at}`).toBeLessThan(g.height);
+  expect(g.pills).toHaveLength(3);
   for (const p of g.pills) {
     expect(p.left, at).toBeGreaterThanOrEqual(0);
     expect(p.right, at).toBeLessThanOrEqual(g.width);
@@ -60,10 +108,9 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
 });
 
 // UI batch review and design section 17: the words a first visit reads before the first piece.
-// At 253 pieces, at 1280 and 360, they are 36: the name 1, the sentence 14, the red button 5, the
-// six pills 7, the level line 6 and the first collection heading 2 (the search field's
-// 4-word placeholder is not text in the page and is not counted). The budget may not grow.
-test('library: at most 36 visible words before the first piece (design section 17)', async ({
+// With shelves they are 42: the name 1, the sentence 14, the red button 6, the three pills 3, the
+// level line 6, the first shelf's name 1, count 2 and line 9. The budget may not grow.
+test('library: at most 42 visible words before the first piece (design section 17)', async ({
   page,
 }) => {
   await page.goto('/');
@@ -88,40 +135,115 @@ test('library: at most 36 visible words before the first piece (design section 1
   test
     .info()
     .annotations.push({ type: 'words before the first piece', description: `${words.length}` });
-  expect(words.length, words.join(' ')).toBeLessThanOrEqual(36);
+  expect(words.length, words.join(' ')).toBeLessThanOrEqual(42);
 });
 
-test('library: the arrow keys choose a level; the list follows and the pill keeps the focus', async ({
+test('library: the arrow keys choose a level; the shelves follow and the pill keeps the focus', async ({
   page,
 }) => {
   await page.goto('/');
   await libraryReady(page);
-  await page.getByRole('radio', { name: 'First steps', exact: true }).focus();
+  await tierPill(page, 'easy').focus();
   await page.keyboard.press('ArrowRight');
-  const easy = page.getByRole('radio', { name: 'Easy', exact: true });
-  await expect(easy).toBeChecked();
-  await expect(easy).toBeFocused();
-  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[2]!);
-  await expect(page.getByText('The hands begin to move.')).toBeVisible();
-  await expectOneRed(page, 'Easy chosen');
+  const medium = tierPill(page, 'medium');
+  await expect(medium).toBeChecked();
+  await expect(medium).toBeFocused();
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('medium'));
+  await expect(page.getByText('The hands move, with more notes and wider reaches.')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    shelvesOf('medium').map((s) => s.name),
+  );
+  await expectOneRed(page, 'Medium chosen');
+  await page.keyboard.press('ArrowRight');
+  await expect(tierPill(page, 'challenging')).toBeChecked();
+  await expect(tierPill(page, 'challenging')).toBeFocused();
 });
 
-test('library: Advanced opens all its pieces with one red element and no overflow', async ({
+// Shelves spec 4.2: a shelf opens in place with its first page of 40, Show more appends the next
+// page and moves the focus to its first row, Escape goes back to the shelf's All button.
+test('library: a shelf opens in place in pages of 40; Escape goes back to the shelves', async ({
   page,
 }) => {
   await page.goto('/');
   await libraryReady(page);
-  await page.getByRole('radio', { name: 'Advanced', exact: true }).check();
-  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[6]!);
-  await expect(
-    page.getByRole('heading', { name: 'Bach, The Well-Tempered Clavier', exact: true }),
-  ).toBeVisible();
-  await expectOneRed(page, 'Advanced');
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    ),
-  ).toBeLessThanOrEqual(0);
+  await tierPill(page, 'medium').check();
+  const classical = shelvesOf('medium').find((s) => s.id === 'classical')!;
+  expect(classical.count).toBeGreaterThan(80);
+  await shelfButton(page, 'classical').click();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Classical']);
+  await expect(page.getByRole('heading', { level: 2, name: 'Classical' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'All styles' })).toBeVisible();
+  await expect(page.getByText(`${classical.count.toLocaleString('en-US')} pieces`)).toBeVisible();
+  await expect(tierPill(page, 'medium')).toBeChecked();
+  await expect(pieceRows(page)).toHaveCount(40);
+  await expectOneRed(page, 'shelf open');
+  await showMoreButton(page).click();
+  await expect(pieceRows(page)).toHaveCount(80);
+  await expect(pieceRows(page).nth(40)).toBeFocused();
+  await expectNoSeriousA11y(page, 'shelf open');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    shelvesOf('medium').map((s) => s.name),
+  );
+  await expect(shelfButton(page, 'classical')).toBeFocused();
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('medium'));
+  // and with the back button, after the level changed with the shelf open
+  await shelfButton(page, 'songs').click();
+  await tierPill(page, 'easy').check();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Songs']);
+  await page.getByRole('button', { name: 'All styles' }).click();
+  await expect(shelfButton(page, 'songs')).toBeFocused();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    shelvesOf('easy').map((s) => s.name),
+  );
+});
+
+// Shelves spec 4.3: the length pills show above a list of more than 40 pieces, filter it, and
+// keep their choice from shelf to shelf; a shelf of 40 pieces or fewer shows none.
+test('library: the length pills filter an opened shelf and wait for the next', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await tierPill(page, 'medium').check();
+  await shelfButton(page, 'songs').click();
+  const group = page.getByRole('group', { name: 'Length' });
+  await expect(group.getByRole('radio', { name: 'Any length' })).toBeChecked();
+  const pills = await group.getByRole('radio').count();
+  expect(pills).toBeGreaterThanOrEqual(2);
+  await group.getByRole('radio').nth(1).check();
+  await expect(group.getByRole('radio').nth(1)).toBeChecked();
+  await expect(group.getByRole('radio').nth(1)).toBeFocused();
+  const filtered = await page
+    .getByText(/^[\d,]+ pieces?$/)
+    .first()
+    .textContent();
+  expect(Number(filtered!.replace(/\D/g, ''))).toBeLessThan(
+    shelvesOf('medium').find((s) => s.id === 'songs')!.count,
+  );
+  await expectOneRed(page, 'length chosen');
+  await page.getByRole('button', { name: 'All styles' }).click();
+  await shelfButton(page, 'classical').click();
+  await expect(page.getByRole('group', { name: 'Length' }).getByRole('radio').nth(1)).toBeChecked();
+  // a shelf of 40 pieces or fewer has no pills, and cannot filter silently
+  await page.getByRole('button', { name: 'All styles' }).click();
+  await shelfButton(page, 'jazz').click();
+  await expect(page.getByRole('group', { name: 'Length' })).toHaveCount(0);
+  await expect(pieceRows(page)).toHaveCount(
+    shelvesOf('medium').find((s) => s.id === 'jazz')!.count,
+  );
+});
+
+test("library: a level pick keeps an open shelf open and shows that level's pieces", async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await tierPill(page, 'medium').check();
+  await shelfButton(page, 'baroque').click();
+  await tierPill(page, 'challenging').check();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Baroque']);
+  const challenging = shelvesOf('challenging').find((s) => s.id === 'baroque')!;
+  await expect(page.getByText(`${challenging.count} pieces`)).toBeVisible();
+  await expect(pieceRows(page)).toHaveCount(Math.min(40, challenging.count));
 });
 
 test('library: an unsupported file shows a notice and keeps one red element', async ({ page }) => {
@@ -153,21 +275,25 @@ test('library: the layout has no horizontal overflow', async ({ page }) => {
 
 // Review S2 and L2: a piece opened from far down the list kept a clamped scroll offset (scrollY
 // 578 for K.545 on a phone, its title and Play above the viewport), and going back always
-// landed at the top of the library. Runs at 1280 (desktop) and 360 px (mobile).
-test('library: a piece opened from far down opens at the top; going back restores the level and the list position', async ({
+// landed at the top of the library. Shelves spec 4.2: going back also restores the opened shelf
+// and the pages shown. Runs at 1280 (desktop) and 360 px (mobile).
+test('library: a piece opened from far down a shelf opens at the top; going back restores the level, the shelf, the pages and the list position', async ({
   page,
 }) => {
   const scrollY = () => page.evaluate(() => window.scrollY);
   await page.goto('/');
   await libraryReady(page);
-  await showLevelOf(page, 'mozart-sonata-k545-mvt1');
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const row = page.getByRole('button', {
-    name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
-  });
-  await row.scrollIntoViewIfNeeded();
+  const row = await showPiece(page, 'mozart-sonata-k545-mvt1');
+  // a second page, so the restored list has to hold more than the first
+  const more = showMoreButton(page);
+  if (await more.isVisible()) await more.click();
+  const rowCount = await pieceRows(page).count();
+  // The row near the top of the screen, well below the start of the page.
+  await row.evaluate((el) =>
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 80),
+  );
   const listY = await scrollY();
-  expect(listY, 'the list is scrolled far down').toBeGreaterThan(300);
+  expect(listY, 'the list is scrolled down').toBeGreaterThan(100);
 
   const expectArrivalAtTop = async (label: string) => {
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
@@ -186,7 +312,9 @@ test('library: a piece opened from far down opens at the top; going back restore
     expect(roots[0]!.tag).toBe('button');
   };
   const expectListAt = async (label: string, leftAt: number) => {
-    await expect(page.getByRole('radio', { name: 'Intermediate', exact: true })).toBeChecked();
+    await expect(tierPill(page, 'challenging')).toBeChecked();
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Classical']);
+    await expect(pieceRows(page), `${label}: the pages shown`).toHaveCount(rowCount);
     const y = await scrollY();
     expect(Math.abs(y - leftAt), `${label}: scrollY ${y}, left at ${leftAt}`).toBeLessThanOrEqual(
       50,
@@ -222,16 +350,22 @@ test('library: a piece opened from far down opens at the top; going back restore
   await expectListAt('back after forward', 500);
 });
 
-// The list grows with the library (L1: about 150 pieces, 45 rows at level 2); the last row must
-// stay reachable and the long page must not scroll sideways. The mobile project runs it at 360 px.
-test('library: the last piece of the last level is reachable and nothing overflows', async ({
+// The longest shelf (Medium and Challenging classical hold about 650 pieces each) is read to its
+// end, page by page: the last row stays reachable and the long page must not scroll sideways.
+// The mobile project runs it at 360 px.
+test('library: the last piece of the longest shelf is reachable and nothing overflows', async ({
   page,
 }) => {
   await page.goto('/');
   await libraryReady(page);
-  await page.getByRole('radio', { name: 'Challenging', exact: true }).check();
+  await tierPill(page, 'challenging').check();
+  const shelf = shelvesOf('challenging').find((s) => s.id === 'classical')!;
+  await shelfButton(page, 'classical').click();
+  const more = showMoreButton(page);
+  for (let pages = 0; pages < 40 && (await more.count()); pages++) await more.click();
+  await expect(more).toHaveCount(0);
   const open = pieceRows(page);
-  await expect(open).toHaveCount(LEVEL_COUNTS[5]!);
+  await expect(open).toHaveCount(shelf.count);
   const last = open.last();
   await last.scrollIntoViewIfNeeded();
   await expect(last).toBeInViewport();
@@ -259,19 +393,50 @@ test('library: "fur elise" finds Für Elise; Escape brings back the level and it
 }) => {
   await page.goto('/');
   await libraryReady(page);
-  await page.getByRole('radio', { name: 'Easy', exact: true }).check();
+  await tierPill(page, 'medium').check();
   const field = page.getByRole('searchbox', { name: 'Search the library' });
   await field.fill('fur elise');
-  await expect(pieceRows(page)).toHaveCount(searchCount('fur elise'));
+  await expect(pieceRows(page)).toHaveCount(searchRows('fur elise'));
   await expect(
     page.getByRole('button', { name: /^Open Für Elise \(Bagatelle in A minor\)/ }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { level: 2, name: 'Intermediate' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Challenging' })).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(0);
   await expectOneRed(page, 'search');
   await field.press('Escape');
   await expect(field).toHaveValue('');
-  await expect(page.getByRole('radio', { name: 'Easy', exact: true })).toBeChecked();
+  await expect(tierPill(page, 'medium')).toBeChecked();
+});
+
+// Shelves spec 4.4: every level answers in a section of 7 rows; All {n} in {Level} opens it to
+// pages of 40; the shelf names are words of the pieces on them; length pills above 40 results.
+test('library: search sections show 7 rows, open to pages of 40, and find a style by its name', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  const field = page.getByRole('searchbox', { name: 'Search the library' });
+  await field.fill('baroque');
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText([
+    'Easy',
+    'Medium',
+    'Challenging',
+  ]);
+  await expect(pieceRows(page)).toHaveCount(searchRows('baroque'));
+  await expect(page.getByRole('group', { name: 'Length' })).toBeVisible();
+  const medium = page
+    .getByRole('heading', { level: 2, name: 'Medium' })
+    .locator('xpath=ancestor::section');
+  await expect(medium.getByRole('button', { name: /^Open / })).toHaveCount(7);
+  await medium.getByRole('button', { name: /^All [\d,]+ in Medium$/ }).click();
+  await expect(medium.getByRole('button', { name: /^Open / })).toHaveCount(
+    Math.min(40, shelvesOf('medium').find((s) => s.id === 'baroque')!.count),
+  );
+  await expect(medium.getByRole('button', { name: /^Open / }).nth(7)).toBeFocused();
+  await expectOneRed(page, 'search section open');
+  await expectNoSeriousA11y(page, 'search section open');
+  await field.fill('jazz');
+  await expect(pieceRows(page)).toHaveCount(searchRows('jazz'));
 });
 
 test('library: no match says so; Clear brings the list back', async ({ page }) => {
@@ -282,17 +447,19 @@ test('library: no match says so; Clear brings the list back', async ({ page }) =
   await expect(page.getByText('Search looks in titles, composers and collections.')).toBeVisible();
   await expectOneRed(page, 'empty result');
   await page.getByRole('button', { name: 'Clear the search' }).click();
-  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[1]!);
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
 });
 
 test('library: back from a piece found by search shows the same search', async ({ page }) => {
   await page.goto('/');
   await libraryReady(page);
-  await page.getByRole('searchbox', { name: 'Search the library' }).fill('minuet');
+  await page.getByRole('searchbox', { name: 'Search the library' }).fill('petzold minuet');
   await page.getByRole('button', { name: 'Open Minuet in G minor by Christian Petzold' }).click();
   await page.getByRole('button', { name: 'Back to the library' }).click();
-  await expect(page.getByRole('searchbox', { name: 'Search the library' })).toHaveValue('minuet');
-  await expect(pieceRows(page)).toHaveCount(searchCount('minuet'));
+  await expect(page.getByRole('searchbox', { name: 'Search the library' })).toHaveValue(
+    'petzold minuet',
+  );
+  await expect(pieceRows(page)).toHaveCount(searchRows('petzold minuet'));
 });
 
 test('library: a file dropped on the window opens it; a drag that leaves hides the frame', async ({

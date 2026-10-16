@@ -1,7 +1,7 @@
 import type { ScanSession } from '../scan/model.js';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
-import type { Level } from '../library/levels.js';
+import { toTier, type LengthId, type ShelfId, type Tier } from '../library/levels.js';
 
 export type HandSize = 'large' | 'medium' | 'small' | 'child';
 export type HandsMode = 'both' | 'R' | 'L';
@@ -56,9 +56,21 @@ export interface AppState {
    */
   libraryScrollY: number;
   /** The level pill chosen in this visit; null until the reader chooses one. Not persisted. */
-  libraryLevel: Level | null;
+  libraryLevel: Tier | null;
   /** The library's search text in this visit; not persisted. */
   libraryQuery: string;
+  /**
+   * The style shelf opened in place, or null for the shelves (shelves spec 4.2). With
+   * `libraryPages` and `libraryScrollY` it brings the reader back to the same rows from a score.
+   * Not persisted.
+   */
+  libraryShelf: ShelfId | null;
+  /** The search section opened to pages of 40 (shelves spec 4.4), or null. Not persisted. */
+  librarySection: Tier | null;
+  /** Pages of 40 shown of the open shelf or search section; 1 when none is open. Not persisted. */
+  libraryPages: number;
+  /** The length pill chosen, kept across shelves, levels and searches (spec 4.3). Not persisted. */
+  libraryLength: LengthId;
   /** The dock's Practice panel is open; lasts for the visit, every page load starts closed. */
   practiceOpen: boolean;
   openLibrary(): void;
@@ -73,8 +85,17 @@ export interface AppState {
   setTempoFactor(factor: number): void;
   setNotice(message: string | null): void;
   setLibraryScrollY(y: number): void;
-  setLibraryLevel(level: Level): void;
+  /** Chooses a level; the list starts again at its first page. */
+  setLibraryLevel(level: Tier): void;
+  /** Typing a search closes the open section and starts at the first page. */
   setLibraryQuery(query: string): void;
+  /** Opens a shelf (or null: back to the shelves) at its first page. */
+  setLibraryShelf(shelf: ShelfId | null): void;
+  /** Opens a search section (or null) at its first page. */
+  setLibrarySection(section: Tier | null): void;
+  setLibraryPages(pages: number): void;
+  /** Chooses a length; the list starts again at its first page. */
+  setLibraryLength(length: LengthId): void;
   /** Called on Play: the legend has been seen, and a library piece becomes the one to continue. */
   markPlayed(): void;
   setPracticeOpen(open: boolean): void;
@@ -241,6 +262,16 @@ function safeStorage(): StateStorage {
 
 type PersistedState = { settings: Settings };
 
+/**
+ * Builds before the three levels (shelves spec 3) had six level pills. The chosen pill is visit
+ * state and was never written, but a payload that carries one (a grade 1 to 6) is read as its
+ * tier rather than dropped.
+ */
+function pickLibraryLevel(persisted: unknown): Tier | null {
+  if (typeof persisted !== 'object' || persisted === null) return null;
+  return toTier((persisted as { libraryLevel?: unknown }).libraryLevel);
+}
+
 export const useAppStore = create<AppState>()(
   persist<AppState, [], [], PersistedState>(
     (set) => ({
@@ -250,6 +281,10 @@ export const useAppStore = create<AppState>()(
       libraryScrollY: 0,
       libraryLevel: null,
       libraryQuery: '',
+      libraryShelf: null,
+      librarySection: null,
+      libraryPages: 1,
+      libraryLength: 'any',
       practiceOpen: false,
       openLibrary: () => set({ view: { name: 'library' } }),
       openAbout: () => set({ view: { name: 'about' } }),
@@ -265,8 +300,13 @@ export const useAppStore = create<AppState>()(
         }),
       setNotice: (message) => set({ notice: message }),
       setLibraryScrollY: (y) => set({ libraryScrollY: y }),
-      setLibraryLevel: (level) => set({ libraryLevel: level }),
-      setLibraryQuery: (query) => set({ libraryQuery: query }),
+      setLibraryLevel: (level) => set({ libraryLevel: level, libraryPages: 1 }),
+      setLibraryQuery: (query) =>
+        set({ libraryQuery: query, librarySection: null, libraryPages: 1 }),
+      setLibraryShelf: (shelf) => set({ libraryShelf: shelf, libraryPages: 1 }),
+      setLibrarySection: (section) => set({ librarySection: section, libraryPages: 1 }),
+      setLibraryPages: (pages) => set({ libraryPages: Math.max(1, Math.floor(pages)) }),
+      setLibraryLength: (length) => set({ libraryLength: length, libraryPages: 1 }),
       markPlayed: () =>
         set((s) => {
           if (s.view.name !== 'score') return {};
@@ -280,7 +320,8 @@ export const useAppStore = create<AppState>()(
       name: SETTINGS_STORAGE_KEY,
       storage: createJSONStorage(safeStorage),
       partialize: (s) => ({ settings: s.settings }),
-      version: 1,
+      // 2: the library's six level pills became three (shelves spec 3); merge reads a stored level.
+      version: 2,
       // Older payloads go through merge, which validates every field; no reshaping is needed yet.
       migrate: (persisted) => persisted as PersistedState,
       merge: (persisted, current) => {
@@ -288,7 +329,12 @@ export const useAppStore = create<AppState>()(
           typeof persisted === 'object' && persisted !== null
             ? (persisted as { settings?: unknown }).settings
             : undefined;
-        return { ...current, settings: { ...DEFAULT_SETTINGS, ...pickSettings(stored) } };
+        const libraryLevel = pickLibraryLevel(persisted);
+        return {
+          ...current,
+          ...(libraryLevel === null ? {} : { libraryLevel }),
+          settings: { ...DEFAULT_SETTINGS, ...pickSettings(stored) },
+        };
       },
     },
   ),

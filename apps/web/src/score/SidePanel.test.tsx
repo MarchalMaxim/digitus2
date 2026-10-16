@@ -49,12 +49,12 @@ function readyDoc(over: Partial<ScoreDocument> = {}): ScoreDocument {
   };
 }
 
-function renderPanel(doc: ScoreDocument, legendAbove = false) {
+function renderPanel(doc: ScoreDocument, legendAbove = false, piece = melody) {
   return render(
     <SidePanel
       doc={doc}
       source={source}
-      piece={melody}
+      piece={piece}
       setSplitMidi={vi.fn()}
       legendAbove={legendAbove}
     />,
@@ -145,10 +145,20 @@ describe('the hand size', () => {
   });
 });
 
-// UI batch, spec section 12: one level name everywhere, with no number before it.
+// UI batch, spec section 12: one level name everywhere, with no number before it. Shelves spec
+// section 3: the name is the tier the manifest's grade maps to.
 describe('the level', () => {
   it('reads the level name alone', () => {
-    renderPanel(readyDoc()); // Melody, a level-2 piece
+    renderPanel(readyDoc()); // Melody, a grade-2 piece
     expect(screen.getByText('Level').nextElementSibling).toHaveTextContent(/^Easy$/);
+  });
+  it.each([
+    [1, 'Easy'],
+    [3, 'Medium'],
+    [4, 'Challenging'],
+    [6, 'Challenging'],
+  ] as const)('shows grade %i as %s', (level, name) => {
+    renderPanel(readyDoc(), false, { ...melody, level });
+    expect(screen.getByText('Level').nextElementSibling).toHaveTextContent(`${name}`);
   });
 });

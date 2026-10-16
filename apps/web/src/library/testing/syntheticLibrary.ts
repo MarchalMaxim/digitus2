@@ -1,14 +1,14 @@
-import { LEVELS, type GenreId, type Level } from '../levels.js';
+import { GRADES, type GenreId, type Grade } from '../levels.js';
 import type { LibraryEntry } from '../model.js';
 
 /**
- * A deterministic library shaped like L2 (1,000 pieces, levels 1 to 6, collections of 1 to 24
+ * A deterministic library shaped like L2 (1,000 pieces, grades 1 to 6, collections of 1 to 24
  * pieces), for tests of the rules at scale. Not imported by the app.
  */
 export function syntheticLibrary(): LibraryEntry[] {
-  const sizes: Record<Level, number> = { 1: 120, 2: 230, 3: 240, 4: 180, 5: 130, 6: 100 };
+  const sizes: Record<Grade, number> = { 1: 120, 2: 230, 3: 240, 4: 180, 5: 130, 6: 100 };
   const pattern = [24, 12, 8, 5, 3, 2, 1];
-  const genres: Record<Level, GenreId[]> = {
+  const genres: Record<Grade, GenreId[]> = {
     1: ['songs', 'carols'],
     2: ['songs', 'carols', 'baroque', 'romantic'],
     3: ['baroque', 'classical', 'romantic'],
@@ -18,7 +18,7 @@ export function syntheticLibrary(): LibraryEntry[] {
   };
   const out: LibraryEntry[] = [];
   let c = 0;
-  for (const level of LEVELS) {
+  for (const level of GRADES) {
     let left = sizes[level];
     for (let i = 0; left > 0; i++, c++) {
       const n = Math.min(left, pattern[i % pattern.length]!);

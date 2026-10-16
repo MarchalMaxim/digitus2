@@ -1,13 +1,12 @@
 import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import manifestJson from '../../../../content/manifest.json';
-import { GENRES } from './levels.js';
+import { GENRES, TIER_NAMES } from './levels.js';
 import {
   attribution,
   decodeLibraryIndex,
   formatDuration,
   isShareAlike,
-  LEVEL_NAMES,
   libraryPieces,
   type LibraryIndexFile,
   type LibraryPiece,
@@ -38,14 +37,7 @@ describe('manifest', () => {
     expect(pieces.map((p) => p.level)).toEqual(
       [...pieces.map((p) => p.level)].sort((a, b) => a - b),
     );
-    expect(LEVEL_NAMES).toEqual({
-      1: 'First steps',
-      2: 'Easy',
-      3: 'Moderate',
-      4: 'Intermediate',
-      5: 'Challenging',
-      6: 'Advanced',
-    });
+    expect(TIER_NAMES).toEqual({ easy: 'Easy', medium: 'Medium', challenging: 'Challenging' });
   });
   it('keeps the 30 pieces of the first library as the benchmark set and gives every piece a collection', async () => {
     const details = await allDetails();

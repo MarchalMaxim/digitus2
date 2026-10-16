@@ -1,9 +1,8 @@
 import indexUrl from '../../../../content/library-index.json?url';
-import type { GenreId, Level } from './levels.js';
+import type { GenreId, Grade } from './levels.js';
 import type { LibraryEntry } from './model.js';
 
-export type { GenreId, Level } from './levels.js';
-export { LEVEL_NAMES } from './levels.js';
+export type { GenreId, Grade } from './levels.js';
 export { formatDuration } from './model.js';
 export type { LibraryEntry } from './model.js';
 
@@ -26,7 +25,8 @@ export interface LibraryPiece {
   composerDates: string | null;
   catalogue: string | null;
   year: string | null;
-  level: Level;
+  /** The grade, 1 to 6; the page shows its tier (levels.ts `tierOf`). */
+  level: Grade;
   /** The collection's title, e.g. "Children's songs" (catalog.json `collections`). */
   collection: string;
   /** A stable kebab-case id for the collection, e.g. "children-songs". */
@@ -96,7 +96,7 @@ export function decodeLibraryIndex(file: LibraryIndexFile): LibraryEntry[] {
       slug: slugOf(stored, title[i]!),
       title: title[i]!,
       composer: composer[i]!,
-      level: level[i]! as Level,
+      level: level[i]! as Grade,
       collection: collectionTitle!,
       collectionId: collectionId!,
       genre: (file.genres[i] ?? collectionGenre!) as GenreId,

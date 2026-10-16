@@ -2,13 +2,13 @@ import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { libraryScore, mxlOf, utf16leOf } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
-import { archiveSample, libraryReady, showLevelOf } from './helpers/library.js';
+import { archiveSample, libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
 
 test('opens Twinkle from the library: every note gets a digit, one red element, hash set', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /^Open Twinkle/ }).click();
+  await openLibraryPiece(page, 'twinkle-twinkle-little-star');
   await expect(page).toHaveURL(/#\/piece\/twinkle-twinkle-little-star$/);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64);
@@ -177,7 +177,7 @@ test("a line above the score says when the editor's fingering is shown, and only
   await page.getByLabel("Show the editor's fingering").check();
   await expect(line).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: 'Back to the library' }).click();
-  await page.getByRole('button', { name: /^Open Twinkle/ }).click();
+  await openLibraryPiece(page, 'twinkle-twinkle-little-star');
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
   await expect(page.getByLabel("Show the editor's fingering")).toHaveCount(0);
   await expect(line).toHaveCount(0);
@@ -185,13 +185,8 @@ test("a line above the score says when the editor's fingering is shown, and only
 
 test('opens K.545: status appears first, score within 8 s', async ({ page }) => {
   await page.goto('/');
-  await showLevelOf(page, 'mozart-sonata-k545-mvt1');
   const t0 = Date.now();
-  await page
-    .getByRole('button', {
-      name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
-    })
-    .click();
+  await openLibraryPiece(page, 'mozart-sonata-k545-mvt1');
   await expect(page.getByRole('status')).toContainText(/Loading|Fingering|Preparing/);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 8_000 });
   expect(Date.now() - t0).toBeLessThan(8_000);
@@ -251,7 +246,7 @@ test('the focus follows the view: the heading of a piece opened with Enter, then
 }) => {
   await page.goto('/');
   const heading = () => page.evaluate(() => document.activeElement?.closest('h1')?.textContent);
-  await page.getByRole('button', { name: /^Open Twinkle/ }).focus();
+  await (await showPiece(page, 'twinkle-twinkle-little-star')).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#\/piece\/twinkle-twinkle-little-star$/);
   await expect.poll(heading).toBe('Twinkle, Twinkle, Little Star');
@@ -278,7 +273,7 @@ test('the focus follows the view: the heading of a piece opened with Enter, then
 
 test('back to the library and browser back both work', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /^Open Ode to Joy/ }).click();
+  await openLibraryPiece(page, 'ode-to-joy');
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await page.goBack();
   await libraryReady(page);

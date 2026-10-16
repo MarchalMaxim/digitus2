@@ -1,24 +1,41 @@
 /**
  * What the library page shows, as a pure function of the manifest and the reader's choices
- * (spec sections 5 and 6). The React views only render it.
+ * (shelves spec, sections 4 and 5; UI batch spec, sections 5 and 6). The React views only render it.
  */
 import {
-  GENRE_MIN,
-  GENRES_ABOVE,
   OTHER_BELOW,
+  PAGE_SIZE,
+  SAMPLES,
+  SECTION_ROWS,
   showsHeadings,
+  showsLengths,
   showsPills,
   showsSearch,
 } from './disclosure.js';
-import { GENRES, type GenreId, type Level } from './levels.js';
-import { searchPieces, words } from './search.js';
+import {
+  LENGTHS,
+  SHELVES,
+  TIERS,
+  TIER_NAMES,
+  shelfById,
+  shelfOfGenre,
+  tierOf,
+  type GenreId,
+  type Grade,
+  type Length,
+  type LengthId,
+  type ShelfId,
+  type Tier,
+} from './levels.js';
+import { foldText, searchPieces, words } from './search.js';
 
 /** The fields of a manifest entry the library page reads. */
 export interface LibraryEntry {
   slug: string;
   title: string;
   composer: string;
-  level: Level;
+  /** The manifest's grade, 1 to 6; the page shows its tier (`tierOf`). */
+  level: Grade;
   collection: string;
   collectionId: string;
   genre: GenreId;
@@ -43,17 +60,82 @@ export interface Group {
   rows: Row[];
 }
 
-/** One level of an all-levels list or of search results. */
-export interface Section {
-  level: Level;
-  count: number;
-  groups: Group[];
+/** The one text button under a list: `All 312 in Medium` opens a search section, `Show 40 more` pages it. */
+export interface ListAction {
+  kind: 'open' | 'more';
+  label: string;
 }
 
+/** One tier of the small library's list or of search results. */
+export interface Section {
+  tier: Tier;
+  count: number;
+  groups: Group[];
+  /** Rows shown, across the groups. */
+  shown: number;
+  /** A search section opened to pages of 40. */
+  open: boolean;
+  action: ListAction | null;
+}
+
+/** One shelf on the arrival page: its name, count, line and a few sample rows. */
+export interface ShelfSummary {
+  id: ShelfId;
+  name: string;
+  line: string;
+  count: number;
+  rows: Row[];
+  /** `All 145 songs`, or null when the rows are the whole shelf. */
+  all: string | null;
+}
+
+/** The pills above a long list: only the lengths the list holds, `Any length` first. */
+export type LengthOptions = readonly Length[];
+
 export type LibraryLayout =
+  /** A library of 40 pieces or fewer: every tier, each flat. */
   | { kind: 'all'; sections: Section[] }
-  | { kind: 'level'; levels: Level[]; level: Level; count: number; groups: Group[] }
-  | { kind: 'search'; query: string; count: number; sections: Section[] };
+  /** The arrival page: the chosen tier's shelves with sample rows. */
+  | { kind: 'shelves'; tiers: Tier[]; tier: Tier; count: number; shelves: ShelfSummary[] }
+  /** One shelf opened in place, in pages of 40. */
+  | {
+      kind: 'shelf';
+      tiers: Tier[];
+      tier: Tier;
+      shelf: ShelfId;
+      name: string;
+      count: number;
+      groups: Group[];
+      shown: number;
+      more: string | null;
+      /** The length pills, or null; `length` is the choice in effect (always 'any' without pills). */
+      lengths: LengthOptions | null;
+      length: LengthId;
+    }
+  | {
+      kind: 'search';
+      query: string;
+      count: number;
+      sections: Section[];
+      lengths: LengthOptions | null;
+      length: LengthId;
+    };
+
+/** What the reader has chosen, as the store holds it (visit state), and the day for the samples. */
+export interface LibraryChoices {
+  tier: Tier | null;
+  query: string;
+  /** The open shelf, when no search is typed. */
+  shelf?: ShelfId | null;
+  /** The open search section, when a search is typed. */
+  section?: Tier | null;
+  /** Pages of 40 shown of the open shelf or section, 1 or more. */
+  pages?: number;
+  length?: LengthId;
+  /** The local date `YYYY-MM-DD`: the samples change once a day (`localDateKey`). */
+  date: string;
+  lastPlayed?: string | null;
+}
 
 export const OTHER_PIECES = 'Other pieces';
 
@@ -65,8 +147,19 @@ export function formatDuration(sec: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
+/** 1415 -> '1,415': the same in every locale, so tests and announcements agree. */
+export function formatCount(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 export function countText(n: number): string {
-  return n === 1 ? '1 piece' : `${n} pieces`;
+  return n === 1 ? '1 piece' : `${formatCount(n)} pieces`;
+}
+
+/** The local date as `YYYY-MM-DD`: the day the samples are drawn for. */
+export function localDateKey(now: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
 /** The composer up to the first " (": "Lowell Mason (tune Antioch)" -> "Lowell Mason". */
@@ -75,9 +168,9 @@ export function composerShort(composer: string): string {
   return (i < 0 ? composer : composer.slice(0, i)).trim();
 }
 
-/** "Traditional", "Traditional (…)" and "Anonymous": no name worth a line of its own. */
+/** "Unknown", "Traditional", "Traditional (…)" and "Anonymous": no name worth a line of its own. */
 export function isUnnamed(composer: string): boolean {
-  return /^(Traditional|Anonymous)\b/.test(composer);
+  return /^(Unknown|Traditional|Anonymous)\b/.test(composer);
 }
 
 /**
@@ -102,8 +195,10 @@ export function dropTrailingParenthesis(title: string): string {
   return title.replace(/\s*\([^()]*\)$/, '');
 }
 
-export function levelsIn(pieces: readonly LibraryEntry[]): Level[] {
-  return [...new Set(pieces.map((p) => p.level))].sort((a, b) => a - b);
+/** The tiers that hold at least one piece, easiest first. */
+export function tiersIn(pieces: readonly LibraryEntry[]): Tier[] {
+  const present = new Set(pieces.map((p) => tierOf(p.level)));
+  return TIERS.filter((t) => present.has(t));
 }
 
 interface Draft {
@@ -123,15 +218,11 @@ function lastNameWord(composer: string): string | undefined {
   return words(composerShort(composer)).at(-1);
 }
 
-/** One list section's groups, in manifest order (spec 6.2). */
+const plain = (piece: LibraryEntry): Draft => ({ piece, title: piece.title, composerSaid: false });
+
+/** One list's groups, in manifest order (UI batch spec 6.2). */
 function draftGroups(pieces: readonly LibraryEntry[]): DraftGroup[] {
-  const flat = (): DraftGroup[] => [
-    {
-      key: 'flat',
-      heading: null,
-      drafts: pieces.map((p) => ({ piece: p, title: p.title, composerSaid: false })),
-    },
-  ];
+  const flat = (): DraftGroup[] => [{ key: 'flat', heading: null, drafts: pieces.map(plain) }];
   if (!showsHeadings(pieces.length)) return flat();
   const byCollection = new Map<string, LibraryEntry[]>();
   for (const p of pieces) {
@@ -159,19 +250,32 @@ function draftGroups(pieces: readonly LibraryEntry[]): DraftGroup[] {
   }
   if (groups.length === 0) return flat();
   if (other.length > 0) {
-    groups.push({
-      key: 'other',
-      heading: OTHER_PIECES,
-      drafts: other.map((p) => ({ piece: p, title: p.title, composerSaid: false })),
-    });
+    groups.push({ key: 'other', heading: OTHER_PIECES, drafts: other.map(plain) });
   }
   return groups;
 }
 
-/** Turns drafts into rows; a title shown twice anywhere in view keeps its composer on both rows. */
-function finish(sections: DraftGroup[][]): Group[][] {
+/** The first `n` rows of the groups, a group left empty dropped: a page of a long list. */
+function firstRows(groups: DraftGroup[], n: number): DraftGroup[] {
+  const out: DraftGroup[] = [];
+  let left = n;
+  for (const g of groups) {
+    if (left <= 0) break;
+    const drafts = g.drafts.slice(0, left);
+    left -= drafts.length;
+    out.push({ ...g, drafts });
+  }
+  return out;
+}
+
+/**
+ * Turns drafts into rows; a title shown twice anywhere in view keeps its composer on both rows.
+ * `counted` is what "in view" means when it is more than what is drawn: an opened list counts
+ * its unshown pages too, so a row does not gain a composer line when the next page arrives.
+ */
+function finish(sections: DraftGroup[][], counted: DraftGroup[][] = sections): Group[][] {
   const seen = new Map<string, number>();
-  for (const groups of sections)
+  for (const groups of counted)
     for (const g of groups)
       for (const d of g.drafts) seen.set(d.title, (seen.get(d.title) ?? 0) + 1);
   return sections.map((groups) =>
@@ -194,34 +298,303 @@ function finish(sections: DraftGroup[][]): Group[][] {
   );
 }
 
-function sectionsOf(pieces: readonly LibraryEntry[]): Section[] {
-  const levels = levelsIn(pieces);
-  const members = levels.map((l) => pieces.filter((p) => p.level === l));
-  const groups = finish(members.map(draftGroups));
-  return levels.map((level, i) => ({ level, count: members[i]!.length, groups: groups[i]! }));
+const rowCount = (groups: readonly { rows: readonly unknown[] }[]): number =>
+  groups.reduce((n, g) => n + g.rows.length, 0);
+
+/** `Show 40 more`, or `Show the last 17` when the next page is the final one. */
+export function moreLabel(remaining: number): string {
+  return remaining > PAGE_SIZE ? `Show ${PAGE_SIZE} more` : `Show the last ${remaining}`;
 }
 
-/** The page's list for the library, the chosen level and the search text (spec 6.2). */
+/** The pages asked for as a row count (at least one page). */
+const pageRows = (pages: number | undefined): number =>
+  Math.max(1, Math.floor(pages ?? 1)) * PAGE_SIZE;
+
+// -- samples (shelves spec 4.1) -------------------------------------------------------------
+
+/** FNV-1a of the text: the seed of the day's shuffle. */
+function seedOf(text: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/** A small seeded generator (mulberry32): the same seed always draws the same sequence. */
+function randomFrom(seed: number): () => number {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffled<T>(items: readonly T[], seed: string): T[] {
+  const out = [...items];
+  const random = randomFrom(seedOf(seed));
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
+/** The composer's name for the one-per-composer rule; null for "Unknown", Traditional and Anonymous. */
+function namedComposer(composer: string): string | null {
+  const name = composerShort(composer);
+  return name === '' || name === 'Unknown' || isUnnamed(composer) ? null : foldText(name);
+}
+
+/** Curated collections (hand-picked, ids not starting `pdmx-`) against the MuseScore archive's. */
+const isCurated = (p: LibraryEntry): boolean => !p.collectionId.startsWith('pdmx-');
+
+/**
+ * The shelf's sample rows (spec 4.1): at most 5 pieces drawn by a shuffle seeded with `seed`,
+ * no composer twice (unnamed ones never count), at most 2 per collection, hand-picked
+ * collections first for the first two picks; any gap is filled from the shuffle. Shown
+ * shortest first, after `first` (the last piece played) when the shelf holds it.
+ */
+export function sampleShelf(
+  members: readonly LibraryEntry[],
+  seed: string,
+  first: LibraryEntry | null = null,
+): LibraryEntry[] {
+  const order = shuffled(
+    members.filter((p) => p !== first),
+    seed,
+  );
+  const taken: LibraryEntry[] = [];
+  const composers = new Set<string>();
+  const perCollection = new Map<string, number>();
+  const take = (p: LibraryEntry) => {
+    taken.push(p);
+    const name = namedComposer(p.composer);
+    if (name !== null) composers.add(name);
+    perCollection.set(p.collectionId, (perCollection.get(p.collectionId) ?? 0) + 1);
+  };
+  const fits = (p: LibraryEntry) => {
+    const name = namedComposer(p.composer);
+    return (name === null || !composers.has(name)) && (perCollection.get(p.collectionId) ?? 0) < 2;
+  };
+  if (first) take(first);
+  const curatedFirst = [...order.filter(isCurated), ...order.filter((p) => !isCurated(p))];
+  for (const p of curatedFirst) {
+    if (taken.length >= 2) break;
+    if (fits(p)) take(p);
+  }
+  for (const p of order) {
+    if (taken.length >= SAMPLES) break;
+    if (!taken.includes(p) && fits(p)) take(p);
+  }
+  for (const p of order) {
+    if (taken.length >= SAMPLES) break;
+    if (!taken.includes(p)) take(p);
+  }
+  const rest = taken.slice(first ? 1 : 0).sort((a, b) => a.approxDurationSec - b.approxDurationSec);
+  return first ? [first, ...rest] : rest;
+}
+
+// -- lengths (shelves spec 4.3) -------------------------------------------------------------
+
+const inLength = (p: LibraryEntry, length: Length): boolean =>
+  p.approxDurationSec >= length.from && p.approxDurationSec < length.to;
+
+/**
+ * The length pills of a list and the choice in effect: none unless the list holds more than 40
+ * pieces and at least one length besides `Any length` holds a piece. A chosen length the list
+ * does not hold falls back to `Any length`.
+ */
+function lengthPills(
+  list: readonly LibraryEntry[],
+  wanted: LengthId,
+): { lengths: LengthOptions | null; length: LengthId } {
+  if (!showsLengths(list.length)) return { lengths: null, length: 'any' };
+  const options = LENGTHS.filter((l) => l.id === 'any' || list.some((p) => inLength(p, l)));
+  if (options.length < 2) return { lengths: null, length: 'any' };
+  return { lengths: options, length: options.some((l) => l.id === wanted) ? wanted : 'any' };
+}
+
+function withLength(list: readonly LibraryEntry[], id: LengthId): readonly LibraryEntry[] {
+  if (id === 'any') return list;
+  const length = LENGTHS.find((l) => l.id === id)!;
+  return list.filter((p) => inLength(p, length));
+}
+
+// -- layouts --------------------------------------------------------------------------------
+
+/** The small library's list, or search results: a section per tier, each in full. */
+function sectionsOf(pieces: readonly LibraryEntry[]): Section[] {
+  const tiers = tiersIn(pieces);
+  const members = tiers.map((t) => pieces.filter((p) => tierOf(p.level) === t));
+  const groups = finish(members.map(draftGroups));
+  return tiers.map((tier, i) => ({
+    tier,
+    count: members[i]!.length,
+    groups: groups[i]!,
+    shown: members[i]!.length,
+    open: false,
+    action: null,
+  }));
+}
+
+/**
+ * Search results as a section per tier: the first 7 rows and `All {n} in {Tier}`, or, for the
+ * opened section, collection groups in pages of 40.
+ */
+function searchSections(
+  found: readonly LibraryEntry[],
+  open: Tier | null,
+  pages: number | undefined,
+): Section[] {
+  const tiers = tiersIn(found);
+  const members = tiers.map((t) => found.filter((p) => tierOf(p.level) === t));
+  const full = members.map((m, i) => (tiers[i] === open ? draftGroups(m) : null));
+  const visible = members.map((m, i) =>
+    full[i] ? firstRows(full[i]!, pageRows(pages)) : draftGroups(m.slice(0, SECTION_ROWS)),
+  );
+  const groups = finish(
+    visible,
+    visible.map((v, i) => full[i] ?? v),
+  );
+  return tiers.map((tier, i) => {
+    const count = members[i]!.length;
+    const shown = rowCount(groups[i]!);
+    const isOpen = full[i] !== null;
+    const action: ListAction | null = isOpen
+      ? count > shown
+        ? { kind: 'more', label: moreLabel(count - shown) }
+        : null
+      : count > SECTION_ROWS
+        ? { kind: 'open', label: `All ${formatCount(count)} in ${TIER_NAMES[tier]}` }
+        : null;
+    return { tier, count, groups: groups[i]!, shown, open: isOpen, action };
+  });
+}
+
+/** True when the tier holds a piece of the shelf: whether an open shelf stays open on a tier change. */
+export function shelfHasPieces(
+  pieces: readonly LibraryEntry[],
+  tier: Tier,
+  shelf: ShelfId,
+): boolean {
+  return pieces.some((p) => tierOf(p.level) === tier && shelfOfGenre(p.genre) === shelf);
+}
+
+/** The arrival page's shelves of a tier, in the display order, the empty ones left out. */
+function shelvesOf(
+  inTier: readonly LibraryEntry[],
+  tier: Tier,
+  date: string,
+  lastPlayed: string | null,
+): ShelfSummary[] {
+  const byShelf = new Map<ShelfId, LibraryEntry[]>();
+  for (const p of inTier) {
+    const id = shelfOfGenre(p.genre);
+    const members = byShelf.get(id);
+    if (members) members.push(p);
+    else byShelf.set(id, [p]);
+  }
+  const shelves = SHELVES.filter((s) => byShelf.has(s.id)).map((s) => {
+    const members = byShelf.get(s.id)!;
+    const last = lastPlayed === null ? undefined : members.find((p) => p.slug === lastPlayed);
+    return {
+      shelf: s,
+      members,
+      samples: sampleShelf(members, `${date}|${tier}|${s.id}`, last ?? null),
+    };
+  });
+  const rows = finish(
+    shelves.map((s) => [{ key: 'flat', heading: null, drafts: s.samples.map(plain) }]),
+  );
+  return shelves.map(({ shelf, members }, i) => ({
+    id: shelf.id,
+    name: shelf.name,
+    line: shelf.line,
+    count: members.length,
+    rows: rows[i]![0]!.rows,
+    all: members.length > SAMPLES ? `All ${formatCount(members.length)} ${shelf.noun}` : null,
+  }));
+}
+
+/** The page's list for the library and the reader's choices (shelves spec 4; UI batch spec 6.2). */
 export function libraryLayout(
   pieces: readonly LibraryEntry[],
-  { level, query }: { level: Level | null; query: string },
+  choices: LibraryChoices,
 ): LibraryLayout {
-  const q = query.trim();
-  if (q !== '' && showsSearch(pieces.length)) {
-    const found = searchPieces(pieces, q);
-    return { kind: 'search', query: q, count: found.length, sections: sectionsOf(found) };
+  const { tier, shelf, section, pages, date } = choices;
+  const query = choices.query.trim();
+  const wanted = choices.length ?? 'any';
+  if (query !== '' && showsSearch(pieces.length)) {
+    const found = searchPieces(pieces, query);
+    const { lengths, length } = lengthPills(found, wanted);
+    const listed = withLength(found, length);
+    return {
+      kind: 'search',
+      query,
+      count: listed.length,
+      sections: searchSections(listed, section ?? null, pages),
+      lengths,
+      length,
+    };
   }
   if (!showsPills(pieces.length)) return { kind: 'all', sections: sectionsOf(pieces) };
-  const levels = levelsIn(pieces);
-  const chosen = level !== null && levels.includes(level) ? level : levels[0]!;
-  const inLevel = pieces.filter((p) => p.level === chosen);
+  const tiers = tiersIn(pieces);
+  const chosen = tier !== null && tiers.includes(tier) ? tier : tiers[0]!;
+  const inTier = pieces.filter((p) => tierOf(p.level) === chosen);
+  if (shelf && shelfHasPieces(inTier, chosen, shelf)) {
+    const members = inTier.filter((p) => shelfOfGenre(p.genre) === shelf);
+    const { lengths, length } = lengthPills(members, wanted);
+    const listed = withLength(members, length);
+    const full = draftGroups(listed);
+    const visible = firstRows(full, pageRows(pages));
+    const groups = finish([visible], [full])[0]!;
+    const shown = rowCount(groups);
+    return {
+      kind: 'shelf',
+      tiers,
+      tier: chosen,
+      shelf,
+      name: shelfById(shelf).name,
+      count: listed.length,
+      groups,
+      shown,
+      more: listed.length > shown ? moreLabel(listed.length - shown) : null,
+      lengths,
+      length,
+    };
+  }
   return {
-    kind: 'level',
-    levels,
-    level: chosen,
-    count: inLevel.length,
-    groups: finish([draftGroups(inLevel)])[0]!,
+    kind: 'shelves',
+    tiers,
+    tier: chosen,
+    count: inTier.length,
+    shelves: shelvesOf(inTier, chosen, date, choices.lastPlayed ?? null),
   };
+}
+
+/** What the polite live region says about a layout: the count in view, never on arrival (the view). */
+export function announcementFor(layout: LibraryLayout): string {
+  switch (layout.kind) {
+    case 'all':
+      return '';
+    case 'shelves':
+      return `${TIER_NAMES[layout.tier]}: ${countText(layout.count)}`;
+    case 'shelf':
+      return layout.shown > PAGE_SIZE
+        ? `Showing ${formatCount(layout.shown)} of ${formatCount(layout.count)}`
+        : `${layout.name}: ${countText(layout.count)}`;
+    case 'search': {
+      if (layout.count === 0) return `No piece matches “${layout.query}”.`;
+      const open = layout.sections.find((s) => s.open && s.shown > PAGE_SIZE);
+      return open
+        ? `Showing ${formatCount(open.shown)} of ${formatCount(open.count)} in ${TIER_NAMES[open.tier]}`
+        : countText(layout.count);
+    }
+  }
 }
 
 export interface StartTarget {
@@ -230,14 +603,14 @@ export interface StartTarget {
   continuing: boolean;
 }
 
-/** The red button's piece: the last one played while it is in the library, else the first piece of the lowest level. */
+/** The red button's piece: the last one played while it is in the library, else the first piece of the lowest grade. */
 export function startTarget(
   pieces: readonly LibraryEntry[],
   lastPlayed: string | null,
 ): StartTarget {
   const last = lastPlayed === null ? undefined : pieces.find((p) => p.slug === lastPlayed);
   if (last) return { piece: last, continuing: true };
-  const lowest = levelsIn(pieces)[0];
+  const lowest = pieces.reduce((n, p) => Math.min(n, p.level), 6);
   return { piece: pieces.find((p) => p.level === lowest)!, continuing: false };
 }
 
@@ -247,23 +620,14 @@ export function startLabel(target: StartTarget): string {
     : `Start with ${target.piece.title}`;
 }
 
-/** The level the pills open on: chosen in this visit, else the last piece's, else the lowest. */
+/** The tier the pills open on: chosen in this visit, else the last piece's, else the easiest. */
 export function arrivalLevel(
   pieces: readonly LibraryEntry[],
-  chosen: Level | null,
+  chosen: Tier | null,
   lastPlayed: string | null,
-): Level {
-  const levels = levelsIn(pieces);
-  if (chosen !== null && levels.includes(chosen)) return chosen;
+): Tier {
+  const tiers = tiersIn(pieces);
+  if (chosen !== null && tiers.includes(chosen)) return chosen;
   const last = lastPlayed === null ? undefined : pieces.find((p) => p.slug === lastPlayed);
-  return last ? last.level : levels[0]!;
-}
-
-/** The genre pills of a level (spec 6.1): none unless it is long and two genres hold enough of it. */
-export function genrePills(levelPieces: readonly LibraryEntry[]): GenreId[] {
-  if (levelPieces.length <= GENRES_ABOVE) return [];
-  const counts = new Map<GenreId, number>();
-  for (const p of levelPieces) counts.set(p.genre, (counts.get(p.genre) ?? 0) + 1);
-  const ids = GENRES.map((g) => g.id).filter((id) => (counts.get(id) ?? 0) >= GENRE_MIN);
-  return ids.length >= 2 ? ids : [];
+  return last ? tierOf(last.level) : tiers[0]!;
 }

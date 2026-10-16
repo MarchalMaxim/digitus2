@@ -176,6 +176,11 @@ h1[tabindex='-1']:focus {
 
 .note-burst-drift svg {
   display: block;
+  /* The global svg rule's max-width: 100% would squeeze the glyph to the shrink-to-fit width of
+     its absolutely positioned note (about 6 px): the size is fixed here instead. */
+  width: 25px;
+  height: 28px;
+  max-width: none;
   fill: currentColor;
 }
 

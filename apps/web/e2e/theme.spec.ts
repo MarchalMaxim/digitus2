@@ -111,6 +111,99 @@ test('the switch overrides the system, is kept, and gives the page back to the s
   expect(await paper(page)).toBe(DARK_PAPER);
 });
 
+/**
+ * Clicks the switch and returns the transition the browser runs for it: each view-transition
+ * animation's pseudo-element, name, length and easing; where the circle starts and how far it
+ * grows (--ripple-x, -y, -r), against the switch's centre and the viewport; and whether the
+ * controls' own transitions were held meanwhile. No animations when the page simply changed.
+ */
+async function switchAndWatch(page: Page) {
+  await expect(toggle(page)).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Open Twinkle/ })).toBeVisible();
+  return page.evaluate(async () => {
+    const root = document.documentElement;
+    const switchButton = document.querySelector<HTMLButtonElement>('.theme-toggle')!;
+    const box = switchButton.getBoundingClientRect();
+    const centre = [box.x + box.width / 2, box.y + box.height / 2];
+    const viewport = [root.clientWidth, root.clientHeight];
+    switchButton.click();
+    const held = root.classList.contains('theme-changing');
+    const ripple = ['--ripple-x', '--ripple-y', '--ripple-r'].map((name) =>
+      parseFloat(root.style.getPropertyValue(name)),
+    );
+    // A button other than the switch: one of the library's own.
+    const button = document.querySelector('button:not(.theme-toggle)')!;
+    const buttonDuration = getComputedStyle(button).transitionDuration;
+    for (let frame = 0; frame < 30; frame++) {
+      const animations = document
+        .getAnimations()
+        .filter((a) => (a.effect as KeyframeEffect).pseudoElement?.startsWith('::view-transition'))
+        .map((a) => {
+          const effect = a.effect as KeyframeEffect;
+          return {
+            pseudo: effect.pseudoElement,
+            name: (a as CSSAnimation).animationName,
+            duration: effect.getTiming().duration,
+            // A CSS animation keeps its timing function on its keyframes, not on the effect.
+            easing: getComputedStyle(root, effect.pseudoElement).animationTimingFunction,
+          };
+        });
+      if (animations.length) return { held, buttonDuration, centre, viewport, ripple, animations };
+      await new Promise(requestAnimationFrame);
+    }
+    return { held, buttonDuration, centre, viewport, ripple, animations: [] };
+  });
+}
+
+test('the new theme spreads from the switch as a circle over the whole page', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  const watched = await switchAndWatch(page);
+  expect(watched.held).toBe(true);
+  // The circle grows from the switch's centre to the farthest corner of the viewport.
+  const [x, y] = watched.centre as [number, number];
+  const [width, height] = watched.viewport as [number, number];
+  expect(watched.ripple[0]).toBeCloseTo(x, 1);
+  expect(watched.ripple[1]).toBeCloseTo(y, 1);
+  expect(watched.ripple[2]).toBeCloseTo(
+    Math.hypot(Math.max(x, width - x), Math.max(y, height - y)),
+    1,
+  );
+  // Only the new picture moves: it is revealed by the circle over the still old one.
+  const moving = watched.animations.filter((a) => a.pseudo !== '::view-transition-group(root)');
+  expect(moving.map((a) => [a.pseudo, a.name])).toContainEqual([
+    '::view-transition-new(root)',
+    'theme-ripple',
+  ]);
+  expect(moving.every((a) => a.pseudo === '::view-transition-new(root)')).toBe(true);
+  for (const animation of watched.animations) {
+    expect(animation.duration).toBe(400);
+    expect(animation.easing).toBe('cubic-bezier(0.2, 0, 0, 1)');
+  }
+  // Meanwhile a button's own color transition is held so it does not lag behind the paper.
+  expect(watched.buttonDuration).toBe('0s');
+  await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
+  expect(await paper(page)).toBe(DARK_PAPER);
+  // Once it has spread the controls' transitions come back and the circle is forgotten.
+  await expect
+    .poll(() =>
+      page.evaluate(() => [
+        document.documentElement.classList.contains('theme-changing'),
+        document.documentElement.style.getPropertyValue('--ripple-r'),
+      ]),
+    )
+    .toEqual([false, '']);
+});
+
+test('under reduced motion the page simply changes', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await page.goto('/');
+  const watched = await switchAndWatch(page);
+  for (const animation of watched.animations) expect(animation.duration).toBe(0);
+  await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
+  expect(await paper(page)).toBe(DARK_PAPER);
+});
+
 test('a kept theme is on the page before the app runs', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.addInitScript((key) => localStorage.setItem(key, 'dark'), STORAGE_KEY);

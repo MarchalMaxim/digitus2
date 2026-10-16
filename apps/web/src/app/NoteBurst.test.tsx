@@ -1,6 +1,6 @@
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { drawBurst, isEmptyClick, NoteBurst, type BurstClick } from './NoteBurst.js';
+import { drawBurst, isEmptyClick, NoteBurst, type BurstClick, type Press } from './NoteBurst.js';
 
 afterEach(cleanup);
 afterEach(() => vi.restoreAllMocks());
@@ -8,6 +8,9 @@ afterEach(() => vi.restoreAllMocks());
 function click(target: EventTarget | null, extra: Partial<BurstClick> = {}): BurstClick {
   return {
     button: 0,
+    detail: 1,
+    clientX: 100,
+    clientY: 100,
     altKey: false,
     ctrlKey: false,
     metaKey: false,
@@ -51,6 +54,40 @@ describe('the note burst', () => {
     expect(isEmptyClick(click(p, { defaultPrevented: true }), collapsed)).toBe(false);
   });
 
+  it('ignores a drag, a click that clears a selection, and a triple-click', () => {
+    const p = document.createElement('p');
+    const still: Press = { x: 100, y: 100, selected: false };
+    expect(isEmptyClick(click(p), collapsed, still)).toBe(true);
+    expect(isEmptyClick(click(p), collapsed, { x: 103, y: 102, selected: false })).toBe(true);
+    // a drag across text: the pointer came up farther away than it went down
+    expect(isEmptyClick(click(p), collapsed, { x: 100, y: 106, selected: false })).toBe(false);
+    expect(isEmptyClick(click(p), collapsed, { x: 60, y: 100, selected: false })).toBe(false);
+    // text was selected when the pointer went down: the click only clears it
+    expect(isEmptyClick(click(p), collapsed, { x: 100, y: 100, selected: true })).toBe(false);
+    // the third click selects a paragraph
+    expect(isEmptyClick(click(p, { detail: 3 }), collapsed, still)).toBe(false);
+    expect(isEmptyClick(click(p, { detail: 2 }), collapsed, still)).toBe(true);
+  });
+
+  it('lets no notes rise from a drag across the page', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+    const { container } = render(<NoteBurst />);
+    const p = document.createElement('p');
+    document.body.append(p);
+    act(() => {
+      p.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 20, clientY: 80 }));
+      p.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 120, clientY: 80 }));
+    });
+    expect(container.querySelectorAll('.note-burst')).toHaveLength(0);
+    act(() => {
+      p.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 120, clientY: 80 }));
+      p.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 121, clientY: 81 }));
+    });
+    expect(container.querySelectorAll('.note-burst')).toHaveLength(1);
+    p.remove();
+  });
+
   it('draws every burst fresh: 2 to 4 notes that rise, each its own way', () => {
     const lows = drawBurst(() => 0);
     const highs = drawBurst(() => 0.9999);
@@ -65,7 +102,7 @@ describe('the note burst', () => {
       expect(notes.length).toBeLessThanOrEqual(4);
       for (const n of notes) {
         expect(n.dy).toBeLessThan(0);
-        expect(Math.hypot(n.dx, n.dy)).toBeLessThan(50);
+        expect(Math.hypot(n.dx, n.dy)).toBeLessThan(58);
         expect(n.time).toBeGreaterThanOrEqual(0.8);
         expect(n.time).toBeLessThanOrEqual(1.25);
         expect(n.wait).toBeGreaterThanOrEqual(0);

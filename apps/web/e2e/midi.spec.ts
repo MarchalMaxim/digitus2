@@ -10,7 +10,7 @@ const counts = /^Right hand: \d+ notes · left hand: \d+ notes$/;
 
 async function openTwinkleMidi(page: Page) {
   await page.goto('/');
-  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles(twinkle);
+  await page.getByLabel('Open your own score').setInputFiles(twinkle);
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
 }
 
@@ -93,7 +93,7 @@ test('export of a MIDI source downloads the generated MusicXML with a fingering 
 test('a broken MIDI file shows the error state with a way back', async ({ page }) => {
   await page.goto('/');
   await page
-    .getByLabel('Open your own MusicXML or MIDI file')
+    .getByLabel('Open your own score')
     .setInputFiles({ name: 'broken.mid', mimeType: 'audio/midi', buffer: Buffer.from('MThd') });
   // The error state says which file failed in its alert and gives the engine's reason as the
   // detail below it (M4's error layout).

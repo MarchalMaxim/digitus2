@@ -1,0 +1,127 @@
+.scan-view {
+  max-width: 1440px;
+  --gap: 1.5rem;
+}
+.scan-view header {
+  --gap: 0.5rem;
+}
+.scan-view header > button {
+  justify-self: start;
+}
+.scan-filename {
+  overflow-wrap: anywhere;
+}
+.scan-intro,
+.scan-review {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+.scan-intro > *,
+.scan-review > * {
+  min-width: 0;
+}
+.scan-intro > section:first-child {
+  max-width: 36rem;
+}
+.scan-source img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--gray-2);
+}
+.scan-page-list {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.25rem;
+  margin: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+.scan-page-list li {
+  flex: 0 0 6.5rem;
+  min-width: 0;
+}
+.scan-thumbnail {
+  position: relative;
+  width: 100%;
+  padding: 0.25rem;
+  background: var(--paper);
+  border: 1px solid var(--gray-2);
+}
+.scan-thumbnail[aria-pressed='true'] {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.scan-thumbnail img {
+  height: 7rem;
+  object-fit: contain;
+  border: none;
+}
+.scan-thumbnail span {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  color: var(--paper);
+  background: var(--ink);
+}
+.scan-page-caption {
+  display: block;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.scan-page-caption small {
+  display: block;
+}
+.scan-page-edit .row,
+.scan-source-pagination {
+  flex-wrap: wrap;
+}
+.image-pages .own-file {
+  align-self: start;
+}
+.is-disabled {
+  opacity: 0.5;
+}
+.pdf-preview canvas {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--gray-2);
+}
+.scan-download {
+  display: block;
+  text-align: left;
+}
+.scan-setup {
+  border-top: 1px solid var(--gray-2);
+  padding-top: 0.75rem;
+}
+.scan-view summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 0.6rem;
+}
+.scan-view pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  background: var(--gray-1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
+}
+.scan-decision {
+  border-top: 1px solid var(--gray-2);
+  padding-top: 1.5rem;
+  max-width: 52rem;
+}
+@media (max-width: 700px) {
+  .scan-intro,
+  .scan-review {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .scan-view {
+    --gap: 1rem;
+  }
+}

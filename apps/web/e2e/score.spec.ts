@@ -178,7 +178,7 @@ test('opens K.545: status appears first, score within 8 s', async ({ page }) => 
 
 test('shows an error state with a way back when the file is not a score', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+  await page.getByLabel('Open your own score').setInputFiles({
     name: 'bad.musicxml',
     mimeType: 'application/xml',
     buffer: Buffer.from('<nope/>'),
@@ -197,7 +197,7 @@ test('opens a compressed .mxl archive chosen from the library: a digit on every 
   page,
 }) => {
   await page.goto('/');
-  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+  await page.getByLabel('Open your own score').setInputFiles({
     name: 'ode-to-joy.mxl',
     mimeType: 'application/vnd.recordare.musicxml',
     buffer: mxlOf(libraryScore('ode-to-joy')),
@@ -211,7 +211,7 @@ test('opens a UTF-16 MusicXML file with a byte-order mark: a digit on every note
   page,
 }) => {
   await page.goto('/');
-  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+  await page.getByLabel('Open your own score').setInputFiles({
     name: 'twinkle-utf16.musicxml',
     mimeType: 'application/xml',
     buffer: utf16leOf(libraryScore('twinkle-twinkle-little-star')),

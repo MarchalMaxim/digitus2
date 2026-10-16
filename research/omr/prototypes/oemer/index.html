@@ -1,0 +1,98 @@
+<!doctype html><meta charset="utf-8" /><title>Local OMR research prototype</title
+><style>
+  body {
+    font: 16px system-ui;
+    max-width: 650px;
+    margin: 80px auto;
+    padding: 20px;
+  }
+  button {
+    background: #111;
+    color: white;
+    border: 0;
+    padding: 12px 18px;
+    cursor: pointer;
+  }
+  progress {
+    width: 100%;
+    accent-color: #b00;
+  }
+  small {
+    display: block;
+    margin: 18px 0;
+    color: #555;
+  }
+  a {
+    color: #111;
+  }
+</style>
+<h1>Recognise on this device</h1>
+<p>
+  Research prototype. Recognition contains errors and needs review. Your image stays in this
+  browser.
+</p>
+<input id="image" type="file" accept="image/png,image/jpeg" /><button id="run">
+  Recognise locally</button
+><button id="cancel" hidden>Cancel</button
+><small
+  >Runtime and model files download when needed. No recognition service receives your score. This
+  research prototype uses third-party Python compiled to WASM; it is not product integration.</small
+><progress id="progress" value="0" max="1"></progress>
+<p id="status">Choose a score image.</p>
+<a id="download" hidden>Download raw MusicXML</a>
+<script type="module">
+  let worker;
+  window.omrOutcome = null;
+  document.querySelector('#run').onclick = async () => {
+    const file = document.querySelector('#image').files[0];
+    if (!file) return;
+    window.omrOutcome = null;
+    document.querySelector('#download').hidden = true;
+    document.querySelector('#progress').value = 0;
+    document.querySelector('#image').disabled = true;
+    document.querySelector('#run').disabled = true;
+    document.querySelector('#cancel').hidden = false;
+    worker = new Worker('./oemer-worker.mjs', { type: 'module' });
+    worker.onmessage = ({ data }) => {
+      if (data.type === 'progress') {
+        document.querySelector('#status').textContent =
+          data.stage + (data.completed ? ' ' + data.completed + '/' + data.total : '');
+        if (data.total) document.querySelector('#progress').value = data.completed / data.total;
+      } else {
+        window.omrOutcome = data;
+        document.querySelector('#image').disabled = false;
+        document.querySelector('#run').disabled = false;
+        document.querySelector('#cancel').hidden = true;
+        document.querySelector('#status').textContent =
+          data.type === 'result' ? 'Finished. Review recognition before use.' : data.message;
+        if (data.type === 'result') {
+          const link = document.querySelector('#download');
+          link.href = URL.createObjectURL(
+            new Blob([data.xml], { type: 'application/vnd.recordare.musicxml+xml' }),
+          );
+          link.download = 'recognized.musicxml';
+          link.hidden = false;
+        }
+        worker.terminate();
+      }
+    };
+    worker.onerror = (event) => {
+      window.omrOutcome = { type: 'error', message: event.message || 'Worker failed' };
+      document.querySelector('#status').textContent = window.omrOutcome.message;
+      document.querySelector('#run').disabled = false;
+      document.querySelector('#image').disabled = false;
+      document.querySelector('#cancel').hidden = true;
+      worker.terminate();
+    };
+    const bytes = await file.arrayBuffer();
+    worker.postMessage({ bytes, id: file.name }, [bytes]);
+  };
+  document.querySelector('#cancel').onclick = () => {
+    worker?.terminate();
+    window.omrOutcome = { type: 'canceled' };
+    document.querySelector('#image').disabled = false;
+    document.querySelector('#run').disabled = false;
+    document.querySelector('#cancel').hidden = true;
+    document.querySelector('#status').textContent = 'Canceled.';
+  };
+</script>

@@ -3,7 +3,7 @@
 //
 //   pnpm verify            run every step
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
-//                          bundle, e2e, benchmark, benchmark:mutopia, hands)
+//                          omr (requires build), bundle, e2e, benchmark, benchmark:mutopia, hands)
 //
 // Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
 // page's initial JavaScript and CSS exceed 150 KB gzip or Verovio is statically imported
@@ -51,6 +51,8 @@ if (want('typecheck')) run('typecheck', 'pnpm', ['typecheck']);
 if (want('lint')) run('lint', 'pnpm', ['lint']);
 if (want('unit')) run('unit', 'pnpm', ['test']);
 if (want('build')) run('build', 'pnpm', ['build']);
+// Research OMR runner tests use the freshly built parser/evaluator, as external recognizers do.
+if (want('omr')) run('omr', 'pnpm', ['test:omr']);
 if (want('bundle')) run('bundle', 'node', ['scripts/check-bundle-size.mjs']);
 
 if (want('e2e')) {

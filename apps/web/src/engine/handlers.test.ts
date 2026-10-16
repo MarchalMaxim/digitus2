@@ -21,6 +21,19 @@ function load() {
 }
 
 describe('engine handlers', () => {
+  it('refuses repaired notation only for explicit scan imports', () => {
+    const input =
+      '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes><note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><tie type="stop"/><voice>1</voice></note></measure></part></score-partwise>';
+    const request = {
+      id: 1,
+      type: 'load' as const,
+      kind: 'musicxml' as const,
+      input,
+      source: 'scan.musicxml',
+    };
+    expect(handle(request).ok).toBe(true);
+    expect(handle({ ...request, preserveNotation: true }).ok).toBe(false);
+  });
   it('loads the fixture: 67 notes, 67 editorial fingerings, the XML text', () => {
     const r = load();
     expect(r.score.notes).toHaveLength(67);

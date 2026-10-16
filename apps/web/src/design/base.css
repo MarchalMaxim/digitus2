@@ -138,7 +138,7 @@ h1[tabindex='-1']:focus {
   border: 0;
 }
 
-/* The easter egg (NoteBurst.tsx): a few small notes in ink rise from a click on nothing in
+/* The easter egg (NoteBurst.tsx): a few notes in ink rise from a click on nothing in
    particular and fade, no two bursts alike. Each note animates from the click to its own resting
    translate, rotate and scale (set inline), over its own share of --dur-flourish (--note-time,
    after --note-wait), while a second box drifts it sideways on another easing, so every path
@@ -160,8 +160,9 @@ h1[tabindex='-1']:focus {
 
 .note-burst-note {
   position: absolute;
-  left: -5px;
-  top: -17px;
+  /* the notehead (viewBox 4,14 of 18 by 20, drawn at 25 by 28) sits on the click */
+  left: -6px;
+  top: -22px;
   opacity: 0;
   animation: burst-rise calc(var(--dur-flourish) * var(--note-time, 1)) var(--ease)
     calc(var(--dur-flourish) * var(--note-wait, 0)) both;
@@ -175,6 +176,11 @@ h1[tabindex='-1']:focus {
 
 .note-burst-drift svg {
   display: block;
+  /* The global svg rule's max-width: 100% would squeeze the glyph to the shrink-to-fit width of
+     its absolutely positioned note (about 6 px): the size is fixed here instead. */
+  width: 25px;
+  height: 28px;
+  max-width: none;
   fill: currentColor;
 }
 

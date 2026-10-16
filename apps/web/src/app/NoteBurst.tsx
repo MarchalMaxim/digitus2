@@ -26,19 +26,48 @@ export const INTERACTIVE_SELECTOR = [
 /** The parts of a click that decide whether it lets the notes rise. */
 export type BurstClick = Pick<
   MouseEvent,
-  'button' | 'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'defaultPrevented' | 'target'
+  | 'button'
+  | 'detail'
+  | 'altKey'
+  | 'ctrlKey'
+  | 'metaKey'
+  | 'shiftKey'
+  | 'defaultPrevented'
+  | 'target'
+  | 'clientX'
+  | 'clientY'
 >;
+
+/** Where the pointer went down for this click, and whether text was selected at that moment. */
+export interface Press {
+  x: number;
+  y: number;
+  selected: boolean;
+}
+
+/** A pointer that travels farther than this between going down and coming up is dragging. */
+export const DRAG_PX = 4;
 
 /**
  * Whether a click is on nothing in particular: the primary button, no modifier, not handled
- * already, not on or inside anything interactive (INTERACTIVE_SELECTOR), and not the end of a
- * text selection.
+ * already, not on or inside anything interactive (INTERACTIVE_SELECTOR), and nothing to do with
+ * selecting text: not the end of a drag (`press` farther than DRAG_PX from the click), not the end
+ * of a selection, not a click that clears one (text was selected when the pointer went down), and
+ * not the third click of a triple-click, which selects a paragraph.
  */
-export function isEmptyClick(e: BurstClick, selection: Selection | null): boolean {
-  if (e.button !== 0 || e.defaultPrevented) return false;
+export function isEmptyClick(
+  e: BurstClick,
+  selection: Selection | null,
+  press: Press | null = null,
+): boolean {
+  if (e.button !== 0 || e.defaultPrevented || e.detail >= 3) return false;
   if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return false;
   if (!(e.target instanceof Element) || e.target.closest(INTERACTIVE_SELECTOR) !== null)
     return false;
+  if (press !== null) {
+    if (press.selected) return false;
+    if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > DRAG_PX) return false;
+  }
   return selection === null || selection.isCollapsed;
 }
 
@@ -76,7 +105,7 @@ export interface BurstNote {
 
 /**
  * One burst, drawn fresh so no two look alike: 2 to 4 notes in a fan of random direction and
- * width, each 18 to 42 px out, tilted outward, its own size, length and sideways drift. They rise
+ * width, each 22 to 50 px out, tilted outward, its own size, length and sideways drift. They rise
  * like a quick run, up or down, or now and then together like a chord. A double-click's burst
  * (`double`) has half as many notes again, 3 to 6, a little wider and farther out, and one of them,
  * picked at random, in the accent. `random` is Math.random but for tests.
@@ -99,7 +128,7 @@ export function drawBurst(random: () => number = Math.random, double = false): B
     // Never past 85 degrees from straight up: every note rises.
     const degrees = Math.max(-85, Math.min(85, fanCenter + (t - 0.5) * fanWidth + between(-8, 8)));
     const angle = (degrees * Math.PI) / 180;
-    const dist = between(18, 42) * (chord ? 0.85 : 1) * (double ? 1.15 : 1);
+    const dist = between(22, 50) * (chord ? 0.85 : 1) * (double ? 1.15 : 1);
     const dx = Math.round(Math.sin(angle) * dist);
     const order = upward ? i : count - 1 - i;
     notes.push({
@@ -130,10 +159,10 @@ const SLOTS = 6;
 /** Clicks closer together than this add no burst. */
 const MIN_GAP_MS = 90;
 
-/** A small note in ink, drawn like the score's: a tilted head, a stem, flags or a beam. */
+/** A note in ink, 25 by 28 px, drawn like the score's: a tilted head, a stem, flags or a beam. */
 function Glyph({ kind }: { kind: NoteKind }): JSX.Element {
   return (
-    <svg viewBox="0 -2 18 20" width="18" height="20" aria-hidden="true" focusable="false">
+    <svg viewBox="0 -2 18 20" width="25" height="28" aria-hidden="true" focusable="false">
       <ellipse cx="4" cy="14" rx="3.6" ry="2.5" transform="rotate(-20 4 14)" />
       <rect x="6.6" y="1" width="1.2" height="13" />
       {(kind === 'eighth' || kind === 'sixteenth') && (
@@ -167,7 +196,8 @@ function noteStyle(n: BurstNote): CSSProperties {
  * from the pointer, in ink, gone in about half a second, and no two bursts alike (`drawBurst`).
  * A double-click lets half as many notes again rise, one of them in the accent: the one deliberate
  * exception to the rule of one red element, for half a second (docs/app.md). Nothing where a click
- * already does something (`isEmptyClick`), and nothing under prefers-reduced-motion. Transform
+ * already does something or where text is being selected or deselected (`isEmptyClick`), and
+ * nothing under prefers-reduced-motion. Transform
  * and opacity only, on a fixed layer the pointer passes through, hidden from assistive technology
  * and from print, at most SLOTS bursts at once.
  */
@@ -177,8 +207,19 @@ export function NoteBurst(): JSX.Element {
   useEffect(() => {
     let next = 0;
     let last = -Infinity;
+    let press: Press | null = null;
+    // Before the browser acts on the press (and clears any selection), remember where it was and
+    // whether text was selected: a click that only clears a selection lets no notes rise.
+    const onDown = (e: MouseEvent) => {
+      const selection = window.getSelection();
+      press = {
+        x: e.clientX,
+        y: e.clientY,
+        selected: selection !== null && !selection.isCollapsed,
+      };
+    };
     const onClick = (e: MouseEvent) => {
-      if (!isEmptyClick(e, window.getSelection()) || prefersReducedMotion()) return;
+      if (!isEmptyClick(e, window.getSelection(), press) || prefersReducedMotion()) return;
       // The second click of a double-click lets the bigger burst rise; it needs no gap.
       const double = e.detail === 2;
       if (!double && e.timeStamp - last < MIN_GAP_MS) return;
@@ -192,8 +233,12 @@ export function NoteBurst(): JSX.Element {
         return out;
       });
     };
+    document.addEventListener('mousedown', onDown);
     document.addEventListener('click', onClick);
-    return () => document.removeEventListener('click', onClick);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('click', onClick);
+    };
   }, []);
 
   return (

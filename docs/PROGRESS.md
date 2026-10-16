@@ -1,5 +1,9 @@
 # digitus2 — progress journal
 
+## Scanning main integration verified (2026-10-16)
+
+Latest main 1d553ef is merged into codex/scanning-pc. All 12 verification gates passed on the integrated branch using isolated E2E port 4204; the earlier attempt was stopped after detecting the unrelated checkout already serving default port 4173 and is not acceptance evidence. Log: ignored research/omr/results/multi-image/verify-main-integrated-correct-port.log. The user's current six-eighth-note crop retains its pitches/durations but loses the original continuous beam; source beam reconstruction remains an open task, not a claimed fix. Draft PR2 remains for review, with no merge or deployment authorized. Codex — Astra coordination; Sol 6.1 implementation and independent review.
+
 ## Image-batch verification complete (2026-10-16)
 
 Multi-image queue and HOMR render-only beam/voice fixes are frozen and independently reviewed. Root exercised real multi-select, drag order,2native jobs, exact per-page raw hashes, combined26bar import and visible beams in the actual browser. The two inputs are different photos of the same page, not a new accuracy corpus. All12 pnpm verify gates pass (363web/191browser tests); existing musical recognition errors remain. Evidence/limits in docs/reviews/scanning-2026-10-15.md and docs/scanning.md; private captures remain outside git.

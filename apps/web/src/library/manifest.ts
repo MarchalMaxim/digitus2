@@ -100,19 +100,14 @@ export async function loadPiece(slug: string): Promise<LibraryPiece | undefined>
   return (await loadPieceDetails()).get(slug);
 }
 
-const scoreFiles = import.meta.glob('../../../../content/scores/*.musicxml*', {
-  query: '?url',
-  import: 'default',
-}) as Record<string, () => Promise<string>>;
-
 /**
  * Resolves a manifest path such as 'scores/x.musicxml' (or 'scores/x.musicxml.gz', a PDMX piece) to
  * its asset URL (lazy, per file). A .gz file holds gzip bytes: see readScoreFile.
  */
-export function scoreUrl(relativePath: string): Promise<string> {
-  const key = `../../../../content/${relativePath}`;
-  const loader = scoreFiles[key];
-  if (!loader) return Promise.reject(new Error(`no score file ${relativePath}`));
+export async function scoreUrl(relativePath: string): Promise<string> {
+  const { scoreFiles } = await import('./scoreFiles.js');
+  const loader = scoreFiles[`../../../../content/${relativePath}`];
+  if (!loader) throw new Error(`no score file ${relativePath}`);
   return loader();
 }
 

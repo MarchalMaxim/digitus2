@@ -137,7 +137,13 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
         elif chk.get("exact") is not True:
             out.append(f"LilyPond 2.24 MIDI check not exact (only in the MusicXML {chk.get('only_xml_count')}, "
                        f"only in the MIDI {chk.get('only_midi_count')})")
-    if slug in flagged:
+    relaxed = piece.get("relaxedGates")  # level 6 only: a MuseScore piece admitted with its flags recorded
+    if relaxed and entry["level"] != 6:
+        out.append("relaxedGates is allowed for level 6 only")
+    if relaxed:
+        if (slug in flagged) != (relaxed["spans"] > 0):
+            out.append(f"span flags differ from the catalog's relaxedGates ({relaxed['spans']} recorded)")
+    elif slug in flagged:
         out.append("span flags: a slice one hand cannot play (spanFlags in verification.json)")
     score = content / entry["files"]["score"]
     if lint:
@@ -149,6 +155,10 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
                 r = (rec.get("profiles") or {}).get(profile)
                 if r is None:
                     out.append(f"no lint at the {profile} profile")
+                elif relaxed:
+                    if r.get("errors") != relaxed["lint"][profile]:
+                        out.append(f"{r.get('errors')} lint law error(s) at the {profile} profile, the catalog's "
+                                   f"relaxedGates records {relaxed['lint'][profile]}")
                 elif r.get("errors"):
                     out.append(f"{r['errors']} lint law error(s) at the {profile} profile "
                                f"(rule counts, every severity: {r.get('counts')})")

@@ -86,9 +86,11 @@ def load_items() -> list[dict]:
     candidates = {c["sha256"]: c for c in json.loads((RAW / "candidates.json").read_text(encoding="utf-8"))}
     for line in (RAW / "gate.jsonl").open(encoding="utf-8"):
         gate = json.loads(line)
-        if not gate["ok"] or gate["sha256"] not in candidates:  # a superseded representative is skipped
+        if gate["sha256"] not in candidates:  # a superseded representative is skipped
             continue
         cand = candidates[gate["sha256"]]
+        if not pdmx_advanced.usable(gate, cand["notes"]):
+            continue
         sha = gate["sha256"]
         path = CONTENT / "_build" / "pdmx" / sha / f"{sha}.musicxml"
         if not path.exists():

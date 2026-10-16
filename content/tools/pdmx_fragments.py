@@ -90,7 +90,8 @@ def licence_map(paths: set[str]) -> dict[str, str]:
     return out
 
 
-def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = None) -> dict:
+def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = None,
+              relaxed_gates: dict | None = None) -> dict:
     sha = gate["sha256"]
     title = clean_title(cand.get("title"))
     composer = clean_composer(cand.get("composer"))
@@ -127,6 +128,15 @@ def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = 
         "pdmx": {"sha256": sha, "path": cand["path"], "license": licence, "rating": cand.get("rating"),
                  "nRatings": cand.get("n_ratings"), "fingerings": fingerings, "version": cand.get("version")},
     }
+    if relaxed_gates:
+        # the span and lint gates are relaxed for level 6 (pdmx_advanced.py): the flags are recorded, not hidden
+        spans, lint = relaxed_gates["spans"], relaxed_gates["lint"]
+        piece["relaxedGates"] = relaxed_gates
+        piece["notes"] = piece["notes"].replace(
+            "no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles.",
+            f"and, because the span and lint gates are relaxed for level 6, {spans} slice(s) that no hand can strike "
+            f"as written and {lint['medium']} (medium) and {lint['large']} (large) lint law errors in the engine's "
+            f"own fingering: the digits there are advice.")
     if demands:
         piece["levelNote"] = pdmx_advanced.override_reason(gate["level"], demands)
         if level < 5:  # two levels above the proposal: the catalog wants the reason as an override
@@ -203,7 +213,7 @@ def main(argv=None) -> int:
             rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title,
                              "reason": "failed the library's validation: " + (errors[0] if errors else "see verification")})
             continue
-        if not gate["ok"]:
+        if not pdmx_advanced.usable(gate, cand["notes"]):
             not_shipped["gates"] += 1
             continue
         if BROKEN_TEXT.search(title) or BROKEN_TEXT.search(cand.get("composer") or ""):
@@ -228,7 +238,8 @@ def main(argv=None) -> int:
         if not demands and len(pieces) >= a.limit:
             not_shipped["beyond the cap"] += 1
             continue
-        piece = piece_for(gate, cand, licence, demands)
+        relaxed_gates = None if gate["ok"] else pdmx_advanced.relaxed_facts(gate)
+        piece = piece_for(gate, cand, licence, demands, relaxed_gates)
         if piece["slug"] in seen_slugs:  # the sha prefix makes this practically impossible; keep it honest
             raise SystemExit(f"duplicate slug {piece['slug']}")
         seen_slugs.add(piece["slug"])

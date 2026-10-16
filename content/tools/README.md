@@ -186,11 +186,11 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 
 ## MuseScore archive scores (PDMX, 2026-10-16)
 
-1,330 further pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
+1,429 further pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
 files whose uploaders declared them public domain or CC0, and which PDMX found free of licence conflicts
 (`license_conflict` false). Every one is a solo piano score on two staves with notes on both; the
 library's own gates decide the rest. Their fragments are `catalog.d/pdmx-library.json` (1,300 pieces at
-levels 1 to 5) and `catalog.d/pdmx-advanced.json` (30 pieces at level 6); their scores are
+levels 1 to 5) and `catalog.d/pdmx-advanced.json` (129 pieces at level 6, 99 of them with relaxed gates); their scores are
 `scores/<slug>.musicxml.gz` (gzip, mtime 0, byte-identical on a rebuild; the app decompresses them with
 the browser's DecompressionStream), and `content/library-index.json` lists every piece for the library
 page. The steps, in order (run with `content/.venv/Scripts/python.exe -I`; the inputs are the PDMX
@@ -218,10 +218,10 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
    copies of each other are only listed. The same tune at another level (an easy and a fuller arrangement)
    is reported and kept. `--apply` writes `duplicates` into `pdmx-excluded.json`.
 5. `pdmx_scope.py export` and `apply`: MuseScore's genre tags are the uploader's, so a pop song can carry
-   "classical". The candidates (best rated first, 2,037 of them) were read by three differently framed
-   reviewers (a workflow, 2026-10-16); a candidate any of them flagged as modern popular music, film,
-   game or musical themes, or Nazi-era marches is out of scope (59 of 2,037) and recorded in
-   `outOfScope`.
+   "classical". The candidates (best rated first, 2,037 of them, then the 157 relaxed advanced ones with
+   `export --unreviewed`) were read by three differently framed reviewers (a workflow, 2026-10-16); a
+   candidate any of them flagged as modern popular music, film, game or musical themes, or Nazi-era
+   marches is out of scope (69 of 2,194) and recorded in `outOfScope`.
 6. `pdmx_advanced.py` is the rule for level 6 (below). `pdmx_fragments.py [--limit 1300]` writes the two
    fragments: the best-rated passing candidates (a cap in rating order, not a random cut), the advanced
    ones apart and uncapped, skipping every candidate in `pdmx-excluded.json` (build failures, duplicates,
@@ -242,15 +242,28 @@ or of 4 with a score of 10.9 or more (the middle of that band); at least 60 seco
 both sustained fast notes (6 a second) and a stretch of 12 semitones. A placement from proposal 4 carries
 a `levelOverride`. The rule's thresholds were fixed before the yield was known and are not tuned to a
 count; its first form (any one demand) picked five pieces that were not advanced, so it now needs speed and
-stretch together. Every library gate still applies. Result: 30 pieces. Another 205 candidates meet the
-rule but fail the span or lint gate, so even without those gates the archive holds about 235, not 1,000.
+stretch together. Result: 30 pieces that pass every library gate.
+
+**Relaxed gates for level 6** (user decision, 2026-10-16). Advanced pieces are the ones the span check and
+the lint law gate refuse, so a level-6 candidate that meets the rule and fails only those two gates ships
+anyway (`pdmx_advanced.relaxed`): its XSD, notes-on-both-staves and validator checks still hold, and the
+slices no hand can strike and the lint law errors are recorded in the catalog (`relaxedGates`), in the
+piece's notes, and checked by `gates.py` and `test_gates.py` against what the engine finds, so a changed
+score or engine cannot slip through. A total waiver would ship pieces where nearly every note breaks a
+law (the worst of 195 candidates: 1,028 errors per 1,000 notes), so the relaxation has a ceiling of 40
+law errors per 1,000 notes at each profile (ten times the engine's measured rate on real pieces, the
+benchmark floor of 3.92) and 20 unplayable slices per 1,000 notes; both are constants in
+`pdmx_advanced.py` (None lifts them). 145 of the 195 candidates are inside it; 50 are held back. After the
+scope review, dedupe and the build's own validation, 99 ship: a median of 11 law errors a piece (at most
+92, at most 39 per 1,000 notes), 80 of them with span flags (425 slices in all, at most 24 in one piece).
+The digits at those places are advice.
 
 Result of the run (2026-10-16): 175,905 candidates screened, 8,607 two-staff candidates after
-de-duplication, all gated (5,449 pass), 1,330 shipped, 194 refused by the build, 156 archive copies
-removed by `dedupe.py`, 59 out of scope. The archive names a composer for 260 of the 1,330 pieces (20
-percent); the other 1,070 read "Unknown". Levels, archive only: 8, 56, 669, 564, 3, 30 (the frozen
-heuristic's proposals, and 30 placed at 6 by the rule); the whole library (253 curated and 1,330
-archive): 32, 100, 752, 601, 18, 80.
+de-duplication, all gated (5,449 pass), 1,429 shipped (1,300 ordinary, 30 advanced, 99 advanced with
+relaxed gates), 220 refused by the build, 163 archive copies removed by `dedupe.py`, 69 out of scope. The
+archive names a composer for 327 of the 1,429 pieces (23 percent); the other 1,102 read "Unknown".
+Levels, archive only: 8, 56, 669, 564, 3, 129 (the frozen heuristic's proposals, and 129 placed at 6 by
+the rule); the whole library (253 curated and 1,429 archive): 32, 100, 752, 601, 18, 179.
 
 ## Generated and ignored directories
 

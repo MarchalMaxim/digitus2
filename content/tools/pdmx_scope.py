@@ -42,7 +42,7 @@ def review_set() -> list[dict]:
     """The candidates the fragment generator would consider, in its order."""
     gates = [json.loads(line) for line in (RAW / "gate.jsonl").open(encoding="utf-8")]
     candidates = {c["sha256"]: c for c in json.loads((RAW / "candidates.json").read_text(encoding="utf-8"))}
-    gates = [g for g in gates if g["sha256"] in candidates and g["ok"]]
+    gates = [g for g in gates if g["sha256"] in candidates and pdmx_advanced.usable(g, candidates[g["sha256"]]["notes"])]
     gates.sort(key=lambda g: (-int(candidates[g["sha256"]].get("n_ratings") or 0),
                               -float(candidates[g["sha256"]].get("rating") or 0), g["sha256"]))
     excluded = json.loads(EXCLUDED.read_text(encoding="utf-8"))
@@ -55,7 +55,7 @@ def review_set() -> list[dict]:
         cand = candidates[g["sha256"]]
         title = fr.clean_title(cand.get("title"))
         slug = f"pdmx-{fr.ascii_slug(title)}-{g['sha256'][:8]}"
-        if slug in skip or g["sha256"] in skip or fr.REPLACEMENT in title or not pdmx_select.grand_staff(cand):
+        if slug in skip or g["sha256"] in skip or fr.BROKEN_TEXT.search(title) or not pdmx_select.grand_staff(cand):
             continue
         advanced = bool(pdmx_advanced.advanced(g["level"], cand["notes"]))
         if not advanced:
@@ -67,21 +67,33 @@ def review_set() -> list[dict]:
     return items
 
 
-def export() -> None:
+def export(unreviewed: bool = False) -> None:
+    """Write the review list. With `unreviewed`, only the candidates the first review (index.json) did
+    not cover, as items-new.txt, index-new.json and titles-new.json."""
     items = review_set()
+    tag = ""
+    if unreviewed:
+        seen = set(json.loads((OUT / "index.json").read_text(encoding="utf-8")).values())
+        items = [i for i in items if i["sha256"] not in seen]
+        tag = "-new"
     OUT.mkdir(parents=True, exist_ok=True)
     lines = [f"{n}\t{i['title']}\t{i['composer']}\tlevel {i['level']}" for n, i in enumerate(items, 1)]
-    (OUT / "items.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (OUT / "index.json").write_text(json.dumps({str(n): i["sha256"] for n, i in enumerate(items, 1)}), encoding="utf-8")
-    (OUT / "titles.json").write_text(json.dumps({str(n): [i["title"], i["composer"]] for n, i in enumerate(items, 1)},
-                                                ensure_ascii=False), encoding="utf-8")
-    print(f"{len(items)} candidates to review -> {OUT / 'items.txt'}")
+    (OUT / f"items{tag}.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (OUT / f"index{tag}.json").write_text(json.dumps({str(n): i["sha256"] for n, i in enumerate(items, 1)}),
+                                          encoding="utf-8")
+    (OUT / f"titles{tag}.json").write_text(
+        json.dumps({str(n): [i["title"], i["composer"]] for n, i in enumerate(items, 1)}, ensure_ascii=False),
+        encoding="utf-8")
+    print(f"{len(items)} candidates to review -> {OUT / f'items{tag}.txt'}")
 
 
-def apply(votes_path: Path) -> None:
+def apply(votes_path: Path, new: bool = False) -> None:
+    """Write the verdicts into `outOfScope`. With `new` (the votes read items-new.txt) they are added to
+    the existing ones; without it they replace them (the first review)."""
     votes = json.loads(votes_path.read_text(encoding="utf-8"))
-    index = json.loads((OUT / "index.json").read_text(encoding="utf-8"))
-    titles = json.loads((OUT / "titles.json").read_text(encoding="utf-8"))
+    tag = "-new" if new else ""
+    index = json.loads((OUT / f"index{tag}.json").read_text(encoding="utf-8"))
+    titles = json.loads((OUT / f"titles{tag}.json").read_text(encoding="utf-8"))
     tally: dict[str, list[str]] = {}
     for vote in votes:
         for flag in vote["flagged"]:
@@ -89,7 +101,8 @@ def apply(votes_path: Path) -> None:
     out_of_scope = {index[n]: "; ".join(reasons) for n, reasons in tally.items() if n in index and len(reasons) >= AGREE}
     single = {n: r for n, r in tally.items() if len(r) < AGREE}
     doc = json.loads(EXCLUDED.read_text(encoding="utf-8"))
-    doc["outOfScope"] = dict(sorted(out_of_scope.items()))
+    kept = doc.get("outOfScope", {}) if new else {}
+    doc["outOfScope"] = dict(sorted({**kept, **out_of_scope}.items()))
     EXCLUDED.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"flagged by {AGREE} or more reviewers (removed): {len(out_of_scope)}; flagged by one (kept): {len(single)}")
     counts = Counter(len(r) for r in tally.values())
@@ -101,11 +114,13 @@ def apply(votes_path: Path) -> None:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("export")
+    e = sub.add_parser("export")
+    e.add_argument("--unreviewed", action="store_true", help="only the candidates the first review did not cover")
     p = sub.add_parser("apply")
     p.add_argument("votes", type=Path)
+    p.add_argument("--new", action="store_true", help="the votes read items-new.txt; add them to the verdicts")
     a = ap.parse_args(argv)
-    export() if a.cmd == "export" else apply(a.votes)
+    export(a.unreviewed) if a.cmd == "export" else apply(a.votes, a.new)
     return 0
 
 

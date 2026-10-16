@@ -24,10 +24,23 @@ was made for precision, not to reach a count.
 Every library gate still applies (XSD, span check, zero lint law errors at the medium and the large
 profile): the rule only chooses the level of a piece that already passed them. A placement from
 proposal 5 is within one of the proposal; from proposal 4 it needs a `levelOverride`.
+
+Relaxed gates (user decision, 2026-10-16: "relax the span and lint gates for level 6 only"). Advanced
+pieces are the ones that stretch past a hand or make the engine break a fingering law, so the span
+check and the lint law gate refuse most of them: 195 candidates meet the rule above and fail only
+those two gates. A piece that meets the rule, passes every other gate (XSD, notes on both staves, the
+validator) and fails only the span check or the lint law gate ships at level 6 with its flags
+recorded in the catalog (`relaxedGates`) and in its notes, within a ceiling: a total waiver would
+ship pieces where every note breaks a law (the worst candidate: 1,028 law errors per 1,000 notes). The
+ceiling is RELAXED_LINT_PER_1000 law errors per 1,000 notes at each profile (ten times the engine's
+measured rate on real pieces, the benchmark floor of 3.92) and RELAXED_SPANS_PER_1000 unplayable
+slices per 1,000 notes. Set both to None to lift it.
 """
 
 from __future__ import annotations
 
+RELAXED_LINT_PER_1000 = 40.0
+RELAXED_SPANS_PER_1000 = 20.0
 SCORE_FLOOR = 10.9
 MIN_SECONDS = 60.0
 MIN_NOTES = 300
@@ -59,3 +72,36 @@ def override_reason(level: dict, demands: list[str]) -> str:
     return (f"Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes {proposal} "
             f"(score {score}), the upper end of its range for a whole piece, and the piece shows "
             f"{', '.join(demands)}. No syllabus placement is claimed.")
+
+
+def _only_span_or_lint(gate: dict) -> bool:
+    """The gate refused the piece for the span check or the lint law gate and nothing else."""
+    reasons = gate.get("reasons") or []
+    return bool(reasons) and all("lint law error" in r or "slice(s) no hand can strike" in r for r in reasons)
+
+
+def relaxed_facts(gate: dict) -> dict:
+    """What the relaxed gates let through, as the catalog records it: slices and law errors."""
+    lint = gate["lint"]
+    return {"spans": gate.get("spanFlags", 0),
+            "lint": {"medium": lint["medium"]["errors"], "large": lint["large"]["errors"]}}
+
+
+def relaxed(gate: dict, notes: int) -> bool:
+    """True when the piece meets the advanced rule, fails only the span or lint gate, and is within the ceiling."""
+    if gate.get("ok") or not gate.get("level") or not gate.get("lint") or not _only_span_or_lint(gate):
+        return False
+    if not advanced(gate["level"], notes):
+        return False
+    facts = relaxed_facts(gate)
+    if RELAXED_LINT_PER_1000 is not None:
+        if max(facts["lint"].values()) * 1000 / notes > RELAXED_LINT_PER_1000:
+            return False
+    if RELAXED_SPANS_PER_1000 is not None and facts["spans"] * 1000 / notes > RELAXED_SPANS_PER_1000:
+        return False
+    return True
+
+
+def usable(gate: dict, notes: int) -> bool:
+    """A candidate that can ship: it passed every gate, or it is a relaxed advanced piece."""
+    return bool(gate.get("ok")) or relaxed(gate, notes)

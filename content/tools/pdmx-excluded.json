@@ -9,6 +9,7 @@
   "pdmx-andante-from-vivaldi-s-concerto-for-two-18fcfd91": "measure numbers not unique",
   "pdmx-arietta-from-lyric-pieces-op-12-no-1-by-7ec6c529": "69 <fingering> elements in a stripped file",
   "pdmx-atraente-polca-5db81061": "music21: 106 notes with zero duration",
+  "pdmx-ave-maria-7b45abe7": "measure 15: backup before measure start",
   "pdmx-b-bartok-for-children-vol-1-nr-1-childre-ead72fee": "48 <fingering> elements in a stripped file",
   "pdmx-b-bartok-for-children-vol-1-nr-10-childr-52ea61f7": "103 <fingering> elements in a stripped file",
   "pdmx-b-bartok-for-children-vol-1-nr-11-lento-8aa2f70c": "65 <fingering> elements in a stripped file",
@@ -47,6 +48,7 @@
   "pdmx-canon-in-d-22155580": "169 <fingering> elements in a stripped file",
   "pdmx-canon-in-d-easy-75070c52": "67 <fingering> elements in a stripped file",
   "pdmx-children-s-corner-doctor-gradus-ad-parna-336bd61d": "measure 44: backup before measure start",
+  "pdmx-chopin-berceuse-cradle-song-piano-solo-3fa3d096": "measure 43: backup before measure start",
   "pdmx-chopin-fr-d-ric-tudes-op-10-3-tude-in-f-798cc684": "625 <fingering> elements in a stripped file",
   "pdmx-chopin-fr-d-ric-tudes-op-10-6-tude-in-g-fd4ecc35": "444 <fingering> elements in a stripped file",
   "pdmx-chopin-nocturne-op-9-no-2-e-flat-major-0e27efa8": "96 <fingering> elements in a stripped file",
@@ -64,12 +66,15 @@
   "pdmx-czerny-school-of-velocity-op-299-no-1-79c61772": "music21: 28 notes with zero duration",
   "pdmx-czerny-the-art-of-finger-dexterity-op-74-03030181": "music21: 140 notes with zero duration",
   "pdmx-czerny-the-art-of-finger-dexterity-op-74-7dc7832f": "music21: 4 notes with zero duration",
+  "pdmx-czerny-the-art-of-finger-dexterity-op-74-acb03ad8": "music21: 368 notes with zero duration",
   "pdmx-czerny-the-art-of-finger-dexterity-op-74-cac21c4e": "music21: 102 notes with zero duration",
+  "pdmx-czerny-the-art-of-finger-dexterity-op-74-f217535d": "music21: 290 notes with zero duration",
   "pdmx-czerny-the-school-of-velocity-op-299-no-345382ee": "266 <fingering> elements in a stripped file",
   "pdmx-czerny-the-school-of-velocity-op-299-no-cfc0c191": "410 <fingering> elements in a stripped file",
   "pdmx-czerny-the-school-of-velocity-op-299-no-e459830f": "152 <fingering> elements in a stripped file",
   "pdmx-dances-of-the-dolls-polka-dmitri-shostak-ff894b49": "79 <fingering> elements in a stripped file",
   "pdmx-diabelli-sonatina-in-f-major-op-168-no-1-e0edc441": "201 <fingering> elements in a stripped file",
+  "pdmx-do-you-know-why-im-longing-for-the-comin-cba07c91": "measure 13: backup before measure start",
   "pdmx-el-choclo-piano-df60c331": "measure 10: voice 1 lasts 11/4 quarters, time signature allows 2",
   "pdmx-elementary-studies-op-176-etude-1-by-jea-845473ec": "12 <fingering> elements in a stripped file",
   "pdmx-elementary-studies-op-176-etude-3-by-jea-95eb4bab": "19 <fingering> elements in a stripped file",
@@ -78,14 +83,22 @@
   "pdmx-erik-satie-enfantillages-pittoresques-be-639ad423": "197 <fingering> elements in a stripped file",
   "pdmx-f-couperin-les-tambourins-fa6705d3": "measure numbers not unique",
   "pdmx-f-r-elise-c292b667": "no time signature",
+  "pdmx-five-german-dances-landler-02f0f7a9": "86 <fingering> elements in a stripped file",
+  "pdmx-fr-d-ric-chopin-nocturne-in-b-flat-minor-35d655cf": "measure 2: voice 1 lasts 2881/480 quarters, time signature allows 6",
+  "pdmx-fr-d-ric-chopin-nocturne-in-f-sharp-majo-fcfd4a11": "measure 10: backup before measure start",
   "pdmx-fr-d-ric-chopin-prelude-in-d-minor-op-28-abdac1f6": "measure 14: backup before measure start",
   "pdmx-fr-d-ric-chopin-prelude-in-f-minor-op-28-cadda07c": "measure 8: backup before measure start",
+  "pdmx-fr-d-ric-chopin-tude-in-c-sharp-minor-op-5ccd6de1": "measure 52: voice 5 lasts 361/120 quarters, time signature allows 3",
+  "pdmx-franz-liszt-liebestraum-no-3-in-a-flat-m-dd9e6d56": "measure 25: voice 1 lasts 721/120 quarters, time signature allows 6",
+  "pdmx-frederic-chopin-piano-sonata-2-op35-3-fu-2c4c484f": "measure 11: voice 1 lasts 17/4 quarters, time signature allows 4",
   "pdmx-georg-friedrich-h-ndel-sarabande-dfb4b1c2": "37 <fingering> elements in a stripped file",
+  "pdmx-glinka-the-lark-from-a-farewell-to-saint-fe794975": "measure 35: backup before measure start",
   "pdmx-gnossienne-no-1-32750f86": "no time signature",
   "pdmx-gramophone-waltz-doga-doga-b802e2c3": "159 <fingering> elements in a stripped file",
   "pdmx-greensleeves-46683be3": "music21: 48 notes with zero duration",
   "pdmx-greensleeves-6210b667": "music21: 38 notes with zero duration",
   "pdmx-greensleeves-piano-debutant-with-fingeri-d12f9c22": "104 <fingering> elements in a stripped file",
+  "pdmx-happy-birthday-d590e82e": "measure 20: voice 1 lasts 33/8 quarters, time signature allows 4",
   "pdmx-hatikva-himno-nacional-de-israel-6ff337ae": "measure numbers not unique",
   "pdmx-haydn-sonata-in-g-major-hob-xvi-8-a684ee5f": "measure numbers not unique",
   "pdmx-home-on-the-range-secondary-dominants-c3f6eb73": "music21: 112 notes with zero duration",
@@ -93,6 +106,8 @@
   "pdmx-hungarian-dance-no-5-in-f-minor-7ab00fd7": "music21: 12 notes with zero duration",
   "pdmx-inventio-1-c-major-bwv-772-43258728": "116 <fingering> elements in a stripped file",
   "pdmx-inventio-2-c-minor-bwv-773-2eaae4eb": "166 <fingering> elements in a stripped file",
+  "pdmx-ive-a-precious-recollection-twill-neverm-ae778210": "measure 17: voice 1 lasts 1921/480 quarters, time signature allows 4",
+  "pdmx-j-s-bach-choralvorspiel-ich-ruf-zu-dir-h-60acb0d9": "17 <fingering> elements in a stripped file",
   "pdmx-j-s-bach-invention-no-5-in-eb-major-bwv-e9b6f4e3": "156 <fingering> elements in a stripped file",
   "pdmx-j-s-bach-little-prelude-in-c-major-bwv-9-61ada209": "61 <fingering> elements in a stripped file",
   "pdmx-j-s-bach-little-prelude-in-f-major-bwv-9-c0a03583": "319 <fingering> elements in a stripped file",
@@ -120,19 +135,25 @@
   "pdmx-lemoine-tudes-enfantines-op-37-no-50-024fa72b": "107 <fingering> elements in a stripped file",
   "pdmx-lemoine-tudes-enfantines-op-37-no-6-adabae49": "13 <fingering> elements in a stripped file",
   "pdmx-lezginka-caucasus-national-dance-xalq-r-768f4a0c": "2 <fingering> elements in a stripped file",
+  "pdmx-liszt-apparitions-no-2-db8b375f": "measure 98: voice 1 lasts 361/120 quarters, time signature allows 3",
   "pdmx-luigi-cherubini-cours-de-contrepoint-et-121b1551": "measure numbers not unique",
   "pdmx-lytaney-ube-die-geheimnissen-14ca2636": "measure 1: voice 1 lasts 10 quarters, time signature allows 4",
+  "pdmx-malaguena-by-ernesto-lecuona-c47c1152": "12 <fingering> elements in a stripped file",
   "pdmx-march-from-scipio-6737eb7b": "86 <fingering> elements in a stripped file",
   "pdmx-marche-fun-bre-1a7cedcb": "121 <fingering> elements in a stripped file",
   "pdmx-marching-through-georgia-4bd7781a": "1 <fingering> elements in a stripped file",
   "pdmx-mazurka-in-b-minor-op-33-no-4-chopin-4bc3bcaa": "210 <fingering> elements in a stripped file",
+  "pdmx-mikhail-glinka-mily-balakirev-the-lark-282afa86": "measure 33: voice 1 lasts 41/4 quarters, time signature allows 4",
   "pdmx-minuet-1e86be17": "44 <fingering> elements in a stripped file",
   "pdmx-minuet-in-g-07c49c7d": "44 <fingering> elements in a stripped file",
   "pdmx-minuet-in-g-major-haydn-63104cdf": "113 <fingering> elements in a stripped file",
+  "pdmx-minuets-in-g-major-and-g-minor-5ad9e941": "108 <fingering> elements in a stripped file",
   "pdmx-minuetto-in-g-minor-cd751edd": "91 <fingering> elements in a stripped file",
   "pdmx-minute-waltz-in-d-major-op-64-no-1-8c97041e": "measure 50: voice 5 lasts 1441/480 quarters, time signature allows 3",
   "pdmx-modal-bart-k-122e9bb8": "measure numbers not unique",
   "pdmx-mozart-minuet-in-f-major-k2-easy-54a6cacf": "measure 7: voice 1 lasts 11/3 quarters, time signature allows 3",
+  "pdmx-nocturne-4-in-f-major-8635b52a": "measure 9: backup before measure start",
+  "pdmx-nocturne-f-chopinop-9-no-2-a1a3fa66": "measure X1: voice 1 lasts 12 quarters, time signature allows 6",
   "pdmx-nocturne-no-20-in-c-sharp-minor-b-49-0a320de1": "158 <fingering> elements in a stripped file",
   "pdmx-oh-canada-08b84e0e": "37 <fingering> elements in a stripped file",
   "pdmx-old-french-song-0bfc7f02": "23 <fingering> elements in a stripped file",
@@ -141,6 +162,7 @@
   "pdmx-piano-24-la-coronaci-n-5d24a01c": "88 <fingering> elements in a stripped file",
   "pdmx-polonaise-w-a-mozart-0d277e9e": "91 <fingering> elements in a stripped file",
   "pdmx-prelude-and-fugue-23-openwtc-4a4169c8": "measure numbers not unique",
+  "pdmx-richard-wagner-das-rheingold-transformat-c9463c7c": "measure 44: backup before measure start",
   "pdmx-rimsky-korsakov-harmonic-exercises-alter-1546b95a": "music21 parse failed: HarmonyException: not a valid pitch specification: #1iv6",
   "pdmx-rimsky-korsakov-harmonic-exercises-alter-dc1d2073": "music21: 96 notes with zero duration",
   "pdmx-rimsky-korsakov-harmonic-exercises-enhar-25b851ff": "music21 parse failed: HarmonyException: not a valid pitch specification: #1iv6",
@@ -150,6 +172,7 @@
   "pdmx-scandinavian-vals-medley-0e50e07e": "music21: 136 notes with zero duration",
   "pdmx-scarlatti-sonata-k-208-7318622d": "143 <fingering> elements in a stripped file",
   "pdmx-scarlatti-sonate-en-mi-majeur-k531-l430-3af738bc": "270 <fingering> elements in a stripped file",
+  "pdmx-schubert-impromptu-op-142-no-2-e481bbf6": "119 <fingering> elements in a stripped file",
   "pdmx-schubert-s-serenade-piano-solo-5676763d": "measure 26: voice 1 lasts 321/80 quarters, time signature allows 4",
   "pdmx-schumann-album-for-the-young-op-68-no-1-591fa5b9": "53 <fingering> elements in a stripped file",
   "pdmx-schumann-album-for-the-young-op-68-no-10-9dd09332": "50 <fingering> elements in a stripped file",
@@ -172,9 +195,11 @@
   "pdmx-sheeran-shape-of-you-3768c39e": "music21: 6 notes with zero duration",
   "pdmx-six-unison-melodies-3bf25da6": "measure numbers not unique",
   "pdmx-sleep-df242a9d": "measure 24: voice 1 lasts 9/2 quarters, time signature allows 4",
+  "pdmx-sonata-no-24-g-majorized-19a6d412": "measure 177: voice 1 lasts 13/2 quarters, time signature allows 2",
   "pdmx-sonatina-in-g-major-ahn-5-c44662fc": "99 <fingering> elements in a stripped file",
   "pdmx-sorry-6a810b33": "10 <fingering> elements in a stripped file",
   "pdmx-st-finian-16ed61fa": "measure 9: voice 1 lasts 8 quarters, time signature allows 3",
+  "pdmx-stille-nacht-heilige-nacht-c5ec43be": "music21: 132 notes with zero duration",
   "pdmx-study-in-broken-thirds-by-moritz-vogel-259967a6": "32 <fingering> elements in a stripped file",
   "pdmx-sweden-minecraft-for-piano-131a0c44": "music21: 68 notes with zero duration",
   "pdmx-t-l-b-elmira-r-himova-piano-notlar-f6934145": "3 <fingering> elements in a stripped file",
@@ -186,6 +211,7 @@
   "pdmx-th-me-du-1er-mouvement-de-la-sonate-k-33-30916241": "55 <fingering> elements in a stripped file",
   "pdmx-the-art-of-preluding-op-300-n-10-by-carl-072954de": "44 <fingering> elements in a stripped file",
   "pdmx-the-entertainer-0af422e7": "music21: 48 notes with zero duration",
+  "pdmx-the-sandhurst-waltz-3b373e52": "measure numbers not unique",
   "pdmx-the-star-spangled-banner-easy-5119b7be": "no time signature",
   "pdmx-unfailing-love-jw-original-105416aa": "measure 4: voice 1 lasts 39/8 quarters, time signature allows 4",
   "pdmx-variation-ber-einen-walzer-von-diabelli-9d2700fa": "measure numbers not unique",
@@ -215,7 +241,7 @@
   "05b024dd2a23a3185fe6e3a06a451bf38b04ec1ea965f185e4e3035800367d41": {
    "of": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
    "kind": "same tune, same level",
-   "similarity": 0.887
+   "similarity": 0.876
   },
   "05e2903c9a05a21db134dc7e42dc99e77f73bb0f52d62f46e8bacccb6d888f11": {
    "of": "90a82889581f04756c97e7e2f7089420f27ad048030f0aa2e814caf97da7a418",
@@ -295,7 +321,7 @@
   "171dadf0ddc41d83ef114967b74700a51e43b95f27aa018410a121fbd3585bda": {
    "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
    "kind": "same tune, same level",
-   "similarity": 0.938
+   "similarity": 0.906
   },
   "1e86be17f98213bd481592fa539a9272c7fa71c74cda057fe1659092ffbaff8e": {
    "of": "bach-minuet-g-minor-bwv-anh-115",
@@ -316,6 +342,11 @@
    "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "26891fb38d6217bf407aa40f0c21801b61ecd6b1a0e509a1bb1d56904561eafb": {
+   "of": "9293af50c05253357ea9d528fc799cd4ce43560748ae24d1774243efb0c833ac",
+   "kind": "near",
+   "similarity": 0.985
   },
   "287d578834c042d1c2f6d658a7c1372aa6f19c5d578eb6d3be05a9231f2f8a4e": {
    "of": "bulk-czernyc-op-821-czerny-op-821-no-011-czerny-op-821-no-011-ly",
@@ -362,6 +393,11 @@
    "kind": "near",
    "similarity": 0.982
   },
+  "34d433b6fa11d0e087807c8f95d3a78eb3c0656434b44c1a7d8225bb6d827e95": {
+   "of": "499f7bbf07f98a3030e7ca4c35036caa7231b23f446a2b310a5fd65618d15d95",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "38ff7014b1a8a5061c5f0ede023cb748dc4118b42ab24db63b5cecae1b876ed0": {
    "of": "bulk-czernyc-op-821-czerny-op-821-no-004-czerny-op-821-no-004-ly",
    "kind": "near",
@@ -407,6 +443,16 @@
    "kind": "near",
    "similarity": 0.998
   },
+  "4853b0d97a2c9dcab6b8f294aa7a6a8f5fc29558d20ba1597272f990aa5a7c3f": {
+   "of": "5ccd6de13220bd6b06ba03380cb9107fe84c78ef2e46062747ee96a297587375",
+   "kind": "same tune, same level",
+   "similarity": 0.828
+  },
+  "485bfe768a38a7d9dfc04c4331ce9592e69acacba5f49134f2c8db8dcc32ce2f": {
+   "of": "935522268d811bf8e65b885049b17fbd38c96c078f5823f65421c946fe6829cb",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "48b9d4f1fe67e4a1ebd67ea3ad3594705b0a1a6cbd6f6101f009b88aee60f8af": {
    "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
    "kind": "exact",
@@ -435,12 +481,22 @@
   "55cfd74464ac9d31bfd0888a38aaad7dcb56f7cd447d6ef04047fb63659c7f7e": {
    "of": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
    "kind": "same tune, same level",
-   "similarity": 0.885
+   "similarity": 0.876
+  },
+  "58bef41f26d21e689d1f2c1b17bcc07748fee79d3029e34beac517fb617a9694": {
+   "of": "dd9e6d568895bc1591460362d85e1f088ce75e54ed77db312a7fc466376e461b",
+   "kind": "same tune, same level",
+   "similarity": 0.898
   },
   "591fa5b9b853fb12d3bce9e9213b829275ee325bbdebcb2a4707f9310fa1bad4": {
    "of": "schumann-op68-no1-melody",
    "kind": "near",
    "similarity": 0.984
+  },
+  "59d41721d692f2a76d925ca078c4b3dfa1694e40e55aca21040157e9a24b2d70": {
+   "of": "278dd060d5bed23599fe1a989a0fa6588d07d3abd768e61e1a85bfaaa68c978e",
+   "kind": "near",
+   "similarity": 0.977
   },
   "5a7fa6b04811406a3cc312b86868f1a051df88db1876bd58b325bff63247b513": {
    "of": "bach-invention-no1-bwv-772",
@@ -455,7 +511,7 @@
   "5b1c3de2ab1aceb142d578de5069ccae732020685efb544f5f159c8d68b21afc": {
    "of": "63104cdfdddd8552f6db2c091bcfc46affba3e3b0297de86ddc076613c454db7",
    "kind": "same tune, same level",
-   "similarity": 0.922
+   "similarity": 0.913
   },
   "5b27e901fb2b580b820cffe5632596aede7e88ba3698c724c59e7e1afa0eb68d": {
    "of": "bach-minuet-g-major-bwv-anh-114",
@@ -547,6 +603,11 @@
    "kind": "near",
    "similarity": 0.991
   },
+  "85ef9b4cb0d464d60d4f6cdf146993cdf1b4abf15219f45b41e1771a44719dc0": {
+   "of": "61e64dc0fa22580bb83c2ea719cb6bf1807597dffc8399623bfde99c306cbbf9",
+   "kind": "near",
+   "similarity": 0.993
+  },
   "8a2db435c191719e59a043ddd502d20ec6cb841a6e37e468e583549e0e2f98f9": {
    "of": "16b768aedd0cae70a440ff684b493c25ffe1b234cd80ccbb26c97112051742f2",
    "kind": "exact",
@@ -556,11 +617,6 @@
    "of": "tchaikovsky-op39-no5-march-of-the-wooden-soldiers",
    "kind": "near",
    "similarity": 0.991
-  },
-  "8c97041ef637a8ff1fc5a3fb8215297b8c4d782c3645cd6281de59e63f18590c": {
-   "of": "dd09bd65c4c08bb46f25c2ccbb15af666975754a179154ef789326c633a67487",
-   "kind": "same tune, same level",
-   "similarity": 0.801
   },
   "8d3edcc75db75e297d95e784639ba558d41eb1ca2bb08552fa8a8140afc1f2a6": {
    "of": "chopin-prelude-op28-no4",
@@ -631,11 +687,6 @@
    "of": "0bfc7f02d69811253bcb1efa0c0f82cfd4eb3198fd9dd01c60fdc7f0fed034a5",
    "kind": "exact",
    "similarity": 1.0
-  },
-  "9d487bfb65991fcc1bf07e68dc5df7d61af0984d6e60cfb7daf54f830931d0c3": {
-   "of": "8f0c4059fdb65dbb53630f77e9bc832bc665c3bcfe611355342c3888317fa742",
-   "kind": "same tune, same level",
-   "similarity": 0.814
   },
   "9dd09332b88c2330bf11f63fe4f601533186817c74b5c70051b448f6be9906df": {
    "of": "schumann-op68-no10-the-happy-farmer",
@@ -755,7 +806,7 @@
   "b469d4924494d13298df593515ec8d5b317acb3a25081ad7f647164228278b53": {
    "of": "7be646511705d0ffa9f8594078b5c45b19eb4cdd4be56e6de01f170db41c4600",
    "kind": "same tune, same level",
-   "similarity": 0.912
+   "similarity": 0.887
   },
   "b78188eede6bf2819720c1dd3475aa319f276549885cb4ed11736eefbc78ee4b": {
    "of": "schumann-op68-no12-knecht-ruprecht",
@@ -770,7 +821,7 @@
   "bba8ef623b35d07e347a80d124211b7179ee0a35511257459c822d40b7245eaf": {
    "of": "08a0f1a4c9c17bb7c1cdcf7fa04a9b918b79afd653bc85a8292ce18c990071b6",
    "kind": "same tune, same level",
-   "similarity": 0.926
+   "similarity": 0.916
   },
   "bbff92a364ba6f6cba0618bfd94213e1ba6a9cb91fdfdb160a8a08ec17a6aa47": {
    "of": "schumann-op68-no6-poor-orphan",
@@ -887,6 +938,11 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "e43f95dc8dfde1ca99fbcd9e64f344f5275d15531fe1b0bc69a0aad15042053b": {
+   "of": "85ef9b4cb0d464d60d4f6cdf146993cdf1b4abf15219f45b41e1771a44719dc0",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "e495b9cf91f3feceff762709903783910d37fab7e21e61d871af7b91c7ca891e": {
    "of": "bach-minuet-f-major-bwv-anh-113",
    "kind": "exact",
@@ -950,7 +1006,7 @@
   "fa3181df566983ebc76877e26b89a78294568c911107693868fe5e5d359a2be7": {
    "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
    "kind": "same tune, same level",
-   "similarity": 0.938
+   "similarity": 0.906
   },
   "fad61269ad155bf08dc6eb799542b1daff0b550626be139c0938557708c29f5d": {
    "of": "schumann-op68-no8-wild-rider",
@@ -975,13 +1031,19 @@
   "ff37785f2febcda2017d28e224503115a7c4b3f9e3a0c2aa5ca797ac98a045e6": {
    "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
    "kind": "same tune, same level",
-   "similarity": 0.938
+   "similarity": 0.906
+  },
+  "ffe6c2dd1e7d7315b7a0d2fe7e9e6ecf855b8b5847b2861d777dde089bb7f17c": {
+   "of": "a91b15e6c6569bb7b82e94c281858cb0a41a3c3337c6c2b8f87fe626bf347a90",
+   "kind": "near",
+   "similarity": 0.982
   }
  },
  "outOfScope": {
   "00adeaf43fe1f658b0dc75137ab1364d9943c09fc966135879b9dc89be3e90a9": "modern-music: Cartoon TV theme; scope-judge: Cartoon theme; content-safety: Amphibia cartoon theme",
   "094cc2c4bee7b0c662756e56899fa4d4a011a26dfd7ef785afb6096a21deed29": "modern-music: Contemporary worship song; scope-judge: Modern worship song; content-safety: Modern worship song, Matt Redman",
   "097e70dfb552d4a8764351a1374b19df500e523d3a8a705f145947748eea5df4": "modern-music: Modern political march; scope-judge: Political tribute, not traditional repertoire; content-safety: Pinochet propaganda",
+  "0b1c49f2545acbbcfee9f9e2aeaba78cbb6b4a790f3756b7ac04da3144faf60f": "content-safety: Modern Azerbaijani song by living-era composer",
   "11e6db99d8801a3c0eae3d7f1fdd1ce76dc0f1a744cab66084efdd688b347fab": "scope-judge: Modern original, not classical; content-safety: Modern composer James Spiteri",
   "1aaae12082e8bfb380f48a6c160ea0a2a5bea05794e90477596f5cc15ce35c2c": "modern-music: Modern LDS song by Janice Kapp Perry; scope-judge: Modern LDS song by Janice Kapp Perry; content-safety: Janice Kapp Perry modern copyrighted LDS song",
   "1adea15797fd657f316bb1439186c65abde67781019a0da7b8544e117740fc2c": "modern-music: Identity V game music; scope-judge: Video game music; content-safety: Identity V video game",
@@ -990,6 +1052,7 @@
   "233d6491c378d692e741a3bfd094cbd4e985fd947ec51b106ebda6f1f082badd": "modern-music: Hillsong modern worship song; scope-judge: Modern worship band song; content-safety: Hillsong modern worship song",
   "287be700906306cf71d8414648ee5beb6a2341356eddec558c7754b712516188": "modern-music: Simon and Garfunkel song; scope-judge: Pop song, Simon and Garfunkel; content-safety: Simon and Garfunkel modern song",
   "29384e355210f6ec9f9cd63486049aa30243ba048166b5751ac095c0113febf7": "modern-music: Minecraft game theme (C418); scope-judge: Minecraft game music (C418); content-safety: Minecraft video-game theme (C418)",
+  "297dfaf81cb6f8376e944a0ea29c7f39190fd6e535d0ac54b0c83426276f3c51": "modern-music: Pokemon Sword game theme; content-safety: Video-game theme; scope-judge: Pokemon game city theme",
   "30b24b623461812307c437a9be834344a155b12bdc5a182455650d97207fce14": "modern-music: Paterlini modern pop-piano piece; scope-judge: Modern neo-classical pop composer; content-safety: Modern composer Paterlini",
   "30cb5c0725129090034a26ee4aff0e8a4a40bc22119d2f49e9afd442e291dce2": "modern-music: Ed Sheeran pop song Perfect; scope-judge: Ed Sheeran pop song; content-safety: Ed Sheeran modern pop song",
   "321ae371e57ae9be608fc250eb6277dc97ba9267d5a77e9629c7fdcd9b79e3d4": "scope-judge: 1950s pop song; content-safety: Modern 1950s copyrighted song",
@@ -1006,6 +1069,7 @@
   "4925f04bdacc937d42563b18a1694f8cc8e447f349285c13b48f79d0199c7342": "modern-music: Lumineers band song; scope-judge: Band song, The Lumineers; content-safety: The Lumineers modern band song",
   "4abac2d800e4ea220053e1f32486423dbff5599bc9667d6885797d7137813269": "modern-music: TV series theme arrangement",
   "4c55e9c828d1ccc9fdd3b25a3ec9544a3b06feb62db3c86495698cea567a7cae": "modern-music: Ed Sheeran pop song; scope-judge: Modern pop song by Ed Sheeran; content-safety: Ed Sheeran modern pop song",
+  "52124e00132e44e8b310d9be5aa61053f4d68eafeee9d1408a7f193fd37d70b9": "modern-music: Modern pop pianist Maxence Cyrin; content-safety: Modern copyrighted Maxence Cyrin arrangement; scope-judge: Modern artist Maxence Cyrin arrangement",
   "528efbb3e17ac96b6dc2958d7dd9eb02421ebcd842ee4401de004af09e8cd4c2": "modern-music: Piano cover of modern piece; scope-judge: Modern cover arrangement; content-safety: Modern piano cover",
   "533bd65f2d67e816df6752f3367dc5d24aae5401452ddd529a759ef7fa8c8626": "modern-music: Poshlaya Molly band song; scope-judge: Modern band cover; content-safety: Poshlaya Molly modern band",
   "5516a58afe33384465699fa976261592b6c253e4308d2a415d1e66612b6d4b76": "modern-music: Modern worship song, 1986; scope-judge: Modern worship song, 1980s; content-safety: Modern 1986 copyrighted worship song",
@@ -1018,6 +1082,7 @@
   "77e01354a1023409fd6f3220cc8f98694857982f1782ae8eeab922b4ca7049c8": "modern-music: Jazz arrangement of Chopin",
   "7b5a9788465a3692baae420267d0b7d9ccb330a1e246700533b30dd78dedcb84": "content-safety: Modern copyrighted hymn",
   "7e2e9230353453c9b6a2048a43aa3c62950dd6d7e34d96a657e16245eb1bc6e4": "modern-music: Modern online composer piece; scope-judge: Modern fan composition; content-safety: Modern game-style piece by Mrest",
+  "7e9ad893b93eff2c5c32c7757563e89bf72f901c78913ee9d521d499bfe9679b": "content-safety: Soviet anthem written 1943, post-1929 work; scope-judge: 1944 Soviet anthem, post-1929 patriotic song",
   "7ed760308522b4bbccd65148da68e17198ed0ee64e736e8f8b1acd346dddce6f": "modern-music: Wim Mertens modern composition; scope-judge: Modern composer, not classical repertoire; content-safety: Modern composer Wim Mertens",
   "897202414217062c26217791ebb45a10d9bde44e01571f77e3a86dd4e0e1b3cc": "modern-music: Simon and Garfunkel song; scope-judge: Pop song, Simon and Garfunkel; content-safety: Simon and Garfunkel modern song",
   "8afed0825e36f735570b13cfc42942a65109bf8c17c011b75599f9839dd13951": "scope-judge: Modern pop song",
@@ -1026,16 +1091,22 @@
   "99ee7f2e68e341a09c92e169e0a8588dfb26b92549d2943a630acc2c56533abf": "modern-music: Game of Thrones TV theme; scope-judge: TV theme; content-safety: Game of Thrones TV theme",
   "9a54d839c6c251eaa31e0dbad6b4cf130d10cab64f4f3193078bcddde5d91984": "scope-judge: Meme piece",
   "9b217467706e5d57a7b616a6fc382634e17c1f9e05cf1d36fbec8110cc0c169c": "modern-music: 1938 Soviet song Katyusha",
+  "a4a68cd1f0459521b3c4e74124ea6ff8578a40161df7794df87f88814c2501cf": "modern-music: Anime soundtrack; content-safety: Anime soundtrack; scope-judge: Anime soundtrack",
   "ad47da6f71a5d96572f289fef8924fd2785d90284a0ea9e16285bc12ab2f1fb7": "modern-music: Ed Sheeran song; scope-judge: Pop song, Ed Sheeran; content-safety: Ed Sheeran modern pop song",
   "ad50a7ad3255bd197645381407eba58333b7273119459ff15e4ca3619e9e7ac1": "modern-music: Paterlini modern pop-piano piece; scope-judge: Modern neo-classical pop composer; content-safety: Modern composer Paterlini",
+  "b9b5be26d8be7f7ff89d21b17f9c4564be7933670a26b2990c250175bc2a3f74": "modern-music: Audiomachine trailer music, modern; content-safety: Modern trailer music by Audiomachine; scope-judge: Audiomachine trailer music, modern",
+  "be8a6d6d3b382de49fe65b0e7ff1993a02b2897b3039b166343ae6d6c3df954e": "modern-music: 1930s political song, outside scope; content-safety: Nazi-era propaganda march; scope-judge: 1930s Nazi propaganda song",
   "c115d5a3d5fb41df80450838a0f8baa7811db0890118243e8c988e9f13a7699b": "modern-music: Bethel modern worship song; scope-judge: Modern worship band song; content-safety: Bethel Music modern worship",
   "ca3f1befa4b910e1d002f6cb9bfed85c8de68893ba2eb5e8b8c21c719d45c348": "modern-music: Modern game or anime arrangement; scope-judge: Fan arrangement, likely game or anime; content-safety: Modern arrangement of modern song",
+  "cf57d0446a046d552e441c966f893528ce0bb80c25650c48912fd6e3db1cff0d": "modern-music: Video game music; content-safety: Video-game soundtrack piece; scope-judge: Video-game music theme",
   "d34d259bc181e029b6fe45dc5c601a37916a51024797f99512053ac3c307a5f5": "modern-music: Lumineers band song; scope-judge: Band song, The Lumineers; content-safety: The Lumineers modern band song",
+  "d5f38fa57d0db3f0f73368e5df70646b0f6895a810cef30a1e52b045fe5162b3": "modern-music: 1932 political song, outside scope; content-safety: Nazi-era Hitler Youth propaganda song; scope-judge: 1930s Nazi-era song",
   "da1ad8d9b70a499b19ead5bf3de7b4d89628b8d5d9a6d967d7fe493bc9c2adb0": "modern-music: Football club anthem; scope-judge: Football club anthem; content-safety: Modern football club anthem",
   "dc21058f929f8d154d2545302f96586bd90c87f75d4c43daa6f2f4511094b917": "modern-music: Hardstyle electronic track; scope-judge: Modern electronic track; content-safety: Modern electronic dance act",
   "e12f33428302e179537c5c4c06a5fb51b878b1049072f7a3778d1a462f0d8ae1": "modern-music: Modern album track, 2012; scope-judge: Modern album piece; content-safety: Modern 2012 album track",
   "e204aa172fc07e547bfee95b403f4b1c79a4ad676f059d0396f71de868817d19": "modern-music: Nazi party song; scope-judge: Nazi party song; content-safety: Nazi anthem Horst Wessel",
   "eab902b70948569fafbec331e0f5cdd1f52723c268ac0d08d86539c61f30f543": "modern-music: Video game or anime arrangement; scope-judge: Video game music; content-safety: Video game theme transcription",
+  "f660b2ec5a2b30891a099611aea1ad6b1bb8c48f7ef1ba19285fccdd26252788": "content-safety: Modern copyrighted Philip Glass piece",
   "f8dc1646616f5db870c404df2e067cf371033bb5a5616bbe619ed24110a22cf6": "modern-music: Musical Cats, 1981; scope-judge: Stage musical after 1929; content-safety: Cats musical, 1981 Lloyd Webber",
   "fba0b1034bfd08d524b698bbf30309611d826ef93f1e2c93533f552a27cc6d2c": "modern-music: 1930s military march; scope-judge: Nazi-era march, after 1929; content-safety: Nazi-era march"
  }

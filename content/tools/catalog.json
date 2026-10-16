@@ -213,6 +213,18 @@
     "title": "Advanced piano from the MuseScore archive",
     "kind": "genre",
     "genre": "classical"
+  },
+  {
+    "id": "pdmx-songs",
+    "title": "Songs from the MuseScore archive",
+    "kind": "genre",
+    "genre": "songs"
+  },
+  {
+    "id": "pdmx-modern",
+    "title": "Jazz and blues from the MuseScore archive",
+    "kind": "genre",
+    "genre": "modern"
   }
 ],
   "pieces": [

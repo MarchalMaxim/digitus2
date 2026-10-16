@@ -58,8 +58,12 @@ SCREEN_FIELDS = ("path", "sha256", "bytes", "title", "composer", "genres", "rati
                  "n_notes_meta", "complexity")
 
 
-def metadata_candidates(csv_path: Path) -> dict[str, dict]:
-    """Basename of each candidate's .mxl -> the PDMX metadata we keep for the record."""
+def metadata_candidates(csv_path: Path, other: bool = False) -> dict[str, dict]:
+    """Basename of each candidate's .mxl -> the PDMX metadata we keep for the record.
+
+    `other` keeps the complement: the rows whose genre tags are not all in scope (pop, rock, jazz,
+    soundtrack ...), which the default run leaves out. Its records go to screen-other.jsonl, so the
+    two runs never overlap."""
     csv.field_size_limit(10**9)
     out: dict[str, dict] = {}
     with csv_path.open(encoding="utf-8", newline="") as handle:
@@ -78,7 +82,7 @@ def metadata_candidates(csv_path: Path) -> dict[str, dict]:
             if tracks > MAX_TRACKS or not MIN_NOTES <= notes <= MAX_NOTES:
                 continue
             tokens = set(row["genres"].split("-")) if row["genres"] else {"NA"}
-            if not tokens <= ALLOWED_GENRE_TOKENS:
+            if (tokens <= ALLOWED_GENRE_TOKENS) == other:
                 continue
             base = os.path.basename(row["mxl"])
             out[base] = {
@@ -242,12 +246,15 @@ def main(argv=None) -> int:
     ap.add_argument("--archive", type=Path, required=True)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 4) - 2))
+    ap.add_argument("--other", action="store_true",
+                    help="screen the genres outside classical, folk and religious (-> screen-other.jsonl)")
     a = ap.parse_args(argv)
     (RAW / "piano").mkdir(parents=True, exist_ok=True)
-    wanted = metadata_candidates(a.csv)
+    wanted = metadata_candidates(a.csv, other=a.other)
     print(f"metadata candidates: {len(wanted)}", flush=True)
     kept = rejected = 0
-    with (RAW / "screen.jsonl").open("w", encoding="utf-8") as out, Pool(a.workers) as pool:
+    target = RAW / ("screen-other.jsonl" if a.other else "screen.jsonl")
+    with target.open("w", encoding="utf-8") as out, Pool(a.workers) as pool:
         records = pool.imap(_screen_member, stream_members(a.archive, wanted, a.limit), chunksize=16)
         for n, record in enumerate(records, 1):
             out.write(json.dumps(record, ensure_ascii=False) + "\n")

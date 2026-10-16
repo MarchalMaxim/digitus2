@@ -217,7 +217,7 @@ def check_file(path: Path, preview_dir: Path | None, png: bool = False, tempo: f
 
     # --- reader 2: music21
     try:
-        from music21 import converter
+        from music21 import converter, harmony
         import music21
 
         music21.environment.set("warnings", 0)
@@ -226,7 +226,9 @@ def check_file(path: Path, preview_dir: Path | None, png: bool = False, tempo: f
         m21_measures = len(m21_parts[0].getElementsByClass("Measure")) if m21_parts else 0
         flat = sc.flatten()
         m21_notes = [n for n in flat.notes]
-        bad = [n for n in m21_notes if n.duration.quarterLength == 0 and not n.duration.isGrace]
+        # music21 lists a <harmony> chord symbol among .notes with a length of 0 by design: not a note
+        bad = [n for n in m21_notes if n.duration.quarterLength == 0 and not n.duration.isGrace
+               and not isinstance(n, harmony.Harmony)]
         if bad:
             err(f"music21: {len(bad)} notes with zero duration")
         res["stats"]["music21"] = {

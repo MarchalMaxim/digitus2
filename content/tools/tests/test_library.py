@@ -23,7 +23,7 @@ REQUIRED = ["slug", "title", "composer", "composerDates", "catalogue", "year", "
 LICENSES = ("Public Domain", "CC0-1.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0",
             "CC-BY-SA-4.0")
 # Reviewed corpus after the 2026-10-15 bulk expansion; core30 unchanged.
-LEVEL_COUNTS = {1: 32, 2: 100, 3: 752, 4: 601, 5: 18, 6: 179}  # 253 curated + 1,429 MuseScore archive (2026-10-16)
+LEVEL_COUNTS = {1: 47, 2: 212, 3: 1415, 4: 784, 5: 45, 6: 199}  # 253 curated + 2,449 MuseScore archive (2026-10-16)
 
 
 def test_manifest_matches_catalog():
@@ -49,7 +49,7 @@ def test_verification_follows_the_manifest_order():
 def test_level_counts_are_weighted_to_beginners():
     counts = {lvl: sum(1 for e in MANIFEST if e["level"] == lvl) for lvl in LEVEL_COUNTS}
     assert counts == LEVEL_COUNTS
-    assert len(MANIFEST) == 1682
+    assert len(MANIFEST) == 2702
     assert sum(counts[lvl] for lvl in (1, 2, 3)) > sum(counts[lvl] for lvl in (4, 5, 6))
 
 
@@ -121,7 +121,10 @@ def test_genre_counts_match_the_design():
 
 
 def test_archive_genres():
-    # MuseScore archive pieces (2026-10-16): classical or folk, never modern or songs
+    # MuseScore archive pieces (2026-10-16): the classical lane gives classical and folk, the songs lane
+    # songs and, for jazz and blues, modern
     counts = collections.Counter(e["genre"] for e in MANIFEST if e["collectionId"].startswith("pdmx-"))
-    assert set(counts) == {"classical", "folk"}
+    assert set(counts) == {"classical", "folk", "songs", "modern"}
+    assert counts["songs"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-songs")
+    assert counts["modern"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-modern")
     assert counts["folk"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-folk")

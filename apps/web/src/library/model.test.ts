@@ -240,10 +240,11 @@ describe('the expanded library at 253 pieces (spec sections 5, 6, 7)', () => {
 
 describe('the library with the MuseScore archive (2026-10-16)', () => {
   const archive = allPieces.filter((p) => p.collectionId.startsWith('pdmx-'));
-  it('holds the archive pieces in three collections, each with a known genre', () => {
+  it('holds the archive pieces in five collections, each with a known genre', () => {
     expect(archive.length).toBeGreaterThanOrEqual(1000);
+    // the songs lane (2026-10-16): pop, rock, soundtrack and the like go to Songs, jazz and blues to Modern
     expect(new Set(archive.map((p) => p.collectionId))).toEqual(
-      new Set(['pdmx-classical', 'pdmx-folk', 'pdmx-advanced']),
+      new Set(['pdmx-classical', 'pdmx-folk', 'pdmx-advanced', 'pdmx-songs', 'pdmx-modern']),
     );
     // the advanced collection is the archive's level 6, and only that
     for (const p of archive) expect(p.collectionId === 'pdmx-advanced', p.slug).toBe(p.level === 6);

@@ -1,8 +1,11 @@
-"""Keep modern popular music out of the archive pieces.
+"""Keep content the library must not ship out of the archive's classical-lane candidates.
 
-MuseScore's genre tags are the uploader's: a pop song can carry "classical" or "folk". The library's
-scope (user, 2026-10-14) is classical and traditional music, so the archive candidates are reviewed by
-title and composer before they ship.
+MuseScore's genre tags are the uploader's: a pop song can carry "classical" or "folk". This review
+read the classical lane's candidates by title and composer (2026-10-16) with three reviewers. Its
+first form also removed modern popular music, film and game music, and jazz; since the user's broad
+copyright reading and the request for songs that day, genre and copyright date are not reasons. Those
+exclusions were lifted by `pdmx_songs.py reinstate`, which keeps the content ones (Nazi-era and propaganda
+songs, jokes, memes, amateur fan arrangements). The songs lane has its own review: `pdmx_songs.py`.
 
     pdmx_scope.py export            writes content/_build/scope/items.txt, one candidate per line
                                     (number, title, composer, level), best rated first, and index.json

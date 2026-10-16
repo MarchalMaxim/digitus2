@@ -35,6 +35,38 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.1 a second); a stretch of 26 semitones; dense chords (82 percent of onsets)."
   },
   {
+   "slug": "pdmx-above-and-beyond-b9b5be26",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Above and Beyond",
+   "composer": "Audiomachine",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.819), the upper end of its range for a whole piece, and the piece shows sustained fast notes (8.8 a second), a stretch of 24 semitones, dense chords (80 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 8 slice(s) that no hand can strike as written and 37 (medium) and 36 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "b9b5be26d8be7f7ff89d21b17f9c4564be7933670a26b2990c250175bc2a3f74",
+    "path": "./mxl/2/0/Qmc16TmSFvKhn8iCBCtQ2UmxjgN9WdkNmzo7arQGADnxff.mxl",
+    "license": "cc-zero",
+    "rating": "4.75",
+    "nRatings": "25",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 8,
+    "lint": {
+     "medium": 37,
+     "large": 36
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (8.8 a second); a stretch of 24 semitones; dense chords (80 percent of onsets)."
+  },
+  {
    "slug": "pdmx-alabama-dream-17fae740",
    "source": "pdmx",
    "level": 6,
@@ -248,6 +280,63 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (8.0 a second); a stretch of 19 semitones; dense chords (92 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-atraente-polca-5db81061",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Atraente polca",
+   "composer": "Francisca Gonzaga",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "editorial: the file gives no tempo, so 100 quarter notes per minute is a playback default.",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.864), the upper end of its range for a whole piece, and the piece shows sustained fast notes (11.8 a second), a stretch of 12 semitones, dense chords (73 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "5db8106179ecf1b524cf774039484f05449304a35bd078cbe217688708f20768",
+    "path": "./mxl/0/57/QmaZw5S1V4ZLCS2FPLuw3GP7L9dEP3Bp1oZzcje6bBFaeT.mxl",
+    "license": "cc-zero",
+    "rating": "4.74",
+    "nRatings": "5",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (11.8 a second); a stretch of 12 semitones; dense chords (73 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-azerbaijan-folk-song-anadir-arzulara-her-0b1c49f2",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Azerbaijan folk song: Anadir arzulara her zaman Qarabag",
+   "composer": "Söz vÉ musiqisi: BÉhram NÉsibov",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.472), the upper end of its range for a whole piece, and the piece shows sustained fast notes (14.8 a second), a stretch of 19 semitones, dense chords (71 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 1 slice(s) that no hand can strike as written and 6 (medium) and 6 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 2 (removed from the stored file: the app fingers every score itself).",
+   "pdmx": {
+    "sha256": "0b1c49f2545acbbcfee9f9e2aeaba78cbb6b4a790f3756b7ac04da3144faf60f",
+    "path": "./mxl/12/39/QmUQt4qzDzNobPjZERVt9RZwGqH5RFKeYhjaqrthvXXivj.mxl",
+    "license": "cc-zero",
+    "rating": "4.59",
+    "nRatings": "53",
+    "fingerings": 2,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 1,
+    "lint": {
+     "medium": 6,
+     "large": 6
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (14.8 a second); a stretch of 19 semitones; dense chords (71 percent of onsets)."
   },
   {
    "slug": "pdmx-beethoven-symphony-no-1-3rd-movement-pia-b48c655b",
@@ -663,6 +752,94 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (6.5 a second); a stretch of 22 semitones; dense chords (75 percent of onsets)."
   },
   {
+   "slug": "pdmx-czerny-the-art-of-finger-dexterity-op-74-03030181",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Czerny - The Art Of Finger Dexterity (Op. 740) - No. 7",
+   "composer": "C.Czerny Op. 740 Book 1",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 110,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.288), the upper end of its range for a whole piece, and the piece shows sustained fast notes (11.3 a second), a stretch of 12 semitones, dense chords (93 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "03030181d335392d0e9ea82b54bb9ccac85dee658a0905e7fe20952562797d9d",
+    "path": "./mxl/0/25/QmaiRVth8392Xmd1hDNhmJJSZE1aM9pRggx5L6XeiWGj6P.mxl",
+    "license": "cc-zero",
+    "rating": "4.72",
+    "nRatings": "8",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (11.3 a second); a stretch of 12 semitones; dense chords (93 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-czerny-the-art-of-finger-dexterity-op-74-acb03ad8",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Czerny - The Art Of Finger Dexterity (Op. 740) - No. 8",
+   "composer": "C.Czerny Op. 740 Book 1",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 84,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 13.097), the upper end of its range for a whole piece, and the piece shows sustained fast notes (8.8 a second), a stretch of 16 semitones, dense chords (94 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 6 (medium) and 6 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "acb03ad8a760c5d44bfb6e80ee3d9dfd61cf878c70e40c6de95f8db6036c746c",
+    "path": "./mxl/8/28/QmQkqbAqe7hdBtT39jYCMpiUxQLfhF4UF1RmckuarQXfkQ.mxl",
+    "license": "cc-zero",
+    "rating": "4.79",
+    "nRatings": "16",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 2,
+    "lint": {
+     "medium": 6,
+     "large": 6
+    }
+   }
+  },
+  {
+   "slug": "pdmx-czerny-the-art-of-finger-dexterity-op-74-f217535d",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Czerny - The Art Of Finger Dexterity (Op. 740) - No. 3",
+   "composer": "C.Czerny Op. 740 Book 1",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.556), the upper end of its range for a whole piece, and the piece shows sustained fast notes (12.5 a second), a stretch of 16 semitones, dense chords (59 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 2 (medium) and 2 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "f217535dd5dae99203d9c5f446cbdbd96ebced2a57efb18e3ef1835d569e0dff",
+    "path": "./mxl/2/38/QmcqrxFbyzwTtohiNJhER6c9Rd1TxcYxKUpkoWX6pZsQkD.mxl",
+    "license": "cc-zero",
+    "rating": "4.85",
+    "nRatings": "18",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 2,
+    "lint": {
+     "medium": 2,
+     "large": 2
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (12.5 a second); a stretch of 16 semitones; dense chords (59 percent of onsets)."
+  },
+  {
    "slug": "pdmx-dance-of-the-sugar-plum-fairy-335cc81a",
    "source": "pdmx",
    "level": 6,
@@ -686,6 +863,38 @@
     "version": "3.1"
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (12.6 a second); a stretch of 12 semitones; dense chords (71 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-dead-things-f660b2ec",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Dead Things",
+   "composer": "Philip Glass",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 96,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 12.593), the upper end of its range for a whole piece, and the piece shows sustained fast notes (8.2 a second), a stretch of 27 semitones, dense chords (54 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 1 slice(s) that no hand can strike as written and 3 (medium) and 3 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "f660b2ec5a2b30891a099611aea1ad6b1bb8c48f7ef1ba19285fccdd26252788",
+    "path": "./mxl/3/40/QmdrfvikLSygxbpkB5AsikuoYZ47XDy6NYt6Un9vJXTXVz.mxl",
+    "license": "cc-zero",
+    "rating": "4.93",
+    "nRatings": "13",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 1,
+    "lint": {
+     "medium": 3,
+     "large": 3
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (8.2 a second); a stretch of 27 semitones; dense chords (54 percent of onsets)."
   },
   {
    "slug": "pdmx-debussy-suite-bergamasque-iii-clair-de-l-499f7bbf",
@@ -925,6 +1134,56 @@
      "large": 3
     }
    }
+  },
+  {
+   "slug": "pdmx-fantasie-impromptu-jazz-frederic-chopin-77e01354",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Fantasie Impromptu (Jazz Frederic Chopin)",
+   "composer": "Jacob Koller",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 10.976), the upper end of its range for a whole piece, and the piece shows sustained fast notes (13.2 a second), a stretch of 12 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "77e01354a1023409fd6f3220cc8f98694857982f1782ae8eeab922b4ca7049c8",
+    "path": "./mxl/13/11/QmVbjJb6eabFuHsZQMTMwCfWaYgZN53vMjPQHLUVegL27h.mxl",
+    "license": "cc-zero",
+    "rating": "4.71",
+    "nRatings": "74",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (13.2 a second); a stretch of 12 semitones."
+  },
+  {
+   "slug": "pdmx-for-fra-the-lumineers-d34d259b",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "For Fra--The Lumineers",
+   "composer": "The Lumineers",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "editorial: the file gives no tempo, so 100 quarter notes per minute is a playback default.",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.874), the upper end of its range for a whole piece, and the piece shows sustained fast notes (6.9 a second), a stretch of 12 semitones, dense chords (100 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "d34d259bc181e029b6fe45dc5c601a37916a51024797f99512053ac3c307a5f5",
+    "path": "./mxl/8/17/QmQeyRT4yTsUKXgC9Kx2WKDHn5pDW71oRctBdcSF39ZpQT.mxl",
+    "license": "cc-zero",
+    "rating": "4.96",
+    "nRatings": "23",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (6.9 a second); a stretch of 12 semitones; dense chords (100 percent of onsets)."
   },
   {
    "slug": "pdmx-fr-d-ric-chopin-prelude-in-b-flat-major-5d7ab8f8",
@@ -1448,6 +1707,31 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.3 a second); a stretch of 16 semitones; dense chords (76 percent of onsets)."
   },
   {
+   "slug": "pdmx-hungarian-dance-no-5-in-f-minor-7ab00fd7",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Hungarian Dance No 5 in F Minor",
+   "composer": "Johannes Brahms",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 12.453), the upper end of its range for a whole piece, and the piece shows sustained fast notes (12.8 a second), a stretch of 15 semitones, dense chords (53 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "7ab00fd7dd18b04d605325b26b5a853130a2b565c2cfd3e8c4f3c1d75f49918d",
+    "path": "./mxl/17/0/QmZ1qBZMSQgS2kxTEPFhG8vgskcJMtMCPd7umwvjjCDgP4.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (12.8 a second); a stretch of 15 semitones; dense chords (53 percent of onsets)."
+  },
+  {
    "slug": "pdmx-i-am-trusting-in-my-savior-burnett-w-e-b-5df81be9",
    "source": "pdmx",
    "level": 6,
@@ -1624,6 +1908,38 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (10.6 a second); a stretch of 15 semitones."
+  },
+  {
+   "slug": "pdmx-j-s-bach-choralvorspiel-ich-ruf-zu-dir-h-60acb0d9",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "J.S. Bach Choralvorspiel Ich ruf' zu dir Herr BWV 639 (Arrt F. Busoni)",
+   "composer": "Bach Johann Sebastian",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 50,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.754), the upper end of its range for a whole piece, and the piece shows sustained fast notes (8.2 a second), a stretch of 16 semitones, dense chords (76 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 13 (medium) and 8 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 17 (removed from the stored file: the app fingers every score itself).",
+   "pdmx": {
+    "sha256": "60acb0d9724501839ffc52cf8a8029d8b35bc134ebc92abebda8fcc252798d3a",
+    "path": "./mxl/4/23/QmehfxKmagAUes7CGojrhYeWmDZJr89mp6WtJAcZLhHrJi.mxl",
+    "license": "cc-zero",
+    "rating": "4.83",
+    "nRatings": "69",
+    "fingerings": 17,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 2,
+    "lint": {
+     "medium": 13,
+     "large": 8
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (8.2 a second); a stretch of 16 semitones; dense chords (76 percent of onsets)."
   },
   {
    "slug": "pdmx-j-s-bach-prelude-and-fugue-in-c-minor-bw-4a41605b",
@@ -1975,6 +2291,70 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (18.3 a second); a stretch of 16 semitones; dense chords (95 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-minuets-in-g-major-and-g-minor-5ad9e941",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Minuets in G Major and G Minor",
+   "composer": "J. S. BACH.bearbeitet von E. A. Mac Dowell.",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 150,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.375), the upper end of its range for a whole piece, and the piece shows sustained fast notes (9.1 a second), a stretch of 24 semitones, dense chords (51 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 5 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 108 (removed from the stored file: the app fingers every score itself).",
+   "pdmx": {
+    "sha256": "5ad9e9418199f291c159c0c6fa6bebbfb5791d7dd847888f43cf6e888d96ac7d",
+    "path": "./mxl/2/50/Qmcw8jEKt8NUmu11gUJTCo3wGeEw5bZNi43d6o25wDhb4d.mxl",
+    "license": "cc-zero",
+    "rating": "4.77",
+    "nRatings": "6",
+    "fingerings": 108,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 3,
+    "lint": {
+     "medium": 5,
+     "large": 5
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (9.1 a second); a stretch of 24 semitones; dense chords (51 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-motostoke-city-theme-297dfaf8",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Motostoke City Theme",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 118,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 10.913), the upper end of its range for a whole piece, and the piece shows sustained fast notes (7.6 a second), a stretch of 16 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "297dfaf81cb6f8376e944a0ea29c7f39190fd6e535d0ac54b0c83426276f3c51",
+    "path": "./mxl/0/16/QmaDDdQV8oA7p1uyJbuzyBKohTUkrjWzmJuaTcVudBQWf5.mxl",
+    "license": "cc-zero",
+    "rating": "4.88",
+    "nRatings": "6",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 1,
+    "lint": {
+     "medium": 1,
+     "large": 1
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.6 a second); a stretch of 16 semitones."
   },
   {
    "slug": "pdmx-mussorgsky-promenade-61e64dc0",
@@ -2582,6 +2962,37 @@
    }
   },
   {
+   "slug": "pdmx-schubert-impromptu-op-142-no-2-e481bbf6",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Schubert Impromptu Op. 142 No. 2",
+   "composer": "Franz Schubert Opus 142 No 2 DV 935",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 120,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 12.85), the upper end of its range for a whole piece, and the piece shows sustained fast notes (7.5 a second), a stretch of 30 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 9 slice(s) that no hand can strike as written and 46 (medium) and 39 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 119 (removed from the stored file: the app fingers every score itself).",
+   "pdmx": {
+    "sha256": "e481bbf6c011f7ce2e804e919bb0e01a128f22fee53989b6c0bb8daa4addb34c",
+    "path": "./mxl/16/9/QmYabfdUM8Lsp5UYzUaznfApPGC7uA2vShMR6xTFXtMGJ2.mxl",
+    "license": "cc-zero",
+    "rating": "4.82",
+    "nRatings": "14",
+    "fingerings": 119,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 9,
+    "lint": {
+     "medium": 46,
+     "large": 39
+    }
+   }
+  },
+  {
    "slug": "pdmx-schubert-piano-trio-in-e-flat-major-2nd-530d432f",
    "source": "pdmx",
    "level": 6,
@@ -2699,6 +3110,38 @@
     "fingerings": 0,
     "version": "3.1"
    }
+  },
+  {
+   "slug": "pdmx-seria-s-gate-epilogue-cf57d044",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Seria's Gate - Epilogue",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 120,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.811), the upper end of its range for a whole piece, and the piece shows sustained fast notes (8.8 a second), a stretch of 15 semitones, dense chords (66 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 5 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "cf57d0446a046d552e441c966f893528ce0bb80c25650c48912fd6e3db1cff0d",
+    "path": "./mxl/8/21/QmQgNYpCpjECsuHwNN6HYrRjzheDNnBDseU71D1oSjKzua.mxl",
+    "license": "cc-zero",
+    "rating": "4.71",
+    "nRatings": "4",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 3,
+    "lint": {
+     "medium": 5,
+     "large": 5
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (8.8 a second); a stretch of 15 semitones; dense chords (66 percent of onsets)."
   },
   {
    "slug": "pdmx-sextet-from-lucia-di-lammermoor-piano-so-6e857db2",
@@ -2874,6 +3317,37 @@
     "lint": {
      "medium": 8,
      "large": 8
+    }
+   }
+  },
+  {
+   "slug": "pdmx-stille-nacht-heilige-nacht-c5ec43be",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Stille nacht heilige nacht",
+   "composer": "Franz Gruber Arr Hans Günther Kölz",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 14.408), the upper end of its range for a whole piece, and the piece shows sustained fast notes (9.6 a second), a stretch of 23 semitones, dense chords (59 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 7 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "c5ec43be7ecc2099b842f1b646dddc0e1fcfb4fd10208ecc7309e196577cefef",
+    "path": "./mxl/13/50/QmVwPhDXcPiWEr1ooKP5uvrwGhVP7VD6RoE7aCCZSHEcgX.mxl",
+    "license": "cc-zero",
+    "rating": "4.47",
+    "nRatings": "18",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 2,
+    "lint": {
+     "medium": 7,
+     "large": 7
     }
    }
   },
@@ -3241,6 +3715,31 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.5 a second); a stretch of 14 semitones; dense chords (88 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-think-of-me-47d79715",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Think of Me",
+   "composer": "arr. Abigail Reardon",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 90,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.49), the upper end of its range for a whole piece, and the piece shows sustained fast notes (9.7 a second), a stretch of 12 semitones, dense chords (100 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "47d797156f5993ec4da70a3160ea5a37c5e40b0f9d66efba0ad852e9c2f4fab3",
+    "path": "./mxl/7/34/QmPNZH9ot8nd2986cULq7bW7YfACNtsezLgW4vkoMMfZtK.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (9.7 a second); a stretch of 12 semitones; dense chords (100 percent of onsets)."
   },
   {
    "slug": "pdmx-this-world-shall-be-a-garden-where-all-t-ef30738d",
@@ -3612,6 +4111,31 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (9.9 a second); a stretch of 17 semitones; dense chords (88 percent of onsets)."
   },
   {
+   "slug": "pdmx-vilmark-testing-ground-boss-62b627d1",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Vilmark Testing Ground - Boss",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 192,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 12.448), the upper end of its range for a whole piece, and the piece shows sustained fast notes (15.3 a second), a stretch of 14 semitones, dense chords (77 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "62b627d15bba5840d7be63bb7be627efc8f5242d2673bca93dbe07176ffa792f",
+    "path": "./mxl/12/52/QmUxvrRW5JfgTkrVEehxcNL4E5iud3a3XVmE82KTNvoyik.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (15.3 a second); a stretch of 14 semitones; dense chords (77 percent of onsets)."
+  },
+  {
    "slug": "pdmx-vivaldi-concerto-for-two-oboes-rv-535-ii-0cd431ce",
    "source": "pdmx",
    "level": 6,
@@ -3673,6 +4197,31 @@
      "large": 77
     }
    }
+  },
+  {
+   "slug": "pdmx-waltz-a-minor-w-live-recording-opus-post-788bea3a",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Waltz A Minor (W/Live Recording) Opus Posth. B. 150 - F.F. Chopin",
+   "composer": "Opus Posth. B.150 - F. F Chopin",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 116,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 10.964), the upper end of its range for a whole piece, and the piece shows sustained fast notes (6.9 a second), a stretch of 12 semitones, dense chords (65 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 26 (removed from the stored file: the app fingers every score itself).",
+   "pdmx": {
+    "sha256": "788bea3a62af9cb43e9055cde206f829aae5d88dcf01d7de0e93170b11c9f40c",
+    "path": "./mxl/3/29/QmdKexEC1RtbrJmgpxrcWmFau7mp4q3EqCBHfB7KRVfNH9.mxl",
+    "license": "cc-zero",
+    "rating": "4.9",
+    "nRatings": "58",
+    "fingerings": 26,
+    "version": "3.1"
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (6.9 a second); a stretch of 12 semitones; dense chords (65 percent of onsets)."
   },
   {
    "slug": "pdmx-waltz-in-b-minor-5d9b9832",
@@ -3876,6 +4425,38 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.6 a second); a stretch of 36 semitones; dense chords (75 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-yuri-on-ice-ost-a4a68cd1",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Yuri!!! on Ice OST",
+   "composer": "Taru Omebayashi and Taku Matsushiba",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.279), the upper end of its range for a whole piece, and the piece shows sustained fast notes (9.2 a second), a stretch of 31 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 11 slice(s) that no hand can strike as written and 14 (medium) and 12 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "a4a68cd1f0459521b3c4e74124ea6ff8578a40161df7794df87f88814c2501cf",
+    "path": "./mxl/11/4/QmT5FHLyHqHyC9QZqd53U3WEn6wAAsPpDRjs3PPRezyX83.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 11,
+    "lint": {
+     "medium": 14,
+     "large": 12
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (9.2 a second); a stretch of 31 semitones."
   }
  ],
  "rejected": []

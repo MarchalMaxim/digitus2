@@ -1,89 +1,39 @@
 {
- "_comment": "Candidates that must not ship, read by pdmx_fragments.py so the fragment regenerates the same on a fresh checkout. buildFailed: the library's validation refused them (first error each). duplicates: pieces removed as copies of another piece, with the keeper (filled by dedupe.py).",
+ "_comment": "Candidates that must not ship, read by pdmx_fragments.py so the fragment regenerates the same on a fresh checkout. buildFailed: the library's validation refused them (first error each). duplicates: pieces removed as copies of another piece, with the keeper (filled by dedupe.py). outOfScope: removed by a review and not shipped: the classical lane's content exclusions (Nazi-era songs, propaganda, jokes, memes, amateur fan arrangements; pdmx_scope.py and pdmx_songs.py reinstate) and the songs lane's junk and content-safety flags (pdmx_songs.py apply, 2026-10-16). Keys are sha256s.",
  "buildFailed": {
-  "pdmx-10-minutos-de-piano-hanon-1-g-tutorial-4db2f2cd": "8 <fingering> elements in a stripped file",
-  "pdmx-8-j-s-bach-two-part-invention-no-8-in-f-e94925e3": "265 <fingering> elements in a stripped file",
-  "pdmx-a-study-in-double-notes-thirds-by-carl-c-ff3f9718": "177 <fingering> elements in a stripped file",
+  "pdmx-2-pezzi-per-pianoforte-ca1ca029": "measure numbers not unique",
   "pdmx-aaddbfc43c7d5639f78dd6be4621290a3aca6d49-1259c15b": "measure 15: voice 1 lasts 7/2 quarters, time signature allows 3",
-  "pdmx-air-from-little-russia-f44ca27f": "19 <fingering> elements in a stripped file",
+  "pdmx-adeste-fideles-f87f4390": "no time signature",
+  "pdmx-ain-t-misbehavin-06cdcba5": "measure 12: voice 1 lasts 385/96 quarters, time signature allows 4",
   "pdmx-andante-from-vivaldi-s-concerto-for-two-18fcfd91": "measure numbers not unique",
-  "pdmx-arietta-from-lyric-pieces-op-12-no-1-by-7ec6c529": "69 <fingering> elements in a stripped file",
-  "pdmx-atraente-polca-5db81061": "music21: 106 notes with zero duration",
   "pdmx-ave-maria-7b45abe7": "measure 15: backup before measure start",
-  "pdmx-b-bartok-for-children-vol-1-nr-1-childre-ead72fee": "48 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-10-childr-52ea61f7": "103 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-11-lento-8aa2f70c": "65 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-15-allegr-b50a8bd3": "72 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-17-round-aa05358e": "71 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-18-soldie-7753d8fc": "81 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-19-allegr-52c216aa": "122 <fingering> elements in a stripped file",
   "pdmx-b-bartok-for-children-vol-1-nr-2-childre-92aaed5a": "measure numbers not unique",
-  "pdmx-b-bartok-for-children-vol-1-nr-21-allegr-fad123ac": "91 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-22-allegr-13c70e0f": "88 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-23-dance-b5824ab5": "121 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-26-modera-1ad5e6f2": "42 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-27-jest-s-dfadcbae": "67 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-28-choral-de44c985": "154 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-29-pentat-d297153d": "193 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-32-andant-41b9dd31": "159 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-38-winter-5ff2142c": "62 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-39-allegr-d5aae5ab": "199 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-8-childre-4a86be88": "107 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr-9-song-sz-3f290f4b": "55 <fingering> elements in a stripped file",
-  "pdmx-b-bartok-for-children-vol-1-nr33-allegro-4a5b57d8": "159 <fingering> elements in a stripped file",
-  "pdmx-bach-2nd-menuet-for-a-m-bach-easy-024ed2fe": "79 <fingering> elements in a stripped file",
-  "pdmx-bach-little-prelude-in-c-major-bwv-933-8a1d942b": "252 <fingering> elements in a stripped file",
-  "pdmx-bach-little-prelude-in-d-minor-bwv-935-2878442f": "348 <fingering> elements in a stripped file",
-  "pdmx-balla-balla-ballerino-d595b581": "music21: 134 notes with zero duration",
-  "pdmx-bart-k-b-la-for-children-book-2-03-a-ros-050e3bb2": "104 <fingering> elements in a stripped file",
-  "pdmx-bart-k-b-la-for-children-book-2-08-dance-ff871939": "33 <fingering> elements in a stripped file",
-  "pdmx-bart-k-b-la-for-children-book-2-13-a-swi-614eb806": "93 <fingering> elements in a stripped file",
-  "pdmx-bart-k-b-la-for-children-book-2-15-slow-59d153c6": "152 <fingering> elements in a stripped file",
-  "pdmx-bart-k-b-la-for-children-book-2-18-forme-0945b887": "36 <fingering> elements in a stripped file",
+  "pdmx-bart-k-b-la-for-children-book-2-03-a-ros-050e3bb2": "measure numbers not unique",
+  "pdmx-bart-k-b-la-for-children-book-2-13-a-swi-614eb806": "measure numbers not unique",
+  "pdmx-bart-k-b-la-for-children-book-2-15-slow-59d153c6": "measure numbers not unique",
   "pdmx-beatus-vir-qui-timet-dominum-0298f2b2": "measure 1: voice 1 lasts 12 quarters, time signature allows 4",
-  "pdmx-bella-ciao-am-33f9d174": "music21: 12 notes with zero duration",
-  "pdmx-both-ways-43f3ead6": "60 <fingering> elements in a stripped file",
-  "pdmx-bublitchki-928bc9cd": "music21: 48 notes with zero duration",
-  "pdmx-burgm-ller-arabesque-op-100-no-2-20d96545": "6 <fingering> elements in a stripped file",
-  "pdmx-canon-in-d-22155580": "169 <fingering> elements in a stripped file",
-  "pdmx-canon-in-d-easy-75070c52": "67 <fingering> elements in a stripped file",
+  "pdmx-birthday-arrangement-099d4732": "measure X1: voice 1 lasts 7 quarters, time signature allows 4",
+  "pdmx-black-lagoon-medley-6f97ec2c": "measure numbers not unique",
+  "pdmx-cardi-b-s-intro-to-her-2019-grammy-perfo-88c459c4": "measure 1: backup before measure start",
+  "pdmx-cati-09-2-f5843696": "no time signature",
   "pdmx-children-s-corner-doctor-gradus-ad-parna-336bd61d": "measure 44: backup before measure start",
   "pdmx-chopin-berceuse-cradle-song-piano-solo-3fa3d096": "measure 43: backup before measure start",
-  "pdmx-chopin-fr-d-ric-tudes-op-10-3-tude-in-f-798cc684": "625 <fingering> elements in a stripped file",
-  "pdmx-chopin-fr-d-ric-tudes-op-10-6-tude-in-g-fd4ecc35": "444 <fingering> elements in a stripped file",
-  "pdmx-chopin-nocturne-op-9-no-2-e-flat-major-0e27efa8": "96 <fingering> elements in a stripped file",
+  "pdmx-chopin-douze-etudes-op-25-vii-4853b0d9": "measure 28: voice 5 lasts 145/48 quarters, time signature allows 3",
   "pdmx-chopin-nocturne-op27-no2-d-flat-major-bb4f9a44": "measure 75: voice 1 lasts 721/240 quarters, time signature allows 3",
   "pdmx-chopin-prelude-op-28-no-24-6654d318": "measure 58: voice 1 lasts 1441/480 quarters, time signature allows 3",
-  "pdmx-chopin-waltz-in-a-minor-piano-solo-e76b6003": "54 <fingering> elements in a stripped file",
   "pdmx-clementi-sonatina-op-36-no-1-retrograde-0ed52aa9": "measure numbers not unique",
-  "pdmx-cornelius-gurlitt-op-82-92e0f093": "28 <fingering> elements in a stripped file",
-  "pdmx-csuda-j-l-l-nk-034af589": "1 <fingering> elements in a stripped file",
-  "pdmx-czerny-160-kurze-bungen-op-821-no-11-287d5788": "29 <fingering> elements in a stripped file",
-  "pdmx-czerny-160-kurze-bungen-op-821-no-2-10a17643": "29 <fingering> elements in a stripped file",
-  "pdmx-czerny-160-kurze-bungen-op-821-no-4-38ff7014": "46 <fingering> elements in a stripped file",
-  "pdmx-czerny-air-napolitain-santa-lucia-b08d3364": "56 <fingering> elements in a stripped file",
-  "pdmx-czerny-op-599-n-63-ebbe336e": "64 <fingering> elements in a stripped file",
-  "pdmx-czerny-school-of-velocity-op-299-no-1-79c61772": "music21: 28 notes with zero duration",
-  "pdmx-czerny-the-art-of-finger-dexterity-op-74-03030181": "music21: 140 notes with zero duration",
-  "pdmx-czerny-the-art-of-finger-dexterity-op-74-7dc7832f": "music21: 4 notes with zero duration",
-  "pdmx-czerny-the-art-of-finger-dexterity-op-74-acb03ad8": "music21: 368 notes with zero duration",
-  "pdmx-czerny-the-art-of-finger-dexterity-op-74-cac21c4e": "music21: 102 notes with zero duration",
-  "pdmx-czerny-the-art-of-finger-dexterity-op-74-f217535d": "music21: 290 notes with zero duration",
-  "pdmx-czerny-the-school-of-velocity-op-299-no-345382ee": "266 <fingering> elements in a stripped file",
-  "pdmx-czerny-the-school-of-velocity-op-299-no-cfc0c191": "410 <fingering> elements in a stripped file",
-  "pdmx-czerny-the-school-of-velocity-op-299-no-e459830f": "152 <fingering> elements in a stripped file",
-  "pdmx-dances-of-the-dolls-polka-dmitri-shostak-ff894b49": "79 <fingering> elements in a stripped file",
-  "pdmx-diabelli-sonatina-in-f-major-op-168-no-1-e0edc441": "201 <fingering> elements in a stripped file",
+  "pdmx-corpse-bride-duet-emily-7e3c0d56": "measure 5: voice 1 lasts 7/2 quarters, time signature allows 3",
+  "pdmx-das-fliegende-klassenzimmer-overtuere-5eaec443": "measure 43: voice 1 lasts 7/2 quarters, time signature allows 3",
+  "pdmx-death-bed-powfu-c783def7": "no time signature",
+  "pdmx-decisive-battle-ii-octopath-traveler-sol-bf48f972": "measure numbers not unique",
   "pdmx-do-you-know-why-im-longing-for-the-comin-cba07c91": "measure 13: backup before measure start",
+  "pdmx-doraemon-no-uta-92be2e19": "measure 4: overlapping notes in voice 1 at beat 4",
+  "pdmx-duck-tales-b0cf10b5": "no time signature",
   "pdmx-el-choclo-piano-df60c331": "measure 10: voice 1 lasts 11/4 quarters, time signature allows 2",
-  "pdmx-elementary-studies-op-176-etude-1-by-jea-845473ec": "12 <fingering> elements in a stripped file",
-  "pdmx-elementary-studies-op-176-etude-3-by-jea-95eb4bab": "19 <fingering> elements in a stripped file",
-  "pdmx-elementary-studies-op-176-etude-7-by-jea-df65c88b": "92 <fingering> elements in a stripped file",
   "pdmx-elisabeth-jacquet-de-la-guerre-suite-en-236d779a": "measure 1: voice 1 lasts 221/2 quarters, time signature allows 8",
-  "pdmx-erik-satie-enfantillages-pittoresques-be-639ad423": "197 <fingering> elements in a stripped file",
   "pdmx-f-couperin-les-tambourins-fa6705d3": "measure numbers not unique",
   "pdmx-f-r-elise-c292b667": "no time signature",
-  "pdmx-five-german-dances-landler-02f0f7a9": "86 <fingering> elements in a stripped file",
+  "pdmx-five-german-dances-landler-02f0f7a9": "measure 36: backup before measure start",
   "pdmx-fr-d-ric-chopin-nocturne-in-b-flat-minor-35d655cf": "measure 2: voice 1 lasts 2881/480 quarters, time signature allows 6",
   "pdmx-fr-d-ric-chopin-nocturne-in-f-sharp-majo-fcfd4a11": "measure 10: backup before measure start",
   "pdmx-fr-d-ric-chopin-prelude-in-d-minor-op-28-abdac1f6": "measure 14: backup before measure start",
@@ -91,142 +41,102 @@
   "pdmx-fr-d-ric-chopin-tude-in-c-sharp-minor-op-5ccd6de1": "measure 52: voice 5 lasts 361/120 quarters, time signature allows 3",
   "pdmx-franz-liszt-liebestraum-no-3-in-a-flat-m-dd9e6d56": "measure 25: voice 1 lasts 721/120 quarters, time signature allows 6",
   "pdmx-frederic-chopin-piano-sonata-2-op35-3-fu-2c4c484f": "measure 11: voice 1 lasts 17/4 quarters, time signature allows 4",
-  "pdmx-georg-friedrich-h-ndel-sarabande-dfb4b1c2": "37 <fingering> elements in a stripped file",
+  "pdmx-fur-die-blondine-corregida-10973742": "measure 21: overlapping notes in voice 5 at beat 2",
   "pdmx-glinka-the-lark-from-a-farewell-to-saint-fe794975": "measure 35: backup before measure start",
   "pdmx-gnossienne-no-1-32750f86": "no time signature",
-  "pdmx-gramophone-waltz-doga-doga-b802e2c3": "159 <fingering> elements in a stripped file",
-  "pdmx-greensleeves-46683be3": "music21: 48 notes with zero duration",
-  "pdmx-greensleeves-6210b667": "music21: 38 notes with zero duration",
-  "pdmx-greensleeves-piano-debutant-with-fingeri-d12f9c22": "104 <fingering> elements in a stripped file",
+  "pdmx-good-omens-opening-theme-advanced-13a53f90": "measure 25: voice 1 lasts 481/160 quarters, time signature allows 3",
+  "pdmx-gurenge-lisa-kimetsu-no-yaiba-demon-slay-b2c53d19": "measure 12: voice 1 lasts 6 quarters, time signature allows 4",
   "pdmx-happy-birthday-d590e82e": "measure 20: voice 1 lasts 33/8 quarters, time signature allows 4",
   "pdmx-hatikva-himno-nacional-de-israel-6ff337ae": "measure numbers not unique",
   "pdmx-haydn-sonata-in-g-major-hob-xvi-8-a684ee5f": "measure numbers not unique",
-  "pdmx-home-on-the-range-secondary-dominants-c3f6eb73": "music21: 112 notes with zero duration",
-  "pdmx-how-great-thou-art-f-c0d8c404": "music21: 128 notes with zero duration",
-  "pdmx-hungarian-dance-no-5-in-f-minor-7ab00fd7": "music21: 12 notes with zero duration",
-  "pdmx-inventio-1-c-major-bwv-772-43258728": "116 <fingering> elements in a stripped file",
-  "pdmx-inventio-2-c-minor-bwv-773-2eaae4eb": "166 <fingering> elements in a stripped file",
+  "pdmx-hesretinden-shefiqe-axundova-azerbaijan-1b845c71": "measure 23: overlapping notes in voice 5 at beat 4",
+  "pdmx-hot-milk-snail-house-0921dba7": "measure 5: voice 1 lasts 5 quarters, time signature allows 4",
   "pdmx-ive-a-precious-recollection-twill-neverm-ae778210": "measure 17: voice 1 lasts 1921/480 quarters, time signature allows 4",
-  "pdmx-j-s-bach-choralvorspiel-ich-ruf-zu-dir-h-60acb0d9": "17 <fingering> elements in a stripped file",
-  "pdmx-j-s-bach-invention-no-5-in-eb-major-bwv-e9b6f4e3": "156 <fingering> elements in a stripped file",
-  "pdmx-j-s-bach-little-prelude-in-c-major-bwv-9-61ada209": "61 <fingering> elements in a stripped file",
-  "pdmx-j-s-bach-little-prelude-in-f-major-bwv-9-c0a03583": "319 <fingering> elements in a stripped file",
+  "pdmx-johann-strau-sohn-an-der-sch-nen-blauen-99e4e55b": "no time signature",
+  "pdmx-john-denver-annie-s-song-bfff4b3f": "measure 0: voice 1 lasts 4 quarters, time signature allows 3",
   "pdmx-jose-juan-09-2-33fdd088": "no time signature",
-  "pdmx-just-a-closer-walk-with-thee-easy-piano-9f3090af": "music21: 34 notes with zero duration",
-  "pdmx-kiss-the-rain-easy-cb30eeff": "51 <fingering> elements in a stripped file",
-  "pdmx-lago-dos-cisnes-7bf2d875": "19 <fingering> elements in a stripped file",
-  "pdmx-le-courant-limpide-the-crystal-clear-str-424183bb": "78 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-1-668d5efa": "69 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-14-a8a6138e": "169 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-17-05db1288": "71 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-18-d5b39508": "169 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-2-7044313b": "74 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-21-7b302b71": "110 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-22-5d5cc918": "198 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-25-67d82d76": "146 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-26-150c639e": "151 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-34-23c656d1": "184 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-38-8d9d238e": "123 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-39-dad100d5": "168 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-4-37d41821": "106 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-40-030c7de1": "91 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-49-26041910": "355 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-5-bfd8301a": "50 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-50-024fa72b": "107 <fingering> elements in a stripped file",
-  "pdmx-lemoine-tudes-enfantines-op-37-no-6-adabae49": "13 <fingering> elements in a stripped file",
-  "pdmx-lezginka-caucasus-national-dance-xalq-r-768f4a0c": "2 <fingering> elements in a stripped file",
+  "pdmx-liebestr-ume-no-3-58bef41f": "measure 25: voice 1 lasts 15 quarters, time signature allows 6",
   "pdmx-liszt-apparitions-no-2-db8b375f": "measure 98: voice 1 lasts 361/120 quarters, time signature allows 3",
+  "pdmx-love-happens-255f24aa": "measure 6: overlapping notes in voice 1 at beat 4",
   "pdmx-luigi-cherubini-cours-de-contrepoint-et-121b1551": "measure numbers not unique",
   "pdmx-lytaney-ube-die-geheimnissen-14ca2636": "measure 1: voice 1 lasts 10 quarters, time signature allows 4",
-  "pdmx-malaguena-by-ernesto-lecuona-c47c1152": "12 <fingering> elements in a stripped file",
-  "pdmx-march-from-scipio-6737eb7b": "86 <fingering> elements in a stripped file",
-  "pdmx-marche-fun-bre-1a7cedcb": "121 <fingering> elements in a stripped file",
-  "pdmx-marching-through-georgia-4bd7781a": "1 <fingering> elements in a stripped file",
-  "pdmx-mazurka-in-b-minor-op-33-no-4-chopin-4bc3bcaa": "210 <fingering> elements in a stripped file",
+  "pdmx-malaguena-by-ernesto-lecuona-c47c1152": "measure 70: voice 1 lasts 18 quarters, time signature allows 3",
+  "pdmx-mandinga-a6d5b244": "measure 29: voice 5 lasts 9/2 quarters, time signature allows 4",
+  "pdmx-mii-plaza-ffd00d5d": "no time signature",
   "pdmx-mikhail-glinka-mily-balakirev-the-lark-282afa86": "measure 33: voice 1 lasts 41/4 quarters, time signature allows 4",
-  "pdmx-minuet-1e86be17": "44 <fingering> elements in a stripped file",
-  "pdmx-minuet-in-g-07c49c7d": "44 <fingering> elements in a stripped file",
-  "pdmx-minuet-in-g-major-haydn-63104cdf": "113 <fingering> elements in a stripped file",
-  "pdmx-minuets-in-g-major-and-g-minor-5ad9e941": "108 <fingering> elements in a stripped file",
-  "pdmx-minuetto-in-g-minor-cd751edd": "91 <fingering> elements in a stripped file",
   "pdmx-minute-waltz-in-d-major-op-64-no-1-8c97041e": "measure 50: voice 5 lasts 1441/480 quarters, time signature allows 3",
   "pdmx-modal-bart-k-122e9bb8": "measure numbers not unique",
   "pdmx-mozart-minuet-in-f-major-k2-easy-54a6cacf": "measure 7: voice 1 lasts 11/3 quarters, time signature allows 3",
+  "pdmx-necrofantasia-yukari-s-theme-touhou-b57b0326": "measure 1: voice 5 lasts 17/4 quarters, time signature allows 4",
+  "pdmx-nier-automata-a-beautiful-song-6809351b": "measure 31: overlapping notes in voice 1 at beat 3",
   "pdmx-nocturne-4-in-f-major-8635b52a": "measure 9: backup before measure start",
   "pdmx-nocturne-f-chopinop-9-no-2-a1a3fa66": "measure X1: voice 1 lasts 12 quarters, time signature allows 6",
-  "pdmx-nocturne-no-20-in-c-sharp-minor-b-49-0a320de1": "158 <fingering> elements in a stripped file",
-  "pdmx-oh-canada-08b84e0e": "37 <fingering> elements in a stripped file",
-  "pdmx-old-french-song-0bfc7f02": "23 <fingering> elements in a stripped file",
-  "pdmx-op-299-22-8bf2b553": "17 <fingering> elements in a stripped file",
+  "pdmx-nocturne-no-20-in-c-sharp-minor-b-49-0a320de1": "measure 58: backup before measure start",
+  "pdmx-only-love-can-break-your-heart-f6ae4a96": "measure 6: voice 1 lasts 4 quarters, time signature allows 3",
+  "pdmx-p-atd-death-of-a-bachelor-5982a0b0": "measure 82: backup before measure start",
   "pdmx-peio-09-2-8e6a8fed": "no time signature",
-  "pdmx-piano-24-la-coronaci-n-5d24a01c": "88 <fingering> elements in a stripped file",
-  "pdmx-polonaise-w-a-mozart-0d277e9e": "91 <fingering> elements in a stripped file",
+  "pdmx-piano-sonata-in-f-sharp-142ba4d6": "measure 115: voice 5 lasts 13/4 quarters, time signature allows 3",
   "pdmx-prelude-and-fugue-23-openwtc-4a4169c8": "measure numbers not unique",
+  "pdmx-prison-break-theme-92953e3a": "measure 13: voice 1 lasts 6 quarters, time signature allows 4",
+  "pdmx-resonance-soul-eater-opening-1-ee802146": "measure 148: overlapping notes in voice 1 at beat 3.5",
   "pdmx-richard-wagner-das-rheingold-transformat-c9463c7c": "measure 44: backup before measure start",
   "pdmx-rimsky-korsakov-harmonic-exercises-alter-1546b95a": "music21 parse failed: HarmonyException: not a valid pitch specification: #1iv6",
-  "pdmx-rimsky-korsakov-harmonic-exercises-alter-dc1d2073": "music21: 96 notes with zero duration",
   "pdmx-rimsky-korsakov-harmonic-exercises-enhar-25b851ff": "music21 parse failed: HarmonyException: not a valid pitch specification: #1iv6",
-  "pdmx-rimsky-korsakov-harmonic-exercises-polyt-a17ef830": "music21: 6 notes with zero duration",
-  "pdmx-s-kkij-rven-polkka-87f0eb5d": "music21: 78 notes with zero duration",
   "pdmx-sarabande-pachelbel-0d456f15": "measure 16: backup before measure start",
-  "pdmx-scandinavian-vals-medley-0e50e07e": "music21: 136 notes with zero duration",
-  "pdmx-scarlatti-sonata-k-208-7318622d": "143 <fingering> elements in a stripped file",
-  "pdmx-scarlatti-sonate-en-mi-majeur-k531-l430-3af738bc": "270 <fingering> elements in a stripped file",
-  "pdmx-schubert-impromptu-op-142-no-2-e481bbf6": "119 <fingering> elements in a stripped file",
   "pdmx-schubert-s-serenade-piano-solo-5676763d": "measure 26: voice 1 lasts 321/80 quarters, time signature allows 4",
-  "pdmx-schumann-album-for-the-young-op-68-no-1-591fa5b9": "53 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-10-9dd09332": "50 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-11-2c3c4a38": "89 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-12-b78188ee": "192 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-13-08ba6b89": "175 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-14-0796a5f3": "61 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-15-7c2c3831": "139 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-16-910a6921": "61 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-17-3830f1a5": "113 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-18-a741ab3f": "77 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-19-c582851f": "86 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-2-401c1a27": "41 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-3-34625e0a": "31 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-4-a933d059": "96 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-5-11217258": "44 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-6-bbff92a3": "52 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-7-3de76791": "105 <fingering> elements in a stripped file",
-  "pdmx-schumann-album-for-the-young-op-68-no-8-d93a343a": "50 <fingering> elements in a stripped file",
-  "pdmx-sheeran-shape-of-you-3768c39e": "music21: 6 notes with zero duration",
+  "pdmx-selena-gomez-wolves-1aa5161d": "measure 36: voice 1 lasts 5 quarters, time signature allows 4",
+  "pdmx-silhouette-kana-boon-naruto-shippuden-op-59afd9b2": "measure 28: voice 1 lasts 5 quarters, time signature allows 4",
   "pdmx-six-unison-melodies-3bf25da6": "measure numbers not unique",
   "pdmx-sleep-df242a9d": "measure 24: voice 1 lasts 9/2 quarters, time signature allows 4",
   "pdmx-sonata-no-24-g-majorized-19a6d412": "measure 177: voice 1 lasts 13/2 quarters, time signature allows 2",
-  "pdmx-sonatina-in-g-major-ahn-5-c44662fc": "99 <fingering> elements in a stripped file",
-  "pdmx-sorry-6a810b33": "10 <fingering> elements in a stripped file",
+  "pdmx-sonatina-in-c-major-by-c-h-wilton-cd6c0d27": "measure numbers not unique",
+  "pdmx-song-0f5a7388": "measure 1: voice 1 lasts 9/2 quarters, time signature allows 3",
+  "pdmx-souped-up-ratatouille-43b0cb95": "no time signature",
   "pdmx-st-finian-16ed61fa": "measure 9: voice 1 lasts 8 quarters, time signature allows 3",
-  "pdmx-stille-nacht-heilige-nacht-c5ec43be": "music21: 132 notes with zero duration",
-  "pdmx-study-in-broken-thirds-by-moritz-vogel-259967a6": "32 <fingering> elements in a stripped file",
-  "pdmx-sweden-minecraft-for-piano-131a0c44": "music21: 68 notes with zero duration",
-  "pdmx-t-l-b-elmira-r-himova-piano-notlar-f6934145": "3 <fingering> elements in a stripped file",
-  "pdmx-t-r-k-indul-55cfd744": "66 <fingering> elements in a stripped file",
-  "pdmx-tango-la-cumparsita-piano-solo-tutorial-d0671d44": "81 <fingering> elements in a stripped file",
-  "pdmx-tango-la-cumparsita-piano-solo-tutorial-e4041d2f": "84 <fingering> elements in a stripped file",
-  "pdmx-tango-la-cumparsita-piano-solo-tutorial-edf5ab9d": "55 <fingering> elements in a stripped file",
+  "pdmx-strange-problem-1fcde80d": "measure numbers not unique",
+  "pdmx-tango-terzo-0bd605a8": "measure 76: voice 1 lasts 6 quarters, time signature allows 4",
   "pdmx-tchaikovsky-april-9f329b47": "measure 2: voice 1 lasts 4 quarters, time signature allows 3",
-  "pdmx-th-me-du-1er-mouvement-de-la-sonate-k-33-30916241": "55 <fingering> elements in a stripped file",
-  "pdmx-the-art-of-preluding-op-300-n-10-by-carl-072954de": "44 <fingering> elements in a stripped file",
-  "pdmx-the-entertainer-0af422e7": "music21: 48 notes with zero duration",
+  "pdmx-thank-you-for-all-of-your-loving-042aae46": "measure 1: voice 1 lasts 5 quarters, time signature allows 4",
+  "pdmx-the-entertainer-slightly-simplified-0e099d78": "no time signature",
+  "pdmx-the-mandalorian-02d3e6f0": "measure 50: backup before measure start",
+  "pdmx-the-meltdown-maxence-cyrin-52124e00": "measure 74: backup before measure start",
   "pdmx-the-sandhurst-waltz-3b373e52": "measure numbers not unique",
+  "pdmx-the-sims-build-theme-no-6-the-simple-lif-b2f3fc88": "measure 39: voice 1 lasts 9/2 quarters, time signature allows 4",
   "pdmx-the-star-spangled-banner-easy-5119b7be": "no time signature",
+  "pdmx-the-way-i-am-eminem-aca6856e": "no time signature",
+  "pdmx-tones-and-i-dance-monkey-15bba9a2": "measure 1: voice 1 lasts 21/4 quarters, time signature allows 4",
+  "pdmx-truth-kamasi-washington-lead-sheet-12df0411": "measure numbers not unique",
+  "pdmx-tv-revised-rin-rin-hi-hi-325ded2c": "measure 33: voice 1 lasts 19/4 quarters, time signature allows 4",
   "pdmx-unfailing-love-jw-original-105416aa": "measure 4: voice 1 lasts 39/8 quarters, time signature allows 4",
+  "pdmx-unuturum-elbet-f1c16a67": "measure 1: voice 1 lasts 9/2 quarters, time signature allows 4",
+  "pdmx-uptown-girl-857b846e": "no time signature",
   "pdmx-variation-ber-einen-walzer-von-diabelli-9d2700fa": "measure numbers not unique",
-  "pdmx-w-a-mozart-menuet-e6c5e17d": "13 <fingering> elements in a stripped file",
-  "pdmx-waltz-a-minor-w-live-recording-opus-post-788bea3a": "26 <fingering> elements in a stripped file",
-  "pdmx-warschauer-mazurka-4b97cb79": "17 <fingering> elements in a stripped file",
-  "pdmx-we-wish-you-a-marry-christmas-piano-ab1c1b31": "music21: 48 notes with zero duration",
-  "pdmx-xml-swan-song-serenaded957no4-dminor-01-808504d7": "54 <fingering> elements in a stripped file",
-  "pdmx-zarabanda-sarabande-f907ae41": "94 <fingering> elements in a stripped file"
+  "pdmx-vladimircosma-le-jouet-b50317d8": "measure 9: voice 1 lasts 9/2 quarters, time signature allows 4",
+  "pdmx-we-are-one-lion-king-ii-44c76a27": "measure 3: voice 1 lasts 9/2 quarters, time signature allows 4",
+  "pdmx-wherever-will-you-go-20d02506": "measure 15: voice 1 lasts 9/2 quarters, time signature allows 4",
+  "pdmx-within-you-ll-remain-d7fa6857": "measure 9: voice 1 lasts 6 quarters, time signature allows 4",
+  "pdmx-zoosters-breakout-d9943da7": "measure 56: voice 1 lasts 7/2 quarters, time signature allows 3"
  },
  "duplicates": {
+  "013031c2c540232c51b098ecaf435c2b1f640f027fc1d5f3446b594b0277dbdd": {
+   "of": "bf3ba464783c0e24467dd28a4e8fb66e8b70ef971753bc2d01f3f88fe03977c1",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
+  "01714203200843ab295ad03497c2ee14f07404c58957548eca83456060ce5c42": {
+   "of": "4f29dd05409cd132189802adf0bddaa3033c1812e0c6157821ade6cbf1038fc7",
+   "kind": "same tune, same level",
+   "similarity": 0.985
+  },
   "02c443732c3847a4868eed5de7021c41fc00ca19b26d98a0595c46ce65de5552": {
    "of": "7337c1bed9db6f991ad0a13a909860bcc934c44f3d001ba96a5e9b062bc5b051",
    "kind": "near",
    "similarity": 0.966
+  },
+  "03a70659e142bd32bbd08aec6814b68efa1a5db6944106d6c2a67dbc01e46e48": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v25-bwv-988-v25-ly",
+   "kind": "near",
+   "similarity": 0.985
   },
   "03d95ea1601fd009f98e235322b864147fd43bc43a02829270ff5ef653bebb68": {
    "of": "1fe58298fb6c621d25cf13fde82ed65c1bbf86af6ba28c424c688f70b216d239",
@@ -237,11 +147,6 @@
    "of": "mozart-sonata-k545-mvt1",
    "kind": "near",
    "similarity": 0.995
-  },
-  "05b024dd2a23a3185fe6e3a06a451bf38b04ec1ea965f185e4e3035800367d41": {
-   "of": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
-   "kind": "same tune, same level",
-   "similarity": 0.876
   },
   "05e2903c9a05a21db134dc7e42dc99e77f73bb0f52d62f46e8bacccb6d888f11": {
    "of": "90a82889581f04756c97e7e2f7089420f27ad048030f0aa2e814caf97da7a418",
@@ -256,7 +161,7 @@
   "06bb19bcc3217e831cbe905dafa5600420b33aa97f5e93cb8d9382f7110de6c0": {
    "of": "twinkle-twinkle-little-star",
    "kind": "same tune, same level",
-   "similarity": 0.963
+   "similarity": 0.926
   },
   "0796a5f386fe5e978afaf14fee3f1b8f9e4ddd10e300c5788e3e842de74c0797": {
    "of": "schumann-op68-no14-little-study",
@@ -268,8 +173,13 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "0b45d46b8eb97eb058baac9365cc880f5eca535fb0188d0d32b82532bed94bac": {
+   "of": "06a94b81c6eb65c4a83cd0e2a498a0fc0236768b314ff52680dbc1925a6b02fc",
+   "kind": "same tune, same level",
+   "similarity": 0.902
+  },
   "0d00e3404cefb12e47a986efd3597ccee75054e006653f73c0131887b867d2f2": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
    "kind": "exact",
    "similarity": 1.0
   },
@@ -278,15 +188,15 @@
    "kind": "same tune, same level",
    "similarity": 0.831
   },
+  "0dbe33c312c2c977f1a87ef22cf1e9e999bd2f590c79eb124a726f73256e8313": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v19-bwv-988-v19-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "0e27efa883a94526662102d61618ef9baf5f64b908bbc4d5067f560d2e74bec3": {
    "of": "eb8e5d47349296d60983ee027bfe260d5eea54f5ce367adf53eb1581bfa0cd91",
    "kind": "same tune, same level",
    "similarity": 0.89
-  },
-  "0e5c27b3c5d8147c5df0a85897ed67dc082468310070192b1233fde7c9ed6ad5": {
-   "of": "bach-minuet-g-major-bwv-anh-116",
-   "kind": "near",
-   "similarity": 0.987
   },
   "0fd3fd7a3242c5f0697abc357c0593d8313fca2e7f91f2bb09fe58c1a5a3d53d": {
    "of": "bach-minuet-c-minor-bwv-anh-121",
@@ -306,27 +216,32 @@
   "112172581500b9dc294938c4b362c3ff1739ba0e22997483a1c9def0e88a241b": {
    "of": "schumann-op68-no5-little-piece",
    "kind": "same tune, same level",
-   "similarity": 1.0
+   "similarity": 0.984
   },
   "13f79691edd075f6d4e234bb772198b9150e78fb051493739942bc64a945d56a": {
    "of": "aa05358e867b49b9248b343a91bc974268e96b2a1de52889b75d1b7ea3d4370e",
    "kind": "near",
    "similarity": 0.932
   },
-  "145c7d66a09a1c279227c1a48c8362fde8d8c26533a4beedf939489add092075": {
-   "of": "bach-minuet-g-major-bwv-anh-114",
-   "kind": "near",
-   "similarity": 0.99
+  "147ed80a10581c7c6f42a9a07f3fb9acf03bc7880b18b4b4a753f56009ccf9ee": {
+   "of": "7c617d8bb7caf126c623d8cfc8283063b8144d5ccd2389619ad06832a35837c1",
+   "kind": "exact",
+   "similarity": 1.0
   },
   "171dadf0ddc41d83ef114967b74700a51e43b95f27aa018410a121fbd3585bda": {
    "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
    "kind": "same tune, same level",
-   "similarity": 0.906
+   "similarity": 0.875
   },
   "1e86be17f98213bd481592fa539a9272c7fa71c74cda057fe1659092ffbaff8e": {
    "of": "bach-minuet-g-minor-bwv-anh-115",
    "kind": "near",
    "similarity": 0.97
+  },
+  "1e8f7bb227cc05df80461cb1682218f8dfd72f497e3092170a82847fd870cf18": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v08-bwv-988-v08-ly",
+   "kind": "near",
+   "similarity": 0.994
   },
   "2061724cdd0956e85ce9f91bccd1783c38c80ceac3b73bab504da17a9c9bd30e": {
    "of": "bulk-bachjs-bwv515-anna-magdalena-20a-anna-magdalena-20a-ly",
@@ -342,6 +257,16 @@
    "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "22cbfbd84c6cba0cc3fa42bf62c48058f7b4da00fa77059df5d4d9e5d26f7102": {
+   "of": "7be646511705d0ffa9f8594078b5c45b19eb4cdd4be56e6de01f170db41c4600",
+   "kind": "same tune, same level",
+   "similarity": 0.947
+  },
+  "234bf2a1b2b1d353554d970a94ae0aeaa3a48190df75f467ef753b719ab48649": {
+   "of": "253f3eb94bd18a0e306562726e95d562f07e5787777306924bb4d5b275ccf300",
+   "kind": "same tune, same level",
+   "similarity": 0.831
   },
   "26891fb38d6217bf407aa40f0c21801b61ecd6b1a0e509a1bb1d56904561eafb": {
    "of": "9293af50c05253357ea9d528fc799cd4ce43560748ae24d1774243efb0c833ac",
@@ -373,8 +298,8 @@
    "kind": "near",
    "similarity": 0.975
   },
-  "32750f86dc5730f31e4557c3ec504852c92b52dc4444248879a8e35e742daf09": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+  "3243acdf0ee209603d2496d2074eddcb8c28b64dd25f781a8f463e5b2cad2ed7": {
+   "of": "2f51813dc81903ca9b0b06bc6fbb6216625d2fe948a2e70088d234cb147c55ae",
    "kind": "exact",
    "similarity": 1.0
   },
@@ -383,10 +308,10 @@
    "kind": "exact",
    "similarity": 1.0
   },
-  "33fdd088a47044316808f62db1a13de222c21c2276503696685720a37f8e70bc": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
-   "kind": "exact",
-   "similarity": 1.0
+  "34152d70c475724437f0638bae603d944f89fb75da93ac7e704bc9887478d39c": {
+   "of": "d0a4205b61c6be73701303e14c126f3d3356702ab3553c13d24bd420134a718c",
+   "kind": "same tune, same level",
+   "similarity": 0.814
   },
   "34625e0a35700a26d1132eea54de6a9d1c8d7f57ca08f1c58e364f829d965a3a": {
    "of": "schumann-op68-no3-humming-song",
@@ -398,6 +323,11 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "3669801da0b8586e56c7f2b4cfad9e1387807c44d8388bff2e9452b9d8fe2413": {
+   "of": "twinkle-twinkle-little-star",
+   "kind": "same tune, same level",
+   "similarity": 0.889
+  },
   "38ff7014b1a8a5061c5f0ede023cb748dc4118b42ab24db63b5cecae1b876ed0": {
    "of": "bulk-czernyc-op-821-czerny-op-821-no-004-czerny-op-821-no-004-ly",
    "kind": "near",
@@ -407,6 +337,11 @@
    "of": "bach-prelude-c-major-bwv-846",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "3968ee164c2eb466fbced7ad89236d9c219d1baa0b736173f5018d8a2ac8d85f": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v28-bwv-988-v28-ly",
+   "kind": "near",
+   "similarity": 0.994
   },
   "3ab718ad7e1b84fa338863733eb1f7bbd2f2be697e8f8c1cc2ab3dfb44c5127f": {
    "of": "668d5efa59ca432f823e81ece28aacac7de57c00f88bef9a9526efc736bdbf86",
@@ -418,11 +353,6 @@
    "kind": "exact",
    "similarity": 1.0
   },
-  "3e3e04e6db8f173f21320410470faf0d95cac20c18ebd226113313b5eedeb64f": {
-   "of": "bach-invention-no1-bwv-772",
-   "kind": "near",
-   "similarity": 0.96
-  },
   "401c1a27d47daf544ab4532e2ddb6efc05fef28498d9d51bcb708c90bb5143fa": {
    "of": "schumann-op68-no2-soldiers-march",
    "kind": "exact",
@@ -433,20 +363,10 @@
    "kind": "same tune, same level",
    "similarity": 0.827
   },
-  "42ed0195e65b9d735a060b1cf1f536d843d825d69aa472a53f6095eed36c77f9": {
-   "of": "bulk-czernyc-op-821-czerny-op-821-no-005-czerny-op-821-no-005-ly",
-   "kind": "near",
-   "similarity": 0.971
-  },
   "43258728797b234036168521a3bd9d02d01d50e69379a69e03c53e225b7ccc21": {
    "of": "bach-invention-no1-bwv-772",
    "kind": "near",
    "similarity": 0.998
-  },
-  "4853b0d97a2c9dcab6b8f294aa7a6a8f5fc29558d20ba1597272f990aa5a7c3f": {
-   "of": "5ccd6de13220bd6b06ba03380cb9107fe84c78ef2e46062747ee96a297587375",
-   "kind": "same tune, same level",
-   "similarity": 0.828
   },
   "485bfe768a38a7d9dfc04c4331ce9592e69acacba5f49134f2c8db8dcc32ce2f": {
    "of": "935522268d811bf8e65b885049b17fbd38c96c078f5823f65421c946fe6829cb",
@@ -454,39 +374,44 @@
    "similarity": 1.0
   },
   "48b9d4f1fe67e4a1ebd67ea3ad3594705b0a1a6cbd6f6101f009b88aee60f8af": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
    "kind": "exact",
    "similarity": 1.0
   },
   "49f6cacd2dc22f276e9683699f1ba08b8a0a9b4d3814ee2b845fd637924c1d4c": {
    "of": "chopin-prelude-op28-no4",
    "kind": "same tune, same level",
-   "similarity": 0.987
+   "similarity": 0.974
+  },
+  "4a949d5d32f32e127aba35afb9d1b9155253f85b1673669413da8ec8ff9698b4": {
+   "of": "ad19363045166aa12ebe799ec2450b3347efd309df8b346ec8755071689e6498",
+   "kind": "exact",
+   "similarity": 1.0
   },
   "4bffd4804e7e5a3a7ad62b6d66be04e36ea54bd47ce32a3e1dc61a633d8c92bb": {
    "of": "beethoven-fur-elise-woo-59",
    "kind": "near",
    "similarity": 0.997
   },
-  "54a6cacf9b319f2e384794a751e54c4cb4f4dc8d65e65d6169725f2fd8116be9": {
-   "of": "mozart-minuet-f-major-k2",
-   "kind": "same tune, same level",
-   "similarity": 0.841
+  "4e89b95804165ff65614cecb5f47de6d513b2573c7824711a26a9786ee3f9c67": {
+   "of": "9b62932029af75adefe05d429d3588fc3ce0b02a33a5195a8e2bb72abac25aa9",
+   "kind": "near",
+   "similarity": 0.963
   },
-  "558c7e5f1d22b5213af092931085827d730ab36613019b924b0284f75a059ba4": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+  "4e8ed3a05357caf955fc915eb3f55a030eb8bc436cefc7063ad2f24f10748f47": {
+   "of": "c2397698d06b2efac7ff6f312532b5dde0f090b4380e59f8308b6b13d5256873",
+   "kind": "near",
+   "similarity": 0.911
+  },
+  "53ed74cf2bea7a2a1692825a9cb764c6ce948a55c37fb4e695ed2d255c1ab72b": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v18-bwv-988-v18-ly",
    "kind": "exact",
    "similarity": 1.0
   },
-  "55cfd74464ac9d31bfd0888a38aaad7dcb56f7cd447d6ef04047fb63659c7f7e": {
-   "of": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
-   "kind": "same tune, same level",
-   "similarity": 0.876
-  },
-  "58bef41f26d21e689d1f2c1b17bcc07748fee79d3029e34beac517fb617a9694": {
-   "of": "dd9e6d568895bc1591460362d85e1f088ce75e54ed77db312a7fc466376e461b",
-   "kind": "same tune, same level",
-   "similarity": 0.898
+  "558c7e5f1d22b5213af092931085827d730ab36613019b924b0284f75a059ba4": {
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
+   "kind": "exact",
+   "similarity": 1.0
   },
   "591fa5b9b853fb12d3bce9e9213b829275ee325bbdebcb2a4707f9310fa1bad4": {
    "of": "schumann-op68-no1-melody",
@@ -506,12 +431,12 @@
   "5b0d5058d1d898a6fdd10e52556499273a8e5f9faaddaae9d7254765f7b69256": {
    "of": "bulk-czernyc-op-821-czerny-op-821-no-003-czerny-op-821-no-003-ly",
    "kind": "same tune, same level",
-   "similarity": 0.974
+   "similarity": 0.909
   },
   "5b1c3de2ab1aceb142d578de5069ccae732020685efb544f5f159c8d68b21afc": {
    "of": "63104cdfdddd8552f6db2c091bcfc46affba3e3b0297de86ddc076613c454db7",
    "kind": "same tune, same level",
-   "similarity": 0.913
+   "similarity": 0.878
   },
   "5b27e901fb2b580b820cffe5632596aede7e88ba3698c724c59e7e1afa0eb68d": {
    "of": "bach-minuet-g-major-bwv-anh-114",
@@ -528,6 +453,11 @@
    "kind": "near",
    "similarity": 0.92
   },
+  "5eb8fb9dfa97a74a2812d4512336c43217ef922d78479f5b56227e075d1ad82e": {
+   "of": "bach-minuet-c-minor-bwv-anh-121",
+   "kind": "near",
+   "similarity": 0.987
+  },
   "5ef1a5c7e3c1cd641a9e039c0b11ec2d93a979a624eec03a908a1be51f63b528": {
    "of": "bach-minuet-g-major-bwv-anh-116",
    "kind": "near",
@@ -542,6 +472,11 @@
    "of": "mozart-minuet-f-major-k2",
    "kind": "same tune, same level",
    "similarity": 1.0
+  },
+  "5fa57eccc3814f22ce0c3bb07324c79c87ca88d6557b191e1e9e60c50809f255": {
+   "of": "bach-musette-d-major-bwv-anh-126",
+   "kind": "same tune, same level",
+   "similarity": 0.947
   },
   "5fb9729a6c3119b590af24b6d937f5f78ff12cffb9348b2c37bb8a57ffafdeb7": {
    "of": "bach-minuet-c-minor-bwv-anh-121",
@@ -558,10 +493,25 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "690df0536b8f8d94f0cfaadbe80fb51c501472aae4ed9ba9523e578f0e885e60": {
+   "of": "06a94b81c6eb65c4a83cd0e2a498a0fc0236768b314ff52680dbc1925a6b02fc",
+   "kind": "same tune, same level",
+   "similarity": 0.902
+  },
+  "69914bc01707e85fedbf77cc2b69b8dd0e142a4fea7980d5af037c4afce998de": {
+   "of": "4a2ff993f296750571edcce083e80e2e35f8737a56f28c691f360cb422fe7bd4",
+   "kind": "same tune, same level",
+   "similarity": 0.806
+  },
   "6a59d6d185f6cf28034d68dabf5a7654b7c4f710d2526810aab3037104eb60cf": {
    "of": "90a82889581f04756c97e7e2f7089420f27ad048030f0aa2e814caf97da7a418",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "6d55965d7cc4a3ff7f26177391bf22c645235da473b1cd410ff493276fac1892": {
+   "of": "15f4d7c47004ba92f409bb545e3a09cf2e8e7c2bc7d33675204f45b46233d05f",
+   "kind": "same tune, same level",
+   "similarity": 0.868
   },
   "6fece3c3ded9c72391b52086cb473b3f9e24fd0f0ad07fc7579b89027d413da5": {
    "of": "bach-prelude-c-major-bwv-846",
@@ -573,15 +523,20 @@
    "kind": "near",
    "similarity": 0.939
   },
-  "73f2f5117d5686a545000f870110b5d6c9ea2220fa0d602ebe07493cb0cabd16": {
-   "of": "bach-minuet-g-major-bwv-anh-114",
-   "kind": "near",
-   "similarity": 0.985
-  },
   "740d8f8eaa8cc5f7c8e54dbb931367c26fd8379e6518a752fa3ebfc4bf686439": {
    "of": "bulk-beethovenlv-o2-lvb-sonate-02no1-1-lvb-sonate-02no1-1-ly",
    "kind": "near",
    "similarity": 0.998
+  },
+  "77afcdb84f931d9670915d617ae5deb12f4586b4c5b52ba09a92935c9e694b2c": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v29-bwv-988-v29-ly",
+   "kind": "near",
+   "similarity": 0.986
+  },
+  "7969a080c8fa8dee3abb673448010f41f6ccbafb44906f6e5b5e0af6088c2bbb": {
+   "of": "2187e303d935d788a4d10a9f84f8d36a70f2ab6edaf5059f4bd6a0d90e8ea866",
+   "kind": "same tune, same level",
+   "similarity": 1.0
   },
   "798cc684ad3206b65e70027409a7282f68f3cdcd35239ab7359fb971838b11dd": {
    "of": "1f1da18fdc00d048768a98aa5bacb1301ac40292f796a18db4e9c2591dc56344",
@@ -596,17 +551,27 @@
   "7d312e5fdda696798d8a0b9b38fcb55a7986f4bc38a2e3fcc9a13c49676b70c6": {
    "of": "schumann-op68-no8-wild-rider",
    "kind": "same tune, same level",
-   "similarity": 1.0
+   "similarity": 0.983
   },
   "7e2e564d51c308e542585c299678eda9c4e5f13e6bea9bb20676a258d3bfe010": {
    "of": "1fe58298fb6c621d25cf13fde82ed65c1bbf86af6ba28c424c688f70b216d239",
    "kind": "near",
    "similarity": 0.991
   },
+  "81d595be48325a39cd5a0f3ee0c4ad842e32e3fe977520340c2cec0de5e46374": {
+   "of": "3aafaa3a7a5113fb522a8a4b75c65fe425a6ad999f1208f14c78892ca611ccca",
+   "kind": "same tune, same level",
+   "similarity": 0.938
+  },
   "85ef9b4cb0d464d60d4f6cdf146993cdf1b4abf15219f45b41e1771a44719dc0": {
    "of": "61e64dc0fa22580bb83c2ea719cb6bf1807597dffc8399623bfde99c306cbbf9",
    "kind": "near",
    "similarity": 0.993
+  },
+  "861f95f5af779706b5c8303718123db170061b4ad505ee53ce475ad4300d10d0": {
+   "of": "f31f36828230c3f518d0b0096e396fa9e14984e444869b468e40a7c5cb00d02e",
+   "kind": "exact",
+   "similarity": 1.0
   },
   "8a2db435c191719e59a043ddd502d20ec6cb841a6e37e468e583549e0e2f98f9": {
    "of": "16b768aedd0cae70a440ff684b493c25ffe1b234cd80ccbb26c97112051742f2",
@@ -620,11 +585,6 @@
   },
   "8d3edcc75db75e297d95e784639ba558d41eb1ca2bb08552fa8a8140afc1f2a6": {
    "of": "chopin-prelude-op28-no4",
-   "kind": "near",
-   "similarity": 0.99
-  },
-  "8d4f42aa67bf51b0b7f465def7c4acdedf1e350dba7585929eed5ef10bd66f6f": {
-   "of": "bach-minuet-g-major-bwv-anh-114",
    "kind": "near",
    "similarity": 0.99
   },
@@ -671,15 +631,25 @@
   "984178a9b729a3e147b3e5b4714f5c423f13bfd6b1e19e90866932411b12cbbe": {
    "of": "3ba220143884373236ce90dc4b6a3fc2c5fd2a2e6aa437ae7c4c724f931dc384",
    "kind": "same tune, same level",
-   "similarity": 1.0
+   "similarity": 0.975
+  },
+  "99f59af0d4796159850286425eeb5244e632505f23fcffb485ad24ba2e49a0b8": {
+   "of": "15f4d7c47004ba92f409bb545e3a09cf2e8e7c2bc7d33675204f45b46233d05f",
+   "kind": "same tune, same level",
+   "similarity": 0.905
   },
   "9b49fa0d17d9902960188d251c9e8fbd4a313244e2f4d7a552ae1d42c623f65d": {
    "of": "79c61772d06fcf780af9928711d5f349f4105695fbeb97f8ffb7b1c2b7fdf993",
    "kind": "exact",
    "similarity": 1.0
   },
+  "9ba8a4c7d2c6a3c15eef86d8302f47a9754307246c84a6ea048306f491c48588": {
+   "of": "burgmuller-op100-no2-arabesque",
+   "kind": "same tune, same level",
+   "similarity": 0.86
+  },
   "9cb9d4f01b91180309f65e319905e0dcbab233529896a8d88596b6e8d4e5402d": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
    "kind": "exact",
    "similarity": 1.0
   },
@@ -694,7 +664,7 @@
    "similarity": 0.978
   },
   "9e9d609066b09c4cfa9cefdb30b577edaaef0dc1ae2eae6d4711f9a93f65ebb4": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
    "kind": "exact",
    "similarity": 1.0
   },
@@ -721,7 +691,7 @@
   "a2f311ed73dde838b878e832c0d0ab1803f3f521482baa9d5100d5b88050ecbf": {
    "of": "1f1da18fdc00d048768a98aa5bacb1301ac40292f796a18db4e9c2591dc56344",
    "kind": "same tune, same level",
-   "similarity": 1.0
+   "similarity": 0.992
   },
   "a332555c663d64cf879cfd30ddf0fe741c18835e0f80cbc1628ff1a081257dd8": {
    "of": "02c5111636f8b6885c196d168da0303026b61988293a58bb11e439d3e71842da",
@@ -733,8 +703,18 @@
    "kind": "near",
    "similarity": 0.964
   },
+  "a36a1f02ec264185ef8fc435db273e61caf57505568b60fba9ff8cd9554a07ac": {
+   "of": "1402b6fb6ca055b2b58cd30130f64630e9d7cc38818588ec0d02a07e4a2b4220",
+   "kind": "near",
+   "similarity": 0.975
+  },
+  "a54452afbba669fd8281f69b864218f2e74296d342246ec11aba8b384742204d": {
+   "of": "234bf2a1b2b1d353554d970a94ae0aeaa3a48190df75f467ef753b719ab48649",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "a7cfaf96b7058a8ce32ef3ddfa2991500b5f309619c879828a48f78272d8526a": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
    "kind": "exact",
    "similarity": 1.0
   },
@@ -756,7 +736,7 @@
   "a950bef8426b1e1de8ef4df763ea76f12a0f0c617acc7e758ecb595e9bf83a64": {
    "of": "bach-musette-d-major-bwv-anh-126",
    "kind": "same tune, same level",
-   "similarity": 0.973
+   "similarity": 0.947
   },
   "aa7a5323dae8ffde2ab5d27b6fd6da966f05ed9cc6da71ec72c030cef31b20d6": {
    "of": "dfb4b1c26037c4ea6a1ac20278b1f4c4b5937008ec5071ccc2648238d9df00e5",
@@ -768,6 +748,11 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "aba8c9e9c2ce8a4b28a72022b179f5346cc50385e71240d2ea7f7bf5cb063a7a": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v23-bwv-988-v23-ly",
+   "kind": "near",
+   "similarity": 0.999
+  },
   "ae6a440b2e6c4c5ea6d02e0a1e6f35bcaa5245ccbbb6beaf30dc05bac3f37a4f": {
    "of": "7fb2ecd9cc46261e854fd434db06755a02625c4703f1fa0c219b6db89ee18166",
    "kind": "near",
@@ -777,11 +762,6 @@
    "of": "b19a6c9714992523d5e7b8f47d8a4700d4c403c961bd1fa080ba977c625ed040",
    "kind": "same tune, same level",
    "similarity": 0.819
-  },
-  "afe241bd6ee1223b9c69795f64f890e8da3ab2e8723e208efaa537a3ecebcc0f": {
-   "of": "d8c1282c3f55c57bfb882b6ca4be1e9bcb6f0786521efeb863bae17b5eec5bb3",
-   "kind": "near",
-   "similarity": 0.919
   },
   "b0ad3dffcbe5cc52d36a383cc18166f17b62277a01271afb4a390373f7fc5c4e": {
    "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
@@ -803,15 +783,30 @@
    "kind": "near",
    "similarity": 0.999
   },
+  "b388c305c7cb954f8f20277a6f70fff1ee9d62bb0fdc96188dff1335712a5444": {
+   "of": "0891b75be097e48c8af3d5e52dab99d08e3e6b1f2b69e3336cd1fa5f52a1a0a1",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "b469d4924494d13298df593515ec8d5b317acb3a25081ad7f647164228278b53": {
    "of": "7be646511705d0ffa9f8594078b5c45b19eb4cdd4be56e6de01f170db41c4600",
    "kind": "same tune, same level",
    "similarity": 0.887
   },
+  "b53c969ea138c5e74ee090c74af06f22e3f27f3d8bd7cf7d7cdc894c1b6efc61": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v20-bwv-988-v20-ly",
+   "kind": "near",
+   "similarity": 0.971
+  },
   "b78188eede6bf2819720c1dd3475aa319f276549885cb4ed11736eefbc78ee4b": {
    "of": "schumann-op68-no12-knecht-ruprecht",
    "kind": "near",
    "similarity": 0.964
+  },
+  "b7d18ed93e22aa259dbe7d10a3eaa60931ba88a98d9e13543be521f059477d76": {
+   "of": "silent-night",
+   "kind": "same tune, same level",
+   "similarity": 0.973
   },
   "bb10af5a7df65a53ae18bff4593c955337cafe0c9ae6b08d343cd2f171d069f8": {
    "of": "b56a42f1fec40ba27ea6176ec931aee3280b6dbf36d1a99b7fc2072b64b92cd6",
@@ -821,7 +816,7 @@
   "bba8ef623b35d07e347a80d124211b7179ee0a35511257459c822d40b7245eaf": {
    "of": "08a0f1a4c9c17bb7c1cdcf7fa04a9b918b79afd653bc85a8292ce18c990071b6",
    "kind": "same tune, same level",
-   "similarity": 0.916
+   "similarity": 0.836
   },
   "bbff92a364ba6f6cba0618bfd94213e1ba6a9cb91fdfdb160a8a08ec17a6aa47": {
    "of": "schumann-op68-no6-poor-orphan",
@@ -858,10 +853,15 @@
    "kind": "near",
    "similarity": 0.947
   },
-  "c76052f13d8dbaa25b71aec172460ead15c619647b1dbefe47adf0e9de6be137": {
-   "of": "bach-prelude-c-major-bwv-939",
+  "c48864e43a42950538621e4a8f8caf185562d10028681a023b04bb2b5f4e3a71": {
+   "of": "5f33e0deee8e9f4a7b29b17ed15a075f048c699785a086d099a654cd3a86a5c0",
    "kind": "near",
-   "similarity": 0.967
+   "similarity": 0.927
+  },
+  "c76d2f4e74095eaaca2deb6352bde60f5b4d7075ec2995acba5515a0c3c4e247": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v07-bwv-988-v07-ly",
+   "kind": "near",
+   "similarity": 0.994
   },
   "cae33a3f3bb0e4897b20d6deefc2026e362a844e7e993a49e89d4cda167d83d4": {
    "of": "clementi-sonatina-op36-no1-mvt1",
@@ -886,7 +886,7 @@
   "d12f9c22b2eab82481e1b1a5aac3da49ebba26ddf2d0883c8502195e7ed3effb": {
    "of": "greensleeves",
    "kind": "same tune, same level",
-   "similarity": 0.875
+   "similarity": 0.85
   },
   "d244d8c518d0ca1c52fcc539dfca89e824583ca1473d35664def3344cd1f0161": {
    "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
@@ -908,10 +908,20 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "d688fe7e2991323171e786d6af1b1f945d3d3224ebabde6df75166ffb0bebc3a": {
+   "of": "455df0528b91a69aea8f207cf2d6d7220e191d644fd6988070df26a9cdf78061",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "d93a343abfa7c8f543f3e7bb8574e0869ea2f05987ae4e25ebb383d0a0a5873d": {
    "of": "schumann-op68-no8-wild-rider",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "daa7620c6347dedbfb3bd00dd4f0c982ecfc8c7535cafbcc95c07e0cf23209f1": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v09-bwv-988-v09-ly",
+   "kind": "near",
+   "similarity": 0.995
   },
   "dab4f14fe111b35c36a00652be584899f83087df0eec2ab678952533e1a471d5": {
    "of": "bach-invention-no2-bwv-773",
@@ -929,7 +939,7 @@
    "similarity": 0.958
   },
   "de2dfd6b51752fc02cf6b4eb225eee292b2e5f4acd87cb37b41bdf3351eb9dc3": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
+   "of": "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30",
    "kind": "exact",
    "similarity": 1.0
   },
@@ -937,6 +947,16 @@
    "of": "72ced5fe54c3d9426491c48470f1ce3498d74451fc1467e6b74dbcba1755941c",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "dfca1d4be9da79c629bf4a1161c578b3cc36006feb293006fa67d97ed923dadd": {
+   "of": "20e2830731023a9227e77c08d5e5a5d26784921f66ac3b6d5301b6784d24967b",
+   "kind": "same tune, same level",
+   "similarity": 0.957
+  },
+  "e0d57f2cb46fe0365efebf1fbc9fb77aeff12d661c0f7379aa1119aa4e4291f8": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v11-bwv-988-v11-ly",
+   "kind": "near",
+   "similarity": 0.997
   },
   "e43f95dc8dfde1ca99fbcd9e64f344f5275d15531fe1b0bc69a0aad15042053b": {
    "of": "85ef9b4cb0d464d60d4f6cdf146993cdf1b4abf15219f45b41e1771a44719dc0",
@@ -952,6 +972,11 @@
    "of": "c0266a914b34058e8145af9f5781c011871a63e5542b162ed1007ef7a8fad225",
    "kind": "near",
    "similarity": 0.996
+  },
+  "e5e9ce7a1e9f328bca077802d793f9f238e876c177f214ce9ef6aec19e76bf0b": {
+   "of": "ad2ce2a676293be7f6144f25e1ffd4079c29c5480730bff731a4a10841b935b1",
+   "kind": "exact",
+   "similarity": 1.0
   },
   "e6c5e17d14fa9007c1ab2ca6e81d5d6f4dc49480d350945fbcdae037452f97cb": {
    "of": "mozart-minuet-f-major-k2",
@@ -973,6 +998,11 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "ed00ed08014fd4f20da35c7dcb98e7a7143f63341d122b8a3026c3ed81335a6d": {
+   "of": "bach-minuet-a-minor-bwv-anh-120",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "ed7cc4e717204973a032ad84595c339fe491f7964164d68309ea824697270498": {
    "of": "bulk-czernyc-op-821-czerny-op-821-no-001-czerny-op-821-no-001-ly",
    "kind": "exact",
@@ -988,30 +1018,45 @@
    "kind": "exact",
    "similarity": 1.0
   },
-  "f584369611d44816e9179cc66c766b92a4d3a7bfd0ba38fc66c0a9ea26769f30": {
-   "of": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
-   "kind": "exact",
-   "similarity": 1.0
+  "f57c79856e601528dbedcabe542ae09984dfb9ad2a5da5616de3cbe0e5f731e2": {
+   "of": "3e1045d07bb2b2ea4869a3de2457335905a9bb71f2c5566d803ce2986868d42a",
+   "kind": "same tune, same level",
+   "similarity": 0.814
   },
   "f857802b06007d54ce5c12624ff85b68fef693b1532a81c1a36323b826830a87": {
    "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
    "kind": "exact",
    "similarity": 1.0
   },
+  "f8b371270070ad7fb163c1cdc77888bce130efa24f15e15a5a8eb7efd680f082": {
+   "of": "e450af8823e173ad18f1a280c6e633f8c81d47aa4e9252631e0495b48b225fc5",
+   "kind": "same tune, same level",
+   "similarity": 0.878
+  },
   "f907ae41694aa0cb4bae6c3295a3f2cee6a7cbeef2ab1f016952db3fa134c61f": {
    "of": "dfb4b1c26037c4ea6a1ac20278b1f4c4b5937008ec5071ccc2648238d9df00e5",
    "kind": "near",
    "similarity": 0.952
   },
+  "f944675a77970bc458ae2131f6a45e48745944882735291a081d974d52d618a7": {
+   "of": "bulk-bachjs-bwv988-bwv-988-v13-bwv-988-v13-ly",
+   "kind": "near",
+   "similarity": 0.999
+  },
   "fa3181df566983ebc76877e26b89a78294568c911107693868fe5e5d359a2be7": {
    "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
    "kind": "same tune, same level",
-   "similarity": 0.906
+   "similarity": 0.875
   },
   "fad61269ad155bf08dc6eb799542b1daff0b550626be139c0938557708c29f5d": {
    "of": "schumann-op68-no8-wild-rider",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "fce2423502e8ea8ea25482f0d102c241ce9799926798776dc4f1cf6837024d8f": {
+   "of": "1cbdfb290bacde50dc7e2e94f5a805cb50b86c9fc9c0e46e9f742467c11c39e7",
+   "kind": "same tune, same level",
+   "similarity": 0.8
   },
   "fcfc60c73df5f9d3c626ce80eb56b60fe9e66e59b738b7ab58ea50e988170bae": {
    "of": "4bffd4804e7e5a3a7ad62b6d66be04e36ea54bd47ce32a3e1dc61a633d8c92bb",
@@ -1028,10 +1073,15 @@
    "kind": "near",
    "similarity": 0.979
   },
+  "fe10eb1fc73420e51e4ff26cc82b6815a59d8778a515131e2201915e48b32a80": {
+   "of": "3feb4e39f20b6475a8117db6ccd36d14b5c158610e5dd03a1d06796e80b7ac3e",
+   "kind": "same tune, same level",
+   "similarity": 0.929
+  },
   "ff37785f2febcda2017d28e224503115a7c4b3f9e3a0c2aa5ca797ac98a045e6": {
    "of": "d9067003f476317f2969b84ee715f47ef3df9561be8ec29dab3542ae49d9c6b1",
    "kind": "same tune, same level",
-   "similarity": 0.906
+   "similarity": 0.875
   },
   "ffe6c2dd1e7d7315b7a0d2fe7e9e6ecf855b8b5847b2861d777dde089bb7f17c": {
    "of": "a91b15e6c6569bb7b82e94c281858cb0a41a3c3337c6c2b8f87fe626bf347a90",
@@ -1040,74 +1090,340 @@
   }
  },
  "outOfScope": {
-  "00adeaf43fe1f658b0dc75137ab1364d9943c09fc966135879b9dc89be3e90a9": "modern-music: Cartoon TV theme; scope-judge: Cartoon theme; content-safety: Amphibia cartoon theme",
-  "094cc2c4bee7b0c662756e56899fa4d4a011a26dfd7ef785afb6096a21deed29": "modern-music: Contemporary worship song; scope-judge: Modern worship song; content-safety: Modern worship song, Matt Redman",
+  "00a96f7b441969fb9411b56ab37051f3ae64474355deb941bbcf37f2c4d79e02": "review junk: Scale practice exercise, not a piece",
+  "04166412aafe39b0461d0e8b7a38db5d822a6d3ec7c191b523c25d234bef333c": "review junk: Only the ending excerpt of a song, a fragment",
+  "04a13931675ac9112ef5559080f71d3c23341c2bdee03078e52e75174cd28888": "review junk: Title marks it as a test (\"pueba\" = prueba)",
+  "04cecb2c4e636a7edb9a3676dd82a24289640355e37fe0f5657bb98ba70b2e85": "review junk: Mixolydian mode exercise of 85 notes",
+  "054255918e809a55309d9807ea66c372f7a2fa71c2f541514aac3c0a5bc0b328": "review junk: Marked work in progress, unfinished",
+  "08d36f0feb7f26afeed6e40bf50419b66fcc4ca0b40c4d1446233b213cbf869b": "review safety: Russian army patriotic tribute song; state military propaganda",
   "097e70dfb552d4a8764351a1374b19df500e523d3a8a705f145947748eea5df4": "modern-music: Modern political march; scope-judge: Political tribute, not traditional repertoire; content-safety: Pinochet propaganda",
-  "0b1c49f2545acbbcfee9f9e2aeaba78cbb6b4a790f3756b7ac04da3144faf60f": "content-safety: Modern Azerbaijani song by living-era composer",
-  "11e6db99d8801a3c0eae3d7f1fdd1ce76dc0f1a744cab66084efdd688b347fab": "scope-judge: Modern original, not classical; content-safety: Modern composer James Spiteri",
-  "1aaae12082e8bfb380f48a6c160ea0a2a5bea05794e90477596f5cc15ce35c2c": "modern-music: Modern LDS song by Janice Kapp Perry; scope-judge: Modern LDS song by Janice Kapp Perry; content-safety: Janice Kapp Perry modern copyrighted LDS song",
-  "1adea15797fd657f316bb1439186c65abde67781019a0da7b8544e117740fc2c": "modern-music: Identity V game music; scope-judge: Video game music; content-safety: Identity V video game",
+  "09d3044076df22752387d6e968f23eed54b15c94633cb9c145053045b9ea814e": "review safety: Epic Sax Guy: internet meme piece, titled after the meme",
+  "0c132e1b3dd625cc4cbde544b8ce240b8c9bc7b778335db62e3771f441eb246e": "review junk: Extracted synth part, not a standalone piano piece",
+  "0c49733928ce184ca60212133c0c7be15c978d76b5d21a4dc7a2bf2caf0c91fb": "review junk: Simple harmonic base exercise in C major",
+  "0db3e0ca13cca0f551ec99fbe06ef431b6e8d628a8b067d2020f1d1ab7d656bf": "review junk: Title is a hash, effectively an untitled file",
+  "0df9635f1c051ef3572c58f1052103200ed8e7da31adf1a8a2b3f04eb753377c": "review junk: RCM chord progression technical exercise",
+  "0e434754641c20737093ad525bdf0e53c30faa7c5f5bd2c1c82528d826747ec8": "review junk: Fingering exercise for modes, not a piece",
+  "0e5512bb0ad7debcd52cdb5b9a7c39dad09b00abc11a72765c4749fbb304bdfc": "review junk: Titled as small tests, short test fragments",
+  "106b778fbf2e6187f3619ed9aa5c945c84bc13af4704a824fbdc73e843eb07ea": "review junk: Chromatic structure exercise, 87 notes",
+  "106ffbcac48b1eac59b8c67227f62a2e9a991ed7f541a4786867afc67172864b": "review junk: Short guitar riff fragment, not a full piece",
+  "11e10959510046ad944657fcc9c8b2d60ce187cfb65cfd032a555d412ab5217e": "review safety: Coffin Dance meme piece (Astronomia meme)",
+  "123f4375b4e7f7c8a85850163523750a0cbb1748e118b032069fdef63a96dc4a": "review junk: SATB voicing exercise, not a finished piano piece",
+  "14c1ed7498eeb20a643a528bf7566f3d6fa5201ba5bc8eb7a62195cbb4b04498": "review junk: Section chords and melodies exercise, numbered drill",
+  "1566edadb5768bd5a3f38b601faa703764dca9749de42957cbab0d1fb0988b8f": "review junk: Scale harmonization exercise, 56 notes",
+  "18472868db85b1f68d18167178c533715a2790d477cd63a6f210ea4a5ee56b7b": "review junk: Chord experiment file with a gibberish numeric title",
+  "18c72009e4dff58996e11048bdd5ad5d8cd7a0755a08adf0cf5256a86ef343be": "review safety: Sexually explicit Brazilian funk title (Cai de boca no meu b...)",
+  "190adf111def85d164ec39eb728b88496ec820fe15b908845e5ff4d6e5b6868d": "review junk: Numbered SATB harmony exercise, 80 notes",
+  "19bafe06931ec364116ad0c54715c5f45cd3a187fa29c73db5402e1386e34c9f": "review junk: Clef note-reading practice drill, not a piece",
+  "1a6cbb5c5f52e3f7f64f1490d66a5d44db4486364b5166a44d2a76b39fa56900": "review junk: Finger exercise, not a piece",
+  "1afd603efc0c76c2575637cbaac51648d622278d54c09c75fce5c2cc1f0bc5ca": "review junk: School assessment file, 61 notes",
+  "1b0c0ccfa31aface7d432f8482c70b08a6a314186a75677ea935537abbb0aad2": "review junk: Unfinished work-in-progress fugue, short",
+  "1b0f665519dd298b09eed6ef13bb5e9d87131820f4cad76c32ecf21ac052e8da": "review junk: Numbered exercise (Ejercicio 18), 72 notes",
+  "1b241a07da2a099278f7497cfb4552e482cf41795704af05d9997cc37c84a947": "review junk: First-score style file, 85 notes",
+  "1bacda3bf0dda5ef0089764c903fec43a20580bfd90464a8a5175a975b8c937e": "review junk: Auto-generated quantized file name, not a titled piece",
+  "1caf5d5fdeef6d229ff25c32bee66739d60a8d19a8b14114dc1e6221f45f441d": "review junk: Theory progression exercise, composer 'You' template",
+  "1cb7b04682c3265826660992ece8191c5f277f699bfbdf7b54300b6adf6c290c": "review junk: SATB harmony exercise, 40 notes",
   "1cbd4b5ab0f56d1432d59eeac44f5ccdeaa7696f0cfd3472147fb405b9ee13ef": "scope-judge: Amateur fan piano-adventure arrangement",
-  "1e552ec521deb4d08d36e4e7a48b85f43b4658eb3bae889c98d74f891a5a8005": "scope-judge: Likely Ed Sheeran Perfect cover",
-  "233d6491c378d692e741a3bfd094cbd4e985fd947ec51b106ebda6f1f082badd": "modern-music: Hillsong modern worship song; scope-judge: Modern worship band song; content-safety: Hillsong modern worship song",
-  "287be700906306cf71d8414648ee5beb6a2341356eddec558c7754b712516188": "modern-music: Simon and Garfunkel song; scope-judge: Pop song, Simon and Garfunkel; content-safety: Simon and Garfunkel modern song",
-  "29384e355210f6ec9f9cd63486049aa30243ba048166b5751ac095c0113febf7": "modern-music: Minecraft game theme (C418); scope-judge: Minecraft game music (C418); content-safety: Minecraft video-game theme (C418)",
-  "297dfaf81cb6f8376e944a0ea29c7f39190fd6e535d0ac54b0c83426276f3c51": "modern-music: Pokemon Sword game theme; content-safety: Video-game theme; scope-judge: Pokemon game city theme",
-  "30b24b623461812307c437a9be834344a155b12bdc5a182455650d97207fce14": "modern-music: Paterlini modern pop-piano piece; scope-judge: Modern neo-classical pop composer; content-safety: Modern composer Paterlini",
-  "30cb5c0725129090034a26ee4aff0e8a4a40bc22119d2f49e9afd442e291dce2": "modern-music: Ed Sheeran pop song Perfect; scope-judge: Ed Sheeran pop song; content-safety: Ed Sheeran modern pop song",
-  "321ae371e57ae9be608fc250eb6277dc97ba9267d5a77e9629c7fdcd9b79e3d4": "scope-judge: 1950s pop song; content-safety: Modern 1950s copyrighted song",
-  "3301b16198b4b754ec8ab053657c0ecdb6877b1a17b9fb99c2d833b737a419b0": "modern-music: Ed Sheeran song; scope-judge: Pop song; content-safety: Ed Sheeran modern pop song",
-  "35e48df140cef54c775a4b34f9c4538f068ca1f7af8db35bfb4866858bf4f5e6": "scope-judge: Modern original blues by hobbyist",
-  "3875c12364ff81e316f9939b18643d1109ac281c28b807afe48e4ca90214454d": "modern-music: 1939 swing standard; scope-judge: Swing standard, 1939; content-safety: Glenn Miller 1939 jazz standard",
+  "1d0b077c1c2fe22aed326f20a5af719b2f18d5782944f36310c6371840313c96": "review safety: Title 'A LOLI' carries sexualized-minor connotation, offensive",
+  "1de840745b25a3a0b2ffd646c6e87d41c7e76d3d7e7eeef4113d14fac13a25c5": "review safety: Novelty parody of Rudolph made to be funny",
+  "1e64950e3f988291ae39c09a622d84250016a1ed58cf251a2bd864b2bf1b265c": "review junk: Walking bass class practice exercise",
+  "20c8d60fdccd8615bc347e0056946763a1d07b2ade05fa20f58f2bbeccc701d6": "review safety: Gradstein's 'Cześć Partii' is a communist party propaganda tribute song",
+  "2317cc23a4fef61f82267d960f1a7f7df9a8816e4c5bc709d9d1275a87e1ef74": "review junk: Titled as an exercise (dodecaphonic exercise)",
+  "2615d48027e4f5196c8baf6577b844daa704cc41114c1e338c6dcd9a3b35ba37": "review junk: Solfege lesson exercise, not a piano piece",
+  "26f44d02d4d466937ff173e0d82e8251792fbf6e9f330497ff6ba22a4289a9a5": "review junk: Chord progression waltz pattern practice template, composer 'You'",
+  "274d1cae13eec1e887ae34f1a773e37aff6645a6e783bb411f8be305e646f0ab": "review safety: Nyan Cat: internet meme novelty tune",
+  "27bacfaac344d62f941363af68dd4448cc279fb55c1615efe7016bc24e68e391": "review junk: Hash string title, untitled upload",
+  "27bbe6dff4e1c27d63b7c3eed3db86262e92bb7f31ee99a6173ee643cc97b04f": "review junk: Keyboard-mash title, likely test file",
+  "2822abc1c570489e54bdc653051651e5c027897dd664d7dbefae3ddf17b06069": "review junk: Marked work in progress, unfinished",
+  "2899542ac5aea151cdaeb704902b0913d7392e54a643a88342935644c8789582": "review junk: C major scale exercise",
+  "28b88ca20d26d0336a233060cf9b1250ac4b654ae0e454df065747e195bfcfde": "review junk: Marked in progress, unfinished fragment",
+  "2966ae02c90ec1e4b286efc8ecbeee0e3e734d661cb6281359e57f5c587bbadc": "review junk: Title marks arrangement as unfinished, in progress",
+  "2a6a9f6ab40deb6fa43a3f720742239553bffdc5680248f13b69a9cc3d21054c": "review junk: Placeholder title TBD, untitled draft",
+  "2a818987678f4df30de0652c338b94e7d81bf0dc1480529f8fdd111ff719d328": "review junk: E major scale exercise (Tonleiter), not a piece",
+  "2bfbfba2501e6f72780a03de21640f0c45aa15ff51088a996a6cf78b7aa5b95c": "review safety: Joke/meme title sexualizing a children's character",
+  "2c733d677bbc69dde4b11d37678b51bd4441a5d4e6ca1c03bed65499fe94d5ab": "review junk: No title at all, untitled unknown file",
+  "2d5b02161a8bcd6395574b3bb6b0884e7e2b89ef3cb447dc8564200dc3c83aa7": "review junk: Broken-chord progression exercise, composer 'You'",
+  "2e086eefbeb4ff6565fe1914f5c78ba23e0b14bdb2cc45c2b2b6d5d056d303a2": "review junk: SATB harmony continuity exercise fragment, 72 notes",
+  "2e8ce1564be7940c21bb2da9127b8b07ad9215cf3655be9d62d9576432617795": "review junk: C major scale exercise (Escala), not a piece",
+  "2ecc5c273126eb497868670016e3dc956f6f744d2cf18ac2fc3f325ddbb3ba60": "review junk: Chord progression exercise by 'me'",
+  "2eeb2ae910e2ffec418f60545e9733bfbba3a73208a1850ba276cebeb58086c4": "review junk: Numbered exercise (Ejercicio 18), 72 notes",
+  "301be98641627128e219ffe16cd84fff6b4675703a736e053bac4400b57c1b48": "review junk: College homework assignments, exercises not a piece",
+  "305430c47f7ec6613f18be4d3ef067e30d48f3534d1755d5931bc6eb1d2cee73": "review junk: Class technique composition labelled rough draft",
+  "32cebad23fc49731f3845c5ae483b04a8f66d7552869b7463816bfa7d91c40c2": "review junk: Placeholder title 'votre titre', an untitled score",
+  "333e0e3af07258717857976890a5ec6a15c3e0f5a244303cee309ac176df26b1": "review junk: Chord progression drill through keys, an exercise",
+  "3345be48c9fef9e5e45236a056fbddb3716b911f88eb67a035037b89a7e170c6": "review safety: Meme rearrangement, credited 'Ruined by'; novelty joke piece",
+  "33782e86c67948746ccfe23fafad3b5b6b88662ca9829c3636394b419fcb3091": "review junk: Marked WIP, unfinished score",
+  "33c25e0282076ced843b07d8ea90ba0932b4c72bfe97140d3cdce79570258e6b": "review safety: Meme piece: Vine compilation ('My name is Jeff')",
+  "345e7a7c8293e73b421865a7839f27700646e51aa0f3d5e0fb4203d69cd7b904": "review junk: Title 'first try', a test file",
+  "346d9a087a169c3d0e7cbb5cb125388fd10b4b914673d9064438839bac9a4c6b": "review junk: Titled as a progression test",
+  "347c7c3269e60b92e6a0bc1d47767b2a3fe592e6d2d4b0af669874f389b77525": "review junk: Marked in progress, unfinished arrangement",
+  "35768cdf30ad90c33800b77bc524692e38ce17ce0bf69f1e412c891864f2eb3d": "review junk: Placeholder title 'to be given a name', untitled",
+  "35ea6661f5bd8835da1a10afbb2bfb75ad7a00dbf7640636c81e17c99737fc3c": "review junk: Guess-the-song quiz of fragments, not a piece",
+  "36743e0d25e90fcf2df04f9bb9907995325907dead207979d193541089f43f66": "review junk: Sight reading exercises, not a piece",
+  "384b699622a5871f926b33db577adfd3c4e99958a6f185b03bcafc0cd7ce7564": "review junk: WIP first original, unfinished",
   "3887dc474303d00eafa7396f835d0dfdf5aee7ba183156960ed6324fcbf3572f": "scope-judge: Joke novelty arrangement",
-  "3ada6c3194a0fd6235cabd1c699451aa33182d79bd788dca23c7d13775fe34cd": "modern-music: Video game theme piano cover; scope-judge: Video game theme cover; content-safety: Video game theme piano cover",
+  "38f8ff555f45dd041c21b5a124ab239495803350f8bb414efd6d6389265876b9": "review junk: Title 'Teste', 48-note test file",
+  "39bd6b409de2d2f601f0a7d6104baa0f102f8b664831f0e6f4ebb750e4e69aaf": "review safety: Gibberish joke title; novelty meme piece",
+  "39efaa648052137c677d56bd5428a6e6cf0e532d9282e6dec6359fedf4122973": "review junk: Title 'Unnamed Song', an untitled score",
+  "3ae7f6e6ca934f092f500ba6e409eb5bb54aaecf2b1af391cab7de4ef1796bf6": "review safety: Bloodhound Gang sexual-innuendo comedy novelty song",
+  "3daa38d1433f2849ca46357f0ee2cc2cb4aabc02bc9ecc6352bdc899522ee799": "review junk: Scale exercise, not a piece",
+  "3dc496d93a9b0dde35cc54893bd9dc9a77fee28429d415a0613a63bc3f3fca19": "review junk: Titled exercise; 66-note drill",
+  "3de42180b79dd4d32caf29f942145184bdcd4b50bb81f87689344ba4162874c2": "review junk: Theory form exercise ('try-rounded binary form')",
+  "3e389e9a2cc38d71f40a6b6463f3517b5689e4d453a4e5068ffc9f02be4d2107": "review junk: Untitled file (title NA)",
+  "3e914523f8296635d236f24879f64a36a440d787dca9b9e69e1b32c3cef54e12": "review junk: 68-note fugue fragment, not a complete piece",
   "3f58da2cdf335ced903b21f7ebea03eb4ed4a9f6e377ba46f486ec80c77ba0dc": "modern-music: Wartime military song, modern arrangement; scope-judge: Fan arrangement of a Nazi-era song; content-safety: Nazi-era Wehrmacht song",
-  "433c436357b6c923705afb66ed4c1c6d42d1af2cb5a9ce73e454c448b8efc03e": "modern-music: Einaudi modern composition; scope-judge: Modern pop-classical Einaudi; content-safety: Modern composer Einaudi",
-  "4362feda69f35f43b0b247b8e6e0995d4679be4cb855180f3a260226775cd0b4": "modern-music: Film K-PAX score; scope-judge: Film score; content-safety: K-PAX film score",
-  "47d797156f5993ec4da70a3160ea5a37c5e40b0f9d66efba0ad852e9c2f4fab3": "modern-music: Phantom of the Opera musical number, 1986; scope-judge: Phantom of the Opera, 1986 musical; content-safety: Phantom of the Opera musical song, 1986",
-  "4827a7a2cb1782665061f163814783c9de73ed03363eda4f5af9137064d2de9d": "modern-music: Video game track; scope-judge: Video game boss music; content-safety: Video game theme",
-  "4925f04bdacc937d42563b18a1694f8cc8e447f349285c13b48f79d0199c7342": "modern-music: Lumineers band song; scope-judge: Band song, The Lumineers; content-safety: The Lumineers modern band song",
-  "4abac2d800e4ea220053e1f32486423dbff5599bc9667d6885797d7137813269": "modern-music: TV series theme arrangement",
-  "4c55e9c828d1ccc9fdd3b25a3ec9544a3b06feb62db3c86495698cea567a7cae": "modern-music: Ed Sheeran pop song; scope-judge: Modern pop song by Ed Sheeran; content-safety: Ed Sheeran modern pop song",
-  "52124e00132e44e8b310d9be5aa61053f4d68eafeee9d1408a7f193fd37d70b9": "modern-music: Modern pop pianist Maxence Cyrin; content-safety: Modern copyrighted Maxence Cyrin arrangement; scope-judge: Modern artist Maxence Cyrin arrangement",
-  "528efbb3e17ac96b6dc2958d7dd9eb02421ebcd842ee4401de004af09e8cd4c2": "modern-music: Piano cover of modern piece; scope-judge: Modern cover arrangement; content-safety: Modern piano cover",
-  "533bd65f2d67e816df6752f3367dc5d24aae5401452ddd529a759ef7fa8c8626": "modern-music: Poshlaya Molly band song; scope-judge: Modern band cover; content-safety: Poshlaya Molly modern band",
-  "5516a58afe33384465699fa976261592b6c253e4308d2a415d1e66612b6d4b76": "modern-music: Modern worship song, 1986; scope-judge: Modern worship song, 1980s; content-safety: Modern 1986 copyrighted worship song",
-  "5d68b400379cb537a8351584579fe179ec16652709207b3e209f91908ec5ecd5": "modern-music: Elevation Worship modern song; scope-judge: Modern worship band song; content-safety: Elevation Worship modern song",
-  "5fece012c722308c4208d74014bb57db842eac439d25224d274f0c947b354c11": "modern-music: 1938 Soviet song Katyusha",
-  "62b627d15bba5840d7be63bb7be627efc8f5242d2673bca93dbe07176ffa792f": "modern-music: Video game boss track; scope-judge: Video game boss music",
-  "6809b358d2f565aa3110a2deb0595833e8d7990c5c1641501c6a3f25bc11da5c": "modern-music: Jazz version of classical piece",
-  "722506248bae0fb9044b151596fc27422827b72025610f31691a50f7d8dfc3d7": "modern-music: Jules Gaia modern piece; scope-judge: Modern fan arrangement; content-safety: Modern fan arrangement, Jules Gaia",
-  "745eaa57ea30c609e4e3266f0cbe524f353c199a651900cd699a6fb00005d337": "modern-music: Cohen pop song Hallelujah; scope-judge: Modern pop song; content-safety: Leonard Cohen modern song",
-  "77e01354a1023409fd6f3220cc8f98694857982f1782ae8eeab922b4ca7049c8": "modern-music: Jazz arrangement of Chopin",
-  "7b5a9788465a3692baae420267d0b7d9ccb330a1e246700533b30dd78dedcb84": "content-safety: Modern copyrighted hymn",
-  "7e2e9230353453c9b6a2048a43aa3c62950dd6d7e34d96a657e16245eb1bc6e4": "modern-music: Modern online composer piece; scope-judge: Modern fan composition; content-safety: Modern game-style piece by Mrest",
+  "40613f1a4a26bce7c038ac88c8126ec3dae102be835db38f11c8e400ae5e1b61": "review junk: School ternary-form assignment, 82 notes",
+  "415ea7405c00686f47c01c7e5b16481a86cc0b4ef436080f9e353350038b7044": "review junk: Titled test file",
+  "4298a7f80174ea99fdbd61722098fe474ecb2244915f347a0a424f3614d4593e": "review junk: Title marks it unfinished",
+  "4409fc2be156a288eaba57a0028a4378ad2e09e32248d2d18847bca6a4a0a630": "review junk: Title marks it incomplete",
+  "44151544f52b892aadf6fe3a17ad90165760a4ff26a46019b17fc6d42ad2e0d6": "review junk: Work in progress, only 84 notes",
+  "45b0c53ec645bfb28fea028467462b78fce4a1ac5c75969808a077a6c13857f7": "review junk: Handbook harmony tutorial example, not a piece",
+  "464d204e2c4b3a1926f3a90a45377ee29db5a8d9e26f6f132bd11c2e9ac447c5": "review safety: Novelty joke piece: \"Impossible Edition\" meme of Chopsticks",
+  "46e49422eecc0e637eade5dff70bacbe2548e64c3349334b225a50697b8c76d4": "review junk: Title 'prueba' means test",
+  "46fe79ff04340ab80e82f3b66d1b5daa546668f360a8157ff47a395be1b0a509": "review junk: Titled 'Work in progress'",
+  "472b7932e5c689c08b1d2d6d7ecf6d2ea6268d6acdffd4eda4ca9e4302cf6ca6": "review junk: C major practice exercise",
+  "473954818e6ee4aa3112f408225481337ccca9dd38aa4a319d1644136d08a745": "review safety: Coffin Dance meme piece, \"but...\" joke format",
+  "474ddd5f9c4bb5d88e0a979bc0d001f3eb0edc5831b47f9b1209bb25b4c31128": "review junk: Only the opening of the song, 70 notes",
+  "47e4b001d42c827505315eb11a1ae4d357d938d08ecba40e7225ec05061ec41a": "review junk: Placeholder title 'Piano', 79 notes, likely untitled sketch",
+  "4977e16e176446a45a020b997a1d032e9ec2cf46aecbbc899287ae4dd66c9b58": "review junk: Hash filename title, untitled test file",
+  "498c743b8b5a574dc8b9290382c76abaec7488d0ed6d63b061d572c89bd50e7b": "review junk: School music theory assignment, 74 notes",
+  "4a3b6c7185d8eb11b1875d9a7808b739ee6ef9c8cef0635617b9d85f01ae597d": "review junk: \"proba3\" is a test file (proba means test)",
+  "4a578d1a7546fcb5a8f1b9ce88eebb89a4c48b3e4379f8569c4e0f1dfc3ab86d": "review junk: C major scale octave exercise, not a piece",
+  "4d10270d8342e2f883c4cf3171df53ab843de942f96961fa3576eba2133d47b7": "review junk: Marked [WIP], unfinished work in progress",
+  "4d2391280219d372eddeb35641aeef0a0dd0969ea68a3e37088c2e07f9f047f1": "review junk: Modal scales exercise sheet, not a piece",
+  "4d5ed1a9dfc2de519ced363b7a7bc3a56a653f89de527edc27d6de8fefb4c214": "review safety: Kevin MacLeod comedic novelty tune, widely used as meme music",
+  "4dc77a3f3176a48795a292f91f95faa68c9a532e436f2f422e690188768f939c": "review junk: Hash string title, effectively an untitled upload",
+  "4dccaa56cff73ca4ba2d20bf6419c6fb7b88a35cf25d870a9367b0556b7d6a44": "review junk: \"my first\" score by \"me\", a first-try test file",
+  "4e71d1955050717577d967b1fdb00967ac76c6811c30f654ca295bd87a85eedb": "review safety: Joke meme title ('type beat'), novelty piece",
+  "50b7387e04bca0d6012d0445bdb0e57de6541057a413a1e3677897b790a809e2": "review junk: Self-described terrible automatic mp3-to-MIDI conversion; review safety: Joke piece: deliberately terrible Kahoot MIDI meme",
+  "5170a0b3c39bd71dbd7d7764d6196e6c077da8477d2ea3c5ed43bcc5ac80c219": "review junk: Coded fingering (doigte) exercise file, not a piece",
+  "5197fa879d174f427a3dc3b4e2ab1351784b298c79c8f2a8e045af44ae432052": "review junk: 43 notes, a fragment of the standard",
+  "5330d9eccce3d10a8fce02e72c971b34865b6eb7401cbe9ef634e2be74cefd6e": "review junk: Title 'prueba' means test; a test file",
+  "54053597bd9aa9ba1e9793ee95f9895b20eba09148f092daa0008bca58c4c08d": "review junk: Self-described unfinished, unnamed short fragment",
+  "551239b7eb750f21f6ed0e0faf72e4d2f9402efaed72eff1c9ab8baffcfd8052": "review junk: Bare chord progression exercise, 74 notes",
+  "552c9fe0c7fca45441d800537743a6e8a9bbbb628851cb12f70a44656f51cdc7": "review junk: SATB harmony exercise, not a piano piece",
+  "55830596dcc20740504e33c3daea3ff3a6d945fad6e226e3bcd9ad2415520868": "review junk: Numbered exercise ('Ejercicio'), 72 notes",
+  "56f5f8298f22ee9a1239020661aad08b6671e44a0b82749cd2c75e2c9de1f0d6": "review junk: Placeholder title 'rough draft', unfinished work",
+  "5773c29a1ff95e11678a1a19b20946a2889a7f7896b080089459bc59b78e54bd": "review junk: Titled 'working on it', short unfinished fragment",
+  "588da622d4009114e1c8338873ae9d6e450dc44510966414621c37b7b6ad5502": "review junk: SATB voice-leading exercise, 46 notes",
+  "5a79d1c8ed10300a085abc535654ec8f57e2049f9cd96b5259a270aee4645a78": "review junk: Placeholder title 'thing', 86-note sketch",
+  "5ad23b144d4fb13b639676c77fd1705ba83bcf14a75f6152672a3c60414d147a": "review junk: Titled as an exercise file",
+  "5ce804e9ef7bfcf8e0088eeeab7811e98847ccaf700345e5b2c3e1424328f224": "review junk: \"prueba\" means test; test file",
+  "5d17fe6cc54de1067ccbd7845bed99870837ff1d6a40ed7def9efa968e531e6e": "review junk: Placeholder title \"title\", untitled score",
+  "5d91d2356d6786be17ca91467bdcf34165d3fb46fe0aa5a178e249412a25c59c": "review junk: Hash string as title, effectively untitled",
+  "5d93c294aae053e1194f71867769286b5ccef63427e65ff12d6a4afc93fd58fc": "review junk: Timestamped 52-note intro sketch, fragment",
+  "5dcafea519fb0ae0a212b39ee58b5fcc136d018e41b8d1a9a25b39bdc8c2adbc": "review junk: SATB modulation theory exercise, 68 notes",
+  "5e98d561e3de6713d246e422cda21cabd36d6aea868a3feb75e2108fb4b0bcf0": "review junk: Marked incomplete in title",
+  "60eb884e1dcc37346ff1bc84107906261714a333f3f44f14db1a18f1f8971a90": "review junk: Marked work in progress [WIP]",
+  "60edc49ed451e25219bbcc3f26eca5f27c665ecf974d9746371843f788e7a812": "review junk: G Mixolydian mode/scale exercise, 124 notes",
+  "61b208c668af514b9366916ea3639ce358f8bf9b09920fa4bcae6ea73a60d5ef": "review safety: Meme mashup: Moonlight Sonata 'ft. Dr. Dre' novelty piece",
+  "61c53daac7ed6ae14e8dbdd3aa0496d132c7bb8b4aa077710549d48a06af41d4": "review junk: Titled Exercise1, an exercise file",
+  "61d10fc0818525040a27ae1f7646ec78086358a96dfb71b09f67915274a8869a": "review junk: 49-note tenor vocal part, not piano piece",
+  "62e8578fa50e2746ae8ce131fcc9df95e13f7995334cef45fdd9a1e87f3447ae": "review junk: Mambo accompaniment pattern, not a piece",
+  "64fda9e002c0a209382b0ce0d3ca32f2d89295c367814dacb8a926b6b0289795": "review junk: Warm-up exercise, not a piece",
+  "663670063974a41de428b36b5644887bcd72b1e9b41c1918092800ad077e4301": "review junk: Marked WIP, unfinished transcription",
+  "669905676148e09048d26ded6e8af906ccf9fa6241d1bf9fa36335175f274e5e": "review junk: Hash string title, likely untitled test file",
+  "6810da0a84fb8d6c8baf705fcfb85835f414cca7f1d8ec87e92ff860cd267963": "review junk: Marked WIP, sonata still in development",
+  "682a6bad60ec887b9a5d8aec69efcb0ad3bb806238770dd96e6b71ddb062ddcc": "review junk: Aural skills exercise, not a piece",
+  "68811a1639efd1e564820acac9e202eda1a2e774b46e94e0f2c591f403c7d638": "review safety: Ten Little Indians: racially offensive minstrel-origin counting song",
+  "692e2a7ff5ccef6648e493ab1fa27e55638ced6e3a79833252eda496d5e4c8b1": "review junk: Short music theory homework fragment",
+  "69838c9865f7eb7add1c8e8866794b836eb3e112d8bf8002d84aa33862179136": "review junk: Phrase analysis exercise fragment",
+  "69fcdb768392352b7275df229adcd2dd0c1c6721e78412abc8d4120980029214": "review safety: Rhett and Link comedy parody song; joke piece",
+  "6a3e564eb98f69cf40bb1b1c08fcabf7b366e3a598b0a1f0611bf8c0f89a931b": "review junk: Test file by title",
+  "6a675de9283705c04b007008415f409a88fb618868ffddf1e35bdc0a88bad20e": "review safety: Adam Neely meme reharmonization; joke piece made to be funny",
+  "6aab588914fefb1b395b121ca95d2a37cbf030f6f39fe082db35578816e97527": "review safety: Pierre Perret's comic song about genitals; novelty joke song",
+  "6b5443364a5ed905c0bff071c5a21a139205b01abebcab02ddb8cbc581d6e130": "review junk: Intervals exercise, not a piece",
+  "6b5a7d2bd053d8a304fb2143101febe8a577646064f5f206b737852b3e213a1f": "review junk: SATB chromatic part-writing exercise, 44 notes",
+  "6bd1c05a58757eb158ec728e06fc8ec73327327020c0a77d5b6f5b77aa0d857b": "review junk: Example exercise file",
+  "6ca462dc3105f7736c5f816f33ee3247265e6898142ef7b718ecfb0703bef007": "review junk: \"prueba\" means test; a test file",
+  "6f006e752b4e2effa62fe76f59d2b896ae2e73dd43e20bd143c621bcc81cd3d8": "review junk: Title says only most of subject A; incomplete fragment",
+  "70e617706ea0c1bf7058e30b00ba8fe54615fabd4e3839a65e9bdd76459c44a0": "review safety: Title references sexual violence; unsuitable for beginner library",
+  "715847b9f27ef20fd282cc718c4b075c3ce4add6c537db32cd8a00d7f70577ce": "review junk: Marked [IN PROGRESS]; unfinished score",
+  "71fb13d56753d4e0988e3b876112ff257e06bbf4126abfe808bbea6c1f9ee8a0": "review junk: Part-writing assignment, a harmony exercise, not a piece",
+  "7299f55413432bff09ef239837ff51b52d05f41b0bc7c461362d091ddf1df4b8": "review junk: Marked [WIP]; unfinished fragment, 166 notes",
+  "72c5673f648b552c5e6303bf5949016c4464b4d6d9c2d620182ac344081aab13": "review junk: Title marked Unfinished",
+  "72db9e175bcdd66d1fc82ef5991763ac41f801ff636a65d9746375901921e77e": "review junk: Cadence homework exercise (tarea), not a piece",
+  "73d0536ca78e0161855c2c94eac2d76a464247c421815a86a5997bcebf1b80b6": "review junk: Ornament turns demo for Reddit, 56 notes",
+  "76061ce5fe92e78943de21346a7c7e0568856239ed47d3b4660f2771bd8ad45e": "review junk: Section fragment, titled section_b, not a full piece",
+  "7800b98c5268a506e1245491816bb41cc5d378fda31964b8e024fd3c3ca2041f": "review junk: Scale practice exercise, not a piece",
+  "784e347a35de29dd346064d20ccab09404873cb2422c8e0c66629587bf23137b": "review junk: 54-note fragment of a song",
+  "792f0aa4ccdcddafa638870f2acc02088a3f8b1b8178138c2d969dbeadb16ddc": "review junk: Hash string as title, unnamed file",
+  "796e229f3e4555649a7fcc2adb67800cb7a5e55afd970b630956167c89acceed": "review junk: Chord progression pattern drill, exercise",
+  "7a48321016891b5351c5b3a1a1ea81f816b77a7e10f3dff20b8d85fdd6e8cb7d": "review junk: Test file titled 123, 57 notes",
+  "7a5a2b0b03e407ee3775f1dc4afdace81e184221e33fd99302a5ae6aee051f3c": "review junk: Spam title advertising album download; review safety: Spam piracy-download title, not a real piece",
+  "7a9ab13fbfd8c08cc9bc74caa75acac59745eefe53a6b413d6dcef9238829da3": "review safety: Horst Wessel Lied, Nazi party anthem",
+  "7acc4f3fb4d3af17cd83f299cdf4c5adbc45d4d816dd128a609150b64fab1148": "review junk: Exercise file, 42-note fragment",
+  "7bad61f55679a33edf16db4ce096dac4ff6cdaf67f32885a00c9dbed6abfa8cd": "review junk: Tuning experiment, 56 notes, not a piece",
+  "7bed00835ae9cee48f6a4b3a855514c86f1ea064872a93b95a8494d8c2981dcb": "review junk: Exercise file, 47-note fragment",
+  "7c74d236b9bea9e214acf0e464ee371beb22c3e71195ce4ca8af052e2ee8a644": "review junk: 46-note fragment of a theme",
+  "7d862d09c2511f17c719575589ee0952c480fec6755618816e64b0f216bc104d": "review safety: Markiplier 'I'm Back Baby' comedy meme remix",
+  "7de4d829386c658e613380842ea7f56787d4295bf95ad5d3d219da2eee26265d": "review junk: Titled 'Exercício' (exercise), short exercise file",
   "7e9ad893b93eff2c5c32c7757563e89bf72f901c78913ee9d521d499bfe9679b": "content-safety: Soviet anthem written 1943, post-1929 work; scope-judge: 1944 Soviet anthem, post-1929 patriotic song",
-  "7ed760308522b4bbccd65148da68e17198ed0ee64e736e8f8b1acd346dddce6f": "modern-music: Wim Mertens modern composition; scope-judge: Modern composer, not classical repertoire; content-safety: Modern composer Wim Mertens",
-  "897202414217062c26217791ebb45a10d9bde44e01571f77e3a86dd4e0e1b3cc": "modern-music: Simon and Garfunkel song; scope-judge: Pop song, Simon and Garfunkel; content-safety: Simon and Garfunkel modern song",
-  "8afed0825e36f735570b13cfc42942a65109bf8c17c011b75599f9839dd13951": "scope-judge: Modern pop song",
+  "7f29c8a21c9aca7ccadb53fb39db011c8c3d6812dd16dfde75487c30a7eff085": "review safety: We Are Number One, LazyTown meme song",
+  "80880cbd01044610f077a234ead160c4bcc5986da41efc8aacf67ffe298d6b40": "review junk: Intro only, 56 notes, fragment not full piece",
+  "8095baabe761eaa178dbbab941fc919918a5ad4d6d2836b73d980c815ed9be99": "review junk: Coursework practical assignment, exercise file",
+  "80f14a7673ce2385dcf5ea8c9823eb33c29bb6159e04d1551662652877e65d96": "review junk: Marked WIP, unfinished piece",
+  "81c80c6ab351a100fe07102b4ece3e635a0484d339b42701d7c4ac07bae4f78e": "review junk: Titled 'Ejercicio 17', numbered exercise",
+  "81ec1bc666c5470f7b81c8b5b6c3f7dce484deff06b63e1d02351ad9faa88c2b": "review junk: Blues scale in A, 50-note scale exercise",
+  "8254040e647a817263aa2cf215075f4145dfe1fc60751ad01ce75e12c9e3d660": "review junk: Counterpoint suspension theory exercise",
+  "838f73efc53a6f7177d7a6e55f67d76b05fde4d965332f4ced64036afb284233": "review junk: Class composition assignment, 44 notes, fragment",
+  "8433f8d426408239dd65e2625a693d6ac85e2d6d5c66312011b00a7a69ec89b0": "review junk: Motif passages exercise, 48 notes",
+  "85ae5f53f0bcbca510d207ea317af10b6960bb8a0b2658743d09205f4605a02b": "review junk: Drop-2 ii-V-i voicing drill, 48 notes",
+  "8706966278e6b121251afa9a9dc23bf9462609f2b11b067e545ca62539c2780a": "review junk: Theory exercise on secondary dominants, 77 notes",
+  "871549ef5d65a6d705124c228a8190d2a3cef1c52c7edd9c2851b608cebe3d31": "review junk: \"prueba\" means test; a test file",
+  "8779a9fc43610f68ae549860df4246c4333ced859983dd86ea01cee314270479": "review junk: Part-writing class assignment, not a piece",
+  "87ca39da355ecc395e4b4093da52ef8abaeb7e9a0c70657f46fdbc7d3d57db68": "review junk: Marked unfinished, 116-note fragment",
+  "8a9513073b7b94b36f6312c90ef03ecdee926ac81b61940c03e43139714ae3de": "review junk: \"prueba\" means test; a test file",
+  "8afa4ebf14d4ca90e76699744845ef43dffe5ea2ac51c47327770790b2c6ed98": "review junk: Scale/octave exercise at BPM 60, 43 notes",
+  "8b932232b04e38f367eb0c9223828e356b45bd394f6fa9cf4a37a31d7410f9fe": "review safety: Tom Lehrer comedy novelty song made to be funny",
+  "8cc2927b60222ad6f796d07ff9b24d634eade9cd943be9b7519ddabca1cb08e1": "review junk: Titled \"Test\"",
+  "8e0c6fc2c312616d578cf1ca7d1e313fdccd44769be3451d570a3f095c05f202": "review junk: Marked in progress, 134-note fragment",
+  "8f60ab720f55e885e550b0799b23266fb886a7e9c07ec8621f4d67663e1e5d6d": "review junk: \"Primera partitura\" means first score; a trial file",
+  "90251c097922bf51b5f8a5069dffc58963c7461169c973c35bcb6beab5c770a2": "review junk: Rhythmic study exercise with tuplets, 64 notes",
+  "905496b22a6d3d6be4476d2422f60afadb5e6ccc34236ee256389e665bc578a3": "review junk: Music theory exercise on embellishing tones",
+  "927ff57d89ad41be5d229215d8ff64705bd5d68b8bab4eb66973f3136c71802a": "review junk: Harmony exercise demonstrating tritone substitutions",
+  "94aadd85121b6add56db052b26fd3eb01ffd87c2a2391999ad764a8ff7247211": "review safety: Joke title, inside-joke novelty piece",
+  "9575a6660aba580fb06a5dce77ff6cca0256f7c67a0ac1b15bc54460ebcad5ba": "review junk: Marked WIP, unfinished arrangement",
+  "95de0c96c5cd35c72d5d1407e4bf5e5b97170cafc475aa6bdd2600c918c90d89": "review safety: Meme piece: 'Directed by Robert B. Weide' ending meme",
   "96a4ab219a2cb5cd1579717396df9b05e2a5c873df6a1278fad00d5e1a78e476": "modern-music: Soviet anthem, 1944; scope-judge: 1944 Soviet anthem, after 1929",
-  "984e0f10520c70f68a81d3a3fb59e44558c4c0194672825495198263676834d3": "modern-music: Paul de Senneville pop instrumental; scope-judge: Modern pop instrumental; content-safety: Modern composer Paul de Senneville",
-  "99ee7f2e68e341a09c92e169e0a8588dfb26b92549d2943a630acc2c56533abf": "modern-music: Game of Thrones TV theme; scope-judge: TV theme; content-safety: Game of Thrones TV theme",
+  "9703eea9145a10976a0944742d6694876b0549adc6057be70831ebf10de97f4b": "review junk: Marked WIP, only 108 notes, unfinished",
+  "974249208eb537f0fa7b5b33c1108fd5430de374c456e824eab29f38d95e744b": "review junk: Chord exercises in major keys, not a piece",
+  "977a6a58f3b513b53da51f9c0b7db133bd43cadca4c593d94fe271da70cd4d2d": "review junk: Theory exercise: progression with broken chords, composer 'You'",
+  "98c643e304db0909019b561b108685fc78ae0cb39e516394722fc38acd82c6bc": "review junk: Title is a hash string, untitled file",
+  "99dd8d289da860c4bf2873836c88d2fca5987a704fcb4238d01d17bf59d8c47c": "review junk: Test file title",
   "9a54d839c6c251eaa31e0dbad6b4cf130d10cab64f4f3193078bcddde5d91984": "scope-judge: Meme piece",
-  "9b217467706e5d57a7b616a6fc382634e17c1f9e05cf1d36fbec8110cc0c169c": "modern-music: 1938 Soviet song Katyusha",
-  "a4a68cd1f0459521b3c4e74124ea6ff8578a40161df7794df87f88814c2501cf": "modern-music: Anime soundtrack; content-safety: Anime soundtrack; scope-judge: Anime soundtrack",
-  "ad47da6f71a5d96572f289fef8924fd2785d90284a0ea9e16285bc12ab2f1fb7": "modern-music: Ed Sheeran song; scope-judge: Pop song, Ed Sheeran; content-safety: Ed Sheeran modern pop song",
-  "ad50a7ad3255bd197645381407eba58333b7273119459ff15e4ca3619e9e7ac1": "modern-music: Paterlini modern pop-piano piece; scope-judge: Modern neo-classical pop composer; content-safety: Modern composer Paterlini",
-  "b9b5be26d8be7f7ff89d21b17f9c4564be7933670a26b2990c250175bc2a3f74": "modern-music: Audiomachine trailer music, modern; content-safety: Modern trailer music by Audiomachine; scope-judge: Audiomachine trailer music, modern",
+  "9ac20b09d96c65918e646c3d59a27865227d3740d4d5880c613dc94556bff83b": "review junk: Homework assignment, not a piece",
+  "9aedde3d74f5bde437ca37bf06d99d8763b85cd358ce434482630e62012893ef": "review junk: Only page 2 of a piece, fragment",
+  "9afb165df0061a5ea77ec37d0e048cba6581be09846a373922fc659b264b989d": "review junk: Arpeggio exercise",
+  "9ba6999f437ed64766b0c2001cfd50f9181340075883ca3cb205ac68dad6c040": "review junk: Scales and chords exercise",
+  "9c3d87adcf91c42a0cd7d0cd7baac3ac1f6211dbd60e1f03c35fceb77688b94c": "review junk: Eight-bar melody exercise",
+  "9cb6bf8c2d7ad34e3a47ea860cdfede30ecc7ee263357b484c7a6d9f08861ad8": "review junk: Untitled file",
+  "9da603ce588e82cf09d0b6fd6caf04f5da8a27d439c3fe55a2b177e70c5eb06e": "review junk: Part-writing class assignment",
+  "9e05106ea76ff5e9d32f9bd2dd675f5d4cd9ea1d4be01fb77e45f4158cd72863": "review junk: Marked very WIP, unfinished; review safety: Meme 'but every note is harmonized' novelty arrangement",
+  "9e35382bde9aef7e00f1d52fa8df855e4bf98f73023a2af45d45b0e37275c607": "review junk: SATB part-writing exercise, 50 notes",
+  "9e5b6f1b57ff107afd4c095754af8b440a1ae778ea88d480d24fd3f7cf9feef8": "review junk: Marked in progress, unfinished",
+  "9e8c1596fe04879adec2b5d855998831499911f71747d6617a1a12dbe0f0916e": "review junk: Species counterpoint exercise",
+  "9ee5da0d2ac7d64b4e898544ebe6f68afe741bfb55129cc6273511c6d9653a65": "review junk: Eight-bar exercise fragment",
+  "9f6f07c18e35d8e2454bb8169b1fabf8cff53ef70b318fc24a94266b789c7bc9": "review junk: Class composition assignment, 96 notes",
+  "9f718f1da759b1ffa90ba1beca657fb19db58a94fdd5cb7779e3f16ee2d9d24c": "review junk: Marked partially incomplete",
+  "9f9851c34665a227ff2c50f6c7a6f6dd035d8f08b3b3373138b2705f3b949ade": "review junk: Short riff fragment, 108 notes",
+  "9fa38f5a6c83a92803c5a55f90aef111a956be8255ee6381ea547212045469b1": "review junk: Marimba part, not a piano piece",
+  "9fdee017fdcffeb8e7b3cf518d01640391d95b98c3256b0f9f567a6ab2eb4cd4": "review junk: Scale exercise (Tonleiter)",
+  "a187a531072c8827b0defa2ce99e5dc9bc77036a9208d16127f84393315ad1f2": "review junk: title is a file hash, effectively untitled upload",
+  "a1ff6b25e2b0b812690f9cd83a259f8b56e846fad734c05fb581604981e7570e": "review junk: explicitly marked unfinished sonata",
+  "a2fe7d83f68b0f3321dab62dc6ed6ca434f87c0223c4a82af7dad97211f0880f": "review junk: fugue opening only, unfinished fragment",
+  "a3a590a2881c2d271ea5d1584f80274eea950529381b0b4da1e39d7bbebdca56": "review junk: harmony theory study exercise",
+  "a3eb74eb0e91fda5f698e0107073aff48a9dd8561a89408b102f7436515e3c1c": "review junk: theory assignment, 46 notes",
+  "a53e4fdcb7e380db3611c181f534e79a55e8d071e157bc8dd245be65188693b1": "review junk: five-finger exercise, 48 notes",
+  "a6562f8abba3455d77f61dfed6bd7dbc72cf3c166c7c3836b4c7e1da2e7cd646": "review junk: intro fragment only, 40 notes",
+  "a6993dec40656e3fd57685ab5738439000a379f1ec11217ebe12e6b557066dfb": "review junk: class exercise",
+  "a6d51ecc4a73a51e7d0ef39e15cbeacd4e00411944212757a6e78b5d265c8c38": "review junk: short piano bit fragment, 67 notes",
+  "a89a7ef2795745b510623fa3c8bff82a96da13b65e386575af884a2feb6872ec": "review junk: marked incomplete",
+  "a8d04edefffcb9c374b30338ac69de26ce43db67eb43816de5497d2e8993efc2": "review junk: music theory class assignment",
+  "a8e0f47f3e37fe5e7280dba975fcca8b0ee4d10476fb050c4335267d0fbb2bc2": "review junk: first theory project, class assignment",
+  "a8f7f016ef1dfe01b23f85822a0e08aaf61c274053abc28d424e0d595c516ce7": "review junk: part-writing practice exercise",
+  "a9f930747b1b172c72bc1a5d93b3ae5d6452ad2fc14fecd2267219752cb72bd0": "review junk: Hash in place of title, 111 notes; untitled upload",
+  "ac1599fcedf1b0e749b24ee90fae6f4c1090d7844f1ca554843f079c0ccf3f35": "review safety: Meme piece: 'Ladies and Gentlemen we got him' joke",
+  "ac3265fc15521fdbc337750b7eaf094907fe914ba9cc9db3fc714851397a3b4d": "review junk: Composition draft 'take 2', only 44 notes; fragment",
+  "acbcdc0618468f48e34311835ef345b87350357d90056d125e3a89f8686d6656": "review safety: PewDiePie meme/novelty piece",
+  "ad8d0bf3e684770651e1bc8a1798f0173a87040ab076534bdb6d1edade803d77": "review safety: Suicidal title 'I want to die' unsuitable for public library",
+  "adb63322e1e4a592911f5b404468f599ee40ac6926335291c98a4483033e04d7": "review junk: Test file titled 'test2'",
+  "adc4d674df17aa7b3587ef982d7681fd721a260f7bb30c348ddff6190805d3d9": "review junk: Roman numeral analysis worksheet, theory exercise",
+  "ae4e7013550f183a37fee8cf09ae6354033dd227d2c8012ce330e29a1b172cf4": "review junk: One-letter placeholder title, 59-note fragment",
+  "af23edc3a31eccd356f1e3cdeca01f0b9e5d4ee6e49172d1f098b36d36541ddf": "review junk: Violin part only, 90 notes, not a piano piece",
+  "af619326bb070f45d5cb18136548824615b04e22530d57b8a38f6618e9587989": "review junk: G major scale exercise, octaves and hands",
+  "b0a4d91ebaed86a520178dc10deb6b3fcecfadf15de8d2b3fd2de809452c88f7": "review junk: Hash in place of title; untitled upload",
+  "b0f96ba73f2059d7e6a2742c8063fc0ff9775e56e2ebe1dae0e3179ba1f49627": "review junk: Default file name \"Piano1\", effectively untitled",
+  "b23bd3bf67e008abfdb236a13a93997da824dc3ce109e0560246dbabfb581258": "review junk: Counterpoint textbook exercises, not a piece",
+  "b24c875516909f9816fc9131d7ef2a477da87c2c800ac28db834638d4d05e42d": "review junk: Default file name \"piano_01\", effectively untitled",
+  "b2c3c9343165333d45dccc73f0bab0f34fbbd68bc5e8c55de6918bb18073403a": "review junk: C Lydian mode demonstration, scale exercise",
+  "b31230ce9a7b3f966911d9b59e5f9823a2f1135e808be122e51b81ca192ad602": "review junk: Title marks it incomplete",
+  "b454c2adcf87cde82a8948570cff90cdf8832914cb89644b299292f9ac8d03aa": "review junk: Numbered exercise (Ejercicio 18)",
+  "b526e2f5939335ed19a1cd61f9426fe3220a5a09d8c0766d11229bbb31aa2390": "review junk: Marked work in progress (wip)",
+  "b536050152e7ce08d352c02485a6f7feee645e494039579acb59fa036497b0f1": "review junk: Title marks it a test file",
+  "b56a35607dc9b74551324b7f5750a4a9f738e3fa7151a495f25abdba36340b29": "review junk: Hash string as title, untitled upload",
+  "b5e074c83409b39c190558cbdd6dd492d454c845cbe5c801e768cb6e4f58c104": "review junk: Hash string as title, untitled upload",
+  "b60a6aeed34e3755c307c2bcd3d5d8f9609b6e3e17f873c7be23cffc11ffeca2": "review junk: G Phrygian mode demonstration, scale exercise",
+  "b60c6d2c75bde99aefa9f83c30eb261e3656eee6834f24656694346c137cf1be": "review junk: Hash string as title, untitled upload",
+  "b615aa6a1826d852b5ce5f4268ce10f065aed14b2bf72fb00ff0cd664871e153": "review junk: Short attempt fragment, 51 notes",
+  "b63983bcac47dcf964ba16ccbf2ca1a6e80af37a7f8cb11d1899aac85e85f538": "review safety: Nyan Cat meme tune",
+  "b706d5cc4bb5fc7f3a2185ea0be21601d40d45f7034ab1b3ad78894d22a1f488": "review junk: \"Prueba\" means test; test file",
+  "b73009a7720f2e51db23075865a8434bb72135ae89b90cc705d1daa9275f0598": "review junk: SATB harmony exercise, 69 notes",
+  "b75830b9d8cc35e8bb1380a4d8464aed9e643d859ab41248eccbd038cbfd58d1": "review junk: Harmonization exercise, 64 notes",
+  "b798faa344c2dfcfab4414edd069131efd1f89fb51187d80bd58c8b5a405e7bd": "review junk: Title says discarded draft to redo",
+  "b7caf188c6b1800af47b9985854cc7b2995bdaf6393a1e7199ffa487c47d5f6e": "review safety: Profane, offensive title",
+  "b8a4a168a1b2e14ccca84efbae0be95f031d78eee0692b568f5f4d1c8958a100": "review junk: SATB part-writing exercise, 68 notes",
+  "b9418891d9d9e79869f3728f2501ae93dca56e2ce2b1382e50f5eed3fe5376d1": "review junk: Untitled file, \"Untitled-5\"",
+  "b9cfd77bebd3d4184acbee480d96a5ec4e39ee1df6f8d740292067edd90d9cf4": "review junk: Piano scales exercise, not a piece",
+  "ba42b3d76bb03ceaef6c6f65a26e90b7ce5caed1fb4f1f082bedecaa6a1abdd5": "review junk: Title says not finished",
+  "bb069e34a1930a96e8d6bf19ba6e461ed9ce4bb056e7b1a90c50d2227f2ac571": "review junk: SATB part-writing exercise",
+  "bb955faf7e97bc264a54d0bf54c0d6dc0031f6bf2a3b0d3ab31ae30a1a1b3970": "review junk: SATB part-writing exercise, 73 notes",
+  "bc7c07e6487af8f8bb2690490ed9d71137624df54d5797c46c3827f6b1fefde8": "review junk: Scale exercise (Tonleiter G-dur), 92 notes",
+  "bdaf9e355c57fbca6e6e4226b3a2bc98e2332a57ecf614fae3308e3ae61061d4": "review junk: Single run lick fragment, 48 notes",
   "be8a6d6d3b382de49fe65b0e7ff1993a02b2897b3039b166343ae6d6c3df954e": "modern-music: 1930s political song, outside scope; content-safety: Nazi-era propaganda march; scope-judge: 1930s Nazi propaganda song",
-  "c115d5a3d5fb41df80450838a0f8baa7811db0890118243e8c988e9f13a7699b": "modern-music: Bethel modern worship song; scope-judge: Modern worship band song; content-safety: Bethel Music modern worship",
-  "ca3f1befa4b910e1d002f6cb9bfed85c8de68893ba2eb5e8b8c21c719d45c348": "modern-music: Modern game or anime arrangement; scope-judge: Fan arrangement, likely game or anime; content-safety: Modern arrangement of modern song",
-  "cf57d0446a046d552e441c966f893528ce0bb80c25650c48912fd6e3db1cff0d": "modern-music: Video game music; content-safety: Video-game soundtrack piece; scope-judge: Video-game music theme",
-  "d34d259bc181e029b6fe45dc5c601a37916a51024797f99512053ac3c307a5f5": "modern-music: Lumineers band song; scope-judge: Band song, The Lumineers; content-safety: The Lumineers modern band song",
+  "c0b75de635bd93cdec5276ca1699b63d9dd920c59010c7bcb270c7c02a2db206": "review junk: Class composition fragment, 48 notes",
+  "c16e3dd61605975dde95f102ddbe7c7b7850186aefbe30566247abb473c864d4": "review junk: Chord lesson exercise from piano-lessons site",
+  "c2cfe01a834b85a6fd61d97305e2667ee2c43234769af9ac596aafea84039c5d": "review junk: Title 'Untitled', 79 notes, likely test file",
+  "c351d11556bde3d1e9d65164d85869c45300f695bdb6c50874867e977f609c4d": "review junk: 'First Attempt', short practice/test score",
+  "c435ce51a79fd71a07eb4ed4a44df324f41fa95ca8d2f925a7ef2c8fda657489": "review junk: Only 40 notes, fragment of a few bars",
+  "c46374ebb6f644006f6926ea5876c2fbfa429b20d024ba96ab26bde2dcf640e0": "review junk: Worksheet exercise, not a piece",
+  "c6485eacd569ef711661d91e150875708533f187c3ce73ad9f7ef93bb16e813e": "review junk: Scales and chords exercise",
+  "c657f305631356678306b789b424052905f5b9f0a8ff16b033364d343b296877": "review junk: 'Ejercicio' (exercise), 80 notes",
+  "c981cda4dededd5c790c1b0ec3907429ac9ed9c7ec3baa6bba5b28ae51b87578": "review junk: Title 'Untitled-2', unnamed draft file",
+  "c9dac47f05b2929499c899552ff4bb7735548739751e0e9ef483798f8268e2a1": "review junk: Marked WIP, an unfinished work in progress",
+  "cb143519861068d6189951022481397cb3d56d2a70911d511dbca485d33c12a1": "review junk: Titled untitled, likely a scratch file",
+  "cb305292345c18d9a9192404574f70ff1d07ac5186f3a74249ca16121892a5dc": "review junk: Numbered exercise (Ejercicio 18), 72 notes",
+  "cbbc910cdc314135e7623e8ee6053b7f078af235ab516f3ddfee0d0717f87b3c": "review safety: Joke piece: 'Beethoven's Seizure No.69' meme title",
+  "cf791401c2e0773968edb9b1dc0642ff313cb6462055ca3ed5a10d5a82246b32": "review safety: Meme joke piece title 'whats poppppping augh'",
+  "d0634311d13e0f7d2d9dac437aaa843e6b2e0cd068450cb0c2b55dcef197e70a": "review junk: Self-described snippet, a fragment rather than a piece",
+  "d0a52749524ab6348fddd2bc47a22da6cd62fdab6470775634cdbddc3d89420f": "review junk: Part-writing assignment test file",
+  "d27bf14b0f768739980e01edf35fc34456f2370ee93d4725d3945dae7cc8a055": "review junk: Hash filename as title, placeholder upload",
+  "d2ad720f1a95f34730c0eca88e243abe35a738e1b347f3d2dd3b929f0996e868": "review junk: Single-letter placeholder title, likely scratch file",
+  "d3c856dd99b440607abecb059995584ba8e54c6d24faad13ddee3943c9048ff3": "review safety: Title references the '2 Girls 1 Cup' shock porn video",
+  "d3e9d84d36fab08f7cf007a8fa2e69389a268ae005a51a86a40909d64addb8f1": "review junk: Scale/octave exercise at set BPM, not a piece",
+  "d5a5b2b326b699426964a8730c2ce637c2bd68d7e65d77029883a1323741a158": "review safety: Meme joke piece, credited to 'Memer'",
   "d5f38fa57d0db3f0f73368e5df70646b0f6895a810cef30a1e52b045fe5162b3": "modern-music: 1932 political song, outside scope; content-safety: Nazi-era Hitler Youth propaganda song; scope-judge: 1930s Nazi-era song",
-  "da1ad8d9b70a499b19ead5bf3de7b4d89628b8d5d9a6d967d7fe493bc9c2adb0": "modern-music: Football club anthem; scope-judge: Football club anthem; content-safety: Modern football club anthem",
-  "dc21058f929f8d154d2545302f96586bd90c87f75d4c43daa6f2f4511094b917": "modern-music: Hardstyle electronic track; scope-judge: Modern electronic track; content-safety: Modern electronic dance act",
-  "e12f33428302e179537c5c4c06a5fb51b878b1049072f7a3778d1a462f0d8ae1": "modern-music: Modern album track, 2012; scope-judge: Modern album piece; content-safety: Modern 2012 album track",
+  "d5f490feef4abbbdadd7ce14aca867351beacc87fb2a392dba6169f67c369f9e": "review junk: Explicitly marked work in progress, unfinished",
+  "d6d298d3d9897038e242a241d9b03eb9f145ebd851abba6a766338514ab39429": "review junk: Chord progression reference sheet, not a piece",
+  "d7e8da6942959ea79d2c94ec69f72572deb2bab7b525d7c7a7dd0fd9e744c3d7": "review junk: Harmonized phrase exercise in aeolian, 49 notes",
+  "d852ad4979f88b0d5471870556f367e9a68fdeff32284cdd76fb74c9e9995826": "review safety: Teufelslied is the Waffen-SS march 'SS marschiert in Feindesland'",
+  "d8d74b42cf29c5853e6b42eb9188fc91a8e5e7415737bed07e6325b6ebbc333e": "review safety: Minecraft parody novelty song",
+  "d91ab0c6c9e231057b16993a8ad902d4ebe52e11aaf7115f1b826756a74d79fd": "review junk: Default title 'Score 2', 50-note fragment",
+  "dbcd0b7b960aec63328937a9a89353312ce5f7558f464b0fe7a39e6696d1a0b9": "review safety: Soviet Red Army propaganda song",
+  "dc01f654f9f1a48c535f63359a6facde95f306b69c2b1fd9c44d5be8b20eb4e2": "review safety: We Are Number One meme piece",
+  "dc28dae2a484f235c108ff057605d104d48a395b76da805fcede092c8f79fc92": "review junk: Marked \"Unfinished\" in the title",
+  "dde7ced4e0e6d43e44c58fc3fe68ba4b8be0fe4581515bb4dcafb3a508dfd42d": "review junk: Titled \"testing\": a test file",
+  "dea2ff1edd4de8364429ab128a73a4268e789265e03e5af276b759d21e6fb3c3": "review junk: \"Scales\": an exercise, not a piece",
+  "dec93eca6771480745c622a04adf36089d2c68d3bb260ed45b5e023d9a1cd8cc": "review junk: Titled \"Song test\": a test file",
+  "dfa4e8770f6d32907f74c9914ab6a780ee173bba238605df9513ca386669fd2e": "review junk: \"random high partition\": scratch file of random notes, 81 notes",
   "e204aa172fc07e547bfee95b403f4b1c79a4ad676f059d0396f71de868817d19": "modern-music: Nazi party song; scope-judge: Nazi party song; content-safety: Nazi anthem Horst Wessel",
-  "eab902b70948569fafbec331e0f5cdd1f52723c268ac0d08d86539c61f30f543": "modern-music: Video game or anime arrangement; scope-judge: Video game music; content-safety: Video game theme transcription",
-  "f660b2ec5a2b30891a099611aea1ad6b1bb8c48f7ef1ba19285fccdd26252788": "content-safety: Modern copyrighted Philip Glass piece",
-  "f8dc1646616f5db870c404df2e067cf371033bb5a5616bbe619ed24110a22cf6": "modern-music: Musical Cats, 1981; scope-judge: Stage musical after 1929; content-safety: Cats musical, 1981 Lloyd Webber",
-  "fba0b1034bfd08d524b698bbf30309611d826ef93f1e2c93533f552a27cc6d2c": "modern-music: 1930s military march; scope-judge: Nazi-era march, after 1929; content-safety: Nazi-era march"
+  "e29b834885aa50e180200abcda1668fae39b277e16a438f64a3bf1ba7d1641b2": "review junk: 40-note fragment shared to reuse, not a piece",
+  "e3d21a3d217783ab4860bafcce5630a40274b42251d826239bb60fb652904deb": "review junk: Harmony exam exercise, not a piece",
+  "e4968161920026bfebeb47e0b861548759bde50d464e37c4e1929156ab625371": "review junk: Counterpoint exercise file",
+  "e4af2e08ebe48ce458b362d37b889410cc7964ff8628b58e02198c1ac6d9b94f": "review junk: Work-in-progress fragment, only 98 notes",
+  "e4c434399c66d15b227dc49da6c1ba62fbae30eae26195985f762ffc99b5eb4a": "review safety: Meme piece: We Are Number One joke transcription",
+  "e7065fb9f8e0846ce040f7351a778aaec40e694291c0a92d93e47b2463379bde": "review junk: Scale/octave exercise, 43 notes",
+  "ea65ea4d4c5b0608654d0c312c3b2d4bec5846249db3fcf8576eb474ee62e8cd": "review junk: Galant schema (prinner) exercise, not a piece",
+  "eb5fb6eb6d290628d39b370d9c035dfac3332c87a50be49dfea535d3ec08ae5f": "review junk: Untitled file",
+  "ebc1351ecc5a31c3d7b6ccc397e723da02b26db2ec3c6ca1cb27db609422454f": "review safety: Internet meme novelty remix, made to be funny",
+  "ec3d74a9f70e4dd8ac707bf74387b450d9ec56cfe27a127926ee0b29b4c4ae8e": "review junk: Marked WIP, unfinished piece",
+  "efa606322108f918582899d889667d60cd39bf5cf99b69e23cafb1d17bdb2a67": "review junk: Exercise: melody over chord changes, 100 notes",
+  "f254628eed2f58b6faad7c10808966e8eb04d4823640655cfb20dc4909f1a45f": "review junk: Marked WIP, unfinished variations",
+  "f2b7598cde3ec4a30b2bacb081ae264940be1057e4cef6df923a5f036614fbdf": "review junk: Minor scale assignment exercise",
+  "f31e21d2d791fa9e2c2018858007d1a5595b2e1adf15358c6d6ee129bd9aa459": "review junk: WIP piano solo, unfinished",
+  "f379ff8874f20fb93cebe5265b122806023e8d3c2a60a4b7f5afdd2fb37a7011": "review junk: C major scale exercise, 43 notes",
+  "f4030cb271db2bdf7aa07814d3d007918c9f0b5a23e1cf435c0125cb88807785": "review junk: Hash string title, unnamed upload",
+  "f422cb3a6dc226871bcf502461f359afd84879db19f2330040544363444920a0": "review junk: Keyboard-mash title, likely test file",
+  "f438834d4f4c1d3c35fd20ddcdaf7977beabf6512646db42ea44f64cd4206b4d": "review junk: C major voicing exercise, 63 notes",
+  "f5043dad7d357030d02f8216ae887f2014f125a82fbd47653481d8bbb36791da": "review junk: Hash string title, unnamed upload",
+  "f72e45863ea8480bcd4a4b776afadbcff615f148010f6fa88ac4047c82fb1c94": "review junk: Self-described partially incomplete arrangement, short fragment",
+  "fa462eafb5feb377d71eb48d209b4f19de948207cd174aee2ed64237116365f7": "review junk: Keyboard-mash title, likely a test file",
+  "fb6960474fa2df4da8e5c0115d1b5c12c8e7b7c521ebed504f17cdac5436ec14": "review junk: 52 notes, a few-bar fragment",
+  "fba0b1034bfd08d524b698bbf30309611d826ef93f1e2c93533f552a27cc6d2c": "modern-music: 1930s military march; scope-judge: Nazi-era march, after 1929; content-safety: Nazi-era march",
+  "fc74d3639cef51e9dc64204b1dde04aa6b7ae0441c9d4c2ebadd9ad6243cd4bd": "review junk: Daily challenge sketches, not a finished piece",
+  "fca7ac8e11357e40736ac62e9ebb5d3069254deade1c23b09d49229d06cd6012": "review junk: File-name style experiment, not a finished piece",
+  "fd3f131f2d206c0fd3d1694dfea65dbe062d52e3094623fb95f367f57ffef79a": "review junk: Intro only, 60 notes, fragment of a song",
+  "fd43eff65d235acae895b479a85b02a764ccafe36af06cc3b31f34aa1c3db68f": "review safety: Meme parody title riffing on Gangnam Style, ethnic joke",
+  "fe5f86b016ebb1c02f916c59a2224ceb357dc25f6f302f3bf4fe04632618c040": "review junk: Placeholder title 'Sans nom' (untitled), unknown composer, unrated",
+  "feb1075f31943dcb418119787fef395b0fb7137b214ed91da12a93fe17fc2cc5": "review junk: Title 'Twinkle test' marks a test file"
  }
 }

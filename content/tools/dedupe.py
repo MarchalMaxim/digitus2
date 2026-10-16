@@ -14,8 +14,11 @@ level it is a copy too: a learner gains nothing from three Mozart minuets in F a
 onsets differ (a pickup bar, another beat unit). At different levels it is an alternative (an easy and a
 full arrangement of one piece), so it is only listed and stays.
 
-Which copy stays: a curated piece always; among archive pieces, one with a named composer, then the
-more rated, then the smaller slug. A curated piece is never removed, and curated copies of each other
+Which copy stays: a curated piece always; among archive pieces, one that a catalog fragment already
+ships, then one with a named composer, then the more rated, then the smaller slug. A piece that the
+build refuses (`buildFailed` in pdmx-excluded.json) is left out of the comparison: it never ships, so it
+cannot be the copy that stays. The songs lane
+(candidates-other.json, pdmx_songs.py) is compared with the classical lane as one set. A curated piece is never removed, and curated copies of each other
 are only listed. `--apply` writes the archive copies into the `duplicates` map of
 `content/tools/pdmx-excluded.json` ({slug or sha256: {"of": keeper, "kind", "similarity"}}), which
 `pdmx_fragments.py` reads. The full report is written to `content/_build/dedupe/report.json`.
@@ -83,24 +86,45 @@ def load_items() -> list[dict]:
             continue
         items.append({"id": e["slug"], "kind": "curated", "path": CONTENT / e["files"]["score"], "rank": (0,),
                       "level": e["level"]})
-    candidates = {c["sha256"]: c for c in json.loads((RAW / "candidates.json").read_text(encoding="utf-8"))}
-    for line in (RAW / "gate.jsonl").open(encoding="utf-8"):
-        gate = json.loads(line)
-        if gate["sha256"] not in candidates:  # a superseded representative is skipped
+    shipped = shipped_shas()
+    # a piece the build refuses (pdmx-excluded.json) never ships, so it cannot be the copy that stays
+    refused = {slug.rsplit("-", 1)[1] for slug in json.loads(EXCLUDED.read_text(encoding="utf-8")).get("buildFailed", {})}
+    for candidate_file, gate_file in ((RAW / "candidates.json", RAW / "gate.jsonl"),
+                                      (RAW / "candidates-other.json", RAW / "gate-other.jsonl")):  # the songs lane
+        if not gate_file.exists():
             continue
-        cand = candidates[gate["sha256"]]
-        if not pdmx_advanced.usable(gate, cand["notes"]):
-            continue
-        sha = gate["sha256"]
-        path = CONTENT / "_build" / "pdmx" / sha / f"{sha}.musicxml"
-        if not path.exists():
-            continue
-        named = bool((cand.get("composer") or "").strip()) and (cand.get("composer") or "").strip().upper() != "NA"
-        rank = (1, 0 if named else 1, -int(cand.get("n_ratings") or 0), -float(cand.get("rating") or 0), sha)
-        level = 6 if pdmx_advanced.advanced(gate["level"], cand["notes"]) else gate["level"]["level"]
-        items.append({"id": sha, "kind": "pdmx", "path": path, "rank": rank, "title": cand.get("title"), "level": level})
+        candidates = {c["sha256"]: c for c in json.loads(candidate_file.read_text(encoding="utf-8"))}
+        for line in gate_file.open(encoding="utf-8"):
+            gate = json.loads(line)
+            if gate["sha256"] not in candidates:  # a superseded representative is skipped
+                continue
+            cand = candidates[gate["sha256"]]
+            if not pdmx_advanced.usable(gate, cand["notes"]):
+                continue
+            sha = gate["sha256"]
+            if sha[:8] in refused:
+                continue
+            path = CONTENT / "_build" / "pdmx" / sha / f"{sha}.musicxml"
+            if not path.exists():
+                continue
+            named = bool((cand.get("composer") or "").strip()) and (cand.get("composer") or "").strip().upper() != "NA"
+            # a piece the fragments already ship stays over a copy of it (as a curated piece does)
+            rank = (1, 0 if sha in shipped else 1, 0 if named else 1, -int(cand.get("n_ratings") or 0),
+                    -float(cand.get("rating") or 0), sha)
+            level = 6 if pdmx_advanced.advanced(gate["level"], cand["notes"]) else gate["level"]["level"]
+            items.append({"id": sha, "kind": "pdmx", "path": path, "rank": rank, "title": cand.get("title"), "level": level})
     items.sort(key=lambda i: i["rank"])
     return items
+
+
+def shipped_shas() -> set[str]:
+    """The archive pieces the catalog fragments ship now."""
+    out: set[str] = set()
+    for name in ("pdmx-library.json", "pdmx-advanced.json", "pdmx-songs.json"):
+        path = HERE / "catalog.d" / name
+        if path.exists():
+            out |= {p["pdmx"]["sha256"] for p in json.loads(path.read_text(encoding="utf-8")).get("pieces", [])}
+    return out
 
 
 def main(argv=None) -> int:

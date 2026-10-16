@@ -18,6 +18,7 @@ const ALLOW_LARGE_KB = {
   'content/manifest.json': 4096,
   'content/verification.json': 8192,
   'content/tools/catalog.d/pdmx-library.json': 2048, // 1,300 archive pieces, each with its own provenance note
+  'content/tools/catalog.d/pdmx-songs.json': 2048, // 1,000 archive songs, the same note on each
 };
 const ALLOW_PREFIX = ['content/scores/']; // engraved scores may be up to 1.5 MB (checked below)
 const SCORE_MAX_KB = 1536;

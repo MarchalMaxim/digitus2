@@ -150,6 +150,7 @@
   grid-column: 1;
   grid-row: 1;
   font-weight: 600;
+  overflow-wrap: anywhere; /* an archive title can be one long word (a file name): wrap it, never widen the page */
 }
 
 .piece-row .duration {
@@ -163,6 +164,7 @@
 .piece-row .composer {
   grid-column: 1;
   grid-row: 2;
+  overflow-wrap: anywhere;
 }
 
 /* The search field (spec 6.3, 11): after the start button, full width below it on a phone. */

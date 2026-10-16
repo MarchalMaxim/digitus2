@@ -365,17 +365,33 @@ PDMX_LICENCES = {  # PDMX's own licence field (PDMX.csv) -> the name and URL the
 }
 
 
+_FINGERING = re.compile(rb"[ \t]*<fingering(?=[\s>/])[^>]*?(?:/>|>.*?</fingering>)[ \t]*\r?\n?", re.S)
+_EMPTY_TECHNICAL = re.compile(rb"[ \t]*<technical(?:\s[^>]*)?>\s*</technical>[ \t]*\r?\n?")
+_EMPTY_NOTATIONS = re.compile(rb"[ \t]*<notations(?:\s[^>]*)?>\s*</notations>[ \t]*\r?\n?")
+
+
+def strip_fingerings(data: bytes) -> bytes:
+    """The score without its `<fingering>` elements, and without the `<technical>` and `<notations>` they
+    leave empty. The library stores scores stripped (the app fingers them itself), as the Mutopia
+    converter does. A score without fingerings comes back as the same bytes."""
+    if b"<fingering" not in data:
+        return data
+    data = _FINGERING.sub(b"", data)
+    return _EMPTY_NOTATIONS.sub(b"", _EMPTY_TECHNICAL.sub(b"", data))
+
+
 def build_pdmx(piece: dict, out_dir: Path = SCORES) -> dict:
     """A score from the PDMX archive (content/tools/pdmx_select.py). The MusicXML is the archive's own
-    file. It is checked as a plain copy in content/_build/pdmx and, when it passes, stored gzip-compressed
-    as scores/<slug>.musicxml.gz (mtime 0, so a rebuild is byte-identical). A failed check leaves no score
-    file and no manifest entry (`files` empty, `scorePath` None)."""
+    file, less any `<fingering>` digits (`strip_fingerings`). It is checked as a plain copy in
+    content/_build/pdmx and, when it passes, stored gzip-compressed as scores/<slug>.musicxml.gz
+    (mtime 0, so a rebuild is byte-identical). A failed check leaves no score file and no manifest entry
+    (`files` empty, `scorePath` None)."""
     import pdmx_screen
     import validate
 
     slug = piece["slug"]
     info = piece["pdmx"]
-    data = pdmx_screen.xml_from_mxl((PDMX_SELECTED / f"{info['sha256']}.mxl").read_bytes())
+    data = strip_fingerings(pdmx_screen.xml_from_mxl((PDMX_SELECTED / f"{info['sha256']}.mxl").read_bytes()))
     work = PDMX_BUILD / slug
     work.mkdir(parents=True, exist_ok=True)
     plain = work / f"{slug}.musicxml"

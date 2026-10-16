@@ -1,4 +1,4 @@
-"""Turn the PDMX gate results into a catalog fragment: content/tools/catalog.d/pdmx-library.json.
+"""Turn the PDMX gate results into catalog fragments: content/tools/catalog.d/pdmx-library.json and its siblings.
 
 Every candidate that passed `pdmx_gate.py` becomes a piece (source 'pdmx'): its slug, title and
 composer come from the archive's metadata (cleaned), its level is the frozen heuristic's proposal,
@@ -10,11 +10,14 @@ archive's metadata) is rejected rather than shipped with a wrong name.
 The licence comes from PDMX.csv (`license`: publicdomain or cc-zero). Only the two values the
 archive uses are accepted.
 
-A candidate that the advanced rule (pdmx_advanced.py) selects goes to a second fragment,
-`catalog.d/pdmx-advanced.json`, at level 6, with the rule's reason as its levelNote (and a
-levelOverride when the heuristic proposed 4). Advanced pieces are not capped; the main fragment's cap
-counts the others. Candidates in `pdmx-excluded.json` (build failures, duplicates from dedupe.py) are
-skipped.
+Two lanes. The classical lane (candidates.json: genres classical, folk, religious or unlabelled) gives
+`pdmx-library.json` (capped) and `pdmx-advanced.json` (level 6 by the rule in pdmx_advanced.py). The songs
+lane gives `pdmx-songs.json`: every candidate in candidates-other.json (pdmx_songs.py), and any candidate of
+candidates.json whose genre tags are outside the classical lane (a reinstated pop or soundtrack score). The
+songs lane passes only when every gate passes, takes no level-6 override (the frozen heuristic places it), and
+is capped on its own, so it never takes a place from the classical lane.
+
+Candidates in `pdmx-excluded.json` (build failures, duplicates from dedupe.py, out of scope) are skipped.
 
     content/.venv/Scripts/python.exe -I content/tools/pdmx_fragments.py
 """
@@ -37,11 +40,16 @@ CONTENT = HERE.parent
 RAW = CONTENT / "_raw" / "pdmx"
 FRAGMENT = HERE / "catalog.d" / "pdmx-library.json"
 ADVANCED_FRAGMENT = HERE / "catalog.d" / "pdmx-advanced.json"
+SONGS_FRAGMENT = HERE / "catalog.d" / "pdmx-songs.json"
 EXCLUDED = HERE / "pdmx-excluded.json"  # committed: build failures and duplicates (see _comment)
 PDMX_CSV = CONTENT.parent / "research" / "data" / "_downloads" / "pdmx" / "PDMX.csv"
 TASK = 300  # the fragment's task number (catalog.d files carry the plan task that owns them)
 ADVANCED_TASK = 301
+SONGS_TASK = 302
 LIMIT = 1300  # the library ships this many passing candidates that build; the rest stay recorded in `rejected`
+SONGS_LIMIT = 1000  # the songs lane's own cap (by rating), so it never takes a place from the classical lane
+CLASSICAL_LANE_TAGS = {"classical", "folk", "religiousmusic", "NA"}
+JAZZ_TAGS = {"jazz", "blues"}
 
 TRADITIONAL_NAMED = re.compile(r"^(trad\.?|traditional|tradicional|anon\.?|anonymous|anonimo|anónimo)$", re.I)
 ANONYMOUS = re.compile(r"^(anon\.?|anonymous|anonimo|anónimo)$", re.I)
@@ -77,6 +85,20 @@ def collection_for(genres: str) -> str:
     if tokens and all(t == "folk" for t in tokens):
         return COLLECTION_BY_GENRE["folk"]
     return COLLECTION_BY_GENRE["classical"]
+
+
+def song_collection(genres: str) -> str:
+    """The songs lane's collection: jazz and blues go to the Modern genre, everything else to Songs."""
+    tokens = {t for t in (genres or "").split("-") if t}
+    return "pdmx-modern" if tokens & JAZZ_TAGS else "pdmx-songs"
+
+
+def in_songs_lane(cand: dict, from_other_file: bool) -> bool:
+    """True for a song (candidates-other.json) and for a candidate whose genre tags leave the classical lane."""
+    if from_other_file:
+        return True
+    tokens = {t for t in (cand.get("genres") or "").split("-") if t} or {"NA"}
+    return not tokens <= CLASSICAL_LANE_TAGS
 
 
 def licence_map(paths: set[str]) -> dict[str, str]:
@@ -124,7 +146,8 @@ def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = 
                   f"{declared}, and PDMX found no licence conflict. Screened automatically: one sounding "
                   f"part, one or two staves, MusicXML {cand.get('version')} schema valid, no slice that one "
                   f"hand cannot strike, and zero lint law errors at the medium and large profiles. Not "
-                  f"reviewed by eye. Source fingerings: {fingerings}."),
+                  f"reviewed by eye. Source fingerings: {fingerings}"
+                  f"{' (removed from the stored file: the app fingers every score itself)' if fingerings else ''}."),
         "pdmx": {"sha256": sha, "path": cand["path"], "license": licence, "rating": cand.get("rating"),
                  "nRatings": cand.get("n_ratings"), "fingerings": fingerings, "version": cand.get("version")},
     }
@@ -170,22 +193,97 @@ def record_failures(log: Path) -> int:
     return added
 
 
+def _recheck_one(job: tuple[str, str, str, int]) -> tuple[str, str | None]:
+    """(slug, None when the build's own check passes now, else its first error)."""
+    import tempfile
+
+    import build  # the build's own strip and check, so this cannot disagree with it
+
+    slug, sha, licence, tempo = job
+    piece = {"slug": slug, "pdmx": {"sha256": sha, "license": licence, "fingerings": 0}, "tempoBpm": tempo}
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            entry = build.build_pdmx(piece, Path(tmp))
+    except Exception as exc:  # noqa: BLE001 - a piece the build cannot even open stays refused
+        return slug, f"{type(exc).__name__}: {str(exc)[:160]}"
+    if entry["files"]:
+        return slug, None
+    errors = entry["checks"]["errors"]
+    return slug, errors[0] if errors else "failed validation"
+
+
+def recheck_failures(workers: int = 6) -> tuple[int, int]:
+    """Run every recorded build failure through the build's check again; drop those that pass now.
+
+    The record keeps a refusal forever (a validator refuses the same file every time), so when the build
+    or the validator changes, the record must be re-judged by the same code, not by matching its reasons.
+    Returns (released, still refused). A failure whose candidate is no longer in the pool stays recorded."""
+    from multiprocessing import Pool
+
+    excluded = json.loads(EXCLUDED.read_text(encoding="utf-8"))
+    known = excluded["buildFailed"]
+    entries, _ = load_pool()
+    wanted = []
+    for gate, cand, _songs in entries:
+        slug = f"pdmx-{ascii_slug(clean_title(cand.get('title')))}-{gate['sha256'][:8]}"
+        if slug in known:
+            wanted.append((slug, gate, cand))
+    licences = licence_map({cand["path"] for _, _, cand in wanted})
+    jobs = [(slug, gate["sha256"], licences.get(cand["path"]), round(float(gate["tempo"])))
+            for slug, gate, cand in wanted if licences.get(cand["path"]) in ("publicdomain", "cc-zero")]
+    released = 0
+    with Pool(workers) as pool:
+        for n, (slug, error) in enumerate(pool.imap_unordered(_recheck_one, jobs, chunksize=1), 1):
+            if error is None:
+                del known[slug]
+                released += 1
+            else:
+                known[slug] = error[:200]
+            if n % 50 == 0:
+                print(f"  rechecked {n}/{len(jobs)}, released {released}", flush=True)
+    excluded["buildFailed"] = dict(sorted(known.items()))
+    EXCLUDED.write_text(json.dumps(excluded, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return released, len(known)
+
+
+def load_pool() -> tuple[list[tuple[dict, dict, bool]], dict[str, dict]]:
+    """Every gated candidate as (gate, candidate, songs lane), most rated first, and the candidate records."""
+    candidates = {c["sha256"]: c for c in json.loads((RAW / "candidates.json").read_text(encoding="utf-8"))}
+    other: dict[str, dict] = {}
+    if (RAW / "candidates-other.json").exists():
+        other = {c["sha256"]: c for c in json.loads((RAW / "candidates-other.json").read_text(encoding="utf-8"))}
+    entries: list[tuple[dict, dict, bool]] = []
+    for gate in (json.loads(line) for line in (RAW / "gate.jsonl").open(encoding="utf-8")):
+        if gate["sha256"] in candidates:  # a superseded representative of a title is skipped
+            cand = candidates[gate["sha256"]]
+            entries.append((gate, cand, in_songs_lane(cand, False)))
+    if (RAW / "gate-other.jsonl").exists():
+        for gate in (json.loads(line) for line in (RAW / "gate-other.jsonl").open(encoding="utf-8")):
+            if gate["sha256"] in other:
+                entries.append((gate, other[gate["sha256"]], True))
+    # the same order the gate ran in: the most rated candidates first
+    entries.sort(key=lambda e: (-int(e[1].get("n_ratings") or 0), -float(e[1].get("rating") or 0), e[0]["sha256"]))
+    return entries, {**candidates, **other}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--record-failures", type=Path, metavar="LOG",
                     help="first add the pieces refused in this build.py log to pdmx-excluded.json")
+    ap.add_argument("--recheck-failures", action="store_true",
+                    help="first re-run every recorded build failure through the build's check and release those that pass")
     ap.add_argument("--limit", type=int, default=LIMIT,
                     help="ship at most this many ordinary passing candidates, best rated first (default %(default)s)")
+    ap.add_argument("--songs-limit", type=int, default=SONGS_LIMIT,
+                    help="ship at most this many songs, best rated first (default %(default)s)")
     a = ap.parse_args(argv)
     if a.record_failures:
         print(f"recorded {record_failures(a.record_failures)} new build failures")
-    gates = [json.loads(line) for line in (RAW / "gate.jsonl").open(encoding="utf-8")]
-    candidates = {c["sha256"]: c for c in json.loads((RAW / "candidates.json").read_text(encoding="utf-8"))}
+    if a.recheck_failures:
+        released, still = recheck_failures()
+        print(f"rechecked the build failures: {released} released, {still} still refused")
+    entries, candidates = load_pool()
     licences = licence_map({c["path"] for c in candidates.values()})
-    gates = [g for g in gates if g["sha256"] in candidates]  # a superseded representative of a title is skipped
-    # the same order the gate ran in: the most rated candidates first
-    gates.sort(key=lambda g: (-int(candidates[g["sha256"]].get("n_ratings") or 0),
-                              -float(candidates[g["sha256"]].get("rating") or 0), g["sha256"]))
     # Candidates that must not ship. A build failure (verification.json ok false, or pdmx-excluded.json)
     # is kept in `rejected` with the first error, and the cap counts only the others: merge_results drops
     # the record of a piece that has left the catalog, so verification.json alone would forget it and the
@@ -197,64 +295,73 @@ def main(argv=None) -> int:
     for slug, error in excluded["buildFailed"].items():
         build_failed.setdefault(slug, {"validation": {"": {"errors": [error]}}})
     duplicates = excluded.get("duplicates", {})
-    out_of_scope = excluded.get("outOfScope", {})  # pdmx_scope.py: modern popular music and the like
-    pieces: list[dict] = []
+    out_of_scope = excluded.get("outOfScope", {})  # pdmx_scope.py and pdmx_songs.py: the review's exclusions
+    caps = {"classical": a.limit, "songs": a.songs_limit}
+    pieces: dict[str, list[dict]] = {"classical": [], "songs": []}
+    rejected: dict[str, list[dict]] = {"classical": [], "songs": []}  # only what the build refused
     advanced: list[dict] = []
-    rejected: list[dict] = []  # only the candidates the build refused; the rest are counted in _comment
-    not_shipped = {"gates": 0, "duplicates": 0, "out of scope": 0, "beyond the cap": 0}
+    not_shipped = {lane: {"gates": 0, "duplicates": 0, "out of scope": 0, "beyond the cap": 0}
+                   for lane in ("classical", "songs")}
     seen_slugs: set[str] = set()
-    for gate in gates:
-        cand = candidates[gate["sha256"]]
+    for gate, cand, songs in entries:
+        lane = "songs" if songs else "classical"
+        counts = not_shipped[lane]
         title = clean_title(cand.get("title"))
         slug = f"pdmx-{ascii_slug(title)}-{gate['sha256'][:8]}"  # the slug it would have had
         if slug in build_failed:
             first = (build_failed[slug].get("validation") or {})
             errors = [e for v in first.values() for e in (v.get("errors") or [])]
-            rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title,
-                             "reason": "failed the library's validation: " + (errors[0] if errors else "see verification")})
+            rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title,
+                                   "reason": "failed the library's validation: " + (errors[0] if errors else "see verification")})
             continue
-        if not pdmx_advanced.usable(gate, cand["notes"]):
-            not_shipped["gates"] += 1
+        # The songs lane takes only a candidate that passed every gate; the classical lane also takes the
+        # level-6 pieces that pass the relaxed gates (pdmx_advanced.usable).
+        if not (gate["ok"] if songs else pdmx_advanced.usable(gate, cand["notes"])):
+            counts["gates"] += 1
             continue
         if BROKEN_TEXT.search(title) or BROKEN_TEXT.search(cand.get("composer") or ""):
-            rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title,
-                             "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"})
+            rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title,
+                                   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"})
             continue
         if not pdmx_select.grand_staff(cand):
-            rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title,
-                             "reason": "one staff: the library needs a grand staff (two staves)"})
+            rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title,
+                                   "reason": "one staff: the library needs a grand staff (two staves)"})
             continue
         if gate["sha256"] in duplicates or slug in duplicates:
-            not_shipped["duplicates"] += 1
+            counts["duplicates"] += 1
             continue
         if gate["sha256"] in out_of_scope:
-            not_shipped["out of scope"] += 1
+            counts["out of scope"] += 1
             continue
         licence = licences.get(cand["path"])
         if licence not in ("publicdomain", "cc-zero"):
-            rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title, "reason": f"licence {licence!r}"})
+            rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title, "reason": f"licence {licence!r}"})
             continue
-        demands = pdmx_advanced.advanced(gate["level"], cand["notes"])
-        if not demands and len(pieces) >= a.limit:
-            not_shipped["beyond the cap"] += 1
+        demands = None if songs else pdmx_advanced.advanced(gate["level"], cand["notes"])
+        if not demands and len(pieces[lane]) >= caps[lane]:
+            counts["beyond the cap"] += 1
             continue
         relaxed_gates = None if gate["ok"] else pdmx_advanced.relaxed_facts(gate)
         piece = piece_for(gate, cand, licence, demands, relaxed_gates)
+        if songs:
+            piece["collection"] = song_collection(cand.get("genres"))
         if piece["slug"] in seen_slugs:  # the sha prefix makes this practically impossible; keep it honest
             raise SystemExit(f"duplicate slug {piece['slug']}")
         seen_slugs.add(piece["slug"])
-        (advanced if demands else pieces).append(piece)
-    pieces.sort(key=lambda p: (p["level"], p["collection"], p["slug"]))
+        (advanced if demands else pieces[lane]).append(piece)
+    for lane in pieces:
+        pieces[lane].sort(key=lambda p: (p["level"], p["collection"], p["slug"]))
     advanced.sort(key=lambda p: p["slug"])
     notes_gates = ("one staff, a lint law error, an unplayable slice or an XSD error")
-    write_fragment(FRAGMENT, TASK, pieces, rejected, (
+    classical_not = not_shipped["classical"]
+    write_fragment(FRAGMENT, TASK, pieces["classical"], rejected["classical"], (
         "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain "
         "or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by "
         "content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No "
         "individual engraving review: the gates are the review. Not shipped: "
-        f"{not_shipped['gates']} failed a gate ({notes_gates}), {not_shipped['duplicates']} duplicates of "
-        f"another piece (dedupe.py), {not_shipped['out of scope']} out of scope (pdmx_scope.py), "
-        f"{not_shipped['beyond the cap']} passed but ranked beyond the cap of "
+        f"{classical_not['gates']} failed a gate ({notes_gates}), {classical_not['duplicates']} duplicates of "
+        f"another piece (dedupe.py), {classical_not['out of scope']} out of scope (pdmx_scope.py), "
+        f"{classical_not['beyond the cap']} passed but ranked beyond the cap of "
         f"{a.limit} (by rating). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; "
         "`rejected` lists only the candidates the build refused."))
     write_fragment(ADVANCED_FRAGMENT, ADVANCED_TASK, advanced, [], (
@@ -262,9 +369,22 @@ def main(argv=None) -> int:
         "every piece passed the same gates as pdmx-library.json; the rule only chooses the level, which the "
         "frozen heuristic cannot (it has no level 6). The rule's thresholds were fixed before the yield was "
         "known. Pieces are not capped."))
-    levels = {lvl: sum(1 for p in pieces if p['level'] == lvl) for lvl in range(1, 7)}
-    print(f"pieces {len(pieces)}; advanced {len(advanced)}; rejected {len(rejected)}; "
-          f"not shipped {not_shipped}; levels {levels}")
+    songs_not = not_shipped["songs"]
+    write_fragment(SONGS_FRAGMENT, SONGS_TASK, pieces["songs"], rejected["songs"], (
+        "MuseScore archive songs (PDMX): solo piano scores outside classical, folk and religious music (pop, rock, "
+        "soundtrack, jazz, and unlabelled scores by composers outside the classical list) that the uploader declared "
+        "public domain or CC0 with no licence conflict. The user's broad copyright reading (2026-10-16): no check of "
+        "the author's date, so a modern arrangement that the declaration does not cover is a risk the repository "
+        "carries. Chosen by content/tools/pdmx_songs.py; two removal-only lenses (junk, content safety) took out the "
+        "flagged ones. Gated like the rest, but every gate must pass (no relaxed level 6), and the frozen heuristic "
+        "places each song (no level-6 override). Capped at "
+        f"{a.songs_limit} by rating. Not shipped: {songs_not['gates']} failed a gate, {songs_not['duplicates']} "
+        f"duplicates (dedupe.py), {songs_not['out of scope']} out of scope, {songs_not['beyond the cap']} beyond the cap. "
+        "Not reviewed by eye."))
+    levels = {lvl: sum(1 for p in pieces["classical"] if p["level"] == lvl) for lvl in range(1, 7)}
+    songs_levels = {lvl: sum(1 for p in pieces["songs"] if p["level"] == lvl) for lvl in range(1, 7)}
+    print(f"classical {len(pieces['classical'])}, advanced {len(advanced)}, songs {len(pieces['songs'])}; "
+          f"not shipped {not_shipped}; levels {levels}; song levels {songs_levels}")
     return 0
 
 

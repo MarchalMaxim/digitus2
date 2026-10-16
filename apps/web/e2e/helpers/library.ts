@@ -14,13 +14,8 @@ const manifest = JSON.parse(
 
 export const LIBRARY_COUNT = manifest.length;
 
-/** The library list as the app loads it (content/library-index.json). */
-const index = JSON.parse(
-  readFileSync(
-    fileURLToPath(new URL('../../../../content/library-index.json', import.meta.url)),
-    'utf8',
-  ),
-) as Array<{ title: string; composer: string; collection: string }>;
+/** The library list: the manifest holds the same eight fields per piece, in the same order, as content/library-index.json. */
+const index = manifest as unknown as Array<{ title: string; composer: string; collection: string }>;
 
 /**
  * A MuseScore archive piece of one level (collection ids pdmx-*), the first one in the list that

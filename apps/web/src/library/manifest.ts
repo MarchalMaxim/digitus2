@@ -49,9 +49,66 @@ export interface LibraryPiece {
 }
 
 /**
+ * content/library-index.json as written by content/tools/build.py (library_index): the eight fields
+ * the list reads, in a compact columnar form. Each collection's id, title and genre are stored once;
+ * `pieces` holds one parallel column per field, in manifest order.
+ */
+export interface LibraryIndexFile {
+  v: number;
+  /** [id, title, genre] per collection. */
+  collections: ReadonlyArray<readonly string[]>;
+  pieces: {
+    /** An archive piece's slug is stored as "-" + its 8 hash characters (see slugOf); any other whole. */
+    slug: readonly string[];
+    title: readonly string[];
+    composer: readonly string[];
+    level: readonly number[];
+    /** Index into `collections`. */
+    collection: readonly number[];
+    /** Whole seconds. */
+    duration: readonly number[];
+  };
+  /** Piece index -> genre, for the pieces whose genre differs from their collection's. */
+  genres: Readonly<Record<string, string>>;
+}
+
+/** The slug build.py's pdmx_fragments.ascii_slug makes of a title (at most 40 characters). */
+function asciiSlug(title: string): string {
+  const folded = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return folded.slice(0, 40).replace(/-+$/, '') || 'untitled';
+}
+
+/** A piece's slug: "-0f933bca" is an archive piece, "pdmx-" + the slug of its title + "-0f933bca". */
+function slugOf(stored: string, title: string): string {
+  return stored.startsWith('-') ? `pdmx-${asciiSlug(title)}${stored}` : stored;
+}
+
+/** The library list's entries (the eight LibraryEntry fields, in manifest order) from the index file. */
+export function decodeLibraryIndex(file: LibraryIndexFile): LibraryEntry[] {
+  if (file.v !== 2) throw new Error(`unknown library list version ${String(file.v)}`);
+  const { slug, title, composer, level, collection, duration } = file.pieces;
+  return slug.map((stored, i) => {
+    const [collectionId, collectionTitle, collectionGenre] = file.collections[collection[i]!]!;
+    return {
+      slug: slugOf(stored, title[i]!),
+      title: title[i]!,
+      composer: composer[i]!,
+      level: level[i]! as Level,
+      collection: collectionTitle!,
+      collectionId: collectionId!,
+      genre: (file.genres[i] ?? collectionGenre!) as GenreId,
+      approxDurationSec: duration[i]!,
+    };
+  });
+}
+
+/**
  * The library list: content/library-index.json, the eight fields the list reads, in manifest order.
- * It is fetched once before the app renders (main.tsx), not bundled: a 1,550-piece index is about
- * 100 KB gzip, over the start-up bundle budget. The full entries load on demand (loadPieceDetails).
+ * It is fetched once before the app renders (main.tsx), not bundled: the 2,700-piece index is about
+ * 80 KB gzip, over the start-up bundle budget. The full entries load on demand (loadPieceDetails).
  */
 let index: readonly LibraryEntry[] | null = null;
 let indexBySlug = new Map<string, LibraryEntry>();
@@ -68,7 +125,7 @@ export async function loadLibraryIndex(): Promise<void> {
   const response = await fetch(indexUrl);
   if (!response.ok)
     throw new Error(`the library list could not be loaded (HTTP ${response.status})`);
-  setLibraryIndex((await response.json()) as LibraryEntry[]);
+  setLibraryIndex(decodeLibraryIndex((await response.json()) as LibraryIndexFile));
 }
 
 /** The library's pieces in manifest order. Only after loadLibraryIndex has resolved. */

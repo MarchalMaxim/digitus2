@@ -15,7 +15,7 @@ import { ThemeToggle } from '../design/ThemeToggle.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { SECTION_ROWS, showsSearch } from './disclosure.js';
 import { LevelPills } from './LevelPills.js';
-import { TIER_LINES, type ShelfId, type Tier } from './levels.js';
+import { type ShelfId, type Tier } from './levels.js';
 import { libraryPieces } from './manifest.js';
 import {
   announcementFor,
@@ -34,7 +34,6 @@ import { SearchField } from './SearchField.js';
 import { MyScores } from './local/MyScores.js';
 import './library.css';
 
-const LEVEL_LINE_ID = 'library-level-line';
 /** The announcement waits for the reader to stop changing the list (arrowing through the pills). */
 export const ANNOUNCE_DELAY_MS = 500;
 
@@ -293,15 +292,7 @@ export function LibraryView() {
       <MyScores onOpen={rememberScroll} />
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">
-          <LevelPills
-            tiers={layout.tiers}
-            tier={layout.tier}
-            describedBy={LEVEL_LINE_ID}
-            onChange={chooseTier}
-          />
-          <p id={LEVEL_LINE_ID} className="level-line muted">
-            {TIER_LINES[layout.tier]}
-          </p>
+          <LevelPills tiers={layout.tiers} tier={layout.tier} onChange={chooseTier} />
         </div>
       )}
       <div key={listKey} ref={list} className={listClass}>

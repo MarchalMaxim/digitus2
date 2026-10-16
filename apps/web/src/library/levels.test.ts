@@ -6,7 +6,6 @@ import {
   LENGTHS,
   SHELVES,
   TIERS,
-  TIER_LINES,
   TIER_NAMES,
   shelfOfGenre,
   tierOf,
@@ -24,18 +23,12 @@ describe('the four levels (shelves spec 3)', () => {
       'challenging',
     ]);
   });
-  it('names and describes each tier once, with the copy of the spec', () => {
+  it('names each tier once, with the copy of the spec', () => {
     expect(TIERS.map((t) => TIER_NAMES[t])).toEqual([
       'Easy',
       'Medium',
       'Harder',
       'Challenging',
-    ]);
-    expect(TIERS.map((t) => TIER_LINES[t])).toEqual([
-      'Each hand stays close to home.',
-      'The hands move, with more notes and wider reaches.',
-      'Faster runs and reaches of an octave.',
-      'Fast passages, leaps and full chords.',
     ]);
   });
   it('reads a stored level: a tier id, or a grade from a build with six pills', () => {

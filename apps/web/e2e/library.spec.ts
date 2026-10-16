@@ -111,9 +111,9 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
 });
 
 // UI batch review and design section 17: the words a first visit reads before the first piece.
-// With shelves they are 43: the name 1, the sentence 14, the red button 6, the four pills 4, the
-// level line 6, the first shelf's name 1, count 2 and line 9. The budget may not grow.
-test('library: at most 43 visible words before the first piece (design section 17)', async ({
+// With shelves they are 37: the name 1, the sentence 14, the red button 6, the four pills 4, the
+// first shelf's name 1, count 2 and line 9. The budget may not grow.
+test('library: at most 37 visible words before the first piece (design section 17)', async ({
   page,
 }) => {
   await page.goto('/');
@@ -138,7 +138,7 @@ test('library: at most 43 visible words before the first piece (design section 1
   test
     .info()
     .annotations.push({ type: 'words before the first piece', description: `${words.length}` });
-  expect(words.length, words.join(' ')).toBeLessThanOrEqual(43);
+  expect(words.length, words.join(' ')).toBeLessThanOrEqual(37);
 });
 
 test('library: the arrow keys choose a level; the shelves follow and the pill keeps the focus', async ({
@@ -152,7 +152,6 @@ test('library: the arrow keys choose a level; the shelves follow and the pill ke
   await expect(medium).toBeChecked();
   await expect(medium).toBeFocused();
   await expect(pieceRows(page)).toHaveCount(arrivalRows('medium'));
-  await expect(page.getByText('The hands move, with more notes and wider reaches.')).toBeVisible();
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(
     shelvesOf('medium').map((s) => s.name),
   );
@@ -160,11 +159,9 @@ test('library: the arrow keys choose a level; the shelves follow and the pill ke
   await page.keyboard.press('ArrowRight');
   await expect(tierPill(page, 'harder')).toBeChecked();
   await expect(tierPill(page, 'harder')).toBeFocused();
-  await expect(page.getByText('Faster runs and reaches of an octave.')).toBeVisible();
   await page.keyboard.press('ArrowRight');
   await expect(tierPill(page, 'challenging')).toBeChecked();
   await expect(tierPill(page, 'challenging')).toBeFocused();
-  await expect(page.getByText('Fast passages, leaps and full chords.')).toBeVisible();
 });
 
 // Shelves spec 4.2: a shelf opens in place with its first page of 40, Show more appends the next

@@ -106,7 +106,7 @@ describe('LibraryView: the units (shelves spec 4.1, 5)', () => {
 });
 
 describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
-  it('is a radio group named Level with Easy, Medium, Harder and Challenging, described by the level line', () => {
+  it('is a radio group named Level with Easy, Medium, Harder and Challenging', () => {
     const { container } = render(<LibraryView />);
     const group = screen.getByRole('group', { name: 'Level' });
     const radios = within(group).getAllByRole('radio');
@@ -117,20 +117,14 @@ describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
       'Challenging',
     ]);
     expect(within(group).getByRole('radio', { name: 'Easy' })).toBeChecked();
-    expect(within(group).getByRole('radio', { name: 'Easy' })).toHaveAccessibleDescription(
-      'Each hand stays close to home.',
-    );
     expect(group.querySelectorAll('.is-red')).toHaveLength(0);
     expect(container.querySelectorAll('.pill')).toHaveLength(4);
   });
-  it('choosing Medium shows its shelves, says the line and the count once', async () => {
+  it('choosing Medium shows its shelves and says the count once', async () => {
     render(<LibraryView />);
     await userEvent.click(screen.getByRole('radio', { name: 'Medium' }));
     expect(screen.getByRole('radio', { name: 'Medium' })).toBeChecked();
     expect(h2s()).toEqual(['Songs', 'Classical', 'Baroque', 'Romantic']);
-    expect(
-      screen.getByText('The hands move, with more notes and wider reaches.'),
-    ).toBeInTheDocument();
     expect(useAppStore.getState().libraryLevel).toBe('medium');
     await waitFor(
       () =>
@@ -147,7 +141,6 @@ describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
     expect(screen.getByRole('radio', { name: 'Challenging' })).toBeChecked();
-    expect(screen.getByText('Fast passages, leaps and full chords.')).toBeInTheDocument();
   });
 });
 

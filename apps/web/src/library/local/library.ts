@@ -44,7 +44,7 @@ function storageFailed(removing = false) {
       .setNotice(
         removing
           ? 'This score was removed for this visit, but browser storage could not be updated. It may reappear after a reload.'
-          : 'Your score could not be saved in this browser. You can keep working during this visit; keep your original files.',
+          : 'Your score could not be saved. Keep your original files.',
       );
 }
 function write(record: LocalScoreRecord | string) {

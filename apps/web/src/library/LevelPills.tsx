@@ -11,8 +11,6 @@ interface PillRadiosProps<T extends string> {
   name: string;
   options: readonly PillOption<T>[];
   value: T;
-  /** The id of a line that describes every pill, when there is one. */
-  describedBy?: string;
   onChange(value: T): void;
 }
 
@@ -26,7 +24,6 @@ function PillRadios<T extends string>({
   name,
   options,
   value,
-  describedBy,
   onChange,
 }: PillRadiosProps<T>) {
   return (
@@ -39,7 +36,6 @@ function PillRadios<T extends string>({
             name={name}
             value={o.id}
             checked={o.id === value}
-            aria-describedby={describedBy}
             onChange={() => onChange(o.id)}
           />
           <span>{o.label}</span>
@@ -52,20 +48,17 @@ function PillRadios<T extends string>({
 export interface LevelPillsProps {
   tiers: readonly Tier[];
   tier: Tier;
-  /** The id of the level line, which describes every pill. */
-  describedBy: string;
   onChange(tier: Tier): void;
 }
 
 /** The level pills (spec 3): Easy, Medium, Harder, Challenging. */
-export function LevelPills({ tiers, tier, describedBy, onChange }: LevelPillsProps) {
+export function LevelPills({ tiers, tier, onChange }: LevelPillsProps) {
   return (
     <PillRadios
       legend="Level"
       name="library-level"
       options={tiers.map((t) => ({ id: t, label: TIER_NAMES[t] }))}
       value={tier}
-      describedBy={describedBy}
       onChange={onChange}
     />
   );

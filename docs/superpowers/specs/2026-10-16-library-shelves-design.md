@@ -9,14 +9,14 @@
 
 The library holds 2,702 pieces (`content/library-index.json`). Today the page shows six level pills and then every piece of the chosen level, so the page a reader lands on is one of these lists:
 
-| Level (today)    | Pieces | Rows rendered on arrival |
-| ---------------- | -----: | -----------------------: |
-| 1 First steps    |     47 |                       47 |
-| 2 Easy           |    212 |                      212 |
-| 3 Moderate       |  1,415 |                    1,415 |
-| 4 Intermediate   |    784 |                      784 |
-| 5 Challenging    |     45 |                       45 |
-| 6 Advanced       |    199 |                      199 |
+| Level (today)  | Pieces | Rows rendered on arrival |
+| -------------- | -----: | -----------------------: |
+| 1 First steps  |     47 |                       47 |
+| 2 Easy         |    212 |                      212 |
+| 3 Moderate     |  1,415 |                    1,415 |
+| 4 Intermediate |    784 |                      784 |
+| 5 Challenging  |     45 |                       45 |
+| 6 Advanced     |    199 |                      199 |
 
 Six pills whose names do not order themselves (is Intermediate harder than Moderate?), and a list of up to 1,415 rows with no shape: it is hard to read and slow to render. The index the page waits for is 717 KB (129 KB gzip).
 
@@ -28,12 +28,12 @@ No logical scope on the page holds more than 7 siblings: at most 7 page units, 4
 
 The issue asks for Easy, Medium and Challenging; the user then asked for four levels (2026-10-16), adding Harder between Medium and Challenging. The engine's content tools keep grading pieces 1 to 6 (`content/tools/level.py`; the manifest's `level` field is unchanged, so benchmarks and the build are untouched). The web app maps the grade to a level:
 
-| Level       | Grades | Pieces | Gray line under the pills                       |
-| ----------- | ------ | -----: | ----------------------------------------------- |
-| Easy        | 1, 2   |    259 | Each hand stays close to home.                  |
-| Medium      | 3      |  1,415 | The hands move, with more notes and wider reaches. |
-| Harder      | 4      |    784 | Faster runs and reaches of an octave.           |
-| Challenging | 5, 6   |    244 | Fast passages, leaps and full chords.           |
+| Level       | Grades | Pieces |
+| ----------- | ------ | -----: |
+| Easy        | 1, 2   |    259 |
+| Medium      | 3      |  1,415 |
+| Harder      | 4      |    784 |
+| Challenging | 5, 6   |    244 |
 
 The four pills share one row from 360 px wide (`library.css` trims their padding below 400 px); at 320 px the last pill wraps rather than clip.
 
@@ -43,14 +43,14 @@ One name everywhere: pill, search section heading, the score's side panel (which
 
 Inside the chosen level, pieces sit on style shelves. The eight catalog genres fold into six shelves, in this order (well-known tunes first, the beginner's usual way in):
 
-| Shelf                   | Catalog genres     | Easy | Medium | Harder | Challenging |
-| ----------------------- | ------------------ | ---: | -----: | -----: | ----------: |
-| Songs                   | songs              |  145 |    643 |    235 |          21 |
-| Classical               | classical          |   71 |    658 |    486 |         164 |
-| Folk and carols         | folk, carols       |   29 |     57 |     27 |           1 |
-| Baroque                 | baroque            |    5 |     15 |     15 |          33 |
-| Romantic                | romantic           |    6 |     36 |     14 |          14 |
-| Jazz, ragtime and modern | ragtime, modern   |    3 |      6 |      7 |          11 |
+| Shelf                    | Catalog genres  | Easy | Medium | Harder | Challenging |
+| ------------------------ | --------------- | ---: | -----: | -----: | ----------: |
+| Songs                    | songs           |  145 |    643 |    235 |          21 |
+| Classical                | classical       |   71 |    658 |    486 |         164 |
+| Folk and carols          | folk, carols    |   29 |     57 |     27 |           1 |
+| Baroque                  | baroque         |    5 |     15 |     15 |          33 |
+| Romantic                 | romantic        |    6 |     36 |     14 |          14 |
+| Jazz, ragtime and modern | ragtime, modern |    3 |      6 |      7 |          11 |
 
 A shelf with no piece in the level is not shown. Each shelf has a one-line gray description (copy in section 9).
 
@@ -85,26 +85,26 @@ The search field stays in the start row. Typing replaces the level pills and she
 
 ## 5. Page units, in reading order
 
-| # | Unit                         | Present                                         |
-| - | ---------------------------- | ----------------------------------------------- |
-| 1 | Welcome: name, sentence, red Start/Continue button, search field | always                        |
-| 2 | My scores (browser-local uploads) | when the reader has any                     |
-| 3 | Level pills and the gray level line | no search typed                           |
-| 4 | Length pills                 | list in view over 40 pieces                     |
-| 5 | Shelves, or the open shelf, or search results | always                         |
-| 6 | Own-file line                | always                                          |
-| 7 | Footer: About and licences   | always                                          |
+| #   | Unit                                                             | Present                     |
+| --- | ---------------------------------------------------------------- | --------------------------- |
+| 1   | Welcome: name, sentence, red Start/Continue button, search field | always                      |
+| 2   | My scores (browser-local uploads)                                | when the reader has any     |
+| 3   | Level pills                                                      | no search typed             |
+| 4   | Length pills                                                     | list in view over 40 pieces |
+| 5   | Shelves, or the open shelf, or search results                    | always                      |
+| 6   | Own-file line                                                    | always                      |
+| 7   | Footer: About and licences                                       | always                      |
 
 Seven at most; on a first visit the reader sees 1, 3, 5, 6, 7.
 
 ## 6. Performance
 
-| Measure                         | Before        | Target     |
-| ------------------------------- | ------------- | ---------- |
-| Rows rendered on arrival        | up to 1,415   | at most 30 |
-| Rows rendered in any list view  | up to 1,415   | 40 per page shown |
-| `library-index.json`, gzip      | 129 KB        | at least 30 % smaller (compact columnar form with a collection table) |
-| Start-up JS+CSS (bundle gate)   | under 150 KB  | unchanged gate |
+| Measure                        | Before       | Target                                                                |
+| ------------------------------ | ------------ | --------------------------------------------------------------------- |
+| Rows rendered on arrival       | up to 1,415  | at most 30                                                            |
+| Rows rendered in any list view | up to 1,415  | 40 per page shown                                                     |
+| `library-index.json`, gzip     | 129 KB       | at least 30 % smaller (compact columnar form with a collection table) |
+| Start-up JS+CSS (bundle gate)  | under 150 KB | unchanged gate                                                        |
 
 The full manifest still loads on demand only.
 
@@ -118,22 +118,23 @@ The full manifest still loads on demand only.
 
 - Six level names (First steps, Moderate, Intermediate, Advanced leave the UI).
 - The level-long list on arrival.
+- The level lines (the gray line under the pills that described each level) leave too: the pills carry the names alone.
 - Unused disclosure constants for the never-built L2 shapes (`GENRES_ABOVE`, `GENRE_MIN`, `FOLD_ABOVE`, `genrePills`), replaced by shelves.
 
 ## 9. Exact copy
 
-| Where | Copy |
-| ----- | ---- |
-| Songs line | Well-known tunes from children's songs to film and games. |
-| Classical line | Mozart, Clementi, Czerny and the studies pianists grow up on. |
-| Folk and carols line | Folk tunes, dances, carols and hymns. |
-| Baroque line | Bach, Handel, Scarlatti and others, 1600 to 1750. |
-| Romantic line | Schumann, Chopin, Tchaikovsky and others, 1820 to 1900. |
-| Jazz, ragtime and modern line | Joplin's rags and music written since 1900. |
-| Shelf button | `All {n} songs`, `All {n} classical pieces`, `All {n} folk tunes and carols`, `All {n} baroque pieces`, `All {n} romantic pieces`, `All {n} jazz, ragtime and modern pieces` |
-| Back | `All styles` |
-| More | `Show 40 more`, `Show the last {n}` |
-| Search section more | `All {n} in {Level}` |
+| Where                         | Copy                                                                                                                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Songs line                    | Well-known tunes from children's songs to film and games.                                                                                                                    |
+| Classical line                | Mozart, Clementi, Czerny and the studies pianists grow up on.                                                                                                                |
+| Folk and carols line          | Folk tunes, dances, carols and hymns.                                                                                                                                        |
+| Baroque line                  | Bach, Handel, Scarlatti and others, 1600 to 1750.                                                                                                                            |
+| Romantic line                 | Schumann, Chopin, Tchaikovsky and others, 1820 to 1900.                                                                                                                      |
+| Jazz, ragtime and modern line | Joplin's rags and music written since 1900.                                                                                                                                  |
+| Shelf button                  | `All {n} songs`, `All {n} classical pieces`, `All {n} folk tunes and carols`, `All {n} baroque pieces`, `All {n} romantic pieces`, `All {n} jazz, ragtime and modern pieces` |
+| Back                          | `All styles`                                                                                                                                                                 |
+| More                          | `Show 40 more`, `Show the last {n}`                                                                                                                                          |
+| Search section more           | `All {n} in {Level}`                                                                                                                                                         |
 
 ## 10. Follow-ups (not in this change)
 

@@ -1,5 +1,5 @@
 /**
- * The library's grades, levels, shelves and lengths: the names and lines the page shows
+ * The library's grades, levels, shelves and lengths: the names the page shows
  * (library shelves spec, sections 3, 4 and 9). Plain TypeScript with no Vite imports, so the
  * Playwright helpers import it too.
  */
@@ -25,14 +25,6 @@ export const TIER_NAMES: Record<Tier, string> = {
   medium: 'Medium',
   harder: 'Harder',
   challenging: 'Challenging',
-};
-
-/** What the chosen tier asks of the hands: the gray line under the pills. */
-export const TIER_LINES: Record<Tier, string> = {
-  easy: 'Each hand stays close to home.',
-  medium: 'The hands move, with more notes and wider reaches.',
-  harder: 'Faster runs and reaches of an octave.',
-  challenging: 'Fast passages, leaps and full chords.',
 };
 
 /** Grades 1 and 2 are Easy, 3 is Medium, 4 is Harder, 5 and 6 are Challenging. */

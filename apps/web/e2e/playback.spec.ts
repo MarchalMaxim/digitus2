@@ -1461,6 +1461,21 @@ test.describe('the keyboard on a phone', () => {
   });
 });
 
+// Issue #14: on a wide window the score view stopped at 72rem, and a five-octave piece scrolled
+// its keyboard with a third of the window empty. The view now grows with the window.
+test.describe('the keyboard on a wide window', () => {
+  test.use({ viewport: { width: 1716, height: 900 } });
+
+  test('a five-octave piece shows every key without scrolling', async ({ page }) => {
+    await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
+    const keyboard = page.locator('.keyboard-scroll');
+    await expect(keyboard).not.toHaveAttribute('tabindex');
+    const overflow = await keyboard.evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+});
+
 // The dock on a phone, where the review found Pause 5454 px above the viewport (the mobile
 // project does not run this file, so the phone is emulated here).
 test.describe('the dock on a phone', () => {

@@ -117,6 +117,68 @@ describe('chooseTheme', () => {
     chooseTheme('light');
     expect(onChange).toHaveBeenCalledTimes(1);
   });
+
+  describe('where the browser has view transitions', () => {
+    /** A startViewTransition that runs the update when the test says, as the browser does
+     *  once it has the old picture of the page. */
+    function fakeTransitions() {
+      const updates: Array<() => void> = [];
+      const ends: Array<() => void> = [];
+      const start = vi.fn((update: () => void) => {
+        updates.push(update);
+        return { finished: new Promise<void>((resolve) => ends.push(resolve)) };
+      });
+      Object.defineProperty(document, 'startViewTransition', { value: start, configurable: true });
+      return { start, updates, ends };
+    }
+
+    afterEach(() => {
+      delete (document as { startViewTransition?: unknown }).startViewTransition;
+      root().classList.remove('theme-changing');
+    });
+
+    it('cross-fades: the page changes inside the transition, after its old picture', async () => {
+      fakeSystem(false);
+      const transitions = fakeTransitions();
+      const onChange = vi.fn();
+      const stop = subscribeTheme(onChange);
+      chooseTheme('dark');
+      expect(transitions.start).toHaveBeenCalledTimes(1);
+      // The old picture still shows the light page and the sun.
+      expect(root().hasAttribute('data-theme')).toBe(false);
+      expect(onChange).not.toHaveBeenCalled();
+      expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
+      // The controls' own color transitions are held while the page cross-fades.
+      expect(root().classList.contains('theme-changing')).toBe(true);
+      transitions.updates[0]!();
+      expect(root().getAttribute('data-theme')).toBe('dark');
+      expect(onChange).toHaveBeenCalledTimes(1);
+      transitions.ends[0]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root().classList.contains('theme-changing')).toBe(false);
+      stop();
+    });
+
+    it('keeps holding the transitions while a second switch is still cross-fading', async () => {
+      fakeSystem(false);
+      const transitions = fakeTransitions();
+      chooseTheme('dark');
+      transitions.updates[0]!();
+      chooseTheme('light');
+      // The browser skips the first transition for the second; its end must not cut the second.
+      transitions.ends[0]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root().classList.contains('theme-changing')).toBe(true);
+      transitions.updates[1]!();
+      transitions.ends[1]!();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root().classList.contains('theme-changing')).toBe(false);
+      expect(root().hasAttribute('data-theme')).toBe(false);
+    });
+  });
 });
 
 describe('subscribeTheme', () => {

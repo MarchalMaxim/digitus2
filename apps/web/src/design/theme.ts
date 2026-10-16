@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * Light and dark (T7). The page follows the system's color scheme until the reader chooses a
@@ -53,20 +54,46 @@ export function themeOnScreen(): Theme {
 
 const listeners = new Set<() => void>();
 
+/** On the root while the page cross-fades between themes; base.css holds the controls' own
+ *  color transitions meanwhile, so they do not lag behind the paper. */
+const CHANGING = 'theme-changing';
+
+/** The switch whose cross-fade is on screen; an earlier one's end leaves the root alone. */
+let latestSwitch = 0;
+
 /**
  * Shows `theme` and keeps it, or forgets the choice when `theme` is the system's own. Where site
  * data is blocked the page still switches; the choice then lasts as long as the page.
+ *
+ * Where the browser has view transitions the whole page cross-fades from one theme to the other
+ * as a single picture (base.css sets the length, 0 under reduced motion); elsewhere it simply
+ * changes. The page and its subscribers change inside the transition, after the browser has the
+ * old picture, so the icon on the switch turns in the new one.
  */
 export function chooseTheme(theme: Theme): void {
   const own = theme === systemTheme() ? null : theme;
-  show(own);
   try {
     if (own) localStorage.setItem(THEME_STORAGE_KEY, own);
     else localStorage.removeItem(THEME_STORAGE_KEY);
   } catch {
     // Blocked site data, a private window: nothing to keep the choice in.
   }
-  for (const listener of listeners) listener();
+  const apply = () => {
+    show(own);
+    for (const listener of listeners) listener();
+  };
+  if (typeof document.startViewTransition !== 'function') {
+    apply();
+    return;
+  }
+  const root = document.documentElement;
+  const mine = ++latestSwitch;
+  root.classList.add(CHANGING);
+  const done = () => {
+    if (mine === latestSwitch) root.classList.remove(CHANGING);
+  };
+  // flushSync: React draws the switch's new state before the browser takes the new picture.
+  document.startViewTransition(() => flushSync(apply)).finished.then(done, done);
 }
 
 /**

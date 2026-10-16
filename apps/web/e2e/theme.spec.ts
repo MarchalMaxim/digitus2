@@ -111,6 +111,72 @@ test('the switch overrides the system, is kept, and gives the page back to the s
   expect(await paper(page)).toBe(DARK_PAPER);
 });
 
+/**
+ * Clicks the switch and returns the cross-fade the browser runs for it: each view-transition
+ * animation's pseudo-element, length and easing, and whether the controls' own transitions were
+ * held meanwhile. Empty when the page simply changed.
+ */
+async function switchAndWatch(page: Page) {
+  await expect(toggle(page)).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Open Twinkle/ })).toBeVisible();
+  return page.evaluate(async () => {
+    const root = document.documentElement;
+    document.querySelector<HTMLButtonElement>('.theme-toggle')!.click();
+    const held = root.classList.contains('theme-changing');
+    // A button other than the switch: one of the library's own.
+    const button = document.querySelector('button:not(.theme-toggle)')!;
+    const buttonDuration = getComputedStyle(button).transitionDuration;
+    for (let frame = 0; frame < 30; frame++) {
+      const fades = document
+        .getAnimations()
+        .map((a) => a.effect as KeyframeEffect)
+        .filter((effect) => effect.pseudoElement?.startsWith('::view-transition'))
+        .map((effect) => ({
+          pseudo: effect.pseudoElement,
+          duration: effect.getTiming().duration,
+          // A CSS animation keeps its timing function on its keyframes, not on the effect.
+          easing: getComputedStyle(root, effect.pseudoElement).animationTimingFunction,
+        }));
+      if (fades.length) return { held, buttonDuration, fades };
+      await new Promise(requestAnimationFrame);
+    }
+    return { held, buttonDuration, fades: [] };
+  });
+}
+
+test('the switch cross-fades the whole page, in the motion of the icon', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  const watched = await switchAndWatch(page);
+  expect(watched.held).toBe(true);
+  expect([...new Set(watched.fades.map((f) => f.pseudo))].sort()).toEqual([
+    '::view-transition-group(root)',
+    '::view-transition-new(root)',
+    '::view-transition-old(root)',
+  ]);
+  for (const fade of watched.fades) {
+    expect(fade.duration).toBe(200);
+    expect(fade.easing).toBe('cubic-bezier(0.2, 0, 0, 1)');
+  }
+  // While it fades, a button's own color transition is held so it does not lag behind the paper.
+  expect(watched.buttonDuration).toBe('0s');
+  await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
+  expect(await paper(page)).toBe(DARK_PAPER);
+  // Once it has faded the controls' transitions come back.
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.classList.contains('theme-changing')))
+    .toBe(false);
+});
+
+test('under reduced motion the page simply changes', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await page.goto('/');
+  const watched = await switchAndWatch(page);
+  for (const fade of watched.fades) expect(fade.duration).toBe(0);
+  await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
+  expect(await paper(page)).toBe(DARK_PAPER);
+});
+
 test('a kept theme is on the page before the app runs', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.addInitScript((key) => localStorage.setItem(key, 'dark'), STORAGE_KEY);

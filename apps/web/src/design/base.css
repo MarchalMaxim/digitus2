@@ -160,6 +160,22 @@ h1[tabindex='-1']:focus {
   max-width: none;
 }
 
+/* Switching the theme (design/theme.ts): the whole page cross-fades from one theme to the other
+   as a single picture (a view transition), with the icon's own length and easing; under reduced
+   motion that is 0 and the page simply changes. Meanwhile the controls' own color transitions are
+   held, or they would still be fading from the old theme when the cross-fade ends; the icon turns
+   as before. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--ease);
+}
+
+:root.theme-changing :not(.theme-toggle svg *) {
+  transition: none;
+}
+
 /* Light: a sun, a small disc and eight rays. Dark (pressed): the disc grows, the bite (a mask)
    slides in from the top right and cuts a crescent, and the rays turn 45 degrees, shrink and fade.
    Under reduced motion the durations are 0 (tokens.css): the icon simply changes. */

@@ -12,6 +12,10 @@
     "./ornaments": {
       "types": "./dist/src/score/ornaments.d.ts",
       "import": "./dist/src/score/ornaments.js"
+    },
+    "./score-build": {
+      "types": "./dist/src/score/build.d.ts",
+      "import": "./dist/src/score/build.js"
     }
   },
   "bin": {

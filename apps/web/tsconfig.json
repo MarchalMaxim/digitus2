@@ -8,7 +8,8 @@
     "types": ["vite/client", "node"],
     "paths": {
       "@digitus2/engine": ["../../packages/engine/src/index.ts"],
-      "@digitus2/engine/ornaments": ["../../packages/engine/src/score/ornaments.ts"]
+      "@digitus2/engine/ornaments": ["../../packages/engine/src/score/ornaments.ts"],
+      "@digitus2/engine/score-build": ["../../packages/engine/src/score/build.ts"]
     }
   },
   "include": ["src", "e2e", "vite.config.ts", "playwright.config.ts"]

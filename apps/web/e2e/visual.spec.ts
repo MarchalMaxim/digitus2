@@ -22,6 +22,28 @@ import { STATES } from './helpers/states.js';
  */
 const HIDE_TIMINGS = '.side-panel .timings { display: none; }';
 
+/** A sticky dock has a different document position at the top and bottom of a scrollable page.
+ * Capture its natural position below the music, independent of playback/focus scrolling. */
+async function dockScreenshotReady(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Math.abs(
+          window.scrollY -
+            Math.max(
+              0,
+              document.documentElement.scrollHeight - document.documentElement.clientHeight,
+            ),
+        ),
+      ),
+    )
+    .toBeLessThan(1);
+}
+
 /** The states whose screenshot changes while it is taken. */
 const PLAYBACK_STATES = new Set(['score-count-in', 'score-playing']);
 
@@ -38,6 +60,7 @@ for (const s of SCREENSHOT_STATES) {
   test(`visual ${s.name}`, async ({ page }) => {
     await s.go(page);
     await page.addStyleTag({ content: HIDE_TIMINGS });
+    if (s.name === 'score-rewound') await dockScreenshotReady(page);
     await expect(page).toHaveScreenshot(`${s.name}.png`, {
       fullPage: true,
       animations: 'disabled',
@@ -95,6 +118,7 @@ for (const crop of KEYBOARD_CROPS) {
       await expect(pressed.locator('text')).toHaveText(['5', '4']);
       await expect(page.locator('.keyboard-svg .key-hand')).toHaveCount(0);
     }
+    await dockScreenshotReady(page);
     await expect(page.locator('.dock .keyboard')).toHaveScreenshot(`${crop.name}.png`, {
       animations: 'disabled',
     });

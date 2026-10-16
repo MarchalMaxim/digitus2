@@ -304,6 +304,9 @@ export const STATES: AppState[] = [
       await pausedOnThirdNote(page);
       await page.getByRole('button', { name: 'Rewind' }).click();
       await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
+      // The red flies home from the last note heard to Play (RedFlight.tsx, 200 ms): the state
+      // is rewound once it has landed and Play carries it again.
+      await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
     },
     expectTag: 'button',
   },

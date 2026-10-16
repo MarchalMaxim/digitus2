@@ -1,3 +1,4 @@
+import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import manifestJson from '../../../../content/manifest.json';
 import { GENRES } from './levels.js';
@@ -12,6 +13,7 @@ import {
   loadPiece,
   loadPieceDetails,
   pieceBySlug,
+  readScoreFile,
   requiresCredit,
   scoreUrl,
 } from './manifest.js';
@@ -75,6 +77,17 @@ describe('manifest', () => {
     const piece = (await loadPiece('twinkle-twinkle-little-star'))!;
     const url = await scoreUrl(piece.files.score);
     expect(url).toMatch(/twinkle-twinkle-little-star/);
+  });
+  it('reads an archive score whichever way the server answers: gzip bytes are decompressed, bytes it already decoded pass through', async () => {
+    // The Vite servers send a .gz file with Content-Encoding: gzip, so the browser hands over plain
+    // XML; a server that does not send that header hands over the gzip bytes.
+    const xml = '<?xml version="1.0"?><score-partwise version="3.1"/>';
+    const slug = pieces.find((p) => p.collectionId.startsWith('pdmx-'))!.slug;
+    const path = `scores/${slug}.musicxml.gz`;
+    const read = async (bytes: Uint8Array) =>
+      new TextDecoder().decode(await readScoreFile(path, async () => bytes));
+    expect(await read(new Uint8Array(gzipSync(Buffer.from(xml))))).toBe(xml);
+    expect(await read(new TextEncoder().encode(xml))).toBe(xml);
   });
   it('credits every CC BY and CC BY-SA engraving with its typesetter and licence', async () => {
     for (const p of (await allDetails()).filter(requiresCredit)) {

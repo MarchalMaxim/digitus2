@@ -46,7 +46,11 @@ LIMIT = 1300  # the library ships this many passing candidates that build; the r
 TRADITIONAL_NAMED = re.compile(r"^(trad\.?|traditional|tradicional|anon\.?|anonymous|anonimo|anónimo)$", re.I)
 ANONYMOUS = re.compile(r"^(anon\.?|anonymous|anonimo|anónimo)$", re.I)
 PAREN_YEARS = re.compile(r"\s*\(\s*(?:c\.|ca\.)?\s*\d{3,4}\s*(?:[-–—]\s*)?\d{0,4}\s*\)")
-REPLACEMENT = "�"
+# Broken text in the archive's metadata: the replacement character, or UTF-8 read as Latin-1 or cp1252
+# (a Cyrillic title that reads as "Ð..." and "Ã..."). A title or composer like that is not shipped.
+BROKEN_TEXT = re.compile(
+    "�|[ÂÃÐÑ][\u0080-¿Œ-žƒˆ˜–-›€™]"
+)
 COLLECTION_BY_GENRE = {"folk": "pdmx-folk", "classical": "pdmx-classical", "religiousmusic": "pdmx-classical"}
 
 
@@ -202,9 +206,9 @@ def main(argv=None) -> int:
         if not gate["ok"]:
             not_shipped["gates"] += 1
             continue
-        if REPLACEMENT in title or REPLACEMENT in (cand.get("composer") or ""):
+        if BROKEN_TEXT.search(title) or BROKEN_TEXT.search(cand.get("composer") or ""):
             rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title,
-                             "reason": "the archive's title or composer has a replacement character"})
+                             "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"})
             continue
         if not pdmx_select.grand_staff(cand):
             rejected.append({"slug": slug, "sha256": gate["sha256"], "title": title,

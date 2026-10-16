@@ -8692,39 +8692,6 @@
     }
   },
   {
-    "slug": "pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa",
-    "title": "Arrangement for piano - on La ci darem la mano from Don Giovanni - Mozart",
-    "composer": "Unknown",
-    "composerDates": null,
-    "catalogue": null,
-    "year": null,
-    "level": 3,
-    "collection": "Classical piano from the MuseScore archive",
-    "collectionId": "pdmx-classical",
-    "genre": "classical",
-    "benchmarkSet": null,
-    "measures": 22,
-    "approxDurationSec": 55,
-    "timeSignature": "2/4",
-    "key": "A major",
-    "tempoBpm": 48,
-    "source": {
-      "name": "MuseScore, via the PDMX dataset",
-      "url": "https://zenodo.org/records/15571083",
-      "license": "CC0-1.0",
-      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "retrievedAt": "2026-10-13"
-    },
-    "arranger": null,
-    "hasEditorialFingering": false,
-    "excerpt": null,
-    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-    "files": {
-      "score": "scores/pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa.musicxml.gz",
-      "fingered": null
-    }
-  },
-  {
     "slug": "pdmx-arrival-of-the-queen-of-sheba-86b52105",
     "title": "Arrival of the Queen of Sheba",
     "composer": "G. F. Händel",
@@ -15684,6 +15651,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-in-the-paths-of-sin-i-traveled-j-h-tenne-374693a0.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-in-the-place-of-mansions-fair-herbert-j-3b75b09a",
+    "title": "In the place of mansions fair - Herbert J. Lacey",
+    "composer": "Unknown",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 3,
+    "collection": "Classical piano from the MuseScore archive",
+    "collectionId": "pdmx-classical",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 20,
+    "approxDurationSec": 40,
+    "timeSignature": "4/4",
+    "key": "F major",
+    "tempoBpm": 100,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "Public Domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-in-the-place-of-mansions-fair-herbert-j-3b75b09a.musicxml.gz",
       "fingered": null
     }
   },
@@ -25522,39 +25522,6 @@
     }
   },
   {
-    "slug": "pdmx-untitled-0b939135",
-    "title": "ÐÑÑÐµÑÐºÐ¾Ðµ ÐÐ¾Ð½ÐÐ¾ - Ð.Ð. ÐÐ¾ÑÐÑÑ",
-    "composer": "Unknown",
-    "composerDates": null,
-    "catalogue": null,
-    "year": null,
-    "level": 3,
-    "collection": "Classical piano from the MuseScore archive",
-    "collectionId": "pdmx-classical",
-    "genre": "classical",
-    "benchmarkSet": null,
-    "measures": 65,
-    "approxDurationSec": 232,
-    "timeSignature": "4/4",
-    "key": "C major",
-    "tempoBpm": 116,
-    "source": {
-      "name": "MuseScore, via the PDMX dataset",
-      "url": "https://zenodo.org/records/15571083",
-      "license": "CC0-1.0",
-      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "retrievedAt": "2026-10-13"
-    },
-    "arranger": null,
-    "hasEditorialFingering": false,
-    "excerpt": null,
-    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-    "files": {
-      "score": "scores/pdmx-untitled-0b939135.musicxml.gz",
-      "fingered": null
-    }
-  },
-  {
     "slug": "pdmx-upon-the-cross-he-bled-s-m-walter-289b32c4",
     "title": "Upon the cross He bled - S. M. Walter",
     "composer": "Unknown",
@@ -28686,6 +28653,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-list-the-sabbath-bells-so-merrily-ringin-39d11af1.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-look-on-us-kindly-friends-3b7bb3ab",
+    "title": "Look on us kindly friends",
+    "composer": "Unknown",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 3,
+    "collection": "Folk tunes from the MuseScore archive",
+    "collectionId": "pdmx-folk",
+    "genre": "folk",
+    "benchmarkSet": null,
+    "measures": 20,
+    "approxDurationSec": 32,
+    "timeSignature": "3/4",
+    "key": "C major",
+    "tempoBpm": 114,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "Public Domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-look-on-us-kindly-friends-3b7bb3ab.musicxml.gz",
       "fingered": null
     }
   },
@@ -32109,39 +32109,6 @@
     }
   },
   {
-    "slug": "pdmx-aviator-marsh-1910-2b9f8860",
-    "title": "Aviator Marsh (1910)",
-    "composer": "Unknown",
-    "composerDates": null,
-    "catalogue": null,
-    "year": null,
-    "level": 4,
-    "collection": "Classical piano from the MuseScore archive",
-    "collectionId": "pdmx-classical",
-    "genre": "classical",
-    "benchmarkSet": null,
-    "measures": 81,
-    "approxDurationSec": 136,
-    "timeSignature": "2/4",
-    "key": "F major",
-    "tempoBpm": 90,
-    "source": {
-      "name": "MuseScore, via the PDMX dataset",
-      "url": "https://zenodo.org/records/15571083",
-      "license": "CC0-1.0",
-      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "retrievedAt": "2026-10-13"
-    },
-    "arranger": null,
-    "hasEditorialFingering": false,
-    "excerpt": null,
-    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-    "files": {
-      "score": "scores/pdmx-aviator-marsh-1910-2b9f8860.musicxml.gz",
-      "fingered": null
-    }
-  },
-  {
     "slug": "pdmx-awake-and-in-his-strength-renewed-b-d-ac-300d3cf2",
     "title": "Awake and in His strength renewed - B. D. Ackley",
     "composer": "Unknown",
@@ -32270,6 +32237,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-bartlett-allen-chester-g-allen-00a982d7.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-be-still-o-heart-why-fear-and-tremble-ge-3b7e3e16",
+    "title": "Be still O heart why fear and tremble - Geo. C. Stebbins",
+    "composer": "Unknown",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 4,
+    "collection": "Classical piano from the MuseScore archive",
+    "collectionId": "pdmx-classical",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 26,
+    "approxDurationSec": 32,
+    "timeSignature": "2/4",
+    "key": "Ab major",
+    "tempoBpm": 92,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "Public Domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-be-still-o-heart-why-fear-and-tremble-ge-3b7e3e16.musicxml.gz",
       "fingered": null
     }
   },
@@ -32534,6 +32534,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-beyond-the-gloom-and-sorrow-e-s-howard-3a1e7e76.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-beyond-the-winters-storms-and-blight-j-l-3b9fec5d",
+    "title": "Beyond the winters storms and blight - J. Lincoln Hall",
+    "composer": "Unknown",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 4,
+    "collection": "Classical piano from the MuseScore archive",
+    "collectionId": "pdmx-classical",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 19,
+    "approxDurationSec": 40,
+    "timeSignature": "4/4",
+    "key": "Eb major",
+    "tempoBpm": 100,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "Public Domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-beyond-the-winters-storms-and-blight-j-l-3b9fec5d.musicxml.gz",
       "fingered": null
     }
   },
@@ -41708,39 +41741,6 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-outside-the-gate-and-yet-so-near-the-fou-2b03c5d8.musicxml.gz",
-      "fingered": null
-    }
-  },
-  {
-    "slug": "pdmx-poslednee-tango-c-1913-124e8ea8",
-    "title": "Poslednee Tango (c. 1913)",
-    "composer": "Unknown",
-    "composerDates": null,
-    "catalogue": null,
-    "year": null,
-    "level": 4,
-    "collection": "Classical piano from the MuseScore archive",
-    "collectionId": "pdmx-classical",
-    "genre": "classical",
-    "benchmarkSet": null,
-    "measures": 36,
-    "approxDurationSec": 48,
-    "timeSignature": "2/4",
-    "key": "G major",
-    "tempoBpm": 90,
-    "source": {
-      "name": "MuseScore, via the PDMX dataset",
-      "url": "https://zenodo.org/records/15571083",
-      "license": "CC0-1.0",
-      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-      "retrievedAt": "2026-10-13"
-    },
-    "arranger": null,
-    "hasEditorialFingering": false,
-    "excerpt": null,
-    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-    "files": {
-      "score": "scores/pdmx-poslednee-tango-c-1913-124e8ea8.musicxml.gz",
       "fingered": null
     }
   },

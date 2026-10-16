@@ -22,6 +22,26 @@ const index = JSON.parse(
   ),
 ) as Array<{ title: string; composer: string; collection: string }>;
 
+/**
+ * A MuseScore archive piece of one level (collection ids pdmx-*), the first one in the list that
+ * names its composer: its score is a gzip file, which the app must read whichever way a server sends it.
+ */
+export function archiveSample(level: number): { slug: string; title: string } {
+  const piece = (
+    index as unknown as Array<{
+      slug: string;
+      title: string;
+      composer: string;
+      level: number;
+      collectionId: string;
+    }>
+  ).find(
+    (p) => p.collectionId.startsWith('pdmx-') && p.level === level && p.composer !== 'Unknown',
+  );
+  if (!piece) throw new Error(`no archive piece at level ${level}`);
+  return piece;
+}
+
 /** How many pieces a search finds, by the app's own matching (src/library/search.ts), so a count follows the library. */
 export function searchCount(query: string): number {
   return searchPieces(index, query).length;

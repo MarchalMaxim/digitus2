@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { libraryScore, mxlOf, utf16leOf } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
-import { libraryReady, showLevelOf } from './helpers/library.js';
+import { archiveSample, libraryReady, showLevelOf } from './helpers/library.js';
 
 test('opens Twinkle from the library: every note gets a digit, one red element, hash set', async ({
   page,
@@ -19,6 +19,28 @@ test('opens Twinkle from the library: every note gets a digit, one red element, 
   expect(roots[0]!.tag).toBe('button');
   await expectNoSeriousA11y(page, 'score ready');
 });
+
+// MuseScore archive pieces are stored as gzip (`.musicxml.gz`). A server may send such a file with
+// Content-Encoding: gzip (the browser then hands over plain XML) or without it (the app gunzips): this
+// opens one piece from three levels through the production build, whichever the server does.
+for (const level of [1, 4, 6]) {
+  test(`an archive piece of level ${level} opens with its fingerings, its credit and no error`, async ({
+    page,
+  }) => {
+    const piece = archiveSample(level);
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => {
+      if (m.type() === 'error') errors.push(m.text());
+    });
+    await page.goto(`/#/piece/${piece.slug}`);
+    await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(piece.title);
+    await expect(page.getByText('MuseScore, via the PDMX dataset')).toBeVisible();
+    await expectOneRed(page, `archive piece of level ${level}`);
+    expect(errors).toEqual([]);
+  });
+}
 
 test('hand size change re-solves in place and keeps one red element', async ({ page }) => {
   await page.goto('/#/piece/twinkle-twinkle-little-star');

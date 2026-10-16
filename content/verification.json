@@ -26592,102 +26592,6 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
-  "pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": []
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 22,
-      "measureElements": 22,
-      "firstMeasure": "1",
-      "lastMeasure": "22",
-      "notes": 254,
-      "graceNotes": 0,
-      "fingerings": 0,
-      "writtenQuarters": 44.0,
-      "unfoldedQuarters": 44.0,
-      "tempoQpm": 48.0,
-      "key": [
-        "3",
-        null
-      ],
-      "time": [
-        2,
-        4
-      ],
-      "bytes": 94743,
-      "pitchRange": [
-        45,
-        83
-      ],
-      "staffAvgPitch": {
-        "1": 69.8,
-        "2": 56.1
-      },
-      "approxDurationSec": 55,
-      "music21": {
-        "parts": 2,
-        "measures": 22,
-        "noteOrChord": 187,
-        "highestTime": 44.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 1
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 4.618,
-        "shifts": 33.766,
-        "span": 14.0,
-        "chord": 0.649,
-        "fifths": 3.0,
-        "accidentals": 3.15,
-        "seconds": 55.0,
-        "leaps": 3.896
-      },
-      "score": 7.158,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 254,
-          "errors": 0,
-          "warnings": 43,
-          "counts": {
-            "L07": 9,
-            "L08": 3,
-            "L09": 3,
-            "L13": 2,
-            "L14": 28
-          }
-        },
-        "large": {
-          "notes": 254,
-          "errors": 0,
-          "warnings": 46,
-          "counts": {
-            "L07": 12,
-            "L08": 3,
-            "L09": 3,
-            "L13": 2,
-            "L14": 28
-          }
-        }
-      },
-      "scoreSha256": "897869dff3620408bcd7fdde9e3eecf110eadbcbc6d501b9197eed934a20d1d9",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
   "pdmx-arrival-of-the-queen-of-sheba-86b52105": {
     "ok": true,
     "conversionWarnings": [],
@@ -46944,6 +46848,104 @@
         }
       },
       "scoreSha256": "787cf01413843cf7227cf575aecfc834639d0727df95f9a70857737953a01bdd",
+      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-in-the-place-of-mansions-fair-herbert-j-3b75b09a": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-in-the-place-of-mansions-fair-herbert-j-3b75b09a.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 20,
+      "measureElements": 20,
+      "firstMeasure": "1",
+      "lastMeasure": "20",
+      "notes": 293,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 67.0,
+      "unfoldedQuarters": 67.0,
+      "tempoQpm": 100.0,
+      "key": [
+        "-1",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 107016,
+      "pitchRange": [
+        48,
+        74
+      ],
+      "staffAvgPitch": {
+        "1": 68.0,
+        "2": 58.4
+      },
+      "approxDurationSec": 40,
+      "music21": {
+        "parts": 2,
+        "measures": 20,
+        "noteOrChord": 162,
+        "highestTime": 67.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.289,
+        "shifts": 50.381,
+        "span": 12.0,
+        "chord": 0.863,
+        "fifths": 1.0,
+        "accidentals": 0.0,
+        "seconds": 40.2,
+        "leaps": 0.0
+      },
+      "score": 8.35,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 293,
+          "errors": 0,
+          "warnings": 31,
+          "counts": {
+            "L07": 3,
+            "L08": 10,
+            "L09": 7,
+            "L12": 2,
+            "L13": 7,
+            "L14": 9
+          }
+        },
+        "large": {
+          "notes": 293,
+          "errors": 0,
+          "warnings": 29,
+          "counts": {
+            "L07": 6,
+            "L08": 8,
+            "L09": 4,
+            "L12": 2,
+            "L13": 8,
+            "L14": 9
+          }
+        }
+      },
+      "scoreSha256": "33818724aad4e83121cdbfc576277dc66ef0122ef20667542877c5e86edcdbc1",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }
@@ -75567,104 +75569,6 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
-  "pdmx-untitled-0b939135": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-untitled-0b939135.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": []
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 65,
-      "measureElements": 65,
-      "firstMeasure": "1",
-      "lastMeasure": "65",
-      "notes": 1480,
-      "graceNotes": 28,
-      "fingerings": 0,
-      "writtenQuarters": 260.0,
-      "unfoldedQuarters": 448.0,
-      "tempoQpm": 116.0,
-      "key": [
-        "0",
-        null
-      ],
-      "time": [
-        4,
-        4
-      ],
-      "bytes": 573841,
-      "pitchRange": [
-        45,
-        88
-      ],
-      "staffAvgPitch": {
-        "1": 77.6,
-        "2": 57.5
-      },
-      "approxDurationSec": 232,
-      "music21": {
-        "parts": 2,
-        "measures": 65,
-        "noteOrChord": 1149,
-        "highestTime": 260.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 4
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 10.566,
-        "shifts": 29.174,
-        "span": 12.0,
-        "chord": 0.277,
-        "fifths": 0.0,
-        "accidentals": 25.053,
-        "seconds": 134.483,
-        "leaps": 3.06
-      },
-      "score": 8.68,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 1449,
-          "errors": 0,
-          "warnings": 269,
-          "counts": {
-            "L06": 9,
-            "L07": 84,
-            "L08": 53,
-            "L09": 21,
-            "L13": 1,
-            "L14": 102
-          }
-        },
-        "large": {
-          "notes": 1449,
-          "errors": 0,
-          "warnings": 274,
-          "counts": {
-            "L06": 9,
-            "L07": 87,
-            "L08": 53,
-            "L09": 21,
-            "L13": 1,
-            "L14": 104
-          }
-        }
-      },
-      "scoreSha256": "3b48cdb22605ffee5a56ad024fbcebbe6a6d65e20821dc88e4fce68c8978afe3",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
   "pdmx-upon-the-cross-he-bled-s-m-walter-289b32c4": {
     "ok": true,
     "conversionWarnings": [],
@@ -84696,6 +84600,98 @@
         }
       },
       "scoreSha256": "9b1db97e64857b4884d5e9810029899b3ad36a0ca08fd60527f993f0b9e53b75",
+      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-look-on-us-kindly-friends-3b7bb3ab": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-look-on-us-kindly-friends-3b7bb3ab.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 20,
+      "measureElements": 20,
+      "firstMeasure": "1",
+      "lastMeasure": "20",
+      "notes": 155,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 60.5,
+      "unfoldedQuarters": 60.5,
+      "tempoQpm": 114.0,
+      "key": [
+        "0",
+        null
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 55470,
+      "pitchRange": [
+        43,
+        76
+      ],
+      "staffAvgPitch": {
+        "1": 67.0,
+        "2": 53.6
+      },
+      "approxDurationSec": 32,
+      "music21": {
+        "parts": 2,
+        "measures": 20,
+        "noteOrChord": 100,
+        "highestTime": 60.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.868,
+        "shifts": 41.0,
+        "span": 12.0,
+        "chord": 0.76,
+        "fifths": 0.0,
+        "accidentals": 0.0,
+        "seconds": 31.842,
+        "leaps": 0.0
+      },
+      "score": 6.443,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 155,
+          "errors": 0,
+          "warnings": 8,
+          "counts": {
+            "L07": 4,
+            "L13": 3,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 155,
+          "errors": 0,
+          "warnings": 6,
+          "counts": {
+            "L07": 2,
+            "L13": 3,
+            "L14": 4
+          }
+        }
+      },
+      "scoreSha256": "70dcb0831923bdd866fc5db1fc10ea705637f6cae0c7e0a136f3aa186e52502b",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }
@@ -95344,106 +95340,6 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
-  "pdmx-aviator-marsh-1910-2b9f8860": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-aviator-marsh-1910-2b9f8860.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": []
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 81,
-      "measureElements": 82,
-      "firstMeasure": "0",
-      "lastMeasure": "81",
-      "notes": 1063,
-      "graceNotes": 6,
-      "fingerings": 0,
-      "writtenQuarters": 162.5,
-      "unfoldedQuarters": 204.5,
-      "tempoQpm": 90.0,
-      "key": [
-        "-1",
-        null
-      ],
-      "time": [
-        2,
-        4
-      ],
-      "bytes": 414615,
-      "pitchRange": [
-        36,
-        91
-      ],
-      "staffAvgPitch": {
-        "1": 70.3,
-        "2": 55.6
-      },
-      "approxDurationSec": 136,
-      "music21": {
-        "parts": 2,
-        "measures": 82,
-        "noteOrChord": 629,
-        "highestTime": 162.5,
-        "version": "10.5.0"
-      },
-      "verovioPages": 2
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 9.757,
-        "shifts": 62.293,
-        "span": 12.0,
-        "chord": 0.545,
-        "fifths": 1.0,
-        "accidentals": 8.231,
-        "seconds": 108.333,
-        "leaps": 9.416
-      },
-      "score": 10.517,
-      "level": 4
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 1051,
-          "errors": 0,
-          "warnings": 178,
-          "counts": {
-            "L07": 92,
-            "L08": 54,
-            "L09": 4,
-            "L10": 1,
-            "L12": 5,
-            "L13": 18,
-            "L14": 22
-          }
-        },
-        "large": {
-          "notes": 1051,
-          "errors": 0,
-          "warnings": 172,
-          "counts": {
-            "L07": 86,
-            "L08": 51,
-            "L09": 7,
-            "L10": 1,
-            "L12": 5,
-            "L13": 18,
-            "L14": 22
-          }
-        }
-      },
-      "scoreSha256": "ddaa27d46056727b312811dee1883200b638da675f3a16465656d0531c03ee88",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
   "pdmx-awake-and-in-his-strength-renewed-b-d-ac-300d3cf2": {
     "ok": true,
     "conversionWarnings": [],
@@ -95822,6 +95718,102 @@
         }
       },
       "scoreSha256": "a228c224bfdd83e55b144f3d11495d6b706ddcd916d8fa14e8ca15ebec7ceb79",
+      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-be-still-o-heart-why-fear-and-tremble-ge-3b7e3e16": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-be-still-o-heart-why-fear-and-tremble-ge-3b7e3e16.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 26,
+      "measureElements": 26,
+      "firstMeasure": "1",
+      "lastMeasure": "26",
+      "notes": 235,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 49.75,
+      "unfoldedQuarters": 49.75,
+      "tempoQpm": 92.0,
+      "key": [
+        "-4",
+        null
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 95891,
+      "pitchRange": [
+        44,
+        75
+      ],
+      "staffAvgPitch": {
+        "1": 66.7,
+        "2": 55.3
+      },
+      "approxDurationSec": 32,
+      "music21": {
+        "parts": 2,
+        "measures": 26,
+        "noteOrChord": 144,
+        "highestTime": 49.75,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.089,
+        "shifts": 59.526,
+        "span": 12.0,
+        "chord": 0.708,
+        "fifths": 4.0,
+        "accidentals": 2.174,
+        "seconds": 32.446,
+        "leaps": 4.615
+      },
+      "score": 9.57,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 230,
+          "errors": 0,
+          "warnings": 79,
+          "counts": {
+            "L07": 15,
+            "L08": 55,
+            "L09": 5,
+            "L13": 8,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 230,
+          "errors": 0,
+          "warnings": 74,
+          "counts": {
+            "L07": 19,
+            "L08": 44,
+            "L09": 6,
+            "L13": 9,
+            "L14": 5
+          }
+        }
+      },
+      "scoreSha256": "23aa2147edc8b2a44b7793f4d98158922cabd6ca777428a22a94cf1ceaa836c4",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }
@@ -96599,6 +96591,102 @@
         }
       },
       "scoreSha256": "18b0075b18f63a90a67358a1884de3d69d1acabc48a07ad0e8f65e303e4ebb03",
+      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-beyond-the-winters-storms-and-blight-j-l-3b9fec5d": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-beyond-the-winters-storms-and-blight-j-l-3b9fec5d.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 19,
+      "measureElements": 19,
+      "firstMeasure": "1",
+      "lastMeasure": "19",
+      "notes": 299,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 67.25,
+      "unfoldedQuarters": 67.25,
+      "tempoQpm": 100.0,
+      "key": [
+        "-3",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 122671,
+      "pitchRange": [
+        46,
+        77
+      ],
+      "staffAvgPitch": {
+        "1": 67.6,
+        "2": 56.1
+      },
+      "approxDurationSec": 40,
+      "music21": {
+        "parts": 2,
+        "measures": 19,
+        "noteOrChord": 177,
+        "highestTime": 67.25,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.187,
+        "shifts": 52.083,
+        "span": 12.0,
+        "chord": 1.0,
+        "fifths": 3.0,
+        "accidentals": 5.172,
+        "seconds": 40.35,
+        "leaps": 0.0
+      },
+      "score": 9.451,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 290,
+          "errors": 0,
+          "warnings": 60,
+          "counts": {
+            "L07": 3,
+            "L08": 43,
+            "L09": 6,
+            "L13": 2,
+            "L14": 8
+          }
+        },
+        "large": {
+          "notes": 290,
+          "errors": 0,
+          "warnings": 58,
+          "counts": {
+            "L07": 5,
+            "L08": 38,
+            "L09": 7,
+            "L13": 2,
+            "L14": 8
+          }
+        }
+      },
+      "scoreSha256": "13be8f46be744268c4338590304d5e99fe5206e809703d679c8784e10c36e0ae",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }
@@ -123359,106 +123447,6 @@
         }
       },
       "scoreSha256": "d8d63074d87dbef0cda42986022deff4725732071cb4ff64b485f9d2cc57b78c",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
-  "pdmx-poslednee-tango-c-1913-124e8ea8": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-poslednee-tango-c-1913-124e8ea8.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": []
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 36,
-      "measureElements": 37,
-      "firstMeasure": "0",
-      "lastMeasure": "36",
-      "notes": 418,
-      "graceNotes": 0,
-      "fingerings": 0,
-      "writtenQuarters": 72.0,
-      "unfoldedQuarters": 72.0,
-      "tempoQpm": 90.0,
-      "key": [
-        "1",
-        null
-      ],
-      "time": [
-        2,
-        4
-      ],
-      "bytes": 176195,
-      "pitchRange": [
-        33,
-        76
-      ],
-      "staffAvgPitch": {
-        "1": 64.0,
-        "2": 46.3
-      },
-      "approxDurationSec": 48,
-      "music21": {
-        "parts": 2,
-        "measures": 37,
-        "noteOrChord": 342,
-        "highestTime": 72.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 1
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 8.458,
-        "shifts": 53.57,
-        "span": 12.0,
-        "chord": 0.392,
-        "fifths": 1.0,
-        "accidentals": 23.399,
-        "seconds": 48.0,
-        "leaps": 1.493
-      },
-      "score": 9.293,
-      "level": 4
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 406,
-          "errors": 0,
-          "warnings": 90,
-          "counts": {
-            "L07": 18,
-            "L08": 27,
-            "L09": 8,
-            "L11": 1,
-            "L12": 6,
-            "L13": 5,
-            "L14": 30
-          }
-        },
-        "large": {
-          "notes": 406,
-          "errors": 0,
-          "warnings": 89,
-          "counts": {
-            "L07": 17,
-            "L08": 26,
-            "L09": 8,
-            "L11": 1,
-            "L12": 4,
-            "L13": 4,
-            "L14": 33
-          }
-        }
-      },
-      "scoreSha256": "3656610ab2a6ddccabcfbe4cc7f099477b9e4384eb3f01183e65872e9be9ac5d",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }

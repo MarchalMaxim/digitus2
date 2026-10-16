@@ -117,15 +117,18 @@ export function scoreUrl(relativePath: string): Promise<string> {
 }
 
 /**
- * The bytes of a score file: a .gz file (a PDMX piece) is decompressed with the browser's gzip stream,
- * a plain file is returned as it is. `fetchBytes` fetches the asset URL (the tests inject their own).
+ * The bytes of a score file. A PDMX piece is stored as gzip (`.musicxml.gz`), but a server may send
+ * such a file with `Content-Encoding: gzip` (the Vite servers do), and then the browser has already
+ * decompressed it. So the bytes decide, not the extension: bytes that start with the gzip signature
+ * are decompressed with the browser's gzip stream, anything else is returned as it is.
+ * `fetchBytes` fetches the asset URL (the tests inject their own).
  */
 export async function readScoreFile(
   relativePath: string,
   fetchBytes: (url: string) => Promise<Uint8Array>,
 ): Promise<Uint8Array> {
   const bytes = await fetchBytes(await scoreUrl(relativePath));
-  if (!relativePath.endsWith('.gz')) return bytes;
+  if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return bytes;
   const stream = new Blob([bytes as BlobPart])
     .stream()
     .pipeThrough(new DecompressionStream('gzip'));

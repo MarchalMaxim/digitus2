@@ -1,6 +1,6 @@
 {
  "task": 300,
- "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3160 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 122 duplicates of another piece (dedupe.py), 59 out of scope (pdmx_scope.py), 3742 passed but ranked beyond the cap of 1300 (by rating). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
+ "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3160 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 120 duplicates of another piece (dedupe.py), 58 out of scope (pdmx_scope.py), 3737 passed but ranked beyond the cap of 1300 (by rating). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
  "pieces": [
   {
    "slug": "pdmx-allegro-414d6ff6",
@@ -2350,30 +2350,6 @@
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",
-    "fingerings": 0,
-    "version": "3.1"
-   }
-  },
-  {
-   "slug": "pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa",
-   "source": "pdmx",
-   "level": 3,
-   "collection": "pdmx-classical",
-   "title": "Arrangement for piano - on La ci darem la mano from Don Giovanni - Mozart",
-   "composer": "Unknown",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 48,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 7.158).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "ba929faa8dc756a2534b178941e55ca256ba3696164152cedc753cc851e00736",
-    "path": "./mxl/12/11/QmUbXbVmqp7F9W8UMCcsFs22qnW9Cnu3tTGkfs5vPHtf8B.mxl",
-    "license": "cc-zero",
-    "rating": "4.54",
-    "nRatings": "8",
     "fingerings": 0,
     "version": "3.1"
    }
@@ -7435,6 +7411,30 @@
    "pdmx": {
     "sha256": "374693a0bb9e7056af82baf3bd2e0195c768d6a341c0575cb2958630998b076a",
     "path": "./mxl/0/28/QmakogrVcrNPZ9qqTNJdQBf2jVY8VC7Gyw4eLky2gPEhwS.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-in-the-place-of-mansions-fair-herbert-j-3b75b09a",
+   "source": "pdmx",
+   "level": 3,
+   "collection": "pdmx-classical",
+   "title": "In the place of mansions fair - Herbert J. Lacey",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 8.35).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "3b75b09a6ba70732dcbc3f9b6df35e5486ae7c860cee3754784bc2c42861d783",
+    "path": "./mxl/10/37/QmSPe3dVUoXr4FHtEASeJZFrKDYKXpsCicZ7R8NDAcaayL.mxl",
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",
@@ -14595,30 +14595,6 @@
    }
   },
   {
-   "slug": "pdmx-untitled-0b939135",
-   "source": "pdmx",
-   "level": 3,
-   "collection": "pdmx-classical",
-   "title": "ÐÑÑÐµÑÐºÐ¾Ðµ ÐÐ¾Ð½ÐÐ¾ - Ð.Ð. ÐÐ¾ÑÐÑÑ",
-   "composer": "Unknown",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 116,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 8.68).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
-    "path": "./mxl/3/47/QmdUCBWVQcxH6VevEpQb7rLFVzz1o5SftcqZ2ZkwHzfTBq.mxl",
-    "license": "cc-zero",
-    "rating": "4.78",
-    "nRatings": "33",
-    "fingerings": 0,
-    "version": "3.1"
-   }
-  },
-  {
    "slug": "pdmx-upon-the-cross-he-bled-s-m-walter-289b32c4",
    "source": "pdmx",
    "level": 3,
@@ -16899,6 +16875,30 @@
    }
   },
   {
+   "slug": "pdmx-look-on-us-kindly-friends-3b7bb3ab",
+   "source": "pdmx",
+   "level": 3,
+   "collection": "pdmx-folk",
+   "title": "Look on us kindly friends",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 114,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 6.443).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "3b7bb3abaa6ac7badb10af2390158a55a033b6158318a567727e49ddd39c5d03",
+    "path": "./mxl/2/40/QmcriLX3T4R3UGX2tymAQLVi2QmTNZY9AcdxKrVNjdLRoA.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
    "slug": "pdmx-lourdes-hymn-12f38b25",
    "source": "pdmx",
    "level": 3,
@@ -18363,30 +18363,6 @@
    }
   },
   {
-   "slug": "pdmx-aviator-marsh-1910-2b9f8860",
-   "source": "pdmx",
-   "level": 4,
-   "collection": "pdmx-classical",
-   "title": "Aviator Marsh (1910)",
-   "composer": "Unknown",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 90,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 10.517).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "2b9f88608f55c5208cc98f353dbea9d044a2c1f2cd42e9781f87d2ad7eb1c768",
-    "path": "./mxl/1/52/QmbxN9JNV3ZHDQZPz27fEpZgR9bdKsQBdaQ8jWTGgyyBoB.mxl",
-    "license": "cc-zero",
-    "rating": "0.0",
-    "nRatings": "0",
-    "fingerings": 0,
-    "version": "3.1"
-   }
-  },
-  {
    "slug": "pdmx-awake-and-in-his-strength-renewed-b-d-ac-300d3cf2",
    "source": "pdmx",
    "level": 4,
@@ -18475,6 +18451,30 @@
    "pdmx": {
     "sha256": "00a982d723711e50dd832fa13edec493ef8bdb07b53e7d037111fd7d5d40dea8",
     "path": "./mxl/4/18/QmeEdB8YfM8Nz5MVe8HjE47jfR7DbHYByQR3QcGRchLf4N.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-be-still-o-heart-why-fear-and-tremble-ge-3b7e3e16",
+   "source": "pdmx",
+   "level": 4,
+   "collection": "pdmx-classical",
+   "title": "Be still O heart why fear and tremble - Geo. C. Stebbins",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 92,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 9.57).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "3b7e3e16d2177e233412b821f812684b1eb703c8cde293703b4e20886fd64f0d",
+    "path": "./mxl/0/30/QmaLbVGFDmdRLfXGaw1P1RSmY38TrFpfAVqRmqnaHcS8Nb.mxl",
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",
@@ -18667,6 +18667,30 @@
    "pdmx": {
     "sha256": "3a1e7e76eab162dd25eef23009544fd2df2fd5dcd43d7a94c504b5c6242f12de",
     "path": "./mxl/14/50/QmWwZEghcLFgRrio8vPrtQ5HmU97cxasNiqYDzrDDxiHYn.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-beyond-the-winters-storms-and-blight-j-l-3b9fec5d",
+   "source": "pdmx",
+   "level": 4,
+   "collection": "pdmx-classical",
+   "title": "Beyond the winters storms and blight - J. Lincoln Hall",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 9.451).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "3b9fec5ded4935af8ade6a6342e843d86dd33d7d25545e47090131bcf3318bdb",
+    "path": "./mxl/3/19/QmdfvkGYuHjAZzSQiwgjRch1CiaMWsBfkoHtqQAQQD3uYS.mxl",
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",
@@ -25347,30 +25371,6 @@
    }
   },
   {
-   "slug": "pdmx-poslednee-tango-c-1913-124e8ea8",
-   "source": "pdmx",
-   "level": 4,
-   "collection": "pdmx-classical",
-   "title": "Poslednee Tango (c. 1913)",
-   "composer": "Unknown",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 90,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 9.293).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "124e8ea8ccf4434c90a71245d5b1abae53e120ab27436670d78b7e20bb3b199a",
-    "path": "./mxl/11/8/QmT9wBRhGpALwExJ4acKfcnMNgCJ8c8UQZ7MuECePYB7XV.mxl",
-    "license": "cc-zero",
-    "rating": "0.0",
-    "nRatings": "0",
-    "fingerings": 0,
-    "version": "3.1"
-   }
-  },
-  {
    "slug": "pdmx-praludien-op-14-no-1-j-rheinberger-02c6549b",
    "source": "pdmx",
    "level": 4,
@@ -31247,6 +31247,12 @@
    "reason": "failed the library's validation: music21: 28 notes with zero duration"
   },
   {
+   "slug": "pdmx-russian-national-anthem-soviet-state-ant-96a4ab21",
+   "sha256": "96a4ab219a2cb5cd1579717396df9b05e2a5c873df6a1278fad00d5e1a78e476",
+   "title": "Russian National Anthem/Soviet State Anthem on Piano",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
    "slug": "pdmx-s-kkij-rven-polkka-87f0eb5d",
    "sha256": "87f0eb5d0b7b6bbc5863443bb0e966f2aa720c1991bfe4386574303dea2c0e78",
    "title": "Säkkijärven polkka",
@@ -31383,6 +31389,12 @@
    "sha256": "8e6a8fedd38ff22d59e99e1ebe0b072e8a36896b9b342221fea456642831e773",
    "title": "Peio 09.2",
    "reason": "failed the library's validation: no time signature"
+  },
+  {
+   "slug": "pdmx-untitled-0b939135",
+   "sha256": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
+   "title": "ÐÑÑÐµÑÐºÐ¾Ðµ ÐÐ¾Ð½ÐÐ¾ - Ð.Ð. ÐÐ¾ÑÐÑÑ",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
   },
   {
    "slug": "pdmx-greensleeves-piano-debutant-with-fingeri-d12f9c22",
@@ -31767,6 +31779,12 @@
    "sha256": "03030181d335392d0e9ea82b54bb9ccac85dee658a0905e7fe20952562797d9d",
    "title": "Czerny - The Art Of Finger Dexterity (Op. 740) - No. 7",
    "reason": "failed the library's validation: music21: 140 notes with zero duration"
+  },
+  {
+   "slug": "pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa",
+   "sha256": "ba929faa8dc756a2534b178941e55ca256ba3696164152cedc753cc851e00736",
+   "title": "Arrangement for piano - on La ci darem la mano from Don Giovanni - Mozart",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
   },
   {
    "slug": "pdmx-lemoine-tudes-enfantines-op-37-no-25-67d82d76",
@@ -32273,6 +32291,12 @@
    "reason": "failed the library's validation: measure numbers not unique"
   },
   {
+   "slug": "pdmx-poslednee-tango-c-1913-124e8ea8",
+   "sha256": "124e8ea8ccf4434c90a71245d5b1abae53e120ab27436670d78b7e20bb3b199a",
+   "title": "Poslednee Tango (c. 1913)",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
    "slug": "pdmx-aaddbfc43c7d5639f78dd6be4621290a3aca6d49-1259c15b",
    "sha256": "1259c15bde94457dd7d38905a99a30142ef220451f288c6278e1333843b23c30",
    "title": "aaddbfc43c7d5639f78dd6be4621290a3aca6d49 2",
@@ -32339,6 +32363,12 @@
    "reason": "failed the library's validation: 29 <fingering> elements in a stripped file"
   },
   {
+   "slug": "pdmx-aviator-marsh-1910-2b9f8860",
+   "sha256": "2b9f88608f55c5208cc98f353dbea9d044a2c1f2cd42e9781f87d2ad7eb1c768",
+   "title": "Aviator Marsh (1910)",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
    "slug": "pdmx-inventio-2-c-minor-bwv-773-2eaae4eb",
    "sha256": "2eaae4eb8e6b1bd04da8a725bdccb717dd8e47dc4bea58dda917e9e6c2ca45bf",
    "title": "Inventio 2 c Minor BWV 773",
@@ -32357,16 +32387,34 @@
    "reason": "failed the library's validation: music21: 6 notes with zero duration"
   },
   {
+   "slug": "pdmx-in-the-prairies-79952721",
+   "sha256": "799527213ed6a0c5bdc96d56cc84f66263dc70c1793a6086f0bbd480979b5211",
+   "title": "ÐÐµÐ¹ ÑÑÐµÐÐÐ¼Ð (in the prairies)",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
    "slug": "pdmx-hungarian-dance-no-5-in-f-minor-7ab00fd7",
    "sha256": "7ab00fd7dd18b04d605325b26b5a853130a2b565c2cfd3e8c4f3c1d75f49918d",
    "title": "Hungarian Dance No 5 in F Minor",
    "reason": "failed the library's validation: music21: 12 notes with zero duration"
   },
   {
+   "slug": "pdmx-march-of-the-wooden-soldiers-op-39-no5-8aa67e3e",
+   "sha256": "8aa67e3e427592d78ebdf7b7d67017d87d351bb086f4ba98c35ecfde3ae08a44",
+   "title": "March of the Wooden Soldiers Op.39 No5",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
    "slug": "pdmx-fr-d-ric-chopin-prelude-in-d-minor-op-28-abdac1f6",
    "sha256": "abdac1f64690ddeec848b4b999198ebb4909b2ae663ff6a878153f9c95a85aac",
    "title": "Frédéric Chopin: Prelude in D minor Op.28 No.24",
    "reason": "failed the library's validation: measure 14: backup before measure start"
+  },
+  {
+   "slug": "pdmx-bwv-933-ea4acc03",
+   "sha256": "ea4acc0331f9115e5808a006a416368614cfe9161d8fcffe7b76c0faabd62e8b",
+   "title": "ÐÑÐµÐÑÐÐÑ ÐÐ¾ Ð¼ÐÐÐ¾Ñ BWV 933",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
   }
  ]
 }

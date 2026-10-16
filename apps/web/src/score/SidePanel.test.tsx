@@ -155,7 +155,9 @@ describe('the level', () => {
   it.each([
     [1, 'Easy'],
     [3, 'Medium'],
-    [4, 'Challenging'],
+    [2, 'Easy'],
+    [4, 'Harder'],
+    [5, 'Challenging'],
     [6, 'Challenging'],
   ] as const)('shows grade %i as %s', (level, name) => {
     renderPanel(readyDoc(), false, { ...melody, level });

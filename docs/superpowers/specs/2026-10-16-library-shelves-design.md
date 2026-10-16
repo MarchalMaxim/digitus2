@@ -1,4 +1,4 @@
-# Library at 2,700 pieces: three levels and style shelves
+# Library at 2,700 pieces: four levels and style shelves
 
 - Date: 2026-10-16
 - Issue: https://github.com/MarchalMaxim/digitus2/issues/10 ("Make public library easier to read")
@@ -22,19 +22,20 @@ Six pills whose names do not order themselves (is Intermediate harder than Moder
 
 ## 2. The rule of 7
 
-No logical scope on the page holds more than 7 siblings: at most 7 page units, 3 level pills, at most 6 shelves, at most 5 rows per shelf on arrival, at most 4 length pills. Long lists exist only behind one deliberate step (opening a shelf, typing a search) and then arrive in pages, never all at once.
+No logical scope on the page holds more than 7 siblings: at most 7 page units, 4 level pills, at most 6 shelves, at most 5 rows per shelf on arrival, at most 4 length pills. Long lists exist only behind one deliberate step (opening a shelf, typing a search) and then arrive in pages, never all at once.
 
-## 3. Three levels
+## 3. Four levels
 
-The issue asks for Easy, Medium and Challenging. The engine's content tools keep grading pieces 1 to 6 (`content/tools/level.py`; the manifest's `level` field is unchanged, so benchmarks and the build are untouched). The web app maps the grade to a level:
+The issue asks for Easy, Medium and Challenging; the user then asked for four levels (2026-10-16), adding Harder between Medium and Challenging. The engine's content tools keep grading pieces 1 to 6 (`content/tools/level.py`; the manifest's `level` field is unchanged, so benchmarks and the build are untouched). The web app maps the grade to a level:
 
 | Level       | Grades | Pieces | Gray line under the pills                       |
 | ----------- | ------ | -----: | ----------------------------------------------- |
 | Easy        | 1, 2   |    259 | Each hand stays close to home.                  |
 | Medium      | 3      |  1,415 | The hands move, with more notes and wider reaches. |
-| Challenging | 4, 5, 6 |  1,028 | Fast runs, leaps and full chords.               |
+| Harder      | 4      |    784 | Faster runs and reaches of an octave.           |
+| Challenging | 5, 6   |    244 | Fast passages, leaps and full chords.           |
 
-The issue text says "four levels" but names three; this design builds the three named. A fourth (splitting Challenging into Challenging and Advanced at grade 6) is one line in `levels.ts` if wanted.
+The four pills share one row from 360 px wide (`library.css` trims their padding below 400 px); at 320 px the last pill wraps rather than clip.
 
 One name everywhere: pill, search section heading, the score's side panel (which shows the level, not the grade). A level persisted by an older build (1 to 6) migrates to its level on load.
 
@@ -42,14 +43,14 @@ One name everywhere: pill, search section heading, the score's side panel (which
 
 Inside the chosen level, pieces sit on style shelves. The eight catalog genres fold into six shelves, in this order (well-known tunes first, the beginner's usual way in):
 
-| Shelf                   | Catalog genres     | Easy | Medium | Challenging |
-| ----------------------- | ------------------ | ---: | -----: | ----------: |
-| Songs                   | songs              |  145 |    643 |         256 |
-| Classical               | classical          |   71 |    658 |         650 |
-| Folk and carols         | folk, carols       |   29 |     57 |          28 |
-| Baroque                 | baroque            |    5 |     15 |          48 |
-| Romantic                | romantic           |    6 |     36 |          28 |
-| Jazz, ragtime and modern | ragtime, modern   |    3 |      6 |          18 |
+| Shelf                   | Catalog genres     | Easy | Medium | Harder | Challenging |
+| ----------------------- | ------------------ | ---: | -----: | -----: | ----------: |
+| Songs                   | songs              |  145 |    643 |    235 |          21 |
+| Classical               | classical          |   71 |    658 |    486 |         164 |
+| Folk and carols         | folk, carols       |   29 |     57 |     27 |           1 |
+| Baroque                 | baroque            |    5 |     15 |     15 |          33 |
+| Romantic                | romantic           |    6 |     36 |     14 |          14 |
+| Jazz, ragtime and modern | ragtime, modern   |    3 |      6 |      7 |          11 |
 
 A shelf with no piece in the level is not shown. Each shelf has a one-line gray description (copy in section 9).
 
@@ -80,7 +81,7 @@ When the list in view (an open shelf, or search results) holds more than 40 piec
 
 ### 4.4 Search
 
-The search field stays in the start row. Typing replaces the level pills and shelves with results across every level, in three sections (Easy, Medium, Challenging), each with its count. A section shows its first 7 rows and `All 312 in Medium` opens that section to pages of 40, like a shelf. Search also matches shelf names (`baroque`, `jazz`) as words of every piece on that shelf, so a style is one word away. Length pills apply when the results exceed 40. The empty result stays as today.
+The search field stays in the start row. Typing replaces the level pills and shelves with results across every level, in four sections (Easy, Medium, Harder, Challenging), each with its count. A section shows its first 7 rows and `All 312 in Medium` opens that section to pages of 40, like a shelf. Search also matches shelf names (`baroque`, `jazz`) as words of every piece on that shelf, so a style is one word away. Length pills apply when the results exceed 40. The empty result stays as today.
 
 ## 5. Page units, in reading order
 

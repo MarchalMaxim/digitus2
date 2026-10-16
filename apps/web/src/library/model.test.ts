@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   SHELVES,
   TIERS,
+  TIER_NAMES,
   shelfOfGenre,
   tierOf,
   type LengthId,
@@ -78,7 +79,7 @@ const inTierShelf = (list: readonly LibraryEntry[], tier: Tier, id: ShelfId) =>
 describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
   it('opens on Easy and shows the shelves that hold a piece, in the spec order', () => {
     const layout = shelves(pieces);
-    expect(layout.tiers).toEqual(['easy', 'medium', 'challenging']);
+    expect(layout.tiers).toEqual(['easy', 'medium', 'harder', 'challenging']);
     expect(layout.tier).toBe('easy');
     expect(layout.count).toBe(pieces.filter((p) => tierOf(p.level) === 'easy').length);
     const names = layout.shelves.map((s) => s.name);
@@ -133,17 +134,23 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
       romantic: 36,
       jazz: 6,
     });
-    expect(table('challenging')).toEqual({
-      songs: 256,
-      classical: 650,
-      folk: 28,
-      baroque: 48,
-      romantic: 28,
-      jazz: 18,
+    expect(table('harder')).toEqual({
+      songs: 235,
+      classical: 486,
+      folk: 27,
+      baroque: 15,
+      romantic: 14,
+      jazz: 7,
     });
-    expect(
-      ['easy', 'medium', 'challenging'].map((t) => shelves(allPieces, t as Tier).count),
-    ).toEqual([259, 1415, 1028]);
+    expect(table('challenging')).toEqual({
+      songs: 21,
+      classical: 164,
+      folk: 1,
+      baroque: 33,
+      romantic: 14,
+      jazz: 11,
+    });
+    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([259, 1415, 784, 244]);
   });
   it('leaves out a shelf with no piece in the level', () => {
     const noJazz = pieces.filter((p) => shelfOfGenre(p.genre) !== 'jazz');
@@ -471,7 +478,7 @@ describe('search (shelves spec 4.4)', () => {
         s.count > 7
           ? {
               kind: 'open',
-              label: `All ${formatCount(s.count)} in ${{ easy: 'Easy', medium: 'Medium', challenging: 'Challenging' }[s.tier]}`,
+              label: `All ${formatCount(s.count)} in ${TIER_NAMES[s.tier]}`,
             }
           : null,
       );
@@ -529,7 +536,7 @@ describe('search (shelves spec 4.4)', () => {
   it('searches the titles of curated pieces as before', () => {
     const minuet = search(pieces, 'minuet');
     expect(minuet.count).toBe(14);
-    expect(minuet.sections.map((s) => s.tier)).toEqual(['easy', 'medium', 'challenging']);
+    expect(minuet.sections.map((s) => s.tier)).toEqual(['easy', 'medium', 'harder']);
     const fur = search(pieces, 'fur elise');
     expect(fur.sections.flatMap((s) => rowsOf(s.groups)).map((r) => r.title)).toEqual([
       'Für Elise (Bagatelle in A minor)',
@@ -608,7 +615,8 @@ describe('the start button and the level the page opens on', () => {
   it("opens on the level chosen in this visit, else the last piece's level, else Easy", () => {
     expect(arrivalLevel(pieces, null, null)).toBe('easy');
     expect(arrivalLevel(pieces, null, 'bach-minuet-g-major-bwv-anh-114')).toBe('easy'); // grade 2
-    expect(arrivalLevel(pieces, null, 'beethoven-fur-elise-woo-59')).toBe('challenging'); // grade 4
+    expect(arrivalLevel(pieces, null, 'beethoven-fur-elise-woo-59')).toBe('harder'); // grade 4
+    expect(arrivalLevel(pieces, null, 'beethoven-moonlight-sonata-mvt1')).toBe('challenging'); // grade 5
     expect(arrivalLevel(pieces, 'medium', 'bach-minuet-g-major-bwv-anh-114')).toBe('medium');
     expect(arrivalLevel(pieces, 'challenging', null)).toBe('challenging');
     expect(arrivalLevel(pieces, null, 'no-such-piece')).toBe('easy');
@@ -645,7 +653,7 @@ describe('the core 30 (a library of 40 pieces or fewer)', () => {
     const layout = libraryLayout(core, choose({ tier: 'medium', query: 'minuet' }));
     expect(layout.kind).toBe('all'); // no search under 100 pieces: the query is ignored
     if (layout.kind !== 'all') return;
-    expect(layout.sections.map((s) => s.tier)).toEqual(['easy', 'medium', 'challenging']);
+    expect(layout.sections.map((s) => s.tier)).toEqual(['easy', 'medium', 'harder', 'challenging']);
     expect(layout.sections.reduce((n, s) => n + s.count, 0)).toBe(30);
     for (const s of layout.sections) expect(rowsOf(s.groups)).toHaveLength(s.count);
   });
@@ -653,10 +661,10 @@ describe('the core 30 (a library of 40 pieces or fewer)', () => {
 
 describe('a synthetic library of 1,000 pieces (L2)', () => {
   const big = syntheticLibrary();
-  it('has three levels and puts at most 30 rows on the arrival page of each', () => {
+  it('has four levels and puts at most 30 rows on the arrival page of each', () => {
     expect(big).toHaveLength(1000);
     const layout = shelves(big);
-    expect(layout.tiers).toEqual(['easy', 'medium', 'challenging']);
+    expect(layout.tiers).toEqual(['easy', 'medium', 'harder', 'challenging']);
     for (const tier of TIERS) {
       const l = shelves(big, tier);
       expect(l.shelves.length).toBeGreaterThanOrEqual(2);

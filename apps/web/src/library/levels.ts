@@ -13,16 +13,17 @@ export function isGrade(value: unknown): value is Grade {
   return typeof value === 'number' && (GRADES as readonly number[]).includes(value);
 }
 
-/** What the reader sees as the level: three, mapped from the six grades (spec section 3). */
-export type Tier = 'easy' | 'medium' | 'challenging';
+/** What the reader sees as the level: four, mapped from the six grades (spec section 3). */
+export type Tier = 'easy' | 'medium' | 'harder' | 'challenging';
 
 /** The tiers, easiest first. */
-export const TIERS: readonly Tier[] = ['easy', 'medium', 'challenging'];
+export const TIERS: readonly Tier[] = ['easy', 'medium', 'harder', 'challenging'];
 
 /** One name per tier, everywhere: pill, search section heading, announcement, side panel. */
 export const TIER_NAMES: Record<Tier, string> = {
   easy: 'Easy',
   medium: 'Medium',
+  harder: 'Harder',
   challenging: 'Challenging',
 };
 
@@ -30,12 +31,13 @@ export const TIER_NAMES: Record<Tier, string> = {
 export const TIER_LINES: Record<Tier, string> = {
   easy: 'Each hand stays close to home.',
   medium: 'The hands move, with more notes and wider reaches.',
-  challenging: 'Fast runs, leaps and full chords.',
+  harder: 'Faster runs and reaches of an octave.',
+  challenging: 'Fast passages, leaps and full chords.',
 };
 
-/** Grades 1 and 2 are Easy, 3 is Medium, 4 to 6 are Challenging. */
+/** Grades 1 and 2 are Easy, 3 is Medium, 4 is Harder, 5 and 6 are Challenging. */
 export function tierOf(grade: Grade): Tier {
-  return grade <= 2 ? 'easy' : grade === 3 ? 'medium' : 'challenging';
+  return grade <= 2 ? 'easy' : grade === 3 ? 'medium' : grade === 4 ? 'harder' : 'challenging';
 }
 
 /**
@@ -44,9 +46,7 @@ export function tierOf(grade: Grade): Tier {
  */
 export function toTier(value: unknown): Tier | null {
   if (isGrade(value)) return tierOf(value);
-  return typeof value === 'string' && (TIERS as readonly string[]).includes(value)
-    ? (value as Tier)
-    : null;
+  return TIERS.find((t) => t === value) ?? null;
 }
 
 /** The catalog's genre ids (content/tools/catalog.json `genres`), in the catalog's order. */

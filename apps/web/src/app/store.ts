@@ -263,7 +263,7 @@ function safeStorage(): StateStorage {
 type PersistedState = { settings: Settings };
 
 /**
- * Builds before the three levels (shelves spec 3) had six level pills. The chosen pill is visit
+ * Builds before the four levels (shelves spec 3) had six level pills. The chosen pill is visit
  * state and was never written, but a payload that carries one (a grade 1 to 6) is read as its
  * tier rather than dropped.
  */
@@ -320,7 +320,7 @@ export const useAppStore = create<AppState>()(
       name: SETTINGS_STORAGE_KEY,
       storage: createJSONStorage(safeStorage),
       partialize: (s) => ({ settings: s.settings }),
-      // 2: the library's six level pills became three (shelves spec 3); merge reads a stored level.
+      // 2: the library's six level pills became four (shelves spec 3); merge reads a stored level.
       version: 2,
       // Older payloads go through merge, which validates every field; no reshaping is needed yet.
       migrate: (persisted) => persisted as PersistedState,

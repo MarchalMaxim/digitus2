@@ -75,7 +75,7 @@ describe('LibraryView: the units (shelves spec 4.1, 5)', () => {
   });
   it('puts at most 30 rows on the arrival page, in every level', async () => {
     render(<LibraryView />);
-    for (const name of ['Easy', 'Medium', 'Challenging']) {
+    for (const name of ['Easy', 'Medium', 'Harder', 'Challenging']) {
       await userEvent.click(screen.getByRole('radio', { name }));
       expect(rows().length, name).toBeLessThanOrEqual(30);
       expect(screen.getAllByRole('heading', { level: 2 }).length, name).toBeLessThanOrEqual(6);
@@ -106,13 +106,14 @@ describe('LibraryView: the units (shelves spec 4.1, 5)', () => {
 });
 
 describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
-  it('is a radio group named Level with Easy, Medium and Challenging, described by the level line', () => {
+  it('is a radio group named Level with Easy, Medium, Harder and Challenging, described by the level line', () => {
     const { container } = render(<LibraryView />);
     const group = screen.getByRole('group', { name: 'Level' });
     const radios = within(group).getAllByRole('radio');
     expect(radios.map((r) => r.closest('label')!.textContent)).toEqual([
       'Easy',
       'Medium',
+      'Harder',
       'Challenging',
     ]);
     expect(within(group).getByRole('radio', { name: 'Easy' })).toBeChecked();
@@ -120,7 +121,7 @@ describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
       'Each hand stays close to home.',
     );
     expect(group.querySelectorAll('.is-red')).toHaveLength(0);
-    expect(container.querySelectorAll('.pill')).toHaveLength(3);
+    expect(container.querySelectorAll('.pill')).toHaveLength(4);
   });
   it('choosing Medium shows its shelves, says the line and the count once', async () => {
     render(<LibraryView />);
@@ -146,7 +147,7 @@ describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
     expect(screen.getByRole('radio', { name: 'Challenging' })).toBeChecked();
-    expect(screen.getByText('Fast runs, leaps and full chords.')).toBeInTheDocument();
+    expect(screen.getByText('Fast passages, leaps and full chords.')).toBeInTheDocument();
   });
 });
 
@@ -176,20 +177,25 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     );
   });
   it('shows the next page on Show more, focuses its first row and says so once', async () => {
+    library.whole = true; // Challenging classical holds 164 pieces: pages of 40, 40, 40, 40 and 4
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    await open(/^All 48 baroque pieces$/);
+    await open(/^All 164 classical pieces$/);
     expect(rows()).toHaveLength(40);
-    await open('Show the last 8');
-    expect(rows()).toHaveLength(48);
+    await open('Show 40 more');
+    expect(rows()).toHaveLength(80);
     expect(rows()[40]).toHaveFocus();
-    expect(screen.queryByRole('button', { name: /^Show / })).toBeNull();
     expect(useAppStore.getState().libraryPages).toBe(2);
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 48 of 48'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 164'),
       { timeout: 2000 },
     );
+    await open('Show 40 more');
+    await open('Show 40 more');
+    await open('Show the last 4');
+    expect(rows()).toHaveLength(164);
+    expect(screen.queryByRole('button', { name: /^Show / })).toBeNull();
   });
   it('goes back with All styles, focusing the shelf’s All button, and with Escape', async () => {
     render(<LibraryView />);
@@ -218,12 +224,17 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     expect(useAppStore.getState().libraryShelf).toBe('songs');
   });
   it('comes back from a score to the same shelf and the same pages', async () => {
-    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'baroque', libraryPages: 2 });
+    library.whole = true;
+    useAppStore.setState({
+      libraryLevel: 'challenging',
+      libraryShelf: 'classical',
+      libraryPages: 2,
+    });
     render(<LibraryView />);
-    expect(h2s()).toEqual(['Baroque']);
-    expect(rows()).toHaveLength(48);
+    expect(h2s()).toEqual(['Classical']);
+    expect(rows()).toHaveLength(80);
     await userEvent.click(rows()[0]!);
-    expect(useAppStore.getState()).toMatchObject({ libraryShelf: 'baroque', libraryPages: 2 });
+    expect(useAppStore.getState()).toMatchObject({ libraryShelf: 'classical', libraryPages: 2 });
   });
   it('announces the shelf and its count', async () => {
     render(<LibraryView />);
@@ -238,7 +249,8 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
 
 describe('LibraryView: the length pills (shelves spec 4.3)', () => {
   it('appear above a shelf of more than 40 pieces and not on a shorter one', async () => {
-    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'baroque' });
+    library.whole = true;
+    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'classical' });
     render(<LibraryView />);
     const group = screen.getByRole('group', { name: 'Length' });
     const labels = within(group)
@@ -248,12 +260,13 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     expect(within(group).getByRole('radio', { name: 'Any length' })).toBeChecked();
     expect(group.querySelectorAll('.is-red')).toHaveLength(0);
     cleanup();
-    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'classical' });
+    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'baroque' }); // 33 pieces
     render(<LibraryView />);
     expect(screen.queryByRole('group', { name: 'Length' })).toBeNull();
   });
   it('filter the list; the choice outlives the shelf and resets when a shorter list is shown', async () => {
-    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'baroque' });
+    library.whole = true;
+    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'classical' });
     render(<LibraryView />);
     const group = screen.getByRole('group', { name: 'Length' });
     const pills = within(group).getAllByRole('radio');
@@ -263,11 +276,11 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     await userEvent.click(other);
     expect(useAppStore.getState().libraryLength).not.toBe('any');
     expect(rows().length).toBeLessThanOrEqual(before);
-    // a short list (6 pieces) cannot filter silently: the choice is dropped
+    // a short list (11 pieces) cannot filter silently: the choice is dropped
     await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
-    await userEvent.click(screen.getByRole('button', { name: /^All 6 jazz/ }));
+    await userEvent.click(screen.getByRole('button', { name: /^All 11 jazz/ }));
     expect(screen.queryByRole('group', { name: 'Length' })).toBeNull();
-    expect(rows()).toHaveLength(6);
+    expect(rows()).toHaveLength(11);
     await waitFor(() => expect(useAppStore.getState().libraryLength).toBe('any'));
   });
 });
@@ -387,7 +400,7 @@ describe('LibraryView: search (UI batch 6.3; shelves spec 4.4)', () => {
     const { container } = render(<LibraryView />);
     await userEvent.type(screen.getByRole('searchbox'), 'minuet');
     expect(screen.queryByRole('group', { name: 'Level' })).toBeNull();
-    expect(h2s()).toEqual(['Easy', 'Medium', 'Challenging']);
+    expect(h2s()).toEqual(['Easy', 'Medium', 'Harder']);
     // 14 pieces; the one section that holds more than 7 shows 7 and an All button
     expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(13);
     expect(container.querySelectorAll('.is-red')).toHaveLength(1);
@@ -458,8 +471,9 @@ describe('LibraryView: search (UI batch 6.3; shelves spec 4.4)', () => {
     expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
       'Easy',
       'Medium',
+      'Harder',
       'Challenging',
     ]);
-    expect(screen.getAllByRole('button', { name: /^Open / }).length).toBeLessThanOrEqual(21);
+    expect(screen.getAllByRole('button', { name: /^Open / }).length).toBeLessThanOrEqual(28);
   });
 });

@@ -37,7 +37,12 @@ describe('manifest', () => {
     expect(pieces.map((p) => p.level)).toEqual(
       [...pieces.map((p) => p.level)].sort((a, b) => a - b),
     );
-    expect(TIER_NAMES).toEqual({ easy: 'Easy', medium: 'Medium', challenging: 'Challenging' });
+    expect(TIER_NAMES).toEqual({
+      easy: 'Easy',
+      medium: 'Medium',
+      harder: 'Harder',
+      challenging: 'Challenging',
+    });
   });
   it('keeps the 30 pieces of the first library as the benchmark set and gives every piece a collection', async () => {
     const details = await allDetails();

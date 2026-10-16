@@ -320,7 +320,7 @@ describe('the library shelves (shelves spec 3, 4.2, 4.3)', () => {
       [1, 'easy'],
       [2, 'easy'],
       [3, 'medium'],
-      [4, 'challenging'],
+      [4, 'harder'],
       [5, 'challenging'],
       [6, 'challenging'],
     ] as const) {

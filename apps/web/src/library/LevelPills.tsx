@@ -57,7 +57,7 @@ export interface LevelPillsProps {
   onChange(tier: Tier): void;
 }
 
-/** The level pills (spec 3): Easy, Medium, Challenging. */
+/** The level pills (spec 3): Easy, Medium, Harder, Challenging. */
 export function LevelPills({ tiers, tier, describedBy, onChange }: LevelPillsProps) {
   return (
     <PillRadios

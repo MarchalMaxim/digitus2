@@ -22,7 +22,7 @@ test('opens Twinkle from the library: every note gets a digit, one red element, 
 
 // MuseScore archive pieces are stored as gzip (`.musicxml.gz`). A server may send such a file with
 // Content-Encoding: gzip (the browser then hands over plain XML) or without it (the app gunzips): this
-// opens one piece from three levels through the production build, whichever the server does.
+// opens one piece from three grades through the production build, whichever the server does.
 for (const level of [1, 4, 6]) {
   test(`an archive piece of level ${level} opens with its fingerings, its credit and no error`, async ({
     page,

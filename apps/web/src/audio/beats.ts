@@ -1,4 +1,5 @@
-import { ticksToSeconds } from '@digitus2/engine';
+// The subpath, not the engine's index: the index would bring the whole engine onto the main thread.
+import { ticksToSeconds } from '@digitus2/engine/score-build';
 import type { MeasureInfo, Score, TimeSigEvent } from '@digitus2/engine';
 
 export interface Beat {

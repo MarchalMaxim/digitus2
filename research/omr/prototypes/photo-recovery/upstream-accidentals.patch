@@ -1,0 +1,134 @@
+--- a/homr/music_xml_generator.py
++++ b/homr/music_xml_generator.py
+@@ -9,6 +9,7 @@
+ import numpy as np
+ 
+ from homr import constants
++from homr.accidental_display import spell_accidentals
+ from homr.simple_logging import eprint
+ from homr.transformer.vocabulary import (
+     EncodedSymbol,
+@@ -132,6 +133,7 @@
+     for measure in build_measures(args, voice, is_first_part, has_two_staves):
+         part.append(measure)
+     convert_ties(part)
++    spell_accidentals(part)
+     return part
+ 
+ 
+--- /dev/null
++++ b/homr/accidental_display.py
+@@ -0,0 +1,113 @@
++"""Spell MusicXML accidentals from existing sounding pitch, never change music.
++
++HOMR already exports pitch/alter; this completes display instructions for renderers
++which do not infer accidental glyphs. State is per part/staff/pitch octave and
++chronological across voices. Original pitches, durations, notes and ties stay intact.
++"""
++from __future__ import annotations
++
++from collections import defaultdict
++from fractions import Fraction
++import xml.etree.ElementTree as ET
++
++_NAMES = {-2: 'flat-flat', -1: 'flat', 0: 'natural', 1: 'sharp', 2: 'double-sharp'}
++_TAIL = {'time-modification', 'stem', 'notehead', 'notehead-text', 'staff', 'beam', 'notations', 'lyric', 'play', 'listen'}
++
++
++def _key_map(element: ET.Element) -> dict[str, Fraction]:
++    fifths = element.findtext('fifths')
++    if fifths is None:
++        steps = element.findall('key-step')
++        alters = element.findall('key-alter')
++        if len(steps) != len(alters):
++            raise ValueError('Incomplete nontraditional key signature')
++        return {s.text: Fraction(a.text) for s, a in zip(steps, alters)}
++    count = int(fifths)
++    if not -7 <= count <= 7:
++        raise ValueError('Unsupported key signature')
++    order = 'FCGDAEB' if count >= 0 else 'BEADGCF'
++    return {step: Fraction(1 if count >= 0 else -1) for step in order[:abs(count)]}
++
++
++def spell_accidentals(root: ET.Element) -> dict[str, int]:
++    """Add only required missing glyphs. Existing written accidentals are preserved.
++
++    Tie continuations from a verified earlier start need no repeated glyph, and do
++    not establish the accidental of a later new attack in the following measure.
++    Concurrent conflicting voices leave ambiguous state, so a later attack is
++    spelled explicitly rather than relying on arbitrary XML voice order.
++    """
++    added = 0
++    for part in ([root] if root.tag == 'part' else root.findall('part')):
++        keys: dict[str, dict[str, Fraction]] = {'*': {}}
++        active_ties = set()
++        divisions = Fraction(1)
++        for measure in part.findall('measure'):
++            cursor = Fraction(0)
++            previous_start = cursor
++            events = []
++            for order, element in enumerate(measure):
++                if element.tag == 'attributes':
++                    if element.find('divisions') is not None:
++                        divisions = Fraction(element.findtext('divisions'))
++                        if divisions <= 0:
++                            raise ValueError('Nonpositive divisions')
++                    for key in element.findall('key'):
++                        events.append((cursor, 0, order, 'key', key))
++                elif element.tag in {'backup', 'forward'}:
++                    delta = Fraction(element.findtext('duration', '0')) / divisions
++                    cursor += -delta if element.tag == 'backup' else delta
++                elif element.tag == 'note':
++                    start = previous_start if element.find('chord') is not None else cursor
++                    if element.find('chord') is None:
++                        previous_start = start
++                    if element.find('pitch') is not None:
++                        events.append((start, 1, order, 'note', element))
++                    if element.find('chord') is None and element.find('grace') is None:
++                        cursor += Fraction(element.findtext('duration', '0')) / divisions
++            state: dict[tuple, set[Fraction]] = {}
++            groups = defaultdict(list)
++            for event in events:
++                groups[event[0]].append(event)
++            for time in sorted(groups):
++                updates = defaultdict(set)
++                seen = set()
++                for _, _, _, kind, element in sorted(groups[time], key=lambda e: (e[1], e[2])):
++                    if kind == 'key':
++                        staff = element.get('number', '*')
++                        keys[staff] = _key_map(element)
++                        if staff == '*':
++                            keys = {'*': keys['*']}
++                            state.clear()
++                        else:
++                            state = {k: v for k, v in state.items() if k[0] != staff}
++                        continue
++                    pitch = element.find('pitch')
++                    step, octave = pitch.findtext('step'), pitch.findtext('octave')
++                    alter = Fraction(pitch.findtext('alter', '0'))
++                    staff = element.findtext('staff', '1')
++                    voice = element.findtext('voice', '1')
++                    identity = (staff, step, octave)
++                    tied = (staff, voice, step, octave, alter)
++                    types = {tie.get('type') for tie in element.findall('tie')}
++                    continuation = 'stop' in types and tied in active_ties
++                    before = state.get(identity, {keys.get(staff, keys['*']).get(step, Fraction(0))})
++                    simultaneous = (identity, alter)
++                    if not continuation and before != {alter} and simultaneous not in seen:
++                        if element.find('accidental') is None:
++                            if alter not in _NAMES:
++                                raise ValueError('Unsupported microtonal accidental; no glyph guessed')
++                            accidental = ET.Element('accidental')
++                            accidental.text = _NAMES[alter]
++                            position = next((i for i, child in enumerate(element) if child.tag in _TAIL), len(element))
++                            element.insert(position, accidental)
++                            added += 1
++                        seen.add(simultaneous)
++                    if not continuation:
++                        updates[identity].add(alter)
++                    if 'stop' in types:
++                        active_ties.discard(tied)
++                    if 'start' in types:
++                        active_ties.add(tied)
++                state.update(updates)
++    return {'addedAccidentalGlyphs': added}

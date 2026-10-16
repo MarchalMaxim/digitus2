@@ -128,9 +128,9 @@ test('library: an unsupported file shows a notice and keeps one red element', as
   await page.goto('/');
   // The end line sits at the bottom of a long page; the notice (sticky at the top) must still
   // land on screen there.
-  await page.getByText('Open your own MusicXML or MIDI file').scrollIntoViewIfNeeded();
+  await page.getByText('Open your own score').scrollIntoViewIfNeeded();
   await page
-    .getByLabel('Open your own MusicXML or MIDI file')
+    .getByLabel('Open your own score')
     .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
   await expect(page.getByRole('status')).toBeInViewport();
   await expect(

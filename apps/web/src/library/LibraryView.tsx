@@ -21,6 +21,7 @@ import { useWindowFileDrop } from './ownFile.js';
 import { DropFrame, OwnFileLine } from './OwnFileLine.js';
 import { PieceList } from './PieceList.js';
 import { SearchField } from './SearchField.js';
+import { MyScores } from './local/MyScores.js';
 import './library.css';
 
 const LEVEL_LINE_ID = 'library-level-line';
@@ -106,6 +107,16 @@ function useRememberLibraryScroll(): () => void {
 
 export function LibraryView() {
   useWarmUpWhenIdle();
+  const openScan = useAppStore((s) => s.openScan);
+  const scan = (files: File[]) => {
+    rememberScroll();
+    setNotice(null);
+    openScan({
+      id: crypto.randomUUID(),
+      file: files[0]!,
+      pages: files.map((file) => ({ id: crypto.randomUUID(), file })),
+    });
+  };
   const openPiece = useAppStore((s) => s.openPiece);
   const openAbout = useAppStore((s) => s.openAbout);
   const setNotice = useAppStore((s) => s.setNotice);
@@ -140,7 +151,7 @@ export function LibraryView() {
     },
     [rememberScroll, setNotice, openPiece],
   );
-  const dragging = useWindowFileDrop(openFile, setNotice);
+  const dragging = useWindowFileDrop(openFile, setNotice, scan);
   const about = () => {
     rememberScroll();
     openAbout();
@@ -170,6 +181,7 @@ export function LibraryView() {
           {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
         </div>
       </header>
+      <MyScores onOpen={rememberScroll} />
       {layout.kind === 'level' && (
         <div className="level-choice">
           <LevelPills
@@ -196,7 +208,7 @@ export function LibraryView() {
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
         {announcement}
       </p>
-      <OwnFileLine onFile={openFile} onRefuse={setNotice} />
+      <OwnFileLine onFile={openFile} onRefuse={setNotice} onScan={scan} />
       <footer className="library-footer">
         <button type="button" className="text-button" onClick={about}>
           About and licences

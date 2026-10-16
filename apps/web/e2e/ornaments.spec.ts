@@ -8,7 +8,7 @@ test('imported trill uses its unwritten upper key without a false finger digit a
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?audio=silent');
-  await page.getByLabel('Open your own MusicXML or MIDI file').setInputFiles({
+  await page.getByLabel('Open your own score', { exact: true }).setInputFiles({
     name: 'ornaments.musicxml',
     mimeType: 'application/xml',
     buffer: Buffer.from(xml),

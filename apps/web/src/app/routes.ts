@@ -4,8 +4,8 @@ import type { useAppStore, View } from './store.js';
 const FILE_HASH = '#/piece/file';
 const PIECE_PREFIX = '#/piece/';
 
-/** Shown when the URL points at a dropped file whose bytes are gone (reload, Back, Forward). */
-export const FILE_NOT_RESTORABLE_NOTICE = 'Drop the file again to continue.';
+/** Uploaded scores reopen explicitly from the local collection, without starting a scan. */
+export const FILE_NOT_RESTORABLE_NOTICE = 'Open it from My scores, or choose the file again.';
 
 export function viewToHash(view: View): string {
   switch (view.name) {
@@ -13,6 +13,8 @@ export function viewToHash(view: View): string {
       return '#/';
     case 'about':
       return '#/about';
+    case 'scan':
+      return '#/scan';
     case 'score':
       return view.source.kind === 'library' ? `${PIECE_PREFIX}${view.source.slug}` : FILE_HASH;
   }
@@ -44,6 +46,17 @@ export function installHashSync(store: typeof useAppStore): () => void {
     const hash = location.hash;
     const { view } = store.getState();
     if (viewToHash(view) === hash) return;
+    // A scan-derived score retains its source. Back restores that review; after a reload
+    // the reader chooses the saved item explicitly from My scores.
+    if (
+      hash === '#/scan' &&
+      view.name === 'score' &&
+      view.source.kind === 'file' &&
+      view.source.scan
+    ) {
+      store.setState({ view: { name: 'scan', session: view.source.scan } });
+      return;
+    }
     const next = hashToView(hash);
     if (next) {
       store.setState({ view: next });
@@ -51,7 +64,8 @@ export function installHashSync(store: typeof useAppStore): () => void {
     }
     // Not restorable or unknown: fall back to the library. Correct the hash first so the view
     // change below finds it already in place and does not push a second history entry.
-    if (hash === FILE_HASH) store.setState({ notice: FILE_NOT_RESTORABLE_NOTICE });
+    if (hash === FILE_HASH || hash === '#/scan')
+      store.setState({ notice: FILE_NOT_RESTORABLE_NOTICE });
     replaceHash(viewToHash({ name: 'library' }));
     if (view.name !== 'library') store.setState({ view: { name: 'library' } });
   };

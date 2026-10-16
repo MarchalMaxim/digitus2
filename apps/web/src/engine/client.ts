@@ -15,7 +15,7 @@ export interface EngineClient {
   load(
     input: string | Uint8Array,
     source: string,
-    opts?: { splitMidi?: number },
+    opts?: { splitMidi?: number; preserveNotation?: boolean },
   ): Promise<{
     score: Score;
     editorial: Assignment;
@@ -127,6 +127,9 @@ export function createEngineClient(
         kind: sourceKind(source),
         input,
         source,
+        ...(opts?.preserveNotation !== undefined
+          ? { preserveNotation: opts.preserveNotation }
+          : {}),
         ...(opts?.splitMidi !== undefined ? { splitMidi: opts.splitMidi } : {}),
       }).then(({ score, editorial, warnings, xml, midiInfo }) => ({
         score,

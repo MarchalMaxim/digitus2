@@ -22,6 +22,28 @@ import { STATES } from './helpers/states.js';
  */
 const HIDE_TIMINGS = '.side-panel .timings { display: none; }';
 
+/** A sticky dock has a different document position at the top and bottom of a scrollable page.
+ * Capture its natural position below the music, independent of playback/focus scrolling. */
+async function dockScreenshotReady(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Math.abs(
+          window.scrollY -
+            Math.max(
+              0,
+              document.documentElement.scrollHeight - document.documentElement.clientHeight,
+            ),
+        ),
+      ),
+    )
+    .toBeLessThan(1);
+}
+
 /** The states whose screenshot changes while it is taken. */
 const PLAYBACK_STATES = new Set(['score-count-in', 'score-playing']);
 
@@ -50,6 +72,7 @@ for (const [s, dark] of [
     if (dark) await page.emulateMedia({ colorScheme: 'dark' });
     await s.go(page);
     await page.addStyleTag({ content: HIDE_TIMINGS });
+    if (s.name === 'score-rewound') await dockScreenshotReady(page);
     await expect(page).toHaveScreenshot(`${name}.png`, {
       fullPage: true,
       animations: 'disabled',
@@ -94,6 +117,23 @@ for (const crop of KEYBOARD_CROPS) {
   test(`visual ${crop.name}`, async ({ page }) => {
     if (crop.dark) await page.emulateMedia({ colorScheme: 'dark' });
     await pausedTwinkleAt(page, crop.sec);
+    // Capture the intentional final key travel, never an in-flight press/restrike frame.
+    await page.locator('.keyboard-svg').evaluate(async (svg) => {
+      await Promise.all(
+        svg.getAnimations({ subtree: true }).map((animation) => animation.finished.catch(() => {})),
+      );
+    });
+    if (crop.name === 'keyboard-unlettered') {
+      const pressed = page.locator('.keyboard-svg .key.is-pressed');
+      expect(
+        await pressed.evaluateAll((keys) =>
+          keys.map((key) => Number(key.getAttribute('data-midi'))),
+        ),
+      ).toEqual([48, 67]);
+      await expect(pressed.locator('text')).toHaveText(['5', '4']);
+      await expect(page.locator('.keyboard-svg .key-hand')).toHaveCount(0);
+    }
+    await dockScreenshotReady(page);
     await expect(page.locator('.dock .keyboard')).toHaveScreenshot(`${crop.name}.png`, {
       animations: 'disabled',
     });

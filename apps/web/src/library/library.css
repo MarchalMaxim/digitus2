@@ -13,6 +13,28 @@
   gap: 0.5rem;
 }
 
+.local-scores summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+}
+
+.local-score-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.local-score-row .piece-row {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.local-score-row > .text-button {
+  min-height: 44px;
+}
+
 .start-row {
   display: flex;
   flex-wrap: wrap;

@@ -19,6 +19,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm test:omr
       # Playwright is a dependency of apps/web only; the root has no playwright binary.
       - run: pnpm --filter @digitus2/web exec playwright install --with-deps chromium
       - run: pnpm --filter @digitus2/web e2e

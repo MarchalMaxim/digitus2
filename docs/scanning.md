@@ -1,6 +1,6 @@
 # Experimental photo and PDF scanning
 
-Experimental recognition accepts PNG, JPEG and PDF, then adds finger numbers **only after you review the recognition**. Current evidence is strongest for original PDFs and flat, high-resolution printed scans. Ordinary book-photo acceptance is **not ready**: a real well-lit, curved 768 × 1024 book photo failed, and bounded preparation/alternative-recognizer controls did not produce usable fingering input. This work remains a draft for that photo capability.
+Experimental recognition accepts PNG, JPEG and PDF, then adds finger numbers **only after you review the recognition**. The optional PC worker uses a pinned local homr profile for photos and Audiveris for PDFs. Both supplied book photos now recover the main piano layout in prototype testing, but musical review still finds errors such as duplicated notes and missing chord ties. This remains a draft, correction-and-review workflow; it is not an accurate automatic transcription guarantee.
 
 Good-looking notation can still contain wrong pitches, rhythms, missing bars or incorrect hands. Original PDFs generally work better than screenshots. Handwriting and arbitrary phone-photo conditions are not established capabilities.
 
@@ -25,14 +25,15 @@ Get the digitus2 repository from [GitHub](https://github.com/MarchalMaxim/digitu
 ```powershell
 powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
 powershell -File research/omr/prototypes/oemer-quality/prepare-text-models.ps1
+powershell -File research/omr/prototypes/homr-photo/setup.ps1
 ```
 
-The scripts download and verify a pinned Audiveris 5.11.0 archive (about 85 MB) and the compatible English text model (about 23 MB). Audiveris is extracted into the repository's ignored research directory, rather than installed as a system service. Existing prepared extraction is deliberately preserved; if the first script reports that extraction exists, use the verified existing runtime instead of extracting over it.
+The photo setup prepares an isolated Python CPU runtime, pinned homr source and ONNX models (about 139 MB compressed model downloads); it verifies source/model identities and applies the documented geometry/export patches. The optional homr code and models are AGPL-3.0 software, fetched locally rather than bundled into the MIT web app. The PDF scripts download and verify a pinned Audiveris 5.11.0 archive (about 85 MB) and the compatible English text model (about 23 MB). Audiveris is extracted into the repository's ignored research directory, rather than installed as a system service. Existing prepared extraction is deliberately preserved; if the first script reports that extraction exists, use the verified existing runtime instead of extracting over it.
 
 Start the worker whenever you want to scan:
 
 ```powershell
-python research/omr/prototypes/local-worker/worker.py --bundle research/omr/results/quality-wave/toolchain --short-staves --text-models research/omr/results/quality-wave/text-models
+python research/omr/prototypes/local-worker/worker.py --bundle research/omr/results/quality-wave/toolchain --short-staves --text-models research/omr/results/quality-wave/text-models --homr-toolchain research/omr/results/photo-options/toolchain
 ```
 
 Keep that terminal open. It should report `http://127.0.0.1:8996` and the `pinned-eng` recognizer profile. Close it or press Ctrl+C to stop the worker and its current recognition process. No account, public server, tunnel or automatic startup is configured.
@@ -42,7 +43,7 @@ The measured experimental profile uses two fixed short-staff settings and the pi
 The worker defaults to allowing the deployed origin `https://marchalmaxim.github.io`. For a local development preview, add its **exact** loopback origin explicitly:
 
 ```powershell
-python research/omr/prototypes/local-worker/worker.py --bundle research/omr/results/quality-wave/toolchain --short-staves --text-models research/omr/results/quality-wave/text-models --dev-origin http://127.0.0.1:4196
+python research/omr/prototypes/local-worker/worker.py --bundle research/omr/results/quality-wave/toolchain --short-staves --text-models research/omr/results/quality-wave/text-models --homr-toolchain research/omr/results/photo-options/toolchain --dev-origin http://127.0.0.1:4196
 ```
 
 Use that exact address in the browser. `http://localhost:4196` is a different origin and needs its own `--dev-origin` option. Other ports and external HTTP hosts remain denied. The worker still binds only to 127.0.0.1; the development option never creates a public listener.
@@ -60,7 +61,7 @@ Use that exact address in the browser. `http://localhost:4196` is a different or
 
 ## Privacy and lifetime
 
-The original file goes only from this browser to the optional worker on 127.0.0.1. Recognition is performed by the local Audiveris process. There is no external recognition service or score upload to GitHub. Initial tool setup downloads software/model assets; ordinary app assets are served by the website as usual.
+The original file goes only from this browser to the optional worker on 127.0.0.1. Recognition runs locally in the prepared homr process for photos and Audiveris for PDFs. Setup downloads the dependencies; scan jobs do not download models or contact an external recognizer. There is no external recognition service or score upload to GitHub. Initial tool setup downloads software/model assets; ordinary app assets are served by the website as usual.
 
 The app keeps original bytes, raw XML and recognizer provenance in memory during this visit. They are not written to localStorage; reloading clears them. Save the raw XML if you need it later. On the PC, jobs use isolated temporary directories, settings and caches. Terminal jobs expire after five minutes while the worker runs; shutdown removes its owned job directories. The worker rejects oversize inputs, bounds result/log/workspace size and terminates timed-out or cancelled native processes. See the [connector research report](research/omr-local-worker-2026-10-15.md) for the measured boundaries.
 
@@ -68,8 +69,12 @@ PDF source preview uses [Mozilla PDF.js](https://mozilla.github.io/pdf.js/exampl
 
 Codex — Sol 6.1 implementation; Astra coordination and independent acceptance.
 
-## Real-photo acceptance limit
+## Real-photo acceptance and remaining limits
 
-The tested book photo was rejected by the native recognizer's scale stage at six pixels between staff lines, before XML existed. Three deterministic job-local preparation controls retained the untouched original but either crashed recognition or produced fragmented, musically unusable exports. A single existing photo-oriented recognizer with dewarping produced XML, but independent visual review found wrong durations, lost chords and severe bass-to-right-hand assignment errors. Those results are held; none of that preparation or alternative output is enabled in the app.
+The original Audiveris photo path failed both supplied book photographs: one stopped at six-pixel staff spacing; the sharper one lost grand-staff grouping and exported tiny fragments. Simple contrast/upscaling and an oemer control did not solve those failures.
 
-The public job status now distinguishes low staff resolution, multiple scores, timeout and known incomplete native export. Detailed source images, native logs and negative controls remain private local evidence. A successful HTTP job or strict XML parse is never an accuracy certificate. This limitation must be resolved before claiming ordinary book-photo scanning works.
+The new local homr profile recognizes the four main piano systems. Geometry-based preprocessing excludes detached small examples and removes a neighbouring five-line staff from a decoder margin before recognition. It never substitutes a handwritten score or deletes XML bars to match a reference. The original input remains untouched, and excluded material is flagged for review. A generic exporter fix makes existing semantic accidentals visible without changing their pitches.
+
+These changes improve recovery, not certainty. The same page can still contain duplicated notes, missed chord ties, incomplete ornaments or incorrect rhythms. Meter can be inferred rather than read when a continuation page omits it. A legitimate short inset passage can resemble an explanatory example: compare the whole original, including excluded areas, before accepting a result. Download and correct the MusicXML in a notation editor when needed.
+
+Exact source/output comparisons and private negative controls are recorded in docs/reviews/scanning-2026-10-15.md. Private user photos and results are never published. Software tests, successful exports and strict parsing do not certify musical accuracy.

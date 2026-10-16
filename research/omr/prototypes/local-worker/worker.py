@@ -34,6 +34,7 @@ class Job:
     result: bytes | None = None
     failure: dict | None = None
     thread: threading.Thread | None = None
+    metadata: dict | None = None
 
 
 class LocalWorker:
@@ -91,6 +92,7 @@ class LocalWorker:
             }), encoding="utf-8")
             source = directory / ("input" + extension)
             source.write_bytes(data)
+            job.metadata = self.review_metadata(source)
             self.jobs[job.id] = job
             job.thread = threading.Thread(target=self._run, args=(job, source), daemon=True)
             job.thread.start()
@@ -109,7 +111,9 @@ class LocalWorker:
             xml = ET.fromstring(data)
             if xml.tag != "score-partwise":
                 raise ValueError("not a partwise score")
+            metadata = self.review_metadata(source, job.directory)
             with self.lock:
+                job.metadata = metadata
                 if job.cancelled.is_set():
                     job.state = "cancelled"
                 else:
@@ -138,11 +142,13 @@ class LocalWorker:
             job = self.jobs.get(identifier)
             if job is None:
                 return None
-            return {"id": job.id, "state": job.state, **self.review_metadata(),
+            return {"id": job.id, "state": job.state, **(job.metadata or self.review_metadata()),
                     "error": job.failure["code"] if job.failure else {"failed": "recognition-failed", "timed_out": "recognition-timeout"}.get(job.state),
                     "failure": job.failure}
 
-    def review_metadata(self):
+    def review_metadata(self, source=None, directory=None):
+        if source is not None and hasattr(self.recognizer, "metadata_for"):
+            return {**self.recognizer.metadata_for(source, directory), "needsReview": True}
         return {"needsReview": True, "recognizer": getattr(self.recognizer, "name", "test-recognizer"),
                 "capabilities": getattr(self.recognizer, "capabilities", {}),
                 "warnings": getattr(self.recognizer, "warnings", [])}
@@ -175,6 +181,46 @@ class LocalWorker:
             with self.lock:
                 if self.jobs.pop(job.id, None):
                     shutil.rmtree(job.directory)
+
+
+class PhotoPdfRecognizer:
+    """Explicit image/PDF dispatch; no fallback, conversion or input rewriting."""
+    def __init__(self, pdf, photo):
+        self.pdf, self.photo = pdf, photo
+        self.name = f"{photo.name} (images); {pdf.name} (PDF)"
+        self.capabilities = {**getattr(pdf, "capabilities", {}), "experimentalPhotoProfile": True,
+                             "originalPdfInput": True, "originalImageInput": True}
+        self.warnings = list(getattr(photo, "warnings", [])) + list(getattr(pdf, "warnings", []))
+
+    def branch(self, source):
+        suffix = source.suffix.lower()
+        if suffix == ".pdf":
+            return self.pdf
+        if suffix in {".jpg", ".jpeg", ".png"}:
+            return self.photo
+        raise ValueError("Unsupported recognizer input")
+
+    def __call__(self, source, destination, cancelled):
+        return self.branch(source)(source, destination, cancelled)
+
+    def metadata_for(self, source, directory=None):
+        branch = self.branch(source)
+        warnings = list(getattr(branch, "warnings", []))
+        if branch is self.photo and directory is not None:
+            metadata = directory / "recognition.json"
+            if metadata.exists():
+                if metadata.is_symlink() or metadata.stat().st_size > 256 * 1024:
+                    raise ValueError("Invalid recognition metadata")
+                record = json.loads(metadata.read_text(encoding="utf-8"))
+                actual = record.get("warnings", [])
+                if not isinstance(actual, list) or len(actual) > 32 or any(
+                        not isinstance(w, dict) or not isinstance(w.get("code"), str)
+                        or not isinstance(w.get("message"), str) or len(w["message"]) > 2000
+                        for w in actual):
+                    raise ValueError("Invalid recognition warnings")
+                warnings = actual
+        return {"needsReview": True, "recognizer": branch.name,
+                "capabilities": getattr(branch, "capabilities", {}), "warnings": warnings}
 
 
 class Server(ThreadingHTTPServer):
@@ -334,7 +380,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             identifier = self.server.worker.submit(data, valid[mime][1])
-            self.send(202, {"id": identifier, "state": "running", **self.server.worker.review_metadata()})
+            self.send(202, self.server.worker.status(identifier))
         except BlockingIOError:
             self.send(409, {"error": "busy-or-retention-full"})
 
@@ -373,6 +419,7 @@ def main():
     parser.add_argument("--port", type=int, default=8996)
     parser.add_argument("--root", type=Path, default=Path("research/omr/results/connector-wave/jobs"))
     parser.add_argument("--bundle", type=Path, default=Path("research/omr/results/audiveris-spike"))
+    parser.add_argument("--homr-toolchain", type=Path, help="Explicit prepared pinned HOMR image profile; PDFs continue through Audiveris")
     parser.add_argument("--timeout", type=float, default=180)
     parser.add_argument("--short-staves", action="store_true", help="Experimental quality profile; always needs review")
     parser.add_argument("--text-models", type=Path, help="Optional pinned legacy-capable English tessdata directory")
@@ -381,6 +428,9 @@ def main():
     if any(urlsplit(origin).scheme != "http" or urlsplit(origin).hostname not in {"127.0.0.1", "localhost"} for origin in args.dev_origin):
         parser.error("--dev-origin must be an exact HTTP loopback origin")
     recognizer = Audiveris(args.bundle, timeout=args.timeout, short_staves=args.short_staves, text_models=args.text_models)
+    if args.homr_toolchain:
+        from homr import Homr
+        recognizer = PhotoPdfRecognizer(recognizer, Homr(args.homr_toolchain, timeout=args.timeout))
     worker = LocalWorker(args.root, recognizer)
     server = serve(worker, args.port, {ORIGIN, *args.dev_origin})
     stopping = threading.Event()

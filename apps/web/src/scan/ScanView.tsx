@@ -279,21 +279,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               <div className="stack">
                 <p>
                   On the PC running this browser, open the digitus2 project folder. Install the
-                  pinned recognizer and English text model once, then start the worker when you need
-                  it.
+                  photo and PDF recognizers once, then start the worker when you need it.
                 </p>
                 <pre>
                   <code>
                     powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
                     {'\n'}powershell -File
                     research/omr/prototypes/oemer-quality/prepare-text-models.ps1
+                    {'\n'}powershell -File research/omr/prototypes/homr-photo/setup.ps1
                   </code>
                 </pre>
                 <pre>
                   <code>
                     python research/omr/prototypes/local-worker/worker.py --bundle
                     research/omr/results/quality-wave/toolchain --short-staves --text-models
-                    research/omr/results/quality-wave/text-models
+                    research/omr/results/quality-wave/text-models --homr-toolchain
+                    research/omr/results/photo-options/toolchain
                   </code>
                 </pre>
                 <p className="small">
@@ -331,8 +332,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ) : (
         <>
           <p>
-            Compare every page: pitches, rhythms, missing bars, hands and key/time signatures. Text
-            and tempo may be incomplete. No fingerings have been added yet.
+            Compare every page: pitches, rhythms, ties, missing bars, hands and key/time signatures.
+            Text and tempo may be incomplete. No fingerings have been added yet.
           </p>
           <div className="scan-review">
             <section className="scan-source stack">

@@ -281,3 +281,62 @@ def test_native_scale_reason_reaches_status_without_private_logs(api):
     assert "6 pixels" in status["failure"]["message"]
     assert "C:/" not in json.dumps(status)
     assert request(api, "GET", f"/v1/jobs/{identifier}/result")[0] == 409
+
+class BranchRecognizer:
+    def __init__(self, name):
+        self.name=name
+        self.capabilities={'testBranch':name}
+        self.warnings=[{'code':name,'message':name+' needs review'}]
+        self.inputs=[]
+    def __call__(self, source, destination, cancelled):
+        self.inputs.append((source.suffix,source.read_bytes()))
+        if self.name=='photo':
+            (destination/'recognition.json').write_text(json.dumps({'warnings':[
+                *self.warnings,{'code':'foreign-staff-omitted','message':'An inset example was omitted; compare the source.'}]}))
+        output=destination/'score.musicxml';output.write_text('<score-partwise/>');return output
+
+
+def test_explicit_router_preserves_pdf_and_image_bytes(tmp_path):
+    from worker import PhotoPdfRecognizer
+    pdf,photo=BranchRecognizer('pdf'),BranchRecognizer('photo')
+    router=PhotoPdfRecognizer(pdf,photo)
+    for extension,data,expected in [('.pdf',b'%PDF-original',pdf),('.jpg',b'\xff\xd8\xff-original',photo),('.png',PNG,photo)]:
+        folder=tmp_path/extension[1:];folder.mkdir()
+        source=folder/('input'+extension);source.write_bytes(data)
+        router(source,folder,threading.Event())
+        assert expected.inputs[-1]==(extension,data)
+        metadata=router.metadata_for(source,folder)
+        assert metadata['recognizer']==expected.name
+        assert metadata['needsReview'] is True
+        assert metadata['warnings'][-1]['code']==('foreign-staff-omitted' if expected is photo else 'pdf')
+    assert len(pdf.inputs)==1 and len(photo.inputs)==2
+
+
+def test_job_specific_metadata_does_not_leak_between_pdf_and_photo(tmp_path):
+    from worker import PhotoPdfRecognizer
+    worker=LocalWorker(tmp_path,PhotoPdfRecognizer(BranchRecognizer('pdf'),BranchRecognizer('photo')))
+    try:
+        image=worker.submit(PNG,'.png');worker.jobs[image].thread.join(2)
+        assert worker.status(image)['recognizer']=='photo'
+        assert any(w['code']=='foreign-staff-omitted' for w in worker.status(image)['warnings'])
+        pdf=worker.submit(b'%PDF-original','.pdf');worker.jobs[pdf].thread.join(2)
+        assert worker.status(pdf)['recognizer']=='pdf'
+        assert all(w['code']!='foreign-staff-omitted' for w in worker.status(pdf)['warnings'])
+        assert worker.status(image)['recognizer']=='photo'
+        assert worker.status(image)['needsReview'] is True
+    finally:worker.close()
+
+
+def test_invalid_photo_warning_metadata_cannot_publish_ready_result(tmp_path):
+    from worker import PhotoPdfRecognizer
+    photo=BranchRecognizer('photo')
+    def invalid(source,destination,cancelled):
+        path=destination/'recognition.json';path.write_text('{"warnings":[{"code":"broken"}]}')
+        out=destination/'result.musicxml';out.write_text('<score-partwise/>');return out
+    photo.__class__=type('InvalidBranch',(BranchRecognizer,),{'__call__':staticmethod(invalid)})
+    worker=LocalWorker(tmp_path,PhotoPdfRecognizer(BranchRecognizer('pdf'),photo))
+    try:
+        identifier=worker.submit(PNG,'.png');worker.jobs[identifier].thread.join(2)
+        assert worker.status(identifier)['state']=='failed'
+        assert worker.jobs[identifier].result is None
+    finally:worker.close()

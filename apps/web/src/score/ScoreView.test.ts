@@ -1,7 +1,7 @@
 import type { Assignment } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
 import { en } from '../i18n/en/index.js';
-import { scoreStatusLine, showsEditorial, type StatusInputs } from './ScoreView.js';
+import { loaderTune, scoreStatusLine, showsEditorial, type StatusInputs } from './ScoreView.js';
 
 /** A ready score, playable, with the player idle (or playing, past any count-in). */
 const ready: StatusInputs = {
@@ -95,5 +95,21 @@ describe("the editor's fingering line", () => {
     expect(showsEditorial({ assignment: null, editorial })).toBe(false);
     // Equal digits are not the same fingering: only the editorial assignment itself counts.
     expect(showsEditorial({ assignment: { ...editorial }, editorial })).toBe(false);
+  });
+});
+
+// The loader (issue #28) stands where the music will be while there is none yet.
+describe('the loader', () => {
+  it('plays the scale while loading, writes the fingering while fingering, chords while laying out', () => {
+    expect(loaderTune('idle', 0)).toBe('scale');
+    expect(loaderTune('loading', 0)).toBe('scale');
+    expect(loaderTune('fingering', 0)).toBe('fingering');
+    expect(loaderTune('rendering', 0)).toBe('chords');
+  });
+
+  it('goes once the score is ready, and never shows over pages already on screen', () => {
+    expect(loaderTune('ready', 1)).toBeNull();
+    expect(loaderTune('error', 0)).toBeNull();
+    expect(loaderTune('loading', 2)).toBeNull();
   });
 });

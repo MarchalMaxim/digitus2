@@ -27,6 +27,9 @@
   --dur-flourish: 520ms; /* the easter egg's notes, the one motion meant to be noticed (NoteBurst.tsx) */
   --dur-reveal: 400ms; /* the new theme spreading from the switch (base.css): long enough to read as
                           a ripple, not a wipe (the user, 2026-10-16, issue #11) */
+  /* One note of the loader's scale (base.css, .loader): about 125 beats a minute, a steady
+     practice tempo. A rhythm, not a transition: reduced motion stops the loader instead. */
+  --loader-beat: 240ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --font-ui: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;

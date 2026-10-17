@@ -1094,6 +1094,404 @@ html:has(.dock) {
   opacity: 0.4;
 }
 
+/* The loader (Loader.tsx, issue #28): one octave in the keyboard's colors, where a key at a time
+   goes down in the accent, one beat each (--loader-beat). The accent is one group that steps from
+   key to key without gliding, and the key under it goes down with it the way the dock's keys do.
+   While a score loads, and while a page is recognised, it plays the scale C to C; while the
+   engine fingers, the scale again with the right hand's fingering coming up on each key as it is
+   played, held for two beats at the top; while the score is laid out, C E G and F A C take
+   turns. */
+.loader {
+  display: block;
+  width: 15rem;
+  max-width: 100%;
+  height: auto;
+}
+
+.loader-key {
+  fill: var(--key-white);
+  stroke: var(--key-line);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation-delay: calc(var(--key) * var(--loader-beat));
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.loader-black {
+  fill: var(--key-black);
+  stroke: var(--key-line);
+  stroke-width: 1;
+}
+
+/* Inside the key's outline: the accent has no stroke of its own. */
+.loader-red rect {
+  stroke-width: 0;
+}
+
+.loader-red {
+  animation-timing-function: step-end;
+  animation-iteration-count: infinite;
+}
+
+.loader-digit {
+  font: 600 15px var(--font-ui);
+  fill: var(--key-digit);
+  opacity: 0;
+  animation-delay: calc(var(--key) * var(--loader-beat));
+  animation-duration: calc(10 * var(--loader-beat));
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.loader.is-scale .loader-red {
+  animation-name: loader-scale;
+  animation-duration: calc(8 * var(--loader-beat));
+}
+
+.loader.is-scale .loader-key {
+  animation-name: loader-press-8;
+  animation-duration: calc(8 * var(--loader-beat));
+}
+
+.loader.is-fingering .loader-red {
+  animation-name: loader-fingering;
+  animation-duration: calc(10 * var(--loader-beat));
+}
+
+.loader.is-fingering .loader-key {
+  animation-name: loader-press-10;
+  animation-duration: calc(10 * var(--loader-beat));
+}
+
+.loader.is-fingering .k7 {
+  animation-name: loader-hold;
+}
+
+.loader.is-chords .loader-red {
+  animation-name: loader-chords;
+  animation-duration: calc(6 * var(--loader-beat));
+}
+
+.loader.is-chords .loader-key {
+  animation-duration: calc(6 * var(--loader-beat));
+  animation-delay: 0s;
+}
+
+.loader.is-chords :is(.k0, .k2, .k4, .k3, .k5, .k7) {
+  animation-name: loader-chord;
+}
+
+.loader.is-chords :is(.k3, .k5, .k7) {
+  animation-delay: calc(3 * var(--loader-beat));
+}
+
+/* Each finger number comes up in white on the accent as its key is played, turns to the key's
+   digit color as the accent moves on, and all go together at the end of the pass. The top C's
+   stays on the accent, held to the end. */
+.loader.is-fingering .d0 {
+  animation-name: loader-digit-0;
+}
+.loader.is-fingering .d1 {
+  animation-name: loader-digit-1;
+}
+.loader.is-fingering .d2 {
+  animation-name: loader-digit-2;
+}
+.loader.is-fingering .d3 {
+  animation-name: loader-digit-3;
+}
+.loader.is-fingering .d4 {
+  animation-name: loader-digit-4;
+}
+.loader.is-fingering .d5 {
+  animation-name: loader-digit-5;
+}
+.loader.is-fingering .d6 {
+  animation-name: loader-digit-6;
+}
+.loader.is-fingering .d7 {
+  animation-name: loader-digit-7;
+}
+
+@keyframes loader-scale {
+  0% {
+    transform: none;
+  }
+  12.5% {
+    transform: translateX(36px);
+  }
+  25% {
+    transform: translateX(72px);
+  }
+  37.5% {
+    transform: translateX(108px);
+  }
+  50% {
+    transform: translateX(144px);
+  }
+  62.5% {
+    transform: translateX(180px);
+  }
+  75% {
+    transform: translateX(216px);
+  }
+  87.5%,
+  100% {
+    transform: translateX(252px);
+  }
+}
+
+@keyframes loader-fingering {
+  0% {
+    transform: none;
+  }
+  10% {
+    transform: translateX(36px);
+  }
+  20% {
+    transform: translateX(72px);
+  }
+  30% {
+    transform: translateX(108px);
+  }
+  40% {
+    transform: translateX(144px);
+  }
+  50% {
+    transform: translateX(180px);
+  }
+  60% {
+    transform: translateX(216px);
+  }
+  70%,
+  100% {
+    transform: translateX(252px);
+  }
+}
+
+@keyframes loader-chords {
+  0% {
+    transform: none;
+  }
+  50%,
+  100% {
+    transform: translateX(108px);
+  }
+}
+
+@keyframes loader-press-8 {
+  0%,
+  11% {
+    transform: scaleY(0.976);
+  }
+  12.5%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes loader-press-10 {
+  0%,
+  8.8% {
+    transform: scaleY(0.976);
+  }
+  10%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes loader-hold {
+  0%,
+  28.8% {
+    transform: scaleY(0.976);
+  }
+  30%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes loader-chord {
+  0%,
+  47% {
+    transform: scaleY(0.976);
+  }
+  50%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes loader-digit-0 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  96% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  98%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-1 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  86% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-2 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  76% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  78%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-3 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  66% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  68%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-4 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  56% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  58%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-5 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  46% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  48%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-6 {
+  0%,
+  8.4% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  9.6%,
+  36% {
+    opacity: 1;
+    fill: var(--key-digit);
+  }
+  38%,
+  100% {
+    opacity: 0;
+    fill: var(--key-digit);
+  }
+}
+
+@keyframes loader-digit-7 {
+  0%,
+  26% {
+    opacity: 1;
+    fill: var(--on-accent);
+  }
+  28%,
+  100% {
+    opacity: 0;
+    fill: var(--on-accent);
+  }
+}
+
+/* Reduced motion: the accent stands on the first key (C, or C E G), nothing moves, and the
+   fingering is written out, the first finger in white on the accent. */
+@media (prefers-reduced-motion: reduce) {
+  .loader * {
+    animation: none;
+  }
+
+  .loader .loader-digit {
+    opacity: 1;
+  }
+
+  .loader .d0 {
+    fill: var(--on-accent);
+  }
+}
+
+/* The loader stands where the music will be (ScoreView.tsx): the empty sheet under it then takes
+   no room of its own. */
+.score-loader {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+}
+
+.score-loader + .score-stage .score-sheet:empty {
+  min-height: 0;
+}
+
 @media (max-width: 899.98px) {
   .score-layout {
     grid-template-columns: minmax(0, 1fr);

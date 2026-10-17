@@ -3,6 +3,7 @@ import { messageOf } from '../app/errors.js';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { Loader } from '../design/Loader.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import { downloadText } from '../export/download.js';
 import { createEngineClient } from '../engine/client.js';
@@ -319,8 +320,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   {phase === 'connecting' ? t.scan.view.connecting : t.scan.view.connect}
                 </Button>
               ) : phase === 'scanning' || phase === 'cancelling' ? (
+                // Plain while the loader below carries the screen's one red.
                 <Button
-                  primary
                   disabled={phase === 'cancelling'}
                   onClick={() => {
                     void cancel();
@@ -342,6 +343,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </Button>
               )}
             </div>
+            {(phase === 'scanning' || phase === 'cancelling') && (
+              <div className="scan-loader">
+                <Loader tune="scale" />
+              </div>
+            )}
             <p role="status">
               {phase === 'scanning'
                 ? batch

@@ -63,8 +63,9 @@ export interface TransportProps {
   /** Paused with the last group heard marked (T10): the cursor is the red element, Play is plain. */
   resumeShown?: boolean;
   /**
-   * The red is on its way between Play and the cursor (RedFlight.tsx): the traveling shape is the
-   * red element meanwhile, so the button is plain even where it would be red.
+   * Something else carries the red: the shape on its way between Play and the cursor
+   * (RedFlight.tsx), or the loader while the score is busy (Loader.tsx). The button is plain
+   * meanwhile, even where it would be red.
    */
   redAway?: boolean;
 }

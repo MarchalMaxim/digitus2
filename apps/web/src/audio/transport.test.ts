@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { parseMusicXml, type Score } from '@digitus2/engine';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createPiano, createSilentInstrument, noteVelocity } from './instrument.js';
+import { createPiano, createSilentInstrument, noteVelocity, PIANO_SOFTEST } from './instrument.js';
 import { Transport } from './transport.js';
 
 const { score } = parseMusicXml(
@@ -92,8 +92,8 @@ beforeEach(() => {
 
 describe('the sampled piano', () => {
   it('plays the dynamics marks: loads their velocity layers and starts each note at its velocity', async () => {
-    // short-piano opens with a p between the staves: both hands play every note at 56.
-    expect(new Set(score.notes.map((n) => n.velocity))).toEqual(new Set([56]));
+    // short-piano opens with a p between the staves: both hands play every note at 68.
+    expect(new Set(score.notes.map((n) => n.velocity))).toEqual(new Set([68]));
     const piano = createPiano({} as AudioContext);
     await piano.load(
       score.notes.map((n) => n.midi),
@@ -108,9 +108,9 @@ describe('the sampled piano', () => {
     run(t, 21);
     expect(smplrMock.pianos).toHaveLength(1);
     const fake = smplrMock.pianos[0]!;
-    expect(fake.options.notesToLoad.velocityRange).toEqual([56, 56]);
+    expect(fake.options.notesToLoad.velocityRange).toEqual([68, 68]);
     expect(fake.starts).toHaveLength(67);
-    expect(fake.starts.every((s) => s.velocity === 56)).toBe(true);
+    expect(fake.starts.every((s) => s.velocity === 68)).toBe(true);
   });
   it("plays a note without a velocity at its hand's, the left hand softer", () => {
     const unmarked = { ...score, notes: score.notes.map(({ velocity: _, ...n }) => n) };
@@ -126,12 +126,21 @@ describe('the sampled piano', () => {
   });
   it('loads the layers from the softest velocity to the loudest and passes velocities through', async () => {
     const piano = createPiano({} as AudioContext);
-    await piano.load([60, 62], [33, 96, 49]);
+    await piano.load([60, 62], [56, 96, 68]);
     const fake = smplrMock.pianos[0]!;
-    expect(fake.options.notesToLoad.velocityRange).toEqual([33, 96]);
-    piano.start({ midi: 60, time: 0, duration: 1, velocity: 33, hand: 'L' });
+    expect(fake.options.notesToLoad.velocityRange).toEqual([56, 96]);
+    piano.start({ midi: 60, time: 0, duration: 1, velocity: 56, hand: 'L' });
     piano.start({ midi: 62, time: 0, duration: 1, velocity: 96, hand: 'R' });
-    expect(fake.starts.map((s) => s.velocity)).toEqual([33, 96]);
+    expect(fake.starts.map((s) => s.velocity)).toEqual([56, 96]);
+  });
+  it('never plays or loads the muffled softest layer: a softer note plays at its floor', async () => {
+    const piano = createPiano({} as AudioContext);
+    await piano.load([60, 62], [20, 96]);
+    const fake = smplrMock.pianos[0]!;
+    expect(PIANO_SOFTEST).toBe(41); // smplr's ppp layer, 1 to 40, plays through a 1 kHz low-pass
+    expect(fake.options.notesToLoad.velocityRange).toEqual([PIANO_SOFTEST, 96]);
+    piano.start({ midi: 60, time: 0, duration: 1, velocity: 20, hand: 'L' });
+    expect(fake.starts.map((s) => s.velocity)).toEqual([PIANO_SOFTEST]);
   });
   it('keeps the newest of two overlapping loads and disposes the older one', async () => {
     smplrMock.autoReady = false;

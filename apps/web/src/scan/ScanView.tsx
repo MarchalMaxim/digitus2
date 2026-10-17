@@ -504,9 +504,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   {session.recognizedAt ? new Date(session.recognizedAt).toLocaleString() : ''}
                 </p>
                 <p>
-                  Find retained originals and recognition in My scores. Keep your
-                  own original files; browser storage can be cleared. Recognition is not certified
-                  accurate; playback tempo may use an app default.
+                  Find retained originals and recognition in My scores. Keep your own original
+                  files; browser storage can be cleared. Recognition is not certified accurate;
+                  playback tempo may use an app default.
                 </p>
                 {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
                   <p>Beam grouping is inferred and may differ from the original.</p>

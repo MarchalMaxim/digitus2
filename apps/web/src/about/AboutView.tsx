@@ -96,9 +96,7 @@ export function AboutView() {
 
       <section className="stack" aria-labelledby="about-what">
         <h2 id="about-what">What this is</h2>
-        <p>
-          digitus2 writes finger numbers on piano music for beginning and intermediate players.
-        </p>
+        <p>digitus2 writes finger numbers on piano music for beginning and intermediate players.</p>
       </section>
 
       <section className="stack" aria-labelledby="about-how">
@@ -115,10 +113,9 @@ export function AboutView() {
         <h2 id="about-who">Who made it</h2>
         <p>
           Created by Claude, Anthropic&apos;s AI model, in an autonomous multi-day build directed by
-          Maxim Marchal. To our knowledge, nothing like this exists yet: a fingering engine
-          verified against expert annotations. The code, the research notes and the verification
-          results are in the{' '}
-          <ExternalLink href={REPOSITORY_URL}>repository</ExternalLink>.
+          Maxim Marchal. To our knowledge, nothing like this exists yet: a fingering engine verified
+          against expert annotations. The code, the research notes and the verification results are
+          in the <ExternalLink href={REPOSITORY_URL}>repository</ExternalLink>.
         </p>
       </section>
 

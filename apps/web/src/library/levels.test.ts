@@ -24,12 +24,7 @@ describe('the four levels (shelves spec 3)', () => {
     ]);
   });
   it('names each tier once, with the copy of the spec', () => {
-    expect(TIERS.map((t) => TIER_NAMES[t])).toEqual([
-      'Easy',
-      'Medium',
-      'Harder',
-      'Challenging',
-    ]);
+    expect(TIERS.map((t) => TIER_NAMES[t])).toEqual(['Easy', 'Medium', 'Harder', 'Challenging']);
   });
   it('reads a stored level: a tier id, or a grade from a build with six pills', () => {
     expect(toTier('medium')).toBe('medium');

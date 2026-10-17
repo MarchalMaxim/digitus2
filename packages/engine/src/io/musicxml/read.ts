@@ -44,30 +44,53 @@ type Located<T extends { tick: number }> = {
 };
 
 /**
- * A dynamics mark (or a `<sound dynamics>`) as a velocity from its position on, for its part:
- * every staff of it, or one staff when the mark stands outside the staves (`dynamicsStaff`).
+ * A dynamics mark (or a `<sound dynamics>`) as a velocity from its position on, or a gradual
+ * change (a hairpin, cresc., dim.), for its part: every staff of it, or one staff when the mark
+ * stands outside the staves (`dynamicsStaff`).
  */
-interface DynamicsEvent {
+type DynamicsEvent = {
   part: number;
   staff: number | undefined;
   measureIndex: number;
   offset: number;
-  velocity: number;
+} & ({ velocity: number } | Ramp);
+
+interface Ramp {
+  /** +1 louder, -1 softer. */
+  direction: 1 | -1;
+  /** A hairpin's stop; cresc. and dim. (and a hairpin left open) run to the next mark. */
+  end?: { measureIndex: number; offset: number };
 }
 
 const DEFAULT_QPM = 120;
 
-/** The MIDI velocity each dynamics mark plays at. */
+/**
+ * The MIDI velocity each dynamics mark plays at: steps of 12 around mf, so a change from p to f
+ * is a clear step rather than a switch (smplr's gain grows with the square of the velocity, on
+ * top of the louder sample layer).
+ */
 const DYNAMICS_VELOCITY: Record<string, number> = {
-  ppp: 16,
-  pp: 33,
-  p: 49,
-  mp: 64,
+  ppp: 32,
+  pp: 44,
+  p: 56,
+  mp: 68,
   mf: 80,
-  f: 96,
-  ff: 112,
-  fff: 126,
+  f: 92,
+  ff: 104,
+  fff: 116,
 };
+
+/** How far a hairpin, cresc. or dim. goes when no mark in its direction ends it: one mark's step. */
+const RAMP_STEP = 12;
+/** A cresc. or dim. without a later mark (or a hairpin without a stop) lasts this many bars. */
+const RAMP_BARS = 4;
+
+/**
+ * The velocity a note without one of its own plays at (no dynamics mark before it, no MIDI
+ * source): the accompaniment slightly softer than the melody. A hairpin before the first mark
+ * starts from it.
+ */
+export const UNMARKED_VELOCITY: Record<Hand, number> = { R: 96, L: 88 };
 
 const BEAT_UNIT_QUARTERS: Record<string, number> = {
   whole: 4,
@@ -131,6 +154,8 @@ export function parseMusicXml(
   const keys: Located<KeySigEvent>[] = [];
   const tiedEnds = new Map<Note, { measureIndex: number; offset: number }>();
   const dynamics: DynamicsEvent[] = [];
+  /** Hairpins waiting for their stop, keyed by part and `<wedge number>`. */
+  const openWedges = new Map<string, Ramp>();
   /** Each note's part and staff within it, which the dynamics marks are written per. */
   const noteStaves = new Map<Note, { part: number; staff: number }>();
   const tieJoins: {
@@ -201,23 +226,40 @@ export function parseMusicXml(
           case 'sound': {
             const qpm = readTempo(el);
             if (qpm !== undefined && partIndex === 0) tempos.push(at<TempoEvent>({ qpm }));
+            // A direction's <offset> moves its sound only with sound="yes".
+            const shift = firstChild(el, 'offset');
+            const where = {
+              part: partIndex,
+              staff: dynamicsStaff(el, staves),
+              measureIndex: mIndex,
+              offset:
+                cursor -
+                measureStart +
+                (shift?.getAttribute('sound') === 'yes'
+                  ? scaled(shift.textContent ?? '0', currentDivisions, divisions)
+                  : 0),
+            };
             const velocity = readDynamics(el);
-            if (velocity !== undefined) {
-              // A direction's <offset> moves its sound only with sound="yes".
-              const shift = firstChild(el, 'offset');
-              dynamics.push({
-                part: partIndex,
-                staff: dynamicsStaff(el, staves),
-                measureIndex: mIndex,
-                offset:
-                  cursor -
-                  measureStart +
-                  (shift?.getAttribute('sound') === 'yes'
-                    ? scaled(shift.textContent ?? '0', currentDivisions, divisions)
-                    : 0),
-                velocity,
-              });
+            if (velocity !== undefined) dynamics.push({ ...where, velocity });
+            if (el.tagName !== 'direction') break;
+            for (const w of allDescendants(el, 'wedge')) {
+              const key = `${partIndex}:${w.getAttribute('number') ?? '1'}`;
+              const type = w.getAttribute('type');
+              if (type === 'crescendo' || type === 'diminuendo') {
+                const ramp: DynamicsEvent & Ramp = {
+                  ...where,
+                  direction: type === 'crescendo' ? 1 : -1,
+                };
+                dynamics.push(ramp);
+                openWedges.set(key, ramp);
+              } else if (type === 'stop') {
+                const ramp = openWedges.get(key);
+                if (ramp) ramp.end = { measureIndex: mIndex, offset: where.offset };
+                openWedges.delete(key);
+              }
             }
+            const direction = wordsDirection(el);
+            if (direction !== undefined) dynamics.push({ ...where, direction });
             break;
           }
           case 'backup': {
@@ -605,6 +647,19 @@ function readDynamics(el: Element): number | undefined {
 }
 
 /**
+ * The direction a `<words>` marking changes the level in: cresc. louder; dim., decresc. and their
+ * kin softer (also inside "dim. e poco rit." and the like).
+ */
+function wordsDirection(el: Element): 1 | -1 | undefined {
+  for (const w of allDescendants(el, 'words')) {
+    const text = w.textContent ?? '';
+    if (/\b(decresc|dim|smorz|perdend|calando|morendo)/i.test(text)) return -1;
+    if (/\bcresc/i.test(text)) return 1;
+  }
+  return undefined;
+}
+
+/**
  * The one staff a dynamics direction applies to, or undefined for every staff of its part. In
  * piano music a mark between the staves (below the upper staff, above the lower one, MusicXML's
  * default placement for dynamics being below) is for both hands; only a mark above the top staff
@@ -615,17 +670,35 @@ function dynamicsStaff(el: Element, staves: number): number | undefined {
   const staff = Number(childText(el, 'staff') ?? NaN);
   const placement =
     el.getAttribute('placement') ||
-    allDescendants(el, 'dynamics')[0]?.getAttribute('placement') ||
+    ['dynamics', 'wedge', 'words']
+      .map((tag) => allDescendants(el, tag)[0]?.getAttribute('placement'))
+      .find((p) => p) ||
     'below';
   if (staff === 1 && placement === 'above') return 1;
   if (staff === staves && placement === 'below') return staff;
   return undefined;
 }
 
+/** An absolute-tick dynamics event of one part, in the order `staffLevels` takes them. */
+type TickEvent = { tick: number; staff: number | undefined; measureIndex: number } & (
+  { velocity: number } | { direction: 1 | -1; end: number | undefined; endMeasure: number }
+);
+
 /**
- * Gives each note the velocity of the latest dynamics event at or before its onset on its staff
- * (final ticks; of events at the same tick the later in the document wins). A note before its
- * staff's first mark keeps no velocity.
+ * A stretch of one staff's level: from `tick` it moves linearly from `from` to `to`, reached at
+ * `end`, and holds `to` from there until the next stretch.
+ */
+interface Level {
+  tick: number;
+  end: number;
+  from: number;
+  to: number;
+}
+
+/**
+ * Gives each note the level of its staff at its onset (final ticks): the latest mark, or a point
+ * on a hairpin, cresc. or dim. running through it. A note before its staff's first mark or
+ * gradual change keeps no velocity.
  */
 function applyDynamics(
   notes: Note[],
@@ -634,37 +707,106 @@ function applyDynamics(
   measures: MeasureInfo[],
 ): void {
   if (dynamics.length === 0) return;
-  const byPart = new Map<number, { tick: number; staff: number | undefined; velocity: number }[]>();
+  const byPart = new Map<number, TickEvent[]>();
   for (const d of dynamics) {
-    const event = {
-      tick: measures[d.measureIndex]!.startTick + d.offset,
-      staff: d.staff,
-      velocity: d.velocity,
-    };
+    const at = { tick: measures[d.measureIndex]!.startTick + d.offset, staff: d.staff };
+    const event: TickEvent =
+      'velocity' in d
+        ? { ...at, measureIndex: d.measureIndex, velocity: d.velocity }
+        : {
+            ...at,
+            measureIndex: d.measureIndex,
+            direction: d.direction,
+            end: d.end && measures[d.end.measureIndex]!.startTick + d.end.offset,
+            endMeasure: d.end?.measureIndex ?? d.measureIndex,
+          };
     const list = byPart.get(d.part);
     if (list) list.push(event);
     else byPart.set(d.part, [event]);
   }
-  for (const list of byPart.values()) list.sort((a, b) => a.tick - b.tick); // stable
+  // By tick, a mark before a gradual change at the same tick (which starts from it); stable, so
+  // of two marks at the same tick the later in the document wins.
+  for (const list of byPart.values()) {
+    list.sort((a, b) => a.tick - b.tick || Number('direction' in a) - Number('direction' in b));
+  }
+  const levels = new Map<string, Level[]>();
   for (const n of notes) {
     const where = noteStaves.get(n)!;
     const events = byPart.get(where.part);
     if (!events) continue;
-    let lo = 0;
-    let hi = events.length;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (events[mid]!.tick <= n.onsetTick) lo = mid + 1;
-      else hi = mid;
+    const key = `${where.part}:${where.staff}`;
+    let staffLevel = levels.get(key);
+    if (!staffLevel) {
+      staffLevel = staffLevels(
+        events.filter((e) => e.staff === undefined || e.staff === where.staff),
+        UNMARKED_VELOCITY[n.hand],
+        measures,
+      );
+      levels.set(key, staffLevel);
     }
-    for (let i = lo - 1; i >= 0; i--) {
-      const e = events[i]!;
-      if (e.staff === undefined || e.staff === where.staff) {
-        n.velocity = e.velocity;
-        break;
-      }
-    }
+    const level = levelAt(staffLevel, n.onsetTick);
+    if (level !== undefined) n.velocity = Math.round(level);
   }
+}
+
+/**
+ * One staff's level over time from its events in order. A gradual change runs from the level at
+ * its start to the mark at its end (for a hairpin, one up to a bar after its stop), when that
+ * mark lies in its direction, else one step (`RAMP_STEP`); then it holds. A mark inside it sets
+ * the level and the change carries on from there.
+ */
+function staffLevels(events: TickEvent[], unmarked: number, measures: MeasureInfo[]): Level[] {
+  const marks = events.filter((e): e is TickEvent & { velocity: number } => 'velocity' in e);
+  const last = measures[measures.length - 1]!;
+  const scoreEnd = last.startTick + last.lengthTicks;
+  const out: Level[] = [];
+  /** The gradual change under way, which a mark inside it resumes. */
+  let ramp: { end: number; direction: 1 | -1; target: number | undefined } | undefined;
+  const push = (tick: number, from: number) => {
+    const to =
+      ramp!.target !== undefined && Math.sign(ramp!.target - from) === ramp!.direction
+        ? ramp!.target
+        : Math.min(127, Math.max(1, from + ramp!.direction * RAMP_STEP));
+    out.push({ tick, end: ramp!.end, from, to });
+  };
+  for (const e of events) {
+    const current = out[out.length - 1];
+    if (current && current.end > e.tick) {
+      // Cut the stretch under way short at this event.
+      current.to = levelAt(out, e.tick)!;
+      current.end = e.tick;
+    }
+    if (ramp && ramp.end <= e.tick) ramp = undefined;
+    if ('velocity' in e) {
+      out.push({ tick: e.tick, end: e.tick, from: e.velocity, to: e.velocity });
+      if (ramp) push(e.tick, e.velocity);
+      continue;
+    }
+    const next = marks.find((m) => m.tick > e.tick);
+    const cap = measures[e.measureIndex + RAMP_BARS]?.startTick ?? scoreEnd;
+    const end = e.end ?? Math.min(cap, next?.tick ?? cap);
+    if (end <= e.tick) continue;
+    const window = e.end === undefined ? 0 : measures[e.endMeasure]!.lengthTicks;
+    const target = marks.find((m) => m.tick >= end && m.tick <= end + window);
+    ramp = { end, direction: e.direction, target: target?.velocity };
+    push(e.tick, levelAt(out, e.tick) ?? unmarked);
+  }
+  return out;
+}
+
+/** The level at a tick, or undefined before the first stretch. */
+function levelAt(levels: Level[], tick: number): number | undefined {
+  let lo = 0;
+  let hi = levels.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (levels[mid]!.tick <= tick) lo = mid + 1;
+    else hi = mid;
+  }
+  const l = levels[lo - 1];
+  if (!l) return undefined;
+  if (tick >= l.end) return l.to;
+  return l.from + ((l.to - l.from) * (tick - l.tick)) / (l.end - l.tick);
 }
 
 function readFingering(noteEl: Element): Finger | undefined {

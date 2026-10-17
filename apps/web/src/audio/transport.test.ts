@@ -92,8 +92,8 @@ beforeEach(() => {
 
 describe('the sampled piano', () => {
   it('plays the dynamics marks: loads their velocity layers and starts each note at its velocity', async () => {
-    // short-piano opens with a p between the staves: both hands play every note at 49.
-    expect(new Set(score.notes.map((n) => n.velocity))).toEqual(new Set([49]));
+    // short-piano opens with a p between the staves: both hands play every note at 56.
+    expect(new Set(score.notes.map((n) => n.velocity))).toEqual(new Set([56]));
     const piano = createPiano({} as AudioContext);
     await piano.load(
       score.notes.map((n) => n.midi),
@@ -108,9 +108,9 @@ describe('the sampled piano', () => {
     run(t, 21);
     expect(smplrMock.pianos).toHaveLength(1);
     const fake = smplrMock.pianos[0]!;
-    expect(fake.options.notesToLoad.velocityRange).toEqual([49, 49]);
+    expect(fake.options.notesToLoad.velocityRange).toEqual([56, 56]);
     expect(fake.starts).toHaveLength(67);
-    expect(fake.starts.every((s) => s.velocity === 49)).toBe(true);
+    expect(fake.starts.every((s) => s.velocity === 56)).toBe(true);
   });
   it("plays a note without a velocity at its hand's, the left hand softer", () => {
     const unmarked = { ...score, notes: score.notes.map(({ velocity: _, ...n }) => n) };

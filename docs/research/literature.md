@@ -2,7 +2,9 @@
 
 *Scope.* This document surveys research on automatic piano fingering from Parncutt et al. (1997) to October 2026. It is written so that an engineer can implement the most useful approaches in TypeScript, in the browser and without a server, from this document alone. Every factual claim carries a bracketed reference number that resolves to a URL in [§9 References](#9-references). Where a number could not be verified against a primary source it is marked **(unverified)**, and where sources disagree both versions are given.
 
-*How the sources were read.* Primary PDFs were text-extracted and read in full for: Parncutt et al. 1997 [1], Nakamura, Saito & Yoshii 2020 [9], Nakamura, Ono & Sagayama 2014 [8], Yonebayashi et al. 2007 [5], Al Kasimi et al. 2007 [6], Balliauw et al. 2017 [13], Moryossef et al. [14], Ramoneda et al. 2022 [15], Srivatsan & Berg-Kirkpatrick 2022 [16], Guan, Yan & Hsu 2021 [17], Zhao, Guan & Li [18], Ramoneda et al. 2021 [19], Ramoneda et al. ICASSP 2022 [20], and Randolph, Di Eugenio & Badgerow 2023 [24]. Jacobs 2001 [2] and Hart et al. 2000 [3] are paywalled. They are described from their abstracts and from independent open-source re-implementations ([26], [42]), and the text says so where this applies.
+*Sources.* The primary PDFs were read in full for: Parncutt et al. 1997 [1], Nakamura, Saito & Yoshii 2020 [9], Nakamura, Ono & Sagayama 2014 [8], Yonebayashi et al. 2007 [5], Al Kasimi et al. 2007 [6], Balliauw et al. 2017 [13], Moryossef et al. [14], Ramoneda et al. 2022 [15], Srivatsan & Berg-Kirkpatrick 2022 [16], Guan, Yan & Hsu 2021 [17], Zhao, Guan & Li [18], Ramoneda et al. 2021 [19], Ramoneda et al. ICASSP 2022 [20], and Randolph, Di Eugenio & Badgerow 2023 [24]. Jacobs 2001 [2] and Hart et al. 2000 [3] are paywalled. They are described from their abstracts and from independent open-source re-implementations ([26], [42]), and the text says so where this applies.
+
+The engine in `packages/engine` follows §6. Where the build departs from the recommendation, or where a proposal is now implemented, a status note says so (§0, §4.3, §4.4, §5, §6, §7).
 
 ---
 
@@ -32,11 +34,13 @@ The spread between a 2007-style first-order HMM and the best 2022 neural model i
 3. **Optional third:** a small neural re-ranker (ArGNN-like [15]; by our estimate about 10^5 parameters; pure PyTorch, exportable to ONNX Runtime Web). Use it on the Viterbi N-best list and as an uncertainty signal. Expect about +0.5 to +2 M_gen (our estimate), at the cost of a dependency on non-commercially licensed training data.
 4. **For MIDI import:** decode hand separation first with a cheap DP or Kalman filter (about 91 to 93% note-level accuracy reported [8], [40]), then decode fingering per hand.
 
+**Status.** Items 1, 2 and 4 are built (§6.10), with one difference: the learned weights are linear weights over the rule terms and indicator features, with no HMM tables. Item 3, the neural re-ranker, is not built.
+
 **Surprises and caveats:**
-- **Licensing.** PIG may be used only for non-profit academic purposes [10]. ThumbSet is access-restricted [15]. Models trained on them carry these terms (the `chirality` project explicitly propagates them [42]). Train the shipped weights on permissively licensed data, or obtain permission (§6.9).
+- **Licensing.** PIG may be used only for non-profit academic purposes [10]. ThumbSet is access-restricted [15]. Models trained on them carry these terms (the `chirality` project explicitly propagates them [42]). Decision: the shipped weights are trained on open data only, and PIG-fitted weights stay research-only (§6.9).
 - **Re-runs disagree with the published HMM numbers.** Re-running Nakamura's HMMs with a proper validation split lowers HMM3 from 64.5 to 63.63 M_gen and makes HMM2 the best HMM [15]. Nakamura's weight coefficients were tuned for estimation accuracy without a separate validation set [9]. Treat third-decimal differences as noise.
 - **The human "ceiling" has been re-measured inconsistently.** The right-hand-only human M_gen is 70.2 in [15] but 67.6 in [42]. The row in [15] is identical, digit for digit, to Nakamura's human row for a different 14-piece subset [9]. Implement the metrics yourself and test them.
-- **An exact Viterbi over Parncutt's 1997 rules, with equal weights, reportedly reaches 64.9 M_gen**, about equal to HMM3, whereas earlier rule solvers reached about 59 [42] (unverified, single developer). If it reproduces, the main weakness of rule-based systems was the solver (fragment enumeration, VNS, local search), not the rules.
+- **An exact Viterbi over Parncutt's 1997 rules, with equal weights, reportedly reaches 64.9 M_gen**, about equal to HMM3, whereas earlier rule solvers reached about 59 [42] (single developer). A re-run in this repository confirms it: 65.4 with uniform weights and 66.0 with weights learned here, against 65.0 for HMM3 on the same split (`docs/research/baselines.md`). The main weakness of rule-based systems was the solver (fragment enumeration, VNS, local search), not the rules.
 - **No peer-reviewed transformer, diffusion or LLM model reports PIG results** as of October 2026. Recent activity is in video and motion-capture datasets (PianoVAM, FürElise, SKY-Piano, PianoMotion10M), robot piano playing (RoboPianist, RP1M), and fingering-based difficulty estimation [30]–[39].
 - **Match rate is a weak proxy for quality.** Two models with nearly equal M_gen can differ drastically in physically awkward patterns ("hops", "smears", crossings) [16]. Use the lint and metamorphic tests in §5.
 
@@ -619,7 +623,7 @@ First posted on OpenReview in 2019, then on arXiv in 2023 (2303.03745) [14].
 
 ### 2.13 The two "Guan et al." papers (2021, 2022)
 
-The brief asked about "Guan et al. (GNN fingering)". **No graph neural network paper by Guan was found.** There are two BiLSTM papers with a Guan as an author. The GNN fingering model in the literature is Ramoneda et al.'s ArGNN (§2.15).
+A "Guan et al." graph-neural-network fingering paper is sometimes cited. **No such paper was found.** There are two BiLSTM papers with a Guan as an author. The GNN fingering model in the literature is Ramoneda et al.'s ArGNN (§2.15).
 
 **(a) Guan, Yan & Hsu 2021**, Nordic SMC 2021 (Zenodo 5723888, CC BY 4.0) [17]:
 - **Model:** a BiLSTM over a 4-D input vector per note transition: previous finger, colour of the start key, colour of the end key, and semitone distance clipped to ±12. It predicts note $n+1$ from $a$ past and $b$ future notes; the tuned values were (a, b) = (2, 8) to (2, 10), so future context mattered more.
@@ -1042,7 +1046,7 @@ All numbers are percentages. "Std" means trained on the 120-piece miscellaneous 
 1. Every method in groups A–C lies between about 61 and 67 M_gen, against a human 71.4. Pre-training on large, noisy fingering data (APFD, ThumbSet) is the only ingredient that has clearly moved the needle, by +2 to +3 points over HMM3.
 2. **M_rec separates models that keep sequences consistent** (HMMs, autoregressive networks: 74–79) from per-note classifiers (FF and LSTM: about 69.5). Use M_rec and the fluency metrics when choosing between models of similar M_gen [9], [15], [16].
 3. Protocol effects reach about 1 point. HMM3 is 64.5 under the original protocol and 63.63 under Ramoneda's. Differences below about 1 point between papers should not drive design decisions.
-4. A good rule-based engine reaches HMM level: 64.9 with equal weights and 65.4 with learned weights [42]. This is unverified, but if it holds, it removes the main argument for preferring a data-trained model in digitus2.
+4. A good rule-based engine reaches HMM level: 64.9 with equal weights and 65.4 with learned weights [42]. A re-run in this repository agrees (65.4 with uniform weights, 66.0 with weights learned here; `docs/research/baselines.md`), which removes the main argument for preferring a data-trained model in digitus2.
 
 ---
 
@@ -1056,7 +1060,7 @@ All numbers are percentages. "Std" means trained on the 120-piece miscellaneous 
 
   **Hanon**, *The Virtuoso Pianist* (1873), transposes one short figure stepwise up and back down two octaves, keeping the figure fixed. It explicitly targets thumb crossing and the weakness of fingers 4 and 5, and its Part III adds repeated notes, double notes, and scales in thirds and octaves. Its pedagogical value is contested (Whiteside, Taubman) [80]. For digitus2, the relevant ideas are the fixed fingering of a transposed figure (regularity) and the attention to fingers 4 and 5.
 
-  Bardas, *Zur Psychologie der Klaviertechnik* (Berlin, 1927) [51], is a German classic on the psychology of technique. Its fingering rules could not be accessed for this survey. The "1932" date in the brief may refer to a later edition; this is unverified. Gellrich & Parncutt (1998) revive a forgotten 18th–19th-century fingering method [72]. Musafia (1971) [8] and Bar-Niv (2012) [78] are book-length treatments of fingering.
+  Bardas, *Zur Psychologie der Klaviertechnik* (Berlin, 1927) [51], is a German classic on the psychology of technique. Its fingering rules could not be accessed for this survey. Gellrich & Parncutt (1998) revive a forgotten 18th–19th-century fingering method [72]. Musafia (1971) [8] and Bar-Niv (2012) [78] are book-length treatments of fingering.
 - **Empirical studies:**
   - Clarke et al.'s interview study (*Talking Fingers*, 1997) [70] and Sloboda et al.'s sight-reading study (1998) [69] are summarised in [1]. Pianists use stronger fingers on metrical accents, change hand position at phrase boundaries, and use 4→3 about 45% more often than 3→4.
   - The PIG analysis [9] shows that most notes admit only one or two fingers.
@@ -1122,6 +1126,8 @@ These rules run on any fingering, whether computed, imported from MusicXML, or t
 | L22 | W | Too many position changes per bar for the selected level (e.g. more than 1 at "Primer"). | proposal |
 | L23 | I | Finger substitution present (discouraged for beginners). | [9] |
 
+Status: `packages/engine/src/lint/rules.ts` implements L01 to L14 under these ids, with L06 and L10 as errors for beginners. Its L15 is a different rule (a thumb crossing inside one five-finger position, beginners only), and its L24 tells a beginner about the other thumb crossings. The catalogue's L15 to L23 are not implemented.
+
 ### 4.4 Hand-size profiles for beginners
 
 Two families of tables are available:
@@ -1142,6 +1148,8 @@ Basis for the boundaries:
 - Mean spans of 20.1 cm for adult women and 22.6 cm for adult men [44].
 - The children's range comes from a non-pianist educational estimate [75], so treat it as a placeholder.
 
+Status: the engine implements the presets as Parncutt's semitone tables scaled by 1.0 (`large`), 0.9 (`medium`), 0.8 (`small`) and 0.7 (`child`) (`packages/engine/src/fingering/params/profiles.json`), not as Balliauw's tables. The `small` and `child` factors are placeholders to calibrate with teachers.
+
 ---
 
 ## 5. Verification beyond match rate
@@ -1152,6 +1160,8 @@ Match rates against PIG are necessary for comparison with the literature but ins
 - the PIG licence restricts how PIG can be used (§6.9).
 
 The proposals below are concrete and automatable. Items marked *(new)* are, as far as this survey found, not used in the published literature.
+
+Status: built are the four PIG metrics (matching the Python reference evaluator), lint with a gate on errors per 1,000 notes (`benchmarks/floor.json`), the metamorphic tests MR1, MR2, MR6, MR7, MR8 and MR10 (`packages/engine/src/eval/metamorphic.ts`), and a weekly language-model teacher review that stands in for §5.7 (`docs/research/teacher-review.md`) and is never a gate. A human teacher study has not been run.
 
 ### 5.1 A metric suite (Python and TypeScript, kept in lock-step)
 
@@ -1234,6 +1244,8 @@ Sources: ThumbSet-style extraction from public-domain MuseScore files [15]; Clem
 ---
 
 ## 6. Recommendation for digitus2
+
+**Status.** Built as recommended, with these departures. Engine B is learned linear weights over the rule terms and indicator features (finger pairs, finger on a black or white key, lattice step), fitted with an averaged passive-aggressive structured perceptron; it has no HMM tables and no CRF. The shipped set `learned-open` is fitted on open data only (the textbook oracle, the Beringer corpus and the Mutopia train half), and PIG-fitted sets stay research-only (§6.9). The neural re-ranker (§6.8) is not built. Measured results are in `docs/experiments.md` and `benchmarks/history.md`; per-component status is in §6.10.
 
 ### 6.1 Decision
 
@@ -1418,6 +1430,8 @@ Training options:
 ```
 In the snippet, `[5]` and `[[5,5]]` stand for arrays of those shapes. The HMM α/λ values shown are Nakamura's [9] and must be re-tuned on our own training data.
 
+The shipped weight files use a simpler schema, `digitus2.weights/1` (`packages/engine/src/fingering/params/weightSets.ts`): one weight per rule id, a confidence temperature and the provenance of the fit.
+
 **Parity.** Generate features in Python and TypeScript from one shared specification. Add a CI test that compares per-note feature vectors and decoded outputs on a fixed corpus.
 
 ### 6.6 Beginner-specific extensions
@@ -1435,6 +1449,8 @@ In the snippet, `[5]` and `[[5,5]]` stand for arrays of those shapes. The HMM α
 5. **Teacher anchors.** Fingers given in the score are clamped, as proposed in [5] and implemented in [29].
 6. **Level-dependent weights.** "Primer" raises the weights for position shifts, thumb-on-black and hops, and disables substitutions and non-thumb crossings. "Intermediate" moves towards the expert-fitted weights.
 
+Status: all six are built: the five-finger-position term (`handPositionShift`), standard-fingering templates, the consistent-repeats pass, hand-size profiles, pinned fingers (teacher and editorial anchors), and level-dependent weights (`profiles-weights.json`, CLI `--level beginner|expert`).
+
 ### 6.7 Hand separation for MIDI import
 
 Option 1 is the **pitch-trajectory DP**, the recommended starting point. It is in the spirit of the merged-output pitch model of [8] and the Kalman approach of [41], [40].
@@ -1448,6 +1464,8 @@ Option 1 is the **pitch-trajectory DP**, the recommended starting point. It is i
 - **Expected accuracy:** about 91–93% of notes. Nakamura's merged-output HMM had 7.1% error on its corpus [8]; Penner & Hindle's Kalman-based "Synthesis" reached 90.8% on PIG [40]. Expect the most errors in textures with wide hand movements, such as Debussy at 18.7% [8].
 
 Option 2 is **joint refinement**. After per-hand fingering, if a hand has E-level lint (span or more than 5 notes), try moving the boundary notes of that slice to the other hand and re-decode locally. Balliauw et al. list this as future work [13]. It was not evaluated in the literature found.
+
+Status: option 1 is built as `separateHands` (`packages/engine/src/io/midi/handSeparation.ts`; beam 64, learned movement, span, position and pattern tables). It gives 92.05% of PIG test notes the ground-truth hand (macro average over the 30 test pieces, after the score is played as MIDI; `benchmarks/history.md`, section Hand separation).
 
 ### 6.8 Optional Phase 3: neural re-ranker
 
@@ -1477,23 +1495,25 @@ Option 2 is **joint refinement**. After per-hand fingering, if a hand has E-leve
 3. Public-domain editorial fingerings, after checking each source's terms.
 4. PIG for comparison with the literature, for research only, unless permission is obtained.
 
-### 6.10 Milestones and acceptance criteria
+Status: the shipped weights use items 1 and 3 (Beringer, the textbook scales and arpeggios, and Mutopia editorial fingerings); item 2 (teacher-annotated beginner pieces) is not done; PIG serves research evaluation only.
 
-| Milestone | Deliverable | Acceptance |
-|---|---|---|
-| M0 | Evaluation harness (TS + Python), PIG reader, metrics, lint, metamorphic tests | Metrics equal the reference evaluator [11] to 0.01 on released outputs; tests run in CI |
-| M1 | Engine A + hand profiles + anchors + N-best + explanations | Parncutt Table 2 and the 4-1-2-5 example exact [1]; standard scales 100%; zero E-lint; MR1/MR5/MR6/MR8/MR10 pass; < 50 ms per 1,000 notes in the browser; PIG M_gen reported (target ≥ 62; 64+ would replicate [42]) |
-| M2 | Engine B (HMM mode + log-linear), JSON models, parity tests | Under the standard protocol, ≥ HMM3 (64.5) with PIG-trained research weights; report the drop with permissive-only weights; M_rec ≥ 77; hops and smears at least as low as HMM3's [16] |
-| M3 | Hand separation for MIDI import | ≥ 90% note-level hand accuracy on score-derived MIDI and on PIG [40] |
-| M4 (optional) | Neural re-ranker | +1 M_gen over M2 with no increase in E-lint, hops or smears |
-| M5 | Teacher study | Pairwise preference ≥ 60% for digitus2 over the M2 baseline on beginner pieces; inter-rater agreement reported (§5.7) |
+### 6.10 Components and acceptance criteria
+
+| Component | Deliverable | Acceptance | Status |
+|---|---|---|---|
+| Evaluation harness | Evaluation harness (TS + Python), PIG reader, metrics, lint, metamorphic tests | Metrics equal the reference evaluator [11] to 0.01 on released outputs; tests run in CI | Built (`packages/engine/src/eval`, `src/lint`). The four metrics agree with the Python reference to 1e-6 on a real PIG piece. |
+| Engine A | Engine A + hand profiles + anchors + N-best + explanations | Parncutt Table 2 and the 4-1-2-5 example exact [1]; standard scales 100%; zero E-lint; MR1/MR5/MR6/MR8/MR10 pass; < 50 ms per 1,000 notes in the browser; PIG M_gen reported (target ≥ 62; 64+ would replicate [42]) | Built (`packages/engine/src/fingering`) with per-note alternatives and term explanations instead of a k-best list. With the literature-default weights it scored 59.7 M_gen on the PIG test split when first built and 61.9 after hardening (`benchmarks/history.md`). |
+| Engine B | Engine B (HMM mode + log-linear), JSON models, parity tests | Under the standard protocol, ≥ HMM3 (64.5) with PIG-trained research weights; report the drop with permissive-only weights; M_rec ≥ 77; hops and smears at least as low as HMM3's [16] | Built as learned weights, without an HMM mode. PIG-trained research weights score 67.7 M_gen and 80.7 M_rec; the shipped open-data set `learned-open` scores 63.9 and 76.4, a drop of 3.8 M_gen (`benchmarks/history.md`). |
+| Hand separation | Hand separation for MIDI import | ≥ 90% note-level hand accuracy on score-derived MIDI and on PIG [40] | Built (§6.7); 92.05% on the PIG test split. |
+| Neural re-ranker (optional) | Neural re-ranker | +1 M_gen over Engine B with no increase in E-lint, hops or smears | Not built. |
+| Teacher study | Teacher study | Pairwise preference ≥ 60% for digitus2 over the Engine B baseline on beginner pieces; inter-rater agreement reported (§5.7) | Not run with human teachers. The language-model review of §5 is built so that its batch files can go to a human teacher unchanged (`docs/research/teacher-review.md`). |
 
 ---
 
 ## 7. Open questions and risks
 
-1. **Does the "exact rule Viterbi = HMM3" result reproduce?** It is reported by one developer, without peer review [42]. M1 tests it directly.
-2. **No beginner ground truth.** PIG is advanced classical repertoire by experienced pianists [9]. A small, permissively licensed beginner corpus is needed to tune Engine B for digitus2's audience (§6.9).
+1. **Does the "exact rule Viterbi = HMM3" result reproduce?** It is reported by one developer, without peer review [42]. It reproduces for chirality's implementation: 65.4 M_gen with uniform weights and 66.0 with weights learned here, against 65.0 for HMM3 (`docs/research/baselines.md`); the paired-bootstrap interval of the learned-weights run against HMM3 includes 0. digitus2's own engine with the literature-default weights scored 59.7 M_gen when first built and 61.9 after hardening, and open-data learned weights score 63.9 (`benchmarks/history.md`).
+2. **No beginner ground truth.** PIG is advanced classical repertoire by experienced pianists [9]. A small, permissively licensed beginner corpus is needed to tune Engine B for digitus2's audience (§6.9). The shipped weights are fitted on the textbook oracle, Beringer and Mutopia editorial fingerings (`docs/research/textbook-oracle.md`, `docs/research/datasets.md`), which are not beginner-specific.
 3. **Polyphony within one hand.** Even the best models struggle with successive chords [16]. Rule chords [13] and slice trellises [6] are untested on PIG beyond the chord HMM (61.2) [9].
 4. **Interaction between hands.** It is not modelled by any method that reports PIG results [9]. Parncutt, Sloboda & Clarke (1999) studied hand interdependence in parallel melodic music (cited in [13]).
 5. **Timing, articulation, pedal and tempo** are largely unused because PIG timings are score-derived [24]. MusicXML tempo, slurs and staccato can still provide these signals for digitus2.

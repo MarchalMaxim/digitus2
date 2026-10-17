@@ -36,7 +36,7 @@ Assumed:
 ## 3. Non-goals
 
 - Instruments other than piano; organ pedals; harpsichord-specific fingering.
-- Pedaling, hairpins, or performance rendering beyond straightforward playback. Playback does follow the dynamics marks ppp to fff (`docs/app.md`, Audio).
+- Pedaling, or performance rendering beyond straightforward playback. Playback does follow the dynamics marks ppp to fff, hairpins and cresc. or dim. (`docs/app.md`, Audio).
 - Accounts, login, cloud sync, or a hosted server. All state is local to the browser. The one exception is the optional recognition worker that scanning can use on the reader's own PC (section 9, view 4).
 - Native mobile apps.
 - Certified transcription from photos or PDFs. Scanning is experimental and its output is always reviewed against the source.

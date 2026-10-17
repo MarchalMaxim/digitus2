@@ -1,4 +1,5 @@
 import type { Hand } from '@digitus2/engine';
+import { UNMARKED_VELOCITY } from '@digitus2/engine/score-build';
 import type { SplendidGrandPiano } from 'smplr';
 
 /** One note to sound, in context seconds. */
@@ -19,14 +20,11 @@ export interface Instrument {
 }
 
 /**
- * A note without a velocity of its own (no dynamics mark before it, no MIDI source) plays at its
- * hand's: the accompaniment slightly softer than the melody, both in the mezzo-forte layer.
+ * The velocity a note plays at: its own (a dynamics mark or hairpin, MIDI), else its hand's
+ * (`UNMARKED_VELOCITY`, the accompaniment slightly softer than the melody).
  */
-const HAND_VELOCITY: Record<Hand, number> = { R: 96, L: 88 };
-
-/** The velocity a note plays at: its own (a dynamics mark, MIDI), else its hand's. */
 export function noteVelocity(note: { velocity?: number; hand: Hand }): number {
-  return note.velocity ?? HAND_VELOCITY[note.hand];
+  return note.velocity ?? UNMARKED_VELOCITY[note.hand];
 }
 
 /**
@@ -45,7 +43,7 @@ export function createPiano(ctx: AudioContext): Instrument {
   return {
     async load(midis, velocities) {
       const id = ++loads;
-      const used = velocities.length > 0 ? new Set(velocities) : new Set([HAND_VELOCITY.R]);
+      const used = velocities.length > 0 ? new Set(velocities) : new Set([UNMARKED_VELOCITY.R]);
       const velocityRange: [number, number] = [Math.min(...used), Math.max(...used)];
       const smplr = await import('smplr');
       if (id !== loads) return; // a newer load started while smplr was being imported

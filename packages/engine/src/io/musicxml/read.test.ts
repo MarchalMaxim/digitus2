@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { strToU8, zipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
+import { UNMARKED_VELOCITY } from '../../score/build.js';
 import { parseMusicXml } from './read.js';
 
 const xml = readFileSync(
@@ -354,7 +355,7 @@ describe('parseMusicXml dynamics', () => {
     mark: string | null,
     { staff, sound, placement }: { staff?: number; sound?: string; placement?: string } = {},
   ) =>
-    `<direction${placement === undefined ? '' : ` placement="${placement}"`}><direction-type>${mark === null ? '<words>cresc.</words>' : `<dynamics><${mark}/></dynamics>`}</direction-type>${staff === undefined ? '' : `<staff>${staff}</staff>`}${sound === undefined ? '' : `<sound dynamics="${sound}"/>`}</direction>`;
+    `<direction${placement === undefined ? '' : ` placement="${placement}"`}><direction-type>${mark === null ? '<words>dolce</words>' : `<dynamics><${mark}/></dynamics>`}</direction-type>${staff === undefined ? '' : `<staff>${staff}</staff>`}${sound === undefined ? '' : `<sound dynamics="${sound}"/>`}</direction>`;
   const onStaff = (staff: number) => `<voice>${staff}</voice><staff>${staff}</staff>`;
   const twoStaves = (...measures: string[]) =>
     `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1">${measures
@@ -369,13 +370,13 @@ describe('parseMusicXml dynamics', () => {
   it('maps every mark from ppp to fff to a velocity', () => {
     const marks = ['ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff'];
     const { score } = parseMusicXml(onePart(marks.map((m) => dyn(m) + n('C', 4, 1)).join('')));
-    expect(score.notes.map((x) => x.velocity)).toEqual([16, 33, 49, 64, 80, 96, 112, 126]);
+    expect(score.notes.map((x) => x.velocity)).toEqual([32, 44, 56, 68, 80, 92, 104, 116]);
   });
   it('leaves notes before the first mark without a velocity and carries a mark across bars', () => {
     expect(velocities(onePart(n('C', 4, 1) + dyn('p') + n('D', 4, 1), n('E', 4, 1)))).toEqual([
       [60, undefined],
-      [62, 49],
-      [64, 49],
+      [62, 56],
+      [64, 56],
     ]);
   });
   it('applies a mark between the staves to both hands, at its offset in the bar', () => {
@@ -386,14 +387,14 @@ describe('parseMusicXml dynamics', () => {
       `${dyn('pp')}${n('F', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('F', 3, 1, onStaff(2))}`,
     );
     expect(velocities(xml)).toEqual([
-      [72, 49],
-      [48, 49],
-      [74, 112],
-      [50, 112],
-      [76, 64],
-      [52, 64],
-      [77, 33],
-      [53, 33],
+      [72, 56],
+      [48, 56],
+      [74, 104],
+      [50, 104],
+      [76, 68],
+      [52, 68],
+      [77, 44],
+      [53, 44],
     ]);
   });
   it('keeps a mark above the top staff or below the bottom one to that hand', () => {
@@ -402,10 +403,10 @@ describe('parseMusicXml dynamics', () => {
       `${dyn('mf', { staff: 1, placement: 'above' })}${n('D', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('D', 3, 1, onStaff(2))}`,
     );
     expect(velocities(xml)).toEqual([
-      [72, 49],
-      [48, 96],
+      [72, 56],
+      [48, 92],
       [74, 80],
-      [50, 96],
+      [50, 92],
     ]);
   });
   it('reads sound dynamics as a percentage of forte when no mark gives a level', () => {
@@ -418,8 +419,8 @@ describe('parseMusicXml dynamics', () => {
     );
     expect(velocities(xml)).toEqual([
       [60, 54],
-      [62, 33], // the mark wins over its sound
-      [64, 33], // an accent such as sfz keeps the level
+      [62, 44], // the mark wins over its sound
+      [64, 44], // an accent such as sfz keeps the level
       [65, 72],
     ]);
   });
@@ -435,11 +436,197 @@ describe('parseMusicXml dynamics', () => {
         <measure number="2">${dyn('pp')}${n('D', 3, 2)}</measure>
       </part></score-partwise>`;
     expect(velocities(xml)).toEqual([
-      [72, 49],
+      [72, 56],
       [48, undefined],
-      [74, 49],
-      [50, 33],
-      [76, 96],
+      [74, 56],
+      [50, 44],
+      [76, 92],
+    ]);
+  });
+});
+
+describe('parseMusicXml hairpins', () => {
+  const dyn = (mark: string) =>
+    `<direction><direction-type><dynamics><${mark}/></dynamics></direction-type></direction>`;
+  /** A `<wedge>` direction: crescendo, diminuendo or stop. */
+  const wedge = (
+    type: string,
+    { number, staff, placement }: { number?: number; staff?: number; placement?: string } = {},
+  ) =>
+    `<direction${placement === undefined ? '' : ` placement="${placement}"`}><direction-type><wedge type="${type}"${number === undefined ? '' : ` number="${number}"`}/></direction-type>${staff === undefined ? '' : `<staff>${staff}</staff>`}</direction>`;
+  const words = (text: string) =>
+    `<direction><direction-type><words>${text}</words></direction-type></direction>`;
+  const velocities = (input: string) =>
+    parseMusicXml(input).score.notes.map((x) => [x.midi, x.velocity]);
+
+  it('ramps a crescendo from the level at its start to the mark at its end', () => {
+    const xml = onePart(
+      dyn('p') + wedge('crescendo') + n('C', 4, 1) + n('D', 4, 1) + n('E', 4, 1) + n('F', 4, 1),
+      wedge('stop') + dyn('f') + n('G', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 56],
+      [62, 65],
+      [64, 74],
+      [65, 83],
+      [67, 92],
+    ]);
+  });
+  it('takes a diminuendo with no mark at its end one step softer and holds that level', () => {
+    const xml = onePart(
+      dyn('f') + wedge('diminuendo') + n('C', 4, 1) + n('D', 4, 1) + wedge('stop'),
+      n('E', 4, 1) + n('F', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 92],
+      [62, 86],
+      [64, 80],
+      [65, 80],
+    ]);
+  });
+  it('goes one step when the mark at its end lies the other way, then plays the mark', () => {
+    const xml = onePart(
+      dyn('f') + wedge('crescendo') + n('C', 4, 1) + n('D', 4, 1) + wedge('stop'),
+      dyn('p') + n('E', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 92],
+      [62, 98],
+      [64, 56],
+    ]);
+  });
+  it('carries on from a mark inside a hairpin towards its end', () => {
+    const xml = onePart(
+      dyn('p') + wedge('crescendo') + n('C', 4, 1) + n('D', 4, 1) + dyn('mp') + n('E', 4, 1),
+      n('F', 4, 1) + wedge('stop') + dyn('f') + n('G', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 56],
+      [62, 65],
+      [64, 68],
+      [65, 80],
+      [67, 92],
+    ]);
+  });
+  it('reads cresc. and dim. as a change up to the next mark', () => {
+    const xml = onePart(
+      dyn('pp') + words('cresc.') + n('C', 4, 1) + n('D', 4, 1) + n('E', 4, 1) + n('F', 4, 1),
+      dyn('mf') + words('dim. e poco rit.') + n('G', 4, 1) + n('A', 4, 1),
+      dyn('p') + n('B', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 44],
+      [62, 53],
+      [64, 62],
+      [65, 71],
+      [67, 80],
+      [69, 68],
+      [71, 56],
+    ]);
+  });
+  it('takes a cresc. with no mark after it one step up over four bars at most', () => {
+    const xml = onePart(
+      dyn('p') + words('poco a poco cresc.') + n('C', 4, 4),
+      n('D', 4, 4),
+      n('E', 4, 4),
+      n('F', 4, 4),
+      n('G', 4, 4),
+      n('A', 4, 4),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 56],
+      [62, 59],
+      [64, 62],
+      [65, 65],
+      [67, 68],
+      [69, 68],
+    ]);
+  });
+  it("starts a hairpin before any mark from the hand's unmarked level", () => {
+    const xml = onePart(
+      n('B', 3, 1) +
+        wedge('diminuendo') +
+        n('C', 4, 1) +
+        n('D', 4, 1) +
+        wedge('stop') +
+        n('E', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [59, undefined],
+      [60, UNMARKED_VELOCITY.R],
+      [62, UNMARKED_VELOCITY.R - 6],
+      [64, UNMARKED_VELOCITY.R - 12],
+    ]);
+  });
+  it('ends a hairpin at its stop in time when another voice writes the stop first', () => {
+    const v2 = '<voice>2</voice>';
+    const xml = onePart(
+      dyn('f') +
+        n('C', 5, 2) +
+        n('D', 5, 2) +
+        wedge('stop') +
+        '<backup><duration>4</duration></backup>' +
+        n('C', 4, 1, v2) +
+        wedge('diminuendo') +
+        n('D', 4, 1, v2) +
+        n('E', 4, 1, v2) +
+        n('F', 4, 1, v2),
+      n('G', 4, 4),
+    );
+    const byPitch = Object.fromEntries(velocities(xml));
+    expect(byPitch).toEqual({ 72: 92, 60: 92, 62: 92, 74: 88, 64: 88, 65: 84, 67: 80 });
+  });
+  it('keeps a run of hairpins without marks within a step of the latest mark', () => {
+    const sigh = (a: string, b: string) =>
+      wedge('diminuendo') + n(a, 4, 1) + n(b, 4, 1) + wedge('stop');
+    const xml = onePart(
+      dyn('p') + sigh('C', 'D') + sigh('E', 'F'),
+      sigh('G', 'A') + wedge('crescendo') + n('B', 4, 2) + wedge('stop'),
+      n('C', 5, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 56],
+      [62, 50],
+      [64, 44],
+      [65, 44],
+      [67, 44],
+      [69, 44],
+      [71, 44],
+      [72, 56],
+    ]);
+  });
+  it("lets a staff without a mark of its own follow the other staff's", () => {
+    const onStaff = (staff: number) => `<voice>${staff}</voice><staff>${staff}</staff>`;
+    const above = `<direction placement="above"><direction-type><dynamics><pp/></dynamics></direction-type><staff>1</staff></direction>`;
+    const lowerF = `<direction placement="below"><direction-type><dynamics><f/></dynamics></direction-type><staff>2</staff></direction>`;
+    const xml = `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1">
+      <measure number="1"><attributes><divisions>1</divisions><staves>2</staves></attributes>${above}${n('C', 5, 1, onStaff(1))}${words('cresc.')}${n('D', 5, 1, onStaff(1))}<backup><duration>2</duration></backup>${n('C', 3, 1, onStaff(2))}${n('D', 3, 1, onStaff(2))}</measure>
+      <measure number="2">${n('E', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${lowerF}${n('E', 3, 1, onStaff(2))}</measure>
+      </part></score-partwise>`;
+    // The cresc. finds no mark for four bars on the upper staff, so it climbs one step over the
+    // score's three ticks; the lower staff follows the pp until its own f.
+    expect(velocities(xml)).toEqual([
+      [72, 44],
+      [48, 44],
+      [74, 44],
+      [50, 44],
+      [76, 50],
+      [52, 92],
+    ]);
+  });
+  it('pairs hairpins by number and keeps one above the top staff to the right hand', () => {
+    const onStaff = (staff: number) => `<voice>${staff}</voice><staff>${staff}</staff>`;
+    const xml = `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1">
+      <measure number="1"><attributes><divisions>1</divisions><staves>2</staves></attributes>${dyn('p')}${wedge('crescendo', { number: 2, staff: 1, placement: 'above' })}${wedge('diminuendo', { staff: 2, placement: 'below' })}${n('C', 5, 1, onStaff(1))}${n('D', 5, 1, onStaff(1))}${wedge('stop', { number: 2 })}<backup><duration>2</duration></backup>${n('C', 3, 1, onStaff(2))}${n('D', 3, 1, onStaff(2))}</measure>
+      <measure number="2">${wedge('stop')}${n('E', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('E', 3, 1, onStaff(2))}</measure>
+      </part></score-partwise>`;
+    expect(velocities(xml)).toEqual([
+      [72, 56],
+      [48, 56],
+      [74, 62],
+      [50, 50],
+      [76, 68],
+      [52, 44],
     ]);
   });
 });

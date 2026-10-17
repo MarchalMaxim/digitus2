@@ -2,7 +2,7 @@
  * The playback cursor. While playing, a requestAnimationFrame loop reads the audible score time
  * from the transport, finds the onset group being heard, and when it changes swaps the `.is-red`
  * class onto that group's notes (the cursor never animates: a class swap per group is what keeps
- * it within one frame of the sound, rendering spike section 7). It also reports the keys held at
+ * it within one frame of the sound, rendering spike section 4.3). It also reports the keys held at
  * the cursor, with their fingers, for the on-screen keyboard: the notes struck at this onset and
  * the earlier ones still sounding (a held bass note stays pressed under a running melody). React
  * state changes only when the group changes, never on every frame. On each group change it also

@@ -9,10 +9,7 @@ const folders = [
   'research/omr/prototypes/oemer-performance',
   'research/omr/prototypes/local-worker',
 ];
-const files = [
-  'docs/research/omr-performance-wave-2026-10-15.md',
-  'docs/research/omr-local-worker-2026-10-15.md',
-];
+const files = [];
 async function collect(directory) {
   for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
     if (entry.isFile() && /\.(mjs|html|md)$/.test(entry.name))

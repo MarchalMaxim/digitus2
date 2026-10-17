@@ -120,7 +120,7 @@ export interface LikelihoodOptions {
   /**
    * An annotator finger whose margin is at least this is left out of the likelihood (default
    * `PENALTY_MARGIN`; `Infinity` counts every finite margin). Expert fingers that break a
-   * solver hard rule (legato overlaps, learning prototype section 7) would otherwise dominate the
+   * solver hard rule (legato overlaps, learning prototype section 3) would otherwise dominate the
    * sum with about 1000 / T nats each and drag the fitted temperature to the top of its range.
    */
   penaltyMargin?: number;

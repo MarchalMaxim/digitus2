@@ -90,7 +90,7 @@ MusicXML trills and upper/lower mordents sound automatically, and the keyboard f
 
 The original MusicXML is unchanged. Fingering export preserves its signs, written notes and principal fingerings; performance attacks are a separate view. The red cursor stays on the written note. Auxiliary keyboard pitches have no invented finger number, and their samples and keyboard range load automatically. No ornament control is added.
 
-These are practice defaults, with no promise of historically authentic Bach execution or instruction for alternating fingers. Unsupported compound, accelerating or microtonal ornaments keep their notation and ordinary held-note playback. Extension lines do not extend realisation beyond the first written segment; ties then hold the principal. Live tempo changes normally wait for a safe attack boundary, bounded to 250 ms including the look-ahead. If interleaved ornaments have no safe boundary in that window, playback resynchronises with the existing 50 ms seek delay and rearticulates sounding notes. See [scope, review fixes and verification evidence](reviews/ornaments-2026-10-16.md).
+These are practice defaults, with no promise of historically authentic Bach execution or instruction for alternating fingers. Unsupported compound, accelerating or microtonal ornaments keep their notation and ordinary held-note playback. Extension lines do not extend realisation beyond the first written segment; ties then hold the principal. Live tempo changes normally wait for a safe attack boundary, bounded to 250 ms including the look-ahead. If interleaved ornaments have no safe boundary in that window, playback resynchronises with the existing 50 ms seek delay and rearticulates sounding notes.
 
 ## Screens
 

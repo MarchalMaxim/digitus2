@@ -74,7 +74,7 @@ describe.skipIf(!have)('corpora', () => {
     const test = loadCorpora({ mutopiaTest: true }).pieces;
     expect(train.length + test.length).toBe(286);
     expect(new Set(train.map((p) => p.id)).size + new Set(test.map((p) => p.id)).size).toBe(286);
-    // learning prototype section 7 item 3: 224 / 62 parts
+    // learning-prototype.md sections 1 and 6: 224 / 62 parts
     expect(train).toHaveLength(224);
     expect(test).toHaveLength(62);
     for (const p of [...train, ...test]) expect(p.license).toBeTruthy();

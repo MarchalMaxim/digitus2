@@ -17,8 +17,8 @@ import { Lcg } from './lcg.js';
  * The M3 trainer: an averaged passive-aggressive (PA-I) structured perceptron over the solver's own
  * cost, `cost(path) = w · Φ(path)` (`pathFeatures`), with Hamming loss-augmented decoding through
  * `solveHand` (its `unaryExtra` hook) and latent targets for pieces with several annotators or with
- * unfingered notes. Settings and corrections: `docs/research/learning-prototype.md` and the binding
- * section at the end of `docs/superpowers/plans/2026-10-13-m3-learning.md`.
+ * unfingered notes. Settings and corrections: `docs/research/learning-prototype.md`, section 6
+ * (settings adopted by the engine).
  */
 
 export interface TrainOptions {
@@ -41,7 +41,7 @@ export interface TrainOptions {
   /**
    * Ids whose weight stays at its initial value: the update leaves them out (their component of
    * Φ(y+) − Φ(ŷ) is dropped from the step and its norm, not from the loss). Task 4 freezes
-   * `template` at the Parncutt value (plan correction 8).
+   * `template` at the Parncutt value (learning-prototype.md section 6).
    */
   frozen?: RuleId[];
   /**
@@ -60,7 +60,7 @@ export interface EpochInfo {
   skipped: number;
   /**
    * Examples whose target path breaks a hard rule of the solver (it pays a chord or held-note
-   * penalty in the pinned soft decode). They are trained on anyway (plan correction 4).
+   * penalty in the pinned soft decode). They are trained on anyway (learning-prototype.md section 6).
    */
   infeasibleTargets: number;
   /** Mean margin loss over the updates (0 without updates). */
@@ -201,7 +201,7 @@ const round6 = (x: number): number => Math.round(x * 1e6) / 1e6 + 0;
  *    (ties: the lowest k; with one annotation, that one).
  * 2. Target path y+: the gold of k* where it fingers a note and the model's best fingers elsewhere
  *    (a decode with every fingered note pinned, `soft` so an impossible pin still yields a path).
- *    A target that breaks a hard rule is kept (`infeasibleTargets`; plan correction 4).
+ *    A target that breaks a hard rule is kept (`infeasibleTargets`; learning-prototype.md section 6).
  * 3. Most violating path ŷ: the hard decode with `-rho` on every wrong finger of a fingered note
  *    (`unaryExtra`; an unfingered note gets nothing).
  * 4. `loss = w · Φ(y+) − w · Φ(ŷ) + rho × hamming`, hamming over the fingered notes only.

@@ -1,8 +1,9 @@
 # teacher_review: a language model as a qualitative fingering oracle
 
 Research harness for the question "can an LLM acting as a piano teacher review fingerings
-usefully, and how should it sit in the verification loop?". Findings, protocol, rubric and the
-reusable reviewer brief: [`docs/research/teacher-review.md`](../../docs/research/teacher-review.md).
+usefully, and how should it sit in the verification loop?". Findings, protocol and rubric:
+[`docs/research/teacher-review.md`](../../docs/research/teacher-review.md); the reviewer brief is
+`prompts/brief.md`.
 
 Pure Python 3.11 standard library (plus `pytest` for the tests); reuses `research/fingering_eval`
 for PIG reading. Run everything with `research/.venv` (its `digitus2_research.pth` puts

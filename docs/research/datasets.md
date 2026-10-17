@@ -436,7 +436,7 @@ fingering; useful for "what do amateurs actually do" statistics and as noisy tra
 
 PDMX (Long et al., ICASSP 2025; Zenodo 10.5281/zenodo.15571083, CC BY 4.0): 254k public-domain
 MuseScore scores as MusicXML. ThumbSet (Ramoneda et al. 2022) was built from exactly this kind of
-material but is access-restricted. `download_datasets.py pdmx_fingered` (opt-in, 2.1 GB) streams
+material but is access-restricted. `download_datasets.py pdmx_fingered` (opt-in, 1.9 GB) streams
 `mxl.tar.gz` (md5-verified) and keeps only keyboard scores with `<fingering>` elements, writing
 `research/data/pdmx_fingered/mxl/…` plus `fingered_keyboard_index.json` (fingering and note counts
 per file) and `PDMX.csv` (per-score metadata/licence).

@@ -102,7 +102,7 @@ export interface LearnResult {
 
 export const DEFAULT_SEED = 20261013;
 const DEFAULTS = { epochs: 12, C: 0.2, rho: 1, seeds: 3, profile: 'large' } as const;
-/** Not learned (plan correction 8): the prototype saw it fall to 0.4, below the textbook gate. */
+/** Not learned (learning-prototype.md section 6): the prototype saw it fall to 0.4, below the textbook gate. */
 const FROZEN: RuleId[] = ['template'];
 
 export const LEARN_LICENSES: Record<LearnConfig, string> = {

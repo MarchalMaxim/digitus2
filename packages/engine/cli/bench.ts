@@ -807,7 +807,7 @@ export function runBench(opts: BenchOptions): {
       floorBreaches.push(
         `${opts.floor}: the ${section.name} block for split ${opts.split} sets no metric (every floor in it is null)`,
       );
-    // Floors are measured per weight set (plan correction 9): gating another set against them
+    // Floors are measured per weight set (learning-prototype.md section 6): gating another set against them
     // would pass or fail for the wrong reason, and so would gating changed weights under the
     // set's old name (floor.json records the weights' hash next to the set).
     if (section.gated && floor.weightSet !== undefined && floor.weightSet !== set.id)

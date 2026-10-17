@@ -368,7 +368,7 @@ describe('outputs', () => {
   }, 20_000);
 });
 
-// M2 hardening (docs/superpowers/plans/2026-10-14-m2-hardening.md, Task 1).
+// M2 hardening (docs/experiments.md, solver rules and weights).
 const LARGE = HAND_PROFILES.large.tables;
 const fingersIn = (score: Score, assignment: Record<string, { finger: Finger }>) =>
   score.notes.map((n) => assignment[n.id]!.finger);

@@ -3,7 +3,7 @@
   --gap: 1.5rem;
 }
 
-/* One 44rem reading column, left-aligned with the score view's edge (critique C8). */
+/* One 44rem reading column, left-aligned with the score view's edge. */
 .library > * {
   max-width: 44rem;
 }

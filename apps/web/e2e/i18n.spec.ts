@@ -81,7 +81,7 @@ test.describe('in an en-US browser', () => {
     await page.goto('/');
     await libraryReady(page);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await page.getByRole('button', { name: 'Français' }).click();
+    await page.getByRole('button', { name: 'Français', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
     await expect(page.getByRole('navigation', { name: fr.common.language })).toBeVisible();
     expect(await kept(page)).toBe('fr');
@@ -92,7 +92,7 @@ test.describe('in an en-US browser', () => {
     await expect(page.getByText(fr.library.tiers.easy).first()).toBeVisible();
 
     // Picking the browser's own language forgets the pick.
-    await page.getByRole('button', { name: 'English' }).click();
+    await page.getByRole('button', { name: 'English', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     expect(await kept(page)).toBeNull();
   });

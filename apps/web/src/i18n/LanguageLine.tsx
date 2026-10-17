@@ -13,7 +13,6 @@ export function LanguageLine() {
     <nav className="language-line" aria-label={t.common.language}>
       {LOCALES.map((l, i) => (
         <span key={l}>
-          {i > 0 && <span aria-hidden="true"> · </span>}
           <button
             type="button"
             className="text-button"
@@ -23,6 +22,9 @@ export function LanguageLine() {
           >
             {LOCALE_NAMES[l]}
           </button>
+          {/* After the name, so a wrapped line ends with the dot; no-break spaces, since a flex
+              item drops ordinary spaces at its edges. */}
+          {i < LOCALES.length - 1 && <span aria-hidden="true">{'\u00a0·\u00a0'}</span>}
         </span>
       ))}
     </nav>

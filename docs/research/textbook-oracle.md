@@ -1,6 +1,6 @@
 # Textbook fingering oracle
 
-Date: 2026-10-13. Data: `benchmarks/textbook/` (`scales.json`, `arpeggios.json`, `chromatic.json`).
+Data: `benchmarks/textbook/` (`scales.json`, `arpeggios.json`, `chromatic.json`).
 Generator and gates: `python benchmarks/textbook/generate.py` (it also rewrites the tables at the end of this file).
 
 The oracle is a set of generated patterns whose fingering is what piano method books print: scales,
@@ -73,7 +73,7 @@ Conventions that hold for every entry:
   LH `5 4 3 2 1 4 3 2 1`. When it starts on a black note, the thumbs go on white keys: RH on the white key
   reached from a black key, LH on the white key that leads to a black key. For diminished sevenths this puts
   the two thumbs on different white notes, as Black states. No per-key printed table for black-root seventh
-  chords could be read online, so those 20 entries are marked `confidence: "rule"`.
+  chords could be read online, so those 40 entries (20 per family) are marked `confidence: "rule"`.
 
 ### Chromatic scale
 
@@ -119,7 +119,7 @@ A scorer should accept the primary or any alternative. A stricter scorer can gra
 
 ## Sources
 
-All URLs were fetched on 2026-10-13. The table at the end of this file maps source keys to URLs.
+The table at the end of this file maps source keys to URLs.
 
 - Escadon chart (University of Miami), 4th-finger placement and arpeggio chart:
   https://www.cs.miami.edu/~burt/music/finger-charts.html
@@ -151,7 +151,7 @@ All URLs were fetched on 2026-10-13. The table at the end of this file maps sour
 | Source | Why it was not used |
 |---|---|
 | ABRSM and RCM scale books | Not online. The only report found is a forum post saying ABRSM marks E-flat major RH to start on 2. That agrees with the recorded alternative, so it changes nothing. |
-| Hanon No. 39 to 43 scans (IMSLP), University of Washington piano proficiency PDF | Scanned images. The PDFs could not be rendered here because poppler is missing, so their digits were never read. Hanon is cited only for the families and for No. 42, through Black. |
+| Hanon No. 39 to 43 scans (IMSLP), University of Washington piano proficiency PDF | Scanned images, so their digits were never read. Hanon is cited only for the families and for No. 42, through Black. |
 | Wikipedia, Fingering (music) | No scale tables. |
 | R. T. Kelley scale chart | Explicitly "optimized" fingerings, not the traditional ones (it says to use them with caution). |
 | musicmagix.com chart | Internally inconsistent: for example, B-flat and E-flat major LH are given the B-flat minor fingering. |

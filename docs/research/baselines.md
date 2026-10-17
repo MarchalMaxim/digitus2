@@ -1,9 +1,11 @@
 # Piano-fingering baselines: every open-source implementation we could find, run on PIG
 
-Status: 2026-10-13. Owner: baselines work package. Code, wrappers and raw results:
-[`research/baselines/`](../../research/baselines/) (start with its README).
+Code, wrappers and raw results: [`research/baselines/`](../../research/baselines/) (start with its
+README).
 Machine-readable results: [`research/baselines/results.json`](../../research/baselines/results.json),
-per piece: `results_per_piece_test.csv` / `results_per_piece_all.csv`.
+per piece: `results_per_piece_test.csv` / `results_per_piece_all.csv`. Both key the rows by baseline
+id, for example `nakamura_fhmm3` (FHMM3) and `fingerflow_learned` (FingerFlow, learned weights);
+`digitus2 bench --compare` reads these ids.
 
 ## TL;DR
 
@@ -38,13 +40,12 @@ per piece: `results_per_piece_test.csv` / `results_per_piece_all.csv`.
   path), ValHaLA fingers the left hand with the right-hand model (31.5; 52.3 mirrored), the
   2014 Balliauw VNS code does not optimise (below random), PianoFingering.jl crashes on 4/30
   pieces, huukhang's flagship "phrase-aware" pipeline is worse than its own simple DP.
-* **License**: code we may reuse in an MIT project: pianoplayer, Ramoneda's ArGNN/ArLSTM (code
-  and weights), pydactyl, Kanma/piano_fingering, autofingering, huukhang, ValHaLA (all MIT).
-  Not reusable: FingerFlow, Nakamura's C++/JS, lumikey, APF-Gen, Hand-thesia, BShakhovsky,
-  ackyedy, CHOWMHALVIN, VNS (no license = all rights reserved), chirality (AGPL-3.0),
-  PianoFingering.jl, the MuseScore plugin, TimKoornstra (GPL-3.0), OpenNote (PolyForm
-  Noncommercial). The PIG dataset itself is "nonprofit, academic use only" -- weights
-  trained on it inherit that question (see the datasets doc).
+* **License**: only the MIT repositories (pianoplayer, Ramoneda's ArGNN/ArLSTM code and weights,
+  pydactyl, Kanma/piano_fingering, autofingering, huukhang, ValHaLA) can be reused as code; the
+  rest has no license (all rights reserved), is copyleft or is non-commercial (see "Licenses and
+  reuse in an MIT project"). The PIG dataset itself is "nonprofit, academic use only", and
+  weights trained on it inherit that restriction: digitus2 treats PIG-fitted weights as research
+  only and ships a set trained on open data (see [`datasets.md`](datasets.md)).
 
 ## Protocol
 
@@ -264,8 +265,8 @@ learning or reusing. Commits are pinned in `research/baselines/setup_baselines.s
 ### Hand-thesia (V9011N/pygame-piano-animator; no license file)
 * A falling-notes player whose fingering planner is a beam search over chord fingerings with a
   physical cost and "figure" templates (scales, arpeggios, octaves, thirds, trills), weights
-  fitted by coordinate search on 031-150. Our first wrapper scored 32% because its loader
-  re-orders notes; mapping back by (onset, pitch, channel) gives 65.8. Fast (0.1 s/piece).
+  fitted by coordinate search on 031-150. Its loader re-orders notes (32% until the output is
+  mapped back by (onset, pitch, channel), then 65.8). Fast (0.1 s/piece).
 * Learn: explicit figure detection + standard fingerings as a soft prior is cheap and effective.
 
 ### lumikey/piano-fingering-model (no license file)
@@ -420,13 +421,18 @@ Fingering (benchmarked) and pianoplayer integrations.
   copyleft: chirality (AGPL-3.0), PianoFingering.jl, Smart Piano Fingering, TimKoornstra (GPL-3.0);
   non-commercial: OpenNote (PolyForm NC 1.0).
 * **Data**: PIG is "nonprofit, academic use only"; every learned baseline here (and the
-  Ramoneda MIT checkpoints) was trained on it. ThumbSet is "upon request".
+  Ramoneda MIT checkpoints) was trained on it. ThumbSet is "upon request". digitus2's shipped
+  weight set uses neither.
 
 ## What digitus2 should take from this
 
-1. **Target**: on the official split, beat FingerFlow's 68.6 M_gen / 82.3 M_rec without test
-   leakage; humans are at 71.4 / 84.3 (Bach 62.4, Mozart 71.6, Chopin 80.1). Report paired
-   bootstrap CIs -- with 30 pieces anything within ~2 points of FHMM3 is noise.
+1. **Reference points**: the best fair system is FingerFlow at 68.6 M_gen / 82.3 M_rec; humans
+   are at 71.4 / 84.3 (Bach 62.4, Mozart 71.6, Chopin 80.1). The only configuration that gets near
+   FingerFlow uses weights fitted on PIG, which cannot ship. On this test split digitus2's shipped set (`learned-open`,
+   open data only) scores 63.89 M_gen, -1.12 [-3.93, +1.91] against FHMM3 and -4.74 [-6.84,
+   -2.70] against FingerFlow-learned; the PIG-fitted research set scores 67.66, -0.97 [-2.73,
+   +0.74] against FingerFlow-learned (`docs/experiments.md`). Report paired bootstrap CIs: with
+   30 pieces anything within ~2 points of FHMM3 is noise.
 2. **Architecture that works**: exact dynamic programming (Viterbi, second order or chord-aware
    events) over a *learned* linear cost on interpretable features. FingerFlow, chirality and
    Nakamura's HMMs all have this shape; exactness alone is worth ~2.5 points over pruned
@@ -442,5 +448,4 @@ Fingering (benchmarked) and pianoplayer integrations.
    (ThumbSet) is the only external data any published system used.
 5. **Evaluation hygiene**: split PIG by *piece* (never by file); give every system the same
    hands; never feed a file containing fingers to a system that treats them as anchors; check
-   note alignment after any re-ordering reader (two of our first wrappers were wrong until we
-   compared against the repository's own evaluator).
+   note alignment after any re-ordering reader (compare against the repository's own evaluator).

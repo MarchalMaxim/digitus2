@@ -2,7 +2,7 @@
 
 Every request the owner makes lands here: the request in the owner's words, the agreed approach, and its status. Open items come first. Done and closed items stay at the end, one line each, so they are not requested or rebuilt twice.
 
-Also open, tracked as GitHub issues: #5 smarter scrolling, #13 and #17 dynamics (p, f) ignored by playback.
+Also open, tracked as GitHub issues: #5 smarter scrolling.
 
 ## Open
 
@@ -84,3 +84,4 @@ The owner accepts an experimental release for clear photos of printed music. Rul
 - **T19, T20** At least 1,000 more scores, then songs "not necessarily classical or folk": done. 2,702 pieces, the additions from the MuseScore archive (PDMX) on the uploader's declared licence (the owner's broad copyright reading). Only content exclusions apply (junk, Nazi-era and propaganda pieces), and a piece the build refuses is dropped ("if the refusals do not work, drop them"). Pipeline: `content/tools/README.md`.
 - **Ornaments** "Add support for trills and the Bach zigzag ornament": done. Signs and principal fingerings are kept; auxiliary notes sound and show on the keyboard without invented fingering. A practice default, with no claim about historical performance.
 - **Scanning basics**: multi-image batches, page rotation, browser-local My scores, and source comparison without a mandatory acknowledgment checkbox are done.
+- **#13, #17** Dynamics (p, f) ignored by playback: done. The marks ppp to fff become velocities and the piano loads the velocity layers the piece uses; a mark between the staves is for both hands (`docs/app.md`, Audio). Hairpins are not played.

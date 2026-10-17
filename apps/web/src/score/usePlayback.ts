@@ -3,7 +3,7 @@
  * Transport (audio/transport.ts), and mirrors the transport settings from the store into it.
  *
  * The AudioContext is created on the first play(), inside the click that asked for it, so the
- * browser lets it start. The instrument loads the piece's pitches once per score; Play is
+ * browser lets it start. The instrument loads the piece's pitches and velocity layers once per score; Play is
  * unavailable and busy while it does. A new score stops playback and drops the transport and the
  * loop; unmounting also closes the context. A loop changed while playing reaches the transport
  * once the typing settles (LOOP_SETTLE_MS). The transport's count-in reports become `countIn`,
@@ -23,7 +23,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import type { Phrase } from '../i18n/messages.js';
 import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
-import { instrumentFromLocation, type Instrument } from '../audio/instrument.js';
+import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
 import { scheduleClick } from '../audio/metronome.js';
 import type * as TransportExports from '../audio/transport.js';
 
@@ -132,6 +132,10 @@ export function mutedHandsFor(hands: HandsMode): Hand[] {
 
 function uniqueMidis(score: Score): number[] {
   return [...new Set(score.notes.flatMap((n) => ornamentAttacks(n).map((attack) => attack.midi)))];
+}
+
+function uniqueVelocities(score: Score): number[] {
+  return [...new Set(score.notes.map(noteVelocity))];
 }
 
 export function usePlayback(score: Score | null): Playback {
@@ -294,7 +298,7 @@ export function usePlayback(score: Score | null): Playback {
     const samples =
       loadedRef.current === s
         ? Promise.resolve()
-        : instrument.load(uniqueMidis(s)).then(
+        : instrument.load(uniqueMidis(s), uniqueVelocities(s)).then(
             () => {
               if (ctxRef.current === audio) loadedRef.current = s;
             },

@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { parseMusicXml, type Score } from '@digitus2/engine';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PIANO_LAYER, createPiano, createSilentInstrument } from './instrument.js';
+import { createPiano, createSilentInstrument, noteVelocity } from './instrument.js';
 import { Transport } from './transport.js';
 
 const { score } = parseMusicXml(
@@ -91,9 +91,14 @@ beforeEach(() => {
 });
 
 describe('the sampled piano', () => {
-  it('starts every transport note at a velocity inside the loaded layer, the left hand softer', async () => {
+  it('plays the dynamics marks: loads their velocity layers and starts each note at its velocity', async () => {
+    // short-piano opens with a p between the staves: both hands play every note at 49.
+    expect(new Set(score.notes.map((n) => n.velocity))).toEqual(new Set([49]));
     const piano = createPiano({} as AudioContext);
-    await piano.load(score.notes.map((n) => n.midi));
+    await piano.load(
+      score.notes.map((n) => n.midi),
+      score.notes.map(noteVelocity),
+    );
     const t = new Transport(
       { ctx, instrument: piano, score, setInterval: (() => 0) as never, clearInterval: () => {} },
       { startDelaySec: 0 },
@@ -103,30 +108,37 @@ describe('the sampled piano', () => {
     run(t, 21);
     expect(smplrMock.pianos).toHaveLength(1);
     const fake = smplrMock.pianos[0]!;
-    const [low, high] = fake.options.notesToLoad.velocityRange;
-    expect([low, high]).toEqual([...PIANO_LAYER]);
+    expect(fake.options.notesToLoad.velocityRange).toEqual([49, 49]);
     expect(fake.starts).toHaveLength(67);
-    expect(fake.starts.every((s) => s.velocity >= low && s.velocity <= high)).toBe(true);
-    expect(new Set(fake.starts.map((s) => s.velocity)).size).toBe(2); // melody and accompaniment
-    // The transport's own velocities are in the layer already: the clamp below is only a guard.
-    const silent = make();
-    silent.setCountIn(false);
-    silent.play();
-    run(silent, 21);
+    expect(fake.starts.every((s) => s.velocity === 49)).toBe(true);
+  });
+  it("plays a note without a velocity at its hand's, the left hand softer", () => {
+    const unmarked = { ...score, notes: score.notes.map(({ velocity: _, ...n }) => n) };
+    const t = make({ score: unmarked });
+    t.setCountIn(false);
+    t.play();
+    run(t, 21);
     expect(instrument.events).toHaveLength(67);
-    expect(instrument.events.every((e) => e.velocity >= low && e.velocity <= high)).toBe(true);
-    const byHand = (h: string) => instrument.events.find((e) => e.hand === h)!.velocity;
-    expect(byHand('L')).toBeLessThan(byHand('R'));
-    piano.start({ midi: 60, time: 0, duration: 1, velocity: 20, hand: 'L' });
-    piano.start({ midi: 60, time: 0, duration: 1, velocity: 127, hand: 'R' });
-    expect(fake.starts.slice(-2).map((s) => s.velocity)).toEqual([low, high]);
+    const byHand = (h: string) =>
+      new Set(instrument.events.filter((e) => e.hand === h).map((e) => e.velocity));
+    expect(byHand('R')).toEqual(new Set([96]));
+    expect(byHand('L')).toEqual(new Set([88]));
+  });
+  it('loads the layers from the softest velocity to the loudest and passes velocities through', async () => {
+    const piano = createPiano({} as AudioContext);
+    await piano.load([60, 62], [33, 96, 49]);
+    const fake = smplrMock.pianos[0]!;
+    expect(fake.options.notesToLoad.velocityRange).toEqual([33, 96]);
+    piano.start({ midi: 60, time: 0, duration: 1, velocity: 33, hand: 'L' });
+    piano.start({ midi: 62, time: 0, duration: 1, velocity: 96, hand: 'R' });
+    expect(fake.starts.map((s) => s.velocity)).toEqual([33, 96]);
   });
   it('keeps the newest of two overlapping loads and disposes the older one', async () => {
     smplrMock.autoReady = false;
     const piano = createPiano({} as AudioContext);
-    const first = piano.load([60]);
+    const first = piano.load([60], [96]);
     await vi.waitFor(() => expect(smplrMock.pianos).toHaveLength(1));
-    const second = piano.load([62]);
+    const second = piano.load([62], [96]);
     await vi.waitFor(() => expect(smplrMock.pianos).toHaveLength(2));
     const [older, newer] = smplrMock.pianos as [FakePiano, FakePiano];
     newer.resolve();

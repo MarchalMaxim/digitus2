@@ -11,39 +11,48 @@ export interface NoteEvent {
 }
 
 export interface Instrument {
-  /** Fetch what the given pitches need; resolves when they can be played. */
-  load(midis: number[]): Promise<void>;
+  /** Fetch what the given pitches at the given velocities need; resolves when they can be played. */
+  load(midis: number[], velocities: number[]): Promise<void>;
   start(e: NoteEvent): void;
   /** Silence everything that is sounding or scheduled. */
   stopAll(): void;
 }
 
 /**
- * The one velocity layer the piano loads (smplr's mezzo-forte layer). smplr matches samples by
- * velocity, so a note whose velocity lies outside this range finds no sample and stays silent;
- * `createPiano` clamps every velocity into it.
+ * A note without a velocity of its own (no dynamics mark before it, no MIDI source) plays at its
+ * hand's: the accompaniment slightly softer than the melody, both in the mezzo-forte layer.
  */
-export const PIANO_LAYER: readonly [number, number] = [85, 100];
+const HAND_VELOCITY: Record<Hand, number> = { R: 96, L: 88 };
+
+/** The velocity a note plays at: its own (a dynamics mark, MIDI), else its hand's. */
+export function noteVelocity(note: { velocity?: number; hand: Hand }): number {
+  return note.velocity ?? HAND_VELOCITY[note.hand];
+}
 
 /**
  * The sampled piano: smplr's Splendid Grand Piano (public domain samples), loading only the
- * piece's pitches and the mezzo-forte layer (about 2.5 MB instead of 19.5 MB, rendering spike
- * section 4.1). `notesToLoad` is fixed at construction, so the sampler is created inside
- * `load()`; smplr itself is imported there too, which keeps it out of the entry chunk.
+ * piece's pitches and the velocity layers its velocities fall in (rendering spike section 4.1:
+ * about 2.5 MB per layer for an 8-bar piece instead of 19.5 MB for everything). smplr matches
+ * samples by velocity, so a note outside the loaded layers would stay silent; its
+ * `velocityRange` is one span, so the layers between the softest and the loudest load too.
+ * `notesToLoad` is fixed at construction, so the sampler is created inside `load()`; smplr itself
+ * is imported there too, which keeps it out of the entry chunk.
  */
 export function createPiano(ctx: AudioContext): Instrument {
   let piano: SplendidGrandPiano | null = null;
   /** Counts `load()` calls: only the newest one may replace the piano. */
   let loads = 0;
   return {
-    async load(midis) {
+    async load(midis, velocities) {
       const id = ++loads;
+      const used = velocities.length > 0 ? new Set(velocities) : new Set([HAND_VELOCITY.R]);
+      const velocityRange: [number, number] = [Math.min(...used), Math.max(...used)];
       const smplr = await import('smplr');
       if (id !== loads) return; // a newer load started while smplr was being imported
       const next = smplr.SplendidGrandPiano(ctx, {
         notesToLoad: {
           notes: [...new Set(midis)],
-          velocityRange: [PIANO_LAYER[0], PIANO_LAYER[1]],
+          velocityRange,
           fallback: 'nearest',
         },
       });
@@ -56,8 +65,7 @@ export function createPiano(ctx: AudioContext): Instrument {
       piano = next;
     },
     start(e) {
-      const velocity = Math.min(PIANO_LAYER[1], Math.max(PIANO_LAYER[0], e.velocity));
-      piano?.start({ note: e.midi, velocity, time: e.time, duration: e.duration });
+      piano?.start({ note: e.midi, velocity: e.velocity, time: e.time, duration: e.duration });
     },
     stopAll() {
       piano?.stop();

@@ -53,7 +53,7 @@ export interface Note {
   chordId: string;
   /** Document-order indices of the source elements merged into this sounding note (tie start first). */
   sourceIndices: number[];
-  /** MIDI velocity 0..127 when the source carries one (PIG, MIDI). */
+  /** MIDI velocity 0..127 when the source carries one (PIG, MIDI, MusicXML dynamics marks). */
   velocity?: number;
   ornament?: Ornament;
 }

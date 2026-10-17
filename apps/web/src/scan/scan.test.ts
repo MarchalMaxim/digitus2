@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import { en } from '../i18n/en/index.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 import { createScanClient } from './client.js';
 import { SCAN_LIMIT, validateScan } from './model.js';
 
@@ -70,5 +72,10 @@ describe('experimental scan boundary', () => {
     expect((await createScanClient(fetcher).connect()).warnings).toEqual([
       'English OCR is not configured.',
     ]);
+  });
+  it('throws errors that can be written in another language', async () => {
+    const error = await validateScan(new File(['fake'], 'score.png')).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(PhraseError);
+    expect((error as PhraseError).message).toBe(en.scan.files.contentMismatch);
   });
 });

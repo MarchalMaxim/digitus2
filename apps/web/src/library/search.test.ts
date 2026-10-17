@@ -52,3 +52,19 @@ describe('search (spec 6.3)', () => {
     expect(searchPieces([rondo, furElise], 'r')).toEqual([rondo, furElise]);
   });
 });
+
+describe('shelf names in the language on screen', () => {
+  const piece = { ...furElise, genre: 'romantic' as const };
+  it('find the shelf in that language and still in English', () => {
+    const dutch = (id: string) => (id === 'romantic' ? 'Romantiek' : id);
+    expect(matchesQuery(piece, 'romantiek')).toBe(false);
+    expect(matchesQuery(piece, 'romantiek', dutch)).toBe(true);
+    expect(matchesQuery(piece, 'romantic', dutch)).toBe(true);
+  });
+  it('never search by the joining word of a shelf name', () => {
+    const folk = { ...rondo, collection: 'Dances', genre: 'folk' as const };
+    expect(matchesQuery(folk, 'and')).toBe(false);
+    expect(matchesQuery(folk, 'carols')).toBe(true);
+    expect(matchesQuery(folk, 'et', () => 'Folklore et chants de Noël')).toBe(false);
+  });
+});

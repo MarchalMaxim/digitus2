@@ -8,7 +8,10 @@ import { downloadText } from '../export/download.js';
 import { createEngineClient } from '../engine/client.js';
 import { createRenderer } from '../score/render/renderer.js';
 import { ScoreSheet } from '../score/ScoreSheet.js';
-import { createScanClient, type WorkerMetadata } from './client.js';
+import { useLocale, useT } from '../i18n/i18n.js';
+import type { Messages, Phrase } from '../i18n/messages.js';
+import { PhraseError } from '../i18n/PhraseError.js';
+import { createScanClient, UNKNOWN_WARNING, type WorkerMetadata } from './client.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
@@ -22,17 +25,26 @@ const delay = () => new Promise<void>((resolve) => setTimeout(resolve, 350));
 export function ScanView({ session: initial }: { session: ScanSession }) {
   const [session, setSession] = useState(initial);
   const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
+  const t = useT();
+  const [locale] = useLocale();
   const [phase, setPhase] = useState<
     'connect' | 'connected' | 'connecting' | 'scanning' | 'cancelling' | 'review'
   >(initial.xml || hasPageRecognition ? 'review' : 'connect');
-  const [error, setError] = useState(
+  // Errors are kept as phrases, so they follow a change of language while they are on screen.
+  const [error, setErrorPhrase] = useState<Phrase | null>(() =>
     hasPageRecognition && !initial.xml && initial.pages!.length > 1
-      ? 'The pages were recognized, but their notation could not be combined. Individual page files are available below.'
-      : '',
+      ? (m: Messages) => m.scan.errors.notCombinedSaved
+      : null,
   );
+  const setError = (phrase: Phrase | null) => {
+    setErrorPhrase(() => phrase);
+  };
   const [health, setHealth] = useState<WorkerMetadata>();
   const [pages, setPages] = useState<string[]>([]);
-  const [reviewError, setReviewError] = useState('');
+  const [reviewError, setReviewErrorPhrase] = useState<Phrase | null>(null);
+  const setReviewError = (phrase: Phrase | null) => {
+    setReviewErrorPhrase(() => phrase);
+  };
   const [reviewReady, setReviewReady] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selected, setSelected] = useState(0);
@@ -83,7 +95,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     const engine = createEngineClient();
     const renderer = createRenderer();
     setReviewReady(false);
-    setReviewError('');
+    setReviewError(null);
     setPages([]);
     void (async () => {
       // Render independently of import: an importer refusal must not erase the raw result.
@@ -93,18 +105,17 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           if (current) setPages(result.pages);
         })
         .catch((cause: unknown) => {
-          if (current) setReviewError('Notation could not be displayed: ' + messageOf(cause));
+          if (current) setReviewError((m) => m.scan.errors.notationNotShown(messageOf(cause, m)));
         });
       try {
         const result = await engine.load(reviewXml, 'scan.musicxml', { preserveNotation: true });
         if (current) {
           setWarnings(result.warnings);
-          if (!result.score.notes.length) setReviewError('No playable notes were recognized.');
+          if (!result.score.notes.length) setReviewError((m) => m.scan.errors.noNotes);
           else setReviewReady(true);
         }
       } catch (cause) {
-        if (current)
-          setReviewError('This recognition cannot be used for fingerings: ' + messageOf(cause));
+        if (current) setReviewError((m) => m.scan.errors.notUsable(messageOf(cause, m)));
       }
       await rendered;
     })();
@@ -122,7 +133,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   };
   const arrange = (next: ScanPage[]) => {
     if (busy) return;
-    setError('');
+    setError(null);
     retain({
       ...session,
       file: next[0]!.file,
@@ -135,7 +146,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   };
 
   const connect = async () => {
-    setError('');
+    setError(null);
     setPhase('connecting');
     try {
       const metadata = await client.connect();
@@ -145,9 +156,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     } catch {
       if (alive.current) {
         setPhase('connect');
-        setError(
-          'Could not connect to this PC. Start the worker, then allow this site’s local connection when your browser asks. If you denied it, change this site’s local-network permission and try again.',
-        );
+        setError((m) => m.scan.errors.connectFailed);
       }
     }
   };
@@ -159,7 +168,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       const id = run.id ?? (await run.started);
       if (id) await client.cancel(id);
     } catch {
-      setError('Could not confirm cancellation. Close the worker terminal to stop processing.');
+      setError((m) => m.scan.errors.cancelFailed);
     } finally {
       if (alive.current) setPhase('connected');
     }
@@ -171,7 +180,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       started?: Promise<string>;
     };
     active.current = run;
-    setError('');
+    setError(null);
     setPhase('scanning');
     const results = sourcePages.map((page) => ({ ...page }));
     for (const [index, page] of results.entries()) {
@@ -189,8 +198,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         }
         const deadline = performance.now() + 190000;
         while (!run.cancelled && alive.current) {
-          if (performance.now() > deadline)
-            throw new Error('Recognition timed out. Try a smaller, clearer page.');
+          if (performance.now() > deadline) throw new PhraseError((m) => m.scan.errors.timedOut);
           const status = await client.status(run.id);
           if (status.state === 'ready') {
             const xml = await client.result(run.id);
@@ -202,11 +210,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             break;
           }
           if (['failed', 'cancelled', 'timed_out'].includes(status.state ?? ''))
-            throw new Error(
-              typeof status.failure?.message === 'string'
-                ? status.failure.message
-                : 'The PC could not recognize a complete score from this page. Try the original PDF or a flatter, higher-resolution image.',
-            );
+            throw typeof status.failure?.message === 'string'
+              ? new Error(status.failure.message)
+              : new PhraseError((m) => m.scan.errors.notRecognized);
           await delay();
         }
       } catch (cause) {
@@ -226,10 +232,13 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           results.findIndex((page) => !page.xml),
         ),
       );
+      const reason = results[0]!.error;
       setError(
         batch
-          ? 'Some pages need another scan. Recognized pages are kept.'
-          : (results[0]!.error ?? 'Recognition failed.'),
+          ? (m) => m.scan.errors.somePagesFailed
+          : reason
+            ? () => reason
+            : (m) => m.scan.errors.recognitionFailed,
       );
       setPhase('connected');
       return;
@@ -239,10 +248,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       xml = joinScanPages(results.map((page) => page.xml!));
     } catch (cause) {
       setError(
-        batch
-          ? 'The pages were recognized, but their notation could not be combined. ' +
-              messageOf(cause)
-          : messageOf(cause),
+        batch ? (m) => m.scan.errors.notCombined(messageOf(cause, m)) : (m) => messageOf(cause, m),
       );
       setReviewMode('page');
     }
@@ -266,6 +272,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     });
     setPhase('review');
   };
+  const warningText = (warning: string) =>
+    warning === GRAPHIC_SPAN_WARNING
+      ? t.scan.review.graphicSpanWarning
+      : warning === UNKNOWN_WARNING
+        ? t.scan.review.unknownWarning
+        : warning;
   const useResult = () => {
     if (!canUseResult) return;
     useAppStore.getState().openPiece({
@@ -279,28 +291,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     <main className="page scan-view stack">
       <header className="stack">
         <button className="text-button" onClick={openLibrary}>
-          Back to library
+          {t.scan.view.back}
         </button>
         <ThemeToggle />
-        <p className="small muted">Experimental scan</p>
+        <p className="small muted">{t.scan.view.experimental}</p>
         <h1 ref={heading} tabIndex={-1}>
-          {phase === 'review' ? 'Review the recognition' : 'From paper to piano'}
+          {phase === 'review' ? t.scan.view.titleReview : t.scan.view.titleStart}
         </h1>
         <p className="scan-filename">
-          {batch ? `${sourcePages.length} page images` : session.file.name}
+          {batch ? t.scan.view.pageImages(sourcePages.length) : session.file.name}
         </p>
       </header>
       {phase !== 'review' ? (
         <div className="scan-intro">
           <section className="stack">
-            <p>
-              Original PDFs and flat, high-resolution scans work best. Book photos are experimental
-              and can fail, even when well lit. Results open beside the original for review.
-            </p>
-            <p className="small muted">
-              This experimental option needs the PC worker on this computer. A phone’s localhost
-              cannot reach your PC.
-            </p>
+            <p>{t.scan.view.advice}</p>
+            <p className="small muted">{t.scan.view.workerNeeded}</p>
             <div className="row">
               {phase === 'connect' || phase === 'connecting' ? (
                 <Button
@@ -310,7 +316,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     void connect();
                   }}
                 >
-                  {phase === 'connecting' ? 'Connecting…' : 'Connect to this PC'}
+                  {phase === 'connecting' ? t.scan.view.connecting : t.scan.view.connect}
                 </Button>
               ) : phase === 'scanning' || phase === 'cancelling' ? (
                 <Button
@@ -320,7 +326,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     void cancel();
                   }}
                 >
-                  {phase === 'cancelling' ? 'Cancelling…' : 'Cancel scan'}
+                  {phase === 'cancelling' ? t.scan.view.cancelling : t.scan.view.cancelScan}
                 </Button>
               ) : (
                 <Button
@@ -331,32 +337,28 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   }}
                 >
                   {batch && sourcePages.some((p) => p.error)
-                    ? 'Retry failed pages'
-                    : 'Scan this score'}
+                    ? t.scan.view.retryFailed
+                    : t.scan.view.scanScore}
                 </Button>
               )}
             </div>
             <p role="status">
               {phase === 'scanning'
-                ? `${batch ? `Page ${scanningPage} of ${sourcePages.length} · ` : ''}Recognizing on this PC… Usually a few seconds; longer pages can take a few minutes.`
+                ? batch
+                  ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
+                  : t.scan.view.scanning
                 : phase === 'connected'
-                  ? 'PC connected.'
+                  ? t.scan.view.connected
                   : ''}
             </p>
             {health?.capabilities?.textModelConfigured === false && (
-              <p role="status">
-                English text recognition is not configured. Musical text may be missing. See setup
-                below.
-              </p>
+              <p role="status">{t.scan.view.textModelMissing}</p>
             )}
-            {error && <p role="alert">{error}</p>}
+            {error && <p role="alert">{error(t)}</p>}
             <details className="scan-setup">
-              <summary>Set up the PC worker</summary>
+              <summary>{t.scan.setup.summary}</summary>
               <div className="stack">
-                <p>
-                  On the PC running this browser, open the digitus2 project folder. Install the
-                  photo and PDF recognizers once, then start the worker when you need it.
-                </p>
+                <p>{t.scan.setup.install}</p>
                 <pre>
                   <code>
                     powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
@@ -373,22 +375,19 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     research/omr/results/photo-options/toolchain
                   </code>
                 </pre>
-                <p className="small">
-                  Keep that terminal open. Allow the browser’s local connection after pressing
-                  Connect. To stop processing, close the worker.
-                </p>
+                <p className="small">{t.scan.setup.keepOpen}</p>
                 <a
                   href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Setup and troubleshooting
+                  {t.scan.setup.help}
                 </a>
               </div>
             </details>
           </section>
           <section className="stack scan-source">
-            <h2>Original</h2>
+            <h2>{t.scan.view.original}</h2>
             {isImage ? (
               <ImagePages
                 pages={sourcePages}
@@ -404,28 +403,25 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               (session.file.type === 'application/pdf' ? (
                 <>
                   <a href={sourceUrl} target="_blank" rel="noreferrer">
-                    Open original PDF
+                    {t.scan.view.openPdf}
                   </a>
-                  <Suspense fallback={<p>Preparing original PDF…</p>}>
+                  <Suspense fallback={<p>{t.scan.view.preparingPdf}</p>}>
                     <PdfPreview file={session.file} />
                   </Suspense>
                 </>
               ) : (
-                <img src={sourceUrl} alt="Original printed score" />
+                <img src={sourceUrl} alt={t.scan.view.originalAlt} />
               ))
             )}
           </section>
         </div>
       ) : (
         <>
-          <p>
-            Recognition may contain errors in notes, rhythms, ties or hands. Text and tempo may be
-            incomplete. No fingerings have been added yet.
-          </p>
-          {error && <p role="alert">{error}</p>}
+          <p>{t.scan.review.caveat}</p>
+          {error && <p role="alert">{error(t)}</p>}
           <div className="scan-review">
             <section className="scan-source stack">
-              <h2>Original</h2>
+              <h2>{t.scan.view.original}</h2>
               {isImage ? (
                 <ImagePages
                   pages={sourcePages}
@@ -439,30 +435,32 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 sourceUrl && (
                   <>
                     <a href={sourceUrl} target="_blank" rel="noreferrer">
-                      Open original {session.file.type === 'application/pdf' ? 'PDF' : 'image'}
+                      {session.file.type === 'application/pdf'
+                        ? t.scan.view.openPdf
+                        : t.scan.view.openImage}
                     </a>
                     {session.file.type === 'application/pdf' ? (
-                      <Suspense fallback={<p>Preparing original PDF…</p>}>
+                      <Suspense fallback={<p>{t.scan.view.preparingPdf}</p>}>
                         <PdfPreview file={session.file} />
                       </Suspense>
                     ) : (
-                      <img src={sourceUrl} alt="Original printed score" />
+                      <img src={sourceUrl} alt={t.scan.view.originalAlt} />
                     )}
                   </>
                 )
               )}
             </section>
             <section className="stack" ref={resultHost}>
-              <h2>Recognized notation</h2>
+              <h2>{t.scan.review.recognized}</h2>
               {batch && (
-                <div className="row" aria-label="Recognition view">
+                <div className="row" aria-label={t.scan.review.viewLabel}>
                   <button
                     aria-pressed={reviewMode === 'page'}
                     onClick={() => {
                       setReviewMode('page');
                     }}
                   >
-                    Page recognition
+                    {t.scan.review.pageRecognition}
                   </button>
                   <button
                     disabled={!session.xml}
@@ -471,54 +469,47 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                       setReviewMode('combined');
                     }}
                   >
-                    Combined score
+                    {t.scan.review.combinedScore}
                   </button>
                 </div>
               )}
               {batch && (
                 <p className="small muted">
                   {reviewMode === 'page'
-                    ? `Recognition of page ${selected + 1}`
-                    : 'All pages in reading order'}
+                    ? t.scan.review.pageShown(selected + 1)
+                    : t.scan.review.allPages}
                 </p>
               )}
               {pages.length ? (
-                <ScoreSheet pages={pages} label="raw scan recognition" />
+                <ScoreSheet pages={pages} label={t.scan.review.sheetLabel} />
               ) : (
-                <p role="status">{reviewError || 'Preparing recognized notation…'}</p>
+                <p role="status">{reviewError ? reviewError(t) : t.scan.review.preparing}</p>
               )}
             </section>
           </div>
           <section className="stack scan-decision">
-            {reviewError && (
-              <p role="alert">
-                {reviewError} Download the raw file for correction in a notation editor, or try
-                another image.
-              </p>
-            )}
+            {reviewError && <p role="alert">{t.scan.review.problem(reviewError(t))}</p>}
             <details>
-              <summary>Recognition details</summary>
+              <summary>{t.scan.review.detailsSummary}</summary>
               <div className="stack small">
                 <p>
                   {session.recognizer ?? 'Audiveris'} ·{' '}
-                  {session.recognizedAt ? new Date(session.recognizedAt).toLocaleString() : ''}
+                  {session.recognizedAt
+                    ? new Date(session.recognizedAt).toLocaleString(locale)
+                    : ''}
                 </p>
-                <p>
-                  Find retained originals and recognition in My scores. Keep your own original
-                  files; browser storage can be cleared. Recognition is not certified accurate;
-                  playback tempo may use an app default.
-                </p>
+                <p>{t.scan.review.retained}</p>
                 {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
-                  <p>Beam grouping is inferred and may differ from the original.</p>
+                  <p>{t.scan.review.beamGrouping}</p>
                 )}
                 {[...(session.warnings ?? []), ...warnings].map((warning, i) => (
-                  <p key={i}>{warning}</p>
+                  <p key={i}>{warningText(warning)}</p>
                 ))}
               </div>
             </details>
             {batch && (
               <details>
-                <summary>Download individual page files</summary>
+                <summary>{t.scan.review.downloadPagesSummary}</summary>
                 <div className="stack">
                   {sourcePages.map(
                     (p, index) =>
@@ -530,7 +521,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                             downloadText(`page-${index + 1}-recognized.musicxml`, p.xml!)
                           }
                         >
-                          Download page {index + 1} MusicXML
+                          {t.scan.review.downloadPage(index + 1)}
                         </button>
                       ),
                   )}
@@ -547,17 +538,17 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   )
                 }
               >
-                {batch ? 'Download combined MusicXML' : 'Download raw MusicXML'}
+                {batch ? t.scan.review.downloadCombined : t.scan.review.downloadRaw}
               </button>
             )}
             <div className="row">
               <Button primary disabled={!canUseResult} onClick={useResult}>
-                Use for fingerings
+                {t.scan.review.useForFingerings}
               </Button>
               <button
                 onClick={() => {
                   setPhase('connect');
-                  setError('');
+                  setError(null);
                   setReviewMode('combined');
                   retain({
                     ...session,
@@ -566,7 +557,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   });
                 }}
               >
-                Scan again
+                {t.scan.review.scanAgain}
               </button>
             </div>
           </section>

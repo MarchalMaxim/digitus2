@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  gridPhrase,
-  handCountLine,
-  importLine,
-  noteName,
-  SPLIT_HELP,
-  SPLIT_KEYS,
-} from './midiCopy.js';
+import { en } from '../i18n/en/index.js';
+import { gridPhrase, handCountLine, importLine, noteName, SPLIT_KEYS } from './midiCopy.js';
 
 describe('MIDI copy', () => {
   it('names the grid the import used', () => {
@@ -37,9 +31,9 @@ describe('MIDI copy', () => {
   });
   it('offers the keys from C2 to C6 by name and explains the split', () => {
     expect(SPLIT_KEYS).toHaveLength(49);
-    expect(SPLIT_KEYS.slice(0, 3).map(noteName)).toEqual(['C2', 'C#2', 'D2']);
+    expect(SPLIT_KEYS.slice(0, 3).map((m) => noteName(m))).toEqual(['C2', 'C#2', 'D2']);
     expect(noteName(60)).toBe('C4');
     expect(noteName(SPLIT_KEYS[SPLIT_KEYS.length - 1]!)).toBe('C6');
-    expect(SPLIT_HELP).toBe('Keys from the chosen note upward go to the right hand.');
+    expect(en.score.midi.splitHelp).toBe('Keys from the chosen note upward go to the right hand.');
   });
 });

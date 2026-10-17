@@ -2,10 +2,13 @@ import type { TempoEvent } from '@digitus2/engine';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { en } from '../i18n/en/index.js';
+import { useT } from '../i18n/i18n.js';
+import type { Messages, Phrase } from '../i18n/messages.js';
 import type { LoopRange, Playback } from './usePlayback.js';
 
 /** What the loop says when its "from" is after its "to" (polish plan Task 6, review S11). */
-export const LOOP_REVERSED_TEXT = 'The loop needs "from" before "to".';
+export const LOOP_REVERSED_TEXT: Phrase = (t) => t.transport.loopReversed;
 
 /**
  * The engine's tempo before a score's first tempo mark, or for a score with none, in quarter
@@ -32,23 +35,21 @@ export function startQpm(tempoMap: readonly TempoEvent[]): number {
  * per minute ("70 % · ♩ = 70" for a piece written at 100 played at 70 %; review S8 found "70 %"
  * next to the printed "♩ = 100"). The percentage alone while the score is not read yet.
  */
-export function tempoText(factor: number, qpm: number | null): string {
-  const percent = `${Math.round(factor * 100)} %`;
+export function tempoText(factor: number, qpm: number | null, t: Messages = en): string {
+  const percent = t.transport.tempoPercent(Math.round(factor * 100));
   return qpm === null ? percent : `${percent} · ♩ = ${Math.round(qpm * factor)}`;
 }
 
 /** The same for the slider's `aria-valuetext`, in words. */
-function tempoValueText(factor: number, qpm: number | null): string {
-  const percent = `${Math.round(factor * 100)} %`;
-  return qpm === null
-    ? percent
-    : `${percent}, ${Math.round(qpm * factor)} quarter notes per minute`;
+function tempoValueText(t: Messages, factor: number, qpm: number | null): string {
+  const percent = t.transport.tempoPercent(Math.round(factor * 100));
+  return qpm === null ? percent : t.transport.tempoSpoken(percent, Math.round(qpm * factor));
 }
 
-const HANDS: { value: HandsMode; label: string }[] = [
-  { value: 'both', label: 'Both hands' },
-  { value: 'R', label: 'Right hand' },
-  { value: 'L', label: 'Left hand' },
+const HANDS: { value: HandsMode; label: Phrase }[] = [
+  { value: 'both', label: (t) => t.transport.handsBoth },
+  { value: 'R', label: (t) => t.transport.handsRight },
+  { value: 'L', label: (t) => t.transport.handsLeft },
 ];
 
 export interface TransportProps {
@@ -181,6 +182,7 @@ export function Transport({
   resumeShown = false,
   redAway = false,
 }: TransportProps) {
+  const t = useT();
   const playing = playback.playing;
   const loading = playback.loading;
   /**
@@ -212,7 +214,7 @@ export function Transport({
   }, []);
 
   return (
-    <div className="transport-group" role="toolbar" aria-label="Playback">
+    <div className="transport-group" role="toolbar" aria-label={t.transport.playback}>
       {/* One button for both states, so focus stays on it when it flips. It is never natively
           disabled: a disabled button drops the focus to <body> (Play cannot start while the
           samples load after the first Play of a score), and a reader who started playback with
@@ -221,13 +223,13 @@ export function Transport({
       <Button
         primary={red}
         className="play-button"
-        aria-label={playing ? 'Pause' : 'Play'}
+        aria-label={playing ? t.transport.pause : t.transport.play}
         aria-keyshortcuts="Space"
         aria-busy={loading || undefined}
         aria-disabled={playBlocked || undefined}
         onClick={toggle}
       >
-        {playing ? 'Pause' : 'Play'}
+        {playing ? t.transport.pause : t.transport.play}
       </Button>
       {/* Rewind is unavailable at the start, where it has nothing to do. Like Play it says so
           with aria-disabled rather than natively: Rewind while paused brings the start, and a
@@ -240,7 +242,7 @@ export function Transport({
           if (!rewindIdle) playback.rewind();
         }}
       >
-        Rewind
+        {t.transport.rewind}
       </button>
     </div>
   );
@@ -323,6 +325,7 @@ export function PracticeControls({
   qpm = null,
   currentBar,
 }: PracticeControlsProps) {
+  const t = useT();
   const settings = useAppStore((s) => s.settings);
   const setSettings = useAppStore((s) => s.setSettings);
   const tempoFactor = useAppStore(tempoFactorOf);
@@ -357,25 +360,25 @@ export function PracticeControls({
   return (
     <div className="transport no-print">
       <label className="tempo">
-        Tempo
+        {t.transport.tempo}
         <input
           type="range"
           min={50}
           max={150}
           step={5}
           value={tempoPercent}
-          aria-valuetext={tempoValueText(tempoFactor, qpm)}
+          aria-valuetext={tempoValueText(t, tempoFactor, qpm)}
           onChange={(e) => setTempoFactor(Number(e.currentTarget.value) / 100)}
         />
         {/* A plain span: <output> is an implicit status region, and the score view's status line
             must be the only one. The slider announces the same value through aria-valuetext. */}
         <span className="tempo-value" aria-hidden="true">
-          {tempoText(tempoFactor, qpm)}
+          {tempoText(tempoFactor, qpm, t)}
         </span>
       </label>
 
       <fieldset className="segmented" ref={handsRef}>
-        <legend className="visually-hidden">Hands</legend>
+        <legend className="visually-hidden">{t.transport.hands}</legend>
         <span className="segmented-thumb" aria-hidden="true" />
         {HANDS.map((h) => (
           <label key={h.value}>
@@ -386,7 +389,7 @@ export function PracticeControls({
               checked={settings.hands === h.value}
               onChange={() => setSettings({ hands: h.value })}
             />
-            <span>{h.label}</span>
+            <span>{h.label(t)}</span>
           </label>
         ))}
       </fieldset>
@@ -397,7 +400,7 @@ export function PracticeControls({
           checked={settings.metronome}
           onChange={(e) => setSettings({ metronome: e.currentTarget.checked })}
         />{' '}
-        Metronome
+        {t.transport.metronome}
       </label>
       <label className="check">
         <input
@@ -405,7 +408,7 @@ export function PracticeControls({
           checked={settings.countIn}
           onChange={(e) => setSettings({ countIn: e.currentTarget.checked })}
         />{' '}
-        Count-in
+        {t.transport.countIn}
       </label>
 
       <div className="loop">
@@ -415,7 +418,7 @@ export function PracticeControls({
             checked={looping}
             onChange={(e) => toggleLoop(e.currentTarget.checked)}
           />{' '}
-          Loop bars
+          {t.transport.loopBars}
         </label>
         {looping && (
           <>
@@ -424,19 +427,19 @@ export function PracticeControls({
               inputMode="numeric"
               min={1}
               max={measureCount > 0 ? measureCount : undefined}
-              aria-label="Loop from bar"
+              aria-label={t.transport.loopFromBar}
               value={loopFrom}
               aria-invalid={reversed || undefined}
               aria-describedby={reversed ? loopMessageId : undefined}
               onChange={(e) => changeLoop(e.currentTarget.value, loopTo)}
             />
-            <span>to</span>
+            <span>{t.transport.loopTo}</span>
             <input
               type="number"
               inputMode="numeric"
               min={1}
               max={measureCount > 0 ? measureCount : undefined}
-              aria-label="Loop to bar"
+              aria-label={t.transport.loopToBar}
               value={loopTo}
               aria-invalid={reversed || undefined}
               aria-describedby={reversed ? loopMessageId : undefined}
@@ -449,7 +452,7 @@ export function PracticeControls({
                 the accent is Play. */}
             {reversed && (
               <p id={loopMessageId} className="loop-message small">
-                {LOOP_REVERSED_TEXT}
+                {LOOP_REVERSED_TEXT(t)}
               </p>
             )}
           </>

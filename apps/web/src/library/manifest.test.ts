@@ -1,6 +1,7 @@
 import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import manifestJson from '../../../../content/manifest.json';
+import { messages as fr } from '../i18n/fr/index.js';
 import { GENRES, TIER_NAMES } from './levels.js';
 import {
   attribution,
@@ -169,6 +170,21 @@ describe('manifest', () => {
       `Engraving by ${k2.source.typesetter} for the Mutopia Project, CC BY 2.5`,
     );
     expect(attribution(byOnly).url).toBe('https://creativecommons.org/licenses/by/2.5/');
+  });
+  it('writes the credit line in the language it is given', async () => {
+    const k2 = (await loadPiece('mozart-minuet-f-major-k2'))!;
+    const byOnly = {
+      ...k2,
+      source: {
+        ...k2.source,
+        license: 'CC-BY-2.5',
+        licenseUrl: 'https://creativecommons.org/licenses/by/2.5/',
+      },
+    };
+    expect(attribution(byOnly, fr).text).toBe(
+      `Gravure de ${k2.source.typesetter} pour le Mutopia Project, CC BY 2.5`,
+    );
+    expect(attribution(k2, fr).text).toMatch(/domaine public$/);
   });
   it('still marks the five share-alike engravings of the first library', async () => {
     expect(

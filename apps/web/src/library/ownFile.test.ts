@@ -13,7 +13,7 @@ describe('own files (spec 3, 7.6)', () => {
     const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
     const photos = [new File([png], 'second.png'), new File([png], 'first.png')];
     const scans: File[][] = [];
-    const refused: string[] = [];
+    const refused: unknown[] = [];
     acceptScoreFiles(
       photos,
       () => {},

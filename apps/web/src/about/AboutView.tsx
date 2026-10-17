@@ -1,8 +1,11 @@
 import { ENGINE_VERSION } from '@digitus2/engine';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
+import type { Messages } from '../i18n/messages.js';
 import { Button } from '../design/Button.js';
+import { en } from '../i18n/en/index.js';
+import { useT } from '../i18n/i18n.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import {
   isShareAlike,
@@ -18,11 +21,9 @@ const MIDI_FILE_URL = 'https://github.com/carter-thaxton/midi-file';
 const SMPLR_URL = 'https://github.com/danigb/smplr';
 const SAMPLES_URL = 'https://github.com/sfzinstruments/SplendidGrandPiano';
 
-const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-
-/** 5 -> 'Five'; numbers past nine stay digits. */
+/** 5 -> 'Five': a count written as a word up to nine, in English (the tests' language). */
 export function countWord(n: number): string {
-  return NUMBER_WORDS[n] ?? String(n);
+  return en.about.pieces.count(n);
 }
 
 /**
@@ -33,22 +34,10 @@ export function isArchivePiece(p: LibraryPiece): boolean {
   return p.source.name.startsWith('MuseScore');
 }
 
-/** The sentence above the table; it names CC BY only once the library has such an engraving. */
-const CREDITED = 'credited here and on their score pages.';
-function creditSentence(curated: readonly LibraryPiece[]): string {
-  const shareAlikeCount = curated.filter(isShareAlike).length;
-  /** CC BY engravings: credited like the share-alike ones, without a share-alike term. */
-  const attributionOnlyCount = curated.filter((p) => requiresCredit(p) && !isShareAlike(p)).length;
-  return attributionOnlyCount === 0
-    ? `${countWord(shareAlikeCount)} engravings are shared under CC BY-SA and are ${CREDITED}`
-    : `${countWord(shareAlikeCount)} engravings are shared under CC BY-SA and ` +
-        `${countWord(attributionOnlyCount).toLowerCase()} under CC BY; all are ${CREDITED}`;
-}
-
 /** Who engraved a piece: the Mutopia typesetter, or our own arrangement. */
-function engraving(p: LibraryPiece): { text: string; url: string | null } {
-  if (p.source.name.startsWith('digitus2')) return { text: 'digitus2 arrangement', url: null };
-  const by = p.source.typesetter ?? 'Unnamed typesetter';
+function engraving(p: LibraryPiece, t: Messages): { text: string; url: string | null } {
+  if (p.source.name.startsWith('digitus2')) return { text: t.about.pieces.arrangement, url: null };
+  const by = p.source.typesetter ?? t.about.pieces.unnamedTypesetter;
   if (p.source.name === 'The Mutopia Project' || p.source.mutopiaId !== undefined) {
     return { text: `${by} (Mutopia Project)`, url: p.source.url };
   }
@@ -65,8 +54,30 @@ function ExternalLink({ href, children }: { href: string; children: string }) {
   );
 }
 
+/**
+ * A text with links: each [bracketed] part is a link, made by the next of `links` from its words,
+ * so a translation puts the link wherever its own word order needs it.
+ */
+function Linked({
+  text,
+  links,
+}: {
+  text: string;
+  links: readonly ((label: string) => ReactNode)[];
+}) {
+  return (
+    <>
+      {text.split(/\[([^\]]*)\]/).map((part, i) => (
+        <Fragment key={i}>{i % 2 === 0 ? part : links[(i - 1) / 2]!(part)}</Fragment>
+      ))}
+    </>
+  );
+}
+
 /** What digitus2 is, how it chooses fingerings, and every licence and attribution it owes. */
 export function AboutView() {
+  const t = useT();
+  const a = t.about;
   const [details, setDetails] = useState<LibraryPiece[] | null>(null);
   useEffect(() => {
     let live = true;
@@ -78,100 +89,97 @@ export function AboutView() {
     };
   }, []);
   const curated = (details ?? []).filter((p) => !isArchivePiece(p));
+  const shareAlikeCount = curated.filter(isShareAlike).length;
+  /** CC BY engravings: credited like the share-alike ones, without a share-alike term. */
+  const attributionCount = curated.filter((p) => requiresCredit(p) && !isShareAlike(p)).length;
   const archiveCount = (details ?? []).length - curated.length;
   const openLibrary = useAppStore((s) => s.openLibrary);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
+  const link = (href: string) => (label: string) => (
+    <ExternalLink href={href}>{label}</ExternalLink>
+  );
   return (
     <main className="page stack about">
       <header className="about-header">
         <Button primary className="no-print" onClick={openLibrary}>
-          Back to the library
+          {a.back}
         </Button>
         <ThemeToggle />
         <h1 ref={heading} tabIndex={-1}>
-          About digitus2
+          {a.title}
         </h1>
       </header>
 
       <section className="stack" aria-labelledby="about-what">
-        <h2 id="about-what">What this is</h2>
-        <p>digitus2 writes finger numbers on piano music for beginning and intermediate players.</p>
+        <h2 id="about-what">{a.what.heading}</h2>
+        <p>{a.what.body}</p>
       </section>
 
       <section className="stack" aria-labelledby="about-how">
-        <h2 id="about-how">How the fingerings are chosen</h2>
-        <p>
-          The engine scores every possible fingering with ergonomic rules from the piano-fingering
-          literature (finger spans, thumb crossings, weak fingers, black keys, hand position
-          changes) and picks the cheapest one for the whole piece with an exact search. Your hand
-          size changes the spans it allows. The engine version is {ENGINE_VERSION}.
-        </p>
+        <h2 id="about-how">{a.how.heading}</h2>
+        <p>{a.how.body(ENGINE_VERSION)}</p>
       </section>
 
       <section className="stack" aria-labelledby="about-who">
-        <h2 id="about-who">Who made it</h2>
+        <h2 id="about-who">{a.who.heading}</h2>
         <p>
-          Created by Claude, Anthropic&apos;s AI model, in an autonomous multi-day build directed by
-          Maxim Marchal. To our knowledge, nothing like this exists yet: a fingering engine verified
-          against expert annotations. The code, the research notes and the verification results are
-          in the <ExternalLink href={REPOSITORY_URL}>repository</ExternalLink>.
+          <Linked text={a.who.body} links={[link(REPOSITORY_URL)]} />
         </p>
       </section>
 
       <section className="stack" aria-labelledby="about-licences">
-        <h2 id="about-licences">Licences</h2>
+        <h2 id="about-licences">{a.licences.heading}</h2>
         <ul className="about-list">
           <li>
-            <ExternalLink href={REPOSITORY_URL}>digitus2</ExternalLink> is free software under the
-            MIT licence.
+            <Linked text={a.licences.digitus2} links={[link(REPOSITORY_URL)]} />
           </li>
           <li>
-            Music engraving by <ExternalLink href={VEROVIO_URL}>Verovio</ExternalLink>,
-            LGPL-3.0-or-later, used as an unmodified library.
+            <Linked text={a.licences.verovio} links={[link(VEROVIO_URL)]} />
           </li>
           <li>
-            PDF previews use{' '}
-            <ExternalLink href="https://mozilla.github.io/pdf.js/">PDF.js</ExternalLink> (
-            <a
-              href={import.meta.env.BASE_URL + 'licenses/pdfjs.txt'}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Apache-2.0
-            </a>
-            ).
+            <Linked
+              text={a.licences.pdfjs}
+              links={[
+                link('https://mozilla.github.io/pdf.js/'),
+                (label) => (
+                  <a
+                    href={import.meta.env.BASE_URL + 'licenses/pdfjs.txt'}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {label}
+                  </a>
+                ),
+              ]}
+            />
           </li>
           <li>
-            MIDI files are read with <ExternalLink href={MIDI_FILE_URL}>midi-file</ExternalLink>{' '}
-            (MIT).
+            <Linked text={a.licences.midiFile} links={[link(MIDI_FILE_URL)]} />
           </li>
           <li>
-            Piano sound: <ExternalLink href={SMPLR_URL}>smplr</ExternalLink> (MIT) playing the{' '}
-            <ExternalLink href={SAMPLES_URL}>Splendid Grand Piano</ExternalLink> samples (public
-            domain).
+            <Linked text={a.licences.piano} links={[link(SMPLR_URL), link(SAMPLES_URL)]} />
           </li>
         </ul>
       </section>
 
       <section className="stack" aria-labelledby="about-pieces">
-        <h2 id="about-pieces">The built-in pieces</h2>
+        <h2 id="about-pieces">{a.pieces.heading}</h2>
         <p>
-          The pieces use public-domain or Creative Commons editions.{' '}
-          {details !== null && creditSentence(curated)}
+          {a.pieces.intro} {details !== null && a.pieces.credit(shareAlikeCount, attributionCount)}
         </p>
         <table className="about-pieces">
           <thead>
             <tr>
-              <th scope="col">Piece</th>
-              <th scope="col">Composer</th>
-              <th scope="col">Engraving</th>
-              <th scope="col">Licence</th>
+              <th scope="col">{a.pieces.columns.piece}</th>
+              <th scope="col">{a.pieces.columns.composer}</th>
+              <th scope="col">{a.pieces.columns.engraving}</th>
+              <th scope="col">{a.pieces.columns.licence}</th>
             </tr>
           </thead>
           <tbody>
             {curated.map((p) => {
-              const by = engraving(p);
+              const by = engraving(p, t);
               return (
                 <tr key={p.slug}>
                   <td>
@@ -192,13 +200,7 @@ export function AboutView() {
             })}
           </tbody>
         </table>
-        {archiveCount > 0 && (
-          <p>
-            {archiveCount.toLocaleString('en-US')} more scores come from the MuseScore archive (the
-            PDMX dataset). Each is public domain or CC0 as its uploader declared it, and each names
-            its source and licence on its score page.
-          </p>
-        )}
+        {archiveCount > 0 && <p>{a.pieces.archive(archiveCount)}</p>}
       </section>
     </main>
   );

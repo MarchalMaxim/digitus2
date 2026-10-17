@@ -1,24 +1,34 @@
 import { scanMime, validateScan, validateScanImages } from '../scan/model.js';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { Phrase } from '../i18n/messages.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 
-export const NOT_A_SCORE_REFUSAL =
-  'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).';
+/** What a refusal tells the reader: a text, or a Phrase written in the language on screen. */
+export type Refusal = string | Phrase;
+
+export const NOT_A_SCORE_REFUSAL: Phrase = (t) => t.library.ownFile.notScore;
+
+/** The refusal for a failed validation: the error's own text, else `fallback`. */
+function refusalOf(cause: unknown, fallback: Phrase): Refusal {
+  if (cause instanceof PhraseError) return cause.phrase;
+  return cause instanceof Error ? cause.message : fallback;
+}
 
 const SCORE_EXTENSIONS = ['.musicxml', '.xml', '.mxl', '.mid', '.midi'];
 
 export function acceptScoreFiles(
   files: readonly File[],
   onFile: (name: string, bytes: Uint8Array) => void,
-  onRefuse: (message: string) => void,
+  onRefuse: (message: Refusal) => void,
   onScan?: (files: File[]) => void,
 ): void {
   if (files.length > 1) {
     if (!onScan) {
-      onRefuse('Open one MusicXML or MIDI file at a time.');
+      onRefuse((t) => t.library.ownFile.oneAtATime);
       return;
     }
     void validateScanImages(files).then(onScan, (cause: unknown) =>
-      onRefuse(cause instanceof Error ? cause.message : 'Could not read these files.'),
+      onRefuse(refusalOf(cause, (t) => t.library.ownFile.cannotReadFiles)),
     );
     return;
   }
@@ -37,13 +47,13 @@ export function isScoreFileName(name: string): boolean {
 export function acceptScoreFile(
   file: File | undefined,
   onFile: (name: string, bytes: Uint8Array) => void,
-  onRefuse: (message: string) => void,
+  onRefuse: (message: Refusal) => void,
   onScan?: (file: File) => void,
 ): void {
   if (!file) return;
   if (onScan && scanMime(file.name)) {
     void validateScan(file).then(onScan, (error: unknown) =>
-      onRefuse(error instanceof Error ? error.message : 'Could not read this file.'),
+      onRefuse(refusalOf(error, (t) => t.library.ownFile.cannotReadFile)),
     );
     return;
   }
@@ -73,7 +83,7 @@ export function carriesFiles(dt: DataTransfer | null | undefined): boolean {
  */
 export function useWindowFileDrop(
   onFile: (name: string, bytes: Uint8Array) => void,
-  onRefuse: (message: string) => void,
+  onRefuse: (message: Refusal) => void,
   onScan?: (files: File[]) => void,
 ): boolean {
   const [dragging, setDragging] = useState(false);

@@ -18,6 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
 import { fileIdentity, useAppStore, type PieceSource } from '../app/store.js';
 import { createEngineClient, type EngineClient } from '../engine/client.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 import { loadPiece, pieceBySlug, readScoreFile } from '../library/manifest.js';
 import { injectNoteIds } from './render/injectIds.js';
 import { createRenderer, SupersededError, type ScoreRenderer } from './render/renderer.js';
@@ -28,6 +29,11 @@ export type DocStatus = 'idle' | 'loading' | 'fingering' | 'rendering' | 'ready'
 export interface ScoreDocument {
   status: DocStatus;
   error: string | null;
+  /**
+   * What was thrown, so the screen writes the reason in the language it shows now (a language
+   * switch while the error is open); `error` is the same text written when it happened.
+   */
+  errorCause?: unknown;
   score: Score | null;
   /** The unpacked source text, without our ids or fingerings. */
   xml: string | null;
@@ -110,7 +116,7 @@ const RENDER_ATTEMPTS = 3;
 
 async function fetchBytes(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`the score file could not be fetched (HTTP ${res.status})`);
+  if (!res.ok) throw new PhraseError((t) => t.score.doc.fetchFailed(res.status));
   return new Uint8Array(await res.arrayBuffer());
 }
 
@@ -288,7 +294,7 @@ export function useScoreDocument(
         let fingeredPath: string | null = null;
         if (slug !== null) {
           const piece = await loadPiece(slug);
-          if (!piece) throw new Error(`there is no piece called "${slug}"`);
+          if (!piece) throw new PhraseError((t) => t.score.doc.noPiece(slug));
           input = await readScoreFile(piece.files.score, svc.fetchText ?? fetchBytes);
           sourceName = piece.files.score;
           fingeredPath = piece.files.fingered;
@@ -326,7 +332,8 @@ export function useScoreDocument(
           composer: slug === null && metaComposer ? metaComposer : s.composer,
         }));
       } catch (e) {
-        if (live()) setState((s) => ({ ...s, status: 'error', error: messageOf(e) }));
+        if (live())
+          setState((s) => ({ ...s, status: 'error', error: messageOf(e), errorCause: e }));
       }
     })();
     return () => {
@@ -350,7 +357,8 @@ export function useScoreDocument(
         setState((s) => ({ ...s, status: 'rendering', solveMs: solved.ms }));
       },
       (e: unknown) => {
-        if (live()) setState((s) => ({ ...s, status: 'error', error: messageOf(e) }));
+        if (live())
+          setState((s) => ({ ...s, status: 'error', error: messageOf(e), errorCause: e }));
       },
     );
   }, [status]);
@@ -422,8 +430,8 @@ export function useScoreDocument(
         // way back, never a score left 'Preparing' for good.
         if (!current()) return;
         const error =
-          e instanceof SupersededError ? 'the score could not be laid out, please try again' : e;
-        setState((s) => ({ ...s, status: 'error', error: messageOf(error) }));
+          e instanceof SupersededError ? new PhraseError((t) => t.score.doc.layoutFailed) : e;
+        setState((s) => ({ ...s, status: 'error', error: messageOf(error), errorCause: error }));
       }
     })();
   }, [status, showEditorial, widthBucket, nonce]);
@@ -465,7 +473,8 @@ export function useScoreDocument(
           digitChanges: diff.changes.size > 0 ? diff.changes : null,
         }));
       } catch (e) {
-        if (current()) setState((s) => ({ ...s, status: 'error', error: messageOf(e) }));
+        if (current())
+          setState((s) => ({ ...s, status: 'error', error: messageOf(e), errorCause: e }));
       }
     })();
   }, [status, handSize]);

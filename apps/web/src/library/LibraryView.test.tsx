@@ -1,12 +1,14 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
+import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { FINGER_LEGEND } from '../score/FingerLegend.js';
 import type * as ManifestModule from './manifest.js';
 import { shelfOfGenre } from './levels.js';
 import { libraryPieces } from './manifest.js';
 import { LibraryView } from './LibraryView.js';
+import { useLocalLibrary } from './local/state.js';
 
 // These layout pins describe the 253 curated pieces unless a test asks for the whole library
 // (2,702 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
@@ -468,5 +470,69 @@ describe('LibraryView: search (UI batch 6.3; shelves spec 4.4)', () => {
       'Challenging',
     ]);
     expect(screen.getAllByRole('button', { name: /^Open / }).length).toBeLessThanOrEqual(28);
+  });
+});
+
+describe('LibraryView in another language (issue #6)', () => {
+  afterEach(() => {
+    resetLocaleForTests();
+    useLocalLibrary.setState({ items: [], failed: false });
+  });
+  it('speaks French: sentence, button, levels, shelves, counts and the end line', async () => {
+    await act(() => chooseLocale('fr'));
+    render(<LibraryView />);
+    expect(
+      screen.getByText(
+        'Les numéros de doigts pour le piano. Choisissez un morceau, appuyez sur Lire et suivez la note rouge.',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Commencer avec Twinkle, Twinkle, Little Star' }),
+    ).toHaveClass('is-red');
+    expect(screen.getByRole('radio', { name: 'Facile' })).toBeChecked();
+    expect(h2s()).toEqual([
+      'Chansons',
+      'Classique',
+      'Folklore et chants de Noël',
+      'Baroque',
+      'Romantique',
+    ]);
+    const songs = shelfOf('Chansons');
+    expect(within(songs).getByText('41 morceaux')).toBeInTheDocument();
+    expect(within(songs).getByRole('button', { name: 'Voir les 41 chansons' })).toBeInTheDocument();
+    expect(within(songs).getAllByRole('button', { name: /^Ouvrir .+ de .+/ })).toHaveLength(5);
+    expect(screen.getByLabelText('Ouvrir votre propre partition')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'À propos et licences' })).toBeInTheDocument();
+  });
+  it('announces in the language on screen, and finds a shelf by its name there', async () => {
+    library.whole = true;
+    await act(() => chooseLocale('nl'));
+    render(<LibraryView />);
+    await userEvent.click(screen.getByRole('radio', { name: 'Gemiddeld' }));
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent(
+        /^Gemiddeld: [\d.]+ stukken$/,
+      ),
+    );
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: 'De bibliotheek doorzoeken' }),
+      'barok',
+    );
+    expect(screen.getAllByRole('button', { name: /^Open .+ van .+/ }).length).toBeGreaterThan(0);
+    await userEvent.clear(screen.getByRole('searchbox'));
+    await userEvent.type(screen.getByRole('searchbox'), 'zzzzqq');
+    expect(screen.getByText('Geen stuk gevonden voor “zzzzqq”.')).toBeInTheDocument();
+  });
+  it('writes the saved scores in Portuguese', async () => {
+    await act(() => chooseLocale('pt'));
+    useLocalLibrary.setState({
+      items: [{ id: 'a', name: 'piano.png', detail: 'draft', saved: true }],
+      failed: false,
+    });
+    render(<LibraryView />);
+    expect(screen.getByText('Minhas partituras')).toBeInTheDocument();
+    expect(screen.getByText('Salvas')).toBeInTheDocument();
+    expect(screen.getByText('Rascunho de digitalização')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remover piano.png (salva)' })).toBeInTheDocument();
   });
 });

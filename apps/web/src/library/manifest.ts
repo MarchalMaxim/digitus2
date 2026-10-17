@@ -1,3 +1,6 @@
+import { en } from '../i18n/en/index.js';
+import type { Messages } from '../i18n/messages.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 import indexUrl from '../../../../content/library-index.json?url';
 import manifestUrl from '../../../../content/manifest.json?url';
 import type { GenreId, Grade } from './levels.js';
@@ -151,8 +154,10 @@ export function setPieceDetails(entries: readonly LibraryPiece[]): void {
 export function loadPieceDetails(): Promise<Map<string, LibraryPiece>> {
   if (details) return details;
   const loading = fetch(manifestUrl).then(async (response) => {
-    if (!response.ok)
-      throw new Error(`the library details could not be loaded (HTTP ${response.status})`);
+    if (!response.ok) {
+      console.error(`the library details could not be loaded (HTTP ${response.status})`);
+      throw new PhraseError((t) => t.library.loadFailed);
+    }
     const entries = (await response.json()) as LibraryPiece[];
     return new Map(entries.map((p) => [p.slug, p]));
   });
@@ -224,19 +229,27 @@ function isMutopia(p: LibraryPiece): boolean {
   return p.source.name === 'The Mutopia Project' || p.source.mutopiaId !== undefined;
 }
 
-export function attribution(p: LibraryPiece): { text: string; url: string | null } {
+/**
+ * The credit line of a piece, written in the language of `t` (English without it). The url is
+ * the licence for a CC BY or own engraving, else the source.
+ */
+export function attribution(
+  p: LibraryPiece,
+  t: Messages = en,
+): { text: string; url: string | null } {
+  const say = t.library.credit;
   if (isOwnArrangement(p)) {
-    return { text: 'digitus2 arrangement, CC0 (public domain)', url: p.source.licenseUrl };
+    return { text: say.arrangement, url: p.source.licenseUrl };
   }
   if (isMutopia(p)) {
-    const by = p.source.typesetter ?? 'an unnamed typesetter';
+    const by = p.source.typesetter ?? say.unnamedTypesetter;
     if (requiresCredit(p)) {
       return {
-        text: `Engraving by ${by} for the Mutopia Project, ${licenseLabel(p.source.license)}`,
+        text: say.engraving(by, licenseLabel(p.source.license)),
         url: p.source.licenseUrl,
       };
     }
-    return { text: `Engraving by ${by} for the Mutopia Project, public domain`, url: p.source.url };
+    return { text: say.engravingPublicDomain(by), url: p.source.url };
   }
   // No library piece takes this branch today; it keeps a future source credited rather than blank.
   return { text: `${p.source.name}, ${licenseLabel(p.source.license)}`, url: p.source.url };

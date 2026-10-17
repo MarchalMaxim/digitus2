@@ -1,7 +1,8 @@
 import { Fragment } from 'react';
+import { useT } from '../i18n/i18n.js';
 import { LengthPills } from './LevelPills.js';
-import { TIER_NAMES, type LengthId, type ShelfId } from './levels.js';
-import { countText, type Group, type LibraryLayout, type Row, type Section } from './model.js';
+import { type LengthId, type ShelfId } from './levels.js';
+import { type Group, type LibraryLayout, type Row, type Section } from './model.js';
 
 export interface PieceListActions {
   onOpen(slug: string): void;
@@ -30,6 +31,7 @@ export interface PieceListProps extends PieceListActions {
  */
 export function PieceList({ layout, freshFrom, ...actions }: PieceListProps) {
   const { onOpen } = actions;
+  const t = useT();
   switch (layout.kind) {
     case 'shelves':
       return (
@@ -38,7 +40,7 @@ export function PieceList({ layout, freshFrom, ...actions }: PieceListProps) {
             <section key={s.id} className="shelf" aria-labelledby={`shelf-${s.id}`}>
               <div className="shelf-head">
                 <h2 id={`shelf-${s.id}`}>{s.name}</h2>
-                <span className="count muted">{countText(s.count)}</span>
+                <span className="count muted">{t.library.pieces(s.count)}</span>
               </div>
               <p className="muted">{s.line}</p>
               <Rows rows={s.rows} offset={0} freshFrom={null} onOpen={onOpen} />
@@ -60,13 +62,13 @@ export function PieceList({ layout, freshFrom, ...actions }: PieceListProps) {
       return (
         <section className="shelf" aria-labelledby="shelf-open">
           <button type="button" className="text-button back" onClick={actions.onBack}>
-            All styles
+            {t.library.list.allStyles}
           </button>
           <div className="shelf-head">
             <h2 id="shelf-open" tabIndex={-1}>
               {layout.name}
             </h2>
-            <span className="count muted">{countText(layout.count)}</span>
+            <span className="count muted">{t.library.pieces(layout.count)}</span>
           </div>
           {layout.lengths && (
             <LengthPills
@@ -101,8 +103,8 @@ export function PieceList({ layout, freshFrom, ...actions }: PieceListProps) {
               data-section={s.tier}
             >
               <div className="shelf-head">
-                <h2 id={`level-${s.tier}`}>{TIER_NAMES[s.tier]}</h2>
-                <span className="count muted">{countText(s.count)}</span>
+                <h2 id={`level-${s.tier}`}>{t.library.tiers[s.tier]}</h2>
+                <span className="count muted">{t.library.pieces(s.count)}</span>
               </div>
               <Groups groups={s.groups} freshFrom={s.open ? freshFrom : null} onOpen={onOpen} />
               {s.action !== null && (
@@ -119,7 +121,7 @@ export function PieceList({ layout, freshFrom, ...actions }: PieceListProps) {
         <>
           {layout.sections.map((s) => (
             <section key={s.tier} className="level-section" aria-labelledby={`level-${s.tier}`}>
-              <h2 id={`level-${s.tier}`}>{TIER_NAMES[s.tier]}</h2>
+              <h2 id={`level-${s.tier}`}>{t.library.tiers[s.tier]}</h2>
               <Groups groups={s.groups} freshFrom={null} onOpen={onOpen} />
             </section>
           ))}

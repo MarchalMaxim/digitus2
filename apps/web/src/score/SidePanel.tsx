@@ -2,25 +2,15 @@ import { useId, useMemo, useState, type ChangeEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandSize, type PieceSource } from '../app/store.js';
 import { downloadText, exportFilename } from '../export/download.js';
-import { TIER_NAMES, tierOf } from '../library/levels.js';
+import { useT } from '../i18n/i18n.js';
+import { tierOf } from '../library/levels.js';
 import { formatDuration, type LibraryPiece } from '../library/manifest.js';
 import { FingerLegend } from './FingerLegend.js';
 import { MidiImportPanel } from './MidiImportPanel.js';
+import { keyName } from './keyName.js';
 import { services, type ScoreDocument } from './useScoreDocument.js';
 
-const HAND_SIZES: { value: HandSize; label: string }[] = [
-  { value: 'large', label: 'Large' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'small', label: 'Small' },
-  { value: 'child', label: 'Child' },
-];
-
-/**
- * What the hand size changes, under its select (polish plan Task 6, review S9: nothing said it,
- * and a beginner may read "Child" as an easier mode).
- */
-export const HAND_SIZE_HELP =
-  'Hand size changes the stretches the fingering allows. Choose child or small for small hands.';
+const HAND_SIZES: readonly HandSize[] = ['large', 'medium', 'small', 'child'];
 
 export interface SidePanelProps {
   doc: ScoreDocument;
@@ -52,6 +42,7 @@ export function SidePanel({
   setSplitMidi,
   legendAbove = false,
 }: SidePanelProps) {
+  const t = useT();
   const handSize = useAppStore((s) => s.settings.handSize);
   const showEditorial = useAppStore((s) => s.settings.showEditorial);
   const setSettings = useAppStore((s) => s.setSettings);
@@ -93,15 +84,15 @@ export function SidePanel({
       const fingered = await services.engine.fingeredXml(xml, score, assignment);
       downloadText(exportFilename(source), fingered);
     } catch (e) {
-      setNotice(`Could not export the score: ${messageOf(e)}`);
+      setNotice((t) => t.score.side.exportFailed(messageOf(e, t)));
     } finally {
       setExporting(false);
     }
   };
 
   return (
-    <aside className="side-panel stack no-print" aria-label="Piece and fingering">
-      <h2 className="visually-hidden">Piece and fingering</h2>
+    <aside className="side-panel stack no-print" aria-label={t.score.side.label}>
+      <h2 className="visually-hidden">{t.score.side.label}</h2>
       <FingerLegend className={legendAbove ? 'wide-only' : undefined} />
       {doc.midiInfo && doc.score && (
         <MidiImportPanel
@@ -117,26 +108,26 @@ export function SidePanel({
           {piece && (
             <>
               <div>
-                <dt>Level</dt>
-                <dd>{TIER_NAMES[tierOf(piece.level)]}</dd>
+                <dt>{t.score.side.facts.level}</dt>
+                <dd>{t.library.tiers[tierOf(piece.level)]}</dd>
               </div>
               <div>
-                <dt>Key</dt>
-                <dd>{piece.key}</dd>
+                <dt>{t.score.side.facts.key}</dt>
+                <dd>{keyName(piece.key, t)}</dd>
               </div>
               <div>
-                <dt>Time</dt>
+                <dt>{t.score.side.facts.time}</dt>
                 <dd>{piece.timeSignature}</dd>
               </div>
               <div>
-                <dt>Length</dt>
+                <dt>{t.score.side.facts.length}</dt>
                 <dd>{formatDuration(piece.approxDurationSec)}</dd>
               </div>
             </>
           )}
           {measures !== null && (
             <div>
-              <dt>Bars</dt>
+              <dt>{t.score.side.facts.bars}</dt>
               <dd>{measures}</dd>
             </div>
           )}
@@ -145,17 +136,17 @@ export function SidePanel({
 
       <div className="hand-size">
         <label className="field">
-          Hand size
+          {t.score.side.handSize.label}
           <select value={handSize} onChange={onHandSize} aria-describedby={handSizeHelpId}>
-            {HAND_SIZES.map((h) => (
-              <option key={h.value} value={h.value}>
-                {h.label}
+            {HAND_SIZES.map((size) => (
+              <option key={size} value={size}>
+                {t.score.side.handSize[size]}
               </option>
             ))}
           </select>
         </label>
         <p id={handSizeHelpId} className="field-help muted small">
-          {HAND_SIZE_HELP}
+          {t.score.side.handSize.help}
         </p>
       </div>
 
@@ -166,16 +157,16 @@ export function SidePanel({
             checked={showEditorial}
             onChange={(e) => setSettings({ showEditorial: e.currentTarget.checked })}
           />{' '}
-          Show the editor's fingering
+          {t.score.side.showEditorial}
         </label>
       )}
 
       <div className="panel-actions">
         <button type="button" disabled={!canExport} onClick={() => void onExport()}>
-          Export MusicXML
+          {t.score.side.exportButton}
         </button>
         <button type="button" disabled={!ready} onClick={() => window.print()}>
-          Print
+          {t.score.side.print}
         </button>
       </div>
 
@@ -183,10 +174,10 @@ export function SidePanel({
           they wait behind a disclosure, closed by default; it is there once there is either. */}
       {(timings || doc.warnings.length > 0) && (
         <details className="panel-details">
-          <summary>Details</summary>
+          <summary>{t.score.side.details}</summary>
           {timings && (
             <p className="timings muted small">
-              Fingered in {timings.solve} ms · laid out in {timings.render} ms
+              {t.score.side.timings(timings.solve, timings.render)}
             </p>
           )}
           {doc.warnings.length > 0 && (

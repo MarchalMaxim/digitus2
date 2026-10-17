@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { useT } from '../i18n/i18n.js';
 import { pieceKey, useAppStore, type View } from './store.js';
 import { NoteBurst } from './NoteBurst.js';
 import { Notice } from './Notice.js';
@@ -53,6 +54,7 @@ function useScrollOnViewChange(key: string): void {
 }
 
 export function App() {
+  const t = useT();
   useEffect(() => {
     void import('../library/local/library.js').then((m) => m.installLocalLibrary());
   }, []);
@@ -65,7 +67,7 @@ export function App() {
       {view.name === 'library' && <LibraryView />}
       {view.name === 'score' && <ScoreView key={key} source={view.source} />}
       {view.name === 'scan' && (
-        <Suspense fallback={<p className="page">Opening scan...</p>}>
+        <Suspense fallback={<p className="page">{t.app.openingScan}</p>}>
           <ScanView key={key} session={view.session} />
         </Suspense>
       )}

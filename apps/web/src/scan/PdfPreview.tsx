@@ -7,6 +7,9 @@ import {
 } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { messageOf } from '../app/errors.js';
+import { useT } from '../i18n/i18n.js';
+import type { Phrase } from '../i18n/messages.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -14,13 +17,18 @@ GlobalWorkerOptions.workerSrc = workerUrl;
 export function PdfPreview({ file }: { file: File }) {
   const [document, setDocument] = useState<PDFDocumentProxy>();
   const [pageNumber, setPageNumber] = useState(1);
-  const [error, setError] = useState('');
+  const t = useT();
+  const [error, setErrorPhrase] = useState<Phrase | null>(null);
+  // A phrase is a function, which useState would call as an update.
+  const setError = (phrase: Phrase | null) => {
+    setErrorPhrase(() => phrase);
+  };
   const canvas = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let current = true;
     let task: ReturnType<typeof getDocument> | undefined;
-    setError('');
+    setError(null);
     setReady(false);
     void file
       .arrayBuffer()
@@ -37,7 +45,7 @@ export function PdfPreview({ file }: { file: File }) {
         if (current) setDocument(pdf);
       })
       .catch((cause: unknown) => {
-        if (current) setError('Preview unavailable: ' + messageOf(cause));
+        if (current) setError((tt) => tt.scan.preview.unavailable(messageOf(cause, tt)));
       });
     return () => {
       current = false;
@@ -60,12 +68,12 @@ export function PdfPreview({ file }: { file: File }) {
       target.width = Math.ceil(scaled.width);
       target.height = Math.ceil(scaled.height);
       const context = target.getContext('2d');
-      if (!context) throw new Error('Canvas is not available.');
+      if (!context) throw new PhraseError((tt) => tt.scan.preview.canvasMissing);
       render = page.render({ canvas: target, canvasContext: context, viewport: scaled });
       await render.promise;
       if (current) setReady(true);
     })().catch((cause: unknown) => {
-      if (current) setError('Preview unavailable: ' + messageOf(cause));
+      if (current) setError((tt) => tt.scan.preview.unavailable(messageOf(cause, tt)));
     });
     return () => {
       current = false;
@@ -79,30 +87,28 @@ export function PdfPreview({ file }: { file: File }) {
           <button
             disabled={pageNumber <= 1}
             onClick={() => setPageNumber((page) => page - 1)}
-            aria-label="Previous original page"
+            aria-label={t.scan.pager.previousLabel}
           >
-            Previous
+            {t.scan.pager.previous}
           </button>
-          <span>
-            Page {pageNumber} of {document.numPages}
-          </span>
+          <span>{t.scan.pager.pageOf(pageNumber, document.numPages)}</span>
           <button
             disabled={pageNumber >= document.numPages}
             onClick={() => setPageNumber((page) => page + 1)}
-            aria-label="Next original page"
+            aria-label={t.scan.pager.nextLabel}
           >
-            Next
+            {t.scan.pager.next}
           </button>
         </div>
       )}
-      {!ready && <p role="status">{error || 'Preparing original PDF…'}</p>}
+      {!ready && <p role="status">{error ? error(t) : t.scan.view.preparingPdf}</p>}
       <canvas
         ref={canvas}
         role="img"
-        aria-label={`Original PDF, page ${pageNumber}`}
+        aria-label={t.scan.preview.pageLabel(pageNumber)}
         hidden={!ready}
       />
-      {error && <p className="small">Open the original PDF above to compare all pages.</p>}
+      {error && <p className="small">{t.scan.preview.openToCompare}</p>}
     </div>
   );
 }

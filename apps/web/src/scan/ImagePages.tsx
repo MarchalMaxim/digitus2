@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
+import { useT } from '../i18n/i18n.js';
+import type { Phrase } from '../i18n/messages.js';
 import { SCAN_PAGE_LIMIT, validateScanImages, type ScanPage } from './model.js';
 import { rotateScanPage } from './rotation.js';
 
@@ -39,7 +41,12 @@ export function ImagePages({
   onChange(pages: ScanPage[]): void;
   onRotating?(value: boolean): void;
 }) {
-  const [error, setError] = useState('');
+  const t = useT();
+  const [error, setErrorPhrase] = useState<Phrase | null>(null);
+  // A phrase is a function, which useState would call as an update.
+  const setError = (phrase: Phrase | null) => {
+    setErrorPhrase(() => phrase);
+  };
   const [rotating, setRotating] = useState(false);
   const rotation = useRef<AbortController | undefined>(undefined);
   const dragged = useRef<string | undefined>(undefined);
@@ -65,7 +72,7 @@ export function ImagePages({
     rotation.current = controller;
     setRotating(true);
     onRotating?.(true);
-    setError('');
+    setError(null);
     try {
       const next = await rotateScanPage(selectedPage, controller.signal);
       const current = latest.current;
@@ -75,7 +82,7 @@ export function ImagePages({
       if (index < 0 || current.pages[index]!.file !== selectedPage.file) return;
       current.onChange(current.pages.map((page, i) => (i === index ? next : page)));
     } catch (cause) {
-      if (alive.current && !controller.signal.aborted) setError(messageOf(cause));
+      if (alive.current && !controller.signal.aborted) setError((tt) => messageOf(cause, tt));
     } finally {
       rotation.current = undefined;
       if (alive.current) {
@@ -97,11 +104,9 @@ export function ImagePages({
       {pages.length > 1 && (
         <>
           <p className="small muted">
-            {editable
-              ? 'Arrange pages in reading order. Drag a thumbnail or select a page to move it.'
-              : `${pages.length} original pages, in reading order.`}
+            {editable ? t.scan.pages.arrange : t.scan.pages.originalCount(pages.length)}
           </p>
-          <ol className="scan-page-list" aria-label="Score pages">
+          <ol className="scan-page-list" aria-label={t.scan.pages.listLabel}>
             {pages.map((page, index) => (
               <li
                 key={page.id}
@@ -130,7 +135,7 @@ export function ImagePages({
                   className="scan-thumbnail"
                   aria-pressed={selected === index}
                   onClick={() => onSelect(index)}
-                  aria-label={`Select page ${index + 1}: ${(page.originalFile ?? page.file).name}`}
+                  aria-label={t.scan.pages.select(index + 1, (page.originalFile ?? page.file).name)}
                 >
                   <Thumbnail file={page.file} />
                   <span>{index + 1}</span>
@@ -138,7 +143,11 @@ export function ImagePages({
                 <span className="scan-page-caption">
                   {(page.originalFile ?? page.file).name}
                   <small>
-                    {page.error ? 'Needs retry' : page.xml ? 'Recognized' : 'Ready to scan'}
+                    {page.error
+                      ? t.scan.pages.needsRetry
+                      : page.xml
+                        ? t.scan.pages.recognized
+                        : t.scan.pages.ready}
                   </small>
                 </span>
               </li>
@@ -155,26 +164,30 @@ export function ImagePages({
                 void rotate();
               }}
             >
-              Rotate 90° clockwise
+              {t.scan.pages.rotate}
             </button>
-            {rotating && <button onClick={() => rotation.current?.abort()}>Cancel rotation</button>}
+            {rotating && (
+              <button onClick={() => rotation.current?.abort()}>
+                {t.scan.pages.cancelRotation}
+              </button>
+            )}
           </div>
-          {rotating && <p role="status">Rotating image…</p>}
+          {rotating && <p role="status">{t.scan.pages.rotating}</p>}
           {pages.length > 1 && (
             <div className="row">
               <button
                 disabled={busy || rotating || selected === 0}
                 onClick={() => move(selected, selected - 1)}
-                aria-label={`Move page ${selected + 1} earlier`}
+                aria-label={t.scan.pages.moveEarlierLabel(selected + 1)}
               >
-                Move earlier
+                {t.scan.pages.moveEarlier}
               </button>
               <button
                 disabled={busy || rotating || selected === pages.length - 1}
                 onClick={() => move(selected, selected + 1)}
-                aria-label={`Move page ${selected + 1} later`}
+                aria-label={t.scan.pages.moveLaterLabel(selected + 1)}
               >
-                Move later
+                {t.scan.pages.moveLater}
               </button>
               <button
                 disabled={busy}
@@ -182,14 +195,14 @@ export function ImagePages({
                   onChange(pages.filter((p) => p.id !== selectedPage.id));
                   onSelect(Math.max(0, selected - 1));
                 }}
-                aria-label={`Remove page ${selected + 1}`}
+                aria-label={t.scan.pages.removeLabel(selected + 1)}
               >
-                Remove page
+                {t.scan.pages.remove}
               </button>
             </div>
           )}
           <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
-            Add page images
+            {t.scan.pages.addImages}
             <input
               type="file"
               multiple
@@ -205,68 +218,58 @@ export function ImagePages({
                     if (!alive.current) return;
                     const current = latest.current;
                     if (current.busy) {
-                      setError('Finish this scan before adding more pages.');
+                      setError((tt) => tt.scan.pages.finishFirst);
                       return;
                     }
                     if (current.pages.length + validated.length > SCAN_PAGE_LIMIT) {
-                      setError('Choose up to 20 page images at a time.');
+                      setError((tt) => tt.scan.files.pageLimit);
                       return;
                     }
-                    setError('');
+                    setError(null);
                     current.onChange([
                       ...current.pages,
                       ...validated.map((file) => ({ id: crypto.randomUUID(), file })),
                     ]);
                   },
                   (cause: unknown) => {
-                    if (alive.current) setError(messageOf(cause));
+                    if (alive.current) setError((tt) => messageOf(cause, tt));
                   },
                 );
               }}
             />
           </label>
-          {error && <p role="alert">{error}</p>}
+          {error && <p role="alert">{error(t)}</p>}
         </div>
       )}
       {pages.length > 1 && (
-        <div className="row scan-source-pagination" aria-label="Original page navigation">
+        <div className="row scan-source-pagination" aria-label={t.scan.pager.navLabel}>
           <button
             disabled={selected === 0}
             onClick={() => onSelect(selected - 1)}
-            aria-label="Previous original page"
+            aria-label={t.scan.pager.previousLabel}
           >
-            Previous
+            {t.scan.pager.previous}
           </button>
-          <span>
-            Page {selected + 1} of {pages.length}
-          </span>
+          <span>{t.scan.pager.pageOf(selected + 1, pages.length)}</span>
           <button
             disabled={selected === pages.length - 1}
             onClick={() => onSelect(selected + 1)}
-            aria-label="Next original page"
+            aria-label={t.scan.pager.nextLabel}
           >
-            Next
+            {t.scan.pager.next}
           </button>
         </div>
       )}
       {selectedPage.error && (
-        <p role="status">
-          Page {selected + 1}: {selectedPage.error}
-        </p>
+        <p role="status">{t.scan.pages.pageError(selected + 1, selectedPage.error)}</p>
       )}
       <img
         className="scan-original-image"
         src={url}
-        alt={
-          pages.length > 1
-            ? `Original printed score, page ${selected + 1}`
-            : 'Original printed score'
-        }
+        alt={pages.length > 1 ? t.scan.pages.altPage(selected + 1) : t.scan.pages.alt}
       />
       {!!selectedPage.quarterTurns && (
-        <p className="small muted">
-          Rotated {selectedPage.quarterTurns * 90}° clockwise for scanning. Original file kept.
-        </p>
+        <p className="small muted">{t.scan.pages.rotated(selectedPage.quarterTurns * 90)}</p>
       )}
     </div>
   );

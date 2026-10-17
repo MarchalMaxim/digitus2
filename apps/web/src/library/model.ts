@@ -2,6 +2,7 @@
  * What the library page shows, as a pure function of the manifest and the reader's choices
  * (shelves spec, sections 4 and 5; UI batch spec, sections 5 and 6). The React views only render it.
  */
+import type { Messages } from '../i18n/messages.js';
 import {
   OTHER_BELOW,
   PAGE_SIZE,
@@ -16,8 +17,6 @@ import {
   LENGTHS,
   SHELVES,
   TIERS,
-  TIER_NAMES,
-  shelfById,
   shelfOfGenre,
   tierOf,
   type GenreId,
@@ -137,23 +136,12 @@ export interface LibraryChoices {
   lastPlayed?: string | null;
 }
 
-export const OTHER_PIECES = 'Other pieces';
-
 /** 29 -> '0:29', 132.3 -> '2:12' (whole seconds, truncated). */
 export function formatDuration(sec: number): string {
   const total = Math.max(0, Math.floor(sec));
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
-}
-
-/** 1415 -> '1,415': the same in every locale, so tests and announcements agree. */
-export function formatCount(n: number): string {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-export function countText(n: number): string {
-  return n === 1 ? '1 piece' : `${formatCount(n)} pieces`;
 }
 
 /** The local date as `YYYY-MM-DD`: the day the samples are drawn for. */
@@ -221,7 +209,7 @@ function lastNameWord(composer: string): string | undefined {
 const plain = (piece: LibraryEntry): Draft => ({ piece, title: piece.title, composerSaid: false });
 
 /** One list's groups, in manifest order (UI batch spec 6.2). */
-function draftGroups(pieces: readonly LibraryEntry[]): DraftGroup[] {
+function draftGroups(pieces: readonly LibraryEntry[], t: Messages): DraftGroup[] {
   const flat = (): DraftGroup[] => [{ key: 'flat', heading: null, drafts: pieces.map(plain) }];
   if (!showsHeadings(pieces.length)) return flat();
   const byCollection = new Map<string, LibraryEntry[]>();
@@ -250,7 +238,7 @@ function draftGroups(pieces: readonly LibraryEntry[]): DraftGroup[] {
   }
   if (groups.length === 0) return flat();
   if (other.length > 0) {
-    groups.push({ key: 'other', heading: OTHER_PIECES, drafts: other.map(plain) });
+    groups.push({ key: 'other', heading: t.library.list.otherPieces, drafts: other.map(plain) });
   }
   return groups;
 }
@@ -273,7 +261,11 @@ function firstRows(groups: DraftGroup[], n: number): DraftGroup[] {
  * `counted` is what "in view" means when it is more than what is drawn: an opened list counts
  * its unshown pages too, so a row does not gain a composer line when the next page arrives.
  */
-function finish(sections: DraftGroup[][], counted: DraftGroup[][] = sections): Group[][] {
+function finish(
+  sections: DraftGroup[][],
+  t: Messages,
+  counted: DraftGroup[][] = sections,
+): Group[][] {
   const seen = new Map<string, number>();
   for (const groups of counted)
     for (const g of groups)
@@ -291,7 +283,7 @@ function finish(sections: DraftGroup[][], counted: DraftGroup[][] = sections): G
             : isUnnamed(piece.composer) || composerSaid
               ? null
               : composerShort(piece.composer),
-        label: `Open ${piece.title} by ${piece.composer}`,
+        label: t.library.list.openPiece(piece.title, piece.composer),
         duration: formatDuration(piece.approxDurationSec),
       })),
     })),
@@ -302,8 +294,10 @@ const rowCount = (groups: readonly { rows: readonly unknown[] }[]): number =>
   groups.reduce((n, g) => n + g.rows.length, 0);
 
 /** `Show 40 more`, or `Show the last 17` when the next page is the final one. */
-export function moreLabel(remaining: number): string {
-  return remaining > PAGE_SIZE ? `Show ${PAGE_SIZE} more` : `Show the last ${remaining}`;
+export function moreLabel(remaining: number, t: Messages): string {
+  return remaining > PAGE_SIZE
+    ? t.library.list.showMore(PAGE_SIZE)
+    : t.library.list.showLast(remaining);
 }
 
 /** The pages asked for as a row count (at least one page). */
@@ -427,10 +421,13 @@ function withLength(list: readonly LibraryEntry[], id: LengthId): readonly Libra
 // -- layouts --------------------------------------------------------------------------------
 
 /** The small library's list, or search results: a section per tier, each in full. */
-function sectionsOf(pieces: readonly LibraryEntry[]): Section[] {
+function sectionsOf(pieces: readonly LibraryEntry[], t: Messages): Section[] {
   const tiers = tiersIn(pieces);
   const members = tiers.map((t) => pieces.filter((p) => tierOf(p.level) === t));
-  const groups = finish(members.map(draftGroups));
+  const groups = finish(
+    members.map((m) => draftGroups(m, t)),
+    t,
+  );
   return tiers.map((tier, i) => ({
     tier,
     count: members[i]!.length,
@@ -449,15 +446,17 @@ function searchSections(
   found: readonly LibraryEntry[],
   open: Tier | null,
   pages: number | undefined,
+  t: Messages,
 ): Section[] {
   const tiers = tiersIn(found);
   const members = tiers.map((t) => found.filter((p) => tierOf(p.level) === t));
-  const full = members.map((m, i) => (tiers[i] === open ? draftGroups(m) : null));
+  const full = members.map((m, i) => (tiers[i] === open ? draftGroups(m, t) : null));
   const visible = members.map((m, i) =>
-    full[i] ? firstRows(full[i]!, pageRows(pages)) : draftGroups(m.slice(0, SECTION_ROWS)),
+    full[i] ? firstRows(full[i]!, pageRows(pages)) : draftGroups(m.slice(0, SECTION_ROWS), t),
   );
   const groups = finish(
     visible,
+    t,
     visible.map((v, i) => full[i] ?? v),
   );
   return tiers.map((tier, i) => {
@@ -466,10 +465,10 @@ function searchSections(
     const isOpen = full[i] !== null;
     const action: ListAction | null = isOpen
       ? count > shown
-        ? { kind: 'more', label: moreLabel(count - shown) }
+        ? { kind: 'more', label: moreLabel(count - shown, t) }
         : null
       : count > SECTION_ROWS
-        ? { kind: 'open', label: `All ${formatCount(count)} in ${TIER_NAMES[tier]}` }
+        ? { kind: 'open', label: t.library.list.allInLevel(count, t.library.tiers[tier]) }
         : null;
     return { tier, count, groups: groups[i]!, shown, open: isOpen, action };
   });
@@ -490,6 +489,7 @@ function shelvesOf(
   tier: Tier,
   date: string,
   lastPlayed: string | null,
+  t: Messages,
 ): ShelfSummary[] {
   const byShelf = new Map<ShelfId, LibraryEntry[]>();
   for (const p of inTier) {
@@ -509,14 +509,15 @@ function shelvesOf(
   });
   const rows = finish(
     shelves.map((s) => [{ key: 'flat', heading: null, drafts: s.samples.map(plain) }]),
+    t,
   );
   return shelves.map(({ shelf, members }, i) => ({
     id: shelf.id,
-    name: shelf.name,
-    line: shelf.line,
+    name: t.library.shelves[shelf.id].name,
+    line: t.library.shelves[shelf.id].line,
     count: members.length,
     rows: rows[i]![0]!.rows,
-    all: members.length > SAMPLES ? `All ${formatCount(members.length)} ${shelf.noun}` : null,
+    all: members.length > SAMPLES ? t.library.shelves[shelf.id].all(members.length) : null,
   }));
 }
 
@@ -524,24 +525,25 @@ function shelvesOf(
 export function libraryLayout(
   pieces: readonly LibraryEntry[],
   choices: LibraryChoices,
+  t: Messages,
 ): LibraryLayout {
   const { tier, shelf, section, pages, date } = choices;
   const query = choices.query.trim();
   const wanted = choices.length ?? 'any';
   if (query !== '' && showsSearch(pieces.length)) {
-    const found = searchPieces(pieces, query);
+    const found = searchPieces(pieces, query, (id) => t.library.shelves[id].name);
     const { lengths, length } = lengthPills(found, wanted);
     const listed = withLength(found, length);
     return {
       kind: 'search',
       query,
       count: listed.length,
-      sections: searchSections(listed, section ?? null, pages),
+      sections: searchSections(listed, section ?? null, pages, t),
       lengths,
       length,
     };
   }
-  if (!showsPills(pieces.length)) return { kind: 'all', sections: sectionsOf(pieces) };
+  if (!showsPills(pieces.length)) return { kind: 'all', sections: sectionsOf(pieces, t) };
   const tiers = tiersIn(pieces);
   const chosen = tier !== null && tiers.includes(tier) ? tier : tiers[0]!;
   const inTier = pieces.filter((p) => tierOf(p.level) === chosen);
@@ -549,20 +551,20 @@ export function libraryLayout(
     const members = inTier.filter((p) => shelfOfGenre(p.genre) === shelf);
     const { lengths, length } = lengthPills(members, wanted);
     const listed = withLength(members, length);
-    const full = draftGroups(listed);
+    const full = draftGroups(listed, t);
     const visible = firstRows(full, pageRows(pages));
-    const groups = finish([visible], [full])[0]!;
+    const groups = finish([visible], t, [full])[0]!;
     const shown = rowCount(groups);
     return {
       kind: 'shelf',
       tiers,
       tier: chosen,
       shelf,
-      name: shelfById(shelf).name,
+      name: t.library.shelves[shelf].name,
       count: listed.length,
       groups,
       shown,
-      more: listed.length > shown ? moreLabel(listed.length - shown) : null,
+      more: listed.length > shown ? moreLabel(listed.length - shown, t) : null,
       lengths,
       length,
     };
@@ -572,27 +574,28 @@ export function libraryLayout(
     tiers,
     tier: chosen,
     count: inTier.length,
-    shelves: shelvesOf(inTier, chosen, date, choices.lastPlayed ?? null),
+    shelves: shelvesOf(inTier, chosen, date, choices.lastPlayed ?? null, t),
   };
 }
 
 /** What the polite live region says about a layout: the count in view, never on arrival (the view). */
-export function announcementFor(layout: LibraryLayout): string {
+export function announcementFor(layout: LibraryLayout, t: Messages): string {
+  const say = t.library;
   switch (layout.kind) {
     case 'all':
       return '';
     case 'shelves':
-      return `${TIER_NAMES[layout.tier]}: ${countText(layout.count)}`;
+      return say.announce.counted(say.tiers[layout.tier], layout.count);
     case 'shelf':
       return layout.shown > PAGE_SIZE
-        ? `Showing ${formatCount(layout.shown)} of ${formatCount(layout.count)}`
-        : `${layout.name}: ${countText(layout.count)}`;
+        ? say.announce.showing(layout.shown, layout.count)
+        : say.announce.counted(layout.name, layout.count);
     case 'search': {
-      if (layout.count === 0) return `No piece matches “${layout.query}”.`;
+      if (layout.count === 0) return say.search.noMatch(layout.query);
       const open = layout.sections.find((s) => s.open && s.shown > PAGE_SIZE);
       return open
-        ? `Showing ${formatCount(open.shown)} of ${formatCount(open.count)} in ${TIER_NAMES[open.tier]}`
-        : countText(layout.count);
+        ? say.announce.showingIn(open.shown, open.count, say.tiers[open.tier])
+        : say.pieces(layout.count);
     }
   }
 }
@@ -614,10 +617,10 @@ export function startTarget(
   return { piece: pieces.find((p) => p.level === lowest)!, continuing: false };
 }
 
-export function startLabel(target: StartTarget): string {
+export function startLabel(target: StartTarget, t: Messages): string {
   return target.continuing
-    ? `Continue with ${dropTrailingParenthesis(target.piece.title)}`
-    : `Start with ${target.piece.title}`;
+    ? t.library.welcome.continueWith(dropTrailingParenthesis(target.piece.title))
+    : t.library.welcome.startWith(target.piece.title);
 }
 
 /** The tier the pills open on: chosen in this visit, else the last piece's, else the easiest. */

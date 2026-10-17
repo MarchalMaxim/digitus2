@@ -1,6 +1,7 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { THEME_STORAGE_KEY } from './theme.js';
 import { ThemeToggle } from './ThemeToggle.js';
 
@@ -22,6 +23,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  resetLocaleForTests();
   vi.unstubAllGlobals();
 });
 
@@ -61,5 +63,14 @@ describe('ThemeToggle', () => {
     expect(svg.querySelector('mask .theme-bite')).not.toBeNull();
     expect(screen.getByRole('button')).toHaveClass('no-print');
     expect(screen.getByRole('button')).not.toHaveClass('is-red');
+  });
+
+  it('is named in the language on screen', async () => {
+    systemPrefersDark(false);
+    await act(async () => {
+      await chooseLocale('nl');
+    });
+    render(<ThemeToggle />);
+    expect(screen.getByRole('button', { name: 'Donker thema' })).toBeInTheDocument();
   });
 });

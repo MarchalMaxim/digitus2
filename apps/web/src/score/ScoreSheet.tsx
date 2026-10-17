@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useT } from '../i18n/i18n.js';
 
 export interface ScoreSheetProps {
   /** SVG pages from the Verovio worker, in order. */
   pages: string[];
-  /** The piece title; the host is announced as "Score of <label>". */
+  /** The piece title; the host is announced as "Score of <label>" (in the language on screen). */
   label: string;
   /** Receives the host element on mount (and null on unmount) for digit patching and the cursor. */
   onHost?: (host: HTMLDivElement | null) => void;
@@ -21,6 +22,7 @@ export interface ScoreSheetProps {
  * base.css), so the layout only has to be redone when the width bucket changes.
  */
 export function ScoreSheet({ pages, label, onHost, resting = false }: ScoreSheetProps) {
+  const t = useT();
   const hostRef = useRef<HTMLDivElement>(null);
 
   // A layout effect: the pages are in before the parent's layout effects run (the dimming of a
@@ -39,7 +41,7 @@ export function ScoreSheet({ pages, label, onHost, resting = false }: ScoreSheet
     <div
       className={resting ? 'score-sheet is-resting' : 'score-sheet'}
       role="img"
-      aria-label={`Score of ${label}`}
+      aria-label={t.score.sheet.label(label)}
       ref={hostRef}
     />
   );

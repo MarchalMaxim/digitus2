@@ -1,12 +1,7 @@
 import type { Assignment } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
-import {
-  EDITORIAL_SHOWN_TEXT,
-  LOADING_PIANO_TEXT,
-  scoreStatusLine,
-  showsEditorial,
-  type StatusInputs,
-} from './ScoreView.js';
+import { en } from '../i18n/en/index.js';
+import { scoreStatusLine, showsEditorial, type StatusInputs } from './ScoreView.js';
 
 /** A ready score, playable, with the player idle (or playing, past any count-in). */
 const ready: StatusInputs = {
@@ -27,7 +22,7 @@ describe('the status line', () => {
   });
 
   it('says "Loading the piano…" while the first Play loads the samples', () => {
-    expect(LOADING_PIANO_TEXT).toBe('Loading the piano…');
+    expect(en.score.view.loadingPiano).toBe('Loading the piano…');
     expect(scoreStatusLine({ ...ready, loading: true })).toEqual(info('Loading the piano…'));
   });
 
@@ -85,7 +80,7 @@ describe("the editor's fingering line", () => {
   const editorial: Assignment = { n1: { finger: 2, source: 'editorial' } };
 
   it('reads "Showing the editor\'s fingering"', () => {
-    expect(EDITORIAL_SHOWN_TEXT).toBe("Showing the editor's fingering");
+    expect(en.score.view.editorialShown).toBe("Showing the editor's fingering");
   });
 
   it("shows while the pages carry the editor's fingering", () => {

@@ -21,6 +21,7 @@ import type { Hand, Score } from '@digitus2/engine';
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
+import type { Phrase } from '../i18n/messages.js';
 import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, type Instrument } from '../audio/instrument.js';
 import { scheduleClick } from '../audio/metronome.js';
@@ -119,10 +120,8 @@ class SamplesError extends Error {}
  */
 export const LOOP_SETTLE_MS = 400;
 
-export const SAMPLES_FAILED_NOTICE =
-  'The piano sounds could not be loaded. Check the connection and press Play again.';
-export const PLAYER_FAILED_NOTICE =
-  'The player could not be loaded. Check the connection and press Play again.';
+export const SAMPLES_FAILED_NOTICE: Phrase = (t) => t.transport.samplesFailed;
+export const PLAYER_FAILED_NOTICE: Phrase = (t) => t.transport.playerFailed;
 
 /** The hands the transport silences for a hands setting. */
 export function mutedHandsFor(hands: HandsMode): Hand[] {

@@ -3,7 +3,8 @@ import { create } from 'zustand';
 export interface LocalScoreSummary {
   id: string;
   name: string;
-  detail: string;
+  /** What was saved: the score file itself, a recognised scan, or a scan still being worked on. */
+  detail: 'file' | 'recognition' | 'draft';
   saved: boolean;
 }
 

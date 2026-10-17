@@ -324,3 +324,23 @@ h2[tabindex='-1']:focus {
   font-size: 1.125rem;
   font-weight: 600;
 }
+
+/* The language line (i18n/LanguageLine.tsx): quiet gray names, the one on screen in ink and not
+   underlined, since it is no longer a choice. */
+.language-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--gray-3);
+  font-size: 0.875rem;
+}
+
+.language-line .text-button {
+  min-height: 44px;
+  color: inherit;
+}
+
+.language-line .text-button[aria-current='true'] {
+  color: var(--ink);
+  text-decoration: none;
+}

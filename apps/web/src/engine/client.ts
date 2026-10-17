@@ -5,6 +5,7 @@
  */
 import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
 import type { HandSize } from '../app/store.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 import { sourceKind, type EngineRequest, type EngineResponse } from './protocol.js';
 
 export interface EngineClient {
@@ -93,7 +94,9 @@ export function createEngineClient(
   // would otherwise leave every pending call waiting forever. handle() itself never throws.
   worker.onerror = (e: ErrorEvent) => {
     if (closed) return;
-    closed = new Error(`the engine worker failed${e.message ? `: ${e.message}` : ''}`);
+    // The reader may be shown this (a score that cannot load), so it is a Phrase.
+    const detail = e.message;
+    closed = new PhraseError((t) => t.app.engineFailed(detail));
     worker.terminate();
     rejectAll(closed);
     onFail?.(closed);

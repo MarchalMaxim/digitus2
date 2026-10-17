@@ -1,24 +1,11 @@
 # Library at 2,700 pieces: four levels and style shelves
 
-- Date: 2026-10-16
 - Issue: https://github.com/MarchalMaxim/digitus2/issues/10 ("Make public library easier to read")
-- Status: design for implementation on branch `claude/pensive-mccarthy-lya162`.
-- Supersedes, for the library page only: `2026-10-14-ui-batch-design.md` sections 4.1 (six level pills), 6.1 (PILLS_ABOVE, GENRES_ABOVE, FOLD_ABOVE thresholds) and 6.2 (the list's shapes). Everything else there (rows, one red element, motion, keyboard, drop, own-file line, About) stands.
+- Scope: the library page. This document defines its levels, shelves, thresholds and list shapes, which replace the six level pills (UI batch spec 4.1), the genre row and folded collections (6.1, 8) and the one-level list (6.2). `2026-10-14-ui-batch-design.md` keeps rows, the one red element, motion, keyboard, the drop frame, the end line and About.
 
-## 1. The problem, measured
+## 1. The problem
 
-The library holds 2,702 pieces (`content/library-index.json`). Today the page shows six level pills and then every piece of the chosen level, so the page a reader lands on is one of these lists:
-
-| Level (today)  | Pieces | Rows rendered on arrival |
-| -------------- | -----: | -----------------------: |
-| 1 First steps  |     47 |                       47 |
-| 2 Easy         |    212 |                      212 |
-| 3 Moderate     |  1,415 |                    1,415 |
-| 4 Intermediate |    784 |                      784 |
-| 5 Challenging  |     45 |                       45 |
-| 6 Advanced     |    199 |                      199 |
-
-Six pills whose names do not order themselves (is Intermediate harder than Moderate?), and a list of up to 1,415 rows with no shape: it is hard to read and slow to render. The index the page waits for is 717 KB (129 KB gzip).
+The library holds 2,702 pieces (`content/library-index.json`). Six level pills whose names do not order themselves (is Intermediate harder than Moderate?) followed by every piece of the chosen level made a page of up to 1,415 rows with no shape: hard to read and slow to render, behind an index of 717 KB (129 KB gzip). The page now shows at most 30 rows on arrival.
 
 ## 2. The rule of 7
 
@@ -26,7 +13,7 @@ No logical scope on the page holds more than 7 siblings: at most 7 page units, 4
 
 ## 3. Four levels
 
-The issue asks for Easy, Medium and Challenging; the user then asked for four levels (2026-10-16), adding Harder between Medium and Challenging. The engine's content tools keep grading pieces 1 to 6 (`content/tools/level.py`; the manifest's `level` field is unchanged, so benchmarks and the build are untouched). The web app maps the grade to a level:
+The issue asks for Easy, Medium and Challenging; the owner asked for four levels, adding Harder between Medium and Challenging. The engine's content tools keep grading pieces 1 to 6 (`content/tools/level.py`; the manifest's `level` field is unchanged, so benchmarks and the build are untouched). The web app maps the grade to a level:
 
 | Level       | Grades | Pieces |
 | ----------- | ------ | -----: |
@@ -67,7 +54,7 @@ The 5 sample rows show the shelf's range, not its first five manifest entries:
 
 The reader's last-played piece, when it is in this level and shelf, is always the first sample (the red Continue button already points at it; the row is not red).
 
-At most 6 shelves x 5 rows = 30 rows render on arrival (today up to 1,415).
+At most 6 shelves x 5 rows = 30 rows render on arrival.
 
 ### 4.2 A shelf opened
 
@@ -81,7 +68,7 @@ When the list in view (an open shelf, or search results) holds more than 40 piec
 
 ### 4.4 Search
 
-The search field stays in the start row. Typing replaces the level pills and shelves with results across every level, in four sections (Easy, Medium, Harder, Challenging), each with its count. A section shows its first 7 rows and `All 312 in Medium` opens that section to pages of 40, like a shelf. Search also matches shelf names (`baroque`, `jazz`) as words of every piece on that shelf, so a style is one word away. Length pills apply when the results exceed 40. The empty result stays as today.
+The search field stays in the start row. Typing replaces the level pills and shelves with results across every level, in four sections (Easy, Medium, Harder, Challenging), each with its count. A section shows its first 7 rows and `All 312 in Medium` opens that section to pages of 40, like a shelf. Search also matches shelf names (`baroque`, `jazz`) as words of every piece on that shelf, so a style is one word away. Length pills apply when the results exceed 40. The empty result is the UI batch spec's (6.2).
 
 ## 5. Page units, in reading order
 
@@ -99,27 +86,27 @@ Seven at most; on a first visit the reader sees 1, 3, 5, 6, 7.
 
 ## 6. Performance
 
-| Measure                        | Before       | Target                                                                |
-| ------------------------------ | ------------ | --------------------------------------------------------------------- |
-| Rows rendered on arrival       | up to 1,415  | at most 30                                                            |
-| Rows rendered in any list view | up to 1,415  | 40 per page shown                                                     |
-| `library-index.json`, gzip     | 129 KB       | at least 30 % smaller (compact columnar form with a collection table) |
-| Start-up JS+CSS (bundle gate)  | under 150 KB | unchanged gate                                                        |
+| Measure                        | Budget                                                               |
+| ------------------------------ | -------------------------------------------------------------------- |
+| Rows rendered on arrival       | at most 30                                                           |
+| Rows rendered in any list view | 40 per page shown                                                    |
+| `library-index.json`, gzip     | 79 KB (compact columnar form with a collection table; 129 KB before) |
+| Start-up JS+CSS (bundle gate)  | under 150 KB gzip                                                    |
 
 The full manifest still loads on demand only.
 
 ## 7. Red, motion, keyboard
 
 - The one red element stays the Start/Continue button. Chosen pills are ink-filled. Shelf buttons and `Show more` are quiet text buttons.
-- Opening a shelf, a page, a level: the list fades in with the existing `is-fresh` 160 ms ease-out; heights never animate; reduced motion is instant.
+- Opening a shelf, a page, a level: the list fades in with the existing `is-fresh` fade (`--dur-fast`, 120 ms ease-out); heights never animate; reduced motion is instant.
 - Level and length pills are native radio fieldsets (existing `LevelPills` technique). Shelf headings are h2, collection headings h3. The polite live region announces `Medium: 1,415 pieces`, `Songs: 643 pieces`, `Showing 80 of 643`, and search counts, 500 ms after the last change, never on arrival.
 
-## 8. What leaves
+## 8. What the page does not carry
 
-- Six level names (First steps, Moderate, Intermediate, Advanced leave the UI).
-- The level-long list on arrival.
-- The level lines (the gray line under the pills that described each level) leave too: the pills carry the names alone.
-- Unused disclosure constants for the never-built L2 shapes (`GENRES_ABOVE`, `GENRE_MIN`, `FOLD_ABOVE`, `genrePills`), replaced by shelves.
+- The six old level names (First steps, Moderate, Intermediate and Advanced are not in the UI).
+- A level-long list on arrival.
+- Level lines (a gray line under the pills describing each level): the pills carry the names alone.
+- Genre pills and folded collections: the shelves replace them.
 
 ## 9. Exact copy
 

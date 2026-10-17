@@ -1,10 +1,15 @@
 # Textbook fingering oracle
 
-These are generated patterns whose fingering is what piano method books print: scales, arpeggios and
-chromatic scales in every key, both hands, both directions. Use them to test the digitus2 engine without
-ambiguity. Every entry cites its sources. Where books disagree, the most common fingering is `fingers`
-and the others are in `alternatives`. The conventions, the per-key tables, every source URL and the list of
-disputed cases are in [`docs/research/textbook-oracle.md`](../../docs/research/textbook-oracle.md).
+Generated patterns whose fingering is what piano method books print: scales, arpeggios and chromatic
+scales in every key, both hands, both directions. They test the digitus2 engine without ambiguity. Every
+entry cites its sources. Where books disagree, the most common fingering is `fingers` and the others are in
+`alternatives`. The conventions, the per-key tables, every source URL and the list of disputed cases are in
+[`docs/research/textbook-oracle.md`](../../docs/research/textbook-oracle.md).
+
+The engine uses the oracle three ways. `packages/engine/src/eval/textbook.test.ts` scores the solver against
+it and enforces the `textbook` floors of `benchmarks/floor.json`. The solver's scale, arpeggio and chromatic
+templates (`packages/engine/src/fingering/params/textbook/`) are copies of these files, checked against the
+originals by `templates.test.ts`. The shipped weight set `learned-open` is fitted on it.
 
 ## Files
 
@@ -15,8 +20,6 @@ disputed cases are in [`docs/research/textbook-oracle.md`](../../docs/research/t
 | `chromatic.json` | Chromatic scale from each of the 12 pitch classes; RH and LH; ascending and descending; 2 octaves | 48 |
 | `generate.py` | Builds the three JSON files from the cited tables, rewrites the tables in the research doc, then runs `check.py` | |
 | `check.py` | Quality gates (see below); exits with code 1 on any failure | |
-
-Total: 672 entries.
 
 ## Schema
 
@@ -84,9 +87,6 @@ descending entry is the exact reverse of its ascending entry.
 
 146 entries carry at least one alternative (114 scales, 32 arpeggios).
 
-Each scale has 12 keys × 2 hands × 2 directions × 3 lengths = 144 entries per mode. Each arpeggio mode has
-12 × 2 × 2 = 48.
-
 ## Regenerate and check
 
 ```
@@ -129,6 +129,32 @@ Python 3.11, standard library only. Both scripts exit with code 1 if any gate fa
     Each one must appear in its entry, as `fingers` or as an alternative, and that fingering must cite the
     transcribed source.
 
-A mutation test was run on purpose: wrong pitches, a thumb on a black key, repeated fingers, a broken
-reverse, a wrong anchor and similar errors were injected. All 25 kinds of corruption were caught, and so
-were a wrong transcription and a wrong attribution in the source-fidelity gate.
+The gates were mutation-tested: wrong pitches, a thumb on a black key, repeated fingers, a broken reverse,
+a wrong anchor and similar errors were injected. All 25 kinds of corruption were caught, and so were a wrong
+transcription and a wrong attribution in the source-fidelity gate.
+
+## Sources
+
+Each entry cites the sources that print its fingering, and each JSON file lists the ones it uses in
+`sourcesUsed`. The research doc also lists the sources tried and not used, and why. One example page per
+source:
+
+- pianoscales.org, Piano Major Scales: https://www.pianoscales.org/major.html
+- MasterPiano, Piano scales: https://www.masterpiano.com/piano-scales
+- piano-keyboard-guide.com, one page per scale: https://www.piano-keyboard-guide.com/a-flat-major-scale.html
+- oktav.com, one page per scale: https://www.oktav.com/en/c/a-flat-major-scale-piano
+- Musicnotes, Scale guide: https://www.musicnotes.com/blog/scale-guide-how-to-play-b-flat-major-on-piano
+- Hoffman Academy lessons: https://app.hoffmanacademy.com/lessons/piano/d-major-scale-arpeggio/video/
+- R. Beauchamp, Music & Health piano syllabus: https://musicandhealth.co.uk/scales_examples/fingering.htm
+- Commonwealth University (Mansfield), piano handout for new students:
+  https://commonwealthu.edu/documents/music-piano-handout-new-students-mansfield
+- Fingering charts of Prof. Escadon, University of Miami, c. 1999, published by B. Rosenberg:
+  https://www.cs.miami.edu/~burt/music/finger-charts.html
+- R. T. Kelley, Guide to Learning Piano, arpeggio fingering chart: https://robertkelleyphd.com/home/arpfing.htm
+- Seventh-chord arpeggios, fingering rules: P. Roskell, The Art of Piano Fingering, ch. 11
+  (https://dfp.informance.biz/content/pages/6-the-art-of-piano-fingering/447-chapter-11-arpeggios-of-the-dominant-seventh)
+  and ch. 12
+  (https://www.informance.biz/wiki/6-the-art-of-piano-fingering/448-chapter-12-arpeggios-of-the-diminished-seventh);
+  F. Black, Guide to Playing Diminished Seventh Arpeggios for ABRSM Grade 8 Piano
+  (https://www.scribd.com/doc/264965107/Diminished-7th-Guide); C.-L. Hanon, The Virtuoso Pianist, Part II
+  (https://imslp.org/wiki/The_Virtuoso_Pianist_(Hanon,_Charles-Louis))

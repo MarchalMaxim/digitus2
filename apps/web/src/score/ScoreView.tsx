@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { Loader, type LoaderTune } from '../design/Loader.js';
 import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
 import { flash, prefersReducedMotion } from '../design/motion.js';
 import { messages, useT } from '../i18n/i18n.js';
@@ -29,6 +30,20 @@ function busyText(status: DocStatus, t: Messages): string | undefined {
   if (status === 'fingering') return text.fingering;
   if (status === 'rendering') return text.rendering;
   return undefined;
+}
+
+/**
+ * What the loader plays while the score is busy and there is no music to show yet (Loader.tsx):
+ * the scale while it loads, the scale with its fingering while the engine fingers, chords while
+ * it is laid out. Null once the score is ready, and while a busy score keeps its pages on screen
+ * (the same piece opened again).
+ */
+export function loaderTune(status: DocStatus, pageCount: number): LoaderTune | null {
+  if (pageCount > 0) return null;
+  if (status === 'idle' || status === 'loading') return 'scale';
+  if (status === 'fingering') return 'fingering';
+  if (status === 'rendering') return 'chords';
+  return null;
 }
 
 /** How long a hand switch takes to sweep from the first bar of a system to the last (ms). */
@@ -325,6 +340,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
     );
   }
 
+  const tune = loaderTune(doc.status, doc.pages.length);
   const status = scoreStatusLine(
     {
       docStatus: doc.status,
@@ -379,6 +395,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
           )}
           {/* Paused with the last group heard marked (T10), the red notes breathe for a moment
               (base.css, `.is-resting`): where Play resumes. */}
+          {/* Where the music will be, the loader carries the screen's one red until the score is
+              ready; then Play takes it. */}
+          {tune && (
+            <div className="score-loader no-print">
+              <Loader tune={tune} />
+            </div>
+          )}
           <BarSeek
             host={host}
             layoutKey={barLayout}
@@ -430,12 +453,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
                 currentBar={currentBar}
               />
             </div>
-            {/* Paused with the last group heard marked (T10): the cursor keeps the red. */}
+            {/* Paused with the last group heard marked (T10): the cursor keeps the red. While the
+                loader plays, it has the red and Play is plain. */}
             <Transport
               playback={playback}
               disabled={doc.status !== 'ready' || !playable}
               resumeShown={!playback.playing && currentGroup >= 0}
-              redAway={red.redAway}
+              redAway={red.redAway || tune !== null}
             />
             {narrow && practiceToggle}
             {range && (

@@ -125,3 +125,8 @@
     --gap: 1rem;
   }
 }
+
+/* The loader while a page is recognised (design/Loader.tsx), above the status line. */
+.scan-loader {
+  width: 10rem;
+}

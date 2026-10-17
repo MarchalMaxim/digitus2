@@ -9,7 +9,7 @@ plus numpy and scikit-learn; nothing here ships in the product.
 ```
 python -m venv research/.venv-readability
 research/.venv-readability/Scripts/python.exe -m pip install -r research/readability/requirements.txt
-echo C:/.../thingamajig/research > research/.venv-readability/Lib/site-packages/digitus2_research.pth
+echo <absolute path to research/> > research/.venv-readability/Lib/site-packages/digitus2_research.pth
 ```
 
 The `.pth` line puts `research/` on `sys.path` so that `readability` and `fingering_eval` import.
@@ -19,10 +19,12 @@ Always run with `-X utf8` on Windows (the manifests contain non-ASCII titles).
 
 * Mutopia editorial corpus: `research/data/mutopia_fingering/FingeringFiles/*.txt` (PIG format,
   hand in the channel column, finger `0` = nothing printed) plus `manifest.json`; built by
-  `research/scripts/build_mutopia_fingering.py` (datasets agent). Only `status == ok` parts are
-  used: 286 parts, 193,059 notes, 36,183 printed digits.
-* Library pieces with the source edition's fingerings: `content/scores/*.fingered.musicxml`
-  (8 pieces, 3,457 notes, 751 printed digits after merging tied continuations).
+  `research/scripts/build_mutopia_fingering.py`. Only `status == ok` parts are used: 286 parts,
+  193,059 notes, 36,183 printed digits.
+* Library pieces with the source edition's fingerings: `content/scores/*.fingered.musicxml`. The
+  committed results cover 8 pieces (3,457 notes, 751 printed digits after merging tied
+  continuations). The loader reads every fingered file present, so the counts change as the
+  library changes.
 * Textbook scale, arpeggio and chromatic fingerings: `benchmarks/textbook/*.json`.
 * Derived, gitignored (`research/data/.gitignore` ignores everything under `research/data/`
   except the listed manifests): `research/data/readability/mutopia_beats/<piece_id>.json` (beats
@@ -32,10 +34,11 @@ Always run with `-X utf8` on Windows (the manifests contain non-ASCII titles).
 ## Pipeline
 
 ```
-research/.venv-readability/Scripts/python.exe -X utf8 research/readability/run_all.py
+research/.venv-readability/Scripts/python.exe -X utf8 research/readability/run_all.py [--skip-enrich]
 ```
 
-runs, in order (about two minutes on one core; `OMP_NUM_THREADS=2`):
+runs, in order (about two minutes on one core; `OMP_NUM_THREADS=2`). `--skip-enrich` leaves out
+the first step. That step also skips itself when `research/data/mutopia_src/ftp` is absent.
 
 | Step | Script | Output |
 |---|---|---|
@@ -46,7 +49,8 @@ runs, in order (about two minutes on one core; `OMP_NUM_THREADS=2`):
 | item 3: player model, hide-20 and leave-one-out | `eval_player.py` (`player_model.py`, `textbook.py`) | `results/player_model*.json/csv` |
 | the minimal-sufficient reduction applied to editorial digits (unbiased on fully fingered parts) | `reduce.py` | `results/reduction.json`, `results/reduction_by_part.csv` |
 | item 4: printed-digit predictor | `predictor.py` | `results/predictor*.json/csv/txt` |
-| markdown tables for the report | `report_tables.py` | stdout |
+
+`report_tables.py` is not part of `run_all.py`. It prints the markdown tables for the report to stdout.
 
 Tests: `research/.venv-readability/Scripts/python.exe -X utf8 -m pytest research/readability/tests -q`.
 

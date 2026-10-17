@@ -1,35 +1,31 @@
-# oemer local research prototype
+# oemer in the browser
 
-Research only. No service receives a score. Current native clean-fixture strict structural/full-note F1 is 88.37% for Twinkle, 88.73% for Bach and 0.59% for Chopin. Bar alignment and whole-voice fingerprints compound structural errors; these are not literal notehead-detection accuracy percentages. See the [evidence report](../../../../docs/research/browser-omr-next-2026-10-15.md). Real whole-image browser Twinkle recognition completed in 21 min 08 s, with exact native label/per-piece-score parity and the same rhythm/timing errors. Product integration is not accepted.
+Research prototype that runs [oemer](https://github.com/BreezeWhite/oemer) entirely in the browser: both ONNX segmentation models in ONNX Runtime Web (one WASM thread, no cross-origin isolation) and oemer's unchanged Python reconstruction in Pyodide. A native runner serves as the comparison. Not used by the product.
 
-From repository root, with Python 3.11, Node/pnpm dependencies and Playwright Chromium installed:
+Result: on the clean Twinkle page the browser output matches native exactly (identical label maps and score), but the run takes 21 minutes on a desktop CPU. Native strict full-note F1 is 88.37% (Twinkle), 88.73% (Bach) and 0.59% (Chopin), and oemer exports no meter or beams. Details: [docs/research/omr.md](../../../../docs/research/omr.md).
+
+## Run
+
+From the repository root, with Python 3.11, pnpm dependencies and Playwright Chromium:
 
 ```powershell
 pnpm --filter @digitus2/engine build
-node research/omr/prepare.mjs --out research/omr/results/fixtures-final
+node research/omr/prepare.mjs --out research/omr/results/fixtures-final     # skip if the corpus exists; it refuses to overwrite
 powershell -NoProfile -File research/omr/prototypes/oemer/setup.ps1
 node research/omr/results/local-options/check-model-shapes.mjs
-node research/omr/results/local-options/run-browser-full.mjs
-```
-
-Fixture preparation refuses to overwrite an existing corpus; skip that command when the pinned fixture corpus already exists. Setup downloads official pinned MIT oemer source/checkpoints and ONNX Runtime Web into ignored `research/omr/results/local-options/`, checks source/model/package hashes, creates an isolated venv and converts inspected classifiers to safe NPZ/JSON. No Torch or system install. ONNX files total 109.2 MB; native Python dependencies, ORT Web and Pyodide packages are additional. Preserve upstream notices; wrapper files do not relicense upstream. Browser runtime uses pinned Pyodide 0.26.4 public static packages. Processing happens in a dedicated local worker; cold runtime downloads need internet.
-
-The browser runner chooses the actual clean Twinkle PNG, executes both ONNX models in browser WASM, reconstructs MusicXML in browser WASM, and saves unmodified XML, timings, request audit and screenshot. It has a 30-minute timeout and closes its browser/server. Evidence filenames are retained; pass a new run ID for another call:
-
-```powershell
-node research/omr/results/local-options/run-browser-full.mjs independent-review
-node research/omr/results/local-options/run-browser-full.mjs cancel-check --cancel-smoke
+node research/omr/results/local-options/run-browser-full.mjs NEW-RUN-ID
+node research/omr/results/local-options/run-browser-full.mjs NEW-CANCEL-ID --cancel-smoke
 node research/omr/prototypes/oemer/check-static-server.mjs
 ```
 
-The local server serves only required experiment assets. External requests are restricted to GETs of pinned public Pyodide runtime/package files. Cancellation terminates the worker. Raw results and large third-party assets remain ignored. Use the same pinned fixture corpus/reference MusicXML; do not derive expected notes from recognition output.
+`setup.ps1` downloads oemer at commit `dbe2a933`, its two release checkpoints (109.2 MB) and ONNX Runtime Web 1.22.0 into the ignored `research/omr/results/local-options/`, checking every hash. It copies the runners there and creates an isolated venv from `requirements.txt`. It also converts oemer's pickled SVC classifiers to safe NPZ/JSON, so the browser never loads pickle. Nothing is installed system-wide. The browser fetches Pyodide 0.26.4 from its public CDN; the local server allows only those GETs and the experiment's own assets, and cancelling terminates the worker. The browser runner has a 30-minute limit and closes its browser and server.
 
-For native diagnosis:
+Native comparison and label parity:
 
 ```powershell
 research/omr/results/local-options/.venv/Scripts/python.exe research/omr/results/local-options/run-oemer-native.py twinkle-twinkle-little-star
+research/omr/results/local-options/.venv/Scripts/python.exe research/omr/prototypes/oemer/compare-label-parity.py NATIVE.pkl NATIVE.png BROWSER-RUN.json
+node research/omr/results/local-options/render-output.mjs OUTPUT.musicxml
 ```
 
-Other fixture IDs are `bach-minuet-g-major-bwv-anh-114` and `chopin-prelude-op28-no7`. Locally generated prediction caches make later native calls reconstruction-only. The native diagnostic runner overwrites its prior XML and native-ID JSON, and does not bind an existing cache to a fixture hash. Use a fresh experiment directory for independent native recognition, or archive prior outputs and explicitly remove only the known generated cache before fresh inference. Do not treat a cached reconstruction as fresh recognition. Preserve earlier logs and scorecards. The native runner uses restricted upstream SVC unpickling, four CPU ORT threads and clean-image deskew disabled. The browser never loads pickle. Third-party Python-to-WASM is allowed only for this research; the product TypeScript rule is not waived.
-
-Meaningful validation is actual whole-image browser XML, strict `research/omr/evaluate.mjs` scoring, raw-output rendering, cancellation and network-boundary audit. Patch inference or reconstruction from native masks alone is not end-to-end recognition. No perfect-accuracy claim or calibrated confidence is supported.
+The other fixture ids are `bach-minuet-g-major-bwv-anh-114` and `chopin-prelude-op28-no7`. The native runner overwrites its previous XML. It also reuses a cached prediction without checking that it belongs to the fixture, which turns the call into reconstruction only. Use a fresh directory for a fresh native run. Score outputs with `research/omr/evaluate.mjs` against the fixture manifest, never against recognition output.

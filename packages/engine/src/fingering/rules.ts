@@ -163,7 +163,7 @@ export const RULE_IDS: readonly RuleId[] = Object.freeze(
  * The physical rule terms whose weights must stay non-negative during learning (a negative weight
  * would reward the strain the term measures). doubledFinger (the M2 hardening's price of each
  * finger a slice of more than five notes must double) is one of them; repeatedNoteFingerChange is
- * not (its learned weight is negative, plan correction 7).
+ * not (its learned weight is negative, learning-prototype.md section 6).
  */
 const PENALTY_RULES: ReadonlySet<string> = new Set<RuleId>([
   'stretch',

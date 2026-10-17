@@ -7,7 +7,7 @@
 //        [--profile medium] [--weight-set <id>]
 //
 // Paths are relative to the current directory (the repository root). Deterministic for the same
-// engine build and inputs. Schema: docs/superpowers/plans/2026-10-14-m7a-teacher-review-job.md, Task 1.
+// engine build and inputs.
 // A null gap means that no complete path gives that finger (the engine's +Infinity).
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';

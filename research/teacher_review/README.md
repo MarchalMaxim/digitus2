@@ -1,8 +1,9 @@
 # teacher_review: a language model as a qualitative fingering oracle
 
 Research harness for the question "can an LLM acting as a piano teacher review fingerings
-usefully, and how should it sit in the verification loop?". Findings, protocol, rubric and the
-reusable reviewer brief: [`docs/research/teacher-review.md`](../../docs/research/teacher-review.md).
+usefully, and how should it sit in the verification loop?". Findings, protocol and rubric:
+[`docs/research/teacher-review.md`](../../docs/research/teacher-review.md); the reviewer brief is
+`prompts/brief.md`.
 
 Pure Python 3.11 standard library (plus `pytest` for the tests); reuses `research/fingering_eval`
 for PIG reading. Run everything with `research/.venv` (its `digitus2_research.pth` puts
@@ -31,7 +32,7 @@ they are derived from PIG, which permits non-profit academic use but not redistr
 
 ```bash
 PY=research/.venv/Scripts/python.exe
-$PY -m pytest research/teacher_review/tests -q                       # 36 tests
+$PY -m pytest research/teacher_review/tests -q
 $PY -I -m teacher_review.build_benchmark --seed 20261013 --runs A B  # 40 passages x 3 conditions x 2 runs
 # dispatch one blinded reviewer per batch file (see "Dispatch" below), then:
 $PY -I -m teacher_review.collect --run A
@@ -44,8 +45,8 @@ and batches come out every time, so a run can be re-dispatched without touching 
 
 ## Dispatch
 
-The reviewers are Opus subagents launched by the coordinator (the harness prepares the inputs
-and validates the outputs; it does not call a model API itself). For every
+The reviewers are Opus subagents, launched from an agent session. The harness prepares the inputs
+and validates the outputs; it does not call a model API itself. For every
 `research/data/teacher_review/runs/<run>/batch-NN.md` launch one agent with this prompt,
 substituting the two paths:
 
@@ -89,18 +90,20 @@ they are exact.
 
 ## Weekly review (verification spec 3.12)
 
-The pilot's harness runs every week on the current engine. Plan:
-`docs/superpowers/plans/2026-10-14-m7a-teacher-review-job.md`. Run it by path from the repository
-root, not with `-m` (in a worktree the shared venv would import the main checkout's harness;
-`weekly.py where` prints the harness directory actually imported):
+The weekly job runs this harness on the current engine; it is specified in
+`docs/superpowers/specs/2026-10-13-verification-design.md`, section 3.12. Run the harness by path
+from the repository root, not with `-m`: a venv shared between checkouts would import another
+checkout's harness.
+`weekly.py where` prints the harness directory actually imported. `<date>` is the run date,
+YYYY-MM-DD.
 
 ```bash
 PY=research/.venv/Scripts/python.exe
 pnpm --filter @digitus2/engine build
-$PY -I research/teacher_review/weekly.py build --date 2026-10-21      # bench, dump, select, batches, launches
-# the coordinator launches one Opus reviewer per row of research/data/teacher_review/weekly/<date>/launches.json
-$PY -I research/teacher_review/weekly.py collect --date 2026-10-21
-$PY -I research/teacher_review/weekly.py report --date 2026-10-21     # docs/reviews/teacher-<date>.md
+$PY -I research/teacher_review/weekly.py build --date <date>      # bench, dump, select, batches, launches
+# launch one Opus reviewer per row of research/data/teacher_review/weekly/<date>/launches.json
+$PY -I research/teacher_review/weekly.py collect --date <date>
+$PY -I research/teacher_review/weekly.py report --date <date>     # docs/reviews/teacher-<date>.md
 ```
 
 | Module | What |

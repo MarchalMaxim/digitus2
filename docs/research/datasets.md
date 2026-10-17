@@ -1,8 +1,8 @@
 # Piano-fingering ground truth for digitus2: datasets, validation, metrics
 
-*Datasets workstream report (October 2026). Code: `research/fingering_eval/` (library),
-`research/scripts/` (download, build, validation), `research/tests/` (89 tests). Data layout,
-licences and reproduction commands: [`research/data/README.md`](../../research/data/README.md).*
+*Code: `research/fingering_eval/` (library), `research/scripts/` (download, build, validation),
+`research/tests/`. Data layout, licences and reproduction commands:
+[`research/data/README.md`](../../research/data/README.md).*
 
 ## 1. Summary
 
@@ -11,7 +11,7 @@ We have **three usable, independent kinds of ground truth** plus one large but n
 | Source | What it is | Size | Labels | Licence | Obtained | Verdict |
 |---|---|---|---|---|---|---|
 | **PIG v1.2** (Nakamura, Saito & Yoshii 2020) | fingerings *actually used* by experienced pianists, every note fingered | 150 pieces (excerpts), 309 fingering files, 48,724 notes / 100,040 note-fingerings, 11 pianists | complete, 1-6 pianists per piece | non-profit academic use only, no redistribution | yes (public byte-identical mirrors; official site needs registration) | **Primary benchmark.** Clean (6 hard errors in 100k notes). Use the official split + the 4 metrics; the human ceiling is M_gen 71.4. |
-| **Mutopia editorial fingerings** (new, built here) | fingerings printed by editors/typesetters in public-domain/CC LilyPond engravings, converted to PIG format | 310 two-hand parts from 164 pieces; 203,931 notes, 38,131 fingered (**286 verified parts, 160 pieces, 36,183 fingered notes**) | partial (median 30% of notes per part), one "editor" per piece | per piece PD / CC BY / CC BY-SA | yes | **Second, independent oracle**, strongest for beginner/intermediate pedagogy (Clementi Op. 42, Diabelli, Czerny, Burgmüller, Mozart K545, Chopin). Notes verified against LilyPond's own MIDI (293 of 310 parts; 2 more differ only through later source edits). Agrees with PIG pianists about as well as pianists agree with each other. Evaluate on fingered notes only. |
+| **Mutopia editorial fingerings** (built here) | fingerings printed by editors/typesetters in public-domain/CC LilyPond engravings, converted to PIG format | 310 two-hand parts from 164 pieces; 203,931 notes, 38,131 fingered (**286 verified parts, 160 pieces, 36,183 fingered notes**) | partial (median 30% of notes per part), one "editor" per piece | per piece PD / CC BY / CC BY-SA | yes | **Second, independent oracle**, strongest for beginner/intermediate pedagogy (Clementi Op. 42, Diabelli, Czerny, Burgmüller, Mozart K545, Chopin). Notes verified against LilyPond's own MIDI (293 of 310 parts; 2 more differ only through later source edits). Agrees with PIG pianists about as well as pianists agree with each other. Evaluate on fingered notes only. |
 | **Beringer & Dunhill 1900** scales/arpeggios/broken chords (D. Randolph's pydactyl abcD transcriptions) | canonical technical fingerings in all keys | 84 exercises (128 fingering files incl. Beringer's alternatives), 13,648 notes | complete | PD fingerings, MIT transcription | yes | **Unit-test oracle**: an engine for beginners must reproduce standard scale/arpeggio fingerings. 1 transcription error found. |
 | **PianoVAM v1.2** | fingering of amateur *performances*, labelled from video (semi-automatic) + 1,800 manually checked notes | 106 recordings, 525,483 notes (80% labelled) | automatic (95.7% accurate on the manual subset) | CC BY-NC-SA 4.0 | yes (labels only) | Secondary / sanity data: realistic amateur performances, but pseudo-labels and performance (not score) notes. Not an oracle. |
 | PDMX fingered subset (MuseScore public-domain MusicXML) | user-entered fingerings in community scores (the population ThumbSet was built from) | 978 keyboard scores, 1.67 M notes, 110k fingering marks | partial (≈7% of notes), noisy | CC BY 4.0 / CC0 / PD | yes (opt-in, 2.1 GB download) | Large, noisy; candidate for training/weak supervision, not for verification. |
@@ -31,10 +31,10 @@ official C++ tool on 408 test cases to within its 6-digit printing precision (ma
 
 ### 2.1 Acquisition and provenance
 
-* Official page: <https://beam.kisarazu.ac.jp/research/PianoFingeringDataset/> (the
-  `~saito/` URL in the task brief is dead, HTTP 404). Download requires a **registration form**
+* Official page: <https://beam.kisarazu.ac.jp/research/PianoFingeringDataset/> (the older
+  `~saito/` URL is dead, HTTP 404). Download requires a **registration form**
   (first/last name, country, affiliation, job title, phone, e-mail, purpose); a one-hour password
-  is then e-mailed. We did not submit personal data on the user's behalf.
+  is then e-mailed.
 * We downloaded the public copy in `CHOWMHALVIN/Piano-Fingering-Suggestion-Model-with-Intuitive-UI`
   at commit `0aebdd3b29db1f71d2d2708c298b051727363d91` (folder `PianoFingeringDataset_v1.2`).
   Its 463 files (309 fingering files, 150 score PDFs, `List.csv/.pdf`, `README.pdf`,
@@ -47,9 +47,10 @@ official C++ tool on 408 test cases to within its 6-digit printing precision (ma
 * **Licence (verbatim):** "Only nonprofit, academic use is allowed." — "Upon the use of PIG
   Dataset, we kindly ask every user to explicitly cite/mention the following paper": E. Nakamura,
   Y. Saito, K. Yoshii, *Statistical Learning and Estimation of Piano Fingering*, Information
-  Sciences 517, 68–85 (2020), arXiv:1904.10237. ⇒ never commit PIG files; the user should
-  register on the official page if digitus2 keeps using PIG (non-profit research use is fine;
-  digitus2's own code is MIT, the data is not part of it).
+  Sciences 517, 68–85 (2020), arXiv:1904.10237. ⇒ never commit or redistribute PIG files;
+  anyone reproducing the PIG experiments registers on the official page and obtains the data
+  themselves (non-profit research use only; digitus2's own code is MIT, the data is not part of
+  it).
 
 ### 2.2 File format (verified on all 309 files)
 
@@ -128,8 +129,8 @@ The dataset archive contains **no code** (README §3 lists only `ScorePDF/`, `Fi
 
 We compiled the two evaluation programs (MinGW g++ 9.2, `-static`) from a copy in
 `research/data/_build/` and used them only to cross-check our implementation
-(`research/scripts/crosscheck_official_eval.py`). The HMMs themselves are being benchmarked by
-the baselines workstream.
+(`research/scripts/crosscheck_official_eval.py`). The HMMs themselves are benchmarked in
+[`baselines.md`](baselines.md).
 
 ### 2.6 Validation (`research/fingering_eval/validate.py`, `research/scripts/validate_datasets.py`)
 
@@ -237,28 +238,19 @@ strings, plus `Evaluate_SimpleMatchRate` on all of them): 0 disagreements, max |
 finger `0` (partially fingered corpora) are masked by the CLI.
 
 ```
-research/.venv/Scripts/python.exe -I -m fingering_eval.evaluate --pred <dir|file> --gold research/data/pig --split test
+python -I -m fingering_eval.evaluate --pred <dir|file> --gold research/data/pig --split test
   [--mode official|press|exact] [--per-piece] [--json out.json] [--pred-annotation K]
   [--gold-annotations K,..] [--human] [--whole-piece] [--status ok]   # --status for manifests
 ```
-Importable from the project root with `research` on `sys.path`: the venv has a
-`digitus2_research.pth`; otherwise `PYTHONPATH=research python -m fingering_eval.evaluate ...`
+Run with the research venv's interpreter (`research/.venv`, see `research/data/README.md`). `research`
+is on `sys.path` through the venv's `digitus2_research.pth`; otherwise `PYTHONPATH=research python -m fingering_eval.evaluate ...`
 (bash) / `$env:PYTHONPATH='research'` (PowerShell), or in code `sys.path.insert(0, "research")`.
 
-Real output (gold vs. one pianist as prediction; HMM3; human reference):
+Real output (gold = all pianists, one pianist as prediction; HMM3; human reference):
 
 ```
-$ research/.venv/Scripts/python.exe -I -m fingering_eval.evaluate --pred research/data/pig --pred-annotation 1 --gold research/data/pig --split test --gold-annotations 1
-Prediction research/data/pig vs gold research\data\pig split=test mode=official
-                   M_gen  M_high  M_soft   M_rec
-macro (paper)     100.00  100.00  100.00  100.00   (30 pieces)
-micro (notes)     100.00  100.00  100.00  100.00   (10225 notes)
-  Bach            100.00  100.00  100.00  100.00   (10 pieces)
-  Chopin          100.00  100.00  100.00  100.00   (10 pieces)
-  Mozart          100.00  100.00  100.00  100.00   (10 pieces)
-
-$ research/.venv/Scripts/python.exe -I -m fingering_eval.evaluate --pred research/data/pig --pred-annotation 1 --gold research/data/pig --split test
-Prediction research/data/pig vs gold research\data\pig split=test mode=official
+$ python -I -m fingering_eval.evaluate --pred research/data/pig --pred-annotation 1 --gold research/data/pig --split test
+Prediction research/data/pig vs gold research/data/pig split=test mode=official
                    M_gen  M_high  M_soft   M_rec
 macro (paper)      77.10  100.00  100.00  100.00   (30 pieces)
 micro (notes)      77.71  100.00  100.00  100.00   (10225 notes)
@@ -266,8 +258,8 @@ micro (notes)      77.71  100.00  100.00  100.00   (10225 notes)
   Chopin           81.97  100.00  100.00  100.00   (10 pieces)
   Mozart           77.72  100.00  100.00  100.00   (10 pieces)
 
-$ research/.venv/Scripts/python.exe -I -m fingering_eval.evaluate --pred research/data/pig_hmm/Result_FHMM3 --gold research/data/pig --split test
-Prediction research/data/pig_hmm/Result_FHMM3 vs gold research\data\pig split=test mode=official
+$ python -I -m fingering_eval.evaluate --pred research/data/pig_hmm/Result_FHMM3 --gold research/data/pig --split test
+Prediction research/data/pig_hmm/Result_FHMM3 vs gold research/data/pig split=test mode=official
                    M_gen  M_high  M_soft   M_rec
 macro (paper)      64.48   71.00   85.49   77.78   (30 pieces)
 micro (notes)      65.69   71.65   85.85   78.44   (10225 notes)
@@ -275,8 +267,8 @@ micro (notes)      65.69   71.65   85.85   78.44   (10225 notes)
   Chopin           74.14   79.43   89.73   83.58   (10 pieces)
   Mozart           59.50   67.56   81.79   74.56   (10 pieces)
 
-$ research/.venv/Scripts/python.exe -I -m fingering_eval.evaluate --human --gold research/data/pig --split test
-Human reference (leave-one-out) on research\data\pig split=test mode=official
+$ python -I -m fingering_eval.evaluate --human --gold research/data/pig --split test
+Human reference (leave-one-out) on research/data/pig split=test mode=official
                    M_gen  M_high  M_soft   M_rec
 macro (paper)      71.37   79.13   90.80   84.26   (30 pieces)
 micro (notes)      72.33   79.56   90.86   84.68   (10225 notes)
@@ -285,10 +277,10 @@ micro (notes)      72.33   79.56   90.86   84.68   (10225 notes)
   Mozart           71.59   81.71   93.34   86.71   (10 pieces)
 ```
 
-(With gold = all pianists, M_gen of a pianist is not 100% because the other pianists disagree;
-M_high/M_soft/M_rec are 100% because that pianist is one of the ground truths.)
+In the first run M_gen of one pianist is not 100% because the other pianists disagree;
+M_high/M_soft/M_rec are 100% because that pianist is one of the ground truths.
 
-## 4. Mutopia editorial fingerings (new corpus)
+## 4. Mutopia editorial fingerings
 
 ### 4.1 Method (`fingering_eval/lilypond.py`, `fingering_eval/mutopia.py`, `scripts/build_mutopia_fingering.py`)
 
@@ -330,8 +322,6 @@ M_high/M_soft/M_rec are 100% because that pianist is one of the ground truths.)
   website build: converting the website's own source reproduces the website MIDI exactly);
   15 parts remain mismatched (13 small harpsichord examples of Couperin's *L'Art de toucher le
   clavecin*, Mozart K379 piano part iii, Rachmaninoff Op. 23/1) and are marked `suspect`.
-  This check found and drove fixes for 8 interpreter bugs (positioned rests, directed ties,
-  tremolo semantics, `\parallelMusic`, `\context Staff` re-use, header/score swallowing, …).
 * **Independent alignment with PIG** (`compare_mutopia_pig_overlap.py`): four pieces exist in both
   corpora; 1,402 of 1,417 PIG notes (98.9%) align by pitch sequence with our Mutopia notes.
 * Validators (`reports/mutopia_validation.json`): 352 "impossible" spans and 37 same-finger
@@ -446,12 +436,12 @@ fingering; useful for "what do amateurs actually do" statistics and as noisy tra
 
 PDMX (Long et al., ICASSP 2025; Zenodo 10.5281/zenodo.15571083, CC BY 4.0): 254k public-domain
 MuseScore scores as MusicXML. ThumbSet (Ramoneda et al. 2022) was built from exactly this kind of
-material but is access-restricted. `download_datasets.py pdmx_fingered` (opt-in, 2.1 GB) streams
+material but is access-restricted. `download_datasets.py pdmx_fingered` (opt-in, 1.9 GB) streams
 `mxl.tar.gz` (md5-verified) and keeps only keyboard scores with `<fingering>` elements, writing
 `research/data/pdmx_fingered/mxl/…` plus `fingered_keyboard_index.json` (fingering and note counts
 per file) and `PDMX.csv` (per-score metadata/licence).
 
-**Result of the scan (October 2026):** of **254,035** PDMX scores only **1,538 (0.6%)** contain any
+**Result of the scan:** of **254,035** PDMX scores only **1,538 (0.6%)** contain any
 `<fingering>` element, and **978** of those are keyboard scores (884 with a two-staff part):
 1.67 M notes, **110,366 fingering marks** (median density 11% of notes; 665 scores have ≥ 20
 marks, 248 have ≥ 100). Licences (PDMX.csv): CC0 906, public-domain mark 72; PDMX flags 244 of
@@ -468,8 +458,8 @@ and engraving shortcuts are common in community scores.
 
 **Verdict:** a large *weak-supervision* source (user-entered, unreviewed, often partial and of
 unknown provenance — ThumbSet's authors call the equivalent data noisy); do not use it to verify
-the engine. A MusicXML → PIG converter (music21 is installed) is the natural next step if the
-training workstream wants it.
+the engine. It is not used for training. `convert_pdmx_sample.py` converts a sample to PIG format;
+training on it would need the full conversion.
 
 ## 9. Other candidates checked
 
@@ -497,24 +487,10 @@ training workstream wants it.
   mirrors), `make_pig_splits.py`, `validate_datasets.py`, `crosscheck_official_eval.py`,
   `build_mutopia_fingering.py`, `crosscheck_mutopia_midi.py`, `compare_mutopia_pig_overlap.py`,
   `convert_pydactyl_beringer.py`, `check_music21_corpus.py`, `convert_pdmx_sample.py`.
-* Tests: `research/tests/` (89 tests: PIG parsing, metrics incl. brute-force M_rec and the paper's
-  Fig. 5 example, validators, CLI, LilyPond interpreter, Table 2 integration, corpus consistency
-  incl. reproducing PianoVAM's published label accuracy):
+* Tests: `research/tests/` (PIG parsing, metrics incl. brute-force M_rec and the paper's Fig. 5
+  example, validators, CLI, LilyPond interpreter, Table 2 integration, corpus consistency incl.
+  reproducing PianoVAM's published label accuracy), run with the research venv's interpreter:
 
 ```
-$ cd research && .venv/Scripts/python.exe -I -m pytest tests
-============================= test session starts =============================
-platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
-rootdir: C:\Users\maxim\Desktop\projects\github\thingamajig\research
-collected 89 items
-
-tests\test_corpora.py ....                                               [  4%]
-tests\test_evaluate_cli.py ....                                          [  8%]
-tests\test_lilypond.py ...................                               [ 30%]
-tests\test_metrics.py ..............                                     [ 46%]
-tests\test_pig_dataset.py .....                                          [ 51%]
-tests\test_pig_io.py .................................                   [ 88%]
-tests\test_validate.py ..........                                        [100%]
-
-============================= 89 passed in 3.87s ==============================
+cd research && python -I -m pytest tests
 ```

@@ -14,7 +14,7 @@ it drown the beginner textures the app opens most (M6 plan, deviation recorded i
 
 Sources: the built-in library (content/manifest.json; staff 1 = right hand), the Mutopia train
 half (channel = hand) and, for research only, the PIG train split. PIG statistics never go under
-packages/ or apps/ (PIG licence: non-profit academic use; docs/PROGRESS.md "Standing findings").
+packages/ or apps/ (PIG licence: non-profit academic use; docs/PROGRESS.md "Decisions").
 
 Usage, from the repo root:
   research/.venv/Scripts/python.exe -I research/scripts/make_hand_motion.py \\

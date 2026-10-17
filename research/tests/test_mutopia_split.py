@@ -1,11 +1,11 @@
-"""The committed Mutopia split (M3 plan Task 2, learning-prototype correction 3).
+"""The committed Mutopia split (docs/research/learning-prototype.md, sections 1 and 6).
 
 ``research/data/splits/mutopia_split.json`` was written by ``research/learn/make_mutopia_split.py``
 (the learning prototype); the plan's separate script step is replaced by this test, which runs that
 generator twice into a temporary directory, checks that both runs are byte-identical, that they
 reproduce the committed file byte for byte from the manifest, and the split's properties: no
 Mutopia id on both sides, every ``ok`` part assigned exactly once, a 25 to 35 percent test share of
-pieces, and the counts the M3 plan relies on (112 / 48 ids, 224 / 62 parts).
+pieces, and the counts the learner relies on (112 / 48 ids, 224 / 62 parts).
 """
 import importlib.util
 import json
@@ -83,7 +83,7 @@ def test_split_properties():
         assert str(m["mutopia_id"]) in ids
     share = len(test_ids) / (len(train_ids) + len(test_ids))
     assert 0.25 <= share <= 0.35
-    # counts the M3 plan relies on (learning-prototype report, section 7 item 3)
+    # counts the learner relies on (learning-prototype report, sections 1 and 6)
     assert (len(train_ids), len(test_ids)) == (112, 48)
     assert (len(s["train"]["pieces"]), len(s["test"]["pieces"])) == (224, 62)
     assert data["counts"]["train"]["parts"] == 224 and data["counts"]["test"]["parts"] == 62

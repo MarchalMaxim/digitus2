@@ -1,20 +1,19 @@
 # Rendering, playback and parsing spike
 
-Status: done, 2026-10-13. The spike prototype lives in `research/spikes/render/` and is throwaway: nothing in it becomes app code, only the decisions and the snippets below carry over.
-Inputs: spec `docs/superpowers/specs/2026-10-13-digitus2-design.md` (sections 4, 7 and 10; the renderer and sampler choices are binding for M4) and the M1 plan (`packages/engine` reads MusicXML with `@xmldom/xmldom` and `fflate`).
+A throwaway prototype in `research/spikes/render/` measured the candidates for score rendering, piano playback, MIDI parsing, MusicXML parsing and the app shell. Nothing in it became app code; the choices below are built in `apps/web` and `packages/engine`, and this report keeps the evidence for them.
 
 ## 1. Recommendation
 
 | Concern | Choice | Key evidence (details in sections 3 to 7) |
 |---|---|---|
-| Score renderer | **Verovio 6.3** (WASM), lazy-loaded, rendering in a Web Worker, behind the planned renderer adapter | Keeps MusicXML `note@id`, so after we inject our ids every SVG note has `id === ScoreNote.id` (1473 of 1473). It also writes each digit's note into the SVG (`g.fing[data-startid]`). CSS colors exactly one note or one digit red. It honors fingering `placement` per voice and reflows cleanly at 360 px. Costs: 2.3 MB gzip (lazy), about 0.7 s for 120 bars, LGPL-3.0-or-later. |
+| Score renderer | **Verovio 6.3** (WASM), lazy-loaded, rendering in a Web Worker, behind the renderer adapter | Keeps MusicXML `note@id`, so after we inject our ids every SVG note has `id === ScoreNote.id` (1473 of 1473). It also writes each digit's note into the SVG (`g.fing[data-startid]`). CSS colors exactly one note or one digit red. It honors fingering `placement` per voice and reflows cleanly at 360 px. Costs: 2.3 MB gzip (lazy), about 0.7 s for 120 bars, LGPL-3.0-or-later. |
 | Fallback renderer | OpenSheetMusicDisplay 2.2 | 2 to 3 times faster (0.26 s for 120 bars), 350 KB gzip, BSD-3, built-in cursor. It loses on fingering engraving, per-note styling (grace notes inherit the color) and stable ids. |
 | Fingering edits | Change digits **in place** in the SVG (4 ms for all 1472 digits). Re-render only when a note gains or loses a digit. | Verovio has no API to add a `<fing>` to the loaded document (`edit({action:'insert', elementType:'fing'})` fails). Re-loading the MusicXML takes 44 ms for 8 bars and about 0.7 s for 120 bars, including the DOM update. |
 | Piano sound | **smplr 1.1** `SplendidGrandPiano` (public-domain Akai samples) | Library is 9.6 KB gzip. Scheduling is sample-accurate (0.0 ms jitter, 0.0 ms offset). `notesToLoad` fetches only the piece's pitches in one velocity layer: 2.5 MB for the 8-bar piece, against 19.5 MB for every layer. |
-| Transport | Our own transport (about 110 lines; `src/audio/scheduler.ts`) driven by the engine's score model. smplr's `Sequencer` is the verified plan B. | Tempo factor, seek, loop range, per-hand mute and metronome are all verified on the event log. A tempo map works natively in score seconds. |
+| Transport | Our own transport (`apps/web/src/audio/transport.ts`) driven by the engine's score model. smplr's `Sequencer` is the verified plan B. | Tempo factor, seek, loop range, per-hand mute and metronome are all verified on the event log. A tempo map works natively in score seconds. |
 | Cursor sync | `requestAnimationFrame` + `AudioContext.getOutputTimestamp()` | The red note appears +5 ms after the sound (median; max 15.8 ms, so within one frame), and the same at 4x CPU throttle. The naive `ctx.currentTime` is 41 ms early on this machine and gets worse with Bluetooth output. |
 | MIDI | **midi-file** + 15-line tempo map | 2.8 KB gzip. It returns raw ticks, which the quantizer needs; the timing is correct across tempo changes. @tonejs/midi is the convenient alternative, but has had no release since 2022. |
-| MusicXML reader | Our own reader (as M1 builds it) over a DOM-less XML parser, plus **fflate** for `.mxl` | Every variant gives the same model. `@xmldom/xmldom` (the M1 choice) is fine: 80 to 130 ms for 400 KB. **txml** is about 6 to 7 times faster and 15 times smaller if parsing moves into a worker on phones. The about-50-line proof in section 8.7 matches the full reader note for note on both fixtures. |
+| MusicXML reader | The engine's own reader over a DOM-less XML parser, plus **fflate** for `.mxl` | Every variant gives the same model. `@xmldom/xmldom` (the engine's choice) is fine: 80 to 130 ms for 400 KB. **txml** is about 6 to 7 times faster and 15 times smaller if parsing moves into a worker on phones. |
 | UI shell | React 19 + Vite, **vanilla CSS with custom properties** (no Tailwind), **CSS transitions / WAAPI** (no `motion`), **zustand**, **no router**, vitest + Testing Library + Playwright | Shell cost over React: zustand +0.5 KB gzip, react-router +12.8 KB, `motion.div` +43.3 KB, Tailwind CSS 3.0 KB against 0.6 KB of hand-written CSS. |
 
 There are no hard blockers. The soft ones, with mitigations, are in section 9.
@@ -23,13 +22,13 @@ There are no hard blockers. The soft ones, with mitigations, are in section 9.
 
 - **Machine:** AMD Ryzen 7 7800X3D (8 cores / 16 threads), 31 GB RAM, Windows 11. Headless Chromium 147 (Playwright 1.59.1, `--mute-audio`, autoplay allowed).
 - **Build and stats:** Vite 8.3.4 production build served by `vite preview`. Timings are the median of 7 runs (the first, cold run is listed separately where it matters). A frame is "painted" one `requestAnimationFrame` + `setTimeout(0)` after the DOM change.
-- **Caveat: shared CPU.** Other agents' Python jobs kept total CPU at 65 to 100 % during the production runs; one process used about 7 cores from 20:59 onwards. Absolute times are therefore pessimistic, by about 1.5 to 2 times: dev-mode runs before 20:59 measured 154 ms (OSMD) and 413 ms (Verovio) for the 120-bar piece, against 265 ms and 710 ms below. The ranking between libraries was the same in every run.
+- **Caveat: shared CPU.** Background jobs kept total CPU at 65 to 100 % during the production runs. Absolute times are therefore pessimistic, by about 1.5 to 2 times: dev-mode runs on a quieter machine measured 154 ms (OSMD) and 413 ms (Verovio) for the 120-bar piece, against 265 ms and 710 ms below. The ranking between libraries was the same in every run.
 - **Mobile estimate:** `CPU_THROTTLE=4` emulates a mid-range phone through CDP `Emulation.setCPUThrottlingRate`. Results files carry an `@cpu4x` suffix.
 - **Fixtures** (`research/spikes/render/fixtures/`, generated by `scripts/gen-fixtures.mjs`):
   - `short-piano.musicxml`: 8 bars, 2 staves, 71 pitched notes, 67 `<technical><fingering>`. It has chords with per-note fingering, ties (including a 3-note chord tied over the barline), slurs, both grace kinds (`slash="yes"` and plain), an 8th-note triplet, a second voice in the right hand with `placement="below"` fingering, accidentals, a rest, fermatas, and fingerings without `placement` in bars 7 and 8. Notes carry `id` attributes.
   - `long-120.musicxml`: 120 bars, 1473 notes, 1472 fingerings, no ids, 400 KB. It has a key change at bar 61, a 3/4 section at bars 97 to 104, a tempo change, Alberti bass, triplets and grace notes.
   - `.mxl` versions of both, and `tempo-map.mid` (3 tracks; 96, 60 and 120 bpm) for the MIDI parsers.
-- **Results:** raw output is in `research/spikes/render/results/*.json` (`all.json` merges them) and screenshots are in `research/spikes/render/screenshots/`.
+- **Results:** raw output is in `research/spikes/render/results/*.json` and screenshots are in `research/spikes/render/screenshots/`.
 
 ## 3. Score rendering (question 1)
 
@@ -54,7 +53,7 @@ Candidates: OpenSheetMusicDisplay 2.2.1 (TypeScript, on its own VexFlow 1.2.93 f
 | TypeScript typings | full .d.ts (minor: `PlacementEnum` is not exported) | **none**; we wrote a 36-line ambient d.ts | ships raw `.ts` sources (peer `typescript@^5`) | full |
 | License | BSD-3-Clause | **LGPL-3.0-or-later** | MIT | MIT |
 | Releases 2025 / 2026 (npm) | 4 / 13 (2.0.0 on 2026-06-15, 2.2.1 on 2026-10-12) | 10 / 5 (6.0.0 on 2026-01-28, 6.3.0 on 2026-08-19) | 9 / 51 | 1 / 0 (5.0.0 on 2025-03-05) |
-| GitHub (2026-10-13) | 1987 stars, pushed 2026-10-12 | 945 stars, pushed 2026-10-13 | 43 stars, pushed 2026-10-11 | 247 stars, pushed 2026-09-16 |
+| GitHub, when checked | 1987 stars, pushed 2026-10-12 | 945 stars, pushed 2026-10-13 | 43 stars, pushed 2026-10-11 | 247 stars, pushed 2026-09-16 |
 
 ### 3.2 Render time (production build, medians, ms)
 
@@ -147,14 +146,14 @@ Every player schedules with `AudioBufferSourceNode.start(when)`, so timing is sa
 
 ### 4.3 Demo and audio/visual sync
 
-`playback.html` parses the MusicXML with our reader and renders it with Verovio (or `?renderer=osmd`). It loads smplr with only the needed samples, schedules with our transport, and colors the current onset group red from a `requestAnimationFrame` loop. Each switch is logged with the frame time and the time the onset leaves the speakers, which comes from `getOutputTimestamp()`. Results over 34 onsets of the 8-bar piece:
+A prototype page parsed the MusicXML with our reader and rendered it with Verovio (or OSMD). It loaded smplr with only the needed samples, scheduled with the spike transport, and coloured the current onset group red from a `requestAnimationFrame` loop. Each switch was logged with the frame time and the time the onset leaves the speakers, which comes from `getOutputTimestamp()`. Results over 34 onsets of the 8-bar piece:
 
 | Cursor clock | Verovio | OSMD | Verovio, 4x CPU |
 |---|---|---|---|
 | `getOutputTimestamp()` (compensated) | red **+5.0 ms** after the sound (median), range -0.4 to +15.8, p95 15.4 | +9.3, max 13.8 | +5.7, max 14.1 |
 | `ctx.currentTime` (naive) | red **-40.7 ms before** the sound (median), range -49.5 to -32.2 | -41.4 | -40.9 |
 
-rAF ran at 16.7 ms frames (max 16.8). Compensated sync is bounded by one frame. Aiming at the next frame (about +8 ms of lead) would center it on 0. The naive clock is early by the device output latency, which is 40 ms here and 150 to 250 ms on Bluetooth, so compensation is required. A scheduler bug found on the way: using an epsilon on look-ahead window boundaries double-triggered 3 notes. Windows must be half-open `[from, to)`.
+rAF ran at 16.7 ms frames (max 16.8). Compensated sync is bounded by one frame. Aiming at the next frame (about +8 ms of lead) would center it on 0. The naive clock is early by the device output latency, which is 40 ms here and 150 to 250 ms on Bluetooth, so compensation is required. Gotcha: an epsilon on look-ahead window boundaries double-triggered 3 notes. Windows must be half-open `[from, to)`.
 
 ![playback with the current note red](../../research/spikes/render/screenshots/playback-sync.png)
 
@@ -164,7 +163,7 @@ Use smplr `SplendidGrandPiano`:
 - best licensing (public domain), multi-layer samples;
 - tiny library, zero added latency;
 - load per piece with `notesToLoad`;
-- self-host the `.ogg`/`.m4a` files later through its `baseUrl` option and HTTP or Cache Storage, so playback works offline.
+- self-hosting the `.ogg`/`.m4a` files through its `baseUrl` option and HTTP or Cache Storage would make playback work offline; the app still loads them from smplr's hosted site.
 
 Keep our own transport: it is the engine model's timeline (tempo map, hands, ties merged) and the cursor needs the same clock. smplr's `Sequencer` is a working plan B. Skip Tone.js: it is 57 KB, adds a 100 ms default look-ahead trap, and gives us no extra capability. Reject @tonejs/piano, soundfont-player and soundfont3 (all dead). Use spessasynth_lib only if General MIDI multi-instrument playback is ever wanted.
 
@@ -174,15 +173,15 @@ Fixture: format 1 with a conductor track. Tempo goes 96 bpm, then 60 bpm at bar 
 
 | | Gzip | API | Tempo map | Types | Result | Maintenance |
 |---|---|---|---|---|---|---|
-| **midi-file** 1.2.4 | 2.8 KB | `parseMidi(bytes)` gives raw events with `deltaTime`; also `writeMidi` | yours (15 lines, section 8.5) | bundled .d.ts | correct (10 / 18 / 21.5 s), under 0.1 ms | release 2023, repo active 2026-08 |
+| **midi-file** 1.2.4 | 2.8 KB | `parseMidi(bytes)` gives raw events with `deltaTime`; also `writeMidi` | yours (15 lines) | bundled .d.ts | correct (10 / 18 / 21.5 s), under 0.1 ms | release 2023, repo active 2026-08 |
 | @tonejs/midi 2.0.28 | 9.0 KB | `new Midi(buf)` gives `tracks[].notes{midi,ticks,time,duration}`, `header.tempos`, `ticksToSeconds` | applied | bundled .d.ts | correct; **drops the note-less conductor track**, so track indices shift | last release 2022-02 |
 | midi-json-parser 8.1.75 | 3.3 KB (spawns a worker) | `await parseArrayBuffer(buf)` (async, via worker broker) | yours | bundled | correct | active 2026 |
 
-Recommendation: midi-file. The spec's MIDI reader quantizes on a tick grid, so ticks plus our own tempo map are what we want. It is synchronous, tiny, and runs in Node, workers and tests.
+Recommendation: midi-file, which the engine's MIDI reader (`packages/engine/src/io/midi/read.ts`) uses. The importer quantizes on a tick grid, so ticks plus our own tempo map are what we want. It is synchronous, tiny, and runs in Node, workers and tests.
 
 ## 6. MusicXML parsing for the engine (question 4)
 
-Each "own reader" row runs the same about-180-line model builder (`src/model/musicxml.ts`; the reduced proof is in section 8.7). The builder works over a 4-field XML tree (`src/model/xnode.ts`), with one adapter per parser. It handles:
+Each "own reader" row runs the same about-180-line model builder over a 4-field XML tree, with one adapter per parser. It handles:
 - parts, staves (hand = staff), voices and backup/forward;
 - chords, merged ties and grace notes;
 - tuplets and divisions changes;
@@ -196,7 +195,7 @@ All variants produced identical models: 1473 notes, 1472 fingerings and 1185 cho
 | Own reader over **txml** 6.0.3 | 11.5 | 20.8 | 1.9 KB (reader + fflate + txml: 6.4 KB) | yes | fastest and smallest. Two caveats: it does not decode entities (we do), and you must pass `selfClosingTags: []` because the HTML defaults would swallow a MusicXML `<link>`. |
 | Own reader over DOMParser | 31.0 | n/a | 0 (4.7 KB total) | main thread only | not usable in workers or Node |
 | Own reader over @rgrove/parse-xml 5.0 | 23.2 | 35.4 | 4.1 KB | yes | spec-compliant and small |
-| Own reader over **@xmldom/xmldom** 0.9.12 (M1 choice) | 79.5 | 129.9 | 29.5 KB | yes | slowest of the four, but a real W3C DOM plus `XMLSerializer` for the fingering writer. Acceptable at once per file load. |
+| Own reader over **@xmldom/xmldom** 0.9.12 (the engine's choice) | 79.5 | 129.9 | 29.5 KB | yes | slowest of the four, but a real W3C DOM plus `XMLSerializer` for the fingering writer. Acceptable at once per file load. |
 | Own reader over fast-xml-parser 5.11 | 43.1 | 52.5 | 20.4 KB | yes | needs `preserveOrder: true` (note/backup order), awkward output |
 | musicxml-io 0.12.1 | 7.0 (parse + `getAllNotes`) | – | 18.6 KB (25.3 KB with serialize + `addFingering`) | yes | MIT, typed, keeps note ids (`_id`), fingering in `notations[{technical:'fingering',text}]`, query and edit ops, `.mxl` built in. It does not give merged ties, seconds or hands directly, and it is v0.x with one maintainer (7 stars). Worth a look for the writer. |
 | musicxml-interfaces 0.0.21 | 139.8 | – | 44.8 KB | yes | **AGPL-3.0**, unmaintained since 2022: blocker |
@@ -207,7 +206,7 @@ All variants produced identical models: 1473 notes, 1472 fingerings and 1185 cho
 
 `.mxl`: fflate `unzipSync` takes 1.4 ms in the browser and 1.0 ms in Node for the long piece, and is 2.7 KB gzip. jszip takes 3.9 ms and is 27.9 KB.
 
-Recommendation: keep M1's own reader. `@xmldom/xmldom` + fflate is fine for M1. If parsing moves into a worker on phones, swap the XML layer to txml; it is a 20-line adapter, and the spike runs both behind the same interface. Do not adopt a MusicXML library as the model: none produces the engine model (hand, merged ties, seconds), and the two complete ones are AGPL or GPL.
+Recommendation: the engine's own reader. `@xmldom/xmldom` + fflate is fine. If parsing moves into a worker on phones, swap the XML layer to txml; it is a 20-line adapter, and the spike ran both behind the same interface. Do not adopt a MusicXML library as the model: none produces the engine model (hand, merged ties, seconds), and the two complete ones are AGPL or GPL.
 
 ## 7. App shell (question 5)
 
@@ -222,7 +221,7 @@ Sizes are a Vite production build. The marginal cost is measured over react 19.3
 | `motion/react-mini` `useAnimate` | +3.0 KB | only if WAAPI ergonomics are needed |
 | Tailwind 4.3 (sample transport bar + list) | 3.0 KB CSS (11.1 KB min) | **no**: vanilla CSS is 0.6 KB gzip for the same UI |
 
-- **Styling: vanilla CSS with custom properties, optionally CSS Modules.** The design system is a handful of tokens: `--ink: #000`, `--paper: #fff`, a few grays, `--accent: #e3000f`, `--dur: 120–200ms`, `--ease`. A utility framework mostly invites colors we must not use. Enforce the single red with one class (`.is-current`) used by the score, the keyboard and the primary button.
+- **Styling: vanilla CSS with custom properties, optionally CSS Modules.** The design system is a handful of tokens: ink, paper, a few greys, `--accent: #e3000f`, durations, an easing curve. A utility framework mostly invites colours we must not use. The single red is enforced by one class (`.is-red`) used by the score, the keyboard and the primary button.
 - **Motion: CSS transitions for state changes**, plus `element.animate()` (WAAPI) for one-shots like the digit flash after a re-solve. Respect `prefers-reduced-motion`. The cursor itself must not animate: a class swap in the rAF callback is what keeps the sync within one frame.
 - **Testing:**
   - vitest for the pure-TS engine (Node environment);
@@ -232,14 +231,14 @@ Sizes are a Vite production build. The marginal cost is measured over react 19.3
 
 ## 8. Snippets (TypeScript)
 
-These are condensed from the spike sources, which were run. Paths are relative to `research/spikes/render/`.
+Condensed sketches of the approach that was run in the spike. The built versions live in `apps/web/src/score/render/`, `apps/web/src/audio/` and `packages/engine/src/io/`.
 
 ### 8.1 Render MusicXML with fingerings (Verovio in a worker, our ids injected)
 
 ```ts
 // render.worker.ts — layout and SVG off the main thread
 import createVerovioModule from 'verovio/wasm';   // 2.3 MB gzip chunk, loaded on first use
-import { VerovioToolkit } from 'verovio/esm';     // no typings shipped: see src/types/verovio.d.ts
+import { VerovioToolkit } from 'verovio/esm';     // no typings shipped: see score/render/types/verovio.d.ts
 let tk: VerovioToolkit | undefined;
 self.onmessage = async ({ data }: MessageEvent<{ xml: string; widthPx: number }>) => {
   tk ??= new VerovioToolkit(await createVerovioModule());
@@ -272,18 +271,18 @@ worker.onmessage = ({ data }: MessageEvent<string[]>) => { host.innerHTML = data
 ```css
 :root { --ink: #000; --paper: #fff; --accent: #e3000f; }
 .score { color: var(--ink); background: var(--paper); }   /* Verovio paints with currentColor */
-.score .is-current, .score .is-current * { fill: var(--accent); stroke: var(--accent); }
+.score .is-red, .score .is-red * { fill: var(--accent); stroke: var(--accent); }
 ```
 
 ```ts
 let current: Element[] = [];
 export function highlight(noteId: string | null, withDigit = false) {
-  for (const el of current) el.classList.remove('is-current');
+  for (const el of current) el.classList.remove('is-red');
   current = [];
   if (!noteId) return;
   const note = document.getElementById(noteId);                                   // SVG id === model id
   const digit = withDigit ? document.querySelector(`g.fing[data-startid="#${noteId}"]`) : null;
-  for (const el of [note, digit]) if (el) { el.classList.add('is-current'); current.push(el); }
+  for (const el of [note, digit]) if (el) { el.classList.add('is-red'); current.push(el); }
 }
 // click-to-select / hover: (e.target as Element).closest('g.note')?.id is the ScoreNote id
 ```
@@ -301,40 +300,14 @@ export function setDigits(changes: Map<string, string>) {        // noteId -> di
     g.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out' });
   }
 }
-
-// (b) a note gains a digit: edit the MusicXML, then re-render (8 bars about 45 ms; 120 bars about 0.7 s, in the worker)
-import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
-
-// children of <note> that must come AFTER <notations> (MusicXML 4.0 note content model)
-const AFTER_NOTATIONS = new Set(['lyric', 'play', 'listen']);
-
-export function setFingering(xml: string, noteId: string, finger: string, placement?: 'above' | 'below'): string {
-  const doc = new DOMParser().parseFromString(xml, 'application/xml');
-  const note = Array.from(doc.getElementsByTagName('note')).find((n) => n.getAttribute('id') === noteId);
-  if (!note) throw new Error('no <note id="' + noteId + '">');
-  const child = (parent: Element, name: string) => Array.from(parent.childNodes).find((c) => c.nodeName === name) as Element | undefined;
-  let notations = child(note as unknown as Element, 'notations');
-  if (!notations) {
-    notations = doc.createElement('notations') as unknown as Element;
-    const before = Array.from(note.childNodes).find((c) => AFTER_NOTATIONS.has(c.nodeName));
-    note.insertBefore(notations as never, (before ?? null) as never);
-  }
-  let technical = child(notations, 'technical');
-  if (!technical) { technical = doc.createElement('technical') as unknown as Element; notations.appendChild(technical); }
-  let fingering = Array.from(technical.childNodes).find((c) => c.nodeName === 'fingering' && (c as Element).getAttribute('substitution') !== 'yes') as Element | undefined;
-  if (!fingering) { fingering = doc.createElement('fingering') as unknown as Element; technical.appendChild(fingering); }
-  fingering.textContent = finger;
-  if (placement) fingering.setAttribute('placement', placement);
-  return new XMLSerializer().serializeToString(doc);
-}
-
-// OSMD fallback: edit the model and re-render (8 ms for 8 bars, 170 ms for 120 bars); no re-parse
-// const ti = new TechnicalInstruction(); ti.type = TechnicalInstructionType.Fingering; ti.value = '3';
-// ti.placement = 0 /* PlacementEnum.Above, not exported */; ti.sourceNote = note;
-// note.ParentVoiceEntry.TechnicalInstructions.push(ti); osmd.render();
 ```
 
-`scripts/snippet-check.ts` verifies (b): our reader sees the new digits, and Verovio goes from 67 to 68 `g.fing`, with `data-startid="#n15"` present and `n10` showing the new digit.
+(b) A note gains a digit: edit the MusicXML, then re-render (8 bars about 45 ms; 120 bars about 0.7 s, in the worker). After the re-render Verovio shows 68 instead of 67 `g.fing` on the short fixture, with `data-startid` on the new one. Gotchas when inserting `<fingering>` with a DOM:
+
+- `<notations>` must come before `<lyric>`, `<play>` and `<listen>` in the MusicXML 4.0 note content model;
+- skip `<fingering substitution="yes">` when looking for the note's existing digit.
+
+The engine's writer (`packages/engine/src/io/musicxml/write.ts`) implements this.
 
 ### 8.4 Playback with a sampled piano, synced to the cursor
 
@@ -344,7 +317,7 @@ const ctx = new AudioContext({ latencyHint: 'interactive' });
 const piano = SplendidGrandPiano(ctx, {   // only what this piece needs: about 2.5 MB instead of 19.5 MB
   notesToLoad: { notes: [...new Set(score.notes.map((n) => n.midi))], velocityRange: [85, 100], fallback: 'nearest' },
 });
-await piano.load;
+await piano.ready;
 
 // look-ahead scheduler: every 25 ms, start the notes whose onset falls in the next 150 ms
 let t0 = 0, next = 0, tempo = 1;            // tempo = speed factor
@@ -370,129 +343,26 @@ function frame() {
 }
 ```
 
-The full version with seek, loop, mute and metronome is `src/audio/scheduler.ts`; the cursor and measurement code is `src/pages/playback.ts`.
+The built transport (seek, loop, mute, metronome, count-in) is `apps/web/src/audio/transport.ts`; the cursor clock is `apps/web/src/audio/clock.ts`.
 
 ### 8.5 MIDI to notes (midi-file + tempo map)
 
-```ts
-import { parseMidi } from 'midi-file';
-export function midiToNotes(bytes: Uint8Array) {
-  const { header, tracks } = parseMidi(bytes);
-  const ppq = header.ticksPerBeat ?? 480;
-  const tempos: { tick: number; us: number }[] = [];
-  const notes: { midi: number; channel: number; track: number; startTick: number; endTick: number; onsetSec?: number }[] = [];
-  tracks.forEach((events, track) => {
-    let tick = 0;
-    const open = new Map<string, number[]>();          // channel:pitch -> start ticks (overlaps)
-    for (const e of events) {
-      tick += e.deltaTime;
-      if (e.type === 'setTempo') tempos.push({ tick, us: e.microsecondsPerBeat });
-      else if (e.type === 'noteOn' && e.velocity > 0) { const k = e.channel + ':' + e.noteNumber; open.set(k, [...(open.get(k) ?? []), tick]); }
-      else if (e.type === 'noteOff' || e.type === 'noteOn') {
-        const start = open.get(e.channel + ':' + e.noteNumber)?.shift();
-        if (start !== undefined) notes.push({ midi: e.noteNumber, channel: e.channel, track, startTick: start, endTick: tick });
-      }
-    }
-  });
-  tempos.sort((a, b) => a.tick - b.tick);
-  if (!tempos.length || tempos[0].tick > 0) tempos.unshift({ tick: 0, us: 500_000 });
-  const acc = [0];
-  for (let i = 1; i < tempos.length; i++) acc[i] = acc[i - 1] + ((tempos[i].tick - tempos[i - 1].tick) / ppq) * (tempos[i - 1].us / 1e6);
-  const sec = (t: number) => { let i = tempos.length - 1; while (i > 0 && tempos[i].tick > t) i--; return acc[i] + ((t - tempos[i].tick) / ppq) * (tempos[i].us / 1e6); };
-  for (const n of notes) n.onsetSec = sec(n.startTick);
-  return { ppq, tempos, notes };
-}
-```
-
-The full version with velocity and duration is `src/snippets/midi-notes.ts`. It was checked by `scripts/midi-check.ts`: 10 s, 18 s and 21.5 s.
+`parseMidi(bytes)` returns events with `deltaTime`; accumulate ticks per track. Collect `setTempo` events from every track and, when none sits at tick 0, insert the default 500 000 µs per beat there. Pair `noteOn` (velocity above 0) with the next `noteOff` or velocity-0 `noteOn` through a first-in first-out list per channel and pitch, so overlapping notes of one pitch pair correctly. Convert ticks to seconds by walking the tempo map: accumulated seconds at each tempo change, plus the ticks since it at that tempo. The prototype matched 10 s, 18 s and 21.5 s on the tempo-map fixture. The engine's reader is `packages/engine/src/io/midi/read.ts`.
 
 ### 8.6 Loading `.mxl`
 
-```ts
-import { unzipSync, strFromU8 } from 'fflate';
-export function unpack(bytes: Uint8Array): string {
-  if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) return strFromU8(bytes).replace(/^﻿/, '');   // not a zip: plain XML
-  const zip = unzipSync(bytes);
-  const root = /full-path="([^"]+)"/.exec(strFromU8(zip['META-INF/container.xml'] ?? new Uint8Array()))?.[1]
-    ?? Object.keys(zip).find((n) => !n.startsWith('META-INF') && /\.(musicxml|xml)$/.test(n))!;
-  return strFromU8(zip[root]);
-}
-```
-
-UTF-16 files (older Finale exports) need the BOM check from `src/model/mxl.ts`.
-
-### 8.7 Proof: MusicXML to notes with timing, hand and fingering (about 50 lines)
-
-The file is `research/spikes/render/src/model/proof.ts`, 55 lines. It runs in Node, workers and the browser. `scripts/proof-check.ts` checks it against the full reader:
-
-| Fixture | Notes (proof / full reader) | Identical |
-|---|---|---|
-| short `.mxl` | 67 / 67 | 67 |
-| short `.musicxml` | 67 / 67 | 67 |
-| long | 1472 / 1472 | 1471 |
-
-The single long-piece "difference" is a test-key collision: a grace note with the same pitch and onset as its main note.
-
-```ts
-import { DOMParser } from '@xmldom/xmldom';
-// + unpack() from 8.6
-export interface Note { midi: number; onsetQ: number; onsetSec: number; durQ: number; hand: 'R' | 'L'; staff: number; voice: string; chord: boolean; grace: boolean; finger?: string }
-const SEMI: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-const kid = (e: Element, n: string) => Array.from(e.childNodes).find((c) => c.nodeName === n) as Element | undefined;
-const val = (e: Element | undefined, n: string) => (e && kid(e, n)?.textContent?.trim()) ?? undefined;
-
-export function readNotes(xml: string): Note[] {
-  const doc = new DOMParser().parseFromString(xml, 'application/xml') as unknown as Document;
-  const notes: Note[] = [], tempos: [number, number][] = [], open = new Map<string, Note>();
-  for (const part of Array.from(doc.getElementsByTagName('part'))) {
-    let div = 1, staves = 1, start = 0;
-    for (const m of Array.from(part.getElementsByTagName('measure'))) {
-      let pos = 0, max = 0, last = 0;
-      for (const el of Array.from(m.childNodes).filter((n): n is Element => n.nodeType === 1)) {
-        if (el.nodeName === 'attributes') { div = Number(val(el, 'divisions') ?? div); staves = Number(val(el, 'staves') ?? staves); }
-        else if (el.nodeName === 'backup') pos -= Number(val(el, 'duration')) / div;
-        else if (el.nodeName === 'forward') { pos += Number(val(el, 'duration')) / div; max = Math.max(max, pos); }
-        else if (el.nodeName === 'direction' || el.nodeName === 'sound') {
-          const t = (el.nodeName === 'sound' ? el : kid(el, 'sound'))?.getAttribute('tempo'); if (t) tempos.push([start + pos, Number(t)]);
-        } else if (el.nodeName === 'note') {
-          const chord = !!kid(el, 'chord'), grace = !!kid(el, 'grace'), dur = grace ? 0 : Number(val(el, 'duration') ?? 0) / div;
-          const onset = chord ? last : pos;
-          if (!chord) { last = pos; pos += dur; max = Math.max(max, pos); }
-          const p = kid(el, 'pitch'); if (!p) continue; // rests, unpitched
-          const staff = Number(val(el, 'staff') ?? 1), midi = 12 * (Number(val(p, 'octave')) + 1) + SEMI[val(p, 'step')!] + Number(val(p, 'alter') ?? 0);
-          const ties = Array.from(el.getElementsByTagName('tie')).map((t) => t.getAttribute('type'));
-          const head = open.get(staff + ':' + midi);
-          if (ties.includes('stop') && head) { head.durQ += dur; if (!ties.includes('start')) open.delete(staff + ':' + midi); continue; } // merge tie
-          const fing = Array.from(el.getElementsByTagName('fingering')).find((f) => f.getAttribute('substitution') !== 'yes');
-          const n: Note = { midi, onsetQ: start + onset, onsetSec: 0, durQ: dur, staff, hand: staves > 1 && staff > 1 ? 'L' : 'R', voice: val(el, 'voice') ?? '1', chord, grace, finger: fing?.textContent?.trim() || undefined };
-          notes.push(n);
-          if (ties.includes('start')) open.set(staff + ':' + midi, n);
-        }
-      }
-      start += max;
-    }
-  }
-  const tm = tempos.length ? tempos.sort((a, b) => a[0] - b[0]) : [[0, 120] as [number, number]];
-  if (tm[0][0] > 0) tm.unshift([0, tm[0][1]]); // tempo map: [quarter position, bpm]
-  const sec = (q: number) => { let s = 0, i = 0; for (; i + 1 < tm.length && tm[i + 1][0] <= q; i++) s += ((tm[i + 1][0] - tm[i][0]) * 60) / tm[i][1]; return s + ((q - tm[i][0]) * 60) / tm[i][1]; };
-  for (const n of notes) n.onsetSec = sec(n.onsetQ);
-  return notes.sort((a, b) => a.onsetQ - b.onsetQ || a.midi - b.midi);
-}
-```
-
-The proof omits what the engine reader adds: timewise conversion, cross-staff notes, `<cue>`, repeats expansion, grace timing, and per-note ids with `docIndex` (needed by `injectNoteIds`).
+Check for the zip signature (`PK`); otherwise the bytes are plain XML (strip a leading BOM). For a zip, read `META-INF/container.xml`, take the `full-path` of its rootfile, and fall back to the first entry outside `META-INF` that ends in `.musicxml` or `.xml`. fflate's `unzipSync` and `strFromU8` do the work. UTF-16 files (older Finale exports) need a BOM check. The engine's version is `packages/engine/src/io/musicxml/unpack.ts`.
 
 ## 9. Risks and soft blockers
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Verovio LGPL-3.0-or-later inside an MIT app | compliance | Ship the unmodified npm build as its own lazily loaded chunk (it already is a separate `verovio-module-*.js`). Add the LGPL text, attribution and a source link (github.com/rism-digital/verovio) to the about page. Do not patch it; if we ever must, publish the patch. |
-| Verovio 2.3 MB gzip and 1.4 s WASM init at 4x CPU | first open on phones | Lazy import on the score view and preload it from the library view. Compile once per session (the worker keeps the instance). The service worker caches it. |
+| Verovio LGPL-3.0-or-later inside an MIT app | compliance | Ship the unmodified npm build as its own lazily loaded chunk (it already is a separate `verovio-module-*.js`). The about page names the licence and links the source (github.com/rism-digital/verovio). Do not patch it; if we ever must, publish the patch. |
+| Verovio 2.3 MB gzip and 1.4 s WASM init at 4x CPU | first open on phones | Lazy import on the score view and preload it from the library view. Compile once per session (the worker keeps the instance). A service worker could cache it (not built). |
 | Verovio long-piece layout: 0.7 s desktop, 3.7 s at 4x | jank | Worker rendering (the main thread is only busy for the insert), page 1 first, wrapped layout, relayout only at breakpoints (otherwise scale via `svgViewBox`) |
 | No API to add a `<fing>` to Verovio's loaded document | edit latency | Digits always exist after the first solve, so patch them in place (section 8.3a). Re-load only on add or remove. |
-| No Verovio typings | DX | 36-line ambient module (`src/types/verovio.d.ts`), owned by the renderer adapter |
-| OSMD (if used): colors leak to grace notes in the same group; lower-voice placement ignored; bar numbers look like digits | readability | Color `.vf-notehead`; `drawMeasureNumbersOnlyAtSystemStart`; accept stacked digits or switch to Verovio |
-| smplr repo has no LICENSE file (npm says MIT); hosted samples on `smpldsnds.github.io` | supply chain, offline use | Self-host the needed `.ogg`/`.m4a` (public domain) next to the app; pin the version |
+| No Verovio typings | DX | A small ambient module (`apps/web/src/score/render/types/verovio.d.ts`), owned by the renderer adapter |
+| smplr repo has no LICENSE file (npm says MIT); hosted samples on `smpldsnds.github.io` | supply chain, offline use | Self-host the needed `.ogg`/`.m4a` (public domain) next to the app (not done yet); the version is pinned |
 | Salamander (Tone / @tonejs/piano) is CC BY 3.0, MusyngKite is CC BY-SA | attribution or share-alike | Not chosen. If used, credit them in the app. |
 | Output latency varies by device (Bluetooth 150 to 250 ms) | perceived sync | Always map through `getOutputTimestamp()`. Optionally offer a user calibration offset. |
 
@@ -500,36 +370,17 @@ The proof omits what the engine reader adds: timewise conversion, cross-staff no
 
 ```bash
 cd research/spikes/render
-pnpm install            # this folder is its own pnpm workspace root (pnpm-workspace.yaml): never touches the repo lockfile
+pnpm install            # this folder is its own pnpm workspace root (pnpm-workspace.yaml): it never touches the repo lockfile
 pnpm fetch:samples      # 1.9 MB Salamander subset for the self-hosted Tone.Sampler case (gitignored)
-pnpm dev                # http://localhost:4316; index.html links every page (?auto=1 runs a bench)
-pnpm build && pnpm preview          # http://localhost:4317
+pnpm dev                # index.html links every page (?auto=1 runs a bench)
+pnpm build && pnpm preview
 pnpm measure            # Playwright headless -> results/*.json, screenshots/*.png (RUNS=7; CPU_THROTTLE=4; args: base url, job filter)
 pnpm sizes && pnpm sizes:css        # bundle sizes -> results/bundle-sizes.json; Tailwind vs vanilla CSS
 pnpm check:node                     # proof vs full reader, snippet checks, MIDI check, Node parser bench
-pnpm typecheck                      # TypeScript 7.0.2 strict over all spike sources: 0 errors
+pnpm typecheck
 ```
 
-Playwright 1.59.1 is pinned because it uses the Chromium build (147, revision 1217) already installed on this machine. Elsewhere, run `pnpm exec playwright install chromium`.
-
-Main files:
-- `src/model/`: our reader, the XML adapters, `.mxl` and the proof;
-- `src/render/`: Verovio and OSMD helpers;
-- `src/audio/`: transport and onset recorder;
-- `src/pages/`: one page per experiment;
-- `src/snippets/`: tested doc snippets;
-- `scripts/`: fixture generator, sample fetch, Playwright driver, size probes, Node checks;
-- `bundle/`: size probes.
-
-## 11. Process notes
-
-- **Two writers in the spike folder.** From about 20:59 a second instance of the spike agent wrote into the same folder. It added `scripts/measure.mjs`, `src/pages/{midi,parsers}.ts` and an alternative `playback.ts`. Its files were kept and fixed:
-  - track selection in `midi.ts`;
-  - a fingering probe in `parsers.ts`;
-  - a hashed fixture URL.
-
-  Its `playback.ts` was replaced because it added the output latency instead of subtracting it. `research/spikes/render/COORDINATION.md` has the timeline.
-- **Root workspace touched once.** One `pnpm install --frozen-lockfile` in the spike folder at 21:27 resolved to the new root workspace, because pnpm ignores `ignore-workspace` in `.npmrc`. The root `pnpm-lock.yaml` was not modified (frozen), but the root `node_modules/.modules.yaml` and `.bin` were re-linked. A spike-local `pnpm-workspace.yaml` now prevents this.
+Playwright is pinned to 1.59.1; if the matching Chromium is missing, run `pnpm exec playwright install chromium`.
 
 ## Sources
 
@@ -543,4 +394,4 @@ Main files:
 - @tonejs/midi: https://github.com/Tonejs/Midi; midi-file: https://github.com/carter-thaxton/midi-file; midi-json-parser: https://github.com/chrisguttandin/midi-json-parser
 - musicxml-io: https://github.com/tan-z-tan/musicxml-io; musicxml-player (GPL-3.0): https://github.com/infojunkie/musicxml-player
 - Web Audio `getOutputTimestamp`: https://developer.mozilla.org/docs/Web/API/AudioContext/getOutputTimestamp
-- npm publish dates and versions: `pnpm view <pkg> time` on 2026-10-13; GitHub repo metadata via api.github.com on 2026-10-13
+- npm publish dates and versions: `pnpm view <pkg> time`; GitHub repo metadata: api.github.com

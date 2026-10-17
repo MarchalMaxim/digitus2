@@ -1,57 +1,175 @@
-import { LEVEL_NAMES } from './levels.js';
-import type { Group, LibraryLayout, Row } from './model.js';
+import { Fragment } from 'react';
+import { LengthPills } from './LevelPills.js';
+import { TIER_NAMES, type LengthId, type ShelfId } from './levels.js';
+import { countText, type Group, type LibraryLayout, type Row, type Section } from './model.js';
 
-export interface PieceListProps {
+export interface PieceListActions {
+  onOpen(slug: string): void;
+  onOpenShelf(shelf: ShelfId): void;
+  /** `All styles`, or Escape: back from an opened shelf to the shelves. */
+  onBack(): void;
+  /** `Show 40 more` under an opened shelf. */
+  onMore(): void;
+  /** `All 312 in Medium` or `Show 40 more` under a search section. */
+  onSection(section: Section): void;
+  onLength(length: LengthId): void;
+}
+
+export interface PieceListProps extends PieceListActions {
   layout: LibraryLayout;
+  /**
+   * The row (counted through the groups of the opened list) the page just appended starts at:
+   * rows from there fade in, the ones above stay still. Null when no page was appended.
+   */
+  freshFrom: number | null;
+}
+
+/**
+ * The list (shelves spec 4, 5): the shelves with their sample rows, one opened shelf, search
+ * sections, or the small library's tiers. The layout says what to draw; this only draws it.
+ */
+export function PieceList({ layout, freshFrom, ...actions }: PieceListProps) {
+  const { onOpen } = actions;
+  switch (layout.kind) {
+    case 'shelves':
+      return (
+        <>
+          {layout.shelves.map((s) => (
+            <section key={s.id} className="shelf" aria-labelledby={`shelf-${s.id}`}>
+              <div className="shelf-head">
+                <h2 id={`shelf-${s.id}`}>{s.name}</h2>
+                <span className="count muted">{countText(s.count)}</span>
+              </div>
+              <p className="muted">{s.line}</p>
+              <Rows rows={s.rows} offset={0} freshFrom={null} onOpen={onOpen} />
+              {s.all !== null && (
+                <button
+                  type="button"
+                  className="text-button"
+                  data-shelf-all={s.id}
+                  onClick={() => actions.onOpenShelf(s.id)}
+                >
+                  {s.all}
+                </button>
+              )}
+            </section>
+          ))}
+        </>
+      );
+    case 'shelf':
+      return (
+        <section className="shelf" aria-labelledby="shelf-open">
+          <button type="button" className="text-button back" onClick={actions.onBack}>
+            All styles
+          </button>
+          <div className="shelf-head">
+            <h2 id="shelf-open" tabIndex={-1}>
+              {layout.name}
+            </h2>
+            <span className="count muted">{countText(layout.count)}</span>
+          </div>
+          {layout.lengths && (
+            <LengthPills
+              lengths={layout.lengths}
+              length={layout.length}
+              onChange={actions.onLength}
+            />
+          )}
+          <Groups groups={layout.groups} freshFrom={freshFrom} onOpen={onOpen} />
+          {layout.more !== null && (
+            <button type="button" className="text-button" onClick={actions.onMore}>
+              {layout.more}
+            </button>
+          )}
+        </section>
+      );
+    case 'search':
+      return (
+        <>
+          {layout.lengths && (
+            <LengthPills
+              lengths={layout.lengths}
+              length={layout.length}
+              onChange={actions.onLength}
+            />
+          )}
+          {layout.sections.map((s) => (
+            <section
+              key={s.tier}
+              className="level-section"
+              aria-labelledby={`level-${s.tier}`}
+              data-section={s.tier}
+            >
+              <div className="shelf-head">
+                <h2 id={`level-${s.tier}`}>{TIER_NAMES[s.tier]}</h2>
+                <span className="count muted">{countText(s.count)}</span>
+              </div>
+              <Groups groups={s.groups} freshFrom={s.open ? freshFrom : null} onOpen={onOpen} />
+              {s.action !== null && (
+                <button type="button" className="text-button" onClick={() => actions.onSection(s)}>
+                  {s.action.label}
+                </button>
+              )}
+            </section>
+          ))}
+        </>
+      );
+    case 'all':
+      return (
+        <>
+          {layout.sections.map((s) => (
+            <section key={s.tier} className="level-section" aria-labelledby={`level-${s.tier}`}>
+              <h2 id={`level-${s.tier}`}>{TIER_NAMES[s.tier]}</h2>
+              <Groups groups={s.groups} freshFrom={null} onOpen={onOpen} />
+            </section>
+          ))}
+        </>
+      );
+  }
+}
+
+interface GroupsProps {
+  groups: Group[];
+  freshFrom: number | null;
   onOpen(slug: string): void;
 }
 
-/** The list (spec 6.2): one level under a hidden heading, or level sections with visible headings. */
-export function PieceList({ layout, onOpen }: PieceListProps) {
-  if (layout.kind === 'level') {
-    return (
-      <section aria-labelledby="library-list-heading">
-        <h2 id="library-list-heading" className="visually-hidden">
-          {LEVEL_NAMES[layout.level]}
-        </h2>
-        <Groups groups={layout.groups} onOpen={onOpen} />
-      </section>
-    );
-  }
+function Groups({ groups, freshFrom, onOpen }: GroupsProps) {
+  let offset = 0;
   return (
     <>
-      {layout.sections.map((s) => (
-        <section key={s.level} className="level-section" aria-labelledby={`level-${s.level}`}>
-          <h2 id={`level-${s.level}`}>{LEVEL_NAMES[s.level]}</h2>
-          <Groups groups={s.groups} onOpen={onOpen} />
-        </section>
-      ))}
-    </>
-  );
-}
-
-function Groups({ groups, onOpen }: { groups: Group[]; onOpen(slug: string): void }) {
-  return (
-    <>
-      {groups.map((g) =>
-        g.heading === null ? (
-          <Rows key={g.key} rows={g.rows} onOpen={onOpen} />
+      {groups.map((g) => {
+        const rows = <Rows rows={g.rows} offset={offset} freshFrom={freshFrom} onOpen={onOpen} />;
+        offset += g.rows.length;
+        return g.heading === null ? (
+          <Fragment key={g.key}>{rows}</Fragment>
         ) : (
           <div key={g.key} className="collection">
             <h3>{g.heading}</h3>
-            <Rows rows={g.rows} onOpen={onOpen} />
+            {rows}
           </div>
-        ),
-      )}
+        );
+      })}
     </>
   );
 }
 
-function Rows({ rows, onOpen }: { rows: Row[]; onOpen(slug: string): void }) {
+interface RowsProps {
+  rows: Row[];
+  /** How many rows of the list come before these. */
+  offset: number;
+  freshFrom: number | null;
+  onOpen(slug: string): void;
+}
+
+function Rows({ rows, offset, freshFrom, onOpen }: RowsProps) {
   return (
     <ul className="piece-list">
-      {rows.map((r) => (
-        <li key={r.slug}>
+      {rows.map((r, i) => (
+        <li
+          key={r.slug}
+          className={freshFrom !== null && offset + i >= freshFrom ? 'is-new' : undefined}
+        >
           <button
             type="button"
             className="piece-row"

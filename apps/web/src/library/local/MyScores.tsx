@@ -6,11 +6,7 @@ export function MyScores({ onOpen }: { onOpen(): void }) {
   const failed = useLocalLibrary((s) => s.failed);
   if (!items.length) return null;
   const allSaved = items.every((item) => item.saved);
-  const storageLabel = allSaved
-    ? 'Stored in this browser'
-    : failed
-      ? 'Available for this visit only'
-      : 'Saving in this browser…';
+  const storageLabel = allSaved ? 'Saved' : failed ? 'Available for this visit only' : 'Saving…';
   return (
     <details className="local-scores">
       <summary>My scores</summary>

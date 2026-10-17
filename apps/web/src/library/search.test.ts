@@ -30,6 +30,24 @@ describe('search (spec 6.3)', () => {
     expect(matchesQuery(furElise, '  ')).toBe(false);
     expect(matchesQuery(furElise, '!!')).toBe(false);
   });
+  it("matches a piece by the name of its shelf (shelves spec 4.4): 'baroque', 'jazz', 'carols'", () => {
+    const prelude = { title: 'Prelude', composer: 'J. S. Bach', collection: 'Keyboard works' };
+    expect(matchesQuery(prelude, 'baroque')).toBe(false); // no genre given: the words are the piece's own
+    expect(matchesQuery({ ...prelude, genre: 'baroque' }, 'baroque')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'baroque' }, 'bach baroq')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'ragtime' }, 'jazz')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'ragtime' }, 'ragtime')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'modern' }, 'modern')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'carols' }, 'folk')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'carols' }, 'carol')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'folk' }, 'carols')).toBe(true);
+    expect(matchesQuery({ ...prelude, genre: 'songs' }, 'baroque')).toBe(false);
+  });
+  it('does not match a piece by the joining "and" of a shelf name', () => {
+    expect(
+      matchesQuery({ title: 'Tune', composer: 'X', collection: 'Y', genre: 'folk' }, 'and'),
+    ).toBe(false);
+  });
   it('keeps the order it is given', () => {
     expect(searchPieces([rondo, furElise], 'r')).toEqual([rondo, furElise]);
   });

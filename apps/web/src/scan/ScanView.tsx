@@ -298,9 +298,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               and can fail, even when well lit. Results open beside the original for review.
             </p>
             <p className="small muted">
-              This experimental option needs the PC worker on this computer. Your score goes to that
-              worker, never an external recognition service. A phone’s localhost cannot reach your
-              PC.
+              This experimental option needs the PC worker on this computer. A phone’s localhost
+              cannot reach your PC.
             </p>
             <div className="row">
               {phase === 'connect' || phase === 'connecting' ? (
@@ -376,8 +375,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </pre>
                 <p className="small">
                   Keep that terminal open. Allow the browser’s local connection after pressing
-                  Connect. To stop processing, close the worker. No public server or account is
-                  needed.
+                  Connect. To stop processing, close the worker.
                 </p>
                 <a
                   href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
@@ -506,9 +504,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   {session.recognizedAt ? new Date(session.recognizedAt).toLocaleString() : ''}
                 </p>
                 <p>
-                  Find retained originals and recognition in My scores in this browser. Keep your
-                  own original files; browser storage can be cleared. Recognition is not certified
-                  accurate; playback tempo may use an app default.
+                  Find retained originals and recognition in My scores. Keep your own original
+                  files; browser storage can be cleared. Recognition is not certified accurate;
+                  playback tempo may use an app default.
                 </p>
                 {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
                   <p>Beam grouping is inferred and may differ from the original.</p>

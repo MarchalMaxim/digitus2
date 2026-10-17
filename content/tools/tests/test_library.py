@@ -13,6 +13,7 @@ TOOLS = Path(__file__).resolve().parents[1]
 CONTENT = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 import build  # noqa: E402
+import pdmx_fragments  # noqa: E402
 import validate  # noqa: E402
 
 MANIFEST = json.loads((CONTENT / "manifest.json").read_text(encoding="utf-8"))
@@ -110,6 +111,47 @@ def test_every_entry_carries_its_genre():
     for e in MANIFEST:
         assert e["genre"] == build.piece_genre(by_slug[e["slug"]], genres), e["slug"]
     assert list(MANIFEST[0])[list(MANIFEST[0]).index("collectionId") + 1] == "genre"
+
+
+def decode_index(index: dict) -> list[dict]:
+    """The reader's side of build.library_index (apps/web decodeLibraryIndex), to check the writer against."""
+    assert index["v"] == 2
+    cols = index["pieces"]
+    out = []
+    for i, stored in enumerate(cols["slug"]):
+        cid, collection, genre = index["collections"][cols["collection"][i]]
+        title = cols["title"][i]
+        slug = f"pdmx-{pdmx_fragments.ascii_slug(title)}{stored}" if stored.startswith("-") else stored
+        out.append({"slug": slug, "title": title, "composer": cols["composer"][i], "level": cols["level"][i],
+                    "collection": collection, "collectionId": cid, "genre": index["genres"].get(str(i), genre),
+                    "approxDurationSec": cols["duration"][i]})
+    return out
+
+
+def test_library_index_decodes_to_the_eight_fields_of_every_entry():
+    fields = ("slug", "title", "composer", "level", "collection", "collectionId", "genre", "approxDurationSec")
+    index = build.library_index(MANIFEST)
+    assert decode_index(index) == [{k: e[k] for k in fields} for e in MANIFEST]
+    assert set(index) == {"v", "collections", "pieces", "genres"}
+    assert [c[0] for c in index["collections"]] == list(dict.fromkeys(e["collectionId"] for e in MANIFEST))
+
+
+def test_library_index_file_is_the_manifest_index():
+    written = json.loads((CONTENT / "library-index.json").read_text(encoding="utf-8"))
+    assert written == build.library_index(MANIFEST)  # regenerate with build.write_library_index(MANIFEST)
+
+
+def test_library_index_stores_archive_slugs_by_their_hash_and_genres_by_exception():
+    entry = {"slug": "pdmx-someone-you-loved-0f933bca", "title": "Someone You Loved", "composer": "x",
+             "level": 3, "collection": "Songs", "collectionId": "s", "genre": "songs", "approxDurationSec": 131.6}
+    other = dict(entry, slug="amazing-grace", title="Amazing Grace", genre="modern", approxDurationSec=58)
+    index = build.library_index([entry, entry | {"slug": "pdmx-someone-you-loved-11111111"}, other])
+    assert index["pieces"]["slug"] == ["-0f933bca", "-11111111", "amazing-grace"]
+    assert index["pieces"]["duration"] == [132, 132, 58]
+    assert index["collections"] == [["s", "Songs", "songs"]]
+    assert index["genres"] == {"2": "modern"}
+    # a slug that is not "pdmx-" + the title's slug + a hash is kept whole
+    assert build.index_slug("pdmx-other-name-0f933bca", "Someone You Loved") == "pdmx-other-name-0f933bca"
 
 
 def test_genre_counts_match_the_design():

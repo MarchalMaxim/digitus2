@@ -5,11 +5,11 @@ import '@testing-library/jest-dom/vitest';
 import indexJson from '../../../../content/library-index.json';
 import manifestJson from '../../../../content/manifest.json';
 import {
+  decodeLibraryIndex,
   setLibraryIndex,
   setPieceDetails,
-  type LibraryEntry,
   type LibraryPiece,
 } from '../library/manifest.js';
 
-setLibraryIndex(indexJson as LibraryEntry[]);
+setLibraryIndex(decodeLibraryIndex(indexJson));
 setPieceDetails(manifestJson as LibraryPiece[]);

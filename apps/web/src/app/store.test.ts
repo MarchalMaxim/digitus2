@@ -202,6 +202,10 @@ describe('what the library remembers (UI batch, spec section 16)', () => {
       settings: { ...DEFAULT_SETTINGS },
       libraryLevel: null,
       libraryQuery: '',
+      libraryShelf: null,
+      librarySection: null,
+      libraryPages: 1,
+      libraryLength: 'any',
     });
   });
   it('loads older settings with lastPlayed at its default, keeps a valid one, and drops an invalid one', async () => {
@@ -225,8 +229,8 @@ describe('what the library remembers (UI batch, spec section 16)', () => {
     expect(useAppStore.getState().settings.lastPlayed).toBeNull();
   });
   it('keeps the chosen level for the visit only', () => {
-    useAppStore.getState().setLibraryLevel(3);
-    expect(useAppStore.getState().libraryLevel).toBe(3);
+    useAppStore.getState().setLibraryLevel('medium');
+    expect(useAppStore.getState().libraryLevel).toBe('medium');
     expect(
       JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.libraryLevel,
     ).toBeUndefined();
@@ -238,6 +242,100 @@ describe('what the library remembers (UI batch, spec section 16)', () => {
     expect(
       JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.libraryQuery,
     ).toBeUndefined();
+  });
+});
+
+describe('the library shelves (shelves spec 3, 4.2, 4.3)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({
+      view: { name: 'library' },
+      settings: { ...DEFAULT_SETTINGS },
+      libraryLevel: null,
+      libraryQuery: '',
+      libraryShelf: null,
+      librarySection: null,
+      libraryPages: 1,
+      libraryLength: 'any',
+    });
+  });
+  it('starts with no shelf open, one page and any length', () => {
+    expect(useAppStore.getState()).toMatchObject({
+      libraryShelf: null,
+      librarySection: null,
+      libraryPages: 1,
+      libraryLength: 'any',
+    });
+  });
+  it('keeps the open shelf and the pages shown for the visit, across a score and back, and never writes them', () => {
+    const S = () => useAppStore.getState();
+    S().setLibraryShelf('baroque');
+    S().setLibraryPages(3);
+    S().openPiece({ kind: 'library', slug: 'ode-to-joy' });
+    S().openLibrary();
+    expect(S()).toMatchObject({ libraryShelf: 'baroque', libraryPages: 3 });
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state;
+    for (const key of ['libraryShelf', 'libraryPages', 'librarySection', 'libraryLength'])
+      expect(saved[key], key).toBeUndefined();
+  });
+  it('starts again at the first page when the list changes: shelf, section, level, length, search', () => {
+    const S = () => useAppStore.getState();
+    for (const change of [
+      () => S().setLibraryShelf('songs'),
+      () => S().setLibrarySection('medium'),
+      () => S().setLibraryLevel('challenging'),
+      () => S().setLibraryLength('short'),
+      () => S().setLibraryQuery('bach'),
+    ]) {
+      S().setLibraryPages(4);
+      change();
+      expect(S().libraryPages).toBe(1);
+    }
+    expect(S()).toMatchObject({
+      libraryShelf: 'songs',
+      libraryLength: 'short',
+      libraryQuery: 'bach',
+    });
+  });
+  it('closes the open search section when the search text changes, and keeps the shelf', () => {
+    const S = () => useAppStore.getState();
+    S().setLibraryShelf('jazz');
+    S().setLibrarySection('easy');
+    S().setLibraryQuery('x');
+    expect(S()).toMatchObject({ librarySection: null, libraryShelf: 'jazz' });
+  });
+  it('never shows fewer than one page', () => {
+    useAppStore.getState().setLibraryPages(0);
+    expect(useAppStore.getState().libraryPages).toBe(1);
+    useAppStore.getState().setLibraryPages(2.9);
+    expect(useAppStore.getState().libraryPages).toBe(2);
+  });
+  it('reads a level saved by a build with six level pills as its level', async () => {
+    const stored = (libraryLevel: unknown) =>
+      localStorage.setItem(
+        SETTINGS_STORAGE_KEY,
+        JSON.stringify({ state: { settings: { handSize: 'small' }, libraryLevel }, version: 1 }),
+      );
+    for (const [grade, tier] of [
+      [1, 'easy'],
+      [2, 'easy'],
+      [3, 'medium'],
+      [4, 'harder'],
+      [5, 'challenging'],
+      [6, 'challenging'],
+    ] as const) {
+      useAppStore.setState({ libraryLevel: null });
+      stored(grade);
+      await useAppStore.persist.rehydrate();
+      expect(useAppStore.getState().libraryLevel, `grade ${grade}`).toBe(tier);
+      expect(useAppStore.getState().settings.handSize).toBe('small');
+    }
+    for (const junk of [7, 'hard', null]) {
+      useAppStore.setState({ libraryLevel: null });
+      stored(junk);
+      await useAppStore.persist.rehydrate();
+      expect(useAppStore.getState().libraryLevel, String(junk)).toBeNull();
+    }
   });
 });
 

@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { openPractice, setLoopBars } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
+import { openLibraryPiece } from './helpers/library.js';
 import { holdPianoSamples } from './helpers/samples.js';
 import { STATES } from './helpers/states.js';
 
@@ -246,7 +247,7 @@ test.describe('the dock from 480 px', () => {
     await openTwinkle(page);
     await openPractice(page);
     await page.getByRole('button', { name: 'Back to the library' }).click();
-    await page.getByRole('button', { name: /^Open Mary Had a Little Lamb/ }).click();
+    await openLibraryPiece(page, 'mary-had-a-little-lamb');
     await expect(page.locator('.dock .practice-toggle')).toHaveAttribute('aria-expanded', 'true');
     // For the visit only (spec 13 and 16): a reload closes it.
     await page.reload();

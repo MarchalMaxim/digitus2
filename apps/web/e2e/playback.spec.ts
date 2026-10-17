@@ -4,7 +4,7 @@ import { closePractice, openPractice, setLoopBars } from './helpers/practice.js'
 import { accentAreas, type AccentArea, type Box } from './helpers/pixels.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples } from './helpers/samples.js';
-import { libraryReady, showLevelOf } from './helpers/library.js';
+import { libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
 const LOADING_THE_PIANO = 'Loading the piano…';
@@ -1347,10 +1347,10 @@ test.describe('playback with the silent instrument', () => {
       await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
       return rate;
     };
-    /** Back to the library, then the piece of that row, ready to play. */
-    const openFromLibrary = async (row: RegExp, title: string) => {
+    /** Back to the library, then the piece of that slug, ready to play. */
+    const openFromLibrary = async (slug: string, title: string) => {
       await page.getByRole('button', { name: 'Back to the library' }).click();
-      await page.getByRole('button', { name: row }).click();
+      await openLibraryPiece(page, slug);
       await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
       await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 20_000 });
       await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
@@ -1369,7 +1369,7 @@ test.describe('playback with the silent instrument', () => {
     expect(slow, `Twinkle at 70 %: score seconds per second ${slow}`).toBeLessThan(0.8);
 
     // Ode to Joy (written at 108) opens at 100 %, and plays at it.
-    await openFromLibrary(/^Open Ode to Joy/, 'Ode to Joy');
+    await openFromLibrary('ode-to-joy', 'Ode to Joy');
     await expect(slider).toHaveValue('100');
     await expect(tempo).toHaveText('100 % · ♩ = 108');
     const full = await playRate();
@@ -1377,7 +1377,7 @@ test.describe('playback with the silent instrument', () => {
     expect(full, `Ode to Joy at 100 %: score seconds per second ${full}`).toBeLessThan(1.1);
 
     // Twinkle keeps its own 70 %, also after a reload.
-    await openFromLibrary(/^Open Twinkle/, 'Twinkle, Twinkle, Little Star');
+    await openFromLibrary('twinkle-twinkle-little-star', 'Twinkle, Twinkle, Little Star');
     await expect(slider).toHaveValue('70');
     await expect(tempo).toHaveText('70 % · ♩ = 70');
     await page.reload();
@@ -1539,15 +1539,13 @@ test.describe('the dock on a phone', () => {
     const scrollY = () => page.evaluate(() => window.scrollY);
     await page.goto('/?audio=silent');
     await libraryReady(page);
-    await showLevelOf(page, 'mozart-sonata-k545-mvt1');
-    // The view change: K.545 opened from far down the library.
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const row = page.getByRole('button', {
-      name: /^Open Piano Sonata in C major \('Sonata facile'\), 1st movement/,
-    });
-    await row.scrollIntoViewIfNeeded();
-    // One level is a shorter page than the whole library was (UI batch): far down is past 300 px.
-    expect(await scrollY()).toBeGreaterThan(300);
+    const row = await showPiece(page, 'mozart-sonata-k545-mvt1');
+    // The view change: K.545 opened from far down its shelf.
+    // The row near the top of the screen, well below the start of the page.
+    await row.evaluate((el) =>
+      window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 80),
+    );
+    expect(await scrollY()).toBeGreaterThan(100);
     await row.click();
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
     expect(await scrollY(), 'the score opens at the top').toBe(0);

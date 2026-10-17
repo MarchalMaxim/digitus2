@@ -1,4 +1,4 @@
-/* The library page (spec sections 3 to 7). Tokens only; the page's one accent is the start button's .is-red. */
+/* The library page (UI batch spec sections 3 to 7; shelves spec). Tokens only; the page's one accent is the start button's .is-red. */
 .library {
   --gap: 1.5rem;
 }
@@ -54,7 +54,7 @@
   gap: 0.5rem;
 }
 
-/* Pills wrap onto a second row on a phone: every level stays in view (spec 2, 4.1). */
+/* Pills wrap onto a second row on a phone: every pill stays in view (spec 2, 4.1). */
 .pills {
   display: flex;
   flex-wrap: wrap;
@@ -82,6 +82,17 @@
     background var(--dur-fast) var(--ease),
     color var(--dur-fast) var(--ease),
     border-color var(--dur-fast) var(--ease);
+}
+
+/* Four level pills (Challenging is the longest) must share one row from 360 px: a little less air
+   between and inside them on a phone. At 320 px they still wrap rather than clip. */
+@media (max-width: 400px) {
+  .level-choice .pills {
+    gap: 0.375rem;
+  }
+  .level-choice .pill {
+    padding: 0 0.5rem;
+  }
 }
 
 .pill input {
@@ -114,7 +125,8 @@
   min-height: 100vh;
 }
 
-.library-list.is-fresh > * {
+.library-list.is-fresh > *,
+.piece-list > .is-new {
   animation: library-fade var(--dur-fast) var(--ease);
 }
 
@@ -127,6 +139,53 @@
 .level-section + .level-section,
 .collection + .collection {
   margin-top: 1.5rem;
+}
+
+/* A shelf (shelves spec 4.1): name and count on one line, its gray line, the rows, one quiet button. */
+.shelf {
+  display: grid;
+  justify-items: start;
+}
+
+.shelf + .shelf {
+  margin-top: 2rem;
+}
+
+.shelf-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75rem;
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+.shelf > .piece-list,
+.shelf > .collection {
+  justify-self: stretch;
+}
+
+.shelf > .collection {
+  margin-top: 1.5rem;
+}
+
+.shelf > .pills {
+  margin-top: 0.5rem;
+}
+
+.library-list > .pills {
+  margin-bottom: 1.5rem;
+}
+
+.library-list .text-button {
+  min-height: 44px;
+}
+
+/* An opened shelf's heading takes the focus (LibraryView.tsx); like the page's, it is no control. */
+h2[tabindex='-1']:focus {
+  outline: none;
 }
 
 .collection h3 {

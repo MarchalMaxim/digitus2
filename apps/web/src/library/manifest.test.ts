@@ -1,13 +1,14 @@
 import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import manifestJson from '../../../../content/manifest.json';
-import { GENRES } from './levels.js';
+import { GENRES, TIER_NAMES } from './levels.js';
 import {
   attribution,
+  decodeLibraryIndex,
   formatDuration,
   isShareAlike,
-  LEVEL_NAMES,
   libraryPieces,
+  type LibraryIndexFile,
   type LibraryPiece,
   licenseLabel,
   loadPiece,
@@ -36,13 +37,11 @@ describe('manifest', () => {
     expect(pieces.map((p) => p.level)).toEqual(
       [...pieces.map((p) => p.level)].sort((a, b) => a - b),
     );
-    expect(LEVEL_NAMES).toEqual({
-      1: 'First steps',
-      2: 'Easy',
-      3: 'Moderate',
-      4: 'Intermediate',
-      5: 'Challenging',
-      6: 'Advanced',
+    expect(TIER_NAMES).toEqual({
+      easy: 'Easy',
+      medium: 'Medium',
+      harder: 'Harder',
+      challenging: 'Challenging',
     });
   });
   it('keeps the 30 pieces of the first library as the benchmark set and gives every piece a collection', async () => {
@@ -67,6 +66,64 @@ describe('manifest', () => {
       expect(p.title, p.slug).toBe(details[i]!.title);
       expect(p.level, p.slug).toBe(details[i]!.level);
     }
+  });
+  it('decodes the compact library index to the eight list fields of every manifest piece', async () => {
+    const details = await allDetails();
+    for (const [i, p] of pieces.entries()) {
+      const d = details[i]!;
+      expect(p, p.slug).toEqual({
+        slug: d.slug,
+        title: d.title,
+        composer: d.composer,
+        level: d.level,
+        collection: d.collection,
+        collectionId: d.collectionId,
+        genre: d.genre,
+        approxDurationSec: d.approxDurationSec,
+      });
+    }
+  });
+  it('decodes a columnar index: collections once, archive slugs rebuilt from the title, genre overrides', () => {
+    const file: LibraryIndexFile = {
+      v: 2,
+      collections: [
+        ['hymns', 'Hymns and spirituals', 'carols'],
+        ['pdmx-songs', 'Songs from the MuseScore archive', 'songs'],
+      ],
+      pieces: {
+        slug: ['amazing-grace', '-0f933bca', '-00000001', '-00000002'],
+        title: [
+          'Amazing Grace',
+          'Someone You Loved',
+          'A very long title that goes on and on and on, past forty characters',
+          '!?',
+        ],
+        composer: ['Traditional', 'Lewis Capaldi', 'Unknown', 'Unknown'],
+        level: [1, 3, 4, 4],
+        collection: [0, 1, 1, 1],
+        duration: [58, 132, 90, 12],
+      },
+      genres: { '3': 'modern' },
+    };
+    const entries = decodeLibraryIndex(file);
+    expect(entries.map((e) => e.slug)).toEqual([
+      'amazing-grace',
+      'pdmx-someone-you-loved-0f933bca',
+      'pdmx-a-very-long-title-that-goes-on-and-on-an-00000001',
+      'pdmx-untitled-00000002',
+    ]);
+    expect(entries[1]).toEqual({
+      slug: 'pdmx-someone-you-loved-0f933bca',
+      title: 'Someone You Loved',
+      composer: 'Lewis Capaldi',
+      level: 3,
+      collection: 'Songs from the MuseScore archive',
+      collectionId: 'pdmx-songs',
+      genre: 'songs',
+      approxDurationSec: 132,
+    });
+    expect(entries.map((e) => e.genre)).toEqual(['carols', 'songs', 'songs', 'modern']);
+    expect(() => decodeLibraryIndex({ ...file, v: 1 })).toThrow(/version/);
   });
   it('finds a piece by its slug in the index and its full entry on demand', async () => {
     expect(pieceBySlug('twinkle-twinkle-little-star')?.title).toBe('Twinkle, Twinkle, Little Star');

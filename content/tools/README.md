@@ -196,7 +196,7 @@ user's request, "not necessarily classical or folk"): `catalog.d/pdmx-songs.json
 Their scores are
 `scores/<slug>.musicxml.gz` (gzip, mtime 0, byte-identical on a rebuild; the app decompresses them with
 the browser's DecompressionStream), and `content/library-index.json` lists every piece for the library
-page. The steps, in order (run with `content/.venv/Scripts/python.exe -I`; the inputs are the PDMX
+page (compact columnar form, see step 7). The steps, in order (run with `content/.venv/Scripts/python.exe -I`; the inputs are the PDMX
 download in `research/data/_downloads/pdmx/`, and every output is under the ignored `content/_raw/pdmx/`
 and `content/_build/`, except the committed `pdmx-excluded.json`):
 
@@ -235,7 +235,8 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
    no manifest entry. A refused piece is recorded and dropped (`--record-failures`); `build.py --source pdmx
    --only SLUG...` then builds just the pieces that the new fragments added. Repeat until a build refuses nothing. `build.py --manifest-only` then
    re-renders every manifest entry, and `build.py` writes `library-index.json` (the eight fields the
-   library list reads).
+   library list reads, in a compact columnar form: `build.library_index` describes it, and
+   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 79 KB gzip for 2,702 pieces).
 8. `gates.py --pending` (or `--new`) writes the verification records (span check, lint, level). For a
    MuseScore piece the LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to
    cross-check); the other gates do.

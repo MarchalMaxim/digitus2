@@ -2,7 +2,14 @@ import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { openPractice, setLoopBars } from './practice.js';
 import { holdPianoSamples } from './samples.js';
-import { LEVEL_COUNTS, libraryReady, searchCount } from './library.js';
+import {
+  arrivalRows,
+  libraryReady,
+  searchRows,
+  shelfButton,
+  showMoreButton,
+  tierPill,
+} from './library.js';
 
 /**
  * The application states the design brief is checked in (M4 plan, Task 10): each a name, a way
@@ -51,7 +58,7 @@ export async function dropFrameShown(page: Page): Promise<void> {
 async function library(page: Page): Promise<void> {
   await page.goto('/');
   await libraryReady(page);
-  await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[1]!);
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
 }
 
 /** Twinkle with every note fingered; `query` adds e.g. `?audio=silent` before the hash. */
@@ -134,9 +141,23 @@ export const STATES: AppState[] = [
     name: 'library-level',
     go: async (page) => {
       await library(page);
-      // Easy, not Moderate: with the MuseScore archive Moderate holds about 750 rows, a 50,000 px page.
-      await page.getByRole('radio', { name: 'Easy', exact: true }).check();
-      await expect(pieceRows(page)).toHaveCount(LEVEL_COUNTS[2]!);
+      // Medium, the biggest level: its arrival page is still at most 30 rows.
+      await tierPill(page, 'medium').check();
+      await expect(pieceRows(page)).toHaveCount(arrivalRows('medium'));
+    },
+    expectTag: 'button',
+  },
+  {
+    // A shelf opened in place (shelves spec 4.2): the back button, the length pills and a first page.
+    name: 'library-shelf',
+    go: async (page) => {
+      await library(page);
+      await tierPill(page, 'medium').check();
+      await shelfButton(page, 'songs').click();
+      await expect(page.getByRole('button', { name: 'All styles' })).toBeVisible();
+      await expect(page.getByRole('group', { name: 'Length' })).toBeVisible();
+      await expect(pieceRows(page)).toHaveCount(40);
+      await expect(showMoreButton(page)).toBeVisible();
     },
     expectTag: 'button',
   },
@@ -165,7 +186,7 @@ export const STATES: AppState[] = [
     go: async (page) => {
       await library(page);
       await page.getByRole('searchbox', { name: 'Search the library' }).fill('minuet');
-      await expect(pieceRows(page)).toHaveCount(searchCount('minuet'));
+      await expect(pieceRows(page)).toHaveCount(searchRows('minuet'));
     },
     expectTag: 'button',
   },

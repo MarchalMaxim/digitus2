@@ -27,7 +27,7 @@ test('local library: draft bytes, reading order, explicit resume and deletion su
   await page.getByRole('button', { name: 'Select page 2: first.png' }).click();
   await page.getByRole('button', { name: 'Move page 2 earlier' }).click();
   await myScores(page);
-  await expect(page.getByText('Stored in this browser', { exact: true })).toBeVisible();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Open saved first.png' })).toBeVisible();
   await page.reload();
   await page.getByText('My scores', { exact: true }).click();
@@ -123,7 +123,7 @@ test('local library: uploaded MusicXML survives refresh and duplicate uploads st
   await page.locator('input[type=file]').setInputFiles(file);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible();
   await myScores(page);
-  await expect(page.getByText('Stored in this browser', { exact: true })).toBeVisible();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   await page.reload();
   await page.getByText('My scores', { exact: true }).click();
   await page.getByRole('button', { name: 'Open saved my-score.musicxml' }).click();
@@ -159,7 +159,7 @@ test('local library: orientation and unchanged original bytes survive refresh', 
   await expect(page.getByRole('button', { name: 'Rotate 90° clockwise' })).toBeEnabled();
   await expect(page.locator('.scan-original-image')).toHaveJSProperty('naturalWidth', 4);
   await myScores(page);
-  await expect(page.getByText('Stored in this browser', { exact: true })).toBeVisible();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   await page.reload();
   await page.getByText('My scores', { exact: true }).click();
   await page.getByRole('button', { name: 'Open saved turn.png' }).click();

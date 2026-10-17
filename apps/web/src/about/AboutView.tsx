@@ -96,11 +96,7 @@ export function AboutView() {
 
       <section className="stack" aria-labelledby="about-what">
         <h2 id="about-what">What this is</h2>
-        <p>
-          digitus2 writes finger numbers on piano music for beginning and intermediate players.
-          Fingerings and playback run in your browser. Experimental photo and PDF recognition uses
-          an optional worker on this PC, without an external recognition service.
-        </p>
+        <p>digitus2 writes finger numbers on piano music for beginning and intermediate players.</p>
       </section>
 
       <section className="stack" aria-labelledby="about-how">
@@ -117,10 +113,9 @@ export function AboutView() {
         <h2 id="about-who">Who made it</h2>
         <p>
           Created by Claude, Anthropic&apos;s AI model, in an autonomous multi-day build directed by
-          Maxim Marchal. To our knowledge, nothing like this exists yet: a fingering engine that
-          runs entirely in the browser and is verified against expert annotations. The code, the
-          research notes and the verification results are in the{' '}
-          <ExternalLink href={REPOSITORY_URL}>repository</ExternalLink>.
+          Maxim Marchal. To our knowledge, nothing like this exists yet: a fingering engine verified
+          against expert annotations. The code, the research notes and the verification results are
+          in the <ExternalLink href={REPOSITORY_URL}>repository</ExternalLink>.
         </p>
       </section>
 
@@ -145,7 +140,7 @@ export function AboutView() {
             >
               Apache-2.0
             </a>
-            ), locally in your browser.
+            ).
           </li>
           <li>
             MIDI files are read with <ExternalLink href={MIDI_FILE_URL}>midi-file</ExternalLink>{' '}

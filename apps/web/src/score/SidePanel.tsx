@@ -2,7 +2,8 @@ import { useId, useMemo, useState, type ChangeEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandSize, type PieceSource } from '../app/store.js';
 import { downloadText, exportFilename } from '../export/download.js';
-import { formatDuration, LEVEL_NAMES, type LibraryPiece } from '../library/manifest.js';
+import { TIER_NAMES, tierOf } from '../library/levels.js';
+import { formatDuration, type LibraryPiece } from '../library/manifest.js';
 import { FingerLegend } from './FingerLegend.js';
 import { MidiImportPanel } from './MidiImportPanel.js';
 import { services, type ScoreDocument } from './useScoreDocument.js';
@@ -117,7 +118,7 @@ export function SidePanel({
             <>
               <div>
                 <dt>Level</dt>
-                <dd>{LEVEL_NAMES[piece.level]}</dd>
+                <dd>{TIER_NAMES[tierOf(piece.level)]}</dd>
               </div>
               <div>
                 <dt>Key</dt>

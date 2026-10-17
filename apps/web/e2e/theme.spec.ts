@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
+import { libraryReady, openLibraryPiece } from './helpers/library.js';
 import { expectOneRed } from './helpers/red.js';
 
 // Light and dark (T7): the page follows the system's color scheme until the reader chooses a
@@ -97,7 +98,7 @@ test('the switch overrides the system, is kept, and gives the page back to the s
   await page.reload();
   await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
   expect(await paper(page)).toBe(DARK_PAPER);
-  await page.getByRole('button', { name: /^Open Twinkle/ }).click();
+  await openLibraryPiece(page, 'twinkle-twinkle-little-star');
   await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
   expect(await paper(page)).toBe(DARK_PAPER);
 
@@ -119,7 +120,9 @@ test('the switch overrides the system, is kept, and gives the page back to the s
  */
 async function switchAndWatch(page: Page) {
   await expect(toggle(page)).toBeVisible();
-  await expect(page.getByRole('button', { name: /^Open Twinkle/ })).toBeVisible();
+  // The library has drawn its buttons. (Not a piece's row: the arrival page shows five samples a
+  // shelf, and which ones changes with the day.)
+  await libraryReady(page);
   return page.evaluate(async () => {
     const root = document.documentElement;
     const switchButton = document.querySelector<HTMLButtonElement>('.theme-toggle')!;

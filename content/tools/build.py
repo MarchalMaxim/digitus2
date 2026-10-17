@@ -33,6 +33,7 @@ import re
 import sys
 import time
 import xml.etree.ElementTree as ET
+from collections import Counter
 from fractions import Fraction as F
 from pathlib import Path
 
@@ -40,6 +41,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import jsonio  # noqa: E402
+import pdmx_fragments  # noqa: E402
 import ly2musicxml as L  # noqa: E402
 import xmlcheck as xc  # noqa: E402
 
@@ -463,15 +465,64 @@ def manifest_entry(piece: dict, built: dict, stats: dict, collections: dict[str,
     return entry
 
 
-INDEX_FIELDS = ("slug", "title", "composer", "level", "collection", "collectionId", "genre", "approxDurationSec")
+def index_slug(slug: str, title: str) -> str:
+    """An archive piece's slug is "pdmx-" + the slug of its title + "-" + 8 hash characters
+    (pdmx_fragments); the index then keeps only "-" + the hash and the reader rebuilds the rest from the
+    title. Any other slug is kept whole (none starts with "-")."""
+    hash8 = slug[-8:]
+    return "-" + hash8 if slug == f"pdmx-{pdmx_fragments.ascii_slug(title)}-{hash8}" else slug
+
+
+def library_index(manifest: list[dict]) -> dict:
+    """The library list in its compact columnar form (version 2; apps/web decodeLibraryIndex reads it):
+
+      v            2
+      collections  [[id, title, genre], ...]  each collection once, in order of first appearance; its
+                   genre is the one most of its pieces have
+      pieces       parallel columns, one value per piece in manifest order:
+                   slug (index_slug), title, composer, level, collection (an index into collections),
+                   duration (whole seconds)
+      genres       {piece index: genre} for the pieces whose genre differs from their collection's
+
+    A piece's eight LibraryEntry fields are these; the keys, the repeated collection title, id and
+    genre, and most of every archive slug are what the form leaves out."""
+    order: dict[str, int] = {}
+    collections: list[list[str]] = []
+    counts: dict[str, Counter] = {}
+    for e in manifest:
+        cid = e["collectionId"]
+        if cid not in order:
+            order[cid] = len(collections)
+            collections.append([cid, e["collection"], ""])
+            counts[cid] = Counter()
+        if collections[order[cid]][1] != e["collection"]:
+            raise SystemExit(f"collection {cid} has two titles: {collections[order[cid]][1]!r}, {e['collection']!r}")
+        counts[cid][e["genre"]] += 1
+    for cid, row in zip(order, collections):
+        row[2] = counts[cid].most_common(1)[0][0]
+    return {
+        "v": 2,
+        "collections": collections,
+        "pieces": {
+            "slug": [index_slug(e["slug"], e["title"]) for e in manifest],
+            "title": [e["title"] for e in manifest],
+            "composer": [e["composer"] for e in manifest],
+            "level": [e["level"] for e in manifest],
+            "collection": [order[e["collectionId"]] for e in manifest],
+            "duration": [round(e["approxDurationSec"]) for e in manifest],
+        },
+        "genres": {str(i): e["genre"] for i, e in enumerate(manifest)
+                   if e["genre"] != collections[order[e["collectionId"]]][2]},
+    }
 
 
 def write_library_index(manifest: list[dict]) -> None:
-    """content/library-index.json: the eight fields the library list reads (apps/web LibraryEntry), one
-    compact record per piece in manifest order. It is bundled, so it stays small; the full manifest
-    (sources, notes, file paths) loads only when a piece opens or the About page is shown."""
-    slim = [{k: e.get(k) for k in INDEX_FIELDS} for e in manifest]
-    jsonio.write_atomic(LIBRARY_INDEX, json.dumps(slim, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+    """content/library-index.json: the eight fields the library list reads (apps/web LibraryEntry) for
+    every piece in manifest order, in the compact form of library_index. It is fetched before the app
+    renders, so it stays small (about 78 KB gzip for 2,702 pieces, against 129 KB as one object per piece);
+    the full manifest (sources, notes, file paths) loads only when a piece opens or the About page is shown."""
+    jsonio.write_atomic(LIBRARY_INDEX, json.dumps(library_index(manifest), ensure_ascii=False,
+                                                  separators=(",", ":")).encode("utf-8"))
 
 
 def is_piece_record(value) -> bool:

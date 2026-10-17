@@ -1,21 +1,31 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { hashToView } from '../app/routes.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
-import { showsSearch } from './disclosure.js';
+import { SECTION_ROWS, showsSearch } from './disclosure.js';
 import { LevelPills } from './LevelPills.js';
-import { LEVEL_LINES, LEVEL_NAMES } from './levels.js';
+import { type ShelfId, type Tier } from './levels.js';
 import { libraryPieces } from './manifest.js';
 import {
+  announcementFor,
   arrivalLevel,
-  countText,
   libraryLayout,
+  localDateKey,
+  shelfHasPieces,
   startLabel,
   startTarget,
-  type LibraryLayout,
+  type Section,
 } from './model.js';
 import { useWindowFileDrop } from './ownFile.js';
 import { DropFrame, OwnFileLine } from './OwnFileLine.js';
@@ -24,15 +34,14 @@ import { SearchField } from './SearchField.js';
 import { MyScores } from './local/MyScores.js';
 import './library.css';
 
-const LEVEL_LINE_ID = 'library-level-line';
 /** The announcement waits for the reader to stop changing the list (arrowing through the pills). */
 export const ANNOUNCE_DELAY_MS = 500;
 
-function announcementFor(layout: LibraryLayout): string {
-  if (layout.kind === 'search')
-    return layout.count === 0 ? `No piece matches “${layout.query}”.` : countText(layout.count);
-  return layout.kind === 'level' ? `${LEVEL_NAMES[layout.level]}: ${countText(layout.count)}` : '';
-}
+/** Where the focus goes once the list has changed: the clicked control is gone or the rows are new. */
+type FocusTarget =
+  | { kind: 'heading' }
+  | { kind: 'shelf-button'; shelf: ShelfId }
+  | { kind: 'row'; within: string | null; index: number };
 
 /** True once `key` has differed from its first value: the list fades in on changes, never on arrival. */
 function useChanged(key: string): boolean {
@@ -105,6 +114,34 @@ function useRememberLibraryScroll(): () => void {
   }, [setLibraryScrollY]);
 }
 
+/**
+ * Moves the focus once a list change has rendered: to the opened shelf's heading, back to the
+ * shelf's `All N` button, or to the first row a page appended. The clicked button is gone by
+ * then, and without this the focus falls to <body>. The heading of an opened shelf is also
+ * brought to the top of the screen when the reader had scrolled past it.
+ */
+function useFocusAfterChange(
+  list: RefObject<HTMLElement | null>,
+  target: RefObject<FocusTarget | null>,
+) {
+  useEffect(() => {
+    const wanted = target.current;
+    const root = list.current;
+    target.current = null;
+    if (!wanted || !root) return;
+    if (wanted.kind === 'heading') {
+      const top = root.getBoundingClientRect().top;
+      if (top < 0) window.scrollBy(0, top);
+      root.querySelector<HTMLElement>('#shelf-open')?.focus({ preventScroll: true });
+    } else if (wanted.kind === 'shelf-button') {
+      root.querySelector<HTMLElement>(`[data-shelf-all="${wanted.shelf}"]`)?.focus();
+    } else {
+      const scope = wanted.within === null ? root : root.querySelector(wanted.within);
+      scope?.querySelectorAll<HTMLElement>('.piece-row')[wanted.index]?.focus();
+    }
+  });
+}
+
 export function LibraryView() {
   useWarmUpWhenIdle();
   const openScan = useAppStore((s) => s.openScan);
@@ -125,18 +162,49 @@ export function LibraryView() {
   const setLibraryLevel = useAppStore((s) => s.setLibraryLevel);
   const query = useAppStore((s) => s.libraryQuery);
   const setLibraryQuery = useAppStore((s) => s.setLibraryQuery);
+  const shelf = useAppStore((s) => s.libraryShelf);
+  const setLibraryShelf = useAppStore((s) => s.setLibraryShelf);
+  const section = useAppStore((s) => s.librarySection);
+  const setLibrarySection = useAppStore((s) => s.setLibrarySection);
+  const pages = useAppStore((s) => s.libraryPages);
+  const setLibraryPages = useAppStore((s) => s.setLibraryPages);
+  const length = useAppStore((s) => s.libraryLength);
+  const setLibraryLength = useAppStore((s) => s.setLibraryLength);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const rememberScroll = useRememberLibraryScroll();
   const pieces = libraryPieces();
-  const level = arrivalLevel(pieces, chosenLevel, lastPlayed);
-  const layout = useMemo(() => libraryLayout(pieces, { level, query }), [pieces, level, query]);
+  const tier = arrivalLevel(pieces, chosenLevel, lastPlayed);
+  // The day is read once per visit to the page: the samples never change while the reader looks.
+  const [date] = useState(() => localDateKey());
+  const layout = useMemo(
+    () => libraryLayout(pieces, { tier, query, shelf, section, pages, length, date, lastPlayed }),
+    [pieces, tier, query, shelf, section, pages, length, date, lastPlayed],
+  );
   const start = startTarget(pieces, lastPlayed);
-  // Every search result list shares the key 'search': keystrokes after the first swap the rows
-  // without a fade (spec 6.4).
-  const listKey = layout.kind === 'level' ? `level-${layout.level}` : layout.kind;
+  // Search results share the key 'search': keystrokes after the first swap the rows without a
+  // fade (UI batch spec 6.4). A page appended fades its new rows only (`freshFrom`).
+  const listKey =
+    layout.kind === 'shelves'
+      ? `tier-${layout.tier}`
+      : layout.kind === 'shelf'
+        ? `shelf-${layout.tier}-${layout.shelf}`
+        : layout.kind;
   const fade = useChanged(listKey);
   const announcement = useAnnouncement(announcementFor(layout));
+  const list = useRef<HTMLDivElement>(null);
+  const focusAfter = useRef<FocusTarget | null>(null);
+  const [appended, setAppended] = useState<{ key: string; from: number } | null>(null);
+  const freshFrom = appended?.key === listKey ? appended.from : null;
+  const openShelf = layout.kind === 'shelf' ? layout.shelf : null;
+  // A length the list in view cannot honour (its list is 40 pieces or fewer, or holds none of
+  // that length) must not filter silently: the choice goes back to Any length (spec 4.3).
+  const lengthInEffect =
+    layout.kind === 'shelf' || layout.kind === 'search' ? layout.length : length;
+  useEffect(() => {
+    if (lengthInEffect !== length) setLibraryLength(lengthInEffect);
+  }, [lengthInEffect, length, setLibraryLength]);
+  useFocusAfterChange(list, focusAfter);
   // A refusal still showing would be stale in the score view, so opening anything clears it.
   const open = (source: PieceSource) => {
     rememberScroll();
@@ -157,9 +225,48 @@ export function LibraryView() {
     rememberScroll();
     openAbout();
   };
+  const chooseTier = (next: Tier) => {
+    setLibraryLevel(next);
+    // The shelf stays open on a level that has it, else the reader is back at the shelves.
+    if (shelf !== null && !shelfHasPieces(pieces, next, shelf)) setLibraryShelf(null);
+  };
+  const openShelfAt = (id: ShelfId) => {
+    focusAfter.current = { kind: 'heading' };
+    setLibraryShelf(id);
+  };
+  // Stable, so the Escape listener is not added again on every render.
+  const closeShelf = useCallback(() => {
+    if (openShelf === null) return;
+    focusAfter.current = { kind: 'shelf-button', shelf: openShelf };
+    setLibraryShelf(null);
+  }, [openShelf, setLibraryShelf]);
+  useEffect(() => {
+    if (openShelf === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !e.defaultPrevented) closeShelf();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openShelf, closeShelf]);
+  const showMore = () => {
+    if (layout.kind !== 'shelf') return;
+    focusAfter.current = { kind: 'row', within: null, index: layout.shown };
+    setAppended({ key: listKey, from: layout.shown });
+    setLibraryPages(pages + 1);
+  };
+  const sectionAction = (s: Section) => {
+    focusAfter.current = {
+      kind: 'row',
+      within: `[data-section="${s.tier}"]`,
+      index: s.action?.kind === 'open' ? SECTION_ROWS : s.shown,
+    };
+    setAppended({ key: listKey, from: s.action?.kind === 'open' ? SECTION_ROWS : s.shown });
+    if (s.action?.kind === 'open') setLibrarySection(s.tier);
+    else setLibraryPages(pages + 1);
+  };
   const listClass = [
     'library-list',
-    layout.kind === 'level' ? 'is-level' : '',
+    layout.kind === 'shelves' || layout.kind === 'shelf' ? 'is-level' : '',
     fade ? 'is-fresh' : '',
   ]
     .filter(Boolean)
@@ -183,27 +290,28 @@ export function LibraryView() {
         </div>
       </header>
       <MyScores onOpen={rememberScroll} />
-      {layout.kind === 'level' && (
+      {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">
-          <LevelPills
-            levels={layout.levels}
-            level={layout.level}
-            describedBy={LEVEL_LINE_ID}
-            onChange={setLibraryLevel}
-          />
-          <p id={LEVEL_LINE_ID} className="level-line muted">
-            {LEVEL_LINES[layout.level]}
-          </p>
+          <LevelPills tiers={layout.tiers} tier={layout.tier} onChange={chooseTier} />
         </div>
       )}
-      <div key={listKey} className={listClass}>
+      <div key={listKey} ref={list} className={listClass}>
         {layout.kind === 'search' && layout.count === 0 ? (
           <div className="empty-result">
             <p>No piece matches “{layout.query}”.</p>
             <p className="muted">Search looks in titles, composers and collections.</p>
           </div>
         ) : (
-          <PieceList layout={layout} onOpen={(slug) => open({ kind: 'library', slug })} />
+          <PieceList
+            layout={layout}
+            freshFrom={freshFrom}
+            onOpen={(slug) => open({ kind: 'library', slug })}
+            onOpenShelf={openShelfAt}
+            onBack={closeShelf}
+            onMore={showMore}
+            onSection={sectionAction}
+            onLength={setLibraryLength}
+          />
         )}
       </div>
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">

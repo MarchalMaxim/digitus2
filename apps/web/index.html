@@ -15,6 +15,28 @@
           document.documentElement.setAttribute('data-theme', theme);
         }
       } catch (e) {}
+      // The language (src/i18n/i18n.ts): the one picked on the line at the foot of the library,
+      // otherwise the first of the browser's languages the app speaks, otherwise English. Screen
+      // readers read the page in it; main.tsx loads its texts before the first render.
+      (function () {
+        var known = ['en', 'nl', 'fr', 'es', 'pt'];
+        var lang = null;
+        try {
+          lang = localStorage.getItem('digitus2.lang');
+        } catch (e) {}
+        if (known.indexOf(lang) < 0) {
+          lang = 'en';
+          var tags = navigator.languages || [navigator.language || ''];
+          for (var i = 0; i < tags.length; i++) {
+            var primary = String(tags[i]).split('-')[0].toLowerCase();
+            if (known.indexOf(primary) >= 0) {
+              lang = primary;
+              break;
+            }
+          }
+        }
+        document.documentElement.lang = lang;
+      })();
     </script>
   </head>
   <body>

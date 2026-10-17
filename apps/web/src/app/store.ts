@@ -2,6 +2,7 @@ import type { ScanSession } from '../scan/model.js';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import { toTier, type LengthId, type ShelfId, type Tier } from '../library/levels.js';
+import type { Phrase } from '../i18n/messages.js';
 
 export type HandSize = 'large' | 'medium' | 'small' | 'child';
 export type HandsMode = 'both' | 'R' | 'L';
@@ -48,7 +49,8 @@ export type View =
 export interface AppState {
   view: View;
   settings: Settings;
-  notice: string | null;
+  /** A text, or a Phrase written in the language on screen when it is shown (Notice.tsx). */
+  notice: string | Phrase | null;
   /**
    * How far the library was scrolled (`window.scrollY`) when the reader last left it, by opening
    * a piece, a file or the about page, or through the history; the library comes back there
@@ -83,7 +85,7 @@ export interface AppState {
    * not a number, or no piece open, changes nothing. Read it back with `tempoFactorOf`.
    */
   setTempoFactor(factor: number): void;
-  setNotice(message: string | null): void;
+  setNotice(message: string | Phrase | null): void;
   setLibraryScrollY(y: number): void;
   /** Chooses a level; the list starts again at its first page. */
   setLibraryLevel(level: Tier): void;

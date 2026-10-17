@@ -12,6 +12,7 @@ import { hashToView } from '../app/routes.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
+import { LanguageLine } from '../i18n/LanguageLine.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { SECTION_ROWS, showsSearch } from './disclosure.js';
 import { LevelPills } from './LevelPills.js';
@@ -322,6 +323,7 @@ export function LibraryView() {
         <button type="button" className="text-button" onClick={about}>
           About and licences
         </button>
+        <LanguageLine />
       </footer>
       {dragging && <DropFrame />}
     </main>

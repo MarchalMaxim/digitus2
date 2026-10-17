@@ -2,7 +2,7 @@
 
 Every request the owner makes lands here: the request in the owner's words, the agreed approach, and its status. Open items come first. Done and closed items stay at the end, one line each, so they are not requested or rebuilt twice.
 
-Also open, tracked as GitHub issues: #5 smarter scrolling, #6 Dutch, French, Spanish and Portuguese, #13 and #17 dynamics (p, f) ignored by playback.
+Also open, tracked as GitHub issues: #5 smarter scrolling, #13 and #17 dynamics (p, f) ignored by playback.
 
 ## Open
 
@@ -70,6 +70,7 @@ The owner accepts an experimental release for clear photos of printed music. Rul
 
 ## Done or closed
 
+- **#6** "support NL/FR/ES/PT": done. The page speaks the browser's language and falls back to English, with one language line at the foot of the library, typed dictionaries per view, no i18n library, and lazy-loaded languages (`docs/app.md`, Languages). Open: a native-speaker review of each language.
 - **T1** Sticky transport ("should be sticky"): Play, Pause, Rewind and the keyboard form a sticky bottom dock; tempo, hands, metronome, count-in and loop fold into one Practice toggle at every width. Pinning both rows at the top was rejected: about 130 px of score lost on a laptop.
 - **T4** Login, resistant to brute force, without big-tech OAuth: closed. The owner chose GitHub Pages only ("I ONLY want it on github pages"), and a static public site cannot sit behind a login. If a self-hosted deployment returns, see `docs/research/auth-options.md`.
 - **T6** Landing page "a bit cluttered", "like Apple design, where some UI elements only appear when they are needed": done. Clear units, levels with style shelves, search for long lists, a window-wide drop with a red frame; progressive disclosure became an app-wide rule (CLAUDE.md).

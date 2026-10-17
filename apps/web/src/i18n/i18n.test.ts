@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { en } from './en/index.js';
 import { formatNumber, plural } from './format.js';
@@ -128,4 +131,44 @@ describe('every language has every text', () => {
       for (const [path, text] of strings(t, '')) expect(text.trim(), path).not.toBe('');
     });
   }
+});
+
+/**
+ * The script in index.html that sets <html lang> before the first paint, run against a fake
+ * document, storage and navigator: it must agree with i18n.ts on the key and the matching.
+ */
+function runPrePaint(stored: () => string | null, languages: string[]): string {
+  // A path, not a URL: under happy-dom `URL` is the fake window's, which node:fs refuses.
+  const html = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), '../../index.html'),
+    'utf8',
+  );
+  const script = /<script>([\s\S]*?)<\/script>/.exec(html)?.[1];
+  expect(script).toContain(`'${LOCALE_STORAGE_KEY}'`);
+  const doc = { documentElement: { lang: '', setAttribute: () => {} } };
+  new Function('localStorage', 'document', 'navigator', script!)({ getItem: stored }, doc, {
+    languages,
+  });
+  return doc.documentElement.lang;
+}
+
+describe('the pre-paint script in index.html', () => {
+  it('sets the kept pick, else the browser language the app speaks, else English', () => {
+    expect(runPrePaint(() => 'es', ['fr-FR'])).toBe('es');
+    expect(runPrePaint(() => null, ['de-CH', 'fr-CH'])).toBe('fr');
+    expect(runPrePaint(() => 'klingon', ['pt-BR'])).toBe('pt');
+    expect(runPrePaint(() => null, ['ja'])).toBe('en');
+  });
+
+  it('agrees with matchLocale', () => {
+    for (const tags of [['nl-BE'], ['EN-gb'], ['it', 'es-MX'], []])
+      expect(runPrePaint(() => null, tags)).toBe(matchLocale(tags));
+  });
+
+  it('never throws when site data is blocked', () => {
+    const blocked = () => {
+      throw new DOMException('blocked', 'SecurityError');
+    };
+    expect(runPrePaint(blocked, ['nl'])).toBe('nl');
+  });
 });

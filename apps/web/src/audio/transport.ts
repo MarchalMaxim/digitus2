@@ -4,7 +4,7 @@ import type { Beat } from './beats.js';
 import { buildBeats, countInBar, measureEndSec, measureStartSec } from './beats.js';
 import type { AudioClock } from './clock.js';
 import { audibleTime } from './clock.js';
-import type { Instrument } from './instrument.js';
+import { noteVelocity, type Instrument } from './instrument.js';
 
 export interface TransportDeps {
   ctx: AudioClock;
@@ -59,11 +59,6 @@ const GRACE_LEAD_SEC = 0.05;
 const GRACE_DURATION_SEC = 0.1;
 const MIN_DURATION_SEC = 0.05;
 const MAX_TEMPO_DEFERRAL_SEC = 0.25;
-/**
- * The accompaniment is slightly softer than the melody. Both lie inside the piano's loaded
- * velocity layer (`PIANO_LAYER`, 85 to 100): smplr plays nothing for a velocity outside it.
- */
-const VELOCITY: Record<Hand, number> = { R: 96, L: 88 };
 /** Segments stay this long after they end: the audible time lags `currentTime` by the output latency. */
 const SEGMENT_KEEP_SEC = 2;
 
@@ -95,7 +90,7 @@ function buildEvents(score: Score): PlayEvent[] {
           : Math.max(MIN_DURATION_SEC, n.offsetSec - n.onsetSec),
       midi: attack.midi,
       hand: n.hand,
-      velocity: VELOCITY[n.hand],
+      velocity: noteVelocity(n),
       ...(n.ornament && (index + 1 < attacks.length || attack.midi !== n.midi)
         ? { ornamentEnd: Math.min(attack.offsetSec, n.ornament.endSec) }
         : {}),

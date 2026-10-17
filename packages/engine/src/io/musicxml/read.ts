@@ -43,7 +43,31 @@ type Located<T extends { tick: number }> = {
   event: Omit<T, 'tick'>;
 };
 
+/**
+ * A dynamics mark (or a `<sound dynamics>`) as a velocity from its position on, for its part:
+ * every staff of it, or one staff when the mark stands outside the staves (`dynamicsStaff`).
+ */
+interface DynamicsEvent {
+  part: number;
+  staff: number | undefined;
+  measureIndex: number;
+  offset: number;
+  velocity: number;
+}
+
 const DEFAULT_QPM = 120;
+
+/** The MIDI velocity each dynamics mark plays at. */
+const DYNAMICS_VELOCITY: Record<string, number> = {
+  ppp: 16,
+  pp: 33,
+  p: 49,
+  mp: 64,
+  mf: 80,
+  f: 96,
+  ff: 112,
+  fff: 126,
+};
 
 const BEAT_UNIT_QUARTERS: Record<string, number> = {
   whole: 4,
@@ -106,6 +130,9 @@ export function parseMusicXml(
   const times: Located<TimeSigEvent>[] = [];
   const keys: Located<KeySigEvent>[] = [];
   const tiedEnds = new Map<Note, { measureIndex: number; offset: number }>();
+  const dynamics: DynamicsEvent[] = [];
+  /** Each note's part and staff within it, which the dynamics marks are written per. */
+  const noteStaves = new Map<Note, { part: number; staff: number }>();
   const tieJoins: {
     previousMeasure: number;
     previousEnd: number;
@@ -174,6 +201,23 @@ export function parseMusicXml(
           case 'sound': {
             const qpm = readTempo(el);
             if (qpm !== undefined && partIndex === 0) tempos.push(at<TempoEvent>({ qpm }));
+            const velocity = readDynamics(el);
+            if (velocity !== undefined) {
+              // A direction's <offset> moves its sound only with sound="yes".
+              const shift = firstChild(el, 'offset');
+              dynamics.push({
+                part: partIndex,
+                staff: dynamicsStaff(el, staves),
+                measureIndex: mIndex,
+                offset:
+                  cursor -
+                  measureStart +
+                  (shift?.getAttribute('sound') === 'yes'
+                    ? scaled(shift.textContent ?? '0', currentDivisions, divisions)
+                    : 0),
+                velocity,
+              });
+            }
             break;
           }
           case 'backup': {
@@ -336,6 +380,7 @@ export function parseMusicXml(
               sourceIndices: [index],
             };
             notes.push(note);
+            noteStaves.set(note, { part: partIndex, staff: localStaff });
             if (!isGrace) ornaments.note(el, note, ornamentContext, offset - onset);
             if (tieStart) {
               if (opts.preserveNotation) {
@@ -398,6 +443,7 @@ export function parseMusicXml(
       n.offsetTick = measures[tiedEnd.measureIndex]!.startTick + tiedEnd.offset;
     }
   }
+  applyDynamics(notes, noteStaves, dynamics, measures);
   const absolute = <T extends { tick: number }>(located: Located<T>[]): T[] =>
     located
       .map((l) => ({ tick: measures[l.measureIndex]!.startTick + l.offset, ...l.event }) as T)
@@ -536,6 +582,89 @@ function readTempo(el: Element): number | undefined {
   // Each dot adds half the previous value: 1, 1.5, 1.75, ... times the undotted unit.
   const quarters = (BEAT_UNIT_QUARTERS[unit] ?? 1) * (2 - 0.5 ** dots);
   return perMinute * quarters;
+}
+
+/**
+ * The velocity a `<direction>` or `<sound>` sets: its dynamics mark (ppp to fff), else its
+ * `<sound dynamics>`, a percentage of forte (MIDI velocity 90). A mark outside ppp to fff (sfz,
+ * fp) is an accent, so the direction sets no level, whatever its sound says.
+ */
+function readDynamics(el: Element): number | undefined {
+  const marks = el.tagName === 'direction' ? allDescendants(el, 'dynamics') : [];
+  for (const d of marks) {
+    for (const mark of childElements(d)) {
+      const velocity = DYNAMICS_VELOCITY[mark.tagName];
+      if (velocity !== undefined) return velocity;
+    }
+  }
+  if (marks.length > 0) return undefined;
+  const sound = el.tagName === 'sound' ? el : allDescendants(el, 'sound')[0];
+  const percent = Number(sound?.getAttribute('dynamics') || NaN);
+  if (!Number.isFinite(percent) || percent < 0) return undefined;
+  return Math.min(127, Math.max(1, Math.round(percent * 0.9)));
+}
+
+/**
+ * The one staff a dynamics direction applies to, or undefined for every staff of its part. In
+ * piano music a mark between the staves (below the upper staff, above the lower one, MusicXML's
+ * default placement for dynamics being below) is for both hands; only a mark above the top staff
+ * or below the bottom one is for that staff's hand alone.
+ */
+function dynamicsStaff(el: Element, staves: number): number | undefined {
+  if (el.tagName !== 'direction' || staves < 2) return undefined;
+  const staff = Number(childText(el, 'staff') ?? NaN);
+  const placement =
+    el.getAttribute('placement') ||
+    allDescendants(el, 'dynamics')[0]?.getAttribute('placement') ||
+    'below';
+  if (staff === 1 && placement === 'above') return 1;
+  if (staff === staves && placement === 'below') return staff;
+  return undefined;
+}
+
+/**
+ * Gives each note the velocity of the latest dynamics event at or before its onset on its staff
+ * (final ticks; of events at the same tick the later in the document wins). A note before its
+ * staff's first mark keeps no velocity.
+ */
+function applyDynamics(
+  notes: Note[],
+  noteStaves: Map<Note, { part: number; staff: number }>,
+  dynamics: DynamicsEvent[],
+  measures: MeasureInfo[],
+): void {
+  if (dynamics.length === 0) return;
+  const byPart = new Map<number, { tick: number; staff: number | undefined; velocity: number }[]>();
+  for (const d of dynamics) {
+    const event = {
+      tick: measures[d.measureIndex]!.startTick + d.offset,
+      staff: d.staff,
+      velocity: d.velocity,
+    };
+    const list = byPart.get(d.part);
+    if (list) list.push(event);
+    else byPart.set(d.part, [event]);
+  }
+  for (const list of byPart.values()) list.sort((a, b) => a.tick - b.tick); // stable
+  for (const n of notes) {
+    const where = noteStaves.get(n)!;
+    const events = byPart.get(where.part);
+    if (!events) continue;
+    let lo = 0;
+    let hi = events.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (events[mid]!.tick <= n.onsetTick) lo = mid + 1;
+      else hi = mid;
+    }
+    for (let i = lo - 1; i >= 0; i--) {
+      const e = events[i]!;
+      if (e.staff === undefined || e.staff === where.staff) {
+        n.velocity = e.velocity;
+        break;
+      }
+    }
+  }
 }
 
 function readFingering(noteEl: Element): Finger | undefined {

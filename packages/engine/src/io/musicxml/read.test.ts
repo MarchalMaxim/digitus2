@@ -347,3 +347,99 @@ describe('parseMusicXml staves, encodings and containers', () => {
     expect(score.notes.map((x) => x.midi)).toEqual([72]);
   });
 });
+
+describe('parseMusicXml dynamics', () => {
+  /** A `<direction>` with a dynamics mark (or none), optional `<sound>` attributes and staff. */
+  const dyn = (
+    mark: string | null,
+    { staff, sound, placement }: { staff?: number; sound?: string; placement?: string } = {},
+  ) =>
+    `<direction${placement === undefined ? '' : ` placement="${placement}"`}><direction-type>${mark === null ? '<words>cresc.</words>' : `<dynamics><${mark}/></dynamics>`}</direction-type>${staff === undefined ? '' : `<staff>${staff}</staff>`}${sound === undefined ? '' : `<sound dynamics="${sound}"/>`}</direction>`;
+  const onStaff = (staff: number) => `<voice>${staff}</voice><staff>${staff}</staff>`;
+  const twoStaves = (...measures: string[]) =>
+    `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1">${measures
+      .map(
+        (m, i) =>
+          `<measure number="${i + 1}">${i === 0 ? '<attributes><divisions>1</divisions><staves>2</staves></attributes>' : ''}${m}</measure>`,
+      )
+      .join('')}</part></score-partwise>`;
+  const velocities = (input: string) =>
+    parseMusicXml(input).score.notes.map((x) => [x.midi, x.velocity]);
+
+  it('maps every mark from ppp to fff to a velocity', () => {
+    const marks = ['ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff'];
+    const { score } = parseMusicXml(onePart(marks.map((m) => dyn(m) + n('C', 4, 1)).join('')));
+    expect(score.notes.map((x) => x.velocity)).toEqual([16, 33, 49, 64, 80, 96, 112, 126]);
+  });
+  it('leaves notes before the first mark without a velocity and carries a mark across bars', () => {
+    expect(velocities(onePart(n('C', 4, 1) + dyn('p') + n('D', 4, 1), n('E', 4, 1)))).toEqual([
+      [60, undefined],
+      [62, 49],
+      [64, 49],
+    ]);
+  });
+  it('applies a mark between the staves to both hands, at its offset in the bar', () => {
+    // Below the upper staff (also by default) or above the lower one, or naming no staff.
+    const xml = twoStaves(
+      `${dyn('p', { staff: 1 })}${n('C', 5, 1, onStaff(1))}${dyn('ff', { staff: 1, placement: 'below' })}${n('D', 5, 1, onStaff(1))}<backup><duration>2</duration></backup>${n('C', 3, 1, onStaff(2))}${n('D', 3, 1, onStaff(2))}`,
+      `${dyn('mp', { staff: 2, placement: 'above' })}${n('E', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('E', 3, 1, onStaff(2))}`,
+      `${dyn('pp')}${n('F', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('F', 3, 1, onStaff(2))}`,
+    );
+    expect(velocities(xml)).toEqual([
+      [72, 49],
+      [48, 49],
+      [74, 112],
+      [50, 112],
+      [76, 64],
+      [52, 64],
+      [77, 33],
+      [53, 33],
+    ]);
+  });
+  it('keeps a mark above the top staff or below the bottom one to that hand', () => {
+    const xml = twoStaves(
+      `${dyn('p', { staff: 1 })}${n('C', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${dyn('f', { staff: 2, placement: 'below' })}${n('C', 3, 1, onStaff(2))}`,
+      `${dyn('mf', { staff: 1, placement: 'above' })}${n('D', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('D', 3, 1, onStaff(2))}`,
+    );
+    expect(velocities(xml)).toEqual([
+      [72, 49],
+      [48, 96],
+      [74, 80],
+      [50, 96],
+    ]);
+  });
+  it('reads sound dynamics as a percentage of forte when no mark gives a level', () => {
+    // MusicXML's sound dynamics is a percentage of forte, MIDI velocity 90.
+    const xml = onePart(
+      dyn(null, { sound: '60' }) + n('C', 4, 1),
+      dyn('pp', { sound: '100' }) + n('D', 4, 1),
+      dyn('sfz', { sound: '120' }) + n('E', 4, 1),
+      '<sound dynamics="80"/>' + n('F', 4, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 54],
+      [62, 33], // the mark wins over its sound
+      [64, 33], // an accent such as sfz keeps the level
+      [65, 72],
+    ]);
+  });
+  it('keeps dynamics within their part and at the final bar starts', () => {
+    // P2's first bar is longer, so P1's second bar moves later in the second pass.
+    const xml = `<score-partwise><part-list><score-part id="P1"/><score-part id="P2"/></part-list>
+      <part id="P1">
+        <measure number="1"><attributes><divisions>1</divisions></attributes>${dyn('p')}${n('C', 5, 1)}</measure>
+        <measure number="2">${n('D', 5, 1)}${dyn('f')}${n('E', 5, 1)}</measure>
+      </part>
+      <part id="P2">
+        <measure number="1"><attributes><divisions>1</divisions></attributes>${n('C', 3, 4)}</measure>
+        <measure number="2">${dyn('pp')}${n('D', 3, 2)}</measure>
+      </part></score-partwise>`;
+    expect(velocities(xml)).toEqual([
+      [72, 49],
+      [48, undefined],
+      [74, 49],
+      [50, 33],
+      [76, 96],
+    ]);
+  });
+});

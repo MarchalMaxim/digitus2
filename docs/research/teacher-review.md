@@ -1,9 +1,9 @@
 # A language model as a piano-teacher oracle for fingerings: protocol, pilot, measurements, recommendation
 
-*Verification research report (October 2026). Code: `research/teacher_review/` (renderer, fault
-injector, blinded benchmark builder, collector, scorer, 36 tests). Results: `research/teacher_review/results/`.
-Rendered passages and raw reviewer outputs stay under `research/data/teacher_review/` (PIG-derived,
-not committed).*
+*Verification research report. Code: `research/teacher_review/` (renderer, fault injector, blinded
+benchmark builder, collector, scorer, and the weekly job built on them). Results:
+`research/teacher_review/results/`. Rendered passages and raw reviewer outputs stay under
+`research/data/teacher_review/` (PIG-derived, not committed).*
 
 ## 1. Question and answer in brief
 
@@ -12,7 +12,7 @@ fingerings (the verification spec, section 2, lists only quantitative oracles), 
 be used in the verification loop?
 
 **Answer.** Yes, with a clear role. In a blinded pilot on 40 PIG passages x 3 conditions x 2 runs
-(240 reviews by 30 fresh Opus subagents), the reviewer
+(240 reviews in 30 blinded batches, each read by a fresh Opus reviewer), the reviewer
 
 * found **99%** of 184 planted hard faults within one note
   (95% with the right category), with
@@ -29,7 +29,7 @@ be used in the verification loop?
   scores, 81% verdict agreement, 91/92 faults found in both);
 * read the text rendering back with 0 errors in 6042 digits;
 * cost a median 15,805 tokens and 72 s of wall time per passage-condition
-  (measured by the Agent tool; almost all of it reasoning).
+  (measured; almost all of it reasoning).
 
 The failure modes are also clear: it applies the "finger still holding a key" rule to sounding
 durations that pianists release early or pedal, it sometimes calls an expert's choice on a
@@ -48,7 +48,7 @@ reviewed in three *conditions* that share every note and differ only in the fing
 | Condition | Fingering | Why |
 |---|---|---|
 | `expert` | one of the piece's four to six PIG annotators, drawn at random per passage | the positive control: what an experienced pianist actually played |
-| `fhmm3` | the authors' released third-order HMM output for the same notes (`research/data/pig_hmm/Result_FHMM3`, M_gen 65.0 on the test split) | a realistic engine output, better than our M2 floor target and below the human ceiling |
+| `fhmm3` | the authors' released third-order HMM output for the same notes (`research/data/pig_hmm/Result_FHMM3`, M_gen 65.0 on the test split) | a realistic engine output, below the human ceiling |
 | `corrupted` | the expert fingering with two or three planted faults of distinct, recorded kinds | the negative control with known ground truth per note |
 
 ### 2.2 Rendering
@@ -177,25 +177,23 @@ kind.
   takes the shortest window from each start bar that holds at least 14 reviewed notes, and in these
   pieces that is usually two bars; a later run should sample the length uniformly.
 * **Runs**: A (framing `variant_a`) and B (framing `variant_b`), each 15 batches of 8 items,
-  independently shuffled and re-labelled. 30 reviewer agents in all, every one a fresh Opus
+  independently shuffled and re-labelled. 30 reviewers in all, every one a fresh Opus
   subagent that saw one batch file and nothing else.
-* Built with `research/.venv/Scripts/python.exe -I -m teacher_review.build_benchmark --seed 20261013 --runs A B`.
+* Built by `teacher_review.build_benchmark` with seed 20261013; `research/teacher_review/README.md`
+  reproduces the pilot.
 
 ### 3.2 Execution
 
 All 30 batches returned valid JSON with all 8 items, every note id valid and every score in range
-(`results/A/collect_report.json`, `results/B/collect_report.json`: 0 and
-0 problems). The reviewers were dispatched from the coordinator session with the
-prompt in `research/teacher_review/README.md`, up to the session's concurrency cap at a time, on
-2026-10-13 between 21:12 and 21:53 UTC. Commands: `collect --run A`, `collect --run B`,
-`score --runs A B` (section 4 is `results/summary.md` verbatim).
+(`results/A/collect_report.json`, `results/B/collect_report.json`: 0 problems each). The
+reviewers were launched with the prompt in `research/teacher_review/README.md`. Section 4 is
+`results/summary.md` verbatim.
 
 ### 3.3 Cost (measured)
 
 The Agent tool reports, per reviewer, the tokens it consumed in total (prompt, reasoning, tool
 round-trips, output) and the wall time from launch to hand-back. These were captured for
-14 of the 30 batches (`results/dispatch_log.json`; the others' completion notices
-arrived without a usage block):
+14 of the 30 batches (`results/dispatch_log.json`):
 
 | batch | tokens | wall s | items |
 |---|---|---|---|
@@ -350,7 +348,7 @@ an hour of wall time with up to twenty reviewers in parallel.
   (56/1114); notes on which at least one other annotator
   differs were flagged at 15% (137/900).
   So the reviewer flags *more* often where experts themselves disagree, which is the behaviour one
-  wants from a second opinion (not the "flags less" that the question in the brief anticipated), and
+  wants from a second opinion, and
   80% of its proposed fixes on expert passages are the finger
   another PIG annotator actually used.
 * **Self-consistency.** Across the two runs (different framing, order, ids and batch-mates), overall
@@ -400,26 +398,31 @@ oracles of the verification spec (PIG, Mutopia, textbook, expert base rates, bas
 stay the only judges of numbers; the reviewer reads what those oracles cannot explain and writes
 the hypotheses the iteration protocol (spec section 4) needs.
 
-Use it in `pnpm verify`'s neighbourhood as a **weekly teacher review job** (after the daily UI
-review of spec section 3.10 starts, the two can share a schedule):
+It runs as a **weekly teacher review job** outside `pnpm verify`
+(`research/teacher_review/weekly.py`: build, collect, report):
 
-1. **Input selection** (automatic, from the latest bench run): (a) the 20 passages around the
-   engine's lowest-confidence notes (section 3.8 calibration buckets), (b) every hard-error
-   gallery entry (section 3.3) with its surrounding two to four bars, (c) 10 random passages
-   from the library pieces at levels 1 to 3 as a control, and (d) once the app exists, the
-   passages a user edited. Render each with `teacher_review.render` from the engine's MusicXML
-   (exact bars and beats), the reviewed hand(s) fingered, the other hand as context.
+1. **Input selection** (automatic, from the latest bench run; `select.py`): (a) the 20 passages
+   around the engine's lowest-confidence library notes (section 3.8 calibration buckets), at most
+   two per piece, (b) up to 16 windows of two to four bars around the hard errors of the bench
+   gallery (section 3.3), taken from PIG validation pieces only, never the official test pieces,
+   (c) 10 random passages from the library pieces at levels 1 to 3 as a control, 4 of them also
+   with planted faults and 4 others again as recall twins (section 6.4), and (d) the passages a
+   user edited, which waits until the app stores edits. Each passage is rendered with
+   `teacher_review.render` from the engine's MusicXML (exact bars and beats), the reviewed hand(s)
+   fingered, the other hand as context.
 2. **Dispatch** as blinded batches of 8 passages (different passages per batch, random order,
-   opaque ids, no mention of the engine version or whether the passage is a control). Two
-   independent reviewers per batch when budget allows; one is enough for the control set.
+   opaque ids, no mention of the engine version or whether the passage is a control).
+   Low-confidence and hard-error batches are read by two independent reviewers, one under each
+   framing of section 2.4; control batches by one.
 3. **Collect and score** with `teacher_review.collect`; the same validators apply.
 4. **Turn consistent objections into hypotheses.** An objection is *consistent* when both
    reviewers raise it at the same position with the same kind, or one reviewer raises it with
    severity `error`. Group consistent objections by kind and by lint rule; each group with three
-   or more members becomes one dated entry in `docs/experiments.md` ("the reviewer objects to
-   hops in sixteenth-note Alberti figures in 6 of 20 low-confidence passages; hypothesis: the hop
-   penalty is too weak below 150 ms; expected effect: fewer L11 warnings, no change in M_gen").
-   The hypothesis is then tested with the quantitative loop as usual.
+   or more members becomes one entry in `docs/experiments.md` ("the reviewer objects to hops in
+   sixteenth-note Alberti figures in 6 of 20 low-confidence passages; hypothesis: the hop penalty
+   is too weak below 150 ms; expected effect: fewer L11 warnings, no change in M_gen"). The
+   hypothesis is then tested with the quantitative loop as usual. Planted and recall twins are
+   instrument checks and feed no hypotheses.
 5. **Report** `docs/reviews/teacher-YYYY-MM-DD.md`: the tables of section 4 for the control set
    (sensitivity on the planted-fault control, objection rate on expert control if PIG passages are
    included locally), the list of hypotheses, and the three most instructive objections verbatim.
@@ -450,8 +453,8 @@ disposes.
 
 ### 6.3 The periodic reviewer agent: exact brief
 
-The agent receives three things: the dispatch wrapper below, the brief of section 7 (the file
-`research/teacher_review/prompts/brief.md`, unchanged), and one batch file produced by
+The agent receives three things: the dispatch wrapper below, the brief (the file
+`research/teacher_review/prompts/brief.md`, unchanged; section 7), and one batch file produced by
 `teacher_review.render` with the legend. Nothing else. The wrapper, ready to paste into an
 agent prompt (replace the two paths):
 
@@ -478,102 +481,48 @@ Model: Opus (the pilot's reviewer); Sonnet was not measured and should be pilote
 planted-fault control before use. Batch size 8 (about 20,000 characters of input); two
 reviewers per batch for the low-confidence and hard-error sets.
 
-### 6.4 Two improvements to make before the first weekly run
+### 6.4 Two improvements over the pilot
 
-1. **Say what `dur` means.** Add to the legend: "`dur` is the sounding length in the source;
+The weekly job (`research/teacher_review/dispatch.py`, `select.py`) applies both.
+
+1. **Say what `dur` means.** The weekly legend adds: "`dur` is the sounding length in the source;
    pianists release early or use the pedal, so a finger may be re-used after a long note unless
-   the notes are slurred." This removes the one systematic false positive found (section 5).
-2. **Score the rendering, not the memory.** For library pieces with well-known editions,
-   either strip the composer line or add a control passage transposed by a tritone; if the
-   reviewer's objections change when the composer is hidden, it is recalling an edition rather
-   than reading the passage. The pilot's read-back check shows the text is read correctly, not
-   that it is the only thing read.
+   the notes are slurred." This removes the one systematic false positive found in the pilot
+   (section 5). The pilot's legend (`render.LEGEND`) did not say it.
+2. **Score the rendering, not the memory.** Each recall twin is a control passage again with the
+   composer hidden, transposed by a tritone, re-fingered by the engine in the new key and with
+   its bars renumbered from 1. If the reviewer's objections change when the composer is hidden,
+   it is recalling an edition rather than reading the passage. The pilot's read-back check shows
+   the text is read correctly, not that it is the only thing read.
 
-## 7. The reviewer brief (verbatim)
+## 7. The reviewer brief
 
-This is `research/teacher_review/prompts/brief.md`, ready to paste into an agent prompt together with the notation legend (`render.LEGEND`) and the passages. The dispatch wrapper used in the pilot is in `research/teacher_review/README.md`.
+The brief is `research/teacher_review/prompts/brief.md`, read at run time by `dispatch.py`; paste it
+into an agent prompt together with the notation legend and the passages. The dispatch wrapper of the
+pilot is in `research/teacher_review/README.md` and section 6.3. It asks the reviewer, for every
+passage, to:
 
-> # Fingering review brief
->
-> You are reviewing piano fingerings as an experienced piano teacher would, for a student of
-> beginning-to-intermediate level with a medium-sized adult hand (an octave is comfortable, a ninth
-> is a stretch, a tenth is out of reach). You will see short passages (two to eight bars) in a
-> compact text notation, each with a candidate fingering for one or both hands. The fingerings
-> come from different sources: some were written by expert pianists, some by a computer program,
-> and some contain deliberately planted mistakes. You are not told which is which, and you should
-> not try to guess. Judge every passage on its own merits.
->
-> ## What you must do for every passage
->
-> 1. Read the passage back. For each reviewed hand, write the fingers in note order (chord notes
->    low to high) as a space-separated digit string. This is a reading check; copy exactly.
-> 2. Score five criteria from 0 to 3 (integers):
->    - `possible`: physically possible. Hard rules: no two simultaneous notes on one finger (except
->      the thumb on two adjacent white keys), chord fingers in pitch order, spans within what a
->      medium hand can hold (3-4 or 4-5 no wider than a third, 2-3 a fourth, 2-5 or 1-5 an octave
->      to a ninth), no finger re-used on a new key while it still holds another.
->      3 = nothing impossible; 2 = one spot that is awkward but playable; 1 = one impossible spot;
->      0 = several impossible spots.
->    - `idiomatic`: standard scale and arpeggio fingerings where the music is a scale or arpeggio,
->      only legal crossings (thumb under 2, 3 or 4, and 2, 3 or 4 over the thumb; never a long
->      finger over another long finger), standard chord shapes (right hand root-position triads
->      1-3-5, first inversion 1-2-5; left hand 5-3-1 and 5-2-1).
->      3 = idiomatic throughout; 2 = one odd choice; 1 = several; 0 = unidiomatic throughout.
->    - `economical`: as few position changes as the music allows, shifts placed at rests, long
->      notes or phrase ends, no hops (same finger on two consecutive different keys with no rest
->      between), no needless stretches.
->      3 = economical; 2 = one avoidable shift, hop or stretch; 1 = several; 0 = restless.
->    - `consistent`: identical or sequentially repeated figures get the same fingering.
->      3 = consistent (or no repeats present); 2 = one inconsistency; 1 = several; 0 = chaotic.
->    - `beginner_friendly`: thumb and fifth finger stay off black keys where a white-key finger is
->      available, no thumb passing onto a black key, no 3-4-5 runs where 1-2-3 or 2-3-4 would do,
->      no spans beyond a comfortable octave, no finger substitutions.
->      3 = a student could use it as is; 2 = one or two edits; 1 = several spots need rework;
->      0 = unsuitable for a student.
-> 3. Give an overall verdict: `good` (hand it to the student as is), `acceptable` (one or two
->    small edits), `flawed` (needs rework), `unplayable` (contains something physically impossible
->    at tempo).
-> 4. List specific objections. Each objection names the note ids it concerns (from the passage),
->    a kind from the vocabulary below, a severity, a problem statement of at most 25 words, and a
->    proposed fix as a mapping from note id to finger. Only raise objections you would defend to a
->    colleague; an empty list is a perfectly good answer when the fingering is sound. Do not invent
->    notes that are not in the passage. Do not object to the music itself, only to the fingering.
->    Severity: `error` = physically impossible or a hard rule above; `warning` = playable but
->    ergonomically poor; `info` = a matter of preference.
-> 5. Add one or two sentences of overall comment (optional).
->
-> Objection kinds: `same_finger_chord`, `crossed_chord`, `impossible_span`, `nonthumb_crossing`,
-> `thumb_pass_onto_black`, `hop`, `reversed_run`, `thumb_on_black`, `fifth_on_black`, `stretch`,
-> `position_change`, `inconsistent`, `weak_finger`, `repeated_note`, `nonstandard_pattern`, `other`.
->
-> ## Output
->
-> Return one JSON document with this shape and nothing else (no prose outside the JSON):
->
-> ```json
-> {
->   "batch": "<batch id from the input file>",
->   "started_at": "<ISO-8601 UTC timestamp taken before you read the passages>",
->   "finished_at": "<ISO-8601 UTC timestamp taken after you wrote the last item>",
->   "items": [
->     {
->       "item": "<passage id>",
->       "readback": {"R": "1 2 3 1 2 3 4 5", "L": "5 4 3 2 1"},
->       "scores": {"possible": 3, "idiomatic": 2, "economical": 2, "consistent": 3, "beginner_friendly": 2},
->       "verdict": "acceptable",
->       "objections": [
->         {"notes": ["R7", "R8"], "kind": "hop", "severity": "warning",
->          "problem": "Finger 3 repeated on G4 then A4 at sixteenth-note speed with no rest.",
->          "fix": {"R7": 2, "R8": 3}}
->       ],
->       "comment": "Mostly standard; the shift in bar 3 could wait for the rest."
->     }
->   ]
-> }
-> ```
->
-> Include `readback` only for the hands whose fingering you were asked to review. Every item in the
-> input file must appear exactly once in `items`, in the same order.
+1. Read the fingering back: for each reviewed hand, the fingers in note order (chord notes low to
+   high) as a space-separated digit string, copied exactly.
+2. Score the five criteria of section 2.3 from 0 to 3, with an anchor for each score. The reviewer is
+   an experienced piano teacher judging for a student of beginning-to-intermediate level with a
+   medium-sized adult hand (an octave is comfortable, a ninth is a stretch, a tenth is out of
+   reach). The span limits behind `possible`: 3-4 or 4-5 no wider than a third, 2-3 a fourth, 2-5 or
+   1-5 an octave to a ninth.
+3. Give a verdict: `good` (hand it to the student as is), `acceptable` (one or two small edits),
+   `flawed` (needs rework) or `unplayable` (contains something physically impossible at tempo).
+4. List objections as in section 2.3: note ids, a kind from the vocabulary, a severity (`error` =
+   physically impossible or a hard rule; `warning` = playable but ergonomically poor; `info` = a
+   matter of preference), a problem of at most 25 words and a fix as a mapping from note id to
+   finger. An empty list is a good answer when the fingering is sound; the reviewer must not invent
+   notes or object to the music itself.
+5. Add an optional comment of one or two sentences.
+
+The brief says that the fingerings come from different sources (expert pianists, a computer program,
+deliberately planted mistakes), that the reviewer is not told which is which and should not guess.
+The output is one JSON document and nothing else: `batch`, `started_at` and `finished_at` (UTC
+timestamps taken before reading and after writing), and `items`, one per passage in input order, each
+with `item`, `readback` (only for the reviewed hands), `scores`, `verdict`, `objections` and `comment`.
 
 ## 8. Limitations
 
@@ -594,8 +543,8 @@ This is `research/teacher_review/prompts/brief.md`, ready to paste into an agent
   engine's output on known pieces) that is realistic, but it inflates what the rendering alone
   conveys. The read-back check shows the rendering is at least read correctly.
 * **Bars and beats of PIG passages are estimated** (section 2.2); six of the thirty test pieces
-  were excluded for that reason, so the sample is 24 pieces, 40 passages, about 1,600 reviewed
-  notes per run. Per-kind sensitivities rest on 6 to 24 planted faults each.
+  were excluded for that reason, so the sample is 24 pieces, 40 passages, 1,007 reviewed
+  notes per condition and run. Per-kind sensitivities rest on 6 to 24 planted faults each.
 * **Two runs, one model, no human teacher.** Self-consistency is measured, inter-rater agreement
   with human teachers is not (literature 5.7 asks for several raters). The protocol is ready
   for that: the same batch files can be given to a teacher.

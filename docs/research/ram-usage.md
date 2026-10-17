@@ -1,4 +1,4 @@
-# RAM usage (issue #7, 2026-10-16)
+# RAM usage
 
 Production build, headless Chromium on Linux, 1280 × 900. Renderer PSS from `/proc/<pid>/smaps_rollup`; JS heaps and WASM memory per page and worker over CDP.
 
@@ -13,19 +13,14 @@ About 210 MB of the roughly 400 MB total is Chromium's own processes (browser, G
 | Sleeping Beauty waltz (298 bars, 30k SVG nodes) | 313 | 20.1 |
 
 - **Verovio worker:** a fixed 128 MB WASM heap (3 MB data, a 64 MB stack, then the heap), plus about 50 MB of compiled code and script. It is warmed up on the library list and lives until the tab closes. Left as is (see `docs/app.md`, Known limitations).
-- **Library manifest:** opening any piece imported all 2,702 manifest entries as a JS module; V8 kept its source and string literal, about 12 MB. **Fixed.**
-- **Engine on the main thread:** `audio/beats.ts` imported from the engine index, loading the whole 1 MB engine chunk on the main thread. **Fixed.**
+- **Library manifest:** importing the manifest as a JS module made V8 keep its source and string literal for all 2,702 entries, about 12 MB. The piece details are now fetched as JSON instead.
+- **Engine on the main thread:** importing `audio/beats.ts` from the engine index loaded the whole 1 MB engine chunk on the main thread. It now uses the `@digitus2/engine/score-build` subpath (`score/build.ts`).
 - **Long scores:** the SVG of a 298-bar piece costs about 120 MB; inherent to laying out every page.
 - **Engine worker** 10 to 35 MB; **playback** under 20 MB plus Chromium's audio service.
 
-## Fixes
+The two fixes cut the page JS heap with Twinkle open from 15.1 to 7.9 MB, and with the long piece from 20.1 to 13.1 MB. `loadPieceDetails` fetches `manifest.json?url` (tests inject it with `setPieceDetails`).
 
-- `loadPieceDetails` fetches `manifest.json?url` instead of importing it (tests inject it with `setPieceDetails`).
-- New engine subpath `@digitus2/engine/score-build` (`score/build.ts`), used by `beats.ts`.
-
-Page JS heap with Twinkle open: 15.1 → 7.9 MB; with the long piece: 20.1 → 13.1 MB.
-
-## Verovio options, for a later decision
+## Verovio options, not taken
 
 | Option | Saves | Costs |
 | --- | --- | --- |

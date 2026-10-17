@@ -3,7 +3,8 @@
 Research report for verification spec section 3.6 ("Be easy to read": printed-digit density and
 inferability). Code: `research/readability/` (see its README for the pipeline); every number
 below comes from a results file under `research/readability/results/` and the command that
-produced it is given with each table. Written 2026-10-13.
+produced it is given with each table. The spec's section 3.6 follows the recommendations of
+section 7.
 
 ## 0. Summary
 
@@ -48,10 +49,12 @@ produced it is given with each table. Written 2026-10-13.
 
 ## 1. Question and method
 
-Editors print a finger number only where a player needs one. The verification spec proposes to
-print the same way: keep a digit only where a simple player model cannot infer it, and it sets
-density goals (at most 40 percent of notes at the floor, 30 target, about 20 "editor level").
-Nobody had measured what editors do. This study measures it on two sources:
+Editors print a finger number only where a player needs one. The verification spec prints the
+same way: a digit is kept only where a simple player model cannot infer it. Its first formulation
+listed contexts that trigger a digit (first note, after a rest, after a long note, wide leap, chord
+outer voice, run start) and set one row of density goals (at most 40 percent of notes at the floor,
+30 target, about 20 "editor level"). This study measures what editors do, to test that list and
+those goals, on two sources:
 
 * **Mutopia editorial corpus** (`docs/research/datasets.md` section 4): the 286 verified
   (`status == ok`) two-hand parts, 193,059 notes, 36,183 printed digits, converted from
@@ -65,7 +68,7 @@ Nobody had measured what editors do. This study measures it on two sources:
   continuations into the note that starts the tie (the substitution markers of Moonlight and
   Schumann Op. 68/1 sit on the same note as the primary digit, so they do not add digits).
 
-**Levels.** Mutopia parts are grouped by composer as the brief prescribes: *teaching* = Clementi
+**Levels.** Mutopia parts are grouped by composer: *teaching* = Clementi
 Op. 42, Diabelli (Op. 149 duets, Op. 163 sonatinas), Czerny (Op. 821, 840), Burgmüller Op. 100,
 Kuhlau, Mozart K545 (203 parts); *concert* = Chopin, Liszt, Rachmaninoff (18 parts); *other* =
 everything else (Verdi reductions, Beethoven, Schumann, Bach, Grieg, ..., 65 parts). Because
@@ -96,9 +99,9 @@ moves by one white-key column or more; a change of exactly half a column is the 
 ambiguity of the model, not a shift), and crossings (thumb under: 1 printed after 2-4 moving
 outward; finger over: 2-4 printed after 1 moving inward).
 
-**Pipeline** (`research/readability/run_all.py`): `enrich_mutopia.py` (21.9 s) ->
-`build_features.py` (196,516 rows, 4.1 s) -> `stats.py` (items 1 and 5) -> `repeats.py` (item
-2) -> `eval_player.py` (item 3) -> `predictor.py` (item 4). Tests:
+**Pipeline** (`research/readability/run_all.py`): `enrich_mutopia.py` ->
+`build_features.py` (196,516 rows) -> `stats.py` (sections 2 and 3) -> `repeats.py` (section 4)
+-> `eval_player.py` (section 5) -> `predictor.py` (section 6). Tests:
 `research/.venv-readability/Scripts/python.exe -X utf8 -m pytest research/readability/tests -q`.
 
 ## 2. The corpus
@@ -302,7 +305,7 @@ criterion of the spec, and the reason the predictor in section 6 cannot do much 
 ## 4. Repeated passages
 
 Command: `cd research && OMP_NUM_THREADS=2 .venv-readability/Scripts/python.exe -X utf8 -m readability.repeats`
-(`results/repeats.json`, 2.0 s). A repeated segment is at least four consecutive events of one
+(`results/repeats.json`). A repeated segment is at least four consecutive events of one
 hand whose pitch tuples match up to one constant semitone shift, with the same per-note
 durations and the same inter-onset intervals (1/48-beat grid). Segments are found greedily left
 to right by hashing four-event windows and extending matches as far as possible without
@@ -404,7 +407,7 @@ the finger of the last visible digit.
 ### 5.2 Hide-20 and leave-one-out
 
 Command: `OMP_NUM_THREADS=2 research/.venv-readability/Scripts/python.exe -X utf8 research/readability/eval_player.py --seeds 0 1 2 3 4`
-(`results/player_model.json`, 10.1 s). Hide-20: in each part and hand a random 20 percent of
+(`results/player_model.json`). Hide-20: in each part and hand a random 20 percent of
 the printed digits is hidden (`random.Random(seed)`, seeds 0 to 4), the model reads the hand with
 the remaining digits visible, and each hidden note is scored. Coverage = inferred / hidden,
 accuracy = correct / inferred, reconstruction = correct / hidden. Mean over seeds [min-max]:
@@ -647,7 +650,7 @@ The table in section 7 turns this into targets.
 
 Command: `cd research && OMP_NUM_THREADS=2 .venv-readability/Scripts/python.exe -X utf8 -m readability.predictor`
 (`results/predictor.json`, `predictor_coefficients.csv`, `predictor_tree.txt`,
-`predictor_library.csv`; 12.4 s). Rows: the 193,059 Mutopia notes; target: printed. Inputs: 39
+`predictor_library.csv`). Rows: the 193,059 Mutopia notes; target: printed. Inputs: 39
 score-only features (the contexts of section 3.2 as numbers and one-hot bins; the
 printed-derived columns are excluded because they leak the target). Models: logistic regression
 on standardised inputs (C = 1, no class weighting), a depth-3 decision tree (min 200 notes per
@@ -775,11 +778,10 @@ Findings:
 
 ## 7. Recommendations
 
-### 7.1 The validated player model (for the engine team)
+### 7.1 The validated player model
 
-Implement exactly the reader of section 5.1 (`research/readability/player_model.py` is the
-reference; 23 unit tests cover C and D positions, C minor, skips, crossings, left-hand mirroring,
-chord fill and the hide-20 scoring), with one addition and one option:
+The reader specified for the engine is that of section 5.1 (`research/readability/player_model.py`
+is the reference implementation), with one addition (R5) and one option (the textbook patterns):
 
 1. **R0** a printed digit is taken as printed and becomes the position anchor `ref`.
 2. **R1** repeated pitch (single note): same finger as the previous event. Measured: 54 percent
@@ -794,7 +796,7 @@ chord fill and the hide-20 scoring), with one addition and one option:
 5. **R4** chords: from the nearest printed chord note by `steps`; without one, every note from
    `ref`; duplicate fingers or values outside 1..5 give up. Measured: 78 percent from a printed
    chord note, 61 percent from `ref`; inner voices inferable 94 percent of the time.
-6. **R5 (new) repeat memory, last resort**: if R1-R4 give up or the engine's complete fingering
+6. **R5 repeat memory, last resort**: if R1-R4 give up or the engine's complete fingering
    disagrees with them, and the event is a later occurrence of a repeated segment (same hand,
    same intervals and rhythm, at least four events, exact or transposed; `repeats.find_repeats`),
    the reader remembers the finger used at the corresponding note of the first statement.
@@ -806,9 +808,9 @@ chord fill and the hide-20 scoring), with one addition and one option:
    forward-only. A look-ahead to the next printed digit was not tested and is the obvious next
    improvement (coverage halves when the last digit is 17 or more events back).
 
-### 7.2 The reduction rules: change the spec
+### 7.2 The reduction rules
 
-Keep the mechanism, drop the context list as a printing trigger:
+Keep the mechanism, drop the context list as a printing trigger (the spec's section 3.6 now says so):
 
 * **Keep**: "keep a digit only where the player model cannot infer it", implemented as the
   greedy forward pass of `reduce.py` (every kept digit is necessary given the earlier ones, and
@@ -861,9 +863,8 @@ of notes:
 | library level 5 (Moonlight i, Chopin 69/2) | 21.7 | 21.1 | 17.6-24.7 | |
 | concert (Chopin, Liszt, Rachmaninoff) | 20.7 | 17.8 | 9.3-41.8 | |
 
-Recommended targets for the "Be easy to read" row of the verification spec (printed-digit
-density after the reduction of 7.2, per library level; inferability stays 100 percent by
-construction):
+Targets for the "Be easy to read" row of the verification spec (printed-digit density after the
+reduction of 7.2, per library level; inferability stays 100 percent by construction):
 
 | Level | Floor (never worse) | Target | Editor level (stretch) | Basis |
 |---|---|---|---|---|
@@ -872,7 +873,7 @@ construction):
 | 4-5 | 40 | 30 | 25 | editors 18 to 29 percent (K545 29, Moonlight 25, Chopin waltz 18); a complete fingering of exercise material needs 33 percent with repeat memory, 39 without |
 | all levels, relative check | at or below the editor's density on the same piece | at or below 0.8 times | at or below 0.5 times | editors print 2.3 to 2.9 times what this reader needs (section 5.5) |
 
-The spec's single row (floor 40, target 30, editor level about 20) is therefore right for
+A single row of floor 40, target 30 and editor level about 20 is therefore right for
 levels 4 and 5 and too loose for levels 1 to 3, where editors print half as much. The "about 20"
 editor level is confirmed for pieces (library median 18, Burgmüller 12 to 17, Czerny 23) but not
 for exercise collections (Diabelli 34, Clementi 49), which the app does not ship.
@@ -912,13 +913,13 @@ for exercise collections (Diabelli 34, Clementi 49), which the app does not ship
 |---|---|
 | `research/readability/README.md` | pipeline and conventions |
 | `research/readability/corpus.py`, `musicxml.py`, `keyboard.py`, `features.py`, `enrich_mutopia.py`, `build_features.py` | data model, loaders, beat recovery, per-note features |
-| `research/readability/stats.py` | items 1 and 5 (`results/density.json`, `print_rate_by_context.csv`, `printed_contexts.json`) |
-| `research/readability/repeats.py` | item 2 (`results/repeats.json`) |
-| `research/readability/player_model.py`, `textbook.py`, `eval_player.py` | item 3 (`results/player_model.json`, `player_model_by_context.csv`, `player_model_by_rule.csv`) |
+| `research/readability/stats.py` | sections 2 and 3 (`results/density.json`, `print_rate_by_context.csv`, `printed_contexts.json`) |
+| `research/readability/repeats.py` | section 4 (`results/repeats.json`) |
+| `research/readability/player_model.py`, `textbook.py`, `eval_player.py` | section 5 (`results/player_model.json`, `player_model_by_context.csv`, `player_model_by_rule.csv`) |
 | `research/readability/reduce.py` | the minimal-sufficient reduction applied to editorial digits, with the repeat-memory variant (`results/reduction.json`, `reduction_by_part.csv`) |
-| `research/readability/predictor.py` | item 4 (`results/predictor.json`, `predictor_coefficients.csv`, `predictor_tree.txt`, `predictor_library.csv`) |
+| `research/readability/predictor.py` | section 6 (`results/predictor.json`, `predictor_coefficients.csv`, `predictor_tree.txt`, `predictor_library.csv`) |
 | `research/readability/report_tables.py`, `run_all.py` | every table in this report, generated from the results files; end-to-end run (about one minute) |
-| `research/readability/tests/` | 67 unit tests (`test_keyboard`, `test_features`, `test_musicxml`, `test_corpus`, `test_stats`, `test_player_model`, `test_textbook`, `test_reduce`, `test_repeats`, `test_predictor`) |
+| `research/readability/tests/` | unit tests (`test_keyboard`, `test_features`, `test_musicxml`, `test_corpus`, `test_stats`, `test_player_model`, `test_textbook`, `test_reduce`, `test_repeats`, `test_predictor`) |
 | `research/readability/requirements.txt`, `research/.venv-readability/` (gitignored) | pinned environment: numpy 2.4.6, scipy 1.17.1, scikit-learn 1.8.0, python-ly 0.9.10, pytest 9.1.1 |
 | `research/data/readability/` (gitignored) | `mutopia_beats/*.json`, `features.csv` |
 

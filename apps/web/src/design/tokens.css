@@ -17,6 +17,9 @@
   /* What the Hands thumb blends with (base.css, .segmented-thumb): a difference with white
      inverts what lies under it, in either theme. */
   --invert: #ffffff;
+  /* How strongly the bar under the pointer is tinted with the ink (base.css, .bar-tint): a light
+     ink on dark paper needs more to show. */
+  --bar-tint: 0.04;
   --dur-press: 50ms; /* a key going down: quick, like a hammer (base.css, .keyboard-svg .key) */
   --dur-fast: 120ms;
   --dur: 160ms;
@@ -50,6 +53,7 @@
     --key-line: #111111;
     --key-digit: #111111;
     --key-down: #8f8f8f;
+    --bar-tint: 0.08;
   }
 }
 
@@ -69,6 +73,7 @@
     --key-line: #111111;
     --key-digit: #111111;
     --key-down: #8f8f8f;
+    --bar-tint: 0.08;
   }
 }
 

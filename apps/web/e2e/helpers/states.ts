@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { openPractice, setLoopBars } from './practice.js';
+import { seekBar } from './seek.js';
 import { holdPianoSamples } from './samples.js';
 import {
   arrivalRows,
@@ -331,6 +332,18 @@ export const STATES: AppState[] = [
       await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
     },
     expectTag: 'button',
+  },
+  {
+    // T13: a click on a bar while stopped cues it; its first note takes the red once the hop lands.
+    name: 'score-cued',
+    go: async (page) => {
+      await twinkleReady(page, '?audio=silent');
+      await seekBar(page, 2);
+      await expect(page.locator('.red-ghost')).toHaveCount(0);
+      await expect(page.locator('.score-sheet .is-red').first()).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+    },
+    expectTag: 'cursor',
   },
   {
     name: 'score-loop',

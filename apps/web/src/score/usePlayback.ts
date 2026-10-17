@@ -10,7 +10,9 @@
  * which the status line counts, and its lead-in reports become `waiting`, which the cursor waits
  * for (no note is marked before it sounds) while Pause keeps the red. `atStart` says whether a
  * stop left the position at the start (Rewind while stopped, the end) or away from it (a pause),
- * where the cursor keeps the last group heard marked (T10).
+ * where the cursor keeps the last group heard marked (T10). `seek` moves the position to a bar's
+ * start (T13), before the first Play too: `cue` then says where Play starts is that bar, and the
+ * cursor marks its first note there until a note is heard.
  *
  * The transport module is a lazy chunk, fetched as soon as a score is open: it reads the beat
  * grid through the engine's public API, and any runtime import of the engine brings
@@ -83,9 +85,22 @@ export interface Playback {
    * while paused away from the start (T10) and clears it here.
    */
   atStart: boolean;
+  /**
+   * The score time a seek (T13) put the position at, a bar's start, until a note is heard there
+   * (or Rewind, or a new score); null otherwise. Stopped, the cursor marks the first group of the
+   * hands played at or after it, the note Play starts with, rather than the last one heard.
+   */
+  cue: number | null;
   play(): void;
   pause(): void;
   rewind(): void;
+  /**
+   * Moves the position to `sec` (a bar's start, T13), playing or not, before the first Play too.
+   * Playing, the music goes on from there after `leadSec` (at least the transport's start delay):
+   * the red hops there meanwhile (RedFlight.tsx). Stopped, Play starts there; a seek to 0 while
+   * stopped is Rewind.
+   */
+  seek(sec: number, opts?: { leadSec?: number }): void;
   /** The score time being heard now, in seconds (0 before the first play). */
   positionSec(): number;
   /**
@@ -151,6 +166,7 @@ export function usePlayback(score: Score | null): Playback {
   const [waiting, setWaiting] = useState(false);
   const [atStart, setAtStart] = useState(true);
   const [loop, setLoopState] = useState<LoopRange | null>(null);
+  const [cue, setCue] = useState<number | null>(null);
   /** `atStart` for play(), which runs in a click: a Play from the start lets the red travel. */
   const atStartRef = useRef(atStart);
   useLayoutEffect(() => {
@@ -164,6 +180,8 @@ export function usePlayback(score: Score | null): Playback {
   const loadedRef = useRef<Score | null>(null);
   const scoreRef = useRef<Score | null>(score);
   const loopRef = useRef<LoopRange | null>(null);
+  /** A seek before the first Play, while there is no transport yet: where it will start. */
+  const pendingSecRef = useRef<number | null>(null);
   /** Bumped by every play, pause and score change: a pending start checks it is still wanted. */
   const playSeqRef = useRef(0);
   /** The delayed hand-over of a loop changed while playing (see LOOP_SETTLE_MS). */
@@ -188,11 +206,13 @@ export function usePlayback(score: Score | null): Playback {
     transportRef.current?.dispose();
     transportRef.current = null;
     loopRef.current = null;
+    pendingSecRef.current = null;
     setPlaying(false);
     setLoading(false);
     setCountIn(null);
     setWaiting(false);
     setAtStart(true);
+    setCue(null);
     setLoopState(null);
   }, [cancelLoopPush]);
 
@@ -263,6 +283,7 @@ export function usePlayback(score: Score | null): Playback {
           transport.rewind();
           setPlaying(false);
           setAtStart(true);
+          setCue(null);
         };
         // The count-in, for the status line, and the lead-in, which the cursor waits for (it
         // marks nothing until the first note of the hands played is heard). A tick that ends
@@ -270,7 +291,14 @@ export function usePlayback(score: Score | null): Playback {
         transport.onCountInBeat = (beat, beats, beatInBar) =>
           setCountIn({ beat, beats, beatInBar });
         transport.onCountInEnd = () => setCountIn(null);
-        transport.onLeadInChange = setWaiting;
+        // A note heard after a seek: the cue is over, the cursor follows what is heard. A lead-in
+        // that a pause ends heard nothing, so the cue stays.
+        transport.onLeadInChange = (leadingIn) => {
+          setWaiting(leadingIn);
+          if (!leadingIn && transport.state.playing) setCue(null);
+        };
+        if (pendingSecRef.current !== null) transport.seek(pendingSecRef.current);
+        pendingSecRef.current = null;
         transportRef.current = transport;
         t = transport;
       }
@@ -337,12 +365,45 @@ export function usePlayback(score: Score | null): Playback {
   const rewind = useCallback(() => {
     const t = transportRef.current;
     t?.rewind();
+    pendingSecRef.current = null;
+    setCue(null);
     if (!t?.state.playing) setAtStart(true);
   }, []);
 
-  const positionSec = useCallback(() => transportRef.current?.positionSec() ?? 0, []);
+  // T13. Playing, the transport goes on from `sec` after the lead; stopped, it only moves where
+  // Play starts (kept here until the first Play makes a transport).
+  const seek = useCallback(
+    (sec: number, opts: { leadSec?: number } = {}) => {
+      const t = transportRef.current;
+      if (t?.state.playing) {
+        t.seek(sec, opts);
+        setCue(sec);
+        return;
+      }
+      if (!(sec > 0)) {
+        rewind();
+        return;
+      }
+      if (t) t.seek(sec);
+      else if (scoreRef.current) pendingSecRef.current = sec;
+      else return;
+      setCue(sec);
+      setAtStart(false);
+    },
+    [rewind],
+  );
 
-  const startSec = useCallback(() => transportRef.current?.startSec() ?? 0, []);
+  const positionSec = useCallback(
+    () => transportRef.current?.positionSec() ?? pendingSecRef.current ?? 0,
+    [],
+  );
+
+  // Before the first Play, a cue (the score view keeps its seeks inside a loop) or the top.
+  const startSec = useCallback(() => {
+    const t = transportRef.current;
+    if (t) return t.startSec();
+    return pendingSecRef.current ?? 0;
+  }, []);
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);
 
@@ -375,10 +436,12 @@ export function usePlayback(score: Score | null): Playback {
       countIn,
       waiting,
       atStart,
+      cue,
       loop,
       play,
       pause,
       rewind,
+      seek,
       positionSec,
       startSec,
       leadingIn,
@@ -391,10 +454,12 @@ export function usePlayback(score: Score | null): Playback {
       countIn,
       waiting,
       atStart,
+      cue,
       loop,
       play,
       pause,
       rewind,
+      seek,
       positionSec,
       startSec,
       leadingIn,

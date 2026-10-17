@@ -58,9 +58,11 @@ function playing({
     countIn,
     waiting,
     atStart: false,
+    cue: null,
     play: vi.fn(),
     pause: vi.fn(),
     rewind: vi.fn(),
+    seek: vi.fn(),
     positionSec: () => clock?.sec ?? sec,
     startSec: () => clock?.sec ?? sec,
     leadingIn: () => clock?.leadingIn ?? waiting,
@@ -76,11 +78,13 @@ function playing({
  */
 function stopped({
   atStart = false,
+  cued = false,
   sec = 0,
   loop = null,
   loopStart = sec,
 }: {
   atStart?: boolean;
+  cued?: boolean;
   sec?: number;
   loop?: LoopRange | null;
   loopStart?: number;
@@ -90,6 +94,7 @@ function stopped({
     playing: false,
     waiting: false,
     atStart,
+    cue: cued ? sec : null,
     loop,
     startSec: () => (loop ? loopStart : sec),
   };
@@ -697,6 +702,72 @@ describe('the cursor while paused', () => {
     expect(marked(host)).toEqual([]);
     rerender({ playback: stopped({ sec: 0.01 }), layoutKey: 2 });
     expect(marked(host)).toEqual(groups[0]!.noteIds);
+    host.remove();
+  });
+});
+
+// T13: a seek while stopped (a click on a bar, the arrow keys) cues the bar: the note Play starts
+// with is marked, wherever the cursor was and whatever was heard before.
+describe('the cursor at a cue', () => {
+  it('marks the group at the cue from the start, and a group before the last one heard', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 4);
+    const host = hostFor(groups);
+    const { result, rerender } = renderHook(
+      (playback: Playback) =>
+        useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+      { initialProps: stopped({ atStart: true }) },
+    );
+    expect(marked(host)).toEqual([]);
+    rerender(stopped({ cued: true, sec: groups[2]!.sec }));
+    expect(marked(host)).toEqual(groups[2]!.noteIds);
+    expect(result.current.currentGroup).toBe(2);
+    // Its keys are pressed, with the notes still held from before it.
+    expect(result.current.pressed.length).toBeGreaterThanOrEqual(groups[2]!.noteIds.length);
+    // Heard up to the last group, paused, then cued back to the second: marked there.
+    rerender(playing({ sec: groups[3]!.sec + 0.01 }));
+    rerender(stopped({ sec: groups[3]!.sec + 0.01 }));
+    expect(result.current.currentGroup).toBe(3);
+    rerender(stopped({ cued: true, sec: groups[1]!.sec }));
+    expect(marked(host)).toEqual(groups[1]!.noteIds);
+    expect(result.current.currentGroup).toBe(1);
+    host.remove();
+  });
+  it('marks the first note of the hands played at or after the cue, past a rest', () => {
+    const groups = PICKUP; // the right hand's pickup alone at 0 s, then both hands at 0.6 s
+    const host = hostFor(groups);
+    const { result } = renderHook(() =>
+      useCursor({
+        host,
+        groups,
+        playback: stopped({ cued: true, sec: 0.3 }),
+        assignment: null,
+        mutedHands: ['R'],
+      }),
+    );
+    const g2 = groups.find((g) => g.notes.some((n) => n.hand === 'L'))!;
+    expect(result.current.currentGroup).toBe(groups.indexOf(g2));
+    expect(marked(host)).toEqual(g2.notes.filter((n) => n.hand === 'L').map((n) => n.id));
+    expect(result.current.pressed.every((k) => k.hand === 'L')).toBe(true);
+    host.remove();
+  });
+  it('marks nothing when Play would start elsewhere (a cue outside the loop)', () => {
+    const groups = BOTH_AT_ONCE.slice(0, 3);
+    const host = hostFor(groups);
+    renderHook(() =>
+      useCursor({
+        host,
+        groups,
+        playback: stopped({
+          cued: true,
+          sec: groups[2]!.sec,
+          loop: { from: 0, to: 0 },
+          loopStart: 0,
+        }),
+        assignment: null,
+        mutedHands: [],
+      }),
+    );
+    expect(marked(host)).toEqual([]);
     host.remove();
   });
 });

@@ -29,7 +29,7 @@ export default defineConfig({
     {
       name: 'mobile',
       use: { ...desktop, viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true },
-      testMatch: /(library|states|hand-letters|scan|scan-rotation)\.spec\.ts/,
+      testMatch: /(library|states|hand-letters|scan|scan-rotation|seek)\.spec\.ts/,
     },
     ...(process.env.CI ? [] : [{ name: 'visual', use: desktop, testMatch: /visual\.spec\.ts/ }]),
   ],

@@ -2,6 +2,7 @@ import type { TempoEvent } from '@digitus2/engine';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { Button } from '../design/Button.js';
+import { TOUCH_QUERY, useMediaQuery } from '../design/media.js';
 import { en } from '../i18n/en/index.js';
 import { useT } from '../i18n/i18n.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
@@ -318,6 +319,10 @@ function placeThumb(
  * They say what they mean (polish plan Task 6): the tempo shows the tempo it makes ("70 % · ♩ =
  * 70") and is the open piece's own, so a different piece opens at 100 %; a loop typed in reverse
  * is not applied, and a line under the inputs says why.
+ *
+ * Moving through the piece has no control of its own (T13): the score is the timeline. The
+ * panel's last line says so, in the words of the screen it is on (a tap; a click and the arrow
+ * keys).
  */
 export function PracticeControls({
   playback,
@@ -339,6 +344,7 @@ export function PracticeControls({
   const handsRef = useSegmentedThumb(settings.hands);
   const reversed = loopIsReversed(loopFrom, loopTo);
   const loopMessageId = useId();
+  const touch = useMediaQuery(TOUCH_QUERY);
 
   const changeLoop = (fromText: string, toText: string) => {
     setLoopFrom(fromText);
@@ -458,6 +464,10 @@ export function PracticeControls({
           </>
         )}
       </div>
+
+      <p className="seek-help small muted">
+        {touch ? t.transport.seekHelpTouch : t.transport.seekHelp}
+      </p>
     </div>
   );
 }

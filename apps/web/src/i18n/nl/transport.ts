@@ -18,6 +18,8 @@ export const transport: Messages['transport'] = {
   loopFromBar: 'Herhalen vanaf maat',
   loopToBar: 'Herhalen tot maat',
   loopTo: 'tot',
+  seekHelp: 'Klik op een maat om erheen te gaan. ← en → gaan één maat terug of verder.',
+  seekHelpTouch: 'Tik op een maat om erheen te gaan.',
   loopReversed: 'Het begin van de herhaling moet vóór het einde liggen.',
   samplesFailed:
     'De pianoklanken konden niet worden geladen. Controleer de verbinding en druk opnieuw op Afspelen.',

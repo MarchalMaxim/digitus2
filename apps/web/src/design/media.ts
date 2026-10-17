@@ -3,6 +3,9 @@ import { useCallback, useMemo, useSyncExternalStore } from 'react';
 /** Narrow screens: the stylesheet's own breakpoint (base.css, `@media (max-width: 479.98px)`). */
 export const NARROW_QUERY = '(max-width: 479.98px)';
 
+/** Screens pointed at with a finger (a phone, a tablet): nothing hovers there, and no arrow keys. */
+export const TOUCH_QUERY = '(hover: none)';
+
 function listFor(query: string): MediaQueryList | null {
   return typeof matchMedia === 'function' ? matchMedia(query) : null;
 }

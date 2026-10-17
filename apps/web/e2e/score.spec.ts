@@ -151,12 +151,13 @@ test("a line above the score says when the editor's fingering is shown, and only
   await expect(line).toBeVisible({ timeout: 20_000 });
   // It follows the pages, not the checkbox: when it shows, the editor's 26 digits are on screen.
   expect(await digits.count()).toBe(26);
-  // Above the score: in the score column, right before the sheet, wholly above it.
+  // Above the score: in the score column, right before the sheet (in the stage that makes its bars
+  // clickable, BarSeek.tsx), wholly above it.
   const place = await page.evaluate((text) => {
     const el = [...document.querySelectorAll('.score-main p')].find((p) => p.textContent === text)!;
     const sheet = document.querySelector('.score-sheet')!;
     return {
-      beforeSheet: el.nextElementSibling === sheet,
+      beforeSheet: el.nextElementSibling === sheet.closest('.score-stage'),
       bottom: el.getBoundingClientRect().bottom,
       sheetTop: sheet.getBoundingClientRect().top,
     };

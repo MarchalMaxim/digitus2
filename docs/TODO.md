@@ -33,11 +33,11 @@ No native app: the web app already lays out from 360 px and runs everything in t
 
 ### T5 More difficult pieces (partly done)
 
-> "We want some more difficult songs as well." Later: substantial Chopin and Rachmaninoff, and at least 1,000 more pieces at level 6.
+> "We want some more difficult songs as well." Later: substantial Chopin and Rachmaninoff, and at least 1,000 more pieces at the top level.
 
-Done: level 6 exists (199 pieces; the library has 41 by Chopin and 2 by Rachmaninoff). Most come from the MuseScore archive; at the owner's choice the span and lint gates are relaxed for level 6 only, under a ceiling of 40 law errors and 20 unplayable slices per 1,000 notes.
+Done: grade 6 exists in the manifest, shown under Challenging (199 pieces; the library has 41 by Chopin and 2 by Rachmaninoff). Most come from the MuseScore archive; at the owner's choice the span and lint gates are relaxed for grade 6 only, under a ceiling of 40 law errors and 20 unplayable slices per 1,000 notes.
 
-Open: 1,000 more at level 6 is not reachable from the archive (about 235 candidates at most). The next lever is an advanced Mutopia lane with Chopin at its core (Op. 28, nocturnes, waltzes, mazurkas, études Op. 10 and 25, polonaises, ballades, scherzos), plus Liszt, Debussy, Scriabin, Albéniz, Granados, Brahms, Schubert, late Beethoven, the Goldberg Variations and the Well-Tempered Clavier. Rachmaninoff (d. 1943) is public domain in the EU and, in the US, for works published before 1929 (Preludes Op. 3, 23, 32; Études-Tableaux Op. 33, 39; Sonata No. 2); the Corelli Variations, the Paganini Rhapsody and the Symphonic Dances stay out until 2027, 2030 and 2036. Mutopia has few Rachmaninoff engravings, and the ten acquired Rachmaninoff editions are held by the quality gates.
+Open: 1,000 more at grade 6 is not reachable from the archive (about 235 candidates at most). The next lever is an advanced Mutopia lane with Chopin at its core (Op. 28, nocturnes, waltzes, mazurkas, études Op. 10 and 25, polonaises, ballades, scherzos), plus Liszt, Debussy, Scriabin, Albéniz, Granados, Brahms, Schubert, late Beethoven, the Goldberg Variations and the Well-Tempered Clavier. Rachmaninoff (d. 1943) is public domain in the EU and, in the US, for works published before 1929 (Preludes Op. 3, 23, 32; Études-Tableaux Op. 33, 39; Sonata No. 2); the Corelli Variations, the Paganini Rhapsody and the Symphonic Dances stay out until 2027, 2030 and 2036. Mutopia has few Rachmaninoff engravings, and the ten acquired Rachmaninoff editions are held by the quality gates.
 
 ### T2 Pieces that are not in the public domain (scheduled: L2)
 

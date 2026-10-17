@@ -1,4 +1,5 @@
-import { UNMARKED_VELOCITY, type Hand } from '@digitus2/engine';
+import type { Hand } from '@digitus2/engine';
+import { UNMARKED_VELOCITY } from '@digitus2/engine/score-build';
 import type { SplendidGrandPiano } from 'smplr';
 
 /** One note to sound, in context seconds. */

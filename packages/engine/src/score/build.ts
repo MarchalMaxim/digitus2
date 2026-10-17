@@ -3,6 +3,13 @@ import type { Hand, HandEvent, Note, Score, TempoEvent } from './types.js';
 
 const DEFAULT_QPM = 120;
 
+/**
+ * The velocity a note without one of its own plays at (no dynamics mark before it, no MIDI
+ * source): the accompaniment slightly softer than the melody. A hairpin before the first mark
+ * starts from it.
+ */
+export const UNMARKED_VELOCITY: Record<Hand, number> = { R: 96, L: 88 };
+
 export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number {
   const map =
     tempoMap.length > 0

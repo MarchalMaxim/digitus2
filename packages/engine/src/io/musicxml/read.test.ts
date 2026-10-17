@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { strToU8, zipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { parseMusicXml, UNMARKED_VELOCITY } from './read.js';
+import { UNMARKED_VELOCITY } from '../../score/build.js';
+import { parseMusicXml } from './read.js';
 
 const xml = readFileSync(
   fileURLToPath(new URL('../../../fixtures/two-staff.musicxml', import.meta.url)),
@@ -555,6 +556,62 @@ describe('parseMusicXml hairpins', () => {
       [60, UNMARKED_VELOCITY.R],
       [62, UNMARKED_VELOCITY.R - 6],
       [64, UNMARKED_VELOCITY.R - 12],
+    ]);
+  });
+  it('ends a hairpin at its stop in time when another voice writes the stop first', () => {
+    const v2 = '<voice>2</voice>';
+    const xml = onePart(
+      dyn('f') +
+        n('C', 5, 2) +
+        n('D', 5, 2) +
+        wedge('stop') +
+        '<backup><duration>4</duration></backup>' +
+        n('C', 4, 1, v2) +
+        wedge('diminuendo') +
+        n('D', 4, 1, v2) +
+        n('E', 4, 1, v2) +
+        n('F', 4, 1, v2),
+      n('G', 4, 4),
+    );
+    const byPitch = Object.fromEntries(velocities(xml));
+    expect(byPitch).toEqual({ 72: 92, 60: 92, 62: 92, 74: 88, 64: 88, 65: 84, 67: 80 });
+  });
+  it('keeps a run of hairpins without marks within a step of the latest mark', () => {
+    const sigh = (a: string, b: string) =>
+      wedge('diminuendo') + n(a, 4, 1) + n(b, 4, 1) + wedge('stop');
+    const xml = onePart(
+      dyn('p') + sigh('C', 'D') + sigh('E', 'F'),
+      sigh('G', 'A') + wedge('crescendo') + n('B', 4, 2) + wedge('stop'),
+      n('C', 5, 1),
+    );
+    expect(velocities(xml)).toEqual([
+      [60, 56],
+      [62, 50],
+      [64, 44],
+      [65, 44],
+      [67, 44],
+      [69, 44],
+      [71, 44],
+      [72, 56],
+    ]);
+  });
+  it("lets a staff without a mark of its own follow the other staff's", () => {
+    const onStaff = (staff: number) => `<voice>${staff}</voice><staff>${staff}</staff>`;
+    const above = `<direction placement="above"><direction-type><dynamics><pp/></dynamics></direction-type><staff>1</staff></direction>`;
+    const lowerF = `<direction placement="below"><direction-type><dynamics><f/></dynamics></direction-type><staff>2</staff></direction>`;
+    const xml = `<score-partwise><part-list><score-part id="P1"/></part-list><part id="P1">
+      <measure number="1"><attributes><divisions>1</divisions><staves>2</staves></attributes>${above}${n('C', 5, 1, onStaff(1))}${words('cresc.')}${n('D', 5, 1, onStaff(1))}<backup><duration>2</duration></backup>${n('C', 3, 1, onStaff(2))}${n('D', 3, 1, onStaff(2))}</measure>
+      <measure number="2">${n('E', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${lowerF}${n('E', 3, 1, onStaff(2))}</measure>
+      </part></score-partwise>`;
+    // The cresc. finds no mark for four bars on the upper staff, so it climbs one step over the
+    // score's three ticks; the lower staff follows the pp until its own f.
+    expect(velocities(xml)).toEqual([
+      [72, 44],
+      [48, 44],
+      [74, 44],
+      [50, 44],
+      [76, 50],
+      [52, 92],
     ]);
   });
   it('pairs hairpins by number and keeps one above the top staff to the right hand', () => {

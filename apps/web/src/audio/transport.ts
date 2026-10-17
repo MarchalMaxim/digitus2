@@ -292,7 +292,13 @@ export class Transport {
     this.instrument.stopAll();
   }
 
-  seek(sec: number): void {
+  /**
+   * Moves the position to `sec`. Stopped, that is where play() starts. Playing, the music goes on
+   * from there after a lead-in; `leadSec` holds it back for that long when it is longer than the
+   * start delay: the score view's red hops to the new place meanwhile, and the music comes in as
+   * it lands (RedFlight.tsx).
+   */
+  seek(sec: number, opts: { leadSec?: number } = {}): void {
     let target = Math.min(Math.max(0, sec), this.endSec);
     if (!this.playing) {
       this.position = target;
@@ -303,8 +309,9 @@ export class Transport {
     this.instrument.stopAll();
     this.countInClicks = [];
     this.endCountIn(); // a seek cuts the count-in short: the music starts at the target now
+    const delay = Math.max(this.startDelaySec, opts.leadSec ?? 0);
     this.segments = [
-      { ctx: this.ctx.currentTime + this.startDelaySec, score: target, factor: this.tempoFactor },
+      { ctx: this.ctx.currentTime + delay, score: target, factor: this.tempoFactor },
     ];
     this.scheduledTo = target;
     this.wraps = []; // the wraps scheduled before the seek will not sound

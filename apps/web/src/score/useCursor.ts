@@ -38,6 +38,11 @@
  * (Play after a pause, before the next note) still has the group heard before it to show; a
  * pause in any other lead-in (the count-in from the start, after Rewind while playing, a loop
  * wrap, a Play from a loop's start elsewhere) heard nothing of its pass, so nothing is marked.
+ *
+ * Stopped after a seek (T13, `playback.cue`: a click on a bar, the arrow keys) it marks the first
+ * group of the hands played at or after the position, the note Play starts with, with its keys
+ * pressed, and scrolls it into view like the playing cursor; a pause in the lead-in that follows
+ * marks it again, since nothing has been heard there yet.
  */
 import type { Assignment, Hand, Note } from '@digitus2/engine';
 import { ornamentAttacks, type OrnamentAttack } from '@digitus2/engine/ornaments';
@@ -217,6 +222,7 @@ export function useCursor({
   const playing = playback.playing;
   const waiting = playback.waiting;
   const atStart = playback.atStart;
+  const cue = playback.cue;
   // A loop set while paused can move where Play starts (T10): the paused marks follow it.
   const loop = playback.loop;
   const playbackRef = useRef(playback);
@@ -255,12 +261,22 @@ export function useCursor({
     // makes Play start at the loop's first bar instead (`startSec`): nothing to resume there
     // either, so the marks clear and Play takes the red; a loop round the position, or none,
     // marks it again, since the position is unchanged.
+    // T13: stopped after a seek, the group Play starts with is marked instead: the first at or
+    // after the position (a bar may start with a rest in the hands played).
     const pos = playbackRef.current.positionSec();
-    if (!playing && !atStart && heardSecRef.current < pos) {
+    const cued = cue !== null;
+    if (!playing && !atStart && (cued || heardSecRef.current < pos)) {
       stopSecRef.current = pos;
       clearCurrent(host);
       const resumes = Math.abs(playbackRef.current.startSec() - pos) < 1e-9;
-      const i = resumes ? groupIndexAt(active, pos) : -1;
+      const next = groupIndexAt(active, pos - 1e-9) + 1;
+      const i = !resumes
+        ? -1
+        : cued
+          ? next < active.length
+            ? next
+            : -1
+          : groupIndexAt(active, pos);
       if (i < 0) {
         markedSecRef.current = Number.NaN;
         setPressed((prev) => (prev.length > 0 ? [] : prev));
@@ -270,15 +286,21 @@ export function useCursor({
         return;
       }
       const g = active[i]!;
-      setCurrent(host, g.noteIds, g.tick);
+      const marked = setCurrent(host, g.noteIds, g.tick);
       markedSecRef.current = g.sec;
-      setPressed(pressedKeys(g.sounding, assignment, pos, performances));
+      if (cued) {
+        followRef.current = { system: null, target: null, until: 0 };
+        followCursor(marked, followRef.current);
+      }
+      // The keys of the group itself at its onset when cued: the position may be a rest before it.
+      const keysAt = cued ? g.sec : pos;
+      setPressed(pressedKeys(g.sounding, assignment, keysAt, performances));
       setStruckCount(0);
-      const mutedNotes = mutedAt[groupIndexAt(mutedAt, pos)]?.notes ?? NO_NOTES;
+      const mutedNotes = mutedAt[groupIndexAt(mutedAt, keysAt)]?.notes ?? NO_NOTES;
       setMuted((prev) =>
         prev.length === 0 && mutedNotes.length === 0
           ? prev
-          : pressedKeys(mutedNotes, assignment, pos, performances),
+          : pressedKeys(mutedNotes, assignment, keysAt, performances),
       );
       setCurrentGroup(g.index);
       return;
@@ -376,7 +398,19 @@ export function useCursor({
     };
     frame();
     return () => cancelAnimationFrame(raf);
-  }, [host, playing, waiting, atStart, loop, active, mutedAt, assignment, layoutKey, performances]);
+  }, [
+    host,
+    playing,
+    waiting,
+    atStart,
+    cue,
+    loop,
+    active,
+    mutedAt,
+    assignment,
+    layoutKey,
+    performances,
+  ]);
 
   // Playwright's sync check: the transport clock and the group the cursor shows.
   useEffect(() => {
@@ -442,16 +476,15 @@ interface Follow {
 const SMOOTH_SCROLL_MS = 1500;
 
 /**
- * Keeps the marked notes and their system readable above the dock (`cursorScrollDelta`), called
- * once per onset group: one style read and a few `getBoundingClientRect` calls, never per frame.
- * The band is the window less the page's scroll padding (the dock's measured height at the
- * bottom, base.css). While a smooth scroll is under way the layout is judged where that scroll
- * will leave it, so the notes that follow do not cut it short. Smooth unless the reader asked for
- * reduced motion.
+ * Where the cursor's scroll for `marked` would take the page (`cursorScrollDelta`), as the
+ * `scrollY` to scroll to and the one it is judged from, or null to stay put. The band is the
+ * window less the page's scroll padding (the dock's measured height at the bottom, base.css).
+ * While a smooth scroll is under way the layout is judged where that scroll will leave it, so the
+ * notes that follow do not cut it short. Updates `follow.system`.
  */
-function followCursor(marked: Element[], follow: Follow): void {
+function cursorScroll(marked: Element[], follow: Follow): { from: number; top: number } | null {
   const first = marked[0];
-  if (!first) return;
+  if (!first) return null;
   const system = first.closest('g.system') ?? first;
   const systemChanged = system !== follow.system;
   follow.system = system;
@@ -482,12 +515,32 @@ function followCursor(marked: Element[], follow: Follow): void {
     systemChanged,
     band,
   );
-  if (delta === null) return;
+  if (delta === null) return null;
   const max = Math.max(0, root.scrollHeight - root.clientHeight);
   const top = Math.min(max, Math.max(0, from + delta));
-  if (Math.abs(top - from) < 1) return; // already as far as the page goes
+  if (Math.abs(top - from) < 1) return null; // already as far as the page goes
+  return { from, top };
+}
+
+/**
+ * Whether marking `notes` from a standstill (a seek, T13) would scroll the page to show them: the
+ * red hops to notes only where they already are readable (RedFlight.tsx), since a hop drawn on a
+ * moving page would land in the wrong place.
+ */
+export function cursorWouldScroll(notes: Element[]): boolean {
+  return cursorScroll(notes, { system: null, target: null, until: 0 }) !== null;
+}
+
+/**
+ * Keeps the marked notes and their system readable above the dock (`cursorScroll`), called once
+ * per onset group: one style read and a few `getBoundingClientRect` calls, never per frame.
+ * Smooth unless the reader asked for reduced motion.
+ */
+function followCursor(marked: Element[], follow: Follow): void {
+  const scroll = cursorScroll(marked, follow);
+  if (scroll === null) return;
   const smooth = !prefersReducedMotion();
-  window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
-  follow.target = top;
-  follow.until = now + (smooth ? SMOOTH_SCROLL_MS : 0);
+  window.scrollTo({ top: scroll.top, behavior: smooth ? 'smooth' : 'auto' });
+  follow.target = scroll.top;
+  follow.until = performance.now() + (smooth ? SMOOTH_SCROLL_MS : 0);
 }

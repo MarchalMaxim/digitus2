@@ -13,6 +13,14 @@ export function prefersReducedMotion(): boolean {
  */
 export const RED_FLIGHT_MS = 200;
 
+/**
+ * How long the red's hop to a bar sought takes (T13, score/RedFlight.tsx), from a neighbouring
+ * note to across the page: long enough to follow, short enough that the music, which waits for
+ * it while playing, never seems to hesitate.
+ */
+export const HOP_MIN_MS = 220;
+export const HOP_MAX_MS = 340;
+
 /** How long a key held down takes to lift and go down again when its note is struck again. */
 export const RESTRIKE_MS = 110;
 

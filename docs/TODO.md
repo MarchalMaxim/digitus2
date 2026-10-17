@@ -6,17 +6,6 @@ Also open, tracked as GitHub issues: #5 smarter scrolling.
 
 ## Open
 
-### T13 Wind back in a track (scheduled: M5, first task)
-
-> "The ability to wind back in a track. Think about the UX for this (it should not be hard)."
-
-The score is the timeline. No scrub bar or progress line: that would be a permanent control, and a timeline means nothing to a beginner who reads bars.
-
-- Click a bar's empty staff space, or its bar number, to move there. The red moves to that bar's first note. Paused, it stays there, ready to resume; playing, it continues from there after the usual lead-in. Clicks on notes and digits stay reserved for note editing (M5).
-- Left and Right move one bar back or forward, Shift+Left and Shift+Right four bars, while playing or paused. Home is Rewind.
-- No new control. The Practice panel gains one line of help ("Click a bar to go there. Arrow keys move a bar") and the bar under the pointer gets a light hover tint. Seeking inside a loop stays inside it.
-- Tests: unit tests for the bar-from-click mapping and the keyboard handler; e2e: play, Left, the red is on the previous bar's first note, one red element throughout; a visual baseline with the hover tint.
-
 ### T12 Held notes in imported MIDI (scheduled: M8)
 
 > "Support the 'long' notes, i.e. the notes that are connected by a line to sound continuous. The MIDI player doesn't do that yet."
@@ -84,5 +73,6 @@ The owner accepts an experimental release for clear photos of printed music. Rul
 - **T19, T20** At least 1,000 more scores, then songs "not necessarily classical or folk": done. 2,702 pieces, the additions from the MuseScore archive (PDMX) on the uploader's declared licence (the owner's broad copyright reading). Only content exclusions apply (junk, Nazi-era and propaganda pieces), and a piece the build refuses is dropped ("if the refusals do not work, drop them"). Pipeline: `content/tools/README.md`.
 - **Ornaments** "Add support for trills and the Bach zigzag ornament": done. Signs and principal fingerings are kept; auxiliary notes sound and show on the keyboard without invented fingering. A practice default, with no claim about historical performance.
 - **Scanning basics**: multi-image batches, page rotation, browser-local My scores, and source comparison without a mandatory acknowledgment checkbox are done.
+- **T13, #23** "The ability to wind back in a track", then "allow seeking through a piece … effortlessly and intuitively, both on mobile and desktop", with whimsical accents: done. The score is the timeline, with no new control: a click or tap anywhere in a bar goes to its start; Left and Right step a bar, Shift four, Home rewinds; seeks stay inside a loop. Stopped, the bar's first note is cued red and Play starts there; playing, the music goes on from there. The red hops to the bar in an arc and, playing, the music comes in as it lands; the bar under the pointer is tinted and the bar sought leaves a fading footprint. One gray line in the Practice panel says how (`docs/app.md`, Moving through the piece). Clicks on notes now seek too; note editing (M5) will have to take notes over.
 - **#13, #17** Dynamics (p, f) ignored by playback: done. The marks ppp to fff become velocities and the piano loads the velocity layers the piece uses; a mark between the staves is for both hands (`docs/app.md`, Audio).
 - **#22** "Take into account increasing and decreasing intensity marks" (hairpins and cresc.), and p and f sounding "a bit abrupt sometimes: like a switch being turned. Can we dampen this slightly?": done. Hairpins and cresc., dim. and their kin ramp the velocity note by note to the mark at their end, or one mark's step when none ends them; the marks moved closer together (steps of 12 around mf: p 56 and f 92 instead of 49 and 96), so p to f is 8.6 dB instead of 11.7 dB (`docs/app.md`, Audio).

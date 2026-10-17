@@ -7,6 +7,8 @@ import { flash, prefersReducedMotion } from '../design/motion.js';
 import { messages, useT } from '../i18n/i18n.js';
 import type { Messages } from '../i18n/messages.js';
 import { useLibraryPiece } from '../library/useLibraryPiece.js';
+import { BarSeek, type BarSeekHandle } from './BarSeek.js';
+import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
@@ -235,6 +237,55 @@ export function ScoreView({ source }: { source: PieceSource }) {
     if (playing && !playable) pause();
   }, [playing, playable, pause]);
 
+  // T13: the score is the timeline. A click or tap in a bar, or Left and Right (Shift: four bars),
+  // goes to a bar's start; the red hops there (RedFlight.tsx) and, playing, the music comes in as
+  // it lands. Seeks stay inside a loop. Home is Rewind.
+  const barStarts = useMemo(() => (score ? barStartSecs(score) : []), [score]);
+  const seekable = doc.status === 'ready' && playable && barStarts.length > 0;
+  const barSeekRef = useRef<BarSeekHandle>(null);
+  // The bars move with new pages and with the width (the pages scale within a layout's width).
+  const barLayout = useMemo(() => ({ pages: doc.pages, width }), [doc.pages, width]);
+  const loop = playback.loop;
+  const canSeek = useCallback(
+    (bar: number) => seekable && (!loop || (bar >= loop.from && bar <= loop.to)),
+    [seekable, loop],
+  );
+  const seekToBar = useCallback(
+    (bar: number) => {
+      if (!seekable) return;
+      const target = clampBar(bar, barStarts.length, playback.loop);
+      const sec = barStarts[target]!;
+      if (!playback.playing && sec <= 0) {
+        if (!playback.atStart) playback.rewind(); // the red flies home
+        return;
+      }
+      playback.seek(sec, { leadSec: red.hop(sec) });
+    },
+    [seekable, barStarts, playback, red],
+  );
+  const seekKeyRef = useRef<(e: KeyboardEvent) => void>(() => undefined);
+  useEffect(() => {
+    seekKeyRef.current = (e) => {
+      const key = seekKey(e);
+      if (key === null || !seekable) return;
+      if (key.kind === 'start') {
+        // Like the Rewind button; the page goes to its top as Home does anywhere.
+        if (playback.playing || !playback.atStart) playback.rewind();
+        return;
+      }
+      e.preventDefault(); // no sideways scroll
+      const at = playback.playing ? playback.positionSec() : playback.startSec();
+      const bar = clampBar(barIndexAt(barStarts, at) + key.bars, barStarts.length, playback.loop);
+      seekToBar(bar);
+      barSeekRef.current?.footprint(bar);
+    };
+  });
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => seekKeyRef.current(e);
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   const piece = useLibraryPiece(source.kind === 'library' ? source.slug : null);
   const name = source.kind === 'library' ? (piece?.title ?? source.slug) : source.name;
   // The piece's tempo where it starts, for the tempo control's "♩ = …" (polish plan Task 6).
@@ -328,12 +379,21 @@ export function ScoreView({ source }: { source: PieceSource }) {
           )}
           {/* Paused with the last group heard marked (T10), the red notes breathe for a moment
               (base.css, `.is-resting`): where Play resumes. */}
-          <ScoreSheet
-            pages={doc.pages}
-            label={doc.title}
-            onHost={setHost}
-            resting={!playback.playing && currentGroup >= 0}
-          />
+          <BarSeek
+            host={host}
+            layoutKey={barLayout}
+            canSeek={canSeek}
+            onSeek={seekToBar}
+            handle={barSeekRef}
+          >
+            <ScoreSheet
+              pages={doc.pages}
+              label={doc.title}
+              onHost={setHost}
+              resting={!playback.playing && currentGroup >= 0 && !red.hopping}
+              hopping={red.hopping}
+            />
+          </BarSeek>
           {/* The dock: sticky at the bottom of the window while the score column is on screen,
               so Pause and the fingers stay in view wherever the cursor scrolls the score. Its
               DOM order is the order on screen, and so the tab order, at every width (spec 13; no

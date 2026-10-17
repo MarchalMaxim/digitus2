@@ -517,6 +517,51 @@ fieldset {
   background: currentColor;
 }
 
+/* The score as a timeline (T13, score/BarSeek.tsx): a click or tap in a bar goes there. The bar
+   under a mouse pointer takes a light tint, and the bar a seek lands on leaves a footprint that
+   fades; both in ink at low opacity over the music, never in the accent. No footprint under
+   reduced motion (--dur is 0 there). */
+.score-stage {
+  position: relative;
+}
+
+.score-stage.is-over-bar {
+  cursor: pointer;
+}
+
+.bar-tint,
+.bar-footprint {
+  position: absolute;
+  pointer-events: none;
+  background: var(--ink);
+  border-radius: 4px;
+}
+
+.bar-tint {
+  opacity: var(--bar-tint);
+}
+
+.bar-footprint {
+  opacity: 0;
+  animation: bar-footprint calc(var(--dur) * 4) var(--ease);
+}
+
+@keyframes bar-footprint {
+  from {
+    opacity: 0.1;
+  }
+}
+
+/* A hop under way to a cue (RedFlight.tsx): the notes it lands on stay in ink until it arrives,
+   so the hop is the one accent meanwhile. Drawn as the accent draws them (tokens.css, `svg
+   .is-red`), in the engraving's ink. */
+.score-sheet.is-hopping svg .is-red,
+.score-sheet.is-hopping svg .is-red * {
+  color: var(--score-ink);
+  fill: var(--score-ink);
+  stroke: var(--score-ink);
+}
+
 /* One hand practised alone: the other hand's notes, with their beams and rests, and its digits
    are dimmed as its keys are (render/dom.ts, dimNotes); the staff lines and clefs stay. A note
    of that hand inside a chord the cursor marks (one chord shared by both hands) is never pale:
@@ -763,6 +808,12 @@ fieldset {
 .loop input[type='number'] {
   width: 5rem;
   padding: 0.5rem 0.625rem;
+}
+
+/* How to move through the piece (T13, Transport.tsx): the panel's last line, on a row of its own. */
+.seek-help {
+  flex-basis: 100%;
+  margin: 0;
 }
 
 /* Why a loop typed in reverse plays no loop (Transport.tsx): its own line under the inputs, in

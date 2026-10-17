@@ -13,11 +13,26 @@
  * lead-in that Play began with the red on Play (not a resume, nor a seek or a loop wrap while
  * playing), and not when the note is too close for a visible flight. Nothing travels under
  * prefers-reduced-motion.
+ *
+ * A seek (T13: a click on a bar, the arrow keys) makes the red hop: from where it is (the cursor's
+ * notehead, or Play) to the first notehead of the bar sought, along an arc whose height grows with
+ * the distance, stretching a little in the air and squashing as it lands. Playing, the music holds
+ * back as long (usePlayback.ts `seek`) and comes in as it lands; stopped, the cue the cursor marks
+ * there is drawn in ink until the hop arrives (`hopping`, base.css), so one element is red
+ * throughout. It hops only between places that are on screen and stay put (`cursorWouldScroll`):
+ * a seek to a bar out of view jumps there, and the page scrolls.
  */
 import type { Hand } from '@digitus2/engine';
-import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
-import { EASE, prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
+import {
+  EASE,
+  HOP_MAX_MS,
+  HOP_MIN_MS,
+  prefersReducedMotion,
+  RED_FLIGHT_MS,
+} from '../design/motion.js';
 import type { OnsetGroup } from './onsetGroups.js';
+import { cursorWouldScroll } from './useCursor.js';
 import type { Playback } from './usePlayback.js';
 
 /** A flight shorter than this is not worth seeing: the red jumps, as it always did. */
@@ -34,14 +49,39 @@ export interface FlightBox {
   h: number;
 }
 
-export interface FlightPlan {
-  /** 'out': from Play to the first notehead; 'home': from the last notehead heard to Play. */
+/** Between Play and the cursor: 'out' from Play to the first notehead, 'home' back to Play. */
+export interface TravelPlan {
   dir: 'out' | 'home';
   /** Play's box. */
   button: FlightBox;
   /** The notehead's box. */
   note: FlightBox;
   durationMs: number;
+}
+
+/** A seek's hop (T13): from where the red is to the first notehead of the bar sought. */
+export interface HopPlan {
+  dir: 'hop';
+  /** Where the red leaves from: a notehead (`fromNote`), or Play (Pause) with its exact box. */
+  from: FlightBox;
+  fromNote: boolean;
+  /** The notehead it lands on. */
+  note: FlightBox;
+  durationMs: number;
+  /** Hopping while playing: it holds on the notehead until the cursor takes the red. */
+  playing: boolean;
+}
+
+export type FlightPlan = TravelPlan | HopPlan;
+
+/** How long a hop over `distance` pixels takes: quick for a neighbour, a little longer across. */
+export function hopMs(distance: number): number {
+  return Math.round(Math.min(HOP_MAX_MS, HOP_MIN_MS + distance * 0.12));
+}
+
+/** How high a hop over `distance` pixels rises above the higher of its two ends. */
+export function hopLift(distance: number): number {
+  return Math.min(40, Math.max(12, distance * 0.15));
 }
 
 function boxOf(el: Element): FlightBox {
@@ -89,14 +129,46 @@ export function flightFrames(plan: FlightPlan): {
   xEasing: string;
   yEasing: string;
 } {
-  const shape = (b: FlightBox, round: boolean): Keyframe => ({
-    width: `${b.w}px`,
-    height: `${round ? b.h * 0.8 : b.h}px`,
-    marginLeft: `${-b.w / 2}px`,
-    marginTop: `${-(round ? b.h * 0.8 : b.h) / 2}px`,
-    borderRadius: round ? '50%' : '0%',
-    transform: `rotate(${round ? -20 : 0}deg)`,
-  });
+  /** The shape over box `b`, round (a notehead, tilted) or square, stretched by `sx` and `sy`. */
+  const shape = (b: FlightBox, round: boolean, sx = 1, sy = 1, offset?: number): Keyframe => {
+    const w = b.w * sx;
+    const h = (round ? b.h * 0.8 : b.h) * sy;
+    return {
+      ...(offset === undefined ? {} : { offset }),
+      width: `${w}px`,
+      height: `${h}px`,
+      marginLeft: `${-w / 2}px`,
+      marginTop: `${-h / 2}px`,
+      borderRadius: round ? '50%' : '0%',
+      transform: `rotate(${round ? -20 : 0}deg)`,
+    };
+  };
+  if (plan.dir === 'hop') {
+    // An arc: across at an even pace, up quickly and down faster, like a ball tossed; in the air
+    // the shape is already the notehead, a little long, and it squashes as it lands.
+    const { from, note: to } = plan;
+    const peak = Math.min(from.y, to.y) - hopLift(Math.hypot(to.x - from.x, to.y - from.y));
+    return {
+      x: [{ transform: `translateX(${from.x}px)` }, { transform: `translateX(${to.x}px)` }],
+      y: [
+        { transform: `translateY(${from.y}px)`, easing: 'cubic-bezier(0.25, 0.6, 0.45, 1)' },
+        {
+          transform: `translateY(${peak}px)`,
+          offset: 0.45,
+          easing: 'cubic-bezier(0.55, 0, 0.75, 0.4)',
+        },
+        { transform: `translateY(${to.y}px)` },
+      ],
+      shape: [
+        shape(from, plan.fromNote),
+        shape(to, true, 0.85, 1.2, 0.45),
+        shape(to, true, 1.3, 0.7, 0.88),
+        shape(to, true),
+      ],
+      xEasing: 'cubic-bezier(0.3, 0, 0.7, 1)',
+      yEasing: 'linear',
+    };
+  }
   const from = plan.dir === 'out' ? plan.button : plan.note;
   const to = plan.dir === 'out' ? plan.note : plan.button;
   return {
@@ -132,7 +204,14 @@ export function useRedFlight({
   groups,
   mutedHands,
   currentGroup,
-}: RedFlightOptions): { flight: FlightPlan | null; redAway: boolean; landed: () => void } {
+}: RedFlightOptions): {
+  flight: FlightPlan | null;
+  redAway: boolean;
+  /** A hop is under way: the cue it lands on is drawn in ink until it arrives. */
+  hopping: boolean;
+  landed: () => void;
+  hop: (sec: number) => number;
+} {
   const [plan, setPlan] = useState<FlightPlan | null>(null);
   const { playing, waiting, atStart } = playback;
   const playbackRef = useRef(playback);
@@ -144,7 +223,16 @@ export function useRedFlight({
 
   // A flight is on screen only in the state it belongs to: out, while the lead-in runs; home,
   // while stopped. Anything else (Pause in the lead-in, Play during a flight home) ends it.
-  const shown = plan !== null && (plan.dir === 'out' ? playing && waiting : !playing) ? plan : null;
+  // A hop while playing lasts the lead-in, as a flight out does; a hop while stopped, until it lands.
+  const shown =
+    plan !== null &&
+    (plan.dir === 'out' || (plan.dir === 'hop' && plan.playing) ? playing && waiting : !playing)
+      ? plan
+      : null;
+  const shownRef = useRef(shown);
+  useLayoutEffect(() => {
+    shownRef.current = shown;
+  });
 
   // The cursor's noteheads, kept for a flight home: they stay in the page after the marks clear.
   const lastHeadsRef = useRef<Element[]>([]);
@@ -208,13 +296,58 @@ export function useRedFlight({
     if (plan !== null && shown === null) setPlan(null);
   }, [plan, shown]);
 
-  return { flight: shown, redAway: shown !== null, landed: () => setPlan(null) };
+  // A seek (T13): the red hops from where it is to the first notehead at `sec`, when both ends are
+  // on screen and the cursor will not scroll the page (`cursorWouldScroll`). Called before the
+  // seek, from the click or the key; returns how long the music should hold back for it (seconds,
+  // 0 when nothing hops). A seek during a flight ends that flight: the red jumps.
+  const hop = useCallback((sec: number): number => {
+    const o = optsRef.current;
+    const h = o.host;
+    fromPlayRef.current = false; // a seek in Play's lead-in: the hop replaces the flight out
+    if (shownRef.current !== null) {
+      setPlan(null);
+      return 0;
+    }
+    if (!h || prefersReducedMotion()) return 0;
+    const heads = [...h.querySelectorAll('.is-red .notehead')];
+    const button = heads.length === 0 ? o.playButton() : null;
+    const from = button ? boxOf(button) : topmost(heads);
+    const targets = firstHeads(h, o.groups, o.mutedHands, sec);
+    const to = topmost(targets);
+    if (!from || !to || !onScreen(from) || cursorWouldScroll(targets)) return 0;
+    const durationMs = hopMs(Math.hypot(to.x - from.x, to.y - from.y));
+    setPlan({
+      dir: 'hop',
+      from,
+      fromNote: button === null,
+      note: to,
+      durationMs,
+      playing: playbackRef.current.playing,
+    });
+    return durationMs / 1000;
+  }, []);
+
+  return {
+    flight: shown,
+    redAway: shown !== null,
+    hopping: shown?.dir === 'hop',
+    landed: () => setPlan(null),
+    hop,
+  };
+}
+
+/** Whether a box's centre is inside the window. */
+function onScreen(b: FlightBox): boolean {
+  const height = window.innerHeight || document.documentElement.clientHeight;
+  const width = window.innerWidth || document.documentElement.clientWidth;
+  return b.x >= 0 && b.x <= width && b.y >= 0 && b.y <= height;
 }
 
 /**
  * The red on its way: three nested boxes on a fixed layer (X, Y, then the shape itself, the one
- * red element while it flies). Started before the paint; a flight home calls `onLanded` when it
- * arrives, a flight out holds on the notehead until the cursor takes the red.
+ * red element while it flies). Started before the paint; a flight home and a hop while stopped
+ * call `onLanded` when they arrive, a flight out and a hop while playing hold on the notehead
+ * until the cursor takes the red.
  */
 export function RedGhost({
   plan,
@@ -238,7 +371,7 @@ export function RedGhost({
     if (!x || !y || !shape) return;
     const f = flightFrames(plan);
     if (typeof shape.animate !== 'function') {
-      if (plan.dir === 'home') landedRef.current();
+      if (plan.dir !== 'out' && !(plan.dir === 'hop' && plan.playing)) landedRef.current();
       return;
     }
     const timing = { duration: plan.durationMs, fill: 'both' as const };
@@ -247,7 +380,8 @@ export function RedGhost({
       y.animate(f.y, { ...timing, easing: f.yEasing }),
       shape.animate(f.shape, { ...timing, easing: EASE }),
     ];
-    if (plan.dir === 'home') anims[2]!.onfinish = () => landedRef.current();
+    if (plan.dir === 'home' || (plan.dir === 'hop' && !plan.playing))
+      anims[2]!.onfinish = () => landedRef.current();
     return () => anims.forEach((a) => a.cancel());
   }, [plan]);
 

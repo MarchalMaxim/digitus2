@@ -18,6 +18,8 @@ export const transport: Messages['transport'] = {
   loopFromBar: 'Repetir a partir do compasso',
   loopToBar: 'Repetir até o compasso',
   loopTo: 'até',
+  seekHelp: 'Clique num compasso para ir até lá. ← e → recuam ou avançam um compasso.',
+  seekHelpTouch: 'Toque num compasso para ir até lá.',
   loopReversed: 'O início da repetição deve vir antes do fim.',
   samplesFailed:
     'Não foi possível carregar os sons do piano. Verifique a conexão e toque em Tocar novamente.',

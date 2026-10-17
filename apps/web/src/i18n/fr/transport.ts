@@ -18,6 +18,8 @@ export const transport: Messages['transport'] = {
   loopFromBar: 'Boucle à partir de la mesure',
   loopToBar: 'Boucle jusqu’à la mesure',
   loopTo: 'à',
+  seekHelp: 'Cliquez sur une mesure pour y aller. ← et → avancent ou reculent d’une mesure.',
+  seekHelpTouch: 'Touchez une mesure pour y aller.',
   loopReversed: 'Le début de la boucle doit précéder la fin.',
   samplesFailed:
     'Les sons du piano n’ont pas pu être chargés. Vérifiez la connexion et appuyez de nouveau sur Lire.',

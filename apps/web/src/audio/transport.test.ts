@@ -447,6 +447,22 @@ describe('Transport', () => {
       expect(instrument.events[0]!.time).toBeCloseTo(100.2, 6);
     });
 
+    // T13: a seek while playing holds the music back as long as the red hops to the new bar.
+    it('holds a seek back by leadSec too, and goes on from the target', () => {
+      const t = make({ startDelaySec: 0.05 });
+      t.setCountIn(false);
+      t.play();
+      run(t, 1);
+      const before = instrument.events.length;
+      t.seek(5, { leadSec: 0.3 });
+      expect(t.positionSec()).toBe(5); // holds at the target meanwhile
+      expect(t.leadInRemainingSec()).toBeCloseTo(0.3, 6);
+      run(t, 0.5);
+      const after = instrument.events.slice(before);
+      expect(after[0]!.time).toBeCloseTo(ctx.currentTime - 0.5 + 0.3, 6);
+      expect(t.positionSec()).toBeGreaterThan(5);
+    });
+
     it('counts down to the first note of the hands played, then reports null', () => {
       const t = make({ score: pickup });
       t.setCountIn(false);

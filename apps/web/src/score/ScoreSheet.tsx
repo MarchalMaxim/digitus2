@@ -13,6 +13,11 @@ export interface ScoreSheetProps {
    * (base.css, `.score-sheet.is-resting`), so the eye finds where Play resumes. Default false.
    */
   resting?: boolean;
+  /**
+   * The red is hopping to the cue the cursor marks (T13, RedFlight.tsx): the marked notes stay in
+   * ink until it lands (base.css, `.score-sheet.is-hopping`). Default false.
+   */
+  hopping?: boolean;
 }
 
 /**
@@ -21,7 +26,13 @@ export interface ScoreSheetProps {
  * the old ones, never append. Each SVG scales to the column width (`.score-sheet svg` in
  * base.css), so the layout only has to be redone when the width bucket changes.
  */
-export function ScoreSheet({ pages, label, onHost, resting = false }: ScoreSheetProps) {
+export function ScoreSheet({
+  pages,
+  label,
+  onHost,
+  resting = false,
+  hopping = false,
+}: ScoreSheetProps) {
   const t = useT();
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +50,9 @@ export function ScoreSheet({ pages, label, onHost, resting = false }: ScoreSheet
 
   return (
     <div
-      className={resting ? 'score-sheet is-resting' : 'score-sheet'}
+      className={['score-sheet', resting && 'is-resting', hopping && 'is-hopping']
+        .filter(Boolean)
+        .join(' ')}
       role="img"
       aria-label={t.score.sheet.label(label)}
       ref={hostRef}

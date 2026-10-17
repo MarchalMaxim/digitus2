@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
 import { flash, prefersReducedMotion } from '../design/motion.js';
+import { messages, useT } from '../i18n/i18n.js';
+import type { Messages } from '../i18n/messages.js';
 import { useLibraryPiece } from '../library/useLibraryPiece.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
@@ -17,21 +20,17 @@ import { useCursor } from './useCursor.js';
 import { mutedHandsFor, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
 
-const STATUS_TEXT: Partial<Record<DocStatus, string>> = {
-  idle: 'Loading the score…',
-  loading: 'Loading the score…',
-  fingering: 'Fingering…',
-  rendering: 'Preparing the score…',
-};
+/** The status line's text while the score is busy, by status. */
+function busyText(status: DocStatus, t: Messages): string | undefined {
+  const text = t.score.view.status;
+  if (status === 'idle' || status === 'loading') return text.loading;
+  if (status === 'fingering') return text.fingering;
+  if (status === 'rendering') return text.rendering;
+  return undefined;
+}
 
 /** How long a hand switch takes to sweep from the first bar of a system to the last (ms). */
 export const HAND_SWEEP_MS = 140;
-
-/** The status line while the first Play of a score fetches the piano's samples. */
-export const LOADING_PIANO_TEXT = 'Loading the piano…';
-
-/** The line above the score while it shows the editor's fingering (polish plan Task 5). */
-export const EDITORIAL_SHOWN_TEXT = "Showing the editor's fingering";
 
 /**
  * Whether the pages on screen carry the editor's fingering: the assignment they show is the
@@ -45,16 +44,11 @@ export function showsEditorial(doc: Pick<ScoreDocument, 'assignment' | 'editoria
   return doc.assignment !== null && doc.assignment === doc.editorial;
 }
 
-/** What the error state says first, before the engine's message. */
-const FILE_ERROR_TEXT =
-  'This file could not be read as sheet music. digitus2 opens MusicXML and MIDI files (.musicxml, .xml, .mxl, .mid or .midi).';
-const PIECE_ERROR_TEXT = 'Something went wrong while preparing this piece. Please try again.';
-
 /** The status line when the selected hands have no notes in this piece. */
-function nothingToPlayText(hands: HandsMode): string {
-  if (hands === 'L') return 'This piece has no notes for the left hand.';
-  if (hands === 'R') return 'This piece has no notes for the right hand.';
-  return 'This piece has no notes to play.';
+function nothingToPlayText(hands: HandsMode, t: Messages): string {
+  if (hands === 'L') return t.score.view.noNotesLeft;
+  if (hands === 'R') return t.score.view.noNotesRight;
+  return t.score.view.noNotes;
 }
 
 /** What the status line is made from. */
@@ -83,22 +77,19 @@ export interface StatusLine {
  * piano after the first Play, then the count-in, each click's beat in its bar ("1", "2", "3",
  * "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4" then "1" when a whole bar comes
  * before a pickup). Null when there is nothing to say (a ready score, stopped or playing the
- * music).
+ * music). Written in `t` (default: the language on screen).
  */
-export function scoreStatusLine({
-  docStatus,
-  playable,
-  hands,
-  loading,
-  countIn,
-}: StatusInputs): StatusLine | null {
+export function scoreStatusLine(
+  { docStatus, playable, hands, loading, countIn }: StatusInputs,
+  t: Messages = messages(),
+): StatusLine | null {
   const info = (text: string): StatusLine => ({ text, kind: 'info' });
   if (docStatus !== 'ready') {
-    const text = STATUS_TEXT[docStatus];
+    const text = busyText(docStatus, t);
     return text === undefined ? null : info(text);
   }
-  if (!playable) return info(nothingToPlayText(hands));
-  if (loading) return info(LOADING_PIANO_TEXT);
+  if (!playable) return info(nothingToPlayText(hands, t));
+  if (loading) return info(t.score.view.loadingPiano);
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
   return null;
 }
@@ -154,6 +145,7 @@ function useDockHeight<T extends HTMLElement>(): (el: T | null) => void {
 }
 
 export function ScoreView({ source }: { source: PieceSource }) {
+  const t = useT();
   const openLibrary = useAppStore((s) => s.openLibrary);
   const [measureRef, width] = useElementWidth<HTMLElement>();
   const dockHeightRef = useDockHeight<HTMLDivElement>();
@@ -263,24 +255,35 @@ export function ScoreView({ source }: { source: PieceSource }) {
         />
         <main className="score-error stack">
           <p role="alert">
-            Could not open {name}. {source.kind === 'file' ? FILE_ERROR_TEXT : PIECE_ERROR_TEXT}
+            {source.kind === 'file'
+              ? t.score.view.couldNotOpenFile(name)
+              : t.score.view.couldNotOpenPiece(name)}
           </p>
-          {doc.error && <p className="muted small">Details: {doc.error}</p>}
+          {doc.error && (
+            <p className="muted small">
+              {t.score.view.details(
+                doc.errorCause === undefined ? doc.error : messageOf(doc.errorCause, t),
+              )}
+            </p>
+          )}
           <Button primary onClick={openLibrary}>
-            Back to the library
+            {t.score.header.back}
           </Button>
         </main>
       </div>
     );
   }
 
-  const status = scoreStatusLine({
-    docStatus: doc.status,
-    playable,
-    hands,
-    loading: playback.loading,
-    countIn: playback.countIn,
-  });
+  const status = scoreStatusLine(
+    {
+      docStatus: doc.status,
+      playable,
+      hands,
+      loading: playback.loading,
+      countIn: playback.countIn,
+    },
+    t,
+  );
   // One toggle, rendered where it stands on screen: first in the dock from 480 px, after Rewind
   // below (the dock's comment).
   const practiceToggle = (
@@ -292,7 +295,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
       aria-controls={panelId}
       onClick={() => setPracticeOpen(!practiceOpen)}
     >
-      Practice
+      {t.score.view.practice}
     </button>
   );
   return (
@@ -312,7 +315,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
               if (source.scan) useAppStore.getState().openScan(source.scan);
             }}
           >
-            Scan source and recognition
+            {t.score.view.scanSource}
           </button>
         </p>
       )}
@@ -321,7 +324,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
           {/* Says whose digits the score shows when they are the editor's, right above the music
               (the toggle sits in the side panel, off screen on a phone or once scrolled). */}
           {showsEditorial(doc) && (
-            <p className="editorial-shown muted small no-print">{EDITORIAL_SHOWN_TEXT}</p>
+            <p className="editorial-shown muted small no-print">{t.score.view.editorialShown}</p>
           )}
           {/* Paused with the last group heard marked (T10), the red notes breathe for a moment
               (base.css, `.is-resting`): where Play resumes. */}

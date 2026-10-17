@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { formatNumber } from '../i18n/format.js';
+import { en } from '../i18n/en/index.js';
 import {
   SHELVES,
   TIERS,
@@ -13,9 +15,7 @@ import { libraryPieces, loadPieceDetails } from './manifest.js';
 import {
   announcementFor,
   arrivalLevel,
-  countText,
   dropTrailingParenthesis,
-  formatCount,
   isUnnamed,
   libraryLayout,
   localDateKey,
@@ -48,7 +48,7 @@ const choose = (over: Partial<LibraryChoices> = {}): LibraryChoices => ({
   ...over,
 });
 const shelves = (list: readonly LibraryEntry[], tier: Tier | null = null, over = {}) => {
-  const layout = libraryLayout(list, choose({ tier, ...over }));
+  const layout = libraryLayout(list, choose({ tier, ...over }), en);
   if (layout.kind !== 'shelves') throw new Error(layout.kind);
   return layout;
 };
@@ -58,7 +58,7 @@ const shelf = (
   id: ShelfId,
   over: Partial<LibraryChoices> = {},
 ) => {
-  const layout = libraryLayout(list, choose({ tier, shelf: id, ...over }));
+  const layout = libraryLayout(list, choose({ tier, shelf: id, ...over }), en);
   if (layout.kind !== 'shelf') throw new Error(layout.kind);
   return layout;
 };
@@ -67,7 +67,7 @@ const search = (
   query: string,
   over: Partial<LibraryChoices> = {},
 ) => {
-  const layout = libraryLayout(list, choose({ query, ...over }));
+  const layout = libraryLayout(list, choose({ query, ...over }), en);
   if (layout.kind !== 'search') throw new Error(layout.kind);
   return layout;
 };
@@ -364,7 +364,7 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     expect(last.shown).toBe(658);
     expect(shelf(allPieces, 'medium', 'classical', { pages: 500 }).shown).toBe(658);
     expect(shelf(allPieces, 'medium', 'classical', { pages: 0 }).shown).toBe(40);
-    expect([moreLabel(41), moreLabel(40), moreLabel(1)]).toEqual([
+    expect([moreLabel(41, en), moreLabel(40, en), moreLabel(1, en)]).toEqual([
       'Show 40 more',
       'Show the last 40',
       'Show the last 1',
@@ -376,10 +376,10 @@ describe('an opened shelf (shelves spec 4.2)', () => {
       (p) => !(tierOf(p.level) === 'easy' && shelfOfGenre(p.genre) === 'baroque'),
     );
     expect(shelfHasPieces(noBaroque, 'easy', 'baroque')).toBe(false);
-    expect(libraryLayout(noBaroque, choose({ tier: 'easy', shelf: 'baroque' })).kind).toBe(
+    expect(libraryLayout(noBaroque, choose({ tier: 'easy', shelf: 'baroque' }), en).kind).toBe(
       'shelves',
     );
-    expect(libraryLayout(noBaroque, choose({ tier: 'medium', shelf: 'baroque' })).kind).toBe(
+    expect(libraryLayout(noBaroque, choose({ tier: 'medium', shelf: 'baroque' }), en).kind).toBe(
       'shelf',
     );
   });
@@ -478,7 +478,7 @@ describe('search (shelves spec 4.4)', () => {
         s.count > 7
           ? {
               kind: 'open',
-              label: `All ${formatCount(s.count)} in ${TIER_NAMES[s.tier]}`,
+              label: `All ${formatNumber('en', s.count)} in ${TIER_NAMES[s.tier]}`,
             }
           : null,
       );
@@ -561,16 +561,16 @@ describe('search (shelves spec 4.4)', () => {
     ]);
   });
   it('treats spaces as no search and punctuation as an empty result', () => {
-    expect(libraryLayout(pieces, choose({ tier: 'medium', query: '   ' }))).toMatchObject({
+    expect(libraryLayout(pieces, choose({ tier: 'medium', query: '   ' }), en)).toMatchObject({
       kind: 'shelves',
       tier: 'medium',
     });
-    expect(libraryLayout(pieces, choose({ query: 'fur elize' }))).toMatchObject({
+    expect(libraryLayout(pieces, choose({ query: 'fur elize' }), en)).toMatchObject({
       kind: 'search',
       count: 0,
       sections: [],
     });
-    expect(libraryLayout(pieces, choose({ query: '!!' }))).toMatchObject({
+    expect(libraryLayout(pieces, choose({ query: '!!' }), en)).toMatchObject({
       kind: 'search',
       count: 0,
     });
@@ -579,34 +579,36 @@ describe('search (shelves spec 4.4)', () => {
 
 describe('what the live region says (shelves spec 7)', () => {
   it('names the level, the shelf, the page and the search count', () => {
-    expect(announcementFor(shelves(allPieces, 'medium'))).toBe('Medium: 1,415 pieces');
-    expect(announcementFor(shelf(allPieces, 'medium', 'songs'))).toBe('Songs: 643 pieces');
-    expect(announcementFor(shelf(allPieces, 'medium', 'songs', { pages: 2 }))).toBe(
+    expect(announcementFor(shelves(allPieces, 'medium'), en)).toBe('Medium: 1,415 pieces');
+    expect(announcementFor(shelf(allPieces, 'medium', 'songs'), en)).toBe('Songs: 643 pieces');
+    expect(announcementFor(shelf(allPieces, 'medium', 'songs', { pages: 2 }), en)).toBe(
       'Showing 80 of 643',
     );
-    expect(announcementFor(search(pieces, 'minuet'))).toBe('14 pieces');
-    expect(announcementFor(search(pieces, 'fur elize'))).toBe('No piece matches “fur elize”.');
-    expect(announcementFor(search(allPieces, 'a', { section: 'medium', pages: 2 }))).toMatch(
+    expect(announcementFor(search(pieces, 'minuet'), en)).toBe('14 pieces');
+    expect(announcementFor(search(pieces, 'fur elize'), en)).toBe('No piece matches “fur elize”.');
+    expect(announcementFor(search(allPieces, 'a', { section: 'medium', pages: 2 }), en)).toMatch(
       /^Showing 80 of [\d,]+ in Medium$/,
     );
   });
   it('writes counts as words, with a comma from a thousand', () => {
-    expect([countText(1), countText(24), countText(1415)]).toEqual([
+    expect([en.library.pieces(1), en.library.pieces(24), en.library.pieces(1415)]).toEqual([
       '1 piece',
       '24 pieces',
       '1,415 pieces',
     ]);
-    expect(formatCount(1000000)).toBe('1,000,000');
+    expect(formatNumber('en', 1000000)).toBe('1,000,000');
   });
 });
 
 describe('the start button and the level the page opens on', () => {
   it('starts with Twinkle, or continues with the last piece played while it is still in the library', () => {
-    expect(startLabel(startTarget(pieces, null))).toBe('Start with Twinkle, Twinkle, Little Star');
-    expect(startLabel(startTarget(pieces, 'beethoven-fur-elise-woo-59'))).toBe(
+    expect(startLabel(startTarget(pieces, null), en)).toBe(
+      'Start with Twinkle, Twinkle, Little Star',
+    );
+    expect(startLabel(startTarget(pieces, 'beethoven-fur-elise-woo-59'), en)).toBe(
       'Continue with Für Elise',
     );
-    expect(startLabel(startTarget(pieces, 'no-such-piece'))).toBe(
+    expect(startLabel(startTarget(pieces, 'no-such-piece'), en)).toBe(
       'Start with Twinkle, Twinkle, Little Star',
     );
     expect(dropTrailingParenthesis('Ode to Joy (simplified)')).toBe('Ode to Joy');
@@ -650,7 +652,7 @@ describe('the core 30 (a library of 40 pieces or fewer)', () => {
     const core = [...(await loadPieceDetails()).values()].filter(
       (p) => p.benchmarkSet === 'core30',
     );
-    const layout = libraryLayout(core, choose({ tier: 'medium', query: 'minuet' }));
+    const layout = libraryLayout(core, choose({ tier: 'medium', query: 'minuet' }), en);
     expect(layout.kind).toBe('all'); // no search under 100 pieces: the query is ignored
     if (layout.kind !== 'all') return;
     expect(layout.sections.map((s) => s.tier)).toEqual(['easy', 'medium', 'harder', 'challenging']);
@@ -676,7 +678,7 @@ describe('a synthetic library of 1,000 pieces (L2)', () => {
   it('renders no more than a page of an opened shelf', () => {
     for (const tier of TIERS) {
       for (const s of shelves(big, tier).shelves) {
-        const opened: LibraryLayout = libraryLayout(big, choose({ tier, shelf: s.id }));
+        const opened: LibraryLayout = libraryLayout(big, choose({ tier, shelf: s.id }), en);
         expect(opened.kind).toBe('shelf');
         if (opened.kind === 'shelf') expect(rowsOf(opened.groups).length).toBeLessThanOrEqual(40);
       }

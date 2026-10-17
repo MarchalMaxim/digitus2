@@ -13,6 +13,7 @@ import { useAppStore, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import { LanguageLine } from '../i18n/LanguageLine.js';
+import { useT } from '../i18n/i18n.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { SECTION_ROWS, showsSearch } from './disclosure.js';
 import { LevelPills } from './LevelPills.js';
@@ -144,6 +145,7 @@ function useFocusAfterChange(
 }
 
 export function LibraryView() {
+  const t = useT();
   useWarmUpWhenIdle();
   const openScan = useAppStore((s) => s.openScan);
   const scan = (files: File[]) => {
@@ -179,8 +181,9 @@ export function LibraryView() {
   // The day is read once per visit to the page: the samples never change while the reader looks.
   const [date] = useState(() => localDateKey());
   const layout = useMemo(
-    () => libraryLayout(pieces, { tier, query, shelf, section, pages, length, date, lastPlayed }),
-    [pieces, tier, query, shelf, section, pages, length, date, lastPlayed],
+    () =>
+      libraryLayout(pieces, { tier, query, shelf, section, pages, length, date, lastPlayed }, t),
+    [pieces, tier, query, shelf, section, pages, length, date, lastPlayed, t],
   );
   const start = startTarget(pieces, lastPlayed);
   // Search results share the key 'search': keystrokes after the first swap the rows without a
@@ -192,7 +195,7 @@ export function LibraryView() {
         ? `shelf-${layout.tier}-${layout.shelf}`
         : layout.kind;
   const fade = useChanged(listKey);
-  const announcement = useAnnouncement(announcementFor(layout));
+  const announcement = useAnnouncement(announcementFor(layout, t));
   const list = useRef<HTMLDivElement>(null);
   const focusAfter = useRef<FocusTarget | null>(null);
   const [appended, setAppended] = useState<{ key: string; from: number } | null>(null);
@@ -280,12 +283,10 @@ export function LibraryView() {
         <h1 ref={heading} tabIndex={-1}>
           digitus2
         </h1>
-        <p className="muted">
-          Finger numbers for piano. Pick a piece, press play, and follow the red note.
-        </p>
+        <p className="muted">{t.library.welcome.tagline}</p>
         <div className="start-row">
           <Button primary onClick={() => open({ kind: 'library', slug: start.piece.slug })}>
-            {startLabel(start)}
+            {startLabel(start, t)}
           </Button>
           {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
         </div>
@@ -299,8 +300,8 @@ export function LibraryView() {
       <div key={listKey} ref={list} className={listClass}>
         {layout.kind === 'search' && layout.count === 0 ? (
           <div className="empty-result">
-            <p>No piece matches “{layout.query}”.</p>
-            <p className="muted">Search looks in titles, composers and collections.</p>
+            <p>{t.library.search.noMatch(layout.query)}</p>
+            <p className="muted">{t.library.search.noMatchHint}</p>
           </div>
         ) : (
           <PieceList
@@ -321,7 +322,7 @@ export function LibraryView() {
       <OwnFileLine onFile={openFile} onRefuse={setNotice} onScan={scan} />
       <footer className="library-footer">
         <button type="button" className="text-button" onClick={about}>
-          About and licences
+          {t.library.aboutAndLicences}
         </button>
         <LanguageLine />
       </footer>

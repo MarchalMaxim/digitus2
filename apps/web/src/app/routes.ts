@@ -1,3 +1,4 @@
+import type { Phrase } from '../i18n/messages.js';
 import { pieceBySlug } from '../library/manifest.js';
 import type { useAppStore, View } from './store.js';
 
@@ -5,7 +6,7 @@ const FILE_HASH = '#/piece/file';
 const PIECE_PREFIX = '#/piece/';
 
 /** Uploaded scores reopen explicitly from the local collection, without starting a scan. */
-export const FILE_NOT_RESTORABLE_NOTICE = 'Open it from My scores, or choose the file again.';
+export const FILE_NOT_RESTORABLE_NOTICE: Phrase = (t) => t.app.fileNotRestorable;
 
 export function viewToHash(view: View): string {
   switch (view.name) {

@@ -25,12 +25,7 @@ function publish() {
           record.kind === 'file'
             ? record.name
             : (record.session.pages?.[0]?.originalFile?.name ?? record.session.file.name),
-        detail:
-          record.kind === 'file'
-            ? 'Score file'
-            : record.session.xml
-              ? 'Recognition saved'
-              : 'Scan draft',
+        detail: record.kind === 'file' ? 'file' : record.session.xml ? 'recognition' : 'draft',
         saved: saved.has(record.id),
       })),
   });
@@ -43,8 +38,8 @@ function storageFailed(removing = false) {
       .getState()
       .setNotice(
         removing
-          ? 'This score was removed for this visit, but browser storage could not be updated. It may reappear after a reload.'
-          : 'Your score could not be saved. Keep your original files.',
+          ? (t) => t.library.myScores.removedNotErased
+          : (t) => t.library.myScores.saveFailed,
       );
 }
 function write(record: LocalScoreRecord | string) {
@@ -154,9 +149,7 @@ export async function openLocalScore(id: string, expectedView = useAppStore.getS
     }
   } catch {
     if (!current() || records.get(id) !== record || removed.has(id)) return;
-    useAppStore
-      .getState()
-      .setNotice('This saved score could not be opened. Choose your original file again.');
+    useAppStore.getState().setNotice((t) => t.library.myScores.openFailed);
   }
 }
 export function removeLocalScore(id: string) {

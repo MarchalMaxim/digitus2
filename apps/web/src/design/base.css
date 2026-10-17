@@ -640,10 +640,14 @@ fieldset {
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
+  max-width: 100%;
 }
 
+/* The slider gives way first where a longer label ("Andamento") meets a 360 px screen. */
 .tempo input {
   width: 7.5rem;
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 /* The percentage and the tempo it makes ("70 % · ♩ = 70", Transport.tsx), on one line. Wide

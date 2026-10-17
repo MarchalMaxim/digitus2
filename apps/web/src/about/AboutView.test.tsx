@@ -1,5 +1,6 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import type * as ManifestModule from '../library/manifest.js';
 import {
   isShareAlike,
@@ -11,7 +12,10 @@ import {
 import { AboutView, countWord, isArchivePiece } from './AboutView.js';
 
 // Testing Library only cleans up automatically when vitest globals are on; they are off here.
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  resetLocaleForTests();
+});
 
 const PREFIX = 'The pieces use public-domain or Creative Commons editions.';
 
@@ -117,5 +121,19 @@ describe('AboutView', () => {
     const red = container.querySelectorAll('.is-red');
     expect(red).toHaveLength(1);
     expect(red[0]).toHaveTextContent('Back to the library');
+  });
+  it('speaks French when the reader chose it, links included', async () => {
+    await act(async () => {
+      await chooseLocale('fr');
+    });
+    render(<AboutView />);
+    expect(screen.getByRole('heading', { level: 1, name: 'À propos de digitus2' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Retour à la bibliothèque' })).toBeVisible();
+    expect(screen.getByText(/Gravure musicale par/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'dépôt' })).toHaveAttribute(
+      'href',
+      'https://github.com/MarchalMaxim/digitus2',
+    );
+    expect(await screen.findByText(/gravures sont partagées sous CC BY-SA/)).toBeInTheDocument();
   });
 });

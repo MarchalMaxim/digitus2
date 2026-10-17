@@ -1,4 +1,5 @@
-import { TIER_NAMES, type Length, type LengthId, type Tier } from './levels.js';
+import { useT } from '../i18n/i18n.js';
+import { type Length, type LengthId, type Tier } from './levels.js';
 
 interface PillOption<T extends string> {
   id: T;
@@ -53,11 +54,12 @@ export interface LevelPillsProps {
 
 /** The level pills (spec 3): Easy, Medium, Harder, Challenging. */
 export function LevelPills({ tiers, tier, onChange }: LevelPillsProps) {
+  const t = useT();
   return (
     <PillRadios
-      legend="Level"
+      legend={t.library.pills.level}
       name="library-level"
-      options={tiers.map((t) => ({ id: t, label: TIER_NAMES[t] }))}
+      options={tiers.map((id) => ({ id, label: t.library.tiers[id] }))}
       value={tier}
       onChange={onChange}
     />
@@ -73,11 +75,12 @@ export interface LengthPillsProps {
 
 /** The length pills (shelves spec 4.3), above a list of more than 40 pieces. */
 export function LengthPills({ lengths, length, onChange }: LengthPillsProps) {
+  const t = useT();
   return (
     <PillRadios
-      legend="Length"
+      legend={t.library.pills.length}
       name="library-length"
-      options={lengths}
+      options={lengths.map((l) => ({ id: l.id, label: t.library.pills.lengths[l.id] }))}
       value={length}
       onChange={onChange}
     />

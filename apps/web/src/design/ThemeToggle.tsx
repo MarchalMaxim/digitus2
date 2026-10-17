@@ -1,3 +1,4 @@
+import { useT } from '../i18n/i18n.js';
 import { useTheme } from './theme.js';
 
 /** One toggle per page (it sits in each view's header), so a fixed id names its mask. */
@@ -13,12 +14,13 @@ const MASK_ID = 'theme-crescent';
  */
 export function ThemeToggle() {
   const [theme, choose] = useTheme();
+  const t = useT();
   const dark = theme === 'dark';
   return (
     <button
       type="button"
       className="theme-toggle no-print"
-      aria-label="Dark theme"
+      aria-label={t.app.darkTheme}
       aria-pressed={dark}
       onClick={(event) => choose(dark ? 'light' : 'dark', event.currentTarget)}
     >

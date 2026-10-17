@@ -1,7 +1,8 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { useAppStore } from '../app/store.js';
+import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { ScanView } from './ScanView.js';
 
 const { load, renderNotation } = vi.hoisted(() => ({ load: vi.fn(), renderNotation: vi.fn() }));
@@ -25,6 +26,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  resetLocaleForTests();
   vi.restoreAllMocks();
 });
 
@@ -123,3 +125,28 @@ it.each(['import', 'render', 'empty'] as const)(
     expect(screen.queryByRole('checkbox')).toBeNull();
   },
 );
+
+it('speaks French, including a restored error and the page navigation', async () => {
+  await act(async () => {
+    await chooseLocale('fr');
+  });
+  const file = new File(['source'], 'source.png', { type: 'image/png' });
+  render(
+    <ScanView
+      session={{
+        id: 'saved',
+        file,
+        pages: [
+          { id: 'first', file, xml: '<score-partwise/>' },
+          { id: 'second', file, xml: '<score-partwise/>' },
+        ],
+      }}
+    />,
+  );
+  expect(screen.getByRole('heading', { name: 'Vérifiez la reconnaissance' })).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Reconnaissance par page' })).toBeVisible();
+  expect(screen.getByRole('alert')).toHaveTextContent('leur notation n’a pas pu être combinée');
+  expect(screen.getByRole('button', { name: 'Page d’origine suivante' })).toBeVisible();
+  expect(screen.getByText('Page 1 sur 2')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Utiliser pour le doigté' })).toBeDisabled();
+});

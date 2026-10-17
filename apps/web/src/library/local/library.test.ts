@@ -1,5 +1,11 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+import { en } from '../../i18n/en/index.js';
+import type { Phrase } from '../../i18n/messages.js';
 import type { LocalScoreRecord } from './records.js';
+
+/** The notice as the reader sees it: a Phrase is written in English here. */
+const noticeText = (notice: string | Phrase | null) =>
+  typeof notice === 'function' ? notice(en) : notice;
 
 const fixture = vi.hoisted(() => ({
   rows: [] as unknown[],
@@ -142,7 +148,9 @@ it('quota failure retains the current scan and reports that it is not saved', as
   fixture.writeError = new DOMException('Full', 'QuotaExceededError');
   const session = { id: 'draft', file: new File(['pixels'], 'piano.png') };
   store.getState().openScan(session);
-  await vi.waitFor(() => expect(store.getState().notice).toContain('could not be saved'));
+  await vi.waitFor(() =>
+    expect(noticeText(store.getState().notice)).toContain('could not be saved'),
+  );
   expect(store.getState().view).toEqual({ name: 'scan', session });
   const { useLocalLibrary } = await import('./state.js');
   expect(useLocalLibrary.getState().items.find((item) => item.id === 'scan:draft')?.saved).toBe(
@@ -158,7 +166,9 @@ it('a failed initial read keeps a newly uploaded draft usable and explains the f
   library.installLocalLibrary();
   const session = { id: 'draft', file: new File(['pixels'], 'piano.png') };
   store.getState().openScan(session);
-  await vi.waitFor(() => expect(store.getState().notice).toContain('could not be saved'));
+  await vi.waitFor(() =>
+    expect(noticeText(store.getState().notice)).toContain('could not be saved'),
+  );
   expect(store.getState().view).toEqual({ name: 'scan', session });
   const { useLocalLibrary } = await import('./state.js');
   expect(useLocalLibrary.getState().items[0]?.name).toBe('piano.png');

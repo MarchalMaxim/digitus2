@@ -2,6 +2,8 @@ import type { Finger, Hand, Score } from '@digitus2/engine';
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { restrike } from '../design/motion.js';
+import { useT } from '../i18n/i18n.js';
+import { handLetter } from './handLetters.js';
 
 /**
  * A key held down at the cursor, with the finger that plays it. `finger` is null when the
@@ -147,7 +149,7 @@ const NO_KEYS: PressedKey[] = [];
 /**
  * The on-screen keyboard: white keys white with an ink outline, black keys ink. A pressed key
  * turns gray (`--gray-2`, white or black) and shows the finger number that plays it. An L or R
- * above it says the hand only while the hands come close (`handLetters`, T11); elsewhere the
+ * above it (the hand's letter in the language on screen) says the hand only while the hands come close (`handLetters`, T11); elsewhere the
  * numbers stand alone. With one hand muted, that hand's keys at the cursor show the same
  * way, dimmed (`.is-muted`), never pressed. Class names only; the colors come from base.css, and
  * nothing here is ever red. A pressed key goes down fast and comes up slowly (key travel, base.css);
@@ -166,6 +168,7 @@ export function Keyboard({
   muted = NO_KEYS,
   handLetters = false,
 }: KeyboardProps): JSX.Element {
+  const t = useT();
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
   const shapeOf = useMemo(() => new Map(keys.map((k) => [k.midi, k])), [keys]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -273,7 +276,7 @@ export function Keyboard({
         y={h - (k.black ? 23 : 30)}
         textAnchor="middle"
       >
-        {p.hand}
+        {handLetter(p.hand, t)}
       </text>
     );
   };
@@ -285,7 +288,7 @@ export function Keyboard({
         className="keyboard-svg"
         viewBox={`-0.5 -0.5 ${width + 1} ${WHITE_H + 1}`}
         role="img"
-        aria-label="Keyboard"
+        aria-label={t.score.keyboard.label}
         style={{ minWidth: Math.max(1, whiteCount) * MIN_WHITE_PX }}
       >
         {keys.filter((k) => !k.black).map(key)}

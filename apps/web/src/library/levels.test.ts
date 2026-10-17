@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { en } from '../i18n/en/index.js';
 import catalog from '../../../../content/tools/catalog.json';
 import {
   GENRES,
@@ -87,5 +88,17 @@ describe('the length pills (shelves spec 4.3)', () => {
       [60, 180],
       [180, Infinity],
     ]);
+  });
+});
+
+describe('the English dictionary and the names kept here for tests', () => {
+  it('say the same tiers, shelves and lengths', () => {
+    expect(en.library.tiers).toEqual(TIER_NAMES);
+    for (const s of SHELVES) {
+      expect(en.library.shelves[s.id].name).toBe(s.name);
+      expect(en.library.shelves[s.id].line).toBe(s.line);
+      expect(en.library.shelves[s.id].all(7)).toBe(`All 7 ${s.noun}`);
+    }
+    for (const l of LENGTHS) expect(en.library.pills.lengths[l.id]).toBe(l.label);
   });
 });

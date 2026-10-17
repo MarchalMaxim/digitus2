@@ -1,4 +1,6 @@
 import { parseMusicXml } from '@digitus2/engine';
+import type { Phrase } from '../i18n/messages.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 
 export const GRAPHIC_SPAN_TAGS =
   'slur, wedge, octave-shift, pedal, bracket, dashes, glissando, slide, wavy-line, tuplet, hammer-on, pull-off';
@@ -8,30 +10,28 @@ export const GRAPHIC_SPAN_WARNING =
 const children = (node: Element, tag: string) =>
   Array.from(node.children).filter((child) => child.tagName === tag);
 const text = (node: Element, tag: string) => children(node, tag)[0]?.textContent?.trim();
-const refuse = (reason: string): never => {
-  throw new Error(
-    `These pages cannot be combined safely: ${reason}. Download each page for correction in a notation editor.`,
-  );
+const refuse = (reason: Phrase): never => {
+  throw new PhraseError((t) => t.scan.join.refused(reason(t)));
 };
 
 /** Append raw measures, keeping each page's own time units and notation. Never re-engrave notes. */
 export function joinScanPages(pages: readonly string[]): string {
-  if (!pages.length) return refuse('no recognized pages');
+  if (!pages.length) return refuse((t) => t.scan.join.reasons.noPages);
   if (pages.length === 1) return pages[0]!;
   const documents = pages.map((xml) => {
-    if (/<!ENTITY/i.test(xml)) return refuse('XML entities are unsupported');
+    if (/<!ENTITY/i.test(xml)) return refuse((t) => t.scan.join.reasons.entities);
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
     if (doc.querySelector('parsererror') || doc.documentElement.tagName !== 'score-partwise')
-      return refuse('expected partwise MusicXML');
+      return refuse((t) => t.scan.join.reasons.notPartwise);
     if (
       doc.querySelector('repeat, ending, segno, coda') ||
       Array.from(doc.querySelectorAll('sound')).some((el) =>
         ['dacapo', 'dalsegno', 'tocoda', 'fine'].some((a) => el.hasAttribute(a)),
       )
     )
-      return refuse('repeat or jump navigation needs manual review');
+      return refuse((t) => t.scan.join.reasons.repeats);
     if (doc.querySelector('transpose, staff-details, measure-style'))
-      return refuse('transposition or special staff/measure attributes need manual review');
+      return refuse((t) => t.scan.join.reasons.transposition);
     return doc;
   });
   const layouts = documents.map((doc, pageIndex) => {
@@ -39,14 +39,15 @@ export function joinScanPages(pages: readonly string[]): string {
     const parts = children(root, 'part');
     const list = children(root, 'part-list')[0];
     const entries = list ? children(list, 'score-part') : [];
-    if (!parts.length || parts.length !== entries.length) return refuse('incomplete part layout');
+    if (!parts.length || parts.length !== entries.length)
+      return refuse((t) => t.scan.join.reasons.partLayout);
     let count: number | undefined;
     const layout = parts.map((part, partIndex) => {
       const entry = entries[partIndex]!;
-      if (part.id !== entry.id) return refuse('part order differs from the part list');
+      if (part.id !== entry.id) return refuse((t) => t.scan.join.reasons.partOrder);
       const measures = children(part, 'measure');
       if (!measures.length || (count !== undefined && count !== measures.length))
-        return refuse('parts have unequal measure counts');
+        return refuse((t) => t.scan.join.reasons.measureCounts);
       count = measures.length;
       const opening: Element[] = [];
       for (const element of Array.from(measures[0]!.children)) {
@@ -61,9 +62,7 @@ export function joinScanPages(pages: readonly string[]): string {
         !starting('time').length ||
         !starting('clef').length
       )
-        return refuse(
-          `page ${pageIndex + 1} needs explicit starting divisions, key, time and clefs`,
-        );
+        return refuse((t) => t.scan.join.reasons.startingSetup(pageIndex + 1));
       const staves = Number(value('staves') ?? 1);
       const clefs = new Set(
         starting('clef').map((clef) => Number(clef.getAttribute('number') ?? 1)),
@@ -74,9 +73,9 @@ export function joinScanPages(pages: readonly string[]): string {
         clefs.size !== staves ||
         [...clefs].some((staff) => !Number.isSafeInteger(staff) || staff < 1 || staff > staves)
       )
-        return refuse('incomplete starting staff layout');
+        return refuse((t) => t.scan.join.reasons.staffLayout);
       if (Array.from(part.querySelectorAll('staves')).some((s) => Number(s.textContent) !== staves))
-        return refuse('staff layout changes inside a page');
+        return refuse((t) => t.scan.join.reasons.staffChange);
       const instruments = children(entry, 'score-instrument');
       const instrumentIds = new Set(instruments.map((el) => el.id));
       if (
@@ -84,7 +83,7 @@ export function joinScanPages(pages: readonly string[]): string {
           (el) => !instrumentIds.has(el.id),
         )
       )
-        return refuse('instrument reference has no declaration');
+        return refuse((t) => t.scan.join.reasons.instrumentUndeclared);
       const midi = children(entry, 'midi-instrument')
         .map((el) =>
           [
@@ -102,14 +101,14 @@ export function joinScanPages(pages: readonly string[]): string {
   });
   const first = layouts[0]!;
   layouts.forEach((layout) => {
-    if (layout.length !== first.length) return refuse('part counts differ');
+    if (layout.length !== first.length) return refuse((t) => t.scan.join.reasons.partCounts);
     layout.forEach((item, index) => {
       const target = first[index]!;
       if (
         text(item.entry, 'part-name') !== text(target.entry, 'part-name') ||
         item.staves !== target.staves
       )
-        return refuse('part or staff layouts differ');
+        return refuse((t) => t.scan.join.reasons.layoutsDiffer);
       if (
         item.instruments.length !== target.instruments.length ||
         item.midi !== target.midi ||
@@ -118,7 +117,7 @@ export function joinScanPages(pages: readonly string[]): string {
             text(el, 'instrument-name') !== text(target.instruments[i]!, 'instrument-name'),
         )
       )
-        return refuse('instrument layouts differ');
+        return refuse((t) => t.scan.join.reasons.instrumentsDiffer);
     });
   });
 
@@ -133,7 +132,7 @@ export function joinScanPages(pages: readonly string[]): string {
     for (const element of Array.from(doc.querySelectorAll('[id]'))) {
       const old = element.id;
       if (!['part', 'midi-instrument', 'instrument'].includes(element.tagName)) {
-        if (definitions.has(old)) return refuse('duplicate XML IDs inside one page');
+        if (definitions.has(old)) return refuse((t) => t.scan.join.reasons.duplicateIds);
         definitions.add(old);
       }
       if (!ids.has(old)) ids.set(old, `page${pageIndex + 1}-${old}`);
@@ -151,7 +150,7 @@ export function joinScanPages(pages: readonly string[]): string {
         if (value === null) continue;
         const raw = value.startsWith('#') ? value.slice(1) : value;
         const mapped = ids.get(raw);
-        if (!mapped) return refuse('unresolved XML ID reference');
+        if (!mapped) return refuse((t) => t.scan.join.reasons.unresolvedId);
         element.setAttribute(attr, (value.startsWith('#') ? '#' : '') + mapped);
       }
     }
@@ -168,13 +167,12 @@ export function joinScanPages(pages: readonly string[]): string {
       for (const span of Array.from(layout[partIndex]!.part.querySelectorAll(GRAPHIC_SPAN_TAGS))) {
         const old = Number(span.getAttribute('number') ?? 1);
         if (!Number.isInteger(old) || old < 1 || old > 16)
-          return refuse('invalid graphic span number');
+          return refuse((t) => t.scan.join.reasons.spanNumber);
         const key = `${span.tagName}:${old}`;
         let mapped = local.get(key);
         if (mapped === undefined) {
           mapped = (allocated.get(span.tagName) ?? 0) + 1;
-          if (mapped > 16)
-            return refuse('more than 16 page-specific numbers for one notation span type');
+          if (mapped > 16) return refuse((t) => t.scan.join.reasons.spanOverflow);
           allocated.set(span.tagName, mapped);
           local.set(key, mapped);
         }

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
+import { useT } from '../i18n/i18n.js';
 import { attribution, type LibraryPiece } from '../library/manifest.js';
 import { FingerLegend } from './FingerLegend.js';
 
@@ -39,14 +40,15 @@ export function useLegendAbove(): boolean {
  * side panel's, beside the score, is the one shown.
  */
 export function ScoreHeader({ title, composer, piece, onBack, legend = false }: ScoreHeaderProps) {
-  const credit = piece ? attribution(piece) : null;
+  const t = useT();
+  const credit = piece ? attribution(piece, t) : null;
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   return (
     <header className="score-header">
       {onBack && (
         <button type="button" className="back-button no-print" onClick={onBack}>
-          Back to the library
+          {t.score.header.back}
         </button>
       )}
       <ThemeToggle />

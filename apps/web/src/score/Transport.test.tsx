@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { DEFAULT_SETTINGS, tempoFactorOf, useAppStore } from '../app/store.js';
@@ -11,6 +11,8 @@ import {
   tempoText,
   Transport,
 } from './Transport.js';
+import { en } from '../i18n/en/index.js';
+import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import type { Playback } from './usePlayback.js';
 
 /** The practice controls and the transport (the dock's buttons), as the score view shows them. */
@@ -48,7 +50,10 @@ function playback(
     setLoop: vi.fn<Playback['setLoop']>(),
   };
 }
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  resetLocaleForTests();
+});
 // The controls belong to the score view, and the tempo factor is the open piece's own.
 beforeEach(() =>
   useAppStore.setState({
@@ -409,10 +414,12 @@ describe('the tempo control', () => {
   });
 });
 
+const LOOP_REVERSED = LOOP_REVERSED_TEXT(en);
+
 // Polish plan Task 6, review S11: a reversed range (from 6, to 2) was ignored without a word.
 describe('a loop whose "from" is after "to"', () => {
   it('is not a loop: the bars typed in reverse, before or after clamping to the piece', () => {
-    expect(LOOP_REVERSED_TEXT).toBe('The loop needs "from" before "to".');
+    expect(LOOP_REVERSED_TEXT(en)).toBe('The loop needs "from" before "to".');
     expect(loopFromInputs('6', '2', 12)).toBeNull();
     expect(loopFromInputs('20', '15', 12)).toBeNull();
     expect(loopFromInputs('15', '20', 12)).toEqual({ from: 11, to: 11 });
@@ -427,39 +434,60 @@ describe('a loop whose "from" is after "to"', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Loop bars' }));
     const from = screen.getByRole('spinbutton', { name: 'Loop from bar' });
     const to = screen.getByRole('spinbutton', { name: 'Loop to bar' });
-    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(screen.queryByText(LOOP_REVERSED)).toBeNull();
     expect(from).not.toHaveAttribute('aria-invalid');
 
     // "Loop bars" prefilled bars 1 and 2; empty "to" to type the range from scratch.
     fireEvent.change(to, { target: { value: '' } });
     fireEvent.change(from, { target: { value: '6' } });
     // Half typed is not reversed: nothing to say yet.
-    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(screen.queryByText(LOOP_REVERSED)).toBeNull();
     fireEvent.change(to, { target: { value: '2' } });
-    const message = screen.getByText(LOOP_REVERSED_TEXT);
+    const message = screen.getByText(LOOP_REVERSED);
     expect(message).toBeVisible();
     expect(pb.setLoop).toHaveBeenLastCalledWith(null);
     for (const input of [from, to]) {
       expect(input).toHaveAttribute('aria-invalid', 'true');
-      expect(input).toHaveAccessibleDescription(LOOP_REVERSED_TEXT);
+      expect(input).toHaveAccessibleDescription(LOOP_REVERSED);
     }
     expect(container.querySelector('.loop')).toContainElement(message);
     // Never red: the brief's one red stays Play, and an error is not the next action.
     expect(container.querySelectorAll('.is-red')).toHaveLength(0);
 
     fireEvent.change(to, { target: { value: '8' } });
-    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(screen.queryByText(LOOP_REVERSED)).toBeNull();
     expect(pb.setLoop).toHaveBeenLastCalledWith({ from: 5, to: 7 });
     for (const input of [from, to]) {
       expect(input).not.toHaveAttribute('aria-invalid');
-      expect(input).not.toHaveAccessibleDescription(LOOP_REVERSED_TEXT);
+      expect(input).not.toHaveAccessibleDescription(LOOP_REVERSED);
     }
 
     // Reversed again, then unticked: the message goes with the inputs.
     fireEvent.change(from, { target: { value: '9' } });
-    expect(screen.getByText(LOOP_REVERSED_TEXT)).toBeVisible();
+    expect(screen.getByText(LOOP_REVERSED)).toBeVisible();
     fireEvent.click(screen.getByRole('checkbox', { name: 'Loop bars' }));
-    expect(screen.queryByText(LOOP_REVERSED_TEXT)).toBeNull();
+    expect(screen.queryByText(LOOP_REVERSED)).toBeNull();
     expect(pb.setLoop).toHaveBeenLastCalledWith(null);
+  });
+});
+
+describe('in another language', () => {
+  it("writes the controls in French, with the tempo in the language's own number style", async () => {
+    await act(() => chooseLocale('fr'));
+    const { container } = render(<Controls playback={playback()} />);
+    expect(screen.getByRole('toolbar', { name: 'Lecture' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lire' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Rembobiner' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Métronome' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Gauche' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: /Tempo/ })).toHaveAttribute(
+      'aria-valuetext',
+      '100\u00a0%',
+    );
+    expect(container.querySelector('.tempo-value')?.textContent).toBe('100\u00a0%');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Boucle de mesures' }));
+    expect(
+      screen.getByRole('spinbutton', { name: 'Boucle jusqu’à la mesure' }),
+    ).toBeInTheDocument();
   });
 });

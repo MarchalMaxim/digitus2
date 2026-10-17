@@ -3,6 +3,7 @@
  * confuse them. Decided from the score once per piece, both hands, whatever is muted.
  */
 import type { Hand, Note } from '@digitus2/engine';
+import type { Messages } from '../i18n/messages.js';
 import type { OnsetGroup } from './onsetGroups.js';
 
 /** Hands this many semitones apart or closer are close: a perfect fifth, about four white keys. */
@@ -46,4 +47,9 @@ export function lettersShown(
 ): boolean {
   const g = currentGroup >= 0 ? groups[currentGroup] : undefined;
   return g !== undefined && bars.has(g.notes[0]!.measureIndex);
+}
+
+/** The letter that names a hand on the keyboard, in the language of `t`: L and R, G and D, I and D. */
+export function handLetter(hand: Hand, t: Messages): string {
+  return t.score.keyboard.hands[hand];
 }

@@ -1,3 +1,12 @@
+import { PhraseError } from '../i18n/PhraseError.js';
+
+/**
+ * Kept in the saved warnings as this English marker; the review writes it in the language on
+ * screen (ScanView.tsx).
+ */
+export const UNKNOWN_WARNING =
+  'The recognizer reported an unknown warning. Check the original carefully.';
+
 /** Explicit-action-only connection to the optional PC worker. */
 export interface WorkerMetadata {
   protocol?: string;
@@ -21,7 +30,7 @@ function metadataOf(
       typeof warning.message === 'string'
     )
       return warning.message;
-    return 'The recognizer reported an unknown warning. Check the original carefully.';
+    return UNKNOWN_WARNING;
   });
   return { ...value, warnings };
 }
@@ -36,22 +45,22 @@ export function createScanClient(fetcher: typeof fetch = fetch) {
     };
     const response = await fetcher('http://127.0.0.1:8996/v1/' + path, options);
     if (!response.ok)
-      throw new Error(
+      throw new PhraseError((t) =>
         [409, 429].includes(response.status)
-          ? 'The PC is already scanning. Try again shortly.'
-          : `PC worker returned ${response.status}.`,
+          ? t.scan.client.busy
+          : t.scan.client.workerStatus(response.status),
       );
     return response;
   }
   const path = (id: string) => {
-    if (!/^[a-f0-9]{32}$/.test(id)) throw new Error('Invalid scan job.');
+    if (!/^[a-f0-9]{32}$/.test(id)) throw new PhraseError((t) => t.scan.client.invalidJob);
     return 'jobs/' + id;
   };
   return {
     async connect(): Promise<WorkerMetadata> {
       const metadata = metadataOf(await (await request('health')).json());
       if (metadata.protocol !== 'digitus2-scan-v1')
-        throw new Error('Update the PC worker to continue.');
+        throw new PhraseError((t) => t.scan.client.updateWorker);
       return metadata;
     },
     async start(file: File): Promise<string> {
@@ -62,7 +71,7 @@ export function createScanClient(fetcher: typeof fetch = fetch) {
           body: file,
         })
       ).json()) as WorkerMetadata;
-      if (!job.id) throw new Error('The worker did not return a scan job.');
+      if (!job.id) throw new PhraseError((t) => t.scan.client.noJob);
       path(job.id);
       return job.id;
     },

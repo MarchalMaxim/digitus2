@@ -1,22 +1,25 @@
 import { useAppStore } from '../../app/store.js';
+import { useT } from '../../i18n/i18n.js';
 import { useLocalLibrary } from './state.js';
 
 export function MyScores({ onOpen }: { onOpen(): void }) {
+  const t = useT();
   const items = useLocalLibrary((s) => s.items);
   const failed = useLocalLibrary((s) => s.failed);
   if (!items.length) return null;
+  const say = t.library.myScores;
   const allSaved = items.every((item) => item.saved);
-  const storageLabel = allSaved ? 'Saved' : failed ? 'Available for this visit only' : 'Saving…';
+  const storageLabel = allSaved ? say.saved : failed ? say.thisVisitOnly : say.saving;
   return (
     <details className="local-scores">
-      <summary>My scores</summary>
+      <summary>{say.heading}</summary>
       <p className="small muted">{storageLabel}</p>
       <ul className="piece-list">
         {items.map((item) => (
           <li key={item.id} className="local-score-row">
             <button
               className="piece-row"
-              aria-label={`Open saved ${item.name}`}
+              aria-label={say.open(item.name)}
               onClick={() => {
                 const view = useAppStore.getState().view;
                 onOpen();
@@ -25,21 +28,23 @@ export function MyScores({ onOpen }: { onOpen(): void }) {
             >
               <span className="title">{item.name}</span>
               <span className="composer small muted">
-                {!failed && !item.saved ? 'Saving…' : item.detail}
+                {!failed && !item.saved ? say.saving : say.detail[item.detail]}
               </span>
             </button>
             <button
               className="text-button small"
-              aria-label={`Remove saved ${item.name}`}
+              aria-label={say.removeLabel(item.name)}
               onClick={() => {
                 void import('./library.js')
                   .then((m) => m.removeLocalScore(item.id))
                   .catch(() =>
-                    useAppStore.getState().setNotice('This score could not be removed. Try again.'),
+                    useAppStore
+                      .getState()
+                      .setNotice((texts) => texts.library.myScores.removeFailed),
                   );
               }}
             >
-              Remove
+              {say.remove}
             </button>
           </li>
         ))}

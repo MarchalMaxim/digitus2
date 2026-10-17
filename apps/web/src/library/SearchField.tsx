@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useT } from '../i18n/i18n.js';
 
 export interface SearchFieldProps {
   query: string;
@@ -11,14 +12,15 @@ export interface SearchFieldProps {
  * hidden (library.css), so there is one clear control and no icon to learn.
  */
 export function SearchField({ query, onChange }: SearchFieldProps) {
+  const t = useT();
   const input = useRef<HTMLInputElement>(null);
   return (
     <div role="search" className="library-search">
       <input
         ref={input}
         type="search"
-        aria-label="Search the library"
-        placeholder="Search pieces and composers"
+        aria-label={t.library.search.label}
+        placeholder={t.library.search.placeholder}
         value={query}
         onChange={(e) => onChange(e.currentTarget.value)}
         onKeyDown={(e) => {
@@ -32,13 +34,13 @@ export function SearchField({ query, onChange }: SearchFieldProps) {
         <button
           type="button"
           className="text-button search-clear"
-          aria-label="Clear the search"
+          aria-label={t.library.search.clearLabel}
           onClick={() => {
             onChange('');
             input.current?.focus();
           }}
         >
-          Clear
+          {t.library.search.clear}
         </button>
       )}
     </div>

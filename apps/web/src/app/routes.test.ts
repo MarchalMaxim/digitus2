@@ -1,6 +1,7 @@
+import { en } from '../i18n/en/index.js';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from './store.js';
-import { hashToView, installHashSync, viewToHash } from './routes.js';
+import { FILE_NOT_RESTORABLE_NOTICE, hashToView, installHashSync, viewToHash } from './routes.js';
 
 afterEach(() => {
   location.hash = '';
@@ -70,7 +71,10 @@ describe('routes', () => {
     location.hash = '#/piece/file';
     const uninstall = installHashSync(useAppStore);
     expect(useAppStore.getState().view).toEqual({ name: 'library' });
-    expect(useAppStore.getState().notice).toBe('Open it from My scores, or choose the file again.');
+    expect(useAppStore.getState().notice).toBe(FILE_NOT_RESTORABLE_NOTICE);
+    expect(FILE_NOT_RESTORABLE_NOTICE(en)).toBe(
+      'Open it from My scores, or choose the file again.',
+    );
     uninstall();
   });
 });

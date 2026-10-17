@@ -74,17 +74,20 @@ const DEFAULT_QPM = 120;
 /**
  * The MIDI velocity each dynamics mark plays at: steps of 12 around mf, so a change from p to f
  * is a clear step rather than a switch (smplr's gain grows with the square of the velocity, on
- * top of the louder sample layer).
+ * top of the louder sample layer). mf sits between the hands' unmarked levels (96 and 88), so a
+ * piece marked mf sounds like one with no mark, and each mark plays the piano's sample layer
+ * nearest its name (mp and p its mp layer, mf its mf layer, f and above its ff layer): one step
+ * lower put mf on the mp layer and p on the pp layer, softer and duller than the music asks.
  */
 const DYNAMICS_VELOCITY: Record<string, number> = {
-  ppp: 32,
-  pp: 44,
-  p: 56,
-  mp: 68,
-  mf: 80,
-  f: 92,
-  ff: 104,
-  fff: 116,
+  ppp: 44,
+  pp: 56,
+  p: 68,
+  mp: 80,
+  mf: 92,
+  f: 104,
+  ff: 116,
+  fff: 127,
 };
 
 /** How far a hairpin, cresc. or dim. goes when no mark in its direction ends it: one mark's step. */
@@ -620,8 +623,10 @@ function readTempo(el: Element): number | undefined {
 
 /**
  * The velocity a `<direction>` or `<sound>` sets: its dynamics mark (ppp to fff), else its
- * `<sound dynamics>`, a percentage of forte (MIDI velocity 90). A mark outside ppp to fff (sfz,
- * fp) is an accent, so the direction sets no level, whatever its sound says.
+ * `<sound dynamics>`, a percentage of MIDI velocity 90, moved onto the marks' scale: the MIDI
+ * velocities notation programs write for the marks (MuseScore: mf 80, f 96, 16 apart) map onto
+ * `DYNAMICS_VELOCITY` (mf 92, f 104, 12 apart). A mark outside ppp to fff (sfz, fp) is an
+ * accent, so the direction sets no level, whatever its sound says.
  */
 function readDynamics(el: Element): number | undefined {
   const marks = el.tagName === 'direction' ? allDescendants(el, 'dynamics') : [];
@@ -635,7 +640,8 @@ function readDynamics(el: Element): number | undefined {
   const sound = el.tagName === 'sound' ? el : allDescendants(el, 'sound')[0];
   const percent = Number(sound?.getAttribute('dynamics') || NaN);
   if (!Number.isFinite(percent) || percent < 0) return undefined;
-  return Math.min(127, Math.max(1, Math.round(percent * 0.9)));
+  const midi = percent * 0.9;
+  return Math.min(127, Math.max(1, Math.round(DYNAMICS_VELOCITY.mf! + (midi - 80) * 0.75)));
 }
 
 /**

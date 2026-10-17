@@ -28,6 +28,13 @@ export function noteVelocity(note: { velocity?: number; hand: Hand }): number {
 }
 
 /**
+ * The softest velocity the piano plays. smplr's softest layer (1 to 40) is its pp samples through
+ * a 1 kHz low-pass filter, which sounds as if played through a towel; a softer note (a long
+ * diminuendo, a MIDI file) plays at this floor instead, on the pp layer.
+ */
+export const PIANO_SOFTEST = 41;
+
+/**
  * The sampled piano: smplr's Splendid Grand Piano (public domain samples), loading only the
  * piece's pitches and the velocity layers its velocities fall in (rendering spike section 4.1:
  * about 2.5 MB per layer for an 8-bar piece instead of 19.5 MB for everything). smplr matches
@@ -43,7 +50,7 @@ export function createPiano(ctx: AudioContext): Instrument {
   return {
     async load(midis, velocities) {
       const id = ++loads;
-      const used = velocities.length > 0 ? new Set(velocities) : new Set([UNMARKED_VELOCITY.R]);
+      const used = new Set((velocities.length > 0 ? velocities : [UNMARKED_VELOCITY.R]).map(floor));
       const velocityRange: [number, number] = [Math.min(...used), Math.max(...used)];
       const smplr = await import('smplr');
       if (id !== loads) return; // a newer load started while smplr was being imported
@@ -63,12 +70,21 @@ export function createPiano(ctx: AudioContext): Instrument {
       piano = next;
     },
     start(e) {
-      piano?.start({ note: e.midi, velocity: e.velocity, time: e.time, duration: e.duration });
+      piano?.start({
+        note: e.midi,
+        velocity: floor(e.velocity),
+        time: e.time,
+        duration: e.duration,
+      });
     },
     stopAll() {
       piano?.stop();
     },
   };
+}
+
+function floor(velocity: number): number {
+  return Math.max(PIANO_SOFTEST, velocity);
 }
 
 /** Records what it is asked to play and makes no sound (tests and `?audio=silent`). */

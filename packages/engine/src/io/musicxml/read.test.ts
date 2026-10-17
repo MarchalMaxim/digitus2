@@ -370,13 +370,13 @@ describe('parseMusicXml dynamics', () => {
   it('maps every mark from ppp to fff to a velocity', () => {
     const marks = ['ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff'];
     const { score } = parseMusicXml(onePart(marks.map((m) => dyn(m) + n('C', 4, 1)).join('')));
-    expect(score.notes.map((x) => x.velocity)).toEqual([32, 44, 56, 68, 80, 92, 104, 116]);
+    expect(score.notes.map((x) => x.velocity)).toEqual([44, 56, 68, 80, 92, 104, 116, 127]);
   });
   it('leaves notes before the first mark without a velocity and carries a mark across bars', () => {
     expect(velocities(onePart(n('C', 4, 1) + dyn('p') + n('D', 4, 1), n('E', 4, 1)))).toEqual([
       [60, undefined],
-      [62, 56],
-      [64, 56],
+      [62, 68],
+      [64, 68],
     ]);
   });
   it('applies a mark between the staves to both hands, at its offset in the bar', () => {
@@ -387,14 +387,14 @@ describe('parseMusicXml dynamics', () => {
       `${dyn('pp')}${n('F', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('F', 3, 1, onStaff(2))}`,
     );
     expect(velocities(xml)).toEqual([
-      [72, 56],
-      [48, 56],
-      [74, 104],
-      [50, 104],
-      [76, 68],
-      [52, 68],
-      [77, 44],
-      [53, 44],
+      [72, 68],
+      [48, 68],
+      [74, 116],
+      [50, 116],
+      [76, 80],
+      [52, 80],
+      [77, 56],
+      [53, 56],
     ]);
   });
   it('keeps a mark above the top staff or below the bottom one to that hand', () => {
@@ -403,25 +403,28 @@ describe('parseMusicXml dynamics', () => {
       `${dyn('mf', { staff: 1, placement: 'above' })}${n('D', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('D', 3, 1, onStaff(2))}`,
     );
     expect(velocities(xml)).toEqual([
-      [72, 56],
-      [48, 92],
-      [74, 80],
-      [50, 92],
+      [72, 68],
+      [48, 104],
+      [74, 92],
+      [50, 104],
     ]);
   });
-  it('reads sound dynamics as a percentage of forte when no mark gives a level', () => {
-    // MusicXML's sound dynamics is a percentage of forte, MIDI velocity 90.
+  it("reads sound dynamics on the marks' scale when no mark gives a level", () => {
+    // MusicXML's sound dynamics is a percentage of MIDI velocity 90; MuseScore writes 88.89 with
+    // an mf (velocity 80) and 106.67 with an f (96), which land on the marks' own levels.
     const xml = onePart(
-      dyn(null, { sound: '60' }) + n('C', 4, 1),
+      dyn(null, { sound: '88.89' }) + n('C', 4, 1),
       dyn('pp', { sound: '100' }) + n('D', 4, 1),
       dyn('sfz', { sound: '120' }) + n('E', 4, 1),
-      '<sound dynamics="80"/>' + n('F', 4, 1),
+      '<sound dynamics="106.67"/>' + n('F', 4, 1),
+      '<sound dynamics="60"/>' + n('G', 4, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 54],
-      [62, 44], // the mark wins over its sound
-      [64, 44], // an accent such as sfz keeps the level
-      [65, 72],
+      [60, 92],
+      [62, 56], // the mark wins over its sound
+      [64, 56], // an accent such as sfz keeps the level
+      [65, 104],
+      [67, 73],
     ]);
   });
   it('keeps dynamics within their part and at the final bar starts', () => {
@@ -436,11 +439,11 @@ describe('parseMusicXml dynamics', () => {
         <measure number="2">${dyn('pp')}${n('D', 3, 2)}</measure>
       </part></score-partwise>`;
     expect(velocities(xml)).toEqual([
-      [72, 56],
+      [72, 68],
       [48, undefined],
-      [74, 56],
-      [50, 44],
-      [76, 92],
+      [74, 68],
+      [50, 56],
+      [76, 104],
     ]);
   });
 });
@@ -465,11 +468,11 @@ describe('parseMusicXml hairpins', () => {
       wedge('stop') + dyn('f') + n('G', 4, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 56],
-      [62, 65],
-      [64, 74],
-      [65, 83],
-      [67, 92],
+      [60, 68],
+      [62, 77],
+      [64, 86],
+      [65, 95],
+      [67, 104],
     ]);
   });
   it('takes a diminuendo with no mark at its end one step softer and holds that level', () => {
@@ -478,10 +481,10 @@ describe('parseMusicXml hairpins', () => {
       n('E', 4, 1) + n('F', 4, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 92],
-      [62, 86],
-      [64, 80],
-      [65, 80],
+      [60, 104],
+      [62, 98],
+      [64, 92],
+      [65, 92],
     ]);
   });
   it('goes one step when the mark at its end lies the other way, then plays the mark', () => {
@@ -490,9 +493,9 @@ describe('parseMusicXml hairpins', () => {
       dyn('p') + n('E', 4, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 92],
-      [62, 98],
-      [64, 56],
+      [60, 104],
+      [62, 110],
+      [64, 68],
     ]);
   });
   it('carries on from a mark inside a hairpin towards its end', () => {
@@ -501,11 +504,11 @@ describe('parseMusicXml hairpins', () => {
       n('F', 4, 1) + wedge('stop') + dyn('f') + n('G', 4, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 56],
-      [62, 65],
-      [64, 68],
-      [65, 80],
-      [67, 92],
+      [60, 68],
+      [62, 77],
+      [64, 80],
+      [65, 92],
+      [67, 104],
     ]);
   });
   it('reads cresc. and dim. as a change up to the next mark', () => {
@@ -515,13 +518,13 @@ describe('parseMusicXml hairpins', () => {
       dyn('p') + n('B', 4, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 44],
-      [62, 53],
-      [64, 62],
-      [65, 71],
-      [67, 80],
-      [69, 68],
-      [71, 56],
+      [60, 56],
+      [62, 65],
+      [64, 74],
+      [65, 83],
+      [67, 92],
+      [69, 80],
+      [71, 68],
     ]);
   });
   it('takes a cresc. with no mark after it one step up over four bars at most', () => {
@@ -534,12 +537,12 @@ describe('parseMusicXml hairpins', () => {
       n('A', 4, 4),
     );
     expect(velocities(xml)).toEqual([
-      [60, 56],
-      [62, 59],
-      [64, 62],
-      [65, 65],
-      [67, 68],
-      [69, 68],
+      [60, 68],
+      [62, 71],
+      [64, 74],
+      [65, 77],
+      [67, 80],
+      [69, 80],
     ]);
   });
   it("starts a hairpin before any mark from the hand's unmarked level", () => {
@@ -574,7 +577,7 @@ describe('parseMusicXml hairpins', () => {
       n('G', 4, 4),
     );
     const byPitch = Object.fromEntries(velocities(xml));
-    expect(byPitch).toEqual({ 72: 92, 60: 92, 62: 92, 74: 88, 64: 88, 65: 84, 67: 80 });
+    expect(byPitch).toEqual({ 72: 104, 60: 104, 62: 104, 74: 100, 64: 100, 65: 96, 67: 92 });
   });
   it('keeps a run of hairpins without marks within a step of the latest mark', () => {
     const sigh = (a: string, b: string) =>
@@ -585,14 +588,14 @@ describe('parseMusicXml hairpins', () => {
       n('C', 5, 1),
     );
     expect(velocities(xml)).toEqual([
-      [60, 56],
-      [62, 50],
-      [64, 44],
-      [65, 44],
-      [67, 44],
-      [69, 44],
-      [71, 44],
-      [72, 56],
+      [60, 68],
+      [62, 62],
+      [64, 56],
+      [65, 56],
+      [67, 56],
+      [69, 56],
+      [71, 56],
+      [72, 68],
     ]);
   });
   it("lets a staff without a mark of its own follow the other staff's", () => {
@@ -606,12 +609,12 @@ describe('parseMusicXml hairpins', () => {
     // The cresc. finds no mark for four bars on the upper staff, so it climbs one step over the
     // score's three ticks; the lower staff follows the pp until its own f.
     expect(velocities(xml)).toEqual([
-      [72, 44],
-      [48, 44],
-      [74, 44],
-      [50, 44],
-      [76, 50],
-      [52, 92],
+      [72, 56],
+      [48, 56],
+      [74, 56],
+      [50, 56],
+      [76, 62],
+      [52, 104],
     ]);
   });
   it('pairs hairpins by number and keeps one above the top staff to the right hand', () => {
@@ -621,12 +624,12 @@ describe('parseMusicXml hairpins', () => {
       <measure number="2">${wedge('stop')}${n('E', 5, 1, onStaff(1))}<backup><duration>1</duration></backup>${n('E', 3, 1, onStaff(2))}</measure>
       </part></score-partwise>`;
     expect(velocities(xml)).toEqual([
-      [72, 56],
-      [48, 56],
-      [74, 62],
-      [50, 50],
-      [76, 68],
-      [52, 44],
+      [72, 68],
+      [48, 68],
+      [74, 74],
+      [50, 62],
+      [76, 80],
+      [52, 56],
     ]);
   });
 });

@@ -2,6 +2,7 @@ import { parseMusicXml } from '@digitus2/engine';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
+import type * as InstrumentExports from '../audio/instrument.js';
 import { usePlayback } from './usePlayback.js';
 
 const instrument = vi.hoisted(() => ({
@@ -9,7 +10,10 @@ const instrument = vi.hoisted(() => ({
   start: vi.fn(),
   stopAll: vi.fn(),
 }));
-vi.mock('../audio/instrument.js', () => ({ instrumentFromLocation: () => instrument }));
+vi.mock('../audio/instrument.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof InstrumentExports>()),
+  instrumentFromLocation: () => instrument,
+}));
 
 afterEach(() => {
   cleanup();
@@ -35,5 +39,5 @@ it('loads the auxiliary sample before first Play even when the pitch never occur
   const { result } = renderHook(() => usePlayback(score));
   act(() => result.current.play());
   await waitFor(() => expect(result.current.playing).toBe(true));
-  expect(instrument.load).toHaveBeenCalledWith([60, 62]);
+  expect(instrument.load).toHaveBeenCalledWith([60, 62], [96]);
 });

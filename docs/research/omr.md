@@ -58,10 +58,10 @@ Set `DIGITUS2_OMR_HOMR`, `DIGITUS2_OMR_BUNDLE` or `DIGITUS2_OMR_TEXT_MODELS` whe
 
 | Route (16 pages each) | Imports | Full-note F1 before | after | Pitch F1 after | Ties missed before | after | Extra ties | Duplicates | Wrong staff | Beam F1 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| homr, clean | 16 | 86.77 | 89.97 | 99.28 | 17 | 13 | 1 | 2 | 1 | 0 |
-| homr, shadow | 16 | 83.54 | 86.77 | 99.26 | 18 | 13 | 1 | 1 | 63 | 0 |
-| homr, low contrast | 16 | 87.79 | 90.98 | 99.56 | 17 | 13 | 1 | 1 | 0 | 0 |
-| homr, skew | 15 | 86.14 | 89.41 | 96.97 | 17 | 13 | 1 | 0 | 0 | 0 |
+| homr, clean | 16 | 86.77 | 89.95 | 99.26 | 17 | 13 | 1 | 2 | 1 | 0 |
+| homr, shadow | 16 | 83.54 | 86.75 | 99.25 | 18 | 13 | 1 | 1 | 63 | 0 |
+| homr, low contrast | 16 | 87.79 | 90.96 | 99.54 | 17 | 13 | 1 | 1 | 0 | 0 |
+| homr, skew | 15 | 86.14 | 89.39 | 96.95 | 17 | 13 | 1 | 0 | 0 | 0 |
 | Audiveris, PDF | 16 | 86.65 | 86.65 | 98.72 | 8 | 8 | 0 | 1 | 0 | 92.01 |
 
 The two worker rules behind "after" (`local-worker/normalize_export.py`, applied to every homr export and reported as a review warning):

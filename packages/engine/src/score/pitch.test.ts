@@ -28,6 +28,19 @@ describe('midiToSpelling', () => {
   });
 });
 
+describe('midiToSpelling over a whole octave', () => {
+  const sharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const flat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  it.each([
+    ['sharp', sharp],
+    ['flat', flat],
+  ] as const)('spells all twelve pitch classes in %s mode', (prefer, names) => {
+    for (let pc = 0; pc < 12; pc++) {
+      expect(formatPigPitch(midiToSpelling(60 + pc, prefer))).toBe(`${names[pc]}4`);
+    }
+  });
+});
+
 describe('isBlackKey', () => {
   it('matches the five black keys per octave', () => {
     const blacks = [61, 63, 66, 68, 70];

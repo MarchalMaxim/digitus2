@@ -4,18 +4,21 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PARNCUTT_WEIGHTS, RULE_IDS } from '../src/fingering/rules.js';
 import { validateWeightSet } from '../src/fingering/params/weightSets.js';
+import { dataGate } from './dataGate.js';
 import { confidenceSamples, fitTemperature } from '../src/learn/calibration.js';
 import { defaultCorpusRoots, loadCorpora, repoRoot } from './corpora.js';
 import { runLearn } from './learn.js';
 import { main } from './run.js';
 
 const roots = defaultCorpusRoots();
-const have =
+const have = dataGate(
+  'the learn checks',
   existsSync(join(roots.pig, 'FingeringFiles')) &&
-  existsSync(join(roots.beringer, 'FingeringFiles')) &&
-  existsSync(join(roots.mutopia, 'FingeringFiles')) &&
-  existsSync(roots.mutopiaSplit) &&
-  existsSync(roots.pigValidation);
+    existsSync(join(roots.beringer, 'FingeringFiles')) &&
+    existsSync(join(roots.mutopia, 'FingeringFiles')) &&
+    existsSync(roots.mutopiaSplit) &&
+    existsSync(roots.pigValidation),
+);
 
 const silent = { stdout: () => undefined, stderr: () => undefined };
 
@@ -93,7 +96,15 @@ describe.skipIf(!have)('learn', () => {
     const dir = mkdtempSync(join(tmpdir(), 'digitus2-learn-pig-'));
     try {
       const out = join(dir, 'pig.json');
-      const r = runLearn({ config: 'pig', epochs: 1, seeds: 3, out, date: '2026-01-01T00:00:00Z' });
+      const lines: string[] = [];
+      const r = runLearn({
+        config: 'pig',
+        epochs: 1,
+        seeds: 3,
+        out,
+        date: '2026-01-01T00:00:00Z',
+        print: (t) => lines.push(t),
+      });
       const file = validateWeightSet(JSON.parse(readFileSync(out, 'utf8')));
       expect(file.id).toBe('learned-pig');
       expect(file.provenance.license).toMatch(/^research only/);
@@ -106,6 +117,39 @@ describe.skipIf(!have)('learn', () => {
       expect(file.provenance.validation!.noteAccuracy).toBeCloseTo(median, 5);
       expect(Object.keys(file.provenance.validation!.seeds!.values)).toHaveLength(3);
       expect(file.weights.template).toBe(PARNCUTT_WEIGHTS.template);
+      // The log prints percentages with two decimals; the spread over seeds is the sample
+      // standard deviation (n - 1), here for three values.
+      const mean = vals.reduce((a, b) => a + b, 0) / 3;
+      const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / 2);
+      const two = (x: number) => (100 * x).toFixed(2);
+      const summary = lines.find((l) => l.startsWith('validation gen '))!;
+      expect(summary).toContain(`validation gen ${two(mean)} +- ${two(sd)} over 3 seed(s)`);
+      for (const s of r.seeds)
+        expect(lines).toContain(
+          `seed ${s.seed}: best epoch ${s.bestEpoch}, train ${two(s.train!)}, validation ${two(s.validation!)}`,
+        );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 300_000);
+  it('open without validation prints a dash where the validation accuracy is missing', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'digitus2-learn-novalidation-'));
+    try {
+      const lines: string[] = [];
+      runLearn({
+        config: 'open',
+        epochs: 1,
+        seeds: 1,
+        validation: false,
+        out: join(dir, 'open.json'),
+        date: '2026-01-01T00:00:00Z',
+        print: (t) => lines.push(t),
+      });
+      await yieldToRunner();
+      expect(lines.some((l) => /^seed \d+ epoch 1: .*, validation -$/.test(l))).toBe(true);
+      expect(
+        lines.some((l) => /^seed \d+: best epoch 1, train \d+\.\d{2}, validation -$/.test(l)),
+      ).toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

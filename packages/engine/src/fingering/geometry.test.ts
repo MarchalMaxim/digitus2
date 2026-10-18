@@ -17,4 +17,10 @@ describe('geometry', () => {
     expect(x14(64) - x14(60)).toBe(4);
     expect(x14(65) - x14(64)).toBe(2);
   });
+  it('counts white keys from C: G is the fifth white key, and B sits 12 units above C', () => {
+    // Octave of C4 (60): C D E F G A B are white columns 0..6 above C; the sharps share their natural's column.
+    const cols = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6];
+    for (let i = 0; i < 12; i++) expect(whiteColumn(60 + i) - whiteColumn(60)).toBe(cols[i]);
+    expect(x14(71) - x14(60)).toBe(12);
+  });
 });

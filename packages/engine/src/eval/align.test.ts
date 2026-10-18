@@ -27,6 +27,42 @@ describe('alignScores', () => {
       ['11', '1'],
     ]);
   });
+  it('pairs shuffled simultaneous notes of both hands by position and returns them in gold order', () => {
+    const file = (rows: Array<[string, number, string, 0 | 1]>) =>
+      parsePig(
+        '//Version: PianoFingering_v170101\n' +
+          rows
+            .map(([id, on, name, hand]) => `${id}\t${on}\t${on + 0.5}\t${name}\t80\t80\t${hand}\t1`)
+            .join('\n') +
+          '\n',
+      );
+    // Gold file order differs from position order (onset, right hand first, pitch).
+    const g = file([
+      ['g0', 0.5, 'D4', 0],
+      ['g1', 0, 'C4', 0],
+      ['g2', 0, 'C3', 1],
+      ['g3', 0, 'E4', 0],
+    ]);
+    const p = file([
+      ['p0', 0, 'C3', 1],
+      ['p1', 0.5, 'D4', 0],
+      ['p2', 0, 'E4', 0],
+      ['p3', 0, 'C4', 0],
+    ]);
+    // parsePig sorts notes by position; put both note lists in file order instead.
+    const inFileOrder = (f: ReturnType<typeof file>, ids: string[]) => ({
+      ...f.score,
+      notes: ids.map((id) => f.score.notes.find((n) => n.id === id)!),
+    });
+    const gold = inFileOrder(g, ['g0', 'g1', 'g2', 'g3']);
+    const pred = inFileOrder(p, ['p0', 'p1', 'p2', 'p3']);
+    expect(alignScores(pred, gold)).toEqual([
+      ['p1', 'g0'],
+      ['p3', 'g1'],
+      ['p0', 'g2'],
+      ['p2', 'g3'],
+    ]);
+  });
   it('throws when note counts differ', () => {
     const g = parsePig(gold);
     const p = parsePig(gold.split('\n').slice(0, 3).join('\n') + '\n');

@@ -62,6 +62,35 @@ describe('importMidi', () => {
     expect(at(6)).toBeCloseTo(18, 6);
     expect(score.notes[score.notes.length - 1]!.onsetSec).toBeCloseTo(21.5, 6); // the last right-hand note
   });
+  it('passes the composer to the score and keeps the MIDI velocity of each note through the MusicXML round trip', () => {
+    const on = (noteNumber: number, velocity: number): MidiEvent => ({
+      deltaTime: 0,
+      type: 'noteOn',
+      channel: 0,
+      noteNumber,
+      velocity,
+    });
+    const off = (noteNumber: number): MidiEvent => ({
+      deltaTime: 480,
+      type: 'noteOff',
+      channel: 0,
+      noteNumber,
+      velocity: 0,
+    });
+    const end: MidiEvent = { deltaTime: 0, meta: true, type: 'endOfTrack' };
+    const bytes = new Uint8Array(
+      writeMidi({
+        header: { format: 1, numTracks: 1, ticksPerBeat: 480 },
+        tracks: [[on(72, 53), off(72), on(74, 101), off(74), end]],
+      }),
+    );
+    const { score } = importMidi(bytes, { title: 'velocities', composer: 'A. Composer' });
+    expect(score.meta.composer).toBe('A. Composer');
+    const byMidi = new Map(score.notes.map((n) => [n.midi, n.velocity]));
+    expect(byMidi.get(72)).toBe(53);
+    expect(byMidi.get(74)).toBe(101);
+    expect(importMidi(bytes).score.meta.composer).toBeUndefined();
+  });
   it('refuses a file without notes', () => {
     const end: MidiEvent = { deltaTime: 0, meta: true, type: 'endOfTrack' };
     const empty = new Uint8Array(

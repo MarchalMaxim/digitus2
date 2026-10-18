@@ -65,6 +65,9 @@ describe('estimateKey', () => {
     expect(keyFifths(1, 'major')).toBe(-5);
     expect(keyFifths(4, 'minor')).toBe(1);
     expect(keyFifths(0, 'minor')).toBe(-3);
+    // Every major tonic against its key signature: sharps up the circle of fifths, flats down.
+    const majors = [0, -5, 2, -3, 4, -1, 6, 1, -4, 3, -2, 5]; // C Db D Eb E F F# G Ab A Bb B
+    majors.forEach((fifths, tonic) => expect(keyFifths(tonic, 'major')).toBe(fifths));
   });
 });
 

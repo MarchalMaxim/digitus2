@@ -72,4 +72,53 @@ describe('scan notation preservation with ornaments', () => {
       /cannot preserve notation: note 0: invalid or missing duration/,
     );
   });
+
+  it('rejects a missing or empty octave and an invalid step instead of guessing a pitch', () => {
+    const pitched = (pitch: string) =>
+      xml([measure(attributes + `<note><pitch>${pitch}</pitch><duration>4</duration></note>`)]);
+    const bad = [
+      '<step>C</step>',
+      '<step>C</step><octave></octave>',
+      '<step>H</step><octave>4</octave>',
+      '<step>c</step><octave>4</octave>',
+      '<octave>4</octave>',
+    ];
+    for (const pitch of bad) {
+      expect(() => parseMusicXml(pitched(pitch), { preserveNotation: true })).toThrow(
+        /cannot preserve notation: note 0: invalid or missing pitch step\/octave/,
+      );
+    }
+  });
+
+  it('rejects a staves or staff value of zero', () => {
+    const withStaves = (staves: string, staff = '') =>
+      xml([
+        measure(
+          `<attributes><divisions>4</divisions><staves>${staves}</staves></attributes>` +
+            note('C', staff),
+        ),
+      ]);
+    expect(() => parseMusicXml(withStaves('0'), { preserveNotation: true })).toThrow(
+      /staves must be a positive safe integer/,
+    );
+    expect(() =>
+      parseMusicXml(withStaves('1', '<staff>0</staff>'), { preserveNotation: true }),
+    ).toThrow(/staff must be a positive safe integer/);
+  });
+
+  it('keeps a note tied across three measures as one note and accepts its contiguous joins', () => {
+    const source = xml([
+      measure(attributes + note('C', '<tie type="start"/>', 16)) +
+        measure(note('C', '<tie type="stop"/><tie type="start"/>', 16), 2) +
+        measure(note('C', '<tie type="stop"/>', 16), 3),
+    ]);
+    const { score, warnings } = parseMusicXml(source, { preserveNotation: true });
+    expect(warnings).toEqual([]);
+    expect(score.notes).toHaveLength(1);
+    expect(score.notes[0]).toMatchObject({
+      onsetTick: 0,
+      offsetTick: 48,
+      sourceIndices: [0, 1, 2],
+    });
+  });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MidiData } from './read.js';
-import { chooseGrid, QUANT_DIVISIONS, quantize } from './quantize.js';
+import { beatOf, chooseGrid, QUANT_DIVISIONS, quantize } from './quantize.js';
 
 function data(notes: Array<[number, number, number]>, ppq = 480): MidiData {
   return {
@@ -90,6 +90,39 @@ describe('quantize', () => {
       'merged 1 duplicate note',
       'shortened 1 note that overlapped the next note on the same key',
     ]);
+  });
+  it('does not shorten a note that ends exactly where the next note on its key begins', () => {
+    const q = quantize(
+      data([
+        [0, 480, 60],
+        [480, 960, 60],
+      ]),
+    );
+    expect(q.notes.map((n) => [n.onset, n.offset])).toEqual([
+      [0, 480],
+      [480, 960],
+    ]);
+    expect(q.warnings).toEqual([]);
+  });
+  it('sorts unsorted input by onset, then pitch, and merges duplicates in source order', () => {
+    const q = quantize(
+      data([
+        [960, 1200, 67],
+        [480, 720, 64],
+        [480, 720, 60],
+        [480, 600, 64],
+      ]),
+    );
+    expect(q.notes.map((n) => [n.onset, n.midi, n.sources])).toEqual([
+      [480, 60, [2]],
+      [480, 64, [1, 3]],
+      [960, 67, [0]],
+    ]);
+  });
+  it('puts an onset a 64th note (a sixteenth of a quarter) early on the next beat, and an earlier one not', () => {
+    const sixtyFourth = QUANT_DIVISIONS / 16;
+    expect(beatOf(QUANT_DIVISIONS - sixtyFourth)).toBe(1);
+    expect(beatOf(QUANT_DIVISIONS - sixtyFourth - 1)).toBe(0);
   });
   it('gives a note shorter than the grid one grid unit', () => {
     expect(quantize(data([[480, 490, 60]])).notes[0]).toMatchObject({ onset: 480, offset: 600 });

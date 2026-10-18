@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { toHandExamples } from '../src/learn/data.js';
+import { dataGate } from './dataGate.js';
 import {
   defaultCorpusRoots,
   loadCorpora,
@@ -13,10 +14,12 @@ import {
 // The plan's check used paths relative to the working directory, which is packages/engine under
 // `pnpm --filter`; the default roots resolve from the repository root instead.
 const roots = defaultCorpusRoots();
-const have =
+const have = dataGate(
+  'the corpora checks',
   existsSync(join(roots.pig, 'FingeringFiles')) &&
-  existsSync(join(roots.mutopia, 'FingeringFiles')) &&
-  existsSync(roots.mutopiaSplit);
+    existsSync(join(roots.mutopia, 'FingeringFiles')) &&
+    existsSync(roots.mutopiaSplit),
+);
 
 describe.skipIf(!have)('corpora', () => {
   it('validation pieces are 20 fixed train ids', () => {

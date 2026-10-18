@@ -298,6 +298,14 @@ describe('cli bench', () => {
     expect(text).toMatch(/^gen +\d+\.\d\d +0\.00 +\d+\.\d\d +none$/m);
     expect(text).toContain('no floor set');
   });
+  it('bench needs both --gold and --split, each alone is a usage error', () => {
+    const { args } = toyBench(null);
+    const at = (flag: string) => args[args.indexOf(flag) + 1]!;
+    const c = capture();
+    expect(main(['bench', '--gold', at('--gold')], c.io)).toBe(2);
+    expect(main(['bench', '--split', at('--split')], c.io)).toBe(2);
+    expect(c.err.join('')).toContain('bench needs --gold and --split');
+  });
   it('--limit scores the first pieces only and never updates latest.json', () => {
     const { root, args } = toyBench(null);
     const c = capture();

@@ -40,6 +40,15 @@ describe('MusicXML ornaments', () => {
     expect(parseMusicXml(out).score.notes[0]?.ornament).toEqual(score.notes[0]?.ornament);
   });
 
+  it('resolves a trill in a seven-sharp key and skips one in a key beyond seven', () => {
+    expect(
+      parseMusicXml(xml(note(c, '<trill-mark/>'), 7)).score.notes[0]?.ornament?.upperMidi,
+    ).toBe(63);
+    expect(parseMusicXml(xml(note(c, '<trill-mark/>'), 8)).score.notes[0]?.ornament).toBe(
+      undefined,
+    );
+  });
+
   it('resolves a diatonic neighbor from key and explicit ornament accidental', () => {
     const e = '<step>E</step><octave>4</octave>';
     expect(

@@ -90,4 +90,10 @@ describe('hand-motion statistics', () => {
     expect(() => loadHandMotion({ ...raw, idleSec: 0 })).toThrow(/idleSec/);
     expect(() => loadHandMotion({ ...raw, pattern: { L: { L: 1 } } })).toThrow(/pattern/);
   });
+  it('accepts a crossing and an idle penalty of 0 but not a negative one', () => {
+    expect(loadHandMotion({ ...raw, mu: 0 }).mu).toBe(0);
+    expect(loadHandMotion({ ...raw, nu: 0 }).nu).toBe(0);
+    expect(() => loadHandMotion({ ...raw, mu: -1 })).toThrow(/mu/);
+    expect(() => loadHandMotion({ ...raw, nu: -1 })).toThrow(/nu/);
+  });
 });

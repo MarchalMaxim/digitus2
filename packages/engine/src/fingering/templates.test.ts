@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { normalizeTextbookEntries } from '../eval/textbook.js';
 import type { TextbookEntry } from '../eval/textbook.js';
 import { parsePig } from '../io/pig/read.js';
@@ -357,6 +357,37 @@ describe('textbook template files', () => {
     for (const f of FILES) {
       const read = (dir: string): unknown => JSON.parse(readFileSync(join(dir, f), 'utf8'));
       expect(read(copy), f).toEqual(read(src));
+    }
+  });
+});
+
+describe('textbook template reader', () => {
+  it('drops an entry whose midi holds a NaN or an infinite number, and keeps a clean one', async () => {
+    const entry = (id: string, midi: number[]) => ({
+      id,
+      family: 'scale',
+      hand: 'rh',
+      direction: 'asc',
+      midi,
+      fingers: midi.map(() => 1),
+    });
+    const entries = [
+      entry('clean', [60, 62]),
+      entry('nan', [60, Number.NaN]),
+      entry('infinite', [60, Number.POSITIVE_INFINITY]),
+    ];
+    vi.resetModules();
+    vi.doMock('./params/textbook/scales.json', () => ({ default: { entries } }));
+    vi.doMock('./params/textbook/arpeggios.json', () => ({ default: { entries: [] } }));
+    vi.doMock('./params/textbook/chromatic.json', () => ({ default: { entries: [] } }));
+    try {
+      const fresh = await import('./templates.js');
+      expect(fresh.TEXTBOOK_TEMPLATES.R.map((e) => e.id)).toEqual(['clean']);
+    } finally {
+      vi.doUnmock('./params/textbook/scales.json');
+      vi.doUnmock('./params/textbook/arpeggios.json');
+      vi.doUnmock('./params/textbook/chromatic.json');
+      vi.resetModules();
     }
   });
 });

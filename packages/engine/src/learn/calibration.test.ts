@@ -114,6 +114,16 @@ describe('calibration details', () => {
     expect(Number.isFinite(nll)).toBe(true);
     expect(nll).toBeCloseTo(200 / 0.2 + Math.log(1 + 4 * Math.exp(-200 / 0.2)), 6);
   });
+  it('a correct finger whose margin is exactly the penalty margin is left out, one just below it counts', () => {
+    const at = (margin: number): ConfidenceSample => ({
+      margins: [0, margin, 1, 2, 3],
+      chosen: 0,
+      correct: [false, true, false, false, false],
+    });
+    expect(negativeLogLikelihood([at(PENALTY_MARGIN)], 2)).toBe(0);
+    expect(negativeLogLikelihood([at(PENALTY_MARGIN - 1)], 2)).toBeGreaterThan(200);
+    expect(negativeLogLikelihood([at(10)], 2, { penaltyMargin: 10 })).toBe(0);
+  });
   it('a correct finger priced at a hard-rule penalty does not count, so such notes cannot drag the fit to the bound', () => {
     // The solver's penalties are 1000 per broken hard rule; an expert finger that breaks one has a
     // margin of about 1000 and a probability below e^-25 at every temperature in range.

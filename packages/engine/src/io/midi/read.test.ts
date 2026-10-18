@@ -162,4 +162,24 @@ describe('parseMidiFile', () => {
     const tempoCut = smf([[tempo(0, 90), on(0, 60), off(480, 60), end()]]).slice(0, 28);
     expect(() => parseMidiFile(tempoCut)).toThrow(/^not a MIDI file/);
   });
+  it('keeps the highest piano key, C8, and counts nothing outside the range', () => {
+    const data = parseMidiFile(smf([[on(0, 108), off(480, 108), end()]]));
+    expect(data.notes.map((n) => n.midi)).toEqual([108]);
+    expect(data.warnings.some((w) => w.includes('outside the piano range'))).toBe(false);
+  });
+  it('rejects a header whose ticks per beat is zero', () => {
+    const bytes = smf([[on(0, 60), off(480, 60), end()]]);
+    bytes[12] = 0; // the writer turns 0 into 128, so patch the header
+    bytes[13] = 0;
+    expect(() => parseMidiFile(bytes)).toThrow(/^not a MIDI file/);
+  });
+  it('sorts tempo changes by tick even when two tracks list them out of order', () => {
+    const data = parseMidiFile(
+      smf([
+        [tempo(960, 60), end()],
+        [tempo(0, 120), tempo(480, 90), on(0, 60), off(480, 60), end()],
+      ]),
+    );
+    expect(data.tempos.map((t) => t.tick)).toEqual([0, 480, 960]);
+  });
 });

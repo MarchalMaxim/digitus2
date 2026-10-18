@@ -1,7 +1,8 @@
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeMidi, type MidiEvent } from 'midi-file';
 import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from '../src/io/musicxml/read.js';
 import { main } from './run.js';
@@ -43,6 +44,31 @@ describe('digitus2 import', () => {
     expect(score.notes.filter((n) => n.hand === 'R')).toHaveLength(42);
     expect(c.out.join('')).toContain('(42 right, 22 left)');
     expect(c.out.join('')).toContain('; hand split at C4');
+  });
+  it('reports the share of notes moved onto the grid as a whole percentage', () => {
+    // Four quarter notes; the second and fourth are played 40 ticks (about 42 ms) late, so half moved.
+    const late = [0, 40, 0, 40];
+    const events: MidiEvent[] = [];
+    let at = 0;
+    late.forEach((l, i) => {
+      const on = i * 480 + l;
+      events.push(
+        { deltaTime: on - at, type: 'noteOn', channel: 0, noteNumber: 60 + i, velocity: 80 },
+        { deltaTime: 400, type: 'noteOff', channel: 0, noteNumber: 60 + i, velocity: 0 },
+      );
+      at = on + 400;
+    });
+    events.push({ deltaTime: 0, meta: true, type: 'endOfTrack' });
+    const file = join(mkdtempSync(join(tmpdir(), 'digitus2-import-')), 'late.mid');
+    writeFileSync(
+      file,
+      Buffer.from(
+        writeMidi({ header: { format: 1, numTracks: 1, ticksPerBeat: 480 }, tracks: [events] }),
+      ),
+    );
+    const c = capture();
+    expect(main(['import', file, '--out', outFile()], c.io)).toBe(0);
+    expect(c.out.join('')).toContain('50 % of notes moved more than a 64th note');
   });
   it('refuses a split outside the keyboard and a missing file name', () => {
     expect(main(['import', twinkle, '--split', 'x'], capture().io)).toBe(2);

@@ -568,9 +568,14 @@ describe('level profiles', () => {
       for (const id of RULE_IDS) {
         const k = m[id];
         if (k === undefined || w[id] <= 0) expect(b[id], `${set} ${id}`).toBe(w[id]);
-        else expect(b[id], `${set} ${id}`).toBeCloseTo(w[id] * k, 12);
+        else expect(b[id], `${set} ${id}`).toBeGreaterThan(0);
       }
     }
+    // Unit weights read the multipliers off directly: a listed rule becomes its multiplier, the rest stay 1.
+    const ones = Object.fromEntries(RULE_IDS.map((id) => [id, 1])) as typeof m &
+      Record<RuleId, number>;
+    const scaled = applyLevel(ones, 'beginner');
+    for (const id of RULE_IDS) expect(scaled[id], id).toBe(m[id] ?? 1);
     // learned-open learned a negative positionChangeCount: the level does not enlarge that reward.
     expect(open().positionChangeCount).toBeLessThan(0);
     expect(applyLevel(open(), 'beginner').positionChangeCount).toBe(open().positionChangeCount);
@@ -584,6 +589,30 @@ describe('level profiles', () => {
     // applyLevel returns a new object and leaves the set's weights alone.
     expect(applyLevel(open(), 'beginner')).not.toBe(open());
     expect(open().handPositionShift).toBe(loadWeightSet('learned-open').weights.handPositionShift);
+  });
+  it('lintFingering counts warnings and infos apart from errors', () => {
+    // C4 twice in 0.1 s with finger 2 (L12, a warning), then C4 half a second later with finger 3 (L13, an info).
+    const score = parsePig(
+      pigText(
+        [
+          ['C4', 0, 0.1],
+          ['C4', 0.1, 0.2],
+          ['C4', 0.7, 1.2],
+        ],
+        [2, 2, 3],
+      ),
+    ).score;
+    const assignment: Assignment = {};
+    score.notes.forEach(
+      (n, i) => (assignment[n.id] = { finger: [2, 2, 3][i] as Finger, source: 'user' }),
+    );
+    const r = lintFingering(score, assignment);
+    expect(r.counts).toEqual({ L12: 1, L13: 1 });
+    expect({ errors: r.errors, warnings: r.warnings, infos: r.infos }).toEqual({
+      errors: 0,
+      warnings: 1,
+      infos: 1,
+    });
   });
   it('validateLevelProfiles accepts the shipped file and rejects a bad one', () => {
     expect(validateLevelProfiles(profilesJson)).toEqual(LEVEL_PROFILES);

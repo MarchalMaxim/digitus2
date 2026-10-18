@@ -184,15 +184,62 @@ function setPitch(score: ScanScore, note: ScanNote, step: Step, alter: number, o
   if (accidental) insert(el, make(doc, 'accidental', accidental));
 }
 
-function applyPitch(score: ScanScore, c: Extract<Correction, { kind: 'pitch' }>) {
+function applyPitch(doc: XMLDocument, score: ScanScore, c: Extract<Correction, { kind: 'pitch' }>) {
   const note = find(score, c.note);
-  if (note.rest || note.midi === undefined) refuse((t) => t.scan.edit.refused.rest);
+  if (note.grace || (note.rest && note.chord)) refuse((t) => t.scan.edit.refused.rest);
+  if (note.rest) {
+    // A note the recognition read as a rest: the rest becomes that note, same length and place.
+    const rest = kid(note.element, 'rest')!;
+    rest.replaceWith(make(doc, 'pitch'));
+    for (const child of kids(note.element, 'notehead')) child.remove();
+    if (!kid(note.element, 'type')) refuse((t) => t.scan.edit.refused.unwritable);
+  } else if (note.midi === undefined) refuse((t) => t.scan.edit.refused.rest);
   if (!STEPS.includes(c.step) || !Number.isInteger(c.octave) || c.octave < 0 || c.octave > 9)
     refuse((t) => t.scan.edit.refused.missing);
   if (![-2, -1, 0, 1, 2].includes(c.alter)) refuse((t) => t.scan.edit.refused.missing);
   const midi = midiOf(c.step, c.alter, c.octave);
   if (midi < 21 || midi > 108) refuse((t) => t.scan.edit.refused.range);
-  for (const linked of tieChain(score, note)) setPitch(score, linked, c.step, c.alter, c.octave);
+  const chain = note.rest ? [note] : tieChain(score, note);
+  const before = { step: note.step, octave: note.octave };
+  for (const linked of chain) setPitch(score, linked, c.step, c.alter, c.octave);
+  redrawAccidentals(doc, note, [before, { step: c.step, octave: c.octave }]);
+}
+
+/**
+ * After a pitch change, the later notes of the same letter and octave in that bar and staff are
+ * drawn with the accidental they now need: a sharp added or removed carries through the bar.
+ * Their pitches (what sounds) are untouched.
+ */
+function redrawAccidentals(
+  doc: XMLDocument,
+  edited: ScanNote,
+  letters: { step?: Step | undefined; octave: number }[],
+) {
+  const score = readScanScore(doc);
+  const later = score.notes
+    .filter(
+      (n) =>
+        n.part === edited.part &&
+        n.measure === edited.measure &&
+        n.staff === edited.staff &&
+        n.onset > edited.onset &&
+        !n.rest &&
+        !n.tieStop &&
+        n.step !== undefined &&
+        letters.some((l) => l.step === n.step && l.octave === n.octave),
+    )
+    .sort((a, b) => a.onset - b.onset);
+  for (const n of later) {
+    kid(n.element, 'accidental')?.remove();
+    const needed = neededAccidental(
+      readScanScore(doc),
+      find(readScanScore(doc), n.ordinal),
+      n.step!,
+      n.alter,
+      n.octave,
+    );
+    if (needed) insert(n.element, make(doc, 'accidental', needed));
+  }
 }
 
 /** Bar-local onsets of every note outside `moved`, keyed by element. */
@@ -238,6 +285,8 @@ function applyDuration(
 ) {
   let note = find(score, c.note);
   if (note.grace) refuse((t) => t.scan.edit.refused.grace);
+  // A tuplet's length is set by its bracket as much as its note value: not changed here.
+  if (kid(note.element, 'time-modification')) refuse((t) => t.scan.edit.refused.tuplet);
   if (!NOTE_TYPES.includes(c.type) || ![0, 1].includes(c.dots))
     refuse((t) => t.scan.edit.refused.missing);
   const quarters = QUARTERS[c.type] * (c.dots ? 1.5 : 1);
@@ -260,7 +309,9 @@ function applyDuration(
     for (const member of chord) {
       const el = member.element;
       setText(el, 'duration', String(local));
-      if (!kid(el, 'rest') || kid(el, 'type')) setText(el, 'type', c.type);
+      // A whole-bar rest given a length becomes an ordinary rest of that length.
+      kid(el, 'rest')?.removeAttribute('measure');
+      setText(el, 'type', c.type);
       for (const dot of kids(el, 'dot')) dot.remove();
       if (c.dots) insert(el, make(doc, 'dot'));
     }
@@ -389,6 +440,11 @@ function applyRemove(
   c: Extract<Correction, { kind: 'remove' }>,
 ) {
   const note = find(score, c.note);
+  if (note.grace) {
+    // A grace note holds no time: it simply goes.
+    note.element.remove();
+    return;
+  }
   if (note.rest) {
     // A stray rest goes, and the rest of its voice moves up into its place.
     if (note.grace || note.chord) refuse((t) => t.scan.edit.refused.missing);
@@ -410,8 +466,16 @@ function applyRemove(
     note.element.remove();
     return;
   }
-  // A lone note becomes a rest of the same length, so nothing after it moves.
   const el = note.element;
+  // In a hand already too long for its bar (a duplicated note), the note goes and the rest of
+  // its voice moves up; otherwise it becomes a rest of the same length, so nothing moves.
+  const timing = barTiming(score, note.part, note.measure);
+  const beats = timing?.staves.find((s) => s.staff === note.staff)?.beats;
+  if (timing?.expected !== undefined && beats !== undefined && beats > timing.expected + 1e-9) {
+    const length = Number(kid(el, 'duration')?.textContent) || 0;
+    retime(doc, score, el, -length, () => el.remove());
+    return;
+  }
   kid(el, 'pitch')!.replaceWith(make(doc, 'rest'));
   for (const tag of ['accidental', 'stem', 'notehead', 'beam', 'notations'])
     for (const child of kids(el, tag)) child.remove();
@@ -421,7 +485,7 @@ function apply(doc: XMLDocument, correction: Correction) {
   const score = readScanScore(doc);
   switch (correction.kind) {
     case 'pitch':
-      return applyPitch(score, correction);
+      return applyPitch(doc, score, correction);
     case 'duration':
       return applyDuration(doc, score, correction);
     case 'tie':

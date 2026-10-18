@@ -60,6 +60,7 @@ const PIPELINE = [
   'research/omr/prototypes/local-worker/audiveris.py',
   'research/omr/prototypes/local-worker/recognition_errors.py',
   'research/omr/prototypes/local-worker/normalize_export.py',
+  'research/omr/acceptance/recognize.py',
   'research/omr/prototypes/homr-photo/source-manifests.json',
   'research/omr/prototypes/homr-photo/requirements-cpu.txt',
   'research/omr/prototypes/homr-photo/upstream.patch',
@@ -114,7 +115,7 @@ export function aggregate(rows) {
 
 /** Floors as benchmarks/floor.json sets them: an F1 in percent minus 0.5, rounded down to 0.1. */
 export function floorsFrom(summary) {
-  const pct = (x) => Math.floor((x * 100 - 0.5) * 10) / 10;
+  const pct = (x) => Math.max(0, Math.floor((x * 100 - 0.5) * 10) / 10);
   return Object.fromEntries(
     Object.entries(summary).map(([key, s]) => [
       key,
@@ -141,6 +142,10 @@ export function breaches(summary, floors) {
       out.push(`${key}: not measured`);
       continue;
     }
+    // A floor without one of its keys is a broken floor file, never a silent pass.
+    const keys = ['importedMin', 'fullNoteF1Min', 'pitchF1Min', 'beamF1Min', 'tiesMissedMax', 'tiesExtraMax', 'duplicatesMax', 'wrongStaffMax'];
+    const absent = keys.filter((k) => typeof f[k] !== 'number');
+    if (absent.length) out.push(`${key}: floor.json lacks ${absent.join(', ')}`);
     const pct = (x) => Math.round(x * 10000) / 100;
     if (s.imported < f.importedMin) out.push(`${key}: ${s.imported} pages import, floor ${f.importedMin}`);
     for (const [name, min] of [['fullNoteF1', f.fullNoteF1Min], ['pitchF1', f.pitchF1Min], ['beamF1', f.beamF1Min]])

@@ -3,7 +3,7 @@
  * selected or a correction exists: the review stays a comparison first, and editing appears only
  * where a reader asks for it (progressive disclosure).
  */
-import { useLayoutEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useT } from '../i18n/i18n.js';
 import type { Messages } from '../i18n/messages.js';
 import {
@@ -59,14 +59,21 @@ export function tryCorrection(raw: string, corrections: readonly Correction[], n
 }
 
 const hand = (t: Messages, note: Pick<ScanNote, 'staff' | 'staves' | 'part'>) =>
-  note.staves === 2 ? (note.staff === 1 ? t.scan.edit.rightHand : t.scan.edit.leftHand) : t.scan.edit.staff(note.staff);
-const where = (t: Messages, note: ScanNote) => `${t.scan.edit.bar(note.measureNumber)}, ${hand(t, note)}`;
+  note.staves === 2
+    ? note.staff === 1
+      ? t.scan.edit.rightHand
+      : t.scan.edit.leftHand
+    : t.scan.edit.staff(note.staff);
+const where = (t: Messages, note: ScanNote) =>
+  `${t.scan.edit.bar(note.measureNumber)}, ${hand(t, note)}`;
 const pitchOf = (t: Messages, note: Pick<ScanNote, 'step' | 'alter' | 'octave'>) =>
   note.step ? t.scan.edit.pitch(note.step, note.alter, note.octave) : '';
 function lengthOf(t: Messages, note: ScanNote) {
   const name = note.type ? (t.scan.edit.lengths[note.type] ?? note.type) : '';
   if (!name) return '';
-  return note.rest ? t.scan.edit.restLength(name, note.dots > 0) : t.scan.edit.noteLength(name, note.dots > 0);
+  return note.rest
+    ? t.scan.edit.restLength(name, note.dots > 0)
+    : t.scan.edit.noteLength(name, note.dots > 0);
 }
 
 export function describeNote(t: Messages, note: ScanNote): string {
@@ -84,13 +91,44 @@ export function timingText(t: Messages, score: ScanScore, part: number, measure:
   if (!timing || !bar) return '';
   const staves = timing.staves.length;
   const hands = timing.staves.map((s) =>
-    t.scan.edit.handBeats(hand(t, { staff: s.staff, staves, part }), Math.round(s.beats * 1000) / 1000),
+    t.scan.edit.handBeats(
+      hand(t, { staff: s.staff, staves, part }),
+      Math.round(s.beats * 1000) / 1000,
+    ),
   );
   return t.scan.edit.timing(
     t.scan.edit.bar(bar.number),
     hands,
     bar.meter ? `${bar.meter.beats}/${bar.meter.beatType}` : undefined,
   );
+}
+
+/** True when the bar's hands disagree on its length or one runs past the time signature. */
+export function timingIssue(score: ScanScore, part: number, measure: number): boolean {
+  const timing = barTiming(score, part, measure);
+  if (!timing) return false;
+  const used = timing.staves.filter((s) => s.beats > 0);
+  return (
+    used.some((s) => Math.abs(s.beats - used[0]!.beats) > 1e-9) ||
+    (timing.expected !== undefined && used.some((s) => s.beats > timing.expected! + 1e-9))
+  );
+}
+
+/**
+ * The pitch a rest becomes when the reader says it is a note: the nearest earlier note on its
+ * staff, else the next one, else the middle line (B4 in treble, D3 in bass).
+ */
+export function restPitch(score: ScanScore, rest: ScanNote) {
+  const order = readingOrder(score).filter(
+    (n) => n.part === rest.part && n.staff === rest.staff && n.step !== undefined && !n.rest,
+  );
+  const before = order.filter((n) => n.onset <= rest.onset).at(-1);
+  const after = order.find((n) => n.onset > rest.onset);
+  const near = before ?? after;
+  if (near) return { step: near.step!, alter: near.alter, octave: near.octave };
+  return rest.staff === 1
+    ? { step: 'B' as Step, alter: 0, octave: 4 }
+    : { step: 'D' as Step, alter: 0, octave: 3 };
 }
 
 /** A correction as listed for review, described from the raw recognition it applies to. */
@@ -101,7 +139,11 @@ export function describeCorrection(t: Messages, raw: ScanScore, c: Correction): 
   const pitch = pitchOf(t, note);
   switch (c.kind) {
     case 'pitch':
-      return t.scan.edit.changed.pitch(at, pitch, t.scan.edit.pitch(c.step, c.alter, c.octave));
+      return t.scan.edit.changed.pitch(
+        at,
+        pitch || lengthOf(t, note),
+        t.scan.edit.pitch(c.step, c.alter, c.octave),
+      );
     case 'duration':
       return t.scan.edit.changed.duration(
         at,
@@ -141,7 +183,8 @@ export function describeProblem(t: Messages, score: ScanScore, problem: Problem)
 /** The note a problem points at: its note, or the first note of its bar. */
 export function problemNote(score: ScanScore, problem: Problem): number | undefined {
   if (problem.kind !== 'bar-timing') return problem.note;
-  return readingOrder(score).find((n) => n.part === problem.part && n.measure === problem.bar)?.ordinal;
+  return readingOrder(score).find((n) => n.part === problem.part && n.measure === problem.bar)
+    ?.ordinal;
 }
 
 /** A diatonic step from `note`, taking the key signature's alteration for the new letter. */
@@ -154,7 +197,15 @@ export function stepPitch(score: ScanScore, note: ScanNote, direction: 1 | -1) {
   const fifths = bar?.fifths.get(note.staff) ?? 0;
   const order: Step[] = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
   const alter =
-    fifths > 0 ? (order.slice(0, fifths).includes(step) ? 1 : 0) : fifths < 0 ? ([...order].reverse().slice(0, -fifths).includes(step) ? -1 : 0) : 0;
+    fifths > 0
+      ? order.slice(0, fifths).includes(step)
+        ? 1
+        : 0
+      : fifths < 0
+        ? [...order].reverse().slice(0, -fifths).includes(step)
+          ? -1
+          : 0
+        : 0;
   return { step, alter, octave };
 }
 
@@ -176,6 +227,15 @@ export function NoteEditor({
   const t = useT();
   const note = score.notes.find((n) => n.ordinal === ordinal);
   const order = useMemo(() => readingOrder(score), [score]);
+  const title = useRef<HTMLParagraphElement>(null);
+  const kind = note ? (note.rest ? 'rest' : 'note') : 'none';
+  const shown = useRef(kind);
+  useEffect(() => {
+    // When a note becomes a rest (or back) its buttons change: keep the focus in the panel.
+    // (Only when the focus fell to the page; a reader on the sheet keeps it there.)
+    if (shown.current !== kind && document.activeElement === document.body) title.current?.focus();
+    shown.current = kind;
+  }, [kind]);
   if (!note) return null;
   const position = order.indexOf(note);
   const chord = chordOf(score, note);
@@ -189,7 +249,9 @@ export function NoteEditor({
   return (
     <section className="note-editor stack" aria-label={t.scan.edit.panelLabel}>
       <div className="note-editor-head">
-        <p className="note-editor-title">{describeNote(t, note)}</p>
+        <p className="note-editor-title" ref={title} tabIndex={-1}>
+          {describeNote(t, note)}
+        </p>
         <button
           className="note-editor-symbol"
           aria-label={t.scan.edit.previous}
@@ -225,7 +287,13 @@ export function NoteEditor({
               aria-pressed={note.alter === alter}
               onClick={() => {
                 if (note.alter !== alter)
-                  onCorrect({ kind: 'pitch', note: ordinal, step: note.step!, alter, octave: note.octave });
+                  onCorrect({
+                    kind: 'pitch',
+                    note: ordinal,
+                    step: note.step!,
+                    alter,
+                    octave: note.octave,
+                  });
               }}
             >
               {['♭', '♮', '♯'][alter + 1]}
@@ -275,49 +343,85 @@ export function NoteEditor({
           {tiedFrom && (
             <button
               aria-pressed
-              onClick={() => onCorrect({ kind: 'tie', note: ordinal, tied: false, side: 'previous' })}
+              onClick={() =>
+                onCorrect({ kind: 'tie', note: ordinal, tied: false, side: 'previous' })
+              }
             >
               {t.scan.edit.tiePrevious}
             </button>
           )}
           {note.staves === 2 && (
-            <button onClick={() => onCorrect({ kind: 'hand', note: ordinal, staff: note.staff === 1 ? 2 : 1 })}>
+            <button
+              onClick={() =>
+                onCorrect({ kind: 'hand', note: ordinal, staff: note.staff === 1 ? 2 : 1 })
+              }
+            >
               {note.staff === 1 ? t.scan.edit.toLeftHand : t.scan.edit.toRightHand}
             </button>
           )}
-          {linked.length === 1 && (
-            <button onClick={() => onCorrect({ kind: 'remove', note: ordinal })}>
-              {t.scan.edit.remove}
-            </button>
-          )}
-        </div>
-      )}
-      {note.rest && !note.chord && (
-        <div className="note-editor-row">
           <button onClick={() => onCorrect({ kind: 'remove', note: ordinal })}>
             {t.scan.edit.remove}
           </button>
         </div>
       )}
-      <p className="small" role="status">
-        {status}
-      </p>
+      {note.rest && !note.chord && (
+        <div className="note-editor-row">
+          <button
+            onClick={() => onCorrect({ kind: 'pitch', note: ordinal, ...restPitch(score, note) })}
+          >
+            {t.scan.edit.makeNote}
+          </button>
+          <button onClick={() => onCorrect({ kind: 'remove', note: ordinal })}>
+            {t.scan.edit.remove}
+          </button>
+        </div>
+      )}
+      {/* Read out through the review's live region; shown here beside the controls. */}
+      <p className="small">{status}</p>
     </section>
   );
 }
 
-/** Marks the selected note in the rendered sheet; it carries the screen's one red while selected. */
+/**
+ * Marks the selected note in the rendered sheet: it carries the screen's one red while selected,
+ * and an ink box around it says the same without colour (high contrast, colour blindness).
+ */
 export function useSelectedMark(host: HTMLElement | null, ordinal: number | null, pages: string[]) {
   useLayoutEffect(() => {
     if (!host || ordinal === null) return;
     const element = host.querySelector(`[id="s${ordinal}"]`);
     element?.classList.add('is-red');
-    return () => element?.classList.remove('is-red');
+    const frame = host.parentElement;
+    let box: HTMLDivElement | undefined;
+    const place = () => {
+      if (!element || !frame) return;
+      const outer = frame.getBoundingClientRect();
+      const inner = element.getBoundingClientRect();
+      box ??= frame.appendChild(document.createElement('div'));
+      box.className = 'scan-selection-box';
+      box.setAttribute('aria-hidden', 'true');
+      Object.assign(box.style, {
+        left: `${inner.left - outer.left - 4}px`,
+        top: `${inner.top - outer.top - 4}px`,
+        width: `${inner.width + 8}px`,
+        height: `${inner.height + 8}px`,
+      });
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => {
+      element?.classList.remove('is-red');
+      window.removeEventListener('resize', place);
+      box?.remove();
+    };
   }, [host, ordinal, pages]);
 }
 
 /** The note under a click or tap, or the nearest one within reach of a fingertip. */
-export function noteAt(host: HTMLElement, event: { target: EventTarget | null; clientX: number; clientY: number }) {
+export function noteAt(
+  host: HTMLElement,
+  event: { target: EventTarget | null; clientX: number; clientY: number },
+) {
   const hit = (event.target as Element | null)?.closest?.('g.note, g.rest');
   const id = (el: Element | null | undefined) => {
     const match = /^s(\d+)$/.exec(el?.id ?? '');

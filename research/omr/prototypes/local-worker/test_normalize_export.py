@@ -134,3 +134,33 @@ def test_normalize_reports_what_it_changed():
     assert audit == {"emptyMeasuresMerged": 1, "slursReadAsTies": 1}
     assert [w["code"] for w in warnings] == ["recognition-export-normalized"]
     assert "1 empty measure" in warnings[0]["message"] and "1 slur" in warnings[0]["message"]
+
+
+def test_a_chain_of_slurred_continuations_becomes_a_tie_chain():
+    # E5 (bar 1) - E5 (bar 2, slur stop and start) - a third E5 where the second ends.
+    data = score(
+        HEAD + n("C", 5, 4, 1, kind="half") + n("E", 5, 2, 2, "start"),
+        n("E", 5, 2, 1, "stop").replace("</notations>", '<slur type="start" number="1"/></notations>') + n("E", 5, 2, 1, "stop") + n("D", 5, 2, 1),
+    )
+    fixed, count = ties_from_slurs(data)
+    assert count == 2
+    marks = ties(fixed)
+    assert marks[1][1] == ["start"] and marks[2][1] == ["stop", "start"] and marks[3][1] == ["stop"]
+
+
+def test_slurs_with_different_numbers_are_not_paired():
+    data = score(
+        HEAD + n("C", 5, 4, 1, kind="half") + n("E", 5, 2, 2, "start").replace('number="1"', 'number="2"'),
+        n("E", 5, 2, 1, "stop") + n("D", 5, 4, 1, kind="half"),
+    )
+    assert ties_from_slurs(data) == (data, 0)
+
+
+def test_two_empty_measures_in_a_row_are_left_alone():
+    data = score(
+        HEAD + NOTE,
+        '<barline location="right"><ending type="stop" number="1"/></barline>',
+        '<barline location="right"><repeat direction="backward"/></barline>',
+        NOTE,
+    )
+    assert merge_empty_measures(data) == (data, 0)

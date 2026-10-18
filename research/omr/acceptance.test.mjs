@@ -50,6 +50,12 @@ test('floors follow the benchmark rule, and a worse run is a breach while an equ
     'homr:clean: duplicates 1 above ceiling 0',
   ]);
   assert.deepEqual(breaches({}, floors), ['homr:clean: not measured']);
+  const { tiesExtraMax: _dropped, ...partial } = floors['homr:clean'];
+  assert.deepEqual(breaches(summary, { 'homr:clean': partial }), [
+    'homr:clean: floor.json lacks tiesExtraMax',
+  ]);
+  // A route that measures zero never gets a negative floor.
+  assert.equal(floorsFrom(aggregate([row('homr', 'clean', 'parsed', 0)]))['homr:clean'].fullNoteF1Min, 0);
 });
 
 test('without the recognisers the gate reports why, for verify to skip it', () => {

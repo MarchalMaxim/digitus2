@@ -10,9 +10,8 @@ export const scan: Messages['scan'] = {
     pageImages: (n: number) =>
       plural('nl', n, { one: '# pagina-afbeelding', other: '# pagina-afbeeldingen' }),
     advice:
-      'Originele PDF’s en vlakke scans met hoge resolutie werken het best. Foto’s van boeken zijn experimenteel en kunnen mislukken, ook bij goed licht. Het resultaat opent naast het origineel, zodat je het kunt controleren.',
-    workerNeeded:
-      'Voor deze experimentele optie heb je de pc-worker op deze computer nodig. De localhost van een telefoon kan je pc niet bereiken.',
+      'Originele pdf’s en vlakke scans in hoge resolutie werken het best. Foto’s van boeken kunnen mislukken, ook bij goed licht. Het resultaat opent naast het origineel, zodat je het kunt controleren.',
+    workerNeeded: 'Scannen vraagt het pc-programma, draaiend op deze computer.',
     connect: 'Verbinden met deze pc',
     connecting: 'Verbinden…',
     cancelScan: 'Scan annuleren',
@@ -54,6 +53,8 @@ export const scan: Messages['scan'] = {
     problem: (error: string) =>
       `${error} Corrigeer de noten hier, download het ruwe bestand voor een notatieprogramma of probeer een andere afbeelding.`,
     detailsSummary: 'Details van de herkenning',
+    /** The disclosure holding the MusicXML downloads. */
+    filesSummary: 'Bestanden voor een notatieprogramma',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Technische reden: ${reason}`,
     retained:
@@ -61,6 +62,9 @@ export const scan: Messages['scan'] = {
     beamGrouping: 'De balkgroepering is afgeleid en kan afwijken van het origineel.',
     graphicSpanWarning:
       'Legatobogen en andere notatiebogen blijven binnen elke gescande pagina. Vergelijk de voortzettingen aan de paginarand; ontbrekende eindpunten zijn niet hersteld.',
+    /** The worker found a piano page read as one staff: shown above the comparison. */
+    grandStaffWarning:
+      'De notenbalken zijn niet tot een pianosysteem gekoppeld, dus beide handen worden als één gelezen. De vingerzetting zou de handen verkeerd hebben: probeer een vlakkere, gelijkmatig belichte foto of de originele pdf.',
     unknownWarning:
       'De herkenner meldde een onbekende waarschuwing. Controleer het origineel goed.',
     downloadPagesSummary: 'Bestanden per pagina downloaden',
@@ -72,7 +76,7 @@ export const scan: Messages['scan'] = {
   },
   edit: {
     hint: 'Selecteer een noot om die te corrigeren.',
-    keys: 'Links en Rechts kiezen de vorige of volgende noot, Omhoog en Omlaag veranderen de toonhoogte, Escape sluit de editor.',
+    keys: 'Enter kiest de eerste noot. Links en Rechts kiezen de vorige of volgende noot, Omhoog en Omlaag veranderen de toonhoogte (met Shift een octaaf), Escape sluit de editor.',
     pitch: (step: string, alter: number, octave: number) =>
       `${step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Maat ${bar}`,
@@ -117,6 +121,8 @@ export const scan: Messages['scan'] = {
     toLeftHand: 'Naar de linkerhand',
     toRightHand: 'Naar de rechterhand',
     remove: 'Noot verwijderen',
+    /** A rest the recognition put where the page has a note. */
+    makeNote: 'Maak er een noot van',
     previous: 'Vorige noot',
     next: 'Volgende noot',
     done: 'Klaar',
@@ -128,6 +134,8 @@ export const scan: Messages['scan'] = {
     undo: 'Ongedaan maken',
     reset: 'Terug naar de herkenning',
     resetDone: 'Alle correcties zijn weggehaald. Ongedaan maken zet ze terug.',
+    /** Read out after Undo; `what` is the correction taken back, or empty. */
+    undone: (what: string) => (what ? `Ongedaan gemaakt: ${what}.` : 'Ongedaan gemaakt.'),
     listSummary: 'Correcties bekijken',
     changed: {
       pitch: (where: string, from: string, to: string) => `${where}: ${from} → ${to}`,
@@ -145,9 +153,9 @@ export const scan: Messages['scan'] = {
       plural('nl', n, { one: '# plek om te controleren', other: '# plekken om te controleren' }),
     problems: {
       tieGap: (where: string, pitch: string, gap: string) =>
-        `${where}: de overbinding op ${pitch} bereikt de volgende ${pitch} ${gap} te laat.`,
+        `${where}: de overgebonden ${pitch} eindigt ${gap} voordat de volgende ${pitch} begint. Controleer de duren.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
-        `${where}: de overbinding op ${pitch} bereikt de volgende ${pitch} ${gap} te vroeg.`,
+        `${where}: de overgebonden ${pitch} loopt ${gap} door in de volgende ${pitch}. Controleer de duren.`,
       tieUnmatched: (where: string, pitch: string) =>
         `${where}: een overbinding op ${pitch} heeft geen bijpassende noot.`,
       barTiming: (timing: string) => `De handen lopen niet gelijk. ${timing}`,
@@ -160,6 +168,8 @@ export const scan: Messages['scan'] = {
       rest: 'Een rust heeft geen toonhoogte om te veranderen.',
       range: 'Die toonhoogte ligt buiten het bereik van de piano.',
       grace: 'Een voorslag duurt geen tijd, dus de duur kan hier niet veranderen.',
+      tuplet:
+        'De duur van een noot in een triool of een andere antimetrische groep kan hier niet veranderen. Gebruik een notatieprogramma.',
       unwritable: 'Deze duur kan in deze partituur niet geschreven worden.',
       otherHand:
         'Deze wijziging zou noten in de andere hand of stem verplaatsen en is niet uitgevoerd. Controleer de maat in een notatieprogramma.',
@@ -177,7 +187,7 @@ export const scan: Messages['scan'] = {
     takePhoto: 'Foto maken',
     takeAnother: 'Nog een foto maken',
     explain:
-      'De herkenning draait op een pc, en een telefoon kan die niet bereiken. Stuur deze foto’s naar de pc waarop het programma draait en open ze daar.',
+      'De herkenning draait op een pc, en een telefoon kan die niet bereiken. Stuur deze foto’s naar je pc en open ze daar om te scannen.',
     share: 'Foto’s naar je pc sturen',
     save: 'Foto’s opslaan',
     shareTitle: 'Foto’s van een partituur',
@@ -188,8 +198,6 @@ export const scan: Messages['scan'] = {
   errors: {
     notCombinedSaved:
       'De pagina’s zijn herkend, maar de notatie kon niet worden samengevoegd. De bestanden per pagina staan hieronder.',
-    notCombined: (reason: string) =>
-      `De pagina’s zijn herkend, maar de notatie kon niet worden samengevoegd. ${reason}`,
     somePagesFailed:
       'Sommige pagina’s moeten opnieuw worden gescand. Herkende pagina’s blijven bewaard.',
     recognitionFailed: 'Herkenning mislukt.',
@@ -275,7 +283,8 @@ export const scan: Messages['scan'] = {
   },
   client: {
     busy: 'De pc is al aan het scannen. Probeer het zo meteen opnieuw.',
-    workerStatus: (status: number) => `De pc-worker gaf status ${status}.`,
+    workerStatus: (status: number) =>
+      `Het pc-programma kon niet antwoorden (fout ${status}). Start het opnieuw en probeer het nog eens.`,
     invalidJob: 'Ongeldige scantaak.',
     updateWorker: 'Werk de pc-worker bij om door te gaan.',
     noJob: 'De worker gaf geen scantaak terug.',

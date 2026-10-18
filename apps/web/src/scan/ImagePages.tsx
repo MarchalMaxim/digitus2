@@ -200,13 +200,16 @@ export function ImagePages({
                 </button>
                 <span className="scan-page-caption">
                   {(page.originalFile ?? page.file).name}
-                  <small>
-                    {page.error
-                      ? t.scan.pages.needsRetry
-                      : page.xml
-                        ? t.scan.pages.recognized
-                        : t.scan.pages.ready}
-                  </small>
+                  {/* A phone cannot scan, so it never says a page is ready to. */}
+                  {!camera && (
+                    <small>
+                      {page.error
+                        ? t.scan.pages.needsRetry
+                        : page.xml
+                          ? t.scan.pages.recognized
+                          : t.scan.pages.ready}
+                    </small>
+                  )}
                 </span>
               </li>
             ))}

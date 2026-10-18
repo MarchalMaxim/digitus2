@@ -10,9 +10,8 @@ export const scan: Messages['scan'] = {
     pageImages: (n: number) =>
       plural('es', n, { one: '# imagen de página', other: '# imágenes de página' }),
     advice:
-      'Los PDF originales y los escaneos planos de alta resolución funcionan mejor. Las fotos de libros son experimentales y pueden fallar, incluso con buena luz. El resultado se abre junto al original para que lo revises.',
-    workerNeeded:
-      'Esta opción experimental necesita el programa de PC en este ordenador. El localhost de un teléfono no puede llegar a tu PC.',
+      'Los PDF originales y los escaneos planos de alta resolución funcionan mejor. Las fotos de libros pueden fallar, incluso bien iluminadas. El resultado se abre junto al original para revisarlo.',
+    workerNeeded: 'Para escanear hace falta el programa del PC en marcha en este ordenador.',
     connect: 'Conectar con este PC',
     connecting: 'Conectando…',
     cancelScan: 'Cancelar escaneo',
@@ -54,6 +53,8 @@ export const scan: Messages['scan'] = {
     problem: (error: string) =>
       `${error} Corrige las notas aquí, descarga el archivo sin procesar para un editor de partituras o prueba con otra imagen.`,
     detailsSummary: 'Detalles del reconocimiento',
+    /** The disclosure holding the MusicXML downloads. */
+    filesSummary: 'Archivos para un editor de partituras',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Motivo técnico: ${reason}`,
     retained:
@@ -61,6 +62,9 @@ export const scan: Messages['scan'] = {
     beamGrouping: 'La agrupación de las barras se deduce y puede diferir del original.',
     graphicSpanWarning:
       'Las ligaduras y otros signos de notación se mantienen dentro de cada página escaneada. Compara las continuaciones en los bordes de página; los extremos que faltan no se han reparado.',
+    /** The worker found a piano page read as one staff: shown above the comparison. */
+    grandStaffWarning:
+      'Los pentagramas no se emparejaron en un sistema de piano, así que las dos manos se leen como una. La digitación saldría con las manos mal: prueba una foto más plana y bien iluminada o el PDF original.',
     unknownWarning: 'El reconocedor indicó una advertencia desconocida. Revisa bien el original.',
     downloadPagesSummary: 'Descargar los archivos de cada página',
     downloadPage: (page: number) => `Descargar el MusicXML de la página ${page}`,
@@ -71,7 +75,7 @@ export const scan: Messages['scan'] = {
   },
   edit: {
     hint: 'Selecciona una nota para corregirla.',
-    keys: 'Izquierda y Derecha seleccionan la nota anterior o siguiente, Arriba y Abajo cambian su altura, Escape cierra el editor.',
+    keys: 'Intro selecciona la primera nota. Izquierda y Derecha seleccionan la nota anterior o siguiente, Arriba y Abajo cambian su altura (con Mayús, una octava), Escape cierra el editor.',
     pitch: (step: string, alter: number, octave: number) =>
       `${({ C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Compás ${bar}`,
@@ -115,6 +119,8 @@ export const scan: Messages['scan'] = {
     toLeftHand: 'Pasar a la mano izquierda',
     toRightHand: 'Pasar a la mano derecha',
     remove: 'Quitar la nota',
+    /** A rest the recognition put where the page has a note. */
+    makeNote: 'Convertir en nota',
     previous: 'Nota anterior',
     next: 'Nota siguiente',
     done: 'Listo',
@@ -126,6 +132,8 @@ export const scan: Messages['scan'] = {
     undo: 'Deshacer',
     reset: 'Volver al reconocimiento',
     resetDone: 'Se quitaron todas las correcciones. Deshacer las recupera.',
+    /** Read out after Undo; `what` is the correction taken back, or empty. */
+    undone: (what: string) => (what ? `Deshecho: ${what}.` : 'Deshecho.'),
     listSummary: 'Ver las correcciones',
     changed: {
       pitch: (where: string, from: string, to: string) => `${where}: ${from} → ${to}`,
@@ -143,9 +151,9 @@ export const scan: Messages['scan'] = {
       plural('es', n, { one: '# punto que revisar', other: '# puntos que revisar' }),
     problems: {
       tieGap: (where: string, pitch: string, gap: string) =>
-        `${where}: la ligadura de ${pitch} llega al siguiente ${pitch} ${gap} tarde.`,
+        `${where}: el ${pitch} ligado termina ${gap} antes de que empiece el siguiente ${pitch}. Revisa las duraciones.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
-        `${where}: la ligadura de ${pitch} llega al siguiente ${pitch} ${gap} antes.`,
+        `${where}: el ${pitch} ligado se mete ${gap} en el siguiente ${pitch}. Revisa las duraciones.`,
       tieUnmatched: (where: string, pitch: string) =>
         `${where}: una ligadura en ${pitch} no tiene nota que le corresponda.`,
       barTiming: (timing: string) => `Las manos no coinciden. ${timing}`,
@@ -158,6 +166,8 @@ export const scan: Messages['scan'] = {
       rest: 'Un silencio no tiene altura que cambiar.',
       range: 'Esa altura está fuera del registro del piano.',
       grace: 'Una nota de adorno no ocupa tiempo, así que aquí no se puede cambiar su duración.',
+      tuplet:
+        'La duración de una nota de un tresillo u otro grupo irregular no se puede cambiar aquí. Usa un editor de partituras.',
       unwritable: 'Esta duración no se puede escribir en esta partitura.',
       otherHand:
         'Este cambio movería notas de la otra mano o voz, así que no se hizo. Revisa el compás en un editor de partituras.',
@@ -175,7 +185,7 @@ export const scan: Messages['scan'] = {
     takePhoto: 'Hacer una foto',
     takeAnother: 'Hacer otra foto',
     explain:
-      'El reconocimiento se hace en un PC, y un teléfono no puede conectarse a él. Envía estas fotos al PC donde funciona el programa y ábrelas allí.',
+      'El reconocimiento se hace en un PC, y un teléfono no puede conectarse a él. Envía estas fotos a tu PC y ábrelas allí para escanearlas.',
     share: 'Enviar las fotos a tu PC',
     save: 'Guardar las fotos',
     shareTitle: 'Fotos de partitura',
@@ -186,8 +196,6 @@ export const scan: Messages['scan'] = {
   errors: {
     notCombinedSaved:
       'Se reconocieron las páginas, pero no se pudo combinar su notación. Los archivos de cada página están disponibles más abajo.',
-    notCombined: (reason: string) =>
-      `Se reconocieron las páginas, pero no se pudo combinar su notación. ${reason}`,
     somePagesFailed:
       'Algunas páginas necesitan otro escaneo. Las páginas reconocidas se conservan.',
     recognitionFailed: 'El reconocimiento falló.',
@@ -272,7 +280,8 @@ export const scan: Messages['scan'] = {
   },
   client: {
     busy: 'El PC ya está escaneando. Inténtalo de nuevo en un momento.',
-    workerStatus: (status: number) => `El programa de PC respondió con el código ${status}.`,
+    workerStatus: (status: number) =>
+      `El programa del PC no pudo responder (error ${status}). Reinícialo y vuelve a intentarlo.`,
     invalidJob: 'Tarea de escaneo no válida.',
     updateWorker: 'Actualiza el programa de PC para continuar.',
     noJob: 'El programa no devolvió ninguna tarea de escaneo.',

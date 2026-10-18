@@ -126,18 +126,10 @@ describe('pitch corrections', () => {
       [71, 4],
     ]);
   });
-  it('refuses a rest and an unknown ordinal', () => {
+  it('refuses an unknown ordinal and a grace note', () => {
     const raw = score([BAR]);
     expect(() =>
       applyCorrections(raw, [{ kind: 'pitch', note: 99, step: 'C', alter: 0, octave: 4 }], {
-        strict: true,
-      }),
-    ).toThrow(CorrectionError);
-    const rest = score([
-      n('r', 6, 'half', { dots: 1 }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
-    ]);
-    expect(() =>
-      applyCorrections(rest, [{ kind: 'pitch', note: 0, step: 'C', alter: 0, octave: 4 }], {
         strict: true,
       }),
     ).toThrow(CorrectionError);
@@ -462,5 +454,99 @@ describe('removing a stray rest', () => {
       [48, 6, 6, 'L'],
     ]);
     expect(findProblems(readScanScore(parseScanXml(xml)))).toEqual([]);
+  });
+});
+
+describe('review fixes', () => {
+  it('redraws the accidentals that follow in the bar, so the page shows what sounds', () => {
+    // Read as F4 F4 F4; the page has F#4 F4 (natural) F4.
+    const raw = score([
+      n('F4', 2, 'quarter') +
+        n('F4', 2, 'quarter') +
+        n('F4', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'pitch', note: 0, step: 'F', alter: 1, octave: 4 },
+    ]);
+    const marks = [...parseScanXml(xml).getElementsByTagName('note')].map(
+      (el) => el.querySelector('accidental')?.textContent ?? '',
+    );
+    expect(marks).toEqual(['sharp', 'natural', '', '']);
+    expect(sounding(xml).map((x) => x[0])).toEqual([66, 65, 65, 48]);
+  });
+  it('refuses a length change on a tuplet note instead of breaking its bar', () => {
+    const triplet = n('C5', 2, 'eighth')
+      .replace('<voice>', '<voice>')
+      .replace(
+        '<staff>',
+        '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification><staff>',
+      );
+    const raw = score([
+      triplet + n('D5', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() =>
+      applyCorrections(raw, [{ kind: 'duration', note: 0, type: 'quarter', dots: 0 }], {
+        strict: true,
+      }),
+    ).toThrow(CorrectionError);
+  });
+  it('removes a grace note outright', () => {
+    const grace = `<note><grace/><pitch><step>B</step><octave>4</octave></pitch><voice>1</voice><type>eighth</type><staff>1</staff></note>`;
+    const raw = score([grace + BAR]);
+    const { xml } = applyCorrections(raw, [{ kind: 'remove', note: 0 }]);
+    expect(xml).not.toContain('<grace');
+    expect(sounding(xml)).toHaveLength(4);
+  });
+  it('turns a whole-bar rest into an ordinary rest of the chosen length', () => {
+    const raw = score([
+      `<note><rest measure="yes"/><duration>6</duration><voice>1</voice><staff>1</staff></note>` +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const doc = parseScanXml(
+      applyCorrections(raw, [{ kind: 'duration', note: 0, type: 'quarter', dots: 0 }]).xml,
+    );
+    const rest = doc.getElementsByTagName('note')[0]!;
+    expect(rest.querySelector('rest')!.hasAttribute('measure')).toBe(false);
+    expect(rest.querySelector('type')?.textContent).toBe('quarter');
+  });
+  it('makes a rest a note when the recognition missed one', () => {
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('r', 2, 'quarter') +
+        n('E5', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'pitch', note: 1, step: 'D', alter: 0, octave: 5 },
+    ]);
+    expect(sounding(xml)).toEqual([
+      [72, 0, 2, 'R'],
+      [74, 2, 2, 'R'],
+      [76, 4, 2, 'R'],
+      [48, 0, 6, 'L'],
+    ]);
+  });
+  it('removes a note outright when its hand is too long for the bar, rather than leaving a rest', () => {
+    // A duplicated D5 makes the right hand four beats in 3/4.
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('E5', 2, 'quarter') +
+        backup(8) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { xml } = applyCorrections(raw, [{ kind: 'remove', note: 2 }]);
+    expect(xml).not.toContain('<rest');
+    expect(sounding(xml)).toEqual([
+      [72, 0, 2, 'R'],
+      [74, 2, 2, 'R'],
+      [76, 4, 2, 'R'],
+      [48, 0, 6, 'L'],
+    ]);
   });
 });

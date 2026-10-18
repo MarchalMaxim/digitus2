@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { openFiles } from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 
 const png = Buffer.from(
@@ -82,6 +83,7 @@ test('local library: recognized notation reopens without reconnecting or rescann
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   expect(requests).toBe(before);
   const download = page.waitForEvent('download');
+  await openFiles(page);
   await page.getByRole('button', { name: 'Download raw MusicXML' }).click();
   const { readFileSync } = await import('node:fs');
   expect(readFileSync((await (await download).path())!)).toEqual(xml);

@@ -22,24 +22,25 @@ MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the worke
 5. Correct what differs, note by note (Correct the recognition, below).
 6. Press **Use for fingerings** to open the normal score view with fingerings and playback. The button is enabled once the recognised score, with your corrections, passes the strict import and renders. **Scan source and recognition** in the score view returns to the comparison, and so does the browser's Back button, without a new job.
 
-**Download raw MusicXML** saves the recognised file untouched, without fingerings. A batch offers **Download combined MusicXML** and each page's file instead. Once you have corrected notes, **Download corrected MusicXML** saves the corrected copy too. A notation editor remains the tool for what the review cannot correct. The playback tempo of a scan may be the app's default, not a recognised tempo.
+**Download raw MusicXML** saves the recognised file untouched, without fingerings. A batch offers **Download combined MusicXML** and each page's file instead. Once you have corrected notes, **Download corrected MusicXML** saves the corrected copy too. The downloads sit under **Files for a notation editor**. A notation editor remains the tool for what the review cannot correct. The playback tempo of a scan may be the app's default, not a recognised tempo.
 
 ## Correct the recognition
 
-Select a note or rest in **Recognized notation** to correct it: click or tap it (a tap close to a note reaches it), or focus the notation and use the arrow keys. The selected note carries the screen's red, and a panel docks at the bottom of the screen with what the note is ("Bar 11 · right hand · A4 quarter note · tied") and what can change:
+Select a note or rest in **Recognized notation** to correct it: click or tap it (a tap close to a note reaches it), or focus the notation and press Enter for the first note, then the arrow keys. The selected note carries the screen's red and an ink frame (so the selection does not rest on colour alone), and a panel docks at the bottom of the screen with what the note is ("Bar 11 · right hand · A4 quarter note · tied") and what can change:
 
 | Control | What it does |
 | --- | --- |
-| Lower, Higher; ♭ ♮ ♯ | Moves the note one step on the staff, taking the key signature's sharp or flat for the new letter, or sets its accidental. A tied note moves with its whole tie chain, so a tie never joins two pitches. Up and Down do the same from the keyboard. |
-| Whole to 16th, Dotted | Sets the length of the note, or of its whole chord. The rest of its voice moves with it; the other hand and the other voices never move, and a change that would move them is refused. The panel then says how long each hand's bar is ("Bar 2: right hand 2 beats, left hand 3 beats, in 3/4."). |
+| Lower, Higher; ♭ ♮ ♯ | Moves the note one step on the staff, taking the key signature's sharp or flat for the new letter, or sets its accidental. A tied note moves with its whole tie chain, so a tie never joins two pitches, and later notes of that letter in the bar are drawn with the accidental they now need. Up and Down do the same from the keyboard; with Shift, a whole octave (a misread clef or ledger line). |
+| Whole to 16th, Dotted | Sets the length of the note, or of its whole chord. The rest of its voice moves with it; the other hand and the other voices never move, and a change that would move them is refused, as is a change to a note in a triplet or other tuplet. When the hands then disagree on the bar's length, the panel says so ("Bar 2: right hand 2 beats, left hand 3 beats, in 3/4."). |
 | Tied to next | Ties the note to the same pitch starting exactly where it ends, writing both the sounding tie and the drawn one, or removes the tie. A slur is never turned into a tie or back. When nothing of that pitch starts there, the panel says so instead of guessing. |
 | To left hand, To right hand | Moves the note to the other staff at the same time: the hand the fingering uses. |
-| Remove | A duplicated chord note goes; a lone note becomes a rest of the same length; a stray rest goes and the rest of its voice moves up into its place. |
+| Remove | A duplicated chord note goes; a grace note goes; a lone note in a hand that is too long for its bar (a duplicate) goes and the rest of its voice moves up, otherwise it becomes a rest of the same length; a stray rest goes and the rest of its voice moves up into its place. A tied note asks for its tie to be removed first. |
+| Make it a note | On a rest the recognition put where the page has a note: the rest becomes a note of the same length, at the pitch of the nearest note on its staff, ready to be moved with Lower and Higher. |
 | ‹ ›, Done | The previous or next note in reading order; Done or Escape closes the panel. |
 
-Every correction is checked before it is recorded, then the notation is rendered and imported again at once, so **Use for fingerings** follows what is on screen. **Undo** (or Ctrl+Z) takes back the last correction, **Reset to recognition** removes them all (Undo brings them back), and **Review corrections** lists them in the order they were made ("Bar 2, right hand: quarter rest removed"). Notes are named by their position in the raw recognition, not by the strict import, so a recognition the import refuses can still be corrected until it passes. Correcting works on the combined score; a batch whose pages cannot be combined is reviewed page by page and corrected in a notation editor.
+Every correction is checked before it is recorded, then the notation is rendered and imported again at once, so **Use for fingerings** follows what is on screen. **Undo** (or Ctrl+Z) takes back the last correction and says which, **Reset to recognition** removes them all (Undo brings them back), and **Review corrections** lists them in the order they were made ("Bar 2, right hand: quarter rest removed"). Notes are named by their position in the raw recognition, not by the strict import, so a recognition the import refuses can still be corrected until it passes. Correcting works on the combined score; a batch whose pages cannot be combined is reviewed page by page and corrected in a notation editor.
 
-**Places to check** appears above the notation when rules checked on the file itself find something: a tie whose next note of that pitch starts late or early (the bar 11 tie of the test page, whose continuation arrived a quarter note late, is one), a tie without a matching note, hands that disagree on a bar's length, or a hand longer than its time signature. Each entry selects its note. They point at a place; they never decide the correction. On the library's correct engravings the tie rules are silent on all 280 curated pieces, and the hand rule flags 9 of them, in bars where the engraving lets one voice end early.
+**Places to check** appears above the notation when rules checked on the file itself find something: a tied note that ends before or after the next note of its pitch begins (the bar 11 tie of the test page, whose continuation arrived a quarter note late, is one), a tie without a matching note, hands that disagree on a bar's length, or a hand longer than its time signature. Each entry selects its note. While the strict import refuses the recognition, the list opens by itself and its first entry carries the screen's red instead of the unusable **Use for fingerings** (with no entry, **Scan again** does). They point at a place; they never decide the correction. On the library's correct engravings the tie rules are silent on all 280 curated pieces, and the hand rule flags 9 of them, in bars where the engraving lets one voice end early.
 
 ## On a phone or tablet
 
@@ -85,6 +86,8 @@ powershell -File research/omr/prototypes/homr-photo/setup.ps1
 - `prepare-text-models.ps1` downloads and checks the pinned English text model (about 23 MB) into `research/omr/results/quality-wave/text-models`.
 - `setup.ps1` prepares homr in `research/omr/results/photo-options/toolchain`: an isolated CPU-only Python environment, the pinned source and three ONNX models (about 139 MB), with the project's patches applied and every file digest checked (see `research/omr/prototypes/homr-photo/README.md`).
 
+The scripts run in Windows PowerShell 5.1 and in PowerShell 7. Keep the repository in a short folder, such as `C:\Users\you\digitus2`: Windows limits paths to 260 characters unless long paths are enabled, and the homr environment holds files about 125 characters deep, so a deeply nested checkout fails during `setup.ps1` with "No such file or directory". `setup.ps1 -Root C:\short\folder` puts homr elsewhere; pass that folder to `--homr-toolchain`. The Audiveris extraction already goes through the folder's short 8.3 name.
+
 All three locations are ignored by git. Start the worker whenever you want to scan, and keep the terminal open:
 
 ```powershell
@@ -111,13 +114,17 @@ Worker limits: one recognition at a time, 10 MiB per upload, 20 MiB per result, 
 
 ## Known recognition errors and limits
 
-The only real-photo test material is two photos of one printed continuation page. On both, the homr profile recovers all 13 main bars and both hands, with these errors:
+Measured on the acceptance corpus (16 library pieces rendered as pages, each in four photo-like variants for homr and as a PDF for Audiveris; numbers and method in `docs/research/omr.md`): homr gets 97 to 99.6% of pitches and 86.8 to 91.0% of notes fully right (pitch, onset, length, staff and voice), Audiveris on the PDFs 98.7% and 86.7%. The errors to look for:
 
-- missed chord ties on two notes, which then sound again instead of being held;
-- a duplicated C5 (smaller photo);
-- a bass E3 assigned to the upper hand (smaller photo);
-- beams inferred from the meter instead of read from the source;
-- key and time signature inferred when a continuation page does not print them.
+- **Missed ties**: 13 of the corpus's 47 ties have no tie or slur mark in homr's recognition at all, so the note sounds again instead of being held. Use **Tied to next**.
+- **Rhythm**: notes read with the wrong value (sixteenths as 32nds, a stray rest), which **Places to check** often finds as hands that disagree on a bar's length.
+- **A lost grand staff**: on a badly lit photo homr can read a piano page as one staff whose clef keeps changing. The review then says so above the comparison; the hands are not separated, so use another photo or the PDF.
+- **Beams** on photos are drawn by beat for readability, not read from the source; on PDFs Audiveris reads them.
+- **Key and time signature** are inferred when a continuation page does not print them.
+
+The worker changes a homr export in two lossless ways, and says so under **Recognition details**: a measure that holds no music (homr writes the bracket closing a first ending as a measure of its own, which shifted every later bar) joins its neighbours, and a slur joining one pitch to its continuation is read as a tie even when homr gave the two notes different voice numbers. No pitch, duration or onset changes.
+
+The two photos of a printed continuation page that first tested scanning also showed a duplicated C5 and a bass E3 in the upper hand; those photos are not in the repository, so these two errors are not re-measured. Correct such notes with **Remove** and **To left hand**.
 
 Further limits:
 
@@ -125,10 +132,10 @@ Further limits:
 - Ornaments can be incomplete and rhythms wrong on any page.
 - Audiveris (used for PDFs, and for images without homr) fails below about 10 px between staff lines and on skewed or curved pages.
 - Text and tempo can be incomplete. A tempo like "= 100" without a recognised beat unit gives no tempo, and an app default tempo is not a recognised one.
-- A recognition job finishing does not mean its notation imports. In one test scan, an A4 tie in bar 11 whose continuation arrives a quarter note late is refused by the strict import.
-- Synthetic test pages, strict parsing and passing tests do not certify musical accuracy. Phone-photo robustness, multi-page books and browsers other than desktop Chrome are untested.
+- A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
+- Synthetic test pages, strict parsing and passing tests do not certify musical accuracy. Real phone photos, multi-page books and browsers other than desktop Chrome are untested.
 
-The open requests are recognition fixes, source beam recovery, an acceptance corpus, in-browser correction and a shared library. They are tracked in #39, #40 and #41.
+Source beam recovery for photos and a shared library are open requests (#39, #41).
 
 ## Licences
 

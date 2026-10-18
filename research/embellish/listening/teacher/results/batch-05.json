@@ -1,0 +1,70 @@
+{
+  "batch": "batch-05",
+  "started_at": "2026-10-18T21:38:19Z",
+  "finished_at": "2026-10-18T21:39:38Z",
+  "items": [
+    {
+      "item": "em-4ac4",
+      "scores": {"musical": 2, "fits_harmony": 2, "beginner_friendly": 1},
+      "verdict": "awkward",
+      "objections": [
+        {"notes": ["R17", "R18", "R19", "R20", "R21"], "kind": "clutter", "severity": "warning",
+         "problem": "The B-A-B-A-B eighths in bar 13 fidget like a written-out trill; a held A or a simple step would phrase better."},
+        {"notes": ["R6", "R7", "R8", "R9", "L8", "L9", "L10", "L11"], "kind": "rhythm", "severity": "warning",
+         "problem": "Running eighths in both hands at once in bar 11 is a coordination hurdle for a beginner at this tempo."},
+        {"notes": ["R12", "R13", "R14", "R15"], "kind": "clutter", "severity": "info",
+         "problem": "The B-C-D-C turn keeps bar 12 busy; plainer note values would let the line breathe before bar 13."},
+        {"notes": ["R11", "L13"], "kind": "clash", "severity": "info",
+         "problem": "C5 over the left hand's D3 on beat 2 of bar 12 makes a bare seventh that rubs slightly."}
+      ],
+      "comment": "The tune underneath is pleasant, but bars 11 to 13 are almost all eighths and bar 13 circles on A and B; I would simplify the second half."
+    },
+    {
+      "item": "em-dba8",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R1", "R2", "R3", "R9", "R10", "R11"], "kind": "rhythm", "severity": "info",
+         "problem": "The two eighth-note neighbour turns add a rhythm step; plain repeated quarters would be even simpler for a first piece."}
+      ],
+      "comment": "A clear, singable line over a simple I-IV-V bass; the neighbour turns are consistent and harmless."
+    },
+    {
+      "item": "em-2b32",
+      "scores": {"musical": 2, "fits_harmony": 3, "beginner_friendly": 2},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R11", "R12", "R13", "R14", "R15", "R16", "R17"], "kind": "repetitive", "severity": "info",
+         "problem": "Bars 7 and 8 circle round A twice, so the line loses direction before the leap up to D."}
+      ],
+      "comment": "A folk-like modal line that sits well on the open fifths; the steady eighths are manageable at 96 but leave little rest."
+    },
+    {
+      "item": "em-bb98",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R1", "R2", "R3"], "kind": "phrase", "severity": "info",
+         "problem": "The F-G-F flick at the start softens the repeated-note figure that gives this phrase its bounce."}
+      ],
+      "comment": "Lively and well supported by the bass; the F at the end of bar 8 is a natural seventh over G."
+    },
+    {
+      "item": "em-fa1d",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [
+        {"notes": ["R1", "L1"], "kind": "clash", "severity": "info",
+         "problem": "The downbeat F5 over C4 is an accented fourth; it resolves at once down the scale, so it is fine."}
+      ],
+      "comment": "A neat scale figure over a two-note bass line; the held F over B in bar 4 is a clear dominant that resolves to E over C."
+    },
+    {
+      "item": "em-a8b1",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "Stepwise, five-finger melody with a plain tonic-dominant bass; ideal beginner material."
+    }
+  ]
+}

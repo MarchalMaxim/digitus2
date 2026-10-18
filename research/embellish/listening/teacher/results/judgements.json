@@ -1,0 +1,1400 @@
+{
+ "batches": {
+  "batch-01": {
+   "results": "batch-01.json",
+   "items": 6,
+   "wall_s": 75.0,
+   "problems": []
+  },
+  "batch-02": {
+   "results": "batch-02.json",
+   "items": 6,
+   "wall_s": 80.0,
+   "problems": []
+  },
+  "batch-03": {
+   "results": "batch-03.json",
+   "items": 6,
+   "wall_s": 75.0,
+   "problems": []
+  },
+  "batch-04": {
+   "results": "batch-04.json",
+   "items": 6,
+   "wall_s": 52.0,
+   "problems": []
+  },
+  "batch-05": {
+   "results": "batch-05.json",
+   "items": 6,
+   "wall_s": 79.0,
+   "problems": []
+  }
+ },
+ "items": [
+  {
+   "item": "em-bff7",
+   "batch": "batch-01",
+   "position": 1,
+   "n": 3,
+   "slug": "when-the-saints-go-marching-in",
+   "title": "When the Saints Go Marching In",
+   "condition": "plain",
+   "bars": [
+    4,
+    7
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 8,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "A plain, hymn-like line built on the C chord; the F in bar 5 is a simple passing note into G."
+  },
+  {
+   "item": "em-3474",
+   "batch": "batch-01",
+   "position": 2,
+   "n": 10,
+   "slug": "pdmx-andantino-096f28b3",
+   "title": "Andantino",
+   "condition": "light",
+   "bars": [
+    9,
+    12
+   ],
+   "inserted_ids": [
+    "R2",
+    "R9"
+   ],
+   "inserted_rules": {
+    "R2": "passing",
+    "R9": "passing"
+   },
+   "notes_R": 13,
+   "notes_L": 11,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 2,
+    "beginner_friendly": 3
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R4",
+      "R11"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "The leap to D5 on beat 3 sits a fourth over the left hand's A, rubbing before the G chord arrives."
+    }
+   ],
+   "comment": "A tidy two-bar idea stated twice, minuet style; only the leaped-to D over A minor is slightly sour."
+  },
+  {
+   "item": "em-9d9f",
+   "batch": "batch-01",
+   "position": 3,
+   "n": 5,
+   "slug": "ode-to-joy",
+   "title": "Ode to Joy (simplified)",
+   "condition": "light",
+   "bars": [
+    7,
+    10
+   ],
+   "inserted_ids": [
+    "R2",
+    "R12"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-repeated",
+    "R12": "passing"
+   },
+   "notes_R": 18,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Narrow, stepwise and songlike; every non-chord note passes by step, and the F in bar 10 resolves neatly to E."
+  },
+  {
+   "item": "em-cd2d",
+   "batch": "batch-01",
+   "position": 4,
+   "n": 6,
+   "slug": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "condition": "plain",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 9,
+   "notes_L": 10,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "A simple modal tune over open fifths; nothing to fix."
+  },
+  {
+   "item": "em-88af",
+   "batch": "batch-01",
+   "position": 5,
+   "n": 4,
+   "slug": "camptown-races",
+   "title": "Camptown Races",
+   "condition": "playful",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [
+    "R3",
+    "R5",
+    "R9",
+    "R12",
+    "R13",
+    "R16",
+    "R18",
+    "R19",
+    "R21"
+   ],
+   "inserted_rules": {
+    "R3": "passing",
+    "R5": "passing",
+    "R9": "passing",
+    "R12": "neighbour-long",
+    "R13": "neighbour-long",
+    "R16": "anticipation",
+    "R18": "neighbour-long",
+    "R19": "neighbour-long",
+    "R21": "neighbour-repeated"
+   },
+   "notes_R": 21,
+   "notes_L": 6,
+   "scores": {
+    "musical": 2,
+    "fits_harmony": 3,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R12",
+      "R13",
+      "R14",
+      "R15"
+     ],
+     "kind": "clutter",
+     "severity": "warning",
+     "problem": "D-E-D-E-D-C wobbles back and forth; the eighth-note neighbour figure makes bar 7 fidgety rather than singing."
+    },
+    {
+     "notes": [
+      "R18",
+      "R19"
+     ],
+     "kind": "clutter",
+     "severity": "info",
+     "problem": "The C-D-C turn at the cadence softens the arrival on C; a plain held C would close the phrase better."
+    }
+   ],
+   "comment": "The tune's outline is clear, but bars 5 and 7 carry a lot of eighth-note wiggles for a beginner at this tempo."
+  },
+  {
+   "item": "em-05fb",
+   "batch": "batch-01",
+   "position": 6,
+   "n": 8,
+   "slug": "pdmx-bayernhymne-07ef6e69",
+   "title": "Bayernhymne",
+   "condition": "light",
+   "bars": [
+    1,
+    4
+   ],
+   "inserted_ids": [
+    "R2",
+    "R10"
+   ],
+   "inserted_rules": {
+    "R2": "passing",
+    "R10": "passing"
+   },
+   "notes_R": 12,
+   "notes_L": 5,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R5"
+     ],
+     "kind": "rhythm",
+     "severity": "warning",
+     "problem": "The repeated G entering off the beat after an eighth rest is a tricky syncopation for a beginner to count."
+    },
+    {
+     "notes": [
+      "R1",
+      "R12",
+      "L1"
+     ],
+     "kind": "other",
+     "severity": "info",
+     "problem": "The melody plays three bars unaccompanied and the left hand answers alone in bar 4; hands never play together here."
+    }
+   ],
+   "comment": "A natural, singable phrase; the only real hurdle is the off-beat G in bar 2."
+  },
+  {
+   "item": "em-3400",
+   "batch": "batch-02",
+   "position": 1,
+   "n": 1,
+   "slug": "twinkle-twinkle-little-star",
+   "title": "Twinkle, Twinkle, Little Star",
+   "condition": "playful",
+   "bars": [
+    1,
+    4
+   ],
+   "inserted_ids": [
+    "R2",
+    "R5",
+    "R8",
+    "R11",
+    "R12",
+    "R14",
+    "R17",
+    "R20",
+    "R23",
+    "R24"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-repeated",
+    "R5": "neighbour-repeated",
+    "R8": "neighbour-repeated",
+    "R11": "neighbour-long",
+    "R12": "neighbour-long",
+    "R14": "neighbour-repeated",
+    "R17": "neighbour-repeated",
+    "R20": "neighbour-repeated",
+    "R23": "neighbour-long",
+    "R24": "neighbour-long"
+   },
+   "notes_R": 24,
+   "notes_L": 7,
+   "scores": {
+    "musical": 2,
+    "fits_harmony": 2,
+    "beginner_friendly": 1
+   },
+   "verdict": "awkward",
+   "objections": [
+    {
+     "notes": [
+      "R2",
+      "R5",
+      "R8",
+      "R14",
+      "R17",
+      "R20"
+     ],
+     "kind": "clutter",
+     "severity": "warning",
+     "problem": "Every note pair gets the same neighbour-note eighth figure; the tune turns mechanical and busy for a beginner at this tempo."
+    },
+    {
+     "notes": [
+      "R8"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "The passing B4 against the left hand's F3 in bar 2 makes a brief tritone rub."
+    },
+    {
+     "notes": [
+      "R23",
+      "R24"
+     ],
+     "kind": "phrase",
+     "severity": "warning",
+     "problem": "The phrase ends on an off-beat eighth C instead of a settled long tonic, weakening the cadence."
+    }
+   ],
+   "comment": "The underlying tune is clear, but the constant ornament figure clutters it; I would restore plain quarters in at least bars 3 and 4."
+  },
+  {
+   "item": "em-b06b",
+   "batch": "batch-02",
+   "position": 2,
+   "n": 4,
+   "slug": "camptown-races",
+   "title": "Camptown Races",
+   "condition": "plain",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 12,
+   "notes_L": 6,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Plain quarter-note tune with a clear half cadence and pickup; ideal beginner material."
+  },
+  {
+   "item": "em-21e9",
+   "batch": "batch-02",
+   "position": 3,
+   "n": 2,
+   "slug": "jingle-bells",
+   "title": "Jingle Bells (chorus)",
+   "condition": "plain",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 15,
+   "notes_L": 8,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Repeated notes are the character of this tune; the bass roots support it cleanly to the half cadence."
+  },
+  {
+   "item": "em-0c95",
+   "batch": "batch-02",
+   "position": 4,
+   "n": 9,
+   "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+   "title": "Come let us All with Fervour",
+   "condition": "light",
+   "bars": [
+    10,
+    13
+   ],
+   "inserted_ids": [
+    "R8"
+   ],
+   "inserted_rules": {
+    "R8": "passing"
+   },
+   "notes_R": 15,
+   "notes_L": 19,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 2,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R11"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "D5 over the bass E3 on beat 4 of bar 12 is an unprepared seventh; it passes quickly to C."
+    },
+    {
+     "notes": [
+      "L3",
+      "L4",
+      "L8",
+      "L9",
+      "L10",
+      "L11"
+     ],
+     "kind": "rhythm",
+     "severity": "info",
+     "problem": "The left hand's leap from C2 to G3 and the eighth run in bar 11 are a stretch for a beginner."
+    }
+   ],
+   "comment": "A singable, well-shaped melody; the only demands are in the walking left hand."
+  },
+  {
+   "item": "em-df8e",
+   "batch": "batch-02",
+   "position": 5,
+   "n": 7,
+   "slug": "pdmx-allegro-414d6ff6",
+   "title": "Allegro",
+   "condition": "playful",
+   "bars": [
+    2,
+    5
+   ],
+   "inserted_ids": [
+    "R7",
+    "R9",
+    "R10",
+    "R12",
+    "R14"
+   ],
+   "inserted_rules": {
+    "R7": "anticipation",
+    "R9": "neighbour-long",
+    "R10": "neighbour-long",
+    "R12": "passing",
+    "R14": "anticipation"
+   },
+   "notes_R": 14,
+   "notes_L": 4,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Stepwise line with good tendency-tone resolutions (F to E over B to C); the downbeat F in bar 2 reads as a normal appoggiatura."
+  },
+  {
+   "item": "em-f379",
+   "batch": "batch-02",
+   "position": 6,
+   "n": 10,
+   "slug": "pdmx-andantino-096f28b3",
+   "title": "Andantino",
+   "condition": "plain",
+   "bars": [
+    9,
+    12
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 11,
+   "notes_L": 11,
+   "scores": {
+    "musical": 2,
+    "fits_harmony": 2,
+    "beginner_friendly": 3
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R3",
+      "R9"
+     ],
+     "kind": "clash",
+     "severity": "warning",
+     "problem": "D5 over the left hand's A3 is an unresolved fourth that leaps away instead of resolving by step."
+    },
+    {
+     "notes": [
+      "R7",
+      "R8",
+      "R9",
+      "R10",
+      "R11"
+     ],
+     "kind": "repetitive",
+     "severity": "info",
+     "problem": "Bars 11 and 12 repeat bars 9 and 10 exactly, with no change to round off the phrase."
+    }
+   ],
+   "comment": "Easy to play and coherent, but the angular D on beat 3 and the literal repeat make it feel like an exercise."
+  },
+  {
+   "item": "em-5716",
+   "batch": "batch-03",
+   "position": 1,
+   "n": 3,
+   "slug": "when-the-saints-go-marching-in",
+   "title": "When the Saints Go Marching In",
+   "condition": "playful",
+   "bars": [
+    4,
+    7
+   ],
+   "inserted_ids": [
+    "R2",
+    "R3",
+    "R5",
+    "R8",
+    "R10",
+    "R12",
+    "R14",
+    "R16",
+    "R17"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-long",
+    "R3": "neighbour-long",
+    "R5": "passing",
+    "R8": "anticipation",
+    "R10": "passing",
+    "R12": "passing",
+    "R14": "passing",
+    "R16": "neighbour-long",
+    "R17": "neighbour-long"
+   },
+   "notes_R": 17,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "A singable carol line: the scale runs in bars 5 to 7 sit comfortably under one hand and every strong beat agrees with the bass."
+  },
+  {
+   "item": "em-c2c3",
+   "batch": "batch-03",
+   "position": 2,
+   "n": 8,
+   "slug": "pdmx-bayernhymne-07ef6e69",
+   "title": "Bayernhymne",
+   "condition": "playful",
+   "bars": [
+    1,
+    4
+   ],
+   "inserted_ids": [
+    "R2",
+    "R4",
+    "R9",
+    "R12",
+    "R14"
+   ],
+   "inserted_rules": {
+    "R2": "passing",
+    "R4": "passing",
+    "R9": "anticipation",
+    "R12": "passing",
+    "R14": "passing"
+   },
+   "notes_R": 15,
+   "notes_L": 5,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R10",
+      "R11",
+      "R12",
+      "R13",
+      "R14"
+     ],
+     "kind": "clutter",
+     "severity": "info",
+     "problem": "D repeated across the barline, then a C-D-E-D squiggle, makes bar 3 fussier than the plain bar 2."
+    }
+   ],
+   "comment": "A clear five-finger tune with a left-hand answer in bar 4; the eighth-note turn in bar 3 is the one spot a beginner will stumble on."
+  },
+  {
+   "item": "em-d79d",
+   "batch": "batch-03",
+   "position": 3,
+   "n": 1,
+   "slug": "twinkle-twinkle-little-star",
+   "title": "Twinkle, Twinkle, Little Star",
+   "condition": "plain",
+   "bars": [
+    1,
+    4
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 14,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Plain repeated quarters over a simple I-IV-V bass; ideal first-piece material."
+  },
+  {
+   "item": "em-ed3b",
+   "batch": "batch-03",
+   "position": 4,
+   "n": 2,
+   "slug": "jingle-bells",
+   "title": "Jingle Bells (chorus)",
+   "condition": "playful",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [
+    "R2",
+    "R4",
+    "R9",
+    "R11",
+    "R16",
+    "R19",
+    "R21",
+    "R22",
+    "R24"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-repeated",
+    "R4": "neighbour-repeated",
+    "R9": "neighbour-repeated",
+    "R11": "neighbour-repeated",
+    "R16": "neighbour-repeated",
+    "R19": "anticipation",
+    "R21": "neighbour-long",
+    "R22": "neighbour-long",
+    "R24": "passing"
+   },
+   "notes_R": 24,
+   "notes_L": 8,
+   "scores": {
+    "musical": 1,
+    "fits_harmony": 2,
+    "beginner_friendly": 1
+   },
+   "verdict": "awkward",
+   "objections": [
+    {
+     "notes": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+     ],
+     "kind": "clutter",
+     "severity": "warning",
+     "problem": "F-G-F-G eighths wobble on the spot; the bar loses its pulse and the tune disappears."
+    },
+    {
+     "notes": [
+      "R8",
+      "R9",
+      "R10",
+      "R11",
+      "R12",
+      "R13"
+     ],
+     "kind": "repetitive",
+     "severity": "warning",
+     "problem": "Six eighths alternating E and F in one bar sound like a trill exercise, not a melody."
+    },
+    {
+     "notes": [
+      "R15",
+      "R16",
+      "R17",
+      "R18",
+      "R19"
+     ],
+     "kind": "repetitive",
+     "severity": "warning",
+     "problem": "The same oscillation again, now D-E, in bar 7: a third bar in a row of identical wobbling."
+    },
+    {
+     "notes": [
+      "R14"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "E held on the downbeat over the G bass of a dominant bar sounds a little soft and unclear."
+    },
+    {
+     "notes": [
+      "R23",
+      "R24"
+     ],
+     "kind": "phrase",
+     "severity": "info",
+     "problem": "Stepping from G down to F on beat 4 weakens the arrival; holding the G would land the phrase."
+    }
+   ],
+   "comment": "The harmony is sound, but almost every beat is split into a neighbour-note wobble at quarter = 120; I would rewrite bars 5 to 7 with plain repeated notes."
+  },
+  {
+   "item": "em-7253",
+   "batch": "batch-03",
+   "position": 5,
+   "n": 6,
+   "slug": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "condition": "light",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [
+    "R2",
+    "R8"
+   ],
+   "inserted_rules": {
+    "R2": "passing",
+    "R8": "passing"
+   },
+   "notes_R": 11,
+   "notes_L": 10,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "A shapely modal folk line rising to D and falling back, with open-fifth chords that support every strong beat."
+  },
+  {
+   "item": "em-f233",
+   "batch": "batch-03",
+   "position": 6,
+   "n": 5,
+   "slug": "ode-to-joy",
+   "title": "Ode to Joy (simplified)",
+   "condition": "playful",
+   "bars": [
+    7,
+    10
+   ],
+   "inserted_ids": [
+    "R2",
+    "R6",
+    "R10",
+    "R11",
+    "R13",
+    "R16",
+    "R22",
+    "R24"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-repeated",
+    "R6": "anticipation",
+    "R10": "neighbour-long",
+    "R11": "neighbour-long",
+    "R13": "neighbour-repeated",
+    "R16": "passing",
+    "R22": "passing",
+    "R24": "anticipation"
+   },
+   "notes_R": 24,
+   "notes_L": 7,
+   "scores": {
+    "musical": 1,
+    "fits_harmony": 2,
+    "beginner_friendly": 1
+   },
+   "verdict": "awkward",
+   "objections": [
+    {
+     "notes": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6",
+      "R7",
+      "R8",
+      "R9",
+      "R10",
+      "R11"
+     ],
+     "kind": "repetitive",
+     "severity": "warning",
+     "problem": "The line circles C and D for two whole bars with no direction or goal."
+    },
+    {
+     "notes": [
+      "R4"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "D on strong beat 3 over a sustained C bass rubs mildly; C would sit better."
+    },
+    {
+     "notes": [
+      "R12",
+      "R13",
+      "R15",
+      "R16"
+     ],
+     "kind": "clutter",
+     "severity": "warning",
+     "problem": "Eighth-note neighbour pairs fill bar 9 and keep the melody stuck between C and E."
+    },
+    {
+     "notes": [
+      "R19",
+      "R20",
+      "R21",
+      "R22",
+      "R23",
+      "R24"
+     ],
+     "kind": "clutter",
+     "severity": "warning",
+     "problem": "Six running eighths end the passage; busy for a beginner and the phrase never settles."
+    }
+   ],
+   "comment": "Harmonically safe, but the tune is lost under constant C-D-E wiggling; I would rewrite it with longer notes and a clear shape."
+  },
+  {
+   "item": "em-801a",
+   "batch": "batch-04",
+   "position": 1,
+   "n": 10,
+   "slug": "pdmx-andantino-096f28b3",
+   "title": "Andantino",
+   "condition": "playful",
+   "bars": [
+    9,
+    12
+   ],
+   "inserted_ids": [
+    "R2",
+    "R5",
+    "R7",
+    "R9",
+    "R12",
+    "R15",
+    "R17"
+   ],
+   "inserted_rules": {
+    "R2": "passing",
+    "R5": "passing",
+    "R7": "passing",
+    "R9": "passing",
+    "R12": "passing",
+    "R15": "passing",
+    "R17": "passing"
+   },
+   "notes_R": 18,
+   "notes_L": 11,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "A clean two-bar sequence over A minor and G; the eighth-note figures are stepwise and sit comfortably at this tempo."
+  },
+  {
+   "item": "em-a7f4",
+   "batch": "batch-04",
+   "position": 2,
+   "n": 4,
+   "slug": "camptown-races",
+   "title": "Camptown Races",
+   "condition": "light",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [
+    "R3"
+   ],
+   "inserted_rules": {
+    "R3": "passing"
+   },
+   "notes_R": 13,
+   "notes_L": 6,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Singable, plain Foster-style line with a clear half-note cadence on C and a pickup into the next phrase."
+  },
+  {
+   "item": "em-165d",
+   "batch": "batch-04",
+   "position": 3,
+   "n": 3,
+   "slug": "when-the-saints-go-marching-in",
+   "title": "When the Saints Go Marching In",
+   "condition": "light",
+   "bars": [
+    4,
+    7
+   ],
+   "inserted_ids": [
+    "R3",
+    "R9"
+   ],
+   "inserted_rules": {
+    "R3": "passing",
+    "R9": "passing"
+   },
+   "notes_R": 10,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "A simple stepwise carol line; the only non-chord tones are passing notes on weak beats."
+  },
+  {
+   "item": "em-481a",
+   "batch": "batch-04",
+   "position": 4,
+   "n": 7,
+   "slug": "pdmx-allegro-414d6ff6",
+   "title": "Allegro",
+   "condition": "light",
+   "bars": [
+    2,
+    5
+   ],
+   "inserted_ids": [
+    "R9"
+   ],
+   "inserted_rules": {
+    "R9": "passing"
+   },
+   "notes_R": 10,
+   "notes_L": 4,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 2,
+    "beginner_friendly": 3
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R1",
+      "L1"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "The run starts on F5 over the C4 bass, so the downbeat of bar 2 is a dissonant fourth; acceptable as an appoggiatura."
+    }
+   ],
+   "comment": "Tidy classical figure; the G7 to C motion in bars 4-5 is handled well and the rhythm is easy."
+  },
+  {
+   "item": "em-7e2e",
+   "batch": "batch-04",
+   "position": 5,
+   "n": 8,
+   "slug": "pdmx-bayernhymne-07ef6e69",
+   "title": "Bayernhymne",
+   "condition": "plain",
+   "bars": [
+    1,
+    4
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 10,
+   "notes_L": 5,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R4"
+     ],
+     "kind": "rhythm",
+     "severity": "info",
+     "problem": "The eighth rest followed by an off-beat eighth G4 in bar 2 is the one syncopated spot a beginner must count carefully."
+    }
+   ],
+   "comment": "Arpeggio opening and stepwise descent read like a real tune; the hands alternate rather than overlap, so nothing clashes."
+  },
+  {
+   "item": "em-bfb2",
+   "batch": "batch-04",
+   "position": 6,
+   "n": 9,
+   "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+   "title": "Come let us All with Fervour",
+   "condition": "plain",
+   "bars": [
+    10,
+    13
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 14,
+   "notes_L": 19,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 2,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R10",
+      "L15"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "D5 on beat 4 of bar 12 sits a seventh above the left hand's E3; mild, but it rubs."
+    },
+    {
+     "notes": [
+      "L8",
+      "L9",
+      "L10",
+      "L11"
+     ],
+     "kind": "clutter",
+     "severity": "info",
+     "problem": "Four running eighths in the left hand in bar 11 make this the busiest spot for a beginner."
+    }
+   ],
+   "comment": "The melody is shapely and stepwise; the left hand is more active than the tune needs."
+  },
+  {
+   "item": "em-4ac4",
+   "batch": "batch-05",
+   "position": 1,
+   "n": 9,
+   "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+   "title": "Come let us All with Fervour",
+   "condition": "playful",
+   "bars": [
+    10,
+    13
+   ],
+   "inserted_ids": [
+    "R3",
+    "R7",
+    "R9",
+    "R11",
+    "R15",
+    "R19",
+    "R21"
+   ],
+   "inserted_rules": {
+    "R3": "anticipation",
+    "R7": "neighbour-repeated",
+    "R9": "anticipation",
+    "R11": "passing",
+    "R15": "anticipation",
+    "R19": "neighbour-repeated",
+    "R21": "anticipation"
+   },
+   "notes_R": 21,
+   "notes_L": 19,
+   "scores": {
+    "musical": 2,
+    "fits_harmony": 2,
+    "beginner_friendly": 1
+   },
+   "verdict": "awkward",
+   "objections": [
+    {
+     "notes": [
+      "R17",
+      "R18",
+      "R19",
+      "R20",
+      "R21"
+     ],
+     "kind": "clutter",
+     "severity": "warning",
+     "problem": "The B-A-B-A-B eighths in bar 13 fidget like a written-out trill; a held A or a simple step would phrase better."
+    },
+    {
+     "notes": [
+      "R6",
+      "R7",
+      "R8",
+      "R9",
+      "L8",
+      "L9",
+      "L10",
+      "L11"
+     ],
+     "kind": "rhythm",
+     "severity": "warning",
+     "problem": "Running eighths in both hands at once in bar 11 is a coordination hurdle for a beginner at this tempo."
+    },
+    {
+     "notes": [
+      "R12",
+      "R13",
+      "R14",
+      "R15"
+     ],
+     "kind": "clutter",
+     "severity": "info",
+     "problem": "The B-C-D-C turn keeps bar 12 busy; plainer note values would let the line breathe before bar 13."
+    },
+    {
+     "notes": [
+      "R11",
+      "L13"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "C5 over the left hand's D3 on beat 2 of bar 12 makes a bare seventh that rubs slightly."
+    }
+   ],
+   "comment": "The tune underneath is pleasant, but bars 11 to 13 are almost all eighths and bar 13 circles on A and B; I would simplify the second half."
+  },
+  {
+   "item": "em-dba8",
+   "batch": "batch-05",
+   "position": 2,
+   "n": 1,
+   "slug": "twinkle-twinkle-little-star",
+   "title": "Twinkle, Twinkle, Little Star",
+   "condition": "light",
+   "bars": [
+    1,
+    4
+   ],
+   "inserted_ids": [
+    "R2",
+    "R10"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-repeated",
+    "R10": "neighbour-repeated"
+   },
+   "notes_R": 16,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R1",
+      "R2",
+      "R3",
+      "R9",
+      "R10",
+      "R11"
+     ],
+     "kind": "rhythm",
+     "severity": "info",
+     "problem": "The two eighth-note neighbour turns add a rhythm step; plain repeated quarters would be even simpler for a first piece."
+    }
+   ],
+   "comment": "A clear, singable line over a simple I-IV-V bass; the neighbour turns are consistent and harmless."
+  },
+  {
+   "item": "em-2b32",
+   "batch": "batch-05",
+   "position": 3,
+   "n": 6,
+   "slug": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "condition": "playful",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [
+    "R2",
+    "R4",
+    "R6",
+    "R7",
+    "R9",
+    "R12",
+    "R14",
+    "R16",
+    "R17",
+    "R19"
+   ],
+   "inserted_rules": {
+    "R2": "passing",
+    "R4": "anticipation",
+    "R6": "neighbour-long",
+    "R7": "neighbour-long",
+    "R9": "passing",
+    "R12": "passing",
+    "R14": "anticipation",
+    "R16": "neighbour-long",
+    "R17": "neighbour-long",
+    "R19": "neighbour-repeated"
+   },
+   "notes_R": 19,
+   "notes_L": 10,
+   "scores": {
+    "musical": 2,
+    "fits_harmony": 3,
+    "beginner_friendly": 2
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R11",
+      "R12",
+      "R13",
+      "R14",
+      "R15",
+      "R16",
+      "R17"
+     ],
+     "kind": "repetitive",
+     "severity": "info",
+     "problem": "Bars 7 and 8 circle round A twice, so the line loses direction before the leap up to D."
+    }
+   ],
+   "comment": "A folk-like modal line that sits well on the open fifths; the steady eighths are manageable at 96 but leave little rest."
+  },
+  {
+   "item": "em-bb98",
+   "batch": "batch-05",
+   "position": 4,
+   "n": 2,
+   "slug": "jingle-bells",
+   "title": "Jingle Bells (chorus)",
+   "condition": "light",
+   "bars": [
+    5,
+    8
+   ],
+   "inserted_ids": [
+    "R2",
+    "R17"
+   ],
+   "inserted_rules": {
+    "R2": "neighbour-repeated",
+    "R17": "passing"
+   },
+   "notes_R": 17,
+   "notes_L": 8,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "acceptable",
+   "objections": [
+    {
+     "notes": [
+      "R1",
+      "R2",
+      "R3"
+     ],
+     "kind": "phrase",
+     "severity": "info",
+     "problem": "The F-G-F flick at the start softens the repeated-note figure that gives this phrase its bounce."
+    }
+   ],
+   "comment": "Lively and well supported by the bass; the F at the end of bar 8 is a natural seventh over G."
+  },
+  {
+   "item": "em-fa1d",
+   "batch": "batch-05",
+   "position": 5,
+   "n": 7,
+   "slug": "pdmx-allegro-414d6ff6",
+   "title": "Allegro",
+   "condition": "plain",
+   "bars": [
+    2,
+    5
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 9,
+   "notes_L": 4,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [
+    {
+     "notes": [
+      "R1",
+      "L1"
+     ],
+     "kind": "clash",
+     "severity": "info",
+     "problem": "The downbeat F5 over C4 is an accented fourth; it resolves at once down the scale, so it is fine."
+    }
+   ],
+   "comment": "A neat scale figure over a two-note bass line; the held F over B in bar 4 is a clear dominant that resolves to E over C."
+  },
+  {
+   "item": "em-a8b1",
+   "batch": "batch-05",
+   "position": 6,
+   "n": 5,
+   "slug": "ode-to-joy",
+   "title": "Ode to Joy (simplified)",
+   "condition": "plain",
+   "bars": [
+    7,
+    10
+   ],
+   "inserted_ids": [],
+   "inserted_rules": {},
+   "notes_R": 16,
+   "notes_L": 7,
+   "scores": {
+    "musical": 3,
+    "fits_harmony": 3,
+    "beginner_friendly": 3
+   },
+   "verdict": "natural",
+   "objections": [],
+   "comment": "Stepwise, five-finger melody with a plain tonic-dominant bass; ideal beginner material."
+  }
+ ],
+ "missing_items": []
+}

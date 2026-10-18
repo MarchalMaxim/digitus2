@@ -294,3 +294,25 @@ describe('problems to check', () => {
     expect(findProblems(readScanScore(parseScanXml(raw)))).toEqual([expect.objectContaining({ kind: 'tie-unmatched', note: 0 })]);
   });
 });
+
+describe('removing a stray rest', () => {
+  it('pulls the rest of its voice earlier, keeps the other hand, and so mends a late tie', () => {
+    const raw = score([
+      n('C5', 2, 'quarter') + n('D5', 2, 'quarter') + n('A4', 2, 'quarter', { tie: 'start' }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('r', 2, 'quarter') + n('A4', 2, 'quarter', { tie: 'stop' }) + n('B4', 2, 'quarter') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'remove', note: 4 },
+      { kind: 'duration', note: 6, type: 'half', dots: 0 },
+    ]);
+    expect(sounding(xml)).toEqual([
+      [72, 0, 2, 'R'],
+      [74, 2, 2, 'R'],
+      [69, 4, 4, 'R'],
+      [71, 8, 4, 'R'],
+      [48, 0, 6, 'L'],
+      [48, 6, 6, 'L'],
+    ]);
+    expect(findProblems(readScanScore(parseScanXml(xml)))).toEqual([]);
+  });
+});

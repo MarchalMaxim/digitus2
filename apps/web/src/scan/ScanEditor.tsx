@@ -120,7 +120,7 @@ export function describeCorrection(t: Messages, raw: ScanScore, c: Correction): 
         hand(t, { ...note, staff: c.staff }),
       );
     case 'remove':
-      return t.scan.edit.changed.removed(at, pitch);
+      return t.scan.edit.changed.removed(at, pitch || lengthOf(t, note));
   }
 }
 
@@ -290,6 +290,13 @@ export function NoteEditor({
               {t.scan.edit.remove}
             </button>
           )}
+        </div>
+      )}
+      {note.rest && !note.chord && (
+        <div className="note-editor-row">
+          <button onClick={() => onCorrect({ kind: 'remove', note: ordinal })}>
+            {t.scan.edit.remove}
+          </button>
         </div>
       )}
       <p className="small" role="status">

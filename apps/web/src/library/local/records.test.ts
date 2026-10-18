@@ -137,3 +137,32 @@ describe('local score records', () => {
     expect(isLocalScoreRecord(withFile({ type: 5 }))).toBe(false);
   });
 });
+
+describe('saved corrections', () => {
+  const corrected = {
+    ...session,
+    corrections: [
+      { kind: 'pitch' as const, note: 3, step: 'B' as const, alter: -1, octave: 4 },
+      { kind: 'duration' as const, note: 4, type: 'quarter' as const, dots: 1 as const },
+      { kind: 'tie' as const, note: 5, tied: false, side: 'previous' as const },
+      { kind: 'hand' as const, note: 6, staff: 2 },
+      { kind: 'remove' as const, note: 7 },
+    ],
+  };
+  const row = (value: unknown) => ({ version: 1, id: 'scan:x', updatedAt: 1, kind: 'scan', session: value });
+  it('keeps the raw recognition and the list of corrections side by side', () => {
+    const stored = storeSession(corrected);
+    expect(stored.xml).toBe('<score-partwise/>');
+    expect(restoreSession(stored).corrections).toEqual(corrected.corrections);
+    expect(isLocalScoreRecord(row(stored))).toBe(true);
+  });
+  it.each([
+    ['an unknown kind', { kind: 'transpose', note: 1 }],
+    ['a pitch out of range', { kind: 'pitch', note: 1, step: 'H', alter: 0, octave: 4 }],
+    ['an extra field', { kind: 'remove', note: 1, xml: '<evil/>' }],
+    ['a negative note', { kind: 'remove', note: -1 }],
+    ['a length the editor never writes', { kind: 'duration', note: 1, type: 'breve', dots: 0 }],
+  ])('refuses a row with %s', (_label, correction) => {
+    expect(isLocalScoreRecord(row({ ...storeSession(session), corrections: [correction] }))).toBe(false);
+  });
+});

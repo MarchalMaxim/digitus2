@@ -390,9 +390,13 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     }
     if (correction.kind === 'remove') {
       // A removed chord member hands the selection to the note left in its place.
+      // A removed rest hands it to the next note in reading order.
       const target = corrected.score.notes.find((n) => n.ordinal === correction.note);
       const chord = target ? chordOf(corrected.score, target) : [];
-      const neighbour = chord.find((n) => n !== target);
+      const order = readingOrder(corrected.score);
+      const neighbour =
+        chord.find((n) => n !== target) ??
+        (target?.rest ? order[order.indexOf(target) + 1] : undefined);
       if (neighbour) setNote(neighbour.ordinal);
     }
     setUndoStack((stack) => [...stack, corrections]);
@@ -846,7 +850,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             )}
             <div className="row">
               {/* Plain while a selected note carries the screen's one red. */}
-              <Button primary={!selectedNote} disabled={!canUseResult} onClick={useResult}>
+              <Button
+                className="scan-use"
+                primary={!selectedNote}
+                disabled={!canUseResult}
+                onClick={useResult}
+              >
                 {t.scan.review.useForFingerings}
               </Button>
               <button

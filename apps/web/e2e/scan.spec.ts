@@ -4,6 +4,10 @@ import { libraryScore } from './helpers/files.js';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
 
+// Recognition needs the PC worker, which a phone cannot reach: these flows run as a PC window,
+// at 360 px in the mobile project. The phone's own path is scan-phone.spec.ts.
+test.use({ hasTouch: false, isMobile: false });
+
 const id = 'a'.repeat(32);
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=',
@@ -86,7 +90,7 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   expect(uploads).toEqual([firstPhoto, secondPhoto, secondPhoto]);
   await page.getByRole('button', { name: 'Select page 1: first.png' }).click();
-  await page.getByRole('button', { name: 'Next original page' }).click();
+  await page.getByRole('button', { name: 'Select page 2: second.png' }).click();
   await expect(page.getByRole('img', { name: 'Original printed score, page 2' })).toBeVisible();
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download combined MusicXML' }).click();

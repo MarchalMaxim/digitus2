@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "version": "v1",
+  "note": "Library pieces with their MusicXML as ground truth, rendered by prepare.mjs. Every page image goes to homr (the photo route) in each listed variant; every PDF to Audiveris (the PDF route). Synthetic pages, not camera photos: they measure the pipeline against exact truth, not photo robustness.",
+  "slugs": [
+    "twinkle-twinkle-little-star",
+    "bach-minuet-g-major-bwv-anh-114",
+    "chopin-prelude-op28-no7",
+    "ode-to-joy",
+    "amazing-grace",
+    "greensleeves",
+    "schumann-op68-no1-melody",
+    "bach-minuet-a-minor-bwv-anh-120",
+    "burgmuller-op100-no5-innocence",
+    "bach-prelude-e-minor-bwv-941",
+    "tchaikovsky-op39-no1-morning-prayer",
+    "bach-polonaise-g-minor-bwv-anh-119",
+    "bulk-czernyc-op-821-czerny-op-821-no-005-czerny-op-821-no-005-ly",
+    "kuhlau-sonatina-op20-no1-mvt2",
+    "chopin-waltz-op69-no2",
+    "schumann-op68-no10-the-happy-farmer"
+  ],
+  "routes": {
+    "homr": ["clean", "shadow", "lowContrast", "skew"],
+    "audiveris": ["pdf"]
+  }
+}

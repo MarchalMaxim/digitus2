@@ -131,7 +131,6 @@ describe('joining separately recognized pages', () => {
       'navigation',
       page().replace('</measure>', '<barline><repeat direction="backward"/></barline></measure>'),
     ],
-    ['notation', page().replace('<duration>4</duration>', '<duration>0</duration>')],
     ['IDs', page().replace('id="n2"', 'id="n1"')],
     [
       'instrument reference',
@@ -147,6 +146,13 @@ describe('joining separately recognized pages', () => {
     ],
   ])('refuses unsupported %s rather than silently changing notation', (_kind, xml) => {
     expect(() => joinScanPages([page(), xml])).toThrow();
+  });
+  it('joins a page whose notes do not fit together, leaving the refusal to the strict import', () => {
+    // The joined file is what the review corrects; it is never made to look valid.
+    const broken = page().replace('<duration>4</duration>', '<duration>0</duration>');
+    const xml = joinScanPages([page(), broken]);
+    expect(xml).toContain('<duration>0</duration>');
+    expect(() => parseMusicXml(xml, { preserveNotation: true })).toThrow();
   });
   it('refuses a part without measures, naming the measure counts', () => {
     const empty = page().replace(/<measure[\s\S]*<\/measure>/, '');

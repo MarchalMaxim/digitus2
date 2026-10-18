@@ -38,7 +38,7 @@ Select a note or rest in **Recognized notation** to correct it: click or tap it 
 | Make it a note              | On a rest the recognition put where the page has a note: the rest becomes a note of the same length, at the pitch of the nearest note on its staff, ready to be moved with Lower and Higher.                                                                                                                                                                                                           |
 | ‹ ›, Done                   | The previous or next note in reading order; Done or Escape closes the panel.                                                                                                                                                                                                                                                                                                                           |
 
-Every correction is checked before it is recorded, then the notation is rendered and imported again at once, so **Use for fingerings** follows what is on screen. **Undo** (or Ctrl+Z) takes back the last correction and says which, **Reset to recognition** removes them all (Undo brings them back), and **Review corrections** lists them in the order they were made ("Bar 2, right hand: quarter rest removed"). Notes are named by their position in the raw recognition, not by the strict import, so a recognition the import refuses can still be corrected until it passes. Correcting works on the combined score; a batch whose pages cannot be combined is reviewed page by page and corrected in a notation editor.
+Every correction is checked before it is recorded, then the notation is rendered and imported again at once, so **Use for fingerings** follows what is on screen. **Undo** (or Ctrl+Z) takes back the last correction and says which, **Reset to recognition** removes them all (Undo brings them back), and **Review corrections** lists them in the order they were made ("Bar 2, right hand: quarter rest removed"). Notes are named by their position in the raw recognition, not by the strict import, so a recognition the import refuses can still be corrected until it passes. Correcting works on the combined score, including when a page's notes do not fit together; only a batch whose pages cannot be combined at all (below) is reviewed page by page and corrected in a notation editor. A misread time signature cannot be corrected in the review.
 
 **Places to check** appears above the notation when rules checked on the file itself find something: a tied note that ends before or after the next note of its pitch begins (the bar 11 tie of the test page, whose continuation arrived a quarter note late, is one), a tie without a matching note, hands that disagree on a bar's length, or a hand longer than its time signature. Each entry selects its note. While the strict import refuses the recognition, the list opens by itself and its first entry carries the screen's red instead of the unusable **Use for fingerings** (with no entry, **Scan again** does). They point at a place; they never decide the correction. On 250 of the library's curated engravings (8,101 bars) the tie rules flag nothing and the hand rule flags 12 bars in 7 pieces (0.15%), where the engraving lets one voice end early.
 
@@ -56,7 +56,7 @@ Each rotation is computed from the original image, after its EXIF orientation, r
 
 ### Image batches
 
-The combined score appends each page's recognised measures in your order, keeping each page's time units, signatures and notation. It needs compatible parts and staves and an explicit starting context on each page. Repeat and jump navigation, incompatible layouts and invalid ties block the combined score; page-by-page review and downloads stay available. Combining never repairs recognition or fills in notes at page boundaries.
+The combined score appends each page's recognised measures in your order, keeping each page's time units, signatures and notation. It needs compatible parts and staves and an explicit starting context on each page. Repeat and jump navigation and incompatible layouts block the combined score; page-by-page review and downloads stay available. Notes that do not fit together, such as a broken tie on one page or across a page edge, do not block it: the combined score opens with them under **Places to check**, and the strict import keeps **Use for fingerings** unavailable until they are corrected. Combining never repairs recognition or fills in notes at page boundaries.
 
 Slur and other span numbers are renumbered per page, so a slur never links across pages by accident; check continuations at page edges. MusicXML allows only 16 numbers per span type, so a batch whose spans would need more is refused, even below 20 pages.
 
@@ -124,7 +124,12 @@ Measured on the acceptance corpus (16 library pieces rendered as pages, each in 
 
 The worker changes a homr export in two lossless ways, and says so under **Recognition details**: a measure that holds no music (homr writes the bracket closing a first ending as a measure of its own, which shifted every later bar) joins its neighbours, and a slur joining one pitch to its continuation is read as a tie even when homr gave the two notes different voice numbers. No pitch, duration or onset changes.
 
-The two photos of a printed continuation page that first tested scanning also showed a duplicated C5 and a bass E3 in the upper hand; those photos are not in the repository, so these two errors are not re-measured. Correct such notes with **Remove** and **To left hand**.
+On eleven real phone photos (WhatsApp-compressed, five pages of Boëllmann's Op. 28 and a bound book page; results per photo in `docs/research/omr.md`), all were recognised, 9 pass the strict import and 8 have exactly the page's bars. What they add to the list:
+
+- **Upside-down photos**: rotate them first. As taken, one lost its grand staff and another its key and meter; rotated, both read right.
+- **Compound meters**: homr read 4/4 for 9/8 on both photos of one page, so every bar there is listed as longer than its time signature.
+- **Cut-off or torn pages** come back with extra bars.
+- **Duplicates and wrong hands**: the book page's first photos showed a duplicated C5 and a bass E3 in the upper hand. Correct such notes with **Remove** and **To left hand**.
 
 Further limits:
 
@@ -133,7 +138,7 @@ Further limits:
 - Audiveris (used for PDFs, and for images without homr) fails below about 10 px between staff lines and on skewed or curved pages.
 - Text and tempo can be incomplete. A tempo like "= 100" without a recognised beat unit gives no tempo, and an app default tempo is not a recognised one.
 - A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
-- Synthetic test pages, strict parsing and passing tests do not certify musical accuracy. Real phone photos, multi-page books and browsers other than desktop Chrome are untested.
+- Synthetic test pages, eleven phone photos checked on bars, staves, key and time, strict parsing and passing tests do not certify musical accuracy. Multi-page books and browsers other than desktop Chrome are untested.
 
 Source beam recovery for photos is an open request (#39).
 

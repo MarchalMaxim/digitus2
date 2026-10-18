@@ -76,6 +76,35 @@ What remains, and why:
 - **Duplicates** are mostly shared noteheads written in two voices, which the reference also has; the remaining counts are rhythm errors (Czerny's sixteenths read as 32nds).
 - **Beams.** homr writes no beams, its segmentation has no beam class (stems and rests only) and its note positions are attention estimates in staff-crop coordinates, so beam strokes cannot be linked to recognised notes without an alignment homr does not provide. The app's display inference (`scanBeams.ts`) matches 133 of the 357 reference groups on clean pages (precision 26.6%, recall 37.3%). Recovering beams from the image would have to beat that at about 98% precision on every variant to be presented as read from the source; that work is not done (#39). The PDF route reads beams from the source: 92.01% exact groups.
 
+### Real phone photos
+
+`research/omr/photos/` holds eleven phone photographs by the owner (public domain; WhatsApp-compressed JPEGs, 1200×1600, about 0.2 MB each): pages 1 to 5 of Boëllmann's Improvisations Op. 28 (No. I in 3/4 with one sharp, No. II in 9/8 with two sharps), several in two conditions, and two photos of the continuation page of a bound book that first tested scanning. None of the pieces is in the library, so there is no note-level truth: `manifest.json` holds what was read off each page by eye, and the gate's `photos` route checks it exactly. Two photos are cut off at the bottom; none is unusable. The upside-down photos are scanned as taken and turned 180° as **Rotate** does.
+
+| Photo | Bars (page) | Staves | Key | Time (page) | Strict import | Worker rules |
+| --- | ---: | ---: | :---: | :---: | :---: | --- |
+| No. I p. 1, hand shadow | 19 (19) | 2 | ✓ | ✓ | ✓ | none needed |
+| No. I p. 2, shadow, cut off | 28 (24) | 2 | ✓ | ✓ | ✓ | 4 slurs read as ties |
+| No. I p. 2, flat | 24 (24) | 2 | ✓ | ✓ | ✓ | 4 slurs read as ties |
+| No. I p. 3, upside down, as taken | 24 (24) | 1 | ✗ | ✓ | ✓ | grand-staff warning shown |
+| No. I p. 3, upside down, rotated | 24 (24) | 2 | ✓ | ✓ | ✓ | 9 slurs read as ties |
+| No. I p. 3, perspective | 24 (24) | 2 | ✓ | ✓ | ✓ | 8 slurs read as ties |
+| No. II p. 4, perspective, cut off | 14 (11) | 2 | ✓ | ✓ | ✗ tie gap | none |
+| No. II p. 4, upside down, as taken | 11 (11) | 2 | ✗ | 4/4 (9/8) | ✗ tie gap | none |
+| No. II p. 4, upside down, rotated | 16 (11) | 2 | ✓ | ✓ | ✗ tie gap | none |
+| No. II p. 5, shadow, torn | 27 → 26 (15) | 2 | ✓ | 4/4 (9/8) | ✓ | 1 empty measure merged, 1 tie |
+| No. II p. 5, flat | 15 (15) | 2 | ✓ | 4/4 (9/8) | ✓ | 1 slur read as a tie |
+| Book p. 25, warm light | 13 (13) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | 1 slur read as a tie |
+| Book p. 25, dim | 13 (13) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | 1 slur read as a tie |
+
+Totals as taken (11 photos): 11 recognised, 9 pass the strict import, 8 have the page's bars, 10 its staves, 9 its key, 6 its time signature. Rotated (2 photos): both recognised, 1 imports, and both have the right staves, key and time; 1 has the right bars. These counts are the gate's `photoFloors`. The worker rules changed the bar count only on the torn page (27 to 26) and changed no import result. All four slurs read as ties on page 2 (flat) were checked against the print: each is a half note tied to an eighth of the same pitch (bars 14 to 17). The other conversions were not checked by eye.
+
+What the photos show:
+
+- **Turn an upside-down photo before scanning.** As taken, page 3 lost its grand staff (one staff whose clef keeps changing, which the review flags) and page 4 lost its key and meter; rotated, both read the right staves, key and time.
+- **The 9/8 pages are the weak case.** homr infers the meter from bar lengths when it misses the printed one, and read 4/4 on both photos of page 5, so every bar there runs 4.5 beats into a 4-beat bar; the review lists each one as longer than its time signature. Page 4 fails the strict import on all three photos with a tie whose two notes do not meet. On the rotated photo it is bar 16 of homr's 16: a tied half note A4 that ends a beat before its continuation. The review points at it, and making the note dotted clears it; that bar is also one of homr's extra bars, so the photo still needs checking against the page.
+- **Extra bars** come from the cut-off photos (a partial last system) and the torn corner, which homr splits into more measures than the page has.
+- **The book page** reads the same on both photos: all 13 main bars, both hands, 155 notes. The earlier test (156 and 157 notes on the owner's first two photos of this page) also found a duplicated C5 and a bass E3 in the upper hand; without note-level truth the gate does not count them.
+
 ## Routes evaluated
 
 | Route                                                                                                                                                                                                                | Runs where                                       | Result                                                                                                                                                                     | Decision                                       |
@@ -148,7 +177,7 @@ Generated photo-like stresses (Audiveris, short-staff profile, English OCR):
 
 ### Real book photos
 
-Two private photos of the same printed continuation page (768×1024 and 1200×1600), with book curvature, uneven light, four grand-staff systems, alternative bass cue staves and footnote music:
+The owner's first two photos of a printed continuation page (768×1024 and 1200×1600; the page is in the gate as `continuation-page25`, from two later photos), with book curvature, uneven light, four grand-staff systems, alternative bass cue staves and footnote music:
 
 | Attempt                                                   | Result                                                                                    |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -187,4 +216,4 @@ Nothing below is bundled into the MIT web app. The setup scripts fetch each comp
 
 ## Open questions
 
-Source beam recovery for photos is open (#39). Phone-photo robustness, multi-page books and the photo errors seen only on the private test page (a duplicated C5, a bass E3 in the upper hand) are not re-measured: those photos are not in the repository, and the synthetic corpus does not reproduce them.
+Source beam recovery for photos is open (#39). The phone photos have page-level facts only (bars, staves, key, time); note-level errors on them, such as the duplicated C5 and the bass E3 in the upper hand on the book page, are not counted, and the synthetic corpus does not reproduce them. Correcting a misread time signature is not in the review.

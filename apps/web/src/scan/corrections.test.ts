@@ -7,7 +7,9 @@ import {
   findProblems,
   type Correction,
 } from './corrections.js';
+import { en } from '../i18n/en/index.js';
 import { parseScanXml, readScanScore } from './notes.js';
+import { describeProblem } from './ScanEditor.js';
 
 /** One note element: `p` is a pitch like C5 or Bb4, or `r` for a rest. */
 function n(
@@ -223,6 +225,17 @@ describe('duration corrections check both hands', () => {
         { staff: 2, beats: 3 },
       ],
     });
+  });
+  it('says whether the hands disagree or the whole bar overruns its time signature', () => {
+    // Both hands 4 beats in 3/4 (a misread meter), then a bar whose hands differ.
+    const long = n('C5', 8, 'whole') + backup(8) + n('C3', 8, 'whole', { staff: 2 });
+    const uneven = n('C5', 6, 'half', { dots: 1 }) + backup(6) + n('C3', 4, 'half', { staff: 2 });
+    const parsed = readScanScore(parseScanXml(score([long, uneven])));
+    const texts = findProblems(parsed).map((p) => describeProblem(en, parsed, p));
+    expect(texts).toEqual([
+      'The bar is longer than its time signature. Bar 1: right hand 4 beats, left hand 4 beats, in 3/4.',
+      'The hands disagree. Bar 2: right hand 3 beats, left hand 2 beats, in 3/4.',
+    ]);
   });
   it('refuses a grace note', () => {
     const raw = score([

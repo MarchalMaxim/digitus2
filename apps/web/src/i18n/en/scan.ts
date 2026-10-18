@@ -54,6 +54,12 @@ export const scan = {
     /** `error` is the reason, already written as a sentence. */
     problem: (error: string) =>
       `${error} Correct the notes here, download the raw file for a notation editor, or try another image.`,
+    /** The same, in page review, when the combined score can be corrected. */
+    problemInCombined: (error: string) =>
+      `${error} Correct the notes in the combined score, download the raw file for a notation editor, or try another image.`,
+    /** The same, when the recognition cannot be corrected here. */
+    problemReadOnly: (error: string) =>
+      `${error} Download the raw file for a notation editor, or try another image.`,
     detailsSummary: 'Recognition details',
     /** The disclosure holding the MusicXML downloads. */
     filesSummary: 'Files for a notation editor',
@@ -169,6 +175,8 @@ export const scan = {
         `${where}: a tie on ${pitch} has no matching note.`,
       /** `timing` is the sentence from `timing` above. */
       barTiming: (timing: string) => `The hands disagree. ${timing}`,
+      /** The hands agree, but the bar runs past the time signature. */
+      barLong: (timing: string) => `The bar is longer than its time signature. ${timing}`,
     },
     /** A gap as a length: "a quarter note", "2 beats". */
     gap: (beats: number) => plural('en', beats, { one: '# beat', other: '# beats' }),

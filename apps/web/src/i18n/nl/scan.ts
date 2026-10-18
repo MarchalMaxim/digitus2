@@ -52,6 +52,10 @@ export const scan: Messages['scan'] = {
     preparing: 'Herkende notatie voorbereiden…',
     problem: (error: string) =>
       `${error} Corrigeer de noten hier, download het ruwe bestand voor een notatieprogramma of probeer een andere afbeelding.`,
+    problemInCombined: (error: string) =>
+      `${error} Corrigeer de noten in de gecombineerde partituur, download het ruwe bestand voor een notatieprogramma of probeer een andere afbeelding.`,
+    problemReadOnly: (error: string) =>
+      `${error} Download het ruwe bestand voor een notatieprogramma of probeer een andere afbeelding.`,
     detailsSummary: 'Details van de herkenning',
     /** The disclosure holding the MusicXML downloads. */
     filesSummary: 'Bestanden voor een notatieprogramma',
@@ -159,6 +163,7 @@ export const scan: Messages['scan'] = {
       tieUnmatched: (where: string, pitch: string) =>
         `${where}: een overbinding op ${pitch} heeft geen bijpassende noot.`,
       barTiming: (timing: string) => `De handen lopen niet gelijk. ${timing}`,
+      barLong: (timing: string) => `De maat is langer dan de maatsoort. ${timing}`,
     },
     gap: (beats: number) => plural('nl', beats, { one: '# tel', other: '# tellen' }),
     downloadCorrected: 'Gecorrigeerde MusicXML downloaden',

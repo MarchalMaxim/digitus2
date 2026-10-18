@@ -18,13 +18,14 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { beamGroups, compareBeams, errorClasses } from './diagnose.mjs';
+import { beamGroups, compareBeams, errorClasses, photoFacts } from './diagnose.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
 const RESULTS = join(REPO, 'research/omr/results/acceptance');
 const CORPUS = join(HERE, 'acceptance/corpus.json');
 const FLOOR = join(HERE, 'acceptance/floor.json');
+const PHOTOS = join(HERE, 'photos');
 export const SKIP = 3;
 
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -156,6 +157,77 @@ export function breaches(summary, floors) {
   return out;
 }
 
+const PHOTO_COUNTS = ['recognised', 'imported', 'barsRight', 'stavesRight', 'keyRight', 'timeRight'];
+
+/**
+ * Real phone photos have no MusicXML ground truth: each is checked on the facts read off the page
+ * (research/omr/photos/manifest.json). Per variant ('as-taken', and 'rotated' for a photo taken
+ * upside down and turned with Rotate): how many pages the recogniser returned at all, how many the
+ * strict import accepts, and how many have exactly the page's bars, staves, key and time.
+ */
+export function photoSummary(rows) {
+  const out = {};
+  for (const row of rows) {
+    const g = (out[`photos:${row.variant}`] ??= { pages: 0, ...Object.fromEntries(PHOTO_COUNTS.map((k) => [k, 0])) });
+    g.pages++;
+    const f = row.facts;
+    if (!f) continue;
+    g.recognised++;
+    if (f.imports) g.imported++;
+    if (f.bars === row.expect.bars) g.barsRight++;
+    if (f.staves === row.expect.staves) g.stavesRight++;
+    if (f.fifths === row.expect.fifths) g.keyRight++;
+    if (row.expect.time !== null && f.time === row.expect.time) g.timeRight++;
+  }
+  return out;
+}
+export function photoFloorsFrom(summary) {
+  return Object.fromEntries(
+    Object.entries(summary).map(([key, s]) => [key, Object.fromEntries(PHOTO_COUNTS.map((k) => [`${k}Min`, s[k]]))]),
+  );
+}
+export function photoBreaches(summary, floors) {
+  const out = [];
+  for (const [key, f] of Object.entries(floors)) {
+    const s = summary[key];
+    if (!s) {
+      out.push(`${key}: not measured`);
+      continue;
+    }
+    for (const k of PHOTO_COUNTS) {
+      if (typeof f[`${k}Min`] !== 'number') out.push(`${key}: floor.json lacks ${k}Min`);
+      else if (s[k] < f[`${k}Min`]) out.push(`${key}: ${k} ${s[k]} below floor ${f[`${k}Min`]}`);
+    }
+  }
+  return out;
+}
+
+/** The photos as jobs: each as taken, and a turned copy (a PNG, as the app's Rotate makes) when needed. */
+function photoJobs(tc, pipeline) {
+  const manifest = JSON.parse(readFileSync(join(PHOTOS, 'manifest.json'), 'utf8'));
+  const turned = join(RESULTS, 'photos');
+  mkdirSync(turned, { recursive: true });
+  const jobs = [];
+  for (const photo of manifest.photos) {
+    const variants = [['as-taken', join(PHOTOS, photo.file)]];
+    if (photo.rotate) {
+      const target = join(turned, `${photo.id}-rotated-${photo.rotate}.png`);
+      if (!existsSync(target)) {
+        // The homr environment has Pillow; the turn is exact (no resampling at 180 degrees).
+        const python = join(tc.homr, 'venv/Scripts/python.exe');
+        const r = spawnSync(python, ['-I', '-c', 'import sys;from PIL import Image;Image.open(sys.argv[1]).rotate(int(sys.argv[3]),expand=True).save(sys.argv[2])', join(PHOTOS, photo.file), target, String(-photo.rotate)], { encoding: 'utf8' });
+        if (r.status !== 0) throw new Error(`could not turn ${photo.file}: ${r.stderr}`);
+      }
+      variants.push(['rotated', target]);
+    }
+    for (const [variant, input] of variants) {
+      const key = sha(Buffer.concat([readFileSync(input), Buffer.from(`homr:${pipeline}`)])).slice(0, 24);
+      jobs.push({ id: `${photo.id}:homr:${variant}`, photo, recognizer: 'homr', variant, input, output: join(RESULTS, 'cache', `${key}.musicxml`) });
+    }
+  }
+  return jobs;
+}
+
 async function fixtures(corpus) {
   const dir = join(RESULTS, `fixtures-${corpus.version}`);
   const manifest = join(dir, 'manifest.json');
@@ -233,8 +305,9 @@ export async function main(args = process.argv.slice(2)) {
       }
   }
   mkdirSync(join(RESULTS, 'cache'), { recursive: true });
+  const photos = photoJobs(tc, pipeline);
   const jobFile = join(RESULTS, 'jobs.json');
-  writeFileSync(jobFile, JSON.stringify(jobs.map(({ id, recognizer, input, output }) => ({ id, recognizer, input, output })), null, 1));
+  writeFileSync(jobFile, JSON.stringify([...jobs, ...photos].map(({ id, recognizer, input, output }) => ({ id, recognizer, input, output })), null, 1));
   const run = spawnSync(
     tc.python,
     ['-I', join(HERE, 'acceptance/recognize.py'), jobFile, '--bundle', tc.bundle, '--text-models', tc.textModels, '--homr-toolchain', tc.homr],
@@ -248,7 +321,14 @@ export async function main(args = process.argv.slice(2)) {
     return { id: job.id, piece: job.piece.id, recognizer: job.recognizer, variant: job.variant, ...score(E, reference, job.output) };
   });
   const summary = aggregate(rows);
-  const card = { schemaVersion: 1, corpus: corpus.version, pipeline, recognitionExecuted: true, summary, rows };
+  const photoRows = photos.map((job) => ({
+    id: job.id,
+    variant: job.variant,
+    expect: { bars: job.photo.bars, staves: job.photo.staves, fifths: job.photo.fifths, time: job.photo.time },
+    facts: existsSync(job.output) ? photoFacts(E, readFileSync(job.output, 'utf8')) : null,
+  }));
+  const photoTotals = photoSummary(photoRows);
+  const card = { schemaVersion: 1, corpus: corpus.version, pipeline, recognitionExecuted: true, summary, rows, photos: { summary: photoTotals, rows: photoRows } };
   mkdirSync(RESULTS, { recursive: true });
   writeFileSync(join(RESULTS, 'latest.json'), JSON.stringify(card, null, 2));
 
@@ -258,8 +338,11 @@ export async function main(args = process.argv.slice(2)) {
     console.log(
       `${key.padEnd(22)} ${String(s.pages).padStart(5)} ${String(s.imported).padStart(8)} ${pct(s.fullNoteF1).padStart(8)} ${pct(s.pitchF1).padStart(6)} ${pct(s.beamF1).padStart(6)} ${String(s.tiesMissed).padStart(11)} ${String(s.duplicates).padStart(3)} ${String(s.wrongStaff).padStart(11)}`,
     );
+  console.log('\nphotos:variant      pages recognised imported bars staves key time');
+  for (const [key, p] of Object.entries(photoTotals))
+    console.log(`${key.padEnd(19)} ${String(p.pages).padStart(5)} ${String(p.recognised).padStart(10)} ${String(p.imported).padStart(8)} ${String(p.barsRight).padStart(4)} ${String(p.stavesRight).padStart(6)} ${String(p.keyRight).padStart(3)} ${String(p.timeRight).padStart(4)}`);
   if (args.includes('--update-floor')) {
-    writeFileSync(FLOOR, JSON.stringify({ schemaVersion: 1, corpus: corpus.version, note: 'Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts.', floors: floorsFrom(summary) }, null, 2) + '\n');
+    writeFileSync(FLOOR, JSON.stringify({ schemaVersion: 1, corpus: corpus.version, note: 'Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact.', floors: floorsFrom(summary), photoFloors: photoFloorsFrom(photoTotals) }, null, 2) + '\n');
     console.log(`\nFloors written to ${FLOOR}`);
     return 0;
   }
@@ -269,7 +352,8 @@ export async function main(args = process.argv.slice(2)) {
   }
   const floor = JSON.parse(readFileSync(FLOOR, 'utf8'));
   if (floor.corpus !== corpus.version) throw new Error('floor.json was measured on another corpus version');
-  const found = breaches(summary, floor.floors);
+  const found = [...breaches(summary, floor.floors), ...photoBreaches(photoTotals, floor.photoFloors ?? {})];
+  if (!floor.photoFloors) found.push('photos: floor.json has no photoFloors');
   if (found.length) {
     console.log('\nRegressions:\n' + found.map((line) => `  ${line}`).join('\n'));
     return 1;

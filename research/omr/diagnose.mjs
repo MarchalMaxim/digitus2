@@ -165,3 +165,32 @@ export function compareBeams(reference, recognized) {
   const total = reference.length + recognized.length;
   return { matched, reference: reference.length, recognized: recognized.length, f1: total ? (2 * matched) / total : 1 };
 }
+
+/**
+ * What a recognised photo page is checked on when there is no MusicXML ground truth: the facts
+ * read off the page by eye (research/omr/photos/manifest.json). Bars and the first key and time
+ * signature come from the XML itself, so a file the strict import refuses is still measured.
+ */
+export function photoFacts(E, xml) {
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  const part = childElements(doc.documentElement, 'part')[0];
+  const measures = part ? childElements(part, 'measure') : [];
+  let staves = 1;
+  let fifths = null;
+  let time = null;
+  for (const el of doc.getElementsByTagName('staves')) staves = Math.max(staves, Number(el.textContent) || 1);
+  const key = doc.getElementsByTagName('fifths')[0];
+  if (key) fifths = Number(key.textContent);
+  const t = doc.getElementsByTagName('time')[0];
+  if (t) time = `${childText(t, 'beats')}/${childText(t, 'beat-type')}`;
+  let imports = false;
+  let error = null;
+  let notes = 0;
+  try {
+    notes = E.parseMusicXml(xml, { preserveNotation: true }).score.notes.length;
+    imports = true;
+  } catch (cause) {
+    error = cause.message;
+  }
+  return { imports, error, bars: measures.length, staves, fifths, time, notes };
+}

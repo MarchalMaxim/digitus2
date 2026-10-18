@@ -2,6 +2,10 @@ import { expect, test, type Page } from '@playwright/test';
 import { openFiles } from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 
+// My scores holds recognitions made on a PC (a phone cannot reach the PC worker): these flows
+// run as a PC window, at 360 px in the mobile project.
+test.use({ hasTouch: false, isMobile: false });
+
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=',
   'base64',

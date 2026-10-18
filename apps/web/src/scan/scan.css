@@ -130,3 +130,117 @@
 .scan-loader {
   width: 10rem;
 }
+
+/* A pressed toggle (the review's view switch, the editor's pitch and length) is drawn inverted,
+   as a chosen level pill is: the state is visible without colour. */
+.scan-view button[aria-pressed='true']:not(.scan-thumbnail) {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* The recognised sheet takes notes as targets only while correcting is possible. */
+.scan-sheet.is-editable {
+  cursor: pointer;
+}
+.scan-sheet:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+/* A note stepped to with the keyboard stays clear of the editor docked below it. */
+.scan-sheet g.note,
+.scan-sheet g.rest {
+  scroll-margin: 6rem 0 22rem;
+}
+
+/* The note editor docks at the bottom of the screen while a note is selected, like a sheet a
+   thumb can reach on a phone; it scrolls itself when a small screen cannot hold it. */
+.note-editor {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+  --gap: 0.5rem;
+}
+.note-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+.note-editor-title {
+  flex: 1 1 12rem;
+  margin: 0;
+  font-weight: 600;
+}
+.note-editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+.note-editor-label {
+  flex: 0 0 4.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-3);
+}
+.note-editor button {
+  padding: 0.5rem 0.75rem;
+}
+.note-editor .note-editor-symbol {
+  min-width: 44px;
+  padding: 0.5rem;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+.note-editor .text-button {
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  /* The group names stay for screen readers; on a phone the buttons speak for themselves. */
+  .note-editor-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.scan-problems summary,
+.scan-corrections summary {
+  font-weight: 600;
+}
+.scan-problems ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scan-problems .text-button {
+  min-height: 44px;
+  text-align: left;
+}
+.scan-corrections .row {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.scan-corrections ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+/* The selected page's tools: square symbol buttons, 44 px to the touch. */
+.scan-page-tools {
+  gap: 0.375rem;
+}
+.scan-tool {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+}

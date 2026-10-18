@@ -220,6 +220,8 @@ export const scan: Messages['scan'] = {
   pages: {
     arrange:
       'Zet de pagina’s in leesvolgorde. Sleep een miniatuur of kies een pagina om die te verplaatsen.',
+    /** On a touch screen, where pages cannot be dragged. */
+    arrangeTouch: 'Zet de pagina’s in leesvolgorde: kies een pagina en verplaats die met de pijlen.',
     originalCount: (n: number) =>
       plural('nl', n, {
         one: '# originele pagina, in leesvolgorde.',

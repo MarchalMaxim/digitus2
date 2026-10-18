@@ -3,6 +3,7 @@ import { messageOf } from '../app/errors.js';
 import { useT } from '../i18n/i18n.js';
 import type { Phrase } from '../i18n/messages.js';
 import { SCAN_PAGE_LIMIT, validateScanImages, type ScanPage } from './model.js';
+import { namedCapture } from './phone.js';
 import { rotateScanPage } from './rotation.js';
 
 export function useBlobUrl(blob: Blob | undefined): string | undefined {
@@ -17,6 +18,27 @@ export function useBlobUrl(blob: Blob | undefined): string | undefined {
     return () => URL.revokeObjectURL(next);
   }, [blob]);
   return url;
+}
+/** The page tools' symbols, drawn in the text colour. */
+function ToolIcon({ name }: { name: 'rotate' | 'earlier' | 'later' | 'remove' }) {
+  const paths = {
+    rotate: 'M17 4v4.5h-4.5M16.6 8.4A7 7 0 1 0 17 13',
+    earlier: 'M15 5l-7 7 7 7',
+    later: 'M9 5l7 7-7 7',
+    remove: 'M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12M10.5 10.5v5.5M13.5 10.5v5.5',
+  };
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path
+        d={paths[name]}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 function Thumbnail({ file }: { file: File }) {
   const url = useBlobUrl(file);
@@ -102,8 +124,10 @@ export function ImagePages({
     onChange(reordered);
     onSelect(to);
   };
-  const addFiles = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.currentTarget.files ?? []);
+  const addFiles = (event: ChangeEvent<HTMLInputElement>, captured = false) => {
+    const files = Array.from(event.currentTarget.files ?? []).map((file) =>
+      captured ? namedCapture(file) : file,
+    );
     event.currentTarget.value = '';
     if (!files.length) return;
     void validateScanImages(files).then(
@@ -134,7 +158,11 @@ export function ImagePages({
       {pages.length > 1 && (
         <>
           <p className="small muted">
-            {editable ? t.scan.pages.arrange : t.scan.pages.originalCount(pages.length)}
+            {editable
+              ? camera
+                ? t.scan.pages.arrangeTouch
+                : t.scan.pages.arrange
+              : t.scan.pages.originalCount(pages.length)}
           </p>
           <ol className="scan-page-list" aria-label={t.scan.pages.listLabel}>
             {pages.map((page, index) => (
@@ -187,15 +215,54 @@ export function ImagePages({
       )}
       {editable && (
         <div className="stack scan-page-edit">
-          <div className="row">
+          {/* One row of tools for the selected page: universal symbols, each named for screen
+              readers, so the row fits a phone held in one hand. */}
+          <div className="row scan-page-tools">
             <button
+              className="scan-tool"
               disabled={busy || rotating}
+              aria-label={t.scan.pages.rotate}
+              title={t.scan.pages.rotate}
               onClick={() => {
                 void rotate();
               }}
             >
-              {t.scan.pages.rotate}
+              <ToolIcon name="rotate" />
             </button>
+            {pages.length > 1 && (
+              <>
+                <button
+                  className="scan-tool"
+                  disabled={busy || rotating || selected === 0}
+                  onClick={() => move(selected, selected - 1)}
+                  aria-label={t.scan.pages.moveEarlierLabel(selected + 1)}
+                  title={t.scan.pages.moveEarlier}
+                >
+                  <ToolIcon name="earlier" />
+                </button>
+                <button
+                  className="scan-tool"
+                  disabled={busy || rotating || selected === pages.length - 1}
+                  onClick={() => move(selected, selected + 1)}
+                  aria-label={t.scan.pages.moveLaterLabel(selected + 1)}
+                  title={t.scan.pages.moveLater}
+                >
+                  <ToolIcon name="later" />
+                </button>
+                <button
+                  className="scan-tool"
+                  disabled={busy}
+                  onClick={() => {
+                    onChange(pages.filter((p) => p.id !== selectedPage.id));
+                    onSelect(Math.max(0, selected - 1));
+                  }}
+                  aria-label={t.scan.pages.removeLabel(selected + 1)}
+                  title={t.scan.pages.remove}
+                >
+                  <ToolIcon name="remove" />
+                </button>
+              </>
+            )}
             {rotating && (
               <button onClick={() => rotation.current?.abort()}>
                 {t.scan.pages.cancelRotation}
@@ -203,34 +270,6 @@ export function ImagePages({
             )}
           </div>
           {rotating && <p role="status">{t.scan.pages.rotating}</p>}
-          {pages.length > 1 && (
-            <div className="row">
-              <button
-                disabled={busy || rotating || selected === 0}
-                onClick={() => move(selected, selected - 1)}
-                aria-label={t.scan.pages.moveEarlierLabel(selected + 1)}
-              >
-                {t.scan.pages.moveEarlier}
-              </button>
-              <button
-                disabled={busy || rotating || selected === pages.length - 1}
-                onClick={() => move(selected, selected + 1)}
-                aria-label={t.scan.pages.moveLaterLabel(selected + 1)}
-              >
-                {t.scan.pages.moveLater}
-              </button>
-              <button
-                disabled={busy}
-                onClick={() => {
-                  onChange(pages.filter((p) => p.id !== selectedPage.id));
-                  onSelect(Math.max(0, selected - 1));
-                }}
-                aria-label={t.scan.pages.removeLabel(selected + 1)}
-              >
-                {t.scan.pages.remove}
-              </button>
-            </div>
-          )}
           <div className="row">
             {camera && (
               <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
@@ -241,7 +280,7 @@ export function ImagePages({
                   capture="environment"
                   className="visually-hidden"
                   disabled={busy}
-                  onChange={addFiles}
+                  onChange={(event) => addFiles(event, true)}
                 />
               </label>
             )}
@@ -253,30 +292,11 @@ export function ImagePages({
                 accept=".png,.jpg,.jpeg,image/jpeg,image/png"
                 className="visually-hidden"
                 disabled={busy}
-                onChange={addFiles}
+                onChange={(event) => addFiles(event)}
               />
             </label>
           </div>
           {error && <p role="alert">{error(t)}</p>}
-        </div>
-      )}
-      {pages.length > 1 && (
-        <div className="row scan-source-pagination" aria-label={t.scan.pager.navLabel}>
-          <button
-            disabled={selected === 0}
-            onClick={() => onSelect(selected - 1)}
-            aria-label={t.scan.pager.previousLabel}
-          >
-            {t.scan.pager.previous}
-          </button>
-          <span>{t.scan.pager.pageOf(selected + 1, pages.length)}</span>
-          <button
-            disabled={selected === pages.length - 1}
-            onClick={() => onSelect(selected + 1)}
-            aria-label={t.scan.pager.nextLabel}
-          >
-            {t.scan.pager.next}
-          </button>
         </div>
       )}
       {selectedPage.error && (

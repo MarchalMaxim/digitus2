@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import type { Phrase } from '../i18n/messages.js';
 import { useT } from '../i18n/i18n.js';
-import { isTouchOnly } from '../scan/phone.js';
+import { isTouchOnly, namedCapture } from '../scan/phone.js';
 import { acceptScoreFiles, SCORE_ACCEPT } from './ownFile.js';
 
 // The plan names this module OwnFile.tsx. On Windows' case-insensitive file system an import of
@@ -46,7 +46,11 @@ export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
             accept="image/jpeg,image/png"
             capture="environment"
             className="visually-hidden"
-            onChange={onChange}
+            onChange={(e) => {
+              const input = e.currentTarget;
+              acceptScoreFiles(Array.from(input.files ?? []).map((file) => namedCapture(file)), onFile, onRefuse, onScan);
+              input.value = '';
+            }}
           />
         </label>
       )}

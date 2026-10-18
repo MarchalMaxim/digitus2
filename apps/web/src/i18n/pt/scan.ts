@@ -217,6 +217,8 @@ export const scan: Messages['scan'] = {
   pages: {
     arrange:
       'Coloque as páginas na ordem de leitura. Arraste uma miniatura ou selecione uma página para movê-la.',
+    /** On a touch screen, where pages cannot be dragged. */
+    arrangeTouch: 'Coloque as páginas na ordem de leitura: selecione uma página e mova-a com as setas.',
     originalCount: (n: number) =>
       plural('pt', n, {
         one: '# página original, na ordem de leitura.',

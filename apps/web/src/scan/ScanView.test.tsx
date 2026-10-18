@@ -147,8 +147,9 @@ it('speaks French, including a restored error and the page navigation', async ()
   expect(screen.getByRole('heading', { name: 'Vérifiez la reconnaissance' })).toBeVisible();
   expect(screen.getByRole('button', { name: 'Reconnaissance par page' })).toBeVisible();
   expect(screen.getByRole('alert')).toHaveTextContent('leur notation n’a pas pu être combinée');
-  expect(screen.getByRole('button', { name: 'Page d’origine suivante' })).toBeVisible();
-  expect(screen.getByText('Page 1 sur 2')).toBeVisible();
+  // Image pages are chosen by their thumbnails; the pager is only for a PDF's pages.
+  expect(screen.getByRole('button', { name: 'Sélectionner la page 2 : source.png' })).toBeVisible();
+  expect(screen.getByText('Reconnaissance de la page 1')).toBeVisible();
   expect(screen.getByRole('button', { name: 'Utiliser pour le doigté' })).toBeDisabled();
 });
 

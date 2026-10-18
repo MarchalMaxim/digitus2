@@ -190,9 +190,23 @@ export function NoteEditor({
     <section className="note-editor stack" aria-label={t.scan.edit.panelLabel}>
       <div className="note-editor-head">
         <p className="note-editor-title">{describeNote(t, note)}</p>
-        <button className="text-button" onClick={onClose}>
-          {t.scan.edit.done}
+        <button
+          className="note-editor-symbol"
+          aria-label={t.scan.edit.previous}
+          disabled={position <= 0}
+          onClick={() => onSelect(order[position - 1]!.ordinal)}
+        >
+          ‹
         </button>
+        <button
+          className="note-editor-symbol"
+          aria-label={t.scan.edit.next}
+          disabled={position < 0 || position >= order.length - 1}
+          onClick={() => onSelect(order[position + 1]!.ordinal)}
+        >
+          ›
+        </button>
+        <button onClick={onClose}>{t.scan.edit.done}</button>
       </div>
       {pitched && (
         <div className="note-editor-row" role="group" aria-label={t.scan.edit.pitchLabel}>
@@ -278,17 +292,6 @@ export function NoteEditor({
           )}
         </div>
       )}
-      <div className="note-editor-row note-editor-nav">
-        <button disabled={position <= 0} onClick={() => onSelect(order[position - 1]!.ordinal)}>
-          {t.scan.edit.previous}
-        </button>
-        <button
-          disabled={position < 0 || position >= order.length - 1}
-          onClick={() => onSelect(order[position + 1]!.ordinal)}
-        >
-          {t.scan.edit.next}
-        </button>
-      </div>
       <p className="small" role="status">
         {status}
       </p>

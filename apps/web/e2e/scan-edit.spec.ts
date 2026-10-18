@@ -117,7 +117,9 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByText('2 corrections', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Reset to recognition' }).click();
-  await expect(page.locator('.scan-result p[aria-hidden="true"]')).toContainText('All corrections removed.');
+  await expect(page.locator('.scan-result p[aria-hidden="true"]')).toContainText(
+    'All corrections removed.',
+  );
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Download corrected MusicXML' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Undo' }).click();

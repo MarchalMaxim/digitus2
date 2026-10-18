@@ -21,7 +21,7 @@ test('local library: draft bytes, reading order, explicit resume and deletion su
   });
   await page.goto('/');
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
-  await page.locator('input[type=file]').setInputFiles([
+  await page.getByLabel('Open your own score').setInputFiles([
     { name: 'second.png', mimeType: 'image/png', buffer: Buffer.concat([png, Buffer.from('two')]) },
     { name: 'first.png', mimeType: 'image/png', buffer: png },
   ]);
@@ -100,7 +100,7 @@ test('local library: own MusicXML reopens and blocked storage keeps the visit us
     }),
   );
   await page.goto('/');
-  await page.locator('input[type=file]').setInputFiles({
+  await page.getByLabel('Open your own score').setInputFiles({
     name: 'my-score.musicxml',
     mimeType: 'text/xml',
     buffer: libraryScore('twinkle-twinkle-little-star'),
@@ -122,7 +122,7 @@ test('local library: uploaded MusicXML survives refresh and duplicate uploads st
     mimeType: 'text/xml',
     buffer: libraryScore('twinkle-twinkle-little-star'),
   };
-  await page.locator('input[type=file]').setInputFiles(file);
+  await page.getByLabel('Open your own score').setInputFiles(file);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible();
   await myScores(page);
   await expect(page.getByText('Saved', { exact: true })).toBeVisible();
@@ -131,7 +131,7 @@ test('local library: uploaded MusicXML survives refresh and duplicate uploads st
   await page.getByRole('button', { name: 'Open saved my-score.musicxml' }).click();
   await expect(page.locator('.score-sheet svg').first()).toBeVisible();
   await page.getByRole('button', { name: /^Back to (the )?library$/ }).click();
-  await page.locator('input[type=file]').setInputFiles(file);
+  await page.getByLabel('Open your own score').setInputFiles(file);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible();
   await myScores(page);
   await expect(page.getByRole('button', { name: 'Open saved my-score.musicxml' })).toHaveCount(2);

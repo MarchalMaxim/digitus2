@@ -107,9 +107,15 @@ async function navigate(request: Request): Promise<Response> {
   }
 }
 
+/**
+ * The precache holds one copy of each file, fetched by the installing worker without an Origin
+ * header. The page asks for its module scripts and stylesheets with one (`crossorigin`), and
+ * `vite preview` answers with `Vary: Origin`, so the match ignores Vary.
+ */
 async function fromPrecache(request: Request): Promise<Response> {
   return (
-    (await caches.match(request, { cacheName: PRECACHE, ignoreSearch: true })) ?? fetch(request)
+    (await caches.match(request, { cacheName: PRECACHE, ignoreSearch: true, ignoreVary: true })) ??
+    fetch(request)
   );
 }
 

@@ -3,7 +3,7 @@ import { expectNoSeriousA11y } from './helpers/axe.js';
 import { closePractice, openPractice, setLoopBars } from './helpers/practice.js';
 import { accentAreas, type AccentArea, type Box } from './helpers/pixels.js';
 import { expectOneRed } from './helpers/red.js';
-import { delayPianoSamples } from './helpers/samples.js';
+import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
@@ -734,6 +734,28 @@ test.describe('playback with the silent instrument', () => {
     await expect(status).toBeEmpty();
     const roots = await expectOneRed(page, 'playing the real piano');
     expect(roots.every((r) => r.inSheet)).toBe(true);
+  });
+
+  // Issue #51: the Vite servers answer a missing file with the app's page and status 200. The
+  // piano rejects a sample that is not audio, so Play says so instead of playing silence.
+  test('a piano sample answered with a page instead of audio: Play says the piano sounds could not be loaded', async ({
+    page,
+  }) => {
+    await page.route(PIANO_SAMPLES, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: '<!doctype html><title>digitus2</title>',
+      }),
+    );
+    await page.goto('/#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect(page.getByText(/piano sounds could not be loaded/)).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Pause' })).toHaveCount(0);
   });
 
   // Polish plan Task 3 review (the blocker): Happy Birthday with the left hand alone. The pickup

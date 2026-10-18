@@ -65,8 +65,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [health, setHealth] = useState<WorkerMetadata>();
   const [pages, setPages] = useState<string[]>([]);
   // The XML each worker last finished with: use waits until both match what is on screen.
-  const [rendered, setRendered] = useState<{ xml: string; error: Phrase | null }>();
-  const [imported, setImported] = useState<{ xml: string; error: Phrase | null }>();
+  // `detail` is the worker's own message, shown only under Recognition details.
+  const [rendered, setRendered] = useState<{ xml: string; error: Phrase | null; detail?: string }>();
+  const [imported, setImported] = useState<{ xml: string; error: Phrase | null; detail?: string }>();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selected, setSelected] = useState(0);
   const [reviewMode, setReviewMode] = useState<'combined' | 'page'>(
@@ -178,7 +179,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         if (!current || (cause as Error)?.name === 'SupersededError') return;
         setRendered({
           xml: renderXml,
-          error: (m) => m.scan.errors.notationNotShown(messageOf(cause, m)),
+          error: (m) => m.scan.errors.notationNotShown,
+          detail: messageOf(cause),
         });
       });
     return () => {
@@ -202,7 +204,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         if (current)
           setImported({
             xml: importXml,
-            error: (m) => m.scan.errors.notUsable(messageOf(cause, m)),
+            error: (m) => m.scan.errors.notUsable,
+            detail: messageOf(cause),
           });
       });
     return () => {
@@ -809,6 +812,13 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 {[...(session.warnings ?? []), ...warnings].map((warning, i) => (
                   <p key={i}>{warningText(warning)}</p>
                 ))}
+                {[rendered, imported].map(
+                  (state, i) =>
+                    state?.detail &&
+                    state.xml === (i === 0 ? renderXml : importXml) && (
+                      <p key={`detail-${i}`}>{t.scan.review.technical(state.detail)}</p>
+                    ),
+                )}
               </div>
             </details>
             {batch && (

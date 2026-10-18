@@ -3,7 +3,8 @@
 //
 //   pnpm verify            run every step
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
-//                          omr (requires build), bundle, e2e, benchmark, benchmark:mutopia, hands)
+//                          omr (requires build), omr:acceptance (requires build), bundle, e2e,
+//                          benchmark, benchmark:mutopia, hands)
 //
 // Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
 // page's initial JavaScript and CSS exceed 150 KB gzip or Verovio is statically imported
@@ -53,6 +54,17 @@ if (want('unit')) run('unit', 'pnpm', ['test']);
 if (want('build')) run('build', 'pnpm', ['build']);
 // Research OMR runner tests use the freshly built parser/evaluator, as external recognizers do.
 if (want('omr')) run('omr', 'pnpm', ['test:omr']);
+// The scanning acceptance gate: the PC worker's recognisers on the library corpus, against
+// research/omr/acceptance/floor.json. Without the recognisers (docs/scanning.md) it is skipped.
+if (want('omr:acceptance')) {
+  const check = spawnSync('node', ['research/omr/acceptance.mjs', '--check'], {
+    encoding: 'utf8',
+    shell: true,
+  });
+  if (check.status === 3)
+    skip('omr:acceptance', `recognisers missing: ${check.stdout.trim() || 'see docs/scanning.md'}`);
+  else run('omr:acceptance', 'node', ['research/omr/acceptance.mjs']);
+}
 if (want('bundle')) run('bundle', 'node', ['scripts/check-bundle-size.mjs']);
 
 if (want('e2e')) {

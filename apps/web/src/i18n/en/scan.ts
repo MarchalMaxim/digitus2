@@ -54,8 +54,10 @@ export const scan = {
     preparing: 'Preparing recognized notation…',
     /** `error` is the reason, already written as a sentence. */
     problem: (error: string) =>
-      `${error} Download the raw file for correction in a notation editor, or try another image.`,
+      `${error} Correct the notes here, download the raw file for a notation editor, or try another image.`,
     detailsSummary: 'Recognition details',
+    /** Under Recognition details: the importer's or renderer's own message. */
+    technical: (reason: string) => `Technical reason: ${reason}`,
     retained:
       'Find retained originals and recognition in My scores. Keep your own original files; browser storage can be cleared. Recognition is not certified accurate; playback tempo may use an app default.',
     beamGrouping: 'Beam grouping is inferred and may differ from the original.',
@@ -201,9 +203,9 @@ export const scan = {
       `The pages were recognized, but their notation could not be combined. ${reason}`,
     somePagesFailed: 'Some pages need another scan. Recognized pages are kept.',
     recognitionFailed: 'Recognition failed.',
-    notationNotShown: (reason: string) => `Notation could not be displayed: ${reason}`,
+    notationNotShown: 'Notation could not be displayed. The technical reason is under Recognition details.',
     noNotes: 'No playable notes were recognized.',
-    notUsable: (reason: string) => `This recognition cannot be used for fingerings: ${reason}`,
+    notUsable: 'This recognition cannot be used for fingerings yet: some of its notes do not fit together.',
     connectFailed:
       'Could not connect to this PC. Start the worker, then allow this site’s local connection when your browser asks. If you denied it, change this site’s local-network permission and try again.',
     cancelFailed: 'Could not confirm cancellation. Close the worker terminal to stop processing.',

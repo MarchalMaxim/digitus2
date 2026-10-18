@@ -166,8 +166,12 @@ export function describeCorrection(t: Messages, raw: ScanScore, c: Correction): 
 }
 
 export function describeProblem(t: Messages, score: ScanScore, problem: Problem): string {
-  if (problem.kind === 'bar-timing')
-    return t.scan.edit.problems.barTiming(timingText(t, score, problem.part, problem.bar));
+  if (problem.kind === 'bar-timing') {
+    const used = problem.timing.staves.filter((s) => s.beats > 0);
+    const disagree = used.some((s) => Math.abs(s.beats - used[0]!.beats) > 1e-9);
+    const timing = timingText(t, score, problem.part, problem.bar);
+    return disagree ? t.scan.edit.problems.barTiming(timing) : t.scan.edit.problems.barLong(timing);
+  }
   const note = score.notes.find((n) => n.ordinal === problem.note);
   if (!note) return '';
   if (problem.kind === 'tie-unmatched')

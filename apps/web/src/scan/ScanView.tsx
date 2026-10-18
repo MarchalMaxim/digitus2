@@ -886,7 +886,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             </section>
           </div>
           <section className="stack scan-decision">
-            {reviewError && <p role="alert">{t.scan.review.problem(reviewError(t))}</p>}
+            {reviewError && (
+              <p role="alert">
+                {(editable
+                  ? t.scan.review.problem
+                  : pageMode && session.xml
+                    ? t.scan.review.problemInCombined
+                    : t.scan.review.problemReadOnly)(reviewError(t))}
+              </p>
+            )}
             <details>
               <summary>{t.scan.review.detailsSummary}</summary>
               <div className="stack small">

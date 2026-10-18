@@ -1,4 +1,3 @@
-import { parseMusicXml } from '@digitus2/engine';
 import type { Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 
@@ -190,8 +189,8 @@ export function joinScanPages(pages: readonly string[]): string {
       });
     });
   });
-  const xml = new XMLSerializer().serializeToString(documents[0]!);
-  // Validates combined rhythm, pitches and cross-page tie continuity without normalizing XML.
-  parseMusicXml(xml, { preserveNotation: true });
-  return xml;
+  // Notes are not judged here: a page whose notes do not fit together still joins, so the review can
+  // point at the place and the reader can correct it. The review's strict import of the joined file
+  // decides whether it can be used for fingerings.
+  return new XMLSerializer().serializeToString(documents[0]!);
 }

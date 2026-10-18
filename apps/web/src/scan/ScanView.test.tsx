@@ -56,6 +56,24 @@ it('reopens complete individual recognition in page review when combining failed
   expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
 });
 
+it('offers correction in a refusal only where the notes can be corrected', async () => {
+  load.mockRejectedValue(new Error('Unsupported notation.'));
+  const file = new File(['source'], 'source.png', { type: 'image/png' });
+  const pages = [
+    { id: 'first', file, xml: '<score-partwise/>' },
+    { id: 'second', file, xml: '<score-partwise/>' },
+  ];
+  const { unmount } = render(<ScanView session={{ id: 'apart', file, pages }} />);
+  // Not combined: nothing here can be corrected.
+  expect(await screen.findByText(/do not fit together. Download the raw file/)).toBeVisible();
+  unmount();
+  render(<ScanView session={{ id: 'joined', file, pages, xml: '<score-partwise/>' }} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Page recognition' }));
+  expect(
+    await screen.findByText(/do not fit together. Correct the notes in the combined score/),
+  ).toBeVisible();
+});
+
 it('waits for valid import and displayed notation before enabling use', async () => {
   let finishImport!: (result: unknown) => void;
   let finishRender!: (result: unknown) => void;

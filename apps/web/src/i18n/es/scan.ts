@@ -52,6 +52,10 @@ export const scan: Messages['scan'] = {
     preparing: 'Preparando la notación reconocida…',
     problem: (error: string) =>
       `${error} Corrige las notas aquí, descarga el archivo sin procesar para un editor de partituras o prueba con otra imagen.`,
+    problemInCombined: (error: string) =>
+      `${error} Corrige las notas en la partitura combinada, descarga el archivo sin procesar para un editor de partituras o prueba con otra imagen.`,
+    problemReadOnly: (error: string) =>
+      `${error} Descarga el archivo sin procesar para un editor de partituras o prueba con otra imagen.`,
     detailsSummary: 'Detalles del reconocimiento',
     /** The disclosure holding the MusicXML downloads. */
     filesSummary: 'Archivos para un editor de partituras',
@@ -157,6 +161,7 @@ export const scan: Messages['scan'] = {
       tieUnmatched: (where: string, pitch: string) =>
         `${where}: una ligadura en ${pitch} no tiene nota que le corresponda.`,
       barTiming: (timing: string) => `Las manos no coinciden. ${timing}`,
+      barLong: (timing: string) => `El compás es más largo que su indicación de compás. ${timing}`,
     },
     gap: (beats: number) => plural('es', beats, { one: '# tiempo', other: '# tiempos' }),
     downloadCorrected: 'Descargar MusicXML corregido',

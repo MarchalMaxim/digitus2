@@ -8,24 +8,25 @@ The tests are mostly real. They are not assertion-free or tautological filler, b
 
 - **When a test runs a line, it notices a change to that line 73% of the time** (653 of 895 mutants; see "Mutation sampling"). Equality flips, dropped negations and inverted conditions are caught 90% to 97% of the time.
 - **Boundaries are where the tests are weakest.** Changing `<` to `<=` or `>` to `>=` is caught only 39% of the time, and `&&`/`||` guards 57%. The tests prove that features work on ordinary inputs and rarely probe the edge of an input.
+- **Most surviving mutants are not caught by any other unit test either.** Of the web app's survivors, 86% also survive every test that imports the mutated file, so the gaps are suite-level gaps and not an artefact of running one test file at a time. About one survivor in five is a mutant that cannot change behaviour, so the true gap rate is a little lower.
 - **React component tests are the weakest group** (59% against 75% for plain TypeScript). Layout and class names are left to the Playwright suite.
-- **Reviewers graded 507 vitest cases: 74% useful, 22% weak, 3% slop** (14 cases). 19% are change detectors: they pin numbers or strings copied from the current output. A sample of the Python suites reads better (86% useful).
+- **Reviewers graded the cases in three vitest groups, and the groups differ.** The 38 files with the lowest mutation scores: 70% of 322 cases useful, 27% weak, 2.2% slop. A one-in-five sample (14 files) of the files that scored 70% or more: 85% useful, 12% weak, 2.8% slop. The sample is the better estimate for the typical file; the flagged group was chosen because it scores worst. About 9% of the sampled cases and 22% of the flagged ones are change detectors, tests that pin numbers or strings copied from the current output. A sample of the Python suites reads better (86% useful).
 - **The one independent oracle does not run in CI.** The test that compares the metrics with the official fingering evaluator, the corpus tests and the training test skip silently when the gitignored datasets are absent, and CI does not download them. Eleven cases are affected (see "Gaps").
 
 The suite is worth keeping and extending. It does not need deleting; it needs the missing assertions named under "Gaps" (the reviewers called 109 survivors real gaps, several pointing at the same missing assertion) and a handful of weak tests tightened.
 
 ## What was done
 
-| Part                             | Scope                                                                                                                                                                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Static scan                      | all 118 vitest files: skips, tautologies, weak matchers, snapshots, mocks                                                                                                                                                |
-| Mutation sampling                | 110 of 118 vitest files; up to 10 mutants per test file, 1,028 in all                                                                                                                                                    |
-| Whole-suite recheck of survivors | 246 of 359 survivors (partial; see below)                                                                                                                                                                                |
-| Qualitative review               | 60 vitest files: 52 mutated files (those under a 70% kill rate when the review was run, plus a deterministic one-in-five sample of the rest) and the eight that cannot be mutated; 13 sampled Python and node:test files |
+| Part                             | Scope                                                                                                                                                                                                                   |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Static scan                      | all 118 vitest files: skips, tautologies, weak matchers, snapshots, mocks                                                                                                                                               |
+| Mutation sampling                | 110 of 118 vitest files; up to 10 mutants per test file, 1,028 in all                                                                                                                                                   |
+| Whole-suite recheck of survivors | 257 of 359 survivors: the web app's complete, the engine's partial (see below)                                                                                                                                          |
+| Qualitative review               | 60 vitest files: 52 mutated files (those under a 70% kill rate when the review was run, plus a deterministic one-in-five sample of the rest) and the eight that were not mutated; 13 sampled Python and node:test files |
 
 Not covered:
 
-- **Seven vitest files cannot be mutated** (the corpus, reference and WASM-render tests: `smoke`, `engrave.library`, `metrics.reference`, `textbook`, `metamorphic`, `verovio.node`, `verovio.midi.node`) and `tokens.test.ts` has no source file. They were judged by reading only.
+- **Seven vitest files were not mutated, by choice** (the corpus, reference and WASM-render tests, which are not tied to one source file: `smoke`, `engrave.library`, `metrics.reference`, `textbook`, `metamorphic`, `verovio.node`, `verovio.midi.node`), and `tokens.test.ts` has no source file. They were judged by reading only.
 - **58 mutated files were not read qualitatively**; their only evidence is the mutation score. Their scores are higher, but a high score does not expose change detectors.
 - **Mutation is sampled**: at most 10 operator changes per test file, spread evenly over the sibling source file and rotated through the operator kinds. It measures a sample of the code, not all of it.
 - **Scores are per test file.** Each test file was run alone against mutants of its own source. A survivor can be caught by a different test file, and the sibling file may exercise only part of a large source. The recheck below addresses this for the survivors it reached.
@@ -84,7 +85,14 @@ About one survivor in five is an equivalent mutant, one that cannot change behav
 
 ### Whole-suite recheck
 
-The 246 survivors rechecked so far were re-applied and run against every test file that imports the mutated source, not just the sibling. **32 of 246 were caught by some other test**; 214 survived the whole related suite (web: 171 of 198 survived; engine: 43 of 48). Survivors that outlive the whole suite are the strongest evidence of an untested behaviour. The recheck is partial: it runs web files in path order and engine files from the end, and an engine mutant takes about two minutes because most engine modules are imported by hundreds of tests. Engine survivors are therefore under-represented.
+Each survivor was re-applied and run against every test file that imports the mutated source, not just the sibling test. This answers whether a different test catches the change.
+
+| Package         | Survivors | Rechecked | Caught by some other test | Survived the whole related suite |
+| --------------- | --------- | --------- | ------------------------- | -------------------------------- |
+| apps/web        | 201       | 198       | 27                        | 171                              |
+| packages/engine | 158       | 59        | 7                         | 52                               |
+
+For the web app the recheck is essentially complete, and 86% of the rechecked survivors are not caught by any unit test, so the per-file scores for the web app are close to suite-level scores. For the engine it is partial: an engine mutant takes about two minutes to recheck because most engine modules are imported by hundreds of tests, so the run stopped after the first 59. The engine recheck ran only the engine's own tests; web tests that import the engine through the app's source alias were not run, so an engine survivor may still be caught there. Equivalent mutants (about one survivor in five) are included in these counts.
 
 ### Best and worst files by mutation
 
@@ -103,20 +111,22 @@ Files whose tests caught every mutant they executed (at least five):
 | `score/bars.test.ts`           | 5     | 7      | 0                  | 3                      | 100%      |
 | `io/musicxml/read.omr.test.ts` | 49    | 6      | 0                  | 4                      | 100%      |
 
-Files with the most survivors the test executed but did not notice (at least four):
+A high score does not expose copied constants: `library/levels.test.ts` is in the first table with every executed mutant killed, yet the reviewer found two cases in it that re-list strings copied from the source.
 
-| Test file                             | Cases | Killed | Survived, executed | Survived, not executed | Kill rate |
-| ------------------------------------- | ----- | ------ | ------------------ | ---------------------- | --------- |
-| `score/score.i18n.test.tsx`           | 7     | 0      | 5                  | 4                      | 0%        |
-| `fingering/params/weightSets.test.ts` | 4     | 0      | 4                  | 1                      | 0%        |
-| `score/ScoreSheet.test.tsx`           | 2     | 1      | 4                  | 0                      | 20%       |
-| `io/midi/motion.test.ts`              | 5     | 1      | 4                  | 0                      | 20%       |
-| `score/usePlayback.ornaments.test.ts` | 1     | 2      | 7                  | 1                      | 22%       |
-| `score/ScoreView.letters.test.tsx`    | 3     | 2      | 6                  | 2                      | 25%       |
-| `scan/ScanView.test.tsx`              | 7     | 3      | 5                  | 2                      | 38%       |
-| `fingering/features.test.ts`          | 6     | 3      | 5                  | 2                      | 38%       |
-| `app/NoteBurst.test.tsx`              | 9     | 4      | 6                  | 0                      | 40%       |
-| `audio/transport.test.ts`             | 33    | 5      | 5                  | 0                      | 50%       |
+Files whose reviewers found the most real gaps (at least three survivors judged real gaps). "Adjusted" counts only the survivors the reviewer called real gaps, dropping equivalent mutants and those another test file owns. † marks a file with no sibling source, whose mutated source was chosen by hand from its imports; its score says less about the test.
+
+| Test file                             | Cases | Killed | Survived, executed | Real gaps (reviewer) | Kill rate | Adjusted |
+| ------------------------------------- | ----- | ------ | ------------------ | -------------------- | --------- | -------- |
+| `score/score.i18n.test.tsx` †         | 7     | 0      | 5                  | 3                    | 0%        | 0%       |
+| `score/ScoreSheet.test.tsx`           | 2     | 1      | 4                  | 4                    | 20%       | 20%      |
+| `score/usePlayback.ornaments.test.ts` | 1     | 2      | 7                  | 4                    | 22%       | 33%      |
+| `io/musicxml/scanOrnaments.test.ts` † | 4     | 2      | 3                  | 3                    | 40%       | 40%      |
+| `scan/ScanView.test.tsx`              | 7     | 3      | 5                  | 4                    | 38%       | 43%      |
+| `app/NoteBurst.test.tsx`              | 9     | 4      | 6                  | 5                    | 40%       | 44%      |
+| `eval/hands.test.ts`                  | 4     | 5      | 5                  | 5                    | 50%       | 50%      |
+| `score/ornaments.test.ts`             | 9     | 5      | 5                  | 5                    | 50%       | 50%      |
+| `fingering/features.test.ts` †        | 6     | 3      | 5                  | 3                    | 38%       | 50%      |
+| `audio/transport.test.ts`             | 33    | 5      | 5                  | 4                    | 50%       | 56%      |
 
 Several of the weakest files are weak because the code they exercise is large and the file covers one aspect of it (`usePlayback.ornaments.test.ts` exercises only the ornament path of `usePlayback.ts`; `score.i18n.test.tsx` checks wording, not the keyboard and import panel behind it). Those are scope limits, not slop.
 
@@ -124,10 +134,12 @@ Several of the weakest files are weak because the code they exercise is large an
 
 Each reviewer read its test files in full and graded each case: **useful** (fails if the named behaviour regresses, with an expected value from an oracle independent of the implementation, and covers an edge or failure mode), **weak** (real but shallow), or **slop** (cannot meaningfully fail: a tautology, an assertion on a mock's own return value, a copy of the code under test, a constant copied from the source). A **change detector** is a case that pins numbers, markup or copy taken from the current output; it can be useful or weak and still be brittle.
 
-| Suite                         | Files | Cases | Useful | Weak | Slop | Change detectors |
-| ----------------------------- | ----- | ----- | ------ | ---- | ---- | ---------------- |
-| vitest                        | 60    | 507   | 377    | 114  | 14   | 94               |
-| pytest and node:test (sample) | 13    | 174   | 150    | 23   | 1    | 17               |
+| Suite                                                  | Files | Cases | Useful | Weak | Slop | Change detectors |
+| ------------------------------------------------------ | ----- | ----- | ------ | ---- | ---- | ---------------- |
+| vitest, flagged (lowest mutation scores)               | 38    | 322   | 226    | 87   | 7    | 72               |
+| vitest, one-in-five sample of the higher-scoring files | 14    | 141   | 120    | 17   | 4    | 13               |
+| vitest, not mutated (read only)                        | 8     | 44    | 31     | 10   | 3    | 9                |
+| pytest and node:test (sample)                          | 13    | 174   | 150    | 23   | 1    | 17               |
 
 File verdicts, vitest: useful 25, mixed 30, weak 5. Pytest and node:test: useful 11, mixed 2.
 
@@ -152,7 +164,7 @@ The files with slop cases, or a weak verdict, and the worst case the reviewer fo
 What the weak and slop cases have in common:
 
 1. **Constants and copy copied from the source**: floors measured and then pinned (`textbook.test.ts`: measured minus 0.01), exact durations and easings (`motion.test.ts`), shelf names and French wording (`levels.test.ts`, `score.i18n.test.tsx`), the 20 validation piece ids (`corpora.test.ts`). These fail on harmless edits and cannot catch a wrong value.
-2. **Vacuous assertions**: `expect(x ?? true).toBeTruthy()` in `transport.test.ts`; `rows().length <= before` in `LibraryView.test.tsx`, which passes when the filter does nothing; "has no red element" in `SidePanel.test.tsx`, which queries a panel that never renders one.
+2. **Vacuous or near-vacuous assertions**: `expect(x ?? true).toBeTruthy()` in `transport.test.ts` is a true tautology; the closing `rows().length <= before` in the `LibraryView.test.tsx` length-filter case passes when the filter does nothing (the case also asserts the store changed, so it is weak rather than empty). "Has no red element" in `SidePanel.test.tsx` is a cheap guard on the one-red rule: it cannot fail today, because the panel never renders a red element, but it would fail the day someone adds one.
 3. **Pass-through and existence checks**: `Button.test.tsx` second case, `version.test.ts`, the smoke test (`score.notes.length > 0` catches a crash, not a wrong note).
 4. **Golden counts**: 81 `toHaveLength(<number>)` assertions with a literal of two or more digits and the 67 and 64 digit counts in the Verovio tests are numbers taken from a run.
 
@@ -183,7 +195,7 @@ None of these is done; delete or rewrite nothing without the owner's say.
 
 1. **Make the skips loud.** Under CI, fail (or at least print a warning with the count) when a data-dependent suite skips, and decide whether a small committed fixture can carry the reference-metrics oracle.
 2. **Add the boundary and bad-input assertions listed above.** The reviewers named 109 survivors as real gaps (several share one missing assertion); the cheapest, highest-value ones are the numeric boundaries and the input-validation cases, because that is where the mutation score is lowest.
-3. **Remove or tighten the vacuous assertions** (the three in "What the weak and slop cases have in common", item 2). They add noise and no protection.
+3. **Delete the one tautology** (`transport.test.ts`) and tighten the closing assertion of the `LibraryView` length-filter case so it fails when the filter does nothing. Keep the `SidePanel` red-element guard.
 4. **Replace copied constants with relations where a relation exists**: for example derive the expected shelf names from the library index, and assert the unit relation for the easing rather than the literal numbers. Keep literal pins where they are the specification (the contrast ratios in `tokens.test.ts` are a good model: a real WCAG formula is the oracle).
 5. **Run mutation sampling occasionally, not in the verification loop.** It is slow (an engine mutant can take two minutes) and noisy. A quarterly run on the files that changed is enough to keep the boundary and guard coverage honest.
 
@@ -262,15 +274,15 @@ Columns: test cases in the file; mutants run; killed; survived (executed / not e
 | `cli/import.test.ts`                                         | 4     | 9       | 7      | 2/0                   | 78%       | 0 of 2           | -               |
 | `cli/learn.test.ts`                                          | 4     | 10      | 6      | 3/0                   | 67%       | 0 of 3           | -               |
 | `cli/run.test.ts`                                            | 21    | 10      | 5      | 1/4                   | 83%       | 0 of 5           | -               |
-| `eval/align.test.ts`                                         | 6     | 10      | 5      | 4/1                   | 56%       | 0 of 1           | useful: 5/1/0   |
-| `eval/hands.test.ts`                                         | 4     | 10      | 5      | 5/0                   | 50%       | 0 of 2           | mixed: 2/2/0    |
+| `eval/align.test.ts`                                         | 6     | 10      | 5      | 4/1                   | 56%       | 0 of 3           | useful: 5/1/0   |
+| `eval/hands.test.ts`                                         | 4     | 10      | 5      | 5/0                   | 50%       | 1 of 5           | mixed: 2/2/0    |
 | `eval/hardErrors.test.ts`                                    | 2     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
 | `eval/metamorphic.test.ts` (read, not mutated)               | -     | -       | -      | -                     | -         | -                | mixed: 4/2/1    |
 | `eval/metrics.reference.test.ts` (read, not mutated)         | -     | -       | -      | -                     | -         | -                | mixed: 1/0/0    |
-| `eval/metrics.test.ts`                                       | 18    | 10      | 9      | 1/0                   | 90%       | -                | -               |
+| `eval/metrics.test.ts`                                       | 18    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
 | `eval/omr.test.ts`                                           | 29    | 10      | 8      | 2/0                   | 80%       | -                | useful: 26/3/0  |
 | `eval/textbook.test.ts` (read, not mutated)                  | -     | -       | -      | -                     | -         | -                | mixed: 3/3/2    |
-| `fingering/features.test.ts`                                 | 6     | 10      | 3      | 5/2                   | 38%       | -                | mixed: 3/1/0    |
+| `fingering/features.test.ts`                                 | 6     | 10      | 3      | 5/2                   | 38%       | 1 of 2           | mixed: 3/1/0    |
 | `fingering/geometry.test.ts`                                 | 2     | 10      | 8      | 2/0                   | 80%       | -                | -               |
 | `fingering/params/weightSets.test.ts`                        | 4     | 10      | 0      | 4/1                   | 0%        | -                | mixed: 2/2/0    |
 | `fingering/profilesWeights.test.ts`                          | 15    | 10      | 8      | 1/1                   | 89%       | -                | -               |
@@ -298,11 +310,11 @@ Columns: test cases in the file; mutants run; killed; survived (executed / not e
 | `io/musicxml/smoke.test.ts` (read, not mutated)              | -     | -       | -      | -                     | -         | -                | weak: 0/1/0     |
 | `io/musicxml/write.test.ts`                                  | 5     | 10      | 8      | 2/0                   | 80%       | -                | -               |
 | `io/pig/pig.test.ts`                                         | 14    | 10      | 5      | 3/2                   | 63%       | -                | useful: 12/2/0  |
-| `learn/bootstrap.test.ts`                                    | 4     | 10      | 6      | 4/0                   | 60%       | -                | mixed: 2/2/0    |
-| `learn/calibration.test.ts`                                  | 17    | 10      | 9      | 1/0                   | 90%       | -                | useful: 15/2/0  |
+| `learn/bootstrap.test.ts`                                    | 4     | 10      | 6      | 4/0                   | 60%       | 0 of 1           | mixed: 2/2/0    |
+| `learn/calibration.test.ts`                                  | 17    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 15/2/0  |
 | `learn/data.test.ts`                                         | 7     | 10      | 10     | 0/0                   | 100%      | -                | -               |
 | `learn/features.test.ts`                                     | 14    | 10      | 10     | 0/0                   | 100%      | -                | -               |
-| `learn/lcg.test.ts`                                          | 5     | 10      | 9      | 1/0                   | 90%       | -                | -               |
+| `learn/lcg.test.ts`                                          | 5     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
 | `learn/perceptron.test.ts`                                   | 16    | 10      | 7      | 2/1                   | 78%       | 0 of 3           | -               |
 | `library/benchmarkSet.test.ts`                               | 4     | 9       | 9      | 0/0                   | 100%      | -                | useful: 4/0/0   |
 | `lint/lint.test.ts`                                          | 20    | 10      | 8      | 2/0                   | 80%       | 1 of 2           | -               |

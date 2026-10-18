@@ -52,8 +52,10 @@ export const scan: Messages['scan'] = {
     allPages: 'Todas las páginas en orden de lectura',
     preparing: 'Preparando la notación reconocida…',
     problem: (error: string) =>
-      `${error} Descarga el archivo en bruto para corregirlo en un editor de partituras, o prueba con otra imagen.`,
+      `${error} Corrige las notas aquí, descarga el archivo sin procesar para un editor de partituras o prueba con otra imagen.`,
     detailsSummary: 'Detalles del reconocimiento',
+    /** Under Recognition details: the importer's or renderer's own message. */
+    technical: (reason: string) => `Motivo técnico: ${reason}`,
     retained:
       'Encuentra los originales y los reconocimientos guardados en Mis partituras. Conserva tus propios archivos originales; el almacenamiento del navegador puede borrarse. El reconocimiento no está certificado como exacto; la reproducción puede usar un tempo predeterminado de la app.',
     beamGrouping: 'La agrupación de las barras se deduce y puede diferir del original.',
@@ -188,10 +190,9 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Algunas páginas necesitan otro escaneo. Las páginas reconocidas se conservan.',
     recognitionFailed: 'El reconocimiento falló.',
-    notationNotShown: (reason: string) => `No se pudo mostrar la notación: ${reason}`,
+    notationNotShown: 'No se pudo mostrar la notación. El motivo técnico está en Detalles del reconocimiento.',
     noNotes: 'No se reconoció ninguna nota que se pueda tocar.',
-    notUsable: (reason: string) =>
-      `Este reconocimiento no se puede usar para las digitaciones: ${reason}`,
+    notUsable: 'Este reconocimiento todavía no se puede usar para la digitación: algunas de sus notas no encajan.',
     connectFailed:
       'No se pudo conectar con este PC. Inicia el programa y permite la conexión local de este sitio cuando el navegador lo pida. Si la denegaste, cambia el permiso de red local de este sitio e inténtalo de nuevo.',
     cancelFailed:

@@ -52,8 +52,10 @@ export const scan: Messages['scan'] = {
     allPages: 'Toutes les pages dans l’ordre de lecture',
     preparing: 'Préparation de la notation reconnue…',
     problem: (error: string) =>
-      `${error} Téléchargez le fichier brut pour le corriger dans un éditeur de partitions, ou essayez une autre image.`,
+      `${error} Corrigez les notes ici, téléchargez le fichier brut pour un éditeur de partitions ou essayez une autre image.`,
     detailsSummary: 'Détails de la reconnaissance',
+    /** Under Recognition details: the importer's or renderer's own message. */
+    technical: (reason: string) => `Raison technique : ${reason}`,
     retained:
       'Retrouvez les originaux et les reconnaissances conservés dans Mes partitions. Gardez vos fichiers d’origine\u00a0; le stockage du navigateur peut être effacé. La reconnaissance n’est pas garantie exacte\u00a0; la lecture peut utiliser un tempo par défaut de l’application.',
     beamGrouping: 'Le regroupement par ligatures est déduit et peut différer de l’original.',
@@ -190,10 +192,9 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Certaines pages doivent être numérisées à nouveau. Les pages reconnues sont conservées.',
     recognitionFailed: 'La reconnaissance a échoué.',
-    notationNotShown: (reason: string) => `La notation n’a pas pu être affichée\u00a0: ${reason}`,
+    notationNotShown: 'La notation n’a pas pu être affichée. La raison technique figure dans les détails de la reconnaissance.',
     noNotes: 'Aucune note jouable n’a été reconnue.',
-    notUsable: (reason: string) =>
-      `Cette reconnaissance ne peut pas servir pour le doigté\u00a0: ${reason}`,
+    notUsable: 'Cette reconnaissance ne peut pas encore servir au doigté : certaines de ses notes ne s’accordent pas.',
     connectFailed:
       'Impossible de se connecter à ce PC. Lancez le programme, puis autorisez la connexion locale de ce site quand votre navigateur la demande. Si vous l’avez refusée, modifiez l’autorisation de réseau local de ce site et réessayez.',
     cancelFailed:

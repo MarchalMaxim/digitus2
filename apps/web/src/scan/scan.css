@@ -177,6 +177,12 @@
   margin: 0;
   font-weight: 600;
 }
+@media (max-width: 600px) {
+  /* On a phone the description takes its own line and the three controls share the next. */
+  .note-editor-title {
+    flex-basis: 100%;
+  }
+}
 .note-editor-row {
   display: flex;
   flex-wrap: wrap;

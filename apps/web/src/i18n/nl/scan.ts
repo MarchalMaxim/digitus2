@@ -52,8 +52,10 @@ export const scan: Messages['scan'] = {
     allPages: 'Alle pagina’s in leesvolgorde',
     preparing: 'Herkende notatie voorbereiden…',
     problem: (error: string) =>
-      `${error} Download het ruwe bestand om het in een notatie-editor te corrigeren, of probeer een andere afbeelding.`,
+      `${error} Corrigeer de noten hier, download het ruwe bestand voor een notatieprogramma of probeer een andere afbeelding.`,
     detailsSummary: 'Details van de herkenning',
+    /** Under Recognition details: the importer's or renderer's own message. */
+    technical: (reason: string) => `Technische reden: ${reason}`,
     retained:
       'Bewaarde originelen en herkenningen vind je in Mijn partituren. Bewaar zelf ook je originele bestanden; de opslag van je browser kan worden gewist. De herkenning is niet gegarandeerd juist; bij het afspelen kan een standaardtempo van de app gelden.',
     beamGrouping: 'De balkgroepering is afgeleid en kan afwijken van het origineel.',
@@ -191,10 +193,9 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Sommige pagina’s moeten opnieuw worden gescand. Herkende pagina’s blijven bewaard.',
     recognitionFailed: 'Herkenning mislukt.',
-    notationNotShown: (reason: string) => `De notatie kon niet worden getoond: ${reason}`,
+    notationNotShown: 'De notatie kon niet worden getoond. De technische reden staat bij de herkenningsdetails.',
     noNotes: 'Er zijn geen speelbare noten herkend.',
-    notUsable: (reason: string) =>
-      `Deze herkenning is niet bruikbaar voor vingerzettingen: ${reason}`,
+    notUsable: 'Deze herkenning kan nog niet voor vingerzettingen worden gebruikt: sommige noten passen niet bij elkaar.',
     connectFailed:
       'Kon geen verbinding maken met deze pc. Start de worker en sta de lokale verbinding van deze site toe als je browser erom vraagt. Heb je die geweigerd? Wijzig dan de toestemming voor het lokale netwerk van deze site en probeer het opnieuw.',
     cancelFailed:

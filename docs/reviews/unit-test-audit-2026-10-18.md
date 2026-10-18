@@ -10,24 +10,23 @@ The tests are mostly real. They are not assertion-free or tautological filler, b
 - **Boundaries are where the tests are weakest.** Changing `<` to `<=` or `>` to `>=` is caught only 39% of the time, and `&&`/`||` guards 57%. The tests prove that features work on ordinary inputs and rarely probe the edge of an input.
 - **Most surviving mutants are not caught by any other unit test either.** Of the web app's survivors, 86% also survive every test that imports the mutated file, so the gaps are suite-level gaps and not an artefact of running one test file at a time. About one survivor in five is a mutant that cannot change behaviour, so the true gap rate is a little lower.
 - **React component tests are the weakest group** (59% against 75% for plain TypeScript). Layout and class names are left to the Playwright suite.
-- **Reviewers graded the cases in three vitest groups, and the groups differ.** The 38 files with the lowest mutation scores: 70% of 322 cases useful, 27% weak, 2.2% slop. A one-in-five sample (14 files) of the files that scored 70% or more: 85% useful, 12% weak, 2.8% slop. The sample is the better estimate for the typical file; the flagged group was chosen because it scores worst. About 9% of the sampled cases and 22% of the flagged ones are change detectors, tests that pin numbers or strings copied from the current output. A sample of the Python suites reads better (86% useful).
+- **Reviewers read every vitest file (118) and graded 1216 cases: 75% useful, 22% weak, 2.7% slop, and 16% change detectors**, tests that pin numbers or strings copied from the current output. The groups differ. The 38 files with the lowest mutation scores: 70% of 322 cases useful, 27% weak, 2.2% slop, 22% change detectors. The 72 files that scored 70% or more: 78% of 850 useful, 19% weak, 2.7% slop, 14% change detectors. The 8 files that were not mutated: 70% useful, 23% weak, 6.8% slop. A sample of the Python suites reads better (86% useful).
 - **The one independent oracle does not run in CI.** The test that compares the metrics with the official fingering evaluator, the corpus tests and the training test skip silently when the gitignored datasets are absent, and CI does not download them. Eleven cases are affected (see "Gaps").
 
-The suite is worth keeping and extending. It does not need deleting; it needs the missing assertions named under "Gaps" (the reviewers called 109 survivors real gaps, several pointing at the same missing assertion) and a handful of weak tests tightened.
+The suite is worth keeping and extending. It does not need deleting; it needs the missing assertions named under "Gaps" (the reviewers called 157 survivors real gaps, several pointing at the same missing assertion) and a handful of weak tests tightened.
 
 ## What was done
 
-| Part                             | Scope                                                                                                                                                                                                                   |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Static scan                      | all 118 vitest files: skips, tautologies, weak matchers, snapshots, mocks                                                                                                                                               |
-| Mutation sampling                | 110 of 118 vitest files; up to 10 mutants per test file, 1,028 in all                                                                                                                                                   |
-| Whole-suite recheck of survivors | 257 of 359 survivors: the web app's complete, the engine's partial (see below)                                                                                                                                          |
-| Qualitative review               | 60 vitest files: 52 mutated files (those under a 70% kill rate when the review was run, plus a deterministic one-in-five sample of the rest) and the eight that were not mutated; 13 sampled Python and node:test files |
+| Part                             | Scope                                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Static scan                      | all 118 vitest files: skips, tautologies, weak matchers, snapshots, mocks                                                                           |
+| Mutation sampling                | 110 of 118 vitest files; up to 10 mutants per test file, 1,028 in all                                                                               |
+| Whole-suite recheck of survivors | 257 of 359 survivors: the web app's complete, the engine's partial (see below)                                                                      |
+| Qualitative review               | all 118 vitest files (110 mutated and eight not mutated), each read in full with its mutation result in hand; 13 sampled Python and node:test files |
 
 Not covered:
 
 - **Seven vitest files were not mutated, by choice** (the corpus, reference and WASM-render tests, which are not tied to one source file: `smoke`, `engrave.library`, `metrics.reference`, `textbook`, `metamorphic`, `verovio.node`, `verovio.midi.node`), and `tokens.test.ts` has no source file. They were judged by reading only.
-- **58 mutated files were not read qualitatively**; their only evidence is the mutation score. Their scores are higher, but a high score does not expose change detectors.
 - **Mutation is sampled**: at most 10 operator changes per test file, spread evenly over the sibling source file and rotated through the operator kinds. It measures a sample of the code, not all of it.
 - **Scores are per test file.** Each test file was run alone against mutants of its own source. A survivor can be caught by a different test file, and the sibling file may exercise only part of a large source. The recheck below addresses this for the survivors it reached.
 - **The Playwright suite (19 specs) was not audited.** The Python suites (about 67 files) were sampled at low depth (13 files). `BarSeek.test.tsx` is excluded because it was written alongside this audit.
@@ -81,7 +80,7 @@ Test files by kill rate (files with at least one scored mutant the test executed
 | 85% to 99% | 16    |
 | 100%       | 17    |
 
-About one survivor in five is an equivalent mutant, one that cannot change behaviour (cosmetic wording, a tie broken the same way). Of the 160 survivors the reviewers judged, 109 were real gaps, 32 equivalent and 19 another test file's job. The kill rates above therefore understate the tests by a few points.
+About one survivor in five is an equivalent mutant, one that cannot change behaviour (cosmetic wording, a tie broken the same way). Of the 242 survivors the reviewers judged, 157 were real gaps, 63 equivalent and 22 another test file's job. The kill rates above therefore understate the tests by a few points.
 
 ### Whole-suite recheck
 
@@ -134,14 +133,18 @@ Several of the weakest files are weak because the code they exercise is large an
 
 Each reviewer read its test files in full and graded each case: **useful** (fails if the named behaviour regresses, with an expected value from an oracle independent of the implementation, and covers an edge or failure mode), **weak** (real but shallow), or **slop** (cannot meaningfully fail: a tautology, an assertion on a mock's own return value, a copy of the code under test, a constant copied from the source). A **change detector** is a case that pins numbers, markup or copy taken from the current output; it can be useful or weak and still be brittle.
 
-| Suite                                                  | Files | Cases | Useful | Weak | Slop | Change detectors |
-| ------------------------------------------------------ | ----- | ----- | ------ | ---- | ---- | ---------------- |
-| vitest, flagged (lowest mutation scores)               | 38    | 322   | 226    | 87   | 7    | 72               |
-| vitest, one-in-five sample of the higher-scoring files | 14    | 141   | 120    | 17   | 4    | 13               |
-| vitest, not mutated (read only)                        | 8     | 44    | 31     | 10   | 3    | 9                |
-| pytest and node:test (sample)                          | 13    | 174   | 150    | 23   | 1    | 17               |
+| Suite                                                    | Files | Cases | Useful | Weak | Slop | Change detectors |
+| -------------------------------------------------------- | ----- | ----- | ------ | ---- | ---- | ---------------- |
+| vitest, lowest mutation scores (under 70%)               | 38    | 322   | 226    | 87   | 7    | 72               |
+| vitest, scored 70% or more: the first one-in-five sample | 14    | 141   | 120    | 17   | 4    | 13               |
+| vitest, scored 70% or more: the rest                     | 58    | 709   | 539    | 148  | 19   | 103              |
+| vitest, not mutated (read only)                          | 8     | 44    | 31     | 10   | 3    | 9                |
+| **vitest, all**                                          | 118   | 1216  | 916    | 262  | 33   | 197              |
+| pytest and node:test (sample)                            | 13    | 174   | 150    | 23   | 1    | 17               |
 
-File verdicts, vitest: useful 25, mixed 30, weak 5. Pytest and node:test: useful 11, mixed 2.
+The first sample of 14 files estimated the higher-scoring group at 85% useful; reading the other 58 gave 76%. The sample ran about 9 points high, which is why every file was read in the end.
+
+File verdicts, vitest: useful 66, mixed 47, weak 5. Pytest and node:test: useful 11, mixed 2.
 
 The files with slop cases, or a weak verdict, and the worst case the reviewer found in each:
 
@@ -160,6 +163,19 @@ The files with slop cases, or a weak verdict, and the worst case the reviewer fo
 - `io/musicxml/infra.test.ts` (useful; 11 useful, 4 weak, 1 slop): expect(api.timewiseToPartwise).toBe(timewiseToPartwise)
 - `lint/rules.test.ts` (useful; 13 useful, 0 weak, 1 slop): 'documents the warning in the rule table': expect(LINT_RULES.L07.title).toMatch(/hold beyond reach/)
 - `version.test.ts` (weak; 0 useful, 1 weak, 0 slop): expect(ENGINE_VERSION).toMatch(/^\d+\.\d+\.\d+$/)
+- `score/useCursor.test.ts` (useful; 24 useful, 4 weak, 1 slop): cursorScrollDelta 'keeps clear of a bar at the top of the window too': pixel constants like `toBe(-215)` hand-derived but arbitrary
+- `cli/bench.test.ts` (useful; 13 useful, 3 weak, 1 slop): 'defaults --against to the FHMM3 and FingerFlow-learned ids': `expect(FHMM3_ID).toBe('nakamura_fhmm3')`
+- `fingering/profilesWeights.test.ts` (useful; 10 useful, 4 weak, 1 slop): Positive-weights test re-implements applyLevel: "toBeCloseTo(w[id] * k, 12)" mirrors the code's own multiplication.
+- `fingering/rules.test.ts` (useful; 22 useful, 6 weak, 2 slop): "expect(PARNCUTT_WEIGHTS.doubledFinger).toBe(50)" asserts a constant copied from the JSON.
+- `library/model.test.ts` (useful; 28 useful, 13 weak, 3 slop): 'writes counts as words' – expect([en.library.pieces(1), ...]).toEqual(['1 piece',...]) restates i18n copy and tests formatNumber
+- `library/search.test.ts` (useful; 6 useful, 1 weak, 1 slop): 'does not match a piece by the joining "and"' – duplicates the second 'never search by the joining word' test
+- `score/ScoreView.test.ts` (mixed; 6 useful, 3 weak, 1 slop): expect(en.score.view.editorialShown).toBe("Showing the editor's fingering")
+- `score/Transport.test.tsx` (useful; 17 useful, 6 weak, 2 slop): expect(screen.queryByRole('group', { name: 'Practice' })).toBeNull()
+- `app/store.test.ts` (useful; 17 useful, 8 weak, 2 slop): starts on the library with default settings: "toEqual(DEFAULT_SETTINGS)" compares a constant to itself.
+- `design/media.test.ts` (useful; 3 useful, 0 weak, 1 slop): breakpoint test: "toBe('(max-width: 479.98px)')" copies the constant from source.
+- `design/ThemeToggle.test.tsx` (mixed; 2 useful, 1 weak, 1 slop): Icon test: "svg.querySelector('mask .theme-bite')" asserts class names copied from the markup.
+- `library/disclosure.test.ts` (mixed; 4 useful, 0 weak, 1 slop): has the numbers the specs give: "toEqual([40, 100, 12, 3, 5, 40, 7, 40])" copies every constant.
+- `library/manifest.test.ts` (mixed; 8 useful, 5 weak, 2 slop): index matches the manifest: "expect(pieces.map((p) => p.slug)).toEqual(details.map" duplicates the decode test.
 
 What the weak and slop cases have in common:
 
@@ -194,7 +210,7 @@ The CI workflow runs `pnpm test` without downloading the datasets, and the bench
 None of these is done; delete or rewrite nothing without the owner's say.
 
 1. **Make the skips loud.** Under CI, fail (or at least print a warning with the count) when a data-dependent suite skips, and decide whether a small committed fixture can carry the reference-metrics oracle.
-2. **Add the boundary and bad-input assertions listed above.** The reviewers named 109 survivors as real gaps (several share one missing assertion); the cheapest, highest-value ones are the numeric boundaries and the input-validation cases, because that is where the mutation score is lowest.
+2. **Add the boundary and bad-input assertions listed above.** The reviewers named 157 survivors as real gaps (several share one missing assertion); the cheapest, highest-value ones are the numeric boundaries and the input-validation cases, because that is where the mutation score is lowest.
 3. **Delete the one tautology** (`transport.test.ts`) and tighten the closing assertion of the `LibraryView` length-filter case so it fails when the filter does nothing. Keep the `SidePanel` red-element guard.
 4. **Replace copied constants with relations where a relation exists**: for example derive the expected shelf names from the library index, and assert the unit relation for the easing rather than the literal numbers. Keep literal pins where they are the specification (the contrast ratios in `tokens.test.ts` are a good model: a real WCAG formula is the oracle).
 5. **Run mutation sampling occasionally, not in the verification loop.** It is slow (an engine mutant can take two minutes) and noisy. A quarterly run on the files that changed is enough to keep the boundary and guard coverage honest.
@@ -205,53 +221,53 @@ Columns: test cases in the file; mutants run; killed; survived (executed / not e
 
 | Test file                                                    | Cases | Mutants | Killed | Survived (exec / not) | Kill rate | Caught elsewhere | Review          |
 | ------------------------------------------------------------ | ----- | ------- | ------ | --------------------- | --------- | ---------------- | --------------- |
-| `about/AboutView.test.tsx`                                   | 6     | 10      | 7      | 3/0                   | 70%       | 0 of 3           | -               |
-| `app/App.test.tsx`                                           | 5     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | -               |
+| `about/AboutView.test.tsx`                                   | 6     | 10      | 7      | 3/0                   | 70%       | 0 of 3           | mixed: 3/3/0    |
+| `app/App.test.tsx`                                           | 5     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | useful: 4/1/0   |
 | `app/NoteBurst.test.tsx`                                     | 9     | 10      | 4      | 6/0                   | 40%       | 0 of 6           | mixed: 6/3/0    |
 | `app/routes.test.ts`                                         | 4     | 10      | 7      | 3/0                   | 70%       | 0 of 3           | useful: 4/0/0   |
-| `app/store.test.ts`                                          | 27    | 10      | 7      | 3/0                   | 70%       | 1 of 3           | -               |
-| `audio/beats.test.ts`                                        | 5     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | -               |
-| `audio/clock.test.ts`                                        | 3     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | -               |
-| `audio/ornaments.test.ts`                                    | 8     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | -               |
+| `app/store.test.ts`                                          | 27    | 10      | 7      | 3/0                   | 70%       | 1 of 3           | useful: 17/8/2  |
+| `audio/beats.test.ts`                                        | 5     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | useful: 5/0/0   |
+| `audio/clock.test.ts`                                        | 3     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | mixed: 2/1/0    |
+| `audio/ornaments.test.ts`                                    | 8     | 10      | 8      | 2/0                   | 80%       | 0 of 2           | useful: 7/1/0   |
 | `audio/transport.test.ts`                                    | 33    | 10      | 5      | 5/0                   | 50%       | 3 of 5           | useful: 27/6/0  |
 | `design/Button.test.tsx`                                     | 2     | 2       | 2      | 0/0                   | 100%      | -                | weak: 1/0/1     |
-| `design/checkColors.test.ts`                                 | 5     | 10      | 7      | 2/1                   | 78%       | -                | -               |
+| `design/checkColors.test.ts`                                 | 5     | 10      | 7      | 2/1                   | 78%       | -                | useful: 4/1/0   |
 | `design/Loader.test.tsx`                                     | 4     | 10      | 5      | 5/0                   | 50%       | 0 of 5           | mixed: 3/1/0    |
-| `design/media.test.ts`                                       | 4     | 3       | 3      | 0/0                   | 100%      | -                | -               |
+| `design/media.test.ts`                                       | 4     | 3       | 3      | 0/0                   | 100%      | -                | useful: 3/0/1   |
 | `design/motion.test.ts`                                      | 4     | 10      | 6      | 4/0                   | 60%       | 0 of 4           | mixed: 2/2/0    |
-| `design/theme.test.ts`                                       | 18    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
-| `design/ThemeToggle.test.tsx`                                | 4     | 2       | 2      | 0/0                   | 100%      | -                | -               |
+| `design/theme.test.ts`                                       | 18    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 14/4/0  |
+| `design/ThemeToggle.test.tsx`                                | 4     | 2       | 2      | 0/0                   | 100%      | -                | mixed: 2/1/1    |
 | `design/tokens.test.ts` (no source to mutate)                | 23    | -       | -      | -                     | -         | -                | useful: 20/3/0  |
 | `engine/client.test.ts`                                      | 7     | 10      | 10     | 0/0                   | 100%      | -                | useful: 7/0/0   |
-| `engine/handlers.test.ts`                                    | 13    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
-| `export/download.test.ts`                                    | 2     | 3       | 3      | 0/0                   | 100%      | -                | -               |
-| `i18n/i18n.test.ts`                                          | 16    | 10      | 5      | 1/4                   | 83%       | 0 of 5           | -               |
+| `engine/handlers.test.ts`                                    | 13    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 10/3/0  |
+| `export/download.test.ts`                                    | 2     | 3       | 3      | 0/0                   | 100%      | -                | mixed: 1/1/0    |
+| `i18n/i18n.test.ts`                                          | 16    | 10      | 5      | 1/4                   | 83%       | 0 of 5           | useful: 15/1/0  |
 | `i18n/LanguageLine.test.tsx`                                 | 2     | 6       | 4      | 2/0                   | 67%       | 0 of 2           | mixed: 1/1/0    |
-| `library/disclosure.test.ts`                                 | 5     | 10      | 10     | 0/0                   | 100%      | -                | -               |
+| `library/disclosure.test.ts`                                 | 5     | 10      | 10     | 0/0                   | 100%      | -                | mixed: 4/0/1    |
 | `library/levels.test.ts`                                     | 8     | 10      | 10     | 0/0                   | 100%      | -                | mixed: 4/2/2    |
 | `library/LibraryView.test.tsx`                               | 37    | 10      | 6      | 3/1                   | 67%       | 0 of 4           | mixed: 20/15/2  |
-| `library/local/library.test.ts`                              | 8     | 10      | 7      | 2/1                   | 78%       | 0 of 3           | -               |
+| `library/local/library.test.ts`                              | 8     | 10      | 7      | 2/1                   | 78%       | 0 of 3           | useful: 7/1/0   |
 | `library/local/records.test.ts`                              | 3     | 10      | 6      | 4/0                   | 60%       | 0 of 4           | mixed: 2/1/0    |
-| `library/manifest.test.ts`                                   | 15    | 10      | 4      | 1/4                   | 80%       | 0 of 5           | -               |
-| `library/model.test.ts`                                      | 44    | 10      | 8      | 2/0                   | 80%       | 0 of 2           | -               |
+| `library/manifest.test.ts`                                   | 15    | 10      | 4      | 1/4                   | 80%       | 0 of 5           | mixed: 8/5/2    |
+| `library/model.test.ts`                                      | 44    | 10      | 8      | 2/0                   | 80%       | 0 of 2           | useful: 28/13/3 |
 | `library/ownFile.test.ts`                                    | 5     | 10      | 3      | 2/5                   | 60%       | 5 of 7           | mixed: 3/2/0    |
 | `library/OwnFileLine.test.tsx`                               | 4     | 0       | 0      | 0/0                   | n/a       | -                | mixed: 2/2/0    |
-| `library/search.test.ts`                                     | 8     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
+| `library/search.test.ts`                                     | 8     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 6/1/1   |
 | `scan/ImagePages.test.tsx`                                   | 7     | 10      | 4      | 3/3                   | 57%       | 0 of 6           | useful: 6/1/0   |
 | `scan/join.test.ts`                                          | 18    | 10      | 7      | 2/1                   | 78%       | 0 of 3           | useful: 16/2/0  |
 | `scan/rotation.test.ts`                                      | 3     | 10      | 0      | 1/9                   | 0%        | 0 of 10          | mixed: 3/0/0    |
 | `scan/scan.test.ts`                                          | 6     | 10      | 5      | 3/2                   | 63%       | 1 of 5           | mixed: 4/2/0    |
 | `scan/ScanView.test.tsx`                                     | 7     | 10      | 3      | 5/2                   | 38%       | 0 of 7           | mixed: 6/1/0    |
-| `score/bars.test.ts`                                         | 5     | 10      | 7      | 0/3                   | 100%      | 0 of 3           | -               |
-| `score/handLetters.test.ts`                                  | 14    | 10      | 10     | 0/0                   | 100%      | -                | -               |
+| `score/bars.test.ts`                                         | 5     | 10      | 7      | 0/3                   | 100%      | 0 of 3           | useful: 5/0/0   |
+| `score/handLetters.test.ts`                                  | 14    | 10      | 10     | 0/0                   | 100%      | -                | useful: 12/2/0  |
 | `score/Keyboard.test.tsx`                                    | 10    | 10      | 6      | 4/0                   | 60%       | 0 of 4           | mixed: 7/3/0    |
-| `score/midiCopy.test.ts`                                     | 4     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
-| `score/MidiImportPanel.test.tsx`                             | 3     | 4       | 4      | 0/0                   | 100%      | -                | -               |
+| `score/midiCopy.test.ts`                                     | 4     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | mixed: 3/1/0    |
+| `score/MidiImportPanel.test.tsx`                             | 3     | 4       | 4      | 0/0                   | 100%      | -                | mixed: 1/2/0    |
 | `score/onsetGroups.test.ts`                                  | 3     | 10      | 5      | 2/0                   | 71%       | 0 of 2           | useful: 3/0/0   |
-| `score/RedFlight.test.ts`                                    | 5     | 10      | 3      | 1/6                   | 75%       | 0 of 7           | -               |
-| `score/render/dom.test.ts`                                   | 8     | 10      | 7      | 3/0                   | 70%       | 0 of 3           | -               |
-| `score/render/injectIds.test.ts`                             | 3     | 5       | 5      | 0/0                   | 100%      | -                | -               |
-| `score/render/normalizeVoices.test.ts`                       | 4     | 10      | 6      | 2/2                   | 75%       | 0 of 4           | -               |
+| `score/RedFlight.test.ts`                                    | 5     | 10      | 3      | 1/6                   | 75%       | 0 of 7           | mixed: 3/2/0    |
+| `score/render/dom.test.ts`                                   | 8     | 10      | 7      | 3/0                   | 70%       | 0 of 3           | useful: 7/1/0   |
+| `score/render/injectIds.test.ts`                             | 3     | 5       | 5      | 0/0                   | 100%      | -                | useful: 3/0/0   |
+| `score/render/normalizeVoices.test.ts`                       | 4     | 10      | 6      | 2/2                   | 75%       | 0 of 4           | useful: 3/1/0   |
 | `score/render/renderer.test.ts`                              | 4     | 10      | 6      | 4/0                   | 60%       | 0 of 4           | mixed: 3/1/0    |
 | `score/render/scanBeams.test.ts`                             | 15    | 10      | 7      | 3/0                   | 70%       | 0 of 3           | useful: 15/0/0  |
 | `score/render/verovio.midi.node.test.ts` (read, not mutated) | -     | -       | -      | -                     | -         | -                | mixed: 1/1/0    |
@@ -260,66 +276,66 @@ Columns: test cases in the file; mutants run; killed; survived (executed / not e
 | `score/ScoreHeader.test.tsx`                                 | 4     | 9       | 4      | 3/2                   | 57%       | 1 of 5           | mixed: 2/2/0    |
 | `score/ScoreSheet.test.tsx`                                  | 2     | 5       | 1      | 4/0                   | 20%       | 0 of 4           | weak: 1/1/0     |
 | `score/ScoreView.letters.test.tsx`                           | 3     | 10      | 2      | 6/2                   | 25%       | 2 of 8           | useful: 3/0/0   |
-| `score/ScoreView.test.ts`                                    | 10    | 10      | 2      | 0/8                   | 100%      | 2 of 8           | -               |
+| `score/ScoreView.test.ts`                                    | 10    | 10      | 2      | 0/8                   | 100%      | 2 of 8           | mixed: 6/3/1    |
 | `score/SidePanel.test.tsx`                                   | 13    | 10      | 2      | 2/6                   | 50%       | 0 of 8           | mixed: 9/3/1    |
-| `score/Transport.test.tsx`                                   | 25    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
-| `score/useCursor.test.ts`                                    | 29    | 10      | 8      | 1/1                   | 89%       | 0 of 2           | -               |
+| `score/Transport.test.tsx`                                   | 25    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 17/6/2  |
+| `score/useCursor.test.ts`                                    | 29    | 10      | 8      | 1/1                   | 89%       | 0 of 2           | useful: 24/4/1  |
 | `score/usePlayback.ornaments.test.ts`                        | 1     | 10      | 2      | 7/1                   | 22%       | 0 of 8           | mixed: 1/0/0    |
 | `score/useScoreDocument.midi.test.ts`                        | 3     | 10      | 3      | 2/5                   | 60%       | 4 of 7           | useful: 2/1/0   |
 | `score/useScoreDocument.test.ts`                             | 11    | 10      | 6      | 3/1                   | 67%       | 1 of 4           | useful: 9/2/0   |
-| `cli/bench.test.ts`                                          | 18    | 10      | 7      | 3/0                   | 70%       | 0 of 3           | -               |
+| `cli/bench.test.ts`                                          | 18    | 10      | 7      | 3/0                   | 70%       | 0 of 3           | useful: 13/3/1  |
 | `cli/corpora.test.ts`                                        | 10    | 10      | 5      | 4/1                   | 56%       | 0 of 5           | mixed: 6/3/1    |
 | `cli/evalhands.test.ts`                                      | 4     | 10      | 5      | 5/0                   | 50%       | 0 of 5           | mixed: 3/1/0    |
 | `cli/evaluate.test.ts`                                       | 2     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 2/0/0   |
-| `cli/import.test.ts`                                         | 4     | 9       | 7      | 2/0                   | 78%       | 0 of 2           | -               |
-| `cli/learn.test.ts`                                          | 4     | 10      | 6      | 3/0                   | 67%       | 0 of 3           | -               |
-| `cli/run.test.ts`                                            | 21    | 10      | 5      | 1/4                   | 83%       | 0 of 5           | -               |
+| `cli/import.test.ts`                                         | 4     | 9       | 7      | 2/0                   | 78%       | 0 of 2           | useful: 2/2/0   |
+| `cli/learn.test.ts`                                          | 4     | 10      | 6      | 3/0                   | 67%       | 0 of 3           | mixed: 2/2/0    |
+| `cli/run.test.ts`                                            | 21    | 10      | 5      | 1/4                   | 83%       | 0 of 5           | useful: 14/5/0  |
 | `eval/align.test.ts`                                         | 6     | 10      | 5      | 4/1                   | 56%       | 0 of 3           | useful: 5/1/0   |
 | `eval/hands.test.ts`                                         | 4     | 10      | 5      | 5/0                   | 50%       | 1 of 5           | mixed: 2/2/0    |
-| `eval/hardErrors.test.ts`                                    | 2     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
+| `eval/hardErrors.test.ts`                                    | 2     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 1/1/0   |
 | `eval/metamorphic.test.ts` (read, not mutated)               | -     | -       | -      | -                     | -         | -                | mixed: 4/2/1    |
 | `eval/metrics.reference.test.ts` (read, not mutated)         | -     | -       | -      | -                     | -         | -                | mixed: 1/0/0    |
-| `eval/metrics.test.ts`                                       | 18    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
+| `eval/metrics.test.ts`                                       | 18    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 15/3/0  |
 | `eval/omr.test.ts`                                           | 29    | 10      | 8      | 2/0                   | 80%       | -                | useful: 26/3/0  |
 | `eval/textbook.test.ts` (read, not mutated)                  | -     | -       | -      | -                     | -         | -                | mixed: 3/3/2    |
 | `fingering/features.test.ts`                                 | 6     | 10      | 3      | 5/2                   | 38%       | 1 of 2           | mixed: 3/1/0    |
-| `fingering/geometry.test.ts`                                 | 2     | 10      | 8      | 2/0                   | 80%       | -                | -               |
+| `fingering/geometry.test.ts`                                 | 2     | 10      | 8      | 2/0                   | 80%       | -                | mixed: 1/1/0    |
 | `fingering/params/weightSets.test.ts`                        | 4     | 10      | 0      | 4/1                   | 0%        | -                | mixed: 2/2/0    |
-| `fingering/profilesWeights.test.ts`                          | 15    | 10      | 8      | 1/1                   | 89%       | -                | -               |
-| `fingering/repeats.test.ts`                                  | 9     | 10      | 7      | 3/0                   | 70%       | -                | -               |
-| `fingering/rules.test.ts`                                    | 30    | 10      | 7      | 2/1                   | 78%       | -                | -               |
+| `fingering/profilesWeights.test.ts`                          | 15    | 10      | 8      | 1/1                   | 89%       | -                | useful: 10/4/1  |
+| `fingering/repeats.test.ts`                                  | 9     | 10      | 7      | 3/0                   | 70%       | -                | useful: 7/2/0   |
+| `fingering/rules.test.ts`                                    | 30    | 10      | 7      | 2/1                   | 78%       | -                | useful: 22/6/2  |
 | `fingering/sequence.test.ts`                                 | 5     | 10      | 4      | 1/5                   | 80%       | -                | useful: 4/1/0   |
 | `fingering/solve.test.ts`                                    | 47    | 10      | 5      | 3/1                   | 63%       | -                | useful: 35/10/2 |
-| `fingering/spans.test.ts`                                    | 5     | 10      | 10     | 0/0                   | 100%      | -                | -               |
-| `fingering/templates.test.ts`                                | 21    | 10      | 9      | 1/0                   | 90%       | -                | -               |
-| `fingering/viterbi.test.ts`                                  | 7     | 10      | 7      | 3/0                   | 70%       | -                | -               |
+| `fingering/spans.test.ts`                                    | 5     | 10      | 10     | 0/0                   | 100%      | -                | useful: 3/2/0   |
+| `fingering/templates.test.ts`                                | 21    | 10      | 9      | 1/0                   | 90%       | -                | useful: 16/5/0  |
+| `fingering/viterbi.test.ts`                                  | 7     | 10      | 7      | 3/0                   | 70%       | -                | useful: 5/2/0   |
 | `io/midi/engrave.library.test.ts` (read, not mutated)        | -     | -       | -      | -                     | -         | -                | useful: 1/0/0   |
-| `io/midi/engrave.test.ts`                                    | 13    | 10      | 5      | 1/4                   | 83%       | -                | -               |
+| `io/midi/engrave.test.ts`                                    | 13    | 10      | 5      | 1/4                   | 83%       | -                | useful: 10/3/0  |
 | `io/midi/handSeparation.test.ts`                             | 11    | 10      | 7      | 3/0                   | 70%       | -                | useful: 8/3/0   |
-| `io/midi/import.test.ts`                                     | 7     | 10      | 7      | 3/0                   | 70%       | -                | -               |
-| `io/midi/key.test.ts`                                        | 9     | 10      | 7      | 3/0                   | 70%       | -                | -               |
+| `io/midi/import.test.ts`                                     | 7     | 10      | 7      | 3/0                   | 70%       | -                | mixed: 5/2/0    |
+| `io/midi/key.test.ts`                                        | 9     | 10      | 7      | 3/0                   | 70%       | -                | useful: 8/1/0   |
 | `io/midi/motion.test.ts`                                     | 5     | 10      | 1      | 4/0                   | 20%       | -                | mixed: 3/2/0    |
 | `io/midi/quantize.test.ts`                                   | 8     | 10      | 6      | 4/0                   | 60%       | -                | useful: 7/1/0   |
-| `io/midi/read.test.ts`                                       | 10    | 10      | 7      | 3/0                   | 70%       | -                | -               |
-| `io/midi/toScore.test.ts`                                    | 12    | 10      | 7      | 2/1                   | 78%       | -                | -               |
+| `io/midi/read.test.ts`                                       | 10    | 10      | 7      | 3/0                   | 70%       | -                | useful: 9/1/0   |
+| `io/midi/toScore.test.ts`                                    | 12    | 10      | 7      | 2/1                   | 78%       | -                | useful: 10/2/0  |
 | `io/musicxml/infra.test.ts`                                  | 16    | 12      | 7      | 3/2                   | 70%       | -                | useful: 11/4/1  |
-| `io/musicxml/ornaments.test.ts`                              | 12    | 10      | 7      | 1/2                   | 88%       | -                | -               |
-| `io/musicxml/read.omr.test.ts`                               | 49    | 10      | 6      | 0/4                   | 100%      | -                | -               |
-| `io/musicxml/read.test.ts`                                   | 53    | 10      | 7      | 1/2                   | 88%       | -                | -               |
+| `io/musicxml/ornaments.test.ts`                              | 12    | 10      | 7      | 1/2                   | 88%       | -                | useful: 10/2/0  |
+| `io/musicxml/read.omr.test.ts`                               | 49    | 10      | 6      | 0/4                   | 100%      | -                | useful: 46/3/0  |
+| `io/musicxml/read.test.ts`                                   | 53    | 10      | 7      | 1/2                   | 88%       | -                | useful: 46/7/0  |
 | `io/musicxml/scanOrnaments.test.ts`                          | 4     | 10      | 2      | 3/5                   | 40%       | -                | mixed: 3/1/0    |
 | `io/musicxml/smoke.test.ts` (read, not mutated)              | -     | -       | -      | -                     | -         | -                | weak: 0/1/0     |
-| `io/musicxml/write.test.ts`                                  | 5     | 10      | 8      | 2/0                   | 80%       | -                | -               |
+| `io/musicxml/write.test.ts`                                  | 5     | 10      | 8      | 2/0                   | 80%       | -                | mixed: 4/1/0    |
 | `io/pig/pig.test.ts`                                         | 14    | 10      | 5      | 3/2                   | 63%       | -                | useful: 12/2/0  |
 | `learn/bootstrap.test.ts`                                    | 4     | 10      | 6      | 4/0                   | 60%       | 0 of 1           | mixed: 2/2/0    |
 | `learn/calibration.test.ts`                                  | 17    | 10      | 9      | 1/0                   | 90%       | 0 of 1           | useful: 15/2/0  |
-| `learn/data.test.ts`                                         | 7     | 10      | 10     | 0/0                   | 100%      | -                | -               |
-| `learn/features.test.ts`                                     | 14    | 10      | 10     | 0/0                   | 100%      | -                | -               |
-| `learn/lcg.test.ts`                                          | 5     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | -               |
-| `learn/perceptron.test.ts`                                   | 16    | 10      | 7      | 2/1                   | 78%       | 0 of 3           | -               |
+| `learn/data.test.ts`                                         | 7     | 10      | 10     | 0/0                   | 100%      | -                | useful: 7/0/0   |
+| `learn/features.test.ts`                                     | 14    | 10      | 10     | 0/0                   | 100%      | -                | useful: 12/2/0  |
+| `learn/lcg.test.ts`                                          | 5     | 10      | 9      | 1/0                   | 90%       | 0 of 1           | mixed: 2/3/0    |
+| `learn/perceptron.test.ts`                                   | 16    | 10      | 7      | 2/1                   | 78%       | 0 of 3           | useful: 13/3/0  |
 | `library/benchmarkSet.test.ts`                               | 4     | 9       | 9      | 0/0                   | 100%      | -                | useful: 4/0/0   |
-| `lint/lint.test.ts`                                          | 20    | 10      | 8      | 2/0                   | 80%       | 1 of 2           | -               |
+| `lint/lint.test.ts`                                          | 20    | 10      | 8      | 2/0                   | 80%       | 1 of 2           | useful: 14/6/0  |
 | `lint/rules.test.ts`                                         | 14    | 10      | 5      | 3/2                   | 63%       | 3 of 5           | useful: 13/0/1  |
-| `score/build.test.ts`                                        | 8     | 10      | 8      | 1/1                   | 89%       | 0 of 2           | -               |
+| `score/build.test.ts`                                        | 8     | 10      | 8      | 1/1                   | 89%       | 0 of 2           | mixed: 4/4/0    |
 | `score/ornaments.test.ts`                                    | 9     | 10      | 5      | 5/0                   | 50%       | 0 of 5           | mixed: 7/2/0    |
-| `score/pitch.test.ts`                                        | 7     | 10      | 7      | 3/0                   | 70%       | 1 of 3           | -               |
+| `score/pitch.test.ts`                                        | 7     | 10      | 7      | 3/0                   | 70%       | 1 of 3           | mixed: 4/3/0    |
 | `version.test.ts`                                            | 1     | 0       | 0      | 0/0                   | n/a       | -                | weak: 0/1/0     |

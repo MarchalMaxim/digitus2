@@ -24,7 +24,7 @@ import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
-import { handOff, handOffFiles, isTouchOnly } from './phone.js';
+import { canShareFiles, handOff, handOffFiles, isTouchOnly } from './phone.js';
 import {
   correct,
   timingIssue,
@@ -574,7 +574,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                       void sendPhotos();
                     }}
                   >
-                    {typeof navigator.share === 'function' ? t.scan.phone.share : t.scan.phone.save}
+                    {canShareFiles() ? t.scan.phone.share : t.scan.phone.save}
                   </Button>
                 </div>
                 <p role="status">

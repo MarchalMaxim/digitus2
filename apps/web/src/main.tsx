@@ -7,6 +7,7 @@ import { messages, startLocale } from './i18n/i18n.js';
 import { installHashSync } from './app/routes.js';
 import { useAppStore } from './app/store.js';
 import { loadLibraryIndex } from './library/manifest.js';
+import { registerServiceWorker } from './app/serviceWorker.js';
 
 // The library list is fetched first: the URL and the library both read it (manifest.ts). The
 // texts of the reader's language arrive alongside, so the page never shows English first.
@@ -23,3 +24,6 @@ Promise.all([loadLibraryIndex(), startLocale()])
     document.getElementById('root')!.textContent = messages().app.listFailed;
     console.error(error);
   });
+
+// Offline use and installing (issue #35): the service worker, registered once the page has loaded.
+registerServiceWorker();

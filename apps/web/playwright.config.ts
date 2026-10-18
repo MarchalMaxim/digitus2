@@ -16,6 +16,10 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${port}`,
     trace: 'retain-on-failure',
+    // The production build registers a service worker (src/app/serviceWorker.ts). Page routes do
+    // not see the requests a service worker answers, so every spec blocks it; e2e/pwa.spec.ts
+    // alone allows it.
+    serviceWorkers: 'block',
     launchOptions: { args: ['--autoplay-policy=no-user-gesture-required', '--mute-audio'] },
   },
   webServer: {

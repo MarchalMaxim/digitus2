@@ -187,7 +187,7 @@ Library:
 
 Scanning:
 
-- Recognition errors remain: missed chord ties, a duplicated note, a wrong hand assignment, beam membership inferred from the meter rather than read. Meter can be inferred when a page omits it. Details: `docs/scanning.md`; follow-ups #39, #40, #41.
+- Recognition errors remain and are corrected in the review (#40, done): on the acceptance corpus homr misses 13 of 47 ties that carry no mark in its output, loses the grand staff on a shadowed page, and photo beams are inferred from the meter rather than read; the duplicated C5 and wrong-hand E3 of the private test photos are not re-measured. Details: `docs/scanning.md`, `docs/research/omr.md`; open: #39 (beams), #41.
 
 ## Next
 

@@ -1,4 +1,4 @@
-import { scanMime, validateScan, validateScanImages } from '../scan/model.js';
+import { scanType, validateScan, validateScanImages } from '../scan/model.js';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
@@ -51,7 +51,7 @@ export function acceptScoreFile(
   onScan?: (file: File) => void,
 ): void {
   if (!file) return;
-  if (onScan && scanMime(file.name)) {
+  if (onScan && scanType(file)) {
     void validateScan(file).then(onScan, (error: unknown) =>
       onRefuse(refusalOf(error, (t) => t.library.ownFile.cannotReadFile)),
     );

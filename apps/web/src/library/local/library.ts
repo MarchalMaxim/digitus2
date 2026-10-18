@@ -25,7 +25,14 @@ function publish() {
           record.kind === 'file'
             ? record.name
             : (record.session.pages?.[0]?.originalFile?.name ?? record.session.file.name),
-        detail: record.kind === 'file' ? 'file' : record.session.xml ? 'recognition' : 'draft',
+        detail:
+          record.kind === 'file'
+            ? 'file'
+            : !record.session.xml
+              ? 'draft'
+              : record.session.corrections?.length
+                ? 'corrected'
+                : 'recognition',
         saved: saved.has(record.id),
       })),
   });

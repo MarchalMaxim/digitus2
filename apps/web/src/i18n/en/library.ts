@@ -117,7 +117,12 @@ export const library = {
     removeLabel: (name: string) => `Remove saved ${name}`,
     remove: 'Remove',
     /** The gray line under a score's name, by what was saved. */
-    detail: { file: 'Score file', recognition: 'Recognition saved', draft: 'Scan draft' },
+    detail: {
+      file: 'Score file',
+      recognition: 'Recognition saved',
+      corrected: 'Corrected recognition',
+      draft: 'Scan draft',
+    },
     removeFailed: 'This score could not be removed. Try again.',
     removedNotErased:
       'This score was removed for this visit, but browser storage could not be updated. It may reappear after a reload.',

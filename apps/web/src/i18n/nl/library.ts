@@ -99,6 +99,7 @@ export const library: Messages['library'] = {
       file: 'Partituurbestand',
       recognition: 'Herkenning opgeslagen',
       draft: 'Scanconcept',
+      corrected: 'Gecorrigeerde herkenning',
     },
     removeFailed: 'Deze partituur kon niet worden verwijderd. Probeer het opnieuw.',
     removedNotErased:

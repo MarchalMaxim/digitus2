@@ -68,6 +68,120 @@ export const scan: Messages['scan'] = {
     useForFingerings: 'Utiliser pour le doigté',
     scanAgain: 'Numériser à nouveau',
   },
+  edit: {
+    hint: 'Sélectionnez une note pour la corriger.',
+    keys: 'Gauche et Droite sélectionnent la note précédente ou suivante, Haut et Bas changent sa hauteur, Échap ferme l’éditeur.',
+    pitch: (step: string, alter: number, octave: number) =>
+      `${({ C: 'Do', D: 'Ré', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+    bar: (bar: string) => `Mesure ${bar}`,
+    rightHand: 'main droite',
+    leftHand: 'main gauche',
+    staff: (staff: number) => `portée ${staff}`,
+    lengths: {
+      whole: 'ronde',
+      half: 'blanche',
+      quarter: 'noire',
+      eighth: 'croche',
+      '16th': 'double croche',
+      '32nd': 'triple croche',
+    } as Record<string, string>,
+    noteLength: (length: string, dotted: boolean) => `${length}${dotted ? ' pointée' : ''}`,
+    restLength: (length: string, dotted: boolean) =>
+      `silence (${length}${dotted ? ' pointée' : ''})`,
+    tied: 'liée',
+    describe: (parts: string[]) => parts.join(' · '),
+    panelLabel: 'Corriger la note sélectionnée',
+    pitchLabel: 'Hauteur',
+    lower: 'Plus bas',
+    lowerLabel: 'Descendre d’un degré',
+    higher: 'Plus haut',
+    higherLabel: 'Monter d’un degré',
+    flat: 'Bémol',
+    natural: 'Bécarre',
+    sharp: 'Dièse',
+    lengthLabel: 'Durée',
+    lengthButtons: {
+      whole: 'Ronde',
+      half: 'Blanche',
+      quarter: 'Noire',
+      eighth: 'Croche',
+      '16th': 'Double',
+      '32nd': 'Triple',
+    } as Record<string, string>,
+    dotted: 'Pointée',
+    tieNext: 'Liée à la note suivante',
+    tiePrevious: 'Liée à la note précédente',
+    toLeftHand: 'Passer à la main gauche',
+    toRightHand: 'Passer à la main droite',
+    remove: 'Supprimer la note',
+    previous: 'Note précédente',
+    next: 'Note suivante',
+    done: 'Terminé',
+    handBeats: (hand: string, beats: number) =>
+      `${hand} ${plural('fr', beats, { one: '# temps', other: '# temps' })}`,
+    timing: (bar: string, hands: string[], meter?: string) =>
+      `${bar} : ${hands.join(', ')}${meter ? `, en ${meter}` : ''}.`,
+    corrections: (n: number) => plural('fr', n, { one: '# correction', other: '# corrections' }),
+    undo: 'Annuler',
+    reset: 'Revenir à la reconnaissance',
+    resetDone: 'Toutes les corrections sont retirées. Annuler les rétablit.',
+    listSummary: 'Voir les corrections',
+    changed: {
+      pitch: (where: string, from: string, to: string) => `${where} : ${from} → ${to}`,
+      duration: (where: string, pitch: string, from: string, to: string) =>
+        `${where} : ${pitch} ${from} → ${to}`,
+      tie: (where: string, pitch: string) => `${where} : ${pitch} liée au ${pitch} suivant`,
+      untie: (where: string, pitch: string) => `${where} : liaison de ${pitch} retirée`,
+      hand: (where: string, pitch: string, hand: string) =>
+        `${where} : ${pitch} passée à la ${hand}`,
+      removed: (where: string, pitch: string) => `${where} : ${pitch} supprimée`,
+    },
+    stale: (kept: number) =>
+      `Certaines corrections enregistrées ne s’appliquent plus à cette reconnaissance. Les ${kept} premières sont conservées.`,
+    problemsSummary: (n: number) =>
+      plural('fr', n, { one: '# endroit à vérifier', other: '# endroits à vérifier' }),
+    problems: {
+      tieGap: (where: string, pitch: string, gap: string) =>
+        `${where} : la liaison de ${pitch} atteint le ${pitch} suivant avec ${gap} de retard.`,
+      tieEarly: (where: string, pitch: string, gap: string) =>
+        `${where} : la liaison de ${pitch} atteint le ${pitch} suivant avec ${gap} d’avance.`,
+      tieUnmatched: (where: string, pitch: string) =>
+        `${where} : une liaison sur ${pitch} n’a pas de note correspondante.`,
+      barTiming: (timing: string) => `Les mains ne concordent pas. ${timing}`,
+    },
+    gap: (beats: number) => plural('fr', beats, { one: '# temps', other: '# temps' }),
+    downloadCorrected: 'Télécharger le MusicXML corrigé',
+    correctedSheetLabel: 'la reconnaissance corrigée',
+    refused: {
+      missing: 'Cette note n’est plus dans la partition.',
+      rest: 'Un silence n’a pas de hauteur à changer.',
+      range: 'Cette hauteur sort de l’étendue du piano.',
+      grace: 'Une appoggiature ne prend pas de temps ; sa durée ne peut pas être changée ici.',
+      unwritable: 'Cette durée ne peut pas être écrite dans cette partition.',
+      otherHand:
+        'Ce changement déplacerait des notes de l’autre main ou voix ; il n’a pas été fait. Vérifiez la mesure dans un éditeur de partitions.',
+      noTieTarget: (pitch: { step: string; alter: number; octave: number }) =>
+        `Aucun ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ne commence là où cette note finit ; elle ne peut pas être liée. Corrigez d’abord les durées.`,
+      noTieSource: (pitch: { step: string; alter: number; octave: number }) =>
+        `Aucun ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ne finit là où cette note commence ; elle ne peut pas être liée.`,
+      tieTaken: 'La note suivante est déjà liée à une autre note.',
+      tiedRemove: 'Retirez la liaison de cette note avant de la supprimer.',
+      chordLengths: 'Les notes de l’accord ont des durées différentes. Changez d’abord la durée.',
+      oneStaff: 'Cette partition n’a qu’une portée.',
+    },
+  },
+  phone: {
+    takePhoto: 'Prendre une photo',
+    takeAnother: 'Prendre une autre photo',
+    explain:
+      'La reconnaissance se fait sur un PC, qu’un téléphone ne peut pas joindre. Envoyez ces photos au PC où tourne le programme, puis ouvrez-les là-bas.',
+    share: 'Envoyer les photos à votre PC',
+    save: 'Enregistrer les photos',
+    shareTitle: 'Photos de partition',
+    shared: 'Photos transmises. Ouvrez-les sur votre PC avec « Ouvrir votre propre partition ».',
+    saved:
+      'Photos enregistrées sur cet appareil. Transférez-les sur votre PC, puis ouvrez-les avec « Ouvrir votre propre partition ».',
+  },
   errors: {
     notCombinedSaved:
       'Les pages ont été reconnues, mais leur notation n’a pas pu être combinée. Les fichiers de chaque page sont disponibles ci-dessous.',

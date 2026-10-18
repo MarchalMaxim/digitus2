@@ -68,6 +68,121 @@ export const scan: Messages['scan'] = {
     useForFingerings: 'Gebruiken voor vingerzettingen',
     scanAgain: 'Opnieuw scannen',
   },
+  edit: {
+    hint: 'Selecteer een noot om die te corrigeren.',
+    keys: 'Links en Rechts kiezen de vorige of volgende noot, Omhoog en Omlaag veranderen de toonhoogte, Escape sluit de editor.',
+    pitch: (step: string, alter: number, octave: number) =>
+      `${step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+    bar: (bar: string) => `Maat ${bar}`,
+    rightHand: 'rechterhand',
+    leftHand: 'linkerhand',
+    staff: (staff: number) => `notenbalk ${staff}`,
+    lengths: {
+      whole: 'hele',
+      half: 'halve',
+      quarter: 'kwart',
+      eighth: 'achtste',
+      '16th': 'zestiende',
+      '32nd': 'tweeëndertigste',
+    } as Record<string, string>,
+    noteLength: (length: string, dotted: boolean) =>
+      `${dotted ? 'gepunteerde ' : ''}${length} noot`,
+    restLength: (length: string, dotted: boolean) =>
+      `${dotted ? 'gepunteerde ' : ''}${length} rust`,
+    tied: 'overgebonden',
+    describe: (parts: string[]) => parts.join(' · '),
+    panelLabel: 'De gekozen noot corrigeren',
+    pitchLabel: 'Toonhoogte',
+    lower: 'Lager',
+    lowerLabel: 'Eén stap lager',
+    higher: 'Hoger',
+    higherLabel: 'Eén stap hoger',
+    flat: 'Mol',
+    natural: 'Herstellingsteken',
+    sharp: 'Kruis',
+    lengthLabel: 'Duur',
+    lengthButtons: {
+      whole: 'Hele',
+      half: 'Halve',
+      quarter: 'Kwart',
+      eighth: 'Achtste',
+      '16th': '16e',
+      '32nd': '32e',
+    } as Record<string, string>,
+    dotted: 'Gepunteerd',
+    tieNext: 'Overgebonden naar volgende',
+    tiePrevious: 'Overgebonden van vorige',
+    toLeftHand: 'Naar de linkerhand',
+    toRightHand: 'Naar de rechterhand',
+    remove: 'Noot verwijderen',
+    previous: 'Vorige noot',
+    next: 'Volgende noot',
+    done: 'Klaar',
+    handBeats: (hand: string, beats: number) =>
+      `${hand} ${plural('nl', beats, { one: '# tel', other: '# tellen' })}`,
+    timing: (bar: string, hands: string[], meter?: string) =>
+      `${bar}: ${hands.join(', ')}${meter ? `, in ${meter}` : ''}.`,
+    corrections: (n: number) => plural('nl', n, { one: '# correctie', other: '# correcties' }),
+    undo: 'Ongedaan maken',
+    reset: 'Terug naar de herkenning',
+    resetDone: 'Alle correcties zijn weggehaald. Ongedaan maken zet ze terug.',
+    listSummary: 'Correcties bekijken',
+    changed: {
+      pitch: (where: string, from: string, to: string) => `${where}: ${from} → ${to}`,
+      duration: (where: string, pitch: string, from: string, to: string) =>
+        `${where}: ${pitch} ${from} → ${to}`,
+      tie: (where: string, pitch: string) =>
+        `${where}: ${pitch} overgebonden naar de volgende ${pitch}`,
+      untie: (where: string, pitch: string) => `${where}: overbinding op ${pitch} weggehaald`,
+      hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} naar de ${hand}`,
+      removed: (where: string, pitch: string) => `${where}: ${pitch} verwijderd`,
+    },
+    stale: (kept: number) =>
+      `Sommige opgeslagen correcties passen niet meer bij deze herkenning. De eerste ${kept} blijven behouden.`,
+    problemsSummary: (n: number) =>
+      plural('nl', n, { one: '# plek om te controleren', other: '# plekken om te controleren' }),
+    problems: {
+      tieGap: (where: string, pitch: string, gap: string) =>
+        `${where}: de overbinding op ${pitch} bereikt de volgende ${pitch} ${gap} te laat.`,
+      tieEarly: (where: string, pitch: string, gap: string) =>
+        `${where}: de overbinding op ${pitch} bereikt de volgende ${pitch} ${gap} te vroeg.`,
+      tieUnmatched: (where: string, pitch: string) =>
+        `${where}: een overbinding op ${pitch} heeft geen bijpassende noot.`,
+      barTiming: (timing: string) => `De handen lopen niet gelijk. ${timing}`,
+    },
+    gap: (beats: number) => plural('nl', beats, { one: '# tel', other: '# tellen' }),
+    downloadCorrected: 'Gecorrigeerde MusicXML downloaden',
+    correctedSheetLabel: 'de gecorrigeerde herkenning',
+    refused: {
+      missing: 'Deze noot staat niet meer in de partituur.',
+      rest: 'Een rust heeft geen toonhoogte om te veranderen.',
+      range: 'Die toonhoogte ligt buiten het bereik van de piano.',
+      grace: 'Een voorslag duurt geen tijd, dus de duur kan hier niet veranderen.',
+      unwritable: 'Deze duur kan in deze partituur niet geschreven worden.',
+      otherHand:
+        'Deze wijziging zou noten in de andere hand of stem verplaatsen en is niet uitgevoerd. Controleer de maat in een notatieprogramma.',
+      noTieTarget: (pitch: { step: string; alter: number; octave: number }) =>
+        `Er begint geen ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} waar deze noot eindigt, dus overbinden kan niet. Corrigeer eerst de duren.`,
+      noTieSource: (pitch: { step: string; alter: number; octave: number }) =>
+        `Er eindigt geen ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} waar deze noot begint, dus overbinden kan niet.`,
+      tieTaken: 'De volgende noot is al overgebonden vanaf een andere noot.',
+      tiedRemove: 'Haal eerst de overbinding van deze noot weg.',
+      chordLengths: 'De noten van het akkoord hebben verschillende duren. Verander eerst de duur.',
+      oneStaff: 'Deze partituur heeft één notenbalk.',
+    },
+  },
+  phone: {
+    takePhoto: 'Foto maken',
+    takeAnother: 'Nog een foto maken',
+    explain:
+      'De herkenning draait op een pc, en een telefoon kan die niet bereiken. Stuur deze foto’s naar de pc waarop het programma draait en open ze daar.',
+    share: 'Foto’s naar je pc sturen',
+    save: 'Foto’s opslaan',
+    shareTitle: 'Foto’s van een partituur',
+    shared: 'Foto’s doorgegeven. Open ze op je pc met ‘Open je eigen partituur’.',
+    saved:
+      'Foto’s opgeslagen op dit apparaat. Zet ze op je pc en open ze daar met ‘Open je eigen partituur’.',
+  },
   errors: {
     notCombinedSaved:
       'De pagina’s zijn herkend, maar de notatie kon niet worden samengevoegd. De bestanden per pagina staan hieronder.',

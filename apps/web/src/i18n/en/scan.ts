@@ -70,6 +70,129 @@ export const scan = {
     useForFingerings: 'Use for fingerings',
     scanAgain: 'Scan again',
   },
+  /** Correcting the recognised notation, note by note, inside the review. */
+  edit: {
+    hint: 'Select a note to correct it.',
+    /** The sheet's description for keyboard and screen-reader users. */
+    keys: 'Left and Right select the previous or next note, Up and Down change its pitch, Escape closes the editor.',
+    /** "C4", "B♭3": a pitch with its octave, in the names this language uses. */
+    pitch: (step: string, alter: number, octave: number) =>
+      `${step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+    bar: (bar: string) => `Bar ${bar}`,
+    rightHand: 'right hand',
+    leftHand: 'left hand',
+    staff: (staff: number) => `staff ${staff}`,
+    lengths: {
+      whole: 'whole',
+      half: 'half',
+      quarter: 'quarter',
+      eighth: 'eighth',
+      '16th': '16th',
+      '32nd': '32nd',
+    } as Record<string, string>,
+    /** `length` is one of the lengths above. */
+    noteLength: (length: string, dotted: boolean) => `${dotted ? 'dotted ' : ''}${length} note`,
+    restLength: (length: string, dotted: boolean) => `${dotted ? 'dotted ' : ''}${length} rest`,
+    tied: 'tied',
+    /** Joins the parts of a note's description: "Bar 11 · right hand · A4 quarter note". */
+    describe: (parts: string[]) => parts.join(' · '),
+    panelLabel: 'Correct the selected note',
+    pitchLabel: 'Pitch',
+    lower: 'Lower',
+    lowerLabel: 'Lower by one step',
+    higher: 'Higher',
+    higherLabel: 'Higher by one step',
+    flat: 'Flat',
+    natural: 'Natural',
+    sharp: 'Sharp',
+    lengthLabel: 'Length',
+    /** Button labels for the note lengths, short enough for a phone. */
+    lengthButtons: {
+      whole: 'Whole',
+      half: 'Half',
+      quarter: 'Quarter',
+      eighth: 'Eighth',
+      '16th': '16th',
+      '32nd': '32nd',
+    } as Record<string, string>,
+    dotted: 'Dotted',
+    tieNext: 'Tied to next note',
+    tiePrevious: 'Tied from previous note',
+    toLeftHand: 'Move to left hand',
+    toRightHand: 'Move to right hand',
+    remove: 'Remove note',
+    previous: 'Previous note',
+    next: 'Next note',
+    done: 'Done',
+    /** One hand's length in a bar, as in "right hand 3 beats". */
+    handBeats: (hand: string, beats: number) =>
+      `${hand} ${plural('en', beats, { one: '# beat', other: '# beats' })}`,
+    /** "Bar 11: right hand 3 beats, left hand 3 beats, in 3/4." */
+    timing: (bar: string, hands: string[], meter?: string) =>
+      `${bar}: ${hands.join(', ')}${meter ? `, in ${meter}` : ''}.`,
+    corrections: (n: number) => plural('en', n, { one: '# correction', other: '# corrections' }),
+    undo: 'Undo',
+    reset: 'Reset to recognition',
+    resetDone: 'All corrections removed. Undo brings them back.',
+    listSummary: 'Review corrections',
+    /** The corrections as listed; `where` is "Bar 11, right hand". */
+    changed: {
+      pitch: (where: string, from: string, to: string) => `${where}: ${from} → ${to}`,
+      duration: (where: string, pitch: string, from: string, to: string) =>
+        `${where}: ${pitch} ${from} → ${to}`,
+      tie: (where: string, pitch: string) => `${where}: ${pitch} tied to the next ${pitch}`,
+      untie: (where: string, pitch: string) => `${where}: tie on ${pitch} removed`,
+      hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} moved to the ${hand}`,
+      removed: (where: string, pitch: string) => `${where}: ${pitch} removed`,
+    },
+    stale: (kept: number) =>
+      `Some saved corrections no longer apply to this recognition. The first ${kept} are kept.`,
+    problemsSummary: (n: number) =>
+      plural('en', n, { one: '# place to check', other: '# places to check' }),
+    problems: {
+      tieGap: (where: string, pitch: string, gap: string) =>
+        `${where}: the tie on ${pitch} reaches its next ${pitch} ${gap} late.`,
+      tieEarly: (where: string, pitch: string, gap: string) =>
+        `${where}: the tie on ${pitch} reaches its next ${pitch} ${gap} early.`,
+      tieUnmatched: (where: string, pitch: string) =>
+        `${where}: a tie on ${pitch} has no matching note.`,
+      /** `timing` is the sentence from `timing` above. */
+      barTiming: (timing: string) => `The hands disagree. ${timing}`,
+    },
+    /** A gap as a length: "a quarter note", "2 beats". */
+    gap: (beats: number) => plural('en', beats, { one: '# beat', other: '# beats' }),
+    downloadCorrected: 'Download corrected MusicXML',
+    correctedSheetLabel: 'corrected scan recognition',
+    refused: {
+      missing: 'This note is no longer in the score.',
+      rest: 'A rest has no pitch to change.',
+      range: 'That pitch is outside the piano’s range.',
+      grace: 'A grace note takes no time, so its length cannot be changed here.',
+      unwritable: 'This length cannot be written in this score.',
+      otherHand:
+        'This change would move notes in the other hand or voice, so it was not made. Check the bar in a notation editor.',
+      noTieTarget: (pitch: { step: string; alter: number; octave: number }) =>
+        `No ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} starts where this note ends, so it cannot be tied. Correct the lengths first.`,
+      noTieSource: (pitch: { step: string; alter: number; octave: number }) =>
+        `No ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ends where this note starts, so it cannot be tied.`,
+      tieTaken: 'The next note is already tied from another note.',
+      tiedRemove: 'Remove this note’s tie before removing the note.',
+      chordLengths: 'The chord’s notes have different lengths. Change the length first.',
+      oneStaff: 'This score has a single staff.',
+    },
+  },
+  /** On a phone or tablet, which cannot reach the PC worker. */
+  phone: {
+    takePhoto: 'Take a photo',
+    takeAnother: 'Take another photo',
+    explain:
+      'Recognition runs on a PC, and a phone cannot reach it. Send these photos to the PC that runs the worker, then open them there.',
+    share: 'Send photos to your PC',
+    save: 'Save photos',
+    shareTitle: 'Score photos',
+    shared: 'Photos handed over. Open them on your PC with “Open your own score”.',
+    saved: 'Photos saved to this device. Move them to your PC, then open them with “Open your own score”.',
+  },
   errors: {
     notCombinedSaved:
       'The pages were recognized, but their notation could not be combined. Individual page files are available below.',

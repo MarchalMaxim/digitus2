@@ -4,7 +4,7 @@ export interface LocalScoreSummary {
   id: string;
   name: string;
   /** What was saved: the score file itself, a recognised scan, or a scan still being worked on. */
-  detail: 'file' | 'recognition' | 'draft';
+  detail: 'file' | 'recognition' | 'corrected' | 'draft';
   saved: boolean;
 }
 

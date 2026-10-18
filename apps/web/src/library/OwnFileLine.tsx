@@ -1,6 +1,7 @@
-import type { ChangeEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import type { Phrase } from '../i18n/messages.js';
 import { useT } from '../i18n/i18n.js';
+import { isTouchOnly } from '../scan/phone.js';
 import { acceptScoreFiles, SCORE_ACCEPT } from './ownFile.js';
 
 // The plan names this module OwnFile.tsx. On Windows' case-insensitive file system an import of
@@ -13,9 +14,13 @@ export interface OwnFileProps {
   onScan?(files: File[]): void;
 }
 
-/** The end line (spec 3): a text button that opens the file chooser; the page never mentions dropping. */
+/**
+ * The end line (spec 3): a text button that opens the file chooser; the page never mentions
+ * dropping. On a touch-only device a second one opens the camera, to photograph a printed page.
+ */
 export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
   const t = useT();
+  const [camera] = useState(() => !!onScan && isTouchOnly());
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
     acceptScoreFiles(Array.from(input.files ?? []), onFile, onRefuse, onScan);
@@ -33,6 +38,18 @@ export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
           onChange={onChange}
         />
       </label>
+      {camera && (
+        <label className="text-button own-file">
+          {t.scan.phone.takePhoto}
+          <input
+            type="file"
+            accept="image/jpeg,image/png"
+            capture="environment"
+            className="visually-hidden"
+            onChange={onChange}
+          />
+        </label>
+      )}
     </p>
   );
 }

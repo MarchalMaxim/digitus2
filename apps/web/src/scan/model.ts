@@ -1,4 +1,5 @@
 import { PhraseError } from '../i18n/PhraseError.js';
+import type { Correction } from './corrections.js';
 
 /** Source provenance, also retained by the browser's local score library. */
 export interface ScanSession {
@@ -10,6 +11,11 @@ export interface ScanSession {
   recognizedAt?: string | undefined;
   recognizer?: string | undefined;
   warnings?: string[] | undefined;
+  /**
+   * The reader's corrections of the combined recognition `xml`, in the order they were made. The
+   * raw `xml` itself never changes; the corrected copy is `xml` with these replayed (corrections.ts).
+   */
+  corrections?: Correction[] | undefined;
 }
 export interface ScanPage {
   id: string;
@@ -28,7 +34,7 @@ export const SCAN_PAGE_LIMIT = 20;
 export async function validateScanImages(files: readonly File[]): Promise<File[]> {
   if (!files.length || files.length > SCAN_PAGE_LIMIT)
     throw new PhraseError((t) => t.scan.files.pageLimit);
-  if (files.some((file) => !scanMime(file.name)?.startsWith('image/')))
+  if (files.some((file) => !scanType(file)?.startsWith('image/')))
     throw new PhraseError((t) => t.scan.files.imagesOrOneFile);
   return Promise.all(files.map(validateScan));
 }
@@ -46,8 +52,20 @@ export function scanMime(name: string): string | null {
     )[extension] ?? null
   );
 }
+const SCAN_TYPES: Record<string, string> = {
+  'image/png': '.png',
+  'image/jpeg': '.jpg',
+  'application/pdf': '.pdf',
+};
+/**
+ * The scan type of a file: by its extension, or, for a name without one of ours (a phone camera
+ * can hand over "image" or a numbered name), by the type the browser reports.
+ */
+export function scanType(file: Pick<File, 'name' | 'type'>): string | null {
+  return scanMime(file.name) ?? (file.type in SCAN_TYPES ? file.type : null);
+}
 export async function validateScan(file: File): Promise<File> {
-  const type = scanMime(file.name);
+  const type = scanType(file);
   if (!type || file.size === 0 || file.size > SCAN_LIMIT)
     throw new PhraseError((t) => t.scan.files.fileTypes);
   const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
@@ -58,5 +76,7 @@ export async function validateScan(file: File): Promise<File> {
         ? bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255
         : bytes.join(',') === '137,80,78,71,13,10,26,10';
   if (!valid) throw new PhraseError((t) => t.scan.files.contentMismatch);
-  return new File([file], file.name, { type, lastModified: file.lastModified });
+  // A camera file named without our extension gets one, so the PC worker and downloads agree.
+  const name = scanMime(file.name) ? file.name : file.name.replace(/\.[^.]*$/, '') + SCAN_TYPES[type];
+  return new File([file], name, { type, lastModified: file.lastModified });
 }

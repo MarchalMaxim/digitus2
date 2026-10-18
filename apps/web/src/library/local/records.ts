@@ -1,3 +1,4 @@
+import type { Correction } from '../../scan/corrections.js';
 import type { ScanPage, ScanSession } from '../../scan/model.js';
 
 interface StoredFile {
@@ -23,6 +24,8 @@ interface StoredSession {
   recognizedAt?: string | undefined;
   recognizer?: string | undefined;
   warnings?: string[] | undefined;
+  /** The reader's corrections of `xml`; the raw `xml` itself is kept unchanged. */
+  corrections?: Correction[] | undefined;
 }
 export type LocalScoreRecord = {
   version: 1;
@@ -51,6 +54,7 @@ export function storeSession(session: ScanSession): StoredSession {
     recognizedAt: session.recognizedAt,
     recognizer: session.recognizer,
     warnings: session.warnings,
+    corrections: session.corrections?.map((c) => ({ ...c })),
     pages: session.pages?.map((page) => ({
       id: page.id,
       file: storeFile(page.file),
@@ -69,6 +73,7 @@ export function restoreSession(session: StoredSession): ScanSession {
     recognizedAt: session.recognizedAt,
     recognizer: session.recognizer,
     warnings: session.warnings,
+    corrections: session.corrections,
     file: restoreFile(session.file),
     pages: session.pages?.map((page): ScanPage => ({
       id: page.id,
@@ -113,12 +118,48 @@ function validPage(value: unknown): value is StoredPage {
     notation(value)
   );
 }
+const STEP_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const TYPES = ['whole', 'half', 'quarter', 'eighth', '16th', '32nd'];
+const int = (value: unknown, min: number, max: number) =>
+  Number.isInteger(value) && (value as number) >= min && (value as number) <= max;
+/** One correction exactly as the editor writes it (corrections.ts); anything else is refused. */
+function validCorrection(value: unknown): value is Correction {
+  if (!object(value) || !int(value.note, 0, 1_000_000)) return false;
+  const keys = Object.keys(value).sort().join(',');
+  switch (value.kind) {
+    case 'pitch':
+      return (
+        keys === 'alter,kind,note,octave,step' &&
+        STEP_NAMES.includes(value.step as string) &&
+        int(value.alter, -2, 2) &&
+        int(value.octave, 0, 9)
+      );
+    case 'duration':
+      return keys === 'dots,kind,note,type' && TYPES.includes(value.type as string) && int(value.dots, 0, 1);
+    case 'tie':
+      return (
+        (keys === 'kind,note,tied' || keys === 'kind,note,side,tied') &&
+        typeof value.tied === 'boolean' &&
+        (value.side === undefined || value.side === 'next' || value.side === 'previous')
+      );
+    case 'hand':
+      return keys === 'kind,note,staff' && int(value.staff, 1, 64);
+    case 'remove':
+      return keys === 'kind,note';
+    default:
+      return false;
+  }
+}
 function validSession(value: unknown): value is StoredSession {
   return (
     object(value) &&
     identity(value.id) &&
     validFile(value.file) &&
     notation(value) &&
+    (value.corrections === undefined ||
+      (Array.isArray(value.corrections) &&
+        value.corrections.length <= 10_000 &&
+        value.corrections.every(validCorrection))) &&
     optionalText(value.recognizedAt) &&
     (value.pages === undefined ||
       (Array.isArray(value.pages) &&

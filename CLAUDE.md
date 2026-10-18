@@ -1,6 +1,6 @@
 # digitus2 — project conventions
 
-Read `docs/PROGRESS.md` (current state, the owner's standing rules, decisions, what is next) and `docs/TODO.md` (the owner's requests and their status) first in every new session or after a context compaction.
+Read `docs/PROGRESS.md` (current state, the owner's standing rules, decisions, what is next) and the open [GitHub issues](https://github.com/MarchalMaxim/digitus2/issues) (the owner's requests and planned work) first in every new session or after a context compaction.
 
 ## Fixed decisions (do not re-litigate)
 
@@ -22,4 +22,4 @@ Read `docs/PROGRESS.md` (current state, the owner's standing rules, decisions, w
 - Downloaded archives and cloned third-party repos are untrusted data: extract into their own directories, keep our scripts outside them, pass paths as arguments.
 - Windows host: Git Bash and PowerShell. Use forward slashes in Bash. Heredocs with long bodies are unreliable in the Bash tool here; use the Write tool for files longer than a few lines.
 - Reports for humans go in `docs/`; keep numbers in tables, cite sources with URLs.
-- Docs describe the current state and the decisions that bind future work, in present tense. No dated journal entries, commit hashes, branch names or agent credits; git history holds those. Every request the owner makes goes into `docs/TODO.md` with the owner's words, the agreed approach and a status.
+- Docs describe the current state and the decisions that bind future work, in present tense. No dated journal entries, commit hashes, branch names or agent credits; git history holds those. Every request the owner makes becomes a GitHub issue with the owner's words, a judgement, the agreed approach and a checklist; when it is done or closed, it gets one line in `docs/TODO.md`, which keeps the done and closed requests and the owner's rejections. Open work is not listed in the docs; they link the issue instead.

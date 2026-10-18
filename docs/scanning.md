@@ -40,7 +40,7 @@ The pinned homr writes no beams. For display, the app infers conventional beat g
 
 Uploads are saved automatically in the browser's IndexedDB (database `digitus2.my-scores`), with page order, rotation, original and rotated bytes, the raw recognised MusicXML and the recogniser's name. Plain MusicXML and MIDI imports are saved too. **My scores** appears in the library when it has entries. Reopening an entry never reconnects to the PC or restarts recognition. A multi-page result that cannot be combined still reopens page by page. Remove deletes an entry. A failed save is reported and the current work stays usable.
 
-Browser storage belongs to one site and one browser profile, so a local preview and the GitHub Pages site have separate collections. Clearing site data or storage eviction removes it ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [storage limits](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)), so keep your own copies. Nothing is shared or published; a shared library is an open request in `docs/TODO.md`.
+Browser storage belongs to one site and one browser profile, so a local preview and the GitHub Pages site have separate collections. Clearing site data or storage eviction removes it ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [storage limits](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)), so keep your own copies. Nothing is shared or published; a shared library is an open request (#41).
 
 ## Set up the PC worker
 
@@ -101,7 +101,7 @@ Further limits:
 - A recognition job finishing does not mean its notation imports. In one test scan, an A4 tie in bar 11 whose continuation arrives a quarter note late is refused by the strict import.
 - Synthetic test pages, strict parsing and passing tests do not certify musical accuracy. Phone-photo robustness, multi-page books and browsers other than desktop Chrome are untested.
 
-The open requests are recognition fixes, source beam recovery, an acceptance corpus, in-browser correction and a shared library. They are tracked in `docs/TODO.md` under T9.
+The open requests are recognition fixes, source beam recovery, an acceptance corpus, in-browser correction and a shared library. They are tracked in #39, #40 and #41.
 
 ## Licences
 

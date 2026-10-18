@@ -1,6 +1,6 @@
 # digitus2 — status
 
-This file holds the project's current state: where things are, what lives outside the repository, the owner's standing rules, the decisions that constrain future work, known limitations and what is next. The owner's requests and their status live in `docs/TODO.md`. Keep both current when work lands.
+This file holds the project's current state: where things are, what lives outside the repository, the owner's standing rules, the decisions that constrain future work, known limitations and what is next. Open requests and planned work are [GitHub issues](https://github.com/MarchalMaxim/digitus2/issues); `docs/TODO.md` keeps the done and closed requests. Keep this file current when work lands.
 
 The app is public at https://marchalmaxim.github.io/digitus2/ (GitHub Pages, deployed from `main` on every push by `.github/workflows/pages.yml`). The repository is https://github.com/MarchalMaxim/digitus2 (MIT).
 
@@ -12,7 +12,7 @@ The app is public at https://marchalmaxim.github.io/digitus2/ (GitHub Pages, dep
 | Verification spec (goals, oracles, checks, iteration protocol)                                      | `docs/superpowers/specs/2026-10-13-verification-design.md`                                                            |
 | Landing page and library designs                                                                    | `docs/superpowers/specs/2026-10-14-ui-batch-design.md`, `docs/superpowers/specs/2026-10-16-library-shelves-design.md` |
 | M5 plan (predates the UI batch; re-plan before running it)                                          | `docs/superpowers/plans/2026-10-14-m5-interaction-readability.md`                                                     |
-| The owner's requests and bug reports                                                                | `docs/TODO.md`                                                                                                        |
+| The owner's requests: open ones as GitHub issues, done and closed ones                              | `docs/TODO.md`                                                                                                        |
 | `pnpm verify`, floors, CI, recovery after a restart                                                 | `docs/verification-loop.md`                                                                                           |
 | Web app: behaviour, architecture, motion, themes, budgets, limitations                              | `docs/app.md`                                                                                                         |
 | Experimental scanning: use, PC worker setup, limits                                                 | `docs/scanning.md`                                                                                                    |
@@ -59,7 +59,7 @@ Not committed, and how to get it back:
 - **Verification.** `pnpm verify` is the definition of done. Readability for intermediate players is a first-class metric. A qualitative UI review by an Opus subagent (verification spec 3.10) accompanies UI work.
 - **UI minimalism.** "Make sure that the UI stays very pristine and not cluttered. I very much like it right now. Do not overclutter it with features and be brutal with this." Controls appear only in the context that needs them (progressive disclosure).
 - **Merging.** Never merge into `main` without the owner's explicit confirmation. Work goes on a branch and a pull request; the owner merges.
-- **Requests.** Every request or bug report the owner posts gets a row in `docs/TODO.md` with a judgement and a status.
+- **Requests.** Every request or bug report the owner posts becomes a GitHub issue with the owner's words, a judgement, the agreed approach and a checklist. When it is done or closed, it gets one line in `docs/TODO.md`.
 - **This file.** Keep it current; it is what a new session reads first.
 
 ## Milestones
@@ -71,17 +71,17 @@ Not committed, and how to get it back:
 | M2 Solver v1 and verification core | done                  | Rule-based cost model with an exact second-order Viterbi, held-note and chord laws, lint, `digitus2 bench` with scorecards and error galleries, metamorphic suite. Rules only on PIG test: gen 61.89; textbook exact 486 of 672; 35 ms per 1,000 notes.                                                                                                                                                                                          |
 | M3 Learning                        | done                  | Weights learned on open data (`learned-open`, shipped as `RECOMMENDED_WEIGHT_SET`), calibrated confidences, beginner level, consistent-repeats pass, Mutopia oracle. PIG test gen 63.89, Mutopia test 65.48, ECE 0.0684 (numbers under Decisions).                                                                                                                                                                                               |
 | M4 App MVP                         | done                  | Library, score view with a digit on every note, playback with the red cursor and an on-screen keyboard, export, print, about; Playwright flows at desktop and phone width with the one-red and axe checks; visual baselines; Verovio lazy-loaded.                                                                                                                                                                                                |
-| M5 Interaction and readability     | partly done           | Done: seeking through a piece (T13): a click or tap in a bar, the arrow keys, the red hopping there. Open: note editing with pins, readability reduction, explanations; the plan predates the UI batch and needs a re-plan (see Next).                                                                                                                                                                                                           |
+| M5 Interaction and readability     | partly done           | Done: seeking through a piece (T13): a click or tap in a bar, the arrow keys, the red hopping there. Open (#42): note editing with pins, readability reduction, explanations; the plan predates the UI batch and needs a re-plan.                                                                                                                                                                                                                |
 | M6 MIDI import                     | done                  | MIDI reader, per-beat quantizer, hand separation (beam-searched pitch-trajectory DP with priors fitted on the library and the Mutopia train half), key estimate, two-staff engraving, drop a `.mid` in the app. Hands: PIG test 92.05, Mutopia test half 85.10, library core30 92.96; floor 91.0. 2,000 notes import in 88 ms.                                                                                                                   |
-| M7 Verification suite              | partly done           | Done: metamorphic suite (M2), calibration gate (M3), one-red, axe and visual checks (M4). Open: the readability reduction and player model, which run with M5.                                                                                                                                                                                                                                                                                   |
+| M7 Verification suite              | partly done           | Done: metamorphic suite (M2), calibration gate (M3), one-red, axe and visual checks (M4). Open: the readability reduction and player model, which run with M5 (#42); the further checks in #52.                                                                                                                                                                                                                                                  |
 | M7-A Teacher review job            | done                  | `research/teacher_review/weekly.py`: blinded Opus reviewers judge low-confidence, hard-error, control, planted-fault and recall passages; shared objections become hypotheses in `docs/experiments.md`. Never a gate. First run: 53 passages, 8 of 8 planted faults found, 3.11 objections per 100 control notes; report `docs/reviews/teacher-2026-10-14.md`.                                                                                   |
-| M8 Polish                          | partly done           | Done: Pages deployment (M12), dark mode, motion. Open: PWA (T3), MIDI held notes (T12).                                                                                                                                                                                                                                                                                                                                                          |
-| M9 Neural evaluation               | not started           | ArGNN is the best published model (66.84 on PIG test); adopt a neural model only if it beats the hybrid on every oracle.                                                                                                                                                                                                                                                                                                                         |
+| M8 Polish                          | partly done           | Done: Pages deployment (M12), dark mode, motion. Open: PWA (#35), MIDI held notes (#34).                                                                                                                                                                                                                                                                                                                                                         |
+| M9 Neural evaluation               | not started           | ArGNN is the best published model (66.84 on PIG test); adopt a neural model only if it beats the hybrid on every oracle (#57).                                                                                                                                                                                                                                                                                                                   |
 | M10 Photo and PDF input            | experimental, shipped | PNG, JPEG and PDF import through an optional local PC worker (Audiveris for PDFs, homr for photos), multi-image batches, page rotation, source-versus-recognition review, raw MusicXML download, browser-local "My scores". PDF acceptance: strict full-note F1 86.73% (three PDFs) and 93.19% (four held-out); native jobs take about 8–14 s.                                                                                                   |
 | M11 Demo videos                    | not started           | A reusable skill that records scripted Playwright scenarios as short silent clips for the README and the Pages landing; the app itself stays uncluttered.                                                                                                                                                                                                                                                                                        |
 | M12 GitHub Pages deployment        | done                  | `.github/workflows/pages.yml` builds with `--base=/digitus2/` and deploys `apps/web/dist` on every push to `main`. Public, static, no login.                                                                                                                                                                                                                                                                                                     |
 | L1 Curated library                 | done                  | 149 pieces in 23 collections: core 30 pinned by SHA-256 and rebuilt byte for byte, 46 arrangements, 73 Mutopia engravings; catalog v2, level heuristic, gates, `repro.py`, provenance; the `core30` benchmark set.                                                                                                                                                                                                                               |
-| L2 Broad library and browsing UI   | done, except T2       | Delivered as the 2,702-piece library below (PDMX through automatic gates, compressed scores, a browsing UI). The private folder and the CC-licensed lane (T2) are not done.                                                                                                                                                                                                                                                                      |
+| L2 Broad library and browsing UI   | done, except #37      | Delivered as the 2,702-piece library below (PDMX through automatic gates, compressed scores, a browsing UI). The private folder and the CC-licensed lane (#37) are not done.                                                                                                                                                                                                                                                                     |
 | UI batch (T6, T1, T10, T11)        | done                  | Landing page in units with progressive disclosure, red Start or Continue button, search from 100 pieces, window drop; Practice toggle in the sticky dock; the pause and hand-letter rules under Decisions.                                                                                                                                                                                                                                       |
 | Library at 2,702 pieces            | done                  | 253 curated pieces (Mutopia engravings and arrangements, 50 at grade 6) plus 2,449 from the MuseScore archive (PDMX): 1,300 classical, folk and religious at grades 1–5, 149 advanced at grade 6, 1,000 songs (979 songs, 21 jazz and blues). Grades 1–6 hold 47 / 212 / 1,415 / 784 / 45 / 199. Four levels (Easy, Medium, Harder, Challenging) with up to six style shelves of five daily-rotating samples; at most 30 rows render on arrival. |
 | Motion craft (T17, T18)            | done                  | Key travel, one-hand sweep, the red travelling between Play and the cursor, note-burst easter egg on clicks on nothing interactive (not while selecting text).                                                                                                                                                                                                                                                                                   |
@@ -131,7 +131,7 @@ References on the same split: human agreement 71.4; FingerFlow with learned weig
 
 - **Curated lanes** (the 253 curated pieces): public-domain or traditional compositions; L1 admitted a piece only when every author died in 1955 or earlier and it was published in 1928 or earlier. Engravings and arrangements are public domain, CC0, CC BY or CC BY-SA; CC BY and CC BY-SA pieces are credited in the app (typesetter, licence, Mutopia id from `content/manifest.json`). Scarborough Fair uses the traditional Dorian tune.
 - **Archive lanes (PDMX), the owner's broad copyright reading:** a score is admitted on the uploader's declaration of public domain or CC0 with PDMX's `license_conflict` false; there is no author-date check. The songs lane (pop, rock, soundtrack, jazz, blues) therefore ships modern arrangements in a public repository on that declaration: a stated risk the owner accepted. Only content exclusions apply (junk, Nazi-era and propaganda pieces; `content/tools/pdmx-excluded.json`); any single reviewer's flag removes a candidate.
-- **Non-public-domain scores copied from the web are refused** (unauthorised copies, public repository). The legitimate routes are T2's private local folder and CC-licensed lane.
+- **Non-public-domain scores copied from the web are refused** (unauthorised copies, public repository). The legitimate routes are a private local folder and a CC-licensed lane (#37).
 - **Gates:** every piece passes the XSD, the span check, notes on both staves and zero lint law errors at the medium and large profiles. The core 30 are exempt from the law check. Level 6 may relax the span and lint gates within a ceiling (40 law errors per 1,000 notes at each profile, 20 unplayable slices per 1,000), with the flags recorded (`relaxedGates` in the catalog, a sentence in the piece's notes, checked by `gates.py`), because the app's product is the fingering.
 - **Levels:** the frozen heuristic proposes grades 1–5; grade 6 comes from a stated rule (`content/tools/pdmx_advanced.py`). The UI shows four levels (grades 1–2, 3, 4, 5–6); the manifest keeps the grade.
 - **Dedupe compares notes, not titles** (`content/tools/dedupe.py`); a curated piece is never removed, and the same tune at another level stays.
@@ -141,7 +141,7 @@ References on the same split: human agreement 71.4; FingerFlow with learned weig
 
 ### App and UI
 
-- **GitHub Pages only:** public, static, no VPS, no login. The auth study stays as reference (`docs/research/auth-options.md`). Mobile is the responsive web app, made installable as a PWA (T3); no native app.
+- **GitHub Pages only:** public, static, no VPS, no login. The auth study stays as reference (`docs/research/auth-options.md`). Mobile is the responsive web app, made installable as a PWA (#35); no native app.
 - **One red element on screen;** it may scroll out of view. The red travelling between Play and the cursor counts as the one red; the note burst's double-click accent is a deliberate exception.
 - **Pause keeps the resume point red;** Play is plain while paused away from the start.
 - **Hand letters on the keyboard only in bars where the hands come within a fifth** (a per-onset octave rule would toggle 41 times in the Minuet), with no phone exception.
@@ -167,44 +167,43 @@ Engine:
 - With open data the engine trails FingerFlow's learned weights clearly and FHMM3 within noise; closing the gap needs PIG-fitted weights (the owner's decision above).
 - On PIG validation `learned-open` scores below `parncutt` (66.53 against 69.31) while the test split and the Mutopia half favour it (+1.8 and +4.3). The teacher and UI reviews judge the shipped set.
 - The per-annotator calibration definition was chosen after seeing the test ECE under the old definition. On the Mutopia half the ECE is 0.104 (reported, not gated): the editors agree with the engine more often than its confidence says.
-- The textbook floors gate `parncutt` only. Beginner confidences use the expert-level temperature. Five legato reaches of 13 to 14 semitones remain at the beginner level. The trainer's epoch selection tolerates decode errors and uses `solveHand`.
+- The textbook floors gate `parncutt` only. The app solves at the expert level (#46). Beginner confidences use the expert-level temperature. Five legato reaches of 13 to 14 semitones remain at the beginner level. The trainer's epoch selection tolerates decode errors and uses `solveHand`.
 - 28% of expert annotations violate a solver hard rule, mostly legato overlaps of about 50 ms. On PIG piece 029 the hard decode is infeasible (overlaps of 9 to 27 ms) and the solver falls back to its soft decode. On the PIG validation pieces every lint law error of the shipped set lies in a hand with no legal fingering. The experts' own fingerings score 8.00 lint errors per 1,000 notes.
-- CLI gaps: `bench` has no `--library-set` flag and `lint` no `--profile`. `research/readability/corpus.py` reads every `.fingered` score in the library rather than core30, so its numbers move as the library grows.
+- CLI gaps (#47): `bench` has no `--library-set` flag and `lint` no `--profile`. `research/readability/corpus.py` reads every `.fingered` score in the library rather than core30, so its numbers move as the library grows.
+- Open solver leads and the teacher-review hypotheses: #45, #44.
 
-Teacher review, to fix before the next run:
-
-- The recall twins are distinguishable from the controls by their text (all read "Composer: unknown" and "Bars 1-5"; three landed in one batch).
-- Report hard-error gallery coverage (103 of 118 rows covered in the first run).
-- Print the dispatch log's reason in the Cost section.
-- Caveat the drift row: the pilot's agreement pooled three conditions.
-- Widen `render.py`'s columns for five-note chords (10 of 779 library windows skipped).
-- The style table covers core30 only; newer pieces fall back to the composer field.
+Teacher review: six fixes are due before the next weekly run (#43).
 
 App and tests:
 
 - Verovio's fixed 128 MB WASM heap dominates the tab's memory; it is left as is by the owner's decision (`docs/app.md`).
-- Imported MIDI loses held notes: one voice per hand shortens them (T12). MusicXML is unaffected.
-- The visual baselines are Windows renders; the library-state baselines need regenerating and reviewing on Windows after the shelves change, and the score states after seeking (T13): the new `score-cued` state has no baseline yet, and the Practice panel gained a line (`score-practice-open`, `score-loop`).
-- In a Linux sandbox some e2e checks (dock geometry in `states.spec.ts`, two playback scroll tests) fail on `main` as well; not investigated.
-- The solver's random-walk timing test (500 ms locally, 1,200 ms under CI) can exceed its local budget under load (509.7 ms measured once in a full run).
+- Imported MIDI loses held notes: one voice per hand shortens them (#34). MusicXML is unaffected.
+- Repeats are not expanded in playback (#50); the piano samples load from smplr's host (#51).
+- The visual baselines are Windows renders; regenerate and review them on Windows when a state changes.
+- In a Linux sandbox some e2e checks (#55) (dock geometry in `states.spec.ts`, two playback scroll tests) fail on `main` as well; not investigated.
+- The solver's random-walk timing test (500 ms locally, 1,200 ms under CI) can exceed its local budget under load (509.7 ms measured once in a full run; #55).
 
 Library:
 
-- About 1,300 archive pieces have no composer ("Unknown"), the 1,201 pieces of the classical archive collection are not split by composer era, and archive titles need cleaning.
-- The grades skew to 3 and 4. Grade 6 holds 199 pieces: the owner's ask for 1,000 more at that level is out of reach from PDMX under the gates. The remaining levers are an advanced Mutopia lane and lifting the 2,500-note ceiling.
+- About 1,300 archive pieces have no composer ("Unknown"), the 1,201 pieces of the classical archive collection are not split by composer era, and archive titles need cleaning (#48).
+- The grades skew to 3 and 4. Grade 6 holds 199 pieces: the owner's ask for 1,000 more at that level is out of reach from PDMX under the gates. The remaining levers are an advanced Mutopia lane and lifting the 2,500-note ceiling (#36); converter fixes would release held Mutopia editions (#49).
 
 Scanning:
 
-- Recognition errors remain: missed chord ties, a duplicated note, a wrong hand assignment, beam membership inferred from the meter rather than read. Meter can be inferred when a page omits it. Details: `docs/scanning.md`.
+- Recognition errors remain: missed chord ties, a duplicated note, a wrong hand assignment, beam membership inferred from the meter rather than read. Meter can be inferred when a page omits it. Details: `docs/scanning.md`; follow-ups #39, #40, #41.
 
 ## Next
 
-1. Re-plan M5 against the current app, then run it: note editing and the readability reduction (T13, seeking, is done; editing must take clicks on notes over from the seek). The app tasks were planned against the old `Transport.tsx`, `ScoreView.tsx` and `SidePanel.tsx`. Task 7 must apply the design's section 9 rule: selecting a note while paused clears the paused cursor's marks, clearing the selection marks the paused group again (`primary = !playing && !selectionActive && !resumeShown`), with an e2e test of play, pause, click a note, Escape, one red root each time. The editor gate must use `benchmarkEntries` (core30).
-2. T12: MIDI held notes.
-3. The teacher-review fixes above, then the next weekly run.
-4. T3: PWA.
-5. T2: private local folder and CC-licensed lane.
-6. Scanning follow-ups in `docs/TODO.md` (recognition corrections in the browser, a shared library).
-7. Library follow-ups: composer eras and titles for archive pieces; regenerate the library visual baselines on Windows.
-8. T14: experimental embellishment (research spike first).
-9. M11 demo videos; M9 neural evaluation.
+In order:
+
+1. M5, re-planned against the current app: note editing and the readability reduction (#42).
+2. MIDI held notes (#34).
+3. The teacher-review fixes, then the next weekly run (#43).
+4. PWA (#35).
+5. Private local folder and CC-licensed lane (#37).
+6. Scanning follow-ups: recognition, correction in the browser, a shared library (#39, #40, #41).
+7. Library metadata of the archive pieces (#48).
+8. Experimental embellishment, research spike first (#38).
+9. M11 demo videos (#58); M9 neural evaluation (#57).
+
+Everything else open is in the issue list.

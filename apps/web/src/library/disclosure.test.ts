@@ -15,6 +15,19 @@ import {
 } from './disclosure.js';
 
 describe('the disclosure thresholds (spec 6.1, shelves spec 2 to 4)', () => {
+  // The spec's numbers are a specification, so a change to one should be a deliberate edit to this list.
+  it('has the numbers the specs give', () => {
+    expect([
+      PILLS_ABOVE,
+      SEARCH_FROM,
+      HEADINGS_ABOVE,
+      OTHER_BELOW,
+      SAMPLES,
+      PAGE_SIZE,
+      SECTION_ROWS,
+      LENGTH_ABOVE,
+    ]).toEqual([40, 100, 12, 3, 5, 40, 7, 40]);
+  });
   it('keeps the rule of 7 and orders the thresholds as the specs do', () => {
     // No list a reader sees at a glance is longer than 7 rows.
     expect(SAMPLES).toBeLessThanOrEqual(7);

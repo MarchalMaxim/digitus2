@@ -24,11 +24,11 @@
 
 Details:
 
-- `hygiene`: a trackable file over 1 MB (scores 1.5 MB; the manifest, verification records and archive catalog fragments have their own limits), trackable files over 100 MB in total, or a heavy directory (`research/data/pig`, `content/_raw`, ...) not ignored by git. It uses `git ls-files`.
+- `hygiene`: a trackable file over 1 MB (scores 1.5 MB; the manifest, verification records and archive catalog fragments have their own limits), trackable files over 100 MB in total, or a heavy directory (`research/data/pig`, `content/_raw`, the piano samples in `apps/web/public/piano` and `build/piano-samples`, ...) not ignored by git. It uses `git ls-files`.
 - `design`: a colour literal in `apps/web/src` or `index.html` outside `src/design/tokens.css`, a second chromatic colour in `tokens.css`, or the red referenced outside the `.is-red` rule.
 - `omr`: fixture validation, pinned ground truth, whole-score export handling, and penalties for missing or invalid results. It runs no recognition model and is not an accuracy gate.
 - `bundle`: counts the entry chunk and its static imports from `apps/web/dist/.vite/manifest.json`.
-- `e2e`: fails on more or fewer than one red element in any application state of `apps/web/e2e/helpers/states.ts` (desktop and 360 px, light and dark), a serious or critical axe violation, horizontal page scroll, library LCP of 2 s or more, the K.545 score taking 8 s or more to appear, the cursor out of sync with the audio clock, or (locally, project `visual`) a screenshot differing from its baseline.
+- `e2e`: fails on more or fewer than one red element in any application state of `apps/web/e2e/helpers/states.ts` (desktop and 360 px, light and dark), a serious or critical axe violation, horizontal page scroll, library LCP of 2 s or more, the K.545 score taking 8 s or more to appear, the cursor out of sync with the audio clock, or (locally, project `visual`) a screenshot differing from its baseline. Every spec blocks service workers except `pwa.spec.ts`, which checks the web app manifest and icons, the service worker controlling the first visit, an offline reload of a piece opened before, the piano playing offline from the samples kept, and a newer worker cleaning up after the older one. No spec needs the piano samples: the flows that play the real instrument answer its sample requests with a silent WAV.
 
 The benchmark and hands steps run `packages/engine/dist/cli/main.js`, so they need a build, and they skip when the datasets are absent (`research/data/pig`, `research/data/mutopia_fingering`; see `research/data/README.md`). A run with those steps skipped has not checked the floors.
 
@@ -69,7 +69,7 @@ A PIG-fitted research set (never shipped) writes under `research/weights/` with 
 
 `.github/workflows/ci.yml` runs on every push to `main` and on pull requests: install, `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build`, `pnpm test:omr`, then the Playwright e2e suite with `CI=true` (one retry, the HTML report uploaded on failure). The hygiene, design, bundle, benchmark and hands steps run only under `pnpm verify`: PIG cannot be redistributed, so CI has no benchmark data. The solver's random-walk timing test has one budget everywhere: a ratio to a reference workload timed in the same moments, so a slower or busier machine does not move it.
 
-`.github/workflows/pages.yml` builds and deploys the app to GitHub Pages on every push to `main`.
+`.github/workflows/pages.yml` builds and deploys the app to GitHub Pages on every push to `main`. Before the build it fetches the pinned piano samples (`node scripts/fetch-piano-samples.mjs`, which checks the release asset against `scripts/piano-samples.lock.json`; cached by the lock's hash), and after it fails unless `dist` holds the samples, `sw.js` and the web app manifest. `ci.yml` and `pnpm verify` do not fetch the samples; the service worker's precache budget (24 MiB) fails the `build` step, in CI and locally.
 
 Checks that need a dataset outside the repository (the corpora, learn and reference-metrics suites) skip when it is absent, and say so on the console: `SKIPPED ... did not run`. CI has no such data, so those lines are expected there. On a machine that should have the data, `DIGITUS2_REQUIRE_DATA=1 pnpm test` turns each missing dataset into a failure instead.
 

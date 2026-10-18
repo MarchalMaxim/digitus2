@@ -41,7 +41,7 @@
     </defaults>
   <credit page="1">
     <credit-type>title</credit-type>
-    <credit-words default-x="612" default-y="1527.31" justify="center" valign="top" font-size="24">Bayernhymne</credit-words>
+    <credit-words default-x="612" default-y="1527.31" justify="center" valign="top" font-size="24">Bayernhymne (embellished, playful)</credit-words>
     </credit>
   <part-list>
     <score-part id="P1">

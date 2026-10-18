@@ -6,7 +6,9 @@ plain score, light, playful):
   1. the embellisher writes `research/data/embellish/<slug>/<density>.musicxml` and the record of every
      inserted note, `<density>.inserted.json` (the plain copy is `none.musicxml`; the library score
      itself is only read);
-  2. `check.verify` compares it with the plain score (untouched notes, strong positions);
+  2. `check.verify` compares it with the plain score (untouched notes, strong positions); a density
+     whose output fails the check is refused with the check's problems as the reason, and the plain
+     score stands for it;
   3. the built engine CLI reads it (`inspect`), fingers it at the beginner level and lints that
      fingering with the beginner rules:
          node packages/engine/dist/cli/main.js finger <file> --level beginner --format pig --out <pig>
@@ -106,6 +108,13 @@ def _json(o):
     raise TypeError(type(o))
 
 
+def check_refusal(rep) -> str | None:
+    """The refusal reason of a density whose embellished score fails the own check, or None."""
+    if rep.ok:
+        return None
+    return "own check failed: " + "; ".join(rep.problems)[:300]
+
+
 def process(entry: dict) -> list[dict]:
     slug = entry["slug"]
     d = OUT / slug
@@ -115,21 +124,27 @@ def process(entry: dict) -> list[dict]:
     for density in DENSITIES:
         t0 = time.time()
         res = core.embellish(plain, density)
+        refusal, inserted, xml, check = res.refusal, res.inserted, res.xml, None
+        if density != "none" and not refusal:
+            rep = verify(plain, xml, inserted, res.melody_voice)
+            check = {"ok": rep.ok, "problems": rep.problems, "strong_total": rep.strong_total,
+                     "strong_kept": rep.strong_kept}
+            refusal = check_refusal(rep)
+            if refusal:  # a failed check refuses this density: the plain score stands
+                inserted, xml = [], plain
         path = d / f"{density}.musicxml"
-        path.write_text(res.xml, encoding="utf-8", newline="")
+        path.write_text(xml, encoding="utf-8", newline="")
         (d / f"{density}.inserted.json").write_text(json.dumps(
-            {"slug": slug, "density": density, "refusal": res.refusal, "melodyVoice": res.melody_voice,
-             "inserted": res.inserted}, indent=1, default=_json), encoding="utf-8")
+            {"slug": slug, "density": density, "refusal": refusal, "melodyVoice": res.melody_voice,
+             "inserted": inserted}, indent=1, default=_json), encoding="utf-8")
         row = {"slug": slug, "title": entry["title"], "level": entry["level"], "collection": entry["collection"],
-               "license": entry["source"]["license"], "density": density, "refusal": res.refusal,
-               "melody_voice": res.melody_voice, "inserted": len(res.inserted),
-               "figures": sum(1 for i in res.inserted if i["role"] != "return"),
-               "by_rule": _count(res.inserted), "skipped": dict(res.skipped), "candidates": dict(res.candidates)}
-        if density != "none" and not res.refusal:
-            rep = verify(plain, res.xml, res.inserted, res.melody_voice)
-            row["check"] = {"ok": rep.ok, "problems": rep.problems, "strong_total": rep.strong_total,
-                            "strong_kept": rep.strong_kept}
-        if density == "none" or (res.inserted and not res.refusal):
+               "license": entry["source"]["license"], "density": density, "refusal": refusal,
+               "melody_voice": res.melody_voice, "inserted": len(inserted),
+               "figures": sum(1 for i in inserted if i["role"] != "return"),
+               "by_rule": _count(inserted), "skipped": dict(res.skipped), "candidates": dict(res.candidates)}
+        if check is not None:
+            row["check"] = check
+        if density == "none" or (inserted and not refusal):
             row.update(engine(path))
             row["level_heuristic"] = level_of(path, entry["tempoBpm"])
         row["seconds"] = round(time.time() - t0, 2)

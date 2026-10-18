@@ -30,6 +30,7 @@ import sys
 from collections import Counter
 from fractions import Fraction as F
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 HERE = Path(__file__).resolve().parent
 RESEARCH = HERE.parent
@@ -89,11 +90,31 @@ def select(results: list[dict], manifest: list[dict]) -> list[dict]:
     return picked
 
 
-def retitle(xml: str, suffix: str) -> str:
+def retitle(xml: str, suffix: str, title: str) -> str:
+    """Adds " (suffix)" to the work and movement titles and to every credit that shows one of them (or
+    the catalogue `title`); a file with neither title gets a movement title, so the app shows the version."""
+    names = {escape(title).strip()}
+    found = False
     for tag in ("work-title", "movement-title"):
         m = re.search(rf"<{tag}>(.*?)</{tag}>", xml, flags=re.S)
         if m:
-            return xml[:m.end(1)] + f" ({suffix})" + xml[m.end(1):]
+            names.add(m.group(1).strip())
+            xml = xml[:m.end(1)] + f" ({suffix})" + xml[m.end(1):]
+            found = True
+    xml = re.sub(r"(<credit-words\b[^>]*>)(.*?)(</credit-words>)",
+                 lambda m: m.group(1) + m.group(2) + (f" ({suffix})" if m.group(2).strip() in names else "") + m.group(3),
+                 xml, flags=re.S)
+    if not found:
+        new = f"<movement-title>{escape(title)} ({suffix})</movement-title>"
+        anchor = None
+        for close in ("</movement-number>", "</work>"):
+            k = xml.find(close)
+            if k >= 0:
+                anchor = k + len(close)
+                break
+        if anchor is None:
+            anchor = re.search(r"<score-partwise\b[^>]*>", xml).end()
+        xml = xml[:anchor] + new + xml[anchor:]
     return xml
 
 
@@ -235,12 +256,12 @@ def main(argv=None) -> int:
         record = {"slug": e["slug"], "inserted": {d: versions[d][1] for d in DENS}}
         stem = f"{k:02d}-{e['slug']}"
         for cond, (xml, _) in versions.items():
-            out = retitle(xml, "plain" if cond == "plain" else f"embellished, {cond}")
+            out = retitle(xml, "plain" if cond == "plain" else f"embellished, {cond}", e["title"])
             data = out.encode("utf-8")
             if len(data) > MAX_BYTES:
                 raise SystemExit(f"{stem}-{cond} is {len(data)} bytes, over {MAX_BYTES}")
             (LISTEN / f"{stem}-{cond}.musicxml").write_bytes(data)
-        (LISTEN / f"{stem}.inserted.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8")
+        (LISTEN / f"{stem}.inserted.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8", newline="\n")
         span = window(read(versions["playful"][0]), versions["playful"][1])
         listing.append({"n": k, "slug": e["slug"], "title": e["title"], "composer": e["composer"],
                         "collection": e["collection"], "level": e["level"], "tempoBpm": e["tempoBpm"],
@@ -262,7 +283,7 @@ def main(argv=None) -> int:
             items.append({"item": pid, "slug": e["slug"], "condition": cond, "text": render(p),
                           "bars": [p.bar_first, p.bar_last], "inserted_ids": inserted_ids(p, ins),
                           "notes_R": sum(len(ev.pitches) for ev in p.events["R"])})
-    (LISTEN / "pieces.json").write_text(json.dumps(listing, indent=1, ensure_ascii=False), encoding="utf-8")
+    (LISTEN / "pieces.json").write_text(json.dumps(listing, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
     brief = (TEACHER / "brief.md").read_text(encoding="utf-8")
     batches = plan(items, a.seed)
     key = []
@@ -272,8 +293,8 @@ def main(argv=None) -> int:
         for item in batch:
             parts.append("```\n" + item["text"] + "```\n")
             key.append({k: v for k, v in item.items() if k != "text"} | {"batch": bid})
-        (TEACHER / f"{bid}.md").write_text("\n".join(parts), encoding="utf-8")
-    (TEACHER / "key.json").write_text(json.dumps(key, indent=1), encoding="utf-8")
+        (TEACHER / f"{bid}.md").write_text("\n".join(parts), encoding="utf-8", newline="\n")
+    (TEACHER / "key.json").write_text(json.dumps(key, indent=1), encoding="utf-8", newline="\n")
     print(f"{len(picked)} pieces, {len(items)} passages in {len(batches)} batches")
     for row in listing:
         print(f"{row['n']:2d} {row['slug']:44} added {row['added']} proposal {row['proposal']} window {row['window']}")

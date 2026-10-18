@@ -2,7 +2,9 @@
 
 These are ten pieces from the built-in library. Each comes in three versions: the plain score and
 the two embellished versions, **light** and **playful**. The title inside each file says which
-version it is ("Twinkle, Twinkle, Little Star (embellished, light)").
+version it is ("Twinkle, Twinkle, Little Star (embellished, light)"). The suffix goes on the work
+and movement titles and on the title printed on the page (`<credit-words>`). A file with no title
+gets a movement title.
 
 To listen:
 
@@ -17,6 +19,7 @@ The files are rebuilt with:
 ```bash
 research/.venv/Scripts/python.exe -I research/embellish/run.py         # the scoring run (needs the built engine)
 research/.venv/Scripts/python.exe -I research/embellish/listening.py   # this folder
+node research/embellish/render_check.mjs                              # Verovio check of this folder
 ```
 
 ## The pieces
@@ -52,8 +55,13 @@ be under copyright. Andantino also tests the divisions scale-up. Its file uses o
 quarter note, so the embellisher first rewrites every duration in eighths. The rhythm sounds the
 same.
 
-All 30 files load and render without an error in Verovio 6.3.0, the app's renderer. They are not
-validated against the MusicXML XSD.
+`node research/embellish/render_check.mjs` loads all 30 files in Verovio 6.3.0, the app's renderer,
+from `apps/web/node_modules`. It checks three things:
+- each file renders with no error;
+- each embellished version has exactly the recorded number of notes more than the plain one;
+- the beam counts are unchanged.
+
+Run `pnpm install --frozen-lockfile` first. The files are not validated against the MusicXML XSD.
 
 ## Questions for the owner
 

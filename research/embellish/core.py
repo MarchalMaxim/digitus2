@@ -2,13 +2,21 @@
 
 The embellisher reads a partwise MusicXML score, finds the melody (the top voice of staff 1, the
 right hand), and splits some melody notes in place: the note keeps its onset and pitch and gives the
-end of its length to one or two new notes in the same voice and staff. Nothing else in the file
-changes: no other note, no measure length, no direction. The plain file is never written to. When
-the score's <divisions> cannot write an eighth (a file with divisions 1), every <divisions>,
-<duration> and <offset> is multiplied by the same factor first: the numbers change, the music does not.
+end of its length to one or two new notes in the same voice and staff. No other note, measure length
+or direction changes in content; the plain file is never written to. When the score's <divisions>
+cannot write an eighth (a file with divisions 1), every <divisions>, <duration> and <offset>, and the
+attack and release attributes of a note, are multiplied by the same factor first: the numbers change,
+the music does not.
 
-Rules (each inserted note is diatonic in the key signature in force, never starts on a strong beat,
-and is the highest note sounding while it lasts):
+The file is written back by ElementTree, which re-emits the whole tree. Its content is the same
+(elements, attributes, text, comments and processing instructions are kept, and the XML declaration
+and DOCTYPE are copied from the input), but the bytes are not: an empty element is written as
+`<x />` whatever its input form (`<x></x>`, `<x/>`), whitespace inside tags and the quoting of
+attributes are normalised, character references are written as characters, and attributes in a
+namespace other than `xml:` would get a generated prefix (MusicXML uses none).
+
+Rules (each inserted note is diatonic in the key signature in force at its onset, never starts on
+or holds across a strong position, and is the highest note sounding while it lasts):
 
   passing             A then B a third apart (both in the key, B starts where A ends): the weak end
                       of A becomes the scale step between them (C-E -> C-D-E).
@@ -21,18 +29,18 @@ and is the highest note sounding while it lasts):
                       downbeat usually ends a phrase, and the breath stays.
 
 Where a note may be split: a single note of the melody voice (no chord, tie, tuplet, fermata or
-grace), not in the last bar and not the last melody note, of a length the split table holds. The
-weak end is half the note (quarter, half), a third (dotted half: 2 + 1), a quarter (whole: 3 + 1) or
-the last eighth (dotted quarter: 1 + 1/2); no new note is shorter than an eighth. Strong positions
-are the downbeat and, in 4/4, 2/2, 4/2, 6/4, 4/8, 6/8 and 12/8, the middle of the bar; a pickup bar
-is counted from its end. The key is the key signature's major scale (a minor key uses its relative
-major's notes, the natural minor).
+grace), not in the last bar and not the last melody note, not in a bar whose time signature changes
+after its first position, of a length the split table holds. The weak end is half the note
+(quarter, half), a third (dotted half: 2 + 1), a quarter (whole: 3 + 1) or the last eighth (dotted
+quarter: 1 + 1/2); no new note is shorter than an eighth. Strong positions are the downbeat and, in
+4/4, 2/2, 4/2, 6/4, 4/8, 6/8 and 12/8, the middle of the bar; a pickup bar is counted from its end.
+The key is the key signature's major scale (a minor key uses its relative major's notes, the
+natural minor); a key change inside a bar applies from its position.
 
 Densities: `none` returns the input unchanged; `light` uses passing and neighbour-repeated, at most
 one figure per bar and never in two neighbouring bars; `playful` uses all four rules, at most two
-figures per bar. Candidates are taken
-in rule order (passing, neighbour-repeated, anticipation, neighbour-long), then by onset; a note
-carries at most one figure. No randomness.
+figures per bar. Candidates are taken in rule order (passing, neighbour-repeated, anticipation,
+neighbour-long), then by onset; a note carries at most one figure. No randomness.
 
 Refusals (the piece is returned unchanged with a reason): not one partwise part, not two staves, no
 melody voice owning at least 90% of the right hand's top line, or a melody voice of which more than
@@ -82,6 +90,7 @@ class Measure:
     time: tuple[int, int] | None
     fifths: int
     offset: F = F(0)   # added to a position to get the metric position (a pickup bar counts from its end)
+    inner_time_change: bool = False  # a <time> inside the bar, after its first position
 
     @property
     def nominal(self) -> F | None:
@@ -102,6 +111,13 @@ class Measure:
             return True
         return bool(self.time) and tuple(self.time) in HALF_BAR_STRONG and metric == self.nominal / 2
 
+    def sounds_through_strong(self, start: F, end: F) -> bool:
+        """A note from metric position `start` to `end` holds across a strong position (not starting on it)."""
+        if not self.time:
+            return False
+        marks = [self.nominal / 2] if tuple(self.time) in HALF_BAR_STRONG else []
+        return any(start < s < end for s in marks + [self.nominal])
+
 
 @dataclass
 class Note:
@@ -119,6 +135,7 @@ class Note:
     tie: bool
     tuplet: bool
     fermata: bool
+    fifths: int = 0  # the key signature in force at the note's onset
 
     @property
     def end(self) -> F:
@@ -183,7 +200,7 @@ def _pitch(el: ET.Element) -> int | None:
 
 
 def parse(text: str) -> ET.Element:
-    parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+    parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True, insert_pis=True))
     parser.feed(text)
     return parser.close()
 
@@ -202,6 +219,7 @@ def analyse(text: str) -> Piece:
         return piece
     divisions, fifths, time, staves = 1, 0, None, 1
     abs_start = F(0)
+    key_changes: list[tuple[F, int]] = []  # (onset, fifths) in document order
     for mi, m in enumerate(parts[0].findall("measure")):
         pos = F(0)
         maxpos = F(0)
@@ -216,6 +234,7 @@ def analyse(text: str) -> Piece:
                 k = el.find("key/fifths")
                 if k is not None:
                     fifths = _int(k.text)
+                    key_changes.append((abs_start + pos, fifths))
                     if pos == 0:
                         meas.fifths = fifths
                 t = el.find("time")
@@ -227,6 +246,8 @@ def analyse(text: str) -> Piece:
                         time = None
                     if pos == 0:
                         meas.time = time
+                    else:
+                        meas.inner_time_change = True
             elif el.tag == "backup":
                 pos -= F(_int(el.findtext("duration")), divisions)
             elif el.tag == "forward":
@@ -253,6 +274,8 @@ def analyse(text: str) -> Piece:
             meas.offset = nominal - meas.length
         piece.measures.append(meas)
         abs_start += meas.length
+    for n in piece.notes:  # a key change applies from its position, whatever the document order
+        n.fifths = next((f for t, f in reversed(key_changes) if t <= n.onset), 0)
     piece.staves = staves
     if staves != 2:
         piece.refusal = f"{staves} staff/staves: the right hand is not a staff of its own"
@@ -387,14 +410,16 @@ def _candidates(piece: Piece, skipped: Counter) -> list[Candidate]:
             reason = "fermata"
         elif m.time is None:
             reason = "no time signature"
+        elif m.inner_time_change:
+            reason = "time change inside the bar"
         if reason:
             skipped[reason] += 1
             continue
         nxt = melody[i + 1]
         b = nxt.top
         contiguous = nxt.onset == a.end and nxt.onset not in graces
-        sc = scale(m.fifths)
-        same_key = b.measure.fifths == m.fifths
+        sc = scale(a.fifths)
+        same_key = b.fifths == a.fifths
         found = []
         if contiguous and same_key and abs(b.pitch - a.pitch) in (3, 4) and a.pitch % 12 in sc and b.pitch % 12 in sc:
             mid = between(a.pitch, b.pitch, sc)
@@ -425,7 +450,7 @@ def _candidates(piece: Piece, skipped: Counter) -> list[Candidate]:
             why = None
             for k, (length, p) in enumerate(zip(lengths[1:], pitches)):
                 metric = t - m.start + m.offset
-                if m.strong(metric):
+                if m.strong(metric) or m.sounds_through_strong(metric, metric + length):
                     why = "strong beat"
                     break
                 role = "return" if rule == "neighbour-long" and k == 1 else "neighbour"
@@ -468,11 +493,17 @@ def divisions_factor(piece: Piece) -> int:
 
 
 def scale_divisions(root: ET.Element, factor: int) -> None:
-    """Multiplies every <divisions>, <duration> and <offset> by `factor`: the same music in finer units."""
+    """Multiplies every <divisions>, <duration> and <offset>, and each note's attack and release, by
+    `factor`: the same music in finer units."""
     for el in root.iter():
         if el.tag in ("divisions", "duration", "offset") and el.text and el.text.strip():
             v = F(el.text.strip()) * factor
             el.text = str(v.numerator) if v.denominator == 1 else str(float(v))
+        if el.tag == "note":
+            for attr in ("attack", "release"):
+                if el.get(attr):
+                    v = F(el.get(attr)) * factor
+                    el.set(attr, str(v.numerator) if v.denominator == 1 else str(float(v)))
 
 
 def _select(cands: list[Candidate], density: str) -> list[Candidate]:
@@ -571,11 +602,11 @@ def embellish(text: str, density: str) -> Result:
         at = list(parent).index(a.el)
         t = a.onset + c.parts[0][0]
         for k, (length, midi, role) in enumerate(c.parts[1:], start=1):
-            el = _new_note(a, midi, length, m.fifths, same_spelling=(midi == a.pitch and role == "return"))
+            el = _new_note(a, midi, length, a.fifths, same_spelling=(midi == a.pitch and role == "return"))
             parent.insert(at + k, el)
             metric = t - m.start + m.offset
             inserted.append({"bar": m.number, "beat": fmt_beat(metric / m.beat_q + 1), "onset": t,
-                             "pitch": pitch_name(midi, m.fifths) if role != "return" else _name_of(a.el),
+                             "pitch": pitch_name(midi, a.fifths) if role != "return" else _name_of(a.el),
                              "midi": midi, "rule": c.rule, "role": role,
                              "length": fmt_beat(length)})
             t += length

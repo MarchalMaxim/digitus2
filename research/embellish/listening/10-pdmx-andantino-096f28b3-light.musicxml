@@ -41,7 +41,7 @@
     </defaults>
   <credit page="1">
     <credit-type>title</credit-type>
-    <credit-words default-x="595.44" default-y="1626.67" justify="center" valign="top" font-size="24">Andantino</credit-words>
+    <credit-words default-x="595.44" default-y="1626.67" justify="center" valign="top" font-size="24">Andantino (embellished, light)</credit-words>
     </credit>
   <part-list>
     <score-part id="P1">

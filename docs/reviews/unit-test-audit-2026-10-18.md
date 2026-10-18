@@ -206,7 +206,7 @@ The CI workflow runs `pnpm test` without downloading the datasets, and the bench
 
 ## Recommendations
 
-None of these is done; delete or rewrite nothing without the owner's say.
+The first three are done: the skips print `SKIPPED` and `DIGITUS2_REQUIRE_DATA=1` turns them into failures, the assertions were added and the vacuous ones tightened. The rest, and the audit of the Playwright and Python suites, is #54. Delete or rewrite nothing without the owner's say.
 
 1. **Make the skips loud.** Under CI, fail (or at least print a warning with the count) when a data-dependent suite skips, and decide whether a small committed fixture can carry the reference-metrics oracle.
 2. **Add the boundary and bad-input assertions listed above.** The reviewers named 157 survivors as real gaps (several share one missing assertion); the cheapest, highest-value ones are the numeric boundaries and the input-validation cases, because that is where the mutation score is lowest.

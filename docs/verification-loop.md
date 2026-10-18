@@ -75,8 +75,8 @@ Checks that need a dataset outside the repository (the corpora, learn and refere
 
 ## Recovery after a restart or a context compaction
 
-1. Read `CLAUDE.md`, `docs/PROGRESS.md` and `docs/TODO.md`.
+1. Read `CLAUDE.md`, `docs/PROGRESS.md` and the open GitHub issues.
 2. Check the tree: `git status` and `git log` show uncommitted output and the current branch.
 3. Run `pnpm verify` (with the datasets in place) to learn the true state.
 4. Look for agents or workflows that were interrupted: see which tasks finished, inspect the files an interrupted agent touched, and resume the workflow from its saved script (finished tasks are cached) instead of starting over.
-5. Commit finished work with explicit paths, update `docs/PROGRESS.md` and `docs/TODO.md`, and continue with "Next" in `docs/PROGRESS.md`.
+5. Commit finished work with explicit paths, update `docs/PROGRESS.md`, close or tick the issue (and add a line to `docs/TODO.md` when a request is done), and continue with "Next" in `docs/PROGRESS.md`.

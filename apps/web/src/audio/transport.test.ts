@@ -282,6 +282,61 @@ describe('Transport', () => {
     expect(grace[0]!.duration).toBeCloseTo(0.1, 6);
     expect(t.state.positionSec).toBeCloseTo(20, 6);
   });
+  it('starts with no count-in: a fresh transport plays its first note at once', () => {
+    const t = make();
+    expect(t.state.countIn).toBe(false);
+    t.play();
+    run(t, 0.2);
+    expect(clicks).toHaveLength(0);
+    expect(instrument.events[0]!.time).toBeCloseTo(100, 6);
+  });
+  it.each([-1, 0, NaN, Infinity])('ignores a tempo factor of %s', (bad) => {
+    const t = make();
+    t.setTempoFactor(0.5);
+    t.setTempoFactor(bad);
+    expect(t.state.tempoFactor).toBe(0.5);
+  });
+  describe('a tempo change in the middle of a trill', () => {
+    // 4/4 at 120 qpm, one half note of C4 (1 s) trilled.
+    const trill = (beats: number) =>
+      parseMusicXml(
+        '<score-partwise><part-list><score-part id="P"><part-name>Piano</part-name></score-part></part-list>' +
+          '<part id="P"><measure number="1"><attributes><divisions>4</divisions><key><fifths>0</fifths></key>' +
+          '<time><beats>2</beats><beat-type>4</beat-type></time></attributes>' +
+          '<note><pitch><step>C</step><octave>4</octave></pitch><duration>8</duration><voice>1</voice>' +
+          `<type>half</type><notations><ornaments><trill-mark beats="${beats}"/></ornaments></notations></note>` +
+          '</measure></part></score-partwise>',
+      ).score;
+    const joined = (events: { time: number; duration: number }[]) =>
+      events.every(
+        (e, i) =>
+          i === 0 || Math.abs(e.time - (events[i - 1]!.time + events[i - 1]!.duration)) < 1e-9,
+      );
+
+    it('never splits an attack already scheduled: the next one starts where it ends', () => {
+      const t = make({ score: trill(9) });
+      t.setCountIn(false);
+      t.play();
+      t.setTempoFactor(2);
+      run(t, 0.6);
+      expect(instrument.events.length).toBeGreaterThan(5);
+      expect(joined(instrument.events)).toBe(true);
+      expect(instrument.stopAllCalls).toBe(0);
+    });
+    it('treats an attack starting exactly where scheduling stopped as not yet scheduled', () => {
+      // Eight attacks over 1 s: one every 0.125 s, so the second begins on the look-ahead edge.
+      const t = make({ score: trill(8), lookAheadSec: 0.125 });
+      t.setCountIn(false);
+      t.play();
+      expect(instrument.events.map((e) => e.time)).toEqual([100]);
+      t.setTempoFactor(2);
+      run(t, 0.5);
+      // The attack on the edge belongs to the new tempo: half as long as the first.
+      expect(instrument.events[1]!.duration).toBeCloseTo(instrument.events[0]!.duration / 2, 9);
+      expect(instrument.events[1]!.time).toBeCloseTo(100.125, 9);
+      expect(instrument.stopAllCalls).toBe(0);
+    });
+  });
   it('clicks the count-in without the metronome, holds the position, and silences on pause', () => {
     const t = make();
     t.setCountIn(true);

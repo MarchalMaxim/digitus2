@@ -121,4 +121,21 @@ describe('useScoreDocument with a MIDI file', () => {
     expect(result.current.midiInfo).toBeNull();
     expect(result.current.splitMidi).toBeNull();
   });
+  it('opens again when other bytes arrive under the same file name', async () => {
+    const engine = inlineEngine();
+    const other = new Uint8Array([...twinkle, 0, 0, 0]); // the same song with trailing padding
+    const { result, rerender } = renderHook(
+      ({ bytes }) =>
+        useScoreDocument({ kind: 'file', name: 'twinkle.mid', bytes }, 800, {
+          engine,
+          renderer: fakeRenderer(),
+        }),
+      { initialProps: { bytes: twinkle } },
+    );
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(engine.splits).toHaveLength(1);
+    rerender({ bytes: other });
+    await waitFor(() => expect(engine.splits).toHaveLength(2));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+  });
 });

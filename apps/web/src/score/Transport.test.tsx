@@ -341,6 +341,7 @@ describe('the loop as one checkbox (spec 13)', () => {
   });
   it('is not a group named Practice any more: the dock toggle names it', () => {
     render(<PracticeControls playback={playback()} measureCount={12} currentBar={1} />);
+    expect(screen.getByRole('checkbox', { name: 'Loop bars' })).toBeInTheDocument(); // it did render
     expect(screen.queryByRole('group', { name: 'Practice' })).toBeNull();
   });
 });
@@ -426,6 +427,11 @@ describe('a loop whose "from" is after "to"', () => {
     expect(loopFromInputs('20', '15', 12)).toBeNull();
     expect(loopFromInputs('15', '20', 12)).toEqual({ from: 11, to: 11 });
     expect(loopFromInputs('2', '6', 12)).toEqual({ from: 1, to: 5 });
+  });
+
+  it('loops the only bar of a one-bar piece', () => {
+    expect(loopFromInputs('1', '1', 1)).toEqual({ from: 0, to: 0 });
+    expect(loopFromInputs('1', '5', 1)).toEqual({ from: 0, to: 0 });
   });
 
   it('says so under the loop inputs and is not applied; a range in order clears the message', () => {

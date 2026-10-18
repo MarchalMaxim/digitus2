@@ -43,12 +43,25 @@ describe('motion', () => {
     const [frames, options] = animate.mock.calls[0]! as [Keyframe[], KeyframeAnimationOptions];
     expect(frames).toHaveLength(3);
     expect(frames[1]).toEqual({ transform: 'none', offset: 0.35 });
+    expect(frames[0]!.transform).toBe(getComputedStyle(el).transform);
+    expect(frames[0]!.transform).not.toBe('none');
     expect(frames[0]!.transform).toBe(frames[2]!.transform);
     expect(options.duration).toBe(RESTRIKE_MS);
     media.mockReturnValue({ matches: true } as MediaQueryList);
     restrike(el);
     expect(animate).toHaveBeenCalledTimes(1);
     expect(() => restrike(null)).not.toThrow();
+    el.remove();
+  });
+  it('restrike from an unpressed key starts and ends at none', () => {
+    const el = document.createElement('div');
+    document.body.append(el);
+    const animate = vi.fn();
+    (el as unknown as { animate: unknown }).animate = animate;
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+    restrike(el);
+    const [frames] = animate.mock.calls[0]! as [Keyframe[]];
+    expect(frames.map((f) => f.transform)).toEqual(['none', 'none', 'none']);
     el.remove();
   });
   it('flash does nothing under prefers-reduced-motion or without element.animate', () => {

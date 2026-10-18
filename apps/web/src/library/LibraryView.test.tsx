@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { FINGER_LEGEND } from '../score/FingerLegend.js';
+import type * as ScoreDocumentModule from '../score/useScoreDocument.js';
 import type * as ManifestModule from './manifest.js';
 import { shelfOfGenre } from './levels.js';
 import { libraryPieces } from './manifest.js';
@@ -24,8 +25,20 @@ vi.mock('./manifest.js', async (importOriginal) => {
   };
 });
 
+const warmUp = vi.hoisted(() => ({ calls: 0 }));
+vi.mock('../score/useScoreDocument.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof ScoreDocumentModule>();
+  return {
+    ...actual,
+    warmUpServices: () => {
+      warmUp.calls++;
+    },
+  };
+});
+
 beforeEach(() => {
   library.whole = false;
+  warmUp.calls = 0;
   useAppStore.setState({
     view: { name: 'library' },
     settings: { ...DEFAULT_SETTINGS },
@@ -40,7 +53,10 @@ beforeEach(() => {
   });
 });
 // Testing Library only cleans up automatically when vitest globals are on; they are off here.
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 const rows = () => screen.getAllByRole('button', { name: /^Open / });
 const h2s = () => screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
@@ -534,5 +550,53 @@ describe('LibraryView in another language (issue #6)', () => {
     expect(screen.getByText('Salvas')).toBeInTheDocument();
     expect(screen.getByText('Rascunho de digitalização')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remover piano.png (salva)' })).toBeInTheDocument();
+  });
+});
+
+describe('LibraryView: warming up the score services', () => {
+  const idleNow = () => {
+    vi.stubGlobal(
+      'requestIdleCallback',
+      vi.fn((callback: () => void) => {
+        callback();
+        return 1;
+      }),
+    );
+    vi.stubGlobal('cancelIdleCallback', vi.fn());
+  };
+  it('starts them when the browser is idle and has Workers', () => {
+    idleNow();
+    vi.stubGlobal('Worker', class {});
+    render(<LibraryView />);
+    expect(warmUp.calls).toBe(1);
+  });
+  it('starts nothing where there are no Workers', () => {
+    idleNow();
+    vi.stubGlobal('Worker', undefined);
+    render(<LibraryView />);
+    expect(warmUp.calls).toBe(0);
+  });
+});
+
+describe('LibraryView: the fade of a changed list (UI batch spec 6.4)', () => {
+  const list = (container: HTMLElement) => container.querySelector('.library-list')!;
+  it('is absent on arrival and appears when another level replaces the shelves', async () => {
+    const { container } = render(<LibraryView />);
+    expect(list(container)).not.toHaveClass('is-fresh');
+    await userEvent.click(screen.getByRole('radio', { name: 'Medium' }));
+    expect(list(container)).toHaveClass('is-fresh');
+  });
+  it('appears when a shelf opens in place of the shelves', async () => {
+    const { container } = render(<LibraryView />);
+    await userEvent.click(screen.getByRole('button', { name: 'All 41 songs' }));
+    expect(list(container)).toHaveClass('is-fresh');
+  });
+  it('does not appear when a page is appended to a shelf', async () => {
+    library.whole = true;
+    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'classical' });
+    const { container } = render(<LibraryView />);
+    await userEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
+    expect(rows()).toHaveLength(80);
+    expect(list(container)).not.toHaveClass('is-fresh');
   });
 });

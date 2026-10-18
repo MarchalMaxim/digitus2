@@ -60,7 +60,9 @@ describe('ThemeToggle', () => {
     expect(svg.querySelector('.theme-rays')).not.toBeNull();
     expect(svg.querySelector('.theme-core')).not.toBeNull();
     // The bite is a mask: it cuts the crescent whatever lies behind the button (its hover fill).
-    expect(svg.querySelector('mask .theme-bite')).not.toBeNull();
+    const mask = svg.querySelector('mask')!;
+    expect(mask.querySelector('circle')).not.toBeNull();
+    expect(svg.querySelector('g')).toHaveAttribute('mask', `url(#${mask.id})`);
     expect(screen.getByRole('button')).toHaveClass('no-print');
     expect(screen.getByRole('button')).not.toHaveClass('is-red');
   });

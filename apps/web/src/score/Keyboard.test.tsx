@@ -204,6 +204,54 @@ describe('Keyboard', () => {
     expect(keysToShow([rh1, lh], 150)).toEqual({ left: 300, right: 322 });
     expect(keysToShow([lh, rh1], 150)).toEqual({ left: 0, right: 22 });
   });
+  it('breaks a tie between stretches holding equally many keys in favour of the earlier one', () => {
+    const struck = { left: 0, right: 22 };
+    const earlier = [
+      { left: 300, right: 322 },
+      { left: 344, right: 366 },
+    ];
+    const later = [
+      { left: 600, right: 622 },
+      { left: 644, right: 666 },
+    ];
+    expect(keysToShow([struck, ...earlier, ...later], 150)).toEqual({ left: 300, right: 366 });
+  });
+  it('centres a black key on the line between its two white neighbours', () => {
+    const { container } = render(<Keyboard lowMidi={48} highMidi={71} pressed={[]} />);
+    const x = (midi: number) =>
+      Number(container.querySelector(`[data-midi="${midi}"] rect`)!.getAttribute('x'));
+    const width = Number(container.querySelector('[data-midi="61"] rect')!.getAttribute('width'));
+    // C#4 sits between C4 and D4: its centre is where D4 begins.
+    expect(x(61) + width / 2).toBe(x(62));
+    expect(x(70) + width / 2).toBe(x(71));
+  });
+  it('keeps the range on the 88 keys of a piano when the lowest note is the lowest key', () => {
+    expect(keyboardRange({ notes: [{ midi: 21 }] } as never)).toEqual({
+      lowMidi: 21,
+      highMidi: 47,
+    });
+    expect(keyboardRange({ notes: [{ midi: 108 }] } as never)).toEqual({
+      lowMidi: 84,
+      highMidi: 108,
+    });
+  });
+  it('scrolls a pressed black key out of view to the middle of the key, by its own width', () => {
+    // Nothing is laid out here: stub a 337 px wide keyboard (scale 1) seen through 100 px.
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(337);
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(100);
+    vi.spyOn(SVGElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      width: 337,
+      height: 101,
+    } as DOMRect);
+    const { container } = render(
+      <Keyboard lowMidi={48} highMidi={71} pressed={[{ midi: 70, finger: 2, hand: 'R' }]} />,
+    );
+    const key = container.querySelector('[data-midi="70"] rect')!;
+    const left = Number(key.getAttribute('x')) + 0.5;
+    const middle = left + Number(key.getAttribute('width')) / 2;
+    const scroller = container.querySelector('.keyboard-scroll') as HTMLElement;
+    expect(scroller.scrollLeft).toBe(middle - 50);
+  });
   it('computes a range from C below the lowest note to B above the highest, at least two octaves', () => {
     expect(keyboardRange({ notes: [{ midi: 62 }, { midi: 65 }] } as never)).toEqual({
       lowMidi: 48,

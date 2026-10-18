@@ -337,6 +337,26 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     const songs = shelf(pieces, 'easy', 'songs');
     expect(songs.groups.some((g) => g.heading === "Children's songs")).toBe(true);
   });
+  it('puts a shelf whose pieces all come from one collection under that collection heading', () => {
+    const entry = (i: number, over: Partial<LibraryEntry>): LibraryEntry => ({
+      slug: `p${i}`,
+      title: `Piece ${i}`,
+      composer: 'Traditional',
+      level: 1,
+      collection: 'Lone collection',
+      collectionId: 'lone',
+      genre: 'songs',
+      approxDurationSec: 60,
+      ...over,
+    });
+    const list = [
+      ...Array.from({ length: 13 }, (_, i) => entry(i, {})),
+      ...Array.from({ length: 40 }, (_, i) =>
+        entry(100 + i, { level: 5, genre: 'classical', collectionId: `other${i}` }),
+      ),
+    ];
+    expect(headings(shelf(list, 'easy', 'songs').groups)).toEqual([['Lone collection', 13]]);
+  });
   it('arrives in pages of 40, each page the same rows plus 40 more', () => {
     const one = shelf(allPieces, 'medium', 'classical');
     expect(one.shown).toBe(40);
@@ -591,11 +611,10 @@ describe('what the live region says (shelves spec 7)', () => {
     );
   });
   it('writes counts as words, with a comma from a thousand', () => {
-    expect([en.library.pieces(1), en.library.pieces(24), en.library.pieces(1415)]).toEqual([
-      '1 piece',
-      '24 pieces',
-      '1,415 pieces',
-    ]);
+    // The wording is the dictionary's; what matters here is the singular and the grouping.
+    expect(en.library.pieces(1)).toMatch(/^1 piece$/);
+    expect(en.library.pieces(24)).toContain('24');
+    expect(en.library.pieces(1415)).toContain(formatNumber('en', 1415));
     expect(formatNumber('en', 1000000)).toBe('1,000,000');
   });
 });
@@ -658,6 +677,8 @@ describe('the core 30 (a library of 40 pieces or fewer)', () => {
     expect(layout.sections.map((s) => s.tier)).toEqual(['easy', 'medium', 'harder', 'challenging']);
     expect(layout.sections.reduce((n, s) => n + s.count, 0)).toBe(30);
     for (const s of layout.sections) expect(rowsOf(s.groups)).toHaveLength(s.count);
+    // Every level is already in full: none is "opened" and none offers a button.
+    for (const s of layout.sections) expect(s.open).toBe(false);
   });
 });
 

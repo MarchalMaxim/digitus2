@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { en } from '../i18n/en/index.js';
 import { PhraseError } from '../i18n/PhraseError.js';
-import { createScanClient } from './client.js';
+import { createScanClient, UNKNOWN_WARNING } from './client.js';
 import { SCAN_LIMIT, validateScan } from './model.js';
 
 describe('experimental scan boundary', () => {
@@ -72,6 +72,34 @@ describe('experimental scan boundary', () => {
     expect((await createScanClient(fetcher).connect()).warnings).toEqual([
       'English OCR is not configured.',
     ]);
+  });
+  it('turns warnings that carry no text into the unknown-warning marker', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          protocol: 'digitus2-scan-v1',
+          warnings: [null, 7, {}, { code: 'x' }, { message: 5 }, 'plain text'],
+        }),
+      ),
+    );
+    expect((await createScanClient(fetcher).connect()).warnings).toEqual([
+      UNKNOWN_WARNING,
+      UNKNOWN_WARNING,
+      UNKNOWN_WARNING,
+      UNKNOWN_WARNING,
+      UNKNOWN_WARNING,
+      'plain text',
+    ]);
+  });
+  it('takes a file of exactly ten mebibytes and refuses one byte more', async () => {
+    const tenMiB = 10 * 1024 * 1024;
+    const pdf = (size: number) => {
+      const bytes = new Uint8Array(size);
+      bytes.set(new TextEncoder().encode('%PDF-1.7'));
+      return new File([bytes], 'score.pdf');
+    };
+    await expect(validateScan(pdf(tenMiB))).resolves.toBeInstanceOf(File);
+    await expect(validateScan(pdf(tenMiB + 1))).rejects.toThrow('10 MB');
   });
   it('throws errors that can be written in another language', async () => {
     const error = await validateScan(new File(['fake'], 'score.png')).catch((e: unknown) => e);

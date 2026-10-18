@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
-import { parseMusicXml } from '@digitus2/engine';
+import { parseMusicXml, type Note } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
 import { buildOnsetGroups, groupIndexAt, hasNotesFor } from './onsetGroups.js';
 
@@ -17,6 +17,26 @@ describe('onset groups', () => {
     for (let i = 1; i < groups.length; i++)
       expect(groups[i]!.tick).toBeGreaterThan(groups[i - 1]!.tick);
     expect(groups[0]!.endSec).toBe(groups[1]!.sec);
+  });
+  it('orders groups by tick whatever order the notes arrive in', () => {
+    const note = (id: string, tick: number, sec: number, offsetSec: number) =>
+      ({ id, onsetTick: tick, onsetSec: sec, offsetSec, hand: 'R' }) as unknown as Note;
+    const groups = buildOnsetGroups({
+      ...score,
+      notes: [note('late', 960, 2, 2.5), note('early', 0, 0, 1), note('middle', 480, 1, 1.5)],
+    });
+    expect(groups.map((g) => g.tick)).toEqual([0, 480, 960]);
+    expect(groups.map((g) => g.noteIds)).toEqual([['early'], ['middle'], ['late']]);
+    expect(groups.map((g) => g.endSec)).toEqual([1, 2, 2.5]);
+  });
+  it('ends the last group when its longest note ends', () => {
+    const note = (id: string, offsetSec: number) =>
+      ({ id, onsetTick: 0, onsetSec: 1, offsetSec, hand: 'R' }) as unknown as Note;
+    const [group] = buildOnsetGroups({
+      ...score,
+      notes: [note('short', 1.5), note('long', 3), note('middle', 2)],
+    });
+    expect(group!.endSec).toBe(3);
   });
   it('finds the current group by time', () => {
     const groups = buildOnsetGroups(score);

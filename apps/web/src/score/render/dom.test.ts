@@ -139,3 +139,29 @@ describe('dimming the hand left out', () => {
     expect(sweep('l2b')).toBe('0ms');
   });
 });
+
+describe('dimming edge cases', () => {
+  it('leaves the rests of a note-less staff place alone when another staff is dimmed', () => {
+    const div = document.createElement('div');
+    div.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><g class="system"><g class="measure">
+      <g class="staff"><g class="layer" id="top"><g class="note" id="a1"></g></g></g>
+      <g class="staff"><g class="layer" id="bottom"><g class="rest" id="rest"></g></g></g>
+    </g></g></svg>`;
+    expect(dimNotes(div, new Set(['a1']))).toBe(1);
+    expect(div.querySelector('#top')).toHaveClass('is-muted');
+    expect(div.querySelector('#bottom')).not.toHaveClass('is-muted');
+  });
+
+  it('sweeps the middle bar of a three-bar system to half the spread', () => {
+    const div = document.createElement('div');
+    div.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><g class="system">
+      <g class="measure" id="m1"><g class="note" id="x1"></g></g>
+      <g class="measure" id="m2"><g class="note" id="x2"></g></g>
+      <g class="measure" id="m3"><g class="note" id="x3"></g></g>
+    </g></svg>`;
+    sweepDimming([...div.querySelectorAll('g.note')], 140);
+    const sweep = (id: string) =>
+      (div.querySelector(`#${id}`) as SVGElement).style.getPropertyValue('--sweep');
+    expect([sweep('x1'), sweep('x2'), sweep('x3')]).toEqual(['0ms', '70ms', '140ms']);
+  });
+});

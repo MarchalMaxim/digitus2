@@ -43,4 +43,20 @@ describe('check-colors', () => {
     };
     expect(findForbiddenColors([ts]).map((p) => p.reason)).toEqual(['color literal #e3e3e3e3']);
   });
+  it('accepts three- and four-digit grays in the token file', () => {
+    const short = { ...tokens, text: ':root { --ink-2: #333; --gray-2: #3333; }' };
+    expect(findForbiddenColors([short])).toEqual([]);
+  });
+  it('reports the line a problem is on, counting from 1', () => {
+    const css = {
+      path: 'apps/web/src/x.css',
+      text: ['.a { color: #000000; }', '.b { margin: 0; }', '.c { fill: rgb(1,2,3); }'].join('\n'),
+    };
+    const second = {
+      ...tokens,
+      text: [':root {', '  --ink: #000000;', '  --blue: #0000ff;', '}'].join('\n'),
+    };
+    expect(findForbiddenColors([css]).map((p) => p.line)).toEqual([1, 3]);
+    expect(findForbiddenColors([second]).map((p) => p.line)).toEqual([3]);
+  });
 });

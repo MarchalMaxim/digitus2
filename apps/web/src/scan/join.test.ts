@@ -148,4 +148,22 @@ describe('joining separately recognized pages', () => {
   ])('refuses unsupported %s rather than silently changing notation', (_kind, xml) => {
     expect(() => joinScanPages([page(), xml])).toThrow();
   });
+  it('refuses a part without measures, naming the measure counts', () => {
+    const empty = page().replace(/<measure[\s\S]*<\/measure>/, '');
+    expect(() => joinScanPages([page(), empty])).toThrow(/measure counts/);
+  });
+  it('refuses parts of one page that hold different numbers of measures', () => {
+    const measure =
+      '<measure number="1"><attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>F</sign><line>4</line></clef></attributes><note><pitch><step>E</step><octave>2</octave></pitch><duration>16</duration><type>whole</type></note></measure>';
+    const uneven = page()
+      .replace(
+        '</part-list>',
+        '<score-part id="P2"><part-name>Bass</part-name></score-part></part-list>',
+      )
+      .replace(
+        '</score-partwise>',
+        `<part id="P2">${measure}${measure.replace('"1"', '"2"')}</part></score-partwise>`,
+      );
+    expect(() => joinScanPages([uneven, uneven])).toThrow(/measure counts/);
+  });
 });

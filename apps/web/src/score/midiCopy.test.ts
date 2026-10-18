@@ -13,6 +13,22 @@ describe('MIDI copy', () => {
       'a 32nd-note grid with triplets',
     );
   });
+  it('names all twelve pitch classes with sharps', () => {
+    expect(Array.from({ length: 12 }, (_, i) => noteName(60 + i))).toEqual([
+      'C4',
+      'C#4',
+      'D4',
+      'D#4',
+      'E4',
+      'F4',
+      'F#4',
+      'G4',
+      'G#4',
+      'A4',
+      'A#4',
+      'B4',
+    ]);
+  });
   it('writes the import line with a rounded percentage', () => {
     expect(
       importLine({

@@ -116,6 +116,24 @@ describe('AboutView', () => {
       vi.resetModules();
     }
   });
+  it('writes no archive sentence when the library holds no archive piece', async () => {
+    const curated = await curatedPieces();
+    vi.resetModules();
+    vi.doMock('../library/manifest.js', async (importOriginal) => ({
+      ...(await importOriginal<typeof ManifestModule>()),
+      loadPieceDetails: async () => new Map(curated.map((p) => [p.slug, p])),
+    }));
+    try {
+      const { AboutView: WithoutArchive } = await import('./AboutView.js');
+      render(<WithoutArchive />);
+      // The table has loaded once the credit sentence counts the curated pieces.
+      await waitFor(() => expect(creditParagraph().textContent).toBe(expectedCredit(curated)));
+      expect(screen.queryByText(/more scores come from/)).not.toBeInTheDocument();
+    } finally {
+      vi.doUnmock('../library/manifest.js');
+      vi.resetModules();
+    }
+  });
   it('has exactly one red element, the back button', () => {
     const { container } = render(<AboutView />);
     const red = container.querySelectorAll('.is-red');

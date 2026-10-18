@@ -195,3 +195,22 @@ it('hydration cannot restore a draft removed while the initial read was pending'
   expect(useLocalLibrary.getState().items).toEqual([]);
   expect(fixture.disk.has('scan:draft')).toBe(false);
 });
+
+it.each([
+  ['oldest first', [1, 5, 3]],
+  ['newest first', [5, 3, 1]],
+])('lists saved items newest first, whichever way the disk returns them (%s)', async (_, times) => {
+  fixture.rows = times.map((updatedAt) => ({
+    version: 1,
+    id: `at-${updatedAt}`,
+    updatedAt,
+    kind: 'file',
+    name: `at-${updatedAt}.musicxml`,
+    blob: new Blob(['score']),
+  }));
+  const library = await import('./library.js');
+  const { useLocalLibrary } = await import('./state.js');
+  library.installLocalLibrary();
+  await vi.waitFor(() => expect(useLocalLibrary.getState().items).toHaveLength(3));
+  expect(useLocalLibrary.getState().items.map((item) => item.id)).toEqual(['at-5', 'at-3', 'at-1']);
+});

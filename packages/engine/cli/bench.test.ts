@@ -71,6 +71,7 @@ describe('runBench', () => {
     expect(scorecard.skipped.map((s) => s.id).sort()).toEqual(['003', '004']);
     expect(scorecard.pieces[0]!.gen).toBe(100);
     expect(scorecard.pieces[0]!.annotators).toBe(2);
+    expect(scorecard.pieces[0]!.soft).toBe(100); // every note matches: a percentage, not a fraction
     expect(scorecard.macro.gen).toBeCloseTo((100 + scorecard.pieces[1]!.gen) / 2);
     expect(floorBreaches.some((b) => b.includes('gen'))).toBe(true);
     // A gated run that skips pieces is a breach in itself (Review Focus 5).
@@ -110,6 +111,52 @@ describe('runBench', () => {
     // Runner-up 4 and the why-not gap of the annotator's 4, both negative against the engine's 5.
     expect(row).toMatch(/\| 4 -\d+\.\d(, \d [+-]\d+\.\d)? \| 4 \| 4: -\d+\.\d \|/);
     expect(gallery).toContain('negative where the pass gave the note a finger');
+  });
+
+  it('writes a zero cost gap with a plus sign, as +0.0', () => {
+    // Four C4 in a row: the engine takes 1 and fingers 2 and 3 cost exactly the same as it does.
+    const root = mkdtempSync(join(tmpdir(), 'digitus2-bench-'));
+    const notes = (fingers: number[]) =>
+      H +
+      fingers.map((f, i) => `${i}\t${i * 0.5}\t${(i + 1) * 0.5}\tC4\t80\t80\t0\t${f}`).join('\n') +
+      '\n';
+    writeFileSync(join(root, '001-1_fingering.txt'), notes([2, 1, 1, 1]));
+    const { gallery } = scorePiece('001', root, {
+      profile: 'large',
+      weightSet: loadWeightSet('parncutt'),
+    });
+    const row = gallery!.split('\n').find((l) => l.startsWith('| 0 |'))!;
+    expect(row).toContain('| 2: +0.0 |');
+  });
+
+  it('puts a note all annotators agree on against the engine first, as a hard error', () => {
+    const root = mkdtempSync(join(tmpdir(), 'digitus2-bench-'));
+    // The engine fingers the scale 1 2 3 1 2 3 4 5. The annotators differ from each other at E4
+    // (note 2) and agree on 2 against the engine's 4 at B4 (note 6).
+    writeFileSync(join(root, '001-1_fingering.txt'), file([1, 2, 4, 1, 2, 3, 2, 5]));
+    writeFileSync(join(root, '001-2_fingering.txt'), file([1, 2, 5, 1, 2, 3, 2, 5]));
+    const { result, gallery } = scorePiece('001', root, {
+      profile: 'large',
+      weightSet: loadWeightSet('parncutt'),
+    });
+    const rows = gallery!.split('\n').filter((l) => /^\| \d+ \|/.test(l));
+    expect(rows.map((r) => r.split(' | ')[0])).toEqual(['| 6', '| 2']); // hard first, not in note order
+    expect(rows[0]).toMatch(/\| hard \|$/);
+    expect(rows[1]).not.toMatch(/hard/);
+    expect(result.hardErrorRate).toBeGreaterThan(0);
+  });
+
+  it("does not call a lone annotator's difference a hard error", () => {
+    const root = mkdtempSync(join(tmpdir(), 'digitus2-bench-'));
+    writeFileSync(join(root, '001-1_fingering.txt'), file([1, 2, 3, 1, 2, 3, 2, 5]));
+    const { result, gallery } = scorePiece('001', root, {
+      profile: 'large',
+      weightSet: loadWeightSet('parncutt'),
+    });
+    const rows = gallery!.split('\n').filter((l) => /^\| \d+ \|/.test(l));
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).not.toMatch(/\| hard \|$/);
+    expect(result.hardErrorRate).toBe(0);
   });
 
   it('gates the lint floor, and only a labelled run replaces latest.json', () => {
@@ -419,8 +466,13 @@ describe('runBench', () => {
 
   it('defaults --against to the FHMM3 and FingerFlow-learned ids of the baselines CSV', () => {
     expect(DEFAULT_AGAINST).toEqual([FHMM3_ID, FINGERFLOW_ID]);
-    expect(FHMM3_ID).toBe('nakamura_fhmm3');
-    expect(FINGERFLOW_ID).toBe('fingerflow_learned');
+    expect(FHMM3_ID).not.toBe(FINGERFLOW_ID);
+  });
+
+  it.skipIf(!haveBaselines)('names baselines that the baselines CSV has rows for', () => {
+    const ids = new Set(parseCsv(baselinesCsv).map((r) => r.baseline));
+    expect(ids.has(FHMM3_ID)).toBe(true);
+    expect(ids.has(FINGERFLOW_ID)).toBe(true);
   });
 
   it.skipIf(!haveBaselines)(

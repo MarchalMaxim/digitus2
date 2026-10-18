@@ -17,6 +17,9 @@ describe('LanguageLine', () => {
     const names = ['English', 'Nederlands', 'Français', 'Español', 'Português'];
     for (const name of names) expect(screen.getByRole('button', { name })).toBeInTheDocument();
     expect(line).toHaveTextContent(names.join(' · '));
+    // Exactly, so no dot trails the last name: a separator only between neighbours.
+    expect(line.textContent).toBe(names.join(' · '));
+    expect(line.querySelectorAll('[aria-hidden="true"]')).toHaveLength(names.length - 1);
     expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-current', 'true');
     expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute('lang', 'fr');
   });

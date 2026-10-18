@@ -129,4 +129,47 @@ describe('digitus2 evalhands', () => {
     expect(all.pieces.map((p) => p.id)).toEqual(['twinkle', 'twinkle-again']);
     expect(all.set).toBe('all');
   });
+  it('averages piece accuracies per piece (macro) and per note (note-weighted)', () => {
+    const f = fixtureDir();
+    // A second, short piece (4 notes) whose gold hands are the wrong way round, so that it scores
+    // far below the 8-note piece and the two averages differ.
+    const swapped: Array<[string, number]> = [
+      ['C5', 1],
+      ['C3', 0],
+      ['D5', 1],
+      ['G2', 0],
+    ];
+    writeFileSync(join(f.gold, 'FingeringFiles', '004-1_fingering.txt'), piece(swapped));
+    writeFileSync(
+      f.split,
+      JSON.stringify({
+        default_split: 'toy',
+        splits: { toy: { test: { pieces: ['001', '004'] } } },
+      }),
+    );
+    const pig = runEvalHands({ gold: f.gold, split: f.split }).scorecard.pig!;
+    const [a, b] = pig.pieces as [(typeof pig.pieces)[0], (typeof pig.pieces)[0]];
+    expect([a.notes, b.notes]).toEqual([8, 4]);
+    expect(a.accuracy).toBeGreaterThan(b.accuracy);
+    expect(pig.macro).toBeCloseTo((a.accuracy + b.accuracy) / 2, 9);
+    expect(pig.noteWeighted).toBeCloseTo((a.accuracy * 8 + b.accuracy * 4) / 12, 9);
+    expect(pig.noteWeighted).toBeGreaterThan(pig.macro); // the longer piece scored higher
+  });
+  it('averages to 0, not NaN, when no piece could be scored', () => {
+    const f = fixtureDir();
+    const only = join(f.root, 'only-missing.json');
+    writeFileSync(
+      only,
+      JSON.stringify({ default_split: 'toy', splits: { toy: { test: { pieces: ['003'] } } } }),
+    );
+    const pig = runEvalHands({ gold: f.gold, split: only }).scorecard.pig!;
+    expect(pig.pieces).toEqual([]);
+    expect(pig.macro).toBe(0);
+    expect(pig.noteWeighted).toBe(0);
+  });
+  it('scores the PIG pieces only when both the gold directory and the split are given', () => {
+    const f = fixtureDir();
+    expect(runEvalHands({ gold: f.gold }).scorecard.pig).toBeNull();
+    expect(runEvalHands({ split: f.split }).scorecard.pig).toBeNull();
+  });
 });

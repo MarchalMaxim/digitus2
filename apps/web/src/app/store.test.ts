@@ -394,3 +394,18 @@ describe('the first Play (UI batch, spec sections 12 and 16)', () => {
     expect(stored.settings?.practiceOpen).toBeUndefined();
   });
 });
+
+describe('the default settings', () => {
+  it('start a beginner with a medium hand, both hands, a count-in and nothing else on', () => {
+    expect(DEFAULT_SETTINGS).toEqual({
+      handSize: 'medium',
+      tempoByPiece: {},
+      hands: 'both',
+      metronome: false,
+      countIn: true,
+      showEditorial: false,
+      lastPlayed: null,
+      legendSeen: false,
+    });
+  });
+});

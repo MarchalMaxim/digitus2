@@ -62,6 +62,7 @@ describe('the hop', () => {
     // It squashes as it lands: wider and flatter just before it settles.
     const squash = f.shape[f.shape.length - 2]!;
     expect(parseFloat(String(squash.width))).toBeGreaterThan(12);
+    expect(squash.borderRadius).toBe('50%'); // squashed, still a notehead, never a square
   });
 
   it("leaves Play with Play's exact box when the red is on Play", () => {

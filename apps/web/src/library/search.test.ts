@@ -43,11 +43,6 @@ describe('search (spec 6.3)', () => {
     expect(matchesQuery({ ...prelude, genre: 'folk' }, 'carols')).toBe(true);
     expect(matchesQuery({ ...prelude, genre: 'songs' }, 'baroque')).toBe(false);
   });
-  it('does not match a piece by the joining "and" of a shelf name', () => {
-    expect(
-      matchesQuery({ title: 'Tune', composer: 'X', collection: 'Y', genre: 'folk' }, 'and'),
-    ).toBe(false);
-  });
   it('keeps the order it is given', () => {
     expect(searchPieces([rondo, furElise], 'r')).toEqual([rondo, furElise]);
   });

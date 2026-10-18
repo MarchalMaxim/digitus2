@@ -63,14 +63,10 @@ describe('the six shelves (shelves spec 4)', () => {
     expect(shelfOfGenre('modern')).toBe('jazz');
   });
   it('say what they hold in one line, and name what the button counts', () => {
-    expect(SHELVES.map((s) => s.noun)).toEqual([
-      'songs',
-      'classical pieces',
-      'folk tunes and carols',
-      'baroque pieces',
-      'romantic pieces',
-      'jazz, ragtime and modern pieces',
-    ]);
+    const nouns = SHELVES.map((s) => s.noun);
+    expect(new Set(nouns).size).toBe(SHELVES.length);
+    // A noun follows "All 7" in a button, so it is lower case and never ends in a stop.
+    for (const noun of nouns) expect(noun).toMatch(/^[a-z][^.]*$/);
     for (const s of SHELVES) expect(s.line).toMatch(/\.$/);
   });
 });

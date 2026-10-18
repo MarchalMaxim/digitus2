@@ -15,8 +15,7 @@ import {
 /**
  * The application states the design brief is checked in (M4 plan, Task 10): each a name, a way
  * to reach it from a fresh page, and the kind of element that must be the screen's one red.
- * Shared by `states.spec.ts` (one red, axe, no horizontal overflow, desktop and mobile) and
- * `visual.spec.ts` (screenshot baselines); Playwright forbids one spec importing another.
+ * Used by `states.spec.ts` (one red, axe, no horizontal overflow, desktop and mobile).
  */
 export interface AppState {
   name: string;

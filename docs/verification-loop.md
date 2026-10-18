@@ -38,7 +38,6 @@ The format check (`pnpm format:check`) is not a verify step; CI runs it, so run 
 Name one or more steps: `pnpm verify unit`, `pnpm verify build bundle`, `pnpm verify build omr`, `pnpm verify build benchmark`, `pnpm verify benchmark:mutopia` (the Mutopia oracle alone).
 
 - **E2E port.** Playwright starts `vite preview` on port 4173 and, outside CI, reuses any server already listening there: stop a stale preview first, or the suite tests an old build. `DIGITUS2_E2E_PORT=4189 pnpm verify` gives a second checkout its own port.
-- **Visual baselines.** The `visual` project runs only outside CI (fonts differ between machines) and compares against `apps/web/e2e/visual.spec.ts-snapshots/`. The committed baselines are Windows renders (`*-win32.png`); on another OS there is nothing to compare against, so run the other projects only: `pnpm --filter @digitus2/web build && pnpm --filter @digitus2/web exec playwright test --project desktop --project mobile`. After an intended visual change, rewrite the baselines on Windows with `pnpm --filter @digitus2/web exec playwright test --project=visual --update-snapshots=all`, review every PNG, and restore the ones the change should not have touched. The comparison tolerates small pixel differences (`maxDiffPixelRatio` 0.002), so a changed count in a baseline can go stale without failing.
 
 ## Floors
 
@@ -67,7 +66,7 @@ A PIG-fitted research set (never shipped) writes under `research/weights/` with 
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every push to `main` and on pull requests: install, `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build`, `pnpm test:omr`, then the Playwright e2e suite with `CI=true` (no `visual` project, one retry, the HTML report uploaded on failure). The hygiene, design, bundle, benchmark and hands steps run only under `pnpm verify`: PIG cannot be redistributed, so CI has no benchmark data. The solver's random-walk timing test allows 1,200 ms under CI against 500 ms locally, because the GitHub runner is slower.
+`.github/workflows/ci.yml` runs on every push to `main` and on pull requests: install, `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build`, `pnpm test:omr`, then the Playwright e2e suite with `CI=true` (one retry, the HTML report uploaded on failure). The hygiene, design, bundle, benchmark and hands steps run only under `pnpm verify`: PIG cannot be redistributed, so CI has no benchmark data. The solver's random-walk timing test has one budget everywhere: a ratio to a reference workload timed in the same moments, so a slower or busier machine does not move it.
 
 `.github/workflows/pages.yml` builds and deploys the app to GitHub Pages on every push to `main`.
 

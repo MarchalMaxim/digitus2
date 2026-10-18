@@ -305,6 +305,49 @@ describe('constraints', () => {
   });
 });
 
+/**
+ * The yardstick of the solver's timing test: a second-order min-sum decode with the solver's shape
+ * (25 states and 125 transitions per note, costs from callbacks, Float64Array rows) over 150,000
+ * notes, written out here so that no change to the solver changes it. Returns the optimum, so the
+ * work cannot be optimised away.
+ */
+function referenceDecode(): number {
+  const n = 150_000;
+  const unary = (i: number, f: number) => ((i * 7 + f * 13) % 11) * 0.5;
+  const pair = (i: number, g: number, f: number) => Math.abs(g - f) * (1 + (i % 3));
+  const triple = (i: number, h: number, g: number, f: number) =>
+    h === f ? 0.25 : ((h + g + f + i) % 5) * 0.125;
+  let prev = new Float64Array(25);
+  let next = new Float64Array(25);
+  for (let g = 0; g < 5; g++)
+    for (let f = 0; f < 5; f++) prev[g * 5 + f] = unary(0, g) + unary(1, f) + pair(1, g, f);
+  for (let i = 2; i < n; i++) {
+    for (let g = 0; g < 5; g++)
+      for (let f = 0; f < 5; f++) {
+        let best = Number.POSITIVE_INFINITY;
+        for (let h = 0; h < 5; h++) best = Math.min(best, prev[h * 5 + g]! + triple(i, h, g, f));
+        next[g * 5 + f] = best + unary(i, f) + pair(i, g, f);
+      }
+    [prev, next] = [next, prev];
+  }
+  return Math.min(...prev);
+}
+
+/**
+ * The solver's warm solve of the 2,000-note walk may take at most this many reference decodes
+ * (`referenceDecode`). Measured on a 16-core Windows machine, for both weight sets:
+ *
+ * | condition                          | solve (ms) | reference (ms) | ratio     |
+ * | ---------------------------------- | ---------- | -------------- | --------- |
+ * | the test alone                     | 150–158    | 29.6–30.2      | 4.98–5.20 |
+ * | beside 24 CPU-bound processes      | 871–979    | 190–202        | 4.57–5.00 |
+ * | inside `pnpm test` (all suites)    | 236–359    | 48–59          | 4.95–6.08 |
+ * | the solver made to solve twice     | 305        | 30.0           | 10.19     |
+ *
+ * The last row is a doubled solver: it fails the bound, which the old 500 ms budget let through.
+ */
+const SOLVE_REFERENCE_RATIO = 10;
+
 describe('outputs', () => {
   it('solves both hands, gives confidences, alternatives and explanations', () => {
     const text =
@@ -345,27 +388,37 @@ describe('outputs', () => {
     }
     const { score } = parsePig(H + rows.join('\n') + '\n');
     // The budget is for a warm solve: the first call also pays for the JIT. The walk has repeated
-    // passages, so the consistency pass runs (75 repeated passages, about twice the work). The
-    // time is the fastest of three warm solves (about 130 ms alone): a single one measured up to
-    // 1,028 ms while `pnpm test` ran the other suites beside it (M3 Task 9), which times the
-    // machine, not the solver. Every solve must give the same fingering. The budget holds for the
-    // solver's default set (parncutt) and for RECOMMENDED_WEIGHT_SET, the set the CLI and the gate
-    // solve with (learned-open, M3 Task 9). The GitHub runner is slower and shares its two cores
-    // with the other suites: it measured 542 ms for parncutt on a docs-only commit (2026-10-14),
-    // so under CI the budget is 1,200 ms; the 500 ms budget stays the local one.
-    const budgetMs = process.env.CI ? 1200 : 500;
+    // passages, so the consistency pass runs (75 repeated passages, about twice the work). Every
+    // solve must give the same fingering. The budget holds for the solver's default set (parncutt)
+    // and for RECOMMENDED_WEIGHT_SET, the set the CLI and the gate solve with.
+    //
+    // A budget in milliseconds times the machine, not the solver: the same solve measured 130 ms
+    // alone, up to 1,028 ms beside the other suites and 542 ms on the GitHub runner. So the
+    // budget is a ratio to a reference workload measured in the same moments: each round times
+    // one reference run and one solve back to back, and the test takes the fastest of each over
+    // five rounds. Load slows both alike and the ratio stays; a slower solver moves only the
+    // solve, so a solve that takes twice its work fails on every machine.
     for (const weightSet of ['parncutt', RECOMMENDED_WEIGHT_SET] as const) {
       const a = solveFingering(score, { hands: ['R'], weightSet });
-      let ms = Infinity;
-      for (let k = 0; k < 3; k++) {
-        const t0 = performance.now();
+      referenceDecode(); // warm, as the solve above is
+      let solveMs = Infinity;
+      let referenceMs = Infinity;
+      for (let k = 0; k < 5; k++) {
+        let t0 = performance.now();
+        referenceDecode();
+        referenceMs = Math.min(referenceMs, performance.now() - t0);
+        t0 = performance.now();
         const b = solveFingering(score, { hands: ['R'], weightSet });
-        ms = Math.min(ms, performance.now() - t0);
+        solveMs = Math.min(solveMs, performance.now() - t0);
         expect(JSON.stringify(b.assignment), weightSet).toBe(JSON.stringify(a.assignment));
       }
-      expect(ms, weightSet).toBeLessThan(budgetMs);
+      const ratio = solveMs / referenceMs;
+      expect(
+        ratio,
+        `${weightSet}: ${solveMs.toFixed(1)} ms / ${referenceMs.toFixed(1)} ms`,
+      ).toBeLessThan(SOLVE_REFERENCE_RATIO);
     }
-  }, 20_000);
+  }, 30_000);
 });
 
 // M2 hardening (docs/experiments.md, solver rules and weights).

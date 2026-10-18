@@ -32,7 +32,7 @@ jobs:
       - run: node scripts/fetch-piano-samples.mjs
       - run: pnpm --filter @digitus2/engine build
       - run: pnpm --filter @digitus2/web exec vite build --base=/${{ github.event.repository.name }}/
-      - run: test -f apps/web/dist/piano/manifest.json
+      - run: test -f apps/web/dist/piano/manifest.json && test -f apps/web/dist/sw.js && test -f apps/web/dist/manifest.webmanifest
       - uses: actions/upload-pages-artifact@v3
         with: { path: apps/web/dist }
   deploy:

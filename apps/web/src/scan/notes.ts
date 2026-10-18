@@ -153,7 +153,9 @@ export function readScanScore(doc: XMLDocument): ScanScore {
             const value = Number(text(key, 'fifths'));
             if (!Number.isInteger(value)) continue;
             const number = key.getAttribute('number');
-            const targets = number ? [Number(number)] : Array.from({ length: staves }, (_, i) => i + 1);
+            const targets = number
+              ? [Number(number)]
+              : Array.from({ length: staves }, (_, i) => i + 1);
             for (const staff of targets) {
               fifths.set(staff, value);
               if (!sawNote) bar.fifths.set(staff, value);
@@ -310,13 +312,13 @@ export function tieSource(score: ScanScore, note: ScanNote): ScanNote | undefine
 /** Every note joined to `note` by ties, in order. */
 export function tieChain(score: ScanScore, note: ScanNote): ScanNote[] {
   const chain = [note];
-  for (let n = note; n.tieStop; ) {
+  for (let n = note; n.tieStop;) {
     const source = tieSource(score, n);
     if (!source || chain.includes(source)) break;
     chain.unshift(source);
     n = source;
   }
-  for (let n = note; n.tieStart; ) {
+  for (let n = note; n.tieStart;) {
     const partner = tiePartner(score, n);
     if (!partner || chain.includes(partner)) break;
     chain.push(partner);

@@ -8,7 +8,11 @@ import { PNG } from './helpers/scan.js';
 test.skip(({ isMobile }) => !isMobile, 'the phone path is checked on the mobile project');
 
 const capture = (page: Page) => page.locator('input[type=file][capture]');
-const photo = (tag: string) => ({ name: 'image', mimeType: 'image/png', buffer: Buffer.concat([PNG, Buffer.from(tag)]) });
+const photo = (tag: string) => ({
+  name: 'image',
+  mimeType: 'image/png',
+  buffer: Buffer.concat([PNG, Buffer.from(tag)]),
+});
 
 async function photographTwoPages(page: Page) {
   let connections = 0;
@@ -42,7 +46,12 @@ test('scan on a phone: camera pages, thumb-sized tools, and an honest hand-off w
   // The second photo is the first page: move it with the toolbar.
   await page.getByRole('button', { name: /^Select page 2: photo/ }).click();
   await page.getByRole('button', { name: 'Move page 2 earlier' }).click();
-  for (const name of ['Rotate 90° clockwise', 'Move page 1 earlier', 'Move page 1 later', 'Remove page 1']) {
+  for (const name of [
+    'Rotate 90° clockwise',
+    'Move page 1 earlier',
+    'Move page 1 later',
+    'Remove page 1',
+  ]) {
     const box = (await page.getByRole('button', { name }).boundingBox())!;
     expect(box.width, name).toBeGreaterThanOrEqual(44);
     expect(box.height, name).toBeGreaterThanOrEqual(44);

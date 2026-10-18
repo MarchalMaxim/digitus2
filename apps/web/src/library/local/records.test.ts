@@ -149,7 +149,13 @@ describe('saved corrections', () => {
       { kind: 'remove' as const, note: 7 },
     ],
   };
-  const row = (value: unknown) => ({ version: 1, id: 'scan:x', updatedAt: 1, kind: 'scan', session: value });
+  const row = (value: unknown) => ({
+    version: 1,
+    id: 'scan:x',
+    updatedAt: 1,
+    kind: 'scan',
+    session: value,
+  });
   it('keeps the raw recognition and the list of corrections side by side', () => {
     const stored = storeSession(corrected);
     expect(stored.xml).toBe('<score-partwise/>');
@@ -163,6 +169,8 @@ describe('saved corrections', () => {
     ['a negative note', { kind: 'remove', note: -1 }],
     ['a length the editor never writes', { kind: 'duration', note: 1, type: 'breve', dots: 0 }],
   ])('refuses a row with %s', (_label, correction) => {
-    expect(isLocalScoreRecord(row({ ...storeSession(session), corrections: [correction] }))).toBe(false);
+    expect(isLocalScoreRecord(row({ ...storeSession(session), corrections: [correction] }))).toBe(
+      false,
+    );
   });
 });

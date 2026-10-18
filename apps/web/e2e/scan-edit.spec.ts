@@ -41,7 +41,9 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   // The place to check points at the tie and explains it.
   await page.getByText('1 place to check', { exact: true }).click();
   await page
-    .getByRole('button', { name: 'Bar 1, right hand: the tie on A4 reaches its next A4 1 beat late.' })
+    .getByRole('button', {
+      name: 'Bar 1, right hand: the tie on A4 reaches its next A4 1 beat late.',
+    })
     .click();
   await expect(editor(page)).toContainText('Bar 1 · right hand · A4 quarter note · tied');
   await expect(sheetNote(page, 2)).toHaveClass(/is-red/);
@@ -55,7 +57,10 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   await page.getByRole('button', { name: 'Tied to next' }).click();
   await expect(editor(page)).toContainText('No A4 starts where this note ends');
   await page.keyboard.press('Control+z');
-  await expect(page.getByRole('button', { name: 'Tied to next' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Tied to next' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
 
   // The stray quarter rest in bar 2 goes; the left hand does not move.
   await tap(page, 4);

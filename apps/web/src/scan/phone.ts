@@ -40,15 +40,22 @@ export function handOffFiles(pages: readonly ScanPage[]): File[] {
   return pages.map((page, index) => {
     const name = (page.originalFile ?? page.file).name.replace(/\.[^.]+$/, '');
     const extension = page.file.type === 'image/png' ? 'png' : 'jpg';
-    return new File([page.file], `page-${String(index + 1).padStart(Math.max(2, width), '0')}-${name}.${extension}`, {
-      type: page.file.type,
-      lastModified: page.file.lastModified,
-    });
+    return new File(
+      [page.file],
+      `page-${String(index + 1).padStart(Math.max(2, width), '0')}-${name}.${extension}`,
+      {
+        type: page.file.type,
+        lastModified: page.file.lastModified,
+      },
+    );
   });
 }
 
 /** 'shared' through the share sheet, 'saved' as downloads, or 'cancelled' when the reader backed out. */
-export async function handOff(files: File[], title: string): Promise<'shared' | 'saved' | 'cancelled'> {
+export async function handOff(
+  files: File[],
+  title: string,
+): Promise<'shared' | 'saved' | 'cancelled'> {
   const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
   if (typeof nav.share === 'function' && nav.canShare?.({ files })) {
     try {

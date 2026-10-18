@@ -29,7 +29,14 @@ import {
 } from './notes.js';
 
 export type NoteType = 'whole' | 'half' | 'quarter' | 'eighth' | '16th' | '32nd';
-export const NOTE_TYPES: readonly NoteType[] = ['whole', 'half', 'quarter', 'eighth', '16th', '32nd'];
+export const NOTE_TYPES: readonly NoteType[] = [
+  'whole',
+  'half',
+  'quarter',
+  'eighth',
+  '16th',
+  '32nd',
+];
 const QUARTERS: Record<NoteType, number> = {
   whole: 4,
   half: 2,
@@ -138,7 +145,13 @@ function keyAlter(fifths: number, step: Step): number {
 }
 
 /** The accidental a note needs on paper: against the key and earlier notes of its bar and staff. */
-function neededAccidental(score: ScanScore, note: ScanNote, step: Step, alter: number, octave: number) {
+function neededAccidental(
+  score: ScanScore,
+  note: ScanNote,
+  step: Step,
+  alter: number,
+  octave: number,
+) {
   const bar = score.bars.find((b) => b.part === note.part && b.index === note.measure);
   let state = keyAlter(bar?.fifths.get(note.staff) ?? 0, step);
   const earlier = score.notes
@@ -185,7 +198,9 @@ function applyPitch(score: ScanScore, c: Extract<Correction, { kind: 'pitch' }>)
 /** Bar-local onsets of every note outside `moved`, keyed by element. */
 function onsets(score: ScanScore, moved: Set<Element>) {
   return new Map(
-    score.notes.filter((n) => !moved.has(n.element)).map((n) => [n.element, n.offsetInBar] as const),
+    score.notes
+      .filter((n) => !moved.has(n.element))
+      .map((n) => [n.element, n.offsetInBar] as const),
   );
 }
 
@@ -216,10 +231,15 @@ function divisionsAt(note: ScanNote): number {
   return divisions;
 }
 
-function applyDuration(doc: XMLDocument, score: ScanScore, c: Extract<Correction, { kind: 'duration' }>) {
+function applyDuration(
+  doc: XMLDocument,
+  score: ScanScore,
+  c: Extract<Correction, { kind: 'duration' }>,
+) {
   let note = find(score, c.note);
   if (note.grace) refuse((t) => t.scan.edit.refused.grace);
-  if (!NOTE_TYPES.includes(c.type) || ![0, 1].includes(c.dots)) refuse((t) => t.scan.edit.refused.missing);
+  if (!NOTE_TYPES.includes(c.type) || ![0, 1].includes(c.dots))
+    refuse((t) => t.scan.edit.refused.missing);
   const quarters = QUARTERS[c.type] * (c.dots ? 1.5 : 1);
   let divisions = divisionsAt(note);
   let local = quarters * divisions;
@@ -253,7 +273,13 @@ function applyDuration(doc: XMLDocument, score: ScanScore, c: Extract<Correction
  * to the other voices is re-measured, and every note outside the segment is checked to start
  * exactly where it did. Refuses the change otherwise.
  */
-function retime(doc: XMLDocument, score: ScanScore, lead: Element, delta: number, change: () => void) {
+function retime(
+  doc: XMLDocument,
+  score: ScanScore,
+  lead: Element,
+  delta: number,
+  change: () => void,
+) {
   const segment = new Set<Element>();
   for (let el = lead as Element | null; el; el = el.nextElementSibling) {
     if (el.localName === 'backup') break;
@@ -357,7 +383,11 @@ function applyHand(score: ScanScore, c: Extract<Correction, { kind: 'hand' }>) {
   for (const linked of tieChain(score, note)) setText(linked.element, 'staff', String(c.staff));
 }
 
-function applyRemove(doc: XMLDocument, score: ScanScore, c: Extract<Correction, { kind: 'remove' }>) {
+function applyRemove(
+  doc: XMLDocument,
+  score: ScanScore,
+  c: Extract<Correction, { kind: 'remove' }>,
+) {
   const note = find(score, c.note);
   if (note.rest) {
     // A stray rest goes, and the rest of its voice moves up into its place.
@@ -477,7 +507,10 @@ export function barTiming(score: ScanScore, part: number, measure: number): BarT
   const bar = score.bars.find((b) => b.part === part && b.index === measure);
   if (!bar) return;
   const beat = bar.meter ? (score.ticksPerQuarter * 4) / bar.meter.beatType : score.ticksPerQuarter;
-  const staffCount = Math.max(1, ...score.notes.filter((n) => n.part === part).map((n) => n.staves));
+  const staffCount = Math.max(
+    1,
+    ...score.notes.filter((n) => n.part === part).map((n) => n.staves),
+  );
   return {
     expected: bar.meter?.beats,
     staves: Array.from({ length: staffCount }, (_, i) => ({
@@ -488,7 +521,14 @@ export function barTiming(score: ScanScore, part: number, measure: number): BarT
 }
 
 export type Problem =
-  | { kind: 'tie-gap'; note: number; target: number; gapTicks: number; part: number; measure: number }
+  | {
+      kind: 'tie-gap';
+      note: number;
+      target: number;
+      gapTicks: number;
+      part: number;
+      measure: number;
+    }
   | { kind: 'tie-unmatched'; note: number; part: number; measure: number }
   | { kind: 'bar-timing'; part: number; bar: number; timing: BarTiming };
 
@@ -519,12 +559,22 @@ export function findProblems(score: ScanScore): Problem[] {
           measure: note.measure,
         });
       else if (!paired && !acrossRepeat(note, undefined))
-        problems.push({ kind: 'tie-unmatched', note: note.ordinal, part: note.part, measure: note.measure });
+        problems.push({
+          kind: 'tie-unmatched',
+          note: note.ordinal,
+          part: note.part,
+          measure: note.measure,
+        });
     }
     if (note.tieStop) {
       const source = tieSource(score, note);
       if ((!source || tiePartner(score, source) !== note) && !acrossRepeat(undefined, note))
-        problems.push({ kind: 'tie-unmatched', note: note.ordinal, part: note.part, measure: note.measure });
+        problems.push({
+          kind: 'tie-unmatched',
+          note: note.ordinal,
+          part: note.part,
+          measure: note.measure,
+        });
     }
   }
   for (const bar of score.bars) {
@@ -539,7 +589,8 @@ export function findProblems(score: ScanScore): Problem[] {
       !bar.implicit &&
       timing.expected !== undefined &&
       used.some((s) => s.beats > timing.expected! + 1e-9);
-    if (disagree || long) problems.push({ kind: 'bar-timing', part: bar.part, bar: bar.index, timing });
+    if (disagree || long)
+      problems.push({ kind: 'bar-timing', part: bar.part, bar: bar.index, timing });
   }
   return problems;
 }

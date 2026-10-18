@@ -135,7 +135,11 @@ function validCorrection(value: unknown): value is Correction {
         int(value.octave, 0, 9)
       );
     case 'duration':
-      return keys === 'dots,kind,note,type' && TYPES.includes(value.type as string) && int(value.dots, 0, 1);
+      return (
+        keys === 'dots,kind,note,type' &&
+        TYPES.includes(value.type as string) &&
+        int(value.dots, 0, 1)
+      );
     case 'tie':
       return (
         (keys === 'kind,note,tied' || keys === 'kind,note,side,tied') &&

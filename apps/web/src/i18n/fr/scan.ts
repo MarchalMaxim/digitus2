@@ -55,7 +55,7 @@ export const scan: Messages['scan'] = {
       `${error} Corrigez les notes ici, téléchargez le fichier brut pour un éditeur de partitions ou essayez une autre image.`,
     detailsSummary: 'Détails de la reconnaissance',
     /** Under Recognition details: the importer's or renderer's own message. */
-    technical: (reason: string) => `Raison technique : ${reason}`,
+    technical: (reason: string) => `Raison technique\u00a0: ${reason}`,
     retained:
       'Retrouvez les originaux et les reconnaissances conservés dans Mes partitions. Gardez vos fichiers d’origine\u00a0; le stockage du navigateur peut être effacé. La reconnaissance n’est pas garantie exacte\u00a0; la lecture peut utiliser un tempo par défaut de l’application.',
     beamGrouping: 'Le regroupement par ligatures est déduit et peut différer de l’original.',
@@ -74,7 +74,7 @@ export const scan: Messages['scan'] = {
     hint: 'Sélectionnez une note pour la corriger.',
     keys: 'Gauche et Droite sélectionnent la note précédente ou suivante, Haut et Bas changent sa hauteur, Échap ferme l’éditeur.',
     pitch: (step: string, alter: number, octave: number) =>
-      `${({ C: 'Do', D: 'Ré', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+      `${({ C: 'Do', D: 'Ré', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Mesure ${bar}`,
     rightHand: 'main droite',
     leftHand: 'main gauche',
@@ -122,21 +122,21 @@ export const scan: Messages['scan'] = {
     handBeats: (hand: string, beats: number) =>
       `${hand} ${plural('fr', beats, { one: '# temps', other: '# temps' })}`,
     timing: (bar: string, hands: string[], meter?: string) =>
-      `${bar} : ${hands.join(', ')}${meter ? `, en ${meter}` : ''}.`,
+      `${bar}\u00a0: ${hands.join(', ')}${meter ? `, en ${meter}` : ''}.`,
     corrections: (n: number) => plural('fr', n, { one: '# correction', other: '# corrections' }),
     undo: 'Annuler',
     reset: 'Revenir à la reconnaissance',
     resetDone: 'Toutes les corrections sont retirées. Annuler les rétablit.',
     listSummary: 'Voir les corrections',
     changed: {
-      pitch: (where: string, from: string, to: string) => `${where} : ${from} → ${to}`,
+      pitch: (where: string, from: string, to: string) => `${where}\u00a0: ${from} → ${to}`,
       duration: (where: string, pitch: string, from: string, to: string) =>
-        `${where} : ${pitch} ${from} → ${to}`,
-      tie: (where: string, pitch: string) => `${where} : ${pitch} liée au ${pitch} suivant`,
-      untie: (where: string, pitch: string) => `${where} : liaison de ${pitch} retirée`,
+        `${where}\u00a0: ${pitch} ${from} → ${to}`,
+      tie: (where: string, pitch: string) => `${where}\u00a0: ${pitch} liée au ${pitch} suivant`,
+      untie: (where: string, pitch: string) => `${where}\u00a0: liaison de ${pitch} retirée`,
       hand: (where: string, pitch: string, hand: string) =>
-        `${where} : ${pitch} passée à la ${hand}`,
-      removed: (where: string, pitch: string) => `${where} : ${pitch} supprimée`,
+        `${where}\u00a0: ${pitch} passée à la ${hand}`,
+      removed: (where: string, pitch: string) => `${where}\u00a0: ${pitch} supprimée`,
     },
     stale: (kept: number) =>
       `Certaines corrections enregistrées ne s’appliquent plus à cette reconnaissance. Les ${kept} premières sont conservées.`,
@@ -144,11 +144,11 @@ export const scan: Messages['scan'] = {
       plural('fr', n, { one: '# endroit à vérifier', other: '# endroits à vérifier' }),
     problems: {
       tieGap: (where: string, pitch: string, gap: string) =>
-        `${where} : la liaison de ${pitch} atteint le ${pitch} suivant avec ${gap} de retard.`,
+        `${where}\u00a0: la liaison de ${pitch} atteint le ${pitch} suivant avec ${gap} de retard.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
-        `${where} : la liaison de ${pitch} atteint le ${pitch} suivant avec ${gap} d’avance.`,
+        `${where}\u00a0: la liaison de ${pitch} atteint le ${pitch} suivant avec ${gap} d’avance.`,
       tieUnmatched: (where: string, pitch: string) =>
-        `${where} : une liaison sur ${pitch} n’a pas de note correspondante.`,
+        `${where}\u00a0: une liaison sur ${pitch} n’a pas de note correspondante.`,
       barTiming: (timing: string) => `Les mains ne concordent pas. ${timing}`,
     },
     gap: (beats: number) => plural('fr', beats, { one: '# temps', other: '# temps' }),
@@ -158,14 +158,14 @@ export const scan: Messages['scan'] = {
       missing: 'Cette note n’est plus dans la partition.',
       rest: 'Un silence n’a pas de hauteur à changer.',
       range: 'Cette hauteur sort de l’étendue du piano.',
-      grace: 'Une appoggiature ne prend pas de temps ; sa durée ne peut pas être changée ici.',
+      grace: 'Une appoggiature ne prend pas de temps\u00a0; sa durée ne peut pas être changée ici.',
       unwritable: 'Cette durée ne peut pas être écrite dans cette partition.',
       otherHand:
-        'Ce changement déplacerait des notes de l’autre main ou voix ; il n’a pas été fait. Vérifiez la mesure dans un éditeur de partitions.',
+        'Ce changement déplacerait des notes de l’autre main ou voix\u00a0; il n’a pas été fait. Vérifiez la mesure dans un éditeur de partitions.',
       noTieTarget: (pitch: { step: string; alter: number; octave: number }) =>
-        `Aucun ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ne commence là où cette note finit ; elle ne peut pas être liée. Corrigez d’abord les durées.`,
+        `Aucun ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ne commence là où cette note finit\u00a0; elle ne peut pas être liée. Corrigez d’abord les durées.`,
       noTieSource: (pitch: { step: string; alter: number; octave: number }) =>
-        `Aucun ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ne finit là où cette note commence ; elle ne peut pas être liée.`,
+        `Aucun ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} ne finit là où cette note commence\u00a0; elle ne peut pas être liée.`,
       tieTaken: 'La note suivante est déjà liée à une autre note.',
       tiedRemove: 'Retirez la liaison de cette note avant de la supprimer.',
       chordLengths: 'Les notes de l’accord ont des durées différentes. Changez d’abord la durée.',
@@ -192,9 +192,11 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Certaines pages doivent être numérisées à nouveau. Les pages reconnues sont conservées.',
     recognitionFailed: 'La reconnaissance a échoué.',
-    notationNotShown: 'La notation n’a pas pu être affichée. La raison technique figure dans les détails de la reconnaissance.',
+    notationNotShown:
+      'La notation n’a pas pu être affichée. La raison technique figure dans les détails de la reconnaissance.',
     noNotes: 'Aucune note jouable n’a été reconnue.',
-    notUsable: 'Cette reconnaissance ne peut pas encore servir au doigté : certaines de ses notes ne s’accordent pas.',
+    notUsable:
+      'Cette reconnaissance ne peut pas encore servir au doigté\u00a0: certaines de ses notes ne s’accordent pas.',
     connectFailed:
       'Impossible de se connecter à ce PC. Lancez le programme, puis autorisez la connexion locale de ce site quand votre navigateur la demande. Si vous l’avez refusée, modifiez l’autorisation de réseau local de ce site et réessayez.',
     cancelFailed:
@@ -221,7 +223,8 @@ export const scan: Messages['scan'] = {
     arrange:
       'Placez les pages dans l’ordre de lecture. Faites glisser une miniature ou sélectionnez une page pour la déplacer.',
     /** On a touch screen, where pages cannot be dragged. */
-    arrangeTouch: 'Mettez les pages dans l’ordre de lecture : sélectionnez une page, puis déplacez-la avec les flèches.',
+    arrangeTouch:
+      'Mettez les pages dans l’ordre de lecture\u00a0: sélectionnez une page, puis déplacez-la avec les flèches.',
     originalCount: (n: number) =>
       plural('fr', n, {
         one: '# page d’origine, dans l’ordre de lecture.',

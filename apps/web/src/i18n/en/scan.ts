@@ -79,7 +79,7 @@ export const scan = {
     keys: 'Left and Right select the previous or next note, Up and Down change its pitch, Escape closes the editor.',
     /** "C4", "B♭3": a pitch with its octave, in the names this language uses. */
     pitch: (step: string, alter: number, octave: number) =>
-      `${step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+      `${step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Bar ${bar}`,
     rightHand: 'right hand',
     leftHand: 'left hand',
@@ -144,7 +144,8 @@ export const scan = {
         `${where}: ${pitch} ${from} → ${to}`,
       tie: (where: string, pitch: string) => `${where}: ${pitch} tied to the next ${pitch}`,
       untie: (where: string, pitch: string) => `${where}: tie on ${pitch} removed`,
-      hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} moved to the ${hand}`,
+      hand: (where: string, pitch: string, hand: string) =>
+        `${where}: ${pitch} moved to the ${hand}`,
       removed: (where: string, pitch: string) => `${where}: ${pitch} removed`,
     },
     stale: (kept: number) =>
@@ -193,7 +194,8 @@ export const scan = {
     save: 'Save photos',
     shareTitle: 'Score photos',
     shared: 'Photos handed over. Open them on your PC with “Open your own score”.',
-    saved: 'Photos saved to this device. Move them to your PC, then open them with “Open your own score”.',
+    saved:
+      'Photos saved to this device. Move them to your PC, then open them with “Open your own score”.',
   },
   errors: {
     notCombinedSaved:
@@ -203,9 +205,11 @@ export const scan = {
       `The pages were recognized, but their notation could not be combined. ${reason}`,
     somePagesFailed: 'Some pages need another scan. Recognized pages are kept.',
     recognitionFailed: 'Recognition failed.',
-    notationNotShown: 'Notation could not be displayed. The technical reason is under Recognition details.',
+    notationNotShown:
+      'Notation could not be displayed. The technical reason is under Recognition details.',
     noNotes: 'No playable notes were recognized.',
-    notUsable: 'This recognition cannot be used for fingerings yet: some of its notes do not fit together.',
+    notUsable:
+      'This recognition cannot be used for fingerings yet: some of its notes do not fit together.',
     connectFailed:
       'Could not connect to this PC. Start the worker, then allow this site’s local connection when your browser asks. If you denied it, change this site’s local-network permission and try again.',
     cancelFailed: 'Could not confirm cancellation. Close the worker terminal to stop processing.',

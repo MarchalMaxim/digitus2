@@ -73,7 +73,7 @@ export const scan: Messages['scan'] = {
     hint: 'Selecciona una nota para corregirla.',
     keys: 'Izquierda y Derecha seleccionan la nota anterior o siguiente, Arriba y Abajo cambian su altura, Escape cierra el editor.',
     pitch: (step: string, alter: number, octave: number) =>
-      `${({ C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+      `${({ C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Compás ${bar}`,
     rightHand: 'mano derecha',
     leftHand: 'mano izquierda',
@@ -133,7 +133,8 @@ export const scan: Messages['scan'] = {
         `${where}: ${pitch} ${from} → ${to}`,
       tie: (where: string, pitch: string) => `${where}: ${pitch} ligada al siguiente ${pitch}`,
       untie: (where: string, pitch: string) => `${where}: ligadura de ${pitch} quitada`,
-      hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} pasada a la ${hand}`,
+      hand: (where: string, pitch: string, hand: string) =>
+        `${where}: ${pitch} pasada a la ${hand}`,
       removed: (where: string, pitch: string) => `${where}: ${pitch} quitada`,
     },
     stale: (kept: number) =>
@@ -190,9 +191,11 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Algunas páginas necesitan otro escaneo. Las páginas reconocidas se conservan.',
     recognitionFailed: 'El reconocimiento falló.',
-    notationNotShown: 'No se pudo mostrar la notación. El motivo técnico está en Detalles del reconocimiento.',
+    notationNotShown:
+      'No se pudo mostrar la notación. El motivo técnico está en Detalles del reconocimiento.',
     noNotes: 'No se reconoció ninguna nota que se pueda tocar.',
-    notUsable: 'Este reconocimiento todavía no se puede usar para la digitación: algunas de sus notas no encajan.',
+    notUsable:
+      'Este reconocimiento todavía no se puede usar para la digitación: algunas de sus notas no encajan.',
     connectFailed:
       'No se pudo conectar con este PC. Inicia el programa y permite la conexión local de este sitio cuando el navegador lo pida. Si la denegaste, cambia el permiso de red local de este sitio e inténtalo de nuevo.',
     cancelFailed:
@@ -219,7 +222,8 @@ export const scan: Messages['scan'] = {
     arrange:
       'Ordena las páginas en orden de lectura. Arrastra una miniatura o selecciona una página para moverla.',
     /** On a touch screen, where pages cannot be dragged. */
-    arrangeTouch: 'Ordena las páginas en orden de lectura: selecciona una página y muévela con las flechas.',
+    arrangeTouch:
+      'Ordena las páginas en orden de lectura: selecciona una página y muévela con las flechas.',
     originalCount: (n: number) =>
       plural('es', n, {
         one: '# página original, en orden de lectura.',

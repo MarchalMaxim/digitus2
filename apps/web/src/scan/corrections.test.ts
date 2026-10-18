@@ -51,17 +51,26 @@ const strict = (xml: string) => parseMusicXml(xml, { preserveNotation: true }).s
 /** Sounding notes as [midi, onset, length, hand]: right hand first, each hand in time order. */
 const sounding = (xml: string) =>
   strict(xml)
-    .notes.map((note) => [note.midi, note.onsetTick, note.offsetTick - note.onsetTick, note.hand] as const)
+    .notes.map(
+      (note) => [note.midi, note.onsetTick, note.offsetTick - note.onsetTick, note.hand] as const,
+    )
     .sort((a, b) => (a[3] === b[3] ? 0 : a[3] === 'R' ? -1 : 1) || a[1] - b[1] || a[0] - b[0])
     .map((note) => [...note]);
 
 // Bar: right hand quarter C5, quarter D5, quarter E5; left hand dotted half C3.
-const BAR = n('C5', 2, 'quarter') + n('D5', 2, 'quarter') + n('E5', 2, 'quarter') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 });
+const BAR =
+  n('C5', 2, 'quarter') +
+  n('D5', 2, 'quarter') +
+  n('E5', 2, 'quarter') +
+  backup(6) +
+  n('C3', 6, 'half', { staff: 2, dots: 1 });
 
 describe('pitch corrections', () => {
   it('changes one note, writes the accidental it needs and leaves every other note alone', () => {
     const raw = score([BAR]);
-    const { xml } = applyCorrections(raw, [{ kind: 'pitch', note: 1, step: 'E', alter: -1, octave: 5 }]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'pitch', note: 1, step: 'E', alter: -1, octave: 5 },
+    ]);
     expect(sounding(xml)).toEqual([
       [72, 0, 2, 'R'],
       [75, 2, 2, 'R'],
@@ -69,23 +78,47 @@ describe('pitch corrections', () => {
       [48, 0, 6, 'L'],
     ]);
     const doc = parseScanXml(xml);
-    expect(doc.getElementsByTagName('note')[1]!.querySelector('accidental')?.textContent).toBe('flat');
+    expect(doc.getElementsByTagName('note')[1]!.querySelector('accidental')?.textContent).toBe(
+      'flat',
+    );
     expect(doc.getElementsByTagName('note')[0]!.querySelector('accidental')).toBeNull();
   });
   it('writes a natural against the key signature and removes an accidental no longer needed', () => {
-    const raw = score([n('F5', 2, 'quarter') + n('G5', 4, 'half') + backup(6) + n('r', 6, 'half', { staff: 2, dots: 1 })], 3, 1);
+    const raw = score(
+      [
+        n('F5', 2, 'quarter') +
+          n('G5', 4, 'half') +
+          backup(6) +
+          n('r', 6, 'half', { staff: 2, dots: 1 }),
+      ],
+      3,
+      1,
+    );
     // F5 in G major sounds F#; correcting it to F natural needs a natural sign.
-    const { xml } = applyCorrections(raw, [{ kind: 'pitch', note: 0, step: 'F', alter: 0, octave: 5 }]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'pitch', note: 0, step: 'F', alter: 0, octave: 5 },
+    ]);
     expect(parseScanXml(xml).querySelector('note accidental')?.textContent).toBe('natural');
-    const back = applyCorrections(xml, [{ kind: 'pitch', note: 0, step: 'F', alter: 1, octave: 5 }]).xml;
+    const back = applyCorrections(xml, [
+      { kind: 'pitch', note: 0, step: 'F', alter: 1, octave: 5 },
+    ]).xml;
     expect(parseScanXml(back).querySelector('note accidental')).toBeNull();
   });
   it('moves a whole tie chain together, so a tie never joins two pitches', () => {
     const raw = score([
-      n('C5', 2, 'quarter') + n('D5', 2, 'quarter') + n('A4', 2, 'quarter', { tie: 'start' }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
-      n('A4', 2, 'quarter', { tie: 'stop' }) + n('r', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('C5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: 'start' }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('A4', 2, 'quarter', { tie: 'stop' }) +
+        n('r', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
     ]);
-    const { xml } = applyCorrections(raw, [{ kind: 'pitch', note: 4, step: 'B', alter: 0, octave: 4 }]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'pitch', note: 4, step: 'B', alter: 0, octave: 4 },
+    ]);
     const notes = strict(xml).notes.filter((note) => note.hand === 'R');
     expect(notes.map((note) => [note.midi, note.offsetTick - note.onsetTick])).toEqual([
       [72, 2],
@@ -95,9 +128,19 @@ describe('pitch corrections', () => {
   });
   it('refuses a rest and an unknown ordinal', () => {
     const raw = score([BAR]);
-    expect(() => applyCorrections(raw, [{ kind: 'pitch', note: 99, step: 'C', alter: 0, octave: 4 }], { strict: true })).toThrow(CorrectionError);
-    const rest = score([n('r', 6, 'half', { dots: 1 }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
-    expect(() => applyCorrections(rest, [{ kind: 'pitch', note: 0, step: 'C', alter: 0, octave: 4 }], { strict: true })).toThrow(CorrectionError);
+    expect(() =>
+      applyCorrections(raw, [{ kind: 'pitch', note: 99, step: 'C', alter: 0, octave: 4 }], {
+        strict: true,
+      }),
+    ).toThrow(CorrectionError);
+    const rest = score([
+      n('r', 6, 'half', { dots: 1 }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() =>
+      applyCorrections(rest, [{ kind: 'pitch', note: 0, step: 'C', alter: 0, octave: 4 }], {
+        strict: true,
+      }),
+    ).toThrow(CorrectionError);
   });
 });
 
@@ -105,9 +148,16 @@ describe('duration corrections check both hands', () => {
   it('lengthening a right-hand note before a backup keeps every left-hand onset', () => {
     // Recognised as three quarters plus a stray eighth: the right hand is half a beat long.
     const raw = score([
-      n('C5', 2, 'quarter') + n('D5', 1, 'eighth') + n('E5', 2, 'quarter') + backup(5) + n('C3', 2, 'quarter', { staff: 2 }) + n('G3', 4, 'half', { staff: 2 }),
+      n('C5', 2, 'quarter') +
+        n('D5', 1, 'eighth') +
+        n('E5', 2, 'quarter') +
+        backup(5) +
+        n('C3', 2, 'quarter', { staff: 2 }) +
+        n('G3', 4, 'half', { staff: 2 }),
     ]);
-    const { xml } = applyCorrections(raw, [{ kind: 'duration', note: 1, type: 'quarter', dots: 0 }]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'duration', note: 1, type: 'quarter', dots: 0 },
+    ]);
     expect(sounding(xml)).toEqual([
       [72, 0, 2, 'R'],
       [74, 2, 2, 'R'],
@@ -118,18 +168,30 @@ describe('duration corrections check both hands', () => {
     expect(xml).toContain('<backup><duration>6</duration></backup>');
   });
   it('shortening keeps the other hand too and removes a backup that would become empty', () => {
-    const raw = score([n('C5', 6, 'half', { dots: 1 }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
-    const { xml } = applyCorrections(raw, [{ kind: 'duration', note: 0, type: 'quarter', dots: 0 }]);
+    const raw = score([
+      n('C5', 6, 'half', { dots: 1 }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { xml } = applyCorrections(raw, [
+      { kind: 'duration', note: 0, type: 'quarter', dots: 0 },
+    ]);
     expect(sounding(xml)).toEqual([
       [72, 0, 2, 'R'],
       [48, 0, 6, 'L'],
     ]);
   });
   it('changes every member of a chord, never splitting it', () => {
-    const raw = score([n('C5', 2, 'quarter') + n('E5', 2, 'quarter', { chord: true }) + n('D5', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('E5', 2, 'quarter', { chord: true }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
     const { xml } = applyCorrections(raw, [{ kind: 'duration', note: 1, type: 'half', dots: 0 }]);
     const right = strict(xml).notes.filter((note) => note.hand === 'R');
-    expect(right.map((note) => [note.midi, note.onsetTick, note.offsetTick - note.onsetTick])).toEqual([
+    expect(
+      right.map((note) => [note.midi, note.onsetTick, note.offsetTick - note.onsetTick]),
+    ).toEqual([
       [72, 0, 4],
       [76, 0, 4],
       [74, 4, 4],
@@ -140,7 +202,13 @@ describe('duration corrections check both hands', () => {
     const { xml } = applyCorrections(raw, [{ kind: 'duration', note: 0, type: '16th', dots: 0 }]);
     const notes = strict(xml);
     const quarter = notes.divisions;
-    expect(notes.notes.map((note) => [note.midi, note.onsetTick / quarter, (note.offsetTick - note.onsetTick) / quarter])).toEqual([
+    expect(
+      notes.notes.map((note) => [
+        note.midi,
+        note.onsetTick / quarter,
+        (note.offsetTick - note.onsetTick) / quarter,
+      ]),
+    ).toEqual([
       [72, 0, 0.25],
       [48, 0, 3],
       [74, 0.25, 1],
@@ -148,21 +216,48 @@ describe('duration corrections check both hands', () => {
     ]);
   });
   it('reports each hand against the time signature', () => {
-    const raw = score([n('C5', 2, 'quarter') + n('D5', 1, 'eighth') + n('E5', 2, 'quarter') + backup(5) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('D5', 1, 'eighth') +
+        n('E5', 2, 'quarter') +
+        backup(5) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
     const timing = barTiming(readScanScore(parseScanXml(raw)), 0, 0);
-    expect(timing).toEqual({ expected: 3, staves: [{ staff: 1, beats: 2.5 }, { staff: 2, beats: 3 }] });
+    expect(timing).toEqual({
+      expected: 3,
+      staves: [
+        { staff: 1, beats: 2.5 },
+        { staff: 2, beats: 3 },
+      ],
+    });
   });
   it('refuses a grace note', () => {
-    const raw = score([`<note><grace/><pitch><step>B</step><octave>4</octave></pitch><voice>1</voice><type>eighth</type><staff>1</staff></note>` + BAR]);
-    expect(() => applyCorrections(raw, [{ kind: 'duration', note: 0, type: 'quarter', dots: 0 }], { strict: true })).toThrow(CorrectionError);
+    const raw = score([
+      `<note><grace/><pitch><step>B</step><octave>4</octave></pitch><voice>1</voice><type>eighth</type><staff>1</staff></note>` +
+        BAR,
+    ]);
+    expect(() =>
+      applyCorrections(raw, [{ kind: 'duration', note: 0, type: 'quarter', dots: 0 }], {
+        strict: true,
+      }),
+    ).toThrow(CorrectionError);
   });
 });
 
 describe('tie corrections', () => {
   const twoBars = (gap: boolean) =>
     score([
-      n('C5', 2, 'quarter') + n('D5', 2, 'quarter') + n('A4', 2, 'quarter', { tie: gap ? 'start' : undefined }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
-      (gap ? n('r', 2, 'quarter') : '') + n('A4', 2, 'quarter', { tie: gap ? 'stop' : undefined }) + n('B4', gap ? 2 : 4, gap ? 'quarter' : 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('C5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: gap ? 'start' : undefined }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      (gap ? n('r', 2, 'quarter') : '') +
+        n('A4', 2, 'quarter', { tie: gap ? 'stop' : undefined }) +
+        n('B4', gap ? 2 : 4, gap ? 'quarter' : 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
     ]);
   it('ties a note to the same pitch that starts where it ends, writing sound and notation', () => {
     const raw = twoBars(false);
@@ -191,7 +286,14 @@ describe('tie corrections', () => {
     // It cannot be tied again as it is: nothing of that pitch starts where the A4 ends.
     let refusal: unknown;
     try {
-      applyCorrections(raw, [{ kind: 'tie', note: 2, tied: false }, { kind: 'tie', note: 2, tied: true }], { strict: true });
+      applyCorrections(
+        raw,
+        [
+          { kind: 'tie', note: 2, tied: false },
+          { kind: 'tie', note: 2, tied: true },
+        ],
+        { strict: true },
+      );
     } catch (cause) {
       refusal = cause;
     }
@@ -212,13 +314,25 @@ describe('tie corrections', () => {
 
 describe('hand and removal corrections', () => {
   it('moves a note to the other hand without moving it in time', () => {
-    const raw = score([n('C5', 2, 'quarter') + n('E3', 2, 'quarter', { chord: true }) + n('D5', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('E3', 2, 'quarter', { chord: true }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
     const { xml } = applyCorrections(raw, [{ kind: 'hand', note: 1, staff: 2 }]);
     expect(sounding(xml)).toContainEqual([52, 0, 2, 'L']);
     expect(sounding(xml).filter((note) => note[3] === 'R')).toHaveLength(2);
   });
   it('removes a duplicated chord member, and turns a lone note into a rest of the same length', () => {
-    const raw = score([n('C5', 2, 'quarter') + n('C5', 2, 'quarter', { chord: true }) + n('D5', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('C5', 2, 'quarter', { chord: true }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
     const removed = applyCorrections(raw, [{ kind: 'remove', note: 1 }]).xml;
     expect(sounding(removed)).toEqual([
       [72, 0, 2, 'R'],
@@ -233,7 +347,13 @@ describe('hand and removal corrections', () => {
     ]);
   });
   it('removing a chord lead promotes the next member in place', () => {
-    const raw = score([n('C5', 2, 'quarter') + n('E5', 2, 'quarter', { chord: true }) + n('D5', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('E5', 2, 'quarter', { chord: true }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
     const { xml } = applyCorrections(raw, [{ kind: 'remove', note: 0 }]);
     expect(sounding(xml)).toEqual([
       [76, 0, 2, 'R'],
@@ -248,7 +368,12 @@ describe('replaying corrections', () => {
     // C5 with a duplicated C5 chord member, then D5 and E5: deleting the member shifts every
     // later element's document position, but corrections keep addressing raw ordinals.
     const raw = score([
-      n('C5', 2, 'quarter') + n('C5', 2, 'quarter', { chord: true }) + n('D5', 2, 'quarter') + n('E5', 2, 'quarter') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('C5', 2, 'quarter') +
+        n('C5', 2, 'quarter', { chord: true }) +
+        n('D5', 2, 'quarter') +
+        n('E5', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
     ]);
     const list: Correction[] = [
       { kind: 'remove', note: 1 },
@@ -263,8 +388,12 @@ describe('replaying corrections', () => {
   });
   it('gives the render copy stable ids on every note and none in the export', () => {
     const raw = score([BAR]);
-    const result = applyCorrections(raw, [{ kind: 'pitch', note: 1, step: 'E', alter: 0, octave: 5 }]);
-    expect([...parseScanXml(result.renderXml).getElementsByTagName('note')].map((el) => el.id)).toEqual(['s0', 's1', 's2', 's3']);
+    const result = applyCorrections(raw, [
+      { kind: 'pitch', note: 1, step: 'E', alter: 0, octave: 5 },
+    ]);
+    expect(
+      [...parseScanXml(result.renderXml).getElementsByTagName('note')].map((el) => el.id),
+    ).toEqual(['s0', 's1', 's2', 's3']);
     expect(result.xml).not.toContain('data-scan-note');
     expect(result.xml).not.toContain('id="s1"');
   });
@@ -283,23 +412,42 @@ describe('problems to check', () => {
   it('flags hands that disagree inside a bar, but not a pickup bar both hands agree on', () => {
     const raw = score([
       n('G4', 2, 'quarter') + backup(2) + n('r', 2, 'quarter', { staff: 2 }),
-      n('C5', 2, 'quarter') + n('D5', 1, 'eighth') + n('E5', 2, 'quarter') + backup(5) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('C5', 2, 'quarter') +
+        n('D5', 1, 'eighth') +
+        n('E5', 2, 'quarter') +
+        backup(5) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
       BAR,
     ]);
     const problems = findProblems(readScanScore(parseScanXml(raw)));
     expect(problems).toEqual([expect.objectContaining({ kind: 'bar-timing', bar: 1 })]);
   });
   it('flags a tie stop without a start', () => {
-    const raw = score([n('C5', 2, 'quarter', { tie: 'stop' }) + n('D5', 4, 'half') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 })]);
-    expect(findProblems(readScanScore(parseScanXml(raw)))).toEqual([expect.objectContaining({ kind: 'tie-unmatched', note: 0 })]);
+    const raw = score([
+      n('C5', 2, 'quarter', { tie: 'stop' }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(findProblems(readScanScore(parseScanXml(raw)))).toEqual([
+      expect.objectContaining({ kind: 'tie-unmatched', note: 0 }),
+    ]);
   });
 });
 
 describe('removing a stray rest', () => {
   it('pulls the rest of its voice earlier, keeps the other hand, and so mends a late tie', () => {
     const raw = score([
-      n('C5', 2, 'quarter') + n('D5', 2, 'quarter') + n('A4', 2, 'quarter', { tie: 'start' }) + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
-      n('r', 2, 'quarter') + n('A4', 2, 'quarter', { tie: 'stop' }) + n('B4', 2, 'quarter') + backup(6) + n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('C5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: 'start' }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('r', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: 'stop' }) +
+        n('B4', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
     ]);
     const { xml } = applyCorrections(raw, [
       { kind: 'remove', note: 4 },

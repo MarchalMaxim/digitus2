@@ -74,7 +74,7 @@ export const scan: Messages['scan'] = {
     hint: 'Selecteer een noot om die te corrigeren.',
     keys: 'Links en Rechts kiezen de vorige of volgende noot, Omhoog en Omlaag veranderen de toonhoogte, Escape sluit de editor.',
     pitch: (step: string, alter: number, octave: number) =>
-      `${step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+      `${step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Maat ${bar}`,
     rightHand: 'rechterhand',
     leftHand: 'linkerhand',
@@ -193,9 +193,11 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Sommige pagina’s moeten opnieuw worden gescand. Herkende pagina’s blijven bewaard.',
     recognitionFailed: 'Herkenning mislukt.',
-    notationNotShown: 'De notatie kon niet worden getoond. De technische reden staat bij de herkenningsdetails.',
+    notationNotShown:
+      'De notatie kon niet worden getoond. De technische reden staat bij de herkenningsdetails.',
     noNotes: 'Er zijn geen speelbare noten herkend.',
-    notUsable: 'Deze herkenning kan nog niet voor vingerzettingen worden gebruikt: sommige noten passen niet bij elkaar.',
+    notUsable:
+      'Deze herkenning kan nog niet voor vingerzettingen worden gebruikt: sommige noten passen niet bij elkaar.',
     connectFailed:
       'Kon geen verbinding maken met deze pc. Start de worker en sta de lokale verbinding van deze site toe als je browser erom vraagt. Heb je die geweigerd? Wijzig dan de toestemming voor het lokale netwerk van deze site en probeer het opnieuw.',
     cancelFailed:
@@ -222,7 +224,8 @@ export const scan: Messages['scan'] = {
     arrange:
       'Zet de pagina’s in leesvolgorde. Sleep een miniatuur of kies een pagina om die te verplaatsen.',
     /** On a touch screen, where pages cannot be dragged. */
-    arrangeTouch: 'Zet de pagina’s in leesvolgorde: kies een pagina en verplaats die met de pijlen.',
+    arrangeTouch:
+      'Zet de pagina’s in leesvolgorde: kies een pagina en verplaats die met de pijlen.',
     originalCount: (n: number) =>
       plural('nl', n, {
         one: '# originele pagina, in leesvolgorde.',

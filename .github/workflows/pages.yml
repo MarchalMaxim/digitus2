@@ -1,7 +1,8 @@
 name: pages
 # Deploys the web app to GitHub Pages on every push to main (M12, user decision 2026-10-14:
 # Pages only, no VPS). The site is public. The app is static files: the engine runs in the
-# browser, so nothing else is deployed. The build uses the repository name as the base path.
+# browser, so nothing else is deployed. The build uses the repository name as the base path. It
+# also unpacks the piano samples from the release asset pinned by scripts/piano-samples.lock.json.
 on:
   push:
     branches: [main]
@@ -22,8 +23,16 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
+      # The piano samples (issue #51): the release asset pinned by scripts/piano-samples.lock.json,
+      # unpacked into apps/web/public/piano, which the build copies to <base>piano/.
+      - uses: actions/cache@v4
+        with:
+          path: apps/web/public/piano
+          key: piano-samples-${{ hashFiles('scripts/piano-samples.lock.json') }}
+      - run: node scripts/fetch-piano-samples.mjs
       - run: pnpm --filter @digitus2/engine build
       - run: pnpm --filter @digitus2/web exec vite build --base=/${{ github.event.repository.name }}/
+      - run: test -f apps/web/dist/piano/manifest.json
       - uses: actions/upload-pages-artifact@v3
         with: { path: apps/web/dist }
   deploy:

@@ -57,11 +57,16 @@ The owner accepts an experimental release for clear photos of printed music. Rul
 - [ ] Correct a recognised score in the browser instead of rescanning or exporting to another editor. Start with selecting a note and editing pitch, duration and ties, with immediate preview and revalidation, Undo and reset. Keep the raw recognition separate from the corrected copy in My scores, and export both. Give source notes stable ids independent of strict import, so invalid recognition can still be edited. Corrections are explicit and reviewable, never silent rewrites. Keep graphical slurs distinct from sounding ties, and check both hands' timing before changing durations or onsets. Regression case: a genuine A4 tie in bar 11 of the test page whose continuation appears late in the export.
 - [ ] Shared library: make uploaded or recognised scores available to other people. Needs shared storage, explicit publishing and visibility, provenance and redistribution permission, and removal and moderation. Never auto-publish local uploads. Today scores live only in the browser (IndexedDB).
 
-### T23 Are the unit tests useful, or AI slop? (in progress)
+### T23 Are the unit tests useful, or AI slop? (audit done; recommendations open)
 
 > "do a thorough search of the unit tests in this project: are they actually useful, or are they just AI slop ? thorough!"
 
-A first pass found no skipped, `.only` or tautological tests and very few weak assertions; the small files read as meaningful, and `BarSeek` was the one important component with no unit test (added). The thorough pass runs in its own session: mutation sampling of every test file's source (a test that survives a deliberate breakage of the code it covers is not guarding it), a read of every test by Sonnet agents against a rubric (useful, weak, slop), a spot-check of what they claim, and a report with numbers in `docs/reviews/`. Nothing is deleted unasked.
+Mutation sampling and a read-only review of every vitest file: the tests are mostly real. A test that runs a line catches a change to it 73% of the time; of 1,216 cases read, 75% are useful, 22% weak and 2.7% slop. They are thin at boundaries and bad input (a `<` to `<=` change is caught 39% of the time), weakest for React component tests, and the comparison with the official fingering evaluator skips silently in CI. Report: `docs/reviews/unit-test-audit-2026-10-18.md`. Nothing is deleted or rewritten unasked.
+
+- [ ] Make the skips that need the gitignored datasets loud in CI (eleven cases, including the only comparison with the official evaluator).
+- [ ] Add the boundary and bad-input assertions the report lists (157 survivors the reviewers call real gaps).
+- [ ] Tighten the few vacuous assertions it names (`transport.test.ts`, `LibraryView.test.tsx`) and the copied-constant tests.
+- [ ] Not audited yet: the Playwright specs, and most of the pytest files (13 of about 67 sampled).
 
 ## Done or closed
 

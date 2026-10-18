@@ -269,3 +269,10 @@
 .scan-problems button {
   transition: none;
 }
+/* A place to check that offers its fix: the fix sits under the entry it answers. */
+.scan-problems li.has-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}

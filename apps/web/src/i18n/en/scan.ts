@@ -161,7 +161,12 @@ export const scan = {
       hand: (where: string, pitch: string, hand: string) =>
         `${where}: ${pitch} moved to the ${hand}`,
       removed: (where: string, pitch: string) => `${where}: ${pitch} removed`,
+      /** `bar` is the bar's printed number; `from` is absent when no meter was recognised. */
+      meter: (bar: string, from: string | undefined, to: string) =>
+        `From bar ${bar}: time signature ${from ? `${from} → ` : ''}${to}`,
     },
+    /** Offered on a place to check when the hands agree but overrun the time signature. */
+    setMeter: (meter: string, bar: string) => `Set ${meter} time from bar ${bar}`,
     stale: (kept: number) =>
       `Some saved corrections no longer apply to this recognition. The first ${kept} are kept.`,
     problemsSummary: (n: number) =>
@@ -200,6 +205,9 @@ export const scan = {
       tiedRemove: 'Remove this note’s tie before removing the note.',
       chordLengths: 'The chord’s notes have different lengths. Change the length first.',
       oneStaff: 'This score has a single staff.',
+      meter: 'That time signature cannot be written here.',
+      noBar: 'This bar is no longer in the score.',
+      sameMeter: (meter: string) => `The bar is already in ${meter}.`,
     },
   },
   /** On a phone or tablet, which cannot reach the PC worker. */

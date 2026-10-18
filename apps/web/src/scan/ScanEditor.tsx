@@ -132,6 +132,12 @@ export function restPitch(score: ScanScore, rest: ScanNote) {
 
 /** A correction as listed for review, described from the raw recognition it applies to. */
 export function describeCorrection(t: Messages, raw: ScanScore, c: Correction): string {
+  if (c.kind === 'meter') {
+    const bar = raw.bars.find((b) => b.part === 0 && b.index === c.bar);
+    if (!bar) return '';
+    const from = bar.meter ? `${bar.meter.beats}/${bar.meter.beatType}` : undefined;
+    return t.scan.edit.changed.meter(bar.number, from, `${c.beats}/${c.beatType}`);
+  }
   const note = raw.notes.find((n) => n.ordinal === c.note);
   if (!note) return '';
   const at = where(t, note);

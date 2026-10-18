@@ -149,7 +149,10 @@ export const scan: Messages['scan'] = {
       hand: (where: string, pitch: string, hand: string) =>
         `${where}\u00a0: ${pitch} passée à la ${hand}`,
       removed: (where: string, pitch: string) => `${where}\u00a0: ${pitch} supprimée`,
+      meter: (bar: string, from: string | undefined, to: string) =>
+        `À partir de la mesure ${bar}\u00a0: chiffrage ${from ? `${from} → ` : ''}${to}`,
     },
+    setMeter: (meter: string, bar: string) => `Passer en ${meter} à partir de la mesure ${bar}`,
     stale: (kept: number) =>
       `Certaines corrections enregistrées ne s’appliquent plus à cette reconnaissance. Les ${kept} premières sont conservées.`,
     problemsSummary: (n: number) =>
@@ -185,6 +188,9 @@ export const scan: Messages['scan'] = {
       tiedRemove: 'Retirez la liaison de cette note avant de la supprimer.',
       chordLengths: 'Les notes de l’accord ont des durées différentes. Changez d’abord la durée.',
       oneStaff: 'Cette partition n’a qu’une portée.',
+      meter: 'Ce chiffrage ne peut pas être écrit ici.',
+      noBar: 'Cette mesure n’est plus dans la partition.',
+      sameMeter: (meter: string) => `La mesure est déjà en ${meter}.`,
     },
   },
   phone: {

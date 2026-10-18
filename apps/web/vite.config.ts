@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { serviceWorkerPlugin } from './src/sw/vitePlugin.js';
 
 const engineSrc = fileURLToPath(new URL('../../packages/engine/src/index.ts', import.meta.url));
 const ornamentSrc = fileURLToPath(
@@ -35,7 +36,7 @@ function pianoSamplesNotice(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), pianoSamplesNotice()],
+  plugins: [react(), pianoSamplesNotice(), serviceWorkerPlugin()],
   resolve: {
     alias: {
       '@digitus2/engine/ornaments': ornamentSrc,

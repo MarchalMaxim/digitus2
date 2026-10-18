@@ -103,7 +103,7 @@ async function expectDockKeepsPause(page: Page): Promise<void> {
   await expect(page.locator('body')).toBeFocused();
 }
 
-/** A red note seen outside the band between the top of the window and the dock. */
+/** A red note left outside the band between the top of the window and the dock. */
 interface OutsideBand {
   tick: string | null;
   top: number;
@@ -113,13 +113,23 @@ interface OutsideBand {
 }
 
 /**
+ * How many frames in a row a red note may stay outside the band on a page that has not moved:
+ * the cursor asks for its scroll with the notes that need it, but a smooth scroll leaves the
+ * page where it is for a few frames before it moves (Chromium's ease-in). Measured with the CPU
+ * throttled 3 times, the case CI met at 29 frames a second: three frames (60 to 100 ms), then the
+ * page moves. A cursor left behind stays outside until it leaves the band itself, for many more.
+ */
+const LEFT_BEHIND_FRAMES = 5;
+
+/**
  * Samples animation frames for at least `minimumMs`, extending up to 45 s until more than 200
- * eligible frames cover four checked systems. A frame counts
- * when the dock is stuck to the bottom of the window, the page has not scrolled for three frames
- * and the cursor has marked the same notes for three frames: a scroll the cursor asks for moves
- * the page within a frame of the notes that asked for it, so only a cursor left behind the dock
- * (or above the window) shows up. Returns the counted frames, how far the cursor went (onset
- * groups and systems) and the counted frames with a red note outside the band.
+ * steady frames cover four checked systems. A frame is steady when the dock is stuck to the
+ * bottom of the window, the page has not scrolled for three frames and the cursor has marked the
+ * same notes for three frames. A red note is left behind when it stays outside the band, with
+ * the dock stuck and the page not moving, for more than `LEFT_BEHIND_FRAMES` frames in a row: a
+ * count of frames, not a time, because the scroll's start-up is counted in frames and frames slow
+ * down with the machine. Returns the steady frames, how far the cursor went (onset groups and
+ * systems) and each time a red note was left behind.
  */
 function sampleCursorAgainstDock(
   page: Page,
@@ -132,63 +142,72 @@ function sampleCursorAgainstDock(
   elapsedMs: number;
   outside: OutsideBand[];
 }> {
-  return page.evaluate(async (minimumDuration) => {
-    const outside: OutsideBand[] = [];
-    const groups = new Set<string | null>();
-    const systems = new Set<Element>();
-    const checkedSystems = new Set<Element>();
-    let frames = 0;
-    let lastY = window.scrollY;
-    let lastTick: string | null = null;
-    let still = 0;
-    let same = 0;
-    const start = performance.now();
-    const deadline = start + 45_000;
-    await new Promise<void>((resolve) => {
-      const frame = () => {
-        const now = performance.now();
-        if (
-          now >= deadline ||
-          (now - start >= minimumDuration && frames > 200 && checkedSystems.size >= 4)
-        ) {
-          resolve();
-          return;
-        }
-        const reds = [...document.querySelectorAll('.score-sheet .is-red')];
-        still = window.scrollY === lastY ? still + 1 : 0;
-        lastY = window.scrollY;
-        const tick = reds[0]?.getAttribute('data-onset-tick') ?? null;
-        same = tick === lastTick ? same + 1 : 0;
-        lastTick = tick;
-        const dock = document.querySelector('.dock')!.getBoundingClientRect();
-        const stuck = Math.abs(dock.bottom - window.innerHeight) < 1;
-        if (reds.length > 0) {
-          groups.add(tick);
-          const system = reds[0]!.closest('g.system');
-          if (system) systems.add(system);
-          if (stuck && still >= 3 && same >= 2) {
-            frames++;
-            if (system) checkedSystems.add(system);
+  return page.evaluate(
+    async ({ minimumDuration, leftBehindFrames }) => {
+      const outside: OutsideBand[] = [];
+      const groups = new Set<string | null>();
+      const systems = new Set<Element>();
+      const checkedSystems = new Set<Element>();
+      let frames = 0;
+      let lastY = window.scrollY;
+      let lastTick: string | null = null;
+      let still = 0;
+      let same = 0;
+      let run = 0; // frames in a row with a red note outside the band on a page not moving
+      const start = performance.now();
+      const deadline = start + 45_000;
+      await new Promise<void>((resolve) => {
+        const frame = () => {
+          const now = performance.now();
+          if (
+            now >= deadline ||
+            (now - start >= minimumDuration && frames > 200 && checkedSystems.size >= 4)
+          ) {
+            resolve();
+            return;
+          }
+          const reds = [...document.querySelectorAll('.score-sheet .is-red')];
+          still = window.scrollY === lastY ? still + 1 : 0;
+          lastY = window.scrollY;
+          const tick = reds[0]?.getAttribute('data-onset-tick') ?? null;
+          same = tick === lastTick ? same + 1 : 0;
+          lastTick = tick;
+          const dock = document.querySelector('.dock')!.getBoundingClientRect();
+          const stuck = Math.abs(dock.bottom - window.innerHeight) < 1;
+          if (reds.length > 0) {
+            groups.add(tick);
+            const system = reds[0]!.closest('g.system');
+            if (system) systems.add(system);
+            if (stuck && still >= 3 && same >= 2) {
+              frames++;
+              if (system) checkedSystems.add(system);
+            }
+          }
+          let out = false;
+          if (reds.length > 0 && stuck && still >= 1) {
             const rects = reds.map((r) => r.getBoundingClientRect());
             const top = Math.min(...rects.map((r) => r.top));
             const bottom = Math.max(...rects.map((r) => r.bottom));
-            if (top < -0.5 || bottom > dock.top + 0.5)
+            out = top < -0.5 || bottom > dock.top + 0.5;
+            if (out && run === leftBehindFrames)
               outside.push({ tick, top, bottom, dockTop: dock.top, scrollY: window.scrollY });
           }
-        }
+          run = out ? run + 1 : 0;
+          requestAnimationFrame(frame);
+        };
         requestAnimationFrame(frame);
+      });
+      return {
+        frames,
+        groups: groups.size,
+        systems: systems.size,
+        checkedSystems: checkedSystems.size,
+        elapsedMs: performance.now() - start,
+        outside,
       };
-      requestAnimationFrame(frame);
-    });
-    return {
-      frames,
-      groups: groups.size,
-      systems: systems.size,
-      checkedSystems: checkedSystems.size,
-      elapsedMs: performance.now() - start,
-      outside,
-    };
-  }, minimumMs);
+    },
+    { minimumDuration: minimumMs, leftBehindFrames: LEFT_BEHIND_FRAMES },
+  );
 }
 
 /** One animation frame of the score view, as `sampleUntilFirstRedNote` records it. */
@@ -299,7 +318,7 @@ async function expectCursorAboveDock(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Play' }).click();
   await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
   const seen = await sampleCursorAgainstDock(page, 18_000);
-  const coverage = `${seen.frames} frames, ${seen.groups} groups, ${seen.systems} observed systems, ${seen.checkedSystems} checked systems in ${Math.round(seen.elapsedMs)} ms`;
+  const coverage = `${seen.frames} steady frames, ${seen.groups} groups, ${seen.systems} observed systems, ${seen.checkedSystems} checked systems in ${Math.round(seen.elapsedMs)} ms`;
   expect(seen.systems, `the cursor crossed several systems: ${coverage}`).toBeGreaterThanOrEqual(4);
   expect(
     seen.checkedSystems,
@@ -308,7 +327,7 @@ async function expectCursorAboveDock(page: Page): Promise<void> {
   expect(seen.frames, `frames counted: ${coverage}`).toBeGreaterThan(200);
   expect(
     seen.outside.length,
-    `frames with a red note outside the band above the dock (${coverage}), first: ` +
+    `red notes left outside the band above the dock (${coverage}), first: ` +
       JSON.stringify(seen.outside.slice(0, 3)),
   ).toBe(0);
   await expectOneRed(page, 'playing after the sampling');

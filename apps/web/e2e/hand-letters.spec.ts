@@ -60,3 +60,22 @@ test('Twinkle: no letters in bars 1 to 3; L and R together from bar 4, where the
   expect(k.letters).toHaveLength(k.pressed);
   await expectOneRed(page, 'Twinkle bar 4');
 });
+
+// T10 and T11: paused, the pressed keys keep their finger numbers. In bar 1 the hands are an
+// octave apart, so the third note's keys carry their digits alone, without L or R.
+test('Twinkle paused in bar 1: the pressed keys carry their finger numbers, no hand letters', async ({
+  page,
+}) => {
+  await playSilently(page, 'twinkle-twinkle-little-star', '50');
+  // The third note sounds from 1.2 s to 1.8 s of the score: at 50 %, 1.2 s of the clock to pause in.
+  await expect
+    .poll(() => position(page), { timeout: 10_000, intervals: [50] })
+    .toBeGreaterThan(1.25);
+  await page.getByRole('button', { name: 'Pause' }).click();
+  const pressed = page.locator('.keyboard-svg .key.is-pressed');
+  expect(
+    await pressed.evaluateAll((keys) => keys.map((key) => Number(key.getAttribute('data-midi')))),
+  ).toEqual([48, 67]);
+  await expect(pressed.locator('text')).toHaveText(['5', '4']);
+  await expect(page.locator('.keyboard-svg .key-hand')).toHaveCount(0);
+});

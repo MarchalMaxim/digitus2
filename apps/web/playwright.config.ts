@@ -7,7 +7,7 @@ const desktop = { ...devices['Desktop Chrome'], viewport: { width: 1280, height:
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
-  expect: { timeout: 10_000, toHaveScreenshot: { maxDiffPixelRatio: 0.002 } },
+  expect: { timeout: 10_000 },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   // Under CI also an HTML report (with the traces of failed tests) in playwright-report/, which
@@ -25,12 +25,11 @@ export default defineConfig({
     timeout: 60_000,
   },
   projects: [
-    { name: 'desktop', use: desktop, testIgnore: /visual\.spec\.ts/ },
+    { name: 'desktop', use: desktop },
     {
       name: 'mobile',
       use: { ...desktop, viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true },
       testMatch: /(library|states|hand-letters|scan|scan-rotation|seek)\.spec\.ts/,
     },
-    ...(process.env.CI ? [] : [{ name: 'visual', use: desktop, testMatch: /visual\.spec\.ts/ }]),
   ],
 });

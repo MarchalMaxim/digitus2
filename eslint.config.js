@@ -15,7 +15,6 @@ export default tseslint.config(
       'benchmarks/**',
       'apps/web/playwright-report/**',
       'apps/web/test-results/**',
-      'apps/web/e2e/**/*-snapshots/**',
     ],
   },
   js.configs.recommended,

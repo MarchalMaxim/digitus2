@@ -434,7 +434,7 @@ The checks in `research/embellish/check.py` are the specification for that gate'
 
 - ten pieces, six curated arrangements and four MuseScore-archive pieces, in plain, light and
   playful versions, ready to drop into the app (30 files, 0.92 MB in total, each under 60 kB; the
-  folder with the records and the teacher batch is 1.04 MB);
+  folder with the records and the teacher batch is 1.10 MB);
 - the questions for the owner;
 - a blinded teacher batch in the shape of `research/teacher_review`: 30 four-bar passages in five
   batches, a listening brief and the key.

@@ -32,15 +32,21 @@ interface FakePiano {
   stop(): void;
   dispose(): void;
 }
-const smplrMock = vi.hoisted(() => ({ pianos: [] as FakePiano[], autoReady: true }));
+const smplrMock = vi.hoisted(() => ({
+  pianos: [] as FakePiano[],
+  autoReady: true,
+  failReady: false,
+}));
 vi.mock('smplr', () => ({
   SplendidGrandPiano: (_ctx: unknown, options: FakePiano['options']) => {
     let resolve = () => {};
-    const ready = smplrMock.autoReady
-      ? Promise.resolve()
-      : new Promise<void>((r) => {
-          resolve = r;
-        });
+    const ready = smplrMock.failReady
+      ? Promise.reject(new Error('samples did not load'))
+      : smplrMock.autoReady
+        ? Promise.resolve()
+        : new Promise<void>((r) => {
+            resolve = r;
+          });
     const piano: FakePiano = {
       options,
       starts: [],
@@ -93,6 +99,7 @@ beforeEach(() => {
   clicks = [];
   smplrMock.pianos.length = 0;
   smplrMock.autoReady = true;
+  smplrMock.failReady = false;
 });
 
 describe('the sampled piano', () => {
@@ -172,6 +179,13 @@ describe('the sampled piano', () => {
     piano.start({ midi: 62, time: 0, duration: 1, velocity: 90, hand: 'R' });
     expect(newer.starts).toHaveLength(1);
     expect(older.starts).toHaveLength(0);
+  });
+  it('disposes the sampler of a load that fails, and the failure propagates', async () => {
+    smplrMock.failReady = true;
+    const piano = createPiano({} as AudioContext);
+    await expect(piano.load([60], [96])).rejects.toThrow('samples did not load');
+    expect(smplrMock.pianos).toHaveLength(1);
+    expect(smplrMock.pianos[0]!.disposed).toBe(true);
   });
 });
 

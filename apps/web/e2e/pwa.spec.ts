@@ -3,8 +3,7 @@ import { ASSETS_CACHE, PIANO_CACHE, PRECACHE_PREFIX } from '../src/sw/policy.js'
 import { PIANO_SAMPLES, silentWav } from './helpers/samples.js';
 
 // The installable, offline app (issues #35 and #51). This spec alone lets the app register its
-// service worker; every other spec blocks it (playwright.config.ts). With service workers allowed,
-// Playwright applies the context's offline mode and context.route to the worker's own fetches.
+// service worker; every other spec blocks it (playwright.config.ts).
 test.use({ serviceWorkers: 'allow' });
 
 const TWINKLE = '#/piece/twinkle-twinkle-little-star';
@@ -76,7 +75,7 @@ function expectOnlyNavigationsReached(reached: readonly string[]): void {
 
 /**
  * Whether a fetch of a file the worker sends to the network succeeds: online, the preview answers
- * it (with its page); offline, it fails. The control that offline applies to the worker's fetches.
+ * it (with its page); offline, it fails.
  */
 function fetchMissingAsset(page: Page): Promise<'resolved' | 'rejected'> {
   return page.evaluate(
@@ -212,44 +211,39 @@ test('the piano plays offline from the samples kept on the first Play', async ({
   expectOnlyNavigationsReached(reached);
 });
 
-test("a newer worker, once activated, deletes the older precache and the assets cache's copies of its shell", async ({
+test("a newer worker, once activated, deletes the older precaches and the assets cache's copies of its shell", async ({
   page,
   context,
 }) => {
   await page.goto('/');
-  const older = await controlled(page);
-  const shellFile = (await cachedPaths(page, older)).find((p) => /^\/assets\/.+\.js$/.test(p));
+  const current = await controlled(page);
+  const shellFile = (await cachedPaths(page, current)).find((p) => /^\/assets\/.+\.js$/.test(p));
   expect(shellFile, 'a precached script').toBeDefined();
-  // As if an older worker had kept a file of the newer shell at runtime, next to a score's chunk.
+  // As if an older build had left its precache and an older piano cache, and an older worker had
+  // kept a file of the newer shell at runtime, next to a score's chunk.
+  const OLDER_PRECACHE = `${PRECACHE_PREFIX}e2e0older000`;
+  const OLDER_PIANO = 'digitus2-piano-samples-v0';
   const KEPT = '/assets/kept-x.js';
   await page.evaluate(
-    async ({ cache, paths }) => {
-      const open = await caches.open(cache);
-      for (const path of paths)
-        await open.put(path, new Response('', { headers: { 'content-type': 'text/javascript' } }));
+    async ({ assets, paths, older }) => {
+      const js = () => new Response('', { headers: { 'content-type': 'text/javascript' } });
+      const open = await caches.open(assets);
+      for (const path of paths) await open.put(path, js());
+      for (const name of older) await (await caches.open(name)).put('/index.html', js());
     },
-    { cache: ASSETS_CACHE, paths: [shellFile!, KEPT] },
+    { assets: ASSETS_CACHE, paths: [shellFile!, KEPT], older: [OLDER_PRECACHE, OLDER_PIANO] },
   );
   expect((await cachedPaths(page, ASSETS_CACHE)).sort()).toEqual([KEPT, shellFile!].sort());
 
-  // A newer build's worker: the same shell under another version, at another script URL.
-  const version = older.slice(PRECACHE_PREFIX.length);
-  const script = await (await page.request.get('/sw.js')).text();
-  expect(script.split(version).length - 1, 'the version appears once in sw.js').toBe(1);
-  const newerVersion = 'e2e0newer000';
+  // The newer worker is the same sw.js at another script URL, which the browser installs as a new
+  // worker. It is served by the preview as it is, not changed by a route: the browser checks a
+  // worker's script for updates with fetches a route does not see, and a script that differed from
+  // what the preview serves would install yet another worker.
   const NEWER_SCRIPT = '/sw.js?newer=1';
-  let routed = 0;
-  await context.route(
-    (url) => url.pathname === '/sw.js' && url.search === '?newer=1',
-    (route) => {
-      routed += 1;
-      return route.fulfill({
-        status: 200,
-        contentType: 'text/javascript',
-        body: script.replace(version, newerVersion),
-      });
-    },
-  );
+  const newerWorker = context.waitForEvent('serviceworker', {
+    predicate: (worker) => worker.url().endsWith(NEWER_SCRIPT),
+    timeout: 30_000,
+  });
   const installed = await page.evaluate(async (scriptUrl) => {
     const registration = await navigator.serviceWorker.register(scriptUrl, {
       scope: '/',
@@ -265,22 +259,33 @@ test("a newer worker, once activated, deletes the older precache and the assets 
     });
   }, NEWER_SCRIPT);
   expect(installed).toBe('installed');
-  expect(routed, 'the newer script came from the route').toBeGreaterThan(0);
+  const worker = await newerWorker;
 
-  // It waits while a page of the app is open; once none is, it activates. A plain file of the site
-  // (not the app, which would register /sw.js again) reads the caches under the newer worker.
+  // It waits while a page of the app is open and activates once none is; its activate handler has
+  // finished when its state reads "activated". The caches are read in the worker itself, so no
+  // page of the site opens again (the app would register /sw.js again).
   await expect(async () => {
     await page.goto('about:blank');
-    await page.goto('/licenses/pdfjs.txt');
-    const script = await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL ?? '');
-    expect(script).toBe(new URL(NEWER_SCRIPT, page.url()).href);
+    const state = await worker.evaluate(() => {
+      const scope = self as unknown as {
+        serviceWorker: ServiceWorker;
+        registration: ServiceWorkerRegistration;
+      };
+      return {
+        state: scope.serviceWorker.state,
+        active: scope.registration.active === scope.serviceWorker,
+        waiting: scope.registration.waiting !== null,
+        installing: scope.registration.installing !== null,
+      };
+    });
+    expect(state).toEqual({ state: 'activated', active: true, waiting: false, installing: false });
   }).toPass({ timeout: 30_000 });
-  await expect
-    .poll(async () => ({
-      caches: (await page.evaluate(() => caches.keys()))
-        .filter((name) => name.startsWith(PRECACHE_PREFIX))
-        .sort(),
-      assets: await cachedPaths(page, ASSETS_CACHE),
-    }))
-    .toEqual({ caches: [`${PRECACHE_PREFIX}${newerVersion}`], assets: [KEPT] });
+  const left = await worker.evaluate(
+    async ({ assets }) => ({
+      caches: (await caches.keys()).sort(),
+      assets: (await (await caches.open(assets)).keys()).map((r) => new URL(r.url).pathname),
+    }),
+    { assets: ASSETS_CACHE },
+  );
+  expect(left).toEqual({ caches: [ASSETS_CACHE, current].sort(), assets: [KEPT] });
 });

@@ -58,6 +58,7 @@ research/spikes/**/playwright-report/
 
 # Claude Code session state
 .claude/
+.superpowers/
 
 # Benchmark output (bench writes these; pnpm verify's scorecards are benchmarks/runs/verify-pig.json,
 # verify-mutopia.json and verify-hands.json; the milestone scorecards benchmarks/latest.json,

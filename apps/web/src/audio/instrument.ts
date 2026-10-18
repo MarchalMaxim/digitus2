@@ -67,7 +67,12 @@ export function createPiano(ctx: AudioContext): Instrument {
           fallback: 'nearest',
         },
       });
-      await next.ready;
+      try {
+        await next.ready;
+      } catch (e) {
+        next.dispose(); // the samples failed to load; do not leave the sampler on the destination
+        throw e;
+      }
       if (id !== loads) {
         next.dispose(); // superseded while its samples were loading
         return;

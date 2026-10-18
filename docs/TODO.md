@@ -63,7 +63,7 @@ The owner accepts an experimental release for clear photos of printed music. Rul
 
 Mutation sampling and a read-only review of every vitest file: the tests are mostly real. A test that runs a line catches a change to it 73% of the time; of 1,216 cases read, 75% are useful, 22% weak and 2.7% slop. They are thin at boundaries and bad input (a `<` to `<=` change is caught 39% of the time), weakest for React component tests, and the comparison with the official fingering evaluator skips silently in CI. Report: `docs/reviews/unit-test-audit-2026-10-18.md`. Nothing is deleted or rewritten unasked.
 
-- [ ] Make the skips that need the gitignored datasets loud in CI (eleven cases, including the only comparison with the official evaluator).
+- [ ] Make the skips that need the gitignored datasets loud in CI (ten cases, including the only comparison with the official evaluator).
 - [ ] Add the boundary and bad-input assertions the report lists (157 survivors the reviewers call real gaps).
 - [ ] Tighten the few vacuous assertions it names (`transport.test.ts`, `LibraryView.test.tsx`) and the copied-constant tests.
 - [ ] Not audited yet: the Playwright specs, and most of the pytest files (13 of about 67 sampled).

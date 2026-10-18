@@ -23,7 +23,6 @@ import {
   readScanScore,
   readingOrder,
   STEPS,
-  tieChain,
   type ScanNote,
   type ScanScore,
   type Step,
@@ -240,7 +239,6 @@ export function NoteEditor({
   const position = order.indexOf(note);
   const chord = chordOf(score, note);
   const pitched = !note.rest && note.step !== undefined;
-  const linked = tieChain(score, note);
   const tiedFrom = note.tieStop;
   const step = (direction: 1 | -1) => {
     const next = stepPitch(score, note, direction);

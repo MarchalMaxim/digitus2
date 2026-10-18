@@ -10,11 +10,12 @@ embellisher's timeline does not hide itself.
     unchanged: the multiset of (onset, pitch, duration, staff, voice, grace) is identical;
   * every plain melody note still starts at its onset with its pitch, and every other melody note in
     the embellished score is one of the recorded insertions (onset and pitch);
-  * no inserted note starts on a strong position, and at every strong position the notes struck are
-    the same as in the plain score;
-  * "chord tones kept on strong beats": every (strong position, melody pitch) that sounds in the plain
-    score sounds in the embellished one, and is struck there when it is struck in the plain score.
-    `strong_total` counts those pairs and `strong_kept` the ones kept.
+  * no inserted note starts on a strong position or holds across one (a record's `length`), and at
+    every strong position the notes struck are the same as in the plain score;
+  * "melody pitches kept on strong positions": every (strong position, melody pitch) that sounds in
+    the plain score sounds in the embellished one, and is struck there when it is struck in the plain
+    score. `strong_total` counts those pairs and `strong_kept` the ones kept. (The rules treat these
+    pitches as chord tones; the check does not analyse harmony.)
 
 License: MIT.
 """
@@ -112,6 +113,12 @@ def verify(plain: str, embellished: str, inserted: list[dict], melody_voice: str
     for o, _ in recorded.elements():
         if o in strong_set:
             problems.append(f"an inserted note starts on a strong position ({o})")
+    for i in inserted:
+        if "length" in i:
+            start = F(i["onset"])
+            end = start + F(i["length"])
+            if any(start < s < end for s in strong):
+                problems.append(f"an inserted note sounds through a strong position ({start} to {end})")
     struck_all_a = Counter((n.onset, n.pitch) for n in a.notes if n.pitch is not None and not n.grace
                            and n.onset in strong_set)
     struck_all_b = Counter((n.onset, n.pitch) for n in b.notes if n.pitch is not None and not n.grace

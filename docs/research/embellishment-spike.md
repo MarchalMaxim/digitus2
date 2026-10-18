@@ -36,7 +36,9 @@ sometimes mannered.
 
 1. **Reading.** The embellisher reads a library score as partwise MusicXML, unzipping `.gz`
    archive scores in memory. It builds the timeline of every note: onset, length, voice, staff,
-   and the key and meter in force. The library file is only read.
+   and the key and meter in force. A key change applies from its position, also inside a bar. A
+   time-signature change inside a bar leaves that bar's notes alone. No level 1 or 2 piece has a key
+   or time change inside a bar; both cases are covered by tests. The library file is only read.
 2. **Melody.** The melody is the voice of staff 1 (the right hand) that holds the highest sounding
    note at the most right-hand onsets. A piece is refused when:
    - it is not one piano part on two staves;
@@ -47,7 +49,7 @@ sometimes mannered.
 3. **Rules.** Candidates are found for every melody note (section 3). Each new note must meet
    five conditions:
    - it is in the key signature's scale;
-   - it starts after the note it splits, never on a strong position;
+   - it starts after the note it splits, never on a strong position, and does not hold across one;
    - it is higher than every other note sounding while it lasts;
    - it is not a semitone from an accidental elsewhere in the bar;
    - it is at least an eighth long.
@@ -57,11 +59,24 @@ sometimes mannered.
    - the chosen note keeps its onset and pitch, and its length and note type are shortened;
    - the new notes follow it as `<note>` elements in the same voice and staff;
    - beams are removed from the edited notes only;
-   - nothing else in the file is touched.
+   - no other note, measure or direction changes in content.
 
    When the file's `<divisions>` cannot express an eighth (one division per quarter in 26 of the
-   259 pieces, 25 of them from the archive), every `<divisions>`, `<duration>` and `<offset>` is first multiplied by the same
-   factor. The numbers change; the music does not.
+   259 pieces, 25 of them from the archive), every `<divisions>`, `<duration>` and `<offset>`, and
+   the `attack` and `release` attributes of a note, are first multiplied by the same factor. The
+   numbers change; the music does not.
+
+   The file is written back with Python's ElementTree, which re-emits the whole tree. The content
+   is kept: elements, attributes, text, comments and processing instructions. The XML declaration
+   and DOCTYPE are copied from the input. The bytes are not kept:
+   - an empty element is written as `<x />`, whether the input had `<x/>` or `<x></x>` (for example
+     `<midi-device ...></midi-device>`);
+   - whitespace inside tags and the quoting of attributes are normalised;
+   - character references are written as characters;
+   - an attribute in a namespace other than `xml:` would get a generated prefix (MusicXML uses none).
+
+   A byte diff of plain and embellished therefore shows more than the melody; the check below
+   compares the music.
 6. **Independent check** (`check.py`). The check reads both files with the content pipeline's own
    reader (`content/tools/xmlcheck.py`) and derives the strong positions again. It verifies that:
    - the measure lengths are the same;
@@ -69,9 +84,12 @@ sometimes mannered.
      voice and grace;
    - every plain melody note still starts at its onset with its pitch;
    - every extra note is a recorded insertion;
-   - no insertion starts on a strong position;
+   - no insertion starts on a strong position or holds across one;
    - each melody pitch that sounds on a strong position still sounds there, and is still struck
      there if it was struck in the plain score ("strong kept").
+
+   A density whose output fails this check is refused for that piece with the check's problems as
+   the reason, and the plain score stands for it.
 7. **Engine.** The built CLI runs on each file: `inspect`, then
    `finger <file> --level beginner --format pig`, then `lint <file> --fingering <pig> --beginner --json`.
    This uses the default hand profile (large) for the span tables.
@@ -88,10 +106,11 @@ The full run over 259 pieces and 3 densities takes about six minutes with four w
 reproduce it, build the engine with `pnpm --filter @digitus2/engine build`, then run:
 
 ```bash
-research/.venv/Scripts/python.exe -m pytest research/embellish/tests -q -p no:cacheprovider   # 30 tests
+research/.venv/Scripts/python.exe -m pytest research/embellish/tests -q -p no:cacheprovider   # 41 tests
 research/.venv/Scripts/python.exe -I research/embellish/run.py          # research/data/embellish/results.json
 research/.venv/Scripts/python.exe -I research/embellish/report.py       # the tables below
 research/.venv/Scripts/python.exe -I research/embellish/listening.py    # research/embellish/listening/
+node research/embellish/render_check.mjs                                # Verovio check of the listening files
 ```
 
 ## 3. The rules as implemented
@@ -123,7 +142,8 @@ and B is the next melody note, which starts where A ends.
 - In compound meters, only the quarter and the dotted quarter are split.
 - neighbour-long divides a half into quarter, eighth, eighth; a dotted half into three quarters;
   a whole into dotted half, eighth, eighth.
-- A split that would put a new note on a strong position is not made.
+- A split that would start a new note on a strong position, or hold one across a strong position
+  (a syncopated half note from beat 1.5 to 3.5 in 4/4, split into two quarters), is not made.
 
 **Strong positions.** These are the downbeat, and the middle of the bar in 4/4, 2/2, 4/2, 6/4,
 4/8, 6/8 and 12/8. A pickup bar is counted from its end.
@@ -266,11 +286,22 @@ notes added. The largest rises in the score are:
 | L24 thumb crossing shown to a beginner | 535 | 588 | 549 |
 | Notes | 39,623 | 41,119 | 45,628 |
 
-Two warnings grow faster than the notes do:
+Per 1,000 notes, these warnings rise in at least one density:
 
-- **L14** goes from 102 to 114 (light) and 118 (playful) per 1,000 notes. A passing note between
-  fingers 3 and 5 is fingered 3-4-5.
-- **L11** goes from 6 to 24. Playful's eighths after a long note make fast hops.
+| Rule | plain | light | playful |
+|---|---:|---:|---:|
+| L14 agility (3 to 4, 3-4-5) | 101.6 | 113.6 | 118.3 |
+| L24 thumb crossing shown to a beginner | 13.5 | 14.3 | 12.0 |
+| L08 thumb on a black key | 6.5 | 7.1 | 6.0 |
+| L12 fast repeated key with the same finger | 1.06 | 1.05 | 1.34 |
+| L11 fast hop with the same finger | 0.15 | 0.27 | 0.53 |
+
+- **L14** rises most. A passing note between fingers 3 and 5 is fingered 3-4-5.
+- **L11** more than triples at playful, from a small base. Playful's eighths after a long note make
+  fast hops.
+- **L08 and L24** rise at light and fall below the plain rate at playful.
+- **L12** rises at playful only.
+- **L07 and L13** fall at both densities. Their counts stay about the same while the notes grow.
 
 The beginner errors that rise come from these piece and density pairs:
 
@@ -331,11 +362,14 @@ most convincing rule. They are also the most common: 954 of the 1,496 notes adde
    weak half. Over a held left-hand chord the clash is brief and usual for a non-chord tone. The
    82 "accidental nearby" skips remove the worst cases: a natural against a sharp in the bar.
 
-**Formatting.** The added eighths carry no beams in the file, so the score shows flags. Verovio
-6.3.0, the app's renderer, does not beam them itself: on the 30 listening files it reports the same
-number of beams as in the plain files. Verovio 6.3.0 loads and renders all 30 files without an
-error, and its note counts differ from the plain files by exactly the recorded insertions. Lyrics
-stay on the first part of a split note, so the new notes form a melisma.
+**Formatting.** The added eighths carry no beams in the file, so the score shows flags. The check
+`node research/embellish/render_check.mjs` loads each of the 30 listening files in Verovio 6.3.0,
+the app's renderer, from `apps/web/node_modules`. On every file it finds:
+- the file loads and page 1 renders, with no error in Verovio's log;
+- the note count is the plain file's plus exactly the recorded insertions;
+- the beam count is the same as the plain file's, so Verovio does not beam the new eighths itself.
+
+Lyrics stay on the first part of a split note, so the new notes form a melisma.
 
 ## 6. Recommendation for the app side
 
@@ -356,10 +390,15 @@ hands, loop and speed controls.
 **The pipeline**, all in the browser:
 
 1. **Embellish the MusicXML text.** Port `research/embellish/core.py` (about 600 lines with its
-   documentation) to
-   TypeScript as a pure function from text to text, with the record of inserted notes. The app
-   renders MusicXML with Verovio and parses it with the engine's reader, so text in and text out
-   fits both. It needs the same refusals, the divisions scale-up and the per-note guards.
+   documentation) to TypeScript as a pure function from text to text, with the record of inserted
+   notes. The app renders MusicXML with Verovio and parses it with the engine's reader, so text in
+   and text out fits both. The port needs:
+   - the same refusals and the divisions scale-up;
+   - the same per-note guards, including the one that a new note neither starts on nor holds
+     across a strong position;
+   - key changes followed from their position, and bars with a time change inside left alone;
+   - a serialiser that keeps comments and processing instructions. The browser's `XMLSerializer`
+     also re-emits the tree, so the same byte-level caveats as section 2 apply.
 2. **Re-solve.** The worker solves the embellished score as it solves any score. The solver needs
    nothing new: the added notes are ordinary notes, and no law error appeared in 472
    piece-densities. Editorial fingerings of the original notes stay pins; added notes get no pin.
@@ -393,7 +432,8 @@ The checks in `research/embellish/check.py` are the specification for that gate'
 `research/embellish/listening/` holds the material for the issue's second step:
 
 - ten pieces, six curated arrangements and four MuseScore-archive pieces, in plain, light and
-  playful versions, ready to drop into the app (30 files, 1.2 MB in total, each under 60 kB);
+  playful versions, ready to drop into the app (30 files, 0.92 MB in total, each under 60 kB; the
+  folder with the records and the teacher batch is 1.04 MB);
 - the questions for the owner;
 - a blinded teacher batch in the shape of `research/teacher_review`: 30 four-bar passages in five
   batches, a listening brief and the key.
@@ -417,6 +457,10 @@ No collector or scorer is built for it. The listening README says what one would
   engine's `inspect` and, for the 30 listening files, Verovio 6.3.0. They are not checked against
   the MusicXML 4.0 XSD. The new `<note>` elements follow the schema's child order (pitch, duration,
   voice, type, dot, stem, staff).
+- **Bytes are not preserved.** The embellished file keeps the plain file's music, comments and
+  processing instructions, but ElementTree re-emits every element (section 2, step 5). Empty
+  elements, whitespace inside tags, attribute quoting and character references come out
+  normalised. A tool that compares files byte for byte sees changes outside the melody.
 - **Nobody has listened yet.** The judgements in section 5 come from reading the notes. The
   listening test decides.
 

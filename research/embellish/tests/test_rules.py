@@ -75,8 +75,66 @@ def test_never_on_a_strong_beat():
     # a dotted half from beat 1 would put the passing note on beat 3 of 4/4: refused
     xml = score([[("C4", 3), ("E4", 1)], [("F4", 4)]])
     res = core.embellish(xml, "playful")
-    assert all(i["beat"] not in ("1", "3") for i in res.inserted)
+    assert res.inserted
+    assert all(F(i["onset"]) % 4 not in (0, 2) for i in res.inserted)  # 4/4: downbeat and half bar
     assert "passing" not in rules(res)
+
+
+def test_a_new_note_never_sounds_through_a_strong_position():
+    # the syncopated half note C4 (beats 1.5 to 3.5) -> E4 is a third, but its weak end (beats 2.5 to 3.5)
+    # would hold the passing D4 across beat 3; its long-note neighbour would return on beat 3: both refused
+    xml = score([[("G4", F(1, 2)), ("C4", 2), ("E4", 1), ("D4", F(1, 2))], [("C4", 4)]])
+    res = core.embellish(xml, "playful")
+    for i in res.inserted:
+        start, end = F(i["onset"]), F(i["onset"]) + F(i["length"])
+        assert not any(start < s < end for s in (F(2), F(4)))
+    assert "passing" not in rules(res) and "neighbour-long" not in rules(res)
+    assert res.skipped["strong beat"] >= 1
+
+
+def test_minor_key_uses_the_key_signature_scale():
+    # A minor (no sharps or flats): A -> C is filled with B; E -> G# (the raised leading tone) is not filled
+    xml = score([[("A4", 1), ("C5", 1), ("E4", 1), ("G#4", 1)], [("A4", 4)]],
+                lh=[[("A2", 4)], [("A2", 4)]], mode="minor")
+    res = core.embellish(xml, "playful")
+    assert [i["pitch"] for i in res.inserted if i["rule"] == "passing"] == ["B4"]
+    assert all(i["midi"] % 12 != 7 for i in res.inserted)  # no G natural next to the G#
+
+
+def test_a_key_change_inside_a_bar_is_followed():
+    # the key changes to G major at beat 3 of bar 1: E4 -> G4 there is filled with F#4, not F4
+    xml = score([[("C4", 1), ("D4", 1), ("E4", 1), ("G4", 1)], [("A4", 4)]], lh=[[("r", 4)], [("D3", 4)]])
+    at = xml.index("<note>", xml.index("<note>", xml.index("<note>") + 1) + 1)  # before the third note
+    xml = xml[:at] + "<attributes><key><fifths>1</fifths></key></attributes>" + xml[at:]
+    res = core.embellish(xml, "light")
+    assert [(i["pitch"], i["midi"]) for i in res.inserted] == [("F#4", 66)]
+
+
+def test_a_time_change_inside_a_bar_leaves_that_bar_alone():
+    xml = score([[("C4", 1), ("E4", 1), ("C4", 1), ("E4", 1)], [("C4", 1), ("E4", 1), ("G4", 2)], [("C4", 4)]])
+    at = xml.index("<note>", xml.index("<note>", xml.index("<note>") + 1) + 1)
+    xml = xml[:at] + "<attributes><time><beats>2</beats><beat-type>4</beat-type></time></attributes>" + xml[at:]
+    res = core.embellish(xml, "playful")
+    assert all(F(i["onset"]) >= 4 for i in res.inserted)
+    assert res.skipped["time change inside the bar"] >= 1
+
+
+def test_serialisation_keeps_doctype_comments_and_processing_instructions():
+    xml = score([[("C4", 1), ("E4", 1), ("D4", 2)], [("C4", 4)]])
+    xml = xml.replace('<part id="P1">', '<part id="P1"><!-- a comment --><?app keep="yes"?>', 1)
+    res = core.embellish(xml, "light")
+    assert res.inserted
+    assert res.xml.startswith(xml[:xml.index("<score-partwise")])
+    assert "<!DOCTYPE score-partwise" in res.xml
+    assert "<!-- a comment -->" in res.xml and '<?app keep="yes"?>' in res.xml
+
+
+def test_divisions_scale_up_covers_attack_and_release():
+    xml = score([[("C4", 1), ("E4", 1), ("D4", 2)], [("C4", 4)]], lh=[[("C3", 4)], [("C3", 4)]], divisions=1)
+    xml = xml.replace("<note><pitch><step>C</step><octave>3</octave>", '<note attack="1" release="-1">'
+                      "<pitch><step>C</step><octave>3</octave>", 1)
+    res = core.embellish(xml, "light")
+    assert '<note attack="2" release="-2">' in res.xml
 
 
 def test_compound_meter_dotted_quarter_splits_into_quarter_and_eighth():

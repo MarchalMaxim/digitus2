@@ -20,6 +20,11 @@ RULES = ("passing", "neighbour-repeated", "anticipation", "neighbour-long")
 DENS = ("light", "playful")
 
 
+def signed(x: float) -> str:
+    """A change with its sign: +0.02, -0.01."""
+    return f"{x:+.2f}"
+
+
 def pct(a: int, b: int) -> str:
     return f"{100 * a / b:.0f}%" if b else "n/a"
 
@@ -33,6 +38,8 @@ def refusal_kind(r: str) -> str:
         return "not two staves"
     if "parts" in r:
         return "not one piano part"
+    if r.startswith("own check failed"):
+        return "the own check failed"
     return r
 
 
@@ -108,8 +115,8 @@ def tables(by: dict[str, dict[str, dict]]) -> tuple[str, str]:
                  per(lambda d: str(sum(1 for p in emb(d) if p[d]["level_heuristic"]["proposal"]
                                        - p["none"]["level_heuristic"]["proposal"] >= 2)))))
     rows.append(("Level score change, median",
-                 per(lambda d: f"+{statistics.median([p[d]['level_heuristic']['score'] - p['none']['level_heuristic']['score'] for p in emb(d)]):.2f}"
-                     if emb(d) else "n/a")))
+                 per(lambda d: signed(statistics.median([p[d]['level_heuristic']['score'] - p['none']['level_heuristic']['score']
+                                                         for p in emb(d)])) if emb(d) else "n/a")))
     lines.append("### Summary per density\n")
     lines.append(head)
     for label, vals in rows:

@@ -67,6 +67,119 @@ export const scan: Messages['scan'] = {
     useForFingerings: 'Usar para os dedilhados',
     scanAgain: 'Digitalizar de novo',
   },
+  edit: {
+    hint: 'Selecione uma nota para corrigi-la.',
+    keys: 'Esquerda e Direita selecionam a nota anterior ou seguinte, Cima e Baixo mudam a altura, Escape fecha o editor.',
+    pitch: (step: string, alter: number, octave: number) =>
+      `${({ C: 'Dó', D: 'Ré', E: 'Mi', F: 'Fá', G: 'Sol', A: 'Lá', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+    bar: (bar: string) => `Compasso ${bar}`,
+    rightHand: 'mão direita',
+    leftHand: 'mão esquerda',
+    staff: (staff: number) => `pauta ${staff}`,
+    lengths: {
+      whole: 'semibreve',
+      half: 'mínima',
+      quarter: 'semínima',
+      eighth: 'colcheia',
+      '16th': 'semicolcheia',
+      '32nd': 'fusa',
+    } as Record<string, string>,
+    noteLength: (length: string, dotted: boolean) => `${length}${dotted ? ' pontuada' : ''}`,
+    restLength: (length: string, dotted: boolean) =>
+      `pausa de ${length}${dotted ? ' pontuada' : ''}`,
+    tied: 'ligada',
+    describe: (parts: string[]) => parts.join(' · '),
+    panelLabel: 'Corrigir a nota selecionada',
+    pitchLabel: 'Altura',
+    lower: 'Mais grave',
+    lowerLabel: 'Descer um grau',
+    higher: 'Mais aguda',
+    higherLabel: 'Subir um grau',
+    flat: 'Bemol',
+    natural: 'Bequadro',
+    sharp: 'Sustenido',
+    lengthLabel: 'Duração',
+    lengthButtons: {
+      whole: 'Semibreve',
+      half: 'Mínima',
+      quarter: 'Semínima',
+      eighth: 'Colcheia',
+      '16th': 'Semicolcheia',
+      '32nd': 'Fusa',
+    } as Record<string, string>,
+    dotted: 'Pontuada',
+    tieNext: 'Ligada à próxima',
+    tiePrevious: 'Ligada à anterior',
+    toLeftHand: 'Passar para a mão esquerda',
+    toRightHand: 'Passar para a mão direita',
+    remove: 'Remover a nota',
+    previous: 'Nota anterior',
+    next: 'Próxima nota',
+    done: 'Concluir',
+    handBeats: (hand: string, beats: number) =>
+      `${hand} ${plural('pt', beats, { one: '# tempo', other: '# tempos' })}`,
+    timing: (bar: string, hands: string[], meter?: string) =>
+      `${bar}: ${hands.join(', ')}${meter ? `, em ${meter}` : ''}.`,
+    corrections: (n: number) => plural('pt', n, { one: '# correção', other: '# correções' }),
+    undo: 'Desfazer',
+    reset: 'Voltar ao reconhecimento',
+    resetDone: 'Todas as correções foram removidas. Desfazer as traz de volta.',
+    listSummary: 'Ver as correções',
+    changed: {
+      pitch: (where: string, from: string, to: string) => `${where}: ${from} → ${to}`,
+      duration: (where: string, pitch: string, from: string, to: string) =>
+        `${where}: ${pitch} ${from} → ${to}`,
+      tie: (where: string, pitch: string) => `${where}: ${pitch} ligada ao próximo ${pitch}`,
+      untie: (where: string, pitch: string) => `${where}: ligadura de ${pitch} removida`,
+      hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} passada para a ${hand}`,
+      removed: (where: string, pitch: string) => `${where}: ${pitch} removida`,
+    },
+    stale: (kept: number) =>
+      `Algumas correções salvas não se aplicam mais a este reconhecimento. As primeiras ${kept} foram mantidas.`,
+    problemsSummary: (n: number) =>
+      plural('pt', n, { one: '# ponto para conferir', other: '# pontos para conferir' }),
+    problems: {
+      tieGap: (where: string, pitch: string, gap: string) =>
+        `${where}: a ligadura de ${pitch} chega ao próximo ${pitch} ${gap} atrasada.`,
+      tieEarly: (where: string, pitch: string, gap: string) =>
+        `${where}: a ligadura de ${pitch} chega ao próximo ${pitch} ${gap} adiantada.`,
+      tieUnmatched: (where: string, pitch: string) =>
+        `${where}: uma ligadura em ${pitch} não tem nota correspondente.`,
+      barTiming: (timing: string) => `As mãos não coincidem. ${timing}`,
+    },
+    gap: (beats: number) => plural('pt', beats, { one: '# tempo', other: '# tempos' }),
+    downloadCorrected: 'Baixar MusicXML corrigido',
+    correctedSheetLabel: 'o reconhecimento corrigido',
+    refused: {
+      missing: 'Esta nota não está mais na partitura.',
+      rest: 'Uma pausa não tem altura para mudar.',
+      range: 'Essa altura está fora da extensão do piano.',
+      grace: 'Uma apojatura não ocupa tempo, então sua duração não pode ser mudada aqui.',
+      unwritable: 'Esta duração não pode ser escrita nesta partitura.',
+      otherHand:
+        'Esta mudança moveria notas da outra mão ou voz, por isso não foi feita. Confira o compasso num editor de partituras.',
+      noTieTarget: (pitch: { step: string; alter: number; octave: number }) =>
+        `Nenhum ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} começa onde esta nota termina, então ela não pode ser ligada. Corrija primeiro as durações.`,
+      noTieSource: (pitch: { step: string; alter: number; octave: number }) =>
+        `Nenhum ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} termina onde esta nota começa, então ela não pode ser ligada.`,
+      tieTaken: 'A próxima nota já está ligada a outra nota.',
+      tiedRemove: 'Remova a ligadura desta nota antes de remover a nota.',
+      chordLengths: 'As notas do acorde têm durações diferentes. Mude a duração primeiro.',
+      oneStaff: 'Esta partitura tem uma só pauta.',
+    },
+  },
+  phone: {
+    takePhoto: 'Tirar uma foto',
+    takeAnother: 'Tirar outra foto',
+    explain:
+      'O reconhecimento roda num PC, e um celular não consegue alcançá-lo. Envie estas fotos para o PC onde o programa roda e abra-as lá.',
+    share: 'Enviar as fotos para o seu PC',
+    save: 'Salvar as fotos',
+    shareTitle: 'Fotos de partitura',
+    shared: 'Fotos enviadas. Abra-as no seu PC com “Abrir sua própria partitura”.',
+    saved:
+      'Fotos salvas neste aparelho. Passe-as para o seu PC e abra-as com “Abrir sua própria partitura”.',
+  },
   errors: {
     notCombinedSaved:
       'As páginas foram reconhecidas, mas a notação delas não pôde ser combinada. Os arquivos de cada página estão disponíveis abaixo.',

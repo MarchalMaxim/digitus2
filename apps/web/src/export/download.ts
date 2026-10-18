@@ -9,7 +9,12 @@ export const MUSICXML_MIME = 'application/vnd.recordare.musicxml+xml';
 
 /** Starts a download of `text` named `filename`: a Blob behind an <a download>, then revoked. */
 export function downloadText(filename: string, text: string, mime = MUSICXML_MIME): void {
-  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  downloadBlob(filename, new Blob([text], { type: mime }));
+}
+
+/** Starts a download of `blob` named `filename`, through a short-lived object URL. */
+export function downloadBlob(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
   try {
     const a = document.createElement('a');
     a.href = url;

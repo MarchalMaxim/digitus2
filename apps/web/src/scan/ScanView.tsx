@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
@@ -6,23 +7,44 @@ import { Button } from '../design/Button.js';
 import { Loader } from '../design/Loader.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import { downloadText } from '../export/download.js';
-import { createEngineClient } from '../engine/client.js';
-import { createRenderer } from '../score/render/renderer.js';
+import { createEngineClient, type EngineClient } from '../engine/client.js';
+import { createRenderer, type ScoreRenderer } from '../score/render/renderer.js';
 import { ScoreSheet } from '../score/ScoreSheet.js';
 import { useLocale, useT } from '../i18n/i18n.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import { createScanClient, UNKNOWN_WARNING, type WorkerMetadata } from './client.js';
+import type { Correction } from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
+import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
+import { handOff, handOffFiles, isTouchOnly } from './phone.js';
+import {
+  correct,
+  describeCorrection,
+  describeNote,
+  describeProblem,
+  findProblems,
+  NoteEditor,
+  noteAt,
+  problemNote,
+  stepPitch,
+  timingText,
+  tryCorrection,
+  useSelectedMark,
+} from './ScanEditor.js';
 import './scan.css';
 
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
 
 const delay = () => new Promise<void>((resolve) => setTimeout(resolve, 350));
+const NO_CORRECTIONS: Correction[] = [];
 
-/** Review renders raw XML, never calls solve or exports replacement XML. */
+/**
+ * Review renders the raw recognition, or the reader's corrected copy of it, and never calls solve.
+ * Corrections are explicit and listed; the raw recognition is kept and downloadable unchanged.
+ */
 export function ScanView({ session: initial }: { session: ScanSession }) {
   const [session, setSession] = useState(initial);
   const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
@@ -42,11 +64,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   };
   const [health, setHealth] = useState<WorkerMetadata>();
   const [pages, setPages] = useState<string[]>([]);
-  const [reviewError, setReviewErrorPhrase] = useState<Phrase | null>(null);
-  const setReviewError = (phrase: Phrase | null) => {
-    setReviewErrorPhrase(() => phrase);
-  };
-  const [reviewReady, setReviewReady] = useState(false);
+  // The XML each worker last finished with: use waits until both match what is on screen.
+  const [rendered, setRendered] = useState<{ xml: string; error: Phrase | null }>();
+  const [imported, setImported] = useState<{ xml: string; error: Phrase | null }>();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selected, setSelected] = useState(0);
   const [reviewMode, setReviewMode] = useState<'combined' | 'page'>(
@@ -55,6 +75,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [scanningPage, setScanningPage] = useState(1);
   const [rotating, setRotating] = useState(false);
   const [width, setWidth] = useState(640);
+  const [touchOnly] = useState(isTouchOnly);
+  const [handOffState, setHandOffState] = useState<'shared' | 'saved' | null>(null);
+  const [note, setNote] = useState<number | null>(null);
+  const [editStatus, setEditStatusPhrase] = useState<Phrase | null>(null);
+  const setEditStatus = (phrase: Phrase | null) => {
+    setEditStatusPhrase(() => phrase);
+  };
+  const [undoStack, setUndoStack] = useState<Correction[][]>([]);
+  const [sheetHost, setSheetHost] = useState<HTMLDivElement | null>(null);
   const resultHost = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
@@ -63,15 +92,51 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     cancelled: false,
   });
   const alive = useRef(true);
+  // One engine and one renderer for the whole review, so a correction re-renders without restarting
+  // a worker or recompiling Verovio.
+  const workers = useRef<{ engine: EngineClient; renderer: ScoreRenderer } | null>(null);
+  const getWorkers = () =>
+    (workers.current ??= { engine: createEngineClient(), renderer: createRenderer() });
   const sourceUrl = useBlobUrl(session.file);
   const sourcePages = session.pages ?? [{ id: session.id, file: session.file, xml: session.xml }];
   const batch = sourcePages.length > 1;
   const isImage = session.file.type !== 'application/pdf';
-  const reviewXml = batch && reviewMode === 'page' ? sourcePages[selected]?.xml : session.xml;
+  const corrections = session.corrections ?? NO_CORRECTIONS;
+  const corrected = useMemo(
+    () => (session.xml ? correct(session.xml, corrections) : undefined),
+    [session.xml, corrections],
+  );
+  const rawScore = useMemo(() => {
+    if (!session.xml || !corrections.length) return undefined;
+    try {
+      return readScanScore(parseScanXml(session.xml));
+    } catch {
+      return undefined;
+    }
+  }, [session.xml, corrections.length]);
+  const pageMode = batch && reviewMode === 'page';
+  const editable = phase === 'review' && !pageMode && !!corrected;
+  const importXml = pageMode ? sourcePages[selected]?.xml : (corrected?.xml ?? session.xml);
+  const renderXml = pageMode ? sourcePages[selected]?.xml : (corrected?.renderXml ?? session.xml);
+  const problems = useMemo(
+    () => (editable && corrected ? findProblems(corrected.score) : []),
+    [editable, corrected],
+  );
   const openLibrary = useAppStore((s) => s.openLibrary);
   const busy = phase === 'connecting' || phase === 'scanning' || phase === 'cancelling';
+  const renderError = rendered && rendered.xml === renderXml ? rendered.error : null;
+  const importError = imported && imported.xml === importXml ? imported.error : null;
+  const reviewError = renderError ?? importError;
   const canUseResult =
-    !!session.xml && reviewMode === 'combined' && reviewReady && pages.length > 0 && !reviewError;
+    !!session.xml &&
+    reviewMode === 'combined' &&
+    rendered?.xml === renderXml &&
+    imported?.xml === importXml &&
+    pages.length > 0 &&
+    !reviewError;
+  const selectedNote =
+    note !== null && editable ? corrected.score.notes.find((n) => n.ordinal === note) : undefined;
+  useSelectedMark(sheetHost, selectedNote ? note : null, pages);
 
   useEffect(() => {
     alive.current = true;
@@ -79,6 +144,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       alive.current = false;
       active.current.cancelled = true;
       if (active.current.id) void client.cancel(active.current.id).catch(() => {});
+      workers.current?.engine.dispose();
+      workers.current?.renderer.dispose();
+      workers.current = null;
     };
   }, [client]);
   useEffect(() => {
@@ -91,41 +159,56 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     return () => observer.disconnect();
   }, [phase]);
   useEffect(() => {
-    if (!reviewXml || phase !== 'review') return;
-    let current = true;
-    const engine = createEngineClient();
-    const renderer = createRenderer();
-    setReviewReady(false);
-    setReviewError(null);
+    // A new mode or page shows its own notation; a correction keeps the old one until the new
+    // render arrives, so the sheet never flashes empty.
     setPages([]);
-    void (async () => {
-      // Render independently of import: an importer refusal must not erase the raw result.
-      const rendered = renderer
-        .render({ xml: reviewXml, widthPx: width })
-        .then((result) => {
-          if (current) setPages(result.pages);
-        })
-        .catch((cause: unknown) => {
-          if (current) setReviewError((m) => m.scan.errors.notationNotShown(messageOf(cause, m)));
+  }, [reviewMode, pageMode ? selected : -1]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!renderXml || phase !== 'review') return;
+    let current = true;
+    // Render independently of import: an importer refusal must not erase the raw result.
+    getWorkers()
+      .renderer.render({ xml: renderXml, widthPx: width })
+      .then((result) => {
+        if (!current) return;
+        setPages(result.pages);
+        setRendered({ xml: renderXml, error: null });
+      })
+      .catch((cause: unknown) => {
+        if (!current || (cause as Error)?.name === 'SupersededError') return;
+        setRendered({
+          xml: renderXml,
+          error: (m) => m.scan.errors.notationNotShown(messageOf(cause, m)),
         });
-      try {
-        const result = await engine.load(reviewXml, 'scan.musicxml', { preserveNotation: true });
-        if (current) {
-          setWarnings(result.warnings);
-          if (!result.score.notes.length) setReviewError((m) => m.scan.errors.noNotes);
-          else setReviewReady(true);
-        }
-      } catch (cause) {
-        if (current) setReviewError((m) => m.scan.errors.notUsable(messageOf(cause, m)));
-      }
-      await rendered;
-    })();
+      });
     return () => {
       current = false;
-      engine.dispose();
-      renderer.dispose();
     };
-  }, [reviewXml, width, phase]);
+  }, [renderXml, width, phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!importXml || phase !== 'review') return;
+    let current = true;
+    getWorkers()
+      .engine.load(importXml, 'scan.musicxml', { preserveNotation: true })
+      .then((result) => {
+        if (!current) return;
+        setWarnings(result.warnings);
+        setImported({
+          xml: importXml,
+          error: result.score.notes.length ? null : (m) => m.scan.errors.noNotes,
+        });
+      })
+      .catch((cause: unknown) => {
+        if (current)
+          setImported({
+            xml: importXml,
+            error: (m) => m.scan.errors.notUsable(messageOf(cause, m)),
+          });
+      });
+    return () => {
+      current = false;
+    };
+  }, [importXml, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const retain = (next: ScanSession) => {
     // The local score library retains completed source/recognition snapshots in IndexedDB.
@@ -135,6 +218,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const arrange = (next: ScanPage[]) => {
     if (busy) return;
     setError(null);
+    setHandOffState(null);
     retain({
       ...session,
       file: next[0]!.file,
@@ -143,6 +227,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       recognizedAt: undefined,
       recognizer: undefined,
       warnings: undefined,
+      corrections: undefined,
     });
   };
 
@@ -257,6 +342,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ...session,
       pages: results,
       xml,
+      corrections: undefined,
       recognizedAt: new Date().toISOString(),
       recognizer: [...new Set(results.map((p) => p.recognizer).filter(Boolean))].join(', '),
       warnings: [
@@ -271,6 +357,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         ]),
       ],
     });
+    setUndoStack([]);
     setPhase('review');
   };
   const warningText = (warning: string) =>
@@ -284,12 +371,103 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     useAppStore.getState().openPiece({
       kind: 'file',
       name: session.file.name.replace(/\.[^.]+$/, '') + '.musicxml',
-      bytes: new TextEncoder().encode(session.xml),
+      bytes: new TextEncoder().encode(corrected?.xml ?? session.xml),
       scan: session,
     });
   };
+  const sendPhotos = async () => {
+    const result = await handOff(handOffFiles(sourcePages), t.scan.phone.shareTitle);
+    if (alive.current && result !== 'cancelled') setHandOffState(result);
+  };
+
+  // Corrections: each one is checked before it is recorded, and recorded only when it applies.
+  const applyCorrection = (correction: Correction) => {
+    if (!session.xml || !corrected) return;
+    const refusal = tryCorrection(session.xml, corrections, correction);
+    if (refusal) {
+      setEditStatus(refusal);
+      return;
+    }
+    if (correction.kind === 'remove') {
+      // A removed chord member hands the selection to the note left in its place.
+      const target = corrected.score.notes.find((n) => n.ordinal === correction.note);
+      const chord = target ? chordOf(corrected.score, target) : [];
+      const neighbour = chord.find((n) => n !== target);
+      if (neighbour) setNote(neighbour.ordinal);
+    }
+    setUndoStack((stack) => [...stack, corrections]);
+    setEditStatus(null);
+    retain({ ...session, corrections: [...corrections, correction] });
+  };
+  const undo = () => {
+    if (!corrections.length && !undoStack.length) return;
+    const previous = undoStack.at(-1) ?? corrections.slice(0, -1);
+    setUndoStack((stack) => stack.slice(0, -1));
+    setEditStatus(null);
+    retain({ ...session, corrections: previous.length ? previous : undefined });
+  };
+  const reset = () => {
+    if (!corrections.length) return;
+    setUndoStack((stack) => [...stack, corrections]);
+    setEditStatus((m) => m.scan.edit.resetDone);
+    retain({ ...session, corrections: undefined });
+  };
+  const select = useCallback(
+    (ordinal: number | null) => {
+      setNote(ordinal);
+      setEditStatus(null);
+      if (ordinal === null || !sheetHost) return;
+      requestAnimationFrame(() =>
+        sheetHost.querySelector(`[id="s${ordinal}"]`)?.scrollIntoView?.({ block: 'nearest' }),
+      );
+    },
+    [sheetHost],
+  );
+  const onSheetClick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!editable || !sheetHost) return;
+    const ordinal = noteAt(sheetHost, event);
+    if (ordinal !== undefined) select(ordinal);
+  };
+  const onSheetKey = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (!editable || !corrected) return;
+    const order = readingOrder(corrected.score);
+    if (!order.length) return;
+    const position = selectedNote ? order.indexOf(selectedNote) : -1;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+      event.preventDefault();
+      const next =
+        position < 0
+          ? 0
+          : Math.min(order.length - 1, Math.max(0, position + (event.key === 'ArrowRight' ? 1 : -1)));
+      select(order[next]!.ordinal);
+    } else if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && selectedNote?.step) {
+      event.preventDefault();
+      applyCorrection({
+        kind: 'pitch',
+        note: selectedNote.ordinal,
+        ...stepPitch(corrected.score, selectedNote, event.key === 'ArrowUp' ? 1 : -1),
+      });
+    } else if (event.key === 'Escape' && selectedNote) {
+      event.preventDefault();
+      select(null);
+    }
+  };
+  const onReviewKey = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
+      if (!editable || !corrections.length) return;
+      event.preventDefault();
+      undo();
+    }
+  };
+  const baseName = session.file.name.replace(/\.[^.]+$/, '');
+  const statusText = editStatus
+    ? editStatus(t)
+    : selectedNote && corrected
+      ? timingText(t, corrected.score, selectedNote.part, selectedNote.measure)
+      : '';
+
   return (
-    <main className="page scan-view stack">
+    <main className="page scan-view stack" onKeyDown={phase === 'review' ? onReviewKey : undefined}>
       <header className="stack">
         <button className="text-button" onClick={openLibrary}>
           {t.scan.view.back}
@@ -306,59 +484,85 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       {phase !== 'review' ? (
         <div className="scan-intro">
           <section className="stack">
-            <p>{t.scan.view.advice}</p>
-            <p className="small muted">{t.scan.view.workerNeeded}</p>
-            <div className="row">
-              {phase === 'connect' || phase === 'connecting' ? (
-                <Button
-                  primary
-                  disabled={busy || rotating}
-                  onClick={() => {
-                    void connect();
-                  }}
-                >
-                  {phase === 'connecting' ? t.scan.view.connecting : t.scan.view.connect}
-                </Button>
-              ) : phase === 'scanning' || phase === 'cancelling' ? (
-                // Plain while the loader below carries the screen's one red.
-                <Button
-                  disabled={phase === 'cancelling'}
-                  onClick={() => {
-                    void cancel();
-                  }}
-                >
-                  {phase === 'cancelling' ? t.scan.view.cancelling : t.scan.view.cancelScan}
-                </Button>
-              ) : (
-                <Button
-                  primary
-                  disabled={rotating}
-                  onClick={() => {
-                    void scan();
-                  }}
-                >
-                  {batch && sourcePages.some((p) => p.error)
-                    ? t.scan.view.retryFailed
-                    : t.scan.view.scanScore}
-                </Button>
-              )}
-            </div>
-            {(phase === 'scanning' || phase === 'cancelling') && (
-              <div className="scan-loader">
-                <Loader tune="scale" />
-              </div>
-            )}
-            <p role="status">
-              {phase === 'scanning'
-                ? batch
-                  ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
-                  : t.scan.view.scanning
-                : phase === 'connected'
-                  ? t.scan.view.connected
-                  : ''}
-            </p>
-            {health?.capabilities?.textModelConfigured === false && (
-              <p role="status">{t.scan.view.textModelMissing}</p>
+            {touchOnly && isImage ? (
+              <>
+                <p>{t.scan.phone.explain}</p>
+                <div className="row">
+                  <Button
+                    primary
+                    disabled={rotating}
+                    onClick={() => {
+                      void sendPhotos();
+                    }}
+                  >
+                    {typeof navigator.share === 'function' ? t.scan.phone.share : t.scan.phone.save}
+                  </Button>
+                </div>
+                <p role="status">
+                  {handOffState === 'shared'
+                    ? t.scan.phone.shared
+                    : handOffState === 'saved'
+                      ? t.scan.phone.saved
+                      : ''}
+                </p>
+              </>
+            ) : (
+              <>
+                <p>{t.scan.view.advice}</p>
+                <p className="small muted">{t.scan.view.workerNeeded}</p>
+                <div className="row">
+                  {phase === 'connect' || phase === 'connecting' ? (
+                    <Button
+                      primary
+                      disabled={busy || rotating}
+                      onClick={() => {
+                        void connect();
+                      }}
+                    >
+                      {phase === 'connecting' ? t.scan.view.connecting : t.scan.view.connect}
+                    </Button>
+                  ) : phase === 'scanning' || phase === 'cancelling' ? (
+                    // Plain while the loader below carries the screen's one red.
+                    <Button
+                      disabled={phase === 'cancelling'}
+                      onClick={() => {
+                        void cancel();
+                      }}
+                    >
+                      {phase === 'cancelling' ? t.scan.view.cancelling : t.scan.view.cancelScan}
+                    </Button>
+                  ) : (
+                    <Button
+                      primary
+                      disabled={rotating}
+                      onClick={() => {
+                        void scan();
+                      }}
+                    >
+                      {batch && sourcePages.some((p) => p.error)
+                        ? t.scan.view.retryFailed
+                        : t.scan.view.scanScore}
+                    </Button>
+                  )}
+                </div>
+                {(phase === 'scanning' || phase === 'cancelling') && (
+                  <div className="scan-loader">
+                    <Loader tune="scale" />
+                  </div>
+                )}
+                <p role="status">
+                  {phase === 'scanning'
+                    ? batch
+                      ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
+                      : t.scan.view.scanning
+                    : phase === 'connected'
+                      ? t.scan.view.connected
+                      : ''}
+                </p>
+                {health?.capabilities?.textModelConfigured === false && (
+                  <p role="status">{t.scan.view.textModelMissing}</p>
+                )}
+              </>
             )}
             {error && <p role="alert">{error(t)}</p>}
             <details className="scan-setup">
@@ -401,6 +605,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 onSelect={setSelected}
                 editable
                 busy={busy}
+                camera={touchOnly}
                 onChange={arrange}
                 onRotating={setRotating}
               />
@@ -425,6 +630,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         <>
           <p>{t.scan.review.caveat}</p>
           {error && <p role="alert">{error(t)}</p>}
+          {corrected && corrected.applied < corrections.length && (
+            <p role="alert">{t.scan.edit.stale(corrected.applied)}</p>
+          )}
           <div className="scan-review">
             <section className="scan-source stack">
               <h2>{t.scan.view.original}</h2>
@@ -456,7 +664,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 )
               )}
             </section>
-            <section className="stack" ref={resultHost}>
+            <section className="stack scan-result" ref={resultHost}>
               <h2>{t.scan.review.recognized}</h2>
               {batch && (
                 <div className="row" aria-label={t.scan.review.viewLabel}>
@@ -464,6 +672,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     aria-pressed={reviewMode === 'page'}
                     onClick={() => {
                       setReviewMode('page');
+                      select(null);
                     }}
                   >
                     {t.scan.review.pageRecognition}
@@ -486,10 +695,95 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     : t.scan.review.allPages}
                 </p>
               )}
+              {editable && problems.length > 0 && corrected && (
+                <details className="scan-problems">
+                  <summary>{t.scan.edit.problemsSummary(problems.length)}</summary>
+                  <ul className="stack">
+                    {problems.map((problem, index) => {
+                      const target = problemNote(corrected.score, problem);
+                      return (
+                        <li key={index}>
+                          <button
+                            className="text-button"
+                            disabled={target === undefined}
+                            onClick={() => {
+                              if (target !== undefined) select(target);
+                            }}
+                          >
+                            {describeProblem(t, corrected.score, problem)}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </details>
+              )}
               {pages.length ? (
-                <ScoreSheet pages={pages} label={t.scan.review.sheetLabel} />
+                <div
+                  className={`scan-sheet${editable ? ' is-editable' : ''}`}
+                  tabIndex={editable ? 0 : undefined}
+                  role={editable ? 'group' : undefined}
+                  aria-label={editable ? t.scan.review.recognized : undefined}
+                  aria-describedby={editable ? 'scan-edit-keys' : undefined}
+                  onClick={onSheetClick}
+                  onKeyDown={onSheetKey}
+                >
+                  <ScoreSheet
+                    pages={pages}
+                    label={
+                      corrections.length
+                        ? t.scan.edit.correctedSheetLabel
+                        : t.scan.review.sheetLabel
+                    }
+                    onHost={setSheetHost}
+                  />
+                </div>
               ) : (
                 <p role="status">{reviewError ? reviewError(t) : t.scan.review.preparing}</p>
+              )}
+              {editable && (
+                <p id="scan-edit-keys" className="visually-hidden">
+                  {t.scan.edit.keys}
+                </p>
+              )}
+              <p className="visually-hidden" aria-live="polite">
+                {selectedNote ? describeNote(t, selectedNote) : ''}
+              </p>
+              {selectedNote && corrected ? (
+                <NoteEditor
+                  score={corrected.score}
+                  ordinal={selectedNote.ordinal}
+                  status={statusText}
+                  onCorrect={applyCorrection}
+                  onSelect={select}
+                  onClose={() => select(null)}
+                />
+              ) : (
+                editable && pages.length > 0 && <p className="small muted">{t.scan.edit.hint}</p>
+              )}
+              {editable && !selectedNote && editStatus && (
+                <p className="small" role="status">
+                  {editStatus(t)}
+                </p>
+              )}
+              {editable && (corrections.length > 0 || undoStack.length > 0) && (
+                <div className="stack scan-corrections">
+                  <div className="row">
+                    {corrections.length > 0 && <span>{t.scan.edit.corrections(corrections.length)}</span>}
+                    <button onClick={undo}>{t.scan.edit.undo}</button>
+                    {corrections.length > 0 && <button onClick={reset}>{t.scan.edit.reset}</button>}
+                  </div>
+                  {corrections.length > 0 && rawScore && (
+                    <details>
+                      <summary>{t.scan.edit.listSummary}</summary>
+                      <ol className="stack small">
+                        {corrections.slice(0, corrected?.applied).map((c, index) => (
+                          <li key={index}>{describeCorrection(t, rawScore, c)}</li>
+                        ))}
+                      </ol>
+                    </details>
+                  )}
+                </div>
               )}
             </section>
           </div>
@@ -537,18 +831,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             {session.xml && (
               <button
                 className="text-button scan-download"
-                onClick={() =>
-                  downloadText(
-                    session.file.name.replace(/\.[^.]+$/, '') + '-recognized.musicxml',
-                    session.xml!,
-                  )
-                }
+                onClick={() => downloadText(baseName + '-recognized.musicxml', session.xml!)}
               >
                 {batch ? t.scan.review.downloadCombined : t.scan.review.downloadRaw}
               </button>
             )}
+            {session.xml && corrected && corrections.length > 0 && (
+              <button
+                className="text-button scan-download"
+                onClick={() => downloadText(baseName + '-corrected.musicxml', corrected.xml)}
+              >
+                {t.scan.edit.downloadCorrected}
+              </button>
+            )}
             <div className="row">
-              <Button primary disabled={!canUseResult} onClick={useResult}>
+              {/* Plain while a selected note carries the screen's one red. */}
+              <Button primary={!selectedNote} disabled={!canUseResult} onClick={useResult}>
                 {t.scan.review.useForFingerings}
               </Button>
               <button
@@ -556,9 +854,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   setPhase('connect');
                   setError(null);
                   setReviewMode('combined');
+                  select(null);
+                  setUndoStack([]);
                   retain({
                     ...session,
                     xml: undefined,
+                    corrections: undefined,
                     pages: sourcePages.map((p) => ({ ...p, xml: undefined, error: undefined })),
                   });
                 }}

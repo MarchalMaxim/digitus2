@@ -99,6 +99,7 @@ export const library: Messages['library'] = {
       file: 'Archivo de partitura',
       recognition: 'Reconocimiento guardado',
       draft: 'Borrador de escaneo',
+      corrected: 'Reconocimiento corregido',
     },
     removeFailed: 'No se pudo eliminar esta partitura. Inténtalo de nuevo.',
     removedNotErased:

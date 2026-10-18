@@ -67,6 +67,119 @@ export const scan: Messages['scan'] = {
     useForFingerings: 'Usar para las digitaciones',
     scanAgain: 'Escanear de nuevo',
   },
+  edit: {
+    hint: 'Selecciona una nota para corregirla.',
+    keys: 'Izquierda y Derecha seleccionan la nota anterior o siguiente, Arriba y Abajo cambian su altura, Escape cierra el editor.',
+    pitch: (step: string, alter: number, octave: number) =>
+      `${({ C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯'.repeat(alter) : '♭'.repeat(-alter)}${octave}`,
+    bar: (bar: string) => `Compás ${bar}`,
+    rightHand: 'mano derecha',
+    leftHand: 'mano izquierda',
+    staff: (staff: number) => `pentagrama ${staff}`,
+    lengths: {
+      whole: 'redonda',
+      half: 'blanca',
+      quarter: 'negra',
+      eighth: 'corchea',
+      '16th': 'semicorchea',
+      '32nd': 'fusa',
+    } as Record<string, string>,
+    noteLength: (length: string, dotted: boolean) => `${length}${dotted ? ' con puntillo' : ''}`,
+    restLength: (length: string, dotted: boolean) =>
+      `silencio de ${length}${dotted ? ' con puntillo' : ''}`,
+    tied: 'ligada',
+    describe: (parts: string[]) => parts.join(' · '),
+    panelLabel: 'Corregir la nota seleccionada',
+    pitchLabel: 'Altura',
+    lower: 'Más grave',
+    lowerLabel: 'Bajar un grado',
+    higher: 'Más aguda',
+    higherLabel: 'Subir un grado',
+    flat: 'Bemol',
+    natural: 'Becuadro',
+    sharp: 'Sostenido',
+    lengthLabel: 'Duración',
+    lengthButtons: {
+      whole: 'Redonda',
+      half: 'Blanca',
+      quarter: 'Negra',
+      eighth: 'Corchea',
+      '16th': 'Semicorchea',
+      '32nd': 'Fusa',
+    } as Record<string, string>,
+    dotted: 'Con puntillo',
+    tieNext: 'Ligada a la siguiente',
+    tiePrevious: 'Ligada a la anterior',
+    toLeftHand: 'Pasar a la mano izquierda',
+    toRightHand: 'Pasar a la mano derecha',
+    remove: 'Quitar la nota',
+    previous: 'Nota anterior',
+    next: 'Nota siguiente',
+    done: 'Listo',
+    handBeats: (hand: string, beats: number) =>
+      `${hand} ${plural('es', beats, { one: '# tiempo', other: '# tiempos' })}`,
+    timing: (bar: string, hands: string[], meter?: string) =>
+      `${bar}: ${hands.join(', ')}${meter ? `, en ${meter}` : ''}.`,
+    corrections: (n: number) => plural('es', n, { one: '# corrección', other: '# correcciones' }),
+    undo: 'Deshacer',
+    reset: 'Volver al reconocimiento',
+    resetDone: 'Se quitaron todas las correcciones. Deshacer las recupera.',
+    listSummary: 'Ver las correcciones',
+    changed: {
+      pitch: (where: string, from: string, to: string) => `${where}: ${from} → ${to}`,
+      duration: (where: string, pitch: string, from: string, to: string) =>
+        `${where}: ${pitch} ${from} → ${to}`,
+      tie: (where: string, pitch: string) => `${where}: ${pitch} ligada al siguiente ${pitch}`,
+      untie: (where: string, pitch: string) => `${where}: ligadura de ${pitch} quitada`,
+      hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} pasada a la ${hand}`,
+      removed: (where: string, pitch: string) => `${where}: ${pitch} quitada`,
+    },
+    stale: (kept: number) =>
+      `Algunas correcciones guardadas ya no se aplican a este reconocimiento. Se conservan las primeras ${kept}.`,
+    problemsSummary: (n: number) =>
+      plural('es', n, { one: '# punto que revisar', other: '# puntos que revisar' }),
+    problems: {
+      tieGap: (where: string, pitch: string, gap: string) =>
+        `${where}: la ligadura de ${pitch} llega al siguiente ${pitch} ${gap} tarde.`,
+      tieEarly: (where: string, pitch: string, gap: string) =>
+        `${where}: la ligadura de ${pitch} llega al siguiente ${pitch} ${gap} antes.`,
+      tieUnmatched: (where: string, pitch: string) =>
+        `${where}: una ligadura en ${pitch} no tiene nota que le corresponda.`,
+      barTiming: (timing: string) => `Las manos no coinciden. ${timing}`,
+    },
+    gap: (beats: number) => plural('es', beats, { one: '# tiempo', other: '# tiempos' }),
+    downloadCorrected: 'Descargar MusicXML corregido',
+    correctedSheetLabel: 'el reconocimiento corregido',
+    refused: {
+      missing: 'Esta nota ya no está en la partitura.',
+      rest: 'Un silencio no tiene altura que cambiar.',
+      range: 'Esa altura está fuera del registro del piano.',
+      grace: 'Una nota de adorno no ocupa tiempo, así que aquí no se puede cambiar su duración.',
+      unwritable: 'Esta duración no se puede escribir en esta partitura.',
+      otherHand:
+        'Este cambio movería notas de la otra mano o voz, así que no se hizo. Revisa el compás en un editor de partituras.',
+      noTieTarget: (pitch: { step: string; alter: number; octave: number }) =>
+        `Ningún ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} empieza donde termina esta nota, así que no se puede ligar. Corrige primero las duraciones.`,
+      noTieSource: (pitch: { step: string; alter: number; octave: number }) =>
+        `Ningún ${scan.edit.pitch(pitch.step, pitch.alter, pitch.octave)} termina donde empieza esta nota, así que no se puede ligar.`,
+      tieTaken: 'La nota siguiente ya está ligada a otra nota.',
+      tiedRemove: 'Quita la ligadura de esta nota antes de quitar la nota.',
+      chordLengths: 'Las notas del acorde tienen duraciones distintas. Cambia primero la duración.',
+      oneStaff: 'Esta partitura tiene un solo pentagrama.',
+    },
+  },
+  phone: {
+    takePhoto: 'Hacer una foto',
+    takeAnother: 'Hacer otra foto',
+    explain:
+      'El reconocimiento se hace en un PC, y un teléfono no puede conectarse a él. Envía estas fotos al PC donde funciona el programa y ábrelas allí.',
+    share: 'Enviar las fotos a tu PC',
+    save: 'Guardar las fotos',
+    shareTitle: 'Fotos de partitura',
+    shared: 'Fotos enviadas. Ábrelas en tu PC con «Abre tu propia partitura».',
+    saved:
+      'Fotos guardadas en este dispositivo. Pásalas a tu PC y ábrelas con «Abre tu propia partitura».',
+  },
   errors: {
     notCombinedSaved:
       'Se reconocieron las páginas, pero no se pudo combinar su notación. Los archivos de cada página están disponibles más abajo.',

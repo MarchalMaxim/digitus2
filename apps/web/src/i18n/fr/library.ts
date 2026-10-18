@@ -101,6 +101,7 @@ export const library: Messages['library'] = {
       file: 'Fichier de partition',
       recognition: 'Reconnaissance enregistrée',
       draft: 'Brouillon de numérisation',
+      corrected: 'Reconnaissance corrigée',
     },
     removeFailed: 'Impossible de supprimer cette partition. Réessayez.',
     removedNotErased:

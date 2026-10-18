@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useT } from '../i18n/i18n.js';
 import type { Phrase } from '../i18n/messages.js';
@@ -32,10 +32,13 @@ export function ImagePages({
   onSelect,
   onChange,
   onRotating,
+  camera = false,
 }: {
   pages: ScanPage[];
   editable: boolean;
   busy: boolean;
+  /** A touch-only device: adding a page opens the camera first. */
+  camera?: boolean;
   selected: number;
   onSelect(index: number): void;
   onChange(pages: ScanPage[]): void;
@@ -98,6 +101,33 @@ export function ImagePages({
     reordered.splice(to, 0, item!);
     onChange(reordered);
     onSelect(to);
+  };
+  const addFiles = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = '';
+    if (!files.length) return;
+    void validateScanImages(files).then(
+      (validated) => {
+        if (!alive.current) return;
+        const current = latest.current;
+        if (current.busy) {
+          setError((tt) => tt.scan.pages.finishFirst);
+          return;
+        }
+        if (current.pages.length + validated.length > SCAN_PAGE_LIMIT) {
+          setError((tt) => tt.scan.files.pageLimit);
+          return;
+        }
+        setError(null);
+        current.onChange([
+          ...current.pages,
+          ...validated.map((file) => ({ id: crypto.randomUUID(), file })),
+        ]);
+      },
+      (cause: unknown) => {
+        if (alive.current) setError((tt) => messageOf(cause, tt));
+      },
+    );
   };
   return (
     <div className="stack image-pages">
@@ -201,43 +231,32 @@ export function ImagePages({
               </button>
             </div>
           )}
-          <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
-            {t.scan.pages.addImages}
-            <input
-              type="file"
-              multiple
-              accept=".png,.jpg,.jpeg"
-              className="visually-hidden"
-              disabled={busy}
-              onChange={(event) => {
-                const files = Array.from(event.currentTarget.files ?? []);
-                event.currentTarget.value = '';
-                if (!files.length) return;
-                void validateScanImages(files).then(
-                  (validated) => {
-                    if (!alive.current) return;
-                    const current = latest.current;
-                    if (current.busy) {
-                      setError((tt) => tt.scan.pages.finishFirst);
-                      return;
-                    }
-                    if (current.pages.length + validated.length > SCAN_PAGE_LIMIT) {
-                      setError((tt) => tt.scan.files.pageLimit);
-                      return;
-                    }
-                    setError(null);
-                    current.onChange([
-                      ...current.pages,
-                      ...validated.map((file) => ({ id: crypto.randomUUID(), file })),
-                    ]);
-                  },
-                  (cause: unknown) => {
-                    if (alive.current) setError((tt) => messageOf(cause, tt));
-                  },
-                );
-              }}
-            />
-          </label>
+          <div className="row">
+            {camera && (
+              <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
+                {t.scan.phone.takeAnother}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  capture="environment"
+                  className="visually-hidden"
+                  disabled={busy}
+                  onChange={addFiles}
+                />
+              </label>
+            )}
+            <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
+              {t.scan.pages.addImages}
+              <input
+                type="file"
+                multiple
+                accept=".png,.jpg,.jpeg,image/jpeg,image/png"
+                className="visually-hidden"
+                disabled={busy}
+                onChange={addFiles}
+              />
+            </label>
+          </div>
           {error && <p role="alert">{error(t)}</p>}
         </div>
       )}

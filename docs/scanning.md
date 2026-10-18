@@ -9,7 +9,8 @@ MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the worke
 - **Original bytes are kept.** Unrotated images and PDFs go to the worker byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser.
 - **Nothing leaves your computer.** The file goes only from the browser to the worker on 127.0.0.1. There is no external recognition service and no upload. Scan jobs download nothing; only the one-time setup does.
 - **Recognition errors stay visible.** The source and the recognised notation sit side by side, and every result is marked as needing review. Scanned notation goes through a strict import that refuses malformed notation, for example a tie stop without a start. You can still download such a result, but **Use for fingerings** stays disabled.
-- **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The worker never picks one of several exported scores or publishes an incomplete export.
+- **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The worker never picks one of several exported scores or publishes an incomplete export. The one change the worker makes to a recognition is lossless and described under Known recognition errors (a measure that holds no music joins its neighbours).
+- **Your corrections are explicit.** Each correction you make in the review is recorded, listed and undoable. The raw recognition is kept unchanged beside the corrected copy, and both can be downloaded.
 - **Display preparation never changes the music.** Inferred beams and a voice regrouping for Verovio (below) apply only to the rendered copy. Recognised pitches, timing, note ids, raw downloads and the input to fingering and playback are untouched.
 
 ## Scan a score
@@ -18,9 +19,35 @@ MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the worke
 2. On the PC that runs the worker, press **Connect to this PC**. If the browser asks, allow this site to connect to the local computer. The app never contacts the worker before you press Connect.
 3. Press **Scan this score**. Pages are recognised one at a time in the order shown. **Cancel scan** stops the job, and leaving the page cancels it too. A page that fails keeps the others; **Retry failed pages** resubmits only the failed ones. Most pages take seconds, difficult ones a few minutes.
 4. Compare the original with **Recognized notation**: every page, pitches, rhythms, bar count, clefs, key and time signatures, and hands. For an image batch, select a thumbnail to see that page's recognition, or switch to **Combined score**. For a PDF, step through the original with Previous and Next; the recognised pages may break differently. Text and tempo may be missing.
-5. Press **Use for fingerings** to open the normal score view with fingerings and playback. The button is enabled once the recognised score passes the strict import and renders. **Scan source and recognition** in the score view returns to the comparison, and so does the browser's Back button, without a new job.
+5. Correct what differs, note by note (Correct the recognition, below).
+6. Press **Use for fingerings** to open the normal score view with fingerings and playback. The button is enabled once the recognised score, with your corrections, passes the strict import and renders. **Scan source and recognition** in the score view returns to the comparison, and so does the browser's Back button, without a new job.
 
-**Download raw MusicXML** saves the recognised file untouched, without fingerings. A batch offers **Download combined MusicXML** and each page's file instead. Correct a file in a notation editor, then open the corrected MusicXML normally. The playback tempo of a scan may be the app's default, not a recognised tempo.
+**Download raw MusicXML** saves the recognised file untouched, without fingerings. A batch offers **Download combined MusicXML** and each page's file instead. Once you have corrected notes, **Download corrected MusicXML** saves the corrected copy too. A notation editor remains the tool for what the review cannot correct. The playback tempo of a scan may be the app's default, not a recognised tempo.
+
+## Correct the recognition
+
+Select a note or rest in **Recognized notation** to correct it: click or tap it (a tap close to a note reaches it), or focus the notation and use the arrow keys. The selected note carries the screen's red, and a panel docks at the bottom of the screen with what the note is ("Bar 11 · right hand · A4 quarter note · tied") and what can change:
+
+| Control | What it does |
+| --- | --- |
+| Lower, Higher; ♭ ♮ ♯ | Moves the note one step on the staff, taking the key signature's sharp or flat for the new letter, or sets its accidental. A tied note moves with its whole tie chain, so a tie never joins two pitches. Up and Down do the same from the keyboard. |
+| Whole to 16th, Dotted | Sets the length of the note, or of its whole chord. The rest of its voice moves with it; the other hand and the other voices never move, and a change that would move them is refused. The panel then says how long each hand's bar is ("Bar 2: right hand 2 beats, left hand 3 beats, in 3/4."). |
+| Tied to next | Ties the note to the same pitch starting exactly where it ends, writing both the sounding tie and the drawn one, or removes the tie. A slur is never turned into a tie or back. When nothing of that pitch starts there, the panel says so instead of guessing. |
+| To left hand, To right hand | Moves the note to the other staff at the same time: the hand the fingering uses. |
+| Remove | A duplicated chord note goes; a lone note becomes a rest of the same length; a stray rest goes and the rest of its voice moves up into its place. |
+| ‹ ›, Done | The previous or next note in reading order; Done or Escape closes the panel. |
+
+Every correction is checked before it is recorded, then the notation is rendered and imported again at once, so **Use for fingerings** follows what is on screen. **Undo** (or Ctrl+Z) takes back the last correction, **Reset to recognition** removes them all (Undo brings them back), and **Review corrections** lists them in the order they were made ("Bar 2, right hand: quarter rest removed"). Notes are named by their position in the raw recognition, not by the strict import, so a recognition the import refuses can still be corrected until it passes. Correcting works on the combined score; a batch whose pages cannot be combined is reviewed page by page and corrected in a notation editor.
+
+**Places to check** appears above the notation when rules checked on the file itself find something: a tie whose next note of that pitch starts late or early (the bar 11 tie of the test page, whose continuation arrived a quarter note late, is one), a tie without a matching note, hands that disagree on a bar's length, or a hand longer than its time signature. Each entry selects its note. They point at a place; they never decide the correction. On the library's correct engravings the tie rules are silent on all 280 curated pieces, and the hand rule flags 9 of them, in bars where the engraving lets one voice end early.
+
+## On a phone or tablet
+
+A phone cannot reach the PC worker: its 127.0.0.1 is the phone itself, and the worker accepts connections only from its own computer. On a device whose only pointer is a finger, the library offers **Take a photo** next to **Open your own score**, and the scan page offers **Take another photo** for further pages. Photos are named by the time they were taken. The page tools (rotate, move earlier, move later, remove) are one row of symbol buttons sized for a thumb, and pages are put in order by selecting a thumbnail and moving it, because dragging needs a mouse.
+
+Instead of **Connect to this PC**, the phone says that recognition runs on a PC and offers **Send photos to your PC**, which opens the phone's own share sheet (mail, messages, a cloud drive of your choosing), or **Save photos** where the browser cannot share files. The files are named `page-01-…`, `page-02-…` in your order, so the PC's file chooser lists them in reading order. The app uploads nothing; where the photos go is your choice in the share sheet. On the PC, open them with **Open your own score** and scan as usual.
+
+A phone that recognises by itself would need the PC worker reachable over the local network, with pairing and authentication. That is not built: the worker is designed for the one computer it runs on (`docs/research/omr.md`, Browser to worker connection).
 
 ### Rotation
 
@@ -38,7 +65,7 @@ The pinned homr writes no beams. For display, the app infers conventional beat g
 
 ## My scores
 
-Uploads are saved automatically in the browser's IndexedDB (database `digitus2.my-scores`), with page order, rotation, original and rotated bytes, the raw recognised MusicXML and the recogniser's name. Plain MusicXML and MIDI imports are saved too. **My scores** appears in the library when it has entries. Reopening an entry never reconnects to the PC or restarts recognition. A multi-page result that cannot be combined still reopens page by page. Remove deletes an entry. A failed save is reported and the current work stays usable.
+Uploads are saved automatically in the browser's IndexedDB (database `digitus2.my-scores`), with page order, rotation, original and rotated bytes, the raw recognised MusicXML, your list of corrections and the recogniser's name. The raw recognition is never overwritten: the corrected copy is the raw recognition with the saved corrections replayed, and an entry with corrections is listed as **Corrected recognition**. Plain MusicXML and MIDI imports are saved too. **My scores** appears in the library when it has entries. Reopening an entry never reconnects to the PC or restarts recognition. A multi-page result that cannot be combined still reopens page by page. Remove deletes an entry. A failed save is reported and the current work stays usable.
 
 Browser storage belongs to one site and one browser profile, so a local preview and the GitHub Pages site have separate collections. Clearing site data or storage eviction removes it ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [storage limits](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)), so keep your own copies. Nothing is shared or published; a shared library is an open request (#41).
 

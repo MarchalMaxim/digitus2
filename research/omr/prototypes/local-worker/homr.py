@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import xml.etree.ElementTree as ET
 from audiveris import run_process
+from normalize_export import normalize
 
 COMMIT = "ab369ac54277afab582afa4725441f7cbba76593"
 SOURCE_MANIFEST_PATH = Path(__file__).resolve().parent.parent / "homr-photo/source-manifests.json"
@@ -169,8 +170,13 @@ class Homr:
             "timeSignatureProvenance":"may-be-inferred-from-recognized-bar-durations",
             "keySignatureProvenance":"may-be-assumed-when-absent-from-the-page",
         }
+        # Lossless export rules and checks (normalize_export.py): their counts are audited and
+        # shown in the review as warnings, so the downloaded file's differences are explained.
+        data,audit,normalized=normalize(data)
+        metadata.update(audit)
+        warnings.extend(normalized)
         (destination/"recognition.json").write_text(json.dumps(metadata,indent=2),encoding="utf-8")
         output=destination/"result.musicxml"
-        shutil.copyfile(produced,output)
+        output.write_bytes(data)
         return output
 

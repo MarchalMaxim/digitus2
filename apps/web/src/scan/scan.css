@@ -133,7 +133,7 @@
 
 /* A pressed toggle (the review's view switch, the editor's pitch and length) is drawn inverted,
    as a chosen level pill is: the state is visible without colour. */
-.scan-view button[aria-pressed='true']:not(.scan-thumbnail) {
+.scan-result button[aria-pressed='true'] {
   color: var(--paper);
   background: var(--ink);
   border-color: var(--ink);

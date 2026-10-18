@@ -64,3 +64,8 @@ research/spikes/**/playwright-report/
 # latest-mutopia.json and latest-hands.json, floor.json, history.md and textbook/ stay tracked)
 benchmarks/runs/
 benchmarks/errors/
+
+# Piano samples (issue #51): the piano-samples-v1 release asset, unpacked by
+# scripts/fetch-piano-samples.mjs (piano.partial/ while it unpacks). build/piano-samples/ is
+# covered by the build/ rule above.
+apps/web/public/piano*/

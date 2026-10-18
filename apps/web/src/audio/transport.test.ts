@@ -740,7 +740,6 @@ describe('Transport', () => {
     t.play();
     run(t, 1);
     expect(instrument.events[0]!.time).toBeGreaterThanOrEqual(100);
-    expect(score.notes.find((n) => n.id === instrument.events[0]!.hand + 'x') ?? true).toBeTruthy();
     expect(Math.min(...instrument.events.map((e) => e.time - 100 + 10))).toBeGreaterThanOrEqual(10);
     t.pause();
     const n = instrument.events.length;

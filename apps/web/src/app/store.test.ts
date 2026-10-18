@@ -22,7 +22,17 @@ beforeEach(() => {
 describe('store', () => {
   it('starts on the library with default settings', () => {
     expect(useAppStore.getState().view).toEqual({ name: 'library' });
-    expect(useAppStore.getState().settings).toEqual(DEFAULT_SETTINGS);
+    // The defaults are a promise to a first-time visitor, so they are spelled out here, not read back from the source.
+    expect(useAppStore.getState().settings).toEqual({
+      handSize: 'medium',
+      tempoByPiece: {},
+      hands: 'both',
+      metronome: false,
+      countIn: true,
+      showEditorial: false,
+      lastPlayed: null,
+      legendSeen: false,
+    });
   });
   it('opens a library piece, the about page, and goes back', () => {
     useAppStore.getState().openPiece({ kind: 'library', slug: 'ode-to-joy' });

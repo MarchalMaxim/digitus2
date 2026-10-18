@@ -270,7 +270,7 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     const before = rows().length;
     await userEvent.click(other);
     expect(useAppStore.getState().libraryLength).not.toBe('any');
-    expect(rows().length).toBeLessThanOrEqual(before);
+    expect(rows().length).toBeLessThan(before);
     // a short list (11 pieces) cannot filter silently: the choice is dropped
     await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
     await userEvent.click(screen.getByRole('button', { name: /^All 11 jazz/ }));

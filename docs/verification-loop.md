@@ -71,6 +71,8 @@ A PIG-fitted research set (never shipped) writes under `research/weights/` with 
 
 `.github/workflows/pages.yml` builds and deploys the app to GitHub Pages on every push to `main`.
 
+Checks that need a dataset outside the repository (the corpora, learn and reference-metrics suites) skip when it is absent, and say so on the console: `SKIPPED ... did not run`. CI has no such data, so those lines are expected there. On a machine that should have the data, `DIGITUS2_REQUIRE_DATA=1 pnpm test` turns each missing dataset into a failure instead.
+
 ## Recovery after a restart or a context compaction
 
 1. Read `CLAUDE.md`, `docs/PROGRESS.md` and `docs/TODO.md`.

@@ -724,6 +724,12 @@ test.describe('playback with the silent instrument', () => {
     test.info().annotations.push({ type: 'loading shown (ms)', description: lasted.toFixed(0) });
     expect(lasted).toBeGreaterThan(900);
     expect(requested.length, 'piano samples requested').toBeGreaterThan(0);
+    // The samples come from the app's own site, under their stored names (issue #51).
+    const origin = new URL(page.url()).origin;
+    for (const url of requested) {
+      expect(new URL(url).origin, url).toBe(origin);
+      expect(new URL(url).pathname, url).toMatch(/^\/piano\/[A-Za-z0-9_-]+\.ogg$/);
+    }
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible();
     await expect(status).toBeEmpty();
     const roots = await expectOneRed(page, 'playing the real piano');

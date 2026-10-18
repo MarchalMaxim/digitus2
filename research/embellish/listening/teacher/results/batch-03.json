@@ -1,0 +1,72 @@
+{
+  "batch": "batch-03",
+  "started_at": "2026-10-18T21:38:20Z",
+  "finished_at": "2026-10-18T21:39:35Z",
+  "items": [
+    {
+      "item": "em-5716",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "A singable carol line: the scale runs in bars 5 to 7 sit comfortably under one hand and every strong beat agrees with the bass."
+    },
+    {
+      "item": "em-c2c3",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 2},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R10", "R11", "R12", "R13", "R14"], "kind": "clutter", "severity": "info",
+         "problem": "D repeated across the barline, then a C-D-E-D squiggle, makes bar 3 fussier than the plain bar 2."}
+      ],
+      "comment": "A clear five-finger tune with a left-hand answer in bar 4; the eighth-note turn in bar 3 is the one spot a beginner will stumble on."
+    },
+    {
+      "item": "em-d79d",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "Plain repeated quarters over a simple I-IV-V bass; ideal first-piece material."
+    },
+    {
+      "item": "em-ed3b",
+      "scores": {"musical": 1, "fits_harmony": 2, "beginner_friendly": 1},
+      "verdict": "awkward",
+      "objections": [
+        {"notes": ["R1", "R2", "R3", "R4"], "kind": "clutter", "severity": "warning",
+         "problem": "F-G-F-G eighths wobble on the spot; the bar loses its pulse and the tune disappears."},
+        {"notes": ["R8", "R9", "R10", "R11", "R12", "R13"], "kind": "repetitive", "severity": "warning",
+         "problem": "Six eighths alternating E and F in one bar sound like a trill exercise, not a melody."},
+        {"notes": ["R15", "R16", "R17", "R18", "R19"], "kind": "repetitive", "severity": "warning",
+         "problem": "The same oscillation again, now D-E, in bar 7: a third bar in a row of identical wobbling."},
+        {"notes": ["R14"], "kind": "clash", "severity": "info",
+         "problem": "E held on the downbeat over the G bass of a dominant bar sounds a little soft and unclear."},
+        {"notes": ["R23", "R24"], "kind": "phrase", "severity": "info",
+         "problem": "Stepping from G down to F on beat 4 weakens the arrival; holding the G would land the phrase."}
+      ],
+      "comment": "The harmony is sound, but almost every beat is split into a neighbour-note wobble at quarter = 120; I would rewrite bars 5 to 7 with plain repeated notes."
+    },
+    {
+      "item": "em-7253",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "A shapely modal folk line rising to D and falling back, with open-fifth chords that support every strong beat."
+    },
+    {
+      "item": "em-f233",
+      "scores": {"musical": 1, "fits_harmony": 2, "beginner_friendly": 1},
+      "verdict": "awkward",
+      "objections": [
+        {"notes": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"], "kind": "repetitive", "severity": "warning",
+         "problem": "The line circles C and D for two whole bars with no direction or goal."},
+        {"notes": ["R4"], "kind": "clash", "severity": "info",
+         "problem": "D on strong beat 3 over a sustained C bass rubs mildly; C would sit better."},
+        {"notes": ["R12", "R13", "R15", "R16"], "kind": "clutter", "severity": "warning",
+         "problem": "Eighth-note neighbour pairs fill bar 9 and keep the melody stuck between C and E."},
+        {"notes": ["R19", "R20", "R21", "R22", "R23", "R24"], "kind": "clutter", "severity": "warning",
+         "problem": "Six running eighths end the passage; busy for a beginner and the phrase never settles."}
+      ],
+      "comment": "Harmonically safe, but the tune is lost under constant C-D-E wiggling; I would rewrite it with longer notes and a clear shape."
+    }
+  ]
+}

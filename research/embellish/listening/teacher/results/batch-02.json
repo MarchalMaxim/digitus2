@@ -1,0 +1,66 @@
+{
+  "batch": "batch-02",
+  "started_at": "2026-10-18T21:38:18Z",
+  "finished_at": "2026-10-18T21:39:38Z",
+  "items": [
+    {
+      "item": "em-3400",
+      "scores": {"musical": 2, "fits_harmony": 2, "beginner_friendly": 1},
+      "verdict": "awkward",
+      "objections": [
+        {"notes": ["R2", "R5", "R8", "R14", "R17", "R20"], "kind": "clutter", "severity": "warning",
+         "problem": "Every note pair gets the same neighbour-note eighth figure; the tune turns mechanical and busy for a beginner at this tempo."},
+        {"notes": ["R8"], "kind": "clash", "severity": "info",
+         "problem": "The passing B4 against the left hand's F3 in bar 2 makes a brief tritone rub."},
+        {"notes": ["R23", "R24"], "kind": "phrase", "severity": "warning",
+         "problem": "The phrase ends on an off-beat eighth C instead of a settled long tonic, weakening the cadence."}
+      ],
+      "comment": "The underlying tune is clear, but the constant ornament figure clutters it; I would restore plain quarters in at least bars 3 and 4."
+    },
+    {
+      "item": "em-b06b",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "Plain quarter-note tune with a clear half cadence and pickup; ideal beginner material."
+    },
+    {
+      "item": "em-21e9",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "Repeated notes are the character of this tune; the bass roots support it cleanly to the half cadence."
+    },
+    {
+      "item": "em-0c95",
+      "scores": {"musical": 3, "fits_harmony": 2, "beginner_friendly": 2},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R11"], "kind": "clash", "severity": "info",
+         "problem": "D5 over the bass E3 on beat 4 of bar 12 is an unprepared seventh; it passes quickly to C."},
+        {"notes": ["L3", "L4", "L8", "L9", "L10", "L11"], "kind": "rhythm", "severity": "info",
+         "problem": "The left hand's leap from C2 to G3 and the eighth run in bar 11 are a stretch for a beginner."}
+      ],
+      "comment": "A singable, well-shaped melody; the only demands are in the walking left hand."
+    },
+    {
+      "item": "em-df8e",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "Stepwise line with good tendency-tone resolutions (F to E over B to C); the downbeat F in bar 2 reads as a normal appoggiatura."
+    },
+    {
+      "item": "em-f379",
+      "scores": {"musical": 2, "fits_harmony": 2, "beginner_friendly": 3},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R3", "R9"], "kind": "clash", "severity": "warning",
+         "problem": "D5 over the left hand's A3 is an unresolved fourth that leaps away instead of resolving by step."},
+        {"notes": ["R7", "R8", "R9", "R10", "R11"], "kind": "repetitive", "severity": "info",
+         "problem": "Bars 11 and 12 repeat bars 9 and 10 exactly, with no change to round off the phrase."}
+      ],
+      "comment": "Easy to play and coherent, but the angular D on beat 3 and the literal repeat make it feel like an exercise."
+    }
+  ]
+}

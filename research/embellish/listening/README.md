@@ -104,12 +104,34 @@ For each piece, play plain, then light, then playful.
 
 Dispatch one fresh reviewer per batch with the wrapper of `docs/research/teacher-review.md`
 section 6.3. Replace "piano fingerings" with "melodies", and keep the rule to read only the batch
-file. Nothing collects or scores the outputs yet. `research/teacher_review/collect.py` validates
-the fingering schema, not this one. Scoring needs a small collector that does three things:
+file. Each reviewer's JSON goes to `teacher/results/batch-NN.json`.
 
-- check that every item appears once and that every note id exists;
-- compare, per condition, the mean scores and the share of `natural` or `acceptable` verdicts;
-- compare the objection rate on inserted notes (`inserted_ids` in the key) with the rate on the
-  original notes of the same passages.
+Two scripts collect and score the results:
 
-That collector is not built in this spike.
+- **`research/embellish/collect.py`** checks every results file against the brief's schema:
+  - every input item appears exactly once, in the batch file's order;
+  - the scores are integers 0 to 3, and the verdict is one of the four;
+  - each objection's kind and severity come from the brief, and its problem is at most 25 words;
+  - every note id an objection names exists in that passage.
+
+  It reports the problems per batch and exits 1 if there are any. It joins the key and each
+  inserted id's rule from `NN-<slug>.inserted.json`, and writes `teacher/results/judgements.json`.
+- **`research/embellish/score.py`** writes `teacher/results/summary.json` and `summary.md`. Per
+  condition, it gives:
+  - the mean scores and the verdicts;
+  - objections per 100 notes, by kind and by severity;
+  - hits (objections that name an inserted note) against false positives (objections that name
+    only original right-hand notes);
+  - the share of inserted and of original notes that objections name, and the same per rule.
+
+  Per piece, it gives the condition that scores highest, and a paired sign test of plain against
+  light and against playful.
+
+```bash
+research/.venv/Scripts/python.exe -I research/embellish/collect.py
+research/.venv/Scripts/python.exe -I research/embellish/score.py
+research/.venv/Scripts/python.exe -I -m pytest research/embellish/tests -q
+```
+
+The result is in section 8 of
+[`docs/research/embellishment-spike.md`](../../../docs/research/embellishment-spike.md).

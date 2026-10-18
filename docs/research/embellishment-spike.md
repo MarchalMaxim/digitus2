@@ -28,9 +28,10 @@ conditions:
 | Level proposal two or more up | 0 | 0 |
 | Pieces with more beginner errors (L06, L10) than the plain score | 3 | 6 |
 
-The open question is whether it sounds good. That is for the owner's listening test and the
-blinded teacher batch (section 5). On inspection, light sounds natural. Playful sounds busy and
-sometimes mannered.
+The open question is whether it sounds good. That is for the owner's listening test. On
+inspection (section 5), light sounds natural, and playful sounds busy and sometimes mannered. The
+blinded model review (section 8) agrees: light scores the same as the plain score, and playful
+scores lower, with most objections on its added notes.
 
 ## 2. Method
 
@@ -439,9 +440,143 @@ The checks in `research/embellish/check.py` are the specification for that gate'
   batches, a listening brief and the key.
 
 The batch reuses `teacher_review`'s data model and text renderer without the fingering column.
-No collector or scorer is built for it. The listening README says what one would need.
+`research/embellish/collect.py` and `research/embellish/score.py` validate and score its results
+(section 8).
 
-## 8. Limits
+## 8. Blinded listening review
+
+**Protocol.** Five fresh, blinded Opus reviewers each read one batch of six four-bar passages
+with the listening brief (`research/embellish/listening/teacher/brief.md`) and nothing else. Each
+batch mixes the three conditions (plain, light, playful) in random order and never holds the same
+piece twice. The item ids are random and the key stays hidden, so no reviewer knows which passages
+are edited or which notes are added.
+
+`research/embellish/collect.py` checks every results file against the brief's schema, and all 30
+items pass with no problem. `research/embellish/score.py` joins the key and every added note's
+rule, and writes the tables below to `research/embellish/listening/teacher/results/summary.md`.
+
+**Scores and verdicts.** Each criterion runs from 0 to 3, so the total runs from 0 to 9. There are
+ten passages per condition.
+
+| Condition | musical | fits_harmony | beginner_friendly | Total | natural | acceptable | awkward | wrong |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| plain | 2.90 | 2.80 | 2.80 | 8.50 | 7 | 3 | 0 | 0 |
+| light | 3.00 | 2.70 | 2.80 | 8.50 | 4 | 6 | 0 | 0 |
+| playful | 2.20 | 2.60 | 1.90 | 6.70 | 3 | 3 | 4 | 0 |
+
+**Objections.** The note count covers both hands. A *hit* names at least one added note. A *false
+positive* names original right-hand notes and no added note. An objection that names left-hand
+notes only is neither. Every added note is in the right hand.
+
+| Condition | Notes | Objections | Per passage | Per 100 notes | Warning | Info | Hits: added only | Hits: mixed | False positives | Left hand only |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| plain | 202 | 6 | 0.6 | 2.97 | 1 | 5 | - | - | 5 | 1 |
+| light | 219 | 8 | 0.8 | 3.65 | 1 | 7 | 0 | 2 | 5 | 1 |
+| playful | 281 | 20 | 2.0 | 7.12 | 11 | 9 | 5 | 13 | 2 | 0 |
+
+A mixed hit names added and original notes together. Of playful's 18 hits, 13 are mixed, so the
+hit count overstates how precisely the objections find the added notes. The per-note table below
+is the fairer measure.
+
+No reviewer raises an `error` or a `wrong_note`. At light, both hits are `info`, and the one
+warning names an original note. At playful, all 11 warnings are hits. Objections per 100 notes,
+by kind:
+
+| Condition | clash | rhythm | clutter | repetitive | phrase | other |
+|---|---:|---:|---:|---:|---:|---:|
+| plain | 1.49 | 0.50 | 0.50 | 0.50 | 0.00 | 0.00 |
+| light | 1.37 | 1.37 | 0.00 | 0.00 | 0.46 | 0.46 |
+| playful | 1.42 | 0.36 | 3.20 | 1.42 | 0.71 | 0.00 |
+
+**Per note.** Many playful objections name a whole bar, which takes in original notes too. The
+table gives the share of right-hand notes that some objection names.
+
+| Condition | Added notes named | Original notes named | Added, warning or error | Original, warning or error |
+|---|---:|---:|---:|---:|
+| plain | - | 9 of 118 (8%) | - | 2 of 118 (2%) |
+| light | 3 of 17 (18%) | 13 of 118 (11%) | 0 of 17 (0%) | 1 of 118 (1%) |
+| playful | 39 of 79 (49%) | 40 of 118 (34%) | 28 of 79 (35%) | 29 of 118 (25%) |
+
+**Rules.** Each added id is joined to its rule in `NN-<slug>.inserted.json`. The baseline rows
+give the original right-hand notes of the same passages.
+
+| Rule | Condition | Notes in the passages | Named by an objection | Named at warning or error |
+|---|---|---:|---:|---:|
+| passing | light | 13 | 0 (0%) | 0 (0%) |
+| neighbour-repeated | light | 4 | 3 (75%) | 0 (0%) |
+| *original notes (baseline)* | light | 118 | 13 (11%) | 1 (1%) |
+| neighbour-repeated | playful | 17 | 15 (88%) | 15 (88%) |
+| anticipation | playful | 14 | 7 (50%) | 5 (36%) |
+| neighbour-long | playful | 22 | 10 (45%) | 6 (27%) |
+| passing | playful | 26 | 7 (27%) | 2 (8%) |
+| *original notes (baseline)* | playful | 118 | 40 (34%) | 29 (25%) |
+
+The rule the reviewers object to most is the upper neighbour on repeated notes, by count and by
+rate. At playful, 15 of its 17 notes fall under a warning, as in Twinkle's "same neighbour-note
+eighth figure" on every pair. This is the mannerism of section 5, point 1. At light, 3 of its 4
+notes are named, all at `info`. neighbour-long draws the cadence objections of section 5, point 2:
+the final C-D-C of Twinkle and of Camptown Races. The passing note is the least objected rule.
+At light, no objection names any of its 13 notes. At playful, it is named less often than the
+tune's own notes (27% against 34%; 8% against 25% at warning).
+
+**Per piece.** The table gives the total score (0 to 9). The three conditions of a piece are
+always read by three different reviewers.
+
+| # | Piece | plain | light | playful |
+|---:|---|---:|---:|---:|
+| 1 | Twinkle, Twinkle, Little Star | 9 | 9 | 5 |
+| 2 | Jingle Bells (chorus) | 9 | 9 | 4 |
+| 3 | When the Saints Go Marching In | 9 | 9 | 9 |
+| 4 | Camptown Races | 9 | 9 | 7 |
+| 5 | Ode to Joy (simplified) | 9 | 9 | 4 |
+| 6 | Scarborough Fair | 9 | 9 | 7 |
+| 7 | Allegro | 9 | 8 | 9 |
+| 8 | Bayernhymne | 8 | 8 | 8 |
+| 9 | Come Let Us All with Fervour | 7 | 7 | 5 |
+| 10 | Andantino | 7 | 8 | 9 |
+
+The paired comparison counts pieces by total score. The sign test is exact and two-sided, with
+ties dropped.
+
+| Comparison | First higher | Tie | Second higher | Mean difference | Sign test p |
+|---|---:|---:|---:|---:|---:|
+| plain vs light | 1 | 8 | 1 | 0.0 | 1.000 |
+| plain vs playful | 6 | 3 | 1 | 1.8 | 0.125 |
+| light vs playful | 6 | 2 | 2 | 1.8 | 0.289 |
+
+**Light against playful.**
+- **Light reads as the plain tune.** It ties plain on 8 of 10 pieces and has the same mean
+  total. Its objections are as frequent as plain's, and as mild. Its verdict drops from natural
+  to acceptable on three pieces. On Twinkle and Jingle Bells, an `info` objection names a
+  repeated-note neighbour among other notes. On Allegro, the objection names original notes only.
+  Light's passing notes draw no objection.
+- **Playful costs about two points of nine.** Most of the loss is in beginner_friendly (1.90
+  against 2.80) and musical (2.20 against 2.90), not in harmony. Its objections are mostly
+  clutter and repetition, and they land on the added notes.
+- **Playful works on some pieces.** It ties plain on When the Saints, Allegro and Bayernhymne,
+  and beats it on Andantino. On When the Saints, this matches the reading in section 5.
+- **What it supports.** The review supports section 6: offer light. neighbour-repeated is the
+  rule to listen to at both densities, and passing is clean at both. At light, that evidence is
+  only 4 notes. It points the owner toward also hearing a light that uses passing notes alone.
+
+**What it does not say.**
+- **A model is not an ear.** The reviewers read a text notation and imagine the sound. Nothing
+  is played to them.
+- **Reviewer and condition are confounded.** Each condition of a piece goes to a different
+  reviewer, and each passage is read once. Reviewer leniency is therefore mixed into every paired
+  difference, and there is no self-consistency check.
+- **The sample is small.** Ten pieces give no significant difference, even for plain against
+  playful (p = 0.125).
+- **Light gets little exposure.** The windows are the bars with the most playful insertions.
+  Light has only 17 added notes across its ten passages, 13% of the right hand; playful has 79,
+  40%.
+- **The reviewers know about the edits.** The brief says some passages are edited, which may
+  make them look harder for faults.
+- **The owner decides.** The owner's listening test (`research/embellish/listening/README.md`)
+  remains the decision. This review only says where to listen first: repeated-note neighbours and
+  filled cadences at playful.
+
+## 9. Limits
 
 - **The heuristic is crude.** The level proposal is the frozen heuristic, fitted on 30 labelled
   pieces. It counts density, shifts and leaps, not musical difficulty, so a rise of zero is not
@@ -461,10 +596,11 @@ No collector or scorer is built for it. The listening README says what one would
   processing instructions, but ElementTree re-emits every element (section 2, step 5). Empty
   elements, whitespace inside tags, attribute quoting and character references come out
   normalised. A tool that compares files byte for byte sees changes outside the melody.
-- **Nobody has listened yet.** The judgements in section 5 come from reading the notes. The
-  listening test decides.
+- **No human has listened yet.** The judgements in section 5 come from reading the notes, and
+  the review in section 8 comes from a language model reading text. The owner's listening test
+  decides.
 
-## 9. Sources
+## 10. Sources
 
 - Nonchord tone (passing, neighbour, anticipation): https://en.wikipedia.org/wiki/Nonchord_tone
 - Diminution: https://en.wikipedia.org/wiki/Diminution

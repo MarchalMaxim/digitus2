@@ -83,3 +83,26 @@ test('beam groups are read from the source XML and compared as exact groups', ()
     f1: 0,
   });
 });
+
+test('the facts a photo page is checked on: bars, staves, key, time and the strict import', async () => {
+  const { photoFacts } = await import('./diagnose.mjs');
+  const xml = score([n('C5', 6, 'half') + LH, n('D5', 6, 'half') + LH]).replace(
+    '<time>',
+    '<key><fifths>1</fifths></key><time>',
+  );
+  assert.deepEqual(photoFacts(E, xml), {
+    imports: true,
+    error: null,
+    bars: 2,
+    staves: 2,
+    fifths: 1,
+    time: '3/4',
+    notes: 4,
+  });
+  // A refused file still counts its bars from the XML.
+  const broken = xml.replace('<duration>6</duration>', '<duration>6</duration><tie type="stop"/>');
+  const facts = photoFacts(E, broken);
+  assert.equal(facts.imports, false);
+  assert.equal(facts.bars, 2);
+  assert.match(facts.error, /tie stop without a start/);
+});

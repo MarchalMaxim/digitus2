@@ -86,3 +86,22 @@ test('the cache key changes with any file of the recognition pipeline', () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('photo pages are counted by the facts read off the page, and a worse run is a breach', async () => {
+  const { photoSummary, photoFloorsFrom, photoBreaches } = await import('./acceptance.mjs');
+  const expect = { bars: 24, staves: 2, fifths: 1, time: '3/4' };
+  const facts = (bars, staves, imports = true) => ({ imports, bars, staves, fifths: 1, time: '3/4' });
+  const rows = [
+    { variant: 'as-taken', expect, facts: facts(24, 2) },
+    { variant: 'as-taken', expect, facts: facts(28, 2) },
+    { variant: 'rotated', expect, facts: facts(24, 1, false) },
+    { variant: 'as-taken', expect: { ...expect, time: null }, facts: null },
+  ];
+  const summary = photoSummary(rows);
+  assert.deepEqual(summary['photos:as-taken'], { pages: 3, recognised: 2, imported: 2, barsRight: 1, stavesRight: 2, keyRight: 2, timeRight: 2 });
+  assert.deepEqual(summary['photos:rotated'], { pages: 1, recognised: 1, imported: 0, barsRight: 1, stavesRight: 0, keyRight: 1, timeRight: 1 });
+  const floors = photoFloorsFrom(summary);
+  assert.deepEqual(photoBreaches(summary, floors), []);
+  const worse = photoSummary(rows.map((r, i) => (i === 0 ? { ...r, facts: facts(23, 2) } : r)));
+  assert.deepEqual(photoBreaches(worse, floors), ['photos:as-taken: barsRight 0 below floor 1']);
+});

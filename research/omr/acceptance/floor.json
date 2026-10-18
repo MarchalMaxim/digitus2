@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "corpus": "v1",
-  "note": "Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts.",
+  "note": "Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact.",
   "floors": {
     "homr:clean": {
       "importedMin": 16,
@@ -52,6 +52,24 @@
       "tiesExtraMax": 0,
       "duplicatesMax": 1,
       "wrongStaffMax": 0
+    }
+  },
+  "photoFloors": {
+    "photos:as-taken": {
+      "recognisedMin": 11,
+      "importedMin": 9,
+      "barsRightMin": 8,
+      "stavesRightMin": 10,
+      "keyRightMin": 9,
+      "timeRightMin": 6
+    },
+    "photos:rotated": {
+      "recognisedMin": 2,
+      "importedMin": 1,
+      "barsRightMin": 1,
+      "stavesRightMin": 2,
+      "keyRightMin": 2,
+      "timeRightMin": 2
     }
   }
 }

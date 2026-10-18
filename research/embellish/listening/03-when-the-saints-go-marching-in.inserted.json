@@ -1,0 +1,359 @@
+{
+ "slug": "when-the-saints-go-marching-in",
+ "inserted": {
+  "light": [
+   {
+    "bar": "1",
+    "beat": "2.5",
+    "onset": "3/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "2.5",
+    "onset": "19/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "2.5",
+    "onset": "35/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "2",
+    "onset": "25",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "10",
+    "beat": "4",
+    "onset": "39",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "14",
+    "beat": "2",
+    "onset": "53",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   }
+  ],
+  "playful": [
+   {
+    "bar": "1",
+    "beat": "2.5",
+    "onset": "3/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "1",
+    "beat": "4.5",
+    "onset": "7/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "4",
+    "onset": "7",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "4.5",
+    "onset": "15/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "2.5",
+    "onset": "19/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "4.5",
+    "onset": "23/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "4",
+    "beat": "4",
+    "onset": "15",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "4",
+    "beat": "4.5",
+    "onset": "31/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "2.5",
+    "onset": "35/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "4.5",
+    "onset": "39/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "2",
+    "onset": "21",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "6",
+    "beat": "4",
+    "onset": "23",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "7",
+    "beat": "2",
+    "onset": "25",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "7",
+    "beat": "4",
+    "onset": "27",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "4.5",
+    "onset": "55/2",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "8",
+    "beat": "4",
+    "onset": "31",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "8",
+    "beat": "4.5",
+    "onset": "63/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "2.5",
+    "onset": "67/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "4.5",
+    "onset": "71/2",
+    "pitch": "C4",
+    "midi": 60,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "10",
+    "beat": "4",
+    "onset": "39",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "11",
+    "beat": "2",
+    "onset": "41",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "11",
+    "beat": "4",
+    "onset": "43",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "1"
+   },
+   {
+    "bar": "13",
+    "beat": "4.5",
+    "onset": "103/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "14",
+    "beat": "2",
+    "onset": "53",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "14",
+    "beat": "4",
+    "onset": "55",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "1"
+   },
+   {
+    "bar": "15",
+    "beat": "2",
+    "onset": "57",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "15",
+    "beat": "2.5",
+    "onset": "115/2",
+    "pitch": "C4",
+    "midi": 60,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "15",
+    "beat": "4",
+    "onset": "59",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "15",
+    "beat": "4.5",
+    "onset": "119/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   }
+  ]
+ }
+}

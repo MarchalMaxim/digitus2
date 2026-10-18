@@ -193,7 +193,8 @@ describe('held pairs (L03 active loop)', () => {
   });
   it('documents the warning in the rule table', () => {
     expect(LINT_RULES.L07.law).toBe(false);
-    expect(LINT_RULES.L07.title).toMatch(/hold beyond reach/);
+    // The table must describe what the rule actually emits.
+    expect(LINT_RULES.L07.title).toContain(BEYOND_REACH.split(':')[0]);
   });
 });
 

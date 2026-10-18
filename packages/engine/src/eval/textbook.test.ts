@@ -106,6 +106,10 @@ describe('textbook entries', () => {
     expect(r.byFamily.scale!.exact).toBe(1);
     expect(r.byFamily.chord!.exact).toBe(1);
     expect(r.exactRate).toBe(1);
+    // The chord's primary fingering [9, 9, 9] is unreachable; only its alternative matches.
+    expect(r.exact).toBe(2);
+    expect(r.noteAccuracy).toBe(1);
+    expect(r.failures).toEqual([]);
   });
   // The planned test at the default tempo: the rules alone finger the scale 1 2 2 1 1 2 3 4 here;
   // the Task 8 template closes it.
@@ -134,6 +138,10 @@ describe('textbook entries', () => {
     expect(r.byFamily.scale!.exact).toBe(1);
     expect(r.byFamily.chord!.exact).toBe(1);
     expect(r.exactRate).toBe(1);
+    // The chord's primary fingering [9, 9, 9] is unreachable; only its alternative matches.
+    expect(r.exact).toBe(2);
+    expect(r.noteAccuracy).toBe(1);
+    expect(r.failures).toEqual([]);
   });
   // Planned: templates off gave exact rate 0 here (the slow hop path). Since the M2 review hop rule
   // the rules alone finger the scale exactly too.

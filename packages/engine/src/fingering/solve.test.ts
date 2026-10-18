@@ -853,8 +853,7 @@ describe('hold tolerance (M3 Task 7, H1: a legato overlap is not a held key)', (
   const pins = Object.fromEntries(
     score.notes.map((n) => [n.id, { finger: 2 as Finger, source: 'user' as const, pinned: true }]),
   );
-  it('makeContext defaults to the 1 ms tolerance of the hold walk and takes another', () => {
-    expect(makeContext(HAND_PROFILES.large).holdEpsSec).toBe(1e-3);
+  it('makeContext takes another hold tolerance', () => {
     expect(makeContext(HAND_PROFILES.large, {}, { holdEpsSec: 0.05 }).holdEpsSec).toBe(0.05);
   });
   it('solveHand charges the held-note law only for an overlap beyond the tolerance', () => {

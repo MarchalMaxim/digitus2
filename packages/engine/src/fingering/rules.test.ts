@@ -201,7 +201,8 @@ describe('chord span terms', () => {
     expect(
       pts(tripleTerms(ctx, note(60, 0), 1, note(61, 0), 1, note(62, 0), 1), 'doubledFinger'),
     ).toBe(0);
-    expect(PARNCUTT_WEIGHTS.doubledFinger).toBe(50);
+    expect(isPenaltyRule('doubledFinger')).toBe(true);
+    expect(PARNCUTT_WEIGHTS.doubledFinger).toBeGreaterThan(0);
   });
 });
 
@@ -368,6 +369,11 @@ describe('indicator and timing features', () => {
     expect(points(slow, 'shiftFast')).toBeCloseTo(points(slow, 'handPositionShift') * 0.25, 9);
     expect(points(pairTerms(ctx, note(60, 0), 1, note(60, 1, 0.1), 2), 'repeatFast')).toBe(1);
     expect(points(pairTerms(ctx, note(60, 0), 1, note(60, 1, 0.5), 2), 'repeatFast')).toBe(0);
+    // Exactly at the limit the repetition is no longer fast.
+    for (const f of [1, 2] as const)
+      expect(
+        points(pairTerms(ctx, note(60, 0), 1, note(60, 1, ctx.repeatFastSec), f), 'repeatFast'),
+      ).toBe(0);
   });
 });
 

@@ -322,6 +322,12 @@ describe('scoreToMusicXml', () => {
       ),
     ).toThrow(/more than 4 voices/);
   });
+  it('names the staff that has too many voices', () => {
+    const overlapping = (hand: Hand) =>
+      scoreOf([0, 120, 240, 360, 480].map((on, i) => [on, 1920, 60 + 2 * i, hand] as Spec));
+    expect(() => scoreToMusicXml(overlapping('R'))).toThrow(/upper staff/);
+    expect(() => scoreToMusicXml(overlapping('L'))).toThrow(/lower staff/);
+  });
   it('keeps the tempo map of tempo-map.mid through quantization, separation, engraving and reading back', () => {
     const d = parseMidiFile(
       new Uint8Array(

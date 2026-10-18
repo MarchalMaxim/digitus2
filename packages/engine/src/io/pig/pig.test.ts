@@ -22,6 +22,7 @@ describe('parsePig', () => {
     expect(byId['3']!.offsetSec).toBe(1);
     expect(byId['1']!.onsetTick).toBe(480);
     expect(byId['0']!.velocity).toBe(80);
+    expect(score.notes.every((n) => !n.isGrace)).toBe(true);
     expect(assignment['0']).toEqual({ finger: 1, source: 'editorial' });
     expect(assignment['2']).toEqual({ finger: 3, substitution: 1, source: 'editorial' });
     expect(assignment['3']).toEqual({ finger: 5, source: 'editorial' });
@@ -122,5 +123,34 @@ describe('writePig', () => {
       .slice(1)
       .map((l) => l.split('\t')[0]);
     expect(ids).toEqual(['0', '1', '2', '3', '4', '5']);
+  });
+  it('writes shuffled notes back in their source order', () => {
+    const { score, assignment } = parsePig(fixture);
+    const shuffled = { ...score, notes: [...score.notes].reverse() };
+    const ids = writePig(shuffled, assignment)
+      .trim()
+      .split('\n')
+      .slice(1)
+      .map((l) => l.split('\t')[0]);
+    expect(ids).toEqual(['0', '1', '2', '3', '4', '5']);
+  });
+  it('orders notes without a source position by onset, then pitch', () => {
+    const { score } = parsePig(fixture);
+    const unplaced = {
+      ...score,
+      notes: [...score.notes].reverse().map((n) => ({ ...n, sourceIndices: [] as number[] })),
+    };
+    const ids = writePig(unplaced)
+      .trim()
+      .split('\n')
+      .slice(1)
+      .map((l) => l.split('\t')[0]);
+    expect(ids).toEqual(['3', '4', '0', '1', '5', '2']);
+  });
+  it('writes a very small number of seconds in plain decimal notation', () => {
+    const text = `${fixture.split('\n')[0]}\n0\t0.0000001\t0.4591\tC4\t64\t80\t0\t1\n`;
+    const first = parsePig(text);
+    const line = writePig(first.score, first.assignment).split('\n')[1]!;
+    expect(line.split('\t').slice(1, 3)).toEqual(['0.0000001', '0.4591']);
   });
 });

@@ -101,6 +101,36 @@ describe('midiToScore', () => {
     );
     expect(warnings).toEqual(['measure 1: 6 notes in the right hand at one time']);
   });
+  it('does not warn about five notes in one hand at one time', () => {
+    const { warnings } = build(
+      data([60, 62, 64, 65, 67].map((m) => [0, 480, m] as [number, number, number])),
+    );
+    expect(warnings).toEqual([]);
+  });
+  it('shortens by onset order even when the notes of a hand arrive out of order', () => {
+    const q = quantize(data([]));
+    q.notes = [960, 480, 0].map((onset, i) => ({
+      onset,
+      offset: 1920,
+      onsetSec: onset / 960,
+      midi: 60 + i,
+      velocity: 64,
+      channel: 0,
+      track: 0,
+      sources: [i],
+    }));
+    const { score, warnings } = midiToScore(
+      data([]),
+      q,
+      q.notes.map(() => 'R'),
+    );
+    expect(score.notes.map((n) => [n.onsetTick, n.offsetTick])).toEqual([
+      [0, 480],
+      [480, 960],
+      [960, 1920],
+    ]);
+    expect(warnings).toEqual(['2 notes were shortened so each hand has one voice']);
+  });
   it('warns about a hand stretched beyond 17 semitones', () => {
     const { warnings } = build(
       data([

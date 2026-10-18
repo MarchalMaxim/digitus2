@@ -87,6 +87,38 @@ describe('default ornament realization', () => {
     expect(ornamentAttacks(edge)).toEqual([{ midi: 60, onsetSec: 2, offsetSec: 5 }]);
   });
 
+  it.each([
+    ['zero', 2, 5],
+    ['negative', 1, 5],
+    ['infinite', Infinity, Infinity],
+  ])('keeps a note with %s ornament duration as one plain event', (_name, endSec, offsetSec) => {
+    const n = principal({ endSec });
+    n.offsetSec = offsetSec;
+    expect(ornamentAttacks(n)).toEqual([{ midi: 60, onsetSec: 2, offsetSec }]);
+  });
+
+  it('allows an auxiliary note exactly on the lowest piano key', () => {
+    expect(
+      ornamentAttacks(principal({ kind: 'mordent', lowerMidi: 21 })).map((e) => e.midi),
+    ).toEqual([60, 21, 60]);
+  });
+
+  it('scales the default trill rate with the written duration', () => {
+    // 0.9 s of trill: a rate that differs by one attack per second changes the count here.
+    const events = ornamentAttacks(principal({ kind: 'trill-mark', endSec: 2.9 }));
+    expect(events).toHaveLength(7);
+  });
+
+  it('spaces the attacks evenly and ends the ornament at half of a very short note', () => {
+    const n = principal({ long: true, endSec: 2.01 });
+    n.offsetSec = 2.01;
+    const events = ornamentAttacks(n);
+    expect(events).toHaveLength(5);
+    const step = events[1]!.onsetSec - events[0]!.onsetSec;
+    events.forEach((e, i) => expect(e.onsetSec).toBeCloseTo(2 + step * i, 9));
+    expect(events.at(-1)!.onsetSec).toBeCloseTo(2.005, 9);
+  });
+
   it('keeps ordinary notes as one event', () => {
     const n = principal();
     delete n.ornament;

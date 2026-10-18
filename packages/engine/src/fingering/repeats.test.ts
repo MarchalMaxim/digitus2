@@ -229,6 +229,20 @@ describe('findRepeats (M3 Task 7, H4)', () => {
     expect(again).toBeGreaterThan(1);
     expect(seq.notes[again]!.pitch).toBe(seq.notes[0]!.pitch);
   });
+  it('barPositions gives no position to a note whose bar does not exist', () => {
+    const score = libraryScore('twinkle-twinkle-little-star');
+    const seq = buildHandSequence(score, 'R');
+    const first = seq.notes[0]!.noteId;
+    const broken = {
+      ...score,
+      notes: score.notes.map((n) =>
+        n.id === first ? { ...n, measureIndex: score.measures.length } : n,
+      ),
+    };
+    const positions = barPositions(broken, seq);
+    expect(positions[0]).toBeUndefined();
+    expect(positions[1]).toBeTypeOf('number');
+  });
   it('pairConsistency counts the pairs whose two copies take the same fingers', () => {
     const s = melody(['C4', 'F4', 'C4', 'C5', 'C4', 'A4', 'F4', 'E4', 'C4', 'C5', 'C4', 'A4']);
     const pairs = repeatPairs(s);

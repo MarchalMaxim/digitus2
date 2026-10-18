@@ -36,4 +36,19 @@ describe('pairedBootstrap', () => {
     expect(() => pairedBootstrap([], [])).toThrow();
     expect(() => pairedBootstrap([1], [1], { resamples: 0 })).toThrow();
   });
+  it('accepts a single resample: one draw gives a degenerate interval', () => {
+    expect(pairedBootstrap([3], [1], { resamples: 1 })).toEqual({
+      delta: 2,
+      ci95: [2, 2],
+      n: 1,
+    });
+  });
+  it('interpolates the interval between neighbouring resamples on a tiny series', () => {
+    // Two pairs differing by 0 and 10: each resample mean is 0, 5 or 10, so with two resamples
+    // the 2.5th and 97.5th percentiles lie 0.95 of the way between them: a width of 0, 4.75 or 9.5.
+    const { ci95 } = pairedBootstrap([10, 20], [10, 10], { resamples: 2 });
+    expect(ci95[0]).toBeLessThanOrEqual(ci95[1]);
+    const width = ci95[1] - ci95[0];
+    expect([0, 4.75, 9.5].some((w) => Math.abs(w - width) < 1e-9)).toBe(true);
+  });
 });

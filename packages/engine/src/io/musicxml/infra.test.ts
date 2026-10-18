@@ -32,6 +32,17 @@ describe('dom helpers', () => {
   });
 });
 
+describe('parseXml errors', () => {
+  it('reports a recoverable error with the XML parse error prefix and its own message', () => {
+    expect(() => parseXml('<a>&nope;</a>')).toThrow('XML parse error: entity not found:&nope;');
+  });
+  it('reports the first of several errors', () => {
+    expect(() => parseXml('<!DOCTYPE a [<!ENTITY e "x">]><a>&e;&e2;</a>')).toThrow(
+      'XML parse error: entity not found:&e;',
+    );
+  });
+});
+
 describe('unpackMusicXml', () => {
   it('returns text unchanged and strips a BOM', () => {
     expect(unpackMusicXml('﻿<a/>')).toBe('<a/>');
@@ -102,6 +113,8 @@ describe('unpackMusicXml encodings', () => {
 describe('package exports', () => {
   it('exports timewiseToPartwise from the package entry point', () => {
     expect(api.timewiseToPartwise).toBe(timewiseToPartwise);
+    const out = api.timewiseToPartwise(parseXml(TIMEWISE));
+    expect(out.documentElement!.tagName).toBe('score-partwise');
   });
   it('keeps the xmldom helpers internal', () => {
     expect('parseXml' in api).toBe(false);
@@ -120,6 +133,10 @@ describe('timewiseToPartwise', () => {
     const root = out.documentElement!;
     expect(root.tagName).toBe('score-partwise');
     expect(childElements(root, 'part-list')).toHaveLength(1);
+    const names = childElements(childElements(root, 'part-list')[0]!, 'score-part').map((p) =>
+      childText(p, 'part-name'),
+    );
+    expect(names).toEqual(['Piano', 'Left']);
     const parts = childElements(root, 'part');
     expect(parts.map((p) => p.getAttribute('id'))).toEqual(['P1', 'P2']);
     const p1Measures = childElements(parts[0]!, 'measure');

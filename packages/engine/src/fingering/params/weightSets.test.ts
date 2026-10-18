@@ -39,6 +39,8 @@ describe('weight sets', () => {
     const custom: WeightSetFile = { ...p, id: 'custom', weights: { ...p.weights, hop: 3 } };
     expect(loadWeightSet(custom).weights.hop).toBe(3);
     expect(() => loadWeightSet('nope' as 'parncutt')).toThrow(/unknown weight set/);
+    for (const junk of [null, [], 'text', 7])
+      expect(() => validateWeightSet(junk)).toThrow(/not a JSON object/);
     const missing: Record<string, number> = { ...p.weights };
     delete missing.hop;
     expect(() => validateWeightSet({ ...p, weights: missing })).toThrow(/hop/);

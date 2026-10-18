@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parsePig } from '../io/pig/read.js';
 import { metricsForScores } from './align.js';
+import { dataGate } from '../../cli/dataGate.js';
 
 const root = new URL('../../../../', import.meta.url);
 const ref = JSON.parse(
@@ -20,7 +21,7 @@ const dir = fileURLToPath(new URL('research/data/pig/FingeringFiles/', root));
 const load = (a: string) => parsePig(readFileSync(`${dir}${ref.piece}-${a}_fingering.txt`, 'utf8'));
 
 describe('metrics agree with the Python reference (official evaluator conventions)', () => {
-  it.skipIf(!existsSyncSafe(dir))(
+  it.skipIf(!dataGate('the reference metrics check', existsSyncSafe(dir)))(
     'matches gen, high, soft and rec to 1e-6 on a real PIG piece',
     () => {
       const pred = load(ref.predAnnotation);

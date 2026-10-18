@@ -330,7 +330,32 @@ describe('L15 thumb crossing inside one five-finger position (beginner)', () => 
   });
 });
 
+describe('lintFingering severity totals', () => {
+  it('counts errors, warnings and infos separately', () => {
+    const r = lint([
+      [0, 1, 'C4', 0, 1], // thumb on adjacent white keys: L01, info
+      [0, 1, 'D4', 0, 1],
+      [0, 1, 'C3', 1, -3], // lower note under the lower finger: L02 and L05, errors
+      [0, 1, 'E3', 1, -5],
+      [2, 3, 'C5', 0, 3], // 3 followed by 4: L14, warning
+      [3, 4, 'D5', 0, 4],
+    ]);
+    const severities = r.issues.map((i) => i.severity).sort();
+    expect(severities).toEqual(['error', 'error', 'info', 'warning']);
+    expect([r.errors, r.warnings, r.infos]).toEqual([2, 1, 1]);
+  });
+});
+
 describe('positionChanges and wideStretches', () => {
+  it('counts a position change when the anchor moves exactly one white key', () => {
+    const { score, assignment } = parsePig(
+      pig([
+        [0, 0.5, 'D4', 0, 1],
+        [0.5, 1, 'E4', 0, 1],
+      ]),
+    );
+    expect(positionChanges(score, assignment)).toBe(1);
+  });
   it('counts a position change where the implied five-finger anchor moves a white key or more', () => {
     const { score, assignment } = parsePig(
       pig([

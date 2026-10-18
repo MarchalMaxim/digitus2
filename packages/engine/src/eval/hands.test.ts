@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from '../io/musicxml/read.js';
+import { HAND_MOTION, HAND_PATTERNS } from '../io/midi/motion.js';
+import type { HandMotionParams } from '../io/midi/motion.js';
 import { parsePig } from '../io/pig/read.js';
 import { benchmarkEntries } from '../library/benchmarkSet.js';
 import { evaluateHands, scoreToMidiData } from './hands.js';
@@ -28,6 +30,53 @@ describe('evaluateHands', () => {
     expect(data.notes.map((n) => [n.tick, n.endTick, n.midi])).toEqual(
       score.notes.map((n) => [n.onsetTick, n.offsetTick, n.midi]),
     );
+  });
+  it('keeps the time signatures of the score and falls back to 4/4 when it has none', () => {
+    const score = pigSample();
+    expect(scoreToMidiData({ ...score, timeSignatures: [] }).timeSignatures).toEqual([
+      { tick: 0, beats: 4, beatType: 4 },
+    ]);
+    expect(
+      scoreToMidiData({ ...score, timeSignatures: [{ tick: 0, beats: 3, beatType: 4 }] })
+        .timeSignatures,
+    ).toEqual([{ tick: 0, beats: 3, beatType: 4 }]);
+    const two = [
+      { tick: 0, beats: 3, beatType: 4 },
+      { tick: 1440, beats: 6, beatType: 8 },
+    ];
+    expect(scoreToMidiData({ ...score, timeSignatures: two }).timeSignatures).toEqual(two);
+  });
+  it('counts exactly the notes whose quantized note got their true hand', () => {
+    const score = parsePig(
+      [
+        '//Version: PianoFingering_v170101',
+        '0\t0.000000\t1.000000\tC5\t80\t80\t0\t1',
+        '1\t0.000000\t1.000000\tC2\t80\t80\t1\t-5',
+        '',
+      ].join('\n'),
+    ).score;
+    expect(evaluateHands(score)).toEqual({ notes: 2, correct: 2, accuracy: 100 });
+  });
+  it('separates with the given motion parameters instead of the shipped ones', () => {
+    // Parameters that make a right-hand pattern overwhelmingly likely: every note goes right.
+    const pattern = Object.fromEntries(
+      HAND_PATTERNS.map((a) => [
+        a,
+        Object.fromEntries(HAND_PATTERNS.map((b) => [b, b === 'R' ? 1 - 2e-9 : 1e-9])),
+      ]),
+    ) as HandMotionParams['pattern'];
+    const rightish: HandMotionParams = { ...HAND_MOTION, pattern };
+    const score = parsePig(
+      [
+        '//Version: PianoFingering_v170101',
+        ...['C3', 'D3', 'E3', 'F3'].map(
+          (p, k) => `${k}\t${k * 0.5}\t${k * 0.5 + 0.5}\t${p}\t80\t80\t1\t-${k + 1}`,
+        ),
+        '',
+      ].join('\n'),
+    ).score;
+    expect(evaluateHands(score).correct).toBe(4);
+    expect(evaluateHands(score, { params: rightish }).correct).toBe(0);
   });
   it('scores the PIG sample note by note', () => {
     const r = evaluateHands(pigSample());

@@ -49,4 +49,17 @@ describe('evaluateDirs', () => {
     expect(report.noteWeighted.gen).toBeCloseTo(0.75, 12);
     expect(formatReport(report)).toMatch(/^skipped: 002\.txt \(no annotated gold notes\)$/m);
   });
+  it('formats each percentage with two decimals in the piece and mean rows', () => {
+    const root = mkdtempSync(join(tmpdir(), 'digitus2-eval-'));
+    const gold = join(root, 'gold');
+    const pred = join(root, 'pred');
+    mkdirSync(gold, { recursive: true });
+    mkdirSync(pred, { recursive: true });
+    writeFileSync(join(gold, '001-1_fingering.txt'), notes(['1', '2', '3', '4']));
+    writeFileSync(join(pred, '001.txt'), notes(['1', '2', '1', '4']));
+    const out = formatReport(evaluateDirs(pred, gold));
+    expect(out).toMatch(/^1\s+75\.00 /m);
+    expect(out).toMatch(/^mean\s+75\.00 /m);
+    expect(out).toMatch(/^notes\s+75\.00 /m);
+  });
 });

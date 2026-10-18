@@ -89,6 +89,10 @@ describe('runMetamorphic', () => {
     const r = runMetamorphic(score);
     expect(r.checks.map((c) => c.id)).toEqual(['DET', 'MR1', 'MR2', 'MR10', 'MR6', 'MR7', 'MR8']);
     expect(r.checks.filter((c) => !c.passed)).toEqual([]);
+    expect(r.passed).toBe(true);
+    // A check passes only by reaching its threshold; determinism needs full agreement.
+    for (const c of r.checks) expect(c.agreement).toBeGreaterThanOrEqual(c.threshold);
+    expect(r.checks[0]).toMatchObject({ id: 'DET', agreement: 1, threshold: 1 });
     // Locality leaves out only the right-hand run through the moved C5; the left hand is compared.
     const mr7 = (x: typeof r) => x.checks.find((c) => c.id === 'MR7')!.details;
     expect(mr7(r)).toMatch(/^4 notes in the first half .* \(4 left out/);

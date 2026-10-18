@@ -1,11 +1,13 @@
 import type { Page, Route } from '@playwright/test';
 
 /**
- * Where smplr fetches the Splendid Grand Piano's samples (the real instrument, `instrument.ts`).
- * The suite never reaches the network: a flow that plays with the real instrument (no
- * `?audio=silent`) answers these requests itself with the helpers below.
+ * The piano sample requests: smplr fetches them from the app's own site, `<base>piano/<file>`
+ * (`src/audio/pianoSamples.ts`), which serves the `piano-samples-v1` release asset. The suite never
+ * needs that asset: a flow that plays with the real instrument (no `?audio=silent`) answers these
+ * requests itself with the helpers below. Service workers are blocked in the suite
+ * (playwright.config.ts), so `page.route` sees these requests.
  */
-export const PIANO_SAMPLES = 'https://smpldsnds.github.io/**';
+export const PIANO_SAMPLES = /\/piano\/[^/?#]+\.(?:ogg|m4a)$/;
 
 /**
  * A short silent WAV (mono, 16-bit PCM, 44.1 kHz). Chromium's `decodeAudioData` reads it whatever
@@ -30,14 +32,9 @@ export function silentWav(seconds = 0.05, rate = 44_100): Buffer {
   return wav;
 }
 
-/** Answers a sample request with the silent WAV (cross-origin, so with a CORS header). */
+/** Answers a sample request with the silent WAV. */
 function fulfillSilently(route: Route): Promise<void> {
-  return route.fulfill({
-    status: 200,
-    contentType: 'audio/wav',
-    headers: { 'access-control-allow-origin': '*' },
-    body: silentWav(),
-  });
+  return route.fulfill({ status: 200, contentType: 'audio/wav', body: silentWav() });
 }
 
 /**

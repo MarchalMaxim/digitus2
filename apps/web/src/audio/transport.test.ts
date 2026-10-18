@@ -18,7 +18,12 @@ const { score: pickup } = parseMusicXml(
 
 /** A stand-in for smplr's sampler: records its options, the notes it starts, and disposal. */
 interface FakePiano {
-  options: { notesToLoad: { notes: number[]; velocityRange: [number, number] } };
+  options: {
+    baseUrl?: string;
+    formats?: string[];
+    storage?: { fetch(url: string): Promise<unknown> };
+    notesToLoad: { notes: number[]; velocityRange: [number, number] };
+  };
   starts: { note: number; velocity: number }[];
   disposed: boolean;
   ready: Promise<void>;
@@ -91,6 +96,14 @@ beforeEach(() => {
 });
 
 describe('the sampled piano', () => {
+  it("loads its samples from the app's own piano directory, in both formats", async () => {
+    const piano = createPiano({} as AudioContext);
+    await piano.load([60], [96]);
+    const fake = smplrMock.pianos[0]!;
+    expect(fake.options.baseUrl).toBe('/piano');
+    expect(fake.options.formats).toEqual(['ogg', 'm4a']);
+    expect(typeof fake.options.storage?.fetch).toBe('function');
+  });
   it('plays the dynamics marks: loads their velocity layers and starts each note at its velocity', async () => {
     // short-piano opens with a p between the staves: both hands play every note at 68.
     expect(new Set(score.notes.map((n) => n.velocity))).toEqual(new Set([68]));

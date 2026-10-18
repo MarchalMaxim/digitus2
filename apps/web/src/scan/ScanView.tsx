@@ -66,8 +66,16 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [pages, setPages] = useState<string[]>([]);
   // The XML each worker last finished with: use waits until both match what is on screen.
   // `detail` is the worker's own message, shown only under Recognition details.
-  const [rendered, setRendered] = useState<{ xml: string; error: Phrase | null; detail?: string }>();
-  const [imported, setImported] = useState<{ xml: string; error: Phrase | null; detail?: string }>();
+  const [rendered, setRendered] = useState<{
+    xml: string;
+    error: Phrase | null;
+    detail?: string;
+  }>();
+  const [imported, setImported] = useState<{
+    xml: string;
+    error: Phrase | null;
+    detail?: string;
+  }>();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selected, setSelected] = useState(0);
   const [reviewMode, setReviewMode] = useState<'combined' | 'page'>(
@@ -186,7 +194,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     return () => {
       current = false;
     };
-  }, [renderXml, width, phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [renderXml, width, phase]);
   useEffect(() => {
     if (!importXml || phase !== 'review') return;
     let current = true;
@@ -211,7 +219,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     return () => {
       current = false;
     };
-  }, [importXml, phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [importXml, phase]);
 
   const retain = (next: ScanSession) => {
     // The local score library retains completed source/recognition snapshots in IndexedDB.
@@ -445,7 +453,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       const next =
         position < 0
           ? 0
-          : Math.min(order.length - 1, Math.max(0, position + (event.key === 'ArrowRight' ? 1 : -1)));
+          : Math.min(
+              order.length - 1,
+              Math.max(0, position + (event.key === 'ArrowRight' ? 1 : -1)),
+            );
       select(order[next]!.ordinal);
     } else if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && selectedNote?.step) {
       event.preventDefault();
@@ -776,7 +787,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               {editable && (corrections.length > 0 || undoStack.length > 0) && (
                 <div className="stack scan-corrections">
                   <div className="row">
-                    {corrections.length > 0 && <span>{t.scan.edit.corrections(corrections.length)}</span>}
+                    {corrections.length > 0 && (
+                      <span>{t.scan.edit.corrections(corrections.length)}</span>
+                    )}
                     <button onClick={undo}>{t.scan.edit.undo}</button>
                     {corrections.length > 0 && <button onClick={reset}>{t.scan.edit.reset}</button>}
                   </div>

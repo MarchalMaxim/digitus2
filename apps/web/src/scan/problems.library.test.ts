@@ -14,7 +14,9 @@ interface Entry {
 }
 const manifest = JSON.parse(readFileSync(join(content, 'manifest.json'), 'utf8')) as Entry[];
 // A missing field means core30; later pieces carry null.
-const core30 = manifest.filter((entry) => (entry.benchmarkSet === undefined ? 'core30' : entry.benchmarkSet) === 'core30');
+const core30 = manifest.filter(
+  (entry) => (entry.benchmarkSet === undefined ? 'core30' : entry.benchmarkSet) === 'core30',
+);
 
 function read(entry: Entry): string {
   const bytes = readFileSync(join(content, entry.files.score));
@@ -28,7 +30,10 @@ function read(entry: Entry): string {
 describe('places to check on correct scores', () => {
   it('finds nothing in the core 30 library pieces', () => {
     const flagged = core30
-      .map((entry) => ({ slug: entry.slug, problems: findProblems(readScanScore(parseScanXml(read(entry)))) }))
+      .map((entry) => ({
+        slug: entry.slug,
+        problems: findProblems(readScanScore(parseScanXml(read(entry)))),
+      }))
       .filter((row) => row.problems.length);
     expect(flagged).toEqual([]);
   });

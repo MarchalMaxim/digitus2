@@ -16,11 +16,16 @@ for (const scheme of ['light', 'dark'] as const) {
 
     for (const s of STATES) {
       const name = scheme === 'light' ? s.name : `${s.name} (dark)`;
-      test(`state ${name}: one red element and no serious a11y issues`, async ({ page }) => {
+      test(`state ${name}: one red element and no serious a11y issues`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(!!s.pcOnly && testInfo.project.name === 'mobile', 'reached only on a PC');
         await s.go(page);
         const roots = await expectOneRed(page, name);
         if (s.expectTag === 'cursor') expect(roots.every((r) => r.inSheet)).toBe(true);
         else if (s.expectTag === 'frame') expect(roots[0]!.className).toContain('drop-frame');
+        else if (s.expectTag === 'note')
+          expect(roots[0]!.inSheet && /\bnote\b/.test(roots[0]!.className)).toBe(true);
         else expect(roots[0]!.tag).toBe('button');
         await expectNoSeriousA11y(page, name);
         const overflow = await page.evaluate(

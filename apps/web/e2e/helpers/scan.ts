@@ -28,7 +28,10 @@ export async function mockWorker(page: Page, xml: string | (() => string)): Prom
 /** Opens one page image from the library, connects to the (mocked) PC and scans it. */
 export async function scanOnePage(page: Page, name = 'printed-score.png'): Promise<void> {
   await page.goto('/');
-  await page.locator('input[type=file]').first().setInputFiles({ name, mimeType: 'image/png', buffer: PNG });
+  await page
+    .locator('input[type=file]')
+    .first()
+    .setInputFiles({ name, mimeType: 'image/png', buffer: PNG });
   await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();

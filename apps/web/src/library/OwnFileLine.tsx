@@ -48,7 +48,12 @@ export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
             className="visually-hidden"
             onChange={(e) => {
               const input = e.currentTarget;
-              acceptScoreFiles(Array.from(input.files ?? []).map((file) => namedCapture(file)), onFile, onRefuse, onScan);
+              acceptScoreFiles(
+                Array.from(input.files ?? []).map((file) => namedCapture(file)),
+                onFile,
+                onRefuse,
+                onScan,
+              );
               input.value = '';
             }}
           />

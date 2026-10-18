@@ -1,5 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
+import { mockWorker, RECOGNITION_WITH_ERRORS } from './scan.js';
 import { openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
 import { holdPianoSamples } from './samples.js';
@@ -22,9 +24,14 @@ export interface AppState {
   go: (page: Page) => Promise<void>;
   /**
    * 'button': a single red button. 'cursor': the playback cursor's note groups in the sheet.
-   * 'frame': the drop frame while a file is dragged.
+   * 'frame': the drop frame while a file is dragged. 'note': one selected note in the sheet.
    */
-  expectTag: 'button' | 'cursor' | 'frame';
+  expectTag: 'button' | 'cursor' | 'frame' | 'note';
+  /**
+   * Reached only on a PC: a recognition needs the PC worker, which a phone cannot reach, so the
+   * mobile (touch) project skips the state; narrow PC windows are checked in scan-edit.spec.ts.
+   */
+  pcOnly?: boolean;
 }
 
 const TWINKLE = 'twinkle-twinkle-little-star';
@@ -387,4 +394,66 @@ export const STATES: AppState[] = [
     },
     expectTag: 'button',
   },
+  {
+    name: 'scan-import',
+    go: async (page) => {
+      await scanSource(page);
+      // On a PC, Connect to this PC is the red; on a phone, the hand-off (scan-phone.spec.ts).
+      await expect(page.locator('.scan-intro .is-red')).toBeVisible();
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'scan-review',
+    go: async (page) => {
+      await scanReview(page, readFileSync(TWINKLE_XML, 'utf8'));
+      await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+    },
+    expectTag: 'button',
+    pcOnly: true,
+  },
+  {
+    name: 'scan-note-selected',
+    go: async (page) => {
+      await scanReview(page, readFileSync(TWINKLE_XML, 'utf8'));
+      await page.locator('.scan-sheet [id="s2"]').click({ force: true });
+      await expect(page.getByRole('region', { name: 'Correct the selected note' })).toBeVisible();
+    },
+    expectTag: 'note',
+    pcOnly: true,
+  },
+  {
+    name: 'scan-refused',
+    go: async (page) => {
+      await scanReview(page, RECOGNITION_WITH_ERRORS);
+      await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+      await page.getByText('1 place to check', { exact: true }).click();
+    },
+    expectTag: 'button',
+    pcOnly: true,
+  },
 ];
+
+/** The rendered Twinkle page (CC0, from the library) and its MusicXML, standing in for a scan. */
+const TWINKLE_PAGE = fileURLToPath(new URL('../../fixtures/twinkle-page.png', import.meta.url));
+const TWINKLE_XML = fileURLToPath(
+  new URL('../../../../content/scores/twinkle-twinkle-little-star.musicxml', import.meta.url),
+);
+
+/** The scan page with the Twinkle page chosen, before any connection. */
+async function scanSource(page: Page): Promise<void> {
+  await library(page);
+  await page.getByLabel('Open your own score').setInputFiles(TWINKLE_PAGE);
+  await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
+  await expect(page.locator('.scan-original-image')).toHaveJSProperty('complete', true);
+}
+
+/** The review of `xml` as the (mocked) PC worker's recognition of the Twinkle page. */
+async function scanReview(page: Page, xml: string): Promise<void> {
+  await mockWorker(page, xml);
+  await scanSource(page);
+  await page.getByRole('button', { name: 'Connect to this PC' }).click();
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  await expect(page.locator('.scan-sheet svg').first()).toBeVisible();
+}

@@ -469,7 +469,7 @@ describe('runBench', () => {
     expect(FHMM3_ID).not.toBe(FINGERFLOW_ID);
   });
 
-  it.skipIf(!haveBaselines)('names baselines that the baselines CSV has rows for', () => {
+  it('names baselines that the baselines CSV has rows for', () => {
     const ids = new Set(parseCsv(baselinesCsv).map((r) => r.baseline));
     expect(ids.has(FHMM3_ID)).toBe(true);
     expect(ids.has(FINGERFLOW_ID)).toBe(true);

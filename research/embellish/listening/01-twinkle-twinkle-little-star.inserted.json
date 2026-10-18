@@ -1,0 +1,339 @@
+{
+ "slug": "twinkle-twinkle-little-star",
+ "inserted": {
+  "light": [
+   {
+    "bar": "1",
+    "beat": "1.5",
+    "onset": "1/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "1.5",
+    "onset": "17/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "1.5",
+    "onset": "33/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "1.5",
+    "onset": "49/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "1.5",
+    "onset": "65/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "1.5",
+    "onset": "81/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   }
+  ],
+  "playful": [
+   {
+    "bar": "1",
+    "beat": "1.5",
+    "onset": "1/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "1",
+    "beat": "3.5",
+    "onset": "5/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "1.5",
+    "onset": "9/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "4",
+    "onset": "7",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "4.5",
+    "onset": "15/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "1.5",
+    "onset": "17/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "3.5",
+    "onset": "21/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "4",
+    "beat": "1.5",
+    "onset": "25/2",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "4",
+    "beat": "4",
+    "onset": "15",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "4",
+    "beat": "4.5",
+    "onset": "31/2",
+    "pitch": "C4",
+    "midi": 60,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "1.5",
+    "onset": "33/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "3.5",
+    "onset": "37/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "1.5",
+    "onset": "41/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "4",
+    "onset": "23",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "4.5",
+    "onset": "47/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "1.5",
+    "onset": "49/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "3.5",
+    "onset": "53/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "8",
+    "beat": "1.5",
+    "onset": "57/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "8",
+    "beat": "4",
+    "onset": "31",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "8",
+    "beat": "4.5",
+    "onset": "63/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "1.5",
+    "onset": "65/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "3.5",
+    "onset": "69/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "10",
+    "beat": "1.5",
+    "onset": "73/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "10",
+    "beat": "4",
+    "onset": "39",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "10",
+    "beat": "4.5",
+    "onset": "79/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "1.5",
+    "onset": "81/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "3.5",
+    "onset": "85/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   }
+  ]
+ }
+}

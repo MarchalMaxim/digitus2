@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "corpus": "v1",
+  "note": "Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts.",
+  "floors": {
+    "homr:clean": {
+      "importedMin": 16,
+      "fullNoteF1Min": 89.4,
+      "pitchF1Min": 98.7,
+      "beamF1Min": 0,
+      "tiesMissedMax": 13,
+      "tiesExtraMax": 1,
+      "duplicatesMax": 2,
+      "wrongStaffMax": 1
+    },
+    "homr:shadow": {
+      "importedMin": 16,
+      "fullNoteF1Min": 86.2,
+      "pitchF1Min": 98.7,
+      "beamF1Min": 0,
+      "tiesMissedMax": 13,
+      "tiesExtraMax": 1,
+      "duplicatesMax": 1,
+      "wrongStaffMax": 63
+    },
+    "homr:lowContrast": {
+      "importedMin": 16,
+      "fullNoteF1Min": 90.4,
+      "pitchF1Min": 99,
+      "beamF1Min": 0,
+      "tiesMissedMax": 13,
+      "tiesExtraMax": 1,
+      "duplicatesMax": 1,
+      "wrongStaffMax": 0
+    },
+    "homr:skew": {
+      "importedMin": 15,
+      "fullNoteF1Min": 88.8,
+      "pitchF1Min": 96.4,
+      "beamF1Min": 0,
+      "tiesMissedMax": 13,
+      "tiesExtraMax": 1,
+      "duplicatesMax": 0,
+      "wrongStaffMax": 0
+    },
+    "audiveris:pdf": {
+      "importedMin": 16,
+      "fullNoteF1Min": 86.1,
+      "pitchF1Min": 98.2,
+      "beamF1Min": 91.5,
+      "tiesMissedMax": 8,
+      "tiesExtraMax": 0,
+      "duplicatesMax": 1,
+      "wrongStaffMax": 0
+    }
+  }
+}

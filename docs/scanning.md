@@ -114,7 +114,7 @@ Worker limits: one recognition at a time, 10 MiB per upload, 20 MiB per result, 
 
 ## Known recognition errors and limits
 
-Measured on the acceptance corpus (16 library pieces rendered as pages, each in four photo-like variants for homr and as a PDF for Audiveris; numbers and method in `docs/research/omr.md`): homr gets 97 to 99.6% of pitches and 86.8 to 91.0% of notes fully right (pitch, onset, length, staff and voice), Audiveris on the PDFs 98.7% and 86.7%. The errors to look for:
+Measured on the acceptance corpus (16 library pieces rendered as pages, each in four photo-like variants for homr and as a PDF for Audiveris; numbers and method in `docs/research/omr.md`): homr gets 97.0 to 99.5% of pitches and 86.8 to 91.0% of notes fully right (pitch, onset, length, staff and voice), Audiveris on the PDFs 98.7% and 86.7%. The errors to look for:
 
 - **Missed ties**: 13 of the corpus's 47 ties have no tie or slur mark in homr's recognition at all, so the note sounds again instead of being held. Use **Tied to next**.
 - **Rhythm**: notes read with the wrong value (sixteenths as 32nds, a stray rest), which **Places to check** often finds as hands that disagree on a bar's length.

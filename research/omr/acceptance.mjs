@@ -59,6 +59,7 @@ const PIPELINE = [
   'research/omr/prototypes/local-worker/homr.py',
   'research/omr/prototypes/local-worker/audiveris.py',
   'research/omr/prototypes/local-worker/recognition_errors.py',
+  'research/omr/prototypes/local-worker/normalize_export.py',
   'research/omr/prototypes/homr-photo/source-manifests.json',
   'research/omr/prototypes/homr-photo/requirements-cpu.txt',
   'research/omr/prototypes/homr-photo/upstream.patch',
@@ -123,6 +124,7 @@ export function floorsFrom(summary) {
         pitchF1Min: pct(s.pitchF1),
         beamF1Min: pct(s.beamF1),
         tiesMissedMax: s.tiesMissed,
+        tiesExtraMax: s.tiesExtra,
         duplicatesMax: s.duplicates,
         wrongStaffMax: s.wrongStaff,
       },
@@ -143,7 +145,7 @@ export function breaches(summary, floors) {
     if (s.imported < f.importedMin) out.push(`${key}: ${s.imported} pages import, floor ${f.importedMin}`);
     for (const [name, min] of [['fullNoteF1', f.fullNoteF1Min], ['pitchF1', f.pitchF1Min], ['beamF1', f.beamF1Min]])
       if (pct(s[name]) < min) out.push(`${key}: ${name} ${pct(s[name])} below floor ${min}`);
-    for (const [name, max] of [['tiesMissed', f.tiesMissedMax], ['duplicates', f.duplicatesMax], ['wrongStaff', f.wrongStaffMax]])
+    for (const [name, max] of [['tiesMissed', f.tiesMissedMax], ['tiesExtra', f.tiesExtraMax], ['duplicates', f.duplicatesMax], ['wrongStaff', f.wrongStaffMax]])
       if (s[name] > max) out.push(`${key}: ${name} ${s[name]} above ceiling ${max}`);
   }
   return out;

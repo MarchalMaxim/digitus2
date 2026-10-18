@@ -38,6 +38,7 @@ test('floors follow the benchmark rule, and a worse run is a breach while an equ
     pitchF1Min: 89.5,
     beamF1Min: 49.5,
     tiesMissedMax: 1,
+    tiesExtraMax: 0,
     duplicatesMax: 0,
     wrongStaffMax: 2,
   });

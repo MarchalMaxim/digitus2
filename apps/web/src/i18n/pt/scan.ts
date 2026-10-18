@@ -161,7 +161,8 @@ export const scan: Messages['scan'] = {
       tieUnmatched: (where: string, pitch: string) =>
         `${where}: uma ligadura em ${pitch} não tem nota correspondente.`,
       barTiming: (timing: string) => `As mãos não coincidem. ${timing}`,
-      barLong: (timing: string) => `O compasso é mais longo que a sua fórmula de compasso. ${timing}`,
+      barLong: (timing: string) =>
+        `O compasso é mais longo que a sua fórmula de compasso. ${timing}`,
     },
     gap: (beats: number) => plural('pt', beats, { one: '# tempo', other: '# tempos' }),
     downloadCorrected: 'Baixar MusicXML corrigido',

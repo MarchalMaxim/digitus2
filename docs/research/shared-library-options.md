@@ -1,5 +1,7 @@
 # Shared library of readers' scores: options
 
+**Decision: option (c).** The owner declined a shared library; the document stays as the record of the options weighed.
+
 This study answers [#41](https://github.com/MarchalMaxim/digitus2/issues/41): "Make uploaded or recognised scores available to other people", with explicit publishing, provenance and redistribution permission per score, and removal and moderation. It also asks whether this is still wanted under the Pages-only, no-login decision. Section 4 states the decision the owner has to take.
 
 ## 1. Constraints

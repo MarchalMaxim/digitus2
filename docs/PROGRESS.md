@@ -159,6 +159,7 @@ References on the same split: human agreement 71.4; FingerFlow with learned weig
 - **PDFs go to Audiveris with their original bytes** (measurably better recognition); photos go to a pinned homr (AGPL-3.0, fetched locally, never bundled into the MIT app).
 - **Scanning ships as experimental:** the owner accepts a useful first release for clear photos of printed scores. Source-versus-recognition review comes before any use for fingerings, the raw MusicXML can be downloaded for correction elsewhere, and the app makes no accuracy claim. No hand-written replacement XML or unreviewed preprocessing ships.
 - **Uploaded scores stay in the browser** (IndexedDB "My scores"); no worker credentials or job state are stored, and nothing is published automatically. Private photos and recognition outputs are never committed.
+- **No shared library of uploads:** readers share files themselves and the library stays curated (#41 closed; options in `docs/research/shared-library-options.md`).
 
 ## Known limitations and open findings
 
@@ -198,7 +199,7 @@ In order:
 3. The teacher-review fixes, then the next weekly run (#43).
 4. PWA (#35).
 5. Private local folder and CC-licensed lane (#37).
-6. Scanning follow-ups: recognition, correction in the browser, a shared library (#39, #40, #41).
+6. Scanning follow-ups: recognition and correction in the browser (#39, #40).
 7. Library metadata of the archive pieces (#48).
 8. Experimental embellishment, research spike first (#38).
 9. M11 demo videos (#58); M9 neural evaluation (#57).

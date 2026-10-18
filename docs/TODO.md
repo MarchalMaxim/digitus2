@@ -6,6 +6,12 @@ Also open, tracked as GitHub issues: #5 smarter scrolling.
 
 ## Open
 
+### T21 Are the unit tests useful, or filler? (audit done; recommendations open)
+
+> "Do a thorough search of the unit tests in this project: are they actually useful, or are they just AI slop? Thorough!"
+
+Approach: mutation sampling (one operator changed at a time in the source next to each test, then that test file re-run), a re-run of the survivors against every test that imports the mutated source, and a read-only review of the test files by reviewers, with a hand check of their claims. The result is in `docs/reviews/unit-test-audit-2026-10-18.md`: the tests are mostly real (about 73% of mutations that a test executes are caught), but thin at boundaries and bad input, weakest for React component tests, and the strongest oracle (the metrics against the official evaluator) skips silently in CI. Nothing was deleted or rewritten. Open for the owner: make the data-dependent skips loud in CI, add the boundary and bad-input assertions the report lists, and tighten the few vacuous assertions it names.
+
 ### T12 Held notes in imported MIDI (scheduled: M8)
 
 > "Support the 'long' notes, i.e. the notes that are connected by a line to sound continuous. The MIDI player doesn't do that yet."

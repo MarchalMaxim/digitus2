@@ -115,6 +115,12 @@ describe('SidePanel', () => {
     expect(screen.queryByText('Details', { exact: true })).toBeNull();
     expect(screen.getByText(LEGEND)).toBeVisible();
   });
+
+  // The one-red rule (docs/app.md): the panel never draws the red element.
+  it('has no red element', () => {
+    const { container } = renderPanel(readyDoc());
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+  });
 });
 
 // Polish plan Task 6, review S9: Large, Medium, Small and Child had no word on what they change,

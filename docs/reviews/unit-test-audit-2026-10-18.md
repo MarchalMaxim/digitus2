@@ -11,7 +11,7 @@ The tests are mostly real. They are not assertion-free or tautological filler, b
 - **Most surviving mutants are not caught by any other unit test either.** Of the web app's survivors, 86% also survive every test that imports the mutated file, so the gaps are suite-level gaps and not an artefact of running one test file at a time. About one survivor in five is a mutant that cannot change behaviour, so the true gap rate is a little lower.
 - **React component tests are the weakest group** (59% against 75% for plain TypeScript). Layout and class names are left to the Playwright suite.
 - **Reviewers read every vitest file (118) and graded 1216 cases: 75% useful, 22% weak, 2.7% slop, and 16% change detectors**, tests that pin numbers or strings copied from the current output. The groups differ. The 38 files with the lowest mutation scores: 70% of 322 cases useful, 27% weak, 2.2% slop, 22% change detectors. The 72 files that scored 70% or more: 78% of 850 useful, 19% weak, 2.7% slop, 14% change detectors. The 8 files that were not mutated: 70% useful, 23% weak, 6.8% slop. A sample of the Python suites reads better (86% useful).
-- **The one independent oracle does not run in CI.** The test that compares the metrics with the official fingering evaluator, the corpus tests and the training test skip silently when the gitignored datasets are absent, and CI does not download them. Eleven cases are affected (see "Gaps").
+- **The one independent oracle does not run in CI.** The test that compares the metrics with the official fingering evaluator, the corpus tests and the training test skip silently when the gitignored datasets are absent, and CI does not download them. Ten cases are affected (see "Gaps"). The baselines check in the bench suite is not affected: its input is tracked.
 
 The suite is worth keeping and extending. It does not need deleting; it needs the missing assertions named under "Gaps" (the reviewers called 157 survivors real gaps, several pointing at the same missing assertion) and a handful of weak tests tightened.
 
@@ -201,7 +201,6 @@ Data-dependent tests that skip silently:
 | `corpora.test.ts`           | 7 of 10                                                                                                          |
 | `learn.test.ts`             | 2 of 4                                                                                                           |
 | `metrics.reference.test.ts` | 1 of 1 (compares gen, high, soft and rec with the official evaluator to 1e-6: the strongest oracle in the suite) |
-| `bench.test.ts` (baselines) | 1                                                                                                                |
 
 The CI workflow runs `pnpm test` without downloading the datasets, and the benchmark gates are not part of CI either, so these checks run only on a machine that has the data. A missing dataset is reported as a skip, which reads as a pass.
 

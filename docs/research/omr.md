@@ -187,4 +187,4 @@ Nothing below is bundled into the MIT web app. The setup scripts fetch each comp
 
 ## Open questions
 
-Source beam recovery for photos and the shared library are open (#39, #41). Phone-photo robustness, multi-page books and the photo errors seen only on the private test page (a duplicated C5, a bass E3 in the upper hand) are not re-measured: those photos are not in the repository, and the synthetic corpus does not reproduce them.
+Source beam recovery for photos is open (#39). Phone-photo robustness, multi-page books and the photo errors seen only on the private test page (a duplicated C5, a bass E3 in the upper hand) are not re-measured: those photos are not in the repository, and the synthetic corpus does not reproduce them.

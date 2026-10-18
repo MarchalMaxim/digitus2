@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { openFiles } from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
@@ -93,6 +94,7 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await page.getByRole('button', { name: 'Select page 2: second.png' }).click();
   await expect(page.getByRole('img', { name: 'Original printed score, page 2' })).toBeVisible();
   const downloading = page.waitForEvent('download');
+  await openFiles(page);
   await page.getByRole('button', { name: 'Download combined MusicXML' }).click();
   const download = await downloading;
   const content = readFileSync((await download.path())!, 'utf8');
@@ -139,6 +141,7 @@ test('scan: deliberate connection, raw review, explicit use and retained provena
       fullPage: true,
     });
   const downloading = page.waitForEvent('download');
+  await openFiles(page);
   await page.getByRole('button', { name: 'Download raw MusicXML' }).click();
   const download = await downloading;
   expect(download.suggestedFilename()).toBe('printed-score-recognized.musicxml');
@@ -155,6 +158,7 @@ test('scan: deliberate connection, raw review, explicit use and retained provena
   await expect(page.locator('.score-sheet g.fing').first()).toBeVisible();
   await page.getByRole('button', { name: 'Scan source and recognition' }).click();
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  await openFiles(page);
   await expect(page.getByRole('button', { name: 'Download raw MusicXML' })).toBeVisible();
 });
 
@@ -193,6 +197,7 @@ test('scan: importer refusal retains raw output and blocks fingering use', async
   await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('alert')).toContainText('cannot be used');
+  await openFiles(page);
   await expect(page.getByRole('button', { name: 'Download raw MusicXML' })).toBeVisible();
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
@@ -272,6 +277,7 @@ test('scan: local multipage PDF preview, original upload and exact raw export', 
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   expect(uploaded).toEqual(pdf);
   const pending = page.waitForEvent('download');
+  await openFiles(page);
   await page.getByRole('button', { name: 'Download raw MusicXML' }).click();
   const download = await pending;
   const path = await download.path();

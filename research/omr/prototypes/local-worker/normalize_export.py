@@ -54,10 +54,10 @@ def merge_empty_measures(data: bytes) -> tuple[bytes, int]:
         return data, 0
     total = counts.pop()
     # Only indices where every part's measure is empty, never the first or the last.
+    empty = [all(_empty(part.findall("measure")[i]) for part in parts) for i in range(total)]
+    # Two empty measures in a row would need a choice of where each barline goes: leave them.
     indices = [
-        i
-        for i in range(1, total - 1)
-        if all(_empty(part.findall("measure")[i]) for part in parts)
+        i for i in range(1, total - 1) if empty[i] and not empty[i - 1] and not empty[i + 1]
     ]
     if not indices:
         return data, 0
@@ -180,8 +180,11 @@ def ties_from_slurs(data: bytes) -> tuple[bytes, int]:
         if len(candidates) != 1:
             continue
         stop = candidates[0][0]
-        ends = _slurs(stop, "stop")
-        if not ends or stop.find("tie") is not None or start.find("tie") is not None:
+        number = begins[0][1].get("number", "1")
+        # Only the stop of the same slur number closes this slur.
+        ends = [e for e in _slurs(stop, "stop") if e[1].get("number", "1") == number]
+        has = lambda note, kind: any(t.get("type") == kind for t in note.findall("tie"))
+        if not ends or has(start, "start") or has(stop, "stop"):
             continue
         (begin_notations, begin_slur), (end_notations, end_slur) = begins[0], ends[0]
         begin_notations.remove(begin_slur)

@@ -8,11 +8,11 @@ What was evaluated for the experimental scanning feature (`docs/scanning.md`), w
 - No external recognition service and no score upload: the owner requires recognition within the application. Online services were surveyed but never used.
 - Photos (PNG, JPEG) go to a pinned, patched homr; PDFs go to Audiveris 5.11.0 with a short-staff profile and the English text model. Only these two recovered usable music in the tests below.
 - Browser-only recognition was rejected: no tested checkpoint produced usable notes fast enough. SMT++ produced wrong notes; oemer took 21 minutes for one page and kept its rhythm and meter errors.
-- Recognition output is never repaired or guessed. Errors stay visible for review, and a strict importer refuses malformed notation.
+- Recognition output is never repaired or guessed. Errors stay visible for review, and a strict importer refuses malformed notation. The worker applies two lossless export rules, checked on the file and reported in the review (Acceptance corpus and gate, below).
 
 ## Evaluation harness
 
-`research/omr/prepare.mjs` renders library scores into complete page sets (clean PNG, deterministic photo-like degradations, PDF). Its manifest pins each original MusicXML by SHA-256 with its source and licence. The original XML is the ground truth. `research/omr/evaluate.mjs` scores whole-score exports (`.musicxml`, `.xml` or `.mxl`, one per fixture id) from any recogniser against it. The `omr` step of `pnpm verify` runs the harness tests (`pnpm test:omr`). It downloads no models and is not an accuracy gate.
+`research/omr/prepare.mjs` renders library scores into complete page sets (clean PNG, deterministic photo-like degradations, PDF). Its manifest pins each original MusicXML by SHA-256 with its source and licence. The original XML is the ground truth. `research/omr/evaluate.mjs` scores whole-score exports (`.musicxml`, `.xml` or `.mxl`, one per fixture id) from any recogniser against it. The `omr` step of `pnpm verify` runs the harness tests (`pnpm test:omr`); it downloads no models and is not an accuracy gate. The accuracy gate is `omr:acceptance` (below).
 
 ```sh
 pnpm --filter @digitus2/engine build
@@ -41,6 +41,40 @@ Each bar is paired by ordinal position. Onsets are exact rational quarter-note o
 These are precision, recall and F1 per projection, not per-note accuracy. Strict full-note F1 is the headline number. Because the voice key is the whole onset/pitch set of a voice in its bar, one wrong note can invalidate its neighbours. A low full-note F1 therefore does not mean that most noteheads were wrong. The scorer parses with `preserveNotation: true` (duplicates and chord-member durations kept; tied segments merged). Slurs, beams, articulations, enharmonic spelling and layout are not scored, and rests count only through timing. A reference that fails preservation-mode parsing is fixed or dropped; the checks are never relaxed to suit a candidate.
 
 The default corpus is page 1 of three library pieces: Twinkle, Bach Minuet in G (BWV Anh. 114) and Chopin Prelude Op. 28 No. 7 (436 sounding notes). The held-out pages are Ode to Joy, Amazing Grace, Greensleeves and Schumann Op. 68 No. 1. All are synthetic engravings, not historical scans or phone photos.
+
+## Acceptance corpus and gate
+
+`research/omr/acceptance.mjs` is the scanning gate, the `omr:acceptance` step of `pnpm verify`. It renders the 16 one-page library pieces of `research/omr/acceptance/corpus.json` with `prepare.mjs`, recognises every page with the PC worker's own adapters (`acceptance/recognize.py` imports `local-worker/homr.py` and `audiveris.py`, so the gate measures the shipped pipeline), and scores note by note against the library MusicXML: the projection F1s above plus `diagnose.mjs`. It fails when a route falls below `research/omr/acceptance/floor.json`. Without the recognisers it reports SKIP with the reason. Outputs are cached in the ignored `research/omr/results/acceptance/` by the hash of the input and of the pipeline's files, so a rerun recognises only what changed (80 recognitions take about 15 minutes on a Ryzen 7 7800X3D).
+
+```sh
+node research/omr/acceptance.mjs --check          # 0, or 3 with the reason the recognisers are missing
+node research/omr/acceptance.mjs                  # recognise what changed, score, compare with floor.json
+node research/omr/acceptance.mjs --update-floor   # after a reviewed, measured change
+```
+
+Set `DIGITUS2_OMR_HOMR`, `DIGITUS2_OMR_BUNDLE` or `DIGITUS2_OMR_TEXT_MODELS` when a toolchain is not in its setup folder. The corpus adds pieces with ties across voices and bars, chords, volta endings, long beams, tuplets and two-voice staves to the earlier seven: Bach BWV Anh. 120, 119 and BWV 941, Burgmüller Op. 100 No. 5, Tchaikovsky Op. 39 No. 1, Czerny Op. 821 No. 5, Kuhlau Op. 20 No. 1 (II), Chopin Op. 69 No. 2 and Schumann Op. 68 No. 10. Each page goes to homr in four variants (clean, shadow, low contrast, 1.5° skew) and its PDF to Audiveris. They are synthetic engravings: exact truth for the pipeline, not evidence of robustness to camera photos.
+
+`diagnose.mjs` counts the error classes of issue #39 over bars whose starts agree: **ties missed** (a reference tie the recognition re-attacks), **ties extra** (the reverse), **duplicates** (notes beyond the reference's count at one staff, onset and pitch) and **wrong staff** (onset and pitch right, staff wrong), plus **beam F1** over exact primary beam groups. Floors follow the benchmark rule (F1 in percent minus 0.5, rounded down); error ceilings are the measured counts.
+
+| Route (16 pages each) | Imports | Full-note F1 before | after | Pitch F1 after | Ties missed before | after | Extra ties | Duplicates | Wrong staff | Beam F1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| homr, clean | 16 | 86.77 | 89.97 | 99.28 | 17 | 13 | 1 | 2 | 1 | 0 |
+| homr, shadow | 16 | 83.54 | 86.77 | 99.26 | 18 | 13 | 1 | 1 | 63 | 0 |
+| homr, low contrast | 16 | 87.79 | 90.98 | 99.56 | 17 | 13 | 1 | 1 | 0 | 0 |
+| homr, skew | 15 | 86.14 | 89.41 | 96.97 | 17 | 13 | 1 | 0 | 0 | 0 |
+| Audiveris, PDF | 16 | 86.65 | 86.65 | 98.72 | 8 | 8 | 0 | 1 | 0 | 92.01 |
+
+The two worker rules behind "after" (`local-worker/normalize_export.py`, applied to every homr export and reported as a review warning):
+
+- **An empty measure joins its neighbours.** homr writes the bracket that closes a first ending as a measure of its own, holding only that barline; every later bar was then counted one too far (Burgmüller Op. 100 No. 5: 51.2% to 91.2%). The barline moves onto the bar it closes, attributes and directions open the next bar, and no pitch, duration or onset changes. Two empty measures in a row, or barlines that would collide, leave the file unchanged.
+- **A slur joining one pitch to its continuation is a tie, whatever the voice numbers.** homr's model draws ties and slurs as one class and its exporter converts a slur to a tie only between notes of the same voice number; its voice numbers change across held notes (Bach BWV 941 bar 4: the held E5 is voice 2, its continuation voice 1). The worker applies the same rule by staff, pitch and exact time: one slur start and the stop of the same slur number, on one pitch, the second note starting where the first ends; ambiguous cases stay slurs.
+
+What remains, and why:
+
+- **13 missed ties per homr variant** carry no tie or slur mark in homr's output at all (Bach BWV 941, Chopin Op. 28 No. 7, Kuhlau): the model did not see them, and inventing them would be a guess. The review's **Tied to next** corrects them.
+- **63 wrong-staff notes** are one page (Bach BWV Anh. 120 with the edge shadow) that homr read as a single staff whose clef alternates between treble and bass: the grand staff was not paired. The worker detects this pattern (one part, no `<staves>`, three or more treble–bass clef changes; it fires on this page and on no other of the 64) and the review shows a warning above the comparison; nothing is repaired.
+- **Duplicates** are mostly shared noteheads written in two voices, which the reference also has; the remaining counts are rhythm errors (Czerny's sixteenths read as 32nds).
+- **Beams.** homr writes no beams, its segmentation has no beam class (stems and rests only) and its note positions are attention estimates in staff-crop coordinates, so beam strokes cannot be linked to recognised notes without an alignment homr does not provide. The app's display inference (`scanBeams.ts`) matches 133 of the 357 reference groups on clean pages (precision 26.6%, recall 37.3%). Recovering beams from the image would have to beat that at about 98% precision on every variant to be presented as read from the source; that work is not done (#39). The PDF route reads beams from the source: 92.01% exact groups.
 
 ## Routes evaluated
 
@@ -153,4 +187,4 @@ Nothing below is bundled into the MIT web app. The setup scripts fetch each comp
 
 ## Open questions
 
-The open scanning requests (recognition errors, beam recovery, an acceptance corpus beyond one test page, in-browser correction, a shared library) are in `docs/TODO.md` under T9. Phone-photo robustness, multi-page books and mobile use are not established.
+Source beam recovery for photos and the shared library are open (#39, #41). Phone-photo robustness, multi-page books and the photo errors seen only on the private test page (a duplicated C5, a bass E3 in the upper hand) are not re-measured: those photos are not in the repository, and the synthetic corpus does not reproduce them.

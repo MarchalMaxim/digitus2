@@ -10,10 +10,9 @@ export const scan = {
     /** Shown instead of a file name when several page photos are scanned as one score. */
     pageImages: (n: number) => plural('en', n, { one: '# page image', other: '# page images' }),
     advice:
-      'Original PDFs and flat, high-resolution scans work best. Book photos are experimental and can fail, even when well lit. Results open beside the original for review.',
+      'Original PDFs and flat, high-resolution scans work best. Book photos can fail, even when well lit. Results open beside the original for review.',
     /** The "PC worker" is a small program the reader runs on their own computer to recognise scores. */
-    workerNeeded:
-      'This experimental option needs the PC worker on this computer. A phone’s localhost cannot reach your PC.',
+    workerNeeded: 'Scanning needs the PC worker running on this computer.',
     connect: 'Connect to this PC',
     connecting: 'Connecting…',
     cancelScan: 'Cancel scan',
@@ -56,6 +55,8 @@ export const scan = {
     problem: (error: string) =>
       `${error} Correct the notes here, download the raw file for a notation editor, or try another image.`,
     detailsSummary: 'Recognition details',
+    /** The disclosure holding the MusicXML downloads. */
+    filesSummary: 'Files for a notation editor',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Technical reason: ${reason}`,
     retained:
@@ -64,6 +65,9 @@ export const scan = {
     /** Shown when several scanned pages are joined into one score. */
     graphicSpanWarning:
       'Slurs and other notation spans are kept within each scanned page. Compare continuations at page edges; missing endpoints have not been repaired.',
+    /** The worker found a piano page read as one staff: shown above the comparison. */
+    grandStaffWarning:
+      'The staves were not paired into a grand staff, so both hands are read as one. Use for fingerings would give wrong hands: try a flatter, evenly lit photo or the original PDF.',
     unknownWarning: 'The recognizer reported an unknown warning. Check the original carefully.',
     downloadPagesSummary: 'Download individual page files',
     downloadPage: (page: number) => `Download page ${page} MusicXML`,
@@ -76,7 +80,7 @@ export const scan = {
   edit: {
     hint: 'Select a note to correct it.',
     /** The sheet's description for keyboard and screen-reader users. */
-    keys: 'Left and Right select the previous or next note, Up and Down change its pitch, Escape closes the editor.',
+    keys: 'Enter selects the first note. Left and Right select the previous or next note, Up and Down change its pitch (with Shift, an octave), Escape closes the editor.',
     /** "C4", "B♭3": a pitch with its octave, in the names this language uses. */
     pitch: (step: string, alter: number, octave: number) =>
       `${step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
@@ -123,6 +127,8 @@ export const scan = {
     toLeftHand: 'To left hand',
     toRightHand: 'To right hand',
     remove: 'Remove',
+    /** A rest the recognition put where the page has a note. */
+    makeNote: 'Make it a note',
     previous: 'Previous note',
     next: 'Next note',
     done: 'Done',
@@ -136,6 +142,8 @@ export const scan = {
     undo: 'Undo',
     reset: 'Reset to recognition',
     resetDone: 'All corrections removed. Undo brings them back.',
+    /** Read out after Undo; `what` is the correction taken back, or empty. */
+    undone: (what: string) => (what ? `Undone: ${what}.` : 'Undone.'),
     listSummary: 'Review corrections',
     /** The corrections as listed; `where` is "Bar 11, right hand". */
     changed: {
@@ -154,9 +162,9 @@ export const scan = {
       plural('en', n, { one: '# place to check', other: '# places to check' }),
     problems: {
       tieGap: (where: string, pitch: string, gap: string) =>
-        `${where}: the tie on ${pitch} reaches its next ${pitch} ${gap} late.`,
+        `${where}: the tied ${pitch} ends ${gap} before the next ${pitch} begins. Check the note lengths.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
-        `${where}: the tie on ${pitch} reaches its next ${pitch} ${gap} early.`,
+        `${where}: the tied ${pitch} runs ${gap} into the next ${pitch}. Check the note lengths.`,
       tieUnmatched: (where: string, pitch: string) =>
         `${where}: a tie on ${pitch} has no matching note.`,
       /** `timing` is the sentence from `timing` above. */
@@ -171,6 +179,8 @@ export const scan = {
       rest: 'A rest has no pitch to change.',
       range: 'That pitch is outside the piano’s range.',
       grace: 'A grace note takes no time, so its length cannot be changed here.',
+      tuplet:
+        'The length of a note in a triplet or other tuplet cannot be changed here. Use a notation editor.',
       unwritable: 'This length cannot be written in this score.',
       otherHand:
         'This change would move notes in the other hand or voice, so it was not made. Check the bar in a notation editor.',
@@ -189,7 +199,7 @@ export const scan = {
     takePhoto: 'Take a photo',
     takeAnother: 'Take another photo',
     explain:
-      'Recognition runs on a PC, and a phone cannot reach it. Send these photos to the PC that runs the worker, then open them there.',
+      'Recognition runs on a PC, and a phone cannot reach it. Send these photos to your PC, then open them there to scan.',
     share: 'Send photos to your PC',
     save: 'Save photos',
     shareTitle: 'Score photos',
@@ -200,9 +210,6 @@ export const scan = {
   errors: {
     notCombinedSaved:
       'The pages were recognized, but their notation could not be combined. Individual page files are available below.',
-    /** `reason` is the explanation of why the pages could not be joined. */
-    notCombined: (reason: string) =>
-      `The pages were recognized, but their notation could not be combined. ${reason}`,
     somePagesFailed: 'Some pages need another scan. Recognized pages are kept.',
     recognitionFailed: 'Recognition failed.',
     notationNotShown:
@@ -281,7 +288,8 @@ export const scan = {
   },
   client: {
     busy: 'The PC is already scanning. Try again shortly.',
-    workerStatus: (status: number) => `PC worker returned ${status}.`,
+    workerStatus: (status: number) =>
+      `The PC worker could not answer (error ${status}). Restart it and try again.`,
     invalidJob: 'Invalid scan job.',
     updateWorker: 'Update the PC worker to continue.',
     noJob: 'The worker did not return a scan job.',

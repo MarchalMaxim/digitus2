@@ -416,6 +416,7 @@ export const STATES: AppState[] = [
     name: 'scan-note-selected',
     go: async (page) => {
       await scanReview(page, readFileSync(TWINKLE_XML, 'utf8'));
+      await expect(page.locator('.scan-sheet')).toHaveAttribute('aria-busy', 'false');
       await page.locator('.scan-sheet [id="s2"]').click({ force: true });
       await expect(page.getByRole('region', { name: 'Correct the selected note' })).toBeVisible();
     },
@@ -427,7 +428,7 @@ export const STATES: AppState[] = [
     go: async (page) => {
       await scanReview(page, RECOGNITION_WITH_ERRORS);
       await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
-      await page.getByText('1 place to check', { exact: true }).click();
+      await expect(page.locator('details.scan-problems')).toHaveAttribute('open', '');
     },
     expectTag: 'button',
     pcOnly: true,

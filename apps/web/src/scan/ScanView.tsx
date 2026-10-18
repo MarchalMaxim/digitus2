@@ -13,7 +13,12 @@ import { ScoreSheet } from '../score/ScoreSheet.js';
 import { useLocale, useT } from '../i18n/i18n.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
-import { createScanClient, UNKNOWN_WARNING, type WorkerMetadata } from './client.js';
+import {
+  createScanClient,
+  GRAND_STAFF_WARNING,
+  UNKNOWN_WARNING,
+  type WorkerMetadata,
+} from './client.js';
 import type { Correction } from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
@@ -22,6 +27,7 @@ import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
 import { handOff, handOffFiles, isTouchOnly } from './phone.js';
 import {
   correct,
+  timingIssue,
   describeCorrection,
   describeNote,
   describeProblem,
@@ -77,6 +83,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     detail?: string;
   }>();
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [combineDetail, setCombineDetail] = useState<string>();
   const [selected, setSelected] = useState(0);
   const [reviewMode, setReviewMode] = useState<'combined' | 'page'>(
     hasPageRecognition && !initial.xml ? 'page' : 'combined',
@@ -94,6 +101,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [undoStack, setUndoStack] = useState<Correction[][]>([]);
   const [sheetHost, setSheetHost] = useState<HTMLDivElement | null>(null);
   const resultHost = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const client = useRef(createScanClient()).current;
@@ -136,6 +144,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const renderError = rendered && rendered.xml === renderXml ? rendered.error : null;
   const importError = imported && imported.xml === importXml ? imported.error : null;
   const reviewError = renderError ?? importError;
+  const settled = rendered?.xml === renderXml && imported?.xml === importXml;
   const canUseResult =
     !!session.xml &&
     reviewMode === 'combined' &&
@@ -145,8 +154,25 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     !reviewError;
   const selectedNote =
     note !== null && editable ? corrected.score.notes.find((n) => n.ordinal === note) : undefined;
+  // Saved corrections that no longer apply are dropped by the next change, never replayed.
+  const kept = corrected ? corrections.slice(0, corrected.applied) : corrections;
+  // The one red: on Use for fingerings while it can be used (or is still being checked); on a
+  // refused recognition, on the first place to check, or on Scan again; on a selected note.
+  const useLive =
+    canUseResult || (!settled && reviewMode === 'combined' && !!session.xml && !reviewError);
+  const nextRed = selectedNote
+    ? 'note'
+    : useLive
+      ? 'use'
+      : editable && problems.length
+        ? 'problem'
+        : 'again';
   useSelectedMark(sheetHost, selectedNote ? note : null, pages);
 
+  useEffect(() => {
+    // The scan's controls go away when the review opens: the heading takes the focus.
+    if (phase === 'review') heading.current?.focus();
+  }, [phase]);
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -344,9 +370,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     try {
       xml = joinScanPages(results.map((page) => page.xml!));
     } catch (cause) {
-      setError(
-        batch ? (m) => m.scan.errors.notCombined(messageOf(cause, m)) : (m) => messageOf(cause, m),
-      );
+      setError(batch ? (m) => m.scan.errors.notCombinedSaved : (m) => messageOf(cause, m));
+      // The joiner's own reason goes under Recognition details.
+      if (batch) setCombineDetail(messageOf(cause));
       setReviewMode('page');
     }
     retain({
@@ -376,7 +402,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ? t.scan.review.graphicSpanWarning
       : warning === UNKNOWN_WARNING
         ? t.scan.review.unknownWarning
-        : warning;
+        : warning === GRAND_STAFF_WARNING
+          ? t.scan.review.grandStaffWarning
+          : warning;
   const useResult = () => {
     if (!canUseResult) return;
     useAppStore.getState().openPiece({
@@ -394,7 +422,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   // Corrections: each one is checked before it is recorded, and recorded only when it applies.
   const applyCorrection = (correction: Correction) => {
     if (!session.xml || !corrected) return;
-    const refusal = tryCorrection(session.xml, corrections, correction);
+    const refusal = tryCorrection(session.xml, kept, correction);
     if (refusal) {
       setEditStatus(refusal);
       return;
@@ -410,15 +438,20 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         (target?.rest ? order[order.indexOf(target) + 1] : undefined);
       if (neighbour) setNote(neighbour.ordinal);
     }
-    setUndoStack((stack) => [...stack, corrections]);
+    setUndoStack((stack) => [...stack, kept]);
     setEditStatus(null);
-    retain({ ...session, corrections: [...corrections, correction] });
+    retain({ ...session, corrections: [...kept, correction] });
   };
   const undo = () => {
     if (!corrections.length && !undoStack.length) return;
     const previous = undoStack.at(-1) ?? corrections.slice(0, -1);
     setUndoStack((stack) => stack.slice(0, -1));
-    setEditStatus(null);
+    // Say what was undone: the last correction, when one was taken away.
+    const undone =
+      previous.length === corrections.length - 1 && rawScore
+        ? describeCorrection(t, rawScore, corrections.at(-1)!)
+        : '';
+    setEditStatus((m) => m.scan.edit.undone(undone));
     retain({ ...session, corrections: previous.length ? previous : undefined });
   };
   const reset = () => {
@@ -439,12 +472,25 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     [sheetHost],
   );
   const onSheetClick = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (!editable || !sheetHost) return;
+    if (!editable || !sheetHost || !corrected) return;
+    // A click a screen reader sends for Enter carries no pointer: it starts at the first note.
+    if (event.detail === 0 && !selectedNote) {
+      const first = readingOrder(corrected.score)[0];
+      if (first) select(first.ordinal);
+      return;
+    }
     const ordinal = noteAt(sheetHost, event);
     if (ordinal !== undefined) select(ordinal);
   };
-  const onSheetKey = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+  const closeEditor = () => {
+    select(null);
+    sheetRef.current?.focus();
+  };
+  const onEditKey = (event: ReactKeyboardEvent<HTMLElement>) => {
     if (!editable || !corrected) return;
+    const target = event.target as Element;
+    const inSheet = !!target.closest?.('.scan-sheet');
+    if (!inSheet && !target.closest?.('.note-editor')) return;
     const order = readingOrder(corrected.score);
     if (!order.length) return;
     const position = selectedNote ? order.indexOf(selectedNote) : -1;
@@ -458,16 +504,27 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               Math.max(0, position + (event.key === 'ArrowRight' ? 1 : -1)),
             );
       select(order[next]!.ordinal);
+    } else if (inSheet && (event.key === 'Enter' || event.key === ' ') && !selectedNote) {
+      event.preventDefault();
+      select(order[0]!.ordinal);
     } else if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && selectedNote?.step) {
       event.preventDefault();
+      const up = event.key === 'ArrowUp';
       applyCorrection({
         kind: 'pitch',
         note: selectedNote.ordinal,
-        ...stepPitch(corrected.score, selectedNote, event.key === 'ArrowUp' ? 1 : -1),
+        // Shift moves a whole octave, the error a misread clef or ledger line gives.
+        ...(event.shiftKey
+          ? {
+              step: selectedNote.step,
+              alter: selectedNote.alter,
+              octave: selectedNote.octave + (up ? 1 : -1),
+            }
+          : stepPitch(corrected.score, selectedNote, up ? 1 : -1)),
       });
     } else if (event.key === 'Escape' && selectedNote) {
       event.preventDefault();
-      select(null);
+      closeEditor();
     }
   };
   const onReviewKey = (event: ReactKeyboardEvent<HTMLElement>) => {
@@ -478,11 +535,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     }
   };
   const baseName = session.file.name.replace(/\.[^.]+$/, '');
+  // The bar's timing is said only when the hands disagree or a hand overruns the bar.
   const statusText = editStatus
     ? editStatus(t)
-    : selectedNote && corrected
+    : selectedNote &&
+        corrected &&
+        timingIssue(corrected.score, selectedNote.part, selectedNote.measure)
       ? timingText(t, corrected.score, selectedNote.part, selectedNote.measure)
       : '';
+  const liveText = editStatus ? editStatus(t) : selectedNote ? describeNote(t, selectedNote) : '';
 
   return (
     <main className="page scan-view stack" onKeyDown={phase === 'review' ? onReviewKey : undefined}>
@@ -583,36 +644,46 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               </>
             )}
             {error && <p role="alert">{error(t)}</p>}
-            <details className="scan-setup">
-              <summary>{t.scan.setup.summary}</summary>
-              <div className="stack">
-                <p>{t.scan.setup.install}</p>
-                <pre>
-                  <code>
-                    powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
-                    {'\n'}powershell -File
-                    research/omr/prototypes/oemer-quality/prepare-text-models.ps1
-                    {'\n'}powershell -File research/omr/prototypes/homr-photo/setup.ps1
-                  </code>
-                </pre>
-                <pre>
-                  <code>
-                    python research/omr/prototypes/local-worker/worker.py --bundle
-                    research/omr/results/quality-wave/toolchain --short-staves --text-models
-                    research/omr/results/quality-wave/text-models --homr-toolchain
-                    research/omr/results/photo-options/toolchain
-                  </code>
-                </pre>
-                <p className="small">{t.scan.setup.keepOpen}</p>
-                <a
-                  href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {t.scan.setup.help}
-                </a>
-              </div>
-            </details>
+            {touchOnly && isImage ? (
+              <a
+                href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t.scan.setup.help}
+              </a>
+            ) : (
+              <details className="scan-setup">
+                <summary>{t.scan.setup.summary}</summary>
+                <div className="stack">
+                  <p>{t.scan.setup.install}</p>
+                  <pre>
+                    <code>
+                      powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
+                      {'\n'}powershell -File
+                      research/omr/prototypes/oemer-quality/prepare-text-models.ps1
+                      {'\n'}powershell -File research/omr/prototypes/homr-photo/setup.ps1
+                    </code>
+                  </pre>
+                  <pre>
+                    <code>
+                      python research/omr/prototypes/local-worker/worker.py --bundle
+                      research/omr/results/quality-wave/toolchain --short-staves --text-models
+                      research/omr/results/quality-wave/text-models --homr-toolchain
+                      research/omr/results/photo-options/toolchain
+                    </code>
+                  </pre>
+                  <p className="small">{t.scan.setup.keepOpen}</p>
+                  <a
+                    href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t.scan.setup.help}
+                  </a>
+                </div>
+              </details>
+            )}
           </section>
           <section className="stack scan-source">
             <h2>{t.scan.view.original}</h2>
@@ -647,6 +718,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ) : (
         <>
           <p>{t.scan.review.caveat}</p>
+          {/* A lost grand staff decides every fingering, so it is said here, not under Details. */}
+          {(session.warnings ?? []).includes(GRAND_STAFF_WARNING) && (
+            <p role="alert">{t.scan.review.grandStaffWarning}</p>
+          )}
           {error && <p role="alert">{error(t)}</p>}
           {corrected && corrected.applied < corrections.length && (
             <p role="alert">{t.scan.edit.stale(corrected.applied)}</p>
@@ -682,7 +757,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 )
               )}
             </section>
-            <section className="stack scan-result" ref={resultHost}>
+            <section className="stack scan-result" ref={resultHost} onKeyDown={onEditKey}>
               <h2>{t.scan.review.recognized}</h2>
               {batch && (
                 <div className="row" aria-label={t.scan.review.viewLabel}>
@@ -714,7 +789,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </p>
               )}
               {editable && problems.length > 0 && corrected && (
-                <details className="scan-problems">
+                <details className="scan-problems" open={nextRed === 'problem' || undefined}>
                   <summary>{t.scan.edit.problemsSummary(problems.length)}</summary>
                   <ul className="stack">
                     {problems.map((problem, index) => {
@@ -722,7 +797,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                       return (
                         <li key={index}>
                           <button
-                            className="text-button"
+                            className={
+                              index === 0 && nextRed === 'problem' ? 'is-red' : 'text-button'
+                            }
                             disabled={target === undefined}
                             onClick={() => {
                               if (target !== undefined) select(target);
@@ -736,15 +813,18 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   </ul>
                 </details>
               )}
+              {editable && pages.length > 0 && !selectedNote && <p>{t.scan.edit.hint}</p>}
               {pages.length ? (
                 <div
+                  ref={sheetRef}
                   className={`scan-sheet${editable ? ' is-editable' : ''}`}
+                  // Busy while the notation on screen is older than the corrections.
+                  aria-busy={rendered?.xml !== renderXml}
                   tabIndex={editable ? 0 : undefined}
                   role={editable ? 'group' : undefined}
                   aria-label={editable ? t.scan.review.recognized : undefined}
                   aria-describedby={editable ? 'scan-edit-keys' : undefined}
                   onClick={onSheetClick}
-                  onKeyDown={onSheetKey}
                 >
                   <ScoreSheet
                     pages={pages}
@@ -765,7 +845,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </p>
               )}
               <p className="visually-hidden" aria-live="polite">
-                {selectedNote ? describeNote(t, selectedNote) : ''}
+                {liveText}
               </p>
               {selectedNote && corrected ? (
                 <NoteEditor
@@ -774,22 +854,20 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   status={statusText}
                   onCorrect={applyCorrection}
                   onSelect={select}
-                  onClose={() => select(null)}
+                  onClose={closeEditor}
                 />
               ) : (
-                editable && pages.length > 0 && <p className="small muted">{t.scan.edit.hint}</p>
-              )}
-              {editable && !selectedNote && editStatus && (
-                <p className="small" role="status">
-                  {editStatus(t)}
-                </p>
+                editable &&
+                editStatus && (
+                  <p className="small" aria-hidden="true">
+                    {editStatus(t)}
+                  </p>
+                )
               )}
               {editable && (corrections.length > 0 || undoStack.length > 0) && (
                 <div className="stack scan-corrections">
                   <div className="row">
-                    {corrections.length > 0 && (
-                      <span>{t.scan.edit.corrections(corrections.length)}</span>
-                    )}
+                    {kept.length > 0 && <span>{t.scan.edit.corrections(kept.length)}</span>}
                     <button onClick={undo}>{t.scan.edit.undo}</button>
                     {corrections.length > 0 && <button onClick={reset}>{t.scan.edit.reset}</button>}
                   </div>
@@ -825,6 +903,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 {[...(session.warnings ?? []), ...warnings].map((warning, i) => (
                   <p key={i}>{warningText(warning)}</p>
                 ))}
+                {combineDetail && <p>{t.scan.review.technical(combineDetail)}</p>}
                 {[rendered, imported].map(
                   (state, i) =>
                     state?.detail &&
@@ -834,54 +913,56 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 )}
               </div>
             </details>
-            {batch && (
-              <details>
-                <summary>{t.scan.review.downloadPagesSummary}</summary>
+            {(session.xml || sourcePages.some((p) => p.xml)) && (
+              <details className="scan-files">
+                <summary>{t.scan.review.filesSummary}</summary>
                 <div className="stack">
-                  {sourcePages.map(
-                    (p, index) =>
-                      p.xml && (
-                        <button
-                          key={p.id}
-                          className="text-button scan-download"
-                          onClick={() =>
-                            downloadText(`page-${index + 1}-recognized.musicxml`, p.xml!)
-                          }
-                        >
-                          {t.scan.review.downloadPage(index + 1)}
-                        </button>
-                      ),
+                  {session.xml && (
+                    <button
+                      className="text-button scan-download"
+                      onClick={() => downloadText(baseName + '-recognized.musicxml', session.xml!)}
+                    >
+                      {batch ? t.scan.review.downloadCombined : t.scan.review.downloadRaw}
+                    </button>
                   )}
+                  {session.xml && corrected && kept.length > 0 && (
+                    <button
+                      className="text-button scan-download"
+                      onClick={() => downloadText(baseName + '-corrected.musicxml', corrected.xml)}
+                    >
+                      {t.scan.edit.downloadCorrected}
+                    </button>
+                  )}
+                  {batch &&
+                    sourcePages.map(
+                      (p, index) =>
+                        p.xml && (
+                          <button
+                            key={p.id}
+                            className="text-button scan-download"
+                            onClick={() =>
+                              downloadText(`page-${index + 1}-recognized.musicxml`, p.xml!)
+                            }
+                          >
+                            {t.scan.review.downloadPage(index + 1)}
+                          </button>
+                        ),
+                    )}
                 </div>
               </details>
-            )}
-            {session.xml && (
-              <button
-                className="text-button scan-download"
-                onClick={() => downloadText(baseName + '-recognized.musicxml', session.xml!)}
-              >
-                {batch ? t.scan.review.downloadCombined : t.scan.review.downloadRaw}
-              </button>
-            )}
-            {session.xml && corrected && corrections.length > 0 && (
-              <button
-                className="text-button scan-download"
-                onClick={() => downloadText(baseName + '-corrected.musicxml', corrected.xml)}
-              >
-                {t.scan.edit.downloadCorrected}
-              </button>
             )}
             <div className="row">
               {/* Plain while a selected note carries the screen's one red. */}
               <Button
                 className="scan-use"
-                primary={!selectedNote}
+                primary={nextRed === 'use'}
                 disabled={!canUseResult}
                 onClick={useResult}
               >
                 {t.scan.review.useForFingerings}
               </Button>
-              <button
+              <Button
+                primary={nextRed === 'again'}
                 onClick={() => {
                   setPhase('connect');
                   setError(null);
@@ -897,7 +978,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 }}
               >
                 {t.scan.review.scanAgain}
-              </button>
+              </Button>
             </div>
           </section>
         </>

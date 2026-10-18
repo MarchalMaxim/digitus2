@@ -6,6 +6,12 @@ import { PhraseError } from '../i18n/PhraseError.js';
  */
 export const UNKNOWN_WARNING =
   'The recognizer reported an unknown warning. Check the original carefully.';
+/**
+ * The worker found a piano page read as one staff with alternating clefs: the hands are not
+ * separated. Kept as this marker so the review can show it, translated, above the comparison.
+ */
+export const GRAND_STAFF_WARNING =
+  'The staves were not paired into a grand staff, so the hands are not separated.';
 
 /** Explicit-action-only connection to the optional PC worker. */
 export interface WorkerMetadata {
@@ -23,6 +29,13 @@ function metadataOf(
 ): WorkerMetadata {
   const warnings = (value.warnings ?? []).map((warning: unknown) => {
     if (typeof warning === 'string') return warning;
+    if (
+      typeof warning === 'object' &&
+      warning !== null &&
+      'code' in warning &&
+      warning.code === 'recognition-grand-staff-unpaired'
+    )
+      return GRAND_STAFF_WARNING;
     if (
       typeof warning === 'object' &&
       warning !== null &&

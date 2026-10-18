@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { en } from '../i18n/en/index.js';
 import { PhraseError } from '../i18n/PhraseError.js';
-import { createScanClient, UNKNOWN_WARNING } from './client.js';
+import { createScanClient, GRAND_STAFF_WARNING, UNKNOWN_WARNING } from './client.js';
 import { SCAN_LIMIT, validateScan } from './model.js';
 
 describe('experimental scan boundary', () => {
@@ -90,6 +90,17 @@ describe('experimental scan boundary', () => {
       UNKNOWN_WARNING,
       'plain text',
     ]);
+  });
+  it('keeps the unpaired grand staff warning as a marker the review translates and shows', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          protocol: 'digitus2-scan-v1',
+          warnings: [{ code: 'recognition-grand-staff-unpaired', message: 'English text' }],
+        }),
+      ),
+    );
+    expect((await createScanClient(fetcher).connect()).warnings).toEqual([GRAND_STAFF_WARNING]);
   });
   it('takes a file of exactly ten mebibytes and refuses one byte more', async () => {
     const tenMiB = 10 * 1024 * 1024;

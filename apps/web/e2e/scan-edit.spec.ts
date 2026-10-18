@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
-import { mockWorker, RECOGNITION_WITH_ERRORS, scanOnePage } from './helpers/scan.js';
+import { mockWorker, openFiles, RECOGNITION_WITH_ERRORS, scanOnePage } from './helpers/scan.js';
 import { redBars, seekBar } from './helpers/seek.js';
 
 // Correcting needs a recognition, and recognition needs the PC: these flows run as a PC window,
@@ -14,9 +14,14 @@ const sheetNote = (page: Page, ordinal: number) => page.locator(`.scan-sheet [id
  * A tap on a note as a reader makes it: at the note's centre, whatever lies on top there (a staff
  * line often does), which the review resolves to the nearest note.
  */
-const tap = (page: Page, ordinal: number) => sheetNote(page, ordinal).click({ force: true });
+async function tap(page: Page, ordinal: number) {
+  // Wait for the notation of the latest correction before reaching into it.
+  await expect(page.locator('.scan-sheet')).toHaveAttribute('aria-busy', 'false');
+  await sheetNote(page, ordinal).click({ force: true });
+}
 const editor = (page: Page) => page.getByRole('region', { name: 'Correct the selected note' });
 async function downloaded(page: Page, name: string): Promise<string> {
+  await openFiles(page);
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name }).click();
   const download = await pending;
@@ -39,10 +44,11 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   await expectOneRed(page, 'refused recognition before editing');
 
   // The place to check points at the tie and explains it.
-  await page.getByText('1 place to check', { exact: true }).click();
+  // Refused, the places to check open by themselves and the first one carries the red.
+  await expect(page.locator('details.scan-problems')).toHaveAttribute('open', '');
   await page
     .getByRole('button', {
-      name: 'Bar 1, right hand: the tie on A4 reaches its next A4 1 beat late.',
+      name: 'Bar 1, right hand: the tied A4 ends 1 beat before the next A4 begins. Check the note lengths.',
     })
     .click();
   await expect(editor(page)).toContainText('Bar 1 · right hand · A4 quarter note · tied');
@@ -72,7 +78,8 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   await tap(page, 6);
   await expect(editor(page)).toContainText('Bar 2: right hand 2 beats, left hand 3 beats, in 3/4.');
   await editor(page).getByRole('button', { name: 'Half', exact: true }).click();
-  await expect(editor(page)).toContainText('Bar 2: right hand 3 beats, left hand 3 beats, in 3/4.');
+  // Once the hands agree the bar's timing is no longer said.
+  await expect(editor(page)).not.toContainText('Bar 2: right hand');
   await expect(page.locator('.scan-problems')).toHaveCount(0);
 
   // The misread D5 in bar 3 is raised a step from the keyboard; Escape closes the editor.
@@ -110,7 +117,7 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByText('2 corrections', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Reset to recognition' }).click();
-  await expect(page.getByText('All corrections removed.', { exact: false })).toBeVisible();
+  await expect(page.locator('.scan-result p[aria-hidden="true"]')).toContainText('All corrections removed.');
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Download corrected MusicXML' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Undo' }).click();

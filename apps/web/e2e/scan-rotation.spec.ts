@@ -1,5 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Recognition needs the PC worker, which a phone cannot reach: these flows run as a PC window,
+// at 360 px in the mobile project. The phone's own path is scan-phone.spec.ts.
+test.use({ hasTouch: false, isMobile: false });
+
 const health = { protocol: 'digitus2-scan-v1', recognizer: 'rotation boundary test' };
 async function imageBytes(page: Page, jpeg = false) {
   return Buffer.from(

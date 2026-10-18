@@ -244,3 +244,8 @@
   width: 44px;
   padding: 0;
 }
+
+/* The red moves at once between Use for fingerings and a selected note; a fade would show two. */
+.scan-use {
+  transition: none;
+}

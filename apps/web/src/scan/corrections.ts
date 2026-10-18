@@ -236,24 +236,33 @@ function applyDuration(doc: XMLDocument, score: ScanScore, c: Extract<Correction
   const chord = chordOf(score, note);
   const lead = chord[0]!;
   const old = Number(kid(lead.element, 'duration')?.textContent);
-  const delta = local - old;
-  // Every note after the chord in its voice segment moves with it; nothing else may move.
+  retime(doc, score, lead.element, local - old, () => {
+    for (const member of chord) {
+      const el = member.element;
+      setText(el, 'duration', String(local));
+      if (!kid(el, 'rest') || kid(el, 'type')) setText(el, 'type', c.type);
+      for (const dot of kids(el, 'dot')) dot.remove();
+      if (c.dots) insert(el, make(doc, 'dot'));
+    }
+  });
+}
+
+/**
+ * Changes the length of the voice segment that starts at `lead` by `delta` (in the part's
+ * divisions) through `change`, keeping every other voice where it was: the `<backup>` that returns
+ * to the other voices is re-measured, and every note outside the segment is checked to start
+ * exactly where it did. Refuses the change otherwise.
+ */
+function retime(doc: XMLDocument, score: ScanScore, lead: Element, delta: number, change: () => void) {
   const segment = new Set<Element>();
-  for (let el = lead.element as Element | null; el; el = el.nextElementSibling) {
+  for (let el = lead as Element | null; el; el = el.nextElementSibling) {
     if (el.localName === 'backup') break;
     if (el.localName === 'note') segment.add(el);
   }
   const before = onsets(score, segment);
-  for (const member of chord) {
-    const el = member.element;
-    setText(el, 'duration', String(local));
-    if (!kid(el, 'rest') || kid(el, 'type')) setText(el, 'type', c.type);
-    for (const dot of kids(el, 'dot')) dot.remove();
-    if (c.dots) insert(el, make(doc, 'dot'));
-  }
-  // The backup that returns to the other voices covers the changed length.
-  let backup: Element | null = lead.element.nextElementSibling;
+  let backup: Element | null = lead.nextElementSibling;
   while (backup && backup.localName !== 'backup') backup = backup.nextElementSibling;
+  change();
   if (backup && delta) {
     const value = Number(kid(backup, 'duration')?.textContent) + delta;
     if (value < 0) refuse((t) => t.scan.edit.refused.otherHand);
@@ -263,7 +272,8 @@ function applyDuration(doc: XMLDocument, score: ScanScore, c: Extract<Correction
   const after = readScanScore(doc);
   const moved = onsets(after, segment);
   for (const [el, onset] of before) {
-    // Rescaled ticks are compared in the same unit: both scores share ticksPerQuarter.
+    // A removed note has no onset left to keep.
+    if (!el.isConnected) continue;
     if (moved.get(el) !== onset * (after.ticksPerQuarter / score.ticksPerQuarter))
       refuse((t) => t.scan.edit.refused.otherHand);
   }
@@ -349,7 +359,13 @@ function applyHand(score: ScanScore, c: Extract<Correction, { kind: 'hand' }>) {
 
 function applyRemove(doc: XMLDocument, score: ScanScore, c: Extract<Correction, { kind: 'remove' }>) {
   const note = find(score, c.note);
-  if (note.rest) refuse((t) => t.scan.edit.refused.rest);
+  if (note.rest) {
+    // A stray rest goes, and the rest of its voice moves up into its place.
+    if (note.grace || note.chord) refuse((t) => t.scan.edit.refused.missing);
+    const length = Number(kid(note.element, 'duration')?.textContent) || 0;
+    retime(doc, score, note.element, -length, () => note.element.remove());
+    return;
+  }
   if (note.tieStart || note.tieStop) refuse((t) => t.scan.edit.refused.tiedRemove);
   const chord = chordOf(score, note);
   if (chord.length > 1) {

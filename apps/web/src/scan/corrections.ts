@@ -9,6 +9,8 @@
  * `<backup>` that returns to them is re-measured, and every other note's onset is checked); a tie
  * writes both the sounding `<tie>` and the drawn `<tied>` and never touches a slur; removal keeps
  * the bar's timing (a chord member is deleted, a lone note becomes a rest of the same length).
+ * A time signature change names its bar by index instead, and moves no note: it rewrites only
+ * `<time>`, from that bar until the recognition writes a different time signature.
  */
 import type { Phrase } from '../i18n/messages.js';
 import {
@@ -52,7 +54,10 @@ export type Correction =
   /** `tied` on the tie that starts at this note (`side` 'next', the default) or ends at it. */
   | { kind: 'tie'; note: number; tied: boolean; side?: 'next' | 'previous' }
   | { kind: 'hand'; note: number; staff: number }
-  | { kind: 'remove'; note: number };
+  | { kind: 'remove'; note: number }
+  /** The time signature from bar index `bar` on, in every part. */
+  | { kind: 'meter'; bar: number; beats: number; beatType: number };
+export type MeterCorrection = Extract<Correction, { kind: 'meter' }>;
 
 export class CorrectionError extends Error {
   constructor(readonly phrase: Phrase) {
@@ -112,7 +117,8 @@ function insert(note: Element, child: Element) {
   note.insertBefore(child, after ?? null);
 }
 function make(doc: Document, tag: string, content?: string, attrs: Record<string, string> = {}) {
-  const el = doc.createElement(tag);
+  // In the score's own namespace (none), as a browser does; some DOMs would give XHTML's.
+  const el = doc.createElementNS(doc.documentElement.namespaceURI, tag);
   if (content !== undefined) el.textContent = content;
   for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
   return el;
@@ -481,6 +487,98 @@ function applyRemove(
     for (const child of kids(el, tag)) child.remove();
 }
 
+/** MusicXML's child order within `<attributes>`, for inserting a `<time>` at its place. */
+const ATTRIBUTES_ORDER = [
+  'footnote',
+  'level',
+  'divisions',
+  'key',
+  'time',
+  'staves',
+  'part-symbol',
+  'instruments',
+  'clef',
+  'staff-details',
+  'transpose',
+  'for-part',
+  'directive',
+  'measure-style',
+];
+const BEAT_TYPES = [1, 2, 4, 8, 16, 32];
+const meterText = (m: { beats: number; beatType: number }) => `${m.beats}/${m.beatType}`;
+function readTime(time: Element) {
+  return {
+    beats: Number(kid(time, 'beats')?.textContent),
+    beatType: Number(kid(time, 'beat-type')?.textContent),
+  };
+}
+function setTime(time: Element, c: MeterCorrection) {
+  // A common-time or cut-time symbol would still draw the old meter.
+  time.removeAttribute('symbol');
+  time.removeAttribute('separator');
+  const doc = time.ownerDocument;
+  time.replaceChildren(
+    make(doc, 'beats', String(c.beats)),
+    make(doc, 'beat-type', String(c.beatType)),
+  );
+}
+/** Writes the meter at the start of `measure`: in its leading `<attributes>`, before any note. */
+function writeTime(measure: Element, c: MeterCorrection): Element[] {
+  const doc = measure.ownerDocument;
+  const music = kids(measure).find((el) => ['note', 'backup', 'forward'].includes(el.localName));
+  const leading: Element[] = [];
+  for (const el of kids(measure)) {
+    if (el === music) break;
+    if (el.localName === 'attributes') leading.push(el);
+  }
+  const times = leading.flatMap((el) => kids(el, 'time'));
+  if (times.length) {
+    for (const time of times) setTime(time, c);
+    return times;
+  }
+  let attributes = leading[0];
+  if (!attributes) {
+    attributes = make(doc, 'attributes');
+    measure.insertBefore(attributes, music ?? null);
+  }
+  const time = make(doc, 'time');
+  setTime(time, c);
+  const rank = ATTRIBUTES_ORDER.indexOf('time');
+  const after = kids(attributes).find((el) => ATTRIBUTES_ORDER.indexOf(el.localName) > rank);
+  attributes.insertBefore(time, after ?? null);
+  return [time];
+}
+
+function applyMeter(doc: XMLDocument, score: ScanScore, c: MeterCorrection) {
+  if (!Number.isInteger(c.beats) || c.beats < 1 || c.beats > 32 || !BEAT_TYPES.includes(c.beatType))
+    refuse((t) => t.scan.edit.refused.meter);
+  const parts = kids(doc.documentElement, 'part');
+  const same = (m: { beats: number; beatType: number } | undefined) =>
+    m?.beats === c.beats && m?.beatType === c.beatType;
+  let changed = false;
+  parts.forEach((part, index) => {
+    const measures = kids(part, 'measure');
+    const start = Number.isInteger(c.bar) ? measures[c.bar] : undefined;
+    if (!start) return refuse((t) => t.scan.edit.refused.noBar);
+    const old = score.bars.find((b) => b.part === index && b.index === c.bar)?.meter;
+    if (same(old)) return;
+    changed = true;
+    const written = writeTime(start, c);
+    if (!old) return;
+    // The replaced meter restated later (a joined page's opening) changes with it; the first
+    // different time signature the recognition wrote ends the change.
+    for (const measure of measures.slice(c.bar))
+      for (const time of measure.getElementsByTagName('time')) {
+        if (written.includes(time) || time.parentElement?.localName !== 'attributes') continue;
+        const found = readTime(time);
+        if (same(found)) continue;
+        if (found.beats !== old.beats || found.beatType !== old.beatType) return;
+        setTime(time, c);
+      }
+  });
+  if (!changed) refuse((t) => t.scan.edit.refused.sameMeter(meterText(c)));
+}
+
 function apply(doc: XMLDocument, correction: Correction) {
   const score = readScanScore(doc);
   switch (correction.kind) {
@@ -494,6 +592,8 @@ function apply(doc: XMLDocument, correction: Correction) {
       return applyHand(score, correction);
     case 'remove':
       return applyRemove(doc, score, correction);
+    case 'meter':
+      return applyMeter(doc, score, correction);
     default:
       return refuse((t) => t.scan.edit.refused.missing);
   }
@@ -657,4 +757,49 @@ export function findProblems(score: ScanScore): Problem[] {
       problems.push({ kind: 'bar-timing', part: bar.part, bar: bar.index, timing });
   }
   return problems;
+}
+
+/** A meter `quarters` long: whole beats as quarters, else eighths, else sixteenths. */
+function meterOfLength(quarters: number) {
+  for (const beatType of [4, 8, 16]) {
+    const beats = (quarters * beatType) / 4;
+    if (Math.abs(beats - Math.round(beats)) < 1e-9)
+      return beats >= 1 && beats <= 32 ? { beats: Math.round(beats), beatType } : undefined;
+  }
+}
+
+/**
+ * The time signature change to offer from the places to check: when two or more bars of a part
+ * have hands that agree with each other on one length that runs past the time signature (a
+ * misread meter, such as 4/4 for 9/8), the meter of that length, from the first of those bars.
+ * At most one offer per part, so a page of such bars shows it once; it never decides on its own.
+ */
+export function meterOffers(
+  score: ScanScore,
+  problems: readonly Problem[],
+): Map<Problem, MeterCorrection> {
+  const offers = new Map<Problem, MeterCorrection>();
+  const candidates = problems.flatMap((problem) => {
+    if (problem.kind !== 'bar-timing' || problem.timing.expected === undefined) return [];
+    const used = problem.timing.staves.filter((s) => s.beats > 0);
+    if (used.some((s) => Math.abs(s.beats - used[0]!.beats) > 1e-9)) return [];
+    const meter = score.bars.find((b) => b.part === problem.part && b.index === problem.bar)?.meter;
+    const proposed = meter && meterOfLength((used[0]!.beats * 4) / meter.beatType);
+    return proposed ? [{ problem, proposed }] : [];
+  });
+  const parts = new Set(candidates.map((c) => c.problem.part));
+  for (const part of parts) {
+    const inPart = candidates.filter((c) => c.problem.part === part);
+    const first = inPart.find((c) =>
+      inPart.some(
+        (other) =>
+          other !== c &&
+          other.proposed.beats === c.proposed.beats &&
+          other.proposed.beatType === c.proposed.beatType,
+      ),
+    );
+    if (first && first.problem.kind === 'bar-timing')
+      offers.set(first.problem, { kind: 'meter', bar: first.problem.bar, ...first.proposed });
+  }
+  return offers;
 }

@@ -147,6 +147,7 @@ describe('saved corrections', () => {
       { kind: 'tie' as const, note: 5, tied: false, side: 'previous' as const },
       { kind: 'hand' as const, note: 6, staff: 2 },
       { kind: 'remove' as const, note: 7 },
+      { kind: 'meter' as const, bar: 0, beats: 9, beatType: 8 },
     ],
   };
   const row = (value: unknown) => ({
@@ -168,6 +169,8 @@ describe('saved corrections', () => {
     ['an extra field', { kind: 'remove', note: 1, xml: '<evil/>' }],
     ['a negative note', { kind: 'remove', note: -1 }],
     ['a length the editor never writes', { kind: 'duration', note: 1, type: 'breve', dots: 0 }],
+    ['a beat type that is not a note value', { kind: 'meter', bar: 0, beats: 9, beatType: 3 }],
+    ['a meter with a note', { kind: 'meter', bar: 0, beats: 9, beatType: 8, note: 1 }],
   ])('refuses a row with %s', (_label, correction) => {
     expect(isLocalScoreRecord(row({ ...storeSession(session), corrections: [correction] }))).toBe(
       false,

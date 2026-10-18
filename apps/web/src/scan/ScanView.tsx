@@ -19,7 +19,7 @@ import {
   UNKNOWN_WARNING,
   type WorkerMetadata,
 } from './client.js';
-import type { Correction } from './corrections.js';
+import { meterOffers, type Correction } from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
@@ -138,6 +138,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const problems = useMemo(
     () => (editable && corrected ? findProblems(corrected.score) : []),
     [editable, corrected],
+  );
+  // A misread meter is fixed from its place to check, offered only where the hands agree.
+  const offers = useMemo(
+    () => (corrected ? meterOffers(corrected.score, problems) : new Map()),
+    [corrected, problems],
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
   const busy = phase === 'connecting' || phase === 'scanning' || phase === 'cancelling';
@@ -439,7 +444,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       if (neighbour) setNote(neighbour.ordinal);
     }
     setUndoStack((stack) => [...stack, kept]);
-    setEditStatus(null);
+    if (correction.kind === 'meter') {
+      // The place to check it came from goes away: say what changed, and keep the focus nearby.
+      const score = corrected.score;
+      setEditStatus((m) => `${describeCorrection(m, score, correction)}.`);
+      sheetRef.current?.focus();
+    } else setEditStatus(null);
     retain({ ...session, corrections: [...kept, correction] });
   };
   const undo = () => {
@@ -794,8 +804,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   <ul className="stack">
                     {problems.map((problem, index) => {
                       const target = problemNote(corrected.score, problem);
+                      const offer = offers.get(problem);
+                      const bar =
+                        offer &&
+                        corrected.score.bars.find(
+                          (b) => b.part === problem.part && b.index === offer.bar,
+                        );
                       return (
-                        <li key={index}>
+                        <li key={index} className={offer ? 'has-offer' : undefined}>
                           <button
                             className={
                               index === 0 && nextRed === 'problem' ? 'is-red' : 'text-button'
@@ -807,6 +823,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                           >
                             {describeProblem(t, corrected.score, problem)}
                           </button>
+                          {offer && bar && (
+                            <button onClick={() => applyCorrection(offer)}>
+                              {t.scan.edit.setMeter(`${offer.beats}/${offer.beatType}`, bar.number)}
+                            </button>
+                          )}
                         </li>
                       );
                     })}

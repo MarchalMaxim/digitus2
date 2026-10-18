@@ -68,7 +68,7 @@ The pinned homr writes no beams. For display, the app infers conventional beat g
 
 Uploads are saved automatically in the browser's IndexedDB (database `digitus2.my-scores`), with page order, rotation, original and rotated bytes, the raw recognised MusicXML, your list of corrections and the recogniser's name. The raw recognition is never overwritten: the corrected copy is the raw recognition with the saved corrections replayed, and an entry with corrections is listed as **Corrected recognition**. Plain MusicXML and MIDI imports are saved too. **My scores** appears in the library when it has entries. Reopening an entry never reconnects to the PC or restarts recognition. A multi-page result that cannot be combined still reopens page by page. Remove deletes an entry. A failed save is reported and the current work stays usable.
 
-Browser storage belongs to one site and one browser profile, so a local preview and the GitHub Pages site have separate collections. Clearing site data or storage eviction removes it ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [storage limits](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)), so keep your own copies. Nothing is shared or published; a shared library is an open request (#41).
+Browser storage belongs to one site and one browser profile, so a local preview and the GitHub Pages site have separate collections. Clearing site data or storage eviction removes it ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [storage limits](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)), so keep your own copies. Nothing is shared or published.
 
 ## Set up the PC worker
 
@@ -135,7 +135,7 @@ Further limits:
 - A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
 - Synthetic test pages, strict parsing and passing tests do not certify musical accuracy. Real phone photos, multi-page books and browsers other than desktop Chrome are untested.
 
-Source beam recovery for photos and a shared library are open requests (#39, #41).
+Source beam recovery for photos is an open request (#39).
 
 ## Licences
 

@@ -116,11 +116,11 @@ export const scan = {
       '32nd': '32nd',
     } as Record<string, string>,
     dotted: 'Dotted',
-    tieNext: 'Tied to next note',
-    tiePrevious: 'Tied from previous note',
-    toLeftHand: 'Move to left hand',
-    toRightHand: 'Move to right hand',
-    remove: 'Remove note',
+    tieNext: 'Tied to next',
+    tiePrevious: 'Tied from previous',
+    toLeftHand: 'To left hand',
+    toRightHand: 'To right hand',
+    remove: 'Remove',
     previous: 'Previous note',
     next: 'Next note',
     done: 'Done',
@@ -227,6 +227,8 @@ export const scan = {
   },
   pages: {
     arrange: 'Arrange pages in reading order. Drag a thumbnail or select a page to move it.',
+    /** On a touch screen, where pages cannot be dragged. */
+    arrangeTouch: 'Arrange pages in reading order: select a page, then move it with the arrows.',
     originalCount: (n: number) =>
       plural('en', n, {
         one: '# original page, in reading order.',

@@ -15,6 +15,25 @@ export function isTouchOnly(): boolean {
   return matchMedia('(any-pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
 }
 
+let lastCapture = '';
+let sameSecond = 0;
+/**
+ * A camera capture renamed after the time it was taken ("photo 14.05.31.jpg"): phones hand
+ * every capture over as "image.jpg", which says nothing in a list of pages.
+ */
+export function namedCapture(file: File, at = new Date()): File {
+  const time = [at.getHours(), at.getMinutes(), at.getSeconds()]
+    .map((n) => String(n).padStart(2, '0'))
+    .join('.');
+  sameSecond = time === lastCapture ? sameSecond + 1 : 1;
+  lastCapture = time;
+  const extension = file.type === 'image/png' ? 'png' : 'jpg';
+  return new File([file], `photo ${time}${sameSecond > 1 ? ` (${sameSecond})` : ''}.${extension}`, {
+    type: file.type,
+    lastModified: file.lastModified,
+  });
+}
+
 /** The files to hand over, named in reading order so the PC's file chooser lists them in order. */
 export function handOffFiles(pages: readonly ScanPage[]): File[] {
   const width = String(pages.length).length;

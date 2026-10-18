@@ -1,6 +1,13 @@
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { drawBurst, isEmptyClick, NoteBurst, type BurstClick, type Press } from './NoteBurst.js';
+import {
+  DRAG_PX,
+  drawBurst,
+  isEmptyClick,
+  NoteBurst,
+  type BurstClick,
+  type Press,
+} from './NoteBurst.js';
 
 afterEach(cleanup);
 afterEach(() => vi.restoreAllMocks());
@@ -51,6 +58,9 @@ describe('the note burst', () => {
     expect(isEmptyClick(click(p), { isCollapsed: false } as Selection)).toBe(false);
     expect(isEmptyClick(click(p, { button: 1 }), collapsed)).toBe(false);
     expect(isEmptyClick(click(p, { shiftKey: true }), collapsed)).toBe(false);
+    expect(isEmptyClick(click(p, { altKey: true }), collapsed)).toBe(false);
+    expect(isEmptyClick(click(p, { ctrlKey: true }), collapsed)).toBe(false);
+    expect(isEmptyClick(click(p, { metaKey: true }), collapsed)).toBe(false);
     expect(isEmptyClick(click(p, { defaultPrevented: true }), collapsed)).toBe(false);
   });
 
@@ -59,6 +69,13 @@ describe('the note burst', () => {
     const still: Press = { x: 100, y: 100, selected: false };
     expect(isEmptyClick(click(p), collapsed, still)).toBe(true);
     expect(isEmptyClick(click(p), collapsed, { x: 103, y: 102, selected: false })).toBe(true);
+    // exactly the drag distance away is still a click; any farther is a drag
+    expect(isEmptyClick(click(p), collapsed, { x: 100 - DRAG_PX, y: 100, selected: false })).toBe(
+      true,
+    );
+    expect(isEmptyClick(click(p), collapsed, { x: 100, y: 100 + DRAG_PX, selected: false })).toBe(
+      true,
+    );
     // a drag across text: the pointer came up farther away than it went down
     expect(isEmptyClick(click(p), collapsed, { x: 100, y: 106, selected: false })).toBe(false);
     expect(isEmptyClick(click(p), collapsed, { x: 60, y: 100, selected: false })).toBe(false);
@@ -125,6 +142,32 @@ describe('the note burst', () => {
       for (const n of double) expect(n.dy).toBeLessThan(0);
       expect(drawBurst(random).some((n) => n.accent)).toBe(false);
     }
+  });
+
+  it('plays a chord together and a run one note after another', () => {
+    // A scripted random: the first draws are the count, then whether it is a chord, the rest 0.5.
+    const scripted = (...first: number[]) => {
+      const queue = [...first];
+      return () => queue.shift() ?? 0.5;
+    };
+    const gaps = (notes: { wait: number }[]) => {
+      const waits = notes.map((n) => n.wait).sort((a, b) => a - b);
+      return waits.slice(1).map((w, i) => w - waits[i]!);
+    };
+    const chord = gaps(drawBurst(scripted(0.5, 0.1)));
+    const run = gaps(drawBurst(scripted(0.5, 0.9)));
+    expect(chord).toHaveLength(2);
+    expect(run).toHaveLength(2);
+    for (const g of chord) expect(g).toBeLessThan(0.043);
+    for (const g of run) expect(g).toBeGreaterThanOrEqual(0.054);
+  });
+
+  it('puts the accent on the note the random draw picks, not always the last', () => {
+    // Draws in order: count, chord, fan centre, fan width, direction, step, then the accent.
+    const queue = [0.5, 0.9, 0.5, 0.5, 0.5, 0.5, 0.5];
+    const notes = drawBurst(() => queue.shift() ?? 0.5, true);
+    expect(notes).toHaveLength(5);
+    expect(notes.map((n) => n.accent)).toEqual([false, false, true, false, false]);
   });
 
   it('draws its notes where the click was, hidden from assistive technology', () => {

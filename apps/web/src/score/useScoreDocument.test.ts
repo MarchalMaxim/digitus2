@@ -208,6 +208,47 @@ describe('useScoreDocument', () => {
   });
 });
 
+describe('which source is open', () => {
+  it('opens again when other bytes arrive under the same file name', async () => {
+    const engine = inlineEngine();
+    const text = new TextDecoder().decode(bytes);
+    const other = new TextEncoder().encode(
+      text.replace('Digitus Spike Etude', 'Another Spike Etude'),
+    );
+    expect(other).not.toEqual(bytes);
+    const { result, rerender } = renderHook(
+      ({ b }) =>
+        useScoreDocument({ kind: 'file', name: 'x.musicxml', bytes: b }, 800, {
+          engine,
+          renderer: fakeRenderer(),
+        }),
+      { initialProps: { b: bytes } },
+    );
+    await waitFor(() => expect(result.current.title).toBe('Digitus Spike Etude (short)'));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    rerender({ b: other });
+    await waitFor(() => expect(result.current.title).toBe('Another Spike Etude (short)'));
+    expect(engine.calls.filter((c) => c === 'load')).toHaveLength(2);
+  });
+  it('treats a plain file as an ordinary import, not a scan import', async () => {
+    const loads: unknown[] = [];
+    const engine = inlineEngine();
+    const load = engine.load;
+    engine.load = (input, source, opts) => {
+      loads.push(opts);
+      return load(input, source, opts);
+    };
+    const { result } = renderHook(() =>
+      useScoreDocument({ kind: 'file', name: 'x.musicxml', bytes }, 800, {
+        engine,
+        renderer: fakeRenderer(),
+      }),
+    );
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(loads).toEqual([undefined]);
+  });
+});
+
 describe('score document helpers', () => {
   const fing = (finger: 1 | 2 | 3 | 4 | 5, substitution?: 1 | 2 | 3 | 4 | 5) =>
     substitution === undefined
@@ -242,5 +283,19 @@ describe('score document helpers', () => {
     const editorial: Assignment = { a0: fing(1), a1: fing(2), a2: fing(3) };
     expect(rekeyByIndex(fingered, editorial, stripped)).toEqual({ n0: fing(1), n2: fing(3) });
     expect(rekeyByIndex(fingered, {}, stripped)).toBeNull();
+  });
+  it('pairs notes up to the shorter score when the two differ in length', () => {
+    const three = scoreOf([
+      ['a0', 60],
+      ['a1', 62],
+      ['a2', 64],
+    ]);
+    const two = scoreOf([
+      ['n0', 60],
+      ['n1', 62],
+    ]);
+    const all: Assignment = { a0: fing(1), a1: fing(2), a2: fing(3), n0: fing(1), n1: fing(2) };
+    expect(rekeyByIndex(three, all, two)).toEqual({ n0: fing(1), n1: fing(2) });
+    expect(rekeyByIndex(two, all, three)).toEqual({ a0: fing(1), a1: fing(2) });
   });
 });

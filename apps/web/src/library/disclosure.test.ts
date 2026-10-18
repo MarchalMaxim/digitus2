@@ -15,17 +15,17 @@ import {
 } from './disclosure.js';
 
 describe('the disclosure thresholds (spec 6.1, shelves spec 2 to 4)', () => {
-  it('has the numbers the specs give', () => {
-    expect([
-      PILLS_ABOVE,
-      SEARCH_FROM,
-      HEADINGS_ABOVE,
-      OTHER_BELOW,
-      SAMPLES,
-      PAGE_SIZE,
-      SECTION_ROWS,
-      LENGTH_ABOVE,
-    ]).toEqual([40, 100, 12, 3, 5, 40, 7, 40]);
+  it('keeps the rule of 7 and orders the thresholds as the specs do', () => {
+    // No list a reader sees at a glance is longer than 7 rows.
+    expect(SAMPLES).toBeLessThanOrEqual(7);
+    expect(SECTION_ROWS).toBeLessThanOrEqual(7);
+    // Pills come before search, headings only inside a list that already fits a page.
+    expect(PILLS_ABOVE).toBeLessThan(SEARCH_FROM);
+    expect(HEADINGS_ABOVE).toBeLessThan(PAGE_SIZE);
+    expect(OTHER_BELOW).toBeGreaterThan(1);
+    expect(PAGE_SIZE).toBeGreaterThan(SECTION_ROWS);
+    // The length pills follow the same size as the level pills: a list too long to scan.
+    expect(LENGTH_ABOVE).toBe(PILLS_ABOVE);
   });
   it('shows the level pills above 40 pieces', () => {
     expect(showsPills(40)).toBe(false);

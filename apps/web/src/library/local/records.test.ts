@@ -91,4 +91,49 @@ describe('local score records', () => {
     ).toBe(false);
     expect(isLocalScoreRecord({ ...record, updatedAt: NaN })).toBe(false);
   });
+  it('accepts every quarter turn from 0 to 3', () => {
+    for (const quarterTurns of [0, 1, 2, 3]) {
+      const stored = storeSession({
+        ...session,
+        pages: [{ ...session.pages[0]!, quarterTurns: quarterTurns as 1 }],
+      });
+      expect(
+        isLocalScoreRecord({ version: 1, id: 'one', updatedAt: 10, kind: 'scan', session: stored }),
+        String(quarterTurns),
+      ).toBe(true);
+    }
+  });
+  it('keeps an id or file name under 2048 characters, and rejects one that long', () => {
+    const file = (name: string) => ({
+      version: 1,
+      id: 'one',
+      updatedAt: 10,
+      kind: 'file',
+      name,
+      blob: new Blob(['midi']),
+    });
+    expect(isLocalScoreRecord(file('n'.repeat(2047)))).toBe(true);
+    expect(isLocalScoreRecord(file('n'.repeat(2048)))).toBe(false);
+    expect(isLocalScoreRecord({ ...file('a'), id: 'i'.repeat(2047) })).toBe(true);
+    expect(isLocalScoreRecord({ ...file('a'), id: 'i'.repeat(2048) })).toBe(false);
+    expect(isLocalScoreRecord({ ...file('a'), id: '' })).toBe(false);
+  });
+  it('rejects a stored image whose type or modified time is not usable', () => {
+    const record = {
+      version: 1,
+      id: 'one',
+      updatedAt: 10,
+      kind: 'scan',
+      session: storeSession(session),
+    };
+    const withFile = (patch: object) => ({
+      ...record,
+      session: { ...record.session, file: { ...record.session.file, ...patch } },
+    });
+    expect(isLocalScoreRecord(withFile({}))).toBe(true);
+    expect(isLocalScoreRecord(withFile({ lastModified: NaN }))).toBe(false);
+    expect(isLocalScoreRecord(withFile({ lastModified: Infinity }))).toBe(false);
+    expect(isLocalScoreRecord(withFile({ lastModified: '123' }))).toBe(false);
+    expect(isLocalScoreRecord(withFile({ type: 5 }))).toBe(false);
+  });
 });

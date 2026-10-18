@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ImagePages } from './ImagePages.js';
@@ -151,4 +151,42 @@ it('preserves another page added while rotation is pending and invalidates only 
   expect(changed[0]!.map((p) => p.id)).toEqual(['first', 'second']);
   expect(changed[0]![0]!.xml).toBeUndefined();
   expect(changed[0]![1]).toBe(second);
+});
+
+const threePages = (): ScanPage[] =>
+  ['a', 'b', 'c'].map((id) => ({ id, file: new File([png], id + '.png') }));
+const listProps = {
+  busy: false,
+  selected: 0,
+  onSelect: () => {},
+  onChange: () => {},
+};
+
+it('tells an editable list to arrange the pages and a fixed list how many originals it holds', () => {
+  const { rerender } = render(<ImagePages {...listProps} pages={threePages()} editable />);
+  expect(screen.getByText(/Arrange pages/)).toBeVisible();
+  expect(screen.queryByText(/original pages/)).toBeNull();
+  rerender(<ImagePages {...listProps} pages={threePages()} editable={false} />);
+  expect(screen.getByText('3 original pages, in reading order.')).toBeVisible();
+  expect(screen.queryByText(/Arrange pages/)).toBeNull();
+});
+
+it('numbers the thumbnails from one', () => {
+  render(<ImagePages {...listProps} pages={threePages()} editable />);
+  const numbers = screen
+    .getAllByRole('button', { name: /^Select page / })
+    .map((button) => within(button).getByText(/^\d+$/).textContent);
+  expect(numbers).toEqual(['1', '2', '3']);
+  expect(screen.getByRole('button', { name: /^Select page 3: c\.png/ })).toBeVisible();
+});
+
+it('cannot move the last page later but can move any other page later', () => {
+  const { rerender } = render(
+    <ImagePages {...listProps} pages={threePages()} selected={1} editable />,
+  );
+  expect(screen.getByRole('button', { name: 'Move page 2 later' })).toBeEnabled();
+  rerender(<ImagePages {...listProps} pages={threePages()} selected={2} editable />);
+  expect(screen.getByRole('button', { name: 'Move page 3 later' })).toBeDisabled();
+  rerender(<ImagePages {...listProps} pages={threePages()} selected={0} editable />);
+  expect(screen.getByRole('button', { name: 'Move page 1 later' })).toBeEnabled();
 });

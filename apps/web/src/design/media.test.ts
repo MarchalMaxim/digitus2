@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NARROW_QUERY, useMediaQuery } from './media.js';
@@ -30,7 +32,8 @@ afterEach(() => {
 
 describe('useMediaQuery', () => {
   it('is the breakpoint the stylesheet uses for narrow screens', () => {
-    expect(NARROW_QUERY).toBe('(max-width: 479.98px)');
+    const css = readFileSync(resolve(process.cwd(), 'src/design/base.css'), 'utf8');
+    expect(css).toContain(`@media ${NARROW_QUERY}`);
   });
 
   it('follows the media query as it changes, and stops listening when unmounted', () => {

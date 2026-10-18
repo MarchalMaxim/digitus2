@@ -39,6 +39,21 @@ describe('own files (spec 3, 7.6)', () => {
     await vi.waitFor(() => expect(refused).toHaveLength(2));
     expect(scans).toHaveLength(1);
   });
+  it('takes a single file through the batch entry without the one-at-a-time refusal', async () => {
+    const onFile = vi.fn();
+    const onRefuse = vi.fn();
+    acceptScoreFiles([new File(['<score-partwise/>'], 'song.musicxml')], onFile, onRefuse);
+    await vi.waitFor(() => expect(onFile).toHaveBeenCalledTimes(1));
+    expect(onRefuse).not.toHaveBeenCalled();
+  });
+  it('refuses several files at once when scanning is not offered', () => {
+    const onRefuse = vi.fn();
+    const onFile = vi.fn();
+    const two = [new File(['a'], 'a.musicxml'), new File(['b'], 'b.musicxml')];
+    acceptScoreFiles(two, onFile, onRefuse);
+    expect(onRefuse).toHaveBeenCalledTimes(1);
+    expect(onFile).not.toHaveBeenCalled();
+  });
   it('takes MusicXML and MIDI by extension, in any case', () => {
     expect(['a.musicxml', 'b.XML', 'c.mxl', 'd.MID', 'e.midi'].map(isScoreFileName)).toEqual([
       true,

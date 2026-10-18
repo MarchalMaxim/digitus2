@@ -73,6 +73,7 @@ describe('HOMR voice serialization for Verovio', () => {
       ),
     );
     const out = normalizeVoices(xml);
+    expect(out).not.toBe(xml); // regrouped, not bailed out
     expect(musicalEvents(out)).toEqual(musicalEvents(xml));
     const before = new DOMParser().parseFromString(xml, 'text/xml');
     const after = new DOMParser().parseFromString(out, 'text/xml');
@@ -118,5 +119,21 @@ describe('HOMR voice serialization for Verovio', () => {
       const xml = score(body);
       expect(normalizeVoices(xml)).toBe(xml);
     }
+  });
+});
+
+describe('HOMR voice serialization refusals', () => {
+  it('refuses a backup that runs before the start of the bar, even when nothing else is wrong', () => {
+    // Each lane is in order and no note overlaps another in its lane; only the negative position
+    // is wrong.
+    const body = backup(1) + upper1 + backup(2) + rest + lower1 + upper2;
+    const xml = score(body);
+    expect(normalizeVoices(xml)).toBe(xml);
+  });
+
+  it('refuses a chord note that has no note before it to join', () => {
+    const orphan = note('orphan', 'C', 3, 1, '5', '2', '<chord/>');
+    const xml = score(upper1 + backup(2) + orphan + rest + lower1 + upper2 + backup(1) + lower2);
+    expect(normalizeVoices(xml)).toBe(xml);
   });
 });

@@ -49,7 +49,9 @@ describe('engine handlers', () => {
     expect(Object.keys(a.assignment)).toHaveLength(67);
     for (const n of score.notes) expect([1, 2, 3, 4, 5]).toContain(a.assignment[n.id]!.finger);
     expect(a.assignment).toEqual(b.assignment);
+    // An elapsed time, so it cannot exceed the time since the page began.
     expect(a.ms).toBeGreaterThanOrEqual(0);
+    expect(a.ms).toBeLessThanOrEqual(performance.now());
   });
   it('respects pins', () => {
     const { score } = load();

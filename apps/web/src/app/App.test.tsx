@@ -21,6 +21,30 @@ describe('App', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'digitus2' })).toBeInTheDocument();
   });
+
+  it('shows the About page on the about view only, not beside the library', async () => {
+    // Load the lazy chunk first so that an About page wrongly rendered would already be there.
+    await import('../about/AboutView.js');
+    render(<App />);
+    await act(async () => {});
+    expect(screen.queryByRole('heading', { level: 1, name: 'About digitus2' })).toBeNull();
+    act(() => useAppStore.setState({ view: { name: 'about' } }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'About digitus2' }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the scan fallback on the scan view only', () => {
+    const { unmount } = render(<App />);
+    expect(screen.queryByText('Opening scan...')).toBeNull();
+    act(() =>
+      useAppStore.setState({
+        view: { name: 'scan', session: { id: 'scan-1', file: new File([], 'page.png') } },
+      }),
+    );
+    expect(screen.getByText('Opening scan...')).toBeInTheDocument();
+    unmount();
+  });
 });
 
 // Review S2 and L2: a new view used to keep the old one's (clamped) scroll offset, so a piece

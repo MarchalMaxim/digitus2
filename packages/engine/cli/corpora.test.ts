@@ -1,9 +1,14 @@
-import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { toHandExamples } from '../src/learn/data.js';
-import { defaultCorpusRoots, loadCorpora, PIG_VALIDATION_PIECES } from './corpora.js';
+import {
+  defaultCorpusRoots,
+  loadCorpora,
+  PIG_VALIDATION_PIECES,
+  readPigValidation,
+} from './corpora.js';
 
 // The plan's check used paths relative to the working directory, which is packages/engine under
 // `pnpm --filter`; the default roots resolve from the repository root instead.
@@ -18,10 +23,12 @@ describe.skipIf(!have)('corpora', () => {
     expect(PIG_VALIDATION_PIECES).toHaveLength(20);
     expect(PIG_VALIDATION_PIECES).toEqual([...PIG_VALIDATION_PIECES].sort());
     for (const id of PIG_VALIDATION_PIECES) expect(Number(id)).toBeGreaterThanOrEqual(31);
-    // research/data/splits/pig_validation.json (learning prototype; not recomputed here)
-    expect(PIG_VALIDATION_PIECES.join(' ')).toBe(
-      '031 034 038 039 041 046 052 053 066 076 077 080 082 083 098 117 118 119 120 138',
-    );
+    expect(new Set(PIG_VALIDATION_PIECES).size).toBe(20);
+    for (const id of PIG_VALIDATION_PIECES) expect(id).toMatch(/^\d{3}$/);
+    // the list is the file's own, and every id of it is a PIG train piece the loader can read
+    expect(PIG_VALIDATION_PIECES).toEqual(readPigValidation(roots.pigValidation));
+    const { pieces } = loadCorpora({ pigValidation: true });
+    expect(pieces.map((p) => p.id)).toEqual([...PIG_VALIDATION_PIECES]);
   });
   it('loads PIG train without the validation and test pieces, with every annotation', () => {
     const { pieces, sources } = loadCorpora({ pigTrain: true });
@@ -133,5 +140,70 @@ describe('corpora without data', () => {
     expect(loadCorpora({ textbook: true }, { textbook: dir }).pieces.map((p) => p.id)).toEqual([
       'c-major-r',
     ]);
+  });
+});
+
+// A PIG-shaped corpus written for the test: the data-free half of the loader's contract.
+describe('corpora from files written for the test', () => {
+  const H = '//Version: PianoFingering_v170101\n';
+  /** Two right-hand notes; the first is fingered `first`, the second 5. */
+  const annotation = (first: number) =>
+    `${H}0\t0\t0.5\tC4\t80\t80\t0\t${first}\n1\t0.5\t1\tD4\t80\t80\t0\t5\n`;
+  function pigRoots(files: Record<string, number>) {
+    const root = mkdtempSync(join(tmpdir(), 'digitus2-corpora-'));
+    const pig = join(root, 'pig');
+    mkdirSync(pig);
+    for (const [name, first] of Object.entries(files))
+      writeFileSync(join(pig, name), annotation(first));
+    const pigSplit = join(root, 'split.json');
+    writeFileSync(
+      pigSplit,
+      JSON.stringify({
+        splits: { nakamura2020: { train: { pieces: ['031', '032'] }, test: { pieces: ['001'] } } },
+      }),
+    );
+    const pigValidation = join(root, 'validation.json');
+    writeFileSync(pigValidation, JSON.stringify({ pieces: ['032'] }));
+    return { pig, pigSplit, pigValidation };
+  }
+
+  it("reads a piece's annotation files in annotation order, not file name order", () => {
+    // Sorted as text, -10 comes before -2; as annotation numbers, -2 comes first.
+    const roots = pigRoots({
+      '031-1_fingering.txt': 1,
+      '031-2_fingering.txt': 2,
+      '031-10_fingering.txt': 3,
+      '032-1_fingering.txt': 1,
+    });
+    const piece = loadCorpora({ pigTrain: true }, roots).pieces[0]!;
+    expect(piece.id).toBe('031');
+    const firstNote = piece.score.notes[0]!.id;
+    expect(piece.annotations.map((a) => a[firstNote]?.finger)).toEqual([1, 2, 3]);
+  });
+
+  it('records the subset a source was read as, and none for a corpus without subsets', () => {
+    const roots = pigRoots({ '031-1_fingering.txt': 1, '032-1_fingering.txt': 1 });
+    const train = loadCorpora({ pigTrain: true }, roots).sources[0]!;
+    expect(train.subset).toBe('train');
+    expect(loadCorpora({ pigValidation: true }, roots).sources[0]!.subset).toBe('validation');
+    const textbook = mkdtempSync(join(tmpdir(), 'digitus2-textbook-'));
+    writeFileSync(join(textbook, 'scales.json'), '[]');
+    writeFileSync(join(textbook, 'arpeggios.json'), '[]');
+    writeFileSync(join(textbook, 'chromatic.json'), '[]');
+    const source = loadCorpora({ textbook: true }, { textbook }).sources[0]!;
+    expect('subset' in source).toBe(false);
+  });
+
+  it('refuses a validation list whose pieces are not an array of ids', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'digitus2-validation-'));
+    const read = (json: unknown) => {
+      const file = join(dir, 'v.json');
+      writeFileSync(file, JSON.stringify(json));
+      return () => readPigValidation(file);
+    };
+    expect(read({ pieces: ['b', 'a'] })()).toEqual(['a', 'b']);
+    expect(read({ pieces: 5 })).toThrow(/expected a "pieces" array of piece ids/);
+    expect(read({ pieces: [31, 34] })).toThrow(/expected a "pieces" array of piece ids/);
+    expect(read({})).toThrow(/expected a "pieces" array of piece ids/);
   });
 });

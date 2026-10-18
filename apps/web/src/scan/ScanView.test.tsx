@@ -5,6 +5,7 @@ import { useAppStore } from '../app/store.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { ScanView } from './ScanView.js';
 
+const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const { load, renderNotation } = vi.hoisted(() => ({ load: vi.fn(), renderNotation: vi.fn() }));
 
 // DOM tests have no browser workers; pixel/upload behavior is covered by Playwright.
@@ -149,4 +150,77 @@ it('speaks French, including a restored error and the page navigation', async ()
   expect(screen.getByRole('button', { name: 'Page d’origine suivante' })).toBeVisible();
   expect(screen.getByText('Page 1 sur 2')).toBeVisible();
   expect(screen.getByRole('button', { name: 'Utiliser pour le doigté' })).toBeDisabled();
+});
+
+it('shows the file name, with no page-view toggle, for a single-page session', async () => {
+  render(
+    <ScanView
+      session={{
+        id: 'saved',
+        file: new File(['source'], 'source.png', { type: 'image/png' }),
+        xml: '<score-partwise/>',
+      }}
+    />,
+  );
+  await vi.waitFor(() => expect(renderNotation).toHaveBeenCalled());
+  expect(screen.getByText('source.png')).toBeVisible();
+  expect(screen.queryByText(/page image/)).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Page recognition' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Combined score' })).toBeNull();
+});
+
+it('connects, scans one image and arrives at the review of the recognition', async () => {
+  const id = 'b'.repeat(32);
+  const xml = '<score-partwise><part-list/></score-partwise>';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((url: string, init?: RequestInit) => {
+      if (url.endsWith('/health'))
+        return Promise.resolve(new Response(JSON.stringify({ protocol: 'digitus2-scan-v1' })));
+      if (init?.method === 'POST') return Promise.resolve(new Response(JSON.stringify({ id })));
+      if (url.endsWith('/result')) return Promise.resolve(new Response(xml));
+      return Promise.resolve(new Response(JSON.stringify({ state: 'ready', recognizer: 'Test' })));
+    }),
+  );
+  try {
+    render(
+      <ScanView
+        session={{
+          id: 'fresh',
+          file: new File([png], 'photo.png', { type: 'image/png' }),
+        }}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Connect to this PC' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+    await vi.waitFor(() =>
+      expect(load).toHaveBeenCalledWith(xml, 'scan.musicxml', expect.anything()),
+    );
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it('renders the recognition at the width of its column, rounded to a step of 80 pixels', async () => {
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get: () => 1000,
+  });
+  try {
+    render(
+      <ScanView
+        session={{
+          id: 'saved',
+          file: new File(['source'], 'source.png', { type: 'image/png' }),
+          xml: '<score-partwise/>',
+        }}
+      />,
+    );
+    await vi.waitFor(() =>
+      expect(renderNotation).toHaveBeenLastCalledWith(expect.objectContaining({ widthPx: 1040 })),
+    );
+  } finally {
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth;
+  }
 });

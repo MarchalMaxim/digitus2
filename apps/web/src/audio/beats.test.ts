@@ -93,7 +93,37 @@ describe('beats', () => {
     expect(long.map((b) => b.accent)).toEqual([false, false, false]);
     long.forEach((b, k) => expect(b.sec).toBeCloseTo(0.5 * k, 9));
   });
+
+  it('gives a short bar after the first no pickup lead: it starts on beat 1', () => {
+    // 4/4 at 120 qpm: a full first bar, then a bar of two quarters (a short bar, not a pickup).
+    const short = withShortSecondBar();
+    expect(short.measures[1]!.lengthTicks).toBe(short.divisions * 2);
+    const bar1 = buildBeats(short).filter((b) => b.measureIndex === 1);
+    expect(bar1.map((b) => b.beatInBar)).toEqual([1, 2]);
+    expect(bar1.map((b) => b.accent)).toEqual([true, false]);
+    expect(bar1[0]!.sec).toBeCloseTo(2, 9);
+    expect(bar1[1]!.sec).toBeCloseTo(2.5, 9);
+  });
 });
+
+/** 4/4 at 120 qpm: one full bar of quarter notes, then a bar of only two quarters. */
+function withShortSecondBar(): Score {
+  const note =
+    '<note><pitch><step>C</step><octave>5</octave></pitch><duration>2</duration>' +
+    '<type>quarter</type></note>';
+  const attributes =
+    '<attributes><divisions>2</divisions><key><fifths>0</fifths></key>' +
+    '<time><beats>4</beats><beat-type>4</beat-type></time>' +
+    '<clef><sign>G</sign><line>2</line></clef></attributes>' +
+    '<direction><direction-type><metronome><beat-unit>quarter</beat-unit>' +
+    '<per-minute>120</per-minute></metronome></direction-type><sound tempo="120"/></direction>';
+  const xml =
+    '<?xml version="1.0" encoding="UTF-8"?><score-partwise version="4.0">' +
+    '<part-list><score-part id="P1"><part-name>Melody</part-name></score-part></part-list>' +
+    `<part id="P1"><measure number="1">${attributes}${note.repeat(4)}</measure>` +
+    `<measure number="2">${note.repeat(2)}</measure></part></score-partwise>`;
+  return parseMusicXml(xml).score;
+}
 
 /**
  * A one-staff melody in `beats`/4 at 120 qpm (a beat is 0.5 s): a first measure of

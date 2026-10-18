@@ -1,5 +1,9 @@
-import { expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { rotateScanPage } from './rotation.js';
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 it('restores the unchanged original and clears recognition on the fourth turn', async () => {
   const originalFile = new File(['original bytes including metadata'], 'original.jpg', {
@@ -50,4 +54,19 @@ it('rejects a cancelled operation even when no decoding would be needed', async 
       controller.signal,
     ),
   ).rejects.toMatchObject({ name: 'AbortError' });
+});
+
+it('reads the width and height of a normal PNG header and goes on to decode it', async () => {
+  const bytes = new Uint8Array(24);
+  bytes[0] = 137;
+  const view = new DataView(bytes.buffer);
+  view.setUint32(16, 1000);
+  view.setUint32(20, 800);
+  const decode = vi.fn().mockRejectedValue(new Error('decoder reached'));
+  vi.stubGlobal('createImageBitmap', decode);
+  const file = new File([bytes], 'page.png', { type: 'image/png' });
+  await expect(rotateScanPage({ id: 'page', file }, new AbortController().signal)).rejects.toThrow(
+    'decoder reached',
+  );
+  expect(decode).toHaveBeenCalledTimes(1);
 });

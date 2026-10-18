@@ -141,6 +141,25 @@ describe('HOMR engraving fallback', () => {
     ]);
   });
 
+  it('uses three dotted-quarter groups in 9/8', () => {
+    const nine = Array.from({ length: 9 }, (_, i) => note(`n${i}`)).join('');
+    const marks = beams(prepareScanBeams(score(nine, '<beats>9</beats><beat-type>8</beat-type>')));
+    expect(marks.map(([, b]) => b)).toEqual(
+      ['begin', 'continue', 'end', 'begin', 'continue', 'end', 'begin', 'continue', 'end'].map(
+        (v) => [`1:${v}`],
+      ),
+    );
+  });
+
+  it('ends a group on a sixteenth after an eighth with a backward hook', () => {
+    const xml = score(note('a') + note('b', '', 1, '16th') + note('c', '', 8, 'half'));
+    expect(beams(prepareScanBeams(xml))).toEqual([
+      ['a', ['1:begin']],
+      ['b', ['1:end', '2:backward hook']],
+      ['c', []],
+    ]);
+  });
+
   it.each([
     ['another exporter', score(sixEighths, undefined, 'MuseScore')],
     [
@@ -150,6 +169,17 @@ describe('HOMR engraving fallback', () => {
       ),
     ],
     ['unknown meter', score(sixEighths, '')],
+    [
+      '3/8, which is not a supported meter',
+      score(
+        sixEighths.slice(0, sixEighths.indexOf('<note id="n3"')),
+        '<beats>3</beats><beat-type>8</beat-type>',
+      ),
+    ],
+    [
+      '6/4, which is not a supported meter',
+      score(sixEighths, '<beats>6</beats><beat-type>4</beat-type>'),
+    ],
     ['additive meter', score(sixEighths, '<beats>2+1</beats><beat-type>4</beat-type>')],
     [
       'tuplets',

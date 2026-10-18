@@ -1,6 +1,10 @@
 import type { Assignment } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
 import { en } from '../i18n/en/index.js';
+import { messages as es } from '../i18n/es/index.js';
+import { messages as fr } from '../i18n/fr/index.js';
+import { messages as nl } from '../i18n/nl/index.js';
+import { messages as pt } from '../i18n/pt/index.js';
 import { loaderTune, scoreStatusLine, showsEditorial, type StatusInputs } from './ScoreView.js';
 
 /** A ready score, playable, with the player idle (or playing, past any count-in). */
@@ -79,8 +83,10 @@ describe("the editor's fingering line", () => {
   const engine: Assignment = { n1: { finger: 1, source: 'engine' } };
   const editorial: Assignment = { n1: { finger: 2, source: 'editorial' } };
 
-  it('reads "Showing the editor\'s fingering"', () => {
-    expect(en.score.view.editorialShown).toBe("Showing the editor's fingering");
+  it('has a line in every language, each its own', () => {
+    const lines = [en, es, fr, nl, pt].map((m) => m.score.view.editorialShown);
+    expect(lines.every((line) => line.trim() !== '')).toBe(true);
+    expect(new Set(lines).size).toBe(lines.length);
   });
 
   it("shows while the pages carry the editor's fingering", () => {

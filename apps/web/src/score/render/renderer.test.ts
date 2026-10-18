@@ -60,4 +60,18 @@ describe('renderer', () => {
     w.onerror?.({ message: 'out of memory' } as ErrorEvent);
     await expect(pending).rejects.toThrow('the score renderer failed: out of memory');
   });
+  it('does not ask for a warm-up once a render has already woken the worker', () => {
+    const w = fakeWorker([1000]);
+    const types: string[] = [];
+    const post = w.postMessage;
+    w.postMessage = (m: unknown) => {
+      types.push((m as { type: string }).type);
+      post(m);
+    };
+    const r = createRenderer(w);
+    void r.render({ xml: '<x/>', widthPx: 800 }).catch(() => undefined);
+    r.warmUp();
+    expect(types).toEqual(['render']);
+    r.dispose();
+  });
 });

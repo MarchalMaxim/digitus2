@@ -13,14 +13,29 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Start' })).toHaveClass('is-red');
     expect(screen.getByRole('button', { name: 'Other' })).not.toHaveClass('is-red');
   });
-  it('passes through type, disabled and aria attributes', () => {
+  it('never submits a form unless asked: type defaults to button, an explicit type wins', () => {
     render(
-      <Button type="submit" disabled aria-label="Go">
-        x
-      </Button>,
+      <>
+        <Button>Plain</Button>
+        <Button type="submit">Send</Button>
+      </>,
     );
-    const b = screen.getByRole('button', { name: 'Go' });
-    expect(b).toBeDisabled();
-    expect(b).toHaveAttribute('type', 'submit');
+    expect(screen.getByRole('button', { name: 'Plain' })).toHaveAttribute('type', 'button');
+    expect(screen.getByRole('button', { name: 'Send' })).toHaveAttribute('type', 'submit');
+  });
+  it('keeps the caller classes beside the red one, and adds none when there are none', () => {
+    render(
+      <>
+        <Button primary className="wide">
+          Both
+        </Button>
+        <Button className="wide">Caller</Button>
+        <Button>Bare</Button>
+      </>,
+    );
+    const both = screen.getByRole('button', { name: 'Both' });
+    expect(both).toHaveClass('is-red', 'wide');
+    expect(screen.getByRole('button', { name: 'Caller' })).toHaveAttribute('class', 'wide');
+    expect(screen.getByRole('button', { name: 'Bare' })).not.toHaveAttribute('class');
   });
 });

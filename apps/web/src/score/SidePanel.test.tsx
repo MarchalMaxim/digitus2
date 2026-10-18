@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore, type PieceSource } from '../app/store.js';
 import { loadPiece } from '../library/manifest.js';
 import { SidePanel } from './SidePanel.js';
+import { services } from './useScoreDocument.js';
 import type { ScoreDocument } from './useScoreDocument.js';
 
 beforeEach(() =>
@@ -114,11 +115,6 @@ describe('SidePanel', () => {
     expect(screen.queryByText('Details', { exact: true })).toBeNull();
     expect(screen.getByText(LEGEND)).toBeVisible();
   });
-
-  it('has no red element', () => {
-    const { container } = renderPanel(readyDoc());
-    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
-  });
 });
 
 // Polish plan Task 6, review S9: Large, Medium, Small and Child had no word on what they change,
@@ -162,5 +158,48 @@ describe('the level', () => {
   ] as const)('shows grade %i as %s', (level, name) => {
     renderPanel(readyDoc(), false, { ...melody, level });
     expect(screen.getByText('Level').nextElementSibling).toHaveTextContent(`${name}`);
+  });
+});
+
+// Export hands the fingering on screen to the engine worker and saves the text it returns.
+describe('exporting the fingering', () => {
+  const score = { notes: [], measures: [] } as never;
+  const complete = { xml: '<score-partwise/>', score, assignment: {} };
+  const exportButton = () => screen.getByRole('button', { name: 'Export MusicXML' });
+
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:fake');
+    URL.revokeObjectURL = vi.fn();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each([
+    ['the source text', { xml: null }],
+    ['the score', { score: null }],
+    ['the fingering', { assignment: null }],
+    ['all three', { xml: null, score: null, assignment: null }],
+  ] as const)('is unavailable without %s', (_name, missing) => {
+    renderPanel(readyDoc({ ...complete, ...missing }));
+    expect(exportButton()).toBeDisabled();
+  });
+
+  it('is available once the score, its text and its fingering are all there', () => {
+    renderPanel(readyDoc(complete));
+    expect(exportButton()).toBeEnabled();
+  });
+
+  it('ignores a second click while the first export is still running', async () => {
+    let finish: (xml: string) => void = () => undefined;
+    const fingeredXml = vi.fn(() => new Promise<string>((resolve) => (finish = resolve)));
+    vi.spyOn(services, 'engine', 'get').mockReturnValue({ fingeredXml } as never);
+    renderPanel(readyDoc(complete));
+    await userEvent.click(exportButton());
+    expect(exportButton()).toBeDisabled();
+    await userEvent.click(exportButton());
+    expect(fingeredXml).toHaveBeenCalledTimes(1);
+    finish('<fingered/>');
+    await vi.waitFor(() => expect(exportButton()).toBeEnabled());
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
   });
 });

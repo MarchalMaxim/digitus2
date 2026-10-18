@@ -77,4 +77,13 @@ describe('routes', () => {
     );
     uninstall();
   });
+  it('corrects an unrestorable hash in place, without a new history entry', () => {
+    location.hash = '#/garbage';
+    const entries = history.length;
+    const uninstall = installHashSync(useAppStore);
+    expect(useAppStore.getState().view).toEqual({ name: 'library' });
+    expect(location.hash).toBe('#/');
+    expect(history.length).toBe(entries);
+    uninstall();
+  });
 });

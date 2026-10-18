@@ -806,10 +806,16 @@ describe('the cursor scroll', () => {
 
   it('keeps clear of a bar at the top of the window too', () => {
     const below = { top: 50, bottom: 600 };
-    // 180 px tall in a 550 px band starting at 50: its top goes to 235.
-    expect(cursorScrollDelta({ top: 20, bottom: 200 }, { top: 30, bottom: 60 }, true, below)).toBe(
-      -215,
-    );
+    const system = { top: 20, bottom: 200 };
+    const delta = cursorScrollDelta(system, { top: 30, bottom: 60 }, true, below);
+    // Up is negative: the system, behind the top bar now, is brought below it.
+    expect(delta).not.toBeNull();
+    expect(delta as number).toBeLessThan(0);
+    // After the scroll the system lies wholly in the band, with equal room above and below.
+    const gapAbove = system.top - (delta as number) - below.top;
+    const gapBelow = below.bottom - (system.bottom - (delta as number));
+    expect(gapAbove).toBeGreaterThan(0);
+    expect(gapAbove).toBe(gapBelow);
   });
 
   it('puts a system taller than the band at its top, or centres the red notes when they would still be under the dock', () => {

@@ -43,4 +43,28 @@ describe('Loader', () => {
     const scale = render(<Loader tune="scale" />);
     expect(scale.container.querySelectorAll('.loader-digit')).toHaveLength(0);
   });
+
+  it('sets the black keys on the borders after C, D, F, G and A, each once', () => {
+    const { container } = render(<Loader tune="scale" />);
+    const white = Array.from(container.querySelectorAll('.loader-key'), (r) => ({
+      right: Number(r.getAttribute('x')) + Number(r.getAttribute('width')),
+    }));
+    const centres = Array.from(container.querySelectorAll('.loader-black'), (r) => {
+      return Number(r.getAttribute('x')) + Number(r.getAttribute('width')) / 2;
+    });
+    // C#, D#, F#, G#, A#: the border after the white key at index 0, 1, 3, 4 and 5.
+    expect(centres).toEqual([0, 1, 3, 4, 5].map((i) => white[i]!.right));
+  });
+
+  it('writes each finger in the middle of its own key', () => {
+    const { container } = render(<Loader tune="fingering" />);
+    const keys = Array.from(container.querySelectorAll('.loader-key'));
+    const digits = Array.from(container.querySelectorAll('.loader-digit'));
+    expect(digits).toHaveLength(keys.length);
+    digits.forEach((d, i) => {
+      const k = keys[i]!;
+      const middle = Number(k.getAttribute('x')) + Number(k.getAttribute('width')) / 2;
+      expect(Number(d.getAttribute('x'))).toBe(middle);
+    });
+  });
 });

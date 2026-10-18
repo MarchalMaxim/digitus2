@@ -51,6 +51,17 @@ export function handOffFiles(pages: readonly ScanPage[]): File[] {
   });
 }
 
+/** Whether this browser can hand image files to the device's share sheet. */
+export function canShareFiles(): boolean {
+  const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
+  if (typeof nav.share !== 'function' || typeof nav.canShare !== 'function') return false;
+  try {
+    return nav.canShare({ files: [new File([''], 'page.png', { type: 'image/png' })] });
+  } catch {
+    return false;
+  }
+}
+
 /** 'shared' through the share sheet, 'saved' as downloads, or 'cancelled' when the reader backed out. */
 export async function handOff(
   files: File[],

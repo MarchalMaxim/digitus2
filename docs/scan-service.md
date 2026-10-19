@@ -117,14 +117,16 @@ The free grant is counted per billing account, not per project ([Cloud Run prici
 
 ## Timings
 
-The photo is the owner's flat phone photo of Boëllmann Op. 28 No. II, page 5 (`research/omr/photos/boellmann-op28-page5-flat.jpeg`, 153,687 bytes); the PDF is the acceptance corpus's Amazing Grace (`amazing-grace/clean.pdf` rendered by `research/omr/prepare.mjs`, 51,425 bytes). Times are the whole request as `smoke.mjs` measures it.
+The photo is the owner's flat phone photo of Boëllmann Op. 28 No. II, page 5 (`research/omr/photos/boellmann-op28-page5-flat.jpeg`, 153,687 bytes); the PDF is the acceptance corpus's Amazing Grace (`amazing-grace/clean.pdf` rendered by `research/omr/prepare.mjs`, 51,425 bytes). Times are the whole request as `smoke.mjs` measures it. The container rows are one session, the two images alternating; a warm time is the median of five runs (photo 8.3 to 8.8 s against 9.3 to 10.3 s, PDF 6.1 to 6.6 s against 8.5 to 8.8 s). The speed changes (Audiveris without `-save` and with an ahead-of-time class cache, and two homr patches) leave every output of the acceptance gate unchanged; `docs/research/omr.md`, Scan speed.
 
-| Where                                                               | Health from a cold service (cold start) | Photo (homr) | PDF (Audiveris) |
-| ------------------------------------------------------------------- | --------------------------------------- | ------------ | --------------- |
-| The container on the owner's PC at 4 vCPU and 8 GiB, first requests | —                                       | 14.8 s       | 10.1 s          |
-| The same, warm                                                      | —                                       | 10.1 s       | 8.6 s           |
-| The deployed service, first requests after a cold start             | 4.5 s                                   | 34.0 s       | 15.8 s          |
-| The deployed service, warm                                          | —                                       | 35.2 s       | 16.2 s          |
+| Where                                                                             | Health from a cold service (cold start) | Photo (homr) | PDF (Audiveris) |
+| --------------------------------------------------------------------------------- | --------------------------------------- | ------------ | --------------- |
+| The container on the owner's PC at 4 vCPU and 8 GiB, first requests               | —                                       | 8.6 s        | 6.2 s           |
+| The same, warm                                                                    | —                                       | 8.4 s        | 6.2 s           |
+| The container without the speed changes of #73, first requests                    | —                                       | 10.1 s       | 9.1 s           |
+| The same, warm                                                                    | —                                       | 9.6 s        | 8.5 s           |
+| The deployed service without the speed changes, first requests after a cold start | 4.5 s                                   | 34.0 s       | 15.8 s          |
+| The deployed service without the speed changes, warm                              | —                                       | 35.2 s       | 16.2 s          |
 
 The cold start is measured from outside: a health request after 40 idle minutes, with no instance left, answered in 4.5 s, and the next one in 0.06 s. Cloud Run's own system log agrees: 4 to 6 s from each instance start to the moment the container listens, across five starts. A reader whose warm-up finds no instance waits that long before the health answer. Cloud Run's front end can also answer a request itself, with 429 when no instance is available (during a rollout, or when the one instance is saturated) or with an error once billing is disabled; those answers carry no CORS headers, so the browser reports them as a failed request and the app shows that the scanner could not answer. The container is ready about 2 s after it starts. Each Audiveris job extracts its native libraries into its own cache, so cold and warm PDF times are alike. A Cloud Run vCPU is slower than a core of the owner's PC, and the photo path suffers most: with the same thread budget of 4, a photo takes about 3.5 times longer on the service than in the container at home and a PDF page about 1.9 times. Runs on the service also vary more than at home: the same warm photo took between 24 and 36 s across one day. A thread budget of 2 on the service was tried and is slower (31 to 32 s against 24 s with 4 on the same afternoon). The stage timings behind these numbers and the options they leave are in `docs/research/omr.md`.
 

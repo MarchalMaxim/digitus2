@@ -19,6 +19,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "prototypes" / "local-worker"))
 from recognition_errors import RecognitionError  # noqa: E402
+from thread_budget import VARIABLE as THREADS_VARIABLE, detect as detect_threads  # noqa: E402
 from worker import LocalWorker, PhotoPdfRecognizer, validate_result  # noqa: E402
 
 PROTOCOL = "digitus2-scan-v2"
@@ -67,8 +68,9 @@ class Service:
     """Runs one recognition at a time in the calling thread and removes its directory before answering."""
     review_metadata = LocalWorker.review_metadata
 
-    def __init__(self, recognizer, root: Path, *, max_bytes=10 * 1024 * 1024, max_result_bytes=20 * 1024 * 1024):
+    def __init__(self, recognizer, root: Path, *, max_bytes=10 * 1024 * 1024, max_result_bytes=20 * 1024 * 1024, threads=None):
         self.recognizer = recognizer
+        self.threads = threads
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.max_bytes, self.max_result_bytes = max_bytes, max_result_bytes
@@ -232,7 +234,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send(404, {"error": "not-found"})
             return
         self.send(200, {"protocol": PROTOCOL, **self.server.service.metadata(),
-                        "maxUploadBytes": self.server.service.max_bytes})
+                        "maxUploadBytes": self.server.service.max_bytes, "threads": self.server.service.threads})
 
     def do_POST(self):
         if not self.boundary(client_header=True):
@@ -322,15 +324,24 @@ def main():
     parser.add_argument("--timeout", type=float, default=180)
     parser.add_argument("--dev-origin", action="append", default=[], help="Exact loopback HTTP development origin; Pages remains allowed")
     parser.add_argument("--rate-limit", type=int, default=30, help="Recognitions per caller per rolling hour")
+    parser.add_argument("--threads", type=int, default=None,
+                        help=f"CPU threads for homr's ONNX Runtime and OpenCV; default {THREADS_VARIABLE}, else the container's CPU quota")
     args = parser.parse_args()
     if any(urlsplit(origin).scheme != "http" or urlsplit(origin).hostname not in {"127.0.0.1", "localhost"} for origin in args.dev_origin):
         parser.error("--dev-origin must be an exact HTTP loopback origin")
+    if args.threads is None:
+        args.threads = detect_threads()
+    elif args.threads <= 0:
+        parser.error("--threads must be positive")
+    if args.threads is not None:
+        # Before the recognisers are built: homr's child inherits the service's environment.
+        os.environ[THREADS_VARIABLE] = str(args.threads)
     recognizer = PhotoPdfRecognizer(
         Audiveris(args.bundle, timeout=args.timeout, short_staves=args.short_staves, text_models=args.text_models),
         Homr(args.homr_toolchain, timeout=args.timeout))
-    server = serve(Service(recognizer, args.root), args.port, {ORIGIN, *args.dev_origin}, Limiter(limit=args.rate_limit))
+    server = serve(Service(recognizer, args.root, threads=args.threads), args.port, {ORIGIN, *args.dev_origin}, Limiter(limit=args.rate_limit))
     print(json.dumps({"listening": f"http://{server.server_address[0]}:{server.server_port}", "protocol": PROTOCOL,
-                      "recognizer": recognizer.name}), flush=True)
+                      "recognizer": recognizer.name, "threads": args.threads}), flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

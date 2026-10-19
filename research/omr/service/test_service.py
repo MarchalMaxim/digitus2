@@ -76,6 +76,17 @@ def test_health_names_the_protocol_and_the_upload_limit(api):
     assert body["protocol"] == "digitus2-scan-v2"
     assert body["maxUploadBytes"] == 64
     assert body["needsReview"] is True
+    assert body["threads"] is None
+
+def test_health_names_the_thread_budget(api):
+    api[1].threads = 4
+    body = json.loads(request(api, "GET", "/v1/health")[2])
+    assert body["threads"] == 4
+    assert "threads" not in api[1].metadata()
+
+def test_the_thread_budget_is_a_service_setting(tmp_path):
+    assert Service(Recognizer(), tmp_path, threads=4).threads == 4
+    assert Service(Recognizer(), tmp_path).threads is None
 
 def test_recognize_answers_the_xml_with_metadata_and_keeps_nothing(api, tmp_path, capsys):
     status, headers, body = request(api, "POST", "/v1/recognize", PNG)

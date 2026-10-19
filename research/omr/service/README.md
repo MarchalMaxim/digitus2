@@ -66,6 +66,64 @@ powershell -File research/omr/service/budget/budget.ps1 -Project ID -BillingAcco
 
 `deploy.ps1` builds this image, pushes it to Artifact Registry, deploys it to Cloud Run with the service's settings and runs `smoke.mjs` against the new URL. `budget.ps1` creates the 5-a-month budget and the kill-switch function that disables billing for the project when the budget is reached.
 
+Both scripts stop at the first failing command and are safe to run again: they create the repository, topic, service account and budget only when missing.
+
+### Deploy
+
+`deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2]` enables the Cloud Run and Artifact Registry APIs, creates the Docker repository `<region>-docker.pkg.dev/<project>/<repository>` when missing and gives it a cleanup policy that keeps the 2 most recent versions of the image and deletes older ones (Artifact Registry applies it about once a day). It tags the image with the short git commit, with `-dirty` added when `research/omr` has uncommitted changes, and deploys it with these settings:
+
+| Setting               | Value                                                        |
+| --------------------- | ------------------------------------------------------------ |
+| CPU, memory           | 4, 8 GiB, as in [Run locally](#run-locally)                  |
+| Requests per instance | 4 (`--concurrency`); the service itself runs one recognition |
+| Instances             | 0 to 1: no instance runs, and none is billed, while idle     |
+| Request timeout       | 240 s, above the service's 180 s recognition limit           |
+| Start-up CPU boost    | on                                                           |
+| Execution environment | gen2                                                         |
+| Access                | public (`--allow-unauthenticated`, ingress all), port 8080   |
+
+It then prints the service URL and runs `smoke.mjs` against it, passing the first PDF under `research/omr/results/acceptance/fixtures-v1/` with `--pdf`; without one it says the PDF route was not smoked.
+
+### Budget and kill-switch
+
+`budget/budget.ps1 -Project ID -BillingAccount ID [-Amount 5] [-Topic digitus2-scan-budget] [-Simulate true]` follows Google's [Disable billing usage with notifications](https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications):
+
+| Piece    | What it is                                                                                                                                                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Budget   | `digitus2-scan` on the billing account, 5 a month in the account's currency, for this project only; notifications at 50 %, 90 % and 100 % go to the Pub/Sub topic                                                                                                              |
+| Topic    | `digitus2-scan-budget`; the budget publishes the month's running cost to it several times a day                                                                                                                                                                                |
+| Function | `stop-billing` (Cloud Run functions, Python 3.12, europe-west4), source `budget/main.py`, triggered by the topic                                                                                                                                                               |
+| Identity | Its own service account `stop-billing@<project>.iam.gserviceaccount.com`: Billing Account Administrator on the billing account (as Google's guide grants) and log writer on the project. The scan service keeps the Compute Engine default account, which gets no billing role |
+
+`main.py` is Google's Python sample with two changes: it acts when the cost reaches the budget, not only above it, and simulation comes from the `SIMULATE` environment variable (on unless it is `false`). For each notification it decodes `costAmount` and `budgetAmount`; under the budget it does nothing; otherwise it reads the project's billing state and, when billing is on, unlinks the billing account (`update_project_billing_info` with an empty `billing_account_name`) or, in simulation, only logs that it would. A refused unlink is logged, not raised. Its tests stub the Google client modules:
+
+```sh
+python -m pytest research/omr/service/budget -q
+```
+
+### Simulation test
+
+The function starts in simulation. After `budget.ps1`, publish a notification over the budget; the script prints the command with the project filled in. The backslashes keep the quotes through `gcloud.cmd` in PowerShell:
+
+```powershell
+gcloud pubsub topics publish digitus2-scan-budget --project ID --message '{\"costAmount\": 6, \"budgetAmount\": 5}'
+gcloud functions logs read stop-billing --gen2 --region europe-west4 --project ID --limit 20
+```
+
+The log shows `Cost: 6.0 Budget: 5.0` and a line with `simulation: nothing was changed`; billing stays linked. The console shows the same under Cloud Run functions, `stop-billing`, Logs.
+
+### Switching simulation off
+
+Once the simulation test logs `simulation`, redeploy the function live:
+
+```powershell
+powershell -File research/omr/service/budget/budget.ps1 -Project ID -BillingAccount ID -Simulate false
+```
+
+Under `-File` the switch is text, so `-Simulate false` and `-Simulate $false` both work. From then on a notification at or over the budget unlinks billing. Do not publish the test message again while the function is live: it would unlink billing for the project.
+
 ## When billing is disabled
 
 The kill-switch unlinks the project from its billing account when the month's cost reaches the budget; the service then stops answering and the app says the scanner could not answer. Scanning stays off until the budget period resets on the first of the month, because the notifications repeat with the running total and would unlink a relinked project again. To recover, on the first of the month (or after raising the budget for the current month), link the project to the billing account again in the Cloud console (Billing, My projects). The service resumes by itself; if Google removed it meanwhile, run the deploy script again.
+
+The budget and the function need nothing: relinking does not change them, and the function stays live. To raise the ceiling for the current month, change the amount of the `digitus2-scan` budget in the console (Billing, Budgets & alerts) first and link billing afterwards; `budget.ps1 -Amount` updates the same budget, but it also redeploys the function, which needs billing linked, so it suits a project that is still linked.

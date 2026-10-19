@@ -1,0 +1,97 @@
+# Creates the monthly budget and the kill-switch function that unlinks billing when it is reached.
+# Safe to run again: run it with -Simulate false once the published-message test logged "simulation".
+param(
+  [Parameter(Mandatory = $true)][string]$Project,
+  [Parameter(Mandatory = $true)][string]$BillingAccount,
+  [decimal]$Amount = 5,
+  [string]$Topic = 'digitus2-scan-budget',
+  # A string so that `powershell -File budget.ps1 -Simulate $false` works too: -File passes text.
+  [string]$Simulate = 'true'
+)
+$ErrorActionPreference = 'Stop'
+$Region = 'europe-west4'
+$Function = 'stop-billing'
+$Budget = 'digitus2-scan'
+$RepoRoot = [IO.Path]::GetFullPath("$PSScriptRoot/../../../..")
+$Source = "$RepoRoot/research/omr/service/budget"
+$Account = "$Function@$Project.iam.gserviceaccount.com"
+
+switch ("$Simulate".Trim().TrimStart('$').ToLowerInvariant()) {
+  { $_ -in 'true', '1' } { $SimulateValue = 'true' }
+  { $_ -in 'false', '0' } { $SimulateValue = 'false' }
+  default { throw "-Simulate must be true or false, not '$Simulate'" }
+}
+$AmountText = $Amount.ToString([Globalization.CultureInfo]::InvariantCulture)
+
+function Invoke-Checked([string]$What, [scriptblock]$Command) {
+  & $Command
+  if ($LASTEXITCODE -ne 0) { throw "$What failed (exit $LASTEXITCODE)" }
+}
+
+# True when the command exits 0; its output is discarded. Windows PowerShell turns redirected
+# native stderr into a terminating error under 'Stop', so the probe runs under 'Continue'.
+function Test-Native([scriptblock]$Command) {
+  $ErrorActionPreference = 'Continue'
+  & $Command 2>&1 | Out-Null
+  return $LASTEXITCODE -eq 0
+}
+
+Invoke-Checked 'Enabling the APIs' {
+  gcloud services enable cloudbilling.googleapis.com billingbudgets.googleapis.com pubsub.googleapis.com `
+    cloudfunctions.googleapis.com cloudbuild.googleapis.com eventarc.googleapis.com run.googleapis.com `
+    artifactregistry.googleapis.com iam.googleapis.com --project $Project
+}
+
+if (-not (Test-Native { gcloud pubsub topics describe $Topic --project $Project })) {
+  Invoke-Checked 'Creating the topic' { gcloud pubsub topics create $Topic --project $Project }
+}
+
+# The function runs as its own service account, so the billing role never reaches the Compute Engine
+# default account that the public scan service runs as.
+if (-not (Test-Native { gcloud iam service-accounts describe $Account --project $Project })) {
+  Invoke-Checked 'Creating the function service account' {
+    gcloud iam service-accounts create $Function --display-name 'digitus2 billing kill-switch' --project $Project
+  }
+}
+Invoke-Checked 'Letting the function write its log' {
+  gcloud projects add-iam-policy-binding $Project --member "serviceAccount:$Account" --role roles/logging.logWriter --condition=None --quiet
+}
+
+Invoke-Checked 'Deploying the function' {
+  gcloud functions deploy $Function --gen2 --runtime python312 --region $Region --source $Source `
+    --entry-point stop_billing --trigger-topic $Topic --set-env-vars "SIMULATE=$SimulateValue" `
+    --service-account $Account --project $Project --quiet
+}
+
+# As Google's guide does: the function's service account becomes Billing Account Administrator.
+$FunctionAccount = (& gcloud functions describe $Function --region $Region --project $Project --format 'value(serviceConfig.serviceAccountEmail)')
+if ($LASTEXITCODE -ne 0 -or -not $FunctionAccount) { throw "Reading the function's service account failed" }
+$FunctionAccount = "$FunctionAccount".Trim()
+Invoke-Checked 'Granting the function billing access' {
+  gcloud billing accounts add-iam-policy-binding $BillingAccount --member "serviceAccount:$FunctionAccount" --role roles/billing.admin --billing-project $Project
+}
+
+$TopicName = "projects/$Project/topics/$Topic"
+$Existing = (& gcloud billing budgets list --billing-account $BillingAccount --filter "displayName=$Budget" --format 'value(name)' --billing-project $Project)
+if ($LASTEXITCODE -ne 0) { throw 'Listing the budgets failed' }
+$Existing = @($Existing | Where-Object { $_ })
+if ($Existing.Count -gt 1) { throw "More than one budget is named $Budget; delete the extra ones in the console" }
+if ($Existing.Count -eq 1) {
+  Invoke-Checked 'Updating the budget' {
+    gcloud billing budgets update $Existing[0] --budget-amount $AmountText --filter-projects "projects/$Project" `
+      --notifications-rule-pubsub-topic $TopicName --billing-project $Project
+  }
+} else {
+  Invoke-Checked 'Creating the budget' {
+    gcloud billing budgets create --billing-account $BillingAccount --display-name $Budget --budget-amount $AmountText `
+      --filter-projects "projects/$Project" --threshold-rule percent=0.5 --threshold-rule percent=0.9 `
+      --threshold-rule percent=1.0 --notifications-rule-pubsub-topic $TopicName --billing-project $Project
+  }
+}
+
+Write-Host "Budget $Budget at $AmountText a month; the function runs with SIMULATE=$SimulateValue."
+Write-Host 'Test it with a message over the budget (the backslashes survive gcloud.cmd on Windows):'
+Write-Host "  gcloud pubsub topics publish $Topic --project $Project --message '{\`"costAmount\`": 6, \`"budgetAmount\`": 5}'"
+Write-Host 'Then read the function log (expect "simulation" while SIMULATE=true):'
+Write-Host "  gcloud functions logs read $Function --gen2 --region $Region --project $Project --limit 20"
+Write-Host "  or the console: Cloud Run functions, $Function, Logs"

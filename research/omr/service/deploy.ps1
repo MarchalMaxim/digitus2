@@ -1,0 +1,83 @@
+# Builds the scan service image, pushes it to Artifact Registry, deploys it to Cloud Run and smokes it.
+# Safe to run again: it is also how the service comes back after Google removed it.
+param(
+  [Parameter(Mandatory = $true)][string]$Project,
+  [string]$Region = 'europe-west4',
+  [string]$Service = 'digitus2-scan',
+  [string]$Repository = 'digitus2'
+)
+$ErrorActionPreference = 'Stop'
+$RepoRoot = [IO.Path]::GetFullPath("$PSScriptRoot/../../..")
+
+function Invoke-Checked([string]$What, [scriptblock]$Command) {
+  & $Command
+  if ($LASTEXITCODE -ne 0) { throw "$What failed (exit $LASTEXITCODE)" }
+}
+
+# True when the command exits 0; its output is discarded. Windows PowerShell turns redirected
+# native stderr into a terminating error under 'Stop', so the probe runs under 'Continue'.
+function Test-Native([scriptblock]$Command) {
+  $ErrorActionPreference = 'Continue'
+  & $Command 2>&1 | Out-Null
+  return $LASTEXITCODE -eq 0
+}
+
+$Sha = (& git -C $RepoRoot rev-parse --short HEAD)
+if ($LASTEXITCODE -ne 0 -or -not $Sha) { throw 'Reading the git commit failed' }
+$Sha = "$Sha".Trim()
+$Changes = (& git -C $RepoRoot status --porcelain -- research/omr)
+if ($LASTEXITCODE -ne 0) { throw 'Reading the git status failed' }
+if ($Changes) { $Sha = "$Sha-dirty" }
+$Registry = "$Region-docker.pkg.dev"
+$Image = "$Registry/$Project/$Repository/${Service}:$Sha"
+
+Invoke-Checked 'Enabling the APIs' {
+  gcloud services enable run.googleapis.com artifactregistry.googleapis.com --project $Project
+}
+
+if (-not (Test-Native { gcloud artifacts repositories describe $Repository --location $Region --project $Project })) {
+  Invoke-Checked 'Creating the Artifact Registry repository' {
+    gcloud artifacts repositories create $Repository --repository-format docker --location $Region --project $Project --description 'digitus2 scan service images'
+  }
+}
+
+# Keep the two most recent versions of each image and delete the rest; Keep wins over Delete.
+$Policy = @'
+[
+  { "name": "keep-two-most-recent", "action": { "type": "Keep" }, "mostRecentVersions": { "keepCount": 2 } },
+  { "name": "delete-older", "action": { "type": "Delete" }, "condition": { "tagState": "any" } }
+]
+'@
+$PolicyFile = Join-Path ([IO.Path]::GetTempPath()) "digitus2-cleanup-policy-$PID.json"
+[IO.File]::WriteAllText($PolicyFile, $Policy, (New-Object Text.UTF8Encoding($false)))
+try {
+  Invoke-Checked 'Setting the cleanup policy' {
+    gcloud artifacts repositories set-cleanup-policies $Repository --location $Region --project $Project --policy $PolicyFile --no-dry-run
+  }
+} finally {
+  Remove-Item -LiteralPath $PolicyFile -ErrorAction SilentlyContinue
+}
+
+Invoke-Checked 'Configuring Docker for Artifact Registry' { gcloud auth configure-docker $Registry --quiet }
+Invoke-Checked 'Building the image' {
+  docker build -f "$RepoRoot/research/omr/service/Dockerfile" -t $Image "$RepoRoot/research/omr"
+}
+Invoke-Checked 'Pushing the image' { docker push $Image }
+
+Invoke-Checked 'Deploying to Cloud Run' {
+  gcloud run deploy $Service --image $Image --region $Region --project $Project `
+    --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 `
+    --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080 --quiet
+}
+
+$Url = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(status.url)')
+if ($LASTEXITCODE -ne 0 -or -not $Url) { throw 'Reading the service URL failed' }
+$Url = "$Url".Trim()
+Write-Host "Service URL: $Url"
+Write-Host "Image: $Image"
+
+$SmokeArgs = @("$RepoRoot/research/omr/service/smoke.mjs", $Url)
+$Pdf = Get-ChildItem -LiteralPath "$RepoRoot/research/omr/results/acceptance/fixtures-v1" -Filter '*.pdf' -Recurse -File -ErrorAction SilentlyContinue |
+  Sort-Object FullName | Select-Object -First 1
+if ($Pdf) { $SmokeArgs += @('--pdf', $Pdf.FullName) } else { Write-Host 'No PDF fixture under research/omr/results/acceptance/fixtures-v1: the PDF route was not smoked.' }
+Invoke-Checked 'The smoke test' { node @SmokeArgs }

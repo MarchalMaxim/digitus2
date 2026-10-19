@@ -27,3 +27,18 @@ export async function closePractice(page: Page): Promise<void> {
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 }
+
+/**
+ * "Add notes between" (issue #67) is decided: the Practice panel's `data-embellish` is no longer
+ * 'pending' (with `value`, it is that one). An offered switch adds a row to the panel, so a flow
+ * that clicks in the panel on a piece that may be offered one (a level 1 or 2 piece, a file)
+ * waits for this first: the panel no longer grows under the click. The guard and the layout of
+ * the added notes take a moment after the score is ready.
+ */
+export async function embellishDecided(page: Page, value?: 'offered' | 'none'): Promise<void> {
+  await expect(page.locator('.practice-panel')).toHaveAttribute(
+    'data-embellish',
+    value ?? /^(offered|none)$/,
+    { timeout: 20_000 },
+  );
+}

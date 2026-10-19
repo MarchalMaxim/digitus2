@@ -10,7 +10,7 @@ import type { Messages } from '../i18n/messages.js';
 import { useLibraryPiece } from '../library/useLibraryPiece.js';
 import { BarSeek, type BarSeekHandle } from './BarSeek.js';
 import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
-import { applyCarry, captureCarry, type Carry } from './carry.js';
+import { useEmbellishCarry } from './carry.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
@@ -281,41 +281,10 @@ export function ScoreView({ source }: { source: PieceSource }) {
   );
 
   // "Add notes between" (issue #67). The switch swaps the score, which halts playback and drops
-  // the loop (usePlayback.ts): the bar, the loop and the play state are recorded before it and
-  // put back once the version asked for is on screen. Keyed on `shownVersion`, not on
-  // `embellished`, which turns before the new pages are in. Declared after usePlayback, so its
-  // halt for the new score has run first. A switch that never changed the score (switched back
-  // before the new version came in) halted nothing, so nothing is put back; a version withdrawn
-  // or refused (`embellish` leaves 'offered') drops what was recorded.
-  const carryRef = useRef<{
-    carry: Carry;
-    to: ScoreDocument['shownVersion'];
-    from: ScoreDocument['score'];
-  } | null>(null);
-  const { setEmbellished } = doc;
-  const toggleEmbellish = useCallback(
-    (on: boolean) => {
-      carryRef.current = {
-        carry: captureCarry(playback, barStarts),
-        to: on ? 'embellished' : 'plain',
-        from: score,
-      };
-      setEmbellished(on);
-    },
-    [playback, barStarts, score, setEmbellished],
-  );
-  const { embellish, shownVersion } = doc;
-  useEffect(() => {
-    const pending = carryRef.current;
-    if (!pending) return;
-    if (embellish !== 'offered') {
-      carryRef.current = null;
-      return;
-    }
-    if (shownVersion !== pending.to) return;
-    carryRef.current = null;
-    if (score !== pending.from) applyCarry(pending.carry, playback, barStarts);
-  }, [score, embellish, shownVersion, playback, barStarts]);
+  // the loop (usePlayback.ts): the bar, the loop and the play state are recorded and put back
+  // once the version asked for is on screen (carry.ts). Called after usePlayback, so its halt
+  // for the new score has run first.
+  const toggleEmbellish = useEmbellishCarry(doc, score, playback, barStarts);
 
   const seekKeyRef = useRef<(e: KeyboardEvent) => void>(() => undefined);
   useEffect(() => {

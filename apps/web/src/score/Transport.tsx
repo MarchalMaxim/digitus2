@@ -1,5 +1,5 @@
 import type { TempoEvent } from '@digitus2/engine';
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { TOUCH_QUERY, useMediaQuery } from '../design/media.js';
@@ -371,10 +371,24 @@ export function PracticeControls({
     changeLoop(from, to);
   };
 
+  // A switch that fails takes the box away (`embellish` goes null): when it had the focus, the
+  // focus moves to the control before it, the loop's last, rather than falling to the page. A
+  // ref's cleanup runs before React removes the box, while it still holds the focus.
+  const loopRef = useRef<HTMLDivElement>(null);
+  const addNotesRef = useCallback((box: HTMLInputElement | null) => {
+    if (!box) return;
+    return () => {
+      if (document.activeElement !== box) return;
+      const fields = loopRef.current?.querySelectorAll('input');
+      fields?.[fields.length - 1]?.focus();
+    };
+  }, []);
+
   // A tick box like Metronome, after the loop: there only once the embellished version exists.
   const addNotes = embellish && (
     <label className="check">
       <input
+        ref={addNotesRef}
         type="checkbox"
         checked={embellish.on}
         onChange={(e) => embellish.set(e.currentTarget.checked)}
@@ -437,7 +451,7 @@ export function PracticeControls({
         {t.transport.countIn}
       </label>
 
-      <div className="loop">
+      <div className="loop" ref={loopRef}>
         <label className="check">
           <input
             type="checkbox"

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openPractice } from './helpers/practice.js';
+import { embellishDecided, openPractice } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
 
 const position = (page: Page) =>
@@ -16,6 +16,7 @@ async function playSilently(page: Page, slug: string, tempoPercent = '100'): Pro
   await page.goto(`/?audio=silent#/piece/${slug}`);
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
   await openPractice(page);
+  await embellishDecided(page);
   await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
   if (tempoPercent !== '100') await page.getByRole('slider', { name: 'Tempo' }).fill(tempoPercent);
   await page.getByRole('button', { name: 'Play' }).click();

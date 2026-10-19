@@ -364,6 +364,16 @@ describe('Transport', () => {
       expect(instrument.stopAllCalls).toBe(0);
     });
   });
+  // A play carried across "Add notes between" (issue #67) goes on as the music did.
+  it('plays without the count-in when the play says so, with the count-in on', () => {
+    const t = make();
+    t.setCountIn(true);
+    t.play({ countIn: false });
+    run(t, 1);
+    expect(clicks).toEqual([]);
+    expect(instrument.events[0]!.time).toBeCloseTo(100, 9);
+    expect(t.state.countIn).toBe(true); // the setting itself is unchanged
+  });
   it('clicks the count-in without the metronome, holds the position, and silences on pause', () => {
     const t = make();
     t.setCountIn(true);

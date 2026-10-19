@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { mockWorker, RECOGNITION_WITH_ERRORS } from './scan.js';
-import { openPractice, setLoopBars } from './practice.js';
+import { embellishDecided, openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
 import { holdPianoSamples } from './samples.js';
 import {
@@ -81,9 +81,7 @@ async function twinkleReady(page: Page, query = ''): Promise<void> {
     timeout: SCORE_TIMEOUT,
   });
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
-  await expect(page.locator('.practice-panel')).toHaveAttribute('data-embellish', 'offered', {
-    timeout: SCORE_TIMEOUT,
-  });
+  await embellishDecided(page, 'offered');
 }
 
 /** The engine's digits as printed, in document order (to see a re-solve land). */

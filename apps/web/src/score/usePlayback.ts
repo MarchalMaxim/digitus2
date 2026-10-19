@@ -91,7 +91,11 @@ export interface Playback {
    * hands played at or after it, the note Play starts with, rather than the last one heard.
    */
   cue: number | null;
-  play(): void;
+  /**
+   * Plays from where Play starts. `resume` is a play carried across "Add notes between" (issue
+   * #67, carry.ts): the music goes on as it was, with no count-in and no flight of the red.
+   */
+  play(opts?: { resume?: boolean }): void;
   pause(): void;
   rewind(): void;
   /**
@@ -153,6 +157,44 @@ function uniqueVelocities(score: Score): number[] {
   return [...new Set(score.notes.map(noteVelocity))];
 }
 
+/** What the instrument needs to play a score: its pitches, and its velocities' span. */
+interface Samples {
+  midis: number[];
+  velocities: number[];
+  low: number;
+  high: number;
+}
+
+const samplesOf = new WeakMap<Score, Samples>();
+
+function samplesFor(score: Score): Samples {
+  let samples = samplesOf.get(score);
+  if (!samples) {
+    const velocities = uniqueVelocities(score);
+    samples = {
+      midis: uniqueMidis(score),
+      velocities,
+      low: Math.min(...velocities),
+      high: Math.max(...velocities),
+    };
+    samplesOf.set(score, samples);
+  }
+  return samples;
+}
+
+/**
+ * Whether the loaded samples play `needed`: its pitches among the loaded ones, its velocities
+ * within the loaded span (the piano loads every layer between the softest and the loudest).
+ */
+function covers(loaded: Samples | null, needed: Samples): boolean {
+  if (!loaded) return false;
+  const have = new Set(loaded.midis);
+  return (
+    needed.midis.every((m) => have.has(m)) &&
+    (needed.velocities.length === 0 || (needed.low >= loaded.low && needed.high <= loaded.high))
+  );
+}
+
 export function usePlayback(score: Score | null): Playback {
   // The open piece's own tempo factor (polish plan Task 6): a different piece opens at 100 %.
   const tempoFactor = useAppStore(tempoFactorOf);
@@ -176,8 +218,13 @@ export function usePlayback(score: Score | null): Playback {
   const ctxRef = useRef<AudioContext | null>(null);
   const instrumentRef = useRef<Instrument | null>(null);
   const transportRef = useRef<TransportExports.Transport | null>(null);
-  /** The score whose pitches the instrument has loaded. */
-  const loadedRef = useRef<Score | null>(null);
+  /**
+   * What the instrument has loaded. It stays across a new score, so a score it already plays (the
+   * other version of "Add notes between", issue #67, back again) starts at once.
+   */
+  const loadedRef = useRef<Samples | null>(null);
+  /** Counts the instrument's loads: only the newest one replaces its samples (instrument.ts). */
+  const loadSeqRef = useRef(0);
   const scoreRef = useRef<Score | null>(score);
   const loopRef = useRef<LoopRange | null>(null);
   /** A seek before the first Play, while there is no transport yet: where it will start. */
@@ -247,108 +294,122 @@ export function usePlayback(score: Score | null): Playback {
     t.setCountIn(countInOn);
   }, [tempoFactor, hands, metronome, countInOn]);
 
-  const play = useCallback(() => {
-    const s = scoreRef.current;
-    if (!s || transportRef.current?.state.playing) return;
-    const seq = ++playSeqRef.current;
-    let ctx = ctxRef.current;
-    if (!ctx) {
-      ctx = new AudioContext({ latencyHint: 'interactive' });
-      ctxRef.current = ctx;
-      instrumentRef.current = instrumentFromLocation(ctx, window.location.search);
-      loadedRef.current = null;
-    }
-    if (ctx.state === 'suspended') ctx.resume().catch(() => undefined);
-    const audio = ctx;
-    const instrument = instrumentRef.current!;
-
-    const start = (mod: TransportModule) => {
-      if (seq !== playSeqRef.current || scoreRef.current !== s || ctxRef.current !== audio) return;
-      let t = transportRef.current;
-      if (!t) {
-        const transport = new mod.Transport({
-          ctx: audio,
-          instrument,
-          score: s,
-          click: (time, accent) => scheduleClick(audio, time, accent),
-        });
-        const state = useAppStore.getState();
-        const settings = state.settings;
-        transport.setTempoFactor(tempoFactorOf(state));
-        transport.setMuted(mutedHandsFor(settings.hands));
-        transport.setMetronome(settings.metronome);
-        transport.setCountIn(settings.countIn);
-        // The end: back to the start, stopped; the cursor clears and Play is red again.
-        transport.onEnd = () => {
-          transport.rewind();
-          setPlaying(false);
-          setAtStart(true);
-          setCue(null);
-        };
-        // The count-in, for the status line, and the lead-in, which the cursor waits for (it
-        // marks nothing until the first note of the hands played is heard). A tick that ends
-        // both reports both, so they reach the screen in one render.
-        transport.onCountInBeat = (beat, beats, beatInBar) =>
-          setCountIn({ beat, beats, beatInBar });
-        transport.onCountInEnd = () => setCountIn(null);
-        // A note heard after a seek: the cue is over, the cursor follows what is heard. A lead-in
-        // that a pause ends heard nothing, so the cue stays.
-        transport.onLeadInChange = (leadingIn) => {
-          setWaiting(leadingIn);
-          if (!leadingIn && transport.state.playing) setCue(null);
-        };
-        if (pendingSecRef.current !== null) transport.seek(pendingSecRef.current);
-        pendingSecRef.current = null;
-        transportRef.current = transport;
-        t = transport;
+  const play = useCallback(
+    (opts: { resume?: boolean } = {}) => {
+      const resume = opts.resume === true;
+      const s = scoreRef.current;
+      if (!s || transportRef.current?.state.playing) return;
+      const seq = ++playSeqRef.current;
+      let ctx = ctxRef.current;
+      if (!ctx) {
+        ctx = new AudioContext({ latencyHint: 'interactive' });
+        ctxRef.current = ctx;
+        instrumentRef.current = instrumentFromLocation(ctx, window.location.search);
+        loadedRef.current = null;
       }
-      pushLoop(); // stopped: the loop only sets where play() starts
-      // From the start without a count-in, the first note waits for the red to travel to it from
-      // Play (RedFlight.tsx), so it sounds as the red lands; never under prefers-reduced-motion.
-      const travels =
-        atStartRef.current && !useAppStore.getState().settings.countIn && !prefersReducedMotion();
-      // play() reports a count-in's first beat and the lead-in at once, so they reach the screen
-      // in the same render as playing: Pause takes the red from Play, and no note is marked.
-      t.play(travels ? { leadSec: RED_FLIGHT_MS / 1000 } : {});
-      setPlaying(true);
-      setAtStart(false);
-      // Every Play marks the legend as seen and, for a library piece, makes it the one the
-      // library offers to continue (spec 12 and 16).
-      useAppStore.getState().markPlayed();
-    };
+      if (ctx.state === 'suspended') ctx.resume().catch(() => undefined);
+      const audio = ctx;
+      const instrument = instrumentRef.current!;
 
-    // Everything at hand (every Play after the first): start in the click itself.
-    if (loadedRef.current === s && transportLoaded) {
-      start(transportLoaded);
-      return;
-    }
-    setLoading(true);
-    const samples =
-      loadedRef.current === s
+      const start = (mod: TransportModule) => {
+        if (seq !== playSeqRef.current || scoreRef.current !== s || ctxRef.current !== audio)
+          return;
+        let t = transportRef.current;
+        if (!t) {
+          const transport = new mod.Transport({
+            ctx: audio,
+            instrument,
+            score: s,
+            click: (time, accent) => scheduleClick(audio, time, accent),
+          });
+          const state = useAppStore.getState();
+          const settings = state.settings;
+          transport.setTempoFactor(tempoFactorOf(state));
+          transport.setMuted(mutedHandsFor(settings.hands));
+          transport.setMetronome(settings.metronome);
+          transport.setCountIn(settings.countIn);
+          // The end: back to the start, stopped; the cursor clears and Play is red again.
+          transport.onEnd = () => {
+            transport.rewind();
+            setPlaying(false);
+            setAtStart(true);
+            setCue(null);
+          };
+          // The count-in, for the status line, and the lead-in, which the cursor waits for (it
+          // marks nothing until the first note of the hands played is heard). A tick that ends
+          // both reports both, so they reach the screen in one render.
+          transport.onCountInBeat = (beat, beats, beatInBar) =>
+            setCountIn({ beat, beats, beatInBar });
+          transport.onCountInEnd = () => setCountIn(null);
+          // A note heard after a seek: the cue is over, the cursor follows what is heard. A lead-in
+          // that a pause ends heard nothing, so the cue stays.
+          transport.onLeadInChange = (leadingIn) => {
+            setWaiting(leadingIn);
+            if (!leadingIn && transport.state.playing) setCue(null);
+          };
+          if (pendingSecRef.current !== null) transport.seek(pendingSecRef.current);
+          pendingSecRef.current = null;
+          transportRef.current = transport;
+          t = transport;
+        }
+        pushLoop(); // stopped: the loop only sets where play() starts
+        // From the start without a count-in, the first note waits for the red to travel to it from
+        // Play (RedFlight.tsx), so it sounds as the red lands; never under prefers-reduced-motion.
+        // A resume (a play carried across a switch) goes on as the music did: no count-in, and the
+        // red stays where it is.
+        const travels =
+          !resume &&
+          atStartRef.current &&
+          !useAppStore.getState().settings.countIn &&
+          !prefersReducedMotion();
+        // play() reports a count-in's first beat and the lead-in at once, so they reach the screen
+        // in the same render as playing: Pause takes the red from Play, and no note is marked.
+        t.play(resume ? { countIn: false } : travels ? { leadSec: RED_FLIGHT_MS / 1000 } : {});
+        setPlaying(true);
+        setAtStart(false);
+        // Every Play marks the legend as seen and, for a library piece, makes it the one the
+        // library offers to continue (spec 12 and 16).
+        useAppStore.getState().markPlayed();
+      };
+
+      // Everything at hand (every Play after the first): start in the click itself.
+      const needed = samplesFor(s);
+      const loaded = covers(loadedRef.current, needed);
+      if (loaded && transportLoaded) {
+        start(transportLoaded);
+        return;
+      }
+      setLoading(true);
+      const load = loaded ? loadSeqRef.current : ++loadSeqRef.current;
+      const samples = loaded
         ? Promise.resolve()
-        : instrument.load(uniqueMidis(s), uniqueVelocities(s)).then(
+        : instrument.load(needed.midis, needed.velocities).then(
             () => {
-              if (ctxRef.current === audio) loadedRef.current = s;
+              if (ctxRef.current === audio && load === loadSeqRef.current) {
+                loadedRef.current = needed;
+              }
             },
             (e: unknown) => {
               throw new SamplesError('samples', { cause: e });
             },
           );
-    Promise.all([loadTransport(), samples]).then(
-      ([mod]) => {
-        if (seq !== playSeqRef.current) return;
-        setLoading(false);
-        start(mod);
-      },
-      (e: unknown) => {
-        if (seq !== playSeqRef.current) return;
-        setLoading(false);
-        useAppStore
-          .getState()
-          .setNotice(e instanceof SamplesError ? SAMPLES_FAILED_NOTICE : PLAYER_FAILED_NOTICE);
-      },
-    );
-  }, [pushLoop]);
+      Promise.all([loadTransport(), samples]).then(
+        ([mod]) => {
+          if (seq !== playSeqRef.current) return;
+          setLoading(false);
+          start(mod);
+        },
+        (e: unknown) => {
+          if (seq !== playSeqRef.current) return;
+          setLoading(false);
+          useAppStore
+            .getState()
+            .setNotice(e instanceof SamplesError ? SAMPLES_FAILED_NOTICE : PLAYER_FAILED_NOTICE);
+        },
+      );
+    },
+    [pushLoop],
+  );
 
   const pause = useCallback(() => {
     playSeqRef.current++;

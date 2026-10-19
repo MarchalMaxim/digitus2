@@ -1,5 +1,6 @@
 """Pinned portable Audiveris adapter: direct argv, isolated settings, bounded lifetime."""
 from __future__ import annotations
+from dataclasses import dataclass
 import hashlib
 import json
 import os
@@ -13,6 +14,8 @@ from recognition_errors import native_failure, check_complete_export, multiple_s
 
 MSI_SHA256 = "5f1b4e96a12c53c7da426814b76e599363c4181e291855996e0a6878dda95f71"
 ENGLISH_SHA256 = "daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047"
+DEB_SHA256 = "f20113aaa33b3149ec8d6a09b2a7963360e65fafd92d69389987a85bbc3ec7a3"
+DEB_NAME = "Audiveris-5.11.0-ubuntu24.04-x86_64.deb"
 
 
 def process_alive(pid):
@@ -117,15 +120,46 @@ def unwrap_mxl(path, maximum=20 * 1024 * 1024):
         return archive.read(name)
 
 
+@dataclass(frozen=True)
+class Layout:
+    java: Path
+    classpath: str
+    package: str
+
+
+def detect_layout(bundle: Path) -> Layout:
+    """The verified install in a bundle: the Windows portable MSI, else the Ubuntu package."""
+    for name, expected in [("audiveris-5.11.0.msi", MSI_SHA256), (DEB_NAME, DEB_SHA256)]:
+        package = bundle / name
+        if not package.is_file():
+            continue
+        if hashlib.sha256(package.read_bytes()).hexdigest() != expected:
+            raise ValueError("Audiveris release hash mismatch")
+        if name == DEB_NAME:
+            app = bundle / "lib/app"
+            return Layout(bundle / "lib/runtime/bin/java", os.pathsep.join([str(app), str(app / "*")]), "deb")
+        portable = bundle / "portable/Audiveris"
+        return Layout(portable / "runtime/bin/java.exe", str(portable / "app/*"), "msi")
+    raise ValueError("Audiveris release not found in bundle")
+
+
+def job_environment(destination: Path, platform: str = os.name) -> dict[str, str]:
+    """Per-job settings, temporary and cache directories for the platform's conventions."""
+    if platform == "nt":
+        return {"APPDATA": str(destination / "roaming"), "LOCALAPPDATA": str(destination / "local"),
+                "TEMP": str(destination / "tmp"), "TMP": str(destination / "tmp")}
+    return {"HOME": str(destination / "home"), "XDG_CONFIG_HOME": str(destination / "roaming"),
+            "XDG_DATA_HOME": str(destination / "local"), "XDG_CACHE_HOME": str(destination / "javacpp"),
+            "TMPDIR": str(destination / "tmp")}
+
+
 class Audiveris:
     def __init__(self, bundle, *, timeout=180, short_staves=False, text_models=None):
         self.bundle = Path(bundle).resolve()
         self.timeout = timeout
         if not 0 < timeout <= 600:
             raise ValueError("timeout must be in (0,600]")
-        if hashlib.sha256((self.bundle / "audiveris-5.11.0.msi").read_bytes()).hexdigest() != MSI_SHA256:
-            raise ValueError("Audiveris release hash mismatch")
-        self.portable = self.bundle / "portable/Audiveris"
+        self.layout = detect_layout(self.bundle)
         self.short_staves = short_staves
         self.text_model = Path(text_models).resolve() / "eng.traineddata" if text_models else None
         if self.text_model and hashlib.sha256(self.text_model.read_bytes()).hexdigest() != ENGLISH_SHA256:
@@ -144,23 +178,22 @@ class Audiveris:
         for name in ["home", "tmp", "roaming", "local", "javacpp", "exports"]:
             (destination / name).mkdir()
         env = dict(os.environ)
-        env.update(APPDATA=str(destination / "roaming"), LOCALAPPDATA=str(destination / "local"),
-                   TEMP=str(destination / "tmp"), TMP=str(destination / "tmp"))
         # Do not inherit JVM options that could override isolation or inject an agent.
         for name in ["JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS", "CLASSPATH", "TESSDATA_PREFIX"]:
             env.pop(name, None)
+        env.update(job_environment(destination))
         if self.text_model:
             import shutil
             (destination / "tessdata").mkdir()
             shutil.copyfile(self.text_model, destination / "tessdata/eng.traineddata")
             env["TESSDATA_PREFIX"] = str(destination / "tessdata")
-        command = [str(self.portable / "runtime/bin/java.exe"), "-Xms256m", "-Xmx4g",
+        command = [str(self.layout.java), "-Xms256m", "-Xmx4g",
                    "-XX:ActiveProcessorCount=4", "-Djava.awt.headless=true", "-Dfile.encoding=UTF-8",
                    "-Duser.home=" + str(destination / "home"),
                    "-Djava.io.tmpdir=" + str(destination / "tmp"),
                    "-Dorg.bytedeco.javacpp.cachedir=" + str(destination / "javacpp"),
                    "--add-exports=java.desktop/sun.awt.image=ALL-UNNAMED", "--enable-native-access=ALL-UNNAMED",
-                   "-cp", str(self.portable / "app/*"), "Audiveris"]
+                   "-cp", self.layout.classpath, "Audiveris"]
         if self.short_staves:
             command += ["-constant", "org.audiveris.omr.sheet.grid.LinesRetriever.minStaffLength=12",
                         "-constant", "org.audiveris.omr.sheet.grid.ClustersRetriever.minClusterLengthRatio=0.15"]
@@ -168,7 +201,8 @@ class Audiveris:
             command += ["-constant", "org.audiveris.omr.text.Language.defaultSpecification=eng"]
         command += ["-batch", "-transcribe", "-export", "-save", "-output", str(destination / "exports"), "--", str(source)]
         (destination / "invocation.json").write_text(json.dumps({
-            "command": command, "profile": self.name, "msiSha256": MSI_SHA256,
+            "command": command, "profile": self.name,
+            self.layout.package + "Sha256": MSI_SHA256 if self.layout.package == "msi" else DEB_SHA256,
             "textModelSha256": ENGLISH_SHA256 if self.text_model else None,
             "inputSha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         }, indent=2), encoding="utf-8")

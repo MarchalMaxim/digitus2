@@ -19,8 +19,8 @@ def prepared(tmp_path,monkeypatch):
     (source/"homr").mkdir(parents=True)
     (source/"homr/main.py").write_bytes(b"pass\n")
     (source/"homr/model.onnx").write_bytes(b"pinned-model")
-    (bundle/"venv/Scripts").mkdir(parents=True)
-    (bundle/"venv/Scripts/python.exe").write_bytes(b"test-launcher")
+    homr.venv_python(bundle).parent.mkdir(parents=True)
+    homr.venv_python(bundle).write_bytes(b"test-launcher")
     requirements=tmp_path/"requirements.txt"
     requirements.write_text("onnxruntime==1.0\n")
     (bundle/"installed.txt").write_text("onnxruntime==1.0\n")
@@ -30,6 +30,10 @@ def prepared(tmp_path,monkeypatch):
     monkeypatch.setattr(homr,"REQUIREMENTS_PATH",requirements)
     monkeypatch.setattr(homr,"MODELS",{"homr/model.onnx":digest(b"pinned-model")})
     return bundle,source
+
+def test_interpreter_path_follows_the_platform():
+    assert homr.venv_python(Path("t"), "nt") == Path("t/venv/Scripts/python.exe")
+    assert homr.venv_python(Path("t"), "posix") == Path("t/venv/bin/python")
 
 def test_preflight_rejects_missing_or_changed_model(prepared):
     bundle,source=prepared

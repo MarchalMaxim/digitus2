@@ -56,6 +56,10 @@ def package_lines(path):
     return sorted(line.strip().lower() for line in path.read_text(encoding="utf-8-sig").splitlines()
                   if line.strip() and not line.lstrip().startswith("#"))
 
+def venv_python(toolchain: Path, platform: str = os.name) -> Path:
+    """The prepared virtual environment's interpreter: Scripts/python.exe on Windows, bin/python elsewhere."""
+    return toolchain/("venv/Scripts/python.exe" if platform == "nt" else "venv/bin/python")
+
 def read_audit(path):
     if path.stat().st_size > 1024 * 1024:
         raise ValueError("recognizer audit limit")
@@ -71,7 +75,7 @@ class Homr:
         if not 0 < timeout <= 600:
             raise ValueError("timeout must be in (0,600]")
         self.source=self.toolchain/f"homr-{COMMIT}-piano-cues"
-        self.python=self.toolchain/"venv/Scripts/python.exe"
+        self.python=venv_python(self.toolchain)
         self.manifest=json.loads(SOURCE_MANIFEST_PATH.read_text())
         if self.manifest.get("commit") != COMMIT:
             raise ValueError("HOMR source pin mismatch")

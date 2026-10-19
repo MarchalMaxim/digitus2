@@ -59,7 +59,7 @@ COPY service/setup-homr.py /app/research/omr/service/setup-homr.py
 RUN python3 /app/research/omr/service/setup-homr.py --root /opt/homr --python /usr/bin/python3 \
  && rm -rf /opt/homr/pip-cache /opt/homr/downloads
 
-# Audiveris's JDK ahead-of-time class cache (about 66 MB, about 3 s less per PDF), recorded from one
+# Audiveris's JDK ahead-of-time class cache (65 MB, about 1.4 s less per PDF), recorded from one
 # recognition through the adapter; train-aot.py fails the build unless a strict run maps it and
 # gives the same MusicXML. The adapter uses /opt/audiveris/audiveris.aot when the file exists.
 COPY service/train-aot.py service/aot-training.pdf /app/research/omr/service/

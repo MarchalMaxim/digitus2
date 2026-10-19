@@ -1,4 +1,5 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Page, type Request } from '@playwright/test';
+import { SCAN_SERVICE } from '../../src/scan/service.js';
 
 /** A 1×1 PNG: the source image of a mocked scan (its pixels are never recognised). */
 export const PNG = Buffer.from(
@@ -6,33 +7,75 @@ export const PNG = Buffer.from(
   'base64',
 );
 export const HEALTH = {
-  protocol: 'digitus2-scan-v1',
+  protocol: 'digitus2-scan-v2',
   recognizer: 'test recognizer',
   capabilities: { textModelConfigured: true },
 };
 
-/** Answers the PC worker's protocol with `xml` as every page's recognition. */
-export async function mockWorker(page: Page, xml: string | (() => string)): Promise<void> {
-  const id = 'd'.repeat(32);
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
+/** What a hook answers a recognition with: a status and a JSON body (or none). */
+export interface MockAnswer {
+  status?: number;
+  json?: unknown;
+  body?: string;
+}
+
+/** The method and path of a request to the scan service, e.g. `GET /v1/health`. */
+export function serviceCall(request: Request): string | null {
+  if (!request.url().startsWith(SCAN_SERVICE + '/') || request.method() === 'OPTIONS') return null;
+  return `${request.method()} ${new URL(request.url()).pathname}`;
+}
+/** Records every call to the scan service, in order, as `serviceCall` names it. */
+export function recordService(page: Page): string[] {
+  const calls: string[] = [];
+  page.on('request', (request) => {
+    const call = serviceCall(request);
+    if (call) calls.push(call);
+  });
+  return calls;
+}
+
+/**
+ * Answers the scan service at `SCAN_SERVICE`: the health with `HEALTH`, every recognition with
+ * `xml` (or what `onRecognize` answers instead) and every cancel as accepted.
+ */
+export async function mockService(
+  page: Page,
+  xml: string | ((request: Request) => string),
+  hooks: { onRecognize?: (request: Request) => Promise<MockAnswer | void> } = {},
+): Promise<void> {
+  await page.route(`${SCAN_SERVICE}/**`, async (route) => {
     const request = route.request();
-    if (request.url().endsWith('/health')) await route.fulfill({ json: HEALTH });
-    else if (request.method() === 'POST') await route.fulfill({ status: 202, json: { id } });
-    else if (request.method() === 'DELETE') await route.fulfill({ json: { state: 'cancelled' } });
-    else if (request.url().endsWith('/result'))
-      await route.fulfill({ body: typeof xml === 'string' ? xml : xml() });
-    else await route.fulfill({ json: { state: 'ready', ...HEALTH } });
+    const path = new URL(request.url()).pathname;
+    try {
+      if (path === '/v1/health') await route.fulfill({ json: HEALTH });
+      else if (request.method() === 'POST' && path === '/v1/recognize') {
+        const answer = await hooks.onRecognize?.(request);
+        if (answer) await route.fulfill(answer);
+        else
+          await route.fulfill({
+            json: {
+              state: 'ready',
+              ...HEALTH,
+              warnings: [],
+              xml: typeof xml === 'string' ? xml : xml(request),
+            },
+          });
+      } else if (request.method() === 'DELETE')
+        await route.fulfill({ json: { state: 'cancelling' } });
+      else await route.fulfill({ status: 404, json: { error: 'not-found' } });
+    } catch {
+      // The page aborted the request (a cancelled scan): there is no one left to answer.
+    }
   });
 }
 
-/** Opens one page image from the library, connects to the (mocked) PC and scans it. */
+/** Opens one page image from the library and scans it with the (mocked) scan service. */
 export async function scanOnePage(page: Page, name = 'printed-score.png'): Promise<void> {
   await page.goto('/');
   await page
     .locator('input[type=file]')
     .first()
     .setInputFiles({ name, mimeType: 'image/png', buffer: PNG });
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
   await expect(page.locator('.scan-sheet svg').first()).toBeVisible();

@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
 import {
-  mockWorker,
+  mockService,
   openFiles,
   RECOGNITION_MISREAD_METER,
   RECOGNITION_WITH_ERRORS,
@@ -11,8 +11,8 @@ import {
 } from './helpers/scan.js';
 import { redBars, seekBar } from './helpers/seek.js';
 
-// Correcting needs a recognition, and recognition needs the PC: these flows run as a PC window,
-// at 360 px in the mobile project (the phone itself is scan-phone.spec.ts).
+// Correcting needs a recognition: these flows run as a PC window (mouse, no camera), also at
+// 360 px in the mobile project (the touch phone's camera and page tools are scan-phone.spec.ts).
 test.use({ hasTouch: false, isMobile: false });
 
 const sheetNote = (page: Page, ordinal: number) => page.locator(`.scan-sheet [id="s${ordinal}"]`);
@@ -40,7 +40,7 @@ async function noOverflow(page: Page) {
 test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, reset and exported', async ({
   page,
 }, testInfo) => {
-  await mockWorker(page, RECOGNITION_WITH_ERRORS);
+  await mockService(page, RECOGNITION_WITH_ERRORS);
   await scanOnePage(page);
   // The strict import refuses the late tie; the raw result stays visible and downloadable.
   await expect(page.getByRole('alert').first()).toContainText('cannot be used for fingerings');
@@ -136,7 +136,7 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
 test('scan edit: the corrected copy plays, notes there still seek, and My scores keeps both copies', async ({
   page,
 }) => {
-  await mockWorker(page, RECOGNITION_WITH_ERRORS);
+  await mockService(page, RECOGNITION_WITH_ERRORS);
   await scanOnePage(page, 'tie-page.png');
   await tap(page, 4);
   await editor(page).getByRole('button', { name: 'Remove' }).click();
@@ -167,7 +167,7 @@ test('scan edit: the editor speaks the screen language and stays clear of horizo
   page,
 }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
-  await mockWorker(page, RECOGNITION_WITH_ERRORS);
+  await mockService(page, RECOGNITION_WITH_ERRORS);
   await scanOnePage(page);
   await tap(page, 0);
   await expect(editor(page)).toContainText('Bar 1 · right hand · C5 quarter note');
@@ -179,7 +179,7 @@ test('scan edit: the editor speaks the screen language and stays clear of horizo
 test('scan edit: a misread 4/4 is set to 9/8 from its place to check, and no note moves', async ({
   page,
 }, testInfo) => {
-  await mockWorker(page, RECOGNITION_MISREAD_METER);
+  await mockService(page, RECOGNITION_MISREAD_METER);
   await scanOnePage(page, 'nine-eight.png');
   // The bars import, so Use for fingerings keeps the red; the places to check stay folded.
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();

@@ -1,10 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
+import { mockService } from './helpers/scan.js';
 
-// Recognition needs the PC worker, which a phone cannot reach: these flows run as a PC window,
-// at 360 px in the mobile project. The phone's own path is scan-phone.spec.ts.
+// These flows run as a PC window (mouse, no camera), also at 360 px in the mobile project. A
+// touch phone scans the same way; its camera and page tools are scan-phone.spec.ts.
 test.use({ hasTouch: false, isMobile: false });
 
-const health = { protocol: 'digitus2-scan-v1', recognizer: 'rotation boundary test' };
 async function imageBytes(page: Page, jpeg = false) {
   return Buffer.from(
     await page.evaluate((jpeg) => {
@@ -63,15 +63,14 @@ test('scan rotation changes actual preview and upload pixels; four turns restore
   page,
 }) => {
   const uploads: Buffer[] = [];
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    if (route.request().url().endsWith('/health')) await route.fulfill({ json: health });
-    else if (route.request().method() === 'POST') {
-      uploads.push(route.request().postDataBuffer()!);
-      await route.fulfill({ status: 202, json: { id: 'a'.repeat(32) } });
-    } else
-      await route.fulfill({
-        json: { state: 'failed', failure: { message: 'Rotation test only.' } },
-      });
+  await mockService(page, '', {
+    onRecognize: async (request) => {
+      uploads.push(request.postDataBuffer()!);
+      return {
+        status: 422,
+        json: { state: 'failed', failure: { code: 'test', message: 'Rotation test only.' } },
+      };
+    },
   });
   await page.goto('/');
   const original = await imageBytes(page);
@@ -84,7 +83,6 @@ test('scan rotation changes actual preview and upload pixels; four turns restore
   await expect
     .poll(() => pixels(page))
     .toEqual({ width: 4, height: 6, corners: [160, 0, 240, 80] });
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('alert')).toContainText('Rotation test only.');
   expect(await pixels(page, uploads[0])).toEqual({
@@ -108,15 +106,14 @@ test('scan rotation honors JPEG EXIF orientation and only changes the selected p
   page,
 }) => {
   const uploads: Buffer[] = [];
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    if (route.request().url().endsWith('/health')) await route.fulfill({ json: health });
-    else if (route.request().method() === 'POST') {
-      uploads.push(route.request().postDataBuffer()!);
-      await route.fulfill({ status: 202, json: { id: 'b'.repeat(32) } });
-    } else
-      await route.fulfill({
-        json: { state: 'failed', failure: { message: 'Rotation test only.' } },
-      });
+  await mockService(page, '', {
+    onRecognize: async (request) => {
+      uploads.push(request.postDataBuffer()!);
+      return {
+        status: 422,
+        json: { state: 'failed', failure: { code: 'test', message: 'Rotation test only.' } },
+      };
+    },
   });
   await page.goto('/');
   const original = await imageBytes(page);
@@ -139,7 +136,6 @@ test('scan rotation honors JPEG EXIF orientation and only changes the selected p
   const turned = await pixels(page);
   for (const [index, expected] of [240, 160, 80, 0].entries())
     expect(Math.abs(turned.corners[index]! - expected)).toBeLessThan(8);
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect.poll(() => uploads.length).toBe(2);
   expect(uploads[0]).toEqual(original);
@@ -163,7 +159,7 @@ test('scan rotation encoding failures keep the current image usable', async ({ p
   await page.getByRole('button', { name: 'Rotate 90° clockwise' }).click();
   await expect(page.getByRole('alert')).toContainText('could not be rotated');
   expect(await pixels(page)).toEqual(before);
-  await expect(page.getByRole('button', { name: 'Connect to this PC' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
   await page.evaluate(() => {
     HTMLCanvasElement.prototype.toBlob = function (callback) {
       callback(new Blob([new Uint8Array(10 * 1024 * 1024 + 1)]));

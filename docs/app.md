@@ -331,7 +331,7 @@ Without the samples, `vite dev` and `vite build` warn once and Play says the pia
 
 ## Testing
 
-`pnpm verify` is the whole loop (hygiene, design, typecheck, lint, unit, build, omr, omr:acceptance, bundle, e2e, benchmark, benchmark:mutopia, hands, embellish; see `docs/verification-loop.md`). The app's share:
+`pnpm verify` is the whole loop (hygiene, design, typecheck, lint, unit, build, omr, omr:service, omr:acceptance, bundle, e2e, benchmark, benchmark:mutopia, hands, embellish; see `docs/verification-loop.md`). The app's share:
 
 | Level              | Command                                                                                | Notes                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

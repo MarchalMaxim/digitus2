@@ -89,7 +89,7 @@ Before a deploy, the image is built and checked locally (`research/omr/service/R
 | Identity     | Its own service account with Billing Account Administrator on the billing account, as Google's guide grants; its code unlinks only its own project. The scan service keeps the Compute Engine default account, which has no billing role                                               |
 | Set up with  | `powershell -File research/omr/service/budget/budget.ps1 -Project digitus2-scan -BillingAccount ID`, first in simulation mode, tested with a published notification over the budget, then redeployed with `-Simulate false` (`research/omr/service/README.md`, Budget and kill-switch) |
 
-This follows Google's [Disable billing usage with notifications](https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications). Billing notifications lag by hours, so the real ceiling is 5 plus what a busy instance costs during the lag: at the worst case below, about 10 a day, a six-hour lag adds about 2.50.
+This follows Google's [Disable billing usage with notifications](https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications). Billing notifications lag by hours, so the real ceiling is 5 plus what a busy instance costs during the lag: at the worst case below, about 10 a day, a lag of, for example, six hours adds about 2.50.
 
 ## When billing is disabled
 
@@ -107,7 +107,7 @@ Prices as published for Tier 1 regions ([Cloud Run pricing](https://cloud.google
 | Beyond the free grant                          | $0.000024 per vCPU-second, $0.0000025 per GiB-second, $0.40 per million requests |
 | One second of the service, 4 vCPU and 8 GiB    | $0.000116                                                                        |
 | Free recognition time a month                  | 45,000 s: about 1,500 pages of 30 s, or 750 pages of 60 s                        |
-| What 5 buys beyond the free grant              | about 43,000 s more, about 1,400 pages of 30 s                                   |
+| What 5 US dollars' worth buys beyond the grant | about 43,000 s more, about 1,400 pages of 30 s                                   |
 | Worst case, one instance busy around the clock | about $10 a day                                                                  |
 | A warm-up request                              | at least 100 ms of the instance, about $0.00001                                  |
 

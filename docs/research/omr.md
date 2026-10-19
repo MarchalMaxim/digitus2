@@ -5,7 +5,7 @@ What was evaluated for the experimental scanning feature (`docs/scanning.md`), w
 ## Decision
 
 - Recognition runs on a container the project operates on Google Cloud Run (`research/omr/service/`, `docs/scan-service.md`): one recognition at a time, scaled to zero when idle, its spend capped at 5 a month by a budget that disables billing. Every device scans the same way, phones included, with nothing to install and no account (Hosted recognition, below). GitHub Pages stays the only deployment of the app, and the product code stays TypeScript; Python runs only in that container.
-- The loopback worker (`research/omr/prototypes/local-worker`) is a research tool: the acceptance gate and the adapters' tests run its code, and the service imports its job runner and adapters. The app no longer talks to it.
+- The loopback worker (`research/omr/prototypes/local-worker`) is a research tool: the acceptance gate and the adapters' tests run its code, and the service imports its job runner and adapters. The app does not talk to it.
 - No vendor recognition service: the online services surveyed need sign-ups, sell per-page credits and keep the score on the vendor's servers (Online services, below). The project's own service names its provider before any page is sent, is used only on the reader's explicit **Scan this score**, keeps nothing and ships no token in the static bundle.
 - Photos (PNG, JPEG) go to a pinned, patched homr; PDFs go to Audiveris 5.11.0 with a short-staff profile and the English text model. Only these two recovered usable music in the tests below.
 - Browser-only recognition was rejected: no tested checkpoint produced usable notes fast enough. SMT++ produced wrong notes; oemer took 21 minutes for one page and kept its rhythm and meter errors.
@@ -201,7 +201,7 @@ The Flat/Tutteo OMR API was the most concrete option. Its capabilities endpoint 
 
 ## Hosted recognition
 
-Scanning used to need the loopback worker installed and started on the reader's own Windows PC, which a phone could not reach at all. The owner asked for a way that does not rely on a local machine (#62), was open to a Google Cloud or Azure instance "as long as we keep the costs heavily in control (also: no AWS)", ruled out services where the reader signs up, and did not want on-device recognition for its own sake. The routes weighed:
+The loopback worker has to be installed and started on a Windows PC, and a phone cannot reach it at all. The owner asked for a way that does not rely on a local machine (#62), was open to a Google Cloud or Azure instance "as long as we keep the costs heavily in control (also: no AWS)", ruled out services where the reader signs up, and did not want on-device recognition for its own sake. The routes weighed:
 
 | Route | Verdict |
 | --- | --- |
@@ -228,11 +228,13 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 
 The Linux build is a different build of the same pinned libraries: Python 3.12 from Ubuntu 24.04 installs the locked `homr-photo/requirements-cpu.txt` unchanged, the patched homr source matches `source-manifests.json`, and Audiveris 5.11.0 comes from its Ubuntu package. Its adapter's class path is `lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first and Audiveris exports nothing. On a headless Linux Audiveris also needs fontconfig with one font and `GDK_SCALE` set, which its package does not declare (`research/omr/service/README.md`).
 
-**Equivalence.** `node research/omr/acceptance.mjs --service URL` sends the same 16-piece corpus through a running container, scores it with the same scorer and compares it with `research/omr/acceptance/floor.json`, like the gate. A route within one count per error class or 0.5 F1 points of its floor is explained here and does not block a deploy; a larger gap goes to the owner first. The table of the container's results beside the Windows numbers of the acceptance table above follows the run.
+**Equivalence.** `node research/omr/acceptance.mjs --service URL` sends the same 16-piece corpus through a running container, scores it with the same scorer and compares it with `research/omr/acceptance/floor.json`, like the gate. A route within one count per error class or 0.5 F1 points of its floor is explained here and does not block a deploy; a larger gap goes to the owner first.
+
+Container results against the floors: not yet measured (the table, beside the Windows numbers of the acceptance table above, replaces this line).
 
 ## Browser to research worker connection
 
-This section describes the loopback worker, which the app no longer uses; it stays as the research harness's server. A public HTTPS page needs the browser's permission to reach a program on loopback ([Chrome local network access](https://developer.chrome.com/blog/local-network-access)). In Chrome 155 the governing permission is `loopback-network`; a legacy `local-network-access` grant alone was denied ([Chrome guidance](https://github.com/GoogleChrome/modern-web-guidance/blob/main/skills/modern-web-guidance/guides/security/local-network-access.md)). The client sends `targetAddressSpace: 'loopback'` and no credentials. The worker binds 127.0.0.1 only and checks the exact Host and an allowed Origin. That origin check cannot tell apart the project paths under `marchalmaxim.github.io`, and it is not authentication against a local program that forges headers. The worker is not designed for a public or multi-user deployment: that would need authentication, TLS and isolation.
+This section describes the loopback worker, the research harness's server; the app does not use it. A public HTTPS page needs the browser's permission to reach a program on loopback ([Chrome local network access](https://developer.chrome.com/blog/local-network-access)). In Chrome 155 the governing permission is `loopback-network`; a legacy `local-network-access` grant alone was denied ([Chrome guidance](https://github.com/GoogleChrome/modern-web-guidance/blob/main/skills/modern-web-guidance/guides/security/local-network-access.md)). The client sends `targetAddressSpace: 'loopback'` and no credentials. The worker binds 127.0.0.1 only and checks the exact Host and an allowed Origin. That origin check cannot tell apart the project paths under `marchalmaxim.github.io`, and it is not authentication against a local program that forges headers. The worker is not designed for a public or multi-user deployment: that would need authentication, TLS and isolation.
 
 ## Licences
 

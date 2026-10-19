@@ -38,11 +38,13 @@
 ### Task 1: Linux-capable adapters
 
 **Files:**
+
 - Modify: `research/omr/prototypes/local-worker/homr.py:74` (interpreter path)
 - Modify: `research/omr/prototypes/local-worker/audiveris.py:118-175` (layout, environment, command)
 - Test: `research/omr/prototypes/local-worker/test_homr.py`, `research/omr/prototypes/local-worker/test_audiveris_layout.py` (new)
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces, in `homr.py`: `def venv_python(toolchain: Path, platform: str = os.name) -> Path` returning `toolchain/"venv/Scripts/python.exe"` for `"nt"` and `toolchain/"venv/bin/python"` otherwise; `Homr.__init__` uses it.
 - Produces, in `audiveris.py`: `DEB_SHA256 = "f20113aaa33b3149ec8d6a09b2a7963360e65fafd92d69389987a85bbc3ec7a3"`, `DEB_NAME = "Audiveris-5.11.0-ubuntu24.04-x86_64.deb"`; `@dataclass(frozen=True) class Layout: java: Path; classpath: str; package: str` (`package` is `"msi"` or `"deb"`); `def detect_layout(bundle: Path) -> Layout`; `def job_environment(destination: Path, platform: str = os.name) -> dict[str, str]`; `Audiveris.__init__` keeps its signature and stores `self.layout`.
@@ -182,12 +184,14 @@ git commit -m "Scanning adapters: Linux layouts for the homr environment and the
 ### Task 2: The synchronous service
 
 **Files:**
+
 - Create: `research/omr/service/service.py`
 - Create: `research/omr/service/test_service.py`
 - Modify: `research/omr/prototypes/local-worker/worker.py:95-110` (extract `validate_result`)
 - Modify: `scripts/verify.mjs:59` (an `omr:service` step after `omr`), `docs/verification-loop.md` (its row in the step table)
 
 **Interfaces:**
+
 - Consumes: `LocalWorker`, `PhotoPdfRecognizer` from `worker.py`; `Audiveris`, `Homr`, `run_process` semantics (a recogniser is `callable(source: Path, destination: Path, cancelled: threading.Event) -> Path`, raising `InterruptedError` when cancelled, `TimeoutError` on timeout, `RecognitionError` with `.public` for a public failure); `RecognitionError` from `recognition_errors.py`.
 - Produces, in `worker.py`: `def validate_result(output: Path, directory: Path, max_result_bytes: int) -> bytes` (the checks now inline in `LocalWorker._run`: inside the directory, not a symlink, a file, size, no `<!ENTITY`, root `score-partwise`), used by `_run`.
 - Produces, in `service.py`: `PROTOCOL = "digitus2-scan-v2"`, `ORIGIN = "https://marchalmaxim.github.io"`, `JOB_ID = re.compile(r"[a-f0-9]{32}")`;
@@ -251,10 +255,12 @@ git commit -m "Scan service: one synchronous recognition per request, cancel by 
 ### Task 3: The container and the smoke script
 
 **Files:**
+
 - Create: `research/omr/service/setup-homr.py`, `research/omr/service/Dockerfile`, `research/omr/.dockerignore`, `research/omr/service/smoke.mjs`, `research/omr/service/README.md`
 - Test: `research/omr/service/test_setup_homr.py`
 
 **Interfaces:**
+
 - Consumes: `COMMIT`, `MODELS` from `local-worker/homr.py`; `prepare_patched.py` from `homr-photo/`; `service.py` from Task 2.
 - Produces: `setup-homr.py --root DIR [--python PATH]` with `ARCHIVE_SHA256 = "23c81d6783c995866c256dba403bfa374639aeb20df64b738a0fc0034d160315"`, `ARCHIVE_URL = f"https://github.com/liebharc/homr/archive/{COMMIT}.zip"`, `def verify_sha256(path: Path, expected: str) -> None` (raises `ValueError` naming the file), and the same steps as `homr-photo/setup.ps1`: download the archive, verify, extract, create the venv with `--python`, `pip install --only-binary=:all: -r requirements-cpu.txt`, `pip freeze > installed.txt`, `prepare_patched.py --verify-pristine-only`, `python -m homr.main --init --no-title --gpu no` with `PYTHONPATH` at the pristine source, verify every `.onnx` against `MODELS`, write `models.json`, `prepare_patched.py` (patch and verify).
 - Produces: an image whose entry point is `python3 research/omr/service/service.py --bundle /opt/audiveris --short-staves --text-models /opt/text-models --homr-toolchain /opt/homr`, `CMD []`, listening on `PORT` (8080), running as a non-root user, with `/app/research/omr/prototypes/{local-worker,homr-photo,photo-recovery}` and `/app/research/omr/service` copied in. The Audiveris package is installed with `apt-get install -y ./Audiveris-5.11.0-ubuntu24.04-x86_64.deb` after its digest check, and the package file is kept at `/opt/audiveris/Audiveris-5.11.0-ubuntu24.04-x86_64.deb` for the adapter's check. `eng.traineddata` and its `LICENSE` are fetched from `https://raw.githubusercontent.com/tesseract-ocr/tessdata/4767ea922bcc460e70b87b1d303ebdfed0897da8/` and the model's digest checked. Python: Ubuntu's `python3` (3.12) with `python3-venv`; if the locked requirements do not install with `--only-binary=:all:` on 3.12, use a managed Python 3.11 and say so in the README.
@@ -307,10 +313,12 @@ git commit -m "Scan service container: pinned homr and Audiveris on Ubuntu, with
 ### Task 4: Equivalence of the Linux build on the acceptance corpus
 
 **Files:**
+
 - Modify: `research/omr/acceptance.mjs` (a `--service URL` mode)
 - Test: `research/omr/acceptance.test.mjs`
 
 **Interfaces:**
+
 - Consumes: the running container from Task 3; the toolchains on this machine (the photo rotation step uses the homr environment's Python).
 - Produces: `export async function recognizeViaService(jobs, service, { fetch = globalThis.fetch, origin = ORIGIN } = {})`: for each job without an output, POSTs the input bytes to `${service}/v1/recognize` with `Content-Type` by extension (`.png`, `.jpg`/`.jpeg`, `.pdf`), `Origin`, `X-Digitus2-Client: 1` and a random `X-Digitus2-Job`; a 200 writes `body.xml` to `job.output`, any other status writes `job.output + '.failed.json'` with `{ status, message }` from `body.failure?.message ?? body.error`. Jobs run one after another. `main` with `--service URL` keeps the fixtures, the job list, the scoring and the floor comparison, but recognises with `recognizeViaService` and caches under `research/omr/results/acceptance/cache-service/<recognizer label from health, sanitised>/` instead of `cache/`, writes the scorecard to `latest-service.json`, and prints the same table.
 
@@ -337,12 +345,14 @@ git commit -m "Acceptance gate: recognise through a running scan service to chec
 ### Task 5: The v2 client in the app
 
 **Files:**
+
 - Create: `apps/web/src/scan/service.ts`
 - Modify: `apps/web/src/scan/client.ts`
 - Modify: `apps/web/src/i18n/en/scan.ts` (`client` and `errors` keys only in this task), `es`, `fr`, `nl`, `pt` likewise
 - Test: `apps/web/src/scan/scan.test.ts`
 
 **Interfaces:**
+
 - Produces, `service.ts`: `export const PLACEHOLDER_SCAN_SERVICE = 'https://scan.digitus2.invalid'`; `export const DEPLOYED_SCAN_SERVICE = PLACEHOLDER_SCAN_SERVICE` (replaced by the real URL in Task 10); `export const SCAN_SERVICE: string = (import.meta.env?.VITE_SCAN_SERVICE as string | undefined) || DEPLOYED_SCAN_SERVICE`. No other import, so the e2e specs can import it under Node.
 - Produces, `client.ts`: `export const PROTOCOL = 'digitus2-scan-v2'`; `export interface ScanServiceMetadata` (the fields of today's `WorkerMetadata` minus `id`, `state`, `failure`); `export interface Recognition { xml: string; recognizer?: string; warnings: string[]; capabilities?: ScanServiceMetadata['capabilities'] }`; `export function newJobId(): string` (32 lowercase hex from `crypto.getRandomValues`); `export function createScanClient(fetcher: typeof fetch = fetch, base: string = SCAN_SERVICE)` returning `{ health(): Promise<ScanServiceMetadata>; recognize(file: File, job: string, signal?: AbortSignal): Promise<Recognition>; cancel(job: string): Promise<void> }`. `UNKNOWN_WARNING` and `GRAND_STAFF_WARNING` and the warning normalisation stay.
 - Behaviour: `health` GETs `/v1/health` with a 10 s timeout, `mode: 'cors'`, `credentials: 'omit'`, and throws `PhraseError(t.scan.client.outdated)` when `protocol !== PROTOCOL`. `recognize` POSTs `/v1/recognize` with headers `Content-Type: file.type`, `X-Digitus2-Client: 1`, `X-Digitus2-Job: job`, the file as body, aborted by `signal` or after 200 s; it maps: a rejected fetch (network) → `PhraseError(t.scan.errors.offline)` unless the signal aborted (rethrow); 200 → the recognition (missing `xml` → `PhraseError(t.scan.client.noResult)`); 409 → throw `new DOMException('cancelled', 'AbortError')`; 422 and 504 → `new Error(failure.message)` when the body carries a string message, else `PhraseError(t.scan.errors.notRecognized)` (422) or `PhraseError(t.scan.errors.timedOut)` (504); 429 with a JSON body whose `error` is `rate-limited` → `PhraseError(t.scan.client.limited)`; any other 429 and 503 → `PhraseError(t.scan.client.busy)` whatever the body; any other status → `PhraseError(t.scan.client.serviceStatus(status))`. `cancel` sends `DELETE /v1/jobs/<job>` with `X-Digitus2-Client: 1` and `keepalive: true`, and resolves even on a non-2xx answer. A job id that does not match `/^[a-f0-9]{32}$/` throws `PhraseError(t.scan.client.invalidJob)`.
@@ -383,11 +393,13 @@ git commit -m "Scan client v2: one request per page to the scan service"
 ### Task 6: One button on the scan page
 
 **Files:**
+
 - Modify: `apps/web/src/scan/ScanView.tsx`, `apps/web/src/scan/phone.ts`
 - Modify: `apps/web/src/i18n/{en,es,fr,nl,pt}/scan.ts` (`view`, `setup`, `phone`, `errors` keys)
 - Test: `apps/web/src/scan/ScanView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 5's client (`health`, `recognize`, `cancel`, `newJobId`).
 - Produces: `ScanView` phases `'ready' | 'scanning' | 'cancelling' | 'review'`; `phone.ts` keeps `isTouchOnly` and `namedCapture` only.
 - Copy (English): `view.where` "Recognition runs on the project's scanner on Google Cloud (Netherlands). Your page is sent there, recognized and then deleted."; `view.scanning` "Recognizing… Usually under a minute. The first scan after a quiet spell takes longer while the scanner starts."; `view.scanningPage(page, total)` "Page {page} of {total} · Recognizing… Usually under a minute. The first scan after a quiet spell takes longer while the scanner starts."; `view.help` "How scanning works" (a link to `https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md`); `errors.cancelFailed` "Cancellation could not be confirmed. The scanner stops by itself within three minutes."; keep `view.advice`, `view.cancelScan`, `view.cancelling`, `view.retryFailed`, `view.scanScore`, `view.textModelMissing`, `phone.takePhoto`, `phone.takeAnother`. Removed in all five languages: `view.workerNeeded`, `view.connect`, `view.connecting`, `view.connected`, the whole `setup` object, `phone.explain`, `phone.share`, `phone.save`, `phone.shareTitle`, `phone.shared`, `phone.saved`.
@@ -429,9 +441,11 @@ git commit -m "Scan page: one button on every device, the scanner warmed up on a
 ### Task 7: End-to-end specs against the service origin
 
 **Files:**
+
 - Modify: `apps/web/e2e/helpers/scan.ts`, `apps/web/e2e/scan.spec.ts`, `apps/web/e2e/scan-phone.spec.ts`, `apps/web/e2e/scan-rotation.spec.ts`, `apps/web/e2e/scan-edit.spec.ts`, `apps/web/e2e/local-library.spec.ts`, `apps/web/e2e/embellish.spec.ts` (every `127.0.0.1:8996` route and every `Connect to this PC` click)
 
 **Interfaces:**
+
 - Consumes: `SCAN_SERVICE` from `../src/scan/service.js` (the placeholder origin in e2e builds).
 - Produces, `helpers/scan.ts`: `export const HEALTH = { protocol: 'digitus2-scan-v2', recognizer: 'test recognizer', capabilities: { textModelConfigured: true } }`; `export async function mockService(page, xml: string | ((request: Request) => string), hooks?: { onRecognize?: (request) => Promise<Response-like | void> })` routing `${SCAN_SERVICE}/**`: health → `HEALTH`; POST → 200 `{ state: 'ready', ...HEALTH, xml }`; DELETE → 200 `{ state: 'cancelling' }`; `scanOnePage(page, name)` no longer clicks Connect.
 
@@ -454,10 +468,12 @@ git commit -m "e2e: scan through the service origin on PC and phone"
 ### Task 8: Deploy and budget scripts
 
 **Files:**
+
 - Create: `research/omr/service/deploy.ps1`, `research/omr/service/budget/main.py`, `research/omr/service/budget/requirements.txt`, `research/omr/service/budget/test_main.py`, `research/omr/service/budget/budget.ps1`
 - Modify: `research/omr/service/README.md`
 
 **Interfaces:**
+
 - Produces, `deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2]`: `gcloud services enable run.googleapis.com artifactregistry.googleapis.com`; create the Artifact Registry Docker repository when missing and set a cleanup policy that keeps the 2 most recent versions; `gcloud auth configure-docker <region>-docker.pkg.dev --quiet`; `docker build -f research/omr/service/Dockerfile -t <region>-docker.pkg.dev/<project>/<repo>/<service>:<short git sha> research/omr`; push; `gcloud run deploy <service> --image ... --region ... --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080`; print the service URL; run `node research/omr/service/smoke.mjs <url>`.
 - Produces, `budget/main.py`: Google's Python sample shaped as `def stop_billing(cloud_event) -> None` with `def decide(cost: float, budget: float, billing_enabled: bool) -> str` returning `"keep"`, `"disable"` or `"already-disabled"`, `SIMULATE = os.environ.get("SIMULATE", "true").lower() != "false"`, the project id from `GOOGLE_CLOUD_PROJECT` or the metadata server, `google.cloud.billing_v1.CloudBillingClient` for `get_project_billing_info` and `update_project_billing_info(name=..., project_billing_info={"billing_account_name": ""})`, `PermissionDenied` caught and logged. `requirements.txt`: `functions-framework==3.*`, `google-cloud-billing`, `google-cloud-logging` at the versions Google's page lists.
 - Produces, `budget.ps1 -Project ID -BillingAccount ID [-Amount 5] [-Topic digitus2-scan-budget] [-Simulate $true]`: enable `cloudbilling`, `billingbudgets`, `pubsub`, `cloudfunctions`, `cloudbuild`, `eventarc`, `run`, `artifactregistry`; create the topic; deploy the function (`gcloud functions deploy stop-billing --gen2 --runtime python312 --region europe-west4 --source research/omr/service/budget --entry-point stop_billing --trigger-topic <topic> --set-env-vars SIMULATE=<true|false>`); grant the function's service account `roles/billing.admin` on the billing account as Google's guide does; create the budget with `gcloud billing budgets create --billing-account <id> --display-name digitus2-scan --budget-amount <amount> --filter-projects projects/<id> --threshold-rule percent=0.5 --threshold-rule percent=0.9 --threshold-rule percent=1.0 --notifications-rule-pubsub-topic projects/<id>/topics/<topic>`; print the test command `gcloud pubsub topics publish <topic> --message '{"costAmount": 6, "budgetAmount": 5}'` and where to read the function's log.
@@ -494,6 +510,7 @@ git commit -m "Scan service: deploy script and the billing kill-switch at 5 a mo
 ### Task 9: Documents
 
 **Files:**
+
 - Modify: `docs/scanning.md`, `docs/research/omr.md`, `docs/PROGRESS.md`, `docs/app.md`, `docs/TODO.md`, `research/omr/prototypes/local-worker/README.md`
 - Create: `docs/scan-service.md`
 

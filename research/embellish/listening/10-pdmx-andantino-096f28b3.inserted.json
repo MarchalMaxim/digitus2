@@ -1,0 +1,399 @@
+{
+ "slug": "pdmx-andantino-096f28b3",
+ "inserted": {
+  "light": [
+   {
+    "bar": "1",
+    "beat": "1.5",
+    "onset": "1/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "1.5",
+    "onset": "13/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "1.5",
+    "onset": "25/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "1.5",
+    "onset": "37/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "1.5",
+    "onset": "49/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "1.5",
+    "onset": "61/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "13",
+    "beat": "3.5",
+    "onset": "77/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "15",
+    "beat": "1.5",
+    "onset": "85/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "17",
+    "beat": "1.5",
+    "onset": "97/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "19",
+    "beat": "1.5",
+    "onset": "109/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "21",
+    "beat": "3.5",
+    "onset": "125/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   }
+  ],
+  "playful": [
+   {
+    "bar": "1",
+    "beat": "1.5",
+    "onset": "1/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "1.5",
+    "onset": "7/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "1.5",
+    "onset": "13/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "3.5",
+    "onset": "17/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "4",
+    "beat": "1.5",
+    "onset": "19/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "5",
+    "beat": "1.5",
+    "onset": "25/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "1.5",
+    "onset": "31/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "1.5",
+    "onset": "37/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "7",
+    "beat": "3.5",
+    "onset": "41/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "1.5",
+    "onset": "49/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "3.5",
+    "onset": "53/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "10",
+    "beat": "1.5",
+    "onset": "55/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "10",
+    "beat": "2.5",
+    "onset": "57/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "1.5",
+    "onset": "61/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "3.5",
+    "onset": "65/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "12",
+    "beat": "1.5",
+    "onset": "67/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "13",
+    "beat": "1.5",
+    "onset": "73/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "13",
+    "beat": "3.5",
+    "onset": "77/2",
+    "pitch": "C5",
+    "midi": 72,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "14",
+    "beat": "2.5",
+    "onset": "81/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "14",
+    "beat": "3.5",
+    "onset": "83/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "15",
+    "beat": "1.5",
+    "onset": "85/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "15",
+    "beat": "3.5",
+    "onset": "89/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "17",
+    "beat": "1.5",
+    "onset": "97/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "17",
+    "beat": "2.5",
+    "onset": "99/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "19",
+    "beat": "1.5",
+    "onset": "109/2",
+    "pitch": "B4",
+    "midi": 71,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "19",
+    "beat": "3.5",
+    "onset": "113/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "20",
+    "beat": "3.5",
+    "onset": "119/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "21",
+    "beat": "3.5",
+    "onset": "125/2",
+    "pitch": "A4",
+    "midi": 69,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   }
+  ]
+ }
+}

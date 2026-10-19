@@ -15,6 +15,7 @@ import { libraryPieces, loadPieceDetails } from './manifest.js';
 import {
   announcementFor,
   arrivalLevel,
+  composerShort,
   dropTrailingParenthesis,
   isUnnamed,
   libraryLayout,
@@ -182,6 +183,35 @@ describe('isUnnamed', () => {
       expect(isUnnamed(c)).toBe(true);
     for (const c of ['Johann Sebastian Bach', 'Unknownia Band', 'Ibu Sud'])
       expect(isUnnamed(c)).toBe(false);
+  });
+});
+
+describe('composerShort', () => {
+  it('separates a credit the source glued to the name', () => {
+    expect(composerShort('Johann Sebastian Bachattributed to Christian Petzold')).toBe(
+      'Johann Sebastian Bach, attributed to Christian Petzold',
+    );
+    expect(composerShort('Elton JohnArranged by Sadie King')).toBe(
+      'Elton John, Arranged by Sadie King',
+    );
+    expect(composerShort('Joe HisaishiTrans. August Jansson')).toBe(
+      'Joe Hisaishi, Trans. August Jansson',
+    );
+  });
+  it('drops a parenthesis the source glued to the name', () => {
+    expect(composerShort('Christian Petzold(collected by J.S. Bach)')).toBe('Christian Petzold');
+    expect(composerShort('Lowell Mason (tune Antioch)')).toBe('Lowell Mason');
+  });
+  it('keeps names that are written in camel case', () => {
+    for (const c of ['ConcernedApe', 'WoodenToaster', 'CeeLo Green', 'Stephen MacLellan'])
+      expect(composerShort(c)).toBe(c);
+  });
+  it('leaves no credit glued to a name anywhere in the library', () => {
+    const glued =
+      /\p{Ll}(?:attributed|arranged by|Arr\b|Arranged|Arrangement|Transcribed|Edited|Bearbeitung)|\p{L}\(/u;
+    expect(allPieces.map((p) => composerShort(p.composer)).filter((c) => glued.test(c))).toEqual(
+      [],
+    );
   });
 });
 

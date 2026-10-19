@@ -1,0 +1,478 @@
+[
+ {
+  "item": "em-bff7",
+  "slug": "when-the-saints-go-marching-in",
+  "condition": "plain",
+  "bars": [
+   4,
+   7
+  ],
+  "inserted_ids": [],
+  "notes_R": 8,
+  "batch": "batch-01"
+ },
+ {
+  "item": "em-3474",
+  "slug": "pdmx-andantino-096f28b3",
+  "condition": "light",
+  "bars": [
+   9,
+   12
+  ],
+  "inserted_ids": [
+   "R2",
+   "R9"
+  ],
+  "notes_R": 13,
+  "batch": "batch-01"
+ },
+ {
+  "item": "em-9d9f",
+  "slug": "ode-to-joy",
+  "condition": "light",
+  "bars": [
+   7,
+   10
+  ],
+  "inserted_ids": [
+   "R2",
+   "R12"
+  ],
+  "notes_R": 18,
+  "batch": "batch-01"
+ },
+ {
+  "item": "em-cd2d",
+  "slug": "scarborough-fair",
+  "condition": "plain",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [],
+  "notes_R": 9,
+  "batch": "batch-01"
+ },
+ {
+  "item": "em-88af",
+  "slug": "camptown-races",
+  "condition": "playful",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [
+   "R3",
+   "R5",
+   "R9",
+   "R12",
+   "R13",
+   "R16",
+   "R18",
+   "R19",
+   "R21"
+  ],
+  "notes_R": 21,
+  "batch": "batch-01"
+ },
+ {
+  "item": "em-05fb",
+  "slug": "pdmx-bayernhymne-07ef6e69",
+  "condition": "light",
+  "bars": [
+   1,
+   4
+  ],
+  "inserted_ids": [
+   "R2",
+   "R10"
+  ],
+  "notes_R": 12,
+  "batch": "batch-01"
+ },
+ {
+  "item": "em-3400",
+  "slug": "twinkle-twinkle-little-star",
+  "condition": "playful",
+  "bars": [
+   1,
+   4
+  ],
+  "inserted_ids": [
+   "R2",
+   "R5",
+   "R8",
+   "R11",
+   "R12",
+   "R14",
+   "R17",
+   "R20",
+   "R23",
+   "R24"
+  ],
+  "notes_R": 24,
+  "batch": "batch-02"
+ },
+ {
+  "item": "em-b06b",
+  "slug": "camptown-races",
+  "condition": "plain",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [],
+  "notes_R": 12,
+  "batch": "batch-02"
+ },
+ {
+  "item": "em-21e9",
+  "slug": "jingle-bells",
+  "condition": "plain",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [],
+  "notes_R": 15,
+  "batch": "batch-02"
+ },
+ {
+  "item": "em-0c95",
+  "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+  "condition": "light",
+  "bars": [
+   10,
+   13
+  ],
+  "inserted_ids": [
+   "R8"
+  ],
+  "notes_R": 15,
+  "batch": "batch-02"
+ },
+ {
+  "item": "em-df8e",
+  "slug": "pdmx-allegro-414d6ff6",
+  "condition": "playful",
+  "bars": [
+   2,
+   5
+  ],
+  "inserted_ids": [
+   "R7",
+   "R9",
+   "R10",
+   "R12",
+   "R14"
+  ],
+  "notes_R": 14,
+  "batch": "batch-02"
+ },
+ {
+  "item": "em-f379",
+  "slug": "pdmx-andantino-096f28b3",
+  "condition": "plain",
+  "bars": [
+   9,
+   12
+  ],
+  "inserted_ids": [],
+  "notes_R": 11,
+  "batch": "batch-02"
+ },
+ {
+  "item": "em-5716",
+  "slug": "when-the-saints-go-marching-in",
+  "condition": "playful",
+  "bars": [
+   4,
+   7
+  ],
+  "inserted_ids": [
+   "R2",
+   "R3",
+   "R5",
+   "R8",
+   "R10",
+   "R12",
+   "R14",
+   "R16",
+   "R17"
+  ],
+  "notes_R": 17,
+  "batch": "batch-03"
+ },
+ {
+  "item": "em-c2c3",
+  "slug": "pdmx-bayernhymne-07ef6e69",
+  "condition": "playful",
+  "bars": [
+   1,
+   4
+  ],
+  "inserted_ids": [
+   "R2",
+   "R4",
+   "R9",
+   "R12",
+   "R14"
+  ],
+  "notes_R": 15,
+  "batch": "batch-03"
+ },
+ {
+  "item": "em-d79d",
+  "slug": "twinkle-twinkle-little-star",
+  "condition": "plain",
+  "bars": [
+   1,
+   4
+  ],
+  "inserted_ids": [],
+  "notes_R": 14,
+  "batch": "batch-03"
+ },
+ {
+  "item": "em-ed3b",
+  "slug": "jingle-bells",
+  "condition": "playful",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [
+   "R2",
+   "R4",
+   "R9",
+   "R11",
+   "R16",
+   "R19",
+   "R21",
+   "R22",
+   "R24"
+  ],
+  "notes_R": 24,
+  "batch": "batch-03"
+ },
+ {
+  "item": "em-7253",
+  "slug": "scarborough-fair",
+  "condition": "light",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [
+   "R2",
+   "R8"
+  ],
+  "notes_R": 11,
+  "batch": "batch-03"
+ },
+ {
+  "item": "em-f233",
+  "slug": "ode-to-joy",
+  "condition": "playful",
+  "bars": [
+   7,
+   10
+  ],
+  "inserted_ids": [
+   "R2",
+   "R6",
+   "R10",
+   "R11",
+   "R13",
+   "R16",
+   "R22",
+   "R24"
+  ],
+  "notes_R": 24,
+  "batch": "batch-03"
+ },
+ {
+  "item": "em-801a",
+  "slug": "pdmx-andantino-096f28b3",
+  "condition": "playful",
+  "bars": [
+   9,
+   12
+  ],
+  "inserted_ids": [
+   "R2",
+   "R5",
+   "R7",
+   "R9",
+   "R12",
+   "R15",
+   "R17"
+  ],
+  "notes_R": 18,
+  "batch": "batch-04"
+ },
+ {
+  "item": "em-a7f4",
+  "slug": "camptown-races",
+  "condition": "light",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [
+   "R3"
+  ],
+  "notes_R": 13,
+  "batch": "batch-04"
+ },
+ {
+  "item": "em-165d",
+  "slug": "when-the-saints-go-marching-in",
+  "condition": "light",
+  "bars": [
+   4,
+   7
+  ],
+  "inserted_ids": [
+   "R3",
+   "R9"
+  ],
+  "notes_R": 10,
+  "batch": "batch-04"
+ },
+ {
+  "item": "em-481a",
+  "slug": "pdmx-allegro-414d6ff6",
+  "condition": "light",
+  "bars": [
+   2,
+   5
+  ],
+  "inserted_ids": [
+   "R9"
+  ],
+  "notes_R": 10,
+  "batch": "batch-04"
+ },
+ {
+  "item": "em-7e2e",
+  "slug": "pdmx-bayernhymne-07ef6e69",
+  "condition": "plain",
+  "bars": [
+   1,
+   4
+  ],
+  "inserted_ids": [],
+  "notes_R": 10,
+  "batch": "batch-04"
+ },
+ {
+  "item": "em-bfb2",
+  "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+  "condition": "plain",
+  "bars": [
+   10,
+   13
+  ],
+  "inserted_ids": [],
+  "notes_R": 14,
+  "batch": "batch-04"
+ },
+ {
+  "item": "em-4ac4",
+  "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+  "condition": "playful",
+  "bars": [
+   10,
+   13
+  ],
+  "inserted_ids": [
+   "R3",
+   "R7",
+   "R9",
+   "R11",
+   "R15",
+   "R19",
+   "R21"
+  ],
+  "notes_R": 21,
+  "batch": "batch-05"
+ },
+ {
+  "item": "em-dba8",
+  "slug": "twinkle-twinkle-little-star",
+  "condition": "light",
+  "bars": [
+   1,
+   4
+  ],
+  "inserted_ids": [
+   "R2",
+   "R10"
+  ],
+  "notes_R": 16,
+  "batch": "batch-05"
+ },
+ {
+  "item": "em-2b32",
+  "slug": "scarborough-fair",
+  "condition": "playful",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [
+   "R2",
+   "R4",
+   "R6",
+   "R7",
+   "R9",
+   "R12",
+   "R14",
+   "R16",
+   "R17",
+   "R19"
+  ],
+  "notes_R": 19,
+  "batch": "batch-05"
+ },
+ {
+  "item": "em-bb98",
+  "slug": "jingle-bells",
+  "condition": "light",
+  "bars": [
+   5,
+   8
+  ],
+  "inserted_ids": [
+   "R2",
+   "R17"
+  ],
+  "notes_R": 17,
+  "batch": "batch-05"
+ },
+ {
+  "item": "em-fa1d",
+  "slug": "pdmx-allegro-414d6ff6",
+  "condition": "plain",
+  "bars": [
+   2,
+   5
+  ],
+  "inserted_ids": [],
+  "notes_R": 9,
+  "batch": "batch-05"
+ },
+ {
+  "item": "em-a8b1",
+  "slug": "ode-to-joy",
+  "condition": "plain",
+  "bars": [
+   7,
+   10
+  ],
+  "inserted_ids": [],
+  "notes_R": 16,
+  "batch": "batch-05"
+ }
+]

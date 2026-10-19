@@ -2,7 +2,13 @@ import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
-import { mockWorker, openFiles, RECOGNITION_WITH_ERRORS, scanOnePage } from './helpers/scan.js';
+import {
+  mockWorker,
+  openFiles,
+  RECOGNITION_MISREAD_METER,
+  RECOGNITION_WITH_ERRORS,
+  scanOnePage,
+} from './helpers/scan.js';
 import { redBars, seekBar } from './helpers/seek.js';
 
 // Correcting needs a recognition, and recognition needs the PC: these flows run as a PC window,
@@ -168,4 +174,52 @@ test('scan edit: the editor speaks the screen language and stays clear of horizo
   await expectOneRed(page, 'dark editor');
   await expectNoSeriousA11y(page, 'dark editor');
   await noOverflow(page);
+});
+
+test('scan edit: a misread 4/4 is set to 9/8 from its place to check, and no note moves', async ({
+  page,
+}, testInfo) => {
+  await mockWorker(page, RECOGNITION_MISREAD_METER);
+  await scanOnePage(page, 'nine-eight.png');
+  // The bars import, so Use for fingerings keeps the red; the places to check stay folded.
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  await expect(page.locator('.scan-problems summary')).toHaveText('3 places to check');
+  await page.locator('.scan-problems summary').click();
+  await expect(
+    page.getByRole('button', {
+      name: 'The bar is longer than its time signature. Bar 1: right hand 4.5 beats, left hand 4.5 beats, in 4/4.',
+    }),
+  ).toBeVisible();
+  // Offered once, under the first of the bars, never as a standing control.
+  const offer = page.getByRole('button', { name: /^Set .* time from bar/ });
+  await expect(offer).toHaveCount(1);
+  await expect(offer).toHaveText('Set 9/8 time from bar 1');
+  await expectOneRed(page, 'meter offered');
+  await expectNoSeriousA11y(page, 'meter offered');
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('meter-offered.png'), fullPage: true });
+
+  await offer.click();
+  await expect(page.locator('.scan-problems')).toHaveCount(0);
+  await expect(page.getByText('1 correction', { exact: true })).toBeVisible();
+  await expect(page.locator('.scan-result p[aria-hidden="true"]')).toHaveText(
+    'From bar 1: time signature 4/4 → 9/8.',
+  );
+  await page.getByText('Review corrections', { exact: true }).click();
+  await expect(page.locator('.scan-corrections ol li')).toHaveText([
+    'From bar 1: time signature 4/4 → 9/8',
+  ]);
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  await expectOneRed(page, 'meter set');
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('meter-set.png'), fullPage: true });
+
+  // Only the time signature changed: every note is the raw recognition's, byte for byte.
+  const corrected = await downloaded(page, 'Download corrected MusicXML');
+  expect(corrected).toContain('<time><beats>9</beats><beat-type>8</beat-type></time>');
+  const notes = (xml: string) => xml.match(/<note>.*?<\/note>/g);
+  expect(notes(corrected)).toEqual(notes(RECOGNITION_MISREAD_METER));
+
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect(page.locator('.scan-problems summary')).toHaveText('3 places to check');
 });

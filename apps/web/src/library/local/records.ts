@@ -124,8 +124,16 @@ const int = (value: unknown, min: number, max: number) =>
   Number.isInteger(value) && (value as number) >= min && (value as number) <= max;
 /** One correction exactly as the editor writes it (corrections.ts); anything else is refused. */
 function validCorrection(value: unknown): value is Correction {
-  if (!object(value) || !int(value.note, 0, 1_000_000)) return false;
+  if (!object(value)) return false;
   const keys = Object.keys(value).sort().join(',');
+  if (value.kind === 'meter')
+    return (
+      keys === 'bar,beatType,beats,kind' &&
+      int(value.bar, 0, 1_000_000) &&
+      int(value.beats, 1, 32) &&
+      [1, 2, 4, 8, 16, 32].includes(value.beatType as number)
+    );
+  if (!int(value.note, 0, 1_000_000)) return false;
   switch (value.kind) {
     case 'pitch':
       return (

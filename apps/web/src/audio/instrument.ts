@@ -1,6 +1,7 @@
 import type { Hand } from '@digitus2/engine';
 import { UNMARKED_VELOCITY } from '@digitus2/engine/score-build';
 import type { SplendidGrandPiano } from 'smplr';
+import { pianoSampleBaseUrl, pianoStorage } from './pianoSamples.js';
 
 /** One note to sound, in context seconds. */
 export interface NoteEvent {
@@ -41,7 +42,9 @@ export const PIANO_SOFTEST = 41;
  * samples by velocity, so a note outside the loaded layers would stay silent; its
  * `velocityRange` is one span, so the layers between the softest and the loudest load too.
  * `notesToLoad` is fixed at construction, so the sampler is created inside `load()`; smplr itself
- * is imported there too, which keeps it out of the entry chunk.
+ * is imported there too, which keeps it out of the entry chunk. The samples come from the app's own
+ * site (`<base>piano/`, see pianoSamples.ts); Safari fetches the `.m4a` files, other browsers the
+ * `.ogg` ones.
  */
 export function createPiano(ctx: AudioContext): Instrument {
   let piano: SplendidGrandPiano | null = null;
@@ -55,13 +58,21 @@ export function createPiano(ctx: AudioContext): Instrument {
       const smplr = await import('smplr');
       if (id !== loads) return; // a newer load started while smplr was being imported
       const next = smplr.SplendidGrandPiano(ctx, {
+        baseUrl: pianoSampleBaseUrl(import.meta.env.BASE_URL),
+        formats: ['ogg', 'm4a'],
+        storage: pianoStorage(),
         notesToLoad: {
           notes: [...new Set(midis)],
           velocityRange,
           fallback: 'nearest',
         },
       });
-      await next.ready;
+      try {
+        await next.ready;
+      } catch (e) {
+        next.dispose(); // the samples failed to load; do not leave the sampler on the destination
+        throw e;
+      }
       if (id !== loads) {
         next.dispose(); // superseded while its samples were loading
         return;

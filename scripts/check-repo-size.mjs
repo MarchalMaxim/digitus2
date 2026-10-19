@@ -32,6 +32,8 @@ const MUST_BE_IGNORED = [
   'research/data/pig',
   'research/spikes/render/node_modules',
   'content/_raw',
+  'apps/web/public/piano',
+  'build/piano-samples',
 ];
 
 function git(args) {

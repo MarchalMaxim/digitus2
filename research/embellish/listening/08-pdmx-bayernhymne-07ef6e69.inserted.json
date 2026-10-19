@@ -1,0 +1,169 @@
+{
+ "slug": "pdmx-bayernhymne-07ef6e69",
+ "inserted": {
+  "light": [
+   {
+    "bar": "1",
+    "beat": "3.5",
+    "onset": "5/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "2.5",
+    "onset": "19/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "3.5",
+    "onset": "45/2",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   }
+  ],
+  "playful": [
+   {
+    "bar": "1",
+    "beat": "3.5",
+    "onset": "5/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "1",
+    "beat": "4.5",
+    "onset": "7/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "2",
+    "beat": "4.5",
+    "onset": "15/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "2.5",
+    "onset": "19/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "3",
+    "beat": "3.5",
+    "onset": "21/2",
+    "pitch": "D4",
+    "midi": 62,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "3.5",
+    "onset": "45/2",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "passing",
+    "role": "passing",
+    "length": "0.5"
+   },
+   {
+    "bar": "6",
+    "beat": "4.5",
+    "onset": "47/2",
+    "pitch": "G4",
+    "midi": 67,
+    "rule": "neighbour-repeated",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "9",
+    "beat": "4.5",
+    "onset": "71/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "11",
+    "beat": "4.5",
+    "onset": "87/2",
+    "pitch": "F4",
+    "midi": 65,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "12",
+    "beat": "4.5",
+    "onset": "95/2",
+    "pitch": "B3",
+    "midi": 59,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   },
+   {
+    "bar": "13",
+    "beat": "2",
+    "onset": "49",
+    "pitch": "C4",
+    "midi": 60,
+    "rule": "neighbour-long",
+    "role": "neighbour",
+    "length": "0.5"
+   },
+   {
+    "bar": "13",
+    "beat": "2.5",
+    "onset": "99/2",
+    "pitch": "B3",
+    "midi": 59,
+    "rule": "neighbour-long",
+    "role": "return",
+    "length": "0.5"
+   },
+   {
+    "bar": "13",
+    "beat": "4.5",
+    "onset": "103/2",
+    "pitch": "E4",
+    "midi": 64,
+    "rule": "anticipation",
+    "role": "anticipation",
+    "length": "0.5"
+   }
+  ]
+ }
+}

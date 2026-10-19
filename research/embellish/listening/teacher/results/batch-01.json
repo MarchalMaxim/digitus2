@@ -1,0 +1,62 @@
+{
+  "batch": "batch-01",
+  "started_at": "2026-10-18T21:38:18Z",
+  "finished_at": "2026-10-18T21:39:33Z",
+  "items": [
+    {
+      "item": "em-bff7",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "A plain, hymn-like line built on the C chord; the F in bar 5 is a simple passing note into G."
+    },
+    {
+      "item": "em-3474",
+      "scores": {"musical": 3, "fits_harmony": 2, "beginner_friendly": 3},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R4", "R11"], "kind": "clash", "severity": "info",
+         "problem": "The leap to D5 on beat 3 sits a fourth over the left hand's A, rubbing before the G chord arrives."}
+      ],
+      "comment": "A tidy two-bar idea stated twice, minuet style; only the leaped-to D over A minor is slightly sour."
+    },
+    {
+      "item": "em-9d9f",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "Narrow, stepwise and songlike; every non-chord note passes by step, and the F in bar 10 resolves neatly to E."
+    },
+    {
+      "item": "em-cd2d",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 3},
+      "verdict": "natural",
+      "objections": [],
+      "comment": "A simple modal tune over open fifths; nothing to fix."
+    },
+    {
+      "item": "em-88af",
+      "scores": {"musical": 2, "fits_harmony": 3, "beginner_friendly": 2},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R12", "R13", "R14", "R15"], "kind": "clutter", "severity": "warning",
+         "problem": "D-E-D-E-D-C wobbles back and forth; the eighth-note neighbour figure makes bar 7 fidgety rather than singing."},
+        {"notes": ["R18", "R19"], "kind": "clutter", "severity": "info",
+         "problem": "The C-D-C turn at the cadence softens the arrival on C; a plain held C would close the phrase better."}
+      ],
+      "comment": "The tune's outline is clear, but bars 5 and 7 carry a lot of eighth-note wiggles for a beginner at this tempo."
+    },
+    {
+      "item": "em-05fb",
+      "scores": {"musical": 3, "fits_harmony": 3, "beginner_friendly": 2},
+      "verdict": "acceptable",
+      "objections": [
+        {"notes": ["R5"], "kind": "rhythm", "severity": "warning",
+         "problem": "The repeated G entering off the beat after an eighth rest is a tricky syncopation for a beginner to count."},
+        {"notes": ["R1", "R12", "L1"], "kind": "other", "severity": "info",
+         "problem": "The melody plays three bars unaccompanied and the left hand answers alone in bar 4; hands never play together here."}
+      ],
+      "comment": "A natural, singable phrase; the only real hurdle is the off-beat G in bar 2."
+    }
+  ]
+}

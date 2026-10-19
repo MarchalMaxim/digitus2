@@ -1,0 +1,342 @@
+[
+ {
+  "n": 1,
+  "slug": "twinkle-twinkle-little-star",
+  "title": "Twinkle, Twinkle, Little Star",
+  "composer": "Traditional",
+  "collection": "Children's songs",
+  "level": 1,
+  "tempoBpm": 100,
+  "source": {
+   "name": "digitus2 (own arrangement)",
+   "url": "https://github.com/MarchalMaxim/digitus2/blob/main/content/tools/arrange.py",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": null
+  },
+  "files": [
+   "01-twinkle-twinkle-little-star-plain.musicxml",
+   "01-twinkle-twinkle-little-star-light.musicxml",
+   "01-twinkle-twinkle-little-star-playful.musicxml"
+  ],
+  "added": {
+   "light": 6,
+   "playful": 27
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   1,
+   4
+  ]
+ },
+ {
+  "n": 2,
+  "slug": "jingle-bells",
+  "title": "Jingle Bells (chorus)",
+  "composer": "James Lord Pierpont",
+  "collection": "Christmas carols and songs",
+  "level": 1,
+  "tempoBpm": 120,
+  "source": {
+   "name": "digitus2 (own arrangement)",
+   "url": "https://github.com/MarchalMaxim/digitus2/blob/main/content/tools/arrange.py",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": null
+  },
+  "files": [
+   "02-jingle-bells-plain.musicxml",
+   "02-jingle-bells-light.musicxml",
+   "02-jingle-bells-playful.musicxml"
+  ],
+  "added": {
+   "light": 7,
+   "playful": 29
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   5,
+   8
+  ]
+ },
+ {
+  "n": 3,
+  "slug": "when-the-saints-go-marching-in",
+  "title": "When the Saints Go Marching In",
+  "composer": "Traditional (African-American spiritual)",
+  "collection": "Hymns and spirituals",
+  "level": 1,
+  "tempoBpm": 112,
+  "source": {
+   "name": "digitus2 (own arrangement)",
+   "url": "https://github.com/MarchalMaxim/digitus2/blob/main/content/tools/arrange.py",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": null
+  },
+  "files": [
+   "03-when-the-saints-go-marching-in-plain.musicxml",
+   "03-when-the-saints-go-marching-in-light.musicxml",
+   "03-when-the-saints-go-marching-in-playful.musicxml"
+  ],
+  "added": {
+   "light": 6,
+   "playful": 29
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 2
+  },
+  "window": [
+   4,
+   7
+  ]
+ },
+ {
+  "n": 4,
+  "slug": "camptown-races",
+  "title": "Camptown Races",
+  "composer": "Stephen Foster",
+  "collection": "Songs before 1929",
+  "level": 1,
+  "tempoBpm": 100,
+  "source": {
+   "name": "digitus2 (own arrangement)",
+   "url": "https://github.com/MarchalMaxim/digitus2/blob/main/content/tools/arrange.py",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": null
+  },
+  "files": [
+   "04-camptown-races-plain.musicxml",
+   "04-camptown-races-light.musicxml",
+   "04-camptown-races-playful.musicxml"
+  ],
+  "added": {
+   "light": 4,
+   "playful": 23
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   5,
+   8
+  ]
+ },
+ {
+  "n": 5,
+  "slug": "ode-to-joy",
+  "title": "Ode to Joy (simplified)",
+  "composer": "Ludwig van Beethoven",
+  "collection": "Classical themes, simplified",
+  "level": 1,
+  "tempoBpm": 108,
+  "source": {
+   "name": "digitus2 (own arrangement)",
+   "url": "https://github.com/MarchalMaxim/digitus2/blob/main/content/tools/arrange.py",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": null
+  },
+  "files": [
+   "05-ode-to-joy-plain.musicxml",
+   "05-ode-to-joy-light.musicxml",
+   "05-ode-to-joy-playful.musicxml"
+  ],
+  "added": {
+   "light": 7,
+   "playful": 25
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   7,
+   10
+  ]
+ },
+ {
+  "n": 6,
+  "slug": "scarborough-fair",
+  "title": "Scarborough Fair",
+  "composer": "Traditional (English ballad)",
+  "collection": "Folk songs",
+  "level": 2,
+  "tempoBpm": 96,
+  "source": {
+   "name": "digitus2 (own arrangement)",
+   "url": "https://github.com/MarchalMaxim/digitus2/blob/main/content/tools/arrange.py",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": null
+  },
+  "files": [
+   "06-scarborough-fair-plain.musicxml",
+   "06-scarborough-fair-light.musicxml",
+   "06-scarborough-fair-playful.musicxml"
+  ],
+  "added": {
+   "light": 4,
+   "playful": 31
+  },
+  "proposal": {
+   "plain": 3,
+   "light": 3,
+   "playful": 3
+  },
+  "window": [
+   5,
+   8
+  ]
+ },
+ {
+  "n": 7,
+  "slug": "pdmx-allegro-414d6ff6",
+  "title": "Allegro",
+  "composer": "Alexander Reinagle",
+  "collection": "Classical piano from the MuseScore archive",
+  "level": 1,
+  "tempoBpm": 100,
+  "source": {
+   "name": "MuseScore, via the PDMX dataset",
+   "url": "https://zenodo.org/records/15571083",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": "2026-10-13"
+  },
+  "files": [
+   "07-pdmx-allegro-414d6ff6-plain.musicxml",
+   "07-pdmx-allegro-414d6ff6-light.musicxml",
+   "07-pdmx-allegro-414d6ff6-playful.musicxml"
+  ],
+  "added": {
+   "light": 8,
+   "playful": 21
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   2,
+   5
+  ]
+ },
+ {
+  "n": 8,
+  "slug": "pdmx-bayernhymne-07ef6e69",
+  "title": "Bayernhymne",
+  "composer": "Unknown",
+  "collection": "Songs from the MuseScore archive",
+  "level": 1,
+  "tempoBpm": 100,
+  "source": {
+   "name": "MuseScore, via the PDMX dataset",
+   "url": "https://zenodo.org/records/15571083",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": "2026-10-13"
+  },
+  "files": [
+   "08-pdmx-bayernhymne-07ef6e69-plain.musicxml",
+   "08-pdmx-bayernhymne-07ef6e69-light.musicxml",
+   "08-pdmx-bayernhymne-07ef6e69-playful.musicxml"
+  ],
+  "added": {
+   "light": 3,
+   "playful": 13
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   1,
+   4
+  ]
+ },
+ {
+  "n": 9,
+  "slug": "pdmx-come-let-us-all-with-fervour-2ea30690",
+  "title": "Come let us All with Fervour",
+  "composer": "Unknown",
+  "collection": "Folk tunes from the MuseScore archive",
+  "level": 2,
+  "tempoBpm": 100,
+  "source": {
+   "name": "MuseScore, via the PDMX dataset",
+   "url": "https://zenodo.org/records/15571083",
+   "license": "Public Domain",
+   "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "retrievedAt": "2026-10-13"
+  },
+  "files": [
+   "09-pdmx-come-let-us-all-with-fervour-2ea30690-plain.musicxml",
+   "09-pdmx-come-let-us-all-with-fervour-2ea30690-light.musicxml",
+   "09-pdmx-come-let-us-all-with-fervour-2ea30690-playful.musicxml"
+  ],
+  "added": {
+   "light": 7,
+   "playful": 20
+  },
+  "proposal": {
+   "plain": 2,
+   "light": 2,
+   "playful": 2
+  },
+  "window": [
+   10,
+   13
+  ]
+ },
+ {
+  "n": 10,
+  "slug": "pdmx-andantino-096f28b3",
+  "title": "Andantino",
+  "composer": "Unknown",
+  "collection": "Classical piano from the MuseScore archive",
+  "level": 1,
+  "tempoBpm": 100,
+  "source": {
+   "name": "MuseScore, via the PDMX dataset",
+   "url": "https://zenodo.org/records/15571083",
+   "license": "CC0-1.0",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "retrievedAt": "2026-10-13"
+  },
+  "files": [
+   "10-pdmx-andantino-096f28b3-plain.musicxml",
+   "10-pdmx-andantino-096f28b3-light.musicxml",
+   "10-pdmx-andantino-096f28b3-playful.musicxml"
+  ],
+  "added": {
+   "light": 11,
+   "playful": 28
+  },
+  "proposal": {
+   "plain": 1,
+   "light": 1,
+   "playful": 1
+  },
+  "window": [
+   9,
+   12
+  ]
+ }
+]

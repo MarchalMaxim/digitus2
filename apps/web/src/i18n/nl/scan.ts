@@ -150,7 +150,10 @@ export const scan: Messages['scan'] = {
       untie: (where: string, pitch: string) => `${where}: overbinding op ${pitch} weggehaald`,
       hand: (where: string, pitch: string, hand: string) => `${where}: ${pitch} naar de ${hand}`,
       removed: (where: string, pitch: string) => `${where}: ${pitch} verwijderd`,
+      meter: (bar: string, from: string | undefined, to: string) =>
+        `Vanaf maat ${bar}: maatsoort ${from ? `${from} → ` : ''}${to}`,
     },
+    setMeter: (meter: string, bar: string) => `Gebruik ${meter} vanaf maat ${bar}`,
     stale: (kept: number) =>
       `Sommige opgeslagen correcties passen niet meer bij deze herkenning. De eerste ${kept} blijven behouden.`,
     problemsSummary: (n: number) =>
@@ -186,6 +189,9 @@ export const scan: Messages['scan'] = {
       tiedRemove: 'Haal eerst de overbinding van deze noot weg.',
       chordLengths: 'De noten van het akkoord hebben verschillende duren. Verander eerst de duur.',
       oneStaff: 'Deze partituur heeft één notenbalk.',
+      meter: 'Die maatsoort kan hier niet geschreven worden.',
+      noBar: 'Deze maat staat niet meer in de partituur.',
+      sameMeter: (meter: string) => `De maat staat al in ${meter}.`,
     },
   },
   phone: {

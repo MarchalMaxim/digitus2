@@ -148,7 +148,10 @@ export const scan: Messages['scan'] = {
       hand: (where: string, pitch: string, hand: string) =>
         `${where}: ${pitch} pasada a la ${hand}`,
       removed: (where: string, pitch: string) => `${where}: ${pitch} quitada`,
+      meter: (bar: string, from: string | undefined, to: string) =>
+        `Desde el compás ${bar}: indicación de compás ${from ? `${from} → ` : ''}${to}`,
     },
+    setMeter: (meter: string, bar: string) => `Usar ${meter} desde el compás ${bar}`,
     stale: (kept: number) =>
       `Algunas correcciones guardadas ya no se aplican a este reconocimiento. Se conservan las primeras ${kept}.`,
     problemsSummary: (n: number) =>
@@ -184,6 +187,9 @@ export const scan: Messages['scan'] = {
       tiedRemove: 'Quita la ligadura de esta nota antes de quitar la nota.',
       chordLengths: 'Las notas del acorde tienen duraciones distintas. Cambia primero la duración.',
       oneStaff: 'Esta partitura tiene un solo pentagrama.',
+      meter: 'Esa indicación de compás no se puede escribir aquí.',
+      noBar: 'Este compás ya no está en la partitura.',
+      sameMeter: (meter: string) => `El compás ya está en ${meter}.`,
     },
   },
   phone: {

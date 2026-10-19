@@ -150,10 +150,24 @@ export function localDateKey(now: Date = new Date()): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
+/**
+ * A credit that starts right after a lowercase letter: the MuseScore archive joins a score's credit
+ * lines with nothing between them ("Johann Sebastian Bachattributed to Christian Petzold"). Only
+ * these words count, so names written in camel case ("ConcernedApe") stay whole.
+ */
+const GLUED_CREDIT =
+  /(?<=\p{Ll})(?=(?:attributed|arranged) (?:to|by)\b|(?:Arr|Arrang|Trans)\.|(?:Arr|Arranged|Arrangement|Transcribed|Transcripted|Bearbeitung|Edited|Simplified|Rewritten)\b)/gu;
+
+/** The composer as the archive meant it: a comma before a glued credit, a space before a glued "(". */
+export function composerText(composer: string): string {
+  return composer.replace(GLUED_CREDIT, ', ').replace(/(?<=\p{L})\(/gu, ' (');
+}
+
 /** The composer up to the first " (": "Lowell Mason (tune Antioch)" -> "Lowell Mason". */
 export function composerShort(composer: string): string {
-  const i = composer.indexOf(' (');
-  return (i < 0 ? composer : composer.slice(0, i)).trim();
+  const text = composerText(composer);
+  const i = text.indexOf(' (');
+  return (i < 0 ? text : text.slice(0, i)).trim();
 }
 
 /** "Unknown", "Traditional", "Traditional (…)" and "Anonymous": no name worth a line of its own. */
@@ -283,7 +297,7 @@ function finish(
             : isUnnamed(piece.composer) || composerSaid
               ? null
               : composerShort(piece.composer),
-        label: t.library.list.openPiece(piece.title, piece.composer),
+        label: t.library.list.openPiece(piece.title, composerText(piece.composer)),
         duration: formatDuration(piece.approxDurationSec),
       })),
     })),

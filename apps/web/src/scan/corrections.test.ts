@@ -5,11 +5,12 @@ import {
   barTiming,
   CorrectionError,
   findProblems,
+  meterOffers,
   type Correction,
 } from './corrections.js';
 import { en } from '../i18n/en/index.js';
 import { parseScanXml, readScanScore } from './notes.js';
-import { describeProblem } from './ScanEditor.js';
+import { describeCorrection, describeProblem } from './ScanEditor.js';
 
 /** One note element: `p` is a pitch like C5 or Bb4, or `r` for a rest. */
 function n(
@@ -36,13 +37,13 @@ function n(
 }
 const backup = (d: number) => `<backup><duration>${d}</duration></backup>`;
 /** A two-staff piano score, divisions 2 (an eighth is 1), 3/4 unless `beats` is given. */
-function score(measures: string[], beats = 3, fifths = 0) {
+function score(measures: string[], beats = 3, fifths = 0, beatType = 4) {
   const body = measures
     .map(
       (m, i) =>
         `<measure number="${i + 1}">${
           i === 0
-            ? `<attributes><divisions>2</divisions><key><fifths>${fifths}</fifths></key><time><beats>${beats}</beats><beat-type>4</beat-type></time><staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes>`
+            ? `<attributes><divisions>2</divisions><key><fifths>${fifths}</fifths></key><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time><staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes>`
             : ''
         }${m}</measure>`,
     )
@@ -561,5 +562,129 @@ describe('review fixes', () => {
       [76, 4, 2, 'R'],
       [48, 0, 6, 'L'],
     ]);
+  });
+});
+
+describe('time signature corrections', () => {
+  // Nine eighths in both hands: a 9/8 bar, 4.5 beats when the recognition says 4/4.
+  const NINE =
+    n('C5', 3, 'quarter', { dots: 1 }) +
+    n('D5', 3, 'quarter', { dots: 1 }) +
+    n('E5', 3, 'quarter', { dots: 1 }) +
+    backup(9) +
+    n('C3', 6, 'half', { staff: 2, dots: 1 }) +
+    n('G3', 3, 'quarter', { staff: 2, dots: 1 });
+  // Four quarters in both hands: a 4/4 bar.
+  const FOUR = n('C5', 8, 'whole') + backup(8) + n('C3', 8, 'whole', { staff: 2 });
+  const time = (beats: number, beatType: number) =>
+    `<attributes><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time></attributes>`;
+  const meters = (xml: string) =>
+    readScanScore(parseScanXml(xml)).bars.map((b) => `${b.meter?.beats}/${b.meter?.beatType}`);
+  const meter = (bar: number, beats: number, beatType: number): Correction => ({
+    kind: 'meter',
+    bar,
+    beats,
+    beatType,
+  });
+  const refusal = (raw: string, c: Correction) => {
+    try {
+      applyCorrections(raw, [c], { strict: true });
+    } catch (cause) {
+      if (cause instanceof CorrectionError) return cause.phrase(en);
+      throw cause;
+    }
+    return 'applied';
+  };
+
+  it('sets 9/8 over a misread 4/4 without moving a note, and the places to check clear', () => {
+    const raw = score([NINE, NINE, NINE], 4);
+    expect(findProblems(readScanScore(parseScanXml(raw)))).toHaveLength(3);
+    const { xml } = applyCorrections(raw, [meter(0, 9, 8)], { strict: true });
+    expect(sounding(xml)).toEqual(sounding(raw));
+    expect(meters(xml)).toEqual(['9/8', '9/8', '9/8']);
+    expect(findProblems(readScanScore(parseScanXml(xml)))).toEqual([]);
+    expect(strict(xml).timeSignatures.map((t) => [t.beats, t.beatType])).toEqual([[9, 8]]);
+    expect(xml.match(/<time>/g)).toHaveLength(1);
+  });
+  it('from a later bar: the bars before keep their meter, and the new one is written before the notes', () => {
+    const raw = score([FOUR, NINE, NINE], 4);
+    const { xml } = applyCorrections(raw, [meter(1, 9, 8)], { strict: true });
+    expect(sounding(xml)).toEqual(sounding(raw));
+    expect(meters(xml)).toEqual(['4/4', '9/8', '9/8']);
+    expect(strict(xml).timeSignatures.map((t) => [t.tick, t.beats, t.beatType])).toEqual([
+      [0, 4, 4],
+      [8, 9, 8],
+    ]);
+    expect(xml).toContain('<measure number="2"><attributes><time><beats>9</beats>');
+  });
+  it('also replaces the old meter where a joined page restates it, and stops at a different one', () => {
+    const raw = score([NINE, time(4, 4) + NINE, time(3, 4) + BAR, time(4, 4) + NINE, NINE], 4);
+    const { xml } = applyCorrections(raw, [meter(0, 9, 8)], { strict: true });
+    expect(meters(xml)).toEqual(['9/8', '9/8', '3/4', '4/4', '4/4']);
+    expect(sounding(xml)).toEqual(sounding(raw));
+  });
+  it('rewrites homr’s layout in place: two leading attributes and a common-time symbol', () => {
+    const raw = score([NINE, NINE], 4).replace(
+      /<attributes>.*?<\/attributes>/,
+      '<attributes><divisions>2</divisions><staves>2</staves><time symbol="common"><beats>4</beats><beat-type>4</beat-type></time></attributes>' +
+        '<attributes><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef><key><fifths>2</fifths></key></attributes>',
+    );
+    const { xml } = applyCorrections(raw, [meter(0, 9, 8)], { strict: true });
+    expect(xml).toContain(
+      '<attributes><divisions>2</divisions><staves>2</staves><time><beats>9</beats><beat-type>8</beat-type></time></attributes>',
+    );
+    expect(xml.match(/<time/g)).toHaveLength(1);
+    expect(meters(xml)).toEqual(['9/8', '9/8']);
+  });
+  it('writes a time signature into a bar that has none, in MusicXML’s order', () => {
+    const raw = score([NINE], 4).replace(/<time>.*?<\/time>/, '');
+    const { xml } = applyCorrections(raw, [meter(0, 9, 8)], { strict: true });
+    expect(xml).toContain(
+      '<key><fifths>0</fifths></key><time><beats>9</beats><beat-type>8</beat-type></time><staves>2</staves>',
+    );
+    expect(meters(xml)).toEqual(['9/8']);
+  });
+  it('refuses a meter it cannot write, a bar that is not there and the meter already in force', () => {
+    const raw = score([NINE, NINE], 4);
+    const unwritable = en.scan.edit.refused.meter;
+    expect(refusal(raw, meter(0, 0, 8))).toBe(unwritable);
+    expect(refusal(raw, meter(0, 2.5, 8))).toBe(unwritable);
+    expect(refusal(raw, meter(0, 33, 8))).toBe(unwritable);
+    expect(refusal(raw, meter(0, 9, 3))).toBe(unwritable);
+    expect(refusal(raw, meter(2, 9, 8))).toBe(en.scan.edit.refused.noBar);
+    expect(refusal(raw, meter(1, 4, 4))).toBe(en.scan.edit.refused.sameMeter('4/4'));
+  });
+  it('never makes the strict import fail: a bar that still overruns the new meter imports', () => {
+    const raw = score([NINE], 4);
+    const { xml } = applyCorrections(raw, [meter(0, 3, 4)], { strict: true });
+    expect(() => strict(xml)).not.toThrow();
+    expect(findProblems(readScanScore(parseScanXml(xml)))).toEqual([
+      expect.objectContaining({ kind: 'bar-timing', bar: 0 }),
+    ]);
+  });
+  it('is offered once, from the first of the bars whose hands agree but overrun the meter', () => {
+    const uneven = n('C5', 9, 'whole') + backup(9) + n('C3', 6, 'half', { staff: 2, dots: 1 });
+    const parsed = readScanScore(parseScanXml(score([FOUR, NINE, NINE, uneven, NINE], 4)));
+    const problems = findProblems(parsed);
+    expect(problems.map((p) => p.kind === 'bar-timing' && p.bar)).toEqual([1, 2, 3, 4]);
+    const offers = meterOffers(parsed, problems);
+    expect([...offers].map(([p, c]) => [p.kind === 'bar-timing' && p.bar, c])).toEqual([
+      [1, meter(1, 9, 8)],
+    ]);
+  });
+  it('offers whole beats as quarters, and nothing for one long bar or hands that disagree', () => {
+    const quarters = readScanScore(parseScanXml(score([BAR, BAR], 2)));
+    expect([...meterOffers(quarters, findProblems(quarters)).values()]).toEqual([meter(0, 3, 4)]);
+    const single = readScanScore(parseScanXml(score([NINE, FOUR], 4)));
+    expect(meterOffers(single, findProblems(single)).size).toBe(0);
+    const uneven = n('C5', 9, 'whole') + backup(9) + n('C3', 6, 'half', { staff: 2, dots: 1 });
+    const disagree = readScanScore(parseScanXml(score([uneven, uneven], 4)));
+    expect(meterOffers(disagree, findProblems(disagree)).size).toBe(0);
+  });
+  it('is listed by bar and meter', () => {
+    const raw = readScanScore(parseScanXml(score([NINE, NINE], 4)));
+    expect(describeCorrection(en, raw, meter(0, 9, 8))).toBe(
+      'From bar 1: time signature 4/4 → 9/8',
+    );
   });
 });

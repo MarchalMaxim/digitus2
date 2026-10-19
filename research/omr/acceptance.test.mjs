@@ -182,3 +182,61 @@ test('the service cache is named by the recogniser the service reports', async (
     'HOMR_ab369ac54277_experimental-piano-photo-cpu_images_Audiveris-5.11.0_x_y_PDF_',
   );
 });
+
+test('a timeout or server error is not cached and is asked again; only the recogniser verdict is', async () => {
+  const { recognizeViaService } = await import('./acceptance.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-service-'));
+  try {
+    writeFileSync(join(dir, 'slow.png'), 'png');
+    writeFileSync(join(dir, 'blur.png'), 'png');
+    const slow = { id: 's:homr:clean', input: join(dir, 'slow.png'), output: join(dir, 's.musicxml') };
+    const blur = { id: 'b:homr:clean', input: join(dir, 'blur.png'), output: join(dir, 'b.musicxml') };
+    const sent = [];
+    const fetch = async (_url, init) => {
+      const name = sent.length % 2 ? 'blur' : 'slow';
+      sent.push(name);
+      return name === 'slow'
+        ? { status: 504, json: async () => ({ state: 'timed_out', failure: { message: 'timed out' } }), headers: new Headers() }
+        : { status: 422, json: async () => ({ state: 'failed', failure: { message: 'blur' } }), headers: new Headers() };
+    };
+    const first = await recognizeViaService([slow, blur], 'http://scan.test', { fetch });
+    assert.deepEqual(first, { cachedFailures: 0, uncached: 1 });
+    assert.equal(existsSync(slow.output + '.failed.json'), false);
+    assert.equal(existsSync(slow.output), false);
+    assert.match(readFileSync(blur.output + '.failed.json', 'utf8'), /blur/);
+    // The next run asks again for the timed-out page only.
+    const second = await recognizeViaService([slow, blur], 'http://scan.test', { fetch });
+    assert.deepEqual(second, { cachedFailures: 1, uncached: 1 });
+    assert.deepEqual(sent, ['slow', 'blur', 'slow']);
+    // A connection that breaks is not cached either.
+    const broken = async () => {
+      throw new TypeError('fetch failed');
+    };
+    assert.deepEqual(await recognizeViaService([slow], 'http://scan.test', { fetch: broken }), { cachedFailures: 0, uncached: 1 });
+    assert.equal(existsSync(slow.output + '.failed.json'), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a busy service is waited out at most 30 times, one second when Retry-After is not a number', async () => {
+  const { recognizeViaService } = await import('./acceptance.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-service-'));
+  try {
+    writeFileSync(join(dir, 'page.pdf'), '%PDF');
+    const job = { id: 'p:audiveris:pdf', input: join(dir, 'page.pdf'), output: join(dir, 'p.musicxml') };
+    const waits = [];
+    const busy = async () => ({ status: 429, json: async () => ({ error: 'busy' }), headers: new Headers({ 'Retry-After': 'soon' }) });
+    await assert.rejects(recognizeViaService([job], 'http://scan.test', { fetch: busy, sleep: async (ms) => waits.push(ms) }), /busy for 30 attempts/);
+    assert.equal(waits.length, 29);
+    assert.ok(waits.every((ms) => ms === 1000));
+    assert.equal(existsSync(job.output + '.failed.json'), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a recogniser label that names no folder is refused', async () => {
+  const { serviceLabel } = await import('./acceptance.mjs');
+  for (const bad of ['', '   ', '.', '..', undefined, null, 42]) assert.throws(() => serviceLabel(bad), /recogniser label/);
+});

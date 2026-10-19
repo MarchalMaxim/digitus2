@@ -211,52 +211,80 @@ export function photoBreaches(summary, floors) {
 export const ORIGIN = 'https://marchalmaxim.github.io';
 const CONTENT_TYPES = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.pdf': 'application/pdf' };
 
-/** The service's recogniser label as a folder name. */
+/** The service's recogniser label as a folder name; a label that names no folder is refused. */
 export function serviceLabel(recognizer) {
-  return String(recognizer).replace(/[^A-Za-z0-9._-]+/g, '_');
+  if (typeof recognizer !== 'string' || !recognizer.trim())
+    throw new Error(`the scan service reports no recogniser label (${JSON.stringify(recognizer)})`);
+  const label = recognizer.replace(/[^A-Za-z0-9._-]+/g, '_');
+  if (/^\.*$/.test(label)) throw new Error(`the recogniser label ${JSON.stringify(recognizer)} names no cache folder`);
+  return label;
 }
+
+const BUSY_ATTEMPTS = 30;
 
 /**
  * Recognises through a running scan service, one job after another, as recognize.py does locally: a
- * job whose output or recorded failure exists is skipped; a 200 writes the MusicXML, any other answer
- * a `.failed.json` the scoring counts as an empty page. A busy service is waited out (Retry-After);
- * the hourly limit stops the run, since a page refused for it says nothing about the recogniser.
+ * job whose output or recorded failure exists is skipped; a 200 writes the MusicXML. Only the
+ * recogniser's own verdict (422) is cached as a `.failed.json` the scoring counts as an empty page;
+ * a timeout, a server error or a broken answer depends on the service's code and host, which the
+ * cache key does not cover, so it is reported and asked again on the next run. A busy service is
+ * waited out (Retry-After, at most 30 attempts); the hourly limit stops the run, since a page refused
+ * for it says nothing about the recogniser.
  */
 export async function recognizeViaService(
   jobs,
   service,
   { fetch = globalThis.fetch, origin = ORIGIN, sleep = (ms) => new Promise((done) => setTimeout(done, ms)) } = {},
 ) {
+  const cachedFailures = jobs.filter((job) => !existsSync(job.output) && existsSync(job.output + '.failed.json')).length;
   const pending = jobs.filter((job) => !existsSync(job.output) && !existsSync(job.output + '.failed.json'));
-  console.log(JSON.stringify({ jobs: jobs.length, toRun: pending.length }));
+  console.log(JSON.stringify({ jobs: jobs.length, toRun: pending.length, cachedFailures }));
   const url = `${service.replace(/\/+$/, '')}/v1/recognize`;
+  let uncached = 0;
   for (const [index, job] of pending.entries()) {
     const type = CONTENT_TYPES[extname(job.input).toLowerCase()];
     if (!type) throw new Error(`${job.id}: no content type for ${job.input}`);
     const bytes = readFileSync(job.input);
     const started = Date.now();
-    let response;
-    let body;
-    for (;;) {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { Origin: origin, 'X-Digitus2-Client': '1', 'X-Digitus2-Job': randomBytes(16).toString('hex'), 'Content-Type': type },
-        body: bytes,
-      });
-      body = await response.json().catch(() => ({}));
-      if (response.status !== 429) break;
-      if (body.error !== 'busy') throw new Error(`the scan service refused ${job.id}: ${body.error ?? 429} (Retry-After ${response.headers.get('Retry-After')} s)`);
-      await sleep(Number(response.headers.get('Retry-After') || 1) * 1000);
-    }
-    mkdirSync(dirname(job.output), { recursive: true });
-    let status = 'ok';
-    if (response.status === 200 && typeof body.xml === 'string') writeFileSync(job.output, body.xml);
-    else {
-      status = `failed: ${response.status}`;
-      writeFileSync(job.output + '.failed.json', JSON.stringify({ status: response.status, message: body.failure?.message ?? body.error }));
+    let status;
+    try {
+      let response;
+      let body;
+      for (let attempt = 1; ; attempt++) {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: { Origin: origin, 'X-Digitus2-Client': '1', 'X-Digitus2-Job': randomBytes(16).toString('hex'), 'Content-Type': type },
+          body: bytes,
+        });
+        body = await response.json().catch(() => ({}));
+        if (response.status !== 429) break;
+        if (body.error !== 'busy') throw new Error(`the scan service refused ${job.id}: ${body.error ?? 429} (Retry-After ${response.headers.get('Retry-After')} s)`);
+        if (attempt >= BUSY_ATTEMPTS) throw new Error(`the scan service stayed busy for ${BUSY_ATTEMPTS} attempts at ${job.id}; is another client using it?`);
+        const seconds = Number(response.headers.get('Retry-After'));
+        const wait = Number.isFinite(seconds) && seconds > 0 ? seconds : 1;
+        console.log(JSON.stringify({ busy: job.id, attempt, waitSeconds: wait }));
+        await sleep(wait * 1000);
+      }
+      mkdirSync(dirname(job.output), { recursive: true });
+      if (response.status === 200 && typeof body.xml === 'string') {
+        writeFileSync(job.output, body.xml);
+        status = 'ok';
+      } else if (response.status === 422) {
+        writeFileSync(job.output + '.failed.json', JSON.stringify({ status: response.status, message: body.failure?.message ?? body.error }));
+        status = 'failed: 422';
+      } else {
+        uncached++;
+        status = `not cached: ${response.status} ${body.state ?? body.error ?? ''} ${body.failure?.message ?? ''}`.trim();
+      }
+    } catch (error) {
+      if (/^the scan service (refused|stayed busy)/.test(error.message)) throw error;
+      uncached++;
+      status = `not cached: ${error.message}`;
     }
     console.log(JSON.stringify({ done: index + 1, of: pending.length, id: job.id, status, seconds: Math.round((Date.now() - started) / 100) / 10 }));
   }
+  console.log(`Service run: ${cachedFailures} cached failures skipped, ${uncached} answers not cached (asked again on the next run).`);
+  return { cachedFailures, uncached };
 }
 
 /** The photos as jobs: each as taken, and a turned copy (a PNG, as the app's Rotate makes) when needed. */
@@ -357,7 +385,7 @@ export async function main(args = process.argv.slice(2)) {
   let recognizedBy = null;
   if (service) {
     const health = await fetch(`${service.replace(/\/+$/, '')}/v1/health`, { headers: { Origin: ORIGIN } });
-    const about = await health.json();
+    const about = await health.json().catch(() => ({}));
     if (about.protocol !== 'digitus2-scan-v2') throw new Error(`${service} is not a digitus2-scan-v2 service (${health.status})`);
     recognizedBy = { service, recognizer: about.recognizer };
     cache = join(RESULTS, 'cache-service', serviceLabel(about.recognizer));

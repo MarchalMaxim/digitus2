@@ -25,6 +25,8 @@ The build context is `research/omr`; `research/omr/.dockerignore` keeps results,
 
 Audiveris on a headless Linux needs two things its package does not declare: fontconfig with one font (Java's font manager fails without them) and `GDK_SCALE` set, because otherwise it probes the monitor scale through GTK and aborts when `libgtk-3` is missing. The package's post-install registers a desktop menu entry and a MIME type, so the image creates the empty system menu and MIME directories first. The adapter's class path is `/opt/audiveris/lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first, and Audiveris then resolves its resources in the job directory and exports nothing.
 
+The build records a JDK ahead-of-time class cache for Audiveris, `/opt/audiveris/audiveris.aot` (about 66 MB), with `train-aot.py`: one recognition of `aot-training.pdf` (the library's Amazing Grace, CC0, as the acceptance corpus renders it) through the adapter with `-XX:AOTCacheOutput`, then a second run with `-XX:AOTMode=on`, which exits when the cache is unusable, and must give the same MusicXML; otherwise the build fails. The adapter adds `-XX:AOTCache` when the file exists and runs without it otherwise, as on Windows. It saves about 3 s a PDF.
+
 ## Run locally
 
 ```sh

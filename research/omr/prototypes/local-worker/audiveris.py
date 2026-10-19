@@ -16,6 +16,9 @@ MSI_SHA256 = "5f1b4e96a12c53c7da426814b76e599363c4181e291855996e0a6878dda95f71"
 ENGLISH_SHA256 = "daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047"
 DEB_SHA256 = "f20113aaa33b3149ec8d6a09b2a7963360e65fafd92d69389987a85bbc3ec7a3"
 DEB_NAME = "Audiveris-5.11.0-ubuntu24.04-x86_64.deb"
+# A JDK ahead-of-time class cache beside the release, built by the service image from one training
+# run (research/omr/service/train-aot.py). Without it the JVM starts as before.
+AOT_CACHE = "audiveris.aot"
 
 
 def process_alive(pid):
@@ -155,8 +158,9 @@ def job_environment(destination: Path, platform: str = os.name) -> dict[str, str
 
 
 class Audiveris:
-    def __init__(self, bundle, *, timeout=180, short_staves=False, text_models=None):
+    def __init__(self, bundle, *, timeout=180, short_staves=False, text_models=None, aot_output=None):
         self.bundle = Path(bundle).resolve()
+        self.aot_output = Path(aot_output).resolve() if aot_output else None
         self.timeout = timeout
         if not 0 < timeout <= 600:
             raise ValueError("timeout must be in (0,600]")
@@ -193,14 +197,19 @@ class Audiveris:
                    "-Duser.home=" + str(destination / "home"),
                    "-Djava.io.tmpdir=" + str(destination / "tmp"),
                    "-Dorg.bytedeco.javacpp.cachedir=" + str(destination / "javacpp"),
-                   "--add-exports=java.desktop/sun.awt.image=ALL-UNNAMED", "--enable-native-access=ALL-UNNAMED",
-                   "-cp", self.layout.classpath, "Audiveris"]
+                   "--add-exports=java.desktop/sun.awt.image=ALL-UNNAMED", "--enable-native-access=ALL-UNNAMED"]
+        if self.aot_output:
+            command += ["-XX:AOTCacheOutput=" + str(self.aot_output)]
+        elif (self.bundle / AOT_CACHE).is_file():
+            # Auto mode: a cache this JVM cannot use is skipped with a warning; the result is the same.
+            command += ["-XX:AOTCache=" + str(self.bundle / AOT_CACHE)]
+        command += ["-cp", self.layout.classpath, "Audiveris"]
         if self.short_staves:
             command += ["-constant", "org.audiveris.omr.sheet.grid.LinesRetriever.minStaffLength=12",
                         "-constant", "org.audiveris.omr.sheet.grid.ClustersRetriever.minClusterLengthRatio=0.15"]
         if self.text_model:
             command += ["-constant", "org.audiveris.omr.text.Language.defaultSpecification=eng"]
-        command += ["-batch", "-transcribe", "-export", "-save", "-output", str(destination / "exports"), "--", str(source)]
+        command += ["-batch", "-transcribe", "-export", "-output", str(destination / "exports"), "--", str(source)]
         (destination / "invocation.json").write_text(json.dumps({
             "command": command, "profile": self.name,
             self.layout.package + "Sha256": MSI_SHA256 if self.layout.package == "msi" else DEB_SHA256,

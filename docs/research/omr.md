@@ -222,7 +222,7 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 | One second of the service (4 vCPU, 8 GiB) beyond the grant | $0.000116 |
 | Free recognition time a month at that size | 45,000 s, about 1,300 photos of 35 s |
 | Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 5 a month plus what the hours of alert lag cost |
-| A phone photo, in the container at 4 vCPU on the owner's PC | 22.2 s |
+| A phone photo, in the container at 4 vCPU on the owner's PC, warm | 10.1 s |
 | A corpus PDF, in the container at 4 vCPU on the owner's PC | 8.6 s |
 | The same photo and PDF on the deployed service, warm | 35.2 s and 16.2 s |
 | The deployed service's cold start, a health request with no instance left | 4.5 s |

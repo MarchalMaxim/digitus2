@@ -10,7 +10,7 @@ From the repository root, with Python 3.11 or later:
 powershell -File research/omr/prototypes/homr-photo/setup.ps1
 ```
 
-The script downloads homr at commit `ab369ac` and creates an isolated CPU-only virtual environment with the locked inference dependencies (`requirements-cpu.txt`). It fetches three pinned ONNX models (about 139 MB of downloads, 157 MB unpacked), applies the four source patches below and verifies the 46 inference source files. No PyTorch, GPU or global package is needed. A second run re-verifies the prepared source, and any unexpected edit or added file fails it. The toolchain lands in the ignored `research/omr/results/photo-options/toolchain` (override with `-Root`). Pass that directory to the worker with `--homr-toolchain`.
+The script downloads homr at commit `ab369ac` and creates an isolated CPU-only virtual environment with the locked inference dependencies (`requirements-cpu.txt`). It fetches three pinned ONNX models (about 139 MB of downloads, 157 MB unpacked), applies the five source patches below and verifies the 46 inference source files. No PyTorch, GPU or global package is needed. A second run re-verifies the prepared source, and any unexpected edit or added file fails it. The toolchain lands in the ignored `research/omr/results/photo-options/toolchain` (override with `-Root`). Pass that directory to the worker with `--homr-toolchain`.
 
 At recognition time the adapter (`../local-worker/homr.py`) re-checks the source and model pins. It runs homr in a child Python process with networking disabled and title OCR off, and rejects images above 25 megapixels before decoding. It keeps the original image bytes and uses the worker's timeout, cancellation and log bounds.
 
@@ -20,6 +20,7 @@ At recognition time the adapter (`../local-worker/homr.py`) re-checks the source
 - `../photo-recovery/upstream-boundaries.patch` masks a detached, smaller five-line staff inside a grand staff's decoder margin, keeping the main staff and its ledger margin.
 - `../photo-recovery/upstream-accidentals.patch` writes accidental display glyphs that match the recognised pitch alterations; pitches are unchanged.
 - `../photo-recovery/upstream-coverage.patch` lets a staff that homr finds by its lines alone replace the one partial staff it overlaps. Without it, line tracking can split a staff when its clef is missed, and the duplicate filter keeps only the part with more anchors, so the decoder never sees the rest of the system (issue 129). The replacement needs the partial staff to span less than 75 percent of the page column, the new staff to add at least a tenth of the column (so a short last system found twice stays as it was) and four of the five lines to agree within half a staff space, which keeps out shifted copies from lines shining through the paper.
+- `upstream-speed.patch` (`patch_speed.py`) changes speed only: title OCR (rapidocr) is imported only when title detection is on, which the adapter turns off, and the bounding-box touch pre-check reads each box's centre and major axis computed once, with the upstream arithmetic. The 43 gate pages give identical MusicXML and staff positions with and without it.
 
 Each exclusion or mask is recorded in the job's audit and shown as a review warning, because an indented single-staff coda can look like an example. Key and time signatures missing from a continuation page may be inferred by the model. On the public clean piano and single-melody controls, the output is byte-identical with and without the first three patches. The coverage patch leaves the other thirteen photos of `research/omr/photos/` byte-identical and the library corpus routes at their recorded figures. Setup keeps the vendor files' byte format regardless of git line endings and never rewrites the patch files. The pinned source identity is in `source-manifests.json`.
 
@@ -32,6 +33,7 @@ homr code and models are AGPL-3.0; see `NOTICE.md` and `LICENSE.upstream`. The w
 ```powershell
 python research/omr/prototypes/homr-photo/test_piano_cues.py
 python research/omr/prototypes/homr-photo/test_prepare_patched.py
+python research/omr/prototypes/homr-photo/test_patch_speed.py
 python -m pytest research/omr/prototypes/local-worker/test_homr.py -q
 python research/omr/prototypes/homr-photo/run.py PATH_TO_IMAGE NEW_JOB --piano-cues
 ```

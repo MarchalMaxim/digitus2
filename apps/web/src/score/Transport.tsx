@@ -81,6 +81,12 @@ export interface PracticeControlsProps {
   qpm?: number | null;
   /** The bar the cursor is in, 1-based (1 when nothing is marked): where "Loop bars" starts. */
   currentBar: number;
+  /**
+   * "Add notes between" (issue #67): the switch between the plain score and its embellished
+   * version, on or off. Absent (undefined or null) while the piece has no embellished version:
+   * the tick box is then not there at all.
+   */
+  embellish?: { on: boolean; set(on: boolean): void } | null;
 }
 
 /**
@@ -330,6 +336,7 @@ export function PracticeControls({
   measureCount,
   qpm = null,
   currentBar,
+  embellish = null,
 }: PracticeControlsProps) {
   const t = useT();
   const settings = useAppStore((s) => s.settings);
@@ -363,6 +370,18 @@ export function PracticeControls({
       loopFrom === '' && loopTo === '' ? loopPrefill(currentBar, measureCount) : [loopFrom, loopTo];
     changeLoop(from, to);
   };
+
+  // A tick box like Metronome, after the loop: there only once the embellished version exists.
+  const addNotes = embellish && (
+    <label className="check">
+      <input
+        type="checkbox"
+        checked={embellish.on}
+        onChange={(e) => embellish.set(e.currentTarget.checked)}
+      />{' '}
+      {t.transport.addNotes}
+    </label>
+  );
 
   return (
     <div className="transport no-print">
@@ -465,6 +484,8 @@ export function PracticeControls({
           </>
         )}
       </div>
+
+      {addNotes}
 
       <p className="seek-help small muted">
         {touch ? t.transport.seekHelpTouch : t.transport.seekHelp}

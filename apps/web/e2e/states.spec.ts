@@ -114,11 +114,17 @@ function practiceControls(page: Page): Locator[] {
   ];
 }
 
-/** Twinkle, ready, with its 64 digits. */
+/**
+ * Twinkle, ready, with its 64 digits, and "Add notes between" offered: the Practice panel has its
+ * last row (the tick box), so it no longer grows while its geometry is measured.
+ */
 async function openTwinkle(page: Page): Promise<void> {
   await page.goto('/#/piece/twinkle-twinkle-little-star');
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+  await expect(page.locator('.practice-panel')).toHaveAttribute('data-embellish', 'offered', {
+    timeout: 20_000,
+  });
 }
 
 /** The settings of a reader who has pressed Play before: no finger legend under the header. */

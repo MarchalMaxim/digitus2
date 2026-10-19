@@ -22,6 +22,8 @@ export const transport = {
   loopFromBar: 'Loop from bar',
   loopToBar: 'Loop to bar',
   loopTo: 'to',
+  /** The Practice switch that plays and shows the piece with passing and neighbour notes added (docs/app.md). */
+  addNotes: 'Add notes between',
   /** Shown when the loop's first bar is after its last. */
   /** One line in the Practice panel: how to move through the piece (T13). With a mouse and keys. */
   seekHelp: 'Click a bar to go there. ← and → move one bar.',

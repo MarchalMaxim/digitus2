@@ -213,4 +213,47 @@ describe('exporting the fingering', () => {
     await vi.waitFor(() => expect(exportButton()).toBeEnabled());
     expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
   });
+
+  // "Add notes between" (issue #67): the export is the plain score with the plain fingering,
+  // whichever version is on screen.
+  it('export writes the plain document while notes are added', async () => {
+    const fingeredXml = vi.fn<
+      (xml: string, score: unknown, assignment: unknown) => Promise<string>
+    >(() => Promise.resolve('<fingered/>'));
+    vi.spyOn(services, 'engine', 'get').mockReturnValue({ fingeredXml } as never);
+    const plainScore = { notes: [], measures: [] } as never;
+    const plainAssignment = { n0: { finger: 1 } } as never;
+    const doc = readyDoc({
+      ...complete,
+      // The embellished version is on screen: its own score and fingering.
+      score: { notes: [], measures: [] } as never,
+      assignment: { n0: { finger: 2 }, n1: { finger: 3 } } as never,
+      embellish: 'offered',
+      embellished: true,
+      shownVersion: 'embellished',
+      plain: { score: plainScore, assignment: plainAssignment },
+    });
+    renderPanel(doc);
+    expect(exportButton()).toBeEnabled();
+    await userEvent.click(exportButton());
+    expect(fingeredXml).toHaveBeenCalledTimes(1);
+    expect(fingeredXml).toHaveBeenCalledWith(doc.xml, plainScore, plainAssignment);
+    expect(fingeredXml.mock.calls[0]![1]).not.toBe(doc.score);
+    expect(fingeredXml.mock.calls[0]![2]).not.toBe(doc.assignment);
+    await vi.waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(1));
+  });
+
+  it('is unavailable while the plain fingering is missing, whatever is on screen', () => {
+    const plainScore = { notes: [], measures: [] } as never;
+    renderPanel(
+      readyDoc({
+        ...complete,
+        embellish: 'offered',
+        embellished: true,
+        shownVersion: 'embellished',
+        plain: { score: plainScore, assignment: null },
+      }),
+    );
+    expect(exportButton()).toBeDisabled();
+  });
 });

@@ -10,6 +10,7 @@ import type { Messages } from '../i18n/messages.js';
 import { useLibraryPiece } from '../library/useLibraryPiece.js';
 import { BarSeek, type BarSeekHandle } from './BarSeek.js';
 import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
+import { applyCarry, captureCarry, type Carry } from './carry.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
@@ -278,6 +279,44 @@ export function ScoreView({ source }: { source: PieceSource }) {
     },
     [seekable, barStarts, playback, red],
   );
+
+  // "Add notes between" (issue #67). The switch swaps the score, which halts playback and drops
+  // the loop (usePlayback.ts): the bar, the loop and the play state are recorded before it and
+  // put back once the version asked for is on screen. Keyed on `shownVersion`, not on
+  // `embellished`, which turns before the new pages are in. Declared after usePlayback, so its
+  // halt for the new score has run first. A switch that never changed the score (switched back
+  // before the new version came in) halted nothing, so nothing is put back; a version withdrawn
+  // or refused (`embellish` leaves 'offered') drops what was recorded.
+  const carryRef = useRef<{
+    carry: Carry;
+    to: ScoreDocument['shownVersion'];
+    from: ScoreDocument['score'];
+  } | null>(null);
+  const { setEmbellished } = doc;
+  const toggleEmbellish = useCallback(
+    (on: boolean) => {
+      carryRef.current = {
+        carry: captureCarry(playback, barStarts),
+        to: on ? 'embellished' : 'plain',
+        from: score,
+      };
+      setEmbellished(on);
+    },
+    [playback, barStarts, score, setEmbellished],
+  );
+  const { embellish, shownVersion } = doc;
+  useEffect(() => {
+    const pending = carryRef.current;
+    if (!pending) return;
+    if (embellish !== 'offered') {
+      carryRef.current = null;
+      return;
+    }
+    if (shownVersion !== pending.to) return;
+    carryRef.current = null;
+    if (score !== pending.from) applyCarry(pending.carry, playback, barStarts);
+  }, [score, embellish, shownVersion, playback, barStarts]);
+
   const seekKeyRef = useRef<(e: KeyboardEvent) => void>(() => undefined);
   useEffect(() => {
     seekKeyRef.current = (e) => {
@@ -434,10 +473,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
             <p role="status" className={statusClass(status)}>
               {status?.text}
             </p>
-            {/* Only hidden while closed, so the controls (and a loop being typed) live on. */}
+            {/* Only hidden while closed, so the controls (and a loop being typed) live on.
+                `data-embellish` says whether "Add notes between" is still being decided; the e2e
+                specs wait on it. */}
             <div
               id={panelId}
               className="practice-panel"
+              data-embellish={doc.embellish}
               hidden={!practiceOpen}
               onKeyDown={(e) => {
                 if (e.key !== 'Escape') return;
@@ -451,6 +493,9 @@ export function ScoreView({ source }: { source: PieceSource }) {
                 measureCount={doc.score?.measures.length ?? 0}
                 qpm={qpm}
                 currentBar={currentBar}
+                embellish={
+                  doc.embellish === 'offered' ? { on: doc.embellished, set: toggleEmbellish } : null
+                }
               />
             </div>
             {/* Paused with the last group heard marked (T10): the cursor keeps the red. While the

@@ -224,7 +224,7 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
   it('keeps the shelf open on a level that has it, and returns to the shelves on one that has not', async () => {
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    await open(/^All 6 jazz, ragtime and modern pieces$/);
+    await open(/^All 7 jazz, ragtime and modern pieces$/);
     expect(h2s()).toEqual(['Jazz, ragtime and modern']);
     await userEvent.click(screen.getByRole('radio', { name: 'Easy' })); // Easy has no jazz
     expect(h2s()).toEqual(['Songs', 'Classical', 'Folk and carols', 'Baroque', 'Romantic']);
@@ -288,11 +288,11 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     await userEvent.click(other);
     expect(useAppStore.getState().libraryLength).not.toBe('any');
     expect(rows().length).toBeLessThan(before);
-    // a short list (36 pieces) cannot filter silently: the choice is dropped
+    // a short list (37 pieces) cannot filter silently: the choice is dropped
     await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
-    await userEvent.click(screen.getByRole('button', { name: /^All 36 jazz/ }));
+    await userEvent.click(screen.getByRole('button', { name: /^All 37 jazz/ }));
     expect(screen.queryByRole('group', { name: 'Length' })).toBeNull();
-    expect(rows()).toHaveLength(36);
+    expect(rows()).toHaveLength(37);
     await waitFor(() => expect(useAppStore.getState().libraryLength).toBe('any'));
   });
 });

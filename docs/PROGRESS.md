@@ -200,7 +200,7 @@ Library:
 Scanning:
 
 - Recognition errors remain and are corrected in the review (#40, done): on the acceptance corpus homr misses 13 of 47 ties that carry no mark in its output, loses the grand staff on a shadowed page, and photo beams are inferred from the meter rather than read; the duplicated C5 and wrong-hand E3 of the private test photos are not re-measured. Details: `docs/scanning.md`, `docs/research/omr.md`; open: #39 (beams).
-- Scanning needs a connection, recognises one page at a time for all readers (the others are told the scanner is busy), and stops for the rest of the month once the 5 spend cap is reached (`docs/scan-service.md`).
+- Scanning needs a connection, recognises one page at a time for all readers (the others wait, for up to three minutes, then are told the scanner is busy), and stops for the rest of the month once the 5 spend cap is reached (`docs/scan-service.md`).
 
 ## Next
 

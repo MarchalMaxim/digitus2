@@ -17,10 +17,13 @@ export const scan: Messages['scan'] = {
     cancelling: 'Annuleren…',
     retryFailed: 'Mislukte pagina’s opnieuw proberen',
     scanScore: 'Deze partituur scannen',
-    scanning:
-      'Bezig met herkennen… Meestal binnen een minuut. De eerste scan na een rustige periode duurt langer, omdat de scanner dan moet opstarten.',
+    scanning: 'Bezig met herkennen…',
     scanningPage: (page: number, total: number) =>
-      `Pagina ${page} van ${total} · Bezig met herkennen… Meestal binnen een minuut. De eerste scan na een rustige periode duurt langer, omdat de scanner dan moet opstarten.`,
+      `Pagina ${page} van ${total} · Bezig met herkennen…`,
+    waiting: 'Er wordt een andere partituur gescand. De jouwe begint zodra die klaar is.',
+    progress: 'Voortgang van de herkenning',
+    secondsLeft: (seconds: number) => `Ongeveer ${seconds} seconden`,
+    overdue: 'Dit duurt langer dan gewoonlijk.',
     textModelMissing:
       'Herkenning van Engelse tekst is niet ingesteld. Muzikale tekst kan ontbreken.',
     help: 'Zo werkt scannen',

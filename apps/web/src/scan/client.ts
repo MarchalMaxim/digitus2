@@ -15,6 +15,47 @@ export const UNKNOWN_WARNING =
 export const GRAND_STAFF_WARNING =
   'The staves were not paired into a grand staff, so the hands are not separated.';
 
+/**
+ * How long one request usually takes on the deployed service, warm, as measured in
+ * `docs/scan-service.md` (Timings): the scan bar (progress.ts) is timed by these.
+ */
+export const EXPECTED_PHOTO_SECONDS = 35;
+export const EXPECTED_PDF_SECONDS = 16;
+/** The time a page is expected to take, in milliseconds, by its kind. */
+export function expectedMs(file: Blob): number {
+  return (file.type === 'application/pdf' ? EXPECTED_PDF_SECONDS : EXPECTED_PHOTO_SECONDS) * 1000;
+}
+
+/** While the scanner is busy with another score, the same job is offered again this often… */
+export const BUSY_RETRY_MS = 5_000;
+/** …for at most this long; then the busy answer is reported as a failure. */
+export const BUSY_WAIT_MS = 180_000;
+/**
+ * The service's answer while another recognition runs: no recognition started, nothing counted
+ * against the hourly limit, so the same job can be offered again (ScanView.tsx waits).
+ */
+export class BusyError extends PhraseError {
+  override name = 'BusyError';
+  constructor() {
+    super(BUSY);
+  }
+}
+/** Resolves after `ms`, or rejects with the abort reason as soon as `signal` aborts. */
+export function pause(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const stop = () => {
+      clearTimeout(timer);
+      reject(signal.reason ?? new DOMException('aborted', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', stop);
+      resolve();
+    }, ms);
+    if (signal.aborted) stop();
+    else signal.addEventListener('abort', stop, { once: true });
+  });
+}
+
 /** The protocol this client speaks; the app and the service are deployed together. */
 export const PROTOCOL = 'digitus2-scan-v2';
 /** What the scan service says about itself in its health answer. */
@@ -84,7 +125,7 @@ function refusal(status: number, body: Record<string, unknown>): Error {
     );
   }
   // Only the service's own 429 carries these bodies; any other refusal is a failure to answer.
-  if (status === 429 && body.error === 'busy') return new PhraseError(BUSY);
+  if (status === 429 && body.error === 'busy') return new BusyError();
   if (status === 429 && body.error === 'rate-limited') return new PhraseError(LIMITED);
   return new PhraseError((t) => t.scan.client.serviceStatus(status));
 }

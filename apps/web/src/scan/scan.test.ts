@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { en } from '../i18n/en/index.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
+  BusyError,
   createScanClient,
+  expectedMs,
+  EXPECTED_PDF_SECONDS,
+  EXPECTED_PHOTO_SECONDS,
   GRAND_STAFF_WARNING,
   newJobId,
   PROTOCOL,
@@ -157,6 +161,28 @@ describe('experimental scan boundary', () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+  it('marks only the service’s own busy answer as worth waiting for', async () => {
+    const answer = (response: Response) =>
+      failure(
+        createScanClient(vi.fn<typeof fetch>().mockResolvedValue(response)).recognize(page(), job),
+      );
+    const busy = await answer(json({ error: 'busy' }, 429));
+    expect(busy).toBeInstanceOf(BusyError);
+    expect((busy as Error).message).toBe(en.scan.client.busy);
+    // A host's own refusal and the hourly limit are not waited out.
+    for (const other of [
+      new Response('<html>Too many</html>', { status: 429 }),
+      new Response('', { status: 503 }),
+      json({ error: 'rate-limited' }, 429),
+    ])
+      expect(await answer(other)).not.toBeInstanceOf(BusyError);
+  });
+  it('expects a photo and a PDF page to take what the deployed service measured', () => {
+    expect(expectedMs(new File([''], 'a.jpg', { type: 'image/jpeg' }))).toBe(
+      EXPECTED_PHOTO_SECONDS * 1000,
+    );
+    expect(expectedMs(page())).toBe(EXPECTED_PDF_SECONDS * 1000);
   });
   it('gives up after 200 seconds with the timed-out phrase', async () => {
     vi.useFakeTimers();

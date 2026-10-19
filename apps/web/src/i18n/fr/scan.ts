@@ -17,10 +17,13 @@ export const scan: Messages['scan'] = {
     cancelling: 'Annulation…',
     retryFailed: 'Réessayer les pages en échec',
     scanScore: 'Numériser cette partition',
-    scanning:
-      'Reconnaissance… En général moins d’une minute. La première numérisation après une période d’inactivité prend plus longtemps, car le service de numérisation doit démarrer.',
-    scanningPage: (page: number, total: number) =>
-      `Page ${page} sur ${total} · Reconnaissance… En général moins d’une minute. La première numérisation après une période d’inactivité prend plus longtemps, car le service de numérisation doit démarrer.`,
+    scanning: 'Reconnaissance…',
+    scanningPage: (page: number, total: number) => `Page ${page} sur ${total} · Reconnaissance…`,
+    waiting:
+      'Une autre partition est en cours de numérisation. La vôtre commence dès qu’elle est terminée.',
+    progress: 'Progression de la reconnaissance',
+    secondsLeft: (seconds: number) => `Environ ${seconds} secondes`,
+    overdue: 'Cela prend plus de temps que d’habitude.',
     textModelMissing:
       'La reconnaissance du texte anglais n’est pas configurée. Le texte musical peut manquer.',
     help: 'Comment fonctionne la numérisation',

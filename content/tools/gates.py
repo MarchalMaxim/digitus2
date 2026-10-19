@@ -148,10 +148,13 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
         if (slug in flagged) != (relaxed["spans"] > 0):
             out.append(f"span flags differ from the catalog's relaxedGates ({relaxed['spans']} recorded)")
         notes = st.get("notes") or 0
-        if not notes or not pdmx_advanced.within_ceiling(relaxed, notes):
+        requested = pdmx_advanced.requested(piece.get("composer"))  # the owner's scoped relaxation (issue #80)
+        if not notes or not pdmx_advanced.within_ceiling(relaxed, notes, requested=requested):
+            spans_max, lint_max = ((pdmx_advanced.REQUESTED_SPANS_PER_1000, pdmx_advanced.REQUESTED_LINT_PER_1000)
+                                   if requested else (pdmx_advanced.RELAXED_SPANS_PER_1000,
+                                                      pdmx_advanced.RELAXED_LINT_PER_1000))
             out.append(f"relaxedGates beyond the ceiling ({relaxed['spans']} slices, lint {relaxed['lint']} in "
-                       f"{notes} notes; at most {pdmx_advanced.RELAXED_SPANS_PER_1000:g} and "
-                       f"{pdmx_advanced.RELAXED_LINT_PER_1000:g} per 1,000)")
+                       f"{notes} notes; at most {spans_max:g} and {lint_max:g} per 1,000)")
         if pdmx_advanced.relaxed_sentence(relaxed) not in (piece.get("notes") or ""):
             out.append("the notes do not state the relaxedGates flags")
         if piece.get("source") == "mutopia":

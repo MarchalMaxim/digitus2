@@ -90349,6 +90349,39 @@
     }
   },
   {
+    "slug": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+    "title": "Franz Liszt: Grandes études de Paganini No.6 in A minor",
+    "composer": "Niccolò Paganini / Franz Liszt",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 220,
+    "approxDurationSec": 210,
+    "timeSignature": "2/4",
+    "key": "C major",
+    "tempoBpm": 128,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 60 slice(s) that no hand can strike as written and 173 (medium) and 166 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Grandes etudes de Paganini No. 6: bar 217, voices run 1/240 and 1/120 of a quarter past the bar; bar 218 backs up 3 ticks short of the bar start (rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+    "files": {
+      "score": "scores/pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
     "slug": "pdmx-franz-liszt-transcendental-tude-no-2-in-d2dd5a2b",
     "title": "Franz Liszt: Transcendental Étude No.2 in A minor Fusées",
     "composer": "Franz Liszt",
@@ -90378,6 +90411,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 10 slice(s) that no hand can strike as written and 30 (medium) and 29 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-franz-liszt-transcendental-tude-no-2-in-d2dd5a2b.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+    "title": "Franz Liszt: Transcendental Étude No.8 in C minor Wilde Jagd",
+    "composer": "Franz Liszt",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 228,
+    "approxDurationSec": 242,
+    "timeSignature": "6/8",
+    "key": "Eb major",
+    "tempoBpm": 160,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 12 slice(s) that no hand can strike as written and 67 (medium) and 65 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Transcendental Etude No. 8: bar 27 backs up 6 ticks short of the bar start, bar 175 runs 2 ticks past the bar (rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+    "files": {
+      "score": "scores/pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32.musicxml.gz",
       "fingered": null
     }
   },
@@ -91405,6 +91471,39 @@
     }
   },
   {
+    "slug": "pdmx-liszt-apparitions-no-2-db8b375f",
+    "title": "Liszt Apparitions - No. 2",
+    "composer": "Franz Liszt",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 98,
+    "approxDurationSec": 134,
+    "timeSignature": "6/8",
+    "key": "C major",
+    "tempoBpm": 130,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 11 slice(s) that no hand can strike as written and 18 (medium) and 16 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Apparitions No. 2: bar 98, two voices run 1/120 of a quarter past the bar (tuplet rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+    "files": {
+      "score": "scores/pdmx-liszt-apparitions-no-2-db8b375f.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
     "slug": "pdmx-luft-hafen-894c6719",
     "title": "Luft Hafen",
     "composer": "Unknown",
@@ -91896,6 +91995,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 0 slice(s) that no hand can strike as written and 18 (medium) and 15 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-o-let-the-heavens-be-joyful-and-earth-re-298131d4.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+    "title": "October: Autumn Song from Tchaikovsky's The Seasons",
+    "composer": "P. Tschaikowsky Op. 37a No. 10",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 56,
+    "approxDurationSec": 168,
+    "timeSignature": "4/4",
+    "key": "F major",
+    "tempoBpm": 80,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 9 (medium) and 4 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5.musicxml.gz",
       "fingered": null
     }
   },
@@ -92428,6 +92560,105 @@
     }
   },
   {
+    "slug": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+    "title": "Rachmaninoff - Moment Musical No 3 in B Minor",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 55,
+    "approxDurationSec": 355,
+    "timeSignature": "4/4",
+    "key": "D major",
+    "tempoBpm": 56,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 6 slice(s) that no hand can strike as written and 54 (medium) and 52 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+    "title": "Rachmaninoff - Moment Musical No 5 in Db Major",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 53,
+    "approxDurationSec": 233,
+    "timeSignature": "4/4",
+    "key": "Db major",
+    "tempoBpm": 54,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 41 (medium) and 40 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+    "title": "Rachmaninoff: Ètude-Tableaux No. 1 in C Minor",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 78,
+    "approxDurationSec": 135,
+    "timeSignature": "4/4",
+    "key": "Eb major",
+    "tempoBpm": 130,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 25 slice(s) that no hand can strike as written and 71 (medium) and 71 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Rachmaninoff, Etude-Tableaux No. 1: eight bars whose voices run 3/160 or 1/40 of a quarter past the bar (tuplet rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+    "files": {
+      "score": "scores/pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
     "slug": "pdmx-rejoice-give-praise-our-king-is-here-i-h-637954e5",
     "title": "Rejoice give praise our King is here - I. H. Meredith",
     "composer": "Unknown",
@@ -92919,6 +93150,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-search-light-rag-85c186c6.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+    "title": "Sergei Rachmaninoff: Moment Musicaux Op.16 No.4 in E minor",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 67,
+    "approxDurationSec": 155,
+    "timeSignature": "4/4",
+    "key": "G major",
+    "tempoBpm": 104,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 123 (medium) and 110 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c.musicxml.gz",
       "fingered": null
     }
   },

@@ -388,12 +388,21 @@ def build_pdmx(piece: dict, out_dir: Path = SCORES) -> dict:
     content/_build/pdmx and, when it passes, stored gzip-compressed as scores/<slug>.musicxml.gz
     (mtime 0, so a rebuild is byte-identical). A failed check leaves no score file and no manifest entry
     (`files` empty, `scorePath` None)."""
+    import pdmx_repair
     import pdmx_screen
     import validate
 
     slug = piece["slug"]
     info = piece["pdmx"]
     data = strip_fingerings(pdmx_screen.xml_from_mxl((PDMX_SELECTED / f"{info['sha256']}.mxl").read_bytes()))
+    # A pinned score is repaired first (content/tools/pdmx_repair.py, issue #80). A repair that is refused leaves the
+    # score as it is, and the validator then refuses it, with the reason recorded.
+    refused_repair = None
+    if info["sha256"] in pdmx_repair.pinned_repairs():
+        try:
+            data, _ = pdmx_repair.repair(data)
+        except pdmx_repair.RepairRefused as exc:
+            refused_repair = str(exc)
     work = PDMX_BUILD / slug
     work.mkdir(parents=True, exist_ok=True)
     plain = work / f"{slug}.musicxml"
@@ -401,6 +410,9 @@ def build_pdmx(piece: dict, out_dir: Path = SCORES) -> dict:
     # The size limit is on the file as stored, the gzip copy: a long score (the note ceiling is 25,000) is several
     # MB as plain XML and a few hundred KB stored.
     checks = validate.check_file(plain, PREVIEW, False, tempo=piece.get("tempoBpm"), max_bytes=None)
+    if refused_repair:
+        checks["errors"].insert(0, f"repair refused: {refused_repair}")
+        checks["ok"] = False
     stored = gzip.compress(data, compresslevel=9, mtime=0)
     if len(stored) > validate.MAX_BYTES:
         checks["errors"].append(f"stored file is {len(stored)} bytes (> {validate.MAX_BYTES})")

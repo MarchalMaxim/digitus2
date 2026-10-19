@@ -44,7 +44,8 @@ def test_new_piece_passes_every_gate(entry):
         want = relaxed["lint"][profile] if relaxed else 0
         assert v["lint"]["profiles"][profile]["errors"] == want, (profile, v["lint"]["profiles"][profile]["counts"])
     if relaxed:  # within the archive's ceiling, stated in the notes; a Mutopia piece keeps both MIDI checks
-        assert pdmx_advanced.within_ceiling(relaxed, st["notes"]), (relaxed, st["notes"])
+        requested = pdmx_advanced.requested(cat.get("composer"))  # the scoped ceiling of the four composers (issue #80)
+        assert pdmx_advanced.within_ceiling(relaxed, st["notes"], requested=requested), (relaxed, st["notes"])
         assert pdmx_advanced.relaxed_sentence(relaxed) in cat["notes"]
         if cat["source"] == "mutopia":
             assert v["midiChecks"]["mutopiaMidi"]["exact"] is True

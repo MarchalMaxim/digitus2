@@ -2543,6 +2543,37 @@
    }
   },
   {
+   "slug": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Franz Liszt: Grandes études de Paganini No.6 in A minor",
+   "composer": "Niccolò Paganini / Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 128,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 13.2), the upper end of its range for a whole piece, and the piece shows sustained fast notes (21.2 a second), a stretch of 24 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 60 slice(s) that no hand can strike as written and 173 (medium) and 166 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Grandes etudes de Paganini No. 6: bar 217, voices run 1/240 and 1/120 of a quarter past the bar; bar 218 backs up 3 ticks short of the bar start (rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "2e6669e0bfcdb3c6d6d5b237954b05485fc284716b4d8418942ac8dbf7bbdb4f",
+    "path": "./mxl/4/11/Qmebw62b2fg5JhiNG7uZc9PEmUuhHFFLKYki5pyvy1voMN.mxl",
+    "license": "cc-zero",
+    "rating": "4.5",
+    "nRatings": "19",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 60,
+    "lint": {
+     "medium": 173,
+     "large": 166
+    }
+   }
+  },
+  {
    "slug": "pdmx-franz-liszt-transcendental-tude-no-2-in-d2dd5a2b",
    "source": "pdmx",
    "level": 6,
@@ -2570,6 +2601,37 @@
     "lint": {
      "medium": 30,
      "large": 29
+    }
+   }
+  },
+  {
+   "slug": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Franz Liszt: Transcendental Étude No.8 in C minor Wilde Jagd",
+   "composer": "Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 16.821), the upper end of its range for a whole piece, and the piece shows sustained fast notes (26.0 a second), a stretch of 24 semitones, dense chords (65 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 12 slice(s) that no hand can strike as written and 67 (medium) and 65 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Transcendental Etude No. 8: bar 27 backs up 6 ticks short of the bar start, bar 175 runs 2 ticks past the bar (rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "337a8e32de583bd4bca9fdabb8618b9ecdb2130fe3897293b4967fd716393fc7",
+    "path": "./mxl/4/22/QmeGUD86jCsGtpMQCVScrm5yjPv6Hf5H53yMWsJsu9XFPz.mxl",
+    "license": "cc-zero",
+    "rating": "4.85",
+    "nRatings": "4",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 12,
+    "lint": {
+     "medium": 67,
+     "large": 65
     }
    }
   },
@@ -3499,6 +3561,38 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.2 a second); a stretch of 17 semitones."
   },
   {
+   "slug": "pdmx-liszt-apparitions-no-2-db8b375f",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Liszt Apparitions - No. 2",
+   "composer": "Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.658), the upper end of its range for a whole piece, and the piece shows sustained fast notes (11.7 a second), a stretch of 16 semitones, dense chords (51 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 11 slice(s) that no hand can strike as written and 18 (medium) and 16 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Apparitions No. 2: bar 98, two voices run 1/120 of a quarter past the bar (tuplet rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "db8b375f8af30ed6d96c8ed69b339a6d2077cc7269b4d41b266b0d04ef14538e",
+    "path": "./mxl/12/2/QmU3n5oSFgbxPHLaqH83zdqWhsxdRuttHFExiwFasiagaN.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 11,
+    "lint": {
+     "medium": 18,
+     "large": 16
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (11.7 a second); a stretch of 16 semitones; dense chords (51 percent of onsets)."
+  },
+  {
    "slug": "pdmx-luft-hafen-894c6719",
    "source": "pdmx",
    "level": 6,
@@ -3957,6 +4051,38 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (8.2 a second); a stretch of 12 semitones; dense chords (82 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "October: Autumn Song from Tchaikovsky's The Seasons",
+   "composer": "P. Tschaikowsky Op. 37a No. 10",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 80,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 10.568), the upper end of its range for a whole piece, and the piece shows sustained fast notes (5.0 a second), a stretch of 19 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 9 (medium) and 4 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "c38d49b5ae4e6de1d09582060cfc68e66bdd3c7434dfc2c13c14906e474e050f",
+    "path": "./mxl/4/13/QmecvQCAXGvX7dNDBLKdEMYhxaehk3gdBMQ5ccBY5wGDS8.mxl",
+    "license": "cc-zero",
+    "rating": "4.82",
+    "nRatings": "247",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 3,
+    "lint": {
+     "medium": 9,
+     "large": 4
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (5.0 a second); a stretch of 19 semitones."
   },
   {
    "slug": "pdmx-overture-to-carmen-for-piano-solo-by-geo-ee7748e4",
@@ -4435,6 +4561,100 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.7 a second); a stretch of 22 semitones; dense chords (77 percent of onsets)."
   },
   {
+   "slug": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Rachmaninoff - Moment Musical No 3 in B Minor",
+   "composer": "Sergei Rachmaninoff",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 56,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 13.097), the upper end of its range for a whole piece, and the piece shows sustained fast notes (5.1 a second), a stretch of 27 semitones, dense chords (92 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 6 slice(s) that no hand can strike as written and 54 (medium) and 52 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "d5a1cb9b3bdffc0e5abca750b3124293cfb7286a2c26cb5f2786117b7b642298",
+    "path": "./mxl/16/35/QmYowyRmD2jiFvRNr6SaNrLLyxY8vX1eRmPs22RLMZExsp.mxl",
+    "license": "cc-zero",
+    "rating": "4.83",
+    "nRatings": "21",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 6,
+    "lint": {
+     "medium": 54,
+     "large": 52
+    }
+   }
+  },
+  {
+   "slug": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Rachmaninoff - Moment Musical No 5 in Db Major",
+   "composer": "Sergei Rachmaninoff",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 54,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 12.648), the upper end of its range for a whole piece, and the piece shows sustained fast notes (4.8 a second), a stretch of 36 semitones, dense chords (84 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 41 (medium) and 40 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "7d3ee99fae8755de1b03e85ec48f59c7b2ffdef8e26be38d8a2080cdb4c93d8e",
+    "path": "./mxl/12/52/QmUxEb9UmpcoNvB3gAcoLJL91wPkD3EWyTd1QXnKZ2DkBb.mxl",
+    "license": "cc-zero",
+    "rating": "4.85",
+    "nRatings": "18",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 3,
+    "lint": {
+     "medium": 41,
+     "large": 40
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (4.8 a second); a stretch of 36 semitones; dense chords (84 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Rachmaninoff: Ètude-Tableaux No. 1 in C Minor",
+   "composer": "Sergei Rachmaninoff",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 15.606), the upper end of its range for a whole piece, and the piece shows sustained fast notes (22.3 a second), a stretch of 28 semitones, dense chords (54 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 25 slice(s) that no hand can strike as written and 71 (medium) and 71 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Rachmaninoff, Etude-Tableaux No. 1: eight bars whose voices run 3/160 or 1/40 of a quarter past the bar (tuplet rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "0df00b70712cc7f91fe081913f276060595662b135eec550eaeb64a52c6512db",
+    "path": "./mxl/3/13/Qmdc75HV6tGZcYsrPFw87yngDPvCWSFwF3CXXnj9yySiXJ.mxl",
+    "license": "cc-zero",
+    "rating": "4.92",
+    "nRatings": "11",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 25,
+    "lint": {
+     "medium": 71,
+     "large": 71
+    }
+   }
+  },
+  {
    "slug": "pdmx-rejoice-give-praise-our-king-is-here-i-h-637954e5",
    "source": "pdmx",
    "level": 6,
@@ -4896,6 +5116,38 @@
     "fingerings": 0,
     "version": "3.1"
    }
+  },
+  {
+   "slug": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Sergei Rachmaninoff: Moment Musicaux Op.16 No.4 in E minor",
+   "composer": "Sergei Rachmaninoff",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 104,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 10.035), the upper end of its range for a whole piece, and the piece shows sustained fast notes (18.7 a second), a stretch of 16 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 123 (medium) and 110 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "cbd8288c913d14ba5bc57d16b94629f3ca538f21e1869b12b6d3102881d13257",
+    "path": "./mxl/11/41/QmTRPZhYJzrAhjguwW93X9djKmqXbW4je5uv15yoRf7GBu.mxl",
+    "license": "cc-zero",
+    "rating": "4.92",
+    "nRatings": "178",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 2,
+    "lint": {
+     "medium": 123,
+     "large": 110
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (18.7 a second); a stretch of 16 semitones."
   },
   {
    "slug": "pdmx-seria-s-gate-epilogue-cf57d044",

@@ -268342,6 +268342,118 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 220,
+      "measureElements": 220,
+      "firstMeasure": "1",
+      "lastMeasure": "220",
+      "notes": 4464,
+      "graceNotes": 63,
+      "fingerings": 0,
+      "writtenQuarters": 440.0,
+      "unfoldedQuarters": 448.0,
+      "tempoQpm": 128.0,
+      "key": [
+        "0",
+        null
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 2273126,
+      "pitchRange": [
+        29,
+        101
+      ],
+      "staffAvgPitch": {
+        "1": 76.7,
+        "2": 55.2
+      },
+      "approxDurationSec": 210,
+      "music21": {
+        "parts": 2,
+        "measures": 220,
+        "noteOrChord": 2953,
+        "highestTime": 440.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 12
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 21.236,
+        "shifts": 58.728,
+        "span": 24.0,
+        "chord": 0.469,
+        "fifths": 0.0,
+        "accidentals": 16.849,
+        "seconds": 206.25,
+        "leaps": 12.54
+      },
+      "score": 13.203,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 4433,
+          "errors": 173,
+          "warnings": 984,
+          "counts": {
+            "L01": 2,
+            "L03": 18,
+            "L04": 2,
+            "L05": 152,
+            "L06": 8,
+            "L07": 561,
+            "L08": 190,
+            "L09": 31,
+            "L10": 4,
+            "L11": 49,
+            "L12": 17,
+            "L13": 12,
+            "L14": 124
+          }
+        },
+        "large": {
+          "notes": 4433,
+          "errors": 166,
+          "warnings": 991,
+          "counts": {
+            "L01": 2,
+            "L03": 17,
+            "L04": 2,
+            "L05": 146,
+            "L06": 7,
+            "L07": 577,
+            "L08": 186,
+            "L09": 27,
+            "L10": 4,
+            "L11": 46,
+            "L12": 10,
+            "L13": 16,
+            "L14": 134
+          }
+        }
+      },
+      "scoreSha256": "02db8d823caa3e6166f4a2afaabf8efd6543501324efbae6509d77a4c0b43919",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "pdmx-franz-liszt-transcendental-tude-no-2-in-d2dd5a2b": {
     "ok": true,
     "conversionWarnings": [],
@@ -268451,6 +268563,118 @@
       },
       "scoreSha256": "61f5ef9eade0a1cc3f43e0f2f69e2e2ed160c0a1b9befc5c8aa8daa47991c783",
       "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 228,
+      "measureElements": 228,
+      "firstMeasure": "1",
+      "lastMeasure": "228",
+      "notes": 6306,
+      "graceNotes": 4,
+      "fingerings": 0,
+      "writtenQuarters": 646.0,
+      "unfoldedQuarters": 646.0,
+      "tempoQpm": 160.0,
+      "key": [
+        "-3",
+        null
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 2854831,
+      "pitchRange": [
+        24,
+        107
+      ],
+      "staffAvgPitch": {
+        "2": 52.1,
+        "1": 75.7
+      },
+      "approxDurationSec": 242,
+      "music21": {
+        "parts": 2,
+        "measures": 228,
+        "noteOrChord": 3230,
+        "highestTime": 646.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 15
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 25.99,
+        "shifts": 75.498,
+        "span": 24.0,
+        "chord": 0.652,
+        "fifths": 3.0,
+        "accidentals": 31.623,
+        "seconds": 242.25,
+        "leaps": 24.309
+      },
+      "score": 16.821,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 6195,
+          "errors": 67,
+          "warnings": 1847,
+          "counts": {
+            "L01": 4,
+            "L03": 9,
+            "L04": 2,
+            "L05": 52,
+            "L06": 5,
+            "L07": 684,
+            "L08": 688,
+            "L09": 261,
+            "L10": 21,
+            "L11": 133,
+            "L12": 3,
+            "L13": 35,
+            "L14": 52
+          }
+        },
+        "large": {
+          "notes": 6195,
+          "errors": 65,
+          "warnings": 1789,
+          "counts": {
+            "L01": 4,
+            "L03": 9,
+            "L04": 2,
+            "L05": 50,
+            "L06": 4,
+            "L07": 695,
+            "L08": 656,
+            "L09": 237,
+            "L10": 21,
+            "L11": 125,
+            "L12": 3,
+            "L13": 34,
+            "L14": 48
+          }
+        }
+      },
+      "scoreSha256": "0ca9c030c234ba063f439c73fcb9ce28a76857223f3fd95a91c3f06cf170b916",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -271676,6 +271900,114 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "pdmx-liszt-apparitions-no-2-db8b375f": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-liszt-apparitions-no-2-db8b375f.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 34: 3/2 of 3 quarters (partial bar, e.g. 1st ending)",
+          "measure 35: 3/2 of 3 quarters (partial bar, e.g. 1st ending)",
+          "measure 52: 3/2 of 3 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 98,
+      "measureElements": 98,
+      "firstMeasure": "1",
+      "lastMeasure": "98",
+      "notes": 1638,
+      "graceNotes": 27,
+      "fingerings": 0,
+      "writtenQuarters": 289.5,
+      "unfoldedQuarters": 289.5,
+      "tempoQpm": 130.0,
+      "key": [
+        "0",
+        null
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 853046,
+      "pitchRange": [
+        33,
+        101
+      ],
+      "staffAvgPitch": {
+        "1": 75.8,
+        "2": 56.4
+      },
+      "approxDurationSec": 134,
+      "music21": {
+        "parts": 2,
+        "measures": 98,
+        "noteOrChord": 1217,
+        "highestTime": 289.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 5
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 11.72,
+        "shifts": 48.09,
+        "span": 16.0,
+        "chord": 0.509,
+        "fifths": 0.0,
+        "accidentals": 27.395,
+        "seconds": 133.615,
+        "leaps": 10.682
+      },
+      "score": 11.658,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1583,
+          "errors": 18,
+          "warnings": 298,
+          "counts": {
+            "L05": 18,
+            "L06": 2,
+            "L07": 130,
+            "L08": 74,
+            "L09": 19,
+            "L11": 8,
+            "L12": 7,
+            "L13": 14,
+            "L14": 58
+          }
+        },
+        "large": {
+          "notes": 1583,
+          "errors": 16,
+          "warnings": 298,
+          "counts": {
+            "L05": 16,
+            "L06": 2,
+            "L07": 141,
+            "L08": 64,
+            "L09": 20,
+            "L11": 8,
+            "L12": 7,
+            "L13": 12,
+            "L14": 56
+          }
+        }
+      },
+      "scoreSha256": "d0a79a3d73ce31ec6b78a290a0da4db5cc31115a07e29302bb4d314f631c64ba",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "pdmx-luft-hafen-894c6719": {
     "ok": true,
     "conversionWarnings": [],
@@ -273230,6 +273562,107 @@
       },
       "scoreSha256": "28cf5e66e319c50ec2775219f65c9c0e897a64c42a6d6192f6525549c20aacb1",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 56,
+      "measureElements": 56,
+      "firstMeasure": "1",
+      "lastMeasure": "56",
+      "notes": 916,
+      "graceNotes": 14,
+      "fingerings": 0,
+      "writtenQuarters": 224.0,
+      "unfoldedQuarters": 224.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-1",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 503548,
+      "pitchRange": [
+        37,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 69.9,
+        "2": 55.7
+      },
+      "approxDurationSec": 168,
+      "music21": {
+        "parts": 2,
+        "measures": 56,
+        "noteOrChord": 730,
+        "highestTime": 224.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.964,
+        "shifts": 51.417,
+        "span": 19.0,
+        "chord": 0.44,
+        "fifths": 1.0,
+        "accidentals": 13.789,
+        "seconds": 168.0,
+        "leaps": 32.906
+      },
+      "score": 10.568,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 846,
+          "errors": 9,
+          "warnings": 202,
+          "counts": {
+            "L03": 2,
+            "L05": 7,
+            "L06": 7,
+            "L07": 96,
+            "L08": 24,
+            "L09": 15,
+            "L13": 20,
+            "L14": 60
+          }
+        },
+        "large": {
+          "notes": 846,
+          "errors": 4,
+          "warnings": 202,
+          "counts": {
+            "L05": 4,
+            "L06": 4,
+            "L07": 92,
+            "L08": 24,
+            "L09": 15,
+            "L13": 18,
+            "L14": 67
+          }
+        }
+      },
+      "scoreSha256": "8685d982842ab1d177a327267db9b64569dde1703144b22058ef0caab78c8c21",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -274889,6 +275322,315 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 55,
+      "measureElements": 56,
+      "firstMeasure": "0",
+      "lastMeasure": "55",
+      "notes": 1202,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 211.0,
+      "unfoldedQuarters": 331.0,
+      "tempoQpm": 56.0,
+      "key": [
+        "2",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 600124,
+      "pitchRange": [
+        23,
+        85
+      ],
+      "staffAvgPitch": {
+        "1": 62.4,
+        "2": 40.3
+      },
+      "approxDurationSec": 355,
+      "music21": {
+        "parts": 2,
+        "measures": 56,
+        "noteOrChord": 641,
+        "highestTime": 211.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.087,
+        "shifts": 80.558,
+        "span": 27.0,
+        "chord": 0.917,
+        "fifths": 2.0,
+        "accidentals": 10.174,
+        "seconds": 226.071,
+        "leaps": 2.222
+      },
+      "score": 13.097,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1149,
+          "errors": 54,
+          "warnings": 233,
+          "counts": {
+            "L03": 2,
+            "L05": 52,
+            "L07": 98,
+            "L08": 104,
+            "L09": 25,
+            "L10": 1,
+            "L13": 3,
+            "L14": 5
+          }
+        },
+        "large": {
+          "notes": 1149,
+          "errors": 52,
+          "warnings": 222,
+          "counts": {
+            "L05": 52,
+            "L07": 99,
+            "L08": 96,
+            "L09": 22,
+            "L10": 1,
+            "L13": 3,
+            "L14": 4
+          }
+        }
+      },
+      "scoreSha256": "2ff06add975b9b6fe2a0060c3f9ec362c110565c7ab2c6711adbd3c642a16aed",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 53,
+      "measureElements": 53,
+      "firstMeasure": "1",
+      "lastMeasure": "53",
+      "notes": 1169,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 210.0,
+      "unfoldedQuarters": 210.0,
+      "tempoQpm": 54.0,
+      "key": [
+        "-5",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 700730,
+      "pitchRange": [
+        25,
+        83
+      ],
+      "staffAvgPitch": {
+        "2": 43.6,
+        "1": 64.6
+      },
+      "approxDurationSec": 233,
+      "music21": {
+        "parts": 2,
+        "measures": 53,
+        "noteOrChord": 933,
+        "highestTime": 210.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.783,
+        "shifts": 47.004,
+        "span": 36.0,
+        "chord": 0.844,
+        "fifths": 5.0,
+        "accidentals": 10.125,
+        "seconds": 233.333,
+        "leaps": 1.266
+      },
+      "score": 12.648,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1101,
+          "errors": 41,
+          "warnings": 323,
+          "counts": {
+            "L03": 1,
+            "L05": 40,
+            "L06": 1,
+            "L07": 120,
+            "L08": 166,
+            "L09": 32,
+            "L13": 5,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 1101,
+          "errors": 40,
+          "warnings": 320,
+          "counts": {
+            "L03": 1,
+            "L05": 39,
+            "L06": 1,
+            "L07": 189,
+            "L08": 95,
+            "L09": 30,
+            "L13": 5,
+            "L14": 5
+          }
+        }
+      },
+      "scoreSha256": "ab2d99571808f1d8ab71c095f94f17b52256c68f65f143d078516dff968f21b4",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 78,
+      "measureElements": 78,
+      "firstMeasure": "1",
+      "lastMeasure": "78",
+      "notes": 3026,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 292.0,
+      "unfoldedQuarters": 292.0,
+      "tempoQpm": 130.0,
+      "key": [
+        "-3",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 1650425,
+      "pitchRange": [
+        24,
+        94
+      ],
+      "staffAvgPitch": {
+        "2": 49.8,
+        "1": 69.3
+      },
+      "approxDurationSec": 135,
+      "music21": {
+        "parts": 2,
+        "measures": 78,
+        "noteOrChord": 2162,
+        "highestTime": 292.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 10
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 22.305,
+        "shifts": 68.536,
+        "span": 28.0,
+        "chord": 0.543,
+        "fifths": 3.0,
+        "accidentals": 27.778,
+        "seconds": 134.769,
+        "leaps": 17.496
+      },
+      "score": 15.606,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 3002,
+          "errors": 71,
+          "warnings": 1001,
+          "counts": {
+            "L05": 71,
+            "L06": 7,
+            "L07": 361,
+            "L08": 352,
+            "L09": 131,
+            "L10": 6,
+            "L11": 96,
+            "L12": 5,
+            "L13": 20,
+            "L14": 43
+          }
+        },
+        "large": {
+          "notes": 3002,
+          "errors": 71,
+          "warnings": 992,
+          "counts": {
+            "L05": 71,
+            "L06": 6,
+            "L07": 374,
+            "L08": 350,
+            "L09": 128,
+            "L10": 6,
+            "L11": 82,
+            "L12": 5,
+            "L13": 21,
+            "L14": 41
+          }
+        }
+      },
+      "scoreSha256": "eb89d06ca2863381f9978dcfee036a5571cd618b9a65891d311df1014502ccab",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "pdmx-rejoice-give-praise-our-king-is-here-i-h-637954e5": {
     "ok": true,
     "conversionWarnings": [],
@@ -276500,6 +277242,114 @@
       },
       "scoreSha256": "3a24dc47ba697f0c7233d69f382a8db5a95d6b972ba6d1a5c8012511e82c9817",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 67,
+      "measureElements": 67,
+      "firstMeasure": "1",
+      "lastMeasure": "67",
+      "notes": 2893,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 268.0,
+      "unfoldedQuarters": 268.0,
+      "tempoQpm": 104.0,
+      "key": [
+        "1",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 1714789,
+      "pitchRange": [
+        28,
+        98
+      ],
+      "staffAvgPitch": {
+        "2": 53.8,
+        "1": 71.0
+      },
+      "approxDurationSec": 155,
+      "music21": {
+        "parts": 2,
+        "measures": 67,
+        "noteOrChord": 2508,
+        "highestTime": 268.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 8
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 18.698,
+        "shifts": 34.434,
+        "span": 16.0,
+        "chord": 0.306,
+        "fifths": 1.0,
+        "accidentals": 16.672,
+        "seconds": 154.615,
+        "leaps": 4.397
+      },
+      "score": 10.035,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 2768,
+          "errors": 123,
+          "warnings": 521,
+          "counts": {
+            "L03": 29,
+            "L05": 94,
+            "L06": 6,
+            "L07": 252,
+            "L08": 45,
+            "L09": 24,
+            "L10": 2,
+            "L11": 100,
+            "L12": 2,
+            "L13": 3,
+            "L14": 90
+          }
+        },
+        "large": {
+          "notes": 2768,
+          "errors": 110,
+          "warnings": 523,
+          "counts": {
+            "L03": 17,
+            "L05": 93,
+            "L06": 17,
+            "L07": 263,
+            "L08": 42,
+            "L09": 26,
+            "L10": 2,
+            "L11": 90,
+            "L12": 2,
+            "L13": 3,
+            "L14": 81
+          }
+        }
+      },
+      "scoreSha256": "1084aea4b643c740717c52d4c35ef2b0f44d317e78e0e3989e4a25fda573dd9f",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -333678,6 +334528,932 @@
       ]
     },
     {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "1",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "E4",
+        "A4",
+        "C5",
+        "A5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "1",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "C4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "2",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "B4",
+        "E5",
+        "G#5",
+        "E6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "2",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E3",
+        "B3",
+        "E4",
+        "G#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "3",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "E4",
+        "A4",
+        "C5",
+        "A5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "3",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "C4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "4",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "B4",
+        "E5",
+        "G#5",
+        "E6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "4",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E3",
+        "B3",
+        "E4",
+        "G#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "5",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "E4",
+        "A4",
+        "C5",
+        "A5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "C4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "6",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "B4",
+        "E5",
+        "G#5",
+        "E6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "6",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E3",
+        "B3",
+        "E4",
+        "G#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "7",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "E4",
+        "A4",
+        "C5",
+        "A5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "7",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "C4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "8",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "B4",
+        "E5",
+        "G#5",
+        "E6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "8",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E3",
+        "B3",
+        "E4",
+        "G#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "9",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "E5",
+        "A5",
+        "C#6",
+        "A6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "9",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "C#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "10",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "A4",
+        "F5",
+        "A5",
+        "F6"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "10",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D3",
+        "A3",
+        "D4",
+        "F4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D5",
+        "G5",
+        "B5",
+        "G6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "11",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G2",
+        "D3",
+        "G3",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "12",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G4",
+        "E5",
+        "G5",
+        "E6"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "12",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "G3",
+        "C4",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "13",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "B4",
+        "F5",
+        "B5",
+        "F6"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "14",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "A4",
+        "E5",
+        "A5",
+        "E6"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "17",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "E5",
+        "A5",
+        "C#6",
+        "A6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "17",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "C#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "18",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "A4",
+        "F5",
+        "A5",
+        "F6"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "19",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D5",
+        "G5",
+        "B5",
+        "G6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "19",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G2",
+        "D3",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "20",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G4",
+        "E5",
+        "G5",
+        "E6"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "20",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "G3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "21",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "B4",
+        "F5",
+        "B5",
+        "F6"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "22",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "A4",
+        "E5",
+        "A5",
+        "E6"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "36",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "38",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "54",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "A3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "76",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G5",
+        "A5",
+        "A6"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "76",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "C#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "78",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "F5",
+        "G5",
+        "G6"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "78",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G2",
+        "D3",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "79",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "E3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "81",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E2",
+        "C3",
+        "A3"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "82",
+      "hand": "L",
+      "quarter": 1.0,
+      "pitches": [
+        "E2",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "95",
+      "hand": "L",
+      "quarter": 1.5,
+      "pitches": [
+        "C3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "97",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "A3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "104",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A1",
+        "A2",
+        "A3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "105",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G#1",
+        "G#2",
+        "G#3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "106",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A1",
+        "A2",
+        "A3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "107",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G#1",
+        "G#2",
+        "G#3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "108",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C#2",
+        "C#3",
+        "C#4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "109",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D2",
+        "D3",
+        "D4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "110",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "111",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "112",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D2",
+        "D3",
+        "D4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "113",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "114",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D2",
+        "D3",
+        "D4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "115",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A1",
+        "A2",
+        "A3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+      "bar": "203",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "E3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
       "piece": "pdmx-franz-liszt-transcendental-tude-no-2-in-d2dd5a2b",
       "bar": "7",
       "hand": "L",
@@ -333835,6 +335611,205 @@
       "span": 14,
       "reasons": [
         "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "27",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G1",
+        "B1",
+        "D2",
+        "G2",
+        "D3",
+        "F3"
+      ],
+      "span": 22,
+      "reasons": [
+        "span",
+        "notes"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "69",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G#4",
+        "A#4",
+        "D5",
+        "A#5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "69",
+      "hand": "R",
+      "quarter": 2.5,
+      "pitches": [
+        "G#4",
+        "A#4",
+        "F#5",
+        "A#5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "70",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D#3",
+        "A#3",
+        "G4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "153",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "C3",
+        "A3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "166",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "F5",
+        "G5",
+        "B5",
+        "G6"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "171",
+      "hand": "L",
+      "quarter": 1.5,
+      "pitches": [
+        "G3",
+        "D4",
+        "F4",
+        "B4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "204",
+      "hand": "R",
+      "quarter": 1.5,
+      "pitches": [
+        "E6",
+        "F6",
+        "A6",
+        "E7"
+      ],
+      "span": 12,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "216",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C1",
+        "E1",
+        "G1",
+        "C2",
+        "C3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "217",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G1",
+        "A#1",
+        "C#2",
+        "G2",
+        "C#3"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "218",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C1",
+        "E1",
+        "G1",
+        "C2",
+        "C3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+      "bar": "219",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "G#1",
+        "B1",
+        "D2",
+        "F2",
+        "F3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span",
+        "notes"
       ]
     },
     {
@@ -336683,6 +338658,168 @@
       ]
     },
     {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "56",
+      "hand": "L",
+      "quarter": 0.75,
+      "pitches": [
+        "E2",
+        "B2",
+        "E3",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "56",
+      "hand": "L",
+      "quarter": 1.0,
+      "pitches": [
+        "E2",
+        "B2",
+        "E3",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "56",
+      "hand": "L",
+      "quarter": 1.5,
+      "pitches": [
+        "E2",
+        "B2",
+        "E3",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "56",
+      "hand": "L",
+      "quarter": 2.25,
+      "pitches": [
+        "E2",
+        "E3",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "56",
+      "hand": "L",
+      "quarter": 2.5,
+      "pitches": [
+        "E2",
+        "E3",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "72",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D5",
+        "F#6"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "73",
+      "hand": "R",
+      "quarter": 2.5,
+      "pitches": [
+        "A4",
+        "C#6"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "74",
+      "hand": "R",
+      "quarter": 1.5,
+      "pitches": [
+        "A4",
+        "C#6"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "75",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D5",
+        "F#6"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "75",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "A5",
+        "C#7"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-liszt-apparitions-no-2-db8b375f",
+      "bar": "75",
+      "hand": "R",
+      "quarter": 2.0,
+      "pitches": [
+        "A4",
+        "C#6"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
       "piece": "pdmx-luft-hafen-894c6719",
       "bar": "1",
       "hand": "R",
@@ -337769,6 +339906,52 @@
         "F#7"
       ],
       "span": 36,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+      "bar": "12",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "D4"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+      "bar": "21",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "E4"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+      "bar": "45",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "D4"
+      ],
+      "span": 17,
       "reasons": [
         "span"
       ]
@@ -339037,6 +341220,529 @@
         "F#4"
       ],
       "span": 22,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "G3",
+        "C#4",
+        "G4",
+        "B4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "26",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "B1",
+        "B2",
+        "F#3",
+        "A3",
+        "D4"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "43",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "G3",
+        "C#4",
+        "G4",
+        "B4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "46",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "E2",
+        "E3",
+        "B3",
+        "D4",
+        "G4"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "48",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "F#2",
+        "C#3",
+        "A#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "49",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "C#4",
+        "D4",
+        "A4",
+        "C#5"
+      ],
+      "span": 12,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+      "bar": "29",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "F#3",
+        "A#3",
+        "E4",
+        "A#4",
+        "A#5"
+      ],
+      "span": 28,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+      "bar": "35",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E1",
+        "E2",
+        "B2",
+        "G#3",
+        "E4"
+      ],
+      "span": 36,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+      "bar": "38",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "F3",
+        "G#3",
+        "C#4",
+        "F4",
+        "G#4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "1",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "2",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "3",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "G#1",
+        "G#2",
+        "B3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 3.5,
+      "pitches": [
+        "G1",
+        "G2",
+        "G3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "6",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "7",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "8",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "19",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G1",
+        "G2",
+        "A#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "20",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G1",
+        "G2",
+        "A#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "21",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "22",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "27",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D1",
+        "D2",
+        "F3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "29",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C#1",
+        "C#2",
+        "F3"
+      ],
+      "span": 28,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "31",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C#1",
+        "C#2",
+        "E3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "33",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C1",
+        "C2",
+        "E3"
+      ],
+      "span": 28,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "46",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "47",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "48",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "50",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "G#1",
+        "G#2",
+        "B3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "50",
+      "hand": "L",
+      "quarter": 3.5,
+      "pitches": [
+        "G1",
+        "G2",
+        "G3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "51",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "52",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "53",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F1",
+        "F2",
+        "G#3"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+      "bar": "59",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G2",
+        "D#3",
+        "B3"
+      ],
+      "span": 16,
       "reasons": [
         "span"
       ]
@@ -341453,6 +344159,36 @@
         "G#2",
         "F#3",
         "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+      "bar": "41",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "G2",
+        "E3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+      "bar": "42",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "G2",
+        "E3"
       ],
       "span": 16,
       "reasons": [

@@ -7,9 +7,9 @@ copies with the editor's fingering) and the 119 pieces of the L1 build (see
 engraving was checked note by note against LilyPond's own MIDI. Regenerate with
 `content/tools/build.py` (see `content/tools/README.md`).
 
-The library has since grown to 2,702 pieces: 253 curated pieces (our
+The library has since grown to 3,189 pieces: 253 curated pieces (our
 arrangements and Mutopia engravings, the first 149 of them documented here) and
-2,449 scores from the MuseScore archive (PDMX), which admits only files
+2,936 scores from the MuseScore archive (PDMX), which admits only files
 declared public domain or CC0. The later lanes, their selection rules and their
 build steps are in `content/tools/README.md`. The manifest groups pieces into
 grades 1–6; the app shows them as four levels (Easy 1–2, Medium 3, Harder 4,

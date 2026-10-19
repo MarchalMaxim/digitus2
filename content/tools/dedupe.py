@@ -21,7 +21,8 @@ cannot be the copy that stays. The songs lane
 (candidates-other.json, pdmx_songs.py) is compared with the classical lane as one set. A curated piece is never removed, and curated copies of each other
 are only listed. `--apply` writes the archive copies into the `duplicates` map of
 `content/tools/pdmx-excluded.json` ({slug or sha256: {"of": keeper, "kind", "similarity"}}), which
-`pdmx_fragments.py` reads. The full report is written to `content/_build/dedupe/report.json`.
+`pdmx_fragments.py` reads; a copy already in the map stays while the piece it copies can still ship. The
+full report is written to `content/_build/dedupe/report.json`.
 
     content/.venv/Scripts/python.exe -I content/tools/dedupe.py [--apply]
 """
@@ -120,7 +121,7 @@ def load_items() -> list[dict]:
 def shipped_shas() -> set[str]:
     """The archive pieces the catalog fragments ship now."""
     out: set[str] = set()
-    for name in ("pdmx-library.json", "pdmx-advanced.json", "pdmx-songs.json"):
+    for name in ("pdmx-library.json", "pdmx-advanced.json", "pdmx-songs.json", "pdmx-songs-advanced.json"):
         path = HERE / "catalog.d" / name
         if path.exists():
             out |= {p["pdmx"]["sha256"] for p in json.loads(path.read_text(encoding="utf-8")).get("pieces", [])}
@@ -203,6 +204,15 @@ def main(argv=None) -> int:
           f"same tune, other arrangement (kept): {len(same_tune)}", flush=True)
     if a.apply:
         doc = json.loads(EXCLUDED.read_text(encoding="utf-8"))
+        # A copy found by an earlier run stays a copy while the piece it copies can still ship (an item that is not a
+        # copy itself): a larger pool can make a shared shingle common (COMMON) and hide a pair the smaller pool found
+        # (six pairs when the note ceiling was lifted). A piece that keeps a copy in this run is never one.
+        keepers = {v["of"] for v in found.values()}
+        kept = {other: rec for other, rec in doc.get("duplicates", {}).items()
+                if other not in found and other not in keepers and rec["of"] in data and rec["of"] not in found}
+        if kept:
+            print(f"kept {len(kept)} copies found by an earlier run", flush=True)
+        found = {**kept, **found}
         doc["duplicates"] = dict(sorted(found.items()))
         EXCLUDED.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print(f"wrote {len(found)} duplicates to {EXCLUDED.name}", flush=True)

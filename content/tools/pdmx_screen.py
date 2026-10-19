@@ -8,7 +8,7 @@ the scores are never edited by hand. The pipeline is:
    (the column `license_conflict` marks the 31,221 rows where MuseScore's website and the
    file's own copyright data disagree), that are not drafts or vocal scores, that have at
    most two tracks, whose genres are classical, folk or unlabelled, and that have 30 to
-   6,000 notes.
+   25,000 notes (MAX_NOTES).
 2. Archive (mxl.tar.gz): stream the members that match, read each .mxl container once,
    and parse its MusicXML. A score is a solo piano score when exactly one part sounds, it
    has one or two staves, its instrument is a piano (General MIDI 1 to 6, or the part
@@ -24,7 +24,9 @@ Run with the content interpreter from the repository root:
         --csv research/data/_downloads/pdmx/PDMX.csv \
         --archive research/data/_downloads/pdmx/mxl.tar.gz
 
-`--limit N` screens only the first N matching members (a quick check).
+`--limit N` screens only the first N matching members (a quick check). `--above N` screens only
+the rows with more than N notes, the ones a run with a ceiling of N left out, and appends them to
+the screen file, so raising MAX_NOTES does not need a full run again.
 """
 
 from __future__ import annotations
@@ -52,7 +54,11 @@ ALLOWED_LICENSES = ("publicdomain", "cc-zero")
 ALLOWED_GENRE_TOKENS = {"classical", "folk", "NA", "religiousmusic"}
 PIANO_PROGRAMS = {"1", "2", "3", "4", "5", "6"}  # General MIDI 1-based: grand, bright, electric grand, honky-tonk, EP1, EP2
 PIANO_NAME_WORDS = ("piano", "klavier", "pianoforte", "pianofort")
-MIN_NOTES, MAX_NOTES = 30, 6000
+# The ceiling was 6,000 notes until the owner asked to lift it (2026-10-19). It is now the longest score
+# tested in the app: Chopin's twelve Etudes Op. 25 in one file, 24,956 notes and 919 bars, fingered and laid
+# out in 8.6 s, open in 16 s at phone width (190 pages, 110 MB of page heap), and it plays. Measured in a
+# background tab of the dev server, which can run slower than a tab in front.
+MIN_NOTES, MAX_NOTES = 30, 25000
 MAX_TRACKS = 2
 SCREEN_FIELDS = ("path", "sha256", "bytes", "title", "composer", "genres", "rating", "n_ratings",
                  "n_notes_meta", "complexity")
@@ -248,13 +254,17 @@ def main(argv=None) -> int:
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     ap.add_argument("--other", action="store_true",
                     help="screen the genres outside classical, folk and religious (-> screen-other.jsonl)")
+    ap.add_argument("--above", type=int, default=None, metavar="N",
+                    help="screen only the rows with more than N notes (what a ceiling of N left out) and append them")
     a = ap.parse_args(argv)
     (RAW / "piano").mkdir(parents=True, exist_ok=True)
     wanted = metadata_candidates(a.csv, other=a.other)
+    if a.above is not None:
+        wanted = {base: meta for base, meta in wanted.items() if meta["n_notes_meta"] > a.above}
     print(f"metadata candidates: {len(wanted)}", flush=True)
     kept = rejected = 0
     target = RAW / ("screen-other.jsonl" if a.other else "screen.jsonl")
-    with target.open("w", encoding="utf-8") as out, Pool(a.workers) as pool:
+    with target.open("a" if a.above is not None else "w", encoding="utf-8") as out, Pool(a.workers) as pool:
         records = pool.imap(_screen_member, stream_members(a.archive, wanted, a.limit), chunksize=16)
         for n, record in enumerate(records, 1):
             out.write(json.dumps(record, ensure_ascii=False) + "\n")

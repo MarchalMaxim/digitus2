@@ -105,10 +105,11 @@ def items() -> int:
     return len(songs)
 
 
-def apply(flags_path: Path) -> None:
-    """Any flag removes a song (AGREE = 1). The flags are numbered as the last `items` run numbered them."""
+def apply(flags_path: Path, index_path: Path = BUILD / "index.json") -> None:
+    """Any flag removes a song (AGREE = 1). The flags are numbered as the last `items` run numbered them, or as
+    `index_path` maps another review list's numbers to sha256s."""
     flags = json.loads(flags_path.read_text(encoding="utf-8"))
-    index = json.loads((BUILD / "index.json").read_text(encoding="utf-8"))
+    index = json.loads(index_path.read_text(encoding="utf-8"))
     reasons: dict[str, list[str]] = {}
     for flag in flags:
         sha = index.get(str(flag["n"]))
@@ -150,6 +151,8 @@ def main(argv=None) -> int:
     sub.add_parser("items")
     p = sub.add_parser("apply")
     p.add_argument("flags", type=Path)
+    p.add_argument("--index", type=Path, default=BUILD / "index.json",
+                   help="number -> sha256 of the review list the flags refer to (default: the last `items` run)")
     sub.add_parser("reinstate")
     c = sub.add_parser("candidates")
     c.add_argument("--archive", type=Path, required=True)
@@ -157,7 +160,7 @@ def main(argv=None) -> int:
     if a.cmd == "items":
         items()
     elif a.cmd == "apply":
-        apply(a.flags)
+        apply(a.flags, a.index)
     elif a.cmd == "reinstate":
         reinstate()
     else:

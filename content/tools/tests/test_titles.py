@@ -3,7 +3,6 @@ the check that no title or composer in the catalog is still the damaged form of 
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
@@ -49,9 +48,7 @@ def test_a_repair_is_the_text_of_the_score_that_damages_into_the_field():
         "In der Halle des Bergkönigs - Grieg")
 
 
-# What a letter damaged to its lead byte leaves behind: a lead letter of Latin-1 followed by something
-# that is not part of a word, as in "Äáºm" or "ÃÏ". The titles of the library hold none.
-RESIDUE = re.compile("[ÃÂÄÅÆÐÑØÙÎÏÕ×Ç][^a-zA-Z ]|[À-ÿ][\u0080-¿]|[¡-¿][À-ÿ]|[ÃÂÄÅÆÐÑØÙÎÏ]$")
+RESIDUE = titles.RESIDUE
 
 
 def archive_pieces():

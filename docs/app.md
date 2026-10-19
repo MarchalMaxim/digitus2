@@ -4,7 +4,7 @@ The app in `apps/web` (`@digitus2/web`): static files on GitHub Pages, no server
 
 ## What the app does
 
-A beginner opens one of the 2,702 built-in pieces from the library, or a MusicXML or MIDI file of their own, and sees the score with a finger number on every note, chosen by the digitus2 engine for the selected hand size. Play sounds the piece on a sampled grand piano while a red cursor marks the notes being heard and an on-screen keyboard shows which finger plays which key. Tempo, one hand or both, metronome, count-in and a bar loop help practice. The fingered score can be exported as MusicXML or printed. An about page lists every licence and attribution.
+A beginner opens one of the 3,189 built-in pieces from the library, or a MusicXML or MIDI file of their own, and sees the score with a finger number on every note, chosen by the digitus2 engine for the selected hand size. Play sounds the piece on a sampled grand piano while a red cursor marks the notes being heard and an on-screen keyboard shows which finger plays which key. Tempo, one hand or both, metronome, count-in and a bar loop help practice. The fingered score can be exported as MusicXML or printed. An about page lists every licence and attribution.
 
 Everything runs in the browser. The network carries the app's static files, the piano samples (served by the app's own site) and, only when the reader connects to it, the optional local scanning worker. The app installs from the browser, and a service worker keeps the app and what the reader has opened, so a piece opened once opens and plays offline.
 
@@ -70,7 +70,7 @@ Why Verovio (spike sections 1, 3 and 9): it keeps MusicXML note ids; it writes e
 
 ### Library data
 
-- `content/library-index.json` holds the eight fields the list reads (slug, title, composer, grade, collection, genre, duration) in a compact columnar form with a collection table. It is fetched before the app renders and is not bundled: at 2,702 pieces it is about 78 KB gzip, which would break the start-up budget.
+- `content/library-index.json` holds the eight fields the list reads (slug, title, composer, grade, collection, genre, duration) in a compact columnar form with a collection table. It is fetched before the app renders and is not bundled: at 3,189 pieces it is about 93 KB gzip, which would break the start-up budget.
 - `content/manifest.json` holds the full entries (sources, licences, file paths; 3.7 MB, about 229 KB gzip). It is fetched as JSON the first time a library piece or the about page needs it, not imported as a module: a 3 MB JSON module keeps its source text and the parsed string alive for the page's lifetime (about 12 MB of heap).
 - The map from manifest paths to score files (`import.meta.glob`, one entry per piece) lives in `scoreFiles.ts` and loads when a score opens. In the start-up chunk it made the bundle grow with the library (152.2 KB gzip at 1,682 pieces, over the 150 KB budget).
 - MuseScore-archive scores are stored as gzip (`.musicxml.gz`). A server may already have decoded such a file, so `readScoreFile` decides by the gzip signature bytes (`1f 8b`), not by the extension.
@@ -404,7 +404,7 @@ Gates, enforced by `pnpm verify`:
 | Twinkle's first system, legend seen                                              | top at most 220 px at 768 and 1280, 240 px at 360                                                                                                               | `states.spec.ts`                                |
 | Service worker precache                                                          | at most 24 MiB                                                                                                                                                  | `src/sw/vitePlugin.ts` (step `build`)           |
 
-Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of the files in `dist/assets` on a production build of the current library (2,702 pieces); sizes are in KB of 1024 bytes.
+Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of the files in `dist/assets` on a production build of the library at 2,702 pieces (it holds 3,189 now; the start-up bundle does not grow with it); sizes are in KB of 1024 bytes.
 
 | Measure                             | Value                                                                                                                                                                                                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -416,7 +416,7 @@ Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of t
 | Library data                        | `library-index.json` 214 KB, about 78 KB gzip, fetched before the first render; `manifest.json` 3.7 MB, 229 KB gzip, fetched when a library piece or the about page first needs it                                                                                                              |
 | Rows on the arrival page of a level | at most 30 (up to 1,415 before the shelves)                                                                                                                                                                                                                                                     |
 
-Library LCP and the open times below were last measured with the 149-piece library and have not been re-measured since the library grew to 2,702 pieces and the list became a fetched index; the gates above still apply. Opening a library piece now first fetches the manifest once (the table above), which those open times do not include.
+Library LCP and the open times below were last measured with the 149-piece library and have not been re-measured since the library grew to thousands of pieces (3,189 now) and the list became a fetched index; the gates above still apply. Opening a library piece now first fetches the manifest once (the table above), which those open times do not include.
 
 Mozart K.545 open path, on the development machine (Windows 11, Playwright's Chromium 1217), a cold browser context per run, the times taken inside the page from the click to the first animation frame or DOM change that shows the milestone; medians:
 

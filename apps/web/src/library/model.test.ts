@@ -99,8 +99,8 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
   it('writes the count and the All button of a shelf; a shelf of 5 or fewer shows all and no button', () => {
     const layout = shelves(allPieces, 'easy');
     const songs = layout.shelves.find((s) => s.id === 'songs')!;
-    expect(songs.count).toBe(145);
-    expect(songs.all).toBe('All 145 songs');
+    expect(songs.count).toBe(153);
+    expect(songs.all).toBe('All 153 songs');
     const jazz = layout.shelves.find((s) => s.id === 'jazz')!;
     expect(jazz.count).toBe(3);
     expect(jazz.all).toBeNull();
@@ -109,18 +109,18 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
     expect(baroque.count).toBe(5);
     expect(baroque.all).toBeNull();
     const medium = shelves(allPieces, 'medium');
-    expect(medium.shelves.find((s) => s.id === 'classical')!.all).toBe('All 658 classical pieces');
+    expect(medium.shelves.find((s) => s.id === 'classical')!.all).toBe('All 661 classical pieces');
     expect(medium.shelves.find((s) => s.id === 'folk')!.all).toBe('All 57 folk tunes and carols');
     expect(medium.shelves.find((s) => s.id === 'jazz')!.all).toBe(
       'All 6 jazz, ragtime and modern pieces',
     );
   });
-  it('holds the library of the spec: 2,702 pieces, the counts of the spec table', () => {
-    expect(allPieces).toHaveLength(2702);
+  it('holds the library of the spec: 3,189 pieces, the counts of the spec table', () => {
+    expect(allPieces).toHaveLength(3189);
     const table = (tier: Tier) =>
       Object.fromEntries(shelves(allPieces, tier).shelves.map((s) => [s.id, s.count]));
     expect(table('easy')).toEqual({
-      songs: 145,
+      songs: 153,
       classical: 71,
       folk: 29,
       baroque: 5,
@@ -128,30 +128,30 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
       jazz: 3,
     });
     expect(table('medium')).toEqual({
-      songs: 643,
-      classical: 658,
+      songs: 690,
+      classical: 661,
       folk: 57,
       baroque: 15,
       romantic: 36,
       jazz: 6,
     });
     expect(table('harder')).toEqual({
-      songs: 235,
-      classical: 486,
+      songs: 208,
+      classical: 487,
       folk: 27,
       baroque: 15,
       romantic: 14,
-      jazz: 7,
+      jazz: 5,
     });
     expect(table('challenging')).toEqual({
-      songs: 21,
-      classical: 164,
+      songs: 382,
+      classical: 235,
       folk: 1,
       baroque: 33,
       romantic: 14,
-      jazz: 11,
+      jazz: 36,
     });
-    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([259, 1415, 784, 244]);
+    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([267, 1465, 756, 701]);
   });
   it('leaves out a shelf with no piece in the level', () => {
     const noJazz = pieces.filter((p) => shelfOfGenre(p.genre) !== 'jazz');
@@ -345,11 +345,11 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     const layout = shelf(allPieces, 'medium', 'classical', { pages: 99 });
     expect(layout.kind).toBe('shelf');
     expect(layout.name).toBe('Classical');
-    expect(layout.count).toBe(658);
-    expect(layout.shown).toBe(658);
+    expect(layout.count).toBe(661);
+    expect(layout.shown).toBe(661);
     const names = layout.groups.map((g) => g.heading);
     expect(names.every((h) => h !== null)).toBe(true);
-    expect(rowsOf(layout.groups)).toHaveLength(658);
+    expect(rowsOf(layout.groups)).toHaveLength(661);
     // the curated pieces: wherever a shelf has headings, "Other pieces" comes last
     const withHeadings = TIERS.flatMap((tier) =>
       SHELVES.filter((sh) => shelfHasPieces(pieces, tier, sh.id))
@@ -407,12 +407,12 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     expect(rowsOf(all.groups).slice(0, first.length)).toEqual(first);
   });
   it('offers the last page by its size, and nothing after the last', () => {
-    // Medium classical: 658 = 16 pages of 40 and 18.
-    expect(shelf(allPieces, 'medium', 'classical', { pages: 16 }).more).toBe('Show the last 18');
+    // Medium classical: 661 = 16 pages of 40 and 21.
+    expect(shelf(allPieces, 'medium', 'classical', { pages: 16 }).more).toBe('Show the last 21');
     const last = shelf(allPieces, 'medium', 'classical', { pages: 17 });
     expect(last.more).toBeNull();
-    expect(last.shown).toBe(658);
-    expect(shelf(allPieces, 'medium', 'classical', { pages: 500 }).shown).toBe(658);
+    expect(last.shown).toBe(661);
+    expect(shelf(allPieces, 'medium', 'classical', { pages: 500 }).shown).toBe(661);
     expect(shelf(allPieces, 'medium', 'classical', { pages: 0 }).shown).toBe(40);
     expect([moreLabel(41, en), moreLabel(40, en), moreLabel(1, en)]).toEqual([
       'Show 40 more',
@@ -629,10 +629,10 @@ describe('search (shelves spec 4.4)', () => {
 
 describe('what the live region says (shelves spec 7)', () => {
   it('names the level, the shelf, the page and the search count', () => {
-    expect(announcementFor(shelves(allPieces, 'medium'), en)).toBe('Medium: 1,415 pieces');
-    expect(announcementFor(shelf(allPieces, 'medium', 'songs'), en)).toBe('Songs: 643 pieces');
+    expect(announcementFor(shelves(allPieces, 'medium'), en)).toBe('Medium: 1,465 pieces');
+    expect(announcementFor(shelf(allPieces, 'medium', 'songs'), en)).toBe('Songs: 690 pieces');
     expect(announcementFor(shelf(allPieces, 'medium', 'songs', { pages: 2 }), en)).toBe(
-      'Showing 80 of 643',
+      'Showing 80 of 690',
     );
     expect(announcementFor(search(pieces, 'minuet'), en)).toBe('14 pieces');
     expect(announcementFor(search(pieces, 'fur elize'), en)).toBe('No piece matches “fur elize”.');
@@ -686,8 +686,13 @@ describe('the library with the MuseScore archive (2026-10-16)', () => {
     expect(new Set(archive.map((p) => p.collectionId))).toEqual(
       new Set(['pdmx-classical', 'pdmx-folk', 'pdmx-advanced', 'pdmx-songs', 'pdmx-modern']),
     );
-    // the advanced collection is the archive's grade 6, and only that
-    for (const p of archive) expect(p.collectionId === 'pdmx-advanced', p.slug).toBe(p.level === 6);
+    // grade 6 of the archive: the classical lane's is the advanced collection, the songs lane's stays on
+    // its Songs or Modern shelf (2026-10-19)
+    for (const p of archive) {
+      if (p.collectionId === 'pdmx-advanced') expect(p.level, p.slug).toBe(6);
+      if (p.level === 6)
+        expect(['pdmx-advanced', 'pdmx-songs', 'pdmx-modern'], p.slug).toContain(p.collectionId);
+    }
   });
   it('counts every level, and the levels add up to the whole library', () => {
     const counts = TIERS.map((t) => allPieces.filter((p) => tierOf(p.level) === t).length);

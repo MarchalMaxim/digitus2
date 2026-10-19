@@ -11,7 +11,7 @@ import { libraryPieces } from './manifest.js';
 import { LibraryView } from './LibraryView.js';
 import { useLocalLibrary } from './local/state.js';
 
-// These layout pins describe the 253 curated pieces unless a test asks for the whole library
+// These layout pins describe the 277 curated pieces unless a test asks for the whole library
 // (3,211 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
 const library = vi.hoisted(() => ({ whole: false }));
 vi.mock('./manifest.js', async (importOriginal) => {

@@ -37,7 +37,7 @@ import { syntheticLibrary } from './testing/syntheticLibrary.js';
 
 const allPieces = libraryPieces();
 
-// The 253 curated pieces: the pins below describe them. The MuseScore archive pieces (collection
+// The 277 curated pieces: the pins below describe them. The MuseScore archive pieces (collection
 // ids pdmx-*, 2026-10-16) are checked in their own blocks further down.
 const pieces = allPieces.filter((p) => !p.collectionId.startsWith('pdmx-'));
 

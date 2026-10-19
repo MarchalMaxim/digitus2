@@ -58,6 +58,16 @@ try {
   Remove-Item -LiteralPath $PolicyFile -ErrorAction SilentlyContinue
 }
 
+# The service runs as its own account with no role at all. The Compute Engine default account, which
+# Cloud Run would use otherwise, is Editor on a project without an organization: code reached through a
+# recogniser could then take its token and reach the kill-switch or the budget.
+$RunAccount = "$Service-run@$Project.iam.gserviceaccount.com"
+if (-not (Test-Native { gcloud iam service-accounts describe $RunAccount --project $Project })) {
+  Invoke-Checked 'Creating the service account the service runs as' {
+    gcloud iam service-accounts create "$Service-run" --display-name 'digitus2 scan service (no roles)' --project $Project
+  }
+}
+
 Invoke-Checked 'Configuring Docker for Artifact Registry' { gcloud auth configure-docker $Registry --quiet }
 Invoke-Checked 'Building the image' {
   docker build -f "$RepoRoot/research/omr/service/Dockerfile" -t $Image "$RepoRoot/research/omr"
@@ -70,7 +80,7 @@ Invoke-Checked 'Deploying to Cloud Run' {
   gcloud run deploy $Service --image $Image --region $Region --project $Project `
     --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 `
     --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080 `
-    --set-env-vars DIGITUS2_OMR_THREADS=4 --quiet
+    --set-env-vars DIGITUS2_OMR_THREADS=4 --service-account $RunAccount --quiet
 }
 
 $Url = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(status.url)')

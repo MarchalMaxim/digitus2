@@ -278,6 +278,79 @@ describe('"Add notes between" in the score document', () => {
     expect(result.current.score).toBe(plainScore);
     expect(result.current.pages).toEqual(plainPages);
   });
+  it('a hand-split round trip leaves the switch off', async () => {
+    const midi: PieceSource = { kind: 'file', name: 'twinkle.mid', bytes: read(TWINKLE_MID) };
+    const renderer = fakeRenderer();
+    const { result } = renderHook(() =>
+      useScoreDocument(midi, 800, { engine: inlineEngine(), renderer }),
+    );
+    await waitFor(() => expect(result.current.embellish).toBe('offered'));
+    act(() => result.current.setEmbellished(true));
+    expect(result.current.shownVersion).toBe('embellished');
+    const before = renderer.xmls.length;
+    act(() => result.current.setSplitMidi(60));
+    await waitFor(() => expect(result.current.embellish).toBe('offered'));
+    act(() => result.current.setSplitMidi(null));
+    expect(result.current.embellished).toBe(false);
+    await waitFor(() => expect(result.current.embellish).toBe('offered'));
+    // Settle any layout the new document would ask for.
+    await act(async () => {});
+    expect(result.current.splitMidi).toBeNull();
+    expect(result.current.embellished).toBe(false);
+    expect(result.current.shownVersion).toBe('plain');
+    expect(result.current.score!.notes).toHaveLength(64);
+    // Each reopen lays out its plain score and pre-lays out its embellished one, nothing more:
+    // the embellished version is never laid out to be shown.
+    expect(renderer.xmls.slice(before).map(notesIn)).toEqual([64, 70, 64, 70]);
+  });
+  it('keeps the pages of one width bucket per version', async () => {
+    const { result, rerender, renderer } = await openOffered();
+    const renders = renderer.renders;
+    rerender({ src: twinkle, w: 500 });
+    await waitFor(() => expect(result.current.pages[0]).toContain('data-w="500"'));
+    // Back at 800 the plain pages are laid out again: only the 480 bucket's were kept.
+    rerender({ src: twinkle, w: 800 });
+    await waitFor(() => expect(result.current.pages[0]).toContain('data-w="800"'));
+    expect(renderer.renders).toBe(renders + 2);
+    // The embellished pages laid out ahead at 800 are still there: the switch lays nothing out.
+    act(() => result.current.setEmbellished(true));
+    expect(result.current.shownVersion).toBe('embellished');
+    expect(result.current.pages[0]).toContain('data-notes="70"');
+    expect(renderer.renders).toBe(renders + 2);
+    // A new width lays out the embellished version and drops its 800 pages, so switching off
+    // and on again at 800 lays it out once more.
+    rerender({ src: twinkle, w: 1200 });
+    await waitFor(() => expect(result.current.pages[0]).toContain('data-w="1200"'));
+    rerender({ src: twinkle, w: 800 });
+    await waitFor(() => expect(result.current.pages[0]).toContain('data-w="800"'));
+    expect(result.current.pages[0]).toContain('data-notes="70"');
+    expect(renderer.renders).toBe(renders + 4);
+  });
+  it("a failed fetch of the editor's fingering at the switch is the plain document's error", async () => {
+    let failFingered = false;
+    const fetchFlaky = (url: string) =>
+      failFingered && url.includes('.fingered')
+        ? Promise.reject(new Error('the fingered file could not be fetched'))
+        : fetchText(url);
+    const engine = inlineEngine();
+    const { result } = renderHook(() =>
+      useScoreDocument({ kind: 'library', slug: 'schumann-op68-no1-melody' }, 800, {
+        engine,
+        renderer: fakeRenderer(),
+        fetchText: fetchFlaky,
+      }),
+    );
+    await waitFor(() => expect(result.current.embellish).toBe('offered'), { timeout: 15_000 });
+    failFingered = true;
+    act(() => {
+      useAppStore.getState().setSettings({ showEditorial: true });
+      result.current.setEmbellished(true);
+    });
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    expect(result.current.error).toBe('the fingered file could not be fetched');
+    // Not an embellished layout failure: the switch is not withdrawn.
+    expect(result.current.embellish).toBe('offered');
+  }, 30_000);
   it('a hand-size change re-fingers both versions', async () => {
     const { result, engine, renderer } = await openOffered();
     const offered = offerFor(result.current.xml!);
@@ -345,20 +418,24 @@ describe('which pieces are tried', () => {
   it('asks the worker for a grade-1 library piece and never for a grade-3 one', async () => {
     const piece = (await loadPiece('twinkle-twinkle-little-star'))!;
     expect(piece.level).toBe(1);
-    const details = await loadPieceDetails();
-    setPieceDetails([...details.values(), { ...piece, slug: 'twinkle-at-grade-3', level: 3 }]);
-    const engine = inlineEngine();
-    const { result: hard } = renderHook(() =>
-      useScoreDocument({ kind: 'library', slug: 'twinkle-at-grade-3' }, 800, {
-        engine,
-        renderer: fakeRenderer(),
-        fetchText,
-      }),
-    );
-    await waitFor(() => expect(hard.current.embellish).toBe('none'));
-    expect(engine.calls).not.toContain('embellish');
-    const { result: easy } = await openOffered({ kind: 'library', slug: piece.slug });
-    expect(easy.current.embellish).toBe('offered');
+    const details = [...(await loadPieceDetails()).values()];
+    setPieceDetails([...details, { ...piece, slug: 'twinkle-at-grade-3', level: 3 }]);
+    try {
+      const engine = inlineEngine();
+      const { result: hard } = renderHook(() =>
+        useScoreDocument({ kind: 'library', slug: 'twinkle-at-grade-3' }, 800, {
+          engine,
+          renderer: fakeRenderer(),
+          fetchText,
+        }),
+      );
+      await waitFor(() => expect(hard.current.embellish).toBe('none'));
+      expect(engine.calls).not.toContain('embellish');
+      const { result: easy } = await openOffered({ kind: 'library', slug: piece.slug });
+      expect(easy.current.embellish).toBe('offered');
+    } finally {
+      setPieceDetails(details);
+    }
   });
   it('asks for a dropped file of 900 notes and never for one of 901', async () => {
     const open = async (n: number) => {

@@ -272,6 +272,52 @@ function pagesKey(version: VersionName, widthBucket: number, editorial: boolean)
   return `${version}|${widthBucket}|${editorial ? 'editorial' : 'engine'}`;
 }
 
+/**
+ * Keeps pages laid out for one version at one width bucket. The version's pages at other buckets
+ * are dropped (a switch needs only the other version at the current width, and a window dragged
+ * across the buckets would otherwise keep a full set of pages per bucket), and the entry is
+ * stored last, so the newest entry is the last in the map.
+ */
+function storePages(
+  doc: OpenDoc,
+  version: VersionName,
+  widthBucket: number,
+  editorial: boolean,
+  entry: { pages: string[]; assignment: Assignment; ms: number },
+): void {
+  for (const k of [...doc.pages.keys()])
+    if (k.startsWith(`${version}|`) && !k.startsWith(`${version}|${widthBucket}|`))
+      doc.pages.delete(k);
+  const key = pagesKey(version, widthBucket, editorial);
+  doc.pages.delete(key);
+  doc.pages.set(key, entry);
+}
+
+/** The width to lay out at: the measured one, or the fallback while the column has none. */
+function layoutWidth(widthPx: number): number {
+  return widthPx > 0 ? widthPx : FALLBACK_WIDTH_PX;
+}
+
+/**
+ * The text the renderer lays out for `assignment` on version `v` (fingered, with our note ids):
+ * written by the engine once per fingering, then kept in `v.laidOut`. Null when `live()` turned
+ * false while the engine wrote it.
+ */
+async function laidOutText(
+  v: Version,
+  assignment: Assignment,
+  svc: ScoreServices,
+  live: () => boolean,
+): Promise<string | null> {
+  const kept = v.laidOut.get(assignment);
+  if (kept !== undefined) return kept;
+  const fingered = await svc.engine.fingeredXml(v.xml, v.score, assignment);
+  if (!live()) return null;
+  const xml = injectNoteIds(fingered, v.score);
+  v.laidOut.set(assignment, xml);
+  return xml;
+}
+
 /** The fingering the plain pages show or would show: the editor's when shown, else the engine's. */
 function plainFingering(doc: OpenDoc, showEditorial: boolean): Assignment | null {
   return (showEditorial ? doc.plain.editorial : null) ?? doc.plain.engine;
@@ -420,9 +466,9 @@ export function useScoreDocument(
    * shown. Reads the refs, so it is taken before they are reset.
    */
   const plainRestore = useCallback(() => {
-    const width = widthRef.current > 0 ? widthRef.current : FALLBACK_WIDTH_PX;
     const showEd = useAppStore.getState().settings.showEditorial;
-    return plainOnScreen(docRef.current, shownVersionRef.current, bucket(width), showEd);
+    const widthBucket = bucket(layoutWidth(widthRef.current));
+    return plainOnScreen(docRef.current, shownVersionRef.current, widthBucket, showEd);
   }, []);
 
   // A new hand split reopens the source (effect 1). The reopen starts here, in the same update as
@@ -461,6 +507,10 @@ export function useScoreDocument(
     solvedForRef.current = null;
     renderKeyRef.current = null;
     setState(reopen ? (s) => reopening(s, restore) : initialDoc(slug, fileName));
+    // Every open starts with the switch off. The key check turns it off in the render that
+    // changes the source or the split; this keeps it off when the key comes back (a split
+    // round trip, 60 then automatic), so the embellished version never shows unasked.
+    setSwitch((s) => (s.on ? { ...s, on: false } : s));
     const svc = svcRef.current;
     const bytes = bytesRef.current;
     void (async () => {
@@ -551,7 +601,7 @@ export function useScoreDocument(
   //    width bucket, the "Add notes between" switch or reRender() asks for it. Pages laid out
   //    before for the same version, width bucket and fingering are taken as they are. Results
   //    of superseded requests are dropped.
-  const widthBucket = bucket(widthPx > 0 ? widthPx : FALLBACK_WIDTH_PX);
+  const widthBucket = bucket(layoutWidth(widthPx));
   useEffect(() => {
     if (status !== 'rendering' && status !== 'ready') return;
     const doc = docRef.current;
@@ -567,6 +617,9 @@ export function useScoreDocument(
     const seq = ++renderSeqRef.current;
     const current = () => !session.cancelled && renderSeqRef.current === seq;
     const svc = svcRef.current;
+    // Set once the plain editorial is in: a failure before that (the `.fingered` file did not
+    // load) is the plain document's, never the embellished version's.
+    let laying = false;
     void (async () => {
       try {
         // Awaited only when there is a file to load, so a switch to pages laid out before lands
@@ -576,6 +629,7 @@ export function useScoreDocument(
             ? await loadEditorial(doc, svc)
             : doc.plain.editorial;
         if (!current()) return;
+        laying = true;
         const editorial =
           version === 'plain'
             ? plainEditorial
@@ -589,18 +643,13 @@ export function useScoreDocument(
         if (cached && cached.assignment === shown) {
           result = cached;
         } else {
-          let xml = v.laidOut.get(shown);
-          if (xml === undefined) {
-            const fingered = await svc.engine.fingeredXml(v.xml, v.score, shown);
-            if (!current()) return;
-            xml = injectNoteIds(fingered, v.score);
-            v.laidOut.set(shown, xml);
-          }
+          const xml = await laidOutText(v, shown, svc, current);
+          if (xml === null) return;
           let rendered: { pages: string[]; ms: number } | undefined;
           let width = FALLBACK_WIDTH_PX;
           for (let attempt = 1; !rendered; attempt++) {
             try {
-              width = widthRef.current > 0 ? widthRef.current : FALLBACK_WIDTH_PX;
+              width = layoutWidth(widthRef.current);
               rendered = await svc.renderer.render({ xml, widthPx: width });
             } catch (e) {
               // Superseded by our own newer request: that one publishes. Superseded by another
@@ -612,7 +661,7 @@ export function useScoreDocument(
           }
           if (!current()) return;
           result = rendered;
-          doc.pages.set(pagesKey(version, bucket(width), useEditorial), {
+          storePages(doc, version, bucket(width), useEditorial, {
             pages: result.pages,
             assignment: shown,
             ms: result.ms,
@@ -651,7 +700,7 @@ export function useScoreDocument(
         // request after every attempt (other documents kept taking the worker): an error with a
         // way back, never a score left 'Preparing' for good.
         if (!current()) return;
-        if (version === 'embellished') {
+        if (version === 'embellished' && laying) {
           // The embellished version cannot be laid out: the switch goes, and the plain version
           // (still or again) on screen is laid out by the run this triggers. Never an error.
           doc.embellished = null;
@@ -677,6 +726,26 @@ export function useScoreDocument(
     const seq = ++solveSeqRef.current;
     const current = () => !session.cancelled && solveSeqRef.current === seq;
     const svc = svcRef.current;
+    /**
+     * Shows `next` in place of the fingering on screen: its changed digits are patched into the
+     * pages, or, when a digit or a substitution comes or goes, the pages are laid out again.
+     * `extra` is published either way.
+     */
+    const patchShown = (shown: Assignment, next: Assignment, extra: Partial<DocState>) => {
+      const diff = diffDigits(shown, next);
+      if (diff.structural) {
+        if (Object.keys(extra).length > 0) setState((s) => ({ ...s, ...extra }));
+        setNonce((n) => n + 1);
+        return;
+      }
+      shownRef.current = next;
+      setState((s) => ({
+        ...s,
+        ...extra,
+        assignment: next,
+        digitChanges: diff.changes.size > 0 ? diff.changes : null,
+      }));
+    };
     const embellished = doc.embellished;
     if (embellished?.assignments) {
       const next = embellished.assignments[handSize];
@@ -687,19 +756,7 @@ export function useScoreDocument(
         shownVersionRef.current === 'embellished' &&
         shown !== null &&
         shown !== embellished.editorial;
-      if (showingEngine) {
-        const diff = diffDigits(shown, next);
-        if (diff.structural) {
-          setNonce((n) => n + 1);
-        } else {
-          shownRef.current = next;
-          setState((s) => ({
-            ...s,
-            assignment: next,
-            digitChanges: diff.changes.size > 0 ? diff.changes : null,
-          }));
-        }
-      }
+      if (showingEngine) patchShown(shown, next, {});
     }
     void (async () => {
       try {
@@ -716,24 +773,8 @@ export function useScoreDocument(
         // score out again with plain.engine).
         const showingEngine =
           shownVersionRef.current === 'plain' && shown !== null && shown !== doc.plain.editorial;
-        if (!showingEngine) {
-          setState((s) => ({ ...s, solveMs: solved.ms, plain }));
-          return;
-        }
-        const diff = diffDigits(shown, solved.assignment);
-        if (diff.structural) {
-          setState((s) => ({ ...s, solveMs: solved.ms, plain }));
-          setNonce((n) => n + 1);
-          return;
-        }
-        shownRef.current = solved.assignment;
-        setState((s) => ({
-          ...s,
-          solveMs: solved.ms,
-          plain,
-          assignment: solved.assignment,
-          digitChanges: diff.changes.size > 0 ? diff.changes : null,
-        }));
+        if (!showingEngine) setState((s) => ({ ...s, solveMs: solved.ms, plain }));
+        else patchShown(shown, solved.assignment, { solveMs: solved.ms, plain });
       } catch (e) {
         if (current())
           setState((s) => ({ ...s, status: 'error', error: messageOf(e), errorCause: e }));
@@ -762,9 +803,8 @@ export function useScoreDocument(
     }
     const svc = svcRef.current;
     void (async () => {
-      let v: Version;
       let engine: Assignment;
-      let xml: string;
+      let xml: string | null;
       try {
         const { offered } = await svc.engine.embellish(doc.plain.xml);
         if (!live()) return;
@@ -774,7 +814,7 @@ export function useScoreDocument(
         }
         const profile = solvedForRef.current ?? useAppStore.getState().settings.handSize;
         engine = offered.assignments[profile];
-        v = {
+        const v: Version = {
           score: offered.score,
           xml: offered.xml,
           engine,
@@ -784,10 +824,8 @@ export function useScoreDocument(
         };
         // Set before the next await, so a hand-size change meanwhile re-fingers it (effect 4).
         doc.embellished = v;
-        const fingered = await svc.engine.fingeredXml(v.xml, v.score, engine);
-        if (!live()) return;
-        xml = injectNoteIds(fingered, v.score);
-        v.laidOut.set(engine, xml);
+        xml = await laidOutText(v, engine, svc, live);
+        if (xml === null) return;
       } catch {
         // The switch is an extra: a failure here only means the piece does not get one.
         doc.embellished = null;
@@ -795,10 +833,10 @@ export function useScoreDocument(
         return;
       }
       try {
-        const width = widthRef.current > 0 ? widthRef.current : FALLBACK_WIDTH_PX;
+        const width = layoutWidth(widthRef.current);
         const rendered = await svc.renderer.render({ xml, widthPx: width });
         if (!live()) return;
-        doc.pages.set(pagesKey('embellished', bucket(width), false), {
+        storePages(doc, 'embellished', bucket(width), false, {
           pages: rendered.pages,
           assignment: engine,
           ms: rendered.ms,

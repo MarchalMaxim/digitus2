@@ -392,14 +392,16 @@ A photo (homr), warm, 9.9 s:
 
 A PDF page (Audiveris), 8.8 s: JVM start 0.37 s, book open and first save 0.36 s, then the recognition steps, led by BEAMS (2.45 s), HEADS (1.47 s) and CURVES (0.75 s). The JVM keeps about 2 cores busy. A second book in the same JVM takes 5.5 s instead of 8.45 s, so about 3 s of each page is class loading and JIT warm-up.
 
-What the service runs, each with identical output on the acceptance gate's 93 pages (80 corpus recognitions and 13 photos, on Windows and in the container). Together they take the reference photo from 9.6 to 8.4 s and the PDF from 8.5 to 6.2 s in the container, warm (`docs/scan-service.md`, Timings). The savings each change gave when it was first measured alone:
+What the service runs, each with identical output on the acceptance gate's 93 pages (80 corpus recognitions and 13 photos, on Windows and in the container). Together they take the reference photo from 9.6 to 8.4 s and the PDF from 8.5 to 6.2 s in the container, warm (`docs/scan-service.md`, Timings). How the savings split:
 
-| Change | Saves, measured alone | Why it is safe |
+| Change | Saves in the container | Why it is safe |
 | --- | ---: | --- |
-| Audiveris without `-save` | 2.4 s a PDF | It rewrote the `.omr` book after every step, and nothing reads it. |
-| A JDK 25 ahead-of-time class cache for Audiveris ([JEP 483](https://openjdk.org/jeps/483), [JEP 514](https://openjdk.org/jeps/514)) | 3.2 s a PDF; 1.4 s in the service image (7.8 to 6.4 s for Audiveris alone) | Recorded in the image from one recognition through the adapter; the build fails unless a run in strict mode maps it and gives the same MusicXML. The JVM ignores a cache it cannot use. About 66 MB. |
-| homr loads title OCR (rapidocr) only when title detection is on | 1.2 s a photo | The adapter passes `--no-title`. |
-| homr computes each bounding box's centre and major axis once for the touch pre-check | 1.3 s a photo | About 1.1 million calls a page; the arithmetic is upstream's, and 850,000 random box pairs give the same answers. |
+| Audiveris without `-save` | about 0.9 s a PDF (the 2.3 s total less the cache's share) | It rewrote the `.omr` book after every step, and nothing reads it. |
+| A JDK 25 ahead-of-time class cache for Audiveris ([JEP 483](https://openjdk.org/jeps/483), [JEP 514](https://openjdk.org/jeps/514)) | 1.4 s a PDF (Audiveris alone, 7.8 to 6.4 s, three runs each) | Recorded in the image from one recognition through the adapter; the build fails unless a run in strict mode maps it and gives the same MusicXML. In the service's default mode the JVM ignores a cache it cannot use. 65 MB. |
+| homr loads title OCR (rapidocr) only when title detection is on | 1.2 s a photo, the two homr changes together | The adapter passes `--no-title`. |
+| homr computes each bounding box's centre and major axis once for the touch pre-check | (in the 1.2 s above) | About 1.1 million calls a page; the arithmetic is upstream's, and 850,000 random box pairs give the same answers. |
+
+Measured one at a time during the investigation, on a PC that other work was slowing, the four changes saved 2.4, 3.2, 1.2 and 1.3 s. Those figures do not add up to the totals measured here, so the table gives the A/B measurements.
 
 Measured and not adopted:
 

@@ -48,6 +48,11 @@ def damage(text: str) -> str:
     return "".join(out)
 
 
+# What a letter damaged to its lead byte leaves behind: a lead letter of Latin-1 followed by something
+# that is not part of a word, as in "Äáºm" or "ÃÏ". The titles of the library hold none.
+RESIDUE = re.compile("[ÃÂÄÅÆÐÑØÙÎÏÕ×Ç][^a-zA-Z ]|[À-ÿ][\u0080-¿]|[¡-¿][À-ÿ]|[ÃÂÄÅÆÐÑØÙÎÏ]$")
+
+
 def leaves_trace(text: str) -> bool:
     """Whether damaging `text` leaves a trace of it in the damaged text (a stripped lead letter such
     as Ä or á), not only a gap where a symbol was dropped."""

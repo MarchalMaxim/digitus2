@@ -398,7 +398,13 @@ def build_pdmx(piece: dict, out_dir: Path = SCORES) -> dict:
     work.mkdir(parents=True, exist_ok=True)
     plain = work / f"{slug}.musicxml"
     jsonio.write_atomic(plain, data)
-    checks = validate.check_file(plain, PREVIEW, False, tempo=piece.get("tempoBpm"))
+    # The size limit is on the file as stored, the gzip copy: a long score (the note ceiling is 25,000) is several
+    # MB as plain XML and a few hundred KB stored.
+    checks = validate.check_file(plain, PREVIEW, False, tempo=piece.get("tempoBpm"), max_bytes=None)
+    stored = gzip.compress(data, compresslevel=9, mtime=0)
+    if len(stored) > validate.MAX_BYTES:
+        checks["errors"].append(f"stored file is {len(stored)} bytes (> {validate.MAX_BYTES})")
+        checks["ok"] = False
     licence_name, licence_url = PDMX_LICENCES[info["license"]]
     source = {"name": "MuseScore, via the PDMX dataset", "url": PDMX_URL, "license": licence_name,
               "licenseUrl": licence_url, "retrievedAt": PDMX_RETRIEVED}
@@ -407,7 +413,7 @@ def build_pdmx(piece: dict, out_dir: Path = SCORES) -> dict:
     if not checks["ok"]:
         return {**base, "files": [], "scorePath": None}
     out = out_dir / f"{slug}.musicxml.gz"
-    jsonio.write_atomic(out, gzip.compress(data, compresslevel=9, mtime=0))
+    jsonio.write_atomic(out, stored)
     return {**base, "files": [out.name], "scorePath": f"scores/{out.name}"}
 
 

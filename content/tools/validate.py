@@ -81,12 +81,15 @@ def xsd_errors(path: Path) -> list[str] | None:
     return [f"line {e.line}: {e.message}" for e in list(schema.error_log)[:10]]
 
 
-def check_file(path: Path, preview_dir: Path | None, png: bool = False, tempo: float | None = None) -> dict:
+def check_file(path: Path, preview_dir: Path | None, png: bool = False, tempo: float | None = None,
+               max_bytes: int | None = MAX_BYTES) -> dict:
+    """`max_bytes` limits the file as stored; a score stored gzip-compressed is checked on its stored size by
+    its caller (build.build_pdmx) and passes None here."""
     res = {"file": path.name, "errors": [], "warnings": [], "stats": {}}
     err, warn = res["errors"].append, res["warnings"].append
     data = path.read_bytes()
-    if len(data) > MAX_BYTES:
-        err(f"file is {len(data)} bytes (> {MAX_BYTES})")
+    if max_bytes is not None and len(data) > max_bytes:
+        err(f"file is {len(data)} bytes (> {max_bytes})")
     if data[:2] == b"PK":
         err("compressed (.mxl) data; plain .musicxml required")
     try:

@@ -24,7 +24,7 @@
 
 Details:
 
-- `hygiene`: a trackable file over 1 MB (scores 1.5 MB; the manifest, verification records and archive catalog fragments have their own limits), trackable files over 100 MB in total, or a heavy directory (`research/data/pig`, `content/_raw`, ...) not ignored by git. It uses `git ls-files`.
+- `hygiene`: a trackable file over 1 MB (scores 1.5 MB; the manifest, verification records and archive catalog fragments have their own limits), trackable files over 120 MB in total, or a heavy directory (`research/data/pig`, `content/_raw`, ...) not ignored by git. It uses `git ls-files`.
 - `design`: a colour literal in `apps/web/src` or `index.html` outside `src/design/tokens.css`, a second chromatic colour in `tokens.css`, or the red referenced outside the `.is-red` rule.
 - `omr`: fixture validation, pinned ground truth, whole-score export handling, and penalties for missing or invalid results. It runs no recognition model and is not an accuracy gate.
 - `bundle`: counts the entry chunk and its static imports from `apps/web/dist/.vite/manifest.json`.

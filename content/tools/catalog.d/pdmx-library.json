@@ -1,6 +1,6 @@
 {
  "task": 300,
- "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3015 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 145 duplicates of another piece (dedupe.py), 10 out of scope (pdmx_scope.py), 3914 passed but ranked beyond the cap of 1300 (by rating). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
+ "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3129 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 155 duplicates of another piece (dedupe.py), 17 out of scope (pdmx_scope.py), 3913 passed but ranked beyond the cap of 1300 pieces at levels 1 to 4 (by rating; level 5 is not capped). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
  "pieces": [
   {
    "slug": "pdmx-allegro-414d6ff6",
@@ -12315,6 +12315,30 @@
    }
   },
   {
+   "slug": "pdmx-piano-sonata-no-26-movement-1-beethoven-6ebb5bed",
+   "source": "pdmx",
+   "level": 3,
+   "collection": "pdmx-classical",
+   "title": "Piano Sonata No. 26 Movement 1 (Beethoven)",
+   "composer": "Ludvig van Beethoven",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 30,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 7.4).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "6ebb5bede729c5c35ecf31d133b5adb0a845211945f48fd9ac7a186521a568fb",
+    "path": "./mxl/2/40/QmcrhFuX5rC5XYegwRd92yK5LQoFkQDuVw9Xu5957wmTYG.mxl",
+    "license": "publicdomain",
+    "rating": "4.79",
+    "nRatings": "7",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
    "slug": "pdmx-polonaise-w-a-mozart-0d277e9e",
    "source": "pdmx",
    "level": 3,
@@ -12694,6 +12718,30 @@
     "license": "cc-zero",
     "rating": "0.0",
     "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-rondo-alla-turca-6b51dd11",
+   "source": "pdmx",
+   "level": 3,
+   "collection": "pdmx-classical",
+   "title": "Rondo Alla Turca",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "editorial: the file gives no tempo, so 100 quarter notes per minute is a playback default.",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 9.047).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "6b51dd118503d6d63b03d877cba61e989088b4173e584db4df332939a5cac3ae",
+    "path": "./mxl/6/21/QmNg5rJJQgdSBGEoDjricmzdDa5vtRdhXRYeAjJwMJi1RM.mxl",
+    "license": "publicdomain",
+    "rating": "4.66",
+    "nRatings": "21",
     "fingerings": 0,
     "version": "3.1"
    }
@@ -13223,6 +13271,30 @@
     "rating": "0.0",
     "nRatings": "0",
     "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-sonata-in-c-major-wolfgang-amadeus-mozar-1da21529",
+   "source": "pdmx",
+   "level": 3,
+   "collection": "pdmx-classical",
+   "title": "Sonata In C Major Wolfgang Amadeus Mozart",
+   "composer": "arr. Kelvin Olaiya.",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 141,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 8.205).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 100 (removed from the stored file: the app fingers every score itself).",
+   "pdmx": {
+    "sha256": "1da21529bdeb4c730ddb18c3bc34b4cecff58f7d4ed8add7d24bc71a9864a71f",
+    "path": "./mxl/12/33/QmUny47gQHfTufjAS5aqi2gTJxSF3CzcksTubecgQUGLwp.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 100,
     "version": "3.1"
    }
   },
@@ -24627,6 +24699,30 @@
    }
   },
   {
+   "slug": "pdmx-night-train-philip-glass-arr-for-solo-pi-640f7dc4",
+   "source": "pdmx",
+   "level": 4,
+   "collection": "pdmx-classical",
+   "title": "Night Train - Philip Glass (arr. for solo piano)",
+   "composer": "Philip Glass arr. Bradley Pittman",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 165,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 9.559).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "640f7dc46817fe2ff9dab8a1feedc9789a98b2512eda91ba3e699e5d9d238c52",
+    "path": "./mxl/0/22/QmaGhdaS9jaXLpEjmhWhWt9ko5NjejBL6RbaNufB22YGJM.mxl",
+    "license": "cc-zero",
+    "rating": "4.84",
+    "nRatings": "23",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
    "slug": "pdmx-no-matter-how-far-from-the-fold-you-have-03a15c82",
    "source": "pdmx",
    "level": 4,
@@ -31107,6 +31203,30 @@
    }
   },
   {
+   "slug": "pdmx-gymnopedie-1-eff03068",
+   "source": "pdmx",
+   "level": 5,
+   "collection": "pdmx-classical",
+   "title": "Gymnopedie 1",
+   "composer": "Erik SATIE",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "editorial: the file gives no tempo, so 100 quarter notes per minute is a playback default.",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 5 (score 12.991).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "eff03068485fbb6d9a69a340e95d24dcda8a5ee5889c5217cbd5ee5b17cbc015",
+    "path": "./mxl/9/12/QmRBLhDuMdEtFet2nSQ5vKRny8wQG42VMBsitwhwL65Eet.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
    "slug": "pdmx-lemoine-tudes-enfantines-op-37-no-49-26041910",
    "source": "pdmx",
    "level": 5,
@@ -31127,6 +31247,54 @@
     "rating": "0.0",
     "nRatings": "0",
     "fingerings": 355,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-marcha-de-pabellones-45816a24",
+   "source": "pdmx",
+   "level": 5,
+   "collection": "pdmx-classical",
+   "title": "Marcha de pabellones",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 80,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 5 (score 15.615).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "45816a24097b8602c98c94ce4ba7b842b62bf6e1bf5eff969e4c4f2863848133",
+    "path": "./mxl/12/26/QmUj5hqsHFtUsrhkqz1ZanTfdTdzkZEA1KYM3AnWaS5GET.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-pr-lude-omnitonique-47654228",
+   "source": "pdmx",
+   "level": 5,
+   "collection": "pdmx-classical",
+   "title": "Prélude Omnitonique",
+   "composer": "Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "editorial: the file gives no tempo, so 100 quarter notes per minute is a playback default.",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 5 (score 13.733).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "47654228260739f0b8c330e727ad1a835ee7f70a967aa17660708b6e3a430659",
+    "path": "./mxl/13/26/QmVjPEH4ZEoNxGY7nyhuesaNdSPpnLvq3KRQRquhC2fSi3.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
     "version": "3.1"
    }
   },
@@ -31179,6 +31347,78 @@
    }
   },
   {
+   "slug": "pdmx-to-my-memory-comes-a-vision-b-d-ackley-5a1f3f1a",
+   "source": "pdmx",
+   "level": 5,
+   "collection": "pdmx-classical",
+   "title": "To my memory comes a vision - B. D. Ackley",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 5 (score 12.836).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "5a1f3f1aa103e9481b37d0498e6b9ca56a46055460909326bbfe60c80899f02d",
+    "path": "./mxl/17/40/QmZrPPL63YP48iNwk3m7KkHhP5o7nfh4CYJj1ETW8zSZ9X.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-vals-n-9-d-969-3e14e740",
+   "source": "pdmx",
+   "level": 5,
+   "collection": "pdmx-classical",
+   "title": "Vals nº 9 D. 969",
+   "composer": "Franz Schubert",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 5 (score 13.073).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "3e14e740c9d7b38e82eb67b26ad320de9a29e35aa3c26415df73a0f1e26c5404",
+    "path": "./mxl/7/35/QmPonJGxaesb13WhENtmiUTNRYWsBc17UoVt4tfJpiKgP6.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-with-bright-colors-flying-on-jesus-relyi-e7ceb654",
+   "source": "pdmx",
+   "level": 5,
+   "collection": "pdmx-classical",
+   "title": "With bright colors flying on Jesus relying - Adam Geibel",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 5 (score 12.986).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "e7ceb654c9111059015a51a5a69d8bdfea5b436bee0f1e9b1c2b9e4517f65561",
+    "path": "./mxl/7/9/QmPa5quPic5gGZfnt135zPhFxaVnHm4EsyHTa61vdoP48i.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
    "slug": "pdmx-king-of-kings-07577b9c",
    "source": "pdmx",
    "level": 5,
@@ -31204,6 +31444,12 @@
   }
  ],
  "rejected": [
+  {
+   "slug": "pdmx-beethoven-symphony-no-5-1st-movement-pia-12853bf6",
+   "sha256": "12853bf6535cc924a6dd1fc52e7d506a404e2ec416c779becd2fb120074969ef",
+   "title": "Beethoven Symphony No. 5 (1st movement) Piano solo",
+   "reason": "failed the library's validation: measure 269: voice 1 lasts 10 quarters, time signature allows 2"
+  },
   {
    "slug": "pdmx-mozart-minuet-in-f-major-k2-easy-54a6cacf",
    "sha256": "54a6cacf9b319f2e384794a751e54c4cb4f4dc8d65e65d6169725f2fd8116be9",
@@ -31235,6 +31481,12 @@
    "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
   },
   {
+   "slug": "pdmx-beethoven-piano-sonata-no-5-in-c-minor-o-6eda6af2",
+   "sha256": "6eda6af296cc1004f7943692b2addfbc345bc2d24149aa4ce788775b6c119fa8",
+   "title": "Beethoven Piano Sonata No. 5 in C-Minor Op. 10 No. 1",
+   "reason": "failed the library's validation: measure 312: backup before measure start"
+  },
+  {
    "slug": "pdmx-fr-d-ric-chopin-nocturne-in-b-flat-minor-35d655cf",
    "sha256": "35d655cfde78a0944ebc224787e25fe1c0cfc11fe68f6e37ddfd2372b7d5fdf5",
    "title": "Frédéric Chopin: Nocturne in B-flat minor Op.9 No.1",
@@ -31247,10 +31499,22 @@
    "reason": "failed the library's validation: measure 58: backup before measure start"
   },
   {
+   "slug": "pdmx-chopin-ballade-no-2-piano-solo-c9dbbc13",
+   "sha256": "c9dbbc13106591c5f518a5b366b8c86b4a047f5a549558692a9ca2ea2589a7b2",
+   "title": "Chopin Ballade No. 2 (Piano solo)",
+   "reason": "failed the library's validation: measure 46: voice 1 lasts 4 quarters, time signature allows 3"
+  },
+  {
    "slug": "pdmx-chopin-berceuse-cradle-song-piano-solo-3fa3d096",
    "sha256": "3fa3d0964a4a547119507ab6093c511f6b9f087e016ae532cd83d434f1efb033",
    "title": "Chopin Berceuse (Cradle Song) Piano solo",
    "reason": "failed the library's validation: measure 43: backup before measure start"
+  },
+  {
+   "slug": "pdmx-hungarian-dance-no-1-c94c7636",
+   "sha256": "c94c7636aa8658dc4f002ee9462de2a15f6bc84164af829d3df639038081b0ae",
+   "title": "Hungarian Dance No. 1",
+   "reason": "failed the library's validation: measure 29: voice 1 lasts 3 quarters, time signature allows 2"
   },
   {
    "slug": "pdmx-schubert-s-serenade-piano-solo-5676763d",
@@ -31265,6 +31529,12 @@
    "reason": "failed the library's validation: measure 33: voice 1 lasts 41/4 quarters, time signature allows 4"
   },
   {
+   "slug": "pdmx-brandenburg-concerto-no-3-solo-piano-arr-eaebba2e",
+   "sha256": "eaebba2ef517c46f28ce4a40726a5b75eb26cb3a543cb9718fec4a97b71f032f",
+   "title": "Brandenburg Concerto No. 3 (Solo Piano Arrangement)",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
    "slug": "pdmx-franz-liszt-liebestraum-no-3-in-a-flat-m-dd9e6d56",
    "sha256": "dd9e6d568895bc1591460362d85e1f088ce75e54ed77db312a7fc466376e461b",
    "title": "Franz Liszt: Liebestraum No.3 in A-flat major",
@@ -31275,6 +31545,18 @@
    "sha256": "a684ee5f53bf0072528fa0d9c6556f9ba8390746f5849fe67baca6bb22175860",
    "title": "Haydn: Sonata in G Major HOB.XVI:8",
    "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-fr-d-ric-chopin-tude-in-a-minor-op-25-no-e3b9cc47",
+   "sha256": "e3b9cc47b189f17ad463019a3e6bbc163f61f5591e4c15f9f075dfca3180abe4",
+   "title": "Frédéric Chopin: Étude in A minor Op.25 No.11 Winter Wind",
+   "reason": "failed the library's validation: measure 95: voice 1 lasts 18 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-maurice-ravel-s-la-valse-piano-solo-4bd434fe",
+   "sha256": "4bd434fe2c2f32b573244dc194818ad01edaa3fe7a84cea8b039e4a22f795b85",
+   "title": "Maurice Ravel's La Valse (Piano solo)",
+   "reason": "failed the library's validation: measure 702: backup before measure start"
   },
   {
    "slug": "pdmx-chopin-prelude-op-28-no-24-6654d318",
@@ -31301,10 +31583,28 @@
    "reason": "failed the library's validation: no time signature"
   },
   {
+   "slug": "pdmx-islamey-an-oriental-fantasy-by-mily-bala-1cbb0c31",
+   "sha256": "1cbb0c3192ae6cafcbd938d3fdfaab3b2784207c9f1cf8273b911e5c52ba2d8e",
+   "title": "Islamey: An Oriental Fantasy by Mily Balakirev (Piano solo)",
+   "reason": "failed the library's validation: measure 259: backup before measure start"
+  },
+  {
    "slug": "pdmx-untitled-0b939135",
    "sha256": "0b939135b1f96805357cff201a4d7f491f2abf86800c4b00eab268eeb2edc111",
    "title": "ÐÑÑÐµÑÐºÐ¾Ðµ ÐÐ¾Ð½ÐÐ¾ - Ð.Ð. ÐÐ¾ÑÐÑÑ",
    "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
+   "slug": "pdmx-italian-polkka-9fe4bdfd",
+   "sha256": "9fe4bdfd19b88599e3b0fdb3aeecf75d3a9750d6a08f192df3d1cd9714e5a867",
+   "title": "ÐÑÐÐÑÑÐ½ÑÐºÐÑ ÐÐ¾ÐÑÐºÐ / Italian Polkka",
+   "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
+  },
+  {
+   "slug": "pdmx-la-campanella-liszt-fa7d661e",
+   "sha256": "fa7d661e18a701048ae2051eb449aadfe6a9a0f4df911e4c7df40325bad5040e",
+   "title": "La Campanella Liszt",
+   "reason": "failed the library's validation: measure 78: backup before measure start"
   },
   {
    "slug": "pdmx-liebestr-ume-no-3-58bef41f",
@@ -31319,15 +31619,33 @@
    "reason": "failed the library's validation: measure 10: backup before measure start"
   },
   {
+   "slug": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-d00b260e",
+   "sha256": "d00b260e152fc7b19f88565804144fbfad0a2377cf69b24b0fb1fd128ad72884",
+   "title": "Franz Liszt: Grandes études de Paganini No.3 in G-sharp minor La Campanella",
+   "reason": "failed the library's validation: measure 76: backup before measure start"
+  },
+  {
    "slug": "pdmx-malaguena-by-ernesto-lecuona-c47c1152",
    "sha256": "c47c1152cb8103f1840ea7dc8e0655b18ee3ca7bd1f47131e9fd50621ac212d3",
    "title": "Malaguena by Ernesto Lecuona",
    "reason": "failed the library's validation: measure 70: voice 1 lasts 18 quarters, time signature allows 3"
   },
   {
+   "slug": "pdmx-mozart-k-256-twelve-variations-on-ah-vou-f2a85ea6",
+   "sha256": "f2a85ea6c03ecfe954b1b0e7382923b854496cbd8cb45ea51c89a976efd52e54",
+   "title": "Mozart K.256 (Twelve Variations on Ah vous dirai-je Maman)",
+   "reason": "failed the library's validation: measure 75: backup before measure start"
+  },
+  {
    "slug": "pdmx-hatikva-himno-nacional-de-israel-6ff337ae",
    "sha256": "6ff337ae99ad0aabc94946338c968661ff96c9d378915a06bd6c8e6ad34f9b0d",
    "title": "HATIKVA - Himno Nacional de Israel",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-piano-sonata-no-30-l-v-beethoven-op-109-4ffa1724",
+   "sha256": "4ffa1724c7e80a91442fc72809790914d52aec8d123877bc853c849e79ecf2c1",
+   "title": "Piano Sonata No.30 (L.v.Beethoven Op.109)",
    "reason": "failed the library's validation: measure numbers not unique"
   },
   {
@@ -31337,10 +31655,40 @@
    "reason": "failed the library's validation: measure 11: voice 1 lasts 17/4 quarters, time signature allows 4"
   },
   {
+   "slug": "pdmx-franz-liszt-transcendental-tude-no-10-in-576c5ba3",
+   "sha256": "576c5ba36125057355938cd77e0df97bf9d2d2921dcb8a76fa0e71b6adcac1fe",
+   "title": "Franz Liszt: Transcendental Étude No.10 in F minor Appassionata",
+   "reason": "failed the library's validation: measure X2: voice 1 lasts 9/4 quarters, time signature allows 2"
+  },
+  {
+   "slug": "pdmx-die-meistersinger-von-n-rnberg-vorspiel-373731b5",
+   "sha256": "373731b5c896705a12889ca3cc8791c9c0081bb45ec2f0e7472484be0352a98b",
+   "title": "Die Meistersinger Von Nürnberg - Vorspiel (R.Wagner - H.v.Bülow)",
+   "reason": "failed the library's validation: measure 133: overlapping notes in voice 1 at beat 4.25"
+  },
+  {
+   "slug": "pdmx-polonaise-heroic-in-a-flat-major-469016fa",
+   "sha256": "469016fa6907c9d7c7a67c64fff48d2137a6588cdde8da9b565b0aac11e8256d",
+   "title": "Polonaise Heroic in A flat Major",
+   "reason": "failed the library's validation: measure 30: voice 1 lasts 23/2 quarters, time signature allows 6"
+  },
+  {
    "slug": "pdmx-b-bartok-for-children-vol-1-nr-2-childre-92aaed5a",
    "sha256": "92aaed5a73d6461224fb49686b0e96887e5e7bbf69d2c3d709cb1aad1a4e73dd",
    "title": "B. Bartok For Children Vol 1 Nr 2 Children's Song",
    "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+   "sha256": "2e6669e0bfcdb3c6d6d5b237954b05485fc284716b4d8418942ac8dbf7bbdb4f",
+   "title": "Franz Liszt: Grandes études de Paganini No.6 in A minor",
+   "reason": "failed the library's validation: measure 218: backup before measure start"
+  },
+  {
+   "slug": "pdmx-tude-after-paganini-s-5th-caprice-r-schu-43340c2d",
+   "sha256": "43340c2d28b193de63ff4602c1a7b0886a5bbf7f25ebf021ec5c969822ddf5a1",
+   "title": "Étude after Paganini's 5th Caprice - R. Schumann Op. 3 No. 1",
+   "reason": "failed the library's validation: measure 1: backup before measure start"
   },
   {
    "slug": "pdmx-andante-from-vivaldi-s-concerto-for-two-18fcfd91",
@@ -31355,6 +31703,18 @@
    "reason": "failed the library's validation: measure 2: voice 1 lasts 4 quarters, time signature allows 3"
   },
   {
+   "slug": "pdmx-piano-sonata-no-21-l-v-beethoven-op-53-d6750fbe",
+   "sha256": "d6750fbeb1f1883888217289a7cd9265b65bdfe2ecd7c77e94c4ee239334e72e",
+   "title": "Piano Sonata No.21 (L.v.Beethoven Op.53)",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-rondo-a-capriccio-rage-over-a-lost-penny-17f78eff",
+   "sha256": "17f78effb59579d31f4872a6391c223a1584e6d5d3e198c52e6f4a3e5bbc606d",
+   "title": "Rondo a Capriccio Rage over a lost Penny Beethoven op 129",
+   "reason": "failed the library's validation: measure 15: voice 2 lasts 321/160 quarters, time signature allows 2"
+  },
+  {
    "slug": "pdmx-six-unison-melodies-3bf25da6",
    "sha256": "3bf25da68b05824e787d64e2c1a4c72f2549d15a2bb738ce2d85f6bb5a25815c",
    "title": "Six Unison Melodies",
@@ -31365,6 +31725,54 @@
    "sha256": "105416aac3095f2ac7e9593c7df2d3ee42a6e5258ac6468a8ec37f5e915bd0a3",
    "title": "Unfailing Love-JW Original",
    "reason": "failed the library's validation: measure 4: voice 1 lasts 39/8 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-grande-polka-de-concert-bartlett-d5f5bc45",
+   "sha256": "d5f5bc45393cf3da6bbdf54ee1304a60380c9140831de56a0cf28ce941aa626c",
+   "title": "Grande Polka de Concert - Bartlett",
+   "reason": "failed the library's validation: measure 127: backup before measure start"
+  },
+  {
+   "slug": "pdmx-piano-sonata-no-6-op-10-no-2-l-v-beethov-7a9fb629",
+   "sha256": "7a9fb6298de5baa5f1f95a115d00daac9d002b0133df748815b9794a43a492d4",
+   "title": "Piano Sonata No.6 Op.10 No.2 (L.v.Beethoven)",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-3rd-mov-op-27-no-2-sonate-no-14-moonligh-728a1a04",
+   "sha256": "728a1a049bba9febcbed5805589861488b49ded499e75fcdf654dede62635546",
+   "title": "3rd Mov. Op.27 No.2 Sonate No.14 Moonlight Beethoven",
+   "reason": "failed the library's validation: measure 189: voice 1 lasts 23 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+   "sha256": "0df00b70712cc7f91fe081913f276060595662b135eec550eaeb64a52c6512db",
+   "title": "Rachmaninoff: Ètude-Tableaux No. 1 in C Minor",
+   "reason": "failed the library's validation: measure 25: voice 1 lasts 643/160 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-second-suite-in-f-126f8af7",
+   "sha256": "126f8af7c49aa8ee2e6add74917088f90d48151b6f3419ea2a7c4968bdf6ff5b",
+   "title": "Second Suite in F",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-gottschalk-waltz-1863-77702641",
+   "sha256": "777026411fabc008d927c371c3bc4b3badbb70caa50c4d7232c03cd9c19d9109",
+   "title": "Gottschalk Waltz (1863)",
+   "reason": "failed the library's validation: measure 13: voice 1 lasts 801/160 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-franz-liszt-hungarian-rhapsody-no-10-in-5e7197e3",
+   "sha256": "5e7197e3e716dccec35ec8e48df0f309d8eb2b58defcef7828e1cc5e8ab4e7ff",
+   "title": "Franz Liszt: Hungarian Rhapsody No.10 in E major",
+   "reason": "failed the library's validation: measure 34: backup before measure start"
+  },
+  {
+   "slug": "pdmx-ballade-no-4-f-chopin-op-52-69255fd5",
+   "sha256": "69255fd5b5b003b4b75f05160ba867b0b908ee99e8c6e4052520bdc4200f28ca",
+   "title": "Ballade No.4 (F.Chopin Op.52)",
+   "reason": "failed the library's validation: measure 134: voice 1 lasts 21 quarters, time signature allows 3"
   },
   {
    "slug": "pdmx-jose-juan-09-2-33fdd088",
@@ -31379,10 +31787,34 @@
    "reason": "the archive's title or composer is broken text (replacement characters or mis-decoded)"
   },
   {
+   "slug": "pdmx-piano-sonata-no-16-op-31-no-1-l-v-beetho-b1e25b04",
+   "sha256": "b1e25b04b86d5bfdc4768a6ecb78fc79db57e1941035d616111e8507ae5d873d",
+   "title": "Piano Sonata No.16 Op.31 No.1 (L.v.Beethoven)",
+   "reason": "failed the library's validation: measure 10: backup before measure start"
+  },
+  {
+   "slug": "pdmx-liszt-fantasy-on-themes-from-mozart-s-op-ddcd2d5e",
+   "sha256": "ddcd2d5e4847a08aa843e60e5f4c0871edd9c9622689cc654d7b835dfd0ea279",
+   "title": "Liszt Fantasy on Themes from Mozart's Opera The Marriage of Figaro",
+   "reason": "failed the library's validation: measure 156: backup before measure start"
+  },
+  {
+   "slug": "pdmx-polonaise-f-chopin-op-53-7f3b4a32",
+   "sha256": "7f3b4a32667e446b68bfabe4df690907b6dc42fd08a15be897f4c1bc74cf694a",
+   "title": "Polonaise (F.Chopin Op.53)",
+   "reason": "failed the library's validation: measure 136: backup before measure start"
+  },
+  {
    "slug": "pdmx-richard-wagner-das-rheingold-transformat-c9463c7c",
    "sha256": "c9463c7cc6838b4e4073a8abb15388c5b578e6d646eb4683ee3b4d57a7a6820a",
    "title": "Richard Wagner - Das Rheingold Transformation Music (Piano Score)",
    "reason": "failed the library's validation: measure 44: backup before measure start"
+  },
+  {
+   "slug": "pdmx-pomp-and-circumstance-march-no-3-in-c-mi-0b3d1cd2",
+   "sha256": "0b3d1cd29626ec4142cba5fe14781a1230ed5d79263ff618f03a33496c1b15db",
+   "title": "Pomp and Circumstance March No. 3 in C Minor (Piano Transcription)",
+   "reason": "failed the library's validation: measure 52: backup before measure start"
   },
   {
    "slug": "pdmx-arrangement-for-piano-on-la-ci-darem-la-ba929faa",
@@ -31401,6 +31833,12 @@
    "sha256": "c292b667afea928be31753d68d765b653f4017cc3f6dc1e6361241c008a7b868",
    "title": "Für Elise",
    "reason": "failed the library's validation: no time signature"
+  },
+  {
+   "slug": "pdmx-ronde-a-from-iberia-by-alb-niz-e1b30a7c",
+   "sha256": "e1b30a7c5700d5d1c410616848bf685b028b45c9eee3fbe8aa9a3105de6253f1",
+   "title": "Rondeña from Iberia by Albéniz",
+   "reason": "failed the library's validation: measure 206: overlapping notes in voice 3 at beat 2.125"
   },
   {
    "slug": "pdmx-bart-k-b-la-for-children-book-2-03-a-ros-050e3bb2",
@@ -31445,10 +31883,40 @@
    "reason": "failed the library's validation: measure numbers not unique"
   },
   {
+   "slug": "pdmx-franz-liszt-hungarian-rhapsody-no-6-in-d-c0df5c1e",
+   "sha256": "c0df5c1e71c8abd05e7c3d3039103e7da5d699d451d7f610e80f71a161ab7d2f",
+   "title": "Franz Liszt: Hungarian Rhapsody No.6 in D-flat major",
+   "reason": "failed the library's validation: measure 78: backup before measure start"
+  },
+  {
+   "slug": "pdmx-piano-sonata-no-2-f-chopin-op-35-aa727f84",
+   "sha256": "aa727f842b629269f76a2af7fc5a5e3e91b97f660defb1418573137634636e09",
+   "title": "Piano Sonata No.2 (F.Chopin Op.35)",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+   "sha256": "337a8e32de583bd4bca9fdabb8618b9ecdb2130fe3897293b4967fd716393fc7",
+   "title": "Franz Liszt: Transcendental Étude No.8 in C minor Wilde Jagd",
+   "reason": "failed the library's validation: measure 27: backup before measure start"
+  },
+  {
+   "slug": "pdmx-piano-sonata-s-liapounow-op-27-84b13bd6",
+   "sha256": "84b13bd697de36e3832d1c7f0829388c230a1936d76dfe4ff7fabffb977b449a",
+   "title": "Piano Sonata (S.Liapounow Op.27)",
+   "reason": "failed the library's validation: measure X3: voice 6 lasts 1921/480 quarters, time signature allows 4"
+  },
+  {
    "slug": "pdmx-f-couperin-les-tambourins-fa6705d3",
    "sha256": "fa6705d3eb308f0b841669abe32f63bb4bad2333bead38d959d901de18625a7a",
    "title": "F. Couperin: Les Tambourins",
    "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-acca-13-shadow-and-truth-3fc6df44",
+   "sha256": "3fc6df4430aca734dccb648515b2fbf5c7214aaddf281ecfd7f1bdeabd2e09b2",
+   "title": "ACCA 13 Shadow And Truth",
+   "reason": "failed the library's validation: measure 42: voice 1 lasts 19/4 quarters, time signature allows 4"
   },
   {
    "slug": "pdmx-nocturne-f-chopinop-9-no-2-a1a3fa66",
@@ -31463,6 +31931,12 @@
    "reason": "failed the library's validation: no time signature"
   },
   {
+   "slug": "pdmx-beethoven-s-5th-symphony-1st-movement-b8ee3a6a",
+   "sha256": "b8ee3a6a0e1c4c12f28518926aefd96b695142b0d1219250414fb09d8cec9426",
+   "title": "Beethoven's_5th_Symphony 1st Movement",
+   "reason": "failed the library's validation: measure 266: voice 1 lasts 9 quarters, time signature allows 2"
+  },
+  {
    "slug": "pdmx-clementi-sonatina-op-36-no-1-retrograde-0ed52aa9",
    "sha256": "0ed52aa9b1e6e60e13d077d34bb77cb6eeafd79c437d033cf681d254d125dd3f",
    "title": "Clementi Sonatina Op. 36 no. 1 retrograde version",
@@ -31475,10 +31949,28 @@
    "reason": "failed the library's validation: music21 parse failed: HarmonyException: not a valid pitch specification: #1iv6"
   },
   {
+   "slug": "pdmx-liszt-venezia-e-napoli-i-revised-version-80ed7702",
+   "sha256": "80ed7702ab232aec5027d1deebb83c3e07ec0585cb4e093fd1928d19be4e30af",
+   "title": "Liszt Venezia e Napoli I (Revised Version)",
+   "reason": "failed the library's validation: measure 71: voice 1 lasts 9/2 quarters, time signature allows 3"
+  },
+  {
+   "slug": "pdmx-memories-of-childhood-c9776a16",
+   "sha256": "c9776a16aafd84fd6edd7cebd47ee04351563fbbcd5053430822de54f3b34aca",
+   "title": "Memories of childhood",
+   "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
    "slug": "pdmx-fr-d-ric-chopin-prelude-in-f-minor-op-28-cadda07c",
    "sha256": "cadda07c6e860d03af047cd1a288590c36160a213f9119a45c2ae450bed8ef95",
    "title": "Frédéric Chopin: Prelude in F minor Op.28 No.18",
    "reason": "failed the library's validation: measure 8: backup before measure start"
+  },
+  {
+   "slug": "pdmx-renaissance-suite-iii-menuet-rameau-leop-cb4778b1",
+   "sha256": "cb4778b16b55603c58c00ab7a96fa62b31741c03e3df02c873b961416fbd180d",
+   "title": "Renaissance Suite - III Menuet {Rameau} - Leopold Godowsky",
+   "reason": "failed the library's validation: measure 138: backup before measure start"
   },
   {
    "slug": "pdmx-the-meltdown-maxence-cyrin-52124e00",
@@ -31623,6 +32115,12 @@
    "sha256": "ae7782105953e172a3a4a43581328722ab98d2c3ab17738459a48e5a6afa7568",
    "title": "Ive a precious recollection twill nevermore depart",
    "reason": "failed the library's validation: measure 17: voice 1 lasts 1921/480 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-piano-sonata-medley-no-1-b3211a8d",
+   "sha256": "b3211a8d4681dc761a9bf7ccc9b13da0ceaa676de1ab1e5070ad0a12f941ca1a",
+   "title": "Piano Sonata Medley No 1",
+   "reason": "failed the library's validation: measure 96: backup before measure start"
   },
   {
    "slug": "pdmx-do-you-know-why-im-longing-for-the-comin-cba07c91",

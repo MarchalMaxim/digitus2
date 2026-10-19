@@ -48,3 +48,12 @@ def test_the_chord_symbol_of_a_lead_sheet_is_not_a_zero_duration_note(tmp_path):
     path.write_text(marked, encoding="utf-8")
     res = validate.check_file(path, None, False)
     assert not [e for e in res["errors"] if "zero duration" in e], res["errors"]
+
+
+def test_the_size_limit_is_on_the_stored_file(tmp_path):
+    # The note ceiling (25,000) admits scores that are several MB as plain XML and a few hundred KB stored gzip:
+    # build.build_pdmx holds the stored file to the limit and passes max_bytes=None for the plain copy (2026-10-19).
+    path = tmp_path / "long.musicxml"
+    path.write_bytes((CONTENT / "scores" / "alle-meine-entchen.musicxml").read_bytes())
+    assert [e for e in validate.check_file(path, None, False, max_bytes=1000)["errors"] if "bytes" in e]
+    assert not [e for e in validate.check_file(path, None, False, max_bytes=None)["errors"] if "bytes" in e]

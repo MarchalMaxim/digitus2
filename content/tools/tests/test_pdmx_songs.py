@@ -3,6 +3,7 @@ reinstatement rule that lifted the genre and copyright-date exclusions (2026-10-
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -35,6 +36,16 @@ def test_jazz_and_blues_go_to_modern_and_the_rest_to_songs():
     assert fr.song_collection("blues") == "pdmx-modern"
     assert fr.song_collection("pop-rbfunksoul") == "pdmx-songs"
     assert fr.song_collection("") == "pdmx-songs"
+
+
+def test_the_songs_lane_places_its_advanced_pieces_at_level_6_on_their_own_shelf():
+    # 2026-10-19: the songs lane takes the level-6 rule (pdmx_advanced.py) and keeps the song on its Songs or
+    # Modern shelf, where the Challenging level shows it
+    doc = json.loads((TOOLS / "catalog.d" / "pdmx-songs-advanced.json").read_text(encoding="utf-8"))
+    assert doc["pieces"]
+    for piece in doc["pieces"]:
+        assert piece["level"] == 6 and piece["collection"] in ("pdmx-songs", "pdmx-modern"), piece["slug"]
+        assert piece["levelNote"].startswith("Advanced by the archive rule"), piece["slug"]
 
 
 def test_the_reinstatement_keeps_content_exclusions_and_lifts_genre_and_copyright_ones():

@@ -12,10 +12,16 @@ archive uses are accepted.
 
 Two lanes. The classical lane (candidates.json: genres classical, folk, religious or unlabelled) gives
 `pdmx-library.json` (capped) and `pdmx-advanced.json` (level 6 by the rule in pdmx_advanced.py). The songs
-lane gives `pdmx-songs.json`: every candidate in candidates-other.json (pdmx_songs.py), and any candidate of
-candidates.json whose genre tags are outside the classical lane (a reinstated pop or soundtrack score). The
-songs lane passes only when every gate passes, takes no level-6 override (the frozen heuristic places it), and
-is capped on its own, so it never takes a place from the classical lane.
+lane gives `pdmx-songs.json` (capped on its own, so it never takes a place from the classical lane) and
+`pdmx-songs-advanced.json` (level 6 by the same rule): every candidate in candidates-other.json
+(pdmx_songs.py), and any candidate of candidates.json whose genre tags are outside the classical lane (a
+reinstated pop or soundtrack score). Both lanes take the level-6 rule and its relaxed gates
+(pdmx_advanced.usable); a level-6 song keeps its Songs or Modern collection, so it shows on that shelf.
+
+The caps hold levels 1 to 4 only: a piece at level 5 or 6 (the app's Challenging) ships whenever it passes,
+because the library is short of hard pieces (the owner, 2026-10-19: "add as many advanced scores as possible").
+Within a cap, a piece the fragments already ship keeps its place (its link keeps working), and the best-rated
+new candidates take the places left, so a larger pool never pushes a shipped piece out.
 
 Candidates in `pdmx-excluded.json` (build failures, duplicates from dedupe.py, out of scope) are skipped.
 
@@ -41,13 +47,16 @@ RAW = CONTENT / "_raw" / "pdmx"
 FRAGMENT = HERE / "catalog.d" / "pdmx-library.json"
 ADVANCED_FRAGMENT = HERE / "catalog.d" / "pdmx-advanced.json"
 SONGS_FRAGMENT = HERE / "catalog.d" / "pdmx-songs.json"
+SONGS_ADVANCED_FRAGMENT = HERE / "catalog.d" / "pdmx-songs-advanced.json"
 EXCLUDED = HERE / "pdmx-excluded.json"  # committed: build failures and duplicates (see _comment)
 PDMX_CSV = CONTENT.parent / "research" / "data" / "_downloads" / "pdmx" / "PDMX.csv"
 TASK = 300  # the fragment's task number (catalog.d files carry the plan task that owns them)
 ADVANCED_TASK = 301
 SONGS_TASK = 302
-LIMIT = 1300  # the library ships this many passing candidates that build; the rest stay recorded in `rejected`
+SONGS_ADVANCED_TASK = 303
+LIMIT = 1300  # the library ships this many passing candidates at levels 1 to 4 that build; the rest stay recorded
 SONGS_LIMIT = 1000  # the songs lane's own cap (by rating), so it never takes a place from the classical lane
+UNCAPPED_LEVEL = 5  # from this level up (the app's Challenging) every passing piece ships: the caps hold levels 1 to 4
 CLASSICAL_LANE_TAGS = {"classical", "folk", "religiousmusic", "NA"}
 JAZZ_TAGS = {"jazz", "blues"}
 
@@ -166,6 +175,36 @@ def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = 
             piece["levelOverride"] = (f"The heuristic proposes {level}, which has no level 6; the archive's advanced "
                                       f"rule places it at 6. {'; '.join(demands)}.")
     return piece
+
+
+def shipped_names() -> dict[str, tuple[str, str]]:
+    """slug -> (title, composer) of every piece the archive fragments ship now.
+
+    The catalog is the authority for a shipped piece's name: titles and composers were repaired in the
+    fragments by hand (titles.py, docs/reviews/library-titles-2026-10-18.md), and a rerun of this script
+    must not put the archive's damaged text back."""
+    out: dict[str, tuple[str, str]] = {}
+    for path in (FRAGMENT, ADVANCED_FRAGMENT, SONGS_FRAGMENT, SONGS_ADVANCED_FRAGMENT):
+        if path.exists():
+            for p in json.loads(path.read_text(encoding="utf-8")).get("pieces", []):
+                out[p["slug"]] = (p["title"], p["composer"])
+    return out
+
+
+def repaired_names(piece: dict) -> tuple[str, str] | None:
+    """The title and composer of a new piece with the damaged stretches put back from its own score's text
+    (titles.repaired), or None when damage is left that the score cannot repair (titles.RESIDUE)."""
+    import titles
+
+    fields = [piece["title"], piece["composer"]]
+    if not all(f.isascii() for f in fields):
+        sha = piece["pdmx"]["sha256"]
+        plain = CONTENT / "_build" / "pdmx" / sha / f"{sha}.musicxml"
+        texts = titles.xml_texts(plain) if plain.exists() else []
+        fields = [titles.repaired(f, texts) if not f.isascii() else f for f in fields]
+    if any(titles.RESIDUE.search(f) for f in fields):
+        return None
+    return fields[0], fields[1]
 
 
 def record_failures(log: Path) -> int:
@@ -296,10 +335,12 @@ def main(argv=None) -> int:
         build_failed.setdefault(slug, {"validation": {"": {"errors": [error]}}})
     duplicates = excluded.get("duplicates", {})
     out_of_scope = excluded.get("outOfScope", {})  # pdmx_scope.py and pdmx_songs.py: the review's exclusions
+    names_now = shipped_names()  # read before any fragment is written
     caps = {"classical": a.limit, "songs": a.songs_limit}
+    eligible: list[tuple[str, dict, bool, bool]] = []  # (lane, piece, advanced, within a cap), in rating order
     pieces: dict[str, list[dict]] = {"classical": [], "songs": []}
     rejected: dict[str, list[dict]] = {"classical": [], "songs": []}  # only what the build refused
-    advanced: list[dict] = []
+    advanced: dict[str, list[dict]] = {"classical": [], "songs": []}
     not_shipped = {lane: {"gates": 0, "duplicates": 0, "out of scope": 0, "beyond the cap": 0}
                    for lane in ("classical", "songs")}
     seen_slugs: set[str] = set()
@@ -314,9 +355,8 @@ def main(argv=None) -> int:
             rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title,
                                    "reason": "failed the library's validation: " + (errors[0] if errors else "see verification")})
             continue
-        # The songs lane takes only a candidate that passed every gate; the classical lane also takes the
-        # level-6 pieces that pass the relaxed gates (pdmx_advanced.usable).
-        if not (gate["ok"] if songs else pdmx_advanced.usable(gate, cand["notes"])):
+        # A candidate that passed every gate, or a level-6 piece that passes the relaxed gates (pdmx_advanced.usable).
+        if not pdmx_advanced.usable(gate, cand["notes"]):
             counts["gates"] += 1
             continue
         if BROKEN_TEXT.search(title) or BROKEN_TEXT.search(cand.get("composer") or ""):
@@ -337,10 +377,7 @@ def main(argv=None) -> int:
         if licence not in ("publicdomain", "cc-zero"):
             rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title, "reason": f"licence {licence!r}"})
             continue
-        demands = None if songs else pdmx_advanced.advanced(gate["level"], cand["notes"])
-        if not demands and len(pieces[lane]) >= caps[lane]:
-            counts["beyond the cap"] += 1
-            continue
+        demands = pdmx_advanced.advanced(gate["level"], cand["notes"])
         relaxed_gates = None if gate["ok"] else pdmx_advanced.relaxed_facts(gate)
         piece = piece_for(gate, cand, licence, demands, relaxed_gates)
         if songs:
@@ -348,10 +385,27 @@ def main(argv=None) -> int:
         if piece["slug"] in seen_slugs:  # the sha prefix makes this practically impossible; keep it honest
             raise SystemExit(f"duplicate slug {piece['slug']}")
         seen_slugs.add(piece["slug"])
-        (advanced if demands else pieces[lane]).append(piece)
+        eligible.append((lane, piece, bool(demands), not demands and gate["level"]["level"] < UNCAPPED_LEVEL))
+    # The caps hold levels 1 to 4. A piece the fragments ship now keeps its place, so its link and the reader's
+    # settings for it keep working; the places left go to the best-rated new candidates (the order of `entries`).
+    free = {lane: caps[lane] - sum(1 for e_lane, piece, _, in_cap in eligible
+                                   if e_lane == lane and in_cap and piece["slug"] in names_now) for lane in caps}
+    for lane, piece, is_advanced, in_cap in eligible:
+        new = piece["slug"] not in names_now
+        if in_cap and new and free[lane] <= 0:
+            not_shipped[lane]["beyond the cap"] += 1
+            continue
+        names = names_now.get(piece["slug"]) or repaired_names(piece)
+        if names is None:
+            rejected[lane].append({"slug": piece["slug"], "sha256": piece["pdmx"]["sha256"], "title": piece["title"],
+                                   "reason": "the archive's title or composer is damaged text that its own score cannot repair"})
+            continue
+        piece["title"], piece["composer"] = names
+        free[lane] -= in_cap and new
+        (advanced[lane] if is_advanced else pieces[lane]).append(piece)
     for lane in pieces:
         pieces[lane].sort(key=lambda p: (p["level"], p["collection"], p["slug"]))
-    advanced.sort(key=lambda p: p["slug"])
+        advanced[lane].sort(key=lambda p: p["slug"])
     notes_gates = ("one staff, a lint law error, an unplayable slice or an XSD error")
     classical_not = not_shipped["classical"]
     write_fragment(FRAGMENT, TASK, pieces["classical"], rejected["classical"], (
@@ -362,29 +416,37 @@ def main(argv=None) -> int:
         f"{classical_not['gates']} failed a gate ({notes_gates}), {classical_not['duplicates']} duplicates of "
         f"another piece (dedupe.py), {classical_not['out of scope']} out of scope (pdmx_scope.py), "
         f"{classical_not['beyond the cap']} passed but ranked beyond the cap of "
-        f"{a.limit} (by rating). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; "
-        "`rejected` lists only the candidates the build refused."))
-    write_fragment(ADVANCED_FRAGMENT, ADVANCED_TASK, advanced, [], (
-        "MuseScore archive pieces placed at level 6 (Advanced) by the rule in content/tools/pdmx_advanced.py: "
-        "every piece passed the same gates as pdmx-library.json; the rule only chooses the level, which the "
-        "frozen heuristic cannot (it has no level 6). The rule's thresholds were fixed before the yield was "
-        "known. Pieces are not capped."))
+        f"{a.limit} pieces at levels 1 to 4 (by rating; level 5 is not capped). Their reasons are in "
+        "content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused."))
+    advanced_rule = (
+        "placed at level 6 (Advanced) by the rule in content/tools/pdmx_advanced.py, which the frozen heuristic "
+        "cannot do (it has no level 6). The rule's thresholds were fixed before the yield was known. A piece passed "
+        "every gate, or it passed every gate but the span check and the lint law gate, which are relaxed for level 6 "
+        "within a ceiling: its flags are recorded in `relaxedGates` and in its notes. Pieces are not capped.")
+    write_fragment(ADVANCED_FRAGMENT, ADVANCED_TASK, advanced["classical"], [], (
+        "MuseScore archive pieces of the classical lane (pdmx-library.json) " + advanced_rule))
     songs_not = not_shipped["songs"]
+    songs_scope = (
+        "solo piano scores outside classical, folk and religious music (pop, rock, soundtrack, jazz, and unlabelled "
+        "scores by composers outside the classical list) that the uploader declared public domain or CC0 with no "
+        "licence conflict. The user's broad copyright reading (2026-10-16): no check of the author's date, so a "
+        "modern arrangement that the declaration does not cover is a risk the repository carries. Chosen by "
+        "content/tools/pdmx_songs.py; two removal-only lenses (junk, content safety) took out the flagged ones. "
+        "Not reviewed by eye.")
     write_fragment(SONGS_FRAGMENT, SONGS_TASK, pieces["songs"], rejected["songs"], (
-        "MuseScore archive songs (PDMX): solo piano scores outside classical, folk and religious music (pop, rock, "
-        "soundtrack, jazz, and unlabelled scores by composers outside the classical list) that the uploader declared "
-        "public domain or CC0 with no licence conflict. The user's broad copyright reading (2026-10-16): no check of "
-        "the author's date, so a modern arrangement that the declaration does not cover is a risk the repository "
-        "carries. Chosen by content/tools/pdmx_songs.py; two removal-only lenses (junk, content safety) took out the "
-        "flagged ones. Gated like the rest, but every gate must pass (no relaxed level 6), and the frozen heuristic "
-        "places each song (no level-6 override). Capped at "
-        f"{a.songs_limit} by rating. Not shipped: {songs_not['gates']} failed a gate, {songs_not['duplicates']} "
-        f"duplicates (dedupe.py), {songs_not['out of scope']} out of scope, {songs_not['beyond the cap']} beyond the cap. "
-        "Not reviewed by eye."))
+        "MuseScore archive songs (PDMX): " + songs_scope + " Every gate passed, and the frozen heuristic places each "
+        f"song. Capped at {a.songs_limit} pieces at levels 1 to 4 by rating (level 5 is not capped; level 6 is "
+        f"pdmx-songs-advanced.json). Not shipped: {songs_not['gates']} failed a gate, {songs_not['duplicates']} "
+        f"duplicates (dedupe.py), {songs_not['out of scope']} out of scope, {songs_not['beyond the cap']} beyond the cap."))
+    write_fragment(SONGS_ADVANCED_FRAGMENT, SONGS_ADVANCED_TASK, advanced["songs"], [], (
+        "MuseScore archive songs of the songs lane (pdmx-songs.json): " + songs_scope + " Each was " + advanced_rule +
+        " A song keeps its Songs or Modern collection, so it shows on that shelf at the Challenging level."))
     levels = {lvl: sum(1 for p in pieces["classical"] if p["level"] == lvl) for lvl in range(1, 7)}
     songs_levels = {lvl: sum(1 for p in pieces["songs"] if p["level"] == lvl) for lvl in range(1, 7)}
-    print(f"classical {len(pieces['classical'])}, advanced {len(advanced)}, songs {len(pieces['songs'])}; "
-          f"not shipped {not_shipped}; levels {levels}; song levels {songs_levels}")
+    relaxed = {lane: sum(1 for p in advanced[lane] if p.get("relaxedGates")) for lane in advanced}
+    print(f"classical {len(pieces['classical'])}, advanced {len(advanced['classical'])}, songs {len(pieces['songs'])}, "
+          f"advanced songs {len(advanced['songs'])} (relaxed gates {relaxed}); not shipped {not_shipped}; "
+          f"levels {levels}; song levels {songs_levels}")
     return 0
 
 

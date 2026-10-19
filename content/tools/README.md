@@ -2,7 +2,7 @@
 
 These scripts produce everything in `content/scores/`, `content/manifest.json`,
 `content/verification.json` and `content/library-index.json`. The library has
-2,702 pieces in six lanes:
+3,189 pieces in six lanes:
 
 | Lane | Catalog | Pieces | Documented in |
 |---|---|---:|---|
@@ -10,8 +10,8 @@ These scripts produce everything in `content/scores/`, `content/manifest.json`,
 | L1 curated library | `catalog.d/` collection fragments | 119 | `docs/research/content-library.md`, section "L1 curated library" |
 | Mutopia expansion | `catalog.d/expansion-bach.json`, `expansion-teaching.json` | 13 | [Mutopia expansions](#mutopia-expansions) |
 | Bulk Mutopia | `catalog.d/expansion-bulk.json` | 91 | [Mutopia expansions](#mutopia-expansions) |
-| MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,449 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
-| MuseScore archive, songs | `catalog.d/pdmx-songs.json` | 1,000 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
+| MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,524 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
+| MuseScore archive, songs | `catalog.d/pdmx-songs.json`, `pdmx-songs-advanced.json` | 1,412 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 
 The first four lanes are the curated core of 253 pieces. Provenance, licences
 and the reasons behind each choice for the first 149 are in
@@ -293,13 +293,17 @@ Known warnings, not defects:
 
 ## MuseScore archive scores (PDMX)
 
-2,449 pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
+2,936 pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
 files whose uploaders declared them public domain or CC0, and which PDMX found free of licence conflicts
 (`license_conflict` false). Every one is a solo piano score on two staves with notes on both; the
 library's own gates decide the rest. Two lanes. The classical lane (genres classical, folk, religious or unlabelled):
-`catalog.d/pdmx-library.json` (1,300 pieces at levels 1 to 5) and `catalog.d/pdmx-advanced.json` (149 pieces at level 6,
+`catalog.d/pdmx-library.json` (1,310 pieces at levels 1 to 5) and `catalog.d/pdmx-advanced.json` (214 pieces at level 6,
 some with relaxed gates). The songs lane (every other genre: pop, rock, soundtrack, jazz, blues, at the owner's request
-for songs "not necessarily classical or folk"): `catalog.d/pdmx-songs.json` (1,000 pieces, capped by rating).
+for songs "not necessarily classical or folk"): `catalog.d/pdmx-songs.json` (1,023 pieces at levels 1 to 5) and
+`catalog.d/pdmx-songs-advanced.json` (389 pieces at level 6, some with relaxed gates). The caps by rating hold levels
+1 to 4 only (1,300 classical pieces, 1,000 songs): a piece at level 5 or 6 ships whenever it passes, because the
+library is short of hard pieces. Within a cap a piece the fragments already ship keeps its place, and the best-rated
+new candidates take the places left, so a larger pool never pushes a shipped piece out.
 Their scores are
 `scores/<slug>.musicxml.gz` (gzip, mtime 0, byte-identical on a rebuild; the app decompresses them with
 the browser's DecompressionStream), and `content/library-index.json` lists every piece for the library
@@ -309,14 +313,14 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
 
 1. `pdmx_screen.py --csv PDMX.csv --archive mxl.tar.gz`: streams the archive once, keeps the
    public-domain or CC0 rows without a licence conflict, genres classical, folk or religious (MuseScore's
-   own tags) or unlabelled, 30 to 6,000 notes, and tests every file for a solo piano score.
-   `screen.jsonl` has a reason for every rejection.
-2. `pdmx_select.py --archive mxl.tar.gz`: keeps 40 to 2,500 notes and the two-staff rule (`grand_staff`:
+   own tags) or unlabelled, 30 to 25,000 notes, and tests every file for a solo piano score.
+   `screen.jsonl` has a reason for every rejection. `--above N` screens only the rows a ceiling of N left
+   out and appends them, so a raised ceiling needs no full run.
+2. `pdmx_select.py --archive mxl.tar.gz`: keeps 40 to 25,000 notes and the two-staff rule (`grand_staff`:
    one sounding part, two staves), admits an unlabelled score only when its composer is a classical one
    (`CLASSICAL_COMPOSERS`), removes duplicates by title and by identical XML, and copies the chosen files to
    `_raw/pdmx/selected/`. An unnamed composer is kept and shown as "Unknown": the licence rule is the
-   uploader's declaration, not the author's date (the owner's broad reading). The 2,500-note
-   ceiling leaves out 164 longer candidates.
+   uploader's declaration, not the author's date (the owner's broad reading).
 3. `pdmx_gate.py --grand-staff [--resume] [--limit N]`: for each candidate, the XSD of its own MusicXML
    version (3.1 or 4.0), the span check, notes on both staves, zero lint law errors at the medium and the
    large profile, and the level proposal of the frozen heuristic. `gate.jsonl` holds the results.
@@ -326,37 +330,53 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
    Mozart minuets in F at level 2 are one piece to a learner); the copy that stays is a curated piece
    first, then a named composer, then the more rated. A curated piece is never removed, and curated
    copies of each other are only listed. The same tune at another level (an easy and a fuller arrangement)
-   is reported and kept. `--apply` writes `duplicates` into `pdmx-excluded.json`.
+   is reported and kept. `--apply` writes `duplicates` into `pdmx-excluded.json`. A copy already recorded
+   stays while the piece it copies can still ship: a larger pool makes more shingles common (`COMMON`) and
+   can hide a pair the smaller pool found (six pairs when the note ceiling was lifted).
 5. `pdmx_scope.py export` and `apply`: MuseScore's genre tags are the uploader's, so a pop song can carry
    "classical". The candidates (best rated first, 2,037 of them, then the 157 relaxed advanced ones with
    `export --unreviewed`) were read by three independently framed reviews; a
    candidate any of them flagged as modern popular music, film, game or musical themes, or Nazi-era
-   marches is out of scope (69 of 2,194) and recorded in `outOfScope`.
-6. `pdmx_advanced.py` is the rule for level 6 (below). `pdmx_fragments.py [--limit 1300]` writes the two
-   fragments: the best-rated passing candidates (a cap in rating order, not a random cut), the advanced
-   ones apart and uncapped, skipping every candidate in `pdmx-excluded.json` (build failures, duplicates,
-   out of scope). `--record-failures LOG` first adds the pieces a `build.py` log reports as refused.
+   marches is out of scope (69 of 2,194) and recorded in `outOfScope`. The genre and date reasons were
+   lifted later (the songs lane, below); the content reasons stay.
+6. `pdmx_advanced.py` is the rule for level 6 (below). `pdmx_fragments.py [--limit 1300] [--songs-limit 1000]`
+   writes the four fragments: the best-rated passing candidates at levels 1 to 4 within each lane's cap, every
+   passing one at level 5, and the advanced ones apart and uncapped, skipping every candidate in
+   `pdmx-excluded.json` (build failures, duplicates, out of scope). The catalog is the authority for a
+   shipped piece's title and composer (they were repaired by hand, `titles.py`), and a new piece's damaged
+   name is repaired from its own score's text or the piece is left out. `--record-failures LOG` first adds the
+   pieces a `build.py` log reports as refused.
 7. `build.py --source pdmx [--only SLUG...]`: converts nothing (the MusicXML is the archive's own file).
    Source `<fingering>` digits are stripped first (`build.strip_fingerings`); each piece is then validated as a plain copy (`validate.check_file`: XSD, the two-staff rule, measure
-   arithmetic and the other library checks), then written gzip-compressed. A failed piece gets no score and
+   arithmetic and the other library checks), then written gzip-compressed. The 1.5 MB size limit applies to
+   the stored gzip file, not the plain copy: a long score is several MB as plain XML. A failed piece gets no score and
    no manifest entry. A refused piece is recorded and dropped (`--record-failures`); `build.py --source pdmx
    --only SLUG...` then builds just the pieces that the new fragments added. Repeat until a build refuses nothing. `build.py --manifest-only` then
    re-renders every manifest entry, and `build.py` writes `library-index.json` (the eight fields the
    library list reads, in a compact columnar form: `build.library_index` describes it, and
-   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 79 KB gzip for 2,702 pieces).
+   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,189 pieces).
 8. `gates.py --pending` (or `--new`) writes the verification records (span check, lint, level). For a
    MuseScore piece the LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to
    cross-check); the other gates do.
 
 **The songs lane** (`pdmx_songs.py`). `pdmx_screen.py --other` screens the rows the classical lane
-skipped (3,224 metadata rows, 1,765 accepted), `pdmx_select.py` and `pdmx_gate.py` run on them with
-`candidates-other.json` and `gate-other.jsonl` (4,228 candidates, 2,482 pass every gate; the songs lane takes no
-relaxed gates and no level-6 override), `pdmx_songs.py items` and `apply` carry the review (two removal-only lenses,
-junk and content safety: 324 removed), and `reinstate` lifts the genre and copyright-date
-exclusions of the classical lane's scope review while keeping the content ones (Nazi-era marches, propaganda, junk).
-`pdmx_fragments.py --songs-limit 1000` ships the best rated; jazz and blues go to the Modern genre, the rest to Songs.
-Copyright: the owner's broad reading, the uploader's declaration with no author-date check. Post-1929 popular
-songs can therefore be in the public repository; the repository carries that risk.
+skipped (3,239 metadata rows, 1,770 accepted), `pdmx_select.py` and `pdmx_gate.py` run on them with
+`candidates-other.json` and `gate-other.jsonl` (4,439 candidates, 2,528 pass every gate), `pdmx_songs.py items` and
+`apply` carry the review (two removal-only lenses, junk and content safety), and `reinstate` lifts the genre and
+copyright-date exclusions of the classical lane's scope review while keeping the content ones (Nazi-era marches,
+propaganda, junk). The songs lane takes the level-6 rule and its relaxed gates like the classical lane; a level-6
+song keeps its Songs or Modern collection, so the Challenging level shows it on that shelf.
+`pdmx_fragments.py --songs-limit 1000` ships the best rated at levels 1 to 4; jazz and blues go to the Modern genre,
+the rest to Songs. Copyright: the owner's broad reading, the uploader's declaration with no author-date check.
+Post-1929 popular songs can therefore be in the public repository; the repository carries that risk.
+
+**The review.** Any reader's flag removes a piece (`outOfScope`, 364 in all). The first songs pool lost 324 to the
+two lenses. When the note ceiling was lifted, the 595 pieces the fragments newly shipped, in both lanes, were read in the
+same two lenses by two independent readers, and the 14 that entered later, as refusals freed places, by one
+(`pdmx_songs.py apply FLAGS --index INDEX` numbers a review list other than `items.txt`): 29 removed, for drafts and
+works in progress, fragments, accompaniment parts, altered versions of known works, titles that are only a code, a
+number or a hash, damaged titles that cannot be recovered, and three military marches. Three damaged titles were
+restored exactly instead, and one composer's name up to the character between its two parts.
 
 **Why the build refuses scores that the gate passed.** `pdmx_gate.py` checks the XSD, the grand staff, the spans, the
 lint laws and the level; the build then runs `validate.check_file` on the file, which is a different, wider set of
@@ -371,10 +391,24 @@ checks. A refusal was therefore always a check the gate does not make. Of 390 re
 
 (193 and 94 make 287, not 278: nine of those scores also carry a real defect, so they stay among the 112.)
 
+When the note ceiling was lifted, the first build of the 574 new pieces refused 154. 105 of those refusals were the
+validator's 1.5 MB limit on the plain XML, a second ceiling on long scores; with the limit on the stored file, 64
+of them pass. The 93 refusals that remain (with the later entrants) are real: bars longer than their time
+signature (72 scores; of the 44 refused for that alone, 31 by more than half a quarter note, such as the cadenza
+bars of Chopin's Ballade No. 4, and 11 by at most a thirty-second of a quarter, a rounding of the file's divisions), a backup before the bar
+start (30), overlapping notes (13) and measure numbers out of order (10).
+
 `pdmx_fragments.py --recheck-failures` re-runs every recorded refusal through the build's own check and releases the
 ones that pass (a refusal is otherwise kept forever), and `dedupe.py` leaves out a piece the build refuses, so it
 cannot be the copy that stays. A piece that still fails is recorded in `pdmx-excluded.json` and dropped
 ("if the refusals do not work, drop them"); nothing is tried again for it.
+
+**The note ceiling.** It was 2,500 notes in `pdmx_select.py` and 6,000 in `pdmx_screen.py` until the owner asked to
+lift it (2026-10-19). It is now 25,000 in both, the longest score tested in the app: Chopin's twelve Études Op. 25 in
+one file (24,956 notes, 919 bars) is fingered in 3.9 s and laid out in 4.7 s, opens in 16 s at phone width (190
+pages, 110 MB of page heap) and plays. Chopin's Sonata No. 3 (13,871 notes) took 4.2 and 3.1 s, the Ballade No. 4
+(6,277 notes) 0.6 and 1.3 s. Above 25,000 notes the archive holds only collections, one whole symphony and MIDI dumps.
+The library ships 160 archive pieces above 2,500 notes and 14 above 6,000; the longest is 20,329.
 
 **Level 6.** The heuristic has four cut points, so it never proposes 6; the 50 curated Advanced pieces
 were placed by hand. An archive piece is placed at 6 by the rule in `pdmx_advanced.py`: a proposal of 5,
@@ -382,7 +416,7 @@ or of 4 with a score of 10.9 or more (the middle of that band); at least 60 seco
 both sustained fast notes (6 a second) and a stretch of 12 semitones. Speed and stretch are required
 together, because either alone admitted pieces that were not advanced. A placement from proposal 4
 carries a `levelOverride`. The thresholds were fixed before the yield was known and are not tuned to a
-count. 38 archive pieces at level 6 pass every library gate.
+count. 172 archive pieces at level 6 pass every library gate.
 
 **Relaxed gates for level 6** (the owner's decision). Advanced pieces are the ones the span check and
 the lint law gate refuse, so a level-6 candidate that meets the rule and fails only those two gates ships
@@ -393,20 +427,21 @@ score or engine cannot slip through. A total waiver would ship pieces where near
 law (the worst candidate had 1,028 errors per 1,000 notes), so the relaxation has a ceiling of 40
 law errors per 1,000 notes at each profile (ten times the engine's measured rate on real pieces, the
 benchmark floor of 3.92) and 20 unplayable slices per 1,000 notes; both are constants in
-`pdmx_advanced.py` (None lifts them). 111 pieces ship with relaxed gates: a median of 11 law errors a
-piece (at most 92), and 92 of them with span flags (470 slices in all, at most 24 in one piece). The
-digits at those places are advice.
+`pdmx_advanced.py` (None lifts them). 431 pieces ship with relaxed gates: a median of 13 law errors a
+piece (at most 277, in a long piece within the ceiling), and 362 of them with span flags (2,918 slices in all, at
+most 63 in one piece). The digits at those places are advice.
 
-**Result.** The classical lane screened 175,905 archive rows, kept 8,607 two-staff candidates after
-de-duplication and passed 5,449 through every gate; the songs lane gated 4,228 candidates and passed 2,482.
-The library ships 1,300 classical pieces at levels 1 to 5, 149 at level 6 (38 passing every gate, 111 with
-relaxed gates) and 1,000 songs (979 Songs, 21 jazz and blues under Modern). The archive names a composer
-for 462 of the 1,449 classical-lane pieces; the rest read "Unknown".
+**Result.** The classical lane screened 176,155 archive rows, kept 8,855 two-staff candidates after
+de-duplication and passed 5,470 through every gate; the songs lane gated 4,439 candidates and passed 2,528.
+The library ships 1,310 classical pieces at levels 1 to 5, 214 at level 6, 1,023 songs at levels 1 to 5 and 389
+at level 6 (1,368 in Songs, 44 jazz and blues under Modern). Of the 603 archive pieces at level 6, 172 pass every
+gate and 431 ship with relaxed gates. The archive names a composer for 528 of the 1,524 classical-lane pieces; the
+rest read "Unknown".
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---:|---:|---:|---:|---:|---:|
-| Archive pieces | 23 | 168 | 1,332 | 747 | 30 | 149 |
-| Whole library (253 curated + 2,449 archive) | 47 | 212 | 1,415 | 784 | 45 | 199 |
+| Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 603 |
+| Whole library (253 curated + 2,936 archive) | 47 | 220 | 1,465 | 756 | 48 | 653 |
 
 ## Generated and ignored directories
 

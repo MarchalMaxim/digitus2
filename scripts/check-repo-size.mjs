@@ -11,11 +11,14 @@ import { execSync } from 'node:child_process';
 import { statSync } from 'node:fs';
 
 const MAX_FILE_KB = 1024;
-const MAX_TOTAL_MB = 100; // 60 until the MuseScore archive pieces (2026-10-16): ~1,250 gzipped scores and the records below
-// The library's generated records grow with every piece (about 1 KB of manifest and 3 KB of verification per
+// 60 until the MuseScore archive pieces (2026-10-16): ~1,250 gzipped scores and the records below. 100 until the
+// note ceiling was lifted (2026-10-19): 487 more archive pieces, mostly long advanced ones, about 32 KB a score
+// gzipped, which took the total to 101 MB. GitHub's own limits (1 GB per repository and Pages site) are far off.
+const MAX_TOTAL_MB = 120;
+// The library's generated records grow with every piece (about 1.3 KB of manifest and 3 KB of verification per
 // piece, and the archive fragment about 1.2 KB a piece), so they carry their own limits instead of the general one.
 const ALLOW_LARGE_KB = {
-  'content/manifest.json': 4096,
+  'content/manifest.json': 5120, // 3,189 pieces: 4,285 KB
   'content/verification.json': 8192,
   'content/tools/catalog.d/pdmx-library.json': 2048, // 1,300 archive pieces, each with its own provenance note
   'content/tools/catalog.d/pdmx-songs.json': 2048, // 1,000 archive songs, the same note on each

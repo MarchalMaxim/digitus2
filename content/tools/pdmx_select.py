@@ -3,7 +3,7 @@
 Input: `content/_raw/pdmx/screen.jsonl` (from `pdmx_screen.py`). The choice keeps the library's
 scope: a classical, folk or religious genre tag (MuseScore's own tags; unlabelled scores are
 left out because nothing says what they are), a named composer or a traditional or anonymous
-attribution, and 40 to 2,500 notes. An unnamed composer is kept (the library shows it as
+attribution, and 40 to 25,000 notes. An unnamed composer is kept (the library shows it as
 unknown): the licence rule is the uploader's declaration, not the author's date. Duplicates go too: one score per normalised title and
 composer (the most rated), and one per identical MusicXML.
 
@@ -27,11 +27,15 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import pdmx_screen  # noqa: E402
+
 REPO = HERE.parent.parent
 RAW = REPO / "content" / "_raw" / "pdmx"
 
 GENRE_TOKENS = {"classical", "folk", "religiousmusic"}
-MIN_NOTES, MAX_NOTES = 40, 2500
+# The ceiling was 2,500 notes until the owner asked to lift it (2026-10-19, for more advanced pieces); it is now
+# the screen's own (pdmx_screen.MAX_NOTES: the longest score tested in the app), so the selection adds none.
+MIN_NOTES, MAX_NOTES = 40, pdmx_screen.MAX_NOTES
 PLACEHOLDER_WORDS = ("urheber", "unbekannt", "unknown", "unattributed", "composer", "various")
 TRADITIONAL = re.compile(r"^(trad\.?|traditional|tradicional|tradicional\.?|anon\.?|anonymous|anonimo|anónimo)$", re.I)
 

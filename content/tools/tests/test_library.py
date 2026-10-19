@@ -24,7 +24,7 @@ REQUIRED = ["slug", "title", "composer", "composerDates", "catalogue", "year", "
 LICENSES = ("Public Domain", "CC0-1.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0",
             "CC-BY-SA-4.0")
 # Reviewed corpus after the 2026-10-15 bulk expansion; core30 unchanged.
-LEVEL_COUNTS = {1: 47, 2: 212, 3: 1415, 4: 784, 5: 45, 6: 199}  # 253 curated + 2,449 MuseScore archive (2026-10-16)
+LEVEL_COUNTS = {1: 47, 2: 220, 3: 1465, 4: 756, 5: 48, 6: 653}  # 253 curated + 2,936 MuseScore archive (2026-10-19)
 
 
 def test_manifest_matches_catalog():
@@ -50,7 +50,7 @@ def test_verification_follows_the_manifest_order():
 def test_level_counts_are_weighted_to_beginners():
     counts = {lvl: sum(1 for e in MANIFEST if e["level"] == lvl) for lvl in LEVEL_COUNTS}
     assert counts == LEVEL_COUNTS
-    assert len(MANIFEST) == 2702
+    assert len(MANIFEST) == 3189
     assert sum(counts[lvl] for lvl in (1, 2, 3)) > sum(counts[lvl] for lvl in (4, 5, 6))
 
 

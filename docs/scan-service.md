@@ -107,8 +107,8 @@ Prices as published for Tier 1 regions ([Cloud Run pricing](https://cloud.google
 | Free each month                                | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests                    |
 | Beyond the free grant                          | $0.000024 per vCPU-second, $0.0000025 per GiB-second, $0.40 per million requests |
 | One second of the service, 4 vCPU and 8 GiB    | $0.000116                                                                        |
-| Free recognition time a month                  | 45,000 s: about 1,500 pages of 30 s, or 750 pages of 60 s                        |
-| What 5 US dollars' worth buys beyond the grant | about 43,000 s more, about 1,400 pages of 30 s                                   |
+| Free recognition time a month                  | 45,000 s: about 1,300 photos of 35 s, or 2,800 PDF pages of 16 s                 |
+| What 5 US dollars' worth buys beyond the grant | about 43,000 s more, about 1,200 photos of 35 s                                  |
 | Worst case, one instance busy around the clock | about $10 a day                                                                  |
 | A warm-up request                              | at least 100 ms of the instance, about $0.00001                                  |
 
@@ -122,10 +122,10 @@ The photo is the owner's flat phone photo of Boëllmann Op. 28 No. II, page 5 (`
 | ------------------------------------------------------------------- | --------------------------------------- | ---------------- | ---------------- |
 | The container on the owner's PC at 4 vCPU and 8 GiB, first requests | —                                       | 22.2 s           | 8.6 s            |
 | The same, second run                                                | —                                       | 22.4 s           | 8.3 s            |
-| The deployed service, first requests after a cold start             | not yet measured                        | not yet measured | not yet measured |
-| The deployed service, warm                                          | —                                       | not yet measured | not yet measured |
+| The deployed service, first requests after a cold start             | not yet measured                        | 34.0 s           | 15.8 s           |
+| The deployed service, warm                                          | —                                       | 35.2 s           | 16.2 s           |
 
-The container is ready about 2 s after it starts. Each Audiveris job extracts its native libraries into its own cache, so cold and warm PDF times are alike.
+The container is ready about 2 s after it starts. Each Audiveris job extracts its native libraries into its own cache, so cold and warm PDF times are alike. A Cloud Run vCPU is slower than a core of the owner's PC: the same page takes about 1.6 times longer on the service than in the container at home, with the same thread budget of 4.
 
 ## Sources
 

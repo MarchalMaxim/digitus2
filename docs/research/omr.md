@@ -220,10 +220,11 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 | --- | --- |
 | Free Cloud Run grant a month, per billing account | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests |
 | One second of the service (4 vCPU, 8 GiB) beyond the grant | $0.000116 |
-| Free recognition time a month at that size | 45,000 s, about 1,500 pages of 30 s |
+| Free recognition time a month at that size | 45,000 s, about 1,300 photos of 35 s |
 | Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 5 a month plus what the hours of alert lag cost |
 | A phone photo, in the container at 4 vCPU on the owner's PC | 22.2 s |
 | A corpus PDF, in the container at 4 vCPU on the owner's PC | 8.6 s |
+| The same photo and PDF on the deployed service, warm | 35.2 s and 16.2 s |
 | The deployed service's cold start | not yet measured |
 
 The Linux build is a different build of the same pinned libraries: Python 3.12 from Ubuntu 24.04 installs the locked `homr-photo/requirements-cpu.txt` unchanged, the patched homr source matches `source-manifests.json`, and Audiveris 5.11.0 comes from its Ubuntu package. Its adapter's class path is `lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first and Audiveris exports nothing. On a headless Linux Audiveris also needs fontconfig with one font and `GDK_SCALE` set, which its package does not declare (`research/omr/service/README.md`).

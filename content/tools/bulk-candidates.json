@@ -86,8 +86,8 @@
   },
   "admissionSummary": {
     "uniqueSourceDirectories": 608,
-    "acceptedNewLibraryPieces": 115,
-    "heldSourceDirectories": 404,
+    "acceptedNewLibraryPieces": 124,
+    "heldSourceDirectories": 395,
     "alreadyRepresentedDirectories": 89,
     "pendingSourceDirectories": 0,
     "note": "Admission is regenerated from the bulk catalog on every save; acquisition status is independent. Full held reasons remain in the catalog rejected records."
@@ -1213,10 +1213,10 @@
       "rdfSha256": "74fd15fae8dae8d02f17adab1b5f8905dd512a15a82b18819b6ce0f170915d10",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
-        "reason": "3 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 322 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole p"
+        "status": "accepted",
+        "catalogSlug": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -1282,10 +1282,10 @@
       "rdfSha256": "50d13df030327ff6058545c9f8bd2f443cd472fbf4a143170843445f415eb7e0",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
-        "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 434 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole p"
+        "status": "accepted",
+        "catalogSlug": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -2740,10 +2740,10 @@
       "rdfSha256": "3bd5ade0b8fa8a3172bdcaf2f67c8a7afe540698e65fe0dfd6085c7442002448",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
-        "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 247 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole pi"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -2763,10 +2763,10 @@
       "rdfSha256": "777468d4d21e5fcf5792fdc702aa79e214b9c41f9efdaf45ab81272bf0b8757a",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
-        "reason": "5 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 255 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole pi"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5569,10 +5569,10 @@
       "rdfSha256": "a3fc1754c29c6cb552b57a6cabbdbcffdf9987dbda294b3aa22e404c2feacef8",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
-        "reason": "1 slice(s) no hand can strike and 4 (medium) and 4 (large) lint law errors in 300 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piec"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5615,10 +5615,10 @@
       "rdfSha256": "a70b53c4dd0fff3ad38fa04a40a54e6b10ac3a7a447e1078af9e3245905fc252",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
-        "reason": "6 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 397 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piec"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -6144,10 +6144,10 @@
       "rdfSha256": "526f1c4b6ffe5f6afc8c201ed7e3f57227cd5ad770288592f87bcc8746c453d9",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
-        "reason": "5 slice(s) no hand can strike and 6 (medium) and 5 (large) lint law errors in 400 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piec"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8743,10 +8743,10 @@
       "rdfSha256": "ca67894a0b7a3c4e8ee129b63d687e63c0f999afd90922894e33e89562784e9f",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
-        "reason": "0 slice(s) no hand can strike and 1 (medium) and 0 (large) lint law errors in 283 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole p"
+        "status": "accepted",
+        "catalogSlug": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8996,10 +8996,10 @@
       "rdfSha256": "9ed2e73b8fcc50f351d437ac86de51804f8b23ba724153c3fc5babf3ea9d16e8",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
-        "reason": "3 slice(s) no hand can strike and 6 (medium) and 3 (large) lint law errors in 352 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (prelude-fugue), held: not a whole p"
+        "status": "accepted",
+        "catalogSlug": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },

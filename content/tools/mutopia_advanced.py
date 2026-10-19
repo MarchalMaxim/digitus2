@@ -9,7 +9,7 @@ The archive's level-6 rule cannot place these editions: it needs the frozen heur
 5, and the heuristic, calibrated on the core 30, proposes 3 for much of the Baroque repertoire the bulk
 lane already ships at 6 (the Art of Fugue, the Goldberg Variations). The lane's own placement is "a
 conservative level 6 for a mature complete original" (content/tools/README.md, Mutopia expansions).
-This rule states that placement for the held editions. A held edition ships at level 6 when all of
+This rule states that placement for the held editions. A held edition ships at level 6 when both of
 these hold:
 
 1. It is concert repertoire: an original keyboard work, or a movement of one, from one of CONCERT's
@@ -18,19 +18,22 @@ these hold:
    KEPT is everything else: chorale harmonisations, Satie (the owner's example of a non-advanced
    edition), teaching and children's collections, folk-dance settings, light contemporary originals,
    and reductions of operatic or orchestral music.
-2. It is a whole piece, as in the archive rule: at least pdmx_advanced.MIN_SECONDS of music at its
-   tempo (the gate's level features) and pdmx_advanced.MIN_NOTES notes.
-3. It fails only the span check or the lint law gate, within the archive's ceiling
+2. It fails only the span check or the lint law gate, within the archive's ceiling
    (pdmx_advanced.within_ceiling), and passes every other gate. Both MIDI cross-checks (LilyPond 2.24
    and the published Mutopia MIDI) stay mandatory and exact.
 
 The categories and the placement of each edition were fixed before any edition was rebuilt, so they do
-not depend on the yield. gates.py checks conditions 1 to 3 for every Mutopia piece with `relaxedGates`.
+not depend on the yield. gates.py checks both conditions for every Mutopia piece with `relaxedGates`.
+
+Revision (2026-10-19, the owner's decision after the first measurement): the rule first also required a
+whole piece by the archive rule (pdmx_advanced.MIN_SECONDS and MIN_NOTES). In the archive that test keeps
+out drafts and fragments; a bulk Mutopia edition is a complete edition by admission, so here it kept out
+only short complete works (Chopin Op. 28 Nos. 11 and 14, Liszt's first Consolation, Goldberg 4, 6 and
+30, the BWV 1006a menuets) and Mozart's unfinished fugue Anh. 41. The owner dropped it, releasing those
+nine; the categories, the placements and the ceiling are unchanged.
 """
 
 from __future__ import annotations
-
-import pdmx_advanced
 
 CATEGORIES = {
     # concert repertoire (condition 1)
@@ -123,26 +126,17 @@ KEPT = {
 CONCERT_CATEGORIES = ("prelude-fugue", "variations", "sonata-suite", "concert-piece", "rag")
 
 
-def whole_piece(seconds: float, notes: int) -> bool:
-    """Condition 2: the archive rule's test for a whole piece rather than a fragment."""
-    return seconds >= pdmx_advanced.MIN_SECONDS and notes >= pdmx_advanced.MIN_NOTES
-
-
-def problems(slug: str, relaxed: dict, notes: int, seconds: float | None) -> list[str]:
-    """Why a Mutopia piece with `relaxedGates` breaks this rule ([] when it keeps it). `notes` is the
-    score's pitched-note count (the validator's stats), `seconds` the gate's level features."""
-    out = []
+def problems(slug: str) -> list[str]:
+    """Why a Mutopia piece with `relaxedGates` breaks condition 1 ([] when it keeps it). Condition 2, the
+    ceiling and the other gates, is checked by gates.py for every relaxed piece."""
     if slug not in CONCERT:
-        out.append("relaxedGates on a Mutopia piece outside the concert list (mutopia_advanced.CONCERT)")
-    if seconds is None or not whole_piece(seconds, notes):
-        out.append(f"not a whole piece by the archive rule ({seconds} s, {notes} notes; at least "
-                   f"{pdmx_advanced.MIN_SECONDS:.0f} s and {pdmx_advanced.MIN_NOTES} notes)")
-    return out
+        return ["relaxedGates on a Mutopia piece outside the concert list (mutopia_advanced.CONCERT)"]
+    return []
 
 
 def level_note(slug: str, proposal: int, seconds: float, notes: int) -> str:
     """The levelNote of an edition this rule places at 6."""
-    return (f"Advanced by the Mutopia rule (mutopia_advanced.py): {CATEGORIES[CONCERT[slug]]}, a whole piece "
+    return (f"Advanced by the Mutopia rule (mutopia_advanced.py): {CATEGORIES[CONCERT[slug]]} "
             f"({seconds:.0f} seconds, {notes} notes), released at level 6 under the relaxed gates. Frozen "
             f"heuristic proposes {proposal}. No syllabus placement is claimed.")
 

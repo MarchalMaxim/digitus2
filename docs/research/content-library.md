@@ -7,7 +7,7 @@ copies with the editor's fingering) and the 119 pieces of the L1 build (see
 engraving was checked note by note against LilyPond's own MIDI. Regenerate with
 `content/tools/build.py` (see `content/tools/README.md`).
 
-The library has since grown to 3,211 pieces: 277 curated pieces (our
+The library has since grown to 3,220 pieces: 286 curated pieces (our
 arrangements and Mutopia engravings, the first 149 of them documented here) and
 2,934 scores from the MuseScore archive (PDMX), which admits only files
 declared public domain or CC0. The later lanes, their selection rules and their

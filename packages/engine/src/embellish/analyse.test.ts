@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   analyseMusicXml,
+  beatQ,
   compound,
   isStrong,
   nominal,
@@ -196,5 +197,24 @@ describe('analyse timeline', () => {
     expect(soundsThroughStrong(m, frac(1), frac(3))).toBe(true);
     expect(soundsThroughStrong(m, frac(2), frac(3))).toBe(false);
     expect(soundsThroughStrong(m, frac(3), frac(5))).toBe(true);
+
+    const m68 = analyseMusicXml(
+      fixtureScore(
+        [
+          [
+            ['C4', 3 / 2],
+            ['E4', 3 / 2],
+          ],
+          [['C4', 3]],
+        ],
+        { lh: [[['C3', 3]], [['C3', 3]]], time: [6, 8] },
+      ),
+    ).measures[0]!;
+    expect(nominal(m68)?.toString()).toBe('3');
+    expect(compound(m68)).toBe(true);
+    expect(beatQ(m68).toString()).toBe('3/2');
+    expect(isStrong(m68, frac(0))).toBe(true);
+    expect(isStrong(m68, frac(3, 2))).toBe(true);
+    expect(isStrong(m68, frac(1))).toBe(false);
   });
 });

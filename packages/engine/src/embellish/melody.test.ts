@@ -2,6 +2,7 @@
 // research/embellish/tests/test_melody.py.
 import { describe, expect, it } from 'vitest';
 import { analyseMusicXml, single } from './analyse.js';
+import { embellishMusicXml } from './embellish.js';
 import { fixtureScore } from './testing/score.js';
 import type { Bar } from './testing/score.js';
 
@@ -82,9 +83,16 @@ describe('melody', () => {
     expect(piece.melody).toEqual([]);
   });
 
-  it.todo(
-    'two voices that trade the top line: embellishMusicXml gives the same refusal, no insertion and the input unchanged',
-  );
+  it('two voices that trade the top line: embellishMusicXml gives the same refusal, no insertion and the input unchanged', () => {
+    const input = tradingXml();
+    const res = embellishMusicXml(input);
+    expect(res.refusal).toBe(analyseMusicXml(input).refusal);
+    expect(res.refusal).toContain('top line');
+    expect(res.inserted).toEqual([]);
+    expect(res.xml).toBe(input);
+    expect(res.melodyVoice).toBeNull();
+    expect(res.skipped).toEqual({});
+  });
 
   it('a chordal right hand is refused', () => {
     const chord = ['C4', 'E4', 'G4'] as const;
@@ -125,7 +133,10 @@ describe('melody', () => {
     );
   });
 
-  it.todo(
-    'a melody with a few chords is kept and the chords are left alone: no insertion at onset 2, skipped.chord 1',
-  );
+  it('a melody with a few chords is kept and the chords are left alone: no insertion at onset 2, skipped.chord 1', () => {
+    const res = embellishMusicXml(fewChordsXml());
+    expect(res.refusal).toBeNull();
+    expect(res.inserted.map((i) => i.onset)).not.toContain('2');
+    expect(res.skipped.chord).toBe(1);
+  });
 });

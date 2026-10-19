@@ -3,7 +3,7 @@
 // _pitch, analyse, _find_melody), with ElementTree's lookups mirrored over @xmldom/xmldom and
 // Python's iteration order kept, so that the light embellisher built on it reproduces the
 // reference exactly (packages/engine/fixtures/embellish-light-golden.json).
-import { parseXml } from '../io/musicxml/dom.js';
+import { childElements, parseXml } from '../io/musicxml/dom.js';
 import type { Document, Element } from '../io/musicxml/dom.js';
 import { frac, roundHalfEven } from './frac.js';
 import type { Frac } from './frac.js';
@@ -116,22 +116,15 @@ export interface Piece {
 
 // ---- ElementTree lookups ------------------------------------------------------------------------
 
-function children(el: Element, name: string): Element[] {
-  const out: Element[] = [];
-  for (let c = el.firstChild; c; c = c.nextSibling)
-    if (c.nodeType === 1 && (c as Element).tagName === name) out.push(c as Element);
-  return out;
-}
-
 /** `el.find(name)` for a direct child, or `el.find("a/b")` across every `a` child. */
 function find(el: Element, path: string): Element | undefined {
   let level = [el];
-  for (const name of path.split('/')) level = level.flatMap((e) => children(e, name));
+  for (const name of path.split('/')) level = level.flatMap((e) => childElements(e, name));
   return level[0];
 }
 
 /** ElementTree's `.text`: the character data before the first child node; `''` when none. */
-function text(el: Element): string {
+export function text(el: Element): string {
   let s = '';
   for (let c = el.firstChild; c && (c.nodeType === 3 || c.nodeType === 4); c = c.nextSibling)
     s += c.nodeValue ?? '';
@@ -194,7 +187,7 @@ export function analyseDocument(doc: Document): Piece {
     piece.refusal = `not a partwise score (${root.tagName})`;
     return piece;
   }
-  const parts = children(root, 'part');
+  const parts = childElements(root, 'part');
   piece.parts = parts.length;
   if (parts.length !== 1) {
     piece.refusal = `${parts.length} parts: the hands are not one piano part`;
@@ -206,7 +199,7 @@ export function analyseDocument(doc: Document): Piece {
   let staves = 1;
   let absStart = ZERO;
   const keyChanges: [Frac, number][] = []; // (onset, fifths) in document order
-  children(parts[0]!, 'measure').forEach((m, mi) => {
+  childElements(parts[0]!, 'measure').forEach((m, mi) => {
     let pos = ZERO;
     let maxpos = ZERO;
     let lastStart = ZERO;
@@ -324,6 +317,7 @@ function findMelody(piece: Piece): void {
     let best: EmbNote | undefined;
     let bestKey: [number, number] = [0, 0];
     for (const n of byStart) {
+      if (t.lt(n.onset)) break; // sorted by onset: no later note sounds at t
       if (!(n.onset.le(t) && t.lt(end(n)))) continue;
       const key: [number, number] = [n.pitch!, n.onset.eq(t) ? 1 : 0];
       if (!best || key[0] > bestKey[0] || (key[0] === bestKey[0] && key[1] > bestKey[1])) {

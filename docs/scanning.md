@@ -120,7 +120,7 @@ Further limits:
 
 - Small inset examples are excluded before recognition and flagged in the result. A legitimate short inset passage, such as an indented coda, can look like an example, so compare the whole original.
 - Ornaments can be incomplete and rhythms wrong on any page.
-- Audiveris (used for PDFs, and for images without homr) fails below about 10 px between staff lines and on skewed or curved pages.
+- Audiveris (used for PDFs) fails below about 10 px between staff lines and on skewed or curved pages.
 - Text and tempo can be incomplete. A tempo like "= 100" without a recognised beat unit gives no tempo, and an app default tempo is not a recognised one.
 - A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
 - Synthetic test pages, eleven phone photos checked on bars, staves, key and time, strict parsing and passing tests do not certify musical accuracy. Multi-page books and browsers other than desktop Chrome are untested.

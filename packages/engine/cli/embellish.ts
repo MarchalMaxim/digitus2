@@ -14,6 +14,7 @@ import {
   guardEmbellishment,
   guardErrors,
 } from '../src/embellish/guard.js';
+import type { GuardRefusal } from '../src/embellish/guard.js';
 import { levelFeatures, levelScore, proposeLevel, round3 } from '../src/embellish/level.js';
 import { RECOMMENDED_WEIGHT_SET } from '../src/fingering/params/weightSets.js';
 import { solveFingering } from '../src/fingering/solve.js';
@@ -73,6 +74,8 @@ export interface EmbellishRow {
   droppedBars: number[];
   /** Why the piece is not offered; null when it is. */
   reason: string | null;
+  /** Who refused the piece (the guard's `kind`); null when it is offered. */
+  kind: GuardRefusal | null;
   /** The level heuristic's proposal (`level.ts`) for the plain score. */
   plainLevel: number;
   /** The proposal for the embellished score; null when the piece is not offered. */
@@ -116,10 +119,6 @@ const proposal = (score: Score, tempoBpm: number) =>
 
 const signed = (d: number) => (d > 0 ? `+${d}` : String(d));
 
-/** A first-pass "N figures (at least M)" reason; the retry's carries "after dropping ...". */
-const TOO_FEW = /^\d+ figures? \(at least \d+\)$/;
-const GUARD_REFUSAL = /^check: |^lint errors|after dropping/;
-
 /** The floor breach `runEmbellishGate` reports; every other failure is a gate failure. */
 const FLOOR_BREACH = /^offered \d+ < \d+$|^floor file /;
 export const isFloorBreach = (failure: string) => FLOOR_BREACH.test(failure);
@@ -159,8 +158,8 @@ export function runEmbellishGate(o: EmbellishGateOptions): {
     const plainLevel = proposal(plain, e.tempoBpm);
     const g = guardEmbellishment(plainXml);
     if (g.offered === null) {
-      if (TOO_FEW.test(g.reason)) card.tooFew++;
-      else if (GUARD_REFUSAL.test(g.reason)) card.guardRefused++;
+      if (g.kind === 'few-figures') card.tooFew++;
+      else if (g.kind === 'guard') card.guardRefused++;
       else card.refused++;
       rows.push({
         slug: e.slug,
@@ -168,6 +167,7 @@ export function runEmbellishGate(o: EmbellishGateOptions): {
         figures: null,
         droppedBars: [],
         reason: g.reason,
+        kind: g.kind,
         plainLevel,
         level: null,
       });
@@ -218,6 +218,7 @@ export function runEmbellishGate(o: EmbellishGateOptions): {
       figures: emb.figures,
       droppedBars: emb.droppedBars,
       reason: null,
+      kind: null,
       plainLevel,
       level,
     });
@@ -269,7 +270,6 @@ export function formatEmbellishScorecard(s: EmbellishScorecard): string {
     `  level change: ${change}`,
   ];
   for (const r of s.rows)
-    if (!r.offered && GUARD_REFUSAL.test(r.reason ?? ''))
-      lines.push(`  guard refused ${r.slug}: ${r.reason}`);
+    if (r.kind === 'guard') lines.push(`  guard refused ${r.slug}: ${r.reason}`);
   return lines.join('\n');
 }

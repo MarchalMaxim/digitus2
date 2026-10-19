@@ -120,7 +120,7 @@ describe('the level heuristic', () => {
       { staves: 1 },
     );
     const f = levelFeatures(parseMusicXml(xml).score, 60);
-    expect(f.leaps).toBe((100 * 0) / 3);
+    expect(f.leaps).toBe(0);
     expect(f.shifts).toBe((100 * 2) / 3);
   });
 });

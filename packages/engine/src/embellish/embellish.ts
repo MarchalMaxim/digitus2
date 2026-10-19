@@ -72,9 +72,10 @@ export function embellishMusicXml(text: string, opts: EmbellishOptions = {}): Em
     const m = a.measure;
     setLength(a.el, c.parts[0]!.length, a.divisions);
     let t = a.onset.add(c.parts[0]!.length);
+    let last = a.el;
     for (const part of c.parts.slice(1)) {
       const midi = part.pitch!;
-      insertNewNote(a, midi, part.length, a.fifths);
+      last = insertNewNote(a, midi, part.length, a.fifths, last);
       const metric = t.sub(m.start).add(m.offset);
       inserted.push({
         measureIndex: m.idx,

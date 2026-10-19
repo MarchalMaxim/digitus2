@@ -7,7 +7,7 @@ import { childElements, firstChild } from '../io/musicxml/dom.js';
 import type { Document, Element, Node } from '../io/musicxml/dom.js';
 import { text } from './analyse.js';
 import type { EmbNote } from './analyse.js';
-import { frac } from './frac.js';
+import { frac, parsePyFraction } from './frac.js';
 import type { Frac } from './frac.js';
 import { spell, TYPE_OF } from './rules.js';
 
@@ -36,25 +36,6 @@ function removeWithTail(el: Element, child: Element): void {
 
 function insertAfter(ref: Element, el: Node): void {
   ref.parentNode!.insertBefore(el, ref.nextSibling);
-}
-
-const PY_FRACTION =
-  /^\s*([-+]?)(?=\d|\.\d)(\d*|\d+(?:_\d+)*)(?:\/(\d+(?:_\d+)*)|(?:\.(\d*|\d+(?:_\d+)*))?(?:[eE]([-+]?\d+(?:_\d+)*))?)\s*$/;
-
-/** Python's `Fraction(s)` for a string: an integer, `"3/4"`, `"1.5"` or `"1e2"`; throws otherwise. */
-export function parsePyFraction(s: string): Frac {
-  const m = PY_FRACTION.exec(s);
-  if (!m) throw new Error(`MusicXML: not a number: ${JSON.stringify(s)}`);
-  const digits = (x: string | undefined) => (x ?? '').replace(/_/g, '');
-  const sign = m[1] === '-' ? -1 : 1;
-  if (m[3] !== undefined) return frac(sign * Number(digits(m[2])), Number(digits(m[3])));
-  const decimal = digits(m[4]);
-  let n = Number(digits(m[2]) + decimal || '0');
-  let d = 10 ** decimal.length;
-  const exp = m[5] === undefined ? 0 : Number(digits(m[5]));
-  if (exp >= 0) n *= 10 ** exp;
-  else d *= 10 ** -exp;
-  return frac(sign * n, d);
 }
 
 /** `str(v.numerator)` for an integer, else the float, as core.py writes a scaled value. */
@@ -128,10 +109,17 @@ export function setLength(el: Element, length: Frac, divisions: number): void {
 
 /**
  * `core._new_note`: a note of `midi`, spelled from the key signature, `length` quarters long, in
- * A's voice, with A's stem and staff when A has them. It goes right after A; when A is followed by
+ * A's voice, with A's stem and staff when A has them. It goes right after `after` (A by default;
+ * pass the previously inserted note to add several in order); when that element is followed by
  * whitespace, a copy of that whitespace goes before the new note, as ElementTree's tail does.
  */
-export function insertNewNote(a: EmbNote, midi: number, length: Frac, fifths: number): Element {
+export function insertNewNote(
+  a: EmbNote,
+  midi: number,
+  length: Frac,
+  fifths: number,
+  after: Element = a.el,
+): Element {
   const doc = a.el.ownerDocument!;
   const n = doc.createElement('note');
   const [step, alter, octave] = spell(midi, fifths);
@@ -148,10 +136,10 @@ export function insertNewNote(a: EmbNote, midi: number, length: Frac, fifths: nu
   const stem = firstChild(a.el, 'stem');
   if (stem) n.appendChild(textElement(doc, 'stem', text(stem)));
   if (firstChild(a.el, 'staff')) n.appendChild(textElement(doc, 'staff', a.staff));
-  const parent = a.el.parentNode!;
-  const after = a.el.nextSibling;
-  if (isBlank(after)) parent.insertBefore(after!.cloneNode(false), after);
-  parent.insertBefore(n, after);
+  const parent = after.parentNode!;
+  const next = after.nextSibling;
+  if (isBlank(next)) parent.insertBefore(next!.cloneNode(false), next);
+  parent.insertBefore(n, next);
   return n;
 }
 

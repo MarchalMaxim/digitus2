@@ -14,9 +14,8 @@ import { timewiseToPartwise } from '../io/musicxml/timewise.js';
 import { unpackMusicXml } from '../io/musicxml/unpack.js';
 import type { Score } from '../score/types.js';
 import type { InsertedNote } from './embellish.js';
-import { frac } from './frac.js';
+import { frac, parsePyFraction } from './frac.js';
 import type { Frac } from './frac.js';
-import { parsePyFraction } from './write.js';
 
 export interface EmbellishCheck {
   ok: boolean;
@@ -148,8 +147,10 @@ function restKeys(doc: Document): string[] {
 function recordValue(s: string): Frac {
   try {
     return parsePyFraction(s);
-  } catch {
-    throw new Error(`inserted note: not a number: ${JSON.stringify(s)}`);
+  } catch (e) {
+    // The reader's own text ("not a number: ...", "zero denominator: ..."), minus its "MusicXML: ".
+    const why = e instanceof Error ? e.message.replace(/^MusicXML: /, '') : String(e);
+    throw new Error(`inserted note: ${why}`);
   }
 }
 

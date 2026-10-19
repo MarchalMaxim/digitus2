@@ -46,8 +46,22 @@ export interface Embellishment {
   melodyVoice: string;
 }
 
+/**
+ * Who refused: the embellisher (or a reader, on input it cannot read), the first pass for carrying
+ * fewer figures than asked, or the guard itself (the check, lint errors, or too few figures after
+ * the retry).
+ */
+export type GuardRefusal = 'embellisher' | 'few-figures' | 'guard';
+
 export type GuardOutcome =
-  { offered: Embellishment; reason: null } | { offered: null; reason: string };
+  | { offered: Embellishment; reason: null; kind: null }
+  | { offered: null; reason: string; kind: GuardRefusal };
+
+const refuse = (reason: string, kind: GuardRefusal): GuardOutcome => ({
+  offered: null,
+  reason,
+  kind,
+});
 
 /** Beginner errors: L06 and L10, which `beginner: true` raises to errors. */
 const BEGINNER_RULES = new Set(['L06', 'L10']);
@@ -86,43 +100,49 @@ export function guardEmbellishment(plainXml: string, opts: GuardOptions = {}): G
   /** The embellishment with `dropBars` removed, or why it cannot be offered. */
   const embellish = (
     eo: EmbellishOptions,
-  ): { r: EmbellishResult & { melodyVoice: string } } | { reason: string } => {
+  ): { r: EmbellishResult & { melodyVoice: string } } | { refusal: GuardOutcome } => {
     let r: EmbellishResult;
     try {
       r = embellishMusicXml(plainXml, eo);
     } catch (e) {
-      return { reason: `unreadable input: ${message(e)}` };
+      return { refusal: refuse(`unreadable input: ${message(e)}`, 'embellisher') };
     }
-    if (r.refusal !== null) return { reason: r.refusal };
+    if (r.refusal !== null) return { refusal: refuse(r.refusal, 'embellisher') };
     const voice = r.melodyVoice;
-    if (voice === null) return { reason: 'no melody voice' };
+    if (voice === null) return { refusal: refuse('no melody voice', 'embellisher') };
     return { r: { ...r, melodyVoice: voice } };
   };
   /** The figure count and the independent check of one embellishment; null when both pass. */
-  const accept = (r: EmbellishResult & { melodyVoice: string }, after: string): string | null => {
+  const accept = (
+    r: EmbellishResult & { melodyVoice: string },
+    after: string,
+  ): GuardOutcome | null => {
     const n = r.inserted.length;
-    if (n < min) return `${plural(n)} (at least ${min})${after}`;
+    if (n < min) {
+      // Only the first pass (no `after`) is "few figures"; the retry's shortfall is the guard's.
+      return refuse(`${plural(n)} (at least ${min})${after}`, after ? 'guard' : 'few-figures');
+    }
     let c: ReturnType<typeof checkEmbellishment>;
     try {
       c = check(plainXml, r.xml, r.inserted, r.melodyVoice);
     } catch (e) {
       // The check reads both scores with the engine reader, which can reject what the embellisher read.
-      return `unreadable input: ${message(e)}`;
+      return refuse(`unreadable input: ${message(e)}`, 'embellisher');
     }
-    if (!c.ok) return `check: ${c.problems[0] ?? 'failed'}`;
+    if (!c.ok) return refuse(`check: ${c.problems[0] ?? 'failed'}`, 'guard');
     return null;
   };
 
   const first = embellish({});
-  if ('reason' in first) return { offered: null, reason: first.reason };
+  if ('refusal' in first) return first.refusal;
   const why = accept(first.r, '');
-  if (why !== null) return { offered: null, reason: why };
+  if (why !== null) return why;
 
   let plain: Score;
   try {
     plain = parseMusicXml(plainXml).score;
   } catch (e) {
-    return { offered: null, reason: `unreadable input: ${message(e)}` };
+    return refuse(`unreadable input: ${message(e)}`, 'embellisher');
   }
   const plainBeginner = new Map<HandProfileId, number>();
   for (const profile of profiles) {
@@ -167,6 +187,7 @@ export function guardEmbellishment(plainXml: string, opts: GuardOptions = {}): G
       melodyVoice: r.melodyVoice,
     },
     reason: null,
+    kind: null,
   });
 
   const e1 = evaluate(first.r);
@@ -174,13 +195,13 @@ export function guardEmbellishment(plainXml: string, opts: GuardOptions = {}): G
 
   const withFigure = new Set(first.r.inserted.map((i) => i.measureIndex));
   const drop = [...e1.offending].filter((b) => withFigure.has(b)).sort((a, b) => a - b);
-  if (drop.length === 0) return { offered: null, reason: 'lint errors in bars with no figure' };
+  if (drop.length === 0) return refuse('lint errors in bars with no figure', 'guard');
   const after = ` after dropping the figures of bars ${drop.join(', ')}`;
   const second = embellish({ dropBars: drop });
-  if ('reason' in second) return { offered: null, reason: second.reason };
+  if ('refusal' in second) return second.refusal;
   const why2 = accept(second.r, after);
-  if (why2 !== null) return { offered: null, reason: why2 };
+  if (why2 !== null) return why2;
   const e2 = evaluate(second.r);
-  if (e2.offending.size > 0) return { offered: null, reason: `lint errors${after}` };
+  if (e2.offending.size > 0) return refuse(`lint errors${after}`, 'guard');
   return offer(second.r, e2, drop);
 }

@@ -11,4 +11,4 @@ export type { EmbellishCheck } from './check.js';
 export { LEVEL_CUTS, levelFeatures, levelScore, proposeLevel, round3 } from './level.js';
 export type { LevelFeatures } from './level.js';
 export { EMBELLISH_MIN_FIGURES, GUARD_PROFILES, guardEmbellishment, guardErrors } from './guard.js';
-export type { Embellishment, GuardOptions, GuardOutcome } from './guard.js';
+export type { Embellishment, GuardOptions, GuardOutcome, GuardRefusal } from './guard.js';

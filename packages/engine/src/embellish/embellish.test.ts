@@ -266,7 +266,12 @@ describe('passing notes', () => {
   it('a time change inside a bar leaves that bar alone', () => {
     const xml = beforeThirdNote(
       fixtureScore([
-        CEEC,
+        [
+          ['C4', 1],
+          ['E4', 1],
+          ['C4', 1],
+          ['E4', 1],
+        ],
         [
           ['C4', 1],
           ['E4', 1],

@@ -315,4 +315,11 @@ describe('checkEmbellishment', () => {
       checkEmbellishment(plain, plain, [{ onset: '1', midi: 62, length: 'x' }], '1'),
     ).toThrow(/^inserted note: not a number: "x"/);
   });
+
+  it('names a zero denominator as such, not as "not a number"', () => {
+    const plain = fixtureScore([CEEC, [['C4', 4]]]);
+    expect(() =>
+      checkEmbellishment(plain, plain, [{ onset: '1/0', midi: 62, length: '1' }], '1'),
+    ).toThrow(/^inserted note: zero denominator: "1\/0"/);
+  });
 });

@@ -89,6 +89,32 @@ export function fracFrom(s: string): Frac {
   return frac(Number(m[1]), m[2] === undefined ? 1 : Number(m[2]));
 }
 
+const PY_FRACTION =
+  /^\s*([-+]?)(?=\d|\.\d)(\d*|\d+(?:_\d+)*)(?:\/(\d+(?:_\d+)*)|(?:\.(\d*|\d+(?:_\d+)*))?(?:[eE]([-+]?\d+(?:_\d+)*))?)\s*$/;
+
+/**
+ * Python's `Fraction(s)` for a string: an integer, `"3/4"`, `"1.5"` or `"1e2"`; throws otherwise
+ * (`not a number` for text Python rejects, `zero denominator` for `"1/0"`).
+ */
+export function parsePyFraction(s: string): Frac {
+  const m = PY_FRACTION.exec(s);
+  if (!m) throw new Error(`MusicXML: not a number: ${JSON.stringify(s)}`);
+  const digits = (x: string | undefined) => (x ?? '').replace(/_/g, '');
+  const sign = m[1] === '-' ? -1 : 1;
+  if (m[3] !== undefined) {
+    const den = Number(digits(m[3]));
+    if (den === 0) throw new Error(`MusicXML: zero denominator: ${JSON.stringify(s)}`);
+    return frac(sign * Number(digits(m[2])), den);
+  }
+  const decimal = digits(m[4]);
+  let n = Number(digits(m[2]) + decimal || '0');
+  let d = 10 ** decimal.length;
+  const exp = m[5] === undefined ? 0 : Number(digits(m[5]));
+  if (exp >= 0) n *= 10 ** exp;
+  else d *= 10 ** -exp;
+  return frac(sign * n, d);
+}
+
 /** Floor modulo, as Python's `%`. */
 export function mod(a: number, n: number): number {
   return (((a % n) + n) % n) + 0;

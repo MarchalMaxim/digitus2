@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fmtBeat, frac, fracFrom, mod, roundHalfEven } from './frac.js';
+import { fmtBeat, frac, fracFrom, mod, parsePyFraction, roundHalfEven } from './frac.js';
 
 describe('Frac', () => {
   it('is normalised and prints as Python prints a Fraction', () => {
@@ -75,5 +75,22 @@ describe('roundHalfEven', () => {
     expect(roundHalfEven(2.5)).toBe(2);
     expect(roundHalfEven(0.6)).toBe(1);
     expect(roundHalfEven(-0.4)).toBe(0);
+  });
+});
+
+describe('parsePyFraction', () => {
+  it('reads what Python reads as a Fraction', () => {
+    expect(parsePyFraction('3').toString()).toBe('3');
+    expect(parsePyFraction(' 3/4 ').toString()).toBe('3/4');
+    expect(parsePyFraction('1.5').toString()).toBe('3/2');
+    expect(parsePyFraction('-.25').toString()).toBe('-1/4');
+    expect(parsePyFraction('1e2').toString()).toBe('100');
+    expect(parsePyFraction('1_0/4').toString()).toBe('5/2');
+  });
+
+  it('names what is wrong', () => {
+    expect(() => parsePyFraction('x')).toThrow(/^MusicXML: not a number: "x"$/);
+    expect(() => parsePyFraction('')).toThrow(/not a number/);
+    expect(() => parsePyFraction('1/0')).toThrow(/^MusicXML: zero denominator: "1\/0"$/);
   });
 });

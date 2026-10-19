@@ -6,6 +6,7 @@ import { lintFingering } from '../lint/index.js';
 import type { LintReport } from '../lint/index.js';
 import type { LintRuleId } from '../lint/rules.js';
 import type { Score } from '../score/types.js';
+import { checkEmbellishment } from './check.js';
 import { embellishMusicXml } from './embellish.js';
 import { GUARD_PROFILES, guardEmbellishment, guardErrors } from './guard.js';
 import { fixtureScore } from './testing/score.js';
@@ -61,6 +62,7 @@ describe('guardEmbellishment', () => {
   it('offers an embellishment with three figures that passes at every profile', () => {
     const out = guardEmbellishment(SIX);
     expect(out.reason).toBeNull();
+    expect(out.kind).toBeNull();
     const e = out.offered!;
     expect(e).not.toBeNull();
     expect(e.figures).toBe(3);
@@ -79,6 +81,7 @@ describe('guardEmbellishment', () => {
     const out = guardEmbellishment(fixtureScore([CEDC, [['C4', 4]]]));
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/1 figure/);
+    expect(out.kind).toBe('few-figures');
   }, 20_000);
 
   it("passes the embellisher's refusal through", () => {
@@ -96,6 +99,7 @@ describe('guardEmbellishment', () => {
     );
     expect(out.offered).toBeNull();
     expect(out.reason).toContain('staff');
+    expect(out.kind).toBe('embellisher');
   }, 20_000);
 
   it('refuses unreadable input instead of throwing', () => {
@@ -104,6 +108,7 @@ describe('guardEmbellishment', () => {
     const out = guardEmbellishment(broken);
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/^unreadable input: /);
+    expect(out.kind).toBe('embellisher');
   }, 20_000);
 
   it('drops the figures of an offending bar and checks again', () => {
@@ -124,6 +129,7 @@ describe('guardEmbellishment', () => {
     const out = guardEmbellishment(EIGHT, { lint });
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/no figure/);
+    expect(out.kind).toBe('guard');
   }, 20_000);
 
   it('refuses when the retry still fails', () => {
@@ -131,6 +137,7 @@ describe('guardEmbellishment', () => {
     const out = guardEmbellishment(EIGHT, { lint });
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/after dropping/);
+    expect(out.kind).toBe('guard');
   }, 20_000);
 
   it('refuses when the retry leaves fewer than three figures', () => {
@@ -138,6 +145,47 @@ describe('guardEmbellishment', () => {
     const out = guardEmbellishment(SIX, { lint });
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/^1 figure \(at least 3\) after dropping the figures of bars 0, 2$/);
+    expect(out.kind).toBe('guard');
+  }, 20_000);
+
+  it('drops the bars of every note an issue names', () => {
+    const first = plainNotes(EIGHT) + 4;
+    const plain = plainNotes(EIGHT);
+    // One issue naming a note of bar 2 and a note of bar 4: both bars go, leaving two figures.
+    const lint: typeof lintFingering = (score, assignment, opts) => {
+      const real = lintFingering(score, assignment, opts);
+      if (score.notes.length !== first || score.notes.length === plain) return real;
+      const at = (bar: number) => score.notes.find((x) => x.measureIndex === bar && x.staff === 1)!;
+      const issue = {
+        rule: 'L01' as const,
+        severity: 'error' as const,
+        hand: 'R' as const,
+        noteIds: [at(2).id, at(4).id],
+        message: 'stub',
+      };
+      return { ...real, issues: [...real.issues, issue], errors: real.errors + 1 };
+    };
+    const out = guardEmbellishment(EIGHT, { lint });
+    expect(out.offered).toBeNull();
+    expect(out.reason).toBe('2 figures (at least 3) after dropping the figures of bars 2, 4');
+  }, 20_000);
+
+  it('checks the reduced embellishment again', () => {
+    const first = plainNotes(EIGHT) + 4;
+    const lint = stubLint(EIGHT, 'L06', [2], (s) => s.notes.length === first);
+    let calls = 0;
+    const out = guardEmbellishment(EIGHT, {
+      lint,
+      check: (...args) => {
+        calls += 1;
+        return calls === 1
+          ? checkEmbellishment(...args)
+          : { ok: false, problems: ['y'], strongTotal: 0, strongKept: 0 };
+      },
+    });
+    expect(calls).toBe(2);
+    expect(out.offered).toBeNull();
+    expect(out.reason).toBe('check: y');
   }, 20_000);
 
   it('a failing independent check refuses', () => {
@@ -146,6 +194,7 @@ describe('guardEmbellishment', () => {
     });
     expect(out.offered).toBeNull();
     expect(out.reason).toBe('check: x');
+    expect(out.kind).toBe('guard');
   }, 20_000);
 });
 

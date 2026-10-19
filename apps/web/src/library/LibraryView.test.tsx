@@ -12,7 +12,7 @@ import { LibraryView } from './LibraryView.js';
 import { useLocalLibrary } from './local/state.js';
 
 // These layout pins describe the 286 curated pieces unless a test asks for the whole library
-// (3,220 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
+// (3,224 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
 const library = vi.hoisted(() => ({ whole: false }));
 vi.mock('./manifest.js', async (importOriginal) => {
   const actual = await importOriginal<typeof ManifestModule>();
@@ -188,10 +188,10 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     );
   });
   it('shows the next page on Show more, focuses its first row and says so once', async () => {
-    library.whole = true; // Challenging classical holds 240 pieces: six pages of 40
+    library.whole = true; // Challenging classical holds 244 pieces: pages of 40 and a last page of 4
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    await open(/^All 240 classical pieces$/);
+    await open(/^All 244 classical pieces$/);
     expect(rows()).toHaveLength(40);
     await open('Show 40 more');
     expect(rows()).toHaveLength(80);
@@ -199,14 +199,15 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     expect(useAppStore.getState().libraryPages).toBe(2);
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 240'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 244'),
       { timeout: 2000 },
     );
     await open('Show 40 more');
     await open('Show 40 more');
     await open('Show 40 more');
-    await open('Show the last 40');
-    expect(rows()).toHaveLength(240);
+    await open('Show 40 more');
+    await open('Show the last 4');
+    expect(rows()).toHaveLength(244);
     expect(screen.queryByRole('button', { name: /^Show / })).toBeNull();
   });
   it('goes back with All styles, focusing the shelf’s All button, and with Escape', async () => {

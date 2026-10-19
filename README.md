@@ -4,7 +4,7 @@ Good piano fingerings for any piece, computed in your browser, for beginning pia
 
 Open a piece (built-in, MusicXML or MIDI), see a finger number on every note, and play it back with the score and an on-screen keyboard following along. Everything runs client-side. Live at https://marchalmaxim.github.io/digitus2/.
 
-The built-in library holds 3,220 pieces in four levels, from first-steps songs to advanced originals. Scanning a photo or PDF of printed music is experimental; see [docs/scanning.md](docs/scanning.md).
+The built-in library holds 3,224 pieces in four levels, from first-steps songs to advanced originals. Scanning a photo or PDF of printed music is experimental; see [docs/scanning.md](docs/scanning.md).
 
 ## Docs
 

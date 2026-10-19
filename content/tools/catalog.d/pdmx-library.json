@@ -31679,12 +31679,6 @@
    "reason": "failed the library's validation: measure numbers not unique"
   },
   {
-   "slug": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
-   "sha256": "2e6669e0bfcdb3c6d6d5b237954b05485fc284716b4d8418942ac8dbf7bbdb4f",
-   "title": "Franz Liszt: Grandes études de Paganini No.6 in A minor",
-   "reason": "failed the library's validation: measure 218: backup before measure start"
-  },
-  {
    "slug": "pdmx-tude-after-paganini-s-5th-caprice-r-schu-43340c2d",
    "sha256": "43340c2d28b193de63ff4602c1a7b0886a5bbf7f25ebf021ec5c969822ddf5a1",
    "title": "Étude after Paganini's 5th Caprice - R. Schumann Op. 3 No. 1",
@@ -31743,12 +31737,6 @@
    "sha256": "728a1a049bba9febcbed5805589861488b49ded499e75fcdf654dede62635546",
    "title": "3rd Mov. Op.27 No.2 Sonate No.14 Moonlight Beethoven",
    "reason": "failed the library's validation: measure 189: voice 1 lasts 23 quarters, time signature allows 4"
-  },
-  {
-   "slug": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
-   "sha256": "0df00b70712cc7f91fe081913f276060595662b135eec550eaeb64a52c6512db",
-   "title": "Rachmaninoff: Ètude-Tableaux No. 1 in C Minor",
-   "reason": "failed the library's validation: measure 25: voice 1 lasts 643/160 quarters, time signature allows 4"
   },
   {
    "slug": "pdmx-second-suite-in-f-126f8af7",
@@ -31893,12 +31881,6 @@
    "sha256": "aa727f842b629269f76a2af7fc5a5e3e91b97f660defb1418573137634636e09",
    "title": "Piano Sonata No.2 (F.Chopin Op.35)",
    "reason": "failed the library's validation: measure numbers not unique"
-  },
-  {
-   "slug": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
-   "sha256": "337a8e32de583bd4bca9fdabb8618b9ecdb2130fe3897293b4967fd716393fc7",
-   "title": "Franz Liszt: Transcendental Étude No.8 in C minor Wilde Jagd",
-   "reason": "failed the library's validation: measure 27: backup before measure start"
   },
   {
    "slug": "pdmx-piano-sonata-s-liapounow-op-27-84b13bd6",
@@ -32133,12 +32115,6 @@
    "sha256": "d590e82ed30279e7c4e17928ae0ca4ac72f8275b508d3597d0f75e90f28b7d73",
    "title": "Happy Birthday",
    "reason": "failed the library's validation: measure 20: voice 1 lasts 33/8 quarters, time signature allows 4"
-  },
-  {
-   "slug": "pdmx-liszt-apparitions-no-2-db8b375f",
-   "sha256": "db8b375f8af30ed6d96c8ed69b339a6d2077cc7269b4d41b266b0d04ef14538e",
-   "title": "Liszt Apparitions - No. 2",
-   "reason": "failed the library's validation: measure 98: voice 1 lasts 361/120 quarters, time signature allows 3"
   },
   {
    "slug": "pdmx-bwv-933-ea4acc03",

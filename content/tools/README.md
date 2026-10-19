@@ -2,7 +2,7 @@
 
 These scripts produce everything in `content/scores/`, `content/manifest.json`,
 `content/verification.json` and `content/library-index.json`. The library has
-3,220 pieces in six lanes:
+3,224 pieces in six lanes:
 
 | Lane | Catalog | Pieces | Documented in |
 |---|---|---:|---|
@@ -10,7 +10,7 @@ These scripts produce everything in `content/scores/`, `content/manifest.json`,
 | L1 curated library | `catalog.d/` collection fragments | 119 | `docs/research/content-library.md`, section "L1 curated library" |
 | Mutopia expansion | `catalog.d/expansion-bach.json`, `expansion-teaching.json` | 13 | [Mutopia expansions](#mutopia-expansions) |
 | Bulk Mutopia | `catalog.d/expansion-bulk.json` | 124 | [Mutopia expansions](#mutopia-expansions) |
-| MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,522 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
+| MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,526 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 | MuseScore archive, songs | `catalog.d/pdmx-songs.json`, `pdmx-songs-advanced.json` | 1,412 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 
 The first four lanes are the curated core of 286 pieces. Provenance, licences
@@ -159,6 +159,7 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 | `musicxml2midi.py` | MusicXML to a format-1 MIDI file with the true hands as tracks (RH, LH), for engine test fixtures. |
 | `mutopia_advanced.py` | The Mutopia rule: which bulk editions held only for the span or lint gate ship at level 6 under the relaxed gates (`CONCERT` and `KEPT`, with a category for each) and the level note. `gates.py` checks it for every Mutopia piece with `relaxedGates`. |
 | `pdmx_*.py`, `dedupe.py`, `pdmx-excluded.json` | The MuseScore archive pipeline and its committed exclusion list (see [below](#musescore-archive-scores-pdmx)). |
+| `pdmx_repair.py`, `pdmx-repairs.json` | The verified rounding repairs of four refused advanced uploads, pinned by SHA-256 (see [Repairs for refused uploads](#repairs-for-refused-uploads)). |
 | `tests/` | pytest. `test_core30.py` pins the 38 core files by SHA-256 (`fixtures/core30.json`). The other files cover the catalog and fragments, the candidates, `jsonio`, the level heuristic, the lint gate, the gates, the arrangements and their melodies, the converter (`fixtures/features.ly`) and library-wide consistency (`test_library.py`, including the counts per level). |
 
 ## How a piece is verified
@@ -352,11 +353,11 @@ Known warnings, not defects:
 
 ## MuseScore archive scores (PDMX)
 
-2,934 pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
+2,938 pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
 files whose uploaders declared them public domain or CC0, and which PDMX found free of licence conflicts
 (`license_conflict` false). Every one is a solo piano score on two staves with notes on both; the
 library's own gates decide the rest. Two lanes. The classical lane (genres classical, folk, religious or unlabelled):
-`catalog.d/pdmx-library.json` (1,310 pieces at levels 1 to 5) and `catalog.d/pdmx-advanced.json` (212 pieces at level 6,
+`catalog.d/pdmx-library.json` (1,310 pieces at levels 1 to 5) and `catalog.d/pdmx-advanced.json` (216 pieces at level 6,
 some with relaxed gates). The songs lane (every other genre: pop, rock, soundtrack, jazz, blues, at the owner's request
 for songs "not necessarily classical or folk"): `catalog.d/pdmx-songs.json` (1,023 pieces at levels 1 to 5) and
 `catalog.d/pdmx-songs-advanced.json` (389 pieces at level 6, some with relaxed gates). The caps by rating hold levels
@@ -413,7 +414,7 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
    --only SLUG...` then builds just the pieces that the new fragments added. Repeat until a build refuses nothing. `build.py --manifest-only` then
    re-renders every manifest entry, and `build.py` writes `library-index.json` (the eight fields the
    library list reads, in a compact columnar form: `build.library_index` describes it, and
-   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,220 pieces).
+   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,224 pieces).
 8. `gates.py --pending` (or `--new`) writes the verification records (span check, lint, level). For a
    MuseScore piece the LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to
    cross-check); the other gates do.
@@ -487,21 +488,34 @@ score or engine cannot slip through; both also hold every relaxed piece, archive
 law (the worst candidate had 1,028 errors per 1,000 notes), so the relaxation has a ceiling of 40
 law errors per 1,000 notes at each profile (ten times the engine's measured rate on real pieces, the
 benchmark floor of 3.92) and 20 unplayable slices per 1,000 notes; both are constants in
-`pdmx_advanced.py` (None lifts them). 430 pieces ship with relaxed gates: a median of 13 law errors a
-piece (at most 277, in a long piece within the ceiling), and 361 of them with span flags (2,913 slices in all, at
+`pdmx_advanced.py` (None lifts them). 434 pieces ship with relaxed gates: a median of 13 law errors a
+piece (at most 277, in a long piece within the ceiling), and 365 of them with span flags (3,021 slices in all, at
 most 63 in one piece). The digits at those places are advice.
 
 **Result.** The classical lane screened 176,155 archive rows, kept 8,855 two-staff candidates after
 de-duplication and passed 5,470 through every gate; the songs lane gated 4,439 candidates and passed 2,528.
-The library ships 1,310 classical pieces at levels 1 to 5, 212 at level 6, 1,023 songs at levels 1 to 5 and 389
-at level 6 (1,368 in Songs, 44 jazz and blues under Modern). Of the 601 archive pieces at level 6, 171 pass every
-gate and 430 ship with relaxed gates. The archive names a composer for 526 of the 1,522 classical-lane pieces; the
+The library ships 1,310 classical pieces at levels 1 to 5, 216 at level 6, 1,023 songs at levels 1 to 5 and 389
+at level 6 (1,368 in Songs, 44 jazz and blues under Modern). Of the 605 archive pieces at level 6, 171 pass every
+gate and 434 ship with relaxed gates. The archive names a composer for 530 of the 1,526 classical-lane pieces; the
 rest read "Unknown".
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---:|---:|---:|---:|---:|---:|
-| Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 601 |
-| Whole library (286 curated + 2,934 archive) | 47 | 220 | 1,465 | 756 | 48 | 684 |
+| Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 605 |
+| Whole library (286 curated + 2,938 archive) | 47 | 220 | 1,465 | 756 | 48 | 688 |
+
+### Repairs for refused uploads
+
+The validator refuses a score at its first defect, and an upload can have many. `pdmx_repair.py` repairs the four
+advanced uploads whose defects are rounding-sized (issue #80): a voice that runs past its bar by at most 1/32 of a
+quarter (tuplet rounding) loses that excess from its last note, and a backup that reaches before the bar start by
+that much gets one rest of the missing length. `verify_content` then compares every pitched note (pitch, voice,
+staff, onset and duration) and every non-note element of the two scores, and the repaired score must pass the
+validator. The repairs are pinned by SHA-256 in `pdmx-repairs.json`. `build.py` applies them before its check, and
+`pdmx_fragments.py` takes a repaired piece's gate counts from the engine's own measurement on the shipped score
+(`measured_gate`), so `gates.py` checks what ships. The other ten refused advanced uploads are not repaired: each has
+bars that run over by more than 1/32 of a quarter (from 1/8 to 18 quarters) or overlapping notes in one voice, which
+no change of this kind fixes.
 
 ## Generated and ignored directories
 

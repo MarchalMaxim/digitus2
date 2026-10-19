@@ -1,0 +1,17 @@
+{
+ "_comment": "Archive scores the build refused whose defects are rounding-sized, repaired by content/tools/pdmx_repair.py before the build's own check (issue #80, 2026-10-19). Keyed by the archive file's SHA-256, as pdmx.sha256 in the catalog. A repair shortens a voice's last note, or adds one rest before a backup, by at most 1/32 of a quarter, and changes no pitch, voice, staff or other element; the repaired score must pass the validator. The other refused advanced uploads (bars over by a quarter or more, overlapping notes in one voice) are not listed: no change of this kind fixes them.",
+ "repairs": {
+  "0df00b70712cc7f91fe081913f276060595662b135eec550eaeb64a52c6512db": {
+   "reason": "Rachmaninoff, Etude-Tableaux No. 1: eight bars whose voices run 3/160 or 1/40 of a quarter past the bar (tuplet rounding)."
+  },
+  "db8b375f8af30ed6d96c8ed69b339a6d2077cc7269b4d41b266b0d04ef14538e": {
+   "reason": "Liszt, Apparitions No. 2: bar 98, two voices run 1/120 of a quarter past the bar (tuplet rounding)."
+  },
+  "2e6669e0bfcdb3c6d6d5b237954b05485fc284716b4d8418942ac8dbf7bbdb4f": {
+   "reason": "Liszt, Grandes etudes de Paganini No. 6: bar 217, voices run 1/240 and 1/120 of a quarter past the bar; bar 218 backs up 3 ticks short of the bar start (rounding)."
+  },
+  "337a8e32de583bd4bca9fdabb8618b9ecdb2130fe3897293b4967fd716393fc7": {
+   "reason": "Liszt, Transcendental Etude No. 8: bar 27 backs up 6 ticks short of the bar start, bar 175 runs 2 ticks past the bar (rounding)."
+  }
+ }
+}

@@ -40,6 +40,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import pdmx_advanced  # noqa: E402
+import pdmx_repair  # noqa: E402
 import pdmx_select  # noqa: E402
 
 CONTENT = HERE.parent
@@ -121,6 +122,22 @@ def licence_map(paths: set[str]) -> dict[str, str]:
     return out
 
 
+def measured_gate(gate: dict, slug: str, verification: dict) -> dict:
+    """A repaired piece's gate record with the engine's own counts on the score the library ships (issue #80). A
+    repair changes a few notes, so the counts recorded for the refused original no longer describe the shipped score.
+    Other pieces keep their records; a repaired piece with no measurement yet keeps its own until gates.py measures it."""
+    if gate["sha256"] not in pdmx_repair.pinned_repairs():
+        return gate
+    profiles = ((verification.get(slug) or {}).get("lint") or {}).get("profiles")
+    if not profiles:
+        return gate
+    measured = dict(gate)
+    measured["spanFlags"] = sum(1 for flag in verification.get("spanFlags") or [] if flag.get("piece") == slug)
+    measured["lint"] = {p: {"notes": profiles[p]["notes"], "errors": profiles[p]["errors"],
+                            "warnings": profiles[p]["warnings"]} for p in ("medium", "large")}
+    return measured
+
+
 def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = None,
               relaxed_gates: dict | None = None) -> dict:
     sha = gate["sha256"]
@@ -167,6 +184,11 @@ def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = 
             "no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles.",
             f"and, because the span and lint gates are relaxed for level 6, "
             f"{pdmx_advanced.relaxed_sentence(relaxed_gates)}: the digits there are advice.")
+    repair = pdmx_repair.pinned_repairs().get(sha)
+    if repair:
+        piece["notes"] += (f" The archive file was repaired for the library: {repair['reason']} Each change is at "
+                           "most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes "
+                           "the validator (content/tools/pdmx_repair.py).")
     if demands:
         piece["levelNote"] = pdmx_advanced.override_reason(gate["level"], demands)
         if level < 5:  # two levels above the proposal: the catalog wants the reason as an override
@@ -353,6 +375,7 @@ def main(argv=None) -> int:
             rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title,
                                    "reason": "failed the library's validation: " + (errors[0] if errors else "see verification")})
             continue
+        gate = measured_gate(gate, slug, verification)
         # A candidate that passed every gate, or a level-6 piece that passes the relaxed gates (pdmx_advanced.usable).
         if not pdmx_advanced.usable(gate, cand["notes"]):
             counts["gates"] += 1

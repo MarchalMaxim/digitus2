@@ -2543,6 +2543,37 @@
    }
   },
   {
+   "slug": "pdmx-franz-liszt-grandes-tudes-de-paganini-no-2e6669e0",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Franz Liszt: Grandes études de Paganini No.6 in A minor",
+   "composer": "Niccolò Paganini / Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 128,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 13.2), the upper end of its range for a whole piece, and the piece shows sustained fast notes (21.2 a second), a stretch of 24 semitones. No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 60 slice(s) that no hand can strike as written and 173 (medium) and 166 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Grandes etudes de Paganini No. 6: bar 217, voices run 1/240 and 1/120 of a quarter past the bar; bar 218 backs up 3 ticks short of the bar start (rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "2e6669e0bfcdb3c6d6d5b237954b05485fc284716b4d8418942ac8dbf7bbdb4f",
+    "path": "./mxl/4/11/Qmebw62b2fg5JhiNG7uZc9PEmUuhHFFLKYki5pyvy1voMN.mxl",
+    "license": "cc-zero",
+    "rating": "4.5",
+    "nRatings": "19",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 60,
+    "lint": {
+     "medium": 173,
+     "large": 166
+    }
+   }
+  },
+  {
    "slug": "pdmx-franz-liszt-transcendental-tude-no-2-in-d2dd5a2b",
    "source": "pdmx",
    "level": 6,
@@ -2570,6 +2601,37 @@
     "lint": {
      "medium": 30,
      "large": 29
+    }
+   }
+  },
+  {
+   "slug": "pdmx-franz-liszt-transcendental-tude-no-8-in-337a8e32",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Franz Liszt: Transcendental Étude No.8 in C minor Wilde Jagd",
+   "composer": "Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 160,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 16.821), the upper end of its range for a whole piece, and the piece shows sustained fast notes (26.0 a second), a stretch of 24 semitones, dense chords (65 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 12 slice(s) that no hand can strike as written and 67 (medium) and 65 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Transcendental Etude No. 8: bar 27 backs up 6 ticks short of the bar start, bar 175 runs 2 ticks past the bar (rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "337a8e32de583bd4bca9fdabb8618b9ecdb2130fe3897293b4967fd716393fc7",
+    "path": "./mxl/4/22/QmeGUD86jCsGtpMQCVScrm5yjPv6Hf5H53yMWsJsu9XFPz.mxl",
+    "license": "cc-zero",
+    "rating": "4.85",
+    "nRatings": "4",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 12,
+    "lint": {
+     "medium": 67,
+     "large": 65
     }
    }
   },
@@ -3497,6 +3559,38 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.2 a second); a stretch of 17 semitones."
+  },
+  {
+   "slug": "pdmx-liszt-apparitions-no-2-db8b375f",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Liszt Apparitions - No. 2",
+   "composer": "Franz Liszt",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 11.658), the upper end of its range for a whole piece, and the piece shows sustained fast notes (11.7 a second), a stretch of 16 semitones, dense chords (51 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 11 slice(s) that no hand can strike as written and 18 (medium) and 16 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Liszt, Apparitions No. 2: bar 98, two voices run 1/120 of a quarter past the bar (tuplet rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "db8b375f8af30ed6d96c8ed69b339a6d2077cc7269b4d41b266b0d04ef14538e",
+    "path": "./mxl/12/2/QmU3n5oSFgbxPHLaqH83zdqWhsxdRuttHFExiwFasiagaN.mxl",
+    "license": "cc-zero",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 11,
+    "lint": {
+     "medium": 18,
+     "large": 16
+    }
+   },
+   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (11.7 a second); a stretch of 16 semitones; dense chords (51 percent of onsets)."
   },
   {
    "slug": "pdmx-luft-hafen-894c6719",
@@ -4433,6 +4527,37 @@
     }
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (7.7 a second); a stretch of 22 semitones; dense chords (77 percent of onsets)."
+  },
+  {
+   "slug": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
+   "source": "pdmx",
+   "level": 6,
+   "collection": "pdmx-advanced",
+   "title": "Rachmaninoff: Ètude-Tableaux No. 1 in C Minor",
+   "composer": "Sergei Rachmaninoff",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 130,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 15.606), the upper end of its range for a whole piece, and the piece shows sustained fast notes (22.3 a second), a stretch of 28 semitones, dense chords (54 percent of onsets). No syllabus placement is claimed.",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 25 slice(s) that no hand can strike as written and 71 (medium) and 71 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0. The archive file was repaired for the library: Rachmaninoff, Etude-Tableaux No. 1: eight bars whose voices run 3/160 or 1/40 of a quarter past the bar (tuplet rounding). Each change is at most 1/32 of a quarter; no pitch, voice or staff changed, and the repaired score passes the validator (content/tools/pdmx_repair.py).",
+   "pdmx": {
+    "sha256": "0df00b70712cc7f91fe081913f276060595662b135eec550eaeb64a52c6512db",
+    "path": "./mxl/3/13/Qmdc75HV6tGZcYsrPFw87yngDPvCWSFwF3CXXnj9yySiXJ.mxl",
+    "license": "cc-zero",
+    "rating": "4.92",
+    "nRatings": "11",
+    "fingerings": 0,
+    "version": "3.1"
+   },
+   "relaxedGates": {
+    "spans": 25,
+    "lint": {
+     "medium": 71,
+     "large": 71
+    }
+   }
   },
   {
    "slug": "pdmx-rejoice-give-praise-our-king-is-here-i-h-637954e5",

@@ -15,10 +15,15 @@ import type { Messages, Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
   BUSY,
+  BUSY_RETRY_MS,
+  BUSY_WAIT_MS,
+  BusyError,
   createScanClient,
+  expectedMs,
   GRAND_STAFF_WARNING,
   LIMITED,
   newJobId,
+  pause,
   UNKNOWN_WARNING,
   type ScanServiceMetadata,
 } from './client.js';
@@ -28,6 +33,7 @@ import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.j
 import type { ScanPage, ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
 import { isTouchOnly } from './phone.js';
+import { ScanProgress } from './ScanProgress.js';
 import {
   correct,
   timingIssue,
@@ -48,6 +54,13 @@ import './scan.css';
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
 
 const NO_CORRECTIONS: Correction[] = [];
+/**
+ * While waiting, an offer of the job that is not answered busy within this time has been taken
+ * by the scanner: the bar replaces the waiting line. A busy answer comes back at once.
+ */
+const TAKEN_AFTER_MS = 2_000;
+/** How long a full bar stays on screen after the answer, so the reader sees it fill. */
+const FULL_HOLD_MS = 400;
 
 /** The scan in progress: the page on the scanner is named by its job, and stopped by both. */
 interface ScanRun {
@@ -65,7 +78,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
   const t = useT();
   const [locale] = useLocale();
-  const [phase, setPhase] = useState<'ready' | 'scanning' | 'cancelling' | 'review'>(
+  // Waiting: the scanner is busy with another reader's page, and this page is offered again.
+  const [phase, setPhase] = useState<'ready' | 'waiting' | 'scanning' | 'cancelling' | 'review'>(
     initial.xml || hasPageRecognition ? 'review' : 'ready',
   );
   // Errors are kept as phrases, so they follow a change of language while they are on screen.
@@ -100,6 +114,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     hasPageRecognition && !initial.xml ? 'page' : 'combined',
   );
   const [scanningPage, setScanningPage] = useState(1);
+  // The bar of the page being recognised: when its request was sent and how long it should take.
+  const [progress, setProgress] = useState<{ since: number; expected: number; done: boolean }>();
   const [rotating, setRotating] = useState(false);
   const [width, setWidth] = useState(640);
   const [touchOnly] = useState(isTouchOnly);
@@ -153,7 +169,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     [corrected, problems],
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
-  const busy = phase === 'scanning' || phase === 'cancelling';
+  const busy = phase === 'waiting' || phase === 'scanning' || phase === 'cancelling';
   const renderError = rendered && rendered.xml === renderXml ? rendered.error : null;
   const importError = imported && imported.xml === importXml ? imported.error : null;
   const reviewError = renderError ?? importError;
@@ -324,8 +340,39 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       const controller = new AbortController();
       run.job = job;
       run.controller = controller;
+      const expected = expectedMs(page.file);
+      const begin = (since: number) => {
+        if (run.cancelled || !alive.current) return;
+        setProgress({ since, expected, done: false });
+        setPhase('scanning');
+      };
       try {
-        const recognition = await client.recognize(page.file, job, controller.signal);
+        // A busy scanner is waited for: the same job is offered again until it is taken, for
+        // at most BUSY_WAIT_MS, then the busy answer stands as this page's failure.
+        const giveUp = Date.now() + BUSY_WAIT_MS;
+        let waiting = false;
+        let recognition;
+        for (;;) {
+          const sent = Date.now();
+          const taken = waiting ? setTimeout(() => begin(sent), TAKEN_AFTER_MS) : undefined;
+          if (!waiting) begin(sent);
+          try {
+            recognition = await client.recognize(page.file, job, controller.signal);
+            break;
+          } catch (cause) {
+            if (!(cause instanceof BusyError) || Date.now() + BUSY_RETRY_MS > giveUp) throw cause;
+          } finally {
+            clearTimeout(taken);
+          }
+          if (run.cancelled || !alive.current) return;
+          waiting = true;
+          setPhase('waiting');
+          await pause(BUSY_RETRY_MS, controller.signal);
+          if (run.cancelled || !alive.current) return;
+        }
+        if (run.cancelled || !alive.current) return;
+        setProgress((bar) => bar && { ...bar, done: true });
+        await pause(FULL_HOLD_MS, controller.signal).catch(() => {});
         if (run.cancelled || !alive.current) return;
         page.xml = recognition.xml;
         page.recognizer = recognition.recognizer ?? latestHealth.current?.recognizer;
@@ -583,7 +630,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             <p>{t.scan.view.advice}</p>
             <p className="small muted">{t.scan.view.where}</p>
             <div className="row">
-              {phase === 'scanning' || phase === 'cancelling' ? (
+              {busy ? (
                 // Plain while the loader below carries the screen's one red.
                 <Button
                   disabled={phase === 'cancelling'}
@@ -607,18 +654,23 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </Button>
               )}
             </div>
-            {(phase === 'scanning' || phase === 'cancelling') && (
+            {busy && (
               <div className="scan-loader">
                 <Loader tune="scale" />
               </div>
             )}
             <p role="status">
-              {phase === 'scanning'
-                ? batch
-                  ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
-                  : t.scan.view.scanning
-                : ''}
+              {phase === 'waiting'
+                ? t.scan.view.waiting
+                : phase === 'scanning'
+                  ? batch
+                    ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
+                    : t.scan.view.scanning
+                  : ''}
             </p>
+            {phase === 'scanning' && progress && (
+              <ScanProgress key={progress.since} {...progress} />
+            )}
             {health?.capabilities?.textModelConfigured === false && (
               <p role="status">{t.scan.view.textModelMissing}</p>
             )}

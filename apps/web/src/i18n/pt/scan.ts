@@ -17,10 +17,12 @@ export const scan: Messages['scan'] = {
     cancelling: 'Cancelando…',
     retryFailed: 'Tentar de novo as páginas com falha',
     scanScore: 'Digitalizar esta partitura',
-    scanning:
-      'Reconhecendo… Costuma levar menos de um minuto. A primeira digitalização depois de um tempo sem uso demora mais, enquanto o serviço de digitalização é iniciado.',
-    scanningPage: (page: number, total: number) =>
-      `Página ${page} de ${total} · Reconhecendo… Costuma levar menos de um minuto. A primeira digitalização depois de um tempo sem uso demora mais, enquanto o serviço de digitalização é iniciado.`,
+    scanning: 'Reconhecendo…',
+    scanningPage: (page: number, total: number) => `Página ${page} de ${total} · Reconhecendo…`,
+    waiting: 'Outra partitura está sendo digitalizada. A sua começa assim que ela terminar.',
+    progress: 'Progresso do reconhecimento',
+    secondsLeft: (seconds: number) => `Cerca de ${seconds} segundos`,
+    overdue: 'Está demorando mais do que o normal.',
     textModelMissing:
       'O reconhecimento de texto em inglês não está configurado. O texto musical pode estar faltando.',
     help: 'Como funciona a digitalização',

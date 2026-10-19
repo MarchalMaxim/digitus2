@@ -1,11 +1,12 @@
 # Optical music recognition (OMR) research
 
-What was evaluated for the experimental scanning feature (`docs/scanning.md`), what was measured, and why the product runs homr (photos) and Audiveris (PDFs) on an optional local PC worker. The prototypes are under `research/omr/prototypes/`; raw outputs stay in the ignored `research/omr/results/`.
+What was evaluated for the experimental scanning feature (`docs/scanning.md`), what was measured, and why the product runs homr (photos) and Audiveris (PDFs) on the project's scan service on Google Cloud Run (`docs/scan-service.md`). The prototypes are under `research/omr/prototypes/`; raw outputs stay in the ignored `research/omr/results/`.
 
 ## Decision
 
-- Recognition runs on the user's own PC in an optional loopback worker (`research/omr/prototypes/local-worker`). GitHub Pages stays the frontend; Python is allowed only in that worker, and the product code stays TypeScript.
-- No external recognition service and no score upload: the owner requires recognition within the application. Online services were surveyed but never used.
+- Recognition runs on a container the project operates on Google Cloud Run (`research/omr/service/`, `docs/scan-service.md`): one recognition at a time, scaled to zero when idle, its spend capped at 5 a month by a budget that disables billing. Every device scans the same way, phones included, with nothing to install and no account (Hosted recognition, below). GitHub Pages stays the only deployment of the app, and the product code stays TypeScript; Python runs only in that container.
+- The loopback worker (`research/omr/prototypes/local-worker`) is a research tool: the acceptance gate and the adapters' tests run its code, and the service imports its job runner and adapters. The app no longer talks to it.
+- No vendor recognition service: the online services surveyed need sign-ups, sell per-page credits and keep the score on the vendor's servers (Online services, below). The project's own service names its provider before any page is sent, is used only on the reader's explicit **Scan this score**, keeps nothing and ships no token in the static bundle.
 - Photos (PNG, JPEG) go to a pinned, patched homr; PDFs go to Audiveris 5.11.0 with a short-staff profile and the English text model. Only these two recovered usable music in the tests below.
 - Browser-only recognition was rejected: no tested checkpoint produced usable notes fast enough. SMT++ produced wrong notes; oemer took 21 minutes for one page and kept its rhythm and meter errors.
 - Recognition output is never repaired or guessed. Errors stay visible for review, and a strict importer refuses malformed notation. The worker applies two lossless export rules, checked on the file and reported in the review (Acceptance corpus and gate, below).
@@ -44,7 +45,7 @@ The default corpus is page 1 of three library pieces: Twinkle, Bach Minuet in G 
 
 ## Acceptance corpus and gate
 
-`research/omr/acceptance.mjs` is the scanning gate, the `omr:acceptance` step of `pnpm verify`. It renders the 16 one-page library pieces of `research/omr/acceptance/corpus.json` with `prepare.mjs`, recognises every page with the PC worker's own adapters (`acceptance/recognize.py` imports `local-worker/homr.py` and `audiveris.py`, so the gate measures the shipped pipeline), and scores note by note against the library MusicXML: the projection F1s above plus `diagnose.mjs`. It fails when a route falls below `research/omr/acceptance/floor.json`. Without the recognisers it reports SKIP with the reason. Outputs are cached in the ignored `research/omr/results/acceptance/` by the hash of the input and of the pipeline's files, so a rerun recognises only what changed (80 recognitions take about 15 minutes on a Ryzen 7 7800X3D).
+`research/omr/acceptance.mjs` is the scanning gate, the `omr:acceptance` step of `pnpm verify`. It renders the 16 one-page library pieces of `research/omr/acceptance/corpus.json` with `prepare.mjs`, recognises every page with the adapters the scan service runs (`acceptance/recognize.py` imports `local-worker/homr.py` and `audiveris.py`, so the gate measures the shipped pipeline), and scores note by note against the library MusicXML: the projection F1s above plus `diagnose.mjs`. It fails when a route falls below `research/omr/acceptance/floor.json`. Without the recognisers it reports SKIP with the reason. Outputs are cached in the ignored `research/omr/results/acceptance/` by the hash of the input and of the pipeline's files, so a rerun recognises only what changed (80 recognitions take about 15 minutes on a Ryzen 7 7800X3D).
 
 ```sh
 node research/omr/acceptance.mjs --check          # 0, or 3 with the reason the recognisers are missing
@@ -113,7 +114,7 @@ What the photos show:
 | [oemer](https://github.com/BreezeWhite/oemer) (two ONNX segmentation models plus Python reconstruction)                                                                                                            | Native, and browser (ONNX Runtime Web + Pyodide) | Full-note F1 88.37 / 88.73 / 0.59 % on the three clean pages; no meter or beams exported; browser Twinkle took 21 min                                                      | Rejected                                       |
 | [Audiveris](https://github.com/Audiveris/audiveris) 5.11.0                                                                                                                                                           | Native (bundled Java)                            | 4–8 s per clean page; 100 % on Twinkle with the short-staff profile; 86.73 % corpus F1 from original PDFs with English OCR                                                  | Adopted for PDFs                               |
 | [homr](https://github.com/liebharc/homr), pinned and patched                                                                                                                                                         | Native (CPU ONNX)                                | Recovers all 13 main bars and both hands on two real book photos where Audiveris and oemer failed                                                                          | Adopted for photos                             |
-| Online services: [Flat/Tutteo OMR API](https://flat.io/developers/docs/api/omr/), [Klangio Scan2Notes](https://klang.io/help/compare-apps-and-subscriptions/), [Newzik](https://newzik.com/notre-api-omr)           | Vendor servers                                   | Not run                                                                                                                                                                    | Rejected: no upload to external services       |
+| Online services: [Flat/Tutteo OMR API](https://flat.io/developers/docs/api/omr/), [Klangio Scan2Notes](https://klang.io/help/compare-apps-and-subscriptions/), [Newzik](https://newzik.com/notre-api-omr)           | Vendor servers                                   | Not run                                                                                                                                                                    | Rejected: sign-ups, per-page credits, the score on the vendor's servers |
 | [satb-line-omr](https://github.com/alexanderalber/satb-line-omr)                                                                                                                                                     | Browser ONNX                                     | Not run: one voice per staff, excludes polyphony and scans                                                                                                                 | Not suitable for piano                         |
 
 ### SMT++ in the browser
@@ -196,15 +197,46 @@ On the public clean piano and single-melody controls the output is byte-identica
 
 ### Online services
 
-The Flat/Tutteo OMR API was the most concrete option. Its capabilities endpoint answered: PNG/PDF in, MusicXML out, 50 pages per job, credits from about $0.10 to $0.33 per page, and job content kept 30 days ([billing](https://flat.io/developers/docs/api/omr/faq/credits), [legal and privacy](https://flat.io/developers/docs/api/omr/faq/legal)). Klangio's API covers audio, not OMR ([API docs](https://api-docs.klang.io/)), and Newzik needs a sales contract. None was used, because scores must not leave the user's machine. If an online route ever returns, it must be explicit, name the provider before any transfer, and never ship a shared token in the static bundle.
+The Flat/Tutteo OMR API was the most concrete option. Its capabilities endpoint answered: PNG/PDF in, MusicXML out, 50 pages per job, credits from about $0.10 to $0.33 per page, and job content kept 30 days ([billing](https://flat.io/developers/docs/api/omr/faq/credits), [legal and privacy](https://flat.io/developers/docs/api/omr/faq/legal)). Klangio's API covers audio, not OMR ([API docs](https://api-docs.klang.io/)), and Newzik needs a sales contract. None was used: each needs a sign-up or a contract, charges per page and keeps the score on the vendor's servers, and the owner rejected all three. The rules for any online route are the ones the project's own service follows: it is explicit, it names the provider before any transfer, and it never ships a shared token in the static bundle.
 
-## Browser to worker connection
+## Hosted recognition
 
-A public HTTPS page needs the browser's permission to reach a program on loopback ([Chrome local network access](https://developer.chrome.com/blog/local-network-access)). In Chrome 155 the governing permission is `loopback-network`; a legacy `local-network-access` grant alone was denied ([Chrome guidance](https://github.com/GoogleChrome/modern-web-guidance/blob/main/skills/modern-web-guidance/guides/security/local-network-access.md)). The client sends `targetAddressSpace: 'loopback'` and no credentials. The worker binds 127.0.0.1 only and checks the exact Host and an allowed Origin. That origin check cannot tell apart the project paths under `marchalmaxim.github.io`, and it is not authentication against a local program that forges headers. The worker is not designed for a public or multi-user deployment: that would need authentication, TLS and isolation.
+Scanning used to need the loopback worker installed and started on the reader's own Windows PC, which a phone could not reach at all. The owner asked for a way that does not rely on a local machine (#62), was open to a Google Cloud or Azure instance "as long as we keep the costs heavily in control (also: no AWS)", ruled out services where the reader signs up, and did not want on-device recognition for its own sake. The routes weighed:
+
+| Route | Verdict |
+| --- | --- |
+| Cloud Run, request-based billing, scale to zero | **Adopted.** The worker's code and recognisers run unchanged in a Linux container; the free grant covers the expected use; the worst case is bounded by one instance and a billing kill-switch; no account for the reader. |
+| Azure Container Apps, consumption plan | Equivalent free grant and scale to zero ([pricing](https://azure.microsoft.com/en-us/pricing/details/container-apps/)); not chosen because the owner already has a Google Cloud account, and Google documents the billing kill-switch pattern. The container is portable, so this stays a fallback. |
+| On-device recognition in the browser (homr on ONNX Runtime Web with WebGPU) | Not now. Never measured; homr's inference code is 45 Python files on OpenCV and numpy, a faithful port is weeks of work and must match the native output; phone speed and memory are unknown (the oemer browser run took 21 minutes single-threaded, and homr reuses that UNet); the AGPL code and models cannot ship inside the MIT app ([WebGPU in major browsers](https://web.dev/blog/webgpu-supported-major-browsers)). A spike remains possible later. |
+| Phone paired with the reader's PC over the local network | Still needs the scripts on a PC. Rejected. |
+| A desktop installer for the worker | Helps PC readers only. Rejected. |
+| Vendor OMR APIs (Flat, Klangio, Newzik) | Sign-ups, per-page credits and the score on a vendor's servers. Rejected by the owner. |
+| Hugging Face Spaces, free CPU tier | Zero cost, but 2 vCPU, a 48-hour sleep with a minute-long wake-up, and a provider the owner did not name. Not chosen. |
+| A 10-second keep-warm ping | Each ping bills at least 100 ms of the whole instance, about 104,000 of the 180,000 free vCPU-seconds a month ([Cloud Run pricing](https://cloud.google.com/run/pricing)), and Cloud Run may recycle the instance anyway. Replaced by one warm-up request when the reader opens the scan page. |
+
+The numbers behind the choice (the full cost table and its sources are in `docs/scan-service.md`):
+
+| Figure | Value |
+| --- | --- |
+| Free Cloud Run grant a month, per billing account | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests |
+| One second of the service (4 vCPU, 8 GiB) beyond the grant | $0.000116 |
+| Free recognition time a month at that size | 45,000 s, about 1,500 pages of 30 s |
+| Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 5 a month plus what the hours of alert lag cost |
+| A phone photo, in the container at 4 vCPU on the owner's PC | 22.2 s |
+| A corpus PDF, in the container at 4 vCPU on the owner's PC | 8.6 s |
+| The deployed service's cold start | not yet measured |
+
+The Linux build is a different build of the same pinned libraries: Python 3.12 from Ubuntu 24.04 installs the locked `homr-photo/requirements-cpu.txt` unchanged, the patched homr source matches `source-manifests.json`, and Audiveris 5.11.0 comes from its Ubuntu package. Its adapter's class path is `lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first and Audiveris exports nothing. On a headless Linux Audiveris also needs fontconfig with one font and `GDK_SCALE` set, which its package does not declare (`research/omr/service/README.md`).
+
+**Equivalence.** `node research/omr/acceptance.mjs --service URL` sends the same 16-piece corpus through a running container, scores it with the same scorer and compares it with `research/omr/acceptance/floor.json`, like the gate. A route within one count per error class or 0.5 F1 points of its floor is explained here and does not block a deploy; a larger gap goes to the owner first. The table of the container's results beside the Windows numbers of the acceptance table above follows the run.
+
+## Browser to research worker connection
+
+This section describes the loopback worker, which the app no longer uses; it stays as the research harness's server. A public HTTPS page needs the browser's permission to reach a program on loopback ([Chrome local network access](https://developer.chrome.com/blog/local-network-access)). In Chrome 155 the governing permission is `loopback-network`; a legacy `local-network-access` grant alone was denied ([Chrome guidance](https://github.com/GoogleChrome/modern-web-guidance/blob/main/skills/modern-web-guidance/guides/security/local-network-access.md)). The client sends `targetAddressSpace: 'loopback'` and no credentials. The worker binds 127.0.0.1 only and checks the exact Host and an allowed Origin. That origin check cannot tell apart the project paths under `marchalmaxim.github.io`, and it is not authentication against a local program that forges headers. The worker is not designed for a public or multi-user deployment: that would need authentication, TLS and isolation.
 
 ## Licences
 
-Nothing below is bundled into the MIT web app. The setup scripts fetch each component and verify its pinned digest.
+Nothing below is bundled into the MIT web app. The research setup scripts and the scan service's container build fetch each component and verify its pinned digest; homr, Audiveris and the text model run on the project's scan service, whose complete source is public in this repository (`research/omr/service/`).
 
 | Component                              | Licence                                                                                                        |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -216,4 +248,4 @@ Nothing below is bundled into the MIT web app. The setup scripts fetch each comp
 
 ## Open questions
 
-Source beam recovery for photos is open (#39). The phone photos have page-level facts only (bars, staves, key, time); note-level errors on them, such as the duplicated C5 and the bass E3 in the upper hand on the book page, are not counted, and the synthetic corpus does not reproduce them. Correcting a misread time signature is not in the review.
+Source beam recovery for photos is open (#39). The phone photos have page-level facts only (bars, staves, key, time); note-level errors on them, such as the duplicated C5 and the bass E3 in the upper hand on the book page, are not counted, and the synthetic corpus does not reproduce them.

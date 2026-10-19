@@ -16,14 +16,17 @@ class PermissionDenied(Exception):
 
 
 class FakeBillingClient:
-    def __init__(self, billing_enabled=True, denied=False):
+    def __init__(self, billing_enabled=True, denied=False, get_denied=False):
         self.billing_enabled = billing_enabled
         self.denied = denied
+        self.get_denied = get_denied
         self.gets = []
         self.updates = []
 
     def get_project_billing_info(self, name):
         self.gets.append(name)
+        if self.get_denied:
+            raise PermissionDenied("resourcemanager.projects.get denied")
         return types.SimpleNamespace(billing_enabled=self.billing_enabled)
 
     def update_project_billing_info(self, name, project_billing_info):
@@ -157,3 +160,33 @@ def test_simulate_false_in_the_environment_turns_simulation_off(monkeypatch, mai
     monkeypatch.setenv("SIMULATE", "False")
     sys.modules.pop("main")
     assert importlib.import_module("main").SIMULATE is False
+
+
+def test_simulation_reports_a_refused_billing_read_as_a_failed_test(monkeypatch, caplog, main):
+    caplog.set_level(logging.INFO)
+    client = use_client(monkeypatch, main, FakeBillingClient(get_denied=True))
+    monkeypatch.setattr(main, "SIMULATE", True)
+    main.stop_billing(event(6, 5))
+    errors = [r.getMessage() for r in caplog.records if r.levelno >= logging.ERROR]
+    assert any("simulation test failed" in message for message in errors)
+    assert "nothing was changed" not in caplog.text
+    assert client.updates == []
+    assert main.cloud_logger_for_tests.entries == []
+
+
+def test_a_real_run_still_unlinks_when_the_billing_read_is_refused(monkeypatch, caplog, main):
+    caplog.set_level(logging.INFO)
+    client = use_client(monkeypatch, main, FakeBillingClient(get_denied=True))
+    monkeypatch.setattr(main, "SIMULATE", False)
+    main.stop_billing(event(6, 5))
+    assert any(r.levelno >= logging.ERROR for r in caplog.records)
+    assert client.updates == [(f"projects/{PROJECT}", {"billing_account_name": ""})]
+
+
+def test_a_successful_simulation_logs_the_billing_read_and_no_error(monkeypatch, caplog, main):
+    caplog.set_level(logging.INFO)
+    use_client(monkeypatch, main, FakeBillingClient())
+    monkeypatch.setattr(main, "SIMULATE", True)
+    main.stop_billing(event(6, 5))
+    assert f"Getting billing info for projects/{PROJECT}" in caplog.text
+    assert not [r for r in caplog.records if r.levelno >= logging.ERROR]

@@ -88,14 +88,14 @@ It then prints the service URL and runs `smoke.mjs` against it, passing the firs
 
 `budget/budget.ps1 -Project ID -BillingAccount ID [-Amount 5] [-Topic digitus2-scan-budget] [-Simulate true]` follows Google's [Disable billing usage with notifications](https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications):
 
-| Piece    | What it is                                                                                                                                                                                                                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Budget   | `digitus2-scan` on the billing account, 5 a month in the account's currency, for this project only; notifications at 50 %, 90 % and 100 % go to the Pub/Sub topic                                                                                                              |
-| Topic    | `digitus2-scan-budget`; the budget publishes the month's running cost to it several times a day                                                                                                                                                                                |
-| Function | `stop-billing` (Cloud Run functions, Python 3.12, europe-west4), source `budget/main.py`, triggered by the topic                                                                                                                                                               |
-| Identity | Its own service account `stop-billing@<project>.iam.gserviceaccount.com`: Billing Account Administrator on the billing account (as Google's guide grants) and log writer on the project. The scan service keeps the Compute Engine default account, which gets no billing role |
+| Piece    | What it is                                                                                                                                                                                                                                                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Budget   | `digitus2-scan` on the billing account, 5 a month in the account's currency, for this project only; notifications at 50 %, 90 % and 100 % go to the Pub/Sub topic                                                                                                                                                                 |
+| Topic    | `digitus2-scan-budget`; the budget publishes the month's running cost to it several times a day                                                                                                                                                                                                                                   |
+| Function | `stop-billing` (Cloud Run functions, Python 3.12, europe-west4), source `budget/main.py`, triggered by the topic                                                                                                                                                                                                                  |
+| Identity | Its own service account `stop-billing@<project>.iam.gserviceaccount.com`: Billing Account Administrator on the billing account (as Google's guide grants); on the project, Browser (to read the billing state), Project Billing Manager (to unlink; without an organization the account role does not reach the project) and log writer. The scan service keeps the Compute Engine default account, which gets no billing role |
 
-`main.py` is Google's Python sample with two changes: it acts when the cost reaches the budget, not only above it, and simulation comes from the `SIMULATE` environment variable (on unless it is `false`). For each notification it decodes `costAmount` and `budgetAmount`; under the budget it does nothing; otherwise it reads the project's billing state and, when billing is on, unlinks the billing account (`update_project_billing_info` with an empty `billing_account_name`) or, in simulation, only logs that it would. A refused unlink is logged, not raised. Its tests stub the Google client modules:
+`main.py` is Google's Python sample with three changes: it acts when the cost reaches the budget, not only above it; simulation comes from the `SIMULATE` environment variable (on unless it is `false`); and in simulation a billing state it cannot read is logged at ERROR as a failed test, because a live run needs the same rights (live, it then assumes billing is on and unlinks, as the sample does). For each notification it decodes `costAmount` and `budgetAmount`; under the budget it does nothing; otherwise it reads the project's billing state and, when billing is on, unlinks the billing account (`update_project_billing_info` with an empty `billing_account_name`) or, in simulation, only logs that it would. A refused unlink is logged, not raised. Its tests stub the Google client modules:
 
 ```sh
 python -m pytest research/omr/service/budget -q
@@ -103,18 +103,24 @@ python -m pytest research/omr/service/budget -q
 
 ### Simulation test
 
-The function starts in simulation. After `budget.ps1`, publish a notification over the budget; the script prints the command with the project filled in. The backslashes keep the quotes through `gcloud.cmd` in PowerShell:
+The function starts in simulation. After `budget.ps1`, publish a notification over the budget; the script prints these commands with the project filled in. The quoting depends on the shell, because gcloud runs as `gcloud.ps1` in PowerShell and hands the arguments to Python: Windows PowerShell 5.1 (and PowerShell 7.0 to 7.2) strips plain double quotes, so they need backslashes; PowerShell 7.3 and later passes them intact and would keep the backslashes; Git Bash passes them intact.
 
-```powershell
-gcloud pubsub topics publish digitus2-scan-budget --project ID --message '{\"costAmount\": 6, \"budgetAmount\": 5}'
+| Shell                                     | Publish command                                                                                                       |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Windows PowerShell 5.1, PowerShell 7.0–7.2 | `gcloud pubsub topics publish digitus2-scan-budget --project ID --message '{\"costAmount\": 6, \"budgetAmount\": 5}'` |
+| PowerShell 7.3 and later, Git Bash        | `gcloud pubsub topics publish digitus2-scan-budget --project ID --message '{"costAmount": 6, "budgetAmount": 5}'`     |
+
+Then read the log:
+
+```sh
 gcloud functions logs read stop-billing --gen2 --region europe-west4 --project ID --limit 20
 ```
 
-The log shows `Cost: 6.0 Budget: 5.0` and a line with `simulation: nothing was changed`; billing stays linked. The console shows the same under Cloud Run functions, `stop-billing`, Logs.
+The test passes when the log shows `Cost: 6.0 Budget: 5.0`, `Getting billing info for projects/ID...` and `Billing disabled for projects/ID. (simulation: nothing was changed)`, with no ERROR line; billing stays linked. `simulation test failed` at ERROR means the function's account cannot read the project's billing state, and a live run would lack the same rights: check its roles on the project before switching simulation off. A `json` error means the quoting did not fit the shell. The console shows the same log under Cloud Run functions, `stop-billing`, Logs.
 
 ### Switching simulation off
 
-Once the simulation test logs `simulation`, redeploy the function live:
+Once the simulation test passes, redeploy the function live:
 
 ```powershell
 powershell -File research/omr/service/budget/budget.ps1 -Project ID -BillingAccount ID -Simulate false
@@ -126,4 +132,10 @@ Under `-File` the switch is text, so `-Simulate false` and `-Simulate $false` bo
 
 The kill-switch unlinks the project from its billing account when the month's cost reaches the budget; the service then stops answering and the app says the scanner could not answer. Scanning stays off until the budget period resets on the first of the month, because the notifications repeat with the running total and would unlink a relinked project again. To recover, on the first of the month (or after raising the budget for the current month), link the project to the billing account again in the Cloud console (Billing, My projects). The service resumes by itself; if Google removed it meanwhile, run the deploy script again.
 
-The budget and the function need nothing: relinking does not change them, and the function stays live. To raise the ceiling for the current month, change the amount of the `digitus2-scan` budget in the console (Billing, Budgets & alerts) first and link billing afterwards; `budget.ps1 -Amount` updates the same budget, but it also redeploys the function, which needs billing linked, so it suits a project that is still linked.
+Unlinked billing can also shut down or delete the kill-switch function, which lives in the same project, and a relinked project without it has no spend ceiling. After relinking, check it:
+
+```powershell
+gcloud functions describe stop-billing --region europe-west4 --project ID --format "value(serviceConfig.environmentVariables)"
+```
+
+If the function is missing or `SIMULATE` is not `false`, run `budget.ps1 -Simulate false` again. To raise the ceiling for the current month, change the amount of the `digitus2-scan` budget in the console (Billing, Budgets & alerts) first and link billing afterwards; `budget.ps1 -Amount` updates the same budget, but it also redeploys the function, which needs billing linked, so it suits a project that is still linked.

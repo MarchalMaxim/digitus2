@@ -1,5 +1,5 @@
 # Creates the monthly budget and the kill-switch function that unlinks billing when it is reached.
-# Safe to run again: run it with -Simulate false once the published-message test logged "simulation".
+# Safe to run again: run it with -Simulate false once the published-message test passes (see the README).
 param(
   [Parameter(Mandatory = $true)][string]$Project,
   [Parameter(Mandatory = $true)][string]$BillingAccount,
@@ -53,8 +53,13 @@ if (-not (Test-Native { gcloud iam service-accounts describe $Account --project 
     gcloud iam service-accounts create $Function --display-name 'digitus2 billing kill-switch' --project $Project
   }
 }
-Invoke-Checked 'Letting the function write its log' {
-  gcloud projects add-iam-policy-binding $Project --member "serviceAccount:$Account" --role roles/logging.logWriter --condition=None --quiet
+# On the project: log writer for its Cloud Logging entry; Browser (resourcemanager.projects.get) to read
+# the billing state; Project Billing Manager to unlink. Without an organization, the billing account
+# role below does not reach the project, so these are needed too (Google: billing/docs/how-to/modify-project).
+foreach ($Role in 'roles/logging.logWriter', 'roles/browser', 'roles/billing.projectManager') {
+  Invoke-Checked "Granting the function $Role" {
+    gcloud projects add-iam-policy-binding $Project --member "serviceAccount:$Account" --role $Role --condition=None --quiet
+  }
 }
 
 Invoke-Checked 'Deploying the function' {
@@ -90,8 +95,11 @@ if ($Existing.Count -eq 1) {
 }
 
 Write-Host "Budget $Budget at $AmountText a month; the function runs with SIMULATE=$SimulateValue."
-Write-Host 'Test it with a message over the budget (the backslashes survive gcloud.cmd on Windows):'
-Write-Host "  gcloud pubsub topics publish $Topic --project $Project --message '{\`"costAmount\`": 6, \`"budgetAmount\`": 5}'"
-Write-Host 'Then read the function log (expect "simulation" while SIMULATE=true):'
+# The quoting the test message needs differs by shell: Windows PowerShell 5.1 strips plain double
+# quotes on the way to gcloud's Python, PowerShell 7.3+ passes them intact and keeps backslashes literally.
+Write-Host 'Test it with a message over the budget; use the line for your shell:'
+Write-Host "  Windows PowerShell 5.1:  gcloud pubsub topics publish $Topic --project $Project --message '{\`"costAmount\`": 6, \`"budgetAmount\`": 5}'"
+Write-Host "  PowerShell 7.3+, Git Bash:  gcloud pubsub topics publish $Topic --project $Project --message '{`"costAmount`": 6, `"budgetAmount`": 5}'"
+Write-Host 'Then read the function log. The test passes when it shows "Getting billing info" and "simulation: nothing was changed" and no ERROR line:'
 Write-Host "  gcloud functions logs read $Function --gen2 --region $Region --project $Project --limit 20"
 Write-Host "  or the console: Cloud Run functions, $Function, Logs"

@@ -2,9 +2,10 @@
 
 Shaped on Google's sample, "Disable billing usage with notifications"
 (https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications, Apache-2.0).
-Two differences from the sample: the switch acts when the cost reaches the budget (the sample waits
-until it exceeds it), and simulation is read from the SIMULATE environment variable, on unless it is
-"false", so the deploy script turns it off without editing code.
+Three differences from the sample: the switch acts when the cost reaches the budget (the sample waits
+until it exceeds it); simulation is read from the SIMULATE environment variable, on unless it is
+"false", so the deploy script turns it off without editing code; and in simulation a billing state
+that cannot be read is logged as a failed test, because a live run needs the same permission.
 
 Unlinking billing stops every paid service in the project, the scan service included.
 """
@@ -70,21 +71,31 @@ def stop_billing(cloud_event) -> None:
         log.info("No action required. Current cost is within budget.")
         return
 
-    action = decide(cost_amount, budget_amount, _is_billing_enabled(project_name))
+    billing_enabled = _read_billing_enabled(project_name)
+    if billing_enabled is None:
+        if SIMULATE:
+            log.error(
+                "simulation test failed: the function cannot read the billing state of %s; "
+                "grant its service account Browser and Project Billing Manager on the project.",
+                project_name,
+            )
+            return
+        billing_enabled = True  # Google's sample: act rather than stall
+    action = decide(cost_amount, budget_amount, billing_enabled)
     if action == "already-disabled":
         log.info("Billing is already disabled for %s.", project_name)
         return
     _disable_billing_for_project(project_name, SIMULATE)
 
 
-def _is_billing_enabled(project_name: str) -> bool:
-    """Whether billing is enabled; assumed enabled when it cannot be read, as in Google's sample."""
+def _read_billing_enabled(project_name: str):
+    """Whether billing is enabled, or None when the billing state cannot be read."""
     try:
         log.info("Getting billing info for %s...", project_name)
         return _client().get_project_billing_info(name=project_name).billing_enabled
-    except Exception as error:  # noqa: BLE001 - the sample's behaviour: act rather than stall
-        log.warning("Error getting billing info: %s; assuming billing is enabled.", error)
-        return True
+    except Exception as error:  # noqa: BLE001 - reported; the caller decides
+        log.error("Error getting billing info for %s: %s", project_name, error)
+        return None
 
 
 def _disable_billing_for_project(project_name: str, simulate: bool) -> None:

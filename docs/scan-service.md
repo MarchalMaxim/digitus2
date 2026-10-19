@@ -31,19 +31,19 @@ The client chooses the job id so that **Cancel scan** can name a job whose answe
 
 ## Limits and boundaries
 
-| Limit                         | Value                                                                                                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Recognitions at once          | 1 per instance, and at most 1 instance                                                                                                                                |
-| Recognitions per caller       | 30 in a rolling hour, kept in memory and reset when the instance stops                                                                                                |
-| Caller                        | The last address in `X-Forwarded-For`, the one Google's front end appends (a client can forge the earlier ones), or the socket address                                |
-| Upload                        | 10 MiB, checked for size, type and leading bytes before the job starts                                                                                                |
-| Result                        | 20 MiB of MusicXML                                                                                                                                                    |
-| Recognition time              | 180 s, then 504                                                                                                                                                       |
-| Thread budget                 | homr's ONNX Runtime and OpenCV use as many threads as the container's CPU quota (4 on Cloud Run), not the host's cores; `DIGITUS2_OMR_THREADS` or `--threads` sets it |
-| Image size                    | homr refuses images over 25 megapixels                                                                                                                                |
-| What is kept after the answer | Nothing: each job has its own temporary directory, deleted before the answer is sent; no job list, no result, no copy of the page                                     |
-| Log                           | One JSON line per job on standard output: file kind, bytes in, bytes out, seconds, outcome. No content, no file name, no address                                      |
-| Network during a job          | homr runs with Python's socket functions disabled by the adapter; the Audiveris JVM is not restricted; no network-level isolation is built                            |
+| Limit                         | Value                                                                                                                                                                                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Recognitions at once          | 1 per instance, and at most 1 instance                                                                                                                                                                               |
+| Recognitions per caller       | 30 in a rolling hour, kept in memory and reset when the instance stops                                                                                                                                               |
+| Caller                        | The last address in `X-Forwarded-For`, the one Google's front end appends (a client can forge the earlier ones), or the socket address                                                                               |
+| Upload                        | 10 MiB, checked for size, type and leading bytes before the job starts                                                                                                                                               |
+| Result                        | 20 MiB of MusicXML                                                                                                                                                                                                   |
+| Recognition time              | 180 s, then 504                                                                                                                                                                                                      |
+| Thread budget                 | homr's ONNX Runtime and OpenCV use as many threads as the container's CPU quota (4 at `--cpus 4`), not the host's cores (the libraries' own defaults without a quota); `DIGITUS2_OMR_THREADS` or `--threads` sets it |
+| Image size                    | homr refuses images over 25 megapixels                                                                                                                                                                               |
+| What is kept after the answer | Nothing: each job has its own temporary directory, deleted before the answer is sent; no job list, no result, no copy of the page                                                                                    |
+| Log                           | One JSON line per job on standard output: file kind, bytes in, bytes out, seconds, outcome. No content, no file name, no address                                                                                     |
+| Network during a job          | homr runs with Python's socket functions disabled by the adapter; the Audiveris JVM is not restricted; no network-level isolation is built                                                                           |
 
 Cloud Run writes its own request log for the service in Cloud Logging, as for every Cloud Run service; that log is Google's, not the service's ([Cloud Run logging](https://cloud.google.com/run/docs/logging)).
 

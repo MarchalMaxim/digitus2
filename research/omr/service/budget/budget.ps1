@@ -68,6 +68,13 @@ Invoke-Checked 'Deploying the function' {
     --service-account $Account --project $Project --quiet
 }
 
+# The Pub/Sub trigger calls the function as the same account; without this binding every call is
+# refused as unauthenticated and the kill-switch never runs.
+Invoke-Checked 'Letting the trigger invoke the function' {
+  gcloud run services add-iam-policy-binding $Function --region $Region --project $Project `
+    --member "serviceAccount:$Account" --role roles/run.invoker --quiet
+}
+
 # As Google's guide does: the function's service account becomes Billing Account Administrator.
 $FunctionAccount = (& gcloud functions describe $Function --region $Region --project $Project --format 'value(serviceConfig.serviceAccountEmail)')
 if ($LASTEXITCODE -ne 0 -or -not $FunctionAccount) { throw "Reading the function's service account failed" }

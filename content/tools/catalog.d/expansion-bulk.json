@@ -2892,7 +2892,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (98 seconds, 770 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (98 seconds, 770 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 4 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -2932,7 +2932,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (81 seconds, 697 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (81 seconds, 697 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 10 slice(s) that no hand can strike as written and 10 (medium) and 10 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -2972,7 +2972,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (120 seconds, 784 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (120 seconds, 784 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 10 slice(s) that no hand can strike as written and 12 (medium) and 10 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3012,7 +3012,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (105 seconds, 932 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (105 seconds, 932 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 8 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3052,7 +3052,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (70 seconds, 648 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (70 seconds, 648 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 8 slice(s) that no hand can strike as written and 9 (medium) and 8 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3092,7 +3092,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (124 seconds, 1070 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (124 seconds, 1070 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3132,7 +3132,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (117 seconds, 992 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (117 seconds, 992 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 0 slice(s) that no hand can strike as written and 1 (medium) and 0 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3174,7 +3174,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-wtc",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (116 seconds, 701 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (116 seconds, 701 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 3 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3214,7 +3214,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (102 seconds, 847 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (102 seconds, 847 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 7 slice(s) that no hand can strike as written and 15 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3254,7 +3254,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set, a whole piece (72 seconds, 567 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set (72 seconds, 567 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3294,7 +3294,7 @@
       "year": null,
       "level": 6,
       "collection": "bach-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set, a whole piece (61 seconds, 663 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set (61 seconds, 663 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 6 (medium) and 2 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3334,7 +3334,7 @@
       "year": null,
       "level": 6,
       "collection": "beethoven-originals",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (225 seconds, 1924 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita (225 seconds, 1924 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 5 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3374,7 +3374,7 @@
       "year": null,
       "level": 6,
       "collection": "beethoven-originals",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (164 seconds, 631 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita (164 seconds, 631 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 4 (medium) and 4 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3416,7 +3416,7 @@
       "year": null,
       "level": 6,
       "collection": "character-pieces",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (261 seconds, 1720 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (261 seconds, 1720 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 15 slice(s) that no hand can strike as written and 45 (medium) and 44 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3455,7 +3455,7 @@
       "year": null,
       "level": 6,
       "collection": "character-pieces",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (68 seconds, 726 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (68 seconds, 726 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 10 slice(s) that no hand can strike as written and 12 (medium) and 12 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3496,7 +3496,7 @@
       "year": null,
       "level": 6,
       "collection": "chopin-op28",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (70 seconds, 1263 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (70 seconds, 1263 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 22 (medium) and 22 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3535,7 +3535,7 @@
       "year": null,
       "level": 6,
       "collection": "chopin-op28",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (160 seconds, 1237 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (160 seconds, 1237 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 6 (medium) and 6 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3575,7 +3575,7 @@
       "year": null,
       "level": 6,
       "collection": "chopin-op28",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (93 seconds, 673 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (93 seconds, 673 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 24 (medium) and 24 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3617,7 +3617,7 @@
       "year": null,
       "level": 6,
       "collection": "classical-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (129 seconds, 660 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita (129 seconds, 660 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 9 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3657,7 +3657,7 @@
       "year": null,
       "level": 6,
       "collection": "classical-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (152 seconds, 1216 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita (152 seconds, 1216 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3699,7 +3699,7 @@
       "year": null,
       "level": 6,
       "collection": "character-pieces",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (104 seconds, 513 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (104 seconds, 513 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 4 slice(s) that no hand can strike as written and 7 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3739,7 +3739,7 @@
       "year": null,
       "level": 6,
       "collection": "classical-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (144 seconds, 1042 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (144 seconds, 1042 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 8 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3779,7 +3779,7 @@
       "year": null,
       "level": 6,
       "collection": "classical-keyboard",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (118 seconds, 665 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (118 seconds, 665 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 0 slice(s) that no hand can strike as written and 7 (medium) and 0 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3819,7 +3819,7 @@
       "year": null,
       "level": 6,
       "collection": "ragtime",
-      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a classic rag, a whole piece (90 seconds, 1265 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a classic rag (90 seconds, 1265 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 2 (medium) and 2 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
@@ -3839,6 +3839,366 @@
         "lint": {
           "medium": 2,
           "large": 2
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
+      "ftpDir": "BachJS/BWV1006a/bwv-1006a_4",
+      "main": "bwv-1006a_4.ly",
+      "sourceSha256": "0cbdef66785f81c7a507fd6bdd32be9a174c8cb0d2bd81ad2117d99ffabc7056",
+      "title": "BWV 1006a - Menuet I",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bwv-1006a_4.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita (76 seconds, 247 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 1,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
+      "ftpDir": "BachJS/BWV1006a/bwv-1006a_5",
+      "main": "bwv-1006a_5.ly",
+      "sourceSha256": "42dd45e704039078e15ba074ae6e79f9e92e922f27101c105f7341abb0bb359d",
+      "title": "BWV 1006a - Menuet II",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bwv-1006a_5.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita (72 seconds, 255 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 7 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 5,
+        "lint": {
+          "medium": 7,
+          "large": 5
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v04",
+      "main": "bwv-988-v04.ly",
+      "sourceSha256": "fd38ccd26679e13280fd0cf8cfb0caa3a7ec3b2c5eba45667bd24124609c8d42",
+      "title": "Goldberg Variations - 4",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bwv-988-v04.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set (38 seconds, 300 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 4 (medium) and 4 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 4,
+          "large": 4
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v06",
+      "main": "bwv-988-v06.ly",
+      "sourceSha256": "f4f8c9fa39952435412fca97f89dffb7144b75cdaf140c2432b27f5b090c2659",
+      "title": "Goldberg Variations - 6",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bwv-988-v06.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set (40 seconds, 397 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 6 slice(s) that no hand can strike as written and 6 (medium) and 6 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 6,
+        "lint": {
+          "medium": 6,
+          "large": 6
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v30",
+      "main": "bwv-988-v30.ly",
+      "sourceSha256": "2a3191ca67c54cf73b20f0d2d58e4093e8bd0e0f58b0c1f224d9cdb29562b9f3",
+      "title": "Goldberg Variations - 30",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bwv-988-v30.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set (48 seconds, 400 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 6 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 5,
+        "lint": {
+          "medium": 6,
+          "large": 5
+        }
+      }
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-11",
+      "main": "Chop-28-11.ly",
+      "sourceSha256": "ce806cb4b63ce77e0b136e4b6ad333cc26fa3cdaf0e0b4cef1b000aa030d050b",
+      "title": "Prélude 11",
+      "tempoBpm": 150.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "Chop-28-11.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Frédéric Chopin",
+      "composerDates": null,
+      "catalogue": "Op 28, No 11",
+      "year": null,
+      "level": 6,
+      "collection": "chopin-op28",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (32 seconds, 322 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 3 slice(s) that no hand can strike as written and 6 (medium) and 6 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 3,
+        "lint": {
+          "medium": 6,
+          "large": 6
+        }
+      }
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-14",
+      "main": "Chop-28-14.ly",
+      "sourceSha256": "be03db643c7191cd44d20891ea03993887b56f41cfed2cad4925d764098c7b92",
+      "title": "Prélude 14",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "Chop-28-14.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Frédéric Chopin",
+      "composerDates": null,
+      "catalogue": "Op 28, No 14",
+      "year": null,
+      "level": 6,
+      "collection": "chopin-op28",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (57 seconds, 434 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 1,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
+      "ftpDir": "LisztF/S.172/liszt-consolation-no1",
+      "main": "liszt-consolation-no1.ly",
+      "sourceSha256": "731440571b3fabc86f8056a056ab211b5b50471899d38e4ba8fb0d909b46977c",
+      "title": "Consolation, S.172 No.1",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "liszt-consolation-no1.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Franz Liszt",
+      "composerDates": null,
+      "catalogue": "S.172",
+      "year": null,
+      "level": 6,
+      "collection": "character-pieces",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation) (74 seconds, 283 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 0 slice(s) that no hand can strike as written and 1 (medium) and 0 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 0,
+        "lint": {
+          "medium": 1,
+          "large": 0
+        }
+      }
+    },
+    {
+      "slug": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
+      "ftpDir": "MozartWA/Anh41/k375g",
+      "main": "k375g.ly",
+      "subdir": "k375g-lys",
+      "sourceSha256": "37ab217c705a7d96c52a565c0f527fc67f73a80d657c5cb80b53e02f70b89096",
+      "title": "Fugue fragment Anh. 41 (375g)",
+      "tempoBpm": 110.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "k375g.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Wolfgang Amadeus Mozart",
+      "composerDates": null,
+      "catalogue": "Anh. 41 (375g)",
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire (57 seconds, 352 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 3 slice(s) that no hand can strike as written and 6 (medium) and 3 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 3,
+        "lint": {
+          "medium": 6,
+          "large": 3
         }
       }
     }
@@ -6167,30 +6527,6 @@
       "reason": "Independent source/render comparison confirms overlapping, mispaired hairpins in measure 4. Polyphonic MusicXML serializes wedge stops before starts; Verovio warns that a hairpin is ignored because its start is not temporally before its end. Preserve the original rather than silently omit or distort the expression."
     },
     {
-      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
-      "ftpDir": "BachJS/BWV1006a/bwv-1006a_4",
-      "sourceSha256": "0cbdef66785f81c7a507fd6bdd32be9a174c8cb0d2bd81ad2117d99ffabc7056",
-      "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 247 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole piece by the archive rule (76 s, 247 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
-      "ftpDir": "BachJS/BWV1006a/bwv-1006a_5",
-      "sourceSha256": "42dd45e704039078e15ba074ae6e79f9e92e922f27101c105f7341abb0bb359d",
-      "reason": "5 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 255 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole piece by the archive rule (72 s, 255 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v04",
-      "sourceSha256": "fd38ccd26679e13280fd0cf8cfb0caa3a7ec3b2c5eba45667bd24124609c8d42",
-      "reason": "1 slice(s) no hand can strike and 4 (medium) and 4 (large) lint law errors in 300 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piece by the archive rule (38 s, 300 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v06",
-      "sourceSha256": "f4f8c9fa39952435412fca97f89dffb7144b75cdaf140c2432b27f5b090c2659",
-      "reason": "6 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 397 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piece by the archive rule (40 s, 397 notes; at least 60 s and 300 notes)"
-    },
-    {
       "slug": "bulk-bachjs-bwv988-bwv-988-v15-bwv-988-v15-ly",
       "ftpDir": "BachJS/BWV988/bwv-988-v15",
       "sourceSha256": "8cd35a7871ae08ffdecf4553357e9da2104077e369d42fea9aa9887eb04e298d",
@@ -6206,7 +6542,7 @@
       "slug": "bulk-bachjs-bwv988-bwv-988-v22-bwv-988-v22-ly",
       "ftpDir": "BachJS/BWV988/bwv-988-v22",
       "sourceSha256": "d328cd81bbfba3e5881332c3546bd832caccf1259f6756e71e66a662d708a0fb",
-      "reason": "2 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 318 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: the source's tempo word \"Alla breve\" is a rehearsal mark, which the converter drops (#49); not a whole piece by the archive rule (43 s, 318 notes; at least 60 s and 300 notes)"
+      "reason": "2 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 318 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: the source's tempo word \"Alla breve\" is a rehearsal mark, which the converter drops (#49)"
     },
     {
       "slug": "bulk-bachjs-bwv988-bwv-988-v24-bwv-988-v24-ly",
@@ -6215,40 +6551,10 @@
       "reason": "23 slice(s) no hand can strike and 28 (medium) and 23 (large) lint law errors in 638 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the relaxed ceiling (43.9 law errors and 36.1 slices per 1,000 notes; at most 40 and 20)"
     },
     {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v30",
-      "sourceSha256": "2a3191ca67c54cf73b20f0d2d58e4093e8bd0e0f58b0c1f224d9cdb29562b9f3",
-      "reason": "5 slice(s) no hand can strike and 6 (medium) and 5 (large) lint law errors in 400 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piece by the archive rule (48 s, 400 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-11",
-      "sourceSha256": "ce806cb4b63ce77e0b136e4b6ad333cc26fa3cdaf0e0b4cef1b000aa030d050b",
-      "reason": "3 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 322 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole piece by the archive rule (32 s, 322 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-14",
-      "sourceSha256": "be03db643c7191cd44d20891ea03993887b56f41cfed2cad4925d764098c7b92",
-      "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 434 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole piece by the archive rule (57 s, 434 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
-      "ftpDir": "LisztF/S.172/liszt-consolation-no1",
-      "sourceSha256": "731440571b3fabc86f8056a056ab211b5b50471899d38e4ba8fb0d909b46977c",
-      "reason": "0 slice(s) no hand can strike and 1 (medium) and 0 (large) lint law errors in 283 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole piece by the archive rule (74 s, 283 notes; at least 60 s and 300 notes)"
-    },
-    {
-      "slug": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
-      "ftpDir": "MozartWA/Anh41/k375g",
-      "sourceSha256": "37ab217c705a7d96c52a565c0f527fc67f73a80d657c5cb80b53e02f70b89096",
-      "reason": "3 slice(s) no hand can strike and 6 (medium) and 3 (large) lint law errors in 352 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (prelude-fugue), held: not a whole piece by the archive rule (57 s, 352 notes; at least 60 s and 300 notes)"
-    },
-    {
       "slug": "bulk-mozartwa-kv331-kv331-1-5-var4-kv331-1-5-var4-ly",
       "ftpDir": "MozartWA/KV331/KV331_1_5_var4",
       "sourceSha256": "c335d5c13c0add480bfb3827393a447b79add0698532ab3ea266c95cba38f2e1",
-      "reason": "54 slice(s) no hand can strike and 131 (medium) and 128 (large) lint law errors in 485 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the relaxed ceiling (270.1 law errors and 111.3 slices per 1,000 notes; at most 40 and 20); not a whole piece by the archive rule (43 s, 485 notes; at least 60 s and 300 notes)"
+      "reason": "54 slice(s) no hand can strike and 131 (medium) and 128 (large) lint law errors in 485 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the relaxed ceiling (270.1 law errors and 111.3 slices per 1,000 notes; at most 40 and 20)"
     },
     {
       "slug": "bulk-rachmaninoffs-o23-rach-prelude23-10-rach-prelude23-10-ly",
@@ -6266,7 +6572,7 @@
       "slug": "bulk-scriabina-o16-scriabine-op16-no5-scriabine-op16-no5-ly",
       "ftpDir": "ScriabinA/O16/scriabine-op16-no5",
       "sourceSha256": "76df67aea357730ba748e0924c5d7f73c2237204f97f8dec1f55ae4e4c220391",
-      "reason": "3 slice(s) no hand can strike and 23 (medium) and 11 (large) lint law errors in 251 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: beyond the relaxed ceiling (91.6 law errors and 12.0 slices per 1,000 notes; at most 40 and 20); not a whole piece by the archive rule (34 s, 251 notes; at least 60 s and 300 notes)"
+      "reason": "3 slice(s) no hand can strike and 23 (medium) and 11 (large) lint law errors in 251 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: beyond the relaxed ceiling (91.6 law errors and 12.0 slices per 1,000 notes; at most 40 and 20)"
     }
   ]
 }

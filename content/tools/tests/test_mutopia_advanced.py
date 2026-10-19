@@ -9,7 +9,6 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOLS))
 import mutopia_advanced as M  # noqa: E402
-import pdmx_advanced  # noqa: E402
 
 BULK = json.loads((TOOLS / "catalog.d/expansion-bulk.json").read_text(encoding="utf-8"))
 SHIPPED = {p["slug"]: p for p in BULK["pieces"]}
@@ -47,14 +46,9 @@ def test_a_concert_edition_still_held_says_why():
         assert "Mutopia rule" in reason or not only_span_or_lint(reason), (slug, reason)
 
 
-def test_problems_name_each_broken_condition():
-    slug = next(iter(M.CONCERT))
-    flags = {"spans": 1, "lint": {"medium": 2, "large": 2}}
-    assert M.problems(slug, flags, 1000, 120.0) == []
-    assert any("concert list" in p for p in M.problems("bulk-not-on-the-list", flags, 1000, 120.0))
-    assert any("whole piece" in p for p in M.problems(slug, flags, pdmx_advanced.MIN_NOTES - 1, 120.0))
-    assert any("whole piece" in p for p in M.problems(slug, flags, 1000, pdmx_advanced.MIN_SECONDS - 1))
-    assert any("whole piece" in p for p in M.problems(slug, flags, 1000, None))
+def test_problems_name_a_piece_outside_the_concert_list():
+    assert M.problems(next(iter(M.CONCERT))) == []
+    assert any("concert list" in p for p in M.problems("bulk-not-on-the-list"))
 
 
 def test_level_note_claims_no_syllabus_placement():

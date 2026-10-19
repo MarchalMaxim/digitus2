@@ -48,8 +48,7 @@ def test_new_piece_passes_every_gate(entry):
         assert pdmx_advanced.relaxed_sentence(relaxed) in cat["notes"]
         if cat["source"] == "mutopia":
             assert v["midiChecks"]["mutopiaMidi"]["exact"] is True
-            seconds = v["levelProposal"]["features"]["seconds"]
-            assert mutopia_advanced.problems(slug, relaxed, st["notes"], seconds) == []
+            assert mutopia_advanced.problems(slug) == []
     score = CONTENT / entry["files"]["score"]
     assert v["lint"]["scoreSha256"] == hashlib.sha256(score.read_bytes()).hexdigest(), "stale lint: run gates.py"
     for f in filter(None, entry["files"].values()):
@@ -285,14 +284,12 @@ def test_verdict_relaxed_mutopia_piece_keeps_the_mutopia_rule(tmp_path, monkeypa
     _relaxed(case)
     assert any("concert list" in p for p in _problems(case))  # CREDITED is not on mutopia_advanced.CONCERT
     monkeypatch.setitem(mutopia_advanced.CONCERT, CREDITED["slug"], "sonata-suite")
-    case = _case(tmp_path / "short", CREDITED)
+    case = _case(tmp_path / "short", CREDITED)  # a short complete work keeps the rule (no whole-piece test)
     _relaxed(case)
-    case[1]["levelProposal"]["features"]["seconds"] = 45.0
-    assert any("whole piece" in p for p in _problems(case))
-    case = _case(tmp_path / "few", CREDITED)
-    _relaxed(case, lint=0)
+    case[1]["levelProposal"]["features"]["seconds"] = 32.0
     case[1]["stats"]["notes"] = 250
-    assert any("whole piece" in p for p in _problems(case))
+    case[2]["relaxedGates"] = {"spans": 0, "lint": {"medium": 2, "large": 2}}
+    assert _problems(case) == []
 
 
 def test_selection():

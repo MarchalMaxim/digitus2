@@ -133,7 +133,7 @@ class Homr:
                 env.pop(key,None)
         env.update(HOME=str(destination/"home"),USERPROFILE=str(destination/"home"),
                    APPDATA=str(destination/"roaming"),LOCALAPPDATA=str(destination/"local"),
-                   TEMP=str(destination/"tmp"),TMP=str(destination/"tmp"),OMP_NUM_THREADS="4")
+                   TEMP=str(destination/"tmp"),TMP=str(destination/"tmp"),TMPDIR=str(destination/"tmp"),OMP_NUM_THREADS="4")
         command=[str(self.python),"-I","-B","-c",BOOTSTRAP,str(self.source),str(local_input)]
         (destination/"invocation.json").write_text(json.dumps({
             "command":command,"profile":self.name,"commit":COMMIT,

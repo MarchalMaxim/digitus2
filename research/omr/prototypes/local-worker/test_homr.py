@@ -77,6 +77,7 @@ def test_original_input_isolation_and_per_job_audits(prepared,tmp_path,monkeypat
     assert "PYTHONPATH" not in captured["env"] and "PYTHONHOME" not in captured["env"]
     for key in ["HOME","USERPROFILE","APPDATA","LOCALAPPDATA","TEMP","TMP"]:
         assert Path(captured["env"][key]).is_relative_to(job)
+    assert captured["env"]["TMPDIR"]==captured["env"]["TEMP"]
     metadata=adapter.metadata_for(source,job)
     assert metadata["omittedStaffRegions"]==1 and metadata["maskedStaffRegions"]==1
     assert metadata["recognizer"]==adapter.name

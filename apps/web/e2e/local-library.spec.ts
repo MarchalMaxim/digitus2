@@ -1,9 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openFiles } from './helpers/scan.js';
+import { blockService, mockService, openFiles, recordService } from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 
-// My scores holds recognitions made on a PC (a phone cannot reach the PC worker): these flows
-// run as a PC window, at 360 px in the mobile project.
+// These flows run as a PC window (mouse, no camera), also at 360 px in the mobile project.
 test.use({ hasTouch: false, isMobile: false });
 
 const png = Buffer.from(
@@ -18,11 +17,9 @@ async function myScores(page: Page) {
 test('local library: draft bytes, reading order, explicit resume and deletion survive reload', async ({
   page,
 }) => {
-  let connections = 0;
-  await page.route('http://127.0.0.1:8996/**', (route) => {
-    connections++;
-    return route.abort();
-  });
+  // Arriving on the scan page warms the scanner up; nothing is recognized without Scan.
+  const calls = recordService(page);
+  await mockService(page, '');
   await page.goto('/');
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
   await page.getByLabel('Open your own score').setInputFiles([
@@ -48,7 +45,7 @@ test('local library: draft bytes, reading order, explicit resume and deletion su
       source,
     ),
   ).toEqual([...png]);
-  expect(connections).toBe(0);
+  expect(calls.filter((call) => call.startsWith('POST'))).toEqual([]);
   await myScores(page);
   await page.getByRole('button', { name: 'Remove saved first.png' }).click();
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
@@ -56,36 +53,24 @@ test('local library: draft bytes, reading order, explicit resume and deletion su
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
 });
 
-test('local library: recognized notation reopens without reconnecting or rescanning', async ({
-  page,
-}) => {
-  let requests = 0;
+test('local library: recognized notation reopens without rescanning', async ({ page }) => {
+  const calls = recordService(page);
   const xml = libraryScore('twinkle-twinkle-little-star');
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    requests++;
-    const request = route.request();
-    if (request.url().endsWith('/health'))
-      await route.fulfill({ json: { protocol: 'digitus2-scan-v1', recognizer: 'test' } });
-    else if (request.method() === 'POST')
-      await route.fulfill({ status: 202, json: { id: 'a'.repeat(32) } });
-    else if (request.url().endsWith('/result')) await route.fulfill({ body: xml });
-    else await route.fulfill({ json: { state: 'ready' } });
-  });
+  await mockService(page, xml.toString('utf8'));
   await page.goto('/');
   await page
     .locator('input[type=file]')
     .setInputFiles({ name: 'remember.png', mimeType: 'image/png', buffer: png });
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
   await myScores(page);
   await page.reload();
   await page.getByText('My scores', { exact: true }).click();
-  const before = requests;
+  const before = calls.length;
   await page.getByRole('button', { name: 'Open saved remember.png' }).click();
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
-  expect(requests).toBe(before);
+  expect(calls).toHaveLength(before);
   const download = page.waitForEvent('download');
   await openFiles(page);
   await page.getByRole('button', { name: 'Download raw MusicXML' }).click();
@@ -144,6 +129,7 @@ test('local library: uploaded MusicXML survives refresh and duplicate uploads st
 test('local library: orientation and unchanged original bytes survive refresh', async ({
   page,
 }) => {
+  await blockService(page);
   await page.goto('/');
   const original = Buffer.from(
     await page.evaluate(() => {

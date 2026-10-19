@@ -11,33 +11,24 @@ export const scan = {
     pageImages: (n: number) => plural('en', n, { one: '# page image', other: '# page images' }),
     advice:
       'Original PDFs and flat, high-resolution scans work best. Book photos can fail, even when well lit. Results open beside the original for review.',
-    /** The "PC worker" is a small program the reader runs on their own computer to recognise scores. */
-    workerNeeded: 'Scanning needs the PC worker running on this computer.',
-    connect: 'Connect to this PC',
-    connecting: 'Connecting…',
+    where:
+      'Recognition runs on the project’s scanner on Google Cloud (Netherlands). Your page is sent there, recognized and then deleted.',
     cancelScan: 'Cancel scan',
     cancelling: 'Cancelling…',
     retryFailed: 'Retry failed pages',
     scanScore: 'Scan this score',
-    scanning: 'Recognizing on this PC… Usually a few seconds; longer pages can take a few minutes.',
+    scanning:
+      'Recognizing… Usually under a minute. The first scan after a quiet spell takes longer while the scanner starts.',
     scanningPage: (page: number, total: number) =>
-      `Page ${page} of ${total} · Recognizing on this PC… Usually a few seconds; longer pages can take a few minutes.`,
-    connected: 'PC connected.',
-    textModelMissing:
-      'English text recognition is not configured. Musical text may be missing. See setup below.',
+      `Page ${page} of ${total} · Recognizing… Usually under a minute. The first scan after a quiet spell takes longer while the scanner starts.`,
+    textModelMissing: 'English text recognition is not configured. Musical text may be missing.',
+    /** The link to how scanning works, under the scan button. */
+    help: 'How scanning works',
     original: 'Original',
     openPdf: 'Open original PDF',
     openImage: 'Open original image',
     preparingPdf: 'Preparing original PDF…',
     originalAlt: 'Original printed score',
-  },
-  setup: {
-    summary: 'Set up the PC worker',
-    install:
-      'On the PC running this browser, open the digitus2 project folder. Install the photo and PDF recognizers once, then start the worker when you need it.',
-    keepOpen:
-      'Keep that terminal open. Allow the browser’s local connection after pressing Connect. To stop processing, close the worker.',
-    help: 'Setup and troubleshooting',
   },
   review: {
     caveat:
@@ -71,7 +62,7 @@ export const scan = {
     /** Shown when several scanned pages are joined into one score. */
     graphicSpanWarning:
       'Slurs and other notation spans are kept within each scanned page. Compare continuations at page edges; missing endpoints have not been repaired.',
-    /** The worker found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'The staves were not paired into a grand staff, so both hands are read as one. Use for fingerings would give wrong hands: try a flatter, evenly lit photo or the original PDF.',
     unknownWarning: 'The recognizer reported an unknown warning. Check the original carefully.',
@@ -210,18 +201,10 @@ export const scan = {
       sameMeter: (meter: string) => `The bar is already in ${meter}.`,
     },
   },
-  /** On a phone or tablet, which cannot reach the PC worker. */
+  /** The camera entry on a phone or tablet. */
   phone: {
     takePhoto: 'Take a photo',
     takeAnother: 'Take another photo',
-    explain:
-      'Recognition runs on a PC, and a phone cannot reach it. Send these photos to your PC, then open them there to scan.',
-    share: 'Send photos to your PC',
-    save: 'Save photos',
-    shareTitle: 'Score photos',
-    shared: 'Photos handed over. Open them on your PC with “Open your own score”.',
-    saved:
-      'Photos saved to this device. Move them to your PC, then open them with “Open your own score”.',
   },
   errors: {
     notCombinedSaved:
@@ -233,12 +216,12 @@ export const scan = {
     noNotes: 'No playable notes were recognized.',
     notUsable:
       'This recognition cannot be used for fingerings yet: some of its notes do not fit together.',
-    connectFailed:
-      'Could not connect to this PC. Start the worker, then allow this site’s local connection when your browser asks. If you denied it, change this site’s local-network permission and try again.',
-    cancelFailed: 'Could not confirm cancellation. Close the worker terminal to stop processing.',
+    offline: 'Could not reach the scanner. Check your connection and try again.',
+    cancelFailed:
+      'Cancellation could not be confirmed. The scanner stops by itself within three minutes.',
     timedOut: 'Recognition timed out. Try a smaller, clearer page.',
     notRecognized:
-      'The PC could not recognize a complete score from this page. Try the original PDF or a flatter, higher-resolution image.',
+      'The scanner could not recognize a complete score from this page. Try the original PDF or a flatter, higher-resolution image.',
   },
   pager: {
     previous: 'Previous',
@@ -303,12 +286,13 @@ export const scan = {
       'The rotated image exceeds 10 MB. Choose a smaller image. Your current image is unchanged.',
   },
   client: {
-    busy: 'The PC is already scanning. Try again shortly.',
-    workerStatus: (status: number) =>
-      `The PC worker could not answer (error ${status}). Restart it and try again.`,
+    busy: 'The scanner is busy with another score. Try again in a minute.',
+    limited: 'You have scanned a lot in the past hour. Try again later.',
+    serviceStatus: (status: number) =>
+      `The scanner could not answer (error ${status}). Try again later.`,
+    noAnswer: 'The scanner could not answer. Try again later.',
+    noResult: 'The scanner returned no score.',
     invalidJob: 'Invalid scan job.',
-    updateWorker: 'Update the PC worker to continue.',
-    noJob: 'The worker did not return a scan job.',
   },
   join: {
     /** `reason` is a short explanation from the list below. */

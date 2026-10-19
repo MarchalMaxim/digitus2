@@ -19,8 +19,8 @@ def prepared(tmp_path,monkeypatch):
     (source/"homr").mkdir(parents=True)
     (source/"homr/main.py").write_bytes(b"pass\n")
     (source/"homr/model.onnx").write_bytes(b"pinned-model")
-    (bundle/"venv/Scripts").mkdir(parents=True)
-    (bundle/"venv/Scripts/python.exe").write_bytes(b"test-launcher")
+    homr.venv_python(bundle).parent.mkdir(parents=True)
+    homr.venv_python(bundle).write_bytes(b"test-launcher")
     requirements=tmp_path/"requirements.txt"
     requirements.write_text("onnxruntime==1.0\n")
     (bundle/"installed.txt").write_text("onnxruntime==1.0\n")
@@ -30,6 +30,10 @@ def prepared(tmp_path,monkeypatch):
     monkeypatch.setattr(homr,"REQUIREMENTS_PATH",requirements)
     monkeypatch.setattr(homr,"MODELS",{"homr/model.onnx":digest(b"pinned-model")})
     return bundle,source
+
+def test_interpreter_path_follows_the_platform():
+    assert homr.venv_python(Path("t"), "nt") == Path("t/venv/Scripts/python.exe")
+    assert homr.venv_python(Path("t"), "posix") == Path("t/venv/bin/python")
 
 def test_preflight_rejects_missing_or_changed_model(prepared):
     bundle,source=prepared
@@ -73,6 +77,7 @@ def test_original_input_isolation_and_per_job_audits(prepared,tmp_path,monkeypat
     assert "PYTHONPATH" not in captured["env"] and "PYTHONHOME" not in captured["env"]
     for key in ["HOME","USERPROFILE","APPDATA","LOCALAPPDATA","TEMP","TMP"]:
         assert Path(captured["env"][key]).is_relative_to(job)
+    assert captured["env"]["TMPDIR"]==captured["env"]["TEMP"]
     metadata=adapter.metadata_for(source,job)
     assert metadata["omittedStaffRegions"]==1 and metadata["maskedStaffRegions"]==1
     assert metadata["recognizer"]==adapter.name
@@ -150,3 +155,59 @@ def test_metadata_available_before_a_job_directory_exists(prepared,tmp_path):
     metadata=adapter.metadata_for(tmp_path/"input.png")
     assert metadata["recognizer"]==adapter.name
     assert metadata["capabilities"]["keySignatureMayBeInferred"] is True
+
+def run_captured(prepared,tmp_path,monkeypatch):
+    bundle,_=prepared
+    adapter=homr.Homr(bundle)
+    job=tmp_path/"job";job.mkdir()
+    source=job/"input.png";source.write_bytes(b"source")
+    captured={}
+    def run(command,directory,env,cancelled,timeout,log):
+        captured.update(command=command,env=env)
+        raise TimeoutError("stop after launch")
+    monkeypatch.setattr(homr,"run_process",run)
+    with pytest.raises(TimeoutError):
+        adapter(source,job,threading.Event())
+    return captured
+
+def test_thread_budget_reaches_the_child_when_set(prepared,tmp_path,monkeypatch):
+    monkeypatch.setenv("DIGITUS2_OMR_THREADS","4")
+    captured=run_captured(prepared,tmp_path,monkeypatch)
+    assert captured["env"]["DIGITUS2_OMR_THREADS"]=="4"
+    assert captured["command"][-1]==str(Path(homr.__file__).resolve().parent)
+    assert captured["command"][-2].endswith("recognize.png")
+
+def test_no_thread_budget_leaves_the_child_unchanged(prepared,tmp_path,monkeypatch):
+    monkeypatch.delenv("DIGITUS2_OMR_THREADS",raising=False)
+    captured=run_captured(prepared,tmp_path,monkeypatch)
+    assert "DIGITUS2_OMR_THREADS" not in captured["env"]
+    assert len(captured["command"])==7
+    assert captured["command"][-1].endswith("recognize.png")
+
+def test_bootstrap_applies_the_thread_budget():
+    assert "thread_budget" in homr.BOOTSTRAP
+    assert homr.BOOTSTRAP.index("thread_budget")<homr.BOOTSTRAP.index("from homr.main import main")
+
+def test_bootstrap_patches_onnxruntime_before_vendor_entry(tmp_path,pillow_python):
+    package=tmp_path/"homr";package.mkdir()
+    (package/"__init__.py").write_text("")
+    (package/"main.py").write_text(
+        'import onnxruntime as ort\n'
+        'def main():\n'
+        '    session=ort.InferenceSession("model.onnx")\n'
+        '    print("threads",session.sess_options.intra_op_num_threads,session.sess_options.inter_op_num_threads)\n')
+    fake=tmp_path/"onnxruntime";fake.mkdir()
+    (fake/"__init__.py").write_text(
+        'class SessionOptions:\n'
+        '    intra_op_num_threads=0\n'
+        '    inter_op_num_threads=0\n'
+        'class InferenceSession:\n'
+        '    def __init__(self,path,sess_options=None,providers=None,**kwargs):\n'
+        '        self.sess_options=sess_options\n')
+    image=tmp_path/"input.png";write_png(image)
+    adapter_dir=str(Path(homr.__file__).resolve().parent)
+    env={**os.environ,"DIGITUS2_OMR_THREADS":"3"}
+    result=subprocess.run([pillow_python,"-I","-B","-c",homr.BOOTSTRAP,str(tmp_path),str(image),adapter_dir],
+                          capture_output=True,text=True,timeout=30,env=env)
+    assert result.returncode==0,result.stderr
+    assert "threads 3 1" in result.stdout

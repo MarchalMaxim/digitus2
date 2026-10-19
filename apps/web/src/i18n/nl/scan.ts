@@ -11,33 +11,24 @@ export const scan: Messages['scan'] = {
       plural('nl', n, { one: '# pagina-afbeelding', other: '# pagina-afbeeldingen' }),
     advice:
       'Originele pdf’s en vlakke scans in hoge resolutie werken het best. Foto’s van boeken kunnen mislukken, ook bij goed licht. Het resultaat opent naast het origineel, zodat je het kunt controleren.',
-    workerNeeded: 'Scannen vraagt het pc-programma, draaiend op deze computer.',
-    connect: 'Verbinden met deze pc',
-    connecting: 'Verbinden…',
+    where:
+      'De herkenning draait op de scanner van het project, in Google Cloud (Nederland). Je pagina wordt daarheen gestuurd, herkend en daarna verwijderd.',
     cancelScan: 'Scan annuleren',
     cancelling: 'Annuleren…',
     retryFailed: 'Mislukte pagina’s opnieuw proberen',
     scanScore: 'Deze partituur scannen',
     scanning:
-      'Bezig met herkennen op deze pc… Meestal een paar seconden; langere pagina’s kunnen enkele minuten duren.',
+      'Bezig met herkennen… Meestal binnen een minuut. De eerste scan na een rustige periode duurt langer, omdat de scanner dan moet opstarten.',
     scanningPage: (page: number, total: number) =>
-      `Pagina ${page} van ${total} · Bezig met herkennen op deze pc… Meestal een paar seconden; langere pagina’s kunnen enkele minuten duren.`,
-    connected: 'Pc verbonden.',
+      `Pagina ${page} van ${total} · Bezig met herkennen… Meestal binnen een minuut. De eerste scan na een rustige periode duurt langer, omdat de scanner dan moet opstarten.`,
     textModelMissing:
-      'Herkenning van Engelse tekst is niet ingesteld. Muzikale tekst kan ontbreken. Zie de installatie hieronder.',
+      'Herkenning van Engelse tekst is niet ingesteld. Muzikale tekst kan ontbreken.',
+    help: 'Zo werkt scannen',
     original: 'Origineel',
     openPdf: 'Originele PDF openen',
     openImage: 'Originele afbeelding openen',
     preparingPdf: 'Originele PDF voorbereiden…',
     originalAlt: 'Originele gedrukte partituur',
-  },
-  setup: {
-    summary: 'De pc-worker installeren',
-    install:
-      'Open op de pc waarop je deze browser gebruikt de projectmap van digitus2. Installeer de herkenners voor foto’s en PDF’s één keer en start de worker wanneer je hem nodig hebt.',
-    keepOpen:
-      'Laat die terminal open. Sta de lokale verbinding van de browser toe nadat je op Verbinden met deze pc hebt gedrukt. Sluit de worker om het verwerken te stoppen.',
-    help: 'Installatie en probleemoplossing',
   },
   review: {
     caveat:
@@ -66,7 +57,7 @@ export const scan: Messages['scan'] = {
     beamGrouping: 'De balkgroepering is afgeleid en kan afwijken van het origineel.',
     graphicSpanWarning:
       'Legatobogen en andere notatiebogen blijven binnen elke gescande pagina. Vergelijk de voortzettingen aan de paginarand; ontbrekende eindpunten zijn niet hersteld.',
-    /** The worker found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'De notenbalken zijn niet tot een pianosysteem gekoppeld, dus beide handen worden als één gelezen. De vingerzetting zou de handen verkeerd hebben: probeer een vlakkere, gelijkmatig belichte foto of de originele pdf.',
     unknownWarning:
@@ -197,14 +188,6 @@ export const scan: Messages['scan'] = {
   phone: {
     takePhoto: 'Foto maken',
     takeAnother: 'Nog een foto maken',
-    explain:
-      'De herkenning draait op een pc, en een telefoon kan die niet bereiken. Stuur deze foto’s naar je pc en open ze daar om te scannen.',
-    share: 'Foto’s naar je pc sturen',
-    save: 'Foto’s opslaan',
-    shareTitle: 'Foto’s van een partituur',
-    shared: 'Foto’s doorgegeven. Open ze op je pc met ‘Open je eigen partituur’.',
-    saved:
-      'Foto’s opgeslagen op dit apparaat. Zet ze op je pc en open ze daar met ‘Open je eigen partituur’.',
   },
   errors: {
     notCombinedSaved:
@@ -217,13 +200,12 @@ export const scan: Messages['scan'] = {
     noNotes: 'Er zijn geen speelbare noten herkend.',
     notUsable:
       'Deze herkenning kan nog niet voor vingerzettingen worden gebruikt: sommige noten passen niet bij elkaar.',
-    connectFailed:
-      'Kon geen verbinding maken met deze pc. Start de worker en sta de lokale verbinding van deze site toe als je browser erom vraagt. Heb je die geweigerd? Wijzig dan de toestemming voor het lokale netwerk van deze site en probeer het opnieuw.',
+    offline: 'Kon de scanner niet bereiken. Controleer je verbinding en probeer het opnieuw.',
     cancelFailed:
-      'Kon het annuleren niet bevestigen. Sluit de terminal van de worker om het verwerken te stoppen.',
+      'Kon het annuleren niet bevestigen. De scanner stopt binnen drie minuten vanzelf.',
     timedOut: 'De herkenning duurde te lang. Probeer een kleinere, duidelijkere pagina.',
     notRecognized:
-      'De pc kon op deze pagina geen volledige partituur herkennen. Probeer de originele PDF of een vlakkere afbeelding met hogere resolutie.',
+      'De scanner kon op deze pagina geen volledige partituur herkennen. Probeer de originele PDF of een vlakkere afbeelding met hogere resolutie.',
   },
   pager: {
     previous: 'Vorige',
@@ -293,12 +275,13 @@ export const scan: Messages['scan'] = {
       'De gedraaide afbeelding is groter dan 10 MB. Kies een kleinere afbeelding. Je huidige afbeelding blijft ongewijzigd.',
   },
   client: {
-    busy: 'De pc is al aan het scannen. Probeer het zo meteen opnieuw.',
-    workerStatus: (status: number) =>
-      `Het pc-programma kon niet antwoorden (fout ${status}). Start het opnieuw en probeer het nog eens.`,
+    busy: 'De scanner is bezig met een andere partituur. Probeer het over een minuut opnieuw.',
+    limited: 'Je hebt het afgelopen uur veel gescand. Probeer het later opnieuw.',
+    serviceStatus: (status: number) =>
+      `De scanner kon niet antwoorden (fout ${status}). Probeer het later opnieuw.`,
+    noAnswer: 'De scanner kon niet antwoorden. Probeer het later opnieuw.',
+    noResult: 'De scanner gaf geen partituur terug.',
     invalidJob: 'Ongeldige scantaak.',
-    updateWorker: 'Werk de pc-worker bij om door te gaan.',
-    noJob: 'De worker gaf geen scantaak terug.',
   },
   join: {
     refused: (reason: string) =>

@@ -1,6 +1,6 @@
-# Local PC recognition worker
+# Local recognition worker (research)
 
-The optional helper behind the app's scanning feature. It is a loopback HTTP server, written with Python's standard library only, that runs homr on page images and Audiveris on PDFs and returns the raw MusicXML. User setup and troubleshooting are in [docs/scanning.md](../../../../docs/scanning.md); the research behind it is in [docs/research/omr.md](../../../../docs/research/omr.md).
+The research loopback server and the scan service's engine. `worker.py` is a loopback HTTP server, written with Python's standard library only, that runs homr on page images and Audiveris on PDFs and returns the raw MusicXML; the acceptance harness and the adapters' tests use this folder on a Windows PC. Its job runner, adapters (`homr.py`, `audiveris.py`), export rules (`normalize_export.py`) and error mapping (`recognition_errors.py`) are also what the app's scan service runs in its Linux container ([research/omr/service](../../service/README.md), [docs/scan-service.md](../../../../docs/scan-service.md)). The app does not talk to this worker: readers scan through the service ([docs/scanning.md](../../../../docs/scanning.md)). The research behind it is in [docs/research/omr.md](../../../../docs/research/omr.md).
 
 ## Run
 
@@ -18,31 +18,31 @@ Start the worker:
 python research/omr/prototypes/local-worker/worker.py --bundle research/omr/results/quality-wave/toolchain --short-staves --text-models research/omr/results/quality-wave/text-models --homr-toolchain research/omr/results/photo-options/toolchain
 ```
 
-| Option                  | Effect                                                                                                                                                      |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--bundle DIR`          | Audiveris toolchain (must hold the checked `audiveris-5.11.0.msi` and `portable/Audiveris`); always required, because PDFs use it                            |
-| `--short-staves`        | Two Audiveris constants that keep short staves (`LinesRetriever.minStaffLength=12`, `ClustersRetriever.minClusterLengthRatio=0.15`)                          |
-| `--text-models DIR`     | Pinned English `eng.traineddata`, copied into each job; without it, health, status and results carry an `ocr-language-not-configured` warning                |
-| `--homr-toolchain DIR`  | Prepared homr for PNG and JPEG; without it, images also go to Audiveris                                                                                     |
-| `--dev-origin URL`      | Also allow an exact `http://127.0.0.1:PORT` or `http://localhost:PORT` origin (repeatable); the Pages origin stays allowed                                   |
-| `--timeout S`           | Native timeout per job, default 180 s, maximum 600 s                                                                                                       |
-| `--port`, `--root`      | Listening port (default 8996) and job directory (default `research/omr/results/connector-wave/jobs`)                                                       |
+| Option                 | Effect                                                                                                                                        |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--bundle DIR`         | Audiveris toolchain (must hold the checked `audiveris-5.11.0.msi` and `portable/Audiveris`); always required, because PDFs use it             |
+| `--short-staves`       | Two Audiveris constants that keep short staves (`LinesRetriever.minStaffLength=12`, `ClustersRetriever.minClusterLengthRatio=0.15`)           |
+| `--text-models DIR`    | Pinned English `eng.traineddata`, copied into each job; without it, health, status and results carry an `ocr-language-not-configured` warning |
+| `--homr-toolchain DIR` | Prepared homr for PNG and JPEG; without it, images also go to Audiveris                                                                       |
+| `--dev-origin URL`     | Also allow an exact `http://127.0.0.1:PORT` or `http://localhost:PORT` origin (repeatable); the Pages origin stays allowed                    |
+| `--timeout S`          | Native timeout per job, default 180 s, maximum 600 s                                                                                          |
+| `--port`, `--root`     | Listening port (default 8996) and job directory (default `research/omr/results/connector-wave/jobs`)                                          |
 
 Keep the terminal open. Ctrl+C stops running recognition and removes this instance's job directories. Force-killing Python can skip that cleanup; expired directories of an interrupted instance are removed the next time the worker runs.
 
 ## Protocol
 
-| Request                  | Purpose                                                                    |
-| ------------------------ | -------------------------------------------------------------------------- |
-| `GET /v1/health`         | Protocol, recogniser profile, capabilities, warnings and upload limit      |
+| Request                  | Purpose                                                                     |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `GET /v1/health`         | Protocol, recogniser profile, capabilities, warnings and upload limit       |
 | `POST /v1/jobs`          | Original PNG, JPEG or PDF body with its MIME type; returns a job id and 202 |
-| `GET /v1/jobs/ID`        | `running`, `cancelling`, `ready`, `failed`, `timed_out` or `cancelled`     |
-| `GET /v1/jobs/ID/result` | The parsed raw MusicXML after a successful exit; otherwise 409             |
-| `DELETE /v1/jobs/ID`     | Cancel: stops the native process tree and drops any result                 |
+| `GET /v1/jobs/ID`        | `running`, `cancelling`, `ready`, `failed`, `timed_out` or `cancelled`      |
+| `GET /v1/jobs/ID/result` | The parsed raw MusicXML after a successful exit; otherwise 409              |
+| `DELETE /v1/jobs/ID`     | Cancel: stops the native process tree and drops any result                  |
 
 `needsReview` is always true. An HTTP success means the job completed, not that the music is right. POST and DELETE require the header `X-Digitus2-Client: 1`. Every request needs the exact loopback Host and port and an allowed Origin, `https://marchalmaxim.github.io` by default, and CORS preflights are answered. A failed job carries a code, a message and bounded public details. Low staff resolution, for example, reports the measured interline. No log, local path or stack trace is sent over HTTP. Several exported scores or a known incomplete export is a failure: the worker never chooses one or publishes a partial result.
 
-`client.mjs` exports `createLocalWorkerClient()` with `health`, `start`, `status`, `wait`, `result` and `cancel`. The app has its own client in `apps/web/src/scan/client.ts`. Call it only from a user action. Fetches send `targetAddressSpace: 'loopback'` and no credentials; in Chrome the governing permission is `loopback-network`, and denial is an ordinary connection failure. If the network drops after a POST, the job keeps running until it finishes, times out or is cancelled, so do not resubmit it blindly.
+`client.mjs` exports `createLocalWorkerClient()` with `health`, `start`, `status`, `wait`, `result` and `cancel`, for research scripts. The app's client (`apps/web/src/scan/client.ts`) speaks the service's protocol `digitus2-scan-v2`, not this one. Call it only from a user action. Fetches send `targetAddressSpace: 'loopback'` and no credentials; in Chrome the governing permission is `loopback-network`, and denial is an ordinary connection failure. If the network drops after a POST, the job keeps running until it finishes, times out or is cancelled, so do not resubmit it blindly.
 
 ## Limits and boundaries
 
@@ -58,9 +58,6 @@ Keep the terminal open. Ctrl+C stops running recognition and removes this instan
 ```powershell
 python -m pytest research/omr/prototypes/local-worker -q
 node --test research/omr/prototypes/local-worker/client.test.mjs
-pnpm --filter @digitus2/engine build
-node research/omr/prototypes/local-worker/browser-smoke.mjs NEW-RUN-ID --text-models research/omr/results/quality-wave/text-models
-node research/omr/prototypes/local-worker/score-output.mjs NEW-RUN-ID
 ```
 
-The Python tests cover the HTTP boundary, job lifecycle, real child-process cancellation and timeout, archive checks and native argument isolation. Tests with a simulated recogniser cover the protocol only, not accuracy. `browser-smoke.mjs` starts its own worker and drives installed Chrome against the deployed Pages origin. It tests denied and granted loopback permission, runs a real scan, cancels a second job and imports the raw MusicXML through the app's file input. Results go to `research/omr/results/connector-wave/`, and each run id must be new. `format-durable.mjs` formats this folder with Prettier, which the repository's formatter skips under `research/`.
+The Python tests cover the HTTP boundary, job lifecycle, real child-process cancellation and timeout, archive checks and native argument isolation. Tests with a simulated recogniser cover the protocol only, not accuracy. The end-to-end check is `research/omr/service/smoke.mjs` against a running or deployed service, plus the Playwright scan specs against a mocked service (`docs/app.md`, Testing). `format-durable.mjs` formats this folder with Prettier, which the repository's formatter skips under `research/`.

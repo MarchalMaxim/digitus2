@@ -11,33 +11,24 @@ export const scan: Messages['scan'] = {
       plural('pt', n, { one: '# imagem de página', other: '# imagens de página' }),
     advice:
       'PDFs originais e digitalizações planas em alta resolução funcionam melhor. Fotos de livros podem falhar, mesmo bem iluminadas. O resultado abre ao lado do original para revisão.',
-    workerNeeded: 'Para digitalizar, o programa do PC precisa estar rodando neste computador.',
-    connect: 'Conectar a este PC',
-    connecting: 'Conectando…',
+    where:
+      'O reconhecimento roda no serviço de digitalização do projeto, no Google Cloud (Países Baixos). Sua página é enviada para lá, reconhecida e depois apagada.',
     cancelScan: 'Cancelar digitalização',
     cancelling: 'Cancelando…',
     retryFailed: 'Tentar de novo as páginas com falha',
     scanScore: 'Digitalizar esta partitura',
     scanning:
-      'Reconhecendo neste PC… Costuma levar alguns segundos; páginas mais longas podem levar alguns minutos.',
+      'Reconhecendo… Costuma levar menos de um minuto. A primeira digitalização depois de um tempo sem uso demora mais, enquanto o serviço de digitalização é iniciado.',
     scanningPage: (page: number, total: number) =>
-      `Página ${page} de ${total} · Reconhecendo neste PC… Costuma levar alguns segundos; páginas mais longas podem levar alguns minutos.`,
-    connected: 'PC conectado.',
+      `Página ${page} de ${total} · Reconhecendo… Costuma levar menos de um minuto. A primeira digitalização depois de um tempo sem uso demora mais, enquanto o serviço de digitalização é iniciado.`,
     textModelMissing:
-      'O reconhecimento de texto em inglês não está configurado. O texto musical pode estar faltando. Veja a configuração abaixo.',
+      'O reconhecimento de texto em inglês não está configurado. O texto musical pode estar faltando.',
+    help: 'Como funciona a digitalização',
     original: 'Original',
     openPdf: 'Abrir o PDF original',
     openImage: 'Abrir a imagem original',
     preparingPdf: 'Preparando o PDF original…',
     originalAlt: 'Partitura impressa original',
-  },
-  setup: {
-    summary: 'Configurar o programa de PC',
-    install:
-      'No PC em que você usa este navegador, abra a pasta do projeto digitus2. Instale uma única vez os reconhecedores de fotos e de PDF e depois inicie o programa quando precisar.',
-    keepOpen:
-      'Deixe esse terminal aberto. Permita a conexão local do navegador depois de clicar em Conectar a este PC. Para parar o processamento, feche o programa.',
-    help: 'Configuração e solução de problemas',
   },
   review: {
     caveat:
@@ -66,7 +57,7 @@ export const scan: Messages['scan'] = {
     beamGrouping: 'O agrupamento das barras é deduzido e pode diferir do original.',
     graphicSpanWarning:
       'Ligaduras e outros sinais de notação ficam dentro de cada página digitalizada. Compare as continuações nas bordas das páginas; os pontos finais que faltam não foram reparados.',
-    /** The worker found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'As pautas não foram unidas num sistema de piano, então as duas mãos são lidas como uma. O dedilhado sairia com as mãos erradas: tente uma foto mais plana e bem iluminada ou o PDF original.',
     unknownWarning: 'O reconhecedor indicou um aviso desconhecido. Confira bem o original.',
@@ -196,14 +187,6 @@ export const scan: Messages['scan'] = {
   phone: {
     takePhoto: 'Tirar uma foto',
     takeAnother: 'Tirar outra foto',
-    explain:
-      'O reconhecimento roda num PC, e um celular não consegue alcançá-lo. Envie estas fotos para o seu PC e abra-as lá para digitalizar.',
-    share: 'Enviar as fotos para o seu PC',
-    save: 'Salvar as fotos',
-    shareTitle: 'Fotos de partitura',
-    shared: 'Fotos enviadas. Abra-as no seu PC com “Abrir sua própria partitura”.',
-    saved:
-      'Fotos salvas neste aparelho. Passe-as para o seu PC e abra-as com “Abrir sua própria partitura”.',
   },
   errors: {
     notCombinedSaved:
@@ -216,13 +199,13 @@ export const scan: Messages['scan'] = {
     noNotes: 'Nenhuma nota tocável foi reconhecida.',
     notUsable:
       'Este reconhecimento ainda não pode ser usado para o dedilhado: algumas notas não se encaixam.',
-    connectFailed:
-      'Não foi possível conectar a este PC. Inicie o programa e permita a conexão local deste site quando o navegador perguntar. Se você negou, altere a permissão de rede local deste site e tente de novo.',
+    offline:
+      'Não foi possível acessar o serviço de digitalização. Verifique sua conexão e tente de novo.',
     cancelFailed:
-      'Não foi possível confirmar o cancelamento. Feche o terminal do programa para parar o processamento.',
+      'Não foi possível confirmar o cancelamento. O serviço de digitalização para sozinho em até três minutos.',
     timedOut: 'O reconhecimento demorou demais. Tente uma página menor e mais nítida.',
     notRecognized:
-      'O PC não conseguiu reconhecer uma partitura completa nesta página. Tente o PDF original ou uma imagem mais plana e de maior resolução.',
+      'O serviço de digitalização não conseguiu reconhecer uma partitura completa nesta página. Tente o PDF original ou uma imagem mais plana e de maior resolução.',
   },
   pager: {
     previous: 'Anterior',
@@ -292,12 +275,13 @@ export const scan: Messages['scan'] = {
       'A imagem girada passa de 10 MB. Escolha uma imagem menor. Sua imagem atual não foi alterada.',
   },
   client: {
-    busy: 'O PC já está digitalizando. Tente de novo em instantes.',
-    workerStatus: (status: number) =>
-      `O programa do PC não conseguiu responder (erro ${status}). Reinicie-o e tente de novo.`,
+    busy: 'O serviço de digitalização está ocupado com outra partitura. Tente de novo em um minuto.',
+    limited: 'Você digitalizou bastante na última hora. Tente de novo mais tarde.',
+    serviceStatus: (status: number) =>
+      `O serviço de digitalização não conseguiu responder (erro ${status}). Tente de novo mais tarde.`,
+    noAnswer: 'O serviço de digitalização não conseguiu responder. Tente de novo mais tarde.',
+    noResult: 'O serviço de digitalização não devolveu nenhuma partitura.',
     invalidJob: 'Tarefa de digitalização inválida.',
-    updateWorker: 'Atualize o programa de PC para continuar.',
-    noJob: 'O programa não devolveu nenhuma tarefa de digitalização.',
   },
   join: {
     refused: (reason: string) =>

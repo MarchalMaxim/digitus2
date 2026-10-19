@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { libraryScore } from './helpers/files.js';
 import { embellishDecided, openPractice, setLoopBars } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
-import { mockWorker, scanOnePage } from './helpers/scan.js';
+import { mockService, scanOnePage } from './helpers/scan.js';
 import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
 
 // "Add notes between" (issue #67): a piece the guard offers gets one more tick box in the
@@ -187,13 +187,13 @@ test('the switch is absent on a piece with fewer than three figures', async ({ p
 });
 
 // Ruling 7's non-eligible import: Twinkle's own text, which would be offered were it eligible.
-// The scan goes through the PC's worker, as in scan.spec: without touch, also at a phone's width
-// (a touch phone takes the phone path, which scan-phone.spec covers).
+// The scan goes through the (mocked) scan service, as in scan.spec: without touch, also at a
+// phone's width (a touch phone's camera and page tools are scan-phone.spec).
 test.describe('a scan import', () => {
   test.use({ hasTouch: false, isMobile: false });
 
   test('the switch is absent on a scan import', async ({ page }) => {
-    await mockWorker(page, libraryScore(TWINKLE).toString('utf8'));
+    await mockService(page, libraryScore(TWINKLE).toString('utf8'));
     await scanOnePage(page);
     await page.getByRole('button', { name: 'Use for fingerings' }).click();
     await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({

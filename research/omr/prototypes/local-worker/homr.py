@@ -20,8 +20,10 @@ MODELS = {
 # Isolated Python ignores inherited PYTHONPATH/PYTHONHOME. Only this verified source
 # directory is added; socket hooks also prevent unexpected Python model-download
 # code from contacting the network. No request contains the private source image.
+# With DIGITUS2_OMR_THREADS set, the adapter's directory follows the input path and
+# thread_budget.py is loaded from it by file, so the adapter's homr.py cannot shadow homr.
 BOOTSTRAP = """
-import sys,socket,warnings
+import os,sys,socket,warnings
 def offline(*args,**kwargs):
     raise RuntimeError("Network disabled during local music recognition")
 socket.create_connection=offline
@@ -41,6 +43,12 @@ try:
                 raise ValueError("image budget")
 except Exception as exc:
     raise RuntimeError("Image dimensions or encoding exceed the local recognition budget") from None
+if os.environ.get("DIGITUS2_OMR_THREADS") and len(sys.argv)>3:
+    import importlib.util
+    spec=importlib.util.spec_from_file_location("thread_budget",os.path.join(sys.argv[3],"thread_budget.py"))
+    thread_budget=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(thread_budget)
+    thread_budget.apply(int(os.environ["DIGITUS2_OMR_THREADS"]))
 from homr.main import main
 sys.argv=["homr","--gpu","no","--no-title","--write-staff-positions",input_path]
 main()
@@ -55,6 +63,10 @@ def python_sources(root):
 def package_lines(path):
     return sorted(line.strip().lower() for line in path.read_text(encoding="utf-8-sig").splitlines()
                   if line.strip() and not line.lstrip().startswith("#"))
+
+def venv_python(toolchain: Path, platform: str = os.name) -> Path:
+    """The prepared virtual environment's interpreter: Scripts/python.exe on Windows, bin/python elsewhere."""
+    return toolchain/("venv/Scripts/python.exe" if platform == "nt" else "venv/bin/python")
 
 def read_audit(path):
     if path.stat().st_size > 1024 * 1024:
@@ -71,7 +83,7 @@ class Homr:
         if not 0 < timeout <= 600:
             raise ValueError("timeout must be in (0,600]")
         self.source=self.toolchain/f"homr-{COMMIT}-piano-cues"
-        self.python=self.toolchain/"venv/Scripts/python.exe"
+        self.python=venv_python(self.toolchain)
         self.manifest=json.loads(SOURCE_MANIFEST_PATH.read_text())
         if self.manifest.get("commit") != COMMIT:
             raise ValueError("HOMR source pin mismatch")
@@ -129,8 +141,10 @@ class Homr:
                 env.pop(key,None)
         env.update(HOME=str(destination/"home"),USERPROFILE=str(destination/"home"),
                    APPDATA=str(destination/"roaming"),LOCALAPPDATA=str(destination/"local"),
-                   TEMP=str(destination/"tmp"),TMP=str(destination/"tmp"),OMP_NUM_THREADS="4")
+                   TEMP=str(destination/"tmp"),TMP=str(destination/"tmp"),TMPDIR=str(destination/"tmp"),OMP_NUM_THREADS="4")
         command=[str(self.python),"-I","-B","-c",BOOTSTRAP,str(self.source),str(local_input)]
+        if "DIGITUS2_OMR_THREADS" in env:
+            command.append(str(Path(__file__).resolve().parent))
         (destination/"invocation.json").write_text(json.dumps({
             "command":command,"profile":self.name,"commit":COMMIT,
             "sourcePythonTreeSha256":tree_hash,"modelHashes":MODELS,

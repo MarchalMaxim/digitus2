@@ -1,26 +1,36 @@
 # Scanning (experimental)
 
-Scanning turns a photo or PDF of printed piano music into a score with fingerings. Recognition runs on your own PC, in an optional local worker: homr for photos and Audiveris for PDFs. The app shows the original beside the recognised notation, and you decide whether to use the result. Recognition is not reliable. Good-looking notation can still contain wrong pitches, rhythms, ties, bars or hands, so treat every result as a draft to check. Original PDFs and flat, high-resolution scans work best; book photos can fail even when well lit. Handwriting is not supported.
+Scanning turns a photo or PDF of printed piano music into a score with fingerings. Recognition runs on the project's scanner, a small service on Google Cloud: homr for photos and Audiveris for PDFs. It works the same on a PC, a tablet and a phone, with nothing to install and no account. The app shows the original beside the recognised notation, and you decide whether to use the result. Recognition is not reliable. Good-looking notation can still contain wrong pitches, rhythms, ties, bars or hands, so treat every result as a draft to check. Original PDFs and flat, high-resolution scans work best; book photos can fail even when well lit. Handwriting is not supported.
 
-MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the worker. Why these recognisers were chosen, and what was measured: `docs/research/omr.md`.
+MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the scanner. Why these recognisers were chosen, and what was measured: `docs/research/omr.md`. How the scanner runs, what it costs and how its spend is capped: `docs/scan-service.md`.
 
 ## What the app guarantees
 
-- **Original bytes are kept.** Unrotated images and PDFs go to the worker byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser.
-- **Nothing leaves your computer.** The file goes only from the browser to the worker on 127.0.0.1. There is no external recognition service and no upload. Scan jobs download nothing; only the one-time setup does.
+- **Original bytes are kept.** Unrotated images and PDFs go to the scanner byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser.
+- **The page goes only where the scan page says** (Where your page goes, below), and only when you press **Scan this score**.
 - **Recognition errors stay visible.** The source and the recognised notation sit side by side, and every result is marked as needing review. Scanned notation goes through a strict import that refuses malformed notation, for example a tie stop without a start. You can still download such a result, but **Use for fingerings** stays disabled.
-- **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The worker never picks one of several exported scores or publishes an incomplete export. The worker changes a recognition only by two lossless rules, described under Known recognition errors and reported under Recognition details.
+- **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The scanner never picks one of several exported scores or publishes an incomplete export. The scanner changes a recognition only by two lossless rules, described under Known recognition errors and reported under Recognition details.
 - **Your corrections are explicit.** Each correction you make in the review is recorded, listed and undoable. The raw recognition is kept unchanged beside the corrected copy, and both can be downloaded.
 - **Display preparation never changes the music.** Inferred beams and a voice regrouping for Verovio (below) apply only to the rendered copy. Recognised pitches, timing, note ids, raw downloads and the input to fingering and playback are untouched.
+
+## Where your page goes
+
+The scan page says it in one sentence under the advice: "Recognition runs on the project’s scanner on Google Cloud (Netherlands). Your page is sent there, recognized and then deleted." Pressing **Scan this score** is the act that sends it; there is no separate consent step.
+
+- **What is sent.** Each page's original bytes (or the rotated PNG), one page per request, over HTTPS to the scanner's address in `apps/web/src/scan/service.ts`. Nothing else: no name, no account, no other page. Opening the scan page sends one request that carries no page, to wake the scanner while you arrange the pages.
+- **What the scanner keeps.** Nothing. The page is recognised in memory (Cloud Run's file system is memory) and deleted when the job ends, together with its result; there is no job list and no copy. For each page the scanner writes one log line with the file type, the sizes, the seconds taken and the outcome, never the content, the file name or your address. To hold each reader to 30 recognitions an hour it counts your address in memory for up to an hour; the count is gone when the scanner stops. Google Cloud keeps its own request log for the service (time, status and the caller's address), as for any Cloud Run service ([Cloud Run logging](https://cloud.google.com/run/docs/logging)).
+- **One page at a time.** The scanner recognises one page at a time, for all readers together. When another reader's page is being recognised, the app says the scanner is busy and keeps your pages; try again in a minute. In a batch, the pages after the busy one are not sent; **Retry failed pages** sends them.
+- **The scanner sleeps when nobody scans.** The first scan after a quiet spell waits while it starts, and the status line says so.
+- **It needs a connection.** Offline, the app says it could not reach the scanner and keeps the pages; the rest of the app works offline as before.
+- **Its spend is capped.** The project pays for the scanner and caps it at 5 a month; when the cap is reached, scanning is off until the next month and the app says "The scanner could not answer. Try again later." (`docs/scan-service.md`).
 
 ## Scan a score
 
 1. At the end of the library, choose **Open your own score**, or drop files onto the library. Choose up to 20 PNG or JPEG page images together (10 MB each), or one PDF (10 MB). Drag the thumbnails into reading order. Selecting a page shows keyboard-accessible move and remove controls and **Rotate 90° clockwise**. Rotate a sideways or upside-down photo before scanning.
-2. On the PC that runs the worker, press **Connect to this PC**. If the browser asks, allow this site to connect to the local computer. The app never contacts the worker before you press Connect.
-3. Press **Scan this score**. Pages are recognised one at a time in the order shown. **Cancel scan** stops the job, and leaving the page cancels it too. A page that fails keeps the others; **Retry failed pages** resubmits only the failed ones. Most pages take seconds, difficult ones a few minutes.
-4. Compare the original with **Recognized notation**: every page, pitches, rhythms, bar count, clefs, key and time signatures, and hands. For an image batch, select a thumbnail to see that page's recognition, or switch to **Combined score**. For a PDF, step through the original with Previous and Next; the recognised pages may break differently. Text and tempo may be missing.
-5. Correct what differs, note by note (Correct the recognition, below).
-6. Press **Use for fingerings** to open the normal score view with fingerings and playback. The button is enabled once the recognised score, with your corrections, passes the strict import and renders. **Scan source and recognition** in the score view returns to the comparison, and so does the browser's Back button, without a new job.
+2. Press **Scan this score**. Pages are recognised one at a time in the order shown; the status line reads "Page 2 of 5 · Recognizing…" for a batch. **Cancel scan** stops the job, and leaving the page cancels it too. A page that fails keeps the others; **Retry failed pages** resubmits only the failed ones. Most pages take under a minute, and the first scan after a quiet spell longer while the scanner starts (timings in `docs/scan-service.md`); the scanner gives up on a page after three minutes.
+3. Compare the original with **Recognized notation**: every page, pitches, rhythms, bar count, clefs, key and time signatures, and hands. For an image batch, select a thumbnail to see that page's recognition, or switch to **Combined score**. For a PDF, step through the original with Previous and Next; the recognised pages may break differently. Text and tempo may be missing.
+4. Correct what differs, note by note (Correct the recognition, below).
+5. Press **Use for fingerings** to open the normal score view with fingerings and playback. The button is enabled once the recognised score, with your corrections, passes the strict import and renders. **Scan source and recognition** in the score view returns to the comparison, and so does the browser's Back button, without a new job.
 
 **Download raw MusicXML** saves the recognised file untouched, without fingerings. A batch offers **Download combined MusicXML** and each page's file instead. Once you have corrected notes, **Download corrected MusicXML** saves the corrected copy too. The downloads sit under **Files for a notation editor**. A notation editor remains the tool for what the review cannot correct. The playback tempo of a scan may be the app's default, not a recognised tempo.
 
@@ -46,11 +56,7 @@ A misread time signature is corrected from **Places to check**, never from a sta
 
 ## On a phone or tablet
 
-A phone cannot reach the PC worker: its 127.0.0.1 is the phone itself, and the worker accepts connections only from its own computer. On a device whose only pointer is a finger, the library offers **Take a photo** next to **Open your own score**, and the scan page offers **Take another photo** for further pages. Photos are named by the time they were taken. The page tools (rotate, move earlier, move later, remove) are one row of symbol buttons sized for a thumb, and pages are put in order by selecting a thumbnail and moving it, because dragging needs a mouse.
-
-Instead of **Connect to this PC**, the phone says that recognition runs on a PC and offers **Send photos to your PC**, which opens the phone's own share sheet (mail, messages, a cloud drive of your choosing), or **Save photos** where the browser cannot share files. The files are named `page-01-…`, `page-02-…` in your order, so the PC's file chooser lists them in reading order. The app uploads nothing; where the photos go is your choice in the share sheet. On the PC, open them with **Open your own score** and scan as usual.
-
-A phone that recognises by itself would need the PC worker reachable over the local network, with pairing and authentication. That is not built: the worker is designed for the one computer it runs on (`docs/research/omr.md`, Browser to worker connection).
+A phone or tablet scans exactly like a PC: the same **Scan this score**, the same scanner, the same review. What differs is the camera and the touch tools. On a device whose only pointer is a finger, the library offers **Take a photo** next to **Open your own score**, and the scan page offers **Take another photo** for further pages. Photos are named by the time they were taken. The page tools (rotate, move earlier, move later, remove) are one row of symbol buttons sized for a thumb, and pages are put in order by selecting a thumbnail and moving it, because dragging needs a mouse.
 
 ### Rotation
 
@@ -68,51 +74,28 @@ The pinned homr writes no beams. For display, the app infers conventional beat g
 
 ## My scores
 
-Uploads are saved automatically in the browser's IndexedDB (database `digitus2.my-scores`), with page order, rotation, original and rotated bytes, the raw recognised MusicXML, your list of corrections and the recogniser's name. The raw recognition is never overwritten: the corrected copy is the raw recognition with the saved corrections replayed, and an entry with corrections is listed as **Corrected recognition**. Plain MusicXML and MIDI imports are saved too. **My scores** appears in the library when it has entries. Reopening an entry never reconnects to the PC or restarts recognition. A multi-page result that cannot be combined still reopens page by page. Remove deletes an entry. A failed save is reported and the current work stays usable.
+Uploads are saved automatically in the browser's IndexedDB (database `digitus2.my-scores`), with page order, rotation, original and rotated bytes, the raw recognised MusicXML, your list of corrections and the recogniser's name. The raw recognition is never overwritten: the corrected copy is the raw recognition with the saved corrections replayed, and an entry with corrections is listed as **Corrected recognition**. Plain MusicXML and MIDI imports are saved too. **My scores** appears in the library when it has entries. Reopening an entry never contacts the scanner or restarts recognition. A multi-page result that cannot be combined still reopens page by page. Remove deletes an entry. A failed save is reported and the current work stays usable.
 
 Browser storage belongs to one site and one browser profile, so a local preview and the GitHub Pages site have separate collections. Clearing site data or storage eviction removes it ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [storage limits](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)), so keep your own copies. Nothing is shared or published.
 
-## Set up the PC worker
+## When scanning does not start
 
-You need a Windows PC with PowerShell and Python 3.11 or later; desktop Chrome is the tested browser. The worker starts the Java runtime bundled with Audiveris, and Audiveris may use a 4 GB heap, so leave memory free. A phone or tablet cannot use the worker: its localhost is the device itself.
+The app keeps your pages in every case below, and **Scan this score** stays available.
 
-Get the repository from [GitHub](https://github.com/MarchalMaxim/digitus2) and open a terminal in its root folder. Run once:
+- **"The scanner is busy with another score. Try again in a minute."** One page is recognised at a time for every reader. Wait a minute and press it again. In a batch, the pages after it wait too.
+- **"Could not reach the scanner. Check your connection and try again."** The device is offline. Reconnect and retry; nothing was lost.
+- **"The scanner could not answer. Try again later."** The device is online, but no answer from the scanner reached the app: the scanner is down, overloaded, or switched off for the rest of the month because its spend cap was reached (`docs/scan-service.md`). In those cases Google answers in front of the scanner, and the browser does not let the page read that answer, so the app cannot say which one it is. A network drop the device has not noticed looks the same.
+- **"The scanner could not answer (error 500). Try again later."** The scanner itself answered with an error. The number is its error code.
+- **"Recognition timed out. Try a smaller, clearer page."** The scanner gives up on a page after three minutes. A smaller crop, a flatter photo or the original PDF usually helps.
+- **"You have scanned a lot in the past hour. Try again later."** Each reader has 30 recognitions an hour; the limit frees up as the hour passes. In a batch, the pages after it wait too.
+- **"Cancellation could not be confirmed. The scanner stops by itself within three minutes."** The cancel request was lost; the page stops by the scanner's own time limit, and the scanner may say it is busy until then.
 
-```powershell
-powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
-powershell -File research/omr/prototypes/oemer-quality/prepare-text-models.ps1
-powershell -File research/omr/prototypes/homr-photo/setup.ps1
-```
+When the scanner answers but cannot read the page:
 
-- `prepare-audiveris.ps1` downloads the Audiveris 5.11.0 Windows installer (about 85 MB), checks its SHA-256 and unpacks it with an administrative extraction into `research/omr/results/quality-wave/toolchain`. Nothing is installed on the system. If it reports that the extraction exists, keep the existing one.
-- `prepare-text-models.ps1` downloads and checks the pinned English text model (about 23 MB) into `research/omr/results/quality-wave/text-models`.
-- `setup.ps1` prepares homr in `research/omr/results/photo-options/toolchain`: an isolated CPU-only Python environment, the pinned source and three ONNX models (about 139 MB), with the project's patches applied and every file digest checked (see `research/omr/prototypes/homr-photo/README.md`).
-
-The scripts run in Windows PowerShell 5.1 and in PowerShell 7. Keep the repository in a short folder, such as `C:\Users\you\digitus2`: Windows limits paths to 260 characters unless long paths are enabled, and the homr environment holds files about 125 characters deep, so a deeply nested checkout fails during `setup.ps1` with "No such file or directory". `setup.ps1 -Root C:\short\folder` puts homr elsewhere; pass that folder to `--homr-toolchain`. The Audiveris extraction already goes through the folder's short 8.3 name.
-
-All three locations are ignored by git. Start the worker whenever you want to scan, and keep the terminal open:
-
-```powershell
-python research/omr/prototypes/local-worker/worker.py --bundle research/omr/results/quality-wave/toolchain --short-staves --text-models research/omr/results/quality-wave/text-models --homr-toolchain research/omr/results/photo-options/toolchain
-```
-
-It prints `http://127.0.0.1:8996` and the recogniser profile (homr for images, Audiveris with `pinned-eng` for PDFs). Ctrl+C or closing the terminal stops the worker and any running recognition. No account, public server, tunnel or automatic startup is involved.
-
-- `--short-staves` turns on two Audiveris settings that keep short staves, such as a one-bar final system. `--text-models` enables English text recognition. Without it, the worker and the app warn that musical text may be missing. Even with it, a metronome mark's beat unit is often unresolved.
-- Without `--homr-toolchain`, images also go to Audiveris, which fails on most photos.
-- The worker accepts requests only from `https://marchalmaxim.github.io`. For a local preview, add its exact origin, for example `--dev-origin http://127.0.0.1:4196`, and open that exact address: `http://localhost:4196` is a different origin and needs its own option. The worker still listens on 127.0.0.1 only.
-
-Worker limits: one recognition at a time, 10 MiB per upload, 20 MiB per result, a 180 s timeout per job (the app stops waiting after about three minutes), eight retained jobs, and five minutes' retention for finished jobs. homr refuses images over 25 megapixels. Each job gets its own temporary directory, settings and caches, removed on expiry and at shutdown. The protocol is described in `research/omr/prototypes/local-worker/README.md`.
-
-## Connection problems
-
-- **Could not connect.** Check that the worker terminal is running on this PC, then retry Connect. If you denied local access, allow the site's local or loopback-network connection in the browser's site settings and retry. Never disable browser security.
-- **PC already scanning.** One recognition runs at a time; wait or cancel the other job.
-- **Staff resolution too low.** The message gives the measured staff-line spacing, for example six pixels. Use the full-resolution original, photograph a smaller area more closely, or use the original PDF. Enlarging a compressed image does not restore detail.
+- **Staff resolution too low.** The message gives the measured staff-line spacing, for example six pixels. Use the full-resolution original, photograph a smaller area more closely, or use the original PDF. Enlarging a compressed image does not restore detail. homr refuses images over 25 megapixels.
 - **Multiple scores or incomplete export.** Separate examples, footnotes and a curved page can confuse the recogniser. Try a single main music section or the original PDF.
 - **Other recognition failure.** A flatter, sharper source may help; ordinary book photos remain unreliable.
 - **Preview unavailable.** Open the original in another tab. The PDF preview does not run document scripts, and some unusual PDFs or image encodings do not preview.
-- **Cancellation cannot be confirmed.** Close the worker terminal to stop recognition.
 
 ## Known recognition errors and limits
 
@@ -124,7 +107,7 @@ Measured on the acceptance corpus (16 library pieces rendered as pages, each in 
 - **Beams** on photos are drawn by beat for readability, not read from the source; on PDFs Audiveris reads them.
 - **Key and time signature** are inferred when a continuation page does not print them.
 
-The worker changes a homr export in two lossless ways, and says so under **Recognition details**: a measure that holds no music (homr writes the bracket closing a first ending as a measure of its own, which shifted every later bar) joins its neighbours, and a slur joining one pitch to its continuation is read as a tie even when homr gave the two notes different voice numbers. No pitch, duration or onset changes.
+The scanner changes a homr export in two lossless ways, and says so under **Recognition details**: a measure that holds no music (homr writes the bracket closing a first ending as a measure of its own, which shifted every later bar) joins its neighbours, and a slur joining one pitch to its continuation is read as a tie even when homr gave the two notes different voice numbers. No pitch, duration or onset changes.
 
 On eleven real phone photos (WhatsApp-compressed, five pages of Boëllmann's Op. 28 and a bound book page; results per photo in `docs/research/omr.md`), all were recognised, 9 pass the strict import and 8 have exactly the page's bars. What they add to the list:
 
@@ -137,7 +120,7 @@ Further limits:
 
 - Small inset examples are excluded before recognition and flagged in the result. A legitimate short inset passage, such as an indented coda, can look like an example, so compare the whole original.
 - Ornaments can be incomplete and rhythms wrong on any page.
-- Audiveris (used for PDFs, and for images without homr) fails below about 10 px between staff lines and on skewed or curved pages.
+- Audiveris (used for PDFs) fails below about 10 px between staff lines and on skewed or curved pages.
 - Text and tempo can be incomplete. A tempo like "= 100" without a recognised beat unit gives no tempo, and an app default tempo is not a recognised one.
 - A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
 - Synthetic test pages, eleven phone photos checked on bars, staves, key and time, strict parsing and passing tests do not certify musical accuracy. Multi-page books and browsers other than desktop Chrome are untested.
@@ -148,4 +131,4 @@ Source beam recovery for photos is an open request (#39).
 
 The PDF preview uses unmodified [Mozilla PDF.js](https://mozilla.github.io/pdf.js/examples/) (Apache-2.0) on a canvas, bundled with its licence and credited in About. The browser's own PDF viewer was not used: its coloured chrome breaks the black-and-white rule, and it blocked the raw download. The preview never changes what is recognised.
 
-The recognisers are not part of the MIT web app. The setup scripts fetch them onto your PC: homr code and models are AGPL-3.0, Audiveris is AGPL-3.0-or-later, and the English text model is Apache-2.0. The worker's wrappers do not relicense them.
+The recognisers are not part of the MIT web app: they run on the project's server, and nothing of them reaches your browser. homr code and models are AGPL-3.0, Audiveris is AGPL-3.0-or-later, and the English text model is Apache-2.0. The scanner's complete source is public in this repository: the service in `research/omr/service/` (its `Dockerfile` fetches each recogniser at a pinned version and checks its digest) and the adapters in `research/omr/prototypes/local-worker/`, whose wrappers do not relicense them.

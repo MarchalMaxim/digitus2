@@ -117,8 +117,8 @@ def test_native_argv_settings_and_model_isolation(tmp_path, monkeypatch, with_en
     assert source.read_bytes() == b"%PDF-original-vector-bytes"
     assert captured["command"][-1] == str(source)
     assert captured["command"][captured["command"].index("-cp") + 1] == str(bundle / "portable/Audiveris/app/*")
-    for key in ["APPDATA", "LOCALAPPDATA", "TEMP", "TMP"]:
-        assert Path(captured["env"][key]).is_relative_to(job)
+    for key, value in audiveris.job_environment(job).items():
+        assert captured["env"][key] == value and Path(value).is_relative_to(job)
     assert "JAVA_TOOL_OPTIONS" not in captured["env"]
     import json
     invocation = json.loads((job / "invocation.json").read_text())

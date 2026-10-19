@@ -93,10 +93,6 @@
   display: block;
   text-align: left;
 }
-.scan-setup {
-  border-top: 1px solid var(--gray-2);
-  padding-top: 0.75rem;
-}
 .scan-view summary {
   cursor: pointer;
   min-height: 44px;

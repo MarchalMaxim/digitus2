@@ -1,24 +1,25 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { openFiles } from './helpers/scan.js';
+import { SCAN_SERVICE } from '../src/scan/service.js';
+import {
+  blockService,
+  mockService,
+  openFiles,
+  recordService,
+  serviceCall,
+} from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
 
-// Recognition needs the PC worker, which a phone cannot reach: these flows run as a PC window,
-// at 360 px in the mobile project. The phone's own path is scan-phone.spec.ts.
+// These flows run as a PC window (mouse, no camera), also at 360 px in the mobile project. A
+// touch phone scans the same way; its camera and thumb-sized page tools are scan-phone.spec.ts.
 test.use({ hasTouch: false, isMobile: false });
 
-const id = 'a'.repeat(32);
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=',
   'base64',
 );
-const health = {
-  protocol: 'digitus2-scan-v1',
-  recognizer: 'test recognizer',
-  capabilities: { textModelConfigured: true },
-};
 async function choose(page: Page) {
   await page.goto('/');
   await page
@@ -33,27 +34,28 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   const uploads: Buffer[] = [];
   const firstPhoto = Buffer.concat([png, Buffer.from('first')]);
   const secondPhoto = Buffer.concat([png, Buffer.from('second')]);
-  const firstId = 'b'.repeat(32);
-  const secondId = 'c'.repeat(32);
   let secondAttempts = 0;
   const xml = (step: string) =>
     `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes><note id="n1"><pitch><step>${step}</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type></note></measure></part></score-partwise>`;
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    const request = route.request();
-    const url = request.url();
-    if (url.endsWith('/health')) await route.fulfill({ json: health });
-    else if (request.method() === 'POST') {
-      uploads.push(request.postDataBuffer()!);
-      const next = uploads.length === 1 ? firstId : secondId;
-      if (next === secondId) secondAttempts++;
-      await route.fulfill({ status: 202, json: { id: next } });
-    } else if (url.endsWith('/result'))
-      await route.fulfill({ body: xml(url.includes(firstId) ? 'C' : 'D') });
-    else if (request.method() === 'DELETE') await route.fulfill({ json: { state: 'cancelled' } });
-    else if (url.endsWith(secondId) && secondAttempts === 1)
-      await route.fulfill({ json: { state: 'failed', failure: { message: 'Page too blurry.' } } });
-    else await route.fulfill({ json: { state: 'ready', ...health } });
-  });
+  await mockService(
+    page,
+    (request) => xml(request.postDataBuffer()!.equals(firstPhoto) ? 'C' : 'D'),
+    {
+      onRecognize: async (request) => {
+        const upload = request.postDataBuffer()!;
+        uploads.push(upload);
+        // The second photo fails once, then succeeds on the retry.
+        if (upload.equals(secondPhoto) && ++secondAttempts === 1)
+          return {
+            status: 422,
+            json: {
+              state: 'failed',
+              failure: { code: 'not-recognized', message: 'Page too blurry.' },
+            },
+          };
+      },
+    },
+  );
   await page.goto('/');
   await page.locator('input[type=file]').setInputFiles([
     { name: 'second.png', mimeType: 'image/png', buffer: secondPhoto },
@@ -81,7 +83,6 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await expectOneRed(page, 'image page ordering');
   await expectNoSeriousA11y(page, 'image page ordering');
   await page.screenshot({ path: testInfo.outputPath('image-ordering.png'), fullPage: true });
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByText('Page too blurry.', { exact: false })).toBeVisible();
   await expect(page.locator('.scan-page-list li').first()).toContainText('Recognized');
@@ -106,32 +107,37 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
 });
 
-test('scan: deliberate connection, raw review, explicit use and retained provenance', async ({
+test('scan: the warm-up happens on arrival, the page goes only on Scan', async ({
   page,
 }, testInfo) => {
-  let requests = 0;
+  const calls = recordService(page);
   let uploaded: Buffer | null = null;
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    requests++;
-    const request = route.request();
-    if (request.url().endsWith('/health')) await route.fulfill({ json: health });
-    else if (request.method() === 'POST') {
+  let headers: Record<string, string> = {};
+  await mockService(page, libraryScore('twinkle-twinkle-little-star').toString('utf8'), {
+    onRecognize: async (request) => {
       uploaded = request.postDataBuffer();
-      await route.fulfill({ status: 202, json: { id, state: 'running' } });
-    } else if (request.url().endsWith('/result'))
-      await route.fulfill({
-        contentType: 'application/vnd.recordare.musicxml+xml',
-        body: libraryScore('twinkle-twinkle-little-star'),
-      });
-    else await route.fulfill({ json: { state: 'ready', ...health } });
+      headers = await request.allHeaders();
+    },
   });
   await choose(page);
-  expect(requests).toBe(0);
-  await expectOneRed(page, 'scan connection');
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
+  // Exactly one request on arrival, the health warm-up: the page itself is not sent yet.
+  await expect.poll(() => calls).toEqual(['GET /v1/health']);
+  await expect(page.getByRole('button', { name: 'Connect to this PC' })).toHaveCount(0);
+  await expect(
+    page.getByText(
+      'Recognition runs on the project’s scanner on Google Cloud (Netherlands). Your page is sent there, recognized and then deleted.',
+    ),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'How scanning works' })).toBeVisible();
+  await expectOneRed(page, 'scan intro');
+  expect(calls).toEqual(['GET /v1/health']);
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
+  expect(calls).toEqual(['GET /v1/health', 'POST /v1/recognize']);
   expect(uploaded).toEqual(png);
+  expect(headers['x-digitus2-client']).toBe('1');
+  expect(headers['x-digitus2-job']).toMatch(/^[a-f0-9]{32}$/);
+  expect(headers['content-type']).toBe('image/png');
   await expect(page.locator('.scan-review g.fing')).toHaveCount(0);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
@@ -149,10 +155,10 @@ test('scan: deliberate connection, raw review, explicit use and retained provena
   await expectNoSeriousA11y(page, 'scan review');
   await page.getByRole('button', { name: 'Use for fingerings' }).click();
   await expect(page.locator('.score-sheet g.fing').first()).toBeVisible();
-  const workerRequests = requests;
+  const serviceCalls = calls.length;
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
-  expect(requests).toBe(workerRequests);
+  expect(calls).toHaveLength(serviceCalls);
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   await page.getByRole('button', { name: 'Use for fingerings' }).click();
   await expect(page.locator('.score-sheet g.fing').first()).toBeVisible();
@@ -160,41 +166,51 @@ test('scan: deliberate connection, raw review, explicit use and retained provena
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
   await openFiles(page);
   await expect(page.getByRole('button', { name: 'Download raw MusicXML' })).toBeVisible();
+  expect(calls).toHaveLength(serviceCalls);
 });
 
-test('scan: unavailable worker is recoverable and has on-demand setup', async ({ page }) => {
-  await page.route('http://127.0.0.1:8996/**', (route) => route.abort());
+test('scan: a scanner that does not answer is reported and the scan can be retried', async ({
+  page,
+}) => {
+  // Google's answers in front of the service (billing off, its 429 and 5xx) carry no CORS
+  // header: the page sees a failed request while the device is online.
+  await blockService(page);
   await choose(page);
-  await expect(page.getByText('Keep that terminal open.', { exact: false })).not.toBeVisible();
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
-  await expect(page.getByRole('alert')).toContainText('Could not connect');
-  await expect(page.getByRole('button', { name: 'Connect to this PC' })).toBeEnabled();
-  await page.getByText('Set up the PC worker', { exact: true }).click();
-  await expect(page.locator('pre').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByRole('alert')).toContainText(
+    'The scanner could not answer. Try again later.',
+  );
+  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
+});
+
+test('scan: an offline device is told to check its connection', async ({ page }) => {
+  await blockService(page);
+  await choose(page);
+  await page.context().setOffline(true);
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByRole('alert')).toContainText(
+    'Could not reach the scanner. Check your connection and try again.',
+  );
+  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
+  await page.context().setOffline(false);
+});
+
+test('scan: a busy scanner says so and keeps the button', async ({ page }) => {
+  await mockService(page, '', {
+    onRecognize: async () => ({ status: 429, json: { error: 'busy' } }),
+  });
+  await choose(page);
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByRole('alert')).toContainText('busy');
+  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
 });
 
 test('scan: importer refusal retains raw output and blocks fingering use', async ({ page }) => {
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    const request = route.request();
-    if (request.url().endsWith('/health'))
-      await route.fulfill({
-        json: {
-          ...health,
-          warnings: [
-            { code: 'ocr-language-not-configured', message: 'English OCR is not configured.' },
-          ],
-        },
-      });
-    else if (request.method() === 'POST') await route.fulfill({ status: 202, json: { id } });
-    else if (request.url().endsWith('/result'))
-      await route.fulfill({
-        body: '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes><note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><tie type="stop"/></note></measure></part></score-partwise>',
-        contentType: 'application/xml',
-      });
-    else await route.fulfill({ json: { ...health, state: 'ready' } });
-  });
+  await mockService(
+    page,
+    '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes><note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><tie type="stop"/></note></measure></part></score-partwise>',
+  );
   await choose(page);
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('alert')).toContainText('cannot be used');
   await openFiles(page);
@@ -204,23 +220,23 @@ test('scan: importer refusal retains raw output and blocks fingering use', async
 });
 
 test('scan: cancellation deletes the job and returns to retry', async ({ page }) => {
-  let deleted = false;
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    if (route.request().method() === 'DELETE') {
-      deleted = true;
-      await route.fulfill({ json: { state: 'cancelling' } });
-    } else if (route.request().url().endsWith('/health')) await route.fulfill({ json: health });
-    else if (route.request().method() === 'POST')
-      await route.fulfill({ status: 202, json: { id } });
-    else await route.fulfill({ json: { state: 'running' } });
+  // The service holds the recognition until the cancel arrives, then answers it as cancelled.
+  await mockService(page, '', {
+    onRecognize: async () => {
+      await page.waitForRequest((request) => request.method() === 'DELETE');
+      return { status: 409, json: { state: 'cancelled' } };
+    },
   });
   await choose(page);
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
+  const posting = page.waitForRequest((request) => serviceCall(request) === 'POST /v1/recognize');
   await page.getByRole('button', { name: 'Scan this score' }).click();
-  await page.waitForRequest((request) => request.url().endsWith(id));
+  const job = (await (await posting).allHeaders())['x-digitus2-job'];
+  expect(job).toMatch(/^[a-f0-9]{32}$/);
+  const deleting = page.waitForRequest((request) => request.method() === 'DELETE');
   await page.getByRole('button', { name: 'Cancel scan' }).click();
-  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeVisible();
-  expect(deleted).toBe(true);
+  expect((await deleting).url()).toBe(`${SCAN_SERVICE}/v1/jobs/${job}`);
+  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
+  await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
 /** Tiny two-page vector PDF: local preview/pagination/upload boundary, not an accuracy fixture. */
@@ -256,14 +272,10 @@ test('scan: local multipage PDF preview, original upload and exact raw export', 
   const pdf = originalPdf();
   const xml = libraryScore('twinkle-twinkle-little-star');
   let uploaded: Buffer | null = null;
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    const request = route.request();
-    if (request.url().endsWith('/health')) await route.fulfill({ json: health });
-    else if (request.method() === 'POST') {
+  await mockService(page, xml.toString('utf8'), {
+    onRecognize: async (request) => {
       uploaded = request.postDataBuffer();
-      await route.fulfill({ status: 202, json: { id } });
-    } else if (request.url().endsWith('/result')) await route.fulfill({ body: xml });
-    else await route.fulfill({ json: { ...health, state: 'ready' } });
+    },
   });
   await page.goto('/');
   await page
@@ -272,7 +284,6 @@ test('scan: local multipage PDF preview, original upload and exact raw export', 
   await expect(page.getByRole('img', { name: 'Original PDF, page 1' })).toBeVisible();
   await page.getByRole('button', { name: 'Next original page' }).click();
   await expect(page.getByRole('img', { name: 'Original PDF, page 2' })).toBeVisible();
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   expect(uploaded).toEqual(pdf);
@@ -291,25 +302,21 @@ test('scan: local multipage PDF preview, original upload and exact raw export', 
 test('scan: known native resolution failure explains the actual cause and stays retryable', async ({
   page,
 }) => {
-  await page.route('http://127.0.0.1:8996/**', async (route) => {
-    if (route.request().url().endsWith('/health')) await route.fulfill({ json: health });
-    else if (route.request().method() === 'POST')
-      await route.fulfill({ status: 202, json: { id } });
-    else
-      await route.fulfill({
-        json: {
-          state: 'failed',
-          failure: {
-            code: 'staff-resolution-too-low',
-            message:
-              'The staff lines are only 6 pixels apart. Use the full-resolution original photo or the original PDF.',
-            details: { interlinePixels: 6 },
-          },
+  await mockService(page, '', {
+    onRecognize: async () => ({
+      status: 422,
+      json: {
+        state: 'failed',
+        failure: {
+          code: 'staff-resolution-too-low',
+          message:
+            'The staff lines are only 6 pixels apart. Use the full-resolution original photo or the original PDF.',
+          details: { interlinePixels: 6 },
         },
-      });
+      },
+    }),
   });
   await choose(page);
-  await page.getByRole('button', { name: 'Connect to this PC' }).click();
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('alert')).toContainText('6 pixels');
   await expect(page.getByRole('alert')).toContainText('full-resolution');

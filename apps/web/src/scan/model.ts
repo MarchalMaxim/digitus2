@@ -76,7 +76,7 @@ export async function validateScan(file: File): Promise<File> {
         ? bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255
         : bytes.join(',') === '137,80,78,71,13,10,26,10';
   if (!valid) throw new PhraseError((t) => t.scan.files.contentMismatch);
-  // A camera file named without our extension gets one, so the PC worker and downloads agree.
+  // A camera file named without our extension gets one, so its name and type agree in downloads.
   const name = scanMime(file.name)
     ? file.name
     : file.name.replace(/\.[^.]*$/, '') + SCAN_TYPES[type];

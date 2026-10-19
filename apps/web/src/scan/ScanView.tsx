@@ -12,19 +12,19 @@ import { createRenderer, type ScoreRenderer } from '../score/render/renderer.js'
 import { ScoreSheet } from '../score/ScoreSheet.js';
 import { useLocale, useT } from '../i18n/i18n.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
-import { PhraseError } from '../i18n/PhraseError.js';
 import {
   createScanClient,
   GRAND_STAFF_WARNING,
+  newJobId,
   UNKNOWN_WARNING,
-  type WorkerMetadata,
+  type ScanServiceMetadata,
 } from './client.js';
 import { meterOffers, type Correction } from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
-import { canShareFiles, handOff, handOffFiles, isTouchOnly } from './phone.js';
+import { isTouchOnly } from './phone.js';
 import {
   correct,
   timingIssue,
@@ -44,8 +44,14 @@ import './scan.css';
 
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
 
-const delay = () => new Promise<void>((resolve) => setTimeout(resolve, 350));
 const NO_CORRECTIONS: Correction[] = [];
+
+/** The scan in progress: the page on the scanner is named by its job, and stopped by both. */
+interface ScanRun {
+  cancelled: boolean;
+  job?: string;
+  controller?: AbortController;
+}
 
 /**
  * Review renders the raw recognition, or the reader's corrected copy of it, and never calls solve.
@@ -56,9 +62,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
   const t = useT();
   const [locale] = useLocale();
-  const [phase, setPhase] = useState<
-    'connect' | 'connected' | 'connecting' | 'scanning' | 'cancelling' | 'review'
-  >(initial.xml || hasPageRecognition ? 'review' : 'connect');
+  const [phase, setPhase] = useState<'ready' | 'scanning' | 'cancelling' | 'review'>(
+    initial.xml || hasPageRecognition ? 'review' : 'ready',
+  );
   // Errors are kept as phrases, so they follow a change of language while they are on screen.
   const [error, setErrorPhrase] = useState<Phrase | null>(() =>
     hasPageRecognition && !initial.xml && initial.pages!.length > 1
@@ -68,7 +74,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const setError = (phrase: Phrase | null) => {
     setErrorPhrase(() => phrase);
   };
-  const [health, setHealth] = useState<WorkerMetadata>();
+  const [health, setHealth] = useState<ScanServiceMetadata>();
   const [pages, setPages] = useState<string[]>([]);
   // The XML each worker last finished with: use waits until both match what is on screen.
   // `detail` is the worker's own message, shown only under Recognition details.
@@ -92,7 +98,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [rotating, setRotating] = useState(false);
   const [width, setWidth] = useState(640);
   const [touchOnly] = useState(isTouchOnly);
-  const [handOffState, setHandOffState] = useState<'shared' | 'saved' | null>(null);
   const [note, setNote] = useState<number | null>(null);
   const [editStatus, setEditStatusPhrase] = useState<Phrase | null>(null);
   const setEditStatus = (phrase: Phrase | null) => {
@@ -105,9 +110,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const client = useRef(createScanClient()).current;
-  const active = useRef<{ id?: string; cancelled: boolean; started?: Promise<string> }>({
-    cancelled: false,
-  });
+  const active = useRef<ScanRun>({ cancelled: false });
   const alive = useRef(true);
   // One engine and one renderer for the whole review, so a correction re-renders without restarting
   // a worker or recompiling Verovio.
@@ -145,7 +148,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     [corrected, problems],
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
-  const busy = phase === 'connecting' || phase === 'scanning' || phase === 'cancelling';
+  const busy = phase === 'scanning' || phase === 'cancelling';
   const renderError = rendered && rendered.xml === renderXml ? rendered.error : null;
   const importError = imported && imported.xml === importXml ? imported.error : null;
   const reviewError = renderError ?? importError;
@@ -182,13 +185,26 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     alive.current = true;
     return () => {
       alive.current = false;
-      active.current.cancelled = true;
-      if (active.current.id) void client.cancel(active.current.id).catch(() => {});
+      const run = active.current;
+      run.cancelled = true;
+      run.controller?.abort();
+      if (run.job) void client.cancel(run.job).catch(() => {});
       workers.current?.engine.dispose();
       workers.current?.renderer.dispose();
       workers.current = null;
     };
   }, [client]);
+  useEffect(() => {
+    // The scanner sleeps when unused: a health request on arrival wakes it before the button is
+    // pressed. Its failure says nothing; the scan itself reports any problem.
+    if (phase !== 'ready') return;
+    client.health().then(
+      (metadata) => {
+        if (alive.current) setHealth(metadata);
+      },
+      () => {},
+    );
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const element = resultHost.current;
     if (!element) return;
@@ -260,7 +276,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const arrange = (next: ScanPage[]) => {
     if (busy) return;
     setError(null);
-    setHandOffState(null);
     retain({
       ...session,
       file: next[0]!.file,
@@ -273,40 +288,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     });
   };
 
-  const connect = async () => {
-    setError(null);
-    setPhase('connecting');
-    try {
-      const metadata = await client.connect();
-      if (!alive.current) return;
-      setHealth(metadata);
-      setPhase('connected');
-    } catch {
-      if (alive.current) {
-        setPhase('connect');
-        setError((m) => m.scan.errors.connectFailed);
-      }
-    }
-  };
   const cancel = async () => {
-    active.current.cancelled = true;
+    const run = active.current;
+    const job = run.job;
+    run.cancelled = true;
     setPhase('cancelling');
+    run.controller?.abort();
     try {
-      const run = active.current;
-      const id = run.id ?? (await run.started);
-      if (id) await client.cancel(id);
+      if (job) await client.cancel(job);
     } catch {
-      setError((m) => m.scan.errors.cancelFailed);
+      if (alive.current) setError((m) => m.scan.errors.cancelFailed);
     } finally {
-      if (alive.current) setPhase('connected');
+      if (alive.current) setPhase('ready');
     }
   };
   const scan = async () => {
-    const run = { cancelled: false } as {
-      id?: string;
-      cancelled: boolean;
-      started?: Promise<string>;
-    };
+    const run: ScanRun = { cancelled: false };
     active.current = run;
     setError(null);
     setPhase('scanning');
@@ -316,39 +313,34 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       if (run.cancelled || !alive.current) return;
       setScanningPage(index + 1);
       page.error = undefined;
-      delete run.id;
+      // One synchronous request per page, named by a job id so a cancel can reach it at once.
+      const job = newJobId();
+      const controller = new AbortController();
+      run.job = job;
+      run.controller = controller;
       try {
-        run.started = client.start(page.file);
-        run.id = await run.started;
-        if (run.cancelled || !alive.current) {
-          await client.cancel(run.id);
+        const recognition = await client.recognize(page.file, job, controller.signal);
+        if (run.cancelled || !alive.current) return;
+        page.xml = recognition.xml;
+        page.recognizer = recognition.recognizer ?? health?.recognizer;
+        // The service's own warnings stand in for a page that reports none.
+        page.warnings = recognition.warnings.length
+          ? recognition.warnings
+          : (health?.warnings ?? []);
+        retain({ ...session, pages: results.map((p) => ({ ...p })) });
+      } catch (cause) {
+        if (run.cancelled || !alive.current) return;
+        if ((cause as Error)?.name === 'AbortError') {
+          // Cancelled on the scanner's side: the scan stops, and nothing went wrong.
+          run.cancelled = true;
+          setPhase('ready');
           return;
         }
-        const deadline = performance.now() + 190000;
-        while (!run.cancelled && alive.current) {
-          if (performance.now() > deadline) throw new PhraseError((m) => m.scan.errors.timedOut);
-          const status = await client.status(run.id);
-          if (status.state === 'ready') {
-            const xml = await client.result(run.id);
-            if (run.cancelled || !alive.current) return;
-            page.xml = xml;
-            page.recognizer = status.recognizer ?? health?.recognizer;
-            page.warnings = status.warnings ?? health?.warnings ?? [];
-            retain({ ...session, pages: results.map((p) => ({ ...p })) });
-            break;
-          }
-          if (['failed', 'cancelled', 'timed_out'].includes(status.state ?? ''))
-            throw typeof status.failure?.message === 'string'
-              ? new Error(status.failure.message)
-              : new PhraseError((m) => m.scan.errors.notRecognized);
-          await delay();
-        }
-      } catch (cause) {
-        if (run.id) await client.cancel(run.id).catch(() => {});
-        if (alive.current && !run.cancelled) {
-          page.error = messageOf(cause);
-          retain({ ...session, pages: results.map((p) => ({ ...p })) });
-        }
+        page.error = messageOf(cause);
+        retain({ ...session, pages: results.map((p) => ({ ...p })) });
+      } finally {
+        delete run.job;
+        delete run.controller;
       }
     }
     if (run.cancelled || !alive.current) return;
@@ -368,7 +360,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             ? () => reason
             : (m) => m.scan.errors.recognitionFailed,
       );
-      setPhase('connected');
+      setPhase('ready');
       return;
     }
     let xml: string | undefined;
@@ -418,10 +410,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       bytes: new TextEncoder().encode(corrected?.xml ?? session.xml),
       scan: session,
     });
-  };
-  const sendPhotos = async () => {
-    const result = await handOff(handOffFiles(sourcePages), t.scan.phone.shareTitle);
-    if (alive.current && result !== 'cancelled') setHandOffState(result);
   };
 
   // Corrections: each one is checked before it is recorded, and recorded only when it applies.
@@ -573,127 +561,56 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       {phase !== 'review' ? (
         <div className="scan-intro">
           <section className="stack">
-            {touchOnly && isImage ? (
-              <>
-                <p>{t.scan.phone.explain}</p>
-                <div className="row">
-                  <Button
-                    primary
-                    disabled={rotating}
-                    onClick={() => {
-                      void sendPhotos();
-                    }}
-                  >
-                    {canShareFiles() ? t.scan.phone.share : t.scan.phone.save}
-                  </Button>
-                </div>
-                <p role="status">
-                  {handOffState === 'shared'
-                    ? t.scan.phone.shared
-                    : handOffState === 'saved'
-                      ? t.scan.phone.saved
-                      : ''}
-                </p>
-              </>
-            ) : (
-              <>
-                <p>{t.scan.view.advice}</p>
-                <p className="small muted">{t.scan.view.workerNeeded}</p>
-                <div className="row">
-                  {phase === 'connect' || phase === 'connecting' ? (
-                    <Button
-                      primary
-                      disabled={busy || rotating}
-                      onClick={() => {
-                        void connect();
-                      }}
-                    >
-                      {phase === 'connecting' ? t.scan.view.connecting : t.scan.view.connect}
-                    </Button>
-                  ) : phase === 'scanning' || phase === 'cancelling' ? (
-                    // Plain while the loader below carries the screen's one red.
-                    <Button
-                      disabled={phase === 'cancelling'}
-                      onClick={() => {
-                        void cancel();
-                      }}
-                    >
-                      {phase === 'cancelling' ? t.scan.view.cancelling : t.scan.view.cancelScan}
-                    </Button>
-                  ) : (
-                    <Button
-                      primary
-                      disabled={rotating}
-                      onClick={() => {
-                        void scan();
-                      }}
-                    >
-                      {batch && sourcePages.some((p) => p.error)
-                        ? t.scan.view.retryFailed
-                        : t.scan.view.scanScore}
-                    </Button>
-                  )}
-                </div>
-                {(phase === 'scanning' || phase === 'cancelling') && (
-                  <div className="scan-loader">
-                    <Loader tune="scale" />
-                  </div>
-                )}
-                <p role="status">
-                  {phase === 'scanning'
-                    ? batch
-                      ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
-                      : t.scan.view.scanning
-                    : phase === 'connected'
-                      ? t.scan.view.connected
-                      : ''}
-                </p>
-                {health?.capabilities?.textModelConfigured === false && (
-                  <p role="status">{t.scan.view.textModelMissing}</p>
-                )}
-              </>
+            <p>{t.scan.view.advice}</p>
+            <p className="small muted">{t.scan.view.where}</p>
+            <div className="row">
+              {phase === 'scanning' || phase === 'cancelling' ? (
+                // Plain while the loader below carries the screen's one red.
+                <Button
+                  disabled={phase === 'cancelling'}
+                  onClick={() => {
+                    void cancel();
+                  }}
+                >
+                  {phase === 'cancelling' ? t.scan.view.cancelling : t.scan.view.cancelScan}
+                </Button>
+              ) : (
+                <Button
+                  primary
+                  disabled={rotating}
+                  onClick={() => {
+                    void scan();
+                  }}
+                >
+                  {batch && sourcePages.some((p) => p.error)
+                    ? t.scan.view.retryFailed
+                    : t.scan.view.scanScore}
+                </Button>
+              )}
+            </div>
+            {(phase === 'scanning' || phase === 'cancelling') && (
+              <div className="scan-loader">
+                <Loader tune="scale" />
+              </div>
+            )}
+            <p role="status">
+              {phase === 'scanning'
+                ? batch
+                  ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
+                  : t.scan.view.scanning
+                : ''}
+            </p>
+            {health?.capabilities?.textModelConfigured === false && (
+              <p role="status">{t.scan.view.textModelMissing}</p>
             )}
             {error && <p role="alert">{error(t)}</p>}
-            {touchOnly && isImage ? (
-              <a
-                href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {t.scan.setup.help}
-              </a>
-            ) : (
-              <details className="scan-setup">
-                <summary>{t.scan.setup.summary}</summary>
-                <div className="stack">
-                  <p>{t.scan.setup.install}</p>
-                  <pre>
-                    <code>
-                      powershell -File research/omr/prototypes/oemer-quality/prepare-audiveris.ps1
-                      {'\n'}powershell -File
-                      research/omr/prototypes/oemer-quality/prepare-text-models.ps1
-                      {'\n'}powershell -File research/omr/prototypes/homr-photo/setup.ps1
-                    </code>
-                  </pre>
-                  <pre>
-                    <code>
-                      python research/omr/prototypes/local-worker/worker.py --bundle
-                      research/omr/results/quality-wave/toolchain --short-staves --text-models
-                      research/omr/results/quality-wave/text-models --homr-toolchain
-                      research/omr/results/photo-options/toolchain
-                    </code>
-                  </pre>
-                  <p className="small">{t.scan.setup.keepOpen}</p>
-                  <a
-                    href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {t.scan.setup.help}
-                  </a>
-                </div>
-              </details>
-            )}
+            <a
+              href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t.scan.view.help}
+            </a>
           </section>
           <section className="stack scan-source">
             <h2>{t.scan.view.original}</h2>
@@ -993,7 +910,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               <Button
                 primary={nextRed === 'again'}
                 onClick={() => {
-                  setPhase('connect');
+                  setPhase('ready');
                   setError(null);
                   setReviewMode('combined');
                   select(null);

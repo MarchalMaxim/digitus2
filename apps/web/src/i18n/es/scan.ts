@@ -11,33 +11,24 @@ export const scan: Messages['scan'] = {
       plural('es', n, { one: '# imagen de página', other: '# imágenes de página' }),
     advice:
       'Los PDF originales y los escaneos planos de alta resolución funcionan mejor. Las fotos de libros pueden fallar, incluso bien iluminadas. El resultado se abre junto al original para revisarlo.',
-    workerNeeded: 'Para escanear hace falta el programa del PC en marcha en este ordenador.',
-    connect: 'Conectar con este PC',
-    connecting: 'Conectando…',
+    where:
+      'El reconocimiento se hace en el escáner del proyecto, en Google Cloud (Países Bajos). Tu página se envía allí, se reconoce y después se borra.',
     cancelScan: 'Cancelar escaneo',
     cancelling: 'Cancelando…',
     retryFailed: 'Reintentar las páginas fallidas',
     scanScore: 'Escanear esta partitura',
     scanning:
-      'Reconociendo en este PC… Suele tardar unos segundos; las páginas más largas pueden tardar unos minutos.',
+      'Reconociendo… Suele tardar menos de un minuto. El primer escaneo tras un rato sin uso tarda más mientras el escáner arranca.',
     scanningPage: (page: number, total: number) =>
-      `Página ${page} de ${total} · Reconociendo en este PC… Suele tardar unos segundos; las páginas más largas pueden tardar unos minutos.`,
-    connected: 'PC conectado.',
+      `Página ${page} de ${total} · Reconociendo… Suele tardar menos de un minuto. El primer escaneo tras un rato sin uso tarda más mientras el escáner arranca.`,
     textModelMissing:
-      'El reconocimiento de texto en inglés no está configurado. Puede faltar el texto musical. Mira la configuración más abajo.',
+      'El reconocimiento de texto en inglés no está configurado. Puede faltar el texto musical.',
+    help: 'Cómo funciona el escaneo',
     original: 'Original',
     openPdf: 'Abrir el PDF original',
     openImage: 'Abrir la imagen original',
     preparingPdf: 'Preparando el PDF original…',
     originalAlt: 'Partitura impresa original',
-  },
-  setup: {
-    summary: 'Configurar el programa de PC',
-    install:
-      'En el PC donde usas este navegador, abre la carpeta del proyecto digitus2. Instala una sola vez los reconocedores de fotos y de PDF y luego inicia el programa cuando lo necesites.',
-    keepOpen:
-      'Deja esa terminal abierta. Permite la conexión local del navegador después de pulsar Conectar con este PC. Para detener el procesamiento, cierra el programa.',
-    help: 'Configuración y solución de problemas',
   },
   review: {
     caveat:
@@ -66,7 +57,7 @@ export const scan: Messages['scan'] = {
     beamGrouping: 'La agrupación de las barras se deduce y puede diferir del original.',
     graphicSpanWarning:
       'Las ligaduras y otros signos de notación se mantienen dentro de cada página escaneada. Compara las continuaciones en los bordes de página; los extremos que faltan no se han reparado.',
-    /** The worker found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'Los pentagramas no se emparejaron en un sistema de piano, así que las dos manos se leen como una. La digitación saldría con las manos mal: prueba una foto más plana y bien iluminada o el PDF original.',
     unknownWarning: 'El reconocedor indicó una advertencia desconocida. Revisa bien el original.',
@@ -195,14 +186,6 @@ export const scan: Messages['scan'] = {
   phone: {
     takePhoto: 'Hacer una foto',
     takeAnother: 'Hacer otra foto',
-    explain:
-      'El reconocimiento se hace en un PC, y un teléfono no puede conectarse a él. Envía estas fotos a tu PC y ábrelas allí para escanearlas.',
-    share: 'Enviar las fotos a tu PC',
-    save: 'Guardar las fotos',
-    shareTitle: 'Fotos de partitura',
-    shared: 'Fotos enviadas. Ábrelas en tu PC con «Abre tu propia partitura».',
-    saved:
-      'Fotos guardadas en este dispositivo. Pásalas a tu PC y ábrelas con «Abre tu propia partitura».',
   },
   errors: {
     notCombinedSaved:
@@ -217,10 +200,10 @@ export const scan: Messages['scan'] = {
       'Este reconocimiento todavía no se puede usar para la digitación: algunas de sus notas no encajan.',
     offline: 'No se pudo conectar con el escáner. Comprueba tu conexión e inténtalo de nuevo.',
     cancelFailed:
-      'No se pudo confirmar la cancelación. Cierra la terminal del programa para detener el procesamiento.',
+      'No se pudo confirmar la cancelación. El escáner se detiene solo en un máximo de tres minutos.',
     timedOut: 'El reconocimiento tardó demasiado. Prueba con una página más pequeña y más nítida.',
     notRecognized:
-      'El PC no pudo reconocer una partitura completa en esta página. Prueba con el PDF original o con una imagen más plana y de mayor resolución.',
+      'El escáner no pudo reconocer una partitura completa en esta página. Prueba con el PDF original o con una imagen más plana y de mayor resolución.',
   },
   pager: {
     previous: 'Anterior',

@@ -29,6 +29,7 @@ afterEach(() => {
   cleanup();
   resetLocaleForTests();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 it('reopens complete individual recognition in page review when combining failed', () => {
@@ -51,7 +52,7 @@ it('reopens complete individual recognition in page review when combining failed
     'true',
   );
   expect(screen.getByRole('button', { name: 'Combined score' })).toBeDisabled();
-  expect(screen.queryByRole('button', { name: 'Connect to this PC' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Scan this score' })).toBeNull();
   expect(screen.getByRole('alert')).toHaveTextContent('their notation could not be combined');
   expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
 });
@@ -188,37 +189,139 @@ it('shows the file name, with no page-view toggle, for a single-page session', a
   expect(screen.queryByRole('button', { name: 'Combined score' })).toBeNull();
 });
 
-it('connects, scans one image and arrives at the review of the recognition', async () => {
-  const id = 'b'.repeat(32);
-  const xml = '<score-partwise><part-list/></score-partwise>';
-  vi.stubGlobal(
-    'fetch',
-    vi.fn((url: string, init?: RequestInit) => {
-      if (url.endsWith('/health'))
-        return Promise.resolve(new Response(JSON.stringify({ protocol: 'digitus2-scan-v1' })));
-      if (init?.method === 'POST') return Promise.resolve(new Response(JSON.stringify({ id })));
-      if (url.endsWith('/result')) return Promise.resolve(new Response(xml));
-      return Promise.resolve(new Response(JSON.stringify({ state: 'ready', recognizer: 'Test' })));
-    }),
+/** A scan service stub: `recognize` answers each POST; the health and DELETE answers are fixed. */
+function stubService(options: {
+  health?: () => Promise<Response>;
+  recognize?: (init: RequestInit) => Promise<Response>;
+}) {
+  const fetcher = vi.fn((url: string, init?: RequestInit) => {
+    if (url.endsWith('/v1/health'))
+      return (
+        options.health?.() ??
+        Promise.resolve(
+          new Response(JSON.stringify({ protocol: 'digitus2-scan-v2', recognizer: 'Test' })),
+        )
+      );
+    if (url.endsWith('/v1/recognize') && init?.method === 'POST')
+      return (
+        options.recognize?.(init) ??
+        Promise.resolve(
+          new Response(
+            JSON.stringify({ state: 'ready', xml: scanXml, recognizer: 'Test', warnings: [] }),
+          ),
+        )
+      );
+    if (init?.method === 'DELETE')
+      return Promise.resolve(new Response(JSON.stringify({ state: 'cancelled' })));
+    return Promise.resolve(new Response('{}', { status: 404 }));
+  });
+  vi.stubGlobal('fetch', fetcher);
+  const calls = (method: string) =>
+    fetcher.mock.calls.filter(([, init]) => init?.method === method);
+  const job = () =>
+    (calls('POST')[0]?.[1]?.headers as Record<string, string> | undefined)?.['X-Digitus2-Job'];
+  return { fetcher, calls, job };
+}
+/** A recognition that never answers until the request is aborted. */
+const pending = (init: RequestInit) =>
+  new Promise<Response>((_, reject) => {
+    init.signal?.addEventListener('abort', () => {
+      reject(init.signal?.reason ?? new DOMException('aborted', 'AbortError'));
+    });
+  });
+const scanXml = '<score-partwise><part-list/></score-partwise>';
+const freshSession = () => ({
+  id: 'fresh',
+  file: new File([png], 'photo.png', { type: 'image/png' }),
+});
+
+it('warms the scanner up on arrival, scans one image and arrives at the review', async () => {
+  const service = stubService({});
+  render(<ScanView session={freshSession()} />);
+  // The warm-up is a health request on arrival; nothing is sent before the button is pressed.
+  await vi.waitFor(() =>
+    expect(service.fetcher).toHaveBeenCalledWith(
+      expect.stringMatching(/\/v1\/health$/),
+      expect.anything(),
+    ),
   );
-  try {
-    render(
-      <ScanView
-        session={{
-          id: 'fresh',
-          file: new File([png], 'photo.png', { type: 'image/png' }),
-        }}
-      />,
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Connect to this PC' }));
-    await userEvent.click(await screen.findByRole('button', { name: 'Scan this score' }));
-    expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
-    await vi.waitFor(() =>
-      expect(load).toHaveBeenCalledWith(xml, 'scan.musicxml', expect.anything()),
-    );
-  } finally {
-    vi.unstubAllGlobals();
-  }
+  expect(service.calls('POST')).toHaveLength(0);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  const post = service.calls('POST');
+  expect(post).toHaveLength(1);
+  expect(post[0]![0]).toMatch(/\/v1\/recognize$/);
+  const headers = post[0]![1]!.headers as Record<string, string>;
+  expect(headers['X-Digitus2-Job']).toMatch(/^[a-f0-9]{32}$/);
+  expect(headers['X-Digitus2-Client']).toBe('1');
+  await vi.waitFor(() =>
+    expect(load).toHaveBeenCalledWith(scanXml, 'scan.musicxml', expect.anything()),
+  );
+});
+
+it('shows nothing when the warm-up fails, and the scan still works', async () => {
+  const service = stubService({ health: () => Promise.reject(new TypeError('Failed to fetch')) });
+  render(<ScanView session={freshSession()} />);
+  await vi.waitFor(() => expect(service.fetcher).toHaveBeenCalled());
+  await act(async () => {
+    await Promise.resolve();
+  });
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+});
+
+it('cancels the running job with a DELETE and returns to Scan this score', async () => {
+  const service = stubService({ recognize: pending });
+  render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(1));
+  await userEvent.click(screen.getByRole('button', { name: 'Cancel scan' }));
+  expect(await screen.findByRole('button', { name: 'Scan this score' })).toBeEnabled();
+  const job = service.job();
+  expect(job).toMatch(/^[a-f0-9]{32}$/);
+  expect(service.calls('DELETE').map(([url]) => url)).toEqual([
+    expect.stringMatching(new RegExp(`/v1/jobs/${job}$`)),
+  ]);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.queryByRole('heading', { name: 'Review the recognition' })).toBeNull();
+});
+
+it('sends the DELETE when the view unmounts mid-scan', async () => {
+  const service = stubService({ recognize: pending });
+  const { unmount } = render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(1));
+  const signal = service.calls('POST')[0]![1]!.signal!;
+  unmount();
+  await vi.waitFor(() => expect(service.calls('DELETE')).toHaveLength(1));
+  expect(service.calls('DELETE')[0]![0]).toMatch(new RegExp(`/v1/jobs/${service.job()}$`));
+  expect(signal.aborted).toBe(true);
+});
+
+it('offers the same single button on a touch-only device', async () => {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(any-pointer: coarse)',
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+  stubService({});
+  render(<ScanView session={freshSession()} />);
+  expect(screen.getByRole('button', { name: 'Scan this score' })).toBeVisible();
+  expect(screen.queryByText(/Send photos/)).toBeNull();
+  expect(screen.queryByText(/Save photos/)).toBeNull();
+  expect(screen.getByText(/Google Cloud \(Netherlands\)/)).toHaveClass('small', 'muted');
+  expect(screen.getByRole('link', { name: 'How scanning works' })).toHaveAttribute(
+    'href',
+    'https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md',
+  );
+  // The camera entry stays on a touch-only device.
+  expect(screen.getByText('Take another photo')).toBeVisible();
+  await act(async () => {
+    await Promise.resolve();
+  });
 });
 
 it('renders the recognition at the width of its column, rounded to a step of 80 pixels', async () => {

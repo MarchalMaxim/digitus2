@@ -11,33 +11,24 @@ export const scan: Messages['scan'] = {
       plural('fr', n, { one: '# image de page', other: '# images de pages' }),
     advice:
       'Les PDF d’origine et les numérisations à plat en haute résolution donnent les meilleurs résultats. Les photos de livres peuvent échouer, même bien éclairées. Le résultat s’ouvre à côté de l’original pour que vous puissiez le vérifier.',
-    workerNeeded: 'La numérisation nécessite le programme PC lancé sur cet ordinateur.',
-    connect: 'Se connecter à ce PC',
-    connecting: 'Connexion…',
+    where:
+      'La reconnaissance se fait sur le service de numérisation du projet, sur Google Cloud (Pays-Bas). Votre page y est envoyée, reconnue, puis supprimée.',
     cancelScan: 'Annuler la numérisation',
     cancelling: 'Annulation…',
     retryFailed: 'Réessayer les pages en échec',
     scanScore: 'Numériser cette partition',
     scanning:
-      'Reconnaissance sur ce PC… En général quelques secondes\u00a0; les pages plus longues peuvent prendre quelques minutes.',
+      'Reconnaissance… En général moins d’une minute. La première numérisation après une période d’inactivité prend plus longtemps, car le service de numérisation doit démarrer.',
     scanningPage: (page: number, total: number) =>
-      `Page ${page} sur ${total} · Reconnaissance sur ce PC… En général quelques secondes\u00a0; les pages plus longues peuvent prendre quelques minutes.`,
-    connected: 'PC connecté.',
+      `Page ${page} sur ${total} · Reconnaissance… En général moins d’une minute. La première numérisation après une période d’inactivité prend plus longtemps, car le service de numérisation doit démarrer.`,
     textModelMissing:
-      'La reconnaissance du texte anglais n’est pas configurée. Le texte musical peut manquer. Voir la configuration ci-dessous.',
+      'La reconnaissance du texte anglais n’est pas configurée. Le texte musical peut manquer.',
+    help: 'Comment fonctionne la numérisation',
     original: 'Original',
     openPdf: 'Ouvrir le PDF d’origine',
     openImage: 'Ouvrir l’image d’origine',
     preparingPdf: 'Préparation du PDF d’origine…',
     originalAlt: 'Partition imprimée d’origine',
-  },
-  setup: {
-    summary: 'Configurer le programme PC',
-    install:
-      'Sur le PC qui exécute ce navigateur, ouvrez le dossier du projet digitus2. Installez une seule fois les outils de reconnaissance des photos et des PDF, puis lancez le programme quand vous en avez besoin.',
-    keepOpen:
-      'Laissez ce terminal ouvert. Autorisez la connexion locale du navigateur après avoir appuyé sur «\u00a0Se connecter à ce PC\u00a0». Pour arrêter le traitement, fermez le programme.',
-    help: 'Configuration et dépannage',
   },
   review: {
     caveat:
@@ -66,7 +57,7 @@ export const scan: Messages['scan'] = {
     beamGrouping: 'Le regroupement par ligatures est déduit et peut différer de l’original.',
     graphicSpanWarning:
       'Les liaisons et autres signes de notation restent limités à chaque page numérisée. Comparez les suites en bord de page\u00a0; les extrémités manquantes n’ont pas été réparées.',
-    /** The worker found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'Les portées n’ont pas été réunies en système de piano : les deux mains sont lues comme une seule. Le doigté aurait de mauvaises mains : essayez une photo plus plate et bien éclairée, ou le PDF d’origine.',
     unknownWarning:
@@ -196,14 +187,6 @@ export const scan: Messages['scan'] = {
   phone: {
     takePhoto: 'Prendre une photo',
     takeAnother: 'Prendre une autre photo',
-    explain:
-      'La reconnaissance se fait sur un PC, qu’un téléphone ne peut pas joindre. Envoyez ces photos à votre PC, puis ouvrez-les là-bas pour les numériser.',
-    share: 'Envoyer les photos à votre PC',
-    save: 'Enregistrer les photos',
-    shareTitle: 'Photos de partition',
-    shared: 'Photos transmises. Ouvrez-les sur votre PC avec « Ouvrir votre propre partition ».',
-    saved:
-      'Photos enregistrées sur cet appareil. Transférez-les sur votre PC, puis ouvrez-les avec « Ouvrir votre propre partition ».',
   },
   errors: {
     notCombinedSaved:
@@ -219,10 +202,10 @@ export const scan: Messages['scan'] = {
     offline:
       'Impossible de joindre le service de numérisation. Vérifiez votre connexion et réessayez.',
     cancelFailed:
-      'Impossible de confirmer l’annulation. Fermez le terminal du programme pour arrêter le traitement.',
+      'Impossible de confirmer l’annulation. Le service de numérisation s’arrête de lui-même dans les trois minutes.',
     timedOut: 'La reconnaissance a pris trop de temps. Essayez une page plus petite et plus nette.',
     notRecognized:
-      'Le PC n’a pas pu reconnaître une partition complète sur cette page. Essayez le PDF d’origine ou une image plus plate et de meilleure résolution.',
+      'Le service de numérisation n’a pas pu reconnaître une partition complète sur cette page. Essayez le PDF d’origine ou une image plus plate et de meilleure résolution.',
   },
   pager: {
     previous: 'Précédente',

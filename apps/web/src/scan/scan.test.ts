@@ -9,7 +9,6 @@ import {
   UNKNOWN_WARNING,
 } from './client.js';
 import { SCAN_LIMIT, validateScan } from './model.js';
-import { DEPLOYED_SCAN_SERVICE, SCAN_SERVICE } from './service.js';
 
 describe('experimental scan boundary', () => {
   it('validates signatures and keeps original PDF bytes and normalized MIME', async () => {
@@ -180,9 +179,6 @@ describe('experimental scan boundary', () => {
     const ids = new Set(Array.from({ length: 50 }, newJobId));
     expect(ids.size).toBe(50);
     for (const id of ids) expect(id).toMatch(/^[a-f0-9]{32}$/);
-  });
-  it('talks to the deployed service unless the build names another', () => {
-    expect(SCAN_SERVICE).toBe(DEPLOYED_SCAN_SERVICE);
   });
   it('normalizes actual structured worker warnings into safe review text', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(

@@ -23,6 +23,25 @@ ORIGIN = "https://marchalmaxim.github.io"
 TERMINAL = {"ready", "failed", "cancelled", "timed_out"}
 
 
+def validate_result(output: Path, directory: Path, max_result_bytes: int) -> bytes:
+    """The recogniser's MusicXML bytes, or ValueError unless a contained, bounded, entity-free partwise score."""
+    output = Path(output).resolve()
+    if Path(directory).resolve() not in output.parents or output.is_symlink() or not output.is_file():
+        raise ValueError("invalid output")
+    if output.stat().st_size > max_result_bytes:
+        raise ValueError("oversized output")
+    data = output.read_bytes()
+    if b"<!ENTITY" in data.upper():
+        raise ValueError("XML entities are not accepted")
+    try:
+        xml = ET.fromstring(data)
+    except ET.ParseError:
+        raise ValueError("not well-formed XML") from None
+    if xml.tag != "score-partwise":
+        raise ValueError("not a partwise score")
+    return data
+
+
 @dataclass
 class Job:
     id: str
@@ -100,17 +119,8 @@ class LocalWorker:
 
     def _run(self, job, source):
         try:
-            output = Path(self.recognizer(source, job.directory, job.cancelled)).resolve()
-            if job.directory not in output.parents or output.is_symlink() or not output.is_file():
-                raise ValueError("invalid output")
-            if output.stat().st_size > self.max_result_bytes:
-                raise ValueError("oversized output")
-            data = output.read_bytes()
-            if b"<!ENTITY" in data.upper():
-                raise ValueError("XML entities are not accepted")
-            xml = ET.fromstring(data)
-            if xml.tag != "score-partwise":
-                raise ValueError("not a partwise score")
+            data = validate_result(self.recognizer(source, job.directory, job.cancelled),
+                                   job.directory, self.max_result_bytes)
             metadata = self.review_metadata(source, job.directory)
             with self.lock:
                 job.metadata = metadata

@@ -3,7 +3,7 @@
 //
 //   pnpm verify            run every step
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
-//                          omr (requires build), omr:acceptance (requires build), bundle, e2e,
+//                          omr (requires build), omr:service, omr:acceptance (requires build), bundle, e2e,
 //                          benchmark, benchmark:mutopia, hands, embellish)
 //
 // Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
@@ -57,6 +57,19 @@ if (want('unit')) run('unit', 'pnpm', ['test']);
 if (want('build')) run('build', 'pnpm', ['build']);
 // Research OMR runner tests use the freshly built parser/evaluator, as external recognizers do.
 if (want('omr')) run('omr', 'pnpm', ['test:omr']);
+// The scan service and the loopback worker's Python tests; SKIP where Python or pytest is missing.
+if (want('omr:service')) {
+  const probe = spawnSync('python', ['-c', '"import pytest"'], { stdio: 'ignore', shell: true });
+  if (probe.status !== 0) skip('omr:service', 'python with pytest not found');
+  else
+    run('omr:service', 'python', [
+      '-m',
+      'pytest',
+      'research/omr/service',
+      'research/omr/prototypes/local-worker',
+      '-q',
+    ]);
+}
 // The scanning acceptance gate: the PC worker's recognisers on the library corpus, against
 // research/omr/acceptance/floor.json. Without the recognisers (docs/scanning.md) it is skipped.
 if (want('omr:acceptance')) {

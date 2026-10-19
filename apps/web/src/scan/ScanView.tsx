@@ -75,6 +75,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setErrorPhrase(() => phrase);
   };
   const [health, setHealth] = useState<ScanServiceMetadata>();
+  // Read by a scan that started before the warm-up answered.
+  const latestHealth = useRef<ScanServiceMetadata | undefined>(undefined);
   const [pages, setPages] = useState<string[]>([]);
   // The XML each worker last finished with: use waits until both match what is on screen.
   // `detail` is the worker's own message, shown only under Recognition details.
@@ -200,6 +202,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     if (phase !== 'ready') return;
     client.health().then(
       (metadata) => {
+        latestHealth.current = metadata;
         if (alive.current) setHealth(metadata);
       },
       () => {},
@@ -322,11 +325,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         const recognition = await client.recognize(page.file, job, controller.signal);
         if (run.cancelled || !alive.current) return;
         page.xml = recognition.xml;
-        page.recognizer = recognition.recognizer ?? health?.recognizer;
+        const service = latestHealth.current;
+        page.recognizer = recognition.recognizer ?? service?.recognizer;
         // The service's own warnings stand in for a page that reports none.
         page.warnings = recognition.warnings.length
           ? recognition.warnings
-          : (health?.warnings ?? []);
+          : (service?.warnings ?? []);
         retain({ ...session, pages: results.map((p) => ({ ...p })) });
       } catch (cause) {
         if (run.cancelled || !alive.current) return;

@@ -136,8 +136,9 @@ def detect_layout(bundle: Path) -> Layout:
         if hashlib.sha256(package.read_bytes()).hexdigest() != expected:
             raise ValueError("Audiveris release hash mismatch")
         if name == DEB_NAME:
-            app = bundle / "lib/app"
-            return Layout(bundle / "lib/runtime/bin/java", os.pathsep.join([str(app), str(app / "*")]), "deb")
+            # Jars only: with lib/app itself on the class path its loose classes load first, and
+            # Audiveris then resolves res/ in the job directory and exports nothing.
+            return Layout(bundle / "lib/runtime/bin/java", str(bundle / "lib/app" / "*"), "deb")
         portable = bundle / "portable/Audiveris"
         return Layout(portable / "runtime/bin/java.exe", str(portable / "app/*"), "msi")
     raise ValueError("Audiveris release not found in bundle")

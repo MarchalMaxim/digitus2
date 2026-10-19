@@ -1,0 +1,6 @@
+results/
+photos/
+prototypes/oemer*
+**/__pycache__
+**/.pytest_cache
+**/*.test.mjs

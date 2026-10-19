@@ -37,7 +37,7 @@ import { syntheticLibrary } from './testing/syntheticLibrary.js';
 
 const allPieces = libraryPieces();
 
-// The 277 curated pieces: the pins below describe them. The MuseScore archive pieces (collection
+// The 286 curated pieces: the pins below describe them. The MuseScore archive pieces (collection
 // ids pdmx-*, 2026-10-16) are checked in their own blocks further down.
 const pieces = allPieces.filter((p) => !p.collectionId.startsWith('pdmx-'));
 
@@ -115,8 +115,8 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
       'All 6 jazz, ragtime and modern pieces',
     );
   });
-  it('holds the library of the spec: 3,211 pieces, the counts of the spec table', () => {
-    expect(allPieces).toHaveLength(3211);
+  it('holds the library of the spec: 3,220 pieces, the counts of the spec table', () => {
+    expect(allPieces).toHaveLength(3220);
     const table = (tier: Tier) =>
       Object.fromEntries(shelves(allPieces, tier).shelves.map((s) => [s.id, s.count]));
     expect(table('easy')).toEqual({
@@ -145,13 +145,13 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
     });
     expect(table('challenging')).toEqual({
       songs: 382,
-      classical: 239,
+      classical: 240,
       folk: 1,
-      baroque: 44,
-      romantic: 20,
+      baroque: 49,
+      romantic: 23,
       jazz: 37,
     });
-    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([267, 1465, 756, 723]);
+    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([267, 1465, 756, 732]);
   });
   it('leaves out a shelf with no piece in the level', () => {
     const noJazz = pieces.filter((p) => shelfOfGenre(p.genre) !== 'jazz');

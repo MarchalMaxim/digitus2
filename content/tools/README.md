@@ -2,18 +2,18 @@
 
 These scripts produce everything in `content/scores/`, `content/manifest.json`,
 `content/verification.json` and `content/library-index.json`. The library has
-3,211 pieces in six lanes:
+3,220 pieces in six lanes:
 
 | Lane | Catalog | Pieces | Documented in |
 |---|---|---:|---|
 | Core 30 (own arrangements and Mutopia engravings) | `catalog.json` | 30 | `docs/research/content-library.md` |
 | L1 curated library | `catalog.d/` collection fragments | 119 | `docs/research/content-library.md`, section "L1 curated library" |
 | Mutopia expansion | `catalog.d/expansion-bach.json`, `expansion-teaching.json` | 13 | [Mutopia expansions](#mutopia-expansions) |
-| Bulk Mutopia | `catalog.d/expansion-bulk.json` | 115 | [Mutopia expansions](#mutopia-expansions) |
+| Bulk Mutopia | `catalog.d/expansion-bulk.json` | 124 | [Mutopia expansions](#mutopia-expansions) |
 | MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,522 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 | MuseScore archive, songs | `catalog.d/pdmx-songs.json`, `pdmx-songs-advanced.json` | 1,412 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 
-The first four lanes are the curated core of 277 pieces. Provenance, licences
+The first four lanes are the curated core of 286 pieces. Provenance, licences
 and the reasons behind each choice for the first 149 are in
 `docs/research/content-library.md`.
 
@@ -157,7 +157,7 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 | `repro.py` | `--core30` or `--all`: rebuilds those pieces into `content/_build/repro` (`build.py --out-dir`) and compares every file byte for byte with `content/scores/`. It exits 1 on any difference. |
 | `jsonio.py` | `library_lock()`, `write_atomic()`, `write_json()` and `update_json()`: the lock and the atomic writes for the shared JSON files. |
 | `musicxml2midi.py` | MusicXML to a format-1 MIDI file with the true hands as tracks (RH, LH), for engine test fixtures. |
-| `mutopia_advanced.py` | The Mutopia rule: which bulk editions held only for the span or lint gate ship at level 6 under the relaxed gates (`CONCERT` and `KEPT`, with a category for each), the whole-piece condition and the level note. `gates.py` checks it for every Mutopia piece with `relaxedGates`. |
+| `mutopia_advanced.py` | The Mutopia rule: which bulk editions held only for the span or lint gate ship at level 6 under the relaxed gates (`CONCERT` and `KEPT`, with a category for each) and the level note. `gates.py` checks it for every Mutopia piece with `relaxedGates`. |
 | `pdmx_*.py`, `dedupe.py`, `pdmx-excluded.json` | The MuseScore archive pipeline and its committed exclusion list (see [below](#musescore-archive-scores-pdmx)). |
 | `tests/` | pytest. `test_core30.py` pins the 38 core files by SHA-256 (`fixtures/core30.json`). The other files cover the catalog and fragments, the candidates, `jsonio`, the level heuristic, the lint gate, the gates, the arrangements and their melodies, the converter (`fixtures/features.ly`) and library-wide consistency (`test_library.py`, including the counts per level). |
 
@@ -220,7 +220,7 @@ Swedish polska), built and gated like any Mutopia engraving. Decisions:
 - The Handel source editions are dated 1930 and carry explicit Mutopia
   public-domain declarations.
 
-**Bulk Mutopia (115 pieces).** `bulk_sources.py` inventories the local
+**Bulk Mutopia (124 pieces).** `bulk_sources.py` inventories the local
 Mutopia mirror (`research/data/mutopia_src/`, see `research/data/README.md`),
 keeping editions whose instrument declaration is only piano, harpsichord,
 clavichord, keyboard or organ. It reads each edition's canonical RDF and
@@ -244,7 +244,7 @@ $PY -I content/tools/bulk_sources.py --download
 | Editions with published MIDI (MIDI files) | 607 (733) |
 | Editions not already in the catalog | 519 |
 | Public domain / CC BY / CC BY-SA | 369 / 72 / 167 |
-| Accepted / held with reasons / already represented | 115 / 404 / 89 |
+| Accepted / held with reasons / already represented | 124 / 395 / 89 |
 
 Admission is stricter than for a hand-picked piece. Every accepted edition is:
 
@@ -289,7 +289,7 @@ a conservative level 6, with a `levelNote` that claims no syllabus placement
 and a `levelOverride` where 6 is more than one above the proposal. Teaching pieces keep a reviewed placement within one
 of the proposal: Czerny Op. 821/5 went to level 3 rather than 2 for its
 chromatic ornaments and density. The lane's levels are 37 at 3, 3 at 4, 1 at
-5 and 74 at 6.
+5 and 83 at 6.
 
 **Level 6 under the relaxed gates** (the owner's decision: concert-level bulk
 editions held only for the span or lint gate may ship at grade 6 under the
@@ -298,10 +298,12 @@ Each of the 66 editions held only for those gates is placed in `CONCERT`
 (preludes and fugues, variations, sonata and suite movements, Romantic concert
 pieces, rags) or in `KEPT` (chorales, Satie, teaching and children's
 collections, a folk dance, light contemporary originals, reductions), with its
-category. A concert edition ships at 6 when it is a whole piece by the archive
-rule (60 s and 300 notes), stays within the archive's ceiling
-(`pdmx_advanced.within_ceiling`) and passes every other gate, both MIDI checks
-included. Its flags are in `relaxedGates` and in its notes
+category. A concert edition ships at 6 when it stays within the archive's
+ceiling (`pdmx_advanced.within_ceiling`) and passes every other gate, both MIDI
+checks included. The rule first also asked for a whole piece by the archive
+rule (60 s and 300 notes). The owner dropped that test after the first
+measurement: a bulk edition is complete by admission, so the test only held
+back short complete works, nine of them. Its flags are in `relaxedGates` and in its notes
 (`pdmx_advanced.relaxed_sentence`). The archive's own level-6 rule could not
 place these editions, because the heuristic proposes 3 for most of this
 Baroque repertoire.
@@ -309,13 +311,14 @@ Baroque repertoire.
 The 42 concert editions were fetched again with `fetch_mutopia.py` (a
 candidates file of their directories) and pinned by `sourceSha256`, then built
 and gated twice. The first pass measured the flags; the second checked the
-recorded ones.
+recorded ones. When the whole-piece test was dropped, the held concert editions
+were rebuilt and gated again.
 
 | Concert editions | Count |
 |---|---:|
-| Released at level 6 | 24 (11 Bach, 3 Chopin, 2 each Beethoven, Brahms, Haydn and Mozart, Liszt, Turpin) |
-| Held: not a whole piece | 10 (Chopin Op. 28 Nos. 11 and 14, Liszt Consolation 1, Goldberg 4, 6, 22 and 30, BWV 1006a Menuets I and II, Mozart Anh. 41) |
-| Held: beyond the ceiling | 7 (Goldberg 15, 21 and 24, Scarlatti, Rachmaninoff Op. 23 No. 10; K. 331 Var. 4 and Scriabin Op. 16 No. 5 are short as well) |
+| Released at level 6 | 33 (16 Bach, 5 Chopin, 3 Mozart, 2 each Beethoven, Brahms, Haydn and Liszt, Turpin) |
+| Held: beyond the ceiling | 7 (Goldberg 15, 21 and 24, Scarlatti, Rachmaninoff Op. 23 No. 10, K. 331 Var. 4, Scriabin Op. 16 No. 5) |
+| Held: a lost tempo word | 1 (Goldberg 22) |
 | Held: source changed since it was pinned | 1 (Chopin Op. 28 No. 20) |
 
 Goldberg 15 and 22 also lose their tempo word ("Andante", "Alla breve"),
@@ -323,18 +326,18 @@ which the source writes as a rehearsal mark (#49). A screen of every tempo,
 mark and text-script word against the MusicXML found it, as did the visual
 check.
 
-The 24 released editions:
+The 33 released editions:
 
-- carry a median of 7 law errors at the worse profile (at most 45, Brahms
+- carry a median of 6 law errors at the worse profile (at most 45, Brahms
   Op. 118 No. 2);
-- 22 of them have span flags: 99 slices in all, at most 15 in one piece.
+- 30 of them have span flags: 124 slices in all, at most 15 in one piece.
 
 Two archive uploads copied released editions: Chopin's Preludes Op. 28 No. 12
 (a near copy) and No. 19 (the same tune at the same level). Following
 dedupe's rule that the curated piece stays, they are recorded under
 `duplicates` in `pdmx-excluded.json`, and `pdmx_fragments.py` no longer ships
 them. The comparison used dedupe's own functions and thresholds, run on every
-shipped piece against the 24.
+shipped piece against the 33.
 
 After a release, `bulk_sources.py --readmit` regenerates the admission of
 `bulk-candidates.json`.
@@ -410,7 +413,7 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
    --only SLUG...` then builds just the pieces that the new fragments added. Repeat until a build refuses nothing. `build.py --manifest-only` then
    re-renders every manifest entry, and `build.py` writes `library-index.json` (the eight fields the
    library list reads, in a compact columnar form: `build.library_index` describes it, and
-   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,211 pieces).
+   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,220 pieces).
 8. `gates.py --pending` (or `--new`) writes the verification records (span check, lint, level). For a
    MuseScore piece the LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to
    cross-check); the other gates do.
@@ -467,7 +470,7 @@ pages, 110 MB of page heap) and plays. Chopin's Sonata No. 3 (13,871 notes) took
 The library ships 160 archive pieces above 2,500 notes and 14 above 6,000; the longest is 20,329.
 
 **Level 6.** The heuristic has four cut points, so it never proposes 6; the curated Advanced pieces
-were placed by hand (50) or by the Mutopia rule (24, see [Mutopia expansions](#mutopia-expansions)). An archive piece is placed at 6 by the rule in `pdmx_advanced.py`: a proposal of 5,
+were placed by hand (50) or by the Mutopia rule (33, see [Mutopia expansions](#mutopia-expansions)). An archive piece is placed at 6 by the rule in `pdmx_advanced.py`: a proposal of 5,
 or of 4 with a score of 10.9 or more (the middle of that band); at least 60 seconds and 300 notes; and
 both sustained fast notes (6 a second) and a stretch of 12 semitones. Speed and stretch are required
 together, because either alone admitted pieces that were not advanced. A placement from proposal 4
@@ -498,7 +501,7 @@ rest read "Unknown".
 | Level | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---:|---:|---:|---:|---:|---:|
 | Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 601 |
-| Whole library (277 curated + 2,934 archive) | 47 | 220 | 1,465 | 756 | 48 | 675 |
+| Whole library (286 curated + 2,934 archive) | 47 | 220 | 1,465 | 756 | 48 | 684 |
 
 ## Generated and ignored directories
 

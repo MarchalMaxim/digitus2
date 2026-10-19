@@ -158,8 +158,7 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
             published = (record.get("midiChecks") or {}).get("mutopiaMidi")
             if not published or published.get("exact") is not True:
                 out.append("a relaxed Mutopia piece needs an exact published Mutopia MIDI check")
-            seconds = ((record.get("levelProposal") or {}).get("features") or {}).get("seconds")
-            out += mutopia_advanced.problems(slug, relaxed, notes, seconds)
+            out += mutopia_advanced.problems(slug)
     elif slug in flagged:
         out.append("span flags: a slice one hand cannot play (spanFlags in verification.json)")
     score = content / entry["files"]["score"]

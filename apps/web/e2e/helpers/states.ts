@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { mockWorker, RECOGNITION_WITH_ERRORS } from './scan.js';
-import { openPractice, setLoopBars } from './practice.js';
+import { embellishDecided, openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
 import { holdPianoSamples } from './samples.js';
 import {
@@ -36,6 +36,8 @@ export interface AppState {
 
 const TWINKLE = 'twinkle-twinkle-little-star';
 const TWINKLE_NOTES = 64;
+/** Twinkle with "Add notes between" on: six upper neighbours added. */
+const TWINKLE_EMBELLISHED_NOTES = 70;
 const ARABESQUE = 'burgmuller-op100-no2-arabesque';
 const ARABESQUE_EDITORIAL_DIGITS = 26;
 /** Schumann's Melody: the engine's reader warns about two duplicate notes. */
@@ -68,13 +70,18 @@ async function library(page: Page): Promise<void> {
   await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
 }
 
-/** Twinkle with every note fingered; `query` adds e.g. `?audio=silent` before the hash. */
+/**
+ * Twinkle with every note fingered; `query` adds e.g. `?audio=silent` before the hash. Also waits
+ * until "Add notes between" is offered, so the Practice panel has its last row (the tick box) and
+ * no longer grows while a state is checked.
+ */
 async function twinkleReady(page: Page, query = ''): Promise<void> {
   await page.goto(`/${query}#/piece/${TWINKLE}`);
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
     timeout: SCORE_TIMEOUT,
   });
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+  await embellishDecided(page, 'offered');
 }
 
 /** The engine's digits as printed, in document order (to see a re-solve land). */
@@ -366,6 +373,19 @@ export const STATES: AppState[] = [
       await twinkleReady(page);
       await openPractice(page);
       await expect(page.getByRole('slider', { name: 'Tempo' })).toBeVisible();
+    },
+    expectTag: 'button',
+  },
+  {
+    // "Add notes between" (issue #67) ticked: the embellished score with its own digits.
+    name: 'score-embellished',
+    go: async (page) => {
+      await twinkleReady(page);
+      await openPractice(page);
+      await page.getByRole('checkbox', { name: 'Add notes between' }).check();
+      await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_EMBELLISHED_NOTES, {
+        timeout: SCORE_TIMEOUT,
+      });
     },
     expectTag: 'button',
   },

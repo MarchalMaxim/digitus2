@@ -306,6 +306,121 @@ describe('PracticeControls', () => {
   });
 });
 
+// "Add notes between" (issue #67): a tick box like Metronome, there only once the piece has an
+// embellished version (the score view passes `embellish` then, and null before).
+describe('"Add notes between"', () => {
+  it('PracticeControls without embellish shows no Add notes between', () => {
+    const { rerender } = render(
+      <PracticeControls playback={playback()} measureCount={12} currentBar={1} />,
+    );
+    expect(screen.queryByRole('checkbox', { name: 'Add notes between' })).toBeNull();
+    rerender(
+      <PracticeControls playback={playback()} measureCount={12} currentBar={1} embellish={null} />,
+    );
+    expect(screen.queryByRole('checkbox', { name: 'Add notes between' })).toBeNull();
+    expect(screen.getByRole('checkbox', { name: 'Metronome' })).toBeInTheDocument();
+  });
+
+  it('with embellish it shows an unticked Add notes between that calls set', async () => {
+    const set = vi.fn<(on: boolean) => void>();
+    const { container } = render(
+      <PracticeControls
+        playback={playback()}
+        measureCount={12}
+        currentBar={1}
+        embellish={{ on: false, set }}
+      />,
+    );
+    const box = screen.getByRole('checkbox', { name: 'Add notes between' });
+    expect(box).not.toBeChecked();
+    // A tick box like its neighbours: a native checkbox inside a `label.check`, nothing else.
+    const label = box.closest('label')!;
+    expect(label).toHaveClass('check');
+    expect(label.className).toBe(
+      screen.getByRole('checkbox', { name: 'Metronome' }).closest('label')!.className,
+    );
+    expect(label.parentElement).toBe(container.querySelector('.transport'));
+    // After the loop block, before the seek help line.
+    const loopBars = screen.getByRole('checkbox', { name: 'Loop bars' });
+    expect(loopBars.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(label.previousElementSibling).toHaveClass('loop');
+    expect(label.nextElementSibling).toHaveClass('seek-help');
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+
+    await userEvent.click(box);
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledWith(true);
+  });
+
+  it('shows the switch ticked while notes are added, and unticking calls set(false)', async () => {
+    const set = vi.fn<(on: boolean) => void>();
+    render(
+      <PracticeControls
+        playback={playback()}
+        measureCount={12}
+        currentBar={1}
+        embellish={{ on: true, set }}
+      />,
+    );
+    const box = screen.getByRole('checkbox', { name: 'Add notes between' });
+    expect(box).toBeChecked();
+    await userEvent.click(box);
+    expect(set).toHaveBeenCalledWith(false);
+  });
+
+  // Review minor 1: a switch that fails takes the focused box away; focus stays in the panel, on
+  // the control before it, rather than falling to the page.
+  it('moves focus to the control before the box when the box goes while focused', () => {
+    const set = vi.fn<(on: boolean) => void>();
+    const pb = playback();
+    const { rerender } = render(
+      <PracticeControls
+        playback={pb}
+        measureCount={12}
+        currentBar={1}
+        embellish={{ on: true, set }}
+      />,
+    );
+    screen.getByRole('checkbox', { name: 'Add notes between' }).focus();
+    rerender(<PracticeControls playback={pb} measureCount={12} currentBar={1} embellish={null} />);
+    expect(screen.queryByRole('checkbox', { name: 'Add notes between' })).toBeNull();
+    expect(screen.getByRole('checkbox', { name: 'Loop bars' })).toHaveFocus();
+  });
+
+  it('moves focus to the last loop field when the loop is on', () => {
+    const set = vi.fn<(on: boolean) => void>();
+    const pb = { ...playback(), loop: { from: 2, to: 3 } };
+    const { rerender } = render(
+      <PracticeControls
+        playback={pb}
+        measureCount={12}
+        currentBar={1}
+        embellish={{ on: true, set }}
+      />,
+    );
+    screen.getByRole('checkbox', { name: 'Add notes between' }).focus();
+    rerender(<PracticeControls playback={pb} measureCount={12} currentBar={1} embellish={null} />);
+    expect(screen.getByLabelText('Loop to bar')).toHaveFocus();
+  });
+
+  it('leaves focus where it is when the box goes unfocused', () => {
+    const set = vi.fn<(on: boolean) => void>();
+    const pb = playback();
+    const { rerender } = render(
+      <PracticeControls
+        playback={pb}
+        measureCount={12}
+        currentBar={1}
+        embellish={{ on: true, set }}
+      />,
+    );
+    const metronome = screen.getByRole('checkbox', { name: 'Metronome' });
+    metronome.focus();
+    rerender(<PracticeControls playback={pb} measureCount={12} currentBar={1} embellish={null} />);
+    expect(metronome).toHaveFocus();
+  });
+});
+
 describe('the loop as one checkbox (spec 13)', () => {
   it('prefills the bar at the cursor and the next, clamped to the piece', () => {
     expect(loopPrefill(3, 12)).toEqual(['3', '4']);

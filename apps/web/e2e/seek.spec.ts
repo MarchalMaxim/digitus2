@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { closePractice, openPractice, setLoopBars } from './helpers/practice.js';
+import { closePractice, embellishDecided, openPractice, setLoopBars } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
 import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
 
@@ -16,6 +16,8 @@ async function twinkle(page: Page): Promise<void> {
     timeout: 20_000,
   });
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+  // "Add notes between" is offered on Twinkle: its row is in the Practice panel before a click.
+  await embellishDecided(page, 'offered');
 }
 
 async function noCountIn(page: Page): Promise<void> {

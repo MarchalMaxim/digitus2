@@ -119,3 +119,31 @@ it('asks for no lead when a count-in leads the Play from the start', async () =>
   expect(play.mock.calls[0]![0]).toEqual({});
   play.mockRestore();
 });
+
+// "Add notes between" (issue #67): the piano keeps what it has loaded across a new score. A score
+// whose pitches and velocities it already holds plays at once; one with a pitch it lacks loads.
+it('loads the samples again for a new score only when it needs a pitch the piano lacks', async () => {
+  stubAudio();
+  useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, countIn: false, metronome: false } });
+  const c4 = parseMusicXml(ONE_NOTE).score;
+  const c4Again = parseMusicXml(ONE_NOTE).score;
+  const d4 = parseMusicXml(ONE_NOTE.replace('<step>C</step>', '<step>D</step>')).score;
+  const { result, rerender } = renderHook(({ score }) => usePlayback(score), {
+    initialProps: { score: c4 },
+  });
+  act(() => result.current.play());
+  await waitFor(() => expect(result.current.playing).toBe(true));
+  expect(instrument.load).toHaveBeenCalledTimes(1);
+
+  rerender({ score: c4Again });
+  act(() => result.current.play());
+  expect(result.current.playing).toBe(true); // in the click: nothing to load
+  expect(instrument.load).toHaveBeenCalledTimes(1);
+
+  rerender({ score: d4 });
+  act(() => result.current.play());
+  expect(result.current.loading).toBe(true);
+  await waitFor(() => expect(result.current.playing).toBe(true));
+  expect(instrument.load).toHaveBeenCalledTimes(2);
+  expect(instrument.load).toHaveBeenLastCalledWith([62], [96]);
+});

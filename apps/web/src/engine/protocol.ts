@@ -27,7 +27,9 @@ export type EngineRequest =
       preserveNotation?: boolean;
     }
   | { id: number; type: 'solve'; score: Score; profile: HandSize; pins?: Assignment }
-  | { id: number; type: 'fingeredXml'; xml: string; score: Score; assignment: Assignment };
+  | { id: number; type: 'fingeredXml'; xml: string; score: Score; assignment: Assignment }
+  /** "Add notes between": the guarded light embellishment of a plain MusicXML text. */
+  | { id: number; type: 'embellish'; xml: string };
 
 export type EngineResponse =
   | {
@@ -43,4 +45,28 @@ export type EngineResponse =
     }
   | { id: number; ok: true; type: 'solve'; assignment: Assignment; ms: number }
   | { id: number; ok: true; type: 'fingeredXml'; xml: string }
+  | {
+      id: number;
+      ok: true;
+      type: 'embellish';
+      /**
+       * The embellished version, or null when the guard refused it (`reason` says why): its
+       * MusicXML text, its score, the file's own fingering (on original notes only) and the
+       * guarded fingering at every hand size, solved as the app solves the plain score.
+       */
+      offered: {
+        xml: string;
+        score: Score;
+        editorial: Assignment;
+        assignments: Record<HandSize, Assignment>;
+        figures: number;
+      } | null;
+      reason: string | null;
+      ms: number;
+    }
   | { id: number; ok: false; error: string };
+
+/** The embellished version the worker offers. */
+export type EmbellishedDoc = NonNullable<
+  Extract<EngineResponse, { type: 'embellish'; ok: true }>['offered']
+>;

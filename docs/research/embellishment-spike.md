@@ -376,12 +376,14 @@ Lyrics stay on the first part of a split note, so the new notes form a melisma.
 
 Build the app side only if the owner likes the listening test. If so, keep it small.
 
+The app builds this as the Practice switch `Add notes between` (`docs/app.md`): light only, the upper neighbour only a whole step up, guarded at every hand size, and gated by `pnpm verify` (`embellish`).
+
 **One choice.** "Add notes between" is a single on/off switch in the Practice panel, next to the
 hands, loop and speed controls.
 
 - It is off by default, and is not remembered across pieces.
 - It appears only on pieces the embellisher accepts that get at least three light figures. That is
-  195 of the 259 level 1 and 2 pieces, and the switch is hidden on the rest.
+  175 of the 267 level 1 and 2 pieces, and the switch is hidden on the rest.
 - On, it plays and shows the **light** density. Playful is not offered, because two densities
   would need a second control and playful's mannerisms are the main risk. If the owner prefers
   playful in the test, the switch gives playful instead; it should not offer both.

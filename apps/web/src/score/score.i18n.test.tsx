@@ -45,6 +45,11 @@ const doc: ScoreDocument = {
   digitChanges: null,
   midiInfo: null,
   splitMidi: null,
+  embellish: 'none',
+  embellished: false,
+  shownVersion: 'plain',
+  plain: null,
+  setEmbellished: () => {},
 };
 
 describe('the score view in another language', () => {

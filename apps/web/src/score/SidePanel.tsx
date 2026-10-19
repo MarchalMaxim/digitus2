@@ -55,14 +55,20 @@ export function SidePanel({
   const hasEditorial =
     (piece?.files.fingered ?? null) !== null ||
     (doc.editorial !== null && Object.keys(doc.editorial).length > 0);
-  const measures = piece?.measures ?? doc.score?.measures.length ?? null;
+  // "Add notes between" (issue #67): the facts, the MIDI hand counts and the export are the plain
+  // score's, whichever version is on screen. `plain` is null until the first ready and during a
+  // MIDI reopen; the plain version is then the one on screen (useScoreDocument.ts).
+  const shownPlain = doc.shownVersion === 'plain';
+  const plainScore = doc.plain?.score ?? (shownPlain ? doc.score : null);
+  const plainAssignment = doc.plain ? doc.plain.assignment : shownPlain ? doc.assignment : null;
+  const measures = piece?.measures ?? plainScore?.measures.length ?? null;
   const hands = useMemo(() => {
-    const notes = doc.score?.notes ?? [];
+    const notes = plainScore?.notes ?? [];
     return {
       right: notes.filter((n) => n.hand === 'R').length,
       left: notes.filter((n) => n.hand === 'L').length,
     };
-  }, [doc.score]);
+  }, [plainScore]);
 
   const onHandSize = (e: ChangeEvent<HTMLSelectElement>) =>
     setSettings({ handSize: e.currentTarget.value as HandSize });
@@ -72,16 +78,18 @@ export function SidePanel({
     doc.solveMs !== null && doc.renderMs !== null
       ? { solve: Math.round(doc.solveMs), render: Math.round(doc.renderMs) }
       : null;
-  const { xml, score, assignment } = doc;
-  const canExport = ready && !exporting && xml !== null && score !== null && assignment !== null;
+  const { xml } = doc;
+  const canExport =
+    ready && !exporting && xml !== null && plainScore !== null && plainAssignment !== null;
 
-  // Exports the fingering on screen (the engine's, or the editor's when that is shown): the
-  // engine worker writes it into the source MusicXML, and the browser saves the text.
+  // Exports the plain score with the fingering its pages show (the engine's, or the editor's when
+  // that is shown), never the added notes: the engine worker writes it into the source MusicXML,
+  // and the browser saves the text.
   const onExport = async () => {
     if (!canExport) return;
     setExporting(true);
     try {
-      const fingered = await services.engine.fingeredXml(xml, score, assignment);
+      const fingered = await services.engine.fingeredXml(xml, plainScore, plainAssignment);
       downloadText(exportFilename(source), fingered);
     } catch (e) {
       setNotice((t) => t.score.side.exportFailed(messageOf(e, t)));
@@ -94,7 +102,7 @@ export function SidePanel({
     <aside className="side-panel stack no-print" aria-label={t.score.side.label}>
       <h2 className="visually-hidden">{t.score.side.label}</h2>
       <FingerLegend className={legendAbove ? 'wide-only' : undefined} />
-      {doc.midiInfo && doc.score && (
+      {doc.midiInfo && plainScore && (
         <MidiImportPanel
           info={doc.midiInfo}
           right={hands.right}

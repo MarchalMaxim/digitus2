@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { closePractice, openPractice, setLoopBars } from './helpers/practice.js';
+import { closePractice, embellishDecided, openPractice, setLoopBars } from './helpers/practice.js';
 import { accentAreas, type AccentArea, type Box } from './helpers/pixels.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
@@ -417,6 +417,7 @@ test.describe('playback with the silent instrument', () => {
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     // The count-in (one 2.4 s bar here) holds the first red note back; the next test covers it.
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
@@ -449,6 +450,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('slider', { name: 'Tempo' }).fill('50');
     await page.getByRole('button', { name: 'Play' }).click();
     await expect(page.getByRole('status')).toHaveText('1');
@@ -471,6 +473,7 @@ test.describe('playback with the silent instrument', () => {
       timeout: 20_000,
     });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // At 50 % the pickup lasts 1.2 s before the left hand's first note.
     await page.getByRole('slider', { name: 'Tempo' }).fill('50');
@@ -517,6 +520,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await page.getByRole('slider', { name: 'Tempo' }).fill('50');
@@ -554,6 +558,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await expect
@@ -583,6 +588,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await page.waitForFunction(
@@ -619,6 +625,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await expect(page.getByRole('checkbox', { name: 'Count-in' })).toBeChecked();
     const sampled = sampleUntilFirstRedNote(page, 10_000);
     await page.getByRole('button', { name: 'Play' }).click();
@@ -687,6 +694,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // The status line is a live region that is always in the dock, empty until there is something
     // to say, so a screen reader announces its first words ("Loading the piano…", the first "1").
@@ -772,6 +780,7 @@ test.describe('playback with the silent instrument', () => {
         timeout: 20_000,
       });
       await openPractice(page);
+      await embellishDecided(page);
       await page.getByRole('radio', { name: 'Left hand' }).check();
       const countInBox = page.getByRole('checkbox', { name: 'Count-in' });
       await expect(countInBox).toBeChecked(); // the default
@@ -870,6 +879,7 @@ test.describe('playback with the silent instrument', () => {
       timeout: 20_000,
     });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await setLoopBars(page, '1', '2');
@@ -949,6 +959,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('radio', { name: 'Left hand' }).click();
     // The count-in (2.4 s here) presses no key until the first note sounds: play through it.
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
@@ -964,6 +975,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     for (let i = 0; i < 6; i++) {
@@ -989,6 +1001,7 @@ test.describe('playback with the silent instrument', () => {
       timeout: 20_000,
     });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // Select and read in one browser task: playback can release a key between
     // Playwright's selector lookup and evaluateAll callback on a busy CI runner.
@@ -1106,6 +1119,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const groupSecs = () =>
@@ -1162,6 +1176,7 @@ test.describe('playback with the silent instrument', () => {
 
     // The left hand selected, stopped: the right hand's staff and digits at 40 %.
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('radio', { name: 'Left hand' }).check();
     await expect(sheetDims.first()).toBeAttached();
     await expectScoreDimmed(page, true, 'left hand, stopped');
@@ -1216,6 +1231,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     await page.waitForTimeout(2000);
@@ -1270,6 +1286,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const play = page.getByRole('button', { name: 'Play' });
     await expect(play).toBeEnabled();
@@ -1305,6 +1322,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
     // Twinkle's bars last 2.4 s: wait until bar 3.
@@ -1331,6 +1349,7 @@ test.describe('playback with the silent instrument', () => {
     await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     const from = page.getByLabel('Loop from bar');
     const to = page.getByLabel('Loop to bar');
@@ -1407,6 +1426,7 @@ test.describe('playback with the silent instrument', () => {
     await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
     await expect(tempo).toHaveText('100 % · ♩ = 100');
     await openPractice(page);
+    await embellishDecided(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await slider.fill('70');
     await expect(tempo).toHaveText('70 % · ♩ = 70');
@@ -1447,6 +1467,7 @@ test.describe('playback with the silent instrument', () => {
     const play = page.getByRole('button', { name: 'Play' });
     await expect(play).toBeEnabled({ timeout: 20_000 });
     await openPractice(page);
+    await embellishDecided(page); // a file of up to 900 notes may be offered the switch
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // A loop keeps the short piece playing, so only the hand switch can stop it.
     await setLoopBars(page, '1', '2');

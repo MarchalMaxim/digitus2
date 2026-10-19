@@ -249,16 +249,18 @@ export class Transport {
   /**
    * Plays from `startSec()`. `leadSec` holds the start back for that long when it is longer than
    * the start delay: the score view's red travels from Play to the first note meanwhile, and the
-   * note sounds as it lands (useRedFlight.ts). A count-in starts after it too.
+   * note sounds as it lands (useRedFlight.ts). A count-in starts after it too. `countIn: false`
+   * plays without one whatever the setting: a play carried across "Add notes between" (issue
+   * #67) goes on as the music did.
    */
-  play(opts: { leadSec?: number } = {}): void {
+  play(opts: { leadSec?: number; countIn?: boolean } = {}): void {
     if (this.playing) return;
     const start = this.startSec();
     const factor = this.tempoFactor;
     let t0 = this.ctx.currentTime + Math.max(this.startDelaySec, opts.leadSec ?? 0);
     this.countInClicks = [];
     this.countInBeats = [];
-    if (this.countIn) {
+    if (opts.countIn ?? this.countIn) {
       // The count-in, on the bar grid: a whole bar, or before a pickup the beats before it.
       const m = this.measureStartingAt(start);
       if (m >= 0) {

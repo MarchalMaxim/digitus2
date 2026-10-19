@@ -11,5 +11,6 @@ docs/research/
 *.musicxml
 *.mxl
 *.xml
+packages/engine/fixtures/embellish-light-golden.json
 apps/web/playwright-report
 apps/web/test-results

@@ -108,7 +108,7 @@ def test_deb_layout_uses_the_package_java_and_both_class_path_entries(deb_bundle
     layout = audiveris.detect_layout(deb_bundle)
     assert layout.package == "deb"
     assert layout.java == deb_bundle / "lib/runtime/bin/java"
-    assert set(layout.classpath.split(os.pathsep)) == {str(deb_bundle / "lib/app"), str(deb_bundle / "lib/app" / "*")}
+    assert layout.classpath == str(deb_bundle / "lib/app" / "*")
 
 def test_msi_layout_is_unchanged(msi_bundle):
     layout = audiveris.detect_layout(msi_bundle)

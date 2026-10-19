@@ -50,6 +50,11 @@
     "accuracyMin": 91,
     "note": "Hand separation (digitus2 evalhands): macro accuracy in percent on the PIG test split, first annotation of each piece, channel = truth. Set by M6 Task 9 to the measured value minus 1.0. Set 2026-10-14 by M6 Task 9 from 92.05 (commit 86ea924, measured on the uncommitted M6 Tasks 3-6 tree over it; label m6-hands; macro 92.0499 minus 1.0, rounded down to one decimal; note-weighted 91.89; shipped tables from the library and the Mutopia train half, no PIG data)."
   },
+  "embellish": {
+    "levels": [1, 2],
+    "offeredMin": 170,
+    "note": "Light embellishment (\"Add notes between\", docs/research/embellishment-spike.md section 6): the pieces at levels 1 and 2 that the guard offers (packages/engine/src/embellish/guard.ts: the light embellisher, the independent check, then solve with learned-open at the large, medium, small and child profiles and lint with beginner: true; zero law errors and no more beginner errors than the plain score at every profile, the figures of offending bars dropped once, at least three figures). digitus2 embellish --library also fails on any offered piece whose independent check, lint or level proposal (at most one up) fails. offeredMin is the measured count: the run is deterministic, so a drop is a change to explain, not noise. Measured 170 of 259 (785 passing and 335 neighbour notes, 13 retried)."
+  },
   "references": {
     "nakamura_chmm": {
       "gen": 62.1,

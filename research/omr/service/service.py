@@ -53,6 +53,15 @@ class Limiter:
             hits.append(now)
             return True, 0
 
+    def refund(self, key: str):
+        """Give back the newest recognition of key, for an answer that started none."""
+        with self.lock:
+            hits = self.hits.get(key)
+            if hits:
+                hits.pop()
+            if not hits:
+                self.hits.pop(key, None)
+
 
 class Service:
     """Runs one recognition at a time in the calling thread and removes its directory before answering."""
@@ -169,7 +178,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Connection", "close")
-        origin = self.headers.get("Origin")
+        # Absent when the request line itself was malformed.
+        origin = self.headers.get("Origin") if getattr(self, "headers", None) else None
         if origin in self.server.origins:
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
@@ -182,6 +192,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(payload)
             except (BrokenPipeError, ConnectionResetError):
                 pass
+
+    def send_error(self, code, message=None, explain=None):
+        """The framework's own errors (unsupported method, malformed request) as JSON with the usual headers."""
+        body = {"error": "not-found" if code in {404, 501} else "bad-request"}
+        self.send(code, None if getattr(self, "command", None) == "HEAD" else body)
 
     def boundary(self, client_header=False):
         if len(self.headers.get_all("Origin", [])) != 1 or self.headers.get("Origin") not in self.server.origins:
@@ -252,11 +267,15 @@ class Handler(BaseHTTPRequestHandler):
         if len(self.headers.get_all("X-Digitus2-Job", [])) != 1 or not JOB_ID.fullmatch(job_id):
             self.send(400, {"error": "job-id-required"})
             return
-        allowed, wait = self.server.limiter.allow(self.caller())
+        caller = self.caller()
+        allowed, wait = self.server.limiter.allow(caller)
         if not allowed:
             self.send(429, {"error": "rate-limited"}, extra={"Retry-After": str(wait)})
             return
         status, body = self.server.service.recognize(data, valid[mime][1], job_id)
+        if body.get("error") in {"busy", "duplicate-job"}:
+            # The limit counts recognitions; an answer that started none does not use it up.
+            self.server.limiter.refund(caller)
         self.send(status, body, extra={"Retry-After": str(BUSY_RETRY_SECONDS)} if body.get("error") == "busy" else None)
 
     def do_DELETE(self):

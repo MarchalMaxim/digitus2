@@ -167,6 +167,21 @@ def test_the_limiter_keys_on_the_last_forwarded_address(api):
     assert 0 < int(headers["Retry-After"]) <= 3600
     assert request(api, "POST", "/v1/recognize", PNG, {"X-Forwarded-For": "1.1.1.1, 2.2.2.2"})[0] == 200
 
+def test_busy_and_duplicate_answers_do_not_use_up_the_limit(api):
+    forwarded = {"X-Forwarded-For": "1.1.1.1"}
+    job = secrets.token_hex(16)
+    api[2].block.clear()
+    thread, first = in_thread(lambda: request(api, "POST", "/v1/recognize", PNG, {**forwarded, "X-Digitus2-Job": job}))
+    wait_running(api[2])
+    assert json.loads(request(api, "POST", "/v1/recognize", PNG, forwarded)[2]) == {"error": "busy"}
+    assert json.loads(request(api, "POST", "/v1/recognize", PNG, {**forwarded, "X-Digitus2-Job": job})[2]) == {"error": "duplicate-job"}
+    api[2].block.set()
+    thread.join(5)
+    assert first["result"][0] == 200
+    assert request(api, "POST", "/v1/recognize", PNG, forwarded)[0] == 200
+    status, _, body = request(api, "POST", "/v1/recognize", PNG, forwarded)
+    assert (status, json.loads(body)) == (429, {"error": "rate-limited"})
+
 def test_the_limiter_window_rolls():
     now = [1000.0]
     limiter = Limiter(limit=2, window=60, clock=lambda: now[0])
@@ -227,3 +242,12 @@ def test_unknown_paths_and_queries_are_not_found(api):
     assert request(api, "GET", "/v1/health?anything=1")[0] == 404
     assert request(api, "POST", "/v1/jobs", PNG)[0] == 404
     assert request(api, "DELETE", "/v1/jobs/not-a-job")[0] == 404
+
+def test_an_unsupported_method_answers_json_with_the_usual_headers(api):
+    status, headers, body = request(api, "PUT", "/v1/recognize", PNG)
+    assert status == 501
+    assert headers["Content-Type"] == "application/json"
+    assert headers["Cache-Control"] == "no-store"
+    assert headers["X-Content-Type-Options"] == "nosniff"
+    assert headers["Access-Control-Allow-Origin"] == ORIGIN
+    assert json.loads(body) == {"error": "not-found"}

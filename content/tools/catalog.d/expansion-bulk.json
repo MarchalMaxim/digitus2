@@ -2874,6 +2874,973 @@
       },
       "levelOverride": "The core-30 heuristic saturates at level 5 and does not establish an advanced ceiling; conservative repertoire placement reflects the complete edition and coordination demands. No external syllabus claim is made.",
       "compactXml": true
+    },
+    {
+      "slug": "bulk-bachjs-bwv847-fuga2-fuga2-ly",
+      "ftpDir": "BachJS/BWV847/fuga2",
+      "main": "fuga2.ly",
+      "sourceSha256": "5b4ba90ea58a8daae5f74d9f022ef65ffccd6ab4faf8e9c58d099ed1426db6db",
+      "title": "Das Wohltemperierte Clavier I, Fuga II",
+      "tempoBpm": 76.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "fuga2.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 847",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (98 seconds, 770 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 4 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 4,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "ftpDir": "BachJS/BWV856/BWV856_Fugue11",
+      "main": "BWV856_Fugue11.ly",
+      "sourceSha256": "3e4b7458aa6e690bd8deed04f6cf7c9e9921d0020f0a2ede35e460073cd4784f",
+      "title": "Das Wohltemperierte Clavier I, Fuga XI",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "BWV856_Fugue11.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 856",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (81 seconds, 697 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 10 slice(s) that no hand can strike as written and 10 (medium) and 10 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 10,
+        "lint": {
+          "medium": 10,
+          "large": 10
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "ftpDir": "BachJS/BWV861/BWV861_Fuga16",
+      "main": "BWV861_Fuga16.ly",
+      "sourceSha256": "a7f2ee48fee28d1576a26eea2480443e06fde190aa9302078540895113a9994e",
+      "title": "Das Wohltemperierte Clavier I, Fuga XVI",
+      "tempoBpm": 68.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "BWV861_Fuga16.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 861",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (120 seconds, 784 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 10 slice(s) that no hand can strike as written and 12 (medium) and 10 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 10,
+        "lint": {
+          "medium": 12,
+          "large": 10
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+      "ftpDir": "BachJS/BWV862/bach-fugue17",
+      "main": "bach-fugue17.ly",
+      "sourceSha256": "34164bfbcd6bc895447656ebc98862e0b8e8ab0a57502147f044440d84f2d844",
+      "title": "Das Wohltemperierte Clavier I, Fuga XVII",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bach-fugue17.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 862",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (105 seconds, 932 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 8 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 5,
+        "lint": {
+          "medium": 8,
+          "large": 5
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "ftpDir": "BachJS/BWV865/BWV865_Praeludium20",
+      "main": "BWV865_Praeludium20.ly",
+      "sourceSha256": "a29cddaf24f3675322a88d2dd26b50a16a153fbe2b6ba350b76ea8488d969127",
+      "title": "Das Wohltemperierte Clavier I, Praeludium XX",
+      "tempoBpm": 106.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "BWV865_Praeludium20.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 865",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (70 seconds, 648 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 8 slice(s) that no hand can strike as written and 9 (medium) and 8 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 8,
+        "lint": {
+          "medium": 9,
+          "large": 8
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly",
+      "ftpDir": "BachJS/BWV870/wtk2fuga1",
+      "main": "wtk2fuga1.ly",
+      "sourceSha256": "b5f5bddd7808f6e8c6e11b8e2c08d0f258566b73087f173b30544d4dc7c8fbba",
+      "title": "Das Wohltemperierte Clavier II, Fuga I",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "wtk2fuga1.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 870",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (124 seconds, 1070 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 1,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv870-wtk2prelude1-wtk2prelude1-ly",
+      "ftpDir": "BachJS/BWV870/wtk2prelude1",
+      "main": "wtk2prelude1.ly",
+      "sourceSha256": "195a875fdad383adca7f3707ca945992494e82c9aa36d277d736ae3993197cf0",
+      "title": "Das Wohltemperierte Clavier II, Praeludium I",
+      "tempoBpm": 70.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "wtk2prelude1.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 870",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (117 seconds, 992 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 0 slice(s) that no hand can strike as written and 1 (medium) and 0 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": [
+          "hidden note at 29 merged into the visible note of the same pitch (cross-voice tie)"
+        ],
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 0,
+        "lint": {
+          "medium": 1,
+          "large": 0
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly",
+      "ftpDir": "BachJS/BWV871/wtk2-fugue2",
+      "main": "wtk2-fugue2.ly",
+      "sourceSha256": "da57e6cc6323f819c794e9c6c53012e7421d1e9550dfa37d2aba008c7edd4bad",
+      "title": "Das Wohltemperierte Clavier II, Fuga II",
+      "tempoBpm": 58.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "wtk2-fugue2.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 871",
+      "year": null,
+      "level": 6,
+      "collection": "bach-wtc",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (116 seconds, 701 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 3 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 3,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "ftpDir": "BachJS/BWV952/fugue-c-major",
+      "main": "fugue-c-major.ly",
+      "sourceSha256": "23bb9c7726d6a77054d678601b22df3f8ca73d32a86aa8d87d4e6f66d6485a02",
+      "title": "Fugue in C major",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "fugue-c-major.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": "BWV 952",
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (102 seconds, 847 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 7 slice(s) that no hand can strike as written and 15 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 7,
+        "lint": {
+          "medium": 15,
+          "large": 7
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v01",
+      "main": "bwv-988-v01.ly",
+      "sourceSha256": "24fcef149fc4ac2b562020f7db2c38084bee0c47c73adec9cea7134d1aa18b5c",
+      "title": "Goldberg Variations - 1",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "bwv-988-v01.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set, a whole piece (72 seconds, 567 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 1,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v12",
+      "main": "bwv-988-v12.ly",
+      "sourceSha256": "9dbdd58703a3d4fcc9e9f8278eba210ef0256de6bf24de711e92403055d20528",
+      "title": "Goldberg Variations - 12",
+      "tempoBpm": 94.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "bwv-988-v12.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johann Sebastian Bach",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "bach-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a variation of a concert variation set, a whole piece (61 seconds, 663 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 6 (medium) and 2 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 2,
+        "lint": {
+          "medium": 6,
+          "large": 2
+        }
+      }
+    },
+    {
+      "slug": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+      "ftpDir": "BeethovenLv/O10/lvb_sonate_10no2_3",
+      "main": "lvb_sonate_10no2_3.ly",
+      "sourceSha256": "cc28243001a13e4cbf02bc21e3768b5ef5a29583b7a7fd64874b40a3dc46d3d6",
+      "title": "Sonata No. 6 (3rd Movement: Presto)",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "lvb_sonate_10no2_3.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Ludwig van Beethoven",
+      "composerDates": null,
+      "catalogue": "Op. 10, No. 2",
+      "year": null,
+      "level": 6,
+      "collection": "beethoven-originals",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (225 seconds, 1924 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 5 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 5,
+        "lint": {
+          "medium": 5,
+          "large": 5
+        }
+      }
+    },
+    {
+      "slug": "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly",
+      "ftpDir": "BeethovenLv/O2/LVB_Sonate_02no1_3",
+      "main": "LVB_Sonate_02no1_3.ly",
+      "sourceSha256": "1ed2b4e3a7e59e5043c3c0f65855af4620662672db0e870522759488d3971e40",
+      "title": "Sonata No. 1 (3rd Movement: Allegretto)",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "LVB_Sonate_02no1_3.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Ludwig van Beethoven",
+      "composerDates": null,
+      "catalogue": "Op. 2, No. 1",
+      "year": null,
+      "level": 6,
+      "collection": "beethoven-originals",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (164 seconds, 631 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 4 (medium) and 4 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": [
+          "LilyPond voice 5 has overlapping notes; split into 2 MusicXML voices"
+        ],
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 4,
+          "large": 4
+        }
+      }
+    },
+    {
+      "slug": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "ftpDir": "BrahmsJ/O118/intermezzo",
+      "main": "intermezzo.ly",
+      "sourceSha256": "5bd64924ba0c1a72018144bbd9245ebef7d6892acb163fb282c3a25bd0f21623",
+      "title": "2. Intermezzo",
+      "tempoBpm": 80.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "intermezzo.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johannes Brahms",
+      "composerDates": null,
+      "catalogue": "Op. 118, No. 2",
+      "year": null,
+      "level": 6,
+      "collection": "character-pieces",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (261 seconds, 1720 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 15 slice(s) that no hand can strike as written and 45 (medium) and 44 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 15,
+        "lint": {
+          "medium": 45,
+          "large": 44
+        }
+      }
+    },
+    {
+      "slug": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "ftpDir": "BrahmsJ/O39/waltz-op39-15",
+      "main": "waltz-op39-15.ly",
+      "sourceSha256": "64cef49cf056947e8d4f900535dbc28a4a841653ff1e2a936534e928e2209a65",
+      "title": "Waltz No. 15",
+      "tempoBpm": 116.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "waltz-op39-15.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Johannes Brahms",
+      "composerDates": null,
+      "catalogue": "Op. 39",
+      "year": null,
+      "level": 6,
+      "collection": "character-pieces",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (68 seconds, 726 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 10 slice(s) that no hand can strike as written and 12 (medium) and 12 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": [
+          "tuplet bracket without notes skipped"
+        ],
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 10,
+        "lint": {
+          "medium": 12,
+          "large": 12
+        }
+      }
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-12",
+      "main": "Chop-28-12.ly",
+      "sourceSha256": "02071eaeff99eba165b27d3fb0047f74782b43433010d6d843934d19787b4de7",
+      "title": "Prélude 12",
+      "tempoBpm": 208.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "Chop-28-12.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Frédéric Chopin",
+      "composerDates": null,
+      "catalogue": "Op 28, No 12",
+      "year": null,
+      "level": 6,
+      "collection": "chopin-op28",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (70 seconds, 1263 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 22 (medium) and 22 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 5,
+        "lint": {
+          "medium": 22,
+          "large": 22
+        }
+      }
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-19-chop-28-19-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-19",
+      "main": "Chop-28-19.ly",
+      "sourceSha256": "af1c3a2069a66b72ff83067d5b9d64b5b90297bc3745f16db0804b6411a959e1",
+      "title": "Prélude 19",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "Chop-28-19.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Frédéric Chopin",
+      "composerDates": null,
+      "catalogue": "Op 28, No 19",
+      "year": null,
+      "level": 6,
+      "collection": "chopin-op28",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (160 seconds, 1237 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 6 (medium) and 6 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 6,
+          "large": 6
+        }
+      }
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-22-chop-28-22-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-22",
+      "main": "Chop-28-22.ly",
+      "sourceSha256": "338dc910cc75cb8847d94c177f01ee745c137007b6fdf90fde3216325341c2d9",
+      "title": "Prélude 22",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "Chop-28-22.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Frédéric Chopin",
+      "composerDates": null,
+      "catalogue": "Op 28, No 22",
+      "year": null,
+      "level": 6,
+      "collection": "chopin-op28",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (93 seconds, 673 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 5. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 24 (medium) and 24 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": [
+          "hidden note at 3/4 merged into the visible note of the same pitch (cross-voice tie)",
+          "slur at 1/2 could not be attached"
+        ],
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 2,
+        "lint": {
+          "medium": 24,
+          "large": 24
+        }
+      }
+    },
+    {
+      "slug": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly",
+      "ftpDir": "HaydnFJ/HOB-XVI-27/hob-xvi-27-ii-menuet-trio",
+      "main": "hob-xvi-27-ii-menuet-trio.ly",
+      "sourceSha256": "53245b0fdd6d0797a1593cf04eeb45a1ebdc99502b53f621312015d6c449c126",
+      "title": "Sonate I, II - Menuetto",
+      "tempoBpm": 92.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "hob-xvi-27-ii-menuet-trio.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Joseph Haydn",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (129 seconds, 660 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 9 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 2,
+        "lint": {
+          "medium": 9,
+          "large": 7
+        }
+      }
+    },
+    {
+      "slug": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly",
+      "ftpDir": "HaydnFJ/HOB-XVI-27/hob-xvi-27-iii-presto",
+      "main": "hob-xvi-27-iii-presto.ly",
+      "sourceSha256": "de6ac2a470cce694d596f4d311ccb53cc8c01b37d5f0458c9591a562b1511d79",
+      "title": "Sonate I, III - Presto",
+      "tempoBpm": 120.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "hob-xvi-27-iii-presto.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Joseph Haydn",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a movement of a sonata, suite or partita, a whole piece (152 seconds, 1216 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 1 slice(s) that no hand can strike as written and 1 (medium) and 1 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": [
+          "slur ending on a rest at 32 moved to the previous note"
+        ],
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 1,
+        "lint": {
+          "medium": 1,
+          "large": 1
+        }
+      }
+    },
+    {
+      "slug": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
+      "ftpDir": "LisztF/S.172/liszt-consolation-no4",
+      "main": "liszt-consolation-no4.ly",
+      "sourceSha256": "54e1013ad29f991237598db58e2e53c3230b186202fc7435402283f62385d1fb",
+      "title": "Consolation, S.172 No.4",
+      "tempoBpm": 80.0,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "liszt-consolation-no4.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Franz Liszt",
+      "composerDates": null,
+      "catalogue": "S.172",
+      "year": null,
+      "level": 6,
+      "collection": "character-pieces",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a Romantic or later concert piece (prelude, intermezzo, waltz, consolation), a whole piece (104 seconds, 513 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 4 slice(s) that no hand can strike as written and 7 (medium) and 7 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 4,
+        "lint": {
+          "medium": 7,
+          "large": 7
+        }
+      }
+    },
+    {
+      "slug": "bulk-mozartwa-kv153-k153-k153-ly",
+      "ftpDir": "MozartWA/KV153/k153",
+      "main": "k153.ly",
+      "sourceSha256": "cd8464f6036798ca3697b50ae42e6065aff03562a1f0fc57419041a3240b1851",
+      "title": "Fugue in E-flat Major KV 153/375f",
+      "tempoBpm": 110.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "k153.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Wolfgang Amadeus Mozart",
+      "composerDates": null,
+      "catalogue": "KV 153/375f",
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (144 seconds, 1042 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 5 slice(s) that no hand can strike as written and 8 (medium) and 5 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 5,
+        "lint": {
+          "medium": 8,
+          "large": 5
+        }
+      }
+    },
+    {
+      "slug": "bulk-mozartwa-kv154-k154-k154-ly",
+      "ftpDir": "MozartWA/KV154/k154",
+      "main": "k154.ly",
+      "sourceSha256": "005f460accd50bf94e910adf8b3010731c86900c00aa4ab85bad9bf98757bc53",
+      "title": "Fugue in G Minor KV 154/385k",
+      "tempoBpm": 110.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "k154.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Wolfgang Amadeus Mozart",
+      "composerDates": null,
+      "catalogue": "KV 154/385k",
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a prelude or fugue of the Baroque or Classical keyboard repertoire, a whole piece (118 seconds, 665 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 3. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 0 slice(s) that no hand can strike as written and 7 (medium) and 0 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 0,
+        "lint": {
+          "medium": 7,
+          "large": 0
+        }
+      }
+    },
+    {
+      "slug": "bulk-turpint-turpin-turpin-ly",
+      "ftpDir": "TurpinT/turpin",
+      "main": "turpin.ly",
+      "sourceSha256": "8ade5af8da486ef5e2d1ef6fc33033cedf52c7bc404a5be690c7edd0ae7c14f6",
+      "title": "The St. Louis Rag",
+      "tempoBpm": 96.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "turpin.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-19",
+      "composer": "Tom Turpin",
+      "composerDates": null,
+      "catalogue": " ",
+      "year": null,
+      "level": 6,
+      "collection": "ragtime",
+      "levelNote": "Advanced by the Mutopia rule (mutopia_advanced.py): a classic rag, a whole piece (90 seconds, 1265 notes), released at level 6 under the relaxed gates. Frozen heuristic proposes 4. No syllabus placement is claimed.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema, readers and rendering pass; because the span and lint gates are relaxed for level 6 (mutopia_advanced.py), 2 slice(s) that no hand can strike as written and 2 (medium) and 2 (large) lint law errors in the engine's own fingering: the digits there are advice. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the span and lint gates); rebuilt from the fetched source pinned by SHA-256; every tempo, mark and text-script word of the source found in the MusicXML; page 1 of six editions (Brahms Op. 39 No. 15, Turpin's St. Louis Rag, WTC II Prelude 1, Beethoven Op. 2 No. 1/III, Rachmaninoff Op. 23 No. 10 and Goldberg Variation 15) compared by eye with LilyPond's own engraving of the same source",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "converterDiagnostics": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "source tempo, mark and text-script words retained",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic has no level 6 and underrates this repertoire; the placement follows the stated Mutopia rule (mutopia_advanced.py). No external syllabus claim is made.",
+      "compactXml": true,
+      "relaxedGates": {
+        "spans": 2,
+        "lint": {
+          "medium": 2,
+          "large": 2
+        }
+      }
     }
   ],
   "rejected": [
@@ -2942,18 +3909,6 @@
       "ftpDir": "BachJS/BWV1006a/bwv-1006a_3",
       "sourceSha256": "59e93b8e0ade31f645a43a1595e3691d2f652d2f878ae282ca9899e53483ac2b",
       "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 4, 'L06': 2, 'L07': 35, 'L08': 42, 'L09': 14, 'L13': 10, 'L14': 113}); 3 lint law error(s) at the large profile (rule counts, every severity: {'L05': 3, 'L07': 32, 'L08': 39, 'L09': 16, 'L13': 11, 'L14': 117}); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
-      "ftpDir": "BachJS/BWV1006a/bwv-1006a_4",
-      "sourceSha256": "0cbdef66785f81c7a507fd6bdd32be9a174c8cb0d2bd81ad2117d99ffabc7056",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L07': 12, 'L08': 14, 'L09': 5, 'L13': 3, 'L14': 31}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L07': 15, 'L08': 11, 'L09': 6, 'L13': 3, 'L14': 32})"
-    },
-    {
-      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
-      "ftpDir": "BachJS/BWV1006a/bwv-1006a_5",
-      "sourceSha256": "42dd45e704039078e15ba074ae6e79f9e92e922f27101c105f7341abb0bb359d",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 7, 'L06': 2, 'L07': 23, 'L08': 14, 'L09': 5, 'L13': 6, 'L14': 38}); 5 lint law error(s) at the large profile (rule counts, every severity: {'L05': 5, 'L06': 2, 'L07': 22, 'L08': 16, 'L09': 5, 'L13': 7, 'L14': 37})"
     },
     {
       "slug": "bulk-bachjs-bwv1006a-bwv-1006a-6-bwv-1006a-6-ly",
@@ -3202,12 +4157,6 @@
       "reason": "ConversionError: lilypond failed for bwv847a.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-bachjs-bwv847-bwv847a-bwv847a-ly\\lilypond.log):\nGNU LilyPond 2.24.3 (running Guile 2.2)\nChanging working directory to: `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv847-bwv847a-bwv847a-ly/out'\nProcessing `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv847-bwv847a-bwv847a-ly/src/__digitus2_wrapper.ly'\nParsing...\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv847-bwv847a-bwv847a-ly/src/bwv847a.ly:154:2: error: Guile signaled an error for the expression beginning here\n#\n (if (equal? paper-width (* 8.5 in))\n\nSyntax error:\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv847-bwv847a-bwv847a-ly/src/bwv847a.ly:155:8: definition in expression context, where definitions are not allowed, in form (define system-count 12)\nInterpreting music...\nInterpreting music...[8][16][24][32]\nPreprocessing graphical objects...\nMIDI output to `bwv847a.mid'...\nFinding the ideal number of pages...\nFitting music on 1 or 2 pages...\nDrawing systems...\nConverting to `bwv847a.pdf'...\nfatal error: failed files: \"C:\\\\Users\\\\maxim\\\\.codex\\\\worktrees\\\\library-expansion\\\\thingamajig\\\\content\\\\_build\\\\bulk\\\\compile\\\\bulk-bachjs-bwv847-bwv847a-bwv847a-ly\\\\src\\\\__digitus2_wrapper.ly\"\n"
     },
     {
-      "slug": "bulk-bachjs-bwv847-fuga2-fuga2-ly",
-      "ftpDir": "BachJS/BWV847/fuga2",
-      "sourceSha256": "5b4ba90ea58a8daae5f74d9f022ef65ffccd6ab4faf8e9c58d099ed1426db6db",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 4, 'L06': 1, 'L07': 45, 'L08': 20, 'L09': 8, 'L10': 2, 'L11': 6, 'L13': 8, 'L14': 66}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L07': 48, 'L08': 16, 'L09': 12, 'L11': 5, 'L13': 8, 'L14': 62})"
-    },
-    {
       "slug": "bulk-bachjs-bwv848-bwv848a-bwv848a-ly",
       "ftpDir": "BachJS/BWV848/bwv848a",
       "sourceSha256": "407836354aaf412593af98d7b49019423afcbb75e30e7a7b6129dd0d00e44f7f",
@@ -3280,12 +4229,6 @@
       "reason": "ConversionError: lilypond failed for bwv855b.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-bachjs-bwv855-bwv855b-bwv855b-ly\\lilypond.log):\nGNU LilyPond 2.24.3 (running Guile 2.2)\nChanging working directory to: `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv855-bwv855b-bwv855b-ly/out'\nProcessing `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv855-bwv855b-bwv855b-ly/src/__digitus2_wrapper.ly'\nParsing...\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv855-bwv855b-bwv855b-ly/src/bwv855b.ly:141:2: error: Guile signaled an error for the expression beginning here\n#\n (if (equal? paper-width (* 8.5 in)) (define system-count 11))\n\nSyntax error:\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv855-bwv855b-bwv855b-ly/src/bwv855b.ly:141:36: definition in expression context, where definitions are not allowed, in form (define system-count 11)\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv855-bwv855b-bwv855b-ly/src/bwv855b.ly:142:2: error: Guile signaled an error for the expression beginning here\n#\n (if (equal? paper-width (* 210 mm)) (define system-count 12))\n\nSyntax error:\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv855-bwv855b-bwv855b-ly/src/bwv855b.ly:142:36: definition in expression context, where definitions are not allowed, in form (define system-count 12)\nInterpreting music...\nInterpreting music...[8][16][24][32][40]\nPreprocessing graphical objects...\nMIDI output to `bwv855b.mid'...\nFinding the ideal number of pages...\nFitting music on 1 or 2 pages...\nDrawing systems...\nConverting to `bwv855b.pdf'...\nwarning: `(gs -q -dNODISPLAY -dNOSAFER -dNOPAUSE -dBATCH -dAutoRotatePages=/None -dPrinted=false ./lilypond-tmp-5660274)' failed (1)\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/.venv/Lib/site-packages/lilypond-binaries/share/lilypond/2.24.3/ly/init.ly:65:2: error: Guile signaled an error for the expression beginning here\n#\n (let ((book-handler (if (defined? 'default-toplevel-book-handler)\nThrow to key `ly-file-failed' with args `()'.\n"
     },
     {
-      "slug": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
-      "ftpDir": "BachJS/BWV856/BWV856_Fugue11",
-      "sourceSha256": "3e4b7458aa6e690bd8deed04f6cf7c9e9921d0020f0a2ede35e460073cd4784f",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 10 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 10, 'L06': 6, 'L07': 33, 'L08': 10, 'L09': 10, 'L11': 31, 'L13': 1, 'L14': 88}); 10 lint law error(s) at the large profile (rule counts, every severity: {'L05': 10, 'L06': 7, 'L07': 38, 'L08': 8, 'L09': 10, 'L11': 25, 'L13': 1, 'L14': 87})"
-    },
-    {
       "slug": "bulk-bachjs-bwv857-bwv857-fuga12-bwv857-fuga12-ly",
       "ftpDir": "BachJS/BWV857/BWV857_Fuga12",
       "sourceSha256": "4dddfff4bc514403654ce4d014a7771801b0c01b1d566caeadb4912c556d6cfd",
@@ -3304,18 +4247,6 @@
       "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 29 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 3, 'L05': 26, 'L06': 11, 'L07': 101, 'L08': 52, 'L09': 20, 'L10': 1, 'L11': 30, 'L13': 3, 'L14': 244}); 18 lint law error(s) at the large profile (rule counts, every severity: {'L05': 18, 'L06': 10, 'L07': 110, 'L08': 40, 'L09': 21, 'L11': 24, 'L13': 3, 'L14': 244}); published MIDI does not match exactly; no automatic source exception; source notation uses markup musicglyph requiring visual transcription review"
     },
     {
-      "slug": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
-      "ftpDir": "BachJS/BWV861/BWV861_Fuga16",
-      "sourceSha256": "a7f2ee48fee28d1576a26eea2480443e06fde190aa9302078540895113a9994e",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 12 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 12, 'L06': 6, 'L07': 52, 'L08': 29, 'L09': 22, 'L10': 1, 'L11': 13, 'L13': 4, 'L14': 100}); 10 lint law error(s) at the large profile (rule counts, every severity: {'L05': 10, 'L06': 5, 'L07': 63, 'L08': 26, 'L09': 19, 'L10': 1, 'L11': 13, 'L13': 4, 'L14': 105})"
-    },
-    {
-      "slug": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
-      "ftpDir": "BachJS/BWV862/bach-fugue17",
-      "sourceSha256": "34164bfbcd6bc895447656ebc98862e0b8e8ab0a57502147f044440d84f2d844",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 6, 'L06': 5, 'L07': 50, 'L08': 74, 'L09': 37, 'L13': 1, 'L14': 102}); 5 lint law error(s) at the large profile (rule counts, every severity: {'L05': 5, 'L06': 5, 'L07': 61, 'L08': 62, 'L09': 40, 'L14': 104})"
-    },
-    {
       "slug": "bulk-bachjs-bwv862-bach-prelude17-bach-prelude17-ly",
       "ftpDir": "BachJS/BWV862/bach-prelude17",
       "sourceSha256": "054de809a9ed9da6093bcbe4b65bb6ac05b18775639532c5a408ff30c73563ce",
@@ -3328,12 +4259,6 @@
       "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 30 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 29, 'L06': 9, 'L07': 116, 'L08': 34, 'L09': 15, 'L11': 41, 'L13': 23, 'L14': 258}); 22 lint law error(s) at the large profile (rule counts, every severity: {'L05': 22, 'L06': 11, 'L07': 124, 'L08': 28, 'L09': 18, 'L11': 25, 'L13': 25, 'L14': 271}); scores/bulk-bachjs-bwv865-bwv865-fuga20-bwv865-fuga20-ly.musicxml: 859864 bytes > 700000"
     },
     {
-      "slug": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
-      "ftpDir": "BachJS/BWV865/BWV865_Praeludium20",
-      "sourceSha256": "a29cddaf24f3675322a88d2dd26b50a16a153fbe2b6ba350b76ea8488d969127",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 9 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 9, 'L07': 42, 'L08': 7, 'L09': 3, 'L11': 9, 'L13': 5, 'L14': 68}); 8 lint law error(s) at the large profile (rule counts, every severity: {'L05': 8, 'L07': 41, 'L08': 7, 'L09': 2, 'L11': 7, 'L13': 5, 'L14': 68})"
-    },
-    {
       "slug": "bulk-bachjs-bwv869-bwv869-praeludium24-bwv869-praeludium24-ly",
       "ftpDir": "BachJS/BWV869/BWV869_Praeludium24",
       "sourceSha256": "70009202f844be65c1a2b0538d960f579b8e3435c0be9cbd7e0e069e94f364ed",
@@ -3344,24 +4269,6 @@
       "ftpDir": "BachJS/BWV869/bwv869b",
       "sourceSha256": "5bc44c80396caabd3e39f0fb4dc91cd74aecc2d45ef4f3951c85b778e87ddc25",
       "reason": "ConversionError: lilypond failed for bwv869b.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly\\lilypond.log):\ningamajig/content/.venv/Lib/site-packages/lilypond-binaries/share/lilypond\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:31:48: error: unknown escaped string: `\\soprano'\n\t\t\t\\new Staff = \"RH\" { << \n                                               \\soprano \\\\ \\alto >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:31:48: error: string outside of text script or \\lyricmode\n\t\t\t\\new Staff = \"RH\" { << \n                                               \\soprano \\\\ \\alto >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:31:60: error: unknown escaped string: `\\alto'\n\t\t\t\\new Staff = \"RH\" { << \\soprano \\\\ \n                                                           \\alto >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:31:60: error: string outside of text script or \\lyricmode\n\t\t\t\\new Staff = \"RH\" { << \\soprano \\\\ \n                                                           \\alto >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:32:48: error: unknown escaped string: `\\tenore'\n\t\t\t\\new Staff = \"LH\" { << \n                                               \\tenore \\\\ \\basso >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:32:48: error: string outside of text script or \\lyricmode\n\t\t\t\\new Staff = \"LH\" { << \n                                               \\tenore \\\\ \\basso >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:32:59: error: unknown escaped string: `\\basso'\n\t\t\t\\new Staff = \"LH\" { << \\tenore \\\\ \n                                                          \\basso >> }\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly/src/bwv869b.ly:32:59: error: string outside of text script or \\lyricmode\n\t\t\t\\new Staff = \"LH\" { << \\tenore \\\\ \n                                                          \\basso >> }\n\nInterpreting music...\nInterpreting music...\nPreprocessing graphical objects...\nMIDI output to `bwv869b.mid'...\nFinding the ideal number of pages...\nFitting music on 1 page...\nDrawing systems...\nConverting to `bwv869b.pdf'...\nfatal error: failed files: \"C:\\\\Users\\\\maxim\\\\.codex\\\\worktrees\\\\library-expansion\\\\thingamajig\\\\content\\\\_build\\\\bulk\\\\compile\\\\bulk-bachjs-bwv869-bwv869b-bwv869b-lys-bwv869b-ly\\\\src\\\\__digitus2_wrapper.ly\"\n"
-    },
-    {
-      "slug": "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly",
-      "ftpDir": "BachJS/BWV870/wtk2fuga1",
-      "sourceSha256": "b5f5bddd7808f6e8c6e11b8e2c08d0f258566b73087f173b30544d4dc7c8fbba",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 9, 'L07': 35, 'L08': 2, 'L09': 4, 'L11': 15, 'L13': 1, 'L14': 122}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L06': 7, 'L07': 37, 'L08': 1, 'L09': 3, 'L11': 10, 'L13': 1, 'L14': 98})"
-    },
-    {
-      "slug": "bulk-bachjs-bwv870-wtk2prelude1-wtk2prelude1-ly",
-      "ftpDir": "BachJS/BWV870/wtk2prelude1",
-      "sourceSha256": "195a875fdad383adca7f3707ca945992494e82c9aa36d277d736ae3993197cf0",
-      "reason": "1 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L06': 7, 'L07': 48, 'L08': 12, 'L09': 9, 'L11': 21, 'L14': 116})"
-    },
-    {
-      "slug": "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly",
-      "ftpDir": "BachJS/BWV871/wtk2-fugue2",
-      "sourceSha256": "da57e6cc6323f819c794e9c6c53012e7421d1e9550dfa37d2aba008c7edd4bad",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 3 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 3, 'L06': 6, 'L07': 37, 'L08': 16, 'L09': 10, 'L13': 1, 'L14': 63}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L06': 3, 'L07': 35, 'L08': 17, 'L09': 13, 'L13': 1, 'L14': 73})"
     },
     {
       "slug": "bulk-bachjs-bwv875-bwv875a-bwv875a-ly",
@@ -3400,22 +4307,10 @@
       "reason": "validation failed: bulk-bachjs-bwv910-bwv910-bwv910-ly.musicxml; span flags: a slice one hand cannot play (spanFlags in verification.json); 33 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 5, 'L05': 28, 'L06': 13, 'L07': 191, 'L08': 359, 'L09': 181, 'L10': 2, 'L11': 48, 'L13': 46, 'L14': 433}); 17 lint law error(s) at the large profile (rule counts, every severity: {'L03': 1, 'L05': 16, 'L06': 12, 'L07': 223, 'L08': 300, 'L09': 178, 'L10': 2, 'L11': 34, 'L13': 45, 'L14': 457}); scores/bulk-bachjs-bwv910-bwv910-bwv910-ly.musicxml: 1573871 bytes > 700000"
     },
     {
-      "slug": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
-      "ftpDir": "BachJS/BWV952/fugue-c-major",
-      "sourceSha256": "23bb9c7726d6a77054d678601b22df3f8ca73d32a86aa8d87d4e6f66d6485a02",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 15 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 14, 'L06': 2, 'L07': 40, 'L08': 6, 'L09': 2, 'L11': 10, 'L13': 9, 'L14': 134}); 7 lint law error(s) at the large profile (rule counts, every severity: {'L05': 7, 'L06': 3, 'L07': 43, 'L08': 10, 'L09': 3, 'L10': 2, 'L11': 14, 'L13': 9, 'L14': 130})"
-    },
-    {
       "slug": "bulk-bachjs-bwv988-bwv-988-aria-bwv-988-aria-ly",
       "ftpDir": "BachJS/BWV988/bwv-988-aria",
       "sourceSha256": "f86adfb84573bc7775fe48750f7ee9b6df2adf2fcc5e32fb52c09e589c9e12af",
       "reason": "unsupported notation: articulation 'prallup' not exported"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v01",
-      "sourceSha256": "24fcef149fc4ac2b562020f7db2c38084bee0c47c73adec9cea7134d1aa18b5c",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 5, 'L07': 75, 'L08': 8, 'L09': 8, 'L11': 7, 'L14': 76}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L06': 4, 'L07': 73, 'L08': 6, 'L09': 9, 'L11': 7, 'L14': 68})"
     },
     {
       "slug": "bulk-bachjs-bwv988-bwv-988-v03-bwv-988-v03-ly",
@@ -3424,22 +4319,10 @@
       "reason": "1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 1, 'L07': 26, 'L08': 6, 'L09': 8, 'L11': 3, 'L14': 95}); source notation uses markup musicglyph requiring visual transcription review"
     },
     {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v04",
-      "sourceSha256": "fd38ccd26679e13280fd0cf8cfb0caa3a7ec3b2c5eba45667bd24124609c8d42",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 2, 'L06': 2, 'L07': 20, 'L08': 7, 'L09': 2, 'L11': 2, 'L13': 7, 'L14': 17}); 4 lint law error(s) at the large profile (rule counts, every severity: {'L03': 2, 'L05': 2, 'L06': 2, 'L07': 21, 'L08': 6, 'L09': 2, 'L11': 2, 'L13': 7, 'L14': 14})"
-    },
-    {
       "slug": "bulk-bachjs-bwv988-bwv-988-v05-bwv-988-v05-ly",
       "ftpDir": "BachJS/BWV988/bwv-988-v05",
       "sourceSha256": "645f0ca7a4a738f9e03b3d02f6ea292cd32a016e15c809f60452e57c034c9cab",
       "reason": "unsupported notation: articulation 'downmordent' not exported"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v06",
-      "sourceSha256": "f4f8c9fa39952435412fca97f89dffb7144b75cdaf140c2432b27f5b090c2659",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 4, 'L07': 16, 'L08': 3, 'L09': 6, 'L11': 4, 'L13': 6, 'L14': 42}); 6 lint law error(s) at the large profile (rule counts, every severity: {'L05': 6, 'L06': 4, 'L07': 18, 'L08': 2, 'L09': 6, 'L11': 7, 'L13': 6, 'L14': 42})"
     },
     {
       "slug": "bulk-bachjs-bwv988-bwv-988-v10-bwv-988-v10-ly",
@@ -3448,46 +4331,16 @@
       "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 8, 'L07': 18, 'L08': 4, 'L09': 1, 'L13': 3, 'L14': 44}); 6 lint law error(s) at the large profile (rule counts, every severity: {'L05': 6, 'L07': 19, 'L08': 1, 'L09': 1, 'L11': 1, 'L13': 3, 'L14': 44}); unsupported notation: articulation 'downmordent' not exported"
     },
     {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v12",
-      "sourceSha256": "9dbdd58703a3d4fcc9e9f8278eba210ef0256de6bf24de711e92403055d20528",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 3, 'L07': 33, 'L08': 5, 'L09': 13, 'L11': 9, 'L12': 1, 'L13': 4, 'L14': 103}); 2 lint law error(s) at the large profile (rule counts, every severity: {'L05': 2, 'L06': 1, 'L07': 32, 'L08': 4, 'L09': 13, 'L10': 1, 'L11': 7, 'L12': 1, 'L13': 5, 'L14': 99})"
-    },
-    {
       "slug": "bulk-bachjs-bwv988-bwv-988-v14-bwv-988-v14-ly",
       "ftpDir": "BachJS/BWV988/bwv-988-v14",
       "sourceSha256": "0ba6de9c3f5cd1cbe70539106cc1d087d7a8e69dcd1479b6dfde5c47fa7c5276",
       "reason": "unsupported notation: articulation 'upmordent' not exported"
     },
     {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v15-bwv-988-v15-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v15",
-      "sourceSha256": "8cd35a7871ae08ffdecf4553357e9da2104077e369d42fea9aa9887eb04e298d",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 18 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 18, 'L06': 9, 'L07': 64, 'L08': 28, 'L09': 15, 'L11': 2, 'L13': 9, 'L14': 58}); 14 lint law error(s) at the large profile (rule counts, every severity: {'L05': 14, 'L06': 1, 'L07': 62, 'L08': 23, 'L09': 18, 'L13': 10, 'L14': 65})"
-    },
-    {
       "slug": "bulk-bachjs-bwv988-bwv-988-v16-bwv-988-v16-ly",
       "ftpDir": "BachJS/BWV988/bwv-988-v16",
       "sourceSha256": "11a165225bcbff86a6c556d3075af6a85aa307a75691b5c9cc49c2c3291efb25",
       "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 7, 'L06': 3, 'L07': 37, 'L08': 14, 'L09': 3, 'L11': 5, 'L13': 6, 'L14': 120}); 6 lint law error(s) at the large profile (rule counts, every severity: {'L05': 6, 'L06': 2, 'L07': 38, 'L08': 12, 'L09': 3, 'L11': 7, 'L13': 6, 'L14': 120}); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v21-bwv-988-v21-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v21",
-      "sourceSha256": "2a778159d348b6e39abd9d834d329237f0263e091a8020460b95b1a9e4cf782e",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 15 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 14, 'L06': 3, 'L07': 46, 'L08': 14, 'L09': 10, 'L11': 1, 'L13': 2, 'L14': 57}); 13 lint law error(s) at the large profile (rule counts, every severity: {'L05': 13, 'L06': 2, 'L07': 51, 'L08': 13, 'L09': 7, 'L10': 1, 'L11': 1, 'L13': 2, 'L14': 59})"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v22-bwv-988-v22-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v22",
-      "sourceSha256": "d328cd81bbfba3e5881332c3546bd832caccf1259f6756e71e66a662d708a0fb",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 6, 'L06': 1, 'L07': 24, 'L08': 6, 'L09': 4, 'L10': 1, 'L11': 2, 'L13': 2, 'L14': 10}); 5 lint law error(s) at the large profile (rule counts, every severity: {'L03': 1, 'L05': 4, 'L06': 1, 'L07': 25, 'L08': 5, 'L09': 2, 'L10': 1, 'L11': 1, 'L13': 2, 'L14': 14})"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v24-bwv-988-v24-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v24",
-      "sourceSha256": "caf26a86367bc453dd1b6751b75dba2cbbe2d9d55179a89ccb9cb547be77ec12",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 28 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 28, 'L06': 4, 'L07': 51, 'L08': 12, 'L09': 7, 'L11': 7, 'L13': 3, 'L14': 75}); 23 lint law error(s) at the large profile (rule counts, every severity: {'L05': 23, 'L06': 5, 'L07': 51, 'L08': 14, 'L09': 7, 'L10': 1, 'L11': 8, 'L13': 3, 'L14': 81})"
     },
     {
       "slug": "bulk-bachjs-bwv988-bwv-988-v26-bwv-988-v26-ly",
@@ -3500,12 +4353,6 @@
       "ftpDir": "BachJS/BWV988/bwv-988-v27",
       "sourceSha256": "d2465d8f5e25e5d5640e9699c9f1dba6c23c9bd8d12fa74d1c3bf41438d8331e",
       "reason": "source notation uses markup musicglyph requiring visual transcription review"
-    },
-    {
-      "slug": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
-      "ftpDir": "BachJS/BWV988/bwv-988-v30",
-      "sourceSha256": "2a3191ca67c54cf73b20f0d2d58e4093e8bd0e0f58b0c1f224d9cdb29562b9f3",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 5, 'L06': 1, 'L07': 22, 'L08': 11, 'L09': 6, 'L11': 7, 'L13': 1, 'L14': 24}); 5 lint law error(s) at the large profile (rule counts, every severity: {'L05': 5, 'L07': 23, 'L08': 8, 'L09': 5, 'L11': 3, 'L13': 1, 'L14': 29})"
     },
     {
       "slug": "bulk-bartokb-rom-folk-dance-1-bartok-rom-folk-dance-1-bartok-ly",
@@ -3538,12 +4385,6 @@
       "reason": "published MIDI does not match exactly; no automatic source exception"
     },
     {
-      "slug": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
-      "ftpDir": "BeethovenLv/O10/lvb_sonate_10no2_3",
-      "sourceSha256": "cc28243001a13e4cbf02bc21e3768b5ef5a29583b7a7fd64874b40a3dc46d3d6",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 5 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 5, 'L06': 6, 'L07': 78, 'L08': 69, 'L09': 16, 'L11': 14, 'L13': 46, 'L14': 128}); 5 lint law error(s) at the large profile (rule counts, every severity: {'L05': 5, 'L06': 5, 'L07': 88, 'L08': 56, 'L09': 19, 'L11': 9, 'L13': 50, 'L14': 129})"
-    },
-    {
       "slug": "bulk-beethovenlv-o111-lvb-sonate-111-1-lvb-sonate-111-1-lys-lvb-sonate-111-1-ly",
       "ftpDir": "BeethovenLv/O111/lvb_sonate_111_1",
       "sourceSha256": "2a6d275196d8c0b368707904d58affbf333a5e13b2504814673062c04a1e819a",
@@ -3572,12 +4413,6 @@
       "ftpDir": "BeethovenLv/O2/LVB_Sonate_02no1_2",
       "sourceSha256": "0ef4b7a9a3dc71b11f58085270fb6ea4040f6ecab3b51ac61af7e74aa5cabfe8",
       "reason": "ConversionError: lilypond failed for beethoven-op2-no1-adagio.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly\\lilypond.log):\nead 0 2 ) ( ) ( ) ( ) ) Slur\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:109:12: error: error in #{ ... #}\nshpSlurC = \n           \\shapeII #'( (head 0 2 ) ( ) ( ) ( ) ) Slur\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:110:12: error: wrong type for argument 3.  Expecting music, found (list (quote Slur))\nshpSlurD = \n           \\shapeII #'((head 0.4 5)()(-1 1.5)(head 0 1)) Slur\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:110:12: error: error in #{ ... #}\nshpSlurD = \n           \\shapeII #'((head 0.4 5)()(-1 1.5)(head 0 1)) Slur\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:111:12: error: wrong type for argument 3.  Expecting music, found (list (quote Slur))\nshpSlurE = \n           \\shapeII #'((head)(0 1)()(head)) Slur\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:111:12: error: error in #{ ... #}\nshpSlurE = \n           \\shapeII #'((head)(0 1)()(head)) Slur\n\nInterpreting music...[8][16][24][32][40][48][56]\nPreprocessing graphical objects...\nInterpreting music...\nMIDI output to `beethoven-op2-no1-adagio.mid'...\nFinding the ideal number of pages...\nFitting music on 3 or 4 pages...\nDrawing systems...\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:205:30: programming error: cyclic dependency: calculation-in-progress encountered for PhrasingSlur.control-points\n  | f8-2\\) r c16\\finger \"1  \"\n                             -\\shapeII #'(()(0 1.5))\\(\\pp^\\txtNatTurnC d32-.-2-\\shapeII #'(()(0 0.5))( e-. f-.-1 g-. a-. bes!-.) c b-3 c d c bes a g-1\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly/src/beethoven-op2-no1-adagio.ly:205:30: continuing, cross fingers\nConverting to `beethoven-op2-no1-adagio.pdf'...\nfatal error: failed files: \"C:\\\\Users\\\\maxim\\\\.codex\\\\worktrees\\\\library-expansion\\\\thingamajig\\\\content\\\\_build\\\\bulk\\\\compile\\\\bulk-beethovenlv-o2-lvb-sonate-02no1-2-lvb-sonate-02no1-2-lys-beethoven-op2-no1-adagio-ly\\\\src\\\\__digitus2_wrapper.ly\"\n"
-    },
-    {
-      "slug": "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly",
-      "ftpDir": "BeethovenLv/O2/LVB_Sonate_02no1_3",
-      "sourceSha256": "1ed2b4e3a7e59e5043c3c0f65855af4620662672db0e870522759488d3971e40",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 4, 'L07': 18, 'L08': 28, 'L09': 3, 'L13': 5, 'L14': 75}); 4 lint law error(s) at the large profile (rule counts, every severity: {'L05': 4, 'L06': 2, 'L07': 24, 'L08': 19, 'L09': 3, 'L13': 5, 'L14': 66})"
     },
     {
       "slug": "bulk-beethovenlv-o2-lvb-sonate-02no1-4-lvb-sonate-02no1-4-ly",
@@ -3700,18 +4535,6 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 273, only in the MIDI 273); span flags: a slice one hand cannot play (spanFlags in verification.json); 9 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 9, 'L06': 2, 'L07': 41, 'L08': 7, 'L09': 2, 'L11': 4, 'L13': 14, 'L14': 30}); 9 lint law error(s) at the large profile (rule counts, every severity: {'L05': 9, 'L06': 2, 'L07': 38, 'L08': 7, 'L09': 2, 'L11': 4, 'L13': 14, 'L14': 31}); published MIDI does not match exactly; no automatic source exception"
     },
     {
-      "slug": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
-      "ftpDir": "BrahmsJ/O118/intermezzo",
-      "sourceSha256": "5bd64924ba0c1a72018144bbd9245ebef7d6892acb163fb282c3a25bd0f21623",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 45 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 8, 'L05': 37, 'L06': 5, 'L07': 204, 'L08': 122, 'L09': 65, 'L10': 2, 'L13': 9, 'L14': 58}); 44 lint law error(s) at the large profile (rule counts, every severity: {'L03': 8, 'L05': 36, 'L06': 3, 'L07': 223, 'L08': 112, 'L09': 61, 'L10': 2, 'L13': 9, 'L14': 62})"
-    },
-    {
-      "slug": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
-      "ftpDir": "BrahmsJ/O39/waltz-op39-15",
-      "sourceSha256": "64cef49cf056947e8d4f900535dbc28a4a841653ff1e2a936534e928e2209a65",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 12 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 12, 'L06': 3, 'L07': 72, 'L08': 96, 'L09': 47, 'L13': 2, 'L14': 4}); 12 lint law error(s) at the large profile (rule counts, every severity: {'L05': 12, 'L07': 77, 'L08': 90, 'L09': 42, 'L13': 2, 'L14': 6})"
-    },
-    {
       "slug": "bulk-burgmullerjff-ploermel-ploermel-ly",
       "ftpDir": "BurgmullerJFF/ploermel",
       "sourceSha256": "d061a38e4ee927ce7dc8051d23de1b04e3c93d87f99da4c72d4de2cc1df373c4",
@@ -3790,28 +4613,10 @@
       "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 59 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 4, 'L05': 55, 'L07': 39, 'L08': 21, 'L09': 29, 'L13': 2, 'L14': 5}); 58 lint law error(s) at the large profile (rule counts, every severity: {'L03': 2, 'L05': 56, 'L07': 40, 'L08': 18, 'L09': 30, 'L13': 2, 'L14': 5}); non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4"
     },
     {
-      "slug": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-11",
-      "sourceSha256": "ce806cb4b63ce77e0b136e4b6ad333cc26fa3cdaf0e0b4cef1b000aa030d050b",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 2, 'L07': 35, 'L08': 71, 'L09': 7, 'L11': 12, 'L13': 1, 'L14': 22}); 6 lint law error(s) at the large profile (rule counts, every severity: {'L05': 6, 'L06': 2, 'L07': 41, 'L08': 44, 'L09': 30, 'L11': 8, 'L13': 3, 'L14': 22})"
-    },
-    {
-      "slug": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-12",
-      "sourceSha256": "02071eaeff99eba165b27d3fb0047f74782b43433010d6d843934d19787b4de7",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 22 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 3, 'L05': 19, 'L07': 96, 'L08': 179, 'L09': 38, 'L11': 8, 'L12': 2, 'L13': 33, 'L14': 35}); 22 lint law error(s) at the large profile (rule counts, every severity: {'L03': 3, 'L05': 19, 'L07': 95, 'L08': 174, 'L09': 27, 'L11': 7, 'L12': 2, 'L13': 33, 'L14': 46})"
-    },
-    {
       "slug": "bulk-chopinff-o28-chop-28-13-chop-28-13-ly",
       "ftpDir": "ChopinFF/O28/Chop-28-13",
       "sourceSha256": "9a7a0542243359360141846993d637bd6f34c7de9f7cee542bad2b03950a15b0",
       "reason": "ConversionError: lilypond failed for Chop-28-13.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-chopinff-o28-chop-28-13-chop-28-13-ly\\lilypond.log):\nGNU LilyPond 2.24.3 (running Guile 2.2)\nChanging working directory to: `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-chopinff-o28-chop-28-13-chop-28-13-ly/out'\nProcessing `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-chopinff-o28-chop-28-13-chop-28-13-ly/src/__digitus2_wrapper.ly'\nParsing...\nInterpreting music...[8][16][24][32]\nPreprocessing graphical objects..."
-    },
-    {
-      "slug": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-14",
-      "sourceSha256": "be03db643c7191cd44d20891ea03993887b56f41cfed2cad4925d764098c7b92",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L07': 83, 'L08': 108, 'L09': 4}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L07': 85, 'L08': 106, 'L09': 4})"
     },
     {
       "slug": "bulk-chopinff-o28-chop-28-15-chop-28-15-lys-header-ly",
@@ -3838,12 +4643,6 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 88, only in the MIDI 110); span flags: a slice one hand cannot play (spanFlags in verification.json); 22 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 22, 'L06': 4, 'L07': 70, 'L08': 40, 'L09': 13, 'L10': 1, 'L11': 4, 'L13': 3, 'L14': 42}); 21 lint law error(s) at the large profile (rule counts, every severity: {'L05': 21, 'L06': 4, 'L07': 73, 'L08': 40, 'L09': 11, 'L10': 1, 'L11': 2, 'L12': 2, 'L13': 3, 'L14': 42}); published MIDI does not match exactly; no automatic source exception; non-reduced source tuplet ratio requires displayed-number review: tuplet 22/16; non-reduced source tuplet ratio requires displayed-number review: tuplet 22/16"
     },
     {
-      "slug": "bulk-chopinff-o28-chop-28-19-chop-28-19-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-19",
-      "sourceSha256": "af1c3a2069a66b72ff83067d5b9d64b5b90297bc3745f16db0804b6411a959e1",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 1, 'L07': 478, 'L08': 217, 'L09': 112, 'L10': 1, 'L11': 19, 'L13': 1}); 6 lint law error(s) at the large profile (rule counts, every severity: {'L05': 6, 'L06': 1, 'L07': 492, 'L08': 217, 'L09': 112, 'L10': 1, 'L11': 11, 'L13': 1})"
-    },
-    {
       "slug": "bulk-chopinff-o28-chop-28-2-chop-28-2-ly",
       "ftpDir": "ChopinFF/O28/Chop-28-2",
       "sourceSha256": "ed0e7ccf53b3f6f925ff10382fa32d0ff4165297a266884e999f538238d7da26",
@@ -3853,19 +4652,13 @@
       "slug": "bulk-chopinff-o28-chop-28-20-chop-28-20-ly",
       "ftpDir": "ChopinFF/O28/Chop-28-20",
       "sourceSha256": "cf50fb34abbb643df194d39fdf1831c8ab2d7ab7c8af983236f7739e989dee8f",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 8, 'L07': 25, 'L08': 30, 'L09': 15, 'L10': 1, 'L13': 1}); 8 lint law error(s) at the large profile (rule counts, every severity: {'L05': 8, 'L07': 24, 'L08': 30, 'L09': 15, 'L10': 1, 'L13': 1})"
+      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 8, 'L07': 25, 'L08': 30, 'L09': 15, 'L10': 1, 'L13': 1}); 8 lint law error(s) at the large profile (rule counts, every severity: {'L05': 8, 'L07': 24, 'L08': 30, 'L09': 15, 'L10': 1, 'L13': 1}); Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: the source fetched on 2026-10-19 differs from the pinned sourceSha256, so the new edition needs its own review"
     },
     {
       "slug": "bulk-chopinff-o28-chop-28-21-chop-28-21-ly",
       "ftpDir": "ChopinFF/O28/Chop-28-21",
       "sourceSha256": "9be1b51439f5a3b124c8bd699dc61e8dfa60cec3adb4d47e890d3224e2dbd312",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 3); span flags: a slice one hand cannot play (spanFlags in verification.json); 25 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 23, 'L06': 8, 'L07': 81, 'L08': 117, 'L09': 31, 'L10': 1, 'L11': 1, 'L13': 3, 'L14': 3}); 23 lint law error(s) at the large profile (rule counts, every severity: {'L03': 2, 'L05': 21, 'L06': 5, 'L07': 89, 'L08': 106, 'L09': 38, 'L10': 1, 'L11': 1, 'L13': 3, 'L14': 3}); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-chopinff-o28-chop-28-22-chop-28-22-ly",
-      "ftpDir": "ChopinFF/O28/Chop-28-22",
-      "sourceSha256": "338dc910cc75cb8847d94c177f01ee745c137007b6fdf90fde3216325341c2d9",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 24 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 22, 'L07': 59, 'L08': 98, 'L09': 14, 'L10': 5, 'L11': 12, 'L13': 4, 'L14': 1}); 24 lint law error(s) at the large profile (rule counts, every severity: {'L03': 2, 'L05': 22, 'L07': 59, 'L08': 98, 'L09': 14, 'L10': 5, 'L11': 12, 'L13': 4, 'L14': 1})"
     },
     {
       "slug": "bulk-chopinff-o28-chop-28-23-chop-28-23-ly",
@@ -4246,18 +5039,6 @@
       "reason": "no LilyPond 2.24 MIDI check; multiple distinct source scores; complete anthology/movement selection needs review"
     },
     {
-      "slug": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly",
-      "ftpDir": "HaydnFJ/HOB-XVI-27/hob-xvi-27-ii-menuet-trio",
-      "sourceSha256": "53245b0fdd6d0797a1593cf04eeb45a1ebdc99502b53f621312015d6c449c126",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 9 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 9, 'L06': 4, 'L07': 32, 'L08': 22, 'L09': 1, 'L11': 2, 'L13': 9, 'L14': 40}); 7 lint law error(s) at the large profile (rule counts, every severity: {'L05': 7, 'L06': 2, 'L07': 33, 'L08': 22, 'L09': 3, 'L11': 2, 'L13': 7, 'L14': 29})"
-    },
-    {
-      "slug": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly",
-      "ftpDir": "HaydnFJ/HOB-XVI-27/hob-xvi-27-iii-presto",
-      "sourceSha256": "de6ac2a470cce694d596f4d311ccb53cc8c01b37d5f0458c9591a562b1511d79",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 1, 'L07': 50, 'L08': 6, 'L09': 21, 'L11': 4, 'L13': 23, 'L14': 55}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L06': 1, 'L07': 55, 'L08': 2, 'L09': 21, 'L11': 4, 'L13': 23, 'L14': 62})"
-    },
-    {
       "slug": "bulk-haydnfj-hob-xvi-28-hob-xvi-28-i-allegro-moderato-hob-xvi-28-i-allegro-moderato-ly",
       "ftpDir": "HaydnFJ/HOB-XVI-28/hob-xvi-28-i-allegro-moderato",
       "sourceSha256": "dec2165de2bc34efe9a69f62421502b8fcc8e1070c0ae33f3c05a5c2a8bbceac",
@@ -4414,22 +5195,10 @@
       "reason": "validation failed: bulk-lisztf-ballade-ballade-ly.musicxml, bulk-lisztf-ballade-ballade-ly.fingered.musicxml; LilyPond 2.24 MIDI check not exact (only in the MusicXML 220, only in the MIDI 224); span flags: a slice one hand cannot play (spanFlags in verification.json); 150 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 29, 'L05': 121, 'L06': 15, 'L07': 644, 'L08': 893, 'L09': 258, 'L10': 18, 'L11': 23, 'L13': 50, 'L14': 246}); 145 lint law error(s) at the large profile (rule counts, every severity: {'L03': 30, 'L05': 115, 'L06': 12, 'L07': 648, 'L08': 872, 'L09': 172, 'L10': 18, 'L11': 26, 'L13': 52, 'L14': 266}); scores/bulk-lisztf-ballade-ballade-ly.musicxml: 3060035 bytes > 700000; scores/bulk-lisztf-ballade-ballade-ly.fingered.musicxml: 3066144 bytes > 700000; published MIDI does not match exactly; no automatic source exception; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: times 4/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 9/6; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 15/12; non-reduced source tuplet ratio requires displayed-number review: tuplet 18/12; non-reduced source tuplet ratio requires displayed-number review: tuplet 15/12; non-reduced source tuplet ratio requires displayed-number review: tuplet 18/12; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displayed-number review: tuplet 6/4; non-reduced source tuplet ratio requires displa"
     },
     {
-      "slug": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
-      "ftpDir": "LisztF/S.172/liszt-consolation-no1",
-      "sourceSha256": "731440571b3fabc86f8056a056ab211b5b50471899d38e4ba8fb0d909b46977c",
-      "reason": "1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 2, 'L07': 10, 'L08': 14, 'L09': 4, 'L14': 11})"
-    },
-    {
       "slug": "bulk-lisztf-s-172-liszt-consolation-no3-liszt-consolation-no3-ly",
       "ftpDir": "LisztF/S.172/liszt-consolation-no3",
       "sourceSha256": "dab42ef825f345e19e2dda6ed95095be9438c176af821bf7b598c32a3e252dce",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 3); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 4, 'L06': 2, 'L07': 149, 'L08': 67, 'L09': 35, 'L11': 1, 'L13': 6, 'L14': 20})"
-    },
-    {
-      "slug": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
-      "ftpDir": "LisztF/S.172/liszt-consolation-no4",
-      "sourceSha256": "54e1013ad29f991237598db58e2e53c3230b186202fc7435402283f62385d1fb",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 7, 'L07': 26, 'L08': 95, 'L09': 18, 'L10': 1, 'L13': 5, 'L14': 5}); 7 lint law error(s) at the large profile (rule counts, every severity: {'L05': 7, 'L07': 27, 'L08': 92, 'L09': 18, 'L10': 1, 'L13': 4, 'L14': 5})"
     },
     {
       "slug": "bulk-mendelssohn-bartholdyf-o102-songww-opus102no3-songww-opus102no3-ly",
@@ -4474,24 +5243,6 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 912, only in the MIDI 912); 51 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 9, 'L05': 42, 'L06': 4, 'L07': 149, 'L08': 71, 'L09': 11, 'L11': 2, 'L13': 5, 'L14': 53}); 12 lint law error(s) at the large profile (rule counts, every severity: {'L05': 12, 'L06': 5, 'L07': 143, 'L08': 70, 'L09': 13, 'L11': 2, 'L13': 5, 'L14': 55}); published MIDI does not match exactly; no automatic source exception"
     },
     {
-      "slug": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
-      "ftpDir": "MozartWA/Anh41/k375g",
-      "sourceSha256": "37ab217c705a7d96c52a565c0f527fc67f73a80d657c5cb80b53e02f70b89096",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 3, 'L07': 21, 'L08': 16, 'L09': 10, 'L11': 5, 'L13': 3, 'L14': 35}); 3 lint law error(s) at the large profile (rule counts, every severity: {'L05': 3, 'L06': 3, 'L07': 21, 'L08': 15, 'L09': 10, 'L11': 4, 'L13': 3, 'L14': 37})"
-    },
-    {
-      "slug": "bulk-mozartwa-kv153-k153-k153-ly",
-      "ftpDir": "MozartWA/KV153/k153",
-      "sourceSha256": "cd8464f6036798ca3697b50ae42e6065aff03562a1f0fc57419041a3240b1851",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 8, 'L06': 8, 'L07': 61, 'L08': 53, 'L09': 30, 'L10': 1, 'L11': 3, 'L13': 19, 'L14': 111}); 5 lint law error(s) at the large profile (rule counts, every severity: {'L05': 5, 'L06': 9, 'L07': 78, 'L08': 41, 'L09': 34, 'L10': 1, 'L11': 2, 'L13': 18, 'L14': 113})"
-    },
-    {
-      "slug": "bulk-mozartwa-kv154-k154-k154-ly",
-      "ftpDir": "MozartWA/KV154/k154",
-      "sourceSha256": "005f460accd50bf94e910adf8b3010731c86900c00aa4ab85bad9bf98757bc53",
-      "reason": "7 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 6, 'L06': 8, 'L07': 42, 'L08': 11, 'L09': 9, 'L10': 1, 'L13': 5, 'L14': 66})"
-    },
-    {
       "slug": "bulk-mozartwa-kv309-kv309-1-kv309-1-ly",
       "ftpDir": "MozartWA/KV309/KV309_1",
       "sourceSha256": "14469ead3a7df92d6c52919af51659d3915f2b54ab2425d1f38ce41b292075b6",
@@ -4514,12 +5265,6 @@
       "ftpDir": "MozartWA/KV331/KV331_1_4_var3",
       "sourceSha256": "4e053e14bb17627992378f5253a486147844eddc5c4ba9127f519ad635c29601",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 3); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-mozartwa-kv331-kv331-1-5-var4-kv331-1-5-var4-ly",
-      "ftpDir": "MozartWA/KV331/KV331_1_5_var4",
-      "sourceSha256": "c335d5c13c0add480bfb3827393a447b79add0698532ab3ea266c95cba38f2e1",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 131 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 131, 'L07': 119, 'L08': 27, 'L09': 21, 'L11': 53, 'L13': 2, 'L14': 6}); 128 lint law error(s) at the large profile (rule counts, every severity: {'L05': 128, 'L07': 119, 'L08': 28, 'L09': 21, 'L11': 54, 'L13': 2, 'L14': 6})"
     },
     {
       "slug": "bulk-mozartwa-kv331-kv331-1-6-var5-kv331-1-6-var5-ly",
@@ -4634,12 +5379,6 @@
       "ftpDir": "RachmaninoffS/O23/rach-prelude23-09",
       "sourceSha256": "ab973869b7de657697eba3f2fc5b32071c530e94118e0688126cdda0f119aefa",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 8, only in the MIDI 8); scores/bulk-rachmaninoffs-o23-rach-prelude23-09-rach-prelude23-09-ly.fingered.musicxml: 703915 bytes > 700000; published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-rachmaninoffs-o23-rach-prelude23-10-rach-prelude23-10-ly",
-      "ftpDir": "RachmaninoffS/O23/rach-prelude23-10",
-      "sourceSha256": "0d2f6bbc4740b4112a7ef9c8802b7ea9dfb7a48676cf6703f7efd795513e0baa",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 41 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 6, 'L05': 35, 'L06': 2, 'L07': 49, 'L08': 161, 'L09': 28, 'L13': 11, 'L14': 23}); 34 lint law error(s) at the large profile (rule counts, every severity: {'L03': 2, 'L05': 32, 'L06': 2, 'L07': 57, 'L08': 148, 'L09': 27, 'L13': 11, 'L14': 20})"
     },
     {
       "slug": "bulk-rachmaninoffs-o3-rach-prelude-op3-no2-rach-prelude-op3-no2-ly",
@@ -4772,12 +5511,6 @@
       "ftpDir": "SatieE/Trois_Valses/Son_Binocle",
       "sourceSha256": "bc44b23d9450ecf56be6986c871efcacda286aa7a597ab1c244514885093e018",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 3, only in the MIDI 3); span flags: a slice one hand cannot play (spanFlags in verification.json); 9 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 9, 'L06': 1, 'L07': 24, 'L13': 1, 'L14': 12}); 9 lint law error(s) at the large profile (rule counts, every severity: {'L05': 9, 'L06': 1, 'L07': 20, 'L13': 1, 'L14': 12}); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-scarlattid-ds-sonate-c-ds-sonate-c-ly",
-      "ftpDir": "ScarlattiD/ds_sonate_c",
-      "sourceSha256": "71022252ed9da6f89836f14e07dc90a788aa11a2964e0a8856fb02761b445f5d",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 26 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 24, 'L06': 2, 'L07': 62, 'L11': 2, 'L13': 10, 'L14': 10}); 20 lint law error(s) at the large profile (rule counts, every severity: {'L05': 20, 'L07': 56, 'L11': 2, 'L13': 10, 'L14': 10})"
     },
     {
       "slug": "bulk-scarlattid-k11-sonatensatz-sonatensatz-ly",
@@ -4958,12 +5691,6 @@
       "ftpDir": "ScriabinA/O16/scriabine-op16-no4",
       "sourceSha256": "cf2afc37cfb4f6912d6a818059b0cbc13f10f512ae95800275574706b5d7ff9d",
       "reason": "ConversionError: lilypond failed for scriabine-op16-no4-mid.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-scriabina-o16-scriabine-op16-no4-scriabine-op16-no4-lys-scriabine-op16-no4-mid-ly\\lilypond.log):\nGNU LilyPond 2.24.3 (running Guile 2.2)\nChanging working directory to: `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-scriabina-o16-scriabine-op16-no4-scriabine-op16-no4-lys-scriabine-op16-no4-mid-ly/out'\nProcessing `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-scriabina-o16-scriabine-op16-no4-scriabine-op16-no4-lys-scriabine-op16-no4-mid-ly/src/__digitus2_wrapper.ly'\nParsing...\nInterpreting music...\nMIDI output to `scriabine-op16-no4-mid.mid'...\nSuccess: compilation successfully completed\n"
-    },
-    {
-      "slug": "bulk-scriabina-o16-scriabine-op16-no5-scriabine-op16-no5-ly",
-      "ftpDir": "ScriabinA/O16/scriabine-op16-no5",
-      "sourceSha256": "76df67aea357730ba748e0924c5d7f73c2237204f97f8dec1f55ae4e4c220391",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 23 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 12, 'L05': 11, 'L07': 41, 'L08': 42, 'L09': 21, 'L11': 33, 'L14': 27}); 11 lint law error(s) at the large profile (rule counts, every severity: {'L05': 11, 'L06': 4, 'L07': 52, 'L08': 40, 'L09': 21, 'L11': 22, 'L13': 2, 'L14': 15})"
     },
     {
       "slug": "bulk-scriabina-o59-prelude-prelude-ly",
@@ -5278,12 +6005,6 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly; no automatic source exception"
     },
     {
-      "slug": "bulk-turpint-turpin-turpin-ly",
-      "ftpDir": "TurpinT/turpin",
-      "sourceSha256": "8ade5af8da486ef5e2d1ef6fc33033cedf52c7bc404a5be690c7edd0ae7c14f6",
-      "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 2 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 2, 'L06': 3, 'L07': 128, 'L08': 33, 'L11': 1, 'L13': 9, 'L14': 44}); 2 lint law error(s) at the large profile (rule counts, every severity: {'L05': 2, 'L06': 3, 'L07': 133, 'L08': 31, 'L11': 1, 'L13': 9, 'L14': 50})"
-    },
-    {
       "slug": "bulk-verdig-traviata-01-traviata-01-ly",
       "ftpDir": "VerdiG/Traviata_01",
       "sourceSha256": "8636a5b63ce5a529ebd9e61e4e6dc65e106bf2da46dd28b2173be74c7fd60d2d",
@@ -5444,6 +6165,108 @@
       "ftpDir": "ScriabinA/O16/scriabine-op16-no1",
       "sourceSha256": "b8921a04d4142744048477f1455acb037769a1331dd464987ec94454b452c8c8",
       "reason": "Independent source/render comparison confirms overlapping, mispaired hairpins in measure 4. Polyphonic MusicXML serializes wedge stops before starts; Verovio warns that a hairpin is ignored because its start is not temporally before its end. Preserve the original rather than silently omit or distort the expression."
+    },
+    {
+      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
+      "ftpDir": "BachJS/BWV1006a/bwv-1006a_4",
+      "sourceSha256": "0cbdef66785f81c7a507fd6bdd32be9a174c8cb0d2bd81ad2117d99ffabc7056",
+      "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 247 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole piece by the archive rule (76 s, 247 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
+      "ftpDir": "BachJS/BWV1006a/bwv-1006a_5",
+      "sourceSha256": "42dd45e704039078e15ba074ae6e79f9e92e922f27101c105f7341abb0bb359d",
+      "reason": "5 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 255 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole piece by the archive rule (72 s, 255 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v04",
+      "sourceSha256": "fd38ccd26679e13280fd0cf8cfb0caa3a7ec3b2c5eba45667bd24124609c8d42",
+      "reason": "1 slice(s) no hand can strike and 4 (medium) and 4 (large) lint law errors in 300 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piece by the archive rule (38 s, 300 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v06",
+      "sourceSha256": "f4f8c9fa39952435412fca97f89dffb7144b75cdaf140c2432b27f5b090c2659",
+      "reason": "6 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 397 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piece by the archive rule (40 s, 397 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v15-bwv-988-v15-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v15",
+      "sourceSha256": "8cd35a7871ae08ffdecf4553357e9da2104077e369d42fea9aa9887eb04e298d",
+      "reason": "14 slice(s) no hand can strike and 18 (medium) and 14 (large) lint law errors in 554 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: the source's tempo word \"Andante\" is a rehearsal mark, which the converter drops (#49); beyond the relaxed ceiling (32.5 law errors and 25.3 slices per 1,000 notes; at most 40 and 20)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v21-bwv-988-v21-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v21",
+      "sourceSha256": "2a778159d348b6e39abd9d834d329237f0263e091a8020460b95b1a9e4cf782e",
+      "reason": "13 slice(s) no hand can strike and 15 (medium) and 13 (large) lint law errors in 480 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the relaxed ceiling (31.2 law errors and 27.1 slices per 1,000 notes; at most 40 and 20)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v22-bwv-988-v22-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v22",
+      "sourceSha256": "d328cd81bbfba3e5881332c3546bd832caccf1259f6756e71e66a662d708a0fb",
+      "reason": "2 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 318 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: the source's tempo word \"Alla breve\" is a rehearsal mark, which the converter drops (#49); not a whole piece by the archive rule (43 s, 318 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v24-bwv-988-v24-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v24",
+      "sourceSha256": "caf26a86367bc453dd1b6751b75dba2cbbe2d9d55179a89ccb9cb547be77ec12",
+      "reason": "23 slice(s) no hand can strike and 28 (medium) and 23 (large) lint law errors in 638 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the relaxed ceiling (43.9 law errors and 36.1 slices per 1,000 notes; at most 40 and 20)"
+    },
+    {
+      "slug": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
+      "ftpDir": "BachJS/BWV988/bwv-988-v30",
+      "sourceSha256": "2a3191ca67c54cf73b20f0d2d58e4093e8bd0e0f58b0c1f224d9cdb29562b9f3",
+      "reason": "5 slice(s) no hand can strike and 6 (medium) and 5 (large) lint law errors in 400 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piece by the archive rule (48 s, 400 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-11",
+      "sourceSha256": "ce806cb4b63ce77e0b136e4b6ad333cc26fa3cdaf0e0b4cef1b000aa030d050b",
+      "reason": "3 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 322 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole piece by the archive rule (32 s, 322 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
+      "ftpDir": "ChopinFF/O28/Chop-28-14",
+      "sourceSha256": "be03db643c7191cd44d20891ea03993887b56f41cfed2cad4925d764098c7b92",
+      "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 434 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole piece by the archive rule (57 s, 434 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
+      "ftpDir": "LisztF/S.172/liszt-consolation-no1",
+      "sourceSha256": "731440571b3fabc86f8056a056ab211b5b50471899d38e4ba8fb0d909b46977c",
+      "reason": "0 slice(s) no hand can strike and 1 (medium) and 0 (large) lint law errors in 283 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole piece by the archive rule (74 s, 283 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
+      "ftpDir": "MozartWA/Anh41/k375g",
+      "sourceSha256": "37ab217c705a7d96c52a565c0f527fc67f73a80d657c5cb80b53e02f70b89096",
+      "reason": "3 slice(s) no hand can strike and 6 (medium) and 3 (large) lint law errors in 352 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (prelude-fugue), held: not a whole piece by the archive rule (57 s, 352 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-mozartwa-kv331-kv331-1-5-var4-kv331-1-5-var4-ly",
+      "ftpDir": "MozartWA/KV331/KV331_1_5_var4",
+      "sourceSha256": "c335d5c13c0add480bfb3827393a447b79add0698532ab3ea266c95cba38f2e1",
+      "reason": "54 slice(s) no hand can strike and 131 (medium) and 128 (large) lint law errors in 485 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the relaxed ceiling (270.1 law errors and 111.3 slices per 1,000 notes; at most 40 and 20); not a whole piece by the archive rule (43 s, 485 notes; at least 60 s and 300 notes)"
+    },
+    {
+      "slug": "bulk-rachmaninoffs-o23-rach-prelude23-10-rach-prelude23-10-ly",
+      "ftpDir": "RachmaninoffS/O23/rach-prelude23-10",
+      "sourceSha256": "0d2f6bbc4740b4112a7ef9c8802b7ea9dfb7a48676cf6703f7efd795513e0baa",
+      "reason": "12 slice(s) no hand can strike and 41 (medium) and 34 (large) lint law errors in 989 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: beyond the relaxed ceiling (41.5 law errors and 12.1 slices per 1,000 notes; at most 40 and 20)"
+    },
+    {
+      "slug": "bulk-scarlattid-ds-sonate-c-ds-sonate-c-ly",
+      "ftpDir": "ScarlattiD/ds_sonate_c",
+      "sourceSha256": "71022252ed9da6f89836f14e07dc90a788aa11a2964e0a8856fb02761b445f5d",
+      "reason": "20 slice(s) no hand can strike and 26 (medium) and 20 (large) lint law errors in 798 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: beyond the relaxed ceiling (32.6 law errors and 25.1 slices per 1,000 notes; at most 40 and 20)"
+    },
+    {
+      "slug": "bulk-scriabina-o16-scriabine-op16-no5-scriabine-op16-no5-ly",
+      "ftpDir": "ScriabinA/O16/scriabine-op16-no5",
+      "sourceSha256": "76df67aea357730ba748e0924c5d7f73c2237204f97f8dec1f55ae4e4c220391",
+      "reason": "3 slice(s) no hand can strike and 23 (medium) and 11 (large) lint law errors in 251 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: beyond the relaxed ceiling (91.6 law errors and 12.0 slices per 1,000 notes; at most 40 and 20); not a whole piece by the archive rule (34 s, 251 notes; at least 60 s and 300 notes)"
     }
   ]
 }

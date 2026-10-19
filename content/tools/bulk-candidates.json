@@ -86,8 +86,8 @@
   },
   "admissionSummary": {
     "uniqueSourceDirectories": 608,
-    "acceptedNewLibraryPieces": 91,
-    "heldSourceDirectories": 428,
+    "acceptedNewLibraryPieces": 115,
+    "heldSourceDirectories": 404,
     "alreadyRepresentedDirectories": 89,
     "pendingSourceDirectories": 0,
     "note": "Admission is regenerated from the bulk catalog on every save; acquisition status is independent. Full held reasons remain in the catalog rejected records."
@@ -201,10 +201,10 @@
       "rdfSha256": "43f32bf6b6d0275cbd1c750dff0e593203c949b665d06643b9da2f4d211ba6ba",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 5 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 5, 'L06': 6, 'L07': 78, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -362,10 +362,10 @@
       "rdfSha256": "de07d265d96f2c31635fe4ed1919cf1de02a4e0e26ef78561fdc4bdee7290400",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 4, 'L07': 18, 'L08': 28, "
+        "status": "accepted",
+        "catalogSlug": "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -1216,7 +1216,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-chopinff-o28-chop-28-11-chop-28-11-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 2, 'L07': 35, '"
+        "reason": "3 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 322 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole p"
       },
       "midiCount": 1
     },
@@ -1236,10 +1236,10 @@
       "rdfSha256": "ba3e9ade47fdae9da53af631ff1a5f21bf431242ff681cf15dcf619e1c15df8b",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 22 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 3, 'L05': 19, 'L07': 96,"
+        "status": "accepted",
+        "catalogSlug": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -1285,7 +1285,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-chopinff-o28-chop-28-14-chop-28-14-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L07': 83, 'L08': 108,"
+        "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 434 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole p"
       },
       "midiCount": 1
     },
@@ -1397,10 +1397,10 @@
       "rdfSha256": "9817ea548a14130673f365d60a0e66c1436143809224eee6cc04874edc6bcfcd",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-chopinff-o28-chop-28-19-chop-28-19-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 1, 'L07': 478, "
+        "status": "accepted",
+        "catalogSlug": "bulk-chopinff-o28-chop-28-19-chop-28-19-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -1489,10 +1489,10 @@
       "rdfSha256": "b7eaacc7bac737fb2174d71eaa5aca8451fc043e649d3fa31e8a5e2c47884ef1",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-chopinff-o28-chop-28-22-chop-28-22-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 24 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 22, 'L07': 59,"
+        "status": "accepted",
+        "catalogSlug": "bulk-chopinff-o28-chop-28-22-chop-28-22-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -2136,7 +2136,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-rachmaninoffs-o23-rach-prelude23-10-rach-prelude23-10-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 41 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 6, 'L05': 35, 'L06': 2, "
+        "reason": "12 slice(s) no hand can strike and 41 (medium) and 34 (large) lint law errors in 989 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: beyond the"
       },
       "midiCount": 1
     },
@@ -2743,7 +2743,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv1006a-bwv-1006a-4-bwv-1006a-4-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L07': 12, 'L08': 14, "
+        "reason": "1 slice(s) no hand can strike and 1 (medium) and 1 (large) lint law errors in 247 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole pi"
       },
       "midiCount": 1
     },
@@ -2766,7 +2766,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv1006a-bwv-1006a-5-bwv-1006a-5-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 7, 'L06': 2, 'L07': 23, '"
+        "reason": "5 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 255 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: not a whole pi"
       },
       "midiCount": 1
     },
@@ -4557,10 +4557,10 @@
       "rdfSha256": "4413c8aab6c488a8e146d210ea4ec4ebc9f52a68c137d2d6c314d3f07860e21e",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv847-fuga2-fuga2-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 4, 'L06': 1, 'L07': 45, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv847-fuga2-fuga2-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -4879,10 +4879,10 @@
       "rdfSha256": "494e039389d32ccf5e56dcea4b3f5dd203d755a0029d8f3ce3e99a2e738dd92d",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 10 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 10, 'L06': 6, 'L07': 33,"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5017,10 +5017,10 @@
       "rdfSha256": "7506a15b1cd144f21cd60fe1ab1bb0a86ccca5cf07040c0347927122ae9fb2e6",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 12 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 12, 'L06': 6, 'L07': 52,"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5063,10 +5063,10 @@
       "rdfSha256": "a6c1cccecc9237b6d0c15e29a8858bf252ba19569d437c9fef1ff3e3ec2147f3",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 6, 'L06': 5, 'L"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5132,10 +5132,10 @@
       "rdfSha256": "7f1cf492a0225c507e502c5eab0eef505892367e302b3c8c6b96e548b0c39898",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 9 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 9, 'L07': 42, 'L08': 7, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5201,10 +5201,10 @@
       "rdfSha256": "12b5df0b0af52d7e56643b6f4d0365f9200d091e1692d995c3b2acbe4e4e4fa3",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 9, 'L07': 35, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5224,10 +5224,10 @@
       "rdfSha256": "45fb3c4d12370d6a723e97beb578ea82e62031afdc185ce81beeabbb9bc4efda",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv870-wtk2prelude1-wtk2prelude1-ly",
-        "reason": "1 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L06': 7, 'L07': 48, 'L08': 12, 'L09': 9, 'L11': 21, 'L14': 116})"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv870-wtk2prelude1-wtk2prelude1-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5247,10 +5247,10 @@
       "rdfSha256": "1c631a59dbf94cd9c3f94bb5cd6f97a9db681244a55fea11e55e3643cd8ef416",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 3 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 3, 'L06': 6, 'L07': 37, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5477,10 +5477,10 @@
       "rdfSha256": "1e0d5ff57b023b8a889822f2da933e635ca74f35a9e4e67ebc618ee3463b5fcb",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 15 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 14, 'L06': 2, "
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5523,10 +5523,10 @@
       "rdfSha256": "7365492059a4599024b19148697f4cb9d6ef29be3a8eca58ac016b83da753eb4",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 5, 'L07': 75, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5572,7 +5572,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v04-bwv-988-v04-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 4 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 2, 'L06': 2, 'L"
+        "reason": "1 slice(s) no hand can strike and 4 (medium) and 4 (large) lint law errors in 300 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piec"
       },
       "midiCount": 1
     },
@@ -5618,7 +5618,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v06-bwv-988-v06-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 4, 'L07': 16, '"
+        "reason": "6 slice(s) no hand can strike and 6 (medium) and 6 (large) lint law errors in 397 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piec"
       },
       "midiCount": 1
     },
@@ -5753,10 +5753,10 @@
       "rdfSha256": "7686d7859109b6eb2da2c5542e7c8ecea35217b77dd3421d8a2c5a5b75becd74",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 3, 'L07': 33, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -5825,7 +5825,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v15-bwv-988-v15-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 18 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 18, 'L06': 9, 'L07': 64,"
+        "reason": "14 slice(s) no hand can strike and 18 (medium) and 14 (large) lint law errors in 554 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: the source's "
       },
       "midiCount": 1
     },
@@ -5940,7 +5940,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v21-bwv-988-v21-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 15 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 14, 'L06': 3, "
+        "reason": "13 slice(s) no hand can strike and 15 (medium) and 13 (large) lint law errors in 480 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the re"
       },
       "midiCount": 1
     },
@@ -5963,7 +5963,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v22-bwv-988-v22-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 6, 'L06': 1, 'L"
+        "reason": "2 slice(s) no hand can strike and 7 (medium) and 5 (large) lint law errors in 318 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: the source's tem"
       },
       "midiCount": 1
     },
@@ -6009,7 +6009,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v24-bwv-988-v24-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 28 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 28, 'L06': 4, 'L07': 51,"
+        "reason": "23 slice(s) no hand can strike and 28 (medium) and 23 (large) lint law errors in 638 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the re"
       },
       "midiCount": 1
     },
@@ -6147,7 +6147,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-bachjs-bwv988-bwv-988-v30-bwv-988-v30-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 5, 'L06': 1, 'L"
+        "reason": "5 slice(s) no hand can strike and 6 (medium) and 5 (large) lint law errors in 400 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: not a whole piec"
       },
       "midiCount": 1
     },
@@ -6305,10 +6305,10 @@
       "rdfSha256": "8267090e5780737cf38e29d19e0cf323035affdb8b91f4c4f554f36b8a95dcc1",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 45 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 8, 'L05': 37, 'L06': 5, "
+        "status": "accepted",
+        "catalogSlug": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -6351,10 +6351,10 @@
       "rdfSha256": "e8c1670e1717fe0a652b7b33f2c8f58e4d597e25da2c026721f041acb16dd22e",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 12 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 12, 'L06': 3, 'L07': 72,"
+        "status": "accepted",
+        "catalogSlug": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8053,10 +8053,10 @@
       "rdfSha256": "4dd9b8be1eeaf485646afa87690b6ca399a19b9e69e3856af0f3609c210f0772",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 9 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 9, 'L06': 4, 'L07': 32, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8076,10 +8076,10 @@
       "rdfSha256": "880b63bcf19c10f24e74837197ef693c9920824bf5193b8dbf0d7141bc6e1d76",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 1, 'L07': 50, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8746,7 +8746,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-lisztf-s-172-liszt-consolation-no1-liszt-consolation-no1-ly",
-        "reason": "1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L06': 2, 'L07': 10, 'L08': 14, 'L09': 4, 'L14': 11})"
+        "reason": "0 slice(s) no hand can strike and 1 (medium) and 0 (large) lint law errors in 283 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: not a whole p"
       },
       "midiCount": 1
     },
@@ -8789,10 +8789,10 @@
       "rdfSha256": "b145ad845e91bf13bf1ba72d855e4f20ceb0d18ee4b0d484e8f012dc8b77f18f",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 7 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 7, 'L07': 26, 'L08': 95, "
+        "status": "accepted",
+        "catalogSlug": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8999,7 +8999,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 6 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 6, 'L06': 3, 'L07': 21, '"
+        "reason": "3 slice(s) no hand can strike and 6 (medium) and 3 (large) lint law errors in 352 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (prelude-fugue), held: not a whole p"
       },
       "midiCount": 1
     },
@@ -9042,10 +9042,10 @@
       "rdfSha256": "09b104e557decb9bc10f9a4f3552c2c98791ce70f34dae4aedfb8488b5e2df5a",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-mozartwa-kv153-k153-k153-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 8 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 8, 'L06': 8, 'L07': 61, '"
+        "status": "accepted",
+        "catalogSlug": "bulk-mozartwa-kv153-k153-k153-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -9065,10 +9065,10 @@
       "rdfSha256": "d3167cb16e03c981ea630d61e8542222a4abc6abeeaf3744b98d1a2fe7b0c6f3",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-mozartwa-kv154-k154-k154-ly",
-        "reason": "7 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 1, 'L05': 6, 'L06': 8, 'L07': 42, 'L08': 11, 'L09': 9, 'L10': 1, 'L13': 5, 'L14': 66})"
+        "status": "accepted",
+        "catalogSlug": "bulk-mozartwa-kv154-k154-k154-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -9206,7 +9206,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-mozartwa-kv331-kv331-1-5-var4-kv331-1-5-var4-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 131 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 131, 'L07': 119, 'L08':"
+        "reason": "54 slice(s) no hand can strike and 131 (medium) and 128 (large) lint law errors in 485 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (variations), held: beyond the "
       },
       "midiCount": 1
     },
@@ -10494,7 +10494,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-scarlattid-ds-sonate-c-ds-sonate-c-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 26 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 2, 'L05': 24, 'L06': 2, "
+        "reason": "20 slice(s) no hand can strike and 26 (medium) and 20 (large) lint law errors in 798 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (sonata-suite), held: beyond the "
       },
       "midiCount": 1
     },
@@ -11322,7 +11322,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-scriabina-o16-scriabine-op16-no5-scriabine-op16-no5-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 23 lint law error(s) at the medium profile (rule counts, every severity: {'L03': 12, 'L05': 11, 'L07': 41"
+        "reason": "3 slice(s) no hand can strike and 23 (medium) and 11 (large) lint law errors in 251 notes; Mutopia rule (mutopia_advanced.py): concert repertoire (concert-piece), held: beyond the "
       },
       "midiCount": 1
     },
@@ -13136,10 +13136,10 @@
       "rdfSha256": "45db7509559ade0c59504779e1c16abdf523c70c4b5d4a3bc0d374f3f8d9059a",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-turpint-turpin-turpin-ly",
-        "reason": "span flags: a slice one hand cannot play (spanFlags in verification.json); 2 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 2, 'L06': 3, 'L07': 128, "
+        "status": "accepted",
+        "catalogSlug": "bulk-turpint-turpin-turpin-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },

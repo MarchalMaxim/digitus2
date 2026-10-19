@@ -87,19 +87,30 @@ def relaxed_facts(gate: dict) -> dict:
             "lint": {"medium": lint["medium"]["errors"], "large": lint["large"]["errors"]}}
 
 
-def relaxed(gate: dict, notes: int) -> bool:
-    """True when the piece meets the advanced rule, fails only the span or lint gate, and is within the ceiling."""
-    if gate.get("ok") or not gate.get("level") or not gate.get("lint") or not _only_span_or_lint(gate):
-        return False
-    if not advanced(gate["level"], notes):
-        return False
-    facts = relaxed_facts(gate)
+def within_ceiling(facts: dict, notes: int) -> bool:
+    """The relaxed flags `facts` ({spans, lint: {medium, large}}, as relaxedGates records them) are within
+    the ceiling for a score of `notes` pitched notes. The Mutopia lane (mutopia_advanced.py) shares it."""
     if RELAXED_LINT_PER_1000 is not None:
         if max(facts["lint"].values()) * 1000 / notes > RELAXED_LINT_PER_1000:
             return False
     if RELAXED_SPANS_PER_1000 is not None and facts["spans"] * 1000 / notes > RELAXED_SPANS_PER_1000:
         return False
     return True
+
+
+def relaxed_sentence(facts: dict) -> str:
+    """The words a relaxed piece's notes carry about its flags; gates.py looks for them."""
+    return (f"{facts['spans']} slice(s) that no hand can strike as written and {facts['lint']['medium']} (medium) "
+            f"and {facts['lint']['large']} (large) lint law errors in the engine's own fingering")
+
+
+def relaxed(gate: dict, notes: int) -> bool:
+    """True when the piece meets the advanced rule, fails only the span or lint gate, and is within the ceiling."""
+    if gate.get("ok") or not gate.get("level") or not gate.get("lint") or not _only_span_or_lint(gate):
+        return False
+    if not advanced(gate["level"], notes):
+        return False
+    return within_ceiling(relaxed_facts(gate), notes)
 
 
 def usable(gate: dict, notes: int) -> bool:

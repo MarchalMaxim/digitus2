@@ -11,8 +11,8 @@ import { libraryPieces } from './manifest.js';
 import { LibraryView } from './LibraryView.js';
 import { useLocalLibrary } from './local/state.js';
 
-// These layout pins describe the 253 curated pieces unless a test asks for the whole library
-// (3,189 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
+// These layout pins describe the 277 curated pieces unless a test asks for the whole library
+// (3,211 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
 const library = vi.hoisted(() => ({ whole: false }));
 vi.mock('./manifest.js', async (importOriginal) => {
   const actual = await importOriginal<typeof ManifestModule>();
@@ -188,10 +188,10 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     );
   });
   it('shows the next page on Show more, focuses its first row and says so once', async () => {
-    library.whole = true; // Challenging classical holds 235 pieces: five pages of 40 and 35
+    library.whole = true; // Challenging classical holds 239 pieces: five pages of 40 and 39
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    await open(/^All 235 classical pieces$/);
+    await open(/^All 239 classical pieces$/);
     expect(rows()).toHaveLength(40);
     await open('Show 40 more');
     expect(rows()).toHaveLength(80);
@@ -199,14 +199,14 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     expect(useAppStore.getState().libraryPages).toBe(2);
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 235'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 239'),
       { timeout: 2000 },
     );
     await open('Show 40 more');
     await open('Show 40 more');
     await open('Show 40 more');
-    await open('Show the last 35');
-    expect(rows()).toHaveLength(235);
+    await open('Show the last 39');
+    expect(rows()).toHaveLength(239);
     expect(screen.queryByRole('button', { name: /^Show / })).toBeNull();
   });
   it('goes back with All styles, focusing the shelf’s All button, and with Escape', async () => {
@@ -224,7 +224,7 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
   it('keeps the shelf open on a level that has it, and returns to the shelves on one that has not', async () => {
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    await open(/^All 6 jazz, ragtime and modern pieces$/);
+    await open(/^All 7 jazz, ragtime and modern pieces$/);
     expect(h2s()).toEqual(['Jazz, ragtime and modern']);
     await userEvent.click(screen.getByRole('radio', { name: 'Easy' })); // Easy has no jazz
     expect(h2s()).toEqual(['Songs', 'Classical', 'Folk and carols', 'Baroque', 'Romantic']);
@@ -272,7 +272,7 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     expect(within(group).getByRole('radio', { name: 'Any length' })).toBeChecked();
     expect(group.querySelectorAll('.is-red')).toHaveLength(0);
     cleanup();
-    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'baroque' }); // 33 pieces
+    useAppStore.setState({ libraryLevel: 'challenging', libraryShelf: 'romantic' }); // 20 pieces
     render(<LibraryView />);
     expect(screen.queryByRole('group', { name: 'Length' })).toBeNull();
   });
@@ -288,11 +288,11 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     await userEvent.click(other);
     expect(useAppStore.getState().libraryLength).not.toBe('any');
     expect(rows().length).toBeLessThan(before);
-    // a short list (36 pieces) cannot filter silently: the choice is dropped
+    // a short list (37 pieces) cannot filter silently: the choice is dropped
     await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
-    await userEvent.click(screen.getByRole('button', { name: /^All 36 jazz/ }));
+    await userEvent.click(screen.getByRole('button', { name: /^All 37 jazz/ }));
     expect(screen.queryByRole('group', { name: 'Length' })).toBeNull();
-    expect(rows()).toHaveLength(36);
+    expect(rows()).toHaveLength(37);
     await waitFor(() => expect(useAppStore.getState().libraryLength).toBe('any'));
   });
 });

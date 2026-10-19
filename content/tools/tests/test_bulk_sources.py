@@ -98,6 +98,34 @@ def test_alternative_mains_share_one_download_without_losing_identity(monkeypatc
     assert first['midiFiles'] == []
 
 
+def test_readmit_regenerates_admission_offline_and_keeps_compact_rows(monkeypatch, tmp_path):
+    monkeypatch.setattr(bulk, 'ROOT', tmp_path)
+    monkeypatch.setattr(bulk, 'OUTPUT', tmp_path / 'bulk-candidates.json')
+    fragment = tmp_path / 'content/tools/catalog.d/expansion-bulk.json'
+    fragment.parent.mkdir(parents=True)
+    fragment.write_text(json.dumps({'pieces': [{'ftpDir': 'A/Released', 'main': 'r.ly', 'slug': 'released'}],
+                                    'rejected': [{'ftpDir': 'A/Held', 'slug': 'held', 'reason': 'span flags'}]}))
+    rows = [  # compact rows as the committed index keeps them: no existingCatalogDirectory
+        {'id': 'A/Released/r.ly', 'ftpDir': 'A/Released', 'status': 'acquired',
+         'admission': {'status': 'held', 'catalogSlug': None, 'decisionRecord': 'released', 'reason': 'span flags'}},
+        {'id': 'A/Held/h.ly', 'ftpDir': 'A/Held', 'status': 'acquired',
+         'admission': {'status': 'held', 'catalogSlug': None, 'decisionRecord': 'held', 'reason': 'span flags'}},
+        {'id': 'A/Old/o.ly', 'ftpDir': 'A/Old', 'status': 'acquired',
+         'admission': {'status': 'already-in-library', 'catalogSlug': None, 'reason': 'earlier catalog'}},
+    ]
+    bulk.OUTPUT.write_text(json.dumps({'schemaVersion': 2, 'summary': {'candidates': 3}, 'candidates': rows}))
+    monkeypatch.setattr(sys, 'argv', ['bulk_sources.py', '--readmit'])
+    bulk.main()
+    out = json.loads(bulk.OUTPUT.read_text(encoding='utf-8'))
+    assert [r['admission']['status'] for r in out['candidates']] == ['accepted', 'held', 'already-in-library']
+    assert out['candidates'][0]['admission']['catalogSlug'] == 'released'
+    assert out['candidates'][0]['admission']['selectedSourceMain'] is True
+    assert out['admissionSummary']['acceptedNewLibraryPieces'] == 1
+    assert out['admissionSummary']['heldSourceDirectories'] == 1
+    assert out['admissionSummary']['alreadyRepresentedDirectories'] == 1
+    assert out['summary'] == {'candidates': 3} and out['candidates'][0]['status'] == 'acquired'
+
+
 def test_save_and_refresh_regenerate_catalog_admission(monkeypatch, tmp_path):
     monkeypatch.setattr(bulk, 'ROOT', tmp_path)
     monkeypatch.setattr(bulk, 'CACHE', tmp_path / 'cache')

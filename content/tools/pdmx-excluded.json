@@ -646,6 +646,11 @@
    "kind": "same tune, same level",
    "similarity": 0.852
   },
+  "76e44827df33757af2f4ece3c0ed04998fe09ee2ab8c3b3413dfc9516d799531": {
+   "of": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+   "kind": "near",
+   "similarity": 0.975
+  },
   "77afcdb84f931d9670915d617ae5deb12f4586b4c5b52ba09a92935c9e694b2c": {
    "of": "bulk-bachjs-bwv988-bwv-988-v29-bwv-988-v29-ly",
    "kind": "near",
@@ -675,6 +680,11 @@
    "of": "1fe58298fb6c621d25cf13fde82ed65c1bbf86af6ba28c424c688f70b216d239",
    "kind": "near",
    "similarity": 0.991
+  },
+  "7f16ef6f512a3e6dcc7d7680067919d5d8e89424663189d31ecd520a4bde4510": {
+   "of": "bulk-chopinff-o28-chop-28-19-chop-28-19-ly",
+   "kind": "same tune, same level",
+   "similarity": 0.901
   },
   "81d595be48325a39cd5a0f3ee0c4ad842e32e3fe977520340c2cec0de5e46374": {
    "of": "3aafaa3a7a5113fb522a8a4b75c65fe425a6ad999f1208f14c78892ca611ccca",

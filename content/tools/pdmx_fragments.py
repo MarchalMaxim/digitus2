@@ -162,13 +162,11 @@ def piece_for(gate: dict, cand: dict, licence: str, demands: list[str] | None = 
     }
     if relaxed_gates:
         # the span and lint gates are relaxed for level 6 (pdmx_advanced.py): the flags are recorded, not hidden
-        spans, lint = relaxed_gates["spans"], relaxed_gates["lint"]
         piece["relaxedGates"] = relaxed_gates
         piece["notes"] = piece["notes"].replace(
             "no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles.",
-            f"and, because the span and lint gates are relaxed for level 6, {spans} slice(s) that no hand can strike "
-            f"as written and {lint['medium']} (medium) and {lint['large']} (large) lint law errors in the engine's "
-            f"own fingering: the digits there are advice.")
+            f"and, because the span and lint gates are relaxed for level 6, "
+            f"{pdmx_advanced.relaxed_sentence(relaxed_gates)}: the digits there are advice.")
     if demands:
         piece["levelNote"] = pdmx_advanced.override_reason(gate["level"], demands)
         if level < 5:  # two levels above the proposal: the catalog wants the reason as an override

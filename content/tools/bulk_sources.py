@@ -202,7 +202,8 @@ def admission_records(records):
             piece = held[directory]
             decision = dict(status='held', catalogSlug=None, decisionRecord=piece['slug'],
                             reason=piece['reason'].splitlines()[0][:180])
-        elif row.get('existingCatalogDirectory'):
+        elif row.get('existingCatalogDirectory',
+                     row.get('admission', {}).get('status') == 'already-in-library'):  # a committed compact row
             decision = dict(status='already-in-library', catalogSlug=None,
                             reason='Source directory is represented by the earlier catalog.')
         else:
@@ -264,11 +265,27 @@ def save(records):
     print(json.dumps({k: v for k, v in summary.items() if k != 'composers'}, ensure_ascii=True), flush=True)
 
 
+def readmit():
+    """Regenerate the committed index's admission from the catalog, offline and without the ignored
+    inventory (which --refresh needs): every acquisition fact stays as it was recorded."""
+    full = json.loads(OUTPUT.read_text(encoding='utf-8'))
+    full['admissionSummary'] = admission_records(full['candidates'])
+    temporary = OUTPUT.with_suffix('.json.tmp')
+    temporary.write_text(json.dumps(full, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+    temporary.replace(OUTPUT)
+    print(json.dumps({k: v for k, v in full['admissionSummary'].items() if k != 'note'}), flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--download', action='store_true')
     parser.add_argument('--refresh', action='store_true', help='Reconcile cached metadata without resetting downloaded status')
+    parser.add_argument('--readmit', action='store_true',
+                        help='Regenerate admission in the committed index from the catalog only (offline)')
     args = parser.parse_args()
+    if args.readmit:
+        readmit()
+        return
     if args.refresh:
         path = ROOT / 'content/_raw/bulk/inventory.json'
         if not path.exists():

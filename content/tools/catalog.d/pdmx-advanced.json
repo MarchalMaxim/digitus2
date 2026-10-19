@@ -2332,31 +2332,6 @@
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (10.3 a second); a stretch of 16 semitones."
   },
   {
-   "slug": "pdmx-fr-d-ric-chopin-prelude-in-e-flat-major-7f16ef6f",
-   "source": "pdmx",
-   "level": 6,
-   "collection": "pdmx-advanced",
-   "title": "Frédéric Chopin: Prelude in E-flat major Op.28 No.19",
-   "composer": "Frédéric Chopin",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 176,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 4 (score 12.52), the upper end of its range for a whole piece, and the piece shows sustained fast notes (16.9 a second), a stretch of 12 semitones. No syllabus placement is claimed.",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "7f16ef6f512a3e6dcc7d7680067919d5d8e89424663189d31ecd520a4bde4510",
-    "path": "./mxl/10/16/QmSDxPNzWjpaDfL2BFjjJ2gdpA5NQHDBXkvmFKYSxAekXD.mxl",
-    "license": "cc-zero",
-    "rating": "4.83",
-    "nRatings": "9",
-    "fingerings": 0,
-    "version": "3.1"
-   },
-   "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (16.9 a second); a stretch of 12 semitones."
-  },
-  {
    "slug": "pdmx-fr-d-ric-chopin-prelude-in-f-sharp-minor-63216d02",
    "source": "pdmx",
    "level": 6,
@@ -2380,37 +2355,6 @@
     "version": "3.1"
    },
    "levelOverride": "The heuristic proposes 4, which has no level 6; the archive's advanced rule places it at 6. sustained fast notes (20.0 a second); a stretch of 15 semitones."
-  },
-  {
-   "slug": "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827",
-   "source": "pdmx",
-   "level": 6,
-   "collection": "pdmx-advanced",
-   "title": "Frédéric Chopin: Prelude in G-sharp minor Op.28 No.12",
-   "composer": "Frédéric Chopin",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 230,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "Advanced by the archive rule (pdmx_advanced.py): the heuristic proposes 5 (score 15.641), the upper end of its range for a whole piece, and the piece shows sustained fast notes (19.6 a second), a stretch of 24 semitones, dense chords (89 percent of onsets). No syllabus placement is claimed.",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 5 slice(s) that no hand can strike as written and 25 (medium) and 25 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "76e44827df33757af2f4ece3c0ed04998fe09ee2ab8c3b3413dfc9516d799531",
-    "path": "./mxl/4/1/Qme2p6FB8XxVyrWPk4bcggeTNh7QW28tukHSeJGCZaXyZY.mxl",
-    "license": "cc-zero",
-    "rating": "4.94",
-    "nRatings": "15",
-    "fingerings": 0,
-    "version": "3.1"
-   },
-   "relaxedGates": {
-    "spans": 5,
-    "lint": {
-     "medium": 25,
-     "large": 25
-    }
-   }
   },
   {
    "slug": "pdmx-fr-d-ric-chopin-tude-in-a-flat-major-op-ada9634d",

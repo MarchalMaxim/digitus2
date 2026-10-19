@@ -15,6 +15,8 @@ TOOLS = Path(__file__).resolve().parents[1]
 CONTENT = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 import build  # noqa: E402
+import mutopia_advanced  # noqa: E402
+import pdmx_advanced  # noqa: E402
 
 MANIFEST = json.loads((CONTENT / "manifest.json").read_text(encoding="utf-8"))
 VER = json.loads((CONTENT / "verification.json").read_text(encoding="utf-8"))
@@ -41,6 +43,13 @@ def test_new_piece_passes_every_gate(entry):
     for profile in ("medium", "large"):
         want = relaxed["lint"][profile] if relaxed else 0
         assert v["lint"]["profiles"][profile]["errors"] == want, (profile, v["lint"]["profiles"][profile]["counts"])
+    if relaxed:  # within the archive's ceiling, stated in the notes; a Mutopia piece keeps both MIDI checks
+        assert pdmx_advanced.within_ceiling(relaxed, st["notes"]), (relaxed, st["notes"])
+        assert pdmx_advanced.relaxed_sentence(relaxed) in cat["notes"]
+        if cat["source"] == "mutopia":
+            assert v["midiChecks"]["mutopiaMidi"]["exact"] is True
+            seconds = v["levelProposal"]["features"]["seconds"]
+            assert mutopia_advanced.problems(slug, relaxed, st["notes"], seconds) == []
     score = CONTENT / entry["files"]["score"]
     assert v["lint"]["scoreSha256"] == hashlib.sha256(score.read_bytes()).hexdigest(), "stale lint: run gates.py"
     for f in filter(None, entry["files"].values()):
@@ -195,6 +204,95 @@ def test_verdict_engraving_checks(tmp_path):
     case = _case(tmp_path / "url", CREDITED)
     case[0]["source"] = {**CREDITED["source"], "licenseUrl": None}
     assert any("credit" in p for p in _problems(case))
+
+
+def _relaxed(case, lint: int = 2, spans: int = 0) -> dict:
+    """Turn a gate case into a level-6 piece admitted under relaxed gates with `lint` law errors at each
+    profile and `spans` unplayable slices, recorded as the gates want them (1,000 notes, two minutes)."""
+    entry, record, piece, content = case
+    relaxed = {"spans": spans, "lint": {"medium": lint, "large": lint}}
+    entry["level"] = 6
+    record["levelProposal"].update(level=6, features={"seconds": 120.0})
+    record["stats"]["notes"] = 1000
+    for profile in ("medium", "large"):
+        record["lint"]["profiles"][profile]["errors"] = lint
+    piece["relaxedGates"] = relaxed
+    piece["notes"] = f"Complete source edition; {pdmx_advanced.relaxed_sentence(relaxed)}: the digits there are advice."
+    if "lilypond224Midi" in record["midiChecks"]:  # an engraving: the published check is exact too
+        record["midiChecks"]["mutopiaMidi"] = dict(record["midiChecks"]["lilypond224Midi"])
+    return relaxed
+
+
+@pytest.fixture
+def concert(monkeypatch):
+    """CREDITED on the Mutopia rule's concert list, as a released edition would be."""
+    monkeypatch.setitem(mutopia_advanced.CONCERT, CREDITED["slug"], "sonata-suite")
+
+
+def test_verdict_passes_a_relaxed_mutopia_piece_that_keeps_the_rule(tmp_path, concert):
+    case = _case(tmp_path, CREDITED)
+    _relaxed(case)
+    assert _problems(case) == []
+
+
+def test_verdict_relaxed_flags_must_match_what_the_gates_find(tmp_path, concert):
+    case = _case(tmp_path, CREDITED)
+    _relaxed(case)
+    case[1]["lint"]["profiles"]["large"]["errors"] = 3
+    assert any("relaxedGates records 2" in p for p in _problems(case))
+    case = _case(tmp_path / "spans", CREDITED)
+    _relaxed(case, spans=2)
+    assert any("span flags differ" in p for p in _problems(case))
+    assert _problems(case, flagged={CREDITED["slug"]}) == []
+
+
+def test_verdict_relaxed_ceiling_applies_to_every_lane(tmp_path, concert):
+    case = _case(tmp_path / "lint", CREDITED)
+    _relaxed(case, lint=41)  # 41 law errors in 1,000 notes: one over the archive's ceiling of 40
+    assert any("ceiling" in p for p in _problems(case))
+    case = _case(tmp_path / "spans", CREDITED)
+    _relaxed(case, spans=21)
+    assert any("ceiling" in p for p in _problems(case, flagged={CREDITED["slug"]}))
+    case = _case(tmp_path / "own", OWN)
+    _relaxed(case, lint=41)
+    assert any("ceiling" in p for p in _problems(case))
+
+
+def test_verdict_relaxed_flags_must_be_stated_in_the_notes(tmp_path, concert):
+    case = _case(tmp_path, CREDITED)
+    _relaxed(case)
+    case[2]["notes"] = "Complete source edition."
+    assert any("notes do not state" in p for p in _problems(case))
+
+
+def test_verdict_relaxed_mutopia_piece_keeps_the_published_midi_check(tmp_path, concert):
+    case = _case(tmp_path / "missing", CREDITED)
+    _relaxed(case)
+    case[1]["midiChecks"].pop("mutopiaMidi")
+    assert any("published Mutopia MIDI" in p for p in _problems(case))
+    case = _case(tmp_path / "differs", CREDITED)
+    _relaxed(case)
+    case[1]["midiChecks"]["mutopiaMidi"]["exact"] = False
+    assert any("published Mutopia MIDI" in p for p in _problems(case))
+    case = _case(tmp_path / "lilypond", CREDITED)
+    _relaxed(case)
+    case[1]["midiChecks"]["lilypond224Midi"]["exact"] = False
+    assert any("LilyPond 2.24 MIDI" in p for p in _problems(case))
+
+
+def test_verdict_relaxed_mutopia_piece_keeps_the_mutopia_rule(tmp_path, monkeypatch):
+    case = _case(tmp_path / "list", CREDITED)
+    _relaxed(case)
+    assert any("concert list" in p for p in _problems(case))  # CREDITED is not on mutopia_advanced.CONCERT
+    monkeypatch.setitem(mutopia_advanced.CONCERT, CREDITED["slug"], "sonata-suite")
+    case = _case(tmp_path / "short", CREDITED)
+    _relaxed(case)
+    case[1]["levelProposal"]["features"]["seconds"] = 45.0
+    assert any("whole piece" in p for p in _problems(case))
+    case = _case(tmp_path / "few", CREDITED)
+    _relaxed(case, lint=0)
+    case[1]["stats"]["notes"] = 250
+    assert any("whole piece" in p for p in _problems(case))
 
 
 def test_selection():

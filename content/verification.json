@@ -249461,6 +249461,1034 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "bulk-bachjs-bwv847-fuga2-fuga2-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "fuga2.mid",
+        "exact": true,
+        "xml": 751,
+        "midi": 751,
+        "matched": 751,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 3
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "fuga2.mid",
+        "exact": true,
+        "xml": 751,
+        "midi": 751,
+        "matched": 751,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 3
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv847-fuga2-fuga2-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 31,
+      "measureElements": 31,
+      "firstMeasure": "1",
+      "lastMeasure": "31",
+      "notes": 770,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 124.0,
+      "unfoldedQuarters": 124.0,
+      "tempoQpm": 76.0,
+      "key": [
+        "-3",
+        "minor"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 165421,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 68.9,
+        "2": 50.5
+      },
+      "approxDurationSec": 98,
+      "music21": {
+        "parts": 2,
+        "measures": 31,
+        "noteOrChord": 761,
+        "highestTime": 124.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.702,
+        "shifts": 31.988,
+        "span": 16.0,
+        "chord": 0.373,
+        "fifths": 3.0,
+        "accidentals": 15.119,
+        "seconds": 97.895,
+        "leaps": 2.929
+      },
+      "score": 8.583,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 751,
+          "errors": 4,
+          "warnings": 148,
+          "counts": {
+            "L05": 4,
+            "L06": 1,
+            "L07": 45,
+            "L08": 20,
+            "L09": 8,
+            "L10": 2,
+            "L11": 6,
+            "L13": 8,
+            "L14": 66
+          }
+        },
+        "large": {
+          "notes": 751,
+          "errors": 1,
+          "warnings": 143,
+          "counts": {
+            "L05": 1,
+            "L07": 48,
+            "L08": 16,
+            "L09": 12,
+            "L11": 5,
+            "L13": 8,
+            "L14": 62
+          }
+        }
+      },
+      "scoreSha256": "1fcd46f214d97b7fda855ed9c7126de90b05d5be7836287238b0e168bf64a829",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "BWV856_Fugue11.mid",
+        "exact": true,
+        "xml": 668,
+        "midi": 668,
+        "matched": 668,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "BWV856_Fugue11.mid",
+        "exact": true,
+        "xml": 668,
+        "midi": 668,
+        "matched": 668,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 72,
+      "measureElements": 73,
+      "firstMeasure": "0",
+      "lastMeasure": "72",
+      "notes": 697,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 108.0,
+      "unfoldedQuarters": 108.0,
+      "tempoQpm": 92.0,
+      "key": [
+        "-1",
+        "major"
+      ],
+      "time": [
+        3,
+        8
+      ],
+      "bytes": 157559,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "2": 52.9,
+        "1": 68.9
+      },
+      "approxDurationSec": 70,
+      "music21": {
+        "parts": 2,
+        "measures": 73,
+        "noteOrChord": 697,
+        "highestTime": 108.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.272,
+        "shifts": 24.504,
+        "span": 21.0,
+        "chord": 0.202,
+        "fifths": 1.0,
+        "accidentals": 6.418,
+        "seconds": 81.0,
+        "leaps": 0.0
+      },
+      "score": 7.425,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 668,
+          "errors": 10,
+          "warnings": 178,
+          "counts": {
+            "L05": 10,
+            "L06": 6,
+            "L07": 33,
+            "L08": 10,
+            "L09": 10,
+            "L11": 31,
+            "L13": 1,
+            "L14": 88
+          }
+        },
+        "large": {
+          "notes": 668,
+          "errors": 10,
+          "warnings": 175,
+          "counts": {
+            "L05": 10,
+            "L06": 7,
+            "L07": 38,
+            "L08": 8,
+            "L09": 10,
+            "L11": 25,
+            "L13": 1,
+            "L14": 87
+          }
+        }
+      },
+      "scoreSha256": "48b48f15e31cd7e58425700c6f007b8408457ef03751e7d00b30c4632d0c4ee1",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "BWV861_Fuga16.mid",
+        "exact": true,
+        "xml": 747,
+        "midi": 747,
+        "matched": 747,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "BWV861_Fuga16.mid",
+        "exact": true,
+        "xml": 747,
+        "midi": 747,
+        "matched": 747,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 34,
+      "measureElements": 34,
+      "firstMeasure": "1",
+      "lastMeasure": "34",
+      "notes": 784,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 136.0,
+      "unfoldedQuarters": 136.0,
+      "tempoQpm": 68.0,
+      "key": [
+        "-2",
+        "minor"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 173156,
+      "pitchRange": [
+        36,
+        82
+      ],
+      "staffAvgPitch": {
+        "2": 52.0,
+        "1": 68.8
+      },
+      "approxDurationSec": 120,
+      "music21": {
+        "parts": 2,
+        "measures": 34,
+        "noteOrChord": 779,
+        "highestTime": 136.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.267,
+        "shifts": 33.18,
+        "span": 20.0,
+        "chord": 0.262,
+        "fifths": 2.0,
+        "accidentals": 12.234,
+        "seconds": 120.0,
+        "leaps": 1.597
+      },
+      "score": 8.06,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 747,
+          "errors": 12,
+          "warnings": 223,
+          "counts": {
+            "L05": 12,
+            "L06": 6,
+            "L07": 52,
+            "L08": 29,
+            "L09": 22,
+            "L10": 1,
+            "L11": 13,
+            "L13": 4,
+            "L14": 100
+          }
+        },
+        "large": {
+          "notes": 747,
+          "errors": 10,
+          "warnings": 232,
+          "counts": {
+            "L05": 10,
+            "L06": 5,
+            "L07": 63,
+            "L08": 26,
+            "L09": 19,
+            "L10": 1,
+            "L11": 13,
+            "L13": 4,
+            "L14": 105
+          }
+        }
+      },
+      "scoreSha256": "7cfa10f026bd9cd852bb0d9c6dfedfbb7842d334a50d935f5ee2104f02f6c230",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "bach-fugue17.mid",
+        "exact": true,
+        "xml": 884,
+        "midi": 884,
+        "matched": 884,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "bach-fugue17.mid",
+        "exact": true,
+        "xml": 884,
+        "midi": 884,
+        "matched": 884,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 35,
+      "measureElements": 35,
+      "firstMeasure": "1",
+      "lastMeasure": "35",
+      "notes": 932,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 140.0,
+      "unfoldedQuarters": 140.0,
+      "tempoQpm": 60.0,
+      "key": [
+        "-4",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 204517,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "2": 53.0,
+        "1": 71.0
+      },
+      "approxDurationSec": 140,
+      "music21": {
+        "parts": 2,
+        "measures": 35,
+        "noteOrChord": 922,
+        "highestTime": 140.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.476,
+        "shifts": 31.242,
+        "span": 21.0,
+        "chord": 0.186,
+        "fifths": 4.0,
+        "accidentals": 6.966,
+        "seconds": 105.0,
+        "leaps": 1.093
+      },
+      "score": 8.821,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 884,
+          "errors": 8,
+          "warnings": 268,
+          "counts": {
+            "L03": 2,
+            "L05": 6,
+            "L06": 5,
+            "L07": 50,
+            "L08": 74,
+            "L09": 37,
+            "L13": 1,
+            "L14": 102
+          }
+        },
+        "large": {
+          "notes": 884,
+          "errors": 5,
+          "warnings": 272,
+          "counts": {
+            "L05": 5,
+            "L06": 5,
+            "L07": 61,
+            "L08": 62,
+            "L09": 40,
+            "L14": 104
+          }
+        }
+      },
+      "scoreSha256": "bdd63aaf4ac539998ae214da306b2a0e2aa626c7fc6dbbf73f80e1cc07bf1681",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "BWV865_Praeludium20.mid",
+        "exact": true,
+        "xml": 608,
+        "midi": 608,
+        "matched": 608,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 6
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "BWV865_Praeludium20.mid",
+        "exact": true,
+        "xml": 608,
+        "midi": 608,
+        "matched": 608,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 6
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 28,
+      "measureElements": 28,
+      "firstMeasure": "1",
+      "lastMeasure": "28",
+      "notes": 648,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 124.5,
+      "unfoldedQuarters": 124.5,
+      "tempoQpm": 106.0,
+      "key": [
+        "0",
+        "minor"
+      ],
+      "time": [
+        9,
+        8
+      ],
+      "bytes": 133130,
+      "pitchRange": [
+        36,
+        83
+      ],
+      "staffAvgPitch": {
+        "1": 70.5,
+        "2": 53.2
+      },
+      "approxDurationSec": 70,
+      "music21": {
+        "parts": 2,
+        "measures": 28,
+        "noteOrChord": 633,
+        "highestTime": 124.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.699,
+        "shifts": 23.293,
+        "span": 21.0,
+        "chord": 0.065,
+        "fifths": 0.0,
+        "accidentals": 17.129,
+        "seconds": 70.472,
+        "leaps": 1.271
+      },
+      "score": 7.524,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 608,
+          "errors": 9,
+          "warnings": 129,
+          "counts": {
+            "L05": 9,
+            "L07": 42,
+            "L08": 7,
+            "L09": 3,
+            "L11": 9,
+            "L13": 5,
+            "L14": 68
+          }
+        },
+        "large": {
+          "notes": 608,
+          "errors": 8,
+          "warnings": 125,
+          "counts": {
+            "L05": 8,
+            "L07": 41,
+            "L08": 7,
+            "L09": 2,
+            "L11": 7,
+            "L13": 5,
+            "L14": 68
+          }
+        }
+      },
+      "scoreSha256": "6a744f6cc640a720f8c5b19b5d189bf656995479ee964f61b7edf51ab84dbfd0",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "wtk2fuga1.mid",
+        "exact": true,
+        "xml": 1030,
+        "midi": 1030,
+        "matched": 1030,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "wtk2fuga1.mid",
+        "exact": true,
+        "xml": 1030,
+        "midi": 1030,
+        "matched": 1030,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 83,
+      "measureElements": 83,
+      "firstMeasure": "1",
+      "lastMeasure": "83",
+      "notes": 1070,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 166.0,
+      "unfoldedQuarters": 166.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 228942,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "2": 55.1,
+        "1": 68.2
+      },
+      "approxDurationSec": 124,
+      "music21": {
+        "parts": 2,
+        "measures": 83,
+        "noteOrChord": 1059,
+        "highestTime": 166.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.289,
+        "shifts": 21.926,
+        "span": 16.0,
+        "chord": 0.166,
+        "fifths": 0.0,
+        "accidentals": 5.426,
+        "seconds": 124.5,
+        "leaps": 0.36
+      },
+      "score": 6.54,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1030,
+          "errors": 1,
+          "warnings": 187,
+          "counts": {
+            "L05": 1,
+            "L06": 9,
+            "L07": 35,
+            "L08": 2,
+            "L09": 4,
+            "L11": 15,
+            "L13": 1,
+            "L14": 122
+          }
+        },
+        "large": {
+          "notes": 1030,
+          "errors": 1,
+          "warnings": 156,
+          "counts": {
+            "L05": 1,
+            "L06": 7,
+            "L07": 37,
+            "L08": 1,
+            "L09": 3,
+            "L11": 10,
+            "L13": 1,
+            "L14": 98
+          }
+        }
+      },
+      "scoreSha256": "304df24bbbc52824cf8734391e41081a75bedf40c9ddc93c92564e09cdee3220",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv870-wtk2prelude1-wtk2prelude1-ly": {
+    "ok": true,
+    "conversionWarnings": [
+      "hidden note at 29 merged into the visible note of the same pitch (cross-voice tie)"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "wtk2prelude1.mid",
+        "exact": true,
+        "xml": 833,
+        "midi": 833,
+        "matched": 833,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "wtk2prelude1.mid",
+        "exact": true,
+        "xml": 833,
+        "midi": 833,
+        "matched": 833,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv870-wtk2prelude1-wtk2prelude1-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 34,
+      "measureElements": 34,
+      "firstMeasure": "1",
+      "lastMeasure": "34",
+      "notes": 992,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 136.0,
+      "unfoldedQuarters": 136.0,
+      "tempoQpm": 70.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 232443,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 69.3,
+        "2": 51.9
+      },
+      "approxDurationSec": 117,
+      "music21": {
+        "parts": 2,
+        "measures": 34,
+        "noteOrChord": 976,
+        "highestTime": 136.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.163,
+        "shifts": 28.263,
+        "span": 12.0,
+        "chord": 0.062,
+        "fifths": 0.0,
+        "accidentals": 14.251,
+        "seconds": 116.571,
+        "leaps": 0.0
+      },
+      "score": 6.222,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 832,
+          "errors": 1,
+          "warnings": 213,
+          "counts": {
+            "L03": 1,
+            "L06": 7,
+            "L07": 48,
+            "L08": 12,
+            "L09": 9,
+            "L11": 21,
+            "L14": 116
+          }
+        },
+        "large": {
+          "notes": 832,
+          "errors": 0,
+          "warnings": 232,
+          "counts": {
+            "L06": 8,
+            "L07": 58,
+            "L08": 11,
+            "L09": 12,
+            "L11": 19,
+            "L13": 2,
+            "L14": 124
+          }
+        }
+      },
+      "scoreSha256": "a75644055847b6aecc6f24eaaebc47600bf5ce673080e9e824674964c5e41a4a",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "wtk2-fugue2.mid",
+        "exact": true,
+        "xml": 649,
+        "midi": 649,
+        "matched": 649,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "wtk2-fugue2.mid",
+        "exact": true,
+        "xml": 649,
+        "midi": 649,
+        "matched": 649,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 28,
+      "measureElements": 28,
+      "firstMeasure": "1",
+      "lastMeasure": "28",
+      "notes": 701,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 112.0,
+      "unfoldedQuarters": 112.0,
+      "tempoQpm": 58.0,
+      "key": [
+        "-3",
+        "minor"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 152602,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 68.0,
+        "2": 53.9
+      },
+      "approxDurationSec": 116,
+      "music21": {
+        "parts": 2,
+        "measures": 28,
+        "noteOrChord": 694,
+        "highestTime": 112.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.671,
+        "shifts": 33.821,
+        "span": 16.0,
+        "chord": 0.19,
+        "fifths": 3.0,
+        "accidentals": 15.373,
+        "seconds": 115.862,
+        "leaps": 2.252
+      },
+      "score": 7.685,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 649,
+          "errors": 3,
+          "warnings": 132,
+          "counts": {
+            "L05": 3,
+            "L06": 6,
+            "L07": 37,
+            "L08": 16,
+            "L09": 10,
+            "L13": 1,
+            "L14": 63
+          }
+        },
+        "large": {
+          "notes": 649,
+          "errors": 1,
+          "warnings": 141,
+          "counts": {
+            "L05": 1,
+            "L06": 3,
+            "L07": 35,
+            "L08": 17,
+            "L09": 13,
+            "L13": 1,
+            "L14": 73
+          }
+        }
+      },
+      "scoreSha256": "df841f7784953150b78b14e8300a517548380362224720a34e8cc7cb0f7bd4ef",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "bulk-chopinff-o28-chop-28-3-chop-28-3-ly": {
     "ok": true,
     "conversionWarnings": [],
@@ -249583,6 +250611,400 @@
       },
       "scoreSha256": "e7a06de5a2d49f0afb1cde34abd46d26ffcfb188abc1d5ff24300a78e4b51233",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-chopinff-o28-chop-28-12-chop-28-12-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "Chop-28-12.mid",
+        "exact": true,
+        "xml": 1244,
+        "midi": 1250,
+        "matched": 1244,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 121
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "Chop-28-12.mid",
+        "exact": true,
+        "xml": 1244,
+        "midi": 1250,
+        "matched": 1244,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 121
+      }
+    },
+    "validation": {
+      "bulk-chopinff-o28-chop-28-12-chop-28-12-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 81,
+      "measureElements": 81,
+      "firstMeasure": "1",
+      "lastMeasure": "81",
+      "notes": 1263,
+      "graceNotes": 6,
+      "fingerings": 0,
+      "writtenQuarters": 243.0,
+      "unfoldedQuarters": 243.0,
+      "tempoQpm": 208.0,
+      "key": [
+        "5",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 261026,
+      "pitchRange": [
+        27,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 68.4,
+        "2": 50.3
+      },
+      "approxDurationSec": 70,
+      "music21": {
+        "parts": 2,
+        "measures": 81,
+        "noteOrChord": 812,
+        "highestTime": 243.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 17.761,
+        "shifts": 76.615,
+        "span": 24.0,
+        "chord": 0.898,
+        "fifths": 5.0,
+        "accidentals": 20.643,
+        "seconds": 70.096,
+        "leaps": 9.292
+      },
+      "score": 15.731,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1250,
+          "errors": 22,
+          "warnings": 358,
+          "counts": {
+            "L03": 3,
+            "L05": 19,
+            "L07": 96,
+            "L08": 179,
+            "L09": 38,
+            "L11": 8,
+            "L12": 2,
+            "L13": 33,
+            "L14": 35
+          }
+        },
+        "large": {
+          "notes": 1250,
+          "errors": 22,
+          "warnings": 351,
+          "counts": {
+            "L03": 3,
+            "L05": 19,
+            "L07": 95,
+            "L08": 174,
+            "L09": 27,
+            "L11": 7,
+            "L12": 2,
+            "L13": 33,
+            "L14": 46
+          }
+        }
+      },
+      "scoreSha256": "04197b90b90037e5f41922a22fd0b83bfbd9b7f749cb035563406195f1b7161c",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-chopinff-o28-chop-28-19-chop-28-19-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "Chop-28-19.mid",
+        "exact": true,
+        "xml": 1237,
+        "midi": 1237,
+        "matched": 1237,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "Chop-28-19.mid",
+        "exact": true,
+        "xml": 1237,
+        "midi": 1237,
+        "matched": 1237,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-chopinff-o28-chop-28-19-chop-28-19-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 71,
+      "measureElements": 72,
+      "firstMeasure": "0",
+      "lastMeasure": "71",
+      "notes": 1237,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 214.0,
+      "unfoldedQuarters": 214.0,
+      "tempoQpm": 168.0,
+      "key": [
+        "-3",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 401509,
+      "pitchRange": [
+        31,
+        99
+      ],
+      "staffAvgPitch": {
+        "1": 74.2,
+        "2": 53.4
+      },
+      "approxDurationSec": 76,
+      "music21": {
+        "parts": 2,
+        "measures": 72,
+        "noteOrChord": 1228,
+        "highestTime": 214.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.707,
+        "shifts": 69.927,
+        "span": 19.0,
+        "chord": 0.003,
+        "fifths": 3.0,
+        "accidentals": 17.462,
+        "seconds": 160.5,
+        "leaps": 30.179
+      },
+      "score": 12.274,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1237,
+          "errors": 6,
+          "warnings": 828,
+          "counts": {
+            "L05": 6,
+            "L06": 1,
+            "L07": 478,
+            "L08": 217,
+            "L09": 112,
+            "L10": 1,
+            "L11": 19,
+            "L13": 1
+          }
+        },
+        "large": {
+          "notes": 1237,
+          "errors": 6,
+          "warnings": 834,
+          "counts": {
+            "L05": 6,
+            "L06": 1,
+            "L07": 492,
+            "L08": 217,
+            "L09": 112,
+            "L10": 1,
+            "L11": 11,
+            "L13": 1
+          }
+        }
+      },
+      "scoreSha256": "728f36989037700f805a89518a005bfde03c6ec3e20a0cc3c624550b612129d7",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-chopinff-o28-chop-28-22-chop-28-22-ly": {
+    "ok": true,
+    "conversionWarnings": [
+      "hidden note at 3/4 merged into the visible note of the same pitch (cross-voice tie)",
+      "slur at 1/2 could not be attached"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "Chop-28-22.mid",
+        "exact": true,
+        "xml": 631,
+        "midi": 632,
+        "matched": 631,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 17
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "Chop-28-22.mid",
+        "exact": true,
+        "xml": 631,
+        "midi": 632,
+        "matched": 631,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 17
+      }
+    },
+    "validation": {
+      "bulk-chopinff-o28-chop-28-22-chop-28-22-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 41,
+      "measureElements": 42,
+      "firstMeasure": "0",
+      "lastMeasure": "41",
+      "notes": 673,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 124.5,
+      "unfoldedQuarters": 124.5,
+      "tempoQpm": 150.0,
+      "key": [
+        "-2",
+        "minor"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 165822,
+      "pitchRange": [
+        25,
+        91
+      ],
+      "staffAvgPitch": {
+        "2": 48.2,
+        "1": 69.8
+      },
+      "approxDurationSec": 50,
+      "music21": {
+        "parts": 2,
+        "measures": 42,
+        "noteOrChord": 383,
+        "highestTime": 124.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.779,
+        "shifts": 91.826,
+        "span": 22.0,
+        "chord": 0.913,
+        "fifths": 2.0,
+        "accidentals": 22.749,
+        "seconds": 93.375,
+        "leaps": 11.413
+      },
+      "score": 14.183,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 632,
+          "errors": 24,
+          "warnings": 189,
+          "counts": {
+            "L03": 2,
+            "L05": 22,
+            "L07": 59,
+            "L08": 98,
+            "L09": 14,
+            "L10": 5,
+            "L11": 12,
+            "L13": 4,
+            "L14": 1
+          }
+        },
+        "large": {
+          "notes": 632,
+          "errors": 24,
+          "warnings": 189,
+          "counts": {
+            "L03": 2,
+            "L05": 22,
+            "L07": 59,
+            "L08": 98,
+            "L09": 14,
+            "L10": 5,
+            "L11": 12,
+            "L13": 4,
+            "L14": 1
+          }
+        }
+      },
+      "scoreSha256": "71f80358b78f1e823de493d0dea9b0db0dabe309c2103cbea25f2903c4b39da7",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -250576,6 +251998,392 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "bulk-brahmsj-o118-intermezzo-intermezzo-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "intermezzo.mid",
+        "exact": true,
+        "xml": 1677,
+        "midi": 1677,
+        "matched": 1677,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 98
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "intermezzo.mid",
+        "exact": true,
+        "xml": 1677,
+        "midi": 1677,
+        "matched": 1677,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 78
+      }
+    },
+    "validation": {
+      "bulk-brahmsj-o118-intermezzo-intermezzo-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 116,
+      "measureElements": 117,
+      "firstMeasure": "0",
+      "lastMeasure": "116",
+      "notes": 1720,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 348.0,
+      "unfoldedQuarters": 372.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "3",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 407809,
+      "pitchRange": [
+        28,
+        85
+      ],
+      "staffAvgPitch": {
+        "1": 67.6,
+        "2": 50.4
+      },
+      "approxDurationSec": 279,
+      "music21": {
+        "parts": 2,
+        "measures": 117,
+        "noteOrChord": 1372,
+        "highestTime": 348.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 5
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.272,
+        "shifts": 62.206,
+        "span": 34.0,
+        "chord": 0.463,
+        "fifths": 3.0,
+        "accidentals": 12.951,
+        "seconds": 261.0,
+        "leaps": 12.733
+      },
+      "score": 13.327,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1565,
+          "errors": 45,
+          "warnings": 456,
+          "counts": {
+            "L03": 8,
+            "L05": 37,
+            "L06": 5,
+            "L07": 204,
+            "L08": 122,
+            "L09": 65,
+            "L10": 2,
+            "L13": 9,
+            "L14": 58
+          }
+        },
+        "large": {
+          "notes": 1565,
+          "errors": 44,
+          "warnings": 463,
+          "counts": {
+            "L03": 8,
+            "L05": 36,
+            "L06": 3,
+            "L07": 223,
+            "L08": 112,
+            "L09": 61,
+            "L10": 2,
+            "L13": 9,
+            "L14": 62
+          }
+        }
+      },
+      "scoreSha256": "661d3a2f42f137d8d1d36fac7cabdb6ff53dbfb8508480fb869a0a1cee10b8f5",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly": {
+    "ok": true,
+    "conversionWarnings": [
+      "tuplet bracket without notes skipped"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "waltz-op39-15.mid",
+        "exact": true,
+        "xml": 720,
+        "midi": 720,
+        "matched": 720,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "waltz-op39-15.mid",
+        "exact": true,
+        "xml": 720,
+        "midi": 720,
+        "matched": 720,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 44,
+      "measureElements": 44,
+      "firstMeasure": "1",
+      "lastMeasure": "44",
+      "notes": 726,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 132.0,
+      "unfoldedQuarters": 132.0,
+      "tempoQpm": 116.0,
+      "key": [
+        "-4",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 129096,
+      "pitchRange": [
+        32,
+        92
+      ],
+      "staffAvgPitch": {
+        "1": 71.6,
+        "2": 52.4
+      },
+      "approxDurationSec": 68,
+      "music21": {
+        "parts": 2,
+        "measures": 44,
+        "noteOrChord": 351,
+        "highestTime": 132.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 10.545,
+        "shifts": 88.733,
+        "span": 16.0,
+        "chord": 0.807,
+        "fifths": 4.0,
+        "accidentals": 3.056,
+        "seconds": 68.276,
+        "leaps": 48.092
+      },
+      "score": 15.609,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 720,
+          "errors": 12,
+          "warnings": 222,
+          "counts": {
+            "L05": 12,
+            "L06": 3,
+            "L07": 72,
+            "L08": 96,
+            "L09": 47,
+            "L13": 2,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 720,
+          "errors": 12,
+          "warnings": 215,
+          "counts": {
+            "L05": 12,
+            "L07": 77,
+            "L08": 90,
+            "L09": 42,
+            "L13": 2,
+            "L14": 6
+          }
+        }
+      },
+      "scoreSha256": "81b869fcf758b412d9619f70b7209f04bfac2b217e56f520ffcc65098a83e195",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "liszt-consolation-no4.mid",
+        "exact": true,
+        "xml": 492,
+        "midi": 504,
+        "matched": 492,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 14
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "liszt-consolation-no4.mid",
+        "exact": true,
+        "xml": 492,
+        "midi": 504,
+        "matched": 492,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 5
+      }
+    },
+    "validation": {
+      "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 34,
+      "measureElements": 35,
+      "firstMeasure": "0",
+      "lastMeasure": "34",
+      "notes": 513,
+      "graceNotes": 12,
+      "fingerings": 0,
+      "writtenQuarters": 138.0,
+      "unfoldedQuarters": 138.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-5",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 115472,
+      "pitchRange": [
+        25,
+        76
+      ],
+      "staffAvgPitch": {
+        "1": 62.4,
+        "2": 45.8
+      },
+      "approxDurationSec": 104,
+      "music21": {
+        "parts": 2,
+        "measures": 35,
+        "noteOrChord": 314,
+        "highestTime": 138.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.773,
+        "shifts": 81.482,
+        "span": 16.0,
+        "chord": 0.732,
+        "fifths": 5.0,
+        "accidentals": 22.672,
+        "seconds": 103.5,
+        "leaps": 2.679
+      },
+      "score": 12.139,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 504,
+          "errors": 7,
+          "warnings": 145,
+          "counts": {
+            "L05": 7,
+            "L07": 26,
+            "L08": 95,
+            "L09": 18,
+            "L10": 1,
+            "L13": 5,
+            "L14": 5
+          }
+        },
+        "large": {
+          "notes": 504,
+          "errors": 7,
+          "warnings": 143,
+          "counts": {
+            "L05": 7,
+            "L07": 27,
+            "L08": 92,
+            "L09": 18,
+            "L10": 1,
+            "L13": 4,
+            "L14": 5
+          }
+        }
+      },
+      "scoreSha256": "5a73b66bc12b174fddb38b20796d84fcce4d24e538a33d04bcbca53d006c69f9",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "bulk-joplins-pineapplerag-pineapplerag-ly": {
     "ok": true,
     "conversionWarnings": [],
@@ -250828,6 +252636,133 @@
       },
       "scoreSha256": "68def7bf66194270572ffff8ccc5a90d047c7cb89a87bdc7eec7502f55bba232",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-turpint-turpin-turpin-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "turpin.mid",
+        "exact": true,
+        "xml": 1185,
+        "midi": 1185,
+        "matched": 1185,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "turpin.mid",
+        "exact": true,
+        "xml": 1185,
+        "midi": 1185,
+        "matched": 1185,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-turpint-turpin-turpin-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 72,
+      "measureElements": 72,
+      "firstMeasure": "1",
+      "lastMeasure": "72",
+      "notes": 1265,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 144.0,
+      "unfoldedQuarters": 264.0,
+      "tempoQpm": 96.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 252100,
+      "pitchRange": [
+        29,
+        93
+      ],
+      "staffAvgPitch": {
+        "1": 73.2,
+        "2": 53.4
+      },
+      "approxDurationSec": 165,
+      "music21": {
+        "parts": 2,
+        "measures": 72,
+        "noteOrChord": 752,
+        "highestTime": 144.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 13.211,
+        "shifts": 63.902,
+        "span": 16.0,
+        "chord": 0.524,
+        "fifths": 0.0,
+        "accidentals": 13.12,
+        "seconds": 90.0,
+        "leaps": 26.389
+      },
+      "score": 12.588,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1185,
+          "errors": 2,
+          "warnings": 209,
+          "counts": {
+            "L05": 2,
+            "L06": 3,
+            "L07": 128,
+            "L08": 33,
+            "L11": 1,
+            "L13": 9,
+            "L14": 44
+          }
+        },
+        "large": {
+          "notes": 1185,
+          "errors": 2,
+          "warnings": 218,
+          "counts": {
+            "L05": 2,
+            "L06": 3,
+            "L07": 133,
+            "L08": 31,
+            "L11": 1,
+            "L13": 9,
+            "L14": 50
+          }
+        }
+      },
+      "scoreSha256": "35d4a9f77471bf8ef103ef505b2d0d3a195f307515f28199c97854454c492f78",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -251247,6 +253182,269 @@
       },
       "scoreSha256": "f166ecc6afa624a56aebed266465f6f9b0a16cb101d88b50c47e0158776caf58",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "lvb_sonate_10no2_3.mid",
+        "exact": true,
+        "xml": 1909,
+        "midi": 1915,
+        "matched": 1909,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 634
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "lvb_sonate_10no2_3.mid",
+        "exact": true,
+        "xml": 1909,
+        "midi": 1915,
+        "matched": 1909,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 6
+      }
+    },
+    "validation": {
+      "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 32: 3/2 of 2 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 150,
+      "measureElements": 152,
+      "firstMeasure": "0",
+      "lastMeasure": "150",
+      "notes": 1924,
+      "graceNotes": 6,
+      "fingerings": 0,
+      "writtenQuarters": 300.0,
+      "unfoldedQuarters": 364.0,
+      "tempoQpm": 148.0,
+      "key": [
+        "-1",
+        "major"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 426589,
+      "pitchRange": [
+        29,
+        89
+      ],
+      "staffAvgPitch": {
+        "2": 54.3,
+        "1": 73.4
+      },
+      "approxDurationSec": 148,
+      "music21": {
+        "parts": 2,
+        "measures": 152,
+        "noteOrChord": 1646,
+        "highestTime": 300.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.489,
+        "shifts": 36.024,
+        "span": 26.0,
+        "chord": 0.273,
+        "fifths": 1.0,
+        "accidentals": 17.592,
+        "seconds": 225.0,
+        "leaps": 3.931
+      },
+      "score": 10.409,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1915,
+          "errors": 5,
+          "warnings": 311,
+          "counts": {
+            "L05": 5,
+            "L06": 6,
+            "L07": 78,
+            "L08": 69,
+            "L09": 16,
+            "L11": 14,
+            "L13": 46,
+            "L14": 128
+          }
+        },
+        "large": {
+          "notes": 1915,
+          "errors": 5,
+          "warnings": 306,
+          "counts": {
+            "L05": 5,
+            "L06": 5,
+            "L07": 88,
+            "L08": 56,
+            "L09": 19,
+            "L11": 9,
+            "L13": 50,
+            "L14": 129
+          }
+        }
+      },
+      "scoreSha256": "7da695c27dd0f45de3edf94f332a6c7e07c4a9259efef26d030547653323294a",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly": {
+    "ok": true,
+    "conversionWarnings": [
+      "LilyPond voice 5 has overlapping notes; split into 2 MusicXML voices"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "LVB_Sonate_02no1_3.mid",
+        "exact": true,
+        "xml": 612,
+        "midi": 626,
+        "matched": 612,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 17
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "LVB_Sonate_02no1_3.mid",
+        "exact": true,
+        "xml": 612,
+        "midi": 623,
+        "matched": 612,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 11
+      }
+    },
+    "validation": {
+      "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 14: 2 of 3 quarters (partial bar, e.g. 1st ending)",
+          "measure 40: 2 of 3 quarters (partial bar, e.g. 1st ending)",
+          "measure 50: 2 of 3 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 73,
+      "measureElements": 77,
+      "firstMeasure": "0",
+      "lastMeasure": "73",
+      "notes": 631,
+      "graceNotes": 14,
+      "fingerings": 0,
+      "writtenQuarters": 219.0,
+      "unfoldedQuarters": 369.0,
+      "tempoQpm": 168.0,
+      "key": [
+        "-4",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 130459,
+      "pitchRange": [
+        31,
+        85
+      ],
+      "staffAvgPitch": {
+        "1": 70.7,
+        "2": 57.1
+      },
+      "approxDurationSec": 132,
+      "music21": {
+        "parts": 2,
+        "measures": 77,
+        "noteOrChord": 500,
+        "highestTime": 219.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 3.738,
+        "shifts": 28.985,
+        "span": 24.0,
+        "chord": 0.307,
+        "fifths": 4.0,
+        "accidentals": 25.081,
+        "seconds": 164.25,
+        "leaps": 1.376
+      },
+      "score": 8.846,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 626,
+          "errors": 4,
+          "warnings": 124,
+          "counts": {
+            "L05": 4,
+            "L07": 18,
+            "L08": 28,
+            "L09": 3,
+            "L13": 5,
+            "L14": 75
+          }
+        },
+        "large": {
+          "notes": 626,
+          "errors": 4,
+          "warnings": 114,
+          "counts": {
+            "L05": 4,
+            "L06": 2,
+            "L07": 24,
+            "L08": 19,
+            "L09": 3,
+            "L13": 5,
+            "L14": 66
+          }
+        }
+      },
+      "scoreSha256": "07acfedf76b3edfb81c0b80ca066822e33679e2d4f71f987d08bdacb29aa0af2",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -254022,6 +256220,396 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "fugue-c-major.mid",
+        "exact": true,
+        "xml": 806,
+        "midi": 806,
+        "matched": 806,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "fugue-c-major.mid",
+        "exact": true,
+        "xml": 806,
+        "midi": 806,
+        "matched": 806,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 34,
+      "measureElements": 34,
+      "firstMeasure": "1",
+      "lastMeasure": "34",
+      "notes": 847,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 136.0,
+      "unfoldedQuarters": 136.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 177321,
+      "pitchRange": [
+        36,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 69.0,
+        "2": 51.5
+      },
+      "approxDurationSec": 102,
+      "music21": {
+        "parts": 2,
+        "measures": 34,
+        "noteOrChord": 847,
+        "highestTime": 136.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.912,
+        "shifts": 26.739,
+        "span": 19.0,
+        "chord": 0.171,
+        "fifths": 0.0,
+        "accidentals": 8.798,
+        "seconds": 102.0,
+        "leaps": 0.922
+      },
+      "score": 7.15,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 806,
+          "errors": 15,
+          "warnings": 194,
+          "counts": {
+            "L03": 1,
+            "L05": 14,
+            "L06": 2,
+            "L07": 40,
+            "L08": 6,
+            "L09": 2,
+            "L11": 10,
+            "L13": 9,
+            "L14": 134
+          }
+        },
+        "large": {
+          "notes": 806,
+          "errors": 7,
+          "warnings": 205,
+          "counts": {
+            "L05": 7,
+            "L06": 3,
+            "L07": 43,
+            "L08": 10,
+            "L09": 3,
+            "L10": 2,
+            "L11": 14,
+            "L13": 9,
+            "L14": 130
+          }
+        }
+      },
+      "scoreSha256": "03f14b9c3f200e0bad816f18f017033ea67cd7d22f6608ecf13a8398852560a2",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "bwv-988-v01.mid",
+        "exact": true,
+        "xml": 551,
+        "midi": 551,
+        "matched": 551,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "bwv-988-v01.mid",
+        "exact": true,
+        "xml": 551,
+        "midi": 551,
+        "matched": 551,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 32,
+      "measureElements": 32,
+      "firstMeasure": "1",
+      "lastMeasure": "32",
+      "notes": 567,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 96.0,
+      "unfoldedQuarters": 192.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 123348,
+      "pitchRange": [
+        38,
+        86
+      ],
+      "staffAvgPitch": {
+        "1": 71.5,
+        "2": 54.3
+      },
+      "approxDurationSec": 144,
+      "music21": {
+        "parts": 2,
+        "measures": 32,
+        "noteOrChord": 567,
+        "highestTime": 96.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.667,
+        "shifts": 27.356,
+        "span": 16.0,
+        "chord": 0.016,
+        "fifths": 1.0,
+        "accidentals": 7.246,
+        "seconds": 72.0,
+        "leaps": 4.297
+      },
+      "score": 6.623,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 551,
+          "errors": 1,
+          "warnings": 179,
+          "counts": {
+            "L05": 1,
+            "L06": 5,
+            "L07": 75,
+            "L08": 8,
+            "L09": 8,
+            "L11": 7,
+            "L14": 76
+          }
+        },
+        "large": {
+          "notes": 551,
+          "errors": 1,
+          "warnings": 167,
+          "counts": {
+            "L05": 1,
+            "L06": 4,
+            "L07": 73,
+            "L08": 6,
+            "L09": 9,
+            "L11": 7,
+            "L14": 68
+          }
+        }
+      },
+      "scoreSha256": "d367b1601b6e1ab18817c7c3cbfc87d151e70ec50286f270a99dc9dee5f61678",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "bwv-988-v12.mid",
+        "exact": true,
+        "xml": 632,
+        "midi": 634,
+        "matched": 632,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 8
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "bwv-988-v12.mid",
+        "exact": true,
+        "xml": 632,
+        "midi": 634,
+        "matched": 632,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 8
+      }
+    },
+    "validation": {
+      "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 32,
+      "measureElements": 32,
+      "firstMeasure": "1",
+      "lastMeasure": "32",
+      "notes": 663,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 96.0,
+      "unfoldedQuarters": 192.0,
+      "tempoQpm": 94.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 150664,
+      "pitchRange": [
+        38,
+        83
+      ],
+      "staffAvgPitch": {
+        "1": 68.5,
+        "2": 52.7
+      },
+      "approxDurationSec": 123,
+      "music21": {
+        "parts": 2,
+        "measures": 32,
+        "noteOrChord": 663,
+        "highestTime": 96.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 10.379,
+        "shifts": 27.051,
+        "span": 17.0,
+        "chord": 0.181,
+        "fifths": 1.0,
+        "accidentals": 8.333,
+        "seconds": 61.277,
+        "leaps": 0.348
+      },
+      "score": 7.809,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 634,
+          "errors": 6,
+          "warnings": 167,
+          "counts": {
+            "L05": 6,
+            "L06": 3,
+            "L07": 33,
+            "L08": 5,
+            "L09": 13,
+            "L11": 9,
+            "L12": 1,
+            "L13": 4,
+            "L14": 103
+          }
+        },
+        "large": {
+          "notes": 634,
+          "errors": 2,
+          "warnings": 158,
+          "counts": {
+            "L05": 2,
+            "L06": 1,
+            "L07": 32,
+            "L08": 4,
+            "L09": 13,
+            "L10": 1,
+            "L11": 7,
+            "L12": 1,
+            "L13": 5,
+            "L14": 99
+          }
+        }
+      },
+      "scoreSha256": "0d3f7697d4100404d6b61debace6198b4dca5f632aa9292c1d3036362498a380",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "bulk-handelgf-aylesford-11-allegro-11-allegro-ly": {
     "ok": true,
     "conversionWarnings": [],
@@ -255158,6 +257746,532 @@
       },
       "scoreSha256": "026d78b8ed7034bb9f79ef0018652ddb25df289c0c7d100097d2ee247b539a13",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "hob-xvi-27-ii-menuet-trio.mid",
+        "exact": true,
+        "xml": 637,
+        "midi": 648,
+        "matched": 637,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 10
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "hob-xvi-27-ii-menuet-trio.mid",
+        "exact": true,
+        "xml": 637,
+        "midi": 648,
+        "matched": 637,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 14
+      }
+    },
+    "validation": {
+      "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 66,
+      "measureElements": 66,
+      "firstMeasure": "1",
+      "lastMeasure": "66",
+      "notes": 660,
+      "graceNotes": 11,
+      "fingerings": 0,
+      "writtenQuarters": 198.0,
+      "unfoldedQuarters": 396.0,
+      "tempoQpm": 92.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 165174,
+      "pitchRange": [
+        38,
+        86
+      ],
+      "staffAvgPitch": {
+        "1": 73.6,
+        "2": 59.0
+      },
+      "approxDurationSec": 258,
+      "music21": {
+        "parts": 2,
+        "measures": 66,
+        "noteOrChord": 570,
+        "highestTime": 198.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.933,
+        "shifts": 38.698,
+        "span": 16.0,
+        "chord": 0.278,
+        "fifths": 1.0,
+        "accidentals": 16.17,
+        "seconds": 129.13,
+        "leaps": 2.927
+      },
+      "score": 7.535,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 648,
+          "errors": 9,
+          "warnings": 101,
+          "counts": {
+            "L05": 9,
+            "L06": 4,
+            "L07": 32,
+            "L08": 22,
+            "L09": 1,
+            "L11": 2,
+            "L13": 9,
+            "L14": 40
+          }
+        },
+        "large": {
+          "notes": 648,
+          "errors": 7,
+          "warnings": 91,
+          "counts": {
+            "L05": 7,
+            "L06": 2,
+            "L07": 33,
+            "L08": 22,
+            "L09": 3,
+            "L11": 2,
+            "L13": 7,
+            "L14": 29
+          }
+        }
+      },
+      "scoreSha256": "1f18e43e57c55f268c6c910481a152e5716e8ea2b8dcb56d1556f64d6bc4f3c2",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly": {
+    "ok": true,
+    "conversionWarnings": [
+      "slur ending on a rest at 32 moved to the previous note"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "hob-xvi-27-iii-presto.mid",
+        "exact": true,
+        "xml": 1211,
+        "midi": 1211,
+        "matched": 1211,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 177
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "hob-xvi-27-iii-presto.mid",
+        "exact": true,
+        "xml": 1211,
+        "midi": 1211,
+        "matched": 1211,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 8: 3/2 of 2 quarters (partial bar, e.g. 1st ending)",
+          "measure 24: 3/2 of 2 quarters (partial bar, e.g. 1st ending)",
+          "measure 32: 3/2 of 2 quarters (partial bar, e.g. 1st ending)",
+          "measure 48: 3/2 of 2 quarters (partial bar, e.g. 1st ending)",
+          "measure 56: 3/2 of 2 quarters (partial bar, e.g. 1st ending)",
+          "measure 72: 3/2 of 2 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 152,
+      "measureElements": 159,
+      "firstMeasure": "0",
+      "lastMeasure": "152",
+      "notes": 1216,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 304.0,
+      "unfoldedQuarters": 448.0,
+      "tempoQpm": 120.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 261390,
+      "pitchRange": [
+        31,
+        86
+      ],
+      "staffAvgPitch": {
+        "1": 71.3,
+        "2": 58.2
+      },
+      "approxDurationSec": 224,
+      "music21": {
+        "parts": 2,
+        "measures": 159,
+        "noteOrChord": 1111,
+        "highestTime": 304.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.967,
+        "shifts": 30.979,
+        "span": 17.0,
+        "chord": 0.093,
+        "fifths": 1.0,
+        "accidentals": 7.762,
+        "seconds": 152.0,
+        "leaps": 3.073
+      },
+      "score": 7.585,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1211,
+          "errors": 1,
+          "warnings": 137,
+          "counts": {
+            "L05": 1,
+            "L06": 1,
+            "L07": 50,
+            "L08": 6,
+            "L09": 21,
+            "L11": 4,
+            "L13": 23,
+            "L14": 55
+          }
+        },
+        "large": {
+          "notes": 1211,
+          "errors": 1,
+          "warnings": 145,
+          "counts": {
+            "L05": 1,
+            "L06": 1,
+            "L07": 55,
+            "L08": 2,
+            "L09": 21,
+            "L11": 4,
+            "L13": 23,
+            "L14": 62
+          }
+        }
+      },
+      "scoreSha256": "1c4be9d25a09d375f83a27b79e178fb576721b04e9043e5a2aa2eb5b5a562c55",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-mozartwa-kv153-k153-k153-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "k153.mid",
+        "exact": true,
+        "xml": 1021,
+        "midi": 1021,
+        "matched": 1021,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 6
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "k153.mid",
+        "exact": true,
+        "xml": 1021,
+        "midi": 1021,
+        "matched": 1021,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 6
+      }
+    },
+    "validation": {
+      "bulk-mozartwa-kv153-k153-k153-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 66,
+      "measureElements": 67,
+      "firstMeasure": "0",
+      "lastMeasure": "66",
+      "notes": 1042,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 264.25,
+      "unfoldedQuarters": 264.25,
+      "tempoQpm": 110.0,
+      "key": [
+        "-3",
+        "major"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 214781,
+      "pitchRange": [
+        36,
+        87
+      ],
+      "staffAvgPitch": {
+        "2": 51.9,
+        "1": 67.7
+      },
+      "approxDurationSec": 144,
+      "music21": {
+        "parts": 2,
+        "measures": 67,
+        "noteOrChord": 1042,
+        "highestTime": 264.25,
+        "version": "10.5.0"
+      },
+      "verovioPages": 3
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.097,
+        "shifts": 38.745,
+        "span": 18.0,
+        "chord": 0.388,
+        "fifths": 3.0,
+        "accidentals": 8.407,
+        "seconds": 144.136,
+        "leaps": 0.957
+      },
+      "score": 8.843,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1021,
+          "errors": 8,
+          "warnings": 267,
+          "counts": {
+            "L05": 8,
+            "L06": 8,
+            "L07": 61,
+            "L08": 53,
+            "L09": 30,
+            "L10": 1,
+            "L11": 3,
+            "L13": 19,
+            "L14": 111
+          }
+        },
+        "large": {
+          "notes": 1021,
+          "errors": 5,
+          "warnings": 278,
+          "counts": {
+            "L05": 5,
+            "L06": 9,
+            "L07": 78,
+            "L08": 41,
+            "L09": 34,
+            "L10": 1,
+            "L11": 2,
+            "L13": 18,
+            "L14": 113
+          }
+        }
+      },
+      "scoreSha256": "51b328924b74ab013f945a815b571563a89d203b8817f892f09a969eaebdb464",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-mozartwa-kv154-k154-k154-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "written",
+        "midiFile": "k154.mid",
+        "exact": true,
+        "xml": 614,
+        "midi": 614,
+        "matched": 614,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      },
+      "mutopiaMidi": {
+        "mode": "written",
+        "midiFile": "k154.mid",
+        "exact": true,
+        "xml": 614,
+        "midi": 614,
+        "matched": 614,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-mozartwa-kv154-k154-k154-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 54,
+      "measureElements": 54,
+      "firstMeasure": "1",
+      "lastMeasure": "54",
+      "notes": 665,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 216.0,
+      "unfoldedQuarters": 216.0,
+      "tempoQpm": 110.0,
+      "key": [
+        "-2",
+        "minor"
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 133069,
+      "pitchRange": [
+        42,
+        79
+      ],
+      "staffAvgPitch": {
+        "1": 67.2,
+        "2": 54.6
+      },
+      "approxDurationSec": 118,
+      "music21": {
+        "parts": 2,
+        "measures": 54,
+        "noteOrChord": 665,
+        "highestTime": 216.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.237,
+        "shifts": 31.528,
+        "span": 15.0,
+        "chord": 0.167,
+        "fifths": 2.0,
+        "accidentals": 15.559,
+        "seconds": 117.818,
+        "leaps": 1.7
+      },
+      "score": 6.971,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 614,
+          "errors": 7,
+          "warnings": 137,
+          "counts": {
+            "L03": 1,
+            "L05": 6,
+            "L06": 8,
+            "L07": 42,
+            "L08": 11,
+            "L09": 9,
+            "L10": 1,
+            "L13": 5,
+            "L14": 66
+          }
+        },
+        "large": {
+          "notes": 614,
+          "errors": 0,
+          "warnings": 151,
+          "counts": {
+            "L06": 13,
+            "L07": 53,
+            "L08": 13,
+            "L09": 11,
+            "L13": 5,
+            "L14": 61
+          }
+        }
+      },
+      "scoreSha256": "b6502295c2072742304ab1c8f224d272fbc5f6950437fe21893e71859f31a931",
+      "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -263375,108 +266489,6 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
-  "pdmx-fr-d-ric-chopin-prelude-in-e-flat-major-7f16ef6f": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-fr-d-ric-chopin-prelude-in-e-flat-major-7f16ef6f.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": []
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 67,
-      "measureElements": 68,
-      "firstMeasure": "0",
-      "lastMeasure": "67",
-      "notes": 1165,
-      "graceNotes": 0,
-      "fingerings": 0,
-      "writtenQuarters": 202.0,
-      "unfoldedQuarters": 202.0,
-      "tempoQpm": 176.0,
-      "key": [
-        "-3",
-        null
-      ],
-      "time": [
-        3,
-        4
-      ],
-      "bytes": 756649,
-      "pitchRange": [
-        31,
-        99
-      ],
-      "staffAvgPitch": {
-        "1": 74.1,
-        "2": 53.8
-      },
-      "approxDurationSec": 69,
-      "music21": {
-        "parts": 2,
-        "measures": 68,
-        "noteOrChord": 1155,
-        "highestTime": 202.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 3
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 16.917,
-        "shifts": 70.304,
-        "span": 12.0,
-        "chord": 0.003,
-        "fifths": 3.0,
-        "accidentals": 18.197,
-        "seconds": 68.864,
-        "leaps": 29.809
-      },
-      "score": 12.52,
-      "level": 4
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 1165,
-          "errors": 0,
-          "warnings": 771,
-          "counts": {
-            "L06": 1,
-            "L07": 443,
-            "L08": 196,
-            "L09": 108,
-            "L10": 1,
-            "L11": 20,
-            "L13": 1,
-            "L14": 2
-          }
-        },
-        "large": {
-          "notes": 1165,
-          "errors": 0,
-          "warnings": 777,
-          "counts": {
-            "L06": 1,
-            "L07": 458,
-            "L08": 196,
-            "L09": 108,
-            "L10": 1,
-            "L11": 11,
-            "L13": 1,
-            "L14": 2
-          }
-        }
-      },
-      "scoreSha256": "306dffa9ec547ba750d2148c1fab1fd311a39378ff3d8a57ef3dc178de9a6afd",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
   "pdmx-fr-d-ric-chopin-prelude-in-f-sharp-minor-63216d02": {
     "ok": true,
     "conversionWarnings": [],
@@ -263569,110 +266581,6 @@
         }
       },
       "scoreSha256": "3ffcf67ae65247bfbdeeeee429078c15867a79efa96bea4fefff3c2824e653ec",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
-  "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": []
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 81,
-      "measureElements": 81,
-      "firstMeasure": "1",
-      "lastMeasure": "81",
-      "notes": 1264,
-      "graceNotes": 6,
-      "fingerings": 0,
-      "writtenQuarters": 243.0,
-      "unfoldedQuarters": 243.0,
-      "tempoQpm": 230.0,
-      "key": [
-        "5",
-        null
-      ],
-      "time": [
-        3,
-        4
-      ],
-      "bytes": 535243,
-      "pitchRange": [
-        27,
-        82
-      ],
-      "staffAvgPitch": {
-        "1": 68.4,
-        "2": 50.3
-      },
-      "approxDurationSec": 63,
-      "music21": {
-        "parts": 2,
-        "measures": 81,
-        "noteOrChord": 811,
-        "highestTime": 243.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 3
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 19.561,
-        "shifts": 76.027,
-        "span": 24.0,
-        "chord": 0.894,
-        "fifths": 5.0,
-        "accidentals": 20.403,
-        "seconds": 63.391,
-        "leaps": 9.292
-      },
-      "score": 15.641,
-      "level": 5
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 1245,
-          "errors": 25,
-          "warnings": 356,
-          "counts": {
-            "L03": 6,
-            "L05": 19,
-            "L07": 96,
-            "L08": 178,
-            "L09": 41,
-            "L11": 7,
-            "L12": 1,
-            "L13": 33,
-            "L14": 33
-          }
-        },
-        "large": {
-          "notes": 1245,
-          "errors": 25,
-          "warnings": 352,
-          "counts": {
-            "L03": 6,
-            "L05": 19,
-            "L07": 96,
-            "L08": 173,
-            "L09": 29,
-            "L11": 5,
-            "L12": 1,
-            "L13": 33,
-            "L14": 48
-          }
-        }
-      },
-      "scoreSha256": "b196b6c1b04f56a86747b5254e78189dab925d14af4f0af2fae781be419bfe1e",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }
@@ -317863,6 +320771,1451 @@
       ]
     },
     {
+      "piece": "bulk-bachjs-bwv847-fuga2-fuga2-ly",
+      "bar": "15",
+      "hand": "R",
+      "quarter": 0.5,
+      "pitches": [
+        "G4",
+        "B5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "23",
+      "hand": "R",
+      "quarter": 0.5,
+      "pitches": [
+        "B3",
+        "F5"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "23",
+      "hand": "R",
+      "quarter": 0.75,
+      "pitches": [
+        "C4",
+        "E5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "25",
+      "hand": "R",
+      "quarter": 0.5,
+      "pitches": [
+        "C4",
+        "E5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "25",
+      "hand": "R",
+      "quarter": 1.25,
+      "pitches": [
+        "C4",
+        "A5"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "36",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "F4",
+        "A5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "37",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D4",
+        "A#5"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "37",
+      "hand": "R",
+      "quarter": 0.5,
+      "pitches": [
+        "D4",
+        "A5"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "38",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "C#4",
+        "A5"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "40",
+      "hand": "R",
+      "quarter": 0.5,
+      "pitches": [
+        "C#4",
+        "G5"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv856-bwv856-fugue11-bwv856-fugue11-ly",
+      "bar": "50",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A#2",
+        "D4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "12",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A#2",
+        "D4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "14",
+      "hand": "L",
+      "quarter": 1.0,
+      "pitches": [
+        "F2",
+        "A3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "14",
+      "hand": "L",
+      "quarter": 3.5,
+      "pitches": [
+        "A2",
+        "E4"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "15",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A2",
+        "F4"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "15",
+      "hand": "L",
+      "quarter": 1.0,
+      "pitches": [
+        "A#2",
+        "D4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "15",
+      "hand": "L",
+      "quarter": 3.5,
+      "pitches": [
+        "A#2",
+        "D4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "18",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D#4",
+        "G5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "30",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D2",
+        "A#3"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "34",
+      "hand": "L",
+      "quarter": 1.5,
+      "pitches": [
+        "D2",
+        "A#3"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv861-bwv861-fuga16-bwv861-fuga16-ly",
+      "bar": "34",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G2",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+      "bar": "19",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "D#4",
+        "G#5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+      "bar": "20",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "C#4",
+        "F#5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+      "bar": "20",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "C4",
+        "F5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+      "bar": "34",
+      "hand": "L",
+      "quarter": 3.5,
+      "pitches": [
+        "C#2",
+        "A#3"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv862-bach-fugue17-bach-fugue17-ly",
+      "bar": "35",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D#2",
+        "A#3"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "9",
+      "hand": "R",
+      "quarter": 2.5,
+      "pitches": [
+        "B3",
+        "G5"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "9",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "C#4",
+        "G5"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "10",
+      "hand": "R",
+      "quarter": 2.5,
+      "pitches": [
+        "A3",
+        "F5"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "10",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "B3",
+        "F5"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "C4",
+        "G4",
+        "C5",
+        "E5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 2.0,
+      "pitches": [
+        "C4",
+        "E5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 2.5,
+      "pitches": [
+        "G3",
+        "E5"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv865-bwv865-praeludium20-bwv865-praeludium20-ly",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 3.5,
+      "pitches": [
+        "C4",
+        "F5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv870-wtk2fuga1-wtk2fuga1-ly",
+      "bar": "82",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "A3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv871-wtk2-fugue2-wtk2-fugue2-ly",
+      "bar": "2",
+      "hand": "R",
+      "quarter": 2.0,
+      "pitches": [
+        "A#3",
+        "D5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+      "bar": "75",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "G#3",
+        "B3"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+      "bar": "77",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "G#3",
+        "B3"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+      "bar": "79",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "G#3",
+        "B3"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+      "bar": "80",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "D#1",
+        "D#2",
+        "D#3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-12-chop-28-12-ly",
+      "bar": "81",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G#1",
+        "G#2",
+        "G#3"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-19-chop-28-19-ly",
+      "bar": "71",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D#2",
+        "A#2",
+        "D#3",
+        "G3",
+        "A#3"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-22-chop-28-22-ly",
+      "bar": "40",
+      "hand": "L",
+      "quarter": 1.5,
+      "pitches": [
+        "D2",
+        "A2",
+        "D3",
+        "F#3",
+        "C4"
+      ],
+      "span": 22,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-chopinff-o28-chop-28-22-chop-28-22-ly",
+      "bar": "41",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G2",
+        "D3",
+        "G3",
+        "A#3"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "46",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "E1",
+        "G#3"
+      ],
+      "span": 28,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "47",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E1",
+        "F#3",
+        "A3",
+        "D4"
+      ],
+      "span": 34,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "47",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "E2",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "48",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A1",
+        "C#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "57",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F#2",
+        "C#3",
+        "A#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "61",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F#2",
+        "C#3",
+        "A#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "82",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "A4",
+        "B4",
+        "F#5",
+        "B5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "99",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "C#2",
+        "E3",
+        "A3"
+      ],
+      "span": 20,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "100",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D2",
+        "F#3",
+        "A3"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "101",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "C2",
+        "E3",
+        "A3"
+      ],
+      "span": 21,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "102",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "D2",
+        "F3",
+        "A3"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "114",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "E1",
+        "G#3"
+      ],
+      "span": 28,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "115",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E1",
+        "F#3",
+        "A3",
+        "D4"
+      ],
+      "span": 34,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "115",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "E2",
+        "G#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o118-intermezzo-intermezzo-ly",
+      "bar": "116",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "A1",
+        "C#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "6",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "7",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G2",
+        "F3",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "13",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "14",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "15",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G2",
+        "F3",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "21",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G#4",
+        "A#4",
+        "D5",
+        "F5",
+        "A#5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "27",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "28",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G#2",
+        "D#3",
+        "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-brahmsj-o39-waltz-op39-15-waltz-op39-15-ly",
+      "bar": "35",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G#4",
+        "A#4",
+        "D5",
+        "F5",
+        "A#5"
+      ],
+      "span": 14,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
+      "bar": "1",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "F#3",
+        "C4",
+        "D#4",
+        "A#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
+      "bar": "6",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "F#3",
+        "C4",
+        "D#4",
+        "A#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
+      "bar": "26",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "F#3",
+        "C4",
+        "D#4",
+        "A#4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-lisztf-s-172-liszt-consolation-no4-liszt-consolation-no4-ly",
+      "bar": "32",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F#1",
+        "C#2",
+        "A#2"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-turpint-turpin-turpin-ly",
+      "bar": "24",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "G3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-turpint-turpin-turpin-ly",
+      "bar": "32",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C3",
+        "G3",
+        "E4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+      "bar": "134",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "F4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+      "bar": "135",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "G4"
+      ],
+      "span": 26,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+      "bar": "137",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "F4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+      "bar": "138",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "F4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-beethovenlv-o10-lvb-sonate-10no2-3-lvb-sonate-10no2-3-ly",
+      "bar": "139",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "G4"
+      ],
+      "span": 26,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-beethovenlv-o2-lvb-sonate-02no1-3-lvb-sonate-02no1-3-ly",
+      "bar": "39",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "C3",
+        "E3",
+        "G3",
+        "C4"
+      ],
+      "span": 24,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "G4",
+        "C6"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "15",
+      "hand": "R",
+      "quarter": 0.5,
+      "pitches": [
+        "A3",
+        "E5"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "15",
+      "hand": "R",
+      "quarter": 2.5,
+      "pitches": [
+        "G#3",
+        "C5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "15",
+      "hand": "R",
+      "quarter": 3.0,
+      "pitches": [
+        "C4",
+        "E5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "20",
+      "hand": "R",
+      "quarter": 3.5,
+      "pitches": [
+        "G4",
+        "B5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "21",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "G4",
+        "B5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv952-fugue-c-major-fugue-c-major-ly",
+      "bar": "29",
+      "hand": "L",
+      "quarter": 2.25,
+      "pitches": [
+        "G2",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv988-bwv-988-v01-bwv-988-v01-ly",
+      "bar": "4",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "D2",
+        "F#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly",
+      "bar": "28",
+      "hand": "L",
+      "quarter": 2.5,
+      "pitches": [
+        "G2",
+        "C4"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-bachjs-bwv988-bwv-988-v12-bwv-988-v12-ly",
+      "bar": "29",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "G2",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly",
+      "bar": "29",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "G2",
+        "G3",
+        "B3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-ii-menuet-trio-hob-xvi-27-ii-menuet-trio-ly",
+      "bar": "31",
+      "hand": "R",
+      "quarter": 2.0,
+      "pitches": [
+        "G4",
+        "G5",
+        "B5"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-haydnfj-hob-xvi-27-hob-xvi-27-iii-presto-hob-xvi-27-iii-presto-ly",
+      "bar": "114",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "D4",
+        "B4",
+        "G5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-mozartwa-kv153-k153-k153-ly",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 1.0,
+      "pitches": [
+        "E2",
+        "A#3"
+      ],
+      "span": 18,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-mozartwa-kv153-k153-k153-ly",
+      "bar": "5",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "F2",
+        "A3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-mozartwa-kv153-k153-k153-ly",
+      "bar": "8",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "F2",
+        "A3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-mozartwa-kv153-k153-k153-ly",
+      "bar": "16",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "G#4",
+        "C6"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "bulk-mozartwa-kv153-k153-k153-ly",
+      "bar": "46",
+      "hand": "R",
+      "quarter": 2.0,
+      "pitches": [
+        "C4",
+        "F5"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
       "piece": "pdmx-6-triana-48678234",
       "bar": "26",
       "hand": "L",
@@ -327125,81 +331478,6 @@
         "D#4"
       ],
       "span": 16,
-      "reasons": [
-        "span"
-      ]
-    },
-    {
-      "piece": "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827",
-      "bar": "75",
-      "hand": "L",
-      "quarter": 0.0,
-      "pitches": [
-        "G#2",
-        "G#3",
-        "B3"
-      ],
-      "span": 15,
-      "reasons": [
-        "fingers"
-      ]
-    },
-    {
-      "piece": "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827",
-      "bar": "77",
-      "hand": "L",
-      "quarter": 0.0,
-      "pitches": [
-        "G#2",
-        "G#3",
-        "B3"
-      ],
-      "span": 15,
-      "reasons": [
-        "fingers"
-      ]
-    },
-    {
-      "piece": "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827",
-      "bar": "79",
-      "hand": "L",
-      "quarter": 0.0,
-      "pitches": [
-        "G#2",
-        "G#3",
-        "B3"
-      ],
-      "span": 15,
-      "reasons": [
-        "fingers"
-      ]
-    },
-    {
-      "piece": "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827",
-      "bar": "80",
-      "hand": "L",
-      "quarter": 2.0,
-      "pitches": [
-        "D#1",
-        "D#2",
-        "D#3"
-      ],
-      "span": 24,
-      "reasons": [
-        "span"
-      ]
-    },
-    {
-      "piece": "pdmx-fr-d-ric-chopin-prelude-in-g-sharp-minor-76e44827",
-      "bar": "81",
-      "hand": "L",
-      "quarter": 0.0,
-      "pitches": [
-        "G#1",
-        "G#2",
-        "G#3"
-      ],
-      "span": 24,
       "reasons": [
         "span"
       ]

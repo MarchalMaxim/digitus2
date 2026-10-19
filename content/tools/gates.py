@@ -48,6 +48,8 @@ import check_spans  # noqa: E402
 import jsonio  # noqa: E402
 import level  # noqa: E402
 import lint_gate  # noqa: E402
+import mutopia_advanced  # noqa: E402
+import pdmx_advanced  # noqa: E402
 
 CONTENT = HERE.parent
 MANIFEST = CONTENT / "manifest.json"
@@ -137,12 +139,27 @@ def piece_problems(entry: dict, record: dict, piece: dict, flagged: set[str], li
         elif chk.get("exact") is not True:
             out.append(f"LilyPond 2.24 MIDI check not exact (only in the MusicXML {chk.get('only_xml_count')}, "
                        f"only in the MIDI {chk.get('only_midi_count')})")
-    relaxed = piece.get("relaxedGates")  # level 6 only: a MuseScore piece admitted with its flags recorded
+    # level 6 only: a piece admitted with its span and lint flags recorded, within the archive's ceiling
+    # (pdmx_advanced.py); a Mutopia piece also keeps both MIDI checks and the Mutopia rule (mutopia_advanced.py)
+    relaxed = piece.get("relaxedGates")
     if relaxed and entry["level"] != 6:
         out.append("relaxedGates is allowed for level 6 only")
     if relaxed:
         if (slug in flagged) != (relaxed["spans"] > 0):
             out.append(f"span flags differ from the catalog's relaxedGates ({relaxed['spans']} recorded)")
+        notes = st.get("notes") or 0
+        if not notes or not pdmx_advanced.within_ceiling(relaxed, notes):
+            out.append(f"relaxedGates beyond the ceiling ({relaxed['spans']} slices, lint {relaxed['lint']} in "
+                       f"{notes} notes; at most {pdmx_advanced.RELAXED_SPANS_PER_1000:g} and "
+                       f"{pdmx_advanced.RELAXED_LINT_PER_1000:g} per 1,000)")
+        if pdmx_advanced.relaxed_sentence(relaxed) not in (piece.get("notes") or ""):
+            out.append("the notes do not state the relaxedGates flags")
+        if piece.get("source") == "mutopia":
+            published = (record.get("midiChecks") or {}).get("mutopiaMidi")
+            if not published or published.get("exact") is not True:
+                out.append("a relaxed Mutopia piece needs an exact published Mutopia MIDI check")
+            seconds = ((record.get("levelProposal") or {}).get("features") or {}).get("seconds")
+            out += mutopia_advanced.problems(slug, relaxed, notes, seconds)
     elif slug in flagged:
         out.append("span flags: a slice one hand cannot play (spanFlags in verification.json)")
     score = content / entry["files"]["score"]

@@ -29,8 +29,8 @@ def test_held_editions_do_not_leak_into_the_playable_library():
     accepted = {piece['slug'] for piece in CATALOG['pieces']}
     held = {piece['slug'] for piece in CATALOG['rejected']}
     playable = {piece['slug'] for piece in MANIFEST}
-    assert len(accepted) == 91
-    assert len(held) == 428
+    assert len(accepted) == 115
+    assert len(held) == 404
     assert accepted <= playable
     assert held.isdisjoint(playable)
     assert accepted.isdisjoint(held)

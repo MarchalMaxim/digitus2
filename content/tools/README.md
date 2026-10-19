@@ -2,18 +2,18 @@
 
 These scripts produce everything in `content/scores/`, `content/manifest.json`,
 `content/verification.json` and `content/library-index.json`. The library has
-3,189 pieces in six lanes:
+3,211 pieces in six lanes:
 
 | Lane | Catalog | Pieces | Documented in |
 |---|---|---:|---|
 | Core 30 (own arrangements and Mutopia engravings) | `catalog.json` | 30 | `docs/research/content-library.md` |
 | L1 curated library | `catalog.d/` collection fragments | 119 | `docs/research/content-library.md`, section "L1 curated library" |
 | Mutopia expansion | `catalog.d/expansion-bach.json`, `expansion-teaching.json` | 13 | [Mutopia expansions](#mutopia-expansions) |
-| Bulk Mutopia | `catalog.d/expansion-bulk.json` | 91 | [Mutopia expansions](#mutopia-expansions) |
-| MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,524 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
+| Bulk Mutopia | `catalog.d/expansion-bulk.json` | 115 | [Mutopia expansions](#mutopia-expansions) |
+| MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,522 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 | MuseScore archive, songs | `catalog.d/pdmx-songs.json`, `pdmx-songs-advanced.json` | 1,412 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 
-The first four lanes are the curated core of 253 pieces. Provenance, licences
+The first four lanes are the curated core of 277 pieces. Provenance, licences
 and the reasons behind each choice for the first 149 are in
 `docs/research/content-library.md`.
 
@@ -99,7 +99,9 @@ Adding a Mutopia engraving:
    `$PY -I content/tools/gates.py --only <slug>`. Every gate must pass. A
    piece that fails is excerpted (`convert.barTo` plus `excerpt` text),
    replaced by a spare, or dropped into the fragment's `rejected` list with
-   the reason. It is never shipped with a flag.
+   the reason. It is never shipped with a flag, except a level-6 bulk edition
+   that the Mutopia rule releases under the relaxed gates (see
+   [Mutopia expansions](#mutopia-expansions)).
 4. Set the level: run `$PY -I content/tools/level.py --report`, then write
    `levelNote` (a syllabus placement and the proposal). A final level more
    than one away from the proposal needs `levelOverride`.
@@ -137,7 +139,7 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 | `catalog.d/*.json` | One fragment per implementer (`{task, pieces, rejected}`, where `task` is the plan's task number as an integer; `test_every_fragment_has_the_documented_shape` checks the shape), merged after `catalog.json` in file-name order. Slugs must be unique across all of them. `rejected` keeps every candidate that was not shipped, with the reason, and for a held piece its full entry and a `reinstate` instruction. |
 | `candidates.json` | The L1 plan's Mutopia candidates, main and spare, with the facts the fetch wrote back: RDF licence, `lyFile`, maintainer, LilyPond version, MIDI files, PDF pages, `mainSha256`, `mirrorMatch`. |
 | `fetch_mutopia.py` | Downloads the `.ly` (or `-lys.zip`), the published MIDI, the RDF and the A4 PDF of every Mutopia piece in the merged catalog, or of the named directories. It logs URL, SHA-256 and retrieval time in `content/_raw/mutopia/fetch_log.json` and never executes what it downloads. `--candidates PATH` also fetches the candidates and writes their facts back into that file; `--only-candidates` fetches only those; `--force` downloads again. |
-| `bulk_sources.py` | The bulk Mutopia collector (see [Mutopia expansions](#mutopia-expansions)). `--download` inventories the local mirror and caches canonical RDF and published MIDI with four workers; `--refresh` reconciles the cached metadata offline without resetting download status. |
+| `bulk_sources.py` | The bulk Mutopia collector (see [Mutopia expansions](#mutopia-expansions)). `--download` inventories the local mirror and caches canonical RDF and published MIDI with four workers; `--refresh` reconciles the cached metadata offline without resetting download status; `--readmit` regenerates only the admission of the committed `bulk-candidates.json` from the catalog, offline and without the ignored inventory. |
 | `bulk-candidates.json` | The committed index of the bulk lane: every inventoried edition with its source and RDF hashes, the counts, and the admission state regenerated from `expansion-bulk.json`. |
 | `lilypond/xmldump.ily` | Scheme engravers loaded into LilyPond. They observe LilyPond's interpretation of the score and write it as JSON lines: notes, rests, ties, beams, slurs, tuplets, grace notes, articulations, fingerings, dynamics, hairpins, pedals, clefs, keys, time signatures, bar lines, voltas and tempo marks. |
 | `ly2musicxml.py` | Copies a source to `content/_build/<slug>/`, applies the catalog patches, upgrades it with `convert-ly`, compiles it with LilyPond 2.24 and `xmldump.ily`, and writes partwise MusicXML 4.0. The output has one part with two staves and voices packed per staff, as a stripped copy plus a `.fingered` copy when the source has fingerings. As a CLI (`--help`), pass absolute `--build` and `--out` paths: LilyPond runs in the source directory, so relative ones fail. `build.py` is not affected. |
@@ -155,6 +157,7 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 | `repro.py` | `--core30` or `--all`: rebuilds those pieces into `content/_build/repro` (`build.py --out-dir`) and compares every file byte for byte with `content/scores/`. It exits 1 on any difference. |
 | `jsonio.py` | `library_lock()`, `write_atomic()`, `write_json()` and `update_json()`: the lock and the atomic writes for the shared JSON files. |
 | `musicxml2midi.py` | MusicXML to a format-1 MIDI file with the true hands as tracks (RH, LH), for engine test fixtures. |
+| `mutopia_advanced.py` | The Mutopia rule: which bulk editions held only for the span or lint gate ship at level 6 under the relaxed gates (`CONCERT` and `KEPT`, with a category for each), the whole-piece condition and the level note. `gates.py` checks it for every Mutopia piece with `relaxedGates`. |
 | `pdmx_*.py`, `dedupe.py`, `pdmx-excluded.json` | The MuseScore archive pipeline and its committed exclusion list (see [below](#musescore-archive-scores-pdmx)). |
 | `tests/` | pytest. `test_core30.py` pins the 38 core files by SHA-256 (`fixtures/core30.json`). The other files cover the catalog and fragments, the candidates, `jsonio`, the level heuristic, the lint gate, the gates, the arrangements and their melodies, the converter (`fixtures/features.ly`) and library-wide consistency (`test_library.py`, including the counts per level). |
 
@@ -178,7 +181,9 @@ expressions to the copy of the source in `content/_build/<slug>/src/`.
 5. **Playability.** No slice that one hand cannot strike (`check_spans.py`).
    Zero lint law errors (L01 to L05) on the engine's own fingering at the
    medium and the large profile. The core 30 are exempt; their known flags
-   are recorded.
+   are recorded. Level 6 may relax the span and lint gates within the
+   archive's ceiling (`relaxedGates`; MuseScore archive pieces by
+   `pdmx_advanced.py`, bulk Mutopia editions by `mutopia_advanced.py`).
 6. **Level.** The final level is within one of the heuristic's proposal,
    or `levelOverride` gives the reason.
 7. **Rebuild.** `repro.py --all` rebuilds every file byte for byte from the
@@ -215,7 +220,7 @@ Swedish polska), built and gated like any Mutopia engraving. Decisions:
 - The Handel source editions are dated 1930 and carry explicit Mutopia
   public-domain declarations.
 
-**Bulk Mutopia (91 pieces).** `bulk_sources.py` inventories the local
+**Bulk Mutopia (115 pieces).** `bulk_sources.py` inventories the local
 Mutopia mirror (`research/data/mutopia_src/`, see `research/data/README.md`),
 keeping editions whose instrument declaration is only piano, harpsichord,
 clavichord, keyboard or organ. It reads each edition's canonical RDF and
@@ -239,7 +244,7 @@ $PY -I content/tools/bulk_sources.py --download
 | Editions with published MIDI (MIDI files) | 607 (733) |
 | Editions not already in the catalog | 519 |
 | Public domain / CC BY / CC BY-SA | 369 / 72 / 167 |
-| Accepted / held with reasons / already represented | 91 / 428 / 89 |
+| Accepted / held with reasons / already represented | 115 / 404 / 89 |
 
 Admission is stricter than for a hand-picked piece. Every accepted edition is:
 
@@ -248,7 +253,8 @@ Admission is stricter than for a hand-picked piece. Every accepted edition is:
 - exact against both the LilyPond 2.24 MIDI and the published Mutopia MIDI.
   Both checks are mandatory, and MIDI inside a ZIP keeps its relative path
   so that the published check cannot silently drop out;
-- free of span flags and medium or large law errors;
+- free of span flags and medium or large law errors, except the level-6
+  editions released under the relaxed gates (below);
 - within the 700 KB file budget.
 
 Held editions sit in the fragment's `rejected` list with their reasons:
@@ -264,7 +270,9 @@ Held editions sit in the fragment's `rejected` list with their reasons:
   of 6 (BWV 1080 canon XIII);
 - Scriabin Op. 16/1, whose adjacent hairpins the renderer mispairs.
 
-None of the ten acquired Rachmaninoff editions passes the gates.
+None of the ten acquired Rachmaninoff editions passes the gates. Op. 23 No. 10
+comes closest: it is held at 41.5 law errors per 1,000 notes, over the
+relaxed ceiling of 40.
 
 Composer identity comes from each edition's own metadata, never from its FTP
 folder: folder-derived attribution put Petzold's name on Bach works. Two
@@ -281,7 +289,55 @@ a conservative level 6, with a `levelNote` that claims no syllabus placement
 and a `levelOverride` where 6 is more than one above the proposal. Teaching pieces keep a reviewed placement within one
 of the proposal: Czerny Op. 821/5 went to level 3 rather than 2 for its
 chromatic ornaments and density. The lane's levels are 37 at 3, 3 at 4, 1 at
-5 and 50 at 6.
+5 and 74 at 6.
+
+**Level 6 under the relaxed gates** (the owner's decision: concert-level bulk
+editions held only for the span or lint gate may ship at grade 6 under the
+archive's relaxed gates and ceiling). `mutopia_advanced.py` states the rule.
+Each of the 66 editions held only for those gates is placed in `CONCERT`
+(preludes and fugues, variations, sonata and suite movements, Romantic concert
+pieces, rags) or in `KEPT` (chorales, Satie, teaching and children's
+collections, a folk dance, light contemporary originals, reductions), with its
+category. A concert edition ships at 6 when it is a whole piece by the archive
+rule (60 s and 300 notes), stays within the archive's ceiling
+(`pdmx_advanced.within_ceiling`) and passes every other gate, both MIDI checks
+included. Its flags are in `relaxedGates` and in its notes
+(`pdmx_advanced.relaxed_sentence`). The archive's own level-6 rule could not
+place these editions, because the heuristic proposes 3 for most of this
+Baroque repertoire.
+
+The 42 concert editions were fetched again with `fetch_mutopia.py` (a
+candidates file of their directories) and pinned by `sourceSha256`, then built
+and gated twice. The first pass measured the flags; the second checked the
+recorded ones.
+
+| Concert editions | Count |
+|---|---:|
+| Released at level 6 | 24 (11 Bach, 3 Chopin, 2 each Beethoven, Brahms, Haydn and Mozart, Liszt, Turpin) |
+| Held: not a whole piece | 10 (Chopin Op. 28 Nos. 11 and 14, Liszt Consolation 1, Goldberg 4, 6, 22 and 30, BWV 1006a Menuets I and II, Mozart Anh. 41) |
+| Held: beyond the ceiling | 7 (Goldberg 15, 21 and 24, Scarlatti, Rachmaninoff Op. 23 No. 10; K. 331 Var. 4 and Scriabin Op. 16 No. 5 are short as well) |
+| Held: source changed since it was pinned | 1 (Chopin Op. 28 No. 20) |
+
+Goldberg 15 and 22 also lose their tempo word ("Andante", "Alla breve"),
+which the source writes as a rehearsal mark (#49). A screen of every tempo,
+mark and text-script word against the MusicXML found it, as did the visual
+check.
+
+The 24 released editions:
+
+- carry a median of 7 law errors at the worse profile (at most 45, Brahms
+  Op. 118 No. 2);
+- 22 of them have span flags: 99 slices in all, at most 15 in one piece.
+
+Two archive uploads copied released editions: Chopin's Preludes Op. 28 No. 12
+(a near copy) and No. 19 (the same tune at the same level). Following
+dedupe's rule that the curated piece stays, they are recorded under
+`duplicates` in `pdmx-excluded.json`, and `pdmx_fragments.py` no longer ships
+them. The comparison used dedupe's own functions and thresholds, run on every
+shipped piece against the 24.
+
+After a release, `bulk_sources.py --readmit` regenerates the admission of
+`bulk-candidates.json`.
 
 Known warnings, not defects:
 
@@ -293,11 +349,11 @@ Known warnings, not defects:
 
 ## MuseScore archive scores (PDMX)
 
-2,936 pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
+2,934 pieces come from PDMX (Long et al. 2025, https://zenodo.org/records/15571083): MuseScore
 files whose uploaders declared them public domain or CC0, and which PDMX found free of licence conflicts
 (`license_conflict` false). Every one is a solo piano score on two staves with notes on both; the
 library's own gates decide the rest. Two lanes. The classical lane (genres classical, folk, religious or unlabelled):
-`catalog.d/pdmx-library.json` (1,310 pieces at levels 1 to 5) and `catalog.d/pdmx-advanced.json` (214 pieces at level 6,
+`catalog.d/pdmx-library.json` (1,310 pieces at levels 1 to 5) and `catalog.d/pdmx-advanced.json` (212 pieces at level 6,
 some with relaxed gates). The songs lane (every other genre: pop, rock, soundtrack, jazz, blues, at the owner's request
 for songs "not necessarily classical or folk"): `catalog.d/pdmx-songs.json` (1,023 pieces at levels 1 to 5) and
 `catalog.d/pdmx-songs-advanced.json` (389 pieces at level 6, some with relaxed gates). The caps by rating hold levels
@@ -410,38 +466,39 @@ pages, 110 MB of page heap) and plays. Chopin's Sonata No. 3 (13,871 notes) took
 (6,277 notes) 0.6 and 1.3 s, all measured in a background tab of the dev server. Above 25,000 notes the archive holds only collections, one whole symphony and MIDI dumps.
 The library ships 160 archive pieces above 2,500 notes and 14 above 6,000; the longest is 20,329.
 
-**Level 6.** The heuristic has four cut points, so it never proposes 6; the 50 curated Advanced pieces
-were placed by hand. An archive piece is placed at 6 by the rule in `pdmx_advanced.py`: a proposal of 5,
+**Level 6.** The heuristic has four cut points, so it never proposes 6; the curated Advanced pieces
+were placed by hand (50) or by the Mutopia rule (24, see [Mutopia expansions](#mutopia-expansions)). An archive piece is placed at 6 by the rule in `pdmx_advanced.py`: a proposal of 5,
 or of 4 with a score of 10.9 or more (the middle of that band); at least 60 seconds and 300 notes; and
 both sustained fast notes (6 a second) and a stretch of 12 semitones. Speed and stretch are required
 together, because either alone admitted pieces that were not advanced. A placement from proposal 4
 carries a `levelOverride`. The thresholds were fixed before the yield was known and are not tuned to a
-count. 172 archive pieces at level 6 pass every library gate.
+count. 171 archive pieces at level 6 pass every library gate.
 
 **Relaxed gates for level 6** (the owner's decision). Advanced pieces are the ones the span check and
 the lint law gate refuse, so a level-6 candidate that meets the rule and fails only those two gates ships
 anyway (`pdmx_advanced.relaxed`): its XSD, notes-on-both-staves and validator checks still hold, and the
 slices no hand can strike and the lint law errors are recorded in the catalog (`relaxedGates`), in the
 piece's notes, and checked by `gates.py` and `test_gates.py` against what the engine finds, so a changed
-score or engine cannot slip through. A total waiver would ship pieces where nearly every note breaks a
+score or engine cannot slip through; both also hold every relaxed piece, archive or Mutopia, to the ceiling
+(`pdmx_advanced.within_ceiling`) and look for its flags in its notes. A total waiver would ship pieces where nearly every note breaks a
 law (the worst candidate had 1,028 errors per 1,000 notes), so the relaxation has a ceiling of 40
 law errors per 1,000 notes at each profile (ten times the engine's measured rate on real pieces, the
 benchmark floor of 3.92) and 20 unplayable slices per 1,000 notes; both are constants in
-`pdmx_advanced.py` (None lifts them). 431 pieces ship with relaxed gates: a median of 13 law errors a
-piece (at most 277, in a long piece within the ceiling), and 362 of them with span flags (2,918 slices in all, at
+`pdmx_advanced.py` (None lifts them). 430 pieces ship with relaxed gates: a median of 13 law errors a
+piece (at most 277, in a long piece within the ceiling), and 361 of them with span flags (2,913 slices in all, at
 most 63 in one piece). The digits at those places are advice.
 
 **Result.** The classical lane screened 176,155 archive rows, kept 8,855 two-staff candidates after
 de-duplication and passed 5,470 through every gate; the songs lane gated 4,439 candidates and passed 2,528.
-The library ships 1,310 classical pieces at levels 1 to 5, 214 at level 6, 1,023 songs at levels 1 to 5 and 389
-at level 6 (1,368 in Songs, 44 jazz and blues under Modern). Of the 603 archive pieces at level 6, 172 pass every
-gate and 431 ship with relaxed gates. The archive names a composer for 528 of the 1,524 classical-lane pieces; the
+The library ships 1,310 classical pieces at levels 1 to 5, 212 at level 6, 1,023 songs at levels 1 to 5 and 389
+at level 6 (1,368 in Songs, 44 jazz and blues under Modern). Of the 601 archive pieces at level 6, 171 pass every
+gate and 430 ship with relaxed gates. The archive names a composer for 526 of the 1,522 classical-lane pieces; the
 rest read "Unknown".
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---:|---:|---:|---:|---:|---:|
-| Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 603 |
-| Whole library (253 curated + 2,936 archive) | 47 | 220 | 1,465 | 756 | 48 | 653 |
+| Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 601 |
+| Whole library (277 curated + 2,934 archive) | 47 | 220 | 1,465 | 756 | 48 | 675 |
 
 ## Generated and ignored directories
 

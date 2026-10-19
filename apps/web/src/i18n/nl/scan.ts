@@ -279,7 +279,7 @@ export const scan: Messages['scan'] = {
     limited: 'Je hebt het afgelopen uur veel gescand. Probeer het later opnieuw.',
     serviceStatus: (status: number) =>
       `De scanner kon niet antwoorden (fout ${status}). Probeer het later opnieuw.`,
-    outdated: 'Laad de pagina opnieuw om te scannen: de scanner is bijgewerkt.',
+    noAnswer: 'De scanner kon niet antwoorden. Probeer het later opnieuw.',
     noResult: 'De scanner gaf geen partituur terug.',
     invalidJob: 'Ongeldige scantaak.',
   },

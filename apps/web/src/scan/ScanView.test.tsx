@@ -21,6 +21,8 @@ vi.mock('../score/render/renderer.js', () => ({
     dispose: () => {},
   }),
 }));
+// pdf.js does not run under jsdom; a PDF page's preview is covered by Playwright.
+vi.mock('./PdfPreview.js', () => ({ PdfPreview: () => null }));
 beforeEach(() => {
   load.mockReset().mockResolvedValue({ warnings: [], score: { notes: [{}] } });
   renderNotation.mockReset().mockResolvedValue({ pages: ['<svg/>'] });
@@ -270,6 +272,84 @@ it('shows nothing when the warm-up fails, and the scan still works', async () =>
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
   await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
   expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+});
+
+it("keeps a PDF page's empty warnings empty, whatever the health answer warns of", async () => {
+  const photoWarning = 'Photo recognition is experimental.';
+  const service = stubService({
+    health: () =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            protocol: 'digitus2-scan-v2',
+            recognizer: 'Test',
+            warnings: [photoWarning],
+          }),
+        ),
+      ),
+  });
+  render(
+    <ScanView
+      session={{
+        id: 'pdf',
+        file: new File(['%PDF-1.7'], 'score.pdf', { type: 'application/pdf' }),
+      }}
+    />,
+  );
+  // The warm-up has answered before the scan starts.
+  await vi.waitFor(() => expect(service.fetcher).toHaveBeenCalled());
+  await act(async () => {
+    await Promise.resolve();
+  });
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  expect(screen.queryByText(photoWarning)).toBeNull();
+  const view = useAppStore.getState().view;
+  expect(view.name === 'scan' && view.session.warnings).toEqual([]);
+  expect(view.name === 'scan' && view.session.pages?.[0]?.warnings).toEqual([]);
+});
+
+it('stops a batch at a busy answer and keeps the remaining pages for a retry', async () => {
+  let answered = 0;
+  const service = stubService({
+    recognize: () => {
+      answered += 1;
+      return Promise.resolve(
+        answered === 2
+          ? new Response(JSON.stringify({ error: 'busy' }), { status: 429 })
+          : new Response(
+              JSON.stringify({ state: 'ready', xml: scanXml, recognizer: 'Test', warnings: [] }),
+            ),
+      );
+    },
+  });
+  const file = (name: string) => new File([png], name, { type: 'image/png' });
+  render(
+    <ScanView
+      session={{
+        id: 'batch',
+        file: file('one.png'),
+        pages: [
+          { id: 'one', file: file('one.png') },
+          { id: 'two', file: file('two.png') },
+          { id: 'three', file: file('three.png') },
+        ],
+      }}
+    />,
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'The scanner is busy with another score. Try again in a minute.',
+  );
+  // The third page is not sent: it would only meet the same answer.
+  expect(service.calls('POST')).toHaveLength(2);
+  const view = useAppStore.getState().view;
+  const pages = view.name === 'scan' ? view.session.pages : undefined;
+  expect(pages?.map((page) => !!page.xml)).toEqual([true, false, false]);
+  expect(pages?.slice(1).map((page) => page.error)).toEqual([
+    'The scanner is busy with another score. Try again in a minute.',
+    'The scanner is busy with another score. Try again in a minute.',
+  ]);
 });
 
 it('cancels the running job with a DELETE and returns to Scan this score', async () => {

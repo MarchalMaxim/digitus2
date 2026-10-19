@@ -69,6 +69,14 @@ export async function mockService(
   });
 }
 
+/**
+ * Fails every request to the scan service, for a spec that opens the scan page but never scans:
+ * its warm-up must not reach the deployed service. The route outlives a reload.
+ */
+export async function blockService(page: Page): Promise<void> {
+  await page.route(`${SCAN_SERVICE}/**`, (route) => route.abort());
+}
+
 /** Opens one page image from the library and scans it with the (mocked) scan service. */
 export async function scanOnePage(page: Page, name = 'printed-score.png'): Promise<void> {
   await page.goto('/');

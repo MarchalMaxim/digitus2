@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { mockService } from './helpers/scan.js';
+import { blockService, mockService } from './helpers/scan.js';
 
 // These flows run as a PC window (mouse, no camera), also at 360 px in the mobile project. A
 // touch phone scans the same way; its camera and page tools are scan-phone.spec.ts.
@@ -145,6 +145,7 @@ test('scan rotation honors JPEG EXIF orientation and only changes the selected p
 });
 
 test('scan rotation encoding failures keep the current image usable', async ({ page }) => {
+  await blockService(page);
   await page.goto('/');
   const original = await imageBytes(page);
   await page

@@ -233,6 +233,29 @@ class PhotoPdfRecognizer:
                 "capabilities": getattr(branch, "capabilities", {}), "warnings": warnings}
 
 
+LINGER_SECONDS = 2.0
+LINGER_BYTES = 1024 * 1024
+
+
+def linger_close(request):
+    """Close a connection without losing the answer: stop sending, read what the peer still sends,
+    then close. An answer given before the request body is read (a 403, a 413) would otherwise be
+    lost: closing a socket with unread data resets it, and the reset discards the answer the peer
+    has not read yet (ConnectionAbortedError on Windows). Bounded in time and bytes."""
+    try:
+        request.shutdown(socket.SHUT_WR)
+        deadline, drained = time.monotonic() + LINGER_SECONDS, 0
+        while drained < LINGER_BYTES and (left := deadline - time.monotonic()) > 0:
+            request.settimeout(left)
+            chunk = request.recv(65536)
+            if not chunk:
+                break
+            drained += len(chunk)
+    except OSError:
+        pass
+    request.close()
+
+
 class Server(ThreadingHTTPServer):
     daemon_threads = True
     request_queue_size = 8
@@ -265,7 +288,8 @@ class Server(ThreadingHTTPServer):
                 request.sendall(b"HTTP/1.1 503 Busy\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
             except ConnectionError:
                 pass
-            self.shutdown_request(request)
+            # The plain close: this runs on the accepting thread, which must not linger.
+            super().shutdown_request(request)
             return
         try:
             super().process_request(request, address)
@@ -278,6 +302,9 @@ class Server(ThreadingHTTPServer):
             super().process_request_thread(request, address)
         finally:
             self.slots.release()
+
+    def shutdown_request(self, request):
+        linger_close(request)
 
 
 class Handler(BaseHTTPRequestHandler):

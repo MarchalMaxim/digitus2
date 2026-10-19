@@ -1,6 +1,7 @@
 """HTTP boundary/lifecycle tests; simulated recognition is not OMR evidence."""
 import http.client
 import json
+import socket
 import threading
 import time
 import pytest
@@ -74,6 +75,23 @@ def test_origins_cannot_start_jobs(api, origin):
     status, headers, _ = request(api, "POST", "/v1/jobs", PNG, {"Origin": origin})
     assert status == 403
     assert "Access-Control-Allow-Origin" not in headers
+    assert api[2].inputs == []
+
+def test_origins_refused_before_the_body_arrives_still_read_the_answer(api):
+    # The 403 is sent before the body arrives. Closing a socket with unread data resets it, and a
+    # reset discards the answer the client has not read yet (ConnectionAbortedError on Windows).
+    port = api[0].server_port
+    with socket.create_connection(("127.0.0.1", port), timeout=3) as client:
+        client.sendall(f"POST /v1/jobs HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nOrigin: https://evil.example\r\n"
+                       f"X-Digitus2-Client: 1\r\nContent-Type: image/png\r\nContent-Length: {len(PNG)}\r\n\r\n".encode())
+        time.sleep(0.2)
+        client.sendall(PNG)
+        time.sleep(0.2)
+        answer = b""
+        while chunk := client.recv(4096):
+            answer += chunk
+    assert answer.split(b" ", 2)[1] == b"403"
+    assert b'"origin-not-allowed"' in answer
     assert api[2].inputs == []
 
 def test_rebinding_host_rejected(api):

@@ -20,7 +20,7 @@ from urllib.parse import urlsplit
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "prototypes" / "local-worker"))
 from recognition_errors import RecognitionError  # noqa: E402
 from thread_budget import VARIABLE as THREADS_VARIABLE, detect as detect_threads  # noqa: E402
-from worker import LocalWorker, PhotoPdfRecognizer, validate_result  # noqa: E402
+from worker import LocalWorker, PhotoPdfRecognizer, linger_close, validate_result  # noqa: E402
 
 PROTOCOL = "digitus2-scan-v2"
 ORIGIN = "https://marchalmaxim.github.io"
@@ -158,6 +158,10 @@ class Server(ThreadingHTTPServer):
         connection.settimeout(30)
         return connection, address
 
+    def shutdown_request(self, request):
+        # An early refusal (403, 413) must reach the caller although its body was never read.
+        linger_close(request)
+
     def handle_error(self, request, address):
         """Name the failure's type only; the default handler would log the caller's address."""
         error = sys.exc_info()[1]
@@ -224,8 +228,10 @@ class Handler(BaseHTTPRequestHandler):
                 not requested <= {"content-type", "x-digitus2-client", "x-digitus2-job"}):
             self.send(403, {"error": "preflight-not-allowed"})
             return
+        # Cached for a day (browsers cap it lower), so a page's POST seldom waits on a preflight.
         self.send(204, extra={"Access-Control-Allow-Methods": "GET, POST, DELETE",
-                             "Access-Control-Allow-Headers": "Content-Type, X-Digitus2-Client, X-Digitus2-Job"})
+                             "Access-Control-Allow-Headers": "Content-Type, X-Digitus2-Client, X-Digitus2-Job",
+                             "Access-Control-Max-Age": "86400"})
 
     def do_GET(self):
         if not self.boundary():

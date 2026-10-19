@@ -98,7 +98,7 @@ describe('experimental scan boundary', () => {
     );
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
-  it('maps busy, limited, offline, failure, timeout and other statuses to phrases', async () => {
+  it('maps busy, limited, failure, timeout and other statuses to phrases', async () => {
     const answer = async (response: Response | Error) => {
       const fetcher = vi.fn<typeof fetch>();
       if (response instanceof Error) fetcher.mockRejectedValue(response);
@@ -110,11 +110,15 @@ describe('experimental scan boundary', () => {
       expect(error).toBeInstanceOf(PhraseError);
       expect((error as Error).message).toBe(text);
     };
-    await phrase(new Response('<html>Too many</html>', { status: 429 }), en.scan.client.busy);
+    // Only the service's own busy answer is busy: a bare 429 or a 503 is a failure to answer.
+    await phrase(
+      new Response('<html>Too many</html>', { status: 429 }),
+      en.scan.client.serviceStatus(429),
+    );
     await phrase(json({ error: 'busy' }, 429), en.scan.client.busy);
     await phrase(json({ error: 'rate-limited' }, 429), en.scan.client.limited);
-    await phrase(new Response('', { status: 503 }), en.scan.client.busy);
-    await phrase(new TypeError('Failed to fetch'), en.scan.errors.offline);
+    await phrase(new Response('', { status: 503 }), en.scan.client.serviceStatus(503));
+    await phrase(json({ error: 'busy' }, 503), en.scan.client.serviceStatus(503));
     const blur = await answer(
       json({ state: 'failed', failure: { code: 'low-resolution', message: 'blur' } }, 422),
     );
@@ -128,6 +132,31 @@ describe('experimental scan boundary', () => {
     );
     await phrase(new Response('', { status: 500 }), en.scan.client.serviceStatus(500));
     await phrase(json({ error: 'too large' }, 413), en.scan.client.serviceStatus(413));
+  });
+  it('tells an offline device to check its connection, and an online one that the scanner did not answer', async () => {
+    // Google's own answers (billing disabled, its 429, 503 and 5xx pages) carry no CORS header:
+    // the browser reports them as a failed fetch, like a dropped connection.
+    const failed = vi.fn<typeof fetch>().mockRejectedValue(new TypeError('Failed to fetch'));
+    const client = createScanClient(failed);
+    const failures = async () => [
+      await failure(client.recognize(page(), job)),
+      await failure(client.health()),
+      await failure(client.cancel(job)),
+    ];
+    try {
+      vi.stubGlobal('navigator', { onLine: false });
+      for (const error of await failures()) {
+        expect(error).toBeInstanceOf(PhraseError);
+        expect((error as Error).message).toBe(en.scan.errors.offline);
+      }
+      vi.stubGlobal('navigator', { onLine: true });
+      for (const error of await failures()) {
+        expect(error).toBeInstanceOf(PhraseError);
+        expect((error as Error).message).toBe(en.scan.client.noAnswer);
+      }
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
   it('gives up after 200 seconds with the timed-out phrase', async () => {
     vi.useFakeTimers();
@@ -168,7 +197,8 @@ describe('experimental scan boundary', () => {
       .mockResolvedValueOnce(json({ protocol: PROTOCOL, recognizer: 'Test', maxUploadBytes: 1 }));
     const client = createScanClient(fetcher, 'https://scan.test');
     expect(fetcher).not.toHaveBeenCalled();
-    await expect(client.health()).rejects.toThrow(en.scan.client.outdated);
+    // The warm-up alone reads the health answer, and shows none of its failures.
+    await expect(client.health()).rejects.toThrow('digitus2-scan-v1');
     expect(fetcher).toHaveBeenCalledWith(
       'https://scan.test/v1/health',
       expect.objectContaining({ mode: 'cors', credentials: 'omit' }),

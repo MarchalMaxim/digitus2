@@ -70,7 +70,7 @@ if (want('omr:service')) {
       '-q',
     ]);
 }
-// The scanning acceptance gate: the PC worker's recognisers on the library corpus, against
+// The scanning acceptance gate: the loopback worker's recognisers on the library corpus, against
 // research/omr/acceptance/floor.json. Without the recognisers (docs/scanning.md) it is skipped.
 if (want('omr:acceptance')) {
   const check = spawnSync('node', ['research/omr/acceptance.mjs', '--check'], {

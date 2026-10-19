@@ -279,8 +279,7 @@ export const scan: Messages['scan'] = {
     limited: 'Vous avez beaucoup numérisé au cours de la dernière heure. Réessayez plus tard.',
     serviceStatus: (status: number) =>
       `Le service de numérisation n’a pas pu répondre (erreur ${status}). Réessayez plus tard.`,
-    outdated:
-      'Rechargez la page pour numériser\u00a0: le service de numérisation a été mis à jour.',
+    noAnswer: 'Le service de numérisation n’a pas pu répondre. Réessayez plus tard.',
     noResult: 'Le service de numérisation n’a renvoyé aucune partition.',
     invalidJob: 'Tâche de numérisation non valide.',
   },

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { mockService, openFiles, recordService } from './helpers/scan.js';
+import { blockService, mockService, openFiles, recordService } from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 
 // These flows run as a PC window (mouse, no camera), also at 360 px in the mobile project.
@@ -129,6 +129,7 @@ test('local library: uploaded MusicXML survives refresh and duplicate uploads st
 test('local library: orientation and unchanged original bytes survive refresh', async ({
   page,
 }) => {
+  await blockService(page);
   await page.goto('/');
   const original = Buffer.from(
     await page.evaluate(() => {

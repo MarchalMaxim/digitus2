@@ -15,7 +15,7 @@ export const UNKNOWN_WARNING =
 export const GRAND_STAFF_WARNING =
   'The staves were not paired into a grand staff, so the hands are not separated.';
 
-/** The protocol this client speaks; a service on another one needs the page reloaded. */
+/** The protocol this client speaks; the app and the service are deployed together. */
 export const PROTOCOL = 'digitus2-scan-v2';
 /** What the scan service says about itself in its health answer. */
 export interface ScanServiceMetadata {
@@ -62,6 +62,11 @@ function bodyOf(text: string): Record<string, unknown> {
     return {};
   }
 }
+/** The service's own busy answer: another reader's page is being recognised. */
+export const BUSY: Phrase = (t) => t.scan.client.busy;
+/** The service's own rate-limited answer: this caller has used up its hour. */
+export const LIMITED: Phrase = (t) => t.scan.client.limited;
+
 /** The error for an answer that carries no recognition. */
 function refusal(status: number, body: Record<string, unknown>): Error {
   // The service answers 409 to the pending request of a job its DELETE cancelled.
@@ -78,10 +83,9 @@ function refusal(status: number, body: Record<string, unknown>): Error {
       status === 422 ? t.scan.errors.notRecognized : t.scan.errors.timedOut,
     );
   }
-  if (status === 429 && body.error === 'rate-limited')
-    return new PhraseError((t) => t.scan.client.limited);
-  // A 429 from the service or a 503 from the host in front of it: someone else's score.
-  if (status === 429 || status === 503) return new PhraseError((t) => t.scan.client.busy);
+  // Only the service's own 429 carries these bodies; any other refusal is a failure to answer.
+  if (status === 429 && body.error === 'busy') return new PhraseError(BUSY);
+  if (status === 429 && body.error === 'rate-limited') return new PhraseError(LIMITED);
   return new PhraseError((t) => t.scan.client.serviceStatus(status));
 }
 function checked(job: string): string {
@@ -98,7 +102,15 @@ export function newJobId(): string {
 /** Above the service's 180 s recognition timeout, so its own 504 normally answers first. */
 const RECOGNITION_CEILING = 200_000;
 const QUICK_CEILING = 10_000;
-const offline: Phrase = (t) => t.scan.errors.offline;
+const OFFLINE: Phrase = (t) => t.scan.errors.offline;
+const NO_ANSWER: Phrase = (t) => t.scan.client.noAnswer;
+/**
+ * The phrase for a request that failed without an answer the page may read, chosen when it fails.
+ * Offline, the device says so. Online, the scanner is out of reach: Google's own answers in front
+ * of the service (billing disabled by the kill-switch, its 429, 503 and 5xx pages) carry no CORS
+ * header, so the browser reports them as a network error.
+ */
+const unreachable = (): Phrase => (globalThis.navigator?.onLine === false ? OFFLINE : NO_ANSWER);
 
 /** The hosted scan service: one synchronous request per page, cancelled by its job id. */
 export function createScanClient(fetcher: typeof fetch = fetch, base: string = SCAN_SERVICE) {
@@ -131,7 +143,7 @@ export function createScanClient(fetcher: typeof fetch = fetch, base: string = S
       return { response, body: bodyOf(await response.text()) };
     } catch (error) {
       if (signal?.aborted) throw error;
-      throw new PhraseError(controller.signal.aborted ? late : offline);
+      throw new PhraseError(controller.signal.aborted ? late : unreachable());
     } finally {
       clearTimeout(timer);
       signal?.removeEventListener('abort', follow);
@@ -139,9 +151,10 @@ export function createScanClient(fetcher: typeof fetch = fetch, base: string = S
   }
   return {
     async health(): Promise<ScanServiceMetadata> {
-      const { response, body } = await send('health', {}, QUICK_CEILING, offline);
+      const { response, body } = await send('health', {}, QUICK_CEILING, NO_ANSWER);
       if (!response.ok) throw refusal(response.status, body);
-      if (body.protocol !== PROTOCOL) throw new PhraseError((t) => t.scan.client.outdated);
+      // Only the warm-up asks, and it shows no failure: this keeps another protocol's metadata out.
+      if (body.protocol !== PROTOCOL) throw new Error(`Unknown protocol ${String(body.protocol)}`);
       return { ...body, warnings: warningsOf(body.warnings) } as ScanServiceMetadata;
     },
     async recognize(file: File, job: string, signal?: AbortSignal): Promise<Recognition> {
@@ -178,7 +191,7 @@ export function createScanClient(fetcher: typeof fetch = fetch, base: string = S
         'jobs/' + checked(job),
         { method: 'DELETE', keepalive: true, headers: { 'X-Digitus2-Client': '1' } },
         QUICK_CEILING,
-        offline,
+        NO_ANSWER,
       );
     },
   };

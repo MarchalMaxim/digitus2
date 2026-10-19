@@ -3,7 +3,7 @@
  * without a worker. Only same-origin GET requests inside the worker's scope are answered:
  * navigations network first, then the precached shell; precached files from the precache; other
  * hashed assets (scores and their chunks) and piano samples cache first, kept as they are fetched.
- * Everything else, the scanning worker on 127.0.0.1 included, goes to the network untouched.
+ * Everything else, the scan service's requests included, goes to the network untouched.
  */
 
 export const PRECACHE_PREFIX = 'digitus2-precache-';

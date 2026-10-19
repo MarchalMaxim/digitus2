@@ -12,9 +12,12 @@ import { createRenderer, type ScoreRenderer } from '../score/render/renderer.js'
 import { ScoreSheet } from '../score/ScoreSheet.js';
 import { useLocale, useT } from '../i18n/i18n.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 import {
+  BUSY,
   createScanClient,
   GRAND_STAFF_WARNING,
+  LIMITED,
   newJobId,
   UNKNOWN_WARNING,
   type ScanServiceMetadata,
@@ -325,12 +328,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         const recognition = await client.recognize(page.file, job, controller.signal);
         if (run.cancelled || !alive.current) return;
         page.xml = recognition.xml;
-        const service = latestHealth.current;
-        page.recognizer = recognition.recognizer ?? service?.recognizer;
-        // The service's own warnings stand in for a page that reports none.
-        page.warnings = recognition.warnings.length
-          ? recognition.warnings
-          : (service?.warnings ?? []);
+        page.recognizer = recognition.recognizer ?? latestHealth.current?.recognizer;
+        // A page's warnings are its own: an empty list stays empty.
+        page.warnings = recognition.warnings;
         retain({ ...session, pages: results.map((p) => ({ ...p })) });
       } catch (cause) {
         if (run.cancelled || !alive.current) return;
@@ -341,7 +341,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           return;
         }
         page.error = messageOf(cause);
+        const refusal =
+          cause instanceof PhraseError && (cause.phrase === BUSY || cause.phrase === LIMITED)
+            ? cause.phrase
+            : undefined;
+        if (refusal) {
+          // The pages after it would meet the same answer: they wait for the reader's retry.
+          for (const rest of results.slice(index + 1)) if (!rest.xml) rest.error = page.error;
+        }
         retain({ ...session, pages: results.map((p) => ({ ...p })) });
+        if (refusal) {
+          active.current = { cancelled: false };
+          setSelected(index);
+          setError(refusal);
+          setPhase('ready');
+          return;
+        }
       } finally {
         delete run.job;
         delete run.controller;

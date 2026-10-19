@@ -225,7 +225,7 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 | A phone photo, in the container at 4 vCPU on the owner's PC | 22.2 s |
 | A corpus PDF, in the container at 4 vCPU on the owner's PC | 8.6 s |
 | The same photo and PDF on the deployed service, warm | 35.2 s and 16.2 s |
-| The deployed service's cold start | not yet measured |
+| The deployed service's cold start, instance start to listening | 5 to 6 s |
 
 The Linux build is a different build of the same pinned libraries: Python 3.12 from Ubuntu 24.04 installs the locked `homr-photo/requirements-cpu.txt` unchanged, the patched homr source matches `source-manifests.json`, and Audiveris 5.11.0 comes from its Ubuntu package. Its adapter's class path is `lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first and Audiveris exports nothing. On a headless Linux Audiveris also needs fontconfig with one font and `GDK_SCALE` set, which its package does not declare (`research/omr/service/README.md`).
 

@@ -19,10 +19,10 @@ The scan page says it in one sentence under the advice: "Recognition runs on the
 
 - **What is sent.** Each page's original bytes (or the rotated PNG), one page per request, over HTTPS to the scanner's address in `apps/web/src/scan/service.ts`. Nothing else: no name, no account, no other page. Opening the scan page sends one request that carries no page, to wake the scanner while you arrange the pages.
 - **What the scanner keeps.** Nothing. The page is recognised in memory (Cloud Run's file system is memory) and deleted when the job ends, together with its result; there is no job list and no copy. For each page the scanner writes one log line with the file type, the sizes, the seconds taken and the outcome, never the content, the file name or your address. To hold each reader to 30 recognitions an hour it counts your address in memory for up to an hour; the count is gone when the scanner stops. Google Cloud keeps its own request log for the service (time, status and the caller's address), as for any Cloud Run service ([Cloud Run logging](https://cloud.google.com/run/docs/logging)).
-- **One page at a time.** The scanner recognises one page at a time, for all readers together. When another reader's page is being recognised, the app says the scanner is busy and keeps your pages; try again in a minute.
+- **One page at a time.** The scanner recognises one page at a time, for all readers together. When another reader's page is being recognised, the app says the scanner is busy and keeps your pages; try again in a minute. In a batch, the pages after the busy one are not sent; **Retry failed pages** sends them.
 - **The scanner sleeps when nobody scans.** The first scan after a quiet spell waits while it starts, and the status line says so.
 - **It needs a connection.** Offline, the app says it could not reach the scanner and keeps the pages; the rest of the app works offline as before.
-- **Its spend is capped.** The project pays for the scanner and caps it at 5 a month; when the cap is reached, scanning is off until the next month and the app says the scanner could not answer (`docs/scan-service.md`).
+- **Its spend is capped.** The project pays for the scanner and caps it at 5 a month; when the cap is reached, scanning is off until the next month and the app says "The scanner could not answer. Try again later." (`docs/scan-service.md`).
 
 ## Scan a score
 
@@ -82,12 +82,12 @@ Browser storage belongs to one site and one browser profile, so a local preview 
 
 The app keeps your pages in every case below, and **Scan this score** stays available.
 
-- **"The scanner is busy with another score. Try again in a minute."** One page is recognised at a time for every reader. Wait a minute and press it again.
-- **"Could not reach the scanner. Check your connection and try again."** The device is offline or the network dropped. Reconnect and retry; nothing was lost.
-- **"The scanner could not answer (error 503). Try again later."** The scanner is down, being updated, or switched off for the rest of the month because its spend cap was reached (`docs/scan-service.md`). The number is the scanner's error code.
+- **"The scanner is busy with another score. Try again in a minute."** One page is recognised at a time for every reader. Wait a minute and press it again. In a batch, the pages after it wait too.
+- **"Could not reach the scanner. Check your connection and try again."** The device is offline. Reconnect and retry; nothing was lost.
+- **"The scanner could not answer. Try again later."** The device is online, but no answer from the scanner reached the app: the scanner is down, overloaded, or switched off for the rest of the month because its spend cap was reached (`docs/scan-service.md`). In those cases Google answers in front of the scanner, and the browser does not let the page read that answer, so the app cannot say which one it is. A network drop the device has not noticed looks the same.
+- **"The scanner could not answer (error 500). Try again later."** The scanner itself answered with an error. The number is its error code.
 - **"Recognition timed out. Try a smaller, clearer page."** The scanner gives up on a page after three minutes. A smaller crop, a flatter photo or the original PDF usually helps.
-- **"You have scanned a lot in the past hour. Try again later."** Each reader has 30 recognitions an hour; the limit frees up as the hour passes.
-- **"Reload the page to scan: the scanner has been updated."** The scanner speaks a newer version than this copy of the app; a reload fetches the new app.
+- **"You have scanned a lot in the past hour. Try again later."** Each reader has 30 recognitions an hour; the limit frees up as the hour passes. In a batch, the pages after it wait too.
 - **"Cancellation could not be confirmed. The scanner stops by itself within three minutes."** The cancel request was lost; the page stops by the scanner's own time limit, and the scanner may say it is busy until then.
 
 When the scanner answers but cannot read the page:

@@ -279,7 +279,7 @@ export const scan: Messages['scan'] = {
     limited: 'Você digitalizou bastante na última hora. Tente de novo mais tarde.',
     serviceStatus: (status: number) =>
       `O serviço de digitalização não conseguiu responder (erro ${status}). Tente de novo mais tarde.`,
-    outdated: 'Recarregue a página para digitalizar: o serviço de digitalização foi atualizado.',
+    noAnswer: 'O serviço de digitalização não conseguiu responder. Tente de novo mais tarde.',
     noResult: 'O serviço de digitalização não devolveu nenhuma partitura.',
     invalidJob: 'Tarefa de digitalização inválida.',
   },

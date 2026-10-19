@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { SCAN_SERVICE } from '../src/scan/service.js';
-import { mockService, openFiles, recordService, serviceCall } from './helpers/scan.js';
+import {
+  blockService,
+  mockService,
+  openFiles,
+  recordService,
+  serviceCall,
+} from './helpers/scan.js';
 import { libraryScore } from './helpers/files.js';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
@@ -163,16 +169,36 @@ test('scan: the warm-up happens on arrival, the page goes only on Scan', async (
   expect(calls).toHaveLength(serviceCalls);
 });
 
-test('scan: an unreachable scanner is reported and the scan can be retried', async ({ page }) => {
-  await page.route(`${SCAN_SERVICE}/**`, (route) => route.abort());
+test('scan: a scanner that does not answer is reported and the scan can be retried', async ({
+  page,
+}) => {
+  // Google's answers in front of the service (billing off, its 429 and 5xx) carry no CORS
+  // header: the page sees a failed request while the device is online.
+  await blockService(page);
   await choose(page);
   await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByRole('alert')).toContainText('Could not reach the scanner');
+  await expect(page.getByRole('alert')).toContainText(
+    'The scanner could not answer. Try again later.',
+  );
   await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
 });
 
+test('scan: an offline device is told to check its connection', async ({ page }) => {
+  await blockService(page);
+  await choose(page);
+  await page.context().setOffline(true);
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByRole('alert')).toContainText(
+    'Could not reach the scanner. Check your connection and try again.',
+  );
+  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
+  await page.context().setOffline(false);
+});
+
 test('scan: a busy scanner says so and keeps the button', async ({ page }) => {
-  await mockService(page, '', { onRecognize: async () => ({ status: 429, body: '' }) });
+  await mockService(page, '', {
+    onRecognize: async () => ({ status: 429, json: { error: 'busy' } }),
+  });
   await choose(page);
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.getByRole('alert')).toContainText('busy');

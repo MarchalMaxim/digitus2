@@ -2,6 +2,7 @@
 import http.client
 import json
 import secrets
+import socket
 import threading
 import time
 import pytest
@@ -220,8 +221,27 @@ def test_origin_and_client_header_are_required(api, origin):
     assert headers["Access-Control-Allow-Origin"] == ORIGIN
     assert headers["Access-Control-Allow-Methods"] == "GET, POST, DELETE"
     assert headers["Access-Control-Allow-Headers"] == "Content-Type, X-Digitus2-Client, X-Digitus2-Job"
+    # A cached preflight spares each page one round trip; browsers cap the day at their own limit.
+    assert headers["Access-Control-Max-Age"] == "86400"
     preflight["Access-Control-Request-Headers"] = "x-arbitrary"
     assert request(api, "OPTIONS", "/v1/recognize", headers=preflight)[0] == 403
+
+def test_origins_refused_before_the_body_arrives_still_read_the_answer(api):
+    # Closing a socket with unread data resets it, and the reset would discard the 403.
+    port = api[0].server_port
+    with socket.create_connection(("127.0.0.1", port), timeout=3) as client:
+        client.sendall(f"POST /v1/recognize HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nOrigin: https://evil.example\r\n"
+                       f"X-Digitus2-Client: 1\r\nX-Digitus2-Job: {'a' * 32}\r\nContent-Type: image/png\r\n"
+                       f"Content-Length: {len(PNG)}\r\n\r\n".encode())
+        time.sleep(0.2)
+        client.sendall(PNG)
+        time.sleep(0.2)
+        answer = b""
+        while chunk := client.recv(4096):
+            answer += chunk
+    assert answer.split(b" ", 2)[1] == b"403"
+    assert b'"origin-not-allowed"' in answer
+    assert api[2].inputs == []
 
 def test_the_job_id_must_be_32_hex_and_unused(api):
     for job in [None, "abc", "A" * 32]:

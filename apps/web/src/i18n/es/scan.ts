@@ -276,7 +276,7 @@ export const scan: Messages['scan'] = {
     limited: 'Has escaneado mucho en la última hora. Inténtalo de nuevo más tarde.',
     serviceStatus: (status: number) =>
       `El escáner no pudo responder (error ${status}). Inténtalo de nuevo más tarde.`,
-    outdated: 'Recarga la página para escanear: el escáner se ha actualizado.',
+    noAnswer: 'El escáner no pudo responder. Inténtalo de nuevo más tarde.',
     noResult: 'El escáner no devolvió ninguna partitura.',
     invalidJob: 'Tarea de escaneo no válida.',
   },

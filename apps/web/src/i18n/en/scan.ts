@@ -290,7 +290,7 @@ export const scan = {
     limited: 'You have scanned a lot in the past hour. Try again later.',
     serviceStatus: (status: number) =>
       `The scanner could not answer (error ${status}). Try again later.`,
-    outdated: 'Reload the page to scan: the scanner has been updated.',
+    noAnswer: 'The scanner could not answer. Try again later.',
     noResult: 'The scanner returned no score.',
     invalidJob: 'Invalid scan job.',
   },

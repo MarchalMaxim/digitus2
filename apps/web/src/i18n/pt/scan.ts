@@ -216,8 +216,8 @@ export const scan: Messages['scan'] = {
     noNotes: 'Nenhuma nota tocável foi reconhecida.',
     notUsable:
       'Este reconhecimento ainda não pode ser usado para o dedilhado: algumas notas não se encaixam.',
-    connectFailed:
-      'Não foi possível conectar a este PC. Inicie o programa e permita a conexão local deste site quando o navegador perguntar. Se você negou, altere a permissão de rede local deste site e tente de novo.',
+    offline:
+      'Não foi possível acessar o serviço de digitalização. Verifique sua conexão e tente de novo.',
     cancelFailed:
       'Não foi possível confirmar o cancelamento. Feche o terminal do programa para parar o processamento.',
     timedOut: 'O reconhecimento demorou demais. Tente uma página menor e mais nítida.',
@@ -292,12 +292,13 @@ export const scan: Messages['scan'] = {
       'A imagem girada passa de 10 MB. Escolha uma imagem menor. Sua imagem atual não foi alterada.',
   },
   client: {
-    busy: 'O PC já está digitalizando. Tente de novo em instantes.',
-    workerStatus: (status: number) =>
-      `O programa do PC não conseguiu responder (erro ${status}). Reinicie-o e tente de novo.`,
+    busy: 'O serviço de digitalização está ocupado com outra partitura. Tente de novo em um minuto.',
+    limited: 'Você digitalizou bastante na última hora. Tente de novo mais tarde.',
+    serviceStatus: (status: number) =>
+      `O serviço de digitalização não conseguiu responder (erro ${status}). Tente de novo mais tarde.`,
+    outdated: 'Recarregue a página para digitalizar: o serviço de digitalização foi atualizado.',
+    noResult: 'O serviço de digitalização não devolveu nenhuma partitura.',
     invalidJob: 'Tarefa de digitalização inválida.',
-    updateWorker: 'Atualize o programa de PC para continuar.',
-    noJob: 'O programa não devolveu nenhuma tarefa de digitalização.',
   },
   join: {
     refused: (reason: string) =>

@@ -217,8 +217,7 @@ export const scan: Messages['scan'] = {
     noNotes: 'Er zijn geen speelbare noten herkend.',
     notUsable:
       'Deze herkenning kan nog niet voor vingerzettingen worden gebruikt: sommige noten passen niet bij elkaar.',
-    connectFailed:
-      'Kon geen verbinding maken met deze pc. Start de worker en sta de lokale verbinding van deze site toe als je browser erom vraagt. Heb je die geweigerd? Wijzig dan de toestemming voor het lokale netwerk van deze site en probeer het opnieuw.',
+    offline: 'Kon de scanner niet bereiken. Controleer je verbinding en probeer het opnieuw.',
     cancelFailed:
       'Kon het annuleren niet bevestigen. Sluit de terminal van de worker om het verwerken te stoppen.',
     timedOut: 'De herkenning duurde te lang. Probeer een kleinere, duidelijkere pagina.',
@@ -293,12 +292,13 @@ export const scan: Messages['scan'] = {
       'De gedraaide afbeelding is groter dan 10 MB. Kies een kleinere afbeelding. Je huidige afbeelding blijft ongewijzigd.',
   },
   client: {
-    busy: 'De pc is al aan het scannen. Probeer het zo meteen opnieuw.',
-    workerStatus: (status: number) =>
-      `Het pc-programma kon niet antwoorden (fout ${status}). Start het opnieuw en probeer het nog eens.`,
+    busy: 'De scanner is bezig met een andere partituur. Probeer het over een minuut opnieuw.',
+    limited: 'Je hebt het afgelopen uur veel gescand. Probeer het later opnieuw.',
+    serviceStatus: (status: number) =>
+      `De scanner kon niet antwoorden (fout ${status}). Probeer het later opnieuw.`,
+    outdated: 'Laad de pagina opnieuw om te scannen: de scanner is bijgewerkt.',
+    noResult: 'De scanner gaf geen partituur terug.',
     invalidJob: 'Ongeldige scantaak.',
-    updateWorker: 'Werk de pc-worker bij om door te gaan.',
-    noJob: 'De worker gaf geen scantaak terug.',
   },
   join: {
     refused: (reason: string) =>

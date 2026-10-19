@@ -215,8 +215,7 @@ export const scan: Messages['scan'] = {
     noNotes: 'No se reconoció ninguna nota que se pueda tocar.',
     notUsable:
       'Este reconocimiento todavía no se puede usar para la digitación: algunas de sus notas no encajan.',
-    connectFailed:
-      'No se pudo conectar con este PC. Inicia el programa y permite la conexión local de este sitio cuando el navegador lo pida. Si la denegaste, cambia el permiso de red local de este sitio e inténtalo de nuevo.',
+    offline: 'No se pudo conectar con el escáner. Comprueba tu conexión e inténtalo de nuevo.',
     cancelFailed:
       'No se pudo confirmar la cancelación. Cierra la terminal del programa para detener el procesamiento.',
     timedOut: 'El reconocimiento tardó demasiado. Prueba con una página más pequeña y más nítida.',
@@ -290,12 +289,13 @@ export const scan: Messages['scan'] = {
       'La imagen girada supera los 10 MB. Elige una imagen más pequeña. Tu imagen actual no cambia.',
   },
   client: {
-    busy: 'El PC ya está escaneando. Inténtalo de nuevo en un momento.',
-    workerStatus: (status: number) =>
-      `El programa del PC no pudo responder (error ${status}). Reinícialo y vuelve a intentarlo.`,
+    busy: 'El escáner está ocupado con otra partitura. Inténtalo de nuevo dentro de un minuto.',
+    limited: 'Has escaneado mucho en la última hora. Inténtalo de nuevo más tarde.',
+    serviceStatus: (status: number) =>
+      `El escáner no pudo responder (error ${status}). Inténtalo de nuevo más tarde.`,
+    outdated: 'Recarga la página para escanear: el escáner se ha actualizado.',
+    noResult: 'El escáner no devolvió ninguna partitura.',
     invalidJob: 'Tarea de escaneo no válida.',
-    updateWorker: 'Actualiza el programa de PC para continuar.',
-    noJob: 'El programa no devolvió ninguna tarea de escaneo.',
   },
   join: {
     refused: (reason: string) =>

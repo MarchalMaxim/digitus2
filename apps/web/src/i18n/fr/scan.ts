@@ -216,8 +216,8 @@ export const scan: Messages['scan'] = {
     noNotes: 'Aucune note jouable n’a été reconnue.',
     notUsable:
       'Cette reconnaissance ne peut pas encore servir au doigté\u00a0: certaines de ses notes ne s’accordent pas.',
-    connectFailed:
-      'Impossible de se connecter à ce PC. Lancez le programme, puis autorisez la connexion locale de ce site quand votre navigateur la demande. Si vous l’avez refusée, modifiez l’autorisation de réseau local de ce site et réessayez.',
+    offline:
+      'Impossible de joindre le service de numérisation. Vérifiez votre connexion et réessayez.',
     cancelFailed:
       'Impossible de confirmer l’annulation. Fermez le terminal du programme pour arrêter le traitement.',
     timedOut: 'La reconnaissance a pris trop de temps. Essayez une page plus petite et plus nette.',
@@ -292,12 +292,14 @@ export const scan: Messages['scan'] = {
       'L’image pivotée dépasse 10\u00a0Mo. Choisissez une image plus petite. Votre image actuelle reste inchangée.',
   },
   client: {
-    busy: 'Le PC est déjà en train de numériser. Réessayez dans un instant.',
-    workerStatus: (status: number) =>
-      `Le programme PC n’a pas pu répondre (erreur ${status}). Redémarrez-le et réessayez.`,
+    busy: 'Le service de numérisation traite une autre partition. Réessayez dans une minute.',
+    limited: 'Vous avez beaucoup numérisé au cours de la dernière heure. Réessayez plus tard.',
+    serviceStatus: (status: number) =>
+      `Le service de numérisation n’a pas pu répondre (erreur ${status}). Réessayez plus tard.`,
+    outdated:
+      'Rechargez la page pour numériser\u00a0: le service de numérisation a été mis à jour.',
+    noResult: 'Le service de numérisation n’a renvoyé aucune partition.',
     invalidJob: 'Tâche de numérisation non valide.',
-    updateWorker: 'Mettez à jour le programme PC pour continuer.',
-    noJob: 'Le programme n’a pas renvoyé de tâche de numérisation.',
   },
   join: {
     refused: (reason: string) =>

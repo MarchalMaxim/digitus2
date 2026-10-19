@@ -233,8 +233,7 @@ export const scan = {
     noNotes: 'No playable notes were recognized.',
     notUsable:
       'This recognition cannot be used for fingerings yet: some of its notes do not fit together.',
-    connectFailed:
-      'Could not connect to this PC. Start the worker, then allow this site’s local connection when your browser asks. If you denied it, change this site’s local-network permission and try again.',
+    offline: 'Could not reach the scanner. Check your connection and try again.',
     cancelFailed: 'Could not confirm cancellation. Close the worker terminal to stop processing.',
     timedOut: 'Recognition timed out. Try a smaller, clearer page.',
     notRecognized:
@@ -303,12 +302,13 @@ export const scan = {
       'The rotated image exceeds 10 MB. Choose a smaller image. Your current image is unchanged.',
   },
   client: {
-    busy: 'The PC is already scanning. Try again shortly.',
-    workerStatus: (status: number) =>
-      `The PC worker could not answer (error ${status}). Restart it and try again.`,
+    busy: 'The scanner is busy with another score. Try again in a minute.',
+    limited: 'You have scanned a lot in the past hour. Try again later.',
+    serviceStatus: (status: number) =>
+      `The scanner could not answer (error ${status}). Try again later.`,
+    outdated: 'Reload the page to scan: the scanner has been updated.',
+    noResult: 'The scanner returned no score.',
     invalidJob: 'Invalid scan job.',
-    updateWorker: 'Update the PC worker to continue.',
-    noJob: 'The worker did not return a scan job.',
   },
   join: {
     /** `reason` is a short explanation from the list below. */

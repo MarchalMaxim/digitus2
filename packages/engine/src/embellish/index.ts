@@ -6,3 +6,7 @@ export type {
   EmbellishRule,
   InsertedNote,
 } from './embellish.js';
+export { checkEmbellishment } from './check.js';
+export type { EmbellishCheck } from './check.js';
+export { LEVEL_CUTS, levelFeatures, levelScore, proposeLevel, round3 } from './level.js';
+export type { LevelFeatures } from './level.js';

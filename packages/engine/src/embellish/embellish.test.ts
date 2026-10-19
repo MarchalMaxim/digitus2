@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from '../io/musicxml/read.js';
 import { analyseMusicXml, top } from './analyse.js';
+import { checkEmbellishment } from './check.js';
 import { embellishMusicXml } from './embellish.js';
 import type { EmbellishResult } from './embellish.js';
 import { fracFrom } from './frac.js';
@@ -37,6 +38,12 @@ function lh(xml: string): Ev[] {
 
 const rules = (res: EmbellishResult) => res.inserted.map((i) => i.rule);
 const E = (xml: string) => embellishMusicXml(xml);
+
+/** `checkEmbellishment` of a result against its plain input, in the result's melody voice. */
+function checked(plain: string, res: EmbellishResult) {
+  expect(res.melodyVoice).not.toBeNull();
+  return checkEmbellishment(plain, res.xml, res.inserted, res.melodyVoice!);
+}
 
 /** Insert `xml` before the third `<note>` of `score`, as test_rules.py does. */
 function beforeThirdNote(score: string, xml: string): string {
@@ -346,6 +353,7 @@ describe('writing', () => {
     expect(rules(res)).toEqual(['passing']);
     expect(res.xml).toContain('<divisions>2</divisions>');
     expect(lh(res.xml)).toEqual(lh(input));
+    expect(checked(input, res).ok).toBe(true);
   });
 
   it('the light factor leaves divisions that already split into eighths', () => {
@@ -585,6 +593,10 @@ describe('shared guards', () => {
     const res = E(input);
     expect(lh(res.xml)).toEqual(lh(input));
     expect(res.inserted.map((i) => [i.rule, i.pitch, i.onset])).toEqual([['passing', 'D4', '1/2']]);
+    const rep = checked(input, res);
+    expect(rep.ok).toBe(true);
+    expect(rep.strongTotal).toBe(6);
+    expect(rep.strongKept).toBe(6);
   });
 
   it('a pitch class next to an accidental in the bar is skipped', () => {
@@ -669,20 +681,20 @@ describe('shared guards', () => {
   });
 
   it('a pickup bar counts beats from the end', () => {
-    const res = E(
-      fixtureScore(
+    const input = fixtureScore(
+      [
+        [['C4', 1]],
         [
-          [['C4', 1]],
-          [
-            ['E4', 2],
-            ['D4', 1],
-          ],
-          [['C4', 3]],
+          ['E4', 2],
+          ['D4', 1],
         ],
-        { lh: [[['r', 1]], [['C3', 3]], [['C3', 3]]], time: [3, 4], pickup: true },
-      ),
+        [['C4', 3]],
+      ],
+      { lh: [[['r', 1]], [['C3', 3]], [['C3', 3]]], time: [3, 4], pickup: true },
     );
+    const res = E(input);
     expect(res.inserted[0]).toMatchObject({ bar: '0', beat: '3.5', measureIndex: 0 });
+    expect(checked(input, res).ok).toBe(true);
   });
 
   it('every melody note gets at most one skip reason', () => {

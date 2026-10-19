@@ -230,7 +230,19 @@ The Linux build is a different build of the same pinned libraries: Python 3.12 f
 
 **Equivalence.** `node research/omr/acceptance.mjs --service URL` sends the same 16-piece corpus through a running container, scores it with the same scorer and compares it with `research/omr/acceptance/floor.json`, like the gate. A route within one count per error class or 0.5 F1 points of its floor is explained here and does not block a deploy; a larger gap goes to the owner first.
 
-Container results against the floors: not yet measured (the table, beside the Windows numbers of the acceptance table above, replaces this line).
+The container's results against the floors, with the Windows gate's numbers beside them. Every route meets its floor, and the two builds agree on every count; the MusicXML differs only in line endings, temporary paths and font sizes.
+
+| Route | Floor (imported, full-note F1, pitch F1) | Windows | Container at 4 CPUs |
+| --- | --- | --- | --- |
+| homr, clean | 16, 89.4, 98.7 | 16, 89.95, 99.26 | 16, 89.95, 99.26 |
+| homr, shadow | 16, 86.2, 98.7 | 16, 86.75, 99.25 | 16, 86.75, 99.25 |
+| homr, low contrast | 16, 90.4, 99.0 | 16, 90.96, 99.54 | 16, 90.96, 99.54 |
+| homr, skew | 15, 88.8, 96.4 | 15, 89.39, 96.95 | 15, 89.39, 96.95 |
+| Audiveris, PDF | 16, 86.1, 98.2, beams 91.5 | 16, 86.65, 98.72, beams 92.01 | 16, 86.65, 98.72, beams 92.01 |
+| Photos as taken (11 pages): recognised, imported, bars, staves, key, time | 11, 9, 8, 10, 9, 6 | 11, 9, 8, 10, 9, 6 | 11, 9, 8, 10, 9, 6 |
+| Photos rotated (2 pages) | 2, 1, 1, 2, 2, 2 | 2, 1, 1, 2, 2, 2 | 2, 1, 1, 2, 2, 2 |
+
+In the container a corpus page takes 13 s at the median and 28 s at most (the dense Schumann page and the Chopin waltz), well inside the 180 s limit; without the thread budget the same dense pages took 76 s to over 180 s, because ONNX Runtime sized its thread pool from the host's cores rather than the container's quota.
 
 ## Browser to research worker connection
 

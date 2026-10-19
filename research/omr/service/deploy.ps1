@@ -65,9 +65,12 @@ Invoke-Checked 'Building the image' {
 Invoke-Checked 'Pushing the image' { docker push $Image }
 
 Invoke-Checked 'Deploying to Cloud Run' {
+  # Cloud Run does not expose the 4 vCPU allotment through the cgroup or the affinity mask (the
+  # service detected 9), so the thread budget is set explicitly to the vCPU count.
   gcloud run deploy $Service --image $Image --region $Region --project $Project `
     --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 `
-    --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080 --quiet
+    --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080 `
+    --set-env-vars DIGITUS2_OMR_THREADS=4 --quiet
 }
 
 $Url = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(status.url)')

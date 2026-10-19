@@ -4,8 +4,11 @@
 // are derived again here, so that a fault in the embellisher's timeline does not hide itself.
 //
 // Positions are exact rationals in quarters (`Frac`), as check.py uses Fraction. The engine reader
-// merges tied notes, so check.py's tie flags fold into a note's duration.
-import { childElements, parseXml } from '../io/musicxml/dom.js';
+// merges tied notes, so check.py's tie flags fold into a note's duration. It skips rests, which
+// check.py counts among the notes outside the melody, so a small DOM pass over both files compares
+// the rests (by part, measure, staff, voice and length): a filled or split rest is a changed note.
+import { childElements, childText, parseXml } from '../io/musicxml/dom.js';
+import type { Document } from '../io/musicxml/dom.js';
 import { parseMusicXml } from '../io/musicxml/read.js';
 import { timewiseToPartwise } from '../io/musicxml/timewise.js';
 import { unpackMusicXml } from '../io/musicxml/unpack.js';
@@ -78,10 +81,11 @@ class Multiset {
     return out;
   }
 
+  /** Counts are always positive, so equal maps are equal multisets. */
   equals(other: Multiset): boolean {
-    const positive = (m: Multiset) => [...m.counts].filter(([, c]) => c > 0);
-    const a = positive(this);
-    return a.length === positive(other).length && a.every(([k, c]) => other.counts.get(k) === c);
+    if (this.counts.size !== other.counts.size) return false;
+    for (const [k, c] of this.counts) if (other.counts.get(k) !== c) return false;
+    return true;
   }
 }
 
@@ -95,12 +99,58 @@ function normalise(warning: string): string {
   return warning.replace(/note \d+/g, 'note #');
 }
 
-/** `implicit="yes"` per measure index of the first part, which the `Score` does not carry. */
-export function implicitMeasures(xml: string): boolean[] {
-  const doc = timewiseToPartwise(parseXml(unpackMusicXml(xml)));
+/** The partwise document, read the way `parseMusicXml` reads it. */
+function partwise(xml: string): Document {
+  return timewiseToPartwise(parseXml(unpackMusicXml(xml)));
+}
+
+function implicitOf(doc: Document): boolean[] {
   const part = childElements(doc.documentElement!, 'part')[0];
   if (!part) return [];
   return childElements(part, 'measure').map((m) => m.getAttribute('implicit') === 'yes');
+}
+
+/** `implicit="yes"` per measure index of the first part, which the `Score` does not carry. */
+export function implicitMeasures(xml: string): boolean[] {
+  return implicitOf(partwise(xml));
+}
+
+/**
+ * Every `<rest>` note as `(rest, part, measure, staff, voice, length in quarters)`: the rests
+ * check.py's non-melody `Counter` holds, which the engine's `Score` does not. Measure starts are
+ * compared separately, so the measure index stands in for the onset.
+ */
+function restKeys(doc: Document): string[] {
+  const out: string[] = [];
+  childElements(doc.documentElement!, 'part').forEach((part, pi) => {
+    let divisions = 1;
+    childElements(part, 'measure').forEach((measure, mi) => {
+      for (const el of childElements(measure)) {
+        if (el.tagName === 'attributes') {
+          const d = Number(childText(el, 'divisions'));
+          if (Number.isSafeInteger(d) && d > 0) divisions = d;
+        }
+        if (el.tagName !== 'note' || childElements(el, 'rest').length === 0) continue;
+        const text = childText(el, 'duration');
+        const dur = Number(text);
+        const length =
+          text !== undefined && Number.isSafeInteger(dur) ? frac(dur, divisions) : `${text}`;
+        const staff = childText(el, 'staff') || '1';
+        const voice = childText(el, 'voice') || '1';
+        out.push(`(rest, part ${pi}, measure ${mi}, ${staff}, ${voice}, ${length})`);
+      }
+    });
+  });
+  return out;
+}
+
+/** An inserted note's onset or length, read as Python's `Fraction` reads the record. */
+function recordValue(s: string): Frac {
+  try {
+    return parsePyFraction(s);
+  } catch {
+    throw new Error(`inserted note: not a number: ${JSON.stringify(s)}`);
+  }
 }
 
 /**
@@ -168,10 +218,12 @@ export function checkEmbellishment(
   const barsB = bars(b);
   if (barsA.length !== barsB.length || barsA.some((x, i) => x !== barsB[i]))
     problems.push('measure starts or lengths differ');
-  const plainWarnings = new Set(ra.warnings.map(normalise));
-  const newProblems = [...new Set(rb.warnings.map(normalise))]
-    .filter((w) => !plainWarnings.has(w))
-    .sort();
+  // A multiset: after normalising, a second dropped duplicate reads like the first one.
+  const newProblems = [
+    ...new Multiset(rb.warnings.map(normalise))
+      .minus(new Multiset(ra.warnings.map(normalise)))
+      .counts.keys(),
+  ].sort();
   if (newProblems.length)
     problems.push(
       `new reader problems: ${list(
@@ -186,9 +238,15 @@ export function checkEmbellishment(
     `(${n.onset}, ${n.midi}, ${n.dur}, ${n.staff}, ${n.voice}, ${n.isGrace ? 'True' : 'False'})`;
   const notesA = notesOf(a);
   const notesB = notesOf(b);
+  const docA = partwise(plainXml);
+  const docB = partwise(embellishedXml);
+  const recs = inserted.map((i) => {
+    const onset = recordValue(i.onset);
+    return { onset, end: onset.add(recordValue(i.length)), key: `(${onset}, ${i.midi})` };
+  });
 
-  const restA = new Multiset(notesA.filter((n) => !isMelody(n)).map(key));
-  const restB = new Multiset(notesB.filter((n) => !isMelody(n)).map(key));
+  const restA = new Multiset([...notesA.filter((n) => !isMelody(n)).map(key), ...restKeys(docA)]);
+  const restB = new Multiset([...notesB.filter((n) => !isMelody(n)).map(key), ...restKeys(docB)]);
   if (!restA.equals(restB)) {
     const diff = [
       ...restA.minus(restB).elements().slice(0, 2),
@@ -202,21 +260,22 @@ export function checkEmbellishment(
   const missing = melA.map(struckKey).filter((k) => !struckB.has(k));
   if (missing.length) problems.push(`plain melody notes lost: ${list(missing, 3)}`);
   const extra = new Multiset(melB.map(struckKey)).minus(new Multiset(melA.map(struckKey)));
-  const recorded = new Multiset(inserted.map((i) => `(${parsePyFraction(i.onset)}, ${i.midi})`));
+  const recorded = new Multiset(recs.map((r) => r.key));
   if (!extra.equals(recorded))
     problems.push(
       `unrecorded or missing insertions: ${list(extra.minus(recorded).elements(), 3)}` +
         ` / ${list(recorded.minus(extra).elements(), 3)}`,
     );
 
-  const strong = strongPositions(a, implicitMeasures(plainXml));
+  const strong = strongPositions(a, implicitOf(docA));
   const strongSet = new Set(strong.map((s) => s.toString()));
-  const recordedOnsets = new Multiset(inserted.map((i) => parsePyFraction(i.onset).toString()));
-  for (const o of recordedOnsets.elements())
+  // `recorded.elements()` order: by (onset, midi), first seen first.
+  const onsetOf = new Map(recs.map((r) => [r.key, r.onset.toString()]));
+  for (const k of recorded.elements()) {
+    const o = onsetOf.get(k)!;
     if (strongSet.has(o)) problems.push(`an inserted note starts on a strong position (${o})`);
-  for (const i of inserted) {
-    const start = parsePyFraction(i.onset);
-    const end = start.add(parsePyFraction(i.length));
+  }
+  for (const { onset: start, end } of recs) {
     if (strong.some((s) => start.lt(s) && s.lt(end)))
       problems.push(`an inserted note sounds through a strong position (${start} to ${end})`);
   }

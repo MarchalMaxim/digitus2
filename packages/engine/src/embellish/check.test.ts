@@ -222,9 +222,97 @@ describe('checkEmbellishment', () => {
     const res = embellishMusicXml(plain);
     expect(res.inserted).toHaveLength(1);
     const after = parseMusicXml(res.xml).warnings;
-    expect(after).not.toEqual(before);
+    // Compared raw, the embellished file would have a warning the plain one lacks.
+    expect(after.some((w) => !before.includes(w))).toBe(true);
     const rep = check(plain, res);
     expect(rep.problems).toEqual([]);
     expect(rep.ok).toBe(true);
+  });
+
+  it('refuses a second identical duplicate in a piece that already has one', () => {
+    const plain = fixtureScore(
+      [
+        [
+          ['C4', 1],
+          ['E4', 1],
+          ['D4', 2],
+        ],
+        [['C4', 4]],
+      ],
+      { lh: [[['C3', 4]], [[['C3', 'C3'], 4]]] },
+    );
+    const res = embellishMusicXml(plain);
+    expect(res.inserted).toHaveLength(1);
+    // A second C3 struck with bar 1's C3: the reader drops it, with the same normalised warning.
+    const at = res.xml.indexOf('<note><pitch><step>C</step><octave>3</octave>');
+    const end = res.xml.indexOf('</note>', at) + '</note>'.length;
+    const copy = res.xml.slice(at, end).replace('<note>', '<note><chord/>');
+    const mutated = res.xml.slice(0, end) + copy + res.xml.slice(end);
+    const rep = checkEmbellishment(plain, mutated, res.inserted, '1');
+    expect(rep.ok).toBe(false);
+    expect(rep.problems[0]).toMatch(/^new reader problems: .*duplicate of note #/);
+  });
+
+  it('refuses a recorded note written into a melody rest', () => {
+    const plain = fixtureScore([
+      [
+        ['C4', 1],
+        ['r', 1],
+        ['E4', 2],
+      ],
+      [['C4', 4]],
+    ]);
+    const filled = fixtureScore([
+      [
+        ['C4', 1],
+        ['D4', 1],
+        ['E4', 2],
+      ],
+      [['C4', 4]],
+    ]);
+    const rep = checkEmbellishment(plain, filled, [{ onset: '1', midi: 62, length: '1' }], '1');
+    expect(rep.ok).toBe(false);
+    expect(rep.problems.some((p) => p.startsWith('non-melody notes changed'))).toBe(true);
+  });
+
+  it('refuses a rest split in two', () => {
+    const bars: Bar[] = [
+      [
+        ['C4', 1],
+        ['E4', 1],
+        ['D4', 2],
+      ],
+      [['C4', 4]],
+    ];
+    const plain = fixtureScore(bars, {
+      lh: [
+        [
+          ['r', 2],
+          ['C3', 2],
+        ],
+        [['C3', 4]],
+      ],
+    });
+    const split = fixtureScore(bars, {
+      lh: [
+        [
+          ['r', 1],
+          ['r', 1],
+          ['C3', 2],
+        ],
+        [['C3', 4]],
+      ],
+    });
+    expect(checkEmbellishment(plain, plain, [], '1').ok).toBe(true);
+    const rep = checkEmbellishment(plain, split, [], '1');
+    expect(rep.ok).toBe(false);
+    expect(rep.problems.some((p) => p.startsWith('non-melody notes changed'))).toBe(true);
+  });
+
+  it('names the bad record when an inserted length is not a number', () => {
+    const plain = fixtureScore([CEEC, [['C4', 4]]]);
+    expect(() =>
+      checkEmbellishment(plain, plain, [{ onset: '1', midi: 62, length: 'x' }], '1'),
+    ).toThrow(/^inserted note: not a number: "x"/);
   });
 });

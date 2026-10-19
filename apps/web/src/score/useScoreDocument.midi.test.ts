@@ -1,11 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
-import type { EngineClient } from '../engine/client.js';
-import { handle } from '../engine/handlers.js';
-import { sourceKind } from '../engine/protocol.js';
-import type { ScoreRenderer } from './render/renderer.js';
+import { fakeRenderer, inlineEngine } from './testing/services.js';
 import { useScoreDocument } from './useScoreDocument.js';
 
 // Under happy-dom, Vite's asset plugin rewrites a literal `new URL('…', import.meta.url)` into
@@ -14,45 +11,6 @@ const TWINKLE_MID = '../../fixtures/twinkle.mid';
 const SHORT_PIANO = '../../fixtures/short-piano.musicxml';
 const twinkle = new Uint8Array(readFileSync(new URL(TWINKLE_MID, import.meta.url)));
 const shortPiano = new Uint8Array(readFileSync(new URL(SHORT_PIANO, import.meta.url)));
-
-function inlineEngine(): EngineClient & { splits: Array<number | undefined> } {
-  let id = 0;
-  const splits: Array<number | undefined> = [];
-  const run = (req: Parameters<typeof handle>[0]) => {
-    const r = handle(req);
-    return r.ok ? Promise.resolve(r) : Promise.reject(new Error(r.error));
-  };
-  return {
-    splits,
-    load: (input, source, opts) => {
-      splits.push(opts?.splitMidi);
-      return run({
-        id: ++id,
-        type: 'load',
-        kind: sourceKind(source),
-        input,
-        source,
-        ...(opts?.splitMidi !== undefined ? { splitMidi: opts.splitMidi } : {}),
-      }).then((r) => r as never);
-    },
-    solve: (score, profile, pins) =>
-      run({ id: ++id, type: 'solve', score, profile, ...(pins ? { pins } : {}) }).then(
-        (r) => r as never,
-      ),
-    fingeredXml: (xml, score, assignment) =>
-      run({ id: ++id, type: 'fingeredXml', xml, score, assignment }).then(
-        (r) => (r as { xml: string }).xml,
-      ),
-    dispose: () => {},
-  };
-}
-function fakeRenderer(): ScoreRenderer {
-  return {
-    render: vi.fn(async () => ({ pages: ['<svg/>'], ms: 1 })),
-    warmUp: () => {},
-    dispose: () => {},
-  };
-}
 
 beforeEach(() =>
   useAppStore.setState({
@@ -85,7 +43,7 @@ describe('useScoreDocument with a MIDI file', () => {
     act(() => result.current.setSplitMidi(null));
     await waitFor(() => expect(result.current.midiInfo?.splitMidi).toBeNull());
     await waitFor(() => expect(result.current.status).toBe('ready'));
-    expect(engine.splits).toEqual([undefined, 67, undefined]);
+    expect(engine.loads.map((o) => o?.splitMidi)).toEqual([undefined, 67, undefined]);
   });
   it('keeps the previous import on screen while a new hand split is imported', async () => {
     const { result } = renderHook(() =>
@@ -133,9 +91,9 @@ describe('useScoreDocument with a MIDI file', () => {
       { initialProps: { bytes: twinkle } },
     );
     await waitFor(() => expect(result.current.status).toBe('ready'));
-    expect(engine.splits).toHaveLength(1);
+    expect(engine.loads).toHaveLength(1);
     rerender({ bytes: other });
-    await waitFor(() => expect(engine.splits).toHaveLength(2));
+    await waitFor(() => expect(engine.loads).toHaveLength(2));
     await waitFor(() => expect(result.current.status).toBe('ready'));
   });
 });

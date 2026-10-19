@@ -46,6 +46,11 @@ function readyDoc(over: Partial<ScoreDocument> = {}): ScoreDocument {
     digitChanges: null,
     midiInfo: null,
     splitMidi: null,
+    embellish: 'none',
+    embellished: false,
+    shownVersion: 'plain',
+    plain: null,
+    setEmbellished: () => {},
     ...over,
   };
 }

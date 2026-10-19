@@ -2,68 +2,15 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
-import { handle } from '../engine/handlers.js';
 import type { Assignment, Score } from '@digitus2/engine';
-import type { EngineClient } from '../engine/client.js';
-import { sourceKind } from '../engine/protocol.js';
 import { SupersededError, type ScoreRenderer } from './render/renderer.js';
+import { fakeRenderer, inlineEngine } from './testing/services.js';
 import { bucket, diffDigits, rekeyByIndex, useScoreDocument } from './useScoreDocument.js';
 
 // Under happy-dom, Vite's asset plugin rewrites a literal `new URL('…', import.meta.url)` into
 // an http URL; a path held in a variable is left alone and stays a file URL.
 const FIXTURE = '../../fixtures/short-piano.musicxml';
 const bytes = new Uint8Array(readFileSync(new URL(FIXTURE, import.meta.url)));
-
-/** An engine client that runs the real handlers synchronously inside promises. */
-function inlineEngine(): EngineClient & { calls: string[] } {
-  let id = 0;
-  const calls: string[] = [];
-  const run = (req: Parameters<typeof handle>[0]) => {
-    calls.push(req.type);
-    const r = handle(req);
-    return r.ok ? Promise.resolve(r) : Promise.reject(new Error(r.error));
-  };
-  return {
-    calls,
-    load: (input, source, opts) =>
-      run({
-        id: ++id,
-        type: 'load',
-        kind: sourceKind(source),
-        input,
-        source,
-        ...(opts?.splitMidi !== undefined ? { splitMidi: opts.splitMidi } : {}),
-      }).then((r) => r as never),
-    solve: (score, profile, pins) =>
-      run({ id: ++id, type: 'solve', score, profile, ...(pins ? { pins } : {}) }).then(
-        (r) => r as never,
-      ),
-    fingeredXml: (xml, score, assignment) =>
-      run({ id: ++id, type: 'fingeredXml', xml, score, assignment }).then(
-        (r) => (r as { xml: string }).xml,
-      ),
-    dispose: () => {},
-  };
-}
-function fakeRenderer(): ScoreRenderer & { renders: number; xmls: string[] } {
-  const r = {
-    renders: 0,
-    xmls: [] as string[],
-    render: vi.fn(async ({ xml, widthPx }: { xml: string; widthPx: number }) => {
-      r.renders++;
-      r.xmls.push(xml);
-      return {
-        pages: [
-          `<svg data-w="${widthPx}" data-fings="${(xml.match(/<fingering/g) ?? []).length}"/>`,
-        ],
-        ms: 1,
-      };
-    }),
-    warmUp: () => {},
-    dispose: () => {},
-  };
-  return r;
-}
 
 beforeEach(() =>
   useAppStore.setState({
@@ -109,6 +56,8 @@ describe('useScoreDocument', () => {
       useScoreDocument({ kind: 'file', name: 'x.musicxml', bytes }, 800, { engine, renderer }),
     );
     await waitFor(() => expect(result.current.status).toBe('ready'));
+    // A dropped file is tried for "Add notes between"; this one gets no offer, and no layout.
+    await waitFor(() => expect(result.current.embellish).toBe('none'));
     const before = engine.calls.filter((c) => c === 'solve').length;
     act(() => useAppStore.getState().setSettings({ handSize: 'child' }));
     await waitFor(() => expect(engine.calls.filter((c) => c === 'solve').length).toBe(before + 1));
@@ -145,6 +94,7 @@ describe('useScoreDocument', () => {
       { initialProps: { w: 800 } },
     );
     await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.embellish).toBe('none'));
     rerender({ w: 810 }); // same bucket
     rerender({ w: 500 }); // new bucket
     // The fake renderer counts a call before its result reaches the state, so wait for both:
@@ -164,17 +114,25 @@ describe('useScoreDocument', () => {
       { initialProps: { w: 800 } },
     );
     await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.embellish).toBe('none'));
     const writes = () => engine.calls.filter((c) => c === 'fingeredXml').length;
     expect(writes()).toBe(1);
     const firstXml = renderer.xmls[0];
     rerender({ w: 500 });
-    await waitFor(() => expect(renderer.renders).toBe(2));
+    await waitFor(() => expect(result.current.pages[0]).toContain('data-w="500"'));
+    expect(renderer.renders).toBe(2);
     expect(writes()).toBe(1);
     expect(renderer.xmls[1]).toBe(firstXml);
-    // A different fingering is written once, and switching back reuses the first text.
+    const pages500 = result.current.pages;
+    // A different fingering is written once. Switching back at the same width takes the pages
+    // laid out before, and a new width lays the first text out again.
     act(() => useAppStore.getState().setSettings({ showEditorial: true }));
     await waitFor(() => expect(renderer.renders).toBe(3));
+    await waitFor(() => expect(result.current.assignment).toBe(result.current.editorial));
     act(() => useAppStore.getState().setSettings({ showEditorial: false }));
+    expect(result.current.pages).toBe(pages500);
+    expect(renderer.renders).toBe(3);
+    rerender({ w: 1200 });
     await waitFor(() => expect(renderer.renders).toBe(4));
     expect(writes()).toBe(2);
     expect(renderer.xmls[3]).toBe(firstXml);

@@ -7,6 +7,8 @@ import { sourceKind } from './protocol.js';
 const bytes = new Uint8Array(
   readFileSync(new URL('../../fixtures/short-piano.musicxml', import.meta.url)),
 );
+const scoreText = (name: string) =>
+  readFileSync(new URL(`../../../../content/scores/${name}.musicxml`, import.meta.url), 'utf8');
 
 function load() {
   const r = handle({
@@ -201,5 +203,33 @@ describe('engine handlers: MIDI', () => {
     expect(sourceKind('a.midi')).toBe('midi');
     expect(sourceKind('a.musicxml')).toBe('musicxml');
     expect(sourceKind('a.mxl')).toBe('musicxml');
+  });
+  it('embellish offers Twinkle with six figures and four fingerings', () => {
+    const r = handle({ id: 1, type: 'embellish', xml: scoreText('twinkle-twinkle-little-star') });
+    if (!r.ok || r.type !== 'embellish') throw new Error('embellish failed');
+    expect(r.reason).toBeNull();
+    expect(r.offered!.figures).toBe(6);
+    expect(r.offered!.score.notes).toHaveLength(70);
+    expect(Object.keys(r.offered!.assignments).sort()).toEqual([
+      'child',
+      'large',
+      'medium',
+      'small',
+    ]);
+    // Only the five fields of the protocol cross to the main thread.
+    expect(Object.keys(r.offered!).sort()).toEqual([
+      'assignments',
+      'editorial',
+      'figures',
+      'score',
+      'xml',
+    ]);
+    expect(typeof r.ms).toBe('number');
+  });
+  it('embellish says why Mary gets nothing', () => {
+    const r = handle({ id: 2, type: 'embellish', xml: scoreText('mary-had-a-little-lamb') });
+    if (!r.ok || r.type !== 'embellish') throw new Error('embellish failed');
+    expect(r.offered).toBeNull();
+    expect(r.reason).toMatch(/2 figures/);
   });
 });

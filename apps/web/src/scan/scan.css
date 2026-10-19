@@ -127,8 +127,8 @@
   width: 10rem;
 }
 
-/* The scan bar (ScanProgress.tsx), under the status line: ink on paper, never red, since the
-   loader above it is the screen's one red. It exists only while a page is recognised. */
+/* The scan bar (ScanProgress.tsx), under the status line: ink on paper, never the accent: the
+   loader above it is the screen's one accent. It exists only while a page is recognised. */
 .scan-progress {
   max-width: 24rem;
 }

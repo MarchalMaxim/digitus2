@@ -55,7 +55,7 @@ Name one or more steps: `pnpm verify unit`, `pnpm verify build bundle`, `pnpm ve
 | `unit` (textbook)   | Textbook oracle (672 entries)                                    | note accuracy below `textbook`, solved with the solver's default weights (`parncutt`)                                                                                                                  |
 | `embellish`         | the library's level 1 and 2 pieces (259)                         | offered below `embellish.offeredMin` (170)                                                                                                                                                             |
 
-A floor is the milestone's measurement minus 0.5, rounded down, and is raised in the same commit as the improvement, with a row in `benchmarks/history.md`. The Python scorer in `research/fingering_eval/` matches the official PIG evaluator, and the TypeScript metrics are checked against it.
+A floor is the milestone's measurement minus 0.5, rounded down (except `embellish.offeredMin`, which is the measured count, because the run is deterministic), and is raised in the same commit as the improvement, with a row in `benchmarks/history.md`. The Python scorer in `research/fingering_eval/` matches the official PIG evaluator, and the TypeScript metrics are checked against it.
 
 ### Scorecards
 

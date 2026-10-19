@@ -24,11 +24,11 @@ export const transport = {
   loopTo: 'to',
   /** The Practice switch that plays and shows the piece with passing and neighbour notes added (docs/app.md). */
   addNotes: 'Add notes between',
-  /** Shown when the loop's first bar is after its last. */
   /** One line in the Practice panel: how to move through the piece (T13). With a mouse and keys. */
   seekHelp: 'Click a bar to go there. ← and → move one bar.',
   /** The same where fingers do the pointing (a phone, a tablet). */
   seekHelpTouch: 'Tap a bar to go there.',
+  /** Shown when the loop's first bar is after its last. */
   loopReversed: 'The loop needs "from" before "to".',
   samplesFailed: 'The piano sounds could not be loaded. Check the connection and press Play again.',
   playerFailed: 'The player could not be loaded. Check the connection and press Play again.',

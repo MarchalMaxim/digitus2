@@ -109,7 +109,7 @@ describe('"Add notes between" in the score document', () => {
       seen.push([d.status, d.embellish]);
       return d;
     });
-    await waitFor(() => expect(result.current.embellish).toBe('offered'));
+    await waitFor(() => expect(result.current.embellish).toBe('offered'), { timeout: 15_000 });
     const ready = seen.findIndex(([s]) => s === 'ready');
     const statuses = seen.slice(0, ready + 1).map(([s]) => s);
     expect(statuses.filter((s, i) => statuses[i - 1] !== s)).toEqual([

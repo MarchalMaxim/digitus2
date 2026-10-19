@@ -275,6 +275,12 @@ test.describe('the Practice panel on a phone', () => {
   }) => {
     await openTwinkle(page);
     await openPractice(page);
+    // The last row, "Add notes between" (offered on Twinkle only), lies inside the window.
+    const addNotes = page.getByRole('checkbox', { name: 'Add notes between' });
+    await addNotes.scrollIntoViewIfNeeded();
+    const addBox = (await addNotes.boundingBox())!;
+    expect(addBox.x, JSON.stringify(addBox)).toBeGreaterThanOrEqual(0);
+    expect(addBox.x + addBox.width, JSON.stringify(addBox)).toBeLessThanOrEqual(360);
     // Not a loop yet (from is after to), so nothing but the inputs holds it.
     await setLoopBars(page, '6', '2');
     await page.setViewportSize({ width: 600, height: 740 });

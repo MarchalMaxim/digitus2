@@ -12,7 +12,7 @@ Pure TypeScript piano-fingering engine: score model, MusicXML and PIG readers an
 - `pigMetrics(pred, golds, hands?, goldHands?)` and `metricsForScores(pred, golds)` — general, highest, soft and recombination match rates.
 - `handEvents(score, hand)` — notes grouped into simultaneous events per hand (the solver's input).
 - `embellishMusicXml(text, { density?, dropBars? })` → `{ xml, inserted, refusal, skipped, melodyVoice }` — the light embellishment of a partwise piano score: passing notes that fill a third and an upper neighbour a whole step above a repeated note, at most one figure per bar and never in neighbouring bars. A refused piece comes back unchanged with the reason in `refusal`.
-- `guardEmbellishment(plainXml, opts?)` → `{ offered, reason }` — what the app's `Add notes between` switch runs: the embellisher, the independent check, then a solve and a beginner lint at the large, medium, small and child hand sizes. `offered` holds the embellished score with a fingering for every hand size, or is null with the `reason`.
+- `guardEmbellishment(plainXml, opts?)` → `{ offered, reason, kind }` — what the app's `Add notes between` switch runs: the embellisher, the independent check, then a solve and a beginner lint at the large, medium, small and child hand sizes. `offered` holds the embellished score with a fingering for every hand size, or is null with the `reason` and its `kind`.
 
 ## CLI
 

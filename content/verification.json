@@ -273565,6 +273565,107 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 56,
+      "measureElements": 56,
+      "firstMeasure": "1",
+      "lastMeasure": "56",
+      "notes": 916,
+      "graceNotes": 14,
+      "fingerings": 0,
+      "writtenQuarters": 224.0,
+      "unfoldedQuarters": 224.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-1",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 503548,
+      "pitchRange": [
+        37,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 69.9,
+        "2": 55.7
+      },
+      "approxDurationSec": 168,
+      "music21": {
+        "parts": 2,
+        "measures": 56,
+        "noteOrChord": 730,
+        "highestTime": 224.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.964,
+        "shifts": 51.417,
+        "span": 19.0,
+        "chord": 0.44,
+        "fifths": 1.0,
+        "accidentals": 13.789,
+        "seconds": 168.0,
+        "leaps": 32.906
+      },
+      "score": 10.568,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 846,
+          "errors": 9,
+          "warnings": 202,
+          "counts": {
+            "L03": 2,
+            "L05": 7,
+            "L06": 7,
+            "L07": 96,
+            "L08": 24,
+            "L09": 15,
+            "L13": 20,
+            "L14": 60
+          }
+        },
+        "large": {
+          "notes": 846,
+          "errors": 4,
+          "warnings": 202,
+          "counts": {
+            "L05": 4,
+            "L06": 4,
+            "L07": 92,
+            "L08": 24,
+            "L09": 15,
+            "L13": 18,
+            "L14": 67
+          }
+        }
+      },
+      "scoreSha256": "8685d982842ab1d177a327267db9b64569dde1703144b22058ef0caab78c8c21",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "pdmx-overture-to-carmen-for-piano-solo-by-geo-ee7748e4": {
     "ok": true,
     "conversionWarnings": [],
@@ -275218,6 +275319,209 @@
       },
       "scoreSha256": "cbe20a8835b0c6b963a18591ad670c155f3dc3e8634868e46572db279ed70e44",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 55,
+      "measureElements": 56,
+      "firstMeasure": "0",
+      "lastMeasure": "55",
+      "notes": 1202,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 211.0,
+      "unfoldedQuarters": 331.0,
+      "tempoQpm": 56.0,
+      "key": [
+        "2",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 600124,
+      "pitchRange": [
+        23,
+        85
+      ],
+      "staffAvgPitch": {
+        "1": 62.4,
+        "2": 40.3
+      },
+      "approxDurationSec": 355,
+      "music21": {
+        "parts": 2,
+        "measures": 56,
+        "noteOrChord": 641,
+        "highestTime": 211.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.087,
+        "shifts": 80.558,
+        "span": 27.0,
+        "chord": 0.917,
+        "fifths": 2.0,
+        "accidentals": 10.174,
+        "seconds": 226.071,
+        "leaps": 2.222
+      },
+      "score": 13.097,
+      "level": 5
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1149,
+          "errors": 54,
+          "warnings": 233,
+          "counts": {
+            "L03": 2,
+            "L05": 52,
+            "L07": 98,
+            "L08": 104,
+            "L09": 25,
+            "L10": 1,
+            "L13": 3,
+            "L14": 5
+          }
+        },
+        "large": {
+          "notes": 1149,
+          "errors": 52,
+          "warnings": 222,
+          "counts": {
+            "L05": 52,
+            "L07": 99,
+            "L08": 96,
+            "L09": 22,
+            "L10": 1,
+            "L13": 3,
+            "L14": 4
+          }
+        }
+      },
+      "scoreSha256": "2ff06add975b9b6fe2a0060c3f9ec362c110565c7ab2c6711adbd3c642a16aed",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 53,
+      "measureElements": 53,
+      "firstMeasure": "1",
+      "lastMeasure": "53",
+      "notes": 1169,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 210.0,
+      "unfoldedQuarters": 210.0,
+      "tempoQpm": 54.0,
+      "key": [
+        "-5",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 700730,
+      "pitchRange": [
+        25,
+        83
+      ],
+      "staffAvgPitch": {
+        "2": 43.6,
+        "1": 64.6
+      },
+      "approxDurationSec": 233,
+      "music21": {
+        "parts": 2,
+        "measures": 53,
+        "noteOrChord": 933,
+        "highestTime": 210.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 4
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.783,
+        "shifts": 47.004,
+        "span": 36.0,
+        "chord": 0.844,
+        "fifths": 5.0,
+        "accidentals": 10.125,
+        "seconds": 233.333,
+        "leaps": 1.266
+      },
+      "score": 12.648,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1101,
+          "errors": 41,
+          "warnings": 323,
+          "counts": {
+            "L03": 1,
+            "L05": 40,
+            "L06": 1,
+            "L07": 120,
+            "L08": 166,
+            "L09": 32,
+            "L13": 5,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 1101,
+          "errors": 40,
+          "warnings": 320,
+          "counts": {
+            "L03": 1,
+            "L05": 39,
+            "L06": 1,
+            "L07": 189,
+            "L08": 95,
+            "L09": 30,
+            "L13": 5,
+            "L14": 5
+          }
+        }
+      },
+      "scoreSha256": "ab2d99571808f1d8ab71c095f94f17b52256c68f65f143d078516dff968f21b4",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -276938,6 +277242,114 @@
       },
       "scoreSha256": "3a24dc47ba697f0c7233d69f382a8db5a95d6b972ba6d1a5c8012511e82c9817",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 67,
+      "measureElements": 67,
+      "firstMeasure": "1",
+      "lastMeasure": "67",
+      "notes": 2893,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 268.0,
+      "unfoldedQuarters": 268.0,
+      "tempoQpm": 104.0,
+      "key": [
+        "1",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 1714789,
+      "pitchRange": [
+        28,
+        98
+      ],
+      "staffAvgPitch": {
+        "2": 53.8,
+        "1": 71.0
+      },
+      "approxDurationSec": 155,
+      "music21": {
+        "parts": 2,
+        "measures": 67,
+        "noteOrChord": 2508,
+        "highestTime": 268.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 8
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 18.698,
+        "shifts": 34.434,
+        "span": 16.0,
+        "chord": 0.306,
+        "fifths": 1.0,
+        "accidentals": 16.672,
+        "seconds": 154.615,
+        "leaps": 4.397
+      },
+      "score": 10.035,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 2768,
+          "errors": 123,
+          "warnings": 521,
+          "counts": {
+            "L03": 29,
+            "L05": 94,
+            "L06": 6,
+            "L07": 252,
+            "L08": 45,
+            "L09": 24,
+            "L10": 2,
+            "L11": 100,
+            "L12": 2,
+            "L13": 3,
+            "L14": 90
+          }
+        },
+        "large": {
+          "notes": 2768,
+          "errors": 110,
+          "warnings": 523,
+          "counts": {
+            "L03": 17,
+            "L05": 93,
+            "L06": 17,
+            "L07": 263,
+            "L08": 42,
+            "L09": 26,
+            "L10": 2,
+            "L11": 90,
+            "L12": 2,
+            "L13": 3,
+            "L14": 81
+          }
+        }
+      },
+      "scoreSha256": "1084aea4b643c740717c52d4c35ef2b0f44d317e78e0e3989e4a25fda573dd9f",
+      "engineSrcSha256": "3abd31b28f4ffbb269bd0ca92c5a6738d7520cf05d74f2a99ed1cfc7d49361f9",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -339499,6 +339911,52 @@
       ]
     },
     {
+      "piece": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+      "bar": "12",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "D4"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+      "bar": "21",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "A3",
+        "E4"
+      ],
+      "span": 19,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+      "bar": "45",
+      "hand": "L",
+      "quarter": 2.0,
+      "pitches": [
+        "A2",
+        "E3",
+        "D4"
+      ],
+      "span": 17,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
       "piece": "pdmx-passionate-impromptu-mussorgsky-b995e65e",
       "bar": "18",
       "hand": "L",
@@ -340764,6 +341222,154 @@
       "span": 22,
       "reasons": [
         "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "11",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "G3",
+        "C#4",
+        "G4",
+        "B4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "26",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "B1",
+        "B2",
+        "F#3",
+        "A3",
+        "D4"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "43",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "G3",
+        "C#4",
+        "G4",
+        "B4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "46",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "E2",
+        "E3",
+        "B3",
+        "D4",
+        "G4"
+      ],
+      "span": 27,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "48",
+      "hand": "L",
+      "quarter": 3.0,
+      "pitches": [
+        "F#2",
+        "C#3",
+        "A#3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+      "bar": "49",
+      "hand": "R",
+      "quarter": 1.0,
+      "pitches": [
+        "C#4",
+        "D4",
+        "A4",
+        "C#5"
+      ],
+      "span": 12,
+      "reasons": [
+        "fingers"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+      "bar": "29",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "F#3",
+        "A#3",
+        "E4",
+        "A#4",
+        "A#5"
+      ],
+      "span": 28,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+      "bar": "35",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "E1",
+        "E2",
+        "B2",
+        "G#3",
+        "E4"
+      ],
+      "span": 36,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+      "bar": "38",
+      "hand": "R",
+      "quarter": 0.0,
+      "pitches": [
+        "F3",
+        "G#3",
+        "C#4",
+        "F4",
+        "G#4"
+      ],
+      "span": 15,
+      "reasons": [
+        "fingers"
       ]
     },
     {
@@ -343553,6 +344159,36 @@
         "G#2",
         "F#3",
         "C4"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+      "bar": "41",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "G2",
+        "E3"
+      ],
+      "span": 16,
+      "reasons": [
+        "span"
+      ]
+    },
+    {
+      "piece": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+      "bar": "42",
+      "hand": "L",
+      "quarter": 0.0,
+      "pitches": [
+        "C2",
+        "G2",
+        "E3"
       ],
       "span": 16,
       "reasons": [

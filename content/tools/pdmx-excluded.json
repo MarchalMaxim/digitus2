@@ -52,6 +52,7 @@
   "pdmx-duck-tales-b0cf10b5": "no time signature",
   "pdmx-dynamite-f69b8944": "measure 5: voice 1 lasts 19/4 quarters, time signature allows 4",
   "pdmx-el-choclo-piano-df60c331": "measure 10: voice 1 lasts 11/4 quarters, time signature allows 2",
+  "pdmx-elegie-s-rachmaninoff-op-3-no-1-bdeb8b2d": "measure 83: voice 1 lasts 29 quarters, time signature allows 4",
   "pdmx-elisabeth-jacquet-de-la-guerre-suite-en-236d779a": "measure 1: voice 1 lasts 221/2 quarters, time signature allows 8",
   "pdmx-entropical-splatoon-2-56fa31c8": "measure 41: voice 1 lasts 6 quarters, time signature allows 4",
   "pdmx-entropy-ce5253b7": "measure 37: backup before measure start",
@@ -104,7 +105,10 @@
   "pdmx-last-solo-final-impromptu-3de3622d": "measure 100: backup before measure start",
   "pdmx-le-festin-piano-arr-kno-f710ca5a": "measure 73: voice 1 lasts 7/2 quarters, time signature allows 3",
   "pdmx-liebestr-ume-no-3-58bef41f": "measure 25: voice 1 lasts 15 quarters, time signature allows 6",
+  "pdmx-liszt-apparitions-no-3-fantasy-on-a-walt-32c0b3c2": "measure 13: voice 1 lasts 5 quarters, time signature allows 4",
+  "pdmx-liszt-b-n-diction-de-dieu-dans-la-solitu-da3dd548": "measure 334: voice 1 lasts 8 quarters, time signature allows 6",
   "pdmx-liszt-fantasy-on-themes-from-mozart-s-op-ddcd2d5e": "measure 156: backup before measure start",
+  "pdmx-liszt-god-save-the-queen-paraphrases-20232b33": "measure 77: backup before measure start",
   "pdmx-liszt-venezia-e-napoli-i-revised-version-80ed7702": "measure 71: voice 1 lasts 9/2 quarters, time signature allows 3",
   "pdmx-love-happens-255f24aa": "measure 6: overlapping notes in voice 1 at beat 4",
   "pdmx-luigi-cherubini-cours-de-contrepoint-et-121b1551": "measure numbers not unique",
@@ -150,6 +154,9 @@
   "pdmx-pomp-and-circumstance-march-no-3-in-c-mi-0b3d1cd2": "measure 52: backup before measure start",
   "pdmx-prelude-and-fugue-23-openwtc-4a4169c8": "measure numbers not unique",
   "pdmx-prison-break-theme-92953e3a": "measure 13: voice 1 lasts 6 quarters, time signature allows 4",
+  "pdmx-rachmaninoff-2nd-piano-concerto-3rd-move-14c085c7": "measure 23: voice 1 lasts 5 quarters, time signature allows 4",
+  "pdmx-rachmaninoff-moment-musical-no-1-in-bb-m-edd7b454": "measure 55: voice 1 lasts 16 quarters, time signature allows 7",
+  "pdmx-rachmaninoff-piano-sonata-no-2-op-36-iii-bb66559c": "measure 51: voice 1 lasts 7/2 quarters, time signature allows 3",
   "pdmx-renaissance-suite-iii-menuet-rameau-leop-cb4778b1": "measure 138: backup before measure start",
   "pdmx-resonance-soul-eater-opening-1-ee802146": "measure 148: overlapping notes in voice 1 at beat 3.5",
   "pdmx-richard-wagner-das-rheingold-transformat-c9463c7c": "measure 44: backup before measure start",
@@ -1607,6 +1614,9 @@
   "fd3f131f2d206c0fd3d1694dfea65dbe062d52e3094623fb95f367f57ffef79a": "review junk: Intro only, 60 notes, fragment of a song",
   "fd43eff65d235acae895b479a85b02a764ccafe36af06cc3b31f34aa1c3db68f": "review safety: Meme parody title riffing on Gangnam Style, ethnic joke",
   "fe5f86b016ebb1c02f916c59a2224ceb357dc25f6f302f3bf4fe04632618c040": "review junk: Placeholder title 'Sans nom' (untitled), unknown composer, unrated",
-  "feb1075f31943dcb418119787fef395b0fb7137b214ed91da12a93fe17fc2cc5": "review junk: Title 'Twinkle test' marks a test file"
+  "feb1075f31943dcb418119787fef395b0fb7137b214ed91da12a93fe17fc2cc5": "review junk: Title 'Twinkle test' marks a test file",
+  "55b69e2a1118f3dd8e945446cb84056139addb3a7fbbb70457a873816fc35114": "wrong composer: the score credits Carl Czerny, not Rachmaninoff (review, issue #80)",
+  "cba81da7481fce525087df728c2d6fa01ae55db00f25b8ded1231d7834cf4d7b": "wrong composer: the score credits Justinas Bernotas, not Liszt (review, issue #80)",
+  "ff2dfb5b5291256c55abec467dcdd0354a8db0e3252cb1e7ce6346cb24e81ef3": "attribution not verifiable: no credit in the score, and the title matches no work of Liszt (review, issue #80)"
  }
 }

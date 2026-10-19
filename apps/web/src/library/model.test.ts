@@ -115,8 +115,8 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
       'All 6 jazz, ragtime and modern pieces',
     );
   });
-  it('holds the library of the spec: 3,224 pieces, the counts of the spec table', () => {
-    expect(allPieces).toHaveLength(3224);
+  it('holds the library of the spec: 3,228 pieces, the counts of the spec table', () => {
+    expect(allPieces).toHaveLength(3228);
     const table = (tier: Tier) =>
       Object.fromEntries(shelves(allPieces, tier).shelves.map((s) => [s.id, s.count]));
     expect(table('easy')).toEqual({
@@ -145,13 +145,13 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
     });
     expect(table('challenging')).toEqual({
       songs: 382,
-      classical: 244,
+      classical: 248,
       folk: 1,
       baroque: 49,
       romantic: 23,
       jazz: 37,
     });
-    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([267, 1465, 756, 736]);
+    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([267, 1465, 756, 740]);
   });
   it('leaves out a shelf with no piece in the level', () => {
     const noJazz = pieces.filter((p) => shelfOfGenre(p.genre) !== 'jazz');

@@ -91999,6 +91999,39 @@
     }
   },
   {
+    "slug": "pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5",
+    "title": "October: Autumn Song from Tchaikovsky's The Seasons",
+    "composer": "P. Tschaikowsky Op. 37a No. 10",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 56,
+    "approxDurationSec": 168,
+    "timeSignature": "4/4",
+    "key": "F major",
+    "tempoBpm": 80,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 9 (medium) and 4 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-october-autumn-song-from-tchaikovsky-s-t-c38d49b5.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
     "slug": "pdmx-overture-to-carmen-for-piano-solo-by-geo-ee7748e4",
     "title": "Overture to Carmen for piano solo (By Georges Bizet)",
     "composer": "Georges Bizet",
@@ -92527,6 +92560,72 @@
     }
   },
   {
+    "slug": "pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b",
+    "title": "Rachmaninoff - Moment Musical No 3 in B Minor",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 55,
+    "approxDurationSec": 355,
+    "timeSignature": "4/4",
+    "key": "D major",
+    "tempoBpm": 56,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 6 slice(s) that no hand can strike as written and 54 (medium) and 52 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-rachmaninoff-moment-musical-no-3-in-b-mi-d5a1cb9b.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f",
+    "title": "Rachmaninoff - Moment Musical No 5 in Db Major",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 53,
+    "approxDurationSec": 233,
+    "timeSignature": "4/4",
+    "key": "Db major",
+    "tempoBpm": 54,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 3 slice(s) that no hand can strike as written and 41 (medium) and 40 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-rachmaninoff-moment-musical-no-5-in-db-m-7d3ee99f.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
     "slug": "pdmx-rachmaninoff-tude-tableaux-no-1-in-c-min-0df00b70",
     "title": "Rachmaninoff: Ètude-Tableaux No. 1 in C Minor",
     "composer": "Sergei Rachmaninoff",
@@ -93051,6 +93150,39 @@
     "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
     "files": {
       "score": "scores/pdmx-search-light-rag-85c186c6.musicxml.gz",
+      "fingered": null
+    }
+  },
+  {
+    "slug": "pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c",
+    "title": "Sergei Rachmaninoff: Moment Musicaux Op.16 No.4 in E minor",
+    "composer": "Sergei Rachmaninoff",
+    "composerDates": null,
+    "catalogue": null,
+    "year": null,
+    "level": 6,
+    "collection": "Advanced piano from the MuseScore archive",
+    "collectionId": "pdmx-advanced",
+    "genre": "classical",
+    "benchmarkSet": null,
+    "measures": 67,
+    "approxDurationSec": 155,
+    "timeSignature": "4/4",
+    "key": "G major",
+    "tempoBpm": 104,
+    "source": {
+      "name": "MuseScore, via the PDMX dataset",
+      "url": "https://zenodo.org/records/15571083",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "retrievedAt": "2026-10-13"
+    },
+    "arranger": null,
+    "hasEditorialFingering": false,
+    "excerpt": null,
+    "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, and, because the span and lint gates are relaxed for level 6, 2 slice(s) that no hand can strike as written and 123 (medium) and 110 (large) lint law errors in the engine's own fingering: the digits there are advice. Not reviewed by eye. Source fingerings: 0.",
+    "files": {
+      "score": "scores/pdmx-sergei-rachmaninoff-moment-musicaux-op-1-cbd8288c.musicxml.gz",
       "fingered": null
     }
   },

@@ -45,7 +45,11 @@ def review_set() -> list[dict]:
     """The candidates the fragment generator would consider, in its order."""
     gates = [json.loads(line) for line in (RAW / "gate.jsonl").open(encoding="utf-8")]
     candidates = {c["sha256"]: c for c in json.loads((RAW / "candidates.json").read_text(encoding="utf-8"))}
-    gates = [g for g in gates if g["sha256"] in candidates and pdmx_advanced.usable(g, candidates[g["sha256"]]["notes"])]
+    def usable(g: dict) -> bool:
+        cand = candidates[g["sha256"]]
+        return pdmx_advanced.usable(g, cand["notes"], requested=pdmx_advanced.requested(cand.get("composer")))
+
+    gates = [g for g in gates if g["sha256"] in candidates and usable(g)]
     gates.sort(key=lambda g: (-int(candidates[g["sha256"]].get("n_ratings") or 0),
                               -float(candidates[g["sha256"]].get("rating") or 0), g["sha256"]))
     excluded = json.loads(EXCLUDED.read_text(encoding="utf-8"))
@@ -60,7 +64,8 @@ def review_set() -> list[dict]:
         slug = f"pdmx-{fr.ascii_slug(title)}-{g['sha256'][:8]}"
         if slug in skip or g["sha256"] in skip or fr.BROKEN_TEXT.search(title) or not pdmx_select.grand_staff(cand):
             continue
-        advanced = bool(pdmx_advanced.advanced(g["level"], cand["notes"]))
+        req = pdmx_advanced.requested(cand.get("composer"))
+        advanced = bool(pdmx_advanced.advanced(g["level"], cand["notes"], requested=req))
         if not advanced:
             if ordinary >= REVIEW_LIMIT:
                 continue

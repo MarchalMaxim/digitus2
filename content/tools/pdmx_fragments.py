@@ -376,8 +376,9 @@ def main(argv=None) -> int:
                                    "reason": "failed the library's validation: " + (errors[0] if errors else "see verification")})
             continue
         gate = measured_gate(gate, slug, verification)
+        req = pdmx_advanced.requested(cand.get("composer"))  # the owner's scoped relaxation (issue #80)
         # A candidate that passed every gate, or a level-6 piece that passes the relaxed gates (pdmx_advanced.usable).
-        if not pdmx_advanced.usable(gate, cand["notes"]):
+        if not pdmx_advanced.usable(gate, cand["notes"], requested=req):
             counts["gates"] += 1
             continue
         if BROKEN_TEXT.search(title) or BROKEN_TEXT.search(cand.get("composer") or ""):
@@ -398,7 +399,7 @@ def main(argv=None) -> int:
         if licence not in ("publicdomain", "cc-zero"):
             rejected[lane].append({"slug": slug, "sha256": gate["sha256"], "title": title, "reason": f"licence {licence!r}"})
             continue
-        demands = pdmx_advanced.advanced(gate["level"], cand["notes"])
+        demands = pdmx_advanced.advanced(gate["level"], cand["notes"], requested=req)
         relaxed_gates = None if gate["ok"] else pdmx_advanced.relaxed_facts(gate)
         piece = piece_for(gate, cand, licence, demands, relaxed_gates)
         if songs:

@@ -35,9 +35,17 @@ ship pieces where every note breaks a law (the worst candidate: 1,028 law errors
 ceiling is RELAXED_LINT_PER_1000 law errors per 1,000 notes at each profile (ten times the engine's
 measured rate on real pieces, the benchmark floor of 3.92) and RELAXED_SPANS_PER_1000 unplayable
 slices per 1,000 notes. Set both to None to lift it.
+
+Scoped relaxation (issue #80, the owner's decision of 2026-10-19: "relax the ceiling", "loosen the advanced rule, but
+no more beginner songs"). For an archive piece credited to Liszt, Tchaikovsky, Rachmaninoff or Prokofiev
+(`requested()`, from the composer field), a proposal of 4 is advanced at any score, with sustained fast notes from
+REQUESTED_NPS_MIN a second, and the ceiling is REQUESTED_LINT_PER_1000 and REQUESTED_SPANS_PER_1000. A proposal of 3
+or below is never advanced. Every other composer keeps the rule and the ceiling above.
 """
 
 from __future__ import annotations
+
+import re
 
 RELAXED_LINT_PER_1000 = 40.0
 RELAXED_SPANS_PER_1000 = 20.0
@@ -48,17 +56,39 @@ NPS_MIN = 6.0
 SPAN_MIN = 12
 CHORD_MIN = 0.5
 
+# The owner's scoped relaxation (issue #80, 2026-10-19: "relax the ceiling", "loosen the advanced rule, but no more
+# beginner songs"). For the four composers the library was asked to grow, a piece at proposal 4 is advanced whatever
+# its score, with sustained fast notes from REQUESTED_NPS_MIN a second, under the looser ceiling below. A proposal of
+# 3 or below is never advanced. Every other composer keeps the rule and the ceiling above.
+REQUESTED_COMPOSERS = re.compile(r"liszt|tchaikovsk|tschaikowsk|rachmaninov|rachmaninoff|prokofi", re.I)
+REQUESTED_NPS_MIN = 4.0
+REQUESTED_LINT_PER_1000 = 60.0
+REQUESTED_SPANS_PER_1000 = 30.0
 
-def advanced(level: dict, notes: int) -> list[str]:
+
+def requested(composer: str | None) -> bool:
+    """True for a composer the owner's scoped relaxation covers (REQUESTED_COMPOSERS)."""
+    return bool(composer) and REQUESTED_COMPOSERS.search(composer) is not None
+
+
+def advanced(level: dict, notes: int, requested: bool = False) -> list[str]:
     """The technical demands that qualify a piece, or [] when it is not advanced.
 
-    `level` is the gate's level record {features, score, level}; `notes` the piece's note count."""
+    `level` is the gate's level record {features, score, level}; `notes` the piece's note count. `requested` is
+    the scoped relaxation for the four composers (`requested()`): proposal 4 at any score, and fast notes from
+    REQUESTED_NPS_MIN a second."""
     proposal, score, f = level["level"], level["score"], level["features"]
-    if not (proposal >= 5 or (proposal == 4 and score >= SCORE_FLOOR)):
-        return []
+    if requested:
+        if proposal < 4:
+            return []
+        nps_min = REQUESTED_NPS_MIN
+    else:
+        if not (proposal >= 5 or (proposal == 4 and score >= SCORE_FLOOR)):
+            return []
+        nps_min = NPS_MIN
     if f["seconds"] < MIN_SECONDS or notes < MIN_NOTES:
         return []
-    if f["nps"] < NPS_MIN or f["span"] < SPAN_MIN:
+    if f["nps"] < nps_min or f["span"] < SPAN_MIN:
         return []
     demands = [f"sustained fast notes ({f['nps']:.1f} a second)", f"a stretch of {int(f['span'])} semitones"]
     if f["chord"] >= CHORD_MIN:
@@ -87,13 +117,16 @@ def relaxed_facts(gate: dict) -> dict:
             "lint": {"medium": lint["medium"]["errors"], "large": lint["large"]["errors"]}}
 
 
-def within_ceiling(facts: dict, notes: int) -> bool:
+def within_ceiling(facts: dict, notes: int, requested: bool = False) -> bool:
     """The relaxed flags `facts` ({spans, lint: {medium, large}}, as relaxedGates records them) are within
-    the ceiling for a score of `notes` pitched notes. The Mutopia lane (mutopia_advanced.py) shares it."""
-    if RELAXED_LINT_PER_1000 is not None:
-        if max(facts["lint"].values()) * 1000 / notes > RELAXED_LINT_PER_1000:
+    the ceiling for a score of `notes` pitched notes. The Mutopia lane (mutopia_advanced.py) shares it; `requested`
+    selects the looser ceiling of the scoped relaxation."""
+    lint_max = REQUESTED_LINT_PER_1000 if requested else RELAXED_LINT_PER_1000
+    spans_max = REQUESTED_SPANS_PER_1000 if requested else RELAXED_SPANS_PER_1000
+    if lint_max is not None:
+        if max(facts["lint"].values()) * 1000 / notes > lint_max:
             return False
-    if RELAXED_SPANS_PER_1000 is not None and facts["spans"] * 1000 / notes > RELAXED_SPANS_PER_1000:
+    if spans_max is not None and facts["spans"] * 1000 / notes > spans_max:
         return False
     return True
 
@@ -104,15 +137,15 @@ def relaxed_sentence(facts: dict) -> str:
             f"and {facts['lint']['large']} (large) lint law errors in the engine's own fingering")
 
 
-def relaxed(gate: dict, notes: int) -> bool:
+def relaxed(gate: dict, notes: int, requested: bool = False) -> bool:
     """True when the piece meets the advanced rule, fails only the span or lint gate, and is within the ceiling."""
     if gate.get("ok") or not gate.get("level") or not gate.get("lint") or not _only_span_or_lint(gate):
         return False
-    if not advanced(gate["level"], notes):
+    if not advanced(gate["level"], notes, requested):
         return False
-    return within_ceiling(relaxed_facts(gate), notes)
+    return within_ceiling(relaxed_facts(gate), notes, requested)
 
 
-def usable(gate: dict, notes: int) -> bool:
+def usable(gate: dict, notes: int, requested: bool = False) -> bool:
     """A candidate that can ship: it passed every gate, or it is a relaxed advanced piece."""
-    return bool(gate.get("ok")) or relaxed(gate, notes)
+    return bool(gate.get("ok")) or relaxed(gate, notes, requested)

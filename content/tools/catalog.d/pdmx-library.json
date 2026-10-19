@@ -1,6 +1,6 @@
 {
  "task": 300,
- "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3129 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 157 duplicates of another piece (dedupe.py), 17 out of scope (pdmx_scope.py), 3913 passed but ranked beyond the cap of 1300 pieces at levels 1 to 4 (by rating; level 5 is not capped). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
+ "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3118 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 157 duplicates of another piece (dedupe.py), 17 out of scope (pdmx_scope.py), 3913 passed but ranked beyond the cap of 1300 pieces at levels 1 to 4 (by rating; level 5 is not capped). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
  "pieces": [
   {
    "slug": "pdmx-allegro-414d6ff6",
@@ -31541,6 +31541,12 @@
    "reason": "failed the library's validation: measure 25: voice 1 lasts 721/120 quarters, time signature allows 6"
   },
   {
+   "slug": "pdmx-rachmaninoff-2nd-piano-concerto-3rd-move-14c085c7",
+   "sha256": "14c085c7168a80712e48edde0d01ddeddff6582bd449a1a56d5779ec1fe45899",
+   "title": "Rachmaninoff 2nd Piano Concerto (3rd movement excerpts) Piano solo",
+   "reason": "failed the library's validation: measure 23: voice 1 lasts 5 quarters, time signature allows 4"
+  },
+  {
    "slug": "pdmx-haydn-sonata-in-g-major-hob-xvi-8-a684ee5f",
    "sha256": "a684ee5f53bf0072528fa0d9c6556f9ba8390746f5849fe67baca6bb22175860",
    "title": "Haydn: Sonata in G Major HOB.XVI:8",
@@ -31655,6 +31661,12 @@
    "reason": "failed the library's validation: measure 11: voice 1 lasts 17/4 quarters, time signature allows 4"
   },
   {
+   "slug": "pdmx-liszt-apparitions-no-3-fantasy-on-a-walt-32c0b3c2",
+   "sha256": "32c0b3c2671e60c1f5bc59a859af5b05d85795fa3b60c09a1c65d6a626ef2705",
+   "title": "Liszt Apparitions - No. 3 (Fantasy on a Waltz by Franz Schubert)",
+   "reason": "failed the library's validation: measure 13: voice 1 lasts 5 quarters, time signature allows 4"
+  },
+  {
    "slug": "pdmx-franz-liszt-transcendental-tude-no-10-in-576c5ba3",
    "sha256": "576c5ba36125057355938cd77e0df97bf9d2d2921dcb8a76fa0e71b6adcac1fe",
    "title": "Franz Liszt: Transcendental Étude No.10 in F minor Appassionata",
@@ -31691,6 +31703,12 @@
    "reason": "failed the library's validation: measure numbers not unique"
   },
   {
+   "slug": "pdmx-elegie-s-rachmaninoff-op-3-no-1-bdeb8b2d",
+   "sha256": "bdeb8b2da9e7fb37635927558ba3811c56baa413fa4a174e3dd4dd0538c0838c",
+   "title": "Elegie (S.Rachmaninoff. Op.3.No.1)",
+   "reason": "failed the library's validation: measure 83: voice 1 lasts 29 quarters, time signature allows 4"
+  },
+  {
    "slug": "pdmx-tchaikovsky-april-9f329b47",
    "sha256": "9f329b47ebe9021edf5875d4582e874d06e0047f9f12d15f692554aa2f4b270b",
    "title": "Tchaikovsky-April",
@@ -31721,6 +31739,12 @@
    "reason": "failed the library's validation: measure 4: voice 1 lasts 39/8 quarters, time signature allows 4"
   },
   {
+   "slug": "pdmx-rachmaninoff-piano-sonata-no-2-op-36-iii-bb66559c",
+   "sha256": "bb66559c067c5b0452a5cc36073bb517bb9e82c168732d73ccf71ec931fddc9c",
+   "title": "Rachmaninoff - Piano Sonata No. 2 Op. 36: III (1931 version)",
+   "reason": "failed the library's validation: measure 51: voice 1 lasts 7/2 quarters, time signature allows 3"
+  },
+  {
    "slug": "pdmx-grande-polka-de-concert-bartlett-d5f5bc45",
    "sha256": "d5f5bc45393cf3da6bbdf54ee1304a60380c9140831de56a0cf28ce941aa626c",
    "title": "Grande Polka de Concert - Bartlett",
@@ -31737,6 +31761,12 @@
    "sha256": "728a1a049bba9febcbed5805589861488b49ded499e75fcdf654dede62635546",
    "title": "3rd Mov. Op.27 No.2 Sonate No.14 Moonlight Beethoven",
    "reason": "failed the library's validation: measure 189: voice 1 lasts 23 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-liszt-god-save-the-queen-paraphrases-20232b33",
+   "sha256": "20232b332c5fa64f77a6f019ab42914c370bf100a0a1524db89ae6cf093c07a8",
+   "title": "Liszt God Save the Queen Paraphrases",
+   "reason": "failed the library's validation: measure 77: backup before measure start"
   },
   {
    "slug": "pdmx-second-suite-in-f-126f8af7",
@@ -31881,6 +31911,12 @@
    "sha256": "aa727f842b629269f76a2af7fc5a5e3e91b97f660defb1418573137634636e09",
    "title": "Piano Sonata No.2 (F.Chopin Op.35)",
    "reason": "failed the library's validation: measure numbers not unique"
+  },
+  {
+   "slug": "pdmx-rachmaninoff-moment-musical-no-1-in-bb-m-edd7b454",
+   "sha256": "edd7b45443b28bd3165994e9404290f6189d4404f35230cda815e1988d901ccb",
+   "title": "Rachmaninoff - Moment Musical No 1 in Bb Minor",
+   "reason": "failed the library's validation: measure 55: voice 1 lasts 16 quarters, time signature allows 7"
   },
   {
    "slug": "pdmx-piano-sonata-s-liapounow-op-27-84b13bd6",
@@ -32115,6 +32151,12 @@
    "sha256": "d590e82ed30279e7c4e17928ae0ca4ac72f8275b508d3597d0f75e90f28b7d73",
    "title": "Happy Birthday",
    "reason": "failed the library's validation: measure 20: voice 1 lasts 33/8 quarters, time signature allows 4"
+  },
+  {
+   "slug": "pdmx-liszt-b-n-diction-de-dieu-dans-la-solitu-da3dd548",
+   "sha256": "da3dd548d5049c62db4933b55c10d8c86ad4809de8e160833a94effc58cdfa46",
+   "title": "Liszt Bénédiction de Dieu dans la solitude S. 173/3 (piano solo)",
+   "reason": "failed the library's validation: measure 334: voice 1 lasts 8 quarters, time signature allows 6"
   },
   {
    "slug": "pdmx-bwv-933-ea4acc03",

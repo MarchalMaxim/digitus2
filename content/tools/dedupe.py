@@ -100,7 +100,8 @@ def load_items() -> list[dict]:
             if gate["sha256"] not in candidates:  # a superseded representative is skipped
                 continue
             cand = candidates[gate["sha256"]]
-            if not pdmx_advanced.usable(gate, cand["notes"]):
+            req = pdmx_advanced.requested(cand.get("composer"))
+            if not pdmx_advanced.usable(gate, cand["notes"], requested=req):
                 continue
             sha = gate["sha256"]
             if sha[:8] in refused:
@@ -112,7 +113,7 @@ def load_items() -> list[dict]:
             # a piece the fragments already ship stays over a copy of it (as a curated piece does)
             rank = (1, 0 if sha in shipped else 1, 0 if named else 1, -int(cand.get("n_ratings") or 0),
                     -float(cand.get("rating") or 0), sha)
-            level = 6 if pdmx_advanced.advanced(gate["level"], cand["notes"]) else gate["level"]["level"]
+            level = 6 if pdmx_advanced.advanced(gate["level"], cand["notes"], requested=req) else gate["level"]["level"]
             items.append({"id": sha, "kind": "pdmx", "path": path, "rank": rank, "title": cand.get("title"), "level": level})
     items.sort(key=lambda i: i["rank"])
     return items

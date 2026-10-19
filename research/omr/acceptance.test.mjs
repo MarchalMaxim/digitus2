@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aggregate, breaches, floorsFrom, missing, pipelineHash, SKIP, toolchains } from './acceptance.mjs';
@@ -104,4 +104,81 @@ test('photo pages are counted by the facts read off the page, and a worse run is
   assert.deepEqual(photoBreaches(summary, floors), []);
   const worse = photoSummary(rows.map((r, i) => (i === 0 ? { ...r, facts: facts(23, 2) } : r)));
   assert.deepEqual(photoBreaches(worse, floors), ['photos:as-taken: barsRight 0 below floor 1']);
+});
+
+test('recognizeViaService writes the answer or the failure per job', async () => {
+  const { recognizeViaService } = await import('./acceptance.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-service-'));
+  try {
+    writeFileSync(join(dir, 'page.pdf'), '%PDF-1.4');
+    writeFileSync(join(dir, 'page.png'), 'png');
+    const jobs = [
+      { id: 'a:audiveris:pdf', input: join(dir, 'page.pdf'), output: join(dir, 'out', 'a.musicxml') },
+      { id: 'a:homr:clean', input: join(dir, 'page.png'), output: join(dir, 'out', 'b.musicxml') },
+    ];
+    const requests = [];
+    const answer = (status, body) => ({ status, json: async () => body, headers: new Headers() });
+    const fetch = async (url, init) => {
+      requests.push({ url, init });
+      return init.headers['Content-Type'] === 'application/pdf'
+        ? answer(200, { state: 'ready', xml: '<score-partwise/>' })
+        : answer(422, { state: 'failed', failure: { code: 'blur', message: 'blur' } });
+    };
+    await recognizeViaService(jobs, 'http://scan.test', { fetch });
+    assert.equal(readFileSync(jobs[0].output, 'utf8'), '<score-partwise/>');
+    assert.match(readFileSync(jobs[1].output + '.failed.json', 'utf8'), /blur/);
+    assert.deepEqual(JSON.parse(readFileSync(jobs[1].output + '.failed.json', 'utf8')), { status: 422, message: 'blur' });
+    assert.equal(requests.length, 2);
+    for (const { url, init } of requests) {
+      assert.equal(url, 'http://scan.test/v1/recognize');
+      assert.equal(init.method, 'POST');
+      assert.equal(init.headers['X-Digitus2-Client'], '1');
+      assert.ok(init.headers.Origin);
+      assert.match(init.headers['X-Digitus2-Job'], /^[0-9a-f]{32}$/);
+    }
+    assert.equal(requests[1].init.headers['Content-Type'], 'image/png');
+    // A job with an output or a recorded failure is not sent again.
+    await recognizeViaService(jobs, 'http://scan.test', { fetch });
+    assert.equal(requests.length, 2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('recognizeViaService waits out a busy service and stops on the hourly limit', async () => {
+  const { recognizeViaService } = await import('./acceptance.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-service-'));
+  try {
+    writeFileSync(join(dir, 'photo.jpeg'), 'jpeg');
+    const job = { id: 'p:homr:as-taken', input: join(dir, 'photo.jpeg'), output: join(dir, 'p.musicxml') };
+    const answers = [
+      { status: 429, json: async () => ({ error: 'busy' }), headers: new Headers({ 'Retry-After': '2' }) },
+      { status: 200, json: async () => ({ xml: '<score-partwise/>' }), headers: new Headers() },
+    ];
+    const ids = [];
+    const waits = [];
+    const fetch = async (_url, init) => {
+      ids.push(init.headers['X-Digitus2-Job']);
+      assert.equal(init.headers['Content-Type'], 'image/jpeg');
+      return answers.shift();
+    };
+    await recognizeViaService([job], 'http://scan.test', { fetch, sleep: async (ms) => waits.push(ms) });
+    assert.equal(readFileSync(job.output, 'utf8'), '<score-partwise/>');
+    assert.deepEqual(waits, [2000]);
+    assert.notEqual(ids[0], ids[1]);
+    const limited = { ...job, output: join(dir, 'q.musicxml') };
+    const fetchLimited = async () => ({ status: 429, json: async () => ({ error: 'rate-limited' }), headers: new Headers({ 'Retry-After': '600' }) });
+    await assert.rejects(recognizeViaService([limited], 'http://scan.test', { fetch: fetchLimited }), /rate-limited/);
+    assert.equal(existsSync(limited.output + '.failed.json'), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the service cache is named by the recogniser the service reports', async () => {
+  const { serviceLabel } = await import('./acceptance.mjs');
+  assert.equal(
+    serviceLabel('HOMR/ab369ac54277/experimental-piano-photo-cpu (images); Audiveris-5.11.0/x+y (PDF)'),
+    'HOMR_ab369ac54277_experimental-piano-photo-cpu_images_Audiveris-5.11.0_x_y_PDF_',
+  );
 });

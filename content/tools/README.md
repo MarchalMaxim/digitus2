@@ -407,7 +407,7 @@ cannot be the copy that stays. A piece that still fails is recorded in `pdmx-exc
 lift it (2026-10-19). It is now 25,000 in both, the longest score tested in the app: Chopin's twelve Études Op. 25 in
 one file (24,956 notes, 919 bars) is fingered in 3.9 s and laid out in 4.7 s, opens in 16 s at phone width (190
 pages, 110 MB of page heap) and plays. Chopin's Sonata No. 3 (13,871 notes) took 4.2 and 3.1 s, the Ballade No. 4
-(6,277 notes) 0.6 and 1.3 s. Above 25,000 notes the archive holds only collections, one whole symphony and MIDI dumps.
+(6,277 notes) 0.6 and 1.3 s, all measured in a background tab of the dev server. Above 25,000 notes the archive holds only collections, one whole symphony and MIDI dumps.
 The library ships 160 archive pieces above 2,500 notes and 14 above 6,000; the longest is 20,329.
 
 **Level 6.** The heuristic has four cut points, so it never proposes 6; the 50 curated Advanced pieces

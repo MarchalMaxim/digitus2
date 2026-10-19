@@ -381,7 +381,7 @@ Gates, enforced by `pnpm verify`:
 | Rows rendered                                                                    | at most 30 on arrival, 40 per page shown                                                                                                                        | `library.spec.ts`                               |
 | Twinkle's first system, legend seen                                              | top at most 220 px at 768 and 1280, 240 px at 360                                                                                                               | `states.spec.ts`                                |
 
-Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of the files in `dist/assets` on a production build of the current library (2,702 pieces); sizes are in KB of 1024 bytes.
+Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of the files in `dist/assets` on a production build of the library at 2,702 pieces (it holds 3,189 now; the start-up bundle does not grow with it); sizes are in KB of 1024 bytes.
 
 | Measure                             | Value                                                                                                                                                                                                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -391,7 +391,7 @@ Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of t
 | Library data                        | `library-index.json` 214 KB, about 78 KB gzip, fetched before the first render; `manifest.json` 3.7 MB, 229 KB gzip, fetched when a library piece or the about page first needs it                                                                                                              |
 | Rows on the arrival page of a level | at most 30 (up to 1,415 before the shelves)                                                                                                                                                                                                                                                     |
 
-Library LCP and the open times below were last measured with the 149-piece library and have not been re-measured since the library grew to 2,702 pieces and the list became a fetched index; the gates above still apply. Opening a library piece now first fetches the manifest once (the table above), which those open times do not include.
+Library LCP and the open times below were last measured with the 149-piece library and have not been re-measured since the library grew to thousands of pieces (3,189 now) and the list became a fetched index; the gates above still apply. Opening a library piece now first fetches the manifest once (the table above), which those open times do not include.
 
 Mozart K.545 open path, on the development machine (Windows 11, Playwright's Chromium 1217), a cold browser context per run, the times taken inside the page from the click to the first animation frame or DOM change that shows the milestone; medians:
 

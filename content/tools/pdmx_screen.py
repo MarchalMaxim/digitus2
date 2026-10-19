@@ -56,7 +56,8 @@ PIANO_PROGRAMS = {"1", "2", "3", "4", "5", "6"}  # General MIDI 1-based: grand, 
 PIANO_NAME_WORDS = ("piano", "klavier", "pianoforte", "pianofort")
 # The ceiling was 6,000 notes until the owner asked to lift it (2026-10-19). It is now the longest score
 # tested in the app: Chopin's twelve Etudes Op. 25 in one file, 24,956 notes and 919 bars, fingered and laid
-# out in 8.6 s, open in 16 s at phone width (190 pages, 110 MB of page heap), and it plays.
+# out in 8.6 s, open in 16 s at phone width (190 pages, 110 MB of page heap), and it plays. Measured in a
+# background tab of the dev server, which can run slower than a tab in front.
 MIN_NOTES, MAX_NOTES = 30, 25000
 MAX_TRACKS = 2
 SCREEN_FIELDS = ("path", "sha256", "bytes", "title", "composer", "genres", "rating", "n_ratings",

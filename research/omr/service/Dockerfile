@@ -1,7 +1,7 @@
 # The scan service: pinned homr (photos) and Audiveris 5.11.0 (PDFs) behind service.py.
 # Build context is research/omr:
 #   docker build -f research/omr/service/Dockerfile -t digitus2-scan research/omr
-# The homr commit, the ONNX models, the Audiveris deb and the base image are checked against their
+# The homr commit, the ONNX models, the text model, the Audiveris deb and the base image are checked against their
 # SHA-256; the pip wheels are pinned by version. Nothing is fetched at run time.
 FROM ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
 

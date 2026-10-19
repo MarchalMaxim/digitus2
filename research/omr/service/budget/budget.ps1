@@ -47,7 +47,7 @@ if (-not (Test-Native { gcloud pubsub topics describe $Topic --project $Project 
 }
 
 # The function runs as its own service account, so the billing role never reaches the Compute Engine
-# default account that the public scan service runs as.
+# default account or the account the public scan service runs as.
 if (-not (Test-Native { gcloud iam service-accounts describe $Account --project $Project })) {
   Invoke-Checked 'Creating the function service account' {
     gcloud iam service-accounts create $Function --display-name 'digitus2 billing kill-switch' --project $Project

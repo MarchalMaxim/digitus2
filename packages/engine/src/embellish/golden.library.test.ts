@@ -46,8 +46,8 @@ describe('the light embellisher on the library', () => {
       for (const i of res.inserted) byRule[i.rule] = (byRule[i.rule] ?? 0) + 1;
     }
     expect(mismatches).toEqual([]);
-    expect(golden.pieces).toHaveLength(259);
-    expect(refused).toBe(8);
-    expect(byRule).toEqual({ passing: 954, 'neighbour-repeated': 448 });
+    expect(golden.pieces).toHaveLength(267);
+    expect(refused).toBe(9);
+    expect(byRule).toEqual({ passing: 1057, 'neighbour-repeated': 471 });
   }, 60_000);
 });

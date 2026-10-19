@@ -33,7 +33,7 @@ Details:
 
 The benchmark and hands steps run `packages/engine/dist/cli/main.js`, so they need a build, and they skip when the datasets are absent (`research/data/pig`, `research/data/mutopia_fingering`; see `research/data/README.md`). A run with those steps skipped has not checked the floors.
 
-The `embellish` step needs only the build and the committed library, so it never reports SKIP once the build has run. It runs the same guard as the app, then checks each offered piece again on its own, in about 55 s.
+The `embellish` step needs only the build and the committed library, so it never reports SKIP once the build has run. It runs the same guard as the app, then checks each offered piece again on its own, in about a minute.
 
 The format check (`pnpm format:check`) is not a verify step; CI runs it, so run it before pushing.
 
@@ -53,7 +53,7 @@ Name one or more steps: `pnpm verify unit`, `pnpm verify build bundle`, `pnpm ve
 | `benchmark:mutopia` | Mutopia test half (62 parts, gold notes without a finger masked) | gen below `mutopia.gen` (64.9); a part skipped                                                                                                                                                         |
 | `hands`             | PIG test split and the library's `core30` set                    | PIG macro hand-separation accuracy below `hands.accuracyMin` (91.0)                                                                                                                                    |
 | `unit` (textbook)   | Textbook oracle (672 entries)                                    | note accuracy below `textbook`, solved with the solver's default weights (`parncutt`)                                                                                                                  |
-| `embellish`         | the library's level 1 and 2 pieces (259)                         | offered below `embellish.offeredMin` (170)                                                                                                                                                             |
+| `embellish`         | the library's level 1 and 2 pieces (267)                         | offered below `embellish.offeredMin` (175)                                                                                                                                                             |
 
 A floor is the milestone's measurement minus 0.5, rounded down (except `embellish.offeredMin`, which is the measured count, because the run is deterministic), and is raised in the same commit as the improvement, with a row in `benchmarks/history.md`. The Python scorer in `research/fingering_eval/` matches the official PIG evaluator, and the TypeScript metrics are checked against it.
 

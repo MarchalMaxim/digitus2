@@ -3,6 +3,7 @@
  * throws: every failure becomes `{ ok: false, error }` with the request's id.
  */
 import {
+  guardEmbellishment,
   importMidi,
   injectFingerings,
   parseMusicXml,
@@ -86,6 +87,30 @@ export function handle(req: EngineRequest): EngineResponse {
           type: 'fingeredXml',
           xml: injectFingerings(req.xml, req.score, req.assignment),
         };
+      case 'embellish': {
+        // The guard solves and lints at every hand size with the app's weight set, so the
+        // switch never vanishes on a hand-size change. Only five of its fields cross over.
+        const t0 = performance.now();
+        const { offered: o, reason } = guardEmbellishment(req.xml, {
+          weightSet: RECOMMENDED_WEIGHT_SET,
+        });
+        return {
+          id: req.id,
+          ok: true,
+          type: 'embellish',
+          offered: o
+            ? {
+                xml: o.xml,
+                score: o.score,
+                editorial: o.editorial,
+                assignments: o.assignments,
+                figures: o.figures,
+              }
+            : null,
+          reason,
+          ms: performance.now() - t0,
+        };
+      }
     }
   } catch (e) {
     return { id: req.id, ok: false, error: e instanceof Error ? e.message : String(e) };

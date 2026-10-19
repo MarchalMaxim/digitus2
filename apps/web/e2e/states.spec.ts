@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { openPractice, setLoopBars } from './helpers/practice.js';
+import { embellishDecided, openPractice, setLoopBars } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
 import { openLibraryPiece } from './helpers/library.js';
 import { holdPianoSamples } from './helpers/samples.js';
@@ -114,11 +114,15 @@ function practiceControls(page: Page): Locator[] {
   ];
 }
 
-/** Twinkle, ready, with its 64 digits. */
+/**
+ * Twinkle, ready, with its 64 digits, and "Add notes between" offered: the Practice panel has its
+ * last row (the tick box), so it no longer grows while its geometry is measured.
+ */
 async function openTwinkle(page: Page): Promise<void> {
   await page.goto('/#/piece/twinkle-twinkle-little-star');
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+  await embellishDecided(page, 'offered');
 }
 
 /** The settings of a reader who has pressed Play before: no finger legend under the header. */
@@ -271,6 +275,12 @@ test.describe('the Practice panel on a phone', () => {
   }) => {
     await openTwinkle(page);
     await openPractice(page);
+    // The last row, "Add notes between" (offered on Twinkle only), lies inside the window.
+    const addNotes = page.getByRole('checkbox', { name: 'Add notes between' });
+    await addNotes.scrollIntoViewIfNeeded();
+    const addBox = (await addNotes.boundingBox())!;
+    expect(addBox.x, JSON.stringify(addBox)).toBeGreaterThanOrEqual(0);
+    expect(addBox.x + addBox.width, JSON.stringify(addBox)).toBeLessThanOrEqual(360);
     // Not a loop yet (from is after to), so nothing but the inputs holds it.
     await setLoopBars(page, '6', '2');
     await page.setViewportSize({ width: 600, height: 740 });

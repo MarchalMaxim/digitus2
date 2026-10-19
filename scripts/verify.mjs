@@ -4,7 +4,7 @@
 //   pnpm verify            run every step
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
 //                          omr (requires build), omr:acceptance (requires build), bundle, e2e,
-//                          benchmark, benchmark:mutopia, hands)
+//                          benchmark, benchmark:mutopia, hands, embellish)
 //
 // Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
 // page's initial JavaScript and CSS exceed 150 KB gzip or Verovio is statically imported
@@ -18,10 +18,13 @@
 // number and reported with "no floor set" while it is null; skipped without the Mutopia data. The
 // hands step scores MIDI hand separation (`digitus2 evalhands`) on the PIG test split and the
 // library and fails when the PIG macro accuracy drops below hands.accuracyMin in
-// benchmarks/floor.json; while that is null it only reports.
+// benchmarks/floor.json; while that is null it only reports. The embellish step runs the light
+// embellishment gate (`digitus2 embellish --library`) on the library's level 1 and 2 pieces and fails
+// when fewer pieces are offered than embellish.offeredMin in benchmarks/floor.json or an offered piece
+// fails its check, lint or level; it needs no dataset, only the build.
 //
 // verify never rewrites a tracked file (M3 Task 9): its scorecards go to the gitignored
-// benchmarks/runs/verify-pig.json, verify-mutopia.json and verify-hands.json. The tracked
+// benchmarks/runs/verify-pig.json, verify-mutopia.json, verify-hands.json and verify-embellish.json. The tracked
 // benchmarks/latest.json, latest-mutopia.json and latest-hands.json are milestone scorecards,
 // written only by labelled runs (`bench --label m3-open ...`; `evalhands --label m6-hands --out
 // benchmarks/latest-hands.json`); see docs/verification-loop.md.
@@ -77,15 +80,21 @@ if (want('e2e')) {
 const LIBRARY_MANIFEST = 'content/manifest.json';
 // Gitignored scorecards of the verify runs (.gitignore: benchmarks/runs/).
 const RUNS = 'benchmarks/runs';
+const CLI = 'packages/engine/dist/cli/main.js';
+/** The built engine CLI's usage text (it prints usage without a command), or null when not built. */
+function cliUsage() {
+  if (!existsSync(CLI)) return null;
+  const r = spawnSync('node', [CLI], { encoding: 'utf8', shell: true });
+  return `${r.stdout}${r.stderr}`;
+}
 const wantPig = want('benchmark');
 const wantMutopia = want('benchmark') || only.has('benchmark:mutopia');
 if (wantPig || wantMutopia) {
   const floorPath = 'benchmarks/floor.json';
-  const cli = 'packages/engine/dist/cli/main.js';
+  const cli = CLI;
   const floor = existsSync(floorPath) ? JSON.parse(readFileSync(floorPath, 'utf8')) : null;
-  const usage =
-    floor && existsSync(cli) ? spawnSync('node', [cli], { encoding: 'utf8', shell: true }) : null;
-  const hasBench = usage && /\bbench\b/.test(`${usage.stdout}${usage.stderr}`);
+  const usage = floor ? cliUsage() : null;
+  const hasBench = usage !== null && /\bbench\b/.test(usage);
   // The weight set the floors were measured with; bench refuses to gate another set against them.
   const weights = floor?.weightSet ? ['--weights', floor.weightSet] : [];
   if (wantPig) {
@@ -148,12 +157,10 @@ if (wantPig || wantMutopia) {
 
 if (want('hands')) {
   const floorPath = 'benchmarks/floor.json';
-  const cli = 'packages/engine/dist/cli/main.js';
+  const cli = CLI;
   const floor = existsSync(floorPath) ? JSON.parse(readFileSync(floorPath, 'utf8')) : null;
-  const usage = existsSync(cli)
-    ? spawnSync('node', [cli], { encoding: 'utf8', shell: true })
-    : null;
-  const hasEvalHands = usage && /\bevalhands\b/.test(`${usage.stdout}${usage.stderr}`);
+  const usage = cliUsage();
+  const hasEvalHands = usage !== null && /\bevalhands\b/.test(usage);
   if (!floor?.hands) skip('hands', 'no hands block in benchmarks/floor.json');
   else if (!hasEvalHands) skip('hands', 'engine CLI has no evalhands command yet');
   else if (!existsSync(floor.goldDir)) skip('hands', `dataset missing: ${floor.goldDir}`);
@@ -177,6 +184,28 @@ if (want('hands')) {
     if (typeof floor.hands.accuracyMin === 'number') args.push('--floor', floorPath);
     run('hands', 'node', args);
   }
+}
+
+// The light embellishment gate ("Add notes between"): the guard, the independent check, the lint
+// at every hand profile and the level heuristic on the library's level 1 and 2 pieces, against
+// benchmarks/floor.json `embellish.offeredMin`. Needs only the committed library and the build.
+if (want('embellish')) {
+  const cli = CLI;
+  const usage = cliUsage();
+  if (usage === null) skip('embellish', 'engine not built (run the build step first)');
+  else if (!/\bembellish\b/.test(usage))
+    skip('embellish', 'engine CLI has no embellish command yet');
+  else
+    run('embellish', 'node', [
+      cli,
+      'embellish',
+      '--library',
+      LIBRARY_MANIFEST,
+      '--floor',
+      'benchmarks/floor.json',
+      '--out',
+      `${RUNS}/verify-embellish.json`,
+    ]);
 }
 
 process.stdout.write('\n=== verify summary\n');

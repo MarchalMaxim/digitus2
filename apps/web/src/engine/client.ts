@@ -1,12 +1,18 @@
 /**
- * The engine client: parse, solve and fingered-XML export as promises over the engine worker,
- * so the main thread never parses MusicXML or runs the solver (spec section 4). Requests carry
- * an incrementing id and responses are matched by it, so answers may arrive in any order.
+ * The engine client: parse, solve, fingered-XML export and the guarded embellishment as promises
+ * over the engine worker, so the main thread never parses MusicXML or runs the solver (spec
+ * section 4). Requests carry an incrementing id and responses are matched by it, so answers may
+ * arrive in any order.
  */
 import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
 import type { HandSize } from '../app/store.js';
 import { PhraseError } from '../i18n/PhraseError.js';
-import { sourceKind, type EngineRequest, type EngineResponse } from './protocol.js';
+import {
+  sourceKind,
+  type EmbellishedDoc,
+  type EngineRequest,
+  type EngineResponse,
+} from './protocol.js';
 
 export interface EngineClient {
   /**
@@ -30,6 +36,13 @@ export interface EngineClient {
     pins?: Assignment,
   ): Promise<{ assignment: Assignment; ms: number }>;
   fingeredXml(xml: string, score: Score, assignment: Assignment): Promise<string>;
+  /**
+   * "Add notes between": the guarded light embellishment of a plain MusicXML text, or null with
+   * the guard's reason.
+   */
+  embellish(
+    xml: string,
+  ): Promise<{ offered: EmbellishedDoc | null; reason: string | null; ms: number }>;
   /** Terminates the worker and rejects every pending call. */
   dispose(): void;
 }
@@ -151,6 +164,13 @@ export function createEngineClient(
     },
     fingeredXml(xml, score, assignment) {
       return call({ type: 'fingeredXml', xml, score, assignment }).then((res) => res.xml);
+    },
+    embellish(xml) {
+      return call({ type: 'embellish', xml }).then(({ offered, reason, ms }) => ({
+        offered,
+        reason,
+        ms,
+      }));
     },
     dispose() {
       closed = new Error('engine client disposed');

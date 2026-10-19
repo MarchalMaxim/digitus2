@@ -153,3 +153,4 @@ export { evaluateHands, scoreToMidiData } from './eval/hands.js';
 export type { HandEval } from './eval/hands.js';
 export { evaluateOmr } from './eval/omr.js';
 export type { OmrMetric, OmrMetrics, OmrBarEvaluation, OmrEvaluation } from './eval/omr.js';
+export * from './embellish/index.js';

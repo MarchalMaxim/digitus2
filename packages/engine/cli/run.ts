@@ -17,6 +17,12 @@ import {
   runBench,
 } from './bench.js';
 import type { BenchOptions, FloorFile, Scorecard } from './bench.js';
+import {
+  embellishFile,
+  formatEmbellishScorecard,
+  isFloorBreach,
+  runEmbellishGate,
+} from './embellish.js';
 import { evaluateDirs, formatReport } from './evaluate.js';
 import { formatHandsScorecard, runEvalHands } from './evalhands.js';
 import { fingerFile } from './finger.js';
@@ -58,6 +64,8 @@ const USAGE = `digitus2 <command>
   import <file.mid> [--out f.musicxml] [--split <midi 21..108>] [--title t]
   learn --config pig|open [--epochs 12] [--seeds 3] [--seed ${DEFAULT_SEED}] [--C 0.2] [--rho 1] [--out f.json] [--log f.json] [--date iso] [--no-validation] [--profile p]
                                         (pig: research only, written under research/weights/pig; open: the shipped weights-learned-open.json)
+  embellish <file> [--density light] [--out f.musicxml] [--inserted f.json] [--guard]   write the light embellishment (stdout without --out), or report the refusal
+  embellish --library manifest.json [--levels 1,2] [--floor floor.json] [--out f.json] [--json]   the library gate: guard, check, lint and level on every piece
   evalhands [--gold <dir> --split <json> [--split-name n] [--subset test|train]] [--library manifest.json] [--params hand-motion.json] [--out f.json] [--label l] [--floor floor.json] [--json]
 `;
 
@@ -122,6 +130,7 @@ function dispatch(argv: string[], io: CliIo): number {
   if (command === 'import') return importMidiFile(rest, io);
   if (command === 'evalhands') return evalHands(rest, io);
   if (command === 'learn') return learn(rest, io);
+  if (command === 'embellish') return embellish(rest, io);
   io.stderr(USAGE);
   return 2;
 }
@@ -329,6 +338,66 @@ function evalHands(args: string[], io: CliIo): number {
   );
   for (const b of floorBreaches) io.stderr(`floor breach: ${b}\n`);
   return floorBreaches.length > 0 ? 1 : 0;
+}
+
+function embellish(args: string[], io: CliIo): number {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      density: { type: 'string' },
+      out: { type: 'string' },
+      inserted: { type: 'string' },
+      guard: { type: 'boolean' },
+      library: { type: 'string' },
+      levels: { type: 'string' },
+      floor: { type: 'string' },
+      json: { type: 'boolean' },
+    },
+  });
+  oneOf('density', values.density, ['light'] as const);
+  if (values.library) {
+    if (positionals.length) throw new UsageError('embellish takes a file or --library, not both');
+    if (values.inserted || values.guard || values.density)
+      throw new UsageError('--inserted, --guard and --density are for one file, not --library');
+    let levels: number[] | undefined;
+    if (values.levels !== undefined) {
+      levels = values.levels.split(',').map((x) => Number(x.trim()));
+      if (!levels.every((l) => Number.isInteger(l) && l >= 1 && l <= 5))
+        throw new UsageError('--levels must be a comma-separated list of levels 1 to 5');
+    }
+    const { scorecard, failures } = runEmbellishGate({
+      library: values.library,
+      ...(levels ? { levels } : {}),
+      ...(values.floor ? { floor: values.floor } : {}),
+      ...(values.out ? { out: values.out } : {}),
+    });
+    io.stdout(
+      (values.json ? JSON.stringify(scorecard, null, 2) : formatEmbellishScorecard(scorecard)) +
+        '\n',
+    );
+    for (const f of failures) io.stderr(`${isFloorBreach(f) ? 'floor breach' : 'gate'}: ${f}\n`);
+    return failures.length > 0 ? 1 : 0;
+  }
+  const file = positionals[0];
+  if (!file || positionals.length > 1)
+    throw new UsageError('embellish takes exactly one file, or --library');
+  if (values.levels || values.floor || values.json)
+    throw new UsageError('--levels, --floor and --json are for --library');
+  const r = embellishFile({
+    file,
+    ...(values.out ? { out: values.out } : {}),
+    ...(values.inserted ? { inserted: values.inserted } : {}),
+    guard: values.guard ?? false,
+  });
+  if (r.refusal !== null) {
+    io.stderr(`digitus2: refused: ${r.refusal}\n`);
+    return 1;
+  }
+  const n = r.inserted.length;
+  io.stderr(n ? `light: ${n} note${n === 1 ? '' : 's'} added\n` : 'light: nothing to add\n');
+  if (!values.out) io.stdout(r.xml!);
+  return 0;
 }
 
 /** A numeric option: undefined when absent, a usage error when it is not a number that `ok` accepts. */

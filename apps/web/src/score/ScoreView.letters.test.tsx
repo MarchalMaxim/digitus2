@@ -38,6 +38,11 @@ const doc: ScoreDocument = {
   digitChanges: null,
   midiInfo: null,
   splitMidi: null,
+  embellish: 'none',
+  embellished: false,
+  shownVersion: 'plain',
+  plain: null,
+  setEmbellished: () => {},
 };
 
 vi.mock('./useScoreDocument.js', async (importOriginal) => ({

@@ -103,4 +103,22 @@ describe('engine client', () => {
       ['musicxml', undefined],
     ]);
   });
+  it('posts an embellish request and resolves the offer, the reason and the time', async () => {
+    const sent: EngineRequest[] = [];
+    const offered = {
+      xml: '<e/>',
+      score: { notes: [] } as never,
+      editorial: {},
+      assignments: { large: {}, medium: {}, small: {}, child: {} },
+      figures: 3,
+    };
+    const c = createEngineClient(
+      fakeWorker((req) => {
+        sent.push(req);
+        return { id: req.id, ok: true, type: 'embellish', offered, reason: null, ms: 7 };
+      }),
+    );
+    await expect(c.embellish('<x/>')).resolves.toEqual({ offered, reason: null, ms: 7 });
+    expect(sent).toEqual([{ id: 1, type: 'embellish', xml: '<x/>' }]);
+  });
 });

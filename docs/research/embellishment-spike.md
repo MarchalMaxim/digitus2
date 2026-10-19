@@ -376,6 +376,8 @@ Lyrics stay on the first part of a split note, so the new notes form a melisma.
 
 Build the app side only if the owner likes the listening test. If so, keep it small.
 
+The app builds this as the Practice switch `Add notes between` (`docs/app.md`): light only, the upper neighbour only a whole step up, guarded at every hand size, and gated by `pnpm verify` (`embellish`).
+
 **One choice.** "Add notes between" is a single on/off switch in the Practice panel, next to the
 hands, loop and speed controls.
 

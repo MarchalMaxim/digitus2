@@ -116,6 +116,8 @@ export const library = {
     all: (n: number) => `All ${formatNumber('en', n)} favourites`,
     /** The accessible name of a row's filled heart, which takes the piece off the shelf. */
     remove: (title: string, composer: string) => `Remove ${title} by ${composer} from Favourites`,
+    /** Said to a screen reader when a row's heart took the piece off. */
+    removed: (title: string) => `${title} is no longer in Favourites.`,
   },
   myScores: {
     heading: 'My scores',

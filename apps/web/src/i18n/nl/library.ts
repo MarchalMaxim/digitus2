@@ -93,6 +93,7 @@ export const library: Messages['library'] = {
     all: (n: number) => `Alle ${formatNumber('nl', n)} favorieten`,
     remove: (title: string, composer: string) =>
       `${title} van ${composer} uit Favorieten verwijderen`,
+    removed: (title: string) => `${title} staat niet meer in Favorieten.`,
   },
   myScores: {
     heading: 'Mijn partituren',

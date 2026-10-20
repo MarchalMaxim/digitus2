@@ -312,6 +312,13 @@ describe('LibraryView: the Favourites shelf (issue #78)', () => {
   const favourites = () =>
     screen.queryByRole('heading', { level: 2, name: 'Favourites' })?.closest('section') ?? null;
   const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // The time a heart is pressed, for the guard against a second press (Favourites.tsx).
+  let clock = 0;
+  beforeEach(() => {
+    clock = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => clock);
+  });
+  afterEach(() => vi.restoreAllMocks());
   it('is not there before the first favourite', () => {
     render(<LibraryView />);
     expect(favourites()).toBeNull();
@@ -375,18 +382,39 @@ describe('LibraryView: the Favourites shelf (issue #78)', () => {
       });
     const hearts = () =>
       within(favourites()!).getAllByRole('button', { name: /^Remove .* from Favourites$/ });
+    const said = () => screen.getByTestId('favourites-announcement');
     expect(hearts()).toHaveLength(3);
     await userEvent.click(remove(chosen[0]!.title));
     expect(useAppStore.getState().settings.favourites).toEqual(chosen.slice(1).map((p) => p.slug));
     expect(within(favourites()!).getByText('2 pieces')).toBeInTheDocument();
     expect(hearts()[0]).toHaveFocus(); // the next favourite's heart, now the first
+    expect(said()).toHaveTextContent(`${chosen[0]!.title} is no longer in Favourites.`);
+    clock += 1000;
     await userEvent.click(remove(chosen[2]!.title));
     expect(hearts()).toHaveLength(1);
     expect(hearts()[0]).toHaveFocus(); // the last one gone: the one before it
+    clock += 1000;
     await userEvent.click(remove(chosen[1]!.title));
     expect(favourites()).toBeNull();
     expect(useAppStore.getState().settings.favourites).toEqual([]);
     expect(screen.getByRole('radio', { name: 'Easy' })).toHaveFocus(); // the next unit's control
+    // Said although the shelf, and the heart that was pressed, are gone.
+    expect(said()).toHaveTextContent(`${chosen[1]!.title} is no longer in Favourites.`);
+  });
+  it('takes one favourite off for a double click, or a second press under 400 ms', async () => {
+    const chosen = favour(4);
+    render(<LibraryView />);
+    const hearts = () =>
+      within(favourites()!).getAllByRole('button', { name: /^Remove .* from Favourites$/ });
+    // The rows close up after a removal, so the next heart lands under the pointer.
+    await userEvent.dblClick(hearts()[0]!);
+    expect(useAppStore.getState().settings.favourites).toEqual(chosen.slice(1).map((p) => p.slug));
+    clock += 399;
+    await userEvent.click(hearts()[0]!);
+    expect(hearts()).toHaveLength(3);
+    clock += 1;
+    await userEvent.click(hearts()[0]!);
+    expect(hearts()).toHaveLength(2);
   });
   it('removes one of a shelf shown in full, which stays in full', async () => {
     const chosen = favour(7);

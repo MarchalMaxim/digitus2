@@ -98,6 +98,7 @@ export const library: Messages['library'] = {
     line: 'As peças que você marcou com o coração, as mais recentes primeiro.',
     all: (n: number) => `Ver os ${formatNumber('pt', n)} favoritos`,
     remove: (title: string, composer: string) => `Remover ${title}, de ${composer}, dos Favoritos`,
+    removed: (title: string) => `${title} não está mais nos Favoritos.`,
   },
   myScores: {
     heading: 'Minhas partituras',

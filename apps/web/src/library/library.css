@@ -33,11 +33,27 @@
   border-bottom: 0;
 }
 
+/* The shelf's line breaks before "newest first" rather than leave one word on a phone's line. */
+.favourites > p {
+  text-wrap: pretty;
+}
+
 .favourite-remove {
   flex: none;
   /* The circle's middle on the title's line: the row's top padding and half a line (the title's
      size is the button's). A browser without lh keeps the circle at the row's top. */
   margin-top: calc(0.625rem + 0.5lh - 22px);
+}
+
+/* A smaller glyph than the score page's, beside a row's 16 px title; the ring stays inside the
+   row's rules. */
+.has-trailing > .favourite-remove svg {
+  width: 20px;
+  height: 20px;
+}
+
+.has-trailing > .favourite-remove:focus-visible {
+  outline-offset: -2px;
 }
 
 /* The row's line runs under Remove too, as the list's top line does; Remove keeps the title's

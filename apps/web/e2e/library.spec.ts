@@ -16,6 +16,7 @@ import { expectOneRed } from './helpers/red.js';
 import { dropFrameShown, pieceRows } from './helpers/states.js';
 import { FINGER_LEGEND } from '../src/score/FingerLegend.js';
 import { TIERS } from '../src/library/levels.js';
+import { REMOVE_GUARD_MS } from '../src/library/Favourites.js';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -631,7 +632,11 @@ test('library: the filled heart on a Favourites row takes the piece off, the foc
     localStorage.setItem(
       'digitus2.settings.v1',
       JSON.stringify({
-        state: { settings: { favourites: ['ode-to-joy', 'bach-minuet-g-major-bwv-anh-114'] } },
+        state: {
+          settings: {
+            favourites: ['brahms-lullaby', 'ode-to-joy', 'bach-minuet-g-major-bwv-anh-114'],
+          },
+        },
         version: 2,
       }),
     );
@@ -643,12 +648,17 @@ test('library: the filled heart on a Favourites row takes the piece off, the foc
     shelf.getByText('The pieces you marked with the heart, newest first.'),
   ).toBeVisible();
   const hearts = shelf.getByRole('button', { name: /^Remove .* from Favourites$/ });
+  await expect(hearts).toHaveCount(3);
+  // A double click takes one off, not the next one too, which the rows bring under the pointer.
+  await shelf.getByRole('button', { name: /^Remove Lullaby \(Wiegenlied\) by / }).dblclick();
   await expect(hearts).toHaveCount(2);
+  await page.waitForTimeout(REMOVE_GUARD_MS);
   await shelf.getByRole('button', { name: /^Remove Ode to Joy \(simplified\) by / }).click();
   await expect(shelf.getByText('1 piece')).toBeVisible();
   await expect(hearts).toHaveCount(1);
   await expect(hearts.first()).toBeFocused();
   await expectOneRed(page, 'a favourite removed');
+  await page.waitForTimeout(REMOVE_GUARD_MS);
   await hearts.first().click();
   await expect(shelf).toHaveCount(0);
   await expect(tierPill(page, 'easy')).toBeFocused();

@@ -263,8 +263,13 @@ export function LibraryView() {
       list.current?.querySelector<HTMLElement>('.piece-row');
     next?.focus();
   });
+  // What a screen reader hears when a row's heart took a piece off: the row, and with the last
+  // favourite the whole shelf, is gone, so a live region outside the shelf says so.
+  const [favouriteSaid, setFavouriteSaid] = useState('');
   const removeFavourite = (slug: string) => {
+    const row = favouritesInView?.rows.find((r) => r.slug === slug);
     if (favouritesInView?.count === 1) focusAfterFavourites.current = true;
+    if (row) setFavouriteSaid(t.library.favourites.removed(row.title));
     toggleFavourite(slug);
   };
   // A refusal still showing would be stale in the score view, so opening anything clears it.
@@ -384,6 +389,9 @@ export function LibraryView() {
       </div>
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
         {announcement}
+      </p>
+      <p className="visually-hidden" aria-live="polite" data-testid="favourites-announcement">
+        {favouriteSaid}
       </p>
       <OwnFileLine onFile={openFile} onRefuse={setNotice} onScan={scan} />
       <footer className="library-footer">

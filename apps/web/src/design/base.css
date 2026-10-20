@@ -448,25 +448,31 @@ fieldset {
 }
 
 .favourite-toggle {
+  vertical-align: middle;
+  margin: -0.5rem 0 -0.5rem 0.5rem;
+}
+
+/* The heart (design/HeartIcon.tsx): a round 44 px button with no border, like the theme switch;
+   an ink outline that fills while the piece is a favourite. The Favourites shelf's rows show it
+   filled (library.css, .favourite-remove). Ink only, never red. */
+.heart-button {
   display: inline-grid;
   place-items: center;
-  vertical-align: middle;
   width: 44px;
   height: 44px;
-  margin: -0.5rem 0 -0.5rem 0.5rem;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: none;
 }
 
-.favourite-toggle svg {
+.heart-button svg {
   width: 24px;
   height: 24px;
   max-width: none;
 }
 
-.favourite-toggle path {
+.heart-button path {
   fill: transparent;
   stroke: currentColor;
   stroke-width: 1.5;
@@ -474,7 +480,8 @@ fieldset {
   transition: fill var(--dur-fast) var(--ease);
 }
 
-.favourite-toggle[aria-pressed='true'] path {
+.heart-button[aria-pressed='true'] path,
+.heart-button.is-filled path {
   fill: currentColor;
 }
 

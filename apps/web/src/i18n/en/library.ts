@@ -110,8 +110,12 @@ export const library = {
   /** The shelf of the pieces marked with the score page's heart, above the levels. */
   favourites: {
     heading: 'Favourites',
+    /** The gray line under the shelf's name, as under the style shelves'. */
+    line: 'The pieces you marked with the heart, newest first.',
     /** The button under the shelf that shows the rest: "All 12 favourites" (always six or more). */
     all: (n: number) => `All ${formatNumber('en', n)} favourites`,
+    /** The accessible name of a row's filled heart, which takes the piece off the shelf. */
+    remove: (title: string, composer: string) => `Remove ${title} by ${composer} from Favourites`,
   },
   myScores: {
     heading: 'My scores',

@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useT } from '../i18n/i18n.js';
 import { LengthPills } from './LevelPills.js';
 import { type LengthId, type ShelfId } from './levels.js';
@@ -167,15 +167,24 @@ interface RowsProps {
    * the page (the Favourites shelf) gives its own, so no id is written twice.
    */
   idPrefix?: string;
+  /** A control after each row's button, inside its item (the Favourites shelf's filled heart). */
+  trailing?: (index: number) => ReactNode;
 }
 
-export function Rows({ rows, offset, freshFrom, onOpen, idPrefix = '' }: RowsProps) {
+export function Rows({ rows, offset, freshFrom, onOpen, idPrefix = '', trailing }: RowsProps) {
   return (
     <ul className="piece-list">
       {rows.map((r, i) => (
         <li
           key={r.slug}
-          className={freshFrom !== null && offset + i >= freshFrom ? 'is-new' : undefined}
+          className={
+            [
+              freshFrom !== null && offset + i >= freshFrom ? 'is-new' : '',
+              trailing ? 'has-trailing' : '',
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
         >
           <button
             type="button"
@@ -190,6 +199,7 @@ export function Rows({ rows, offset, freshFrom, onOpen, idPrefix = '' }: RowsPro
             </span>
             {r.composerLine !== null && <span className="composer muted">{r.composerLine}</span>}
           </button>
+          {trailing?.(i)}
         </li>
       ))}
     </ul>

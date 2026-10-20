@@ -607,3 +607,38 @@ test('library: Back after the heart lands on the same rows, the Favourites shelf
     );
   }
 });
+
+test('library: the filled heart on a Favourites row takes the piece off, the focus staying on the list, across a reload', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem(
+      'digitus2.settings.v1',
+      JSON.stringify({
+        state: { settings: { favourites: ['ode-to-joy', 'bach-minuet-g-major-bwv-anh-114'] } },
+        version: 2,
+      }),
+    );
+  });
+  await page.goto('/');
+  await libraryReady(page);
+  const shelf = page.getByRole('region', { name: 'Favourites' });
+  await expect(
+    shelf.getByText('The pieces you marked with the heart, newest first.'),
+  ).toBeVisible();
+  const hearts = shelf.getByRole('button', { name: /^Remove .* from Favourites$/ });
+  await expect(hearts).toHaveCount(2);
+  await shelf.getByRole('button', { name: /^Remove Ode to Joy \(simplified\) by / }).click();
+  await expect(shelf.getByText('1 piece')).toBeVisible();
+  await expect(hearts).toHaveCount(1);
+  await expect(hearts.first()).toBeFocused();
+  await expectOneRed(page, 'a favourite removed');
+  await hearts.first().click();
+  await expect(shelf).toHaveCount(0);
+  await expect(tierPill(page, 'easy')).toBeFocused();
+  await page.reload();
+  await libraryReady(page);
+  await expect(page.getByRole('heading', { name: 'Favourites' })).toHaveCount(0);
+});

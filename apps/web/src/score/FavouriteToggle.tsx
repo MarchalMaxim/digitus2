@@ -1,4 +1,5 @@
 import { useAppStore } from '../app/store.js';
+import { HeartIcon } from '../design/HeartIcon.js';
 import { useT } from '../i18n/i18n.js';
 
 /**
@@ -14,15 +15,12 @@ export function FavouriteToggle({ slug }: { slug: string }) {
   return (
     <button
       type="button"
-      className="favourite-toggle no-print"
+      className="heart-button favourite-toggle no-print"
       aria-label={t.score.header.favourite}
       aria-pressed={pressed}
       onClick={() => toggleFavourite(slug)}
     >
-      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-        {/* Two lobes of radius 4 that meet at the top, and their tangents down to the point. */}
-        <path d="M12 20L5.35 11.46A4 4 0 1 1 12 7.06A4 4 0 1 1 18.65 11.46Z" />
-      </svg>
+      <HeartIcon />
     </button>
   );
 }

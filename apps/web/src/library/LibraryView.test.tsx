@@ -311,6 +311,7 @@ describe('LibraryView: the Favourites shelf (issue #78)', () => {
   };
   const favourites = () =>
     screen.queryByRole('heading', { level: 2, name: 'Favourites' })?.closest('section') ?? null;
+  const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   it('is not there before the first favourite', () => {
     render(<LibraryView />);
     expect(favourites()).toBeNull();
@@ -357,6 +358,46 @@ describe('LibraryView: the Favourites shelf (issue #78)', () => {
     expect(favourites()).not.toBeNull();
     await userEvent.type(screen.getByRole('searchbox'), 'minuet');
     expect(favourites()).toBeNull();
+  });
+  it('says what it holds in one gray line', () => {
+    favour(1);
+    render(<LibraryView />);
+    expect(
+      within(favourites()!).getByText('The pieces you marked with the heart, newest first.'),
+    ).toHaveClass('muted');
+  });
+  it('takes a favourite off with its filled heart, keeping the focus on the next one', async () => {
+    const chosen = favour(3);
+    render(<LibraryView />);
+    const remove = (title: string) =>
+      screen.getByRole('button', {
+        name: new RegExp(`^Remove ${escaped(title)} by .+ from Favourites$`),
+      });
+    const hearts = () =>
+      within(favourites()!).getAllByRole('button', { name: /^Remove .* from Favourites$/ });
+    expect(hearts()).toHaveLength(3);
+    await userEvent.click(remove(chosen[0]!.title));
+    expect(useAppStore.getState().settings.favourites).toEqual(chosen.slice(1).map((p) => p.slug));
+    expect(within(favourites()!).getByText('2 pieces')).toBeInTheDocument();
+    expect(hearts()[0]).toHaveFocus(); // the next favourite's heart, now the first
+    await userEvent.click(remove(chosen[2]!.title));
+    expect(hearts()).toHaveLength(1);
+    expect(hearts()[0]).toHaveFocus(); // the last one gone: the one before it
+    await userEvent.click(remove(chosen[1]!.title));
+    expect(favourites()).toBeNull();
+    expect(useAppStore.getState().settings.favourites).toEqual([]);
+    expect(screen.getByRole('radio', { name: 'Easy' })).toHaveFocus(); // the next unit's control
+  });
+  it('removes one of a shelf shown in full, which stays in full', async () => {
+    const chosen = favour(7);
+    useAppStore.setState({ libraryFavouritesOpen: true });
+    render(<LibraryView />);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: new RegExp(`^Remove ${escaped(chosen[6]!.title)} by .+ from Favourites$`),
+      }),
+    );
+    expect(within(favourites()!).getAllByRole('button', { name: /^Open / })).toHaveLength(6);
   });
   it('skips a favourite the library no longer holds', () => {
     useAppStore.setState({

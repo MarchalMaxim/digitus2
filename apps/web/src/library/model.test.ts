@@ -814,6 +814,7 @@ describe('the favourites shelf (issue #78)', () => {
       composerLine: 'Christian Petzold',
       label: 'Open Minuet by Christian Petzold',
       duration: '1:12',
+      removeLabel: 'Remove Minuet by Christian Petzold from Favourites',
     });
     // A title shown twice keeps its composer on both rows, as everywhere else.
     expect(rows.slice(1).map((r) => r.composerLine)).toEqual(['Traditional', 'Unknown']);

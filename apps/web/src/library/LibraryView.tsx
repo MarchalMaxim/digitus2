@@ -205,6 +205,7 @@ export function LibraryView() {
   const favourites = useAppStore((s) => s.settings.favourites);
   const favouritesOpen = useAppStore((s) => s.libraryFavouritesOpen);
   const setFavouritesOpen = useAppStore((s) => s.setLibraryFavouritesOpen);
+  const toggleFavourite = useAppStore((s) => s.toggleFavourite);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const list = useRef<HTMLDivElement>(null);
@@ -250,6 +251,22 @@ export function LibraryView() {
     if (lengthInEffect !== length) setLibraryLength(lengthInEffect);
   }, [lengthInEffect, length, setLibraryLength]);
   useFocusAfterChange(list, focusAfter);
+  // The last favourite taken off its shelf: the shelf leaves with the focused heart, and the
+  // focus goes to the next unit's control (the chosen level pill, or the small library's first row).
+  const focusAfterFavourites = useRef(false);
+  useEffect(() => {
+    if (!focusAfterFavourites.current) return;
+    focusAfterFavourites.current = false;
+    const page = list.current?.closest('main');
+    const next =
+      page?.querySelector<HTMLElement>('.level-choice input:checked') ??
+      list.current?.querySelector<HTMLElement>('.piece-row');
+    next?.focus();
+  });
+  const removeFavourite = (slug: string) => {
+    if (favouritesInView?.count === 1) focusAfterFavourites.current = true;
+    toggleFavourite(slug);
+  };
   // A refusal still showing would be stale in the score view, so opening anything clears it.
   const open = (source: PieceSource) => {
     rememberScroll();
@@ -337,6 +354,7 @@ export function LibraryView() {
           shelf={favouritesInView}
           onOpen={(slug) => open({ kind: 'library', slug })}
           onAll={() => setFavouritesOpen(true)}
+          onRemove={removeFavourite}
         />
       )}
       <MyScores onOpen={rememberScroll} />

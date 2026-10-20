@@ -88,11 +88,17 @@ export interface ShelfSummary {
   all: string | null;
 }
 
+/** A row of the Favourites shelf, with the name of its filled heart, which takes it off. */
+export interface FavouriteRow extends Row {
+  /** `Remove {full title} by {full composer} from Favourites`. */
+  removeLabel: string;
+}
+
 /** The Favourites shelf above the levels (issue #78): the newest five, or all once asked. */
 export interface FavouritesShelf {
   /** The favourites the library holds. */
   count: number;
-  rows: Row[];
+  rows: FavouriteRow[];
   /** `All 12 favourites`, or null when the rows are all of them. */
   all: string | null;
 }
@@ -559,7 +565,13 @@ export function favouritesShelf(
   const members = favourites.flatMap((slug) => bySlug.get(slug) ?? []);
   if (members.length === 0) return null;
   const shown = open ? members : members.slice(0, SAMPLES);
-  const rows = finish([[{ key: 'flat', heading: null, drafts: shown.map(plain) }]], t)[0]![0]!.rows;
+  const rows = finish(
+    [[{ key: 'flat', heading: null, drafts: shown.map(plain) }]],
+    t,
+  )[0]![0]!.rows.map((row, i) => ({
+    ...row,
+    removeLabel: t.library.favourites.remove(shown[i]!.title, composerText(shown[i]!.composer)),
+  }));
   const all = members.length > shown.length ? t.library.favourites.all(members.length) : null;
   return { count: members.length, rows, all };
 }

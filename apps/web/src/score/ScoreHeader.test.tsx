@@ -65,3 +65,36 @@ describe('the header around the title', () => {
     expect(container.querySelector('p')).toBeNull();
   });
 });
+
+describe('the heart beside the title (issue #78)', () => {
+  it('marks a library piece as a favourite and takes it off again, as a pressed toggle', async () => {
+    render(
+      <ScoreHeader title="T" composer="C" piece={null} onBack={null} favourite="ode-to-joy" />,
+    );
+    const heart = screen.getByRole('button', { name: 'Favourite' });
+    expect(heart).toHaveAttribute('aria-pressed', 'false');
+    expect(heart).toHaveClass('no-print');
+    await userEvent.click(heart);
+    expect(heart).toHaveAttribute('aria-pressed', 'true');
+    expect(useAppStore.getState().settings.favourites).toEqual(['ode-to-joy']);
+    await userEvent.click(heart);
+    expect(heart).toHaveAttribute('aria-pressed', 'false');
+    expect(useAppStore.getState().settings.favourites).toEqual([]);
+  });
+  it('shows a piece favourited earlier as pressed', () => {
+    useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, favourites: ['minuet', 'ode'] } });
+    render(<ScoreHeader title="T" composer="C" piece={null} onBack={null} favourite="ode" />);
+    expect(screen.getByRole('button', { name: 'Favourite' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+  it('is not there for an own file or a score that could not open', () => {
+    render(<ScoreHeader title="T" composer="C" piece={null} onBack={null} />);
+    expect(screen.queryByRole('button', { name: 'Favourite' })).toBeNull();
+  });
+  it('keeps the heart out of the heading', () => {
+    render(<ScoreHeader title="T" composer="C" piece={null} onBack={null} favourite="ode" />);
+    expect(screen.getByRole('heading', { level: 1, name: 'T' })).toBeInTheDocument();
+  });
+});

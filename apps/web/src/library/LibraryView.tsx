@@ -16,12 +16,14 @@ import { LanguageLine } from '../i18n/LanguageLine.js';
 import { useT } from '../i18n/i18n.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { SECTION_ROWS, showsSearch } from './disclosure.js';
+import { Favourites } from './Favourites.js';
 import { LevelPills } from './LevelPills.js';
 import { type ShelfId, type Tier } from './levels.js';
 import { libraryPieces } from './manifest.js';
 import {
   announcementFor,
   arrivalLevel,
+  favouritesShelf,
   libraryLayout,
   localDateKey,
   shelfHasPieces,
@@ -85,7 +87,8 @@ function useWarmUpWhenIdle() {
  * Remembers how far the list is scrolled, so the way back to it (the score's Back button or the
  * browser's) lands on the same rows (App.tsx restores `libraryScrollY`). However the reader
  * leaves: a library control (it calls the function this returns before it opens something), or
- * the history (the browser's Forward, an edited address), which no control sees.
+ * the history (the browser's Forward, an edited address), which no control sees. Where the list
+ * stood is remembered with it (`useAnchoredLibraryScroll`).
  *
  * The scroll is followed while the list is mounted and written to the store once, when the list
  * unmounts (not per scroll event: every store write also rewrites the persisted settings). That
@@ -94,26 +97,52 @@ function useWarmUpWhenIdle() {
  * address still names the library count: a step through the history changes the address first
  * and may then restore the next entry's offset on this page before it goes.
  */
-function useRememberLibraryScroll(): () => void {
+function useRememberLibraryScroll(list: RefObject<HTMLElement | null>): () => void {
   const setLibraryScrollY = useAppStore((s) => s.setLibraryScrollY);
-  /** The offset to write when the list goes; null until the list scrolls or opens something. */
-  const latest = useRef<number | null>(null);
+  /**
+   * The offset to write when the list goes, with where the list stood at that moment; null until
+   * the list scrolls or opens something.
+   */
+  const latest = useRef<{ y: number; top: number | null } | null>(null);
   useLayoutEffect(() => {
     latest.current = null;
     const onScroll = () => {
-      if (hashToView(location.hash)?.name === 'library') latest.current = window.scrollY;
+      if (hashToView(location.hash)?.name === 'library')
+        latest.current = { y: window.scrollY, top: listTop(list.current) };
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
-      if (latest.current !== null) setLibraryScrollY(latest.current);
+      if (latest.current !== null) setLibraryScrollY(latest.current.y, latest.current.top);
     };
-  }, [setLibraryScrollY]);
+  }, [setLibraryScrollY, list]);
   // Stable, so the window's drop listener (useWindowFileDrop) is not added again on every render.
   return useCallback(() => {
-    latest.current = window.scrollY;
-    setLibraryScrollY(window.scrollY);
-  }, [setLibraryScrollY]);
+    latest.current = { y: window.scrollY, top: listTop(list.current) };
+    setLibraryScrollY(latest.current.y, latest.current.top);
+  }, [setLibraryScrollY, list]);
+}
+
+/** Where the list stands on the page, whatever the scroll; null once it has left the document. */
+function listTop(list: HTMLElement | null): number | null {
+  return list?.isConnected ? list.offsetTop : null;
+}
+
+/**
+ * Coming back to the list, moves the remembered offset by as much as the list moved since it was
+ * taken, so the reader lands on the same rows when what stands above the list changed meanwhile:
+ * a heart pressed on the score adds or removes a favourite, a file opened joins My scores. Runs
+ * before App scrolls to the offset (a child's layout effect runs before its parent's). The top of
+ * the page stays the top, as the browsers' own scroll anchoring keeps it.
+ */
+function useAnchoredLibraryScroll(list: RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const { libraryScrollY, libraryListTop, setLibraryScrollY } = useAppStore.getState();
+    const now = listTop(list.current);
+    if (libraryListTop === null || now === null || libraryScrollY <= 0) return;
+    if (now !== libraryListTop)
+      setLibraryScrollY(Math.max(0, libraryScrollY + now - libraryListTop), now);
+  }, [list]);
 }
 
 /**
@@ -173,9 +202,15 @@ export function LibraryView() {
   const setLibraryPages = useAppStore((s) => s.setLibraryPages);
   const length = useAppStore((s) => s.libraryLength);
   const setLibraryLength = useAppStore((s) => s.setLibraryLength);
+  const favourites = useAppStore((s) => s.settings.favourites);
+  const favouritesOpen = useAppStore((s) => s.libraryFavouritesOpen);
+  const setFavouritesOpen = useAppStore((s) => s.setLibraryFavouritesOpen);
+  const toggleFavourite = useAppStore((s) => s.toggleFavourite);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
-  const rememberScroll = useRememberLibraryScroll();
+  const list = useRef<HTMLDivElement>(null);
+  useAnchoredLibraryScroll(list);
+  const rememberScroll = useRememberLibraryScroll(list);
   const pieces = libraryPieces();
   const tier = arrivalLevel(pieces, chosenLevel, lastPlayed);
   // The day is read once per visit to the page: the samples never change while the reader looks.
@@ -184,6 +219,14 @@ export function LibraryView() {
     () =>
       libraryLayout(pieces, { tier, query, shelf, section, pages, length, date, lastPlayed }, t),
     [pieces, tier, query, shelf, section, pages, length, date, lastPlayed, t],
+  );
+  // On the arrival page only: a search or an opened shelf replaces it, as it replaces the shelves.
+  const favouritesInView = useMemo(
+    () =>
+      layout.kind === 'shelves' || layout.kind === 'all'
+        ? favouritesShelf(pieces, favourites, favouritesOpen, t)
+        : null,
+    [layout.kind, pieces, favourites, favouritesOpen, t],
   );
   const start = startTarget(pieces, lastPlayed);
   // Search results share the key 'search': keystrokes after the first swap the rows without a
@@ -196,7 +239,6 @@ export function LibraryView() {
         : layout.kind;
   const fade = useChanged(listKey);
   const announcement = useAnnouncement(announcementFor(layout, t));
-  const list = useRef<HTMLDivElement>(null);
   const focusAfter = useRef<FocusTarget | null>(null);
   const [appended, setAppended] = useState<{ key: string; from: number } | null>(null);
   const freshFrom = appended?.key === listKey ? appended.from : null;
@@ -209,6 +251,22 @@ export function LibraryView() {
     if (lengthInEffect !== length) setLibraryLength(lengthInEffect);
   }, [lengthInEffect, length, setLibraryLength]);
   useFocusAfterChange(list, focusAfter);
+  // The last favourite taken off its shelf: the shelf leaves with the focused heart, and the
+  // focus goes to the next unit's control (the chosen level pill, or the small library's first row).
+  const focusAfterFavourites = useRef(false);
+  useEffect(() => {
+    if (!focusAfterFavourites.current) return;
+    focusAfterFavourites.current = false;
+    const page = list.current?.closest('main');
+    const next =
+      page?.querySelector<HTMLElement>('.level-choice input:checked') ??
+      list.current?.querySelector<HTMLElement>('.piece-row');
+    next?.focus();
+  });
+  const removeFavourite = (slug: string) => {
+    if (favouritesInView?.count === 1) focusAfterFavourites.current = true;
+    toggleFavourite(slug);
+  };
   // A refusal still showing would be stale in the score view, so opening anything clears it.
   const open = (source: PieceSource) => {
     rememberScroll();
@@ -291,6 +349,14 @@ export function LibraryView() {
           {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
         </div>
       </header>
+      {favouritesInView && (
+        <Favourites
+          shelf={favouritesInView}
+          onOpen={(slug) => open({ kind: 'library', slug })}
+          onAll={() => setFavouritesOpen(true)}
+          onRemove={removeFavourite}
+        />
+      )}
       <MyScores onOpen={rememberScroll} />
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">

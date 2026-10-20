@@ -19,6 +19,27 @@
   align-content: center;
 }
 
+/* A Favourites row (Favourites.tsx): the row's button, then its filled heart on the title's line
+   beside the length, one rule under both. */
+.piece-list > .has-trailing {
+  display: flex;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--gray-2);
+}
+
+.has-trailing > .piece-row {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+}
+
+.favourite-remove {
+  flex: none;
+  /* The circle's middle on the title's line: the row's top padding and half a line (the title's
+     size is the button's). A browser without lh keeps the circle at the row's top. */
+  margin-top: calc(0.625rem + 0.5lh - 22px);
+}
+
 /* The row's line runs under Remove too, as the list's top line does; Remove keeps the title's
    0.5rem inset from the line's end. */
 .local-score-row {
@@ -184,7 +205,8 @@
   margin-bottom: 1.5rem;
 }
 
-.library-list .text-button {
+.library-list .text-button,
+.favourites .text-button {
   min-height: 44px;
 }
 

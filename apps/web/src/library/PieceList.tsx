@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useT } from '../i18n/i18n.js';
 import { LengthPills } from './LevelPills.js';
 import { type LengthId, type ShelfId } from './levels.js';
@@ -162,29 +162,44 @@ interface RowsProps {
   offset: number;
   freshFrom: number | null;
   onOpen(slug: string): void;
+  /**
+   * Starts the ids of the rows' parts: a list whose pieces may also stand in another list on
+   * the page (the Favourites shelf) gives its own, so no id is written twice.
+   */
+  idPrefix?: string;
+  /** A control after each row's button, inside its item (the Favourites shelf's filled heart). */
+  trailing?: (index: number) => ReactNode;
 }
 
-function Rows({ rows, offset, freshFrom, onOpen }: RowsProps) {
+export function Rows({ rows, offset, freshFrom, onOpen, idPrefix = '', trailing }: RowsProps) {
   return (
     <ul className="piece-list">
       {rows.map((r, i) => (
         <li
           key={r.slug}
-          className={freshFrom !== null && offset + i >= freshFrom ? 'is-new' : undefined}
+          className={
+            [
+              freshFrom !== null && offset + i >= freshFrom ? 'is-new' : '',
+              trailing ? 'has-trailing' : '',
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
         >
           <button
             type="button"
             className="piece-row"
             aria-label={r.label}
-            aria-describedby={`${r.slug}-duration`}
+            aria-describedby={`${idPrefix}${r.slug}-duration`}
             onClick={() => onOpen(r.slug)}
           >
             <span className="title">{r.title}</span>
-            <span id={`${r.slug}-duration`} className="duration">
+            <span id={`${idPrefix}${r.slug}-duration`} className="duration">
               {r.duration}
             </span>
             {r.composerLine !== null && <span className="composer muted">{r.composerLine}</span>}
           </button>
+          {trailing?.(i)}
         </li>
       ))}
     </ul>

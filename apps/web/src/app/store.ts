@@ -24,6 +24,12 @@ export interface Settings {
   lastPlayed: string | null;
   /** True once the reader has pressed Play in any piece: the finger legend then lives in the side panel only. */
   legendSeen: boolean;
+  /**
+   * The library pieces the reader marked with the score page's heart, by slug, newest first
+   * (issue #78): the library's Favourites shelf. A slug no longer in the library is kept and
+   * simply not shown.
+   */
+  favourites: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -35,6 +41,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showEditorial: false,
   lastPlayed: null,
   legendSeen: false,
+  favourites: [],
 };
 
 export type PieceSource =
@@ -57,6 +64,12 @@ export interface AppState {
    * (App.tsx). Not persisted.
    */
   libraryScrollY: number;
+  /**
+   * Where the library's list stood (its `offsetTop`) when `libraryScrollY` was taken, or null:
+   * coming back, the offset moves by as much as the list did, when what stands above it changed
+   * meanwhile (a heart pressed on the score adds or removes a favourite). Not persisted.
+   */
+  libraryListTop: number | null;
   /** The level pill chosen in this visit; null until the reader chooses one. Not persisted. */
   libraryLevel: Tier | null;
   /** The library's search text in this visit; not persisted. */
@@ -73,6 +86,8 @@ export interface AppState {
   libraryPages: number;
   /** The length pill chosen, kept across shelves, levels and searches (spec 4.3). Not persisted. */
   libraryLength: LengthId;
+  /** The library's Favourites shelf shows every favourite, not only the newest five. Not persisted. */
+  libraryFavouritesOpen: boolean;
   /** The dock's Practice panel is open; lasts for the visit, every page load starts closed. */
   practiceOpen: boolean;
   openLibrary(): void;
@@ -86,7 +101,7 @@ export interface AppState {
    */
   setTempoFactor(factor: number): void;
   setNotice(message: string | Phrase | null): void;
-  setLibraryScrollY(y: number): void;
+  setLibraryScrollY(y: number, listTop?: number | null): void;
   /** Chooses a level; the list starts again at its first page. */
   setLibraryLevel(level: Tier): void;
   /** Typing a search closes the open section and starts at the first page. */
@@ -98,6 +113,9 @@ export interface AppState {
   setLibraryPages(pages: number): void;
   /** Chooses a length; the list starts again at its first page. */
   setLibraryLength(length: LengthId): void;
+  setLibraryFavouritesOpen(open: boolean): void;
+  /** The score page's heart: a library piece becomes the newest favourite, or stops being one. */
+  toggleFavourite(slug: string): void;
   /** Called on Play: the legend has been seen, and a library piece becomes the one to continue. */
   markPlayed(): void;
   setPracticeOpen(open: boolean): void;
@@ -207,7 +225,14 @@ function pickSettings(value: unknown): Partial<Settings> {
   if (typeof raw.lastPlayed === 'string' || raw.lastPlayed === null)
     out.lastPlayed = raw.lastPlayed;
   if (typeof raw.legendSeen === 'boolean') out.legendSeen = raw.legendSeen;
+  if (Array.isArray(raw.favourites)) out.favourites = pickSlugs(raw.favourites);
   return out;
+}
+
+/** A stored list's slugs: the non-empty strings, each once, in their order. */
+function pickSlugs(values: readonly unknown[]): string[] {
+  const slugs = values.filter((v): v is string => typeof v === 'string' && v !== '');
+  return [...new Set(slugs)];
 }
 
 function memoryStorage(): StateStorage {
@@ -281,12 +306,14 @@ export const useAppStore = create<AppState>()(
       settings: { ...DEFAULT_SETTINGS },
       notice: null,
       libraryScrollY: 0,
+      libraryListTop: null,
       libraryLevel: null,
       libraryQuery: '',
       libraryShelf: null,
       librarySection: null,
       libraryPages: 1,
       libraryLength: 'any',
+      libraryFavouritesOpen: false,
       practiceOpen: false,
       openLibrary: () => set({ view: { name: 'library' } }),
       openAbout: () => set({ view: { name: 'about' } }),
@@ -301,7 +328,7 @@ export const useAppStore = create<AppState>()(
           return { settings: { ...s.settings, tempoByPiece } };
         }),
       setNotice: (message) => set({ notice: message }),
-      setLibraryScrollY: (y) => set({ libraryScrollY: y }),
+      setLibraryScrollY: (y, listTop = null) => set({ libraryScrollY: y, libraryListTop: listTop }),
       setLibraryLevel: (level) => set({ libraryLevel: level, libraryPages: 1 }),
       setLibraryQuery: (query) =>
         set({ libraryQuery: query, librarySection: null, libraryPages: 1 }),
@@ -309,6 +336,14 @@ export const useAppStore = create<AppState>()(
       setLibrarySection: (section) => set({ librarySection: section, libraryPages: 1 }),
       setLibraryPages: (pages) => set({ libraryPages: Math.max(1, Math.floor(pages)) }),
       setLibraryLength: (length) => set({ libraryLength: length, libraryPages: 1 }),
+      setLibraryFavouritesOpen: (open) => set({ libraryFavouritesOpen: open }),
+      toggleFavourite: (slug) =>
+        set((s) => {
+          const others = s.settings.favourites.filter((f) => f !== slug);
+          const favourites =
+            others.length < s.settings.favourites.length ? others : [slug, ...others];
+          return { settings: { ...s.settings, favourites } };
+        }),
       markPlayed: () =>
         set((s) => {
           if (s.view.name !== 'score') return {};

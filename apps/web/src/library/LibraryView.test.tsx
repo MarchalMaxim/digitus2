@@ -50,6 +50,7 @@ beforeEach(() => {
     librarySection: null,
     libraryPages: 1,
     libraryLength: 'any',
+    libraryFavouritesOpen: false,
   });
 });
 // Testing Library only cleans up automatically when vitest globals are on; they are off here.
@@ -298,6 +299,126 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
   });
 });
 
+describe('LibraryView: the Favourites shelf (issue #78)', () => {
+  // Curated Easy pieces, in manifest order; the store keeps favourites newest first.
+  const easy = () => libraryPieces().filter((p) => p.level <= 2);
+  const favour = (n: number) => {
+    const chosen = easy().slice(0, n);
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, favourites: chosen.map((p) => p.slug) },
+    });
+    return chosen;
+  };
+  const favourites = () =>
+    screen.queryByRole('heading', { level: 2, name: 'Favourites' })?.closest('section') ?? null;
+  const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  it('is not there before the first favourite', () => {
+    render(<LibraryView />);
+    expect(favourites()).toBeNull();
+  });
+  it('stands above the levels with its count and the favourites newest first, and opens one', async () => {
+    const chosen = favour(3);
+    const { container } = render(<LibraryView />);
+    const shelf = favourites()!;
+    expect(h2s()[0]).toBe('Favourites');
+    expect(
+      shelf.compareDocumentPosition(screen.getByRole('radio', { name: 'Easy' })) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(within(shelf).getByText('3 pieces')).toHaveClass('muted');
+    const titles = within(shelf)
+      .getAllByRole('button', { name: /^Open / })
+      .map((b) => b.querySelector('.title')!.textContent);
+    expect(titles).toEqual(chosen.map((p) => p.title));
+    expect(within(shelf).queryByRole('button', { name: /^All / })).toBeNull();
+    expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+    await userEvent.click(within(shelf).getAllByRole('button', { name: /^Open / })[1]!);
+    expect(useAppStore.getState().view).toEqual({
+      name: 'score',
+      source: { kind: 'library', slug: chosen[1]!.slug },
+    });
+  });
+  it('shows the newest five, and the rest in place on All, focusing the first new row', async () => {
+    favour(7);
+    render(<LibraryView />);
+    const open = () => within(favourites()!).getAllByRole('button', { name: /^Open / });
+    expect(open()).toHaveLength(5);
+    await userEvent.click(screen.getByRole('button', { name: 'All 7 favourites' }));
+    expect(open()).toHaveLength(7);
+    expect(open()[5]).toHaveFocus();
+    expect(screen.queryByRole('button', { name: 'All 7 favourites' })).toBeNull();
+    expect(useAppStore.getState().libraryFavouritesOpen).toBe(true);
+  });
+  it('leaves while a search or a style shelf is open, as the shelves do', async () => {
+    favour(2);
+    render(<LibraryView />);
+    await userEvent.click(screen.getByRole('button', { name: 'All 41 songs' }));
+    expect(favourites()).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
+    expect(favourites()).not.toBeNull();
+    await userEvent.type(screen.getByRole('searchbox'), 'minuet');
+    expect(favourites()).toBeNull();
+  });
+  it('says what it holds in one gray line', () => {
+    favour(1);
+    render(<LibraryView />);
+    expect(
+      within(favourites()!).getByText('The pieces you marked with the heart, newest first.'),
+    ).toHaveClass('muted');
+  });
+  it('takes a favourite off with its filled heart, keeping the focus on the next one', async () => {
+    const chosen = favour(3);
+    render(<LibraryView />);
+    const remove = (title: string) =>
+      screen.getByRole('button', {
+        name: new RegExp(`^Remove ${escaped(title)} by .+ from Favourites$`),
+      });
+    const hearts = () =>
+      within(favourites()!).getAllByRole('button', { name: /^Remove .* from Favourites$/ });
+    expect(hearts()).toHaveLength(3);
+    await userEvent.click(remove(chosen[0]!.title));
+    expect(useAppStore.getState().settings.favourites).toEqual(chosen.slice(1).map((p) => p.slug));
+    expect(within(favourites()!).getByText('2 pieces')).toBeInTheDocument();
+    expect(hearts()[0]).toHaveFocus(); // the next favourite's heart, now the first
+    await userEvent.click(remove(chosen[2]!.title));
+    expect(hearts()).toHaveLength(1);
+    expect(hearts()[0]).toHaveFocus(); // the last one gone: the one before it
+    await userEvent.click(remove(chosen[1]!.title));
+    expect(favourites()).toBeNull();
+    expect(useAppStore.getState().settings.favourites).toEqual([]);
+    expect(screen.getByRole('radio', { name: 'Easy' })).toHaveFocus(); // the next unit's control
+  });
+  it('removes one of a shelf shown in full, which stays in full', async () => {
+    const chosen = favour(7);
+    useAppStore.setState({ libraryFavouritesOpen: true });
+    render(<LibraryView />);
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: new RegExp(`^Remove ${escaped(chosen[6]!.title)} by .+ from Favourites$`),
+      }),
+    );
+    expect(within(favourites()!).getAllByRole('button', { name: /^Open / })).toHaveLength(6);
+  });
+  it('skips a favourite the library no longer holds', () => {
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, favourites: ['no-such-piece', easy()[0]!.slug] },
+    });
+    render(<LibraryView />);
+    expect(within(favourites()!).getByText('1 piece')).toBeInTheDocument();
+    expect(within(favourites()!).getAllByRole('button', { name: /^Open / })).toHaveLength(1);
+  });
+  it('gives a favourite that is also a shelf sample ids of its own', () => {
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, favourites: easy().map((p) => p.slug) },
+      libraryFavouritesOpen: true,
+    });
+    const { container } = render(<LibraryView />);
+    const ids = [...container.querySelectorAll('[id]')].map((e) => e.id);
+    expect(ids.length).toBeGreaterThan(0);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
 describe('LibraryView: the returning reader (UI batch spec 16)', () => {
   it('continues with the last piece played, on its level', () => {
     useAppStore.setState({
@@ -396,6 +517,39 @@ describe('LibraryView: leaving the list (M4, polish plan)', () => {
     const { unmount } = render(<LibraryView />);
     unmount();
     expect(useAppStore.getState().libraryScrollY).toBe(1852);
+  });
+  describe('when what stands above the list changed meanwhile (a heart pressed on the score)', () => {
+    // happy-dom lays nothing out: the list's offset from the page's top is stubbed.
+    let listTop = 0;
+    beforeEach(() => {
+      listTop = 0;
+      vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        return this.classList.contains('library-list') ? listTop : 0;
+      });
+    });
+    afterEach(() => vi.restoreAllMocks());
+    it('remembers where the list stood when it opens a piece', async () => {
+      listTop = 380;
+      render(<LibraryView />);
+      window.scrollTo({ top: 1200 });
+      await userEvent.click(rows()[0]!);
+      expect(useAppStore.getState()).toMatchObject({ libraryScrollY: 1200, libraryListTop: 380 });
+      window.scrollTo({ top: 0 });
+    });
+    it('moves the remembered offset by as much as the list moved, before the page scrolls to it', () => {
+      useAppStore.setState({ libraryScrollY: 1200, libraryListTop: 380 });
+      listTop = 507; // a Favourites shelf of one row now stands above the list
+      render(<LibraryView />);
+      expect(useAppStore.getState()).toMatchObject({ libraryScrollY: 1327, libraryListTop: 507 });
+    });
+    it('keeps the top of the page at the top', () => {
+      useAppStore.setState({ libraryScrollY: 0, libraryListTop: 380 });
+      listTop = 507;
+      render(<LibraryView />);
+      expect(useAppStore.getState().libraryScrollY).toBe(0);
+    });
   });
 });
 

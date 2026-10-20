@@ -433,6 +433,63 @@ fieldset {
   margin-bottom: 0.5rem;
 }
 
+/* A library piece's title and its heart (issue #78): the heart stands in the text flow after the
+   title's last word, so it takes width on the last line only. The row's nowrap governs the one
+   break between the heading and the heart (their nearest common ancestor), so the heart never
+   stands alone on a line: it takes the last word with it. At the heading's size, `middle`
+   centres it on that line's letters; the negative margins keep the 44 px circle from making the
+   line taller. */
+.title-row {
+  font-size: 1.75rem;
+  white-space: nowrap;
+}
+
+.title-row > h1 {
+  display: inline;
+  white-space: normal;
+  /* An archive title can end in one long word (a file name): it breaks rather than push the
+     heart, glued to it, past the column. */
+  overflow-wrap: anywhere;
+}
+
+.favourite-toggle {
+  vertical-align: middle;
+  margin: -0.5rem 0 -0.5rem 0.5rem;
+}
+
+/* The heart (design/HeartIcon.tsx): a round 44 px button with no border, like the theme switch;
+   an ink outline that fills while the piece is a favourite. The Favourites shelf's rows show it
+   filled (library.css, .favourite-remove). Ink only, never red. */
+.heart-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+
+.heart-button svg {
+  width: 24px;
+  height: 24px;
+  max-width: none;
+}
+
+.heart-button path {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: fill var(--dur-fast) var(--ease);
+}
+
+.heart-button[aria-pressed='true'] path,
+.heart-button.is-filled path {
+  fill: currentColor;
+}
+
 .score-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 16rem;

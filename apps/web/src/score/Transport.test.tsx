@@ -51,6 +51,7 @@ function playback(
     leadInRemainingSec: () => null,
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),
+    strike: () => () => undefined,
   };
 }
 afterEach(() => {

@@ -13,6 +13,7 @@ import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
 import { useEmbellishCarry } from './carry.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
+import { handOfKey, keyForNote } from './noteKey.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
 import { EndBurst } from './EndBurst.js';
 import { RedGhost, useRedFlight } from './RedFlight.js';
@@ -31,6 +32,7 @@ import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useCursor } from './useCursor.js';
+import { useHoveredNote } from './useHoveredNote.js';
 import { mutedHandsFor, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
 
@@ -299,6 +301,28 @@ export function ScoreView({ source }: { source: PieceSource }) {
     if (playing && !playable) pause();
   }, [playing, playable, pause]);
 
+  // The keyboard answers (issue #96). Stopped or paused, the key of the note under the mouse
+  // pointer goes down with its finger (useHoveredNote.ts); a key pressed on the keyboard sounds
+  // at its hand's unmarked velocity (playback.strike), whatever the transport is doing. The notes
+  // move with new pages and with the width (as the bars do, `barLayout` below).
+  const noteLayout = useMemo(() => ({ pages: doc.pages, width }), [doc.pages, width]);
+  const hoveredId = useHoveredNote({
+    host,
+    layoutKey: noteLayout,
+    enabled: doc.status === 'ready' && !playback.playing,
+  });
+  const noteById = useMemo(() => new Map(score?.notes.map((n) => [n.id, n])), [score]);
+  const hoveredNote = hoveredId === null ? undefined : noteById.get(hoveredId);
+  const hoveredKey = useMemo(
+    () => (hoveredNote ? keyForNote(hoveredNote, doc.assignment) : null),
+    [hoveredNote, doc.assignment],
+  );
+  const { strike } = playback;
+  const strikeKey = useCallback(
+    (midi: number) => (score ? strike(midi, handOfKey(score, midi)) : undefined),
+    [score, strike],
+  );
+
   // T13: the score is the timeline. A click or tap in a bar, or Left and Right (Shift: four bars),
   // goes to a bar's start; the red hops there (RedFlight.tsx) and, playing, the music comes in as
   // it lands. Seeks stay inside a loop. Home is Rewind.
@@ -532,6 +556,8 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   struckCount={struckCount}
                   muted={muted}
                   handLetters={lettersShown(groups, currentGroup, lettered)}
+                  hovered={hoveredKey}
+                  onStrike={strikeKey}
                 />
               </div>
             )}

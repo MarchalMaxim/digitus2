@@ -16,6 +16,12 @@ export interface Instrument {
   /** Fetch what the given pitches at the given velocities need; resolves when they can be played. */
   load(midis: number[], velocities: number[]): Promise<void>;
   start(e: NoteEvent): void;
+  /**
+   * Sounds `midi` now at `velocity`, for `maxSec` at most (a key clicked on the on-screen
+   * keyboard, issue #96); the function returned stops it sooner (the release). Silent, and the
+   * release harmless, before `load()` has resolved.
+   */
+  strike(midi: number, velocity: number, maxSec: number): () => void;
   /** Silence everything that is sounding or scheduled. */
   stopAll(): void;
 }
@@ -88,6 +94,10 @@ export function createPiano(ctx: AudioContext): Instrument {
         duration: e.duration,
       });
     },
+    strike(midi, velocity, maxSec) {
+      const stop = piano?.start({ note: midi, velocity: floor(velocity), duration: maxSec });
+      return () => stop?.();
+    },
     stopAll() {
       piano?.stop();
     },
@@ -101,14 +111,25 @@ function floor(velocity: number): number {
 /** Records what it is asked to play and makes no sound (tests and `?audio=silent`). */
 export function createSilentInstrument(): Instrument & {
   events: NoteEvent[];
+  /** The keys struck from the keyboard, and the pitches released since. */
+  strikes: { midi: number; velocity: number; maxSec: number }[];
+  released: number[];
   stopAllCalls: number;
 } {
   const silent = {
     events: [] as NoteEvent[],
+    strikes: [] as { midi: number; velocity: number; maxSec: number }[],
+    released: [] as number[],
     stopAllCalls: 0,
     load: () => Promise.resolve(),
     start(e: NoteEvent) {
       silent.events.push(e);
+    },
+    strike(midi: number, velocity: number, maxSec: number) {
+      silent.strikes.push({ midi, velocity, maxSec });
+      return () => {
+        silent.released.push(midi);
+      };
     },
     stopAll() {
       silent.stopAllCalls++;

@@ -50,7 +50,9 @@ class Limiter:
                     del self.hits[other]
             hits = self.hits.setdefault(key, deque())
             if len(hits) >= self.limit:
-                return False, max(1, math.ceil(hits[0] + self.window - now))
+                # The time left, as the window less the time gone: `hits[0] + window - now` rounds
+                # up past the window when the sum crosses a power of two and the clock has not moved.
+                return False, max(1, math.ceil(self.window - (now - hits[0])))
             hits.append(now)
             return True, 0
 

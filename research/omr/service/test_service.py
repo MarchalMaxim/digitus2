@@ -205,6 +205,13 @@ def test_the_limiter_window_rolls():
     now[0] += 50
     assert limiter.allow("a") == (True, 0)
 
+def test_the_wait_never_exceeds_the_window_on_a_coarse_clock():
+    # Windows' monotonic clock ticks coarsely, so a refused request often reads the same instant
+    # as the first hit; 6000.7 + 3600 crosses a power of two and rounds up (Retry-After 3601).
+    limiter = Limiter(limit=1, window=3600, clock=lambda: 6000.7)
+    assert limiter.allow("a") == (True, 0)
+    assert limiter.allow("a") == (False, 3600)
+
 @pytest.mark.parametrize("origin", [None, "null", "https://evil.example", ORIGIN + ".evil.example"])
 def test_origin_and_client_header_are_required(api, origin):
     for method, path in [("GET", "/v1/health"), ("POST", "/v1/recognize"), ("DELETE", f"/v1/jobs/{'a' * 32}")]:

@@ -3,8 +3,16 @@ on:
   push:
     branches: [main]
   pull_request:
+# A new push to a pull request cancels the run it supersedes. Pushes to main are grouped by commit,
+# so they never cancel each other.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 jobs:
-  test:
+  # Three jobs run side by side (issue #83): the wall time is the longest of them, about four
+  # minutes, instead of the sum of every step in one job, which was 12 to 17 minutes with the
+  # Playwright suite alone taking 10 to 14 on two workers.
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,13 +25,42 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm format:check
-      - run: pnpm test
       - run: pnpm build
       - run: pnpm test:omr
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      # The web build resolves the engine from its sources (vite.config.ts aliases), so the engine
+      # is not built here; `pnpm --filter @digitus2/web e2e` would build the same dist again.
+      - run: pnpm --filter @digitus2/web build
       # Playwright is a dependency of apps/web only; the root has no playwright binary.
       - run: pnpm --filter @digitus2/web exec playwright install --with-deps chromium
-      - run: pnpm --filter @digitus2/web e2e
+      # Each shard takes a fifth of the tests on the two workers the runner's four cores give
+      # (playwright.config.ts leaves the worker count at Playwright's default on purpose: the
+      # playback checks sample frames in real time and a crowded runner stretches them).
+      - run: pnpm --filter @digitus2/web exec playwright test --shard=${{ matrix.shard }}/5
         env: { CI: 'true' }
       - uses: actions/upload-artifact@v4
         if: failure()
-        with: { name: playwright-report, path: apps/web/playwright-report, retention-days: 7 }
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: apps/web/playwright-report
+          retention-days: 7

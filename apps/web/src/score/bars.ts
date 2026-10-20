@@ -104,18 +104,48 @@ export interface BarBox {
   bottom: number;
 }
 
+/** One page of the score (an SVG in the host) and its bars. */
+export interface PageBars {
+  page: Element;
+  /** Its top and bottom, in pixels from the host's top. */
+  top: number;
+  bottom: number;
+  /** The number of its first bar among the bars of every page. */
+  first: number;
+  measures: Element[];
+}
+
 /**
- * Where each bar is drawn in the pages inside `host`: from its first staff's top to its last
- * staff's bottom (both hands), between its bar lines, padded above and below by `pad` times the
- * height of a staff, so the digits over and under the staves count too. Bars are `g.measure` elements in document
- * order, which is the score's bar order (the pages are laid out from the score's own MusicXML).
- * A bar drawn nowhere (no staff) is left out. Read from layout: call it once per layout, not per
- * pointer move.
+ * The pages inside `host` (its children) with their bars, numbered across the pages in document
+ * order, which is the score's bar order (the pages are laid out from the score's own MusicXML),
+ * and where each page lies. One box per page: the bars themselves are not measured, so a page that
+ * is not rendered (base.css, `content-visibility`) costs nothing here. Call it once per layout.
  */
-export function barBoxes(host: Element, pad: number): BarBox[] {
+export function pageBars(host: Element): PageBars[] {
+  const origin = host.getBoundingClientRect();
+  let first = 0;
+  return Array.from(host.children).map((page) => {
+    const r = page.getBoundingClientRect();
+    const measures = Array.from(page.querySelectorAll('g.measure'));
+    const out = { page, top: r.top - origin.top, bottom: r.bottom - origin.top, first, measures };
+    first += measures.length;
+    return out;
+  });
+}
+
+/**
+ * Where each bar of `page` is drawn, in pixels from the top left corner of `host`: from its first
+ * staff's top to its last staff's bottom (both hands), between its bar lines, padded above and
+ * below by `pad` times the height of a staff, so the digits over and under the staves count too.
+ * A bar drawn nowhere (no staff) is left out. Read from layout, which draws the page if it was
+ * not drawn: call it once per page and layout, for a page that is needed (a long piece has dozens,
+ * issue #79), not per pointer move.
+ */
+export function barBoxes(host: Element, pad: number, page: PageBars): BarBox[] {
   const origin = host.getBoundingClientRect();
   const out: BarBox[] = [];
-  host.querySelectorAll('g.measure').forEach((measure, bar) => {
+  page.measures.forEach((measure, i) => {
+    const bar = page.first + i;
     let left = Infinity;
     let right = -Infinity;
     let top = Infinity;

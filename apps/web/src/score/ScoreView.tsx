@@ -15,7 +15,16 @@ import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
 import { RedGhost, useRedFlight } from './RedFlight.js';
-import { dimNotes, setDigits, sweepDimming } from './render/dom.js';
+import {
+  mutedElements,
+  redim,
+  setDigits,
+  settleCancelled,
+  settleStill,
+  settleSweep,
+  sweepDimming,
+  systemsOnScreen,
+} from './render/dom.js';
 import { ScoreHeader, useLegendAbove } from './ScoreHeader.js';
 import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
@@ -199,25 +208,61 @@ export function ScoreView({ source }: { source: PieceSource }) {
   const range = useMemo(() => (score ? keyboardRange(score) : null), [score]);
   // One-hand practice: the hand left out is dimmed in the score as on the keyboard (review S10).
   // A layout effect after the pages are in (ScoreSheet writes them in one too), so a hand switch
-  // dims and the cursor re-marks in the same paint, and new pages arrive already dimmed.
-  const mutedIds = useMemo(
-    () => new Set(score?.notes.filter((n) => mutedHands.includes(n.hand)).map((n) => n.id)),
-    [score, mutedHands],
-  );
+  // dims and the cursor re-marks in the same paint, and new pages arrive already dimmed. One set of
+  // note ids per selection and score, so switching back finds the same set (and its elements below).
+  const mutedIdsBy = useMemo(() => {
+    const leftOut = (h: HandsMode) =>
+      new Set(score?.notes.filter((n) => mutedHandsFor(h).includes(n.hand)).map((n) => n.id));
+    return { both: leftOut('both'), L: leftOut('L'), R: leftOut('R') };
+  }, [score]);
+  const mutedIds = mutedIdsBy[hands];
   // A hand switch on the same pages fades the hand left out (or back in) bar by bar, from the first
-  // bar of each system to the last (`sweepDimming`); new pages arrive already dimmed, at once.
-  const dimmedRef = useRef<{ host: Element; pages: string[] } | null>(null);
+  // bar of each system to the last (`sweepDimming`), in the systems on screen; the rest of the
+  // piece, and new pages, change at once. The systems are found before any class changes, while
+  // the layout is clean. What each selection dims is found once per layout (`mutedElements` walks
+  // every page), so a switch only moves the dimming between two lists (issue #79).
+  const dimmedRef = useRef<{
+    host: Element;
+    pages: string[];
+    lists: Map<ReadonlySet<string>, Element[]>;
+    shown: Element[];
+  } | null>(null);
   useLayoutEffect(() => {
     if (!host) return;
     const last = dimmedRef.current;
     const switched = last !== null && last.host === host && last.pages === doc.pages;
-    const before = switched ? [...host.querySelectorAll('.is-muted')] : [];
-    dimNotes(host, mutedIds);
-    dimmedRef.current = { host, pages: doc.pages };
+    const lists = switched ? last.lists : new Map<ReadonlySet<string>, Element[]>();
+    let shown = lists.get(mutedIds);
+    if (!shown) {
+      shown = mutedElements(host, mutedIds);
+      lists.set(mutedIds, shown);
+    }
+    const spread = prefersReducedMotion() ? 0 : HAND_SWEEP_MS;
+    const onScreen = switched && spread > 0 ? systemsOnScreen(host) : new Set<Element>();
+    // New pages arrive with nothing dimmed.
+    const before = switched ? last.shown : [];
+    redim(before, shown);
+    dimmedRef.current = { host, pages: doc.pages, lists, shown };
     if (!switched) return;
-    const changed = new Set([...before, ...host.querySelectorAll('.is-muted')]);
-    sweepDimming(changed, prefersReducedMotion() ? 0 : HAND_SWEEP_MS);
+    if (sweepDimming(host, new Set([...before, ...shown]), spread, onScreen) > 0) settleStill(host);
   }, [host, doc.pages, mutedIds]);
+  // Each element swept settles into its resting look when its own fade ends (`settleSweep`), or
+  // when a switch cancelled it and nothing of it still runs (`settleCancelled`).
+  useEffect(() => {
+    if (!host) return;
+    const settle = (e: Event) => settleSweep(e.target);
+    const cancelled = (e: Event) => settleCancelled(e.target);
+    host.addEventListener('transitionend', settle);
+    host.addEventListener('animationend', settle);
+    host.addEventListener('transitioncancel', cancelled);
+    host.addEventListener('animationcancel', cancelled);
+    return () => {
+      host.removeEventListener('transitionend', settle);
+      host.removeEventListener('animationend', settle);
+      host.removeEventListener('transitioncancel', cancelled);
+      host.removeEventListener('animationcancel', cancelled);
+    };
+  }, [host]);
   const { pressed, muted, currentGroup, struckCount } = useCursor({
     host,
     groups,

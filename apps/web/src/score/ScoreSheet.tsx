@@ -21,6 +21,21 @@ export interface ScoreSheetProps {
 }
 
 /**
+ * Gives a page the aspect ratio of its viewBox. The pages off screen skip their rendering (base.css,
+ * `content-visibility: auto`, issue #79), and a skipped page has no natural size: the ratio keeps
+ * its height, so nothing moves when it is next drawn. A page without a viewBox is left as it is.
+ */
+function keepAspect(page: Element): void {
+  const box = (page.getAttribute('viewBox') ?? '')
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  const [, , width, height] = box;
+  if (box.length !== 4 || !(width! > 0) || !(height! > 0)) return;
+  (page as SVGElement).style.aspectRatio = `${width} / ${height}`;
+}
+
+/**
  * Hosts the rendered pages as inline SVG. The markup is the output of our own Verovio worker
  * laid out from the score being shown; no user-supplied HTML is ever inserted. New pages replace
  * the old ones, never append. Each SVG scales to the column width (`.score-sheet svg` in
@@ -40,7 +55,9 @@ export function ScoreSheet({
   // hand left out, ScoreView.tsx) and before the paint, so they never show undimmed for a frame.
   useLayoutEffect(() => {
     const host = hostRef.current;
-    if (host) host.innerHTML = pages.join('');
+    if (!host) return;
+    host.innerHTML = pages.join('');
+    for (const page of Array.from(host.children)) keepAspect(page);
   }, [pages]);
 
   useEffect(() => {

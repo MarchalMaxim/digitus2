@@ -57,15 +57,15 @@ The fade itself no longer drops frames at full speed (the slowest frame of the s
 | the same with the `<use>` glyphs hidden                  |                11 |
 | the same with each `<use>` replaced by a `<g transform>` copy of its glyph |  2,085 |
 | `filter: opacity(0.4)` instead                           |             2,085 |
-| `will-change: transform` on each page                    |             2,110 |
+| `will-change: transform` on each page                    |             2,090 |
 | `isolation: isolate; contain: paint` on each page        |             2,085 |
 | `opacity` forced to 1 (nothing dimmed, as a control)     |                11 |
 | `fill-opacity` and `stroke-opacity` 0.4 (after)          |                11 |
 | digits at a group opacity of 0.4, notes by fill opacity  |                11 |
 
-The reasons Chrome gave: 1,302 layers for overlap, 619 with no direct reason, 158 inside the scroller. So a transform inside a translucent group is the trigger, not `<use>` itself. With 2,000 layers, every repaint pays for layerization and commit; in the trace of six switches it was the largest single cost, 1,320 ms (`PaintArtifactCompositor::Update`) of 3,930 ms of long tasks, before commit (309 ms), style (255 ms) and paint (238 ms). The playing cursor, a class swap per note, paid it too in one-hand practice.
+So a transform inside a translucent group is the trigger, not `<use>` itself. With 2,000 layers, every repaint pays for layerization and commit. In a trace of six switches on the Rondo, layerization (`PaintArtifactCompositor::Update`) was the largest single cost: 602 ms of the 1,244 ms of long tasks (48 %), ahead of JavaScript (102 ms), paint (85 ms), event dispatch (75 ms), style (58 ms) and commit (57 ms). The playing cursor, a class swap per note, paid it too in one-hand practice.
 
-**2. The sweep faded the whole piece.** Every element dimmed or brought back on every page carried a transition with its `--sweep` delay: 2,103 per one-hand switch on the Rondo, 8,818 on the Scherzo. Each running opacity animation is composited (4,845 layers at the Rondo's peak), and each transition fires `transitionrun`, `transitionstart` and `transitionend`, which React's root listener receives in its capture and bubble phases: 8,418 transitions, 25,254 events and 50,508 listener calls over six switches, 450 ms of event dispatch.
+**2. The sweep faded the whole piece.** Every element dimmed or brought back on every page carried a transition with its `--sweep` delay: 2,103 per one-hand switch on the Rondo, 8,818 on the Scherzo. Each running opacity animation is composited (3,056 layers at the Rondo's peak), and each transition fires `transitionrun`, `transitionstart` and `transitionend`, which bubble to React's root listener: 25,254 events over the six switches of that trace, 278 ms of dispatch.
 
 **3. A switch restyled and walked the whole piece.** Pages far off screen were restyled and repainted too, and `dimNotes` walked all 102,000 elements of the Scherzo on every switch (21 ms there at full speed), with two more full queries for the elements dimmed before and after, and a cursor query (`.is-red, [data-onset-tick]`) that a list of two selectors makes slow: 2.75 ms per call on the Scherzo against 0.25 ms for the class alone.
 
@@ -97,13 +97,13 @@ After the change, what remains of a switch is restyling the pages on screen and 
 
 | Option | Result | Why not |
 | ------ | ------ | ------- |
-| Keep `opacity`, make each page its own layer (`will-change: transform`) or contain it (`isolation`, `contain: paint`) | still 2,085 to 2,110 layers | does not stop the overlap cascade |
+| Keep `opacity`, make each page its own layer (`will-change: transform`) or contain it (`isolation`, `contain: paint`) | still 2,085 to 2,090 layers | does not stop the overlap cascade |
 | Keep `opacity`, draw the glyphs without `<use>` | still 2,085 layers | the transform is the trigger, not the `use` |
 | `filter: opacity(0.4)` | 2,085 layers | the same effect |
 | Dim by colour, ink mixed 40 % into the paper | 11 layers | an opaque gray notehead hides the staff line through it, where 40 % ink lets it show as before |
 | Fade the digits' `opacity` | 320 layers at the peak, 184 ms of long tasks per switch | an opacity animation is composited per element |
 | Fill opacity for the digits too | 11 layers | translucent text on the page is drawn with subpixel smoothing on Windows, which fringes a pale digit with colour; a group opacity keeps it gray |
-| Fade every page (fill opacity, no layers) | janky on the Rondo (8 to 14 slow frames per switch) | thousands of main-thread transitions and their events |
+| Fade every page (fill opacity, on the elements that change only) | 11 layers, but 401 ms of long tasks per switch on the Rondo and 4 janky frames | 2,281 main-thread animations and their events |
 
 ## The look
 
@@ -116,8 +116,8 @@ Old against new, Kuhlau's Rondo, the right hand dimmed, the second system, reduc
 | dark  |    1× |  4,623 of 137,560 (3.4 %) |           1.16 |
 | dark  |    3× |  1,934 of 121,500 (1.6 %) |           0.46 |
 
-The tone is the same (40 %), and the digits are drawn as before. The difference sits in antialiased edges (the old layers were rasterised apart, so even undimmed ink differs by a level or two) and where two dimmed shapes overlap: each shape is dimmed on its own, so a stem's end inside its beam, or a stem along its notehead, is a little darker where they overlap. It shows when zoomed in; at the size the score is read it is a fraction of a pixel. Verovio's markup carries no opacity attributes that could block the inherited dimming (checked on the pieces above).
+The tone is the same (40 %), and the digits are drawn as before. The difference sits in antialiased edges and where two dimmed shapes overlap: each shape is dimmed on its own, so a stem's end inside its beam, or a stem along its notehead, is a little darker where they overlap. It shows when zoomed in; at the size the score is read it is a fraction of a pixel. Verovio's markup on the Rondo carries no opacity attributes that could block the inherited dimming.
 
 ## Guards
 
-`e2e/hand-switch.spec.ts` checks the mechanisms, so a loaded machine cannot fail it: on K.545 scrolled a third of the way down, a switch fades only systems on screen, with at most two transitions per element faded and fewer bars than the piece has; once settled, no element is left marked, no translucent group holds a transformed shape, the dimmed digits rest at a group opacity of 0.4, and Chrome composites fewer than 100 layers; under reduced motion nothing fades. Against the build before the change, the first two of its three tests fail (685 elements drawn through a translucent group holding transformed shapes).
+`e2e/hand-switch.spec.ts` checks the mechanisms, so a loaded machine cannot fail it: on K.545 scrolled a third of the way down, a switch fades only systems on screen, with at most two transitions per element faded and fewer bars than the piece has; once settled, no element is left marked, no translucent group holds a transformed shape, the dimmed digits rest at a group opacity of 0.4, and Chrome composites fewer than 100 layers; under reduced motion nothing fades. Against the build before the change, the first two of its three tests fail: nothing is marked to sweep, and 73 dimmed layers are translucent groups holding transformed shapes.

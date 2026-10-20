@@ -53,6 +53,38 @@ test('local library: draft bytes, reading order, explicit resume and deletion su
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
 });
 
+test("local library: Remove sits inside its row's lines and stays a plain word on hover (#74)", async ({
+  page,
+}) => {
+  await mockService(page, '');
+  await page.goto('/');
+  await page
+    .getByLabel('Open your own score')
+    .setInputFiles({ name: 'first.png', mimeType: 'image/png', buffer: png });
+  await myScores(page);
+  const remove = page.getByRole('button', { name: 'Remove saved first.png' });
+  await expect(remove).toBeVisible();
+  // Some element in the row draws its bottom line across the whole of Remove, as the list's top
+  // line does.
+  const spanned = await remove.evaluate((button) => {
+    const row = button.closest('li')!;
+    const b = button.getBoundingClientRect();
+    return [row, ...row.querySelectorAll('*')].some((el) => {
+      const r = el.getBoundingClientRect();
+      return (
+        getComputedStyle(el).borderBottomWidth !== '0px' && r.left <= b.left && r.right >= b.right
+      );
+    });
+  });
+  expect(spanned).toBe(true);
+  await remove.hover();
+  const background = await remove.evaluate(async (el) => {
+    await Promise.all(el.getAnimations().map((a) => a.finished));
+    return getComputedStyle(el).backgroundColor;
+  });
+  expect(background).toBe('rgba(0, 0, 0, 0)');
+});
+
 test('local library: recognized notation reopens without rescanning', async ({ page }) => {
   const calls = recordService(page);
   const xml = libraryScore('twinkle-twinkle-little-star');

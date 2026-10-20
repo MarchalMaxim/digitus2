@@ -59,6 +59,12 @@ export interface KeyboardProps {
    * number. Undefined: the keys only move.
    */
   onStrike?: (midi: number) => (() => void) | void;
+  /**
+   * The keys the played hands strike in the cursor's bar, one per attack (issue 104): a
+   * keyboard that scrolls chooses its view from these once a bar (`barView`). A new array only
+   * when the bar changes. Undefined: the view follows `pressed`, at every change of it.
+   */
+  barKeys?: readonly number[];
 }
 
 /** How long a key pressed with the pointer stays down at most (ms): usePlayback's KEY_HOLD_SEC. */
@@ -71,29 +77,37 @@ export interface Span {
 }
 
 /**
- * What a scrolling keyboard `view` pixels wide shows of the pressed keys (their spans, in the
- * order of `pressed`): all of them when they fit; otherwise the stretch that holds the most of
- * them, preferring one that holds the first key (struck at the cursor). Null for no keys.
+ * How much of the best stretch's count a scrolling keyboard's view must hold to stay where it is
+ * at a new bar (`barView`): two stretches nearly as good never trade places at every bar line.
  */
-export function keysToShow(spans: readonly Span[], view: number): Span | null {
-  const first = spans[0];
-  if (!first) return null;
+const VIEW_STICKS = 0.6;
+
+/**
+ * Where a scrolling keyboard `view` pixels wide puts its left edge for a bar (issue 104), from
+ * the spans of the keys the bar strikes, one per attack, and its left edge now (`current`). Keys
+ * that all fit stay in view: where they are when they already are, else centred. Keys that do
+ * not fit (a stride bass under chords two octaves up) show the stretch that holds the most
+ * attacks, centred, unless the view now holds `VIEW_STICKS` of that many already.
+ */
+export function barView(spans: readonly Span[], view: number, current: number): number {
+  if (spans.length === 0) return current;
+  const holds = (left: number) =>
+    spans.filter((s) => s.left >= left && s.right <= left + view).length;
   const left = Math.min(...spans.map((s) => s.left));
   const right = Math.max(...spans.map((s) => s.right));
-  if (right - left <= view) return { left, right };
-  // Some best stretch starts at a key's left edge: try each one.
-  let best: Span = first;
-  let bestScore = -1;
-  for (const start of spans) {
-    const inside = spans.filter((s) => s.left >= start.left && s.right <= start.left + view);
-    if (inside.length === 0) continue;
-    const score = inside.length + (inside.includes(first) ? 0.5 : 0);
-    if (score > bestScore) {
-      bestScore = score;
-      best = { left: start.left, right: Math.max(...inside.map((s) => s.right)) };
+  if (right - left <= view) {
+    return holds(current) === spans.length ? current : (left + right) / 2 - view / 2;
+  }
+  // Some best stretch starts at a key's left edge: try each one; the earlier wins a tie.
+  let best = { left, right, count: 0 };
+  for (const start of new Set(spans.map((s) => s.left))) {
+    const inside = spans.filter((s) => s.left >= start && s.right <= start + view);
+    if (inside.length > best.count) {
+      best = { left: start, right: Math.max(...inside.map((s) => s.right)), count: inside.length };
     }
   }
-  return best;
+  if (holds(current) >= best.count * VIEW_STICKS) return current;
+  return (best.left + best.right) / 2 - view / 2;
 }
 
 const WHITE_W = 24;
@@ -183,8 +197,8 @@ const NO_HOVER: PressedKey[] = [];
  *
  * The SVG sits in its own sideways scroller: it never draws a white key narrower than
  * MIN_WHITE_PX, so a wide piece on a phone scrolls instead of shrinking the digits away. A
- * scrolling keyboard follows the pressed keys when they leave its visible part, and is a tab
- * stop so it can also be scrolled from the keyboard.
+ * scrolling keyboard chooses its view once a bar, from the keys the bar strikes (`barView`), and
+ * is a tab stop so it can also be scrolled from the keyboard.
  *
  * The keyboard answers (issue #96): the key of a note hovered in the score goes down with its
  * finger (`hovered`), and a key pressed with the pointer goes down and sounds (`onStrike`,
@@ -200,6 +214,7 @@ export function Keyboard({
   handLetters = false,
   hovered = null,
   onStrike,
+  barKeys,
 }: KeyboardProps): JSX.Element {
   const t = useT();
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
@@ -260,32 +275,32 @@ export function Keyboard({
     downRef.current = new Set([...byMidi.keys()]);
   });
 
-  // Runs when the cursor moves to another group (the only time `pressed` changes). The jump is
-  // instant: the keys on screen are the ones being heard, and a smooth scroll would lag them. A
-  // layout effect, so the scroll lands in the same frame as the newly pressed keys: a passive
-  // effect runs after the paint, and for one frame the pressed keys could sit out of view.
+  // Runs when the cursor enters another bar (`barKeys`; without it, at every change of `pressed`).
+  // The view is chosen once a bar, so a texture wider than the view (a stride bass) does not swing
+  // the keyboard from end to end at every note (issue 104). The jump is instant: the keys on
+  // screen are the ones being heard, and a smooth scroll would lag them. A layout effect, so the
+  // scroll lands in the same frame as the newly pressed keys: a passive effect runs after the
+  // paint, and for one frame the pressed keys could sit out of view.
+  const followed = useMemo(() => barKeys ?? pressed.map((p) => p.midi), [barKeys, pressed]);
   useLayoutEffect(() => {
     const el = scrollRef.current;
     const svg = svgRef.current;
-    if (!el || !svg || pressed.length === 0 || el.scrollWidth <= el.clientWidth + 1) return;
+    if (!el || !svg || followed.length === 0 || el.scrollWidth <= el.clientWidth + 1) return;
     // The viewBox as laid out: scaled to fit the SVG box and centered in it.
     const box = svg.getBoundingClientRect();
     const scale = Math.min(box.width / (width + 1), box.height / (WHITE_H + 1));
     if (!(scale > 0)) return;
     const offset = (box.width - (width + 1) * scale) / 2;
     const spans: Span[] = [];
-    for (const p of pressed) {
-      const k = shapeOf.get(p.midi);
+    for (const midi of followed) {
+      const k = shapeOf.get(midi);
       if (!k) continue;
       const w = k.black ? BLACK_W : WHITE_W;
       spans.push({ left: offset + (k.x + 0.5) * scale, right: offset + (k.x + w + 0.5) * scale });
     }
-    const show = keysToShow(spans, el.clientWidth);
-    if (!show || (show.left >= el.scrollLeft && show.right <= el.scrollLeft + el.clientWidth)) {
-      return;
-    }
-    el.scrollLeft = (show.left + show.right) / 2 - el.clientWidth / 2;
-  }, [pressed, shapeOf, width]);
+    const left = barView(spans, el.clientWidth, el.scrollLeft);
+    if (left !== el.scrollLeft) el.scrollLeft = left;
+  }, [followed, shapeOf, width]);
 
   const key = (k: KeyShape) => {
     const p = byMidi.get(k.midi);

@@ -1,3 +1,5 @@
+import type { Note } from '@digitus2/engine';
+import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
@@ -37,6 +39,9 @@ import { mutedHandsFor, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
 
 /** The status line's text while the score is busy, by status. */
+/** No keys to follow: nothing is marked. */
+const NO_BAR_KEYS: number[] = [];
+
 function busyText(status: DocStatus, t: Messages): string | undefined {
   const text = t.score.view.status;
   if (status === 'idle' || status === 'loading') return text.loading;
@@ -287,6 +292,27 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // The bar the cursor is in (1-based; 1 when nothing is marked): where "Loop bars" starts.
   const currentBar =
     currentGroup >= 0 ? (groups[currentGroup]?.notes[0]?.measureIndex ?? 0) + 1 : 1;
+  // The keys the played hands strike in the cursor's bar, one per attack: a keyboard that scrolls
+  // chooses its view from these, once a bar (issue 104). None while nothing is marked.
+  const marked = currentGroup >= 0;
+  const notesByBar = useMemo(() => {
+    const byBar = new Map<number, Note[]>();
+    for (const n of score?.notes ?? []) {
+      const bar = byBar.get(n.measureIndex);
+      if (bar) bar.push(n);
+      else byBar.set(n.measureIndex, [n]);
+    }
+    return byBar;
+  }, [score]);
+  const barKeys = useMemo(
+    () =>
+      marked
+        ? (notesByBar.get(currentBar - 1) ?? [])
+            .filter((n) => !mutedHands.includes(n.hand))
+            .flatMap((n) => ornamentAttacks(n).map((a) => a.midi))
+        : NO_BAR_KEYS,
+    [notesByBar, currentBar, marked, mutedHands],
+  );
   // The dock's Practice panel: open or closed for the visit (store), closed on every page load.
   const practiceOpen = useAppStore((s) => s.practiceOpen);
   const setPracticeOpen = useAppStore((s) => s.setPracticeOpen);
@@ -558,6 +584,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   handLetters={lettersShown(groups, currentGroup, lettered)}
                   hovered={hoveredKey}
                   onStrike={strikeKey}
+                  barKeys={barKeys}
                 />
               </div>
             )}

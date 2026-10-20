@@ -23,7 +23,15 @@
  * a seek to a bar out of view jumps there, and the page scrolls.
  */
 import type { Hand } from '@digitus2/engine';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type JSX,
+  type RefObject,
+} from 'react';
 import {
   EASE,
   HOP_MAX_MS,
@@ -90,7 +98,7 @@ function boxOf(el: Element): FlightBox {
 }
 
 /** Of several noteheads (a chord, both hands), the highest on the page. */
-function topmost(heads: readonly Element[]): FlightBox | null {
+export function topmost(heads: readonly Element[]): FlightBox | null {
   let best: FlightBox | null = null;
   for (const h of heads) {
     const b = boxOf(h);
@@ -181,6 +189,19 @@ export function flightFrames(plan: FlightPlan): {
   };
 }
 
+/**
+ * The noteheads the cursor marked last (`.is-red .notehead` under `host`), read in a layout
+ * effect whenever the cursor moves to a group, and kept once it clears: they stay in the page, so
+ * a flight home or the finish (EndBurst.tsx) can still leave from where the music ended.
+ */
+export function useLastHeads(host: Element | null, currentGroup: number): RefObject<Element[]> {
+  const ref = useRef<Element[]>([]);
+  useLayoutEffect(() => {
+    if (host && currentGroup >= 0) ref.current = [...host.querySelectorAll('.is-red .notehead')];
+  }, [host, currentGroup]);
+  return ref;
+}
+
 export interface RedFlightOptions {
   /** The score sheet's host (the cursor marks its notes). */
   host: Element | null;
@@ -235,11 +256,7 @@ export function useRedFlight({
   });
 
   // The cursor's noteheads, kept for a flight home: they stay in the page after the marks clear.
-  const lastHeadsRef = useRef<Element[]>([]);
-  useLayoutEffect(() => {
-    if (host && currentGroup >= 0)
-      lastHeadsRef.current = [...host.querySelectorAll('.is-red .notehead')];
-  }, [host, currentGroup]);
+  const lastHeadsRef = useLastHeads(host, currentGroup);
 
   // Home: Rewind while stopped, or the end of the piece, takes the position back to the start.
   // A layout effect, so the shape replaces the cleared marks in the same paint.
@@ -255,7 +272,7 @@ export function useRedFlight({
     const note = topmost(heads);
     if (!button || !note) return;
     setPlan({ dir: 'home', button: boxOf(button), note, durationMs: RED_FLIGHT_MS });
-  }, [atStart, playing]);
+  }, [atStart, playing, lastHeadsRef]);
 
   // Out: only a lead-in that Play began with the red on Play (nothing marked: not a resume, whose
   // red is on the paused cursor), never a seek or a loop wrap while playing.

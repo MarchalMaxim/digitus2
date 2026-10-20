@@ -86,6 +86,12 @@ export interface Playback {
    */
   atStart: boolean;
   /**
+   * How many times the piece has been played to its end: the transport's end, heard, is the one
+   * thing that counts it, never Pause, Rewind, a seek, a loop wrap (a loop never ends) or a new
+   * score. The finish (EndBurst.tsx) answers each count.
+   */
+  ended: number;
+  /**
    * The score time a seek (T13) put the position at, a bar's start, until a note is heard there
    * (or Rewind, or a new score); null otherwise. Stopped, the cursor marks the first group of the
    * hands played at or after it, the note Play starts with, rather than the last one heard.
@@ -207,6 +213,7 @@ export function usePlayback(score: Score | null): Playback {
   const [countIn, setCountIn] = useState<CountIn | null>(null);
   const [waiting, setWaiting] = useState(false);
   const [atStart, setAtStart] = useState(true);
+  const [ended, setEnded] = useState(0);
   const [loop, setLoopState] = useState<LoopRange | null>(null);
   const [cue, setCue] = useState<number | null>(null);
   /** `atStart` for play(), which runs in a click: a Play from the start lets the red travel. */
@@ -328,12 +335,14 @@ export function usePlayback(score: Score | null): Playback {
           transport.setMuted(mutedHandsFor(settings.hands));
           transport.setMetronome(settings.metronome);
           transport.setCountIn(settings.countIn);
-          // The end: back to the start, stopped; the cursor clears and Play is red again.
+          // The end: back to the start, stopped; the cursor clears and Play is red again, and the
+          // finish rises from the last group heard (EndBurst.tsx), in the same render.
           transport.onEnd = () => {
             transport.rewind();
             setPlaying(false);
             setAtStart(true);
             setCue(null);
+            setEnded((n) => n + 1);
           };
           // The count-in, for the status line, and the lead-in, which the cursor waits for (it
           // marks nothing until the first note of the hands played is heard). A tick that ends
@@ -497,6 +506,7 @@ export function usePlayback(score: Score | null): Playback {
       countIn,
       waiting,
       atStart,
+      ended,
       cue,
       loop,
       play,
@@ -515,6 +525,7 @@ export function usePlayback(score: Score | null): Playback {
       countIn,
       waiting,
       atStart,
+      ended,
       cue,
       loop,
       play,

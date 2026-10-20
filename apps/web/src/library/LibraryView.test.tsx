@@ -477,6 +477,39 @@ describe('LibraryView: leaving the list (M4, polish plan)', () => {
     unmount();
     expect(useAppStore.getState().libraryScrollY).toBe(1852);
   });
+  describe('when what stands above the list changed meanwhile (a heart pressed on the score)', () => {
+    // happy-dom lays nothing out: the list's offset from the page's top is stubbed.
+    let listTop = 0;
+    beforeEach(() => {
+      listTop = 0;
+      vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        return this.classList.contains('library-list') ? listTop : 0;
+      });
+    });
+    afterEach(() => vi.restoreAllMocks());
+    it('remembers where the list stood when it opens a piece', async () => {
+      listTop = 380;
+      render(<LibraryView />);
+      window.scrollTo({ top: 1200 });
+      await userEvent.click(rows()[0]!);
+      expect(useAppStore.getState()).toMatchObject({ libraryScrollY: 1200, libraryListTop: 380 });
+      window.scrollTo({ top: 0 });
+    });
+    it('moves the remembered offset by as much as the list moved, before the page scrolls to it', () => {
+      useAppStore.setState({ libraryScrollY: 1200, libraryListTop: 380 });
+      listTop = 507; // a Favourites shelf of one row now stands above the list
+      render(<LibraryView />);
+      expect(useAppStore.getState()).toMatchObject({ libraryScrollY: 1327, libraryListTop: 507 });
+    });
+    it('keeps the top of the page at the top', () => {
+      useAppStore.setState({ libraryScrollY: 0, libraryListTop: 380 });
+      listTop = 507;
+      render(<LibraryView />);
+      expect(useAppStore.getState().libraryScrollY).toBe(0);
+    });
+  });
 });
 
 describe('LibraryView: search (UI batch 6.3; shelves spec 4.4)', () => {

@@ -574,3 +574,36 @@ test('library: the heart on a score puts the piece on the Favourites shelf, acro
   await libraryReady(page);
   await expect(page.getByRole('heading', { name: 'Favourites' })).toHaveCount(0);
 });
+
+// The UI review of issue #78: the Favourites shelf above the list grows or shrinks while the reader
+// is on the score, and Back must still land on the same rows, not on the same pixel offset.
+test('library: Back after the heart lands on the same rows, the Favourites shelf above them new or gone', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  // A sample of the second shelf, brought near the top of the window.
+  const row = page.locator('.library-list .shelf').nth(1).locator('.piece-row').first();
+  const name = (await row.getAttribute('aria-label'))!;
+  const inList = page.locator('.library-list').getByRole('button', { name, exact: true });
+  await inList.evaluate((el) =>
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 80),
+  );
+  const rowTop = () => inList.evaluate((el) => el.getBoundingClientRect().top);
+  const before = await rowTop();
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+  const heart = page.getByRole('button', { name: 'Favourite' });
+  for (const pressed of ['true', 'false']) {
+    await inList.click();
+    await heart.click();
+    await expect(heart).toHaveAttribute('aria-pressed', pressed);
+    await page.getByRole('button', { name: 'Back to the library' }).click();
+    await libraryReady(page);
+    await expect(page.getByRole('region', { name: 'Favourites' })).toHaveCount(
+      pressed === 'true' ? 1 : 0,
+    );
+    expect(Math.abs((await rowTop()) - before), `the row with the heart ${pressed}`).toBeLessThan(
+      3,
+    );
+  }
+});

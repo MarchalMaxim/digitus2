@@ -64,6 +64,12 @@ export interface AppState {
    * (App.tsx). Not persisted.
    */
   libraryScrollY: number;
+  /**
+   * Where the library's list stood (its `offsetTop`) when `libraryScrollY` was taken, or null:
+   * coming back, the offset moves by as much as the list did, when what stands above it changed
+   * meanwhile (a heart pressed on the score adds or removes a favourite). Not persisted.
+   */
+  libraryListTop: number | null;
   /** The level pill chosen in this visit; null until the reader chooses one. Not persisted. */
   libraryLevel: Tier | null;
   /** The library's search text in this visit; not persisted. */
@@ -95,7 +101,7 @@ export interface AppState {
    */
   setTempoFactor(factor: number): void;
   setNotice(message: string | Phrase | null): void;
-  setLibraryScrollY(y: number): void;
+  setLibraryScrollY(y: number, listTop?: number | null): void;
   /** Chooses a level; the list starts again at its first page. */
   setLibraryLevel(level: Tier): void;
   /** Typing a search closes the open section and starts at the first page. */
@@ -300,6 +306,7 @@ export const useAppStore = create<AppState>()(
       settings: { ...DEFAULT_SETTINGS },
       notice: null,
       libraryScrollY: 0,
+      libraryListTop: null,
       libraryLevel: null,
       libraryQuery: '',
       libraryShelf: null,
@@ -321,7 +328,7 @@ export const useAppStore = create<AppState>()(
           return { settings: { ...s.settings, tempoByPiece } };
         }),
       setNotice: (message) => set({ notice: message }),
-      setLibraryScrollY: (y) => set({ libraryScrollY: y }),
+      setLibraryScrollY: (y, listTop = null) => set({ libraryScrollY: y, libraryListTop: listTop }),
       setLibraryLevel: (level) => set({ libraryLevel: level, libraryPages: 1 }),
       setLibraryQuery: (query) =>
         set({ libraryQuery: query, librarySection: null, libraryPages: 1 }),

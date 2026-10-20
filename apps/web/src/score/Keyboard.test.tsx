@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { KEY_HOLD_MS, Keyboard, keyboardRange, keysToShow } from './Keyboard.js';
+import { barView, KEY_HOLD_MS, Keyboard, keyboardRange } from './Keyboard.js';
 
 afterEach(cleanup);
 afterEach(() => vi.restoreAllMocks());
@@ -194,27 +194,39 @@ describe('Keyboard', () => {
     // Not a tab stop until it actually scrolls (nothing is laid out here).
     expect(scroller).not.toHaveAttribute('tabindex');
   });
-  it('shows every pressed key when they fit, else the most of them, preferring the struck one', () => {
-    expect(keysToShow([], 300)).toBeNull();
-    const lh = { left: 0, right: 22 };
-    const rh1 = { left: 300, right: 322 };
-    const rh2 = { left: 344, right: 366 };
-    expect(keysToShow([lh, rh1], 400)).toEqual({ left: 0, right: 322 });
-    expect(keysToShow([lh, rh1, rh2], 150)).toEqual({ left: 300, right: 366 });
-    expect(keysToShow([rh1, lh], 150)).toEqual({ left: 300, right: 322 });
-    expect(keysToShow([lh, rh1], 150)).toEqual({ left: 0, right: 22 });
-  });
-  it('breaks a tie between stretches holding equally many keys in favour of the earlier one', () => {
-    const struck = { left: 0, right: 22 };
-    const earlier = [
-      { left: 300, right: 322 },
-      { left: 344, right: 366 },
+  describe('barView (issue #104)', () => {
+    const key = (left: number) => ({ left, right: left + 22 });
+    /** A stride bar: a low bass and a higher one, alternating under a held chord. */
+    const stride = [
+      ...[0, 300, 0, 300].map(key),
+      ...[440, 462, 506].flatMap((x) => [key(x), key(x), key(x), key(x)]),
     ];
-    const later = [
-      { left: 600, right: 622 },
-      { left: 644, right: 666 },
-    ];
-    expect(keysToShow([struck, ...earlier, ...later], 150)).toEqual({ left: 300, right: 366 });
+    it('stays put with no keys, or when the keys all fit in the view already', () => {
+      expect(barView([], 150, 40)).toBe(40);
+      expect(barView([key(100), key(200)], 200, 90)).toBe(90);
+    });
+    it('centres keys that all fit but are not all in view', () => {
+      expect(barView([key(400), key(500)], 200, 0)).toBe(461 - 100);
+    });
+    it('shows the stretch holding the most of the bar, counting each attack', () => {
+      // The chord's twelve attacks beat the bass's four: the view centres the chord.
+      expect(barView(stride, 150, 0)).toBe((440 + 528) / 2 - 75);
+    });
+    it('keeps the view while it holds nearly as many of the bar as the best stretch', () => {
+      const lowAndHigh = [...[0, 22, 44].map(key), ...[400, 422, 444, 466].map(key)];
+      // Three of seven where the best holds four: close enough, the view stays.
+      expect(barView(lowAndHigh, 100, 0)).toBe(0);
+      // A view holding none of them moves.
+      expect(barView(lowAndHigh, 100, 200)).toBe((400 + 488) / 2 - 50);
+    });
+    it('does not move from bar to bar under a repeated stride', () => {
+      let left = barView(stride, 150, 0);
+      for (let bar = 0; bar < 8; bar++) {
+        const next = barView(bar % 2 ? stride : [...stride].reverse(), 150, left);
+        expect(next).toBe(left);
+        left = next;
+      }
+    });
   });
   it('centres a black key on the line between its two white neighbours', () => {
     const { container } = render(<Keyboard lowMidi={48} highMidi={71} pressed={[]} />);

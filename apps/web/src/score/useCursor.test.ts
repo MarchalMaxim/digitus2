@@ -58,6 +58,7 @@ function playing({
     countIn,
     waiting,
     atStart: false,
+    ended: 0,
     cue: null,
     play: vi.fn(),
     pause: vi.fn(),

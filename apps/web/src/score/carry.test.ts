@@ -25,6 +25,7 @@ function fakePlayback(
     countIn: over.countIn ?? null,
     waiting: false,
     atStart: over.atStart ?? true,
+    ended: 0,
     cue: null,
     loop: over.loop ?? null,
     play: (opts) => calls.push(opts ? `play(${JSON.stringify(opts)})` : 'play()'),

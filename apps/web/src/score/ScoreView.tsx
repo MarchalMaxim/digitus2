@@ -14,6 +14,7 @@ import { useEmbellishCarry } from './carry.js';
 import { letteredBars, lettersShown } from './handLetters.js';
 import { Keyboard, keyboardRange } from './Keyboard.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
+import { EndBurst } from './EndBurst.js';
 import { RedGhost, useRedFlight } from './RedFlight.js';
 import {
   mutedElements,
@@ -536,6 +537,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
             )}
           </div>
           {red.flight && <RedGhost plan={red.flight} onLanded={red.landed} />}
+          <EndBurst host={host} ended={playback.ended} currentGroup={currentGroup} />
         </main>
         <SidePanel
           doc={doc}

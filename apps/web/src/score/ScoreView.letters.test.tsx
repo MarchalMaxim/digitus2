@@ -56,6 +56,7 @@ const playback: Playback = {
   countIn: null,
   waiting: false,
   atStart: false,
+  ended: 0,
   cue: null,
   play: () => {},
   pause: () => {},

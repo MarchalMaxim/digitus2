@@ -650,7 +650,11 @@ export function useScoreDocument(
           for (let attempt = 1; !rendered; attempt++) {
             try {
               width = layoutWidth(widthRef.current);
-              rendered = await svc.renderer.render({ xml, widthPx: width });
+              rendered = await svc.renderer.render({
+                xml,
+                widthPx: width,
+                notes: v.score.notes.length,
+              });
             } catch (e) {
               // Superseded by our own newer request: that one publishes. Superseded by another
               // document on the shared worker while still wanted: ask again.
@@ -805,6 +809,7 @@ export function useScoreDocument(
     void (async () => {
       let engine: Assignment;
       let xml: string | null;
+      let notes: number;
       try {
         const { offered } = await svc.engine.embellish(doc.plain.xml);
         if (!live()) return;
@@ -814,6 +819,7 @@ export function useScoreDocument(
         }
         const profile = solvedForRef.current ?? useAppStore.getState().settings.handSize;
         engine = offered.assignments[profile];
+        notes = offered.score.notes.length;
         const v: Version = {
           score: offered.score,
           xml: offered.xml,
@@ -834,7 +840,7 @@ export function useScoreDocument(
       }
       try {
         const width = layoutWidth(widthRef.current);
-        const rendered = await svc.renderer.render({ xml, widthPx: width });
+        const rendered = await svc.renderer.render({ xml, widthPx: width, notes });
         if (!live()) return;
         storePages(doc, 'embellished', bucket(width), false, {
           pages: rendered.pages,

@@ -14,9 +14,16 @@ const scope = self as unknown as WorkerScope;
 // One cached promise, so concurrent first messages compile the WASM only once. A failed
 // compile is forgotten, so the next request tries again.
 let toolkit: Promise<VerovioToolkit> | undefined;
+// Whether the WASM heap is larger than when the module started; the renderer retires a worker
+// whose heap grew (renderer.ts).
+let heapGrown = () => false;
 function getToolkit(): Promise<VerovioToolkit> {
   toolkit ??= createVerovioModule().then(
-    (module) => new VerovioToolkit(module),
+    (module) => {
+      const initial = module.HEAPU8.length;
+      heapGrown = () => module.HEAPU8.length > initial;
+      return new VerovioToolkit(module);
+    },
     (e: unknown) => {
       toolkit = undefined;
       throw e;
@@ -42,7 +49,7 @@ async function handle(req: RenderWorkerRequest): Promise<RenderWorkerResponse> {
     tk.setOptions(verovioOptions(req.widthPx));
     if (!tk.loadData(req.xml)) throw new Error('the score could not be laid out');
     const pages = Array.from({ length: tk.getPageCount() }, (_, i) => tk.renderToSVG(i + 1));
-    return { id: req.id, ok: true, pages, ms: performance.now() - t0 };
+    return { id: req.id, ok: true, pages, ms: performance.now() - t0, grown: heapGrown() };
   } catch (e) {
     return { id: req.id, ok: false, error: e instanceof Error ? e.message : String(e) };
   }

@@ -40,33 +40,35 @@ Renderer private memory, before → after, median of three runs:
 
 | Piece | Peak while it opens | 6 s after | 40 s after | After a forced GC |
 | --- | ---: | ---: | ---: | ---: |
-| Chopin, Scherzo No. 2 | 844 → 730 MB | 844 → 730 MB | 528 → 472 MB | 527 → 471 MB |
-| Beethoven, Symphony No. 9, first movement | 1,016 → 703 MB | 1,016 → 701 MB | 657 → 375 MB | 655 → 376 MB |
-| Precure piano medley | 1,540 → 967 MB | 1,509 → 648 MB | 947 → 549 MB | 943 → 550 MB |
+| Chopin, Scherzo No. 2 | 844 → 548 MB | 844 → 517 MB | 528 → 286 MB | 527 → 287 MB |
+| Beethoven, Symphony No. 9, first movement | 1,016 → 719 MB | 1,016 → 719 MB | 657 → 376 MB | 655 → 376 MB |
+| Precure piano medley | 1,540 → 994 MB | 1,509 → 994 MB | 947 → 543 MB | 943 → 544 MB |
 
-Each change's share, added one at a time (6 s after / 40 s after, median of three runs):
+The reading 6 s after depends on whether the page's first major GC has run by then (below): on the medley it was 626 to 648 MB in three other runs of the same code path, which had opened more slowly.
 
-| Build | Beethoven's Ninth | Precure medley |
-| --- | ---: | ---: |
-| Before | 1,016 / 657 MB | 1,509 / 947 MB |
-| + no indentation in the SVG | 997 / 610 MB | 1,374 / 859 MB |
-| + the engine worker released | 957 / 586 MB | 1,267 / 830 MB |
-| + a grown Verovio worker retired | 703 / 375 MB | 648 / 549 MB |
+Each change's share, added one at a time (40 s after, median of three runs):
+
+| Build | Scherzo | Beethoven's Ninth | Medley |
+| --- | ---: | ---: | ---: |
+| Before | 528 MB | 657 MB | 947 MB |
+| + no indentation in the SVG | 497 MB | 610 MB | 859 MB |
+| + the engine worker released | 471 MB | 586 MB | 830 MB |
+| + the Verovio worker retired when its heap grew | 472 MB (does not grow) | 375 MB | 549 MB |
+| + the Verovio worker retired after every long piece | 286 MB | 376 MB | 543 MB |
 
 - **No indentation in the SVG** (`svgFormatRaw`, `score/render/options.ts`). Pixel for pixel the same on nine pieces chosen for every kind of text in a score (metronome marks, dynamics, lyrics, words, tuplets, chord symbols, endings, pedals, octave lines, digits), with the same text widths; 42 % less markup and no whitespace text nodes. Every piece gains, in proportion to its length: 47 MB on Beethoven's Ninth (Blink heap 229 → 206 MB, page JS 42 → 36 MB), 88 MB on the medley.
 - **The engine worker is released after a long piece** (`engine/client.ts`). Once it has handled a score of 2,000 notes or more (`HEAVY_NOTES`, about a tenth of the library) and then idled for 2 s with nothing pending, it is terminated, and the next call (a hand size change, an export) starts a fresh one; the worker keeps no state between calls. Chrome hands a terminated worker's JS heap back some 20 to 40 s later (a worker holding 520 MB, terminated: 154 MB of WebAssembly memory came back at once, the rest between 20 and 40 s later, and a GC of the page did not hasten it), about when V8 would have collected the garbage anyway. So the release saves less than its garbage: the idle worker itself for the rest of the visit, and part of the garbage sooner, 24 to 107 MB. Shorter pieces keep their warm worker, and the library's warm-up still loads it ahead of the first piece.
-- **A Verovio worker whose heap grew is retired** (`score/render/renderer.ts`). The worker reports whether its WASM heap is larger than when it started; such a worker is terminated once nothing is pending, and the next layout or the library's next warm-up starts a fresh one. That frees the whole worker, its first 128 MB and its compiled code with them, and WebAssembly memory comes back at once: 211 MB on Beethoven's Ninth and 281 MB on the medley 40 s after the open. It applies only to the pieces whose layout grows the heap (three in the library: the medley and two movements of Beethoven symphonies, from 10,911 notes; the 40 longest pieces were laid out to find them, and the longest that fits, 9,481 notes, stays at 128 MB), which pay a 0.3 to 0.7 s cold start on their next layout (a new width bucket, the editor's fingering) against a layout of 5 to 8 s. On every other piece the worker and its 128 MB stay, as decided (Verovio options below).
+- **The Verovio worker is retired after a long piece** (`score/render/renderer.ts`). Once it has laid out a piece of 2,000 notes or more (the score view passes the note count), or its WASM heap has grown past its start (it reports so), it is terminated as soon as nothing is pending, and the next layout or the library's next warm-up starts a fresh one. That frees the whole worker, its 128 MB of WASM heap and its compiled code, and WebAssembly memory comes back at once: 186 MB on the Scherzo, 211 MB on Beethoven's Ninth, 281 MB on the medley. The owner asked for it on every long piece ("retire the Verovio worker after the layout of every piece of 2,000+ notes too", issue #90); at first it covered only the three pieces whose heap grows. The cost is a cold start on such a piece's next layout (a new width bucket, the editor's fingering, a fingering change that adds or removes a digit), measured as the time from a narrower window to the new pages, median of five: Beethoven's Sonata Op. 79 (2,075 notes) 535 → 893 ms, the Scherzo 2.0 → 2.5 s. Playback, the cursor, seeking, hand switches, loops and print need no layout. Shorter pieces keep the warm worker, and the library warms a fresh one up while idle, so the next piece opens as fast as before.
 
-The fixed build still holds about 300 MB more for some 30 s after a long piece opens than once it settles (Beethoven's Ninth: 700 MB, then 375 MB). It all comes back at the page's first major GC, which V8 runs about 30 s after the open, or at once when one is forced. The page's own heaps account for about 90 MB of it; the two main-thread passes that parse the fingered MusicXML before each layout (`normalizeVoices`, `prepareScanBeams`, both through `DOMParser`) for about 24 MB (a build without them: 689 instead of 713 MB). The rest is not pinned down.
+A long piece still holds 200 to 350 MB more for some 30 s after it opens than once it settles (Beethoven's Ninth: about 700 MB, then 376 MB). It all comes back at the page's first major GC, which V8 runs about 30 s after the open, or at once when one is forced. The page's own heaps account for about 90 MB of it; the two main-thread passes that parse the fingered MusicXML before each layout (`normalizeVoices`, `prepareScanBeams`, both through `DOMParser`) for about 24 MB (a build without them: 689 instead of 713 MB). The rest is not pinned down.
 
-`e2e/memory.spec.ts` opens Beethoven's Sonata Op. 79 (2,075 notes) and checks that the engine worker is gone within 10 s while the layout worker stays, and that a hand size change then fingers the piece again; it fails on the build before.
+`e2e/memory.spec.ts` opens Beethoven's Sonata Op. 79 and checks that both workers go; that a narrower window lays the piece out again in a fresh layout worker, which goes too; that a hand size change fingers it again; and that the library brings a layout worker back, which Twinkle then keeps. It fails on the build before.
 
 ## Options not taken
 
 | Option | Saves | Costs |
 | --- | --- | --- |
 | Keep only the pages near the screen in the DOM | about 245 MB on Beethoven's Ninth, 400 MB on the medley (the table above) | the cursor, the dimming of a hand, the digit patches after a re-solve, click-to-seek, the red's flight and print all find their elements in every page today; each would have to bring the pages it needs back first |
-| Retire the Verovio worker after the layout of every long piece, not only one whose heap grew | the Scherzo: 730 → 515 MB 6 s after the open, 472 → 286 MB 40 s after (two runs of a build that always retires) | 0.3 to 0.7 s on such a piece's next layout; the owner kept the worker warm on purpose, so this is the owner's call |
 | Write the fingerings into the MusicXML text, not an xmldom tree | the second tree at the peak of the open (more than 256 MB live on Beethoven's Ninth), about 1 s per open | a change to the engine's output; it needs an equivalence check over the whole library |
 
 ## Earlier fixes

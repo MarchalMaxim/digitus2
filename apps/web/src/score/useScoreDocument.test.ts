@@ -48,6 +48,8 @@ describe('useScoreDocument', () => {
     expect(result.current.pages[0]).toContain('data-fings="67"');
     expect(result.current.editorial && Object.keys(result.current.editorial)).toHaveLength(67);
     expect(result.current.title).toBe('Digitus Spike Etude (short)');
+    // The renderer retires its worker after a long piece's layout (renderer.ts).
+    expect(renderer.render).toHaveBeenCalledWith(expect.objectContaining({ notes: 67 }));
   });
   it('re-solves without re-rendering when the hand size changes', async () => {
     const engine = inlineEngine();

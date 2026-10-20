@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { HEAVY_NOTES } from '../../engine/client.js';
 import { createRenderer, SupersededError } from './renderer.js';
 // renderer.ts re-exports the engine client's WorkerLike, so one fake worker type serves both.
 import type { WorkerLike } from './renderer.js';
@@ -95,7 +96,7 @@ describe('renderer', () => {
   });
 });
 
-describe('renderer: a worker whose heap grew', () => {
+describe('renderer: a worker whose heap grew, or that laid out a long piece', () => {
   /** Spawns the fake workers `make` returns, in order, and keeps them. */
   function spawner(make: () => ReturnType<typeof fakeWorker>) {
     const spawned: ReturnType<typeof fakeWorker>[] = [];
@@ -152,6 +153,23 @@ describe('renderer: a worker whose heap grew', () => {
     r.warmUp();
     expect(spawned).toHaveLength(2);
     expect(spawned[1]!.posted).toEqual(['init']);
+  });
+
+  it('is retired after the layout of a long piece too, whose heap did not grow', async () => {
+    const { spawn, spawned } = spawner(() => fakeWorker([0, 0]));
+    const r = createRenderer(spawn);
+    await r.render({ xml: '<x/>', widthPx: 800, notes: HEAVY_NOTES });
+    expect(spawned[0]!.terminated).toBe(true);
+    expect((await r.render({ xml: '<x/>', widthPx: 640 })).pages).toEqual(['<svg data-w="640"/>']);
+    expect(spawned).toHaveLength(2);
+  });
+
+  it('is kept after the layout of a shorter piece', async () => {
+    const { spawn, spawned } = spawner(() => fakeWorker([0]));
+    const r = createRenderer(spawn);
+    await r.render({ xml: '<x/>', widthPx: 800, notes: HEAVY_NOTES - 1 });
+    expect(spawned).toHaveLength(1);
+    expect(spawned[0]!.terminated).toBe(false);
   });
 
   it('ignores a failure reported by a worker it has retired', async () => {

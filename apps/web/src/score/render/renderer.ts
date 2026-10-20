@@ -5,14 +5,15 @@
  * A worker that fails (its script did not load, it crashed) rejects every pending and later
  * request, so the score view shows an error instead of waiting forever.
  *
- * Verovio's WASM heap starts at 128 MB and never shrinks: a layout that needs more (the longest
- * pieces: 154 MB for Beethoven's Ninth, 221 MB for an 18,000-note medley) keeps the larger heap
- * for the rest of the visit. A worker that reports such growth is retired once nothing is pending,
- * which frees the whole worker, its first 128 MB with it (some 210 MB on Beethoven's Ninth), and
- * the next layout or warm-up starts a fresh one: only those pieces pay a cold start (0.3 to 0.7 s)
- * on their next layout, which itself takes seconds (docs/research/ram-usage.md).
+ * The worker (its 128 MB WASM heap and some 50 MB of code) is kept warm between pieces, except
+ * after a long one: once it has laid out a piece of `HEAVY_NOTES` or more, or its heap has grown
+ * (Verovio's heap never shrinks: 154 MB after Beethoven's Ninth, 221 MB after an 18,000-note
+ * medley), it is retired once nothing is pending. That frees the whole worker while the piece is
+ * read (some 190 MB on Chopin's Scherzo No. 2), and the next layout or the library's warm-up
+ * starts a fresh one: a long piece pays a cold start on its next layout (a new width bucket, the
+ * editor's fingering), which itself takes seconds (docs/research/ram-usage.md).
  */
-import type { WorkerLike } from '../../engine/client.js';
+import { HEAVY_NOTES, type WorkerLike } from '../../engine/client.js';
 import { normalizeVoices } from './normalizeVoices.js';
 import { prepareScanBeams } from './scanBeams.js';
 
@@ -22,6 +23,8 @@ export type { WorkerLike } from '../../engine/client.js';
 export interface RenderRequest {
   xml: string;
   widthPx: number;
+  /** The piece's note count: a layout of `HEAVY_NOTES` or more retires the worker after it. */
+  notes?: number;
 }
 
 export interface RenderResult {
@@ -66,9 +69,9 @@ function defaultWorker(): WorkerLike {
 }
 
 /**
- * `spawn` makes the worker: one at once, and another after a worker whose heap grew is retired.
- * `onFail` is told once when a worker fails, so the owner can make a fresh renderer for the next
- * piece (this one stays closed).
+ * `spawn` makes the worker: one at once, and another after one is retired. `onFail` is told once
+ * when a worker fails, so the owner can make a fresh renderer for the next piece (this one stays
+ * closed).
  */
 export function createRenderer(
   spawn: () => WorkerLike = defaultWorker,
@@ -82,8 +85,8 @@ export function createRenderer(
   let failure: Error | undefined;
   // The worker running now; undefined once retired, until the next render or warm-up.
   let worker: WorkerLike | undefined;
-  // The worker's heap has grown: retire it once nothing is pending.
-  let grown = false;
+  // The worker has laid out a long piece, or its heap has grown: retire it once nothing is pending.
+  let retire = false;
 
   const rejectAll = (e: Error) => {
     for (const p of pending.values()) p.reject(e);
@@ -95,17 +98,17 @@ export function createRenderer(
     w.onmessage = (e: MessageEvent) => {
       const res = e.data as RenderWorkerResponse;
       // A superseded layout still tells whether the heap grew.
-      if (res.ok && res.grown) grown = true;
+      if (res.ok && res.grown) retire = true;
       const p = pending.get(res.id);
       if (p) {
         pending.delete(res.id);
         if (res.ok) p.resolve({ pages: res.pages, ms: res.ms });
         else p.reject(new Error(res.error));
       }
-      if (grown && pending.size === 0 && w === worker && !disposed) {
+      if (retire && pending.size === 0 && w === worker && !disposed) {
         w.terminate();
         worker = undefined;
-        grown = false;
+        retire = false;
         warmed = false;
       }
     };
@@ -127,7 +130,7 @@ export function createRenderer(
   const post = (m: RenderWorkerRequest) => (worker ??= start()).postMessage(m);
 
   return {
-    render({ xml, widthPx }) {
+    render({ xml, widthPx, notes = 0 }) {
       if (disposed) return Promise.reject(failure ?? new Error('renderer disposed'));
       const id = ++nextId;
       for (const [older, p] of pending) {
@@ -140,6 +143,7 @@ export function createRenderer(
       return new Promise<RenderResult>((resolve, reject) => {
         pending.set(id, { resolve, reject });
         post({ id, type: 'render', xml: prepareScanBeams(normalizeVoices(xml)), widthPx });
+        if (notes >= HEAVY_NOTES) retire = true;
       });
     },
     warmUp() {

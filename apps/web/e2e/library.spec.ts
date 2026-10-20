@@ -469,6 +469,20 @@ test('library: no match says so; Clear brings the list back', async ({ page }) =
   await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
 });
 
+test('library: a hovered Clear stays a plain word inside the field (#76)', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('searchbox', { name: 'Search the library' }).fill('fur elize');
+  const clear = page.getByRole('button', { name: 'Clear the search' });
+  await clear.hover();
+  // Read after the hover transition ends, or a fill still fading in reads as transparent.
+  const background = await clear.evaluate(async (el) => {
+    await Promise.all(el.getAnimations().map((a) => a.finished));
+    return getComputedStyle(el).backgroundColor;
+  });
+  expect(background).toBe('rgba(0, 0, 0, 0)');
+});
+
 test('library: back from a piece found by search shows the same search', async ({ page }) => {
   await page.goto('/');
   await libraryReady(page);

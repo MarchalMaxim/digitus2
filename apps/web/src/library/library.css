@@ -19,20 +19,25 @@
   align-content: center;
 }
 
+/* The row's line runs under Remove too, as the list's top line does; Remove keeps the title's
+   0.5rem inset from the line's end. */
 .local-score-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  border-bottom: 1px solid var(--gray-2);
 }
 
 .local-score-row .piece-row {
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
+  border-bottom: 0;
 }
 
 .local-score-row > .text-button {
   min-height: 44px;
+  padding-inline: 0.5rem;
 }
 
 .start-row {

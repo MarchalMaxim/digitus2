@@ -6,8 +6,9 @@
  * the cursor, with their fingers, for the on-screen keyboard: the notes struck at this onset and
  * the earlier ones still sounding (a held bass note stays pressed under a running melody). React
  * state changes only when the group changes, never on every frame. On each group change it also
- * scrolls the page when the cursor's system or its red notes are not wholly above the dock
- * (`cursorScrollDelta`), so the red note is never left playing under it.
+ * turns the page when the cursor enters a system that is not wholly above the dock
+ * (`cursorScrollDelta`), putting that system at the top of the window, so the red note is never
+ * left playing under the dock and the systems to come stay in view.
  *
  * Groups with no note in an unmuted hand are skipped, so with one hand muted the cursor follows
  * the other hand and never lights a silent note. The muted hands' keys are followed apart, at
@@ -437,16 +438,27 @@ export interface Span {
 }
 
 /**
+ * The room left above a system put at the top of the band by a page turn (pixels): air for the
+ * digits over the staff, less when the system only just fits the band.
+ */
+export const SYSTEM_TOP_MARGIN = 12;
+
+/**
  * How far the page scrolls (pixels, down is positive) to keep the cursor readable, or null to
  * stay put. `band` is the part of the window that no sticky bar covers (the page's scroll
  * padding: the dock at the bottom). `system` is the system the cursor is in and `cursor` its red
  * notes; `systemChanged` says the cursor has just entered that system.
  *
- * The page scrolls when the cursor enters a system that is not wholly in the band (even when its
- * first notes are: the rest of the system, the left hand's staff, would play under the dock), or
- * when the red notes leave the band. It then centres the system in the band. A system taller
- * than the band gets its top at the band's top instead, or, when the red notes would still be
- * outside the band there (or are later in that system), the red notes are centred.
+ * A page turn (issue #5): when the cursor enters a system that is not wholly in the band (even
+ * when its first notes are: the rest of the system, the left hand's staff, would play under the
+ * dock), the page scrolls so that the system's top sits `SYSTEM_TOP_MARGIN` below the band's top,
+ * and the systems after it fill the band. Nothing moves while the system is wholly in the band,
+ * so the page turns once per screenful, when the red reaches the last system fully visible
+ * above the dock, and the upcoming systems stay in view. Within a system that fits the band the
+ * page never scrolls, so a reader's own wheel or touch scroll during playback is not undone
+ * until the next turn. A system taller than the band gets its top at the band's top when its red
+ * notes are readable there, and otherwise, or when the red notes leave the band later in that
+ * system, the red notes are centred.
  */
 export function cursorScrollDelta(
   system: Span,
@@ -458,8 +470,12 @@ export function cursorScrollDelta(
     s.top - shift >= band.top && s.bottom - shift <= band.bottom;
   if (inBand(cursor) && (!systemChanged || inBand(system))) return null;
   const room = band.bottom - band.top;
+  const height = system.bottom - system.top;
+  if (height <= room) {
+    if (!systemChanged) return null;
+    return system.top - band.top - Math.min(SYSTEM_TOP_MARGIN, room - height);
+  }
   const centre = (s: Span) => s.top - (band.top + (room - (s.bottom - s.top)) / 2);
-  if (system.bottom - system.top <= room) return centre(system);
   const start = system.top - band.top;
   return systemChanged && inBand(cursor, start) ? start : centre(cursor);
 }
@@ -534,7 +550,7 @@ export function cursorWouldScroll(notes: Element[]): boolean {
 /**
  * Keeps the marked notes and their system readable above the dock (`cursorScroll`), called once
  * per onset group: one style read and a few `getBoundingClientRect` calls, never per frame.
- * Smooth unless the reader asked for reduced motion.
+ * Smooth unless the reader asked for reduced motion, in which case the page turns at once.
  */
 function followCursor(marked: Element[], follow: Follow): void {
   const scroll = cursorScroll(marked, follow);

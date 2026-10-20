@@ -3,7 +3,7 @@ import { parseMusicXml, type Assignment, type Hand } from '@digitus2/engine';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildOnsetGroups, type OnsetGroup } from './onsetGroups.js';
-import { cursorScrollDelta, useCursor } from './useCursor.js';
+import { cursorScrollDelta, SYSTEM_TOP_MARGIN, useCursor } from './useCursor.js';
 import type { CountIn, LoopRange, Playback } from './usePlayback.js';
 
 afterEach(cleanup);
@@ -776,47 +776,85 @@ describe('the cursor at a cue', () => {
 // The band is the part of the window no sticky bar covers: here a 750 px window less a 150 px dock.
 const band = { top: 0, bottom: 600 };
 
-describe('the cursor scroll', () => {
+describe('the cursor scroll (issue #5: a page turn puts the system at the top of the band)', () => {
   it('stays put while the new system is wholly above the dock', () => {
     expect(
       cursorScrollDelta({ top: 100, bottom: 300 }, { top: 120, bottom: 140 }, true, band),
     ).toBe(null);
+    // Even the last system fully visible above the dock: it is where the next turn is taken from.
+    expect(
+      cursorScrollDelta({ top: 350, bottom: 600 }, { top: 360, bottom: 380 }, true, band),
+    ).toBe(null);
   });
 
-  it('centres a new system that reaches under the dock, even when its first notes are above it', () => {
-    // 250 px tall in a 600 px band: its top goes to 175.
+  it('turns the page to a new system that reaches under the dock, putting it at the top of the band with the margin', () => {
+    // 250 px tall in a 600 px band: its top goes to the margin below the band's top, so the
+    // systems after it fill the band.
     expect(
       cursorScrollDelta({ top: 450, bottom: 700 }, { top: 460, bottom: 480 }, true, band),
-    ).toBe(275);
+    ).toBe(450 - SYSTEM_TOP_MARGIN);
+    // Even when its first notes are above the dock: the rest of the system would play under it.
+    expect(
+      cursorScrollDelta({ top: 400, bottom: 650 }, { top: 410, bottom: 430 }, true, band),
+    ).toBe(400 - SYSTEM_TOP_MARGIN);
   });
 
-  it('within a system, scrolls only when the red notes leave the band, and then centres the system', () => {
+  it('gives up the margin when the system only just fits the band', () => {
+    // 595 px tall in a 600 px band: 5 px of margin is all there is.
+    expect(
+      cursorScrollDelta({ top: 300, bottom: 895 }, { top: 310, bottom: 330 }, true, band),
+    ).toBe(295);
+    // Exactly the band's height: its top at the band's top.
+    expect(
+      cursorScrollDelta({ top: 300, bottom: 900 }, { top: 310, bottom: 330 }, true, band),
+    ).toBe(300);
+  });
+
+  it("within a system that fits the band, never scrolls: a reader's own scroll is kept until the next turn", () => {
     const system = { top: 450, bottom: 700 };
     expect(cursorScrollDelta(system, { top: 460, bottom: 480 }, false, band)).toBe(null);
-    // The left hand's notes, lower in the same system, under the dock.
-    expect(cursorScrollDelta(system, { top: 620, bottom: 640 }, false, band)).toBe(275);
-    // Partly under it is under it.
-    expect(cursorScrollDelta(system, { top: 590, bottom: 601 }, false, band)).toBe(275);
+    // The red notes under the dock, or above the window, after the reader scrolled: no scroll.
+    expect(cursorScrollDelta(system, { top: 620, bottom: 640 }, false, band)).toBe(null);
+    expect(
+      cursorScrollDelta({ top: -100, bottom: 150 }, { top: -50, bottom: -30 }, false, band),
+    ).toBe(null);
   });
 
   it('scrolls back up to a system above the window (a loop starting again)', () => {
     expect(
       cursorScrollDelta({ top: -500, bottom: -250 }, { top: -480, bottom: -460 }, true, band),
-    ).toBe(-675);
+    ).toBe(-500 - SYSTEM_TOP_MARGIN);
   });
 
   it('keeps clear of a bar at the top of the window too', () => {
     const below = { top: 50, bottom: 600 };
     const system = { top: 20, bottom: 200 };
     const delta = cursorScrollDelta(system, { top: 30, bottom: 60 }, true, below);
-    // Up is negative: the system, behind the top bar now, is brought below it.
-    expect(delta).not.toBeNull();
-    expect(delta as number).toBeLessThan(0);
-    // After the scroll the system lies wholly in the band, with equal room above and below.
-    const gapAbove = system.top - (delta as number) - below.top;
-    const gapBelow = below.bottom - (system.bottom - (delta as number));
-    expect(gapAbove).toBeGreaterThan(0);
-    expect(gapAbove).toBe(gapBelow);
+    // Up is negative: the system, behind the top bar now, is brought below it, by the margin.
+    expect(delta).toBe(20 - 50 - SYSTEM_TOP_MARGIN);
+  });
+
+  it('takes fewer turns than the old centring rule over a screenful of systems', () => {
+    // Four 200 px systems 20 px apart, in a 600 px band: playing through them from the top.
+    const systems = [0, 1, 2, 3].map((i) => ({ top: i * 220, bottom: i * 220 + 200 }));
+    let scrollY = 0;
+    let turns = 0;
+    for (const s of systems) {
+      const at = { top: s.top - scrollY, bottom: s.bottom - scrollY };
+      const cursor = { top: at.top + 10, bottom: at.top + 30 };
+      const delta = cursorScrollDelta(at, cursor, true, band);
+      if (delta !== null) {
+        scrollY += delta;
+        turns++;
+      }
+      // After every group the red notes are inside the band.
+      expect(s.top - scrollY).toBeGreaterThanOrEqual(band.top);
+      expect(s.bottom - scrollY).toBeLessThanOrEqual(band.bottom);
+    }
+    // The first two fit the first screen; the third reaches under the dock and turns the page,
+    // bringing the fourth into view with it: one turn, where centring took two.
+    expect(turns).toBe(1);
+    expect(scrollY).toBe(440 - SYSTEM_TOP_MARGIN);
   });
 
   it('puts a system taller than the band at its top, or centres the red notes when they would still be under the dock', () => {

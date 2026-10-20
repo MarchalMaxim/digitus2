@@ -542,3 +542,35 @@ test('library: a piece played becomes the one to continue, on its level, across 
   await expect(page.locator('.score-header .finger-legend')).toHaveCount(0); // seen: the side panel keeps it
   await expect(page.locator('.side-panel .finger-legend')).toBeVisible();
 });
+
+test('library: the heart on a score puts the piece on the Favourites shelf, across a reload, and takes it off', async ({
+  page,
+}) => {
+  await page.goto('/#/piece/bach-minuet-g-major-bwv-anh-114');
+  const heart = page.getByRole('button', { name: 'Favourite' });
+  await expect(heart).toHaveAttribute('aria-pressed', 'false');
+  await heart.click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  const shelf = page.getByRole('region', { name: 'Favourites' });
+  await expect(shelf.getByText('1 piece')).toBeVisible();
+  await page.reload();
+  await libraryReady(page);
+  const row = shelf.getByRole('button', { name: /^Open Minuet in G major/ });
+  await expect(row).toBeVisible();
+  // The shelf stands above the levels.
+  const [shelfTop, pillsTop] = await Promise.all([
+    shelf.evaluate((e) => e.getBoundingClientRect().top),
+    page.getByRole('group', { name: 'Level' }).evaluate((e) => e.getBoundingClientRect().top),
+  ]);
+  expect(shelfTop).toBeLessThan(pillsTop);
+  await expectOneRed(page, 'favourites');
+  await expectNoSeriousA11y(page);
+  await row.click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'true');
+  await heart.click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await libraryReady(page);
+  await expect(page.getByRole('heading', { name: 'Favourites' })).toHaveCount(0);
+});

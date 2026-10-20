@@ -87,6 +87,10 @@ export const library: Messages['library'] = {
     cannotReadFiles: 'No se pudieron leer estos archivos.',
     cannotReadFile: 'No se pudo leer este archivo.',
   },
+  favourites: {
+    heading: 'Favoritos',
+    all: (n: number) => `Ver los ${formatNumber('es', n)} favoritos`,
+  },
   myScores: {
     heading: 'Mis partituras',
     saved: 'Guardadas',

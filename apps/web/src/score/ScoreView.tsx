@@ -381,6 +381,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
         piece={piece}
         onBack={openLibrary}
         legend={legendAbove}
+        favourite={source.kind === 'library' ? source.slug : null}
       />
       {source.kind === 'file' && source.scan && (
         <p className="no-print">

@@ -35,10 +35,10 @@ Everything runs in the browser. The network carries the app's static files, the 
 ### Store
 
 - Only the settings persist, in `localStorage` under `digitus2.settings.v1`. A stored object from an older or newer app is merged field by field with the defaults and unknown fields are ignored. When `localStorage` is blocked the settings live in memory for the visit.
-- Settings: `handSize` (large, medium, small, child; default medium), `tempoByPiece`, `hands`, `metronome`, `countIn` (on by default), `showEditorial`, `lastPlayed` (the slug of the library piece played last, set on every Play of a library piece and never for a dropped file; a slug a later library build removed acts as none) and `legendSeen` (set by the first Play anywhere).
+- Settings: `handSize` (large, medium, small, child; default medium), `tempoByPiece`, `hands`, `metronome`, `countIn` (on by default), `showEditorial`, `lastPlayed` (the slug of the library piece played last, set on every Play of a library piece and never for a dropped file; a slug a later library build removed acts as none) `legendSeen` (set by the first Play anywhere) and `favourites` (the slugs of the library pieces marked with the score page's heart, newest first; a stored list keeps its unique non-empty strings, and a slug a later library build removed is kept but not shown).
 - The tempo factor belongs to the piece, because one factor for every piece made every piece slow once a hard one was slowed. `tempoByPiece` maps a piece's key (`pieceKey`: `piece:<slug>`, or `file:<name>:<fileIdentity>` for a dropped file) to a factor between 50 and 150 %. A piece without an entry plays at 100 %. Only factors other than 100 % are kept, for the 50 pieces changed last (`TEMPO_PIECES_MAX`).
 - The theme choice is kept separately, under `digitus2.theme` (see Light and dark).
-- Visit state, never persisted: the view, a one-line notice, `libraryScrollY`, the chosen level, the search text, the open shelf and search section, the pages shown, the chosen length, and `practiceOpen`.
+- Visit state, never persisted: the view, a one-line notice, `libraryScrollY`, the chosen level, the search text, the open shelf and search section, the pages shown, the chosen length, whether the Favourites shelf shows every favourite (`libraryFavouritesOpen`), and `practiceOpen`.
 
 ### Engine worker
 
@@ -119,15 +119,16 @@ These are practice defaults, with no promise of historically authentic Bach exec
 
 ### Library
 
-The library page reads as a few units, in this order (at most seven; a first visit shows units 1, 3, 5, 6 and 7):
+The library page reads as a few units, in this order (at most seven; a first visit shows units 1, 4, 6, 7 and 8):
 
 1. The welcome: the name `digitus2`, one sentence (`Finger numbers for piano. Pick a piece, press play, and follow the red note.`), the one red button and the search field. The button reads `Start with {title}` (the first piece of the lowest grade) or, once a library piece has been played, `Continue with {title}`.
-2. My scores, when the reader has saved any.
-3. The four level pills.
-4. The length pills, only above a list of more than 40 pieces.
-5. The level's style shelves, or one open shelf, or the search results.
-6. The end line `Open your own score`.
-7. The footer `About and licences`.
+2. Favourites, when the reader has marked any and neither a search nor an opened shelf is showing.
+3. My scores, when the reader has saved any.
+4. The four level pills.
+5. The length pills, only above a list of more than 40 pieces (an opened shelf or search results, which Favourites makes way for).
+6. The level's style shelves, or one open shelf, or the search results.
+7. The end line `Open your own score`.
+8. The footer `About and licences`.
 
 **Levels.** The UI shows four levels over the manifest's grades. One name is used everywhere: the pills, the search section headings, the announcements and the score's side panel.
 
@@ -165,6 +166,8 @@ The level shown on arrival is the one chosen earlier in the visit, else the leve
 
 **Own files.** The end line `Open your own score` opens the file chooser (a `label` around a visually hidden file input). It takes MusicXML (`.musicxml`, `.xml`, `.mxl`), MIDI (`.mid`, `.midi`) and, for scanning, PNG, JPEG and PDF; a camera file without one of those extensions is taken by its type. On a device whose only pointer is a finger (`(any-pointer: coarse)` without `(any-pointer: fine)`), a second text button, `Take a photo`, opens the camera (`capture="environment"`). A file dragged anywhere over the window shows the red drop frame (`Drop to open this file`, `MusicXML, MIDI, photo or PDF`) over the hidden page and opens when dropped; a drag that carries no file (a text selection, a link) shows nothing. The wrong kind of file, chosen or dropped, ends in the gray notice.
 
+**Favourites** (issue #78). The heart beside a library piece's title on its score page (Score view, Header) marks it. Once a favourite exists, a `Favourites` shelf stands under the welcome, above the levels: its name (`h2`), its count, and the newest five rows, written as a shelf's rows (a composer line when the composer is named, always when two rows share a title), with no description line. `All {n} favourites` shows the rest in place, fades them in and moves the focus to the first new row; the shelf then stays complete for the visit, so Back from a score returns to the same rows. It belongs to the arrival page: typing a search or opening a style shelf takes it away with the shelves, and closing them brings it back. Its rows carry ids of their own (`favourite-…`), because a favourite may also be one of the samples below. The favourites live in `localStorage` with the settings (Store); a piece is taken off with the heart, not from the list. Own files have no heart: they are in My scores already.
+
 **My scores.** When the browser holds saved items, a `My scores` disclosure lists them with `Remove` buttons: direct MusicXML and MIDI imports and scans. They live in IndexedDB (`src/library/local/`) and are never uploaded. The list says whether they are saved; a storage failure keeps the current work in memory and shows a notice.
 
 **Screen reader and motion.** The headings are `h2` (shelves, search sections) and `h3` (collections). A polite live region says `{level}: {n} pieces`, `Showing 80 of 643` or the search's count or empty result, 500 ms after the last change and never on arrival. A changed list fades in over 120 ms; keystrokes of a search after the first swap rows without a fade, and an appended page fades only its new rows. In the one-level shapes the list has `min-height: 100vh`, so a shorter level never pulls the page up under the reader's finger. The reading column is 44rem wide.
@@ -173,7 +176,7 @@ The level shown on arrival is the one chosen earlier in the visit, else the leve
 
 The score view is a header, the score, the dock and a side panel. From 900 px the side panel stands beside the score; below it, under the score.
 
-- **Header.** `Back to the library`, the theme switch, the piece title (`h1`), the composer and, for a library piece, an attribution line that credits the engraver and links the licence.
+- **Header.** `Back to the library`, the theme switch, the piece title (`h1`), the composer and, for a library piece, an attribution line that credits the engraver and links the licence. A library piece's title has the heart beside it (`score/FavouriteToggle.tsx`, issue #78), outside the heading: a round 44 px button with no border, after the title's last word on one line and by its first line when it wraps, named "Favourite" with `aria-pressed`; an outline heart that fills with ink while the piece is a favourite, never red, not printed. A dropped file and a score that could not open have none.
 - **Width.** The score view is not held to the other pages' 72rem. From 1280 px it keeps 4rem side margins and grows with the window up to 120rem (`.page.score-view`), so on a wide screen the music runs in longer systems and the keyboard shows a five-octave piece without scrolling (a five-octave piece needs 770 px at the keyboard's 22 px minimum white key; the 72rem column gave 720 at a 1716 px window).
 - **Finger legend.** One line in ink: `Finger numbers: 1 is the thumb and 5 the little finger, in both hands. The upper staff is the right hand, the lower staff the left.` It shows once on a screen. Before the reader's first Play anywhere it stands under the header's credit line below 900 px and at the top of the side panel from 900 px. After the first Play it stands in the side panel at every width. The choice is made when the score view mounts (`useLegendAbove`), so the legend never vanishes from above a playing cursor. The library does not show it; the about page keeps its text.
 - **Editor's fingering.** For a piece with an editor's fingering, the side panel offers `Show the editor's fingering`. While the pages carry the editor's digits, a gray line right above the score reads `Showing the editor's fingering` (not printed). The line follows the pages, not the setting, so it never shows on a piece without an editor's fingering although the setting, kept across pieces, is on.
@@ -344,7 +347,7 @@ Playwright projects: `desktop` (1280 x 900, every spec) and `mobile` (360 x 740,
 **The specs.**
 
 - `smoke` (loads without console errors) and `red` (the start page).
-- `library`, at 1280 and 360: the arrival page of each level (six shelves of at most five rows), one red element, axe, LCP under 2 s; the first-screen gates and the word budget (see Performance budget); the arrow keys choosing a level while the pill keeps the focus; a shelf opening in place in pages of 40 with the focus rules and Escape; the length pills; the longest shelf read to its last row without overflow; a piece opened from far down arriving at the top with its title, Play and first system in view, and going back (the button, the browser's Back, also after Forward) restoring the level, shelf, pages and list position within 50 px; the red button before the search field in the tab order; search (`fur elise`, sections of 7 rows, shelf names as words, an empty result and `Clear`, back from a found piece showing the same search); a file dropped on the window opening, a drag that leaves hiding the frame, a drag without files showing none; a piece played becoming `Continue with …` across a reload.
+- `library`, at 1280 and 360: the arrival page of each level (six shelves of at most five rows), one red element, axe, LCP under 2 s; the first-screen gates and the word budget (see Performance budget); the arrow keys choosing a level while the pill keeps the focus; a shelf opening in place in pages of 40 with the focus rules and Escape; the length pills; the longest shelf read to its last row without overflow; a piece opened from far down arriving at the top with its title, Play and first system in view, and going back (the button, the browser's Back, also after Forward) restoring the level, shelf, pages and list position within 50 px; the red button before the search field in the tab order; search (`fur elise`, sections of 7 rows, shelf names as words, an empty result and `Clear`, back from a found piece showing the same search); a file dropped on the window opening, a drag that leaves hiding the frame, a drag without files showing none; a piece played becoming `Continue with …` across a reload; the heart on a score putting the piece on the Favourites shelf above the levels, across a reload, with one red element and axe, and taking it off again.
 - `local-library`: My scores keep draft bytes, reading order and deletion across a reload; recognised notation reopens without reconnecting; own MusicXML survives a refresh and duplicate uploads stay separate; blocked storage keeps the visit usable.
 - `score`: open, hand-size re-solve, the hand-size help line, the editor's fingering and its line, K.545's open time, an archive piece of each level, the error state, a dropped `.mxl` archive and a UTF-16 file, the focus following the view, back and forward, the side panel's legend and `Details`.
 - `midi`: a dropped MIDI file (digits on every note, the import facts, one red element and axe), the hand split re-importing and `Automatic` restoring the separation, the export of the generated MusicXML, a broken file's error state.
@@ -370,6 +373,7 @@ Playwright projects: `desktop` (1280 x 900, every spec) and `mobile` (360 x 740,
 | library-level       | library, then the Medium pill (30 rows)                                                                                | start button |
 | library-shelf       | Medium, then `All … songs`: the back button, the length pills, the first page of 40 and `Show 40 more`                 | start button |
 | library-returning   | `/` with `lastPlayed` set to the G major minuet (BWV Anh. 114): `Continue with Minuet in G major`, Easy chosen         | start button |
+| library-favourites  | `/` with seven favourites, then `All 7 favourites`: every id on the page once                                          | start button |
 | library-search      | library, then `minuet` in the search field                                                                             | start button |
 | library-empty       | library, then `fur elize`: `No piece matches “fur elize”.`                                                             | start button |
 | library-drag        | library, then a `dragenter` carrying `song.musicxml`: the drop frame, its fade over, the start button hidden           | drop frame   |
@@ -405,7 +409,7 @@ Gates, enforced by `pnpm verify`:
 | Library first screen: the red button's top                                       | at most 130 px at 1280, 160 px at 360                                                                                                                           | `library.spec.ts`                               |
 | Library first screen: the first row's top                                        | at most 420 px at 1280, 600 px at 360, and inside the window; all four pills on one row inside the window; no horizontal overflow                               | `library.spec.ts`                               |
 | Visible words before the first piece, first visit                                | at most 37 (the name 1, the sentence 14, the red button 6, the four pills 4, the first shelf's name 1, count 2 and line 9), plus the search field's placeholder | `library.spec.ts`                               |
-| Rows rendered                                                                    | at most 30 on arrival, 40 per page shown                                                                                                                        | `library.spec.ts`                               |
+| Rows rendered                                                                    | at most 30 on arrival, 40 per page shown; a reader's Favourites shelf adds at most 5 until `All {n} favourites`                                                 | `library.spec.ts`                               |
 | Twinkle's first system, legend seen                                              | top at most 220 px at 768 and 1280, 240 px at 360                                                                                                               | `states.spec.ts`                                |
 | Service worker precache                                                          | at most 24 MiB                                                                                                                                                  | `src/sw/vitePlugin.ts` (step `build`)           |
 
@@ -419,7 +423,7 @@ Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of t
 | Service worker precache             | 30 files (23 hashed under `assets/`, 7 unhashed), 16.14 MiB raw, 3.45 MiB gzip, most of it the Verovio worker, which the library warms up anyway; `sw.js` itself is 4,179 bytes                                                                                                                 |
 | Piano samples                       | 452 files, 44,177,920 bytes as one tar; a piece fetches only its pitches and velocity layers (see Audio)                                                                                                                                                                                        |
 | Library data                        | `library-index.json` 251 KB, about 93 KB gzip, fetched before the first render; `manifest.json` 4.4 MB, 272 KB gzip, fetched when a library piece or the about page first needs it                                                                                                              |
-| Rows on the arrival page of a level | at most 30 (up to 1,465 before the shelves)                                                                                                                                                                                                                                                     |
+| Rows on the arrival page of a level | at most 30 (up to 1,465 before the shelves), plus at most 5 on the Favourites shelf until it is shown in full                                                                                                                                                                                   |
 
 Library LCP and the open times below were last measured with the 149-piece library and have not been re-measured since the library grew to thousands of pieces (3,228 now) and the list became a fetched index; the gates above still apply. Opening a library piece now first fetches the manifest once (the table above), which those open times do not include.
 

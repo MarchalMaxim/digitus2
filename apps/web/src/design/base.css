@@ -428,6 +428,52 @@ fieldset {
   margin-bottom: 0.5rem;
 }
 
+/* A library piece's title and its heart (issue #78): the heart follows the title's last word on
+   one line and sits by the first line when the title wraps. */
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.title-row > h1 {
+  min-width: 0;
+}
+
+.favourite-toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  /* The 44 px circle's middle on the heading's first line: at the heading's size, 1lh is that
+     line's height (a browser without lh keeps the circle at the top). */
+  font-size: 1.75rem;
+  margin-top: calc((1lh - 44px) / 2);
+}
+
+.favourite-toggle svg {
+  width: 24px;
+  height: 24px;
+  max-width: none;
+}
+
+.favourite-toggle path {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: fill var(--dur-fast) var(--ease);
+}
+
+.favourite-toggle[aria-pressed='true'] path {
+  fill: currentColor;
+}
+
 .score-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 16rem;

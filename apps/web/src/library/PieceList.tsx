@@ -162,9 +162,14 @@ interface RowsProps {
   offset: number;
   freshFrom: number | null;
   onOpen(slug: string): void;
+  /**
+   * Starts the ids of the rows' parts: a list whose pieces may also stand in another list on
+   * the page (the Favourites shelf) gives its own, so no id is written twice.
+   */
+  idPrefix?: string;
 }
 
-function Rows({ rows, offset, freshFrom, onOpen }: RowsProps) {
+export function Rows({ rows, offset, freshFrom, onOpen, idPrefix = '' }: RowsProps) {
   return (
     <ul className="piece-list">
       {rows.map((r, i) => (
@@ -176,11 +181,11 @@ function Rows({ rows, offset, freshFrom, onOpen }: RowsProps) {
             type="button"
             className="piece-row"
             aria-label={r.label}
-            aria-describedby={`${r.slug}-duration`}
+            aria-describedby={`${idPrefix}${r.slug}-duration`}
             onClick={() => onOpen(r.slug)}
           >
             <span className="title">{r.title}</span>
-            <span id={`${r.slug}-duration`} className="duration">
+            <span id={`${idPrefix}${r.slug}-duration`} className="duration">
               {r.duration}
             </span>
             {r.composerLine !== null && <span className="composer muted">{r.composerLine}</span>}

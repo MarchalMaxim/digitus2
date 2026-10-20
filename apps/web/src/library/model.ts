@@ -88,6 +88,15 @@ export interface ShelfSummary {
   all: string | null;
 }
 
+/** The Favourites shelf above the levels (issue #78): the newest five, or all once asked. */
+export interface FavouritesShelf {
+  /** The favourites the library holds. */
+  count: number;
+  rows: Row[];
+  /** `All 12 favourites`, or null when the rows are all of them. */
+  all: string | null;
+}
+
 /** The pills above a long list: only the lengths the list holds, `Any length` first. */
 export type LengthOptions = readonly Length[];
 
@@ -533,6 +542,26 @@ function shelvesOf(
     rows: rows[i]![0]!.rows,
     all: members.length > SAMPLES ? t.library.shelves[shelf.id].all(members.length) : null,
   }));
+}
+
+/**
+ * The Favourites shelf (issue #78), or null when no favourite is in the library: the pieces in
+ * the order of `favourites` (newest first), a slug the library no longer holds left out, the
+ * first 5 unless `open`. Its rows follow the shelves' rules, within this list.
+ */
+export function favouritesShelf(
+  pieces: readonly LibraryEntry[],
+  favourites: readonly string[],
+  open: boolean,
+  t: Messages,
+): FavouritesShelf | null {
+  const bySlug = new Map(pieces.map((p) => [p.slug, p]));
+  const members = favourites.flatMap((slug) => bySlug.get(slug) ?? []);
+  if (members.length === 0) return null;
+  const shown = open ? members : members.slice(0, SAMPLES);
+  const rows = finish([[{ key: 'flat', heading: null, drafts: shown.map(plain) }]], t)[0]![0]!.rows;
+  const all = members.length > shown.length ? t.library.favourites.all(members.length) : null;
+  return { count: members.length, rows, all };
 }
 
 /** The page's list for the library and the reader's choices (shelves spec 4; UI batch spec 6.2). */

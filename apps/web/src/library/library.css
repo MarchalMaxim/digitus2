@@ -179,7 +179,8 @@
   margin-bottom: 1.5rem;
 }
 
-.library-list .text-button {
+.library-list .text-button,
+.favourites .text-button {
   min-height: 44px;
 }
 

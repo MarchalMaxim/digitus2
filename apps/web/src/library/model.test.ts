@@ -17,6 +17,7 @@ import {
   arrivalLevel,
   composerShort,
   dropTrailingParenthesis,
+  favouritesShelf,
   isUnnamed,
   libraryLayout,
   localDateKey,
@@ -769,5 +770,52 @@ describe('shortTitle', () => {
     for (const r of shortened)
       expect(bySlug.get(r.slug)!.title.startsWith(r.title.split(' (')[0]!)).toBe(true);
     expect(shortened.map((r) => r.title)).toContain('Canon in D');
+  });
+});
+
+describe('the favourites shelf (issue #78)', () => {
+  const library = syntheticLibrary();
+  const slugs = (n: number) => library.slice(0, n).map((p) => p.slug);
+  const entry = (over: Partial<LibraryEntry>): LibraryEntry => ({
+    ...library[0]!,
+    ...over,
+  });
+  it('is not there until a favourite in the library exists', () => {
+    expect(favouritesShelf(library, [], false, en)).toBeNull();
+    expect(favouritesShelf(library, ['gone-from-the-library'], false, en)).toBeNull();
+  });
+  it('lists the favourites newest first and skips a slug the library no longer holds', () => {
+    const wanted = ['c3-p1', 'gone-from-the-library', 'c0-p0', 'c1-p2'];
+    const favourites = favouritesShelf(library, wanted, false, en)!;
+    expect(favourites.count).toBe(3);
+    expect(favourites.rows.map((r) => r.slug)).toEqual(['c3-p1', 'c0-p0', 'c1-p2']);
+    expect(favourites.all).toBeNull();
+  });
+  it('shows the newest five, then all of them once the reader asks', () => {
+    const closed = favouritesShelf(library, slugs(7), false, en)!;
+    expect(closed.rows.map((r) => r.slug)).toEqual(slugs(5));
+    expect(closed.count).toBe(7);
+    expect(closed.all).toBe('All 7 favourites');
+    const open = favouritesShelf(library, slugs(7), true, en)!;
+    expect(open.rows.map((r) => r.slug)).toEqual(slugs(7));
+    expect(open.all).toBeNull();
+    expect(favouritesShelf(library, slugs(5), false, en)!.all).toBeNull();
+  });
+  it('writes rows as the shelves do: the composer when named, the length, the accessible name', () => {
+    const list = [
+      entry({ slug: 'a', title: 'Minuet', composer: 'Christian Petzold', approxDurationSec: 72 }),
+      entry({ slug: 'b', title: 'Lullaby', composer: 'Traditional' }),
+      entry({ slug: 'c', title: 'Lullaby', composer: 'Unknown' }),
+    ];
+    const rows = favouritesShelf(list, ['a', 'b', 'c'], false, en)!.rows;
+    expect(rows[0]).toEqual({
+      slug: 'a',
+      title: 'Minuet',
+      composerLine: 'Christian Petzold',
+      label: 'Open Minuet by Christian Petzold',
+      duration: '1:12',
+    });
+    // A title shown twice keeps its composer on both rows, as everywhere else.
+    expect(rows.slice(1).map((r) => r.composerLine)).toEqual(['Traditional', 'Unknown']);
   });
 });

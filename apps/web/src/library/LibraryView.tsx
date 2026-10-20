@@ -16,12 +16,14 @@ import { LanguageLine } from '../i18n/LanguageLine.js';
 import { useT } from '../i18n/i18n.js';
 import { warmUpServices } from '../score/useScoreDocument.js';
 import { SECTION_ROWS, showsSearch } from './disclosure.js';
+import { Favourites } from './Favourites.js';
 import { LevelPills } from './LevelPills.js';
 import { type ShelfId, type Tier } from './levels.js';
 import { libraryPieces } from './manifest.js';
 import {
   announcementFor,
   arrivalLevel,
+  favouritesShelf,
   libraryLayout,
   localDateKey,
   shelfHasPieces,
@@ -173,6 +175,9 @@ export function LibraryView() {
   const setLibraryPages = useAppStore((s) => s.setLibraryPages);
   const length = useAppStore((s) => s.libraryLength);
   const setLibraryLength = useAppStore((s) => s.setLibraryLength);
+  const favourites = useAppStore((s) => s.settings.favourites);
+  const favouritesOpen = useAppStore((s) => s.libraryFavouritesOpen);
+  const setFavouritesOpen = useAppStore((s) => s.setLibraryFavouritesOpen);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const rememberScroll = useRememberLibraryScroll();
@@ -184,6 +189,14 @@ export function LibraryView() {
     () =>
       libraryLayout(pieces, { tier, query, shelf, section, pages, length, date, lastPlayed }, t),
     [pieces, tier, query, shelf, section, pages, length, date, lastPlayed, t],
+  );
+  // On the arrival page only: a search or an opened shelf replaces it, as it replaces the shelves.
+  const favouritesInView = useMemo(
+    () =>
+      layout.kind === 'shelves' || layout.kind === 'all'
+        ? favouritesShelf(pieces, favourites, favouritesOpen, t)
+        : null,
+    [layout.kind, pieces, favourites, favouritesOpen, t],
   );
   const start = startTarget(pieces, lastPlayed);
   // Search results share the key 'search': keystrokes after the first swap the rows without a
@@ -291,6 +304,13 @@ export function LibraryView() {
           {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
         </div>
       </header>
+      {favouritesInView && (
+        <Favourites
+          shelf={favouritesInView}
+          onOpen={(slug) => open({ kind: 'library', slug })}
+          onAll={() => setFavouritesOpen(true)}
+        />
+      )}
       <MyScores onOpen={rememberScroll} />
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">

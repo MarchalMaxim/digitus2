@@ -9,6 +9,7 @@ export const score: Messages['score'] = {
   noteLetters: ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'],
   header: {
     back: 'Retour à la bibliothèque',
+    favourite: 'Favori',
   },
   sheet: {
     label: (title: string) => `Partition de ${title}`,

@@ -50,6 +50,7 @@ beforeEach(() => {
     librarySection: null,
     libraryPages: 1,
     libraryLength: 'any',
+    libraryFavouritesOpen: false,
   });
 });
 // Testing Library only cleans up automatically when vitest globals are on; they are off here.
@@ -295,6 +296,85 @@ describe('LibraryView: the length pills (shelves spec 4.3)', () => {
     expect(screen.queryByRole('group', { name: 'Length' })).toBeNull();
     expect(rows()).toHaveLength(37);
     await waitFor(() => expect(useAppStore.getState().libraryLength).toBe('any'));
+  });
+});
+
+describe('LibraryView: the Favourites shelf (issue #78)', () => {
+  // Curated Easy pieces, in manifest order; the store keeps favourites newest first.
+  const easy = () => libraryPieces().filter((p) => p.level <= 2);
+  const favour = (n: number) => {
+    const chosen = easy().slice(0, n);
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, favourites: chosen.map((p) => p.slug) },
+    });
+    return chosen;
+  };
+  const favourites = () =>
+    screen.queryByRole('heading', { level: 2, name: 'Favourites' })?.closest('section') ?? null;
+  it('is not there before the first favourite', () => {
+    render(<LibraryView />);
+    expect(favourites()).toBeNull();
+  });
+  it('stands above the levels with its count and the favourites newest first, and opens one', async () => {
+    const chosen = favour(3);
+    const { container } = render(<LibraryView />);
+    const shelf = favourites()!;
+    expect(h2s()[0]).toBe('Favourites');
+    expect(
+      shelf.compareDocumentPosition(screen.getByRole('radio', { name: 'Easy' })) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(within(shelf).getByText('3 pieces')).toHaveClass('muted');
+    const titles = within(shelf)
+      .getAllByRole('button', { name: /^Open / })
+      .map((b) => b.querySelector('.title')!.textContent);
+    expect(titles).toEqual(chosen.map((p) => p.title));
+    expect(within(shelf).queryByRole('button', { name: /^All / })).toBeNull();
+    expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+    await userEvent.click(within(shelf).getAllByRole('button', { name: /^Open / })[1]!);
+    expect(useAppStore.getState().view).toEqual({
+      name: 'score',
+      source: { kind: 'library', slug: chosen[1]!.slug },
+    });
+  });
+  it('shows the newest five, and the rest in place on All, focusing the first new row', async () => {
+    favour(7);
+    render(<LibraryView />);
+    const open = () => within(favourites()!).getAllByRole('button', { name: /^Open / });
+    expect(open()).toHaveLength(5);
+    await userEvent.click(screen.getByRole('button', { name: 'All 7 favourites' }));
+    expect(open()).toHaveLength(7);
+    expect(open()[5]).toHaveFocus();
+    expect(screen.queryByRole('button', { name: 'All 7 favourites' })).toBeNull();
+    expect(useAppStore.getState().libraryFavouritesOpen).toBe(true);
+  });
+  it('leaves while a search or a style shelf is open, as the shelves do', async () => {
+    favour(2);
+    render(<LibraryView />);
+    await userEvent.click(screen.getByRole('button', { name: 'All 41 songs' }));
+    expect(favourites()).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
+    expect(favourites()).not.toBeNull();
+    await userEvent.type(screen.getByRole('searchbox'), 'minuet');
+    expect(favourites()).toBeNull();
+  });
+  it('skips a favourite the library no longer holds', () => {
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, favourites: ['no-such-piece', easy()[0]!.slug] },
+    });
+    render(<LibraryView />);
+    expect(within(favourites()!).getByText('1 piece')).toBeInTheDocument();
+    expect(within(favourites()!).getAllByRole('button', { name: /^Open / })).toHaveLength(1);
+  });
+  it('gives a favourite that is also a shelf sample ids of its own', () => {
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, favourites: easy().map((p) => p.slug) },
+      libraryFavouritesOpen: true,
+    });
+    const { container } = render(<LibraryView />);
+    const ids = [...container.querySelectorAll('[id]')].map((e) => e.id);
+    expect(ids.length).toBeGreaterThan(0);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 

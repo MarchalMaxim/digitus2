@@ -1733,11 +1733,14 @@ async function lookAtHeldCursor(page: Page): Promise<{ tick: string; marks: Curs
       scrollY: window.scrollY,
       dockTop: document.querySelector('.dock')!.getBoundingClientRect().top,
       marks: reds.map((el) => {
-        const head = el.querySelector('.notehead')!.getBoundingClientRect();
+        const headEl = el.querySelector('.notehead')!;
+        const head = headEl.getBoundingClientRect();
+        // The cursor draws the head larger (base.css, a CSS scale); the area wanted is as engraved.
+        const scale = new DOMMatrix(getComputedStyle(headEl).transform);
         const parts = [...el.querySelectorAll('.notehead, .stem, .flag')];
         return {
           parts: union(parts.map((p) => p.getBoundingClientRect())),
-          head: head.width * head.height,
+          head: (head.width / scale.a) * (head.height / scale.d),
           stem: el.querySelector('.stem') !== null,
         };
       }),
@@ -1782,7 +1785,7 @@ async function lookAtHeldCursor(page: Page): Promise<{ tick: string; marks: Curs
 // Polish plan Task 4 and Review Focus 4 (review S5): the cursor was the red notehead alone, 9 x
 // 8 px (46 red pixels in the review's 360 px screenshot of K.545), easy to lose in a run of
 // sixteenths; the stem, 0.7 px wide, drew no pixel of the red itself. The cursor is now the
-// current notes drawn bold (the notehead outlined 2 px, the stem 4 px wide, the flag outlined), and
+// current notes drawn bold (the notehead at 1.4 times its size, the stem 3 px wide, the flag at 1.3), and
 // still nothing but the notes of one onset.
 test.describe('the cursor on a phone', () => {
   test.use({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });

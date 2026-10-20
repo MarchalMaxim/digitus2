@@ -535,18 +535,42 @@ fieldset {
 
 /* The playback cursor draws the current notes bold, so they can be followed through a run of
    small notes (the review found a 9 x 8 px notehead easy to lose): the accent (tokens.css) also
-   fills the stem and the flag, and these widths make them read. The notehead and the flag are
-   glyphs, so their outline is in the glyph's own units: the sheet draws 25 Verovio units per CSS
-   pixel and a glyph at 0.72 of its size, so 69 units are 2 px. The stem is a line, 4 px wide
-   whatever the scale. Only the marked notes change: still one cursor per onset. */
-.score-sheet svg .is-red .notehead,
+   fills the stem and the flag, and these sizes make them read. The notehead and the flag are the
+   engraved glyphs drawn larger, each scaled about its own box (the head about its centre, the
+   flag about the stem's end it hangs from), so the mark keeps the note's shape: an outline
+   stroked around a glyph this small rounds its points off into a blob (issue #92). The stem is a
+   line, 3 px wide whatever the scale, with round ends so it nestles into the head instead of
+   poking a square corner past it. Only the marked notes change: still one cursor per onset. */
+.score-sheet svg .is-red .notehead {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(1.4);
+}
+
+/* A flag's glyph has its origin at the stem's end: top left for a flag on a stem up (E240, E242,
+   …), bottom left for one on a stem down (E241, E243, …). */
 .score-sheet svg .is-red .flag {
-  stroke-width: 69px;
-  stroke-linejoin: round;
+  transform-box: fill-box;
+  transform-origin: left top;
+  transform: scale(1.3);
+}
+
+.score-sheet
+  svg
+  .is-red
+  .flag:has(
+    > use[href*='E241-'],
+    > use[href*='E243-'],
+    > use[href*='E245-'],
+    > use[href*='E247-'],
+    > use[href*='E249-']
+  ) {
+  transform-origin: left bottom;
 }
 
 .score-sheet svg .is-red .stem > path {
-  stroke-width: 4px;
+  stroke-width: 3px;
+  stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
 

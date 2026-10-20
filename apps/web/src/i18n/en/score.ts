@@ -14,6 +14,8 @@ export const score = {
   noteLetters: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
   header: {
     back: 'Back to the library',
+    /** The heart beside a library piece's title, pressed while the piece is a favourite. */
+    favourite: 'Favourite',
   },
   sheet: {
     /** Name of the rendered sheet music for screen readers; `title` is the piece's title. */

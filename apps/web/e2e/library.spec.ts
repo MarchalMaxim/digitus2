@@ -469,6 +469,20 @@ test('library: no match says so; Clear brings the list back', async ({ page }) =
   await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
 });
 
+test('library: a hovered Clear stays a plain word inside the field (#76)', async ({ page }) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByRole('searchbox', { name: 'Search the library' }).fill('fur elize');
+  const clear = page.getByRole('button', { name: 'Clear the search' });
+  await clear.hover();
+  // Read after the hover transition ends, or a fill still fading in reads as transparent.
+  const background = await clear.evaluate(async (el) => {
+    await Promise.all(el.getAnimations().map((a) => a.finished));
+    return getComputedStyle(el).backgroundColor;
+  });
+  expect(background).toBe('rgba(0, 0, 0, 0)');
+});
+
 test('library: back from a piece found by search shows the same search', async ({ page }) => {
   await page.goto('/');
   await libraryReady(page);
@@ -541,4 +555,104 @@ test('library: a piece played becomes the one to continue, on its level, across 
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled({ timeout: 20_000 });
   await expect(page.locator('.score-header .finger-legend')).toHaveCount(0); // seen: the side panel keeps it
   await expect(page.locator('.side-panel .finger-legend')).toBeVisible();
+});
+
+test('library: the heart on a score puts the piece on the Favourites shelf, across a reload, and takes it off', async ({
+  page,
+}) => {
+  await page.goto('/#/piece/bach-minuet-g-major-bwv-anh-114');
+  const heart = page.getByRole('button', { name: 'Favourite' });
+  await expect(heart).toHaveAttribute('aria-pressed', 'false');
+  await heart.click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  const shelf = page.getByRole('region', { name: 'Favourites' });
+  await expect(shelf.getByText('1 piece')).toBeVisible();
+  await page.reload();
+  await libraryReady(page);
+  const row = shelf.getByRole('button', { name: /^Open Minuet in G major/ });
+  await expect(row).toBeVisible();
+  // The shelf stands above the levels.
+  const [shelfTop, pillsTop] = await Promise.all([
+    shelf.evaluate((e) => e.getBoundingClientRect().top),
+    page.getByRole('group', { name: 'Level' }).evaluate((e) => e.getBoundingClientRect().top),
+  ]);
+  expect(shelfTop).toBeLessThan(pillsTop);
+  await expectOneRed(page, 'favourites');
+  await expectNoSeriousA11y(page);
+  await row.click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'true');
+  await heart.click();
+  await expect(heart).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Back to the library' }).click();
+  await libraryReady(page);
+  await expect(page.getByRole('heading', { name: 'Favourites' })).toHaveCount(0);
+});
+
+// The UI review of issue #78: the Favourites shelf above the list grows or shrinks while the reader
+// is on the score, and Back must still land on the same rows, not on the same pixel offset.
+test('library: Back after the heart lands on the same rows, the Favourites shelf above them new or gone', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  // A sample of the second shelf, brought near the top of the window.
+  const row = page.locator('.library-list .shelf').nth(1).locator('.piece-row').first();
+  const name = (await row.getAttribute('aria-label'))!;
+  const inList = page.locator('.library-list').getByRole('button', { name, exact: true });
+  await inList.evaluate((el) =>
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 80),
+  );
+  const rowTop = () => inList.evaluate((el) => el.getBoundingClientRect().top);
+  const before = await rowTop();
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+  const heart = page.getByRole('button', { name: 'Favourite' });
+  for (const pressed of ['true', 'false']) {
+    await inList.click();
+    await heart.click();
+    await expect(heart).toHaveAttribute('aria-pressed', pressed);
+    await page.getByRole('button', { name: 'Back to the library' }).click();
+    await libraryReady(page);
+    await expect(page.getByRole('region', { name: 'Favourites' })).toHaveCount(
+      pressed === 'true' ? 1 : 0,
+    );
+    expect(Math.abs((await rowTop()) - before), `the row with the heart ${pressed}`).toBeLessThan(
+      3,
+    );
+  }
+});
+
+test('library: the filled heart on a Favourites row takes the piece off, the focus staying on the list, across a reload', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem(
+      'digitus2.settings.v1',
+      JSON.stringify({
+        state: { settings: { favourites: ['ode-to-joy', 'bach-minuet-g-major-bwv-anh-114'] } },
+        version: 2,
+      }),
+    );
+  });
+  await page.goto('/');
+  await libraryReady(page);
+  const shelf = page.getByRole('region', { name: 'Favourites' });
+  await expect(
+    shelf.getByText('The pieces you marked with the heart, newest first.'),
+  ).toBeVisible();
+  const hearts = shelf.getByRole('button', { name: /^Remove .* from Favourites$/ });
+  await expect(hearts).toHaveCount(2);
+  await shelf.getByRole('button', { name: /^Remove Ode to Joy \(simplified\) by / }).click();
+  await expect(shelf.getByText('1 piece')).toBeVisible();
+  await expect(hearts).toHaveCount(1);
+  await expect(hearts.first()).toBeFocused();
+  await expectOneRed(page, 'a favourite removed');
+  await hearts.first().click();
+  await expect(shelf).toHaveCount(0);
+  await expect(tierPill(page, 'easy')).toBeFocused();
+  await page.reload();
+  await libraryReady(page);
+  await expect(page.getByRole('heading', { name: 'Favourites' })).toHaveCount(0);
 });

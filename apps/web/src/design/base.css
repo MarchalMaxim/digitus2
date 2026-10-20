@@ -77,8 +77,9 @@ input {
 
 /* Hover and disabled styles skip the .is-red element: button.is-red and button:hover have the same
    specificity and this file loads after tokens.css, so without :not() hovering or disabling the
-   primary button would erase the single accent element on screen. */
-button:not(.is-red):hover {
+   primary button would erase the single accent element on screen. A text button is a word, not a
+   box: it takes no fill on hover either (its own hover is below). */
+button:not(.is-red, .text-button):hover {
   background: var(--gray-1);
 }
 
@@ -338,6 +339,10 @@ h1[tabindex='-1']:focus {
   text-underline-offset: 0.2em;
 }
 
+.text-button:hover:not(:disabled, [aria-disabled='true']) {
+  text-decoration-thickness: 2px;
+}
+
 /* Notice: one gray line above the view, never red. Sticky so a refusal from the drop zone at the
    bottom of a long library still lands on screen wherever the reader is scrolled. */
 .notice-wrap {
@@ -426,6 +431,63 @@ fieldset {
 .score-header .back-button {
   justify-self: start;
   margin-bottom: 0.5rem;
+}
+
+/* A library piece's title and its heart (issue #78): the heart stands in the text flow after the
+   title's last word, so it takes width on the last line only. The row's nowrap governs the one
+   break between the heading and the heart (their nearest common ancestor), so the heart never
+   stands alone on a line: it takes the last word with it. At the heading's size, `middle`
+   centres it on that line's letters; the negative margins keep the 44 px circle from making the
+   line taller. */
+.title-row {
+  font-size: 1.75rem;
+  white-space: nowrap;
+}
+
+.title-row > h1 {
+  display: inline;
+  white-space: normal;
+  /* An archive title can end in one long word (a file name): it breaks rather than push the
+     heart, glued to it, past the column. */
+  overflow-wrap: anywhere;
+}
+
+.favourite-toggle {
+  vertical-align: middle;
+  margin: -0.5rem 0 -0.5rem 0.5rem;
+}
+
+/* The heart (design/HeartIcon.tsx): a round 44 px button with no border, like the theme switch;
+   an ink outline that fills while the piece is a favourite. The Favourites shelf's rows show it
+   filled (library.css, .favourite-remove). Ink only, never red. */
+.heart-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+
+.heart-button svg {
+  width: 24px;
+  height: 24px;
+  max-width: none;
+}
+
+.heart-button path {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: fill var(--dur-fast) var(--ease);
+}
+
+.heart-button[aria-pressed='true'] path,
+.heart-button.is-filled path {
+  fill: currentColor;
 }
 
 .score-layout {

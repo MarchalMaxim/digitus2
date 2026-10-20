@@ -43,6 +43,16 @@ const ARABESQUE_EDITORIAL_DIGITS = 26;
 /** Schumann's Melody: the engine's reader warns about two duplicate notes. */
 const MELODY = 'schumann-op68-no1-melody';
 const SCORE_TIMEOUT = 20_000;
+/** Seven Easy pieces, the first two also on Easy's Songs shelf (issue #78). */
+const FAVOURITES = [
+  'mary-had-a-little-lamb',
+  'au-clair-de-la-lune',
+  'brahms-lullaby',
+  TWINKLE,
+  'bach-minuet-g-major-bwv-anh-114',
+  'mozart-minuet-f-major-k2',
+  'ode-to-joy',
+];
 /** The library's Twinkle as a two-track MIDI file (M6), dropped through the file chooser. */
 const TWINKLE_MIDI = fileURLToPath(new URL('../../fixtures/twinkle.mid', import.meta.url));
 
@@ -192,6 +202,32 @@ export const STATES: AppState[] = [
         page.getByRole('button', { name: 'Continue with Minuet in G major' }),
       ).toBeVisible();
       await expect(page.getByRole('radio', { name: 'Easy', exact: true })).toBeChecked();
+    },
+    expectTag: 'button',
+  },
+  {
+    // Seven favourites (issue #78), all of them shown: the shelf above the levels, and favourites
+    // that are also Easy's samples, whose rows must not repeat an id.
+    name: 'library-favourites',
+    go: async (page) => {
+      await page.addInitScript(
+        (favourites) =>
+          localStorage.setItem(
+            'digitus2.settings.v1',
+            JSON.stringify({ state: { settings: { favourites } }, version: 2 }),
+          ),
+        FAVOURITES,
+      );
+      await page.goto('/');
+      await libraryReady(page);
+      const shelf = page.getByRole('region', { name: 'Favourites' });
+      await shelf.getByRole('button', { name: 'All 7 favourites' }).click();
+      await expect(shelf.getByRole('button', { name: /^Open / })).toHaveCount(7);
+      // axe reports no duplicate id as serious, so the rows' ids are checked here.
+      const ids = await page.evaluate(() =>
+        [...document.querySelectorAll('[id]')].map((e) => e.id),
+      );
+      expect(new Set(ids).size).toBe(ids.length);
     },
     expectTag: 'button',
   },

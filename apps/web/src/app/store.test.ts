@@ -32,6 +32,7 @@ describe('store', () => {
       showEditorial: false,
       lastPlayed: null,
       legendSeen: false,
+      favourites: [],
     });
   });
   it('opens a library piece, the about page, and goes back', () => {
@@ -395,6 +396,57 @@ describe('the first Play (UI batch, spec sections 12 and 16)', () => {
   });
 });
 
+describe('favourites (issue #78)', () => {
+  const S = () => useAppStore.getState();
+  const stored = () =>
+    JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.settings;
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({ settings: { ...DEFAULT_SETTINGS }, libraryFavouritesOpen: false });
+  });
+  it('adds a piece as the newest favourite and takes it out again, in localStorage', () => {
+    S().toggleFavourite('ode-to-joy');
+    S().toggleFavourite('amazing-grace');
+    expect(S().settings.favourites).toEqual(['amazing-grace', 'ode-to-joy']);
+    expect(stored().favourites).toEqual(['amazing-grace', 'ode-to-joy']);
+    S().toggleFavourite('ode-to-joy');
+    expect(S().settings.favourites).toEqual(['amazing-grace']);
+    expect(stored().favourites).toEqual(['amazing-grace']);
+  });
+  it('loads older settings with no favourites, keeps unique slugs and drops anything else', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { handSize: 'small' } }, version: 2 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings).toMatchObject({ handSize: 'small', favourites: [] });
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        state: { settings: { favourites: ['minuet', 5, 'minuet', '', null, 'ode-to-joy'] } },
+        version: 2,
+      }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.favourites).toEqual(['minuet', 'ode-to-joy']);
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { favourites: 'minuet' } }, version: 2 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.favourites).toEqual([]);
+  });
+  it('keeps the favourites shelf shown in full for the visit only', () => {
+    expect(S().libraryFavouritesOpen).toBe(false);
+    S().setLibraryFavouritesOpen(true);
+    S().openPiece({ kind: 'library', slug: 'ode-to-joy' });
+    S().openLibrary();
+    expect(S().libraryFavouritesOpen).toBe(true);
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state;
+    expect(saved.libraryFavouritesOpen).toBeUndefined();
+  });
+});
+
 describe('the default settings', () => {
   it('start a beginner with a medium hand, both hands, a count-in and nothing else on', () => {
     expect(DEFAULT_SETTINGS).toEqual({
@@ -406,6 +458,7 @@ describe('the default settings', () => {
       showEditorial: false,
       lastPlayed: null,
       legendSeen: false,
+      favourites: [],
     });
   });
 });

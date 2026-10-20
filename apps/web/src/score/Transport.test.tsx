@@ -39,6 +39,7 @@ function playback(
     countIn: null,
     waiting: false,
     atStart: !playing,
+    ended: 0,
     cue: null,
     play: vi.fn<() => void>(),
     pause: vi.fn<() => void>(),

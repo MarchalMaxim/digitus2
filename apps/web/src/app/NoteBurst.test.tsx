@@ -130,12 +130,12 @@ describe('the note burst', () => {
   });
 
   it('draws half as many notes again for a double-click, exactly one of them in the accent', () => {
-    expect(drawBurst(() => 0, true)).toHaveLength(3);
-    expect(drawBurst(() => 0.9999, true)).toHaveLength(6);
+    expect(drawBurst(() => 0, 'double')).toHaveLength(3);
+    expect(drawBurst(() => 0.9999, 'double')).toHaveLength(6);
     let seed = 11;
     const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
     for (let k = 0; k < 50; k++) {
-      const double = drawBurst(random, true);
+      const double = drawBurst(random, 'double');
       expect(double.length).toBeGreaterThanOrEqual(3);
       expect(double.length).toBeLessThanOrEqual(6);
       expect(double.filter((n) => n.accent)).toHaveLength(1);
@@ -165,9 +165,28 @@ describe('the note burst', () => {
   it('puts the accent on the note the random draw picks, not always the last', () => {
     // Draws in order: count, chord, fan centre, fan width, direction, step, then the accent.
     const queue = [0.5, 0.9, 0.5, 0.5, 0.5, 0.5, 0.5];
-    const notes = drawBurst(() => queue.shift() ?? 0.5, true);
+    const notes = drawBurst(() => queue.shift() ?? 0.5, 'double');
     expect(notes).toHaveLength(5);
     expect(notes.map((n) => n.accent)).toEqual([false, false, true, false, false]);
+  });
+
+  // Issue #97: the finish at the end of a piece (score/EndBurst.tsx) is drawn in ink only, since
+  // the red flying home to Play is the screen's one red.
+  it('draws the finish with 3 to 5 notes that rise, none in the accent', () => {
+    expect(drawBurst(() => 0, 'end')).toHaveLength(3);
+    expect(drawBurst(() => 0.9999, 'end')).toHaveLength(5);
+    let seed = 13;
+    const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    for (let k = 0; k < 50; k++) {
+      const end = drawBurst(random, 'end');
+      expect(end.length).toBeGreaterThanOrEqual(3);
+      expect(end.length).toBeLessThanOrEqual(5);
+      expect(end.some((n) => n.accent)).toBe(false);
+      for (const n of end) {
+        expect(n.dy).toBeLessThan(0);
+        expect(n.time).toBeLessThanOrEqual(1.25);
+      }
+    }
   });
 
   it('draws its notes where the click was, hidden from assistive technology', () => {

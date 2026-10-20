@@ -104,24 +104,43 @@ export interface BurstNote {
 }
 
 /**
+ * A burst's shape: a click's, a double-click's, or the finish at the end of a piece (issue #97,
+ * score/EndBurst.tsx).
+ */
+export type BurstShape = 'click' | 'double' | 'end';
+
+/** How many notes each shape lets rise: a weighted draw. */
+const COUNTS: Record<BurstShape, readonly number[]> = {
+  click: [2, 3, 3, 3, 4],
+  double: [3, 5, 5, 5, 6],
+  end: [3, 4, 4, 4, 5],
+};
+
+/**
  * One burst, drawn fresh so no two look alike: 2 to 4 notes in a fan of random direction and
  * width, each 22 to 50 px out, tilted outward, its own size, length and sideways drift. They rise
  * like a quick run, up or down, or now and then together like a chord. A double-click's burst
- * (`double`) has half as many notes again, 3 to 6, a little wider and farther out, and one of them,
- * picked at random, in the accent. `random` is Math.random but for tests.
+ * (`'double'`) has half as many notes again, 3 to 6, a little wider and farther out, and one of
+ * them, picked at random, in the accent. The finish (`'end'`) has 3 to 5, as wide and as far as
+ * the double-click's, and none in the accent: the red flying home is the screen's one red.
+ * `random` is Math.random but for tests.
  */
-export function drawBurst(random: () => number = Math.random, double = false): BurstNote[] {
+export function drawBurst(
+  random: () => number = Math.random,
+  shape: BurstShape = 'click',
+): BurstNote[] {
   const between = (a: number, b: number) => a + random() * (b - a);
   const pick = <T,>(xs: readonly T[]): T =>
     xs[Math.min(xs.length - 1, Math.floor(random() * xs.length))]!;
-  const count = pick(double ? [3, 5, 5, 5, 6] : [2, 3, 3, 3, 4]);
+  const double = shape !== 'click';
+  const count = pick(COUNTS[shape]);
   const chord = random() < 0.15;
   const fanCenter = between(-25, 25);
   const fanWidth = between(50, 110) * (double ? 1.2 : 1);
   const upward = random() < 0.5;
   /** Between two notes of the run, as a fraction of --dur-flourish (28 to 55 ms of 520). */
   const step = chord ? between(0, 0.02) : between(0.054, 0.106);
-  const accent = double ? Math.min(count - 1, Math.floor(random() * count)) : -1;
+  const accent = shape === 'double' ? Math.min(count - 1, Math.floor(random() * count)) : -1;
   const notes: BurstNote[] = [];
   for (let i = 0; i < count; i++) {
     const t = i / (count - 1);
@@ -146,7 +165,8 @@ export function drawBurst(random: () => number = Math.random, double = false): B
   return notes;
 }
 
-interface Burst {
+/** A burst on screen: where it rises from, in viewport px, and its notes. */
+export interface Burst {
   x: number;
   y: number;
   /** Counts the slot's bursts: a new count mounts new notes, so their animation starts over. */
@@ -192,6 +212,29 @@ function noteStyle(n: BurstNote): CSSProperties {
 }
 
 /**
+ * One burst's notes, rising from its point (base.css, `.note-burst`). Inside a
+ * `.note-burst-layer`; the key of a new burst in the same place must change, so its notes mount
+ * afresh and their animation starts over.
+ */
+export function BurstNotes({ burst }: { burst: Burst }): JSX.Element {
+  return (
+    <span className="note-burst" style={{ left: burst.x, top: burst.y }}>
+      {burst.notes.map((n, j) => (
+        <span
+          key={j}
+          className={n.accent ? 'note-burst-note is-red' : 'note-burst-note'}
+          style={noteStyle(n)}
+        >
+          <span className="note-burst-drift" style={{ translate: `${n.drift}px 0px` }}>
+            <Glyph kind={n.kind} />
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
  * An easter egg (motion study 10): a click on nothing in particular lets a few small notes rise
  * from the pointer, in ink, gone in about half a second, and no two bursts alike (`drawBurst`).
  * A double-click lets half as many notes again rise, one of them in the accent: the one deliberate
@@ -226,7 +269,7 @@ export function NoteBurst(): JSX.Element {
       last = e.timeStamp;
       const slot = next;
       next = (next + 1) % SLOTS;
-      const notes = drawBurst(Math.random, double);
+      const notes = drawBurst(Math.random, double ? 'double' : 'click');
       setBursts((prev) => {
         const out = prev.slice();
         out[slot] = { x: e.clientX, y: e.clientY, gen: (prev[slot]?.gen ?? 0) + 1, notes };
@@ -243,24 +286,7 @@ export function NoteBurst(): JSX.Element {
 
   return (
     <div className="note-burst-layer no-print" aria-hidden="true">
-      {bursts.map(
-        (b, i) =>
-          b && (
-            <span key={`${i}-${b.gen}`} className="note-burst" style={{ left: b.x, top: b.y }}>
-              {b.notes.map((n, j) => (
-                <span
-                  key={j}
-                  className={n.accent ? 'note-burst-note is-red' : 'note-burst-note'}
-                  style={noteStyle(n)}
-                >
-                  <span className="note-burst-drift" style={{ translate: `${n.drift}px 0px` }}>
-                    <Glyph kind={n.kind} />
-                  </span>
-                </span>
-              ))}
-            </span>
-          ),
-      )}
+      {bursts.map((b, i) => b && <BurstNotes key={`${i}-${b.gen}`} burst={b} />)}
     </div>
   );
 }

@@ -333,6 +333,164 @@ async function expectCursorAboveDock(page: Page): Promise<void> {
   await expectOneRed(page, 'playing after the sampling');
 }
 
+/** A system the cursor entered while `samplePageTurns` watched (issue #5). */
+interface SystemEntry {
+  /** The system's top and bottom on the page (viewport plus the scroll offset) at entry. */
+  top: number;
+  bottom: number;
+  /** Whether the system lay wholly in the band between the top of the window and the dock at entry. */
+  fit: boolean;
+  /** Whether the page was still moving at entry (a turn under way): its fit is not judged. */
+  moving: boolean;
+  /** How many page turns settled while the cursor was in this system. */
+  turns: number;
+}
+
+/** A page turn that settled: where the cursor's system then stood below the top of the band. */
+interface PageTurn {
+  systemTop: number;
+  scrollY: number;
+}
+
+/** The room a page turn leaves above the system (`SYSTEM_TOP_MARGIN` in useCursor.ts). */
+const SYSTEM_TOP_MARGIN = 12;
+
+/**
+ * Watches the playing cursor cross systems until it has left `minimumSystems` of them (up to
+ * 70 s): for each system, whether it lay wholly in the band above the dock when the cursor
+ * entered it and how many page turns settled during its stay; for each turn, where it left the
+ * system. A turn settles when the page, having moved, holds still for three frames with the
+ * dock stuck to the bottom of the window. Counts of frames and systems, never a time.
+ */
+function samplePageTurns(
+  page: Page,
+  minimumSystems: number,
+): Promise<{
+  band: { top: number; bottom: number };
+  entries: SystemEntry[];
+  turns: PageTurn[];
+  elapsedMs: number;
+}> {
+  return page.evaluate(async (minimum) => {
+    const entries: SystemEntry[] = [];
+    const turns: PageTurn[] = [];
+    let band = { top: 0, bottom: 0 };
+    let system: Element | null = null;
+    let lastY = window.scrollY;
+    let settledY = window.scrollY;
+    let still = 0;
+    const start = performance.now();
+    const deadline = start + 70_000;
+    await new Promise<void>((resolve) => {
+      const frame = () => {
+        // One system more than asked: the last entry's stay is still under way when sampling ends.
+        if (performance.now() >= deadline || entries.length > minimum) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(frame);
+        const dock = document.querySelector('.dock')!.getBoundingClientRect();
+        if (Math.abs(dock.bottom - window.innerHeight) >= 1) return; // the dock not stuck yet
+        band = { top: 0, bottom: dock.top };
+        const y = window.scrollY;
+        const moving = y !== lastY;
+        still = moving ? 0 : still + 1;
+        lastY = y;
+        const red = document.querySelector('.score-sheet .is-red');
+        const current = red?.closest('g.system') ?? null;
+        if (current && current !== system) {
+          system = current;
+          const r = current.getBoundingClientRect();
+          entries.push({
+            top: r.top + y,
+            bottom: r.bottom + y,
+            fit: r.top >= band.top && r.bottom <= band.bottom,
+            moving,
+            turns: 0,
+          });
+        }
+        if (y !== settledY && still >= 3) {
+          settledY = y;
+          const r = system?.getBoundingClientRect();
+          turns.push({ systemTop: r ? r.top - band.top : Number.NaN, scrollY: y });
+          const entry = entries[entries.length - 1];
+          if (entry) entry.turns++;
+        }
+      };
+      requestAnimationFrame(frame);
+    });
+    return { band, entries, turns, elapsedMs: performance.now() - start };
+  }, minimumSystems);
+}
+
+/**
+ * How many scrolls the rule before issue #5 would take over the same systems: it centred every
+ * system the cursor entered that was not wholly in the band, so each turn showed a fraction of
+ * the next system and the next entry scrolled again.
+ */
+function centringTurns(entries: SystemEntry[], band: { top: number; bottom: number }): number {
+  const room = band.bottom - band.top;
+  let scrollY = entries[0] ? Math.max(0, entries[0].top - band.top) : 0;
+  let turns = 0;
+  for (const s of entries) {
+    const top = s.top - scrollY;
+    const bottom = s.bottom - scrollY;
+    if (top >= band.top && bottom <= band.bottom) continue;
+    scrollY += top - (band.top + (room - (bottom - top)) / 2);
+    turns++;
+  }
+  return turns;
+}
+
+/**
+ * Plays K.545 from the start at 150 % until the cursor has left nine systems and checks the
+ * page turns of issue #5: the page holds still while the cursor's system is wholly above the
+ * dock, turns when the cursor enters the first system that is not (the one after the last
+ * system fully visible), each turn leaves that system at the top of the band with the margin
+ * for its digits, and the turns are fewer than centring every entered system would take.
+ */
+async function expectPageTurnsOncePerScreenful(page: Page): Promise<void> {
+  test.setTimeout(110_000); // Score setup plus the sampler's 70 s hard deadline.
+  await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
+  await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
+  await openPractice(page);
+  await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+  await page.getByRole('slider', { name: 'Tempo' }).fill('150');
+  await page.getByRole('button', { name: 'Play' }).click();
+  await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
+  const seen = await samplePageTurns(page, 9);
+  const trace = JSON.stringify(seen);
+  expect(seen.entries.length, `systems entered: ${trace}`).toBeGreaterThan(9);
+  // The stays that ended: the last system entered may still be waiting for its turn to settle.
+  const stays = seen.entries.slice(0, -1);
+  const judged = stays.filter((e) => !e.moving);
+  expect(judged.length, `systems entered on a still page: ${trace}`).toBeGreaterThanOrEqual(4);
+  // The page holds still while the system is wholly visible, and turns once when it is not.
+  for (const e of judged)
+    expect(e.turns, `turns in ${JSON.stringify(e)}: ${trace}`).toBe(e.fit ? 0 : 1);
+  expect(
+    judged.some((e) => e.fit),
+    `a system entered wholly in view: ${trace}`,
+  ).toBe(true);
+  expect(
+    judged.some((e) => !e.fit),
+    `a system entered under the dock: ${trace}`,
+  ).toBe(true);
+  // A turn puts the system's top at the margin below the top of the band.
+  for (const t of seen.turns) {
+    expect(t.systemTop, `a settled turn: ${trace}`).toBeGreaterThanOrEqual(seen.band.top - 1);
+    expect(t.systemTop, `a settled turn: ${trace}`).toBeLessThanOrEqual(SYSTEM_TOP_MARGIN + 1);
+  }
+  // Fewer turns than centring each entered system took: a turn per screenful, not per system.
+  const old = centringTurns(stays, seen.band);
+  test.info().annotations.push({
+    type: 'page turns',
+    description: `${seen.turns.length} over ${stays.length} systems, against ${old} by centring`,
+  });
+  expect(seen.turns.length, `turns against the centring rule's ${old}: ${trace}`).toBeLessThan(old);
+  await expectOneRed(page, 'playing after the sampling');
+}
+
 /** A note or a digit of the score, with the staff it is on and how it is drawn. */
 interface ScoreMark {
   id: string;
@@ -1316,6 +1474,12 @@ test.describe('playback with the silent instrument', () => {
     page,
   }) => {
     await expectCursorAboveDock(page);
+  });
+
+  test('the page turns once per screenful: still while the system is in view, then the next system at the top, fewer turns than centring (issue #5)', async ({
+    page,
+  }) => {
+    await expectPageTurnsOncePerScreenful(page);
   });
 
   test('a loop typed while playing waits for the typing to settle before it moves the playhead', async ({

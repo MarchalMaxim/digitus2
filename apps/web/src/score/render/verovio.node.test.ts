@@ -42,4 +42,21 @@ describe('verovio render contract', () => {
     }
     tk.destroy();
   }, 30_000);
+
+  it('writes no whitespace between elements, and shows its heap', async () => {
+    const { default: createVerovioModule } = await import('verovio/wasm');
+    const { VerovioToolkit } = await import('verovio/esm');
+    const module = await createVerovioModule();
+    // The renderer retires a worker whose heap grew past this (renderer.ts).
+    expect(module.HEAPU8.length).toBeGreaterThan(0);
+    const tk = new VerovioToolkit(module);
+    const { score, editorial } = parseMusicXml(xml);
+    tk.setOptions(verovioOptions(900));
+    expect(tk.loadData(injectNoteIds(injectFingerings(xml, score, editorial), score))).toBeTruthy();
+    const svg = tk.renderToSVG(1);
+    // Indentation would put a text node between every two elements of the page: 1.5 per element,
+    // about 230,000 nodes on a 30-page piece (docs/research/ram-usage.md).
+    expect(svg.match(/>\s+</g) ?? []).toEqual([]);
+    tk.destroy();
+  }, 30_000);
 });

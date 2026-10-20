@@ -4,6 +4,13 @@
  * `SupersededError`, and their late results are dropped, so a resize never shows a stale layout.
  * A worker that fails (its script did not load, it crashed) rejects every pending and later
  * request, so the score view shows an error instead of waiting forever.
+ *
+ * Verovio's WASM heap starts at 128 MB and never shrinks: a layout that needs more (the longest
+ * pieces: 154 MB for Beethoven's Ninth, 221 MB for an 18,000-note medley) keeps the larger heap
+ * for the rest of the visit. A worker that reports such growth is retired once nothing is pending,
+ * which frees the whole worker, its first 128 MB with it (some 210 MB on Beethoven's Ninth), and
+ * the next layout or warm-up starts a fresh one: only those pieces pay a cold start (0.3 to 0.7 s)
+ * on their next layout, which itself takes seconds (docs/research/ram-usage.md).
  */
 import type { WorkerLike } from '../../engine/client.js';
 import { normalizeVoices } from './normalizeVoices.js';
@@ -42,9 +49,12 @@ export class SupersededError extends Error {
 export type RenderWorkerRequest =
   { id: number; type: 'init' } | { id: number; type: 'render'; xml: string; widthPx: number };
 
-/** Messages from the worker. */
+/**
+ * Messages from the worker. `grown`: the worker's WASM heap is larger now than when it started.
+ */
 export type RenderWorkerResponse =
-  { id: number; ok: true; pages: string[]; ms: number } | { id: number; ok: false; error: string };
+  | { id: number; ok: true; pages: string[]; ms: number; grown?: boolean }
+  | { id: number; ok: false; error: string };
 
 interface Pending {
   resolve(r: RenderResult): void;
@@ -56,11 +66,12 @@ function defaultWorker(): WorkerLike {
 }
 
 /**
- * `onFail` is told once when the worker fails, so the owner can make a fresh renderer for the
- * next piece (this one stays closed).
+ * `spawn` makes the worker: one at once, and another after a worker whose heap grew is retired.
+ * `onFail` is told once when a worker fails, so the owner can make a fresh renderer for the next
+ * piece (this one stays closed).
  */
 export function createRenderer(
-  worker: WorkerLike = defaultWorker(),
+  spawn: () => WorkerLike = defaultWorker,
   onFail?: (e: Error) => void,
 ): ScoreRenderer {
   const pending = new Map<number, Pending>();
@@ -69,32 +80,51 @@ export function createRenderer(
   let disposed = false;
   // Set once the worker has failed: every request after that rejects with it.
   let failure: Error | undefined;
+  // The worker running now; undefined once retired, until the next render or warm-up.
+  let worker: WorkerLike | undefined;
+  // The worker's heap has grown: retire it once nothing is pending.
+  let grown = false;
 
-  const post = (m: RenderWorkerRequest) => worker.postMessage(m);
   const rejectAll = (e: Error) => {
     for (const p of pending.values()) p.reject(e);
     pending.clear();
   };
 
-  worker.onmessage = (e: MessageEvent) => {
-    const res = e.data as RenderWorkerResponse;
-    const p = pending.get(res.id);
-    if (!p) return; // superseded, disposed, or an init acknowledgement
-    pending.delete(res.id);
-    if (res.ok) p.resolve({ pages: res.pages, ms: res.ms });
-    else p.reject(new Error(res.error));
-  };
+  function start(): WorkerLike {
+    const w = spawn();
+    w.onmessage = (e: MessageEvent) => {
+      const res = e.data as RenderWorkerResponse;
+      // A superseded layout still tells whether the heap grew.
+      if (res.ok && res.grown) grown = true;
+      const p = pending.get(res.id);
+      if (p) {
+        pending.delete(res.id);
+        if (res.ok) p.resolve({ pages: res.pages, ms: res.ms });
+        else p.reject(new Error(res.error));
+      }
+      if (grown && pending.size === 0 && w === worker && !disposed) {
+        w.terminate();
+        worker = undefined;
+        grown = false;
+        warmed = false;
+      }
+    };
+    // A worker already retired is gone: whatever it reports is not this renderer's.
+    w.onerror = (e: ErrorEvent) => {
+      if (disposed || w !== worker) return;
+      // A failed module load reports a plain Event, without a message.
+      const message = typeof e.message === 'string' && e.message ? `: ${e.message}` : '';
+      failure = new Error(`the score renderer failed${message}`);
+      disposed = true;
+      w.terminate();
+      rejectAll(failure);
+      onFail?.(failure);
+    };
+    return w;
+  }
 
-  worker.onerror = (e: ErrorEvent) => {
-    if (disposed) return;
-    // A failed module load reports a plain Event, without a message.
-    const message = typeof e.message === 'string' && e.message ? `: ${e.message}` : '';
-    failure = new Error(`the score renderer failed${message}`);
-    disposed = true;
-    worker.terminate();
-    rejectAll(failure);
-    onFail?.(failure);
-  };
+  worker = start();
+  const post = (m: RenderWorkerRequest) => (worker ??= start()).postMessage(m);
 
   return {
     render({ xml, widthPx }) {
@@ -120,7 +150,8 @@ export function createRenderer(
     dispose() {
       if (disposed) return;
       disposed = true;
-      worker.terminate();
+      worker?.terminate();
+      worker = undefined;
       rejectAll(new Error('renderer disposed'));
     },
   };

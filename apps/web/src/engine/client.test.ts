@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { createEngineClient, type WorkerLike } from './client.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEngineClient, HEAVY_NOTES, type WorkerLike } from './client.js';
 import type { EngineRequest, EngineResponse } from './protocol.js';
 
 /** A worker that answers from a table, asynchronously, possibly out of order. */
@@ -28,7 +28,7 @@ describe('engine client', () => {
       (req) => ({ id: req.id, ok: true, type: 'fingeredXml', xml: `xml-${req.id}` }),
       [30, 0],
     );
-    const c = createEngineClient(w);
+    const c = createEngineClient(() => w);
     const score = { notes: [] } as never;
     const [a, b] = await Promise.all([
       c.fingeredXml('a', score, {}),
@@ -38,12 +38,14 @@ describe('engine client', () => {
     expect(b).toBe('xml-2');
   });
   it('rejects with the worker error message', async () => {
-    const c = createEngineClient(fakeWorker((req) => ({ id: req.id, ok: false, error: 'boom' })));
+    const c = createEngineClient(() =>
+      fakeWorker((req) => ({ id: req.id, ok: false, error: 'boom' })),
+    );
     await expect(c.load('x', 'x.xml')).rejects.toThrow('boom');
   });
   it('terminates the worker on dispose and rejects pending calls', async () => {
     const w = fakeWorker((req) => ({ id: req.id, ok: false, error: 'late' }), [1000]);
-    const c = createEngineClient(w);
+    const c = createEngineClient(() => w);
     const p = c.load('x', 'x.xml');
     c.dispose();
     expect(w.terminated).toBe(true);
@@ -52,7 +54,10 @@ describe('engine client', () => {
   it('rejects pending and later calls when the worker itself fails', async () => {
     const w = fakeWorker((req) => ({ id: req.id, ok: false, error: 'late' }), [1000]);
     const failures: Error[] = [];
-    const c = createEngineClient(w, (e) => failures.push(e));
+    const c = createEngineClient(
+      () => w,
+      (e) => failures.push(e),
+    );
     const p = c.load('x', 'x.xml');
     w.onerror?.({ message: 'chunk failed to load' } as ErrorEvent);
     await expect(p).rejects.toThrow('chunk failed to load');
@@ -65,14 +70,14 @@ describe('engine client', () => {
     ]);
   });
   it('rejects a response whose type does not match the request', async () => {
-    const c = createEngineClient(
+    const c = createEngineClient(() =>
       fakeWorker((req) => ({ id: req.id, ok: true, type: 'fingeredXml', xml: 'x' })),
     );
     await expect(c.solve({ notes: [] } as never, 'medium')).rejects.toThrow(/"fingeredXml"/);
   });
   it('sends the hand size, and pins only when given', async () => {
     const sent: EngineRequest[] = [];
-    const c = createEngineClient(
+    const c = createEngineClient(() =>
       fakeWorker((req) => {
         sent.push(req);
         return { id: req.id, ok: true, type: 'solve', assignment: {}, ms: 1 };
@@ -88,7 +93,7 @@ describe('engine client', () => {
   });
   it('sends the source kind and the hand split with a load', async () => {
     const sent: EngineRequest[] = [];
-    const c = createEngineClient(
+    const c = createEngineClient(() =>
       fakeWorker((req) => {
         sent.push(req);
         return { id: req.id, ok: false, error: 'stop' };
@@ -112,7 +117,7 @@ describe('engine client', () => {
       assignments: { large: {}, medium: {}, small: {}, child: {} },
       figures: 3,
     };
-    const c = createEngineClient(
+    const c = createEngineClient(() =>
       fakeWorker((req) => {
         sent.push(req);
         return { id: req.id, ok: true, type: 'embellish', offered, reason: null, ms: 7 };
@@ -120,5 +125,145 @@ describe('engine client', () => {
     );
     await expect(c.embellish('<x/>')).resolves.toEqual({ offered, reason: null, ms: 7 });
     expect(sent).toEqual([{ id: 1, type: 'embellish', xml: '<x/>' }]);
+  });
+});
+
+describe('engine client: releasing the worker after work on a long piece', () => {
+  const IDLE = 100;
+  const long = { notes: Array.from({ length: HEAVY_NOTES }, () => ({})) } as never;
+  const short = { notes: Array.from({ length: HEAVY_NOTES - 1 }, () => ({})) } as never;
+
+  /** Spawns fake workers that answer every solve after `delays` (ms), and keeps them in order. */
+  function spawner(delays: number[] = []) {
+    const spawned: ReturnType<typeof fakeWorker>[] = [];
+    const spawn = () => {
+      const w = fakeWorker(
+        (req) => ({ id: req.id, ok: true, type: 'solve', assignment: {}, ms: 1 }),
+        delays,
+      );
+      spawned.push(w);
+      return w;
+    };
+    return { spawn, spawned };
+  }
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('releases the worker once it has idled after a long piece, and answers from a fresh one', async () => {
+    const { spawn, spawned } = spawner();
+    const c = createEngineClient(spawn, undefined, IDLE);
+    expect(spawned).toHaveLength(1); // spawned at once, so the library's warm-up loads it
+    const solved = c.solve(long, 'medium');
+    await vi.advanceTimersByTimeAsync(0);
+    await expect(solved).resolves.toEqual({ assignment: {}, ms: 1 });
+    await vi.advanceTimersByTimeAsync(IDLE - 1);
+    expect(spawned[0]!.terminated).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spawned[0]!.terminated).toBe(true);
+    const again = c.solve(short, 'small');
+    await vi.advanceTimersByTimeAsync(0);
+    await expect(again).resolves.toEqual({ assignment: {}, ms: 1 });
+    expect(spawned).toHaveLength(2);
+  });
+
+  it('counts a long piece by the score it loads', async () => {
+    const spawned: ReturnType<typeof fakeWorker>[] = [];
+    const c = createEngineClient(
+      () => {
+        const w = fakeWorker((req) => ({
+          id: req.id,
+          ok: true,
+          type: 'load',
+          score: long,
+          editorial: {},
+          warnings: [],
+          xml: '<x/>',
+          midiInfo: null,
+        }));
+        spawned.push(w);
+        return w;
+      },
+      undefined,
+      IDLE,
+    );
+    const loaded = c.load('<x/>', 'long.musicxml');
+    await vi.advanceTimersByTimeAsync(0);
+    await loaded;
+    await vi.advanceTimersByTimeAsync(IDLE);
+    expect(spawned[0]!.terminated).toBe(true);
+  });
+
+  it('keeps the worker after work on shorter pieces, and while it is only warmed up', async () => {
+    const { spawn, spawned } = spawner();
+    const c = createEngineClient(spawn, undefined, IDLE);
+    await vi.advanceTimersByTimeAsync(10 * IDLE);
+    const solved = c.solve(short, 'medium');
+    await vi.advanceTimersByTimeAsync(0);
+    await solved;
+    await vi.advanceTimersByTimeAsync(10 * IDLE);
+    expect(spawned).toHaveLength(1);
+    expect(spawned[0]!.terminated).toBe(false);
+  });
+
+  it('never releases a worker with a call pending, and counts the idle time from the last answer', async () => {
+    const { spawn, spawned } = spawner([0, 5 * IDLE]);
+    const c = createEngineClient(spawn, undefined, IDLE);
+    const first = c.solve(long, 'medium');
+    const second = c.solve(long, 'small');
+    await vi.advanceTimersByTimeAsync(0);
+    await first;
+    await vi.advanceTimersByTimeAsync(2 * IDLE);
+    expect(spawned[0]!.terminated).toBe(false);
+    await vi.advanceTimersByTimeAsync(3 * IDLE);
+    await second;
+    await vi.advanceTimersByTimeAsync(IDLE - 1);
+    expect(spawned[0]!.terminated).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spawned[0]!.terminated).toBe(true);
+  });
+
+  it('keeps the worker when a call comes within the idle time', async () => {
+    const { spawn, spawned } = spawner();
+    const c = createEngineClient(spawn, undefined, IDLE);
+    const first = c.solve(long, 'medium');
+    await vi.advanceTimersByTimeAsync(0);
+    await first;
+    await vi.advanceTimersByTimeAsync(IDLE / 2);
+    const second = c.solve(short, 'small');
+    await vi.advanceTimersByTimeAsync(0);
+    await second;
+    await vi.advanceTimersByTimeAsync(IDLE / 2);
+    expect(spawned[0]!.terminated).toBe(false);
+    await vi.advanceTimersByTimeAsync(IDLE / 2);
+    expect(spawned[0]!.terminated).toBe(true);
+    expect(spawned).toHaveLength(1);
+  });
+
+  it('stays closed after dispose, released or not', async () => {
+    const { spawn, spawned } = spawner();
+    const c = createEngineClient(spawn, undefined, IDLE);
+    const solved = c.solve(long, 'medium');
+    await vi.advanceTimersByTimeAsync(0);
+    await solved;
+    await vi.advanceTimersByTimeAsync(IDLE);
+    c.dispose();
+    await expect(c.solve(short, 'medium')).rejects.toThrow(/disposed/);
+    expect(spawned).toHaveLength(1);
+  });
+
+  it('ignores a failure reported by a worker it has released', async () => {
+    const { spawn, spawned } = spawner();
+    const failures: Error[] = [];
+    const c = createEngineClient(spawn, (e) => failures.push(e), IDLE);
+    const solved = c.solve(long, 'medium');
+    await vi.advanceTimersByTimeAsync(0);
+    await solved;
+    await vi.advanceTimersByTimeAsync(IDLE);
+    spawned[0]!.onerror?.({ message: 'late' } as ErrorEvent);
+    expect(failures).toEqual([]);
+    const again = c.solve(short, 'medium');
+    await vi.advanceTimersByTimeAsync(0);
+    await expect(again).resolves.toEqual({ assignment: {}, ms: 1 });
   });
 });

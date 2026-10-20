@@ -1,6 +1,7 @@
 // verovio@6 ships no TypeScript declarations; this is the minimal ambient typing the spike needs.
 declare module 'verovio/wasm' {
-  const createVerovioModule: (opts?: Record<string, unknown>) => Promise<unknown>;
+  /** The Emscripten module; `HEAPU8` is the WASM heap, replaced by a larger view when it grows. */
+  const createVerovioModule: (opts?: Record<string, unknown>) => Promise<{ HEAPU8: Uint8Array }>;
   export default createVerovioModule;
 }
 declare module 'verovio/esm' {

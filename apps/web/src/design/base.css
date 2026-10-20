@@ -442,6 +442,9 @@ fieldset {
 .title-row > h1 {
   display: inline;
   white-space: normal;
+  /* An archive title can end in one long word (a file name): it breaks rather than push the
+     heart, glued to it, past the column. */
+  overflow-wrap: anywhere;
 }
 
 .favourite-toggle {

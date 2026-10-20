@@ -293,6 +293,14 @@ test('library: a piece opened from far down a shelf opens at the top; going back
   const scrollY = () => page.evaluate(() => window.scrollY);
   await page.goto('/');
   await libraryReady(page);
+  // The shelves view shows a daily sample of each shelf, so on the days K.545 is in the Classical
+  // sample `showPiece` finds its row there and opens no shelf. The shelf is opened on purpose:
+  // going back has to restore it.
+  const { tier, shelf } = placeOf('mozart-sonata-k545-mvt1');
+  const pill = tierPill(page, tier);
+  if (!(await pill.isChecked())) await pill.check();
+  await shelfButton(page, shelf).click();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Classical']);
   const row = await showPiece(page, 'mozart-sonata-k545-mvt1');
   // a second page, so the restored list has to hold more than the first
   const more = showMoreButton(page);

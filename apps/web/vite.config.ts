@@ -51,5 +51,9 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: ['src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Two thirds of the suite's time is starting a worker, its happy-dom and the setup file for
+    // each of the 75 files, not running tests. A thread starts faster than a forked process
+    // (30 s to 25 s for the suite on the dev machine); every file still gets its own module graph.
+    pool: 'threads',
   },
 });

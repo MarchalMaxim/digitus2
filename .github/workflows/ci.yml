@@ -3,8 +3,17 @@ on:
   push:
     branches: [main]
   pull_request:
+# A new push to a pull request cancels the run it supersedes. Pushes to main are grouped by commit,
+# so they never cancel each other.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 jobs:
-  test:
+  # Seven jobs run side by side (issue #83): the wall time is the longest of them, about four
+  # minutes, instead of the sum of every step in one job, which was 12 to 17 minutes with the
+  # Playwright suite alone taking 10 to 14 on two workers.
+  checks:
+    name: typecheck, lint, format, build, omr
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,13 +26,62 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm format:check
-      - run: pnpm test
       - run: pnpm build
       - run: pnpm test:omr
+  unit:
+    name: unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+  e2e:
+    name: 'e2e: ${{ matrix.name }}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Five groups of specs, each about a fifth of the suite's time as measured with the JSON
+      # reporter (docs/verification-loop.md, CI). The last group runs every spec the others do not
+      # name, so a new spec runs without being added here; the `[^-]` keeps local-library there.
+      matrix:
+        include:
+          - name: playback
+            slug: playback
+            tests: e2e/playback.spec.ts
+          - name: states on desktop
+            slug: states-desktop
+            tests: --project=desktop e2e/states.spec.ts
+          - name: states on the phone
+            slug: states-mobile
+            tests: --project=mobile e2e/states.spec.ts
+          - name: library, score, hands, embellish
+            slug: library-score-hands-embellish
+            tests: e2e/library.spec.ts e2e/score.spec.ts e2e/hand-letters.spec.ts e2e/embellish.spec.ts
+          - name: the other specs
+            slug: other-specs
+            tests: --grep-invert '(playback|states|[^-]library|score|hand-letters|embellish)\.spec\.ts'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      # The web build resolves the engine from its sources (vite.config.ts aliases), so the engine
+      # is not built here; `pnpm --filter @digitus2/web e2e` would build the same dist again.
+      - run: pnpm --filter @digitus2/web build
       # Playwright is a dependency of apps/web only; the root has no playwright binary.
       - run: pnpm --filter @digitus2/web exec playwright install --with-deps chromium
-      - run: pnpm --filter @digitus2/web e2e
+      # Each group runs on the two workers the runner's four cores give (playwright.config.ts
+      # leaves the worker count at Playwright's default on purpose: the playback checks sample
+      # frames in real time and a crowded runner stretches them).
+      - run: pnpm --filter @digitus2/web exec playwright test ${{ matrix.tests }}
         env: { CI: 'true' }
       - uses: actions/upload-artifact@v4
         if: failure()
-        with: { name: playwright-report, path: apps/web/playwright-report, retention-days: 7 }
+        with:
+          name: playwright-report-${{ matrix.slug }}
+          path: apps/web/playwright-report
+          retention-days: 7

@@ -79,6 +79,7 @@ So a transform inside a translucent group is the trigger, not `<use>` itself. Wi
 | The pages off screen skip style and paint ([`content-visibility: auto`](https://web.dev/articles/content-visibility)), each keeping its viewBox's aspect ratio ([`aspect-ratio`](https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio)) so no size or scroll position changes | `base.css`, `ScoreSheet.tsx` | restyling the whole piece |
 | What each selection dims is found once per layout; a switch moves the class between two lists | `mutedElements`, `redim`, `ScoreView.tsx` | walking every page per switch |
 | The cursor marks are cleared with a one-class query | `clearCurrent` | 2.5 ms per call on a long piece |
+| Click-to-seek measures its bars a page at a time, when a pointer or a step first needs that page | `pageBars`, `barBoxes`, `BarSeek.tsx` | drawing every skipped page at the first hover (below) |
 
 Each step, on the Scherzo, one-hand switches, median of eight (at full speed, then 4× CPU):
 
@@ -92,6 +93,16 @@ Each step, on the Scherzo, one-hand switches, median of eight (at full speed, th
 (Each row was measured against the row before it in its own interleaved run; a dash is a measure not taken in that run. The final table above is the before and after of the whole change.)
 
 After the change, what remains of a switch is restyling the pages on screen and their neighbours (6,900 to 11,900 elements on the Scherzo: a dimmed group's shapes inherit its opacity, so each is restyled), React's render of the score view, and painting the fade.
+
+## What skipping the pages off screen could have cost
+
+`content-visibility: auto` defers a page's work until the page nears the window, so it was checked where that work comes due, on the Scherzo, old build against new:
+
+| Check | Before | After |
+| ----- | ------ | ----- |
+| Document height; page heights after scrolling to the end and back | 33,303 px; unchanged | 33,303 px; unchanged |
+| The first hover over the score, a third of the way down (click-to-seek measures the bars) | one 241 ms long task (every bar measured) | none (one page measured; with every bar measured, the skipped pages drawn at once made it 366 + 60 ms, hence the per-page measuring) |
+| One-hand playback for 9 s across a page turn (the left hand, from the last system of page 3) | 358 frames, 55 over 34 ms, a 323 ms long task | 541 frames, none over 17 ms |
 
 ## Options measured and rejected
 
@@ -116,7 +127,7 @@ Old against new, Kuhlau's Rondo, the right hand dimmed, the second system, reduc
 | dark  |    1× |  4,623 of 137,560 (3.4 %) |           1.16 |
 | dark  |    3× |  1,934 of 121,500 (1.6 %) |           0.46 |
 
-The tone is the same (40 %), and the digits are drawn as before. The difference sits in antialiased edges and where two dimmed shapes overlap: each shape is dimmed on its own, so a stem's end inside its beam, or a stem along its notehead, is a little darker where they overlap. It shows when zoomed in; at the size the score is read it is a fraction of a pixel. Verovio's markup on the Rondo carries no opacity attributes that could block the inherited dimming.
+The crops are in `hand-switch/` next to this report (`light-1x-old.png` against `light-1x-new.png`, and so on). The tone is the same (40 %), and the digits are drawn as before. The difference sits in antialiased edges and where two dimmed shapes overlap: each shape is dimmed on its own, so a stem's end inside its beam, or a stem along its notehead, is a little darker where they overlap. It shows when zoomed in; at the size the score is read it is a fraction of a pixel. Verovio's markup on the Rondo carries no opacity attributes that could block the inherited dimming.
 
 ## Guards
 

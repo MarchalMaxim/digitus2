@@ -8,8 +8,9 @@
  * A click counts only when it is a plain one (`isEmptyClick`: the primary button, no modifier, no
  * drag, no text selection made or cleared) and lands in a bar `canSeek` allows (inside the loop
  * when one is set). It is then handled here, so the note burst (NoteBurst.tsx) stays for clicks on
- * nothing. Where the bars are drawn (`barBoxes`) is read once per layout, at the first pointer
- * that needs it, never per pointer move.
+ * nothing. Where the bars are drawn (`barBoxes`) is read a page at a time, once per layout, the
+ * first time a pointer or a step needs that page, never per pointer move: a long piece has dozens
+ * of pages, and those off screen are not rendered until needed (issue #79).
  */
 import {
   useCallback,
@@ -23,10 +24,13 @@ import {
   type Ref,
 } from 'react';
 import { isEmptyClick, type Press } from '../app/NoteBurst.js';
-import { barAt, barBoxes, type BarBox } from './bars.js';
+import { barAt, barBoxes, pageBars, type BarBox, type PageBars } from './bars.js';
 
 /** How far a bar's box reaches above and below its staves, in staff heights (the digits). */
 const BAR_PAD = 0.75;
+
+/** How far past a page's edges a pointer still looks for that page's bars (px). */
+const PAGE_REACH = 60;
 
 export interface BarSeekHandle {
   /** Leaves the footprint on bar `bar` (a seek by key, which no pointer showed). */
@@ -58,23 +62,35 @@ export function BarSeek({
   children,
 }: BarSeekProps): JSX.Element {
   const stageRef = useRef<HTMLDivElement>(null);
-  const boxesRef = useRef<BarBox[] | null>(null);
+  const layoutRef = useRef<{ pages: PageBars[]; boxes: Map<PageBars, BarBox[]> } | null>(null);
   const pressRef = useRef<Press | null>(null);
   const [hover, setHover] = useState<BarBox | null>(null);
   const [print, setPrint] = useState<{ box: BarBox; key: number } | null>(null);
 
   // New pages or a new width: the bars are measured again when next needed.
   useEffect(() => {
-    boxesRef.current = null;
+    layoutRef.current = null;
     setHover(null);
     setPrint(null);
   }, [host, layoutKey]);
 
-  const boxes = useCallback((): BarBox[] => {
-    if (!host) return [];
-    boxesRef.current ??= barBoxes(host, BAR_PAD);
-    return boxesRef.current;
-  }, [host]);
+  /** The bars of the pages `which` picks, each page measured the first time it is needed. */
+  const boxesOn = useCallback(
+    (which: (page: PageBars) => boolean): BarBox[] => {
+      if (!host) return [];
+      layoutRef.current ??= { pages: pageBars(host), boxes: new Map() };
+      const { pages, boxes } = layoutRef.current;
+      return pages.filter(which).flatMap((page) => {
+        let own = boxes.get(page);
+        if (!own) {
+          own = barBoxes(host, BAR_PAD, page);
+          boxes.set(page, own);
+        }
+        return own;
+      });
+    },
+    [host],
+  );
 
   /** The bar under a pointer at viewport (x, y), when a seek may go there. */
   const seekableAt = useCallback(
@@ -82,18 +98,24 @@ export function BarSeek({
       const stage = stageRef.current;
       if (!stage) return null;
       const origin = stage.getBoundingClientRect();
-      const b = barAt(boxes(), x - origin.left, y - origin.top);
+      const top = y - origin.top;
+      // The pages around the pointer: a bar's box reaches past its staves, over a page's edge too.
+      const near = (page: PageBars) =>
+        top >= page.top - PAGE_REACH && top < page.bottom + PAGE_REACH;
+      const b = barAt(boxesOn(near), x - origin.left, top);
       return b && canSeek(b.bar) ? b : null;
     },
-    [boxes, canSeek],
+    [boxesOn, canSeek],
   );
 
   const footprint = useCallback(
     (bar: number) => {
-      const box = boxes().find((b) => b.bar === bar);
+      const holds = (page: PageBars) =>
+        bar >= page.first && bar < page.first + page.measures.length;
+      const box = boxesOn(holds).find((b) => b.bar === bar);
       if (box) setPrint((p) => ({ box, key: (p?.key ?? 0) + 1 }));
     },
-    [boxes],
+    [boxesOn],
   );
   useImperativeHandle(handle, () => ({ footprint }), [footprint]);
 

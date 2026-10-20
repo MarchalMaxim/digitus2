@@ -39,6 +39,8 @@ function switchTo(page: Page, hands: 'L' | 'R' | 'both') {
     return {
       animations,
       swept: swept.length,
+      sweptBars: new Set(swept.map((el) => el.closest('g.measure'))).size,
+      bars: sheet.querySelectorAll('g.measure').length,
       onScreen,
       dimmed: sheet.querySelectorAll('.is-muted').length,
     };
@@ -62,18 +64,9 @@ test('a hand switch sweeps only the systems on screen; the rest of the piece cha
   const right = await switchTo(page, 'R');
   expect(right.onScreen).toBe(true);
   expect(right.animations).toBeLessThanOrEqual(2 * right.swept);
-  const total = await page.evaluate(
-    () => document.querySelectorAll('.score-sheet g.measure').length,
-  );
-  const swept = await page.evaluate(
-    () =>
-      new Set(
-        [...document.querySelectorAll('.score-sheet .is-sweeping')].map((e) =>
-          e.closest('g.measure'),
-        ),
-      ).size,
-  );
-  expect(swept, 'bars swept of all bars').toBeLessThan(total);
+  // Both hands change on every bar, yet only the bars on screen sweep.
+  expect(right.sweptBars).toBeGreaterThan(0);
+  expect(right.sweptBars, 'bars swept of all bars').toBeLessThan(right.bars);
 });
 
 test('the hand left out is dimmed shape by shape, never by a translucent group of notes', async ({

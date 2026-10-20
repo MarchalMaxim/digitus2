@@ -77,8 +77,9 @@ input {
 
 /* Hover and disabled styles skip the .is-red element: button.is-red and button:hover have the same
    specificity and this file loads after tokens.css, so without :not() hovering or disabling the
-   primary button would erase the single accent element on screen. */
-button:not(.is-red):hover {
+   primary button would erase the single accent element on screen. A text button is a word, not a
+   box: it takes no fill on hover either (its own hover is below). */
+button:not(.is-red, .text-button):hover {
   background: var(--gray-1);
 }
 
@@ -336,6 +337,10 @@ h1[tabindex='-1']:focus {
   padding: 0.5rem 0;
   text-decoration: underline;
   text-underline-offset: 0.2em;
+}
+
+.text-button:hover:not(:disabled, [aria-disabled='true']) {
+  text-decoration-thickness: 2px;
 }
 
 /* Notice: one gray line above the view, never red. Sticky so a refusal from the drop zone at the

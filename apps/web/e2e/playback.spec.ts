@@ -338,9 +338,13 @@ interface ScoreMark {
   id: string;
   /** The place of its staff in the bar: 0 for the upper staff (the right hand), 1 the lower. */
   staff: number;
-  /** Its own computed opacity. */
-  opacity: string;
-  /** What it shows at: the product of its opacity and its ancestors' within the sheet. */
+  /** Its computed fill opacity: how a note is dimmed, which its shapes inherit (base.css). */
+  fillOpacity: string;
+  /**
+   * What it shows at: its fill opacity times the group opacity of it and its ancestors within the
+   * sheet. A note's groups stay opaque (a translucent group of notes costs a compositor layer,
+   * issue #79); a dimmed digit at rest is drawn through its own group opacity instead.
+   */
   shown: number;
   red: boolean;
 }
@@ -355,7 +359,7 @@ function scoreMarks(page: Page): Promise<{ notes: ScoreMark[]; digits: ScoreMark
       return [...staff.parentElement!.children].filter((s) => s.matches('g.staff')).indexOf(staff);
     };
     const shown = (el: Element) => {
-      let o = 1;
+      let o = parseFloat(getComputedStyle(el).fillOpacity);
       for (let e: Element | null = el; e && e !== sheet; e = e.parentElement)
         o *= parseFloat(getComputedStyle(e).opacity);
       return Math.round(o * 1000) / 1000;
@@ -363,7 +367,7 @@ function scoreMarks(page: Page): Promise<{ notes: ScoreMark[]; digits: ScoreMark
     const mark = (el: Element, note: Element | null) => ({
       id: el.id || (el.getAttribute('data-startid') ?? ''),
       staff: staffOf(note),
-      opacity: getComputedStyle(el).opacity,
+      fillOpacity: getComputedStyle(el).fillOpacity,
       shown: shown(el),
       red: el.closest('.is-red') !== null,
     });
@@ -390,9 +394,7 @@ async function expectScoreDimmed(page: Page, left: boolean, label: string): Prom
     expect(n.shown, `${label} ${JSON.stringify(n)}`).toBe(n.staff === out && !n.red ? 0.4 : 1);
   }
   for (const d of digits) {
-    const at = `${label} ${JSON.stringify(d)}`;
-    expect(d.opacity, at).toBe(d.staff === out ? '0.4' : '1');
-    expect(d.shown, at).toBe(d.staff === out ? 0.4 : 1);
+    expect(d.shown, `${label} ${JSON.stringify(d)}`).toBe(d.staff === out ? 0.4 : 1);
   }
 }
 

@@ -455,6 +455,13 @@ fieldset {
   height: auto;
 }
 
+/* A long piece runs to dozens of pages: those off screen skip style and paint, so a hand switch, a
+   cursor step or a digit patch costs a screen's worth of work, not the whole piece's (issue #79).
+   Each page keeps its viewBox's aspect ratio meanwhile (ScoreSheet.tsx), so no size changes. */
+.score-sheet > svg {
+  content-visibility: auto;
+}
+
 /* Verovio draws in black: its inner svg carries color="black" and leaves fill at its initial
    black. Both follow --score-ink here (the ink in light, a softer gray in dark), so the engraving
    turns with the theme (T7); an element's own fill attribute (fill="none") still wins over the
@@ -565,21 +572,51 @@ fieldset {
 /* One hand practised alone: the other hand's notes, with their beams and rests, and its digits
    are dimmed as its keys are (render/dom.ts, dimNotes); the staff lines and clefs stay. A note
    of that hand inside a chord the cursor marks (one chord shared by both hands) is never pale:
-   the accent is drawn whole or not at all. */
+   the accent is drawn whole or not at all. Dimmed shape by shape (fill and stroke opacity, which
+   the shapes inherit), never with `opacity` or a filter on a group of notes: a translucent group
+   holding transformed shapes (every notehead is a scaled `use`) gets a compositor layer of its
+   own in Chrome, and whatever overlaps it another, about 2,000 on a long piece, which every
+   repaint then pays for (issue #79). */
 .score-sheet svg .is-muted {
+  fill-opacity: 0.4;
+  stroke-opacity: 0.4;
+}
+
+/* A digit is text alone, no transform, so a group opacity costs no layer there; and translucent
+   text on the page is drawn with subpixel smoothing (Windows), which fringes a pale digit with
+   colour. At rest a dimmed digit is drawn through a group opacity instead, in gray as before. */
+.score-sheet svg g.fing.is-muted:not(.is-sweeping) {
+  fill-opacity: 1;
   opacity: 0.4;
 }
 
 .score-sheet svg .is-red .is-muted,
 .score-sheet svg .is-red.is-muted {
-  opacity: 1;
+  fill-opacity: 1;
+  stroke-opacity: 1;
 }
 
 /* A hand switch fades the hand left out (or brings it back) bar by bar, from the first bar of each
-   system to the last: each element waits its `--sweep` (ScoreView.tsx, `sweepDimming`). The
-   cursor's notes never fade: the accent is drawn whole or not at all. */
-.score-sheet svg :is(g.note, g.chord, g.layer, g.fing) {
-  transition: opacity var(--dur) var(--ease) var(--sweep, 0ms);
+   system to the last, in the systems on screen: each element dimmed or brought back there waits
+   its `--sweep` (ScoreView.tsx, `sweepDimming`) and settles when its fade ends (`settleSweep`).
+   Declared on those elements only, never on what they hold, which inherits the fade. The fade is
+   on fill and stroke opacity, never `opacity`: animating that gives each element a compositor
+   layer. A digit brought back was drawn through its group opacity, so it fades in from 40 % fill
+   instead. The cursor's notes never fade: the accent is drawn whole or not at all. */
+.score-sheet svg .is-sweeping {
+  transition:
+    fill-opacity var(--dur) var(--ease) var(--sweep, 0ms),
+    stroke-opacity var(--dur) var(--ease) var(--sweep, 0ms);
+}
+
+.score-sheet svg g.fing.is-sweeping:not(.is-muted) {
+  animation: digit-back var(--dur) var(--ease) var(--sweep, 0ms) backwards;
+}
+
+@keyframes digit-back {
+  from {
+    fill-opacity: 0.4;
+  }
 }
 
 .score-sheet svg .is-red,
@@ -1618,8 +1655,16 @@ html:has(.dock) {
     break-inside: avoid;
   }
 
+  /* Every page prints, whatever was on screen. */
+  .score-sheet > svg {
+    content-visibility: visible;
+  }
+
   /* Both hands print in full ink, whichever hand is being practised. */
-  .score-sheet svg .is-muted {
+  .score-sheet svg .is-muted,
+  .score-sheet svg g.fing.is-muted:not(.is-sweeping) {
+    fill-opacity: 1;
+    stroke-opacity: 1;
     opacity: 1;
   }
 

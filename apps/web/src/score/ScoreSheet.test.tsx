@@ -29,6 +29,24 @@ describe('ScoreSheet', () => {
     expect(container.querySelectorAll('svg')).toHaveLength(1);
     expect(container.querySelector('svg')).toHaveAttribute('data-p', '2');
   });
+  // Issue #79: pages off screen skip their rendering (base.css, `content-visibility: auto`), and a
+  // skipped page has no natural size; its own aspect ratio keeps its height.
+  it("gives every page its viewBox's aspect ratio, so a page off screen keeps its height", () => {
+    const { container } = render(
+      <ScoreSheet
+        pages={[
+          '<svg viewBox="0 0 832 1181"></svg>',
+          '<svg viewBox="0 0 832 640"></svg>',
+          '<svg></svg>',
+        ]}
+        label="x"
+      />,
+    );
+    const ratios = [...container.querySelectorAll<SVGSVGElement>('.score-sheet > svg')].map(
+      (page) => page.style.aspectRatio,
+    );
+    expect(ratios).toEqual(['832 / 1181', '832 / 640', '']);
+  });
   it('is neither resting nor hopping unless asked', () => {
     const { container } = render(<ScoreSheet pages={[]} label="x" />);
     expect(container.querySelector('.score-sheet')).not.toHaveClass('is-resting');

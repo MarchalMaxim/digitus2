@@ -26,6 +26,7 @@ import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import type { Phrase } from '../i18n/messages.js';
 import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
+import { keyVelocity } from './noteKey.js';
 import { scheduleClick } from '../audio/metronome.js';
 import type * as TransportExports from '../audio/transport.js';
 
@@ -133,7 +134,18 @@ export interface Playback {
   leadInRemainingSec(): number | null;
   loop: LoopRange | null;
   setLoop(r: LoopRange | null): void;
+  /**
+   * Sounds a key clicked on the on-screen keyboard (issue #96) at `hand`'s unmarked velocity,
+   * until the function returned is called (the release) or `KEY_HOLD_SEC` passes. Before the
+   * first Play the samples are not loaded: the press loads them (`loading`, the status line's
+   * `Loading the piano…`) and the key sounds when they arrive. Nothing to the transport: playing
+   * goes on, stopped stays stopped.
+   */
+  strike(midi: number, hand: Hand): () => void;
 }
+
+/** How long a key clicked on the keyboard sounds at most, in seconds (a pointer held down). */
+export const KEY_HOLD_SEC = 2;
 
 /** Sample-load failures, told apart from a failed fetch of the player chunk. */
 class SamplesError extends Error {}
@@ -291,6 +303,23 @@ export function usePlayback(score: Score | null): Playback {
   // Unmount (after the cleanup above): the context closes.
   useEffect(() => release, [release]);
 
+  // Playwright's check of a key pressed on the keyboard (`?audio=silent` only): the pitches the
+  // silent instrument was asked to strike, in order.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('audio') !== 'silent') return;
+    const w = window as unknown as { __digitus2Keys?: { strikes(): number[] } };
+    const hook = {
+      strikes: () =>
+        (instrumentRef.current as { strikes?: { midi: number }[] } | null)?.strikes?.map(
+          (k) => k.midi,
+        ) ?? [],
+    };
+    w.__digitus2Keys = hook;
+    return () => {
+      if (w.__digitus2Keys === hook) delete w.__digitus2Keys;
+    };
+  }, []);
+
   // The store's transport settings, mirrored into a transport that exists (new ones copy them).
   useEffect(() => {
     const t = transportRef.current;
@@ -301,22 +330,29 @@ export function usePlayback(score: Score | null): Playback {
     t.setCountIn(countInOn);
   }, [tempoFactor, hands, metronome, countInOn]);
 
+  /**
+   * The audio context and the instrument, made on first use inside the click or press that asked
+   * for them, so the browser lets the context start.
+   */
+  const openAudio = useCallback((): { audio: AudioContext; instrument: Instrument } => {
+    let ctx = ctxRef.current;
+    if (!ctx) {
+      ctx = new AudioContext({ latencyHint: 'interactive' });
+      ctxRef.current = ctx;
+      instrumentRef.current = instrumentFromLocation(ctx, window.location.search);
+      loadedRef.current = null;
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => undefined);
+    return { audio: ctx, instrument: instrumentRef.current! };
+  }, []);
+
   const play = useCallback(
     (opts: { resume?: boolean } = {}) => {
       const resume = opts.resume === true;
       const s = scoreRef.current;
       if (!s || transportRef.current?.state.playing) return;
       const seq = ++playSeqRef.current;
-      let ctx = ctxRef.current;
-      if (!ctx) {
-        ctx = new AudioContext({ latencyHint: 'interactive' });
-        ctxRef.current = ctx;
-        instrumentRef.current = instrumentFromLocation(ctx, window.location.search);
-        loadedRef.current = null;
-      }
-      if (ctx.state === 'suspended') ctx.resume().catch(() => undefined);
-      const audio = ctx;
-      const instrument = instrumentRef.current!;
+      const { audio, instrument } = openAudio();
 
       const start = (mod: TransportModule) => {
         if (seq !== playSeqRef.current || scoreRef.current !== s || ctxRef.current !== audio)
@@ -417,7 +453,50 @@ export function usePlayback(score: Score | null): Playback {
         },
       );
     },
-    [pushLoop],
+    [openAudio, pushLoop],
+  );
+
+  // A key clicked on the keyboard (issue #96). The samples it needs are the score's (the keyboard
+  // spans the piece's range; a key outside the piece's pitches plays the nearest loaded sample).
+  // A load started here is the newest (`loadSeqRef`), so a Play meanwhile loads again and this
+  // press leaves `loading` to it.
+  const strike = useCallback(
+    (midi: number, hand: Hand): (() => void) => {
+      const s = scoreRef.current;
+      if (!s) return () => undefined;
+      const { audio, instrument } = openAudio();
+      let released = false;
+      let stop: (() => void) | null = null;
+      const sound = () => {
+        stop = instrument.strike(midi, keyVelocity(hand), KEY_HOLD_SEC);
+        if (released) stop(); // released while the samples were loading: nothing lingers
+      };
+      const needed = samplesFor(s);
+      if (covers(loadedRef.current, needed)) {
+        sound();
+      } else {
+        setLoading(true);
+        const load = ++loadSeqRef.current;
+        instrument.load(needed.midis, needed.velocities).then(
+          () => {
+            if (ctxRef.current !== audio || load !== loadSeqRef.current) return;
+            loadedRef.current = needed;
+            setLoading(false);
+            sound();
+          },
+          () => {
+            if (ctxRef.current !== audio || load !== loadSeqRef.current) return;
+            setLoading(false);
+            useAppStore.getState().setNotice(SAMPLES_FAILED_NOTICE);
+          },
+        );
+      }
+      return () => {
+        released = true;
+        stop?.();
+      };
+    },
+    [openAudio],
   );
 
   const pause = useCallback(() => {
@@ -518,6 +597,7 @@ export function usePlayback(score: Score | null): Playback {
       leadingIn,
       leadInRemainingSec,
       setLoop,
+      strike,
     }),
     [
       playing,
@@ -537,6 +617,7 @@ export function usePlayback(score: Score | null): Playback {
       leadingIn,
       leadInRemainingSec,
       setLoop,
+      strike,
     ],
   );
 }

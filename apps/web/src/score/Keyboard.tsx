@@ -1,9 +1,19 @@
 import type { Finger, Hand, Score } from '@digitus2/engine';
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
-import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from 'react';
 import { restrike } from '../design/motion.js';
 import { useT } from '../i18n/i18n.js';
 import { handLetter } from './handLetters.js';
+import { useKeyPress } from './useKeyPress.js';
 
 /**
  * A key held down at the cursor, with the finger that plays it. `finger` is null when the
@@ -37,7 +47,22 @@ export interface KeyboardProps {
    * come close). Default false.
    */
   handLetters?: boolean;
+  /**
+   * The key of the note under the mouse pointer in the score (issue #96), pressed with its finger
+   * like a cue while the pointer rests there; a key the cursor already holds keeps the cursor's
+   * finger. Never lettered. Default none.
+   */
+  hovered?: PressedKey | null;
+  /**
+   * Sounds a key pressed with the pointer (issue #96); returns the release, called when the key
+   * lifts. The key goes down while the pointer is on it, `KEY_HOLD_MS` at most, without a
+   * number. Undefined: the keys only move.
+   */
+  onStrike?: (midi: number) => (() => void) | void;
 }
+
+/** How long a key pressed with the pointer stays down at most (ms): usePlayback's KEY_HOLD_SEC. */
+export const KEY_HOLD_MS = 2000;
 
 /** A horizontal stretch of the drawn keyboard, in CSS pixels from its left edge. */
 export interface Span {
@@ -145,6 +170,7 @@ function oneByKey(keys: readonly PressedKey[]): Map<number, PressedKey> {
 }
 
 const NO_KEYS: PressedKey[] = [];
+const NO_HOVER: PressedKey[] = [];
 
 /**
  * The on-screen keyboard: white keys white with an ink outline, black keys ink. A pressed key
@@ -159,6 +185,11 @@ const NO_KEYS: PressedKey[] = [];
  * MIN_WHITE_PX, so a wide piece on a phone scrolls instead of shrinking the digits away. A
  * scrolling keyboard follows the pressed keys when they leave its visible part, and is a tab
  * stop so it can also be scrolled from the keyboard.
+ *
+ * The keyboard answers (issue #96): the key of a note hovered in the score goes down with its
+ * finger (`hovered`), and a key pressed with the pointer goes down and sounds (`onStrike`,
+ * useKeyPress.ts), striking again if it was already down. The keys are a pointer affordance,
+ * not buttons: they take no focus and are not named to assistive technology (docs/app.md).
  */
 export function Keyboard({
   lowMidi,
@@ -167,6 +198,8 @@ export function Keyboard({
   struckCount = 0,
   muted = NO_KEYS,
   handLetters = false,
+  hovered = null,
+  onStrike,
 }: KeyboardProps): JSX.Element {
   const t = useT();
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
@@ -176,7 +209,22 @@ export function Keyboard({
   const [scrollable, setScrollable] = useState(false);
   /** The keys down before the latest change of `pressed`. */
   const downRef = useRef<ReadonlySet<number>>(new Set());
-  const byMidi = oneByKey(pressed);
+  /** The cursor's keys alone: these follow the cursor (scroll, letters) and strike again. */
+  const cursorByMidi = oneByKey(pressed);
+  // A key the pointer holds down (useKeyPress): pressed, without a number.
+  const strikeKey = useCallback(
+    (midi: number, el: Element) => {
+      // Already down (the cursor's, or hovered): it lifts and goes down again, as a struck key.
+      if (downRef.current.has(midi)) restrike(el);
+      return onStrike?.(midi);
+    },
+    [onStrike],
+  );
+  const { down, handlers } = useKeyPress({ strike: strikeKey, holdMs: KEY_HOLD_MS });
+  const hoverKeys = hovered ? [hovered] : NO_HOVER;
+  const downKeys: PressedKey[] =
+    down === null ? NO_HOVER : [{ midi: down, finger: null, hand: 'R' }];
+  const byMidi = oneByKey([...pressed, ...hoverKeys, ...downKeys]);
   const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
   const width = Math.max(1, whiteCount) * WHITE_W;
 
@@ -205,6 +253,12 @@ export function Keyboard({
       if (before.has(p.midi)) restrike(svg.querySelector(`g.key[data-midi="${p.midi}"]`));
     }
   }, [pressed, struckCount]);
+  // Every key shown down, for a pointer press to know whether to strike again (above): the
+  // cursor's, the hovered one, and the one the pointer holds. The repeated-note check above reads
+  // the cursor's keys before this runs in the same commit.
+  useLayoutEffect(() => {
+    downRef.current = new Set([...byMidi.keys()]);
+  });
 
   // Runs when the cursor moves to another group (the only time `pressed` changes). The jump is
   // instant: the keys on screen are the ones being heard, and a smooth scroll would lag them. A
@@ -290,10 +344,11 @@ export function Keyboard({
         role="img"
         aria-label={t.score.keyboard.label}
         style={{ minWidth: Math.max(1, whiteCount) * MIN_WHITE_PX }}
+        {...handlers}
       >
         {keys.filter((k) => !k.black).map(key)}
         {keys.filter((k) => k.black).map(key)}
-        {handLetters && [...byMidi.values()].map((p) => handMark(p, false))}
+        {handLetters && [...cursorByMidi.values()].map((p) => handMark(p, false))}
         {handLetters && [...mutedByMidi.values()].map((p) => handMark(p, true))}
       </svg>
     </div>

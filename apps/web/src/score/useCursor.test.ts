@@ -70,6 +70,7 @@ function playing({
     leadInRemainingSec: () => null,
     loop: null,
     setLoop: vi.fn(),
+    strike: () => () => undefined,
   };
 }
 

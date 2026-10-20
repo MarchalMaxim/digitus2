@@ -1,6 +1,6 @@
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Keyboard, keyboardRange, keysToShow } from './Keyboard.js';
+import { KEY_HOLD_MS, Keyboard, keyboardRange, keysToShow } from './Keyboard.js';
 
 afterEach(cleanup);
 afterEach(() => vi.restoreAllMocks());
@@ -277,5 +277,127 @@ describe('Keyboard', () => {
       },
     };
     expect(keyboardRange({ notes: [note] } as never)).toEqual({ lowMidi: 60, highMidi: 83 });
+  });
+
+  // The keyboard answers (issue #96): the key of a hovered note goes down with its finger, like a
+  // cue, and a key pressed with the pointer goes down and sounds until it lifts.
+  describe('hovered and pressed keys', () => {
+    const mouse = { pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0 };
+    it('presses the hovered key with its finger; the cursor keeps its own finger and letters', () => {
+      const { container, rerender } = render(
+        <Keyboard
+          lowMidi={48}
+          highMidi={71}
+          pressed={[{ midi: 60, finger: 1, hand: 'R' }]}
+          hovered={{ midi: 64, finger: 3, hand: 'R' }}
+          handLetters
+        />,
+      );
+      const e4 = container.querySelector('[data-midi="64"]')!;
+      expect(e4).toHaveClass('is-pressed');
+      expect(e4.querySelector('text')).toHaveTextContent('3');
+      expect(container.querySelectorAll('.key-hand')).toHaveLength(1); // the cursor's key alone
+      rerender(
+        <Keyboard
+          lowMidi={48}
+          highMidi={71}
+          pressed={[{ midi: 60, finger: 1, hand: 'R' }]}
+          hovered={{ midi: 60, finger: 2, hand: 'L' }}
+        />,
+      );
+      expect(container.querySelector('[data-midi="60"] text')).toHaveTextContent('1');
+      expect(container.querySelector('[data-midi="64"]')).not.toHaveClass('is-pressed');
+      rerender(<Keyboard lowMidi={48} highMidi={71} pressed={[]} hovered={null} />);
+      expect(container.querySelectorAll('.is-pressed')).toHaveLength(0);
+      expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+    });
+    it('a hovered key that the muted hand holds is pressed, not dimmed', () => {
+      const { container } = render(
+        <Keyboard
+          lowMidi={48}
+          highMidi={71}
+          pressed={[]}
+          muted={[{ midi: 48, finger: 5, hand: 'L' }]}
+          hovered={{ midi: 48, finger: 5, hand: 'L' }}
+        />,
+      );
+      const c3 = container.querySelector('[data-midi="48"]')!;
+      expect(c3).toHaveClass('is-pressed');
+      expect(c3).not.toHaveClass('is-muted');
+    });
+    it('a key pressed with the pointer goes down, sounds, and lifts on release', () => {
+      vi.useFakeTimers();
+      try {
+        const release = vi.fn();
+        const onStrike = vi.fn(() => release);
+        const { container } = render(
+          <Keyboard lowMidi={48} highMidi={71} pressed={[]} onStrike={onStrike} />,
+        );
+        const svg = container.querySelector('svg')!;
+        const d4 = container.querySelector('[data-midi="62"]')!;
+        fireEvent.pointerDown(d4.querySelector('rect')!, mouse);
+        expect(d4).toHaveClass('is-pressed');
+        expect(d4.querySelector('text')).toBeNull(); // no finger for a key the reader pressed
+        expect(onStrike).toHaveBeenCalledWith(62);
+        // A second pointer, or a drag onto another key, strikes nothing.
+        fireEvent.pointerDown(container.querySelector('[data-midi="64"] rect')!, {
+          ...mouse,
+          pointerId: 2,
+        });
+        expect(onStrike).toHaveBeenCalledTimes(1);
+        expect(release).not.toHaveBeenCalled();
+        fireEvent.pointerUp(svg, mouse);
+        expect(release).toHaveBeenCalledTimes(1);
+        expect(d4).not.toHaveClass('is-pressed');
+        // A click on a key is handled: no note burst.
+        const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+        act(() => {
+          d4.dispatchEvent(click);
+        });
+        expect(click.defaultPrevented).toBe(true);
+        // Held: the key lifts by itself after the hold.
+        fireEvent.pointerDown(d4, mouse);
+        expect(d4).toHaveClass('is-pressed');
+        act(() => {
+          vi.advanceTimersByTime(KEY_HOLD_MS + 1);
+        });
+        expect(d4).not.toHaveClass('is-pressed');
+        expect(release).toHaveBeenCalledTimes(2);
+        // Off the keys, nothing.
+        fireEvent.pointerDown(svg, mouse);
+        expect(onStrike).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+    it('a press on a key already down strikes it again', () => {
+      const struck: string[] = [];
+      const proto = Element.prototype as unknown as { animate?: unknown };
+      const original = proto.animate;
+      proto.animate = function (this: Element) {
+        struck.push(this.getAttribute('data-midi') ?? '');
+        return {} as Animation;
+      };
+      vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+      try {
+        const { container } = render(
+          <Keyboard
+            lowMidi={48}
+            highMidi={71}
+            pressed={[{ midi: 60, finger: 1, hand: 'R' }]}
+            hovered={{ midi: 64, finger: 3, hand: 'R' }}
+            onStrike={() => undefined}
+          />,
+        );
+        fireEvent.pointerDown(container.querySelector('[data-midi="60"]')!, mouse);
+        fireEvent.pointerUp(container.querySelector('svg')!, mouse);
+        fireEvent.pointerDown(container.querySelector('[data-midi="64"]')!, mouse);
+        fireEvent.pointerUp(container.querySelector('svg')!, mouse);
+        fireEvent.pointerDown(container.querySelector('[data-midi="65"]')!, mouse);
+        expect(struck).toEqual(['60', '64']);
+      } finally {
+        proto.animate = original;
+      }
+    });
   });
 });

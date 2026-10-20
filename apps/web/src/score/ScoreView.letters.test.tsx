@@ -68,6 +68,7 @@ const playback: Playback = {
   leadInRemainingSec: () => null,
   loop: null,
   setLoop: () => {},
+  strike: () => () => undefined,
 };
 
 vi.mock('./usePlayback.js', async (importOriginal) => ({

@@ -38,6 +38,7 @@ function fakePlayback(
     leadingIn: () => false,
     leadInRemainingSec: () => null,
     setLoop: (r) => calls.push(`setLoop(${JSON.stringify(r)})`),
+    strike: () => () => undefined,
   };
 }
 

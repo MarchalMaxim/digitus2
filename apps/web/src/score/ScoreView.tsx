@@ -19,6 +19,8 @@ import {
   mutedElements,
   redim,
   setDigits,
+  settleCancelled,
+  settleStill,
   settleSweep,
   sweepDimming,
   systemsOnScreen,
@@ -242,17 +244,23 @@ export function ScoreView({ source }: { source: PieceSource }) {
     redim(before, shown);
     dimmedRef.current = { host, pages: doc.pages, lists, shown };
     if (!switched) return;
-    sweepDimming(host, new Set([...before, ...shown]), spread, onScreen);
+    if (sweepDimming(host, new Set([...before, ...shown]), spread, onScreen) > 0) settleStill(host);
   }, [host, doc.pages, mutedIds]);
-  // Each element swept settles into its resting look when its own fade ends (`settleSweep`).
+  // Each element swept settles into its resting look when its own fade ends (`settleSweep`), or
+  // when a switch cancelled it and nothing of it still runs (`settleCancelled`).
   useEffect(() => {
     if (!host) return;
     const settle = (e: Event) => settleSweep(e.target);
+    const cancelled = (e: Event) => settleCancelled(e.target);
     host.addEventListener('transitionend', settle);
     host.addEventListener('animationend', settle);
+    host.addEventListener('transitioncancel', cancelled);
+    host.addEventListener('animationcancel', cancelled);
     return () => {
       host.removeEventListener('transitionend', settle);
       host.removeEventListener('animationend', settle);
+      host.removeEventListener('transitioncancel', cancelled);
+      host.removeEventListener('animationcancel', cancelled);
     };
   }, [host]);
   const { pressed, muted, currentGroup, struckCount } = useCursor({

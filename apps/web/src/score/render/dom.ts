@@ -9,6 +9,7 @@ const RED = 'is-red';
 const ONSET = 'data-onset-tick';
 const MUTED = 'is-muted';
 const SWEEPING = 'is-sweeping';
+const RETURNING = 'is-returning';
 
 function escapeId(id: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return `#${CSS.escape(id)}`;
@@ -169,7 +170,10 @@ export function systemsOnScreen(host: Element, viewportHeight = window.innerHeig
  * fading a whole long piece (8,818 transitions on 780 bars) stalled the page (issue #79). Clears
  * the previous switch's marks first. Read from the markup alone (each bar's place among its
  * system's bars), never from layout, so it adds no style or layout pass between the class change
- * and its transition. `spreadMs` 0 (reduced motion) marks nothing. Returns how many it marked.
+ * and its transition. A digit brought back that was dimmed at rest, drawn through its group
+ * opacity, also gets `.is-returning`, its fade in from that gray (base.css); one still fading from
+ * the switch before (a quick toggle) turns back from where its fade is instead. `spreadMs` 0
+ * (reduced motion) marks nothing. Returns how many it marked.
  */
 export function sweepDimming(
   host: Element,
@@ -177,7 +181,8 @@ export function sweepDimming(
   spreadMs: number,
   systems: ReadonlySet<Element>,
 ): number {
-  for (const el of Array.from(host.querySelectorAll(`.${SWEEPING}`))) unmark(el);
+  const fading = new Set(host.querySelectorAll(`.${SWEEPING}`));
+  for (const el of fading) unmark(el);
   if (spreadMs <= 0) return 0;
   const place = new Map<Element, number>();
   const placeOf = (measure: Element): number => {
@@ -195,6 +200,9 @@ export function sweepDimming(
     const measure = el.closest('g.measure');
     const at = measure ? placeOf(measure) : 0;
     el.classList.add(SWEEPING);
+    if (el.matches('g.fing') && !el.classList.contains(MUTED) && !fading.has(el)) {
+      el.classList.add(RETURNING);
+    }
     (el as SVGElement).style.setProperty('--sweep', `${Math.round(at * spreadMs)}ms`);
     count++;
   }
@@ -202,7 +210,7 @@ export function sweepDimming(
 }
 
 function unmark(el: Element): void {
-  el.classList.remove(SWEEPING);
+  el.classList.remove(SWEEPING, RETURNING);
   (el as SVGElement).style.removeProperty('--sweep');
 }
 
@@ -213,6 +221,31 @@ function unmark(el: Element): void {
  */
 export function settleSweep(target: EventTarget | null): void {
   if (target instanceof Element && target.classList.contains(SWEEPING)) unmark(target);
+}
+
+/**
+ * Ends the sweep of every element of `host` marked that has no fade to run: one whose look did
+ * not change (a switch undone within a frame, before any style was worked out) starts no fade, so
+ * no end event will ever come. `getAnimations` works out the pending style change first, the one
+ * the next frame would, so call it right after `sweepDimming`.
+ */
+export function settleStill(host: Element, doc: Document = host.ownerDocument): void {
+  const fading = new Set(
+    (doc.getAnimations?.() ?? []).map((a) => (a.effect as KeyframeEffect | null)?.target),
+  );
+  for (const el of Array.from(host.querySelectorAll(`.${SWEEPING}`))) {
+    if (!fading.has(el)) unmark(el);
+  }
+}
+
+/**
+ * Ends the sweep of `target` after one of its fades was cancelled (the next switch came during
+ * it), which fires no end event, once none of its fades still runs.
+ */
+export function settleCancelled(target: EventTarget | null): void {
+  if (target instanceof Element && (target.getAnimations?.() ?? []).length === 0) {
+    settleSweep(target);
+  }
 }
 
 /**

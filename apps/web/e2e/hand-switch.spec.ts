@@ -110,6 +110,26 @@ test('the hand left out is dimmed shape by shape, never by a translucent group o
   await cdp.send('LayerTree.disable');
 });
 
+// UI review 2026-10-20 (H1, H3): Left then Right within 100 ms flashed the right hand's digits pale
+// (a fade in from the resting gray on digits never dimmed), and left cancelled fades marked.
+test('a quick toggle turns the fade back without a flash, and every mark settles', async ({
+  page,
+}) => {
+  await openLong(page);
+  const flashing = await page.evaluate(async () => {
+    const pick = (hands: string) =>
+      document.querySelector<HTMLInputElement>(`input[name="hands"][value="${hands}"]`)!.click();
+    pick('L');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    pick('R');
+    return document
+      .getAnimations()
+      .filter((a) => (a as CSSAnimation).animationName === 'digit-back').length;
+  });
+  expect(flashing, 'digits fading in from a gray they never reached').toBe(0);
+  await expect(page.locator('.score-sheet .is-sweeping')).toHaveCount(0, { timeout: 5_000 });
+});
+
 test('reduced motion: a hand switch is instant, nothing is swept', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openLong(page);

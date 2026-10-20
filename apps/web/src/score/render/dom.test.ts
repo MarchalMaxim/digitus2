@@ -7,6 +7,8 @@ import {
   redim,
   setCurrent,
   setDigits,
+  settleCancelled,
+  settleStill,
   settleSweep,
   sweepDimming,
   systemsOnScreen,
@@ -214,6 +216,48 @@ describe('sweeping only what is on screen', () => {
     settleSweep(null);
     expect([...h.querySelectorAll('.is-sweeping')].map((e) => e.id)).toEqual(['a2']);
     expect((h.querySelector('#a1') as SVGElement).style.getPropertyValue('--sweep')).toBe('');
+  });
+
+  // UI review 2026-10-20, H1: a digit brought back fades in from its resting gray only when it was
+  // at rest; one still fading (a quick toggle) turns back from where its fade is.
+  it('marks a digit brought back as returning only when it was dimmed at rest', () => {
+    const div = document.createElement('div');
+    div.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><g class="system" id="sys">
+      <g class="measure"><g class="fing" id="rest"></g><g class="fing" id="fading"></g>
+        <g class="fing" id="going"></g><g class="layer" id="layer"></g></g>
+    </g></svg>`;
+    const el = (id: string) => div.querySelector(`#${id}`)!;
+    el('fading').classList.add('is-sweeping'); // still fading from the switch before
+    el('going').classList.add('is-muted'); // dimmed by this switch
+    const changed = ['rest', 'fading', 'going', 'layer'].map(el);
+    sweepDimming(div, changed, 140, new Set([el('sys')]));
+    expect([...div.querySelectorAll('.is-returning')].map((e) => e.id)).toEqual(['rest']);
+    expect(div.querySelectorAll('.is-sweeping')).toHaveLength(4);
+    settleSweep(el('rest'));
+    expect(el('rest')).not.toHaveClass('is-returning');
+  });
+
+  // UI review 2026-10-20, H3: a fade cancelled by the next switch fires no end event.
+  it('settles an element whose fade was cancelled once nothing of it still runs', () => {
+    const h = sheet();
+    sweepDimming(h, [...h.querySelectorAll('g.layer')], 140, new Set([h.querySelector('#sys1')!]));
+    const a1 = h.querySelector('#a1')!;
+    const a2 = h.querySelector('#a2')!;
+    a1.getAnimations = () => [];
+    a2.getAnimations = () => [{} as Animation];
+    settleCancelled(a1);
+    settleCancelled(a2); // another of its fades still runs
+    expect([...h.querySelectorAll('.is-sweeping')].map((e) => e.id)).toEqual(['a2']);
+  });
+
+  // A switch undone within a frame changes nothing: no fade starts, so no end event will come.
+  it('settles at once every element marked that has no fade to run', () => {
+    const h = sheet();
+    sweepDimming(h, [...h.querySelectorAll('g.layer')], 140, new Set([h.querySelector('#sys1')!]));
+    const a2 = h.querySelector('#a2')!;
+    const doc = { getAnimations: () => [{ effect: { target: a2 } } as unknown as Animation] };
+    settleStill(h, doc as unknown as Document);
+    expect([...h.querySelectorAll('.is-sweeping')].map((e) => e.id)).toEqual(['a2']);
   });
 
   it('finds the systems on screen from one box per page, then one per system of the pages on screen', () => {

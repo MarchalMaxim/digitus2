@@ -652,8 +652,8 @@ fieldset {
   opacity: 0.4;
 }
 
-.score-sheet svg .is-red .is-muted,
-.score-sheet svg .is-red.is-muted {
+.score-sheet svg .is-red,
+.score-sheet svg .is-red .is-muted {
   fill-opacity: 1;
   stroke-opacity: 1;
 }
@@ -663,15 +663,16 @@ fieldset {
    its `--sweep` (ScoreView.tsx, `sweepDimming`) and settles when its fade ends (`settleSweep`).
    Declared on those elements only, never on what they hold, which inherits the fade. The fade is
    on fill and stroke opacity, never `opacity`: animating that gives each element a compositor
-   layer. A digit brought back was drawn through its group opacity, so it fades in from 40 % fill
-   instead. The cursor's notes never fade: the accent is drawn whole or not at all. */
+   layer. A digit brought back from rest was drawn through its group opacity, so it fades in from
+   40 % fill instead (`.is-returning`); one still fading turns back. The cursor's notes never fade
+   and are never pale, even inside a group being dimmed: the accent is drawn whole or not at all. */
 .score-sheet svg .is-sweeping {
   transition:
     fill-opacity var(--dur) var(--ease) var(--sweep, 0ms),
     stroke-opacity var(--dur) var(--ease) var(--sweep, 0ms);
 }
 
-.score-sheet svg g.fing.is-sweeping:not(.is-muted) {
+.score-sheet svg g.fing.is-returning {
   animation: digit-back var(--dur) var(--ease) var(--sweep, 0ms) backwards;
 }
 

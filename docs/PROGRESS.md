@@ -201,7 +201,7 @@ Library:
 
 Scanning:
 
-- Recognition errors remain and are corrected in the review (#40, done): on the acceptance corpus homr misses 13 of 47 ties that carry no mark in its output, loses the grand staff on a shadowed page, and photo beams are inferred from the meter rather than read; the duplicated C5 and wrong-hand E3 of the private test photos are not re-measured. Details: `docs/scanning.md`, `docs/research/omr.md`; open: #39 (beams).
+- Recognition errors remain and are corrected in the review (#40, done): on the acceptance corpus homr misses 13 of 47 ties that carry no mark in its output, loses the grand staff on a shadowed page, and photo beams are inferred from the meter rather than read; the duplicated C5 and wrong-hand E3 of the private test photos are not re-measured. A staff that homr reads only in part, which loses or adds bars, raises an alert in the review, and a fourth homr patch recovers the case behind it: a missed clef that cut off the start of a system (issue 129). Details: `docs/scanning.md`, `docs/research/omr.md`; open: #39 (beams).
 - Scanning needs a connection, recognises one page at a time for all readers (the others are told the scanner is busy), and stops for the rest of the month once the 5 spend cap is reached (`docs/scan-service.md`).
 
 ## Next

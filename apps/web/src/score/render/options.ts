@@ -9,11 +9,15 @@ export const VEROVIO_SCALE = 40;
  * whitespace text node between every two elements of the page: 230,000 nodes on Beethoven's Ninth
  * (docs/research/ram-usage.md).
  */
-export function verovioOptions(widthPx: number): Record<string, unknown> {
+export function verovioOptions(
+  widthPx: number,
+  layout: 'screen' | 'print' = 'screen',
+): Record<string, unknown> {
   return {
     scale: VEROVIO_SCALE,
-    pageWidth: Math.round((widthPx * 100) / VEROVIO_SCALE),
-    adjustPageHeight: true,
+    pageWidth: layout === 'print' ? 1900 : Math.round((widthPx * 100) / VEROVIO_SCALE),
+    ...(layout === 'print' ? { pageHeight: 2420, pageMarginTop: 50 } : {}),
+    adjustPageHeight: layout !== 'print',
     breaks: 'auto',
     header: 'none',
     footer: 'none',

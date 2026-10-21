@@ -46,7 +46,7 @@ async function handle(req: RenderWorkerRequest): Promise<RenderWorkerResponse> {
     await new Promise((r) => setTimeout(r, 0));
     if (req.id < latestRender) return { id: req.id, ok: false, error: 'superseded' };
     const t0 = performance.now();
-    tk.setOptions(verovioOptions(req.widthPx));
+    tk.setOptions(verovioOptions(req.widthPx, req.layout));
     if (!tk.loadData(req.xml)) throw new Error('the score could not be laid out');
     const pages = Array.from({ length: tk.getPageCount() }, (_, i) => tk.renderToSVG(i + 1));
     return { id: req.id, ok: true, pages, ms: performance.now() - t0, grown: heapGrown() };

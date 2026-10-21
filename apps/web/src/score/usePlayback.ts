@@ -28,6 +28,7 @@ import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
 import { keyVelocity } from './noteKey.js';
 import { scheduleClick } from '../audio/metronome.js';
+import { measureEndSec, measureStartSec } from '../audio/beats.js';
 import type * as TransportExports from '../audio/transport.js';
 
 type TransportModule = typeof TransportExports;
@@ -565,11 +566,22 @@ export function usePlayback(score: Score | null): Playback {
     [],
   );
 
-  // Before the first Play, a cue (the score view keeps its seeks inside a loop) or the top.
+  // Before the first Play, apply the transport's loop bounds to the cue without replacing it:
+  // removing a loop restores the original cue. The cursor compares this start with the position.
   const startSec = useCallback(() => {
     const t = transportRef.current;
     if (t) return t.startSec();
-    return pendingSecRef.current ?? 0;
+    const start = pendingSecRef.current ?? 0;
+    const s = scoreRef.current;
+    const range = loopRef.current;
+    if (!s || !range || s.measures.length === 0) return start;
+    const last = s.measures.length - 1;
+    const a = Math.min(Math.max(0, Math.trunc(range.from)), last);
+    const b = Math.min(Math.max(0, Math.trunc(range.to)), last);
+    if (a > b) return start;
+    const from = measureStartSec(s, a);
+    const to = measureEndSec(s, b);
+    return to > from && (start < from || start >= to) ? from : start;
   }, []);
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);

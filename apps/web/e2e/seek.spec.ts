@@ -131,6 +131,44 @@ test('a seek stays inside the loop', async ({ page }) => {
   expect(await redBars(page)).toEqual([2]); // its first
 });
 
+for (const prefix of ['', 'on a phone, ']) {
+  test(`${prefix}a loop before first Play clears an excluded cue and removal restores it`, async ({
+    page,
+    isMobile,
+  }) => {
+    await twinkle(page);
+    await noCountIn(page);
+    await seekBar(page, 2, isMobile);
+    await redSettled(page);
+    expect(await redBars(page)).toEqual([2]);
+    const cue = await positionSec(page);
+
+    // A loop that includes the cued bar keeps its notes and keys marked.
+    await setLoopBars(page, '3', '4');
+    await expect.poll(() => redBars(page)).toEqual([2]);
+    await expect(page.locator('.keyboard-svg .is-pressed')).not.toHaveCount(0);
+
+    // Moving the loop elsewhere changes the next start, without overwriting the seek.
+    await setLoopBars(page, '6', '7');
+    await expect.poll(() => redBars(page)).toEqual([]);
+    await expect(page.locator('.keyboard-svg .is-pressed')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Play' })).toHaveClass(/is-red/);
+    await expectOneRed(page, 'excluded cue before first Play');
+    expect(await positionSec(page)).toBe(cue);
+
+    await page.getByRole('checkbox', { name: 'Loop bars' }).uncheck();
+    await expect.poll(() => redBars(page)).toEqual([2]);
+    await expectOneRed(page, 'restored cue after removing the loop');
+
+    await setLoopBars(page, '6', '7');
+    await closePractice(page);
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect.poll(() => redBars(page)).toEqual([5]);
+    expect(await positionSec(page)).toBeGreaterThan(cue);
+    await expectOneRed(page, 'first playback at the loop start');
+  });
+}
+
 test('on a phone, a tap on a bar cues it, and the Practice panel says so', async ({ page }) => {
   await twinkle(page);
   await seekBar(page, 1, true);

@@ -76,7 +76,8 @@ export const library = {
     /** Search results: opens a level's results in full. `level` is the level's name. */
     allInLevel: (n: number, level: string) => `All ${formatNumber('en', n)} in ${level}`,
     /** The accessible name of a piece's row; its visible text is the title, composer and length. */
-    openPiece: (title: string, composer: string) => `Open ${title} by ${composer}`,
+    openPiece: (title: string, composer: string | null) =>
+      composer === null ? `Open ${title}` : `Open ${title} by ${composer}`,
   },
   search: {
     label: 'Search the library',
@@ -115,7 +116,10 @@ export const library = {
     /** The button under the shelf that shows the rest: "All 12 favourites" (always six or more). */
     all: (n: number) => `All ${formatNumber('en', n)} favourites`,
     /** The accessible name of a row's filled heart, which takes the piece off the shelf. */
-    remove: (title: string, composer: string) => `Remove ${title} by ${composer} from Favourites`,
+    remove: (title: string, composer: string | null) =>
+      composer === null
+        ? `Remove ${title} from Favourites`
+        : `Remove ${title} by ${composer} from Favourites`,
   },
   myScores: {
     heading: 'My scores',

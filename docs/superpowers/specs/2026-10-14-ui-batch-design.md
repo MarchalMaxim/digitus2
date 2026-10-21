@@ -1,6 +1,6 @@
 # UI design: the landing page, the dock, pause and the hand letters
 
-- Scope: the landing page (TODO T6), the Practice controls in the dock (T1), the paused state (T10) and the hand letters on the keyboard (T11). The owner's requests are in `docs/TODO.md`.
+- Scope: the landing page (TODO T6), the Practice controls in the dock (T1), the paused state (T10) and the hand letters on the keyboard (T11). The owner's requests are [GitHub issues](https://github.com/MarchalMaxim/digitus2/issues).
 - Ownership: the library page's levels, shelves, thresholds and list shapes are specified in `2026-10-16-library-shelves-design.md`: four levels (Easy, Medium, Harder, Challenging) with style shelves replace six level pills, level lines, genre pills and folded collections. This document keeps everything else about the landing page (rows, the one red element, motion, keyboard and screen reader, the drop frame, the end line) and the three score-view decisions. Where a section below points to the shelves spec, the shelves spec is the definition.
 - Brief, in the owner's words: "the landing page is a bit cluttered. Please divide into more easily parsable units"; "Make it easier to parse the overview of songs. Maybe add pill filters (for difficulty / genre). Keep the brutal simplicity though"; "some UI elements only appear when they are needed"; "Do not overclutter it with features and be brutal with this"; and, for T11, "Only when the L and R notes are close to each other, it is good to show the hand indicator."
 

@@ -61,7 +61,8 @@ export const library: Messages['library'] = {
     showLast: (n: number) =>
       plural('fr', n, { one: 'Afficher le dernier', other: 'Afficher les # derniers' }),
     allInLevel: (n: number, level: string) => `Voir les ${formatNumber('fr', n)} en ${level}`,
-    openPiece: (title: string, composer: string) => `Ouvrir ${title} de ${composer}`,
+    openPiece: (title: string, composer: string | null) =>
+      composer === null ? `Ouvrir ${title}` : `Ouvrir ${title} de ${composer}`,
   },
   search: {
     label: 'Rechercher dans la bibliothèque',
@@ -93,7 +94,10 @@ export const library: Messages['library'] = {
     heading: 'Favoris',
     line: 'Les morceaux que vous avez marqués d’un cœur, les plus récents d’abord.',
     all: (n: number) => `Voir les ${formatNumber('fr', n)} favoris`,
-    remove: (title: string, composer: string) => `Retirer ${title} de ${composer} des favoris`,
+    remove: (title: string, composer: string | null) =>
+      composer === null
+        ? `Retirer ${title} des favoris`
+        : `Retirer ${title} de ${composer} des favoris`,
   },
   myScores: {
     heading: 'Mes partitions',

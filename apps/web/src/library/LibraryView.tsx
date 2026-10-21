@@ -208,6 +208,7 @@ export function LibraryView() {
   const toggleFavourite = useAppStore((s) => s.toggleFavourite);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
+  const focusLibraryHeading = useCallback(() => heading.current?.focus(), []);
   const list = useRef<HTMLDivElement>(null);
   useAnchoredLibraryScroll(list);
   const rememberScroll = useRememberLibraryScroll(list);
@@ -358,7 +359,7 @@ export function LibraryView() {
           onRemove={removeFavourite}
         />
       )}
-      <MyScores onOpen={rememberScroll} />
+      <MyScores onOpen={rememberScroll} onFocusFallback={focusLibraryHeading} />
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">
           <LevelPills tiers={layout.tiers} tier={layout.tier} onChange={chooseTier} />

@@ -8,7 +8,7 @@ import {
   type CameraOptions,
 } from './helpers/camera.js';
 import { horizontalOverflow } from './helpers/overflow.js';
-import { expectOneRed } from './helpers/red.js';
+import { expectOneRed, redRoots } from './helpers/red.js';
 import { mockService, PNG } from './helpers/scan.js';
 
 // The entry is intentionally touch-only. Exercise it at both the desktop and phone widths.
@@ -18,6 +18,8 @@ const dialog = (page: Page) => page.getByRole('dialog', { name: t.title });
 const shutter = (page: Page) => dialog(page).getByRole('button', { name: t.capture, exact: true });
 const status = (page: Page) => dialog(page).getByRole('status');
 const step = (page: Page, n: number) => dialog(page).getByText(t.step(n, 5), { exact: true });
+/** CPU slowdown for the slow-phone test; DIGITUS2_E2E_CPU overrides it to find a breaking rate. */
+const SLOW_PHONE = Number(process.env.DIGITUS2_E2E_CPU ?? 6);
 
 async function openCamera(page: Page, options?: CameraOptions) {
   await installScoreCamera(page, options);
@@ -34,7 +36,7 @@ async function beginPage(page: Page, score: number) {
   await expect(status(page)).toHaveText(t.align);
 }
 
-async function finishViews(page: Page) {
+async function finishViews(page: Page, { view = 15_000, review = 20_000 } = {}) {
   // Translate the printed page itself to each real page-anchored target. These are 25/75%
   // of the default 5%-inset page, measured in the 360 x 480 camera source pixels.
   const translations = [
@@ -45,10 +47,10 @@ async function finishViews(page: Page) {
   ] as const;
   for (const [index, [x, y]] of translations.entries()) {
     await moveScore(page, x, y);
-    if (index < 3) await expect(step(page, index + 3)).toBeVisible({ timeout: 15_000 });
+    if (index < 3) await expect(step(page, index + 3)).toBeVisible({ timeout: view });
   }
   await expect(dialog(page).getByText(t.review, { exact: true })).toBeVisible({
-    timeout: 20_000,
+    timeout: review,
   });
 }
 
@@ -129,12 +131,61 @@ test('camera: a frozen aligned video cannot count as a steady hold', async ({ pa
   await expectCameraStopped(page);
 });
 
+// A mid-range Android phone is four to six times slower than the desktop running these tests.
+// DevTools slows the page's main thread only, not the tracker's worker, so the second test also
+// keeps the worker from starting: every frame is then analysed on the slowed main thread, at
+// least as slowly as a phone's worker would, and the views must still be taken (issue 143).
+test.describe('slow phone', () => {
+  // Each saturates a CPU core for most of a minute: one after the other, never side by side.
+  test.describe.configure({ mode: 'serial' });
+  for (const worker of [true, false])
+    test(`camera: a slow phone (a CPU ${SLOW_PHONE} times slower) still takes all five photographs${
+      worker ? '' : ', without a worker'
+    }`, async ({ page }) => {
+      test.setTimeout(300_000);
+      if (!worker)
+        await page.addInitScript(() => {
+          const Native = window.Worker;
+          window.Worker = class extends Native {
+            constructor(url: string | URL, options?: WorkerOptions) {
+              if (String(url).includes('tracker')) {
+                (window as unknown as { trackerRefused: boolean }).trackerRefused = true;
+                throw new Error('No module workers here');
+              }
+              super(url, options);
+            }
+          };
+        });
+      await mockService(page, xml('C'));
+      await openCamera(page);
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Emulation.setCPUThrottlingRate', { rate: SLOW_PHONE });
+      try {
+        await moveScore(page, 0, 0, 1);
+        await shutter(page).click();
+        await expect(step(page, 2)).toBeVisible({ timeout: 20_000 });
+        await finishViews(page, { view: 30_000, review: 150_000 });
+        await expectOneRed(page, 'slow phone review');
+        // The variant without a worker really analysed every frame on the slowed main thread.
+        expect(
+          await page.evaluate(
+            () => (window as unknown as { trackerRefused?: boolean }).trackerRefused ?? false,
+          ),
+        ).toBe(!worker);
+      } finally {
+        await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+      }
+    });
+});
+
 test('camera: a dark page asks for the light, and the torch brightens it', async ({ page }) => {
   await openCamera(page, { torch: true, light: 0.12 });
   await expect(status(page)).toHaveText(t.dark, { timeout: 10_000 });
   const light = dialog(page).getByRole('button', { name: t.light, exact: true });
   await expect(light).toHaveAttribute('aria-pressed', 'false');
   await expect(light).toHaveAttribute('data-attention', 'true');
+  // The red moves to the light with the usual 120 ms colour fade: judge it once that has settled.
+  await expect.poll(async () => (await redRoots(page)).length).toBe(1);
   await expectOneRed(page, 'dark camera');
   await light.click();
   await expect(light).toHaveAttribute('aria-pressed', 'true');
@@ -186,7 +237,8 @@ test('camera: denied permission explains the device-camera fallback and imports 
   await expectOneRed(page, 'denied camera');
   await expectNoSeriousA11y(page, 'denied camera');
   const choosing = page.waitForEvent('filechooser');
-  await dialog(page).getByText(t.fallback, { exact: true }).click();
+  // The red button opens the file input, which carries the same name for screen readers.
+  await dialog(page).locator('button', { hasText: t.fallback }).click();
   await (await choosing).setFiles({ name: 'device.png', mimeType: 'image/png', buffer: PNG });
   await expect(dialog(page).getByRole('img', { name: t.review, exact: true })).toBeVisible();
   await dialog(page).getByRole('button', { name: 'Use 1 page', exact: true }).click();

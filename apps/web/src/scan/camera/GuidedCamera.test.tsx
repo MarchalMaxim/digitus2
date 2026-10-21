@@ -4,6 +4,7 @@ import { messages as getT } from '../../i18n/i18n.js';
 import { GuidedCamera } from './GuidedCamera.js';
 import { targetPoints } from './captureState.js';
 import * as quality from './quality.js';
+import * as trackerModule from './tracker.js';
 import * as vision from './vision.js';
 
 beforeEach(() => vi.stubGlobal('isSecureContext', true));
@@ -653,4 +654,165 @@ it('issue 143: a video that stalls during the burst is not photographed', async 
   expect(screen.queryByText(t.step(2, 5))).toBeNull();
   expect(dialog.querySelector('.camera-flash')).toBeNull();
   expect(screen.getByRole('button', { name: t.restart })).toHaveClass('is-red');
+});
+
+/** The matrix that puts the first page-anchored dot under the circle (a 1001 x 563 camera). */
+function onFirstDot(width = 1001, height = 563) {
+  const corners = [
+    { x: width * 0.05, y: height * 0.05 },
+    { x: width * 0.95, y: height * 0.05 },
+    { x: width * 0.95, y: height * 0.95 },
+    { x: width * 0.05, y: height * 0.95 },
+  ];
+  const target = targetPoints(corners, { x: width / 2, y: height / 2 })[0]!;
+  return [
+    1,
+    0,
+    ((width / 2 - target.x) * 360) / width,
+    0,
+    1,
+    ((height / 2 - target.y) * 202) / height,
+    0,
+    0,
+    1,
+  ];
+}
+
+it('issue 143: a slow phone, an update every 400 ms, still holds the circle on a dot', async () => {
+  sharpFrames();
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  sample(0);
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  sample(400);
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  vi.spyOn(vision, 'registerFrame').mockReturnValue({
+    matrix: onFirstDot(),
+    inliers: 30,
+    error: 0,
+    coverage: 0.8,
+  });
+  sample(800);
+  sample(1200);
+  // More than 350 ms apart, yet one unbroken look on this phone: the ring keeps filling.
+  expect(screen.getByRole('dialog').querySelector('[data-holding="true"]')).not.toBeNull();
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  sample(1600);
+  expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
+});
+
+it('issue 143: an answer about a forgotten page moves nothing and takes no view', async () => {
+  sharpFrames();
+  type Done = (answer: unknown) => void;
+  const asked: { kind: 'measure' | 'track'; frame: vision.Frame; done: Done }[] = [];
+  const disposed = vi.fn();
+  vi.spyOn(trackerModule, 'createTracker').mockImplementation(() => {
+    let pending: Done | undefined;
+    const ask = (kind: 'measure' | 'track') => (frame: vision.Frame, done: Done) => {
+      if (pending) return false;
+      pending = done;
+      asked.push({
+        kind,
+        frame,
+        done: (answer) => {
+          pending = undefined;
+          done(answer);
+        },
+      });
+      return true;
+    };
+    return {
+      get busy() {
+        return !!pending;
+      },
+      setReference: () => {},
+      measure: ask('measure'),
+      track: ask('track'),
+      dispose: disposed,
+    } as unknown as trackerModule.Tracker;
+  });
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  const dialog = screen.getByRole('dialog');
+  const answer = (index: number, extra: object) =>
+    act(() => asked[index]!.done({ id: index, ms: 1, frame: asked[index]!.frame, ...extra }));
+  sample(0);
+  // While a frame is being analysed, the next ones are skipped, not queued.
+  sample(130);
+  sample(260);
+  expect(asked.map((question) => question.kind)).toEqual(['measure']);
+  answer(0, { type: 'measure', quality: GOOD, sharp: 100 });
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  sample(400);
+  answer(1, { type: 'measure', quality: GOOD, sharp: 100 });
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  sample(520);
+  expect(asked[2]!.kind).toBe('track');
+  // The reader starts the page over while that frame is analysed; its answer comes late.
+  fireEvent.click(screen.getByRole('button', { name: t.startOver }));
+  answer(2, {
+    type: 'track',
+    sharp: 100,
+    registration: { matrix: onFirstDot(), inliers: 30, error: 0, coverage: 0.8 },
+  });
+  expect(screen.getByRole('status')).toHaveTextContent(t.aim);
+  expect(dialog.querySelector('[data-camera-target]')).toBeNull();
+  expect(dialog.querySelectorAll('.camera-flash')).toHaveLength(1);
+  // The camera goes on with the new page.
+  sample(640);
+  expect(asked.at(-1)!.kind).toBe('measure');
+  cleanup();
+  expect(disposed).toHaveBeenCalledTimes(1);
+});
+
+it('issue 143: a press waits for the analysis of its frame on a slow phone, then takes it', async () => {
+  sharpFrames();
+  const asked: { frame: vision.Frame; done: (answer: unknown) => void }[] = [];
+  vi.spyOn(trackerModule, 'createTracker').mockImplementation(() => {
+    let busy = false;
+    return {
+      get busy() {
+        return busy;
+      },
+      setReference: () => {},
+      measure: (frame: vision.Frame, done: (answer: unknown) => void) => {
+        if (busy) return false;
+        busy = true;
+        asked.push({
+          frame,
+          done: (answer) => {
+            busy = false;
+            done(answer);
+          },
+        });
+        return true;
+      },
+      track: () => false,
+      dispose: () => {},
+    } as unknown as trackerModule.Tracker;
+  });
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    fireEvent.click(screen.getByRole('button', { name: t.capture }));
+    sample(100);
+    expect(asked).toHaveLength(1);
+    // The press's time is up while its frame is still being analysed: not a stopped camera.
+    act(() => vi.advanceTimersByTime(1500));
+    expect(screen.queryByRole('alert')).toBeNull();
+    act(() =>
+      asked[0]!.done({
+        type: 'measure',
+        id: 1,
+        ms: 1,
+        frame: asked[0]!.frame,
+        quality: GOOD,
+        sharp: 100,
+      }),
+    );
+    expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
 });

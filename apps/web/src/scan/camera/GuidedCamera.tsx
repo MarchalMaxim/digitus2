@@ -12,6 +12,7 @@ import { SCAN_LIMIT, validateScanImages } from '../model.js';
 import { namedCapture } from '../phone.js';
 import {
   alignmentStep,
+  continuityWindow,
   HOLD_MS,
   initialAlignment,
   scaledMatrix,
@@ -20,12 +21,11 @@ import {
   validCorners,
 } from './captureState.js';
 import { CAMERA_CONSTRAINTS, hasTorch, releaseCamera, setTorch, tick as haptic } from './device.js';
-import { advise, measureFrame, photographable, type Advice, type FrameQuality } from './quality.js';
+import { advise, photographable, type Advice, type FrameQuality } from './quality.js';
+import { createTracker, type Measured, type Tracked, type Tracker } from './tracker.js';
 import {
   project,
   reconstructPage,
-  registerFrame,
-  sharpness,
   type Capture,
   type Frame,
   type Matrix,
@@ -41,6 +41,8 @@ const IDENTITY: Matrix = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 const PHOTOS = 5;
 /** A press looks this long for the sharpest frame before it settles for the best one seen. */
 const BURST_MS = 1200;
+/** How much longer a press waits for the analysis of a frame it has already taken. */
+const BURST_GRACE_MS = 3000;
 /** The way out appears only after the reader has tried one dot for this long. */
 const SKIP_AFTER_MS = 10_000;
 /** Registration's own floor (vision.registerFrame): a reference below it can never be tracked. */
@@ -54,7 +56,8 @@ function dimensions(width: number, height: number, limit: number) {
   );
   return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }
-function videoFrame(video: HTMLVideoElement, width: number, height: number): Frame {
+/** The picture (the video, or a canvas holding one of its frames) scaled to width x height. */
+function videoFrame(source: CanvasImageSource, width: number, height: number): Frame {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -63,11 +66,31 @@ function videoFrame(video: HTMLVideoElement, width: number, height: number): Fra
     // force the whole camera frame through the CPU first (8 to 30 ms a frame on a desktop).
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Canvas unavailable');
-    context.drawImage(video, 0, 0, width, height);
+    context.drawImage(source, 0, 0, width, height);
     return { width, height, data: context.getImageData(0, 0, width, height).data };
   } finally {
     canvas.width = canvas.height = 0;
   }
+}
+/**
+ * One video frame at full size, held on the GPU: its small copy can be measured first, and its
+ * pixels read back (a 5 MP read-back costs tens of ms) only when it turns out to be worth keeping.
+ */
+function holdFrame(
+  canvas: HTMLCanvasElement,
+  video: HTMLVideoElement,
+  width: number,
+  height: number,
+) {
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Canvas unavailable');
+  context.drawImage(video, 0, 0, width, height);
+  return {
+    small: (size: { width: number; height: number }) => videoFrame(canvas, size.width, size.height),
+    pixels: (): Frame => ({ width, height, data: context.getImageData(0, 0, width, height).data }),
+  };
 }
 function drawFrame(canvas: HTMLCanvasElement, frame: Frame) {
   canvas.width = frame.width;
@@ -79,22 +102,6 @@ function drawFrame(canvas: HTMLCanvasElement, frame: Frame) {
       0,
       0,
     );
-}
-function trackingFrame(frame: Frame): Frame {
-  const full = document.createElement('canvas');
-  const small = document.createElement('canvas');
-  try {
-    drawFrame(full, frame);
-    const size = dimensions(frame.width, frame.height, 360);
-    small.width = size.width;
-    small.height = size.height;
-    const context = small.getContext('2d', { willReadFrequently: true });
-    if (!context) throw new Error('Canvas unavailable');
-    context.drawImage(full, 0, 0, size.width, size.height);
-    return { ...size, data: context.getImageData(0, 0, size.width, size.height).data };
-  } finally {
-    full.width = full.height = small.width = small.height = 0;
-  }
 }
 async function pageFile(frame: Frame, signal: AbortSignal): Promise<File> {
   const canvas = document.createElement('canvas');
@@ -228,9 +235,17 @@ export function GuidedCamera({
   const geometry = useRef<{ width: number; height: number } | undefined>(undefined);
   const hold = useRef(initialAlignment());
   const recent = useRef<FrameQuality[]>([]);
-  const burst = useRef<{ best?: Candidate; timer: ReturnType<typeof setTimeout> } | undefined>(
-    undefined,
-  );
+  const burst = useRef<
+    | {
+        best?: Candidate;
+        timer: ReturnType<typeof setTimeout>;
+        canvas: HTMLCanvasElement;
+        /** Frames of this press sent for analysis, and when the press began. */
+        asked: number;
+        start: number;
+      }
+    | undefined
+  >(undefined);
   const blurryAttempts = useRef(0);
   const noticeAt = useRef(-Infinity);
   const skipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -238,14 +253,33 @@ export function GuidedCamera({
   const cancelVideoFrame = useRef<(() => void) | undefined>(undefined);
   const freshnessExpiry = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastSample = useRef(-Infinity);
+  const tracker = useRef<Tracker | undefined>(undefined);
+  /** Bumped whenever the page in progress is forgotten: answers about older frames are dropped. */
+  const epoch = useRef(0);
+  /** Recent gaps between camera updates, in ms: how fast this phone delivers them. */
+  const gaps = useRef<number[]>([]);
+  const lastUpdate = useRef(-Infinity);
+  /** A view's still is being checked: no tracking frame meanwhile. */
+  const capturing = useRef(false);
+  /** How long one update may stand for the next on this phone (continuityWindow). */
+  const continuity = () => continuityWindow(gaps.current);
+  /** An update arrived for a frame taken at `now`; a long pause (another stage) is no gap. */
+  const updated = (now: number) => {
+    const gap = now - lastUpdate.current;
+    if (gap > 0 && gap < 5000) gaps.current = [...gaps.current.slice(-4), gap];
+    lastUpdate.current = now;
+  };
   const capacity = Math.max(0, Math.min(20, Math.floor(maxPages)));
 
   const endBurst = () => {
     clearTimeout(burst.current?.timer);
+    if (burst.current) burst.current.canvas.width = burst.current.canvas.height = 0;
     burst.current = undefined;
     setShooting(false);
   };
   const stop = () => {
+    epoch.current++;
+    capturing.current = false;
     void releaseCamera(stream.current, lightRef.current);
     stream.current = undefined;
     lightRef.current = false;
@@ -267,6 +301,9 @@ export function GuidedCamera({
   };
   /** Forget the page in progress, whatever stage it reached, so nothing leaks into the next one. */
   const clearPage = () => {
+    epoch.current++;
+    capturing.current = false;
+    lastUpdate.current = -Infinity;
     clearTimeout(skipTimer.current);
     endBurst();
     captures.current = [];
@@ -369,22 +406,33 @@ export function GuidedCamera({
     setFlash((value) => value + 1);
     haptic();
   };
+  const lostView = () => {
+    hold.current = initialAlignment();
+    setHoldSince(null);
+    setQuality('lost');
+  };
+  /**
+   * The hold is complete: photograph the view at full size, and keep it only once the tracker
+   * confirms that this very still, not just the preview before it, shows the dot under the circle.
+   * The full picture waits on the GPU until then.
+   */
   const captureView = () => {
     const element = video.current;
     const base = reference.current;
+    const analysis = tracker.current;
     if (
       stageRef.current !== 'track' ||
       !element ||
       !base ||
+      !analysis ||
+      capturing.current ||
       !hold.current.aligned ||
       session.current?.signal.aborted
     )
       return;
-    if (performance.now() - lastSample.current > 350) {
-      hold.current = initialAlignment();
-      setHoldSince(null);
-      return;
-    }
+    hold.current = initialAlignment();
+    setHoldSince(null);
+    if (performance.now() - lastSample.current > continuity()) return;
     if (
       element.videoWidth !== geometry.current?.width ||
       element.videoHeight !== geometry.current?.height
@@ -392,53 +440,89 @@ export function GuidedCamera({
       turned();
       return;
     }
+    const token = epoch.current;
+    const canvas = document.createElement('canvas');
+    const release = () => {
+      canvas.width = canvas.height = 0;
+    };
     try {
       const first = captures.current[0]!.frame;
-      const frame = videoFrame(element, first.width, first.height);
-      const small = trackingFrame(frame);
-      const region = cornersRef.current.map((point) => ({
-        x: (point.x * base.width) / first.width,
-        y: (point.y * base.height) / first.height,
-      }));
-      const registration = registerFrame(base, small, region);
-      const index = captures.current.length - 1;
-      const point = targetPoints(cornersRef.current, { x: first.width / 2, y: first.height / 2 })[
-        index
-      ]!;
-      const matrix =
-        registration &&
-        scaledMatrix(registration.matrix, first.width / base.width, first.height / base.height);
-      const valid = validView({
-        matrix,
-        previous: captures.current.map((capture) => capture.matrix),
-        target: point,
-        center: { x: first.width / 2, y: first.height / 2 },
-        sharp: sharpness(small) >= TRACKABLE,
+      const still = holdFrame(canvas, element, first.width, first.height);
+      const small = still.small(base);
+      // Set first: without a worker the answer comes before track() returns.
+      capturing.current = true;
+      const asked = analysis.track(small, (answer) => {
+        capturing.current = false;
+        try {
+          if (token !== epoch.current || stageRef.current !== 'track') return;
+          if (!answer) {
+            lostView();
+            return;
+          }
+          const index = captures.current.length - 1;
+          const point = targetPoints(cornersRef.current, {
+            x: first.width / 2,
+            y: first.height / 2,
+          })[index]!;
+          const matrix =
+            answer.registration &&
+            scaledMatrix(
+              answer.registration.matrix,
+              first.width / base.width,
+              first.height / base.height,
+            );
+          const valid = validView({
+            matrix,
+            previous: captures.current.map((capture) => capture.matrix),
+            target: point,
+            center: { x: first.width / 2, y: first.height / 2 },
+            sharp: answer.sharp >= TRACKABLE,
+          });
+          if (!valid || !matrix) {
+            lostView();
+            return;
+          }
+          captures.current.push({ frame: still.pixels(), matrix });
+          captured();
+          if (captures.current.length === PHOTOS) void process();
+          else {
+            setTarget(index + 1);
+            setQuality('align');
+            armSkip();
+          }
+        } catch {
+          lostView();
+        } finally {
+          release();
+        }
       });
-      hold.current = initialAlignment();
-      setHoldSince(null);
-      if (!valid || !matrix) {
-        setQuality('lost');
-        return;
-      }
-      captures.current.push({ frame, matrix });
-      captured();
-      if (captures.current.length === PHOTOS) void process();
-      else {
-        setTarget(index + 1);
-        setQuality('align');
-        armSkip();
+      if (!asked) {
+        capturing.current = false;
+        release();
       }
     } catch {
-      hold.current = initialAlignment();
-      setHoldSince(null);
-      setQuality('lost');
+      capturing.current = false;
+      release();
+      lostView();
     }
   };
   /** The sharpest frame of the burst becomes the page's reference, or the reader is told why not. */
   const settleBurst = () => {
     const element = video.current;
-    const best = burst.current?.best;
+    const pending = burst.current;
+    // The video gave this press its frames, but the phone is still analysing them: wait for that
+    // answer (a little), rather than calling a slow phone a stopped camera.
+    if (
+      pending &&
+      !pending.best &&
+      pending.asked > 0 &&
+      tracker.current?.busy &&
+      performance.now() - pending.start < BURST_MS + BURST_GRACE_MS
+    ) {
+      pending.timer = setTimeout(() => actions.current.settleBurst(), 100);
+      return;
+    }
+    const best = pending?.best;
     endBurst();
     if (stageRef.current !== 'aim' || session.current?.signal.aborted || !element) return;
     // Every frame of the burst is a candidate, so none at all means the video stalled: a frozen
@@ -474,6 +558,13 @@ export function GuidedCamera({
     blurryAttempts.current = 0;
     captured();
     reference.current = small;
+    tracker.current?.setReference(
+      small,
+      quad.map((point) => ({
+        x: (point.x * small.width) / frame.width,
+        y: (point.y * small.height) / frame.height,
+      })),
+    );
     captures.current = [{ frame, matrix: IDENTITY }];
     hold.current = initialAlignment();
     setNotice(undefined);
@@ -488,7 +579,12 @@ export function GuidedCamera({
     setNotice(undefined);
     setPressed(true);
     setShooting(true);
-    burst.current = { timer: setTimeout(() => actions.current.settleBurst(), BURST_MS) };
+    burst.current = {
+      timer: setTimeout(() => actions.current.settleBurst(), BURST_MS),
+      canvas: document.createElement('canvas'),
+      asked: 0,
+      start: performance.now(),
+    };
   };
   /** Optimistic, one request at a time: a quick second tap is not lost or doubled, and a close
    * while the light is coming on still switches it off. */
@@ -523,6 +619,9 @@ export function GuidedCamera({
     clearPage();
     setError(undefined);
     geometry.current = undefined;
+    const analysis = createTracker();
+    tracker.current = analysis;
+    gaps.current = [];
     let cleanupTracks = () => {};
     const interrupted = () => {
       if (!controller.signal.aborted) {
@@ -602,6 +701,9 @@ export function GuidedCamera({
           if (controller.signal.aborted) return;
           schedule();
           if (now - last < 120 || !element.videoWidth || !element.videoHeight) return;
+          // One question at a time: while the last frame is being analysed, this one is skipped,
+          // and the next video frame is tried as soon as the answer is in.
+          if (analysis.busy || capturing.current) return;
           last = now;
           const intrinsic = { width: element.videoWidth, height: element.videoHeight };
           if (
@@ -626,88 +728,123 @@ export function GuidedCamera({
             setLight((value) => (value.available ? value : { available: true, on: false }));
           }
           if (stageRef.current !== 'aim' && stageRef.current !== 'track') return;
-          lastSample.current = performance.now();
-          clearTimeout(freshnessExpiry.current);
-          freshnessExpiry.current = setTimeout(() => {
-            hold.current = initialAlignment();
-            setHoldSince(null);
-            setQuality('lost');
-          }, 350);
+          const token = epoch.current;
+          const current = (answer: { frame: Frame } | undefined, stage: Stage) =>
+            !!answer &&
+            token === epoch.current &&
+            stageRef.current === stage &&
+            !controller.signal.aborted;
+          /** Each update re-arms the watch for the next; past the window the picture is stale. */
+          const fresh = () => {
+            updated(now);
+            lastSample.current = now;
+            clearTimeout(freshnessExpiry.current);
+            freshnessExpiry.current = setTimeout(() => {
+              hold.current = initialAlignment();
+              setHoldSince(null);
+              setQuality('lost');
+            }, continuity());
+          };
           try {
-            const base = reference.current;
             if (stageRef.current === 'aim') {
               const bounds = dimensions(intrinsic.width, intrinsic.height, 360);
-              const current = videoFrame(element, bounds.width, bounds.height);
-              const measured = measureFrame(current);
-              recent.current = [...recent.current.slice(-3), measured];
-              const next = advise(recent.current);
-              setAdvice(next);
-              // A notice stays long enough to be read, then yields to what the picture needs now.
-              if (next !== 'blurry' && now - noticeAt.current > 2500) setNotice(undefined);
-              setOutline(
-                measured.page &&
-                  scalePoints(
-                    measured.page,
-                    intrinsic.width / current.width,
-                    intrinsic.height / current.height,
-                  ),
-              );
               const pending = burst.current;
-              if (!pending) return;
-              const candidate = { small: current, quality: measured, sharp: sharpness(current) };
-              if (!better(candidate, pending.best)) return;
-              const full = dimensions(intrinsic.width, intrinsic.height, 2560);
-              const frame = videoFrame(element, full.width, full.height);
-              const small = trackingFrame(frame);
-              pending.best = { frame, small, quality: measured, sharp: sharpness(small) };
-              if (photographable(measured) && pending.best.sharp >= TRACKABLE)
-                actions.current.settleBurst();
+              // During a press, the full picture waits on the GPU in case this frame is the best.
+              const size = dimensions(intrinsic.width, intrinsic.height, 2560);
+              const full = pending && holdFrame(pending.canvas, element, size.width, size.height);
+              const small = full
+                ? full.small(bounds)
+                : videoFrame(element, bounds.width, bounds.height);
+              const asked = analysis.measure(small, (answer) => {
+                if (!current(answer, 'aim')) return;
+                aimed(answer!, now, intrinsic, pending, full);
+                fresh();
+              });
+              if (asked && pending) pending.asked += 1;
               return;
             }
+            const base = reference.current;
             if (!base) return;
-            const current = videoFrame(element, base.width, base.height);
-            const sharp = sharpness(current) >= TRACKABLE;
-            const first = captures.current[0]!.frame;
-            const region = cornersRef.current.map((point) => ({
-              x: (point.x * base.width) / first.width,
-              y: (point.y * base.height) / first.height,
-            }));
-            const registration = registerFrame(base, current, region);
-            const points = registration
-              ? targetPoints(cornersRef.current, { x: first.width / 2, y: first.height / 2 }).map(
-                  (point) =>
-                    project(registration.matrix, {
-                      x: (point.x * base.width) / first.width,
-                      y: (point.y * base.height) / first.height,
-                    }),
-                )
-              : [];
-            // Lost frames keep the last dots, dimmed, so the way back to the red one stays shown.
-            if (registration)
-              setProjected(
-                points.map((point) => ({
-                  x: (point.x * intrinsic.width) / current.width,
-                  y: (point.y * intrinsic.height) / current.height,
-                })),
-              );
-            const index = captures.current.length - 1;
-            hold.current = alignmentStep(hold.current, {
-              now,
-              point: points[index] ?? null,
-              anchors: points,
-              center: { x: current.width / 2, y: current.height / 2 },
-              sharp,
+            analysis.track(videoFrame(element, base.width, base.height), (answer) => {
+              if (!current(answer, 'track')) return;
+              fresh();
+              tracked(answer!, now, intrinsic, base);
             });
-            setHoldSince(hold.current.aligned ? hold.current.since : null);
-            setQuality(
-              !registration ? 'lost' : !sharp ? 'blurry' : hold.current.aligned ? 'hold' : 'align',
-            );
-            if (hold.current.ready) actions.current.captureView();
           } catch {
             hold.current = initialAlignment();
             setHoldSince(null);
             setQuality('lost');
           }
+        };
+        /** What a measured frame tells the reader, and whether a press has found its photograph. */
+        const aimed = (
+          answer: Measured,
+          now: number,
+          intrinsic: { width: number; height: number },
+          pending: typeof burst.current,
+          full: ReturnType<typeof holdFrame> | undefined,
+        ) => {
+          const { frame: small, quality: measured, sharp } = answer;
+          recent.current = [...recent.current.slice(-3), measured];
+          const next = advise(recent.current);
+          setAdvice(next);
+          // A notice stays long enough to be read, then yields to what the picture needs now.
+          if (next !== 'blurry' && now - noticeAt.current > 2500) setNotice(undefined);
+          setOutline(
+            measured.page &&
+              scalePoints(
+                measured.page,
+                intrinsic.width / small.width,
+                intrinsic.height / small.height,
+              ),
+          );
+          if (!pending || !full || burst.current !== pending) return;
+          const candidate = { small, quality: measured, sharp };
+          if (!better(candidate, pending.best)) return;
+          pending.best = { ...candidate, frame: full.pixels() };
+          if (photographable(measured) && sharp >= TRACKABLE) actions.current.settleBurst();
+        };
+        /** Where the page is now: the dots follow it, and a steady hold takes the view. */
+        const tracked = (
+          answer: Tracked,
+          now: number,
+          intrinsic: { width: number; height: number },
+          base: Frame,
+        ) => {
+          const { registration, frame: small } = answer;
+          const sharp = answer.sharp >= TRACKABLE;
+          const first = captures.current[0]!.frame;
+          const points = registration
+            ? targetPoints(cornersRef.current, { x: first.width / 2, y: first.height / 2 }).map(
+                (point) =>
+                  project(registration.matrix, {
+                    x: (point.x * base.width) / first.width,
+                    y: (point.y * base.height) / first.height,
+                  }),
+              )
+            : [];
+          // Lost frames keep the last dots, dimmed, so the way back to the red one stays shown.
+          if (registration)
+            setProjected(
+              points.map((point) => ({
+                x: (point.x * intrinsic.width) / small.width,
+                y: (point.y * intrinsic.height) / small.height,
+              })),
+            );
+          const index = captures.current.length - 1;
+          hold.current = alignmentStep(hold.current, {
+            now,
+            point: points[index] ?? null,
+            anchors: points,
+            center: { x: small.width / 2, y: small.height / 2 },
+            sharp,
+            window: continuity(),
+          });
+          setHoldSince(hold.current.aligned ? hold.current.since : null);
+          setQuality(
+            !registration ? 'lost' : !sharp ? 'blurry' : hold.current.aligned ? 'hold' : 'align',
+          );
+          if (hold.current.ready) actions.current.captureView();
         };
         schedule();
       } catch (cause) {
@@ -726,6 +863,8 @@ export function GuidedCamera({
       session.current?.abort();
       cleanupTracks();
       stop();
+      analysis.dispose();
+      if (tracker.current === analysis) tracker.current = undefined;
       document.removeEventListener('visibilitychange', onHidden);
       window.removeEventListener('pagehide', interrupted);
       window.removeEventListener('popstate', interrupted);

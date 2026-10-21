@@ -167,6 +167,21 @@ export function mutedHandsFor(hands: HandsMode): Hand[] {
   return [];
 }
 
+/** Whether every note of the piece is in one hand (a melody alone, a MIDI file split to one side). */
+export function oneHanded(score: Score | null): boolean {
+  const first = score?.notes[0]?.hand;
+  return first !== undefined && score!.notes.every((n) => n.hand === first);
+}
+
+/**
+ * The hands a piece plays: the setting, except on a one-hand piece, which plays with both
+ * (issue 112). There the setting could pick the empty hand, Play red with nothing to play; the
+ * setting itself is kept, so the next piece with two hands opens with the reader's choice.
+ */
+export function handsFor(score: Score | null, hands: HandsMode): HandsMode {
+  return oneHanded(score) ? 'both' : hands;
+}
+
 function uniqueMidis(score: Score): number[] {
   return [...new Set(score.notes.flatMap((n) => ornamentAttacks(n).map((attack) => attack.midi)))];
 }
@@ -216,7 +231,10 @@ function covers(loaded: Samples | null, needed: Samples): boolean {
 export function usePlayback(score: Score | null): Playback {
   // The open piece's own tempo factor (polish plan Task 6): a different piece opens at 100 %.
   const tempoFactor = useAppStore(tempoFactorOf);
-  const hands = useAppStore((s) => s.settings.hands);
+  const hands = handsFor(
+    score,
+    useAppStore((s) => s.settings.hands),
+  );
   const metronome = useAppStore((s) => s.settings.metronome);
   const countInOn = useAppStore((s) => s.settings.countIn);
 
@@ -368,7 +386,7 @@ export function usePlayback(score: Score | null): Playback {
           const state = useAppStore.getState();
           const settings = state.settings;
           transport.setTempoFactor(tempoFactorOf(state));
-          transport.setMuted(mutedHandsFor(settings.hands));
+          transport.setMuted(mutedHandsFor(handsFor(s, settings.hands)));
           transport.setMetronome(settings.metronome);
           transport.setCountIn(settings.countIn);
           // The end: back to the start, stopped; the cursor clears and Play is red again, and the

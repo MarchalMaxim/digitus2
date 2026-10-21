@@ -306,6 +306,18 @@ describe('PracticeControls', () => {
     expect(screen.getByRole('spinbutton', { name: 'Loop to bar' })).toHaveValue(3);
     expect(pb.setLoop).not.toHaveBeenCalled();
   });
+
+  // Issue #112: a piece with notes in one hand has nothing for the Hands control to choose.
+  it('leaves the Hands control out on a one-hand piece', () => {
+    const { rerender } = render(
+      <PracticeControls playback={playback()} measureCount={12} currentBar={1} />,
+    );
+    expect(screen.getByRole('radio', { name: 'Left hand' })).toBeInTheDocument();
+    rerender(<PracticeControls playback={playback()} measureCount={12} currentBar={1} oneHanded />);
+    expect(screen.queryByRole('radio', { name: 'Left hand' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Both hands' })).toBeNull();
+    expect(screen.getByRole('checkbox', { name: 'Metronome' })).toBeInTheDocument();
+  });
 });
 
 // "Add notes between" (issue #67): a tick box like Metronome, there only once the piece has an

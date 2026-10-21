@@ -1622,9 +1622,16 @@ test.describe('playback with the silent instrument', () => {
     await expectNoSeriousA11y(page, 'Twinkle at its own tempo');
   });
 
-  test('a one-hand piece with the other hand selected has nothing to play: Play stays red and unavailable', async ({
+  // Issue #112: the saved Hands choice used to carry the empty hand into a one-hand piece, Play red
+  // with nothing to play. Such a piece plays with both hands and offers no Hands control.
+  test('a one-hand piece plays whatever hand is saved, with no Hands control, and the choice is kept', async ({
     page,
   }) => {
+    await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
+    await page.getByRole('radio', { name: 'Left hand' }).check();
+
     await page.goto('/?audio=silent');
     await page.getByLabel('Open your own score').setInputFiles({
       name: 'melody.musicxml',
@@ -1635,21 +1642,19 @@ test.describe('playback with the silent instrument', () => {
     await expect(play).toBeEnabled({ timeout: 20_000 });
     await openPractice(page);
     await embellishDecided(page); // a file of up to 900 notes may be offered the switch
+    await expect(page.getByRole('radio')).toHaveCount(0);
+    await expect(page.getByRole('status')).toBeEmpty();
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
-    // A loop keeps the short piece playing, so only the hand switch can stop it.
-    await setLoopBars(page, '1', '2');
     await play.click();
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
-    // Switching to the empty hand stops playback: Play is the red element again, unavailable.
-    await page.getByRole('radio', { name: 'Left hand' }).click();
-    await expect(page.getByRole('button', { name: 'Play' })).toBeDisabled();
-    await expect(page.getByRole('status')).toHaveText('This piece has no notes for the left hand.');
-    await expect(page.locator('.score-sheet .is-red')).toHaveCount(0);
-    const roots = await expectOneRed(page, 'nothing to play');
-    expect(roots[0]!.tag).toBe('button');
-    await page.getByRole('radio', { name: 'Right hand' }).click();
-    await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
-    await expect(page.getByRole('status')).toBeEmpty();
+    await expectOneRed(page, 'a one-hand piece playing');
+    await page.getByRole('button', { name: 'Pause' }).click();
+
+    // The saved choice is untouched: a piece with two hands opens with the left hand again.
+    await page.goto('/?audio=silent#/piece/twinkle-twinkle-little-star');
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
+    await openPractice(page);
+    await expect(page.getByRole('radio', { name: 'Left hand' })).toBeChecked();
   });
 });
 

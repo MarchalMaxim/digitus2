@@ -87,6 +87,11 @@ export interface PracticeControlsProps {
    * the tick box is then not there at all.
    */
   embellish?: { on: boolean; set(on: boolean): void } | null;
+  /**
+   * Every note is in one hand (issue 112): the piece plays with both hands whatever is saved, so
+   * the Hands control has nothing to choose and is not there.
+   */
+  oneHanded?: boolean;
 }
 
 /**
@@ -264,14 +269,15 @@ export function Transport({
  * hidden (no size) the checked label paints its own fill. The classes are set here, not through
  * React: the fieldset's className prop never changes, so a render never undoes them.
  */
-function useSegmentedThumb(value: string) {
+/** `shown`: whether the control is on screen; it can come back (a MIDI file split again). */
+function useSegmentedThumb(value: string, shown = true) {
   const ref = useRef<HTMLFieldSetElement>(null);
   /** The index of the label the thumb was last put over; null while it is not placed. */
   const lastRef = useRef<number | null>(null);
 
   useLayoutEffect(() => {
     if (ref.current) placeThumb(ref.current, lastRef, true);
-  }, [value]);
+  }, [value, shown]);
 
   useEffect(() => {
     const box = ref.current;
@@ -279,7 +285,7 @@ function useSegmentedThumb(value: string) {
     const observer = new ResizeObserver(() => placeThumb(box, lastRef, false));
     observer.observe(box);
     return () => observer.disconnect();
-  }, []);
+  }, [shown]);
 
   return ref;
 }
@@ -337,6 +343,7 @@ export function PracticeControls({
   qpm = null,
   currentBar,
   embellish = null,
+  oneHanded = false,
 }: PracticeControlsProps) {
   const t = useT();
   const settings = useAppStore((s) => s.settings);
@@ -349,7 +356,7 @@ export function PracticeControls({
   const [loopTo, setLoopTo] = useState(() => (playback.loop ? String(playback.loop.to + 1) : ''));
   const [looping, setLooping] = useState(() => playback.loop !== null);
   const tempoPercent = Math.round(tempoFactor * 100);
-  const handsRef = useSegmentedThumb(settings.hands);
+  const handsRef = useSegmentedThumb(settings.hands, !oneHanded);
   const reversed = loopIsReversed(loopFrom, loopTo);
   const loopMessageId = useId();
   const touch = useMediaQuery(TOUCH_QUERY);
@@ -417,22 +424,24 @@ export function PracticeControls({
         </span>
       </label>
 
-      <fieldset className="segmented" ref={handsRef}>
-        <legend className="visually-hidden">{t.transport.hands}</legend>
-        <span className="segmented-thumb" aria-hidden="true" />
-        {HANDS.map((h) => (
-          <label key={h.value}>
-            <input
-              type="radio"
-              name="hands"
-              value={h.value}
-              checked={settings.hands === h.value}
-              onChange={() => setSettings({ hands: h.value })}
-            />
-            <span>{h.label(t)}</span>
-          </label>
-        ))}
-      </fieldset>
+      {!oneHanded && (
+        <fieldset className="segmented" ref={handsRef}>
+          <legend className="visually-hidden">{t.transport.hands}</legend>
+          <span className="segmented-thumb" aria-hidden="true" />
+          {HANDS.map((h) => (
+            <label key={h.value}>
+              <input
+                type="radio"
+                name="hands"
+                value={h.value}
+                checked={settings.hands === h.value}
+                onChange={() => setSettings({ hands: h.value })}
+              />
+              <span>{h.label(t)}</span>
+            </label>
+          ))}
+        </fieldset>
+      )}
 
       <label className="check">
         <input

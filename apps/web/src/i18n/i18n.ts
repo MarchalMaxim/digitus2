@@ -80,6 +80,7 @@ function switchTo(locale: Locale): Promise<void> {
     },
     (error: unknown) => {
       // No connection for the chunk: the page stays in the language it already speaks.
+      if (mine === latest) show(state.locale, state.t);
       console.error(error);
     },
   );

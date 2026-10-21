@@ -22,8 +22,72 @@ function browserSpeaks(...languages: string[]) {
 }
 
 afterEach(() => {
+  vi.doUnmock('./fr/index.js');
+  vi.doUnmock('./es/index.js');
   vi.restoreAllMocks();
   resetLocaleForTests();
+});
+
+describe('failed language loads', () => {
+  it('restores English metadata after the requested startup language fails', async () => {
+    vi.resetModules();
+    vi.doMock('./fr/index.js', () => Promise.reject(new Error('offline')));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    browserSpeaks('fr-FR');
+    const locale = await import('./i18n.js');
+    document.documentElement.lang = runPrePaint(() => null, ['fr-FR']);
+    expect(document.documentElement.lang).toBe('fr');
+
+    await locale.startLocale();
+
+    expect(locale.currentLocale()).toBe('en');
+    expect(locale.messages().common.dismiss).toBe('Dismiss');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('retains active French when a later Spanish switch fails', async () => {
+    vi.resetModules();
+    vi.doMock('./es/index.js', () => Promise.reject(new Error('offline')));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    browserSpeaks('fr-FR');
+    const locale = await import('./i18n.js');
+    await locale.startLocale();
+
+    await locale.chooseLocale('es');
+
+    expect(locale.currentLocale()).toBe('fr');
+    expect(locale.messages().common.dismiss).toBe('Fermer');
+    expect(document.documentElement.lang).toBe('fr');
+  });
+
+  it('ignores a stale failure after a newer switch succeeds', async () => {
+    vi.resetModules();
+    let rejectFrench!: (reason: Error) => void;
+    vi.doMock(
+      './fr/index.js',
+      () =>
+        new Promise((_, reject) => {
+          rejectFrench = reject;
+        }),
+    );
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    browserSpeaks('en-US');
+    const locale = await import('./i18n.js');
+    const older = locale.chooseLocale('fr');
+    await vi.waitFor(() => expect(rejectFrench).toBeTypeOf('function'));
+    await locale.chooseLocale('es');
+    const onChange = vi.fn();
+    const unsubscribe = locale.subscribeLocale(onChange);
+
+    rejectFrench(new Error('offline'));
+    await older;
+
+    expect(locale.currentLocale()).toBe('es');
+    expect(locale.messages().common.dismiss).toBe('Cerrar');
+    expect(document.documentElement.lang).toBe('es');
+    expect(onChange).not.toHaveBeenCalled();
+    unsubscribe();
+  });
 });
 
 describe('matchLocale', () => {

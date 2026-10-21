@@ -80,11 +80,33 @@ test('camera: a frozen aligned video cannot count as a steady hold', async ({ pa
   await mockService(page, xml('C'));
   await openCamera(page);
   await beginPage(page, 1);
-  await moveScore(page, 81, 108);
-  const capture = dialog(page).getByRole('button', { name: 'Take photo', exact: true });
-  await expect(capture).toBeEnabled({ timeout: 15_000 });
-  await page.evaluate(() => window.scoreCamera.freeze(true));
-  const stoppedAt = await page.evaluate(() => performance.now());
+  // Line the view up and freeze the camera in the page the moment Take photo enables: the view
+  // captures itself after 650 ms of steady alignment, and on a busy runner a round trip from the
+  // test can take longer than that (issue 140).
+  const stoppedAt = await page.evaluate(
+    ({ label, x, y }) =>
+      new Promise<number>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('the view never lined up')), 15_000);
+        const observer = new MutationObserver(() => {
+          const take = [...document.querySelectorAll('button')].find(
+            (button) => button.textContent === label,
+          );
+          if (!take || take.disabled) return;
+          window.scoreCamera.freeze(true);
+          observer.disconnect();
+          clearTimeout(timeout);
+          resolve(performance.now());
+        });
+        observer.observe(document.body, {
+          subtree: true,
+          childList: true,
+          attributeFilter: ['disabled'],
+        });
+        window.scoreCamera.move(x, y);
+      }),
+    { label: scan.camera.capture, x: 81, y: 108 },
+  );
+  const capture = dialog(page).getByRole('button', { name: scan.camera.capture, exact: true });
   await expect
     .poll(() => page.evaluate(() => performance.now()))
     .toBeGreaterThan(stoppedAt + 1_200);

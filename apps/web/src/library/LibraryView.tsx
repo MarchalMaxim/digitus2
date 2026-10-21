@@ -31,7 +31,7 @@ import {
   startTarget,
   type Section,
 } from './model.js';
-import { useWindowFileDrop } from './ownFile.js';
+import { useScoreFileRequests, useWindowFileDrop } from './ownFile.js';
 import { DropFrame, OwnFileLine } from './OwnFileLine.js';
 import { PieceList } from './PieceList.js';
 import { SearchField } from './SearchField.js';
@@ -282,7 +282,8 @@ export function LibraryView() {
     },
     [rememberScroll, setNotice, openPiece],
   );
-  const dragging = useWindowFileDrop(openFile, setNotice, scan);
+  const acceptFiles = useScoreFileRequests(openFile, setNotice, scan);
+  const dragging = useWindowFileDrop(acceptFiles);
   const about = () => {
     rememberScroll();
     openAbout();
@@ -385,7 +386,7 @@ export function LibraryView() {
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
         {announcement}
       </p>
-      <OwnFileLine onFile={openFile} onRefuse={setNotice} onScan={scan} />
+      <OwnFileLine onFiles={acceptFiles} />
       <footer className="library-footer">
         <button type="button" className="text-button" onClick={about}>
           {t.library.aboutAndLicences}

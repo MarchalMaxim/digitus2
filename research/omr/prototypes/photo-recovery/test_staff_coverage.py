@@ -70,6 +70,13 @@ def test_a_candidate_touching_two_staffs_is_left_out():
     assert run([upper, lower], [full]) == ([upper, lower], [])
 
 
+def test_a_short_last_system_found_again_is_not_replaced():
+    # Czerny Op. 821 No. 5: the last system really ends early, and the same staff is found again.
+    short = Staff(167, 1278, 562)
+    same = Staff(167, 1278, 562)
+    assert run([short], [same]) == ([short], [])
+
+
 def test_one_mistracked_line_is_tolerated():
     # The line tracking sometimes jumps to a neighbouring line on one of the five.
     partial = Staff(932, 1844, 562, off_lines=(4,))

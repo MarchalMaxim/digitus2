@@ -4,21 +4,27 @@ homr's line tracking can break a staff in two when its clef is missed. The
 duplicate filter then keeps only the part with more anchors, and the decoder
 never sees the rest of the system. The staffs homr finds by their lines alone
 are added only where no staff is yet, so the complete staff was discarded too.
-Here such a staff replaces the one staff it overlaps when it contains it, the
-partial staff spans clearly less of the page's column, and four of the five
-lines agree within half a staff space. The line check keeps out the shifted
-copies that lines shining through the paper create.
+Here such a staff replaces the one staff it overlaps when it contains it and
+adds a tenth of the column or more, the partial staff spans clearly less of the
+page's column, and four of the five lines agree within half a staff space. The
+gain keeps a short last system, found a second time, as it was. The line check
+keeps out the shifted copies that lines shining through the paper create.
 """
 from __future__ import annotations
 
 PARTIAL_SHARE = 0.75
+MIN_GAIN = 0.1
 LINES_THAT_AGREE = 4
 
 
 def _completes(partial, candidate, column, unit_size, line_y) -> bool:
     if candidate.min_x > partial.min_x + unit_size or candidate.max_x < partial.max_x - unit_size:
         return False
-    if partial.max_x - partial.min_x >= PARTIAL_SHARE * (column[1] - column[0]):
+    column_width = column[1] - column[0]
+    partial_width = partial.max_x - partial.min_x
+    if partial_width >= PARTIAL_SHARE * column_width:
+        return False
+    if candidate.max_x - candidate.min_x - partial_width < MIN_GAIN * column_width:
         return False
     x = (max(partial.min_x, candidate.min_x) + min(partial.max_x, candidate.max_x)) / 2
     agree = sum(

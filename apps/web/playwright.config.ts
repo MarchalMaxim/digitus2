@@ -34,7 +34,7 @@ export default defineConfig({
       name: 'mobile',
       use: { ...desktop, viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true },
       testMatch:
-        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|seek|embellish)\.spec\.ts/,
+        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|seek|embellish)\.spec\.ts/,
     },
   ],
 });

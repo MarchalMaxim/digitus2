@@ -1,0 +1,149 @@
+.guided-camera-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.guided-camera {
+  width: min(100%, 42rem);
+  min-height: 100dvh;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  outline: none;
+}
+.guided-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.guided-camera-header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+.guided-camera-header button {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.5rem;
+}
+.guided-camera-surface {
+  position: relative;
+  width: 100%;
+  max-height: 66dvh;
+  margin: auto;
+  overflow: hidden;
+  background: var(--key-black);
+}
+.guided-camera-surface video,
+.guided-camera-surface canvas,
+.guided-camera-surface img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  inset: 0;
+}
+.camera-video-concealed {
+  visibility: hidden;
+}
+.camera-tracking,
+.camera-corner-layer,
+.camera-corner-layer svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.camera-tracking {
+  pointer-events: none;
+  color: var(--on-accent);
+  filter: drop-shadow(0 1px 1px var(--key-black));
+}
+.camera-tracking circle {
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.camera-tracking .camera-target-current {
+  fill: var(--on-accent);
+}
+.camera-tracking .camera-target-complete {
+  opacity: 0.25;
+}
+.camera-tracking .camera-target {
+  opacity: 0.6;
+}
+.camera-corner-layer svg {
+  pointer-events: none;
+}
+.camera-corner-layer polygon {
+  fill: none;
+  stroke: var(--on-accent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1px 1px var(--key-black));
+}
+.camera-corner {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--on-accent);
+  color: var(--on-accent);
+  background: var(--key-black);
+  border-radius: 50%;
+  touch-action: none;
+  padding: 0;
+  font: 1rem var(--font-mono);
+}
+.camera-corner:focus-visible {
+  outline: 2px solid var(--key-black);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--on-accent);
+}
+.guided-camera-copy {
+  min-height: 3rem;
+}
+.guided-camera-copy p {
+  margin: 0.25rem 0;
+}
+.guided-camera-copy [role='status'] {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.guided-camera-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.guided-camera-actions button,
+.guided-camera-actions label {
+  min-height: 44px;
+}
+@media (min-width: 45rem) {
+  .guided-camera {
+    min-height: auto;
+    padding: 1.5rem;
+  }
+  .guided-camera-surface {
+    max-height: 60dvh;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guided-camera *,
+  .guided-camera *::before,
+  .guided-camera *::after {
+    transition: none;
+    animation: none;
+  }
+}

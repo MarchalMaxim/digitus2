@@ -57,7 +57,7 @@ test('a click on a bar while stopped cues it: the red hops there and Play starts
   expect(cue).toBeGreaterThan(0);
   await page.getByRole('button', { name: 'Play' }).click();
   await expect.poll(() => positionSec(page)).toBeGreaterThan(cue);
-  expect(await redBars(page)).toEqual([2]);
+  await expect.poll(() => redBars(page)).toEqual([2]);
 });
 
 test('Left and Right step a bar, Shift four bars, Home rewinds', async ({ page }) => {

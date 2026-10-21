@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { useT } from '../i18n/i18n.js';
-import { isTouchOnly, namedCapture } from '../scan/phone.js';
+import { CameraEntry } from '../scan/camera/CameraEntry.js';
+import { isTouchOnly } from '../scan/phone.js';
 import { SCORE_ACCEPT } from './ownFile.js';
 
 // The plan names this module OwnFile.tsx. On Windows' case-insensitive file system an import of
@@ -35,22 +36,7 @@ export function OwnFileLine({ onFiles }: OwnFileProps) {
           onChange={onChange}
         />
       </label>
-      {camera && (
-        <label className="text-button own-file">
-          {t.scan.phone.takePhoto}
-          <input
-            type="file"
-            accept="image/jpeg,image/png"
-            capture="environment"
-            className="visually-hidden"
-            onChange={(e) => {
-              const input = e.currentTarget;
-              onFiles(Array.from(input.files ?? []).map((file) => namedCapture(file)));
-              input.value = '';
-            }}
-          />
-        </label>
-      )}
+      {camera && <CameraEntry label={t.scan.phone.takePhoto} onFiles={onFiles} />}
     </p>
   );
 }

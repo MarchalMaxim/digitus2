@@ -6,7 +6,7 @@ MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the scann
 
 ## What the app guarantees
 
-- **Original bytes are kept.** Unrotated images and PDFs go to the scanner byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser.
+- **Uploaded original bytes are kept.** Unrotated images and PDFs go to the scanner byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser. For guided camera capture, the combined, cropped page becomes the retained source; the five intermediate camera frames are temporary and are released after the page is kept.
 - **The page goes only where the scan page says** (Where your page goes, below), and only when you press **Scan this score**.
 - **Recognition errors stay visible.** The source and the recognised notation sit side by side, and every result is marked as needing review. Scanned notation goes through a strict import that refuses malformed notation, for example a tie stop without a start. You can still download such a result, but **Use for fingerings** stays disabled.
 - **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The scanner never picks one of several exported scores or publishes an incomplete export. The scanner changes a recognition only by two lossless rules, described under Known recognition errors and reported under Recognition details.
@@ -25,6 +25,26 @@ The scan page says it in one sentence under the advice: "Recognition runs on the
 - **Its spend is capped.** The project pays for the scanner and caps it at 5 a month; when the cap is reached, scanning is off until the next month and the app says "The scanner could not answer. Try again later." (`docs/scan-service.md`).
 
 ## Scan a score
+
+### Photograph several pages
+
+On a phone or touch tablet, **Take a photo** opens the guided camera. Lay a printed page flat, include its edges and take the first photo. Adjust the four crop corners to the paper, then keep the phone parallel and move its center circle over each of the four dots. The dots follow the photographed page. Hold still at each dot until the view is captured. Blurred or untrackable views do not advance; flatten the page, improve the light or restart if needed.
+
+The camera combines the reference and four overlapping views locally into one cropped page. Check it before keeping it: retake any page with doubled staff lines, lost symbols or unreadable notes. Keep the page, photograph the next one, and finish to send the completed batch to the ordinary page-arrangement screen. You can reorder, rotate, remove and add images there before pressing **Scan this score**. The limit remains 20 pages, 10 MB per page.
+
+Live capture needs a secure browser page and camera permission. **Use device camera** remains available when live capture cannot start. Uploaded images and PDFs still use the ordinary chooser. Camera acquisition and image processing stay in the browser; only **Scan this score** sends the resulting page images to the scanner. Closing the camera releases its video stream and discards pages that were not finished into the batch.
+
+This follows Google's documented [PhotoScan capture interaction](https://support.google.com/photos/answer/7177983?hl=en): an initial reference plus four views, guided by a center reticle and dots on the photographed print. Google's [research explanation](https://research.google/blog/photoscan-taking-glare-free-pictures-of-pictures/) describes registration and glare removal. digitus2 implements its own bounded flat-page alignment and conservative combination; curled books, severe glare and handheld optical quality still need real-phone checking. Synthetic camera tests verify the interaction and geometry; they do not establish recognition accuracy or phone autofocus quality.
+
+### How reconstruction works
+
+The four additional photographs overlap the reference; they are not stitched corner crops. Sparse image features establish a projective mapping from the reference into each view. Tracking uses small images for responsiveness, then captured images receive local patch matching and a refined projective fit at their retained resolution. This matters for music: a small tracking error can otherwise become several pixels at a staff line and create a second stem when images are combined.
+
+The output is sampled through a homography from a rectangular page into the adjusted source quadrilateral. When the views provide consistent perspective information, the page proportions come from orthogonal page axes under a centered, square-pixel pinhole-camera model ([Zhang's planar calibration constraints](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr98-71.pdf)). Near-frontal or inconsistent views use observed edge proportions as an approximation. The browser does not provide calibrated lens intrinsics, so this is not a guarantee of exact physical dimensions.
+
+Combining score images is deliberately conservative: retain reference notation and restore clipped regions only when independent aligned views agree, with local contrast checks against shadows. Bilinear sampling avoids nearest-pixel stair steps. This differs from Google's general-photo soft-minimum fusion and grid optical-flow refinement, whose exact optimizer and crop detector are not published. digitus2 does not claim to reproduce Google's closed implementation or flatten curved paper. The page corners remain explicitly adjustable rather than being presented as automatically detected.
+
+### Recognize and review
 
 1. At the end of the library, choose **Open your own score**, or drop files onto the library. Choose up to 20 PNG or JPEG page images together (10 MB each), or one PDF (10 MB). Drag the thumbnails into reading order. Selecting a page shows keyboard-accessible move and remove controls and **Rotate 90° clockwise**. Rotate a sideways or upside-down photo before scanning.
 2. Press **Scan this score**. Pages are recognised one at a time in the order shown; the status line reads "Page 2 of 5 · Recognizing…" for a batch. **Cancel scan** stops the job, and leaving the page cancels it too. A page that fails keeps the others; **Retry failed pages** resubmits only the failed ones. Most pages take under a minute, and the first scan after a quiet spell longer while the scanner starts (timings in `docs/scan-service.md`); the scanner gives up on a page after three minutes.

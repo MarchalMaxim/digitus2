@@ -3,7 +3,7 @@ import { messageOf } from '../app/errors.js';
 import { useT } from '../i18n/i18n.js';
 import type { Phrase } from '../i18n/messages.js';
 import { SCAN_PAGE_LIMIT, validateScanImages, type ScanPage } from './model.js';
-import { namedCapture } from './phone.js';
+import { CameraEntry } from './camera/CameraEntry.js';
 import { rotateScanPage } from './rotation.js';
 
 export function useBlobUrl(blob: Blob | undefined): string | undefined {
@@ -124,17 +124,18 @@ export function ImagePages({
     onChange(reordered);
     onSelect(to);
   };
-  const addFiles = (event: ChangeEvent<HTMLInputElement>, captured = false) => {
-    const files = Array.from(event.currentTarget.files ?? []).map((file) =>
-      captured ? namedCapture(file) : file,
-    );
+  const addFiles = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.currentTarget.files ?? []);
     event.currentTarget.value = '';
+    appendFiles(files);
+  };
+  const appendFiles = (files: File[]) => {
     if (!files.length) return;
     void validateScanImages(files).then(
       (validated) => {
         if (!alive.current) return;
         const current = latest.current;
-        if (current.busy) {
+        if (current.busy || !current.editable) {
           setError((tt) => tt.scan.pages.finishFirst);
           return;
         }
@@ -275,17 +276,12 @@ export function ImagePages({
           {rotating && <p role="status">{t.scan.pages.rotating}</p>}
           <div className="row">
             {camera && (
-              <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
-                {t.scan.phone.takeAnother}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  capture="environment"
-                  className="visually-hidden"
-                  disabled={busy}
-                  onChange={(event) => addFiles(event, true)}
-                />
-              </label>
+              <CameraEntry
+                label={t.scan.phone.takeAnother}
+                disabled={busy || rotating}
+                maxPages={SCAN_PAGE_LIMIT - pages.length}
+                onFiles={appendFiles}
+              />
             )}
             <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
               {t.scan.pages.addImages}

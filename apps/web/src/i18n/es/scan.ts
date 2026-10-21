@@ -2,6 +2,53 @@ import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
+  camera: {
+    title: 'Fotografía tu partitura',
+    starting: 'Iniciando la cámara…',
+    frame: 'Encuadra la página completa.',
+    reference: 'Haz la primera foto',
+    align: 'Mueve el teléfono para colocar el círculo central sobre el punto.',
+    hold: 'Mantén el teléfono quieto…',
+    lost: 'Retrocede hasta que la página vuelva a estar alineada.',
+    progress: (n: number) => `Vista ${n} de 4`,
+    processing: 'Preparando tu página…',
+    review: 'Revisa tu página',
+    corners: 'Ajusta las esquinas de la página',
+    useCorners: 'Usar estas esquinas',
+    invalidCorners: 'Coloca las cuatro esquinas en orden alrededor de la página.',
+    cornerLabel: (n: number) =>
+      [
+        'Esquina superior izquierda',
+        'Esquina superior derecha',
+        'Esquina inferior derecha',
+        'Esquina inferior izquierda',
+      ][n - 1] ?? 'Esquina de la página',
+    retake: 'Repetir foto',
+    keep: 'Guardar página',
+    nextPage: 'Fotografiar otra página',
+    finish: (n: number) => plural('es', n, { one: 'Usar # página', other: 'Usar # páginas' }),
+    cancel: 'Cancelar',
+    restart: 'Empezar de nuevo',
+    capture: 'Hacer foto',
+    fallback: 'Usar la cámara del dispositivo',
+    denied:
+      'El acceso a la cámara está bloqueado. Permítelo en los ajustes del navegador o usa la cámara del dispositivo.',
+    insecure: 'Abre esta página con una conexión segura o usa la cámara del dispositivo.',
+    unavailable:
+      'La cámara no se ha podido iniciar. Cierra otras aplicaciones de cámara e inténtalo de nuevo, o usa la cámara del dispositivo.',
+    interrupted: 'La cámara se ha detenido. Empieza de nuevo o usa la cámara del dispositivo.',
+    processingFailed:
+      'No se ha podido preparar esta página. Repite la foto o usa la cámara del dispositivo.',
+    tooMany: 'Puedes usar hasta 20 páginas. Continúa con estas páginas.',
+    cornerHint:
+      'Arrastra cada esquina hasta el borde del papel. Usa las flechas del teclado para ajustar con precisión.',
+    pageCount: (n: number) =>
+      plural('es', n, { one: '# página guardada', other: '# páginas guardadas' }),
+    ready: 'Listo para la siguiente página',
+    blurry: 'Esta foto parece borrosa. Mantén el teléfono quieto y repítela.',
+    keepFlat: 'Mantén el teléfono paralelo a la página mientras lo mueves.',
+    close: 'Cerrar cámara',
+  },
   view: {
     back: 'Volver a la biblioteca',
     experimental: 'Escaneo experimental',

@@ -1,0 +1,462 @@
+import { describe, expect, it } from 'vitest';
+import { mergeCaptures, project, registerFrame, sharpness, type Frame } from './vision';
+
+const identity = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+function blank(width = 300, height = 360, value = 245): Frame {
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < data.length; i += 4) data.set([value, value, value, 255], i);
+  return { width, height, data };
+}
+function ink(f: Frame, x: number, y: number, value = 20) {
+  if (x >= 0 && y >= 0 && x < f.width && y < f.height)
+    f.data.set([value, value, value, 255], (Math.floor(y) * f.width + Math.floor(x)) * 4);
+}
+function notation(seed = 17): Frame {
+  const f = blank();
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  for (let system = 0; system < 5; system++) {
+    const top = 25 + system * 65;
+    for (let line = 0; line < 5; line++)
+      for (let x = 15; x < 285; x++) ink(f, x, top + line * 5, 90);
+    for (let note = 0; note < 16; note++) {
+      const x = 20 + note * 16 + Math.floor(rand() * 5),
+        y = top + Math.floor(rand() * 30);
+      for (let dy = -2; dy <= 2; dy++)
+        for (let dx = -3; dx <= 3; dx++)
+          if ((dx * dx) / 10 + (dy * dy) / 5 < 1) ink(f, x + dx, y + dy);
+      for (let dy = -14 - Math.floor(rand() * 8); dy <= 0; dy++) ink(f, x + 3, y + dy);
+      if (rand() > 0.6)
+        for (let dx = 0; dx < 7; dx++) ink(f, x + 3 + dx, y - 13 + Math.floor(dx / 2));
+    }
+  }
+  return f;
+}
+// Independent inverse warp: does not call the production project/solver.
+function warp(f: Frame, h: number[], width = f.width, height = f.height): Frame {
+  const [a, b, c, d, e, g, p, q, r] = h as [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ];
+  const inv = [
+    e * r - g * q,
+    c * q - b * r,
+    b * g - c * e,
+    g * p - d * r,
+    a * r - c * p,
+    c * d - a * g,
+    d * q - e * p,
+    b * p - a * q,
+    a * e - b * d,
+  ];
+  const out = blank(width, height);
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const w = inv[6]! * x + inv[7]! * y + inv[8]!;
+      const sx = Math.round((inv[0]! * x + inv[1]! * y + inv[2]!) / w),
+        sy = Math.round((inv[3]! * x + inv[4]! * y + inv[5]!) / w);
+      if (sx >= 0 && sy >= 0 && sx < f.width && sy < f.height)
+        out.data.set(
+          f.data.subarray((sy * f.width + sx) * 4, (sy * f.width + sx) * 4 + 4),
+          (y * width + x) * 4,
+        );
+    }
+  return out;
+}
+const corners = [
+  { x: 0, y: 0 },
+  { x: 299, y: 0 },
+  { x: 299, y: 359 },
+  { x: 0, y: 359 },
+];
+function multiplyMatrix(a: number[], b: number[]): number[] {
+  return Array.from({ length: 9 }, (_, i) => {
+    const row = Math.floor(i / 3),
+      col = i % 3;
+    return a[row * 3]! * b[col]! + a[row * 3 + 1]! * b[col + 3]! + a[row * 3 + 2]! * b[col + 6]!;
+  });
+}
+function inverseMatrix(m: number[]): number[] {
+  const [a, b, c, d, e, f, g, h, i] = m as [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ];
+  return [
+    e * i - f * h,
+    c * h - b * i,
+    b * f - c * e,
+    f * g - d * i,
+    a * i - c * g,
+    c * d - a * f,
+    d * h - e * g,
+    b * g - a * h,
+    a * e - b * d,
+  ];
+}
+function cameraPlane(ax: number, ay: number, tx: number, ty: number): number[] {
+  const rotation = multiplyMatrix(
+    [Math.cos(ay), 0, Math.sin(ay), 0, 1, 0, -Math.sin(ay), 0, Math.cos(ay)],
+    [1, 0, 0, 0, Math.cos(ax), -Math.sin(ax), 0, Math.sin(ax), Math.cos(ax)],
+  );
+  const aspect = 210 / 297;
+  return multiplyMatrix(
+    [1800, 0, 500, 0, 1800, 500, 0, 0, 1],
+    [
+      rotation[0]! * aspect,
+      rotation[1]!,
+      tx,
+      rotation[3]! * aspect,
+      rotation[4]!,
+      ty,
+      rotation[6]! * aspect,
+      rotation[7]!,
+      2,
+    ],
+  );
+}
+function oraclePoint(h: number[], x: number, y: number) {
+  const z = h[6]! * x + h[7]! * y + h[8]!;
+  return { x: (h[0]! * x + h[1]! * y + h[2]!) / z, y: (h[3]! * x + h[4]! * y + h[5]!) / z };
+}
+describe('score camera registration', () => {
+  it.each([
+    [1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 72, 0, 1, -62, 0, 0, 1],
+    [1, 0, -67.5, 0, 1, 81, 0, 0, 1],
+    [0.94, -0.035, 25, 0.035, 0.94, -21, -0.0001, 0.00015, 1],
+    [1.07, 0.025, -42, -0.018, 1.04, 30, 0.00012, -0.0001, 1],
+  ])('recovers independently rendered projective motion %j', (...matrix) => {
+    const ref = notation(),
+      result = registerFrame(ref, warp(ref, matrix));
+    expect(result).not.toBeNull();
+    for (const point of [
+      { x: 80, y: 90 },
+      { x: 210, y: 250 },
+      { x: 150, y: 180 },
+    ]) {
+      const actual = project(result!.matrix, point),
+        expected = project(matrix, point);
+      expect(Math.hypot(actual.x - expected.x, actual.y - expected.y)).toBeLessThan(2);
+    }
+    expect(result!.inliers).toBeGreaterThanOrEqual(12);
+  });
+  it('rejects blank, unrelated notation, and ambiguous staff lines', () => {
+    const ref = notation();
+    expect(registerFrame(ref, blank())).toBeNull();
+    expect(registerFrame(ref, notation(9643))).toBeNull();
+    for (const seed of [93, 471, 61, 842, 163, 7459, 2137, 19827])
+      expect(registerFrame(ref, notation(seed))).toBeNull();
+    const staves = blank();
+    for (let y = 20; y < 340; y += 5) for (let x = 10; x < 290; x++) ink(staves, x, y);
+    expect(registerFrame(staves, warp(staves, [1, 0, 10, 0, 1, 10, 0, 0, 1]))).toBeNull();
+  });
+  it('reports low sharpness for flat and defocused frames', () => {
+    const ref = notation(),
+      blur = blank();
+    for (let y = 5; y < 355; y++)
+      for (let x = 5; x < 295; x++) {
+        let sum = 0;
+        for (let dy = -5; dy <= 5; dy++)
+          for (let dx = -5; dx <= 5; dx++) sum += ref.data[((y + dy) * 300 + x + dx) * 4]!;
+        ink(blur, x, y, sum / 121);
+      }
+    expect(sharpness(blank())).toBe(0);
+    expect(sharpness(ref)).toBeGreaterThan(80);
+    expect(sharpness(blur)).toBeLessThan(80);
+    expect(registerFrame(ref, blur)).toBeNull();
+  });
+});
+describe('score page fusion', () => {
+  it('reconstructs an independently photographed trapezoidal A4 page into a metric rectangle', async () => {
+    const score = notation(),
+      source = blank(300, 424, 255),
+      aspect = 210 / 297;
+    for (let y = 0; y < 424; y++)
+      for (let x = 0; x < 300; x++) {
+        const value = score.data[(Math.floor((y / 424) * 360) * 300 + x) * 4]!;
+        if (value < 245) ink(source, x, y, value);
+      }
+    const poses = [
+      [0.25, -0.22, -aspect / 2, -0.5],
+      [0.22, -0.19, -aspect / 2 + 0.08, -0.46],
+      [0.28, -0.24, -aspect / 2 - 0.08, -0.54],
+      [0.23, -0.26, -aspect / 2, -0.42],
+      [0.27, -0.2, -aspect / 2, -0.58],
+    ];
+    const planes = poses.map((p) => cameraPlane(p[0]!, p[1]!, p[2]!, p[3]!));
+    const referenceInverse = inverseMatrix(planes[0]!);
+    const captures = planes.map((plane, i) => {
+      const matrix = i === 0 ? identity : multiplyMatrix(plane, referenceInverse);
+      const denominator = matrix[8]!;
+      return {
+        frame: warp(
+          source,
+          multiplyMatrix(plane, [1 / 299, 0, 0, 0, 1 / 423, 0, 0, 0, 1]),
+          1000,
+          1000,
+        ),
+        matrix: matrix.map((v) => v / denominator),
+      };
+    });
+    const pageCorners = [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ].map(([x, y]) => oraclePoint(planes[0]!, x!, y!));
+    const output = await mergeCaptures(captures, pageCorners);
+    expect(Math.abs((output.width - 1) / (output.height - 1) / aspect - 1)).toBeLessThan(0.01);
+    let maxStaffError = 0;
+    for (let system = 0; system < 5; system++)
+      for (let line = 0; line < 5; line++) {
+        const sy = 25 + system * 65 + line * 5;
+        const sourceCenter =
+          (Math.ceil((sy * 424) / 360) + Math.ceil(((sy + 1) * 424) / 360) - 1) / 2;
+        const expected = (sourceCenter / 423) * (output.height - 1);
+        let bestY = 0,
+          bestDark = -Infinity;
+        for (let y = Math.round(expected) - 3; y <= Math.round(expected) + 3; y++) {
+          let darkness = 0;
+          for (let x = Math.round(output.width * 0.08); x < output.width * 0.92; x++)
+            darkness += 255 - output.data[(y * output.width + x) * 4]!;
+          if (darkness > bestDark) {
+            bestDark = darkness;
+            bestY = y;
+          }
+        }
+        maxStaffError = Math.max(maxStaffError, Math.abs(bestY - expected));
+      }
+    expect(maxStaffError).toBeLessThan(1);
+    let stems = 0,
+      maxStemError = 0;
+    for (let y = 20; y < 404; y += 13)
+      for (let x = 20; x < 280; x++) {
+        const at = (px: number, py: number) => source.data[(py * 300 + px) * 4]!;
+        if (
+          at(x, y) < 30 &&
+          at(x, y - 2) < 30 &&
+          at(x, y + 2) < 30 &&
+          at(x - 2, y) > 200 &&
+          at(x + 2, y) > 200
+        ) {
+          const expectedX = (x / 299) * (output.width - 1),
+            oy = Math.round((y / 423) * (output.height - 1));
+          let bestX = 0,
+            bestDark = -Infinity;
+          for (let ox = Math.round(expectedX) - 3; ox <= Math.round(expectedX) + 3; ox++) {
+            let darkness = 0;
+            for (let dy = -1; dy <= 1; dy++)
+              darkness += 255 - output.data[((oy + dy) * output.width + ox) * 4]!;
+            if (darkness > bestDark) {
+              bestDark = darkness;
+              bestX = ox;
+            }
+          }
+          maxStemError = Math.max(maxStemError, Math.abs(bestX - expectedX));
+          stems++;
+        }
+      }
+    expect(stems).toBeGreaterThan(15);
+    expect(maxStemError).toBeLessThan(1);
+  }, 30000);
+  it('retains phase-sensitive single-row staff ink during full-resolution refinement', async () => {
+    const source = notation(),
+      frame = blank(900, 1080, 255);
+    for (let y = 0; y < 1080; y += 3)
+      for (let x = 0; x < 900; x++) {
+        const value = source.data[(Math.floor(y / 3) * 300 + Math.floor(x / 3)) * 4]!;
+        if (value < 245) ink(frame, x, y, value);
+      }
+    const output = await mergeCaptures(
+      Array.from({ length: 5 }, () => ({ frame, matrix: identity })),
+      [
+        { x: 0, y: 0 },
+        { x: 899, y: 0 },
+        { x: 899, y: 1079 },
+        { x: 0, y: 1079 },
+      ],
+    );
+    expect(output.width).toBe(900);
+    expect(output.height).toBe(1080);
+    let changed = 0;
+    for (let i = 0; i < frame.data.length; i++) if (output.data[i] !== frame.data[i]) changed++;
+    expect(changed).toBe(0);
+  }, 30000);
+  it('bilinearly samples fractional page coordinates while retaining integer samples', async () => {
+    const frame = blank(120, 100);
+    for (let y = 0; y < 100; y++) for (let x = 0; x < 120; x++) ink(frame, x, y, x + y);
+    for (const offset of [0, 0.25]) {
+      const output = await mergeCaptures(
+        Array.from({ length: 5 }, () => ({ frame, matrix: identity })),
+        [
+          { x: 10 + offset, y: 8 + offset * 1.6 },
+          { x: 109 + offset, y: 8 + offset * 1.6 },
+          { x: 109 + offset, y: 77 + offset * 1.6 },
+          { x: 10 + offset, y: 77 + offset * 1.6 },
+        ],
+      );
+      expect(output.data[(15 * output.width + 20) * 4]).toBe(Math.round(53 + offset * 2.6));
+    }
+  });
+  it('uses every moved view to recover glare while retaining fine reference marks', async () => {
+    const original = notation();
+    const frames = Array.from({ length: 5 }, () => ({ ...original, data: original.data.slice() }));
+    // Each stripe has a distinct pair of clear moved views. Every moved view
+    // is necessary to form both-view consensus in at least one stripe.
+    for (let v = 0; v < 5; v++)
+      for (let y = 0; y < 360; y++)
+        for (let x = 0; x < 300; x++) {
+          const stripe = Math.min(3, Math.floor(x / 75));
+          if (v === 0 || (v !== stripe + 1 && v !== ((stripe + 1) % 4) + 1))
+            ink(frames[v]!, x, y, 255);
+        }
+    ink(frames[0]!, 150, 180, 0); // a one-pixel annotation only in the reference
+    const result = await mergeCaptures(
+      frames.map((frame) => ({ frame, matrix: identity })),
+      corners,
+    );
+    for (let stripe = 0; stripe < 4; stripe++) {
+      let dark = 0;
+      for (let y = 10; y < result.height - 10; y++)
+        for (let x = stripe * 74 + 10; x < stripe * 74 + 60; x++)
+          if (result.data[(y * result.width + x) * 4]! < 120) dark++;
+      expect(dark).toBeGreaterThan(100);
+    }
+    const fineMark = [];
+    for (let y = 178; y <= 181; y++)
+      for (let x = 148; x <= 151; x++) fineMark.push(result.data[(y * result.width + x) * 4]!);
+    expect(Math.min(...fineMark)).toBeLessThan(60);
+  });
+  it('does not paint an isolated dark shadow or a misaligned note onto white paper', async () => {
+    const ref = notation();
+    for (let i = 0; i < ref.data.length; i += 4)
+      if (ref.data[i] === 245) ref.data.set([255, 255, 255, 255], i);
+    const moved = { ...ref, data: ref.data.slice() };
+    for (let y = 90; y < 110; y++) for (let x = 80; x < 110; x++) ink(moved, x, y, 70);
+    const captures = [ref, moved, moved, ref, ref].map((frame) => ({ frame, matrix: identity }));
+    const result = await mergeCaptures(captures, corners);
+    let changed = 0;
+    for (let i = 0; i < ref.data.length; i += 4) if (result.data[i] !== ref.data[i]) changed++;
+    expect(changed).toBe(0);
+  });
+  it('refines full-resolution subpixel projective alignment before filling clipped notes', async () => {
+    const small = notation(),
+      original = blank(900, 1080, 255);
+    for (let y = 0; y < 1080; y++)
+      for (let x = 0; x < 900; x++) {
+        const value = small.data[(Math.floor(y / 3) * 300 + Math.floor(x / 3)) * 4]!;
+        if (value < 245) ink(original, x, y, value);
+      }
+    const ref = { ...original, data: original.data.slice() };
+    for (let y = 380; y < 580; y++) for (let x = 230; x < 450; x++) ink(ref, x, y, 255);
+    const trueMatrices = [
+      identity,
+      [1.018, 0.009, -105, -0.006, 1.012, 85, 0.000018, -0.00001, 1],
+      [0.989, -0.008, 100, 0.007, 0.995, -90, -0.00001, 0.000015, 1],
+      [1, 0, 113.4, 0, 1, 101.7, 0, 0, 1],
+      [1, 0, -117.3, 0, 1, -104.2, 0, 0, 1],
+    ];
+    const captures = trueMatrices.map((matrix, i) => ({
+      frame: i === 0 ? ref : warp(original, matrix),
+      matrix: matrix.map((v, j) => (i > 0 && j === 2 ? v + 2.3 : i > 0 && j === 5 ? v - 1.7 : v)),
+    }));
+    const output = await mergeCaptures(captures, [
+      { x: 0, y: 0 },
+      { x: 899, y: 0 },
+      { x: 899, y: 1079 },
+      { x: 0, y: 1079 },
+    ]);
+    let recovered = 0,
+      falseInk = 0;
+    for (let y = 385; y < 575; y++)
+      for (let x = 235; x < 445; x++) {
+        const i = (y * 900 + x) * 4,
+          dark = output.data[i]! < 120;
+        if (original.data[i]! < 120 && dark) recovered++;
+        if (dark && original.data[i]! > 200) {
+          let near = false;
+          for (let dy = -1; dy <= 1; dy++)
+            for (let dx = -1; dx <= 1; dx++)
+              if (original.data[((y + dy) * 900 + x + dx) * 4]! < 120) near = true;
+          if (!near) falseInk++;
+        }
+      }
+    expect(recovered).toBeGreaterThan(1000);
+    expect(falseInk).toBe(0);
+  }, 30000);
+  it('rectifies perspective and permits partial moved views', async () => {
+    const ref = notation();
+    const moves = [
+      identity,
+      [1, 0, 60, 0, 1, 0, 0, 0, 1],
+      [1, 0, -60, 0, 1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1, 60, 0, 0, 1],
+      [1, 0, 0, 0, 1, -60, 0, 0, 1],
+    ];
+    const result = await mergeCaptures(
+      moves.map((matrix) => ({ frame: warp(ref, matrix), matrix })),
+      corners,
+    );
+    expect(result.width).toBe(300);
+    expect(result.height).toBe(360);
+    expect(result.data.some((v, i) => i % 4 === 0 && v < 60)).toBe(true);
+  });
+  it('rejects invalid corners, dimension mismatches, missing overlap and wrong view count', async () => {
+    const frame = notation(),
+      good = Array.from({ length: 5 }, () => ({ frame, matrix: identity }));
+    await expect(
+      mergeCaptures(good, [corners[0]!, corners[2]!, corners[1]!, corners[3]!]),
+    ).rejects.toThrow();
+    await expect(mergeCaptures(good.slice(1), corners)).rejects.toThrow();
+    await expect(
+      mergeCaptures([...good.slice(1), { frame: blank(100, 100), matrix: identity }], corners),
+    ).rejects.toThrow();
+    await expect(
+      mergeCaptures([...good.slice(1), { frame, matrix: [1, 0, 500, 0, 1, 0, 0, 0, 1] }], corners),
+    ).rejects.toThrow();
+    await expect(
+      mergeCaptures(
+        [...good.slice(1), { frame, matrix: [0, 0, 120, 0, 0, 120, 0, 0, 1] }],
+        corners,
+      ),
+    ).rejects.toThrow();
+    await expect(
+      mergeCaptures([...good.slice(1), { frame, matrix: [-1, 0, 299, 0, 1, 0, 0, 0, 1] }], corners),
+    ).rejects.toThrow();
+  });
+  it('limits output and yields so cancellation can interrupt processing', async () => {
+    const frame = blank(2600, 1900),
+      captures = Array.from({ length: 5 }, () => ({ frame, matrix: identity }));
+    const largeCorners = [
+      { x: 0, y: 0 },
+      { x: 2599, y: 0 },
+      { x: 2599, y: 1899 },
+      { x: 0, y: 1899 },
+    ];
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 0);
+    await expect(mergeCaptures(captures, largeCorners, controller.signal)).rejects.toThrow(
+      /abort/i,
+    );
+    controller.abort();
+    await expect(mergeCaptures(captures, largeCorners, controller.signal)).rejects.toThrow(
+      /abort/i,
+    );
+  });
+});

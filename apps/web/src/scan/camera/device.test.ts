@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { focusContinuously, hasTorch, releaseCamera, setTorch } from './device.js';
+import { hasTorch, releaseCamera, setTorch } from './device.js';
 
 function track(capabilities: object | (() => never), applied: unknown[] = []) {
   return {
@@ -37,22 +37,19 @@ it('sets the light through an advanced constraint and reports a refusal', async 
   expect(await setTorch(refusing, true)).toBe(false);
 });
 
-it('asks for continuous focus only from a camera that offers it', () => {
-  const applied: unknown[] = [];
-  focusContinuously(track({ focusMode: ['manual', 'continuous'] }, applied));
-  focusContinuously(track({ focusMode: ['manual'] }, applied));
-  focusContinuously(track({}, applied));
-  expect(applied).toEqual([{ advanced: [{ focusMode: 'continuous' }] }]);
-});
-
-it('switches the light off before stopping every track', () => {
+it('switches the light off and lets the request land before stopping every track', async () => {
   const order: string[] = [];
   const video = track({ torch: true });
   vi.mocked(video.applyConstraints).mockImplementation(async () => {
     order.push('light off');
   });
   vi.mocked(video.stop).mockImplementation(() => order.push('stop'));
-  releaseCamera({ getTracks: () => [video] } as unknown as MediaStream, true);
+  await releaseCamera({ getTracks: () => [video] } as unknown as MediaStream, true);
   expect(order).toEqual(['light off', 'stop']);
-  releaseCamera(undefined, true);
+  await releaseCamera(undefined, true);
+  // A camera that never answers the light request is still stopped.
+  const silent = track({ torch: true });
+  vi.mocked(silent.applyConstraints).mockReturnValue(new Promise(() => {}));
+  await releaseCamera({ getTracks: () => [silent] } as unknown as MediaStream, true);
+  expect(silent.stop).toHaveBeenCalledTimes(1);
 });

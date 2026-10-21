@@ -1,20 +1,25 @@
 /**
- * The phone's camera: the stream, its light and its focus (issue 143). The light and the focus
- * mode are not in TypeScript's DOM types; browsers that lack them simply never report them.
+ * The phone's camera: the stream and its light (issue 143). The light is not in TypeScript's DOM
+ * types; browsers that lack it simply never report it. Focus needs no request: Chrome on Android
+ * already focuses continuously, and Safari offers no focus mode.
  */
 
 interface CameraCapabilities extends MediaTrackCapabilities {
   torch?: boolean;
-  focusMode?: string[];
 }
 
-/** 4:3, about 12 MP: the browser picks the largest size the camera offers up to this. */
+/**
+ * 4:3 at the reference's own size (2560 px, 5 MP). Asking for more buys nothing the page keeps,
+ * and Chrome ranks size above frame rate, so a 12 MP ideal can bring a 15 fps sensor mode and
+ * a much slower grab of every frame.
+ */
 export const CAMERA_CONSTRAINTS: MediaStreamConstraints = {
   audio: false,
   video: {
     facingMode: { ideal: 'environment' },
-    width: { ideal: 4032 },
-    height: { ideal: 3024 },
+    width: { ideal: 2560 },
+    height: { ideal: 1920 },
+    frameRate: { ideal: 30 },
   },
 };
 
@@ -26,7 +31,7 @@ function capabilities(track: MediaStreamTrack | undefined): CameraCapabilities {
   }
 }
 
-/** True when the page can switch the camera's light (Android Chrome reports it; iOS Safari does not). */
+/** True when the page can switch the camera's light: Chrome on Android and recent iOS Safari report it. */
 export function hasTorch(track: MediaStreamTrack | undefined): boolean {
   return capabilities(track).torch === true;
 }
@@ -41,19 +46,21 @@ export async function setTorch(track: MediaStreamTrack, on: boolean): Promise<bo
   }
 }
 
-/** Keep refocusing as the phone moves between the views; best effort. */
-export function focusContinuously(track: MediaStreamTrack): void {
-  if (!capabilities(track).focusMode?.includes('continuous')) return;
-  track
-    .applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] })
-    .catch(() => {});
-}
-
-/** Switch the light off first: some phones leave it burning after the track stops. */
-export function releaseCamera(stream: MediaStream | undefined, torchOn: boolean): void {
+/**
+ * Switch the light off first and let the request land: some phones leave it burning after the
+ * track stops. A camera that never answers still stops within a moment.
+ */
+export async function releaseCamera(
+  stream: MediaStream | undefined,
+  torchOn: boolean,
+): Promise<void> {
   if (!stream) return;
   const tracks = stream.getTracks();
-  if (torchOn) for (const track of tracks) void setTorch(track, false);
+  if (torchOn)
+    await Promise.race([
+      Promise.allSettled(tracks.map((track) => setTorch(track, false))),
+      new Promise((resolve) => setTimeout(resolve, 300)),
+    ]);
   for (const track of tracks) track.stop();
 }
 

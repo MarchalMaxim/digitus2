@@ -19,14 +19,7 @@ import {
   validView,
   validCorners,
 } from './captureState.js';
-import {
-  CAMERA_CONSTRAINTS,
-  focusContinuously,
-  hasTorch,
-  releaseCamera,
-  setTorch,
-  tick as haptic,
-} from './device.js';
+import { CAMERA_CONSTRAINTS, hasTorch, releaseCamera, setTorch, tick as haptic } from './device.js';
 import { advise, measureFrame, photographable, type Advice, type FrameQuality } from './quality.js';
 import {
   project,
@@ -66,7 +59,9 @@ function videoFrame(video: HTMLVideoElement, width: number, height: number): Fra
   canvas.width = width;
   canvas.height = height;
   try {
-    const context = canvas.getContext('2d', { willReadFrequently: true });
+    // A fresh GPU canvas scales the video before one small read-back; willReadFrequently would
+    // force the whole camera frame through the CPU first (8 to 30 ms a frame on a desktop).
+    const context = canvas.getContext('2d');
     if (!context) throw new Error('Canvas unavailable');
     context.drawImage(video, 0, 0, width, height);
     return { width, height, data: context.getImageData(0, 0, width, height).data };
@@ -207,13 +202,21 @@ export function GuidedCamera({
   const [quality, setQuality] = useState<'align' | 'hold' | 'lost' | 'blurry'>('align');
   const [advice, setAdvice] = useState<Advice>('good');
   const [outline, setOutline] = useState<Point[] | null>(null);
-  const [notice, setNotice] = useState<'retryBlurry'>();
+  const [notice, setNotice] = useState<'retryBlurry' | 'turned'>();
   const [blurryResult, setBlurryResult] = useState(false);
   const [shooting, setShooting] = useState(false);
+  /** The shutter has been pressed once in this camera: the opening hint has done its job. */
+  const [pressed, setPressed] = useState(false);
+  const [invalidPresses, setInvalidPresses] = useState(0);
+  const fallbackInput = useRef<HTMLInputElement>(null);
   const [flash, setFlash] = useState(0);
   const [canSkip, setCanSkip] = useState(false);
   const [light, setLight] = useState({ available: false, on: false });
   const lightRef = useRef(false);
+  /** The reader's choice, kept while the light is off for processing between pages. */
+  const lightWanted = useRef(false);
+  const lightBusy = useRef(false);
+  const lightKnown = useRef(false);
   const dialog = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const still = useRef<HTMLCanvasElement>(null);
@@ -243,9 +246,11 @@ export function GuidedCamera({
     setShooting(false);
   };
   const stop = () => {
-    releaseCamera(stream.current, lightRef.current);
+    void releaseCamera(stream.current, lightRef.current);
     stream.current = undefined;
     lightRef.current = false;
+    lightWanted.current = false;
+    lightBusy.current = false;
     setLight({ available: false, on: false });
     if (video.current) video.current.srcObject = null;
     cancelAnimationFrame(frameId.current);
@@ -260,13 +265,32 @@ export function GuidedCamera({
     captures.current = [];
     reference.current = undefined;
   };
-  const fail = (reason: CameraError) => {
-    stop();
-    setError(reason);
+  /** Forget the page in progress, whatever stage it reached, so nothing leaks into the next one. */
+  const clearPage = () => {
+    clearTimeout(skipTimer.current);
+    endBurst();
+    captures.current = [];
+    reference.current = undefined;
+    hold.current = initialAlignment();
+    recent.current = [];
+    blurryAttempts.current = 0;
+    cornersRef.current = [];
+    setCorners([]);
+    setTarget(0);
     setHoldSince(null);
+    setCanSkip(false);
+    setEditing(false);
     setPreview(undefined);
     setReviewFile(undefined);
+    setProjected([]);
+    setOutline(null);
     setNotice(undefined);
+    setBlurryResult(false);
+  };
+  const fail = (reason: CameraError) => {
+    stop();
+    clearPage();
+    setError(reason);
     move('error');
   };
   const close = () => {
@@ -290,25 +314,18 @@ export function GuidedCamera({
   const resetPage = () => {
     operation.current?.abort();
     operation.current = new AbortController();
-    clearTimeout(skipTimer.current);
-    endBurst();
-    captures.current = [];
-    reference.current = undefined;
-    hold.current = initialAlignment();
-    recent.current = [];
-    blurryAttempts.current = 0;
-    setTarget(0);
-    setHoldSince(null);
-    setCanSkip(false);
-    setEditing(false);
-    setPreview(undefined);
-    setReviewFile(undefined);
-    setProjected([]);
-    setOutline(null);
-    setNotice(undefined);
-    setBlurryResult(false);
+    clearPage();
     setError(undefined);
+    // The light went off while the page was prepared; it comes back for the next photographs.
+    if (lightWanted.current && !lightRef.current) switchLight(true);
     move(stream.current ? 'aim' : 'error');
+  };
+  /** The phone turned and the picture changed shape: this page's photographs no longer fit
+   * together, so the page starts again, saying why; pages already kept stay. */
+  const turned = () => {
+    resetPage();
+    noticeAt.current = performance.now();
+    setNotice('turned');
   };
   /** The way out of a dot that will not register, offered only once it is needed. */
   const armSkip = () => {
@@ -325,6 +342,8 @@ export function GuidedCamera({
     clearTimeout(skipTimer.current);
     setCanSkip(false);
     setHoldSince(null);
+    // No light while the page is prepared and reviewed: its button is gone until the next page.
+    if (lightRef.current) switchLight(false);
     move('processing');
     setEditing(false);
     setError(undefined);
@@ -370,7 +389,7 @@ export function GuidedCamera({
       element.videoWidth !== geometry.current?.width ||
       element.videoHeight !== geometry.current?.height
     ) {
-      fail('interrupted');
+      turned();
       return;
     }
     try {
@@ -419,19 +438,13 @@ export function GuidedCamera({
   /** The sharpest frame of the burst becomes the page's reference, or the reader is told why not. */
   const settleBurst = () => {
     const element = video.current;
-    let best = burst.current?.best;
+    const best = burst.current?.best;
     endBurst();
     if (stageRef.current !== 'aim' || session.current?.signal.aborted || !element) return;
-    try {
-      if (!best) {
-        // No new frame reached the page during the burst: photograph what the camera shows now.
-        const bounds = dimensions(element.videoWidth, element.videoHeight, 2560);
-        const frame = videoFrame(element, bounds.width, bounds.height);
-        const small = trackingFrame(frame);
-        best = { frame, small, quality: measureFrame(small), sharp: sharpness(small) };
-      }
-    } catch {
-      fail('unavailable');
+    // Every frame of the burst is a candidate, so none at all means the video stalled: a frozen
+    // picture is no photograph, and the reader is told the camera stopped.
+    if (!best) {
+      fail('interrupted');
       return;
     }
     const { frame, small, quality: q } = best;
@@ -443,7 +456,6 @@ export function GuidedCamera({
         : insetCorners(frame.width, frame.height);
     cornersRef.current = quad;
     setCorners(quad);
-    captured();
     if (best.sharp < TRACKABLE) {
       // A blurred reference can never be tracked. Say so once; a second blurred press keeps the
       // single photograph, for the review to show and the reader to keep or retake.
@@ -455,10 +467,12 @@ export function GuidedCamera({
       }
       captures.current = [{ frame, matrix: IDENTITY }];
       setBlurryResult(true);
+      captured();
       void process();
       return;
     }
     blurryAttempts.current = 0;
+    captured();
     reference.current = small;
     captures.current = [{ frame, matrix: IDENTITY }];
     hold.current = initialAlignment();
@@ -472,29 +486,41 @@ export function GuidedCamera({
   const shoot = () => {
     if (stageRef.current !== 'aim' || burst.current || session.current?.signal.aborted) return;
     setNotice(undefined);
+    setPressed(true);
     setShooting(true);
     burst.current = { timer: setTimeout(() => actions.current.settleBurst(), BURST_MS) };
   };
-  const toggleLight = () => {
+  /** Optimistic, one request at a time: a quick second tap is not lost or doubled, and a close
+   * while the light is coming on still switches it off. */
+  function switchLight(on: boolean) {
     const track = stream.current?.getVideoTracks()[0];
-    if (!track) return;
-    const on = !lightRef.current;
+    if (!track || lightBusy.current) return;
+    lightBusy.current = true;
+    lightRef.current = on;
+    setLight({ available: true, on });
     void setTorch(track, on).then((ok) => {
-      if (!ok || stream.current?.getVideoTracks()[0] !== track) return;
-      lightRef.current = on;
-      setLight({ available: true, on });
+      lightBusy.current = false;
+      if (ok || stream.current?.getVideoTracks()[0] !== track) return;
+      lightRef.current = !on;
+      setLight({ available: true, on: !on });
     });
+  }
+  const toggleLight = () => {
+    if (lightBusy.current) return;
+    lightWanted.current = !lightRef.current;
+    switchLight(!lightRef.current);
   };
 
-  const actions = useRef({ captureView, fail, settleBurst });
+  const actions = useRef({ captureView, fail, settleBurst, turned });
   useEffect(() => {
-    actions.current = { captureView, fail, settleBurst };
+    actions.current = { captureView, fail, settleBurst, turned };
   });
   useEffect(() => {
     const controller = new AbortController();
     session.current = controller;
     operation.current = new AbortController();
     move('starting');
+    clearPage();
     setError(undefined);
     geometry.current = undefined;
     let cleanupTracks = () => {};
@@ -512,7 +538,6 @@ export function GuidedCamera({
     document.addEventListener('visibilitychange', onHidden);
     window.addEventListener('pagehide', interrupted);
     window.addEventListener('popstate', interrupted);
-    window.addEventListener('orientationchange', interrupted);
     const run = async () => {
       if (!capacity) {
         actions.current.fail('tooMany');
@@ -545,8 +570,8 @@ export function GuidedCamera({
         await element.play();
         if (controller.signal.aborted) return;
         const videoTrack = acquired.getVideoTracks?.()?.[0];
-        if (videoTrack) focusContinuously(videoTrack);
-        setLight({ available: hasTorch(videoTrack), on: false });
+        lightKnown.current = hasTorch(videoTrack);
+        setLight({ available: lightKnown.current, on: false });
         move('aim');
         let last = -Infinity;
         let lastMediaTime = -Infinity;
@@ -584,15 +609,21 @@ export function GuidedCamera({
             (geometry.current.width !== intrinsic.width ||
               geometry.current.height !== intrinsic.height)
           ) {
-            interrupted();
+            // A turned phone, not a broken camera: follow the new shape, and restart a page whose
+            // photographs were taken in the old one.
+            geometry.current = intrinsic;
+            setSize(intrinsic);
+            if (stageRef.current === 'track' || burst.current) actions.current.turned();
             return;
           }
           if (!geometry.current) {
             geometry.current = intrinsic;
             setSize(intrinsic);
-            // Some phones report the light only once frames flow.
-            if (videoTrack && hasTorch(videoTrack))
-              setLight((value) => (value.available ? value : { available: true, on: false }));
+          }
+          // Chrome learns the light from an asynchronous query, so ask again until it is known.
+          if (videoTrack && !lightKnown.current && hasTorch(videoTrack)) {
+            lightKnown.current = true;
+            setLight((value) => (value.available ? value : { available: true, on: false }));
           }
           if (stageRef.current !== 'aim' && stageRef.current !== 'track') return;
           lastSample.current = performance.now();
@@ -651,12 +682,14 @@ export function GuidedCamera({
                     }),
                 )
               : [];
-            setProjected(
-              points.map((point) => ({
-                x: (point.x * intrinsic.width) / current.width,
-                y: (point.y * intrinsic.height) / current.height,
-              })),
-            );
+            // Lost frames keep the last dots, dimmed, so the way back to the red one stays shown.
+            if (registration)
+              setProjected(
+                points.map((point) => ({
+                  x: (point.x * intrinsic.width) / current.width,
+                  y: (point.y * intrinsic.height) / current.height,
+                })),
+              );
             const index = captures.current.length - 1;
             hold.current = alignmentStep(hold.current, {
               now,
@@ -696,12 +729,17 @@ export function GuidedCamera({
       document.removeEventListener('visibilitychange', onHidden);
       window.removeEventListener('pagehide', interrupted);
       window.removeEventListener('popstate', interrupted);
-      window.removeEventListener('orientationchange', interrupted);
     };
     // A new request explicitly starts a fresh camera session. No render may re-request permission.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request]);
 
+  // The camera moves on by itself (a burst settles, a view is taken): when the focused control
+  // goes with the old stage, focus would fall to the page and Escape and Tab would stop working.
+  useEffect(() => {
+    const element = dialog.current;
+    if (element && !element.contains(document.activeElement)) element.focus();
+  }, [stage]);
   useEffect(() => {
     const element = dialog.current;
     element?.focus();
@@ -769,8 +807,11 @@ export function GuidedCamera({
     }
   };
   const keep = () => {
-    if (!reviewFile || keptRef.current.length >= capacity || session.current?.signal.aborted)
+    if (!reviewFile || session.current?.signal.aborted) return;
+    if (keptRef.current.length >= capacity) {
+      setError('tooMany');
       return;
+    }
     const next = [...keptRef.current, reviewFile];
     keptRef.current = next;
     setKept(next);
@@ -811,6 +852,9 @@ export function GuidedCamera({
   const cornersValid =
     !!cornerFrame && validCorners(corners, cornerFrame.width, cornerFrame.height);
   const reticle = Math.min(size.width, size.height) * 0.045;
+  /** Too dark and the light is off: the light is the next step, so it carries the red. */
+  const lightFirst = stage === 'aim' && advice === 'dark' && light.available && !light.on;
+  const deviceCameraFirst = error === 'denied' || error === 'insecure';
   const status =
     stage === 'starting'
       ? t.starting
@@ -827,7 +871,9 @@ export function GuidedCamera({
                 ? t.blurry
                 : t.aim
         : stage === 'track'
-          ? { align: t.align, hold: t.hold, lost: t.lost, blurry: t.moving }[quality]
+          ? notice
+            ? t[notice]
+            : { align: t.align, hold: t.hold, lost: t.lost, blurry: t.moving }[quality]
           : stage === 'processing'
             ? t.processing
             : stage === 'review'
@@ -837,11 +883,12 @@ export function GuidedCamera({
               : stage === 'kept'
                 ? t.ready
                 : t.title;
+  // Each hint lasts only until the reader has done the thing it explains.
   const hint =
-    stage === 'aim' && !kept.length
+    stage === 'aim' && !kept.length && !pressed
       ? t.intro
-      : stage === 'track'
-        ? t.keepFlat
+      : stage === 'track' && target === 0 && !kept.length
+        ? t.auto
         : stage === 'review' && editing
           ? t.cornerHint
           : stage === 'review' && blurryResult
@@ -898,10 +945,10 @@ export function GuidedCamera({
           )}
           {live && light.available ? (
             <button
-              className="camera-icon-button"
+              className={`camera-icon-button${lightFirst ? ' is-red' : ''}`}
               aria-pressed={light.on}
               aria-label={t.light}
-              data-attention={advice === 'dark' && !light.on && stage === 'aim'}
+              data-attention={lightFirst}
               onClick={toggleLight}
             >
               <Icon name={light.on ? 'lightOn' : 'light'} />
@@ -910,7 +957,7 @@ export function GuidedCamera({
             <span className="camera-icon-space" aria-hidden="true" />
           )}
         </header>
-        <div className="guided-camera-stage">
+        <div className="guided-camera-stage" hidden={stage === 'error' && !preview}>
           <div
             className="guided-camera-surface"
             style={{ '--ratio': ratio, aspectRatio: ratio } as CSSProperties}
@@ -923,7 +970,11 @@ export function GuidedCamera({
               className={showStill || stage === 'error' ? 'camera-video-concealed' : ''}
             />
             {showStill && preview && (
-              <canvas ref={still} className="camera-still" aria-label={t.review} />
+              <canvas
+                ref={still}
+                className={`camera-still${stage === 'processing' ? ' is-processing' : ''}`}
+                aria-label={t.review}
+              />
             )}
             {stage === 'kept' && nativePreviewUrl && (
               <img
@@ -952,7 +1003,7 @@ export function GuidedCamera({
             {stage === 'track' && (
               <svg
                 viewBox={`0 0 ${size.width} ${size.height}`}
-                className="camera-tracking"
+                className={`camera-tracking${quality === 'lost' ? ' is-lost' : ''}`}
                 aria-hidden="true"
               >
                 {projected[target] && (
@@ -995,7 +1046,7 @@ export function GuidedCamera({
                     pathLength={1}
                     cx={size.width / 2}
                     cy={size.height / 2}
-                    r={reticle}
+                    r={reticle * 1.45}
                     transform={`rotate(-90 ${size.width / 2} ${size.height / 2})`}
                     style={{ animationDuration: `${HOLD_MS}ms` }}
                   />
@@ -1046,7 +1097,11 @@ export function GuidedCamera({
               {hint}
             </p>
           )}
-          {editing && !cornersValid && <p role="alert">{t.invalidCorners}</p>}
+          {editing && !cornersValid && (
+            <p role="alert" key={invalidPresses} className={invalidPresses ? 'is-repeated' : ''}>
+              {t.invalidCorners}
+            </p>
+          )}
           {kept.length > 0 && <p className="small">{t.pageCount(kept.length)}</p>}
           {error && <p role="alert">{t[error]}</p>}
         </div>
@@ -1058,7 +1113,7 @@ export function GuidedCamera({
           )}
           {stage === 'aim' && (
             <button
-              className={`camera-shutter is-red${shooting ? ' is-shooting' : ''}`}
+              className={`camera-shutter${lightFirst ? '' : ' is-red'}${shooting ? ' is-shooting' : ''}`}
               aria-label={t.capture}
               aria-busy={shooting}
               onClick={shoot}
@@ -1067,7 +1122,7 @@ export function GuidedCamera({
           {stage === 'track' && (
             <>
               <button className="text-button" onClick={resetPage}>
-                {t.retake}
+                {t.startOver}
               </button>
               {canSkip && (
                 <button className="text-button" onClick={() => void process()}>
@@ -1083,20 +1138,28 @@ export function GuidedCamera({
           )}
           {stage === 'review' && (
             <>
-              <button onClick={resetPage}>{t.retake}</button>
+              <button className={blurryResult && !editing ? 'is-red' : ''} onClick={resetPage}>
+                {t.retake}
+              </button>
               {!editing && <button onClick={() => setEditing(true)}>{t.adjust}</button>}
               {/* The red button is never disabled: invalid corners are explained in the alert above. */}
               {editing ? (
                 <button
                   className="is-red"
                   onClick={() => {
-                    if (cornersValid) void process();
+                    if (cornersValid) {
+                      void process();
+                      return;
+                    }
+                    // Answer the press: the alert is said again and the first corner takes focus.
+                    setInvalidPresses((value) => value + 1);
+                    dialog.current?.querySelector<HTMLButtonElement>('.camera-corner')?.focus();
                   }}
                 >
                   {t.useCorners}
                 </button>
               ) : (
-                <button className="is-red" onClick={keep}>
+                <button className={blurryResult ? '' : 'is-red'} onClick={keep}>
                   {t.keep}
                 </button>
               )}
@@ -1119,31 +1182,46 @@ export function GuidedCamera({
               </button>
             </>
           )}
-          {stage === 'error' && (
-            <>
-              {capacity > 0 && (
-                <button className="is-red" onClick={() => setRequest((value) => value + 1)}>
-                  {t.restart}
+          {stage === 'error' &&
+            (kept.length < capacity ? (
+              <>
+                {/* A refused or insecure camera refuses again at once: then the device camera
+                    is the way on, and the red. */}
+                {deviceCameraFirst ? (
+                  <button className="is-red" onClick={() => fallbackInput.current?.click()}>
+                    {t.fallback}
+                  </button>
+                ) : (
+                  <button className="is-red" onClick={() => setRequest((value) => value + 1)}>
+                    {t.restart}
+                  </button>
+                )}
+                <label className="text-button own-file" hidden={deviceCameraFirst}>
+                  {t.fallback}
+                  <input
+                    ref={fallbackInput}
+                    type="file"
+                    className="visually-hidden"
+                    capture="environment"
+                    accept="image/jpeg,image/png"
+                    aria-label={t.fallback}
+                    onChange={(event) => {
+                      const files = Array.from(event.currentTarget.files ?? []);
+                      event.currentTarget.value = '';
+                      void nativeCapture(files);
+                    }}
+                  />
+                </label>
+                {kept.length > 0 && <button onClick={finish}>{t.finish(kept.length)}</button>}
+              </>
+            ) : (
+              // Every page the batch can hold is kept: finishing is the one way on, and the red.
+              kept.length > 0 && (
+                <button className="is-red" onClick={finish}>
+                  {t.finish(kept.length)}
                 </button>
-              )}
-              <label className="text-button own-file">
-                {t.fallback}
-                <input
-                  type="file"
-                  className="visually-hidden"
-                  capture="environment"
-                  accept="image/jpeg,image/png"
-                  disabled={kept.length >= capacity}
-                  onChange={(event) => {
-                    const files = Array.from(event.currentTarget.files ?? []);
-                    event.currentTarget.value = '';
-                    void nativeCapture(files);
-                  }}
-                />
-              </label>
-              {kept.length > 0 && <button onClick={finish}>{t.finish(kept.length)}</button>}
-            </>
-          )}
+              )
+            ))}
         </div>
       </div>
     </div>,

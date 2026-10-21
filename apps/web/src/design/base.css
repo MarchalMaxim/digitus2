@@ -1721,9 +1721,51 @@ html:has(.dock) {
   }
 }
 
+.print-score {
+  display: none;
+}
+
 /* Print: the title, the composer and the credit, then the pages at full width. Controls, the
    transport, the keyboard, the side panel, the notice and the status line stay on screen only. */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body.printing-score > :not(.print-score) {
+    display: none !important;
+  }
+
+  .printing-score .print-score {
+    display: block;
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  .print-page {
+    width: 190mm;
+    height: 277mm;
+    break-after: page;
+    break-inside: avoid;
+  }
+
+  .print-page:last-child {
+    break-after: auto;
+  }
+
+  .print-heading {
+    box-sizing: border-box;
+    height: 35mm;
+    font: var(--print-heading-font, 10pt)/1.2 serif;
+    overflow-wrap: anywhere;
+  }
+
+  .print-music > svg {
+    display: block;
+    width: 190mm;
+    height: 242mm;
+  }
   .no-print,
   .transport,
   .keyboard,

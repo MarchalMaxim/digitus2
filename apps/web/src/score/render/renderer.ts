@@ -23,6 +23,7 @@ export type { WorkerLike } from '../../engine/client.js';
 export interface RenderRequest {
   xml: string;
   widthPx: number;
+  layout?: 'screen' | 'print';
   /** The piece's note count: a layout of `HEAVY_NOTES` or more retires the worker after it. */
   notes?: number;
 }
@@ -50,7 +51,8 @@ export class SupersededError extends Error {
 
 /** Messages to the worker. */
 export type RenderWorkerRequest =
-  { id: number; type: 'init' } | { id: number; type: 'render'; xml: string; widthPx: number };
+  | { id: number; type: 'init' }
+  | { id: number; type: 'render'; xml: string; widthPx: number; layout?: 'screen' | 'print' };
 
 /**
  * Messages from the worker. `grown`: the worker's WASM heap is larger now than when it started.
@@ -130,7 +132,7 @@ export function createRenderer(
   const post = (m: RenderWorkerRequest) => (worker ??= start()).postMessage(m);
 
   return {
-    render({ xml, widthPx, notes = 0 }) {
+    render({ xml, widthPx, notes = 0, layout = 'screen' }) {
       if (disposed) return Promise.reject(failure ?? new Error('renderer disposed'));
       const id = ++nextId;
       for (const [older, p] of pending) {
@@ -142,7 +144,7 @@ export function createRenderer(
       warmed = true;
       return new Promise<RenderResult>((resolve, reject) => {
         pending.set(id, { resolve, reject });
-        post({ id, type: 'render', xml: prepareScanBeams(normalizeVoices(xml)), widthPx });
+        post({ id, type: 'render', xml: prepareScanBeams(normalizeVoices(xml)), widthPx, layout });
         if (notes >= HEAVY_NOTES) retire = true;
       });
     },

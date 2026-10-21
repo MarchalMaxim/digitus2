@@ -60,6 +60,8 @@ export const score: Messages['score'] = {
     exportButton: 'Exportar MusicXML',
     print: 'Imprimir',
     exportFailed: (reason: string) => `Não foi possível exportar a partitura: ${reason}`,
+    printFailed: (reason: string) => `Não foi possível imprimir a partitura: ${reason}`,
+    printHeadingTooLong: 'O título e os créditos são demasiado longos para uma página impressa.',
     details: 'Detalhes',
     timings: (solveMs: number, renderMs: number) =>
       `Dedilhado em ${solveMs} ms · diagramação em ${renderMs} ms`,

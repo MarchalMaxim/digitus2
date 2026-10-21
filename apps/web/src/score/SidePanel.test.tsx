@@ -6,6 +6,7 @@ import { loadPiece } from '../library/manifest.js';
 import { SidePanel } from './SidePanel.js';
 import { services } from './useScoreDocument.js';
 import type { ScoreDocument } from './useScoreDocument.js';
+import * as rendererModule from './render/renderer.js';
 
 beforeEach(() =>
   useAppStore.setState({
@@ -255,5 +256,74 @@ describe('exporting the fingering', () => {
       }),
     );
     expect(exportButton()).toBeDisabled();
+  });
+});
+
+describe('paper preparation', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('keeps a background failure silent, then retries an explicit Print', async () => {
+    const engrave = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('background'))
+      .mockResolvedValue({ pages: ['<svg/>'], ms: 1 });
+    const dispose = vi.fn();
+    vi.spyOn(rendererModule, 'createRenderer').mockImplementation(() => ({
+      render: engrave,
+      dispose,
+      warmUp: vi.fn(),
+    }));
+    vi.spyOn(services, 'engine', 'get').mockReturnValue({
+      fingeredXml: vi.fn().mockResolvedValue('<score-partwise/>'),
+    } as never);
+    window.print = vi.fn(() => window.dispatchEvent(new Event('afterprint')));
+    renderPanel(
+      readyDoc({
+        xml: '<score-partwise/>',
+        score: { notes: [], measures: [] } as never,
+        assignment: {},
+      }),
+    );
+    const print = screen.getByRole('button', { name: /^Print$/ });
+    await vi.waitFor(() => expect(print).toBeEnabled());
+    expect(useAppStore.getState().notice).toBeNull();
+    await userEvent.click(print);
+    await vi.waitFor(() => expect(window.print).toHaveBeenCalledOnce());
+    expect(engrave).toHaveBeenCalledTimes(2);
+    expect(engrave.mock.calls[1]?.[0]).toMatchObject({ layout: 'print' });
+    expect(dispose).toHaveBeenCalledTimes(2);
+  });
+
+  it('disposes pending preparation and discards its late answer when the score is left', async () => {
+    let finish: (value: { pages: string[]; ms: number }) => void = () => undefined;
+    const engrave = vi.fn(
+      () =>
+        new Promise<{ pages: string[]; ms: number }>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const dispose = vi.fn();
+    vi.spyOn(rendererModule, 'createRenderer').mockReturnValue({
+      render: engrave,
+      dispose,
+      warmUp: vi.fn(),
+    });
+    vi.spyOn(services, 'engine', 'get').mockReturnValue({
+      fingeredXml: vi.fn().mockResolvedValue('<score-partwise/>'),
+    } as never);
+    const view = renderPanel(
+      readyDoc({
+        xml: '<score-partwise/>',
+        score: { notes: [], measures: [] } as never,
+        assignment: {},
+      }),
+    );
+    await vi.waitFor(() => expect(engrave).toHaveBeenCalledOnce());
+    view.unmount();
+    expect(dispose).toHaveBeenCalled();
+    finish({ pages: ['<svg/>'], ms: 1 });
+    await Promise.resolve();
+    window.dispatchEvent(new Event('beforeprint'));
+    expect(document.querySelector('.print-score')).toBeNull();
   });
 });

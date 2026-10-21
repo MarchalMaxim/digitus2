@@ -1,14 +1,17 @@
-import { useId, useMemo, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandSize, type PieceSource } from '../app/store.js';
 import { downloadText, exportFilename } from '../export/download.js';
+import { installPrintPages, printPages } from '../export/print.js';
 import { useT } from '../i18n/i18n.js';
 import { tierOf } from '../library/levels.js';
-import { formatDuration, type LibraryPiece } from '../library/manifest.js';
+import { attribution, formatDuration, type LibraryPiece } from '../library/manifest.js';
 import { FingerLegend } from './FingerLegend.js';
 import { MidiImportPanel } from './MidiImportPanel.js';
 import { keyName } from './keyName.js';
 import { services, type ScoreDocument } from './useScoreDocument.js';
+import { injectNoteIds } from './render/injectIds.js';
+import { createRenderer, type ScoreRenderer } from './render/renderer.js';
 
 const HAND_SIZES: readonly HandSize[] = ['large', 'medium', 'small', 'child'];
 
@@ -48,6 +51,12 @@ export function SidePanel({
   const setSettings = useAppStore((s) => s.setSettings);
   const setNotice = useAppStore((s) => s.setNotice);
   const [exporting, setExporting] = useState(false);
+  const [printing, setPrinting] = useState(false);
+  const [preparing, setPreparing] = useState(true);
+  const [paperReady, setPaperReady] = useState(false);
+  const paper = useRef<{ pages: string[] | null; promise: Promise<string[] | null> } | null>(null);
+  const printRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => printRequest.current?.abort(), [doc.printXml, doc.assignment, doc.status]);
   const handSizeHelpId = useId();
 
   // A library piece's editorial file loads only when the toggle is first switched on, so the
@@ -97,6 +106,135 @@ export function SidePanel({
       setExporting(false);
     }
   };
+
+  const preparePaper = useCallback(
+    async (signal: AbortSignal) => {
+      const xml = doc.printXml ?? doc.xml;
+      if (!xml || !doc.score || !doc.assignment) return null;
+      // An independent renderer means a resize cannot supersede print, or print replace the
+      // screen's layout. Both hands get their full, current (including editorial) fingering.
+      let renderer: ScoreRenderer | undefined;
+      try {
+        renderer = createRenderer();
+        signal.addEventListener('abort', () => renderer?.dispose(), { once: true });
+        const fingered = await services.engine.fingeredXml(xml, doc.score, doc.assignment);
+        if (signal.aborted) return null;
+        const { pages } = await renderer.render({
+          xml: injectNoteIds(fingered, doc.score),
+          widthPx: 760,
+          layout: 'print',
+          notes: doc.score.notes.length,
+        });
+        return signal.aborted ? null : pages;
+      } finally {
+        renderer?.dispose();
+      }
+    },
+    [doc.printXml, doc.xml, doc.score, doc.assignment],
+  );
+
+  // Keep only SVG strings after preparation; the independent WASM worker is released. A native
+  // beforeprint event is synchronous, so it can install this cache without starting async work.
+  useEffect(() => {
+    const request = new AbortController();
+    paper.current = null;
+    setPaperReady(false);
+    if (!ready || !doc.score || !doc.assignment) return;
+    setPreparing(true);
+    const entry = {
+      pages: null as string[] | null,
+      promise: Promise.resolve<string[] | null>(null),
+    };
+    entry.promise = preparePaper(request.signal).then(
+      (pages) => {
+        if (!request.signal.aborted) {
+          entry.pages = pages;
+          setPaperReady(pages !== null);
+          setPreparing(false);
+        }
+        return pages;
+      },
+      () => {
+        // A background failure stays silent. An explicit Print retries and reports failure.
+        if (!request.signal.aborted) setPreparing(false);
+        return null;
+      },
+    );
+    paper.current = entry;
+    return () => {
+      request.abort();
+      paper.current = null;
+    };
+  }, [ready, doc.score, doc.assignment, preparePaper]);
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    const after = () => {
+      cleanup?.();
+      cleanup = undefined;
+    };
+    const before = () => {
+      if (document.body.classList.contains('printing-score') || !paper.current?.pages) return;
+      try {
+        cleanup = installPrintPages(
+          paper.current.pages,
+          doc.title,
+          doc.composer,
+          piece ? attribution(piece, t) : null,
+          legendAbove ? t.score.fingerLegend : undefined,
+        );
+      } catch (e) {
+        const failure = t.score.side.printFailed(messageOf(e, t));
+        setNotice(() => failure);
+        // The native dialog cannot be cancelled from beforeprint. Keep the screen engraving
+        // out of its fallback output and explain the refusal on one temporary paper sheet.
+        cleanup = installPrintPages([''], failure, '');
+      }
+    };
+    window.addEventListener('beforeprint', before);
+    window.addEventListener('afterprint', after);
+    return () => {
+      window.removeEventListener('beforeprint', before);
+      window.removeEventListener('afterprint', after);
+      after();
+    };
+  }, [doc.title, doc.composer, piece, t, legendAbove, setNotice]);
+
+  const onPrint = useCallback(async () => {
+    if (!ready || printing) return;
+    const request = new AbortController();
+    printRequest.current = request;
+    setPrinting(true);
+    try {
+      const pages = (await paper.current?.promise) ?? (await preparePaper(request.signal));
+      if (!request.signal.aborted && pages)
+        await printPages(
+          pages,
+          doc.title,
+          doc.composer,
+          request.signal,
+          piece ? attribution(piece, t) : null,
+          legendAbove ? t.score.fingerLegend : undefined,
+        );
+    } catch (e) {
+      if (!request.signal.aborted) setNotice((t) => t.score.side.printFailed(messageOf(e, t)));
+    } finally {
+      if (printRequest.current === request) {
+        printRequest.current = null;
+        setPrinting(false);
+      }
+    }
+  }, [doc.title, doc.composer, ready, printing, piece, t, legendAbove, setNotice, preparePaper]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!ready || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'p') return;
+      event.preventDefault();
+      void onPrint();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [ready, onPrint]);
 
   return (
     <aside className="side-panel stack no-print" aria-label={t.score.side.label}>
@@ -173,7 +311,13 @@ export function SidePanel({
         <button type="button" disabled={!canExport} onClick={() => void onExport()}>
           {t.score.side.exportButton}
         </button>
-        <button type="button" disabled={!ready} onClick={() => window.print()}>
+        <button
+          type="button"
+          disabled={!ready || printing || preparing}
+          aria-busy={printing || preparing}
+          data-paper-ready={paperReady ? 'true' : 'false'}
+          onClick={() => void onPrint()}
+        >
           {t.score.side.print}
         </button>
       </div>

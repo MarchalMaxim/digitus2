@@ -87,6 +87,8 @@ export const score = {
     print: 'Print',
     /** The notice when saving the file failed; `reason` is the error's own message. */
     exportFailed: (reason: string) => `Could not export the score: ${reason}`,
+    printFailed: (reason: string) => `Could not print the score: ${reason}`,
+    printHeadingTooLong: 'The title and credits are too long to fit on a printed page.',
     /** The closed disclosure with technical facts. */
     details: 'Details',
     /** Time the fingering took and time the layout took, in milliseconds. */

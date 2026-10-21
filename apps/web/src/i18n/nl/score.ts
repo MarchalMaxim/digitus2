@@ -66,6 +66,8 @@ export const score: Messages['score'] = {
     exportButton: 'MusicXML exporteren',
     print: 'Afdrukken',
     exportFailed: (reason: string) => `De partituur kon niet worden geëxporteerd: ${reason}`,
+    printFailed: (reason: string) => `De partituur kon niet worden afgedrukt: ${reason}`,
+    printHeadingTooLong: 'De titel en bronvermelding zijn te lang voor een afgedrukte pagina.',
     details: 'Details',
     timings: (solveMs: number, renderMs: number) =>
       `Vingerzetting in ${solveMs} ms · opmaak in ${renderMs} ms`,

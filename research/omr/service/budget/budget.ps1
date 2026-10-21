@@ -3,7 +3,7 @@
 param(
   [Parameter(Mandatory = $true)][string]$Project,
   [Parameter(Mandatory = $true)][string]$BillingAccount,
-  [decimal]$Amount = 5,
+  [decimal]$Amount = 10,
   [string]$Topic = 'digitus2-scan-budget',
   # A string so that `powershell -File budget.ps1 -Simulate $false` works too: -File passes text.
   [string]$Simulate = 'true'

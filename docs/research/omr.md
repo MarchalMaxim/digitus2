@@ -4,7 +4,7 @@ What was evaluated for the experimental scanning feature (`docs/scanning.md`), w
 
 ## Decision
 
-- Recognition runs on a container the project operates on Google Cloud Run (`research/omr/service/`, `docs/scan-service.md`): one recognition at a time, scaled to zero when idle, its spend capped at 5 a month by a budget that disables billing. Every device scans the same way, phones included, with nothing to install and no account (Hosted recognition, below). GitHub Pages stays the only deployment of the app, and the product code stays TypeScript; Python runs only in that container.
+- Recognition runs on a container the project operates on Google Cloud Run (`research/omr/service/`, `docs/scan-service.md`): one recognition at a time, scaled to zero when idle, its spend capped at 10 a month by a budget that disables billing. Every device scans the same way, phones included, with nothing to install and no account (Hosted recognition, below). GitHub Pages stays the only deployment of the app, and the product code stays TypeScript; Python runs only in that container.
 - The loopback worker (`research/omr/prototypes/local-worker`) is a research tool: the acceptance gate and the adapters' tests run its code, and the service imports its job runner and adapters. The app does not talk to it.
 - No vendor recognition service: the online services surveyed need sign-ups, sell per-page credits and keep the score on the vendor's servers (Online services, below). The project's own service names its provider before any page is sent, is used only on the reader's explicit **Scan this score**, keeps nothing and ships no token in the static bundle.
 - Photos (PNG, JPEG) go to a pinned, patched homr; PDFs go to Audiveris 5.11.0 with a short-staff profile and the English text model. Only these two recovered usable music in the tests below.
@@ -227,7 +227,7 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 | Free Cloud Run grant a month, per billing account | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests |
 | One second of the service (4 vCPU, 8 GiB) beyond the grant | $0.000116 |
 | Free recognition time a month at that size | 45,000 s, about 1,300 photos of 35 s |
-| Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 5 a month plus what the hours of alert lag cost |
+| Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 10 a month plus what the hours of alert lag cost |
 | A phone photo, in the container at 4 vCPU on the owner's PC, warm | 10.1 s |
 | A corpus PDF, in the container at 4 vCPU on the owner's PC | 8.6 s |
 | The same photo and PDF on the deployed service, warm | 35.2 s and 16.2 s |

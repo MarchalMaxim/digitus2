@@ -22,7 +22,7 @@ The scan page says it in one sentence under the advice: "Recognition runs on the
 - **One page at a time.** The scanner recognises one page at a time, for all readers together. When another reader's page is being recognised, the app says the scanner is busy and keeps your pages; try again in a minute. In a batch, the pages after the busy one are not sent; **Retry failed pages** sends them.
 - **The scanner sleeps when nobody scans.** The first scan after a quiet spell waits while it starts, and the status line says so.
 - **It needs a connection.** Offline, the app says it could not reach the scanner and keeps the pages; the rest of the app works offline as before.
-- **Its spend is capped.** The project pays for the scanner and caps it at 5 a month; when the cap is reached, scanning is off until the next month and the app says "The scanner could not answer. Try again later." (`docs/scan-service.md`).
+- **Its spend is capped.** The project pays for the scanner and caps it at 10 a month; when the cap is reached, scanning is off until the next month and the app says "The scanner could not answer. Try again later." (`docs/scan-service.md`).
 
 ## Scan a score
 

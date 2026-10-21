@@ -44,6 +44,8 @@ export interface ScoreDocument {
   score: Score | null;
   /** The unpacked plain source text, without our ids or fingerings, whichever version is shown. */
   xml: string | null;
+  /** Source of the version on screen, for paper engraving with its current assignment. */
+  printXml?: string | null;
   /** What is shown: the engine's fingering, or the editorial one when showEditorial is on. */
   assignment: Assignment | null;
   /**
@@ -603,6 +605,8 @@ export function useScoreDocument(
   //    of superseded requests are dropped.
   const widthBucket = bucket(layoutWidth(widthPx));
   useEffect(() => {
+    // Print media hides the screen and changes its measured width. Keep its engraving intact.
+    if (document.body.classList.contains('printing-score')) return;
     if (status !== 'rendering' && status !== 'ready') return;
     const doc = docRef.current;
     if (!doc?.plain.engine) return;
@@ -861,6 +865,7 @@ export function useScoreDocument(
 
   return {
     ...state,
+    printXml: docRef.current?.[state.shownVersion]?.xml ?? null,
     embellished: embellishedOn,
     splitMidi,
     reRender,

@@ -16,12 +16,24 @@ test('both workers go after a long piece, and come back for a new width, a hand 
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  let layouts = 0;
+  let peakLayouts = 0;
+  page.on('worker', (worker) => {
+    if (worker.url().includes('verovio.worker')) {
+      layouts++;
+      peakLayouts = Math.max(peakLayouts, workers(page, 'verovio'));
+    }
+  });
   await page.goto(`/?audio=silent#/piece/${LONG}`);
   const digits = page.locator('.score-sheet g.fing');
   const firstPage = page.locator('.score-sheet > svg').first();
   await expect(digits.first()).toBeVisible({ timeout: 30_000 });
   await expect.poll(() => workers(page, 'verovio'), { timeout: 10_000 }).toBe(0);
   await expect.poll(() => workers(page, 'engine'), { timeout: 10_000 }).toBe(0);
+
+  expect(layouts).toBe(1);
+  expect(peakLayouts).toBe(1);
+  await expect(page.getByRole('button', { name: 'Print', exact: true })).toBeEnabled();
 
   // A width in another bucket lays the piece out again, in a fresh layout worker that goes too.
   const wide = await firstPage.getAttribute('viewBox');
@@ -41,7 +53,8 @@ test('both workers go after a long piece, and come back for a new width, a hand 
   await expect.poll(() => workers(page, 'verovio'), { timeout: 10_000 }).toBe(1);
   await page.evaluate((slug) => (location.hash = `#/piece/${slug}`), SHORT);
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
-  await page.waitForTimeout(500);
-  expect(workers(page, 'verovio')).toBe(1);
+  await expect.poll(() => workers(page, 'verovio'), { timeout: 10_000 }).toBe(1);
+  expect(layouts).toBe(3);
+  expect(peakLayouts).toBe(1);
   expect(errors).toEqual([]);
 });

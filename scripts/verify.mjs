@@ -71,7 +71,9 @@ const steps = [
   { name: 'design', prepare: () => cmd('node', ['scripts/check-colors.mjs']) },
   { name: 'typecheck', prepare: () => cmd('pnpm', ['typecheck']) },
   { name: 'lint', prepare: () => cmd('pnpm', ['lint']) },
-  // Heavy: vitest takes every core, and its 5 s timeout drops a test on a crowded machine.
+  // Heavy: vitest takes every core, and its 5 s timeout drops a test on a crowded machine. Heavy
+  // steps keep apart from each other; the single-process steps after the build still run beside
+  // them, and `--serial` is the fallback when a timing test fails under that load.
   { name: 'unit', heavy: true, prepare: () => cmd('pnpm', ['test']) },
   { name: 'build', prepare: () => cmd('pnpm', ['build']) },
   // Research OMR runner tests use the freshly built parser/evaluator, as external recognizers do.
@@ -242,6 +244,7 @@ const steps = [
 
 const logOf = (name) => `${LOGS}/${name.replace(/[^a-z0-9-]/gi, '-')}.log`;
 const children = new Set();
+const logged = new Set();
 /** Kills a step's whole process tree: a stray `vite preview` would keep the e2e port. */
 function kill(child) {
   if (process.platform === 'win32')
@@ -265,6 +268,15 @@ function start(step, plan) {
   const began = Date.now();
   if (serial) process.stdout.write(`\n=== ${step.name}: ${line}\n`);
   else process.stdout.write(`start ${step.name}\n`);
+  // The log is opened before the command starts: a step whose log cannot be written never runs.
+  let log;
+  if (!serial) {
+    mkdirSync(LOGS, { recursive: true });
+    log = createWriteStream(logOf(step.name));
+    logged.add(step.name);
+    log.on('error', (error) => process.stdout.write(`${step.name}: log ${error.message}\n`));
+    log.write(`=== ${step.name}: ${line}\n`);
+  }
   return new Promise((resolve) => {
     const child = spawn(plan.cmd, plan.args, {
       shell: true,
@@ -272,11 +284,7 @@ function start(step, plan) {
       detached: process.platform !== 'win32',
     });
     children.add(child);
-    let log;
-    if (!serial) {
-      mkdirSync(LOGS, { recursive: true });
-      log = createWriteStream(logOf(step.name));
-      log.write(`=== ${step.name}: ${line}\n`);
+    if (log) {
       child.stdout.pipe(log, { end: false });
       child.stderr.pipe(log, { end: false });
     }
@@ -302,15 +310,17 @@ const results = await runGraph(steps, {
   start,
   only,
   serial,
-  onSkip: (r) => !serial && process.stdout.write(`SKIP  ${r.name} ${r.detail}\n`),
+  onSettled: (r) =>
+    !serial && process.stdout.write(`${r.status.padEnd(5)} ${r.name} ${r.detail}\n`),
 });
 
 process.stdout.write('\n=== verify summary\n');
 for (const r of results)
   process.stdout.write(`${r.status.padEnd(5)} ${r.name.padEnd(17)} ${r.detail}\n`);
 const failed = results.filter((r) => r.status === 'FAIL');
+// Only logs written in this run: a step that failed before it started has none, or a stale one.
 if (!serial)
-  for (const r of failed) {
+  for (const r of failed.filter((f) => logged.has(f.name))) {
     const lines = readFileSync(logOf(r.name), 'utf8').trimEnd().split('\n');
     process.stdout.write(`\n=== ${r.name} failed: the end of ${logOf(r.name)}\n`);
     process.stdout.write(`${lines.slice(-40).join('\n')}\n`);

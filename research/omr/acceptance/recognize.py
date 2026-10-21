@@ -16,7 +16,7 @@ Usage: python research/omr/acceptance/recognize.py JOBS.json --bundle DIR --text
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 import json
 from pathlib import Path
 import shutil
@@ -95,8 +95,18 @@ def main() -> int:
             print(json.dumps({"done": finished, "of": len(pending), "id": job["id"], "status": status,
                               "seconds": round(time.monotonic() - started, 1)}), flush=True)
 
-    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
-        list(pool.map(run, pending))
+    pool = ThreadPoolExecutor(max_workers=max(1, args.workers))
+    futures = [pool.submit(run, job) for job in pending]
+    try:
+        # Waiting in short steps keeps Ctrl+C deliverable on Windows; an untimed wait blocks it.
+        while not all(future.done() for future in futures):
+            wait(futures, timeout=1)
+    except KeyboardInterrupt:
+        pool.shutdown(wait=False, cancel_futures=True)
+        raise
+    pool.shutdown()
+    for future in futures:
+        future.result()
     return 0
 
 

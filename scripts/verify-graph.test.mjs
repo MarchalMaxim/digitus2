@@ -148,3 +148,54 @@ test('a dependency listed later that skips itself does not stall the run', async
     ],
   );
 });
+
+test('serial mode runs a dependency listed after its dependant first, and does not stall', async () => {
+  const s = fakeStarter();
+  const results = await runGraph([step('hands', { deps: ['build'] }), step('build')], {
+    start: s.start,
+    serial: true,
+  });
+  assert.deepEqual(s.started, ['build', 'hands']);
+  assert.deepEqual(
+    results.map((r) => r.status),
+    ['PASS', 'PASS'],
+  );
+});
+
+test('a step whose precondition check throws fails, and the run still ends with a summary', async () => {
+  const s = fakeStarter();
+  const results = await runGraph(
+    [
+      step('build'),
+      step('hands', {
+        deps: ['build'],
+        prepare: () => {
+          throw new Error('bad floor.json');
+        },
+      }),
+    ],
+    { start: s.start },
+  );
+  assert.deepEqual(
+    results.map((r) => [r.name, r.status]),
+    [
+      ['build', 'PASS'],
+      ['hands', 'FAIL'],
+    ],
+  );
+  assert.match(results[1].detail, /bad floor\.json/);
+});
+
+test('a step that cannot be started fails without stopping the others', async () => {
+  const start = (st) =>
+    st.name === 'lint' ? Promise.reject(new Error('spawn failed')) : Promise.resolve({ ok: true });
+  const results = await runGraph([step('lint'), step('typecheck')], { start });
+  assert.deepEqual(
+    results.map((r) => [r.name, r.status]),
+    [
+      ['lint', 'FAIL'],
+      ['typecheck', 'PASS'],
+    ],
+  );
+  assert.match(results[0].detail, /spawn failed/);
+});

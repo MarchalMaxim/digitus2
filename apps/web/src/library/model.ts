@@ -191,6 +191,16 @@ export function isUnnamed(composer: string): boolean {
 }
 
 /**
+ * The composer as an accessible name says it, or null when there is nothing to say: an empty
+ * composer or "Unknown" (issue 109; in the other languages an untranslated English word).
+ * "Traditional" and "Anonymous" stay: they tell the listener something about the piece.
+ */
+export function composerForLabel(composer: string): string | null {
+  const text = composerText(composer).trim();
+  return text === '' || /^Unknown\b/.test(text) ? null : text;
+}
+
+/**
  * Under its own collection heading, a title ending in a parenthesis whose first comma-separated
  * part is made of words the heading already holds loses that part: "Melody (Album for the Young,
  * No. 1)" under "Schumann, Album for the Young, Op. 68" -> "Melody (No. 1)".
@@ -312,7 +322,7 @@ function finish(
             : isUnnamed(piece.composer) || composerSaid
               ? null
               : composerShort(piece.composer),
-        label: t.library.list.openPiece(piece.title, composerText(piece.composer)),
+        label: t.library.list.openPiece(piece.title, composerForLabel(piece.composer)),
         duration: formatDuration(piece.approxDurationSec),
       })),
     })),
@@ -570,7 +580,7 @@ export function favouritesShelf(
     t,
   )[0]![0]!.rows.map((row, i) => ({
     ...row,
-    removeLabel: t.library.favourites.remove(shown[i]!.title, composerText(shown[i]!.composer)),
+    removeLabel: t.library.favourites.remove(shown[i]!.title, composerForLabel(shown[i]!.composer)),
   }));
   const all = members.length > shown.length ? t.library.favourites.all(members.length) : null;
   return { count: members.length, rows, all };

@@ -60,7 +60,8 @@ export const library: Messages['library'] = {
     showLast: (n: number) =>
       plural('nl', n, { one: 'Laatste stuk tonen', other: 'Laatste # tonen' }),
     allInLevel: (n: number, level: string) => `Alle ${formatNumber('nl', n)} in ${level}`,
-    openPiece: (title: string, composer: string) => `Open ${title} van ${composer}`,
+    openPiece: (title: string, composer: string | null) =>
+      composer === null ? `Open ${title}` : `Open ${title} van ${composer}`,
   },
   search: {
     label: 'De bibliotheek doorzoeken',
@@ -91,8 +92,10 @@ export const library: Messages['library'] = {
     heading: 'Favorieten',
     line: 'De stukken die je met het hartje hebt gemarkeerd, nieuwste eerst.',
     all: (n: number) => `Alle ${formatNumber('nl', n)} favorieten`,
-    remove: (title: string, composer: string) =>
-      `${title} van ${composer} uit Favorieten verwijderen`,
+    remove: (title: string, composer: string | null) =>
+      composer === null
+        ? `${title} uit Favorieten verwijderen`
+        : `${title} van ${composer} uit Favorieten verwijderen`,
   },
   myScores: {
     heading: 'Mijn partituren',

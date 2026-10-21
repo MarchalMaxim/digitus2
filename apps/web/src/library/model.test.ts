@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { formatNumber } from '../i18n/format.js';
 import { en } from '../i18n/en/index.js';
+import { messages as nl } from '../i18n/nl/index.js';
 import {
   SHELVES,
   TIERS,
@@ -818,5 +819,25 @@ describe('the favourites shelf (issue #78)', () => {
     });
     // A title shown twice keeps its composer on both rows, as everywhere else.
     expect(rows.slice(1).map((r) => r.composerLine)).toEqual(['Traditional', 'Unknown']);
+  });
+  // Issue #109: "Unknown" and an empty composer say nothing, so the names leave them out; in
+  // the other languages "Unknown" was an untranslated English word.
+  it('leaves an unknown or empty composer out of the accessible names', () => {
+    const list = [
+      entry({ slug: 'a', title: 'Sonatina in G', composer: 'Unknown' }),
+      entry({ slug: 'b', title: 'Polonaise', composer: '' }),
+      entry({ slug: 'c', title: 'Lullaby', composer: 'Anonymous' }),
+    ];
+    const rows = favouritesShelf(list, ['a', 'b', 'c'], false, en)!.rows;
+    expect(rows.map((r) => [r.label, r.removeLabel])).toEqual([
+      ['Open Sonatina in G', 'Remove Sonatina in G from Favourites'],
+      ['Open Polonaise', 'Remove Polonaise from Favourites'],
+      ['Open Lullaby by Anonymous', 'Remove Lullaby by Anonymous from Favourites'],
+    ]);
+    const dutch = favouritesShelf(list, ['a'], false, nl)!.rows[0]!;
+    expect([dutch.label, dutch.removeLabel]).toEqual([
+      'Open Sonatina in G',
+      'Sonatina in G uit Favorieten verwijderen',
+    ]);
   });
 });

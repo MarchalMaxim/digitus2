@@ -358,7 +358,7 @@ export function LibraryView() {
           onRemove={removeFavourite}
         />
       )}
-      <MyScores onOpen={rememberScroll} />
+      <MyScores onOpen={rememberScroll} onFocusFallback={() => heading.current?.focus()} />
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">
           <LevelPills tiers={layout.tiers} tier={layout.tier} onChange={chooseTier} />

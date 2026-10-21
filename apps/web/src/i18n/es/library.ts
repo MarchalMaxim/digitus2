@@ -105,6 +105,7 @@ export const library: Messages['library'] = {
     open: (name: string) => `Abrir ${name} (guardada)`,
     removeLabel: (name: string) => `Eliminar ${name} (guardada)`,
     remove: 'Eliminar',
+    removed: (name: string) => `Se eliminó ${name}.`,
     detail: {
       file: 'Archivo de partitura',
       recognition: 'Reconocimiento guardado',

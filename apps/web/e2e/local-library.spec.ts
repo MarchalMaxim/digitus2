@@ -14,6 +14,43 @@ async function myScores(page: Page) {
   await page.getByText('My scores', { exact: true }).click();
 }
 
+for (const count of [1, 2]) {
+  test(`local library: keyboard removal preserves focus for ${count} saved scores`, async ({
+    page,
+  }) => {
+    await mockService(page, '');
+    await page.goto('/');
+    for (let index = 0; index < count; index++) {
+      await page.getByLabel('Open your own score').setInputFiles({
+        name: `score-${index}.png`,
+        mimeType: 'image/png',
+        buffer: Buffer.concat([png, Buffer.from(String(index))]),
+      });
+      await myScores(page);
+    }
+    const rows = page.locator('.local-score-row');
+    const firstName = await rows.first().locator('.title').innerText();
+    const nextName = count > 1 ? await rows.nth(1).locator('.title').innerText() : null;
+    const remove = rows.first().getByRole('button', { name: /^Remove saved/ });
+    await remove.focus();
+    await page.keyboard.press('Enter');
+    await expect(rows).toHaveCount(count - 1);
+    const announcement = page.getByTestId('local-score-announcement');
+    await expect(announcement).toHaveText(`Removed ${firstName}.`);
+    await expect(announcement).toHaveAttribute('aria-live', 'polite');
+    if (nextName) {
+      await expect(page.getByRole('button', { name: `Open saved ${nextName}` })).toBeFocused();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Enter');
+      await expect(announcement).toHaveText(`Removed ${nextName}.`);
+    }
+    await expect(page.getByRole('heading', { name: 'digitus2', exact: true })).toBeFocused();
+    await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
+  });
+}
+
 test('local library: draft bytes, reading order, explicit resume and deletion survive reload', async ({
   page,
 }) => {

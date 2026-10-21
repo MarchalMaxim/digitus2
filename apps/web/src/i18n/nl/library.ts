@@ -105,6 +105,7 @@ export const library: Messages['library'] = {
     open: (name: string) => `Opgeslagen ${name} openen`,
     removeLabel: (name: string) => `Opgeslagen ${name} verwijderen`,
     remove: 'Verwijderen',
+    removed: (name: string) => `${name} verwijderd.`,
     detail: {
       file: 'Partituurbestand',
       recognition: 'Herkenning opgeslagen',

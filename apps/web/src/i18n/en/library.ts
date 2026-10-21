@@ -130,6 +130,7 @@ export const library = {
     open: (name: string) => `Open saved ${name}`,
     removeLabel: (name: string) => `Remove saved ${name}`,
     remove: 'Remove',
+    removed: (name: string) => `Removed ${name}.`,
     /** The gray line under a score's name, by what was saved. */
     detail: {
       file: 'Score file',

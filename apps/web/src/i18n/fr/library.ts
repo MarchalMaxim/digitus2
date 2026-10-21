@@ -107,6 +107,7 @@ export const library: Messages['library'] = {
     open: (name: string) => `Ouvrir ${name} (enregistrée)`,
     removeLabel: (name: string) => `Supprimer ${name} (enregistrée)`,
     remove: 'Supprimer',
+    removed: (name: string) => `${name} a été supprimée.`,
     detail: {
       file: 'Fichier de partition',
       recognition: 'Reconnaissance enregistrée',

@@ -1984,11 +1984,16 @@ test.describe('the cursor on a phone', () => {
         const at = `onset ${look.tick}: ${JSON.stringify(m)}`;
         expect(m.box, at).not.toBeNull();
         const box = m.box!;
-        // The red covers the note as engraved, stem and flag included, not just the notehead.
-        expect(box.left, at).toBeLessThanOrEqual(m.parts.left + 1.5);
-        expect(box.top, at).toBeLessThanOrEqual(m.parts.top + 1.5);
-        expect(box.right, at).toBeGreaterThanOrEqual(m.parts.right - 1.5);
-        expect(box.bottom, at).toBeGreaterThanOrEqual(m.parts.bottom - 1.5);
+        // The red covers the note as engraved, stem and flag included, not just the notehead. The
+        // box holds only pixels at least 91 % red (accentAreas), so an edge falls short of the
+        // shapes' geometry: by the part of a pixel the edge covers, and on the bold head's curved
+        // far side by about a pixel more (1.81 px at an onset of K.545 that failed 1 run in 4
+        // with 1.5 px; issue #114). A cursor that left out the stem would miss by its length.
+        const EDGE = 2;
+        expect(box.left, at).toBeLessThanOrEqual(m.parts.left + EDGE);
+        expect(box.top, at).toBeLessThanOrEqual(m.parts.top + EDGE);
+        expect(box.right, at).toBeGreaterThanOrEqual(m.parts.right - EDGE);
+        expect(box.bottom, at).toBeGreaterThanOrEqual(m.parts.bottom - EDGE);
         // It spans at least four times the area of a notehead (the old cursor: less than one)...
         const area = (box.right - box.left) * (box.bottom - box.top);
         expect(area, at).toBeGreaterThanOrEqual(4 * m.head);

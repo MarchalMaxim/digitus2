@@ -12,9 +12,11 @@ jobs:
   # Seven jobs run side by side (issue #83): the wall time is the longest of them, about four
   # minutes, instead of the sum of every step in one job, which was 12 to 17 minutes with the
   # Playwright suite alone taking 10 to 14 on two workers.
+  # The image is pinned: ubuntu-latest moved to 26.04, where Playwright 1.59 cannot install
+  # Chromium. Move it together with a Playwright that supports the newer image.
   checks:
     name: typecheck, lint, format, build, omr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       # pnpm version comes from the root package.json "packageManager" field;
@@ -30,7 +32,7 @@ jobs:
       - run: pnpm test:omr
   unit:
     name: unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -40,7 +42,7 @@ jobs:
       - run: pnpm test
   e2e:
     name: 'e2e: ${{ matrix.name }}'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       # Five groups of specs, each about a fifth of the suite's time as measured with the JSON

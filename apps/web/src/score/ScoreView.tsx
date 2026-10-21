@@ -35,7 +35,7 @@ import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useCursor } from './useCursor.js';
 import { useHoveredNote } from './useHoveredNote.js';
-import { mutedHandsFor, usePlayback, type CountIn } from './usePlayback.js';
+import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
 
 /** The status line's text while the score is busy, by status. */
@@ -210,7 +210,10 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // Playback, the cursor and the keyboard. An error stops playback (the score is gone).
   const score = doc.status === 'error' ? null : doc.score;
   const playback = usePlayback(score);
-  const hands = useAppStore((s) => s.settings.hands);
+  const hands = handsFor(
+    score,
+    useAppStore((s) => s.settings.hands),
+  );
   const mutedHands = useMemo(() => mutedHandsFor(hands), [hands]);
   const groups = useMemo(() => (score ? buildOnsetGroups(score) : []), [score]);
   const range = useMemo(() => (score ? keyboardRange(score) : null), [score]);
@@ -562,6 +565,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                 embellish={
                   doc.embellish === 'offered' ? { on: doc.embellished, set: toggleEmbellish } : null
                 }
+                oneHanded={oneHanded(score)}
               />
             </div>
             {/* Paused with the last group heard marked (T10): the cursor keeps the red. While the

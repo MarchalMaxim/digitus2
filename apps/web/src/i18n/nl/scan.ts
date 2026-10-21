@@ -105,6 +105,9 @@ export const scan: Messages['scan'] = {
     /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'De notenbalken zijn niet tot een pianosysteem gekoppeld, dus beide handen worden als één gelezen. De vingerzetting zou de handen verkeerd hebben: probeer een vlakkere, gelijkmatig belichte foto of de originele pdf.',
+    /** The scanner read only part of a line of music: shown above the comparison. */
+    partlyReadWarning:
+      'Een regel muziek is maar gedeeltelijk gelezen, dus er kunnen maten ontbreken of bijgekomen zijn. Vergelijk het resultaat met het origineel voordat je gaat oefenen.',
     unknownWarning:
       'De herkenner meldde een onbekende waarschuwing. Controleer het origineel goed.',
     downloadPagesSummary: 'Bestanden per pagina downloaden',

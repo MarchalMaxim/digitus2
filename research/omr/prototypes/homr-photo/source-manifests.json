@@ -74,7 +74,8 @@
     "homr/segmentation/config.py": "735c9ef5b30b9737221ca0ef31b4c28b04ee865f9885510da31fcad2c59df147",
     "homr/segmentation/inference_segnet.py": "368273a64bb392d8dd1843492f7b5ac292cdf6513c79cade4f4e35c08772d757",
     "homr/simple_logging.py": "0a289e6deb8d55e0bcd709f4651246a417efb744447a9340b3cd5eb5669271ed",
-    "homr/staff_detection.py": "d5a2f28eadf56b904ed1c8e0c8f6aa659031978ef2e8cba950e17cc4d1f180c0",
+    "homr/staff_coverage.py": "7140e4f1237f39538d74f1cdc22eb973459d827ec8e54fa245ae3b73d88c5c69",
+    "homr/staff_detection.py": "8c460cce26b29cb12328acea9a42ad906579686b07ba9854832bb1960573a69d",
     "homr/staff_dewarping.py": "6b44e0b843e40c1fc7399d88b696707dea17f5b425418da40d66418d41d9752c",
     "homr/staff_parsing.py": "84d8ecc62f6c45fa9bb63ee64644f4a750b79c1b13aad009448f69ddfb09b42e",
     "homr/staff_parsing_tromr.py": "96456c2feb7c306dd056e5ab59f170b4a19bbee7d22fa214965856cfe85669e4",
@@ -94,7 +95,8 @@
   "patches": {
     "upstream.patch": "c1144988c04375f700b568003dd08980bade9e6b068a2ccf32d9227fe1845c63",
     "upstream-accidentals.patch": "18b57997f8b37e56fc7ab1fca3fa8aa85dca46b2c63a4b1443a5361d61b892f6",
-    "upstream-boundaries.patch": "7f6008cd5facf14e2e524e8d06974ff29c199f7d4be512dab372139a9b4de260"
+    "upstream-boundaries.patch": "7f6008cd5facf14e2e524e8d06974ff29c199f7d4be512dab372139a9b4de260",
+    "upstream-coverage.patch": "58a693e82d8e87036d344bbe6455f3d9c55bdf82326fdc53df1db8f58ed3bda7"
   },
   "patchDigestEncoding": "UTF-8 text with LF-normalized line endings"
 }

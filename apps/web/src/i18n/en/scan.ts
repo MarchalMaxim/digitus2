@@ -105,6 +105,9 @@ export const scan = {
     /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'The staves were not paired into a grand staff, so both hands are read as one. Use for fingerings would give wrong hands: try a flatter, evenly lit photo or the original PDF.',
+    /** The scanner read only part of a line of music: shown above the comparison. */
+    partlyReadWarning:
+      'A line of music was read only in part, so bars may be missing or added. Compare the result with the original before practising.',
     unknownWarning: 'The recognizer reported an unknown warning. Check the original carefully.',
     downloadPagesSummary: 'Download individual page files',
     downloadPage: (page: number) => `Download page ${page} MusicXML`,

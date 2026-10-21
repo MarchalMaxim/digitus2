@@ -1,5 +1,6 @@
 import { scanType, validateScan, validateScanImages } from '../scan/model.js';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useAppStore } from '../app/store.js';
 import type { Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 
@@ -33,6 +34,53 @@ export function acceptScoreFiles(
     return;
   }
   acceptScoreFile(files[0], onFile, onRefuse, onScan ? (file) => onScan([file]) : undefined);
+}
+
+/** One request lifetime for every library input, including camera and window drops. */
+export function useScoreFileRequests(
+  onFile: (name: string, bytes: Uint8Array) => void,
+  onRefuse: (message: Refusal) => void,
+  onScan?: (files: File[]) => void,
+): (files: readonly File[]) => void {
+  const generation = useRef(0);
+  const mounted = useRef(false);
+  useLayoutEffect(() => {
+    mounted.current = true;
+    generation.current++;
+    // Subscribe synchronously: leaving and returning in one React batch must cancel too.
+    const unsubscribe = useAppStore.subscribe((state, previous) => {
+      if (state.view !== previous.view) generation.current++;
+    });
+    return () => {
+      mounted.current = false;
+      unsubscribe();
+    };
+  }, []);
+  return useCallback(
+    (files: readonly File[]) => {
+      if (!files.length) return;
+      const view = useAppStore.getState().view;
+      if (!mounted.current || view.name !== 'library') return;
+      const request = ++generation.current;
+      const current = () =>
+        mounted.current && generation.current === request && useAppStore.getState().view === view;
+      acceptScoreFiles(
+        files,
+        (name, bytes) => {
+          if (current()) onFile(name, bytes);
+        },
+        (message) => {
+          if (current()) onRefuse(message);
+        },
+        onScan
+          ? (pages) => {
+              if (current()) onScan(pages);
+            }
+          : undefined,
+      );
+    },
+    [onFile, onRefuse, onScan],
+  );
 }
 
 /** The file chooser's `accept` list. */
@@ -81,15 +129,11 @@ export function carriesFiles(dt: DataTransfer | null | undefined): boolean {
  * The listeners are added once, for as long as the caller is mounted, and call the latest
  * callbacks: re-adding them when a callback changed would reset the count in the middle of a drag.
  */
-export function useWindowFileDrop(
-  onFile: (name: string, bytes: Uint8Array) => void,
-  onRefuse: (message: Refusal) => void,
-  onScan?: (files: File[]) => void,
-): boolean {
+export function useWindowFileDrop(onFiles: (files: readonly File[]) => void): boolean {
   const [dragging, setDragging] = useState(false);
-  const latest = useRef({ onFile, onRefuse, onScan });
+  const latest = useRef(onFiles);
   useLayoutEffect(() => {
-    latest.current = { onFile, onRefuse, onScan };
+    latest.current = onFiles;
   });
   useEffect(() => {
     let depth = 0;
@@ -112,8 +156,7 @@ export function useWindowFileDrop(
       e.preventDefault();
       depth = 0;
       setDragging(false);
-      const { onFile, onRefuse, onScan } = latest.current;
-      acceptScoreFiles(Array.from(e.dataTransfer?.files ?? []), onFile, onRefuse, onScan);
+      latest.current(Array.from(e.dataTransfer?.files ?? []));
     };
     window.addEventListener('dragenter', enter);
     window.addEventListener('dragover', over);

@@ -1,29 +1,27 @@
 import { useState, type ChangeEvent } from 'react';
-import type { Phrase } from '../i18n/messages.js';
 import { useT } from '../i18n/i18n.js';
 import { isTouchOnly, namedCapture } from '../scan/phone.js';
-import { acceptScoreFiles, SCORE_ACCEPT } from './ownFile.js';
+import { SCORE_ACCEPT } from './ownFile.js';
 
 // The plan names this module OwnFile.tsx. On Windows' case-insensitive file system an import of
 // './OwnFile.js' resolves to ownFile.ts (TypeScript and Vite try .ts before .tsx), so it is
 // named after its main export instead.
 
 export interface OwnFileProps {
-  onFile(name: string, bytes: Uint8Array): void;
-  onRefuse(message: string | Phrase): void;
-  onScan?(files: File[]): void;
+  onFiles(files: readonly File[]): void;
+  scanning?: boolean;
 }
 
 /**
  * The end line (spec 3): a text button that opens the file chooser; the page never mentions
  * dropping. On a touch-only device a second one opens the camera, to photograph a printed page.
  */
-export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
+export function OwnFileLine({ onFiles, scanning = false }: OwnFileProps) {
   const t = useT();
-  const [camera] = useState(() => !!onScan && isTouchOnly());
+  const [camera] = useState(() => scanning && isTouchOnly());
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
-    acceptScoreFiles(Array.from(input.files ?? []), onFile, onRefuse, onScan);
+    onFiles(Array.from(input.files ?? []));
     input.value = ''; // choosing the same file again still fires a change
   };
   return (
@@ -48,12 +46,7 @@ export function OwnFileLine({ onFile, onRefuse, onScan }: OwnFileProps) {
             className="visually-hidden"
             onChange={(e) => {
               const input = e.currentTarget;
-              acceptScoreFiles(
-                Array.from(input.files ?? []).map((file) => namedCapture(file)),
-                onFile,
-                onRefuse,
-                onScan,
-              );
+              onFiles(Array.from(input.files ?? []).map((file) => namedCapture(file)));
               input.value = '';
             }}
           />

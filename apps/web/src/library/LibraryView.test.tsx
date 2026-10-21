@@ -64,6 +64,124 @@ const h2s = () => screen.getAllByRole('heading', { level: 2 }).map((h) => h.text
 const shelfOf = (name: string) =>
   screen.getByRole('heading', { level: 2, name }).closest('section')!;
 
+describe('LibraryView: import request lifetime', () => {
+  function pendingFile(name = 'delayed.musicxml') {
+    let resolve!: (bytes: ArrayBuffer) => void;
+    let reject!: (error: Error) => void;
+    const file = new File(['score'], name);
+    vi.spyOn(file, 'arrayBuffer').mockReturnValue(
+      new Promise<ArrayBuffer>((yes, no) => {
+        resolve = yes;
+        reject = no;
+      }),
+    );
+    return { file, resolve, reject };
+  }
+  function choose(file: File) {
+    fireEvent.change(screen.getByLabelText('Open your own score'), { target: { files: [file] } });
+  }
+  async function finish(pending: ReturnType<typeof pendingFile>, fail = false) {
+    await act(async () => {
+      if (fail) pending.reject(new Error('gone'));
+      else pending.resolve(new ArrayBuffer(1));
+    });
+  }
+  it('keeps About after a pending score read completes', async () => {
+    render(<LibraryView />);
+    const pending = pendingFile();
+    choose(pending.file);
+    fireEvent.click(screen.getByRole('button', { name: 'About and licences' }));
+    await finish(pending);
+    expect(useAppStore.getState().view.name).toBe('about');
+  });
+  it('invalidates a read even when navigation leaves and returns before React commits', async () => {
+    render(<LibraryView />);
+    const pending = pendingFile();
+    choose(pending.file);
+    act(() => {
+      useAppStore.getState().openAbout();
+      useAppStore.getState().openLibrary();
+    });
+    await finish(pending);
+    expect(useAppStore.getState().view.name).toBe('library');
+  });
+  it('shares the newest request between the chooser and window drop', async () => {
+    render(<LibraryView />);
+    const old = pendingFile('old.musicxml');
+    const latest = pendingFile('latest.musicxml');
+    choose(old.file);
+    const drop = new Event('drop', { bubbles: true, cancelable: true });
+    Object.defineProperty(drop, 'dataTransfer', {
+      value: { types: ['Files'], files: [latest.file] },
+    });
+    act(() => void window.dispatchEvent(drop));
+    await finish(latest);
+    await finish(old);
+    expect(useAppStore.getState().view).toMatchObject({
+      name: 'score',
+      source: { name: 'latest.musicxml' },
+    });
+  });
+  it('cancels the older request when the new request starts, before either read completes', async () => {
+    render(<LibraryView />);
+    const old = pendingFile('old.musicxml');
+    const latest = pendingFile('latest.musicxml');
+    choose(old.file);
+    choose(latest.file);
+    await finish(old);
+    expect(useAppStore.getState().view.name).toBe('library');
+    await finish(latest);
+    expect(useAppStore.getState().view).toMatchObject({
+      name: 'score',
+      source: { name: 'latest.musicxml' },
+    });
+  });
+  it('ignores a stale refusal after a newer selection and after unmount', async () => {
+    const { unmount } = render(<LibraryView />);
+    const old = pendingFile();
+    choose(old.file);
+    const later = pendingFile('later.musicxml');
+    choose(later.file);
+    await finish(old, true);
+    expect(useAppStore.getState().notice).toBeNull();
+    unmount();
+    await finish(later);
+    expect(useAppStore.getState().view.name).toBe('library');
+  });
+  it.each([false, true])(
+    'ignores delayed scan validation (rejected: %s) after navigation',
+    async (invalid) => {
+      render(<LibraryView />);
+      const pending = pendingFile('page.png');
+      vi.spyOn(pending.file, 'slice').mockReturnValue(pending.file);
+      choose(pending.file);
+      act(() => useAppStore.getState().openAbout());
+      await act(async () =>
+        pending.resolve(new Uint8Array(invalid ? [0] : [137, 80, 78, 71, 13, 10, 26, 10]).buffer),
+      );
+      expect(useAppStore.getState().view.name).toBe('about');
+      expect(useAppStore.getState().notice).toBeNull();
+    },
+  );
+  it('ignores a delayed image batch after leaving and returning', async () => {
+    render(<LibraryView />);
+    const pages = [pendingFile('first.png'), pendingFile('second.png')];
+    for (const page of pages) vi.spyOn(page.file, 'slice').mockReturnValue(page.file);
+    fireEvent.change(screen.getByLabelText('Open your own score'), {
+      target: { files: pages.map((page) => page.file) },
+    });
+    act(() => {
+      useAppStore.getState().openAbout();
+      useAppStore.getState().openLibrary();
+    });
+    await act(async () => {
+      for (const page of pages)
+        page.resolve(new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]).buffer);
+    });
+    expect(useAppStore.getState().view.name).toBe('library');
+  });
+});
+
 describe('LibraryView: the units (shelves spec 4.1, 5)', () => {
   it('is the name, the sentence, one red button, the level pills and the shelves of Easy', () => {
     const { container } = render(<LibraryView />);
@@ -470,6 +588,8 @@ describe('LibraryView: leaving the list (M4, polish plan)', () => {
     window.scrollTo({ top: 1200 });
     await userEvent.click(rows()[0]!);
     expect(useAppStore.getState().libraryScrollY).toBe(1200);
+    // This unit renders LibraryView alone; emulate returning before using its next control.
+    act(() => useAppStore.getState().openLibrary());
     window.scrollTo({ top: 2400 });
     await userEvent.upload(
       screen.getByLabelText('Open your own score'),
@@ -482,6 +602,7 @@ describe('LibraryView: leaving the list (M4, polish plan)', () => {
       }),
     );
     expect(useAppStore.getState().libraryScrollY).toBe(2400);
+    act(() => useAppStore.getState().openLibrary());
     window.scrollTo({ top: 2900 });
     await userEvent.click(screen.getByRole('button', { name: 'About and licences' }));
     expect(useAppStore.getState().libraryScrollY).toBe(2900);

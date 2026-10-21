@@ -2,6 +2,53 @@ import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
+  camera: {
+    title: 'Fotografe a sua partitura',
+    starting: 'A iniciar a câmara…',
+    frame: 'Enquadre a página inteira.',
+    reference: 'Tire a primeira fotografia',
+    align: 'Mova o telemóvel para colocar o círculo central sobre o ponto.',
+    hold: 'Mantenha o telemóvel imóvel…',
+    lost: 'Volte atrás até a página ficar novamente alinhada.',
+    progress: (n: number) => `Vista ${n} de 4`,
+    processing: 'A preparar a sua página…',
+    review: 'Verifique a sua página',
+    corners: 'Ajuste os cantos da página',
+    useCorners: 'Usar estes cantos',
+    invalidCorners: 'Coloque os quatro cantos por ordem à volta da página.',
+    cornerLabel: (n: number) =>
+      [
+        'Canto superior esquerdo',
+        'Canto superior direito',
+        'Canto inferior direito',
+        'Canto inferior esquerdo',
+      ][n - 1] ?? 'Canto da página',
+    retake: 'Repetir fotografia',
+    keep: 'Guardar página',
+    nextPage: 'Fotografar outra página',
+    finish: (n: number) => plural('pt', n, { one: 'Usar # página', other: 'Usar # páginas' }),
+    cancel: 'Cancelar',
+    restart: 'Recomeçar',
+    capture: 'Tirar fotografia',
+    fallback: 'Usar a câmara do dispositivo',
+    denied:
+      'O acesso à câmara está bloqueado. Permita-o nas definições do navegador ou use a câmara do dispositivo.',
+    insecure: 'Abra esta página com uma ligação segura ou use a câmara do dispositivo.',
+    unavailable:
+      'Não foi possível iniciar a câmara. Feche outras aplicações de câmara e tente novamente, ou use a câmara do dispositivo.',
+    interrupted: 'A câmara parou. Recomece ou use a câmara do dispositivo.',
+    processingFailed:
+      'Não foi possível preparar esta página. Repita a fotografia ou use a câmara do dispositivo.',
+    tooMany: 'Pode usar até 20 páginas. Continue com estas páginas.',
+    cornerHint:
+      'Arraste cada canto até à borda do papel. Use as teclas de seta para ajustar com precisão.',
+    pageCount: (n: number) =>
+      plural('pt', n, { one: '# página guardada', other: '# páginas guardadas' }),
+    ready: 'Pronto para a página seguinte',
+    blurry: 'Esta fotografia parece desfocada. Mantenha o telemóvel imóvel e repita-a.',
+    keepFlat: 'Mantenha o telemóvel paralelo à página enquanto o move.',
+    close: 'Fechar câmara',
+  },
   view: {
     back: 'Voltar para a biblioteca',
     experimental: 'Digitalização experimental',

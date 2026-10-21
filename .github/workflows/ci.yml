@@ -40,7 +40,8 @@ jobs:
       - run: pnpm test
   e2e:
     name: 'e2e: ${{ matrix.name }}'
-    runs-on: ubuntu-latest
+    # Playwright 1.59.1 supports Ubuntu 24.04; ubuntu-latest can select an unsupported newer OS.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       # Five groups of specs, each about a fifth of the suite's time as measured with the JSON

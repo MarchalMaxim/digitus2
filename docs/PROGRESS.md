@@ -6,6 +6,8 @@ The app is public at https://marchalmaxim.github.io/digitus2/ (GitHub Pages, dep
 
 ## Where things are
 
+The guided five-view score camera and curved-page reconstruction are implemented in [PR #133](https://github.com/MarchalMaxim/digitus2/pull/133), for [#131](https://github.com/MarchalMaxim/digitus2/issues/131). Independent Astra reviews, three actual-photo checks, all available verification gates and formatting pass: 1,182 engine tests, 1,031 web tests and 379 browser tests (15 intentional skips). Optical OMR acceptance skips because local Audiveris is not prepared. Current behavior, measured results and limits are documented in `docs/scanning.md`. Nothing is merged.
+
 | What                                                                                                | Where                                                                                                                 |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Product spec                                                                                        | `docs/superpowers/specs/2026-10-13-digitus2-design.md`                                                                |
@@ -57,6 +59,8 @@ Not committed, and how to get it back:
 **The verification loop, in plain words.** `pnpm verify` is the definition of done: one command, fifteen steps in a row, and a change counts only when all pass. The ordinary steps are typecheck, lint, unit tests, a production build, a bundle-size budget and Playwright end-to-end tests at desktop and phone widths. The project-specific ones are a repository-size check, a colour guard (black, white, one red), the scanning harness tests, the scan service's Python tests (`omr:service`, SKIP without Python), the scanning acceptance gate (`omr:acceptance`, SKIP without the recognisers), and three benchmark gates that score the engine against the floors in `benchmarks/floor.json`: a change that makes the fingerings worse than the floor fails even when every test passes. CI runs most of the same checks on GitHub. Details: `docs/verification-loop.md`.
 
 ## Standing rules from the owner
+
+All scanner implementation paths have returned to the coordinator; no concurrent source edits are active. Private photographs and generated acceptance evidence stay under ignored `build/`. Only the coordinator runs git.
 
 `CLAUDE.md` carries the fixed decisions and the full wording of the UI rules.
 
@@ -166,6 +170,8 @@ References on the same split: human agreement 71.4; FingerFlow with learned weig
 - **No translucent group of notes in the score (#79):** the hand left out is dimmed shape by shape (fill and stroke opacity), never with `opacity` or a filter on a group that holds transformed shapes, which Chrome composites one layer per group (2,085 on Kuhlau's Rondo, paid by every repaint); a dimmed digit rests at a group opacity, which costs no layer and keeps gray smoothing. A hand switch fades only the systems on screen and never animates `opacity`; the pages off screen skip rendering (`content-visibility: auto`, each keeping its viewBox's aspect ratio). Measurements: `docs/research/hand-switch-performance.md`.
 
 ### Scanning
+
+- **Guided multi-page camera (#131):** the phone camera entry captures a reference and four distinct tracked views. Local processing registers views using a supported displacement grid, rectifies adjusted page corners and straightens curved staves using reference-image staff evidence. Agreeing views contribute image observations; missing notes and glare are not reconstructed. Review, retake and repeated page capture feed the existing ordered batch. Intermediate frames are temporary; the processed page is the retained source. Calibrated 3D geometry, automatic corner detection and PhotoScan quality parity are not claimed. Details and primary research links: `docs/scanning.md`.
 
 - **Recognition runs on the project's scan service on Google Cloud Run** (#62; `docs/scan-service.md`, design `docs/superpowers/specs/2026-10-19-scan-service-design.md`): `europe-west4`, request-based billing, 4 vCPU and 8 GiB, one recognition at a time, 0 to 1 instances, no keep-warm ping and no minimum instance; one warm-up health request when the scan page opens. Every device scans with one **Scan this score**, phones included; the scan page says where the page goes in one sentence, and the press is the consent. The app has no PC worker; the loopback worker is the research server and the service's engine. Recognition in the browser is not built (oemer there took 21 minutes for Twinkle; a homr port is unmeasured), and vendor OMR services are rejected (sign-ups, per-page credits, the score on their servers).
 - **The spend is capped at 5 a month:** a budget in the billing account's currency on the service's own project, alerts at 50, 90 and 100 percent, and Google's kill-switch function that disables billing at the budget. Scanning then stays off until the month resets or the owner raises the budget and relinks; nothing resumes automatically.

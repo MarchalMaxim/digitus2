@@ -2,6 +2,54 @@ import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
+  camera: {
+    title: 'Photographiez votre partition',
+    starting: 'Démarrage de l’appareil photo…',
+    frame: 'Placez toute la page dans le cadre.',
+    reference: 'Prenez la première photo',
+    align: 'Déplacez votre téléphone pour placer le cercle central sur le point.',
+    hold: 'Ne bougez plus…',
+    lost: 'Revenez en arrière jusqu’à ce que la page soit à nouveau alignée.',
+    progress: (n: number) => `Vue ${n} sur 4`,
+    processing: 'Préparation de votre page…',
+    review: 'Vérifiez votre page',
+    corners: 'Ajustez les coins de la page',
+    useCorners: 'Utiliser ces coins',
+    invalidCorners: 'Placez les quatre coins dans l’ordre autour de la page.',
+    cornerLabel: (n: number) =>
+      [
+        'Coin supérieur gauche',
+        'Coin supérieur droit',
+        'Coin inférieur droit',
+        'Coin inférieur gauche',
+      ][n - 1] ?? 'Coin de la page',
+    retake: 'Reprendre',
+    keep: 'Garder la page',
+    nextPage: 'Photographier une autre page',
+    finish: (n: number) => plural('fr', n, { one: 'Utiliser # page', other: 'Utiliser # pages' }),
+    cancel: 'Annuler',
+    restart: 'Recommencer',
+    capture: 'Prendre une photo',
+    fallback: 'Utiliser l’appareil photo du téléphone',
+    denied:
+      'L’accès à l’appareil photo est bloqué. Autorisez-le dans les réglages du navigateur ou utilisez l’appareil photo du téléphone.',
+    insecure:
+      'Ouvrez cette page avec une connexion sécurisée ou utilisez l’appareil photo du téléphone.',
+    unavailable:
+      'L’appareil photo n’a pas pu démarrer. Fermez les autres applications photo et réessayez, ou utilisez l’appareil photo du téléphone.',
+    interrupted:
+      'L’appareil photo s’est arrêté. Recommencez ou utilisez l’appareil photo du téléphone.',
+    processingFailed:
+      'Cette page n’a pas pu être préparée. Reprenez-la ou utilisez l’appareil photo du téléphone.',
+    tooMany: 'Vous pouvez utiliser jusqu’à 20 pages. Continuez avec ces pages.',
+    cornerHint:
+      'Faites glisser chaque coin jusqu’au bord du papier. Utilisez les touches fléchées pour affiner.',
+    pageCount: (n: number) => plural('fr', n, { one: '# page gardée', other: '# pages gardées' }),
+    ready: 'Prêt pour la page suivante',
+    blurry: 'Cette photo semble floue. Ne bougez plus et reprenez-la.',
+    keepFlat: 'Gardez votre téléphone parallèle à la page pendant le déplacement.',
+    close: 'Fermer l’appareil photo',
+  },
   view: {
     back: 'Retour à la bibliothèque',
     experimental: 'Numérisation expérimentale',

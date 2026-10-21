@@ -6,7 +6,7 @@ MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the scann
 
 ## What the app guarantees
 
-- **Original bytes are kept.** Unrotated images and PDFs go to the scanner byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser.
+- **Uploaded original bytes are kept.** Unrotated images and PDFs go to the scanner byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser. For guided camera capture, the combined, cropped page becomes the retained source; the five intermediate camera frames are temporary and are released after the page is kept.
 - **The page goes only where the scan page says** (Where your page goes, below), and only when you press **Scan this score**.
 - **Recognition errors stay visible.** The source and the recognised notation sit side by side, and every result is marked as needing review. Scanned notation goes through a strict import that refuses malformed notation, for example a tie stop without a start. You can still download such a result, but **Use for fingerings** stays disabled.
 - **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The scanner never picks one of several exported scores or publishes an incomplete export. The scanner changes a recognition only by two lossless rules, described under Known recognition errors and reported under Recognition details.
@@ -25,6 +25,41 @@ The scan page says it in one sentence under the advice: "Recognition runs on the
 - **Its spend is capped.** The project pays for the scanner and caps it at 5 a month; when the cap is reached, scanning is off until the next month and the app says "The scanner could not answer. Try again later." (`docs/scan-service.md`).
 
 ## Scan a score
+
+### Photograph several pages
+
+On a phone or touch tablet, **Take a photo** opens the guided camera. Lay a printed page flat, include its edges and take the first photo. Adjust the four crop corners to the paper, then keep the phone parallel and move its center circle over each of the four dots. The dots follow the photographed page. Hold still at each dot until the view is captured. Blurred or untrackable views do not advance; flatten the page, improve the light or restart if needed.
+
+The camera combines the reference and four overlapping views locally into one cropped page. Check it before keeping it: retake any page with doubled staff lines, lost symbols or unreadable notes. Keep the page, photograph the next one, and finish to send the completed batch to the ordinary page-arrangement screen. You can reorder, rotate, remove and add images there before pressing **Scan this score**. The limit remains 20 pages, 10 MB per page.
+
+Live capture needs a secure browser page and camera permission. **Use device camera** remains available when live capture cannot start. Uploaded images and PDFs still use the ordinary chooser. Camera acquisition and image processing stay in the browser; only **Scan this score** sends the resulting page images to the scanner. Closing the camera releases its video stream and discards pages that were not finished into the batch.
+
+This follows Google's documented [PhotoScan capture interaction](https://support.google.com/photos/answer/7177983?hl=en): an initial reference plus four views, guided by a center reticle and dots on the photographed print. Google's [research explanation](https://research.google/blog/photoscan-taking-glare-free-pictures-of-pictures/) describes global registration followed by local grid alignment, combination and rectification. digitus2 implements independent algorithms for this interaction, local alignment and score-specific page straightening. It does not claim equivalence to Google's closed implementation. Glare removal is outside the current scope.
+
+### How reconstruction works
+
+The four additional photographs overlap the reference; they are not stitched corner crops. Sparse image features inside the selected page establish a projective mapping into each view. Tracking uses small images for responsiveness. Captured images then receive local normalized patch matching with forward/backward and ambiguity checks. A smooth displacement grid handles spatially varying residual motion on curved paper. Unsupported areas retain the reference. This matters for music: a small alignment error can otherwise create a second stem when images are combined.
+
+Perspective correction maps a rectangle into the adjusted source quadrilateral. When the views provide sufficient perspective information even allowing for corner-selection error, the page proportions come from orthogonal page axes under a centered, square-pixel pinhole-camera model ([Zhang's planar calibration constraints](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr98-71.pdf)). Near-frontal, inconsistent or curved views use observed edge proportions as an approximation. The browser does not provide calibrated lens intrinsics, so this is not a guarantee of exact physical dimensions.
+
+For curved scores, the processor detects groups of five staff lines in the rectified reference and constructs a monotone vertical warp that straightens supported staves. The warp preserves line order and is composed with perspective correction before sampling the original pixels. It does not redraw notes. Short inset examples do not determine the page surface. Pages without reliable staff evidence receive perspective correction only. This is staff-based straightening, not calibrated three-dimensional surface recovery: strong folds, missing edges and horizontal foreshortening remain limitations.
+
+Aligned views are exposure-normalized and combined only where they agree with the reference. The reference retains at least half the weight; conflicting observations do not replace its notation. Additional views can reduce noise, but do not recover missing or clipped notes, and the staff geometry comes from the reference. Bilinear sampling avoids nearest-pixel stair steps. The page corners remain explicitly adjustable.
+
+`scripts/check-score-camera-photos.mjs` runs the production reconstruction on a private manifest containing one to five actual views per case. It records input hashes, corners, independent raw-pixel staff traces, selected notation patches, contribution counts and before/after PNGs. Photographs and outputs stay under ignored `build/`. The available real-photo evidence comprises three photographs, including two views of one page; it does not establish five-view handheld performance, autofocus quality or recognition accuracy.
+
+On those photographs, manually checked top-line identities and independent five-ruling traces preserve all 26 main staves in order. The table reports the worst RMS bow among the annotated top staff lines, measured in each image's pixels after removing a best-fit straight-line slope. Output tilt is also checked separately and stays below 0.08 degrees. This measures image geometry, not recognized pitches or rhythms.
+
+| Actual input                        | Main staves retained | Worst RMS bow before | After   |
+| ----------------------------------- | -------------------- | -------------------- | ------- |
+| Page 25, photograph A               | 8 / 8                | 5.66 px              | 0.37 px |
+| Page 25, photograph B               | 8 / 8                | 7.25 px              | 0.32 px |
+| Improvisations, photograph C        | 10 / 10              | 3.01 px              | 0.79 px |
+| Genuine A + B, using A as reference | 8 / 8                | 5.66 px              | 0.31 px |
+
+The C bottom staff retains 3.58 px of vertical range over its measured span, and its first upper line's RMS bow slightly worsens (0.45 to 0.55 px). Full-page inspection retains the inset examples and finds no newly missing or doubled symbols; selected-patch comparisons are supporting pixel evidence, not proof of musical accuracy. Strong localized curls, unsupported margins and clipped content remain limits. Source hashes are checked before and after each acceptance run so stale outputs cannot be mistaken for the current implementation.
+
+### Recognize and review
 
 1. At the end of the library, choose **Open your own score**, or drop files onto the library. Choose up to 20 PNG or JPEG page images together (10 MB each), or one PDF (10 MB). Drag the thumbnails into reading order. Selecting a page shows keyboard-accessible move and remove controls and **Rotate 90° clockwise**. Rotate a sideways or upside-down photo before scanning.
 2. Press **Scan this score**. Pages are recognised one at a time in the order shown; the status line reads "Page 2 of 5 · Recognizing…" for a batch. **Cancel scan** stops the job, and leaving the page cancels it too. A page that fails keeps the others; **Retry failed pages** resubmits only the failed ones. Most pages take under a minute, and the first scan after a quiet spell longer while the scanner starts (timings in `docs/scan-service.md`); the scanner gives up on a page after three minutes.

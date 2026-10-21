@@ -2,6 +2,51 @@ import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
+  camera: {
+    title: 'Fotografeer je partituur',
+    starting: 'Camera starten…',
+    frame: 'Zorg dat de hele pagina in beeld is.',
+    reference: 'Maak de eerste foto',
+    align: 'Beweeg je telefoon tot de middelste cirkel op de stip ligt.',
+    hold: 'Houd stil…',
+    lost: 'Beweeg terug tot de pagina weer uitgelijnd is.',
+    progress: (n: number) => `Beeld ${n} van 4`,
+    processing: 'Je pagina voorbereiden…',
+    review: 'Controleer je pagina',
+    corners: 'Pas de paginahoeken aan',
+    useCorners: 'Deze hoeken gebruiken',
+    invalidCorners: 'Plaats de vier hoeken in volgorde rondom de pagina.',
+    cornerLabel: (n: number) =>
+      ['Linkerbovenhoek', 'Rechterbovenhoek', 'Rechteronderhoek', 'Linkeronderhoek'][n - 1] ??
+      'Paginahoek',
+    retake: 'Opnieuw maken',
+    keep: 'Pagina bewaren',
+    nextPage: 'Nog een pagina fotograferen',
+    finish: (n: number) =>
+      plural('nl', n, { one: '# pagina gebruiken', other: '# pagina’s gebruiken' }),
+    cancel: 'Annuleren',
+    restart: 'Opnieuw beginnen',
+    capture: 'Foto maken',
+    fallback: 'Apparaatcamera gebruiken',
+    denied:
+      'Cameratoegang is geblokkeerd. Sta toegang toe in je browserinstellingen of gebruik de camera van je apparaat.',
+    insecure:
+      'Open deze pagina via een beveiligde verbinding of gebruik de camera van je apparaat.',
+    unavailable:
+      'De camera kon niet starten. Sluit andere camera-apps en probeer opnieuw of gebruik de camera van je apparaat.',
+    interrupted: 'De camera is gestopt. Begin opnieuw of gebruik de camera van je apparaat.',
+    processingFailed:
+      'Deze pagina kon niet worden voorbereid. Maak de foto opnieuw of gebruik de camera van je apparaat.',
+    tooMany: 'Je kunt maximaal 20 pagina’s gebruiken. Ga verder met deze pagina’s.',
+    cornerHint:
+      'Sleep elke hoek naar de rand van het papier. Gebruik de pijltjestoetsen voor kleine aanpassingen.',
+    pageCount: (n: number) =>
+      plural('nl', n, { one: '# pagina bewaard', other: '# pagina’s bewaard' }),
+    ready: 'Klaar voor de volgende pagina',
+    blurry: 'Deze foto lijkt onscherp. Houd stil en maak hem opnieuw.',
+    keepFlat: 'Houd je telefoon evenwijdig aan de pagina terwijl je hem beweegt.',
+    close: 'Camera sluiten',
+  },
   view: {
     back: 'Terug naar de bibliotheek',
     experimental: 'Experimenteel scannen',

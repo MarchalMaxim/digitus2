@@ -2,6 +2,46 @@ import { plural } from '../format.js';
 
 /** The scan texts in English, the source every other language must match (messages.ts). */
 export const scan = {
+  camera: {
+    title: 'Photograph your score',
+    starting: 'Starting camera…',
+    frame: 'Fit the whole page in the frame.',
+    reference: 'Take the first photo',
+    align: 'Move your phone to line up the centre circle with the dot.',
+    hold: 'Hold still…',
+    lost: 'Move back until the page lines up again.',
+    progress: (n: number) => `View ${n} of 4`,
+    processing: 'Preparing your page…',
+    review: 'Check your page',
+    corners: 'Adjust the page corners',
+    useCorners: 'Use these corners',
+    invalidCorners: 'Place the four corners around the page in order.',
+    cornerLabel: (n: number) =>
+      ['Top left corner', 'Top right corner', 'Bottom right corner', 'Bottom left corner'][n - 1] ??
+      'Page corner',
+    retake: 'Retake',
+    keep: 'Keep page',
+    nextPage: 'Photograph another page',
+    finish: (n: number) => plural('en', n, { one: 'Use # page', other: 'Use # pages' }),
+    cancel: 'Cancel',
+    restart: 'Start again',
+    capture: 'Take photo',
+    fallback: 'Use device camera',
+    denied:
+      'Camera access is blocked. Allow it in your browser settings, or use your device camera.',
+    insecure: 'Open this page over a secure connection, or use your device camera.',
+    unavailable:
+      'The camera could not start. Close other camera apps and try again, or use your device camera.',
+    interrupted: 'The camera stopped. Start again, or use your device camera.',
+    processingFailed: 'This page could not be prepared. Retake it, or use your device camera.',
+    tooMany: 'You can use up to 20 pages. Use these pages to continue.',
+    cornerHint: 'Drag each corner to the edge of the paper. Use the arrow keys to fine-tune.',
+    pageCount: (n: number) => plural('en', n, { one: '# page kept', other: '# pages kept' }),
+    ready: 'Ready for the next page',
+    blurry: 'This photo looks blurry. Hold still and retake it.',
+    keepFlat: 'Keep your phone parallel to the page as you move it.',
+    close: 'Close camera',
+  },
   view: {
     back: 'Back to library',
     experimental: 'Experimental scan',

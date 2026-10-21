@@ -9,7 +9,7 @@ The built-in library holds 3,228 pieces in four levels, from first-steps songs t
 ## Docs
 
 - [docs/PROGRESS.md](docs/PROGRESS.md): current state, decisions, what is next
-- [Issues](https://github.com/MarchalMaxim/digitus2/issues): open requests and planned work; [docs/TODO.md](docs/TODO.md): the done and closed requests
+- [Issues](https://github.com/MarchalMaxim/digitus2/issues): the owner's requests and planned work, open and closed
 - [Product spec](docs/superpowers/specs/2026-10-13-digitus2-design.md) and [verification spec](docs/superpowers/specs/2026-10-13-verification-design.md)
 - [docs/app.md](docs/app.md): the web app; [docs/verification-loop.md](docs/verification-loop.md): `pnpm verify`
 - `docs/research/`: research reports (literature, datasets, baselines, readability, rendering, OMR)

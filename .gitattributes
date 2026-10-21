@@ -12,9 +12,6 @@ research/data/**/*.txt linguist-generated
 research/data/**/*.json linguist-generated
 benchmarks/runs/*.json linguist-generated
 
-# The done-and-closed ledger grows by one line per pull request, appended at the end, so two
-# branches in flight always touch the same spot: git keeps both sides' lines instead of conflicting.
-docs/TODO.md merge=union
 
 # Lockfile diffs are noise.
 pnpm-lock.yaml -diff linguist-generated

@@ -1,6 +1,6 @@
 # digitus2 — status
 
-This file holds the project's current state: where things are, what lives outside the repository, the owner's standing rules, the decisions that constrain future work, known limitations and what is next. Open requests and planned work are [GitHub issues](https://github.com/MarchalMaxim/digitus2/issues); `docs/TODO.md` keeps the done and closed requests. Keep this file current when work lands.
+This file holds the project's current state: where things are, what lives outside the repository, the owner's standing rules, the decisions that constrain future work, known limitations and what is next. The owner's requests and planned work, open and closed, are [GitHub issues](https://github.com/MarchalMaxim/digitus2/issues). Keep this file current when work lands.
 
 The app is public at https://marchalmaxim.github.io/digitus2/ (GitHub Pages, deployed from `main` on every push by `.github/workflows/pages.yml`). The repository is https://github.com/MarchalMaxim/digitus2 (MIT).
 
@@ -12,7 +12,7 @@ The app is public at https://marchalmaxim.github.io/digitus2/ (GitHub Pages, dep
 | Verification spec (goals, oracles, checks, iteration protocol)                                      | `docs/superpowers/specs/2026-10-13-verification-design.md`                                                            |
 | Landing page and library designs                                                                    | `docs/superpowers/specs/2026-10-14-ui-batch-design.md`, `docs/superpowers/specs/2026-10-16-library-shelves-design.md` |
 | M5 plan (predates the UI batch; re-plan before running it)                                          | `docs/superpowers/plans/2026-10-14-m5-interaction-readability.md`                                                     |
-| The owner's requests: open ones as GitHub issues, done and closed ones                              | `docs/TODO.md`                                                                                                        |
+| The owner's requests, open and closed                                                               | [GitHub issues](https://github.com/MarchalMaxim/digitus2/issues)                                                      |
 | `pnpm verify`, floors, CI, recovery after a restart                                                 | `docs/verification-loop.md`                                                                                           |
 | Web app: behaviour, architecture, motion, themes, budgets, limitations                              | `docs/app.md`                                                                                                         |
 | Experimental scanning: use, where the page goes, limits                                             | `docs/scanning.md`                                                                                                    |
@@ -64,7 +64,7 @@ Not committed, and how to get it back:
 - **Verification.** `pnpm verify` is the definition of done. Readability for intermediate players is a first-class metric. A qualitative UI review by an Opus subagent (verification spec 3.10) accompanies UI work.
 - **UI minimalism.** "Make sure that the UI stays very pristine and not cluttered. I very much like it right now. Do not overclutter it with features and be brutal with this." Controls appear only in the context that needs them (progressive disclosure).
 - **Merging.** Never merge into `main` without the owner's explicit confirmation. Work goes on a branch and a pull request; the owner merges.
-- **Requests.** Every request or bug report the owner posts becomes a GitHub issue with the owner's words, a judgement, the agreed approach and a checklist. When it is done or closed, it gets one line in `docs/TODO.md`.
+- **Requests.** Every request or bug report the owner posts becomes a GitHub issue with the owner's words, a judgement, the agreed approach and a checklist. The pull request that does it closes the issue; a request the owner rejects is closed with the reason.
 - **This file.** Keep it current; it is what a new session reads first.
 
 ## Milestones

@@ -125,6 +125,31 @@ test('switching back restores the plain score and the bar', async ({ page, isMob
   await expectOneRed(page, 'switched off at bar 3');
 });
 
+test('removing a loop after adding notes restores the original pre-play cue', async ({
+  page,
+  isMobile,
+}) => {
+  await twinkle(page);
+  await seekBar(page, 1, isMobile);
+  await redSettled(page);
+  await expect.poll(() => redBars(page)).toEqual([1]);
+  const cue = await positionSec(page);
+  await setLoopBars(page, '6', '7');
+  await expect.poll(() => redBars(page)).toEqual([]);
+
+  // Each direction replaces the score; neither may turn its loop boundary into a seek.
+  for (const on of [true, false]) {
+    await addNotes(page).setChecked(on);
+    await expect(digits(page)).toHaveCount(on ? TWINKLE_EMBELLISHED_NOTES : TWINKLE_NOTES);
+    await expect.poll(() => redBars(page)).toEqual([]);
+    expect(await positionSec(page)).toBeCloseTo(cue);
+    await page.getByRole('checkbox', { name: 'Loop bars' }).uncheck();
+    await expect.poll(() => redBars(page)).toEqual([1]);
+    await expectOneRed(page, 'original cue after a score version switch');
+    await setLoopBars(page, '6', '7');
+  }
+});
+
 // Review Focus 3: the loop stays, playback goes on from the same bar's start, one red. The loop
 // is proved by its wrap after the switch (review S3): the controls' own state would survive a
 // dropped loop, and so would a position read once.

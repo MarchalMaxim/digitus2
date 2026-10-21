@@ -11,7 +11,7 @@ import type { ScoreDocument } from './useScoreDocument.js';
 
 /** Where the reader is, kept across a switch between the plain and the embellished score. */
 export interface Carry {
-  /** The bar (0-based) of the position (playing) or of where Play starts (stopped). */
+  /** The bar (0-based) of the position heard, paused or requested before Play. */
   bar: number;
   loop: LoopRange | null;
   /** Playing, or Play still loading the samples (review S1): playing goes on after the switch. */
@@ -25,9 +25,9 @@ export interface Carry {
   cued: boolean;
 }
 
-/** Where the reader is: the bar of the position (playing) or of where Play starts (stopped). */
+/** Keep the requested position, even when a loop makes Play start somewhere else. */
 export function captureCarry(playback: Playback, barStarts: readonly number[]): Carry {
-  const at = playback.playing ? playback.positionSec() : playback.startSec();
+  const at = playback.positionSec();
   return {
     bar: barIndexAt(barStarts, at),
     loop: playback.loop ? { from: playback.loop.from, to: playback.loop.to } : null,

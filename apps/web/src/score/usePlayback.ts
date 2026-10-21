@@ -28,6 +28,7 @@ import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
 import { keyVelocity } from './noteKey.js';
 import { scheduleClick } from '../audio/metronome.js';
+import { loopSeconds } from '../audio/loop.js';
 import type * as TransportExports from '../audio/transport.js';
 
 type TransportModule = typeof TransportExports;
@@ -112,7 +113,7 @@ export interface Playback {
    * stopped is Rewind.
    */
   seek(sec: number, opts?: { leadSec?: number }): void;
-  /** The score time being heard now, in seconds (0 before the first play). */
+  /** The score time heard, paused or requested by seek before Play, in seconds. */
   positionSec(): number;
   /**
    * While stopped, the score time Play starts from, in seconds: the position, or the loop's
@@ -565,11 +566,15 @@ export function usePlayback(score: Score | null): Playback {
     [],
   );
 
-  // Before the first Play, a cue (the score view keeps its seeks inside a loop) or the top.
+  // Before the first Play, apply the transport's loop bounds to the cue without replacing it:
+  // removing a loop restores the original cue. The cursor compares this start with the position.
   const startSec = useCallback(() => {
     const t = transportRef.current;
     if (t) return t.startSec();
-    return pendingSecRef.current ?? 0;
+    const start = pendingSecRef.current ?? 0;
+    const s = scoreRef.current;
+    const range = s ? loopSeconds(s, loopRef.current) : null;
+    return range && (start < range.from || start >= range.to) ? range.from : start;
   }, []);
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);

@@ -5,6 +5,7 @@ import { buildBeats, countInBar, measureEndSec, measureStartSec } from './beats.
 import type { AudioClock } from './clock.js';
 import { audibleTime } from './clock.js';
 import { noteVelocity, type Instrument } from './instrument.js';
+import { loopSeconds } from './loop.js';
 
 export interface TransportDeps {
   ctx: AudioClock;
@@ -635,14 +636,7 @@ export class Transport {
 
   /** The loop in score seconds, or null when there is none or it is empty. */
   private loopRange(): { from: number; to: number } | null {
-    if (!this.loop || this.score.measures.length === 0) return null;
-    const last = this.score.measures.length - 1;
-    const a = Math.min(Math.max(0, Math.trunc(this.loop.from)), last);
-    const b = Math.min(Math.max(0, Math.trunc(this.loop.to)), last);
-    if (a > b) return null;
-    const from = measureStartSec(this.score, a);
-    const to = measureEndSec(this.score, b);
-    return to > from ? { from, to } : null;
+    return loopSeconds(this.score, this.loop);
   }
 
   /** The index of the measure that starts at `sec`, or -1. */

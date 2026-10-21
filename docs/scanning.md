@@ -104,12 +104,13 @@ Measured on the acceptance corpus (16 library pieces rendered as pages, each in 
 - **Missed ties**: 13 of the corpus's 47 ties have no tie or slur mark in homr's recognition at all, so the note sounds again instead of being held. Use **Tied to next**.
 - **Rhythm**: notes read with the wrong value (sixteenths as 32nds, a stray rest), which **Places to check** often finds as hands that disagree on a bar's length.
 - **A lost grand staff**: on a badly lit photo homr can read a piano page as one staff whose clef keeps changing. The review then says so above the comparison; the hands are not separated, so use another photo or the PDF.
+- **A line of music read only in part**: a staff cut short loses bars, a short stray staff adds some. The review then says that bars may be missing or added and asks you to compare with the original; the alert is shown above the comparison, like the grand-staff one.
 - **Beams** on photos are drawn by beat for readability, not read from the source; on PDFs Audiveris reads them.
 - **Key and time signature** are inferred when a continuation page does not print them.
 
 The scanner changes a homr export in two lossless ways, and says so under **Recognition details**: a measure that holds no music (homr writes the bracket closing a first ending as a measure of its own, which shifted every later bar) joins its neighbours, and a slur joining one pitch to its continuation is read as a tie even when homr gave the two notes different voice numbers. No pitch, duration or onset changes.
 
-On eleven real phone photos (WhatsApp-compressed, five pages of Boëllmann's Op. 28 and a bound book page; results per photo in `docs/research/omr.md`), all were recognised, 9 pass the strict import and 8 have exactly the page's bars. What they add to the list:
+On fourteen real phone photos (eleven WhatsApp-compressed, of five pages of Boëllmann's Op. 28 and a bound book page, and three Google PhotoScan images of Bach's Invention No. 13; results per photo in `docs/research/omr.md`), all were recognised, 12 pass the strict import and 11 have exactly the page's bars. What they add to the list:
 
 - **Upside-down photos**: rotate them first. As taken, one lost its grand staff and another its key and meter; rotated, both read right.
 - **Compound meters**: homr read 4/4 for 9/8 on both photos of one page, so every bar there is listed as longer than its time signature. **Set 9/8 time from bar 1** on the first entry corrects it.
@@ -123,7 +124,7 @@ Further limits:
 - Audiveris (used for PDFs) fails below about 10 px between staff lines and on skewed or curved pages.
 - Text and tempo can be incomplete. A tempo like "= 100" without a recognised beat unit gives no tempo, and an app default tempo is not a recognised one.
 - A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
-- Synthetic test pages, eleven phone photos checked on bars, staves, key and time, strict parsing and passing tests do not certify musical accuracy. Multi-page books and browsers other than desktop Chrome are untested.
+- Synthetic test pages, fourteen phone photos checked on bars, staves, key and time, strict parsing and passing tests do not certify musical accuracy. Multi-page books and browsers other than desktop Chrome are untested.
 
 Source beam recovery for photos is an open request (#39).
 

@@ -212,7 +212,9 @@ def test_bootstrap_patches_onnxruntime_before_vendor_entry(tmp_path,pillow_pytho
     assert result.returncode==0,result.stderr
     assert "threads 3 1" in result.stdout
 
-# Staff positions as homr writes them: class, centre x, centre y, width, height (fractions of the page).
+# Staff positions as homr writes them: one row per staff of every system (a paired grand staff is
+# one row, class 1; an unpaired staff is a row of its own, class 0): class, centre x, centre y,
+# width, height, as fractions of the page.
 INVENTION_PAGE_1 = """1 0.75 0.177 0.4167 0.0895
 1 0.5130 0.331 0.8802 0.0883
 1 0.5130 0.483 0.8802 0.0870
@@ -220,23 +222,38 @@ INVENTION_PAGE_1 = """1 0.75 0.177 0.4167 0.0895
 1 0.5104 0.787 0.8854 0.0887
 """
 
-def test_a_system_that_starts_far_right_of_the_others_is_partly_read():
+def rows(*lines):
+    return "".join(line + "\n" for line in lines)
+
+def test_a_staff_that_starts_far_right_of_the_others_is_partly_read():
     # Invention 13, page 1 (issue 129): the first system was read from mid-bar 2 only.
-    assert homr.partly_read_systems(INVENTION_PAGE_1)==[1]
+    assert homr.partly_read_staves(INVENTION_PAGE_1)==[1]
+
+def test_the_late_start_is_caught_when_it_is_half_the_page():
+    # Two systems, or four staves of which two start late: the column comes from the long staves.
+    assert homr.partly_read_staves(rows("1 0.75 0.2 0.4167 0.09", "1 0.513 0.4 0.8802 0.09"))==[1]
+    four=rows("0 0.75 0.2 0.4167 0.09", "0 0.75 0.3 0.4167 0.09",
+              "0 0.513 0.6 0.88 0.09", "0 0.513 0.7 0.88 0.09")
+    assert homr.partly_read_staves(four)==[1,2]
 
 def test_an_indented_first_system_and_a_short_last_system_are_not():
-    text="1 0.55 0.2 0.80 0.09\n1 0.51 0.4 0.88 0.09\n1 0.51 0.6 0.88 0.09\n1 0.31 0.8 0.48 0.09\n"
-    assert homr.partly_read_systems(text)==[]
+    text=rows("1 0.55 0.2 0.80 0.09", "1 0.51 0.4 0.88 0.09", "1 0.51 0.6 0.88 0.09", "1 0.31 0.8 0.48 0.09")
+    assert homr.partly_read_staves(text)==[]
 
-def test_a_system_that_ends_short_before_the_last_is_partly_read():
-    text="1 0.51 0.2 0.88 0.09\n1 0.30 0.4 0.46 0.09\n1 0.51 0.6 0.88 0.09\n"
-    assert homr.partly_read_systems(text)==[2]
+def test_both_staves_of_an_unpaired_short_last_system_are_not():
+    text=rows("0 0.51 0.2 0.88 0.09", "0 0.51 0.3 0.88 0.09", "0 0.31 0.6 0.48 0.09", "0 0.31 0.7 0.48 0.09")
+    assert homr.partly_read_staves(text)==[]
 
-def test_one_system_or_no_positions_cannot_be_judged():
-    assert homr.partly_read_systems("1 0.3 0.2 0.4 0.09\n")==[]
-    assert homr.partly_read_systems("")==[]
+def test_a_staff_that_ends_short_above_a_full_one_is_partly_read():
+    # A short stray staff from show-through between two systems adds bars.
+    text=rows("1 0.51 0.2 0.88 0.09", "1 0.30 0.4 0.46 0.09", "1 0.51 0.6 0.88 0.09")
+    assert homr.partly_read_staves(text)==[2]
 
-def test_a_partly_read_system_is_a_warning(prepared,tmp_path,monkeypatch):
+def test_one_staff_or_no_positions_cannot_be_judged():
+    assert homr.partly_read_staves(rows("1 0.3 0.2 0.4 0.09"))==[]
+    assert homr.partly_read_staves("")==[]
+
+def test_a_partly_read_staff_is_a_warning(prepared,tmp_path,monkeypatch):
     bundle,_=prepared
     adapter=homr.Homr(bundle)
     job=tmp_path/"job";job.mkdir()
@@ -251,5 +268,5 @@ def test_a_partly_read_system_is_a_warning(prepared,tmp_path,monkeypatch):
     metadata=adapter.metadata_for(source,job)
     warning=metadata["warnings"][-1]
     assert warning["code"]=="recognition-system-partly-read"
-    assert warning["details"]=={"systems":[1]}
-    assert metadata["partlyReadSystems"]==[1]
+    assert warning["details"]=={"staves":[1]}
+    assert metadata["partlyReadStaves"]==[1]

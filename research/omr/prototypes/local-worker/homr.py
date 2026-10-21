@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import statistics
 import xml.etree.ElementTree as ET
 from audiveris import run_process
 from normalize_export import normalize
@@ -68,16 +69,21 @@ def venv_python(toolchain: Path, platform: str = os.name) -> Path:
     """The prepared virtual environment's interpreter: Scripts/python.exe on Windows, bin/python elsewhere."""
     return toolchain/("venv/Scripts/python.exe" if platform == "nt" else "venv/bin/python")
 
-# A system whose edge is this share of the column's width inside the column's edge was read in part.
-# An indented first system is well inside it; a short last system is left alone.
+# A staff whose edge is this share of the column's width inside the column's edge was read in part.
+# An indented first system is well inside it. A staff that ends short is left alone when every
+# staff below it ends short too: the short last system of a piece.
 PARTLY_READ_EDGE = 0.25
+# The column is the median edges of the staves at least this share of the longest, as homr's own
+# _main_column finds it: a partly read staff never moves the column, however many there are.
+LONG_STAFF = 0.75
 
-def partly_read_systems(positions):
+def partly_read_staves(positions):
     """
-    The systems (counted from 1, top to bottom) that homr read only in part, from the staff
-    positions it writes (class, centre x, centre y, width, height per line, as page fractions):
-    a staff cut short loses bars, a short stray staff from show-through adds some. Either would
-    otherwise be silent (issue 129).
+    The staves (counted from 1, top to bottom) that homr read only in part, from the staff
+    positions it writes: one row per staff of every system (a paired grand staff is one row, an
+    unpaired staff a row of its own) with class, centre x, centre y, width and height as page
+    fractions. A staff cut short loses bars, a short stray staff from show-through adds some.
+    Either would otherwise be silent (issue 129).
     """
     extents=[]
     for line in positions.splitlines():
@@ -88,12 +94,14 @@ def partly_read_systems(positions):
         extents.append((centre-width/2,centre+width/2))
     if len(extents)<2:
         return []
-    lefts=sorted(left for left,_ in extents)
-    rights=sorted(right for _,right in extents)
-    left,right=lefts[len(lefts)//2],rights[len(rights)//2]
+    longest=max(end-start for start,end in extents)
+    long_staves=[(start,end) for start,end in extents if end-start>=LONG_STAFF*longest]
+    left=statistics.median(start for start,_ in long_staves)
+    right=statistics.median(end for _,end in long_staves)
     limit=PARTLY_READ_EDGE*(right-left)
-    return [i+1 for i,(start,end) in enumerate(extents)
-            if start-left>limit or (i<len(extents)-1 and right-end>limit)]
+    ends_short=[right-end>limit for _,end in extents]
+    return [i+1 for i,(start,_) in enumerate(extents)
+            if start-left>limit or (ends_short[i] and not all(ends_short[i+1:]))]
 
 def read_audit(path):
     if path.stat().st_size > 1024 * 1024:
@@ -204,20 +212,19 @@ class Homr:
                 "message":f"Recognition excluded {omitted} possible auxiliary staff regions and masked {masked} nearby staff regions. Check the source for any music that should be retained.",
             })
         positions_path=local_input.with_suffix(".txt")
-        partly_read=(partly_read_systems(positions_path.read_text(encoding="utf-8"))
+        partly_read=(partly_read_staves(positions_path.read_text(encoding="utf-8"))
                      if positions_path.is_file() and positions_path.stat().st_size<=1024*1024 else [])
         if partly_read:
             warnings.append({
                 "code":"recognition-system-partly-read",
-                "message":"A line of music was read only in part, so bars may be missing or added. Compare the result with the original, line "
-                          + ", ".join(str(n) for n in partly_read) + ".",
-                "details":{"systems":partly_read},
+                "message":"A line of music was read only in part, so bars may be missing or added. Compare the result with the original.",
+                "details":{"staves":partly_read},
             })
         metadata={
             "recognizer":self.name,"capabilities":dict(self.capabilities),"warnings":warnings,
             "sourceCommit":COMMIT,"sourcePythonTreeSha256":tree_hash,
             "modelHashes":dict(MODELS),"pianoCueAudit":cue,"foreignStaffAudits":foreign,
-            "omittedStaffRegions":omitted,"maskedStaffRegions":masked,"partlyReadSystems":partly_read,
+            "omittedStaffRegions":omitted,"maskedStaffRegions":masked,"partlyReadStaves":partly_read,
             "timeSignatureProvenance":"may-be-inferred-from-recognized-bar-durations",
             "keySignatureProvenance":"may-be-assumed-when-absent-from-the-page",
         }

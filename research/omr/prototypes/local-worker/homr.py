@@ -68,6 +68,33 @@ def venv_python(toolchain: Path, platform: str = os.name) -> Path:
     """The prepared virtual environment's interpreter: Scripts/python.exe on Windows, bin/python elsewhere."""
     return toolchain/("venv/Scripts/python.exe" if platform == "nt" else "venv/bin/python")
 
+# A system whose edge is this share of the column's width inside the column's edge was read in part.
+# An indented first system is well inside it; a short last system is left alone.
+PARTLY_READ_EDGE = 0.25
+
+def partly_read_systems(positions):
+    """
+    The systems (counted from 1, top to bottom) that homr read only in part, from the staff
+    positions it writes (class, centre x, centre y, width, height per line, as page fractions):
+    a staff cut short loses bars, a short stray staff from show-through adds some. Either would
+    otherwise be silent (issue 129).
+    """
+    extents=[]
+    for line in positions.splitlines():
+        fields=line.split()
+        if len(fields)!=5:
+            continue
+        centre,width=float(fields[1]),float(fields[3])
+        extents.append((centre-width/2,centre+width/2))
+    if len(extents)<2:
+        return []
+    lefts=sorted(left for left,_ in extents)
+    rights=sorted(right for _,right in extents)
+    left,right=lefts[len(lefts)//2],rights[len(rights)//2]
+    limit=PARTLY_READ_EDGE*(right-left)
+    return [i+1 for i,(start,end) in enumerate(extents)
+            if start-left>limit or (i<len(extents)-1 and right-end>limit)]
+
 def read_audit(path):
     if path.stat().st_size > 1024 * 1024:
         raise ValueError("recognizer audit limit")
@@ -176,11 +203,21 @@ class Homr:
                 "code":"recognition-auxiliary-regions-omitted",
                 "message":f"Recognition excluded {omitted} possible auxiliary staff regions and masked {masked} nearby staff regions. Check the source for any music that should be retained.",
             })
+        positions_path=local_input.with_suffix(".txt")
+        partly_read=(partly_read_systems(positions_path.read_text(encoding="utf-8"))
+                     if positions_path.is_file() and positions_path.stat().st_size<=1024*1024 else [])
+        if partly_read:
+            warnings.append({
+                "code":"recognition-system-partly-read",
+                "message":"A line of music was read only in part, so bars may be missing or added. Compare the result with the original, line "
+                          + ", ".join(str(n) for n in partly_read) + ".",
+                "details":{"systems":partly_read},
+            })
         metadata={
             "recognizer":self.name,"capabilities":dict(self.capabilities),"warnings":warnings,
             "sourceCommit":COMMIT,"sourcePythonTreeSha256":tree_hash,
             "modelHashes":dict(MODELS),"pianoCueAudit":cue,"foreignStaffAudits":foreign,
-            "omittedStaffRegions":omitted,"maskedStaffRegions":masked,
+            "omittedStaffRegions":omitted,"maskedStaffRegions":masked,"partlyReadSystems":partly_read,
             "timeSignatureProvenance":"may-be-inferred-from-recognized-bar-durations",
             "keySignatureProvenance":"may-be-assumed-when-absent-from-the-page",
         }

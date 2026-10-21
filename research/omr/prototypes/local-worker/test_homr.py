@@ -211,3 +211,45 @@ def test_bootstrap_patches_onnxruntime_before_vendor_entry(tmp_path,pillow_pytho
                           capture_output=True,text=True,timeout=30,env=env)
     assert result.returncode==0,result.stderr
     assert "threads 3 1" in result.stdout
+
+# Staff positions as homr writes them: class, centre x, centre y, width, height (fractions of the page).
+INVENTION_PAGE_1 = """1 0.75 0.177 0.4167 0.0895
+1 0.5130 0.331 0.8802 0.0883
+1 0.5130 0.483 0.8802 0.0870
+1 0.5130 0.634 0.8802 0.0905
+1 0.5104 0.787 0.8854 0.0887
+"""
+
+def test_a_system_that_starts_far_right_of_the_others_is_partly_read():
+    # Invention 13, page 1 (issue 129): the first system was read from mid-bar 2 only.
+    assert homr.partly_read_systems(INVENTION_PAGE_1)==[1]
+
+def test_an_indented_first_system_and_a_short_last_system_are_not():
+    text="1 0.55 0.2 0.80 0.09\n1 0.51 0.4 0.88 0.09\n1 0.51 0.6 0.88 0.09\n1 0.31 0.8 0.48 0.09\n"
+    assert homr.partly_read_systems(text)==[]
+
+def test_a_system_that_ends_short_before_the_last_is_partly_read():
+    text="1 0.51 0.2 0.88 0.09\n1 0.30 0.4 0.46 0.09\n1 0.51 0.6 0.88 0.09\n"
+    assert homr.partly_read_systems(text)==[2]
+
+def test_one_system_or_no_positions_cannot_be_judged():
+    assert homr.partly_read_systems("1 0.3 0.2 0.4 0.09\n")==[]
+    assert homr.partly_read_systems("")==[]
+
+def test_a_partly_read_system_is_a_warning(prepared,tmp_path,monkeypatch):
+    bundle,_=prepared
+    adapter=homr.Homr(bundle)
+    job=tmp_path/"job";job.mkdir()
+    source=job/"input.jpeg";source.write_bytes(b"photo")
+    def run(command,directory,env,cancelled,timeout,log):
+        local=Path(command[-1])
+        local.with_suffix(".musicxml").write_text('<score-partwise><part><measure><note><pitch><step>C</step><octave>4</octave></pitch></note></measure></part></score-partwise>')
+        local.with_name(local.stem+"_piano-cues.json").write_text(json.dumps({"removed":[]}))
+        local.with_suffix(".txt").write_text(INVENTION_PAGE_1)
+    monkeypatch.setattr(homr,"run_process",run)
+    adapter(source,job,threading.Event())
+    metadata=adapter.metadata_for(source,job)
+    warning=metadata["warnings"][-1]
+    assert warning["code"]=="recognition-system-partly-read"
+    assert warning["details"]=={"systems":[1]}
+    assert metadata["partlyReadSystems"]==[1]

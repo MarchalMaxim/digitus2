@@ -1,9 +1,10 @@
 # Photo recovery patches and diagnostics
 
-Maintains two of the three homr source patches that `../homr-photo/setup.ps1` applies, plus the diagnostics that led to them. Run setup through that script; do not patch a live source tree by hand. The patches run on an isolated copy of the AGPL upstream source, and no third-party source, weights or private photos belong in tracked files.
+Maintains three of the four homr source patches that `../homr-photo/setup.ps1` applies, plus the diagnostics that led to them. Run setup through that script; do not patch a live source tree by hand. The patches run on an isolated copy of the AGPL upstream source, and no third-party source, weights or private photos belong in tracked files.
 
 - `patch_accidentals.py SOURCE` (`upstream-accidentals.patch`) completes accidental display in homr's MusicXML generator from the recognised pitch, key and measure state. It does not change pitches, notes, durations, ties or voices.
 - `patch_boundaries.py SOURCE` (`upstream-boundaries.patch`) masks a detached, smaller five-line staff in a grand staff's lower decoder margin before decoding. The uploaded bytes are untouched. Each decision is written to `*_foreign-staff-N.json` and shown as a review warning. The search is capped at sixteen line components (4,368 five-line combinations), and ambiguous margins are left alone.
+- `patch_coverage.py SOURCE` (`upstream-coverage.patch`) writes `homr/staff_coverage.py` (copied from `staff_coverage.py`) into the source and edits `homr/staff_detection.py`, so that a staff found by its lines alone replaces the one partial staff it overlaps when it contains it, the partial staff spans less than 75 percent of the page column, and at least four of the five lines agree within half a staff space. Each replacement is logged by homr.
 
 Tests, using the prepared homr environment:
 

@@ -60,6 +60,9 @@ export const scan: Messages['scan'] = {
     /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'Les portées n’ont pas été réunies en système de piano : les deux mains sont lues comme une seule. Le doigté aurait de mauvaises mains : essayez une photo plus plate et bien éclairée, ou le PDF d’origine.',
+    /** The scanner read only part of a line of music: shown above the comparison. */
+    partlyReadWarning:
+      'Une ligne de musique n’a été lue qu’en partie, donc des mesures peuvent manquer ou être en trop. Comparez le résultat avec l’original avant de vous exercer.',
     unknownWarning:
       'Le programme de reconnaissance a signalé un avertissement inconnu. Vérifiez bien l’original.',
     downloadPagesSummary: 'Télécharger les fichiers de chaque page',

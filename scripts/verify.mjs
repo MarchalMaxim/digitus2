@@ -67,6 +67,7 @@ if (want('omr:service')) {
       'pytest',
       'research/omr/service',
       'research/omr/prototypes/local-worker',
+      'research/omr/prototypes/photo-recovery/test_staff_coverage.py',
       '-q',
     ]);
 }

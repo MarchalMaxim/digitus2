@@ -5,6 +5,7 @@ import {
   createScanClient,
   GRAND_STAFF_WARNING,
   newJobId,
+  PARTLY_READ_WARNING,
   PROTOCOL,
   UNKNOWN_WARNING,
 } from './client.js';
@@ -253,6 +254,24 @@ describe('experimental scan boundary', () => {
       ),
     );
     expect((await createScanClient(fetcher).health()).warnings).toEqual([GRAND_STAFF_WARNING]);
+  });
+  it('keeps a partly read line as its marker, whatever the English message', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
+      json({
+        state: 'ready',
+        recognizer: 'Test',
+        warnings: [
+          {
+            code: 'recognition-system-partly-read',
+            message: 'Part of a line of music was not read. Compare with line 1.',
+            details: { systems: [1] },
+          },
+        ],
+        xml: '<score-partwise/>',
+      }),
+    );
+    const result = await createScanClient(fetcher, 'https://scan.test').recognize(page(), job);
+    expect(result.warnings).toEqual([PARTLY_READ_WARNING]);
   });
   it('takes a file of exactly ten mebibytes and refuses one byte more', async () => {
     const tenMiB = 10 * 1024 * 1024;

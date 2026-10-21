@@ -31,6 +31,7 @@ def main():
         "upstream.patch": here/"upstream.patch",
         "upstream-accidentals.patch": here.parent/"photo-recovery/upstream-accidentals.patch",
         "upstream-boundaries.patch": here.parent/"photo-recovery/upstream-boundaries.patch",
+        "upstream-coverage.patch": here.parent/"photo-recovery/upstream-coverage.patch",
     }
     for name, expected in manifest["patches"].items():
         retained = patch_paths[name].read_text(encoding="utf-8")
@@ -49,6 +50,7 @@ def main():
         subprocess.run([sys.executable,str(here/"patch_source.py"),"--toolchain",str(toolchain)],check=True)
         subprocess.run([sys.executable,str(here.parent/"photo-recovery/patch_accidentals.py"),str(patched)],check=True)
         subprocess.run([sys.executable,str(here.parent/"photo-recovery/patch_boundaries.py"),str(patched)],check=True)
+        subprocess.run([sys.executable,str(here.parent/"photo-recovery/patch_coverage.py"),str(patched)],check=True)
     verify_source(patched,manifest["patched"])
     (toolchain/"setup-source-provenance.json").write_text(json.dumps({
         "commit":COMMIT,"inferencePythonFiles":len(manifest["patched"]),

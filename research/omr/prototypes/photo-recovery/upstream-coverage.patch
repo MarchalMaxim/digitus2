@@ -1,0 +1,110 @@
+--- a/homr/staff_detection.py
++++ b/homr/staff_detection.py
+@@ -13,6 +13,7 @@
+ from homr.debug import Debug
+ from homr.model import Staff, StaffPoint
+ from homr.simple_logging import eprint
++from homr.staff_coverage import add_staffs_without_clef
+ from homr.type_definitions import NDArray
+ 
+ 
+@@ -846,7 +847,7 @@
+     staff is yet, as lines shining through the paper can create shifted duplicates.
+     """
+     if len(raw_staffs) == 0 or len(clef_anchors) == 0:
+-        return []
++        return raw_staffs
+     unit_size = float(np.mean([anchor.average_unit_size for anchor in clef_anchors]))
+     width = image.shape[1]
+     slice_width = max(10, int(2 * unit_size))
+@@ -860,13 +861,20 @@
+     )
+     column = _main_column([(s.min_x, s.max_x) for s in raw_staffs])
+     min_width = (column[1] - column[0]) / 2
+-    return [
++    eligible = [
+         c
+         for c in candidates
+-        if c.max_x - c.min_x >= min_width
+-        and _share_in_column(c.min_x, c.max_x, column) >= 0.9
+-        and not any(c.is_overlapping(s) for s in raw_staffs)
++        if c.max_x - c.min_x >= min_width and _share_in_column(c.min_x, c.max_x, column) >= 0.9
+     ]
++    staffs, replaced = add_staffs_without_clef(
++        raw_staffs, eligible, column, unit_size, _extrapolated_line_y
++    )
++    for partial, staff in replaced:
++        eprint(
++            f"Replaced a partial staff at x {partial.min_x:.0f}-{partial.max_x:.0f}"
++            f" with one at x {staff.min_x:.0f}-{staff.max_x:.0f}"
++        )
++    return staffs
+ 
+ 
+ def break_wide_fragments(
+@@ -957,10 +965,10 @@
+     raw_staffs = merge_staffs_in_same_row(raw_staffs)
+     if len(raw_staffs) != number_of_staffs:
+         eprint("Merged " + str(number_of_staffs - len(raw_staffs)) + " staffs split in a row")
+-    staffs_without_clef = find_staffs_without_clef(raw_staffs, clef_anchors, staff_fragments, image)
+-    if len(staffs_without_clef) > 0:
+-        eprint("Found " + str(len(staffs_without_clef)) + " staffs without clef")
+-    raw_staffs.extend(staffs_without_clef)
++    number_of_staffs = len(raw_staffs)
++    raw_staffs = find_staffs_without_clef(raw_staffs, clef_anchors, staff_fragments, image)
++    if len(raw_staffs) > number_of_staffs:
++        eprint("Found " + str(len(raw_staffs) - number_of_staffs) + " staffs without clef")
+     debug.write_bounding_boxes_alternating_colors(
+         "raw_staffs", raw_staffs + likely_bar_or_rests_lines + clefs_keys
+     )
+--- /dev/null
++++ b/homr/staff_coverage.py
+@@ -0,0 +1,48 @@
++"""Let a staff found by its lines alone replace a partial staff it completes.
++
++homr's line tracking can break a staff in two when its clef is missed. The
++duplicate filter then keeps only the part with more anchors, and the decoder
++never sees the rest of the system. The staffs homr finds by their lines alone
++are added only where no staff is yet, so the complete staff was discarded too.
++Here such a staff replaces the one staff it overlaps when it contains it, the
++partial staff spans clearly less of the page's column, and four of the five
++lines agree within half a staff space. The line check keeps out the shifted
++copies that lines shining through the paper create.
++"""
++from __future__ import annotations
++
++PARTIAL_SHARE = 0.75
++LINES_THAT_AGREE = 4
++
++
++def _completes(partial, candidate, column, unit_size, line_y) -> bool:
++    if candidate.min_x > partial.min_x + unit_size or candidate.max_x < partial.max_x - unit_size:
++        return False
++    if partial.max_x - partial.min_x >= PARTIAL_SHARE * (column[1] - column[0]):
++        return False
++    x = (max(partial.min_x, candidate.min_x) + min(partial.max_x, candidate.max_x)) / 2
++    agree = sum(
++        abs(line_y(mine, x) - line_y(theirs, x)) <= unit_size / 2
++        for mine, theirs in zip(partial.lines, candidate.lines, strict=True)
++    )
++    return agree >= LINES_THAT_AGREE
++
++
++def add_staffs_without_clef(staffs, candidates, column, unit_size, line_y):
++    """
++    The staffs with the candidates added where no staff is yet, and a candidate in place
++    of the one partial staff it completes. Returns the staffs and the (partial, candidate)
++    pairs replaced.
++    """
++    result = list(staffs)
++    replaced = []
++    for candidate in candidates:
++        overlapping = [s for s in staffs if candidate.is_overlapping(s)]
++        if not overlapping:
++            result.append(candidate)
++        elif len(overlapping) == 1 and overlapping[0] in result and _completes(
++            overlapping[0], candidate, column, unit_size, line_y
++        ):
++            result[result.index(overlapping[0])] = candidate
++            replaced.append((overlapping[0], candidate))
++    return result, replaced

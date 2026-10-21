@@ -14,6 +14,12 @@ export const UNKNOWN_WARNING =
  */
 export const GRAND_STAFF_WARNING =
   'The staves were not paired into a grand staff, so the hands are not separated.';
+/**
+ * The service read a line of music on a photo only in part, so bars may be missing or added. Kept as this
+ * page-independent marker so the review can show it, translated, above the comparison.
+ */
+export const PARTLY_READ_WARNING =
+  'A line of music was read only in part, so bars may be missing or added. Compare the result with the original.';
 
 /** The protocol this client speaks; the app and the service are deployed together. */
 export const PROTOCOL = 'digitus2-scan-v2';
@@ -43,6 +49,13 @@ function warningsOf(value: unknown): string[] {
       warning.code === 'recognition-grand-staff-unpaired'
     )
       return GRAND_STAFF_WARNING;
+    if (
+      typeof warning === 'object' &&
+      warning !== null &&
+      'code' in warning &&
+      warning.code === 'recognition-system-partly-read'
+    )
+      return PARTLY_READ_WARNING;
     if (
       typeof warning === 'object' &&
       warning !== null &&

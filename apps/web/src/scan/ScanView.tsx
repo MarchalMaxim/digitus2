@@ -19,6 +19,7 @@ import {
   GRAND_STAFF_WARNING,
   LIMITED,
   newJobId,
+  PARTLY_READ_WARNING,
   UNKNOWN_WARNING,
   type ScanServiceMetadata,
 } from './client.js';
@@ -420,7 +421,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         ? t.scan.review.unknownWarning
         : warning === GRAND_STAFF_WARNING
           ? t.scan.review.grandStaffWarning
-          : warning;
+          : warning === PARTLY_READ_WARNING
+            ? t.scan.review.partlyReadWarning
+            : warning;
   const useResult = () => {
     if (!canUseResult) return;
     useAppStore.getState().openPiece({
@@ -667,6 +670,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           {/* A lost grand staff decides every fingering, so it is said here, not under Details. */}
           {(session.warnings ?? []).includes(GRAND_STAFF_WARNING) && (
             <p role="alert">{t.scan.review.grandStaffWarning}</p>
+          )}
+          {/* Missing bars are as serious, so a partly read line is said here too. */}
+          {(session.warnings ?? []).includes(PARTLY_READ_WARNING) && (
+            <p role="alert">{t.scan.review.partlyReadWarning}</p>
           )}
           {error && <p role="alert">{error(t)}</p>}
           {corrected && corrected.applied < corrections.length && (

@@ -60,6 +60,9 @@ export const scan: Messages['scan'] = {
     /** The scanner found a piano page read as one staff: shown above the comparison. */
     grandStaffWarning:
       'As pautas não foram unidas num sistema de piano, então as duas mãos são lidas como uma. O dedilhado sairia com as mãos erradas: tente uma foto mais plana e bem iluminada ou o PDF original.',
+    /** The scanner read only part of a line of music: shown above the comparison. */
+    partlyReadWarning:
+      'Uma linha de música foi lida só em parte, então podem faltar ou sobrar compassos. Compare o resultado com o original antes de praticar.',
     unknownWarning: 'O reconhecedor indicou um aviso desconhecido. Confira bem o original.',
     downloadPagesSummary: 'Baixar os arquivos de cada página',
     downloadPage: (page: number) => `Baixar o MusicXML da página ${page}`,

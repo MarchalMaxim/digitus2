@@ -5,15 +5,25 @@ export const scan: Messages['scan'] = {
   camera: {
     title: 'Fotografía tu partitura',
     starting: 'Iniciando la cámara…',
-    frame: 'Encuadra la página completa.',
-    reference: 'Haz la primera foto',
-    align: 'Mueve el teléfono para colocar el círculo central sobre el punto.',
+    intro:
+      'Haces cinco fotos desde puntos ligeramente distintos. Se combinan en una sola página nítida.',
+    step: (n: number, total: number) => `Foto ${n} de ${total}`,
+    aim: 'Sostén el teléfono paralelo a la página y luego toca el botón.',
+    dark: 'Demasiado oscuro. Enciende la linterna.',
+    darkNoLight: 'Demasiado oscuro. Busca un sitio con más luz.',
+    blurry: 'Se ve borroso. Mantén el teléfono quieto.',
+    retryBlurry: 'Esa foto salió borrosa. Mantén el teléfono quieto y toca otra vez.',
+    align: 'Mueve el círculo hasta el punto rojo.',
     hold: 'Mantén el teléfono quieto…',
-    lost: 'Retrocede hasta que la página vuelva a estar alineada.',
-    progress: (n: number) => `Vista ${n} de 4`,
-    processing: 'Preparando tu página…',
+    lost: 'Vuelve a apuntar la cámara a la página.',
+    moving: 'Más despacio. La imagen está borrosa.',
+    keepFlat: 'Mantén el teléfono paralelo a la página mientras lo mueves.',
+    skip: 'Omitir el resto',
+    processing: 'Combinando tus fotos…',
     review: 'Revisa tu página',
+    blurryResult: 'Puede que esta página esté borrosa. Repítela si cuesta leer las notas.',
     corners: 'Ajusta las esquinas de la página',
+    adjust: 'Ajustar esquinas',
     useCorners: 'Usar estas esquinas',
     invalidCorners: 'Coloca las cuatro esquinas en orden alrededor de la página.',
     cornerLabel: (n: number) =>
@@ -30,6 +40,7 @@ export const scan: Messages['scan'] = {
     cancel: 'Cancelar',
     restart: 'Empezar de nuevo',
     capture: 'Hacer foto',
+    light: 'Linterna',
     fallback: 'Usar la cámara del dispositivo',
     denied:
       'El acceso a la cámara está bloqueado. Permítelo en los ajustes del navegador o usa la cámara del dispositivo.',
@@ -45,8 +56,6 @@ export const scan: Messages['scan'] = {
     pageCount: (n: number) =>
       plural('es', n, { one: '# página guardada', other: '# páginas guardadas' }),
     ready: 'Listo para la siguiente página',
-    blurry: 'Esta foto parece borrosa. Mantén el teléfono quieto y repítela.',
-    keepFlat: 'Mantén el teléfono paralelo a la página mientras lo mueves.',
     close: 'Cerrar cámara',
   },
   view: {
@@ -234,8 +243,8 @@ export const scan: Messages['scan'] = {
     },
   },
   phone: {
-    takePhoto: 'Hacer una foto',
-    takeAnother: 'Hacer otra foto',
+    takePhoto: 'Fotografía una partitura impresa',
+    takeAnother: 'Fotografiar otra página',
   },
   errors: {
     notCombinedSaved:

@@ -5,15 +5,26 @@ export const scan = {
   camera: {
     title: 'Photograph your score',
     starting: 'Starting camera…',
-    frame: 'Fit the whole page in the frame.',
-    reference: 'Take the first photo',
-    align: 'Move your phone to line up the centre circle with the dot.',
+    /** Under the viewfinder before the first photo: why five photos, in one breath. */
+    intro:
+      'You take five photos from slightly different spots. They are combined into one sharp page.',
+    step: (n: number, total: number) => `Photo ${n} of ${total}`,
+    aim: 'Hold the phone flat over the page, then tap the button.',
+    dark: 'Too dark. Turn on the light.',
+    darkNoLight: 'Too dark. Move to more light.',
+    blurry: 'Blurry. Hold the phone still.',
+    retryBlurry: 'That photo was blurry. Hold still and tap again.',
+    align: 'Move the circle onto the red dot.',
     hold: 'Hold still…',
-    lost: 'Move back until the page lines up again.',
-    progress: (n: number) => `View ${n} of 4`,
-    processing: 'Preparing your page…',
+    lost: 'Point the camera back at the page.',
+    moving: 'Slower. The picture is blurry.',
+    keepFlat: 'Keep the phone flat as you move it.',
+    skip: 'Skip the rest',
+    processing: 'Combining your photos…',
     review: 'Check your page',
+    blurryResult: 'This page may be blurry. Retake it if notes are hard to read.',
     corners: 'Adjust the page corners',
+    adjust: 'Adjust corners',
     useCorners: 'Use these corners',
     invalidCorners: 'Place the four corners around the page in order.',
     cornerLabel: (n: number) =>
@@ -26,6 +37,8 @@ export const scan = {
     cancel: 'Cancel',
     restart: 'Start again',
     capture: 'Take photo',
+    /** The camera's light (the torch): one toggle button, its state read out as pressed. */
+    light: 'Light',
     fallback: 'Use device camera',
     denied:
       'Camera access is blocked. Allow it in your browser settings, or use your device camera.',
@@ -38,8 +51,6 @@ export const scan = {
     cornerHint: 'Drag each corner to the edge of the paper. Use the arrow keys to fine-tune.',
     pageCount: (n: number) => plural('en', n, { one: '# page kept', other: '# pages kept' }),
     ready: 'Ready for the next page',
-    blurry: 'This photo looks blurry. Hold still and retake it.',
-    keepFlat: 'Keep your phone parallel to the page as you move it.',
     close: 'Close camera',
   },
   view: {
@@ -246,8 +257,8 @@ export const scan = {
   },
   /** The camera entry on a phone or tablet. */
   phone: {
-    takePhoto: 'Take a photo',
-    takeAnother: 'Take another photo',
+    takePhoto: 'Photograph a printed score',
+    takeAnother: 'Photograph another page',
   },
   errors: {
     notCombinedSaved:

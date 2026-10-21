@@ -28,7 +28,7 @@ test('scan on a phone: camera pages, thumb-sized tools, reading order and one Sc
   });
   await page.goto('/');
   // The library offers the camera only on a touch-only device.
-  await expect(page.getByText('Take a photo', { exact: true })).toBeVisible();
+  await expect(page.getByText('Photograph a printed score', { exact: true })).toBeVisible();
   await capture(page).setInputFiles(photo('first'));
   await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
   await capture(page).setInputFiles(photo('second'));

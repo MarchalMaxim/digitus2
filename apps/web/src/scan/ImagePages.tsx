@@ -274,7 +274,8 @@ export function ImagePages({
             )}
           </div>
           {rotating && <p role="status">{t.scan.pages.rotating}</p>}
-          <div className="row">
+          {/* The camera and the file chooser on lines of their own, never run together (issue 143). */}
+          <div className="scan-add-pages">
             {camera && (
               <CameraEntry
                 label={t.scan.phone.takeAnother}

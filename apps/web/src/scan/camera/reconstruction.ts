@@ -2,6 +2,7 @@ import type { Capture, Frame, Matrix, Point } from './vision.js';
 import { estimatePageGeometry, type PageGeometry } from './pageGeometry.js';
 import { alignLocalView, mapLocalPoint, type LocalAlignment } from './localRegistration.js';
 import { analyzeStaffGeometry, sourceYAt, type StaffGeometry } from './staffGeometry.js';
+import { fuseViews } from './fusion.js';
 
 export interface ReconstructionResult {
   frame: Frame;
@@ -9,8 +10,9 @@ export interface ReconstructionResult {
   /** Applied inverse staff mesh, in analysis-image coordinates. */
   staff: StaffGeometry | null;
   alignments: readonly LocalAlignment[];
-  /** Per-view sampled pixels. darkSamples counts reference luminance <180;
-   * shadows also qualify, so this is not a count of preserved musical marks. */
+  /** Per-view pixels whose sample agreed with the fusion's consensus of all views.
+   * darkSamples counts those with reference luminance <180; shadows also qualify,
+   * so this is not a count of preserved musical marks. */
   contributions: { reference: number; views: number[]; darkSamples: number[] };
 }
 const identity = [1, 0, 0, 0, 1, 0, 0, 0, 1];
@@ -65,6 +67,93 @@ function luminance(frame: Frame, x: number, y: number): number {
       at(Math.min(ix + 1, frame.width - 1), Math.min(iy + 1, frame.height - 1)) * tx) *
       ty
   );
+}
+function inside(region: readonly Point[], x: number, y: number): boolean {
+  let result = false;
+  for (let i = 0, j = region.length - 1; i < region.length; j = i++) {
+    const a = region[i]!,
+      b = region[j]!;
+    if (a.y > y !== b.y > y && x < ((b.x - a.x) * (y - a.y)) / (b.y - a.y) + a.x) result = !result;
+  }
+  return result;
+}
+/** mapLocalPoint, and beyond its anchors' reach (or their hull) inside a supported cell of the
+ * page the same smooth displacement field, at a confidence that keeps falling with distance.
+ * Glare or defocus leaves the reference without features exactly where the other views are
+ * needed; every such sample must still agree with the consensus of all views in the fusion. */
+function mapView(alignment: LocalAlignment, p: Point): { point: Point; confidence: number } | null {
+  const mapped = mapLocalPoint(alignment, p);
+  if (mapped) return mapped.confidence < 0.35 ? null : mapped;
+  const { width, height, cols, rows } = alignment;
+  if (!(p.x >= 0 && p.y >= 0 && p.x < width && p.y < height) || !inside(alignment.region, p.x, p.y))
+    return null;
+  const gx = Math.max(0, Math.min(cols - 1.001, (p.x / width) * (cols - 1))),
+    gy = Math.max(0, Math.min(rows - 1.001, (p.y / height) * (rows - 1)));
+  const ix = Math.floor(gx),
+    iy = Math.floor(gy),
+    tx = gx - ix,
+    ty = gy - iy,
+    cell = iy * (cols - 1) + ix;
+  if (!alignment.supported[cell]) return null;
+  const radius = Math.min(width / (cols - 1), height / (rows - 1)) * 0.72;
+  let nearest = Infinity,
+    confidence = 0;
+  for (const index of alignment.cellAnchors[cell]!) {
+    const a = alignment.anchors[index]!,
+      d = Math.hypot(a.x - p.x, a.y - p.y);
+    if (d < nearest) {
+      nearest = d;
+      confidence = a.confidence;
+    }
+  }
+  confidence *= 0.7 * Math.min(1, radius / nearest);
+  if (!(confidence >= 0.35)) return null;
+  const at = (grid: Float32Array) => {
+    const i = iy * cols + ix;
+    return (
+      (grid[i]! * (1 - tx) + grid[i + 1]! * tx) * (1 - ty) +
+      (grid[i + cols]! * (1 - tx) + grid[i + cols + 1]! * tx) * ty
+    );
+  };
+  const point = project(
+    alignment.matrix,
+    p.x + at(alignment.displacementX),
+    p.y + at(alignment.displacementY),
+  );
+  if (
+    !(point.x >= 1 && point.y >= 1) ||
+    point.x >= alignment.currentWidth - 2 ||
+    point.y >= alignment.currentHeight - 2
+  )
+    return null;
+  return { point, confidence };
+}
+/** Catmull-Rom: bilinear sampling halves a one-pixel staff line at a half-pixel offset. */
+function cubic(frame: Frame, x: number, y: number): number {
+  const ix = Math.floor(x),
+    iy = Math.floor(y),
+    tx = x - ix,
+    ty = y - iy;
+  const w = (t: number) => [
+    ((2 - t) * t - 1) * t * 0.5,
+    ((3 * t - 5) * t * t + 2) * 0.5,
+    ((4 - 3 * t) * t + 1) * t * 0.5,
+    (t - 1) * t * t * 0.5,
+  ];
+  const wx = w(tx),
+    wy = w(ty);
+  let value = 0;
+  for (let j = 0; j < 4; j++) {
+    const py = Math.max(0, Math.min(frame.height - 1, iy - 1 + j));
+    let row = 0;
+    for (let i = 0; i < 4; i++) {
+      const k = (py * frame.width + Math.max(0, Math.min(frame.width - 1, ix - 1 + i))) * 4;
+      row +=
+        wx[i]! * (frame.data[k]! * 0.299 + frame.data[k + 1]! * 0.587 + frame.data[k + 2]! * 0.114);
+    }
+    value += wy[j]! * row;
+  }
+  return value;
 }
 function validate(captures: readonly Capture[], corners: readonly Point[]) {
   if (captures.length < 1 || captures.length > 5) throw new Error('One to five captures required');
@@ -188,38 +277,49 @@ export async function reconstructPage(
     views: alignments.map(() => 0),
     darkSamples: alignments.map(() => 0),
   };
-  for (let y = 0; y < height; y++) {
-    if (y % 24 === 0) await yieldFrame(signal);
-    for (let x = 0; x < width; x++) {
-      const ax = (x / (width - 1)) * (analysis.width - 1),
-        ay = (y / (height - 1)) * (analysis.height - 1);
-      const sy = staff ? sourceYAt(staff, ax, ay) : ay;
-      const p = project(transform, ax / (analysis.width - 1), sy / (analysis.height - 1));
-      const original = luminance(reference, p.x, p.y);
-      let total = original,
-        weight = 1;
-      for (let view = 0; view < alignments.length; view++) {
-        const mapped = mapLocalPoint(alignments[view]!, p);
-        if (!mapped || mapped.confidence < 0.65) continue;
-        const level = levels[view]!,
-          value =
-            luminance(captures[view + 1]!.frame, mapped.point.x, mapped.point.y) * level.gain +
-            level.bias;
-        // Never use conflicting view evidence to add or erase musical marks.
-        // The reference has at least half the final weight even with four views.
-        if (Math.abs(value - original) > 24) continue;
-        const w = 0.25 * mapped.confidence;
-        total += value * w;
-        weight += w;
-        contributions.views[view] = contributions.views[view]! + 1;
-        if (original < 180) contributions.darkSamples[view] = contributions.darkSamples[view]! + 1;
+  // Clipped highlights only bound the true value from below: glare carries little weight.
+  const saturation = (raw: number) => (raw < 250 ? 1 : Math.max(0.05, (255 - raw) / 5));
+  await fuseViews(
+    width,
+    height,
+    captures.length,
+    (y, values, weights) => {
+      for (let x = 0; x < width; x++) {
+        const ax = (x / (width - 1)) * (analysis.width - 1),
+          ay = (y / (height - 1)) * (analysis.height - 1);
+        const sy = staff ? sourceYAt(staff, ax, ay) : ay;
+        const p = project(transform, ax / (analysis.width - 1), sy / (analysis.height - 1));
+        const original = luminance(reference, p.x, p.y);
+        values[0]![x] = original;
+        weights[0]![x] = saturation(original);
+        for (let view = 0; view < alignments.length; view++) {
+          const mapped = mapView(alignments[view]!, p);
+          if (!mapped) {
+            weights[view + 1]![x] = 0;
+            continue;
+          }
+          const level = levels[view]!,
+            raw = cubic(captures[view + 1]!.frame, mapped.point.x, mapped.point.y);
+          values[view + 1]![x] = raw * level.gain + level.bias;
+          weights[view + 1]![x] = mapped.confidence * saturation(raw);
+        }
       }
-      const i = (y * width + x) * 4,
-        value = total / weight;
-      data[i] = data[i + 1] = data[i + 2] = value;
-      data[i + 3] = 255;
-    }
-  }
+    },
+    (y, fused, admitted, values) => {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        data[i] = data[i + 1] = data[i + 2] = fused[x]!;
+        data[i + 3] = 255;
+        for (let view = 0; view < alignments.length; view++)
+          if (admitted[x]! & (2 << view)) {
+            contributions.views[view] = contributions.views[view]! + 1;
+            if (values[0]![x]! < 180)
+              contributions.darkSamples[view] = contributions.darkSamples[view]! + 1;
+          }
+      }
+    },
+    signal,
+  );
   abort(signal);
   return { frame: { width, height, data }, geometry, staff, alignments, contributions };
 }

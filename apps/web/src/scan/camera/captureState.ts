@@ -49,6 +49,9 @@ export function validCorners(corners: readonly Point[], width: number, height: n
 
 const alignmentTolerance = (center: Point) => Math.max(7, Math.min(center.x, center.y) * 0.065);
 
+/** How long the circle must rest on a dot before that view is photographed (the ring's fill). */
+export const HOLD_MS = 650;
+
 /** Elapsed time is evidence only when consecutive camera images stay aligned and sharp. */
 export function alignmentStep(
   state: Alignment,
@@ -86,7 +89,7 @@ export function alignmentStep(
     now - state.last <= 350 &&
     Math.hypot(point.x - state.point.x, point.y - state.point.y) <= tolerance * 0.5;
   const since = continuous ? (state.since ?? now) : now;
-  return { aligned: true, ready: now - since >= 650, since, last: now, point, anchors };
+  return { aligned: true, ready: now - since >= HOLD_MS, since, last: now, point, anchors };
 }
 
 /** Interior page points must also produce distinct views relative to the reference framing. */

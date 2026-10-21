@@ -5,15 +5,26 @@ export const scan: Messages['scan'] = {
   camera: {
     title: 'Fotografeer je partituur',
     starting: 'Camera starten…',
-    frame: 'Zorg dat de hele pagina in beeld is.',
-    reference: 'Maak de eerste foto',
-    align: 'Beweeg je telefoon tot de middelste cirkel op de stip ligt.',
-    hold: 'Houd stil…',
-    lost: 'Beweeg terug tot de pagina weer uitgelijnd is.',
-    progress: (n: number) => `Beeld ${n} van 4`,
-    processing: 'Je pagina voorbereiden…',
+    intro:
+      'Je maakt vijf foto’s vanaf net iets andere plekken. Ze worden samengevoegd tot één scherpe pagina.',
+    step: (n: number, total: number) => `Foto ${n} van ${total}`,
+    aim: 'Houd de telefoon plat boven de pagina en tik dan op de knop.',
+    dark: 'Te donker. Zet de zaklamp aan.',
+    darkNoLight: 'Te donker. Ga naar een plek met meer licht.',
+    blurry: 'Onscherp. Houd de telefoon stil.',
+    retryBlurry: 'Die foto was onscherp. Houd de telefoon stil en tik opnieuw.',
+    align: 'Beweeg de cirkel naar de rode stip.',
+    hold: 'Stilhouden…',
+    lost: 'Richt de camera weer op de pagina.',
+    moving: 'Langzamer. Het beeld is onscherp.',
+    keepFlat: 'Houd de telefoon plat terwijl je hem beweegt.',
+    skip: 'De rest overslaan',
+    processing: 'Je foto’s samenvoegen…',
     review: 'Controleer je pagina',
+    blurryResult:
+      'Deze pagina is misschien onscherp. Maak hem opnieuw als de noten moeilijk te lezen zijn.',
     corners: 'Pas de paginahoeken aan',
+    adjust: 'Hoeken aanpassen',
     useCorners: 'Deze hoeken gebruiken',
     invalidCorners: 'Plaats de vier hoeken in volgorde rondom de pagina.',
     cornerLabel: (n: number) =>
@@ -27,6 +38,7 @@ export const scan: Messages['scan'] = {
     cancel: 'Annuleren',
     restart: 'Opnieuw beginnen',
     capture: 'Foto maken',
+    light: 'Zaklamp',
     fallback: 'Apparaatcamera gebruiken',
     denied:
       'Cameratoegang is geblokkeerd. Sta toegang toe in je browserinstellingen of gebruik de camera van je apparaat.',
@@ -43,8 +55,6 @@ export const scan: Messages['scan'] = {
     pageCount: (n: number) =>
       plural('nl', n, { one: '# pagina bewaard', other: '# pagina’s bewaard' }),
     ready: 'Klaar voor de volgende pagina',
-    blurry: 'Deze foto lijkt onscherp. Houd stil en maak hem opnieuw.',
-    keepFlat: 'Houd je telefoon evenwijdig aan de pagina terwijl je hem beweegt.',
     close: 'Camera sluiten',
   },
   view: {
@@ -234,8 +244,8 @@ export const scan: Messages['scan'] = {
     },
   },
   phone: {
-    takePhoto: 'Foto maken',
-    takeAnother: 'Nog een foto maken',
+    takePhoto: 'Fotografeer een gedrukte partituur',
+    takeAnother: 'Nog een pagina fotograferen',
   },
   errors: {
     notCombinedSaved:

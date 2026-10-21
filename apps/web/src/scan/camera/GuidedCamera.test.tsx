@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { messages as getT } from '../../i18n/i18n.js';
 import { GuidedCamera } from './GuidedCamera.js';
 import { targetPoints } from './captureState.js';
+import * as quality from './quality.js';
 import * as vision from './vision.js';
 
 beforeEach(() => vi.stubGlobal('isSecureContext', true));
@@ -12,16 +13,18 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-it('tracks the edited page region in reference pixels for live and actual still registration', async () => {
-  const width = 1001;
-  const height = 563;
-  const trackingWidth = 360;
-  const trackingHeight = 202;
+const GOOD: quality.FrameQuality = { brightness: 160, blur: 0.2, glare: 0, page: null };
+
+/** A live camera whose frames the test delivers one at a time, at the times it chooses. */
+async function liveCamera({
+  width = 1001,
+  height = 563,
+  track = new EventTarget() as MediaStreamTrack,
+}: { width?: number; height?: number; track?: MediaStreamTrack } = {}) {
   let now = 0;
   let nextFrame!: VideoFrameRequestCallback;
   vi.spyOn(performance, 'now').mockImplementation(() => now);
   vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
-  vi.spyOn(vision, 'sharpness').mockReturnValue(100);
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (
     this: HTMLCanvasElement,
   ) {
@@ -41,8 +44,7 @@ it('tracks the edited page region in reference pixels for live and actual still 
       ) {}
     },
   );
-  const track = new EventTarget() as MediaStreamTrack;
-  track.stop = () => {};
+  track.stop ??= () => {};
   vi.stubGlobal('navigator', {
     mediaDevices: {
       getUserMedia: async () => ({ getTracks: () => [track], getVideoTracks: () => [track] }),
@@ -63,19 +65,36 @@ it('tracks the edited page region in reference pixels for live and actual still 
     cancelVideoFrameCallback: { value: () => {} },
   });
   await waitFor(() => expect(nextFrame).toBeTypeOf('function'));
-  const sample = (time: number) =>
+  return (time: number) =>
     act(() => {
       now = time;
       nextFrame(time, { mediaTime: time / 1000 } as VideoFrameCallbackMetadata);
     });
+}
+
+it('a press takes the sharp frame, then the page is tracked and each view taken by itself', async () => {
+  const width = 1001;
+  const height = 563;
+  const trackingWidth = 360;
+  const trackingHeight = 202;
+  vi.spyOn(vision, 'sharpness').mockReturnValue(100);
+  vi.spyOn(quality, 'measureFrame').mockReturnValue(GOOD);
+  vi.spyOn(quality, 'advise').mockReturnValue('good');
+  vi.spyOn(quality, 'photographable').mockReturnValue(true);
+  const sample = await liveCamera({ width, height });
   sample(0);
-  fireEvent.click(screen.getByRole('button', { name: getT().scan.camera.reference }));
-  // Change the top-left corner after acquiring the reference; stale default corners are incorrect.
-  fireEvent.keyDown(screen.getByRole('button', { name: getT().scan.camera.cornerLabel(1) }), {
-    key: 'ArrowRight',
-  });
+  const t = getT().scan.camera;
+  expect(screen.getByRole('status')).toHaveTextContent(t.aim);
+  // The shutter is the screen's one red element, and it is never disabled.
+  const shutter = screen.getByRole('button', { name: t.capture });
+  expect(shutter).toHaveClass('is-red');
+  expect(shutter).toBeEnabled();
+  expect(screen.getByRole('dialog').querySelectorAll('.is-red')).toHaveLength(1);
+  fireEvent.click(shutter);
+  expect(screen.getByRole('status')).toHaveTextContent(t.hold);
+  // No corner step: no page stood out, so the page is the frame less a 5% margin.
   const corners = [
-    { x: width * 0.05 + 2, y: height * 0.05 },
+    { x: width * 0.05, y: height * 0.05 },
     { x: width * 0.95, y: height * 0.05 },
     { x: width * 0.95, y: height * 0.95 },
     { x: width * 0.05, y: height * 0.95 },
@@ -102,18 +121,86 @@ it('tracks the edited page region in reference pixels for live and actual still 
     error: 0,
     coverage: 0.8,
   });
-  fireEvent.click(screen.getByRole('button', { name: getT().scan.camera.useCorners }));
   sample(120);
+  expect(screen.getByRole('status')).toHaveTextContent(t.align);
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: t.capture })).toBeNull();
+  sample(240);
   expect(register).toHaveBeenCalledTimes(1);
   expect(register.mock.calls[0]![2]).toEqual(region);
   expect(register.mock.calls[0]![0]).toMatchObject({
     width: trackingWidth,
     height: trackingHeight,
   });
-  fireEvent.click(screen.getByRole('button', { name: getT().scan.camera.capture }));
-  expect(register).toHaveBeenCalledTimes(2);
-  expect(register.mock.calls[1]![2]).toEqual(region);
-  expect(screen.getByRole('status')).toHaveTextContent(getT().scan.camera.progress(2));
+  expect(screen.getByRole('status')).toHaveTextContent(t.hold);
+  expect(screen.getByRole('dialog').querySelector('[data-holding="true"]')).not.toBeNull();
+  // The dot to reach is the one red element while the reader moves the phone.
+  expect(screen.getByRole('dialog').querySelectorAll('.is-red')).toHaveLength(1);
+  expect(screen.getByRole('dialog').querySelector('[data-camera-target="1"]')).toHaveClass(
+    'is-red',
+  );
+  for (let time = 360; time <= 960; time += 120) sample(time);
+  // The hold completed: the still is registered again before it counts.
+  expect(register.mock.calls.length).toBeGreaterThanOrEqual(2);
+  expect(register.mock.calls.at(-1)![2]).toEqual(region);
+  expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
+});
+
+it('a blurred press says so; a second one keeps the single photograph for review', async () => {
+  vi.spyOn(vision, 'sharpness').mockReturnValue(20);
+  vi.spyOn(quality, 'measureFrame').mockReturnValue({ ...GOOD, blur: 0.9 });
+  vi.spyOn(quality, 'advise').mockReturnValue('blurry');
+  vi.spyOn(quality, 'photographable').mockReturnValue(false);
+  const sample = await liveCamera();
+  sample(0);
+  const t = getT().scan.camera;
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  sample(120);
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(t.retryBlurry), {
+    timeout: 3000,
+  });
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  await waitFor(() => expect(screen.queryByRole('button', { name: t.capture })).toBeNull(), {
+    timeout: 3000,
+  });
+});
+
+it('offers the light only when the camera has one, and asks for it when the page is dark', async () => {
+  vi.spyOn(vision, 'sharpness').mockReturnValue(100);
+  vi.spyOn(quality, 'measureFrame').mockReturnValue({ ...GOOD, brightness: 20 });
+  vi.spyOn(quality, 'advise').mockReturnValue('dark');
+  const applied: unknown[] = [];
+  const track = new EventTarget() as MediaStreamTrack;
+  Object.assign(track, {
+    getCapabilities: () => ({ torch: true }),
+    applyConstraints: async (constraints: unknown) => {
+      applied.push(constraints);
+    },
+    stop: () => applied.push('stop'),
+  });
+  const sample = await liveCamera({ track });
+  sample(0);
+  const t = getT().scan.camera;
+  expect(screen.getByRole('status')).toHaveTextContent(t.dark);
+  const light = screen.getByRole('button', { name: t.light });
+  expect(light).toHaveAttribute('aria-pressed', 'false');
+  expect(light).toHaveAttribute('data-attention', 'true');
+  await act(async () => fireEvent.click(light));
+  expect(applied).toEqual([{ advanced: [{ torch: true }] }]);
+  expect(light).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: t.close }));
+  expect(applied.slice(1)).toEqual([{ advanced: [{ torch: false }] }, 'stop']);
+});
+
+it('has no light button when the camera reports none', async () => {
+  vi.spyOn(vision, 'sharpness').mockReturnValue(100);
+  vi.spyOn(quality, 'measureFrame').mockReturnValue(GOOD);
+  vi.spyOn(quality, 'advise').mockReturnValue('dark');
+  const sample = await liveCamera();
+  sample(0);
+  const t = getT().scan.camera;
+  expect(screen.getByRole('status')).toHaveTextContent(t.darkNoLight);
+  expect(screen.queryByRole('button', { name: t.light })).toBeNull();
 });
 
 it('stops every track when permission resolves after the dialog was closed', async () => {

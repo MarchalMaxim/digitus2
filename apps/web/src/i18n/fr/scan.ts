@@ -5,15 +5,26 @@ export const scan: Messages['scan'] = {
   camera: {
     title: 'Photographiez votre partition',
     starting: 'Démarrage de l’appareil photo…',
-    frame: 'Placez toute la page dans le cadre.',
-    reference: 'Prenez la première photo',
-    align: 'Déplacez votre téléphone pour placer le cercle central sur le point.',
+    intro:
+      'Vous prenez cinq photos depuis des positions légèrement différentes. Elles sont réunies en une seule page nette.',
+    step: (n: number, total: number) => `Photo ${n} sur ${total}`,
+    aim: 'Tenez le téléphone à plat au-dessus de la page, puis appuyez sur le bouton.',
+    dark: 'Trop sombre. Allumez la lampe.',
+    darkNoLight: 'Trop sombre. Allez dans un endroit plus éclairé.',
+    blurry: 'Flou. Tenez le téléphone immobile.',
+    retryBlurry: 'Cette photo était floue. Ne bougez plus et appuyez à nouveau.',
+    align: 'Placez le cercle sur le point rouge.',
     hold: 'Ne bougez plus…',
-    lost: 'Revenez en arrière jusqu’à ce que la page soit à nouveau alignée.',
-    progress: (n: number) => `Vue ${n} sur 4`,
-    processing: 'Préparation de votre page…',
+    lost: 'Pointez de nouveau l’appareil photo vers la page.',
+    moving: 'Plus lentement. L’image est floue.',
+    keepFlat: 'Gardez le téléphone à plat en le déplaçant.',
+    skip: 'Passer le reste',
+    processing: 'Assemblage de vos photos…',
     review: 'Vérifiez votre page',
+    blurryResult:
+      'Cette page est peut-être floue. Reprenez-la si les notes sont difficiles à lire.',
     corners: 'Ajustez les coins de la page',
+    adjust: 'Ajuster les coins',
     useCorners: 'Utiliser ces coins',
     invalidCorners: 'Placez les quatre coins dans l’ordre autour de la page.',
     cornerLabel: (n: number) =>
@@ -30,6 +41,7 @@ export const scan: Messages['scan'] = {
     cancel: 'Annuler',
     restart: 'Recommencer',
     capture: 'Prendre une photo',
+    light: 'Lampe',
     fallback: 'Utiliser l’appareil photo du téléphone',
     denied:
       'L’accès à l’appareil photo est bloqué. Autorisez-le dans les réglages du navigateur ou utilisez l’appareil photo du téléphone.',
@@ -46,8 +58,6 @@ export const scan: Messages['scan'] = {
       'Faites glisser chaque coin jusqu’au bord du papier. Utilisez les touches fléchées pour affiner.',
     pageCount: (n: number) => plural('fr', n, { one: '# page gardée', other: '# pages gardées' }),
     ready: 'Prêt pour la page suivante',
-    blurry: 'Cette photo semble floue. Ne bougez plus et reprenez-la.',
-    keepFlat: 'Gardez votre téléphone parallèle à la page pendant le déplacement.',
     close: 'Fermer l’appareil photo',
   },
   view: {
@@ -236,8 +246,8 @@ export const scan: Messages['scan'] = {
     },
   },
   phone: {
-    takePhoto: 'Prendre une photo',
-    takeAnother: 'Prendre une autre photo',
+    takePhoto: 'Photographier une partition imprimée',
+    takeAnother: 'Photographier une autre page',
   },
   errors: {
     notCombinedSaved:

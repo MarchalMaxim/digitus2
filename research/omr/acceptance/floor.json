@@ -56,12 +56,12 @@
   },
   "photoFloors": {
     "photos:as-taken": {
-      "recognisedMin": 11,
-      "importedMin": 9,
-      "barsRightMin": 8,
-      "stavesRightMin": 10,
-      "keyRightMin": 9,
-      "timeRightMin": 6
+      "recognisedMin": 14,
+      "importedMin": 12,
+      "barsRightMin": 11,
+      "stavesRightMin": 13,
+      "keyRightMin": 12,
+      "timeRightMin": 7
     },
     "photos:rotated": {
       "recognisedMin": 2,

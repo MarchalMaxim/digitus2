@@ -79,7 +79,7 @@ What remains, and why:
 
 ### Real phone photos
 
-`research/omr/photos/` holds eleven phone photographs by the owner (public domain; WhatsApp-compressed JPEGs, 1200×1600, about 0.2 MB each): pages 1 to 5 of Boëllmann's Improvisations Op. 28 (No. I in 3/4 with one sharp, No. II in 9/8 with two sharps), several in two conditions, and two photos of the continuation page of a bound book that first tested scanning. None of the pieces is in the library, so there is no note-level truth: `manifest.json` holds what was read off each page by eye, and the gate's `photos` route checks it exactly. Two photos are cut off at the bottom; none is unusable. The upside-down photos are scanned as taken and turned 180° as **Rotate** does.
+`research/omr/photos/` holds fourteen phone photographs by the owner (public domain): eleven WhatsApp-compressed JPEGs (1200×1600, about 0.2 MB each) of pages 1 to 5 of Boëllmann's Improvisations Op. 28 (No. I in 3/4 with one sharp, No. II in 9/8 with two sharps), several in two conditions, and of the continuation page of a bound book that first tested scanning; and three Google PhotoScan images (about 1070×1600) of the three pages of Bach's Invention No. 13. Only the invention is in the library, and the gate checks it like the others, so there is no note-level truth: `manifest.json` holds what was read off each page by eye, and the gate's `photos` route checks it exactly. Two photos are cut off at the bottom; none is unusable. The upside-down photos are scanned as taken and turned 180° as **Rotate** does.
 
 | Photo | Bars (page) | Staves | Key | Time (page) | Strict import | Worker rules |
 | --- | ---: | ---: | :---: | :---: | :---: | --- |
@@ -96,13 +96,18 @@ What remains, and why:
 | No. II p. 5, flat | 15 (15) | 2 | ✓ | 4/4 (9/8) | ✓ | 1 slur read as a tie |
 | Book p. 25, warm light | 13 (13) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | 1 slur read as a tie |
 | Book p. 25, dim | 13 (13) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | 1 slur read as a tie |
+| Invention 13 p. 1, PhotoScan | 12 (12) | 2 | ✓ | ✓ | ✓ | none |
+| Invention 13 p. 2, PhotoScan | 10 (10) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | none |
+| Invention 13 p. 3, PhotoScan | 3 (3) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | none |
 
-Totals as taken (11 photos): 11 recognised, 9 pass the strict import, 8 have the page's bars, 10 its staves, 9 its key, 6 its time signature. Rotated (2 photos): both recognised, 1 imports, and both have the right staves, key and time; 1 has the right bars. These counts are the gate's `photoFloors`. The worker rules changed the bar count only on the torn page (27 to 26) and changed no import result. All four slurs read as ties on page 2 (flat) were checked against the print: each is a half note tied to an eighth of the same pitch (bars 14 to 17). The other conversions were not checked by eye.
+Totals as taken (14 photos): 14 recognised, 12 pass the strict import, 11 have the page's bars, 13 its staves, 12 its key, 7 its time signature. Rotated (2 photos): both recognised, 1 imports, and both have the right staves, key and time; 1 has the right bars. These counts are the gate's `photoFloors`. The worker rules changed the bar count only on the torn page (27 to 26) and changed no import result. All four slurs read as ties on page 2 (flat) were checked against the print: each is a half note tied to an eighth of the same pitch (bars 14 to 17). The other conversions were not checked by eye.
 
 What the photos show:
 
 - **Turn an upside-down photo before scanning.** As taken, page 3 lost its grand staff (one staff whose clef keeps changing, which the review flags) and page 4 lost its key and meter; rotated, both read the right staves, key and time.
 - **The 9/8 pages are the weak case.** homr infers the meter from bar lengths when it misses the printed one, and read 4/4 on both photos of page 5, so every bar there runs 4.5 beats into a 4-beat bar; the review lists each one as longer than its time signature and offers **Set 9/8 time from bar 1**, which leaves one place to check of 14 on the flat photo (bar 14, where the hands disagree) and one of 7 on the torn photo. Page 4 fails the strict import on all three photos with a tie whose two notes do not meet. On the rotated photo it is bar 16 of homr's 16: a tied half note A4 that ends a beat before its continuation. The review points at it, and making the note dotted clears it; that bar is also one of homr's extra bars, so the photo still needs checking against the page.
+- **A missed clef can cost bars.** On Invention 13 page 1, homr finds no bass clef in the first system and its line tracking splits that staff in two; without the coverage patch the duplicate filter keeps only the right part, the system is read from the middle of bar 2, and bars 1 and 2 are lost while bar 3 is read twice (issue 129). With the patch the complete staff, found by its lines alone, takes its place and the page reads all 12 bars.
+- **A partly read system is flagged.** The adapter compares each system's width with the page's column and warns when one is read only in part. On this set it fires on page 4 (perspective, cut off) and page 5 (shadow, torn): on both a short stray staff from show-through adds bars.
 - **Extra bars** come from the cut-off photos (a partial last system) and the torn corner, which homr splits into more measures than the page has.
 - **The book page** reads the same on both photos: all 13 main bars, both hands, 155 notes. The earlier test (156 and 157 notes on the owner's first two photos of this page) also found a duplicated C5 and a bass E3 in the upper hand; without note-level truth the gate does not count them.
 

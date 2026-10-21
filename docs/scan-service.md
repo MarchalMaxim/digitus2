@@ -85,13 +85,13 @@ Before a deploy, the image is built and checked locally (`research/omr/service/R
 
 | Piece        | What it is                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Budget       | `digitus2-scan` on the billing account, 5 a month in the billing account's currency, for this project only; e-mail alerts at 50, 90 and 100 percent                                                                                                                                                                                                                          |
+| Budget       | `digitus2-scan` on the billing account, 10 a month in the billing account's currency, for this project only; e-mail alerts at 50, 90 and 100 percent                                                                                                                                                                                                                         |
 | Notification | The budget publishes the month's running cost to the Pub/Sub topic `digitus2-scan-budget` several times a day                                                                                                                                                                                                                                                                |
 | Kill-switch  | The Cloud Run function `stop-billing` (Python, `budget/main.py`, after Google's sample), triggered by the topic: when the notified cost reaches the budget, it unlinks the project from its billing account                                                                                                                                                                  |
 | Identity     | Its own service account with Billing Account Administrator on the billing account, as Google's guide grants; its code unlinks only its own project. The scan service runs as `digitus2-scan-run@<project>.iam.gserviceaccount.com`, an account with no role at all; the Compute Engine default account, which holds Editor on a project without an organization, is not used |
 | Set up with  | `powershell -File research/omr/service/budget/budget.ps1 -Project digitus2-scan -BillingAccount ID`, first in simulation mode, tested with a published notification over the budget, then redeployed with `-Simulate false` (`research/omr/service/README.md`, Budget and kill-switch)                                                                                       |
 
-This follows Google's [Disable billing usage with notifications](https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications). Billing notifications lag by hours, so the real ceiling is 5 plus what a busy instance costs during the lag: at the worst case below, about 10 a day, a lag of, for example, six hours adds about 2.50.
+This follows Google's [Disable billing usage with notifications](https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications). Billing notifications lag by hours, so the real ceiling is 10 plus what a busy instance costs during the lag: at the worst case below, about 10 a day, a lag of, for example, six hours adds about 2.50.
 
 ## When billing is disabled
 
@@ -103,15 +103,15 @@ To recover, on the first of the month, or after raising the budget for the curre
 
 Prices as published for Tier 1 regions ([Cloud Run pricing](https://cloud.google.com/run/pricing)), in US dollars:
 
-| Item                                           | Figure                                                                           |
-| ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| Free each month                                | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests                    |
-| Beyond the free grant                          | $0.000024 per vCPU-second, $0.0000025 per GiB-second, $0.40 per million requests |
-| One second of the service, 4 vCPU and 8 GiB    | $0.000116                                                                        |
-| Free recognition time a month                  | 45,000 s: about 1,300 photos of 35 s, or 2,800 PDF pages of 16 s                 |
-| What 5 US dollars' worth buys beyond the grant | about 43,000 s more, about 1,200 photos of 35 s                                  |
-| Worst case, one instance busy around the clock | about $10 a day                                                                  |
-| A warm-up request                              | at least 100 ms of the instance, about $0.00001                                  |
+| Item                                            | Figure                                                                           |
+| ----------------------------------------------- | -------------------------------------------------------------------------------- |
+| Free each month                                 | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests                    |
+| Beyond the free grant                           | $0.000024 per vCPU-second, $0.0000025 per GiB-second, $0.40 per million requests |
+| One second of the service, 4 vCPU and 8 GiB     | $0.000116                                                                        |
+| Free recognition time a month                   | 45,000 s: about 1,300 photos of 35 s, or 2,800 PDF pages of 16 s                 |
+| What 10 US dollars' worth buys beyond the grant | about 86,000 s more, about 2,500 photos of 35 s                                  |
+| Worst case, one instance busy around the clock  | about $10 a day                                                                  |
+| A warm-up request                               | at least 100 ms of the instance, about $0.00001                                  |
 
 The free grant is counted per billing account, not per project ([Cloud Run pricing](https://cloud.google.com/run/pricing)): the table assumes a billing account with no other Cloud Run usage. Any other service billed to the same account uses the same 180,000 vCPU-seconds.
 

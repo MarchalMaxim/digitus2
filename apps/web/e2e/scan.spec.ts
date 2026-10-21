@@ -11,6 +11,7 @@ import {
 import { libraryScore } from './helpers/files.js';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 
 // These flows run as a PC window (mouse, no camera), also at 360 px in the mobile project. A
 // touch phone scans the same way; its camera and thumb-sized page tools are scan-phone.spec.ts.
@@ -104,7 +105,7 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await expectOneRed(page, 'combined scan review');
   await expectNoSeriousA11y(page, 'combined scan review');
   await page.screenshot({ path: testInfo.outputPath('combined-review.png'), fullPage: true });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 });
 
 test('scan: the warm-up happens on arrival, the page goes only on Scan', async ({
@@ -296,7 +297,7 @@ test('scan: local multipage PDF preview, original upload and exact raw export', 
   expect(readFileSync(path!)).toEqual(xml);
   await expectOneRed(page, 'PDF raw review');
   await expectNoSeriousA11y(page, 'PDF raw review');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 });
 
 test('scan: known native resolution failure explains the actual cause and stays retryable', async ({

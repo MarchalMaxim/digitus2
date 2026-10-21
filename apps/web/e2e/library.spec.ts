@@ -16,6 +16,7 @@ import { expectOneRed } from './helpers/red.js';
 import { dropFrameShown, pieceRows } from './helpers/states.js';
 import { FINGER_LEGEND } from '../src/score/FingerLegend.js';
 import { TIERS } from '../src/library/levels.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -94,7 +95,9 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
       const r = p.getBoundingClientRect();
       return { left: r.left, right: r.right, top: r.top };
     }),
-    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    overflow:
+      document.documentElement.scrollWidth -
+      Math.ceil(document.documentElement.getBoundingClientRect().width),
   }));
   const phone = g.width < 480;
   const at = JSON.stringify(g);
@@ -277,9 +280,7 @@ test('library: an unsupported file shows a notice and keeps one red element', as
 
 test('library: the layout has no horizontal overflow', async ({ page }) => {
   await page.goto('/');
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
+  const overflow = await horizontalOverflow(page);
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
@@ -388,7 +389,9 @@ test('library: the last piece of the longest shelf is reachable and nothing over
   await last.scrollIntoViewIfNeeded();
   await expect(last).toBeInViewport();
   const { overflow, right, clientWidth } = await last.evaluate((el) => ({
-    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    overflow:
+      document.documentElement.scrollWidth -
+      Math.ceil(document.documentElement.getBoundingClientRect().width),
     right: el.getBoundingClientRect().right,
     clientWidth: document.documentElement.clientWidth,
   }));

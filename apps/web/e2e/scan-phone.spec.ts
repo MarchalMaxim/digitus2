@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { expectOneRed } from './helpers/red.js';
 import { mockService, PNG } from './helpers/scan.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 
 // A phone: touch only, 360 px. It photographs pages with the camera and scans them with the
 // same one button as a PC, through the same scan service.
@@ -59,7 +60,7 @@ test('scan on a phone: camera pages, thumb-sized tools, reading order and one Sc
   }
   await expectOneRed(page, 'phone pages');
   await expectNoSeriousA11y(page, 'phone pages');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
   await page.screenshot({ path: testInfo.outputPath('phone-pages.png'), fullPage: true });
 
   await page.emulateMedia({ colorScheme: 'dark' });
@@ -73,5 +74,5 @@ test('scan on a phone: camera pages, thumb-sized tools, reading order and one Sc
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
   expect(uploads).toEqual([photo('second').buffer, photo('first').buffer]);
   await expectOneRed(page, 'phone review');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 });

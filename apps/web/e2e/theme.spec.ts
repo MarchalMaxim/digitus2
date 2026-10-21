@@ -225,7 +225,9 @@ test('the switch sits at the top right, clear of the heading, at 360 px', async 
     await page.goto(url);
     const box = (await toggle(page).boundingBox())!;
     const heading = (await page.getByRole('heading', { level: 1 }).boundingBox())!;
-    const width = await page.evaluate(() => document.documentElement.clientWidth);
+    // The root's box, not clientWidth: the root reserves the scrollbar gutter (issue #107),
+    // which headless Chromium leaves out of clientWidth (helpers/overflow.ts).
+    const width = await page.evaluate(() => document.documentElement.getBoundingClientRect().width);
     expect(box.width, url).toBe(44);
     expect(box.height, url).toBe(44);
     expect(Math.abs(width - 16 - (box.x + box.width)), url).toBeLessThanOrEqual(0.5);

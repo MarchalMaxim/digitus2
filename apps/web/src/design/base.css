@@ -38,6 +38,19 @@ html {
   text-size-adjust: 100%;
 }
 
+/* A classic scrollbar (Windows, Linux) takes 15 px from the page when it appears: a score that
+   arrives after its short loading view, or a piece too short to scroll after the library, would
+   move everything sideways. The gutter stays reserved, empty on a page that does not scroll
+   (issue 107). Not on a phone-width screen: phones have overlay scrollbars, which take no
+   room, and a phone emulator that hides its scrollbars still reserves the gutter (no media
+   feature tells it from a desktop: hover and pointer flip after its first click). Print has no
+   scrollbar. */
+@media screen and (min-width: 480px) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
 /* Type scale */
 h1 {
   font-size: 1.75rem;

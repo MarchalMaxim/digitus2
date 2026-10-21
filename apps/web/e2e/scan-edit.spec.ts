@@ -10,6 +10,7 @@ import {
   scanOnePage,
 } from './helpers/scan.js';
 import { redBars, seekBar } from './helpers/seek.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 
 // Correcting needs a recognition: these flows run as a PC window (mouse, no camera), also at
 // 360 px in the mobile project (the touch phone's camera and page tools are scan-phone.spec.ts).
@@ -34,7 +35,7 @@ async function downloaded(page: Page, name: string): Promise<string> {
   return readFileSync((await download.path())!, 'utf8');
 }
 async function noOverflow(page: Page) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 }
 
 test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, reset and exported', async ({

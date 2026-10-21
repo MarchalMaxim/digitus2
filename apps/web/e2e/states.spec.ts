@@ -5,6 +5,7 @@ import { expectOneRed } from './helpers/red.js';
 import { openLibraryPiece } from './helpers/library.js';
 import { holdPianoSamples } from './helpers/samples.js';
 import { STATES } from './helpers/states.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 
 // The design brief and accessibility in every application state (verification spec 3.9): one
 // red element (or one playback cursor), zero serious or critical axe violations, and no
@@ -28,9 +29,7 @@ for (const scheme of ['light', 'dark'] as const) {
           expect(roots[0]!.inSheet && /\bnote\b/.test(roots[0]!.className)).toBe(true);
         else expect(roots[0]!.tag).toBe('button');
         await expectNoSeriousA11y(page, name);
-        const overflow = await page.evaluate(
-          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        );
+        const overflow = await horizontalOverflow(page);
         expect(overflow, `${name} horizontal overflow`).toBeLessThanOrEqual(0);
       });
     }
@@ -171,7 +170,9 @@ for (const [width, height, firstSystemMax] of [
         columnBottom: document.querySelector('.score-main')!.getBoundingClientRect().bottom,
         systemTop: document.querySelector('.score-sheet svg g.system')!.getBoundingClientRect().top,
         height: window.innerHeight,
-        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        overflow:
+          document.documentElement.scrollWidth -
+          Math.ceil(document.documentElement.getBoundingClientRect().width),
       }));
       expect(g.panelBottom).toBeLessThanOrEqual(g.playTop + 0.5);
       // The dock grows upward and the music keeps its place. When the column runs past the
@@ -368,9 +369,7 @@ test.describe('the Practice panel on a phone', () => {
     expect(line.valueHeight, JSON.stringify(line)).toBeLessThanOrEqual(line.lineHeight + 0.5);
     expect(line.sameRow, JSON.stringify(line)).toBe(true);
 
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
+    const overflow = await horizontalOverflow(page);
     expect(overflow, 'horizontal overflow with the practice section open').toBeLessThanOrEqual(0);
     const roots = await expectOneRed(page, 'practice copy at 360 px');
     expect(roots[0]!.tag).toBe('button');

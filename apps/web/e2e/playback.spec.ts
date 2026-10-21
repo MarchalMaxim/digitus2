@@ -5,6 +5,7 @@ import { accentAreas, type AccentArea, type Box } from './helpers/pixels.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
 const LOADING_THE_PIANO = 'Loading the piano…';
@@ -1686,10 +1687,8 @@ test.describe('the keyboard on a phone', () => {
       if (view.fits) expect(view.inView, `sample ${i}`).toBe(view.pressed);
       await page.waitForTimeout(250);
     }
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
-    expect(overflow).toBe(0);
+    const overflow = await horizontalOverflow(page);
+    expect(overflow).toBeLessThanOrEqual(0);
     await expectOneRed(page, 'playing on a phone');
     await expectNoSeriousA11y(page, 'playing on a phone');
   });

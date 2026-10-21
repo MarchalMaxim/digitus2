@@ -41,8 +41,13 @@ export function validCorners(corners: readonly Point[], width: number, height: n
     if (Math.hypot(b.x - a.x, b.y - a.y) < Math.min(width, height) * 0.15) return false;
     area += a.x * b.y - b.x * a.y;
   }
-  return area / 2 >= width * height * 0.2;
+  return (
+    area / 2 >= width * height * 0.2 &&
+    targetPoints(corners, { x: width / 2, y: height / 2 }).length === 4
+  );
 }
+
+const alignmentTolerance = (center: Point) => Math.max(7, Math.min(center.x, center.y) * 0.065);
 
 /** Elapsed time is evidence only when consecutive camera images stay aligned and sharp. */
 export function alignmentStep(
@@ -56,7 +61,7 @@ export function alignmentStep(
   },
 ): Alignment {
   const { now, point, center, sharp } = input;
-  const tolerance = Math.max(7, Math.min(center.x, center.y) * 0.065);
+  const tolerance = alignmentTolerance(center);
   if (
     !point ||
     !Number.isFinite(point.x) ||
@@ -84,14 +89,9 @@ export function alignmentStep(
   return { aligned: true, ready: now - since >= 650, since, last: now, point, anchors };
 }
 
-/** Bilinear points stay attached to the edited page, rather than the phone screen. */
-export function targetPoints(corners: readonly Point[]): Point[] {
-  return [
-    [0.25, 0.25],
-    [0.75, 0.25],
-    [0.75, 0.75],
-    [0.25, 0.75],
-  ].map(([u = 0, v = 0]) => ({
+/** Interior page points must also produce distinct views relative to the reference framing. */
+export function targetPoints(corners: readonly Point[], center: Point): Point[] {
+  const at = (u: number, v: number): Point => ({
     x:
       corners[0]!.x * (1 - u) * (1 - v) +
       corners[1]!.x * u * (1 - v) +
@@ -102,7 +102,28 @@ export function targetPoints(corners: readonly Point[]): Point[] {
       corners[1]!.y * u * (1 - v) +
       corners[2]!.y * u * v +
       corners[3]!.y * (1 - u) * v,
-  }));
+  });
+  // Leave room for both holds to land anywhere inside the alignment tolerance.
+  const separation = Math.min(center.x, center.y) * 0.16 + 2 * alignmentTolerance(center) + 1;
+  const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
+  const defaults = [at(0.25, 0.25), at(0.75, 0.25), at(0.75, 0.75), at(0.25, 0.75)];
+  const distinct = (points: Point[]) =>
+    points.every((point, index) =>
+      [center, ...points.slice(0, index)].every((prior) => distance(point, prior) >= separation),
+    );
+  if (distinct(defaults)) return defaults;
+
+  const fractions = [0.15, 0.25, 0.5, 0.75, 0.85];
+  const candidates = fractions.flatMap((v) => fractions.map((u) => at(u, v)));
+  const selected: Point[] = [];
+  while (selected.length < 4) {
+    const anchors = [center, ...selected];
+    const clearance = (point: Point) => Math.min(...anchors.map((prior) => distance(point, prior)));
+    const best = candidates.reduce((a, b) => (clearance(a) >= clearance(b) ? a : b));
+    if (clearance(best) < separation) return [];
+    selected.push(best);
+  }
+  return selected;
 }
 
 /** S H S^-1 for equal-aspect tracking and still canvases. */

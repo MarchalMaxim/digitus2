@@ -59,6 +59,112 @@ function multiply(a: readonly number[], b: readonly number[]): number[] {
   return result.map((v) => v / result[8]!);
 }
 
+type Interval = readonly [number, number];
+const exact = (v: number): Interval => [v, v];
+const add = (a: Interval, b: Interval): Interval => [a[0] + b[0], a[1] + b[1]];
+const subtract = (a: Interval, b: Interval): Interval => [a[0] - b[1], a[1] - b[0]];
+function product(a: Interval, b: Interval): Interval {
+  const values = [a[0] * b[0], a[0] * b[1], a[1] * b[0], a[1] * b[1]];
+  return [Math.min(...values), Math.max(...values)];
+}
+function quotient(a: Interval, b: Interval): Interval {
+  return b[0] <= 0 && b[1] >= 0 ? [-Infinity, Infinity] : product(a, [1 / b[1], 1 / b[0]]);
+}
+
+/**
+ * Enclose the homography for every corner location in the error box. In
+ * particular this bounds the vanishing-point coordinates, whose sign must be
+ * identifiable before division by their product can calibrate a focal length.
+ * Ordinary agreement across views cannot detect this error: every view uses
+ * the same manually selected reference corners.
+ */
+function cornerUncertainty(corners: readonly Point[], radius: number): Interval[] {
+  const [a, b, c, d] = corners.map((p) => ({
+    x: [p.x - radius, p.x + radius] as Interval,
+    y: [p.y - radius, p.y + radius] as Interval,
+  })) as [
+    { x: Interval; y: Interval },
+    { x: Interval; y: Interval },
+    { x: Interval; y: Interval },
+    { x: Interval; y: Interval },
+  ];
+  const dx = subtract(add(a.x, c.x), add(b.x, d.x)),
+    dy = subtract(add(a.y, c.y), add(b.y, d.y)),
+    bx = subtract(b.x, c.x),
+    by = subtract(b.y, c.y),
+    dx2 = subtract(d.x, c.x),
+    dy2 = subtract(d.y, c.y),
+    determinant = subtract(product(bx, dy2), product(dx2, by)),
+    g = quotient(subtract(product(dx, dy2), product(dx2, dy)), determinant),
+    h = quotient(subtract(product(bx, dy), product(dx, by)), determinant);
+  return [
+    add(subtract(b.x, a.x), product(g, b.x)),
+    add(subtract(d.x, a.x), product(h, d.x)),
+    a.x,
+    add(subtract(b.y, a.y), product(g, b.y)),
+    add(subtract(d.y, a.y), product(h, d.y)),
+    a.y,
+    g,
+    h,
+    exact(1),
+  ];
+}
+
+function perspectiveIsObservable(matrix: readonly number[], h: readonly Interval[]): boolean {
+  // Homographies have arbitrary scale. No normalization is needed: excluding
+  // zero in both homogeneous coordinates is invariant under a common scale.
+  return [0, 1].every((column) => {
+    const range = add(
+      add(product(exact(matrix[6]!), h[column]!), product(exact(matrix[7]!), h[column + 3]!)),
+      product(exact(matrix[8]!), h[column + 6]!),
+    );
+    return Number.isFinite(range[0]) && Number.isFinite(range[1]) && range[0] * range[1] > 0;
+  });
+}
+
+function aspectIsStable(
+  corners: readonly Point[],
+  captures: readonly GeometryCapture[],
+  radius: number,
+  aspect: number,
+): boolean {
+  const acceptable = (perturbed: Point[]) => {
+    try {
+      const result = estimateGeometry(perturbed, captures, false);
+      // Use the same proportional tolerance as cross-view aspect consensus,
+      // symmetrically so swapping page axes cannot change the decision.
+      return (
+        result.method === 'metric' &&
+        Math.max(result.aspectRatio / aspect, aspect / result.aspectRatio) < 1.035
+      );
+    } catch {
+      return false;
+    }
+  };
+  // Probe individual coordinates and every simultaneous sign combination of
+  // the eight corner-coordinate errors. Agreement between views alone misses
+  // their correlated bias. This is a deterministic sensitivity test, not an
+  // interval proof of aspect accuracy; the separate interval guard excludes
+  // singular calibrations anywhere inside the localization error box.
+  for (let coordinate = 0; coordinate < 8; coordinate++) {
+    for (const sign of [-1, 1]) {
+      const perturbed = corners.map((p, i) => ({
+        x: p.x + (coordinate === 2 * i ? sign * radius : 0),
+        y: p.y + (coordinate === 2 * i + 1 ? sign * radius : 0),
+      }));
+      if (!acceptable(perturbed)) return false;
+    }
+  }
+  for (let bits = 0; bits < 256; bits++) {
+    const perturbed = corners.map((p, i) => ({
+      x: p.x + (bits & (1 << (2 * i)) ? radius : -radius),
+      y: p.y + (bits & (1 << (2 * i + 1)) ? radius : -radius),
+    }));
+    if (!acceptable(perturbed)) return false;
+  }
+  return true;
+}
+
 /**
  * Flat rectangular paper, pinhole camera, square pixels, zero skew and principal
  * point at frame center. These are explicit assumptions, not camera calibration.
@@ -73,6 +179,14 @@ function multiply(a: readonly number[], b: readonly number[]): number[] {
 export function estimatePageGeometry(
   corners: readonly Point[],
   captures: readonly GeometryCapture[],
+): PageGeometry {
+  return estimateGeometry(corners, captures, true);
+}
+
+function estimateGeometry(
+  corners: readonly Point[],
+  captures: readonly GeometryCapture[],
+  checkSensitivity: boolean,
 ): PageGeometry {
   const reference = captures[0]?.frame;
   if (
@@ -104,6 +218,11 @@ export function estimatePageGeometry(
   const rawHeight = (length(corners[0]!, corners[3]!) + length(corners[1]!, corners[2]!)) / 2;
   if (rawWidth < 23 || rawHeight < 23) throw new Error('Page too small');
   const referenceH = squareToQuad(corners);
+  // A 0.2% frame-coordinate error is four pixels in a 2000px source. Keep it
+  // proportional to resolution because corners are positioned on a scaled
+  // preview, and clamp to at least one source pixel for quantization.
+  const radius = Math.max(1, Math.max(reference.width, reference.height) / 500),
+    uncertainH = cornerUncertainty(corners, radius);
   const views = captures.map(({ frame, matrix }) => {
     if (
       matrix.length !== 9 ||
@@ -125,11 +244,10 @@ export function estimatePageGeometry(
       z2 = h[7]!;
     const focalSquared = -(x1 * x2 + y1 * y2) / (z1 * z2),
       size = Math.max(frame.width, frame.height);
-    // Both axes must carry perspective signal; otherwise tiny corner errors
-    // can create a completely arbitrary finite focal estimate.
+    // A point estimate of perspective is insufficient: its entire localization
+    // error interval must exclude the unobservable (parallel-axis) case.
     const credible =
-      Math.abs(z1) > 0.008 &&
-      Math.abs(z2) > 0.008 &&
+      perspectiveIsObservable(matrix, uncertainH) &&
       focalSquared > (size * 0.2) ** 2 &&
       focalSquared < (size * 8) ** 2;
     return { x1, y1, z1, x2, y2, z2, focal: credible ? Math.sqrt(focalSquared) : null };
@@ -165,6 +283,15 @@ export function estimatePageGeometry(
         }
       }
     }
+  }
+  if (
+    method === 'metric' &&
+    checkSensitivity &&
+    !aspectIsStable(corners, captures, radius, aspectRatio)
+  ) {
+    method = 'approximate';
+    focalLength = null;
+    aspectRatio = rawWidth / rawHeight;
   }
   if (!Number.isFinite(aspectRatio) || aspectRatio < 0.2 || aspectRatio > 5)
     throw new Error('Unsupported page aspect');

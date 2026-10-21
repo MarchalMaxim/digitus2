@@ -7,6 +7,26 @@ import {
   validView,
   validCorners,
 } from './captureState.js';
+import type { Matrix, Point } from './vision.js';
+
+function expectReachableViews(corners: Point[], width: number, height: number) {
+  const center = { x: width / 2, y: height / 2 };
+  const previous: Matrix[] = [[1, 0, 0, 0, 1, 0, 0, 0, 1]];
+  const targets = targetPoints(corners, center);
+  expect(targets).toHaveLength(4);
+  for (const target of targets) {
+    const matrix: Matrix = [1, 0, center.x - target.x, 0, 1, center.y - target.y, 0, 0, 1];
+    expect(validView({ matrix, previous, target, center, sharp: true })).toBe(true);
+    // Every accepted hold, including its tolerance edge, must still be a distinct view.
+    const tolerance = Math.max(7, Math.min(center.x, center.y) * 0.065);
+    for (const dx of [-tolerance * 0.999, 0, tolerance * 0.999]) {
+      const shifted = [...matrix];
+      shifted[2]! += dx;
+      expect(validView({ matrix: shifted, previous, target, center, sharp: true })).toBe(true);
+    }
+    previous.push(matrix);
+  }
+}
 
 describe('real image alignment', () => {
   it('blocks crossed, reversed, nonfinite, tiny and out-of-frame page corners', () => {
@@ -102,18 +122,59 @@ describe('real image alignment', () => {
     expect(state.ready).toBe(false);
   });
   it('anchors four distinct targets inside the edited page quadrilateral', () => {
-    const points = targetPoints([
-      { x: 20, y: 20 },
-      { x: 340, y: 20 },
-      { x: 340, y: 340 },
-      { x: 20, y: 340 },
-    ]);
+    const points = targetPoints(
+      [
+        { x: 20, y: 20 },
+        { x: 340, y: 20 },
+        { x: 340, y: 340 },
+        { x: 20, y: 340 },
+      ],
+      { x: 180, y: 180 },
+    );
     expect(points).toEqual([
       { x: 100, y: 100 },
       { x: 260, y: 100 },
       { x: 260, y: 260 },
       { x: 100, y: 260 },
     ]);
+  });
+  it('can finish an accepted off-center crop whose quarter-page target is at frame center', () => {
+    const corners = [
+      { x: 119, y: 119 },
+      { x: 359, y: 119 },
+      { x: 359, y: 359 },
+      { x: 119, y: 359 },
+    ];
+    expect(validCorners(corners, 360, 360)).toBe(true);
+    expectReachableViews(corners, 360, 360);
+  });
+  it('offers four reachable distinct views for every accepted diverse crop', () => {
+    let accepted = 0;
+    for (const [width, height] of [
+      [360, 360],
+      [270, 360],
+      [360, 203],
+      [2560, 1441],
+    ]) {
+      for (const left of [0.005, 0.1, 0.33]) {
+        for (const top of [0.005, 0.1, 0.33]) {
+          for (const span of [0.5, 0.66]) {
+            for (const skew of [-0.04, 0, 0.04]) {
+              const corners = [
+                { x: width! * left, y: height! * top },
+                { x: width! * (left + span), y: height! * (top + 0.04) },
+                { x: width! * (left + span + skew), y: height! * (top + span) },
+                { x: width! * (left + 0.04), y: height! * (top + span - 0.03) },
+              ];
+              if (!validCorners(corners, width!, height!)) continue;
+              accepted++;
+              expectReachableViews(corners, width!, height!);
+            }
+          }
+        }
+      }
+    }
+    expect(accepted).toBeGreaterThan(100);
   });
   it('converts tracking homographies to full capture pixels, including perspective', () => {
     expect(scaledMatrix([1, 0, 18, 0, 1, -9, 0.001, 0, 1], 5)).toEqual([

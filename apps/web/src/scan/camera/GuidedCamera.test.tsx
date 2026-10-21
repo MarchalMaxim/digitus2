@@ -2,12 +2,118 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { messages as getT } from '../../i18n/i18n.js';
 import { GuidedCamera } from './GuidedCamera.js';
+import { targetPoints } from './captureState.js';
+import * as vision from './vision.js';
 
 beforeEach(() => vi.stubGlobal('isSecureContext', true));
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+});
+
+it('tracks the edited page region in reference pixels for live and actual still registration', async () => {
+  const width = 1001;
+  const height = 563;
+  const trackingWidth = 360;
+  const trackingHeight = 202;
+  let now = 0;
+  let nextFrame!: VideoFrameRequestCallback;
+  vi.spyOn(performance, 'now').mockImplementation(() => now);
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  vi.spyOn(vision, 'sharpness').mockReturnValue(100);
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (
+    this: HTMLCanvasElement,
+  ) {
+    return {
+      drawImage: () => {},
+      putImageData: () => {},
+      getImageData: () => ({ data: new Uint8ClampedArray(this.width * this.height * 4) }),
+    } as unknown as CanvasRenderingContext2D;
+  });
+  vi.stubGlobal(
+    'ImageData',
+    class {
+      constructor(
+        public data: Uint8ClampedArray,
+        public width: number,
+        public height: number,
+      ) {}
+    },
+  );
+  const track = new EventTarget() as MediaStreamTrack;
+  track.stop = () => {};
+  vi.stubGlobal('navigator', {
+    mediaDevices: {
+      getUserMedia: async () => ({ getTracks: () => [track], getVideoTracks: () => [track] }),
+    },
+  });
+  render(<GuidedCamera maxPages={1} onClose={() => {}} onComplete={() => {}} />);
+  const video = screen.getByRole('dialog').querySelector('video')!;
+  Object.defineProperties(video, {
+    srcObject: { value: null, writable: true },
+    videoWidth: { value: width },
+    videoHeight: { value: height },
+    requestVideoFrameCallback: {
+      value: (callback: VideoFrameRequestCallback) => {
+        nextFrame = callback;
+        return 1;
+      },
+    },
+    cancelVideoFrameCallback: { value: () => {} },
+  });
+  await waitFor(() => expect(nextFrame).toBeTypeOf('function'));
+  const sample = (time: number) =>
+    act(() => {
+      now = time;
+      nextFrame(time, { mediaTime: time / 1000 } as VideoFrameCallbackMetadata);
+    });
+  sample(0);
+  fireEvent.click(screen.getByRole('button', { name: getT().scan.camera.reference }));
+  // Change the top-left corner after acquiring the reference; stale default corners are incorrect.
+  fireEvent.keyDown(screen.getByRole('button', { name: getT().scan.camera.cornerLabel(1) }), {
+    key: 'ArrowRight',
+  });
+  const corners = [
+    { x: width * 0.05 + 2, y: height * 0.05 },
+    { x: width * 0.95, y: height * 0.05 },
+    { x: width * 0.95, y: height * 0.95 },
+    { x: width * 0.05, y: height * 0.95 },
+  ];
+  const region = corners.map((point) => ({
+    x: (point.x * trackingWidth) / width,
+    y: (point.y * trackingHeight) / height,
+  }));
+  const target = targetPoints(corners, { x: width / 2, y: height / 2 })[0]!;
+  const matrix = [
+    1,
+    0,
+    ((width / 2 - target.x) * trackingWidth) / width,
+    0,
+    1,
+    ((height / 2 - target.y) * trackingHeight) / height,
+    0,
+    0,
+    1,
+  ];
+  const register = vi.spyOn(vision, 'registerFrame').mockReturnValue({
+    matrix,
+    inliers: 30,
+    error: 0,
+    coverage: 0.8,
+  });
+  fireEvent.click(screen.getByRole('button', { name: getT().scan.camera.useCorners }));
+  sample(120);
+  expect(register).toHaveBeenCalledTimes(1);
+  expect(register.mock.calls[0]![2]).toEqual(region);
+  expect(register.mock.calls[0]![0]).toMatchObject({
+    width: trackingWidth,
+    height: trackingHeight,
+  });
+  fireEvent.click(screen.getByRole('button', { name: getT().scan.camera.capture }));
+  expect(register).toHaveBeenCalledTimes(2);
+  expect(register.mock.calls[1]![2]).toEqual(region);
+  expect(screen.getByRole('status')).toHaveTextContent(getT().scan.camera.progress(2));
 });
 
 it('stops every track when permission resolves after the dialog was closed', async () => {

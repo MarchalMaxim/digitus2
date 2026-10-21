@@ -6,7 +6,7 @@ Build the requested PhotoScan-style four-point acquisition into digitus2's exist
 
 One page begins with a reference photograph. The user then moves the phone, keeping it parallel to the paper, to place the center reticle over each of four targets anchored to the photographed page. Tracking must actually move the targets with the page. Capture a view only after alignment and a steady hold; refuse tracking loss, blur, duplicate viewpoints, and incomplete page coverage. A manual capture remains available once alignment is valid for accessibility. Do not implement decorative targets, a timer slideshow, four corner crops, or four unrelated photos.
 
-Register all five overlapping views to the reference. Produce one rectified page with conservative glare reduction that preserves black music notation. Reject unreliable alignment rather than introducing duplicate notes. Scope is flat printed pages; curved books must be flattened and retried. Provide editable page corners and a review with retake/keep. No proprietary Google assets, code or service is used.
+Register all five overlapping views to the reference. Produce one rectified page while preserving black music notation. Support smoothly curved printed score pages through staff-based straightening. Reject unreliable alignment rather than introducing duplicate notes. Provide editable page corners and a review with retake/keep. No proprietary Google assets, code or service is used. Glare removal is outside the requested scope.
 
 ## Multiple pages and integration
 
@@ -20,13 +20,19 @@ Keep the existing monochrome interface and exactly one red element visible. Came
 
 ## Verification
 
-Unit-test image geometry and registration using synthetic notation with known projective transforms, occlusion, glare, repeated staff lines and unrelated images. Assert all views contribute and dark marks survive. Test alignment/dwell reset and stale camera operations. Exercise two-page capture, retake, cancel, fallback and existing recognition integration in Playwright with controlled camera frames. Run pnpm verify and pnpm format:check. A fresh reviewer checks the UI and numerical output. Real phone optics, autofocus and glare remain a manual acceptance check and must be reported honestly.
+Unit-test image geometry and registration using synthetic notation with known projective transforms, smooth curvature, occlusion, repeated staff lines and unrelated images. Assert all views contribute, dark marks survive and already-flat geometry stays unchanged. Test alignment/dwell reset and stale camera operations. Exercise two-page capture, retake, cancel, fallback and existing recognition integration in Playwright with controlled camera frames. Run pnpm verify and pnpm format:check. Independent Astra reviewers check the acquisition, numerical output and actual-photo evidence. Real phone optics and autofocus remain a device acceptance check.
 
 ## Sources
 
 - https://support.google.com/photos/answer/7177983?hl=en — initial capture, four dots, center reticle, keep the phone parallel.
 - https://research.google/blog/photoscan-taking-glare-free-pictures-of-pictures/ — five views, feature registration, glare reduction, rectification; nonrigid pages need more than one homography.
 
-Implementation choices (ours): use bounded local processing without a new hosted runtime; retain the existing recognizer and batch model; reject curved or untrackable pages rather than claiming Google's full reconstruction quality.
+Implementation choices: bounded local processing without a new hosted runtime; the existing recognizer and batch model; independent algorithms whose limits are explicit. Google's public description discloses its pipeline but not its optimizer, parameters, crop detector or aspect estimator.
 
-User clarification during implementation (2026-10-21): reconstruction into a planar scan is central. Account for output-resolution alignment error, use local refinement before combining images, and recover rectangular proportions from perspective geometry when the camera assumptions and views support it. Near-frontal degeneracy, unknown lens distortion and curved paper must be described honestly. Google's public description discloses its pipeline but not its optimizer, parameters, crop detector or aspect estimator.
+## Reconstruction and evidence
+
+Straighten smoothly curved printed piano staves using detected five-line staff groups and a smooth, monotone image warp. Preserve photographed pixels and symbols, with no generative reconstruction. Local spatially varying alignment registers overlapping views without forcing the entire curved page into one homography. Poorly supported areas retain the reference; unreliable page identity is rejected. Staff geometry comes from the reference, while agreeing aligned views contribute image observations. Missing content is not reconstructed.
+
+Manual-corner uncertainty must prevent false metric aspect confidence; every accepted capture target must be reachable from the chosen crop; registration must require distributed evidence inside the selected page. Preserve cancellation, memory bounds, review/retake and multi-page ordering. Recover rectangular proportions only when camera assumptions and corner sensitivity support them; curved pages use approximate proportions. Strong folds, horizontal foreshortening and unknown lens distortion remain limits.
+
+The production reconstruction API must accept the actual available view count (one to five), so single-photo curvature correction and the two real same-page photos can be tested without duplicating inputs. The guided camera still acquires a reference and four distinct views. Real-photo tests record input hashes, manual crop coordinates, staff residual measurements, correspondence confidence and output files. Keep private images outside version control. A fresh Astra review and the normal verification loop gate completion. Five-view handheld capture and arbitrary creases remain distinct from the available two-view real-photo evidence.

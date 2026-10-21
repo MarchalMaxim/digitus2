@@ -264,9 +264,15 @@ export function GuidedCamera({
       const first = captures.current[0]!.frame;
       const frame = videoFrame(element, first.width, first.height);
       const small = trackingFrame(frame);
-      const registration = registerFrame(base, small);
+      const region = cornersRef.current.map((point) => ({
+        x: (point.x * base.width) / first.width,
+        y: (point.y * base.height) / first.height,
+      }));
+      const registration = registerFrame(base, small, region);
       const index = captures.current.length - 1;
-      const point = targetPoints(cornersRef.current)[index]!;
+      const point = targetPoints(cornersRef.current, { x: first.width / 2, y: first.height / 2 })[
+        index
+      ]!;
       const matrix =
         registration &&
         scaledMatrix(registration.matrix, first.width / base.width, first.height / base.height);
@@ -470,14 +476,19 @@ export function GuidedCamera({
               return;
             }
             if (!base) return;
-            const registration = registerFrame(base, current);
             const first = captures.current[0]!.frame;
+            const region = cornersRef.current.map((point) => ({
+              x: (point.x * base.width) / first.width,
+              y: (point.y * base.height) / first.height,
+            }));
+            const registration = registerFrame(base, current, region);
             const points = registration
-              ? targetPoints(cornersRef.current).map((point) =>
-                  project(registration.matrix, {
-                    x: (point.x * base.width) / first.width,
-                    y: (point.y * base.height) / first.height,
-                  }),
+              ? targetPoints(cornersRef.current, { x: first.width / 2, y: first.height / 2 }).map(
+                  (point) =>
+                    project(registration.matrix, {
+                      x: (point.x * base.width) / first.width,
+                      y: (point.y * base.height) / first.height,
+                    }),
                 )
               : [];
             setProjected(

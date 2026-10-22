@@ -111,6 +111,8 @@ What the photos show:
 - **Extra bars** come from the cut-off photos (a partial last system) and the torn corner, which homr splits into more measures than the page has.
 - **The book page** reads the same on both photos: all 13 main bars, both hands, 155 notes. The earlier test (156 and 157 notes on the owner's first two photos of this page) also found a duplicated C5 and a bass E3 in the upper hand; without note-level truth the gate does not count them.
 
+The same photos, at four turns each, measure the orientation module (`docs/research/orientation.md`).
+
 ## Routes evaluated
 
 | Route                                                                                                                                                                                                                | Runs where                                       | Result                                                                                                                                                                     | Decision                                       |

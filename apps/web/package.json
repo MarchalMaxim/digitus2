@@ -9,6 +9,7 @@
     "preview": "vite preview --port 4173 --strictPort",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "bench:orientation": "vitest run --config vitest.orientation.config.ts",
     "e2e": "vite build && playwright test",
     "e2e:ui": "playwright test --ui"
   },

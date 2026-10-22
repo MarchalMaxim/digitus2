@@ -12,5 +12,11 @@
       "@digitus2/engine/score-build": ["../../packages/engine/src/score/build.ts"]
     }
   },
-  "include": ["src", "e2e", "vite.config.ts", "playwright.config.ts"]
+  "include": [
+    "src",
+    "e2e",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "vitest.orientation.config.ts"
+  ]
 }

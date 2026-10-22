@@ -12,6 +12,7 @@ export const scan: Messages['scan'] = {
     darkNoLight: 'Demasiado escuro. Vá para um sítio com mais luz.',
     blurry: 'Imagem desfocada. Mantenha o telemóvel imóvel.',
     retryBlurry: 'Ficou desfocada. Não mexa e toque outra vez.',
+    retryCapture: 'A foto não ficou. Toque outra vez.',
     align: 'Leve o círculo até ao ponto vermelho.',
     auto: 'Cada foto é tirada sozinha quando o círculo enche.',
     hold: 'Mantenha o telemóvel imóvel…',

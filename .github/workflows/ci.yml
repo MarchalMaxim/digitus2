@@ -73,7 +73,9 @@ jobs:
       # is not built here; `pnpm --filter @digitus2/web e2e` would build the same dist again.
       - run: pnpm --filter @digitus2/web build
       # Playwright is a dependency of apps/web only; the root has no playwright binary.
-      - run: pnpm --filter @digitus2/web exec playwright install --with-deps chromium
+      # WebKit only where the iphone project's camera specs run (issue 145): the other groups name
+      # specs it does not match.
+      - run: pnpm --filter @digitus2/web exec playwright install --with-deps chromium ${{ matrix.slug == 'other-specs' && 'webkit' || '' }}
       # Each group runs on the two workers the runner's four cores give (playwright.config.ts
       # leaves the worker count at Playwright's default on purpose: the playback checks sample
       # frames in real time and a crowded runner stretches them).

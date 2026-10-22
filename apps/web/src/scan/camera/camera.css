@@ -134,6 +134,11 @@ button.camera-icon-button:not(.is-red):hover {
   stroke-dasharray: 4 6;
   opacity: 0.7;
 }
+/* The dots and the guide glide from one tracking answer to the next (issue 147). */
+.camera-tracking circle[data-camera-target],
+.camera-tracking .camera-guide {
+  transition: transform var(--glide, 120ms) linear;
+}
 .camera-tracking circle.camera-target {
   opacity: 0.75;
 }
@@ -226,6 +231,18 @@ button.camera-icon-button:not(.is-red):hover {
 }
 .guided-camera-copy .small {
   opacity: 0.75;
+}
+/* Behind ?camera=debug only (issue 145): the camera's own counts, legible in a screenshot. */
+.guided-camera-copy .camera-debug {
+  margin: 0.4rem auto 0;
+  max-width: 34rem;
+  font:
+    0.7rem/1.35 ui-monospace,
+    monospace;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  opacity: 0.8;
 }
 .guided-camera-actions {
   display: flex;

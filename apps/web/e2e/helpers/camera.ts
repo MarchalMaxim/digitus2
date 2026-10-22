@@ -61,6 +61,10 @@ export interface CameraOptions {
   noise?: number;
   /** Smear the picture along the motion while a glide is under way. */
   motionBlur?: boolean;
+  /** Systems of music on the drawn page, from the top; fewer leave the rest blank (issue 147). */
+  systems?: number;
+  /** A shaking hand: every frame the drawn page lands up to this many camera pixels off. */
+  shake?: number;
 }
 
 /**
@@ -86,11 +90,30 @@ export async function installScoreCamera(
       jitter = 1,
       noise = 2.5,
       motionBlur = true,
+      systems = 6,
+      shake = 0,
     }: CameraOptions) => {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
       const context = canvas.getContext('2d')!;
+      const soft = document.createElement('canvas');
+      const softContext = soft.getContext('2d')!;
+      /** Whether this canvas applies filters: a white pixel blurred into black must spread. */
+      const filters = (() => {
+        const probe = document.createElement('canvas');
+        probe.width = probe.height = 9;
+        const c = probe.getContext('2d')!;
+        c.fillRect(0, 0, 9, 9);
+        const dot = document.createElement('canvas');
+        dot.width = dot.height = 1;
+        const d = dot.getContext('2d')!;
+        d.fillStyle = '#fff';
+        d.fillRect(0, 0, 1, 1);
+        c.filter = 'blur(2px)';
+        c.drawImage(dot, 4, 4);
+        return c.getImageData(2, 4, 1, 1).data[0]! > 0;
+      })();
       let x = 0;
       let y = 0;
       let score = 1;
@@ -118,7 +141,7 @@ export async function installScoreCamera(
         ink.fillStyle = '#151515';
         ink.font = 'bold 16px serif';
         ink.fillText(`Piano ${score}`, 30, 30);
-        for (let system = 0; system < 6; system++) {
+        for (let system = 0; system < systems; system++) {
           const top = 58 + system * 66;
           ink.strokeStyle = '#5a5a5a';
           ink.lineWidth = 1;
@@ -213,6 +236,9 @@ export async function installScoreCamera(
         }
         step();
         const exposure = Math.min(1, light + (camera.torch ? 0.85 : 0));
+        // A shaking hand: this frame's page lands a little off, independently each frame.
+        const sx = shake ? (Math.random() * 2 - 1) * shake : 0;
+        const sy = shake ? (Math.random() * 2 - 1) * shake : 0;
         if (render) {
           // A phone camera delivers about 30 frames a second; drawing every animation frame
           // would only cost CPU (WebGL is software-rendered in headless Chromium).
@@ -222,13 +248,41 @@ export async function installScoreCamera(
             return;
           }
           lastDrawn = now;
-        } else {
+        } else if (filters) {
           context.filter = 'none';
           context.fillStyle = table ? '#2a2a2a' : '#f5f5f5';
           context.fillRect(0, 0, canvas.width, canvas.height);
           context.filter = `brightness(${exposure})${blur ? ` blur(${blur}px)` : ''}`;
-          if (table) context.drawImage(source, 50 + x, 66 + y, 260, 347);
-          else context.drawImage(source, x, y);
+          if (table) context.drawImage(source, 50 + x + sx, 66 + y + sy, 260, 347);
+          else context.drawImage(source, x + sx, y + sy);
+        } else {
+          // Safari's canvas has no filter (issue 145). Blur is a box blur of shifted copies
+          // averaged in turn, across and then down; exposure multiplies every pixel, as
+          // brightness() does.
+          context.fillStyle = table ? '#2a2a2a' : '#f5f5f5';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          if (table) context.drawImage(source, 50 + x + sx, 66 + y + sy, 260, 347);
+          else context.drawImage(source, x + sx, y + sy);
+          if (blur) {
+            const reach = Math.ceil(blur * 1.5);
+            soft.width = canvas.width;
+            soft.height = canvas.height;
+            for (const across of [true, false]) {
+              softContext.drawImage(canvas, 0, 0);
+              for (let shift = -reach, taps = 0; shift <= reach; shift++, taps++) {
+                context.globalAlpha = 1 / (taps + 1);
+                context.drawImage(soft, across ? shift : 0, across ? 0 : shift);
+              }
+              context.globalAlpha = 1;
+            }
+          }
+          if (exposure < 1) {
+            const level = Math.round(255 * exposure);
+            context.globalCompositeOperation = 'multiply';
+            context.fillStyle = `rgb(${level}, ${level}, ${level})`;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.globalCompositeOperation = 'source-over';
+          }
         }
         camera.frames++;
         requestAnimationFrame(frame);

@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { hasTorch, releaseCamera, setTorch } from './device.js';
+import { hasTorch, releaseCamera, setTorch, tick } from './device.js';
 
 function track(capabilities: object | (() => never), applied: unknown[] = []) {
   return {
@@ -52,4 +52,27 @@ it('switches the light off and lets the request land before stopping every track
   vi.mocked(silent.applyConstraints).mockReturnValue(new Promise(() => {}));
   await releaseCamera({ getTracks: () => [silent] } as unknown as MediaStream, true);
   expect(silent.stop).toHaveBeenCalledTimes(1);
+});
+
+it('issue 147: vibrates where it can, and toggles a hidden switch on an iPhone', () => {
+  const vibrate = vi.fn(() => true);
+  vi.stubGlobal('navigator', { vibrate });
+  tick('light');
+  tick();
+  expect(vibrate.mock.calls).toEqual([[10], [22]]);
+  vi.unstubAllGlobals();
+  // iOS Safari: no vibrate; the switch is clicked once and leaves nothing behind.
+  vi.stubGlobal('navigator', {});
+  const clicks: string[] = [];
+  const click = vi.spyOn(HTMLLabelElement.prototype, 'click').mockImplementation(function (
+    this: HTMLLabelElement,
+  ) {
+    const input = this.querySelector('input')!;
+    clicks.push(`${input.type} ${input.hasAttribute('switch')} ${this.isConnected}`);
+  });
+  tick();
+  expect(clicks).toEqual(['checkbox true true']);
+  expect(document.head.querySelector('label')).toBeNull();
+  click.mockRestore();
+  vi.unstubAllGlobals();
 });

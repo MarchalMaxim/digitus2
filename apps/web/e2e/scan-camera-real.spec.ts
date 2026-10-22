@@ -97,7 +97,11 @@ const viewfinder = (page: Page) =>
     const reticle = document.querySelector('circle[data-camera-reticle]');
     const point = (element: Element | null) =>
       element
-        ? { x: Number(element.getAttribute('cx')), y: Number(element.getAttribute('cy')) }
+        ? {
+            // Dots are placed by a transform (they glide); data-x and data-y say where.
+            x: Number(element.getAttribute('data-x') ?? element.getAttribute('cx')),
+            y: Number(element.getAttribute('data-y') ?? element.getAttribute('cy')),
+          }
         : null;
     return {
       photo: document.querySelector('.camera-step')?.textContent ?? null,
@@ -527,7 +531,9 @@ test('camera, real photo: five tracked photos of a printed page fuse into one pa
 
 test('camera, real photo: the capture still completes on a phone-speed CPU (4x throttled)', async ({
   page,
+  browserName,
 }, testInfo) => {
+  test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium DevTools feature');
   test.slow();
   test.setTimeout(420_000);
   await openPhotoCamera(page);

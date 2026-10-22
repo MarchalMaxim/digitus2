@@ -79,9 +79,12 @@ test('camera: stationary video cannot complete a view; cancel releases its real 
   await expectOneRed(page, 'camera viewfinder');
   await beginPage(page, 1);
   const initialFrames = await page.evaluate(() => window.scoreCamera.frames);
-  // Wait for actual camera frames, not an application timer or mocked registration result.
+  // Wait for actual camera frames, not an application timer or mocked registration result. WebKit
+  // in a container draws them more slowly: the count matters, not the time.
   await expect
-    .poll(() => page.evaluate((before) => window.scoreCamera.frames - before, initialFrames))
+    .poll(() => page.evaluate((before) => window.scoreCamera.frames - before, initialFrames), {
+      timeout: 20_000,
+    })
     .toBeGreaterThan(90);
   await expect(step(page, 2)).toBeVisible();
   // No manual shutter while tracking: the red element is the dot to reach.
@@ -141,7 +144,8 @@ test.describe('slow phone', () => {
   for (const worker of [true, false])
     test(`camera: a slow phone (a CPU ${SLOW_PHONE} times slower) still takes all five photographs${
       worker ? '' : ', without a worker'
-    }`, async ({ page }) => {
+    }`, async ({ page, browserName }) => {
+      test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium DevTools feature');
       test.setTimeout(300_000);
       if (!worker)
         await page.addInitScript(() => {
@@ -220,6 +224,119 @@ test('camera: a shaky picture says hold still, and a press always answers', asyn
   await expect(step(page, 2)).toBeVisible();
 });
 
+test('camera: a press is photographed even when no analysis comes back in time', async ({
+  page,
+}) => {
+  // Issue 145: an iPhone said the camera stopped when its analysis lagged behind the press. Here
+  // the tracker's worker answers every frame 3.5 s late, and with nothing usable.
+  await page.addInitScript(() => {
+    const Native = window.Worker;
+    window.Worker = function (url: string | URL, options?: WorkerOptions) {
+      if (!String(url).includes('tracker')) return new Native(url, options);
+      const worker = {
+        onmessage: null as ((event: { data: unknown }) => void) | null,
+        onerror: null,
+        onmessageerror: null,
+        terminate() {},
+        postMessage(message: { type: string; id: number; frame: unknown }) {
+          if (message.type === 'reference') return;
+          setTimeout(
+            () =>
+              worker.onmessage?.({
+                data: { type: 'failed', id: message.id, frame: message.frame },
+              }),
+            3_500,
+          );
+        },
+      };
+      return worker;
+    } as unknown as typeof Worker;
+  });
+  await openCamera(page);
+  await moveScore(page, 0, 0, 1);
+  await shutter(page).click();
+  await expect(step(page, 2)).toBeVisible({ timeout: 5_000 });
+  await expect(dialog(page).getByRole('alert')).toHaveCount(0);
+  await expectOneRed(page, 'press without analysis');
+});
+
+/** Record every haptic tick: vibrations where the browser has them, the iPhone's switch ticks. */
+async function recordTicks(page: Page) {
+  await page.addInitScript(() => {
+    const ticks: (number | 'switch')[] = [];
+    (window as unknown as { ticks: typeof ticks }).ticks = ticks;
+    if ('vibrate' in navigator)
+      navigator.vibrate = ((pattern: number) => {
+        ticks.push(Number(pattern));
+        return true;
+      }) as Navigator['vibrate'];
+    const click = HTMLLabelElement.prototype.click;
+    HTMLLabelElement.prototype.click = function (this: HTMLLabelElement) {
+      if (this.querySelector('input[switch]')) ticks.push('switch');
+      return click.call(this);
+    };
+  });
+}
+const ticks = (page: Page) =>
+  page.evaluate(() => (window as unknown as { ticks: (number | 'switch')[] }).ticks);
+
+test('camera: a shaking hand still takes every view, and each dot is felt', async ({ page }) => {
+  // Issue 147: the page lands up to 10 camera pixels off in every frame, as a hand holds a phone.
+  // The hold before it could not take one view from 8 pixels on; this one takes all four.
+  await recordTicks(page);
+  await mockService(page, xml('C'));
+  await openCamera(page, { shake: 10 });
+  await beginPage(page, 1);
+  await finishViews(page);
+  await expectOneRed(page, 'shaky review');
+  // A light tick when the circle reaches each dot, a firmer one as each photo is taken.
+  const felt = await ticks(page);
+  if (felt.includes('switch')) expect(felt.length).toBeGreaterThanOrEqual(9);
+  else {
+    expect(felt.filter((tick) => tick === 10).length).toBeGreaterThanOrEqual(4);
+    expect(felt.filter((tick) => tick === 22)).toHaveLength(5);
+  }
+});
+
+/**
+ * Take the four views by following the dots the camera shows, wherever it put them: read the red
+ * dot, move the page so it sits under the circle, and look again until the photo is taken.
+ */
+async function followDots(page: Page) {
+  for (let view = 0; view < 4; view++) {
+    const taken =
+      view < 3 ? step(page, view + 3) : dialog(page).getByText(t.review, { exact: true });
+    for (let attempt = 0; attempt < 4 && !(await taken.isVisible()); attempt++) {
+      const dot = dialog(page).locator('circle[data-camera-target].is-red');
+      const at = {
+        x: Number(await dot.getAttribute('data-x')),
+        y: Number(await dot.getAttribute('data-y')),
+      };
+      const now = await page.evaluate(() => ({ x: window.scoreCamera.x, y: window.scoreCamera.y }));
+      // The camera's picture is 360 x 480: its centre is the circle.
+      await moveScore(page, now.x + 180 - at.x, now.y + 240 - at.y);
+      await taken.waitFor({ timeout: 4_000 }).catch(() => {});
+    }
+    await expect(taken).toBeVisible({ timeout: 15_000 });
+  }
+}
+
+test('camera: a page with music only at its top is photographed and tracked', async ({ page }) => {
+  // Issue 147: one system, the rest of the page blank paper, as on the owner's page. The dots stay
+  // with the music, so the camera never has to leave it to reach one, and the views combine.
+  await mockService(page, xml('C'));
+  await openCamera(page, { systems: 1 });
+  await beginPage(page, 1);
+  const dots = await dialog(page)
+    .locator('circle[data-camera-target]')
+    .evaluateAll((circles) => circles.map((circle) => Number(circle.getAttribute('data-y'))));
+  // Music from about 35 to 80 of 480 camera pixels: every dot within reach of it.
+  expect(Math.max(...dots)).toBeLessThan(300);
+  await followDots(page);
+  await expect(dialog(page).getByRole('alert')).toHaveCount(0);
+  await expectOneRed(page, 'partly blank page review');
+});
+
 test('camera: a page on a contrasting table is outlined before the photo', async ({ page }) => {
   await openCamera(page, { table: true });
   await expect(dialog(page).locator('[data-camera-page]')).toHaveCount(1, { timeout: 10_000 });
@@ -252,6 +369,7 @@ test('camera: denied permission explains the device-camera fallback and imports 
 
 test('camera: real tracked views, retake and two kept pages enter ordered recognition', async ({
   page,
+  browserName,
 }, testInfo) => {
   test.setTimeout(120_000);
   const uploads: Buffer[] = [];
@@ -263,11 +381,11 @@ test('camera: real tracked views, retake and two kept pages enter ordered recogn
   await openCamera(page);
   await beginPage(page, 1);
   const target = dialog(page).locator('[data-camera-target="1"]');
-  const initialX = Number(await target.getAttribute('cx'));
+  const initialX = Number(await target.getAttribute('data-x'));
   await moveScore(page, 40, 30);
   // Vision must move the page-anchored dot in response to the pixels in the video.
   await expect
-    .poll(async () => Number(await target.getAttribute('cx')) - initialX)
+    .poll(async () => Number(await target.getAttribute('data-x')) - initialX)
     .toBeGreaterThan(15);
   await expect(step(page, 2)).toBeVisible();
   await finishViews(page);
@@ -324,5 +442,7 @@ test('camera: real tracked views, retake and two kept pages enter ordered recogn
     page.getByRole('heading', { name: 'Review the recognition', exact: true }),
   ).toBeVisible();
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
-  expect(uploads).toEqual([Buffer.from(originals[1]!), Buffer.from(originals[0]!)]);
+  // WebKit gives Playwright no body for an uploaded File: there the two uploads are counted.
+  if (browserName === 'webkit') expect(uploads).toHaveLength(2);
+  else expect(uploads).toEqual([Buffer.from(originals[1]!), Buffer.from(originals[0]!)]);
 });

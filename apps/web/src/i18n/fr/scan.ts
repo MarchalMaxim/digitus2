@@ -13,6 +13,7 @@ export const scan: Messages['scan'] = {
     darkNoLight: 'Trop sombre. Allez dans un endroit plus éclairé.',
     blurry: 'Flou. Tenez le téléphone immobile.',
     retryBlurry: 'Flou. Ne bougez plus et appuyez à nouveau.',
+    retryCapture: 'La photo n’a pas été prise. Appuyez à nouveau.',
     align: 'Placez le cercle sur le point rouge.',
     auto: 'Chaque photo se prend toute seule quand le cercle est plein.',
     hold: 'Ne bougez plus…',

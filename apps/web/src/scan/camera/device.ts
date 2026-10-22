@@ -64,11 +64,34 @@ export async function releaseCamera(
   for (const track of tracks) track.stop();
 }
 
-/** A short tick on phones that vibrate, so a capture is felt as well as seen. */
-export function tick(): void {
+/**
+ * A tick felt in the hand, as PhotoScan gives (issue 147): `light` when the circle reaches the
+ * dot, `firm` when the view is taken. Android vibrates. iOS Safari has no vibration; since iOS 18
+ * it ticks when a switch checkbox is toggled, also from script (the technique of the ios-haptics
+ * package), though iOS 26.5 is reported to have stopped the scripted tick. Elsewhere it is silent.
+ */
+export function tick(strength: 'light' | 'firm' = 'firm'): void {
   try {
-    navigator.vibrate?.(18);
+    if (typeof navigator.vibrate === 'function') {
+      navigator.vibrate(strength === 'light' ? 10 : 22);
+      return;
+    }
   } catch {
     // Some browsers throw when vibration is blocked by policy.
+    return;
+  }
+  try {
+    const label = document.createElement('label');
+    label.ariaHidden = 'true';
+    label.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.setAttribute('switch', '');
+    label.append(input);
+    document.head.append(label);
+    label.click();
+    label.remove();
+  } catch {
+    // No tick, no harm.
   }
 }

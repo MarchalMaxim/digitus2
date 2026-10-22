@@ -12,6 +12,7 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+  sessionStorage.clear();
 });
 
 const GOOD: quality.FrameQuality = { brightness: 160, blur: 0.2, glare: 0, page: null };
@@ -27,6 +28,8 @@ async function liveCamera({
   maxPages = 1,
   onClose = () => {},
   onComplete = () => {},
+  play = () => Promise.resolve(),
+  attachesNeeded = 1,
 }: {
   width?: number;
   height?: number;
@@ -34,11 +37,15 @@ async function liveCamera({
   maxPages?: number;
   onClose?: () => void;
   onComplete?: (files: File[]) => void;
+  /** The video's play(), resolved at once unless the test says otherwise. */
+  play?: () => Promise<void>;
+  /** How many times the stream must be attached before the video shows a picture. */
+  attachesNeeded?: number;
 } = {}) {
   let now = 0;
   let nextFrame: VideoFrameRequestCallback | undefined;
   vi.spyOn(performance, 'now').mockImplementation(() => now);
-  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(play);
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (
     this: HTMLCanvasElement,
   ) {
@@ -72,10 +79,22 @@ async function liveCamera({
   );
   const { rerender } = render(camera(maxPages));
   const video = screen.getByRole('dialog').querySelector('video')!;
+  let stream: unknown = null;
+  let attached = 0;
+  const showing = () => attached >= attachesNeeded;
   Object.defineProperties(video, {
-    srcObject: { value: null, writable: true },
-    videoWidth: { value: width },
-    videoHeight: { value: height },
+    srcObject: {
+      get: () => stream,
+      set: (value: unknown) => {
+        if (value) attached++;
+        stream = value;
+      },
+    },
+    // Playing, as play() left it (jsdom's own media element never plays).
+    paused: { value: false, writable: true },
+    readyState: { get: () => (showing() ? 4 : 0) },
+    videoWidth: { get: () => (showing() ? width : 0) },
+    videoHeight: { get: () => (showing() ? height : 0) },
     requestVideoFrameCallback: {
       value: (callback: VideoFrameRequestCallback) => {
         nextFrame = callback;
@@ -84,12 +103,15 @@ async function liveCamera({
     },
     cancelVideoFrameCallback: { value: () => {} },
   });
-  const ready = () => waitFor(() => expect(nextFrame).toBeTypeOf('function'));
+  const ready = () =>
+    waitFor(() => expect(nextFrame).toBeTypeOf('function'), {
+      timeout: 2000 + 1500 * attachesNeeded,
+    });
   await ready();
-  const sample = (time: number) =>
+  const sample = (time: number, metadata?: Partial<VideoFrameCallbackMetadata>) =>
     act(() => {
       now = time;
-      nextFrame!(time, { mediaTime: time / 1000 } as VideoFrameCallbackMetadata);
+      nextFrame!(time, (metadata ?? { mediaTime: time / 1000 }) as VideoFrameCallbackMetadata);
     });
   return Object.assign(sample, {
     /** Press Restart and wait for the fresh session's first frame request (never the dead one's). */
@@ -678,6 +700,43 @@ function onFirstDot(width = 1001, height = 563) {
   ];
 }
 
+it('issue 147: views that will not combine leave the first photograph as the page, not a refusal', async () => {
+  sharpFrames();
+  const prepared: number[] = [];
+  vi.spyOn(vision, 'reconstructPage').mockImplementation(async (shots) => {
+    prepared.push(shots.length);
+    if (shots.length > 1) throw new Error('Local alignment uncertain');
+    return {
+      frame: { width: 10, height: 10, data: new Uint8ClampedArray(400) },
+    } as unknown as Awaited<ReturnType<typeof vision.reconstructPage>>;
+  });
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    sample(0);
+    fireEvent.click(screen.getByRole('button', { name: t.capture }));
+    sample(120);
+    expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+    vi.spyOn(vision, 'registerFrame').mockReturnValue({
+      matrix: onFirstDot(),
+      inliers: 30,
+      error: 0,
+      coverage: 0.8,
+    });
+    for (let time = 240; time <= 1200; time += 120) sample(time);
+    expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
+    // The reader gives up on the third dot: two photographs to prepare.
+    act(() => vi.advanceTimersByTime(10_000));
+    fireEvent.click(screen.getByRole('button', { name: t.skip }));
+  } finally {
+    vi.useRealTimers();
+  }
+  await waitFor(() => expect(screen.getByText(t.review, { exact: true })).toBeInTheDocument());
+  expect(prepared).toEqual([2, 1]);
+  expect(screen.queryByRole('alert')).toBeNull();
+});
+
 it('issue 143: a slow phone, an update every 400 ms, still holds the circle on a dot', async () => {
   sharpFrames();
   const sample = await liveCamera({ maxPages: 2 });
@@ -765,32 +824,188 @@ it('issue 143: an answer about a forgotten page moves nothing and takes no view'
   expect(disposed).toHaveBeenCalledTimes(1);
 });
 
-it('issue 143: a press waits for the analysis of its frame on a slow phone, then takes it', async () => {
-  sharpFrames();
+/** A tracker that takes one question at a time and answers only when the test says so. */
+function heldTracker() {
   const asked: { frame: vision.Frame; done: (answer: unknown) => void }[] = [];
   vi.spyOn(trackerModule, 'createTracker').mockImplementation(() => {
     let busy = false;
+    const ask = (frame: vision.Frame, done: (answer: unknown) => void) => {
+      if (busy) return false;
+      busy = true;
+      asked.push({
+        frame,
+        done: (answer) => {
+          busy = false;
+          done(answer);
+        },
+      });
+      return true;
+    };
     return {
       get busy() {
         return busy;
       },
       setReference: () => {},
-      measure: (frame: vision.Frame, done: (answer: unknown) => void) => {
-        if (busy) return false;
-        busy = true;
-        asked.push({
-          frame,
-          done: (answer) => {
-            busy = false;
-            done(answer);
-          },
-        });
-        return true;
-      },
-      track: () => false,
+      measure: ask,
+      track: ask,
       dispose: () => {},
     } as unknown as trackerModule.Tracker;
   });
+  return asked;
+}
+
+it('issue 145: a press while the analysis is still busy takes the picture the camera shows', async () => {
+  sharpFrames();
+  const asked = heldTracker();
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  // A frame from before the press is still being analysed through the whole burst.
+  sample(0);
+  expect(asked).toHaveLength(1);
+  pressThroughBurst(sample, 200, 400, 600, 800);
+  expect(asked).toHaveLength(1);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  // The red dot shows at once, before any tracking answer.
+  expect(screen.getByRole('dialog').querySelector('[data-camera-target="1"]')).toHaveClass(
+    'is-red',
+  );
+  // The late answer about the old frame changes nothing.
+  act(() =>
+    asked[0]!.done({
+      type: 'measure',
+      id: 1,
+      ms: 1,
+      frame: asked[0]!.frame,
+      quality: GOOD,
+      sharp: 100,
+    }),
+  );
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+});
+
+it('issue 145: a phone that refuses the full-size read-back still gets its photograph, smaller', async () => {
+  sharpFrames();
+  heldTracker();
+  const sample = await liveCamera({ width: 4000, height: 3000, maxPages: 2 });
+  const t = getT().scan.camera;
+  vi.mocked(HTMLCanvasElement.prototype.getContext).mockImplementation(function (
+    this: HTMLCanvasElement,
+  ) {
+    const { width, height } = this;
+    return {
+      drawImage: () => {},
+      getImageData: () => {
+        // iOS: "Unable to get image data from canvas" once the page holds too much.
+        if (width >= 2560) throw new Error('Unable to get image data from canvas');
+        return { data: new Uint8ClampedArray(width * height * 4) };
+      },
+    } as unknown as CanvasRenderingContext2D;
+  });
+  sample(0);
+  pressThroughBurst(sample, 200, 400);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+});
+
+it('issue 145: a live camera whose picture cannot be read asks for another tap, and keeps running', async () => {
+  sharpFrames();
+  heldTracker();
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+  sample(0);
+  pressThroughBurst(sample, 200, 400);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByRole('status')).toHaveTextContent(t.retryCapture);
+  expect(screen.getByRole('button', { name: t.capture })).toHaveClass('is-red');
+});
+
+it('issue 145: frames that keep coming outweigh a muted flag; an ended track is a stopped camera', async () => {
+  sharpFrames();
+  heldTracker();
+  const track = new EventTarget() as MediaStreamTrack;
+  const sample = await liveCamera({ track, maxPages: 2 });
+  const t = getT().scan.camera;
+  sample(0);
+  // iOS can report the track muted while its pictures still arrive: they are the proof.
+  Object.defineProperty(track, 'muted', { value: true, configurable: true });
+  pressThroughBurst(sample, 200, 400);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: t.startOver }));
+  // A track that has ended gives nothing more, whatever frames came before.
+  Object.defineProperty(track, 'readyState', { value: 'ended' });
+  pressThroughBurst(sample, 1600, 1800);
+  expect(screen.getByRole('alert')).toHaveTextContent(t.interrupted);
+});
+
+it('issue 147: a video already showing pictures starts the camera though play() never settles', async () => {
+  sharpFrames();
+  // WebKit can leave play() pending on a live stream that plays all the same.
+  const sample = await liveCamera({ play: () => new Promise<void>(() => {}) });
+  sample(0);
+  expect(screen.getByRole('button', { name: getT().scan.camera.capture })).toBeInTheDocument();
+});
+
+it('issue 147: a video that never gets a picture is attached to its stream again', async () => {
+  sharpFrames();
+  // WebKit can leave a live stream's video at readyState 0; attaching it again starts it.
+  const sample = await liveCamera({ play: () => new Promise<void>(() => {}), attachesNeeded: 2 });
+  sample(0);
+  expect(screen.getByRole('button', { name: getT().scan.camera.capture })).toBeInTheDocument();
+});
+
+it('issue 145: a frame is new when either video clock moves, and a repeated one is not', async () => {
+  sharpFrames();
+  const asked = heldTracker();
+  const sample = await liveCamera();
+  const measured = (answered: number) =>
+    act(() =>
+      asked[answered]!.done({
+        type: 'measure',
+        id: answered,
+        ms: 1,
+        frame: asked[answered]!.frame,
+        quality: GOOD,
+        sharp: 100,
+      }),
+    );
+  // A media clock that stands still for a live camera, with the frame counter moving.
+  sample(0, { mediaTime: 0, presentedFrames: 1 });
+  measured(0);
+  sample(200, { mediaTime: 0, presentedFrames: 2 });
+  expect(asked).toHaveLength(2);
+  measured(1);
+  // The same frame again (a frozen video) is not analysed twice.
+  sample(400, { mediaTime: 0, presentedFrames: 2 });
+  expect(asked).toHaveLength(2);
+});
+
+it('issue 145: ?camera=debug shows what the camera saw; without it nothing is shown', async () => {
+  sharpFrames();
+  vi.stubGlobal('location', { ...window.location, search: '?camera=debug' });
+  const sample = await liveCamera({ maxPages: 2 });
+  sample(0);
+  await waitFor(() =>
+    expect(screen.getByRole('dialog').querySelector('.camera-debug')).toHaveTextContent(
+      /frames 1 of 1 callbacks/,
+    ),
+  );
+  cleanup();
+  vi.unstubAllGlobals();
+  sessionStorage.clear();
+  vi.stubGlobal('isSecureContext', true);
+  const later = await liveCamera();
+  later(0);
+  // Past the panel's first refresh: nothing appears without the flag.
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  expect(screen.getByRole('dialog').querySelector('.camera-debug')).toBeNull();
+});
+
+it('issue 143: a press whose own frame is still being analysed when its time is up is no stopped camera', async () => {
+  sharpFrames();
+  const asked = heldTracker();
   const sample = await liveCamera({ maxPages: 2 });
   const t = getT().scan.camera;
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
@@ -798,19 +1013,9 @@ it('issue 143: a press waits for the analysis of its frame on a slow phone, then
     fireEvent.click(screen.getByRole('button', { name: t.capture }));
     sample(100);
     expect(asked).toHaveLength(1);
-    // The press's time is up while its frame is still being analysed: not a stopped camera.
-    act(() => vi.advanceTimersByTime(1500));
+    // Issue 145: the picture the camera shows is taken at once, rather than waiting on the answer.
+    act(() => vi.advanceTimersByTime(1200));
     expect(screen.queryByRole('alert')).toBeNull();
-    act(() =>
-      asked[0]!.done({
-        type: 'measure',
-        id: 1,
-        ms: 1,
-        frame: asked[0]!.frame,
-        quality: GOOD,
-        sharp: 100,
-      }),
-    );
     expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
   } finally {
     vi.useRealTimers();

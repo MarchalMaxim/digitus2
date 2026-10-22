@@ -12,6 +12,7 @@ export const scan: Messages['scan'] = {
     darkNoLight: 'Te donker. Ga naar een plek met meer licht.',
     blurry: 'Onscherp. Houd de telefoon stil.',
     retryBlurry: 'Onscherp. Houd de telefoon stil en tik opnieuw.',
+    retryCapture: 'De foto is niet gelukt. Tik opnieuw.',
     align: 'Beweeg de cirkel naar de rode stip.',
     auto: 'Elke foto wordt vanzelf genomen als de cirkel vol is.',
     hold: 'Stilhouden…',

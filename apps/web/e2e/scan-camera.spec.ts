@@ -105,21 +105,22 @@ test('camera: a frozen video cannot count as a pause', async ({ page }) => {
   await mockService(page, xml('C'));
   await openCamera(page);
   await beginPage(page, 1);
-  // Freeze the moment a pause somewhere new begins (issue 140): no Playwright round trip may
-  // fall inside the pause, which a slow runner can outlast.
+  // Move somewhere new and freeze once the first picture of it is drawn (issue 140): no
+  // Playwright round trip may fall inside the pause, which a slow runner can outlast. Freezing at
+  // the camera, not when the app shows the pause, keeps the analysis's own lag (real pictures of
+  // the new place, already on their way) from counting as the frozen time.
   await page.evaluate(() => {
-    const observer = new MutationObserver(() => {
-      if (!document.querySelector('[data-camera-reticle][data-settling="true"]')) return;
+    const before = window.scoreCamera.frames;
+    const watch = () => {
+      if (window.scoreCamera.frames <= before) {
+        requestAnimationFrame(watch);
+        return;
+      }
       window.scoreCamera.freeze(true);
       (window as unknown as { frozeAt: number }).frozeAt = performance.now();
-      observer.disconnect();
-    });
-    observer.observe(document.body, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['data-settling'],
-    });
+    };
     window.scoreCamera.move(81, 108);
+    requestAnimationFrame(watch);
   });
   const frozeAt = () =>
     page.evaluate(() => (window as unknown as { frozeAt?: number }).frozeAt ?? null);

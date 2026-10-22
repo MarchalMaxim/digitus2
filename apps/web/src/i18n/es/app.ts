@@ -8,4 +8,6 @@ export const app: Messages['app'] = {
   darkTheme: 'Tema oscuro',
   engineFailed: (detail: string) =>
     detail ? `el motor ha fallado: ${detail}` : 'el motor ha fallado',
+  updateReady: 'Hay una versión nueva lista.',
+  reload: 'Recargar',
 };

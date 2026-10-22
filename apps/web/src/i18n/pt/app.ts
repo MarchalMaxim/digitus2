@@ -7,4 +7,6 @@ export const app: Messages['app'] = {
   fileNotRestorable: 'Abra-a em Minhas partituras, ou escolha o arquivo de novo.',
   darkTheme: 'Tema escuro',
   engineFailed: (detail: string) => (detail ? `o motor falhou: ${detail}` : 'o motor falhou'),
+  updateReady: 'Uma nova versão está pronta.',
+  reload: 'Recarregar',
 };

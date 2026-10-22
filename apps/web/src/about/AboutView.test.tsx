@@ -1,5 +1,7 @@
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { build, formatBuildDay } from '../app/build.js';
+import type * as BuildModule from '../app/build.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import type * as ManifestModule from '../library/manifest.js';
 import {
@@ -40,6 +42,31 @@ function expectedCredit(library: readonly LibraryPiece[]): string {
 
 function creditParagraph(): HTMLElement {
   return screen.getByText(/^The pieces use public-domain or Creative Commons editions\./);
+}
+
+/**
+ * A fresh AboutView and i18n that read `stamp` as the build. The fresh modules do not have the
+ * test setup's manifest, so the library is mocked empty; call `unbuilt` afterwards.
+ */
+async function aboutBuilt(stamp: { commit: string; date: string }) {
+  vi.resetModules();
+  vi.doMock('../app/build.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof BuildModule>()),
+    build: stamp,
+  }));
+  vi.doMock('../library/manifest.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof ManifestModule>()),
+    loadPieceDetails: async () => new Map<string, LibraryPiece>(),
+  }));
+  const { AboutView: View } = await import('./AboutView.js');
+  const { chooseLocale: choose } = await import('../i18n/i18n.js');
+  return { View, choose };
+}
+
+function unbuilt(): void {
+  vi.doUnmock('../app/build.js');
+  vi.doUnmock('../library/manifest.js');
+  vi.resetModules();
 }
 
 describe('AboutView', () => {
@@ -132,6 +159,40 @@ describe('AboutView', () => {
     } finally {
       vi.doUnmock('../library/manifest.js');
       vi.resetModules();
+    }
+  });
+  it('names the build it runs, with the build day, as its last line', () => {
+    const { container } = render(<AboutView />);
+    const day = formatBuildDay('en');
+    const line = screen.getByText(day ? `Build ${build.commit} · ${day}` : `Build ${build.commit}`);
+    expect(line).toBeInTheDocument();
+    expect(container.querySelector('main')!.lastElementChild).toBe(line);
+  });
+  it('writes the build day in the language of the reader', async () => {
+    const { View, choose } = await aboutBuilt({
+      commit: 'c581d66',
+      date: '2026-10-22T23:30:00.000Z',
+    });
+    try {
+      const view = render(<View />);
+      expect(screen.getByText('Build c581d66 · October 22, 2026')).toBeInTheDocument();
+      view.unmount();
+      await act(async () => {
+        await choose('fr');
+      });
+      render(<View />);
+      expect(screen.getByText('Version c581d66 · 22 octobre 2026')).toBeInTheDocument();
+    } finally {
+      unbuilt();
+    }
+  });
+  it('names only the commit of a dev build', async () => {
+    const { View } = await aboutBuilt({ commit: 'dev', date: '' });
+    try {
+      render(<View />);
+      expect(screen.getByText('Build dev')).toBeInTheDocument();
+    } finally {
+      unbuilt();
     }
   });
   it('has exactly one red element, the back button', () => {

@@ -1,12 +1,13 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import { build, formatBuildDay } from '../app/build.js';
 import { messageOf } from '../app/errors.js';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { Loader } from '../design/Loader.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
-import { downloadText } from '../export/download.js';
+import { downloadText, shareOrDownload } from '../export/download.js';
 import { createEngineClient, type EngineClient } from '../engine/client.js';
 import { createRenderer, type ScoreRenderer } from '../score/render/renderer.js';
 import { ScoreSheet } from '../score/ScoreSheet.js';
@@ -23,6 +24,7 @@ import {
   UNKNOWN_WARNING,
   type ScanServiceMetadata,
 } from './client.js';
+import { makeScanArchive } from './bundle.js';
 import { meterOffers, type Correction } from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
@@ -110,6 +112,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setEditStatusPhrase(() => phrase);
   };
   const [undoStack, setUndoStack] = useState<Correction[][]>([]);
+  const [archiving, setArchiving] = useState(false);
   const [sheetHost, setSheetHost] = useState<HTMLDivElement | null>(null);
   const resultHost = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -555,6 +558,24 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     }
   };
   const baseName = session.file.name.replace(/\.[^.]+$/, '');
+  // Everything the scan did in one file: the phone's share sheet where it has one, else a download.
+  const downloadAll = async () => {
+    if (archiving) return;
+    setArchiving(true);
+    try {
+      const archive = await makeScanArchive(session, {
+        correctedXml: corrected && kept.length > 0 ? corrected.xml : undefined,
+        warnings: [...new Set([...(session.warnings ?? []), ...warnings])],
+        build,
+        userAgent: navigator.userAgent,
+      });
+      await shareOrDownload(archive, baseName || archive.name);
+    } catch (cause) {
+      if (alive.current) setError((m) => messageOf(cause, m));
+    } finally {
+      if (alive.current) setArchiving(false);
+    }
+  };
   // The bar's timing is said only when the hands disagree or a hand overruns the bar.
   const statusText = editStatus
     ? editStatus(t)
@@ -868,6 +889,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     ? new Date(session.recognizedAt).toLocaleString(locale)
                     : ''}
                 </p>
+                <p>{t.about.build(build.commit, formatBuildDay(locale, build))}</p>
                 <p>{t.scan.review.retained}</p>
                 {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
                   <p>{t.scan.review.beamGrouping}</p>
@@ -889,6 +911,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               <details className="scan-files">
                 <summary>{t.scan.review.filesSummary}</summary>
                 <div className="stack">
+                  <button
+                    className="text-button scan-download"
+                    disabled={archiving}
+                    onClick={() => {
+                      void downloadAll();
+                    }}
+                  >
+                    {t.scan.review.downloadAll}
+                  </button>
                   {session.xml && (
                     <button
                       className="text-button scan-download"

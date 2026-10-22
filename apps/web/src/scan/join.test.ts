@@ -222,6 +222,25 @@ describe('issue 152: a page read as a treble part and a bass part', () => {
       [45, 32, 8, 2],
     ]);
   });
+  it('declares the second staff in the first opening attributes when the split page leads', () => {
+    // Issue 156: Verovio reads the staff count from the first measure's first <attributes> only.
+    const xml = joinScanPages([splitPage(), page()]);
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const opening = [...doc.querySelector('part > measure')!.children].filter(
+      (child) => child.tagName === 'attributes',
+    );
+    expect(opening.length).toBeGreaterThan(1);
+    expect(opening[0]!.querySelector('staves')?.textContent).toBe('2');
+    expect(opening.slice(1).flatMap((a) => [...a.querySelectorAll('staves')])).toEqual([]);
+    // After divisions and time, before the clefs, as the schema orders them.
+    expect([...opening[0]!.children].map((child) => child.tagName)).toEqual([
+      'divisions',
+      'time',
+      'staves',
+    ]);
+    const { score } = parseMusicXml(xml, { preserveNotation: true });
+    expect(new Set(score.notes.map((n) => n.staff))).toEqual(new Set([1, 2]));
+  });
   it('leaves a batch of split pages, and a split page alone, as they were', () => {
     expect(joinScanPages([splitPage()])).toBe(splitPage());
     const xml = joinScanPages([splitPage(), splitPage()]);

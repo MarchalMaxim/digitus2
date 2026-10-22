@@ -80,4 +80,6 @@ export const about: Messages['about'] = {
       'sous CC0, selon ce qu’a déclaré la personne qui l’a publiée, et indique sa source et sa licence ' +
       'sur sa page de partition.',
   },
+  build: (commit: string, day: string) =>
+    day ? `Version ${commit} · ${day}` : `Version ${commit}`,
 };

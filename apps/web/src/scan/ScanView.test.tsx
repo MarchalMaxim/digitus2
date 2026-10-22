@@ -1,8 +1,13 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { unzipSync } from 'fflate';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { build, formatBuildDay } from '../app/build.js';
 import { useAppStore } from '../app/store.js';
+import { en } from '../i18n/en/index.js';
+import { messages as fr } from '../i18n/fr/index.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
+import type { ScanSession } from './model.js';
 import { ScanView } from './ScanView.js';
 
 const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -425,4 +430,146 @@ it('renders the recognition at the width of its column, rounded to a step of 80 
   } finally {
     delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth;
   }
+});
+
+/** A scan of two pages, recognised and combined, as the review opens it. */
+function reviewed(): ScanSession {
+  const first = new File([png], 'source.png', { type: 'image/png' });
+  const second = new File([new Uint8Array([...png, 1])], 'second.png', { type: 'image/png' });
+  return {
+    id: 'saved',
+    file: first,
+    pages: [
+      { id: 'first', file: first, xml: '<score-partwise/>' },
+      { id: 'second', file: second, xml: '<score-partwise/>' },
+    ],
+    xml: '<score-partwise/>',
+    recognizedAt: '2026-10-22T20:30:00.000Z',
+    recognizer: 'homr',
+  };
+}
+
+/** The phone's share sheet, as the browser exposes it; removed again by `withoutShare`. */
+function stubShare(canShare: boolean, share: () => Promise<void> = () => Promise.resolve()) {
+  const sheet = {
+    canShare: vi.fn((_data?: ShareData) => canShare),
+    share: vi.fn((_data?: ShareData) => share()),
+  };
+  Object.defineProperty(navigator, 'canShare', { value: sheet.canShare, configurable: true });
+  Object.defineProperty(navigator, 'share', { value: sheet.share, configurable: true });
+  return sheet;
+}
+
+function withoutShare() {
+  Reflect.deleteProperty(navigator, 'share');
+  Reflect.deleteProperty(navigator, 'canShare');
+}
+
+/** The downloads the page starts: the files handed to an object URL, and the anchors' names. */
+function spyDownloads() {
+  const blobs: Blob[] = [];
+  const names: string[] = [];
+  const original = { create: URL.createObjectURL, revoke: URL.revokeObjectURL };
+  URL.createObjectURL = (blob: Blob | MediaSource) => {
+    blobs.push(blob as Blob);
+    return 'blob:x';
+  };
+  URL.revokeObjectURL = () => {};
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+    this: HTMLAnchorElement,
+  ) {
+    if (this.download) names.push(this.download);
+  });
+  return {
+    blobs,
+    names,
+    restore: () => {
+      URL.createObjectURL = original.create;
+      URL.revokeObjectURL = original.revoke;
+    },
+  };
+}
+
+const REVIEW_ENTRIES = [
+  'combined-recognized.musicxml',
+  'page-1-recognized.musicxml',
+  'page-1.png',
+  'page-2-recognized.musicxml',
+  'page-2.png',
+  'scan.json',
+];
+
+it('shares everything the scan did as one ZIP where the phone can share files', async () => {
+  const downloads = spyDownloads();
+  const sheet = stubShare(true);
+  try {
+    render(<ScanView session={reviewed()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Download everything' }));
+    await vi.waitFor(() => expect(sheet.share).toHaveBeenCalledTimes(1));
+    const data = sheet.share.mock.calls[0]![0]!;
+    expect(data.title).toBe('source');
+    expect(data.files).toHaveLength(1);
+    const archive = data.files![0]!;
+    expect(archive.name).toBe('source-scan.zip');
+    expect(archive.type).toBe('application/zip');
+    expect(sheet.canShare).toHaveBeenCalledWith({ files: [archive] });
+    const entries = unzipSync(new Uint8Array(await archive.arrayBuffer()));
+    expect(Object.keys(entries).sort()).toEqual(REVIEW_ENTRIES);
+    expect(entries['page-1.png']).toEqual(png);
+    expect(downloads.names).toEqual([]);
+  } finally {
+    withoutShare();
+    downloads.restore();
+  }
+});
+
+it('downloads the same ZIP where the browser cannot share files', async () => {
+  const downloads = spyDownloads();
+  const sheet = stubShare(false);
+  try {
+    render(<ScanView session={reviewed()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Download everything' }));
+    await vi.waitFor(() => expect(downloads.names).toEqual(['source-scan.zip']));
+    expect(sheet.share).not.toHaveBeenCalled();
+    const archive = downloads.blobs.find((b) => (b as File).name === 'source-scan.zip')!;
+    const entries = unzipSync(new Uint8Array(await archive.arrayBuffer()));
+    expect(Object.keys(entries).sort()).toEqual(REVIEW_ENTRIES);
+  } finally {
+    withoutShare();
+    downloads.restore();
+  }
+});
+
+it('says nothing when the share sheet is closed', async () => {
+  const downloads = spyDownloads();
+  const sheet = stubShare(true, () => Promise.reject(new DOMException('closed', 'AbortError')));
+  try {
+    render(<ScanView session={reviewed()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Download everything' }));
+    await vi.waitFor(() => expect(sheet.share).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(downloads.names).toEqual([]);
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Download everything' })).toBeEnabled();
+  } finally {
+    withoutShare();
+    downloads.restore();
+  }
+});
+
+it('names the build under Recognition details, the day in the language of the reader', async () => {
+  render(<ScanView session={reviewed()} />);
+  expect(
+    screen.getByText(en.about.build(build.commit, formatBuildDay('en', build))),
+  ).toBeInTheDocument();
+  cleanup();
+  await act(async () => {
+    await chooseLocale('fr');
+  });
+  render(<ScanView session={reviewed()} />);
+  expect(
+    screen.getByText(fr.about.build(build.commit, formatBuildDay('fr', build))),
+  ).toBeInTheDocument();
 });

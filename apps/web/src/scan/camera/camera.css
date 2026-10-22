@@ -36,6 +36,29 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
 }
+/* One dot per photo under the count: a thin outline until the photo is taken, then solid white
+   (issue 156). Small and quiet; the count above is the accessible progress. */
+.camera-progress {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.camera-dot {
+  width: 8px;
+  height: 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--on-accent);
+  border-radius: 50%;
+  opacity: 0.5;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+}
+.camera-dot[data-taken='true'] {
+  background: var(--on-accent);
+  opacity: 1;
+}
 .camera-icon-button {
   width: 44px;
   height: 44px;
@@ -109,7 +132,7 @@ button.camera-icon-button:not(.is-red):hover {
   /* A dark halo, so white marks read on white paper as well as on a dark table. */
   filter: drop-shadow(0 0 1px var(--key-black)) drop-shadow(0 0 2px var(--key-black));
 }
-/* Tracking lost: the circle and the marks dim until the page is found again. */
+/* Tracking lost: the circle dims until the page is found again. */
 .camera-tracking.is-lost circle {
   opacity: 0.45;
 }
@@ -130,20 +153,27 @@ button.camera-icon-button:not(.is-red):hover {
 .camera-tracking circle.is-red[data-settling='true'] {
   stroke-width: 6;
 }
-/* Where each photo was taken (issue 154): a white dot on the page, gliding with it between
-   tracking answers. */
-.camera-tracking circle.camera-mark {
-  fill: currentColor;
-  stroke: none;
-  transition: transform 120ms linear;
+/* A photo is taken: the circle swells and settles back, once (issue 156). It scales about its
+   own centre; the stroke keeps its width (vector-effect). */
+.camera-tracking circle.is-red.is-popping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: camera-pop 250ms var(--ease);
 }
+@keyframes camera-pop {
+  40% {
+    transform: scale(1.25);
+  }
+}
+/* The shutter's flash: white over the picture, gone in a blink. Linear, so the whole blink is
+   seen. */
 .camera-flash {
   position: absolute;
   inset: 0;
   background: var(--on-accent);
   opacity: 0;
   pointer-events: none;
-  animation: camera-flash var(--dur-slow) var(--ease);
+  animation: camera-flash 180ms linear;
 }
 @keyframes camera-flash {
   from {
@@ -277,7 +307,8 @@ button.camera-icon-button:not(.is-red):hover {
   .guided-camera *::before,
   .guided-camera *::after,
   .guided-camera .camera-icon-button[data-attention='true'],
-  .guided-camera .guided-camera-copy .is-repeated {
+  .guided-camera .guided-camera-copy .is-repeated,
+  .guided-camera .camera-tracking circle.is-red.is-popping {
     transition: none;
     animation: none;
   }

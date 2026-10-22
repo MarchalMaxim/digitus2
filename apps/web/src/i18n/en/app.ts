@@ -17,4 +17,8 @@ export const app = {
    */
   engineFailed: (detail: string) =>
     detail ? `the engine worker failed: ${detail}` : 'the engine worker failed',
+  /** The line above the view when a newer build of the app has downloaded and is waiting. */
+  updateReady: 'A new version is ready.',
+  /** The button beside it: the page reloads and runs the newer build. */
+  reload: 'Reload',
 };

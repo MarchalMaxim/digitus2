@@ -8,4 +8,6 @@ export const app: Messages['app'] = {
   darkTheme: 'Donker thema',
   engineFailed: (detail: string) =>
     detail ? `de engine-worker is mislukt: ${detail}` : 'de engine-worker is mislukt',
+  updateReady: 'Er staat een nieuwe versie klaar.',
+  reload: 'Opnieuw laden',
 };

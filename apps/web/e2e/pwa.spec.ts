@@ -289,3 +289,98 @@ test("a newer worker, once activated, deletes the older precaches and the assets
   );
   expect(left).toEqual({ caches: [ASSETS_CACHE, current].sort(), assets: [KEPT] });
 });
+
+/**
+ * Installs the same sw.js at another script URL, which the browser takes as a newer worker, and
+ * resolves once it waits (the page is open and controlled by the older one).
+ */
+function installNewerWorker(page: Page, scriptUrl: string): Promise<string> {
+  return page.evaluate(async (script) => {
+    const registration = await navigator.serviceWorker.register(script, {
+      scope: '/',
+      updateViaCache: 'none',
+    });
+    const worker = registration.installing ?? registration.waiting;
+    if (!worker) throw new Error('no new worker');
+    return new Promise<string>((resolve) => {
+      const check = () => {
+        if (worker.state === 'installed' || worker.state === 'redundant') resolve(worker.state);
+      };
+      worker.addEventListener('statechange', check);
+      check();
+    });
+  }, scriptUrl);
+}
+
+test('a waiting worker keeps waiting until it is told to skip, then takes the open page over once', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await controlled(page);
+  const NEWER_SCRIPT = '/sw.js?newer=2';
+  const outcome = await page.evaluate(async (script) => {
+    const changes: string[] = [];
+    navigator.serviceWorker.addEventListener('controllerchange', () =>
+      changes.push(navigator.serviceWorker.controller?.scriptURL ?? ''),
+    );
+    const registration = await navigator.serviceWorker.register(script, {
+      scope: '/',
+      updateViaCache: 'none',
+    });
+    const worker = registration.installing ?? registration.waiting;
+    if (!worker) throw new Error('no new worker');
+    const reached = (states: string[]) =>
+      new Promise<string>((resolve) => {
+        const check = () => {
+          if (states.includes(worker.state)) resolve(worker.state);
+        };
+        worker.addEventListener('statechange', check);
+        check();
+      });
+    const installed = await reached(['installed', 'redundant']);
+    // Nothing ends the wait by itself while the page is open.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const stillWaiting = worker.state;
+    // What the page's Reload button sends (serviceWorker.ts).
+    worker.postMessage({ type: 'skip-waiting' });
+    const activated = await reached(['activated', 'redundant']);
+    // A second change of controller would be a loop of reloads: give it time to show.
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    return { installed, stillWaiting, activated, changes };
+  }, NEWER_SCRIPT);
+  expect(outcome.installed).toBe('installed');
+  expect(outcome.stillWaiting, 'a worker is not activated by itself while the page is open').toBe(
+    'installed',
+  );
+  expect(outcome.activated, 'the message ends the wait, with the page still open').toBe(
+    'activated',
+  );
+  expect(
+    outcome.changes,
+    'the page changes controller once, to the worker told to skip',
+  ).toHaveLength(1);
+  expect(outcome.changes[0]).toMatch(/\/sw\.js\?newer=2$/);
+});
+
+test("the update notice's Reload sends the waiting worker live and reloads the page once", async ({
+  page,
+}) => {
+  let loads = 0;
+  page.on('load', () => loads++);
+  await page.goto('/');
+  await controlled(page);
+  expect(await installNewerWorker(page, '/sw.js?newer=3')).toBe('installed');
+  const notice = page.locator('.notice');
+  await expect(notice).toContainText('A new version is ready.', { timeout: 10_000 });
+  const before = loads;
+  await notice.getByRole('button', { name: 'Reload', exact: true }).click();
+  await expect.poll(() => loads, { timeout: 15_000 }).toBe(before + 1);
+  await controlled(page);
+  expect(
+    await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL),
+    'the reloaded page runs the worker that was waiting',
+  ).toMatch(/\/sw\.js\?newer=3$/);
+  // Nothing reloads it again: the one controller change was answered once.
+  await page.waitForTimeout(2_000);
+  expect(loads).toBe(before + 1);
+});

@@ -35,6 +35,9 @@ importers:
       '@digitus2/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      fflate:
+        specifier: ^0.8.0
+        version: 0.8.3
       pdfjs-dist:
         specifier: 5.4.624
         version: 5.4.624

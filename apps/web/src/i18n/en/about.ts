@@ -69,4 +69,9 @@ export const about = {
       ' from the MuseScore archive (the PDMX dataset). Each is public domain or CC0 as its ' +
       'uploader declared it, and each names its source and licence on its score page.',
   },
+  /**
+   * The line at the end that names the build this page runs. `commit` is the short commit and
+   * `day` the day of the build written in the language ('22 October 2026'), or '' when unknown.
+   */
+  build: (commit: string, day: string) => (day ? `Build ${commit} · ${day}` : `Build ${commit}`),
 };

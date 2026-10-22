@@ -1,13 +1,20 @@
-import { finalizeScore, UNMARKED_VELOCITY, validateScore } from '../../score/build.js';
+import {
+  finalizeScore,
+  ticksToSeconds,
+  UNMARKED_VELOCITY,
+  validateScore,
+} from '../../score/build.js';
 import { spellingToMidi } from '../../score/pitch.js';
 import type { Alter, Spelling, Step } from '../../score/pitch.js';
 import type {
+  Arpeggio,
   Assignment,
   Finger,
   Hand,
   KeySigEvent,
   MeasureInfo,
   Note,
+  PedalEvent,
   Score,
   TempoEvent,
   TimeSigEvent,
@@ -153,6 +160,7 @@ export function parseMusicXml(
   const notes: Note[] = [];
   const ornaments = new OrnamentReader();
   const tempos: Located<TempoEvent>[] = [];
+  const pedals: Located<PedalEvent>[] = [];
   const times: Located<TimeSigEvent>[] = [];
   const keys: Located<KeySigEvent>[] = [];
   const tiedEnds = new Map<Note, { measureIndex: number; offset: number }>();
@@ -243,6 +251,14 @@ export function parseMusicXml(
             };
             const velocity = readDynamics(el);
             if (velocity !== undefined) dynamics.push({ ...where, velocity });
+            const pedal = readPedal(el);
+            if (pedal !== undefined) {
+              pedals.push({
+                measureIndex: mIndex,
+                offset: where.offset,
+                event: { type: pedal, sec: 0 },
+              });
+            }
             if (el.tagName !== 'direction') break;
             for (const w of allDescendants(el, 'wedge')) {
               const wedge = `${partIndex}:${w.getAttribute('number') ?? '1'}`;
@@ -417,6 +433,10 @@ export function parseMusicXml(
               sourceIndices: [index],
             };
             notes.push(note);
+            if (!isGrace) {
+              const arpeggio = readArpeggio(el);
+              if (arpeggio) note.arpeggio = arpeggio;
+            }
             noteStaves.set(note, { part: partIndex, staff: localStaff });
             if (!isGrace) ornaments.note(el, note, ornamentContext, offset - onset);
             if (tieStart) {
@@ -488,6 +508,11 @@ export function parseMusicXml(
   const tempoMap = absolute<TempoEvent>(tempos);
   if (tempoMap.length === 0 || tempoMap[0]!.tick > 0)
     tempoMap.unshift({ tick: 0, qpm: DEFAULT_QPM });
+  // A re-pedal is a stop and a start on one tick, written in either order: lift, change, press.
+  const pedalRank = { up: 0, change: 1, down: 2 };
+  const pedalEvents = absolute<PedalEvent>(pedals)
+    .map((p) => ({ ...p, sec: ticksToSeconds(tempoMap, divisions, p.tick) }))
+    .sort((a, b) => a.tick - b.tick || pedalRank[a.type] - pedalRank[b.type]);
 
   if (opts.preserveNotation && warnings.length > 0) {
     throw new Error(`cannot preserve notation: ${warnings.join('; ')}`);
@@ -501,6 +526,7 @@ export function parseMusicXml(
     keySignatures: absolute<KeySigEvent>(keys),
     measures,
     notes: opts.preserveNotation ? notes : dropDuplicates(notes, editorial, warnings),
+    ...(pedalEvents.length ? { pedals: pedalEvents } : {}),
   });
   const problems = validateScore(score);
   if (problems.length > 0) throw new Error(`invalid score: ${problems.join('; ')}`);
@@ -619,6 +645,45 @@ function readTempo(el: Element): number | undefined {
   // Each dot adds half the previous value: 1, 1.5, 1.75, ... times the undotted unit.
   const quarters = (BEAT_UNIT_QUARTERS[unit] ?? 1) * (2 - 0.5 ** dots);
   return perMinute * quarters;
+}
+
+/**
+ * The damper-pedal mark of a `<direction>` or `<sound>`: its `<pedal>` (start and resume press,
+ * stop and discontinue lift, change re-presses; continue and sostenuto are not the damper), else
+ * its `damper-pedal` attribute (yes or a percentage above 0 presses; no or 0 lifts).
+ */
+function readPedal(el: Element): PedalEvent['type'] | undefined {
+  for (const p of allDescendants(el, 'pedal')) {
+    const type = PEDAL_TYPES[p.getAttribute('type') ?? ''];
+    if (type) return type;
+  }
+  const sound = el.tagName === 'sound' ? el : firstChild(el, 'sound');
+  const damper = sound?.getAttribute('damper-pedal')?.trim().toLowerCase();
+  if (!damper) return undefined;
+  if (damper === 'yes') return 'down';
+  if (damper === 'no') return 'up';
+  const amount = Number(damper);
+  if (!Number.isFinite(amount)) return undefined;
+  return amount > 0 ? 'down' : 'up';
+}
+
+const PEDAL_TYPES: Record<string, PedalEvent['type']> = {
+  start: 'down',
+  resume: 'down',
+  stop: 'up',
+  discontinue: 'up',
+  change: 'change',
+};
+
+/** The `<arpeggiate>` of a note: a rolled chord, up unless it says down. */
+function readArpeggio(el: Element): Arpeggio | undefined {
+  const mark = childElements(el, 'notations').flatMap((n) => childElements(n, 'arpeggiate'))[0];
+  if (!mark) return undefined;
+  const number = Number(mark.getAttribute('number') ?? NaN);
+  return {
+    direction: mark.getAttribute('direction') === 'down' ? 'down' : 'up',
+    ...(Number.isInteger(number) && number > 0 ? { number } : {}),
+  };
 }
 
 /**

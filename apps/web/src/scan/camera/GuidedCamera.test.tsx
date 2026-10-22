@@ -9,6 +9,7 @@ import * as vision from './vision.js';
 beforeEach(() => vi.stubGlobal('isSecureContext', true));
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
   sessionStorage.clear();
@@ -187,6 +188,9 @@ it('a press takes the sharp frame, then the page is tracked and each view taken 
   vi.spyOn(quality, 'advise').mockReturnValue('good');
   vi.spyOn(quality, 'photographable').mockReturnValue(true);
   const sample = await liveCamera({ width, height });
+  // Fake timers now that the camera runs (waitFor needs real ones): the confirmations below last
+  // fractions of a second, and the test steps through them.
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
   sample(0);
   const t = getT().scan.camera;
   expect(screen.getByRole('status')).toHaveTextContent(t.aim);
@@ -216,23 +220,28 @@ it('a press takes the sharp frame, then the page is tracked and each view taken 
     coverage: 0.8,
   });
   sample(120);
-  expect(screen.getByRole('status')).toHaveTextContent(t.sweep(4));
+  expect(screen.getByRole('status')).toHaveTextContent(t.taken(1, 5));
   expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: t.capture })).toBeNull();
-  // No dots to aim at: the circle is the one red element. The first photo's place is marked.
+  // No dots to aim at: the circle is the one red element.
   const dialog = screen.getByRole('dialog');
   expect(dialog.querySelectorAll('.is-red')).toHaveLength(1);
-  expect(dialog.querySelector('[data-camera-reticle]')).toHaveClass('is-red');
-  /** The marks, in camera pixels: where each photo was taken, as the page shows now. */
-  const marks = () =>
-    Array.from(dialog.querySelectorAll('[data-camera-mark]')).map((mark) => [
-      Math.round(Number(mark.getAttribute('data-x'))),
-      Math.round(Number(mark.getAttribute('data-y'))),
-    ]);
-  const shift = { x: (40 * width) / trackingWidth, y: (30 * height) / trackingHeight };
+  const reticle = dialog.querySelector('[data-camera-reticle]')!;
+  expect(reticle).toHaveClass('is-red');
+  /** The progress dots under the count: which photos are taken, the reference first. */
+  const dots = () =>
+    Array.from(dialog.querySelectorAll('[data-camera-progress] [data-taken]')).map((dot) =>
+      dot.getAttribute('data-taken'),
+    );
+  // The reference photo is taken: one dot filled, a flash over the picture, the circle pops, and
+  // the status line says so for a moment before it asks for the next spot (issue 156).
+  expect(dots()).toEqual(['true', 'false', 'false', 'false', 'false']);
+  expect(dialog.querySelector('.camera-flash')).toHaveAttribute('data-camera-flash', '1');
+  expect(reticle).toHaveClass('is-popping');
+  act(() => vi.advanceTimersByTime(250));
+  expect(reticle).not.toHaveClass('is-popping');
+  expect(screen.getByRole('status')).toHaveTextContent(t.taken(1, 5));
   sample(240);
-  // The page moved with the phone, and the first photo's mark with it.
-  expect(marks()).toEqual([[Math.round(width / 2 + shift.x), Math.round(height / 2 + shift.y)]]);
   expect(register).toHaveBeenCalledTimes(1);
   expect(register.mock.calls[0]![2]).toEqual(region);
   expect(register.mock.calls[0]![0]).toMatchObject({
@@ -246,15 +255,29 @@ it('a press takes the sharp frame, then the page is tracked and each view taken 
   expect(register.mock.calls.length).toBeGreaterThanOrEqual(2);
   expect(register.mock.calls.at(-1)![2]).toEqual(region);
   expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
-  // Staying there takes nothing more: the next view must be somewhere new. The new photo's
-  // mark sits under the circle, where it was taken, and the counter says three are left.
-  for (let time = 720; time <= 2400; time += 120) sample(time);
+  // The view is taken: its dot fills, the picture flashes, the circle pops, and the status line
+  // says so for a moment.
+  expect(dots()).toEqual(['true', 'true', 'false', 'false', 'false']);
+  expect(screen.getByRole('status')).toHaveTextContent(t.taken(2, 5));
+  expect(dialog.querySelector('.camera-flash')).toHaveAttribute('data-camera-flash', '2');
+  expect(reticle).toHaveClass('is-popping');
+  // Staying there takes nothing more: the next view must be somewhere new. The camera goes on
+  // delivering a picture every 120 ms meanwhile, so the page stays found.
+  const linger = (from: number, to: number) => {
+    for (let time = from; time <= to; time += 120) {
+      act(() => vi.advanceTimersByTime(120));
+      sample(time);
+    }
+  };
+  linger(720, 1200);
+  // 600 ms on: the pop is over, the words are still there.
+  expect(reticle).not.toHaveClass('is-popping');
+  expect(screen.getByRole('status')).toHaveTextContent(t.taken(2, 5));
+  linger(1320, 2400);
+  // 1.8 s on: the words gave way to the sweep sentence, which counts the photos still to take.
   expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent(t.sweep(3));
-  expect(marks()).toEqual([
-    [Math.round(width / 2 + shift.x), Math.round(height / 2 + shift.y)],
-    [Math.round(width / 2), Math.round(height / 2)],
-  ]);
+  expect(dots()).toEqual(['true', 'true', 'false', 'false', 'false']);
   register.mockReturnValue({
     matrix: [1, 0, -40, 0, 1, 30, 0, 0, 1],
     inliers: 30,
@@ -263,6 +286,9 @@ it('a press takes the sharp frame, then the page is tracked and each view taken 
   });
   for (let time = 2520; time <= 3120; time += 120) sample(time);
   expect(screen.getByText(t.step(4, 5))).toBeInTheDocument();
+  expect(dots()).toEqual(['true', 'true', 'true', 'false', 'false']);
+  expect(screen.getByRole('status')).toHaveTextContent(t.taken(3, 5));
+  expect(dialog.querySelector('.camera-flash')).toHaveAttribute('data-camera-flash', '3');
 });
 
 it('a blurred press says so; a second one keeps the single photograph for review', async () => {
@@ -593,7 +619,7 @@ it('issue 143: corner editing from a failed page does not follow the reader into
   expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
   expect(dialog.querySelectorAll('.camera-corner')).toHaveLength(0);
   expect(screen.queryByText(t.cornerHint)).toBeNull();
-  expect(screen.getByRole('status')).toHaveTextContent(t.sweep(4));
+  expect(screen.getByRole('status')).toHaveTextContent(t.taken(1, 5));
 }, 15000);
 
 it('issue 143: the light goes off while a page is prepared and comes back for the next one', async () => {
@@ -723,6 +749,9 @@ it('issue 147: views that will not combine leave the first photograph as the pag
     // The reader stops sweeping after one view: two photographs to prepare.
     act(() => vi.advanceTimersByTime(10_000));
     fireEvent.click(screen.getByRole('button', { name: t.skip }));
+    // Skipping ends the sweep early: the count of a fifth photo that was never taken goes at once.
+    expect(screen.getByRole('status')).toHaveTextContent(t.processing);
+    expect(document.querySelector('.camera-step')).toBeNull();
   } finally {
     vi.useRealTimers();
   }
@@ -751,6 +780,117 @@ it('issue 143: a slow phone, an update every 400 ms, still pauses long enough fo
   // More than 350 ms apart, yet one unbroken look on this phone: the pause is long enough.
   sample(1200);
   expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
+});
+
+it('issue 156: starting over takes the confirmation, the pop and the filled dots of the old page with it', async () => {
+  sharpFrames();
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  const dialog = screen.getByRole('dialog');
+  const filled = () => dialog.querySelectorAll('[data-camera-progress] [data-taken="true"]').length;
+  const status = () => expect(screen.getByRole('status'));
+  // The page stays where the first photo was taken: found, and no view to take.
+  vi.spyOn(vision, 'registerFrame').mockReturnValue({
+    matrix: [1, 0, 0, 0, 1, 0, 0, 0, 1],
+    inliers: 30,
+    error: 0,
+    coverage: 0.8,
+  });
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  let time = 0;
+  /** Time passes in 50 ms steps, the camera delivering a picture each, so the page stays found. */
+  const linger = (ms: number) => {
+    for (let spent = 0; spent < ms; spent += 50) {
+      act(() => vi.advanceTimersByTime(50));
+      sample((time += 120));
+    }
+  };
+  sample(time);
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  sample((time += 120));
+  expect(filled()).toBe(1);
+  status().toHaveTextContent(t.taken(1, 5));
+  // 100 ms on, 150 ms of the pop and 800 ms of the confirmation are left. The new page's
+  // reference photo must start both again, not borrow the old page's timers.
+  linger(100);
+  fireEvent.click(screen.getByRole('button', { name: t.startOver }));
+  expect(dialog.querySelector('[data-camera-progress]')).toBeNull();
+  status().toHaveTextContent(t.aim);
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  sample((time += 120));
+  expect(filled()).toBe(1);
+  status().toHaveTextContent(t.taken(1, 5));
+  linger(200);
+  // 200 ms into its pop: the old page's timer would have ended it 50 ms ago.
+  expect(dialog.querySelector('[data-camera-reticle]')).toHaveClass('is-popping');
+  linger(650);
+  // 850 ms into its words: the old page's timer would have taken them 50 ms ago.
+  status().toHaveTextContent(t.taken(1, 5));
+  linger(100);
+  status().toHaveTextContent(t.sweep(4));
+});
+
+it('issue 156: the fifth photo fills the fifth dot, which stays through processing and goes with the header', async () => {
+  sharpFrames();
+  let release: () => void = () => {};
+  vi.spyOn(vision, 'reconstructPage').mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        release = () =>
+          resolve({
+            frame: { width: 10, height: 10, data: new Uint8ClampedArray(400) },
+          } as unknown as Awaited<ReturnType<typeof vision.reconstructPage>>);
+      }),
+  );
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  const dialog = screen.getByRole('dialog');
+  const dots = () =>
+    Array.from(dialog.querySelectorAll('[data-camera-progress] [data-taken]')).map((dot) =>
+      dot.getAttribute('data-taken'),
+    );
+  sample(0);
+  fireEvent.click(screen.getByRole('button', { name: t.capture }));
+  sample(120);
+  // Four views, each after a pause somewhere new: the page lands at another corner every time.
+  const register = vi.spyOn(vision, 'registerFrame');
+  const filled = () => dots().filter((dot) => dot === 'true').length;
+  let time = 120;
+  for (const [x, y] of [
+    [40, 30],
+    [-40, 30],
+    [-40, -30],
+    [40, -30],
+  ] as const) {
+    register.mockReturnValue({
+      matrix: [1, 0, x, 0, 1, y, 0, 0, 1],
+      inliers: 30,
+      error: 0,
+      coverage: 0.8,
+    });
+    const before = filled();
+    for (let step = 0; step < 12 && filled() === before; step++) sample((time += 120));
+    expect(filled(), `a view was taken at ${x}, ${y}`).toBe(before + 1);
+  }
+  // The fifth photo is taken: all five dots filled and the count still on screen, while the
+  // photos combine, with Cancel as the one red element.
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(t.processing));
+  expect(dots()).toEqual(['true', 'true', 'true', 'true', 'true']);
+  expect(screen.getByText(t.step(5, 5))).toBeInTheDocument();
+  expect(dialog.querySelector('.camera-flash')).toHaveAttribute('data-camera-flash', '5');
+  expect(dialog.querySelectorAll('.is-red')).toHaveLength(1);
+  // The review opens: the header and its dots are gone.
+  await act(async () => release());
+  await waitFor(() => expect(screen.getByText(t.review, { exact: true })).toBeInTheDocument());
+  expect(dialog.querySelector('[data-camera-progress]')).toBeNull();
+  expect(screen.queryByText(t.step(5, 5))).toBeNull();
+  // Preparing the page again after the corners are adjusted is no sweep: the header stays away.
+  fireEvent.click(screen.getByRole('button', { name: t.adjust }));
+  fireEvent.click(await screen.findByRole('button', { name: t.useCorners }));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(t.processing));
+  expect(dialog.querySelector('.camera-step')).toBeNull();
+  await act(async () => release());
+  await waitFor(() => expect(screen.getByText(t.review, { exact: true })).toBeInTheDocument());
 });
 
 it('issue 143: an answer about a forgotten page moves nothing and takes no view', async () => {

@@ -190,7 +190,7 @@ test("camera, Chromium's fake device: the real capture stack starts, frames flow
   await expect
     .poll(async () => (await seen()).slice(1), { timeout: 10_000 })
     .toEqual(expect.arrayContaining([t.hold]));
-  const answers = [t.sweep(4), t.retryBlurry, t.blurry, t.processing, t.review];
+  const answers = [t.taken(1, 5), t.sweep(4), t.retryBlurry, t.blurry, t.processing, t.review];
   await expect
     .poll(async () => {
       const texts = await seen();

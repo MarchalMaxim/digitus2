@@ -1,11 +1,12 @@
 import { ENGINE_VERSION } from '@digitus2/engine';
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { build, formatBuildDay } from '../app/build.js';
 import { useFocusOnArrival } from '../app/focus.js';
 import { useAppStore } from '../app/store.js';
 import type { Messages } from '../i18n/messages.js';
 import { Button } from '../design/Button.js';
 import { en } from '../i18n/en/index.js';
-import { useT } from '../i18n/i18n.js';
+import { useLocale, useT } from '../i18n/i18n.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import {
   isShareAlike,
@@ -77,6 +78,7 @@ function Linked({
 /** What digitus2 is, how it chooses fingerings, and every licence and attribution it owes. */
 export function AboutView() {
   const t = useT();
+  const [locale] = useLocale();
   const a = t.about;
   const [details, setDetails] = useState<LibraryPiece[] | null>(null);
   useEffect(() => {
@@ -202,6 +204,9 @@ export function AboutView() {
         </table>
         {archiveCount > 0 && <p>{a.pieces.archive(archiveCount)}</p>}
       </section>
+
+      {/* The installed app can run an older build than the site serves: this says which. */}
+      <p className="small muted">{a.build(build.commit, formatBuildDay(locale, build))}</p>
     </main>
   );
 }

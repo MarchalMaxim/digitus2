@@ -72,4 +72,6 @@ export const about: Messages['about'] = {
       'CC0, según lo declaró quien la subió, y cita su fuente y su licencia en la página de su ' +
       'partitura.',
   },
+  build: (commit: string, day: string) =>
+    day ? `Versión ${commit} · ${day}` : `Versión ${commit}`,
 };

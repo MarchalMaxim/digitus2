@@ -20,6 +20,8 @@ export const scan = {
         one: 'Move to a new spot and pause. 1 more.',
         other: 'Move to a new spot and pause. # more.',
       }),
+    /** Said for a moment after each photo, the reference photo included, before the next spot is asked for (issue 156). */
+    taken: (n: number, total: number) => `Photo ${n} of ${total} taken.`,
     auto: 'Pause now and then: each pause somewhere new takes a photo.',
     hold: 'Hold still…',
     lost: 'Point the camera back at the page.',
@@ -131,6 +133,8 @@ export const scan = {
     downloadPage: (page: number) => `Download page ${page} MusicXML`,
     downloadCombined: 'Download combined MusicXML',
     downloadRaw: 'Download raw MusicXML',
+    /** One archive: every page as the scanner received it, each recognition, the warnings, the build. */
+    downloadAll: 'Download everything',
     useForFingerings: 'Use for fingerings',
     scanAgain: 'Scan again',
   },

@@ -72,4 +72,5 @@ export const about: Messages['about'] = {
       ' uit het MuseScore-archief (de PDMX-dataset). Elke partituur is publiek domein of CC0, ' +
       'zoals de uploader het opgaf, en noemt op de eigen partituurpagina de bron en de licentie.',
   },
+  build: (commit: string, day: string) => (day ? `Versie ${commit} · ${day}` : `Versie ${commit}`),
 };

@@ -6,6 +6,8 @@ export const app: Messages['app'] = {
   openingScan: 'Ouverture de la numérisation...',
   fileNotRestorable: 'Ouvrez-la depuis Mes partitions, ou choisissez à nouveau le fichier.',
   darkTheme: 'Thème sombre',
+  updateReady: 'Une nouvelle version est prête.',
+  reload: 'Recharger',
   engineFailed: (detail: string) =>
     detail ? `le moteur a échoué\u00a0: ${detail}` : 'le moteur a échoué',
 };

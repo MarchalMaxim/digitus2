@@ -59,6 +59,13 @@ export interface AppState {
   /** A text, or a Phrase written in the language on screen when it is shown (Notice.tsx). */
   notice: string | Phrase | null;
   /**
+   * Set when a newer build of the app has downloaded and waits (serviceWorker.ts): the call that
+   * reloads the page into it, shown by Notice.tsx with a Reload button until it is dismissed. Kept
+   * apart from `notice` because opening a piece or a file clears that one, and the offer has to
+   * outlast it. Not persisted.
+   */
+  updateReady: (() => void) | null;
+  /**
    * How far the library was scrolled (`window.scrollY`) when the reader last left it, by opening
    * a piece, a file or the about page, or through the history; the library comes back there
    * (App.tsx). Not persisted.
@@ -101,6 +108,8 @@ export interface AppState {
    */
   setTempoFactor(factor: number): void;
   setNotice(message: string | Phrase | null): void;
+  /** Offers the reload into the newer build, or (null) takes the offer away. */
+  setUpdateReady(reload: (() => void) | null): void;
   setLibraryScrollY(y: number, listTop?: number | null): void;
   /** Chooses a level; the list starts again at its first page. */
   setLibraryLevel(level: Tier): void;
@@ -305,6 +314,7 @@ export const useAppStore = create<AppState>()(
       view: { name: 'library' },
       settings: { ...DEFAULT_SETTINGS },
       notice: null,
+      updateReady: null,
       libraryScrollY: 0,
       libraryListTop: null,
       libraryLevel: null,
@@ -328,6 +338,7 @@ export const useAppStore = create<AppState>()(
           return { settings: { ...s.settings, tempoByPiece } };
         }),
       setNotice: (message) => set({ notice: message }),
+      setUpdateReady: (reload) => set({ updateReady: reload }),
       setLibraryScrollY: (y, listTop = null) => set({ libraryScrollY: y, libraryListTop: listTop }),
       setLibraryLevel: (level) => set({ libraryLevel: level, libraryPages: 1 }),
       setLibraryQuery: (query) =>

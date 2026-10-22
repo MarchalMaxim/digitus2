@@ -5,7 +5,7 @@
 //   pnpm verify --serial   run the steps one after another, their output on the console
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
 //                          omr (requires build), omr:service, omr:acceptance (requires build), bundle, e2e,
-//                          benchmark, benchmark:mutopia, hands, embellish)
+//                          e2e:loop (requires build), benchmark, benchmark:mutopia, hands, embellish)
 //
 // Steps run as a graph (scripts/verify-graph.mjs): a step starts once the steps it needs have
 // passed, and the heavy ones (unit, omr:acceptance, e2e) never overlap. Each step's output goes to
@@ -61,7 +61,7 @@ function cliUsage() {
 const has = (command) => new RegExp(`\\b${command}\\b`).test(cliUsage() ?? '');
 // The weight set the floors were measured with; bench refuses to gate another set against them.
 const weights = (f) => (f?.weightSet ? ['--weights', f.weightSet] : []);
-const cmd = (c, args, note) => ({ cmd: c, args, ...(note && { note }) });
+const cmd = (c, args, note, env) => ({ cmd: c, args, ...(note && { note }), ...(env && { env }) });
 
 // Each step checks its preconditions in prepare(), which runs only once its dependencies are done:
 // the engine CLI the benchmark steps need exists only after the build.
@@ -127,6 +127,25 @@ const steps = [
       return want('build')
         ? cmd('pnpm', ['--filter', '@digitus2/web', 'exec', 'playwright', 'test'])
         : cmd('pnpm', ['--filter', '@digitus2/web', 'e2e']);
+    },
+  },
+  // The camera loop (docs/scanning.md, The loop on the PC): the camera over a real page photo,
+  // local homr on the page it made, then the review and the score view. Heavy and apart from e2e:
+  // homr's threads slow every other spec's timing. SKIP, not a pass, without a prepared homr.
+  {
+    name: 'e2e:loop',
+    deps: ['build'],
+    heavy: true,
+    prepare: () => {
+      const homr = process.env.DIGITUS2_OMR_HOMR || 'research/omr/results/photo-options/toolchain';
+      if (!existsSync(`${homr}/venv`))
+        return { skip: `homr not prepared (${homr}; set DIGITUS2_OMR_HOMR)` };
+      return cmd(
+        'pnpm',
+        ['--filter', '@digitus2/web', 'exec', 'playwright', 'test', '--project=loop'],
+        undefined,
+        { DIGITUS2_E2E_LOOP: '1' },
+      );
     },
   },
   {
@@ -280,6 +299,7 @@ function start(step, plan) {
   return new Promise((resolve) => {
     const child = spawn(plan.cmd, plan.args, {
       shell: true,
+      env: { ...process.env, ...plan.env },
       stdio: serial ? 'inherit' : ['ignore', 'pipe', 'pipe'],
       detached: process.platform !== 'win32',
     });

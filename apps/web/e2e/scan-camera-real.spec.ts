@@ -84,7 +84,7 @@ interface Viewfinder {
   photo: string | null;
   /** What the status line (and any alert) says. */
   said: string;
-  /** Tracking has lost the page (the circle and the marks dim). */
+  /** Tracking has lost the page (the circle dims). */
   lost: boolean;
   camera: Point;
 }
@@ -127,13 +127,13 @@ async function sweepView(page: Page, n: number, next: { stop: number }, timeout:
   let pausedSince: number | null = null;
   while (Date.now() < deadline) {
     const view = await viewfinder(page);
-    if (view.photo !== waiting) {
+    // The fifth photo leaves the count and its dots on screen while the page is combined (issue
+    // 156), so only the status line tells that it was taken.
+    const combining =
+      n === 5 && [t.processing, t.review].some((text) => view.said.startsWith(text));
+    if (view.photo !== waiting || combining) {
       // Taken: the next photo, or the page being combined. Anything else is a reset or a failure.
-      const advanced =
-        n < 5
-          ? view.photo === t.step(n + 1, 5)
-          : view.photo === null &&
-            [t.processing, t.review].some((text) => view.said.startsWith(text));
+      const advanced = n < 5 ? view.photo === t.step(n + 1, 5) : combining;
       if (!advanced) throw new Error(`Photo ${n} of 5 led to '${view.photo}': ${view.said}`);
       return stops;
     }
@@ -175,6 +175,7 @@ async function photographPage(page: Page, slow = 1) {
   await expectOneRed(page, 'real camera viewfinder');
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible({ timeout: 10_000 * slow });
+  // The reference photo is confirmed in words for a moment (issue 156), then the sweep sentence.
   await expect(status(page)).toHaveText(t.sweep(4));
   await expectOneRed(page, 'real camera sweep');
   const stops: number[] = [];

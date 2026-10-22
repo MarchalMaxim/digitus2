@@ -3,9 +3,10 @@
  * vitePlugin.ts, which fills in `__PRECACHE__` (the shell, see precache.ts) and `__VERSION__` (a
  * hash of those files). It installs with the precache and takes control of the open pages on its
  * first activation. A newer build's worker waits until every window of the app has closed, so a
- * page never loses the chunks it was built with; on activation it deletes older precaches and
- * the assets cache's copies of its own precached files, and keeps the scores and samples cached
- * so far. Routing: policy.ts.
+ * page never loses the chunks it was built with, unless the reader presses Reload on the notice
+ * that offers it (serviceWorker.ts), which tells the waiting worker to skip the wait. On
+ * activation it deletes older precaches and the assets cache's copies of its own precached
+ * files, and keeps the scores and samples cached so far. Routing: policy.ts.
  */
 import {
   ASSETS_CACHE,
@@ -32,11 +33,13 @@ interface FetchEventLike extends ExtendableEventLike {
 interface ServiceWorkerScope {
   registration: { scope: string };
   clients: { claim(): Promise<void> };
+  skipWaiting(): Promise<void>;
   addEventListener(
     type: 'install' | 'activate',
     listener: (event: ExtendableEventLike) => void,
   ): void;
   addEventListener(type: 'fetch', listener: (event: FetchEventLike) => void): void;
+  addEventListener(type: 'message', listener: (event: { data: unknown }) => void): void;
 }
 
 const sw = self as unknown as ServiceWorkerScope;
@@ -68,6 +71,12 @@ sw.addEventListener('activate', (event) => {
       .then(purgeAssets)
       .then(() => sw.clients.claim()),
   );
+});
+
+// The page's Reload button (serviceWorker.ts, which sends the same text) ends this worker's wait.
+sw.addEventListener('message', (event) => {
+  const data = event.data as { type?: unknown } | null;
+  if (data?.type === 'skip-waiting') void sw.skipWaiting();
 });
 
 sw.addEventListener('fetch', (event) => {

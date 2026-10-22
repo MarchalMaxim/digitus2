@@ -28,6 +28,37 @@ export function downloadBlob(filename: string, blob: Blob): void {
 }
 
 /**
+ * Hands `file` to the person: through the share sheet where the browser can share this file (a
+ * phone, so it goes to WhatsApp or AirDrop), else as a download. Closing the share sheet is not
+ * an error and does nothing more. A share that fails otherwise (the tap's permission lapsed while
+ * the file was made, a target that refused it) downloads the file instead, so it is never lost.
+ */
+export async function shareOrDownload(file: File, title: string): Promise<void> {
+  if (canShareFile(file)) {
+    try {
+      await navigator.share({ files: [file], title });
+      return;
+    } catch (error) {
+      if ((error as { name?: unknown } | null)?.name === 'AbortError') return;
+    }
+  }
+  downloadBlob(file.name, file);
+}
+
+/** Whether the browser has a share sheet that takes this file; `canShare` throws on a bad share. */
+function canShareFile(file: File): boolean {
+  try {
+    return (
+      typeof navigator.share === 'function' &&
+      typeof navigator.canShare === 'function' &&
+      navigator.canShare({ files: [file] })
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The exported file's name. A library piece: '<slug>.fingered.musicxml'. A dropped file: its
  * name without the extension and without any folder, then '.fingered.musicxml'
  * ('My Song.mxl' -> 'My Song.fingered.musicxml').

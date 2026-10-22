@@ -18,7 +18,6 @@ import {
   sweepStep,
   validCorners,
   validView,
-  viewPlace,
   viewPoint,
 } from './captureState.js';
 import { CAMERA_CONSTRAINTS, hasTorch, releaseCamera, setTorch, tick as haptic } from './device.js';
@@ -32,7 +31,6 @@ import { advise, measureFrame, photographable, type Advice, type FrameQuality } 
 import { PointsFilter } from './smoothing.js';
 import { createTracker, type Measured, type Tracked, type Tracker } from './tracker.js';
 import {
-  project,
   reconstructPage,
   sharpness,
   type Capture,
@@ -54,6 +52,10 @@ const BURST_MS = 1200;
 const SKIP_AFTER_MS = 10_000;
 /** Registration's own floor (vision.registerFrame): a reference below it can never be tracked. */
 const TRACKABLE = 80;
+/** How long the status line confirms a photo in words before the sweep sentence returns. */
+const TAKEN_MS = 900;
+/** How long the circle's pop lasts when a photo is taken (camera.css). */
+const POP_MS = 250;
 
 function dimensions(width: number, height: number, limit: number) {
   const scale = Math.min(
@@ -272,8 +274,15 @@ export function GuidedCamera({
   const [taken, setTaken] = useState(0);
   /** The phone pauses somewhere new: the view is about to be taken. */
   const [settling, setSettling] = useState(false);
-  /** Where each photo was taken, on the page as the camera shows it now (issue 154). */
-  const [marks, setMarks] = useState<Point[]>([]);
+  /**
+   * The number of the photo just taken (the reference is 1), while the status line still says so
+   * (issue 156); 0 when none.
+   */
+  const [announced, setAnnounced] = useState(0);
+  /** The fifth photo ended the sweep: the count and dots stay while the photos combine. */
+  const [swept, setSwept] = useState(false);
+  /** A photo was just taken: the circle pops. */
+  const [popping, setPopping] = useState(false);
   const [quality, setQuality] = useState<'sweep' | 'lost' | 'blurry'>('sweep');
   const [advice, setAdvice] = useState<Advice>('good');
   const [outline, setOutline] = useState<Point[] | null>(null);
@@ -334,9 +343,6 @@ export function GuidedCamera({
   /** Recent gaps between camera updates, in ms: how fast this phone delivers them. */
   const gaps = useRef<number[]>([]);
   const lastUpdate = useRef(-Infinity);
-  /** Where each photo was taken, in the first photograph's pixels; the marks follow them. */
-  const places = useRef<Point[]>([]);
-  const markSmoother = useRef(new PointsFilter());
   /** Where the view is, smoothed: registration noise is no movement of the hand (issue 147). */
   const smoother = useRef(new PointsFilter());
   /** A view's still is being checked: no tracking frame meanwhile. */
@@ -384,9 +390,6 @@ export function GuidedCamera({
   const clearPage = () => {
     epoch.current++;
     smoother.current.reset();
-    markSmoother.current.reset();
-    places.current = [];
-    setMarks([]);
     capturing.current = false;
     lastUpdate.current = -Infinity;
     clearTimeout(skipTimer.current);
@@ -399,6 +402,9 @@ export function GuidedCamera({
     cornersRef.current = [];
     setCorners([]);
     setTaken(0);
+    setAnnounced(0);
+    setPopping(false);
+    setSwept(false);
     setSettling(false);
     setCanSkip(false);
     setEditing(false);
@@ -465,6 +471,7 @@ export function GuidedCamera({
     setSettling(false);
     // No light while the page is prepared and reviewed: its button is gone until the next page.
     if (lightRef.current) switchLight(false);
+    setSwept(stageRef.current === 'track' && count === PHOTOS);
     move('processing');
     setEditing(false);
     setError(undefined);
@@ -495,8 +502,10 @@ export function GuidedCamera({
       }
     }
   };
+  /** A photo was taken: a white flash over the picture, the circle's pop, and a firm tick. */
   const captured = () => {
     setFlash((value) => value + 1);
+    setPopping(true);
     haptic();
   };
   const lostView = () => {
@@ -570,19 +579,11 @@ export function GuidedCamera({
             return;
           }
           captures.current.push({ frame: still.pixels(), matrix });
-          const place = viewPlace(matrix, { x: first.width / 2, y: first.height / 2 });
-          if (place) {
-            places.current.push(place);
-            // Under the circle, until the next tracking answer places it on the page.
-            setMarks((shown) => [
-              ...shown,
-              { x: element.videoWidth / 2, y: element.videoHeight / 2 },
-            ]);
-          }
           captured();
           if (captures.current.length === PHOTOS) void process();
           else {
             setTaken(captures.current.length - 1);
+            setAnnounced(captures.current.length);
             setQuality('sweep');
             armSkip();
           }
@@ -704,13 +705,10 @@ export function GuidedCamera({
       })),
     );
     captures.current = [{ frame, matrix: IDENTITY }];
-    places.current = [{ x: frame.width / 2, y: frame.height / 2 }];
-    markSmoother.current.reset();
-    // The first photo's mark shows at once, before any tracking answer.
-    setMarks([{ x: element.videoWidth / 2, y: element.videoHeight / 2 }]);
     sweep.current = initialSweep();
     setNotice(undefined);
     setTaken(0);
+    setAnnounced(1);
     setSettling(false);
     smoother.current.reset();
     setQuality('sweep');
@@ -756,6 +754,19 @@ export function GuidedCamera({
     const timer = setInterval(() => setDiagnosis(log.current.snapshot()), 500);
     return () => clearInterval(timer);
   }, []);
+  // A taken photo is confirmed in words for a moment, then the sweep sentence returns.
+  useEffect(() => {
+    if (!announced) return;
+    const timer = setTimeout(() => setAnnounced(0), TAKEN_MS);
+    return () => clearTimeout(timer);
+  }, [announced]);
+  // The circle's pop is one beat. Two photos never fall inside it (a view needs a 300 ms pause,
+  // sampled every 120 ms or more), so the class is simply taken off again.
+  useEffect(() => {
+    if (!popping) return;
+    const timer = setTimeout(() => setPopping(false), POP_MS);
+    return () => clearTimeout(timer);
+  }, [popping]);
   const actions = useRef({ captureView, fail, settleBurst, turned });
   useEffect(() => {
     actions.current = { captureView, fail, settleBurst, turned };
@@ -926,7 +937,7 @@ export function GuidedCamera({
               log.current.answer(!!answer);
               if (!current(answer, 'track')) return;
               fresh();
-              tracked(answer!, now, intrinsic, base);
+              tracked(answer!, now, base);
             });
             if (asked) log.current.asked();
           } catch (cause) {
@@ -969,12 +980,7 @@ export function GuidedCamera({
           if (photographable(measured) && sharp >= TRACKABLE) actions.current.settleBurst();
         };
         /** Where the view is now: a pause somewhere new, sharp, takes it. */
-        const tracked = (
-          answer: Tracked,
-          now: number,
-          intrinsic: { width: number; height: number },
-          base: Frame,
-        ) => {
+        const tracked = (answer: Tracked, now: number, base: Frame) => {
           const { registration } = answer;
           const sharp = answer.sharp >= TRACKABLE;
           const first = captures.current[0]!.frame;
@@ -997,24 +1003,6 @@ export function GuidedCamera({
             window: continuity(),
           });
           setSettling(sweep.current.fresh && sweep.current.since !== null);
-          // The marks ride on the page: lost frames leave them where they were, dimmed.
-          if (registration)
-            setMarks(
-              markSmoother.current
-                .filter(
-                  places.current.map((place) =>
-                    project(registration.matrix, {
-                      x: (place.x * base.width) / first.width,
-                      y: (place.y * base.height) / first.height,
-                    }),
-                  ),
-                  now,
-                )
-                .map((point) => ({
-                  x: (point.x * intrinsic.width) / base.width,
-                  y: (point.y * intrinsic.height) / base.height,
-                })),
-            );
           setQuality(!registration ? 'lost' : !sharp ? 'blurry' : 'sweep');
           if (sweep.current.ready) actions.current.captureView();
         };
@@ -1186,7 +1174,9 @@ export function GuidedCamera({
         : stage === 'track'
           ? notice
             ? t[notice]
-            : { sweep: t.sweep(PHOTOS - 1 - taken), lost: t.lost, blurry: t.moving }[quality]
+            : announced > 0 && announced === taken + 1
+              ? t.taken(announced, PHOTOS)
+              : { sweep: t.sweep(PHOTOS - 1 - taken), lost: t.lost, blurry: t.moving }[quality]
           : stage === 'processing'
             ? t.processing
             : stage === 'review'
@@ -1251,9 +1241,22 @@ export function GuidedCamera({
           <h2 id="camera-title" className="visually-hidden">
             {t.title}
           </h2>
-          {live && (
+          {(live || (stage === 'processing' && swept)) && (
             <p className="camera-step">
               {t.step(stage === 'aim' ? 1 : Math.min(PHOTOS, taken + 2), PHOTOS)}
+              {/* A dot per photo, filled as each is taken, the last one as the sweep ends: the text
+                  above is the accessible count. They go with the header when the review opens. */}
+              {stage !== 'aim' && (
+                <span className="camera-progress" data-camera-progress="true" aria-hidden="true">
+                  {Array.from({ length: PHOTOS }, (_, index) => (
+                    <span
+                      key={index}
+                      className="camera-dot"
+                      data-taken={index < (stage === 'processing' ? PHOTOS : taken + 1)}
+                    />
+                  ))}
+                </span>
+              )}
             </p>
           )}
           {live && light.available ? (
@@ -1321,27 +1324,13 @@ export function GuidedCamera({
               >
                 {/* The red is the circle: the phone's own aim, which the reader sweeps. */}
                 <circle
-                  className="is-red"
+                  className={`is-red${popping ? ' is-popping' : ''}`}
                   data-camera-reticle="true"
                   data-settling={settling}
                   cx={middle.x}
                   cy={middle.y}
                   r={reticle}
                 />
-                {/* Each photo's place on the page: sweep on to where there is none yet. */}
-                {marks.map((mark, index) => (
-                  <circle
-                    key={index}
-                    className="camera-mark"
-                    data-camera-mark={index + 1}
-                    data-x={mark.x}
-                    data-y={mark.y}
-                    cx={0}
-                    cy={0}
-                    style={{ transform: `translate(${mark.x}px, ${mark.y}px)` }}
-                    r={Math.min(size.width, size.height) * 0.02}
-                  />
-                ))}
               </svg>
             )}
             {editing && displayFrame && (
@@ -1376,7 +1365,14 @@ export function GuidedCamera({
                 ))}
               </div>
             )}
-            {flash > 0 && <div key={flash} className="camera-flash" aria-hidden="true" />}
+            {flash > 0 && (
+              <div
+                key={flash}
+                className="camera-flash"
+                data-camera-flash={flash}
+                aria-hidden="true"
+              />
+            )}
           </div>
         </div>
         <div className="guided-camera-copy">

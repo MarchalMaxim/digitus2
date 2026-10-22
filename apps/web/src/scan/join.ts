@@ -27,7 +27,9 @@ const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
  * the second part's notes become staff 2, after a backup to the start of each measure, in voices of
  * their own; both parts' durations move to a common time unit; the part takes the other pages'
  * name and instrument. No pitch, duration or onset changes. Anything else is left as it was, for
- * the checks below to judge.
+ * the checks below to judge. The second staff is declared in the first of the opening attributes,
+ * where Verovio reads the staff count and ignores any later one (issue 156); homr writes a split
+ * page's clefs in the second.
  */
 function mergeSplitStaves(doc: Document, piano: Document) {
   const root = doc.documentElement;
@@ -56,14 +58,15 @@ function mergeSplitStaves(doc: Document, piano: Document) {
   // The lower part's voices continue after the upper part's, as homr numbers a second staff's.
   const voices = Array.from(upper.querySelectorAll('voice')).map((v) => Number(v.textContent));
   const offset = Math.max(4, ...voices.filter(Number.isSafeInteger));
-  // The upper part's opening attributes: where the second staff and its clef are declared.
+  // The upper part's opening attributes: the first declares the second staff, the last its clef.
   const start: Element[] = [];
   for (const element of Array.from(upperMeasures[0]!.children)) {
     if (['note', 'backup', 'forward'].includes(element.tagName)) break;
     if (element.tagName === 'attributes') start.push(element);
   }
+  const first = start[0];
   const opening = start.at(-1);
-  if (!opening) return;
+  if (!first || !opening) return;
   /** An element in the document's own namespace, as the parsed ones are. */
   const make = (tag: string) => doc.createElementNS(root.namespaceURI, tag);
   /** A note's staff, where MusicXML puts it: before its beams, notations and lyrics. */
@@ -120,7 +123,20 @@ function mergeSplitStaves(doc: Document, piano: Document) {
     instrument.remove();
   const staves = make('staves');
   staves.textContent = '2';
-  opening.insertBefore(staves, children(opening, 'clef')[0] ?? null);
+  // Where the schema puts it: after divisions, key and time, before everything that follows them.
+  const following = Array.from(first.children).find((child) =>
+    [
+      'part-symbol',
+      'instruments',
+      'clef',
+      'staff-details',
+      'transpose',
+      'for-part',
+      'directive',
+      'measure-style',
+    ].includes(child.tagName),
+  );
+  first.insertBefore(staves, following ?? null);
   for (const clef of children(opening, 'clef').filter((c) => !c.hasAttribute('number')))
     clef.setAttribute('number', '1');
   for (const note of Array.from(upper.querySelectorAll('note')))

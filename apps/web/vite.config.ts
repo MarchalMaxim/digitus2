@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +15,27 @@ const scoreBuildSrc = fileURLToPath(
   new URL('../../packages/engine/src/score/build.ts', import.meta.url),
 );
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
+
+/**
+ * The build the app reports about itself (src/app/build.ts): the short commit and the time of
+ * this build. GitHub Pages builds with GITHUB_SHA; anywhere else the checkout answers, and
+ * without git (or outside a checkout) the commit is 'dev'. It never fails the build or a test run.
+ */
+function buildStamp(): { commit: string; date: string } {
+  let commit = process.env.GITHUB_SHA?.slice(0, 7) ?? '';
+  if (!commit) {
+    try {
+      commit = execSync('git rev-parse --short=7 HEAD', {
+        cwd: repoRoot,
+        stdio: ['ignore', 'pipe', 'ignore'],
+        encoding: 'utf8',
+      }).trim();
+    } catch {
+      commit = '';
+    }
+  }
+  return { commit: commit || 'dev', date: new Date().toISOString() };
+}
 
 /**
  * Says once, in `vite dev` and `vite build`, when the piano samples are not in public/piano
@@ -37,6 +59,7 @@ function pianoSamplesNotice(): Plugin {
 
 export default defineConfig({
   plugins: [react(), pianoSamplesNotice(), serviceWorkerPlugin()],
+  define: { __DIGITUS2_BUILD__: JSON.stringify(buildStamp()) },
   resolve: {
     alias: {
       '@digitus2/engine/ornaments': ornamentSrc,

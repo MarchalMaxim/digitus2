@@ -70,6 +70,16 @@ export async function mockService(
 }
 
 /**
+ * Answers the recognitions by call order, for `mockService`: the first call gets `xmls[0]`, the
+ * second `xmls[1]`, and any call beyond the list the last one. The pages of a scan are recognised
+ * one at a time, in reading order, and WebKit exposes no body for a File upload to tell them by.
+ */
+export function inOrder(xmls: readonly string[]): () => string {
+  let calls = 0;
+  return () => xmls[Math.min(calls++, xmls.length - 1)]!;
+}
+
+/**
  * Fails every request to the scan service, for a spec that opens the scan page but never scans:
  * its warm-up must not reach the deployed service. The route outlives a reload.
  */

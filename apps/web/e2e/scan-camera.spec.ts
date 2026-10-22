@@ -18,6 +18,11 @@ const dialog = (page: Page) => page.getByRole('dialog', { name: t.title });
 const shutter = (page: Page) => dialog(page).getByRole('button', { name: t.capture, exact: true });
 const status = (page: Page) => dialog(page).getByRole('status');
 const step = (page: Page, n: number) => dialog(page).getByText(t.step(n, 5), { exact: true });
+/** The filled progress dots under the count: the photos taken so far, the reference included. */
+const filled = (page: Page) => dialog(page).locator('[data-camera-progress] [data-taken="true"]');
+/** A status line that says one of these, exactly. */
+const oneOf = (...texts: string[]) =>
+  new RegExp(`^(?:${texts.map((text) => text.replace(/\W/g, '\\$&')).join('|')})$`);
 /** CPU slowdown for the slow-phone test; DIGITUS2_E2E_CPU overrides it to find a breaking rate. */
 const SLOW_PHONE = Number(process.env.DIGITUS2_E2E_CPU ?? 6);
 
@@ -33,6 +38,8 @@ async function beginPage(page: Page, score: number) {
   await moveScore(page, 0, 0, score);
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible();
+  // The reference photo is confirmed in words for a moment (issue 156), then the sweep sentence.
+  await expect(status(page)).toHaveText(oneOf(t.taken(1, 5), t.sweep(4)));
   await expect(status(page)).toHaveText(t.sweep(4));
 }
 
@@ -362,45 +369,42 @@ test('camera: real tracked views, retake and two kept pages enter ordered recogn
   });
   await openCamera(page);
   await beginPage(page, 1);
-  // Vision follows the pixels in the video: each photo's place is marked on the page and moves
-  // with it (issue 154). In the 360 x 480 camera pixels, the circle is at 180, 240.
-  const marks = () =>
-    dialog(page)
-      .locator('[data-camera-mark]')
-      .evaluateAll((circles) =>
-        circles.map((circle) => [
-          Number(circle.getAttribute('data-x')),
-          Number(circle.getAttribute('data-y')),
-        ]),
-      );
-  const near = (expected: number[][]) => (shown: number[][]) =>
-    shown.length === expected.length &&
-    shown.every((at, i) => Math.hypot(at[0]! - expected[i]![0]!, at[1]! - expected[i]![1]!) < 15);
-  expect(near([[180, 240]])(await marks())).toBe(true);
+  // Vision follows the pixels in the video. The reference photo is taken: one dot is filled
+  // (issue 156). Every sentence the status line says from here on is recorded.
+  await expect(filled(page)).toHaveCount(1);
+  await page.evaluate(() => {
+    const said: string[] = [];
+    (window as unknown as { said: string[] }).said = said;
+    const watch = () => {
+      const text = document.querySelector('.guided-camera [role=status]')?.textContent;
+      if (text && said.at(-1) !== text) said.push(text);
+    };
+    watch();
+    new MutationObserver(watch).observe(document.querySelector('.guided-camera')!, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+  });
   await moveScore(page, 81, 108);
   await expect(step(page, 3)).toBeVisible({ timeout: 15_000 });
+  // The first view is taken: a second dot, a flash, and the status line says so for a moment
+  // before the sweep sentence is back.
+  await expect(filled(page)).toHaveCount(2);
+  await expect(dialog(page).locator('[data-camera-flash]')).toHaveAttribute(
+    'data-camera-flash',
+    '2',
+  );
+  await expect(status(page)).toHaveText(oneOf(t.taken(2, 5), t.sweep(3)));
   await expect(status(page)).toHaveText(t.sweep(3));
-  // The first photo's place moved with the page; the new one is under the circle.
-  await expect
-    .poll(async () =>
-      near([
-        [261, 348],
-        [180, 240],
-      ])(await marks()),
-    )
-    .toBe(true);
+  const said = await page.evaluate(() => (window as unknown as { said: string[] }).said);
+  expect(said.indexOf(t.taken(2, 5))).toBeGreaterThan(-1);
+  expect(said.indexOf(t.taken(2, 5))).toBeLessThan(said.lastIndexOf(t.sweep(3)));
   await moveScore(page, 0, 0);
-  // Back where the first photo was taken: its mark is under the circle again, and no view there.
-  await expect
-    .poll(async () =>
-      near([
-        [180, 240],
-        [99, 132],
-      ])(await marks()),
-    )
-    .toBe(true);
+  // Back where the first photo was taken: no view there, however long the pause.
   await page.waitForTimeout(1_500);
   await expect(step(page, 3)).toBeVisible();
+  await expect(filled(page)).toHaveCount(2);
   await moveScore(page, -81, 108);
   await expect(step(page, 4)).toBeVisible({ timeout: 15_000 });
   await moveScore(page, -81, -108);

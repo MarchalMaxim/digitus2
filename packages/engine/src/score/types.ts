@@ -37,6 +37,19 @@ export interface Ornament {
   endSec: number;
 }
 
+/** A rolled chord's mark (`<arpeggiate>`): playback only; the written onset stays. */
+export interface Arpeggio {
+  direction: 'up' | 'down';
+  number?: number;
+}
+
+/** A damper-pedal mark: down (start, resume, damper-pedal yes or above 0), up (stop, discontinue, no or 0), change. */
+export interface PedalEvent {
+  tick: number;
+  sec: number;
+  type: 'down' | 'up' | 'change';
+}
+
 export interface Note {
   id: string;
   onsetTick: number;
@@ -56,6 +69,7 @@ export interface Note {
   /** MIDI velocity 0..127 when the source carries one (PIG, MIDI, MusicXML dynamics marks). */
   velocity?: number;
   ornament?: Ornament;
+  arpeggio?: Arpeggio;
 }
 
 export interface Score {
@@ -66,6 +80,8 @@ export interface Score {
   keySignatures: KeySigEvent[];
   measures: MeasureInfo[];
   notes: Note[];
+  /** Damper-pedal marks in time order, for the whole score; absent when the source has none. */
+  pedals?: PedalEvent[];
 }
 
 export interface FingerAssignment {

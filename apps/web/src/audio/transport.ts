@@ -1,11 +1,12 @@
 import type { Hand, Score } from '@digitus2/engine';
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import type { Beat } from './beats.js';
-import { buildBeats, countInBar, measureEndSec, measureStartSec } from './beats.js';
+import { buildBeats, countInBar, measureStartSec } from './beats.js';
 import type { AudioClock } from './clock.js';
 import { audibleTime } from './clock.js';
 import { noteVelocity, type Instrument } from './instrument.js';
 import { loopSeconds } from './loop.js';
+import { pedalStops, rollDelays, scoreEndSec } from './performance.js';
 
 export interface TransportDeps {
   ctx: AudioClock;
@@ -80,22 +81,29 @@ function buildEvents(score: Score): PlayEvent[] {
       graceSec.set(n.id, Math.max(0, n.onsetSec - GRACE_LEAD_SEC * (group.length - k)));
     });
   }
+  // A rolled chord starts late and a pedalled note rings on; the written onset stays for the cursor.
+  const roll = rollDelays(score);
+  const held = pedalStops(score);
   const events = score.notes.flatMap((n) =>
-    ornamentAttacks(n).map((attack, index, attacks) => ({
-      sec: graceSec.get(n.id) ?? attack.onsetSec,
-      onset: attack.onsetSec,
-      duration: n.isGrace
-        ? GRACE_DURATION_SEC
-        : n.ornament
-          ? attack.offsetSec - attack.onsetSec
-          : Math.max(MIN_DURATION_SEC, n.offsetSec - n.onsetSec),
-      midi: attack.midi,
-      hand: n.hand,
-      velocity: noteVelocity(n),
-      ...(n.ornament && (index + 1 < attacks.length || attack.midi !== n.midi)
-        ? { ornamentEnd: Math.min(attack.offsetSec, n.ornament.endSec) }
-        : {}),
-    })),
+    ornamentAttacks(n).map((attack, index, attacks) => {
+      const plain = !n.isGrace && !n.ornament;
+      const sec = graceSec.get(n.id) ?? attack.onsetSec + (plain ? (roll.get(n.id) ?? 0) : 0);
+      return {
+        sec,
+        onset: attack.onsetSec,
+        duration: n.isGrace
+          ? GRACE_DURATION_SEC
+          : n.ornament
+            ? attack.offsetSec - attack.onsetSec
+            : Math.max(MIN_DURATION_SEC, (held.get(n.id) ?? n.offsetSec) - sec),
+        midi: attack.midi,
+        hand: n.hand,
+        velocity: noteVelocity(n),
+        ...(n.ornament && (index + 1 < attacks.length || attack.midi !== n.midi)
+          ? { ornamentEnd: Math.min(attack.offsetSec, n.ornament.endSec) }
+          : {}),
+      };
+    }),
   );
   return events.sort((a, b) => a.sec - b.sec); // stable: simultaneous notes keep score order
 }
@@ -217,11 +225,7 @@ export class Transport {
     this.startDelaySec = opts.startDelaySec ?? 0.05;
     this.events = buildEvents(this.score);
     this.beats = buildBeats(this.score);
-    const lastMeasure = this.score.measures.length - 1;
-    // A loop, not Math.max(...notes): spreading a very large score would overflow the stack.
-    let endSec = lastMeasure >= 0 ? measureEndSec(this.score, lastMeasure) : 0;
-    for (const n of this.score.notes) if (n.offsetSec > endSec) endSec = n.offsetSec;
-    this.endSec = endSec;
+    this.endSec = scoreEndSec(this.score);
   }
 
   get state(): TransportState {

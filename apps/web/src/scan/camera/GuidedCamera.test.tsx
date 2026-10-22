@@ -864,15 +864,22 @@ it('issue 145: a live camera whose picture cannot be read asks for another tap, 
   expect(screen.getByRole('button', { name: t.capture })).toHaveClass('is-red');
 });
 
-it('issue 145: a muted camera (iOS lends it to another app) is a stopped camera', async () => {
+it('issue 145: frames that keep coming outweigh a muted flag; an ended track is a stopped camera', async () => {
   sharpFrames();
   heldTracker();
   const track = new EventTarget() as MediaStreamTrack;
   const sample = await liveCamera({ track, maxPages: 2 });
   const t = getT().scan.camera;
   sample(0);
-  Object.defineProperty(track, 'muted', { value: true });
+  // iOS can report the track muted while its pictures still arrive: they are the proof.
+  Object.defineProperty(track, 'muted', { value: true, configurable: true });
   pressThroughBurst(sample, 200, 400);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: t.startOver }));
+  // A track that has ended gives nothing more, whatever frames came before.
+  Object.defineProperty(track, 'readyState', { value: 'ended' });
+  pressThroughBurst(sample, 1600, 1800);
   expect(screen.getByRole('alert')).toHaveTextContent(t.interrupted);
 });
 

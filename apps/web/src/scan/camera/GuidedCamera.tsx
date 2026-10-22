@@ -530,19 +530,12 @@ export function GuidedCamera({
     }
   };
   /**
-   * The camera still gives pictures: a live track that is not muted (iOS mutes it while Control
-   * Center, a call or another app holds the camera) on a video that plays.
+   * The camera gave this press pictures and has not been taken away since. New frames are the
+   * proof: a track's muted flag or a paused video can lag behind or misreport them on a phone.
    */
-  const cameraLive = (element: HTMLVideoElement) => {
+  const stillGiving = (element: HTMLVideoElement, seen: number) => {
     const track = stream.current?.getVideoTracks?.()[0];
-    return (
-      !!track &&
-      track.readyState !== 'ended' &&
-      !track.muted &&
-      !element.paused &&
-      !element.ended &&
-      element.videoWidth > 0
-    );
+    return seen > 0 && !!track && track.readyState !== 'ended' && element.videoWidth > 0;
   };
   /**
    * The picture the video shows now, measured here: the press's photograph when the camera gave
@@ -586,7 +579,7 @@ export function GuidedCamera({
       } catch (cause) {
         log.current.error('read', cause);
       }
-    if (settling && !shot && pending.seen > 0 && cameraLive(element)) {
+    if (settling && !shot && stillGiving(element, pending.seen)) {
       shot = directShot(element);
       if (shot) how = 'direct';
     }
@@ -594,9 +587,9 @@ export function GuidedCamera({
     endBurst();
     if (stageRef.current !== 'aim' || session.current?.signal.aborted || !element) return;
     if (!shot) {
-      // Not one new picture during the whole press, or a track that ended or was taken away: the
-      // camera stopped. A live camera whose picture could not be kept asks for another tap.
-      if (pending.seen > 0 && cameraLive(element)) {
+      // Not one new picture during the whole press, or a track that ended: the camera stopped.
+      // A camera still giving pictures whose picture could not be kept asks for another tap.
+      if (stillGiving(element, pending.seen)) {
         noticeAt.current = performance.now();
         setNotice('retryCapture');
       } else fail('interrupted');

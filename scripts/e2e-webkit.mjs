@@ -33,7 +33,7 @@ const inside = [
   'cd apps/web',
 ].join(' && ');
 // The results (traces, error context) come back to apps/web/test-results/webkit, pass or fail.
-const run = `CI=true pnpm exec playwright test --project=iphone --reporter=list ${extra}; status=$?; rm -rf /out/webkit; cp -r test-results /out/webkit 2>/dev/null; exit $status`;
+const run = `set +e; CI=true pnpm exec playwright test --project=iphone --reporter=list ${extra}; status=$?; rm -rf /out/webkit; cp -r test-results /out/webkit 2>/dev/null; exit $status`;
 
 const result = spawnSync(
   'docker',

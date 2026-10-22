@@ -93,6 +93,21 @@ export async function installScoreCamera(
       const context = canvas.getContext('2d')!;
       const soft = document.createElement('canvas');
       const softContext = soft.getContext('2d')!;
+      /** Whether this canvas applies filters: a white pixel blurred into black must spread. */
+      const filters = (() => {
+        const probe = document.createElement('canvas');
+        probe.width = probe.height = 9;
+        const c = probe.getContext('2d')!;
+        c.fillRect(0, 0, 9, 9);
+        const dot = document.createElement('canvas');
+        dot.width = dot.height = 1;
+        const d = dot.getContext('2d')!;
+        d.fillStyle = '#fff';
+        d.fillRect(0, 0, 1, 1);
+        c.filter = 'blur(2px)';
+        c.drawImage(dot, 4, 4);
+        return c.getImageData(2, 4, 1, 1).data[0]! > 0;
+      })();
       let x = 0;
       let y = 0;
       let score = 1;
@@ -224,19 +239,33 @@ export async function installScoreCamera(
             return;
           }
           lastDrawn = now;
+        } else if (filters) {
+          context.filter = 'none';
+          context.fillStyle = table ? '#2a2a2a' : '#f5f5f5';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.filter = `brightness(${exposure})${blur ? ` blur(${blur}px)` : ''}`;
+          if (table) context.drawImage(source, 50 + x, 66 + y, 260, 347);
+          else context.drawImage(source, x, y);
         } else {
-          // No context.filter: Safari's canvas has none (issue 145). Blur is a downscale and
-          // back; exposure multiplies every pixel, as brightness() did.
+          // Safari's canvas has no filter (issue 145). Blur is a box blur of shifted copies
+          // averaged in turn, across and then down; exposure multiplies every pixel, as
+          // brightness() does.
           context.fillStyle = table ? '#2a2a2a' : '#f5f5f5';
           context.fillRect(0, 0, canvas.width, canvas.height);
           if (table) context.drawImage(source, 50 + x, 66 + y, 260, 347);
           else context.drawImage(source, x, y);
           if (blur) {
-            const factor = 1 + blur;
-            soft.width = Math.max(1, Math.round(canvas.width / factor));
-            soft.height = Math.max(1, Math.round(canvas.height / factor));
-            softContext.drawImage(canvas, 0, 0, soft.width, soft.height);
-            context.drawImage(soft, 0, 0, canvas.width, canvas.height);
+            const reach = Math.ceil(blur * 1.5);
+            soft.width = canvas.width;
+            soft.height = canvas.height;
+            for (const across of [true, false]) {
+              softContext.drawImage(canvas, 0, 0);
+              for (let shift = -reach, taps = 0; shift <= reach; shift++, taps++) {
+                context.globalAlpha = 1 / (taps + 1);
+                context.drawImage(soft, across ? shift : 0, across ? 0 : shift);
+              }
+              context.globalAlpha = 1;
+            }
           }
           if (exposure < 1) {
             const level = Math.round(255 * exposure);

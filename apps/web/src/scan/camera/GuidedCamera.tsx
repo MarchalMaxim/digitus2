@@ -146,6 +146,54 @@ async function pageFile(frame: Frame, signal: AbortSignal): Promise<File> {
     canvas.width = canvas.height = 0;
   }
 }
+/**
+ * The camera's video plays: `play()` resolved, or it is already showing pictures. WebKit can
+ * leave `play()` pending on a live stream that plays all the same, which left the camera on
+ * "Starting" for good (issue 147). A refused play with no picture is still a failure.
+ */
+function playing(element: HTMLVideoElement): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let waited = 0;
+    let kicks = 0;
+    const showing = () => element.videoWidth > 0 && !element.paused;
+    const finish = (error?: unknown) => {
+      if (settled) return;
+      settled = true;
+      clearInterval(watch);
+      element.removeEventListener('playing', check);
+      if (error === undefined) resolve();
+      else reject(error);
+    };
+    const check = () => {
+      if (showing()) finish();
+    };
+    const play = () =>
+      element.play().then(
+        () => finish(),
+        (error: unknown) => {
+          if (showing()) finish();
+          // A refusal during a re-attach is the re-attach's; the watch decides.
+          else if (!kicks) finish(error ?? new Error('play refused'));
+        },
+      );
+    const watch = setInterval(() => {
+      check();
+      // A live stream whose video never gets a picture (WebKit can leave it at readyState 0):
+      // attach the stream again, at most three times.
+      waited += 250;
+      if (settled || waited < 1500 || element.readyState > 0 || kicks >= 3) return;
+      waited = 0;
+      kicks++;
+      const stream = element.srcObject;
+      element.srcObject = null;
+      element.srcObject = stream;
+      void play();
+    }, 250);
+    element.addEventListener('playing', check);
+    void play();
+  });
+}
 /** `angle` plus whole turns, as close as can be to `previous`. */
 const nearestTurn = (angle: number, previous: number) =>
   angle + 2 * Math.PI * Math.round((previous - angle) / (2 * Math.PI));
@@ -771,7 +819,7 @@ export function GuidedCamera({
           return;
         }
         element.srcObject = acquired;
-        await element.play();
+        await playing(element);
         if (controller.signal.aborted) return;
         const videoTrack = acquired.getVideoTracks?.()?.[0];
         lightKnown.current = hasTorch(videoTrack);

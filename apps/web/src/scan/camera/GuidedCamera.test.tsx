@@ -27,6 +27,8 @@ async function liveCamera({
   maxPages = 1,
   onClose = () => {},
   onComplete = () => {},
+  play = () => Promise.resolve(),
+  attachesNeeded = 1,
 }: {
   width?: number;
   height?: number;
@@ -34,11 +36,15 @@ async function liveCamera({
   maxPages?: number;
   onClose?: () => void;
   onComplete?: (files: File[]) => void;
+  /** The video's play(), resolved at once unless the test says otherwise. */
+  play?: () => Promise<void>;
+  /** How many times the stream must be attached before the video shows a picture. */
+  attachesNeeded?: number;
 } = {}) {
   let now = 0;
   let nextFrame: VideoFrameRequestCallback | undefined;
   vi.spyOn(performance, 'now').mockImplementation(() => now);
-  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(play);
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (
     this: HTMLCanvasElement,
   ) {
@@ -72,12 +78,22 @@ async function liveCamera({
   );
   const { rerender } = render(camera(maxPages));
   const video = screen.getByRole('dialog').querySelector('video')!;
+  let stream: unknown = null;
+  let attached = 0;
+  const showing = () => attached >= attachesNeeded;
   Object.defineProperties(video, {
-    srcObject: { value: null, writable: true },
+    srcObject: {
+      get: () => stream,
+      set: (value: unknown) => {
+        if (value) attached++;
+        stream = value;
+      },
+    },
     // Playing, as play() left it (jsdom's own media element never plays).
     paused: { value: false, writable: true },
-    videoWidth: { value: width },
-    videoHeight: { value: height },
+    readyState: { get: () => (showing() ? 4 : 0) },
+    videoWidth: { get: () => (showing() ? width : 0) },
+    videoHeight: { get: () => (showing() ? height : 0) },
     requestVideoFrameCallback: {
       value: (callback: VideoFrameRequestCallback) => {
         nextFrame = callback;
@@ -86,7 +102,10 @@ async function liveCamera({
     },
     cancelVideoFrameCallback: { value: () => {} },
   });
-  const ready = () => waitFor(() => expect(nextFrame).toBeTypeOf('function'));
+  const ready = () =>
+    waitFor(() => expect(nextFrame).toBeTypeOf('function'), {
+      timeout: 2000 + 1500 * attachesNeeded,
+    });
   await ready();
   const sample = (time: number, metadata?: Partial<VideoFrameCallbackMetadata>) =>
     act(() => {
@@ -881,6 +900,22 @@ it('issue 145: frames that keep coming outweigh a muted flag; an ended track is 
   Object.defineProperty(track, 'readyState', { value: 'ended' });
   pressThroughBurst(sample, 1600, 1800);
   expect(screen.getByRole('alert')).toHaveTextContent(t.interrupted);
+});
+
+it('issue 147: a video already showing pictures starts the camera though play() never settles', async () => {
+  sharpFrames();
+  // WebKit can leave play() pending on a live stream that plays all the same.
+  const sample = await liveCamera({ play: () => new Promise<void>(() => {}) });
+  sample(0);
+  expect(screen.getByRole('button', { name: getT().scan.camera.capture })).toBeInTheDocument();
+});
+
+it('issue 147: a video that never gets a picture is attached to its stream again', async () => {
+  sharpFrames();
+  // WebKit can leave a live stream's video at readyState 0; attaching it again starts it.
+  const sample = await liveCamera({ play: () => new Promise<void>(() => {}), attachesNeeded: 2 });
+  sample(0);
+  expect(screen.getByRole('button', { name: getT().scan.camera.capture })).toBeInTheDocument();
 });
 
 it('issue 145: a frame is new when either video clock moves, and a repeated one is not', async () => {

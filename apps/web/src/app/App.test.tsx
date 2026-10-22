@@ -1,8 +1,18 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App.js';
 import { DEFAULT_SETTINGS, useAppStore } from './store.js';
+
+// App starts these imports and does not wait for them; loaded here, none is still loading when the
+// file's environment is torn down (issue 148).
+beforeAll(async () => {
+  await Promise.all([
+    import('../library/local/library.js'),
+    import('../about/AboutView.js'),
+    import('../scan/ScanView.js'),
+  ]);
+});
 
 beforeEach(() => {
   useAppStore.setState({
@@ -23,8 +33,7 @@ describe('App', () => {
   });
 
   it('shows the About page on the about view only, not beside the library', async () => {
-    // Load the lazy chunk first so that an About page wrongly rendered would already be there.
-    await import('../about/AboutView.js');
+    // The lazy chunk is loaded by beforeAll, so an About page wrongly rendered would already be there.
     render(<App />);
     await act(async () => {});
     expect(screen.queryByRole('heading', { level: 1, name: 'About digitus2' })).toBeNull();

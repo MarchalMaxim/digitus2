@@ -1,6 +1,6 @@
 # Verification loop
 
-`pnpm verify` is the definition of done: a change counts only when every step passes on the working tree. The goals, oracles and checks behind it are specified in `docs/superpowers/specs/2026-10-13-verification-design.md`; experiments are logged in `docs/experiments.md`.
+`pnpm verify` is the definition of done: a change counts only when every step passes on the working tree. The goals, oracles and checks behind it are specified in `docs/superpowers/specs/2026-10-13-verification-design.md`; experiments are logged in `docs/experiments.md`. While iterating, run `pnpm verify --changed`; run the full `pnpm verify` once before the pull request.
 
 ## What `pnpm verify` runs
 
@@ -38,13 +38,26 @@ Details:
 - `bundle`: counts the entry chunk and its static imports from `apps/web/dist/.vite/manifest.json`.
 - `e2e`: with `build` in the run, the specs run on the build's output (`pnpm --filter @digitus2/web e2e` would build the web app again and rewrite `apps/web/dist` while `bundle` reads it); without `build` in the run, the `e2e` script builds the app first. It fails on more or fewer than one red element in any application state of `apps/web/e2e/helpers/states.ts` (desktop and 360 px, light and dark), a serious or critical axe violation, horizontal page scroll, library LCP of 2 s or more, the K.545 score taking 8 s or more to appear, the cursor out of sync with the audio clock, or (locally, project `visual`) a screenshot differing from its baseline. Every spec blocks service workers except `pwa.spec.ts`, which checks the web app manifest and icons, the service worker controlling the first visit, an offline reload of a piece opened before, the piano playing offline from the samples kept, a newer worker cleaning up after the older one, and the Reload of the update notice (a waiting worker stays waiting until it is told to skip, then takes the open page over with one change of controller and one reload). `scan-camera.spec.ts`, `scan-camera-real.spec.ts` and `scan-grand-staff.spec.ts` also run in WebKit as the `iphone` project, because an iPhone has no other engine; Playwright's WebKit for Windows has no video streams, so the project is left out on Windows and `node scripts/e2e-webkit.mjs` runs it in Playwright's Linux image under Docker. Tests that throttle the CPU through DevTools run in Chromium only. `scan-camera-loop.spec.ts` is the `e2e:loop` step's own: a `loop` project (a phone window) that exists only when `DIGITUS2_E2E_LOOP` is set and is then run with `--project=loop`, run after `e2e` and never beside it, because local homr's threads slow the other specs' timing. It films a real page photo through the camera, has local homr read the fused page and follows it to the score view; the step reports SKIP without a prepared homr (`DIGITUS2_OMR_HOMR`, and Python 3.11), which is not a pass (`docs/scanning.md`, The loop on the PC). No spec needs the piano samples: the flows that play the real instrument answer its sample requests with a silent WAV.
 
-The benchmark and hands steps run `packages/engine/dist/cli/main.js`: they wait for the `build` step when it is in the run and otherwise need a build already in place, and they skip when the datasets are absent (`research/data/pig`, `research/data/mutopia_fingering`; see `research/data/README.md`). A run with those steps skipped has not checked the floors.
+The benchmark and hands steps run `packages/engine/dist/cli/main.js`: they wait for the `build` step when it is in the run and otherwise need a build already in place, and they skip when the datasets are absent: no `FingeringFiles/` folder under `research/data/pig` or `research/data/mutopia_fingering`, because the manifests tracked beside them are not the data (see `research/data/README.md`). A run with those steps skipped has not checked the floors.
 
 The `embellish` step needs only the build and the committed library, so it never reports SKIP once the build has run. It runs the same guard as the app, then checks each offered piece again on its own, in about a minute.
 
-The format check (`pnpm format:check`) is not a verify step; CI runs it, so run it before pushing.
+The format check (`pnpm format:check`) is not a step of the full `pnpm verify`; CI runs it, so run it before pushing. `pnpm verify --changed` runs it on the changed files.
 
 ### Wall time
+
+Per step, one graph run on the dev machine (the camera work of issue 147), in a checkout without the datasets and without homr: `benchmark`, `benchmark:mutopia`, `hands` and `e2e:loop` skipped, `omr:acceptance` was cached or skipped, so their times are not in the table:
+
+| Step                          | Time      |
+| ----------------------------- | --------- |
+| `e2e`                         | 239 s     |
+| `embellish`                   | 52 s      |
+| `unit`                        | 45 s      |
+| `omr:service`                 | 30 s      |
+| `typecheck`                   | 11 s      |
+| `build`                       | 11 s      |
+| `lint`                        | 6 s       |
+| `hygiene`, `design`, `bundle` | under 1 s |
 
 The wall time of the whole `pnpm verify`, measured on the dev machine (16 cores, 32 GB), with the PIG and Mutopia data and the recognisers in place (the serial run shared the machine with code-review agents, which slowed its `e2e`):
 
@@ -67,6 +80,17 @@ Without the Beringer corpus the corpora tests skip, so `unit` takes about 20 s i
 Name one or more steps: `pnpm verify unit`, `pnpm verify build bundle`, `pnpm verify build omr`, `pnpm verify build benchmark`, `pnpm verify benchmark:mutopia` (the Mutopia oracle alone), `pnpm verify build embellish`. A named step waits only for the named steps it depends on: `pnpm verify build omr` builds first, `pnpm verify omr` runs against the build already in place. `pnpm verify --serial` runs the selection one step at a time.
 
 - **E2E port.** Playwright starts `vite preview` on port 4173 and, outside CI, reuses any server already listening there: stop a stale preview first, or the suite tests an old build. `DIGITUS2_E2E_PORT=4189 pnpm verify` gives a second checkout its own port.
+
+## Verifying only what a change touches
+
+`pnpm verify --changed` is the loop while working; it does not replace the full run. It takes the files changed since the branch left `origin/main` (the diff against the merge-base, committed and uncommitted, plus untracked files; nothing is fetched) and runs:
+
+- always: `hygiene`, `design`, `typecheck`, `lint` and `format` (`prettier --check` on the changed files);
+- the steps the changed paths map to, from the rule table in `scripts/verify-changed.mjs` (the first matching rule wins). Paths that every area depends on select every step: `packages/engine`, `apps/web/src/app`, `design`, `i18n`, `engine` and `test`, the web app's and the repository's configuration files, and `content/`. A path no rule matches also selects every step, so a new directory is slow, never unchecked, until it gets a rule;
+- the steps those need: a selected `e2e`, `bundle` or benchmark step brings `build` with it;
+- `e2e` narrowed to the specs of the matching rules (a changed spec file runs alone), `unit` narrowed to the web tests that import a changed file (`vitest related`), and the script tests when `scripts/verify*` changed. A change that selects every step runs every spec and the whole test suite, and so does a change to a file some test reads outside the web sources: `benchmarks/` and the scripts the web tests import (`scripts/check-colors.mjs`, `scripts/piano-samples*`). A deleted spec file selects nothing; a rule that names a step `scripts/verify.mjs` does not have makes the run fail rather than drop the step.
+
+The run prints before it starts what it will run and why, the specs and the unit selection, and after the summary every step it skipped with the reason. All selected steps passing is not done: the full `pnpm verify` once before the pull request is.
 
 ## Floors
 

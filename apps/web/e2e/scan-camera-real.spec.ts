@@ -15,8 +15,8 @@ import { expectOneRed } from './helpers/red.js';
 // Real texture, realistic motion (issue 143). The camera films a real phone photo of a printed
 // page lying on a wooden table, through a tilted pinhole camera (true perspective, rendered by
 // WebGL) with hand tremor, motion blur while moving and sensor noise, at 720 x 960, so the
-// tracking runs on downscaled frames. The reader's hand is a feedback loop that watches the red
-// dot and glides the phone toward it, as a person does.
+// tracking runs on downscaled frames. The reader's hand sweeps the phone over the page and pauses
+// now and then, as a person does (issue 149).
 test.use({ isMobile: true, hasTouch: true });
 const t = scan.camera;
 const dialog = (page: Page) => page.getByRole('dialog', { name: t.title });
@@ -25,7 +25,7 @@ const status = (page: Page) => dialog(page).getByRole('status');
 const step = (page: Page, n: number) => dialog(page).getByText(t.step(n, 5), { exact: true });
 const review = (page: Page) => dialog(page).getByText(t.review, { exact: true });
 
-/** How the page really samples the camera while it tracks the dots (photos 2 to 5). */
+/** How the page really samples the camera while the reader sweeps (photos 2 to 5). */
 interface Timing {
   /** Milliseconds between the callbacks that tracked a frame. */
   interval: { median: number; p90: number; max: number };
@@ -82,66 +82,62 @@ async function timing(page: Page): Promise<Timing> {
 interface Viewfinder {
   /** The header, e.g. 'Photo 3 of 5'; null once the page is being combined or reviewed. */
   photo: string | null;
-  target: Point | null;
-  reticle: Point | null;
-  holding: boolean;
   /** What the status line (and any alert) says. */
   said: string;
-  /** Tracking has lost the page (the last dots stay, dimmed). */
+  /** Tracking has lost the page (the circle and the ring dim). */
   lost: boolean;
   camera: Point;
 }
 const viewfinder = (page: Page) =>
-  page.evaluate((): Viewfinder => {
-    const red = document.querySelector('circle[data-camera-target].is-red');
-    const reticle = document.querySelector('circle[data-camera-reticle]');
-    const point = (element: Element | null) =>
-      element
-        ? {
-            // Dots are placed by a transform (they glide); data-x and data-y say where.
-            x: Number(element.getAttribute('data-x') ?? element.getAttribute('cx')),
-            y: Number(element.getAttribute('data-y') ?? element.getAttribute('cy')),
-          }
-        : null;
-    return {
-      photo: document.querySelector('.camera-step')?.textContent ?? null,
-      said: [
-        ...document.querySelectorAll('.guided-camera [role=status], .guided-camera [role=alert]'),
-      ]
-        .map((element) => element.textContent)
-        .join(' / '),
-      target: point(red),
-      reticle: point(reticle),
-      holding: reticle?.getAttribute('data-holding') === 'true',
-      lost: !!document.querySelector('svg.camera-tracking.is-lost'),
-      camera: { x: window.scoreCamera.x, y: window.scoreCamera.y },
-    };
-  });
+  page.evaluate((): Viewfinder => ({
+    photo: document.querySelector('.camera-step')?.textContent ?? null,
+    said: [
+      ...document.querySelectorAll('.guided-camera [role=status], .guided-camera [role=alert]'),
+    ]
+      .map((element) => element.textContent)
+      .join(' / '),
+    lost: !!document.querySelector('svg.camera-tracking.is-lost'),
+    camera: { x: window.scoreCamera.x, y: window.scoreCamera.y },
+  }));
 
 /**
- * Photo `n` of 5 (2 to 5): move the phone until the centre circle rests on the red dot, then hold
- * still until the view is taken. Each correction reads the dot and the circle, glides the camera
- * by the remaining offset over a few hundred milliseconds, then lets the page redraw the dot from
- * frames taken after the hand stopped. Returns the number of corrections.
+ * Where the hand pauses while it sweeps (issue 149), in camera pixels from where the first photo
+ * was taken: around it, a sixth of the picture's width away, in no order the app chose. The app
+ * asks for about 72 camera pixels between views here.
  */
-async function reachDot(page: Page, n: number, timeout: number) {
+const STOPS = [
+  { x: 120, y: 0 },
+  { x: 0, y: 120 },
+  { x: -120, y: 0 },
+  { x: 0, y: -120 },
+  { x: 85, y: 85 },
+  { x: -85, y: -85 },
+] as const;
+
+/**
+ * Photo `n` of 5 (2 to 5): sweep the phone to the next stop, then hold it there, as a person
+ * pauses, until the view is taken or a few seconds pass; a stop that already has its view leads on
+ * to the next one. Returns the number of stops it took.
+ */
+async function sweepView(page: Page, n: number, next: { stop: number }, timeout: number) {
   const deadline = Date.now() + timeout;
   const waiting = t.step(n, 5);
-  let corrections = 0;
+  let stops = 0;
   let lostSince: number | null = null;
+  let pausedSince: number | null = null;
   while (Date.now() < deadline) {
     const view = await viewfinder(page);
     if (view.photo !== waiting) {
       // Taken: the next photo, or the page being combined. Anything else is a reset or a failure.
-      const next =
+      const advanced =
         n < 5
           ? view.photo === t.step(n + 1, 5)
           : view.photo === null &&
             [t.processing, t.review].some((text) => view.said.startsWith(text));
-      if (!next) throw new Error(`Photo ${n} of 5 led to '${view.photo}': ${view.said}`);
-      return corrections;
+      if (!advanced) throw new Error(`Photo ${n} of 5 led to '${view.photo}': ${view.said}`);
+      return stops;
     }
-    if (!view.target || !view.reticle || view.lost) {
+    if (view.lost) {
       // Lost: drift back toward where the page was photographed, as a person would.
       lostSince ??= Date.now();
       if (Date.now() - lostSince > 2_000) {
@@ -151,42 +147,24 @@ async function reachDot(page: Page, n: number, timeout: number) {
       continue;
     }
     lostSince = null;
-    const dx = view.reticle.x - view.target.x;
-    const dy = view.reticle.y - view.target.y;
-    const distance = Math.hypot(dx, dy);
-    // Close enough (the app accepts about 23 camera pixels here), or already holding: keep still.
-    if (view.holding || distance < 6) {
+    if (pausedSince !== null && Date.now() - pausedSince < 3_000) {
       await page.waitForTimeout(100);
       continue;
     }
-    corrections++;
-    const ticks = await page.evaluate(
-      () => (window as unknown as { ticks: unknown[] }).ticks.length,
-    );
+    const stop = STOPS[next.stop++ % STOPS.length]!;
+    stops++;
     await glideScore(
       page,
-      view.camera.x + dx,
-      view.camera.y + dy,
-      Math.min(700, Math.max(250, distance * 2)),
+      stop.x,
+      stop.y,
+      Math.min(900, Math.max(300, Math.hypot(stop.x - view.camera.x, stop.y - view.camera.y) * 3)),
     );
-    // Let a few camera frames taken after the hand stopped reach the tracker.
-    await expect
-      .poll(
-        () =>
-          page.evaluate(
-            (before) => (window as unknown as { ticks: unknown[] }).ticks.length - before,
-            ticks,
-          ),
-        { timeout: 5_000 },
-      )
-      .toBeGreaterThan(6)
-      .catch(() => {});
-    await page.waitForTimeout(150);
+    pausedSince = Date.now();
   }
-  throw new Error(`Photo ${n} of 5 was not taken in ${timeout} ms (${corrections} corrections)`);
+  throw new Error(`Photo ${n} of 5 was not taken in ${timeout} ms (${stops} stops)`);
 }
 
-/** The reference photo, then the four tracked views; resolves on the review. */
+/** The reference photo, then the four swept views; resolves on the review. */
 async function photographPage(page: Page, slow = 1) {
   // Only a sharp, lit page earns the press; its outline shows the page was found (the status
   // reads the same whether or not it was).
@@ -197,16 +175,18 @@ async function photographPage(page: Page, slow = 1) {
   await expectOneRed(page, 'real camera viewfinder');
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible({ timeout: 10_000 * slow });
-  await expect(status(page)).toHaveText(t.align);
-  const corrections: number[] = [];
+  await expect(status(page)).toHaveText(t.sweep);
+  await expectOneRed(page, 'real camera sweep');
+  const stops: number[] = [];
+  const next = { stop: 0 };
   for (let n = 2; n <= 5; n++) {
-    corrections.push(await reachDot(page, n, 30_000 * slow));
+    stops.push(await sweepView(page, n, next, 30_000 * slow));
     // Each view advances the header by exactly one, and the last one leads to the review.
     if (n < 5) await expect(step(page, n + 1)).toBeVisible();
   }
   const combining = Date.now();
   await expect(review(page)).toBeVisible({ timeout: 60_000 * slow });
-  return { corrections, combining: Date.now() - combining };
+  return { stops, combining: Date.now() - combining };
 }
 
 interface PageMeasure {
@@ -468,7 +448,7 @@ async function comparePages(page: Page, photo: string): Promise<Comparison> {
 
 /** The whole capture on the real page, and what the fused page must show. */
 async function scanRealPage(page: Page, testInfo: TestInfo, slow: number) {
-  const { corrections, combining } = await photographPage(page, slow);
+  const { stops, combining } = await photographPage(page, slow);
   const sampling = await timing(page);
   const still = dialog(page).locator('canvas.camera-still');
   const size = await still.evaluate((canvas: HTMLCanvasElement) => ({
@@ -485,10 +465,7 @@ async function scanRealPage(page: Page, testInfo: TestInfo, slow: number) {
   });
   const pages = await comparePages(page, PAGE_PHOTO_URL);
   const measurements = testInfo.outputPath('measurements.json');
-  writeFileSync(
-    measurements,
-    JSON.stringify({ corrections, combining, sampling, size, pages }, null, 2),
-  );
+  writeFileSync(measurements, JSON.stringify({ stops, combining, sampling, size, pages }, null, 2));
   await testInfo.attach('measurements', { path: measurements, contentType: 'application/json' });
   // The page's own proportions (the photo is 1308 x 1600): the outline was found, since the
   // fallback inset frame would read 0.75, and the review shows the page undistorted.

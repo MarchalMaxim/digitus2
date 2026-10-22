@@ -5,7 +5,8 @@ export const scan: Messages['scan'] = {
   camera: {
     title: 'Fotografeer je partituur',
     starting: 'Camera starten…',
-    intro: 'Tik één keer en volg dan de stippen. De vijf foto’s worden één scherpe pagina.',
+    intro:
+      'Tik één keer en beweeg de telefoon dan langzaam over de pagina. De vijf foto’s worden één scherpe pagina.',
     step: (n: number, total: number) => `Foto ${n} van ${total}`,
     aim: 'Zorg dat de hele pagina in beeld is en tik dan op de knop.',
     dark: 'Te donker. Zet de zaklamp aan.',
@@ -13,8 +14,8 @@ export const scan: Messages['scan'] = {
     blurry: 'Onscherp. Houd de telefoon stil.',
     retryBlurry: 'Onscherp. Houd de telefoon stil en tik opnieuw.',
     retryCapture: 'De foto is niet gelukt. Tik opnieuw.',
-    align: 'Beweeg de cirkel naar de rode stip.',
-    auto: 'Elke foto wordt vanzelf genomen als de cirkel vol is.',
+    sweep: 'Beweeg de telefoon langzaam over de pagina.',
+    auto: 'Hou af en toe even stil: elke pauze op een nieuwe plek neemt een foto.',
     hold: 'Stilhouden…',
     lost: 'Richt de camera weer op de pagina.',
     turned: 'De telefoon is gedraaid. Begin deze pagina opnieuw.',

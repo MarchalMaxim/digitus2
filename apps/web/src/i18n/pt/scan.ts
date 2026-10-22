@@ -5,7 +5,8 @@ export const scan: Messages['scan'] = {
   camera: {
     title: 'Fotografe a sua partitura',
     starting: 'A iniciar a câmara…',
-    intro: 'Toque uma vez e siga os pontos. As cinco fotos formam uma única página nítida.',
+    intro:
+      'Toque uma vez e depois passe o telemóvel devagar sobre a página. As cinco fotos formam uma única página nítida.',
     step: (n: number, total: number) => `Foto ${n} de ${total}`,
     aim: 'Enquadre a página inteira e depois toque no botão.',
     dark: 'Demasiado escuro. Ligue a lanterna.',
@@ -13,8 +14,8 @@ export const scan: Messages['scan'] = {
     blurry: 'Imagem desfocada. Mantenha o telemóvel imóvel.',
     retryBlurry: 'Ficou desfocada. Não mexa e toque outra vez.',
     retryCapture: 'A foto não ficou. Toque outra vez.',
-    align: 'Leve o círculo até ao ponto vermelho.',
-    auto: 'Cada foto é tirada sozinha quando o círculo enche.',
+    sweep: 'Passe o telemóvel devagar sobre a página.',
+    auto: 'Pare de vez em quando: cada pausa num sítio novo tira uma foto.',
     hold: 'Mantenha o telemóvel imóvel…',
     lost: 'Volte a apontar a câmara para a página.',
     turned: 'O telemóvel rodou. Recomece esta página.',

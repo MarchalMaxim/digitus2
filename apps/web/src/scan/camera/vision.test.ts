@@ -5,7 +5,6 @@ import {
   project,
   registerFrame,
   sharpness,
-  contentBounds,
   type Frame,
 } from './vision';
 import { reconstructPage } from './reconstruction';
@@ -534,33 +533,5 @@ describe('score page fusion', () => {
     await expect(mergeCaptures(captures, largeCorners, controller.signal)).rejects.toThrow(
       /abort/i,
     );
-  });
-});
-
-describe('issue 147: the printed part of a page', () => {
-  const page = [
-    { x: 5, y: 5 },
-    { x: 295, y: 5 },
-    { x: 295, y: 355 },
-    { x: 5, y: 355 },
-  ];
-  it('boxes the music and leaves out blank paper', () => {
-    const box = contentBounds(notation(17, 2), page)!;
-    expect(box.top).toBeLessThan(30);
-    expect(box.bottom).toBeGreaterThan(120);
-    expect(box.bottom).toBeLessThan(200);
-    expect(box.right - box.left).toBeGreaterThan(220);
-    expect(contentBounds(blank(), page)).toBeUndefined();
-  });
-  it('does not count the page edge against a dark table as content', () => {
-    const frame = blank(300, 360, 40);
-    for (let y = 30; y < 330; y++) for (let x = 30; x < 270; x++) ink(frame, x, y, 240);
-    const edge = [
-      { x: 30, y: 30 },
-      { x: 270, y: 30 },
-      { x: 270, y: 330 },
-      { x: 30, y: 330 },
-    ];
-    expect(contentBounds(frame, edge)).toBeUndefined();
   });
 });

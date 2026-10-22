@@ -109,57 +109,41 @@ button.camera-icon-button:not(.is-red):hover {
   /* A dark halo, so white marks read on white paper as well as on a dark table. */
   filter: drop-shadow(0 0 1px var(--key-black)) drop-shadow(0 0 2px var(--key-black));
 }
-/* Tracking lost: the last dots stay, dimmed, so the way back to the dot to reach is shown. */
+/* Tracking lost: the circle and the ring dim until the page is found again. */
 .camera-tracking.is-lost circle,
-.camera-tracking.is-lost line {
+.camera-tracking.is-lost path {
   opacity: 0.45;
 }
-/* :not(.is-red): these rules load after tokens.css and would otherwise whiten the accent dot. */
-.camera-tracking circle:not(.is-red),
 .camera-tracking polygon,
-.camera-tracking line {
+.camera-tracking path {
   stroke: currentColor;
   stroke-width: 2;
   fill: none;
   vector-effect: non-scaling-stroke;
 }
-.camera-tracking .is-red {
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
-}
 .camera-tracking polygon {
   stroke-width: 3;
 }
-.camera-tracking .camera-guide {
-  stroke-dasharray: 4 6;
-  opacity: 0.7;
-}
-/* The dots and the guide glide from one tracking answer to the next (issue 147). */
-.camera-tracking circle[data-camera-target],
-.camera-tracking .camera-guide {
-  transition: transform var(--glide, 120ms) linear;
-}
-.camera-tracking circle.camera-target {
-  opacity: 0.75;
-}
-.camera-tracking circle.camera-target-complete {
-  fill: currentColor;
-  opacity: 0.35;
-}
-.camera-tracking circle[data-holding='true'] {
+/* The circle is an outline, so the music under it stays visible (tokens.css would fill it). */
+.camera-tracking circle.is-red {
+  fill: none;
   stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+  transition: stroke-width var(--dur-fast) var(--ease);
 }
-/* The ring fills while the circle rests on the dot; the view is taken when it closes. */
-.camera-tracking circle.camera-hold {
-  stroke-width: 5;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: camera-hold linear forwards;
+/* A pause somewhere new: the circle thickens, and the view is taken a moment later. */
+.camera-tracking circle.is-red[data-settling='true'] {
+  stroke-width: 6;
 }
-@keyframes camera-hold {
-  to {
-    stroke-dashoffset: 0;
-  }
+/* The ring around the circle: a quarter per view, filled once the view is taken (issue 149). */
+.camera-tracking path.camera-view {
+  opacity: 0.45;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.camera-tracking path.camera-view-taken {
+  stroke-width: 6;
+  stroke-linecap: round;
 }
 .camera-flash {
   position: absolute;
@@ -304,9 +288,5 @@ button.camera-icon-button:not(.is-red):hover {
   .guided-camera .guided-camera-copy .is-repeated {
     transition: none;
     animation: none;
-  }
-  /* The ring is progress, not decoration: it still fills, in four steps instead of smoothly. */
-  .guided-camera .camera-tracking circle.camera-hold {
-    animation: camera-hold steps(4, end) forwards;
   }
 }

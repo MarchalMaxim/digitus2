@@ -33,12 +33,12 @@ async function beginPage(page: Page, score: number) {
   await moveScore(page, 0, 0, score);
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible();
-  await expect(status(page)).toHaveText(t.align);
+  await expect(status(page)).toHaveText(t.sweep);
 }
 
 async function finishViews(page: Page, { view = 15_000, review = 20_000 } = {}) {
-  // Translate the printed page itself to each real page-anchored target. These are 25/75%
-  // of the default 5%-inset page, measured in the 360 x 480 camera source pixels.
+  // Sweep the phone and pause four times (issue 149): the page lands this far from where the
+  // first photo was taken, in the 360 x 480 camera source pixels, in no order the app chose.
   const translations = [
     [81, 108],
     [-81, 108],
@@ -87,9 +87,9 @@ test('camera: stationary video cannot complete a view; cancel releases its real 
     })
     .toBeGreaterThan(90);
   await expect(step(page, 2)).toBeVisible();
-  // No manual shutter while tracking: the red element is the dot to reach.
+  // No manual shutter while tracking: the red element is the circle the reader sweeps.
   await expect(shutter(page)).toHaveCount(0);
-  await expect(dialog(page).locator('[data-camera-target="1"]')).toHaveClass(/is-red/);
+  await expect(dialog(page).locator('[data-camera-reticle]')).toHaveClass(/is-red/);
   await expect(dialog(page).getByText(t.review, { exact: true })).toHaveCount(0);
   await expectOneRed(page, 'stationary guided camera');
   await expectNoSeriousA11y(page, 'stationary guided camera');
@@ -101,25 +101,26 @@ test('camera: stationary video cannot complete a view; cancel releases its real 
   await expect(page.locator('.scan-page-list li')).toHaveCount(0);
 });
 
-test('camera: a frozen aligned video cannot count as a steady hold', async ({ page }) => {
+test('camera: a frozen video cannot count as a pause', async ({ page }) => {
   await mockService(page, xml('C'));
   await openCamera(page);
   await beginPage(page, 1);
-  // Freeze inside the page the moment the ring starts to fill (issue 140): no Playwright round
-  // trip may fall inside the hold, which a slow runner can outlast.
+  // Move somewhere new and freeze once the first picture of it is drawn (issue 140): no
+  // Playwright round trip may fall inside the pause, which a slow runner can outlast. Freezing at
+  // the camera, not when the app shows the pause, keeps the analysis's own lag (real pictures of
+  // the new place, already on their way) from counting as the frozen time.
   await page.evaluate(() => {
-    const observer = new MutationObserver(() => {
-      if (!document.querySelector('[data-camera-reticle][data-holding="true"]')) return;
+    const before = window.scoreCamera.frames;
+    const watch = () => {
+      if (window.scoreCamera.frames <= before) {
+        requestAnimationFrame(watch);
+        return;
+      }
       window.scoreCamera.freeze(true);
       (window as unknown as { frozeAt: number }).frozeAt = performance.now();
-      observer.disconnect();
-    });
-    observer.observe(document.body, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['data-holding'],
-    });
+    };
     window.scoreCamera.move(81, 108);
+    requestAnimationFrame(watch);
   });
   const frozeAt = () =>
     page.evaluate(() => (window as unknown as { frozeAt?: number }).frozeAt ?? null);
@@ -280,59 +281,40 @@ async function recordTicks(page: Page) {
 const ticks = (page: Page) =>
   page.evaluate(() => (window as unknown as { ticks: (number | 'switch')[] }).ticks);
 
-test('camera: a shaking hand still takes every view, and each dot is felt', async ({ page }) => {
+test('camera: a shaking hand still takes every view, and each photo is felt', async ({ page }) => {
   // Issue 147: the page lands up to 10 camera pixels off in every frame, as a hand holds a phone.
-  // The hold before it could not take one view from 8 pixels on; this one takes all four.
+  // The dot hold of issue 143 could not take one view from 8 pixels on; the sweep takes all four.
   await recordTicks(page);
   await mockService(page, xml('C'));
   await openCamera(page, { shake: 10 });
   await beginPage(page, 1);
   await finishViews(page);
   await expectOneRed(page, 'shaky review');
-  // A light tick when the circle reaches each dot, a firmer one as each photo is taken.
+  // A firm tick as each photo is taken, and nothing else to feel.
   const felt = await ticks(page);
-  if (felt.includes('switch')) expect(felt.length).toBeGreaterThanOrEqual(9);
-  else {
-    expect(felt.filter((tick) => tick === 10).length).toBeGreaterThanOrEqual(4);
-    expect(felt.filter((tick) => tick === 22)).toHaveLength(5);
-  }
+  if (felt.includes('switch')) expect(felt).toHaveLength(5);
+  else expect(felt).toEqual([22, 22, 22, 22, 22]);
 });
 
-/**
- * Take the four views by following the dots the camera shows, wherever it put them: read the red
- * dot, move the page so it sits under the circle, and look again until the photo is taken.
- */
-async function followDots(page: Page) {
-  for (let view = 0; view < 4; view++) {
-    const taken =
-      view < 3 ? step(page, view + 3) : dialog(page).getByText(t.review, { exact: true });
-    for (let attempt = 0; attempt < 4 && !(await taken.isVisible()); attempt++) {
-      const dot = dialog(page).locator('circle[data-camera-target].is-red');
-      const at = {
-        x: Number(await dot.getAttribute('data-x')),
-        y: Number(await dot.getAttribute('data-y')),
-      };
-      const now = await page.evaluate(() => ({ x: window.scoreCamera.x, y: window.scoreCamera.y }));
-      // The camera's picture is 360 x 480: its centre is the circle.
-      await moveScore(page, now.x + 180 - at.x, now.y + 240 - at.y);
-      await taken.waitFor({ timeout: 4_000 }).catch(() => {});
-    }
-    await expect(taken).toBeVisible({ timeout: 15_000 });
-  }
-}
-
-test('camera: a page with music only at its top is photographed and tracked', async ({ page }) => {
-  // Issue 147: one system, the rest of the page blank paper, as on the owner's page. The dots stay
-  // with the music, so the camera never has to leave it to reach one, and the views combine.
+test('camera: a page with music only at its top is swept and combined', async ({ page }) => {
+  // Issue 147: one system, the rest of the page blank paper, as on the owner's page. The reader
+  // sweeps over the music, never off it, and the views combine (issue 149).
   await mockService(page, xml('C'));
   await openCamera(page, { systems: 1 });
   await beginPage(page, 1);
-  const dots = await dialog(page)
-    .locator('circle[data-camera-target]')
-    .evaluateAll((circles) => circles.map((circle) => Number(circle.getAttribute('data-y'))));
-  // Music from about 35 to 80 of 480 camera pixels: every dot within reach of it.
-  expect(Math.max(...dots)).toBeLessThan(300);
-  await followDots(page);
+  // Music from about 35 to 80 of 480 camera pixels: moving the page down keeps all of it.
+  const stops = [
+    [50, 30],
+    [-50, 30],
+    [-50, 100],
+    [50, 100],
+  ] as const;
+  for (const [index, [x, y]] of stops.entries()) {
+    await moveScore(page, x, y);
+    const taken =
+      index < 3 ? step(page, index + 3) : dialog(page).getByText(t.review, { exact: true });
+    await expect(taken).toBeVisible({ timeout: 15_000 });
+  }
   await expect(dialog(page).getByRole('alert')).toHaveCount(0);
   await expectOneRed(page, 'partly blank page review');
 });
@@ -380,15 +362,22 @@ test('camera: real tracked views, retake and two kept pages enter ordered recogn
   });
   await openCamera(page);
   await beginPage(page, 1);
-  const target = dialog(page).locator('[data-camera-target="1"]');
-  const initialX = Number(await target.getAttribute('data-x'));
-  await moveScore(page, 40, 30);
-  // Vision must move the page-anchored dot in response to the pixels in the video.
-  await expect
-    .poll(async () => Number(await target.getAttribute('data-x')) - initialX)
-    .toBeGreaterThan(15);
-  await expect(step(page, 2)).toBeVisible();
-  await finishViews(page);
+  // Vision follows the pixels in the video: each pause somewhere new fills a quarter of the ring.
+  const ring = dialog(page).locator('[data-camera-view][data-complete="true"]');
+  await expect(ring).toHaveCount(0);
+  await moveScore(page, 81, 108);
+  await expect(step(page, 3)).toBeVisible({ timeout: 15_000 });
+  await expect(ring).toHaveCount(1);
+  await moveScore(page, 0, 0);
+  // Back where the first photo was taken: no view there.
+  await page.waitForTimeout(1_500);
+  await expect(step(page, 3)).toBeVisible();
+  await moveScore(page, -81, 108);
+  await expect(step(page, 4)).toBeVisible({ timeout: 15_000 });
+  await moveScore(page, -81, -108);
+  await expect(step(page, 5)).toBeVisible({ timeout: 15_000 });
+  await moveScore(page, 81, -108);
+  await expect(dialog(page).getByText(t.review, { exact: true })).toBeVisible({ timeout: 20_000 });
   const previewRatio = await dialog(page)
     .locator('canvas.camera-still')
     .evaluate((canvas: HTMLCanvasElement) => {

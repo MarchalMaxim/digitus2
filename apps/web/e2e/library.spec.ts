@@ -278,6 +278,15 @@ test('library: an unsupported file shows a notice and keeps one red element', as
   await expect(page.getByText(/does not look like/)).toHaveCount(0);
 });
 
+test('library: the address of a piece not in the library shows a notice', async ({ page }) => {
+  await page.goto('/#/piece/does-not-exist');
+  await expect(page.getByText('That piece is not in the library.')).toBeInViewport();
+  await expect(page).toHaveURL(/#\/$/);
+  await expectOneRed(page, 'library with unknown-piece notice');
+  await page.getByRole('button', { name: 'Dismiss' }).click();
+  await expect(page.getByText('That piece is not in the library.')).toHaveCount(0);
+});
+
 test('library: the layout has no horizontal overflow', async ({ page }) => {
   await page.goto('/');
   const overflow = await horizontalOverflow(page);

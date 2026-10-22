@@ -1,7 +1,13 @@
 import { en } from '../i18n/en/index.js';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from './store.js';
-import { FILE_NOT_RESTORABLE_NOTICE, hashToView, installHashSync, viewToHash } from './routes.js';
+import {
+  FILE_NOT_RESTORABLE_NOTICE,
+  UNKNOWN_PIECE_NOTICE,
+  hashToView,
+  installHashSync,
+  viewToHash,
+} from './routes.js';
 
 afterEach(() => {
   location.hash = '';
@@ -77,12 +83,27 @@ describe('routes', () => {
     );
     uninstall();
   });
+  it('falls back to the library with a notice when the piece is not in the library', () => {
+    location.hash = '#/piece/does-not-exist';
+    const uninstall = installHashSync(useAppStore);
+    expect(useAppStore.getState().view).toEqual({ name: 'library' });
+    expect(location.hash).toBe('#/');
+    expect(useAppStore.getState().notice).toBe(UNKNOWN_PIECE_NOTICE);
+    expect(UNKNOWN_PIECE_NOTICE(en)).toBe('That piece is not in the library.');
+    useAppStore.setState({ notice: null });
+    location.hash = '#/piece/no-such-piece';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    expect(useAppStore.getState().notice).toBe(UNKNOWN_PIECE_NOTICE);
+    expect(useAppStore.getState().view).toEqual({ name: 'library' });
+    uninstall();
+  });
   it('corrects an unrestorable hash in place, without a new history entry', () => {
     location.hash = '#/garbage';
     const entries = history.length;
     const uninstall = installHashSync(useAppStore);
     expect(useAppStore.getState().view).toEqual({ name: 'library' });
     expect(location.hash).toBe('#/');
+    expect(useAppStore.getState().notice).toBeNull();
     expect(history.length).toBe(entries);
     uninstall();
   });

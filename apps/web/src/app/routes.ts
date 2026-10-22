@@ -8,6 +8,9 @@ const PIECE_PREFIX = '#/piece/';
 /** Uploaded scores reopen explicitly from the local collection, without starting a scan. */
 export const FILE_NOT_RESTORABLE_NOTICE: Phrase = (t) => t.app.fileNotRestorable;
 
+/** An address names a piece the library does not hold (issue 59, review L4). */
+export const UNKNOWN_PIECE_NOTICE: Phrase = (t) => t.app.unknownPiece;
+
 export function viewToHash(view: View): string {
   switch (view.name) {
     case 'library':
@@ -67,6 +70,7 @@ export function installHashSync(store: typeof useAppStore): () => void {
     // change below finds it already in place and does not push a second history entry.
     if (hash === FILE_HASH || hash === '#/scan')
       store.setState({ notice: FILE_NOT_RESTORABLE_NOTICE });
+    else if (hash.startsWith(PIECE_PREFIX)) store.setState({ notice: UNKNOWN_PIECE_NOTICE });
     replaceHash(viewToHash({ name: 'library' }));
     if (view.name !== 'library') store.setState({ view: { name: 'library' } });
   };

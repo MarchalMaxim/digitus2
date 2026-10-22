@@ -9,6 +9,8 @@ export const app = {
    * name of the reader's own collection in the library.
    */
   fileNotRestorable: 'Open it from My scores, or choose the file again.',
+  /** The notice when the address names a piece that is not in the library (routes.ts). */
+  unknownPiece: 'That piece is not in the library.',
   /** The name of the light and dark switch, pressed while the page is dark. */
   darkTheme: 'Dark theme',
   /**

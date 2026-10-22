@@ -3,9 +3,23 @@
  * reaches can still say why a press failed, in a screenshot. Counts, never pictures.
  */
 
-/** True when the page was opened with `?camera=debug`. */
-export function cameraDebugRequested(search = globalThis.location?.search ?? ''): boolean {
-  return new URLSearchParams(search).get('camera') === 'debug';
+const REMEMBERED = 'digitus2.cameraDebug';
+
+/**
+ * True when the page was opened with `camera=debug`, before or after the `#` (both are easy to
+ * type on a phone), or earlier in this tab: the app's own navigation then keeps it on.
+ */
+export function cameraDebugRequested(
+  search = globalThis.location?.search ?? '',
+  hash = globalThis.location?.hash ?? '',
+): boolean {
+  const asked = /[?&#]camera=debug\b/.test(`${search}#${hash.replace(/^#/, '')}`);
+  try {
+    if (asked) globalThis.sessionStorage?.setItem(REMEMBERED, '1');
+    return asked || globalThis.sessionStorage?.getItem(REMEMBERED) === '1';
+  } catch {
+    return asked;
+  }
 }
 
 export interface CameraDiagnosis {

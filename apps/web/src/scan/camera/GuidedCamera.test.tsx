@@ -12,6 +12,7 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+  sessionStorage.clear();
 });
 
 const GOOD: quality.FrameQuality = { brightness: 160, blur: 0.2, glare: 0, page: null };
@@ -993,8 +994,12 @@ it('issue 145: ?camera=debug shows what the camera saw; without it nothing is sh
   );
   cleanup();
   vi.unstubAllGlobals();
+  sessionStorage.clear();
   vi.stubGlobal('isSecureContext', true);
-  await liveCamera();
+  const later = await liveCamera();
+  later(0);
+  // Past the panel's first refresh: nothing appears without the flag.
+  await new Promise((resolve) => setTimeout(resolve, 600));
   expect(screen.getByRole('dialog').querySelector('.camera-debug')).toBeNull();
 });
 

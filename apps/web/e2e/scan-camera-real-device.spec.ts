@@ -190,7 +190,7 @@ test("camera, Chromium's fake device: the real capture stack starts, frames flow
   await expect
     .poll(async () => (await seen()).slice(1), { timeout: 10_000 })
     .toEqual(expect.arrayContaining([t.hold]));
-  const answers = [t.sweep, t.retryBlurry, t.blurry, t.processing, t.review];
+  const answers = [t.sweep(4), t.retryBlurry, t.blurry, t.processing, t.review];
   await expect
     .poll(async () => {
       const texts = await seen();
@@ -326,7 +326,7 @@ test("camera, Chromium's fake device playing a filmed page: the outline is found
     await expect(dialog(filmed).getByText(t.step(2, 5), { exact: true })).toBeVisible({
       timeout: 10_000,
     });
-    await expect(status(filmed)).toHaveText(t.sweep);
+    await expect(status(filmed)).toHaveText(t.sweep(4));
     await closeAndExpectReleased(filmed);
     await context.close();
   } finally {

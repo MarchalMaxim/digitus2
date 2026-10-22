@@ -84,7 +84,7 @@ interface Viewfinder {
   photo: string | null;
   /** What the status line (and any alert) says. */
   said: string;
-  /** Tracking has lost the page (the circle and the ring dim). */
+  /** Tracking has lost the page (the circle and the marks dim). */
   lost: boolean;
   camera: Point;
 }
@@ -175,7 +175,7 @@ async function photographPage(page: Page, slow = 1) {
   await expectOneRed(page, 'real camera viewfinder');
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible({ timeout: 10_000 * slow });
-  await expect(status(page)).toHaveText(t.sweep);
+  await expect(status(page)).toHaveText(t.sweep(4));
   await expectOneRed(page, 'real camera sweep');
   const stops: number[] = [];
   const next = { stop: 0 };

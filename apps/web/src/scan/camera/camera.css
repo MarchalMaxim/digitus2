@@ -109,20 +109,15 @@ button.camera-icon-button:not(.is-red):hover {
   /* A dark halo, so white marks read on white paper as well as on a dark table. */
   filter: drop-shadow(0 0 1px var(--key-black)) drop-shadow(0 0 2px var(--key-black));
 }
-/* Tracking lost: the circle and the ring dim until the page is found again. */
-.camera-tracking.is-lost circle,
-.camera-tracking.is-lost path {
+/* Tracking lost: the circle and the marks dim until the page is found again. */
+.camera-tracking.is-lost circle {
   opacity: 0.45;
 }
-.camera-tracking polygon,
-.camera-tracking path {
+.camera-tracking polygon {
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 3;
   fill: none;
   vector-effect: non-scaling-stroke;
-}
-.camera-tracking polygon {
-  stroke-width: 3;
 }
 /* The circle is an outline, so the music under it stays visible (tokens.css would fill it). */
 .camera-tracking circle.is-red {
@@ -135,15 +130,12 @@ button.camera-icon-button:not(.is-red):hover {
 .camera-tracking circle.is-red[data-settling='true'] {
   stroke-width: 6;
 }
-/* The ring around the circle: a quarter per view, filled once the view is taken (issue 149). */
-.camera-tracking path.camera-view {
-  opacity: 0.45;
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-.camera-tracking path.camera-view-taken {
-  stroke-width: 6;
-  stroke-linecap: round;
+/* Where each photo was taken (issue 154): a white dot on the page, gliding with it between
+   tracking answers. */
+.camera-tracking circle.camera-mark {
+  fill: currentColor;
+  stroke: none;
+  transition: transform 120ms linear;
 }
 .camera-flash {
   position: absolute;

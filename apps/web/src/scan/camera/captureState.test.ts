@@ -10,9 +10,11 @@ import {
   sweepStep,
   validCorners,
   validView,
+  viewPlace,
+  invertMatrix,
   type Sweep,
 } from './captureState.js';
-import type { Matrix, Point } from './vision.js';
+import { project, type Matrix, type Point } from './vision.js';
 
 const center = { x: 180, y: 240 };
 const radii = sweepRadii(center);
@@ -145,6 +147,16 @@ describe('issue 149: the sweep', () => {
 });
 
 describe('tracking geometry', () => {
+  it('issue 154: finds where on the page a view was taken, through perspective too', () => {
+    // The phone moved so the page shifted 40 right and 30 down: the circle sat 40 left and 30 up.
+    expect(viewPlace([1, 0, 40, 0, 1, 30, 0, 0, 1], center)).toEqual({ x: 140, y: 210 });
+    const tilted: Matrix = [1.1, 0.05, -12, -0.02, 0.95, 8, 0.0004, -0.0002, 1];
+    const inverse = invertMatrix(tilted)!;
+    const back = project(tilted, project(inverse, center));
+    expect(back.x).toBeCloseTo(center.x, 6);
+    expect(back.y).toBeCloseTo(center.y, 6);
+    expect(invertMatrix([1, 2, 3, 2, 4, 6, 0, 0, 1])).toBeNull();
+  });
   it('converts tracking homographies to full capture pixels, including perspective', () => {
     expect(scaledMatrix([1, 0, 18, 0, 1, -9, 0.001, 0, 1], 5)).toEqual([
       1, 0, 90, 0, 1, -45, 0.0002, 0, 1,

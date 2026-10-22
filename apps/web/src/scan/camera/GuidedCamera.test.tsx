@@ -216,16 +216,23 @@ it('a press takes the sharp frame, then the page is tracked and each view taken 
     coverage: 0.8,
   });
   sample(120);
-  expect(screen.getByRole('status')).toHaveTextContent(t.sweep);
+  expect(screen.getByRole('status')).toHaveTextContent(t.sweep(4));
   expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: t.capture })).toBeNull();
-  // No dots to aim at: the circle is the one red element, and the ring has a quarter per view.
+  // No dots to aim at: the circle is the one red element. The first photo's place is marked.
   const dialog = screen.getByRole('dialog');
   expect(dialog.querySelectorAll('.is-red')).toHaveLength(1);
   expect(dialog.querySelector('[data-camera-reticle]')).toHaveClass('is-red');
-  expect(dialog.querySelectorAll('[data-camera-view]')).toHaveLength(4);
-  expect(dialog.querySelectorAll('[data-camera-view][data-complete="true"]')).toHaveLength(0);
+  /** The marks, in camera pixels: where each photo was taken, as the page shows now. */
+  const marks = () =>
+    Array.from(dialog.querySelectorAll('[data-camera-mark]')).map((mark) => [
+      Math.round(Number(mark.getAttribute('data-x'))),
+      Math.round(Number(mark.getAttribute('data-y'))),
+    ]);
+  const shift = { x: (40 * width) / trackingWidth, y: (30 * height) / trackingHeight };
   sample(240);
+  // The page moved with the phone, and the first photo's mark with it.
+  expect(marks()).toEqual([[Math.round(width / 2 + shift.x), Math.round(height / 2 + shift.y)]]);
   expect(register).toHaveBeenCalledTimes(1);
   expect(register.mock.calls[0]![2]).toEqual(region);
   expect(register.mock.calls[0]![0]).toMatchObject({
@@ -239,10 +246,15 @@ it('a press takes the sharp frame, then the page is tracked and each view taken 
   expect(register.mock.calls.length).toBeGreaterThanOrEqual(2);
   expect(register.mock.calls.at(-1)![2]).toEqual(region);
   expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
-  expect(dialog.querySelectorAll('[data-camera-view][data-complete="true"]')).toHaveLength(1);
-  // Staying there takes nothing more: the next view must be somewhere new.
+  // Staying there takes nothing more: the next view must be somewhere new. The new photo's
+  // mark sits under the circle, where it was taken, and the counter says three are left.
   for (let time = 720; time <= 2400; time += 120) sample(time);
   expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent(t.sweep(3));
+  expect(marks()).toEqual([
+    [Math.round(width / 2 + shift.x), Math.round(height / 2 + shift.y)],
+    [Math.round(width / 2), Math.round(height / 2)],
+  ]);
   register.mockReturnValue({
     matrix: [1, 0, -40, 0, 1, 30, 0, 0, 1],
     inliers: 30,
@@ -581,7 +593,7 @@ it('issue 143: corner editing from a failed page does not follow the reader into
   expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
   expect(dialog.querySelectorAll('.camera-corner')).toHaveLength(0);
   expect(screen.queryByText(t.cornerHint)).toBeNull();
-  expect(screen.getByRole('status')).toHaveTextContent(t.sweep);
+  expect(screen.getByRole('status')).toHaveTextContent(t.sweep(4));
 }, 15000);
 
 it('issue 143: the light goes off while a page is prepared and comes back for the next one', async () => {

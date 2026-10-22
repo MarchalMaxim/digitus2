@@ -14,7 +14,11 @@ export const scan: Messages['scan'] = {
     blurry: 'Se ve borroso. Mantén el teléfono quieto.',
     retryBlurry: 'Borrosa. No muevas el teléfono y toca otra vez.',
     retryCapture: 'La foto no se ha hecho. Toca otra vez.',
-    sweep: 'Pasa el teléfono despacio sobre la página.',
+    sweep: (left: number) =>
+      plural('es', left, {
+        one: 'Ve a un sitio nuevo y detente. Falta 1.',
+        other: 'Ve a un sitio nuevo y detente. Faltan #.',
+      }),
     auto: 'Detente de vez en cuando: cada pausa en un sitio nuevo toma una foto.',
     hold: 'Mantén el teléfono quieto…',
     lost: 'Vuelve a apuntar la cámara a la página.',

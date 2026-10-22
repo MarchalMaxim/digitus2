@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { reconstructPage } from './reconstruction';
+import { mapLocalPoint } from './localRegistration';
 import type { Capture, Frame } from './vision';
 
 /**
@@ -13,6 +14,12 @@ import type { Capture, Frame } from './vision';
 
 const W = 420,
   H = 540;
+/** Staff tops; each staff has five one-pixel lines six pixels apart. */
+const STAVES: number[] = [];
+for (let top = 40; top < H - 50; top += 78) STAVES.push(top);
+/** A bump of the page under one photograph that a phone's smooth registration cannot follow:
+ * 3 pixels down at its centre, over the lines of the third staff where the reference is soft. */
+const BUMP = { view: 3, x: 120, y: 205, radius: 10, depth: 3 };
 
 function lcg(seed: number) {
   return () => {
@@ -28,7 +35,7 @@ function truthPage(): Float32Array {
   const ink = (x: number, y: number, v: number) => {
     if (x >= 0 && y >= 0 && x < W && y < H) g[y * W + x] = Math.min(g[y * W + x]!, v);
   };
-  for (let top = 40; top < H - 50; top += 78) {
+  for (const top of STAVES) {
     for (let line = 0; line < 5; line++)
       for (let x = 18; x < W - 18; x++) ink(x, top + line * 6, 70);
     for (const bx of [18, 120, 222, 324, W - 19])
@@ -54,13 +61,18 @@ function truthPage(): Float32Array {
   return g;
 }
 
-/** Independent camera model: smooth page curvature plus motion between photographs. */
-function cameraPoint(x: number, y: number, view: number) {
+/** Independent camera model: smooth page curvature plus motion between photographs, and with
+ * `bumped` the local bump of BUMP in its view. */
+function cameraPoint(x: number, y: number, view: number, bumped = false) {
   if (view === 0) return { x, y };
-  const sign = view % 2 ? 1 : -1;
+  const sign = view % 2 ? 1 : -1,
+    bump =
+      bumped && view === BUMP.view
+        ? BUMP.depth * Math.exp(-((x - BUMP.x) ** 2 + (y - BUMP.y) ** 2) / (2 * BUMP.radius ** 2))
+        : 0;
   return {
     x: x + sign * 4 * Math.sin(y / 105) + view * 2,
-    y: y + sign * 5 * Math.sin(x / 125) * Math.sin(y / 170) - view * 2,
+    y: y + sign * 5 * Math.sin(x / 125) * Math.sin(y / 170) - view * 2 + bump,
   };
 }
 
@@ -127,7 +139,11 @@ const VIEWS: Degradation[] = [
   { blur: (_, y) => ramp(y, 290, 330), glare: { x: 250, y: 300 }, gain: 1.02, bias: -3 },
 ];
 
-function photograph(truth: Float32Array, view: number): { frame: Frame; linear: Float32Array } {
+function photograph(
+  truth: Float32Array,
+  view: number,
+  bumped = false,
+): { frame: Frame; linear: Float32Array } {
   const d = VIEWS[view]!;
   // Geometry: the sensor pixel (x, y) sees the page point s with cameraPoint(s) = (x, y).
   const sharp = new Float32Array(W * H);
@@ -136,7 +152,7 @@ function photograph(truth: Float32Array, view: number): { frame: Frame; linear: 
       let sx = x,
         sy = y;
       for (let i = 0; i < 8; i++) {
-        const q = cameraPoint(sx, sy, view);
+        const q = cameraPoint(sx, sy, view, bumped);
         sx += x - q.x;
         sy += y - q.y;
       }
@@ -172,8 +188,49 @@ interface Score {
   ink: number;
   /** Mean absolute error on the page's ink pixels: how faithfully the marks themselves read. */
   inkError: number;
-  /** Paper pixels, well away from any ink, that read as ink: duplicated or invented marks. */
+  /** Paper pixels, well away from any ink, that read as ink: invented marks. Blind within
+   * three pixels of ink, where a doubled or moved line lands: see lines. */
   ghosts: number;
+  /** Staff-line columns (away from any other mark), over the page and inside BUMP. */
+  lines: LineScore;
+  bump: LineScore;
+}
+interface LineScore {
+  columns: number;
+  /** Columns where the line reads as two separate dips within two rows of its true row. */
+  doubled: number;
+  /** Columns whose only dip lies two rows off the true row. */
+  moved: number;
+}
+
+/** Each staff line, column by column, between its neighbours (six rows apart): the dips (local
+ * minima at least 20 levels below the column's lightest pixel within three rows) within two
+ * rows of the true row. A line drawn twice a pixel or more apart shows two dips. */
+function lineScore(
+  truth: Float32Array,
+  value: (x: number, y: number) => number,
+  inside: (x: number, y: number) => boolean,
+): LineScore {
+  const score = { columns: 0, doubled: 0, moved: 0 };
+  for (const top of STAVES)
+    for (let line = 0; line < 5; line++) {
+      const c = top + line * 6;
+      for (let x = 24; x < W - 24; x++) {
+        if (!inside(x, c)) continue;
+        let alone = truth[c * W + x] === 70;
+        for (let y = c - 3; y <= c + 3; y++) if (y !== c && truth[y * W + x]! < 200) alone = false;
+        if (!alone) continue;
+        const v = Array.from({ length: 7 }, (_, k) => value(x, c - 3 + k)),
+          lightest = Math.max(...v);
+        const dips: number[] = [];
+        for (let k = 1; k <= 5; k++)
+          if (v[k]! < v[k - 1]! && v[k]! <= v[k + 1]! && lightest - v[k]! >= 20) dips.push(k - 3);
+        score.columns++;
+        if (dips.length > 1) score.doubled++;
+        else if (dips.length === 1 && Math.abs(dips[0]!) === 2) score.moved++;
+      }
+    }
+  return score;
 }
 
 function scoreAgainst(truth: Float32Array, value: (x: number, y: number) => number): Score {
@@ -219,49 +276,64 @@ function scoreAgainst(truth: Float32Array, value: (x: number, y: number) => numb
     ink: ink / inkCount,
     inkError: inkError / inkCount,
     ghosts,
+    lines: lineScore(truth, value, () => true),
+    bump: lineScore(truth, value, (x, y) => Math.hypot(x - BUMP.x, y - BUMP.y) < BUMP.radius * 1.5),
   };
+}
+
+/** Five photographs of the page, each scored alone with the renderer's own geometry, and the
+ * reconstruction from them with the production registration. */
+async function scenario(bumped: boolean) {
+  const truth = truthPage();
+  const photos = VIEWS.map((_, view) => photograph(truth, view, bumped));
+  // Each photograph alone, resampled with the renderer's known geometry and exposure.
+  const single = photos.map(({ frame }, view) => {
+    const d = VIEWS[view]!;
+    const g = new Float32Array(W * H);
+    for (let i = 0; i < g.length; i++) g[i] = frame.data[i * 4]!;
+    return scoreAgainst(truth, (x, y) => {
+      const p = cameraPoint(x, y, view, bumped);
+      return (bilinear(g, p.x, p.y) - d.bias) / d.gain;
+    });
+  });
+  const captures: Capture[] = photos.map(({ frame }, view) => ({
+    frame,
+    // A tracking estimate: right direction, a pixel or so off. Local alignment refines it.
+    matrix:
+      view === 0
+        ? [1, 0, 0, 0, 1, 0, 0, 0, 1]
+        : [1, 0, view * 2 + 1.2, 0, 1, -view * 2 - 0.8, 0, 0, 1],
+  }));
+  const corners = [
+    { x: 0, y: 0 },
+    { x: W - 1, y: 0 },
+    { x: W - 1, y: H - 1 },
+    { x: 0, y: H - 1 },
+  ];
+  const result = await reconstructPage(captures, corners);
+  expect(result.frame.width).toBe(W);
+  expect(result.frame.height).toBe(H);
+  const fused = scoreAgainst(truth, (x, y) => result.frame.data[(y * W + x) * 4]!);
+  const best = {
+    error: Math.min(...single.map((s) => s.error)),
+    inkError: Math.min(...single.map((s) => s.inkError)),
+    glare: Math.min(...single.map((s) => s.glare)),
+    ghosts: Math.min(...single.map((s) => s.ghosts)),
+    doubled: Math.min(...single.map((s) => s.lines.doubled)),
+    moved: Math.min(...single.map((s) => s.lines.moved)),
+  };
+  // Printed so a failing run shows how far off it is.
+  console.info(
+    'fusion oracle',
+    bumped ? 'bumped' : 'plain',
+    JSON.stringify({ fused, single, best }),
+  );
+  return { fused, single, best, result };
 }
 
 describe('multi-view fusion against a known page (issue 143)', () => {
   it('beats the best single photograph: sharper, glare-free, no invented marks', async () => {
-    const truth = truthPage();
-    const photos = VIEWS.map((_, view) => photograph(truth, view));
-    // Each photograph alone, resampled with the renderer's known geometry and exposure.
-    const single = photos.map(({ frame }, view) => {
-      const d = VIEWS[view]!;
-      const g = new Float32Array(W * H);
-      for (let i = 0; i < g.length; i++) g[i] = frame.data[i * 4]!;
-      return scoreAgainst(truth, (x, y) => {
-        const p = cameraPoint(x, y, view);
-        return (bilinear(g, p.x, p.y) - d.bias) / d.gain;
-      });
-    });
-    const captures: Capture[] = photos.map(({ frame }, view) => ({
-      frame,
-      // A tracking estimate: right direction, a pixel or so off. Local alignment refines it.
-      matrix:
-        view === 0
-          ? [1, 0, 0, 0, 1, 0, 0, 0, 1]
-          : [1, 0, view * 2 + 1.2, 0, 1, -view * 2 - 0.8, 0, 0, 1],
-    }));
-    const corners = [
-      { x: 0, y: 0 },
-      { x: W - 1, y: 0 },
-      { x: W - 1, y: H - 1 },
-      { x: 0, y: H - 1 },
-    ];
-    const result = await reconstructPage(captures, corners);
-    expect(result.frame.width).toBe(W);
-    expect(result.frame.height).toBe(H);
-    const fused = scoreAgainst(truth, (x, y) => result.frame.data[(y * W + x) * 4]!);
-    const best = {
-      error: Math.min(...single.map((s) => s.error)),
-      inkError: Math.min(...single.map((s) => s.inkError)),
-      glare: Math.min(...single.map((s) => s.glare)),
-      ghosts: Math.min(...single.map((s) => s.ghosts)),
-    };
-    // Printed so a failing run shows how far off it is.
-    console.info('fusion oracle', JSON.stringify({ fused, single, best }));
+    const { fused, best } = await scenario(false);
     expect(fused.error).toBeLessThan(best.error * 0.8);
     // Inside the reference's glare spot, cleaner than any photograph alone. Not an absolute
     // level: there only two views are both sharp and glare-free, and even a perfect average of
@@ -271,5 +343,36 @@ describe('multi-view fusion against a known page (issue 143)', () => {
     expect(fused.inkError).toBeLessThan(best.inkError);
     // A few stray pixels at most; never a duplicated or invented mark.
     expect(fused.ghosts).toBeLessThanOrEqual(best.ghosts + 25);
+    // No staff line drawn twice or moved, beyond what the best photograph alone shows.
+    expect(fused.lines.doubled).toBeLessThanOrEqual(best.doubled + 3);
+    expect(fused.lines.moved).toBeLessThanOrEqual(best.moved + 3);
+  }, 60_000);
+
+  it('draws each line once where one photograph is misregistered by a local bump', async () => {
+    const { fused, single, best, result } = await scenario(true);
+    // The bump must defeat the registration, or this case tests nothing: near its centre the
+    // production map of that view stays at least 1.5 pixels from the true one.
+    const alignment = result.alignments[BUMP.view - 1]!;
+    let residual = 0;
+    for (let dy = -3; dy <= 3; dy++)
+      for (let dx = -3; dx <= 3; dx++) {
+        const p = { x: BUMP.x + dx, y: BUMP.y + dy },
+          mapped = mapLocalPoint(alignment, p),
+          truthPoint = cameraPoint(p.x, p.y, BUMP.view, true);
+        if (mapped)
+          residual = Math.max(
+            residual,
+            Math.hypot(mapped.point.x - truthPoint.x, mapped.point.y - truthPoint.y),
+          );
+      }
+    expect(residual).toBeGreaterThanOrEqual(1.5);
+    // Inside the bump no more doubled or moved line columns than the reference alone shows,
+    // and no invented ink.
+    expect(fused.bump.doubled).toBeLessThanOrEqual(single[0]!.bump.doubled);
+    expect(fused.bump.moved).toBeLessThanOrEqual(single[0]!.bump.moved + 1);
+    expect(fused.ghosts).toBeLessThanOrEqual(best.ghosts + 25);
+    // The bump costs only its own neighbourhood: the page still beats every photograph.
+    expect(fused.error).toBeLessThan(best.error * 0.8);
+    expect(fused.inkError).toBeLessThan(best.inkError);
   }, 60_000);
 });

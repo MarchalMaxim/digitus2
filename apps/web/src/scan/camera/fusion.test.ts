@@ -137,21 +137,35 @@ describe('multi-view fusion (issue 143)', () => {
     expect(error(truth, out, spot)).toBeLessThan(6);
   });
 
-  it('keeps the darker photograph where an even number of views disagree about glare', async () => {
+  it('keeps the darker photographs where an even number of views disagree about glare', async () => {
     // Dim paper (about 170), so the glare raises the local mean by up to 70 without clipping:
     // the even-count consensus then sits between the photographs, on neither of them.
     const truth = page().map((v) => v * 0.7),
       spot = (x: number, y: number) => Math.hypot(x - 60, y - 32) < 14,
       glare = (v: number, x: number, y: number) =>
         v + 70 * Math.exp(-((x - 60) ** 2 + (y - 32) ** 2) / (2 * 12 * 12));
-    const two = [view(truth, 1, { edit: glare }), view(truth, 2)];
-    const four = [...two, view(truth, 3, { edit: glare }), view(truth, 4)];
-    for (const views of [two, four]) {
-      const out = await fuse(views);
-      expect(out.every((v) => Number.isFinite(v) && v >= 0 && v <= 255)).toBe(true);
-      expect(error(truth, views[0]!, spot)).toBeGreaterThan(30);
-      expect(error(truth, out, spot)).toBeLessThan(6);
-    }
+    const views = [view(truth, 1, { edit: glare }), view(truth, 2)];
+    views.push(view(truth, 3, { edit: glare }), view(truth, 4));
+    const out = await fuse(views);
+    expect(out.every((v) => Number.isFinite(v) && v >= 0 && v <= 255)).toBe(true);
+    expect(error(truth, views[0]!, spot)).toBeGreaterThan(30);
+    expect(error(truth, out, spot)).toBeLessThan(6);
+  });
+
+  it('lets the reference hold out against a single other photograph', async () => {
+    // With two photographs a brighter reference may carry soft glare as well as the other a hand
+    // shadow; brightness alone cannot tell them apart, and the reference defines the page. (The
+    // camera benchmark's hand shadows, in parts of the page only two photographs cover, painted
+    // dark bands; glare that clips the reference still loses, see the safety tests.)
+    // Soft glare on the reference therefore stays where only two photographs cover the page
+    // (its marks too: the reference's detail is kept); with four, the darker pair wins (above).
+    const truth = page().map((v) => v * 0.7),
+      shade = (x: number, y: number) => x > 80 && y > 50,
+      deep = (x: number, y: number) => x > 92 && y > 62 && truth[y * W + x] === 245 * 0.7;
+    const shadowed = view(truth, 2, { edit: (v, x, y) => (shade(x, y) ? v * 0.6 : v) });
+    const out = await fuse([view(truth, 1), shadowed]);
+    expect(error(truth, shadowed, deep)).toBeGreaterThan(50);
+    expect(error(truth, out, deep)).toBeLessThan(4);
   });
 
   it('rejects a hand shadow that only one photograph has', async () => {

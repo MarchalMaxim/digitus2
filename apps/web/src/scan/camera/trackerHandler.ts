@@ -44,8 +44,13 @@ export function trackerHandler(): (request: TrackerRequest) => TrackerAnswer | u
   let region: readonly Point[] | undefined;
   return (request) => {
     if (request.type === 'reference') {
-      reference = prepareReference(request.frame, request.region);
       region = request.region;
+      try {
+        reference = prepareReference(request.frame, request.region);
+      } catch {
+        // Unpreparable: every frame then reads as not registered, and the camera says so.
+        reference = undefined;
+      }
       return undefined;
     }
     const start = performance.now();

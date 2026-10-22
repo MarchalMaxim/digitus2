@@ -42,6 +42,9 @@ export interface Tracker {
   dispose(): void;
 }
 
+/** Far longer than any answer takes on a slow phone (about half a second). */
+const ANSWER_DEADLINE_MS = 4000;
+
 function defaultWorker(): TrackerWorker | undefined {
   if (typeof Worker === 'undefined') return undefined;
   return new Worker(new URL('./tracker.worker.ts', import.meta.url), {
@@ -62,7 +65,13 @@ export function createTracker(spawn: () => TrackerWorker | undefined = defaultWo
   }
   let local: ((request: TrackerRequest) => TrackerAnswer | undefined) | undefined;
   let reference: { frame: Frame; region: readonly Point[] } | undefined;
-  let pending: { id: number; done: (answer: TrackerAnswer | undefined) => void } | undefined;
+  let pending:
+    | {
+        id: number;
+        done: (answer: TrackerAnswer | undefined) => void;
+        deadline: ReturnType<typeof setTimeout> | undefined;
+      }
+    | undefined;
   let nextId = 0;
   let closed = false;
 
@@ -78,6 +87,7 @@ export function createTracker(spawn: () => TrackerWorker | undefined = defaultWo
     const waiting = pending;
     // Free before answering, so the answer may ask the next question at once.
     pending = undefined;
+    clearTimeout(waiting?.deadline);
     waiting?.done(value && value.type !== 'failed' ? value : undefined);
   };
   const fallBack = () => {
@@ -100,16 +110,24 @@ export function createTracker(spawn: () => TrackerWorker | undefined = defaultWo
   ): boolean => {
     if (pending || closed) return false;
     const request = { type, id: ++nextId, frame };
-    pending = { id: request.id, done };
+    pending = { id: request.id, done, deadline: undefined };
     if (worker)
       try {
         worker.postMessage(request, [request.frame.data.buffer]);
+        // A worker that neither answers nor fails (killed by the browser, a message lost) must
+        // not leave the camera waiting for ever: the main thread takes over.
+        pending.deadline = setTimeout(fallBack, ANSWER_DEADLINE_MS);
         return true;
       } catch {
         worker.terminate();
         worker = undefined;
       }
-    answer(inThread()(request));
+    // Never left busy: an answer that throws is an unanswered question, and tracking goes on.
+    try {
+      answer(inThread()(request));
+    } catch {
+      answer(undefined);
+    }
     return true;
   };
   return {
@@ -118,7 +136,11 @@ export function createTracker(spawn: () => TrackerWorker | undefined = defaultWo
     },
     setReference(frame, region) {
       reference = { frame, region: region.map((point) => ({ x: point.x, y: point.y })) };
-      if (local) local({ type: 'reference', ...reference });
+      try {
+        if (local) local({ type: 'reference', ...reference });
+      } catch {
+        // A reference the handler cannot prepare tracks nothing; its questions answer undefined.
+      }
       // Copied, not transferred: the reference stays the caller's, and the fallback's.
       if (worker)
         try {
@@ -126,7 +148,12 @@ export function createTracker(spawn: () => TrackerWorker | undefined = defaultWo
         } catch {
           fallBack();
         }
-      else inThread();
+      else
+        try {
+          inThread();
+        } catch {
+          // As above: the questions will answer undefined.
+        }
     },
     measure(frame, done) {
       return ask('measure', frame, (value) => done(value?.type === 'measure' ? value : undefined));
@@ -138,6 +165,7 @@ export function createTracker(spawn: () => TrackerWorker | undefined = defaultWo
       closed = true;
       worker?.terminate();
       worker = undefined;
+      clearTimeout(pending?.deadline);
       pending = undefined;
     },
   };

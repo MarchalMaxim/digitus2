@@ -161,6 +161,48 @@ describe('the camera tracker', () => {
     expect(register.mock.calls[0]![0]).toMatchObject({ region: REGION });
   });
 
+  it('a reference that cannot be prepared never leaves the camera busy (issue 143)', () => {
+    vi.spyOn(vision, 'sharpness').mockReturnValue(100);
+    vi.spyOn(vision, 'prepareReference').mockImplementation(() => {
+      throw new Error('unpreparable');
+    });
+    // After the worker failed, the main thread prepares the reference again and throws.
+    const { worker } = fakeWorker();
+    const tracker = createTracker(() => worker);
+    tracker.setReference(frame(), REGION);
+    const answers: unknown[] = [];
+    tracker.track(frame(), (answer) => answers.push(answer));
+    worker.onerror!(new Event('error'));
+    expect(() => tracker.track(frame(), (answer) => answers.push(answer))).not.toThrow();
+    expect(tracker.busy).toBe(false);
+    expect(answers[1]).toMatchObject({ registration: null });
+    // Without a worker at all, setting the reference cannot throw either.
+    const local = createTracker(() => undefined);
+    expect(() => local.setReference(frame(), REGION)).not.toThrow();
+    expect(local.track(frame(), () => {})).toBe(true);
+    expect(local.busy).toBe(false);
+  });
+
+  it('a worker that never answers is replaced by the main thread after a deadline', () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(vision, 'sharpness').mockReturnValue(100);
+      const { worker } = fakeWorker();
+      const tracker = createTracker(() => worker);
+      const answers: unknown[] = [];
+      tracker.measure(frame(), (answer) => answers.push(answer));
+      expect(tracker.busy).toBe(true);
+      vi.advanceTimersByTime(4000);
+      expect(worker.terminated).toBe(true);
+      expect(answers).toEqual([undefined]);
+      expect(tracker.busy).toBe(false);
+      tracker.measure(frame(), (answer) => answers.push(answer));
+      expect(answers[1]).toMatchObject({ sharp: 100 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('closing stops the worker and refuses every later question', () => {
     const { worker, reply } = fakeWorker();
     const tracker = createTracker(() => worker);

@@ -57,6 +57,16 @@ async function yieldFrame(signal?: AbortSignal) {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
   abort(signal);
 }
+/** Yield to the page at least every 25 ms of work, so Cancel answers while a page is combined. */
+function pacer(signal?: AbortSignal) {
+  let last = performance.now();
+  return async () => {
+    abort(signal);
+    if (performance.now() - last < 25) return;
+    await yieldFrame(signal);
+    last = performance.now();
+  };
+}
 function boxRows(src: Float32Array, dst: Float32Array, width: number, rows: number, r: number) {
   const n = 2 * r + 1;
   for (let y = 0; y < rows; y++) {
@@ -259,8 +269,10 @@ export async function fuseViews(
     windowWeights = Float64Array.from({ length: 2 * tile }, (_, i) => window(i - tile + 0.5));
   let origin = 0;
   // Buffer row j holds image row origin + j; rows outside the image repeat the edge.
-  const fill = (from: number) => {
+  const pause = pacer(signal);
+  const fill = async (from: number) => {
     for (let j = from; j < rows; j++) {
+      if ((j & 7) === 0) await pause();
       const y = origin + j;
       if (y >= 0 && y < height)
         sample(
@@ -281,16 +293,17 @@ export async function fuseViews(
   };
   for (let top = 0; top < height; top += step) {
     origin = top - margin;
-    if (top === 0) fill(0);
+    if (top === 0) await fill(0);
     else {
       for (let v = 0; v < count; v++) {
         z[v]!.copyWithin(0, step * width, size);
         w[v]!.copyWithin(0, step * width, size);
       }
-      fill(rows - step);
+      await fill(rows - step);
     }
     await yieldFrame(signal);
     for (let v = 0; v < count; v++) {
+      await pause();
       const zv = z[v]!,
         wv = w[v]!,
         b = base[v]!,
@@ -407,6 +420,7 @@ export async function fuseViews(
     // Registration of each view's detail on the new tiles, against the leave-one-out anchor.
     // The reference defines the coordinates and is never checked.
     for (let t = tilesDone; t <= lastTile; t++) {
+      await pause();
       const centreY = t * tile + (tile - 1) / 2,
         fromY = Math.max(0, t * tile - tile / 2),
         toY = Math.min(height, (t + 1) * tile + tile / 2);
@@ -479,6 +493,7 @@ export async function fuseViews(
         }
     tilesDone = lastTile + 1;
     for (let j = margin; j < margin + step && origin + j < height; j++) {
+      if ((j & 7) === 0) await pause();
       const rowAt = between(origin + j, tileRows);
       for (let x = 0; x < width; x++) {
         const k = j * width + x,

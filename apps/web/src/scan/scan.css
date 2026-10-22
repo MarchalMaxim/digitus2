@@ -81,6 +81,10 @@
 .image-pages .own-file {
   align-self: start;
 }
+.scan-add-pages {
+  display: grid;
+  justify-items: start;
+}
 .is-disabled {
   opacity: 0.5;
 }

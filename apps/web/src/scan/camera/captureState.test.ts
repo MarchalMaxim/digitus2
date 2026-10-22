@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   alignmentStep,
+  continuityWindow,
+  CONTINUITY_MS,
+  MAX_CONTINUITY_MS,
   initialAlignment,
   scaledMatrix,
   targetPoints,
@@ -90,6 +93,41 @@ describe('real image alignment', () => {
     const input = { point: { x: 180, y: 180 }, center: { x: 180, y: 180 }, sharp: true };
     const state = alignmentStep(initialAlignment(), { ...input, now: 0 });
     expect(alignmentStep(state, { ...input, now: 1200 }).ready).toBe(false);
+  });
+  it('issue 143: a slow phone holds a view with its own, longer gaps between images', () => {
+    const input = { point: { x: 181, y: 180 }, center: { x: 180, y: 180 }, sharp: true };
+    // About 400 ms an update: never two images within 350 ms, so the fixed window never holds.
+    const times = [0, 410, 820, 1230];
+    let fixed = initialAlignment();
+    for (const now of times) fixed = alignmentStep(fixed, { ...input, now });
+    expect(fixed.ready).toBe(false);
+    const window = continuityWindow([410, 400, 420, 410]);
+    expect(window).toBeCloseTo(1025);
+    let slow = initialAlignment();
+    slow = alignmentStep(slow, { ...input, now: 0, window });
+    slow = alignmentStep(slow, { ...input, now: 410, window });
+    // The ring still takes HOLD_MS of real time, whatever the number of images.
+    expect(slow.ready).toBe(false);
+    slow = alignmentStep(slow, { ...input, now: 820, window });
+    expect(slow.ready).toBe(true);
+    expect(slow.since).toBe(0);
+  });
+  it('issue 143: the window follows the typical gap, within fixed floors', () => {
+    expect(continuityWindow([])).toBe(CONTINUITY_MS);
+    expect(continuityWindow([120, 125, 130])).toBe(CONTINUITY_MS);
+    expect(continuityWindow([200, 210, 5000, 220])).toBeCloseTo(537.5);
+    expect(continuityWindow([900, 1000, 1100])).toBe(MAX_CONTINUITY_MS);
+  });
+  it('issue 143: however slow the phone, a stale or repeated image never continues a hold', () => {
+    const input = { point: { x: 180, y: 180 }, center: { x: 180, y: 180 }, sharp: true };
+    const state = alignmentStep(initialAlignment(), { ...input, now: 0, window: 99_999 });
+    // A gap beyond the longest window, even when the caller asks for more.
+    expect(alignmentStep(state, { ...input, now: 1600, window: 99_999 }).since).toBe(1600);
+    // The same image again (a frozen camera repeats its timestamp) is not elapsed time.
+    expect(alignmentStep(state, { ...input, now: 0, window: 99_999 }).since).toBe(0);
+    let frozen = state;
+    for (let i = 0; i < 10; i++) frozen = alignmentStep(frozen, { ...input, now: 0, window: 1500 });
+    expect(frozen.ready).toBe(false);
   });
   it('resets a hold when the page rotates around an otherwise aligned target', () => {
     const input = {

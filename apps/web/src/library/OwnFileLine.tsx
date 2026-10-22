@@ -14,7 +14,8 @@ export interface OwnFileProps {
 
 /**
  * The end line (spec 3): a text button that opens the file chooser; the page never mentions
- * dropping. On a touch-only device a second one opens the camera, to photograph a printed page.
+ * dropping. On a touch-only device the camera, to photograph a printed page, has a line of its
+ * own under it, with the camera symbol (issue 143): side by side the two read as one link.
  */
 export function OwnFileLine({ onFiles }: OwnFileProps) {
   const t = useT();
@@ -25,7 +26,7 @@ export function OwnFileLine({ onFiles }: OwnFileProps) {
     input.value = ''; // choosing the same file again still fires a change
   };
   return (
-    <p className="library-end">
+    <div className="library-end">
       <label className="text-button own-file">
         {t.library.ownFile.open}
         <input
@@ -37,7 +38,7 @@ export function OwnFileLine({ onFiles }: OwnFileProps) {
         />
       </label>
       {camera && <CameraEntry label={t.scan.phone.takePhoto} onFiles={onFiles} />}
-    </p>
+    </div>
   );
 }
 

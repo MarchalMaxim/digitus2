@@ -63,7 +63,7 @@ export function sharpness(frame: Frame): number {
     }
   return Math.max(0, squares / count - (sum / count) ** 2);
 }
-interface Feature extends Point {
+export interface Feature extends Point {
   descriptors: Float32Array[];
 }
 function inRegion(point: Point, region: readonly Point[], margin = 0): boolean {
@@ -75,7 +75,7 @@ function inRegion(point: Point, region: readonly Point[], margin = 0): boolean {
     );
   });
 }
-function regionBounds(frame: Frame, region?: readonly Point[]) {
+function regionBounds(frame: { width: number; height: number }, region?: readonly Point[]) {
   const left = region ? Math.min(...region.map((p) => p.x)) : 0;
   const top = region ? Math.min(...region.map((p) => p.y)) : 0;
   return {
@@ -227,40 +227,72 @@ function homography(matches: Match[], scale: number): number[] | null {
     1,
   ];
 }
+/**
+ * A reference frame's features, found once and reused for every frame registered against it:
+ * finding them is a quarter of a registration's time. `trackable` is false when no frame could
+ * ever be registered against this reference (invalid, too large, blurred, or a bad region).
+ */
+export interface PreparedReference {
+  width: number;
+  height: number;
+  region?: readonly Point[];
+  trackable: boolean;
+  features: readonly Feature[];
+}
+const isPrepared = (reference: Frame | PreparedReference): reference is PreparedReference =>
+  'features' in reference;
+export function prepareReference(reference: Frame, region?: readonly Point[]): PreparedReference {
+  const { width, height } = reference;
+  const trackable =
+    validFrame(reference) &&
+    Math.max(width, height) <= 360 &&
+    sharpness(reference) >= 80 &&
+    !(
+      region &&
+      (region.length !== 4 ||
+        region.some((p, index) => {
+          const b = region[(index + 1) % 4]!,
+            c = region[(index + 2) % 4]!;
+          return (
+            !Number.isFinite(p.x) ||
+            !Number.isFinite(p.y) ||
+            p.x < 0 ||
+            p.y < 0 ||
+            p.x >= width ||
+            p.y >= height ||
+            (b.x - p.x) * (c.y - b.y) - (b.y - p.y) * (c.x - b.x) <= 1
+          );
+        }))
+    );
+  return {
+    width,
+    height,
+    ...(region && { region: region.map((p) => ({ x: p.x, y: p.y })) }),
+    trackable,
+    features: trackable ? features(reference, region) : [],
+  };
+}
+/**
+ * The homography taking reference pixels to `current` pixels, or null when the frames cannot be
+ * registered reliably. Pass a reference prepared once (`prepareReference`) when many frames are
+ * registered against it; its region then applies, and `region` is ignored.
+ */
 export function registerFrame(
-  reference: Frame,
+  reference: Frame | PreparedReference,
   current: Frame,
   region?: readonly Point[],
 ): Registration | null {
+  const prepared = isPrepared(reference) ? reference : prepareReference(reference, region);
+  region = prepared.region;
   if (
-    !validFrame(reference) ||
+    !prepared.trackable ||
     !validFrame(current) ||
-    reference.width !== current.width ||
-    reference.height !== current.height ||
-    Math.max(reference.width, reference.height) > 360 ||
-    sharpness(reference) < 80 ||
+    prepared.width !== current.width ||
+    prepared.height !== current.height ||
     sharpness(current) < 80
   )
     return null;
-  if (
-    region &&
-    (region.length !== 4 ||
-      region.some((p, index) => {
-        const b = region[(index + 1) % 4]!,
-          c = region[(index + 2) % 4]!;
-        return (
-          !Number.isFinite(p.x) ||
-          !Number.isFinite(p.y) ||
-          p.x < 0 ||
-          p.y < 0 ||
-          p.x >= reference.width ||
-          p.y >= reference.height ||
-          (b.x - p.x) * (c.y - b.y) - (b.y - p.y) * (c.x - b.x) <= 1
-        );
-      }))
-  )
-    return null;
-  const a = features(reference, region),
+  const a = prepared.features,
     b = features(current);
   if (a.length < 12 || b.length < 12) return null;
   const pairs: Match[] = [],

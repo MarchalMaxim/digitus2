@@ -86,7 +86,7 @@ export const library: Messages['library'] = {
   },
   aboutAndLicences: 'Informações e licenças',
   ownFile: {
-    open: 'Abrir sua própria partitura',
+    open: 'Abrir a sua própria partitura',
     dropTitle: 'Solte para abrir este arquivo',
     dropHint: 'MusicXML, MIDI, foto ou PDF',
     notScore: 'Isso não parece um arquivo MusicXML ou MIDI (.musicxml, .xml, .mxl, .mid ou .midi).',

@@ -274,15 +274,8 @@ export function ImagePages({
             )}
           </div>
           {rotating && <p role="status">{t.scan.pages.rotating}</p>}
-          <div className="row">
-            {camera && (
-              <CameraEntry
-                label={t.scan.phone.takeAnother}
-                disabled={busy || rotating}
-                maxPages={SCAN_PAGE_LIMIT - pages.length}
-                onFiles={appendFiles}
-              />
-            )}
+          {/* The file chooser, then the camera on its own line, as in the library (issue 143). */}
+          <div className="scan-add-pages">
             <label className={`text-button own-file${busy ? ' is-disabled' : ''}`}>
               {t.scan.pages.addImages}
               <input
@@ -294,6 +287,14 @@ export function ImagePages({
                 onChange={(event) => addFiles(event)}
               />
             </label>
+            {camera && (
+              <CameraEntry
+                label={t.scan.phone.takeAnother}
+                disabled={busy || rotating}
+                maxPages={SCAN_PAGE_LIMIT - pages.length}
+                onFiles={appendFiles}
+              />
+            )}
           </div>
           {error && <p role="alert">{error(t)}</p>}
         </div>

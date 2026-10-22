@@ -38,6 +38,18 @@ export interface LocalAlignment {
 function abort(signal?: AbortSignal) {
   if (signal?.aborted) throw new DOMException('Processing aborted', 'AbortError');
 }
+/** Lets the page breathe about every 25 ms. Browsers clamp a nested zero timeout to 4 ms or
+ * more, so yielding after a fixed count of steps spent much of the work idle. */
+function pacer(signal?: AbortSignal) {
+  let last = performance.now();
+  return async () => {
+    abort(signal);
+    if (performance.now() - last < 25) return;
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    abort(signal);
+    last = performance.now();
+  };
+}
 function project(h: Matrix, x: number, y: number): Point {
   const d = h[6]! * x + h[7]! * y + h[8]!;
   return { x: (h[0]! * x + h[1]! * y + h[2]!) / d, y: (h[3]! * x + h[4]! * y + h[5]!) / d };
@@ -130,36 +142,54 @@ function match(
   radius: number,
   subpixel = false,
 ): Peak | null {
-  const values: number[] = [];
+  const count = (2 * radius + 1) ** 2,
+    values = new Float64Array(count);
   let sum = 0,
     norm = 0;
-  for (let oy = -radius; oy <= radius; oy++)
+  for (let oy = -radius, i = 0; oy <= radius; oy++)
     for (let ox = -radius; ox <= radius; ox++) {
       const v = sample(a, x + ox, y + oy);
       if (!Number.isFinite(v)) return null;
-      values.push(v);
+      values[i++] = v;
       sum += v;
     }
-  const count = values.length,
-    mean = sum / count;
+  const mean = sum / count;
   for (let i = 0; i < count; i++) {
     values[i] = values[i]! - mean;
     norm += values[i]! ** 2;
   }
   if (norm < count * 36) return null;
+  // sample()'s arithmetic, inlined: every offset in the window is a whole pixel, so all share
+  // one fraction (coordinates here are dyadic, so px + ox splits exactly as px does). A sample
+  // outside the image, or a NaN in the data, makes the score -1 as before.
   const score = (px: number, py: number) => {
+    if (
+      px - radius < 0 ||
+      py - radius < 0 ||
+      px + radius >= b.width - 1 ||
+      py + radius >= b.height - 1
+    )
+      return -1;
+    const fx = Math.floor(px),
+      fy = Math.floor(py),
+      dx = px - fx,
+      dy = py - fy,
+      data = b.data,
+      w = b.width;
     let dot = 0,
       total = 0,
       squares = 0,
       i = 0;
     for (let oy = -radius; oy <= radius; oy++)
-      for (let ox = -radius; ox <= radius; ox++) {
-        const v = sample(b, px + ox, py + oy);
-        if (!Number.isFinite(v)) return -1;
+      for (let ox = -radius, k = (fy + oy) * w + fx - radius; ox <= radius; ox++, k++) {
+        const v =
+          (data[k]! * (1 - dx) + data[k + 1]! * dx) * (1 - dy) +
+          (data[k + w]! * (1 - dx) + data[k + w + 1]! * dx) * dy;
         dot += values[i++]! * v;
         total += v;
         squares += v * v;
       }
+    if (dot !== dot || squares !== squares) return -1;
     return dot / Math.sqrt(Math.max(1, norm * (squares - (total * total) / count)));
   };
   const peaks: Peak[] = [];
@@ -309,11 +339,9 @@ export async function alignLocalView(
     currentGray = luminance(current);
   let a: Gray = { width, height, data: new Float32Array(width * height) },
     b: Gray = { width, height, data: new Float32Array(width * height) };
+  const pause = pacer(signal);
   for (let y = 0; y < height; y++) {
-    if (y % 80 === 0) {
-      await new Promise<void>((resolve) => setTimeout(resolve, 0));
-      abort(signal);
-    }
+    if (y % 16 === 0) await pause();
     for (let x = 0; x < width; x++) {
       a.data[y * width + x] = sample(referenceGray, x / scale, y / scale);
       const q = project(initialMatrix, x / scale, y / scale);
@@ -359,10 +387,7 @@ export async function alignLocalView(
     }
   let anchors: LocalAnchor[] = [];
   for (let i = 0; i < candidates.length; i++) {
-    if (i % 8 === 0) {
-      await new Promise<void>((resolve) => setTimeout(resolve, 0));
-      abort(signal);
-    }
+    await pause();
     const p = candidates[i]!;
     let peak = match(aa[2]!, bb[2]!, p.x / 4, p.y / 4, p.x / 4, p.y / 4, 9, 6);
     if (!peak || peak.score < 0.64 || peak.unique < 0.035) continue;
@@ -499,7 +524,9 @@ export async function alignLocalView(
   return alignment;
 }
 
-/** Reference -> current inverse-sampling map. No extrapolation across holes. */
+/** Reference -> current inverse-sampling map. No extrapolation across holes. Called for every
+ * output pixel of every view, so it allocates nothing; the arithmetic is weights' and
+ * interpolate's, in the same order. */
 export function mapLocalPoint(
   alignment: LocalAlignment,
   p: Point,
@@ -515,26 +542,43 @@ export function mapLocalPoint(
     !inside(alignment.hull, p.x, p.y)
   )
     return null;
-  const w = weights(p.x, p.y, alignment.width, alignment.height, alignment.cols, alignment.rows);
-  if (!alignment.supported[w.cell]) return null;
-  const radius =
-    Math.min(alignment.width / (alignment.cols - 1), alignment.height / (alignment.rows - 1)) *
-    0.72;
-  let nearest = Infinity,
-    confidence = 0;
-  for (const index of alignment.cellAnchors[w.cell]!) {
-    const a = alignment.anchors[index]!;
-    const d = Math.hypot(a.x - p.x, a.y - p.y);
-    if (d < nearest) {
-      nearest = d;
-      confidence = a.confidence;
+  const { cols, rows } = alignment;
+  const gx = Math.max(0, Math.min(cols - 1.001, (p.x / alignment.width) * (cols - 1))),
+    gy = Math.max(0, Math.min(rows - 1.001, (p.y / alignment.height) * (rows - 1)));
+  const ix = Math.floor(gx),
+    iy = Math.floor(gy),
+    dx = gx - ix,
+    dy = gy - iy,
+    cell = iy * (cols - 1) + ix;
+  if (!alignment.supported[cell]) return null;
+  const radius = Math.min(alignment.width / (cols - 1), alignment.height / (rows - 1)) * 0.72;
+  // The nearest anchor by squared distance; only its distance needs the square root.
+  let best = -1,
+    nearest2 = Infinity;
+  for (const index of alignment.cellAnchors[cell]!) {
+    const a = alignment.anchors[index]!,
+      ax = a.x - p.x,
+      ay = a.y - p.y,
+      d2 = ax * ax + ay * ay;
+    if (d2 < nearest2) {
+      nearest2 = d2;
+      best = index;
     }
   }
+  const anchor = alignment.anchors[best];
+  const nearest = anchor ? Math.hypot(anchor.x - p.x, anchor.y - p.y) : Infinity;
   if (nearest > radius) return null;
+  const i0 = iy * cols + ix,
+    w0 = (1 - dx) * (1 - dy),
+    w1 = dx * (1 - dy),
+    w2 = (1 - dx) * dy,
+    w3 = dx * dy;
+  const at = (grid: Float32Array) =>
+    grid[i0]! * w0 + grid[i0 + 1]! * w1 + grid[i0 + cols]! * w2 + grid[i0 + cols + 1]! * w3;
   const point = project(
     alignment.matrix,
-    p.x + interpolate(alignment.displacementX, w),
-    p.y + interpolate(alignment.displacementY, w),
+    p.x + at(alignment.displacementX),
+    p.y + at(alignment.displacementY),
   );
   if (
     !Number.isFinite(point.x) ||
@@ -545,5 +589,5 @@ export function mapLocalPoint(
     point.y >= alignment.currentHeight - 2
   )
     return null;
-  return { point, confidence: confidence * (1 - (0.3 * nearest) / radius) };
+  return { point, confidence: anchor!.confidence * (1 - (0.3 * nearest) / radius) };
 }

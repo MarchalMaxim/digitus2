@@ -318,6 +318,12 @@ h2[tabindex='-1']:focus {
   outline-offset: 2px;
 }
 
+/* On a touch-only device the camera sits on its own line under the file chooser (issue 143). */
+.library-end {
+  display: grid;
+  justify-items: start;
+}
+
 /* While files are dragged over the window, the frame is the one accent on screen (spec 9). */
 .library.is-dragging > :not(.drop-frame) {
   visibility: hidden;

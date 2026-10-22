@@ -1,42 +1,78 @@
+/* The camera is a viewfinder: black around the picture in both themes, white type and marks,
+   and the screen's one accent on the shutter or on the dot to reach (issue 143). */
 .guided-camera-backdrop {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: var(--paper);
-  display: grid;
-  place-items: center;
-  overflow: auto;
+  background: var(--key-black);
   overscroll-behavior: contain;
 }
 .guided-camera {
-  width: min(100%, 42rem);
-  min-height: 100dvh;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  --ink: var(--on-accent);
+  --paper: var(--key-black);
+  --gray-1: color-mix(in srgb, var(--on-accent) 14%, var(--key-black));
+  --gray-2: color-mix(in srgb, var(--on-accent) 35%, var(--key-black));
+  --gray-3: color-mix(in srgb, var(--on-accent) 60%, var(--key-black));
+  color: var(--ink);
+  height: 100vh;
+  height: 100dvh;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0.5rem;
   outline: none;
 }
-.guided-camera-header {
-  display: flex;
+.guided-camera-bar {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  padding-top: env(safe-area-inset-top);
 }
-.guided-camera-header h2 {
-  font-size: 1rem;
+.camera-step {
   margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
 }
-.guided-camera-header button {
-  min-width: 44px;
-  min-height: 44px;
-  font-size: 1.5rem;
+.camera-icon-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+}
+button.camera-icon-button:not(.is-red):hover {
+  background: color-mix(in srgb, var(--on-accent) 15%, transparent);
+}
+.camera-icon-button[aria-pressed='true'] {
+  background: var(--on-accent);
+  color: var(--key-black);
+}
+/* Too dark and the light is off: the light button asks to be pressed, in white, never in red. */
+.camera-icon-button[data-attention='true'] {
+  box-shadow: 0 0 0 2px var(--on-accent);
+  animation: camera-attention 1.4s var(--ease) infinite;
+}
+@keyframes camera-attention {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--on-accent) 25%, transparent);
+  }
+}
+.guided-camera-stage {
+  container-type: size;
+  display: grid;
+  place-items: center;
+  min-height: 0;
 }
 .guided-camera-surface {
   position: relative;
-  width: 100%;
-  max-height: 66dvh;
-  margin: auto;
+  width: min(100cqw, calc(100cqh * var(--ratio)));
   overflow: hidden;
   background: var(--key-black);
 }
@@ -52,6 +88,13 @@
 .camera-video-concealed {
   visibility: hidden;
 }
+.guided-camera-stage[hidden] {
+  display: none;
+}
+/* While the photos are combined, the first one stays on screen, dimmed. */
+.camera-still.is-processing {
+  opacity: 0.4;
+}
 .camera-tracking,
 .camera-corner-layer,
 .camera-corner-layer svg {
@@ -63,22 +106,68 @@
 .camera-tracking {
   pointer-events: none;
   color: var(--on-accent);
-  filter: drop-shadow(0 1px 1px var(--key-black));
+  /* A dark halo, so white marks read on white paper as well as on a dark table. */
+  filter: drop-shadow(0 0 1px var(--key-black)) drop-shadow(0 0 2px var(--key-black));
 }
-.camera-tracking circle {
+/* Tracking lost: the last dots stay, dimmed, so the way back to the dot to reach is shown. */
+.camera-tracking.is-lost circle,
+.camera-tracking.is-lost line {
+  opacity: 0.45;
+}
+/* :not(.is-red): these rules load after tokens.css and would otherwise whiten the accent dot. */
+.camera-tracking circle:not(.is-red),
+.camera-tracking polygon,
+.camera-tracking line {
   stroke: currentColor;
   stroke-width: 2;
   fill: none;
   vector-effect: non-scaling-stroke;
 }
-.camera-tracking .camera-target-current {
-  fill: var(--on-accent);
+.camera-tracking .is-red {
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
 }
-.camera-tracking .camera-target-complete {
-  opacity: 0.25;
+.camera-tracking polygon {
+  stroke-width: 3;
 }
-.camera-tracking .camera-target {
-  opacity: 0.6;
+.camera-tracking .camera-guide {
+  stroke-dasharray: 4 6;
+  opacity: 0.7;
+}
+.camera-tracking circle.camera-target {
+  opacity: 0.75;
+}
+.camera-tracking circle.camera-target-complete {
+  fill: currentColor;
+  opacity: 0.35;
+}
+.camera-tracking circle[data-holding='true'] {
+  stroke-width: 3;
+}
+/* The ring fills while the circle rests on the dot; the view is taken when it closes. */
+.camera-tracking circle.camera-hold {
+  stroke-width: 5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: camera-hold linear forwards;
+}
+@keyframes camera-hold {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.camera-flash {
+  position: absolute;
+  inset: 0;
+  background: var(--on-accent);
+  opacity: 0;
+  pointer-events: none;
+  animation: camera-flash var(--dur-slow) var(--ease);
+}
+@keyframes camera-flash {
+  from {
+    opacity: 0.7;
+  }
 }
 .camera-corner-layer svg {
   pointer-events: none;
@@ -103,20 +192,40 @@
   padding: 0;
   font: 1rem var(--font-mono);
 }
+.camera-corner:focus {
+  z-index: 1;
+}
 .camera-corner:focus-visible {
   outline: 2px solid var(--key-black);
   outline-offset: 2px;
   box-shadow: 0 0 0 5px var(--on-accent);
 }
 .guided-camera-copy {
-  min-height: 3rem;
+  min-height: 4.5rem;
+  text-align: center;
+}
+/* A press on an invalid corner set says the alert again, visibly. */
+.guided-camera-copy .is-repeated {
+  animation: camera-nudge var(--dur-slow) var(--ease);
+}
+@keyframes camera-nudge {
+  30% {
+    transform: translateX(-6px);
+  }
+  70% {
+    transform: translateX(6px);
+  }
 }
 .guided-camera-copy p {
-  margin: 0.25rem 0;
+  margin: 0.2rem auto;
+  max-width: 34rem;
 }
 .guided-camera-copy [role='status'] {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.guided-camera-copy .small {
+  opacity: 0.75;
 }
 .guided-camera-actions {
   display: flex;
@@ -124,26 +233,63 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding-bottom: env(safe-area-inset-bottom);
+  min-height: 76px;
 }
 .guided-camera-actions button,
 .guided-camera-actions label {
   min-height: 44px;
 }
-@media (min-width: 45rem) {
+/* The shutter: an accent disc in a white ring, the size of a thumb. It always answers a press. */
+.guided-camera .camera-shutter {
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border-radius: 50%;
+  border: 4px solid var(--on-accent);
+  box-shadow: inset 0 0 0 3px var(--key-black);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.guided-camera .camera-shutter:active,
+.guided-camera .camera-shutter.is-shooting {
+  transform: scale(0.88);
+}
+/* A phone held sideways: the picture on the left, the words and buttons in a column beside it. */
+@media (orientation: landscape) and (max-height: 520px) {
   .guided-camera {
-    min-height: auto;
-    padding: 1.5rem;
+    max-width: none;
+    padding: 0.5rem 1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(11rem, 15rem);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 1rem;
   }
-  .guided-camera-surface {
-    max-height: 60dvh;
+  .guided-camera-stage {
+    grid-column: 1;
+    grid-row: 1 / -1;
+  }
+  .guided-camera-bar,
+  .guided-camera-copy,
+  .guided-camera-actions {
+    grid-column: 2;
+  }
+  .guided-camera-copy {
+    align-self: center;
+    min-height: 0;
+  }
+  .guided-camera-copy [role='status'] {
+    font-size: 0.95rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .guided-camera *,
   .guided-camera *::before,
-  .guided-camera *::after {
+  .guided-camera *::after,
+  .guided-camera .camera-icon-button[data-attention='true'],
+  .guided-camera .guided-camera-copy .is-repeated {
     transition: none;
     animation: none;
+  }
+  /* The ring is progress, not decoration: it still fills, in four steps instead of smoothly. */
+  .guided-camera .camera-tracking circle.camera-hold {
+    animation: camera-hold steps(4, end) forwards;
   }
 }

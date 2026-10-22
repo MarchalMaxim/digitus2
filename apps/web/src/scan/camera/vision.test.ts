@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { mergeCaptures, project, registerFrame, sharpness, type Frame } from './vision';
+import {
+  mergeCaptures,
+  prepareReference,
+  project,
+  registerFrame,
+  sharpness,
+  type Frame,
+} from './vision';
 import { reconstructPage } from './reconstruction';
 
 const identity = [1, 0, 0, 0, 1, 0, 0, 0, 1];
@@ -199,6 +206,53 @@ describe('score camera registration', () => {
     expect(result).not.toBeNull();
     expect(result!.inliers).toBeGreaterThanOrEqual(12);
     expect(result!.coverage).toBeGreaterThan(0.18);
+  });
+  it('a reference prepared once registers every frame exactly as the unprepared one does', () => {
+    const reference = notation();
+    const region = [
+      { x: 20, y: 20 },
+      { x: 280, y: 25 },
+      { x: 275, y: 340 },
+      { x: 25, y: 335 },
+    ];
+    const covered = { ...reference, data: reference.data.slice() };
+    for (let y = 90; y <= 270; y++) for (let x = 70; x <= 230; x++) ink(covered, x, y, 245);
+    const currents = [
+      warp(reference, identity),
+      warp(reference, [1, 0, 72, 0, 1, -62, 0, 0, 1]),
+      warp(reference, [0.94, -0.035, 25, 0.035, 0.94, -21, -0.0001, 0.00015, 1]),
+      warp(reference, [1.07, 0.025, -42, -0.018, 1.04, 30, 0.00012, -0.0001, 1]),
+      warp(covered, [1, 0, 22, 0, 1, 24, 0, 0, 1]),
+      blank(),
+      notation(9643),
+      blank(200, 360),
+    ];
+    for (const area of [undefined, region]) {
+      const prepared = prepareReference(reference, area);
+      expect(prepared).toMatchObject({ width: 300, height: 360, trackable: true });
+      // The same reference, prepared once, serves every frame; the region travels with it.
+      for (const current of currents)
+        expect(registerFrame(prepared, current, [{ x: 0, y: 0 }])).toEqual(
+          registerFrame(reference, current, area),
+        );
+    }
+    expect(registerFrame(prepareReference(reference, region), currents[1]!)).not.toBeNull();
+  });
+  it('a prepared reference keeps the floors: blurred, oversized or a bad region never registers', () => {
+    const reference = notation();
+    const moved = warp(reference, [1, 0, 30, 0, 1, 20, 0, 0, 1]);
+    expect(prepareReference(blank()).trackable).toBe(false);
+    expect(registerFrame(prepareReference(blank()), moved)).toBeNull();
+    const crossed = [
+      { x: 20, y: 20 },
+      { x: 280, y: 340 },
+      { x: 280, y: 20 },
+      { x: 20, y: 340 },
+    ];
+    expect(prepareReference(reference, crossed)).toMatchObject({ trackable: false, features: [] });
+    expect(registerFrame(prepareReference(reference, crossed), moved)).toBeNull();
+    const large = blank(400, 300);
+    expect(prepareReference(large).trackable).toBe(false);
   });
 });
 describe('score page fusion', () => {

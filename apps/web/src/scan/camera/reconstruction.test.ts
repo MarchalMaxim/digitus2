@@ -171,7 +171,9 @@ describe('score page reconstruction', () => {
     // The output must contain measured view evidence on ink, not just report
     // successful registrations while silently returning the reference image.
     expect(changedInkSamples).toBeGreaterThan(500);
-    expect(result.frame.data[annotation]).toBe(0);
+    // Fusion takes the mark's detail from the one sharp view but the paper's local mean from
+    // all views (issue 143), so the reference-only mark survives a few levels above black.
+    expect(result.frame.data[annotation]).toBeLessThan(30);
   }, 30_000);
   it('rejects a different page with the same staff layout and unsupported featureless extra views', async () => {
     await expect(

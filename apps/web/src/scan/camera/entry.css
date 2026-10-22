@@ -1,6 +1,9 @@
 .has-guided-camera #root {
   visibility: hidden;
 }
+.camera-entry {
+  gap: 0.5rem;
+}
 .camera-loading {
   position: fixed;
   inset: 0;

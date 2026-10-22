@@ -398,7 +398,7 @@ it('offers the same single button on a touch-only device', async () => {
     'https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md',
   );
   // The camera entry stays on a touch-only device.
-  expect(screen.getByText('Take another photo')).toBeVisible();
+  expect(screen.getByText('Photograph another page')).toBeVisible();
   await act(async () => {
     await Promise.resolve();
   });

@@ -49,7 +49,33 @@ export function validCorners(corners: readonly Point[], width: number, height: n
 
 const alignmentTolerance = (center: Point) => Math.max(7, Math.min(center.x, center.y) * 0.065);
 
-/** Elapsed time is evidence only when consecutive camera images stay aligned and sharp. */
+/** How long the circle must rest on a dot before that view is photographed (the ring's fill). */
+export const HOLD_MS = 650;
+
+/** The shortest gap between two camera images that still counts as one unbroken look. */
+export const CONTINUITY_MS = 350;
+/** The longest: a picture older than this is stale, however slow the phone. */
+export const MAX_CONTINUITY_MS = 1500;
+/**
+ * How long one camera image may stand for the next, from how often this phone has been
+ * delivering them (the gaps between recent updates, in ms): two and a half typical gaps, so a
+ * slow phone, whose every update takes longer, can still hold a view, between CONTINUITY_MS and
+ * MAX_CONTINUITY_MS.
+ */
+export function continuityWindow(gaps: readonly number[]): number {
+  if (!gaps.length) return CONTINUITY_MS;
+  const sorted = [...gaps].sort((a, b) => a - b);
+  const middle = sorted.length / 2;
+  const median =
+    sorted.length % 2 ? sorted[Math.floor(middle)]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
+  return Math.min(MAX_CONTINUITY_MS, Math.max(CONTINUITY_MS, median * 2.5));
+}
+
+/**
+ * Elapsed time is evidence only when consecutive camera images stay aligned and sharp. `now` is
+ * when the image was taken; `window` is the longest gap between two images that still counts as
+ * continuous (continuityWindow; CONTINUITY_MS when absent).
+ */
 export function alignmentStep(
   state: Alignment,
   input: {
@@ -58,9 +84,10 @@ export function alignmentStep(
     center: Point;
     sharp: boolean;
     anchors?: readonly Point[];
+    window?: number;
   },
 ): Alignment {
-  const { now, point, center, sharp } = input;
+  const { now, point, center, sharp, window = CONTINUITY_MS } = input;
   const tolerance = alignmentTolerance(center);
   if (
     !point ||
@@ -83,10 +110,11 @@ export function alignmentStep(
   const continuous =
     state.point &&
     anchorsStable &&
-    now - state.last <= 350 &&
+    now > state.last &&
+    now - state.last <= Math.min(MAX_CONTINUITY_MS, window) &&
     Math.hypot(point.x - state.point.x, point.y - state.point.y) <= tolerance * 0.5;
   const since = continuous ? (state.since ?? now) : now;
-  return { aligned: true, ready: now - since >= 650, since, last: now, point, anchors };
+  return { aligned: true, ready: now - since >= HOLD_MS, since, last: now, point, anchors };
 }
 
 /** Interior page points must also produce distinct views relative to the reference framing. */

@@ -75,6 +75,21 @@ function LoadingCamera({
   );
 }
 
+/** The universal camera symbol, so the entry reads as the camera and not as another file link. */
+function CameraSymbol() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path
+        d="M4 8h3l1.5-2.5h7L17 8h3v11H4V8Z M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** The camera runtime is downloaded only after the reader asks to photograph a page. */
 export function CameraEntry({
   label,
@@ -133,13 +148,14 @@ export function CameraEntry({
     <>
       <button
         ref={trigger}
-        className="text-button own-file"
+        className="text-button own-file camera-entry"
         disabled={disabled || maxPages < 1}
         onClick={() => {
           setOverLimit(false);
           setOpen(true);
         }}
       >
+        <CameraSymbol />
         {label}
       </button>
       {/* Native capture remains an available fallback, including older mobile browsers. */}

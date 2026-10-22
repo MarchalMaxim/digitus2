@@ -4,9 +4,9 @@ Build the requested PhotoScan-style four-point acquisition into digitus2's exist
 
 ## Capture behavior
 
-One page begins with a reference photograph. The user then moves the phone, keeping it parallel to the paper, to place the center reticle over each of four targets anchored to the photographed page. Tracking must actually move the targets with the page. Capture a view only after alignment and a steady hold; refuse tracking loss, blur, duplicate viewpoints, and incomplete page coverage. A manual capture remains available once alignment is valid for accessibility. Do not implement decorative targets, a timer slideshow, four corner crops, or four unrelated photos.
+One page begins with a reference photograph. Every live frame is measured (brightness, a content-independent blur estimate, glare, the page outline) and the reader is told what to fix first. The shutter is never a disabled button: a press takes the sharpest frame of a short burst, and a frame too blurred to track is refused with a message, then kept as a single photograph on the second press. The camera's torch is offered when the browser reports one. The user then moves the phone, keeping it parallel to the paper, to place the center reticle over each of four targets anchored to the photographed page. Tracking must actually move the targets with the page. Capture a view only after alignment and a steady hold; refuse tracking loss, blur, duplicate viewpoints, and incomplete page coverage. The view is taken by the hold itself; there is no manual capture button, which would sit disabled while the circle is off the dot (issue 143). A quiet **Skip the rest** appears only after ten seconds on one dot and finishes the page with the photos taken so far. Do not implement decorative targets, a timer slideshow, four corner crops, or four unrelated photos.
 
-Register all five overlapping views to the reference. Produce one rectified page while preserving black music notation. Support smoothly curved printed score pages through staff-based straightening. Reject unreliable alignment rather than introducing duplicate notes. Provide editable page corners and a review with retake/keep. No proprietary Google assets, code or service is used. Glare removal is outside the requested scope.
+Register all five overlapping views to the reference. Produce one rectified page while preserving black music notation. Support smoothly curved printed score pages through staff-based straightening. Reject unreliable alignment rather than introducing duplicate notes. Find the page outline automatically when the page contrasts with its background; provide editable page corners in the review, with retake/keep. No proprietary Google assets, code or service is used. Glare removal is outside the requested scope.
 
 ## Multiple pages and integration
 
@@ -16,7 +16,7 @@ The existing quiet camera entry on touch devices opens the guided camera. A nati
 
 ## UI constraints
 
-Keep the existing monochrome interface and exactly one red element visible. Camera overlays use white/black marks; only the current primary action uses red. Hide the underlying app while the camera is open. Controls appear only for the current stage. All text follows the five existing locales. Respect reduced motion, keyboard operation, touch targets and dialog focus restoration.
+Keep the existing monochrome interface and exactly one red element visible. The camera is a black viewfinder with white type and marks. The red element is the shutter while aiming, the dot to reach while tracking, and the primary action elsewhere. Hide the underlying app while the camera is open. Controls appear only for the current stage. All text follows the five existing locales. Respect reduced motion, keyboard operation, touch targets and dialog focus restoration.
 
 ## Verification
 

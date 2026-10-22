@@ -5,15 +5,26 @@ export const scan: Messages['scan'] = {
   camera: {
     title: 'Fotografe a sua partitura',
     starting: 'A iniciar a câmara…',
-    frame: 'Enquadre a página inteira.',
-    reference: 'Tire a primeira fotografia',
-    align: 'Mova o telemóvel para colocar o círculo central sobre o ponto.',
+    intro: 'Toque uma vez e siga os pontos. As cinco fotos formam uma única página nítida.',
+    step: (n: number, total: number) => `Foto ${n} de ${total}`,
+    aim: 'Enquadre a página inteira e depois toque no botão.',
+    dark: 'Demasiado escuro. Ligue a lanterna.',
+    darkNoLight: 'Demasiado escuro. Vá para um sítio com mais luz.',
+    blurry: 'Imagem desfocada. Mantenha o telemóvel imóvel.',
+    retryBlurry: 'Ficou desfocada. Não mexa e toque outra vez.',
+    align: 'Leve o círculo até ao ponto vermelho.',
+    auto: 'Cada foto é tirada sozinha quando o círculo enche.',
     hold: 'Mantenha o telemóvel imóvel…',
-    lost: 'Volte atrás até a página ficar novamente alinhada.',
-    progress: (n: number) => `Vista ${n} de 4`,
-    processing: 'A preparar a sua página…',
+    lost: 'Volte a apontar a câmara para a página.',
+    turned: 'O telemóvel rodou. Recomece esta página.',
+    moving: 'Mais devagar. A imagem está desfocada.',
+    skip: 'Saltar o resto',
+    startOver: 'Recomeçar',
+    processing: 'A combinar as suas fotografias…',
     review: 'Verifique a sua página',
+    blurryResult: 'Esta página pode estar desfocada. Repita-a se as notas forem difíceis de ler.',
     corners: 'Ajuste os cantos da página',
+    adjust: 'Ajustar cantos',
     useCorners: 'Usar estes cantos',
     invalidCorners: 'Coloque os quatro cantos por ordem à volta da página.',
     cornerLabel: (n: number) =>
@@ -30,6 +41,7 @@ export const scan: Messages['scan'] = {
     cancel: 'Cancelar',
     restart: 'Recomeçar',
     capture: 'Tirar fotografia',
+    light: 'Lanterna',
     fallback: 'Usar a câmara do dispositivo',
     denied:
       'O acesso à câmara está bloqueado. Permita-o nas definições do navegador ou use a câmara do dispositivo.',
@@ -45,8 +57,6 @@ export const scan: Messages['scan'] = {
     pageCount: (n: number) =>
       plural('pt', n, { one: '# página guardada', other: '# páginas guardadas' }),
     ready: 'Pronto para a página seguinte',
-    blurry: 'Esta fotografia parece desfocada. Mantenha o telemóvel imóvel e repita-a.',
-    keepFlat: 'Mantenha o telemóvel paralelo à página enquanto o move.',
     close: 'Fechar câmara',
   },
   view: {
@@ -235,8 +245,8 @@ export const scan: Messages['scan'] = {
     },
   },
   phone: {
-    takePhoto: 'Tirar uma foto',
-    takeAnother: 'Tirar outra foto',
+    takePhoto: 'Fotografar uma partitura impressa',
+    takeAnother: 'Fotografar outra página',
   },
   errors: {
     notCombinedSaved:

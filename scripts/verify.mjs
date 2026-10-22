@@ -3,6 +3,10 @@
 //
 //   pnpm verify            run every step, independent steps at the same time (issue 134)
 //   pnpm verify --serial   run the steps one after another, their output on the console
+//   pnpm verify --changed  while iterating (issue 148): typecheck, lint and format, plus only the
+//                          steps the diff against origin/main touches (scripts/verify-changed.mjs);
+//                          says what it ran and what it skipped. The full run stays the gate
+//                          before the pull request.
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
 //                          omr (requires build), omr:service, omr:acceptance (requires build), bundle, e2e,
 //                          e2e:loop (requires build), benchmark, benchmark:mutopia, hands, embellish)
@@ -38,9 +42,20 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runGraph } from './verify-graph.mjs';
+import { changedFiles, goldMissing, planChanged } from './verify-changed.mjs';
 
-const serial = process.argv.includes('--serial');
-const only = new Set(process.argv.slice(2).filter((a) => a !== '--serial'));
+const argv = process.argv.slice(2);
+const serial = argv.includes('--serial');
+const changed = argv.includes('--changed');
+const only = new Set(argv.filter((a) => !a.startsWith('--')));
+if (changed && only.size > 0) {
+  console.error('--changed picks the steps itself; run it without step names');
+  process.exit(2);
+}
+// The files this branch changed since it left origin/main; on a git failure the run is the full one.
+const diff = changed ? changedFiles() : null;
+if (diff && 'error' in diff) console.log(`--changed: ${diff.error}; running every step`);
+const changedList = diff && 'files' in diff ? diff.files : null;
 // `benchmark` runs the PIG gate and the Mutopia oracle; `benchmark:mutopia` the latter alone.
 if (only.has('benchmark')) only.add('benchmark:mutopia');
 const want = (name) => only.size === 0 || only.has(name);
@@ -71,10 +86,46 @@ const steps = [
   { name: 'design', prepare: () => cmd('node', ['scripts/check-colors.mjs']) },
   { name: 'typecheck', prepare: () => cmd('pnpm', ['typecheck']) },
   { name: 'lint', prepare: () => cmd('pnpm', ['lint']) },
+  // Only under --changed (the full run leaves the format check to CI): prettier on the changed files.
+  ...(changedList
+    ? [
+        {
+          name: 'format',
+          prepare: () => {
+            const files = changedList.filter((f) => existsSync(f));
+            return files.length
+              ? cmd('pnpm', ['exec', 'prettier', '--check', '--ignore-unknown', ...files])
+              : { skip: 'no changed file to format' };
+          },
+        },
+      ]
+    : []),
   // Heavy: vitest takes every core, and its 5 s timeout drops a test on a crowded machine. Heavy
   // steps keep apart from each other; the single-process steps after the build still run beside
   // them, and `--serial` is the fallback when a timing test fails under that load.
-  { name: 'unit', heavy: true, prepare: () => cmd('pnpm', ['test']) },
+  {
+    name: 'unit',
+    heavy: true,
+    prepare: () => {
+      // --changed: the web tests related to the changed web files, and the script tests when
+      // scripts/verify* changed; a shared change (selection.unit null) runs the whole suite.
+      if (!selection?.unit) return cmd('pnpm', ['test']);
+      const { web, scripts } = selection.unit;
+      const tests = ['node', '--test', 'scripts/verify-graph.test.mjs'];
+      if (web.length === 0) return cmd(tests[0], tests.slice(1));
+      const related = [
+        '--filter',
+        '@digitus2/web',
+        'exec',
+        'vitest',
+        'related',
+        '--run',
+        '--passWithNoTests',
+        ...web,
+      ];
+      return cmd('pnpm', scripts ? [...related, '&&', ...tests] : related);
+    },
+  },
   { name: 'build', prepare: () => cmd('pnpm', ['build']) },
   // Research OMR runner tests use the freshly built parser/evaluator, as external recognizers do.
   { name: 'omr', deps: ['build'], prepare: () => cmd('pnpm', ['test:omr']) },
@@ -124,6 +175,16 @@ const steps = [
     prepare: () => {
       if (!existsSync('apps/web/playwright.config.ts'))
         return { skip: 'no apps/web/playwright.config.ts yet' };
+      // --changed names the specs the diff maps to (build is in the run, so they use its output).
+      if (selection?.specs)
+        return cmd('pnpm', [
+          '--filter',
+          '@digitus2/web',
+          'exec',
+          'playwright',
+          'test',
+          ...selection.specs,
+        ]);
       return want('build')
         ? cmd('pnpm', ['--filter', '@digitus2/web', 'exec', 'playwright', 'test'])
         : cmd('pnpm', ['--filter', '@digitus2/web', 'e2e']);
@@ -155,7 +216,7 @@ const steps = [
       const f = floor();
       if (!f) return { skip: 'no benchmarks/floor.json' };
       if (!has('bench')) return { skip: 'engine CLI has no bench command yet' };
-      if (!existsSync(f.goldDir)) return { skip: `dataset missing: ${f.goldDir}` };
+      if (goldMissing(f.goldDir)) return { skip: `dataset missing: ${f.goldDir}/FingeringFiles` };
       return cmd('node', [
         CLI,
         'bench',
@@ -185,8 +246,11 @@ const steps = [
       if (!f) return { skip: 'no benchmarks/floor.json' };
       if (!m) return { skip: 'no mutopia block in benchmarks/floor.json' };
       if (!has('bench')) return { skip: 'engine CLI has no bench command yet' };
-      if (!existsSync(m.goldDir) || !existsSync(m.split))
-        return { skip: `dataset missing: ${existsSync(m.goldDir) ? m.split : m.goldDir}` };
+      // The manifests in the gold directory are tracked; only FingeringFiles/ is the data.
+      if (goldMissing(m.goldDir) || !existsSync(m.split))
+        return {
+          skip: `dataset missing: ${goldMissing(m.goldDir) ? `${m.goldDir}/FingeringFiles` : m.split}`,
+        };
       const gated = typeof m.gen === 'number';
       return cmd(
         'node',
@@ -217,7 +281,7 @@ const steps = [
       const f = floor();
       if (!f?.hands) return { skip: 'no hands block in benchmarks/floor.json' };
       if (!has('evalhands')) return { skip: 'engine CLI has no evalhands command yet' };
-      if (!existsSync(f.goldDir)) return { skip: `dataset missing: ${f.goldDir}` };
+      if (goldMissing(f.goldDir)) return { skip: `dataset missing: ${f.goldDir}/FingeringFiles` };
       const args = [
         CLI,
         'evalhands',
@@ -326,6 +390,29 @@ function start(step, plan) {
   });
 }
 
+// --changed: the steps the diff selects. They join `only`, so want('build') below stays right.
+const selection = changedList
+  ? planChanged(changedList, {
+      gates: steps.map((s) => s.name),
+      deps: Object.fromEntries(steps.map((s) => [s.name, s.deps ?? []])),
+    })
+  : null;
+if (selection) {
+  for (const r of selection.run) only.add(r.gate);
+  const { run, specs, unit } = selection;
+  const lines = [
+    `=== verify --changed: ${changedList.length} file(s) changed since ${diff.base.slice(0, 7)} (origin/main)`,
+    ...run.map((r) => `run   ${r.gate.padEnd(17)} ${r.why}`),
+    `e2e specs: ${specs ? specs.join(' ') || 'none' : 'all'}`,
+    `unit: ${
+      unit
+        ? `vitest related on ${unit.web.length} web file(s)${unit.scripts ? ' and the script tests' : ''}`
+        : 'full pnpm test'
+    }`,
+  ];
+  process.stdout.write(`${lines.join('\n')}\n\n`);
+}
+
 const results = await runGraph(steps, {
   start,
   only,
@@ -345,7 +432,13 @@ if (!serial)
     process.stdout.write(`\n=== ${r.name} failed: the end of ${logOf(r.name)}\n`);
     process.stdout.write(`${lines.slice(-40).join('\n')}\n`);
   }
+if (selection)
+  for (const r of selection.skip) process.stdout.write(`SKIP  ${r.gate} not touched: ${r.why}\n`);
 process.stdout.write(
-  failed.length ? `\n${failed.length} step(s) failed\n` : '\nall steps passed\n',
+  failed.length
+    ? `\n${failed.length} step(s) failed\n`
+    : selection
+      ? '\nall selected steps passed; run the full pnpm verify once before the pull request\n'
+      : '\nall steps passed\n',
 );
 process.exitCode = failed.length ? 1 : 0;

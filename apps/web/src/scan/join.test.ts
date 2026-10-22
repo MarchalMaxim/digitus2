@@ -173,3 +173,67 @@ describe('joining separately recognized pages', () => {
     expect(() => joinScanPages([uneven, uneven])).toThrow(/measure counts/);
   });
 });
+
+/**
+ * Issue 152: the owner's last page, as homr read it: a treble and a bass staff as two parts named
+ * "Voice", in different time units, each with homr's split opening attributes.
+ */
+function splitPage() {
+  const voice = (id: string) =>
+    `<score-part id="${id}"><part-name>Voice</part-name><score-instrument id="${id}-I1"><instrument-name>Voice</instrument-name></score-instrument><midi-instrument id="${id}-I1"><midi-program>54</midi-program></midi-instrument></score-part>`;
+  const opening = (divisions: number, sign: string, line: number) =>
+    `<attributes><divisions>${divisions}</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes><attributes><clef number="1"><sign>${sign}</sign><line>${line}</line></clef><key><fifths>0</fifths></key></attributes>`;
+  const note = (step: string, octave: number, duration: number, type: string) =>
+    `<note><pitch><step>${step}</step><octave>${octave}</octave></pitch><duration>${duration}</duration><type>${type}</type><voice>1</voice><staff>1</staff><notations /></note>`;
+  const upper = [
+    `<measure number="1">${opening(4, 'G', 2)}${note('C', 5, 8, 'half')}${note('A', 4, 8, 'half')}</measure>`,
+    `<measure number="2">${note('E', 4, 16, 'whole')}</measure>`,
+  ];
+  const lower = [
+    `<measure number="1">${opening(2, 'F', 4)}${note('A', 2, 8, 'whole')}</measure>`,
+    `<measure number="2">${note('E', 2, 4, 'half')}${note('A', 2, 4, 'half')}</measure>`,
+  ];
+  return `<score-partwise version="4.0"><part-list>${voice('P1')}${voice('P2')}</part-list><part id="P1">${upper.join('')}</part><part id="P2">${lower.join('')}</part></score-partwise>`;
+}
+
+describe('issue 152: a page read as a treble part and a bass part', () => {
+  it('joins the piano pages, every note at its own pitch, time and staff', () => {
+    const xml = joinScanPages([page(), splitPage()]);
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    expect(doc.querySelectorAll('part')).toHaveLength(1);
+    expect(doc.querySelector('part-name')?.textContent).toBe('Piano');
+    const { score } = parseMusicXml(xml, { preserveNotation: true });
+    // In quarters of 4 ticks. The first page's measure is a half note long; the split page's
+    // treble and bass then start together on each of its bars, the bass on the lower staff.
+    const notes = score.notes.map((n) => [
+      n.midi,
+      n.onsetTick,
+      n.offsetTick - n.onsetTick,
+      n.staff,
+    ]);
+    expect(notes).toEqual([
+      [60, 0, 4, 1],
+      [48, 0, 8, 2],
+      [72, 8, 8, 1],
+      [45, 8, 16, 2],
+      [69, 16, 8, 1],
+      [64, 24, 16, 1],
+      [40, 24, 8, 2],
+      [45, 32, 8, 2],
+    ]);
+  });
+  it('leaves a batch of split pages, and a split page alone, as they were', () => {
+    expect(joinScanPages([splitPage()])).toBe(splitPage());
+    const xml = joinScanPages([splitPage(), splitPage()]);
+    expect(new DOMParser().parseFromString(xml, 'text/xml').querySelectorAll('part')).toHaveLength(
+      2,
+    );
+  });
+  it('still refuses split parts that hold different numbers of measures', () => {
+    const uneven = splitPage().replace(
+      /<measure number="2">(?:(?!<\/measure>)[\s\S])*<\/measure><\/part><\/score-partwise>/,
+      '</part></score-partwise>',
+    );
+    expect(() => joinScanPages([page(), uneven])).toThrow();
+  });
+});

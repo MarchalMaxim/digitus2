@@ -7,6 +7,8 @@ export interface Alignment {
   last: number;
   point: Point | null;
   anchors: readonly Point[] | null;
+  /** Bad updates in a row while aligned: one is forgiven, the next empties the ring. */
+  misses: number;
 }
 export const initialAlignment = (): Alignment => ({
   aligned: false,
@@ -15,6 +17,7 @@ export const initialAlignment = (): Alignment => ({
   last: -Infinity,
   point: null,
   anchors: null,
+  misses: 0,
 });
 
 /** A convex, ordered page must fill enough of the reference for four distinct views. */
@@ -47,10 +50,26 @@ export function validCorners(corners: readonly Point[], width: number, height: n
   );
 }
 
-const alignmentTolerance = (center: Point) => Math.max(7, Math.min(center.x, center.y) * 0.065);
+/**
+ * How close the dot must come, as fractions of the frame's shorter half (issue 147). A hand
+ * shakes: the dot is caught once it is inside the circle (`enter`, the circle's own radius),
+ * the hold lasts while it stays within a wider ring (`hold`), and it may move `steady` between
+ * two updates. Each view only has to be distinct and sharp; fusion registers it again.
+ */
+export const CIRCLE = 0.1;
+export function captureRadii(center: Point) {
+  const half = Math.min(center.x, center.y);
+  return {
+    enter: Math.max(7, half * CIRCLE),
+    hold: Math.max(10, half * 0.14),
+    steady: Math.max(5, half * 0.08),
+    /** Two views are distinct when their centres are this far apart. */
+    distinct: half * 0.14,
+  };
+}
 
 /** How long the circle must rest on a dot before that view is photographed (the ring's fill). */
-export const HOLD_MS = 650;
+export const HOLD_MS = 550;
 
 /** The shortest gap between two camera images that still counts as one unbroken look. */
 export const CONTINUITY_MS = 350;
@@ -88,15 +107,21 @@ export function alignmentStep(
   },
 ): Alignment {
   const { now, point, center, sharp, window = CONTINUITY_MS } = input;
-  const tolerance = alignmentTolerance(center);
+  const radii = captureRadii(center);
+  const inTime = now > state.last && now - state.last <= Math.min(MAX_CONTINUITY_MS, window);
   if (
     !point ||
     !Number.isFinite(point.x) ||
     !Number.isFinite(point.y) ||
     !sharp ||
-    Math.hypot(point.x - center.x, point.y - center.y) > tolerance
-  )
+    Math.hypot(point.x - center.x, point.y - center.y) > (state.aligned ? radii.hold : radii.enter)
+  ) {
+    // One bad update (a blurred or lost frame, a twitch past the ring) does not empty the ring;
+    // the next one decides. It never completes a view.
+    if (state.aligned && state.misses < 1 && inTime)
+      return { ...state, ready: false, last: now, misses: state.misses + 1 };
     return { ...initialAlignment(), last: now };
+  }
   const anchors = input.anchors ?? null;
   const anchorsStable =
     !anchors ||
@@ -105,16 +130,23 @@ export function alignmentStep(
       anchors.every(
         (anchor, index) =>
           Math.hypot(anchor.x - state.anchors![index]!.x, anchor.y - state.anchors![index]!.y) <=
-          tolerance * 0.5,
+          radii.steady,
       ));
   const continuous =
     state.point &&
     anchorsStable &&
-    now > state.last &&
-    now - state.last <= Math.min(MAX_CONTINUITY_MS, window) &&
-    Math.hypot(point.x - state.point.x, point.y - state.point.y) <= tolerance * 0.5;
+    inTime &&
+    Math.hypot(point.x - state.point.x, point.y - state.point.y) <= radii.steady;
   const since = continuous ? (state.since ?? now) : now;
-  return { aligned: true, ready: now - since >= HOLD_MS, since, last: now, point, anchors };
+  return {
+    aligned: true,
+    ready: now - since >= HOLD_MS,
+    since,
+    last: now,
+    point,
+    anchors,
+    misses: 0,
+  };
 }
 
 /** Interior page points must also produce distinct views relative to the reference framing. */
@@ -131,8 +163,9 @@ export function targetPoints(corners: readonly Point[], center: Point): Point[] 
       corners[2]!.y * u * v +
       corners[3]!.y * (1 - u) * v,
   });
-  // Leave room for both holds to land anywhere inside the alignment tolerance.
-  const separation = Math.min(center.x, center.y) * 0.16 + 2 * alignmentTolerance(center) + 1;
+  // Leave room for both holds to land anywhere inside the hold ring.
+  const radii = captureRadii(center);
+  const separation = radii.distinct + 2 * radii.hold + 1;
   const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
   const defaults = [at(0.25, 0.25), at(0.75, 0.25), at(0.75, 0.75), at(0.25, 0.75)];
   const distinct = (points: Point[]) =>
@@ -152,6 +185,54 @@ export function targetPoints(corners: readonly Point[], center: Point): Point[] 
     selected.push(best);
   }
   return selected;
+}
+
+/**
+ * Where the four dots go (issue 147): on the page, narrowed to its printed part when blank paper
+ * fills much of it, so reaching a dot never takes the music out of the picture, which is all the
+ * camera can follow. A narrow content box widens about its middle until four distinct dots fit;
+ * none at all, or one that fits nowhere, leaves the page's own dots.
+ */
+export function viewTargets(
+  corners: readonly Point[],
+  center: Point,
+  content?: { left: number; top: number; right: number; bottom: number },
+): Point[] {
+  const page = targetPoints(corners, center);
+  if (!content || page.length !== 4) return page;
+  const xs = corners.map((point) => point.x),
+    ys = corners.map((point) => point.y);
+  const bounds = {
+    left: Math.min(...xs),
+    top: Math.min(...ys),
+    right: Math.max(...xs),
+    bottom: Math.max(...ys),
+  };
+  const pageWidth = bounds.right - bounds.left,
+    pageHeight = bounds.bottom - bounds.top;
+  const width = Math.min(pageWidth, content.right - content.left),
+    height = Math.min(pageHeight, content.bottom - content.top);
+  if (width >= pageWidth * 0.75 && height >= pageHeight * 0.75) return page;
+  const middle = {
+    x: (Math.max(bounds.left, content.left) + Math.min(bounds.right, content.right)) / 2,
+    y: (Math.max(bounds.top, content.top) + Math.min(bounds.bottom, content.bottom)) / 2,
+  };
+  for (let grow = 1; grow <= 4; grow += 0.25) {
+    const w = Math.min(pageWidth, width * grow),
+      h = Math.min(pageHeight, height * grow);
+    const left = Math.min(Math.max(bounds.left, middle.x - w / 2), bounds.right - w),
+      top = Math.min(Math.max(bounds.top, middle.y - h / 2), bounds.bottom - h);
+    const box = [
+      { x: left, y: top },
+      { x: left + w, y: top },
+      { x: left + w, y: top + h },
+      { x: left, y: top + h },
+    ];
+    const targets = targetPoints(box, center);
+    if (targets.length === 4) return targets;
+    if (w === pageWidth && h === pageHeight) break;
+  }
+  return page;
 }
 
 /** S H S^-1 for equal-aspect tracking and still canvases. */
@@ -183,19 +264,19 @@ export function validView({
   center: Point;
   sharp: boolean;
 }): boolean {
-  if (!matrix) return false;
-  const check = alignmentStep(initialAlignment(), {
-    now: 0,
-    point: project(matrix, target),
-    center,
-    sharp,
-  });
-  if (!check.aligned) return false;
+  if (!matrix || !sharp) return false;
+  const radii = captureRadii(center);
+  const point = project(matrix, target);
+  // The still was taken while the hold lasted: anywhere inside the hold ring.
+  if (
+    !Number.isFinite(point.x) ||
+    !Number.isFinite(point.y) ||
+    Math.hypot(point.x - center.x, point.y - center.y) > radii.hold
+  )
+    return false;
   const location = project(matrix, center);
   return previous.every((other) => {
     const prior = project(other, center);
-    return (
-      Math.hypot(location.x - prior.x, location.y - prior.y) >= Math.min(center.x, center.y) * 0.16
-    );
+    return Math.hypot(location.x - prior.x, location.y - prior.y) >= radii.distinct;
   });
 }

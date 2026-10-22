@@ -134,6 +134,11 @@ button.camera-icon-button:not(.is-red):hover {
   stroke-dasharray: 4 6;
   opacity: 0.7;
 }
+/* The dots and the guide glide from one tracking answer to the next (issue 147). */
+.camera-tracking circle[data-camera-target],
+.camera-tracking .camera-guide {
+  transition: transform var(--glide, 120ms) linear;
+}
 .camera-tracking circle.camera-target {
   opacity: 0.75;
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   alignmentStep,
+  captureRadii,
   continuityWindow,
   CONTINUITY_MS,
   MAX_CONTINUITY_MS,
@@ -8,6 +9,7 @@ import {
   scaledMatrix,
   targetPoints,
   validView,
+  viewTargets,
   validCorners,
 } from './captureState.js';
 import type { Matrix, Point } from './vision.js';
@@ -21,7 +23,7 @@ function expectReachableViews(corners: Point[], width: number, height: number) {
     const matrix: Matrix = [1, 0, center.x - target.x, 0, 1, center.y - target.y, 0, 0, 1];
     expect(validView({ matrix, previous, target, center, sharp: true })).toBe(true);
     // Every accepted hold, including its tolerance edge, must still be a distinct view.
-    const tolerance = Math.max(7, Math.min(center.x, center.y) * 0.065);
+    const tolerance = captureRadii(center).hold;
     for (const dx of [-tolerance * 0.999, 0, tolerance * 0.999]) {
       const shifted = [...matrix];
       shifted[2]! += dx;
@@ -73,21 +75,58 @@ describe('real image alignment', () => {
       center: { x: 180, y: 180 },
       sharp: true,
     });
+    const drift = (now: number) => ({ ...sample(now), point: { x: 220, y: 180 } });
     let state = alignmentStep(initialAlignment(), sample(100));
     state = alignmentStep(state, sample(400));
     expect(state.ready).toBe(false);
-    state = alignmentStep(state, { ...sample(500), point: { x: 210, y: 180 } });
+    // Issue 147: one twitch past the ring is forgiven; it never completes a view itself.
+    state = alignmentStep(state, drift(500));
+    expect(state).toMatchObject({ aligned: true, ready: false, since: 100 });
     state = alignmentStep(state, sample(600));
-    state = alignmentStep(state, sample(900));
-    state = alignmentStep(state, sample(1100));
     expect(state.ready).toBe(false);
-    state = alignmentStep(state, sample(1300));
+    state = alignmentStep(state, sample(700));
     expect(state.ready).toBe(true);
-    expect(alignmentStep(state, { ...sample(1400), sharp: false }).ready).toBe(false);
+    // Two in a row empty it.
+    state = alignmentStep(state, drift(800));
+    state = alignmentStep(state, drift(900));
+    expect(state.aligned).toBe(false);
+    state = alignmentStep(state, sample(1000));
+    state = alignmentStep(state, sample(1300));
+    expect(state.ready).toBe(false);
+    state = alignmentStep(state, sample(1600));
+    expect(state.ready).toBe(true);
+    expect(alignmentStep(state, { ...sample(1700), sharp: false }).ready).toBe(false);
     expect(
-      alignmentStep(state, { now: 1400, point: null, center: { x: 180, y: 180 }, sharp: true })
+      alignmentStep(state, { now: 1700, point: null, center: { x: 180, y: 180 }, sharp: true })
         .ready,
     ).toBe(false);
+  });
+  it('issue 147: catches the dot inside the circle and keeps it within the wider ring', () => {
+    const center = { x: 180, y: 135 };
+    const radii = captureRadii(center);
+    const at = (now: number, dx: number) => ({
+      now,
+      point: { x: center.x + dx, y: center.y },
+      center,
+      sharp: true,
+    });
+    // Outside the circle: not caught.
+    expect(alignmentStep(initialAlignment(), at(0, radii.enter + 1)).aligned).toBe(false);
+    // Inside it: caught, then held while a shaking hand stays within the ring.
+    let state = alignmentStep(initialAlignment(), at(0, radii.enter - 1));
+    for (const [now, dx] of [
+      [100, radii.enter + 4],
+      [200, radii.hold - 1],
+      [300, radii.enter],
+      [400, radii.hold - 2],
+      [500, radii.enter - 3],
+      [600, radii.hold - 1],
+    ] as const)
+      state = alignmentStep(state, at(now, dx));
+    expect(state).toMatchObject({ aligned: true, ready: true, since: 0 });
+    // The old rule: 6.5 % of the shorter half, and half that between updates.
+    expect(radii.enter).toBeGreaterThan(135 * 0.065 * 1.5);
+    expect(radii.steady).toBeGreaterThan(135 * 0.065 * 0.5 * 2);
   });
   it('resets when browser frame sampling was interrupted', () => {
     const input = { point: { x: 180, y: 180 }, center: { x: 180, y: 180 }, sharp: true };
@@ -239,5 +278,48 @@ describe('real image alignment', () => {
     expect(validView({ ...input, sharp: false })).toBe(false);
     expect(validView({ ...input, matrix: identity })).toBe(false);
     expect(validView({ ...input, previous: [identity, translation] })).toBe(false);
+  });
+});
+
+describe('issue 147: dots where the music is', () => {
+  const page = [
+    { x: 20, y: 20 },
+    { x: 340, y: 20 },
+    { x: 340, y: 460 },
+    { x: 20, y: 460 },
+  ];
+  const center = { x: 180, y: 240 };
+  it('keeps the page dots for a page of music', () => {
+    const content = { left: 30, top: 30, right: 330, bottom: 440 };
+    expect(viewTargets(page, center, content)).toEqual(targetPoints(page, center));
+    expect(viewTargets(page, center)).toEqual(targetPoints(page, center));
+  });
+  it('narrows the dots to music in the top third, each still a distinct, reachable view', () => {
+    const content = { left: 30, top: 40, right: 330, bottom: 180 };
+    const targets = viewTargets(page, center, content);
+    expect(targets).toHaveLength(4);
+    const previous: Matrix[] = [[1, 0, 0, 0, 1, 0, 0, 0, 1]];
+    for (const target of targets) {
+      // Near the music: no dot asks the camera down to the blank paper.
+      expect(target.y).toBeLessThan(content.bottom + 80);
+      const matrix: Matrix = [1, 0, center.x - target.x, 0, 1, center.y - target.y, 0, 0, 1];
+      expect(validView({ matrix, previous, target, center, sharp: true })).toBe(true);
+      previous.push(matrix);
+    }
+    const pageTargets = targetPoints(page, center);
+    expect(Math.max(...targets.map((t) => t.y))).toBeLessThan(
+      Math.max(...pageTargets.map((t) => t.y)),
+    );
+  });
+  it('widens a small patch of music until four distinct dots fit, inside the page', () => {
+    const content = { left: 150, top: 60, right: 210, bottom: 100 };
+    const targets = viewTargets(page, center, content);
+    expect(targets).toHaveLength(4);
+    for (const target of targets) {
+      expect(target.x).toBeGreaterThanOrEqual(20);
+      expect(target.x).toBeLessThanOrEqual(340);
+      expect(target.y).toBeGreaterThanOrEqual(20);
+      expect(target.y).toBeLessThanOrEqual(460);
+    }
   });
 });

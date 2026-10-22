@@ -5,6 +5,7 @@ import {
   project,
   registerFrame,
   sharpness,
+  contentBounds,
   type Frame,
 } from './vision';
 import { reconstructPage } from './reconstruction';
@@ -19,13 +20,14 @@ function ink(f: Frame, x: number, y: number, value = 20) {
   if (x >= 0 && y >= 0 && x < f.width && y < f.height)
     f.data.set([value, value, value, 255], (Math.floor(y) * f.width + Math.floor(x)) * 4);
 }
-function notation(seed = 17): Frame {
+/** Five systems of notation; fewer leave the rest of the page blank (issue 147). */
+function notation(seed = 17, systems = 5): Frame {
   const f = blank();
   const rand = () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;
     return seed / 4294967296;
   };
-  for (let system = 0; system < 5; system++) {
+  for (let system = 0; system < systems; system++) {
     const top = 25 + system * 65;
     for (let line = 0; line < 5; line++)
       for (let x = 15; x < 285; x++) ink(f, x, top + line * 5, 90);
@@ -188,6 +190,56 @@ describe('score camera registration', () => {
     expect(sharpness(ref)).toBeGreaterThan(80);
     expect(sharpness(blur)).toBeLessThan(80);
     expect(registerFrame(ref, blur)).toBeNull();
+  });
+  it('issue 147: a page with music in its top third only is sharp, and tracked', () => {
+    const partial = notation(17, 2);
+    const defocus = (frame: Frame, radius = 5) => {
+      const out = blank();
+      for (let y = radius; y < 360 - radius; y++)
+        for (let x = radius; x < 300 - radius; x++) {
+          let sum = 0;
+          for (let dy = -radius; dy <= radius; dy++)
+            for (let dx = -radius; dx <= radius; dx++)
+              sum += frame.data[((y + dy) * 300 + x + dx) * 4]!;
+          ink(out, x, y, sum / (2 * radius + 1) ** 2);
+        }
+      return out;
+    };
+    expect(sharpness(partial)).toBeGreaterThan(80);
+    // Slightly soft, as a phone's frame is: sharp, as the same softness on a full page is. Over
+    // the whole frame it read 62, the blank half pulling it under the floor.
+    expect(sharpness(defocus(notation(), 2))).toBeGreaterThan(80);
+    expect(sharpness(defocus(partial, 2))).toBeGreaterThan(80);
+    expect(sharpness(defocus(partial))).toBeLessThan(80);
+    // A full page keeps its reading, so the floor means what it did.
+    expect(sharpness(defocus(notation()))).toBeLessThan(80);
+    for (const matrix of [
+      [1, 0, 24, 0, 1, -18, 0, 0, 1],
+      [0.96, -0.03, 18, 0.03, 0.96, 12, 0, 0, 1],
+    ]) {
+      const result = registerFrame(partial, warp(partial, matrix));
+      expect(result).not.toBeNull();
+      // Also where the page is blank: the dots there are placed by the same plane.
+      for (const point of [
+        { x: 80, y: 60 },
+        { x: 220, y: 140 },
+        { x: 150, y: 300 },
+      ]) {
+        const actual = project(result!.matrix, point),
+          expected = project(matrix, point);
+        expect(Math.hypot(actual.x - expected.x, actual.y - expected.y)).toBeLessThan(3);
+      }
+    }
+    // A sliver of music is still too little to place the page by.
+    const sliver = blank();
+    const one = notation(17, 1);
+    for (let y = 20; y < 60; y++)
+      for (let x = 100; x < 160; x++)
+        sliver.data.set(
+          one.data.subarray((y * 300 + x) * 4, (y * 300 + x) * 4 + 4),
+          (y * 300 + x) * 4,
+        );
+    expect(registerFrame(sliver, warp(sliver, [1, 0, 10, 0, 1, 5, 0, 0, 1]))).toBeNull();
   });
   it('requires distributed matches inside the selected page, not its textured surroundings', () => {
     const reference = notation();
@@ -461,5 +513,33 @@ describe('score page fusion', () => {
     await expect(mergeCaptures(captures, largeCorners, controller.signal)).rejects.toThrow(
       /abort/i,
     );
+  });
+});
+
+describe('issue 147: the printed part of a page', () => {
+  const page = [
+    { x: 5, y: 5 },
+    { x: 295, y: 5 },
+    { x: 295, y: 355 },
+    { x: 5, y: 355 },
+  ];
+  it('boxes the music and leaves out blank paper', () => {
+    const box = contentBounds(notation(17, 2), page)!;
+    expect(box.top).toBeLessThan(30);
+    expect(box.bottom).toBeGreaterThan(120);
+    expect(box.bottom).toBeLessThan(200);
+    expect(box.right - box.left).toBeGreaterThan(220);
+    expect(contentBounds(blank(), page)).toBeUndefined();
+  });
+  it('does not count the page edge against a dark table as content', () => {
+    const frame = blank(300, 360, 40);
+    for (let y = 30; y < 330; y++) for (let x = 30; x < 270; x++) ink(frame, x, y, 240);
+    const edge = [
+      { x: 30, y: 30 },
+      { x: 270, y: 30 },
+      { x: 270, y: 330 },
+      { x: 30, y: 330 },
+    ];
+    expect(contentBounds(frame, edge)).toBeUndefined();
   });
 });

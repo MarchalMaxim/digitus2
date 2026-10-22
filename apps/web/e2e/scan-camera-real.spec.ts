@@ -97,7 +97,11 @@ const viewfinder = (page: Page) =>
     const reticle = document.querySelector('circle[data-camera-reticle]');
     const point = (element: Element | null) =>
       element
-        ? { x: Number(element.getAttribute('cx')), y: Number(element.getAttribute('cy')) }
+        ? {
+            // Dots are placed by a transform (they glide); data-x and data-y say where.
+            x: Number(element.getAttribute('data-x') ?? element.getAttribute('cx')),
+            y: Number(element.getAttribute('data-y') ?? element.getAttribute('cy')),
+          }
         : null;
     return {
       photo: document.querySelector('.camera-step')?.textContent ?? null,

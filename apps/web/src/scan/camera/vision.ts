@@ -49,20 +49,85 @@ function gray(frame: Frame): Float32Array {
 export function sharpness(frame: Frame): number {
   if (!validFrame(frame)) return 0;
   const g = gray(frame),
-    w = frame.width;
-  let sum = 0,
-    squares = 0,
-    count = 0;
-  for (let y = 1; y < frame.height - 1; y += 2)
-    for (let x = 1; x < w - 1; x += 2) {
-      const i = y * w + x,
-        v = g[i - 1]! + g[i + 1]! + g[i - w]! + g[i + w]! - 4 * g[i]!;
-      sum += v;
-      squares += v * v;
-      count++;
+    w = frame.width,
+    h = frame.height;
+  // Measured where there is something to be sharp (issue 147): blank paper and a plain table
+  // have no edges, sharp or blurred, so over the whole frame a half-empty page read as blurred.
+  // Each tile with content counts alike; the mean is scaled by the share of tiles a full page of
+  // music fills, so the floor of 80 means for a full page what it did for the whole frame.
+  let total = 0,
+    content = 0;
+  for (let top = 0; top + SHARP_TILE <= h; top += SHARP_TILE)
+    for (let left = 0; left + SHARP_TILE <= w; left += SHARP_TILE) {
+      let sum = 0,
+        squares = 0;
+      for (let y = top; y < top + SHARP_TILE; y++)
+        for (let x = left; x < left + SHARP_TILE; x++) {
+          const v = g[y * w + x]!;
+          sum += v;
+          squares += v * v;
+        }
+      const n = SHARP_TILE * SHARP_TILE;
+      if (squares / n - (sum / n) ** 2 < CONTENT_FLOOR ** 2) continue;
+      let lsum = 0,
+        lsquares = 0,
+        count = 0;
+      for (let y = Math.max(1, top | 1); y < Math.min(h - 1, top + SHARP_TILE); y += 2)
+        for (let x = Math.max(1, left | 1); x < Math.min(w - 1, left + SHARP_TILE); x += 2) {
+          const i = y * w + x,
+            v = g[i - 1]! + g[i + 1]! + g[i - w]! + g[i + w]! - 4 * g[i]!;
+          lsum += v;
+          lsquares += v * v;
+          count++;
+        }
+      total += Math.max(0, lsquares / count - (lsum / count) ** 2);
+      content++;
     }
-  return Math.max(0, squares / count - (sum / count) ** 2);
+  return content ? (total / content) * FULL_PAGE_SHARE : 0;
 }
+/**
+ * The box around the printed content of the page `region` (issue 147): the tiles whose grey
+ * levels spread past the content floor and lie inside the page by a tile's margin, so the page's
+ * own edge against the table does not count. Undefined when no tile has content.
+ */
+export function contentBounds(
+  frame: Frame,
+  region: readonly Point[],
+): { left: number; top: number; right: number; bottom: number } | undefined {
+  if (!validFrame(frame) || region.length !== 4) return undefined;
+  const g = gray(frame),
+    w = frame.width,
+    h = frame.height;
+  let left = Infinity,
+    top = Infinity,
+    right = -Infinity,
+    bottom = -Infinity;
+  for (let y0 = 0; y0 + SHARP_TILE <= h; y0 += SHARP_TILE)
+    for (let x0 = 0; x0 + SHARP_TILE <= w; x0 += SHARP_TILE) {
+      const middle = { x: x0 + SHARP_TILE / 2, y: y0 + SHARP_TILE / 2 };
+      if (!inRegion(middle, region, SHARP_TILE)) continue;
+      let sum = 0,
+        squares = 0;
+      for (let y = y0; y < y0 + SHARP_TILE; y++)
+        for (let x = x0; x < x0 + SHARP_TILE; x++) {
+          const v = g[y * w + x]!;
+          sum += v;
+          squares += v * v;
+        }
+      const n = SHARP_TILE * SHARP_TILE;
+      if (squares / n - (sum / n) ** 2 < CONTENT_FLOOR ** 2) continue;
+      left = Math.min(left, x0);
+      top = Math.min(top, y0);
+      right = Math.max(right, x0 + SHARP_TILE);
+      bottom = Math.max(bottom, y0 + SHARP_TILE);
+    }
+  return left < right ? { left, top, right, bottom } : undefined;
+}
+/** Tiles of this many pixels; one with a grey-level spread below the floor holds no content. */
+const SHARP_TILE = 24;
+const CONTENT_FLOOR = 10;
+/** The share of a tracking frame's tiles a full page of music fills. */
+const FULL_PAGE_SHARE = 0.75;
 export interface Feature extends Point {
   descriptors: Float32Array[];
 }
@@ -84,6 +149,17 @@ function regionBounds(frame: { width: number; height: number }, region?: readonl
     width: region ? Math.max(...region.map((p) => p.x)) - left : frame.width,
     height: region ? Math.max(...region.map((p) => p.y)) - top : frame.height,
   };
+}
+/** Where a reference's features lie, or undefined when they are too few to say. */
+function featureBounds(features: readonly Point[]) {
+  if (features.length < 12) return undefined;
+  const xs = features.map((p) => p.x),
+    ys = features.map((p) => p.y);
+  const left = Math.min(...xs),
+    top = Math.min(...ys);
+  const width = Math.max(...xs) - left,
+    height = Math.max(...ys) - top;
+  return width > 0 && height > 0 ? { left, top, width, height } : undefined;
 }
 function sample(g: Float32Array, w: number, h: number, x: number, y: number): number {
   x = Math.max(0, Math.min(w - 1.001, x));
@@ -367,18 +443,32 @@ export function registerFrame(
   if (!matrix) return null;
   const xs = inliers.map((p) => p.a.x),
     ys = inliers.map((p) => p.a.y),
-    bounds = regionBounds(reference, region);
-  const spanX = (Math.max(...xs) - Math.min(...xs)) / bounds.width,
-    spanY = (Math.max(...ys) - Math.min(...ys)) / bounds.height;
+    page = regionBounds(reference, region),
+    // Spread is judged against where the page has something to match (issue 147): music in its
+    // top third leaves no matches lower down, but places the page as surely.
+    bounds = featureBounds(prepared.features) ?? page;
+  const width = Math.max(...xs) - Math.min(...xs),
+    height = Math.max(...ys) - Math.min(...ys);
+  const spanX = width / bounds.width,
+    spanY = height / bounds.height;
   const coverage = spanX * spanY;
   const cells = new Set(
     inliers.map(
       ({ a }) =>
-        Math.floor(((a.x - bounds.left) / bounds.width) * 3) +
-        3 * Math.floor(((a.y - bounds.top) / bounds.height) * 3),
+        Math.min(2, Math.floor(((a.x - bounds.left) / bounds.width) * 3)) +
+        3 * Math.min(2, Math.floor(((a.y - bounds.top) / bounds.height) * 3)),
     ),
   );
-  if (spanX < 0.3 || spanY < 0.3 || coverage < 0.18 || cells.size < 4) return null;
+  if (
+    spanX < 0.3 ||
+    spanY < 0.3 ||
+    coverage < 0.18 ||
+    cells.size < 4 ||
+    // However the content lies, a sliver of it is too little to place the whole page by.
+    width < page.width * 0.15 ||
+    height < page.height * 0.15
+  )
+    return null;
   const error = Math.sqrt(
     inliers.reduce((sum, { a, b }) => {
       const p = project(matrix, a);

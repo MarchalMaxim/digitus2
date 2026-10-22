@@ -12,12 +12,13 @@ import { SCAN_LIMIT, validateScanImages } from '../model.js';
 import { namedCapture } from '../phone.js';
 import {
   alignmentStep,
+  CIRCLE,
   continuityWindow,
   HOLD_MS,
   initialAlignment,
   scaledMatrix,
-  targetPoints,
   validView,
+  viewTargets,
   validCorners,
 } from './captureState.js';
 import { CAMERA_CONSTRAINTS, hasTorch, releaseCamera, setTorch, tick as haptic } from './device.js';
@@ -28,8 +29,10 @@ import {
   type CameraDiagnosis,
 } from './diagnosis.js';
 import { advise, measureFrame, photographable, type Advice, type FrameQuality } from './quality.js';
+import { PointsFilter } from './smoothing.js';
 import { createTracker, type Measured, type Tracked, type Tracker } from './tracker.js';
 import {
+  contentBounds,
   project,
   reconstructPage,
   sharpness,
@@ -143,6 +146,9 @@ async function pageFile(frame: Frame, signal: AbortSignal): Promise<File> {
     canvas.width = canvas.height = 0;
   }
 }
+/** `angle` plus whole turns, as close as can be to `previous`. */
+const nearestTurn = (angle: number, previous: number) =>
+  angle + 2 * Math.PI * Math.round((previous - angle) / (2 * Math.PI));
 const insetCorners = (width: number, height: number): Point[] => [
   { x: width * 0.05, y: height * 0.05 },
   { x: width * 0.95, y: height * 0.05 },
@@ -280,6 +286,12 @@ export function GuidedCamera({
   /** Recent gaps between camera updates, in ms: how fast this phone delivers them. */
   const gaps = useRef<number[]>([]);
   const lastUpdate = useRef(-Infinity);
+  /** The dots, smoothed: steady while the phone is, quick when it moves (issue 147). */
+  const smoother = useRef(new PointsFilter());
+  /** The four dots, in the reference photograph's pixels (captureState viewTargets). */
+  const targets = useRef<Point[]>([]);
+  /** The guide line's last turn, in radians. */
+  const guideTurn = useRef(0);
   /** A view's still is being checked: no tracking frame meanwhile. */
   const capturing = useRef(false);
   /** How long one update may stand for the next on this phone (continuityWindow). */
@@ -324,6 +336,8 @@ export function GuidedCamera({
   /** Forget the page in progress, whatever stage it reached, so nothing leaks into the next one. */
   const clearPage = () => {
     epoch.current++;
+    smoother.current.reset();
+    targets.current = [];
     capturing.current = false;
     lastUpdate.current = -Infinity;
     clearTimeout(skipTimer.current);
@@ -482,10 +496,7 @@ export function GuidedCamera({
             return;
           }
           const index = captures.current.length - 1;
-          const point = targetPoints(cornersRef.current, {
-            x: first.width / 2,
-            y: first.height / 2,
-          })[index]!;
+          const point = targets.current[index]!;
           const matrix =
             answer.registration &&
             scaledMatrix(
@@ -630,14 +641,30 @@ export function GuidedCamera({
       })),
     );
     captures.current = [{ frame, matrix: IDENTITY }];
+    const content = contentBounds(
+      small,
+      scalePoints(quad, small.width / frame.width, small.height / frame.height),
+    );
+    const scale = { x: frame.width / small.width, y: frame.height / small.height };
+    targets.current = viewTargets(
+      quad,
+      { x: frame.width / 2, y: frame.height / 2 },
+      content && {
+        left: content.left * scale.x,
+        top: content.top * scale.y,
+        right: content.right * scale.x,
+        bottom: content.bottom * scale.y,
+      },
+    );
     hold.current = initialAlignment();
     setNotice(undefined);
     setTarget(0);
     // The dots start where the photograph put them, so the red one shows before the first
     // tracking answer, however slow the phone (issue 145).
+    smoother.current.reset();
     setProjected(
       scalePoints(
-        targetPoints(quad, { x: frame.width / 2, y: frame.height / 2 }),
+        targets.current,
         element.videoWidth / frame.width,
         element.videoHeight / frame.height,
       ),
@@ -907,13 +934,17 @@ export function GuidedCamera({
           const { registration, frame: small } = answer;
           const sharp = answer.sharp >= TRACKABLE;
           const first = captures.current[0]!.frame;
+          // Smoothed: registration noise no longer shakes the dots, and the hold judges the hand,
+          // not that noise (issue 147).
           const points = registration
-            ? targetPoints(cornersRef.current, { x: first.width / 2, y: first.height / 2 }).map(
-                (point) =>
+            ? smoother.current.filter(
+                targets.current.map((point) =>
                   project(registration.matrix, {
                     x: (point.x * base.width) / first.width,
                     y: (point.y * base.height) / first.height,
                   }),
+                ),
+                now,
               )
             : [];
           // Lost frames keep the last dots, dimmed, so the way back to the red one stays shown.
@@ -925,6 +956,7 @@ export function GuidedCamera({
               })),
             );
           const index = captures.current.length - 1;
+          const reached = hold.current.aligned;
           hold.current = alignmentStep(hold.current, {
             now,
             point: points[index] ?? null,
@@ -934,6 +966,8 @@ export function GuidedCamera({
             window: continuity(),
           });
           setHoldSince(hold.current.aligned ? hold.current.since : null);
+          // Felt as well as seen: a light tick as the circle reaches the dot.
+          if (hold.current.aligned && !reached) haptic('light');
           setQuality(
             !registration ? 'lost' : !sharp ? 'blurry' : hold.current.aligned ? 'hold' : 'align',
           );
@@ -1083,7 +1117,20 @@ export function GuidedCamera({
   const cornerFrame = captures.current[0]?.frame;
   const cornersValid =
     !!cornerFrame && validCorners(corners, cornerFrame.width, cornerFrame.height);
-  const reticle = Math.min(size.width, size.height) * 0.045;
+  /** The circle is the catch: a dot inside it is reached (captureState CIRCLE). */
+  const reticle = (Math.min(size.width, size.height) / 2) * CIRCLE;
+  /** The dots glide from one tracking answer to the next, as long as answers take here. */
+  const glide = Math.round(Math.min(250, Math.max(60, continuity() / 2.5)));
+  const aim = projected[target];
+  const guide = aim && {
+    // The turn nearest the last one, so passing straight left of the centre is no spin.
+    turn: nearestTurn(
+      Math.atan2(aim.y - size.height / 2, aim.x - size.width / 2),
+      guideTurn.current,
+    ),
+    length: Math.hypot(aim.x - size.width / 2, aim.y - size.height / 2),
+  };
+  if (guide) guideTurn.current = guide.turn;
   /** Too dark and the light is off: the light is the next step, so it carries the red. */
   const lightFirst = stage === 'aim' && advice === 'dark' && light.available && !light.on;
   const deviceCameraFirst = error === 'denied' || error === 'insecure';
@@ -1236,15 +1283,21 @@ export function GuidedCamera({
               <svg
                 viewBox={`0 0 ${size.width} ${size.height}`}
                 className={`camera-tracking${quality === 'lost' ? ' is-lost' : ''}`}
+                style={{ '--glide': `${glide}ms` } as CSSProperties}
                 aria-hidden="true"
               >
-                {projected[target] && (
+                {guide && (
+                  // A unit line from the centre, turned and stretched to the dot: a transform, so
+                  // it glides with the dot between tracking answers.
                   <line
                     className="camera-guide"
-                    x1={size.width / 2}
-                    y1={size.height / 2}
-                    x2={projected[target].x}
-                    y2={projected[target].y}
+                    x1={0}
+                    y1={0}
+                    x2={1}
+                    y2={0}
+                    style={{
+                      transform: `translate(${size.width / 2}px, ${size.height / 2}px) rotate(${guide.turn}rad) scale(${guide.length}, 1)`,
+                    }}
                   />
                 )}
                 {projected.map((point, index) => (
@@ -1252,8 +1305,11 @@ export function GuidedCamera({
                     key={index}
                     data-camera-target={index + 1}
                     data-complete={index < target}
-                    cx={point.x}
-                    cy={point.y}
+                    data-x={point.x}
+                    data-y={point.y}
+                    cx={0}
+                    cy={0}
+                    style={{ transform: `translate(${point.x}px, ${point.y}px)` }}
                     r={Math.min(size.width, size.height) * (index === target ? 0.035 : 0.025)}
                     className={
                       index === target

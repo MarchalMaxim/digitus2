@@ -6,7 +6,8 @@ export const scan = {
     title: 'Photograph your score',
     starting: 'Starting camera…',
     /** Under the viewfinder before the first photo: why five photos, in one breath. */
-    intro: 'Tap once, then follow the dots. The five photos are combined into one sharp page.',
+    intro:
+      'Tap once, then move the phone slowly over the page. The five photos are combined into one sharp page.',
     step: (n: number, total: number) => `Photo ${n} of ${total}`,
     aim: 'Fit the whole page in the picture, then tap the button.',
     dark: 'Too dark. Turn on the flashlight.',
@@ -14,8 +15,8 @@ export const scan = {
     blurry: 'Blurry. Hold the phone still.',
     retryBlurry: 'Blurry. Hold still and tap again.',
     retryCapture: 'The photo did not take. Tap again.',
-    align: 'Move the circle onto the red dot.',
-    auto: 'Each photo takes itself when the circle fills.',
+    sweep: 'Move the phone slowly over the page.',
+    auto: 'Pause now and then: each pause somewhere new takes a photo.',
     hold: 'Hold still…',
     lost: 'Point the camera back at the page.',
     turned: 'The phone turned. Start this page again.',

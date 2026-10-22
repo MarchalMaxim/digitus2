@@ -699,6 +699,43 @@ function onFirstDot(width = 1001, height = 563) {
   ];
 }
 
+it('issue 147: views that will not combine leave the first photograph as the page, not a refusal', async () => {
+  sharpFrames();
+  const prepared: number[] = [];
+  vi.spyOn(vision, 'reconstructPage').mockImplementation(async (shots) => {
+    prepared.push(shots.length);
+    if (shots.length > 1) throw new Error('Local alignment uncertain');
+    return {
+      frame: { width: 10, height: 10, data: new Uint8ClampedArray(400) },
+    } as unknown as Awaited<ReturnType<typeof vision.reconstructPage>>;
+  });
+  const sample = await liveCamera({ maxPages: 2 });
+  const t = getT().scan.camera;
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    sample(0);
+    fireEvent.click(screen.getByRole('button', { name: t.capture }));
+    sample(120);
+    expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+    vi.spyOn(vision, 'registerFrame').mockReturnValue({
+      matrix: onFirstDot(),
+      inliers: 30,
+      error: 0,
+      coverage: 0.8,
+    });
+    for (let time = 240; time <= 1200; time += 120) sample(time);
+    expect(screen.getByText(t.step(3, 5))).toBeInTheDocument();
+    // The reader gives up on the third dot: two photographs to prepare.
+    act(() => vi.advanceTimersByTime(10_000));
+    fireEvent.click(screen.getByRole('button', { name: t.skip }));
+  } finally {
+    vi.useRealTimers();
+  }
+  await waitFor(() => expect(screen.getByText(t.review, { exact: true })).toBeInTheDocument());
+  expect(prepared).toEqual([2, 1]);
+  expect(screen.queryByRole('alert')).toBeNull();
+});
+
 it('issue 143: a slow phone, an update every 400 ms, still holds the circle on a dot', async () => {
   sharpFrames();
   const sample = await liveCamera({ maxPages: 2 });

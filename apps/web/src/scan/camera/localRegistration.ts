@@ -417,10 +417,14 @@ export async function alignLocalView(
     anchors = anchors.filter((p) => p.error * scale < 1.8);
     grid = fit(anchors, reference.width, reference.height, cols, rows);
   }
-  const minX = Math.min(...region.map((p) => p.x)),
-    minY = Math.min(...region.map((p) => p.y));
-  const regionWidth = Math.max(...region.map((p) => p.x)) - minX,
-    regionHeight = Math.max(...region.map((p) => p.y)) - minY;
+  // Spread is judged where the page has print to match (issue 147): one system on a blank page
+  // has all its anchors in one band, and they align that band as surely.
+  const printed =
+    candidates.length >= 8 ? candidates.map((p) => ({ x: p.x / scale, y: p.y / scale })) : region;
+  const minX = Math.min(...printed.map((p) => p.x)),
+    minY = Math.min(...printed.map((p) => p.y));
+  const regionWidth = Math.max(1, Math.max(...printed.map((p) => p.x)) - minX),
+    regionHeight = Math.max(1, Math.max(...printed.map((p) => p.y)) - minY);
   const occupied = new Set(
     anchors.map(
       (p) =>
@@ -429,7 +433,9 @@ export async function alignLocalView(
     ),
   );
   if (
-    anchors.length < 16 ||
+    // Sixteen anchors, or, where little is printed, ten that are most of what there was to match.
+    (anchors.length < 16 &&
+      !(anchors.length >= 10 && anchors.length / Math.max(1, candidates.length) >= 0.6)) ||
     anchors.length / Math.max(1, candidates.length) < 0.2 ||
     occupied.size < 6
   )
@@ -481,11 +487,14 @@ export async function alignLocalView(
             )
           )
             selectedFraction += 1 / 16;
-      selectedArea += selectedFraction;
       if (!selectedFraction) continue;
       const px = ((x + 0.5) * reference.width) / (cols - 1),
         py = ((y + 0.5) * reference.height) / (rows - 1),
         radius = 75 / scale;
+      // Blank paper has nothing to align by, and no view could improve it: it is not counted.
+      if (!candidates.some((c) => Math.hypot(c.x / scale - px, c.y / scale - py) < radius))
+        continue;
+      selectedArea += selectedFraction;
       const nearby = anchors.filter((p) => Math.hypot(p.x - px, p.y - py) < radius);
       cellAnchors[y * (cols - 1) + x] = anchors.flatMap((p, index) =>
         Math.hypot(p.x - px, p.y - py) < radius ? [index] : [],

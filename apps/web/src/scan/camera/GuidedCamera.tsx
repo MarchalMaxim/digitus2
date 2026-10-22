@@ -468,10 +468,19 @@ export function GuidedCamera({
     move('processing');
     setEditing(false);
     setError(undefined);
+    const prepare = async (shots: Capture[]) =>
+      (await reconstructPage(shots, cornersRef.current, controller.signal)).frame;
     try {
-      const result = (
-        await reconstructPage(captures.current, cornersRef.current, controller.signal)
-      ).frame;
+      let result: Frame;
+      try {
+        result = await prepare(captures.current);
+      } catch (error) {
+        if (controller.signal.aborted || captures.current.length < 2) throw error;
+        // The views would not combine with it (issue 147: one system on a blank page left too
+        // little to align them by): the first photograph, sharp by then, is the page.
+        log.current.error('combine', error);
+        result = await prepare(captures.current.slice(0, 1));
+      }
       const file = await pageFile(result, controller.signal);
       if (session.current?.signal.aborted || controller.signal.aborted) return;
       setPreview(result);

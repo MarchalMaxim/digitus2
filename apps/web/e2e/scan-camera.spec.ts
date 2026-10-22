@@ -79,9 +79,12 @@ test('camera: stationary video cannot complete a view; cancel releases its real 
   await expectOneRed(page, 'camera viewfinder');
   await beginPage(page, 1);
   const initialFrames = await page.evaluate(() => window.scoreCamera.frames);
-  // Wait for actual camera frames, not an application timer or mocked registration result.
+  // Wait for actual camera frames, not an application timer or mocked registration result. WebKit
+  // in a container draws them more slowly: the count matters, not the time.
   await expect
-    .poll(() => page.evaluate((before) => window.scoreCamera.frames - before, initialFrames))
+    .poll(() => page.evaluate((before) => window.scoreCamera.frames - before, initialFrames), {
+      timeout: 20_000,
+    })
     .toBeGreaterThan(90);
   await expect(step(page, 2)).toBeVisible();
   // No manual shutter while tracking: the red element is the dot to reach.
@@ -319,17 +322,18 @@ async function followDots(page: Page) {
 }
 
 test('camera: a page with music only at its top is photographed and tracked', async ({ page }) => {
-  // Issue 147: two systems, the rest of the page blank paper. The dots stay with the music, so
-  // the camera never has to leave it to reach one.
+  // Issue 147: one system, the rest of the page blank paper, as on the owner's page. The dots stay
+  // with the music, so the camera never has to leave it to reach one, and the views combine.
   await mockService(page, xml('C'));
-  await openCamera(page, { systems: 2 });
+  await openCamera(page, { systems: 1 });
   await beginPage(page, 1);
   const dots = await dialog(page)
     .locator('circle[data-camera-target]')
     .evaluateAll((circles) => circles.map((circle) => Number(circle.getAttribute('data-y'))));
-  // Music from about 58 to 190 of 480 camera pixels: every dot within reach of it.
+  // Music from about 35 to 80 of 480 camera pixels: every dot within reach of it.
   expect(Math.max(...dots)).toBeLessThan(300);
   await followDots(page);
+  await expect(dialog(page).getByRole('alert')).toHaveCount(0);
   await expectOneRed(page, 'partly blank page review');
 });
 

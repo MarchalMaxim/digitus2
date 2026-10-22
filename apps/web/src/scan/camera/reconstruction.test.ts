@@ -16,7 +16,8 @@ const corners = [
   { x: 119, y: 99 },
   { x: 0, y: 99 },
 ];
-function score(seed = 42): Frame {
+/** A page of systems; fewer leave the rest of it blank (issue 147). */
+function score(seed = 42, systems = Infinity): Frame {
   const width = 420,
     height = 540,
     data = new Uint8ClampedArray(width * height * 4).fill(245);
@@ -28,7 +29,7 @@ function score(seed = 42): Frame {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     return seed / 4294967296;
   };
-  for (let top = 35; top < height - 35; top += 70) {
+  for (let top = 35, system = 0; top < height - 35 && system < systems; top += 70, system++) {
     for (let line = 0; line < 5; line++)
       for (let x = 15; x < width - 15; x++) ink(x, top + line * 6, 90);
     for (let n = 0; n < 20; n++) {
@@ -86,6 +87,31 @@ function photograph(source: Frame, view: number): Frame {
   return { width: source.width, height: source.height, data };
 }
 describe('score page reconstruction', () => {
+  it('issue 147: combines the views of a page with one system and blank paper below', async () => {
+    const original = score(42, 1);
+    const captures: Capture[] = [{ frame: original, matrix: identity }];
+    for (let view = 1; view <= 4; view++)
+      captures.push({
+        frame: photograph(original, view),
+        matrix: [1, 0, view * 2 + 1.2, 0, 1, -view * 2 - 0.8, 0, 0, 1],
+      });
+    const result = await reconstructPage(captures, scoreCorners);
+    // Every view aligns by the one system and adds to it; the blank paper is the reference's.
+    expect(result.alignments).toHaveLength(4);
+    for (let view = 0; view < 4; view++) {
+      expect(result.contributions.darkSamples[view]).toBeGreaterThan(300);
+      const errors: number[] = [];
+      for (let x = 40; x < 380; x += 20) {
+        const actual = mapLocalPoint(result.alignments[view]!, { x, y: 50 });
+        if (!actual) continue;
+        const expected = cameraPoint(x, 50, view + 1);
+        errors.push(Math.hypot(actual.point.x - expected.x, actual.point.y - expected.y));
+      }
+      expect(errors.length).toBeGreaterThan(10);
+      errors.sort((a, b) => a - b);
+      expect(errors[Math.floor(errors.length * 0.9)]!).toBeLessThan(1);
+    }
+  });
   it('accepts one actual photograph without manufactured extra captures', async () => {
     const original = image();
     const result = await reconstructPage([{ frame: original, matrix: identity }], corners);

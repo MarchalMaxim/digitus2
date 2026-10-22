@@ -91,6 +91,8 @@ export async function installScoreCamera(
       canvas.width = width;
       canvas.height = height;
       const context = canvas.getContext('2d')!;
+      const soft = document.createElement('canvas');
+      const softContext = soft.getContext('2d')!;
       let x = 0;
       let y = 0;
       let score = 1;
@@ -223,12 +225,26 @@ export async function installScoreCamera(
           }
           lastDrawn = now;
         } else {
-          context.filter = 'none';
+          // No context.filter: Safari's canvas has none (issue 145). Blur is a downscale and
+          // back; exposure multiplies every pixel, as brightness() did.
           context.fillStyle = table ? '#2a2a2a' : '#f5f5f5';
           context.fillRect(0, 0, canvas.width, canvas.height);
-          context.filter = `brightness(${exposure})${blur ? ` blur(${blur}px)` : ''}`;
           if (table) context.drawImage(source, 50 + x, 66 + y, 260, 347);
           else context.drawImage(source, x, y);
+          if (blur) {
+            const factor = 1 + blur;
+            soft.width = Math.max(1, Math.round(canvas.width / factor));
+            soft.height = Math.max(1, Math.round(canvas.height / factor));
+            softContext.drawImage(canvas, 0, 0, soft.width, soft.height);
+            context.drawImage(soft, 0, 0, canvas.width, canvas.height);
+          }
+          if (exposure < 1) {
+            const level = Math.round(255 * exposure);
+            context.globalCompositeOperation = 'multiply';
+            context.fillStyle = `rgb(${level}, ${level}, ${level})`;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.globalCompositeOperation = 'source-over';
+          }
         }
         camera.frames++;
         requestAnimationFrame(frame);

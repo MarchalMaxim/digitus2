@@ -141,7 +141,8 @@ test.describe('slow phone', () => {
   for (const worker of [true, false])
     test(`camera: a slow phone (a CPU ${SLOW_PHONE} times slower) still takes all five photographs${
       worker ? '' : ', without a worker'
-    }`, async ({ page }) => {
+    }`, async ({ page, browserName }) => {
+      test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium DevTools feature');
       test.setTimeout(300_000);
       if (!worker)
         await page.addInitScript(() => {
@@ -218,6 +219,42 @@ test('camera: a shaky picture says hold still, and a press always answers', asyn
   await expect(status(page)).toHaveText(t.aim, { timeout: 10_000 });
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible();
+});
+
+test('camera: a press is photographed even when no analysis comes back in time', async ({
+  page,
+}) => {
+  // Issue 145: an iPhone said the camera stopped when its analysis lagged behind the press. Here
+  // the tracker's worker answers every frame 3.5 s late, and with nothing usable.
+  await page.addInitScript(() => {
+    const Native = window.Worker;
+    window.Worker = function (url: string | URL, options?: WorkerOptions) {
+      if (!String(url).includes('tracker')) return new Native(url, options);
+      const worker = {
+        onmessage: null as ((event: { data: unknown }) => void) | null,
+        onerror: null,
+        onmessageerror: null,
+        terminate() {},
+        postMessage(message: { type: string; id: number; frame: unknown }) {
+          if (message.type === 'reference') return;
+          setTimeout(
+            () =>
+              worker.onmessage?.({
+                data: { type: 'failed', id: message.id, frame: message.frame },
+              }),
+            3_500,
+          );
+        },
+      };
+      return worker;
+    } as unknown as typeof Worker;
+  });
+  await openCamera(page);
+  await moveScore(page, 0, 0, 1);
+  await shutter(page).click();
+  await expect(step(page, 2)).toBeVisible({ timeout: 5_000 });
+  await expect(dialog(page).getByRole('alert')).toHaveCount(0);
+  await expectOneRed(page, 'press without analysis');
 });
 
 test('camera: a page on a contrasting table is outlined before the photo', async ({ page }) => {

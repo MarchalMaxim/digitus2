@@ -36,5 +36,17 @@ export default defineConfig({
       testMatch:
         /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|seek|embellish)\.spec\.ts/,
     },
+    // The score camera on Safari's engine (issue 145): an iPhone has no other. Playwright's WebKit
+    // for Windows has no video streams at all, so this project runs on Linux and macOS (CI, or
+    // `node scripts/e2e-webkit.mjs`, in Docker, on a Windows host).
+    ...(process.platform === 'win32'
+      ? []
+      : [
+          {
+            name: 'iphone',
+            use: { ...devices['iPhone 15'], launchOptions: { args: [] } },
+            testMatch: /scan-camera(-real)?\.spec\.ts/,
+          },
+        ]),
   ],
 });

@@ -13,6 +13,7 @@ export const scan = {
     darkNoLight: 'Too dark. Move to more light.',
     blurry: 'Blurry. Hold the phone still.',
     retryBlurry: 'Blurry. Hold still and tap again.',
+    retryCapture: 'The photo did not take. Tap again.',
     align: 'Move the circle onto the red dot.',
     auto: 'Each photo takes itself when the circle fills.',
     hold: 'Hold still…',

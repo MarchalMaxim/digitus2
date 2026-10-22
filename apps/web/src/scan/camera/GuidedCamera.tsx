@@ -21,11 +21,18 @@ import {
   validCorners,
 } from './captureState.js';
 import { CAMERA_CONSTRAINTS, hasTorch, releaseCamera, setTorch, tick as haptic } from './device.js';
-import { advise, photographable, type Advice, type FrameQuality } from './quality.js';
+import {
+  CameraLog,
+  cameraDebugRequested,
+  diagnosisLines,
+  type CameraDiagnosis,
+} from './diagnosis.js';
+import { advise, measureFrame, photographable, type Advice, type FrameQuality } from './quality.js';
 import { createTracker, type Measured, type Tracked, type Tracker } from './tracker.js';
 import {
   project,
   reconstructPage,
+  sharpness,
   type Capture,
   type Frame,
   type Matrix,
@@ -41,8 +48,6 @@ const IDENTITY: Matrix = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 const PHOTOS = 5;
 /** A press looks this long for the sharpest frame before it settles for the best one seen. */
 const BURST_MS = 1200;
-/** How much longer a press waits for the analysis of a frame it has already taken. */
-const BURST_GRACE_MS = 3000;
 /** The way out appears only after the reader has tried one dot for this long. */
 const SKIP_AFTER_MS = 10_000;
 /** Registration's own floor (vision.registerFrame): a reference below it can never be tracked. */
@@ -89,8 +94,15 @@ function holdFrame(
   context.drawImage(video, 0, 0, width, height);
   return {
     small: (size: { width: number; height: number }) => videoFrame(canvas, size.width, size.height),
-    pixels: (): Frame => ({ width, height, data: context.getImageData(0, 0, width, height).data }),
+    pixels: () => canvasPixels(canvas),
   };
+}
+/** The pixels a canvas holds: one read-back, which iOS refuses once a page has made too many. */
+function canvasPixels(canvas: HTMLCanvasElement): Frame {
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Canvas unavailable');
+  const { width, height } = canvas;
+  return { width, height, data: context.getImageData(0, 0, width, height).data };
 }
 function drawFrame(canvas: HTMLCanvasElement, frame: Frame) {
   canvas.width = frame.width;
@@ -157,14 +169,16 @@ function Icon({ name }: { name: 'close' | 'light' | 'lightOn' }) {
   );
 }
 
+/** A measured frame of a press: its small picture, as analysed, and what the analysis said. */
 interface Candidate {
-  frame: Frame;
   small: Frame;
   quality: FrameQuality;
   sharp: number;
 }
+/** The press's photograph: the best candidate with its full picture. */
+type Shot = Candidate & { frame: Frame };
 /** A frame registration can track beats one it cannot; then the crisper one wins. */
-function better(a: Omit<Candidate, 'frame'>, b: Candidate | undefined) {
+function better(a: Candidate, b: Candidate | undefined) {
   if (!b) return true;
   const trackable = a.sharp >= TRACKABLE;
   return trackable !== b.sharp >= TRACKABLE ? trackable : a.quality.blur < b.quality.blur;
@@ -209,7 +223,7 @@ export function GuidedCamera({
   const [quality, setQuality] = useState<'align' | 'hold' | 'lost' | 'blurry'>('align');
   const [advice, setAdvice] = useState<Advice>('good');
   const [outline, setOutline] = useState<Point[] | null>(null);
-  const [notice, setNotice] = useState<'retryBlurry' | 'turned'>();
+  const [notice, setNotice] = useState<'retryBlurry' | 'retryCapture' | 'turned'>();
   const [blurryResult, setBlurryResult] = useState(false);
   const [shooting, setShooting] = useState(false);
   /** The shutter has been pressed once in this camera: the opening hint has done its job. */
@@ -239,13 +253,20 @@ export function GuidedCamera({
     | {
         best?: Candidate;
         timer: ReturnType<typeof setTimeout>;
-        canvas: HTMLCanvasElement;
-        /** Frames of this press sent for analysis, and when the press began. */
+        /** The frame being analysed is drawn on `scratch`; the best one so far stays on `keep`,
+         * and the two swap, so the full picture is read back once, when the press settles. */
+        scratch: HTMLCanvasElement;
+        keep: HTMLCanvasElement;
+        /** New video frames during the press, and those sent for analysis. */
+        seen: number;
         asked: number;
-        start: number;
       }
     | undefined
   >(undefined);
+  /** Behind `?camera=debug` only: what the camera saw, for a phone no cable can reach. */
+  const debug = useRef(cameraDebugRequested());
+  const log = useRef(new CameraLog());
+  const [diagnosis, setDiagnosis] = useState<CameraDiagnosis>();
   const blurryAttempts = useRef(0);
   const noticeAt = useRef(-Infinity);
   const skipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -273,7 +294,8 @@ export function GuidedCamera({
 
   const endBurst = () => {
     clearTimeout(burst.current?.timer);
-    if (burst.current) burst.current.canvas.width = burst.current.canvas.height = 0;
+    for (const canvas of burst.current ? [burst.current.scratch, burst.current.keep] : [])
+      canvas.width = canvas.height = 0;
     burst.current = undefined;
     setShooting(false);
   };
@@ -500,38 +522,87 @@ export function GuidedCamera({
         capturing.current = false;
         release();
       }
-    } catch {
+    } catch (cause) {
+      log.current.error('view', cause);
       capturing.current = false;
       release();
       lostView();
     }
   };
+  /**
+   * The camera still gives pictures: a live track that is not muted (iOS mutes it while Control
+   * Center, a call or another app holds the camera) on a video that plays.
+   */
+  const cameraLive = (element: HTMLVideoElement) => {
+    const track = stream.current?.getVideoTracks?.()[0];
+    return (
+      !!track &&
+      track.readyState !== 'ended' &&
+      !track.muted &&
+      !element.paused &&
+      !element.ended &&
+      element.videoWidth > 0
+    );
+  };
+  /**
+   * The picture the video shows now, measured here: the press's photograph when the camera gave
+   * the press new frames but none came back analysed in time (a slow or failing analysis, not a
+   * stopped camera). A phone short of canvas memory may still manage the smaller size.
+   */
+  const directShot = (element: HTMLVideoElement): Shot | undefined => {
+    const { videoWidth: width, videoHeight: height } = element;
+    for (const limit of [2560, 1600]) {
+      const canvas = document.createElement('canvas');
+      try {
+        const size = dimensions(width, height, limit);
+        const full = holdFrame(canvas, element, size.width, size.height);
+        const small = full.small(dimensions(width, height, 360));
+        return {
+          small,
+          quality: measureFrame(small),
+          sharp: sharpness(small),
+          frame: full.pixels(),
+        };
+      } catch (cause) {
+        log.current.error('direct', cause);
+      } finally {
+        canvas.width = canvas.height = 0;
+      }
+    }
+    return undefined;
+  };
   /** The sharpest frame of the burst becomes the page's reference, or the reader is told why not. */
   const settleBurst = () => {
     const element = video.current;
     const pending = burst.current;
-    // The video gave this press its frames, but the phone is still analysing them: wait for that
-    // answer (a little), rather than calling a slow phone a stopped camera.
-    if (
-      pending &&
-      !pending.best &&
-      pending.asked > 0 &&
-      tracker.current?.busy &&
-      performance.now() - pending.start < BURST_MS + BURST_GRACE_MS
-    ) {
-      pending.timer = setTimeout(() => actions.current.settleBurst(), 100);
-      return;
+    if (!pending) return;
+    let shot: Shot | undefined;
+    let how: 'best' | 'direct' | 'none' = 'none';
+    const settling = stageRef.current === 'aim' && !session.current?.signal.aborted && element;
+    if (settling && pending.best)
+      try {
+        shot = { ...pending.best, frame: canvasPixels(pending.keep) };
+        how = 'best';
+      } catch (cause) {
+        log.current.error('read', cause);
+      }
+    if (settling && !shot && pending.seen > 0 && cameraLive(element)) {
+      shot = directShot(element);
+      if (shot) how = 'direct';
     }
-    const best = pending?.best;
+    log.current.press({ seen: pending.seen, asked: pending.asked, how });
     endBurst();
     if (stageRef.current !== 'aim' || session.current?.signal.aborted || !element) return;
-    // Every frame of the burst is a candidate, so none at all means the video stalled: a frozen
-    // picture is no photograph, and the reader is told the camera stopped.
-    if (!best) {
-      fail('interrupted');
+    if (!shot) {
+      // Not one new picture during the whole press, or a track that ended or was taken away: the
+      // camera stopped. A live camera whose picture could not be kept asks for another tap.
+      if (pending.seen > 0 && cameraLive(element)) {
+        noticeAt.current = performance.now();
+        setNotice('retryCapture');
+      } else fail('interrupted');
       return;
     }
-    const { frame, small, quality: q } = best;
+    const { frame, small, quality: q } = shot;
     const page =
       q.page && scalePoints(q.page, frame.width / small.width, frame.height / small.height);
     const quad =
@@ -540,7 +611,7 @@ export function GuidedCamera({
         : insetCorners(frame.width, frame.height);
     cornersRef.current = quad;
     setCorners(quad);
-    if (best.sharp < TRACKABLE) {
+    if (shot.sharp < TRACKABLE) {
       // A blurred reference can never be tracked. Say so once; a second blurred press keeps the
       // single photograph, for the review to show and the reader to keep or retake.
       blurryAttempts.current += 1;
@@ -581,9 +652,10 @@ export function GuidedCamera({
     setShooting(true);
     burst.current = {
       timer: setTimeout(() => actions.current.settleBurst(), BURST_MS),
-      canvas: document.createElement('canvas'),
+      scratch: document.createElement('canvas'),
+      keep: document.createElement('canvas'),
+      seen: 0,
       asked: 0,
-      start: performance.now(),
     };
   };
   /** Optimistic, one request at a time: a quick second tap is not lost or doubled, and a close
@@ -607,6 +679,11 @@ export function GuidedCamera({
     switchLight(!lightRef.current);
   };
 
+  useEffect(() => {
+    if (!debug.current) return;
+    const timer = setInterval(() => setDiagnosis(log.current.snapshot()), 500);
+    return () => clearInterval(timer);
+  }, []);
   const actions = useRef({ captureView, fail, settleBurst, turned });
   useEffect(() => {
     actions.current = { captureView, fail, settleBurst, turned };
@@ -674,32 +751,37 @@ export function GuidedCamera({
         move('aim');
         let last = -Infinity;
         let lastMediaTime = -Infinity;
+        let lastPresented = -1;
+        /** A repeated frame (a frozen video) is never analysed twice. Either clock moving means a
+         * new frame: a browser may hold one of them still for a live camera. */
+        const newFrame = (mediaTime: number, presented = -1) => {
+          const fresh = mediaTime !== lastMediaTime || presented !== lastPresented;
+          lastMediaTime = mediaTime;
+          lastPresented = presented;
+          log.current.callback(fresh);
+          return fresh;
+        };
         const schedule = () => {
           if (controller.signal.aborted) return;
           if (typeof element.requestVideoFrameCallback === 'function') {
             const id = element.requestVideoFrameCallback((now, metadata) => {
-              if (metadata.mediaTime === lastMediaTime) {
-                schedule();
-                return;
-              }
-              lastMediaTime = metadata.mediaTime;
-              tick(now);
+              if (newFrame(metadata.mediaTime, metadata.presentedFrames)) tick(now);
+              else schedule();
             });
             cancelVideoFrame.current = () => element.cancelVideoFrameCallback(id);
           } else {
             frameId.current = requestAnimationFrame((now) => {
-              if (element.currentTime === lastMediaTime) {
-                schedule();
-                return;
-              }
-              lastMediaTime = element.currentTime;
-              tick(now);
+              if (newFrame(element.currentTime)) tick(now);
+              else schedule();
             });
           }
         };
         const tick = (now: number) => {
           if (controller.signal.aborted) return;
           schedule();
+          // Every new picture during a press counts, analysed or not: a press that saw none met
+          // a stopped camera; one whose pictures were all skipped met a busy analysis.
+          if (burst.current) burst.current.seen += 1;
           if (now - last < 120 || !element.videoWidth || !element.videoHeight) return;
           // One question at a time: while the last frame is being analysed, this one is skipped,
           // and the next video frame is tried as soon as the answer is in.
@@ -751,26 +833,32 @@ export function GuidedCamera({
               const pending = burst.current;
               // During a press, the full picture waits on the GPU in case this frame is the best.
               const size = dimensions(intrinsic.width, intrinsic.height, 2560);
-              const full = pending && holdFrame(pending.canvas, element, size.width, size.height);
+              const drawn = pending?.scratch;
+              const full = drawn && holdFrame(drawn, element, size.width, size.height);
               const small = full
                 ? full.small(bounds)
                 : videoFrame(element, bounds.width, bounds.height);
               const asked = analysis.measure(small, (answer) => {
+                log.current.answer(!!answer);
                 if (!current(answer, 'aim')) return;
-                aimed(answer!, now, intrinsic, pending, full);
+                aimed(answer!, now, intrinsic, pending, drawn);
                 fresh();
               });
+              if (asked) log.current.asked();
               if (asked && pending) pending.asked += 1;
               return;
             }
             const base = reference.current;
             if (!base) return;
-            analysis.track(videoFrame(element, base.width, base.height), (answer) => {
+            const asked = analysis.track(videoFrame(element, base.width, base.height), (answer) => {
+              log.current.answer(!!answer);
               if (!current(answer, 'track')) return;
               fresh();
               tracked(answer!, now, intrinsic, base);
             });
-          } catch {
+            if (asked) log.current.asked();
+          } catch (cause) {
+            log.current.error(stageRef.current, cause);
             hold.current = initialAlignment();
             setHoldSince(null);
             setQuality('lost');
@@ -782,7 +870,7 @@ export function GuidedCamera({
           now: number,
           intrinsic: { width: number; height: number },
           pending: typeof burst.current,
-          full: ReturnType<typeof holdFrame> | undefined,
+          drawn: HTMLCanvasElement | undefined,
         ) => {
           const { frame: small, quality: measured, sharp } = answer;
           recent.current = [...recent.current.slice(-3), measured];
@@ -798,10 +886,14 @@ export function GuidedCamera({
                 intrinsic.height / small.height,
               ),
           );
-          if (!pending || !full || burst.current !== pending) return;
+          if (!pending || !drawn || burst.current !== pending || pending.scratch !== drawn) return;
           const candidate = { small, quality: measured, sharp };
           if (!better(candidate, pending.best)) return;
-          pending.best = { ...candidate, frame: full.pixels() };
+          // The better frame's canvas is kept and the old best's is drawn over next: no read-back
+          // until the press settles.
+          pending.scratch = pending.keep;
+          pending.keep = drawn;
+          pending.best = candidate;
           if (photographable(measured) && sharp >= TRACKABLE) actions.current.settleBurst();
         };
         /** Where the page is now: the dots follow it, and a steady hold takes the view. */
@@ -1243,6 +1335,13 @@ export function GuidedCamera({
           )}
           {kept.length > 0 && <p className="small">{t.pageCount(kept.length)}</p>}
           {error && <p role="alert">{t[error]}</p>}
+          {diagnosis && (
+            <pre className="camera-debug">
+              {diagnosisLines(diagnosis, video.current, stream.current?.getVideoTracks?.()[0]).join(
+                '\n',
+              )}
+            </pre>
+          )}
         </div>
         <div className="guided-camera-actions">
           {stage === 'starting' && (

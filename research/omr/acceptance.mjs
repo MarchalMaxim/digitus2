@@ -60,6 +60,12 @@ export function missing(tc = toolchains()) {
   return null;
 }
 
+// Recognitions at once on a cache miss (issue 134). Each job keeps the recognisers' own thread pools
+// (ONNX Runtime sizes its pool from the machine, not OMP_NUM_THREADS), so the jobs share the cores:
+// on 16 cores three workers take the 96 corpus and photo recognitions from 904 s to 532 s, and three
+// Audiveris JVMs with their 4 GiB heaps fit in 32 GB. DIGITUS2_OMR_WORKERS sets it.
+const WORKERS = Math.max(1, Number(process.env.DIGITUS2_OMR_WORKERS) || 3);
+
 /** The files whose content decides a recognition; any change invalidates the cache. */
 const PIPELINE = [
   'research/omr/prototypes/local-worker/homr.py',
@@ -413,7 +419,7 @@ export async function main(args = process.argv.slice(2)) {
     writeFileSync(jobFile, JSON.stringify([...jobs, ...photos].map(({ id, recognizer, input, output }) => ({ id, recognizer, input, output })), null, 1));
     const run = spawnSync(
       tc.python,
-      ['-I', join(HERE, 'acceptance/recognize.py'), jobFile, '--bundle', tc.bundle, '--text-models', tc.textModels, '--homr-toolchain', tc.homr],
+      ['-I', join(HERE, 'acceptance/recognize.py'), jobFile, '--bundle', tc.bundle, '--text-models', tc.textModels, '--homr-toolchain', tc.homr, '--workers', String(WORKERS)],
       { stdio: 'inherit' },
     );
     if (run.status !== 0) throw new Error(`recognize.py exited with ${run.status}`);

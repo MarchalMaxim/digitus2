@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm -r --if-present test && node --test scripts/verify-graph.test.mjs",
     "test:omr": "node --test research/omr/*.test.mjs",
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint .",

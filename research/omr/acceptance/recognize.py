@@ -7,12 +7,16 @@ gate measures the shipped pipeline, not a copy of it. A job whose output exists 
 gate names outputs by a hash of the input and of the pipeline, so a stored output is reusable
 exactly when nothing that produced it has changed.
 
+With --workers N, N jobs run at once (issue 134). Each job is a separate native process in its own
+directory with the recognisers' usual thread settings, so a job's output is the same as alone.
+
 Usage: python research/omr/acceptance/recognize.py JOBS.json --bundle DIR --text-models DIR
-       --homr-toolchain DIR [--timeout S]
+       --homr-toolchain DIR [--timeout S] [--workers N]
 """
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, wait
 import json
 from pathlib import Path
 import shutil
@@ -35,6 +39,7 @@ def main() -> int:
     parser.add_argument("--text-models", type=Path, required=True)
     parser.add_argument("--homr-toolchain", type=Path, required=True)
     parser.add_argument("--timeout", type=float, default=300)
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
     jobs = json.loads(args.jobs.read_text(encoding="utf-8"))
     recognizers = {}
@@ -52,8 +57,15 @@ def main() -> int:
         return recognizers[name]
 
     pending = [job for job in jobs if not Path(job["output"]).exists() and not Path(job["output"] + ".failed.json").exists()]
-    print(json.dumps({"jobs": len(jobs), "toRun": len(pending)}), flush=True)
-    for index, job in enumerate(pending, 1):
+    print(json.dumps({"jobs": len(jobs), "toRun": len(pending), "workers": args.workers}), flush=True)
+    # Made before the pool starts, so the workers share them instead of racing to create them.
+    for name in sorted({job["recognizer"] for job in pending}):
+        recognizer(name)
+    progress = threading.Lock()
+    finished = 0
+
+    def run(job) -> None:
+        nonlocal finished
         source = Path(job["input"]).resolve()
         output = Path(job["output"])
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -78,8 +90,23 @@ def main() -> int:
             status = f"failed: {type(error).__name__}"
         finally:
             shutil.rmtree(workspace, ignore_errors=True)
-        print(json.dumps({"done": index, "of": len(pending), "id": job["id"], "status": status,
-                          "seconds": round(time.monotonic() - started, 1)}), flush=True)
+        with progress:
+            finished += 1
+            print(json.dumps({"done": finished, "of": len(pending), "id": job["id"], "status": status,
+                              "seconds": round(time.monotonic() - started, 1)}), flush=True)
+
+    pool = ThreadPoolExecutor(max_workers=max(1, args.workers))
+    futures = [pool.submit(run, job) for job in pending]
+    try:
+        # Waiting in short steps keeps Ctrl+C deliverable on Windows; an untimed wait blocks it.
+        while not all(future.done() for future in futures):
+            wait(futures, timeout=1)
+    except KeyboardInterrupt:
+        pool.shutdown(wait=False, cancel_futures=True)
+        raise
+    pool.shutdown()
+    for future in futures:
+        future.result()
     return 0
 
 

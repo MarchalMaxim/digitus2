@@ -241,6 +241,27 @@ describe('score camera registration', () => {
         );
     expect(registerFrame(sliver, warp(sliver, [1, 0, 10, 0, 1, 5, 0, 0, 1]))).toBeNull();
   });
+  it('issue 147: one system across an otherwise blank page is tracked', () => {
+    // The owner's page: a single system at the top, the rest blank. It is short (a seventh of the
+    // page) but spans the page's width, which places the page as surely near the music.
+    const single = notation(17, 1);
+    for (const matrix of [
+      [1, 0, 22, 0, 1, 16, 0, 0, 1],
+      [0.97, -0.025, 15, 0.025, 0.97, 20, 0, 0, 1],
+    ]) {
+      const result = registerFrame(single, warp(single, matrix));
+      expect(result).not.toBeNull();
+      for (const point of [
+        { x: 40, y: 40 },
+        { x: 260, y: 30 },
+        { x: 150, y: 70 },
+      ]) {
+        const actual = project(result!.matrix, point),
+          expected = project(matrix, point);
+        expect(Math.hypot(actual.x - expected.x, actual.y - expected.y)).toBeLessThan(3);
+      }
+    }
+  });
   it('requires distributed matches inside the selected page, not its textured surroundings', () => {
     const reference = notation();
     const region = [

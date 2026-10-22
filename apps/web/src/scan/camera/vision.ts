@@ -464,9 +464,11 @@ export function registerFrame(
     spanY < 0.3 ||
     coverage < 0.18 ||
     cells.size < 4 ||
-    // However the content lies, a sliver of it is too little to place the whole page by.
-    width < page.width * 0.15 ||
-    height < page.height * 0.15
+    // However the content lies, a patch of it is too little to place the page by. One system
+    // across the page is short but long (issue 147): the matches must stretch 40 % of the page
+    // one way and 6 % the other.
+    Math.max(width / page.width, height / page.height) < 0.4 ||
+    Math.min(width / page.width, height / page.height) < 0.06
   )
     return null;
   const error = Math.sqrt(

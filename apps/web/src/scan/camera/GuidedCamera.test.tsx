@@ -809,6 +809,10 @@ it('issue 145: a press while the analysis is still busy takes the picture the ca
   expect(asked).toHaveLength(1);
   expect(screen.queryByRole('alert')).toBeNull();
   expect(screen.getByText(t.step(2, 5))).toBeInTheDocument();
+  // The red dot shows at once, before any tracking answer.
+  expect(screen.getByRole('dialog').querySelector('[data-camera-target="1"]')).toHaveClass(
+    'is-red',
+  );
   // The late answer about the old frame changes nothing.
   act(() =>
     asked[0]!.done({

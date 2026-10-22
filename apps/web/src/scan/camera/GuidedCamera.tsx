@@ -640,7 +640,15 @@ export function GuidedCamera({
     hold.current = initialAlignment();
     setNotice(undefined);
     setTarget(0);
-    setProjected([]);
+    // The dots start where the photograph put them, so the red one shows before the first
+    // tracking answer, however slow the phone (issue 145).
+    setProjected(
+      scalePoints(
+        targetPoints(quad, { x: frame.width / 2, y: frame.height / 2 }),
+        element.videoWidth / frame.width,
+        element.videoHeight / frame.height,
+      ),
+    );
     setQuality('align');
     move('track');
     armSkip();

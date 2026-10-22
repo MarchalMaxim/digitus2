@@ -5,6 +5,7 @@ export const app: Messages['app'] = {
     'digitus2 n’a pas pu charger la liste des morceaux. Vérifiez la connexion et rechargez la page.',
   openingScan: 'Ouverture de la numérisation...',
   fileNotRestorable: 'Ouvrez-la depuis Mes partitions, ou choisissez à nouveau le fichier.',
+  unknownPiece: 'Ce morceau n’est pas dans la bibliothèque.',
   darkTheme: 'Thème sombre',
   updateReady: 'Une nouvelle version est prête.',
   reload: 'Recharger',

@@ -14,7 +14,11 @@ export const scan: Messages['scan'] = {
     blurry: 'Onscherp. Houd de telefoon stil.',
     retryBlurry: 'Onscherp. Houd de telefoon stil en tik opnieuw.',
     retryCapture: 'De foto is niet gelukt. Tik opnieuw.',
-    sweep: 'Beweeg de telefoon langzaam over de pagina.',
+    sweep: (left: number) =>
+      plural('nl', left, {
+        one: 'Ga naar een nieuwe plek en hou even stil. Nog 1.',
+        other: 'Ga naar een nieuwe plek en hou even stil. Nog #.',
+      }),
     auto: 'Hou af en toe even stil: elke pauze op een nieuwe plek neemt een foto.',
     hold: 'Stilhouden…',
     lost: 'Richt de camera weer op de pagina.',

@@ -15,7 +15,11 @@ export const scan = {
     blurry: 'Blurry. Hold the phone still.',
     retryBlurry: 'Blurry. Hold still and tap again.',
     retryCapture: 'The photo did not take. Tap again.',
-    sweep: 'Move the phone slowly over the page.',
+    sweep: (left: number) =>
+      plural('en', left, {
+        one: 'Move to a new spot and pause. 1 more.',
+        other: 'Move to a new spot and pause. # more.',
+      }),
     auto: 'Pause now and then: each pause somewhere new takes a photo.',
     hold: 'Hold still…',
     lost: 'Point the camera back at the page.',

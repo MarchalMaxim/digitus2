@@ -18,6 +18,7 @@ import {
   sweepStep,
   validCorners,
   validView,
+  viewPlace,
   viewPoint,
 } from './captureState.js';
 import { CAMERA_CONSTRAINTS, hasTorch, releaseCamera, setTorch, tick as haptic } from './device.js';
@@ -31,6 +32,7 @@ import { advise, measureFrame, photographable, type Advice, type FrameQuality } 
 import { PointsFilter } from './smoothing.js';
 import { createTracker, type Measured, type Tracked, type Tracker } from './tracker.js';
 import {
+  project,
   reconstructPage,
   sharpness,
   type Capture,
@@ -191,15 +193,6 @@ function playing(element: HTMLVideoElement): Promise<void> {
     void play();
   });
 }
-/** One quarter of the progress ring around the circle, with a gap at each end, as a path. */
-function quarter(index: number, center: Point, radius: number) {
-  const gap = 0.12;
-  const at = (angle: number) =>
-    `${center.x + radius * Math.cos(angle)} ${center.y + radius * Math.sin(angle)}`;
-  const start = -Math.PI / 2 + (index * Math.PI) / 2 + gap;
-  const end = start + Math.PI / 2 - 2 * gap;
-  return `M ${at(start)} A ${radius} ${radius} 0 0 1 ${at(end)}`;
-}
 const insetCorners = (width: number, height: number): Point[] => [
   { x: width * 0.05, y: height * 0.05 },
   { x: width * 0.95, y: height * 0.05 },
@@ -279,6 +272,8 @@ export function GuidedCamera({
   const [taken, setTaken] = useState(0);
   /** The phone pauses somewhere new: the view is about to be taken. */
   const [settling, setSettling] = useState(false);
+  /** Where each photo was taken, on the page as the camera shows it now (issue 154). */
+  const [marks, setMarks] = useState<Point[]>([]);
   const [quality, setQuality] = useState<'sweep' | 'lost' | 'blurry'>('sweep');
   const [advice, setAdvice] = useState<Advice>('good');
   const [outline, setOutline] = useState<Point[] | null>(null);
@@ -339,6 +334,9 @@ export function GuidedCamera({
   /** Recent gaps between camera updates, in ms: how fast this phone delivers them. */
   const gaps = useRef<number[]>([]);
   const lastUpdate = useRef(-Infinity);
+  /** Where each photo was taken, in the first photograph's pixels; the marks follow them. */
+  const places = useRef<Point[]>([]);
+  const markSmoother = useRef(new PointsFilter());
   /** Where the view is, smoothed: registration noise is no movement of the hand (issue 147). */
   const smoother = useRef(new PointsFilter());
   /** A view's still is being checked: no tracking frame meanwhile. */
@@ -386,6 +384,9 @@ export function GuidedCamera({
   const clearPage = () => {
     epoch.current++;
     smoother.current.reset();
+    markSmoother.current.reset();
+    places.current = [];
+    setMarks([]);
     capturing.current = false;
     lastUpdate.current = -Infinity;
     clearTimeout(skipTimer.current);
@@ -569,6 +570,15 @@ export function GuidedCamera({
             return;
           }
           captures.current.push({ frame: still.pixels(), matrix });
+          const place = viewPlace(matrix, { x: first.width / 2, y: first.height / 2 });
+          if (place) {
+            places.current.push(place);
+            // Under the circle, until the next tracking answer places it on the page.
+            setMarks((shown) => [
+              ...shown,
+              { x: element.videoWidth / 2, y: element.videoHeight / 2 },
+            ]);
+          }
           captured();
           if (captures.current.length === PHOTOS) void process();
           else {
@@ -694,6 +704,10 @@ export function GuidedCamera({
       })),
     );
     captures.current = [{ frame, matrix: IDENTITY }];
+    places.current = [{ x: frame.width / 2, y: frame.height / 2 }];
+    markSmoother.current.reset();
+    // The first photo's mark shows at once, before any tracking answer.
+    setMarks([{ x: element.videoWidth / 2, y: element.videoHeight / 2 }]);
     sweep.current = initialSweep();
     setNotice(undefined);
     setTaken(0);
@@ -912,7 +926,7 @@ export function GuidedCamera({
               log.current.answer(!!answer);
               if (!current(answer, 'track')) return;
               fresh();
-              tracked(answer!, now, base);
+              tracked(answer!, now, intrinsic, base);
             });
             if (asked) log.current.asked();
           } catch (cause) {
@@ -955,7 +969,12 @@ export function GuidedCamera({
           if (photographable(measured) && sharp >= TRACKABLE) actions.current.settleBurst();
         };
         /** Where the view is now: a pause somewhere new, sharp, takes it. */
-        const tracked = (answer: Tracked, now: number, base: Frame) => {
+        const tracked = (
+          answer: Tracked,
+          now: number,
+          intrinsic: { width: number; height: number },
+          base: Frame,
+        ) => {
           const { registration } = answer;
           const sharp = answer.sharp >= TRACKABLE;
           const first = captures.current[0]!.frame;
@@ -978,6 +997,24 @@ export function GuidedCamera({
             window: continuity(),
           });
           setSettling(sweep.current.fresh && sweep.current.since !== null);
+          // The marks ride on the page: lost frames leave them where they were, dimmed.
+          if (registration)
+            setMarks(
+              markSmoother.current
+                .filter(
+                  places.current.map((place) =>
+                    project(registration.matrix, {
+                      x: (place.x * base.width) / first.width,
+                      y: (place.y * base.height) / first.height,
+                    }),
+                  ),
+                  now,
+                )
+                .map((point) => ({
+                  x: (point.x * intrinsic.width) / base.width,
+                  y: (point.y * intrinsic.height) / base.height,
+                })),
+            );
           setQuality(!registration ? 'lost' : !sharp ? 'blurry' : 'sweep');
           if (sweep.current.ready) actions.current.captureView();
         };
@@ -1125,7 +1162,7 @@ export function GuidedCamera({
   const cornerFrame = captures.current[0]?.frame;
   const cornersValid =
     !!cornerFrame && validCorners(corners, cornerFrame.width, cornerFrame.height);
-  /** The circle in the middle, and the ring around it that fills a quarter per view. */
+  /** The circle in the middle: the phone's aim. */
   const reticle = (Math.min(size.width, size.height) / 2) * CIRCLE;
   const middle = { x: size.width / 2, y: size.height / 2 };
   /** Too dark and the light is off: the light is the next step, so it carries the red. */
@@ -1149,7 +1186,7 @@ export function GuidedCamera({
         : stage === 'track'
           ? notice
             ? t[notice]
-            : { sweep: t.sweep, lost: t.lost, blurry: t.moving }[quality]
+            : { sweep: t.sweep(PHOTOS - 1 - taken), lost: t.lost, blurry: t.moving }[quality]
           : stage === 'processing'
             ? t.processing
             : stage === 'review'
@@ -1291,13 +1328,18 @@ export function GuidedCamera({
                   cy={middle.y}
                   r={reticle}
                 />
-                {Array.from({ length: PHOTOS - 1 }, (_, index) => (
-                  <path
+                {/* Each photo's place on the page: sweep on to where there is none yet. */}
+                {marks.map((mark, index) => (
+                  <circle
                     key={index}
-                    data-camera-view={index + 1}
-                    data-complete={index < taken}
-                    className={index < taken ? 'camera-view-taken' : 'camera-view'}
-                    d={quarter(index, middle, reticle * 1.7)}
+                    className="camera-mark"
+                    data-camera-mark={index + 1}
+                    data-x={mark.x}
+                    data-y={mark.y}
+                    cx={0}
+                    cy={0}
+                    style={{ transform: `translate(${mark.x}px, ${mark.y}px)` }}
+                    r={Math.min(size.width, size.height) * 0.02}
                   />
                 ))}
               </svg>

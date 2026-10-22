@@ -33,7 +33,7 @@ async function beginPage(page: Page, score: number) {
   await moveScore(page, 0, 0, score);
   await shutter(page).click();
   await expect(step(page, 2)).toBeVisible();
-  await expect(status(page)).toHaveText(t.sweep);
+  await expect(status(page)).toHaveText(t.sweep(4));
 }
 
 async function finishViews(page: Page, { view = 15_000, review = 20_000 } = {}) {
@@ -362,14 +362,43 @@ test('camera: real tracked views, retake and two kept pages enter ordered recogn
   });
   await openCamera(page);
   await beginPage(page, 1);
-  // Vision follows the pixels in the video: each pause somewhere new fills a quarter of the ring.
-  const ring = dialog(page).locator('[data-camera-view][data-complete="true"]');
-  await expect(ring).toHaveCount(0);
+  // Vision follows the pixels in the video: each photo's place is marked on the page and moves
+  // with it (issue 154). In the 360 x 480 camera pixels, the circle is at 180, 240.
+  const marks = () =>
+    dialog(page)
+      .locator('[data-camera-mark]')
+      .evaluateAll((circles) =>
+        circles.map((circle) => [
+          Number(circle.getAttribute('data-x')),
+          Number(circle.getAttribute('data-y')),
+        ]),
+      );
+  const near = (expected: number[][]) => (shown: number[][]) =>
+    shown.length === expected.length &&
+    shown.every((at, i) => Math.hypot(at[0]! - expected[i]![0]!, at[1]! - expected[i]![1]!) < 15);
+  expect(near([[180, 240]])(await marks())).toBe(true);
   await moveScore(page, 81, 108);
   await expect(step(page, 3)).toBeVisible({ timeout: 15_000 });
-  await expect(ring).toHaveCount(1);
+  await expect(status(page)).toHaveText(t.sweep(3));
+  // The first photo's place moved with the page; the new one is under the circle.
+  await expect
+    .poll(async () =>
+      near([
+        [261, 348],
+        [180, 240],
+      ])(await marks()),
+    )
+    .toBe(true);
   await moveScore(page, 0, 0);
-  // Back where the first photo was taken: no view there.
+  // Back where the first photo was taken: its mark is under the circle again, and no view there.
+  await expect
+    .poll(async () =>
+      near([
+        [180, 240],
+        [99, 132],
+      ])(await marks()),
+    )
+    .toBe(true);
   await page.waitForTimeout(1_500);
   await expect(step(page, 3)).toBeVisible();
   await moveScore(page, -81, 108);

@@ -139,6 +139,38 @@ export function sweepStep(
 /** Where the reference photograph's centre lands in a view registered by `matrix`. */
 export const viewPoint = (matrix: Matrix, center: Point): Point => project(matrix, center);
 
+/** The inverse of a homography, or null when it has none. */
+export function invertMatrix(m: Matrix): Matrix | null {
+  const [a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, i = 0] = m;
+  const A = e * i - f * h;
+  const B = f * g - d * i;
+  const C = d * h - e * g;
+  const det = a * A + b * B + c * C;
+  if (!Number.isFinite(det) || Math.abs(det) < 1e-12) return null;
+  return [
+    A / det,
+    (c * h - b * i) / det,
+    (b * f - c * e) / det,
+    B / det,
+    (a * i - c * g) / det,
+    (c * d - a * f) / det,
+    C / det,
+    (b * g - a * h) / det,
+    (a * e - b * d) / det,
+  ];
+}
+
+/**
+ * Where on the page a view was taken (issue 154): the point of the reference photograph that sat
+ * under the circle, the centre of the view's picture, when it was taken.
+ */
+export function viewPlace(matrix: Matrix, center: Point): Point | null {
+  const inverse = invertMatrix(matrix);
+  if (!inverse) return null;
+  const place = project(inverse, center);
+  return Number.isFinite(place.x) && Number.isFinite(place.y) ? place : null;
+}
+
 /** S H S^-1 for equal-aspect tracking and still canvases. */
 export function scaledMatrix(matrix: Matrix, scaleX: number, scaleY = scaleX): Matrix {
   return [

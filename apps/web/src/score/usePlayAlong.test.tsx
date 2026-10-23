@@ -1,20 +1,25 @@
 import { readFileSync } from 'node:fs';
 import { midiToSpelling, parseMusicXml, type Hand, type Note, type Score } from '@digitus2/engine';
-import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react';
+import { act, cleanup, render, renderHook } from '@testing-library/react';
 import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import type * as InstrumentExports from '../audio/instrument.js';
 import { performanceFor } from '../audio/performance.js';
+import { DUR_SLOW_FALLBACK_MS } from '../design/motion.js';
 import { askForPiano, resetPianoForTests, turnOffPiano } from '../midi/piano.js';
 import type { AccessEvents, OpenedAccess } from '../midi/types.js';
 import { PianoKeyboard } from './PianoKeyboard.js';
-import { alongSteps, type PerfRange } from './playAlong.js';
+import { alongPlan, alongSteps, holdSec, type PerfRange } from './playAlong.js';
 import { usePlayAlong, type PlayAlongOptions } from './usePlayAlong.js';
 import { usePlayback, type Playback } from './usePlayback.js';
 
 // The play-along's glue (issue 182): the piano store drives the hook through a fake lazy chunk,
 // the playback is a fake with a position of its own, and every test runs under StrictMode.
+//
+// The clock is fake (issue 185): a step passes once its keys have been held for its time, so a
+// test presses, lets the time go by with `hold`, and looks. Only the timers and `performance` are
+// faked; microtasks stay real, so the piano connects as it does in the app.
 
 // The lazy chunk (access.ts, with parse.ts) is replaced by a fake that the tests drive.
 const access = vi.hoisted(() => ({
@@ -87,7 +92,9 @@ function scoreOf(specs: NoteSpec[], bars = 2): Score {
 
 /**
  * Steps (both hands): [48 60] at 0, [62] at 0.5, [64] at 1, [60] at 1.5, [60] at 2 seconds. With
- * the left hand muted: [60], [62], [64], [60], [60] at the same seconds.
+ * the left hand muted: [60], [62], [64], [60], [60] at the same seconds. Every step is held for
+ * 500 ms (a quarter at 120 qpm: the gap to the next step, and the shortest note; the last step
+ * holds its note), and the bass 48 sounds 2000 ms, four beats.
  */
 const score = scoreOf([
   { midi: 48, tick: 0, hand: 'L', ticks: 4 },
@@ -212,6 +219,8 @@ interface Setup {
   refresh(over?: Partial<PlayAlongOptions>): void;
   press(...midis: number[]): void;
   release(...midis: number[]): void;
+  /** Lets `ms` go by (the wake-up timer fires in it), then renders with the fake's state. */
+  hold(ms: number): void;
   /** The seconds `cueAt` was called with, in order. */
   cues(): number[];
 }
@@ -252,17 +261,52 @@ function setup(over: Partial<PlayAlongOptions> = {}, prepare?: (f: Fake) => void
     refresh,
     press: (...midis) => send(true, midis),
     release: (...midis) => send(false, midis),
+    hold: (ms) => {
+      elapse(ms);
+      refresh();
+    },
     cues: () => fake.cueAt.mock.calls.map(([sec]) => sec),
   };
 }
 
+/** The hook's result without its store: what the walk shows. */
+function seen(h: { active: boolean; atFirst: boolean; hint: unknown; soundWaits: boolean }) {
+  return { active: h.active, atFirst: h.atFirst, hint: h.hint, soundWaits: h.soundWaits };
+}
+
+/** Lets `ms` of the fake clock go by: the timers due in it fire. */
+function elapse(ms: number): void {
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+}
+
 /** One animation frame: what the align waits for when the red flies home. */
 const frame = () =>
-  act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  act(() => {
+    vi.advanceTimersToNextFrame();
+  });
+
+/** The hold of a step in real milliseconds at the written tempo, for a score built by `alongPlan`. */
+function holdMs(shown: Score, index: number, loop: PerfRange | null = null): number {
+  const plan = alongPlan(performanceFor(shown), []);
+  return holdSec(plan.steps, plan.times, index, loop) * 1000;
+}
+
+const initialView = useAppStore.getState().view;
 
 beforeEach(() => {
+  vi.useFakeTimers({
+    toFake: [
+      'setTimeout',
+      'clearTimeout',
+      'performance',
+      'requestAnimationFrame',
+      'cancelAnimationFrame',
+    ],
+  });
   localStorage.clear();
-  useAppStore.setState({ settings: { ...DEFAULT_SETTINGS } });
+  useAppStore.setState({ view: initialView, settings: { ...DEFAULT_SETTINGS } });
   access.open.mockReset();
   down.clear();
   link.events = null;
@@ -277,12 +321,13 @@ afterEach(() => {
   delete (navigator as unknown as Record<string, unknown>).permissions;
   window.history.replaceState(null, '', '/');
   resetPianoForTests();
+  vi.useRealTimers();
 });
 
 describe('connecting', () => {
   it('cues the first step once the piano connects, and says what to play', async () => {
     const s = setup();
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: false,
       atFirst: false,
       hint: null,
@@ -292,10 +337,10 @@ describe('connecting', () => {
     await connect();
     s.refresh();
     expect(s.cues()).toEqual([0]);
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: true,
       atFirst: true,
-      hint: 2,
+      hint: { kind: 'play', count: 2 },
       soundWaits: false,
     });
   });
@@ -338,14 +383,21 @@ describe('connecting', () => {
 });
 
 describe('the walk', () => {
-  it('moves on when every pitch of the step is held, and not before', async () => {
+  it('moves on when every pitch of the step is held for its time, and not before', async () => {
     await connect();
     const s = setup();
     s.press(60);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]); // a chord of two: one key is not the step
     s.press(48);
+    s.hold(499);
+    expect(s.cues()).toEqual([0]); // held, but not for its time yet
+    s.hold(1);
     expect(s.cues()).toEqual([0, 0.5]);
     s.press(62);
+    s.hold(499);
+    expect(s.cues()).toEqual([0, 0.5]);
+    s.hold(1);
     expect(s.cues()).toEqual([0, 0.5, 1]);
   });
 
@@ -353,6 +405,7 @@ describe('the walk', () => {
     await connect();
     const s = setup();
     s.press(48, 60);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5]);
     s.release(48, 60);
     s.refresh();
@@ -364,8 +417,10 @@ describe('the walk', () => {
     const s = setup();
     s.press(61);
     s.press(72);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
     s.press(48, 60);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5]);
   });
 
@@ -375,8 +430,10 @@ describe('the walk', () => {
     s.press(48);
     s.release(48);
     s.press(60);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
     s.press(48);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5]);
   });
 
@@ -386,6 +443,9 @@ describe('the walk', () => {
     s.press(62, 64); // the next two steps, pressed before the first
     expect(s.cues()).toEqual([0]);
     s.press(48, 60);
+    s.hold(499);
+    expect(s.cues()).toEqual([0]);
+    s.hold(1);
     expect(s.cues()).toEqual([0, 1.5]);
   });
 
@@ -393,14 +453,17 @@ describe('the walk', () => {
     await connect();
     const s = setup();
     s.press(48, 60, 62, 64);
+    s.hold(500);
     // The C held since the first chord is used: it is not the press the first of the two Cs asks for.
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5]);
+    expect(s.cues()).toEqual([0, 1.5]);
     s.release(60);
     s.press(60);
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5, 2]);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1.5, 2]);
     expect(s.fake.finish).not.toHaveBeenCalled();
     s.release(60);
     s.press(60);
+    s.hold(500);
     expect(s.fake.finish).toHaveBeenCalledTimes(1);
   });
 
@@ -408,27 +471,33 @@ describe('the walk', () => {
     await connect();
     const s = setup();
     s.press(48, 60, 62, 64);
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5]);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1.5]);
     s.press(60); // two inputs, or a keyboard that sent no note-off
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5, 2]);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1.5, 2]);
   });
 
   it('reads the hands played: the left hand never moves the red with it muted', async () => {
     await connect();
     const s = setup({ mutedHands: ['L'] });
     expect(s.cues()).toEqual([0]);
-    expect(s.hook.result.current.hint).toBe(1);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'play', count: 1 });
     s.press(48);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
     s.press(60);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5]);
   });
 
   it('shows the hint until the first step is played, and not again', async () => {
     await connect();
     const s = setup();
-    expect(s.hook.result.current.hint).toBe(2);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'play', count: 2 });
     s.press(48, 60);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'play', count: 2 }); // held, not played yet
+    s.hold(500);
     expect(s.hook.result.current.hint).toBeNull();
     s.release(62);
     s.refresh({ mutedHands: ['L'] });
@@ -442,8 +511,359 @@ describe('the walk', () => {
     s.refresh();
     expect(s.hook.result.current.atFirst).toBe(true);
     s.press(48, 60);
+    expect(s.hook.result.current.atFirst).toBe(true);
+    s.hold(500);
     expect(s.hook.result.current.atFirst).toBe(false);
     expect(s.hook.result.current.active).toBe(true);
+  });
+});
+
+// The time a step is held for (issue 185): the gap to the next step, never longer than its
+// shortest note, from the latest press among its keys. Every step of the test score is 500 ms.
+describe('the hold', () => {
+  it('does not move the red at the press: one timer passes it at its time', async () => {
+    await connect();
+    const s = setup();
+    const idle = vi.getTimerCount();
+    s.press(48, 60);
+    expect(s.cues()).toEqual([0]);
+    expect(vi.getTimerCount()).toBe(idle + 1); // StrictMode's second look made no second timer
+    s.refresh();
+    s.refresh();
+    expect(s.cues()).toEqual([0]);
+    expect(vi.getTimerCount()).toBe(idle + 1);
+    s.hold(499);
+    expect(s.cues()).toEqual([0]);
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(vi.getTimerCount()).toBe(idle); // nothing runs on the next step: no timer
+  });
+
+  it('passes a release after four fifths of the hold, at the release, with no timer left', async () => {
+    await connect();
+    const s = setup();
+    const idle = vi.getTimerCount();
+    s.press(48, 60);
+    s.hold(500);
+    s.press(62);
+    s.hold(400);
+    s.release(62);
+    expect(s.cues()).toEqual([0, 0.5, 1]);
+    expect(s.hook.result.current.hint).toBeNull();
+    elapse(DUR_SLOW_FALLBACK_MS + 1000); // the key's level drains, and nothing else was waiting
+    expect(s.cues()).toEqual([0, 0.5, 1]);
+    expect(vi.getTimerCount()).toBe(idle);
+  });
+
+  it('leaves the red on a release that comes too early, and asks for a longer hold', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(500);
+    s.press(62);
+    s.hold(399); // just under four fifths
+    s.release(62);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 1 });
+    s.hold(1000);
+    expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it('puts the hold hint in place of the play hint on the very first step', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(300);
+    s.release(48, 60);
+    expect(s.cues()).toEqual([0]);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 2 });
+  });
+
+  it('starts the time again from a re-press, and the hint goes at the pass', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(300);
+    s.release(48); // 60 stays down and fresh
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 2 });
+    s.hold(100);
+    s.press(48); // the run counts from this press: due 500 ms later
+    s.hold(499);
+    expect(s.cues()).toEqual([0]);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 2 });
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('takes the hint away on a move the walk did not make', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(300);
+    s.release(48, 60);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 2 });
+    s.fake.cue = 0.5; // a seek (bar click) to the second step
+    s.fake.start = 0.5;
+    s.refresh();
+    expect(s.hook.result.current.hint).toEqual({ kind: 'play', count: 1 });
+  });
+
+  it('counts an early press for the next step from its own press', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(200);
+    s.press(62); // due 500 ms after this press, at 700
+    s.hold(299);
+    expect(s.cues()).toEqual([0]);
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5]); // the first step passed at 500: the next is not due yet
+    s.hold(199);
+    expect(s.cues()).toEqual([0, 0.5]);
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5, 1]);
+  });
+
+  it('lets the time run under a flight, and passes at once when the red lands', async () => {
+    await connect();
+    const s = setup();
+    s.fake.flight = true;
+    s.refresh();
+    s.press(48, 60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0]); // no pass under a flight
+    s.hold(300);
+    s.fake.flight = false;
+    s.refresh();
+    expect(s.cues()).toEqual([0, 0.5]); // at the landing, with no wait for a timer
+  });
+
+  it('asks nothing of a release under a flight', async () => {
+    await connect();
+    const s = setup();
+    s.fake.flight = true;
+    s.refresh();
+    s.press(48, 60);
+    s.hold(100);
+    s.release(48);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'play', count: 2 });
+  });
+
+  it('passes every step that is due after a long wait', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60, 62, 64);
+    s.hold(1600);
+    expect(s.cues()).toEqual([0, 1.5]); // the red ends three steps on, in one cue
+  });
+
+  it('is as long again at half the Practice tempo', async () => {
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'half' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: { 'piece:half': 0.5 } },
+    });
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(999);
+    expect(s.cues()).toEqual([0]);
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it("waits the loop's last step for the time before Play would loop back, then wraps", async () => {
+    await connect();
+    const s = setup({}, (f) => {
+      f.stretch = { from: 1, to: 1.75 }; // the steps at 1 and 1.5; the last has a quarter second
+      f.cue = 1;
+      f.atStart = false;
+      f.start = 1;
+    });
+    expect(s.cues()).toEqual([]);
+    s.press(64);
+    s.hold(500);
+    expect(s.cues()).toEqual([1.5]);
+    s.press(60);
+    s.hold(249);
+    expect(s.cues()).toEqual([1.5]);
+    s.hold(1);
+    expect(s.cues()).toEqual([1.5, 1]);
+    expect(s.fake.finish).not.toHaveBeenCalled();
+  });
+
+  it('never keeps a key that was let go where the walk had no step', async () => {
+    await connect();
+    const s = setup({}, (f) => {
+      f.stretch = { from: 2.5, to: 3.5 }; // the hands played have no step here
+      f.start = 2.5;
+    });
+    expect(s.cues()).toEqual([]);
+    s.press(60);
+    s.release(60);
+    expect(s.hook.result.current.levels.get().size).toBe(0);
+    s.fake.stretch = null;
+    s.fake.start = 0;
+    s.refresh();
+    expect(s.cues()).toEqual([0]);
+    s.press(48);
+    s.hold(500);
+    expect(s.cues()).toEqual([0]); // the C let go is not still held
+    s.press(60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it('never keeps a key that was let go while the playback plays now', async () => {
+    await connect();
+    const s = setup();
+    s.press(60);
+    // The playback plays now, before any render shows it: the note is read synchronously.
+    s.fake.playing = true;
+    down.delete(60);
+    act(() => link.events!.note({ on: false, midi: 60 }, heldNow()));
+    s.fake.playing = false;
+    s.press(48);
+    s.hold(500);
+    expect(s.cues()).toEqual([0]); // 60 is not still held: the chord is not complete
+    s.press(60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5]);
+  });
+});
+
+// The keys fill over their note's length (issue 185): the store PianoKeyboard reads.
+describe('the levels of the held keys', () => {
+  it("gives each key of the step its note's length, from its own press", async () => {
+    await connect();
+    const s = setup();
+    const t0 = performance.now();
+    s.press(48, 60);
+    const levels = s.hook.result.current.levels.get();
+    expect(levels.get(48)).toMatchObject({ atMs: t0, lengthMs: 2000, beats: 4, upMs: null });
+    expect(levels.get(60)).toMatchObject({ atMs: t0, lengthMs: 500, beats: 1, upMs: null });
+    expect(levels.size).toBe(2);
+  });
+
+  it('scales the length by the tempo', async () => {
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'fast' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: { 'piece:fast': 1.5 } },
+    });
+    await connect();
+    const s = setup();
+    s.press(60);
+    expect(s.hook.result.current.levels.get().get(60)?.lengthMs).toBeCloseTo(500 / 1.5);
+  });
+
+  it('gives none to a wrong note, nor to a pitch of the hand left out', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(61, 72, 48);
+    expect(s.hook.result.current.levels.get().size).toBe(0);
+    s.press(60);
+    expect([...s.hook.result.current.levels.get().keys()]).toEqual([60]);
+  });
+
+  it("gives the next step's pitch its own length when it is pressed early", async () => {
+    await connect();
+    const s = setup();
+    s.hold(120);
+    const t = performance.now();
+    s.press(62, 64);
+    const levels = s.hook.result.current.levels.get();
+    expect(levels.get(62)).toMatchObject({ atMs: t, lengthMs: 500, beats: 1 });
+    expect(levels.has(64)).toBe(false); // two steps ahead
+  });
+
+  it('gives the next step its levels when the red arrives, from the presses', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(100);
+    const t = performance.now();
+    s.press(64); // two steps ahead: no level yet
+    expect(s.hook.result.current.levels.get().has(64)).toBe(false);
+    s.press(62);
+    s.hold(400); // the red moves to 62's step
+    expect(s.hook.result.current.levels.get().get(64)).toMatchObject({ atMs: t, lengthMs: 500 });
+  });
+
+  it('keeps the bass filling after the red moves on', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(s.hook.result.current.levels.get().has(48)).toBe(true);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(true);
+  });
+
+  it('drains a key let go before it is full, and drops it after the drain', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(1000);
+    s.release(48); // half of its four beats
+    const draining = s.hook.result.current.levels.get().get(48);
+    expect(draining?.upMs).not.toBeNull();
+    expect(draining?.fromLevel).toBeCloseTo(0.5);
+    elapse(DUR_SLOW_FALLBACK_MS - 1);
+    expect(s.hook.result.current.levels.get().has(48)).toBe(true);
+    elapse(1);
+    expect(s.hook.result.current.levels.get().has(48)).toBe(false);
+  });
+
+  it('drops it at once under reduced motion', async () => {
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true } as MediaQueryList);
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(1000);
+    s.release(48);
+    expect(s.hook.result.current.levels.get().has(48)).toBe(false);
+  });
+
+  it('drops a full key when it is let go', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(500);
+    s.release(60);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect(s.hook.result.current.levels.get().has(48)).toBe(true);
+  });
+
+  it('draws a level again from a press during the drain', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(200);
+    s.release(48);
+    s.hold(50);
+    const t = performance.now();
+    s.press(48);
+    expect(s.hook.result.current.levels.get().get(48)).toMatchObject({ atMs: t, upMs: null });
+  });
+
+  it('clears every level on a seek, and when Play starts', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    expect(s.hook.result.current.levels.get().size).toBe(2);
+    s.fake.cue = 0.5; // a seek (bar click)
+    s.fake.start = 0.5;
+    s.refresh();
+    expect(s.hook.result.current.levels.get().size).toBe(0);
+    s.fake.cue = 0;
+    s.fake.start = 0;
+    s.refresh();
+    s.release(48, 60);
+    s.press(48, 60);
+    expect(s.hook.result.current.levels.get().size).toBe(2);
+    s.fake.playing = true;
+    s.refresh();
+    expect(s.hook.result.current.levels.get().size).toBe(0);
   });
 });
 
@@ -451,10 +871,13 @@ describe('the end', () => {
   /** Plays every step: the last C needs its own release and press. */
   function playThrough(s: Setup) {
     s.press(48, 60, 62, 64);
+    s.hold(500);
     s.release(60);
     s.press(60);
+    s.hold(500);
     s.release(60);
     s.press(60);
+    s.hold(500);
   }
 
   it('finishes with the transport end, and cues the first step again once the flight is over', async () => {
@@ -466,11 +889,11 @@ describe('the end', () => {
     expect(s.hook.result.current.active).toBe(true);
     expect(s.hook.result.current.atFirst).toBe(false);
     // The flight home is on screen: there is no cue under it.
-    await frame();
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5, 2]);
+    frame();
+    expect(s.cues()).toEqual([0, 1.5, 2]);
     s.fake.flight = false;
     s.refresh();
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5, 2, 0]);
+    expect(s.cues()).toEqual([0, 1.5, 2, 0]);
     s.refresh();
     expect(s.hook.result.current.atFirst).toBe(true);
   });
@@ -480,8 +903,8 @@ describe('the end', () => {
     const s = setup();
     playThrough(s);
     expect(s.fake.finish).toHaveBeenCalledTimes(1);
-    await frame();
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5, 2, 0]);
+    frame();
+    expect(s.cues()).toEqual([0, 1.5, 2, 0]);
     s.refresh();
     expect(s.hook.result.current.atFirst).toBe(true);
   });
@@ -490,32 +913,34 @@ describe('the end', () => {
     await connect();
     const s = setup();
     s.press(48, 60, 62);
-    expect(s.cues()).toEqual([0, 0.5, 1]);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1]);
     // Rewind: the position goes home and `atStart` turns true; the flight home is planned in a
     // layout effect of this commit and shows in the next render.
     s.fake.cue = null;
     s.fake.atStart = true;
     s.fake.start = 0;
     s.refresh();
-    expect(s.cues()).toEqual([0, 0.5, 1]);
-    await frame();
-    expect(s.cues()).toEqual([0, 0.5, 1, 0]);
+    expect(s.cues()).toEqual([0, 1]);
+    frame();
+    expect(s.cues()).toEqual([0, 1, 0]);
   });
 
   it('does not wait a frame for the flight when it is already shown', async () => {
     await connect();
     const s = setup();
     s.press(48, 60, 62);
+    s.hold(500);
     s.fake.cue = null;
     s.fake.atStart = true;
     s.fake.start = 0;
     s.fake.flight = true;
     s.refresh();
-    await frame();
-    expect(s.cues()).toEqual([0, 0.5, 1]);
+    frame();
+    expect(s.cues()).toEqual([0, 1]);
     s.fake.flight = false;
     s.refresh();
-    expect(s.cues()).toEqual([0, 0.5, 1, 0]);
+    expect(s.cues()).toEqual([0, 1, 0]);
   });
 
   it('counts the first step played after the finish from the fresh presses only', async () => {
@@ -523,10 +948,12 @@ describe('the end', () => {
     const s = setup();
     s.fake.flightOnFinish = true;
     playThrough(s);
-    s.press(48, 60); // pressed during the flight: counts once it lands
+    s.press(48, 60); // pressed during the flight: counts once it lands, from the press
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1.5, 2]);
     s.fake.flight = false;
     s.refresh();
-    expect(s.cues()).toEqual([0, 0.5, 1, 1.5, 2, 0.5]);
+    expect(s.cues()).toEqual([0, 1.5, 2, 0.5]);
   });
 });
 
@@ -536,13 +963,14 @@ describe('when the walk does not move', () => {
     const s = setup();
     s.fake.playing = true;
     s.refresh();
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: false,
       atFirst: false,
       hint: null,
       soundWaits: false,
     });
     s.press(48, 60);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
     expect(s.fake.finish).not.toHaveBeenCalled();
   });
@@ -554,6 +982,7 @@ describe('when the walk does not move', () => {
     s.refresh();
     expect(s.hook.result.current.active).toBe(false);
     s.press(48, 60);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
   });
 
@@ -562,6 +991,7 @@ describe('when the walk does not move', () => {
     const s = setup();
     s.fake.playing = true; // read synchronously by the note, before any render shows it
     s.press(48, 60);
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
   });
 
@@ -571,6 +1001,7 @@ describe('when the walk does not move', () => {
     s.fake.flight = true;
     s.refresh();
     s.press(48, 60);
+    s.hold(500);
     expect(s.cues()).toEqual([0]);
     s.fake.flight = false;
     s.refresh();
@@ -581,6 +1012,8 @@ describe('when the walk does not move', () => {
     await connect();
     const s = setup();
     s.press(48, 60, 62); // waiting on step 3 now
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1]);
     s.fake.playing = true;
     s.refresh();
     s.press(64);
@@ -590,21 +1023,25 @@ describe('when the walk does not move', () => {
     s.fake.start = 1.2;
     s.fake.group = 2;
     s.refresh();
-    expect(s.cues()).toEqual([0, 0.5, 1, 1]); // the marked step becomes the cue, nothing moves on
+    expect(s.cues()).toEqual([0, 1, 1]); // the marked step becomes the cue, nothing moves on
+    s.hold(1000);
+    expect(s.cues()).toEqual([0, 1, 1]);
     s.release(64);
     s.press(64);
-    expect(s.cues()).toEqual([0, 0.5, 1, 1, 1.5]);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1, 1, 1.5]);
   });
 
   it('keeps the cue when the piano goes, and picks the walk up where it was when it returns', async () => {
     await connect();
     const s = setup();
     s.press(48, 60);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5]);
     s.release(48, 60);
     act(() => link.events!.inputs([]));
     s.refresh();
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: false,
       atFirst: false,
       hint: null,
@@ -615,6 +1052,7 @@ describe('when the walk does not move', () => {
     s.refresh();
     expect(s.cues()).toEqual([0, 0.5]);
     s.press(62);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5, 1]);
   });
 
@@ -622,11 +1060,26 @@ describe('when the walk does not move', () => {
     await connect();
     const s = setup();
     s.press(48, 60);
+    s.hold(500);
     act(() => turnOffPiano());
     s.refresh();
     expect(s.hook.result.current.active).toBe(false);
     expect(s.fake.cue).toBe(0.5);
     expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it('stops waiting when the piano goes: no pass comes from a key held before', async () => {
+    await connect();
+    const s = setup();
+    const idle = vi.getTimerCount();
+    s.press(48, 60);
+    expect(vi.getTimerCount()).toBe(idle + 1);
+    act(() => turnOffPiano());
+    s.refresh();
+    expect(vi.getTimerCount()).toBe(idle);
+    s.hold(1000);
+    expect(s.cues()).toEqual([0]);
+    expect(s.hook.result.current.levels.get().size).toBe(0);
   });
 });
 
@@ -641,6 +1094,7 @@ describe('moves the walk did not make', () => {
     expect(s.cues()).toEqual([0.5]);
     expect(s.fake.finish).not.toHaveBeenCalled();
     s.press(62); // the marked step is the one the reader plays
+    s.hold(500);
     expect(s.cues()).toEqual([0.5, 1]);
   });
 
@@ -661,9 +1115,11 @@ describe('moves the walk did not make', () => {
     s.fake.cue = 0.5; // a seek (bar click) to the second step
     s.fake.start = 0.5;
     s.refresh();
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
     s.release(62);
     s.press(62);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 1]);
   });
 
@@ -672,9 +1128,11 @@ describe('moves the walk did not make', () => {
     const s = setup();
     s.press(60); // half of the first chord
     s.refresh({ mutedHands: ['L'] }); // the first step is now the single 60
+    s.hold(1000);
     expect(s.cues()).toEqual([0]);
     s.release(60);
     s.press(60);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5]);
   });
 
@@ -686,9 +1144,11 @@ describe('moves the walk did not make', () => {
     s.fake.start = 0.5;
     s.fake.pos = 0;
     s.refresh();
+    s.hold(1000);
     expect(s.cues()).toEqual([0, 0.5]); // 62 is the loop's first step, but its press is used up
     s.release(62);
     s.press(62);
+    s.hold(500);
     expect(s.cues()).toEqual([0, 0.5, 1]);
   });
 });
@@ -697,10 +1157,10 @@ describe('a hop to another bar', () => {
   it('does not call the red the first step, nor name its pitches, while the hop is on screen', async () => {
     await connect();
     const s = setup();
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: true,
       atFirst: true,
-      hint: 2,
+      hint: { kind: 'play', count: 2 },
       soundWaits: false,
     });
     // A click on a later bar: the playback is cued there, and the red hops (the walk waits).
@@ -708,7 +1168,7 @@ describe('a hop to another bar', () => {
     s.fake.start = 1;
     s.fake.flight = true;
     s.refresh();
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: true,
       atFirst: false,
       hint: null,
@@ -716,10 +1176,10 @@ describe('a hop to another bar', () => {
     });
     s.fake.flight = false;
     s.refresh();
-    expect(s.hook.result.current).toEqual({
+    expect(seen(s.hook.result.current)).toEqual({
       active: true,
       atFirst: false,
-      hint: 1,
+      hint: { kind: 'play', count: 1 },
       soundWaits: false,
     });
     expect(s.cues()).toEqual([0]); // the walk found the playback cued on that step already
@@ -737,11 +1197,14 @@ describe('a loop', () => {
     });
     expect(s.cues()).toEqual([]);
     s.press(62);
+    s.hold(500);
     expect(s.cues()).toEqual([1]);
     s.press(64);
+    s.hold(500);
     expect(s.cues()).toEqual([1, 0.5]);
     s.release(62, 64);
     s.press(62);
+    s.hold(500);
     expect(s.cues()).toEqual([1, 0.5, 1]);
     expect(s.fake.finish).not.toHaveBeenCalled();
   });
@@ -767,45 +1230,63 @@ describe('a loop', () => {
 });
 
 describe('the Playwright check', () => {
+  type Check = { target(): number[]; index(): number; hold(): number };
+  const check = () => (window as unknown as { __digitus2Along?: Check }).__digitus2Along;
+
   it('names the step the red waits on, only in a silent run', async () => {
     await connect();
-    const w = window as unknown as { __digitus2Along?: { target(): number[]; index(): number } };
     const plain = setup();
-    expect(w.__digitus2Along).toBeUndefined();
+    expect(check()).toBeUndefined();
     plain.hook.unmount();
     window.history.replaceState(null, '', '/?audio=silent');
     const s = setup();
-    expect(w.__digitus2Along?.target()).toEqual([48, 60]);
-    expect(w.__digitus2Along?.index()).toBe(0);
+    expect(check()?.target()).toEqual([48, 60]);
+    expect(check()?.index()).toBe(0);
+    expect(check()?.hold()).toBe(500);
     s.press(48, 60);
-    expect(w.__digitus2Along?.target()).toEqual([62]);
-    expect(w.__digitus2Along?.index()).toBe(1);
+    s.hold(500);
+    expect(check()?.target()).toEqual([62]);
+    expect(check()?.index()).toBe(1);
+    expect(check()?.hold()).toBe(500);
     s.fake.playing = true;
     s.refresh();
-    expect(w.__digitus2Along?.target()).toEqual([]);
+    expect(check()?.target()).toEqual([]);
+    expect(check()?.hold()).toBe(0);
     s.hook.unmount();
-    expect(w.__digitus2Along).toBeUndefined();
+    expect(check()).toBeUndefined();
+  });
+
+  it('reports the hold at the Practice tempo', async () => {
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'fast' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: { 'piece:fast': 1.5 } },
+    });
+    await connect();
+    window.history.replaceState(null, '', '/?audio=silent');
+    setup();
+    expect(check()?.hold()).toBeCloseTo(500 / 1.5);
   });
 
   it('names a step only while the playback is cued at it', async () => {
     await connect();
     window.history.replaceState(null, '', '/?audio=silent');
     const s = setup();
-    const w = window as unknown as { __digitus2Along?: { target(): number[]; index(): number } };
     s.press(48, 60);
-    expect(w.__digitus2Along?.target()).toEqual([62]);
+    s.hold(500);
+    expect(check()?.target()).toEqual([62]);
     // A seek the walk has not looked at yet: the index still names the step of before.
     s.fake.start = 2;
     s.fake.cue = 2;
-    expect(w.__digitus2Along?.index()).toBe(1);
-    expect(w.__digitus2Along?.target()).toEqual([]);
+    expect(check()?.index()).toBe(1);
+    expect(check()?.target()).toEqual([]);
+    expect(check()?.hold()).toBe(0);
     // The align looks at the new position and the step it calls for is named.
     s.refresh();
-    expect(w.__digitus2Along?.index()).toBe(4);
-    expect(w.__digitus2Along?.target()).toEqual([60]);
+    expect(check()?.index()).toBe(4);
+    expect(check()?.target()).toEqual([60]);
     // A cue the playback lost (the finish, a halt) names nothing.
     s.fake.cue = null;
-    expect(w.__digitus2Along?.target()).toEqual([]);
+    expect(check()?.target()).toEqual([]);
   });
 });
 
@@ -829,6 +1310,50 @@ describe('the keys on the keyboard', () => {
     act(() => link.events!.note({ on: false, midi: 60 }, [61, 100]));
     expect(container.querySelectorAll('rect.key-held')).toHaveLength(1);
     expect(renders).toBe(before);
+  });
+
+  // The levels (issue 185) are drawn by the keyboard from the hook's store: a press, a level
+  // starting and a level rising render the score view's part (the Parent) not at all; only the
+  // red moving does.
+  it('fills a held key without re-rendering the view: only the red moving does', async () => {
+    await connect();
+    const fake = makeFake();
+    let renders = 0;
+    function Parent() {
+      renders++;
+      const along = usePlayAlong({
+        score,
+        ready: true,
+        playable: true,
+        mutedHands: [],
+        playback: fake.view(),
+        currentGroup: fake.group ?? (fake.cue === null ? -1 : 0),
+        flightShown: fake.flight,
+      });
+      return <PianoKeyboard lowMidi={48} highMidi={72} pressed={[]} levels={along.levels} />;
+    }
+    const { container } = render(<Parent />);
+    const press = (midi: number) => {
+      down.add(midi);
+      act(() => link.events!.note({ on: true, midi }, heldNow()));
+    };
+    expect(fake.cueAt).toHaveBeenCalledWith(0);
+    const before = renders;
+    press(50); // a wrong note: its bar appears, nothing is asked of it
+    expect(container.querySelectorAll('rect.key-held')).toHaveLength(1);
+    expect(container.querySelectorAll('rect.key-level')).toHaveLength(0);
+    expect(renders).toBe(before);
+    press(48); // a key of the step: its level appears
+    expect(container.querySelectorAll('rect.key-level')).toHaveLength(1);
+    expect(renders).toBe(before);
+    for (let i = 0; i < 10; i++) frame(); // rising
+    expect(container.querySelectorAll('rect.key-level')).toHaveLength(1);
+    expect(renders).toBe(before);
+    press(60);
+    elapse(500); // the step is held for its time: the red moves
+    expect(fake.cueAt).toHaveBeenLastCalledWith(0.5);
+    expect(renders).toBeGreaterThan(before);
+    expect(container.querySelector('.is-red')).toBeNull();
   });
 });
 
@@ -876,6 +1401,11 @@ describe('with the real playback', () => {
       act(() => link.events!.note({ on, midi }, heldNow()));
     }
   };
+  /** Lets the lazy transport chunk and the (silent) samples load: real I/O, not fake time. */
+  const settled = () =>
+    act(async () => {
+      await vi.dynamicImportSettled();
+    });
 
   it('cues the first step and leaves it there', async () => {
     await connect();
@@ -883,10 +1413,10 @@ describe('with the real playback', () => {
     expect(result.current.pb.cue).toBe(0);
     expect(result.current.pb.atStart).toBe(false);
     expect(result.current.pb.startPerformanceSec()).toBe(0);
-    expect(result.current.along).toEqual({
+    expect(seen(result.current.along)).toEqual({
       active: true,
       atFirst: true,
-      hint: 2,
+      hint: { kind: 'play', count: 2 },
       soundWaits: false,
     });
     rerender();
@@ -901,6 +1431,7 @@ describe('with the real playback', () => {
     key(true, 62, 64); // the next two steps, before the first
     expect(result.current.pb.cue).toBe(0);
     key(true, 48, 60);
+    elapse(500);
     expect(result.current.pb.startPerformanceSec()).toBe(1.5);
     expect(result.current.pb.cue).toBe(1.5);
     expect(result.current.pb.positionSec()).toBe(1.5);
@@ -911,9 +1442,11 @@ describe('with the real playback', () => {
     await connect();
     const { result } = real();
     key(true, 48, 60);
+    elapse(500);
     expect(result.current.pb.startPerformanceSec()).toBe(0.5);
     act(() => result.current.pb.play());
-    await waitFor(() => expect(result.current.pb.playing).toBe(true));
+    for (let i = 0; i < 50 && !result.current.pb.playing; i++) await settled();
+    expect(result.current.pb.playing).toBe(true);
     expect(result.current.along.active).toBe(false);
     key(true, 62); // played while the music plays: not a press for the step Pause leaves
     act(() => result.current.pb.pause());
@@ -921,10 +1454,12 @@ describe('with the real playback', () => {
     expect(result.current.pb.startPerformanceSec()).toBe(0.5);
     key(false, 62);
     key(true, 62);
+    elapse(500);
     expect(result.current.pb.startPerformanceSec()).toBe(1);
     expect(result.current.pb.cue).toBe(1);
     expect(result.current.pb.positionSec()).toBe(1);
     key(true, 64);
+    elapse(500);
     expect(result.current.pb.startPerformanceSec()).toBe(1.5);
   });
 
@@ -936,13 +1471,16 @@ describe('with the real playback', () => {
     expect(result.current.pb.cue).toBe(2);
     expect(result.current.pb.positionSec()).toBe(2);
     key(true, 60); // the bar's only step: a one-step loop, round again
+    elapse(500);
     expect(result.current.pb.startPerformanceSec()).toBe(2);
     expect(result.current.pb.ended).toBe(0);
     key(false, 60);
     key(true, 60);
+    elapse(500);
     expect(result.current.pb.ended).toBe(0);
     expect(result.current.pb.cue).toBe(2);
     act(() => result.current.pb.setLoop(null));
+    elapse(1000);
     expect(result.current.pb.startPerformanceSec()).toBe(2);
     expect(result.current.along.active).toBe(true);
   });
@@ -951,14 +1489,17 @@ describe('with the real playback', () => {
     await connect();
     const { result } = real();
     key(true, 48, 60, 62, 64);
+    elapse(500);
     key(false, 60);
     key(true, 60);
+    elapse(500);
     key(false, 60);
     key(true, 60);
+    elapse(500);
     expect(result.current.pb.ended).toBe(1);
     expect(result.current.pb.atStart).toBe(true);
     // No flight in this view: the red comes back on the first step a frame later.
-    await frame();
+    frame();
     expect(result.current.pb.cue).toBe(0);
     expect(result.current.along.atFirst).toBe(true);
   });
@@ -971,8 +1512,9 @@ describe('with the real playback', () => {
     expect(steps.map((step) => step.perfSec)).toEqual([0, 2, 4, 6]);
     await connect();
     const { result } = real(repeat);
-    for (const step of steps.slice(0, 2)) {
+    for (const [i, step] of steps.slice(0, 2).entries()) {
       key(true, ...step.pitches);
+      elapse(Math.ceil(holdMs(repeat, i)));
       key(false, ...step.pitches);
     }
     // The red waits on the second hearing of bar 1.
@@ -988,6 +1530,7 @@ describe('with the real playback', () => {
     // The walk stands on that step, and the last step of the piece finishes it.
     expect(result.current.pb.ended).toBe(0);
     key(true, ...steps[3]!.pitches);
+    elapse(Math.ceil(holdMs(repeat, 3)));
     expect(result.current.pb.ended).toBe(1);
   });
 
@@ -1006,22 +1549,32 @@ describe('with the real playback', () => {
           link.events!.note({ on: true, midi }, heldNow());
         }
       });
+    /** The last step's time goes by, and a key is pressed in the same task, before any render. */
+    const finishAnd = (extra: number) =>
+      act(() => {
+        vi.advanceTimersByTime(500);
+        down.add(extra);
+        link.events!.note({ on: true, midi: extra }, heldNow());
+      });
 
     it('does not cue the first step under the finish: the red flies home first', async () => {
       await connect();
       const { result } = real(pickup);
       expect(result.current.pb.cue).toBe(0.5);
       key(true, 60);
+      elapse(500);
       key(true, 62);
+      elapse(500);
       expect(result.current.pb.cue).toBe(2);
       // The last step, and an extra key in the same burst (two MIDI tasks before React renders).
-      burst(64, 67);
+      burst(64);
+      finishAnd(67);
       expect(result.current.pb.ended).toBe(1);
       expect(result.current.pb.atStart).toBe(true);
       expect(result.current.pb.cue).toBeNull();
       expect(result.current.along.active).toBe(true);
       // A frame later, the red is on the first step, and the extra key was no press for it.
-      await frame();
+      frame();
       expect(result.current.pb.cue).toBe(0.5);
       expect(result.current.along.atFirst).toBe(true);
     });
@@ -1030,11 +1583,14 @@ describe('with the real playback', () => {
       await connect();
       const { result } = real(pickup);
       key(true, 60);
+      elapse(500);
       key(true, 62);
-      burst(64, 48);
+      elapse(500);
+      burst(64);
+      finishAnd(48);
       expect(result.current.pb.atStart).toBe(true);
       key(false, 64);
-      await frame();
+      frame();
       expect(result.current.pb.cue).toBe(0.5);
       expect(result.current.pb.ended).toBe(1);
     });
@@ -1046,11 +1602,157 @@ describe('with the real playback', () => {
       await connect();
       const { result } = real(one);
       key(true, 60);
+      elapse(500);
       expect(result.current.pb.ended).toBe(1);
-      await frame();
+      frame();
       key(false, 60);
       key(true, 60);
+      elapse(500);
       expect(result.current.pb.ended).toBe(2);
     });
+  });
+});
+
+// The piano going away, a key pressed under a flight, and a tempo change (issue 185).
+describe('lost keys, late levels and a faster tempo', () => {
+  it('an unplugged piano passes no step: the note-offs of the lost keys are not releases', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(450); // nine tenths of the 500 ms hold: not due yet
+    for (const m of [48, 60]) down.delete(m);
+    act(() => link.events!.inputs([]));
+    s.refresh();
+    expect(s.cues()).toEqual([0]);
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('Turn off passes no step either', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(450);
+    act(() => turnOffPiano());
+    s.refresh();
+    expect(s.cues()).toEqual([0]);
+  });
+
+  it('an unplug on the last step does not finish the piece', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60, 62, 64);
+    s.hold(500);
+    s.release(60);
+    s.press(60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1.5, 2]);
+    s.release(60);
+    s.press(60);
+    s.hold(450);
+    expect(s.fake.finish).not.toHaveBeenCalled();
+    for (const m of [...down]) down.delete(m);
+    act(() => link.events!.inputs([]));
+    s.refresh();
+    expect(s.fake.finish).not.toHaveBeenCalled();
+  });
+
+  it('a key the reader lets go after four fifths still passes the step', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(450);
+    s.release(60);
+    expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it('a key pressed under a flight longer than its step gets its level when the step passes on landing', async () => {
+    await connect();
+    const s = setup();
+    s.fake.flight = true;
+    s.refresh();
+    const t0 = performance.now();
+    s.press(48, 60);
+    s.hold(600);
+    s.fake.flight = false;
+    s.refresh();
+    expect(s.cues()).toEqual([0, 0.5]);
+    const levels = s.hook.result.current.levels.get();
+    expect(levels.get(48)).toMatchObject({ atMs: t0, lengthMs: 2000, beats: 4, upMs: null });
+    expect(levels.get(60)).toMatchObject({ atMs: t0, lengthMs: 500, beats: 1, upMs: null });
+  });
+
+  it('at 200 % a hop longer than the hold: the keys pressed under it fill from their press', async () => {
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'double' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: { 'piece:double': 2 } },
+    });
+    await connect();
+    const s = setup();
+    s.fake.flight = true;
+    s.refresh();
+    const t0 = performance.now();
+    s.press(48, 60);
+    s.hold(300); // the hold is 250 ms
+    s.fake.flight = false;
+    s.refresh();
+    expect(s.cues()).toEqual([0, 0.5]);
+    const levels = s.hook.result.current.levels.get();
+    expect(levels.get(48)).toMatchObject({ atMs: t0, lengthMs: 1000, beats: 4 });
+    expect(levels.get(60)).toMatchObject({ atMs: t0, lengthMs: 250, beats: 1 });
+  });
+
+  it('a key pressed early that a chain passes over gets its level', async () => {
+    await connect();
+    const s = setup();
+    const t0 = performance.now();
+    s.press(62, 64);
+    s.press(48, 60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 1.5]);
+    const levels = s.hook.result.current.levels.get();
+    expect(levels.get(62)).toMatchObject({ atMs: t0, lengthMs: 500, beats: 1 });
+    expect(levels.get(64)).toMatchObject({ atMs: t0, lengthMs: 500, beats: 1 });
+  });
+
+  it('a faster Practice tempo set in the middle of a hold moves the wake-up', async () => {
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'fast' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: {} },
+    });
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(100);
+    act(() =>
+      useAppStore.setState({
+        settings: { ...useAppStore.getState().settings, tempoByPiece: { 'piece:fast': 2 } },
+      }),
+    );
+    s.refresh();
+    s.hold(149);
+    expect(s.cues()).toEqual([0]); // 249 ms held, the hold is now 250
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it("spends no key for a tempo change: a slower tempo waits on, with the keys still the step's", async () => {
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'fast' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: {} },
+    });
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(100);
+    act(() =>
+      useAppStore.setState({
+        settings: { ...useAppStore.getState().settings, tempoByPiece: { 'piece:fast': 0.5 } },
+      }),
+    );
+    s.refresh();
+    s.hold(500);
+    expect(s.cues()).toEqual([0]); // slower: the hold is 1000 ms from the press
+    s.hold(400);
+    expect(s.cues()).toEqual([0, 0.5]);
   });
 });

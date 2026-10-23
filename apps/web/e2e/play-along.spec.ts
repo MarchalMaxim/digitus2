@@ -23,11 +23,14 @@ import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
 // [48 67] [53 65] [65] [48 64] [64] [55 62] [62] [48 60] (bars 1 to 4); every score flow runs
 // with `?audio=silent`, and `strikes()` stays empty throughout: the app makes no sound for the
 // reader's notes. With one hand left out, digitus plays that hand (issue 184) between the
-// reader's steps, counted from each press; `accompanied()` and `accompCancelled()` read what it
-// handed to the instrument and what it dropped (helpers/midi.ts).
+// reader's steps, counted from the press that starts each step running; `accompanied()` and
+// `accompCancelled()` read what it handed to the instrument and what it dropped (helpers/midi.ts).
 
 const TWINKLE = 'twinkle-twinkle-little-star';
 const TWINKLE_NOTES = 64;
+const BWV994 = 'bach-applicatio-c-major-bwv-994';
+/** The Practice tempo at its top, 150 %: every hold is two thirds as long (issue 185). */
+const FAST = { [TWINKLE]: 1.5 };
 const PIANO = 'GO:PIANO MIDI 1';
 
 const START = 'Play along on your piano';
@@ -43,6 +46,7 @@ const DENIED =
 const HINT_MANY = 'Play the red notes on your piano.';
 const SEARCHING = 'Looking for your piano. Make sure it is turned on.';
 const LOADING_THE_PIANO = 'Loading the piano…';
+const HOLD_MANY = 'Hold the red notes a little longer.';
 
 /** The home line's sentence (the library page has another status, the notice) and its button. */
 const sentence = (page: Page): Locator => page.locator('.piano-line [role="status"]');
@@ -389,12 +393,14 @@ test.describe('the score with a piano', () => {
     expect(await cursorSec(page)).toBe(0);
     expect(await midi.index()).toBe(0);
 
-    // One of the two notes does not move it (the walk hears a note as it arrives).
+    // One of the two notes does not move it, however long it is held; both held for the step's
+    // time do (the walk hears a note as it arrives, and passes the step when its time is up).
     await midi.noteOn(60);
     expect(await midi.index()).toBe(0);
     expect(await cursorSec(page)).toBe(0);
+    await staysAt(page, midi, 0);
     await midi.noteOn(48);
-    expect(await midi.index()).toBe(1);
+    await expect.poll(() => midi.index()).toBe(1);
     await expect.poll(() => midi.target()).toEqual([60]);
     await expect(page.getByRole('status')).toHaveText('');
     await expect(rewind(page)).not.toHaveAttribute('aria-disabled', 'true');
@@ -402,12 +408,12 @@ test.describe('the score with a piano', () => {
     await expectOneRed(page, 'the second group');
 
     // The repeated C: the key still down was used by the step before. It needs a release and a
-    // fresh press.
-    expect(await midi.index()).toBe(1);
+    // fresh press, and then its time.
+    await staysAt(page, midi, 1);
     await midi.noteOff(60);
-    expect(await midi.index()).toBe(1);
+    await staysAt(page, midi, 1);
     await midi.noteOn(60);
-    expect(await midi.index()).toBe(2);
+    await expect.poll(() => midi.index()).toBe(2);
     await expect.poll(() => midi.target()).toEqual([67]);
     await midi.noteOff(60);
     await midi.noteOff(48);
@@ -434,7 +440,8 @@ test.describe('the score with a piano', () => {
     await midi.noteOn(60);
     await expect(heldBar(page, 60)).toHaveCount(1);
     await expect(page.locator('.keyboard .key[data-midi="60"]')).toHaveClass(/is-pressed/);
-    await expect(page.locator('.keyboard .key[data-midi="60"] text')).toHaveText(/^[1-5]$/);
+    // The key's first text is its finger: a key that fills draws the number again after it.
+    await expect(page.locator('.keyboard .key[data-midi="60"] text').first()).toHaveText(/^[1-5]$/);
     expect(await midi.index()).toBe(0);
     await midi.noteOff(61);
     await midi.noteOff(60);
@@ -464,14 +471,14 @@ test.describe('the score with a piano', () => {
     await midi.waitForStep();
     // Both notes of the first step under one status byte, with active sensing between them.
     await midi.send([0x90, 48, 90, 0xfe, 60, 90]);
-    expect(await midi.index()).toBe(1);
+    await expect.poll(() => midi.index()).toBe(1);
     // Velocity 0 is a note off, also under running status.
     await midi.send([0x90, 48, 0, 0xfe, 60, 0]);
     await expect(heldBar(page, 60)).toHaveCount(0);
     expect(await midi.index()).toBe(1);
     // Another channel, the same piano.
     await midi.noteOn(60, { channel: 9 });
-    expect(await midi.index()).toBe(2);
+    await expect.poll(() => midi.index()).toBe(2);
     await midi.noteOff(60, { channel: 9 });
     // The pedal and other controllers change nothing.
     await midi.send([0xb0, 64, 127, 0xb0, 64, 0]);
@@ -486,10 +493,13 @@ test.describe('the score with a piano', () => {
     await closePractice(page);
     await expect.poll(() => midi.target()).toEqual([60]);
     await midi.noteOn(48); // the left hand's note of the step before
-    expect(await midi.index()).toBe(0);
+    await expect(page.locator('.keyboard .key-held[data-for-midi="48"]')).toHaveCount(1);
+    // It is the hand left out: no step asks for it and its key does not fill.
+    await expect(page.locator('.keyboard .key[data-midi="48"] rect.key-level')).toHaveCount(0);
+    await staysAt(page, midi, 0);
     await midi.noteOff(48);
     await midi.noteOn(60);
-    expect(await midi.index()).toBe(1);
+    await expect.poll(() => midi.index()).toBe(1);
     await expectOneRed(page, 'the right hand alone');
   });
 
@@ -523,16 +533,16 @@ test.describe('the score with a piano', () => {
     await redSettled(page);
     expect(await midi.waitForStep()).toEqual([53, 65]);
     await midi.noteOn(53);
-    expect(await midi.index(), '65 was held before the move').toBe(7);
+    await staysAt(page, midi, 7, '65 was held before the move');
     await midi.noteOff(65);
     await midi.noteOn(65);
-    expect(await midi.index()).toBe(8);
+    await expect.poll(() => midi.index()).toBe(8);
   });
 
   test('a loop keeps the red inside it: after the last group of the loop, its first', async ({
     page,
   }) => {
-    const midi = await twinkle(page);
+    const midi = await twinkle(page, { tempo: FAST });
     await setLoopBars(page, '2', '3');
     await closePractice(page);
     // Bars 2 and 3 hold the steps 4 to 10.
@@ -626,7 +636,7 @@ test.describe('the score with a piano', () => {
   test('at the end the burst rises, the red flies home, and the first group waits again', async ({
     page,
   }) => {
-    const midi = await twinkle(page);
+    const midi = await twinkle(page, { tempo: FAST });
     const last = (await page.locator('.score-sheet g.measure').count()) - 1;
     await seekBar(page, last);
     await redSettled(page);
@@ -659,7 +669,7 @@ test.describe('the score with a piano', () => {
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    const midi = await twinkle(page);
+    const midi = await twinkle(page, { tempo: FAST });
     const last = (await page.locator('.score-sheet g.measure').count()) - 1;
     await seekBar(page, last);
     await redSettled(page);
@@ -684,7 +694,11 @@ test.describe('the score with a piano', () => {
     page,
   }) => {
     // Bars 1 to 4 of BWV 994 are repeated (issue 50).
-    await installFakeMidi(page, { permission: 'granted', playAlong: true });
+    await installFakeMidi(page, {
+      permission: 'granted',
+      playAlong: true,
+      tempo: { [BWV994]: 1.5 },
+    });
     await page.goto('/?audio=silent#/piece/bach-applicatio-c-major-bwv-994');
     await expect(page.locator('.score-sheet g.measure')).toHaveCount(8, { timeout: 20_000 });
     await expect(play(page)).toBeEnabled();
@@ -727,7 +741,11 @@ test.describe('the score with a piano', () => {
     page,
   }) => {
     test.setTimeout(120_000);
-    await installFakeMidi(page, { permission: 'granted', playAlong: true });
+    await installFakeMidi(page, {
+      permission: 'granted',
+      playAlong: true,
+      tempo: { [BWV994]: 1.5 },
+    });
     await page.goto('/?audio=silent#/piece/bach-applicatio-c-major-bwv-994');
     await expect(page.locator('.score-sheet g.measure')).toHaveCount(8, { timeout: 20_000 });
     await expect(play(page)).toBeEnabled();
@@ -758,7 +776,11 @@ test.describe('the score with a piano', () => {
       test('the page scrolls once as the red enters the next system, and not within a system', async ({
         page,
       }) => {
-        const midi = await twinkle(page);
+        test.setTimeout(120_000);
+        const midi = await twinkle(page, { tempo: FAST });
+        // The seeded 150 % took: the first step's 600 ms are 400 ms.
+        await midi.waitForStep();
+        expect(await midi.hold(), 'the Practice tempo was not seeded').toBeCloseTo(400, 0);
         const steps: Array<{ i: number; system: number; y: number }> = [];
         for (let guard = 0; guard < 60; guard++) {
           await midi.waitForStep();
@@ -810,7 +832,7 @@ test.describe('the score with a piano', () => {
 
   // ---------------------------------------------------------------------------------------
   // The other hand (issue 184). With one hand left out, digitus plays it between the reader's
-  // steps, counted from each press. The fixture is Twinkle at 100 qpm, a quarter note 0.6 s, a
+  // steps, counted from the press that starts each step running. The fixture is Twinkle at 100 qpm, a quarter note 0.6 s, a
   // bar 2.4 s. Right hand chosen (the reader plays the right, digitus the left): every left-hand
   // note falls on a step of the right hand, so each stretch holds at most one note, at the
   // press. Left hand chosen (the reader plays the left, digitus the right): the steps are
@@ -932,38 +954,50 @@ test.describe('the score with a piano', () => {
     await expectOneRed(page, 'at 50 %');
   });
 
-  test('the next step played early drops the notes that have not started and counts from the new press', async ({
+  test('a step pressed again drops the notes that have not started and counts from the new press', async ({
     page,
   }) => {
     const midi = await twinkle(page, { settings: HALF });
     await soundReady(page);
-    await midi.pressStep(); // step 0: 60 sounds now; 60, 67, 67 wait 1.2, 2.4 and 3.6 s
-    await midi.pressStep({ wait: false }); // the next step at once
+    // The step runs the moment its key is down (issue 185): 60 sounds now; 60, 67, 67 wait 1.2,
+    // 2.4 and 3.6 s. The pass comes a note's length later (4.8 s at 50 %) and hands over nothing.
+    await midi.pressStep();
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    const pitches = await midi.target();
+    // A release that comes too early leaves the red where it is and the other hand playing.
+    for (const pitch of pitches) await midi.noteOff(pitch);
+    expect(await accompCancelled(page)).toEqual([]);
+    // The same step pressed again runs from this press: its stretch starts again.
+    for (const pitch of pitches) await midi.noteOn(pitch);
     await expect.poll(() => accompanied(page)).toHaveLength(2);
     const [first, second] = await accompanied(page);
     expect(first).toMatchObject({ midi: 60, hand: 'R' });
-    expect(second).toMatchObject({ midi: 69, hand: 'R' });
+    expect(second).toMatchObject({ midi: 60, hand: 'R' });
     // The queue's three notes were dropped; the note that had started is not among them.
     const dropped = await accompCancelled(page);
     expect(dropped.map((n) => n.midi)).toEqual([60, 67, 67]);
     expect(dropped.map((n) => ms(n.time - first!.time))).toEqual([1200, 2400, 3600]);
-    // The second stretch counts from the second press: 69 now and 69 again 0.6 s on, at 50 %.
+    // The second stretch counts from the second press: 60 again 0.6 s on, at 50 %.
     await expect.poll(() => accompanied(page)).toHaveLength(3);
     const all = await accompanied(page);
-    expect(all[2]).toMatchObject({ midi: 69 });
+    expect(all[2]).toMatchObject({ midi: 60 });
     expect(ms(all[2]!.time - second!.time)).toBe(1200);
-    await expectOneRed(page, 'after the early arrival');
+    await expectOneRed(page, 'after the second press');
   });
 
   test('a click on a bar drops them, and nothing sounds until the next press', async ({ page }) => {
     const midi = await twinkle(page, { settings: HALF });
     await soundReady(page);
-    await midi.playRed();
+    // The step runs at the press, and its stretch with it; the key stays down, so the pass (a
+    // note's length on, 4.8 s at 50 %) has not come when the reader clicks the bar.
+    const held = await midi.waitForStep();
+    await midi.pressStep({ wait: false });
     await expect.poll(() => accompanied(page)).toHaveLength(1);
     const [first] = await accompanied(page);
     await seekBar(page, 2);
     await redSettled(page);
     expect(await midi.waitForStep()).toEqual([53]); // bar 3 starts at 4.8 s
+    for (const pitch of held) await midi.noteOff(pitch);
     // The three notes still waiting were dropped, and the one that sounds was released.
     const cancelled = await accompCancelled(page);
     expect(cancelled.map((n) => n.midi)).toEqual([60, 67, 67, 60]);
@@ -971,8 +1005,8 @@ test.describe('the score with a piano', () => {
     expect(cancelled[3]!.time).toBe(first!.time);
     expect(await accompanied(page)).toHaveLength(1);
     await expectOneRed(page, 'after the seek');
-    // The step of bar 3 played: its stretch, [4.8, 6.0), from this press.
-    await midi.playRed();
+    // The step of bar 3 pressed: its stretch, [4.8, 6.0), from this press.
+    await midi.pressStep();
     await expect.poll(() => accompanied(page)).toHaveLength(2);
     expect((await accompanied(page))[1]).toMatchObject({ midi: 65, hand: 'R' });
   });
@@ -986,7 +1020,8 @@ test.describe('the score with a piano', () => {
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await closePractice(page);
     await soundReady(page);
-    await midi.playRed();
+    const held = await midi.waitForStep();
+    await midi.pressStep({ wait: false }); // the step runs at the press: the stretch is handed over
     await expect.poll(() => accompanied(page)).toHaveLength(1);
     await play(page).click();
     await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
@@ -1001,8 +1036,9 @@ test.describe('the score with a piano', () => {
 
     await page.getByRole('button', { name: 'Pause' }).click();
     await expect(play(page)).toBeVisible();
+    for (const pitch of held) await midi.noteOff(pitch);
     await midi.waitForStep();
-    await midi.playRed();
+    await midi.pressStep();
     await expect.poll(() => accompanied(page)).toHaveLength(2);
     await expectOneRed(page, 'paused, and the walk went on');
   });
@@ -1070,7 +1106,7 @@ test.describe('the score with a piano', () => {
   test('an unplugged piano stops it mid-stretch; the red and the cue stay', async ({ page }) => {
     const midi = await twinkle(page, { settings: HALF });
     await soundReady(page);
-    await midi.playRed();
+    await midi.pressStep(); // the step runs at the press: the stretch is handed over, the red stays
     await expect.poll(() => accompanied(page)).toHaveLength(1);
     const cue = await cursorSec(page);
     await midi.unplug();
@@ -1083,7 +1119,7 @@ test.describe('the score with a piano', () => {
     await expectOneRed(page, 'unplugged mid-stretch');
 
     await midi.plug(PIANO);
-    expect(await midi.waitForStep()).toEqual([53]);
+    expect(await midi.waitForStep()).toEqual([48]); // the step that was held, which never passed
     expect(await cursorSec(page)).toBe(cue);
     expect(await accompanied(page)).toHaveLength(1);
   });
@@ -1168,7 +1204,360 @@ test.describe('the score with a piano', () => {
     await expect.poll(() => redBars(page)).toEqual([2]);
     await expectOneRed(page, 'the bar kept after switching off');
   });
+
+  // A step passes once its keys have been held for its time, and the held keys fill over their
+  // notes' lengths (issue 185). Twinkle's first step is [48 60] at 100 qpm: a quarter is 600 ms,
+  // the hold of the step, and the left hand's C is a whole note of 4 beats.
+
+  /** A key's level, the fill that rises inside it while the reader holds it. */
+  const level = (page: Page, midi: number): Locator =>
+    page.locator(`.keyboard .key[data-midi="${midi}"] rect.key-level`);
+  /** The finger number or hand letter drawn again over the level, in the light gray. */
+  const levelText = (page: Page, midi: number): Locator =>
+    page.locator(`.keyboard .key[data-midi="${midi}"] text.key-on-level`);
+
+  test('a short hold does not pass and asks for a longer one; a held note passes at its time', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page);
+    await midi.waitForStep();
+    const hold = await midi.hold();
+    expect(hold, 'the first step is held for a quarter at 100 qpm').toBe(600);
+
+    // Both keys down for a third of the hold, then up (all in the page, so a slow round trip
+    // cannot make the short hold long): the red stays and the status line asks for more.
+    const tapped = await midi.tap([48, 60], Math.round(hold / 3));
+    expect(tapped, 'the page ran the short tap long: it is the PC, not the walk').toBeLessThan(
+      0.8 * hold,
+    );
+    await expect(page.getByRole('status')).toHaveText(HOLD_MANY);
+    expect(await midi.index()).toBe(0);
+    expect(await cursorSec(page)).toBe(0);
+    expect(await midi.target()).toEqual([48, 60]);
+    await expectOneRed(page, 'a short hold');
+    await expectNoSeriousA11y(page, 'a short hold');
+
+    // Held again, it passes at its time: no sooner than the hold, and not much later.
+    const { index, ms } = await midi.playRedTimed();
+    expect(index).toBe(0);
+    expect(ms, 'the step passed before its time').toBeGreaterThanOrEqual(hold - 20);
+    expect(ms, 'the step passed long after its time').toBeLessThan(hold + 400);
+    await expect(page.getByRole('status')).toHaveText('');
+    expect(await midi.index()).toBe(1);
+    await expectOneRed(page, 'the held note passed');
+    expect(await strikes(page)).toEqual([]);
+  });
+
+  test("a key fills over its note's length, is full, and drains when let go early", async ({
+    page,
+  }) => {
+    const midi = await twinkle(page);
+    await midi.waitForStep();
+    await midi.noteOn(50); // a wrong note: its bar, never a level
+    await expect(heldBar(page, 50)).toHaveCount(1);
+
+    // Both keys of the first step go down and the page watches, frame by frame, until the red
+    // moves on: the left hand's whole note fills slowly, the right hand's quarter is full by then.
+    const watched = await page.evaluate(async () => {
+      const w = window as unknown as {
+        __digitus2Along: { index(): number };
+        __fakeMidi: { send(bytes: number[]): void };
+      };
+      const heightOf = (m: number): number | null => {
+        const el = document.querySelector(`.keyboard .key[data-midi="${m}"] rect.key-level`);
+        return el ? Number(el.getAttribute('height')) : null;
+      };
+      const was = w.__digitus2Along.index();
+      const rising: Record<number, number[]> = { 48: [], 60: [] };
+      const numbers: Record<number, string | null> = { 48: null, 60: null };
+      let wrongNoteFilled = false;
+      for (const m of [48, 60]) w.__fakeMidi.send([0x90, m, 100]);
+      const started = performance.now();
+      await new Promise<void>((resolve) => {
+        const look = () => {
+          for (const m of [48, 60]) {
+            const h = heightOf(m);
+            if (h !== null) rising[m]!.push(h);
+            const text = document.querySelector(
+              `.keyboard .key[data-midi="${m}"] text.key-on-level`,
+            );
+            if (text) numbers[m] = text.textContent;
+          }
+          if (document.querySelector('.keyboard .key[data-midi="50"] rect.key-level'))
+            wrongNoteFilled = true;
+          if (w.__digitus2Along.index() !== was || performance.now() - started > 10_000) resolve();
+          else requestAnimationFrame(look);
+        };
+        look();
+      });
+      await new Promise((r) => requestAnimationFrame(r)); // the attributes follow the clock by a frame
+      return { rising, numbers, wrongNoteFilled, now: { 48: heightOf(48), 60: heightOf(60) } };
+    });
+    const grew = watched.rising[48]!;
+    expect(grew.length, `samples of 48's level: ${grew}`).toBeGreaterThan(1);
+    for (let i = 1; i < grew.length; i++) expect(grew[i]!).toBeGreaterThanOrEqual(grew[i - 1]!);
+    expect(grew.at(-1)!, `48's level did not rise: ${grew}`).toBeGreaterThan(grew[0]!);
+    const grew60 = watched.rising[60]!;
+    expect(grew60.length, `samples of 60's level: ${grew60}`).toBeGreaterThan(1);
+    for (let i = 1; i < grew60.length; i++)
+      expect(grew60[i]!).toBeGreaterThanOrEqual(grew60[i - 1]!);
+    expect(grew60.at(-1)!, `60's level did not rise: ${grew60}`).toBeGreaterThan(grew60[0]!);
+    expect(watched.wrongNoteFilled, 'the wrong note 50 got a level').toBe(false);
+    // The red moves on (step 1 asks for 60 again): 60's note is over, so its key is full (94
+    // units, the key's height less its insets); 48's whole note is a quarter of the way (5 units
+    // of bar and 89 to fill: 27.25 at 0.25).
+    expect(watched.now[60]).toBeCloseTo(94, 0);
+    const fraction = (watched.now[48]! - 5) / 89;
+    expect(fraction, `48 filled to ${watched.now[48]}`).toBeGreaterThan(0.2);
+    expect(fraction, `48 filled to ${watched.now[48]}`).toBeLessThan(0.4);
+    await expect.poll(() => midi.target()).toEqual([60]);
+
+    // The finger number was drawn again over the level on both keys while their step was asked
+    // for (48 is no longer shown pressed once the red has moved on, so its copy is gone with the
+    // number); 60 is asked for again. The wrong note has no level.
+    expect(watched.numbers[48]).toMatch(/^[1-5]$/);
+    expect(watched.numbers[60]).toMatch(/^[1-5]$/);
+    await expect(levelText(page, 60)).toHaveCount(1);
+    await expect(levelText(page, 60)).toHaveText(/^[1-5]$/);
+    await expect(level(page, 50)).toHaveCount(0);
+    await expect(heldBar(page, 50)).toHaveCount(1);
+    await expectOneRed(page, 'the keys filling');
+    await expectNoSeriousA11y(page, 'the keys filling');
+
+    // 48 is let go early: it drains to nothing over --dur-slow (200 ms), shrinking all the way.
+    const drained = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const el = () => document.querySelector('.keyboard .key[data-midi="48"] rect.key-level');
+      const heights: number[] = [];
+      const started = performance.now();
+      w.__fakeMidi.send([0x80, 48, 0]);
+      await new Promise<void>((resolve) => {
+        const look = () => {
+          const found = el();
+          if (!found || performance.now() - started > 3_000) resolve();
+          else {
+            heights.push(Number(found.getAttribute('height')));
+            requestAnimationFrame(look);
+          }
+        };
+        look();
+      });
+      return { heights, ms: performance.now() - started };
+    });
+    expect(drained.heights.length, `heights while draining: ${drained.heights}`).toBeGreaterThan(1);
+    for (let i = 2; i < drained.heights.length; i++)
+      expect(drained.heights[i]!).toBeLessThanOrEqual(drained.heights[i - 1]! + 0.01);
+    expect(drained.heights.at(-1)!).toBeLessThan(drained.heights[0]!);
+    expect(drained.ms, 'the level went before its drain').toBeGreaterThanOrEqual(150);
+    expect(drained.ms, 'the level stayed after its drain').toBeLessThan(1_500);
+    await expect(level(page, 48)).toHaveCount(0);
+    await expect(levelText(page, 48)).toHaveCount(0);
+
+    // 60 is full: let go, its level goes with its bar at once (the next poll finds none).
+    await expect(level(page, 60)).toHaveCount(1);
+    const lingered = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      w.__fakeMidi.send([0x80, 60, 0]);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return document.querySelector('.keyboard .key[data-midi="60"] rect.key-level') !== null;
+    });
+    expect(lingered, 'a full level was still there two frames after the key came up').toBe(false);
+    await expect(heldBar(page, 60)).toHaveCount(0);
+    await midi.noteOff(50);
+    await expect(page.locator('.keyboard .key-held')).toHaveCount(0);
+    expect(await strikes(page)).toEqual([]);
+  });
+
+  // The level's gray and the number on it, in both themes, at a desktop's width and a phone's
+  // (the keys' colors come from tokens, so the check resolves each token in the page).
+  for (const [width, height] of [
+    [1280, 900],
+    [360, 740],
+  ] as const) {
+    test.describe(`the levels at ${width} px`, () => {
+      test.use({ viewport: { width, height } });
+
+      for (const scheme of ['light', 'dark'] as const) {
+        test(`in the ${scheme} theme the level and its number take their tokens, one red throughout`, async ({
+          page,
+        }) => {
+          await page.emulateMedia({ colorScheme: scheme });
+          const midi = await twinkle(page);
+          await midi.waitForStep();
+          const hold = await midi.hold();
+
+          // The hold hint on the status line.
+          const tapped = await midi.tap([48, 60], Math.round(hold / 3));
+          expect(tapped, 'the page ran the short tap long: it is the PC').toBeLessThan(0.8 * hold);
+          await expect(page.getByRole('status')).toHaveText(HOLD_MANY);
+          await expectOneRed(page, `${scheme}, ${width} px, the hold hint`);
+          await expectNoSeriousA11y(page, `${scheme}, ${width} px, the hold hint`);
+
+          // Both keys held: the levels rise (48's for 2.4 s, and 60's stays once full). The page
+          // reads the colours as soon as both numbers are drawn over their levels, which is
+          // before the step is passed at 600 ms and 48 stops being shown pressed.
+          const colours = await page.evaluate(async () => {
+            const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+            const copy = (m: number) =>
+              document.querySelector(`.keyboard .key[data-midi="${m}"] text.key-on-level`);
+            for (const m of [48, 60]) w.__fakeMidi.send([0x90, m, 100]);
+            const started = performance.now();
+            await new Promise<void>((resolve) => {
+              const look = () =>
+                (copy(48) && copy(60)) || performance.now() - started > 3_000
+                  ? resolve()
+                  : requestAnimationFrame(look);
+              look();
+            });
+            const svg = document.querySelector('.keyboard svg')!;
+            const tokenColour = (token: string): string => {
+              const probe = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+              probe.style.fill = `var(${token})`;
+              svg.appendChild(probe);
+              const colour = getComputedStyle(probe).fill;
+              probe.remove();
+              return colour;
+            };
+            const fill = (selector: string): string =>
+              getComputedStyle(document.querySelector(selector)!).fill;
+            return {
+              held: tokenColour('--key-held'),
+              onLevel: tokenColour('--key-on-level'),
+              level48: fill('.keyboard .key[data-midi="48"] rect.key-level'),
+              level60: fill('.keyboard .key[data-midi="60"] rect.key-level'),
+              text48: fill('.keyboard .key[data-midi="48"] text.key-on-level'),
+              text60: fill('.keyboard .key[data-midi="60"] text.key-on-level'),
+            };
+          });
+          expect(colours.level48).toBe(colours.held);
+          expect(colours.level60).toBe(colours.held);
+          expect(colours.text48).toBe(colours.onLevel);
+          expect(colours.text60).toBe(colours.onLevel);
+          // The tokens themselves: a gray bar and the lightest text on it, never the accent.
+          expect(colours.held).toBe(scheme === 'light' ? 'rgb(102, 102, 102)' : 'rgb(61, 61, 61)');
+          expect(colours.onLevel).toBe(
+            scheme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(218, 218, 218)',
+          );
+          await expectOneRed(page, `${scheme}, ${width} px, a level rising`);
+          await expectNoSeriousA11y(page, `${scheme}, ${width} px, a level rising`);
+          await midi.noteOff(48);
+          await midi.noteOff(60);
+        });
+      }
+    });
+  }
+
+  test('under reduced motion the level rises a beat at a time and drains at once', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const midi = await twinkle(page);
+    await midi.waitForStep();
+
+    // The whole note of the left hand is 4 beats (600 ms each): its level steps by quarters of
+    // the key's 89 units (and 5 for the bar), with nothing between, until it is full.
+    const sampled = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const heights: number[] = [];
+      w.__fakeMidi.send([0x90, 48, 100]);
+      const started = performance.now();
+      await new Promise<void>((resolve) => {
+        const look = () => {
+          const el = document.querySelector('.keyboard .key[data-midi="48"] rect.key-level');
+          const h = el ? Number(el.getAttribute('height')) : null;
+          if (h !== null) heights.push(h);
+          if ((h !== null && h >= 94) || performance.now() - started > 8_000) resolve();
+          else requestAnimationFrame(look);
+        };
+        look();
+      });
+      return heights;
+    });
+    const steps = [...new Set(sampled.map((h) => Math.round(h * 100) / 100))].sort((a, b) => a - b);
+    expect(steps, `heights seen: ${sampled}`).toEqual([0, 27.25, 49.5, 71.75, 94]);
+    await midi.noteOff(48);
+    await expect(level(page, 48)).toHaveCount(0, { timeout: 1_000 });
+
+    // Let go part of the way: gone in the next frames, with no drain.
+    const gone = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const el = () => document.querySelector('.keyboard .key[data-midi="48"] rect.key-level');
+      w.__fakeMidi.send([0x90, 48, 100]);
+      await new Promise<void>((resolve) => {
+        const look = () =>
+          el() && Number(el()!.getAttribute('height')) >= 27
+            ? resolve()
+            : requestAnimationFrame(look);
+        look();
+      });
+      w.__fakeMidi.send([0x80, 48, 0]);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return el() === null;
+    });
+    expect(gone, 'the level was still there two frames after the key came up').toBe(true);
+    await expectOneRed(page, 'reduced motion, the level gone');
+  });
+
+  test("nothing changes outside play-along: Play shows the reader's keys with no level", async ({
+    page,
+  }) => {
+    const midi = await twinkle(page);
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await closePractice(page);
+    await midi.waitForStep();
+    await play(page).click();
+    await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+    await midi.noteOn(60);
+    await expect(heldBar(page, 60)).toHaveCount(1);
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    await expect(page.locator('.keyboard text.key-on-level')).toHaveCount(0);
+    expect(await midi.index(), 'the walk is quiet while it plays').toBe(-1);
+    await expectOneRed(page, 'playing, a key held');
+
+    // After Pause the walk spends the held key as before: it neither fills nor counts.
+    await page.getByRole('button', { name: 'Pause' }).click();
+    await expect(play(page)).toBeVisible();
+    await midi.waitForStep();
+    const was = await midi.index();
+    await staysAt(page, midi, was, 'the key held through Play counted for a step');
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    await midi.noteOff(60);
+    await midi.playRed();
+    expect(await midi.index()).not.toBe(was);
+    await expectOneRed(page, 'moved on after the pause');
+  });
+
+  test('without a piano the score has no levels and Play plays as before', async ({ page }) => {
+    const midi = await twinkle(page, { playAlong: false });
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    expect(await midi.target()).toEqual([]);
+    expect(await midi.index()).toBe(-1);
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await closePractice(page);
+    await play(page).click();
+    await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+    await expect.poll(() => positionSec(page)).toBeGreaterThan(0.3);
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    await expectOneRed(page, 'playing with no piano');
+  });
 });
+
+/**
+ * Waits as long as the step the red waits on is held for, and a little more, and checks that the
+ * walk is still on `index`: a key that does not count (the wrong one, one held through a move, a
+ * key without its partner) leaves the red where it is however long it is held.
+ */
+async function staysAt(
+  page: Page,
+  midi: ReturnType<typeof fakeMidi>,
+  index: number,
+  message = 'the red moved on',
+): Promise<void> {
+  await page.waitForTimeout((await midi.hold()) + 300);
+  expect(await midi.index(), message).toBe(index);
+}
 
 /**
  * Samples the screen's red elements again and again (one sample per round trip to the page), from

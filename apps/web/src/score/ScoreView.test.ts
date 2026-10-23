@@ -103,7 +103,11 @@ describe('the status line', () => {
     });
 
     it('goes over the hint and under the count-in, the piano loading and the rest', () => {
-      const both = { ...ready, alongSound: 'click' as const, alongHint: 1 };
+      const both = {
+        ...ready,
+        alongSound: 'click' as const,
+        alongHint: { kind: 'play' as const, count: 1 },
+      };
       expect(scoreStatusLine(both)).toEqual(info('Click the page once to hear the other hand.'));
       expect(scoreStatusLine({ ...both, countIn: { beat: 0, beats: 4, beatInBar: 1 } })).toEqual({
         text: '1',
@@ -119,9 +123,14 @@ describe('the status line', () => {
 
     it('ranks Loading the piano… over the tap sentence and the hint', () => {
       // That usePlayback's `preparing` reaches the line as `loading` is ScoreView.status.test.tsx.
-      expect(scoreStatusLine({ ...ready, loading: true, alongSound: 'tap', alongHint: 2 })).toEqual(
-        info('Loading the piano…'),
-      );
+      expect(
+        scoreStatusLine({
+          ...ready,
+          loading: true,
+          alongSound: 'tap',
+          alongHint: { kind: 'play', count: 2 },
+        }),
+      ).toEqual(info('Loading the piano…'));
     });
   });
 
@@ -135,10 +144,10 @@ describe('the status line', () => {
     it('asks for the red note, or the red notes when the step has more than one pitch', () => {
       expect(en.score.view.playAlongHint(1)).toBe('Play the red note on your piano.');
       expect(en.score.view.playAlongHint(2)).toBe('Play the red notes on your piano.');
-      expect(scoreStatusLine({ ...ready, alongHint: 1 })).toEqual(
+      expect(scoreStatusLine({ ...ready, alongHint: { kind: 'play', count: 1 } })).toEqual(
         info('Play the red note on your piano.'),
       );
-      expect(scoreStatusLine({ ...ready, alongHint: 3 })).toEqual(
+      expect(scoreStatusLine({ ...ready, alongHint: { kind: 'play', count: 3 } })).toEqual(
         info('Play the red notes on your piano.'),
       );
     });
@@ -153,7 +162,51 @@ describe('the status line', () => {
     });
 
     it('comes after what the score is busy with, why Play is unavailable, and the player', () => {
-      const hint = { ...ready, alongHint: 1 };
+      const hint = { ...ready, alongHint: { kind: 'play', count: 1 } } satisfies StatusInputs;
+      expect(scoreStatusLine({ ...hint, docStatus: 'loading' })).toEqual(
+        info('Loading the score…'),
+      );
+      expect(scoreStatusLine({ ...hint, docStatus: 'fingering' })).toEqual(info('Fingering…'));
+      expect(scoreStatusLine({ ...hint, docStatus: 'rendering' })).toEqual(
+        info('Preparing the score…'),
+      );
+      expect(scoreStatusLine({ ...hint, playable: false, hands: 'L' })).toEqual(
+        info('This piece has no notes for the left hand.'),
+      );
+      expect(scoreStatusLine({ ...hint, loading: true })).toEqual(info('Loading the piano…'));
+      expect(scoreStatusLine({ ...hint, countIn: { beat: 0, beats: 4, beatInBar: 1 } })).toEqual({
+        text: '1',
+        kind: 'count',
+      });
+      expect(scoreStatusLine({ ...hint, docStatus: 'error' })).toBeNull();
+    });
+  });
+
+  // After a release that came too early (issue 185) the line asks for a longer hold, in place of
+  // the hint to play, and it is just as low.
+  describe('the hold hint', () => {
+    it('asks for the red note, or the red notes, to be held a little longer', () => {
+      expect(en.score.view.holdLonger(1)).toBe('Hold the red note a little longer.');
+      expect(en.score.view.holdLonger(2)).toBe('Hold the red notes a little longer.');
+      expect(scoreStatusLine({ ...ready, alongHint: { kind: 'hold', count: 1 } })).toEqual(
+        info('Hold the red note a little longer.'),
+      );
+      expect(scoreStatusLine({ ...ready, alongHint: { kind: 'hold', count: 3 } })).toEqual(
+        info('Hold the red notes a little longer.'),
+      );
+    });
+
+    it('is in every language, singular and plural, each its own', () => {
+      const lines = [en, es, fr, nl, pt].flatMap((m) => [
+        m.score.view.holdLonger(1),
+        m.score.view.holdLonger(2),
+      ]);
+      expect(lines.every((line) => line.trim() !== '')).toBe(true);
+      expect(new Set(lines).size).toBe(lines.length);
+    });
+
+    it('comes after what the score is busy with, why Play is unavailable, and the player', () => {
+      const hint = { ...ready, alongHint: { kind: 'hold', count: 1 } } satisfies StatusInputs;
       expect(scoreStatusLine({ ...hint, docStatus: 'loading' })).toEqual(
         info('Loading the score…'),
       );

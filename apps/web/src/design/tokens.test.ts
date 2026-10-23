@@ -72,6 +72,9 @@ const PAIRS: [string, string, number, string][] = [
   ['--key-held', '--key-white', 3, 'the reader’s held key, on a white key'],
   ['--key-held', '--key-down', 3, 'the reader’s held key, on a pressed key'],
   ['--key-held-on-black', '--key-black', 3, 'the reader’s held key, on a black key'],
+  // The finger number and hand letter drawn again over a key's level (issue 185), which fills the
+  // key with --key-held: text, so 4.5:1.
+  ['--key-on-level', '--key-held', 4.5, 'a finger number or hand letter on a key’s level'],
 ];
 
 describe('tokens.css', () => {
@@ -107,7 +110,12 @@ describe('tokens.css', () => {
   }
 
   it('keeps the reader’s held keys pure gray, never the accent, and the same in both dark blocks', () => {
-    for (const name of ['--key-held', '--key-held-on-black', '--key-held-on-dim']) {
+    for (const name of [
+      '--key-held',
+      '--key-held-on-black',
+      '--key-held-on-dim',
+      '--key-on-level',
+    ]) {
       for (const tokens of [light, darkBySystem, darkByChoice]) {
         const value = tokens[name];
         expect(value, name).toMatch(/^#[0-9a-f]{6}$/);

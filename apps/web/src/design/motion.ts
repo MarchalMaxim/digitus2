@@ -7,6 +7,23 @@ export function prefersReducedMotion(): boolean {
   );
 }
 
+/** tokens.css's --dur-slow, for a document without the stylesheet (unit tests). */
+export const DUR_SLOW_FALLBACK_MS = 200;
+
+/**
+ * A duration token in ms, from the root's computed style ("200ms", "0.2s", "0ms"), so script
+ * waits as long as the stylesheet does, and 0 under prefers-reduced-motion like the CSS. Without
+ * a value (no stylesheet): 0 under prefers-reduced-motion, else `fallback`.
+ */
+export function durationMs(token: string, fallback: number = DUR_SLOW_FALLBACK_MS): number {
+  const none = prefersReducedMotion() ? 0 : fallback;
+  if (typeof document === 'undefined') return none;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  const m = /^(\d*\.?\d+)(ms|s)$/.exec(value);
+  if (!m) return none;
+  return Number(m[1]) * (m[2] === 's' ? 1000 : 1);
+}
+
 /**
  * How long the red takes to travel between Play and the cursor (score/RedFlight.tsx). A Play from
  * the start without a count-in holds the first note back this long, so it sounds as the red lands.

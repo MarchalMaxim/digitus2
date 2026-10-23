@@ -21,6 +21,9 @@
   --key-held: #666666;
   --key-held-on-black: #666666;
   --key-held-on-dim: #666666;
+  /* The finger number and the hand letter drawn again over a key's level (base.css, .key-level,
+     issue 185), which fills the key with --key-held as the note is held: 5.7:1 on it. */
+  --key-on-level: #ffffff;
   /* What the Hands thumb blends with (base.css, .segmented-thumb): a difference with white
      inverts what lies under it, in either theme. */
   --invert: #ffffff;
@@ -68,6 +71,7 @@
     --key-held: #3d3d3d;
     --key-held-on-black: #666666;
     --key-held-on-dim: #a6a6a6;
+    --key-on-level: #dadada; /* 7.8:1 on --key-held */
     --bar-tint: 0.08;
   }
 }
@@ -93,6 +97,7 @@
     --key-held: #3d3d3d;
     --key-held-on-black: #666666;
     --key-held-on-dim: #a6a6a6;
+    --key-on-level: #dadada; /* 7.8:1 on --key-held */
     --bar-tint: 0.08;
   }
 }

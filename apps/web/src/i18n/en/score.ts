@@ -50,6 +50,9 @@ export const score = {
       click: 'Click the page once to hear the other hand.',
       tap: 'Tap the page once to hear the other hand.',
     },
+    /** The status line after a release that came too early, while the red waits for the length (issue 185); `count` is the notes of the step. */
+    holdLonger: (count: number): string =>
+      count > 1 ? 'Hold the red notes a little longer.' : 'Hold the red note a little longer.',
     /** The button that opens and closes the practice settings (speed, loop, hands). */
     practice: 'Practice',
     /** The button back to the scan that produced this score. */

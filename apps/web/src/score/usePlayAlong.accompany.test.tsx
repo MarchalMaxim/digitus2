@@ -11,10 +11,12 @@ import type { PerfRange } from './playAlong.js';
 import { usePlayAlong, type PlayAlongOptions } from './usePlayAlong.js';
 import type { Playback } from './usePlayback.js';
 
-// The play-along's other hand (issue 184): after each pass the walk hands the playback the notes
-// digitus plays, and stops them on every move it did not make. The piano store is driven through a
-// fake lazy chunk and the playback is a fake with a position of its own (usePlayAlong.test.tsx
-// has the same); the five members of issue 184 are spies. Every test runs under StrictMode.
+// The play-along's other hand (issue 184): when a step starts running (every pitch of it held and
+// fresh, at the press) the walk hands the playback the notes digitus plays, and stops them on
+// every move it did not make. A step passes a note's length later (issue 185), by the fake clock
+// (`hold`), and the pass hands over nothing. The piano store is driven through a fake lazy chunk
+// and the playback is a fake with a position of its own (usePlayAlong.test.tsx has the same); the
+// five members of issue 184 are spies. Every test runs under StrictMode.
 
 const access = vi.hoisted(() => ({
   open: vi.fn<(events: AccessEvents) => Promise<OpenedAccess>>(),
@@ -195,6 +197,8 @@ interface Setup {
   refresh(over?: Partial<PlayAlongOptions>): void;
   press(...midis: number[]): void;
   release(...midis: number[]): void;
+  /** Lets `ms` go by (the wake-up timer fires in it), then renders with the fake's state. */
+  hold(ms: number): void;
   /** The notes of each `accompany` call, as [midi, offsetSec, hand]. */
   played(): Array<Array<[number, number, Hand]>>;
 }
@@ -236,6 +240,12 @@ function setup(over: Partial<PlayAlongOptions> = {}, prepare?: (f: Fake) => void
     refresh,
     press: (...midis) => send(true, midis),
     release: (...midis) => send(false, midis),
+    hold: (ms) => {
+      act(() => {
+        vi.advanceTimersByTime(ms);
+      });
+      refresh();
+    },
     played: () =>
       fake.accompany.mock.calls.map(([notes]) =>
         notes.map((n): [number, number, Hand] => [n.midi, n.offsetSec, n.hand]),
@@ -245,7 +255,9 @@ function setup(over: Partial<PlayAlongOptions> = {}, prepare?: (f: Fake) => void
 
 /** One animation frame: what the align waits for when the red flies home. */
 const frame = () =>
-  act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  act(() => {
+    vi.advanceTimersToNextFrame();
+  });
 
 /** Forgets the calls made so far: the mount's own (StrictMode runs an effect twice) and the cue's. */
 function forget(f: Fake) {
@@ -255,6 +267,15 @@ function forget(f: Fake) {
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({
+    toFake: [
+      'setTimeout',
+      'clearTimeout',
+      'performance',
+      'requestAnimationFrame',
+      'cancelAnimationFrame',
+    ],
+  });
   localStorage.clear();
   useAppStore.setState({ settings: { ...DEFAULT_SETTINGS } });
   access.open.mockReset();
@@ -279,18 +300,82 @@ afterEach(() => {
   delete (navigator as unknown as Record<string, unknown>).permissions;
   window.history.replaceState(null, '', '/');
   resetPianoForTests();
+  vi.useRealTimers();
 });
 
-describe('what digitus plays after a pass', () => {
+describe('what digitus plays from the press that starts a step', () => {
   it('hands the left hand notes of the stretch to the next step, counted from the press', async () => {
     await connect();
     const s = setup();
     forget(s.fake);
-    s.press(60); // step 0 at 0 s: the stretch is [0, 0.5)
+    s.press(60); // step 0 at 0 s: the stretch is [0, 0.5), handed over at the press
     expect(s.played()).toEqual([[[48, 0, 'L']]]);
     expect(s.fake.accompany.mock.calls[0]![0][0]!.durationSec).toBeCloseTo(1, 6); // a half note rings on
+    s.hold(500); // the step passes a note's length later: the red moves, nothing more is handed over
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
     s.press(62); // step 1: [0.5, 1)
     expect(s.played()).toEqual([[[48, 0, 'L']], [[43, 0, 'L']]]);
+  });
+
+  it('hands the notes over at the press and not at the pass, which comes a note later', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    const cuesBefore = s.fake.cueAt.mock.calls.length;
+    s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    expect(s.fake.cueAt.mock.calls.length).toBe(cuesBefore); // the step has not passed
+    s.hold(499);
+    expect(s.fake.cueAt.mock.calls.length).toBe(cuesBefore);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.hold(1); // held for its time: it passes
+    expect(s.fake.cueAt.mock.calls.length).toBe(cuesBefore + 1);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+  });
+
+  it('keeps playing when the reader lets go early, and a new press of the step counts afresh', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    s.hold(100);
+    s.release(60); // too early: the red stays, the stretch is the piece's rhythm and plays on
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 1 });
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+    s.hold(50);
+    s.press(60); // the step runs again from this press, and its stretch starts again with it
+    expect(s.played()).toEqual([[[48, 0, 'L']], [[48, 0, 'L']]]);
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+    s.hold(500);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('hands nothing over again when a release after four fifths passes the step', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    const cuesBefore = s.fake.cueAt.mock.calls.length;
+    s.press(60);
+    s.hold(400);
+    s.release(60);
+    expect(s.fake.cueAt.mock.calls.length).toBe(cuesBefore + 1);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts a step the keys already held from when the red reaches it', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    s.hold(100);
+    s.press(62); // pressed early, under the first step: it runs only once the red is on it
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.hold(400); // step 0 passes, step 1 runs from its press and not yet for its time
+    expect(s.played()).toEqual([[[48, 0, 'L']], [[43, 0, 'L']]]);
+    s.hold(100);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
   });
 
   it('plays only the hand left out, and the right hand never', async () => {
@@ -321,31 +406,41 @@ describe('what digitus plays after a pass', () => {
     await connect();
     const s = setup();
     forget(s.fake);
-    s.press(60, 62, 64); // the third step, at 1 s: its stretch [1, 1.5) holds the left hand's 64 and 50
+    s.press(60);
+    s.hold(500);
+    s.press(62);
+    s.hold(500);
+    s.press(64); // the third step, at 1 s: its stretch [1, 1.5) holds the left hand's 64 and 50
     expect(s.played().at(-1)).toEqual([[50, 0, 'L']]); // the 64 is the reader's own
   });
 
-  it('calls accompany once for a chain, from the last step of it', async () => {
+  it('hands over the last step of a chain that passes unseen, from its pass', async () => {
     await connect();
     const s = setup();
     forget(s.fake);
-    s.press(62, 64); // the next two steps, pressed before the first: nothing passes
+    s.press(62, 64); // the next two steps, pressed before the first: nothing runs
     expect(s.fake.accompany).not.toHaveBeenCalled();
-    s.press(60); // steps 0, 1 and 2 pass in one decision; the red waits on step 3
-    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.press(60); // step 0 runs: its stretch starts at the press
+    expect(s.played()).toEqual([[[48, 0, 'L']]]);
+    s.hold(500); // steps 0, 1 and 2 pass in one decision; the red waits on step 3
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
     // From step 2 (1 s) to step 3 (1.5 s): the left hand's 64 is the right hand's own, left out.
-    expect(s.played()).toEqual([[[50, 0, 'L']]]);
+    expect(s.played()).toEqual([[[48, 0, 'L']], [[50, 0, 'L']]]);
   });
 
-  it('calls accompany before the walk cues, and for a step that did not pass not at all', async () => {
+  it('calls accompany before the walk cues, and for a step that does not run not at all', async () => {
     await connect();
     const s = setup();
     forget(s.fake);
     s.press(61); // a wrong note
     s.press(72); // another
+    s.hold(1000);
     expect(s.fake.accompany).not.toHaveBeenCalled();
     const cuesBefore = s.fake.cueAt.mock.calls.length;
     s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    expect(s.fake.cueAt.mock.calls.length).toBe(cuesBefore);
+    s.hold(500);
     expect(s.fake.accompany).toHaveBeenCalledTimes(1);
     expect(s.fake.cueAt.mock.calls.length).toBe(cuesBefore + 1);
     expect(s.fake.accompany.mock.invocationCallOrder[0]!).toBeLessThan(
@@ -377,6 +472,7 @@ describe('a loop', () => {
     forget(s.fake);
     s.press(64); // step at 1 s: the stretch [1, 1.5)
     expect(s.played()).toEqual([[[50, 0, 'L']]]);
+    s.hold(500);
     s.press(65); // the loop's last step wraps to its first: [1.5, 2), then digitus waits
     expect(s.played()).toEqual([[[50, 0, 'L']], [[45, 0, 'L']]]);
     // The 45 starts at 1.5 s and is clipped at the loop's end (2 s): half a second at most.
@@ -390,11 +486,17 @@ describe('the end', () => {
     await connect();
     const s = setup();
     s.fake.flightOnFinish = true;
-    s.press(60, 62, 64, 65, 67, 69, 71);
+    for (const midi of [60, 62, 64, 65, 67, 69, 71]) {
+      s.press(midi);
+      s.hold(500);
+    }
     forget(s.fake);
-    s.press(72); // the last step, at 3.5 s
-    expect(s.fake.finish).toHaveBeenCalledTimes(1);
+    s.press(72); // the last step, at 3.5 s: its tail starts at the press
     expect(s.played()).toEqual([[[55, 0, 'L']]]);
+    expect(s.fake.finish).not.toHaveBeenCalled();
+    s.hold(500); // held for its time: the piece finishes, and the tail goes on
+    expect(s.fake.finish).toHaveBeenCalledTimes(1);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
     // The tail rings to the end of the performance and not past it.
     expect(END_SEC).toBeGreaterThan(3.5);
     expect(s.fake.accompany.mock.invocationCallOrder[0]!).toBeLessThan(
@@ -402,14 +504,14 @@ describe('the end', () => {
     );
     expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
     // The flight home, then the first step is cued again: the walk's own move.
-    await frame();
+    frame();
     s.fake.flight = false;
     s.refresh();
     expect(s.fake.cueAt.mock.calls.at(-1)![0]).toBe(0);
     s.refresh();
     expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
     expect(s.hook.result.current.atFirst).toBe(true);
-    // Pressing the first step again during the tail is an early arrival: a new stretch.
+    // Pressing the first step again during the tail starts its stretch at once: a new stretch.
     s.press(60);
     expect(s.fake.accompany).toHaveBeenCalledTimes(2);
     expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
@@ -481,6 +583,7 @@ describe('what stops it', () => {
     await connect();
     const s = setup();
     s.press(60);
+    s.hold(500);
     forget(s.fake);
     act(() => link.events!.inputs([]));
     s.refresh();
@@ -519,7 +622,10 @@ describe('what stops it', () => {
     await connect();
     const s = setup();
     forget(s.fake);
-    s.press(60, 62, 64);
+    for (const midi of [60, 62, 64]) {
+      s.press(midi);
+      s.hold(500);
+    }
     s.release(60, 62, 64);
     s.refresh();
     expect(s.fake.cueAt.mock.calls.length).toBeGreaterThanOrEqual(3);
@@ -588,6 +694,7 @@ describe('the Playwright check', () => {
     const s = setup();
     expect(w.__digitus2Along?.target()).toEqual([60]);
     s.press(60);
+    s.hold(500);
     expect(w.__digitus2Along?.target()).toEqual([62]);
     s.hook.unmount();
     expect(w.__digitus2Along).toBeUndefined();

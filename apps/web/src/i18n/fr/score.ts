@@ -37,6 +37,10 @@ export const score: Messages['score'] = {
       click: 'Cliquez une fois pour entendre l’autre main.',
       tap: 'Touchez une fois pour entendre l’autre main.',
     },
+    holdLonger: (count: number) =>
+      count > 1
+        ? 'Tenez les notes rouges un peu plus longtemps.'
+        : 'Tenez la note rouge un peu plus longtemps.',
     practice: 'S’exercer',
     scanSource: 'Source du scan et reconnaissance',
     couldNotOpenFile: (name: string) =>

@@ -5,8 +5,8 @@ import type { AccNote } from '../audio/instrument.js';
 import { ALONG_EPS, type AlongMove, type AlongStep, type PerfRange } from './playAlong.js';
 
 /**
- * The other hand's accompaniment for the play-along (issue 184): from the steps the reader passed
- * and the walk's move, which stretches of the performance digitus plays, and then which notes of
+ * The other hand's accompaniment for the play-along (issue 184): from the step the reader's press
+ * started running and the walk's move after it, which stretches of the performance digitus plays, and then which notes of
  * the other hand fall in them, as offsets in performance seconds after the press that starts the
  * stretch. Nothing here plays: `Accompanist` hands the notes to the instrument.
  */
@@ -20,15 +20,15 @@ export interface Stretch {
 }
 
 /**
- * The stretches to play after a pass of the walk, which left `last` as the last step passed (-1
- * when none) and moved by `move`. Digitus plays from the step the reader played to the next step
- * of the walk, then waits:
- * - `cue j`: from `steps[last]` to `steps[j]`; when the pass wrapped a loop (`j` is not after
+ * The stretches to play from the step `last`, the one the reader's press started running (issue
+ * 185; a step passed unseen in a chain counts the same), and the move the walk makes after it
+ * (`stepAfter`: `cue j`, or `finish` after the piece's last step; -1 when `last` names no step).
+ * Digitus plays from that step to the next step of the walk, then waits:
+ * - `cue j`: from `steps[last]` to `steps[j]`; when the move wraps a loop (`j` is not after
  *   `last`) from `steps[last]` to the loop's end, and nothing of the loop's opening is played;
  * - `finish`: from `steps[last]` to `endSec`, the piece's tail;
- * - `stay`, or no step passed: none.
- * A chain of steps passed in one decision counts from its last step. Every stretch starts at the
- * press (offset 0). A stretch with no length is no stretch.
+ * - `stay`, or no step: none.
+ * Every stretch starts at the press (offset 0). A stretch with no length is no stretch.
  */
 export function accompanimentStretches(
   steps: readonly AlongStep[],

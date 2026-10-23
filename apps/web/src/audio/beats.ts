@@ -27,6 +27,14 @@ function sortedTimeSignatures(score: Score): TimeSigEvent[] {
   return [...score.timeSignatures].sort((a, b) => a.tick - b.tick);
 }
 
+/**
+ * The beat at `tick` in ticks: `divisions * 4 / beatType` of the time signature in force there,
+ * the beat `buildBeats` clicks and `countInBar` counts (an eighth in 6/8, a half in 2/2).
+ */
+export function beatTicksAt(score: Score, tick: number): number {
+  return (score.divisions * 4) / timeSignatureAt(sortedTimeSignatures(score), tick).beatType;
+}
+
 /** Tick tolerance when comparing positions in a bar (ticks are divisions, beats may be halves). */
 const TICK_EPSILON = 1e-6;
 

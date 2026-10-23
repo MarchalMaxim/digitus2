@@ -81,10 +81,12 @@ export const scan: Messages['scan'] = {
     cancelling: 'Cancelando…',
     retryFailed: 'Reintentar las páginas fallidas',
     scanScore: 'Escanear esta partitura',
-    scanning:
-      'Reconociendo… Suele tardar menos de un minuto. El primer escaneo tras un rato sin uso tarda más mientras el escáner arranca.',
-    scanningPage: (page: number, total: number) =>
-      `Página ${page} de ${total} · Reconociendo… Suele tardar menos de un minuto. El primer escaneo tras un rato sin uso tarda más mientras el escáner arranca.`,
+    scanning: 'Reconociendo…',
+    scanningPage: (page: number, total: number) => `Página ${page} de ${total} · Reconociendo…`,
+    waiting: 'Se está escaneando otra partitura. La tuya empieza en cuanto termine.',
+    progress: 'Progreso del reconocimiento',
+    secondsLeft: (seconds: number) => `Unos ${seconds} segundos`,
+    overdue: 'Está tardando más de lo habitual.',
     textModelMissing:
       'El reconocimiento de texto en inglés no está configurado. Puede faltar el texto musical.',
     help: 'Cómo funciona el escaneo',

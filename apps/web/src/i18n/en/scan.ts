@@ -77,10 +77,16 @@ export const scan = {
     cancelling: 'Cancelling…',
     retryFailed: 'Retry failed pages',
     scanScore: 'Scan this score',
-    scanning:
-      'Recognizing… Usually under a minute. The first scan after a quiet spell takes longer while the scanner starts.',
-    scanningPage: (page: number, total: number) =>
-      `Page ${page} of ${total} · Recognizing… Usually under a minute. The first scan after a quiet spell takes longer while the scanner starts.`,
+    scanning: 'Recognizing…',
+    scanningPage: (page: number, total: number) => `Page ${page} of ${total} · Recognizing…`,
+    /** Shown instead of the bar while the scanner is busy with another reader's score. */
+    waiting: 'Another score is being scanned. Yours starts as soon as it finishes.',
+    /** The name of the scan bar for assistive technology. */
+    progress: 'Recognition progress',
+    /** Under the bar: the expected time left, in steps of five seconds. */
+    secondsLeft: (seconds: number) => `About ${seconds} seconds`,
+    /** Under the bar once the expected time is past. */
+    overdue: 'Taking longer than usual.',
     textModelMissing: 'English text recognition is not configured. Musical text may be missing.',
     /** The link to how scanning works, under the scan button. */
     help: 'How scanning works',

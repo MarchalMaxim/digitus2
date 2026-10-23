@@ -77,11 +77,46 @@ function bodyOf(text: string): Record<string, unknown> {
 }
 /** The service's own busy answer: another reader's page is being recognised. */
 export const BUSY: Phrase = (t) => t.scan.client.busy;
+/** While the scanner is busy with another score, the same job is offered again this often… */
+export const BUSY_RETRY_MS = 5_000;
+/** …for at most this long; then the busy answer is reported as a failure. */
+export const BUSY_WAIT_MS = 180_000;
+/**
+ * The service's busy answer, as a failure the app may wait out: no recognition started and
+ * nothing was counted against the hourly limit, so the same job id can be offered again
+ * (ScanView.tsx). `retryAfterMs` is the wait the answer asks for, at least BUSY_RETRY_MS. The
+ * browser lets a page read `Retry-After` only when the service exposes it; otherwise it is
+ * BUSY_RETRY_MS.
+ */
+export class BusyError extends PhraseError {
+  override name = 'BusyError';
+  readonly retryAfterMs: number;
+  constructor(retryAfter?: string | null) {
+    super(BUSY);
+    const seconds = retryAfter && /^\d+$/.test(retryAfter.trim()) ? Number(retryAfter) : 0;
+    this.retryAfterMs = Math.max(BUSY_RETRY_MS, seconds * 1000);
+  }
+}
+/** Resolves after `ms`, or rejects with the abort reason as soon as `signal` aborts. */
+export function pause(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const stop = () => {
+      clearTimeout(timer);
+      reject(signal.reason ?? new DOMException('aborted', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', stop);
+      resolve();
+    }, ms);
+    if (signal.aborted) stop();
+    else signal.addEventListener('abort', stop, { once: true });
+  });
+}
 /** The service's own rate-limited answer: this caller has used up its hour. */
 export const LIMITED: Phrase = (t) => t.scan.client.limited;
 
 /** The error for an answer that carries no recognition. */
-function refusal(status: number, body: Record<string, unknown>): Error {
+function refusal(status: number, body: Record<string, unknown>, retryAfter?: string | null): Error {
   // The service answers 409 to the pending request of a job its DELETE cancelled.
   if (status === 409) return new DOMException('cancelled', 'AbortError');
   if (status === 422 || status === 504) {
@@ -97,7 +132,7 @@ function refusal(status: number, body: Record<string, unknown>): Error {
     );
   }
   // Only the service's own 429 carries these bodies; any other refusal is a failure to answer.
-  if (status === 429 && body.error === 'busy') return new PhraseError(BUSY);
+  if (status === 429 && body.error === 'busy') return new BusyError(retryAfter);
   if (status === 429 && body.error === 'rate-limited') return new PhraseError(LIMITED);
   return new PhraseError((t) => t.scan.client.serviceStatus(status));
 }
@@ -188,7 +223,7 @@ export function createScanClient(fetcher: typeof fetch = fetch, base: string = S
         (t) => t.scan.errors.timedOut,
         signal,
       );
-      if (!response.ok) throw refusal(response.status, body);
+      if (!response.ok) throw refusal(response.status, body, response.headers.get('Retry-After'));
       if (typeof body.xml !== 'string' || !body.xml)
         throw new PhraseError((t) => t.scan.client.noResult);
       const recognition: Recognition = { xml: body.xml, warnings: warningsOf(body.warnings) };

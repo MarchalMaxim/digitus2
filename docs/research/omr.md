@@ -168,6 +168,67 @@ A phone never gives the same bytes twice, and the same paper was paired on one c
 
 Totals over 56 readings: 56 recognised, 48 import, 11 read as two parts, 42 have the page's bars, 44 its staves, 49 its key, 30 its time. Four of the 14 photos are read as two parts under at least one change (No. I p. 2 shadow, cut off: all four; No. I p. 3 perspective: three; No. II p. 4 cut off and No. II p. 5 torn: two each); the other ten stay one part. Where a page splits, its bars are counted over the whole score: on No. I p. 3 perspective two grand-staff parts of 12 bars each add up to the 24-bar page, while on No. I p. 2 shadow, cut off a 19-bar one-staff part beside a 24-bar grand staff counts 24, the longest part, since a sum would count the same bars twice. The 3% crop of No. I p. 1 reads one staff and key -3. Six photos read the same under every change (No. I p. 2 flat, No. I p. 3 turned, book p. 25 warm light, the three PhotoScan pages). These are the gate's `photoPerturbedFloors` (two-part readings as a ceiling). The changes are a proxy for capture variability, not a copy of it.
 
+### Blur sweep
+
+`node research/omr/blur-sweep.mjs` blurs the 8 one-page truth pieces of `camera-fusion.mjs` (page 1 rendered clean, 1260 × 1782 px, interline 10.7 px) and the 14 phone photos above (interline 8.1 to 11.7 px) at the page's own pixel scale, recognises every variant with local homr (cached by the hash of its bytes and of the acceptance pipeline), and scores it: truth pages with `evaluateOmr` (pitch F1, exact bars, staves), photos with the manifest facts (bars, staves). Variants: Gaussian blur of sigma 0 to 3 px, motion blur of 3, 6 and 9 px across the staff lines (vertical) and along them (horizontal), and on the truth pages Gaussian blur of 0.25, 0.3 and 0.4 interline (2.7, 3.2 and 4.3 px). A page counts as read when its bars and its staves are right. Only pages that read right unblurred take part in the calibration: 18 of 22 (the two cut-off photos, the upside-down page 3 and the torn page 5 do not). The scorecard, with every row, is `research/omr/results/blur-sweep/latest.json` (git-ignored).
+
+The measure is `staffSharpness` in `apps/web/src/scan/camera/sharpness.ts`. For each of the five lines of every staff that `analyzeStaffGeometry` traces, at 20 columns, it divides the line's equivalent width (the area of its dip below the paper over the dip's depth) by the interline, and returns the median. Blur conserves the dip's area and lowers its depth, so the width is 2.5 sigma for a blurred line and the line's own thickness for a sharp one; the paper level comes from the bands just beyond the staff. The rise distance from 10 to 90% of the dip, which the issue names, saturates at about 0.30 interline once neighbouring lines overlap (sigma 2 on a 10 px interline), exactly where homr starts losing bars; the equivalent width keeps growing. When the tracer finds no staff, a copy of the frame with its local contrast raised (gains 4, 8, then 32) is traced instead, which extends the reach from about 0.17 to about 0.3 interline of sigma. A synthetic page of eight staves (interline 10 px, lines 1.2 px thick) measures:
+
+| Gaussian sigma (px) | 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Measure | 0.169 | 0.193 | 0.299 | 0.410 | 0.523 | 0.626 | 0.724 |
+
+Across ink levels 25 and 90 and dense or sparse notes the values stay within 0.7% of their mean, and the same page drawn twice as large and blurred twice as much measures 4.8% lower (0.390 against 0.410); `sharpness.test.ts` asserts 10% for both, that a page blurred to sigma 3 is traced only on the raised-contrast copy, and that no staff is traced, raised contrast included, on sensor noise, faint noise, JPEG-like blocks, a page of text and three test cards. Over the 310 variants of the sweep, on the desktop that ran it with other jobs running, measuring the traced staves takes a median of 6 ms (90th percentile 10 ms, 31 ms at most) and tracing them is the cost: a median of 383 ms (90th percentile 613 ms, 1.1 s at most) on a frame the tracer reads as it is (152 variants), 928 ms (90th percentile 1.6 s, 2.7 s at most) when a raised-contrast copy is needed, the plain attempt included (81 variants), and 1.4 s (90th percentile 2.1 s, 3.1 s at most) to fail (77 variants). The scorecard keeps both times of every row (`traceMs`, `measureMs`).
+
+| Variant | Blur / interline (truth) | Truth pitch F1 | Truth bars right | Truth staves right | Truth measure (traced) | Photos bars right | Photos staves right | Photos read, of those read sharp | Photo blur / interline | Photos measure (traced) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| none | 0 | 99.7 | 8/8 | 8/8 | 0.138 (8) | 11/14 | 13/14 | 10/10 | 0 | 0.257 (13) |
+| Gaussian 0.5 | 0.05 | 99.7 | 8/8 | 8/8 | 0.162 (8) | 11/14 | 13/14 | 10/10 | 0.05 | 0.276 (13) |
+| Gaussian 1 | 0.09 | 99.7 | 8/8 | 8/8 | 0.267 (8) | 11/14 | 14/14 | 9/10 | 0.11 | 0.369 (12) |
+| Gaussian 1.5 | 0.14 | 99.5 | 8/8 | 8/8 | 0.374 (8) | 10/14 | 13/14 | 8/10 | 0.16 | 0.474 (12) |
+| Gaussian 2 | 0.19 | 93.2 | 7/8 | 8/8 | 0.480 (8) | 5/14 | 13/14 | 3/10 | 0.21 | 0.580 (11) |
+| Gaussian 2.5 | 0.23 | 50.9 | 1/8 | 7/8 | 0.588 (7) | 3/14 | 14/14 | 2/10 | 0.27 | 0.688 (9) |
+| Gaussian 3 | 0.28 | 24.5 | 0/8 | 8/8 | 0.699 (6) | 0/14 | 9/14 | 0/10 | 0.32 | 0.711 (5) |
+| 0.25 interline | 0.25 | 35.4 | 0/8 | 7/8 | 0.632 (8) | | | | | |
+| 0.3 interline | 0.30 | 21.8 | 0/8 | 7/8 | 0.737 (4) | | | | | |
+| 0.4 interline | 0.40 | 5.2 | 0/8 | 2/8 | none (0) | | | | | |
+| Vertical motion 3 | 0.08 | 99.6 | 8/8 | 8/8 | 0.373 (8) | 11/14 | 13/14 | 9/10 | 0.09 | 0.440 (11) |
+| Vertical motion 6 | 0.16 | 89.1 | 6/8 | 8/8 | 0.642 (1) | 8/14 | 13/14 | 8/10 | 0.19 | 0.716 (8) |
+| Vertical motion 9 | 0.24 | 20.1 | 0/8 | 3/8 | none (0) | 0/14 | 7/14 | 0/10 | 0.28 | 0.779 (2) |
+| Horizontal motion 3 | 0.08 | 90.9 | 6/8 | 8/8 | 0.142 (8) | 7/14 | 14/14 | 7/10 | 0.09 | 0.256 (13) |
+| Horizontal motion 6 | 0.16 | 19.9 | 0/8 | 6/8 | 0.144 (8) | 0/14 | 13/14 | 0/10 | 0.19 | 0.261 (13) |
+| Horizontal motion 9 | 0.24 | 12.9 | 0/8 | 6/8 | 0.146 (8) | 0/14 | 9/14 | 0/10 | 0.28 | 0.271 (13) |
+
+Blur per interline is sigma for Gaussian blur and length over the square root of 12 for motion blur, over the page's interline. The photos' own blur adds to it: the 13 traced photos as taken measure 0.210 to 0.283 where the truth pages measure 0.134 to 0.142.
+
+What the sweep shows:
+
+- **The measure predicts where homr breaks.** Truth pages lose a bar at 0.48 (7 of 8 bars right) and most bars at 0.59; photos lose bars at 0.58 (3 of 10 still read) and are gone at 0.71. Both curves cross at a measure of about 0.5 to 0.6.
+- **The live 360 px gate sees none of it.** `sharpness` in `vision.ts` at the 360 px the camera judges (TRACKABLE, 80) passes all 204 variants of the 18 calibration pages, the 25 that lose their staves among them: its agreement with homr's outcome is 55.4%, the share of variants homr reads right.
+- **Staff loss follows the blur only where the tracer still sees the page.** The lowest measures at which a variant loses its staves are 0.480 (page 3, perspective, Gaussian 1.5) and 0.484 (book page, warm light, Gaussian 2), but both rest on a partial trace: the tracer finds 2 of the 11 staves it finds on page 3 unblurred and 3 of the 8 on the book page, and the measure is the median of the staves traced, which are the sharpest parts of the page. At Gaussian 2 the same page 3 measures 0.618 on 9 staves, and it already loses bars at Gaussian 1 (20 of 24, measure 0.380). The flat page 5 still reads both staves and all 15 bars at 0.694 and the hand-shadow page 1 at 0.635. The two low rows therefore do not show that staff loss is independent of the blur. A floor that passes no variant that loses its staves, and rejects none of the photos as taken (the largest is 0.283), has to sit below 0.480 over every measured variant. Over the variants that still trace at least half of their page's staves the lowest such measure is 0.711 (hand-shadow page 1, Gaussian 3, 5 of 9 staves), but 24 of the 25 variants that lose their staves are then not judged.
+- **The tracer limits the reach.** The staff tracer finds no staff on 77 of the 310 variants (every variant of the cut-off page 4 photo, which has strong perspective, among them) and these are the heavy blurs: 18 of the 25 variants that lose their staves have no measure. Higher contrast gains (128 and 512, tried on two truth pages) do not extend the reach: past about 0.3 interline the lines are one grey band.
+- **Blur along the staff lines is invisible.** Horizontal motion moves the median measure by at most 0.015 (0.257 to 0.271 on the photos) and any single page by at most 0.03 (0.029 on the torn page 5, 0.023 on the hand-shadow page 1), while 0.16 interline of it already costs every photo its bars; the variants of it that lose their staves measure 0.282 or less, below any floor that keeps the photos, so all 8 of them pass.
+
+| Floor | Photos as taken rejected | Agreement, measured variants (146) | Right-read variants rejected (of 100) | Variants losing staves passed, of the 7 measured | Agreement, gate as the camera would run it (204) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 0.40 | 0 | 79.5% | 28 | 0 | 63.2% |
+| 0.479 | 0 | 87.0% | 16 | 0 | 68.6% |
+| 0.55 | 0 | 88.4% | 10 | 2 | 69.6% |
+| 0.60 | 0 | 84.9% | 6 | 2 | 67.2% |
+| 0.70 | 0 | 74.0% | 2 | 3 | 59.3% |
+
+The gate as the camera would run it judges by the measure where a staff is traced and by the live 360 px measure where none is. The best floor that passes no staves-losing variant is 0.479: it keeps all 13 measurable photos, rejects 16 of the 100 variants homr reads right and 7 of the 25 that lose their staves (18 have no measure, and the live measure passes them), against the 95% agreement and zero false passes the issue asks for.
+
+Two other rules answer the two weaknesses above, a partial trace and no trace. Their floors come from the same calibration (`calibrationCovered` and `gates.strict` in the scorecard):
+
+| Rule | Floor | Variants judged | Agreement | Right-read variants rejected | Variants losing staves passed | Photos as taken rejected |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Measure where traced; the live 360 px measure where none is | 0.479 | 204 | 68.6% | 16 of 113 | 18 of 25 | 0 |
+| Measure where traced; no traced staff counts as blurry | 0.479 | 204 | 84.3% | 29 of 113 | 0 of 25 | 1 |
+| Measure only where at least half of the page's staves are traced | 0.597 | 102 | 93.1% | 2 of 87 | 0 of 1 judged (24 not judged) | 0 |
+
+The second rule is the only one that passes none of the 25 staves-losing variants over all 204, and it is infeasible: it rejects the cut-off page 4 photo as taken (no staff is traced on it, and homr misreads it anyway) and 29 of the 113 variants homr reads right, so it fails the zero-photos-rejected constraint and the agreement is 84.3%. The third reaches 93.1% by leaving 102 variants unjudged, among them 24 of the 25 that lose their staves, so its zero false passes rest on one variant. No rule reaches the 95% agreement with zero false passes and zero photos rejected, and no capture gate is built on any of them. Reproduce with `DIGITUS2_OMR_HOMR=... node research/omr/blur-sweep.mjs` after `pnpm --filter @digitus2/engine build`; the first run takes about 55 minutes on the recognitions, later runs read them from the cache. The open work is [issue 162](https://github.com/MarchalMaxim/digitus2/issues/162).
+
 ## Routes evaluated
 
 | Route                                                                                                                                                                                                                | Runs where                                       | Result                                                                                                                                                                     | Decision                                       |

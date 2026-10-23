@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { parseMusicXml, type Score } from '@digitus2/engine';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPiano, createSilentInstrument, noteVelocity, PIANO_SOFTEST } from './instrument.js';
@@ -839,5 +840,206 @@ describe('Transport', () => {
     expect(instrument.events).toHaveLength(n);
     expect(t.state.playing).toBe(false);
     expect(t.positionSec()).toBeCloseTo(11, 2);
+  });
+});
+
+describe('Transport in performance order (repeats and jumps, issue 50)', () => {
+  // Whole notes C D E F G A at 120 qpm in 4/4: two seconds a bar.
+  const form = (name: string): Score =>
+    parseMusicXml(
+      readFileSync(
+        fileURLToPath(
+          new URL(`../../../../packages/engine/fixtures/${name}.musicxml`, import.meta.url),
+        ),
+        'utf8',
+      ),
+    ).score;
+  const repeat = form('form-repeat'); // bars 1 2 | 1 2
+  const fine = form('form-dc-al-fine'); // bars 1 2 3 4 | 1 2
+  const voltas = form('form-voltas'); // bars 1 2 3 | 1 2 | 4
+  const heard = () => instrument.events.map((e) => [e.midi, e.time - 100] as const);
+
+  function playToEnd(piece: Score, seconds: number) {
+    const t = make({ score: piece });
+    t.setCountIn(false);
+    let ends = 0;
+    t.onEnd = () => ends++;
+    t.play();
+    run(t, seconds);
+    return { t, ends: () => ends };
+  }
+
+  it('plays the repeated bars again and ends once, with the position back in the written score', () => {
+    const t = make({ score: repeat });
+    t.setCountIn(false);
+    let ends = 0;
+    t.onEnd = () => ends++;
+    t.play();
+    run(t, 5);
+    expect(t.positionSec()).toBeCloseTo(1, 2); // second hearing of bar 1
+    run(t, 3.1);
+    expect(ends).toBe(1);
+    expect(heard().map(([midi, sec]) => [midi, Math.round(sec * 10) / 10])).toEqual([
+      [60, 0],
+      [62, 2],
+      [60, 4],
+      [62, 6],
+    ]);
+    expect(t.state.playing).toBe(false);
+    expect(t.positionSec()).toBeCloseTo(4, 6);
+    expect(t.startSec()).toBe(0);
+  });
+
+  it('resumes a pause on the second hearing without a third', () => {
+    const t = make({ score: repeat });
+    t.setCountIn(false);
+    let ends = 0;
+    t.onEnd = () => ends++;
+    t.play();
+    run(t, 5);
+    t.pause();
+    expect(t.positionSec()).toBeCloseTo(1, 2);
+    expect(t.startSec()).toBeCloseTo(1, 2);
+    t.play();
+    run(t, 3.1);
+    expect(ends).toBe(1);
+  });
+
+  it('seeks to the next hearing of a bar going forward and the last going back', () => {
+    // Playing in the first hearing of bar 1 (at 1 s): bar 2 is next, at its first hearing (perf 2),
+    // so the music runs on through the second pass: 6 s more, to perf 8. At its second hearing
+    // (perf 6) it would end after 2 s.
+    const forward = make({ score: repeat });
+    forward.setCountIn(false);
+    let forwardEnds = 0;
+    forward.onEnd = () => forwardEnds++;
+    forward.play();
+    run(forward, 1);
+    forward.seek(2);
+    run(forward, 3.1); // perf 5.1: the second hearing of bar 1
+    expect(forward.state.playing).toBe(true);
+    expect(forward.positionSec()).toBeCloseTo(1.1, 1);
+    run(forward, 3);
+    expect(forwardEnds).toBe(1);
+    // Playing in the second hearing of bar 1 (at 5): bar 2 is the second hearing, ending in 2 s.
+    const second = make({ score: repeat });
+    second.setCountIn(false);
+    let ends = 0;
+    second.onEnd = () => ends++;
+    second.play();
+    run(second, 5);
+    second.seek(2);
+    run(second, 2.1);
+    expect(ends).toBe(1);
+    // And back: from the second hearing of bar 2 (perf 7), bar 1 is its last hearing at or before,
+    // perf 4.5, which ends 3.5 s on. The first hearing (perf 0.5) would play 7.5 s more.
+    const back = make({ score: repeat });
+    back.setCountIn(false);
+    let backEnds = 0;
+    back.onEnd = () => backEnds++;
+    back.play();
+    run(back, 7);
+    back.seek(0.5);
+    run(back, 0.1);
+    expect(back.positionSec()).toBeCloseTo(0.6, 1);
+    expect(back.state.playing).toBe(true);
+    run(back, 3.5);
+    expect(backEnds).toBe(1);
+    expect(back.state.playing).toBe(false);
+  });
+
+  it('seeks, stopped, to the next hearing from where Play would start', () => {
+    const t = make({ score: fine });
+    t.setCountIn(false);
+    t.seek(0);
+    t.play();
+    run(t, 13); // the whole piece, 12 s: ended
+    expect(t.state.playing).toBe(false);
+    t.seek(2); // bar 2, after the end: the next hearing from the top, not the last one
+    expect(t.startSec()).toBeCloseTo(2, 6);
+    t.play();
+    run(t, 2.1);
+    expect(t.state.playing).toBe(true);
+    run(t, 10);
+    expect(t.state.playing).toBe(false);
+  });
+
+  it('seeks to a bar the order does not end on: the last bar of a D.C. al Fine', () => {
+    const t = make({ score: fine });
+    t.setCountIn(false);
+    t.seek(6); // bar 4, the D.C. bar, written 6 s
+    expect(t.positionSec()).toBeCloseTo(6, 6);
+    expect(t.startSec()).toBeCloseTo(6, 6);
+    t.play();
+    run(t, 0.5);
+    expect(t.positionSec()).toBeCloseTo(6.5, 1);
+    run(t, 6); // the D.C. bar, then bars 1 and 2 again, to the Fine
+    expect(t.state.playing).toBe(false);
+    expect(heard().map(([midi]) => midi)).toEqual([65, 60, 62]);
+  });
+
+  it('plays a D.C. al Fine to the Fine', () => {
+    const { ends } = playToEnd(fine, 13);
+    expect(heard().map(([midi]) => midi)).toEqual([60, 62, 64, 65, 60, 62]);
+    expect(ends()).toBe(1);
+  });
+
+  it('ends at 12 s for the D.C. al Fine and reports the end of the last hearing', () => {
+    const t = make({ score: fine });
+    t.setCountIn(false);
+    let endedAt = 0;
+    t.onEnd = () => {
+      endedAt = ctx.currentTime;
+    };
+    t.play();
+    run(t, 13);
+    expect(endedAt).toBeGreaterThanOrEqual(111.99);
+    expect(endedAt).toBeLessThan(112.2);
+  });
+
+  it('moves a loop set while playing to its stretch of the performance, not the written seconds', () => {
+    // Bars 1 2 3 | 1 2 | 4, two seconds each. Bars 3 and 4 are not heard in a row: the loop runs
+    // from the first hearing of bar 3 to the end of bar 4, perf 4..12. Written, they are 4..8.
+    const t = make({ score: voltas });
+    t.setCountIn(false);
+    t.play();
+    run(t, 1);
+    t.setLoop({ from: 2, to: 3 });
+    run(t, 0.1);
+    expect(t.positionSec()).toBeGreaterThanOrEqual(4 - 1e-6); // moved to the start of bar 3
+    run(t, 5.5); // perf 9.6: inside the second hearing of bar 2, which a written loop never plays
+    expect(t.positionSec()).toBeCloseTo(3.6, 1); // written bar 2
+    expect(heard().map(([midi]) => midi)).toEqual([60, 64, 60, 62]); // C, then E C D from perf 4
+    run(t, 6); // wraps at 12 and goes on
+    expect(t.state.playing).toBe(true);
+  });
+
+  it('keeps a loop that holds the music where it is, in a later hearing', () => {
+    const t = make({ score: repeat });
+    t.setCountIn(false);
+    t.play();
+    run(t, 5); // the second hearing of bar 1, perf 5
+    t.setLoop({ from: 0, to: 1 }); // the stretches are perf 0..4 and 4..8: the music is in the second
+    run(t, 1.1); // perf 6.1
+    expect(t.positionSec()).toBeCloseTo(2.1, 1);
+    expect(heard().map(([midi, sec]) => [midi, Math.round(sec)])).toEqual([
+      [60, 0],
+      [62, 2],
+      [60, 4],
+      [62, 6],
+    ]);
+    run(t, 2.1); // wraps at 8 to 4: bar 1 again
+    expect(t.state.playing).toBe(true);
+    expect(heard().at(-1)![0]).toBe(60);
+  });
+
+  it('counts the click-track beats of each hearing', () => {
+    const t = make({ score: repeat });
+    t.setCountIn(false);
+    t.setMetronome(true);
+    t.play();
+    run(t, 8.1);
+    // 4 beats a bar, 4 bars heard.
+    expect(clicks).toHaveLength(16);
   });
 });

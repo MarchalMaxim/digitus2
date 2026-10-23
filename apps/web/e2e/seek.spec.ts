@@ -178,3 +178,22 @@ test('on a phone, a tap on a bar cues it, and the Practice panel says so', async
   await openPractice(page);
   await expect(page.getByText('Tap a bar to go there.')).toBeVisible();
 });
+
+test('Right steps to the next hearing of a bar when the music has gone back', async ({ page }) => {
+  // Bars 1 to 4 of BWV 994 are repeated (issue 50).
+  await page.goto('/?audio=silent#/piece/bach-applicatio-c-major-bwv-994');
+  await expect(page.locator('.score-sheet g.measure')).toHaveCount(8, { timeout: 20_000 });
+  await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+  await embellishDecided(page);
+  await noCountIn(page);
+  await seekBar(page, 3);
+  await redSettled(page);
+  await page.getByRole('button', { name: 'Play' }).click();
+  await expect.poll(() => redBars(page), { timeout: 6_000 }).toEqual([0]);
+  for (const bar of [1, 2, 3]) {
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(() => redBars(page), { timeout: 4_000 }).toEqual([bar]);
+  }
+  // The second hearing carries on to bar 5.
+  await expect.poll(() => redBars(page), { timeout: 6_000 }).toEqual([4]);
+});

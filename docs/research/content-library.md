@@ -491,7 +491,9 @@ setting.
 Three engravings are excerpts, each ending on the tonic at a section end:
 
 - `wanhal-rondo-op42-no1`: bars 1–24 of 56, the theme up to the Fine. The
-  converter cannot play a da capo, so the whole score would end in F major.
+  converter writes the D.C. al Fine as words, which the player acts on, but
+  `xmlcheck.unfold_order` knows no D.C. and Mutopia's MIDI stops at bar 56,
+  so the gates compare no da capo.
 - `mozart-sonata-k545-mvt2`: bars 1–32 of 74, the theme section. The whole
   movement runs 5:18 with repeats, over the length limit.
 - `beethoven-sonata-op13-mvt2`: bars 1–16 of 73, the theme and its
@@ -887,7 +889,7 @@ in the pieces' `notes` and `rejected` entries and remain open:
 | In an unfolded comparison, grace notes are counted once (`best_midi_match` uses `grace_pitches` as written) | `xmlcheck.py` | Blocks Op. 68 Nos. 7, 18 and 26 and Grieg Op. 12 No. 7. Also forces the polska's comparison as written. Fix: count grace notes along `unfold_order`. |
 | Excerpt mode compares written notes with the MIDI before the written length, not the unfolded performance | `build.py` `midi_check` | Blocks The Easy Winners (bars 1–21 with both endings), which is exact when unfolded (611/611) |
 | `barTo` keeps an implicit `<barTo>a` upbeat bar of the next movement | `ly2musicxml.py` | André needs a pre-stage patch |
-| No D.C./Fine playback (`<sound dacapo/fine>`) | `ly2musicxml.py` | Wanhal is cut to the Fine |
+| No D.C. sound mark (`<sound dacapo>`): the converter writes D.C. al Fine as words, which the player acts on; `unfold_order` and the Mutopia MIDI know no da capo | `ly2musicxml.py`, `xmlcheck.py` | Wanhal is cut to the Fine, Pleyel to its first theme |
 | Not exported: measured tremolo, transparent dynamics, TextSpanner text, `\mark` fermatas over the final bar line, header tempo words, `\upmordent`/`\downmordent`, octave-shift lines (`xmldump` reads `ottavation`, which is markup in 2.24) | `ly2musicxml.py`, `xmldump.ily` | Catalog patches above. Unpatched: the fermatas over the final bar lines of Anh. 117a, 119, 120 and 121, and the 8va lines of Burgmüller Nos. 8, 11 and 15, whose pitches are right. |
 | A final `\bar "\|\|"` becomes a light-heavy bar line | `ly2musicxml.py` | Behr, Wanhal |
 | `bracket-visibility #f` on tuplets is serialised as null | `xmldump.ily` | Burgmüller No. 7 patch |

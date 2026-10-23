@@ -5,8 +5,16 @@ import { buildBeats, countInBar, measureStartSec } from './beats.js';
 import type { AudioClock } from './clock.js';
 import { audibleTime } from './clock.js';
 import { noteVelocity, type Instrument } from './instrument.js';
-import { loopSeconds } from './loop.js';
-import { pedalStops, rollDelays, scoreEndSec } from './performance.js';
+import {
+  pedalStops,
+  performanceLoop,
+  performanceOf,
+  rollDelays,
+  scoreEndSec,
+  toPerformanceSec,
+  toWrittenSec,
+  type Performance,
+} from './performance.js';
 
 export interface TransportDeps {
   ctx: AudioClock;
@@ -126,6 +134,9 @@ function toCtx(seg: Segment, sec: number): number {
 
 /**
  * Our own look-ahead scheduler over the engine's timeline (rendering spike sections 4.2 and 8.4).
+ * It plays the score in the order it is heard (repeats and jumps expanded, `performanceOf`), and
+ * every time inside it is a time in that performance. Its public positions and `seek` speak of
+ * the written score, so the cursor, a click on a bar and the arrow keys go back with the music.
  * Every `tickMs` it schedules what falls in the next `lookAheadSec`, in half-open score windows
  * `[previous horizon, horizon)` that never overlap and never leave a gap. `step()` reads no
  * timer or wall clock, so tests drive it with a fake context.
@@ -164,7 +175,7 @@ export class Transport {
 
   private readonly ctx: AudioClock;
   private readonly instrument: Instrument;
-  private readonly score: Score;
+  private readonly perf: Performance;
   private readonly click: ((time: number, accent: boolean) => void) | undefined;
   private readonly startTimer: (fn: () => void, ms: number) => ReturnType<typeof setInterval>;
   private readonly stopTimer: (id: ReturnType<typeof setInterval>) => void;
@@ -174,6 +185,8 @@ export class Transport {
   private readonly events: PlayEvent[];
   private readonly beats: Beat[];
   private readonly endSec: number;
+  /** The end of the written score: a seek may go to any bar, including one the order never ends on. */
+  private readonly writtenEndSec: number;
 
   private playing = false;
   /** Score position while stopped. */
@@ -183,6 +196,8 @@ export class Transport {
   private metronome = false;
   private countIn = false;
   private loop: { from: number; to: number } | null = null;
+  /** The stretch of the performance the loop plays, fixed when the loop is set (`setLoop`). */
+  private loopPerf: { from: number; to: number } | null = null;
   private segments: Segment[] = [];
   /** Everything before this score time has been scheduled (the previous horizon). */
   private scheduledTo = 0;
@@ -213,7 +228,7 @@ export class Transport {
   ) {
     this.ctx = deps.ctx;
     this.instrument = deps.instrument;
-    this.score = deps.score;
+    this.perf = performanceOf(deps.score);
     this.click = deps.click;
     // Called without a receiver: a browser timer called as a method of `deps` would throw.
     const set = deps.setInterval ?? setInterval;
@@ -223,9 +238,10 @@ export class Transport {
     this.lookAheadSec = opts.lookAheadSec ?? 0.15;
     this.tickMs = opts.tickMs ?? 25;
     this.startDelaySec = opts.startDelaySec ?? 0.05;
-    this.events = buildEvents(this.score);
-    this.beats = buildBeats(this.score);
-    this.endSec = scoreEndSec(this.score);
+    this.events = buildEvents(this.perf.score);
+    this.beats = buildBeats(this.perf.score);
+    this.endSec = scoreEndSec(this.perf.score);
+    this.writtenEndSec = scoreEndSec(deps.score);
   }
 
   get state(): TransportState {
@@ -241,11 +257,16 @@ export class Transport {
   }
 
   /**
-   * Where play() starts, in score seconds, read while stopped: the position (the top once it has
-   * reached the end), or the loop's start when the position lies outside the loop. The paused
-   * cursor compares it with the position: only a position Play resumes from is marked.
+   * Where play() starts, in written score seconds, read while stopped: the position (the top once
+   * it has reached the end), or the loop's start when the position lies outside the loop. The
+   * paused cursor compares it with the position: only a position Play resumes from is marked.
    */
   startSec(): number {
+    return toWrittenSec(this.perf, this.perfStartSec());
+  }
+
+  /** `startSec` in performance seconds. */
+  private perfStartSec(): number {
     const start = this.position >= this.endSec ? 0 : this.position;
     const range = this.loopRange();
     return range && (start < range.from || start >= range.to) ? range.from : start;
@@ -260,7 +281,7 @@ export class Transport {
    */
   play(opts: { leadSec?: number; countIn?: boolean } = {}): void {
     if (this.playing) return;
-    const start = this.startSec();
+    const start = this.perfStartSec();
     const factor = this.tempoFactor;
     let t0 = this.ctx.currentTime + Math.max(this.startDelaySec, opts.leadSec ?? 0);
     this.countInClicks = [];
@@ -269,7 +290,7 @@ export class Transport {
       // The count-in, on the bar grid: a whole bar, or before a pickup the beats before it.
       const m = this.measureStartingAt(start);
       if (m >= 0) {
-        const bar = countInBar(this.score, this.beats, m);
+        const bar = countInBar(this.perf.score, this.beats, m);
         for (const c of bar.clicks) {
           const time = t0 + c.offsetSec / factor;
           this.countInClicks.push({ time, accent: c.accent });
@@ -294,18 +315,27 @@ export class Transport {
 
   pause(): void {
     if (!this.playing) return;
-    this.position = this.positionSec();
+    this.position = this.perfPositionSec();
     this.halt();
     this.instrument.stopAll();
   }
 
   /**
-   * Moves the position to `sec`. Stopped, that is where play() starts. Playing, the music goes on
-   * from there after a lead-in; `leadSec` holds it back for that long when it is longer than the
-   * start delay: the score view's red hops to the new place meanwhile, and the music comes in as
-   * it lands (RedFlight.tsx).
+   * Moves the position to `sec`, in written score seconds. A bar heard twice is entered at its
+   * next hearing going forward in the written score, at its last hearing going back
+   * (`toPerformanceSec`). Stopped, that is where play() starts. Playing, the music goes on from
+   * there after a lead-in; `leadSec` holds it back for that long when it is longer than the start
+   * delay: the score view's red hops to the new place meanwhile, and the music comes in as it
+   * lands (RedFlight.tsx).
    */
   seek(sec: number, opts: { leadSec?: number } = {}): void {
+    const written = Math.min(Math.max(0, sec), this.writtenEndSec);
+    const near = this.playing ? this.perfPositionSec() : this.perfStartSec();
+    this.seekPerf(toPerformanceSec(this.perf, written, near), opts);
+  }
+
+  /** `seek` to a performance second. */
+  private seekPerf(sec: number, opts: { leadSec?: number } = {}): void {
     let target = Math.min(Math.max(0, sec), this.endSec);
     if (!this.playing) {
       this.position = target;
@@ -327,7 +357,7 @@ export class Transport {
   }
 
   rewind(): void {
-    this.seek(0);
+    this.seekPerf(0);
   }
 
   setTempoFactor(f: number): void {
@@ -361,8 +391,8 @@ export class Transport {
 
   /** Rare off-grid fallback: a brief rearticulation is preferable to a long stale tempo. */
   private resyncTempo(): void {
-    const position = this.positionSec();
-    this.seek(position);
+    const position = this.perfPositionSec();
+    this.seekPerf(position);
     const seg = this.current();
     const end = this.loopRange()?.to ?? Infinity;
     for (const event of this.events) {
@@ -394,12 +424,25 @@ export class Transport {
 
   setLoop(range: { from: number; to: number } | null): void {
     this.loop = range ? { from: range.from, to: range.to } : null;
+    // A bar heard twice makes several stretches: the one the music is in, else the first.
+    const near = this.playing
+      ? this.perfPositionSec()
+      : this.position >= this.endSec
+        ? 0
+        : this.position;
+    this.loopPerf = performanceLoop(this.perf, this.loop, near);
     if (!this.playing) return;
     const r = this.loopRange();
-    if (r && (this.scheduledTo < r.from || this.scheduledTo > r.to)) this.seek(r.from);
+    if (r && (this.scheduledTo < r.from || this.scheduledTo > r.to)) this.seekPerf(r.from);
   }
 
+  /** The written second the music is at (`now` as in `audibleTime`). */
   positionSec(now?: number): number {
+    return toWrittenSec(this.perf, this.perfPositionSec(now));
+  }
+
+  /** `positionSec` in performance seconds. */
+  private perfPositionSec(now?: number): number {
     if (!this.playing || this.segments.length === 0) return this.position;
     const t = audibleTime(this.ctx, now);
     let seg = this.segments[0]!;
@@ -638,15 +681,15 @@ export class Transport {
     this.onLeadInChange?.(true);
   }
 
-  /** The loop in score seconds, or null when there is none or it is empty. */
+  /** The loop in performance seconds, or null when there is none or it is empty. */
   private loopRange(): { from: number; to: number } | null {
-    return loopSeconds(this.score, this.loop);
+    return this.loopPerf;
   }
 
   /** The index of the measure that starts at `sec`, or -1. */
   private measureStartingAt(sec: number): number {
-    return this.score.measures.findIndex(
-      (_, i) => Math.abs(measureStartSec(this.score, i) - sec) < 1e-6,
+    return this.perf.score.measures.findIndex(
+      (_, i) => Math.abs(measureStartSec(this.perf.score, i) - sec) < 1e-6,
     );
   }
 }

@@ -17,11 +17,31 @@ export interface KeySigEvent {
   fifths: number;
   mode?: 'major' | 'minor';
 }
+/**
+ * The repeat signs and jump marks a bar carries, for playback only (`performanceOrder`); the
+ * engraving stays as written. Absent from a bar with none.
+ */
+export interface MeasureForm {
+  /** A forward repeat sign at the bar's start. */
+  repeatStart?: true;
+  /** A backward repeat sign at the bar's end: how many times the section plays in all (2 when unmarked). */
+  repeatEnd?: number;
+  /** The volta numbers this bar belongs to (a first ending is [1]). */
+  ending?: number[];
+  segno?: true;
+  coda?: true;
+  /** "To Coda": after a D.C. or D.S., jump to the coda. */
+  toCoda?: true;
+  fine?: true;
+  daCapo?: true;
+  dalSegno?: true;
+}
 export interface MeasureInfo {
   index: number;
   startTick: number;
   lengthTicks: number;
   number: string;
+  form?: MeasureForm;
 }
 
 /** Playback interpretation of a source sign; the written note remains the solver's input. */

@@ -12,6 +12,7 @@ import type {
   Finger,
   Hand,
   KeySigEvent,
+  MeasureForm,
   MeasureInfo,
   Note,
   PedalEvent,
@@ -165,6 +166,8 @@ export function parseMusicXml(
   const keys: Located<KeySigEvent>[] = [];
   const tiedEnds = new Map<Note, { measureIndex: number; offset: number }>();
   const dynamics: DynamicsEvent[] = [];
+  /** Each bar's repeat signs and jump marks, read from the first part (the form belongs to the piece). */
+  const forms = new Map<number, MeasureForm>();
   const wedgeStops: WedgeStop[] = [];
   /** Each note's part and staff within it, which the dynamics marks are written per. */
   const noteStaves = new Map<Note, { part: number; staff: number }>();
@@ -181,6 +184,8 @@ export function parseMusicXml(
     let staves = 1;
     // Open ties keyed by `${staff}:${voice}:${midi}`.
     const pending = new Map<string, PendingTie>();
+    /** The volta numbers of the ending that is open (from its start to its stop). */
+    let openEnding: number[] | null = null;
     let measureStart = 0;
     childElements(part, 'measure').forEach((measure, mIndex) => {
       if (measureStarts[mIndex] === undefined) {
@@ -196,6 +201,7 @@ export function parseMusicXml(
       // to the tie start's onset.
       let chordOnset = measureStart;
       let lastAdvance = 0;
+      let closesEnding = false;
       const at = <T extends { tick: number }>(event: Omit<T, 'tick'>): Located<T> => ({
         measureIndex: mIndex,
         offset: cursor - measureStart,
@@ -232,8 +238,31 @@ export function parseMusicXml(
             }
             break;
           }
+          case 'barline': {
+            if (partIndex !== 0) break;
+            const form = formOf(forms, mIndex);
+            const repeat = firstChild(el, 'repeat');
+            if (repeat?.getAttribute('direction') === 'forward') form.repeatStart = true;
+            if (repeat?.getAttribute('direction') === 'backward') {
+              const times = Number.parseInt(repeat.getAttribute('times') ?? '', 10);
+              form.repeatEnd = times > 0 ? times : 2;
+            }
+            const ending = firstChild(el, 'ending');
+            const type = ending?.getAttribute('type');
+            if (type === 'start') {
+              const numbers = (ending!.getAttribute('number') ?? '')
+                .split(/[,\s]+/)
+                .map((v) => Number.parseInt(v, 10))
+                .filter((v) => v > 0);
+              openEnding = numbers.length > 0 ? numbers : null;
+            } else if (type === 'stop' || type === 'discontinue') closesEnding = true;
+            if (firstChild(el, 'segno')) form.segno = true;
+            if (firstChild(el, 'coda')) form.coda = true;
+            break;
+          }
           case 'direction':
           case 'sound': {
+            if (partIndex === 0) readJumps(el, formOf(forms, mIndex));
             const qpm = readTempo(el);
             if (qpm !== undefined && partIndex === 0) tempos.push(at<TempoEvent>({ qpm }));
             // A direction's <offset> moves its sound only with sound="yes".
@@ -460,6 +489,10 @@ export function parseMusicXml(
         }
       }
       measureLengths[mIndex] = Math.max(measureLengths[mIndex] ?? 0, maxCursor - measureStart);
+      if (partIndex === 0) {
+        if (openEnding) formOf(forms, mIndex).ending = [...openEnding];
+        if (closesEnding) openEnding = null;
+      }
     });
     if (pending.size > 0) warnings.push(`part ${partIndex}: ${pending.size} tie(s) never closed`);
   });
@@ -474,6 +507,7 @@ export function parseMusicXml(
       startTick: start,
       lengthTicks: measureLengths[i] ?? 0,
       number: measureNumbers[i] ?? String(i + 1),
+      ...(forms.has(i) && Object.keys(forms.get(i)!).length > 0 ? { form: forms.get(i)! } : {}),
     });
     start += measureLengths[i] ?? 0;
   }
@@ -630,6 +664,44 @@ function validatePreservedDuration(
   if (!(declared > 0) || !Number.isSafeInteger(exactTicks) || exactTicks <= 0) {
     throw new Error(`cannot preserve notation: ${location}: invalid or missing duration`);
   }
+}
+
+function formOf(forms: Map<number, MeasureForm>, index: number): MeasureForm {
+  let form = forms.get(index);
+  if (!form) {
+    form = {};
+    forms.set(index, form);
+  }
+  return form;
+}
+
+/**
+ * The jump marks of a `<direction>` or `<sound>`: the sound's attributes (dacapo, dalsegno, segno,
+ * coda, tocoda, fine) when it has any of them, else the segno and coda symbols and the words
+ * D.C., D.S., Fine and To Coda.
+ */
+function readJumps(el: Element, form: MeasureForm): void {
+  const sound = el.tagName === 'sound' ? el : allDescendants(el, 'sound')[0];
+  const marks = {
+    daCapo: sound?.getAttribute('dacapo') === 'yes',
+    dalSegno: sound?.hasAttribute('dalsegno') ?? false,
+    segno: sound?.hasAttribute('segno') ?? false,
+    coda: sound?.hasAttribute('coda') ?? false,
+    toCoda: sound?.hasAttribute('tocoda') ?? false,
+    fine: sound?.hasAttribute('fine') ?? false,
+  };
+  if (!Object.values(marks).some(Boolean) && el.tagName === 'direction') {
+    marks.segno = allDescendants(el, 'segno').length > 0;
+    marks.coda = allDescendants(el, 'coda').length > 0;
+    for (const w of allDescendants(el, 'words')) {
+      const text = (w.textContent ?? '').trim();
+      if (/^(D\.\s*C\.|Da\s+Capo)/i.test(text)) marks.daCapo = true;
+      else if (/^(D\.\s*S\.|Dal\s+Segno)/i.test(text)) marks.dalSegno = true;
+      else if (/^fine\.?$/i.test(text)) marks.fine = true;
+      else if (/^to\s+coda/i.test(text)) marks.toCoda = true;
+    }
+  }
+  for (const [name, on] of Object.entries(marks)) if (on) form[name as keyof typeof marks] = true;
 }
 
 function readTempo(el: Element): number | undefined {

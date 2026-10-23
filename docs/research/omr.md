@@ -15,6 +15,8 @@ What was evaluated for the experimental scanning feature (`docs/scanning.md`), w
 
 `research/omr/prepare.mjs` renders library scores into complete page sets (clean PNG, deterministic photo-like degradations, PDF). Its manifest pins each original MusicXML by SHA-256 with its source and licence. The original XML is the ground truth. `research/omr/evaluate.mjs` scores whole-score exports (`.musicxml`, `.xml` or `.mxl`, one per fixture id) from any recogniser against it. The `omr` step of `pnpm verify` runs the harness tests (`pnpm test:omr`); it downloads no models and is not an accuracy gate. The accuracy gate is `omr:acceptance` (below).
 
+`research/omr/piece-match.mjs` measures whether a recognised page finds its library piece by its pitch sequence: `docs/research/piece-match.md`.
+
 ```sh
 pnpm --filter @digitus2/engine build
 pnpm test:omr

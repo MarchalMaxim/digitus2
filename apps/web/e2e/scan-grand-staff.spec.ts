@@ -7,59 +7,77 @@ import { inOrder, mockService, PNG, recordService } from './helpers/scan.js';
 // three pages as the recogniser returned them (apps/web/fixtures/scan): two of one piano part with
 // two staves, and a short last page of two one-staff parts, a treble and a bass, which the join
 // merges into the piano layout (issue 152). Joined, reviewed and fingered, they must draw a grand
-// staff. The project's own viewport decides the device: a phone at 360 px, and a PC window.
+// staff. The same holds when the split page comes first, and when every page comes back split,
+// which the join pairs on its own when one opens with a G clef over an F clef (issue 159; pages 1
+// and 2 are written in split form in the committed -split fixtures). The project's own viewport
+// decides the device: a phone at 360 px, and a PC window.
 const fixture = (name: string) =>
   readFileSync(new URL(`../fixtures/scan/${name}.musicxml`, import.meta.url), 'utf8');
 const pages = [1, 2, 3].map((n) => fixture(`owner-page-${n}`));
+const split = [1, 2].map((n) => fixture(`owner-page-${n}-split`));
+/** The scans: the order the service answers in. */
+const cases: Array<{ name: string; answers: string[] }> = [
+  { name: 'the split page last', answers: [pages[0]!, pages[1]!, pages[2]!] },
+  { name: 'the split page first', answers: [pages[2]!, pages[0]!, pages[1]!] },
+  { name: 'every page split', answers: [split[0]!, split[1]!, pages[2]!] },
+];
 /** The bars of a recognition's first part: all of them for a piano part, half for a split page. */
 const bars = (xml: string) => (xml.split('<part id=')[1]!.match(/<measure /g) ?? []).length;
 
-test('scan: three recognised pages draw a grand staff in the review and in the score view', async ({
-  page,
-}, testInfo) => {
-  test.setTimeout(120_000);
-  const calls = recordService(page);
-  await mockService(page, inOrder(pages));
-  await page.goto('/');
-  // Named as the camera names its photos, in the order they were taken; each has its own bytes.
-  const photos = ['10.00.01', '10.00.12', '10.00.23'].map((time, index) => ({
-    name: `photo ${time}.png`,
-    mimeType: 'image/png',
-    buffer: Buffer.concat([PNG, Buffer.from(`page ${index + 1}`)]),
-  }));
-  await page.locator('input[type=file]').first().setInputFiles(photos);
-  await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
-  await expect(page.locator('.scan-page-list li')).toHaveCount(3);
-  // The camera renames the photos it takes (photo 10.00.01.png, or (2) in the same second), so the
-  // first page's name is read from the list; the score's heading is that name as MusicXML.
-  const label = await page
-    .getByRole('button', { name: /^Select page 1: / })
-    .getAttribute('aria-label');
-  const first = label!.replace(/^Select page 1: /, '');
-  expect(first).toMatch(/^photo .+\.png$/);
+for (const { name, answers } of cases) {
+  test(`scan: ${name}, three recognised pages draw a grand staff in the review and in the score view`, async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120_000);
+    const calls = recordService(page);
+    await mockService(page, inOrder(answers));
+    await page.goto('/');
+    // Named as the camera names its photos, in the order they were taken; each has its own bytes.
+    const photos = ['10.00.01', '10.00.12', '10.00.23'].map((time, index) => ({
+      name: `photo ${time}.png`,
+      mimeType: 'image/png',
+      buffer: Buffer.concat([PNG, Buffer.from(`page ${index + 1}`)]),
+    }));
+    await page.locator('input[type=file]').first().setInputFiles(photos);
+    await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
+    await expect(page.locator('.scan-page-list li')).toHaveCount(3);
+    // The camera renames the photos it takes (photo 10.00.01.png, or (2) in the same second), so the
+    // first page's name is read from the list; the score's heading is that name as MusicXML.
+    const label = await page
+      .getByRole('button', { name: /^Select page 1: / })
+      .getAttribute('aria-label');
+    const first = label!.replace(/^Select page 1: /, '');
+    expect(first).toMatch(/^photo .+\.png$/);
 
-  await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible({
-    timeout: 30_000,
+    await page.getByRole('button', { name: 'Scan this score' }).click();
+    await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible({
+      timeout: 30_000,
+    });
+    const review = await expectReviewGrandStaff(page);
+    console.log(`review: ${JSON.stringify(review)}`);
+    await expect(page.locator('.scan-verdict')).toHaveText(
+      `3 pages · ${review.measures} bars · both hands`,
+    );
+    // Every bar of the three pages is there once, in two staves.
+    expect(review.measures).toBe(answers.reduce((sum, xml) => sum + bars(xml), 0));
+    expect(calls.filter((call) => call === 'POST /v1/recognize')).toHaveLength(3);
+    await expect(page.locator('.scan-review g.fing')).toHaveCount(0);
+    await page.screenshot({ path: testInfo.outputPath('review.png'), fullPage: true });
+    // The app paired the split page's staves, and says so under Recognition details.
+    await page.getByText('Recognition details').click();
+    const note = page.getByText(
+      'The treble and bass staves were paired into a grand staff by the app.',
+    );
+    await expect(note).toBeVisible();
+
+    await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Use for fingerings' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      first.replace(/\.[^.]+$/, '') + '.musicxml',
+    );
+    const score = await expectScoreGrandStaff(page);
+    console.log(`score view: ${JSON.stringify(score)}`);
+    expect(score.measures).toBe(review.measures);
+    await page.screenshot({ path: testInfo.outputPath('score.png'), fullPage: true });
   });
-  const review = await expectReviewGrandStaff(page);
-  console.log(`review: ${JSON.stringify(review)}`);
-  await expect(page.locator('.scan-verdict')).toHaveText(
-    `3 pages · ${review.measures} bars · both hands`,
-  );
-  // Every bar of the three pages is there once, in two staves.
-  expect(review.measures).toBe(pages.reduce((sum, xml) => sum + bars(xml), 0));
-  expect(calls.filter((call) => call === 'POST /v1/recognize')).toHaveLength(3);
-  await expect(page.locator('.scan-review g.fing')).toHaveCount(0);
-  await page.screenshot({ path: testInfo.outputPath('review.png'), fullPage: true });
-
-  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
-  await page.getByRole('button', { name: 'Use for fingerings' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    first.replace(/\.[^.]+$/, '') + '.musicxml',
-  );
-  const score = await expectScoreGrandStaff(page);
-  console.log(`score view: ${JSON.stringify(score)}`);
-  expect(score.measures).toBe(review.measures);
-  await page.screenshot({ path: testInfo.outputPath('score.png'), fullPage: true });
-});
+}

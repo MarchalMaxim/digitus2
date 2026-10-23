@@ -30,7 +30,13 @@ import {
 import { makeScanArchive } from './bundle.js';
 import { meterOffers, type Correction } from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
-import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.js';
+import {
+  GRAPHIC_SPAN_TAGS,
+  GRAPHIC_SPAN_WARNING,
+  joinScanPages,
+  PAIRED_STAVES_WARNING,
+  stavesWerePaired,
+} from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
 import { isTouchOnly } from './phone.js';
@@ -507,6 +513,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           )
             ? [GRAPHIC_SPAN_WARNING]
             : []),
+          ...(xml && stavesWerePaired(xml) ? [PAIRED_STAVES_WARNING] : []),
         ]),
       ],
     });
@@ -520,9 +527,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         ? t.scan.review.unknownWarning
         : warning === GRAND_STAFF_WARNING
           ? t.scan.review.grandStaffWarning
-          : warning === PARTLY_READ_WARNING
-            ? t.scan.review.partlyReadWarning
-            : warning;
+          : warning === PAIRED_STAVES_WARNING
+            ? t.scan.review.pairedStavesNote
+            : warning === PARTLY_READ_WARNING
+              ? t.scan.review.partlyReadWarning
+              : warning;
   const useResult = () => {
     if (!canUseResult) return;
     useAppStore.getState().openPiece({

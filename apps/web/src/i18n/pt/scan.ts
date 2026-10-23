@@ -125,6 +125,9 @@ export const scan: Messages['scan'] = {
     /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'As pautas não foram unidas num sistema de piano, então as duas mãos são lidas como uma. O dedilhado sairia com as mãos erradas: tente uma foto mais plana e bem iluminada ou o PDF original.',
+    /** The join paired a treble part and a bass part into a piano part: under Recognition details. */
+    pairedStavesNote:
+      'A aplicação uniu as pautas de clave de sol e de clave de fá num sistema de piano.',
     /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'Uma linha de música foi lida só em parte, então podem faltar ou sobrar compassos. Compare o resultado com o original antes de praticar.',

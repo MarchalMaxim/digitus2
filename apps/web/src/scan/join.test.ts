@@ -1,6 +1,6 @@
 import { parseMusicXml } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
-import { joinScanPages } from './join.js';
+import { joinScanPages, stavesWerePaired } from './join.js';
 
 function page(divisions = 4, step = 'C', part = 'P1') {
   return `<score-partwise version="4.0"><part-list><score-part id="${part}"><part-name>Piano</part-name><score-instrument id="${part}-I"><instrument-name>Piano</instrument-name></score-instrument><midi-instrument id="${part}-I"><midi-program>1</midi-program></midi-instrument></score-part></part-list><part id="${part}"><measure number="1"><attributes><divisions>${divisions}</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes><note id="n1"><pitch><step>${step}</step><octave>4</octave></pitch><duration>${divisions}</duration><voice>1</voice><type>quarter</type><staff>1</staff><instrument id="${part}-I"/></note><forward><duration>${divisions}</duration></forward><backup><duration>${divisions * 2}</duration></backup><note id="n2"><pitch><step>C</step><octave>3</octave></pitch><duration>${divisions * 2}</duration><voice>2</voice><type>half</type><staff>2</staff></note></measure></part></score-partwise>`;
@@ -241,13 +241,115 @@ describe('issue 152: a page read as a treble part and a bass part', () => {
     const { score } = parseMusicXml(xml, { preserveNotation: true });
     expect(new Set(score.notes.map((n) => n.staff))).toEqual(new Set([1, 2]));
   });
-  it('leaves a batch of split pages, and a split page alone, as they were', () => {
-    expect(joinScanPages([splitPage()])).toBe(splitPage());
-    const xml = joinScanPages([splitPage(), splitPage()]);
-    expect(new DOMParser().parseFromString(xml, 'text/xml').querySelectorAll('part')).toHaveLength(
-      2,
-    );
+  it('says in the joined file that it paired the staves, and only then', () => {
+    expect(stavesWerePaired(joinScanPages([page(), splitPage()]))).toBe(true);
+    expect(stavesWerePaired(joinScanPages([splitPage(), page()]))).toBe(true);
+    expect(stavesWerePaired(joinScanPages([page(), page()]))).toBe(false);
+    expect(stavesWerePaired(page())).toBe(false);
   });
+});
+
+/**
+ * Issue 159: a scan whose every page comes back as a treble part and a bass part, or one page that
+ * does, is paired into a piano part as well; nothing in the scan has to show a piano first.
+ */
+describe('issue 159: a scan without a paired page', () => {
+  const piano = (xml: string, pages = 1) => {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    expect(doc.querySelectorAll('part')).toHaveLength(1);
+    expect(doc.querySelectorAll('score-part')).toHaveLength(1);
+    expect(doc.querySelector('part-name')?.textContent).toBe('Piano');
+    expect(doc.querySelector('score-instrument > instrument-name')?.textContent).toBe('Piano');
+    expect(
+      [...doc.querySelectorAll('part > measure > attributes > staves')].map((el) => el.textContent),
+    ).toEqual(Array(pages).fill('2'));
+    return doc;
+  };
+  it('pairs every page of a batch of split pages, every note where it was', () => {
+    const xml = joinScanPages([splitPage(), splitPage(), splitPage()]);
+    const doc = piano(xml, 3);
+    expect(doc.querySelectorAll('measure')).toHaveLength(6);
+    expect(stavesWerePaired(xml)).toBe(true);
+    const { score } = parseMusicXml(xml, { preserveNotation: true });
+    expect(score.notes).toHaveLength(18);
+    expect(new Set(score.notes.map((n) => n.staff))).toEqual(new Set([1, 2]));
+    const bass = score.notes.filter((n) => n.staff === 2);
+    expect(bass.map((n) => [n.midi, n.onsetTick, n.offsetTick - n.onsetTick]).slice(0, 4)).toEqual([
+      [45, 0, 16],
+      [40, 16, 8],
+      [45, 24, 8],
+      [45, 32, 16],
+    ]);
+  });
+  it('pairs a single split page, and leaves a single paired page as it was', () => {
+    const xml = joinScanPages([splitPage()]);
+    piano(xml);
+    expect(stavesWerePaired(xml)).toBe(true);
+    const opening = [
+      ...new DOMParser().parseFromString(xml, 'text/xml').querySelectorAll('part > measure'),
+    ][0]!;
+    expect(opening.querySelector('attributes')?.querySelector('staves')?.textContent).toBe('2');
+    expect(
+      new Set(parseMusicXml(xml, { preserveNotation: true }).score.notes.map((n) => n.staff)),
+    ).toEqual(new Set([1, 2]));
+    expect(joinScanPages([page()])).toBe(page());
+  });
+  it('leaves two parts alone unless they open with a G clef and an F clef', () => {
+    const bothTreble = splitPage().replace(
+      '<sign>F</sign><line>4</line>',
+      '<sign>G</sign><line>2</line>',
+    );
+    expect(joinScanPages([bothTreble])).toBe(bothTreble);
+    const swapped = splitPage()
+      .replace('<sign>G</sign><line>2</line>', '<sign>X</sign><line>0</line>')
+      .replace('<sign>F</sign><line>4</line>', '<sign>G</sign><line>2</line>')
+      .replace('<sign>X</sign><line>0</line>', '<sign>F</sign><line>4</line>');
+    expect(joinScanPages([swapped])).toBe(swapped);
+    // When every page is a pair and one opens G over F, all pages are paired (issue 159).
+    const mixed = new DOMParser().parseFromString(
+      joinScanPages([splitPage(), bothTreble]),
+      'text/xml',
+    );
+    expect(mixed.querySelectorAll('part')).toHaveLength(1);
+    expect(mixed.querySelector('part-name')?.textContent).toBe('Piano');
+    expect(
+      [...mixed.querySelectorAll('part > measure > attributes > staves')].map(
+        (el) => el.textContent,
+      ),
+    ).toEqual(['2', '2']);
+    const apart = joinScanPages([bothTreble, bothTreble]);
+    const doc = new DOMParser().parseFromString(apart, 'text/xml');
+    expect(doc.querySelectorAll('part')).toHaveLength(2);
+    expect(doc.querySelectorAll('score-part part-name')[0]?.textContent).toBe('Voice');
+    expect(stavesWerePaired(apart)).toBe(false);
+  });
+  it('backs the bass up from where the treble ends, not from its furthest point', () => {
+    // A treble measure that ends in a backup (a second voice written first) ends at its start.
+    const trailing = splitPage().replace(
+      '</measure><measure number="2"><note>',
+      '<backup><duration>16</duration></backup></measure><measure number="2"><note>',
+    );
+    expect(trailing).not.toBe(splitPage());
+    const xml = joinScanPages([trailing]);
+    const { score } = parseMusicXml(xml, { preserveNotation: true });
+    const bass = score.notes.filter((n) => n.staff === 2);
+    expect(bass.every((n) => n.onsetTick >= 0)).toBe(true);
+    expect(bass.map((n) => [n.midi, n.onsetTick, n.offsetTick - n.onsetTick])).toEqual([
+      [45, 0, 16],
+      [40, 16, 8],
+      [45, 24, 8],
+    ]);
+  });
+  it('leaves a page of two parts with different numbers of bars as it was', () => {
+    const uneven = splitPage().replace(
+      /<measure number="2">(?:(?!<\/measure>)[\s\S])*<\/measure><\/part><\/score-partwise>/,
+      '</part></score-partwise>',
+    );
+    expect(joinScanPages([uneven])).toBe(uneven);
+  });
+});
+
+describe('issue 152: split pages next to a paired page', () => {
   it('still refuses split parts that hold different numbers of measures', () => {
     const uneven = splitPage().replace(
       /<measure number="2">(?:(?!<\/measure>)[\s\S])*<\/measure><\/part><\/score-partwise>/,

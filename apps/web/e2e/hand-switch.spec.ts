@@ -158,10 +158,15 @@ test('a hand switched in the task of a far scroll: the pages arrive dimmed at re
   await expect(page.locator('.score-sheet g.fing').first()).toBeAttached({ timeout: 30_000 });
   await openPractice(page);
   await embellishDecided(page);
-  await page.evaluate(() => {
-    window.scrollTo(0, document.documentElement.scrollHeight / 3);
+  // The last page, never built at the open: a page already built in view would rightly sweep.
+  const unbuilt = await page.evaluate(() => {
+    const last = document.querySelector('.score-sheet svg[data-page]:last-child')!;
+    const empty = last.childElementCount === 0;
+    window.scrollTo(0, window.scrollY + last.getBoundingClientRect().top);
     document.querySelector<HTMLInputElement>('input[name="hands"][value="L"]')!.click();
+    return empty;
   });
+  expect(unbuilt, 'the last page is not built before the scroll').toBe(true);
   // The pages built a frame later, where the reader is, are dimmed at rest: no sweep, no fade
   // on any system in view.
   await page.waitForFunction(() =>

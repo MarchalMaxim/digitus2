@@ -52,6 +52,7 @@ import { accompanimentNotes, accompanimentStretches } from './accompaniment.js';
 import { createLevelStore, type LevelStore } from './keyLevels.js';
 import {
   ALONG_EPS,
+  HOLD_TOLERANCE,
   NO_KEYS,
   NO_PRESSES,
   alongPlan,
@@ -298,6 +299,11 @@ export function usePlayAlong({
    * so an idle walk calls nothing.
    */
   const accompaniedRef = useRef(false);
+  /**
+   * The running step an early release broke, and the keys of it still held and fresh at the
+   * time (issue 200): each gets the glass too when it comes up while the red still waits there.
+   */
+  const brokenRef = useRef<{ index: number; mates: Set<number> } | null>(null);
 
   /** Each state is set only on a change, so a note that changes nothing renders nothing. */
   const moveIndex = useCallback((to: number) => {
@@ -349,6 +355,7 @@ export function usePlayAlong({
         homeRef.current = false;
         moveIndex(-1);
         levels.clear();
+        brokenRef.current = null;
         markEarly(false);
         handedRef.current = null;
         if (event?.on) {
@@ -382,8 +389,11 @@ export function usePlayAlong({
         loopAtRef.current = stretchKey(stretch);
         // The keys are spent: nothing of what filled or was asked for counts any more.
         levels.clear();
+        brokenRef.current = null;
         markEarly(false);
       }
+      // A key struck again is no longer one of the keys the break left held.
+      if (event?.on) brokenRef.current?.mates.delete(event.midi);
       if (event?.on) ({ keys, presses } = applyNote({ keys, presses }, event, now));
       if (lost && letGo !== undefined) {
         keys = releaseKey(keys, letGo);
@@ -421,15 +431,34 @@ export function usePlayAlong({
       keysRef.current = result.keys;
       pressesRef.current = result.presses;
       // The key comes up now, after the settle judged the release (issue 200). A release the walk
-      // forgave (the settle passed a step with the key in it, at the release) ends its level at
-      // once, like a full key's, so a level that drains on the keys the red asks for always means
-      // a hold that came too soon; a key let go after its step passed (a bass under the melody)
-      // still drains, and so does a key the piano lost.
+      // forgave ends its level at once, like a full key's, so a level that drains on the keys the
+      // red asks for always means a hold that came too soon. Forgiven is a settle that passed a
+      // step with the key in it, at the release, or a key held for four fifths of its own note
+      // (its unstepped fraction, which reduced motion does not step): the other keys of a forgiven
+      // chord come up after the step has passed. A key let go sooner after its step passed (a bass
+      // under the melody) still drains, and so does a key the piano lost.
       if (letGo !== undefined) {
+        const level = levels.get().get(letGo);
         const forgiven =
-          !lost && result.passedSteps.some((at) => o.steps[at]?.pitches.includes(letGo));
+          !lost &&
+          (result.passedSteps.some((at) => o.steps[at]?.pitches.includes(letGo)) ||
+            (level !== undefined &&
+              level.upMs === null &&
+              level.lengthMs > 0 &&
+              (now - level.atMs) / level.lengthMs >= HOLD_TOLERANCE));
         if (forgiven) levels.end(letGo);
         else levels.release(letGo, now);
+        // A mate of a chord an earlier release broke, let go while the red still waits on it: the
+        // glass outlines it too (it drains as well).
+        const broken = brokenRef.current;
+        if (
+          !lost &&
+          result.passed === 0 &&
+          broken?.index === result.at &&
+          broken.mates.delete(letGo)
+        ) {
+          levels.mark(letGo);
+        }
       }
       // A pass clears the hint and the glass, and an early release after it (the chain's end) sets
       // them again.
@@ -437,11 +466,22 @@ export function usePlayAlong({
         setPlayed((n) => n + result.passed);
         markEarly(false);
         levels.clearGlass();
+        brokenRef.current = null;
       }
       if (result.early) {
         markEarly(true);
-        // The glass outlines the key let go too soon, under its level, until the red moves on.
-        if (letGo !== undefined) levels.mark(letGo);
+        // The glass outlines the key let go too soon, under its level, until the red moves on; the
+        // keys of the step still held follow it when they come up.
+        if (letGo !== undefined) {
+          levels.mark(letGo);
+          const step = o.steps[result.at];
+          brokenRef.current = {
+            index: result.at,
+            mates: new Set(
+              (step?.pitches ?? []).filter((midi) => midi !== letGo && keys.get(midi) === true),
+            ),
+          };
+        }
       }
       // The run start: the step the red waits on has all its keys held and fresh since this
       // moment, or null while it does not run. Issue 184's accompaniment starts when it changes,
@@ -538,6 +578,7 @@ export function usePlayAlong({
 
       if (result.move.kind === 'finish') {
         handedRef.current = null;
+        brokenRef.current = null;
         pb.finish();
         homeRef.current = true;
         atRef.current = 0;

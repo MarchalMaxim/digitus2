@@ -2009,6 +2009,27 @@ test.describe('the score with a piano', () => {
     await expectOneRed(page, 'the glass removed by the pass');
   });
 
+  test('a chord let go too soon leaves the glass on every key of it, and the pass removes them', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { tempo: SLOW });
+    expect(await midi.waitForStep()).toEqual([48, 60]);
+    const hold = await midi.hold();
+    expect(hold, 'the first step at half tempo').toBe(1200);
+    const tapped = await midi.tap([48, 60], Math.round(hold / 3));
+    expect(tapped, 'the page ran the short tap long: it is the PC, not the walk').toBeLessThan(
+      0.8 * hold,
+    );
+    await expect(glass(page, 48)).toHaveCount(1);
+    await expect(glass(page, 60)).toHaveCount(1);
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(2);
+    expect(await midi.index()).toBe(0);
+    await expectOneRed(page, 'a chord let go too soon');
+    // Held for its time, the chord passes and the glass goes from both keys.
+    await midi.playRedTimed();
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(0);
+  });
+
   test('a release the walk forgives ends the level at once and shows no glass', async ({
     page,
   }) => {

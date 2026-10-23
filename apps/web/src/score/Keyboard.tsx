@@ -231,7 +231,29 @@ function oneByKey(keys: readonly PressedKey[]): Map<number, PressedKey> {
 const NO_KEYS: PressedKey[] = [];
 const NO_HOVER: PressedKey[] = [];
 const NO_HELD: readonly number[] = [];
-const NO_LIFTING: ReadonlySet<number> = new Set();
+const NO_LIFTING: ReadonlyMap<number, boolean> = new Map();
+
+/**
+ * The keys rising after a release (issue 200), each with whether the cue held it down when it came
+ * up. A key held again leaves; so does a key the cue pressed after it came up uncued, which goes
+ * down in the quick press time, not the damper's. The same map when nothing changed.
+ */
+function liftingAfter(
+  lifting: ReadonlyMap<number, boolean>,
+  before: ReadonlySet<number>,
+  held: ReadonlySet<number>,
+  cued: ReadonlyMap<number, unknown>,
+): ReadonlyMap<number, boolean> {
+  const next = new Map<number, boolean>();
+  for (const [midi, wasCued] of lifting) {
+    if (held.has(midi) || (!wasCued && cued.has(midi))) continue;
+    next.set(midi, cued.has(midi));
+  }
+  for (const midi of before) if (!held.has(midi)) next.set(midi, cued.has(midi));
+  const same =
+    next.size === lifting.size && [...next].every(([midi, cue]) => lifting.get(midi) === cue);
+  return same ? lifting : next;
+}
 
 /** The bar along the front edge of a held key (issue 182): 5 px high on a white key, 4 on a black. */
 function heldBar(k: KeyShape, w: number, h: number) {
@@ -247,7 +269,8 @@ function heldBar(k: KeyShape, w: number, h: number) {
 
 /**
  * The glass of a key (issue 200): the outline of a full level, open at the front edge where the
- * bar sits, half a unit inside the level's width so a level that fills it covers the line. It runs
+ * bar sits, a unit inside the level's width so the line, stroke and all, never shows outside a level
+ * that fills it. It runs
  * up to the level's top (3.5 on a white key, 2.5 on a black one). A white key beside a black key
  * narrows, above the black key's front edge, to the part of the level that shows, 2 units off the
  * black key's edge so the line never merges into it.
@@ -257,8 +280,8 @@ function glassPath(k: KeyShape, blackLeft: boolean, blackRight: boolean): string
   const h = k.black ? BLACK_H : WHITE_H;
   const bar = heldBar(k, w, h);
   const bottom = bar.y + bar.height;
-  const left = bar.x + 0.5;
-  const right = bar.x + bar.width - 0.5;
+  const left = bar.x + 1;
+  const right = bar.x + bar.width - 1;
   if (k.black) return `M ${left} ${bottom} V 2.5 H ${right} V ${bottom}`;
   const parts = [`M ${left} ${bottom}`];
   if (blackLeft) parts.push(`V ${BLACK_H}`, `H ${k.x + BLACK_W / 2 + 2}`);
@@ -364,13 +387,10 @@ export function Keyboard({
   // own quick press would otherwise cut short (`is-lifting`, base.css). Worked out during the render
   // that sees the key let go, so no frame draws it rising at the press time.
   const [heldSeen, setHeldSeen] = useState<ReadonlySet<number>>(heldSet);
-  const [lifting, setLifting] = useState<ReadonlySet<number>>(NO_LIFTING);
-  if (heldSeen !== heldSet) {
-    setHeldSeen(heldSet);
-    const next = new Set([...lifting].filter((midi) => !heldSet.has(midi)));
-    for (const midi of heldSeen) if (!heldSet.has(midi)) next.add(midi);
-    setLifting(next);
-  }
+  const [lifting, setLifting] = useState<ReadonlyMap<number, boolean>>(NO_LIFTING);
+  const nextLifting = liftingAfter(lifting, heldSeen, heldSet, byMidi);
+  if (heldSeen !== heldSet) setHeldSeen(heldSet);
+  if (nextLifting !== lifting) setLifting(nextLifting);
   useEffect(() => {
     if (lifting.size === 0) return;
     const timer = setTimeout(
@@ -386,7 +406,8 @@ export function Keyboard({
     () =>
       new Map<number, KeyGeometry>(
         keys.map((k) => {
-          const travel = heldSet.has(k.midi) ? KEY_TRAVEL.held : KEY_TRAVEL;
+          // A key rising keeps the held travel for the rise, so the letter's clip does not jump.
+          const travel = heldSet.has(k.midi) || lifting.has(k.midi) ? KEY_TRAVEL.held : KEY_TRAVEL;
           return [
             k.midi,
             {
@@ -397,7 +418,7 @@ export function Keyboard({
           ];
         }),
       ),
-    [keys, heldSet],
+    [keys, heldSet, lifting],
   );
   // The keys that draw a level: one in `levels`, on the keyboard, not dimmed (`mutedByMidi` holds
   // the dimmed keys only), with an `h` for those that also draw a letter's copy. The rectangles

@@ -969,6 +969,103 @@ describe('the levels of the held keys', () => {
     expect(s.hook.result.current.levels.glass().size).toBe(0);
   });
 
+  // A chord of two keys, then single notes: [60 64] at 0, [62] at 0.5, [65] at 1 second.
+  const chordScore = scoreOf([
+    { midi: 60, tick: 0 },
+    { midi: 64, tick: 0 },
+    { midi: 62, tick: 1 },
+    { midi: 65, tick: 2 },
+  ]);
+
+  it('ends the level of every key of a forgiven chord, not just the first let go', async () => {
+    await connect();
+    const s = setup({ score: chordScore });
+    s.press(60, 64);
+    s.hold(450); // nine tenths of the hold
+    s.release(60);
+    expect(s.cues()).toEqual([0, 0.5]); // the step passed at the release
+    s.hold(10);
+    s.release(64); // the step is behind already, but this key was held nearly its whole note
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect(s.hook.result.current.levels.get().has(64)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0); // no drain for either
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+  });
+
+  it('still drains a key let go after its step passed when it is held less than four fifths of its note', async () => {
+    await connect();
+    const s = setup(); // [48 60] at 0: the bass sounds 2000 ms
+    s.press(48, 60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5]);
+    s.hold(500);
+    s.release(48); // half of its whole note
+    const level = s.hook.result.current.levels.get().get(48);
+    expect(level?.upMs).not.toBeNull();
+    expect(level?.fromLevel).toBeCloseTo(0.5);
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    s.press(48);
+    s.hold(1700);
+    s.release(48); // seventeen twentieths: held long enough, it ends at once
+    expect(s.hook.result.current.levels.get().has(48)).toBe(false);
+  });
+
+  it('gives the glass to every key of a chord let go too soon', async () => {
+    await connect();
+    const s = setup({ score: chordScore });
+    s.press(60, 64);
+    s.hold(100);
+    s.release(60);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+    s.hold(10);
+    s.release(64);
+    expect([...s.hook.result.current.levels.glass()].sort()).toEqual([60, 64]);
+    expect(s.hook.result.current.levels.get().get(64)?.upMs).not.toBeNull(); // and it drains
+    expect(s.cues()).toEqual([0]);
+    // The red moving on takes both away; the next chord starts clean.
+    s.press(60, 64);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+  });
+
+  it('gives no glass to a chord-mate pressed again after the break, nor to a key lifted before its chord was complete', async () => {
+    await connect();
+    const s = setup({ score: chordScore });
+    s.press(60);
+    s.hold(30);
+    s.release(60); // lifted before 64 was pressed: the step never ran
+    s.press(64);
+    s.hold(30);
+    s.release(64); // 64 alone is no running step either
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    s.press(60, 64);
+    s.hold(100);
+    s.release(60);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+    s.press(64); // the mate is struck again (a duplicate on): it is no longer one of the broken chord
+    s.hold(500);
+    s.release(64);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+  });
+
+  it('forgets the broken chord when the walk is moved from outside', async () => {
+    await connect();
+    const s = setup({ score: chordScore });
+    s.press(60, 64);
+    s.hold(100);
+    s.release(60); // 64 is a mate of the broken chord
+    s.fake.cue = 0.5; // a seek (bar click)
+    s.fake.start = 0.5;
+    s.refresh();
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    s.fake.cue = 0;
+    s.fake.start = 0;
+    s.refresh();
+    s.release(64);
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+  });
+
   it('clears every level on a seek, and when Play starts', async () => {
     await connect();
     const s = setup();

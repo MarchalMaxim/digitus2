@@ -1094,6 +1094,23 @@ describe('Keyboard: the key goes down and the glass (issue 200)', () => {
       expect(c4()).toHaveClass('is-down');
     });
 
+    it('presses a key cued while it is still rising in the quick press time, not the damper time', () => {
+      const { container, rerender } = render(keyboard({ held: [60] }));
+      const c4 = () => container.querySelector('g.key[data-midi="60"]')!;
+      rerender(keyboard({ held: [] })); // let go, nothing cued: rising to rest
+      expect(c4()).toHaveClass('is-lifting');
+      expect(c4()).not.toHaveClass('is-pressed');
+      rerender(keyboard({ pressed: [C4], held: [] })); // the cue arrives meanwhile
+      expect(c4()).toHaveClass('is-pressed');
+      expect(c4()).not.toHaveClass('is-lifting');
+      // A key cued when it came up keeps rising slowly to the cue's depth.
+      rerender(keyboard({ pressed: [C4], held: [60] }));
+      rerender(keyboard({ pressed: [C4], held: [] }));
+      expect(c4()).toHaveClass('is-lifting');
+      rerender(keyboard({ pressed: [C4], held: [] }));
+      expect(c4()).toHaveClass('is-lifting');
+    });
+
     it('does not mark a key that was never held as lifting', () => {
       const { container, rerender } = render(keyboard({ pressed: [C4] }));
       rerender(keyboard({ pressed: [C4], held: [62] }));
@@ -1160,24 +1177,24 @@ describe('Keyboard: the key goes down and the glass (issue 200)', () => {
 
     it('is open at the front edge and runs up the key (a white key with a black key to the right)', () => {
       const { container } = render(keyboard({ glass: new Set([60]) }));
-      // C4: bar x 171 to 189, so the line is half a unit in; it climbs to 3.5 under the key's top
+      // C4: bar x 171 to 189, so the line is a whole unit in (the stroke never shows outside a rising level); it climbs to 3.5 under the key's top
       // and drops to the black key's front edge (62), 2 units off the black key's edge (183).
       expect(glassOf(container, 60)!.getAttribute('d')).toBe(
-        'M 171.5 97 V 3.5 H 183 V 62 H 188.5 V 97',
+        'M 172 97 V 3.5 H 183 V 62 H 188 V 97',
       );
     });
 
     it('narrows into the gap between two black keys', () => {
       const { container } = render(keyboard({ glass: new Set([62]) }));
       expect(glassOf(container, 62)!.getAttribute('d')).toBe(
-        'M 195.5 97 V 62 H 201 V 3.5 H 207 V 62 H 212.5 V 97',
+        'M 196 97 V 62 H 201 V 3.5 H 207 V 62 H 212 V 97',
       );
     });
 
     it('narrows only on the side that has a black key (a white key with one on its left)', () => {
       const { container } = render(keyboard({ glass: new Set([64]) }));
       expect(glassOf(container, 64)!.getAttribute('d')).toBe(
-        'M 219.5 97 V 62 H 225 V 3.5 H 236.5 V 97',
+        'M 220 97 V 62 H 225 V 3.5 H 236 V 97',
       );
     });
 
@@ -1186,15 +1203,13 @@ describe('Keyboard: the key goes down and the glass (issue 200)', () => {
       const { container } = render(
         <Keyboard lowMidi={50} highMidi={73} pressed={[]} glass={new Set([50])} />,
       );
-      expect(glassOf(container, 50)!.getAttribute('d')).toBe(
-        'M 3.5 97 V 3.5 H 15 V 62 H 20.5 V 97',
-      );
+      expect(glassOf(container, 50)!.getAttribute('d')).toBe('M 4 97 V 3.5 H 15 V 62 H 20 V 97');
     });
 
     it('outlines a black key from its bar to 2.5 under its top', () => {
       const { container } = render(keyboard({ glass: new Set([61]) }));
       // C#4: bar x 187 to 197 (10 wide), bottom 60.
-      expect(glassOf(container, 61)!.getAttribute('d')).toBe('M 187.5 60 V 2.5 H 196.5 V 60');
+      expect(glassOf(container, 61)!.getAttribute('d')).toBe('M 188 60 V 2.5 H 196 V 60');
     });
 
     it('is never red, and draws no color of its own', () => {
@@ -1242,10 +1257,18 @@ describe('Keyboard: the key goes down and the glass (issue 200)', () => {
       // Half full: the level is 49.5 high, from 47.5; the held key shortens to 0.94.
       expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.held.white, 6);
       expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.held.white, 6);
-      // Let go (the same level, the key up): the cue's depth.
+      // Let go (the same level, the key up): the key rises, and the clip keeps the held travel
+      // for as long as it does, so it does not jump at the release; then it is the cue's depth.
       rerender(keyboard({ pressed: [C4], handLetters: true, levels, held: [] }));
-      expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.white, 6);
-      expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.white, 6);
+      expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.held.white, 6);
+      expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.held.white, 6);
+      act(() => {
+        vi.advanceTimersByTime(250);
+      });
+      // The level went on rising meanwhile, 1050 of 1600 ms: 5 + 89 * level high, from the bar's bottom, 97.
+      const high = 5 + 89 * (1050 / 1600);
+      expect(num('y')).toBeCloseTo((97 - high) * KEY_TRAVEL.white, 6);
+      expect(num('height')).toBeCloseTo(high * KEY_TRAVEL.white, 6);
     });
   });
 

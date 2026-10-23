@@ -1349,21 +1349,8 @@ test.describe('the score with a piano', () => {
     const fraction = (watched.now[48]! - 5) / 89;
     expect(fraction, `48 filled to ${watched.now[48]}`).toBeGreaterThan(0.2);
     expect(fraction, `48 filled to ${watched.now[48]}`).toBeLessThan(0.4);
-    await expect.poll(() => midi.target()).toEqual([60]);
-
-    // The finger number was drawn again over the level on both keys while their step was asked
-    // for (48 is no longer shown pressed once the red has moved on, so its copy is gone with the
-    // number); 60 is asked for again. The wrong note has no level.
-    expect(watched.numbers[48]).toMatch(/^[1-5]$/);
-    expect(watched.numbers[60]).toMatch(/^[1-5]$/);
-    await expect(levelText(page, 60)).toHaveCount(1);
-    await expect(levelText(page, 60)).toHaveText(/^[1-5]$/);
-    await expect(level(page, 50)).toHaveCount(0);
-    await expect(heldBar(page, 50)).toHaveCount(1);
-    await expectOneRed(page, 'the keys filling');
-    await expectNoSeriousA11y(page, 'the keys filling');
-
-    // 48 is let go early: it drains to nothing over --dur-slow (200 ms), shrinking all the way.
+    // 48 is let go early, right away: on a slow machine the checks below could outlast its whole
+    // note. It drains to nothing over --dur-slow (200 ms), shrinking all the way.
     const drained = await page.evaluate(async () => {
       const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
       const el = () => document.querySelector('.keyboard .key[data-midi="48"] rect.key-level');
@@ -1383,6 +1370,9 @@ test.describe('the score with a piano', () => {
       });
       return { heights, ms: performance.now() - started };
     });
+    expect(drained.heights[0], `48 was full before it was let go: ${drained.heights}`).toBeLessThan(
+      90,
+    );
     expect(drained.heights.length, `heights while draining: ${drained.heights}`).toBeGreaterThan(1);
     for (let i = 2; i < drained.heights.length; i++)
       expect(drained.heights[i]!).toBeLessThanOrEqual(drained.heights[i - 1]! + 0.01);
@@ -1391,6 +1381,20 @@ test.describe('the score with a piano', () => {
     expect(drained.ms, 'the level stayed after its drain').toBeLessThan(1_500);
     await expect(level(page, 48)).toHaveCount(0);
     await expect(levelText(page, 48)).toHaveCount(0);
+
+    await expect.poll(() => midi.target()).toEqual([60]);
+
+    // The finger number was drawn again over the level on both keys while their step was asked
+    // for (48 is no longer shown pressed once the red has moved on, so its copy is gone with the
+    // number); 60 is asked for again. The wrong note has no level.
+    expect(watched.numbers[48]).toMatch(/^[1-5]$/);
+    expect(watched.numbers[60]).toMatch(/^[1-5]$/);
+    await expect(levelText(page, 60)).toHaveCount(1);
+    await expect(levelText(page, 60)).toHaveText(/^[1-5]$/);
+    await expect(level(page, 50)).toHaveCount(0);
+    await expect(heldBar(page, 50)).toHaveCount(1);
+    await expectOneRed(page, 'the keys filling');
+    await expectNoSeriousA11y(page, 'the keys filling');
 
     // 60 is full: let go, its level goes with its bar at once (the next poll finds none).
     await expect(level(page, 60)).toHaveCount(1);

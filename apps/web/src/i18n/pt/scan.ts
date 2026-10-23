@@ -1,4 +1,4 @@
-import { plural } from '../format.js';
+import { formatList, plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
@@ -74,7 +74,7 @@ export const scan: Messages['scan'] = {
     pageImages: (n: number) =>
       plural('pt', n, { one: '# imagem de página', other: '# imagens de página' }),
     advice:
-      'PDFs originais e digitalizações planas em alta resolução funcionam melhor. Fotos de livros podem falhar, mesmo bem iluminadas. O resultado abre ao lado do original para revisão.',
+      'PDFs originais e digitalizações planas em alta resolução funcionam melhor. O resultado abre ao lado do original para revisão.',
     where:
       'O reconhecimento roda no serviço de digitalização do projeto, no Google Cloud (Países Baixos). Sua página é enviada para lá, reconhecida e depois apagada.',
     cancelScan: 'Cancelar digitalização',
@@ -97,15 +97,14 @@ export const scan: Messages['scan'] = {
     originalAlt: 'Partitura impressa original',
   },
   review: {
-    caveat:
-      'O reconhecimento pode ter erros em notas, ritmos, ligaduras ou mãos. O texto e o andamento podem estar incompletos. Nenhum dedilhado foi adicionado ainda.',
     recognized: 'Notação reconhecida',
     sheetLabel: 'reconhecimento bruto da digitalização',
-    viewLabel: 'Visualização do reconhecimento',
-    pageRecognition: 'Reconhecimento por página',
-    combinedScore: 'Partitura combinada',
-    pageShown: (page: number) => `Reconhecimento da página ${page}`,
-    allPages: 'Todas as páginas na ordem de leitura',
+    pageShown: (page: number, joined: boolean) =>
+      joined
+        ? `Reconhecimento da página ${page}. Selecione-a de novo para ver a partitura inteira.`
+        : `Reconhecimento da página ${page}`,
+    allPages:
+      'Todas as páginas na ordem de leitura. Escolha uma página para ver só o reconhecimento dela.',
     preparing: 'Preparando a notação reconhecida…',
     problem: (error: string) =>
       `${error} Corrija as notas aqui, baixe o arquivo bruto para um editor de partituras ou tente outra imagem.`,
@@ -119,14 +118,14 @@ export const scan: Messages['scan'] = {
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Motivo técnico: ${reason}`,
     retained:
-      'Encontre os originais e os reconhecimentos guardados em Minhas partituras. Guarde seus próprios arquivos originais; o armazenamento do navegador pode ser apagado. O reconhecimento não é garantido como correto; a reprodução pode usar um andamento padrão do app.',
+      'Encontre os originais e os reconhecimentos guardados em Minhas partituras. Guarde seus próprios arquivos originais; o armazenamento do navegador pode ser apagado. A reprodução pode usar um andamento padrão do app.',
     beamGrouping: 'O agrupamento das barras é deduzido e pode diferir do original.',
     graphicSpanWarning:
       'Ligaduras e outros sinais de notação ficam dentro de cada página digitalizada. Compare as continuações nas bordas das páginas; os pontos finais que faltam não foram reparados.',
-    /** The scanner found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'As pautas não foram unidas num sistema de piano, então as duas mãos são lidas como uma. O dedilhado sairia com as mãos erradas: tente uma foto mais plana e bem iluminada ou o PDF original.',
-    /** The scanner read only part of a line of music: shown above the comparison. */
+    /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'Uma linha de música foi lida só em parte, então podem faltar ou sobrar compassos. Compare o resultado com o original antes de praticar.',
     unknownWarning: 'O reconhecedor indicou um aviso desconhecido. Confira bem o original.',
@@ -137,6 +136,27 @@ export const scan: Messages['scan'] = {
     downloadAll: 'Baixar tudo',
     useForFingerings: 'Usar para os dedilhados',
     scanAgain: 'Digitalizar de novo',
+  },
+  verdict: {
+    facts: (parts: string[]) => parts.join(' · '),
+    pages: (n: number) => plural('pt', n, { one: '# página', other: '# páginas' }),
+    bars: (n: number) => plural('pt', n, { one: '# compasso', other: '# compassos' }),
+    bothHands: 'ambas as mãos',
+    oneStaff: 'uma só pauta',
+    notJoined:
+      'As páginas não foram unidas em uma só partitura: cada uma é mostrada separadamente e pode ser baixada em Arquivos. Substitua a página que difere e digitalize de novo.',
+    readAsOneStaff: (pages: number[]) =>
+      pages.length === 0
+        ? 'Uma página foi lida como uma só pauta: as mãos estão misturadas. Troque essa foto e digitalize de novo.'
+        : pages.length === 1
+          ? `A página ${pages[0]} foi lida como uma só pauta: as mãos estão misturadas. Troque essa foto e digitalize de novo.`
+          : `As páginas ${formatList('pt', pages.map(String))} foram lidas como uma só pauta: as mãos estão misturadas. Troque essas fotos e digitalize de novo.`,
+    readInPart: (pages: number[]) =>
+      pages.length === 0
+        ? 'Parte de uma linha não foi lida, então faltam ou sobram compassos. Troque essa foto e digitalize de novo.'
+        : pages.length === 1
+          ? `Parte de uma linha da página ${pages[0]} não foi lida, então faltam ou sobram compassos. Troque essa foto e digitalize de novo.`
+          : `Parte de uma linha das páginas ${formatList('pt', pages.map(String))} não foi lida, então faltam ou sobram compassos. Troque essas fotos e digitalize de novo.`,
   },
   edit: {
     hint: 'Selecione uma nota para corrigi-la.',

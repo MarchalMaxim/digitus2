@@ -12,7 +12,7 @@ import { createEngineClient, type EngineClient } from '../engine/client.js';
 import { createRenderer, type ScoreRenderer } from '../score/render/renderer.js';
 import { ScoreSheet } from '../score/ScoreSheet.js';
 import { useLocale, useT } from '../i18n/i18n.js';
-import type { Messages, Phrase } from '../i18n/messages.js';
+import type { Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
   BUSY,
@@ -36,6 +36,7 @@ import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
 import { isTouchOnly } from './phone.js';
 import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
 import { ScanProgress } from './ScanProgress.js';
+import { blocks, verdict as readVerdict, verdictText } from './verdict.js';
 import {
   correct,
   timingIssue,
@@ -63,6 +64,8 @@ const NO_CORRECTIONS: Correction[] = [];
 const TAKEN_AFTER_MS = 2_000;
 /** How long the full bar stays on screen after the last answer, so the reader sees it fill. */
 const FULL_HOLD_MS = 400;
+/** Said by the review's verdict line (verdict.ts), so the alert that would repeat it is not shown. */
+const NOT_COMBINED: Phrase = (m) => m.scan.errors.notCombinedSaved;
 
 /** The scan in progress: the page on the scanner is named by its job, and stopped by both. */
 interface ScanRun {
@@ -86,9 +89,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   );
   // Errors are kept as phrases, so they follow a change of language while they are on screen.
   const [error, setErrorPhrase] = useState<Phrase | null>(() =>
-    hasPageRecognition && !initial.xml && initial.pages!.length > 1
-      ? (m: Messages) => m.scan.errors.notCombinedSaved
-      : null,
+    hasPageRecognition && !initial.xml && initial.pages!.length > 1 ? NOT_COMBINED : null,
   );
   const setError = (phrase: Phrase | null) => {
     setErrorPhrase(() => phrase);
@@ -162,12 +163,16 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   }, [session.xml, corrections.length]);
   const pageMode = batch && reviewMode === 'page';
   const editable = phase === 'review' && !pageMode && !!corrected;
-  const importXml = pageMode ? sourcePages[selected]?.xml : (corrected?.xml ?? session.xml);
+  // What Use for fingerings opens is the combined score, whichever page is on screen: it is the
+  // one imported. Only a scan whose pages did not join imports the page shown.
+  const importXml = session.xml
+    ? (corrected?.xml ?? session.xml)
+    : pageMode
+      ? sourcePages[selected]?.xml
+      : undefined;
   const renderXml = pageMode ? sourcePages[selected]?.xml : (corrected?.renderXml ?? session.xml);
-  const problems = useMemo(
-    () => (editable && corrected ? findProblems(corrected.score) : []),
-    [editable, corrected],
-  );
+  // Counted whichever page is on screen: the verdict says how many places to check there are.
+  const problems = useMemo(() => (corrected ? findProblems(corrected.score) : []), [corrected]);
   // A misread meter is fixed from its place to check, offered only where the hands agree.
   const offers = useMemo(
     () => (corrected ? meterOffers(corrected.score, problems) : new Map()),
@@ -181,7 +186,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const settled = rendered?.xml === renderXml && imported?.xml === importXml;
   const canUseResult =
     !!session.xml &&
-    reviewMode === 'combined' &&
     rendered?.xml === renderXml &&
     imported?.xml === importXml &&
     pages.length > 0 &&
@@ -190,17 +194,28 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     note !== null && editable ? corrected.score.notes.find((n) => n.ordinal === note) : undefined;
   // Saved corrections that no longer apply are dropped by the next change, never replayed.
   const kept = corrected ? corrections.slice(0, corrected.applied) : corrections;
-  // The one red: on Use for fingerings while it can be used (or is still being checked); on a
-  // refused recognition, on the first place to check, or on Scan again; on a selected note.
-  const useLive =
-    canUseResult || (!settled && reviewMode === 'combined' && !!session.xml && !reviewError);
+  // The verdict line (issue 158): what was read, from the facts the session holds.
+  const found = readVerdict({
+    pages: isImage ? sourcePages : undefined,
+    warnings: session.warnings ?? [],
+    joined: !!session.xml || !batch,
+    score: corrected?.score,
+    problems: problems.length,
+  });
+  // The one red: on the next action. A selected note first; Scan again when the verdict says the
+  // scan itself needs another go (a verdict that says "scan again" must not leave the red on
+  // Use); else Use for fingerings while it can be used (or is still being checked), else the
+  // first place to check, else Scan again.
+  const useLive = canUseResult || (!settled && !!session.xml && !reviewError);
   const nextRed = selectedNote
     ? 'note'
-    : useLive
-      ? 'use'
-      : editable && problems.length
-        ? 'problem'
-        : 'again';
+    : blocks(found)
+      ? 'again'
+      : useLive
+        ? 'use'
+        : editable && problems.length
+          ? 'problem'
+          : 'again';
   useSelectedMark(sheetHost, selectedNote ? note : null, pages);
 
   useEffect(() => {
@@ -272,7 +287,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     return () => {
       current = false;
     };
-  }, [renderXml, width, phase]);
+  }, [renderXml, width, phase, reviewMode, pageMode ? selected : -1]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!importXml || phase !== 'review') return;
     let current = true;
@@ -471,7 +486,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     try {
       xml = joinScanPages(results.map((page) => page.xml!));
     } catch (cause) {
-      setError(batch ? (m) => m.scan.errors.notCombinedSaved : (m) => messageOf(cause, m));
+      setError(batch ? NOT_COMBINED : (m) => messageOf(cause, m));
       // The joiner's own reason goes under Recognition details.
       if (batch) setCombineDetail(messageOf(cause));
       setReviewMode('page');
@@ -638,6 +653,19 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       undo();
     }
   };
+  // A thumbnail is the view switch: a page shows its own recognition, the same page again the
+  // whole score. Pages that did not join have no whole score to return to.
+  const showPage = (index: number) => {
+    select(null);
+    if (pageMode && index === selected && session.xml) setReviewMode('combined');
+    else {
+      setSelected(index);
+      if (batch) setReviewMode('page');
+    }
+    // On a phone the recognition sits above the thumbnails: bring it into view.
+    if (typeof matchMedia === 'function' && matchMedia('(max-width: 700px)').matches)
+      resultHost.current?.scrollIntoView?.({ block: 'start' });
+  };
   const baseName = session.file.name.replace(/\.[^.]+$/, '');
   // Everything the scan did in one file: the phone's share sheet where it has one, else a download.
   const downloadAll = async () => {
@@ -771,18 +799,52 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         </div>
       ) : (
         <>
-          <p>{t.scan.review.caveat}</p>
-          {/* A lost grand staff decides every fingering, so it is said here, not under Details. */}
-          {(session.warnings ?? []).includes(GRAND_STAFF_WARNING) && (
-            <p role="alert">{t.scan.review.grandStaffWarning}</p>
-          )}
-          {/* Missing bars are as serious, so a partly read line is said here too. */}
-          {(session.warnings ?? []).includes(PARTLY_READ_WARNING) && (
-            <p role="alert">{t.scan.review.partlyReadWarning}</p>
-          )}
-          {error && <p role="alert">{error(t)}</p>}
+          {/* What was read, in facts. A page read as one staff, a line read in part and pages that
+              did not join are said here, with the action: they decide every fingering. */}
+          <p className="scan-verdict" role={blocks(found) ? 'alert' : undefined}>
+            {verdictText(t, found)}
+          </p>
+          {error && error !== NOT_COMBINED && <p role="alert">{error(t)}</p>}
           {corrected && corrected.applied < corrections.length && (
             <p role="alert">{t.scan.edit.stale(corrected.applied)}</p>
+          )}
+          <div className="row scan-next">
+            {/* Plain while a selected note, or the first place to check, carries the one red. */}
+            <Button
+              className="scan-use"
+              primary={nextRed === 'use'}
+              disabled={!canUseResult}
+              onClick={useResult}
+            >
+              {t.scan.review.useForFingerings}
+            </Button>
+            <Button
+              primary={nextRed === 'again'}
+              onClick={() => {
+                setPhase('ready');
+                setError(null);
+                setReviewMode('combined');
+                select(null);
+                setUndoStack([]);
+                retain({
+                  ...session,
+                  xml: undefined,
+                  corrections: undefined,
+                  pages: sourcePages.map((p) => ({ ...p, xml: undefined, error: undefined })),
+                });
+              }}
+            >
+              {t.scan.review.scanAgain}
+            </Button>
+          </div>
+          {reviewError && (
+            <p role="alert">
+              {(editable
+                ? t.scan.review.problem
+                : pageMode && session.xml
+                  ? t.scan.review.problemInCombined
+                  : t.scan.review.problemReadOnly)(reviewError(t))}
+            </p>
           )}
           <div className="scan-review">
             <section className="scan-source stack">
@@ -791,7 +853,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 <ImagePages
                   pages={sourcePages}
                   selected={selected}
-                  onSelect={setSelected}
+                  onSelect={showPage}
+                  recognized={pageMode ? selected : null}
                   editable={false}
                   busy={false}
                   onChange={arrange}
@@ -818,31 +881,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             <section className="stack scan-result" ref={resultHost} onKeyDown={onEditKey}>
               <h2>{t.scan.review.recognized}</h2>
               {batch && (
-                <div className="row" aria-label={t.scan.review.viewLabel}>
-                  <button
-                    aria-pressed={reviewMode === 'page'}
-                    onClick={() => {
-                      setReviewMode('page');
-                      select(null);
-                    }}
-                  >
-                    {t.scan.review.pageRecognition}
-                  </button>
-                  <button
-                    disabled={!session.xml}
-                    aria-pressed={reviewMode === 'combined'}
-                    onClick={() => {
-                      setReviewMode('combined');
-                    }}
-                  >
-                    {t.scan.review.combinedScore}
-                  </button>
-                </div>
-              )}
-              {batch && (
                 <p className="small muted">
                   {reviewMode === 'page'
-                    ? t.scan.review.pageShown(selected + 1)
+                    ? t.scan.review.pageShown(selected + 1, !!session.xml)
                     : t.scan.review.allPages}
                 </p>
               )}
@@ -955,15 +996,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             </section>
           </div>
           <section className="stack scan-decision">
-            {reviewError && (
-              <p role="alert">
-                {(editable
-                  ? t.scan.review.problem
-                  : pageMode && session.xml
-                    ? t.scan.review.problemInCombined
-                    : t.scan.review.problemReadOnly)(reviewError(t))}
-              </p>
-            )}
             <details>
               <summary>{t.scan.review.detailsSummary}</summary>
               <div className="stack small">
@@ -1038,35 +1070,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </div>
               </details>
             )}
-            <div className="row">
-              {/* Plain while a selected note carries the screen's one red. */}
-              <Button
-                className="scan-use"
-                primary={nextRed === 'use'}
-                disabled={!canUseResult}
-                onClick={useResult}
-              >
-                {t.scan.review.useForFingerings}
-              </Button>
-              <Button
-                primary={nextRed === 'again'}
-                onClick={() => {
-                  setPhase('ready');
-                  setError(null);
-                  setReviewMode('combined');
-                  select(null);
-                  setUndoStack([]);
-                  retain({
-                    ...session,
-                    xml: undefined,
-                    corrections: undefined,
-                    pages: sourcePages.map((p) => ({ ...p, xml: undefined, error: undefined })),
-                  });
-                }}
-              >
-                {t.scan.review.scanAgain}
-              </Button>
-            </div>
           </section>
         </>
       )}

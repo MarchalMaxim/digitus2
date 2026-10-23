@@ -73,6 +73,15 @@ test('scan on a phone: camera pages, thumb-sized tools, reading order and one Sc
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
   expect(uploads).toEqual([photo('second').buffer, photo('first').buffer]);
+  // The verdict and the one red are in the first screen of the phone's review.
+  const verdict = page.locator('.scan-verdict');
+  await expect(verdict).toBeVisible();
+  const viewportHeight = page.viewportSize()!.height;
+  for (const element of [verdict, page.locator('.is-red').first()]) {
+    const box = (await element.boundingBox())!;
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(viewportHeight);
+  }
   await expectOneRed(page, 'phone review');
   expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 });

@@ -1,4 +1,4 @@
-import { plural } from '../format.js';
+import { formatList, plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
@@ -73,7 +73,7 @@ export const scan: Messages['scan'] = {
     pageImages: (n: number) =>
       plural('nl', n, { one: '# pagina-afbeelding', other: '# pagina-afbeeldingen' }),
     advice:
-      'Originele pdf’s en vlakke scans in hoge resolutie werken het best. Foto’s van boeken kunnen mislukken, ook bij goed licht. Het resultaat opent naast het origineel, zodat je het kunt controleren.',
+      'Originele pdf’s en vlakke scans in hoge resolutie werken het best. Het resultaat opent naast het origineel, zodat je het kunt controleren.',
     where:
       'De herkenning draait op de scanner van het project, in Google Cloud (Nederland). Je pagina wordt daarheen gestuurd, herkend en daarna verwijderd.',
     cancelScan: 'Scan annuleren',
@@ -97,15 +97,13 @@ export const scan: Messages['scan'] = {
     originalAlt: 'Originele gedrukte partituur',
   },
   review: {
-    caveat:
-      'De herkenning kan fouten bevatten in noten, ritmes, bogen of handen. Tekst en tempo kunnen onvolledig zijn. Er zijn nog geen vingerzettingen toegevoegd.',
     recognized: 'Herkende notatie',
     sheetLabel: 'ruwe scanherkenning',
-    viewLabel: 'Weergave van de herkenning',
-    pageRecognition: 'Herkenning per pagina',
-    combinedScore: 'Gecombineerde partituur',
-    pageShown: (page: number) => `Herkenning van pagina ${page}`,
-    allPages: 'Alle pagina’s in leesvolgorde',
+    pageShown: (page: number, joined: boolean) =>
+      joined
+        ? `Herkenning van pagina ${page}. Kies haar opnieuw voor de hele partituur.`
+        : `Herkenning van pagina ${page}`,
+    allPages: 'Alle pagina’s in leesvolgorde. Kies een pagina om alleen haar herkenning te zien.',
     preparing: 'Herkende notatie voorbereiden…',
     problem: (error: string) =>
       `${error} Corrigeer de noten hier, download het ruwe bestand voor een notatieprogramma of probeer een andere afbeelding.`,
@@ -119,14 +117,14 @@ export const scan: Messages['scan'] = {
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Technische reden: ${reason}`,
     retained:
-      'Bewaarde originelen en herkenningen vind je in Mijn partituren. Bewaar zelf ook je originele bestanden; de opslag van je browser kan worden gewist. De herkenning is niet gegarandeerd juist; bij het afspelen kan een standaardtempo van de app gelden.',
+      'Bewaarde originelen en herkenningen vind je in Mijn partituren. Bewaar zelf ook je originele bestanden; de opslag van je browser kan worden gewist. Bij het afspelen kan een standaardtempo van de app gelden.',
     beamGrouping: 'De balkgroepering is afgeleid en kan afwijken van het origineel.',
     graphicSpanWarning:
       'Legatobogen en andere notatiebogen blijven binnen elke gescande pagina. Vergelijk de voortzettingen aan de paginarand; ontbrekende eindpunten zijn niet hersteld.',
-    /** The scanner found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'De notenbalken zijn niet tot een pianosysteem gekoppeld, dus beide handen worden als één gelezen. De vingerzetting zou de handen verkeerd hebben: probeer een vlakkere, gelijkmatig belichte foto of de originele pdf.',
-    /** The scanner read only part of a line of music: shown above the comparison. */
+    /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'Een regel muziek is maar gedeeltelijk gelezen, dus er kunnen maten ontbreken of bijgekomen zijn. Vergelijk het resultaat met het origineel voordat je gaat oefenen.',
     unknownWarning:
@@ -138,6 +136,27 @@ export const scan: Messages['scan'] = {
     downloadAll: 'Alles downloaden',
     useForFingerings: 'Gebruiken voor vingerzettingen',
     scanAgain: 'Opnieuw scannen',
+  },
+  verdict: {
+    facts: (parts: string[]) => parts.join(' · '),
+    pages: (n: number) => plural('nl', n, { one: '# pagina', other: '# pagina’s' }),
+    bars: (n: number) => plural('nl', n, { one: '# maat', other: '# maten' }),
+    bothHands: 'beide handen',
+    oneStaff: 'één notenbalk',
+    notJoined:
+      'De pagina’s zijn niet tot één partituur samengevoegd: elke pagina staat apart en is te downloaden onder Bestanden. Vervang de pagina die afwijkt en scan opnieuw.',
+    readAsOneStaff: (pages: number[]) =>
+      pages.length === 0
+        ? 'Een pagina is als één notenbalk gelezen: de handen lopen door elkaar. Vervang die foto en scan opnieuw.'
+        : pages.length === 1
+          ? `Pagina ${pages[0]} is als één notenbalk gelezen: de handen lopen door elkaar. Vervang die foto en scan opnieuw.`
+          : `Pagina’s ${formatList('nl', pages.map(String))} zijn als één notenbalk gelezen: de handen lopen door elkaar. Vervang die foto’s en scan opnieuw.`,
+    readInPart: (pages: number[]) =>
+      pages.length === 0
+        ? 'Een deel van een regel is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto en scan opnieuw.'
+        : pages.length === 1
+          ? `Een deel van een regel op pagina ${pages[0]} is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto en scan opnieuw.`
+          : `Een deel van een regel op pagina’s ${formatList('nl', pages.map(String))} is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto’s en scan opnieuw.`,
   },
   edit: {
     hint: 'Selecteer een noot om die te corrigeren.',

@@ -54,6 +54,7 @@ export function ImagePages({
   onSelect,
   onChange,
   onRotating,
+  recognized,
   camera = false,
 }: {
   pages: ScanPage[];
@@ -62,6 +63,11 @@ export function ImagePages({
   /** A touch-only device: adding a page opens the camera first. */
   camera?: boolean;
   selected: number;
+  /**
+   * The review's thumbnails are its view switch: the page whose own recognition is shown is the
+   * pressed one, and none is pressed while the whole score is. Absent, the selected page is.
+   */
+  recognized?: number | null;
   onSelect(index: number): void;
   onChange(pages: ScanPage[]): void;
   onRotating?(value: boolean): void;
@@ -192,7 +198,9 @@ export function ImagePages({
               >
                 <button
                   className="scan-thumbnail"
-                  aria-pressed={selected === index}
+                  aria-pressed={
+                    recognized === undefined ? selected === index : recognized === index
+                  }
                   onClick={() => onSelect(index)}
                   aria-label={t.scan.pages.select(index + 1, (page.originalFile ?? page.file).name)}
                 >

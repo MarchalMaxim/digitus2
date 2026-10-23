@@ -1,6 +1,6 @@
 # Scanning (experimental)
 
-Scanning turns a photo or PDF of printed piano music into a score with fingerings. Recognition runs on the project's scanner, a small service on Google Cloud: homr for photos and Audiveris for PDFs. It works the same on a PC, a tablet and a phone, with nothing to install and no account. The app shows the original beside the recognised notation, and you decide whether to use the result. Recognition is not reliable. Good-looking notation can still contain wrong pitches, rhythms, ties, bars or hands, so treat every result as a draft to check. Original PDFs and flat, high-resolution scans work best; book photos can fail even when well lit. Handwriting is not supported.
+Scanning turns a photo or PDF of printed piano music into a score with fingerings. Recognition runs on the project's scanner, a small service on Google Cloud: homr for photos and Audiveris for PDFs. It works the same on a PC, a tablet and a phone, with nothing to install and no account. The app shows the original beside the recognised notation, and you decide whether to use the result. Original PDFs and flat, high-resolution scans work best. Handwriting is not supported.
 
 MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the scanner. Why these recognisers were chosen, and what was measured: `docs/research/omr.md`. How the scanner runs, what it costs and how its spend is capped: `docs/scan-service.md`.
 
@@ -8,7 +8,7 @@ MusicXML, compressed MusicXML (`.mxl`) and MIDI open directly, without the scann
 
 - **Uploaded original bytes are kept.** Unrotated images and PDFs go to the scanner byte for byte. A rotated image is sent as a lossless PNG derived from the original, and four turns restore the exact original file. PDFs are never rasterised in the browser. For guided camera capture, the combined, cropped page becomes the retained source; the five intermediate camera frames are temporary and are released after the page is kept.
 - **The page goes only where the scan page says** (Where your page goes, below), and only when you press **Scan this score**.
-- **Recognition errors stay visible.** The source and the recognised notation sit side by side, and every result is marked as needing review. Scanned notation goes through a strict import that refuses malformed notation, for example a tie stop without a start. You can still download such a result, but **Use for fingerings** stays disabled.
+- **Recognition errors stay visible.** The source and the recognised notation sit side by side, and a line under the title says what was read: the pages, the bars, both hands and the places to check, or the one thing that blocks the scan and what to do. Scanned notation goes through a strict import that refuses malformed notation, for example a tie stop without a start. You can still download such a result, but **Use for fingerings** stays disabled.
 - **Nothing is silently corrected.** The app never guesses a repair, deletes bars or invents notes, meter or tempo. The scanner never picks one of several exported scores or publishes an incomplete export. The scanner changes a recognition only by two lossless rules, described under Known recognition errors and reported under Recognition details.
 - **Your corrections are explicit.** Each correction you make in the review is recorded, listed and undoable. The raw recognition is kept unchanged beside the corrected copy, and both can be downloaded.
 - **Display preparation never changes the music.** Inferred beams and a voice regrouping for Verovio (below) apply only to the rendered copy. Recognised pitches, timing, note ids, raw downloads and the input to fingering and playback are untouched.
@@ -103,7 +103,7 @@ WebKit runs in Docker because Playwright's WebKit for Windows has no video strea
 
 1. At the end of the library, choose **Open your own score**, or drop files onto the library. Choose up to 20 PNG or JPEG page images together (10 MB each), or one PDF (10 MB). Drag the thumbnails into reading order. Selecting a page shows keyboard-accessible move and remove controls and **Rotate 90° clockwise**. Rotate a sideways or upside-down photo before scanning.
 2. Press **Scan this score**. Pages are recognised one at a time in the order shown; the status line reads "Page 2 of 5 · Recognizing…" for a batch. **Cancel scan** stops the job, and leaving the page cancels it too. A page that fails keeps the others; **Retry failed pages** resubmits only the failed ones. One black bar runs for the whole batch. It is timed, not reported: each page still to scan counts 35 s for a photo, and a PDF counts 16 s for each of its pages, as the app counts them in the file (the deployed service's warm times in `docs/scan-service.md`), plus 5 s while the scanner may still be starting. The line under it reads "About 70 seconds". The bar eases to about nine tenths by the expected time, creeps after that and fills only when the last page answers. A page that runs far past its own time moves the bar on only within half of what is left, so the pages after it still have room, and the bar never moves back, not even when a busy scanner makes the page wait. When another reader's score is being scanned, the status reads "Another score is being scanned. Yours starts as soon as it finishes." and the app offers the same page again every 5 s for up to three minutes, with **Cancel scan** working throughout. The scanner gives up on a page after three minutes.
-3. Compare the original with **Recognized notation**: every page, pitches, rhythms, bar count, clefs, key and time signatures, and hands. For an image batch, select a thumbnail to see that page's recognition, or switch to **Combined score**. For a PDF, step through the original with Previous and Next; the recognised pages may break differently. Text and tempo may be missing.
+3. Compare the original with **Recognized notation**: every page, pitches, rhythms, bar count, clefs, key and time signatures, and hands. The line under the title says what was read, for example "3 pages · 25 bars · both hands · 2 places to check"; when a page was read as one staff, a line was read only in part, or the pages did not join, it says so in one sentence with what to do, and **Scan again** carries the red. For an image batch, select a thumbnail to see that page's recognition alone, and select it again to return to the whole score; **Use for fingerings** always opens the whole score. On a phone the recognition comes before the original. For a PDF, step through the original with Previous and Next; the recognised pages may break differently. Text and tempo may be missing.
 4. Correct what differs, note by note (Correct the recognition, below).
 5. Press **Use for fingerings** to open the normal score view with fingerings and playback. The button is enabled once the recognised score, with your corrections, passes the strict import and renders. **Scan source and recognition** in the score view returns to the comparison, and so does the browser's Back button, without a new job.
 
@@ -181,7 +181,7 @@ When the scanner answers but cannot read the page:
 
 - **Staff resolution too low.** The message gives the measured staff-line spacing, for example six pixels. Use the full-resolution original, photograph a smaller area more closely, or use the original PDF. Enlarging a compressed image does not restore detail. homr refuses images over 25 megapixels.
 - **Multiple scores or incomplete export.** Separate examples, footnotes and a curved page can confuse the recogniser. Try a single main music section or the original PDF.
-- **Other recognition failure.** A flatter, sharper source may help; ordinary book photos remain unreliable.
+- **Other recognition failure.** A flatter, sharper source may help.
 - **Preview unavailable.** Open the original in another tab. The PDF preview does not run document scripts, and some unusual PDFs or image encodings do not preview.
 
 ## Known recognition errors and limits
@@ -190,8 +190,8 @@ Measured on the acceptance corpus (16 library pieces rendered as pages, each in 
 
 - **Missed ties**: 13 of the corpus's 47 ties have no tie or slur mark in homr's recognition at all, so the note sounds again instead of being held. Use **Tied to next**.
 - **Rhythm**: notes read with the wrong value (sixteenths as 32nds, a stray rest), which **Places to check** often finds as hands that disagree on a bar's length.
-- **A lost grand staff**: on a badly lit photo homr can read a piano page as one staff whose clef keeps changing. The review then says so above the comparison; the hands are not separated, so use another photo or the PDF.
-- **A line of music read only in part**: a staff cut short loses bars, a short stray staff adds some. The review then says that bars may be missing or added and asks you to compare with the original; the alert is shown above the comparison, like the grand-staff one.
+- **A lost grand staff**: on a badly lit photo homr can read a piano page as one staff whose clef keeps changing. The verdict line then names the page and says to replace that photo and scan again; the hands are not separated, so use another photo or the PDF.
+- **A line of music read only in part**: a staff cut short loses bars, a short stray staff adds some. The verdict line then names the page, says that bars are missing or added, and says to replace that photo and scan again, like the grand-staff one.
 - **Beams** on photos are drawn by beat for readability, not read from the source; on PDFs Audiveris reads them.
 - **Key and time signature** are inferred when a continuation page does not print them.
 
@@ -211,7 +211,7 @@ Further limits:
 - Audiveris (used for PDFs) fails below about 10 px between staff lines and on skewed or curved pages.
 - Text and tempo can be incomplete. A tempo like "= 100" without a recognised beat unit gives no tempo, and an app default tempo is not a recognised one.
 - A recognition job finishing does not mean its notation imports. A tie whose continuation arrives late (the bar 11 tie of the test page, a quarter note late) is refused by the strict import until it is corrected.
-- Synthetic test pages, fourteen phone photos checked on bars, staves, key and time, strict parsing and passing tests do not certify musical accuracy. Multi-page books and browsers other than desktop Chrome are untested.
+- Multi-page books and browsers other than desktop Chrome are untested.
 
 Source beam recovery for photos is an open request (#39).
 

@@ -1,4 +1,4 @@
-import { plural } from '../format.js';
+import { formatList, plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 export const scan: Messages['scan'] = {
@@ -76,7 +76,7 @@ export const scan: Messages['scan'] = {
     pageImages: (n: number) =>
       plural('fr', n, { one: '# image de page', other: '# images de pages' }),
     advice:
-      'Les PDF d’origine et les numérisations à plat en haute résolution donnent les meilleurs résultats. Les photos de livres peuvent échouer, même bien éclairées. Le résultat s’ouvre à côté de l’original pour que vous puissiez le vérifier.',
+      'Les PDF d’origine et les numérisations à plat en haute résolution donnent les meilleurs résultats. Le résultat s’ouvre à côté de l’original pour que vous puissiez le vérifier.',
     where:
       'La reconnaissance se fait sur le service de numérisation du projet, sur Google Cloud (Pays-Bas). Votre page y est envoyée, reconnue, puis supprimée.',
     cancelScan: 'Annuler la numérisation',
@@ -100,15 +100,14 @@ export const scan: Messages['scan'] = {
     originalAlt: 'Partition imprimée d’origine',
   },
   review: {
-    caveat:
-      'La reconnaissance peut contenir des erreurs de notes, de rythmes, de liaisons ou de mains. Le texte et le tempo peuvent être incomplets. Aucun doigté n’a encore été ajouté.',
     recognized: 'Notation reconnue',
     sheetLabel: 'reconnaissance brute de la numérisation',
-    viewLabel: 'Affichage de la reconnaissance',
-    pageRecognition: 'Reconnaissance par page',
-    combinedScore: 'Partition combinée',
-    pageShown: (page: number) => `Reconnaissance de la page ${page}`,
-    allPages: 'Toutes les pages dans l’ordre de lecture',
+    pageShown: (page: number, joined: boolean) =>
+      joined
+        ? `Reconnaissance de la page ${page}. Sélectionnez-la à nouveau pour la partition entière.`
+        : `Reconnaissance de la page ${page}`,
+    allPages:
+      'Toutes les pages dans l’ordre de lecture. Choisissez une page pour voir sa reconnaissance seule.',
     preparing: 'Préparation de la notation reconnue…',
     problem: (error: string) =>
       `${error} Corrigez les notes ici, téléchargez le fichier brut pour un éditeur de partitions ou essayez une autre image.`,
@@ -122,14 +121,14 @@ export const scan: Messages['scan'] = {
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Raison technique\u00a0: ${reason}`,
     retained:
-      'Retrouvez les originaux et les reconnaissances conservés dans Mes partitions. Gardez vos fichiers d’origine\u00a0; le stockage du navigateur peut être effacé. La reconnaissance n’est pas garantie exacte\u00a0; la lecture peut utiliser un tempo par défaut de l’application.',
+      'Retrouvez les originaux et les reconnaissances conservés dans Mes partitions. Gardez vos fichiers d’origine\u00a0; le stockage du navigateur peut être effacé. La lecture peut utiliser un tempo par défaut de l’application.',
     beamGrouping: 'Le regroupement par ligatures est déduit et peut différer de l’original.',
     graphicSpanWarning:
       'Les liaisons et autres signes de notation restent limités à chaque page numérisée. Comparez les suites en bord de page\u00a0; les extrémités manquantes n’ont pas été réparées.',
-    /** The scanner found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'Les portées n’ont pas été réunies en système de piano : les deux mains sont lues comme une seule. Le doigté aurait de mauvaises mains : essayez une photo plus plate et bien éclairée, ou le PDF d’origine.',
-    /** The scanner read only part of a line of music: shown above the comparison. */
+    /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'Une ligne de musique n’a été lue qu’en partie, donc des mesures peuvent manquer ou être en trop. Comparez le résultat avec l’original avant de vous exercer.',
     unknownWarning:
@@ -141,6 +140,27 @@ export const scan: Messages['scan'] = {
     downloadAll: 'Tout télécharger',
     useForFingerings: 'Utiliser pour le doigté',
     scanAgain: 'Numériser à nouveau',
+  },
+  verdict: {
+    facts: (parts: string[]) => parts.join(' · '),
+    pages: (n: number) => plural('fr', n, { one: '# page', other: '# pages' }),
+    bars: (n: number) => plural('fr', n, { one: '# mesure', other: '# mesures' }),
+    bothHands: 'deux mains',
+    oneStaff: 'une seule portée',
+    notJoined:
+      'Les pages n’ont pas été réunies en une seule partition\u00a0: chacune est montrée seule et se télécharge dans Fichiers. Remplacez la page qui diffère et numérisez à nouveau.',
+    readAsOneStaff: (pages: number[]) =>
+      pages.length === 0
+        ? 'Une page a été lue comme une seule portée\u00a0: les mains sont mélangées. Remplacez cette photo et numérisez à nouveau.'
+        : pages.length === 1
+          ? `La page ${pages[0]} a été lue comme une seule portée\u00a0: les mains sont mélangées. Remplacez cette photo et numérisez à nouveau.`
+          : `Les pages ${formatList('fr', pages.map(String))} ont été lues comme une seule portée\u00a0: les mains sont mélangées. Remplacez ces photos et numérisez à nouveau.`,
+    readInPart: (pages: number[]) =>
+      pages.length === 0
+        ? 'Une partie d’une ligne n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez cette photo et numérisez à nouveau.'
+        : pages.length === 1
+          ? `Une partie d’une ligne de la page ${pages[0]} n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez cette photo et numérisez à nouveau.`
+          : `Une partie d’une ligne des pages ${formatList('fr', pages.map(String))} n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez ces photos et numérisez à nouveau.`,
   },
   edit: {
     hint: 'Sélectionnez une note pour la corriger.',

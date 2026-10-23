@@ -637,7 +637,7 @@ test.describe('the score with a piano', () => {
       await playToTheEnd(midi);
       const burst = page.locator('.end-burst .note-burst-note');
       await expect(burst.first()).toBeAttached();
-      expect(await burst.count()).toBeGreaterThanOrEqual(3);
+      expect(await burst.count()).toBeGreaterThanOrEqual(6);
       await expect(page.locator('.end-burst .is-red')).toHaveCount(0);
       // The red is back on the first group, and Rewind has nowhere to go.
       await expect.poll(() => midi.index(), { timeout: 15_000 }).toBe(0);

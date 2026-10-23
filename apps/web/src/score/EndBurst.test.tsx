@@ -30,9 +30,9 @@ function motion(reduced: boolean): void {
   vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: reduced } as MediaQueryList);
 }
 
-// Issue #97: ink notes rise from the final chord as the red flies home, at the end only.
+// Issue 97 and issue 193: ink notes rise from the final chord as the red flies home, at the end only.
 describe('the finish', () => {
-  it('lets 3 to 5 ink notes rise from the topmost notehead of the last group heard, once', () => {
+  it('lets 6 to 8 ink notes rise from the topmost notehead of the last group heard, once', () => {
     motion(false);
     const host = sheet();
     const view = render(<EndBurst host={host} ended={0} currentGroup={4} />);
@@ -46,8 +46,8 @@ describe('the finish', () => {
     expect(bursts[0]!.style.left).toBe('300px');
     expect(bursts[0]!.style.top).toBe('180px');
     const notes = bursts[0]!.querySelectorAll('.note-burst-note');
-    expect(notes.length).toBeGreaterThanOrEqual(3);
-    expect(notes.length).toBeLessThanOrEqual(5);
+    expect(notes.length).toBeGreaterThanOrEqual(6);
+    expect(notes.length).toBeLessThanOrEqual(8);
     expect(document.querySelectorAll('.end-burst .is-red')).toHaveLength(0);
     expect(document.querySelector('.end-burst')!.getAttribute('aria-hidden')).toBe('true');
 

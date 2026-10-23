@@ -1,6 +1,6 @@
 /**
- * The finish (issue #97): when the piece has been played to its end, a few ink notes rise from
- * the last group heard, in the easter egg's own vocabulary (app/NoteBurst.tsx, `drawBurst`), as
+ * The finish (issue 97): when the piece has been played to its end, 6 to 8 ink notes rise (issue
+ * 193) from the last group heard, in the easter egg's own vocabulary (app/NoteBurst.tsx, `drawBurst`), as
  * the red flies home to Play (RedFlight.tsx). The burst stands at the topmost notehead the cursor
  * marked last, read before its marks clear; it is ink only, since the flying red is the screen's
  * one red on every frame. Once per play-through: it answers `playback.ended`, which only the

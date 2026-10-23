@@ -359,6 +359,16 @@ def grace_pitches(xs: XScore) -> Counter:
     return Counter((n.staff, n.pitch) for n in xs.notes if n.grace and n.pitch is not None)
 
 
+def unfolded_grace_pitches(xs: XScore) -> Counter:
+    """(staff, pitch) -> number of grace notes played, once per pass of unfold_order."""
+    passes = Counter(unfold_order(xs.measures))
+    res = Counter()
+    for n in xs.notes:
+        if n.grace and n.pitch is not None and passes[n.measure_idx]:
+            res[(n.staff, n.pitch)] += passes[n.measure_idx]
+    return res
+
+
 def compare_notes(xml_notes: list[tuple], midi_notes: list[tuple], grace: Counter | None = None,
                   _track_map: dict | None = None) -> dict:
     """Compare sounding notes of a MusicXML file with a MIDI rendering.
@@ -423,10 +433,9 @@ def compare_notes(xml_notes: list[tuple], midi_notes: list[tuple], grace: Counte
 def best_midi_match(xs: XScore, midi_path: Path) -> dict:
     """Compare against a MIDI file both as written and with repeats unfolded; keep the better."""
     mn = read_midi(midi_path)
-    g = grace_pitches(xs)
-    r1 = compare_notes(written_notes(xs), mn, g)
+    r1 = compare_notes(written_notes(xs), mn, grace_pitches(xs))
     r1["mode"] = "written"
-    r2 = compare_notes(unfolded_notes(xs), mn, g)
+    r2 = compare_notes(unfolded_notes(xs), mn, unfolded_grace_pitches(xs))
     r2["mode"] = "unfolded"
     def bad(r):
         return r["only_xml_count"] + r["only_midi_count"]

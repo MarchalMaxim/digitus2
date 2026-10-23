@@ -30,6 +30,11 @@ export interface Settings {
    * simply not shown.
    */
   favourites: string[];
+  /**
+   * The reader turned on playing along on their own piano (issue 182). The browser's MIDI
+   * permission is separate; a later visit opens MIDI silently only when it is already granted.
+   */
+  playAlong: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -42,6 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lastPlayed: null,
   legendSeen: false,
   favourites: [],
+  playAlong: false,
 };
 
 export type PieceSource =
@@ -235,6 +241,7 @@ function pickSettings(value: unknown): Partial<Settings> {
     out.lastPlayed = raw.lastPlayed;
   if (typeof raw.legendSeen === 'boolean') out.legendSeen = raw.legendSeen;
   if (Array.isArray(raw.favourites)) out.favourites = pickSlugs(raw.favourites);
+  if (typeof raw.playAlong === 'boolean') out.playAlong = raw.playAlong;
   return out;
 }
 

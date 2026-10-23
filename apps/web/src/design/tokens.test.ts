@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 // its contrast in both themes (WCAG 2.1: 4.5:1 for text, 3:1 for graphics).
 
 const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
+const base = readFileSync(new URL('./base.css', import.meta.url), 'utf8');
 
 type Tokens = Record<string, string>;
 
@@ -44,6 +45,17 @@ function contrast(a: string, b: string): number {
   return (hi! + 0.05) / (lo! + 0.05);
 }
 
+/** `fg` at `alpha` over `bg`, as the browser blends an opacity: per channel, in sRGB. */
+function over(fg: string, bg: string, alpha: number): string {
+  const channel = (i: number) =>
+    Math.round(
+      alpha * parseInt(fg.slice(i, i + 2), 16) + (1 - alpha) * parseInt(bg.slice(i, i + 2), 16),
+    )
+      .toString(16)
+      .padStart(2, '0');
+  return `#${channel(1)}${channel(3)}${channel(5)}`;
+}
+
 /** [foreground, background, minimum ratio, what it is] */
 const PAIRS: [string, string, number, string][] = [
   ['--ink', '--paper', 7, 'text'],
@@ -55,6 +67,11 @@ const PAIRS: [string, string, number, string][] = [
   ['--key-digit', '--key-down', 4.5, 'a finger number on a pressed key'],
   ['--key-black', '--key-white', 3, 'a black key beside a white one'],
   ['--key-white', '--key-down', 1.5, 'a pressed key beside a white one'],
+  // The bar along the front edge of a key the reader holds on their own piano (issue 182): a
+  // graphic that must be seen on every key it can lie on (WCAG 1.4.11).
+  ['--key-held', '--key-white', 3, 'the reader’s held key, on a white key'],
+  ['--key-held', '--key-down', 3, 'the reader’s held key, on a pressed key'],
+  ['--key-held-on-black', '--key-black', 3, 'the reader’s held key, on a black key'],
 ];
 
 describe('tokens.css', () => {
@@ -87,6 +104,45 @@ describe('tokens.css', () => {
         expect(contrast(tokens[fg]!, tokens[bg]!)).toBeGreaterThanOrEqual(min);
       });
     }
+  }
+
+  it('keeps the reader’s held keys pure gray, never the accent, and the same in both dark blocks', () => {
+    for (const name of ['--key-held', '--key-held-on-black', '--key-held-on-dim']) {
+      for (const tokens of [light, darkBySystem, darkByChoice]) {
+        const value = tokens[name];
+        expect(value, name).toMatch(/^#[0-9a-f]{6}$/);
+        const [r, g, b] = [1, 3, 5].map((i) => value!.slice(i, i + 2));
+        expect(r, name).toBe(g);
+        expect(g, name).toBe(b);
+        expect(value).not.toBe(tokens['--accent']);
+      }
+      expect(darkBySystem[name]).toBe(darkByChoice[name]);
+    }
+  });
+
+  // A dimmed key (the hand left out) is drawn at one opacity as a whole (base.css, .key.is-muted),
+  // so the reader's bar lies outside that group and is measured against the key as dimmed: a white
+  // key's --key-down over the dock's paper, a black key's over the white key behind it (the
+  // backing, Keyboard.tsx).
+  const dim = Number(
+    /\.key\.is-muted,\s*\.key-hand\.is-muted\s*\{\s*opacity:\s*([\d.]+)/.exec(base)?.[1],
+  );
+  it('reads the dimming opacity of a dimmed key from base.css', () => {
+    expect(dim).toBeGreaterThan(0);
+    expect(dim).toBeLessThan(1);
+  });
+  for (const [name, tokens] of [
+    ['light', light],
+    ['dark', dark],
+  ] as const) {
+    it(`${name}: the reader’s held key on a dimmed white key at least 3:1`, () => {
+      const key = over(tokens['--key-down']!, tokens['--paper']!, dim);
+      expect(contrast(tokens['--key-held-on-dim']!, key)).toBeGreaterThanOrEqual(3);
+    });
+    it(`${name}: the reader’s held key on a dimmed black key at least 3:1`, () => {
+      const key = over(tokens['--key-down']!, tokens['--key-white']!, dim);
+      expect(contrast(tokens['--key-held']!, key)).toBeGreaterThanOrEqual(3);
+    });
   }
 
   it('leaves print to the light tokens: the dark sets apply on screens only', () => {

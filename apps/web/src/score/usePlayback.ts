@@ -12,7 +12,9 @@
  * stop left the position at the start (Rewind while stopped, the end) or away from it (a pause),
  * where the cursor keeps the last group heard marked (T10). `seek` moves the position to a bar's
  * start (T13), before the first Play too: `cue` then says where Play starts is that bar, and the
- * cursor marks its first note there until a note is heard.
+ * cursor marks its first note there until a note is heard. `cueAt` does the same in performance
+ * seconds, the order heard, for the play-along (issue 182): it can name the second hearing of a
+ * repeated bar, which a written second cannot.
  *
  * The transport module is a lazy chunk, fetched as soon as a score is open: it reads the beat
  * grid through the engine's public API, and any runtime import of the engine brings
@@ -28,7 +30,13 @@ import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
 import { keyVelocity } from './noteKey.js';
 import { scheduleClick } from '../audio/metronome.js';
-import { loopStartSec, performanceFor } from '../audio/performance.js';
+import {
+  loopStartSec,
+  performanceFor,
+  performanceLoop as loopStretch,
+  toPerformanceSec,
+  toWrittenSec,
+} from '../audio/performance.js';
 import type * as TransportExports from '../audio/transport.js';
 
 type TransportModule = typeof TransportExports;
@@ -113,6 +121,19 @@ export interface Playback {
    * stopped is Rewind.
    */
   seek(sec: number, opts?: { leadSec?: number }): void;
+  /**
+   * Stopped only (a no-op while the transport plays): moves the position to `perfSec`, a
+   * performance second, and cues it: `cue` becomes `toWrittenSec(perf, perfSec)` and `atStart`
+   * false, at 0 too. Play starts there, on that hearing. Before the first Play the position waits
+   * in `pendingPerfRef`. Calling it again with the same second changes nothing (React bails out).
+   * The play-along's walk (issue 182) moves the red only through this and `finish`.
+   */
+  cueAt(perfSec: number): void;
+  /**
+   * Stopped only: the reader played the last step (issue 182). What the transport's end does:
+   * position to the top, `cue` null, `atStart` true, `ended` + 1.
+   */
+  finish(): void;
   /** The score time heard, paused or requested by seek before Play, in seconds. */
   positionSec(): number;
   /**
@@ -121,6 +142,13 @@ export interface Playback {
    * cursor marks the last group heard only when Play resumes at the position (T10).
    */
   startSec(): number;
+  /** Where Play starts, in performance seconds (loop-aware), stopped or before the first Play. */
+  startPerformanceSec(): number;
+  /**
+   * The loop's stretch in performance seconds, the one the transport plays (before the first Play,
+   * the one that holds the position), or null. A new object on each call before the first Play.
+   */
+  performanceLoop(): { from: number; to: number } | null;
   /**
    * Whether the transport is in a lead-in at the time being heard now, read on every frame:
    * `waiting` follows it on the transport's next scheduler tick, so after a loop wrap to a start
@@ -273,6 +301,11 @@ export function usePlayback(score: Score | null): Playback {
   const loopRef = useRef<LoopRange | null>(null);
   /** A seek before the first Play, while there is no transport yet: where it will start. */
   const pendingSecRef = useRef<number | null>(null);
+  /**
+   * A cue before the first Play (`cueAt`), in performance seconds: it keeps the hearing a written
+   * second cannot. Never set together with `pendingSecRef`; the newest of the two wins.
+   */
+  const pendingPerfRef = useRef<number | null>(null);
   /** Bumped by every play, pause and score change: a pending start checks it is still wanted. */
   const playSeqRef = useRef(0);
   /** The delayed hand-over of a loop changed while playing (see LOOP_SETTLE_MS). */
@@ -298,6 +331,7 @@ export function usePlayback(score: Score | null): Playback {
     transportRef.current = null;
     loopRef.current = null;
     pendingSecRef.current = null;
+    pendingPerfRef.current = null;
     setPlaying(false);
     setLoading(false);
     setCountIn(null);
@@ -417,8 +451,10 @@ export function usePlayback(score: Score | null): Playback {
             setWaiting(leadingIn);
             if (!leadingIn && transport.state.playing) setCue(null);
           };
-          if (pendingSecRef.current !== null) transport.seek(pendingSecRef.current);
+          if (pendingPerfRef.current !== null) transport.seekPerformance(pendingPerfRef.current);
+          else if (pendingSecRef.current !== null) transport.seek(pendingSecRef.current);
           pendingSecRef.current = null;
+          pendingPerfRef.current = null;
           transportRef.current = transport;
           t = transport;
         }
@@ -540,12 +576,79 @@ export function usePlayback(score: Score | null): Playback {
     const t = transportRef.current;
     t?.rewind();
     pendingSecRef.current = null;
+    pendingPerfRef.current = null;
     setCue(null);
     if (!t?.state.playing) setAtStart(true);
   }, []);
 
+  // The play-along's cue (issue 182): `seek` in performance seconds. A written second enters a
+  // bar going back at its last hearing, so a walk through a repeat made of `seek`s would loop the
+  // first pass forever. Never `seek(0)`: that is a Rewind. A playing transport is left alone.
+  const cueAt = useCallback((perfSec: number) => {
+    const s = scoreRef.current;
+    const t = transportRef.current;
+    if (!s || !Number.isFinite(perfSec) || t?.state.playing) return;
+    if (t) t.seekPerformance(perfSec);
+    else {
+      pendingPerfRef.current = perfSec;
+      pendingSecRef.current = null;
+    }
+    setCue(toWrittenSec(performanceFor(s), perfSec));
+    setAtStart(false);
+  }, []);
+
+  // The reader played the last step: what the transport's end does while stopped (onEnd above).
+  const finish = useCallback(() => {
+    if (!scoreRef.current || transportRef.current?.state.playing) return;
+    rewind();
+    setEnded((n) => n + 1);
+  }, [rewind]);
+
+  /** Where a position kept before the first Play stands, in performance seconds. */
+  const pendingPerformanceSec = useCallback((s: Score): number => {
+    if (pendingPerfRef.current !== null) return pendingPerfRef.current;
+    const written = pendingSecRef.current;
+    return written === null ? 0 : toPerformanceSec(performanceFor(s), written, 0);
+  }, []);
+
+  const positionSec = useCallback(() => {
+    const t = transportRef.current;
+    if (t) return t.positionSec();
+    const s = scoreRef.current;
+    if (s && pendingPerfRef.current !== null) {
+      return toWrittenSec(performanceFor(s), pendingPerfRef.current);
+    }
+    return pendingSecRef.current ?? 0;
+  }, []);
+
+  // Before the first Play, apply the transport's loop bounds to the cue without replacing it:
+  // removing a loop restores the original cue. The cursor compares this start with the position.
+  const startPerformanceSec = useCallback(() => {
+    const t = transportRef.current;
+    if (t) return t.performanceStartSec();
+    const s = scoreRef.current;
+    if (!s) return 0;
+    const base = pendingPerformanceSec(s);
+    const range = loopStretch(performanceFor(s), loopRef.current, base);
+    return range && (base < range.from || base >= range.to) ? range.from : base;
+  }, [pendingPerformanceSec]);
+
+  const startSec = useCallback(() => {
+    const t = transportRef.current;
+    if (t) return t.startSec();
+    const s = scoreRef.current;
+    if (s && pendingPerfRef.current !== null) {
+      return toWrittenSec(performanceFor(s), startPerformanceSec());
+    }
+    const start = pendingSecRef.current ?? 0;
+    return s ? loopStartSec(performanceFor(s), loopRef.current, start) : start;
+  }, [startPerformanceSec]);
+
   // T13. Playing, the transport goes on from `sec` after the lead; stopped, it only moves where
-  // Play starts (kept here until the first Play makes a transport).
+  // Play starts (kept here until the first Play makes a transport). Before the first Play, a seek
+  // after a cue of the play-along (issue 182) enters the bar going on from the hearing that cue is
+  // in, as `Transport.seek` does with a transport; without a cue it takes the first hearing, as it
+  // always has.
   const seek = useCallback(
     (sec: number, opts: { leadSec?: number } = {}) => {
       const t = transportRef.current;
@@ -558,29 +661,27 @@ export function usePlayback(score: Score | null): Playback {
         rewind();
         return;
       }
+      const s = scoreRef.current;
       if (t) t.seek(sec);
-      else if (scoreRef.current) pendingSecRef.current = sec;
-      else return;
+      else if (s && pendingPerfRef.current !== null) {
+        pendingPerfRef.current = toPerformanceSec(performanceFor(s), sec, startPerformanceSec());
+        pendingSecRef.current = null;
+      } else if (s) {
+        pendingSecRef.current = sec;
+        pendingPerfRef.current = null;
+      } else return;
       setCue(sec);
       setAtStart(false);
     },
-    [rewind],
+    [rewind, startPerformanceSec],
   );
 
-  const positionSec = useCallback(
-    () => transportRef.current?.positionSec() ?? pendingSecRef.current ?? 0,
-    [],
-  );
-
-  // Before the first Play, apply the transport's loop bounds to the cue without replacing it:
-  // removing a loop restores the original cue. The cursor compares this start with the position.
-  const startSec = useCallback(() => {
+  const performanceLoop = useCallback(() => {
     const t = transportRef.current;
-    if (t) return t.startSec();
-    const start = pendingSecRef.current ?? 0;
+    if (t) return t.performanceLoop();
     const s = scoreRef.current;
-    return s ? loopStartSec(performanceFor(s), loopRef.current, start) : start;
-  }, []);
+    return s ? loopStretch(performanceFor(s), loopRef.current, pendingPerformanceSec(s)) : null;
+  }, [pendingPerformanceSec]);
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);
 
@@ -622,8 +723,12 @@ export function usePlayback(score: Score | null): Playback {
       pause,
       rewind,
       seek,
+      cueAt,
+      finish,
       positionSec,
       startSec,
+      startPerformanceSec,
+      performanceLoop,
       leadingIn,
       playingNow,
       leadInRemainingSec,
@@ -643,8 +748,12 @@ export function usePlayback(score: Score | null): Playback {
       pause,
       rewind,
       seek,
+      cueAt,
+      finish,
       positionSec,
       startSec,
+      startPerformanceSec,
+      performanceLoop,
       leadingIn,
       playingNow,
       leadInRemainingSec,

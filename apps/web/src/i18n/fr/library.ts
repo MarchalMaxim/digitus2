@@ -90,6 +90,18 @@ export const library: Messages['library'] = {
     cannotReadFiles: 'Impossible de lire ces fichiers.',
     cannotReadFile: 'Impossible de lire ce fichier.',
   },
+  piano: {
+    start: 'Jouer avec votre piano',
+    asking: 'Autorisez le navigateur à utiliser votre piano.',
+    connected: (name: string) => `${name} est connecté. Ouvrez un morceau et jouez la note rouge.`,
+    yourPiano: 'Votre piano',
+    none: 'Aucun piano trouvé. Branchez-le avec un câble USB, ou associez-le en Bluetooth et allumez-le.',
+    bluetoothFlag: (flag: string) =>
+      `Sous Windows, un piano Bluetooth nécessite aussi de régler ${flag} sur Enabled.`,
+    denied:
+      'Le navigateur a bloqué le MIDI pour ce site. Autorisez-le dans les paramètres du site, puis appuyez de nouveau.',
+    turnOff: 'Désactiver',
+  },
   favourites: {
     heading: 'Favoris',
     line: 'Les morceaux que vous avez marqués d’un cœur, les plus récents d’abord.',

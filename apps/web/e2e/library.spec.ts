@@ -268,7 +268,8 @@ test('library: an unsupported file shows a notice and keeps one red element', as
   await page
     .getByLabel('Open your own score')
     .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
-  await expect(page.getByRole('status')).toBeInViewport();
+  // The notice, not the piano line's own status (issue 182), which stays empty here.
+  await expect(page.locator('.notice[role="status"]')).toBeInViewport();
   await expect(
     page.getByText(
       'That does not look like a MusicXML or MIDI file (.musicxml, .xml, .mxl, .mid or .midi).',

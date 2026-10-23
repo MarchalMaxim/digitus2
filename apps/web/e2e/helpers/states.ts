@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { mockService, RECOGNITION_WITH_ERRORS } from './scan.js';
+import { fakeMidi, installFakeMidi, type FakeMidiOptions } from './midi.js';
 import { embellishDecided, openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
 import { holdPianoSamples } from './samples.js';
@@ -92,6 +93,26 @@ async function twinkleReady(page: Page, query = ''): Promise<void> {
   });
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
   await embellishDecided(page, 'offered');
+}
+
+/**
+ * The library with a piano already allowed (issue 182): the setting stored and the browser's
+ * permission granted, so the page connects with no press, as on a later visit.
+ */
+async function libraryWithPiano(page: Page, fake: FakeMidiOptions): Promise<void> {
+  await installFakeMidi(page, { permission: 'granted', playAlong: true, ...fake });
+  await page.goto('/');
+  await libraryReady(page);
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
+}
+
+/** Twinkle waiting for a connected piano: the first group red, its step named by the walk. */
+async function twinkleAlong(page: Page): Promise<ReturnType<typeof fakeMidi>> {
+  await installFakeMidi(page, { permission: 'granted', playAlong: true });
+  await twinkleReady(page, '?audio=silent');
+  const midi = fakeMidi(page);
+  await midi.waitForStep();
+  return midi;
 }
 
 /** The engine's digits as printed, in document order (to see a re-solve land). */
@@ -265,6 +286,32 @@ export const STATES: AppState[] = [
     expectTag: 'frame',
   },
   {
+    // The home line with a piano connected (issue 182): the sentence and Turn off; the start
+    // button stays the one red element.
+    name: 'library-piano',
+    go: async (page) => {
+      await libraryWithPiano(page, {});
+      await expect(page.locator('.piano-line [role="status"]')).toHaveText(
+        'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
+      );
+      await expect(page.locator('.piano-line button')).toHaveText('Turn off');
+    },
+    expectTag: 'button',
+  },
+  {
+    // No piano on Windows: the help and the Windows flag, the longest copy of the line at 360 px.
+    name: 'library-piano-none',
+    go: async (page) => {
+      await libraryWithPiano(page, { inputs: [], platform: 'Windows' });
+      await expect(page.locator('.piano-line [role="status"]')).toHaveText(
+        'No piano found. Connect it with a USB cable, or pair it over Bluetooth and turn it on. ' +
+          'On Windows, a Bluetooth piano also needs chrome://flags/#use-winrt-midi-api set to Enabled.',
+      );
+      await expect(page.locator('.piano-line button')).toHaveText('Turn off');
+    },
+    expectTag: 'button',
+  },
+  {
     name: 'about',
     go: async (page) => {
       await page.goto('/#/about');
@@ -390,6 +437,36 @@ export const STATES: AppState[] = [
       await seekBar(page, 2);
       await expect(page.locator('.red-ghost')).toHaveCount(0);
       await expect(page.locator('.score-sheet .is-red').first()).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+    },
+    expectTag: 'cursor',
+  },
+  {
+    // A piano waiting (issue 182): the first group red, Play plain, the hint in the dock, and
+    // the reader's C4 held on the piano: that key shows the cue's fill and finger plus the bar.
+    name: 'score-along',
+    go: async (page) => {
+      const midi = await twinkleAlong(page);
+      await expect(page.getByRole('status')).toHaveText('Play the red notes on your piano.');
+      await midi.noteOn(60); // half of the first step [48, 60]
+      await expect(page.locator('.keyboard .key[data-midi="60"] .key-held')).toHaveCount(1);
+      await expect(page.locator('.keyboard .key[data-midi="60"]')).toHaveClass(/is-pressed/);
+      await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+    },
+    expectTag: 'cursor',
+  },
+  {
+    // Two steps played and one key held: the red waits on the third step [67], the held E4 is
+    // in no step, so it stays held.
+    name: 'score-along-moved',
+    go: async (page) => {
+      const midi = await twinkleAlong(page);
+      await midi.playRed();
+      await midi.playRed();
+      expect(await midi.waitForStep()).toEqual([67]);
+      await midi.noteOn(64);
+      await expect(page.locator('.keyboard .key[data-midi="64"] .key-held')).toHaveCount(1);
+      await expect(page.getByRole('status')).toHaveText('');
       await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
     },
     expectTag: 'cursor',

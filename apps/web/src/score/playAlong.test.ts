@@ -1,0 +1,663 @@
+// @vitest-environment node
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { midiToSpelling, parseMusicXml, type Hand, type Note, type Score } from '@digitus2/engine';
+import { describe, expect, it } from 'vitest';
+import { performanceOf, toWrittenSec } from '../audio/performance.js';
+import {
+  ALONG_EPS,
+  NO_KEYS,
+  advance,
+  alongSteps,
+  anchorStep,
+  pressKey,
+  releaseKey,
+  spendAll,
+  type AlongStep,
+  type Keys,
+  type PerfRange,
+} from './playAlong.js';
+
+const form = (name: string): string =>
+  readFileSync(
+    fileURLToPath(
+      new URL(`../../../../packages/engine/fixtures/${name}.musicxml`, import.meta.url),
+    ),
+    'utf8',
+  );
+
+/** Bars of four quarter notes: divisions 1 and 120 qpm, so a tick is half a second. */
+const BAR_TICKS = 4;
+const TICK_SEC = 0.5;
+
+interface NoteSpec {
+  midi: number;
+  tick: number;
+  hand?: Hand;
+  grace?: boolean;
+  /** Ticks the note lasts (default 1). */
+  ticks?: number;
+  ornament?: Note['ornament'];
+  sourceIndices?: number[];
+}
+
+let nextId = 0;
+function note(spec: NoteSpec): Note {
+  const onsetSec = spec.tick * TICK_SEC;
+  const ticks = spec.grace ? 0 : (spec.ticks ?? 1);
+  return {
+    id: `n${nextId++}`,
+    onsetTick: spec.tick,
+    offsetTick: spec.tick + ticks,
+    onsetSec,
+    offsetSec: onsetSec + ticks * TICK_SEC,
+    midi: spec.midi,
+    spelling: midiToSpelling(spec.midi),
+    hand: spec.hand ?? 'R',
+    staff: spec.hand === 'L' ? 2 : 1,
+    voice: 1,
+    measureIndex: Math.floor(spec.tick / BAR_TICKS),
+    isGrace: spec.grace ?? false,
+    chordId: `c${nextId}`,
+    sourceIndices: spec.sourceIndices ?? [nextId],
+    ...(spec.ornament ? { ornament: spec.ornament } : {}),
+  };
+}
+
+function scoreOf(specs: NoteSpec[], bars = 4): Score {
+  return {
+    meta: {},
+    divisions: 1,
+    tempoMap: [{ tick: 0, qpm: 120 }],
+    timeSignatures: [{ tick: 0, beats: 4, beatType: 4 }],
+    keySignatures: [],
+    measures: Array.from({ length: bars }, (_, i) => ({
+      index: i,
+      startTick: i * BAR_TICKS,
+      lengthTicks: BAR_TICKS,
+      number: String(i + 1),
+    })),
+    notes: specs.map(note),
+  };
+}
+
+function stepsOf(specs: NoteSpec[], muted: Hand[] = []): AlongStep[] {
+  return alongSteps(performanceOf(scoreOf(specs)), muted);
+}
+
+const pitches = (steps: AlongStep[]): number[][] => steps.map((s) => [...s.pitches]);
+
+describe('alongSteps', () => {
+  it('makes one step per onset, with the pitches distinct and ascending', () => {
+    const steps = stepsOf([
+      { midi: 67, tick: 0 },
+      { midi: 60, tick: 0 },
+      { midi: 64, tick: 0 },
+      { midi: 62, tick: 1 },
+      { midi: 65, tick: 3 },
+    ]);
+    expect(pitches(steps)).toEqual([[60, 64, 67], [62], [65]]);
+    expect(steps.map((s) => s.perfSec)).toEqual([0, 0.5, 1.5]);
+  });
+
+  it('orders the steps by onset whatever order the notes arrive in', () => {
+    // Staff after staff, as the reader writes them.
+    const steps = stepsOf([
+      { midi: 72, tick: 0 },
+      { midi: 74, tick: 1 },
+      { midi: 48, tick: 0, hand: 'L' },
+      { midi: 50, tick: 1, hand: 'L' },
+    ]);
+    expect(pitches(steps)).toEqual([
+      [48, 72],
+      [50, 74],
+    ]);
+    expect(steps.map((s) => s.perfSec)).toEqual([0, 0.5]);
+  });
+
+  it('does not require a held bass again at the melody next onset', () => {
+    const steps = stepsOf([
+      { midi: 48, tick: 0, hand: 'L', ticks: 4 },
+      { midi: 60, tick: 0 },
+      { midi: 62, tick: 1 },
+      { midi: 64, tick: 2 },
+    ]);
+    expect(pitches(steps)).toEqual([[48, 60], [62], [64]]);
+  });
+
+  it('asks only for the left hand with the right hand muted, and drops a right-hand-only onset', () => {
+    const specs: NoteSpec[] = [
+      { midi: 72, tick: 0 },
+      { midi: 48, tick: 0, hand: 'L' },
+      { midi: 74, tick: 1 },
+      { midi: 72, tick: 2 },
+      { midi: 50, tick: 2, hand: 'L' },
+    ];
+    const steps = stepsOf(specs, ['R']);
+    expect(pitches(steps)).toEqual([[48], [50]]);
+    expect(steps.map((s) => s.perfSec)).toEqual([0, 1]);
+    expect(pitches(stepsOf(specs, ['L']))).toEqual([[72], [74], [72]]);
+    expect(stepsOf(specs, ['L', 'R'])).toEqual([]);
+  });
+
+  it('never requires a grace note', () => {
+    const steps = stepsOf([
+      { midi: 59, tick: 0, grace: true },
+      { midi: 60, tick: 0 },
+      { midi: 62, tick: 1 },
+    ]);
+    expect(pitches(steps)).toEqual([[60], [62]]);
+    expect(steps[0]!.perfSec).toBe(0);
+  });
+
+  it('drops an onset where the played hands have only grace notes', () => {
+    const specs: NoteSpec[] = [
+      { midi: 60, tick: 0 },
+      { midi: 61, tick: 1, grace: true },
+      { midi: 48, tick: 1, hand: 'L' },
+      { midi: 62, tick: 2 },
+    ];
+    expect(pitches(stepsOf(specs))).toEqual([[60], [48], [62]]);
+    // With the left hand muted, the onset holds only a grace note: it is no step.
+    const muted = stepsOf(specs, ['L']);
+    expect(pitches(muted)).toEqual([[60], [62]]);
+    expect(muted.map((s) => s.perfSec)).toEqual([0, 1]);
+    // A grace note with nothing else at its onset is no step either.
+    expect(
+      pitches(
+        stepsOf([
+          { midi: 61, tick: 1, grace: true },
+          { midi: 62, tick: 2 },
+        ]),
+      ),
+    ).toEqual([[62]]);
+  });
+
+  describe('ornaments', () => {
+    const trill = (startNote: 'main' | 'upper' | 'below'): NonNullable<Note['ornament']> => ({
+      kind: 'trill-mark',
+      long: false,
+      upperMidi: 62,
+      lowerMidi: 59,
+      startNote,
+      endTick: 4,
+      endSec: 2,
+    });
+
+    it('requires the upper note of a trill that starts on it', () => {
+      const steps = stepsOf([
+        { midi: 60, tick: 0, ticks: 4, ornament: trill('upper') },
+        { midi: 65, tick: 4 },
+      ]);
+      expect(pitches(steps)).toEqual([[62], [65]]);
+    });
+
+    it('requires the principal of a trill that starts on it', () => {
+      const steps = stepsOf([
+        { midi: 60, tick: 0, ticks: 4, ornament: trill('main') },
+        { midi: 65, tick: 4 },
+      ]);
+      expect(pitches(steps)).toEqual([[60], [65]]);
+    });
+
+    it('requires the lower note of a trill that starts below', () => {
+      const steps = stepsOf([{ midi: 60, tick: 0, ticks: 4, ornament: trill('below') }]);
+      expect(pitches(steps)).toEqual([[59]]);
+    });
+
+    it('requires the principal of a mordent', () => {
+      const steps = stepsOf([
+        {
+          midi: 60,
+          tick: 0,
+          ticks: 2,
+          ornament: {
+            kind: 'mordent',
+            long: false,
+            upperMidi: 62,
+            lowerMidi: 59,
+            startNote: 'main',
+            endTick: 2,
+            endSec: 1,
+          },
+        },
+      ]);
+      expect(pitches(steps)).toEqual([[60]]);
+    });
+
+    it('asks for the pitch the keyboard shows, together with a plain left hand note', () => {
+      const steps = stepsOf([
+        { midi: 60, tick: 0, ticks: 4, ornament: trill('upper') },
+        { midi: 48, tick: 0, hand: 'L', ticks: 4 },
+      ]);
+      expect(pitches(steps)).toEqual([[48, 62]]);
+    });
+  });
+
+  it('makes a tied note one step, with no step for its continuation', () => {
+    const steps = stepsOf([
+      { midi: 60, tick: 0, ticks: 8, sourceIndices: [0, 1] },
+      { midi: 62, tick: 4 },
+      { midi: 64, tick: 8 },
+    ]);
+    expect(pitches(steps)).toEqual([[60], [62], [64]]);
+    // The tie itself is one engine note: it contributes the one onset.
+    const tiedOnly = stepsOf([{ midi: 60, tick: 0, ticks: 8, sourceIndices: [0, 1] }]);
+    expect(pitches(tiedOnly)).toEqual([[60]]);
+  });
+
+  it('makes a unison of both hands, or of two voices, one pitch', () => {
+    const steps = stepsOf([
+      { midi: 60, tick: 0 },
+      { midi: 60, tick: 0, hand: 'L' },
+      { midi: 64, tick: 1 },
+      { midi: 64, tick: 1 },
+    ]);
+    expect(pitches(steps)).toEqual([[60], [64]]);
+  });
+
+  it('gives no steps for a score with no notes', () => {
+    expect(stepsOf([])).toEqual([]);
+  });
+
+  describe('in the order heard', () => {
+    it('walks a backward repeat over bars 1 and 2 as bars 1 2 1 2 3', () => {
+      const score = scoreOf(
+        [
+          { midi: 60, tick: 0 },
+          { midi: 62, tick: 4 },
+          { midi: 64, tick: 8 },
+        ],
+        3,
+      );
+      score.measures[0]!.form = { repeatStart: true };
+      score.measures[1]!.form = { repeatEnd: 2 };
+      const perf = performanceOf(score);
+      expect(perf.written).toEqual([0, 1, 0, 1, 2]);
+      const steps = alongSteps(perf, []);
+      expect(pitches(steps)).toEqual([[60], [62], [60], [62], [64]]);
+      expect(steps.map((s) => s.perfSec)).toEqual([0, 2, 4, 6, 8]);
+      for (let i = 1; i < steps.length; i++)
+        expect(steps[i]!.perfSec).toBeGreaterThan(steps[i - 1]!.perfSec);
+      // Each step lands on the written group within the cursor's slack.
+      const written = steps.map((s) => toWrittenSec(perf, s.perfSec));
+      expect(written).toEqual([0, 2, 0, 2, 4]);
+    });
+
+    it('walks the voltas as heard: the first ending once, then the second', () => {
+      const { score } = parseMusicXml(form('form-voltas'));
+      const perf = performanceOf(score);
+      const steps = alongSteps(perf, []);
+      // Bars 1 2 3(1st) | 1 2 4(2nd): C D E C D F.
+      expect(pitches(steps)).toEqual([[60], [62], [64], [60], [62], [65]]);
+      expect(steps.map((s) => s.perfSec)).toEqual([0, 2, 4, 6, 8, 10]);
+      expect(steps.map((s) => toWrittenSec(perf, s.perfSec))).toEqual([0, 2, 4, 0, 2, 6]);
+    });
+
+    it('walks a D.C. al Fine to the Fine', () => {
+      const { score } = parseMusicXml(form('form-dc-al-fine'));
+      const perf = performanceOf(score);
+      const steps = alongSteps(perf, []);
+      expect(pitches(steps)).toEqual([[60], [62], [64], [65], [60], [62]]);
+      expect(steps.map((s) => s.perfSec)).toEqual([0, 2, 4, 6, 8, 10]);
+    });
+
+    it.each([63, 70, 77, 90, 93, 100, 110, 120, 130, 137, 144, 151])(
+      'lands every step on its written group at %s qpm, where the seconds do not add up exactly',
+      (qpm) => {
+        const q = (step: string) =>
+          `<note><pitch><step>${step}</step><octave>4</octave></pitch><duration>1</duration><voice>1</voice><type>quarter</type></note>`;
+        const bar = (n: number, steps: string[], extra = '') =>
+          `<measure number="${n}">${
+            n === 1
+              ? `<attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes><direction><direction-type><words>x</words></direction-type><sound tempo="${qpm}"/></direction>`
+              : ''
+          }${n === 2 ? '<barline location="left"><repeat direction="forward"/></barline>' : ''}${steps.map(q).join('')}${extra}</measure>`;
+        // Bars 1 2 3 with a repeat over bars 2 and 3: heard as 1 2 3 2 3, the second hearing of
+        // bar 2 entered by a jump to a bar that does not start at second 0.
+        const source = `<score-partwise><part-list><score-part id="P"><part-name>Piano</part-name></score-part></part-list><part id="P">${bar(1, ['C', 'C', 'C', 'C'])}${bar(2, ['D', 'E', 'F', 'G'])}${bar(3, ['A', 'B', 'A', 'G'], '<barline location="right"><repeat direction="backward"/></barline>')}</part></score-partwise>`;
+        const { score } = parseMusicXml(source);
+        const perf = performanceOf(score);
+        expect(perf.written).toEqual([0, 1, 2, 1, 2]);
+        const steps = alongSteps(perf, []);
+        const writtenNotes = perf.written.flatMap((w) =>
+          score.notes.filter((n) => n.measureIndex === w).sort((a, b) => a.onsetTick - b.onsetTick),
+        );
+        expect(steps).toHaveLength(writtenNotes.length);
+        steps.forEach((step, i) => {
+          expect(toWrittenSec(perf, step.perfSec)).toBeCloseTo(writtenNotes[i]!.onsetSec, 9);
+          expect([...step.pitches]).toEqual([writtenNotes[i]!.midi]);
+        });
+      },
+    );
+
+    it('leaves the hands out of a repeated bar as it does elsewhere', () => {
+      const score = scoreOf([
+        { midi: 72, tick: 0 },
+        { midi: 48, tick: 0, hand: 'L' },
+        { midi: 74, tick: 4 },
+      ]);
+      score.measures[0]!.form = { repeatEnd: 2 };
+      const steps = alongSteps(performanceOf(score), ['R']);
+      expect(pitches(steps)).toEqual([[48], [48]]);
+      expect(steps.map((s) => s.perfSec)).toEqual([0, 2]);
+    });
+  });
+});
+
+describe('anchorStep', () => {
+  const at = (...secs: number[]): AlongStep[] =>
+    secs.map((perfSec) => ({ perfSec, pitches: [60] }));
+  const steps = at(0.5, 1, 2, 3);
+
+  it("'next' is the first step at or after the position", () => {
+    expect(anchorStep(steps, 1, null, 'next')).toBe(1);
+    expect(anchorStep(steps, 1 + ALONG_EPS / 10, null, 'next')).toBe(1);
+    expect(anchorStep(steps, 1 - ALONG_EPS / 10, null, 'next')).toBe(1);
+    expect(anchorStep(steps, 1.2, null, 'next')).toBe(2);
+    expect(anchorStep(steps, 0, null, 'next')).toBe(0);
+    expect(anchorStep(steps, -4, null, 'next')).toBe(0);
+    expect(anchorStep(steps, 3, null, 'next')).toBe(3);
+  });
+
+  it("'next' past the last step is the first step", () => {
+    expect(anchorStep(steps, 3.5, null, 'next')).toBe(0);
+    expect(anchorStep(steps, 1e9, null, 'next')).toBe(0);
+  });
+
+  it("'marked' is the last step at or before the position", () => {
+    expect(anchorStep(steps, 2, null, 'marked')).toBe(2);
+    expect(anchorStep(steps, 2 - ALONG_EPS / 10, null, 'marked')).toBe(2);
+    expect(anchorStep(steps, 2.5, null, 'marked')).toBe(2);
+    expect(anchorStep(steps, 0.5, null, 'marked')).toBe(0);
+    expect(anchorStep(steps, 99, null, 'marked')).toBe(3);
+  });
+
+  it("'marked' before the first step is the first step", () => {
+    expect(anchorStep(steps, 0.2, null, 'marked')).toBe(0);
+    expect(anchorStep(steps, -1, null, 'marked')).toBe(0);
+  });
+
+  it('is -1 when there are no steps', () => {
+    expect(anchorStep([], 0, null, 'next')).toBe(-1);
+    expect(anchorStep([], 0, null, 'marked')).toBe(-1);
+    expect(anchorStep([], 0, { from: 0, to: 4 }, 'next')).toBe(-1);
+  });
+
+  describe('with a loop', () => {
+    // The loop holds the steps at 1 and 2; the step at 3 is where it ends.
+    const loop: PerfRange = { from: 1, to: 3 };
+
+    it('keeps a position inside the loop', () => {
+      expect(anchorStep(steps, 1, loop, 'next')).toBe(1);
+      expect(anchorStep(steps, 1.5, loop, 'next')).toBe(2);
+      expect(anchorStep(steps, 2, loop, 'next')).toBe(2);
+      expect(anchorStep(steps, 1.5, loop, 'marked')).toBe(1);
+      expect(anchorStep(steps, 2.5, loop, 'marked')).toBe(2);
+    });
+
+    it('gives the loop first step for a position outside it', () => {
+      expect(anchorStep(steps, 0, loop, 'next')).toBe(1);
+      expect(anchorStep(steps, 0.5, loop, 'marked')).toBe(1);
+      expect(anchorStep(steps, 3, loop, 'next')).toBe(1);
+      expect(anchorStep(steps, 3, loop, 'marked')).toBe(1);
+      expect(anchorStep(steps, 7, loop, 'next')).toBe(1);
+    });
+
+    it('gives the loop first step past its last step', () => {
+      expect(anchorStep(steps, 2.5, loop, 'next')).toBe(1);
+      expect(anchorStep(steps, 2.999, loop, 'next')).toBe(1);
+    });
+
+    it("gives the loop first step for 'marked' before its first step, inside the loop", () => {
+      const early: PerfRange = { from: 0.7, to: 3 };
+      expect(anchorStep(steps, 0.8, early, 'marked')).toBe(1);
+      expect(anchorStep(steps, 0.8, early, 'next')).toBe(1);
+    });
+
+    it('is -1 when the loop holds no step', () => {
+      expect(anchorStep(steps, 1.2, { from: 1.2, to: 1.8 }, 'next')).toBe(-1);
+      expect(anchorStep(steps, 1.5, { from: 1.2, to: 1.8 }, 'marked')).toBe(-1);
+      expect(anchorStep(steps, 0, { from: 5, to: 9 }, 'next')).toBe(-1);
+    });
+
+    it('counts a step at the loop start in and a step at its end out', () => {
+      expect(anchorStep(steps, 5, { from: 0.5, to: 1 }, 'next')).toBe(0);
+      expect(anchorStep(steps, 5, { from: 2, to: 3 }, 'next')).toBe(2);
+    });
+  });
+});
+
+describe('keys', () => {
+  it('presses a key held and fresh, and a second press refreshes it', () => {
+    const one = pressKey(NO_KEYS, 60);
+    expect([...one]).toEqual([[60, true]]);
+    const spent = spendAll(one);
+    expect([...spent]).toEqual([[60, false]]);
+    expect([...pressKey(spent, 60)]).toEqual([[60, true]]);
+  });
+
+  it('releases a key, and leaves the others', () => {
+    const keys = pressKey(pressKey(NO_KEYS, 60), 64);
+    expect([...releaseKey(keys, 60)]).toEqual([[64, true]]);
+    expect(releaseKey(keys, 62)).toBe(keys);
+  });
+
+  it('never changes the map it was given', () => {
+    const keys = pressKey(NO_KEYS, 60);
+    const before = [...keys];
+    pressKey(keys, 62);
+    releaseKey(keys, 60);
+    spendAll(keys);
+    expect([...keys]).toEqual(before);
+    expect(NO_KEYS.size).toBe(0);
+  });
+
+  it('gives back the same map when nothing changes', () => {
+    const fresh = pressKey(NO_KEYS, 60);
+    expect(pressKey(fresh, 60)).toBe(fresh);
+    expect(spendAll(NO_KEYS)).toBe(NO_KEYS);
+    const spent = spendAll(fresh);
+    expect(spendAll(spent)).toBe(spent);
+  });
+});
+
+describe('advance', () => {
+  const step = (perfSec: number, ...p: number[]): AlongStep => ({ perfSec, pitches: p });
+  const held = (...midis: number[]): Keys => midis.reduce(pressKey, NO_KEYS);
+  const state = (keys: Keys): Array<[number, boolean]> => [...keys].sort((a, b) => a[0] - b[0]);
+  const twinkle = [step(0, 60), step(1, 60), step(2, 67), step(3, 67), step(4, 69)];
+
+  it('passes a single fresh key and marks it used', () => {
+    const r = advance([step(0, 60), step(1, 62)], 0, held(60), null);
+    expect(r.move).toEqual({ kind: 'cue', index: 1 });
+    expect(r.passed).toBe(1);
+    expect(state(r.keys)).toEqual([[60, false]]);
+  });
+
+  it('stays on a wrong key and spends nothing', () => {
+    const keys = held(61);
+    const r = advance([step(0, 60), step(1, 62)], 0, keys, null);
+    expect(r.move).toEqual({ kind: 'stay' });
+    expect(r.passed).toBe(0);
+    expect(r.keys).toBe(keys);
+  });
+
+  it('stays with no key held', () => {
+    expect(advance([step(0, 60)], 0, NO_KEYS, null).move).toEqual({ kind: 'stay' });
+  });
+
+  it('stays on a chord with two of three keys, then the third passes', () => {
+    const steps = [step(0, 60, 64, 67), step(1, 72)];
+    const two = advance(steps, 0, held(60, 64), null);
+    expect(two.move).toEqual({ kind: 'stay' });
+    expect(two.passed).toBe(0);
+    const three = advance(steps, 0, pressKey(two.keys, 67), null);
+    expect(three.move).toEqual({ kind: 'cue', index: 1 });
+    expect(three.passed).toBe(1);
+    expect(state(three.keys)).toEqual([
+      [60, false],
+      [64, false],
+      [67, false],
+    ]);
+  });
+
+  it('passes a chord played apart while the keys stay held', () => {
+    const steps = [step(0, 60, 64, 67), step(1, 72)];
+    let keys = NO_KEYS;
+    for (const midi of [60, 64]) {
+      keys = pressKey(keys, midi);
+      const r = advance(steps, 0, keys, null);
+      expect(r.move).toEqual({ kind: 'stay' });
+      keys = r.keys;
+    }
+    keys = pressKey(keys, 67);
+    expect(advance(steps, 0, keys, null).move).toEqual({ kind: 'cue', index: 1 });
+  });
+
+  it('stays when a chord key was released before the last was down', () => {
+    const steps = [step(0, 60, 64), step(1, 72)];
+    let keys = held(60);
+    keys = advance(steps, 0, keys, null).keys;
+    keys = releaseKey(keys, 60);
+    keys = pressKey(keys, 64);
+    expect(advance(steps, 0, keys, null).move).toEqual({ kind: 'stay' });
+    // Pressing the first key again completes it.
+    expect(advance(steps, 0, pressKey(keys, 60), null).move).toEqual({ kind: 'cue', index: 1 });
+  });
+
+  it('needs a release and a fresh press for a repeated pitch (C C)', () => {
+    const first = advance(twinkle, 0, held(60), null);
+    expect(first.move).toEqual({ kind: 'cue', index: 1 });
+    expect(first.passed).toBe(1);
+    // The same C, still held and used, does not pass the second C.
+    const again = advance(twinkle, 1, first.keys, null);
+    expect(again.move).toEqual({ kind: 'stay' });
+    // Released and pressed again, it does.
+    const fresh = pressKey(releaseKey(first.keys, 60), 60);
+    const second = advance(twinkle, 1, fresh, null);
+    expect(second.move).toEqual({ kind: 'cue', index: 2 });
+    expect(second.passed).toBe(1);
+  });
+
+  it('chains an early press of the next steps into one cue at the end of the chain', () => {
+    const r = advance(twinkle, 0, held(60, 67), null);
+    // Step 0 passes on C; step 1 (C again) needs a fresh C and stops the chain at step 1.
+    expect(r.move).toEqual({ kind: 'cue', index: 1 });
+    const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65)];
+    const chained = advance(steps, 0, held(60, 62, 64), null);
+    expect(chained.move).toEqual({ kind: 'cue', index: 3 });
+    expect(chained.passed).toBe(3);
+    expect(state(chained.keys)).toEqual([
+      [60, false],
+      [62, false],
+      [64, false],
+    ]);
+  });
+
+  it('chains from a step other than the first', () => {
+    const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65)];
+    const r = advance(steps, 1, held(62, 64), null);
+    expect(r.move).toEqual({ kind: 'cue', index: 3 });
+    expect(r.passed).toBe(2);
+  });
+
+  it('finishes on the last step without a loop', () => {
+    const steps = [step(0, 60), step(1, 62)];
+    const r = advance(steps, 1, held(62), null);
+    expect(r.move).toEqual({ kind: 'finish' });
+    expect(r.passed).toBe(1);
+    expect(state(r.keys)).toEqual([[62, false]]);
+  });
+
+  it('finishes at the end of a chain that runs off the piece', () => {
+    const steps = [step(0, 60), step(1, 62), step(2, 64)];
+    const r = advance(steps, 0, held(60, 62, 64), null);
+    expect(r.move).toEqual({ kind: 'finish' });
+    expect(r.passed).toBe(3);
+  });
+
+  it('wraps from the last step of a loop to its first', () => {
+    const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
+    const loop: PerfRange = { from: 2, to: 4 };
+    const r = advance(steps, 3, held(65), loop);
+    expect(r.move).toEqual({ kind: 'cue', index: 2 });
+    expect(r.passed).toBe(1);
+    // Inside the loop it moves on as usual.
+    expect(advance(steps, 2, held(64), loop).move).toEqual({ kind: 'cue', index: 3 });
+  });
+
+  it('never finishes inside a loop, also when the loop ends at the last step', () => {
+    const steps = [step(0, 60), step(1, 62)];
+    const r = advance(steps, 1, held(62), { from: 0, to: 2 });
+    expect(r.move).toEqual({ kind: 'cue', index: 0 });
+  });
+
+  it('needs a fresh press every lap of a one-step loop', () => {
+    const steps = [step(0, 60), step(1, 62)];
+    const loop: PerfRange = { from: 1, to: 2 };
+    const lap = advance(steps, 1, held(62), loop);
+    expect(lap.move).toEqual({ kind: 'cue', index: 1 });
+    expect(lap.passed).toBe(1);
+    const stuck = advance(steps, 1, lap.keys, loop);
+    expect(stuck.move).toEqual({ kind: 'stay' });
+    const next = advance(steps, 1, pressKey(releaseKey(lap.keys, 62), 62), loop);
+    expect(next.move).toEqual({ kind: 'cue', index: 1 });
+    expect(next.passed).toBe(1);
+  });
+
+  it('makes held keys need a fresh press after an external move (spendAll)', () => {
+    const steps = [step(0, 60), step(1, 62)];
+    const keys = spendAll(held(60));
+    expect(advance(steps, 0, keys, null).move).toEqual({ kind: 'stay' });
+    expect(advance(steps, 0, pressKey(releaseKey(keys, 60), 60), null).move).toEqual({
+      kind: 'cue',
+      index: 1,
+    });
+    // Pressing the held key again, without a release, also refreshes it.
+    expect(advance(steps, 0, pressKey(keys, 60), null).move).toEqual({ kind: 'cue', index: 1 });
+  });
+
+  it('ignores extra held keys and leaves them as they are', () => {
+    const r = advance([step(0, 60), step(1, 62)], 0, held(60, 90, 30), null);
+    expect(r.move).toEqual({ kind: 'cue', index: 1 });
+    expect(state(r.keys)).toEqual([
+      [30, true],
+      [60, false],
+      [90, true],
+    ]);
+  });
+
+  it('bounds the chain by the step count', () => {
+    // Steps that need nothing always pass: the chain must still end.
+    const empty = [step(0), step(1), step(2)];
+    const loop: PerfRange = { from: 0, to: 3 };
+    const r = advance(empty, 1, NO_KEYS, loop);
+    expect(r.passed).toBe(empty.length);
+    expect(r.move).toEqual({ kind: 'cue', index: 1 });
+    // Without a loop the same steps run off the end.
+    const open = advance(empty, 0, NO_KEYS, null);
+    expect(open.move).toEqual({ kind: 'finish' });
+    expect(open.passed).toBe(empty.length);
+  });
+
+  it('stays for an index outside the steps', () => {
+    const keys = held(60);
+    expect(advance([step(0, 60)], -1, keys, null).move).toEqual({ kind: 'stay' });
+    expect(advance([step(0, 60)], 1, keys, null).move).toEqual({ kind: 'stay' });
+    expect(advance([], 0, keys, null).move).toEqual({ kind: 'stay' });
+  });
+
+  it('never changes the map it was given', () => {
+    const keys = held(60, 62);
+    const before = state(keys);
+    advance([step(0, 60), step(1, 62), step(2, 64)], 0, keys, null);
+    expect(state(keys)).toEqual(before);
+  });
+
+  it('treats a loop that holds no step as no loop', () => {
+    const steps = [step(0, 60), step(1, 62)];
+    const r = advance(steps, 1, held(62), { from: 5, to: 9 });
+    expect(r.move).toEqual({ kind: 'finish' });
+  });
+});

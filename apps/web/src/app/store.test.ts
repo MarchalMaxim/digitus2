@@ -33,6 +33,7 @@ describe('store', () => {
       lastPlayed: null,
       legendSeen: false,
       favourites: [],
+      playAlong: false,
     });
   });
   it('opens a library piece, the about page, and goes back', () => {
@@ -459,6 +460,45 @@ describe('the default settings', () => {
       lastPlayed: null,
       legendSeen: false,
       favourites: [],
+      playAlong: false,
     });
+  });
+});
+
+describe('playing along on a piano of your own (issue 182)', () => {
+  const S = () => useAppStore.getState();
+  const stored = () =>
+    JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.settings;
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({ settings: { ...DEFAULT_SETTINGS } });
+  });
+  it('is off until the reader turns it on', () => {
+    expect(S().settings.playAlong).toBe(false);
+  });
+  it('is kept in localStorage, on and off', async () => {
+    S().setSettings({ playAlong: true });
+    expect(stored().playAlong).toBe(true);
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.playAlong).toBe(true);
+    S().setSettings({ playAlong: false });
+    expect(stored().playAlong).toBe(false);
+  });
+  it('loads older settings with it off, and drops a value that is not a boolean', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { handSize: 'small' } }, version: 2 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings).toMatchObject({ handSize: 'small', playAlong: false });
+    for (const junk of ['yes', 1, null, [true]]) {
+      useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, playAlong: true } });
+      localStorage.setItem(
+        SETTINGS_STORAGE_KEY,
+        JSON.stringify({ state: { settings: { playAlong: junk } }, version: 2 }),
+      );
+      await useAppStore.persist.rehydrate();
+      expect(S().settings.playAlong, JSON.stringify(junk)).toBe(false);
+    }
   });
 });

@@ -14,6 +14,13 @@
   --key-line: #000000; /* the outlines between the keys */
   --key-digit: #000000; /* the finger numbers and hand letters on the keys */
   --key-down: #cccccc; /* a pressed or dimmed key */
+  /* The bar along the front edge of a key held on the reader's own piano (base.css, .key-held,
+     issue 182): 5.7:1 on a white key, 3.6:1 on a pressed one. On a black key that is not pressed
+     it has its own token (the same gray here, a lighter one in the dark set), 3.7:1. A dimmed
+     white key (--key-down at the dimming's opacity over the dock's paper) has one too, 4.8:1. */
+  --key-held: #666666;
+  --key-held-on-black: #666666;
+  --key-held-on-dim: #666666;
   /* What the Hands thumb blends with (base.css, .segmented-thumb): a difference with white
      inverts what lies under it, in either theme. */
   --invert: #ffffff;
@@ -56,6 +63,11 @@
     --key-line: #111111;
     --key-digit: #111111;
     --key-down: #8f8f8f;
+    /* The reader's held keys: 7.8:1 on a white key, 3.4:1 on a pressed one; 3.3:1 on a black key;
+       on a dimmed white key, a pale gray on its dark, 4.1:1. */
+    --key-held: #3d3d3d;
+    --key-held-on-black: #666666;
+    --key-held-on-dim: #a6a6a6;
     --bar-tint: 0.08;
   }
 }
@@ -76,6 +88,11 @@
     --key-line: #111111;
     --key-digit: #111111;
     --key-down: #8f8f8f;
+    /* The reader's held keys: 7.8:1 on a white key, 3.4:1 on a pressed one; 3.3:1 on a black key;
+       on a dimmed white key, a pale gray on its dark, 4.1:1. */
+    --key-held: #3d3d3d;
+    --key-held-on-black: #666666;
+    --key-held-on-dim: #a6a6a6;
     --bar-tint: 0.08;
   }
 }

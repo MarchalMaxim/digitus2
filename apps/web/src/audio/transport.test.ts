@@ -1042,4 +1042,77 @@ describe('Transport in performance order (repeats and jumps, issue 50)', () => {
     // 4 beats a bar, 4 bars heard.
     expect(clicks).toHaveLength(16);
   });
+
+  describe('the position in performance seconds (play along, issue 182)', () => {
+    it('seekPerformance, stopped, sets where play() starts: the second hearing of a repeat', () => {
+      // Bars 1 2 | 1 2, two seconds a bar: perf 5 is one second into the second hearing of bar 1.
+      const t = make({ score: repeat });
+      t.setCountIn(false);
+      let ends = 0;
+      t.onEnd = () => ends++;
+      t.seekPerformance(5);
+      expect(t.performanceStartSec()).toBeCloseTo(5, 6);
+      expect(t.startSec()).toBeCloseTo(1, 6); // written: one second into bar 1
+      expect(t.positionSec()).toBeCloseTo(1, 6);
+      t.play();
+      run(t, 2.9);
+      expect(ends).toBe(0);
+      run(t, 0.3);
+      expect(ends).toBe(1); // the third second of the second hearing: the piece ends at perf 8
+      expect(t.state.playing).toBe(false);
+    });
+
+    it('enters the hearing it is told to, where a written seek takes the first', () => {
+      // The same bar, written second 1: `seek` goes forward from the top and takes the first
+      // hearing; a walk made of written seeks would loop there forever.
+      const written = make({ score: repeat });
+      written.seek(1);
+      expect(written.performanceStartSec()).toBeCloseTo(1, 6);
+      const performed = make({ score: repeat });
+      performed.seekPerformance(5);
+      expect(performed.performanceStartSec()).toBeCloseTo(5, 6);
+    });
+
+    it('seekPerformance clamps to the piece', () => {
+      const t = make({ score: repeat });
+      t.seekPerformance(-3);
+      expect(t.performanceStartSec()).toBe(0);
+      t.seekPerformance(99);
+      expect(t.positionSec()).toBeCloseTo(4, 6); // the end of the order, back in the written score
+    });
+
+    it('performanceStartSec follows a loop: its start when the position lies outside it', () => {
+      // Bars 1 2 3 | 1 2 | 4: the loop over bars 3 and 4 runs from perf 4 to 12.
+      const t = make({ score: voltas });
+      t.setLoop({ from: 2, to: 3 });
+      expect(t.performanceLoop()).toEqual({ from: 4, to: 12 });
+      expect(t.performanceStartSec()).toBe(4); // the position, 0, lies outside
+      expect(t.startSec()).toBeCloseTo(4, 6);
+      t.seekPerformance(8);
+      expect(t.performanceStartSec()).toBe(8); // inside: unchanged
+      expect(t.startSec()).toBeCloseTo(2, 6); // the second hearing of bar 2, written 2 s
+      t.seekPerformance(2);
+      expect(t.performanceStartSec()).toBe(4);
+      t.seekPerformance(12); // the loop's end is outside it
+      expect(t.performanceStartSec()).toBe(4);
+      t.setLoop(null);
+      expect(t.performanceStartSec()).toBe(0); // the end is the top again
+    });
+
+    it('performanceLoop is the stretch chosen at setLoop: the one holding the position, else the first', () => {
+      const first = make({ score: repeat });
+      expect(first.performanceLoop()).toBeNull();
+      first.setLoop({ from: 0, to: 1 });
+      expect(first.performanceLoop()).toEqual({ from: 0, to: 4 });
+      first.setLoop(null);
+      expect(first.performanceLoop()).toBeNull();
+
+      const second = make({ score: repeat });
+      second.seekPerformance(5);
+      second.setLoop({ from: 0, to: 1 });
+      expect(second.performanceLoop()).toEqual({ from: 4, to: 8 });
+      second.seekPerformance(1); // a later seek does not choose another stretch
+      expect(second.performanceLoop()).toEqual({ from: 4, to: 8 });
+    });
+  });
 });

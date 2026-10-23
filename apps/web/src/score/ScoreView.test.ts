@@ -14,6 +14,7 @@ const ready: StatusInputs = {
   hands: 'both',
   loading: false,
   countIn: null,
+  alongHint: null,
 };
 
 const info = (text: string) => ({ text, kind: 'info' });
@@ -73,6 +74,54 @@ describe('the status line', () => {
       }),
     ).toEqual(info('This piece has no notes for the right hand.'));
     expect(scoreStatusLine({ ...ready, docStatus: 'error', loading: true })).toBeNull();
+  });
+
+  // The play-along's hint (issue 182) is the lowest line of all: it never covers a line that
+  // tells the reader what the score or the player is busy with.
+  describe('the play-along hint', () => {
+    it('says nothing while there is no hint', () => {
+      expect(scoreStatusLine({ ...ready, alongHint: null })).toBeNull();
+    });
+
+    it('asks for the red note, or the red notes when the step has more than one pitch', () => {
+      expect(en.score.view.playAlongHint(1)).toBe('Play the red note on your piano.');
+      expect(en.score.view.playAlongHint(2)).toBe('Play the red notes on your piano.');
+      expect(scoreStatusLine({ ...ready, alongHint: 1 })).toEqual(
+        info('Play the red note on your piano.'),
+      );
+      expect(scoreStatusLine({ ...ready, alongHint: 3 })).toEqual(
+        info('Play the red notes on your piano.'),
+      );
+    });
+
+    it('is in every language, singular and plural, each its own', () => {
+      const lines = [en, es, fr, nl, pt].flatMap((m) => [
+        m.score.view.playAlongHint(1),
+        m.score.view.playAlongHint(2),
+      ]);
+      expect(lines.every((line) => line.trim() !== '')).toBe(true);
+      expect(new Set(lines).size).toBe(lines.length);
+    });
+
+    it('comes after what the score is busy with, why Play is unavailable, and the player', () => {
+      const hint = { ...ready, alongHint: 1 };
+      expect(scoreStatusLine({ ...hint, docStatus: 'loading' })).toEqual(
+        info('Loading the score…'),
+      );
+      expect(scoreStatusLine({ ...hint, docStatus: 'fingering' })).toEqual(info('Fingering…'));
+      expect(scoreStatusLine({ ...hint, docStatus: 'rendering' })).toEqual(
+        info('Preparing the score…'),
+      );
+      expect(scoreStatusLine({ ...hint, playable: false, hands: 'L' })).toEqual(
+        info('This piece has no notes for the left hand.'),
+      );
+      expect(scoreStatusLine({ ...hint, loading: true })).toEqual(info('Loading the piano…'));
+      expect(scoreStatusLine({ ...hint, countIn: { beat: 0, beats: 4, beatInBar: 1 } })).toEqual({
+        text: '1',
+        kind: 'count',
+      });
+      expect(scoreStatusLine({ ...hint, docStatus: 'error' })).toBeNull();
+    });
   });
 });
 

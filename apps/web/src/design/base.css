@@ -1231,6 +1231,35 @@ html:has(.dock) {
   opacity: 0.4;
 }
 
+/* The reader's keys (issue 182): a gray bar along the front edge of each key held on their piano.
+   It sits in the key's group, so it goes down and up with the key's travel, and it is additive:
+   the key keeps its fill, its number and its pressed or dimmed look. The selectors outweigh the
+   key rectangles' fills and outlines above. On a black key that is neither pressed nor dimmed the
+   bar takes its own gray. A dimmed key's bar is not in its group, which the dimming above would
+   take down with it (1.5:1 on the pale key): it sits beside it at full strength. */
+.keyboard-svg g.key rect.key-held {
+  fill: var(--key-held);
+  stroke: none;
+  transition: none;
+  pointer-events: none;
+}
+
+.keyboard-svg g.key rect.key-held.is-on-black {
+  fill: var(--key-held-on-black);
+}
+
+/* Beside a dimmed key (Keyboard.tsx): a dimmed white key is the pale of --key-down over the dock's
+   paper, so it takes the bar of its own gray; a dimmed black key is that pale over a white key's
+   fill, where the held gray of the pressed keys reads. Not in a key's group: no key rule reaches it. */
+.keyboard-svg rect.key-held.is-dimmed {
+  fill: var(--key-held-on-dim);
+  pointer-events: none;
+}
+
+.keyboard-svg rect.key-held.is-dimmed.is-black {
+  fill: var(--key-held);
+}
+
 /* The loader (Loader.tsx, issue #28): one octave in the keyboard's colors, where a key at a time
    goes down in the accent, one beat each (--loader-beat). The accent is one group that steps from
    key to key without gliding, and the key under it goes down with it the way the dock's keys do.

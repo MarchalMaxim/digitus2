@@ -42,6 +42,9 @@ export const score = {
     noNotesLeft: 'This piece has no notes for the left hand.',
     noNotesRight: 'This piece has no notes for the right hand.',
     noNotes: 'This piece has no notes to play.',
+    /** The status line while the red waits for the reader's piano (issue 182); `count` is the notes of the step. */
+    playAlongHint: (count: number): string =>
+      count > 1 ? 'Play the red notes on your piano.' : 'Play the red note on your piano.',
     /** The button that opens and closes the practice settings (speed, loop, hands). */
     practice: 'Practice',
     /** The button back to the scan that produced this score. */

@@ -32,9 +32,13 @@ function fakePlayback(
     pause: () => calls.push('pause()'),
     rewind: () => calls.push('rewind()'),
     seek: (sec) => calls.push(`seek(${sec})`),
+    cueAt: () => {},
+    finish: () => {},
     // The position is heard while playing, paused or requested while stopped.
     positionSec: () => at,
     startSec: () => ((over.playing ?? false) ? 0 : at),
+    startPerformanceSec: () => 0,
+    performanceLoop: () => null,
     leadingIn: () => false,
     playingNow: () => over.playing ?? false,
     leadInRemainingSec: () => null,

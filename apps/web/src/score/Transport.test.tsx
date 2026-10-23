@@ -45,8 +45,12 @@ function playback(
     pause: vi.fn<() => void>(),
     rewind: vi.fn(),
     seek: vi.fn(),
+    cueAt: () => {},
+    finish: () => {},
     positionSec: () => 0,
     startSec: () => 0,
+    startPerformanceSec: () => 0,
+    performanceLoop: () => null,
     leadingIn: () => false,
     playingNow: () => false,
     leadInRemainingSec: () => null,
@@ -142,6 +146,28 @@ describe('Transport', () => {
     rerender(<Transport playback={{ ...playback(false), rewind }} />);
     expect(button).toHaveAttribute('aria-disabled', 'true');
     expect(button).toHaveFocus();
+  });
+  // Playing along (issue 182): the red waits on the piece's first note for the piano. The
+  // position is a cue, not the start, yet there is nothing to rewind to.
+  it('keeps Rewind unavailable while the red waits on the first note, and ignores it then', async () => {
+    const rewind = vi.fn();
+    const waiting = { ...playback(false), atStart: false, rewind };
+    const { rerender } = render(<Transport playback={waiting} resumeShown atFirstNote />);
+    const button = screen.getByRole('button', { name: 'Rewind' });
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(button);
+    expect(rewind).not.toHaveBeenCalled();
+    // The red has moved on (or the piano went): Rewind has something to do again.
+    rerender(<Transport playback={waiting} resumeShown atFirstNote={false} />);
+    expect(button).not.toHaveAttribute('aria-disabled');
+    await userEvent.click(button);
+    expect(rewind).toHaveBeenCalledTimes(1);
+    // The default is off, and a playing transport can always be rewound.
+    rerender(<Transport playback={waiting} resumeShown />);
+    expect(button).not.toHaveAttribute('aria-disabled');
+    rerender(<Transport playback={{ ...playback(true), rewind }} atFirstNote />);
+    expect(button).not.toHaveAttribute('aria-disabled');
   });
   it('wires play, pause, hands, tempo, metronome, count-in and loop', async () => {
     const pb = playback(false);

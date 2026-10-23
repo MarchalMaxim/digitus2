@@ -134,6 +134,7 @@ describe('the score view in another language', () => {
       hands: 'both',
       loading: false,
       countIn: null,
+      alongHint: null,
     } as const;
     expect(scoreStatusLine({ ...ready, loading: true }, messages())).toEqual({
       text: 'De piano laden…',

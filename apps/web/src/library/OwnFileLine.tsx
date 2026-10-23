@@ -2,6 +2,7 @@ import { useState, type ChangeEvent } from 'react';
 import { useT } from '../i18n/i18n.js';
 import { CameraEntry } from '../scan/camera/CameraEntry.js';
 import { isTouchOnly } from '../scan/phone.js';
+import { PianoLine } from './PianoLine.js';
 import { SCORE_ACCEPT } from './ownFile.js';
 
 // The plan names this module OwnFile.tsx. On Windows' case-insensitive file system an import of
@@ -15,7 +16,9 @@ export interface OwnFileProps {
 /**
  * The end line (spec 3): a text button that opens the file chooser; the page never mentions
  * dropping. On a touch-only device the camera, to photograph a printed page, has a line of its
- * own under it, with the camera symbol (issue 143): side by side the two read as one link.
+ * own under it, with the camera symbol (issue 143): side by side the two read as one link. Last
+ * comes the line for playing along on the reader's own piano (issue 182), only where the browser
+ * has Web MIDI.
  */
 export function OwnFileLine({ onFiles }: OwnFileProps) {
   const t = useT();
@@ -38,6 +41,7 @@ export function OwnFileLine({ onFiles }: OwnFileProps) {
         />
       </label>
       {camera && <CameraEntry label={t.scan.phone.takePhoto} onFiles={onFiles} />}
+      <PianoLine />
     </div>
   );
 }

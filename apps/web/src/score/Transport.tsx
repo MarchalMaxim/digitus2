@@ -68,6 +68,11 @@ export interface TransportProps {
    * meanwhile, even where it would be red.
    */
   redAway?: boolean;
+  /**
+   * The red waits on the piece's first note for the piano (issue 182): there is nothing to rewind
+   * to, so Rewind is idle, as it is at the start. Default false.
+   */
+  atFirstNote?: boolean;
 }
 
 export interface PracticeControlsProps {
@@ -183,7 +188,8 @@ export function loopPrefill(currentBar: number, measureCount: number): [string, 
  * score yet, so Pause keeps the red until that note sounds and the cursor takes it. Paused after
  * a note was heard (`resumeShown`, T10), the cursor keeps the last group heard red and Play is
  * plain. Where the red travels between the button and the cursor (`redAway`, RedFlight.tsx), the
- * button is plain while the traveling shape carries it.
+ * button is plain while the traveling shape carries it. Rewind is idle at the start, and while the
+ * red waits on the first note for the reader's piano (`atFirstNote`, issue 182).
  *
  * Space plays and pauses from anywhere while the transport is mounted, unless the focus is in a
  * control that takes Space itself (TAKES_SPACE). Its default, scrolling the page, is cancelled,
@@ -194,6 +200,7 @@ export function Transport({
   disabled = false,
   resumeShown = false,
   redAway = false,
+  atFirstNote = false,
 }: TransportProps) {
   const t = useT();
   const playing = playback.playing;
@@ -205,8 +212,11 @@ export function Transport({
   const red = (playing ? playback.waiting : !resumeShown) && !redAway;
   /** Play cannot start now (the score is not ready, or the samples are loading); Pause always works. */
   const playBlocked = !playing && (disabled || loading);
-  /** Stopped at the start (fresh, rewound, at the end): there is nothing to rewind. */
-  const rewindIdle = !playing && playback.atStart;
+  /**
+   * Stopped at the start (fresh, rewound, at the end), or with the red waiting on the first note
+   * for the piano: there is nothing to rewind.
+   */
+  const rewindIdle = !playing && (playback.atStart || atFirstNote);
   const toggle = () => {
     if (playing) playback.pause();
     else if (!playBlocked) playback.play();

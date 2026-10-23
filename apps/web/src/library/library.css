@@ -324,6 +324,21 @@ h2[tabindex='-1']:focus {
   justify-items: start;
 }
 
+/* Playing along on the reader's own piano (issue 182): the last row of the end line, one gray
+   sentence over one text button. The flag address is one long word; it wraps. */
+.piano-line {
+  display: grid;
+  justify-items: start;
+}
+
+.piano-line p {
+  overflow-wrap: anywhere;
+}
+
+.piano-line .text-button {
+  min-height: 44px;
+}
+
 /* While files are dragged over the window, the frame is the one accent on screen (spec 9). */
 .library.is-dragging > :not(.drop-frame) {
   visibility: hidden;

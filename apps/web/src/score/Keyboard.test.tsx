@@ -413,3 +413,185 @@ describe('Keyboard', () => {
     });
   });
 });
+
+describe('Keyboard: the reader’s own keys (issue 182)', () => {
+  // In the key's group; on a dimmed key, beside it (outside the dimming, see below).
+  const bar = (container: Element, midi: number) =>
+    container.querySelector(
+      `[data-midi="${midi}"] rect.key-held, rect.key-held[data-for-midi="${midi}"]`,
+    );
+
+  it('draws nothing by default', () => {
+    const { container } = render(<Keyboard lowMidi={48} highMidi={71} pressed={[]} />);
+    expect(container.querySelectorAll('.key-held')).toHaveLength(0);
+  });
+
+  it('draws one bar along the front edge of each held key in range, in the key’s own group', () => {
+    const { container } = render(
+      <Keyboard lowMidi={48} highMidi={71} pressed={[]} held={[60, 61, 64]} />,
+    );
+    const bars = [...container.querySelectorAll('rect.key-held')];
+    expect(bars.map((b) => b.closest('g.key')?.getAttribute('data-midi'))).toEqual([
+      '60',
+      '64',
+      '61',
+    ]); // white keys first, then black: the order the keys are drawn in
+    for (const b of bars) expect(b).toHaveAttribute('aria-hidden', 'true');
+    // Sizes: a white key's bar sits 8 px above its foot, a black key's 6 px.
+    const geometry = (midi: number) => {
+      const key = container.querySelector(`[data-midi="${midi}"]`)!;
+      const rect = key.querySelector('rect')!;
+      const b = bar(container, midi)!;
+      const [x, w, h] = ['x', 'width', 'height'].map((a) => Number(rect.getAttribute(a)));
+      return {
+        dx: Number(b.getAttribute('x')) - x!,
+        y: Number(b.getAttribute('y')),
+        dw: w! - Number(b.getAttribute('width')),
+        h: Number(b.getAttribute('height')),
+        rx: Number(b.getAttribute('rx')),
+        keyHeight: h!,
+      };
+    };
+    expect(geometry(60)).toEqual({ dx: 3, y: 92, dw: 6, h: 5, rx: 1, keyHeight: 100 });
+    expect(geometry(61)).toEqual({ dx: 2, y: 56, dw: 4, h: 4, rx: 1, keyHeight: 62 });
+  });
+
+  it('marks a bar on a black key as such only while the key is neither pressed nor dimmed', () => {
+    const { container } = render(
+      <Keyboard
+        lowMidi={48}
+        highMidi={71}
+        pressed={[{ midi: 63, finger: 2, hand: 'R' }]}
+        muted={[{ midi: 66, finger: 3, hand: 'L' }]}
+        held={[60, 61, 63, 66]}
+      />,
+    );
+    expect(bar(container, 61)).toHaveClass('is-on-black'); // plain black key
+    expect(bar(container, 63)).not.toHaveClass('is-on-black'); // pressed: the key is gray
+    expect(bar(container, 66)).not.toHaveClass('is-on-black'); // dimmed: gray too
+    expect(bar(container, 60)).not.toHaveClass('is-on-black'); // a white key
+  });
+
+  it('draws the bar of a dimmed key beside its group, outside the dimming, so it keeps its contrast', () => {
+    const { container } = render(
+      <Keyboard
+        lowMidi={48}
+        highMidi={71}
+        pressed={[]}
+        muted={[
+          { midi: 60, finger: 1, hand: 'L' },
+          { midi: 61, finger: 2, hand: 'L' },
+        ]}
+        held={[60, 61, 62]}
+      />,
+    );
+    for (const midi of [60, 61]) {
+      const key = container.querySelector(`g.key[data-midi="${midi}"]`)!;
+      expect(key).toHaveClass('is-muted');
+      expect(key.querySelector('.key-held')).toBeNull(); // a bar in the group would be dimmed too
+      const b = bar(container, midi)!;
+      expect(b).toHaveClass('is-dimmed');
+      expect(b.closest('.is-muted')).toBeNull();
+      expect(b).toHaveAttribute('aria-hidden', 'true');
+      // The same place on the key as an undimmed key's bar.
+      const rect = key.querySelector('rect')!;
+      const h = Number(rect.getAttribute('height'));
+      expect(Number(b.getAttribute('y'))).toBe(h - (midi === 61 ? 6 : 8));
+      expect(Number(b.getAttribute('x'))).toBe(
+        Number(rect.getAttribute('x')) + (midi === 61 ? 2 : 3),
+      );
+    }
+    expect(bar(container, 60)).not.toHaveClass('is-black');
+    expect(bar(container, 61)).toHaveClass('is-black'); // a dimmed black key is pale, not black
+    expect(bar(container, 61)).not.toHaveClass('is-on-black');
+    // A key that is not dimmed keeps its bar in its group.
+    expect(container.querySelector('g.key[data-midi="62"] rect.key-held')).not.toBeNull();
+    expect(container.querySelectorAll('.key-held')).toHaveLength(3);
+  });
+
+  it('draws the dimmed key’s bar above the key and its number, below the hand letters', () => {
+    const { container } = render(
+      <Keyboard
+        lowMidi={48}
+        highMidi={71}
+        pressed={[]}
+        muted={[{ midi: 60, finger: 1, hand: 'L' }]}
+        handLetters
+        held={[60]}
+      />,
+    );
+    const key = container.querySelector('g.key[data-midi="60"]')!;
+    const b = bar(container, 60)!;
+    const after = (a: Node, z: Node) =>
+      !!(a.compareDocumentPosition(z) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(after(key, b)).toBe(true);
+    expect(after(b, container.querySelector('.key-hand')!)).toBe(true);
+  });
+
+  it('is additive: a held key that is also pressed keeps its digit and its pressed class', () => {
+    const pressed = [
+      { midi: 60, finger: 1 as const, hand: 'R' as const },
+      { midi: 64, finger: 3 as const, hand: 'R' as const },
+    ];
+    const without = render(<Keyboard lowMidi={48} highMidi={71} pressed={pressed} />);
+    const pressedWithout = [...without.container.querySelectorAll('.key.is-pressed')].map((k) =>
+      k.getAttribute('data-midi'),
+    );
+    without.unmount();
+    const { container } = render(
+      <Keyboard lowMidi={48} highMidi={71} pressed={pressed} held={[60, 62]} />,
+    );
+    const c4 = container.querySelector('[data-midi="60"]')!;
+    expect(c4).toHaveClass('is-pressed');
+    expect(c4.querySelector('text')).toHaveTextContent(/^1$/);
+    expect(bar(container, 60)).not.toBeNull();
+    // A held key that nothing presses is not pressed, and the pressed keys are the same ones.
+    expect(container.querySelector('[data-midi="62"]')).not.toHaveClass('is-pressed');
+    expect(bar(container, 62)).not.toBeNull();
+    expect(
+      [...container.querySelectorAll('.key.is-pressed')].map((k) => k.getAttribute('data-midi')),
+    ).toEqual(pressedWithout);
+    // The key's own text is still its finger number alone.
+    expect(c4.querySelectorAll('text')).toHaveLength(1);
+  });
+
+  it('lies above the key’s fill and digit and below the hand letters', () => {
+    const { container } = render(
+      <Keyboard
+        lowMidi={48}
+        highMidi={71}
+        pressed={[{ midi: 60, finger: 1, hand: 'R' }]}
+        handLetters
+        held={[60]}
+      />,
+    );
+    const key = container.querySelector('[data-midi="60"]')!;
+    const b = bar(container, 60)!;
+    const after = (a: Node, z: Node) =>
+      !!(a.compareDocumentPosition(z) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(after(key.querySelector('rect')!, b)).toBe(true);
+    expect(after(key.querySelector('text')!, b)).toBe(true);
+    expect(after(b, container.querySelector('.key-hand')!)).toBe(true);
+  });
+
+  it('ignores a pitch outside the drawn range', () => {
+    const { container } = render(
+      <Keyboard lowMidi={48} highMidi={71} pressed={[]} held={[30, 47, 72, 100]} />,
+    );
+    expect(container.querySelectorAll('.key-held')).toHaveLength(0);
+    expect(container.querySelectorAll('[data-midi]')).toHaveLength(24);
+  });
+
+  it('is never red', () => {
+    const { container } = render(
+      <Keyboard
+        lowMidi={48}
+        highMidi={71}
+        pressed={[{ midi: 60, finger: 1, hand: 'R' }]}
+        held={[48, 60, 61, 71]}
+      />,
+    );
+    expect(container.querySelectorAll('.key-held')).toHaveLength(4);
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+  });
+});

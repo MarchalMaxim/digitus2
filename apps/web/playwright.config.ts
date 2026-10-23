@@ -38,7 +38,7 @@ export default defineConfig({
       name: 'mobile',
       use: phone,
       testMatch:
-        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|scan-grand-staff|seek|embellish|page-window)\.spec\.ts/,
+        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|scan-grand-staff|seek|embellish|page-window|play-along)\.spec\.ts/,
     },
     // The camera loop (issue 156): local homr reads the page the camera made, and its threads slow
     // every other spec's timing (the throttled sweeps, K.545 within 8 s), so the loop is a project
@@ -47,14 +47,15 @@ export default defineConfig({
     ...(loopAsked ? [{ name: 'loop', use: phone, testMatch: LOOP_SPEC }] : []),
     // The score camera on Safari's engine (issue 145): an iPhone has no other. Playwright's WebKit
     // for Windows has no video streams at all, so this project runs on Linux and macOS (CI, or
-    // `node scripts/e2e-webkit.mjs`, in Docker, on a Windows host).
+    // `node scripts/e2e-webkit.mjs`, in Docker, on a Windows host). It also holds the one test
+    // that needs a browser without Web MIDI (issue 182): the library shows no piano line.
     ...(process.platform === 'win32'
       ? []
       : [
           {
             name: 'iphone',
             use: { ...devices['iPhone 15'], launchOptions: { args: [] } },
-            testMatch: /(scan-camera(-real)?|scan-grand-staff)\.spec\.ts/,
+            testMatch: /(scan-camera(-real)?|scan-grand-staff|play-along-home)\.spec\.ts/,
           },
         ]),
   ],

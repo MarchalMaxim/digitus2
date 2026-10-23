@@ -108,6 +108,27 @@ export const library = {
     cannotReadFiles: 'Could not read these files.',
     cannotReadFile: 'Could not read this file.',
   },
+  /** Playing along on the reader's own piano over Web MIDI (issue 182): the line under the end line. */
+  piano: {
+    /** The button while nothing is connected; the press is the reader's consent to the browser's prompt. */
+    start: 'Play along on your piano',
+    /** The line while the browser's permission prompt is open. */
+    asking: 'Allow the browser to use your piano.',
+    /** The line once a piano is connected; `name` is the first input's name, or `yourPiano`. */
+    connected: (name: string) => `${name} is connected. Open a piece and play the red note.`,
+    /** The name used when the connected input has none. */
+    yourPiano: 'Your piano',
+    /** Access was granted but no piano is connected. */
+    none: 'No piano found. Connect it with a USB cable, or pair it over Bluetooth and turn it on.',
+    /** Windows Chromium only; `flag` is the address of the browser's flag page, which stays in English. */
+    bluetoothFlag: (flag: string) =>
+      `On Windows, a Bluetooth piano also needs ${flag} set to Enabled.`,
+    /** The browser blocked MIDI for this site. */
+    denied:
+      'The browser blocked MIDI for this site. Allow it in the site settings, then press again.',
+    /** The button while a piano is connected or sought: it turns playing along off. */
+    turnOff: 'Turn off',
+  },
   /** The shelf of the pieces marked with the score page's heart, above the levels. */
   favourites: {
     heading: 'Favourites',

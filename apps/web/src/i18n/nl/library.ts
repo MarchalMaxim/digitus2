@@ -88,6 +88,18 @@ export const library: Messages['library'] = {
     cannotReadFiles: 'Deze bestanden konden niet worden gelezen.',
     cannotReadFile: 'Dit bestand kon niet worden gelezen.',
   },
+  piano: {
+    start: 'Speel mee op je piano',
+    asking: 'Sta de browser toe je piano te gebruiken.',
+    connected: (name: string) => `${name} is verbonden. Open een stuk en speel de rode noot.`,
+    yourPiano: 'Je piano',
+    none: 'Geen piano gevonden. Sluit hem aan met een USB-kabel, of koppel hem via Bluetooth en zet hem aan.',
+    bluetoothFlag: (flag: string) =>
+      `Op Windows heeft een Bluetooth-piano ook ${flag} op Enabled nodig.`,
+    denied:
+      'De browser blokkeert MIDI voor deze site. Sta het toe in de site-instellingen en druk opnieuw.',
+    turnOff: 'Uitzetten',
+  },
   favourites: {
     heading: 'Favorieten',
     line: 'De stukken die je met het hartje hebt gemarkeerd, nieuwste eerst.',

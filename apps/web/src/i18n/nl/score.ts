@@ -29,6 +29,8 @@ export const score: Messages['score'] = {
     noNotesLeft: 'Dit stuk heeft geen noten voor de linkerhand.',
     noNotesRight: 'Dit stuk heeft geen noten voor de rechterhand.',
     noNotes: 'Dit stuk heeft geen noten om te spelen.',
+    playAlongHint: (count: number) =>
+      count > 1 ? 'Speel de rode noten op je piano.' : 'Speel de rode noot op je piano.',
     practice: 'Oefenen',
     scanSource: 'Scanbron en herkenning',
     couldNotOpenFile: (name: string) =>

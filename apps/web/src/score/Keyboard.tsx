@@ -65,6 +65,13 @@ export interface KeyboardProps {
    * when the bar changes. Undefined: the view follows `pressed`, at every change of it.
    */
   barKeys?: readonly number[];
+  /**
+   * The keys held on the reader's own piano (issue 182): a gray bar along each key's front edge,
+   * never red, never pressed. It is added to whatever the key shows (a cued key held on the piano
+   * keeps its fill and finger), moves with the key's travel, and takes no part in the view or in
+   * what the pointer presses. A pitch outside the drawn range is not shown. Default none.
+   */
+  held?: readonly number[];
 }
 
 /** How long a key pressed with the pointer stays down at most (ms): usePlayback's KEY_HOLD_SEC. */
@@ -185,6 +192,19 @@ function oneByKey(keys: readonly PressedKey[]): Map<number, PressedKey> {
 
 const NO_KEYS: PressedKey[] = [];
 const NO_HOVER: PressedKey[] = [];
+const NO_HELD: readonly number[] = [];
+
+/** The bar along the front edge of a held key (issue 182): 5 px high on a white key, 4 on a black. */
+function heldBar(k: KeyShape, w: number, h: number) {
+  const inset = k.black ? 2 : 3;
+  return {
+    x: k.x + inset,
+    y: h - (k.black ? 6 : 8),
+    width: w - 2 * inset,
+    height: k.black ? 4 : 5,
+    rx: 1,
+  };
+}
 
 /**
  * The on-screen keyboard: white keys white with an ink outline, black keys ink. A pressed key
@@ -199,6 +219,15 @@ const NO_HOVER: PressedKey[] = [];
  * MIN_WHITE_PX, so a wide piece on a phone scrolls instead of shrinking the digits away. A
  * scrolling keyboard chooses its view once a bar, from the keys the bar strikes (`barView`), and
  * is a tab stop so it can also be scrolled from the keyboard.
+ *
+ * The reader's own keys (`held`, issue 182): a gray bar along the front edge of each key held on
+ * their piano, 5 px high on a white key and 4 px on a black one, inside the key's group so it goes
+ * down and up with the key. It is drawn over the key and its number and under the hand letters,
+ * ignores the pointer and is hidden from assistive technology. On a black key that is neither
+ * pressed nor dimmed it takes its own gray (`is-on-black`): the key is black there. A dimmed key
+ * (`.is-muted`) is drawn at 40 % opacity as a whole, which would take its bar down with it: there
+ * the bar is drawn beside the key's group, at full strength, in a gray of its own (`is-dimmed`).
+ * A dimmed key is never pressed, so it has no travel for the bar to follow.
  *
  * The keyboard answers (issue #96): the key of a note hovered in the score goes down with its
  * finger (`hovered`), and a key pressed with the pointer goes down and sounds (`onStrike`,
@@ -215,6 +244,7 @@ export function Keyboard({
   hovered = null,
   onStrike,
   barKeys,
+  held = NO_HELD,
 }: KeyboardProps): JSX.Element {
   const t = useT();
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
@@ -241,6 +271,7 @@ export function Keyboard({
     down === null ? NO_HOVER : [{ midi: down, finger: null, hand: 'R' }];
   const byMidi = oneByKey([...pressed, ...hoverKeys, ...downKeys]);
   const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
+  const heldSet = useMemo(() => new Set(held), [held]);
   const width = Math.max(1, whiteCount) * WHITE_W;
 
   useEffect(() => {
@@ -322,7 +353,22 @@ export function Keyboard({
               {shown.finger}
             </text>
           )}
+          {heldSet.has(k.midi) && !m && (
+            <rect
+              className={`key-held${k.black && !shown ? ' is-on-black' : ''}`}
+              {...heldBar(k, w, h)}
+              aria-hidden="true"
+            />
+          )}
         </g>
+        {heldSet.has(k.midi) && m && (
+          <rect
+            className={`key-held is-dimmed${k.black ? ' is-black' : ''}`}
+            data-for-midi={k.midi}
+            {...heldBar(k, w, h)}
+            aria-hidden="true"
+          />
+        )}
       </Fragment>
     );
   };

@@ -262,13 +262,17 @@ export class Transport {
    * paused cursor compares it with the position: only a position Play resumes from is marked.
    */
   startSec(): number {
-    return toWrittenSec(this.perf, this.perfStartSec());
+    return toWrittenSec(this.perf, this.performanceStartSec());
   }
 
-  /** `startSec` in performance seconds. */
-  private perfStartSec(): number {
+  /**
+   * Where play() starts, in performance seconds: `startSec` in the order heard. The play-along
+   * keeps its place in these (issue 182): a written second cannot tell the hearings of a repeated
+   * bar apart.
+   */
+  performanceStartSec(): number {
     const start = this.position >= this.endSec ? 0 : this.position;
-    const range = this.loopRange();
+    const range = this.performanceLoop();
     return range && (start < range.from || start >= range.to) ? range.from : start;
   }
 
@@ -281,7 +285,7 @@ export class Transport {
    */
   play(opts: { leadSec?: number; countIn?: boolean } = {}): void {
     if (this.playing) return;
-    const start = this.perfStartSec();
+    const start = this.performanceStartSec();
     const factor = this.tempoFactor;
     let t0 = this.ctx.currentTime + Math.max(this.startDelaySec, opts.leadSec ?? 0);
     this.countInClicks = [];
@@ -330,18 +334,21 @@ export class Transport {
    */
   seek(sec: number, opts: { leadSec?: number } = {}): void {
     const written = Math.min(Math.max(0, sec), this.writtenEndSec);
-    const near = this.playing ? this.perfPositionSec() : this.perfStartSec();
-    this.seekPerf(toPerformanceSec(this.perf, written, near), opts);
+    const near = this.playing ? this.perfPositionSec() : this.performanceStartSec();
+    this.seekPerformance(toPerformanceSec(this.perf, written, near), opts);
   }
 
-  /** `seek` to a performance second. */
-  private seekPerf(sec: number, opts: { leadSec?: number } = {}): void {
-    let target = Math.min(Math.max(0, sec), this.endSec);
+  /**
+   * `seek` to a performance second, the order heard: each hearing of a repeated bar has its own.
+   * Stopped, that is where play() starts. Playing, as `seek`.
+   */
+  seekPerformance(perfSec: number, opts: { leadSec?: number } = {}): void {
+    let target = Math.min(Math.max(0, perfSec), this.endSec);
     if (!this.playing) {
       this.position = target;
       return;
     }
-    const range = this.loopRange();
+    const range = this.performanceLoop();
     if (range && (target < range.from || target >= range.to)) target = range.from;
     this.instrument.stopAll();
     this.countInClicks = [];
@@ -357,7 +364,7 @@ export class Transport {
   }
 
   rewind(): void {
-    this.seekPerf(0);
+    this.seekPerformance(0);
   }
 
   setTempoFactor(f: number): void {
@@ -368,7 +375,7 @@ export class Transport {
     // at the same clock time as the keyboard's phase change. Interleaved grids may have no
     // shared edge soon: cap responsiveness at 250 ms, then use a seek and rearticulate holds.
     const seg = this.current();
-    const loopEnd = this.loopRange()?.to ?? Infinity;
+    const loopEnd = this.performanceLoop()?.to ?? Infinity;
     const limit =
       seg.score + (this.ctx.currentTime + MAX_TEMPO_DEFERRAL_SEC - seg.ctx) * seg.factor;
     let boundary = this.scheduledTo;
@@ -392,9 +399,9 @@ export class Transport {
   /** Rare off-grid fallback: a brief rearticulation is preferable to a long stale tempo. */
   private resyncTempo(): void {
     const position = this.perfPositionSec();
-    this.seekPerf(position);
+    this.seekPerformance(position);
     const seg = this.current();
-    const end = this.loopRange()?.to ?? Infinity;
+    const end = this.performanceLoop()?.to ?? Infinity;
     for (const event of this.events) {
       if (event.sec >= position) break;
       const offset = Math.min(event.sec + event.duration, end);
@@ -432,8 +439,8 @@ export class Transport {
         : this.position;
     this.loopPerf = performanceLoop(this.perf, this.loop, near);
     if (!this.playing) return;
-    const r = this.loopRange();
-    if (r && (this.scheduledTo < r.from || this.scheduledTo > r.to)) this.seekPerf(r.from);
+    const r = this.performanceLoop();
+    if (r && (this.scheduledTo < r.from || this.scheduledTo > r.to)) this.seekPerformance(r.from);
   }
 
   /** The written second the music is at (`now` as in `audibleTime`). */
@@ -452,7 +459,7 @@ export class Transport {
       else break;
     }
     const pos = seg.score + (t - seg.ctx) * seg.factor;
-    const range = this.loopRange();
+    const range = this.performanceLoop();
     if (range && seg.score >= range.from && pos >= range.to) {
       return range.from + ((pos - range.from) % (range.to - range.from));
     }
@@ -499,7 +506,7 @@ export class Transport {
       const c = this.countInClicks.shift()!;
       this.click?.(c.time, c.accent);
     }
-    const range = this.loopRange();
+    const range = this.performanceLoop();
     let seg = this.current();
     let horizon = seg.score + (until - seg.ctx) * seg.factor;
     if (range) {
@@ -550,7 +557,7 @@ export class Transport {
   /** Schedules the notes and metronome beats whose score time lies in `[from, to)`. */
   private schedule(seg: Segment, from: number, to: number): void {
     if (!(to > from)) return;
-    const loopEnd = this.loopRange()?.to ?? Infinity;
+    const loopEnd = this.performanceLoop()?.to ?? Infinity;
     for (let i = lowerBound(this.events, from); i < this.events.length; i++) {
       const e = this.events[i]!;
       if (e.sec >= to) break;
@@ -681,8 +688,11 @@ export class Transport {
     this.onLeadInChange?.(true);
   }
 
-  /** The loop in performance seconds, or null when there is none or it is empty. */
-  private loopRange(): { from: number; to: number } | null {
+  /**
+   * The loop's stretch of the performance, in performance seconds, fixed when the loop is set
+   * (`setLoop`); null when there is no loop or it is empty. Read-only.
+   */
+  performanceLoop(): { from: number; to: number } | null {
     return this.loopPerf;
   }
 

@@ -97,6 +97,14 @@ These are settled against the code. A builder who finds one wrong stops and repo
    - the carry's own effect, in the same commit.
 8. **The walk never calls `cueAt` while playing, loading samples, or not ready.** That covers `playback.playing`, `playback.playingNow()`, `playback.loading`, a `doc.status` other than `ready`, and `!playable`.
 
+### Where the build departs from this plan
+
+The review found three places where the plan was wrong; the code and `docs/app.md` follow the corrections.
+
+- **Ruling 3.** A seek made while a cue waits keeps the cue's hearing: with `pendingPerfRef` set, `seek` stores `toPerformanceSec(perf, sec, startPerformanceSec())`, as `Transport.seek` does. Clearing it, as written below, sent a reader who never pressed Play back to a repeat's first hearing on every bar click.
+- **Section 1.4.** The bar of a dimmed key (the hand left out) is drawn beside the key's group, outside its 40 % opacity, with a third token, `--key-held-on-dim`: inside the group it measured 1.5:1.
+- **Section 2.13.** The Spanish, French and Portuguese flag sentences keep the verb "set", and the Portuguese button is an infinitive like its neighbours.
+
 ## 1. Decisions
 
 ### 1.1 Steps (what there is to play)

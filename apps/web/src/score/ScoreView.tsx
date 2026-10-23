@@ -14,9 +14,10 @@ import { BarSeek, type BarSeekHandle } from './BarSeek.js';
 import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
 import { useEmbellishCarry } from './carry.js';
 import { letteredBars, lettersShown } from './handLetters.js';
-import { Keyboard, keyboardRange } from './Keyboard.js';
+import { keyboardRange } from './Keyboard.js';
 import { handOfKey, keyForNote } from './noteKey.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
+import { PianoKeyboard } from './PianoKeyboard.js';
 import { EndBurst } from './EndBurst.js';
 import { RedGhost, useRedFlight } from './RedFlight.js';
 import {
@@ -37,6 +38,7 @@ import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useCursor } from './useCursor.js';
 import { useHoveredNote } from './useHoveredNote.js';
+import { usePlayAlong } from './usePlayAlong.js';
 import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
 
@@ -97,6 +99,11 @@ export interface StatusInputs {
   /** The player is fetching the piano's samples after the first Play. */
   loading: boolean;
   countIn: CountIn | null;
+  /**
+   * The red waits for the reader's piano (issue 182): how many pitches the step in front of
+   * them has, or null when the hint is not shown (usePlayAlong).
+   */
+  alongHint: number | null;
 }
 
 /**
@@ -113,11 +120,12 @@ export interface StatusLine {
  * unavailable (no notes in the selected hand), else what the player is busy with: loading the
  * piano after the first Play, then the count-in, each click's beat in its bar ("1", "2", "3",
  * "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4" then "1" when a whole bar comes
- * before a pickup). Null when there is nothing to say (a ready score, stopped or playing the
+ * before a pickup), then, lowest of all, what the reader plays on their piano while the red
+ * waits (issue 182). Null when there is nothing to say (a ready score, stopped or playing the
  * music). Written in `t` (default: the language on screen).
  */
 export function scoreStatusLine(
-  { docStatus, playable, hands, loading, countIn }: StatusInputs,
+  { docStatus, playable, hands, loading, countIn, alongHint }: StatusInputs,
   t: Messages = messages(),
 ): StatusLine | null {
   const info = (text: string): StatusLine => ({ text, kind: 'info' });
@@ -128,6 +136,7 @@ export function scoreStatusLine(
   if (!playable) return info(nothingToPlayText(hands, t));
   if (loading) return info(t.score.view.loadingPiano);
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
+  if (alongHint !== null) return info(t.score.view.playAlongHint(alongHint));
   return null;
 }
 
@@ -400,6 +409,27 @@ export function ScoreView({ source }: { source: PieceSource }) {
     (bar: number) => seekable && (!loop || (bar >= loop.from && bar <= loop.to)),
     [seekable, loop],
   );
+
+  // "Add notes between" (issue #67). The switch swaps the score, which halts playback and drops
+  // the loop (usePlayback.ts): the bar, the loop and the play state are recorded and put back
+  // once the version asked for is on screen (carry.ts). Called after usePlayback, so its halt
+  // for the new score has run first.
+  const toggleEmbellish = useEmbellishCarry(doc, score, playback, barStarts);
+
+  // Playing along on the reader's own piano (issue 182): while one is connected and the score is
+  // stopped, the red waits on the next step to play and moves on when the reader plays it. Called
+  // after the carry above and after the cursor and the flights, so its passive align effect runs
+  // after theirs in the same commit (usePlayAlong.ts).
+  const along = usePlayAlong({
+    score,
+    ready: doc.status === 'ready',
+    playable,
+    playback,
+    mutedHands,
+    currentGroup,
+    flightShown: red.redAway,
+  });
+
   const seekToBar = useCallback(
     (bar: number) => {
       if (!seekable) return;
@@ -408,19 +438,15 @@ export function ScoreView({ source }: { source: PieceSource }) {
       // A far seek brings the page of its bar in first: the red hops to notes it can find.
       if (host) pageWindowOf(host)?.ensureBar(target);
       if (!playback.playing && sec <= 0) {
+        // The red already waits on the first note for the piano: nowhere to go.
+        if (along.atFirst) return;
         if (!playback.atStart) playback.rewind(); // the red flies home
         return;
       }
       playback.seek(sec, { leadSec: red.hop(sec) });
     },
-    [seekable, barStarts, playback, red, host],
+    [seekable, barStarts, playback, red, host, along.atFirst],
   );
-
-  // "Add notes between" (issue #67). The switch swaps the score, which halts playback and drops
-  // the loop (usePlayback.ts): the bar, the loop and the play state are recorded and put back
-  // once the version asked for is on screen (carry.ts). Called after usePlayback, so its halt
-  // for the new score has run first.
-  const toggleEmbellish = useEmbellishCarry(doc, score, playback, barStarts);
 
   const seekKeyRef = useRef<(e: KeyboardEvent) => void>(() => undefined);
   useEffect(() => {
@@ -429,6 +455,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
       if (key === null || !seekable) return;
       if (key.kind === 'start') {
         // Like the Rewind button; the page goes to its top as Home does anywhere.
+        if (along.atFirst) return;
         if (playback.playing || !playback.atStart) playback.rewind();
         return;
       }
@@ -492,6 +519,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
       hands,
       loading: playback.loading,
       countIn: playback.countIn,
+      alongHint: along.hint,
     },
     t,
   );
@@ -560,7 +588,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
               onHost={setHost}
               windowed
               onPageBuilt={decorate}
-              resting={!playback.playing && currentGroup >= 0 && !red.hopping}
+              resting={!playback.playing && currentGroup >= 0 && !red.hopping && !along.active}
               hopping={red.hopping}
             />
           </BarSeek>
@@ -614,11 +642,12 @@ export function ScoreView({ source }: { source: PieceSource }) {
               disabled={doc.status !== 'ready' || !playable}
               resumeShown={!playback.playing && currentGroup >= 0}
               redAway={red.redAway || tune !== null}
+              atFirstNote={along.atFirst}
             />
             {narrow && practiceToggle}
             {range && (
               <div className="keyboard">
-                <Keyboard
+                <PianoKeyboard
                   lowMidi={range.lowMidi}
                   highMidi={range.highMidi}
                   pressed={pressed}

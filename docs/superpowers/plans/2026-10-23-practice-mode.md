@@ -83,7 +83,8 @@ The owner chose "A switch, Play as normal. In the Practice panel." Commit messag
 8. **The status line gets no new line.** Off, the along, hold and sound hints are all null through `active`. The switch announces its own state.
 9. **The home page does not change.** `PianoLine` stays at the bottom of the home page.
 10. **When it shows:** while `settings.playAlong` is on and the status is `connected`.
-    - It does not show for any other status, or on a piece where the walk has no steps.
+    - It does not show for any other status.
+    - It shows on a piece where the walk has no steps too: while Off no steps are computed, so the switch cannot know.
     - It shows on a one-hand piece.
     - It shows while loading or playing, so it never jumps under the pointer.
 
@@ -109,7 +110,7 @@ The owner chose "A switch, Play as normal. In the Practice panel." Commit messag
 | ------ | ------------------------ |
 | en     | Practice mode            |
 | es     | Modo práctica            |
-| fr     | Mode entraînement        |
+| fr     | Mode exercice            |
 | nl     | Oefenmodus               |
 | pt     | Modo de prática          |
 

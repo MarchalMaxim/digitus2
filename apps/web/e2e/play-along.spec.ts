@@ -596,10 +596,59 @@ test.describe('the score with a piano', () => {
     expect(await midi.index()).toBe(4);
     expect(await redBars(page)).toEqual([1]);
 
+    // A click on the loop's first bar, and Left at the loop's start (it clamps to that bar), land
+    // on the group the red already waits on: no flight there and back either.
+    await seekBar(page, 1);
+    await page.keyboard.press('ArrowLeft');
+    const again = Date.now() + 600;
+    while (Date.now() < again) await expectOneRed(page, 'the loop first bar again');
+    expect(await sawHome(page), 'a hop of no distance was planned').toBe(false);
+    await expect(rewind(page)).toHaveAttribute('aria-disabled', 'true');
+    expect(await cursorSec(page)).toBe(at);
+    expect(await midi.index()).toBe(4);
+
     // One group on, Rewind is available again.
     await midi.playRed();
     await expect.poll(() => midi.index()).toBe(5);
     await expect(rewind(page)).not.toHaveAttribute('aria-disabled', 'true');
+  });
+
+  test.describe('a loop below the first screen (issue 196)', () => {
+    test.use({ viewport: { width: 1280, height: 600 } });
+
+    test("Home on the loop's first group leaves the page where the red is", async ({ page }) => {
+      const midi = await twinkle(page, { tempo: FAST });
+      await setLoopBars(page, '9', '12');
+      await closePractice(page);
+      await expect.poll(() => midi.index()).toBe(28); // the loop's first group
+      await midi.waitForStep();
+      const redInView = () =>
+        page.evaluate(() => {
+          const reds = [...document.querySelectorAll('.score-sheet .is-red')];
+          return {
+            count: reds.length,
+            inView: reds.every((r) => {
+              const b = r.getBoundingClientRect();
+              return b.top >= 0 && b.bottom <= window.innerHeight;
+            }),
+            scrollY: window.scrollY,
+          };
+        });
+      // The page follows the red down to the loop, and settles with it on screen.
+      await expect
+        .poll(async () => {
+          const seen = await redInView();
+          return seen.count > 0 && seen.inView && seen.scrollY > 100;
+        })
+        .toBe(true);
+
+      await page.keyboard.press('Home');
+      await page.waitForTimeout(500); // a smooth scroll to the top would take this long
+      const after = await redInView();
+      expect(after.scrollY, 'the page jumped to the top').toBeGreaterThan(100);
+      expect(after.inView, 'the red went off screen').toBe(true);
+      expect(await midi.index()).toBe(28);
+    });
   });
 
   test("Play starts at the red group, the reader's keys show while it plays, and Pause leaves the red there", async ({
@@ -1797,7 +1846,7 @@ test.describe('the score with a piano', () => {
           } else {
             await (await twinkle(page)).waitForStep();
           }
-          const name = french ? 'Mode entraînement' : 'Practice mode';
+          const name = french ? 'Mode exercice' : 'Practice mode';
           const toggle = page.getByRole('switch', { name });
           await openPractice(page);
           await expect(toggle).toBeChecked();
@@ -1837,6 +1886,18 @@ test.describe('the score with a piano', () => {
             expect(seen.thumb, where).toBe(on ? seen.paper : seen.gray3);
             const box = (await label.boundingBox())!;
             expect(box.height, where).toBeGreaterThanOrEqual(44);
+            // The words stay on one row beside the switch (a wrapped label would still be 44 px
+            // high): the switch's and every text line's vertical centres agree within 2 px.
+            const rows = await label.evaluate((el) => {
+              const range = document.createRange();
+              range.selectNodeContents(el);
+              const centres = [...range.getClientRects()]
+                .filter((r) => r.width > 0 && r.height > 0)
+                .map((r) => r.top + r.height / 2);
+              return { count: centres.length, spread: Math.max(...centres) - Math.min(...centres) };
+            });
+            expect(rows.count, where).toBeGreaterThanOrEqual(2); // the switch and the words
+            expect(rows.spread, `${where}, the label wraps`).toBeLessThanOrEqual(2);
             expect(await horizontalOverflow(page), where).toBeLessThanOrEqual(0);
             await expectOneRed(page, where);
             await expectNoSeriousA11y(page, where);

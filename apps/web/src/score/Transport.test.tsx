@@ -569,7 +569,7 @@ describe('the Practice mode switch', () => {
     const names = {
       en: 'Practice mode',
       es: 'Modo práctica',
-      fr: 'Mode entraînement',
+      fr: 'Mode exercice',
       nl: 'Oefenmodus',
       pt: 'Modo de prática',
     } as const;

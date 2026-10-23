@@ -192,14 +192,26 @@ export function flightFrames(plan: FlightPlan): {
 /**
  * The noteheads the cursor marked last (`.is-red .notehead` under `host`), read in a layout
  * effect whenever the cursor moves to a group, and kept once it clears: they stay in the page, so
- * a flight home or the finish (EndBurst.tsx) can still leave from where the music ended.
+ * a flight home or the finish (EndBurst.tsx) can still leave from where the music ended. Held
+ * weakly: once the cursor has cleared, their page may be torn down (render/pageWindow.ts), and a
+ * strong reference would keep its whole detached SVG alive until the next mark.
  */
-export function useLastHeads(host: Element | null, currentGroup: number): RefObject<Element[]> {
-  const ref = useRef<Element[]>([]);
+export function useLastHeads(
+  host: Element | null,
+  currentGroup: number,
+): RefObject<WeakRef<Element>[]> {
+  const ref = useRef<WeakRef<Element>[]>([]);
   useLayoutEffect(() => {
-    if (host && currentGroup >= 0) ref.current = [...host.querySelectorAll('.is-red .notehead')];
+    if (host && currentGroup >= 0) {
+      ref.current = [...host.querySelectorAll('.is-red .notehead')].map((h) => new WeakRef(h));
+    }
   }, [host, currentGroup]);
   return ref;
+}
+
+/** Of the noteheads `useLastHeads` kept, those still in the page: none when their page was torn. */
+export function liveHeads(heads: readonly WeakRef<Element>[]): Element[] {
+  return heads.map((h) => h.deref()).filter((h): h is Element => h?.isConnected === true);
 }
 
 export interface RedFlightOptions {
@@ -265,7 +277,7 @@ export function useRedFlight({
     const was = atStartRef.current;
     atStartRef.current = atStart;
     if (!atStart || was) return;
-    const heads = lastHeadsRef.current.filter((h) => h.isConnected);
+    const heads = liveHeads(lastHeadsRef.current);
     lastHeadsRef.current = [];
     if (playing || heads.length === 0 || prefersReducedMotion()) return;
     const button = optsRef.current.playButton();

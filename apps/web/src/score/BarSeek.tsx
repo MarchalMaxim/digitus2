@@ -110,8 +110,7 @@ export function BarSeek({
 
   const footprint = useCallback(
     (bar: number) => {
-      const holds = (page: PageBars) =>
-        bar >= page.first && bar < page.first + page.measures.length;
+      const holds = (page: PageBars) => bar >= page.first && bar < page.first + page.count;
       const box = boxesOn(holds).find((b) => b.bar === bar);
       if (box) setPrint((p) => ({ box, key: (p?.key ?? 0) + 1 }));
     },

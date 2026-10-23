@@ -17,6 +17,7 @@ import { dropFrameShown, pieceRows } from './helpers/states.js';
 import { FINGER_LEGEND } from '../src/score/FingerLegend.js';
 import { TIERS } from '../src/library/levels.js';
 import { horizontalOverflow } from './helpers/overflow.js';
+import { expectDigits } from './helpers/sheet.js';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -324,7 +325,7 @@ test('library: a piece opened from far down a shelf opens at the top; going back
   expect(listY, 'the list is scrolled down').toBeGreaterThan(100);
 
   const expectArrivalAtTop = async (label: string) => {
-    await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
+    await expectDigits(page, 1288);
     expect(await scrollY(), `${label}: the score opens at the top`).toBe(0);
     await expect(
       page.getByRole('heading', { level: 1, name: /^Piano Sonata in C major/ }),

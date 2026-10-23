@@ -2,7 +2,7 @@
 
 ## Method
 
-Production build in Playwright's Chromium (new headless) on Windows 11, 1280 × 900, each piece opened by its address in a fresh browser. The renderer process's private memory comes from Windows (`Get-Process`, the commit charge Chrome's Task Manager shows as the memory footprint on Windows); the JS heap and Blink's heap (the DOM, Oilpan) of the page and of each worker come from the DevTools protocol (`Runtime.getHeapUsage`). Each piece is read four times: the peak while it opens (sampled every 250 ms), 6 s after the score shows, 40 s after, and after a garbage collection forced on every thread. Before and after are two production builds, three runs each, interleaved; the tables give the median. The browser's other processes (GPU, network, storage, about 190 MB) are the same for any page and are left out.
+Production build in Playwright's Chromium (new headless) on Windows 11, 1280 × 900, each piece opened by its address in a fresh browser. The renderer process's private memory comes from Windows (`Get-Process`, the commit charge Chrome's Task Manager shows as the memory footprint on Windows); the JS heap and Blink's heap (the DOM, Oilpan) of the page and of each worker come from the DevTools protocol (`Runtime.getHeapUsage`). Each piece is read four times: the peak while it opens (sampled every 250 ms), 6 s after the score shows, 40 s after, and after a garbage collection forced on every thread. Before and after are two production builds, three runs each, interleaved; the tables give the median. `apps/web/scripts/measure-ram.mjs` (`--dist <build> --port <n> --runs 3 --rounds 4`) takes the readings, and also scrolls the piece through and reads again (the leak oracle). The browser's other processes (GPU, network, storage, about 190 MB) are the same for any page and are left out.
 
 The tab's renderer process holds the page and both workers. With the library list open it takes about 226 MB, most of it the Verovio worker (its fixed 128 MB WASM heap and some 50 MB of compiled code), warmed up there so the first piece opens faster.
 
@@ -60,7 +60,49 @@ Each change's share, added one at a time (40 s after, median of three runs):
 - **The engine worker is released after a long piece** (`engine/client.ts`). Once it has handled a score of 2,000 notes or more (`HEAVY_NOTES`, about a tenth of the library) and then idled for 2 s with nothing pending, it is terminated, and the next call (a hand size change, an export) starts a fresh one; the worker keeps no state between calls. Chrome hands a terminated worker's JS heap back some 20 to 40 s later (a worker holding 520 MB, terminated: 154 MB of WebAssembly memory came back at once, the rest between 20 and 40 s later, and a GC of the page did not hasten it), about when V8 would have collected the garbage anyway. So the release saves less than its garbage: the idle worker itself for the rest of the visit, and part of the garbage sooner, 24 to 107 MB. Shorter pieces keep their warm worker, and the library's warm-up still loads it ahead of the first piece.
 - **The Verovio worker is retired after a long piece** (`score/render/renderer.ts`). Once it has laid out a piece of 2,000 notes or more (the score view passes the note count), or its WASM heap has grown past its start (it reports so), it is terminated as soon as nothing is pending, and the next layout or the library's next warm-up starts a fresh one. That frees the whole worker, its 128 MB of WASM heap and its compiled code, and WebAssembly memory comes back at once: 186 MB on the Scherzo, 211 MB on Beethoven's Ninth, 281 MB on the medley. The owner asked for it on every long piece ("retire the Verovio worker after the layout of every piece of 2,000+ notes too", issue #90); at first it covered only the three pieces whose heap grows. The cost is a cold start on such a piece's next layout (a new width bucket, the editor's fingering, a fingering change that adds or removes a digit), measured as the time from a narrower window to the new pages, median of five: Beethoven's Sonata Op. 79 (2,075 notes) 535 → 893 ms, the Scherzo 2.0 → 2.5 s. Playback, the cursor, seeking, hand switches, loops and print need no layout. Shorter pieces keep the warm worker, and the library warms a fresh one up while idle, so the next piece opens as fast as before.
 
-A long piece still holds 200 to 350 MB more for some 30 s after it opens than once it settles (Beethoven's Ninth: about 700 MB, then 376 MB). It all comes back at the page's first major GC, which V8 runs about 30 s after the open, or at once when one is forced. The page's own heaps account for about 90 MB of it; the two main-thread passes that parse the fingered MusicXML before each layout (`normalizeVoices`, `prepareScanBeams`, both through `DOMParser`) for about 24 MB (a build without them: 689 instead of 713 MB). The rest is not pinned down.
+- **Only the pages near the screen are built** (`score/render/pageWindow.ts`, `pageIndex.ts`). A long piece's pages stand as empty SVGs with their viewBox; a page is built within one window height of the window and torn down beyond two, and the page holding the red stays. The pieces of six pages or more are windowed (`WINDOW_MIN_PAGES`); a shorter one and the scan review keep every page. One pass over each layout's markup finds the bars of each page, the page of each note and the notes of each staff place (25 ms on the Scherzo, 34 ms on Beethoven's Ninth, 54 ms on the medley: `buildPageIndex` on the pages the layout worker returns, in Chromium, median of nine), which is all that the cursor, a seek, the bar numbering and the dimming of a whole staff need to know about the pages that are not built. Whatever reads a page brings it in first (the cursor, a seek by key or click, the bar boxes, the note under the pointer); a page built later is dimmed and has the digits patched since the layout as it arrives. Print uses its own engraving, so it needs nothing.
+
+Renderer private memory and the DOM, before → after, median of three runs, interleaved:
+
+| Piece | Peak while it opens | 6 s after | 40 s after | After a forced GC | DOM nodes at 40 s | Pages built at 40 s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Chopin, Scherzo No. 2 (37 pages) | 620 → 618 MB | 569 → 384 MB | 297 → 143 MB | 295 → 141 MB | 145,842 → 8,510 | 37 → 2 |
+| Beethoven, Symphony No. 9, first movement (35 pages) | 648 → 659 MB | 475 → 234 MB | 371 → 151 MB | 361 → 143 MB | 213,651 → 13,181 | 35 → 2 |
+| Precure piano medley (60 pages) | 771 → 805 MB | 580 → 198 MB | 536 → 191 MB | 529 → 183 MB | 340,119 → 12,303 | 60 → 2 |
+
+Measured again on the current main, two runs each, interleaved, the 40 s readings agree within 10 MB: 301 to 303 → 142 to 147 MB on the Scherzo, 380 to 382 → 148 to 150 MB on Beethoven's Ninth, 557 to 567 → 194 to 196 MB on the medley.
+
+The first column stays within 5 % (the medley's 771 → 805 MB is the largest change): the peak while a piece opens is the engine worker's garbage and the layout, which come before the pages are built. The page counts are those at 1280 px, where the score draws at 56 %. The scroll height is the same as before to the pixel (44,255 px on the Scherzo).
+
+Scrolling a piece through raises the renderer above its fresh reading, on both builds, and then it stops growing. The leak oracle (`measure-ram.mjs --rounds 4`) scrolls the piece to the bottom a viewport at a time, returns to the top and forces garbage collections, four times, and reads again after 40 s idle. The Scherzo, median of three runs:
+
+| Build | Fresh open | After round 1 | Round 2 | Round 3 | Round 4 | 40 s idle | DOM nodes, fresh → idle | SVG elements detached |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Every page built | 305 MB | 417 MB | 426 MB | 432 MB | 433 MB | 433 MB | 145,842 → 145,842 | 0 |
+| Pages near the screen | 143 MB | 209 MB | 211 MB | 212 MB | 214 MB | 215 MB | 8,510 → 8,507 | 0 |
+
+The oracle reads three things. The renderer plateaus after the first round (209 to 214 MB through the four; 417 to 433 MB on the build with every page built). The DOM node count returns to its fresh value (8,510 → 8,507) with the same two pages built, and no SVG element is detached and alive (`Runtime.queryObjects` on `SVGElement.prototype`), so no torn page is held. And the rise itself is the cost of having drawn the pages in turn, not a page kept: the build that tears nothing rises too (+112 to 128 MB against +66 to 72 MB), and one jump to the end and back raises it little (170 → 183 MB, and 324 → 327 MB with every page built) where a scroll a viewport at a time raises it more (to 214 MB and to 420 MB, one run each).
+
+The script waits for the score with a locator, not `page.waitForSelector`: that returns an element handle, which the DevTools console keeps. The handle was a digit on the first page, so once that page was torn the page stayed alive, with 12,168 nodes after the first round instead of 8,510 and 70 to 80 MB more; a heap snapshot lists the five detached objects, all reached from "DevTools console".
+
+Every build rises a little with each scroll through a long piece, with or without the window, while the JS heap, the DOM nodes and the detached SVG elements stay where they are. The renderer after each of four rounds, two runs each on the current main, interleaved:
+
+| Piece, build | Fresh open | Round 1 | Round 2 | Round 3 | Round 4 | After a critical memory-pressure notification |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Scherzo, every page built | 302 to 305 MB | 412 to 416 MB | 426 to 437 MB | 427 to 428 MB | 435 to 436 MB | 436 to 438 MB |
+| Scherzo, pages near the screen | 139 to 142 MB | 217 to 220 MB | 207 to 241 MB | 218 to 248 MB | 208 to 255 MB | 208 to 257 MB |
+| Ninth, every page built | 382 to 383 MB | 601 to 602 MB | 599 to 600 MB | 602 to 604 MB | 606 to 609 MB | 608 to 610 MB |
+| Ninth, pages near the screen | 143 to 148 MB | 207 to 240 MB | 209 to 247 MB | 212 to 224 MB | 230 to 249 MB | 231 to 251 MB |
+| Medley, every page built | 545 to 555 MB | 884 to 890 MB | 914 to 921 MB | 923 to 924 MB | 923 to 938 MB | 924 to 939 MB |
+| Medley, pages near the screen | 192 MB | 299 to 300 MB | 312 to 315 MB | 321 MB | 323 to 333 MB | 324 to 333 MB |
+
+The medley rises 34 to 48 MB from the first round to the fourth on main and 23 to 34 MB with the window; over eight rounds the windowed medley reaches 339 to 347 MB, still slowing. A simulated critical memory-pressure notification gives nothing back on either build, so it is not a cache Chrome drops on demand; nothing the page reaches holds it either. It is Chromium's own and not the window's, since the build that tears nothing rises as much.
+
+So the gate is the oracle, not the renderer's bytes: `measure-ram.mjs` exits 1 when, for a piece, any round ends with more DOM nodes, detached nodes or detached SVG elements than the fresh open. Both builds pass it: main's 145,842 / 213,651 / 340,119 nodes and the window's 8,510 / 13,181 / 12,303 come back to within three nodes after every round, and no SVG element is detached and alive. A bound on the bytes would fail main as well.
+
+`useLastHeads` (`RedFlight.tsx`) keeps the noteheads the cursor marked last once its marks clear, for the flight home and the end burst. After a Rewind or a stop the red's page is no longer pinned and the window can tear it, so it holds them weakly (`WeakRef`): the ref no longer keeps a torn page's detached content (3,658 nodes for the Scherzo's first page) alive until the next mark, and a flight home or the finish whose noteheads were torn does not fly. The oracle plays nothing, so it does not exercise this path.
+
+A long piece holds more for some seconds after it opens than once it settles: the 6 s reading less the 40 s reading is 241 MB on the Scherzo, 83 MB on Beethoven's Ninth and 7 MB on the medley (the table above), and the peak while it opens is 618 to 805 MB. It comes back at the page's first major GC, which V8 runs about 30 s after the open, or at once when one is forced. On the build with every page built, Beethoven's Ninth held about 90 MB of this in the page's own heaps, and about 24 MB in the two main-thread passes that parse the fingered MusicXML before each layout (`normalizeVoices`, `prepareScanBeams`, both through `DOMParser`; a build without them: 689 instead of 713 MB); the rest was not pinned down.
 
 `e2e/memory.spec.ts` opens Beethoven's Sonata Op. 79 and checks that both workers go; that a narrower window lays the piece out again in a fresh layout worker, which goes too; that a hand size change fingers it again; and that the library brings a layout worker back, which Twinkle then keeps. It fails on the build before.
 
@@ -68,7 +110,6 @@ A long piece still holds 200 to 350 MB more for some 30 s after it opens than on
 
 | Option | Saves | Costs |
 | --- | --- | --- |
-| Keep only the pages near the screen in the DOM | about 245 MB on Beethoven's Ninth, 400 MB on the medley (the table above) | the cursor, the dimming of a hand, the digit patches after a re-solve, click-to-seek, the red's flight and print all find their elements in every page today; each would have to bring the pages it needs back first |
 | Write the fingerings into the MusicXML text, not an xmldom tree | the second tree at the peak of the open (more than 256 MB live on Beethoven's Ninth), about 1 s per open | a change to the engine's output; it needs an equivalence check over the whole library |
 
 ## Earlier fixes

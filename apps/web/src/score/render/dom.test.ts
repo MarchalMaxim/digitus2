@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import { buildPageIndex } from './pageIndex.js';
+import { PageWindow, pageWindowOf } from './pageWindow.js';
 import {
   clearCurrent,
   dimNotes,
@@ -319,5 +321,58 @@ describe('dimming edge cases', () => {
     const sweep = (id: string) =>
       (div.querySelector(`#${id}`) as SVGElement).style.getPropertyValue('--sweep');
     expect([sweep('x1'), sweep('x2'), sweep('x3')]).toEqual(['0ms', '70ms', '140ms']);
+  });
+
+  // Issue 99: with only some pages in the DOM, whether a whole staff is dimmed is decided across
+  // every page's markup (`quietPlaces`), and handed in.
+  it('dims a whole staff when the places it knows of say so, not by the pages in the DOM', () => {
+    const div = document.createElement('div');
+    div.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><g class="system"><g class="measure">
+      <g class="staff"><g class="layer"><g class="note" id="r1"></g></g></g>
+      <g class="staff"><g class="layer" id="withNote"><g class="note" id="l1"></g></g>
+        <g class="layer" id="restOnly"><g class="rest"></g></g></g>
+    </g></g></svg>`;
+    const ids = new Set(['l1']);
+    const names = (els: Element[]) => els.map((el) => el.id).sort();
+    // Every note of this page at place 1 is dimmed, yet another page's note there is not.
+    expect(names(mutedElements(div, ids, new Set()))).toEqual(['withNote']);
+    expect(names(mutedElements(div, ids, new Set([1])))).toEqual(['restOnly', 'withNote']);
+    expect(names(mutedElements(div, ids))).toEqual(['restOnly', 'withNote']);
+  });
+
+  it('builds the pages of the notes it marks first, on a windowed sheet', () => {
+    const page = (p: number) =>
+      `<svg viewBox="0 0 10 10"><g class="measure"><g class="staff"><g class="note" id="n${p}"><use/></g></g></g></svg>`;
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        observe() {}
+        disconnect() {}
+      },
+    );
+    Object.defineProperty(window, 'innerHeight', { value: 900, configurable: true });
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      const p = this.getAttribute('data-page');
+      return new DOMRect(0, p === null ? 0 : 1000 * Number(p), 1000, p === null ? 0 : 1000);
+    });
+    const host = document.createElement('div');
+    document.body.append(host);
+    const win = new PageWindow(
+      host,
+      buildPageIndex(Array.from({ length: 8 }, (_, p) => page(p))),
+      () => undefined,
+    );
+    win.start();
+    expect(host.querySelector('#n5')).toBeNull();
+    expect(pageWindowOf(host)).toBe(win);
+    const marked = setCurrent(host, ['n5', 'nobody'], 480);
+    expect(marked.map((el) => el.id)).toEqual(['n5']);
+    expect(host.querySelector('#n5')).toHaveClass('is-red');
+    win.dispose();
+    host.remove();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 });

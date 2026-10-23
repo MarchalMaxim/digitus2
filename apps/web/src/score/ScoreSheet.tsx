@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useT } from '../i18n/i18n.js';
+import { buildPageIndex } from './render/pageIndex.js';
+import { keepAspect, PageWindow, WINDOW_MIN_PAGES } from './render/pageWindow.js';
 
 export interface ScoreSheetProps {
   /** SVG pages from the Verovio worker, in order. */
@@ -18,21 +20,17 @@ export interface ScoreSheetProps {
    * ink until it lands (base.css, `.score-sheet.is-hopping`). Default false.
    */
   hopping?: boolean;
-}
-
-/**
- * Gives a page the aspect ratio of its viewBox. The pages off screen skip their rendering (base.css,
- * `content-visibility: auto`, issue #79), and a skipped page has no natural size: the ratio keeps
- * its height, so nothing moves when it is next drawn. A page without a viewBox is left as it is.
- */
-function keepAspect(page: Element): void {
-  const box = (page.getAttribute('viewBox') ?? '')
-    .trim()
-    .split(/[\s,]+/)
-    .map(Number);
-  const [, , width, height] = box;
-  if (box.length !== 4 || !(width! > 0) || !(height! > 0)) return;
-  (page as SVGElement).style.aspectRatio = `${width} / ${height}`;
+  /**
+   * Keep only the pages near the screen in the DOM (issue 99, render/pageWindow.ts) when the piece
+   * has `WINDOW_MIN_PAGES` pages or more; the others stand empty, with their height. The score
+   * view sets it; the scan review keeps every page. Default false.
+   */
+  windowed?: boolean;
+  /**
+   * A page was built after the sheet was laid out (a windowed sheet, as it scrolls or is read):
+   * the place to decorate it. The pages built with the layout are not announced.
+   */
+  onPageBuilt?: (page: SVGSVGElement, i: number) => void;
 }
 
 /**
@@ -47,18 +45,31 @@ export function ScoreSheet({
   onHost,
   resting = false,
   hopping = false,
+  windowed = false,
+  onPageBuilt,
 }: ScoreSheetProps) {
   const t = useT();
   const hostRef = useRef<HTMLDivElement>(null);
+  const builtRef = useRef(onPageBuilt);
+  useLayoutEffect(() => {
+    builtRef.current = onPageBuilt;
+  });
 
   // A layout effect: the pages are in before the parent's layout effects run (the dimming of a
   // hand left out, ScoreView.tsx) and before the paint, so they never show undimmed for a frame.
   useLayoutEffect(() => {
     const host = hostRef.current;
     if (!host) return;
+    if (windowed && pages.length >= WINDOW_MIN_PAGES) {
+      const sheet = new PageWindow(host, buildPageIndex(pages), (page, i) =>
+        builtRef.current?.(page, i),
+      );
+      sheet.start();
+      return () => sheet.dispose();
+    }
     host.innerHTML = pages.join('');
     for (const page of Array.from(host.children)) keepAspect(page);
-  }, [pages]);
+  }, [pages, windowed]);
 
   useEffect(() => {
     onHost?.(hostRef.current);

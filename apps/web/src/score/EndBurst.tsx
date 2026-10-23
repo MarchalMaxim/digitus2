@@ -10,7 +10,7 @@
 import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { BurstNotes, drawBurst, type Burst } from '../app/NoteBurst.js';
 import { prefersReducedMotion } from '../design/motion.js';
-import { topmost, useLastHeads } from './RedFlight.js';
+import { liveHeads, topmost, useLastHeads } from './RedFlight.js';
 
 export interface EndBurstProps {
   /** The score sheet's host (the cursor marks its notes). */
@@ -30,7 +30,7 @@ export function EndBurst({ host, ended, currentGroup }: EndBurstProps): JSX.Elem
   useLayoutEffect(() => {
     if (ended === endedRef.current) return;
     endedRef.current = ended;
-    const heads = lastHeads.current.filter((h) => h.isConnected);
+    const heads = liveHeads(lastHeads.current);
     if (heads.length === 0 || prefersReducedMotion()) return;
     const at = topmost(heads);
     if (!at) return;

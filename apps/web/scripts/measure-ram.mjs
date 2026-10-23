@@ -12,8 +12,8 @@
 // DOM that no tree reaches any more (`detachedNodes`: the DevTools node counter less a walk of the
 // document) and the SVG elements detached from it (`detachedSvg`, `Runtime.queryObjects`), and the
 // pages built. The leak oracle (`--rounds`, 2 by default) scrolls the piece to the bottom and back
-// that many times, forcing garbage collections and reading after each round, and once more after
-// 40 s idle.
+// that many times, forcing garbage collections and reading after each round, once more after
+// 40 s idle, and after a simulated critical memory-pressure notification (what is only cache goes).
 //
 // The gate (issue 99) is that oracle, not the renderer's bytes: after every round no more DOM
 // nodes, detached nodes or detached SVG elements than at the fresh open, and the renderer's memory
@@ -194,7 +194,22 @@ async function measure(slug) {
     }
     await sleep(40_000);
     const idle = await settle();
-    return { slug, label, peakMb: peak, at6, at40, gc, fresh, scroll, afterRounds, idle };
+    // What the browser gives back when told memory is short: caches go, memory still held does not.
+    await cdp.send('Memory.simulatePressureNotification', { level: 'critical' });
+    const pressure = await settle();
+    return {
+      slug,
+      label,
+      peakMb: peak,
+      at6,
+      at40,
+      gc,
+      fresh,
+      scroll,
+      afterRounds,
+      idle,
+      pressure,
+    };
   } finally {
     await browser.close();
   }
@@ -254,6 +269,7 @@ try {
       freshMb: med((r) => r.fresh.rendererMb),
       roundsMb: Array.from({ length: rounds }, (_, i) => med((r) => r.afterRounds[i].rendererMb)),
       idleMb: med((r) => r.idle.rendererMb),
+      pressureMb: med((r) => r.pressure.rendererMb),
       nodes40: med((r) => r.at40.nodes),
       nodesFresh: med((r) => r.fresh.nodes),
       nodesAfterRounds: Array.from({ length: rounds }, (_, i) =>

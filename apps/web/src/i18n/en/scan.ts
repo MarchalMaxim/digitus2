@@ -180,6 +180,7 @@ export const scan = {
     pitch: (step: string, alter: number, octave: number) =>
       `${step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Bar ${bar}`,
+    photoAt: (bar: string) => `${bar} in the photo`,
     rightHand: 'right hand',
     leftHand: 'left hand',
     staff: (staff: number) => `staff ${staff}`,

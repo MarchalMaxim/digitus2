@@ -27,6 +27,7 @@ import {
   type ScanScore,
   type Step,
 } from './notes.js';
+import { NoteCrop } from './NoteCrop.js';
 
 export interface Corrected extends CorrectionResult {
   score: ScanScore;
@@ -225,10 +226,13 @@ export function NoteEditor({
   onCorrect,
   onSelect,
   onClose,
+  photo,
 }: {
   score: ScanScore;
   ordinal: number;
   status: string;
+  /** The page photo the note was read from, drawn around where homr saw the note (issue 161). */
+  photo?: Blob | undefined;
   onCorrect(correction: Correction): void;
   onSelect(ordinal: number): void;
   onClose(): void;
@@ -278,6 +282,14 @@ export function NoteEditor({
         </button>
         <button onClick={onClose}>{t.scan.edit.done}</button>
       </div>
+      {photo && note.imgpos && (
+        <NoteCrop
+          image={photo}
+          at={note.imgpos}
+          size="large"
+          label={t.scan.edit.photoAt(t.scan.edit.bar(note.measureNumber))}
+        />
+      )}
       {pitched && (
         <div className="note-editor-row" role="group" aria-label={t.scan.edit.pitchLabel}>
           <span className="note-editor-label">{t.scan.edit.pitchLabel}</span>

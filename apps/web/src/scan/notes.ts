@@ -42,6 +42,16 @@ export interface ScanNote {
   dots: number;
   tieStart: boolean;
   tieStop: boolean;
+  /**
+   * The scanned page the note was read from, 0-based. A batch's pages are joined in order, and the
+   * join marks each later page's first bar with `<print new-page="yes"/>` (join.ts).
+   */
+  page: number;
+  /**
+   * Where homr saw the note on its page: the symbol's estimated centre in the pixels of the image
+   * it was given, written as `<!-- imgpos: x, y -->` (issue 161). Absent for other recognisers.
+   */
+  imgpos?: { x: number; y: number } | undefined;
 }
 
 export interface ScanBar {
@@ -73,6 +83,8 @@ export interface ScanScore {
   notes: ScanNote[];
   bars: ScanBar[];
   ticksPerQuarter: number;
+  /** The scanned pages the score was joined from: one, and one more per page break of its first part. */
+  pages: number;
 }
 
 const kids = (el: Element, name?: string) =>
@@ -99,6 +111,18 @@ function count(value: string): number {
   return /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : NaN;
 }
 
+const COMMENT_NODE = 8;
+const IMGPOS = /^\s*imgpos:\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/;
+/** homr's image position of a note: the comment it writes inside the `<note>`. */
+function imagePosition(note: Element): ScanNote['imgpos'] {
+  for (const node of note.childNodes) {
+    if (node.nodeType !== COMMENT_NODE) continue;
+    const match = IMGPOS.exec(node.nodeValue ?? '');
+    if (match) return { x: Number(match[1]), y: Number(match[2]) };
+  }
+  return undefined;
+}
+
 export function readScanScore(doc: XMLDocument): ScanScore {
   const parts = kids(doc.documentElement, 'part');
   let ticksPerQuarter = 1;
@@ -111,12 +135,20 @@ export function readScanScore(doc: XMLDocument): ScanScore {
   const lengths: number[] = [];
   const raw: Omit<ScanBar, 'start'>[] = [];
   let ordinal = 0;
+  let pages = 1;
   parts.forEach((part, partIndex) => {
     let divisions = 1;
     let staves = 1;
     let meter: ScanBar['meter'];
     const fifths = new Map<number, number>();
+    let page = 0;
     kids(part, 'measure').forEach((measure, measureIndex) => {
+      if (
+        measureIndex > 0 &&
+        kids(measure, 'print').some((print) => print.getAttribute('new-page') === 'yes')
+      )
+        page++;
+      if (partIndex === 0) pages = page + 1;
       const scale = () => ticksPerQuarter / divisions;
       let cursor = 0;
       let length = 0;
@@ -222,6 +254,8 @@ export function readScanScore(doc: XMLDocument): ScanScore {
             dots: kids(el, 'dot').length,
             tieStart: marks.includes('start'),
             tieStop: marks.includes('stop'),
+            page,
+            imgpos: imagePosition(el),
           });
           ordinal++;
         }
@@ -242,7 +276,7 @@ export function readScanScore(doc: XMLDocument): ScanScore {
   lengths.forEach((_, i) => (starts[i] = i === 0 ? 0 : starts[i - 1]! + lengths[i - 1]!));
   const bars = raw.map((bar) => ({ ...bar, start: starts[bar.index] ?? 0 }));
   for (const note of notes) note.onset += starts[note.measure] ?? 0;
-  return { notes, bars, ticksPerQuarter };
+  return { notes, bars, ticksPerQuarter, pages };
 }
 
 /** Tags every `<note>` with its ordinal so later edits keep each note's identity. */

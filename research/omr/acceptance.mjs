@@ -37,6 +37,9 @@ const PHOTOS = join(HERE, 'photos');
 export const SKIP = 3;
 
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
+/** A recognition's cache name: the input's bytes and the recogniser with the pipeline's hash. */
+export const recognitionKey = (input, recognizer, pipeline) =>
+  sha(Buffer.concat([readFileSync(input), Buffer.from(`${recognizer}:${pipeline}`)])).slice(0, 24);
 
 export function toolchains(env = process.env) {
   const pick = (name, fallback) => resolve(REPO, env[name] || fallback);
@@ -127,6 +130,23 @@ export function aggregate(rows) {
       },
     ]),
   );
+}
+
+/**
+ * The floor file, the keys another benchmark owns (such as imgpos) kept from the previous one. A
+ * null `summary` (a --photos run measured no corpus page) keeps the corpus floors already there;
+ * without `perturbedTotals` the perturbed floors are the previous ones.
+ */
+export function floorFile(previous, corpusVersion, summary, photoTotals, perturbedTotals) {
+  return {
+    ...previous,
+    schemaVersion: 1,
+    corpus: corpusVersion,
+    note: 'Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact; the perturbed floors are the measured counts over the perturbed photos, with the pages read as two parts as a ceiling; the imgpos floor is set by node research/omr/imgpos.mjs and kept when these are rewritten.',
+    floors: summary ? floorsFrom(summary) : keptFloors(previous, corpusVersion),
+    photoFloors: photoFloorsFrom(photoTotals),
+    ...(perturbedTotals && { photoPerturbedFloors: perturbedFloorsFrom(perturbedTotals) }),
+  };
 }
 
 /** Floors as benchmarks/floor.json sets them: an F1 in percent minus 0.5, rounded down to 0.1. */
@@ -397,7 +417,7 @@ function photoJobs(tc, pipeline, cache = join(RESULTS, 'cache')) {
   return jobs;
 }
 
-const PERTURB = join(HERE, 'acceptance/perturb.py');
+const PERTURB =join(HERE, 'acceptance/perturb.py');
 /** Where the perturbed copies are kept: named by perturb.py's hash, so a changed crop or turn writes new files. */
 export function perturbedDirectory(script = PERTURB) {
   return join(RESULTS, 'photos-perturbed', sha(readFileSync(script)).slice(0, 12));
@@ -433,7 +453,8 @@ export function perturbedJobs(tc, pipeline, cache = join(RESULTS, 'cache'), { di
   return jobs;
 }
 
-async function fixtures(corpus) {
+/** The corpus's rendered pages (prepare.mjs), rendered on first use. */
+export async function fixtures(corpus) {
   const dir = join(RESULTS, `fixtures-${corpus.version}`);
   const manifest = join(dir, 'manifest.json');
   if (!existsSync(manifest)) {
@@ -524,7 +545,7 @@ export async function main(args = process.argv.slice(2)) {
       for (const [recognizer, variants] of Object.entries(corpus.routes))
         for (const variant of variants) {
           const input = join(dir, variant === 'pdf' ? piece.pdf : piece.pages[0].images[variant]);
-          const key = sha(Buffer.concat([readFileSync(input), Buffer.from(`${recognizer}:${pipeline}`)])).slice(0, 24);
+          const key = recognitionKey(input, recognizer, pipeline);
           jobs.push({ id: `${piece.id}:${recognizer}:${variant}`, piece, recognizer, variant, input, output: join(cache, `${key}.musicxml`) });
         }
     }
@@ -577,11 +598,10 @@ export async function main(args = process.argv.slice(2)) {
   for (const [key, p] of [...Object.entries(photoTotals), [PERTURBED, perturbedTotals]])
     console.log(`${key.padEnd(19)} ${String(p.pages).padStart(5)} ${String(p.recognised).padStart(10)} ${String(p.imported).padStart(8)} ${String(p.twoParts).padStart(9)} ${String(p.barsRight).padStart(4)} ${String(p.stavesRight).padStart(6)} ${String(p.keyRight).padStart(3)} ${String(p.timeRight).padStart(4)}`);
   console.log('\n' + perturbationTable(photoRows, perturbedRows).join('\n'));
-  const note = 'Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact; the perturbed floors are the measured counts over the perturbed photos, with the pages read as two parts as a ceiling.';
   if (args.includes('--update-floor')) {
-    // --photos measured no corpus page: it replaces only the photo floors of the floors already there.
-    const floors = photosOnly ? keptFloors(JSON.parse(readFileSync(FLOOR, 'utf8')), corpus.version) : floorsFrom(summary);
-    writeFileSync(FLOOR, JSON.stringify({ schemaVersion: 1, corpus: corpus.version, note, floors, photoFloors: photoFloorsFrom(photoTotals), photoPerturbedFloors: perturbedFloorsFrom(perturbedTotals) }, null, 2) + '\n');
+    // --photos measured no corpus page (no summary): it replaces only the photo floors of the floors already there.
+    const previous = existsSync(FLOOR) ? JSON.parse(readFileSync(FLOOR, 'utf8')) : undefined;
+    writeFileSync(FLOOR, JSON.stringify(floorFile(previous, corpus.version, photosOnly ? null : summary, photoTotals, perturbedTotals), null, 2) + '\n');
     console.log(`\nFloors written to ${FLOOR}`);
     return 0;
   }

@@ -81,6 +81,36 @@ What remains, and why:
 - **Duplicates** are mostly shared noteheads written in two voices, which the reference also has; the remaining counts are rhythm errors (Czerny's sixteenths read as 32nds).
 - **Beams.** homr writes no beams, its segmentation has no beam class (stems and rests only) and its note positions are attention estimates in staff-crop coordinates, so beam strokes cannot be linked to recognised notes without an alignment homr does not provide. The app's display inference (`scanBeams.ts`) matches 133 of the 357 reference groups on clean pages (precision 26.6%, recall 37.3%). Recovering beams from the image would have to beat that at about 98% precision on every variant to be presented as read from the source; that work is not done (#39). The PDF route reads beams from the source: 92.01% exact groups.
 
+### Note positions (imgpos)
+
+homr writes each note's estimated centre as `<!-- imgpos: x, y -->`, in the pixels of the image it was given (mapped back through its staff crop, its 1920 px resize and its autocrop). The review draws the page photo around that point (`docs/scanning.md`), so how far the point lies from the notehead sets the size of the crop. `research/omr/imgpos.mjs` measures it on the 16 clean pages of the corpus:
+
+- **Truth.** Verovio draws each reference again with every note named by its document-order index, which must give the fixture's drawing exactly; Chromium lays that drawing out at the PNG's size, and each notehead's box centre is its true position. Distances are in the page's staff spaces (10.8 px on these pages).
+- **Pairing.** Recognised notes pair with reference notes as `evaluateOmr` pairs them: bar by ordinal, then equal onset in the bar and MIDI pitch (the same staff first). `alignScores` is not used, because it needs equal note counts and pitches. Only notes recognised at the right time and pitch are measured: 2,986 of 3,047 reference notes.
+- **Crop.** A crop is 2H staff spaces high and 4H wide, centred on the reported point; a note is inside when |dy| <= H and |dx| <= 2H.
+
+| Measure (16 pages, 2,986 paired notes)        |             Value |
+| --------------------------------------------- | ----------------: |
+| Distance, median                              | 0.75 staff spaces |
+| Distance, 90th percentile                     | 1.65 staff spaces |
+| \|dx\|, median / 90th percentile              |       0.33 / 0.78 |
+| \|dy\|, median / 90th percentile              |       0.56 / 1.53 |
+| Signed dx, dy (recognised minus true), median |     -0.22 / -0.12 |
+| Inside a crop of H = 1                        |             74.5% |
+| Inside a crop of H = 1.5                      |             89.1% |
+| Inside a crop of H = 2                        |             96.5% |
+| Inside a crop of H = 2.5                      |             99.0% |
+| Inside a crop of H = 3                        |             99.5% |
+
+The vertical axis is the weak one: a position is nearer the right bar and beat than the right line or space. The crop is the smallest of H = 1.5, 2, 2.5 and 3 that holds at least 90% of the notes, so it is 4 staff spaces high and 8 wide (H = 2); H = 1.5 holds 89.1%. The signed medians are under 0.3 staff spaces, so the app applies no correction. Per page, the share inside the H = 2 crop is lowest for Ode to Joy (86.7%), Czerny Op. 821 No. 5 (88.9%) and Tchaikovsky Op. 39 No. 1 (90.8%); the others reach 93.5% to 100%. `research/omr/acceptance/floor.json` holds `imgpos: {halfHeightSpaces: 2, insideCropMin: 0.95}`, and the benchmark fails below it.
+
+```sh
+DIGITUS2_OMR_HOMR=<homr toolchain> node research/omr/imgpos.mjs          # measure, compare with the floor
+node research/omr/imgpos.mjs --check                                      # 0, or 3 with the reason homr is missing
+```
+
+It reuses the acceptance gate's recognition cache and recognises the pages that are not cached. It is run by hand, not by `pnpm verify`.
+
 ### Real phone photos
 
 `research/omr/photos/` holds fourteen phone photographs by the owner (public domain): eleven WhatsApp-compressed JPEGs (1200×1600, one 1308×1600, about 0.2 MB each) of pages 1 to 5 of Boëllmann's Improvisations Op. 28 (No. I in 3/4 with one sharp, No. II in 9/8 with two sharps), several in two conditions, and of the continuation page of a bound book that first tested scanning; and three Google PhotoScan images (about 1070×1600) of the three pages of Bach's Invention No. 13. Only the invention is in the library (`bach-invention-no13-bwv-784`), but the gate checks its photos like the others, on facts alone, so no photo is scored note by note: `manifest.json` holds what was read off each page by eye (bars, staves, key and time signature), and the gate's `photos` route checks it exactly. Two photos are cut off at the bottom; none is unusable. The upside-down photos are scanned as taken and turned 180° as **Rotate** does.

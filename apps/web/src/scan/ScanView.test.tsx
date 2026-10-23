@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -992,4 +992,66 @@ it('pairs a single page read as a treble part and a bass part, and says so under
       expect.anything(),
     ),
   );
+});
+
+/** One bar of five quarter notes in 4/4, a place to check, each note read at (40, 30) of the photo. */
+function overlongBar(position: string): string {
+  const note = `<note>${position}<pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><type>quarter</type></note>`;
+  return `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>${note.repeat(5)}</measure></part></score-partwise>`;
+}
+
+/** A photo's decoding is a browser's work: a bitmap and a 2D context that draws nothing. */
+function stubPhotos() {
+  vi.stubGlobal(
+    'createImageBitmap',
+    vi.fn(async () => ({ width: 200, height: 100, close: () => {} })),
+  );
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (
+    this: HTMLCanvasElement,
+  ) {
+    return {
+      fillRect: () => {},
+      drawImage: () => {},
+      getImageData: () => ({ data: new Uint8ClampedArray(this.width * this.height * 4) }),
+    } as unknown as CanvasRenderingContext2D;
+  });
+}
+
+it('shows the photo at a place to check and at the selected note, where homr placed it', async () => {
+  stubPhotos();
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  render(
+    <ScanView
+      session={{
+        id: 'crops',
+        file,
+        xml: overlongBar('<!-- imgpos: 40, 30 -->'),
+        recognizer: 'homr',
+      }}
+    />,
+  );
+  const crop = await screen.findByRole('img', { name: 'Bar 1 in the photo' });
+  expect(crop).toBeInTheDocument();
+  expect(screen.queryByRole('region', { name: 'Correct the selected note' })).toBeNull();
+  await userEvent.click(screen.getByRole('button', { name: /Bar 1/ }));
+  const panel = await screen.findByRole('region', { name: 'Correct the selected note' });
+  expect(within(panel).getByRole('img', { name: 'Bar 1 in the photo' })).toBeVisible();
+  expect(screen.getAllByRole('img', { name: 'Bar 1 in the photo' })).toHaveLength(2);
+});
+
+it('shows no photo for a PDF page or a recognition without positions', async () => {
+  stubPhotos();
+  const image = new File([png], 'page.png', { type: 'image/png' });
+  const pdf = new File(['%PDF-1.7'], 'page.pdf', { type: 'application/pdf' });
+  const { unmount } = render(
+    <ScanView session={{ id: 'pdf', file: pdf, xml: overlongBar('<!-- imgpos: 40, 30 -->') }} />,
+  );
+  await screen.findByRole('button', { name: /Bar 1/ });
+  await act(() => new Promise((done) => setTimeout(done, 30)));
+  expect(screen.queryByRole('img', { name: /in the photo/ })).toBeNull();
+  unmount();
+  render(<ScanView session={{ id: 'none', file: image, xml: overlongBar('') }} />);
+  await screen.findByRole('button', { name: /Bar 1/ });
+  await act(() => new Promise((done) => setTimeout(done, 30)));
+  expect(screen.queryByRole('img', { name: /in the photo/ })).toBeNull();
 });

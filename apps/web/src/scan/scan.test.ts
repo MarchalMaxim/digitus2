@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { en } from '../i18n/en/index.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
+  BUSY_RETRY_MS,
+  BusyError,
   createScanClient,
   GRAND_STAFF_WARNING,
   newJobId,
@@ -158,6 +160,42 @@ describe('experimental scan boundary', () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+  it('marks only the service’s own busy answer as worth waiting for', async () => {
+    const answer = (response: Response) =>
+      failure(
+        createScanClient(vi.fn<typeof fetch>().mockResolvedValue(response)).recognize(page(), job),
+      );
+    const busy = await answer(json({ error: 'busy' }, 429));
+    expect(busy).toBeInstanceOf(BusyError);
+    expect(busy).toBeInstanceOf(PhraseError);
+    expect((busy as Error).message).toBe(en.scan.client.busy);
+    // A host's own refusal and the hourly limit are not waited out.
+    for (const other of [
+      new Response('<html>Too many</html>', { status: 429 }),
+      new Response('', { status: 503 }),
+      json({ error: 'rate-limited' }, 429),
+    ])
+      expect(await answer(other)).not.toBeInstanceOf(BusyError);
+  });
+  it('waits what a busy answer asks for, and at least five seconds', async () => {
+    const retryAfter = async (header?: string) => {
+      const response = json({ error: 'busy' }, 429);
+      if (header !== undefined) response.headers.set('Retry-After', header);
+      const error = await failure(
+        createScanClient(vi.fn<typeof fetch>().mockResolvedValue(response)).recognize(page(), job),
+      );
+      return (error as BusyError).retryAfterMs;
+    };
+    expect(BUSY_RETRY_MS).toBe(5_000);
+    // A browser reads the header only when the service exposes it; without it, five seconds.
+    expect(await retryAfter()).toBe(5_000);
+    expect(await retryAfter('30')).toBe(30_000);
+    expect(await retryAfter('2')).toBe(5_000);
+    expect(await retryAfter('0')).toBe(5_000);
+    // A date or text is not a number of seconds.
+    expect(await retryAfter('Wed, 21 Oct 2026 07:28:00 GMT')).toBe(5_000);
+    expect(await retryAfter('soon')).toBe(5_000);
   });
   it('gives up after 200 seconds with the timed-out phrase', async () => {
     vi.useFakeTimers();

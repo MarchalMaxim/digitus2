@@ -8,6 +8,7 @@ import { en } from '../i18n/en/index.js';
 import { messages as fr } from '../i18n/fr/index.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import type { ScanSession } from './model.js';
+import { BUSY_RETRY_MS, BUSY_WAIT_MS } from './client.js';
 import { ScanView } from './ScanView.js';
 
 const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -314,47 +315,58 @@ it("keeps a PDF page's empty warnings empty, whatever the health answer warns of
   expect(view.name === 'scan' && view.session.pages?.[0]?.warnings).toEqual([]);
 });
 
-it('stops a batch at a busy answer and keeps the remaining pages for a retry', async () => {
-  let answered = 0;
-  const service = stubService({
-    recognize: () => {
-      answered += 1;
-      return Promise.resolve(
-        answered === 2
-          ? new Response(JSON.stringify({ error: 'busy' }), { status: 429 })
-          : new Response(
-              JSON.stringify({ state: 'ready', xml: scanXml, recognizer: 'Test', warnings: [] }),
-            ),
-      );
-    },
-  });
-  const file = (name: string) => new File([png], name, { type: 'image/png' });
-  render(
-    <ScanView
-      session={{
-        id: 'batch',
-        file: file('one.png'),
-        pages: [
-          { id: 'one', file: file('one.png') },
-          { id: 'two', file: file('two.png') },
-          { id: 'three', file: file('three.png') },
-        ],
-      }}
-    />,
-  );
-  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
-  expect(await screen.findByRole('alert')).toHaveTextContent(
-    'The scanner is busy with another score. Try again in a minute.',
-  );
-  // The third page is not sent: it would only meet the same answer.
-  expect(service.calls('POST')).toHaveLength(2);
-  const view = useAppStore.getState().view;
-  const pages = view.name === 'scan' ? view.session.pages : undefined;
-  expect(pages?.map((page) => !!page.xml)).toEqual([true, false, false]);
-  expect(pages?.slice(1).map((page) => page.error)).toEqual([
-    'The scanner is busy with another score. Try again in a minute.',
-    'The scanner is busy with another score. Try again in a minute.',
-  ]);
+/** The service's answer while another reader's page is being recognised. */
+const busyAnswer = () =>
+  Promise.resolve(new Response(JSON.stringify({ error: 'busy' }), { status: 429 }));
+const ready = () =>
+  new Response(JSON.stringify({ state: 'ready', xml: scanXml, recognizer: 'Test', warnings: [] }));
+const jobOf = (init: RequestInit | undefined) =>
+  (init?.headers as Record<string, string>)['X-Digitus2-Job'];
+/** Fake timers that still let real time pass, so the view's own waits and React settle. */
+function fakeClock() {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  return userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+}
+const advance = (ms: number) => act(() => vi.advanceTimersByTimeAsync(ms));
+const photoPage = (name: string) => new File([png], name, { type: 'image/png' });
+const batchOf = (...names: string[]): ScanSession => ({
+  id: 'batch',
+  file: photoPage(names[0]!),
+  pages: names.map((name) => ({ id: name, file: photoPage(name) })),
+});
+const valueOf = (bar: HTMLElement) => Number(bar.getAttribute('aria-valuenow'));
+
+it('stops a batch at a busy answer it has waited out, and keeps the remaining pages', async () => {
+  const user = fakeClock();
+  try {
+    let answered = 0;
+    const service = stubService({
+      recognize: () => {
+        answered += 1;
+        return answered === 1 ? Promise.resolve(ready()) : busyAnswer();
+      },
+    });
+    render(<ScanView session={batchOf('one.png', 'two.png', 'three.png')} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    // The second page waits for the scanner, then gives up.
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    await advance(BUSY_WAIT_MS + BUSY_RETRY_MS);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The scanner is busy with another score. Try again in a minute.',
+    );
+    // The third page is not sent: it would only meet the same answer.
+    const jobs = new Set(service.calls('POST').map(([, init]) => jobOf(init)));
+    expect(jobs.size).toBe(2);
+    const view = useAppStore.getState().view;
+    const pages = view.name === 'scan' ? view.session.pages : undefined;
+    expect(pages?.map((page) => !!page.xml)).toEqual([true, false, false]);
+    expect(pages?.slice(1).map((page) => page.error)).toEqual([
+      'The scanner is busy with another score. Try again in a minute.',
+      'The scanner is busy with another score. Try again in a minute.',
+    ]);
+  } finally {
+    vi.useRealTimers();
+  }
 });
 
 it('cancels the running job with a DELETE and returns to Scan this score', async () => {
@@ -371,6 +383,297 @@ it('cancels the running job with a DELETE and returns to Scan this score', async
   ]);
   expect(screen.queryByRole('alert')).toBeNull();
   expect(screen.queryByRole('heading', { name: 'Review the recognition' })).toBeNull();
+});
+
+it('shows the bar while a page is recognised, and no bar before or after', async () => {
+  const user = fakeClock();
+  try {
+    let finish!: (response: Response) => void;
+    stubService({ recognize: () => new Promise((resolve) => (finish = resolve)) });
+    render(<ScanView session={freshSession()} />);
+    // The warm-up has answered by the time the button is pressed.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.queryByRole('progressbar')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    const bar = await screen.findByRole('progressbar', { name: en.scan.view.progress });
+    expect(screen.getByText(en.scan.view.secondsLeft(35))).toBeVisible();
+    const start = valueOf(bar);
+    await advance(10_000);
+    expect(valueOf(bar)).toBeGreaterThan(start);
+    expect(screen.getByText(en.scan.view.secondsLeft(25))).toBeVisible();
+    await advance(30_000);
+    expect(screen.getByText(en.scan.view.overdue)).toBeVisible();
+    expect(valueOf(bar)).toBeLessThan(100);
+    // The answer fills the bar before the review opens.
+    act(() => finish(ready()));
+    await vi.waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '100'));
+    expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+    expect(screen.queryByRole('progressbar')).toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('allows five more seconds while the warm-up has not answered, and not once it has', async () => {
+  const user = fakeClock();
+  try {
+    // A PDF page is expected to take 16 s: 21 s, said as 25, while the warm-up is out.
+    let answerHealth!: (response: Response) => void;
+    stubService({
+      health: () => new Promise((resolve) => (answerHealth = resolve)),
+      recognize: pending,
+    });
+    const pdf = new File(['%PDF-1.7'], 'score.pdf', { type: 'application/pdf' });
+    render(<ScanView session={{ id: 'pdf', file: pdf }} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.secondsLeft(25))).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Cancel scan' }));
+    await screen.findByRole('button', { name: 'Scan this score' });
+    answerHealth(new Response(JSON.stringify({ protocol: 'digitus2-scan-v2' })));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.secondsLeft(20))).toBeVisible();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('runs one bar across the batch, forward only, full only at the last answer', async () => {
+  const user = fakeClock();
+  try {
+    const finish: Array<(response: Response) => void> = [];
+    const service = stubService({
+      recognize: () => new Promise((resolve) => finish.push(resolve)),
+    });
+    render(<ScanView session={batchOf('one.png', 'two.png', 'three.png')} />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    const bar = await screen.findByRole('progressbar');
+    // Three photos at 35 s each.
+    expect(screen.getByText(en.scan.view.secondsLeft(105))).toBeVisible();
+    expect(screen.getByRole('status')).toHaveTextContent(en.scan.view.scanningPage(1, 3));
+    const values = [valueOf(bar)];
+    const note = () => values.push(valueOf(bar));
+    await advance(20_000);
+    note();
+    // The first answer starts the next page's stretch from where the bar stands: the same bar.
+    act(() => finish[0]!(ready()));
+    await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(2));
+    await vi.waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(en.scan.view.scanningPage(2, 3)),
+    );
+    expect(screen.getByRole('progressbar')).toBe(bar);
+    expect(valueOf(bar)).toBeGreaterThanOrEqual(values.at(-1)!);
+    // Two photos are left: the line counts them.
+    expect(screen.getByText(en.scan.view.secondsLeft(70))).toBeVisible();
+    await advance(75_000);
+    note();
+    expect(screen.getByText(en.scan.view.overdue)).toBeVisible();
+    act(() => finish[1]!(ready()));
+    await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(3));
+    expect(screen.getByRole('progressbar')).toBe(bar);
+    expect(valueOf(bar)).toBeGreaterThanOrEqual(values.at(-1)!);
+    expect(screen.getByText(en.scan.view.secondsLeft(35))).toBeVisible();
+    await advance(10_000);
+    note();
+    // Forward only, and never full before the last answer.
+    expect(values).toEqual([...values].sort((a, b) => a - b));
+    expect(Math.max(...values)).toBeLessThan(100);
+    act(() => finish[2]!(ready()));
+    await vi.waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '100'));
+    expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('counts only the pages a retry sends', async () => {
+  const user = fakeClock();
+  try {
+    stubService({ recognize: pending });
+    const session = batchOf('one.png', 'two.png', 'three.png');
+    session.pages![0]!.xml = scanXml;
+    session.pages![1]!.error = 'Page too blurry.';
+    session.pages![2]!.error = 'Page too blurry.';
+    render(<ScanView session={session} />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await user.click(screen.getByRole('button', { name: 'Retry failed pages' }));
+    await screen.findByRole('progressbar');
+    expect(screen.getByText(en.scan.view.secondsLeft(70))).toBeVisible();
+    expect(screen.getByRole('status')).toHaveTextContent(en.scan.view.scanningPage(2, 3));
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('waits while the scanner is busy, offers the same job again, then shows the bar', async () => {
+  const user = fakeClock();
+  try {
+    let finish!: (response: Response) => void;
+    const service = stubService({
+      recognize: () =>
+        service.calls('POST').length === 1
+          ? busyAnswer()
+          : new Promise((resolve) => (finish = resolve)),
+    });
+    render(<ScanView session={freshSession()} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    expect(screen.queryByRole('progressbar')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Cancel scan' })).toBeEnabled();
+    await advance(BUSY_RETRY_MS);
+    await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(2));
+    const [first, second] = service.calls('POST');
+    expect(jobOf(second![1])).toBe(jobOf(first![1]));
+    // The retry is not answered busy at once: the scanner has taken it, and the bar appears.
+    await advance(2_500);
+    expect(screen.queryByText(en.scan.view.waiting)).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent(en.scan.view.scanning);
+    expect(screen.getByRole('progressbar')).toBeVisible();
+    act(() => finish(ready()));
+    expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('keeps the bar where it stood when a later page has to wait for the scanner', async () => {
+  const user = fakeClock();
+  try {
+    let finish!: (response: Response) => void;
+    const service = stubService({
+      recognize: () => {
+        const offers = service.calls('POST').length;
+        if (offers === 1) return Promise.resolve(ready());
+        return offers === 2 ? busyAnswer() : new Promise((resolve) => (finish = resolve));
+      },
+    });
+    render(<ScanView session={batchOf('one.png', 'two.png')} />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    expect(screen.queryByRole('progressbar')).toBeNull();
+    // The wait does not eat into the bar: the second page's stretch starts when it is taken.
+    await advance(BUSY_RETRY_MS);
+    await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(3));
+    await advance(2_500);
+    const bar = await screen.findByRole('progressbar');
+    expect(screen.getByText(en.scan.view.secondsLeft(35))).toBeVisible();
+    // About 2.5 s into the stretch is 13 percent; had the 5 s of waiting counted, 34.
+    expect(valueOf(bar)).toBeLessThan(20);
+    act(() => finish(ready()));
+    expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('cancels while waiting for the scanner, and nothing is left to delete or offer', async () => {
+  const user = fakeClock();
+  try {
+    const service = stubService({ recognize: busyAnswer });
+    render(<ScanView session={freshSession()} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Cancel scan' }));
+    expect(await screen.findByRole('button', { name: 'Scan this score' })).toBeEnabled();
+    expect(screen.queryByText(en.scan.view.waiting)).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+    // The scanner never took the job, so there is nothing for a DELETE to stop.
+    expect(service.calls('DELETE')).toHaveLength(0);
+    await advance(BUSY_RETRY_MS * 3);
+    expect(service.calls('POST')).toHaveLength(1);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('cancels the job the scanner took after a wait with a DELETE', async () => {
+  const user = fakeClock();
+  try {
+    const service = stubService({
+      recognize: (init) => (service.calls('POST').length === 1 ? busyAnswer() : pending(init)),
+    });
+    render(<ScanView session={freshSession()} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    await advance(BUSY_RETRY_MS);
+    await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(2));
+    await user.click(screen.getByRole('button', { name: 'Cancel scan' }));
+    expect(await screen.findByRole('button', { name: 'Scan this score' })).toBeEnabled();
+    expect(service.calls('DELETE').map(([url]) => url)).toEqual([
+      expect.stringMatching(new RegExp(`/v1/jobs/${service.job()}$`)),
+    ]);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('reports the busy scanner after waiting the longest it waits', async () => {
+  const user = fakeClock();
+  try {
+    const service = stubService({ recognize: busyAnswer });
+    render(<ScanView session={freshSession()} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    await advance(BUSY_WAIT_MS + BUSY_RETRY_MS);
+    expect(await screen.findByRole('alert')).toHaveTextContent(en.scan.client.busy);
+    expect(screen.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
+    expect(screen.queryByText(en.scan.view.waiting)).toBeNull();
+    const offers = service.calls('POST').length;
+    expect(offers).toBeGreaterThan(BUSY_WAIT_MS / BUSY_RETRY_MS / 2);
+    expect(offers).toBeLessThanOrEqual(BUSY_WAIT_MS / BUSY_RETRY_MS + 1);
+    await advance(BUSY_RETRY_MS * 3);
+    expect(service.calls('POST')).toHaveLength(offers);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('waits as long as a busy answer asks to', async () => {
+  const user = fakeClock();
+  try {
+    const service = stubService({
+      recognize: () =>
+        Promise.resolve(
+          new Response(JSON.stringify({ error: 'busy' }), {
+            status: 429,
+            headers: { 'Retry-After': '30' },
+          }),
+        ),
+    });
+    render(<ScanView session={freshSession()} />);
+    await user.click(screen.getByRole('button', { name: 'Scan this score' }));
+    expect(await screen.findByText(en.scan.view.waiting)).toBeVisible();
+    await advance(25_000);
+    expect(service.calls('POST')).toHaveLength(1);
+    await advance(6_000);
+    await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(2));
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('does not wait out the hourly limit', async () => {
+  stubService({
+    recognize: () =>
+      Promise.resolve(new Response(JSON.stringify({ error: 'rate-limited' }), { status: 429 })),
+  });
+  render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(en.scan.client.limited);
+  expect(screen.queryByText(en.scan.view.waiting)).toBeNull();
 });
 
 it('sends the DELETE when the view unmounts mid-scan', async () => {

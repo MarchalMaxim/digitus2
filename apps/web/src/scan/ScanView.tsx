@@ -16,11 +16,14 @@ import type { Messages, Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
   BUSY,
+  BusyError,
+  BUSY_WAIT_MS,
   createScanClient,
   GRAND_STAFF_WARNING,
   LIMITED,
   newJobId,
   PARTLY_READ_WARNING,
+  pause,
   UNKNOWN_WARNING,
   type ScanServiceMetadata,
 } from './client.js';
@@ -31,6 +34,8 @@ import { GRAPHIC_SPAN_TAGS, GRAPHIC_SPAN_WARNING, joinScanPages } from './join.j
 import type { ScanPage, ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
 import { isTouchOnly } from './phone.js';
+import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
+import { ScanProgress } from './ScanProgress.js';
 import {
   correct,
   timingIssue,
@@ -51,6 +56,13 @@ import './scan.css';
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
 
 const NO_CORRECTIONS: Correction[] = [];
+/**
+ * While waiting, an offer of the job that is not answered busy within this time has been taken
+ * by the scanner: the bar replaces the waiting line. A busy answer comes back at once.
+ */
+const TAKEN_AFTER_MS = 2_000;
+/** How long the full bar stays on screen after the last answer, so the reader sees it fill. */
+const FULL_HOLD_MS = 400;
 
 /** The scan in progress: the page on the scanner is named by its job, and stopped by both. */
 interface ScanRun {
@@ -68,7 +80,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
   const t = useT();
   const [locale] = useLocale();
-  const [phase, setPhase] = useState<'ready' | 'scanning' | 'cancelling' | 'review'>(
+  // Waiting: the scanner is busy with another reader's page, and this page is offered again.
+  const [phase, setPhase] = useState<'ready' | 'waiting' | 'scanning' | 'cancelling' | 'review'>(
     initial.xml || hasPageRecognition ? 'review' : 'ready',
   );
   // Errors are kept as phrases, so they follow a change of language while they are on screen.
@@ -83,6 +96,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [health, setHealth] = useState<ScanServiceMetadata>();
   // Read by a scan that started before the warm-up answered.
   const latestHealth = useRef<ScanServiceMetadata | undefined>(undefined);
+  // True from arrival until the warm-up has answered, in any way: the bar allows for a start.
+  const warmingUp = useRef(false);
   const [pages, setPages] = useState<string[]>([]);
   // The XML each worker last finished with: use waits until both match what is on screen.
   // `detail` is the worker's own message, shown only under Recognition details.
@@ -103,6 +118,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     hasPageRecognition && !initial.xml ? 'page' : 'combined',
   );
   const [scanningPage, setScanningPage] = useState(1);
+  // The bar of the whole batch: the stretch it runs now, and whether the last answer filled it.
+  const [bar, setBar] = useState<{ stretch: Stretch; done: boolean }>();
   const [rotating, setRotating] = useState(false);
   const [width, setWidth] = useState(640);
   const [touchOnly] = useState(isTouchOnly);
@@ -157,7 +174,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     [corrected, problems],
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
-  const busy = phase === 'scanning' || phase === 'cancelling';
+  const busy = phase === 'waiting' || phase === 'scanning' || phase === 'cancelling';
   const renderError = rendered && rendered.xml === renderXml ? rendered.error : null;
   const importError = imported && imported.xml === importXml ? imported.error : null;
   const reviewError = renderError ?? importError;
@@ -207,12 +224,16 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     // The scanner sleeps when unused: a health request on arrival wakes it before the button is
     // pressed. Its failure says nothing; the scan itself reports any problem.
     if (phase !== 'ready') return;
+    warmingUp.current = true;
     client.health().then(
       (metadata) => {
+        warmingUp.current = false;
         latestHealth.current = metadata;
         if (alive.current) setHealth(metadata);
       },
-      () => {},
+      () => {
+        warmingUp.current = false;
+      },
     );
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -316,8 +337,20 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     const run: ScanRun = { cancelled: false };
     active.current = run;
     setError(null);
+    setBar(undefined);
     setPhase('scanning');
     const results = sourcePages.map((page) => ({ ...page }));
+    // One request reads every page of a PDF, so the bar counts them.
+    const pdfPages = await Promise.all(
+      results.map((page) => (page.xml ? 1 : pdfPageCount(page.file))),
+    );
+    if (run.cancelled || !alive.current) return;
+    const toScan = (from: number) =>
+      results.flatMap((p, i) =>
+        i >= from && !p.xml ? [{ file: p.file, pdfPages: pdfPages[i] ?? 1 }] : [],
+      );
+    // The stretch of the one bar that runs now; each page starts the next from where it stands.
+    const track: { stretch?: Stretch } = {};
     for (const [index, page] of results.entries()) {
       if (page.xml) continue;
       if (run.cancelled || !alive.current) return;
@@ -326,11 +359,59 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       // One synchronous request per page, named by a job id so a cancel can reach it at once.
       const job = newJobId();
       const controller = new AbortController();
-      run.job = job;
       run.controller = controller;
-      try {
-        const recognition = await client.recognize(page.file, job, controller.signal);
+      // Where the bar stood when this page began, and again each time a busy answer ends a stretch
+      // it showed: a page offered again never moves the bar back.
+      let base = track.stretch ? barAt(track.stretch, Date.now()) : 0;
+      const warming = warmingUp.current;
+      const expected = expectedBatchMs(toScan(index), warming);
+      const own = expectedBatchMs(toScan(index).slice(0, 1), warming);
+      let shown: Stretch | undefined;
+      const begin = (since: number) => {
         if (run.cancelled || !alive.current) return;
+        shown = track.stretch = { since, expected, own, base };
+        setBar({ stretch: track.stretch, done: false });
+        setPhase('scanning');
+      };
+      try {
+        // A busy scanner is waited for: the same job is offered again until it is taken, for at
+        // most BUSY_WAIT_MS, then the busy answer stands as this page's failure.
+        const giveUp = Date.now() + BUSY_WAIT_MS;
+        let waiting = false;
+        let recognition;
+        for (;;) {
+          const sent = Date.now();
+          // Named only while the offer is out: a refused offer started nothing to cancel.
+          run.job = job;
+          const taken = waiting ? setTimeout(() => begin(sent), TAKEN_AFTER_MS) : undefined;
+          if (!waiting) begin(sent);
+          let again: number;
+          try {
+            recognition = await client.recognize(page.file, job, controller.signal);
+            break;
+          } catch (cause) {
+            if (!(cause instanceof BusyError) || Date.now() + cause.retryAfterMs > giveUp)
+              throw cause;
+            again = cause.retryAfterMs;
+            if (shown) base = barAt(shown, Date.now());
+            shown = undefined;
+          } finally {
+            clearTimeout(taken);
+          }
+          delete run.job;
+          if (run.cancelled || !alive.current) return;
+          waiting = true;
+          setPhase('waiting');
+          await pause(again, controller.signal);
+          if (run.cancelled || !alive.current) return;
+        }
+        if (run.cancelled || !alive.current) return;
+        if (results.every((p) => p.xml || p === page)) {
+          // The last answer fills the bar, and the reader sees it full.
+          setBar((current) => current && { ...current, done: true });
+          await pause(FULL_HOLD_MS, controller.signal).catch(() => {});
+          if (run.cancelled || !alive.current) return;
+        }
         page.xml = recognition.xml;
         page.recognizer = recognition.recognizer ?? latestHealth.current?.recognizer;
         // A page's warnings are its own: an empty list stays empty.
@@ -607,7 +688,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             <p>{t.scan.view.advice}</p>
             <p className="small muted">{t.scan.view.where}</p>
             <div className="row">
-              {phase === 'scanning' || phase === 'cancelling' ? (
+              {busy ? (
                 // Plain while the loader below carries the screen's one red.
                 <Button
                   disabled={phase === 'cancelling'}
@@ -631,18 +712,21 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </Button>
               )}
             </div>
-            {(phase === 'scanning' || phase === 'cancelling') && (
+            {busy && (
               <div className="scan-loader">
                 <Loader tune="scale" />
               </div>
             )}
             <p role="status">
-              {phase === 'scanning'
-                ? batch
-                  ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
-                  : t.scan.view.scanning
-                : ''}
+              {phase === 'waiting'
+                ? t.scan.view.waiting
+                : phase === 'scanning'
+                  ? batch
+                    ? t.scan.view.scanningPage(scanningPage, sourcePages.length)
+                    : t.scan.view.scanning
+                  : ''}
             </p>
+            {phase === 'scanning' && bar && <ScanProgress {...bar} />}
             {health?.capabilities?.textModelConfigured === false && (
               <p role="status">{t.scan.view.textModelMissing}</p>
             )}

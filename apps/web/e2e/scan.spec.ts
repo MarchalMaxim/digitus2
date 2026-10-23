@@ -5,6 +5,7 @@ import {
   blockService,
   mockService,
   openFiles,
+  RECOGNITION_WITH_ERRORS,
   recordService,
   serviceCall,
 } from './helpers/scan.js';
@@ -196,14 +197,61 @@ test('scan: an offline device is told to check its connection', async ({ page })
   await page.context().setOffline(false);
 });
 
-test('scan: a busy scanner says so and keeps the button', async ({ page }) => {
+test('scan: a scanner busy past the wait says so and keeps the button', async ({ page }) => {
   await mockService(page, '', {
     onRecognize: async () => ({ status: 429, json: { error: 'busy' } }),
   });
+  // The app waits up to three minutes for a busy scanner; the page's clock skips them.
+  await page.clock.install();
   await choose(page);
   await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByRole('alert')).toContainText('busy');
+  await expect(page.getByText(/Another score is being scanned/)).toBeVisible();
+  // Each offer is a real round trip: step the clock until the app gives up.
+  await expect(async () => {
+    await page.clock.runFor(5_000);
+    await expect(page.getByRole('alert')).toContainText('busy', { timeout: 250 });
+  }).toPass({ timeout: 60_000 });
+  await expect(page.getByText(/Another score is being scanned/)).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
+});
+
+test('scan: a scanner busy with another score is waited for, then the bar runs', async ({
+  page,
+}) => {
+  // The first offer finds the scanner busy; the second is taken and held until the bar is seen.
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  const jobs: string[] = [];
+  await mockService(page, RECOGNITION_WITH_ERRORS, {
+    onRecognize: async (request) => {
+      jobs.push((await request.allHeaders())['x-digitus2-job']!);
+      if (jobs.length === 1) return { status: 429, json: { error: 'busy' } };
+      await held;
+    },
+  });
+  await choose(page);
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  const waiting = page.getByText(
+    'Another score is being scanned. Yours starts as soon as it finishes.',
+  );
+  await expect(waiting).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByRole('progressbar')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Cancel scan' })).toBeEnabled();
+  await expectOneRed(page, 'waiting for the scanner');
+  // The same job is offered again a few seconds later; once taken, the bar replaces the line.
+  const bar = page.getByRole('progressbar', { name: 'Recognition progress' });
+  await expect(bar).toBeVisible({ timeout: 15_000 });
+  await expect(waiting).toHaveCount(0);
+  expect(jobs).toHaveLength(2);
+  expect(jobs[1]).toBe(jobs[0]);
+  await expect(page.getByText(/^About \d+ seconds$/)).toBeVisible();
+  // The loader keeps the one red; the bar is ink.
+  await expectOneRed(page, 'the scan bar');
+  await expectNoSeriousA11y(page, 'the scan bar');
+  release();
+  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  await expect(bar).toHaveCount(0);
 });
 
 test('scan: importer refusal retains raw output and blocks fingering use', async ({ page }) => {

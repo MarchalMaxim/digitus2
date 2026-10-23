@@ -28,7 +28,7 @@ import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
 import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
 import { keyVelocity } from './noteKey.js';
 import { scheduleClick } from '../audio/metronome.js';
-import { loopSeconds } from '../audio/loop.js';
+import { loopStartSec, performanceFor } from '../audio/performance.js';
 import type * as TransportExports from '../audio/transport.js';
 
 type TransportModule = typeof TransportExports;
@@ -579,8 +579,7 @@ export function usePlayback(score: Score | null): Playback {
     if (t) return t.startSec();
     const start = pendingSecRef.current ?? 0;
     const s = scoreRef.current;
-    const range = s ? loopSeconds(s, loopRef.current) : null;
-    return range && (start < range.from || start >= range.to) ? range.from : start;
+    return s ? loopStartSec(performanceFor(s), loopRef.current, start) : start;
   }, []);
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);

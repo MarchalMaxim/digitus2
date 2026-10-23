@@ -1,6 +1,8 @@
 import { PIANO_MAX, PIANO_MIN } from './pitch.js';
 import type { Hand, HandEvent, Note, Score, TempoEvent } from './types.js';
 
+export { performanceOrder } from './form.js';
+
 const DEFAULT_QPM = 120;
 
 /**

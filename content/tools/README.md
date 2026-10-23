@@ -215,8 +215,11 @@ Swedish polska), built and gated like any Mutopia engraving. Decisions:
   source-specific test protects them, because the MIDI comparison cannot
   see fermatas. Invention 3 needs two syntax-only patches for its old
   LilyPond source.
-- Pleyel ships only its 16-bar first theme, because the full piece needs
-  D.C. al Fine playback, which the player does not implement. Its source
+- Pleyel ships only its 16-bar first theme. The converter writes the
+  "D.C. al Fine" as words and the player acts on them, so the full piece
+  needs no converter change: it needs `convert.barTo` dropped and the build
+  gates passed, and `unfold_order` in `xmlcheck.py` knows no D.C. while
+  Mutopia's MIDI stops before the da capo. Its source
   title is "Menuett", although the Mutopia metadata says "Rondo".
 - The Handel source editions are dated 1930 and carry explicit Mutopia
   public-domain declarations.

@@ -6,6 +6,7 @@ import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
 import { horizontalOverflow } from './helpers/overflow.js';
+import { redBars, redSettled, seekBar } from './helpers/seek.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
 const LOADING_THE_PIANO = 'Loading the piano…';
@@ -569,6 +570,57 @@ function pressedHands(page: Page): Promise<(string | null)[]> {
 }
 
 test.describe('playback with the silent instrument', () => {
+  // Issue 50: the score is engraved once and played in performance order; the red goes back to a
+  // repeated bar by itself.
+  test('a repeat plays again: the red goes back to the repeated bar', async ({ page }) => {
+    await page.goto('/?audio=silent#/piece/bach-applicatio-c-major-bwv-994');
+    await expect(page.locator('.score-sheet g.measure')).toHaveCount(8, { timeout: 20_000 });
+    await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+    await openPractice(page);
+    await embellishDecided(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await closePractice(page);
+    // The first section (bars 1 to 4) is repeated: from its last bar the music returns to bar 1.
+    await seekBar(page, 3);
+    await redSettled(page);
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect.poll(() => redBars(page), { timeout: 6_000 }).toEqual([3]);
+    await expect.poll(() => redBars(page), { timeout: 6_000 }).toEqual([0]);
+  });
+
+  test('a D.C. al Fine plays the first section again and stops at the Fine', async ({ page }) => {
+    await page.goto('/?audio=silent#/piece/burgmuller-op100-no6-progres');
+    await expect(page.locator('.score-sheet g.measure')).toHaveCount(16, { timeout: 20_000 });
+    await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+    await openPractice(page);
+    await embellishDecided(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await closePractice(page);
+    await seekBar(page, 15); // the last bar, marked D.C. al Fine
+    await redSettled(page);
+    expect(await redBars(page)).toEqual([15]);
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect.poll(() => redBars(page), { timeout: 6_000 }).toEqual([0]);
+    // Right steps through the second hearing of the first section, to bar 7 (the Fine's bar).
+    for (let bar = 1; bar <= 6; bar++) {
+      await page.keyboard.press('ArrowRight');
+      await expect.poll(() => redBars(page), { timeout: 4_000 }).toEqual([bar]);
+    }
+    // The piece ends at the Fine: bars 9 to 16 are not heard again.
+    const seen: number[] = [];
+    await expect
+      .poll(
+        async () => {
+          seen.push(...(await redBars(page)));
+          return page.getByRole('button', { name: 'Play' }).isVisible();
+        },
+        { timeout: 10_000, intervals: [100] },
+      )
+      .toBe(true);
+    expect(seen.length).toBeGreaterThan(0);
+    expect(Math.max(...seen)).toBeLessThan(8);
+  });
+
   // T10 (spec 14): a pause keeps the last group heard red and its keys pressed, Play plain; Rewind
   // clears them and gives the red back to Play.
   test('play moves a red cursor through the score and lights keys with finger numbers; pause keeps the last group heard red; Rewind gives the red to Play', async ({

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { HOP_MAX_MS, HOP_MIN_MS } from '../design/motion.js';
-import { flightFrames, hopLift, hopMs } from './RedFlight.js';
+import { flightFrames, hopLift, hopMs, liveHeads } from './RedFlight.js';
 
 const button = { x: 100, y: 600, w: 96, h: 44 };
 const note = { x: 300, y: 200, w: 10, h: 8 };
@@ -81,5 +81,23 @@ describe('the hop', () => {
     expect(hopMs(0)).toBe(HOP_MIN_MS);
     expect(hopMs(300)).toBeGreaterThan(hopMs(50));
     expect(hopMs(5000)).toBe(HOP_MAX_MS);
+  });
+});
+
+// The last noteheads are held weakly (issue 99): a page torn down by the page window must not stay
+// alive through them, and a flight home or the finish never leaves from one.
+describe('the last noteheads', () => {
+  it('keeps only those still in the page', () => {
+    const page = document.createElement('div');
+    const kept = page.appendChild(document.createElement('span'));
+    const torn = document.createElement('span');
+    document.body.append(page);
+    try {
+      expect(liveHeads([new WeakRef(kept), new WeakRef(torn)])).toEqual([kept]);
+      page.remove();
+      expect(liveHeads([new WeakRef(kept)])).toEqual([]);
+    } finally {
+      page.remove();
+    }
   });
 });

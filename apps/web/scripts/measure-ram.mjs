@@ -14,6 +14,11 @@
 // pages built. The leak oracle (`--rounds`, 2 by default) scrolls the piece to the bottom and back
 // that many times, forcing garbage collections and reading after each round, and once more after
 // 40 s idle.
+//
+// The gate (issue 99) is that oracle, not the renderer's bytes: after every round no more DOM
+// nodes, detached nodes or detached SVG elements than at the fresh open, and the renderer's memory
+// level from the first round to the last (within 5%: paint and Blink's caches rise once on the
+// first scroll whether or not pages are torn, then plateau). The script exits 1 when a piece fails.
 import { execFileSync, spawn } from 'node:child_process';
 import { chromium } from '@playwright/test';
 
@@ -195,6 +200,25 @@ async function measure(slug) {
   }
 }
 
+/** What a piece's medians break of the gate (see the header), empty when it passes. */
+function gateFailures(m) {
+  const out = [];
+  const grows = (name, fresh, after) => {
+    after.forEach((v, i) => {
+      if (v > fresh) out.push(`${name} ${fresh} -> ${v} after round ${i + 1}`);
+    });
+  };
+  grows('nodes', m.nodesFresh, m.nodesAfterRounds);
+  grows('detachedNodes', m.detachedNodesFresh, m.detachedNodesAfterRounds);
+  grows('detachedSvg', m.detachedSvgFresh, m.detachedSvgAfterRounds);
+  const first = m.roundsMb[0];
+  const last = m.roundsMb[m.roundsMb.length - 1];
+  if (m.roundsMb.length > 1 && last > first * 1.05) {
+    out.push(`renderer ${first} MB after round 1 -> ${last} MB after round ${m.roundsMb.length}`);
+  }
+  return out;
+}
+
 const preview = spawn(
   process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
   ['exec', 'vite', 'preview', '--outDir', dist, '--port', String(port), '--strictPort'],
@@ -217,36 +241,42 @@ try {
       all.set(slug, [...(all.get(slug) ?? []), result]);
     }
   }
+  const failures = [];
   for (const [slug, rs] of all) {
     const med = (pick) => median(rs.map(pick));
-    console.log(
-      JSON.stringify({
-        median: slug,
-        label,
-        peakMb: med((r) => r.peakMb),
-        at6Mb: med((r) => r.at6.rendererMb),
-        at40Mb: med((r) => r.at40.rendererMb),
-        gcMb: med((r) => r.gc.rendererMb),
-        freshMb: med((r) => r.fresh.rendererMb),
-        roundsMb: Array.from({ length: rounds }, (_, i) => med((r) => r.afterRounds[i].rendererMb)),
-        idleMb: med((r) => r.idle.rendererMb),
-        nodes40: med((r) => r.at40.nodes),
-        nodesFresh: med((r) => r.fresh.nodes),
-        nodesAfterRounds: Array.from({ length: rounds }, (_, i) =>
-          med((r) => r.afterRounds[i].nodes),
-        ),
-        detachedNodesFresh: med((r) => r.fresh.detachedNodes),
-        detachedNodesAfterRounds: Array.from({ length: rounds }, (_, i) =>
-          med((r) => r.afterRounds[i].detachedNodes),
-        ),
-        detachedSvgFresh: med((r) => r.fresh.detachedSvg),
-        detachedSvgAfterRounds: Array.from({ length: rounds }, (_, i) =>
-          med((r) => r.afterRounds[i].detachedSvg),
-        ),
-        built40: med((r) => r.at40.built),
-        total: med((r) => r.at40.total),
-      }),
-    );
+    const summary = {
+      median: slug,
+      label,
+      peakMb: med((r) => r.peakMb),
+      at6Mb: med((r) => r.at6.rendererMb),
+      at40Mb: med((r) => r.at40.rendererMb),
+      gcMb: med((r) => r.gc.rendererMb),
+      freshMb: med((r) => r.fresh.rendererMb),
+      roundsMb: Array.from({ length: rounds }, (_, i) => med((r) => r.afterRounds[i].rendererMb)),
+      idleMb: med((r) => r.idle.rendererMb),
+      nodes40: med((r) => r.at40.nodes),
+      nodesFresh: med((r) => r.fresh.nodes),
+      nodesAfterRounds: Array.from({ length: rounds }, (_, i) =>
+        med((r) => r.afterRounds[i].nodes),
+      ),
+      detachedNodesFresh: med((r) => r.fresh.detachedNodes),
+      detachedNodesAfterRounds: Array.from({ length: rounds }, (_, i) =>
+        med((r) => r.afterRounds[i].detachedNodes),
+      ),
+      detachedSvgFresh: med((r) => r.fresh.detachedSvg),
+      detachedSvgAfterRounds: Array.from({ length: rounds }, (_, i) =>
+        med((r) => r.afterRounds[i].detachedSvg),
+      ),
+      built40: med((r) => r.at40.built),
+      total: med((r) => r.at40.total),
+    };
+    const fails = gateFailures(summary);
+    console.log(JSON.stringify({ ...summary, gate: fails.length === 0 ? 'pass' : fails }));
+    if (fails.length > 0) failures.push(slug);
+  }
+  if (failures.length > 0) {
+    console.error(`memory gate failed: ${failures.join(', ')}`);
+    process.exitCode = 1;
   }
 } finally {
   if (process.platform === 'win32') {

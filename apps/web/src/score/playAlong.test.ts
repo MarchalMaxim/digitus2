@@ -6,16 +6,28 @@ import { describe, expect, it } from 'vitest';
 import { performanceOf, toWrittenSec } from '../audio/performance.js';
 import {
   ALONG_EPS,
+  HOLD_TOLERANCE,
   NO_KEYS,
+  NO_PRESSES,
   advance,
+  alongPlan,
   alongSteps,
   anchorStep,
+  holdSec,
+  liftAt,
+  pressAt,
   pressKey,
   releaseKey,
+  runSince,
+  settle,
   spendAll,
+  stepAfter,
   type AlongStep,
   type Keys,
   type PerfRange,
+  type Presses,
+  type Settled,
+  type StepTime,
 } from './playAlong.js';
 
 const form = (name: string): string =>
@@ -715,5 +727,729 @@ describe('advance', () => {
       expect(advance(steps, 9, held(60), null).last).toBe(-1);
       expect(advance([], 0, held(60), null).last).toBe(-1);
     });
+  });
+
+  it('is the untimed settle: times of zero, no presses, the clock at infinity (issue 185)', () => {
+    const zero: StepTime = { shortestSec: 0, lengthSec: [], beats: [] };
+    const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
+    const loop: PerfRange = { from: 2, to: 4 };
+    const cases: Array<[number, Keys, PerfRange | null]> = [
+      [0, held(60), null],
+      [0, held(60, 62, 64), null],
+      [1, held(62, 64), null],
+      [4, held(67), null],
+      [4, held(67), { from: 0, to: 5 }],
+      [3, held(65), loop],
+      [2, held(64, 65), loop],
+      [0, held(61), null],
+      [0, NO_KEYS, null],
+      [0, spendAll(held(60)), null],
+      [9, held(60), null],
+      [-1, held(60), null],
+    ];
+    for (const [index, keys, range] of cases) {
+      const plain = advance(steps, index, keys, range);
+      const timed = settle({
+        steps,
+        times: steps.map(() => zero),
+        index,
+        keys,
+        presses: NO_PRESSES,
+        loop: range,
+        nowMs: Infinity,
+        factor: 1,
+      });
+      expect(timed.keys).toEqual(plain.keys);
+      expect(timed.move).toEqual(plain.move);
+      expect(timed.passed).toBe(plain.passed);
+    }
+  });
+});
+
+describe('presses', () => {
+  it('records when a key went down, and forgets it when it comes up', () => {
+    const one = pressAt(NO_PRESSES, 60, 120);
+    expect([...one]).toEqual([[60, 120]]);
+    const two = pressAt(one, 64, 300);
+    expect([...two]).toEqual([
+      [60, 120],
+      [64, 300],
+    ]);
+    expect([...liftAt(two, 60)]).toEqual([[64, 300]]);
+  });
+
+  it('takes the newer time when a key goes down again', () => {
+    expect([...pressAt(pressAt(NO_PRESSES, 60, 120), 60, 800)]).toEqual([[60, 800]]);
+  });
+
+  it('gives back the same map when nothing changes', () => {
+    const one = pressAt(NO_PRESSES, 60, 120);
+    expect(pressAt(one, 60, 120)).toBe(one);
+    expect(liftAt(one, 62)).toBe(one);
+  });
+
+  it('never changes the map it was given', () => {
+    const one = pressAt(NO_PRESSES, 60, 120);
+    pressAt(one, 64, 5);
+    pressAt(one, 60, 9);
+    liftAt(one, 60);
+    expect([...one]).toEqual([[60, 120]]);
+    expect(NO_PRESSES.size).toBe(0);
+  });
+});
+
+describe('stepAfter', () => {
+  const at = (...secs: number[]): AlongStep[] =>
+    secs.map((perfSec) => ({ perfSec, pitches: [60] }));
+  const steps = at(0, 1, 2, 3, 4);
+
+  it('is the next step, and -1 after the last', () => {
+    expect(stepAfter(steps, 0, null)).toBe(1);
+    expect(stepAfter(steps, 3, null)).toBe(4);
+    expect(stepAfter(steps, 4, null)).toBe(-1);
+  });
+
+  it('wraps from the last step of a loop to its first', () => {
+    const loop: PerfRange = { from: 1, to: 3 };
+    expect(stepAfter(steps, 1, loop)).toBe(2);
+    expect(stepAfter(steps, 2, loop)).toBe(1);
+    // A loop that ends at the last step never finishes.
+    expect(stepAfter(steps, 4, { from: 3, to: 5 })).toBe(3);
+  });
+
+  it('treats a loop that holds no step as no loop', () => {
+    expect(stepAfter(steps, 4, { from: 7, to: 9 })).toBe(-1);
+    expect(stepAfter(steps, 1, { from: 7, to: 9 })).toBe(2);
+  });
+
+  it('is -1 for an index outside the steps', () => {
+    expect(stepAfter(steps, -1, null)).toBe(-1);
+    expect(stepAfter(steps, 5, null)).toBe(-1);
+    expect(stepAfter([], 0, null)).toBe(-1);
+  });
+});
+
+/** The plan of a hand-built score (divisions 1, 120 qpm): a quarter note is 0.5 s. */
+const planOf = (specs: NoteSpec[], muted: Hand[] = []) =>
+  alongPlan(performanceOf(scoreOf(specs)), muted);
+type Plan = ReturnType<typeof planOf>;
+const holdsOf = (plan: Plan, loop: PerfRange | null = null): number[] =>
+  plan.steps.map((_, i) => holdSec(plan.steps, plan.times, i, loop));
+
+describe('alongPlan', () => {
+  const trill: NonNullable<Note['ornament']> = {
+    kind: 'trill-mark',
+    long: false,
+    upperMidi: 62,
+    lowerMidi: 59,
+    startNote: 'upper',
+    endTick: 4,
+    endSec: 2,
+  };
+  const repeated = (): Score => {
+    const score = scoreOf(
+      [
+        { midi: 60, tick: 0 },
+        { midi: 62, tick: 2, ticks: 4 },
+        { midi: 64, tick: 4 },
+      ],
+      2,
+    );
+    score.measures[0]!.form = { repeatEnd: 2 };
+    return score;
+  };
+  const scenarios: Array<[string, () => Score, Hand[]]> = [
+    [
+      'a chord, a held bass and a rest',
+      () =>
+        scoreOf([
+          { midi: 67, tick: 0 },
+          { midi: 60, tick: 0 },
+          { midi: 48, tick: 0, hand: 'L', ticks: 4 },
+          { midi: 65, tick: 3 },
+        ]),
+      [],
+    ],
+    [
+      'a muted hand',
+      () =>
+        scoreOf([
+          { midi: 72, tick: 0 },
+          { midi: 48, tick: 0, hand: 'L' },
+          { midi: 74, tick: 1 },
+        ]),
+      ['R'],
+    ],
+    [
+      'a grace note, a trill and a tie',
+      () =>
+        scoreOf([
+          { midi: 59, tick: 0, grace: true },
+          { midi: 60, tick: 0, ticks: 4, ornament: trill },
+          { midi: 62, tick: 4, ticks: 8, sourceIndices: [7, 8] },
+        ]),
+      [],
+    ],
+    ['a repeat', repeated, []],
+    ['a repeat with a hand muted', repeated, ['L']],
+    ['voltas', () => parseMusicXml(form('form-voltas')).score, []],
+    ['a D.C. al Fine', () => parseMusicXml(form('form-dc-al-fine')).score, []],
+    ['no notes', () => scoreOf([]), []],
+  ];
+
+  it.each(scenarios)('gives the steps of alongSteps, one time each: %s', (_name, build, muted) => {
+    const perf = performanceOf(build());
+    const plan = alongPlan(perf, muted);
+    expect(plan.steps).toEqual(alongSteps(perf, muted));
+    expect(plan.times).toHaveLength(plan.steps.length);
+    plan.times.forEach((t, i) => {
+      expect(t.lengthSec).toHaveLength(plan.steps[i]!.pitches.length);
+      expect(t.beats).toHaveLength(plan.steps[i]!.pitches.length);
+    });
+  });
+
+  it('gives each pitch the length of its note, and the step the shortest', () => {
+    const plan = planOf([
+      { midi: 48, tick: 0, hand: 'L', ticks: 4 },
+      { midi: 60, tick: 0 },
+      { midi: 64, tick: 0, ticks: 2 },
+      { midi: 62, tick: 2 },
+    ]);
+    expect(plan.steps[0]!.pitches).toEqual([48, 60, 64]);
+    expect(plan.times[0]).toEqual({ shortestSec: 0.5, lengthSec: [2, 0.5, 1], beats: [4, 1, 2] });
+    expect(plan.times[1]).toEqual({ shortestSec: 0.5, lengthSec: [0.5], beats: [1] });
+  });
+
+  it('counts a tie inside one run whole', () => {
+    // The tie is one engine note of two quarters, then the next step a half and a quarter in.
+    const plan = planOf([
+      { midi: 60, tick: 0, ticks: 2, sourceIndices: [0, 1] },
+      { midi: 62, tick: 3 },
+    ]);
+    expect(plan.times[0]).toEqual({ shortestSec: 1, lengthSec: [1], beats: [2] });
+    expect(holdsOf(plan)[0]).toBe(1);
+  });
+
+  it('makes a unison of two voices one pitch: the longer length, the shorter shortest', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 60, tick: 0, hand: 'L', ticks: 2 },
+      { midi: 64, tick: 2 },
+    ]);
+    expect(plan.steps[0]!.pitches).toEqual([60]);
+    expect(plan.times[0]).toEqual({ shortestSec: 0.5, lengthSec: [1], beats: [2] });
+  });
+
+  it('gives the upper pitch of an upper-start trill the length of the principal note', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0, ticks: 4, ornament: trill },
+      { midi: 65, tick: 4 },
+    ]);
+    expect(plan.steps[0]!.pitches).toEqual([62]);
+    expect(plan.times[0]).toEqual({ shortestSec: 2, lengthSec: [2], beats: [4] });
+  });
+
+  it('leaves grace notes out of the shortest', () => {
+    const plan = planOf([
+      { midi: 59, tick: 0, grace: true },
+      { midi: 60, tick: 0 },
+      { midi: 62, tick: 1 },
+    ]);
+    expect(plan.times[0]).toEqual({ shortestSec: 0.5, lengthSec: [0.5], beats: [1] });
+  });
+
+  it('leaves the hands left out out of the times', () => {
+    const specs: NoteSpec[] = [
+      { midi: 72, tick: 0 },
+      { midi: 48, tick: 0, hand: 'L', ticks: 2 },
+      { midi: 74, tick: 2 },
+    ];
+    // The quarter of the right hand is not played: the step is the left half note alone.
+    const right = planOf(specs, ['R']);
+    expect(right.steps.map((s) => [...s.pitches])).toEqual([[48]]);
+    expect(right.times).toEqual([{ shortestSec: 1, lengthSec: [1], beats: [2] }]);
+    expect(holdsOf(right)).toEqual([1]);
+    const left = planOf(specs, ['L']);
+    expect(left.times[0]).toEqual({ shortestSec: 0.5, lengthSec: [0.5], beats: [1] });
+  });
+
+  it('counts the beats of the time signature: a half in 4/4, a dotted quarter in 6/8', () => {
+    expect(planOf([{ midi: 60, tick: 0, ticks: 2 }]).times[0]!.beats).toEqual([2]);
+    // Divisions 2 and 6/8: the beat is an eighth, one tick; a dotted quarter is three of them.
+    const sixEight: Score = {
+      ...scoreOf(
+        [
+          { midi: 60, tick: 0, ticks: 3 },
+          { midi: 62, tick: 3, ticks: 3 },
+        ],
+        1,
+      ),
+      divisions: 2,
+      timeSignatures: [{ tick: 0, beats: 6, beatType: 8 }],
+    };
+    expect(alongPlan(performanceOf(sixEight), []).times.map((t) => t.beats)).toEqual([[3], [3]]);
+  });
+
+  it('counts the beats of the signature in force at the step', () => {
+    const changing: Score = {
+      ...scoreOf(
+        [
+          { midi: 60, tick: 0, ticks: 4 },
+          { midi: 62, tick: 8, ticks: 3 },
+        ],
+        4,
+      ),
+      divisions: 2,
+      timeSignatures: [
+        { tick: 0, beats: 4, beatType: 4 },
+        { tick: 8, beats: 6, beatType: 8 },
+      ],
+    };
+    expect(alongPlan(performanceOf(changing), []).times.map((t) => t.beats)).toEqual([[2], [3]]);
+  });
+
+  it('is counted in the order heard: a note running past a repeat end is cut there', () => {
+    // Heard bar 1 bar 1 bar 2. The long note of the first hearing runs into the repeat and is
+    // cut at its run's end (1 s of it); the second hearing runs on into bar 2 whole (2 s).
+    const plan = alongPlan(performanceOf(repeated()), []);
+    expect(plan.steps.map((s) => s.perfSec)).toEqual([0, 1, 2, 3, 4]);
+    expect(plan.times.map((t) => t.lengthSec)).toEqual([[0.5], [1], [0.5], [2], [0.5]]);
+    // The hold of the first hearing's last step is its shortest note (1 s), the gap to the
+    // repeated bar's first step being just as long; the second hearing's is held to the next bar.
+    expect(holdsOf(plan)).toEqual([0.5, 1, 0.5, 1, 0.5]);
+  });
+});
+
+describe('the hold of a step', () => {
+  it('is the gap to the next step: quarters hold a quarter', () => {
+    const plan = planOf([0, 1, 2, 3].map((tick) => ({ midi: 60 + tick, tick })));
+    expect(holdsOf(plan)).toEqual([0.5, 0.5, 0.5, 0.5]);
+  });
+
+  it('is never longer than the gap, nor than the shortest note', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0, ticks: 2 },
+      { midi: 62, tick: 1 },
+      { midi: 64, tick: 3 },
+    ]);
+    // The half note is cut by the quarter that follows; the quarter, by its own length.
+    expect(holdsOf(plan)).toEqual([0.5, 0.5, 0.5]);
+  });
+
+  it('is capped at the shortest note: a whole-note bass under a quarter holds a quarter', () => {
+    const plan = planOf([
+      { midi: 48, tick: 0, hand: 'L', ticks: 4 },
+      { midi: 60, tick: 0 },
+      { midi: 62, tick: 2 },
+    ]);
+    expect(holdsOf(plan)[0]).toBe(0.5);
+  });
+
+  it('does not wait out a rest: a quarter and a quarter rest hold a quarter, not a half', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 62, tick: 2 },
+    ]);
+    expect(holdsOf(plan)).toEqual([0.5, 0.5]);
+  });
+
+  it('is, for the last step of the piece, its shortest note', () => {
+    expect(holdsOf(planOf([{ midi: 60, tick: 0, ticks: 2 }]))).toEqual([1]);
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 62, tick: 1, ticks: 2 },
+      { midi: 48, tick: 1, hand: 'L', ticks: 4 },
+    ]);
+    expect(holdsOf(plan)).toEqual([0.5, 1]);
+  });
+
+  it('is never below 0: a note of no length holds nothing', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0, ticks: 0 },
+      { midi: 62, tick: 1 },
+    ]);
+    expect(holdsOf(plan)).toEqual([0, 0.5]);
+  });
+
+  describe('in a loop', () => {
+    it('ends the loop last step at the loop end when its note runs to it', () => {
+      // Steps at 0, 0.5, 1 (a half note) and 2.
+      const plan = planOf([
+        { midi: 60, tick: 0 },
+        { midi: 62, tick: 1 },
+        { midi: 64, tick: 2, ticks: 2 },
+        { midi: 65, tick: 4 },
+      ]);
+      expect(holdsOf(plan)).toEqual([0.5, 0.5, 1, 0.5]);
+      // The loop ends at 1.5: the half note sounds half a second before Play would loop back.
+      expect(holdsOf(plan, { from: 0, to: 1.5 })).toEqual([0.5, 0.5, 0.5, 0.5]);
+    });
+
+    it('does not wait out a rest before the loop end', () => {
+      const plan = planOf([
+        { midi: 60, tick: 0 },
+        { midi: 62, tick: 1 },
+        { midi: 64, tick: 2 },
+      ]);
+      // The last step sounds a quarter, then the loop has a second of rest left.
+      expect(holdsOf(plan, { from: 0, to: 2 })).toEqual([0.5, 0.5, 0.5]);
+    });
+
+    it('treats a loop that holds no step as no loop', () => {
+      const plan = planOf([
+        { midi: 60, tick: 0 },
+        { midi: 62, tick: 1, ticks: 2 },
+      ]);
+      expect(holdsOf(plan, { from: 5, to: 9 })).toEqual(holdsOf(plan));
+    });
+  });
+});
+
+describe('settle', () => {
+  const quarters = (...midis: number[]): Plan =>
+    planOf(midis.map((midi, tick) => ({ midi, tick })));
+  /** The keys held, each with the time (performance.now ms) it went down. */
+  const down = (...pressed: Array<[number, number]>): { keys: Keys; presses: Presses } => ({
+    keys: pressed.reduce((keys, [midi]) => pressKey(keys, midi), NO_KEYS),
+    presses: pressed.reduce((times, [midi, ms]) => pressAt(times, midi, ms), NO_PRESSES),
+  });
+  const settleAt = (
+    plan: Plan,
+    held: { keys: Keys; presses: Presses },
+    nowMs: number,
+    o: { index?: number; loop?: PerfRange | null; factor?: number; releasing?: number } = {},
+  ): Settled =>
+    settle({
+      steps: plan.steps,
+      times: plan.times,
+      index: o.index ?? 0,
+      keys: held.keys,
+      presses: held.presses,
+      loop: o.loop ?? null,
+      nowMs,
+      factor: o.factor ?? 1,
+      ...(o.releasing === undefined ? {} : { releasing: o.releasing }),
+    });
+  const state = (keys: Keys): Array<[number, boolean]> => [...keys].sort((a, b) => a[0] - b[0]);
+  // Every step below holds 500 ms at 120 qpm and factor 1.
+
+  describe('passedSteps', () => {
+    it('names the steps of the chain, in order', () => {
+      const plan = quarters(60, 62, 64, 65);
+      const r = settleAt(plan, down([60, 0], [62, 0], [64, 0]), 500);
+      expect(r.passed).toBe(3);
+      expect(r.passedSteps).toEqual([0, 1, 2]);
+      expect(r.at).toBe(3);
+    });
+
+    it('is empty when nothing passes, and names the last step on a finish', () => {
+      const plan = quarters(60, 62);
+      expect(settleAt(plan, down([60, 0]), 499).passedSteps).toEqual([]);
+      const done = settleAt(plan, down([62, 0]), 500, { index: 1 });
+      expect(done.move).toEqual({ kind: 'finish' });
+      expect(done.passedSteps).toEqual([1]);
+    });
+
+    it('names the step passed at a release', () => {
+      const plan = quarters(60, 62);
+      expect(settleAt(plan, down([60, 0]), 400, { releasing: 60 }).passedSteps).toEqual([0]);
+    });
+  });
+
+  describe('last, the step passed last (issue 184)', () => {
+    it('is the end of the chain, and -1 when nothing passes', () => {
+      const plan = quarters(60, 62, 64, 65);
+      expect(settleAt(plan, down([60, 0], [62, 0], [64, 0]), 500).last).toBe(2);
+      expect(settleAt(plan, down([60, 0]), 499).last).toBe(-1);
+      expect(settleAt(plan, down([60, 0]), 500).last).toBe(0);
+    });
+
+    it('is the final step on a finish, and the step passed at a release', () => {
+      const plan = quarters(60, 62);
+      expect(settleAt(plan, down([62, 0]), 500, { index: 1 }).last).toBe(1);
+      expect(settleAt(plan, down([60, 0]), 400, { releasing: 60 }).last).toBe(0);
+    });
+
+    it('is the same as advance gives with no hold', () => {
+      const plan = quarters(60, 62, 64);
+      const keys = pressKey(pressKey(NO_KEYS, 60), 62);
+      const untimed = advance(plan.steps, 0, keys, null);
+      const timed = settleAt(plan, { keys, presses: NO_PRESSES }, 0);
+      expect(timed.last).toBe(untimed.last);
+    });
+  });
+
+  describe('runSince', () => {
+    const chord: AlongStep = { perfSec: 0, pitches: [60, 64] };
+
+    it('is the latest press among the keys of the step', () => {
+      const a = down([60, 100], [64, 250]);
+      expect(runSince(chord, a.keys, a.presses)).toBe(250);
+      const b = down([64, 100], [60, 250]);
+      expect(runSince(chord, b.keys, b.presses)).toBe(250);
+    });
+
+    it('is null while a key is missing or spent', () => {
+      const one = down([60, 100]);
+      expect(runSince(chord, one.keys, one.presses)).toBeNull();
+      const both = down([60, 100], [64, 250]);
+      expect(runSince(chord, spendAll(both.keys), both.presses)).toBeNull();
+    });
+
+    it('ignores the keys the step does not ask for', () => {
+      const a = down([60, 100], [64, 250], [90, 900]);
+      expect(runSince(chord, a.keys, a.presses)).toBe(250);
+    });
+
+    it('counts a key with no press time as held since forever, and an empty step too', () => {
+      expect(runSince(chord, pressKey(pressKey(NO_KEYS, 60), 64), NO_PRESSES)).toBe(-Infinity);
+      expect(runSince({ perfSec: 0, pitches: [] }, NO_KEYS, NO_PRESSES)).toBe(-Infinity);
+    });
+  });
+
+  it('does not pass before the hold, and passes at it', () => {
+    const plan = quarters(60, 62);
+    const held = down([60, 100]);
+    const early = settleAt(plan, held, 599);
+    expect(early.move).toEqual({ kind: 'stay' });
+    expect(early.passed).toBe(0);
+    expect(early.early).toBe(false);
+    expect(early.at).toBe(0);
+    expect(early.keys).toBe(held.keys);
+    const due = settleAt(plan, held, 600);
+    expect(due.move).toEqual({ kind: 'cue', index: 1 });
+    expect(due.passed).toBe(1);
+    expect(due.at).toBe(1);
+    expect(state(due.keys)).toEqual([[60, false]]);
+    // The slack of a millionth of a millisecond covers the float sum.
+    expect(settleAt(plan, held, 600 - 1e-7).passed).toBe(1);
+  });
+
+  it('is due at the run start plus the hold, and not due while the step does not run', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 64, tick: 0 },
+      { midi: 67, tick: 1 },
+    ]);
+    const half = settleAt(plan, down([60, 0]), 100);
+    expect(half.wakeAtMs).toBeNull();
+    expect(half.run).toBeNull();
+    const whole = settleAt(plan, down([60, 0], [64, 50]), 100);
+    expect(whole.run).toEqual({ index: 0, sinceMs: 50 });
+    expect(whole.wakeAtMs).toBe(550);
+    expect(whole.move).toEqual({ kind: 'stay' });
+  });
+
+  it('scales the hold by the tempo factor: due at 2, 1 and 2/3 of it at 0.5, 1 and 1.5', () => {
+    const plan = quarters(60, 62);
+    const wake = (factor: number): number | null =>
+      settleAt(plan, down([60, 100]), 100, { factor }).wakeAtMs;
+    expect(wake(0.5)).toBeCloseTo(100 + 1000, 9);
+    expect(wake(1)).toBeCloseTo(100 + 500, 9);
+    expect(wake(1.5)).toBeCloseTo(100 + 500 / 1.5, 9);
+    // And the pass comes there: 1000 ms at half speed, 333 ms at one and a half.
+    expect(settleAt(plan, down([60, 100]), 1099, { factor: 0.5 }).passed).toBe(0);
+    expect(settleAt(plan, down([60, 100]), 1100, { factor: 0.5 }).passed).toBe(1);
+    expect(settleAt(plan, down([60, 100]), 100 + 330, { factor: 1.5 }).passed).toBe(0);
+    expect(settleAt(plan, down([60, 100]), 100 + 334, { factor: 1.5 }).passed).toBe(1);
+  });
+
+  it('passes a release after 4/5 of the hold at the release, taking the key away', () => {
+    expect(HOLD_TOLERANCE * 500).toBe(400);
+    const plan = quarters(60, 62);
+    const r = settleAt(plan, down([60, 0]), 400, { releasing: 60 });
+    expect(r.move).toEqual({ kind: 'cue', index: 1 });
+    expect(r.passed).toBe(1);
+    expect(r.early).toBe(false);
+    expect(r.keys.has(60)).toBe(false);
+    expect(r.presses.has(60)).toBe(false);
+  });
+
+  it('leaves the red for a release before 4/5 of the hold, and the other keys fresh', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 64, tick: 0 },
+      { midi: 67, tick: 1 },
+    ]);
+    const r = settleAt(plan, down([60, 0], [64, 0]), 399, { releasing: 64 });
+    expect(r.move).toEqual({ kind: 'stay' });
+    expect(r.passed).toBe(0);
+    expect(r.early).toBe(true);
+    expect(r.at).toBe(0);
+    expect(state(r.keys)).toEqual([[60, true]]);
+    expect([...r.presses]).toEqual([[60, 0]]);
+    expect(r.run).toBeNull();
+    expect(r.wakeAtMs).toBeNull();
+  });
+
+  it('runs again from a re-press after an early release', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 64, tick: 0 },
+      { midi: 67, tick: 1 },
+    ]);
+    const released = settleAt(plan, down([60, 0], [64, 0]), 300, { releasing: 64 });
+    expect(released.early).toBe(true);
+    const again = {
+      keys: pressKey(released.keys, 64),
+      presses: pressAt(released.presses, 64, 1000),
+    };
+    const r = settleAt(plan, again, 1000);
+    expect(r.run).toEqual({ index: 0, sinceMs: 1000 });
+    expect(r.wakeAtMs).toBe(1500);
+    expect(settleAt(plan, again, 1499).passed).toBe(0);
+    expect(settleAt(plan, again, 1500).passed).toBe(1);
+  });
+
+  it('counts an early press for the next step from its own press', () => {
+    const plan = quarters(60, 62, 64);
+    const held = down([60, 0], [62, 200]);
+    const first = settleAt(plan, held, 500);
+    expect(first.passed).toBe(1);
+    expect(first.move).toEqual({ kind: 'cue', index: 1 });
+    expect(first.run).toEqual({ index: 1, sinceMs: 200 });
+    expect(first.wakeAtMs).toBe(700);
+    const next = { keys: first.keys, presses: first.presses };
+    expect(settleAt(plan, next, 699, { index: 1 }).passed).toBe(0);
+    const second = settleAt(plan, next, 700, { index: 1 });
+    expect(second.passed).toBe(1);
+    expect(second.move).toEqual({ kind: 'cue', index: 2 });
+  });
+
+  it('chains the steps whose time is up, as a timer that fires late would find them', () => {
+    const plan = quarters(60, 62, 64);
+    const held = down([60, 0], [62, 600], [64, 1200]);
+    const late = settleAt(plan, held, 1600);
+    expect(late.passed).toBe(2);
+    expect(late.move).toEqual({ kind: 'cue', index: 2 });
+    expect(late.at).toBe(2);
+    expect(late.run).toEqual({ index: 2, sinceMs: 1200 });
+    expect(late.wakeAtMs).toBe(1700);
+    const due = settleAt(plan, held, 1700);
+    expect(due.passed).toBe(3);
+    expect(due.move).toEqual({ kind: 'finish' });
+    expect(due.at).toBe(-1);
+    expect(due.wakeAtMs).toBeNull();
+    expect(due.run).toBeNull();
+  });
+
+  it('takes a release that is neither a pass nor early when the key is not of the running step', () => {
+    const plan = quarters(60, 62);
+    const r = settleAt(plan, down([60, 0], [90, 0]), 100, { releasing: 90 });
+    expect(r.passed).toBe(0);
+    expect(r.early).toBe(false);
+    expect(state(r.keys)).toEqual([[60, true]]);
+    expect(r.presses.has(90)).toBe(false);
+    // An early press for the next step, let go while the red's step is not yet due, is no different.
+    const next = settleAt(quarters(60, 62, 64), down([60, 0], [62, 50]), 100, { releasing: 62 });
+    expect(next.passed).toBe(0);
+    expect(next.early).toBe(false);
+    expect(next.at).toBe(0);
+    expect(state(next.keys)).toEqual([[60, true]]);
+  });
+
+  it('judges a release the same whether the timer fired on time or late', () => {
+    const plan = quarters(60, 62, 64);
+    const held = down([60, 0], [62, 200]);
+    // 62 is held from 200, so 4/5 of its hold is up at 600.
+    for (const [releaseMs, passed, early] of [
+      [550, 1, true],
+      [600, 2, false],
+      [650, 2, false],
+    ] as const) {
+      const late = settleAt(plan, held, releaseMs, { releasing: 62 });
+      const timer = settleAt(plan, held, 500);
+      const release = settleAt(plan, timer, releaseMs, { index: timer.at, releasing: 62 });
+      expect(late.passed).toBe(passed);
+      expect(late.passed).toBe(timer.passed + release.passed);
+      expect(late.early).toBe(early);
+      expect(late.early).toBe(release.early);
+      expect(late.at).toBe(release.at);
+      expect(late.keys).toEqual(release.keys);
+      expect(late.presses).toEqual(release.presses);
+    }
+  });
+
+  it('takes a release while the step does not run as neither a pass nor early', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0 },
+      { midi: 64, tick: 0 },
+      { midi: 67, tick: 1 },
+    ]);
+    const r = settleAt(plan, down([60, 0]), 100, { releasing: 60 });
+    expect(r.passed).toBe(0);
+    expect(r.early).toBe(false);
+    expect(r.keys.size).toBe(0);
+    // A spent key of the step (C C: the first C is still held) is no early release either.
+    const cc = quarters(60, 60);
+    const first = settleAt(cc, down([60, 0]), 500);
+    expect(first.move).toEqual({ kind: 'cue', index: 1 });
+    const letGo = settleAt(cc, { keys: first.keys, presses: first.presses }, 600, {
+      index: 1,
+      releasing: 60,
+    });
+    expect(letGo.passed).toBe(0);
+    expect(letGo.early).toBe(false);
+    expect(letGo.keys.size).toBe(0);
+  });
+
+  it('wraps the loop, finishes the piece, and bounds the chain', () => {
+    const plan = quarters(60, 62, 64, 65);
+    const loop: PerfRange = { from: 1, to: 2 };
+    const wrapped = settleAt(plan, down([65, 0]), 500, { index: 3, loop });
+    expect(wrapped.move).toEqual({ kind: 'cue', index: 2 });
+    expect(wrapped.passed).toBe(1);
+    expect(wrapped.at).toBe(2);
+    const done = settleAt(plan, down([65, 0]), 500, { index: 3 });
+    expect(done.move).toEqual({ kind: 'finish' });
+    expect(done.at).toBe(-1);
+    expect(done.passed).toBe(1);
+    // Steps that ask for nothing always pass: the chain still ends.
+    const none: StepTime = { shortestSec: 0, lengthSec: [], beats: [] };
+    const steps: AlongStep[] = [0, 1, 2].map((perfSec) => ({ perfSec, pitches: [] }));
+    const bounded = settle({
+      steps,
+      times: steps.map(() => none),
+      index: 1,
+      keys: NO_KEYS,
+      presses: NO_PRESSES,
+      loop: { from: 0, to: 3 },
+      nowMs: 0,
+      factor: 1,
+    });
+    expect(bounded.passed).toBe(3);
+    expect(bounded.move).toEqual({ kind: 'cue', index: 1 });
+  });
+
+  it('passes a step of no length at the press', () => {
+    const plan = planOf([
+      { midi: 60, tick: 0, ticks: 0 },
+      { midi: 62, tick: 1 },
+    ]);
+    const r = settleAt(plan, down([60, 100]), 100);
+    expect(r.passed).toBe(1);
+    expect(r.move).toEqual({ kind: 'cue', index: 1 });
+  });
+
+  it('stays for an index outside the steps, still taking the released key away', () => {
+    const plan = quarters(60);
+    const r = settleAt(plan, down([60, 0]), 900, { index: 4, releasing: 60 });
+    expect(r.move).toEqual({ kind: 'stay' });
+    expect(r.passed).toBe(0);
+    expect(r.early).toBe(false);
+    expect(r.keys.size).toBe(0);
+    expect(r.run).toBeNull();
+    expect(r.wakeAtMs).toBeNull();
+  });
+
+  it('never changes the maps it was given', () => {
+    const plan = quarters(60, 62);
+    const held = down([60, 0], [62, 0]);
+    const keys = state(held.keys);
+    const presses = [...held.presses];
+    settleAt(plan, held, 900, { releasing: 62 });
+    settleAt(plan, held, 100, { releasing: 60 });
+    expect(state(held.keys)).toEqual(keys);
+    expect([...held.presses]).toEqual(presses);
   });
 });

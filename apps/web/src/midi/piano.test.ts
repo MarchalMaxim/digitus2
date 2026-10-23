@@ -316,7 +316,21 @@ describe('the keys', () => {
     link.events!.inputs([]);
     expect(status()).toBe('none');
     expect(heldPitches()).toEqual([]);
-    expect(heard).toEqual([{ on: false, midi: 60 }]);
+    expect(heard).toEqual([{ on: false, midi: 60, lost: true }]);
+  });
+  it("marks only the note-offs it makes itself as lost (issue 185): the reader's own are plain", async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    link.events!.note({ on: true, midi: 60 }, [60]);
+    link.events!.note({ on: true, midi: 64 }, [60, 64]);
+    const heard: NoteMessage[] = [];
+    subscribeNotes((e) => void heard.push(e));
+    link.events!.note({ on: false, midi: 60 }, [64]);
+    link.events!.inputs([]);
+    expect(heard).toEqual([
+      { on: false, midi: 60 },
+      { on: false, midi: 64, lost: true },
+    ]);
   });
 });
 
@@ -331,8 +345,8 @@ describe('Turn off', () => {
     turnOffPiano();
     expect(link.closes).toBe(1);
     expect(heard).toEqual([
-      { on: false, midi: 60 },
-      { on: false, midi: 67 },
+      { on: false, midi: 60, lost: true },
+      { on: false, midi: 67, lost: true },
     ]);
     expect(heldPitches()).toEqual([]);
     expect(pianoSnapshot()).toEqual({ status: 'off', names: [] });
@@ -362,7 +376,7 @@ describe('Turn off', () => {
     const heard: NoteMessage[] = [];
     subscribeNotes((e) => void heard.push(e));
     turnOffPiano();
-    expect(heard).toEqual([{ on: false, midi: 60 }]);
+    expect(heard).toEqual([{ on: false, midi: 60, lost: true }]);
   });
   it('discards an access that was still being asked for', async () => {
     const open = deferredOpen();

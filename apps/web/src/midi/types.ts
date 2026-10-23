@@ -4,6 +4,11 @@
 export interface NoteMessage {
   on: boolean;
   midi: number;
+  /**
+   * Set on the note-offs the store makes when the piano goes away (unplugged, or Turn off): the
+   * key was not let go by the reader, so no reader of the notes may judge it as a release.
+   */
+  lost?: true;
 }
 
 /**

@@ -158,12 +158,12 @@ function setHeld(next: readonly number[]): void {
   notify(heldListeners);
 }
 
-/** Lets go of every held key, so the listeners get their note-offs. */
+/** Lets go of every held key, so the listeners get their note-offs, marked `lost` (issue 185). */
 function releaseAll(): void {
   const keys = held;
   if (keys.length === 0) return;
   setHeld(NO_KEYS);
-  for (const midi of keys) emitNote({ on: false, midi });
+  for (const midi of keys) emitNote({ on: false, midi, lost: true });
 }
 
 /** The connected inputs changed. No input is the status `none`, and then no key can still be down. */

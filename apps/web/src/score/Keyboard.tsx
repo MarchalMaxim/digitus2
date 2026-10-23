@@ -4,6 +4,7 @@ import {
   Fragment,
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -13,6 +14,8 @@ import {
 import { restrike } from '../design/motion.js';
 import { useT } from '../i18n/i18n.js';
 import { handLetter } from './handLetters.js';
+import { levelRect, NO_LEVELS, type KeyLevels } from './keyLevels.js';
+import { useKeyLevels, type KeyGeometry } from './useKeyLevels.js';
 import { useKeyPress } from './useKeyPress.js';
 
 /**
@@ -72,10 +75,26 @@ export interface KeyboardProps {
    * what the pointer presses. A pitch outside the drawn range is not shown. Default none.
    */
   held?: readonly number[];
+  /**
+   * How long the reader has held each key of their own piano that a step asked for, against its
+   * note's written length: a fill of the bar's gray that rises inside the key, with the finger
+   * number and the hand letter drawn again over it in the light gray. A key with no entry (a
+   * wrong note) shows its bar alone, and a dimmed key never shows a level. The entries are times,
+   * not heights: the keyboard moves the fills itself, frame by frame, without rendering
+   * (score/useKeyLevels.ts). Default none (issue 185).
+   */
+  levels?: KeyLevels;
 }
 
 /** How long a key pressed with the pointer stays down at most (ms): usePlayback's KEY_HOLD_SEC. */
 export const KEY_HOLD_MS = 2000;
+
+/**
+ * How far a pressed key shortens from its back edge: the `scaleY` of base.css
+ * (`.keyboard-svg .key.is-pressed`), which a test keeps equal. The hand letters are not in a key's
+ * group and do not travel, so the clip of a level's letter takes the level's rectangle through it.
+ */
+export const KEY_TRAVEL = { white: 0.976, black: 0.96 } as const;
 
 /** A horizontal stretch of the drawn keyboard, in CSS pixels from its left edge. */
 export interface Span {
@@ -206,6 +225,13 @@ function heldBar(k: KeyShape, w: number, h: number) {
   };
 }
 
+/** Where a key's hand letter stands (and its copy over a level, issue 185): over its number. */
+function handSpot(k: KeyShape): { x: number; y: number } {
+  const w = k.black ? BLACK_W : WHITE_W;
+  const h = k.black ? BLACK_H : WHITE_H;
+  return { x: k.x + w / 2, y: h - (k.black ? 23 : 30) };
+}
+
 /**
  * The on-screen keyboard: white keys white with an ink outline, black keys ink. A pressed key
  * turns gray (`--gray-2`, white or black) and shows the finger number that plays it. An L or R
@@ -229,6 +255,19 @@ function heldBar(k: KeyShape, w: number, h: number) {
  * the bar is drawn beside the key's group, at full strength, in a gray of its own (`is-dimmed`).
  * A dimmed key is never pressed, so it has no travel for the bar to follow.
  *
+ * The keys' levels (`levels`, issue 185): a key with an entry draws a fill, `rect.key-level`, in
+ * its group right after its rectangle, which grows from the bar's bottom edge to 3 px under the
+ * key's top (2 on a black key) as the note's length passes; the bar lies over it, so a level's
+ * foot is the bar. It takes the bar's gray, and the black key's own (`is-on-black`) while the key
+ * shows no state. Where it covers the finger number, the number is drawn again after the
+ * original (`text.key-on-level`, aria-hidden, the original stays the key's first text), clipped to
+ * the level and in the light gray that reads on it; the hand letter gets the same copy in the
+ * letters' layer. The clip paths are inside the key's group, so they share its travel; the
+ * letters' are not, so theirs is the level's rectangle through `KEY_TRAVEL`. All of these exist
+ * only while the key has a level and is not dimmed, and the rectangles are drawn empty here:
+ * `useKeyLevels` gives them their size from the clock, before the paint and then once a frame
+ * while some level moves, so a level rising renders nothing.
+ *
  * The keyboard answers (issue #96): the key of a note hovered in the score goes down with its
  * finger (`hovered`), and a key pressed with the pointer goes down and sounds (`onStrike`,
  * useKeyPress.ts), striking again if it was already down. The keys are a pointer affordance,
@@ -245,8 +284,12 @@ export function Keyboard({
   onStrike,
   barKeys,
   held = NO_HELD,
+  levels = NO_LEVELS,
 }: KeyboardProps): JSX.Element {
   const t = useT();
+  // The ids of the clip paths (issue 185): one per keyboard, so two keyboards on a page never
+  // share a clip. useId's characters are not all legal in a `url(#…)`, so they are stripped.
+  const clipBase = `clip-${useId().replace(/[^A-Za-z0-9_-]/g, '')}`;
   const { keys, whiteCount } = useMemo(() => layout(lowMidi, highMidi), [lowMidi, highMidi]);
   const shapeOf = useMemo(() => new Map(keys.map((k) => [k.midi, k])), [keys]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -273,6 +316,30 @@ export function Keyboard({
   const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
   const heldSet = useMemo(() => new Set(held), [held]);
   const width = Math.max(1, whiteCount) * WHITE_W;
+  // What a key's level grows from (issue 185): the held bar, and the scale the key takes pressed.
+  const geometry = useMemo(
+    () =>
+      new Map<number, KeyGeometry>(
+        keys.map((k) => [
+          k.midi,
+          {
+            black: k.black,
+            bar: heldBar(k, k.black ? BLACK_W : WHITE_W, k.black ? BLACK_H : WHITE_H),
+            travel: k.black ? KEY_TRAVEL.black : KEY_TRAVEL.white,
+          },
+        ]),
+      ),
+    [keys],
+  );
+  // The keys that draw a level: one in `levels`, on the keyboard, not dimmed (`mutedByMidi` holds
+  // the dimmed keys only), with an `h` for those that also draw a letter's copy. The rectangles
+  // the loop moves come and go with this, and may do so while `levels` is the same map (the cursor
+  // arrives on a key, the hands come close), so the loop looks them up again when it changes.
+  const levelShape = [...levels.keys()]
+    .filter((midi) => shapeOf.has(midi) && !mutedByMidi.has(midi))
+    .sort((a, b) => a - b)
+    .map((midi) => (handLetters && cursorByMidi.has(midi) ? `${midi}h` : `${midi}`))
+    .join(' ');
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -333,6 +400,9 @@ export function Keyboard({
     if (left !== el.scrollLeft) el.scrollLeft = left;
   }, [followed, shapeOf, width]);
 
+  // The levels move from the clock, not from React (issue 185): see useKeyLevels.
+  useKeyLevels(svgRef, levels, geometry, levelShape);
+
   const key = (k: KeyShape) => {
     const p = byMidi.get(k.midi);
     const m = p ? undefined : mutedByMidi.get(k.midi);
@@ -341,6 +411,13 @@ export function Keyboard({
     const h = k.black ? BLACK_H : WHITE_H;
     const state = p ? ' is-pressed' : m ? ' is-muted' : '';
     const cls = `key ${k.black ? 'is-black' : 'is-white'}${state}`;
+    // The key's level (issue 185): never on a dimmed key, and whether or not the key is still held
+    // (a level let go before it is full drains after the key is up). Drawn empty: useKeyLevels
+    // sets the size of this rectangle and of its clip from the clock, before the paint.
+    const level = levels.has(k.midi) && !m;
+    const levelBox = levelRect(k.black, heldBar(k, w, h), 0);
+    const clipId = `${clipBase}-${k.midi}`;
+    const digit = { x: k.x + w / 2, y: h - (k.black ? 9 : 12), textAnchor: 'middle' } as const;
     return (
       <Fragment key={k.midi}>
         {/* A dimmed black key is see-through: an opaque backing under it keeps the white keys'
@@ -348,10 +425,30 @@ export function Keyboard({
         {m && k.black && <rect className="key-backing" x={k.x} y={0} width={w} height={h} />}
         <g className={cls} data-midi={k.midi} data-hand={shown?.hand}>
           <rect x={k.x} y={0} width={w} height={h} />
-          {shown && shown.finger !== null && (
-            <text x={k.x + w / 2} y={h - (k.black ? 9 : 12)} textAnchor="middle">
+          {level && (
+            <rect
+              className={`key-level${k.black && !shown ? ' is-on-black' : ''}`}
+              data-level-for={k.midi}
+              {...levelBox}
+              aria-hidden="true"
+            />
+          )}
+          {shown && shown.finger !== null && <text {...digit}>{shown.finger}</text>}
+          {/* The number again, after the original, in the light gray, clipped to the level. */}
+          {level && shown && shown.finger !== null && (
+            <text
+              className="key-on-level"
+              {...digit}
+              clipPath={`url(#${clipId})`}
+              aria-hidden="true"
+            >
               {shown.finger}
             </text>
+          )}
+          {level && (
+            <clipPath id={clipId}>
+              <rect data-clip-for={k.midi} {...levelBox} />
+            </clipPath>
           )}
           {heldSet.has(k.midi) && !m && (
             <rect
@@ -379,20 +476,44 @@ export function Keyboard({
   const handMark = (p: PressedKey, dimmed: boolean) => {
     const k = shapeOf.get(p.midi);
     if (!k) return null;
-    const w = k.black ? BLACK_W : WHITE_W;
-    const h = k.black ? BLACK_H : WHITE_H;
     const cls = `key-hand${k.black ? ' is-on-black' : ''}${dimmed ? ' is-muted' : ''}`;
     return (
       <text
         key={`hand-${p.midi}`}
         className={cls}
         data-for-midi={p.midi}
-        x={k.x + w / 2}
-        y={h - (k.black ? 23 : 30)}
+        {...handSpot(k)}
         textAnchor="middle"
       >
         {handLetter(p.hand, t)}
       </text>
+    );
+  };
+
+  // The letter again over a key's level (issue 185), after every letter, in the light gray,
+  // clipped to the level. The letters are not in the keys' groups and do not travel with them, so
+  // the clip is the level's rectangle as the pressed key draws it: `useKeyLevels` scales it by the
+  // key's travel. Only a cursor key has a letter, and a cursor key is never dimmed.
+  const handCopy = (p: PressedKey) => {
+    const k = shapeOf.get(p.midi);
+    if (!k || !levels.has(p.midi)) return null;
+    const clipId = `${clipBase}-hand-${p.midi}`;
+    const levelBox = levelRect(k.black, geometry.get(p.midi)!.bar, 0);
+    return (
+      <Fragment key={`hand-on-level-${p.midi}`}>
+        <text
+          className={`key-hand-on-level${k.black ? ' is-on-black' : ''}`}
+          {...handSpot(k)}
+          textAnchor="middle"
+          clipPath={`url(#${clipId})`}
+          aria-hidden="true"
+        >
+          {handLetter(p.hand, t)}
+        </text>
+        <clipPath id={clipId}>
+          <rect data-hand-clip-for={p.midi} {...levelBox} />
+        </clipPath>
+      </Fragment>
     );
   };
 
@@ -411,6 +532,7 @@ export function Keyboard({
         {keys.filter((k) => k.black).map(key)}
         {handLetters && [...cursorByMidi.values()].map((p) => handMark(p, false))}
         {handLetters && [...mutedByMidi.values()].map((p) => handMark(p, true))}
+        {handLetters && [...cursorByMidi.values()].map(handCopy)}
       </svg>
     </div>
   );

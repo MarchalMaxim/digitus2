@@ -38,7 +38,7 @@ import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useCursor } from './useCursor.js';
 import { useHoveredNote } from './useHoveredNote.js';
-import { usePlayAlong } from './usePlayAlong.js';
+import { usePlayAlong, type AlongHint } from './usePlayAlong.js';
 import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
 
@@ -103,10 +103,11 @@ export interface StatusInputs {
   loading: boolean;
   countIn: CountIn | null;
   /**
-   * The red waits for the reader's piano (issue 182): how many pitches the step in front of
-   * them has, or null when the hint is not shown (usePlayAlong).
+   * The red waits for the reader's piano (issue 182): what to ask of them and how many pitches
+   * the step in front of them has (`play`, or `hold` after a release that came too early, issue
+   * 185), or null when the hint is not shown (usePlayAlong).
    */
-  alongHint: number | null;
+  alongHint: AlongHint | null;
   /**
    * The browser waits for a click before digitus can sound the other hand (issue 184): what the
    * sentence asks for ('tap' on a touch screen), or null when it is not shown (usePlayAlong).
@@ -146,7 +147,13 @@ export function scoreStatusLine(
   if (loading) return info(t.score.view.loadingPiano);
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
   if (alongSound !== null) return info(t.score.view.playAlongSound[alongSound]);
-  if (alongHint !== null) return info(t.score.view.playAlongHint(alongHint));
+  if (alongHint !== null) {
+    return info(
+      alongHint.kind === 'hold'
+        ? t.score.view.holdLonger(alongHint.count)
+        : t.score.view.playAlongHint(alongHint.count),
+    );
+  }
   return null;
 }
 
@@ -670,6 +677,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   hovered={hoveredKey}
                   onStrike={strikeKey}
                   barKeys={barKeys}
+                  levels={along.levels}
                 />
               </div>
             )}

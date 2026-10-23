@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { flash, prefersReducedMotion, restrike, RESTRIKE_MS } from './motion.js';
+import {
+  DUR_SLOW_FALLBACK_MS,
+  durationMs,
+  flash,
+  prefersReducedMotion,
+  restrike,
+  RESTRIKE_MS,
+} from './motion.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -74,5 +81,50 @@ describe('motion', () => {
     expect(prefersReducedMotion()).toBe(true);
     delete (el as unknown as { animate?: unknown }).animate;
     expect(() => flash(el)).not.toThrow();
+  });
+});
+
+describe('durationMs', () => {
+  const root = document.documentElement;
+  afterEach(() => root.style.removeProperty('--dur-slow'));
+
+  function media(reduce: boolean) {
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: reduce } as MediaQueryList);
+  }
+
+  it('reads a duration token from the root’s style, in milliseconds or seconds', () => {
+    media(false);
+    for (const [value, ms] of [
+      ['200ms', 200],
+      ['0.2s', 200],
+      ['0ms', 0],
+      ['  520ms ', 520],
+      ['1s', 1000],
+    ] as const) {
+      root.style.setProperty('--dur-slow', value);
+      expect(durationMs('--dur-slow'), value).toBe(ms);
+    }
+  });
+
+  it('reads 0 under reduced motion when the stylesheet says so, whatever the fallback', () => {
+    media(true);
+    root.style.setProperty('--dur-slow', '0ms');
+    expect(durationMs('--dur-slow')).toBe(0);
+    expect(durationMs('--dur-slow', 500)).toBe(0);
+  });
+
+  it('falls back without a value: 200 ms by default, the given one otherwise', () => {
+    media(false);
+    expect(DUR_SLOW_FALLBACK_MS).toBe(200);
+    expect(durationMs('--dur-slow')).toBe(DUR_SLOW_FALLBACK_MS);
+    expect(durationMs('--dur-slow', 120)).toBe(120);
+    root.style.setProperty('--dur-slow', 'slowly');
+    expect(durationMs('--dur-slow', 120)).toBe(120);
+  });
+
+  it('is 0 without a value when the reader prefers reduced motion', () => {
+    media(true);
+    expect(durationMs('--dur-slow')).toBe(0);
+    expect(durationMs('--dur-slow', 120)).toBe(0);
   });
 });

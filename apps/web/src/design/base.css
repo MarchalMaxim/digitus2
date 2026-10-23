@@ -1213,14 +1213,17 @@ html:has(.dock) {
   font-size: 11px;
 }
 
-/* L or R over a pressed key, only in bars where the hands come within a fifth (T11). */
-.key-hand {
+/* L or R over a pressed key, only in bars where the hands come within a fifth (T11). The copy of
+   a letter drawn over a key's level (.key-hand-on-level, issue 185) has the same font. */
+.key-hand,
+.key-hand-on-level {
   font: 600 10px var(--font-ui);
   fill: var(--key-digit);
   pointer-events: none;
 }
 
-.key-hand.is-on-black {
+.key-hand.is-on-black,
+.key-hand-on-level.is-on-black {
   font-size: 9px;
 }
 
@@ -1258,6 +1261,35 @@ html:has(.dock) {
 
 .keyboard-svg rect.key-held.is-dimmed.is-black {
   fill: var(--key-held);
+}
+
+/* How long the reader has held a note (issue 185): the bar's gray rises from the key's front edge
+   over the note's written length at the Practice tempo, and a full key is a note held long
+   enough. Like the bar it sits in the key's group, so it travels with the key, and takes the
+   bar's gray on every key it can lie on (--key-held, and --key-held-on-black on a black key that
+   shows no state). A key that is dimmed draws none. Its geometry is set from script
+   (useKeyLevels.ts), frame by frame, inside the keyboard's fixed box. */
+.keyboard-svg g.key rect.key-level {
+  fill: var(--key-held);
+  stroke: none;
+  transition: none;
+  pointer-events: none;
+}
+
+.keyboard-svg g.key rect.key-level.is-on-black {
+  fill: var(--key-held-on-black);
+}
+
+/* The finger number is drawn again over the level, clipped to it, in the light gray that reads on
+   the level's gray (5.7:1 and 7.8:1); it keeps the key's text font and the press animation, so it
+   moves with the number under it. The hand letter's copy is in the letters' layer, not in a key. */
+.keyboard-svg g.key text.key-on-level {
+  fill: var(--key-on-level);
+  pointer-events: none;
+}
+
+.key-hand-on-level {
+  fill: var(--key-on-level);
 }
 
 /* The loader (Loader.tsx, issue #28): one octave in the keyboard's colors, where a key at a time

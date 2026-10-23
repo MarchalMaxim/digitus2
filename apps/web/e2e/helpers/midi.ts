@@ -29,6 +29,12 @@ export interface FakeMidiOptions {
    */
   settings?: Record<string, unknown>;
   /**
+   * The Practice tempo of pieces, by library slug (issue 185): merged into the stored settings as
+   * `tempoByPiece`, like `playAlong`. A walk held for its time is long at the written tempo; 1.5,
+   * the top of the slider, makes every hold two thirds as long. It is the reader's own setting.
+   */
+  tempo?: Record<string, number>;
+  /**
    * `requestMIDIAccess` stays pending whatever the permission says, until `resolve` answers it:
    * Chrome's WinRT backend while a Bluetooth piano is off (issue 182).
    */
@@ -62,6 +68,8 @@ interface FakeInput extends EventTarget {
 interface AlongHook {
   target(): number[];
   index(): number;
+  /** The hold in real milliseconds of the step `target()` names, 0 when none (issue 185). */
+  hold(): number;
 }
 
 type Windowed = {
@@ -107,18 +115,29 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
       };
 
       // The stored settings, once per test: a reload keeps what the app did with them.
-      if ((cfg.playAlong !== null || cfg.settings !== null) && keep('seeded') === null) {
+      if (
+        (cfg.playAlong !== null || cfg.settings !== null || cfg.tempo !== null) &&
+        keep('seeded') === null
+      ) {
         keep('seeded', '1');
         try {
           const stored = JSON.parse(localStorage.getItem('digitus2.settings.v1') ?? 'null') as {
             state?: { settings?: Record<string, unknown> };
             version?: number;
           } | null;
-          const settings = {
+          const settings: Record<string, unknown> = {
             ...(stored?.state?.settings ?? {}),
             ...(cfg.settings ?? {}),
-            ...(cfg.playAlong !== null ? { playAlong: cfg.playAlong } : {}),
           };
+          if (cfg.playAlong !== null) settings.playAlong = cfg.playAlong;
+          if (cfg.tempo !== null) {
+            settings.tempoByPiece = {
+              ...((settings.tempoByPiece as Record<string, number> | undefined) ?? {}),
+              ...Object.fromEntries(
+                Object.entries(cfg.tempo).map(([slug, factor]) => [`piece:${slug}`, factor]),
+              ),
+            };
+          }
           localStorage.setItem(
             'digitus2.settings.v1',
             JSON.stringify({ ...stored, state: { ...stored?.state, settings }, version: 2 }),
@@ -326,6 +345,7 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
       unsupported: o.unsupported ?? false,
       playAlong: o.playAlong ?? null,
       settings: o.settings ?? null,
+      tempo: o.tempo ?? null,
       hang: o.hang ?? false,
     },
   );
@@ -530,11 +550,15 @@ export function fakeMidi(page: Page) {
         .toBeGreaterThan(0);
       return found;
     },
+    /** The hold in real milliseconds of the step the red waits on, 0 when it names none (issue 185). */
+    async hold(): Promise<number> {
+      return page.evaluate(() => (window as unknown as Windowed).__digitus2Along?.hold() ?? 0);
+    },
     /**
-     * Presses every pitch of the step the red waits on and holds them: no release, so the next
-     * press follows at once (an early arrival, issue 184). With `wait` false it does not wait for
-     * the step to settle first, which is what a second press a few milliseconds after the first
-     * needs (the walk names the next step as soon as it has moved). Returns the step's index.
+     * Presses every pitch of the step the red waits on and holds them: no release, so the step
+     * runs from the press (the other hand starts there, issue 184) and passes only once it has been
+     * held for its time (issue 185). With `wait` false it does not wait for the step to settle
+     * first, which is what a press right after `waitForStep` needs. Returns the step's index.
      */
     async pressStep(o: { wait?: boolean } = {}): Promise<number> {
       if (o.wait !== false) await api.waitForStep();
@@ -549,28 +573,64 @@ export function fakeMidi(page: Page) {
       });
     },
     /**
-     * Plays the step the red waits on: presses every pitch of it (`__digitus2Along.target()`),
-     * holds them 60 ms, releases them, and waits until the walk has left that step. Returns the
-     * index of the step it played. Waits for a step first, so it also serves the moment after a
-     * finish or a seek.
+     * Presses every pitch of the step the red waits on, holds them until the walk moves on from
+     * that step (a step passes once its keys have been held for its time, issue 185), and then
+     * lets go. Returns the index of the step it played and the milliseconds from the press to the
+     * walk's move, both taken in the page; the wait there polls on animation frames and throws
+     * after 10 s. Waits for a step first, so it also serves the moment after a finish or a seek.
      */
-    async playRed(): Promise<number> {
+    async playRedTimed(): Promise<{ index: number; ms: number }> {
       await api.waitForStep();
       await listening();
-      const was = await page.evaluate(async () => {
+      return page.evaluate(async () => {
         const w = window as unknown as Windowed;
         const hook = w.__digitus2Along!;
+        const host = w.__fakeMidi!;
         const pitches = hook.target();
         const index = hook.index();
-        for (const midi of pitches) w.__fakeMidi!.send([0x90, midi, 100]);
-        await new Promise((r) => setTimeout(r, 60));
-        for (const midi of pitches) w.__fakeMidi!.send([0x80, midi, 0]);
-        return index;
+        const started = performance.now();
+        for (const midi of pitches) host.send([0x90, midi, 100]);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            const look = () => {
+              if (hook.index() !== index) resolve();
+              else if (performance.now() - started > 10_000)
+                reject(new Error(`the red stayed on step ${index} for 10 s`));
+              else requestAnimationFrame(look);
+            };
+            look();
+          });
+        } finally {
+          for (const midi of pitches) host.send([0x80, midi, 0]);
+        }
+        return { index, ms: performance.now() - started };
       });
-      await expect
-        .poll(() => api.index(), { message: 'the red moves on from the step played' })
-        .not.toBe(was);
-      return was;
+    },
+    /**
+     * Plays the step the red waits on: holds all of its pitches until the walk has left that
+     * step, then lets go (`playRedTimed`). Returns the index of the step it played.
+     */
+    async playRed(): Promise<number> {
+      return (await api.playRedTimed()).index;
+    },
+    /**
+     * Presses the pitches, holds them `ms` milliseconds and lets go, all in the page, so a slow
+     * round trip cannot make a short hold long. Returns the milliseconds the keys were down, as
+     * the page measured them: a test of a short hold checks that a busy PC did not make it long.
+     */
+    async tap(pitches: number[], ms: number): Promise<number> {
+      await listening();
+      return page.evaluate(
+        async ([ps, held]) => {
+          const host = (window as unknown as Windowed).__fakeMidi!;
+          const started = performance.now();
+          for (const midi of ps as number[]) host.send([0x90, midi, 100]);
+          await new Promise((r) => setTimeout(r, held as number));
+          for (const midi of ps as number[]) host.send([0x80, midi, 0]);
+          return performance.now() - started;
+        },
+        [pitches, ms] as const,
+      );
     },
   };
   return api;

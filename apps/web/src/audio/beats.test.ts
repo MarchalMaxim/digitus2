@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { parseMusicXml, type Score } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
-import { buildBeats, countInBar, measureEndSec, measureStartSec } from './beats.js';
+import { beatTicksAt, buildBeats, countInBar, measureEndSec, measureStartSec } from './beats.js';
 
 const { score } = parseMusicXml(
   readFileSync(new URL('../../fixtures/short-piano.musicxml', import.meta.url), 'utf8'),
@@ -103,6 +103,70 @@ describe('beats', () => {
     expect(bar1.map((b) => b.accent)).toEqual([true, false]);
     expect(bar1[0]!.sec).toBeCloseTo(2, 9);
     expect(bar1[1]!.sec).toBeCloseTo(2.5, 9);
+  });
+});
+
+/** A score that is only its divisions and time signatures, for the beat length. */
+function signed(divisions: number, timeSignatures: Score['timeSignatures']): Score {
+  return {
+    meta: {},
+    divisions,
+    tempoMap: [{ tick: 0, qpm: 60 }],
+    timeSignatures,
+    keySignatures: [],
+    measures: [],
+    notes: [],
+  };
+}
+
+describe('beatTicksAt', () => {
+  // Divisions 4: a quarter is 4 ticks, an eighth 2, a half 8.
+  it('is a quarter in 4/4 and in 3/4', () => {
+    expect(beatTicksAt(signed(4, [{ tick: 0, beats: 4, beatType: 4 }]), 0)).toBe(4);
+    expect(beatTicksAt(signed(4, [{ tick: 0, beats: 3, beatType: 4 }]), 7)).toBe(4);
+  });
+
+  it('is an eighth in 6/8 and in 3/8', () => {
+    expect(beatTicksAt(signed(4, [{ tick: 0, beats: 6, beatType: 8 }]), 0)).toBe(2);
+    expect(beatTicksAt(signed(4, [{ tick: 0, beats: 3, beatType: 8 }]), 5)).toBe(2);
+  });
+
+  it('is a half in 2/2', () => {
+    expect(beatTicksAt(signed(4, [{ tick: 0, beats: 2, beatType: 2 }]), 0)).toBe(8);
+  });
+
+  it('is the signature in force after a change, whatever order they come in', () => {
+    const changing = signed(4, [
+      { tick: 16, beats: 6, beatType: 8 },
+      { tick: 0, beats: 4, beatType: 4 },
+    ]);
+    expect(beatTicksAt(changing, 0)).toBe(4);
+    expect(beatTicksAt(changing, 15)).toBe(4);
+    expect(beatTicksAt(changing, 16)).toBe(2);
+    expect(beatTicksAt(changing, 1000)).toBe(2);
+  });
+
+  it('is a quarter in common time when no signature is written', () => {
+    expect(beatTicksAt(signed(480, []), 100)).toBe(480);
+  });
+
+  it('is the beat buildBeats spaces its clicks by', () => {
+    const sixEight: Score = {
+      ...signed(4, [{ tick: 0, beats: 6, beatType: 8 }]),
+      measures: [{ index: 0, startTick: 0, lengthTicks: 12, number: '1' }],
+    };
+    for (const piece of [score, pickup, sixEight]) {
+      const beats = buildBeats(piece);
+      let compared = 0;
+      for (let i = 1; i < beats.length; i++) {
+        const a = beats[i - 1]!;
+        const b = beats[i]!;
+        if (a.measureIndex !== b.measureIndex) continue;
+        expect(b.tick - a.tick).toBeCloseTo(beatTicksAt(piece, a.tick), 9);
+        compared++;
+      }
+      expect(compared).toBeGreaterThan(0);
+    }
   });
 });
 

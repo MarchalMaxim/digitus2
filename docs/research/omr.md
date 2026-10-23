@@ -47,7 +47,7 @@ The default corpus is page 1 of three library pieces: Twinkle, Bach Minuet in G 
 
 ## Acceptance corpus and gate
 
-`research/omr/acceptance.mjs` is the scanning gate, the `omr:acceptance` step of `pnpm verify`. It renders the 16 one-page library pieces of `research/omr/acceptance/corpus.json` with `prepare.mjs`, recognises every page with the adapters the scan service runs (`acceptance/recognize.py` imports `local-worker/homr.py` and `audiveris.py`, so the gate measures the shipped pipeline), and scores note by note against the library MusicXML: the projection F1s above plus `diagnose.mjs`. It fails when a route falls below `research/omr/acceptance/floor.json`. Without the recognisers it reports SKIP with the reason. Outputs are cached in the ignored `research/omr/results/acceptance/` by the hash of the input and of the pipeline's files, so a rerun recognises only what changed (80 recognitions take about 15 minutes on a Ryzen 7 7800X3D).
+`research/omr/acceptance.mjs` is the scanning gate, the `omr:acceptance` step of `pnpm verify`. It renders the 16 one-page library pieces of `research/omr/acceptance/corpus.json` with `prepare.mjs`, recognises every page with the adapters the scan service runs (`acceptance/recognize.py` imports `local-worker/homr.py` and `audiveris.py`, so the gate measures the shipped pipeline), and scores note by note against the library MusicXML: the projection F1s above plus `diagnose.mjs`. It fails when a route falls below `research/omr/acceptance/floor.json`. Without the recognisers it reports SKIP with the reason. Outputs are cached in the ignored `research/omr/results/acceptance/` by the hash of the input and of the pipeline's files, so a rerun recognises only what changed (80 recognitions take about 15 minutes on a Ryzen 7 7800X3D). The photos add 16 recognitions as taken and turned and 56 perturbed (`photos:perturbed`); `--photos` runs only the photo routes, which need homr alone, and with `--update-floor` rewrites only their floors.
 
 ```sh
 node research/omr/acceptance.mjs --check          # 0, or 3 with the reason the recognisers are missing
@@ -58,6 +58,8 @@ node research/omr/acceptance.mjs --update-floor   # after a reviewed, measured c
 Set `DIGITUS2_OMR_HOMR`, `DIGITUS2_OMR_BUNDLE` or `DIGITUS2_OMR_TEXT_MODELS` when a toolchain is not in its setup folder. The corpus adds pieces with ties across voices and bars, chords, volta endings, long beams, tuplets and two-voice staves to the earlier seven: Bach BWV Anh. 120, 119 and BWV 941, Burgmüller Op. 100 No. 5, Tchaikovsky Op. 39 No. 1, Czerny Op. 821 No. 5, Kuhlau Op. 20 No. 1 (II), Chopin Op. 69 No. 2 and Schumann Op. 68 No. 10. Each page goes to homr in four variants (clean, shadow, low contrast, 1.5° skew) and its PDF to Audiveris. They are synthetic engravings: exact truth for the pipeline, not evidence of robustness to camera photos.
 
 `diagnose.mjs` counts the error classes of issue #39 over bars whose starts agree: **ties missed** (a reference tie the recognition re-attacks), **ties extra** (the reverse), **duplicates** (notes beyond the reference's count at one staff, onset and pitch) and **wrong staff** (onset and pitch right, staff wrong), plus **beam F1** over exact primary beam groups. Floors follow the benchmark rule (F1 in percent minus 0.5, rounded down); error ceilings are the measured counts.
+
+A page cut from a longer piece (camera-fusion.mjs `sliceScore`, used for the PhotoScan pages of Invention 13) starts at tick 0 as a recognised page does, with every bar keeping its length, so its bars pair with the recognised page's by ordinal position: all 10 bars of PhotoScan page 2 and all 3 of page 3 pair, where a cut that kept its absolute starts paired none and counted each as a timing mismatch. The error classes are 0 over every paired bar; the full-note F1 of the three pages (76.70, 88.74, 87.88) does not depend on the pairing.
 
 | Route (16 pages each) | Imports | Full-note F1 before | after | Pitch F1 after | Ties missed before | after | Extra ties | Duplicates | Wrong staff | Beam F1 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -102,7 +104,7 @@ What remains, and why:
 | Invention 13 p. 2, PhotoScan | 10 (10) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | none |
 | Invention 13 p. 3, PhotoScan | 3 (3) | 2 | ✓ | 4/4 inferred (none printed) | ✓ | none |
 
-Totals as taken (14 photos): 14 recognised, 12 pass the strict import, 11 have the page's bars, 13 its staves, 12 its key, 7 its time signature. Rotated (2 photos): both recognised, 1 imports, and both have the right staves, key and time; 1 has the right bars. These counts are the gate's `photoFloors`. The worker rules changed the bar count only on the torn page (27 to 26) and changed no import result. All four slurs read as ties on page 2 (flat) were checked against the print: each is a half note tied to an eighth of the same pitch (bars 14 to 17). The other conversions were not checked by eye.
+Totals as taken (14 photos): 14 recognised, 12 pass the strict import, 11 have the page's bars, 13 its staves, 12 its key, 7 its time signature. Rotated (2 photos): both recognised, 1 imports, and both have the right staves, key and time; 1 has the right bars. These counts are the gate's `photoFloors`. All 14 are read as one part; staves count as right only for a single part with the page's staves, since a page read as a treble part and a bass part is not the grand staff it shows. The bars of a page are the sum of its parts' measures when every part is a grand staff (a page cut into consecutive halves), and those of its longest part otherwise. The worker rules changed the bar count only on the torn page (27 to 26) and changed no import result. All four slurs read as ties on page 2 (flat) were checked against the print: each is a half note tied to an eighth of the same pitch (bars 14 to 17). The other conversions were not checked by eye.
 
 What the photos show:
 
@@ -112,6 +114,29 @@ What the photos show:
 - **A partly read system is flagged.** The adapter works on homr's staff-position rows, one row per staff of every system (a paired grand staff is one row, an unpaired staff a row of its own). The column is the median left and right edge of the staves at least 0.75 of the longest one. A staff is flagged when it starts more than 25 percent of the column's width right of the column's left edge, or when it ends that far short of the column's right edge and some staff below it does not end short: the short last system of a piece is not flagged, a short system that ends a piece partway down the page, with a full staff below it, is. On this set it fires on No. I p. 2 (shadow, cut off), No. II p. 4 (perspective, cut off) and No. II p. 5 (shadow, torn): each has a short stray staff that adds bars. Without the coverage patch it also fires on Invention 13 p. 1, whose first system starts late.
 - **Extra bars** come from the cut-off photos (a partial last system) and the torn corner, which homr splits into more measures than the page has.
 - **The book page** reads the same on both photos: all 13 main bars, both hands, 155 notes. The earlier test (156 and 157 notes on the owner's first two photos of this page) also found a duplicated C5 and a bass E3 in the upper hand; without note-level truth the gate does not count them.
+
+### Capture variability (photos:perturbed)
+
+A phone never gives the same bytes twice, and the same paper was paired on one capture and split on the next (issue 156). The `photos:perturbed` route recognises each photo, turned upright when taken upside down, under four small changes made by `acceptance/perturb.py`: re-encoded at JPEG quality 95 and 80, cropped by 3% on each side, and rotated by 0.5°. It checks parts, staves, bars, key and time like the photos route. Cells are parts/bars; for the two upside-down photos "as taken" is the turned copy.
+
+| Photo (page bars) | as taken | q95 | q80 | crop 3% | rotate 0.5° |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| No. I p. 1, hand shadow (19) | 1/19 | 1/19 | 1/19 | 1/22 | 1/19 |
+| No. I p. 2, shadow, cut off (24) | 1/28 | 2/24 | 2/25 | 2/28 | 2/20 |
+| No. I p. 2, flat (24) | 1/24 | 1/24 | 1/24 | 1/24 | 1/24 |
+| No. I p. 3, upside down, turned (24) | 1/24 | 1/24 | 1/24 | 1/24 | 1/24 |
+| No. I p. 3, perspective (24) | 1/24 | 1/24 | 2/24 | 2/24 | 2/24 |
+| No. II p. 4, perspective, cut off (11) | 1/14 | 1/16 | 1/11 | 2/17 | 2/12 |
+| No. II p. 4, upside down, turned (11) | 1/16 | 1/12 | 1/11 | 1/11 | 1/11 |
+| No. II p. 5, shadow, torn (15) | 1/26 | 1/28 | 1/25 | 2/18 | 2/20 |
+| No. II p. 5, flat (15) | 1/15 | 1/15 | 1/15 | 1/18 | 1/15 |
+| Book p. 25, warm light (13) | 1/13 | 1/13 | 1/13 | 1/13 | 1/13 |
+| Book p. 25, dim (13) | 1/13 | 1/13 | 1/13 | 1/15 | 1/13 |
+| Invention 13 p. 1, PhotoScan (12) | 1/12 | 1/12 | 1/12 | 1/12 | 1/12 |
+| Invention 13 p. 2, PhotoScan (10) | 1/10 | 1/10 | 1/10 | 1/10 | 1/10 |
+| Invention 13 p. 3, PhotoScan (3) | 1/3 | 1/3 | 1/3 | 1/3 | 1/3 |
+
+Totals over 56 readings: 56 recognised, 48 import, 11 read as two parts, 42 have the page's bars, 44 its staves, 49 its key, 30 its time. Four of the 14 photos are read as two parts under at least one change (No. I p. 2 shadow, cut off: all four; No. I p. 3 perspective: three; No. II p. 4 cut off and No. II p. 5 torn: two each); the other ten stay one part. Where a page splits, its bars are counted over the whole score: on No. I p. 3 perspective two grand-staff parts of 12 bars each add up to the 24-bar page, while on No. I p. 2 shadow, cut off a 19-bar one-staff part beside a 24-bar grand staff counts 24, the longest part, since a sum would count the same bars twice. The 3% crop of No. I p. 1 reads one staff and key -3. Six photos read the same under every change (No. I p. 2 flat, No. I p. 3 turned, book p. 25 warm light, the three PhotoScan pages). These are the gate's `photoPerturbedFloors` (two-part readings as a ceiling). The changes are a proxy for capture variability, not a copy of it.
 
 ## Routes evaluated
 

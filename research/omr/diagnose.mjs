@@ -16,14 +16,23 @@ function quarters(ticks, divisions) {
   return `${t / g}/${d / g}`;
 }
 
-/** Bars paired by ordinal position whose starts agree; later timing errors void the rest. */
+/**
+ * Bars paired by ordinal position whose starts agree; later timing errors void the rest. Starts are
+ * read from each score's first bar, so a reference cut from a longer piece (a page of it) pairs with
+ * a recognised page that starts at tick 0, as evaluateOmr's own bar timing does after the cut is
+ * rebased (camera-fusion.mjs sliceScore, issue 163).
+ */
 function alignedBars(reference, recognized) {
   const pairs = [];
   const count = Math.min(reference.measures.length, recognized.measures.length);
+  const from = (score) => score.measures[0]?.startTick ?? 0;
   for (let i = 0; i < count; i++) {
     const a = reference.measures[i];
     const b = recognized.measures[i];
-    if (quarters(a.startTick, reference.divisions) !== quarters(b.startTick, recognized.divisions))
+    if (
+      quarters(a.startTick - from(reference), reference.divisions) !==
+      quarters(b.startTick - from(recognized), recognized.divisions)
+    )
       break;
     pairs.push([a, b]);
   }
@@ -60,8 +69,11 @@ export function errorClasses(reference, recognized) {
   const pairs = alignedBars(reference, recognized);
   const refBars = notesByBar(reference);
   const recBars = notesByBar(recognized);
-  const at = (score, note) => quarters(note.onsetTick, score.divisions);
-  const end = (score, note) => quarters(note.offsetTick, score.divisions);
+  // Onsets from each score's first bar, like alignedBars: a page cut from a longer piece compares
+  // with a recognised page that starts at tick 0.
+  const first = (score) => score.measures[0]?.startTick ?? 0;
+  const at = (score, note) => quarters(note.onsetTick - first(score), score.divisions);
+  const end = (score, note) => quarters(note.offsetTick - first(score), score.divisions);
   const held = (score, others, note, partners) => {
     // `note` is tied when it spans more than one source element. Its counterpart in the other
     // score re-attacks it when that one starts at the same time and is shorter, with an attack
@@ -170,11 +182,23 @@ export function compareBeams(reference, recognized) {
  * What a recognised photo page is checked on when there is no MusicXML ground truth: the facts
  * read off the page by eye (research/omr/photos/manifest.json). Bars and the first key and time
  * signature come from the XML itself, so a file the strict import refuses is still measured.
+ *
+ * `parts` is the number of <part> elements. A grand staff is one part with two staves; a page read
+ * as a treble part and a bass part (two parts of one staff each) is a different layout that the
+ * largest <staves> value cannot tell apart, so the gate counts staves as right only for one part
+ * (acceptance.mjs photoSummary). `bars` counts the page over all its parts: a page cut into
+ * consecutive grand-staff halves (every part has <staves>2) has the sum of their measures, and any
+ * other layout, such as a 19-bar one-staff part beside a 24-bar grand staff, has its longest part's,
+ * since a sum would count the same bars twice (issue 163).
  */
 export function photoFacts(E, xml) {
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  const part = childElements(doc.documentElement, 'part')[0];
-  const measures = part ? childElements(part, 'measure') : [];
+  const parts = childElements(doc.documentElement, 'part');
+  const lengths = parts.map((part) => childElements(part, 'measure').length);
+  const grandStaves = parts.every((part) =>
+    Array.from(part.getElementsByTagName('staves')).some((el) => Number(el.textContent) === 2),
+  );
+  const bars = grandStaves ? lengths.reduce((a, b) => a + b, 0) : Math.max(0, ...lengths);
   let staves = 1;
   let fifths = null;
   let time = null;
@@ -192,5 +216,5 @@ export function photoFacts(E, xml) {
   } catch (cause) {
     error = cause.message;
   }
-  return { imports, error, bars: measures.length, staves, fifths, time, notes };
+  return { imports, error, parts: parts.length, bars, staves, fifths, time, notes };
 }

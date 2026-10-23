@@ -975,11 +975,31 @@ function score(E, refScore, file) {
   metrics.pitchSequence = { matched: lcs, reference: a.length, recognized: b.length, f1: a.length + b.length ? (2 * lcs) / (a.length + b.length) : 1 };
   return { status, error, metrics, bars: { reference: ev.referenceBars, recognized: ev.recognizedBars, timingMismatches: ev.barTimingMismatches } };
 }
-/** The reference cut to bars [from, to) (ordinal), for a page of a longer piece. */
-function sliceScore(scoreObj, from, to) {
+/**
+ * The reference cut to bars [from, to) (ordinal), for a page of a longer piece. The cut starts at
+ * tick 0, as a recognised page does, because evaluateOmr compares the absolute start of each bar:
+ * every tick (bars, notes, ornaments, signatures) moves back by the first kept bar's start, so each
+ * bar keeps its length and its notes keep their onsets within the bar (issue 163).
+ */
+export function sliceScore(scoreObj, from, to) {
   const measures = scoreObj.measures.slice(from, to);
   const keep = new Set(measures.map((m) => m.index));
-  return { ...scoreObj, measures, notes: scoreObj.notes.filter((n) => keep.has(n.measureIndex)) };
+  const shift = measures[0]?.startTick ?? 0;
+  const back = (tick) => Math.max(0, tick - shift);
+  const note = (n) => ({
+    ...n,
+    onsetTick: n.onsetTick - shift,
+    offsetTick: n.offsetTick - shift,
+    ...(n.ornament && { ornament: { ...n.ornament, endTick: n.ornament.endTick - shift } }),
+  });
+  return {
+    ...scoreObj,
+    measures: measures.map((m) => ({ ...m, startTick: m.startTick - shift })),
+    notes: scoreObj.notes.filter((n) => keep.has(n.measureIndex)).map(note),
+    tempoMap: scoreObj.tempoMap?.map((e) => ({ ...e, tick: back(e.tick) })),
+    timeSignatures: scoreObj.timeSignatures?.map((e) => ({ ...e, tick: back(e.tick) })),
+    keySignatures: scoreObj.keySignatures?.map((e) => ({ ...e, tick: back(e.tick) })),
+  };
 }
 const f1 = (t) => (t.reference + t.recognized ? (2 * t.matched) / (t.reference + t.recognized) : 1);
 function micro(rows, metric) {

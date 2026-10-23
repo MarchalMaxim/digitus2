@@ -1,9 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { aggregate, breaches, floorsFrom, missing, pipelineHash, SKIP, toolchains } from './acceptance.mjs';
+import { aggregate, breaches, floorsFrom, missing, perturbedCopies, PERTURBATIONS, pipelineHash, SKIP, toolchains } from './acceptance.mjs';
 
 const metric = (matched, reference, recognized) => ({ matched, reference, recognized });
 const row = (recognizer, variant, status, matched, extra = {}) => ({
@@ -58,6 +60,13 @@ test('floors follow the benchmark rule, and a worse run is a breach while an equ
   assert.equal(floorsFrom(aggregate([row('homr', 'clean', 'parsed', 0)]))['homr:clean'].fullNoteF1Min, 0);
 });
 
+test('a photos-only floor update keeps the corpus floors only when they were measured on this corpus', async () => {
+  const { keptFloors } = await import('./acceptance.mjs');
+  const floors = { 'homr:clean': { fullNoteF1Min: 89 } };
+  assert.equal(keptFloors({ corpus: 'v1', floors }, 'v1'), floors);
+  assert.throws(() => keptFloors({ corpus: 'v1', floors }, 'v2'), /measured on corpus v1, not v2/);
+});
+
 test('without the recognisers the gate reports why, for verify to skip it', () => {
   const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-accept-'));
   try {
@@ -90,7 +99,7 @@ test('the cache key changes with any file of the recognition pipeline', () => {
 test('photo pages are counted by the facts read off the page, and a worse run is a breach', async () => {
   const { photoSummary, photoFloorsFrom, photoBreaches } = await import('./acceptance.mjs');
   const expect = { bars: 24, staves: 2, fifths: 1, time: '3/4' };
-  const facts = (bars, staves, imports = true) => ({ imports, bars, staves, fifths: 1, time: '3/4' });
+  const facts = (bars, staves, imports = true, parts = 1) => ({ imports, parts, bars, staves, fifths: 1, time: '3/4' });
   const rows = [
     { variant: 'as-taken', expect, facts: facts(24, 2) },
     { variant: 'as-taken', expect, facts: facts(28, 2) },
@@ -98,12 +107,190 @@ test('photo pages are counted by the facts read off the page, and a worse run is
     { variant: 'as-taken', expect: { ...expect, time: null }, facts: null },
   ];
   const summary = photoSummary(rows);
-  assert.deepEqual(summary['photos:as-taken'], { pages: 3, recognised: 2, imported: 2, barsRight: 1, stavesRight: 2, keyRight: 2, timeRight: 2 });
-  assert.deepEqual(summary['photos:rotated'], { pages: 1, recognised: 1, imported: 0, barsRight: 1, stavesRight: 0, keyRight: 1, timeRight: 1 });
+  assert.deepEqual(summary['photos:as-taken'], { pages: 3, recognised: 2, imported: 2, twoParts: 0, barsRight: 1, stavesRight: 2, keyRight: 2, timeRight: 2 });
+  assert.deepEqual(summary['photos:rotated'], { pages: 1, recognised: 1, imported: 0, twoParts: 0, barsRight: 1, stavesRight: 0, keyRight: 1, timeRight: 1 });
   const floors = photoFloorsFrom(summary);
   assert.deepEqual(photoBreaches(summary, floors), []);
   const worse = photoSummary(rows.map((r, i) => (i === 0 ? { ...r, facts: facts(23, 2) } : r)));
   assert.deepEqual(photoBreaches(worse, floors), ['photos:as-taken: barsRight 0 below floor 1']);
+});
+
+test('a page read as two one-staff parts does not have the right staves, however many staves each reads', async () => {
+  const { photoSummary } = await import('./acceptance.mjs');
+  const expect = { bars: 19, staves: 2, fifths: 1, time: '3/4' };
+  const facts = (parts, staves) => ({ imports: true, parts, bars: 19, staves, fifths: 1, time: '3/4' });
+  const summary = photoSummary([
+    { variant: 'as-taken', expect, facts: facts(1, 2) },
+    // Two parts of two staves each, as homr read a page: the largest <staves> is 2, the layout is wrong.
+    { variant: 'as-taken', expect, facts: facts(2, 2) },
+    { variant: 'as-taken', expect, facts: facts(2, 1) },
+    { variant: 'as-taken', expect, facts: facts(1, 1) },
+  ]);
+  assert.equal(summary['photos:as-taken'].stavesRight, 1);
+  assert.equal(summary['photos:as-taken'].twoParts, 2);
+  assert.equal(summary['photos:as-taken'].barsRight, 4);
+});
+
+test('the perturbed photos are counted together: parts read as two, and the floors as measured', async () => {
+  const { perturbedSummary, perturbedFloorsFrom, perturbedBreaches } = await import('./acceptance.mjs');
+  const expect = { bars: 24, staves: 2, fifths: 1, time: '3/4' };
+  const facts = (bars, parts = 1, staves = 2, imports = true) => ({ imports, parts, bars, staves, fifths: 1, time: '3/4' });
+  const rows = [
+    { variant: 'q95', expect, facts: facts(24) },
+    { variant: 'q80', expect, facts: facts(24) },
+    { variant: 'crop3', expect, facts: facts(12, 2) },
+    { variant: 'rot05', expect, facts: null },
+  ];
+  const summary = perturbedSummary(rows);
+  assert.deepEqual(summary, { pages: 4, recognised: 3, imported: 3, twoParts: 1, barsRight: 2, stavesRight: 2, keyRight: 3, timeRight: 3 });
+  const floors = perturbedFloorsFrom(summary);
+  assert.deepEqual(floors, { recognisedMin: 3, importedMin: 3, twoPartsMax: 1, barsRightMin: 2, stavesRightMin: 2, keyRightMin: 3, timeRightMin: 3 });
+  assert.deepEqual(perturbedBreaches(summary, floors), []);
+  // One more two-part read costs a staves hit and adds a two-part read: each is a breach.
+  const worse = perturbedSummary([rows[0], { ...rows[1], facts: facts(24, 2) }, rows[2], rows[3]]);
+  assert.deepEqual(perturbedBreaches(worse, floors), [
+    'photos:perturbed: twoParts 2 above ceiling 1',
+    'photos:perturbed: stavesRight 1 below floor 2',
+  ]);
+  // A floor file that lost a key is a broken file, never a pass.
+  assert.deepEqual(perturbedBreaches(summary, { recognisedMin: 3 }), [
+    'photos:perturbed: floor.json lacks importedMin',
+    'photos:perturbed: floor.json lacks twoPartsMax',
+    'photos:perturbed: floor.json lacks barsRightMin',
+    'photos:perturbed: floor.json lacks stavesRightMin',
+    'photos:perturbed: floor.json lacks keyRightMin',
+    'photos:perturbed: floor.json lacks timeRightMin',
+  ]);
+});
+
+test('every manifest photo becomes four perturbed recognitions, the rotated ones from the upright copy', async () => {
+  const { perturbedJobs, PERTURBATIONS } = await import('./acceptance.mjs');
+  const manifest = JSON.parse(readFileSync(join(import.meta.dirname, 'photos/manifest.json'), 'utf8'));
+  assert.deepEqual(PERTURBATIONS, ['q95', 'q80', 'crop3', 'rot05']);
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-perturbed-'));
+  try {
+    const turned = [];
+    const turn = (_tc, photo) => {
+      const file = join(dir, `${photo.id}-up.png`);
+      writeFileSync(file, `upright ${photo.id}`);
+      turned.push(photo.id);
+      return file;
+    };
+    const derived = [];
+    // Stands for perturb.py: one file per variant whose bytes differ per input and variant.
+    const derive = (_tc, input, out, stem) => {
+      derived.push(input);
+      mkdirSync(out, { recursive: true });
+      return Object.fromEntries(
+        PERTURBATIONS.map((variant) => {
+          const file = join(out, `${stem}-${variant}.jpg`);
+          writeFileSync(file, `${variant}:${readFileSync(input, 'utf8')}`);
+          return [variant, file];
+        }),
+      );
+    };
+    const options = { dir: join(dir, 'perturbed'), turn, derive };
+    const jobs = perturbedJobs({}, 'pipe', join(dir, 'cache'), options);
+    assert.equal(jobs.length, manifest.photos.length * 4);
+    assert.equal(new Set(jobs.map((j) => j.id)).size, jobs.length);
+    assert.equal(new Set(jobs.map((j) => j.output)).size, jobs.length);
+    assert.deepEqual(jobs.slice(0, 4).map((j) => j.variant), PERTURBATIONS);
+    assert.equal(jobs[0].id, `${manifest.photos[0].id}:homr:q95`);
+    assert.ok(jobs.every((j) => j.perturbed && j.recognizer === 'homr' && j.output.endsWith('.musicxml')));
+    // Only the photos taken upside down are turned, and the turned copy is what is perturbed.
+    assert.deepEqual(turned, manifest.photos.filter((p) => p.rotate).map((p) => p.id));
+    const upside = manifest.photos.find((p) => p.rotate);
+    assert.ok(derived.includes(join(dir, `${upside.id}-up.png`)));
+    assert.equal(derived.filter((f) => !f.endsWith('-up.png')).length, manifest.photos.length - turned.length);
+    // The cache key is the hash of the variant's bytes and the pipeline.
+    const again = perturbedJobs({}, 'pipe', join(dir, 'cache'), options);
+    assert.deepEqual(again.map((j) => j.output), jobs.map((j) => j.output));
+    // A photo re-shot under the same id (other bytes) is perturbed under another stem, so the old copies are not reused.
+    const stems = (options2) => {
+      const seen = [];
+      perturbedJobs({}, 'pipe', join(dir, 'cache'), { ...options2, derive: (tc, input, out, stem) => (seen.push(stem), derive(tc, input, out, stem)) });
+      return seen;
+    };
+    const first = stems(options);
+    assert.ok(first.every((stem) => /-[0-9a-f]{12}$/.test(stem)));
+    assert.equal(new Set(first).size, first.length);
+    const turnedAgain = (_tc, photo) => {
+      const file = join(dir, `${photo.id}-up.png`);
+      writeFileSync(file, `reshot ${photo.id}`);
+      return file;
+    };
+    const second = stems({ ...options, turn: turnedAgain });
+    const hashOf = (list) => Object.fromEntries(list.map((stem) => [stem.slice(0, -13), stem.slice(-12)]));
+    const [h1, h2] = [hashOf(first), hashOf(second)];
+    const rotatedIds = manifest.photos.filter((p) => p.rotate).map((p) => p.id);
+    assert.ok(rotatedIds.length > 0);
+    for (const photo of manifest.photos) assert.equal(h1[photo.id] === h2[photo.id], !photo.rotate, photo.id);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the perturbed copies live in a folder named by the script that makes them', async () => {
+  const { perturbedDirectory } = await import('./acceptance.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-perturb-script-'));
+  try {
+    const script = join(dir, 'perturb.py');
+    writeFileSync(script, 'crop = 0.03');
+    const before = perturbedDirectory(script);
+    assert.equal(perturbedDirectory(script), before);
+    writeFileSync(script, 'crop = 0.04');
+    assert.notEqual(perturbedDirectory(script), before);
+    assert.match(before, /photos-perturbed.[0-9a-f]{12}$/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+const homrPython = join(toolchains().homr, 'venv/Scripts/python.exe');
+test('perturb.py writes the four capture changes once, and keeps a file that exists', { skip: !existsSync(homrPython) && 'homr venv not prepared' }, () => {
+  const dir = mkdtempSync(join(tmpdir(), 'digitus2-omr-perturb-run-'));
+  try {
+    const src = join(import.meta.dirname, 'photos/bach-invention13-page3-photoscan.jpeg');
+    const out = perturbedCopies(toolchains(), src, dir, 'p');
+    assert.deepEqual(Object.keys(out), PERTURBATIONS);
+    const sizes = spawnSync(homrPython, ['-I', '-c', 'import sys,json;from PIL import Image;print(json.dumps([Image.open(f).size for f in sys.argv[1:]]))', src, ...PERTURBATIONS.map((v) => out[v])], { encoding: 'utf8' });
+    assert.equal(sizes.status, 0, sizes.stderr);
+    const [input, q95, q80, crop3, rot05] = JSON.parse(sizes.stdout);
+    const [w, h] = input;
+    assert.deepEqual(q95, input);
+    assert.deepEqual(q80, input);
+    assert.deepEqual(crop3, [Math.round(w * 0.97) - Math.round(w * 0.03), Math.round(h * 0.97) - Math.round(h * 0.03)]);
+    assert.deepEqual(rot05, input);
+    assert.ok(statSync(out.q80).size < statSync(out.q95).size);
+    const hashes = (paths) => PERTURBATIONS.map((v) => createHash('sha256').update(readFileSync(paths[v])).digest('hex'));
+    const before = hashes(out);
+    // A file that exists is kept, not rewritten: the sentinel survives the second call.
+    writeFileSync(out.crop3, 'sentinel');
+    const again = perturbedCopies(toolchains(), src, dir, 'p');
+    assert.deepEqual(again, out);
+    assert.equal(readFileSync(out.crop3, 'utf8'), 'sentinel');
+    assert.deepEqual(hashes(again).filter((_, i) => PERTURBATIONS[i] !== 'crop3'), before.filter((_, i) => PERTURBATIONS[i] !== 'crop3'));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the perturbation table puts each photo as taken beside its four variants', async () => {
+  const { perturbationTable } = await import('./acceptance.mjs');
+  const row = (photo, variant, parts, bars) => ({ photo, variant, facts: parts === null ? null : { parts, bars } });
+  const lines = perturbationTable(
+    [
+      { photo: 'a', variant: 'as-taken', facts: { parts: 1, bars: 19 } },
+      { photo: 'b', variant: 'as-taken', facts: { parts: 1, bars: 24 } },
+      { photo: 'b', variant: 'rotated', facts: { parts: 2, bars: 12 } },
+    ],
+    [row('a', 'q95', 1, 19), row('a', 'q80', 2, 25), row('a', 'crop3', null), row('a', 'rot05', 1, 20), row('b', 'q95', 1, 24)],
+  );
+  assert.deepEqual(lines, [
+    'photo | as taken | q95 | q80 | crop3 | rot05',
+    'a | 1p/19b | 1p/19b | 2p/25b | none | 1p/20b',
+    'b | 2p/12b | 1p/24b | - | - | -',
+  ]);
 });
 
 test('recognizeViaService writes the answer or the failure per job', async () => {

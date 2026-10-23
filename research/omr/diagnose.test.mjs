@@ -84,6 +84,47 @@ test('beam groups are read from the source XML and compared as exact groups', ()
   });
 });
 
+/** The score as a cut that kept its place in a longer piece: every tick `shift` later. */
+const moved = (score, shift) => ({
+  ...score,
+  measures: score.measures.map((m) => ({ ...m, startTick: m.startTick + shift })),
+  notes: score.notes.map((x) => ({ ...x, onsetTick: x.onsetTick + shift, offsetTick: x.offsetTick + shift })),
+});
+
+test('bars and notes are compared within the page, so a page cut from a longer piece scores as the whole page does', () => {
+  const bars = (extra) => [
+    n('C5', 6, 'half') + LH,
+    n('D5', 6, 'half') + (extra ? n('D5', 6, 'half', { chord: true }) : '') + LH,
+    n('E5', 6, 'half') + LH,
+  ];
+  const reference = parse(score(bars(false)));
+  const recognized = parse(score(bars(true)));
+  assert.equal(errorClasses(reference, recognized).duplicates, 1);
+  assert.deepEqual(errorClasses(moved(reference, 12), recognized), errorClasses(reference, recognized));
+  // Bars that really start at different places still stop the pairing.
+  const stretched = { ...recognized, measures: recognized.measures.map((m, i) => (i === 1 ? { ...m, startTick: m.startTick + 2 } : m)) };
+  assert.equal(errorClasses(reference, stretched).duplicates, 0);
+});
+
+test('missed ties and wrong-staff notes are still counted when the reference is a cut of a longer piece', () => {
+  const tied = score([
+    n('D5', 4, 'half') + n('C5', 2, 'quarter', { tie: 'start' }) + n('E5', 2, 'quarter', { chord: true, tie: 'start' }) + LH,
+    n('C5', 2, 'quarter', { tie: 'stop' }) + n('E5', 2, 'quarter', { chord: true, tie: 'stop' }) + n('r', 4, 'half') + LH,
+  ]);
+  const retied = score([
+    n('D5', 4, 'half') + n('C5', 2, 'quarter') + n('E5', 2, 'quarter', { chord: true, tie: 'start' }) + LH,
+    n('C5', 2, 'quarter') + n('E5', 2, 'quarter', { chord: true, tie: 'stop' }) + n('r', 4, 'half') + LH,
+  ]);
+  assert.equal(errorClasses(moved(parse(tied), 12), parse(retied)).tiesMissed, 1);
+  assert.equal(errorClasses(parse(retied), moved(parse(tied), 12)).tiesExtra, 1);
+  assert.equal(errorClasses(parse(retied), moved(parse(tied), 12)).tiesMissed, 0);
+  assert.equal(errorClasses(moved(parse(retied), 12), parse(tied)).tiesExtra, 1);
+  const reference = score([n('C5', 6, 'half') + backup(6) + n('E3', 6, 'half', { staff: 2 })]);
+  const swapped = score([n('C5', 6, 'half') + n('E3', 6, 'half', { chord: true }) + backup(6) + n('r', 6, 'half', { staff: 2 })]);
+  assert.equal(errorClasses(moved(parse(reference), 12), parse(swapped)).wrongStaff, 1);
+  assert.deepEqual(errorClasses(moved(parse(reference), 12), parse(reference)), errorClasses(parse(reference), parse(reference)));
+});
+
 test('the facts a photo page is checked on: bars, staves, key, time and the strict import', async () => {
   const { photoFacts } = await import('./diagnose.mjs');
   const xml = score([n('C5', 6, 'half') + LH, n('D5', 6, 'half') + LH]).replace(
@@ -93,6 +134,7 @@ test('the facts a photo page is checked on: bars, staves, key, time and the stri
   assert.deepEqual(photoFacts(E, xml), {
     imports: true,
     error: null,
+    parts: 1,
     bars: 2,
     staves: 2,
     fifths: 1,
@@ -105,4 +147,42 @@ test('the facts a photo page is checked on: bars, staves, key, time and the stri
   assert.equal(facts.imports, false);
   assert.equal(facts.bars, 2);
   assert.match(facts.error, /tie stop without a start/);
+});
+
+test('a page read as two one-staff parts is two parts, and its bars are the longest part', async () => {
+  const { photoFacts } = await import('./diagnose.mjs');
+  const part = (id, bars, clef) =>
+    `<part id="${id}">${Array.from(
+      { length: bars },
+      (_, i) =>
+        `<measure number="${i + 1}">${i === 0 ? `<attributes><divisions>2</divisions><time><beats>3</beats><beat-type>4</beat-type></time><clef><sign>${clef}</sign></clef></attributes>` : ''}${n('C5', 6, 'half')}</measure>`,
+    ).join('')}</part>`;
+  const two = `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>A</part-name></score-part><score-part id="P2"><part-name>B</part-name></score-part></part-list>${part('P1', 5, 'G')}${part('P2', 7, 'F')}</score-partwise>`;
+  const facts = photoFacts(E, two);
+  assert.equal(facts.parts, 2);
+  // Not the first part's 5 bars: the page has as many bars as its longest part.
+  assert.equal(facts.bars, 7);
+  assert.equal(facts.staves, 1);
+  assert.equal(photoFacts(E, '<score-partwise version="4.0"><part-list/></score-partwise>').parts, 0);
+  assert.equal(photoFacts(E, '<score-partwise version="4.0"><part-list/></score-partwise>').bars, 0);
+});
+
+test('a page cut into consecutive grand-staff halves has the bars of both, a mixed split the longest', async () => {
+  const { photoFacts } = await import('./diagnose.mjs');
+  const part = (id, bars, staves) =>
+    `<part id="${id}">${Array.from(
+      { length: bars },
+      (_, i) =>
+        `<measure number="${i + 1}">${i === 0 ? `<attributes><divisions>2</divisions><staves>${staves}</staves><time><beats>3</beats><beat-type>4</beat-type></time></attributes>` : ''}${n('C5', 6, 'half')}</measure>`,
+    ).join('')}</part>`;
+  const doc = (...parts) =>
+    `<score-partwise version="4.0"><part-list>${parts.map((_, i) => `<score-part id="P${i + 1}"><part-name>${i}</part-name></score-part>`).join('')}</part-list>${parts.map((p, i) => part(`P${i + 1}`, ...p)).join('')}</score-partwise>`;
+  // Two grand-staff parts of 12 bars are a 24-bar page cut in half.
+  const halves = photoFacts(E, doc([12, 2], [12, 2]));
+  assert.equal(halves.parts, 2);
+  assert.equal(halves.bars, 24);
+  // A one-staff part beside a grand staff reads the same bars twice: the longest, not the sum.
+  assert.equal(photoFacts(E, doc([19, 1], [24, 2])).bars, 24);
+  // One grand-staff part is its own length.
+  assert.equal(photoFacts(E, doc([24, 2])).bars, 24);
 });

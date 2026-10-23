@@ -157,10 +157,10 @@ The library page reads as a few units, in this order (at most seven; a first vis
 
 | Level       | Grades | Pieces |
 | ----------- | ------ | -----: |
-| Easy        | 1, 2   |    267 |
-| Medium      | 3      |  1,465 |
-| Harder      | 4      |    756 |
-| Challenging | 5, 6   |    723 |
+| Easy        | 1, 2   |    268 |
+| Medium      | 3      |  1,474 |
+| Harder      | 4      |    759 |
+| Challenging | 5, 6   |    744 |
 
 The level shown on arrival is the one chosen earlier in the visit, else the level of the piece played last (if it is still in the library), else the lowest. The four pills share one row from 360 px (below 400 px their padding is trimmed); at 320 px the last pill wraps rather than clips. The pills are a `fieldset` of native radios (legend `Level`, visually hidden): Tab enters on the chosen pill and the arrow keys choose. A chosen pill is ink-filled, never red.
 
@@ -560,7 +560,7 @@ Measurements. Bundle sizes come from `check-bundle-size.mjs` and `gzipSync` of t
 | Service worker precache             | 30 files (23 hashed under `assets/`, 7 unhashed), 16.14 MiB raw, 3.45 MiB gzip, most of it the Verovio worker, which the library warms up anyway; `sw.js` itself is 4,179 bytes                                                                                                                                                                                                                                                                                                                           |
 | Piano samples                       | 452 files, 44,177,920 bytes as one tar; a piece fetches only its pitches and velocity layers (see Audio)                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Library data                        | `library-index.json` 251 KB, about 93 KB gzip, fetched before the first render; `manifest.json` 4.4 MB, 272 KB gzip, fetched when a library piece or the about page first needs it                                                                                                                                                                                                                                                                                                                        |
-| Rows on the arrival page of a level | at most 30 (up to 1,465 before the shelves), plus at most 5 on the Favourites shelf until it is shown in full                                                                                                                                                                                                                                                                                                                                                                                             |
+| Rows on the arrival page of a level | at most 30 (up to 1,474 before the shelves), plus at most 5 on the Favourites shelf until it is shown in full                                                                                                                                                                                                                                                                                                                                                                                             |
 
 Library LCP and the open times below were last measured with the 149-piece library and have not been re-measured since the library grew to thousands of pieces and the list became a fetched index; the gates above still apply. Opening a library piece now first fetches the manifest once (the table above), which those open times do not include.
 

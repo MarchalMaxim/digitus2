@@ -2,18 +2,18 @@
 
 These scripts produce everything in `content/scores/`, `content/manifest.json`,
 `content/verification.json` and `content/library-index.json`. The library has
-3,228 pieces in six lanes:
+3,245 pieces in six lanes:
 
 | Lane | Catalog | Pieces | Documented in |
 |---|---|---:|---|
 | Core 30 (own arrangements and Mutopia engravings) | `catalog.json` | 30 | `docs/research/content-library.md` |
 | L1 curated library | `catalog.d/` collection fragments | 119 | `docs/research/content-library.md`, section "L1 curated library" |
 | Mutopia expansion | `catalog.d/expansion-bach.json`, `expansion-teaching.json` | 13 | [Mutopia expansions](#mutopia-expansions) |
-| Bulk Mutopia | `catalog.d/expansion-bulk.json` | 124 | [Mutopia expansions](#mutopia-expansions) |
+| Bulk Mutopia | `catalog.d/expansion-bulk.json` | 141 | [Mutopia expansions](#mutopia-expansions) |
 | MuseScore archive, classical | `catalog.d/pdmx-library.json`, `pdmx-advanced.json` | 1,530 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 | MuseScore archive, songs | `catalog.d/pdmx-songs.json`, `pdmx-songs-advanced.json` | 1,412 | [MuseScore archive scores](#musescore-archive-scores-pdmx) |
 
-The first four lanes are the curated core of 286 pieces. Provenance, licences
+The first four lanes are the curated core of 303 pieces. Provenance, licences
 and the reasons behind each choice for the first 149 are in
 `docs/research/content-library.md`.
 
@@ -224,7 +224,7 @@ Swedish polska), built and gated like any Mutopia engraving. Decisions:
 - The Handel source editions are dated 1930 and carry explicit Mutopia
   public-domain declarations.
 
-**Bulk Mutopia (124 pieces).** `bulk_sources.py` inventories the local
+**Bulk Mutopia (141 pieces).** `bulk_sources.py` inventories the local
 Mutopia mirror (`research/data/mutopia_src/`, see `research/data/README.md`),
 keeping editions whose instrument declaration is only piano, harpsichord,
 clavichord, keyboard or organ. It reads each edition's canonical RDF and
@@ -248,7 +248,7 @@ $PY -I content/tools/bulk_sources.py --download
 | Editions with published MIDI (MIDI files) | 607 (733) |
 | Editions not already in the catalog | 519 |
 | Public domain / CC BY / CC BY-SA | 369 / 72 / 167 |
-| Accepted / held with reasons / already represented | 124 / 395 / 89 |
+| Accepted / held with reasons / already represented | 141 / 378 / 89 |
 
 Admission is stricter than for a hand-picked piece. Every accepted edition is:
 
@@ -292,8 +292,8 @@ than 5, so it cannot grade concert repertoire. Mature complete originals get
 a conservative level 6, with a `levelNote` that claims no syllabus placement
 and a `levelOverride` where 6 is more than one above the proposal. Teaching pieces keep a reviewed placement within one
 of the proposal: Czerny Op. 821/5 went to level 3 rather than 2 for its
-chromatic ornaments and density. The lane's levels are 37 at 3, 3 at 4, 1 at
-5 and 83 at 6.
+chromatic ornaments and density. The lane's levels are 1 at 2, 49 at 3, 3 at 4,
+1 at 5 and 87 at 6.
 
 **Level 6 under the relaxed gates** (the owner's decision: concert-level bulk
 editions held only for the span or lint gate may ship at grade 6 under the
@@ -343,6 +343,26 @@ dedupe's rule that the curated piece stays, they are recorded under
 them. The comparison used dedupe's own functions and thresholds, run on every
 shipped piece against the 33.
 
+**Released by the grace-count fix (issue 49).** `xmlcheck.best_midi_match` counted a written grace note
+once when it compared the unfolded score with a MIDI file, but a repeated section plays its grace notes
+again. It now counts each grace note once per pass of `unfold_order` (`unfolded_grace_pitches`); the
+written comparison is unchanged. 35 held editions differed only in notes that the MIDI had and the score
+did not, and had no other reason to be held. They were fetched again with `fetch_mutopia.py`, all 35 still
+match their pinned `sourceSha256`, and they were built and measured with the fixed comparator.
+
+| Held editions with only MIDI-only notes | Count |
+|---|---:|
+| Both MIDI checks exact, every gate passes: released | 17 (9 polskas, Schumann Op. 68 Nos. 7, 13, 18 and 36, Mozart K. 331 Theme and Variation 2, Grieg Op. 12 No. 7, Sousa's The Invincible Eagle) |
+| LilyPond 2.24 check exact, published MIDI not exact | 5 (Mendelssohn Op. 102 No. 3, K. 331 Variations 3 and 6, Sousa's King Cotton and The Liberty Bell) |
+| Both checks still differ | 13 (11 polskas, Schumann Op. 68 No. 26, Rimsky-Korsakov Op. 11 No. 3) |
+
+The held editions' reasons now give the measured differences. The released polskas and Schumann pieces
+keep the heuristic's proposal (teaching and folk sets); Grieg, Sousa and the two Mozart movements, complete
+concert originals, take the lane's level 6. Four archive uploads copied released editions: K. 331's theme
+and Op. 68 No. 7 (near copies), No. 13 (the same tune at the same level) and No. 18 (an exact copy). They
+are recorded under `duplicates` in `pdmx-excluded.json`, by the same comparison as above, and four hymns
+took their places under the classical lane's cap.
+
 After a release, `bulk_sources.py --readmit` regenerates the admission of
 `bulk-candidates.json`.
 
@@ -350,7 +370,8 @@ Known warnings, not defects:
 
 - music21 cannot pair one diminuendo in Beethoven Op. 31/2, II, whose stop
   precedes its start in document order. The rendered hairpin matches the
-  source.
+  source. The same holds for one hairpin in Grieg Op. 12 No. 7 (bar 12) and
+  three in Sousa's The Invincible Eagle (bars 8, 24 and 25).
 - Verovio reports 36 mixed-beam placement fallbacks in Goldberg variations
   11, 20 and 28. These are layout warnings; no note or dynamic is dropped.
 
@@ -417,7 +438,7 @@ and `content/_build/`, except the committed `pdmx-excluded.json`):
    --only SLUG...` then builds just the pieces that the new fragments added. Repeat until a build refuses nothing. `build.py --manifest-only` then
    re-renders every manifest entry, and `build.py` writes `library-index.json` (the eight fields the
    library list reads, in a compact columnar form: `build.library_index` describes it, and
-   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,228 pieces).
+   `decodeLibraryIndex` in `apps/web/src/library/manifest.ts` reads it; 93 KB gzip for 3,245 pieces).
 8. `gates.py --pending` (or `--new`) writes the verification records (span check, lint, level). For a
    MuseScore piece the LilyPond 2.24 MIDI cross-check does not apply (there is no Mutopia engraving to
    cross-check); the other gates do.
@@ -511,13 +532,13 @@ validator and are shipped; seven are refused for bars that run over their time s
 de-duplication and passed 5,470 through every gate; the songs lane gated 4,439 candidates and passed 2,528.
 The library ships 1,310 classical pieces at levels 1 to 5, 220 at level 6, 1,023 songs at levels 1 to 5 and 389
 at level 6 (1,368 in Songs, 44 jazz and blues under Modern). Of the 609 archive pieces at level 6, 171 pass every
-gate and 438 ship with relaxed gates. The archive names a composer for 534 of the 1,530 classical-lane pieces; the
+gate and 438 ship with relaxed gates. The archive names a composer for 530 of the 1,530 classical-lane pieces; the
 rest read "Unknown".
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---:|---:|---:|---:|---:|---:|
-| Archive pieces | 23 | 176 | 1,382 | 719 | 33 | 609 |
-| Whole library (286 curated + 2,942 archive) | 47 | 220 | 1,465 | 756 | 48 | 692 |
+| Archive pieces | 23 | 176 | 1,379 | 722 | 33 | 609 |
+| Whole library (303 curated + 2,942 archive) | 47 | 221 | 1,474 | 759 | 48 | 696 |
 
 ### Repairs for refused uploads
 

@@ -11,8 +11,8 @@ import { libraryPieces } from './manifest.js';
 import { LibraryView } from './LibraryView.js';
 import { useLocalLibrary } from './local/state.js';
 
-// These layout pins describe the 286 curated pieces unless a test asks for the whole library
-// (3,228 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
+// These layout pins describe the 303 curated pieces unless a test asks for the whole library
+// (3,245 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
 const library = vi.hoisted(() => ({ whole: false }));
 vi.mock('./manifest.js', async (importOriginal) => {
   const actual = await importOriginal<typeof ManifestModule>();
@@ -200,12 +200,12 @@ describe('LibraryView: the units (shelves spec 4.1, 5)', () => {
   it('shows a shelf as its name, count, line, at most 5 rows and an All button', () => {
     render(<LibraryView />);
     const songs = shelfOf('Songs');
-    expect(within(songs).getByText('41 pieces')).toHaveClass('muted');
+    expect(within(songs).getByText('42 pieces')).toHaveClass('muted');
     expect(
       within(songs).getByText("Well-known tunes from children's songs to film and games."),
     ).toHaveClass('muted');
     expect(within(songs).getAllByRole('button', { name: /^Open / })).toHaveLength(5);
-    expect(within(songs).getByRole('button', { name: 'All 41 songs' })).toBeInTheDocument();
+    expect(within(songs).getByRole('button', { name: 'All 42 songs' })).toBeInTheDocument();
     const baroque = shelfOf('Baroque');
     expect(within(baroque).getAllByRole('button', { name: /^Open / })).toHaveLength(5);
     expect(within(baroque).queryByRole('button', { name: /^All / })).toBeNull();
@@ -265,7 +265,7 @@ describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
     expect(useAppStore.getState().libraryLevel).toBe('medium');
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Medium: 83 pieces'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Medium: 95 pieces'),
       { timeout: 2000 },
     );
   });
@@ -286,20 +286,20 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     userEvent.click(screen.getByRole('button', { name }));
   it('replaces the shelves with that one shelf: All styles, its name and count, its rows by collection', async () => {
     render(<LibraryView />);
-    await open('All 41 songs');
+    await open('All 42 songs');
     expect(h2s()).toEqual(['Songs']);
     expect(screen.getByRole('button', { name: 'All styles' })).toBeInTheDocument();
-    expect(screen.getByText('41 pieces')).toBeInTheDocument();
+    expect(screen.getByText('42 pieces')).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Easy' })).toBeChecked(); // the pills stay
     expect(screen.getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(0);
-    // 41 pieces: one page of 40 and the last 1
+    // 42 pieces: one page of 40 and the last 2
     expect(rows()).toHaveLength(40);
-    expect(screen.getByRole('button', { name: 'Show the last 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show the last 2' })).toBeInTheDocument();
     expect(useAppStore.getState().libraryShelf).toBe('songs');
   });
   it('moves the focus to the shelf heading, which is no tab stop', async () => {
     render(<LibraryView />);
-    await open('All 41 songs');
+    await open('All 42 songs');
     expect(screen.getByRole('heading', { level: 2, name: 'Songs' })).toHaveFocus();
     expect(screen.getByRole('heading', { level: 2, name: 'Songs' })).toHaveAttribute(
       'tabindex',
@@ -307,10 +307,10 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     );
   });
   it('shows the next page on Show more, focuses its first row and says so once', async () => {
-    library.whole = true; // Challenging classical holds 248 pieces: pages of 40 and a last page of 8
+    library.whole = true; // Challenging classical holds 250 pieces: pages of 40 and a last page of 10
     useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    await open(/^All 248 classical pieces$/);
+    await open(/^All 250 classical pieces$/);
     expect(rows()).toHaveLength(40);
     await open('Show 40 more');
     expect(rows()).toHaveLength(80);
@@ -318,28 +318,28 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     expect(useAppStore.getState().libraryPages).toBe(2);
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 248'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 250'),
       { timeout: 2000 },
     );
     await open('Show 40 more');
     await open('Show 40 more');
     await open('Show 40 more');
     await open('Show 40 more');
-    await open('Show the last 8');
-    expect(rows()).toHaveLength(248);
+    await open('Show the last 10');
+    expect(rows()).toHaveLength(250);
     expect(screen.queryByRole('button', { name: /^Show / })).toBeNull();
   });
   it('goes back with All styles, focusing the shelf’s All button, and with Escape', async () => {
     render(<LibraryView />);
-    await open('All 41 songs');
+    await open('All 42 songs');
     await open('All styles');
     expect(h2s()).toEqual(['Songs', 'Classical', 'Folk and carols', 'Baroque', 'Romantic']);
-    expect(screen.getByRole('button', { name: 'All 41 songs' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'All 42 songs' })).toHaveFocus();
     expect(useAppStore.getState().libraryShelf).toBeNull();
-    await open('All 41 songs');
+    await open('All 42 songs');
     await userEvent.keyboard('{Escape}');
     expect(h2s()).toHaveLength(5);
-    expect(screen.getByRole('button', { name: 'All 41 songs' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'All 42 songs' })).toHaveFocus();
   });
   it('keeps the shelf open on a level that has it, and returns to the shelves on one that has not', async () => {
     useAppStore.setState({ libraryLevel: 'challenging' });
@@ -349,10 +349,10 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     await userEvent.click(screen.getByRole('radio', { name: 'Easy' })); // Easy has no jazz
     expect(h2s()).toEqual(['Songs', 'Classical', 'Folk and carols', 'Baroque', 'Romantic']);
     expect(useAppStore.getState().libraryShelf).toBeNull();
-    await open('All 41 songs');
+    await open('All 42 songs');
     await userEvent.click(screen.getByRole('radio', { name: 'Medium' })); // Medium has songs
     expect(h2s()).toEqual(['Songs']);
-    expect(screen.getByText('24 pieces')).toBeInTheDocument();
+    expect(screen.getByText('32 pieces')).toBeInTheDocument();
     expect(useAppStore.getState().libraryShelf).toBe('songs');
   });
   it('comes back from a score to the same shelf and the same pages', async () => {
@@ -370,10 +370,10 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
   });
   it('announces the shelf and its count', async () => {
     render(<LibraryView />);
-    await open('All 41 songs');
+    await open('All 42 songs');
     await waitFor(
       () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Songs: 41 pieces'),
+        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Songs: 42 pieces'),
       { timeout: 2000 },
     );
   });
@@ -470,7 +470,7 @@ describe('LibraryView: the Favourites shelf (issue #78)', () => {
   it('leaves while a search or a style shelf is open, as the shelves do', async () => {
     favour(2);
     render(<LibraryView />);
-    await userEvent.click(screen.getByRole('button', { name: 'All 41 songs' }));
+    await userEvent.click(screen.getByRole('button', { name: 'All 42 songs' }));
     expect(favourites()).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
     expect(favourites()).not.toBeNull();
@@ -791,8 +791,8 @@ describe('LibraryView in another language (issue #6)', () => {
       'Romantique',
     ]);
     const songs = shelfOf('Chansons');
-    expect(within(songs).getByText('41 morceaux')).toBeInTheDocument();
-    expect(within(songs).getByRole('button', { name: 'Voir les 41 chansons' })).toBeInTheDocument();
+    expect(within(songs).getByText('42 morceaux')).toBeInTheDocument();
+    expect(within(songs).getByRole('button', { name: 'Voir les 42 chansons' })).toBeInTheDocument();
     expect(within(songs).getAllByRole('button', { name: /^Ouvrir .+ de .+/ })).toHaveLength(5);
     expect(screen.getByLabelText('Ouvrir votre propre partition')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'À propos et licences' })).toBeInTheDocument();
@@ -865,7 +865,7 @@ describe('LibraryView: the fade of a changed list (UI batch spec 6.4)', () => {
   });
   it('appears when a shelf opens in place of the shelves', async () => {
     const { container } = render(<LibraryView />);
-    await userEvent.click(screen.getByRole('button', { name: 'All 41 songs' }));
+    await userEvent.click(screen.getByRole('button', { name: 'All 42 songs' }));
     expect(list(container)).toHaveClass('is-fresh');
   });
   it('does not appear when a page is appended to a shelf', async () => {

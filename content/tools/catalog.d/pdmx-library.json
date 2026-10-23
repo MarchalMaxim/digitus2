@@ -1,6 +1,6 @@
 {
  "task": 300,
- "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3118 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 157 duplicates of another piece (dedupe.py), 17 out of scope (pdmx_scope.py), 3913 passed but ranked beyond the cap of 1300 pieces at levels 1 to 4 (by rating; level 5 is not capped). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
+ "_comment": "MuseScore archive pieces (PDMX, Long et al. 2025, https://zenodo.org/records/15571083): public domain or CC0 as declared by the uploader, with no licence conflict. Chosen and gated by content/tools/pdmx_select.py, pdmx_gate.py and pdmx_fragments.py; the notes say what was checked. No individual engraving review: the gates are the review. Not shipped: 3118 failed a gate (one staff, a lint law error, an unplayable slice or an XSD error), 161 duplicates of another piece (dedupe.py), 17 out of scope (pdmx_scope.py), 3909 passed but ranked beyond the cap of 1300 pieces at levels 1 to 4 (by rating; level 5 is not capped). Their reasons are in content/_raw/pdmx/gate.jsonl, which is not committed; `rejected` lists only the candidates the build refused.",
  "pieces": [
   {
    "slug": "pdmx-allegro-414d6ff6",
@@ -10803,30 +10803,6 @@
    }
   },
   {
-   "slug": "pdmx-mozart-sonate-no-11-kv-331-andante-grazi-c8605d7d",
-   "source": "pdmx",
-   "level": 3,
-   "collection": "pdmx-classical",
-   "title": "Mozart Sonate No. 11 KV 331 Andante grazioso",
-   "composer": "W. A. Mozart",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 100,
-   "tempoSource": "editorial: the file gives no tempo, so 100 quarter notes per minute is a playback default.",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 7.82).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
-   "pdmx": {
-    "sha256": "c8605d7d3550c1d977cb9cc5e31de840ca21a629ad76f3c60d405ac6b87b1079",
-    "path": "./mxl/1/37/QmbPit26hQ7TsjCqYvdibaGZJ3rBBf4TWk1uxWLguWpvW5.mxl",
-    "license": "publicdomain",
-    "rating": "4.72",
-    "nRatings": "33",
-    "fingerings": 0,
-    "version": "3.1"
-   }
-  },
-  {
    "slug": "pdmx-musette-in-d-major-1d17b712",
    "source": "pdmx",
    "level": 3,
@@ -12891,30 +12867,6 @@
    }
   },
   {
-   "slug": "pdmx-schumann-album-for-the-young-op-68-no-13-08ba6b89",
-   "source": "pdmx",
-   "level": 3,
-   "collection": "pdmx-classical",
-   "title": "Schumann - Album for the Young Op. 68 No. 13 May Lovely May",
-   "composer": "Schumann - Op. 68 No. 13",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 71,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 8.317).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 175 (removed from the stored file: the app fingers every score itself).",
-   "pdmx": {
-    "sha256": "08ba6b89b1903ff9dc57ebd5d0d2d546add2aa04552f34701e724b606781735d",
-    "path": "./mxl/16/42/QmYsvuAhMmDSnFy3fyHJfxnDQVn5j6S2XBq4ZDbQkCCC7M.mxl",
-    "license": "cc-zero",
-    "rating": "4.5",
-    "nRatings": "7",
-    "fingerings": 175,
-    "version": "3.1"
-   }
-  },
-  {
    "slug": "pdmx-schumann-album-for-the-young-op-68-no-15-7c2c3831",
    "source": "pdmx",
    "level": 3,
@@ -12935,54 +12887,6 @@
     "rating": "4.91",
     "nRatings": "9",
     "fingerings": 139,
-    "version": "3.1"
-   }
-  },
-  {
-   "slug": "pdmx-schumann-album-for-the-young-op-68-no-18-a741ab3f",
-   "source": "pdmx",
-   "level": 3,
-   "collection": "pdmx-classical",
-   "title": "Schumann - Album for the Young Op 68 No. 18 The Little Reaper's Song",
-   "composer": "Schumann Op. 68 No. 18",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 112,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 5.256).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 77 (removed from the stored file: the app fingers every score itself).",
-   "pdmx": {
-    "sha256": "a741ab3feedce96cbcc531a0933861d6922534f81f0e8e1d0fa4d0ce873fd0ff",
-    "path": "./mxl/10/51/QmSWXZfDRB7aBd3rD3eRa5tMR4oP7SmxcPruY89nnZ8NBz.mxl",
-    "license": "cc-zero",
-    "rating": "4.92",
-    "nRatings": "10",
-    "fingerings": 77,
-    "version": "3.1"
-   }
-  },
-  {
-   "slug": "pdmx-schumann-album-for-the-young-op-68-no-7-3de76791",
-   "source": "pdmx",
-   "level": 3,
-   "collection": "pdmx-classical",
-   "title": "Schumann - Album for the Young Op. 68 No. 7 The Little Hunter's Song",
-   "composer": "Robert Schumann Op. 68 No. 7",
-   "composerDates": null,
-   "catalogue": null,
-   "year": null,
-   "tempoBpm": 104,
-   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
-   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 6.642).",
-   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it CC0, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 105 (removed from the stored file: the app fingers every score itself).",
-   "pdmx": {
-    "sha256": "3de76791c0f58df912f415dbda39735e33da951cc1eeb38d70b83b91f2149c63",
-    "path": "./mxl/11/5/QmT6BtJwE9qzQ7wb4w9cEk4f988aQzDYxzCDWHyPDbw3MG.mxl",
-    "license": "cc-zero",
-    "rating": "4.92",
-    "nRatings": "11",
-    "fingerings": 105,
     "version": "3.1"
    }
   },
@@ -16531,6 +16435,30 @@
    "pdmx": {
     "sha256": "265d0f0f8e0ecc4fcfc13df67bc727bc2e7a9b68b4f192dca4c37709a6f5bed9",
     "path": "./mxl/13/45/QmVTs3fBAi7QDadtnTyTojvKkfGgdm8hCqStfYyNLNQgmu.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-we-are-traveling-home-to-glory-augustus-32884eb5",
+   "source": "pdmx",
+   "level": 3,
+   "collection": "pdmx-classical",
+   "title": "We are traveling home to glory - Augustus Bothmann",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 106,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 3 (score 8.478).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "32884eb579b1a9c5b0569170f86da7c613edc3508e745329c880d62cf8616e67",
+    "path": "./mxl/12/27/QmUJkz35KEQQ7HJQ7wdyyVgHv9WYAB5TrQyDWdhW7DrnFa.mxl",
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",
@@ -25395,6 +25323,30 @@
    }
   },
   {
+   "slug": "pdmx-o-the-gospel-story-tell-r-m-mcintosh-327c4be6",
+   "source": "pdmx",
+   "level": 4,
+   "collection": "pdmx-classical",
+   "title": "O the gospel story tell - R. M. McIntosh",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 10.074).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "327c4be6cf2b1e9193bacc8237f341200803d8363883981ccc95ecaca7872a76",
+    "path": "./mxl/16/36/QmYpNHeU4F4hWkuEmz6CGmWC6urP931XDjebN7oj224JcX.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
    "slug": "pdmx-o-the-sorrow-and-the-woe-j-b-herbert-1434d740",
    "source": "pdmx",
    "level": 4,
@@ -26563,6 +26515,30 @@
    "pdmx": {
     "sha256": "1be1a1039d09cf3f5da62b90ea88754e5e666d634f7e2d09b2d986d1d8687ea2",
     "path": "./mxl/4/38/Qmeq2tJoobv9fD71qiMkMoFqo3khSYNLrYPRcHKtMiSSgB.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-sing-all-ye-ransomed-of-the-lord-j-h-hal-327e8a32",
+   "source": "pdmx",
+   "level": 4,
+   "collection": "pdmx-classical",
+   "title": "Sing all ye ransomed of the Lord - J. H. Hall",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 110,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 9.871).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "327e8a32c7de795dd98242ad478e8db7440486cf255bc746d57503739dbe7215",
+    "path": "./mxl/14/5/QmW69MKDSjQ4kVgCdNoJXSY5mYmbyy1Xmcgtcy2WKZhady.mxl",
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",
@@ -30355,6 +30331,30 @@
    "pdmx": {
     "sha256": "0182c78d07816dc83fda8825fef5c202e2131dad30c96fc33e065dfcf3e6526b",
     "path": "./mxl/16/39/QmYQoBKZnEG15qK8EFD1L1fAhvScYNni6wiG3WptppBQJm.mxl",
+    "license": "publicdomain",
+    "rating": "0.0",
+    "nRatings": "0",
+    "fingerings": 0,
+    "version": "3.1"
+   }
+  },
+  {
+   "slug": "pdmx-with-folded-hands-and-heads-bowed-down-m-3262c335",
+   "source": "pdmx",
+   "level": 4,
+   "collection": "pdmx-classical",
+   "title": "With folded hands and heads bowed down - Mary B. Blakemore",
+   "composer": "Unknown",
+   "composerDates": null,
+   "catalogue": null,
+   "year": null,
+   "tempoBpm": 100,
+   "tempoSource": "The MuseScore file's own tempo mark (<sound tempo>).",
+   "levelNote": "No syllabus placement is claimed. The frozen level heuristic proposes 4 (score 9.173).",
+   "notes": "Solo piano score from the PDMX archive of MuseScore files. The uploader declared it public domain, and PDMX found no licence conflict. Screened automatically: one sounding part, one or two staves, MusicXML 3.1 schema valid, no slice that one hand cannot strike, and zero lint law errors at the medium and large profiles. Not reviewed by eye. Source fingerings: 0.",
+   "pdmx": {
+    "sha256": "3262c33543f87ac14a9445fbe6bae542ca1cacba4d0ae7729b23505207f6fcd9",
+    "path": "./mxl/17/38/QmZqsP9WitXE2RFMhunZyVvGYHaVMwaHHavu9oi1pqtS2T.mxl",
     "license": "publicdomain",
     "rating": "0.0",
     "nRatings": "0",

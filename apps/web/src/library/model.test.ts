@@ -39,7 +39,7 @@ import { syntheticLibrary } from './testing/syntheticLibrary.js';
 
 const allPieces = libraryPieces();
 
-// The 286 curated pieces: the pins below describe them. The MuseScore archive pieces (collection
+// The 303 curated pieces: the pins below describe them. The MuseScore archive pieces (collection
 // ids pdmx-*, 2026-10-16) are checked in their own blocks further down.
 const pieces = allPieces.filter((p) => !p.collectionId.startsWith('pdmx-'));
 
@@ -101,8 +101,8 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
   it('writes the count and the All button of a shelf; a shelf of 5 or fewer shows all and no button', () => {
     const layout = shelves(allPieces, 'easy');
     const songs = layout.shelves.find((s) => s.id === 'songs')!;
-    expect(songs.count).toBe(153);
-    expect(songs.all).toBe('All 153 songs');
+    expect(songs.count).toBe(154);
+    expect(songs.all).toBe('All 154 songs');
     const jazz = layout.shelves.find((s) => s.id === 'jazz')!;
     expect(jazz.count).toBe(3);
     expect(jazz.all).toBeNull();
@@ -111,18 +111,18 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
     expect(baroque.count).toBe(5);
     expect(baroque.all).toBeNull();
     const medium = shelves(allPieces, 'medium');
-    expect(medium.shelves.find((s) => s.id === 'classical')!.all).toBe('All 661 classical pieces');
+    expect(medium.shelves.find((s) => s.id === 'classical')!.all).toBe('All 658 classical pieces');
     expect(medium.shelves.find((s) => s.id === 'folk')!.all).toBe('All 57 folk tunes and carols');
     expect(medium.shelves.find((s) => s.id === 'jazz')!.all).toBe(
       'All 6 jazz, ragtime and modern pieces',
     );
   });
-  it('holds the library of the spec: 3,228 pieces, the counts of the spec table', () => {
-    expect(allPieces).toHaveLength(3228);
+  it('holds the library of the spec: 3,245 pieces, the counts of the spec table', () => {
+    expect(allPieces).toHaveLength(3245);
     const table = (tier: Tier) =>
       Object.fromEntries(shelves(allPieces, tier).shelves.map((s) => [s.id, s.count]));
     expect(table('easy')).toEqual({
-      songs: 153,
+      songs: 154,
       classical: 71,
       folk: 29,
       baroque: 5,
@@ -130,16 +130,16 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
       jazz: 3,
     });
     expect(table('medium')).toEqual({
-      songs: 690,
-      classical: 661,
+      songs: 698,
+      classical: 658,
       folk: 57,
       baroque: 15,
-      romantic: 36,
+      romantic: 40,
       jazz: 6,
     });
     expect(table('harder')).toEqual({
       songs: 208,
-      classical: 487,
+      classical: 490,
       folk: 27,
       baroque: 15,
       romantic: 14,
@@ -147,13 +147,13 @@ describe('the arrival page at 253 pieces (shelves spec 4.1)', () => {
     });
     expect(table('challenging')).toEqual({
       songs: 382,
-      classical: 248,
+      classical: 250,
       folk: 1,
       baroque: 49,
-      romantic: 23,
+      romantic: 25,
       jazz: 37,
     });
-    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([267, 1465, 756, 740]);
+    expect(TIERS.map((t) => shelves(allPieces, t).count)).toEqual([268, 1474, 759, 744]);
   });
   it('leaves out a shelf with no piece in the level', () => {
     const noJazz = pieces.filter((p) => shelfOfGenre(p.genre) !== 'jazz');
@@ -347,11 +347,11 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     const layout = shelf(allPieces, 'medium', 'classical', { pages: 99 });
     expect(layout.kind).toBe('shelf');
     expect(layout.name).toBe('Classical');
-    expect(layout.count).toBe(661);
-    expect(layout.shown).toBe(661);
+    expect(layout.count).toBe(658);
+    expect(layout.shown).toBe(658);
     const names = layout.groups.map((g) => g.heading);
     expect(names.every((h) => h !== null)).toBe(true);
-    expect(rowsOf(layout.groups)).toHaveLength(661);
+    expect(rowsOf(layout.groups)).toHaveLength(658);
     // the curated pieces: wherever a shelf has headings, "Other pieces" comes last
     const withHeadings = TIERS.flatMap((tier) =>
       SHELVES.filter((sh) => shelfHasPieces(pieces, tier, sh.id))
@@ -409,12 +409,12 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     expect(rowsOf(all.groups).slice(0, first.length)).toEqual(first);
   });
   it('offers the last page by its size, and nothing after the last', () => {
-    // Medium classical: 661 = 16 pages of 40 and 21.
-    expect(shelf(allPieces, 'medium', 'classical', { pages: 16 }).more).toBe('Show the last 21');
+    // Medium classical: 658 = 16 pages of 40 and 18.
+    expect(shelf(allPieces, 'medium', 'classical', { pages: 16 }).more).toBe('Show the last 18');
     const last = shelf(allPieces, 'medium', 'classical', { pages: 17 });
     expect(last.more).toBeNull();
-    expect(last.shown).toBe(661);
-    expect(shelf(allPieces, 'medium', 'classical', { pages: 500 }).shown).toBe(661);
+    expect(last.shown).toBe(658);
+    expect(shelf(allPieces, 'medium', 'classical', { pages: 500 }).shown).toBe(658);
     expect(shelf(allPieces, 'medium', 'classical', { pages: 0 }).shown).toBe(40);
     expect([moreLabel(41, en), moreLabel(40, en), moreLabel(1, en)]).toEqual([
       'Show 40 more',
@@ -631,10 +631,10 @@ describe('search (shelves spec 4.4)', () => {
 
 describe('what the live region says (shelves spec 7)', () => {
   it('names the level, the shelf, the page and the search count', () => {
-    expect(announcementFor(shelves(allPieces, 'medium'), en)).toBe('Medium: 1,465 pieces');
-    expect(announcementFor(shelf(allPieces, 'medium', 'songs'), en)).toBe('Songs: 690 pieces');
+    expect(announcementFor(shelves(allPieces, 'medium'), en)).toBe('Medium: 1,474 pieces');
+    expect(announcementFor(shelf(allPieces, 'medium', 'songs'), en)).toBe('Songs: 698 pieces');
     expect(announcementFor(shelf(allPieces, 'medium', 'songs', { pages: 2 }), en)).toBe(
-      'Showing 80 of 690',
+      'Showing 80 of 698',
     );
     expect(announcementFor(search(pieces, 'minuet'), en)).toBe('14 pieces');
     expect(announcementFor(search(pieces, 'fur elize'), en)).toBe('No piece matches “fur elize”.');

@@ -52,8 +52,8 @@
   },
   "embellish": {
     "levels": [1, 2],
-    "offeredMin": 175,
-    "note": "Light embellishment (\"Add notes between\", docs/research/embellishment-spike.md section 6): the pieces at levels 1 and 2 that the guard offers (packages/engine/src/embellish/guard.ts: the light embellisher, the independent check, then solve with learned-open at the large, medium, small and child profiles and lint with beginner: true; zero law errors and no more beginner errors than the plain score at every profile, the figures of offending bars dropped once, at least three figures). digitus2 embellish --library also fails on any offered piece whose independent check, lint or level proposal (at most one up) fails. offeredMin is the measured count: the run is deterministic, so a drop is a change to explain, not noise. Measured 175 of 267 (794 passing and 346 neighbour notes, 13 offered after the retry, 20 retried)."
+    "offeredMin": 176,
+    "note": "Light embellishment (\"Add notes between\", docs/research/embellishment-spike.md section 6): the pieces at levels 1 and 2 that the guard offers (packages/engine/src/embellish/guard.ts: the light embellisher, the independent check, then solve with learned-open at the large, medium, small and child profiles and lint with beginner: true; zero law errors and no more beginner errors than the plain score at every profile, the figures of offending bars dropped once, at least three figures). digitus2 embellish --library also fails on any offered piece whose independent check, lint or level proposal (at most one up) fails. offeredMin is the measured count: the run is deterministic, so a drop is a change to explain, not noise. Measured 176 of 268 (796 passing and 348 neighbour notes, 13 offered after the retry)."
   },
   "references": {
     "nakamura_chmm": {

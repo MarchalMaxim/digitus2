@@ -985,6 +985,45 @@ test.describe('the score with a piano', () => {
     await expectOneRed(page, 'after the second press');
   });
 
+  test('a step pressed early has its stretch counted from its press: the notes due by then are not struck late', async ({
+    page,
+  }) => {
+    // The reader plays the left hand at 150 %: step 0 [48] holds 1.6 s and its stretch has the
+    // right hand's 60@0, 60@0.4, 67@0.8 and 67@1.2 s; step 1 [53] is the stretch [2.4, 3.6) of
+    // 69@2.4 and 69@3.0, which at this tempo is 0 and 0.4 s into 0.8 s.
+    const midi = await twinkle(page, { settings: { hands: 'L' }, tempo: FAST });
+    await soundReady(page);
+    expect(await midi.waitForStep()).toEqual([48]);
+    const hold = await midi.hold();
+    expect(hold).toBe(1600);
+    // Step 0 goes down; step 1 follows at four fifths of its hold, under it (all in the page, so a
+    // slow round trip cannot move it). The red reaches step 1 0.32 s after its press.
+    const early = await page.evaluate(async (after) => {
+      const host = (window as unknown as { __fakeMidi: { send(bytes: number[]): void } })
+        .__fakeMidi;
+      const started = performance.now();
+      host.send([0x90, 48, 100]);
+      await new Promise((r) => setTimeout(r, after));
+      const pressed = performance.now() - started;
+      host.send([0x90, 53, 100]);
+      return pressed;
+    }, hold * 0.8);
+    expect(early).toBeLessThan(hold);
+    // Step 0's four notes, then step 1's second note: its first (due at the press of the step) is
+    // left out, and the second sounds 0.4 s after that press, as if handed over there.
+    await expect.poll(() => accompanied(page)).toHaveLength(5);
+    const notes = await accompanied(page);
+    expect(notes.map((n) => n.midi)).toEqual([60, 60, 67, 67, 69]);
+    const late = (notes[4]!.time - notes[0]!.time) * 1000;
+    expect(Math.abs(late - (early + 400)), `the 69 sounds ${late} ms after the press`).toBeLessThan(
+      80,
+    );
+    await page.waitForTimeout(700);
+    expect(await accompanied(page)).toHaveLength(5);
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'a step pressed early');
+  });
+
   test('a click on a bar drops them, and nothing sounds until the next press', async ({ page }) => {
     const midi = await twinkle(page, { settings: HALF });
     await soundReady(page);

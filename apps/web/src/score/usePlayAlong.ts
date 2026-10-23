@@ -58,6 +58,7 @@ import {
   pressAt,
   pressKey,
   releaseKey,
+  runSince,
   settle,
   spendAll,
   stepAfter,
@@ -139,6 +140,12 @@ interface Accompaniment {
   events: readonly PlayEvent[];
   endSec: number;
 }
+
+/**
+ * A step pressed before the red reached it is handed over when the red does (issue 185); a note of
+ * its stretch less late than this is struck at once, an older one is left out.
+ */
+const LATE_MS = 100;
 
 const NO_STEPS: AlongStep[] = [];
 const NO_TIMES: StepTime[] = [];
@@ -249,8 +256,20 @@ export function usePlayAlong({
   const earlyRef = useRef(false);
   /** The one wake-up: calls `decide(null)` when the step the red waits on is due. */
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  /** The step the red waits on and since when all its keys have been held; null while none runs. */
-  const runRef = useRef<{ index: number; sinceMs: number } | null>(null);
+  /**
+   * What the walk last handed the other hand over for: the step whose run started the stretch, the
+   * press that started it (`sinceMs`) and the tempo factor it was handed over at. A look at the walk
+   * hands over only what differs from it, so a flight or hop over a run that never changed, and the
+   * landing after it, hand nothing over again. Null while nothing is handed or the stretch's step
+   * stopped running; cleared by every move the walk did not make, by going inactive and by the finish.
+   */
+  const handedRef = useRef<{
+    index: number;
+    sinceMs: number;
+    factor: number;
+    /** How far into the stretch (performance seconds) notes have sounded or been left out, or are struck now. */
+    doneSec: number;
+  } | null>(null);
   /**
    * The walk finished the piece and the red is not home yet: the position went to the top at once,
    * but the render that shows it (`atStart`, no cue) and the red's flight home come later, and
@@ -315,7 +334,7 @@ export function usePlayAlong({
         moveIndex(-1);
         levels.clear();
         markEarly(false);
-        runRef.current = null;
+        handedRef.current = null;
         if (event?.on) {
           ({ keys: keysRef.current, presses: pressesRef.current } = applyNote(
             { keys: keysRef.current, presses: pressesRef.current },
@@ -340,7 +359,7 @@ export function usePlayAlong({
         // the stretch that was sounding no longer leads to where the red is. The walk's own moves
         // (its cue, its finish) leave `atRef` where they put the playback, so they land here never.
         if (atRef.current !== null) stopAccompaniment();
-        runRef.current = null;
+        handedRef.current = null;
         keys = spendAll(keys);
         atRef.current = start;
         stepsAtRef.current = o.steps;
@@ -359,7 +378,6 @@ export function usePlayAlong({
       // A press during a flight or hop is kept and counts, from its own time, once it lands; a
       // release then is a plain one (the flight is the app's move, so it asks nothing of the reader).
       if (homeRef.current || o.flightShown || pb.playingNow()) {
-        runRef.current = null;
         drop();
         return;
       }
@@ -369,7 +387,6 @@ export function usePlayAlong({
       const mode = pb.cue === null && !pb.atStart && o.currentGroup >= 0 ? 'marked' : 'next';
       const here = anchorStep(o.steps, start, stretch, mode);
       if (here < 0) {
-        runRef.current = null;
         drop();
         moveIndex(-1);
         return;
@@ -396,30 +413,49 @@ export function usePlayAlong({
       }
       if (result.early) markEarly(true);
       // The run start: the step the red waits on has all its keys held and fresh since this
-      // moment, or null while it does not run. The one place that moment is taken; issue 184's
-      // accompaniment starts when it changes, not at the pass, which comes a note's length later.
-      const ranBefore = runRef.current;
-      runRef.current = result.run;
+      // moment, or null while it does not run. Issue 184's accompaniment starts when it changes,
+      // not at the pass, which comes a note's length later.
       const plan = o.accompaniment;
       if (plan) {
         // Digitus plays the other hand from the step that started running to the next one the walk
-        // waits on, counted from now: the press, when the press made the step run (a step that
-        // runs from an earlier press, because the red only reached it now, counts from the moment
-        // the red reached it). What the stretch before left unstarted is dropped. A reader who
-        // lets go early leaves it playing: the stretch is the piece's rhythm, not the reader's
-        // hold, and the next press of the step starts it afresh. A step the chain passed without
-        // ever being seen running (all due at once) is played from its pass. Before the cue or
-        // the finish, which do not stop it.
+        // waits on, counted from the press that started the run (issue 185): at the press itself,
+        // or, for a step pressed before the red reached it, when the red does, with the notes due
+        // by then left out (`elapsed`), so the stretch ends when the hold does; a note less than
+        // `LATE_MS` late is struck at once, so the step's downbeat is not lost to a press a few
+        // milliseconds early. What the stretch before left unstarted is dropped. A reader who lets go early leaves it playing: the stretch
+        // is the piece's rhythm, not the reader's hold, and the next press of the step starts it
+        // afresh. A step the chain passed without ever being seen running (all due at once) is
+        // played from its pass. What was handed over decides, not what was seen: a run that did not
+        // change (under a flight or hop, or the pass that comes at its landing) hands nothing over
+        // again; a change of the tempo hands the live run's stretch over again at the new tempo,
+        // from where it has got to. Before the cue or the finish, which do not stop it.
+        const handed = handedRef.current;
         let started = -1;
+        let since = now;
+        /** How far into the stretch the hand-over is, and how far the notes have sounded (performance seconds). */
+        let elapsedSec = 0;
+        let heardSec = 0;
         if (result.run) {
-          const same =
-            ranBefore?.index === result.run.index && ranBefore.sinceMs === result.run.sinceMs;
-          if (!same) started = result.run.index;
-        } else if (
-          result.passed > 0 &&
-          !(result.passed === 1 && ranBefore?.index === result.last)
-        ) {
-          started = result.last;
+          const same = handed?.index === result.run.index && handed.sinceMs === result.run.sinceMs;
+          if (!same || handed.factor !== o.factor) {
+            started = result.run.index;
+            since = result.run.sinceMs;
+            const sinceMs = Number.isFinite(since) ? Math.max(0, now - since) : 0;
+            elapsedSec = (sinceMs / 1000) * o.factor;
+            // A stretch handed over again at a new tempo has sounded as far as the old tempo took it
+            // (or, after several changes, as far as it had been taken): those notes are not struck
+            // again. A first hand-over after an early press leaves out the notes more than `LATE_MS`
+            // overdue.
+            heardSec = same
+              ? Math.max(handed.doneSec, (sinceMs / 1000) * handed.factor)
+              : (Math.max(0, sinceMs - LATE_MS) / 1000) * o.factor;
+          }
+        } else if (result.passed > 0) {
+          const ranSince = runSince(o.steps[result.last]!, keys, presses);
+          since = ranSince ?? now;
+          if (!(handed?.index === result.last && handed.sinceMs === since)) started = result.last;
+        } else {
+          handedRef.current = null; // nothing runs: the next press of a step is a new run
         }
         if (started >= 0) {
           const next = stepAfter(o.steps, started, stretch);
@@ -429,8 +465,16 @@ export function usePlayAlong({
             next < 0 ? { kind: 'finish' } : { kind: 'cue', index: next },
             stretch,
             plan.endSec,
+            elapsedSec,
+            heardSec,
           );
           accompaniedRef.current = true;
+          handedRef.current = {
+            index: started,
+            sinceMs: since,
+            factor: o.factor,
+            doneSec: Math.max(heardSec, elapsedSec),
+          };
           pb.accompany(accompanimentNotes(plan.events, plan.hands, stretches, stretch));
         }
       }
@@ -462,7 +506,7 @@ export function usePlayAlong({
       }
 
       if (result.move.kind === 'finish') {
-        runRef.current = null;
+        handedRef.current = null;
         pb.finish();
         homeRef.current = true;
         atRef.current = 0;
@@ -506,7 +550,7 @@ export function usePlayAlong({
     const unsubscribe = subscribeNotes((event) => decide(event));
     return () => {
       unsubscribe();
-      runRef.current = null;
+      handedRef.current = null;
       clearTimeout(timerRef.current);
       timerRef.current = undefined;
       levels.dispose();

@@ -364,7 +364,7 @@ describe('what digitus plays from the press that starts a step', () => {
     expect(s.fake.accompany).toHaveBeenCalledTimes(1);
   });
 
-  it('counts a step the keys already held from when the red reaches it', async () => {
+  it('hands a step pressed early over when the red reaches it, counted from its press', async () => {
     await connect();
     const s = setup();
     forget(s.fake);
@@ -372,9 +372,10 @@ describe('what digitus plays from the press that starts a step', () => {
     s.hold(100);
     s.press(62); // pressed early, under the first step: it runs only once the red is on it
     expect(s.fake.accompany).toHaveBeenCalledTimes(1);
-    s.hold(400); // step 0 passes, step 1 runs from its press and not yet for its time
-    expect(s.played()).toEqual([[[48, 0, 'L']], [[43, 0, 'L']]]);
-    s.hold(100);
+    s.hold(400); // step 0 passes, step 1 runs from its press (400 ms ago) and not yet for its time
+    // Its stretch [0.5, 1) is 0.4 s old: the 43 at its start is long due and is not struck late.
+    expect(s.played()).toEqual([[[48, 0, 'L']], []]);
+    s.hold(100); // step 1 passes at 600 ms, with the stretch: nothing more is handed over
     expect(s.fake.accompany).toHaveBeenCalledTimes(2);
   });
 
@@ -698,5 +699,285 @@ describe('the Playwright check', () => {
     expect(w.__digitus2Along?.target()).toEqual([62]);
     s.hook.unmount();
     expect(w.__digitus2Along).toBeUndefined();
+  });
+});
+
+/**
+ * Two bars of the right hand, one note a tick (a half second): 60 62 64 65, and a left hand with
+ * notes between its steps: 48 at 0, 43 at 0.5 s, 45 at 0.75 s and 46 at 0.95 s, then 50 at 1 s.
+ */
+const LILT = scoreOf([
+  ...[60, 62, 64, 65].map((midi, tick) => ({ midi, tick })),
+  { midi: 48, tick: 0, hand: 'L', ticks: 1 },
+  { midi: 43, tick: 1, hand: 'L', ticks: 0.5 },
+  { midi: 45, tick: 1.5, hand: 'L', ticks: 0.4 },
+  { midi: 46, tick: 1.9, hand: 'L', ticks: 0.1 },
+  { midi: 50, tick: 2, hand: 'L' },
+]);
+
+/** The notes of each call as [midi, offsetSec], to the millisecond. */
+const rounded = (calls: Array<Array<[number, number, Hand]>>): number[][][] =>
+  calls.map((notes) => notes.map(([midi, offset]) => [midi, Math.round(offset * 1000) / 1000]));
+
+describe('what was handed over decides what is handed over', () => {
+  it('hands a run nothing over again when a flight on screen ends with no move', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60); // step 0 runs: handed over
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.hold(100);
+    s.fake.flight = true; // e.g. a hop to the bar the red already waits on
+    s.refresh();
+    s.hold(100);
+    s.fake.flight = false; // it lands; the same run, the same press
+    s.refresh();
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+  });
+
+  it('hands a run nothing over again when it is due under a flight and passes on the landing', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.hold(100);
+    s.fake.flight = true;
+    s.refresh();
+    s.hold(600); // due under the flight
+    s.fake.flight = false;
+    s.refresh();
+    expect(s.fake.cueAt.mock.calls.map((c) => c[0])).toContain(0.5);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+  });
+
+  it('hands a one-step loop nothing over again when the pass wraps to the same step', async () => {
+    await connect();
+    const s = setup({}, (f) => {
+      f.stretch = { from: 1, to: 1.5 };
+      f.cue = 1;
+      f.atStart = false;
+      f.start = 1;
+    });
+    forget(s.fake);
+    s.press(64);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.hold(500);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.release(64);
+    s.press(64);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('hands a step let go and pressed again under a flight over afresh when it is due by the landing', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.hold(100);
+    s.fake.flight = true;
+    s.refresh();
+    s.release(60);
+    s.press(60); // a new press under the flight
+    s.hold(600); // due by the landing
+    s.fake.flight = false;
+    s.refresh();
+    expect(s.fake.cueAt.mock.calls.map((c) => c[0])).toContain(0.5);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('hands a step let go and pressed again over afresh even in the same millisecond', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    s.release(60); // too early, no time has gone by
+    s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('a step pressed before the red reaches it', () => {
+  it('has its stretch counted from its press: the notes due by then are left out, the tail is on time', async () => {
+    await connect();
+    const s = setup({ score: LILT });
+    forget(s.fake);
+    s.press(60);
+    s.hold(100);
+    s.press(62); // early, under step 0
+    s.hold(400); // step 0 passes at 500 ms; step 1 has run since 100 ms, so its stretch is 400 ms old
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+    // Stretch [0.5, 1): the 43 (at its start) and the 45 (0.25 s in) were due before the red
+    // reached the step and are not struck late; the 46, 0.45 s in, sounds 0.05 s after the
+    // hand-over, as if it had been handed over at the press.
+    expect(rounded(s.played())).toEqual([[[48, 0]], [[46, 0.05]]]);
+    s.hold(100); // the step passes at 600 ms, when its stretch ends: nothing more is handed over
+    expect(s.fake.cueAt.mock.calls.map((c) => c[0]).at(-1)).toBe(1);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('a step pressed a little before the red reaches it', () => {
+  it('strikes the note at the start of its stretch when it is no more than 100 ms late', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    s.hold(499);
+    s.press(62); // 1 ms before the red reaches it
+    s.hold(1);
+    expect(s.played()).toEqual([[[48, 0, 'L']], [[43, 0, 'L']]]);
+  });
+
+  it('keeps the note at 100 ms late', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    s.hold(400);
+    s.press(62); // the red reaches it 100 ms after its press
+    s.hold(100);
+    expect(s.played()[1]).toEqual([[43, 0, 'L']]);
+  });
+
+  it('leaves the note out at 101 ms late', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    s.hold(399);
+    s.press(62);
+    s.hold(101);
+    expect(s.played()[1]).toEqual([]);
+  });
+});
+
+describe('a change of the Practice tempo in the middle of a run', () => {
+  const initialView = useAppStore.getState().view;
+  afterEach(() => useAppStore.setState({ view: initialView }));
+
+  /** Step 0 holds half a second; its stretch [0, 0.5) has the 48, the 50 at 0.25 s and the 52 at 0.45 s. */
+  const RUN = scoreOf([
+    ...[60, 62].map((midi, tick) => ({ midi, tick })),
+    { midi: 48, tick: 0, hand: 'L' },
+    { midi: 50, tick: 0.5, hand: 'L' },
+    { midi: 52, tick: 0.9, hand: 'L' },
+  ]);
+  const open = () =>
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'fast' } },
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: {} },
+    });
+  const tempo = (factor: number) =>
+    act(() =>
+      useAppStore.setState({
+        settings: { ...useAppStore.getState().settings, tempoByPiece: { 'piece:fast': factor } },
+      }),
+    );
+
+  it('hands the stretch over again at the new tempo, from where it has got to', async () => {
+    open();
+    await connect();
+    const s = setup({ score: RUN });
+    forget(s.fake);
+    s.press(60);
+    expect(rounded(s.played())).toEqual([
+      [
+        [48, 0],
+        [50, 0.25],
+        [52, 0.45],
+      ],
+    ]);
+    s.hold(100);
+    tempo(2); // 100 ms in at the written tempo; the hold is now 250 ms from the press
+    s.refresh();
+    // The stretch is 0.2 s of music old at the new tempo, of which 0.1 s sounded at the old one:
+    // the 48 is not struck again, the 50 follows 0.05 s of music later, the 52 0.25 s.
+    expect(rounded(s.played())).toEqual([
+      [
+        [48, 0],
+        [50, 0.25],
+        [52, 0.45],
+      ],
+      [
+        [50, 0.05],
+        [52, 0.25],
+      ],
+    ]);
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+    s.hold(149);
+    expect(s.fake.cueAt.mock.calls.map((c) => c[0])).toEqual([0]);
+    s.hold(1); // the step passes at 250 ms, and hands nothing over
+    expect(s.fake.cueAt.mock.calls.map((c) => c[0])).toEqual([0, 0.5]);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('strikes at once a note that a faster tempo made due and that had not sounded', async () => {
+    open();
+    await connect();
+    const s = setup({ score: RUN });
+    forget(s.fake);
+    s.press(60);
+    s.hold(200); // 0.2 s of music have sounded: the 48 only
+    tempo(2); // counted at the new tempo it is 0.4 s old: the 50 (at 0.25 s) is due
+    s.refresh();
+    expect(rounded(s.played()).at(-1)).toEqual([
+      [50, 0],
+      [52, 0.05],
+    ]);
+  });
+
+  it('never strikes a note twice over several changes toward a slower tempo', async () => {
+    open();
+    useAppStore.setState({
+      settings: { ...DEFAULT_SETTINGS, tempoByPiece: { 'piece:fast': 2 } },
+    });
+    await connect();
+    // The 49 at 0.15 s: struck by the stretch at the first tempo (75 ms in), before the first change.
+    const s = setup({
+      score: scoreOf([
+        ...[60, 62].map((midi, tick) => ({ midi, tick })),
+        { midi: 48, tick: 0, hand: 'L' },
+        { midi: 49, tick: 0.3, hand: 'L' },
+        { midi: 50, tick: 0.5, hand: 'L' },
+        { midi: 52, tick: 0.9, hand: 'L' },
+      ]),
+    });
+    forget(s.fake);
+    s.press(60); // at 200 %: the hold is 250 ms
+    s.hold(100); // 0.2 s of music have gone by: the 48 and the 49
+    tempo(1);
+    s.refresh();
+    expect(rounded(s.played()).at(-1)).toEqual([
+      [50, 0.15],
+      [52, 0.35],
+    ]);
+    s.hold(20);
+    tempo(0.5); // 0.12 s of music at the second tempo: less than what had sounded already
+    s.refresh();
+    // Not the 49 again (0.15 s), though 0.12 s is before it: what sounded stays heard.
+    expect(rounded(s.played()).at(-1)).toEqual([
+      [50, 0.19],
+      [52, 0.39],
+    ]);
+    expect(s.fake.accompany).toHaveBeenCalledTimes(3);
+  });
+
+  it('hands nothing over when the tempo is the same, or the step is no longer held', async () => {
+    open();
+    await connect();
+    const s = setup({ score: RUN });
+    forget(s.fake);
+    s.press(60);
+    s.hold(50);
+    s.refresh(); // a look at the same tempo
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    s.release(60); // too early: the stretch plays on, but the step no longer runs
+    tempo(1.5);
+    s.refresh();
+    expect(s.fake.accompany).toHaveBeenCalledTimes(1);
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
   });
 });

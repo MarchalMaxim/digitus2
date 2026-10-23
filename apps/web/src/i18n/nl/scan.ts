@@ -124,6 +124,9 @@ export const scan: Messages['scan'] = {
     /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'De notenbalken zijn niet tot een pianosysteem gekoppeld, dus beide handen worden als één gelezen. De vingerzetting zou de handen verkeerd hebben: probeer een vlakkere, gelijkmatig belichte foto of de originele pdf.',
+    /** The join paired a treble part and a bass part into a piano part: under Recognition details. */
+    pairedStavesNote:
+      'De app heeft de notenbalk met de g-sleutel en die met de f-sleutel tot een pianosysteem gekoppeld.',
     /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'Een regel muziek is maar gedeeltelijk gelezen, dus er kunnen maten ontbreken of bijgekomen zijn. Vergelijk het resultaat met het origineel voordat je gaat oefenen.',

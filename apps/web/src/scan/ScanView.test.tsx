@@ -1,5 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { build, formatBuildDay } from '../app/build.js';
@@ -950,6 +952,7 @@ it('says nothing when the share sheet is closed', async () => {
 
 it('names the build under Recognition details, the day in the language of the reader', async () => {
   render(<ScanView session={reviewed()} />);
+  expect(screen.queryByText(en.scan.review.pairedStavesNote)).toBeNull();
   expect(
     screen.getByText(en.about.build(build.commit, formatBuildDay('en', build))),
   ).toBeInTheDocument();
@@ -961,4 +964,32 @@ it('names the build under Recognition details, the day in the language of the re
   expect(
     screen.getByText(fr.about.build(build.commit, formatBuildDay('fr', build))),
   ).toBeInTheDocument();
+});
+
+it('pairs a single page read as a treble part and a bass part, and says so under Recognition details', async () => {
+  // Issue 159: the owner's last page as homr wrote it, two parts named Voice.
+  // Vitest runs from apps/web.
+  // Vitest runs from apps/web; jsdom's parser wants the declaration in double quotes.
+  const page = readFileSync(join(process.cwd(), 'fixtures/scan/owner-page-3.musicxml'), 'utf8')
+    .replace(/^<\?xml[^>]*\?>/, '<?xml version="1.0" encoding="utf-8"?>')
+    .trim();
+  stubService({
+    recognize: () =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({ state: 'ready', xml: page, recognizer: 'Test', warnings: [] }),
+        ),
+      ),
+  });
+  render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  expect(screen.getByText(en.scan.review.pairedStavesNote)).toBeInTheDocument();
+  await vi.waitFor(() =>
+    expect(load).toHaveBeenCalledWith(
+      expect.stringContaining('<staves>2</staves>'),
+      'scan.musicxml',
+      expect.anything(),
+    ),
+  );
 });

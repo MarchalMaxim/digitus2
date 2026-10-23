@@ -130,6 +130,8 @@ export const scan = {
     /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'The staves were not paired into a grand staff, so both hands are read as one. Use for fingerings would give wrong hands: try a flatter, evenly lit photo or the original PDF.',
+    /** The join paired a treble part and a bass part into a piano part: under Recognition details. */
+    pairedStavesNote: 'The treble and bass staves were paired into a grand staff by the app.',
     /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'A line of music was read only in part, so bars may be missing or added. Compare the result with the original before practising.',

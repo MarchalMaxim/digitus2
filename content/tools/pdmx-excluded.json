@@ -269,6 +269,11 @@
    "kind": "near",
    "similarity": 0.995
   },
+  "08ba6b89b1903ff9dc57ebd5d0d2d546add2aa04552f34701e724b606781735d": {
+   "of": "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly",
+   "kind": "same tune, same level",
+   "similarity": 1.0
+  },
   "0a5d1f4bdd00f7910a0976a8ae6f78db9877f37c4d9e80cdda3aba31f40a0e29": {
    "of": "bach-minuet-g-major-bwv-anh-114",
    "kind": "exact",
@@ -453,6 +458,11 @@
    "of": "19776d966e8aad8c9be8dc6a23f8d42084791cdf2beb1cf1051bf03d4d7c5fea",
    "kind": "exact",
    "similarity": 1.0
+  },
+  "3de76791c0f58df912f415dbda39735e33da951cc1eeb38d70b83b91f2149c63": {
+   "of": "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly",
+   "kind": "near",
+   "similarity": 0.993
   },
   "401c1a27d47daf544ab4532e2ddb6efc05fef28498d9d51bcb708c90bb5143fa": {
    "of": "schumann-op68-no2-soldiers-march",
@@ -849,6 +859,11 @@
    "kind": "exact",
    "similarity": 1.0
   },
+  "a741ab3feedce96cbcc531a0933861d6922534f81f0e8e1d0fa4d0ce873fd0ff": {
+   "of": "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly",
+   "kind": "exact",
+   "similarity": 1.0
+  },
   "a7cfaf96b7058a8ce32ef3ddfa2991500b5f309619c879828a48f78272d8526a": {
    "of": "0d00e3404cefb12e47a986efd3597ccee75054e006653f73c0131887b867d2f2",
    "kind": "exact",
@@ -998,6 +1013,11 @@
    "of": "bulk-bachjs-bwv988-bwv-988-v07-bwv-988-v07-ly",
    "kind": "near",
    "similarity": 0.994
+  },
+  "c8605d7d3550c1d977cb9cc5e31de840ca21a629ad76f3c60d405ac6b87b1079": {
+   "of": "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly",
+   "kind": "near",
+   "similarity": 1.0
   },
   "cae33a3f3bb0e4897b20d6deefc2026e362a844e7e993a49e89d4cda167d83d4": {
    "of": "clementi-sonatina-op36-no1-mvt1",

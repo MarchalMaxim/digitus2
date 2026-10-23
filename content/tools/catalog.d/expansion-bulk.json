@@ -1970,6 +1970,130 @@
       "compactXml": true
     },
     {
+      "slug": "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly",
+      "ftpDir": "SchumannR/O68/schumann-op68-07-chanson-du-chasseur",
+      "main": "schumann-op68-07-chanson-du-chasseur.ly",
+      "sourceSha256": "4425e1e372e77ed8e1a22f41fb4fc1bb2b21a33ec79c1275379e566ffdff9f45",
+      "title": "Album pour la jeunesse - 7.Chanson du chasseur",
+      "tempoBpm": 140.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "schumann-op68-07-chanson-du-chasseur.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Robert Schumann",
+      "composerDates": null,
+      "catalogue": "O 68 n°7",
+      "year": null,
+      "level": 3,
+      "collection": "schumann-op68",
+      "levelNote": "Measured estimate for a teaching study; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly",
+      "ftpDir": "SchumannR/O68/schumann-op68-13-Mai-cher-Mai",
+      "main": "schumann-op68-13-Mai-cher-Mai.ly",
+      "sourceSha256": "8aa10d30c216c819fe2b8ed7100dd8c27b2f99ef614e4034310516ed33c93e82",
+      "title": "Album pour la jeunesse - 13.Mai, cher Mai, ...",
+      "tempoBpm": 52.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "schumann-op68-13-Mai-cher-Mai.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Robert Schumann",
+      "composerDates": null,
+      "catalogue": "O 68 n°13",
+      "year": null,
+      "level": 3,
+      "collection": "schumann-op68",
+      "levelNote": "Measured estimate for a teaching study; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly",
+      "ftpDir": "SchumannR/O68/schumann-op68-18-moissonneurs",
+      "main": "schumann-op68-18-moissonneurs.ly",
+      "sourceSha256": "8aadd7cf57864a8835f29d2a2d6902a0af1e27c56645e5850c4cdb7e446a7317",
+      "title": "Album pour la jeunesse - 18.Chant des moissonneurs",
+      "tempoBpm": 130.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "schumann-op68-18-moissonneurs.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Robert Schumann",
+      "composerDates": null,
+      "catalogue": "O 68 n°18",
+      "year": null,
+      "level": 3,
+      "collection": "schumann-op68",
+      "levelNote": "Measured estimate for a teaching study; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly",
+      "ftpDir": "SchumannR/O68/schumann-op68-36-chant-de-marins-italiens",
+      "main": "schumann-op68-36-chant-de-marins-italiens.ly",
+      "sourceSha256": "9b8a753c04c16a74ca19c86ac30d6247677afa897f51b4ef3315b4696b6718bf",
+      "title": "Album pour la jeunesse - 36.Chant de marins italiens",
+      "tempoBpm": 60.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "schumann-op68-36-chant-de-marins-italiens.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Robert Schumann",
+      "composerDates": null,
+      "catalogue": "O 68 n°36",
+      "year": null,
+      "level": 3,
+      "collection": "schumann-op68",
+      "levelNote": "Measured estimate for a teaching study; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
       "slug": "bulk-sidwella-little-toy-lost-little-toy-lost-ly",
       "ftpDir": "SidwellA/little-toy-lost",
       "main": "little-toy-lost.ly",
@@ -2769,6 +2893,285 @@
       "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
       "fidelityReview": {
         "method": "Automated source/output screen plus independent representative visual review of the batch",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-12-traditioner-af-swenska-folk-dansar-1-12-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.12",
+      "main": "traditioner_af_swenska_folk_dansar.1.12.ly",
+      "sourceSha256": "c67ba0eb9ea9718e6cb6c95d8a58c746f65668e1f2823f9ce49279a467f808b0",
+      "title": "Traditioner af Swenska Folk-Dansar, 1st part, nr 12",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.1.12.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-34-traditioner-af-swenska-folk-dansar-1-34-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.34",
+      "main": "traditioner_af_swenska_folk_dansar.1.34.ly",
+      "sourceSha256": "186c5c01e59ecb65dbcdccd085cbc9223164cd8b33853beb09b0a8f54d50a864",
+      "title": "Traditioner af Swenska Folk-Dansar, 1st part, nr 34",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.1.34.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-4-traditioner-af-swenska-folk-dansar-1-4-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.4",
+      "main": "traditioner_af_swenska_folk_dansar.1.4.ly",
+      "sourceSha256": "e4745dfc7a9fa2f9b782a816054528ab963a4a1a36d20e95fee1f3ef3c4a6fbe",
+      "title": "Traditioner af Swenska Folk-Dansar, 1st part, nr 4",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.1.4.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 2,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 2; final level 2.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-8-traditioner-af-swenska-folk-dansar-1-8-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.8",
+      "main": "traditioner_af_swenska_folk_dansar.1.8.ly",
+      "sourceSha256": "3d2931efa2c08b46e1fc298e213228f9faea5ebef01c9ff58b3c2d2720ebe050",
+      "title": "Traditioner af Swenska Folk-Dansar, 1st part, nr 8",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.1.8.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-15-traditioner-af-swenska-folk-dansar-2-15-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.2.15",
+      "main": "traditioner_af_swenska_folk_dansar.2.15.ly",
+      "sourceSha256": "c01e8e2feeb39ca6f629c1e6a605388e8de648c0952e5b330b57db875ccc8797",
+      "title": "Traditioner af Swenska Folk-Dansar, 2nd part, nr 15",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.2.15.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-27-traditioner-af-swenska-folk-dansar-2-27-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.2.27",
+      "main": "traditioner_af_swenska_folk_dansar.2.27.ly",
+      "sourceSha256": "2bd11511659f6230713594c51b1407f5c5cb370cdc8effc1b8af0ca4fb30d8b7",
+      "title": "Traditioner af Swenska Folk-Dansar, 2nd part, nr 27",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.2.27.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-11-traditioner-af-swenska-folk-dansar-3-11-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.11",
+      "main": "traditioner_af_swenska_folk_dansar.3.11.ly",
+      "sourceSha256": "ec203a99cc5333760a01c361235f2eef53fdb2d93f57269c8f7915492701767f",
+      "title": "Traditioner af Swenska Folk-Dansar, 3rd part, nr 11",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.3.11.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-22-traditioner-af-swenska-folk-dansar-3-22-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.22",
+      "main": "traditioner_af_swenska_folk_dansar.3.22.ly",
+      "sourceSha256": "53e81314a6e0ae2803741fe4e839e4840b11747c46ef1925ed90b0507bd0dab3",
+      "title": "Traditioner af Swenska Folk-Dansar, 3rd part, nr 22",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.3.22.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-7-traditioner-af-swenska-folk-dansar-3-7-ly",
+      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.7",
+      "main": "traditioner_af_swenska_folk_dansar.3.7.ly",
+      "sourceSha256": "8a0c11f2c12db6805ec1d85209165564e0e666fb07463f644b4bcbf92e95a563",
+      "title": "Traditioner af Swenska Folk-Dansar, 3rd part, nr 7",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "traditioner_af_swenska_folk_dansar.3.7.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Traditional",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 3,
+      "collection": "swedish-folk-dances",
+      "levelNote": "Measured estimate for the complete keyboard setting; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 3.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
         "publishedMidi": "present and exact under existing onset/pitch comparator",
         "unsupportedConversionWarnings": "none",
         "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
@@ -4162,6 +4565,70 @@
       }
     },
     {
+      "slug": "bulk-griege-o12-no03-albumblatt-no03-albumblatt-ly",
+      "ftpDir": "GriegE/O12/No03_Albumblatt",
+      "main": "No03_Albumblatt.ly",
+      "sourceSha256": "00d08ddf39b22588c88a78a4b977511c768080b2a2a1b04fe3e1893bcee15385",
+      "title": "Albumblatt in E minor",
+      "tempoBpm": 80,
+      "tempoSource": "Editorial: quarter = 80 for steady practice; no source MIDI tempo extracted.",
+      "publishedMidi": "No03_Albumblatt.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Edvard Grieg",
+      "composerDates": null,
+      "catalogue": "Op. 12 No. 7",
+      "year": null,
+      "level": 6,
+      "collection": "character-pieces",
+      "levelNote": "Conservative advanced placement for this complete, ungraded repertoire edition; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 6.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic saturates at level 5 and does not establish an advanced ceiling; conservative repertoire placement reflects the complete edition and coordination demands. No external syllabus claim is made.",
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-sousajp-theinvincibleeagle-theinvincibleeagle-ly",
+      "ftpDir": "SousaJP/TheInvincibleEagle",
+      "main": "TheInvincibleEagle.ly",
+      "sourceSha256": "d8c40a92dc7b23d39000a310d7971f4bd8eace10ab66de0a54e08cfeb6f26235",
+      "title": "The Invincible Eagle",
+      "tempoBpm": 180.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "TheInvincibleEagle.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "John Philip Sousa",
+      "composerDates": null,
+      "catalogue": null,
+      "year": null,
+      "level": 6,
+      "collection": "character-pieces",
+      "levelNote": "Conservative advanced placement for this complete, ungraded repertoire edition; no published syllabus placement is claimed. Frozen heuristic proposes 4; final level 6.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic saturates at level 5 and does not establish an advanced ceiling; conservative repertoire placement reflects the complete edition and coordination demands. No external syllabus claim is made.",
+      "compactXml": true
+    },
+    {
       "slug": "bulk-mozartwa-anh41-k375g-k375g-lys-k375g-ly",
       "ftpDir": "MozartWA/Anh41/k375g",
       "main": "k375g.ly",
@@ -4201,6 +4668,70 @@
           "large": 3
         }
       }
+    },
+    {
+      "slug": "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly",
+      "ftpDir": "MozartWA/KV331/KV331_1_1_tema",
+      "main": "KV331_1_1_tema.ly",
+      "sourceSha256": "cad24654df590cefbb1d7a6499cbb9d6061d728dfc82d640a786fbc375be48ef",
+      "title": "Sonate Opus KV 331 - Tema",
+      "tempoBpm": 56.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "KV331_1_1_tema.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Wolfgang Amadeus Mozart",
+      "composerDates": null,
+      "catalogue": "KV 331",
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Conservative advanced placement for this complete, ungraded repertoire edition; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 6.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic saturates at level 5 and does not establish an advanced ceiling; conservative repertoire placement reflects the complete edition and coordination demands. No external syllabus claim is made.",
+      "compactXml": true
+    },
+    {
+      "slug": "bulk-mozartwa-kv331-kv331-1-3-var2-kv331-1-3-var2-ly",
+      "ftpDir": "MozartWA/KV331/KV331_1_3_var2",
+      "main": "KV331_1_3_var2.ly",
+      "sourceSha256": "5b22597322dc1c1e009e244890854a5df559ede888aa93072ebe47839bc3925d",
+      "title": "Sonate Opus KV 331 - Variation 2",
+      "tempoBpm": 56.0,
+      "tempoSource": "Quarter-note tempo derived from source MIDI block.",
+      "publishedMidi": "KV331_1_3_var2.mid",
+      "source": "mutopia",
+      "retrievedAt": "2026-10-23",
+      "composer": "Wolfgang Amadeus Mozart",
+      "composerDates": null,
+      "catalogue": "KV 331",
+      "year": null,
+      "level": 6,
+      "collection": "classical-keyboard",
+      "levelNote": "Conservative advanced placement for this complete, ungraded repertoire edition; no published syllabus placement is claimed. Frozen heuristic proposes 3; final level 6.",
+      "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
+      "fidelityReview": {
+        "method": "Automated source screen at bulk intake (held then only for the MIDI checks, which counted a grace note inside a repeat once); rebuilt from the fetched source pinned by SHA-256 after the xmlcheck.py fix that counts it once per pass (issue 49)",
+        "publishedMidi": "present and exact under existing onset/pitch comparator",
+        "unsupportedConversionWarnings": "none",
+        "markupMusicGlyphs": "no unresolved screened ornaments/navigation glyphs",
+        "headerExpressionsAndNavigation": "screened source expressions and labels retained or absent in source",
+        "tupletNumbers": "no unreviewed non-reduced source ratios",
+        "scoreSelection": "single source score or byte-identical duplicate score outputs",
+        "pedals": "no mixed organ/piano edition requiring review"
+      },
+      "levelOverride": "The core-30 heuristic saturates at level 5 and does not establish an advanced ceiling; conservative repertoire placement reflects the complete edition and coordination demands. No external syllabus claim is made.",
+      "compactXml": true
     }
   ],
   "rejected": [
@@ -5267,12 +5798,6 @@
       "reason": "ConversionError: lilypond failed for TheDyingSwan.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly\\lilypond.log):\ngamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:182:31: error: syntax error, unexpected FRACTION\n<sol' si'>4 \\ottava #1\\tuplet \n                              3/2 {r8 <re'' re'''-.>[<mi'' mi'''-.>]} \\tuplet 3/2 {\\stemUp <fad'' fad'''-.><sol'' sol'''-.><la'' la'''-.>}\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:188:10: error: Guile signaled an error for the expression beginning here\n\\ottava #\n         1<si'' mi''' sol''' si'''>4\\arpeggio <sol'' si'' mi''' sol'''>\\arpeggio <mi'' sol'' si'' mi'''>\\arpeggio \\ottava #0\n\nUnbound variable: #{1<si''}#\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:188:9: error: wrong type for argument 1.  Expecting integer, found #<unspecified>\n\\ottava \n        #1<si'' mi''' sol''' si'''>4\\arpeggio <sol'' si'' mi''' sol'''>\\arpeggio <mi'' sol'' si'' mi'''>\\arpeggio \\ottava #0\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:188:35: error: syntax error, unexpected >\n\\ottava #1<si'' mi''' sol''' si'''\n                                  >4\\arpeggio <sol'' si'' mi''' sol'''>\\arpeggio <mi'' sol'' si'' mi'''>\\arpeggio \\ottava #0\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:197:10: error: Guile signaled an error for the expression beginning here\n\\ottava #\n         1\\tuplet 3/2 {<la'' la'''-> >(<re''' re''''-> >8)}\\ottava #0 r4 r4 \\bar \"||\" \\key sol \\minor \\time 4/4\n\nUnbound variable: #{1\\tuplet}#\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:197:9: error: wrong type for argument 1.  Expecting integer, found #<unspecified>\n\\ottava \n        #1\\tuplet 3/2 {<la'' la'''-> >(<re''' re''''-> >8)}\\ottava #0 r4 r4 \\bar \"||\" \\key sol \\minor \\time 4/4\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:197:19: error: syntax error, unexpected FRACTION\n\\ottava #1\\tuplet \n                  3/2 {<la'' la'''-> >(<re''' re''''-> >8)}\\ottava #0 r4 r4 \\bar \"||\" \\key sol \\minor \\time 4/4\n\nC:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly/src/TheDyingSwan.ly:49:1: error: errors found, ignoring music expression\n\n<<\n\nfatal error: failed files: \"C:\\\\Users\\\\maxim\\\\.codex\\\\worktrees\\\\library-expansion\\\\thingamajig\\\\content\\\\_build\\\\bulk\\\\compile\\\\bulk-gottschalklm-o100-thedyingswan-thedyingswan-ly\\\\src\\\\__digitus2_wrapper.ly\"\n"
     },
     {
-      "slug": "bulk-griege-o12-no03-albumblatt-no03-albumblatt-ly",
-      "ftpDir": "GriegE/O12/No03_Albumblatt",
-      "sourceSha256": "00d08ddf39b22588c88a78a4b977511c768080b2a2a1b04fe3e1893bcee15385",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 14); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
       "slug": "bulk-griege-o46-02-lamortdase-02-lamortdase-ly",
       "ftpDir": "GriegE/O46/02-lamortdase",
       "sourceSha256": "097d51ca2264a32d3d22d90f1faaaf27fd932cf3116fbf9923f452556a17f90b",
@@ -5564,7 +6089,7 @@
       "slug": "bulk-mendelssohn-bartholdyf-o102-songww-opus102no3-songww-opus102no3-ly",
       "ftpDir": "Mendelssohn-BartholdyF/O102/SongWW_opus102no3",
       "sourceSha256": "28d3b96d576b094e6f95d1c9143e81887b8ad250add51bd507b857c128d24b57",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 4); published MIDI does not match exactly; no automatic source exception"
+      "reason": "published MIDI does not match exactly (only in the MusicXML 497, only in the MIDI 495); no automatic source exception"
     },
     {
       "slug": "bulk-mendelssohn-bartholdyf-o16-mendelssohn-scherzo-eminor-mendelssohn-scherzo-eminor-ly",
@@ -5609,22 +6134,10 @@
       "reason": "scores/bulk-mozartwa-kv309-kv309-1-kv309-1-ly.musicxml: 786144 bytes > 700000"
     },
     {
-      "slug": "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly",
-      "ftpDir": "MozartWA/KV331/KV331_1_1_tema",
-      "sourceSha256": "cad24654df590cefbb1d7a6499cbb9d6061d728dfc82d640a786fbc375be48ef",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-mozartwa-kv331-kv331-1-3-var2-kv331-1-3-var2-ly",
-      "ftpDir": "MozartWA/KV331/KV331_1_3_var2",
-      "sourceSha256": "5b22597322dc1c1e009e244890854a5df559ede888aa93072ebe47839bc3925d",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 18); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
       "slug": "bulk-mozartwa-kv331-kv331-1-4-var3-kv331-1-4-var3-ly",
       "ftpDir": "MozartWA/KV331/KV331_1_4_var3",
       "sourceSha256": "4e053e14bb17627992378f5253a486147844eddc5c4ba9127f519ad635c29601",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 3); published MIDI does not match exactly; no automatic source exception"
+      "reason": "published MIDI does not match exactly (only in the MusicXML 222, only in the MIDI 218); no automatic source exception"
     },
     {
       "slug": "bulk-mozartwa-kv331-kv331-1-6-var5-kv331-1-6-var5-ly",
@@ -5636,7 +6149,7 @@
       "slug": "bulk-mozartwa-kv331-kv331-1-7-var6-kv331-1-7-var6-ly",
       "ftpDir": "MozartWA/KV331/KV331_1_7_var6",
       "sourceSha256": "c5902928acb42d945564e6243df8fbaaec1c2ab8d73e9945256f4c50b9b03c8a",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 10); published MIDI does not match exactly; no automatic source exception"
+      "reason": "published MIDI does not match exactly (only in the MusicXML 64, only in the MIDI 56); no automatic source exception"
     },
     {
       "slug": "bulk-mozartwa-kv331-kv331-2-1-menuetto-kv331-2-1-menuetto-ly",
@@ -5768,7 +6281,7 @@
       "slug": "bulk-rimsky-korsakovn-o11-rimsky-korsakov-op11-3-rimsky-korsakov-op11-3-ly",
       "ftpDir": "Rimsky-KorsakovN/O11/rimsky-korsakov-op11-3",
       "sourceSha256": "1a9722d75cf06251aff9a56ddf32aef53fac71518f54221c74ae93e7dc50d3c9",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly (only in the MusicXML 4, only in the MIDI 2); no automatic source exception"
     },
     {
       "slug": "bulk-rimsky-korsakovn-rimsky-rimsky-ly",
@@ -5987,46 +6500,22 @@
       "reason": "ConversionError: expected 2 staves with music, found 3: ['up', 'mid', 'down']"
     },
     {
-      "slug": "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly",
-      "ftpDir": "SchumannR/O68/schumann-op68-07-chanson-du-chasseur",
-      "sourceSha256": "4425e1e372e77ed8e1a22f41fb4fc1bb2b21a33ec79c1275379e566ffdff9f45",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
       "slug": "bulk-schumannr-o68-schumann-op68-11-sicilienne-schumann-op68-11-sicilienne-ly",
       "ftpDir": "SchumannR/O68/schumann-op68-11-sicilienne",
       "sourceSha256": "f0a0b7874b357ecd5bc8684c356a39992e4c5816688be08f7a1056ec5a697975",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 466, only in the MIDI 468); published MIDI does not match exactly; no automatic source exception"
     },
     {
-      "slug": "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly",
-      "ftpDir": "SchumannR/O68/schumann-op68-13-Mai-cher-Mai",
-      "sourceSha256": "8aa10d30c216c819fe2b8ed7100dd8c27b2f99ef614e4034310516ed33c93e82",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 13); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly",
-      "ftpDir": "SchumannR/O68/schumann-op68-18-moissonneurs",
-      "sourceSha256": "8aadd7cf57864a8835f29d2a2d6902a0af1e27c56645e5850c4cdb7e446a7317",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
       "slug": "bulk-schumannr-o68-schumann-op68-26-sans-titre-schumann-op68-26-sans-titre-ly",
       "ftpDir": "SchumannR/O68/schumann-op68-26-sans-titre",
       "sourceSha256": "28f644016b018c55e965edb8f0e2a167940c93ea6fb3d818a538961c3fb328cd",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 217); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 216); published MIDI does not match exactly (only in the MusicXML 1, only in the MIDI 215); no automatic source exception"
     },
     {
       "slug": "bulk-schumannr-o68-schumann-op68-32-sheherazade-schumann-op68-32-sheherazade-lys-schumann-op68-32-sheherazade-mid-ly",
       "ftpDir": "SchumannR/O68/schumann-op68-32-sheherazade",
       "sourceSha256": "59b045d5734afcb2156927b46bdfa507715ee5ccbd6850ddf7e9e4efa71f7ef5",
       "reason": "ConversionError: lilypond failed for schumann-op68-32-sheherazade-mid.ly (see C:\\Users\\maxim\\.codex\\worktrees\\library-expansion\\thingamajig\\content\\_build\\bulk\\compile\\bulk-schumannr-o68-schumann-op68-32-sheherazade-schumann-op68-32-sheherazade-lys-schumann-op68-32-sheherazade-mid-ly\\lilypond.log):\nGNU LilyPond 2.24.3 (running Guile 2.2)\nChanging working directory to: `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-schumannr-o68-schumann-op68-32-sheherazade-schumann-op68-32-sheherazade-lys-schumann-op68-32-sheherazade-mid-ly/out'\nProcessing `C:/Users/maxim/.codex/worktrees/library-expansion/thingamajig/content/_build/bulk/compile/bulk-schumannr-o68-schumann-op68-32-sheherazade-schumann-op68-32-sheherazade-lys-schumann-op68-32-sheherazade-mid-ly/src/__digitus2_wrapper.ly'\nParsing...\nInterpreting music...\nMIDI output to `schumann-op68-32-sheherazade-mid.mid'...\nSuccess: compilation successfully completed\n"
-    },
-    {
-      "slug": "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly",
-      "ftpDir": "SchumannR/O68/schumann-op68-36-chant-de-marins-italiens",
-      "sourceSha256": "9b8a753c04c16a74ca19c86ac30d6247677afa897f51b4ef3315b4696b6718bf",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
     },
     {
       "slug": "bulk-scriabina-o11-scriabin-prelude-op11no1-scriabin-prelude-op11no1-ly",
@@ -6080,7 +6569,7 @@
       "slug": "bulk-sousajp-kingcotton-kingcotton-ly",
       "ftpDir": "SousaJP/KingCotton",
       "sourceSha256": "b50dbea53ae0e7de9311a998cabf4fd597cc98d035028e6e4c369be37b257400",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly; no automatic source exception"
+      "reason": "published MIDI does not match exactly (only in the MusicXML 16, only in the MIDI 0); no automatic source exception"
     },
     {
       "slug": "bulk-sousajp-sousa-washington-post-sousa-washington-post-ly",
@@ -6095,16 +6584,10 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 739, only in the MIDI 1664); published MIDI does not match exactly; no automatic source exception"
     },
     {
-      "slug": "bulk-sousajp-theinvincibleeagle-theinvincibleeagle-ly",
-      "ftpDir": "SousaJP/TheInvincibleEagle",
-      "sourceSha256": "d8c40a92dc7b23d39000a310d7971f4bd8eace10ab66de0a54e08cfeb6f26235",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 8); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
       "slug": "bulk-sousajp-thelibertybell-thelibertybell-ly",
       "ftpDir": "SousaJP/TheLibertyBell",
       "sourceSha256": "40cfbfe118f27383c9744b9157d6c08890becfc7ec0b987eb5733b3833f39aa3",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 5); published MIDI does not match exactly; no automatic source exception"
+      "reason": "published MIDI does not match exactly (only in the MusicXML 8, only in the MIDI 0); no automatic source exception"
     },
     {
       "slug": "bulk-sousajp-thestarsandstripesforever-thestarsandstripesforever-ly",
@@ -6179,12 +6662,6 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 281); published MIDI does not match exactly; no automatic source exception; source notation uses markup musicglyph requiring visual transcription review; source navigation label missing from score: D.C.; source navigation label missing from score: Segno"
     },
     {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-12-traditioner-af-swenska-folk-dansar-1-12-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.12",
-      "sourceSha256": "c67ba0eb9ea9718e6cb6c95d8a58c746f65668e1f2823f9ce49279a467f808b0",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1)"
-    },
-    {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-13-traditioner-af-swenska-folk-dansar-1-13-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.13",
       "sourceSha256": "7ef3adc8c7f8d63b7097d3414cdf7c4434b283994b55c6bda3e5827fa9970b87",
@@ -6200,7 +6677,7 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-17-traditioner-af-swenska-folk-dansar-1-17-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.17",
       "sourceSha256": "0f07314930308c2693461f3fd330adeeeb1f83b71b2e1f79246569f16729ae69",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 49); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 42); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 42); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-18-traditioner-af-swenska-folk-dansar-1-18-ly",
@@ -6212,7 +6689,7 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-19-traditioner-af-swenska-folk-dansar-1-19-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.19",
       "sourceSha256": "4f2623591f2a6e0d98529d5efa1f6dba3948f1734bb33629e656a4da44d8066a",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 2); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-23-traditioner-af-swenska-folk-dansar-1-23-ly",
@@ -6224,19 +6701,19 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-27-traditioner-af-swenska-folk-dansar-1-27-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.27",
       "sourceSha256": "602d7739bf8bdc1fb5ef57a1bb089ee310641ae5130d200cc36f2098bf8237d5",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 12); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 12); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 12); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-29-traditioner-af-swenska-folk-dansar-1-29-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.29",
       "sourceSha256": "23eda8a3cb84a71d1a677544d323927c81815fa7e0b076052fda66dbf9a12192",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 30); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-3-traditioner-af-swenska-folk-dansar-1-3-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.3",
       "sourceSha256": "a53e08cad0b5816dee1695a86c5b235e0b65d8197e99fd7b853ace57e9be0421",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 78); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 78); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 78); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-33-traditioner-af-swenska-folk-dansar-1-33-ly",
@@ -6245,40 +6722,10 @@
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 57); span flags: a slice one hand cannot play (spanFlags in verification.json); 1 lint law error(s) at the medium profile (rule counts, every severity: {'L05': 1, 'L07': 18, 'L08': 16, 'L09': 3, 'L11': 2, 'L13': 1, 'L14': 32}); 1 lint law error(s) at the large profile (rule counts, every severity: {'L05': 1, 'L07': 21, 'L08': 20, 'L09': 6, 'L11': 3, 'L13': 1, 'L14': 36}); published MIDI does not match exactly; no automatic source exception; source notation uses markup musicglyph requiring visual transcription review; source navigation label missing from score: D.C.; source navigation label missing from score: Segno"
     },
     {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-34-traditioner-af-swenska-folk-dansar-1-34-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.34",
-      "sourceSha256": "186c5c01e59ecb65dbcdccd085cbc9223164cd8b33853beb09b0a8f54d50a864",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 5); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-4-traditioner-af-swenska-folk-dansar-1-4-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.4",
-      "sourceSha256": "e4745dfc7a9fa2f9b782a816054528ab963a4a1a36d20e95fee1f3ef3c4a6fbe",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-8-traditioner-af-swenska-folk-dansar-1-8-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.8",
-      "sourceSha256": "3d2931efa2c08b46e1fc298e213228f9faea5ebef01c9ff58b3c2d2720ebe050",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-9-traditioner-af-swenska-folk-dansar-1-9-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.1.9",
       "sourceSha256": "5f5dda4ad66ea831514ef59c5052d34f8248be2a94b5efe011dc9f5d5c479997",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 279); published MIDI does not match exactly; no automatic source exception; source navigation label missing from score: D.C."
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-15-traditioner-af-swenska-folk-dansar-2-15-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.2.15",
-      "sourceSha256": "c01e8e2feeb39ca6f629c1e6a605388e8de648c0952e5b330b57db875ccc8797",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-27-traditioner-af-swenska-folk-dansar-2-27-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.2.27",
-      "sourceSha256": "2bd11511659f6230713594c51b1407f5c5cb370cdc8effc1b8af0ca4fb30d8b7",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1)"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-30-traditioner-af-swenska-folk-dansar-2-30-ly",
@@ -6290,19 +6737,13 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-31-traditioner-af-swenska-folk-dansar-2-31-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.2.31",
       "sourceSha256": "811f506e871ba389cbc1bc43846531a02903cf76a9d10b40abe5f80d1361fb61",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 30); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-1-traditioner-af-swenska-folk-dansar-3-1-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.1",
       "sourceSha256": "6a541648b1e213398b1f07360b5ca4566817c8350c205973a83fbf6c34fe1264",
       "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 67); published MIDI does not match exactly; no automatic source exception; source notation uses markup musicglyph requiring visual transcription review; source navigation label missing from score: D.C.; source navigation label missing from score: Segno"
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-11-traditioner-af-swenska-folk-dansar-3-11-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.11",
-      "sourceSha256": "ec203a99cc5333760a01c361235f2eef53fdb2d93f57269c8f7915492701767f",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1); published MIDI does not match exactly; no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-15-traditioner-af-swenska-folk-dansar-3-15-ly",
@@ -6314,25 +6755,19 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-17-traditioner-af-swenska-folk-dansar-3-17-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.17",
       "sourceSha256": "69632c511f2c6eb76fa3f46053b0dda3745c6cb6fac659147eef59f6c4d2367b",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 10); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 10); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 10); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-18-traditioner-af-swenska-folk-dansar-3-18-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.18",
       "sourceSha256": "8b374a4e8a1f58be43728a234cd1bd2df7ddabb22e668d965e45675811c4cd01",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 146); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-22-traditioner-af-swenska-folk-dansar-3-22-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.22",
-      "sourceSha256": "53e81314a6e0ae2803741fe4e839e4840b11747c46ef1925ed90b0507bd0dab3",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 4); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 146); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 146); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-24-traditioner-af-swenska-folk-dansar-3-24-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.24",
       "sourceSha256": "959f9cfcf9926048bc62c2195747639210aed0fe512d7ab259e09e3e219bcebb",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 13); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 12); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 12); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-5-traditioner-af-swenska-folk-dansar-3-5-ly",
@@ -6344,13 +6779,7 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-6-traditioner-af-swenska-folk-dansar-3-6-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.6",
       "sourceSha256": "8990de34fb67c1d63a9e498a65b96ffad12b785fc5722cb65d2c5f27e31e8755",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 90); published MIDI does not match exactly; no automatic source exception"
-    },
-    {
-      "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-7-traditioner-af-swenska-folk-dansar-3-7-ly",
-      "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.7",
-      "sourceSha256": "8a0c11f2c12db6805ec1d85209165564e0e666fb07463f644b4bcbf92e95a563",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 90); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 90); no automatic source exception"
     },
     {
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-8-traditioner-af-swenska-folk-dansar-3-8-ly",
@@ -6362,7 +6791,7 @@
       "slug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-9-traditioner-af-swenska-folk-dansar-3-9-ly",
       "ftpDir": "Traditional/traditioner_af_swenska_folk_dansar.3.9",
       "sourceSha256": "c2181788ccd4bcef663649c8fa1737ce2c465d2704fb783a80a31ce67d43129f",
-      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly; no automatic source exception"
+      "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 20); no automatic source exception"
     },
     {
       "slug": "bulk-verdig-traviata-01-traviata-01-ly",

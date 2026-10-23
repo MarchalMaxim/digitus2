@@ -7,7 +7,7 @@ copies with the editor's fingering) and the 119 pieces of the L1 build (see
 engraving was checked note by note against LilyPond's own MIDI. Regenerate with
 `content/tools/build.py` (see `content/tools/README.md`).
 
-The library has since grown to 3,228 pieces: 286 curated pieces (our
+The library has since grown to 3,245 pieces: 303 curated pieces (our
 arrangements and Mutopia engravings, the first 149 of them documented here) and
 2,942 scores from the MuseScore archive (PDMX), which admits only files
 declared public domain or CC0. The later lanes, their selection rules and their
@@ -634,8 +634,8 @@ Every new engraving was checked against two MIDI files:
 - **LilyPond 2.24's MIDI of the same upgraded and patched source.** This one
   must be exact; it is exact for all 73 (36,436 notes; 61 compared as written,
   8 with repeats unfolded, 4 as excerpts).
-- **The MIDI that Mutopia published from the original source.** Exact for 67.
-  The 6 differences below are accepted: only this check may differ, and only
+- **The MIDI that Mutopia published from the original source.** Exact for 68.
+  The 5 differences below are accepted: only this check may differ, and only
   with a written reason in the piece's `notes`.
 
 | Slug | Published MIDI | Reason |
@@ -643,7 +643,6 @@ Every new engraving was checked against two MIDI files:
 | `bach-minuet-a-minor-bwv-anh-120` | 75/165 | The source pads the half-bars 12 and 28 with spacer rests. Catalog patches remove them, because they made LilyPond 2.24 insert a beat and the converter drop the final repeat. The Mutopia MIDI (LilyPond 2.12) keeps the spacer beat: shifted back by one quarter, its remaining 90 notes equal the score. |
 | `bach-march-e-flat-major-bwv-anh-127` | 189/357 | The same padding at bars 10 and 29. Shifted by one quarter, the 168 notes equal the score. |
 | `burgmuller-op100-no14-la-styrienne` | 0/310 | The opening grace notes shift LilyPond's whole MIDI timeline by 43/384 of a quarter. Two patches render the LilyPond 2.24 MIDI without them. The MusicXML is byte-identical with and without the patches, and the published MIDI keeps the constant shift. |
-| `swedish-polska-norrbotten` | 422/422, plus 2 MIDI-only | The two extra notes are the second-pass D5 grace notes. `xmlcheck` counts a grace note once even in an unfolded comparison. |
 | `bach-prelude-d-minor-bwv-940` | 168/169 | In bar 5, an E4 re-strikes while another voice holds the same E4. The old MIDI writer (LilyPond 2.11) dropped the re-attack, the same case as Moonlight in the first 30. |
 | `schumann-op15-no1-of-foreign-lands` | 222/224 | The same case: two left-hand G3 re-strikes in bars 6 and 20, missing from the 2006 MIDI (LilyPond 2.6). |
 
@@ -886,7 +885,6 @@ in the pieces' `notes` and `rejected` entries and remain open:
 
 | Limit | Tool | Effect |
 |---|---|---|
-| In an unfolded comparison, grace notes are counted once (`best_midi_match` uses `grace_pitches` as written) | `xmlcheck.py` | Blocks Op. 68 Nos. 7, 18 and 26 and Grieg Op. 12 No. 7. Also forces the polska's comparison as written. Fix: count grace notes along `unfold_order`. |
 | Excerpt mode compares written notes with the MIDI before the written length, not the unfolded performance | `build.py` `midi_check` | Blocks The Easy Winners (bars 1–21 with both endings), which is exact when unfolded (611/611) |
 | `barTo` keeps an implicit `<barTo>a` upbeat bar of the next movement | `ly2musicxml.py` | André needs a pre-stage patch |
 | No D.C. sound mark (`<sound dacapo>`): the converter writes D.C. al Fine as words, which the player acts on; `unfold_order` and the Mutopia MIDI know no da capo | `ly2musicxml.py`, `xmlcheck.py` | Wanhal is cut to the Fine, Pleyel to its first theme |
@@ -952,14 +950,14 @@ Main candidates and spares that were not shipped. Each catalog fragment's
 | `shenandoah` | No notated text source; the two ABC transcriptions found cite no edition and disagree. |
 | `home-on-the-range` | The only notated source found (Project Gutenberg #21300, Lomax: MIDI, Finale, PDF) was not read. |
 | `maple-leaf-rag-easy` | The A strain's melody spans 25 semitones (29 by the other reading); an 8-bar half is not a musical whole. |
-| `schumann-op68-no7-hunting-song` | LilyPond 2.24 MIDI check 612/612 plus 2 MIDI-only notes, the second pass of a grace note: the `xmlcheck` grace-count limit. Every other gate passes. Held until that limit is fixed. |
-| `schumann-op68-no18-reapers-song` | The same limit (458/458 plus 2). Held until that limit is fixed. |
-| `schumann-op68-no26-untitled` | The same limit (682/682 plus 1), after two patches for the padded last bar. Held until that limit is fixed. |
+| `schumann-op68-no7-hunting-song` | Held for a grace note that the unfolded MIDI check counted once. The checker now counts it on every pass, and the same Mutopia edition ships in the bulk lane at level 3. |
+| `schumann-op68-no18-reapers-song` | The same: it ships in the bulk lane at level 3. |
+| `schumann-op68-no26-untitled` | Held for one grace note that the unfolded check counted once (682/682 plus 1, after two patches for the padded last bar); not rebuilt since the fix. The bulk lane's unpatched build of the same edition has 216 more notes in the MIDI. |
 | `schumann-op68-no11-sicilienne` (spare) | 323/789: a spacer in the first ending offsets the unfolded MIDI by an eighth, plus the grace-count limit. |
 | `haydn-sonata-hob-xvi-27-mvt2` | Span flags (bars 29 and 31, cross-staff) and L05 law errors from bar 29; no tonic-ending section of 16 bars before it; 4:18. |
-| `mozart-sonata-k331-mvt1-theme` (spare) | LilyPond 2.24 MIDI check not exact (2 MIDI-only notes). |
+| `mozart-sonata-k331-mvt1-theme` (spare) | LilyPond 2.24 MIDI check not exact (2 MIDI-only notes, the second pass of grace notes). The same edition ships in the bulk lane at level 6. |
 | `beethoven-minuet-woo-82` (spare) | One L03 law error at medium, and a MIDI check that is not exact. |
-| `grieg-lyric-pieces-op12-no7-album-leaf` | The `xmlcheck` grace-count limit (586 sounding notes match; 14 grace notes sound twice). It is Op. 12 No. 7 despite the directory name `No03`. |
+| `grieg-lyric-pieces-op12-no7-album-leaf` | Held for 14 grace notes that sound twice. The checker now counts them on every pass, and the same edition ships in the bulk lane at level 6. It is Op. 12 No. 7 despite the directory name `No03`. |
 | `schumann-op15-no7-traumerei` | Span flags in bars 6 and 22; L05 law errors from bar 6. |
 | `chopin-prelude-op28-no20` | Span flags in bars 2, 6 and 10; 8 law errors from bar 2. |
 | `joplin-peacherine-rag` | 14 law errors at medium (bars 16, 29, 50); bar 16 is inside the first strain. |

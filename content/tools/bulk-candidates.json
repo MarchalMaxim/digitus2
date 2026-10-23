@@ -86,8 +86,8 @@
   },
   "admissionSummary": {
     "uniqueSourceDirectories": 608,
-    "acceptedNewLibraryPieces": 124,
-    "heldSourceDirectories": 395,
+    "acceptedNewLibraryPieces": 141,
+    "heldSourceDirectories": 378,
     "alreadyRepresentedDirectories": 89,
     "pendingSourceDirectories": 0,
     "note": "Admission is regenerated from the bulk catalog on every save; acquisition status is independent. Full held reasons remain in the catalog rejected records."
@@ -7501,10 +7501,10 @@
       "rdfSha256": "016c8f85e9af2d53e50167fa98edd96a4b76185dd877112e1fb10c92d0f26e18",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-griege-o12-no03-albumblatt-no03-albumblatt-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 14); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-griege-o12-no03-albumblatt-no03-albumblatt-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -8838,7 +8838,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-mendelssohn-bartholdyf-o102-songww-opus102no3-songww-opus102no3-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 4); published MIDI does not match exactly; no automatic source exception"
+        "reason": "published MIDI does not match exactly (only in the MusicXML 497, only in the MIDI 495); no automatic source exception"
       },
       "midiCount": 1
     },
@@ -9111,10 +9111,10 @@
       "rdfSha256": "c541577ea74d6162f31ffdd029dfb0b2e5e189281ce6e46c4898a32d1e99bfcb",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -9157,10 +9157,10 @@
       "rdfSha256": "c5be51a4b7e737bf1d9ffa1aa74cd503cbfc48e5fc6f7007500d3519dfdceac8",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-mozartwa-kv331-kv331-1-3-var2-kv331-1-3-var2-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 18); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-mozartwa-kv331-kv331-1-3-var2-kv331-1-3-var2-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -9183,7 +9183,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-mozartwa-kv331-kv331-1-4-var3-kv331-1-4-var3-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 3); published MIDI does not match exactly; no automatic source exception"
+        "reason": "published MIDI does not match exactly (only in the MusicXML 222, only in the MIDI 218); no automatic source exception"
       },
       "midiCount": 1
     },
@@ -9252,7 +9252,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-mozartwa-kv331-kv331-1-7-var6-kv331-1-7-var6-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 10); published MIDI does not match exactly; no automatic source exception"
+        "reason": "published MIDI does not match exactly (only in the MusicXML 64, only in the MIDI 56); no automatic source exception"
       },
       "midiCount": 1
     },
@@ -10034,7 +10034,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-rimsky-korsakovn-o11-rimsky-korsakov-op11-3-rimsky-korsakov-op11-3-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly (only in the MusicXML 4, only in the MIDI 2); no automatic so"
       },
       "midiCount": 1
     },
@@ -10997,10 +10997,10 @@
       "rdfSha256": "1dcd47cd2e7ed7483e1e57b4e3a0b82105b61e4db9664a82b89525e20d39be8a",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -11043,10 +11043,10 @@
       "rdfSha256": "21315ef3ca5e182032f803c0ae801959a7682aa83997be245c2ae86e4474eb07",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 13); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -11066,10 +11066,10 @@
       "rdfSha256": "02e1e683a731b31fe04e2066c6a48bb7643e5b55f2c593793661e56841d8d044",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -11092,7 +11092,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-schumannr-o68-schumann-op68-26-sans-titre-schumann-op68-26-sans-titre-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 217); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 216); published MIDI does not match exactly (only in the MusicXML 1, only in the MIDI 215); no automati"
       },
       "midiCount": 1
     },
@@ -11158,10 +11158,10 @@
       "rdfSha256": "c373b525705106a4ed8c5a7107e4328340f2d0b7e558718fb40b708e20e2fe95",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -11506,7 +11506,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-sousajp-kingcotton-kingcotton-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly; no automatic source exception"
+        "reason": "published MIDI does not match exactly (only in the MusicXML 16, only in the MIDI 0); no automatic source exception"
       },
       "midiCount": 1
     },
@@ -11549,10 +11549,10 @@
       "rdfSha256": "a3dbf6addcb96ef0d23634aa1aad4e0d85e46f9c63043ef79bc5780fdd0e5865",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-sousajp-theinvincibleeagle-theinvincibleeagle-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 8); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-sousajp-theinvincibleeagle-theinvincibleeagle-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -11575,7 +11575,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-sousajp-thelibertybell-thelibertybell-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 5); published MIDI does not match exactly; no automatic source exception"
+        "reason": "published MIDI does not match exactly (only in the MusicXML 8, only in the MIDI 0); no automatic source exception"
       },
       "midiCount": 1
     },
@@ -11917,10 +11917,10 @@
       "rdfSha256": "332ece3af91d5a810683651a568e396bd772c513e7c53820b215254b3a6d644b",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-12-traditioner-af-swenska-folk-dansar-1-12-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1)"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-12-traditioner-af-swenska-folk-dansar-1-12-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12035,7 +12035,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-17-traditioner-af-swenska-folk-dansar-1-17-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 49); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 42); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 42); no automatic "
       },
       "midiCount": 1
     },
@@ -12081,7 +12081,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-19-traditioner-af-swenska-folk-dansar-1-19-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 2); no automatic so"
       },
       "midiCount": 1
     },
@@ -12196,7 +12196,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-27-traditioner-af-swenska-folk-dansar-1-27-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 12); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 12); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 12); no automatic "
       },
       "midiCount": 1
     },
@@ -12219,7 +12219,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-29-traditioner-af-swenska-folk-dansar-1-29-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 30); no automatic "
       },
       "midiCount": 1
     },
@@ -12242,7 +12242,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-3-traditioner-af-swenska-folk-dansar-1-3-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 78); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 78); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 78); no automatic "
       },
       "midiCount": 1
     },
@@ -12331,10 +12331,10 @@
       "rdfSha256": "7c941616213dbe3039535ad2e62e54fea184bade8278c93e85e9428c679c38f8",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-34-traditioner-af-swenska-folk-dansar-1-34-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 5); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-34-traditioner-af-swenska-folk-dansar-1-34-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12354,10 +12354,10 @@
       "rdfSha256": "a910abc0218824ecfa2b9c8db3110cc92d5b858659d850dd36b3beb752940869",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-4-traditioner-af-swenska-folk-dansar-1-4-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-4-traditioner-af-swenska-folk-dansar-1-4-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12446,10 +12446,10 @@
       "rdfSha256": "aaae37aa2d2ddabc1ff52a0c780d160d468458d2163c5019d90604e6e55b8a0f",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-8-traditioner-af-swenska-folk-dansar-1-8-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-1-8-traditioner-af-swenska-folk-dansar-1-8-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12492,10 +12492,10 @@
       "rdfSha256": "f775953be7de13598efd5e0e7a741cd7dc174ed4676cff4bc4a514e3393e4242",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-15-traditioner-af-swenska-folk-dansar-2-15-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-15-traditioner-af-swenska-folk-dansar-2-15-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12515,10 +12515,10 @@
       "rdfSha256": "fd34e4266a32c11417731ab4f10300f9275b2eeb6ff5d8a575c6b9b4e2c4d7d4",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-27-traditioner-af-swenska-folk-dansar-2-27-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1)"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-27-traditioner-af-swenska-folk-dansar-2-27-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12564,7 +12564,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-2-31-traditioner-af-swenska-folk-dansar-2-31-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 30); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 30); no automatic "
       },
       "midiCount": 1
     },
@@ -12630,10 +12630,10 @@
       "rdfSha256": "4104052a516d2598939ee466e4b1172f72845d0a82decb92c57909bb6fe0f657",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-11-traditioner-af-swenska-folk-dansar-3-11-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 1); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-11-traditioner-af-swenska-folk-dansar-3-11-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12771,7 +12771,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-17-traditioner-af-swenska-folk-dansar-3-17-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 10); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 10); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 10); no automatic "
       },
       "midiCount": 1
     },
@@ -12794,7 +12794,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-18-traditioner-af-swenska-folk-dansar-3-18-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 146); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 146); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 146); no automati"
       },
       "midiCount": 1
     },
@@ -12883,10 +12883,10 @@
       "rdfSha256": "d0d6306009c11a976fbd0de7f1c79e237c6152280dba12ac448248c2f5626651",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-22-traditioner-af-swenska-folk-dansar-3-22-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 4); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-22-traditioner-af-swenska-folk-dansar-3-22-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -12932,7 +12932,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-24-traditioner-af-swenska-folk-dansar-3-24-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 13); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 12); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 12); no automatic "
       },
       "midiCount": 1
     },
@@ -13047,7 +13047,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-6-traditioner-af-swenska-folk-dansar-3-6-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 90); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 90); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 90); no automatic "
       },
       "midiCount": 1
     },
@@ -13067,10 +13067,10 @@
       "rdfSha256": "e77f51d647d406a1cf471c28e6b558d56d016c7013e515141a675fdb287700b4",
       "status": "acquired",
       "admission": {
-        "status": "held",
-        "catalogSlug": null,
-        "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-7-traditioner-af-swenska-folk-dansar-3-7-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 2); published MIDI does not match exactly; no automatic source exception"
+        "status": "accepted",
+        "catalogSlug": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-7-traditioner-af-swenska-folk-dansar-3-7-ly",
+        "selectedSourceMain": true,
+        "reason": "Accepted catalog edition; production gates and independent review passed."
       },
       "midiCount": 1
     },
@@ -13116,7 +13116,7 @@
         "status": "held",
         "catalogSlug": null,
         "decisionRecord": "bulk-traditional-traditioner-af-swenska-folk-dansar-3-9-traditioner-af-swenska-folk-dansar-3-9-ly",
-        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly; no automatic source exception"
+        "reason": "LilyPond 2.24 MIDI check not exact (only in the MusicXML 0, only in the MIDI 20); published MIDI does not match exactly (only in the MusicXML 0, only in the MIDI 20); no automatic "
       },
       "midiCount": 1
     },

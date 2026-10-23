@@ -8221,6 +8221,125 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-1-4-traditioner-af-swenska-folk-dansar-1-4-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.4.mid",
+        "exact": true,
+        "xml": 342,
+        "midi": 346,
+        "matched": 342,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 12
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.4.mid",
+        "exact": true,
+        "xml": 342,
+        "midi": 346,
+        "matched": 342,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-1-4-traditioner-af-swenska-folk-dansar-1-4-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 173,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 48.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "0",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 34296,
+      "pitchRange": [
+        45,
+        86
+      ],
+      "staffAvgPitch": {
+        "1": 77.7,
+        "2": 54.2
+      },
+      "approxDurationSec": 72,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 171,
+        "highestTime": 48.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.75,
+        "shifts": 9.839,
+        "span": 8.0,
+        "chord": 0.027,
+        "fifths": 0.0,
+        "accidentals": 1.754,
+        "seconds": 36.0,
+        "leaps": 0.0
+      },
+      "score": 2.695,
+      "level": 2
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 173,
+          "errors": 0,
+          "warnings": 10,
+          "counts": {
+            "L07": 4,
+            "L13": 4,
+            "L14": 6
+          }
+        },
+        "large": {
+          "notes": 173,
+          "errors": 0,
+          "warnings": 9,
+          "counts": {
+            "L07": 3,
+            "L13": 4,
+            "L14": 6
+          }
+        }
+      },
+      "scoreSha256": "f4e9cebd0506c972d6cc401d17fc006a5546d96fa596c88114599f71a27223cf",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "burgmuller-op100-no1-la-candeur": {
     "ok": true,
     "conversionWarnings": [],
@@ -27487,25 +27606,14 @@
       "mutopiaMidi": {
         "mode": "unfolded",
         "midiFile": "traditioner_af_swenska_folk_dansar.1.1.mid",
-        "exact": false,
+        "exact": true,
         "xml": 422,
         "midi": 426,
         "matched": 422,
         "only_xml_count": 0,
-        "only_midi_count": 2,
+        "only_midi_count": 0,
         "only_xml": [],
-        "only_midi": [
-          [
-            "1",
-            51.934895833333336,
-            74
-          ],
-          [
-            "1",
-            57.934895833333336,
-            74
-          ]
-        ],
+        "only_midi": [],
         "duration_mismatches": 4
       }
     },
@@ -27554,49 +27662,6 @@
         "version": "10.5.0"
       },
       "verovioPages": 1
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 9.769,
-        "shifts": 33.716,
-        "span": 12.0,
-        "chord": 0.587,
-        "fifths": 2.0,
-        "accidentals": 12.796,
-        "seconds": 21.6,
-        "leaps": 0.0
-      },
-      "score": 8.463,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 215,
-          "errors": 0,
-          "warnings": 11,
-          "counts": {
-            "L07": 4,
-            "L09": 1,
-            "L13": 4,
-            "L14": 6
-          }
-        },
-        "large": {
-          "notes": 215,
-          "errors": 0,
-          "warnings": 10,
-          "counts": {
-            "L07": 4,
-            "L09": 2,
-            "L13": 4,
-            "L14": 4
-          }
-        }
-      },
-      "scoreSha256": "51d63871a95614a8125466de695f7bdd1316217f7c8748b8d0cdea3c3ad47bf3",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
     }
   },
   "bulk-traditional-traditioner-af-swenska-folk-dansar-1-14-traditioner-af-swenska-folk-dansar-1-14-ly": {
@@ -30261,6 +30326,971 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-1-12-traditioner-af-swenska-folk-dansar-1-12-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.12.mid",
+        "exact": true,
+        "xml": 196,
+        "midi": 198,
+        "matched": 196,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.12.mid",
+        "exact": true,
+        "xml": 196,
+        "midi": 196,
+        "matched": 196,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-1-12-traditioner-af-swenska-folk-dansar-1-12-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 8,
+      "measureElements": 8,
+      "firstMeasure": "1",
+      "lastMeasure": "8",
+      "notes": 99,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 24.0,
+      "unfoldedQuarters": 48.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-1",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 21264,
+      "pitchRange": [
+        38,
+        79
+      ],
+      "staffAvgPitch": {
+        "1": 69.8,
+        "2": 52.1
+      },
+      "approxDurationSec": 36,
+      "music21": {
+        "parts": 2,
+        "measures": 8,
+        "noteOrChord": 92,
+        "highestTime": 24.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.444,
+        "shifts": 25.972,
+        "span": 12.0,
+        "chord": 0.175,
+        "fifths": 1.0,
+        "accidentals": 10.204,
+        "seconds": 18.0,
+        "leaps": 5.0
+      },
+      "score": 5.514,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 99,
+          "errors": 0,
+          "warnings": 16,
+          "counts": {
+            "L06": 1,
+            "L07": 4,
+            "L09": 1,
+            "L14": 10
+          }
+        },
+        "large": {
+          "notes": 99,
+          "errors": 0,
+          "warnings": 15,
+          "counts": {
+            "L06": 1,
+            "L07": 4,
+            "L09": 1,
+            "L14": 9
+          }
+        }
+      },
+      "scoreSha256": "609dcc051ce60716e89d854b1cb6e06ff80c455dfb2946da73cb67f37f856c96",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-1-34-traditioner-af-swenska-folk-dansar-1-34-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.34.mid",
+        "exact": true,
+        "xml": 282,
+        "midi": 292,
+        "matched": 282,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 60
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.34.mid",
+        "exact": true,
+        "xml": 282,
+        "midi": 290,
+        "matched": 282,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-1-34-traditioner-af-swenska-folk-dansar-1-34-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 8,
+      "measureElements": 8,
+      "firstMeasure": "1",
+      "lastMeasure": "8",
+      "notes": 146,
+      "graceNotes": 5,
+      "fingerings": 0,
+      "writtenQuarters": 24.0,
+      "unfoldedQuarters": 48.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 30329,
+      "pitchRange": [
+        36,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 72.3,
+        "2": 49.5
+      },
+      "approxDurationSec": 36,
+      "music21": {
+        "parts": 2,
+        "measures": 8,
+        "noteOrChord": 116,
+        "highestTime": 24.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.833,
+        "shifts": 41.447,
+        "span": 9.0,
+        "chord": 0.404,
+        "fifths": 0.0,
+        "accidentals": 0.0,
+        "seconds": 18.0,
+        "leaps": 0.0
+      },
+      "score": 6.366,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 146,
+          "errors": 0,
+          "warnings": 13,
+          "counts": {
+            "L07": 3,
+            "L13": 2,
+            "L14": 10
+          }
+        },
+        "large": {
+          "notes": 146,
+          "errors": 0,
+          "warnings": 13,
+          "counts": {
+            "L07": 3,
+            "L13": 2,
+            "L14": 10
+          }
+        }
+      },
+      "scoreSha256": "67c8c97bb04d91d7bd60e84797b4c310bac71e777f82534112c00dfab918ae78",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-1-8-traditioner-af-swenska-folk-dansar-1-8-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.8.mid",
+        "exact": true,
+        "xml": 422,
+        "midi": 424,
+        "matched": 422,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 6
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.1.8.mid",
+        "exact": true,
+        "xml": 422,
+        "midi": 424,
+        "matched": 422,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-1-8-traditioner-af-swenska-folk-dansar-1-8-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 212,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 48.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-1",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 42412,
+      "pitchRange": [
+        38,
+        86
+      ],
+      "staffAvgPitch": {
+        "1": 77.5,
+        "2": 57.8
+      },
+      "approxDurationSec": 72,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 198,
+        "highestTime": 48.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.861,
+        "shifts": 27.809,
+        "span": 10.0,
+        "chord": 0.159,
+        "fifths": 1.0,
+        "accidentals": 12.796,
+        "seconds": 36.0,
+        "leaps": 1.136
+      },
+      "score": 5.525,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 212,
+          "errors": 0,
+          "warnings": 25,
+          "counts": {
+            "L07": 9,
+            "L09": 1,
+            "L13": 2,
+            "L14": 15
+          }
+        },
+        "large": {
+          "notes": 212,
+          "errors": 0,
+          "warnings": 25,
+          "counts": {
+            "L07": 9,
+            "L09": 1,
+            "L13": 2,
+            "L14": 15
+          }
+        }
+      },
+      "scoreSha256": "edd3ce745994f6319d198ea1988a30859e6d43422414ee37c8cc95d25ecff6d2",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-2-15-traditioner-af-swenska-folk-dansar-2-15-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.2.15.mid",
+        "exact": true,
+        "xml": 364,
+        "midi": 368,
+        "matched": 364,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 8
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.2.15.mid",
+        "exact": true,
+        "xml": 364,
+        "midi": 368,
+        "matched": 364,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-2-15-traditioner-af-swenska-folk-dansar-2-15-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 14,
+      "measureElements": 14,
+      "firstMeasure": "1",
+      "lastMeasure": "14",
+      "notes": 188,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 42.0,
+      "unfoldedQuarters": 84.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-1",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 37135,
+      "pitchRange": [
+        38,
+        77
+      ],
+      "staffAvgPitch": {
+        "1": 67.0,
+        "2": 52.5
+      },
+      "approxDurationSec": 63,
+      "music21": {
+        "parts": 2,
+        "measures": 14,
+        "noteOrChord": 178,
+        "highestTime": 42.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.905,
+        "shifts": 25.641,
+        "span": 7.0,
+        "chord": 0.306,
+        "fifths": 1.0,
+        "accidentals": 5.376,
+        "seconds": 31.5,
+        "leaps": 6.41
+      },
+      "score": 5.213,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 184,
+          "errors": 0,
+          "warnings": 24,
+          "counts": {
+            "L07": 10,
+            "L09": 2,
+            "L13": 4,
+            "L14": 12
+          }
+        },
+        "large": {
+          "notes": 184,
+          "errors": 0,
+          "warnings": 24,
+          "counts": {
+            "L07": 10,
+            "L09": 3,
+            "L13": 5,
+            "L14": 11
+          }
+        }
+      },
+      "scoreSha256": "21bdfebd957a7784540b13f53c2367cd06531266d4b725c97472f6f95f49f611",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-2-27-traditioner-af-swenska-folk-dansar-2-27-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.2.27.mid",
+        "exact": true,
+        "xml": 430,
+        "midi": 432,
+        "matched": 430,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 68
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.2.27.mid",
+        "exact": true,
+        "xml": 430,
+        "midi": 430,
+        "matched": 430,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-2-27-traditioner-af-swenska-folk-dansar-2-27-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 12,
+      "measureElements": 12,
+      "firstMeasure": "1",
+      "lastMeasure": "12",
+      "notes": 216,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 36.0,
+      "unfoldedQuarters": 72.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 41866,
+      "pitchRange": [
+        38,
+        83
+      ],
+      "staffAvgPitch": {
+        "1": 73.3,
+        "2": 53.8
+      },
+      "approxDurationSec": 54,
+      "music21": {
+        "parts": 2,
+        "measures": 12,
+        "noteOrChord": 148,
+        "highestTime": 36.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.963,
+        "shifts": 33.034,
+        "span": 12.0,
+        "chord": 0.582,
+        "fifths": 1.0,
+        "accidentals": 3.721,
+        "seconds": 27.0,
+        "leaps": 0.0
+      },
+      "score": 7.104,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 216,
+          "errors": 0,
+          "warnings": 14,
+          "counts": {
+            "L07": 1,
+            "L13": 2,
+            "L14": 13
+          }
+        },
+        "large": {
+          "notes": 216,
+          "errors": 0,
+          "warnings": 12,
+          "counts": {
+            "L07": 1,
+            "L13": 2,
+            "L14": 11
+          }
+        }
+      },
+      "scoreSha256": "6e28b5a52714bb40373cdf252a581d1510052f3eecd77132385bf8395d9a87a2",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-3-11-traditioner-af-swenska-folk-dansar-3-11-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.3.11.mid",
+        "exact": true,
+        "xml": 412,
+        "midi": 414,
+        "matched": 412,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 26
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.3.11.mid",
+        "exact": true,
+        "xml": 412,
+        "midi": 414,
+        "matched": 412,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-3-11-traditioner-af-swenska-folk-dansar-3-11-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 209,
+      "graceNotes": 1,
+      "fingerings": 0,
+      "writtenQuarters": 48.0,
+      "unfoldedQuarters": 96.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-3",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 42383,
+      "pitchRange": [
+        36,
+        80
+      ],
+      "staffAvgPitch": {
+        "1": 73.5,
+        "2": 50.0
+      },
+      "approxDurationSec": 72,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 192,
+        "highestTime": 48.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.778,
+        "shifts": 32.62,
+        "span": 12.0,
+        "chord": 0.174,
+        "fifths": 3.0,
+        "accidentals": 4.327,
+        "seconds": 36.0,
+        "leaps": 1.163
+      },
+      "score": 6.133,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 207,
+          "errors": 0,
+          "warnings": 46,
+          "counts": {
+            "L06": 1,
+            "L07": 11,
+            "L08": 10,
+            "L13": 4,
+            "L14": 24
+          }
+        },
+        "large": {
+          "notes": 207,
+          "errors": 0,
+          "warnings": 47,
+          "counts": {
+            "L06": 1,
+            "L07": 14,
+            "L08": 9,
+            "L09": 1,
+            "L13": 4,
+            "L14": 22
+          }
+        }
+      },
+      "scoreSha256": "d3930d1316dbad05e7bd10789604ab7658cffce92b397db3742ab015b0433379",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-3-22-traditioner-af-swenska-folk-dansar-3-22-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.3.22.mid",
+        "exact": true,
+        "xml": 586,
+        "midi": 594,
+        "matched": 586,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 41
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.3.22.mid",
+        "exact": true,
+        "xml": 586,
+        "midi": 590,
+        "matched": 586,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 4
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-3-22-traditioner-af-swenska-folk-dansar-3-22-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 20,
+      "measureElements": 20,
+      "firstMeasure": "1",
+      "lastMeasure": "20",
+      "notes": 306,
+      "graceNotes": 4,
+      "fingerings": 0,
+      "writtenQuarters": 60.0,
+      "unfoldedQuarters": 120.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "-1",
+        "major"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 61411,
+      "pitchRange": [
+        41,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 71.1,
+        "2": 53.4
+      },
+      "approxDurationSec": 90,
+      "music21": {
+        "parts": 2,
+        "measures": 20,
+        "noteOrChord": 304,
+        "highestTime": 60.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.711,
+        "shifts": 27.497,
+        "span": 8.0,
+        "chord": 0.165,
+        "fifths": 1.0,
+        "accidentals": 5.629,
+        "seconds": 45.0,
+        "leaps": 3.185
+      },
+      "score": 5.365,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 297,
+          "errors": 0,
+          "warnings": 51,
+          "counts": {
+            "L07": 13,
+            "L08": 2,
+            "L09": 2,
+            "L11": 1,
+            "L13": 9,
+            "L14": 33
+          }
+        },
+        "large": {
+          "notes": 297,
+          "errors": 0,
+          "warnings": 53,
+          "counts": {
+            "L07": 15,
+            "L08": 1,
+            "L09": 2,
+            "L11": 1,
+            "L13": 8,
+            "L14": 34
+          }
+        }
+      },
+      "scoreSha256": "287fdb2086c8a86e17033dbd140dde66762394090974d9994515e738b41f016d",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-traditional-traditioner-af-swenska-folk-dansar-3-7-traditioner-af-swenska-folk-dansar-3-7-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.3.7.mid",
+        "exact": true,
+        "xml": 204,
+        "midi": 208,
+        "matched": 204,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 88
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "traditioner_af_swenska_folk_dansar.3.7.mid",
+        "exact": true,
+        "xml": 204,
+        "midi": 208,
+        "matched": 204,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 0
+      }
+    },
+    "validation": {
+      "bulk-traditional-traditioner-af-swenska-folk-dansar-3-7-traditioner-af-swenska-folk-dansar-3-7-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 8,
+      "measureElements": 8,
+      "firstMeasure": "1",
+      "lastMeasure": "8",
+      "notes": 104,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 24.0,
+      "unfoldedQuarters": 48.0,
+      "tempoQpm": 80.0,
+      "key": [
+        "1",
+        "minor"
+      ],
+      "time": [
+        3,
+        4
+      ],
+      "bytes": 21291,
+      "pitchRange": [
+        47,
+        83
+      ],
+      "staffAvgPitch": {
+        "1": 78.0,
+        "2": 53.4
+      },
+      "approxDurationSec": 36,
+      "music21": {
+        "parts": 2,
+        "measures": 8,
+        "noteOrChord": 74,
+        "highestTime": 24.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.667,
+        "shifts": 35.417,
+        "span": 12.0,
+        "chord": 0.5,
+        "fifths": 1.0,
+        "accidentals": 9.804,
+        "seconds": 18.0,
+        "leaps": 0.0
+      },
+      "score": 6.539,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 104,
+          "errors": 0,
+          "warnings": 9,
+          "counts": {
+            "L14": 9
+          }
+        },
+        "large": {
+          "notes": 104,
+          "errors": 0,
+          "warnings": 9,
+          "counts": {
+            "L14": 9
+          }
+        }
+      },
+      "scoreSha256": "8b369457c4db90fa2880bd0d3d2ffb4bea36b8cbda71f4c1628e5acdb9d71816",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "swedish-polska-vastergotland": {
     "ok": true,
     "conversionWarnings": [],
@@ -32653,6 +33683,520 @@
       },
       "scoreSha256": "c451ecc60f1301fc0cc073a00b8098452d27efa9a336baeddeb27b00d1a1ee94",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-07-chanson-du-chasseur.mid",
+        "exact": true,
+        "xml": 612,
+        "midi": 616,
+        "matched": 612,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 266
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-07-chanson-du-chasseur.mid",
+        "exact": true,
+        "xml": 612,
+        "midi": 616,
+        "matched": 612,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 24
+      }
+    },
+    "validation": {
+      "bulk-schumannr-o68-schumann-op68-07-chanson-du-chasseur-schumann-op68-07-chanson-du-chasseur-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 8: 5/2 of 3 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 28,
+      "measureElements": 30,
+      "firstMeasure": "0",
+      "lastMeasure": "28",
+      "notes": 318,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 84.0,
+      "unfoldedQuarters": 168.0,
+      "tempoQpm": 140.0,
+      "key": [
+        "-1",
+        "major"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 68240,
+      "pitchRange": [
+        45,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 68.4,
+        "2": 56.4
+      },
+      "approxDurationSec": 72,
+      "music21": {
+        "parts": 2,
+        "measures": 30,
+        "noteOrChord": 243,
+        "highestTime": 84.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.5,
+        "shifts": 38.826,
+        "span": 12.0,
+        "chord": 0.339,
+        "fifths": 1.0,
+        "accidentals": 4.902,
+        "seconds": 36.0,
+        "leaps": 1.739
+      },
+      "score": 7.345,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 308,
+          "errors": 0,
+          "warnings": 30,
+          "counts": {
+            "L06": 1,
+            "L07": 18,
+            "L08": 5,
+            "L11": 2,
+            "L13": 10,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 308,
+          "errors": 0,
+          "warnings": 37,
+          "counts": {
+            "L06": 1,
+            "L07": 22,
+            "L08": 5,
+            "L11": 2,
+            "L13": 10,
+            "L14": 7
+          }
+        }
+      },
+      "scoreSha256": "19dfa9325b1aecac173b39bed39fdf26f3b2590b4a66d17c332c070313f8fbb3",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly": {
+    "ok": true,
+    "conversionWarnings": [
+      "slur at 5 could not be attached"
+    ],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-13-Mai-cher-Mai.mid",
+        "exact": true,
+        "xml": 758,
+        "midi": 784,
+        "matched": 758,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 254
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-13-Mai-cher-Mai.mid",
+        "exact": true,
+        "xml": 758,
+        "midi": 784,
+        "matched": 758,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 41
+      }
+    },
+    "validation": {
+      "bulk-schumannr-o68-schumann-op68-13-mai-cher-mai-schumann-op68-13-mai-cher-mai-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 10: 3/2 of 2 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 26,
+      "measureElements": 28,
+      "firstMeasure": "0",
+      "lastMeasure": "26",
+      "notes": 413,
+      "graceNotes": 13,
+      "fingerings": 0,
+      "writtenQuarters": 52.0,
+      "unfoldedQuarters": 104.0,
+      "tempoQpm": 52.0,
+      "key": [
+        "4",
+        "major"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 105817,
+      "pitchRange": [
+        49,
+        85
+      ],
+      "staffAvgPitch": {
+        "1": 72.9,
+        "2": 61.6
+      },
+      "approxDurationSec": 120,
+      "music21": {
+        "parts": 2,
+        "measures": 28,
+        "noteOrChord": 355,
+        "highestTime": 52.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.483,
+        "shifts": 37.474,
+        "span": 11.0,
+        "chord": 0.294,
+        "fifths": 4.0,
+        "accidentals": 8.997,
+        "seconds": 60.0,
+        "leaps": 0.0
+      },
+      "score": 7.336,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 392,
+          "errors": 0,
+          "warnings": 78,
+          "counts": {
+            "L06": 5,
+            "L07": 16,
+            "L08": 31,
+            "L09": 4,
+            "L13": 13,
+            "L14": 22
+          }
+        },
+        "large": {
+          "notes": 392,
+          "errors": 0,
+          "warnings": 88,
+          "counts": {
+            "L06": 6,
+            "L07": 20,
+            "L08": 32,
+            "L09": 7,
+            "L13": 13,
+            "L14": 23
+          }
+        }
+      },
+      "scoreSha256": "6dfc355cefa4b1776f4b20cdd49e59eecd5f64b4ff409ebed663ae9f01bd94af",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-18-moissonneurs.mid",
+        "exact": true,
+        "xml": 458,
+        "midi": 466,
+        "matched": 458,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 115
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-18-moissonneurs.mid",
+        "exact": true,
+        "xml": 458,
+        "midi": 466,
+        "matched": 458,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 38
+      }
+    },
+    "validation": {
+      "bulk-schumannr-o68-schumann-op68-18-moissonneurs-schumann-op68-18-moissonneurs-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "measure 12: 5/2 of 3 quarters (partial bar, e.g. 1st ending)"
+        ]
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 36,
+      "measureElements": 37,
+      "firstMeasure": "1",
+      "lastMeasure": "36",
+      "notes": 408,
+      "graceNotes": 6,
+      "fingerings": 0,
+      "writtenQuarters": 106.5,
+      "unfoldedQuarters": 130.5,
+      "tempoQpm": 130.0,
+      "key": [
+        "0",
+        "major"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 89746,
+      "pitchRange": [
+        48,
+        84
+      ],
+      "staffAvgPitch": {
+        "1": 70.2,
+        "2": 55.4
+      },
+      "approxDurationSec": 60,
+      "music21": {
+        "parts": 2,
+        "measures": 37,
+        "noteOrChord": 354,
+        "highestTime": 106.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.731,
+        "shifts": 28.574,
+        "span": 9.0,
+        "chord": 0.277,
+        "fifths": 0.0,
+        "accidentals": 2.632,
+        "seconds": 49.154,
+        "leaps": 0.0
+      },
+      "score": 5.591,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 382,
+          "errors": 0,
+          "warnings": 54,
+          "counts": {
+            "L07": 18,
+            "L08": 2,
+            "L11": 4,
+            "L13": 4,
+            "L14": 30
+          }
+        },
+        "large": {
+          "notes": 382,
+          "errors": 0,
+          "warnings": 54,
+          "counts": {
+            "L07": 18,
+            "L08": 2,
+            "L11": 4,
+            "L13": 5,
+            "L14": 30
+          }
+        }
+      },
+      "scoreSha256": "c63d6c786e6afc909d48e3f5ad150121371cb584e381afe615d02e4a4987395f",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-36-chant-de-marins-italiens.mid",
+        "exact": true,
+        "xml": 831,
+        "midi": 848,
+        "matched": 831,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 777
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "schumann-op68-36-chant-de-marins-italiens.mid",
+        "exact": true,
+        "xml": 831,
+        "midi": 848,
+        "matched": 831,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 36
+      }
+    },
+    "validation": {
+      "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "bulk-schumannr-o68-schumann-op68-36-chant-de-marins-italiens-schumann-op68-36-chant-de-marins-italiens-ly.fingered.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 51,
+      "measureElements": 52,
+      "firstMeasure": "0",
+      "lastMeasure": "51",
+      "notes": 739,
+      "graceNotes": 15,
+      "fingerings": 0,
+      "writtenQuarters": 153.5,
+      "unfoldedQuarters": 174.5,
+      "tempoQpm": 30.0,
+      "key": [
+        "-2",
+        "minor"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 178552,
+      "pitchRange": [
+        38,
+        82
+      ],
+      "staffAvgPitch": {
+        "1": 68.2,
+        "2": 55.0
+      },
+      "approxDurationSec": 349,
+      "music21": {
+        "parts": 2,
+        "measures": 52,
+        "noteOrChord": 529,
+        "highestTime": 153.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.651,
+        "shifts": 33.447,
+        "span": 4.0,
+        "chord": 0.798,
+        "fifths": 2.0,
+        "accidentals": 9.384,
+        "seconds": 153.5,
+        "leaps": 4.4
+      },
+      "score": 7.188,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 729,
+          "errors": 0,
+          "warnings": 80,
+          "counts": {
+            "L06": 1,
+            "L07": 25,
+            "L08": 27,
+            "L09": 17,
+            "L11": 4,
+            "L13": 1,
+            "L14": 6
+          }
+        },
+        "large": {
+          "notes": 729,
+          "errors": 0,
+          "warnings": 71,
+          "counts": {
+            "L06": 1,
+            "L07": 23,
+            "L08": 27,
+            "L09": 10,
+            "L11": 2,
+            "L12": 2,
+            "L13": 4,
+            "L14": 6
+          }
+        }
+      },
+      "scoreSha256": "1fe2d715a02ac61efbe1ff247c416bd97fb18897a9de363a76f74a86115f0951",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -71203,106 +72747,6 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
-  "pdmx-mozart-sonate-no-11-kv-331-andante-grazi-c8605d7d": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-mozart-sonate-no-11-kv-331-andante-grazi-c8605d7d.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": [
-          "no <sound tempo> in the score; duration estimated from the catalogue tempo"
-        ]
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 18,
-      "measureElements": 18,
-      "firstMeasure": "1",
-      "lastMeasure": "18",
-      "notes": 240,
-      "graceNotes": 2,
-      "fingerings": 0,
-      "writtenQuarters": 54.0,
-      "unfoldedQuarters": 108.0,
-      "tempoQpm": 100,
-      "key": [
-        "3",
-        null
-      ],
-      "time": [
-        6,
-        8
-      ],
-      "bytes": 94493,
-      "pitchRange": [
-        40,
-        81
-      ],
-      "staffAvgPitch": {
-        "1": 71.9,
-        "2": 58.8
-      },
-      "approxDurationSec": 65,
-      "music21": {
-        "parts": 2,
-        "measures": 18,
-        "noteOrChord": 163,
-        "highestTime": 54.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 1
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 7.346,
-        "shifts": 41.047,
-        "span": 12.0,
-        "chord": 0.627,
-        "fifths": 3.0,
-        "accidentals": 0.42,
-        "seconds": 32.4,
-        "leaps": 0.0
-      },
-      "score": 7.82,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 240,
-          "errors": 0,
-          "warnings": 36,
-          "counts": {
-            "L06": 1,
-            "L07": 7,
-            "L08": 7,
-            "L09": 1,
-            "L13": 6,
-            "L14": 20
-          }
-        },
-        "large": {
-          "notes": 240,
-          "errors": 0,
-          "warnings": 32,
-          "counts": {
-            "L06": 1,
-            "L07": 7,
-            "L08": 7,
-            "L09": 1,
-            "L13": 2,
-            "L14": 16
-          }
-        }
-      },
-      "scoreSha256": "ee478c8604472e6f0d9bca9c5077a894985b1c9302dcd0fa2e4659754b9bd9e3",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
   "pdmx-musette-in-d-major-1d17b712": {
     "ok": true,
     "conversionWarnings": [],
@@ -79570,109 +81014,6 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
-  "pdmx-schumann-album-for-the-young-op-68-no-13-08ba6b89": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-schumann-album-for-the-young-op-68-no-13-08ba6b89.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": [
-          "unusual measure number 'X1'",
-          "measure 20: 3/2 of 2 quarters (partial bar, e.g. 1st ending)"
-        ]
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 52,
-      "measureElements": 54,
-      "firstMeasure": "0",
-      "lastMeasure": "52",
-      "notes": 828,
-      "graceNotes": 28,
-      "fingerings": 0,
-      "writtenQuarters": 104.0,
-      "unfoldedQuarters": 104.0,
-      "tempoQpm": 71.0,
-      "key": [
-        "4",
-        null
-      ],
-      "time": [
-        2,
-        4
-      ],
-      "bytes": 382855,
-      "pitchRange": [
-        49,
-        85
-      ],
-      "staffAvgPitch": {
-        "1": 72.9,
-        "2": 61.6
-      },
-      "approxDurationSec": 88,
-      "music21": {
-        "parts": 2,
-        "measures": 54,
-        "noteOrChord": 710,
-        "highestTime": 104.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 2
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 8.852,
-        "shifts": 37.684,
-        "span": 11.0,
-        "chord": 0.294,
-        "fifths": 4.0,
-        "accidentals": 8.997,
-        "seconds": 87.887,
-        "leaps": 0.0
-      },
-      "score": 8.317,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 786,
-          "errors": 0,
-          "warnings": 174,
-          "counts": {
-            "L06": 8,
-            "L07": 37,
-            "L08": 64,
-            "L09": 18,
-            "L11": 2,
-            "L13": 29,
-            "L14": 45
-          }
-        },
-        "large": {
-          "notes": 786,
-          "errors": 0,
-          "warnings": 155,
-          "counts": {
-            "L06": 8,
-            "L07": 31,
-            "L08": 65,
-            "L09": 20,
-            "L11": 2,
-            "L13": 29,
-            "L14": 29
-          }
-        }
-      },
-      "scoreSha256": "12a5bf230db15823f912f02aad6856732d4b6717fdfd4a4c3df2591e861d7e4d",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
   "pdmx-schumann-album-for-the-young-op-68-no-15-7c2c3831": {
     "ok": true,
     "conversionWarnings": [],
@@ -79766,204 +81107,6 @@
         }
       },
       "scoreSha256": "12dbced5e0330b234e67c1c339c6bbf8208e280601a856d5c84e1c327cc1cb44",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
-  "pdmx-schumann-album-for-the-young-op-68-no-18-a741ab3f": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-schumann-album-for-the-young-op-68-no-18-a741ab3f.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": [
-          "unusual measure number 'X1'",
-          "measure 12: 5/2 of 3 quarters (partial bar, e.g. 1st ending)"
-        ]
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 36,
-      "measureElements": 37,
-      "firstMeasure": "1",
-      "lastMeasure": "36",
-      "notes": 408,
-      "graceNotes": 6,
-      "fingerings": 0,
-      "writtenQuarters": 106.5,
-      "unfoldedQuarters": 130.5,
-      "tempoQpm": 112.0,
-      "key": [
-        "0",
-        null
-      ],
-      "time": [
-        6,
-        8
-      ],
-      "bytes": 166993,
-      "pitchRange": [
-        48,
-        84
-      ],
-      "staffAvgPitch": {
-        "1": 70.2,
-        "2": 55.4
-      },
-      "approxDurationSec": 70,
-      "music21": {
-        "parts": 2,
-        "measures": 37,
-        "noteOrChord": 354,
-        "highestTime": 106.5,
-        "version": "10.5.0"
-      },
-      "verovioPages": 2
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 6.66,
-        "shifts": 28.574,
-        "span": 9.0,
-        "chord": 0.277,
-        "fifths": 0.0,
-        "accidentals": 2.632,
-        "seconds": 57.054,
-        "leaps": 0.0
-      },
-      "score": 5.256,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 382,
-          "errors": 0,
-          "warnings": 54,
-          "counts": {
-            "L06": 2,
-            "L07": 18,
-            "L08": 2,
-            "L13": 4,
-            "L14": 32
-          }
-        },
-        "large": {
-          "notes": 382,
-          "errors": 0,
-          "warnings": 54,
-          "counts": {
-            "L06": 2,
-            "L07": 18,
-            "L08": 2,
-            "L13": 4,
-            "L14": 32
-          }
-        }
-      },
-      "scoreSha256": "4c3346a4b935686d5d5bacbeb7702c717a0cb118be3b952693345e45a635b5b9",
-      "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
-      "cli": "packages/engine/dist/cli/main.js"
-    }
-  },
-  "pdmx-schumann-album-for-the-young-op-68-no-7-3de76791": {
-    "ok": true,
-    "conversionWarnings": [],
-    "midiChecks": {},
-    "validation": {
-      "pdmx-schumann-album-for-the-young-op-68-no-7-3de76791.musicxml": {
-        "ok": true,
-        "errors": [],
-        "warnings": [
-          "measure 8: 5/2 of 3 quarters (partial bar, e.g. 1st ending)",
-          "measure 9: 1/2 of 3 quarters (partial bar, e.g. 1st ending)"
-        ]
-      }
-    },
-    "stats": {
-      "xsdValid": true,
-      "measures": 29,
-      "measureElements": 30,
-      "firstMeasure": "0",
-      "lastMeasure": "29",
-      "notes": 318,
-      "graceNotes": 2,
-      "fingerings": 0,
-      "writtenQuarters": 84.0,
-      "unfoldedQuarters": 168.0,
-      "tempoQpm": 104.0,
-      "key": [
-        "-1",
-        null
-      ],
-      "time": [
-        6,
-        8
-      ],
-      "bytes": 133137,
-      "pitchRange": [
-        45,
-        82
-      ],
-      "staffAvgPitch": {
-        "1": 68.4,
-        "2": 56.4
-      },
-      "approxDurationSec": 97,
-      "music21": {
-        "parts": 2,
-        "measures": 30,
-        "noteOrChord": 243,
-        "highestTime": 84.0,
-        "version": "10.5.0"
-      },
-      "verovioPages": 1
-    },
-    "levelProposal": {
-      "features": {
-        "nps": 6.314,
-        "shifts": 38.826,
-        "span": 12.0,
-        "chord": 0.339,
-        "fifths": 1.0,
-        "accidentals": 4.902,
-        "seconds": 48.462,
-        "leaps": 1.739
-      },
-      "score": 6.642,
-      "level": 3
-    },
-    "lint": {
-      "profiles": {
-        "medium": {
-          "notes": 308,
-          "errors": 0,
-          "warnings": 39,
-          "counts": {
-            "L06": 1,
-            "L07": 25,
-            "L08": 5,
-            "L13": 9,
-            "L14": 8
-          }
-        },
-        "large": {
-          "notes": 308,
-          "errors": 0,
-          "warnings": 36,
-          "counts": {
-            "L06": 1,
-            "L07": 24,
-            "L08": 4,
-            "L13": 8,
-            "L14": 7
-          }
-        }
-      },
-      "scoreSha256": "0d4e6be55b0c29f4b8584d8e132f2f5e6e11603fa3e43bb92a5588b9224983e1",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
       "cli": "packages/engine/dist/cli/main.js"
     }
@@ -94197,6 +95340,102 @@
       },
       "scoreSha256": "6272d41db79cfc1ceb6cc24d71422e6f12659b799c60d05d33aee02f329afa75",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-we-are-traveling-home-to-glory-augustus-32884eb5": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-we-are-traveling-home-to-glory-augustus-32884eb5.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 20,
+      "measureElements": 20,
+      "firstMeasure": "1",
+      "lastMeasure": "20",
+      "notes": 230,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 67.0,
+      "unfoldedQuarters": 67.0,
+      "tempoQpm": 106.0,
+      "key": [
+        "-3",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 89396,
+      "pitchRange": [
+        44,
+        75
+      ],
+      "staffAvgPitch": {
+        "1": 67.1,
+        "2": 57.1
+      },
+      "approxDurationSec": 38,
+      "music21": {
+        "parts": 2,
+        "measures": 20,
+        "noteOrChord": 118,
+        "highestTime": 67.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.065,
+        "shifts": 44.915,
+        "span": 12.0,
+        "chord": 0.898,
+        "fifths": 3.0,
+        "accidentals": 4.783,
+        "seconds": 37.925,
+        "leaps": 1.695
+      },
+      "score": 8.478,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 230,
+          "errors": 0,
+          "warnings": 56,
+          "counts": {
+            "L07": 5,
+            "L08": 42,
+            "L09": 4,
+            "L13": 6,
+            "L14": 5
+          }
+        },
+        "large": {
+          "notes": 230,
+          "errors": 0,
+          "warnings": 50,
+          "counts": {
+            "L07": 7,
+            "L08": 31,
+            "L09": 6,
+            "L13": 6,
+            "L14": 6
+          }
+        }
+      },
+      "scoreSha256": "28094300e07fa9bab81b1ad964ddf6b0e266c0317ced65230c98856270e2adb2",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -199508,6 +200747,104 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "pdmx-o-the-gospel-story-tell-r-m-mcintosh-327c4be6": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-o-the-gospel-story-tell-r-m-mcintosh-327c4be6.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 16,
+      "measureElements": 16,
+      "firstMeasure": "1",
+      "lastMeasure": "16",
+      "notes": 312,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 59.0,
+      "unfoldedQuarters": 59.0,
+      "tempoQpm": 100.0,
+      "key": [
+        "-4",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 124133,
+      "pitchRange": [
+        44,
+        75
+      ],
+      "staffAvgPitch": {
+        "1": 66.3,
+        "2": 53.1
+      },
+      "approxDurationSec": 35,
+      "music21": {
+        "parts": 2,
+        "measures": 16,
+        "noteOrChord": 180,
+        "highestTime": 59.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 8.757,
+        "shifts": 55.961,
+        "span": 12.0,
+        "chord": 0.769,
+        "fifths": 4.0,
+        "accidentals": 3.226,
+        "seconds": 35.4,
+        "leaps": 3.488
+      },
+      "score": 10.074,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 310,
+          "errors": 0,
+          "warnings": 98,
+          "counts": {
+            "L07": 21,
+            "L08": 63,
+            "L09": 9,
+            "L11": 1,
+            "L13": 8,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 310,
+          "errors": 0,
+          "warnings": 85,
+          "counts": {
+            "L07": 28,
+            "L08": 47,
+            "L09": 4,
+            "L11": 1,
+            "L13": 9,
+            "L14": 5
+          }
+        }
+      },
+      "scoreSha256": "f01cb3cfa2f50317bbdbd131efa28c1b98bf33a056665db72f70d5d6dc28ce82",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "pdmx-o-the-sorrow-and-the-woe-j-b-herbert-1434d740": {
     "ok": true,
     "conversionWarnings": [],
@@ -204278,6 +205615,101 @@
       },
       "scoreSha256": "3cea18f6de57ec69b980e1b74ae23a06a3547a9a726a3b3773ffdc072a55089e",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-sing-all-ye-ransomed-of-the-lord-j-h-hal-327e8a32": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-sing-all-ye-ransomed-of-the-lord-j-h-hal-327e8a32.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 20,
+      "measureElements": 20,
+      "firstMeasure": "1",
+      "lastMeasure": "20",
+      "notes": 227,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 67.0,
+      "unfoldedQuarters": 67.0,
+      "tempoQpm": 110.0,
+      "key": [
+        "-2",
+        null
+      ],
+      "time": [
+        4,
+        4
+      ],
+      "bytes": 85646,
+      "pitchRange": [
+        46,
+        75
+      ],
+      "staffAvgPitch": {
+        "1": 67.2,
+        "2": 54.7
+      },
+      "approxDurationSec": 37,
+      "music21": {
+        "parts": 2,
+        "measures": 20,
+        "noteOrChord": 123,
+        "highestTime": 67.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.075,
+        "shifts": 75.833,
+        "span": 12.0,
+        "chord": 0.9,
+        "fifths": 2.0,
+        "accidentals": 2.252,
+        "seconds": 36.545,
+        "leaps": 0.0
+      },
+      "score": 9.871,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 222,
+          "errors": 0,
+          "warnings": 49,
+          "counts": {
+            "L06": 1,
+            "L07": 10,
+            "L08": 29,
+            "L13": 3,
+            "L14": 9
+          }
+        },
+        "large": {
+          "notes": 222,
+          "errors": 0,
+          "warnings": 46,
+          "counts": {
+            "L07": 11,
+            "L08": 27,
+            "L13": 3,
+            "L14": 8
+          }
+        }
+      },
+      "scoreSha256": "5e08607e13a7ef09932327ffb86444a6b0b177dc165d1ac1dbe401ac221cf38d",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -219493,6 +220925,102 @@
       },
       "scoreSha256": "7229a260a7fee174e474f392b617f77094bc36ec78bc321510c56eb393aa214a",
       "engineSrcSha256": "6a863e1d796b8ad1b4ecf5170c352bfbb45e3ae9d3ccda9d7431fe4cf2bac4eb",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "pdmx-with-folded-hands-and-heads-bowed-down-m-3262c335": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {},
+    "validation": {
+      "pdmx-with-folded-hands-and-heads-bowed-down-m-3262c335.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 12,
+      "measureElements": 12,
+      "firstMeasure": "1",
+      "lastMeasure": "12",
+      "notes": 126,
+      "graceNotes": 0,
+      "fingerings": 0,
+      "writtenQuarters": 34.0,
+      "unfoldedQuarters": 34.0,
+      "tempoQpm": 100.0,
+      "key": [
+        "-5",
+        null
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 52445,
+      "pitchRange": [
+        43,
+        73
+      ],
+      "staffAvgPitch": {
+        "1": 63.0,
+        "2": 53.5
+      },
+      "approxDurationSec": 20,
+      "music21": {
+        "parts": 2,
+        "measures": 12,
+        "noteOrChord": 64,
+        "highestTime": 34.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 5.784,
+        "shifts": 55.0,
+        "span": 12.0,
+        "chord": 0.8,
+        "fifths": 5.0,
+        "accidentals": 5.932,
+        "seconds": 20.4,
+        "leaps": 0.0
+      },
+      "score": 9.173,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 118,
+          "errors": 0,
+          "warnings": 32,
+          "counts": {
+            "L07": 4,
+            "L08": 21,
+            "L09": 3,
+            "L13": 4,
+            "L14": 4
+          }
+        },
+        "large": {
+          "notes": 118,
+          "errors": 0,
+          "warnings": 31,
+          "counts": {
+            "L07": 5,
+            "L08": 19,
+            "L09": 3,
+            "L13": 4,
+            "L14": 4
+          }
+        }
+      },
+      "scoreSha256": "898d63ebf6a82ef38ee61ba030532308aa8dcadf61dcd5739f76bf4d7e6aebdc",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
@@ -252758,6 +254286,256 @@
       "cli": "packages/engine/dist/cli/main.js"
     }
   },
+  "bulk-griege-o12-no03-albumblatt-no03-albumblatt-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "No03_Albumblatt.mid",
+        "exact": true,
+        "xml": 586,
+        "midi": 614,
+        "matched": 586,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 66
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "No03_Albumblatt.mid",
+        "exact": true,
+        "xml": 586,
+        "midi": 614,
+        "matched": 586,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 66
+      }
+    },
+    "validation": {
+      "bulk-griege-o12-no03-albumblatt-no03-albumblatt-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 33,
+      "measureElements": 34,
+      "firstMeasure": "0",
+      "lastMeasure": "33",
+      "notes": 327,
+      "graceNotes": 14,
+      "fingerings": 0,
+      "writtenQuarters": 66.5,
+      "unfoldedQuarters": 128.5,
+      "tempoQpm": 112.0,
+      "key": [
+        "1",
+        "minor"
+      ],
+      "time": [
+        2,
+        4
+      ],
+      "bytes": 84466,
+      "pitchRange": [
+        40,
+        88
+      ],
+      "staffAvgPitch": {
+        "1": 70.7,
+        "2": 56.6
+      },
+      "approxDurationSec": 69,
+      "music21": {
+        "parts": 2,
+        "measures": 34,
+        "noteOrChord": 249,
+        "highestTime": 66.5,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 6.095,
+        "shifts": 53.275,
+        "span": 10.0,
+        "chord": 0.311,
+        "fifths": 1.0,
+        "accidentals": 8.553,
+        "seconds": 49.875,
+        "leaps": 9.016
+      },
+      "score": 7.691,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 314,
+          "errors": 0,
+          "warnings": 64,
+          "counts": {
+            "L06": 1,
+            "L07": 45,
+            "L08": 4,
+            "L13": 10,
+            "L14": 14
+          }
+        },
+        "large": {
+          "notes": 314,
+          "errors": 0,
+          "warnings": 62,
+          "counts": {
+            "L06": 1,
+            "L07": 43,
+            "L08": 4,
+            "L13": 13,
+            "L14": 14
+          }
+        }
+      },
+      "scoreSha256": "26ad14d5aaa6218bbd56c4cf5ee2354d5945550fa1d5fa7a8b1fc3d595863645",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-sousajp-theinvincibleeagle-theinvincibleeagle-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "TheInvincibleEagle.mid",
+        "exact": true,
+        "xml": 2166,
+        "midi": 2190,
+        "matched": 2166,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 256
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "TheInvincibleEagle.mid",
+        "exact": true,
+        "xml": 2166,
+        "midi": 2190,
+        "matched": 2166,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 76
+      }
+    },
+    "validation": {
+      "bulk-sousajp-theinvincibleeagle-theinvincibleeagle-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 143,
+      "measureElements": 143,
+      "firstMeasure": "1",
+      "lastMeasure": "143",
+      "notes": 1567,
+      "graceNotes": 16,
+      "fingerings": 0,
+      "writtenQuarters": 429.0,
+      "unfoldedQuarters": 624.0,
+      "tempoQpm": 180.0,
+      "key": [
+        "2",
+        "major"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 326046,
+      "pitchRange": [
+        33,
+        98
+      ],
+      "staffAvgPitch": {
+        "1": 78.6,
+        "2": 53.8
+      },
+      "approxDurationSec": 208,
+      "music21": {
+        "parts": 2,
+        "measures": 143,
+        "noteOrChord": 972,
+        "highestTime": 429.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 5
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 10.469,
+        "shifts": 63.519,
+        "span": 12.0,
+        "chord": 0.572,
+        "fifths": 2.0,
+        "accidentals": 14.496,
+        "seconds": 143.0,
+        "leaps": 5.347
+      },
+      "score": 11.427,
+      "level": 4
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 1469,
+          "errors": 0,
+          "warnings": 296,
+          "counts": {
+            "L06": 2,
+            "L07": 180,
+            "L08": 46,
+            "L09": 1,
+            "L11": 12,
+            "L13": 18,
+            "L14": 55
+          }
+        },
+        "large": {
+          "notes": 1469,
+          "errors": 0,
+          "warnings": 311,
+          "counts": {
+            "L06": 2,
+            "L07": 192,
+            "L08": 43,
+            "L09": 3,
+            "L11": 8,
+            "L13": 18,
+            "L14": 63
+          }
+        }
+      },
+      "scoreSha256": "60259c6f94111181be73b0847cc44931ba20784ff16215f7a62c5b76f6fc0c5b",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
   "bulk-joplins-pineapplerag-pineapplerag-ly": {
     "ok": true,
     "conversionWarnings": [],
@@ -259418,6 +261196,256 @@
       },
       "scoreSha256": "5ce65ee1db65559a1c35b13bab85dc4c5d0955a99bc38e326033372c34c9463b",
       "engineSrcSha256": "e0384184a9281105e1d9d1957b551c489030c555a648c956ae73521433e09385",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "KV331_1_1_tema.mid",
+        "exact": true,
+        "xml": 476,
+        "midi": 480,
+        "matched": 476,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 10
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "KV331_1_1_tema.mid",
+        "exact": true,
+        "xml": 476,
+        "midi": 478,
+        "matched": 476,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-mozartwa-kv331-kv331-1-1-tema-kv331-1-1-tema-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 18,
+      "measureElements": 18,
+      "firstMeasure": "1",
+      "lastMeasure": "18",
+      "notes": 241,
+      "graceNotes": 2,
+      "fingerings": 0,
+      "writtenQuarters": 54.0,
+      "unfoldedQuarters": 108.0,
+      "tempoQpm": 56.0,
+      "key": [
+        "3",
+        "major"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 49934,
+      "pitchRange": [
+        40,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 71.9,
+        "2": 58.8
+      },
+      "approxDurationSec": 116,
+      "music21": {
+        "parts": 2,
+        "measures": 18,
+        "noteOrChord": 209,
+        "highestTime": 54.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 4.131,
+        "shifts": 41.047,
+        "span": 12.0,
+        "chord": 0.627,
+        "fifths": 3.0,
+        "accidentals": 0.418,
+        "seconds": 57.857,
+        "leaps": 0.0
+      },
+      "score": 6.822,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 240,
+          "errors": 0,
+          "warnings": 32,
+          "counts": {
+            "L06": 1,
+            "L07": 7,
+            "L08": 7,
+            "L09": 1,
+            "L13": 5,
+            "L14": 16
+          }
+        },
+        "large": {
+          "notes": 240,
+          "errors": 0,
+          "warnings": 32,
+          "counts": {
+            "L06": 1,
+            "L07": 8,
+            "L08": 6,
+            "L09": 1,
+            "L13": 5,
+            "L14": 16
+          }
+        }
+      },
+      "scoreSha256": "3568306fcfe6947aa3099f88365cab2f6e06cfeb45174c52a4cccb9a2da1ae49",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
+    }
+  },
+  "bulk-mozartwa-kv331-kv331-1-3-var2-kv331-1-3-var2-ly": {
+    "ok": true,
+    "conversionWarnings": [],
+    "midiChecks": {
+      "lilypond224Midi": {
+        "mode": "unfolded",
+        "midiFile": "KV331_1_3_var2.mid",
+        "exact": true,
+        "xml": 884,
+        "midi": 920,
+        "matched": 884,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 78
+      },
+      "mutopiaMidi": {
+        "mode": "unfolded",
+        "midiFile": "KV331_1_3_var2.mid",
+        "exact": true,
+        "xml": 884,
+        "midi": 918,
+        "matched": 884,
+        "only_xml_count": 0,
+        "only_midi_count": 0,
+        "only_xml": [],
+        "only_midi": [],
+        "duration_mismatches": 2
+      }
+    },
+    "validation": {
+      "bulk-mozartwa-kv331-kv331-1-3-var2-kv331-1-3-var2-ly.musicxml": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      }
+    },
+    "stats": {
+      "xsdValid": true,
+      "measures": 18,
+      "measureElements": 18,
+      "firstMeasure": "1",
+      "lastMeasure": "18",
+      "notes": 460,
+      "graceNotes": 18,
+      "fingerings": 0,
+      "writtenQuarters": 54.0,
+      "unfoldedQuarters": 108.0,
+      "tempoQpm": 56.0,
+      "key": [
+        "3",
+        "major"
+      ],
+      "time": [
+        6,
+        8
+      ],
+      "bytes": 144503,
+      "pitchRange": [
+        33,
+        81
+      ],
+      "staffAvgPitch": {
+        "1": 70.9,
+        "2": 58.6
+      },
+      "approxDurationSec": 116,
+      "music21": {
+        "parts": 2,
+        "measures": 18,
+        "noteOrChord": 456,
+        "highestTime": 54.0,
+        "version": "10.5.0"
+      },
+      "verovioPages": 2
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 7.64,
+        "shifts": 31.863,
+        "span": 12.0,
+        "chord": 0.035,
+        "fifths": 3.0,
+        "accidentals": 7.014,
+        "seconds": 57.857,
+        "leaps": 3.463
+      },
+      "score": 6.818,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 460,
+          "errors": 0,
+          "warnings": 85,
+          "counts": {
+            "L07": 22,
+            "L08": 12,
+            "L09": 24,
+            "L11": 1,
+            "L13": 6,
+            "L14": 26
+          }
+        },
+        "large": {
+          "notes": 460,
+          "errors": 0,
+          "warnings": 86,
+          "counts": {
+            "L07": 26,
+            "L08": 11,
+            "L09": 22,
+            "L11": 1,
+            "L13": 6,
+            "L14": 26
+          }
+        }
+      },
+      "scoreSha256": "64b956faa087ff7384beb5511db129bbfcae8edfd47ff8a4ed5f5573d95f74ed",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
       "cli": "packages/engine/dist/cli/main.js"
     }
   },

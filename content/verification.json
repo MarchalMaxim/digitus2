@@ -27662,6 +27662,49 @@
         "version": "10.5.0"
       },
       "verovioPages": 1
+    },
+    "levelProposal": {
+      "features": {
+        "nps": 9.769,
+        "shifts": 33.716,
+        "span": 12.0,
+        "chord": 0.587,
+        "fifths": 2.0,
+        "accidentals": 12.796,
+        "seconds": 21.6,
+        "leaps": 0.0
+      },
+      "score": 8.463,
+      "level": 3
+    },
+    "lint": {
+      "profiles": {
+        "medium": {
+          "notes": 215,
+          "errors": 0,
+          "warnings": 11,
+          "counts": {
+            "L07": 4,
+            "L09": 1,
+            "L13": 4,
+            "L14": 6
+          }
+        },
+        "large": {
+          "notes": 215,
+          "errors": 0,
+          "warnings": 10,
+          "counts": {
+            "L07": 4,
+            "L09": 2,
+            "L13": 4,
+            "L14": 4
+          }
+        }
+      },
+      "scoreSha256": "51d63871a95614a8125466de695f7bdd1316217f7c8748b8d0cdea3c3ad47bf3",
+      "engineSrcSha256": "61ef24a9904799eb4a915027c70f21cd05e5f12084c57f37f0c6397b2cc44071",
+      "cli": "packages/engine/dist/cli/main.js"
     }
   },
   "bulk-traditional-traditioner-af-swenska-folk-dansar-1-14-traditioner-af-swenska-folk-dansar-1-14-ly": {

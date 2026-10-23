@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { pageBars, type PageBars } from './bars.js';
 import { noteAt, noteBoxes, type NoteBox } from './noteKey.js';
+import { pageWindowOf } from './render/pageWindow.js';
 
 /** How far around a note's drawn box the pointer still counts as on it (px). */
 const NOTE_PAD = 3;
@@ -49,6 +50,7 @@ export function useHoveredNote({ host, layoutKey, enabled }: HoveredNoteOptions)
       if (!page) return null;
       let own = boxes.get(page);
       if (!own) {
+        pageWindowOf(host)?.ensurePage(page.index);
         own = noteBoxes(host, page.page, NOTE_PAD);
         boxes.set(page, own);
       }

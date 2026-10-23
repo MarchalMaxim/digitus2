@@ -6,6 +6,7 @@
  */
 import type { Score } from '@digitus2/engine';
 import { ticksToSeconds } from '@digitus2/engine/score-build';
+import { pageWindowOf } from './render/pageWindow.js';
 import { groupIndexAt } from './onsetGroups.js';
 import type { LoopRange } from './usePlayback.js';
 
@@ -110,25 +111,38 @@ export interface PageBars {
   /** Its top and bottom, in pixels from the host's top. */
   top: number;
   bottom: number;
+  /** The page's place among the pages (0-based). */
+  index: number;
   /** The number of its first bar among the bars of every page. */
   first: number;
-  measures: Element[];
+  /** Its number of bars, known without building the page on a windowed sheet (issue 99). */
+  count: number;
 }
 
 /**
  * The pages inside `host` (its children) with their bars, numbered across the pages in document
  * order, which is the score's bar order (the pages are laid out from the score's own MusicXML),
  * and where each page lies. One box per page: the bars themselves are not measured, so a page that
- * is not rendered (base.css, `content-visibility`) costs nothing here. Call it once per layout.
+ * is not rendered (base.css, `content-visibility`) costs nothing here, and neither does one that
+ * is not built (a windowed sheet, issue 99, counts its bars from the markup). Call it once per
+ * layout.
  */
 export function pageBars(host: Element): PageBars[] {
   const origin = host.getBoundingClientRect();
+  const counts = pageWindowOf(host)?.index.bars;
   let first = 0;
-  return Array.from(host.children).map((page) => {
+  return Array.from(host.children).map((page, index) => {
     const r = page.getBoundingClientRect();
-    const measures = Array.from(page.querySelectorAll('g.measure'));
-    const out = { page, top: r.top - origin.top, bottom: r.bottom - origin.top, first, measures };
-    first += measures.length;
+    const count = counts?.[index] ?? page.querySelectorAll('g.measure').length;
+    const out = {
+      page,
+      top: r.top - origin.top,
+      bottom: r.bottom - origin.top,
+      index,
+      first,
+      count,
+    };
+    first += count;
     return out;
   });
 }
@@ -138,13 +152,14 @@ export function pageBars(host: Element): PageBars[] {
  * staff's top to its last staff's bottom (both hands), between its bar lines, padded above and
  * below by `pad` times the height of a staff, so the digits over and under the staves count too.
  * A bar drawn nowhere (no staff) is left out. Read from layout, which draws the page if it was
- * not drawn: call it once per page and layout, for a page that is needed (a long piece has dozens,
- * issue #79), not per pointer move.
+ * not drawn (and builds it first on a windowed sheet): call it once per page and layout, for a page
+ * that is needed (a long piece has dozens, issue #79), not per pointer move.
  */
 export function barBoxes(host: Element, pad: number, page: PageBars): BarBox[] {
+  pageWindowOf(host)?.ensurePage(page.index);
   const origin = host.getBoundingClientRect();
   const out: BarBox[] = [];
-  page.measures.forEach((measure, i) => {
+  page.page.querySelectorAll('g.measure').forEach((measure, i) => {
     const bar = page.first + i;
     let left = Infinity;
     let right = -Infinity;

@@ -5,6 +5,8 @@
  * the engine's note ids (see injectIds.ts), and each `g.fing` carries `data-startid="#<noteId>"`.
  */
 
+import { pageWindowOf } from './pageWindow.js';
+
 const RED = 'is-red';
 const ONSET = 'data-onset-tick';
 const MUTED = 'is-muted';
@@ -26,6 +28,8 @@ function attrValue(s: string): string {
  * Returns the marked elements in the order first met. Does not clear the previous marks.
  */
 export function setCurrent(host: Element, noteIds: string[], onsetTick: number): Element[] {
+  // A windowed sheet builds the pages the notes are on first (issue 99).
+  pageWindowOf(host)?.ensureNotes(noteIds);
   const marked: Element[] = [];
   const seen = new Set<Element>();
   for (const id of noteIds) {
@@ -92,10 +96,15 @@ export function redim(from: readonly Element[], to: readonly Element[]): void {
  * dimmed whole, beams and rests with it; otherwise each dimmed note is dimmed on its own, or its
  * `g.chord` when the whole chord is. The staff lines, clefs and bar lines stay, and so do slurs,
  * ties and dynamics. A digit (`g.fing`, in its bar) is dimmed by `data-startid`. Nothing is
- * dimmed twice over (no dimmed element inside another). It walks every page: a long piece has
- * some 100,000 elements, so the score view finds each selection's list once per layout.
+ * dimmed twice over (no dimmed element inside another). It walks the pages in the DOM. On a
+ * windowed sheet (issue 99) that is some of the pages: `quiet` then says the staff places whose
+ * notes are all dimmed across every page (`quietPlaces`), which the pages in the DOM cannot tell.
  */
-export function mutedElements(host: Element, mutedIds: ReadonlySet<string>): Element[] {
+export function mutedElements(
+  host: Element,
+  mutedIds: ReadonlySet<string>,
+  quiet?: ReadonlySet<number>,
+): Element[] {
   const out: Element[] = [];
   if (mutedIds.size === 0) return out;
   const dim = (el: Element) => {
@@ -108,13 +117,17 @@ export function mutedElements(host: Element, mutedIds: ReadonlySet<string>): Ele
     place: staffPlace(staff),
     notes: Array.from(staff.querySelectorAll('g.note')),
   }));
-  /** Per staff place, whether it has notes and all of them are dimmed. */
-  const quiet = new Map<number, boolean>();
-  for (const { place, notes } of staves) {
-    if (notes.length > 0) quiet.set(place, (quiet.get(place) ?? true) && notes.every(muted));
+  /** The staff places that have notes, all of them dimmed. */
+  let quietPlaces = quiet;
+  if (!quietPlaces) {
+    const known = new Map<number, boolean>();
+    for (const { place, notes } of staves) {
+      if (notes.length > 0) known.set(place, (known.get(place) ?? true) && notes.every(muted));
+    }
+    quietPlaces = new Set([...known].filter(([, all]) => all).map(([place]) => place));
   }
   for (const { staff, place } of staves) {
-    const wholeStaff = quiet.get(place) === true;
+    const wholeStaff = quietPlaces.has(place);
     for (const layer of Array.from(staff.querySelectorAll('g.layer'))) {
       const notes = Array.from(layer.querySelectorAll('g.note'));
       if (wholeStaff || (notes.length > 0 && notes.every(muted))) {

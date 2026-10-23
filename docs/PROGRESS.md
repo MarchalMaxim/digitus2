@@ -199,7 +199,7 @@ Teacher review: six fixes are due before the next weekly run (#43).
 
 App and tests:
 
-- Memory on long pieces: every page stays in the DOM (about 200 MB of Blink heap on Beethoven's Ninth), and Verovio's 128 MB WASM heap stays warm between pieces except after one of 2,000 notes or more, after which both workers are released (`docs/research/ram-usage.md`).
+- Memory on long pieces: a piece of six pages or more keeps only the pages near the screen in the DOM (the Scherzo settles at 143 MB, Beethoven's Ninth at 151 MB; [issue 99](https://github.com/MarchalMaxim/digitus2/issues/99)), and Verovio's 128 MB WASM heap stays warm between pieces except after one of 2,000 notes or more, after which both workers are released (`docs/research/ram-usage.md`).
 - Imported MIDI loses held notes: one voice per hand shortens them (#34). MusicXML is unaffected.
 - Repeats are not expanded in playback (#50).
 - Offline, only the pieces opened before open and only the piano samples fetched before play; the installed app's splash screen and status bar stay white in dark mode; installing and playing on Android and iOS are not yet checked on devices (`docs/app.md`, Known limitations).

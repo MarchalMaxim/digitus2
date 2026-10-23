@@ -6,6 +6,7 @@ import { openLibraryPiece } from './helpers/library.js';
 import { holdPianoSamples } from './helpers/samples.js';
 import { STATES } from './helpers/states.js';
 import { horizontalOverflow } from './helpers/overflow.js';
+import { expectDigits } from './helpers/sheet.js';
 
 // The design brief and accessibility in every application state (verification spec 3.9): one
 // red element (or one playback cursor), zero serious or critical axe violations, and no
@@ -383,7 +384,7 @@ test.describe('the Practice panel on a phone', () => {
 // (desktop) and 360 px (mobile).
 test('a control in the dock takes the focus, or a click, where the page is', async ({ page }) => {
   await page.goto('/#/piece/mozart-sonata-k545-mvt1');
-  await expect(page.locator('.score-sheet g.fing')).toHaveCount(1288, { timeout: 20_000 });
+  await expectDigits(page, 1288);
   const scrollY = () => page.evaluate(() => window.scrollY);
   const dock = page.locator('.dock');
   const play = dock.getByRole('button', { name: 'Play' });

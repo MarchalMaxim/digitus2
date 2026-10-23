@@ -199,7 +199,7 @@ const height = (u, v, amplitude) => {
   return amplitude * Math.max(0, 1 - s * s) * (0.75 + 0.25 * Math.sin((Math.PI * v) / PAGE_MM.height));
 };
 
-function gaussianBlur(src, width, h, sigma) {
+export function gaussianBlur(src, width, h, sigma) {
   if (sigma <= 0.05) return Float32Array.from(src);
   const r = Math.ceil(3 * sigma), k = new Float32Array(2 * r + 1);
   let s = 0;
@@ -394,7 +394,7 @@ export function photograph(texture, view, sev) {
 }
 
 // ---------------------------------------------------------------- Chromium: raster and JPEG coding
-class Codec {
+export class Codec {
   async start() {
     const appRequire = createRequire(join(REPO, 'apps/web/package.json'));
     const playwright = await import(pathToFileURL(appRequire.resolve('@playwright/test')).href);
@@ -625,7 +625,7 @@ export async function buildCamera(newRef = null) {
 }
 
 // ---------------------------------------------------------------- fixtures and captures
-async function fixtures(pieces) {
+export async function fixtures(pieces) {
   const wanted = [...pieces, INVENTION];
   const dir = join(OUT, `fixtures-${sha(...wanted).slice(0, 10)}`);
   if (existsSync(join(dir, 'manifest.json'))) {

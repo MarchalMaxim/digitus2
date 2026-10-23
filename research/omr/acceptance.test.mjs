@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { aggregate, breaches, floorsFrom, missing, perturbedCopies, PERTURBATIONS, pipelineHash, SKIP, toolchains } from './acceptance.mjs';
+import { aggregate, breaches, floorFile, floorsFrom, missing, perturbedCopies, PERTURBATIONS, pipelineHash, SKIP, toolchains } from './acceptance.mjs';
 
 const metric = (matched, reference, recognized) => ({ matched, reference, recognized });
 const row = (recognizer, variant, status, matched, extra = {}) => ({
@@ -426,4 +426,14 @@ test('a busy service is waited out at most 30 times, one second when Retry-After
 test('a recogniser label that names no folder is refused', async () => {
   const { serviceLabel } = await import('./acceptance.mjs');
   for (const bad of ['', '   ', '.', '..', undefined, null, 42]) assert.throws(() => serviceLabel(bad), /recogniser label/);
+});
+
+test('rewriting the floors keeps the keys another benchmark owns', () => {
+  const previous = { schemaVersion: 1, corpus: 'v1', imgpos: { halfHeightSpaces: 2, insideCropMin: 0.9 }, floors: { old: {} } };
+  const summary = { 'homr:clean': { pages: 1, imported: 1, fullNoteF1: 0.9, pitchF1: 0.9, beamF1: 0, tiesMissed: 0, tiesExtra: 0, duplicates: 0, wrongStaff: 0 } };
+  const next = floorFile(previous, 'v1', summary, {});
+  assert.deepEqual(next.imgpos, previous.imgpos);
+  assert.deepEqual(Object.keys(next.floors), ['homr:clean']);
+  assert.equal(next.corpus, 'v1');
+  assert.deepEqual(floorFile(undefined, 'v1', summary, {}).corpus, 'v1');
 });

@@ -190,10 +190,11 @@
   outline: 2px solid var(--ink);
   outline-offset: 4px;
 }
-/* A note stepped to with the keyboard stays clear of the editor docked below it. */
+/* A note stepped to with the keyboard stays clear of the editor docked below it: the editor's
+   controls (22rem) and the photo crop it can hold (6rem high, with its gap). */
 .scan-sheet g.note,
 .scan-sheet g.rest {
-  scroll-margin: 6rem 0 22rem;
+  scroll-margin: 6rem 0 calc(22rem + 6.5rem);
 }
 
 /* The note editor docks at the bottom of the screen while a note is selected, like a sheet a
@@ -304,8 +305,49 @@
 .scan-problems button {
   transition: none;
 }
+/* The page photo around the note homr read (issue 161): grey, with a thin black frame around the
+   spot homr names. Black and white, so it never takes the screen's red. */
+.note-crop {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  border: 1px solid var(--ink);
+  background: white;
+  filter: grayscale(1);
+  line-height: 0;
+}
+.note-crop canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.note-crop-large {
+  width: 192px;
+  height: 96px;
+}
+.note-crop-small {
+  width: 128px;
+  height: 64px;
+}
+.note-crop-frame {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid black;
+  box-shadow: 0 0 0 1px white;
+}
+/* A place to check: its photo beside the text on a PC, above it on a phone. */
+.scan-problems li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+@media (max-width: 600px) {
+  .scan-problems li {
+    flex-direction: column;
+  }
+}
 /* A place to check that offers its fix: the fix sits under the entry it answers. */
-.scan-problems li.has-offer {
+.scan-problem-body.has-offer {
   display: flex;
   flex-direction: column;
   align-items: flex-start;

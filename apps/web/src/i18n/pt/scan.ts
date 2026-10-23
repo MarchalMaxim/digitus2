@@ -167,6 +167,7 @@ export const scan: Messages['scan'] = {
     pitch: (step: string, alter: number, octave: number) =>
       `${({ C: 'Dó', D: 'Ré', E: 'Mi', F: 'Fá', G: 'Sol', A: 'Lá', B: 'Si' } as Record<string, string>)[step] ?? step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Compasso ${bar}`,
+    photoAt: (bar: string) => `${bar} na foto`,
     rightHand: 'mão direita',
     leftHand: 'mão esquerda',
     staff: (staff: number) => `pauta ${staff}`,

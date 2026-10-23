@@ -21,9 +21,13 @@ const sheetNote = (page: Page, ordinal: number) => page.locator(`.scan-sheet [id
  * A tap on a note as a reader makes it: at the note's centre, whatever lies on top there (a staff
  * line often does), which the review resolves to the nearest note.
  */
-async function tap(page: Page, ordinal: number) {
+async function tap(page: Page, ordinal: number, timeout?: number) {
   // Wait for the notation of the latest correction before reaching into it.
-  await expect(page.locator('.scan-sheet')).toHaveAttribute('aria-busy', 'false');
+  await expect(page.locator('.scan-sheet')).toHaveAttribute(
+    'aria-busy',
+    'false',
+    timeout === undefined ? {} : { timeout },
+  );
   await sheetNote(page, ordinal).click({ force: true });
 }
 const editor = (page: Page) => page.getByRole('region', { name: 'Correct the selected note' });
@@ -223,4 +227,129 @@ test('scan edit: a misread 4/4 is set to 9/8 from its place to check, and no not
 
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.locator('.scan-problems summary')).toHaveText('3 places to check');
+});
+
+// Issue 161: homr says where in the photo it saw each note, and the review draws the photo there.
+test('scan edit: a selected note shows the photo at its place', async ({ page }, testInfo) => {
+  // The owner's page has 284 notes: its notation takes a loaded machine a while to draw.
+  test.setTimeout(120_000);
+  const owner = readFileSync(
+    new URL('../fixtures/scan/owner-page-1.musicxml', import.meta.url),
+    'utf8',
+  );
+  // Note 1 of the owner's first page, as homr placed it in the 1800 x 2200 photo it was given.
+  const [x, y] = [...owner.matchAll(/<!-- imgpos: (\d+(?:\.\d+)?), (\d+(?:\.\d+)?) -->/g)][1]!
+    .slice(1, 3)
+    .map(Number) as [number, number];
+  await page.goto('/');
+  // A white photo with a black disc exactly where homr placed the note.
+  const dataUrl = await page.evaluate(
+    ({ x, y }) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1800;
+      canvas.height = 2200;
+      const context = canvas.getContext('2d')!;
+      context.fillStyle = 'white';
+      context.fillRect(0, 0, 1800, 2200);
+      context.fillStyle = 'black';
+      context.beginPath();
+      context.arc(x, y, 8, 0, 2 * Math.PI);
+      context.fill();
+      return canvas.toDataURL('image/png');
+    },
+    { x, y },
+  );
+  await mockService(page, owner);
+  await scanOnePage(page, 'owner.png', Buffer.from(dataUrl.split(',')[1]!, 'base64'), 30_000);
+  await tap(page, 1, 30_000);
+  const crop = editor(page).getByRole('img', { name: 'Bar 1 in the photo' });
+  await expect(crop).toBeVisible({ timeout: 30_000 });
+  const centres = await crop.evaluate(async (el) => {
+    const canvas = el.querySelector('canvas')!;
+    const context = canvas.getContext('2d')!;
+    // The disc is drawn once the photo is decoded: wait for dark pixels.
+    let dark = { x: 0, y: 0, count: 0 };
+    for (let attempt = 0; attempt < 50 && !dark.count; attempt++) {
+      const { data, width, height } = context.getImageData(0, 0, canvas.width, canvas.height);
+      dark = { x: 0, y: 0, count: 0 };
+      for (let row = 0; row < height; row++)
+        for (let column = 0; column < width; column++) {
+          const i = (row * width + column) * 4;
+          if (0.3 * data[i]! + 0.59 * data[i + 1]! + 0.11 * data[i + 2]! < 100) {
+            dark.x += column;
+            dark.y += row;
+            dark.count++;
+          }
+        }
+      if (!dark.count) await new Promise((done) => setTimeout(done, 50));
+    }
+    const box = canvas.getBoundingClientRect();
+    const frame = el.querySelector('.note-crop-frame')!.getBoundingClientRect();
+    return {
+      size: [canvas.width, canvas.height],
+      dark: [dark.x / dark.count, dark.y / dark.count],
+      frame: [frame.left + frame.width / 2 - box.left, frame.top + frame.height / 2 - box.top],
+      box: [box.width, box.height],
+    };
+  });
+  expect(Math.abs(centres.dark[0]! - centres.size[0]! / 2)).toBeLessThanOrEqual(2);
+  expect(Math.abs(centres.dark[1]! - centres.size[1]! / 2)).toBeLessThanOrEqual(2);
+  expect(Math.abs(centres.frame[0]! - centres.box[0]! / 2)).toBeLessThanOrEqual(1);
+  expect(Math.abs(centres.frame[1]! - centres.box[1]! / 2)).toBeLessThanOrEqual(1);
+  // A note stepped to stays clear of the editor docked below it: the margin the sheet keeps below
+  // a note holds the editor, its photo included.
+  const { editorHeight, margin } = await page.evaluate((id) => {
+    const panel = document.querySelector('.note-editor')!;
+    const note = document.getElementById(id)!;
+    return {
+      editorHeight: panel.getBoundingClientRect().height,
+      margin: parseFloat(getComputedStyle(note).scrollMarginBottom),
+    };
+  }, 's1');
+  expect(editorHeight).toBeLessThanOrEqual(margin);
+  await expectOneRed(page, 'crop shown');
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('crop-selected.png'), fullPage: true });
+});
+
+// Issue 161: every place to check shows the photo at its note: above its text on a phone, beside it on a PC.
+test('scan edit: a place to check shows the photo at its note, above its text on a phone and beside it on a PC', async ({
+  page,
+}, testInfo) => {
+  let placed = 0;
+  const xml = RECOGNITION_WITH_ERRORS.replace(
+    /<note>/g,
+    () => `<note><!-- imgpos: ${200 + 60 * placed++}, 400 -->`,
+  );
+  await page.goto('/');
+  const dataUrl = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 1600;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, 1200, 1600);
+    return canvas.toDataURL('image/png');
+  });
+  await mockService(page, xml);
+  await scanOnePage(page, 'places.png', Buffer.from(dataUrl.split(',')[1]!, 'base64'));
+  // Refused, the places to check open by themselves and the first one carries the red.
+  const entry = page.locator('.scan-problems li').first();
+  const crop = entry.locator('.note-crop-small');
+  await expect(crop).toBeVisible();
+  const text = entry.locator('.scan-problem-body');
+  await expect(text.locator('.is-red')).toBeVisible();
+  const [photo, body] = await Promise.all([crop.boundingBox(), text.boundingBox()]);
+  expect(photo!.width).toBeGreaterThan(0);
+  if ((page.viewportSize()?.width ?? 1280) <= 600) {
+    // Above the text, inside the screen.
+    expect(photo!.y + photo!.height).toBeLessThanOrEqual(body!.y + 1);
+    expect(photo!.x + photo!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  } else {
+    // Beside the text.
+    expect(photo!.x + photo!.width).toBeLessThanOrEqual(body!.x + 1);
+  }
+  await expectOneRed(page, 'places to check with their photos');
+  await noOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath('places-crops.png'), fullPage: true });
 });

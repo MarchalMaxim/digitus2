@@ -38,7 +38,8 @@ import {
   stavesWerePaired,
 } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
-import { chordOf, parseScanXml, readingOrder, readScanScore } from './notes.js';
+import { chordOf, parseScanXml, readingOrder, readScanScore, type ScanNote } from './notes.js';
+import { NoteCrop } from './NoteCrop.js';
 import { isTouchOnly } from './phone.js';
 import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
 import { ScanProgress } from './ScanProgress.js';
@@ -198,6 +199,16 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     !reviewError;
   const selectedNote =
     note !== null && editable ? corrected.score.notes.find((n) => n.ordinal === note) : undefined;
+  // The photo a note was read from, when homr placed it there (issue 161). The joined score reads
+  // its pages in the order of the results, so a score of another page count (an old saved session,
+  // a page that failed) shows no photo rather than the wrong one.
+  const photoOf = (n?: ScanNote): Blob | undefined => {
+    const file =
+      n?.imgpos && corrected && corrected.score.pages === sourcePages.length
+        ? sourcePages[n.page]?.file
+        : undefined;
+    return file?.type.startsWith('image/') ? file : undefined;
+  };
   // Saved corrections that no longer apply are dropped by the next change, never replayed.
   const kept = corrected ? corrections.slice(0, corrected.applied) : corrections;
   // The verdict line (issue 158): what was read, from the facts the session holds.
@@ -908,24 +919,39 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                         corrected.score.bars.find(
                           (b) => b.part === problem.part && b.index === offer.bar,
                         );
+                      const where = corrected.score.notes.find((n) => n.ordinal === target);
+                      const photo = photoOf(where);
                       return (
-                        <li key={index} className={offer ? 'has-offer' : undefined}>
-                          <button
-                            className={
-                              index === 0 && nextRed === 'problem' ? 'is-red' : 'text-button'
-                            }
-                            disabled={target === undefined}
-                            onClick={() => {
-                              if (target !== undefined) select(target);
-                            }}
-                          >
-                            {describeProblem(t, corrected.score, problem)}
-                          </button>
-                          {offer && bar && (
-                            <button onClick={() => applyCorrection(offer)}>
-                              {t.scan.edit.setMeter(`${offer.beats}/${offer.beatType}`, bar.number)}
-                            </button>
+                        <li key={index}>
+                          {photo && where?.imgpos && (
+                            <NoteCrop
+                              image={photo}
+                              at={where.imgpos}
+                              size="small"
+                              label={t.scan.edit.photoAt(t.scan.edit.bar(where.measureNumber))}
+                            />
                           )}
+                          <div className={`scan-problem-body${offer ? ' has-offer' : ''}`}>
+                            <button
+                              className={
+                                index === 0 && nextRed === 'problem' ? 'is-red' : 'text-button'
+                              }
+                              disabled={target === undefined}
+                              onClick={() => {
+                                if (target !== undefined) select(target);
+                              }}
+                            >
+                              {describeProblem(t, corrected.score, problem)}
+                            </button>
+                            {offer && bar && (
+                              <button onClick={() => applyCorrection(offer)}>
+                                {t.scan.edit.setMeter(
+                                  `${offer.beats}/${offer.beatType}`,
+                                  bar.number,
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </li>
                       );
                     })}
@@ -974,6 +1000,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   onCorrect={applyCorrection}
                   onSelect={select}
                   onClose={closeEditor}
+                  photo={photoOf(selectedNote)}
                 />
               ) : (
                 editable &&

@@ -88,15 +88,22 @@ export async function blockService(page: Page): Promise<void> {
 }
 
 /** Opens one page image from the library and scans it with the (mocked) scan service. */
-export async function scanOnePage(page: Page, name = 'printed-score.png'): Promise<void> {
+export async function scanOnePage(
+  page: Page,
+  name = 'printed-score.png',
+  buffer: Buffer = PNG,
+  /** How long the review may take to draw the notation: a page of hundreds of notes needs more. */
+  timeout?: number,
+): Promise<void> {
+  const wait = timeout === undefined ? {} : { timeout };
   await page.goto('/');
   await page
     .locator('input[type=file]')
     .first()
-    .setInputFiles({ name, mimeType: 'image/png', buffer: PNG });
+    .setInputFiles({ name, mimeType: 'image/png', buffer });
   await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
-  await expect(page.locator('.scan-sheet svg').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible(wait);
+  await expect(page.locator('.scan-sheet svg').first()).toBeVisible(wait);
 }
 
 /** One MusicXML note: `p` is a pitch like C5, B-4 (flat) or F#4, or 'r' for a rest. */

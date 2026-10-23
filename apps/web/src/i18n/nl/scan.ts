@@ -167,6 +167,7 @@ export const scan: Messages['scan'] = {
     pitch: (step: string, alter: number, octave: number) =>
       `${step}${alter > 0 ? '♯︎'.repeat(alter) : '♭︎'.repeat(-alter)}${octave}`,
     bar: (bar: string) => `Maat ${bar}`,
+    photoAt: (bar: string) => `${bar} op de foto`,
     rightHand: 'rechterhand',
     leftHand: 'linkerhand',
     staff: (staff: number) => `notenbalk ${staff}`,

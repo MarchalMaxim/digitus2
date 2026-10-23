@@ -16,9 +16,9 @@
 // 40 s idle, and after a simulated critical memory-pressure notification (what is only cache goes).
 //
 // The gate (issue 99) is that oracle, not the renderer's bytes: after every round no more DOM
-// nodes, detached nodes or detached SVG elements than at the fresh open, and the renderer's memory
-// level from the first round to the last (within 5%: paint and Blink's caches rise once on the
-// first scroll whether or not pages are torn, then plateau). The script exits 1 when a piece fails.
+// nodes, detached nodes or detached SVG elements than at the fresh open. The renderer rises a
+// little with every round on any build, every page built or not (docs/research/ram-usage.md), so
+// its bytes are reported, not gated. The script exits 1 when a piece fails.
 import { execFileSync, spawn } from 'node:child_process';
 import { chromium } from '@playwright/test';
 
@@ -226,11 +226,6 @@ function gateFailures(m) {
   grows('nodes', m.nodesFresh, m.nodesAfterRounds);
   grows('detachedNodes', m.detachedNodesFresh, m.detachedNodesAfterRounds);
   grows('detachedSvg', m.detachedSvgFresh, m.detachedSvgAfterRounds);
-  const first = m.roundsMb[0];
-  const last = m.roundsMb[m.roundsMb.length - 1];
-  if (m.roundsMb.length > 1 && last > first * 1.05) {
-    out.push(`renderer ${first} MB after round 1 -> ${last} MB after round ${m.roundsMb.length}`);
-  }
   return out;
 }
 

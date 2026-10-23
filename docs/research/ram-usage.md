@@ -70,6 +70,8 @@ Renderer private memory and the DOM, before → after, median of three runs, int
 | Beethoven, Symphony No. 9, first movement (35 pages) | 648 → 659 MB | 475 → 234 MB | 371 → 151 MB | 361 → 143 MB | 213,651 → 13,181 | 35 → 2 |
 | Precure piano medley (60 pages) | 771 → 805 MB | 580 → 198 MB | 536 → 191 MB | 529 → 183 MB | 340,119 → 12,303 | 60 → 2 |
 
+Measured again on the current main, two runs each, interleaved, the 40 s readings agree within 10 MB: 301 to 303 → 142 to 147 MB on the Scherzo, 380 to 382 → 148 to 150 MB on Beethoven's Ninth, 557 to 567 → 194 to 196 MB on the medley.
+
 The first column stays within 5 % (the medley's 771 → 805 MB is the largest change): the peak while a piece opens is the engine worker's garbage and the layout, which come before the pages are built. The page counts are those at 1280 px, where the score draws at 56 %. The scroll height is the same as before to the pixel (44,255 px on the Scherzo).
 
 Scrolling a piece through raises the renderer above its fresh reading, on both builds, and then it stops growing. The leak oracle (`measure-ram.mjs --rounds 4`) scrolls the piece to the bottom a viewport at a time, returns to the top and forces garbage collections, four times, and reads again after 40 s idle. The Scherzo, median of three runs:
@@ -83,7 +85,20 @@ The oracle reads three things. The renderer plateaus after the first round (209 
 
 The script waits for the score with a locator, not `page.waitForSelector`: that returns an element handle, which the DevTools console keeps. The handle was a digit on the first page, so once that page was torn the page stayed alive, with 12,168 nodes after the first round instead of 8,510 and 70 to 80 MB more; a heap snapshot lists the five detached objects, all reached from "DevTools console".
 
-The oracle is the gate, not the renderer's bytes: `measure-ram.mjs` exits 1 when, for a piece, any round ends with more DOM nodes, detached nodes or detached SVG elements than the fresh open, or the renderer rises more than 5 % from the first round to the last. The bytes after a scroll stay above the fresh open on either build (the table), so a bound on them against the fresh open would fail the build that tears nothing as well.
+Every build rises a little with each scroll through a long piece, with or without the window, while the JS heap, the DOM nodes and the detached SVG elements stay where they are. The renderer after each of four rounds, two runs each on the current main, interleaved:
+
+| Piece, build | Fresh open | Round 1 | Round 2 | Round 3 | Round 4 | After a critical memory-pressure notification |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Scherzo, every page built | 302 to 305 MB | 412 to 416 MB | 426 to 437 MB | 427 to 428 MB | 435 to 436 MB | 436 to 438 MB |
+| Scherzo, pages near the screen | 139 to 142 MB | 217 to 220 MB | 207 to 241 MB | 218 to 248 MB | 208 to 255 MB | 208 to 257 MB |
+| Ninth, every page built | 382 to 383 MB | 601 to 602 MB | 599 to 600 MB | 602 to 604 MB | 606 to 609 MB | 608 to 610 MB |
+| Ninth, pages near the screen | 143 to 148 MB | 207 to 240 MB | 209 to 247 MB | 212 to 224 MB | 230 to 249 MB | 231 to 251 MB |
+| Medley, every page built | 545 to 555 MB | 884 to 890 MB | 914 to 921 MB | 923 to 924 MB | 923 to 938 MB | 924 to 939 MB |
+| Medley, pages near the screen | 192 MB | 299 to 300 MB | 312 to 315 MB | 321 MB | 323 to 333 MB | 324 to 333 MB |
+
+The medley rises 34 to 48 MB from the first round to the fourth on main and 23 to 34 MB with the window; over eight rounds the windowed medley reaches 339 to 347 MB, still slowing. A simulated critical memory-pressure notification gives nothing back on either build, so it is not a cache Chrome drops on demand; nothing the page reaches holds it either. It is Chromium's own and not the window's, since the build that tears nothing rises as much.
+
+So the gate is the oracle, not the renderer's bytes: `measure-ram.mjs` exits 1 when, for a piece, any round ends with more DOM nodes, detached nodes or detached SVG elements than the fresh open. Both builds pass it: main's 145,842 / 213,651 / 340,119 nodes and the window's 8,510 / 13,181 / 12,303 come back to within three nodes after every round, and no SVG element is detached and alive. A bound on the bytes would fail main as well.
 
 `useLastHeads` (`RedFlight.tsx`) keeps the noteheads the cursor marked last once its marks clear, for the flight home and the end burst. After a Rewind or a stop the red's page is no longer pinned and the window can tear it, so it holds them weakly (`WeakRef`): the ref no longer keeps a torn page's detached content (3,658 nodes for the Scherzo's first page) alive until the next mark, and a flight home or the finish whose noteheads were torn does not fly. The oracle plays nothing, so it does not exercise this path.
 

@@ -4,8 +4,8 @@ import { levelAt, levelRect, moving, type KeyLevel, type KeyLevels } from './key
 
 /**
  * Where a key's level goes (issue 185): whether the key is black, the held bar the level grows
- * from, and the scale a pressed key takes (`KEY_TRAVEL`), which the hand letters' clip needs
- * because the letters are not in a key's group.
+ * from, and the scale the key takes, the cue's or a key held on the piano's (`KEY_TRAVEL`), which
+ * the hand letters' clip needs because the letters are not in a key's group.
  */
 export interface KeyGeometry {
   black: boolean;

@@ -1034,3 +1034,235 @@ describe('Keyboard: how long a held key has been held (issue 185)', () => {
     });
   });
 });
+
+describe('Keyboard: the key goes down and the glass (issue 200)', () => {
+  const C4 = { midi: 60, finger: 1, hand: 'R' } as const;
+  const keyboard = (rest: Partial<KeyboardProps> = {}) => (
+    <Keyboard lowMidi={48} highMidi={71} pressed={[]} {...rest} />
+  );
+  const glassOf = (c: Element, midi: number) =>
+    c.querySelector(`g.key[data-midi="${midi}"] path.key-glass`);
+  const after = (a: Node, z: Node) =>
+    !!(a.compareDocumentPosition(z) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  describe('the key goes down', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('goes down further for a key held on the piano than the cue alone does', () => {
+      const { container } = render(keyboard({ pressed: [C4], held: [60, 62, 61] }));
+      const key = (midi: number) => container.querySelector(`g.key[data-midi="${midi}"]`)!;
+      expect(key(60)).toHaveClass('is-pressed', 'is-down'); // cued and held
+      expect(key(62)).toHaveClass('is-down'); // a wrong key goes down too
+      expect(key(62)).not.toHaveClass('is-pressed');
+      expect(key(61)).toHaveClass('is-down', 'is-black');
+      expect(key(64)).not.toHaveClass('is-down'); // not held
+      cleanup();
+      const cued = render(keyboard({ pressed: [C4] }));
+      expect(cued.container.querySelector('g.key.is-down')).toBeNull(); // the cue alone
+    });
+
+    it('draws a dimmed key held on the piano as it was: its bar beside it, and no travel', () => {
+      const { container } = render(
+        keyboard({ muted: [{ midi: 62, finger: 2, hand: 'L' }], held: [62] }),
+      );
+      expect(container.querySelector('g.key[data-midi="62"]')).not.toHaveClass('is-down');
+    });
+
+    it('lets a key come up at the damper time for a moment, and not a key held again', () => {
+      const { container, rerender } = render(keyboard({ pressed: [C4], held: [60] }));
+      const c4 = () => container.querySelector('g.key[data-midi="60"]')!;
+      expect(c4()).not.toHaveClass('is-lifting');
+      rerender(keyboard({ pressed: [C4], held: [] })); // let go: back to the cue's depth, slowly
+      expect(c4()).toHaveClass('is-pressed');
+      expect(c4()).not.toHaveClass('is-down');
+      expect(c4()).toHaveClass('is-lifting');
+      act(() => {
+        vi.advanceTimersByTime(250);
+      });
+      expect(c4()).not.toHaveClass('is-lifting');
+      // Let go and pressed again before the class is gone: held again, it is not lifting.
+      rerender(keyboard({ pressed: [C4], held: [60] }));
+      rerender(keyboard({ pressed: [C4], held: [] }));
+      expect(c4()).toHaveClass('is-lifting');
+      rerender(keyboard({ pressed: [C4], held: [60] }));
+      expect(c4()).not.toHaveClass('is-lifting');
+      expect(c4()).toHaveClass('is-down');
+    });
+
+    it('does not mark a key that was never held as lifting', () => {
+      const { container, rerender } = render(keyboard({ pressed: [C4] }));
+      rerender(keyboard({ pressed: [C4], held: [62] }));
+      rerender(keyboard({ pressed: [C4], held: [] }));
+      expect(container.querySelector('g.key[data-midi="60"]')).not.toHaveClass('is-lifting');
+    });
+
+    it('exports the held travel that base.css gives a key held on the piano', () => {
+      const css = readFileSync(resolve(process.cwd(), 'src/design/base.css'), 'utf8');
+      const scaleOf = (selector: string) => {
+        const at = css.indexOf(`${selector} {`);
+        expect(at, selector).toBeGreaterThanOrEqual(0);
+        const body = css.slice(at, css.indexOf('}', at));
+        return Number(/scaleY\(([\d.]+)\)/.exec(body)![1]);
+      };
+      expect(scaleOf('.keyboard-svg .key.is-down')).toBe(KEY_TRAVEL.held.white);
+      expect(scaleOf('.keyboard-svg .key.is-black.is-down')).toBe(KEY_TRAVEL.held.black);
+      // Deeper than the cue's, and a black key deeper than a white one.
+      expect(KEY_TRAVEL.held.white).toBeLessThan(KEY_TRAVEL.white);
+      expect(KEY_TRAVEL.held.black).toBeLessThan(KEY_TRAVEL.black);
+      expect(KEY_TRAVEL.held.black).toBeLessThan(KEY_TRAVEL.held.white);
+    });
+  });
+
+  describe('the glass', () => {
+    it('draws nothing by default', () => {
+      const { container } = render(keyboard({ pressed: [C4] }));
+      expect(container.querySelectorAll('path.key-glass')).toHaveLength(0);
+    });
+
+    it('draws one path in the group of each key it names, hidden from assistive technology', () => {
+      const { container } = render(keyboard({ pressed: [C4], glass: new Set([60, 64, 61]) }));
+      const paths = [...container.querySelectorAll('path.key-glass')];
+      expect(paths.map((p) => p.closest('g.key')?.getAttribute('data-midi'))).toEqual([
+        '60',
+        '64',
+        '61',
+      ]); // white keys first, then black: the order the keys are drawn in
+      for (const p of paths) expect(p).toHaveAttribute('aria-hidden', 'true');
+      expect(glassOf(container, 61)).toHaveClass('is-on-black'); // a black key that shows no state
+      expect(glassOf(container, 60)).not.toHaveClass('is-on-black');
+    });
+
+    it('lies after the key and before the level, so a new press fills it', () => {
+      const store = createLevelStore();
+      store.start(60, { atMs: 0, lengthMs: 1000, beats: 4 });
+      const { container } = render(
+        keyboard({ pressed: [C4], glass: new Set([60]), levels: store.get() }),
+      );
+      const g = container.querySelector('g.key[data-midi="60"]')!;
+      const glass = g.querySelector('path.key-glass')!;
+      expect(after(g.querySelector('rect')!, glass)).toBe(true);
+      expect(after(glass, g.querySelector('rect.key-level')!)).toBe(true);
+      expect(after(glass, g.querySelector('text')!)).toBe(true); // and under the number
+      store.dispose();
+    });
+
+    it('ignores a pitch outside the drawn range, and a dimmed key', () => {
+      const { container } = render(
+        keyboard({ muted: [{ midi: 62, finger: 2, hand: 'L' }], glass: new Set([30, 62]) }),
+      );
+      expect(container.querySelectorAll('path.key-glass')).toHaveLength(0);
+    });
+
+    it('is open at the front edge and runs up the key (a white key with a black key to the right)', () => {
+      const { container } = render(keyboard({ glass: new Set([60]) }));
+      // C4: bar x 171 to 189, so the line is half a unit in; it climbs to 3.5 under the key's top
+      // and drops to the black key's front edge (62), 2 units off the black key's edge (183).
+      expect(glassOf(container, 60)!.getAttribute('d')).toBe(
+        'M 171.5 97 V 3.5 H 183 V 62 H 188.5 V 97',
+      );
+    });
+
+    it('narrows into the gap between two black keys', () => {
+      const { container } = render(keyboard({ glass: new Set([62]) }));
+      expect(glassOf(container, 62)!.getAttribute('d')).toBe(
+        'M 195.5 97 V 62 H 201 V 3.5 H 207 V 62 H 212.5 V 97',
+      );
+    });
+
+    it('narrows only on the side that has a black key (a white key with one on its left)', () => {
+      const { container } = render(keyboard({ glass: new Set([64]) }));
+      expect(glassOf(container, 64)!.getAttribute('d')).toBe(
+        'M 219.5 97 V 62 H 225 V 3.5 H 236.5 V 97',
+      );
+    });
+
+    it('does not narrow for a black key that is out of the range drawn', () => {
+      // The range starts at D: no C# to its left, so D is open on that side.
+      const { container } = render(
+        <Keyboard lowMidi={50} highMidi={73} pressed={[]} glass={new Set([50])} />,
+      );
+      expect(glassOf(container, 50)!.getAttribute('d')).toBe(
+        'M 3.5 97 V 3.5 H 15 V 62 H 20.5 V 97',
+      );
+    });
+
+    it('outlines a black key from its bar to 2.5 under its top', () => {
+      const { container } = render(keyboard({ glass: new Set([61]) }));
+      // C#4: bar x 187 to 197 (10 wide), bottom 60.
+      expect(glassOf(container, 61)!.getAttribute('d')).toBe('M 187.5 60 V 2.5 H 196.5 V 60');
+    });
+
+    it('is never red, and draws no color of its own', () => {
+      const { container } = render(keyboard({ pressed: [C4], glass: new Set([60, 61, 62]) }));
+      expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+      expect(container.querySelectorAll('[fill], [stroke]')).toHaveLength(0);
+    });
+  });
+
+  describe('the hand letter on a key held down', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: [
+          'performance',
+          'requestAnimationFrame',
+          'cancelAnimationFrame',
+          'setTimeout',
+          'clearTimeout',
+        ],
+      });
+      vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('clips the letter over the level by the travel the held key has', () => {
+      const level: KeyLevel = {
+        atMs: performance.now(),
+        lengthMs: 1600,
+        beats: 4,
+        upMs: null,
+        fromLevel: 0,
+        drainMs: 0,
+      };
+      const levels = new Map([[60, level]]);
+      const { container, rerender } = render(
+        keyboard({ pressed: [C4], handLetters: true, levels, held: [60] }),
+      );
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      const clip = () => container.querySelector('clipPath rect[data-hand-clip-for="60"]')!;
+      const num = (a: string) => Number(clip().getAttribute(a));
+      // Half full: the level is 49.5 high, from 47.5; the held key shortens to 0.94.
+      expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.held.white, 6);
+      expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.held.white, 6);
+      // Let go (the same level, the key up): the cue's depth.
+      rerender(keyboard({ pressed: [C4], handLetters: true, levels, held: [] }));
+      expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.white, 6);
+      expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.white, 6);
+    });
+  });
+
+  describe('PianoKeyboard', () => {
+    it('draws the glass of the store it is given, and none without one', () => {
+      const store = createLevelStore();
+      const props = { lowMidi: 48, highMidi: 71, pressed: [C4] };
+      const { container, rerender } = render(<PianoKeyboard {...props} levels={store} />);
+      expect(container.querySelectorAll('path.key-glass')).toHaveLength(0);
+      act(() => store.mark(60));
+      expect(container.querySelectorAll('path.key-glass')).toHaveLength(1);
+      act(() => store.clearGlass());
+      expect(container.querySelectorAll('path.key-glass')).toHaveLength(0);
+      act(() => store.mark(60));
+      rerender(<PianoKeyboard {...props} />); // no store: no glass, and no error
+      expect(container.querySelectorAll('path.key-glass')).toHaveLength(0);
+      store.dispose();
+    });
+  });
+});

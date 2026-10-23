@@ -11,10 +11,10 @@ import {
   useState,
   type JSX,
 } from 'react';
-import { restrike } from '../design/motion.js';
+import { durationMs, restrike } from '../design/motion.js';
 import { useT } from '../i18n/i18n.js';
 import { handLetter } from './handLetters.js';
-import { levelRect, NO_LEVELS, type KeyLevels } from './keyLevels.js';
+import { levelRect, NO_GLASS, NO_LEVELS, type KeyGlass, type KeyLevels } from './keyLevels.js';
 import { useKeyLevels, type KeyGeometry } from './useKeyLevels.js';
 import { useKeyPress } from './useKeyPress.js';
 
@@ -84,6 +84,13 @@ export interface KeyboardProps {
    * (score/useKeyLevels.ts). Default none (issue 185).
    */
   levels?: KeyLevels;
+  /**
+   * The keys let go before their note was held long enough (issue 200): each draws, in its group
+   * under its level, the outline of a full level in the bar's gray, until the red moves on. A
+   * new press fills it from the bottom. A pitch outside the drawn range, or a dimmed key, draws
+   * none. Default none.
+   */
+  glass?: KeyGlass;
 }
 
 /** How long a key pressed with the pointer stays down at most (ms): usePlayback's KEY_HOLD_SEC. */
@@ -91,10 +98,22 @@ export const KEY_HOLD_MS = 2000;
 
 /**
  * How far a pressed key shortens from its back edge: the `scaleY` of base.css
- * (`.keyboard-svg .key.is-pressed`), which a test keeps equal. The hand letters are not in a key's
- * group and do not travel, so the clip of a level's letter takes the level's rectangle through it.
+ * (`.keyboard-svg .key.is-pressed`), which a test keeps equal. A key held on the reader's own
+ * piano goes further down (`held`, `.key.is-down`, issue 200). The hand letters are not in a
+ * key's group and do not travel, so the clip of a level's letter takes the level's rectangle
+ * through the travel the key has.
  */
-export const KEY_TRAVEL = { white: 0.976, black: 0.96 } as const;
+export const KEY_TRAVEL = {
+  white: 0.976,
+  black: 0.96,
+  held: { white: 0.94, black: 0.92 },
+} as const;
+
+/**
+ * How long a key let go keeps `is-lifting` past the damper time, so the class is never taken off
+ * while its rise is still running (ms).
+ */
+const LIFT_SLACK_MS = 20;
 
 /** A horizontal stretch of the drawn keyboard, in CSS pixels from its left edge. */
 export interface Span {
@@ -212,6 +231,7 @@ function oneByKey(keys: readonly PressedKey[]): Map<number, PressedKey> {
 const NO_KEYS: PressedKey[] = [];
 const NO_HOVER: PressedKey[] = [];
 const NO_HELD: readonly number[] = [];
+const NO_LIFTING: ReadonlySet<number> = new Set();
 
 /** The bar along the front edge of a held key (issue 182): 5 px high on a white key, 4 on a black. */
 function heldBar(k: KeyShape, w: number, h: number) {
@@ -223,6 +243,29 @@ function heldBar(k: KeyShape, w: number, h: number) {
     height: k.black ? 4 : 5,
     rx: 1,
   };
+}
+
+/**
+ * The glass of a key (issue 200): the outline of a full level, open at the front edge where the
+ * bar sits, half a unit inside the level's width so a level that fills it covers the line. It runs
+ * up to the level's top (3.5 on a white key, 2.5 on a black one). A white key beside a black key
+ * narrows, above the black key's front edge, to the part of the level that shows, 2 units off the
+ * black key's edge so the line never merges into it.
+ */
+function glassPath(k: KeyShape, blackLeft: boolean, blackRight: boolean): string {
+  const w = k.black ? BLACK_W : WHITE_W;
+  const h = k.black ? BLACK_H : WHITE_H;
+  const bar = heldBar(k, w, h);
+  const bottom = bar.y + bar.height;
+  const left = bar.x + 0.5;
+  const right = bar.x + bar.width - 0.5;
+  if (k.black) return `M ${left} ${bottom} V 2.5 H ${right} V ${bottom}`;
+  const parts = [`M ${left} ${bottom}`];
+  if (blackLeft) parts.push(`V ${BLACK_H}`, `H ${k.x + BLACK_W / 2 + 2}`);
+  parts.push('V 3.5');
+  if (blackRight) parts.push(`H ${k.x + WHITE_W - BLACK_W / 2 - 2}`, `V ${BLACK_H}`);
+  parts.push(`H ${right}`, `V ${bottom}`);
+  return parts.join(' ');
 }
 
 /** Where a key's hand letter stands (and its copy over a level, issue 185): over its number. */
@@ -285,6 +328,7 @@ export function Keyboard({
   barKeys,
   held = NO_HELD,
   levels = NO_LEVELS,
+  glass = NO_GLASS,
 }: KeyboardProps): JSX.Element {
   const t = useT();
   // The ids of the clip paths (issue 185): one per keyboard, so two keyboards on a page never
@@ -315,21 +359,45 @@ export function Keyboard({
   const byMidi = oneByKey([...pressed, ...hoverKeys, ...downKeys]);
   const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
   const heldSet = useMemo(() => new Set(held), [held]);
+  // The keys that came up a moment ago (issue 200): a key held on the piano is drawn further down
+  // than the cue, and one let go rises back to the cue's depth in the damper time, which the cue's
+  // own quick press would otherwise cut short (`is-lifting`, base.css). Worked out during the render
+  // that sees the key let go, so no frame draws it rising at the press time.
+  const [heldSeen, setHeldSeen] = useState<ReadonlySet<number>>(heldSet);
+  const [lifting, setLifting] = useState<ReadonlySet<number>>(NO_LIFTING);
+  if (heldSeen !== heldSet) {
+    setHeldSeen(heldSet);
+    const next = new Set([...lifting].filter((midi) => !heldSet.has(midi)));
+    for (const midi of heldSeen) if (!heldSet.has(midi)) next.add(midi);
+    setLifting(next);
+  }
+  useEffect(() => {
+    if (lifting.size === 0) return;
+    const timer = setTimeout(
+      () => setLifting(NO_LIFTING),
+      durationMs('--dur-slow') + LIFT_SLACK_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [lifting]);
   const width = Math.max(1, whiteCount) * WHITE_W;
-  // What a key's level grows from (issue 185): the held bar, and the scale the key takes pressed.
+  // What a key's level grows from (issue 185): the held bar, and the scale the key takes: the
+  // cue's, or the deeper one of a key held on the piano (issue 200).
   const geometry = useMemo(
     () =>
       new Map<number, KeyGeometry>(
-        keys.map((k) => [
-          k.midi,
-          {
-            black: k.black,
-            bar: heldBar(k, k.black ? BLACK_W : WHITE_W, k.black ? BLACK_H : WHITE_H),
-            travel: k.black ? KEY_TRAVEL.black : KEY_TRAVEL.white,
-          },
-        ]),
+        keys.map((k) => {
+          const travel = heldSet.has(k.midi) ? KEY_TRAVEL.held : KEY_TRAVEL;
+          return [
+            k.midi,
+            {
+              black: k.black,
+              bar: heldBar(k, k.black ? BLACK_W : WHITE_W, k.black ? BLACK_H : WHITE_H),
+              travel: k.black ? travel.black : travel.white,
+            },
+          ];
+        }),
       ),
-    [keys],
+    [keys, heldSet],
   );
   // The keys that draw a level: one in `levels`, on the keyboard, not dimmed (`mutedByMidi` holds
   // the dimmed keys only), with an `h` for those that also draw a letter's copy. The rectangles
@@ -410,7 +478,9 @@ export function Keyboard({
     const w = k.black ? BLACK_W : WHITE_W;
     const h = k.black ? BLACK_H : WHITE_H;
     const state = p ? ' is-pressed' : m ? ' is-muted' : '';
-    const cls = `key ${k.black ? 'is-black' : 'is-white'}${state}`;
+    // A key held on the piano goes down further than the cue (issue 200); a dimmed key does not move.
+    const down = heldSet.has(k.midi) && !m ? ' is-down' : lifting.has(k.midi) ? ' is-lifting' : '';
+    const cls = `key ${k.black ? 'is-black' : 'is-white'}${state}${down}`;
     // The key's level (issue 185): never on a dimmed key, and whether or not the key is still held
     // (a level let go before it is full drains after the key is up). Drawn empty: useKeyLevels
     // sets the size of this rectangle and of its clip from the clock, before the paint.
@@ -425,6 +495,17 @@ export function Keyboard({
         {m && k.black && <rect className="key-backing" x={k.x} y={0} width={w} height={h} />}
         <g className={cls} data-midi={k.midi} data-hand={shown?.hand}>
           <rect x={k.x} y={0} width={w} height={h} />
+          {glass.has(k.midi) && !m && (
+            <path
+              className={`key-glass${k.black && !shown ? ' is-on-black' : ''}`}
+              d={glassPath(
+                k,
+                shapeOf.get(k.midi - 1)?.black === true,
+                shapeOf.get(k.midi + 1)?.black === true,
+              )}
+              aria-hidden="true"
+            />
+          )}
           {level && (
             <rect
               className={`key-level${k.black && !shown ? ' is-on-black' : ''}`}

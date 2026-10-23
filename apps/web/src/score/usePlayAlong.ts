@@ -37,7 +37,9 @@
  * release that comes too early leaves the red where it is and sets `early`, which the status line
  * turns into a hint. The keys the step asks for, and the next step's, fill over their note's
  * length in `levels` (keyLevels.ts), a store that PianoKeyboard reads: a level rising re-renders
- * nothing here.
+ * nothing here. A release the walk forgave ends its level at once; one that came too soon drains
+ * it and leaves the glass on the key, the outline of a full level, until the step passes
+ * (issue 200).
  */
 import type { Hand, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -405,8 +407,6 @@ export function usePlayAlong({
         moveIndex(-1);
         return;
       }
-      // The key comes up now: its level drains, and the settle judges the release before it goes.
-      if (letGo !== undefined) levels.release(letGo, now);
       const result = settle({
         steps: o.steps,
         times: o.times,
@@ -420,12 +420,29 @@ export function usePlayAlong({
       });
       keysRef.current = result.keys;
       pressesRef.current = result.presses;
-      // A pass clears the hint, and an early release after it (the chain's end) sets it again.
+      // The key comes up now, after the settle judged the release (issue 200). A release the walk
+      // forgave (the settle passed a step with the key in it, at the release) ends its level at
+      // once, like a full key's, so a level that drains on the keys the red asks for always means
+      // a hold that came too soon; a key let go after its step passed (a bass under the melody)
+      // still drains, and so does a key the piano lost.
+      if (letGo !== undefined) {
+        const forgiven =
+          !lost && result.passedSteps.some((at) => o.steps[at]?.pitches.includes(letGo));
+        if (forgiven) levels.end(letGo);
+        else levels.release(letGo, now);
+      }
+      // A pass clears the hint and the glass, and an early release after it (the chain's end) sets
+      // them again.
       if (result.passed > 0) {
         setPlayed((n) => n + result.passed);
         markEarly(false);
+        levels.clearGlass();
       }
-      if (result.early) markEarly(true);
+      if (result.early) {
+        markEarly(true);
+        // The glass outlines the key let go too soon, under its level, until the red moves on.
+        if (letGo !== undefined) levels.mark(letGo);
+      }
       // The run start: the step the red waits on has all its keys held and fresh since this
       // moment, or null while it does not run. Issue 184's accompaniment starts when it changes,
       // not at the pass, which comes a note's length later.

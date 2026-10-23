@@ -550,7 +550,7 @@ describe('the hold', () => {
     s.release(62);
     expect(s.cues()).toEqual([0, 0.5, 1]);
     expect(s.hook.result.current.hint).toBeNull();
-    elapse(DUR_SLOW_FALLBACK_MS + 1000); // the key's level drains, and nothing else was waiting
+    elapse(DUR_SLOW_FALLBACK_MS + 1000); // the forgiven key's level ended at once; nothing else was waiting
     expect(s.cues()).toEqual([0, 0.5, 1]);
     expect(vi.getTimerCount()).toBe(idle);
   });
@@ -844,6 +844,129 @@ describe('the levels of the held keys', () => {
     const t = performance.now();
     s.press(48);
     expect(s.hook.result.current.levels.get().get(48)).toMatchObject({ atMs: t, upMs: null });
+  });
+
+  // A release the walk forgives ends its level at once; one that came too soon drains and leaves
+  // the glass on the key until the pass (issue 200).
+  it('ends the level of a release the walk forgives at once, with no drain and no glass', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.hold(400); // four fifths of the 500 ms hold, not yet due
+    s.release(60);
+    expect(s.cues()).toEqual([0, 0.5]); // passed at the release
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0); // no drain left to wait for
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('ends only the key that was forgiven when it is one of a chord', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(400);
+    s.release(60);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect(s.hook.result.current.levels.get().get(48)?.upMs).toBeNull(); // still held, still filling
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+  });
+
+  it('drains a key let go too soon and leaves the glass on it, after the drain, while the red waits', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.hold(200);
+    s.release(60); // two fifths: too soon
+    expect(s.cues()).toEqual([0]);
+    const draining = s.hook.result.current.levels.get().get(60);
+    expect(draining?.upMs).not.toBeNull();
+    expect(draining?.fromLevel).toBeCloseTo(0.4);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+    elapse(DUR_SLOW_FALLBACK_MS);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+    s.hold(2000); // the red waits, and the glass with it
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+  });
+
+  it('keeps the glass under the level of a press that fills it, and a pass clears it', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.hold(200);
+    s.release(60);
+    elapse(DUR_SLOW_FALLBACK_MS);
+    s.press(60);
+    expect(s.hook.result.current.levels.get().get(60)).toMatchObject({ upMs: null });
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+    s.hold(499);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+    s.hold(1);
+    expect(s.cues()).toEqual([0, 0.5]);
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+  });
+
+  it('keeps the glass through a second release that comes too soon', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.hold(100);
+    s.release(60);
+    s.press(60);
+    s.hold(100);
+    s.release(60);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+  });
+
+  it('outlines the key the walk judged, not a wrong key, and not a key whose step passed already', async () => {
+    await connect();
+    const s = setup();
+    s.press(61, 48, 60); // 61 is not in any step
+    s.hold(100);
+    s.release(61);
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    s.hold(400); // the step [48 60] passes; 48's whole note goes on
+    expect(s.cues()).toEqual([0, 0.5]);
+    s.release(48); // the bass lets go after its step passed: it drains, with no hint and no glass
+    expect(s.hook.result.current.levels.get().get(48)?.upMs).not.toBeNull();
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('outlines a key let go too soon under reduced motion, where no level has risen to drain', async () => {
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true } as MediaQueryList);
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.hold(200);
+    s.release(60);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect([...s.hook.result.current.levels.glass()]).toEqual([60]);
+  });
+
+  it('clears the glass on an external move, and when the walk goes inactive', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.hold(100);
+    s.release(60);
+    expect(s.hook.result.current.levels.glass().size).toBe(1);
+    s.fake.cue = 0.5; // a seek (bar click)
+    s.fake.start = 0.5;
+    s.refresh();
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
+    s.fake.cue = 0;
+    s.fake.start = 0;
+    s.refresh();
+    s.press(60);
+    s.hold(100);
+    s.release(60);
+    expect(s.hook.result.current.levels.glass().size).toBe(1);
+    s.fake.playing = true;
+    s.refresh();
+    expect(s.hook.result.current.levels.glass().size).toBe(0);
   });
 
   it('clears every level on a seek, and when Play starts', async () => {

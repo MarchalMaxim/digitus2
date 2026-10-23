@@ -5,7 +5,8 @@ import { durationMs, prefersReducedMotion } from '../design/motion.js';
  * length has passed since the press, 0 to 1, drawn as a fill that rises inside the key. The
  * arithmetic is pure; the store at the end holds the levels on show and is static and small: its
  * only side effect is one timer per key that is draining. `usePlayAlong` writes it, the keyboard
- * reads it (score/useKeyLevels.ts moves the rectangles frame by frame without React).
+ * reads it (score/useKeyLevels.ts moves the rectangles frame by frame without React). The store
+ * also holds the glass (issue 200): the keys let go too soon, outlined while the red waits.
  */
 
 /** One key's level. Times are performance.now ms; lengths are real ms at the tempo. */
@@ -23,6 +24,9 @@ export interface KeyLevel {
 }
 export type KeyLevels = ReadonlyMap<number, KeyLevel>;
 export const NO_LEVELS: KeyLevels = new Map();
+/** The keys outlined by the glass (issue 200), by pitch. */
+export type KeyGlass = ReadonlySet<number>;
+export const NO_GLASS: KeyGlass = new Set();
 
 /** Float noise in `f * beats` (a dotted quarter at one beat) must not cost a step. */
 const STEP_SLACK = 1e-9;
@@ -76,11 +80,24 @@ export interface LevelStore {
   subscribe(listener: () => void): () => void;
   /** The same map until a level is added, released or removed. */
   get(): KeyLevels;
+  /**
+   * The keys let go too soon (issue 200), which the keyboard outlines with the glass: the full
+   * level's shape, left on the key while the red waits. The same set until a key is added or the
+   * set is cleared. It lives in the levels' store and is told with them, but is no level: a level
+   * that drains or goes leaves it alone.
+   */
+  glass(): KeyGlass;
   /** A key's level starts (or starts again, replacing a drain). */
   start(midi: number, level: Omit<KeyLevel, 'upMs' | 'fromLevel' | 'drainMs'>): void;
   /** The key is let go at `nowMs`: drains from where it is, or goes now when full or drainMs is 0. */
   release(midi: number, nowMs: number): void;
-  /** Every level goes at once (an external move, the walk inactive). */
+  /** A key's level ends at once, with no drain (a release the walk forgave, issue 200). */
+  end(midi: number): void;
+  /** A key is let go too soon: the glass outlines it until it is cleared. */
+  mark(midi: number): void;
+  /** The glass goes (the red moves on). The levels stay. */
+  clearGlass(): void;
+  /** Every level and the glass go at once (an external move, the walk inactive). */
   clear(): void;
   /** Cancels the drain timers (unmount). */
   dispose(): void;
@@ -97,6 +114,7 @@ export function createLevelStore(
   const drainOf = o.drainMs ?? (() => durationMs('--dur-slow'));
   const isReduced = o.reduced ?? prefersReducedMotion;
   let levels: KeyLevels = NO_LEVELS;
+  let glass: KeyGlass = NO_GLASS;
   const listeners = new Set<() => void>();
   /** The deletion of each draining level. */
   const timers = new Map<number, ReturnType<typeof setTimeout>>();
@@ -125,6 +143,7 @@ export function createLevelStore(
       return () => void listeners.delete(listener);
     },
     get: () => levels,
+    glass: () => glass,
     start(midi, level) {
       stopTimer(midi);
       publish(new Map(levels).set(midi, { ...level, upMs: null, fromLevel: 0, drainMs: 0 }));
@@ -149,9 +168,25 @@ export function createLevelStore(
         }, drainMs),
       );
     },
+    end(midi) {
+      stopTimer(midi);
+      if (levels.has(midi)) publish(without(midi));
+    },
+    mark(midi) {
+      if (glass.has(midi)) return;
+      glass = new Set(glass).add(midi);
+      publish(levels);
+    },
+    clearGlass() {
+      if (glass.size === 0) return;
+      glass = NO_GLASS;
+      publish(levels);
+    },
     clear() {
       stopTimers();
-      if (levels.size > 0) publish(NO_LEVELS);
+      const changed = levels.size > 0 || glass.size > 0;
+      glass = NO_GLASS;
+      if (changed) publish(NO_LEVELS);
     },
     dispose: stopTimers,
   };

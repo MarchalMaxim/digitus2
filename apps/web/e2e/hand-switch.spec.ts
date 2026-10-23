@@ -17,6 +17,14 @@ async function openLong(page: Page): Promise<void> {
   await embellishDecided(page);
   // A reader practising a passage in the middle of the piece.
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight / 3));
+  // The passage is on screen once its pages are built (issue 99: they are built a frame after the
+  // scroll, and a reader sees the music before switching a hand).
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('.score-sheet g.system')].some((system) => {
+      const r = system.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    }),
+  );
 }
 
 /**
@@ -40,7 +48,15 @@ function switchTo(page: Page, hands: 'L' | 'R' | 'both') {
       animations,
       swept: swept.length,
       sweptBars: new Set(swept.map((el) => el.closest('g.measure'))).size,
-      bars: sheet.querySelectorAll('g.measure').length,
+      // Every bar of the piece: on a piece of six pages or more only the pages near the screen
+      // are in the DOM (issue 99), each page says how many bars it holds.
+      bars: [...sheet.querySelectorAll(':scope > svg')].reduce(
+        (sum, page) =>
+          sum +
+          (Number(page.getAttribute('data-bars')) || page.querySelectorAll('g.measure').length),
+        0,
+      ),
+      pages: sheet.querySelectorAll(':scope > svg').length,
       onScreen,
       dimmed: sheet.querySelectorAll('.is-muted').length,
     };
@@ -66,6 +82,7 @@ test('a hand switch sweeps only the systems on screen; the rest of the piece cha
   expect(right.animations).toBeLessThanOrEqual(2 * right.swept);
   // Both hands change on every bar, yet only the bars on screen sweep.
   expect(right.sweptBars).toBeGreaterThan(0);
+  test.info().annotations.push({ type: 'pages', description: String(right.pages) });
   expect(right.sweptBars, 'bars swept of all bars').toBeLessThan(right.bars);
 });
 
@@ -128,6 +145,54 @@ test('a quick toggle turns the fade back without a flash, and every mark settles
   });
   expect(flashing, 'digits fading in from a gray they never reached').toBe(0);
   await expect(page.locator('.score-sheet .is-sweeping')).toHaveCount(0, { timeout: 5_000 });
+});
+
+// Issue 99: on a long piece the pages a far scroll brings in are built a frame after it, so a hand
+// switched in the same task meets a window with nothing in it. Those pages arrive dimmed at rest,
+// as the piece stood when they were built, without a sweep; switching back is then an ordinary
+// switch of gray digits, which fade back, since they really were gray.
+test('a hand switched in the task of a far scroll: the pages arrive dimmed at rest, and the switch back fades them in', async ({
+  page,
+}) => {
+  await page.goto(`/?audio=silent#/piece/${MOZART}`);
+  await expect(page.locator('.score-sheet g.fing').first()).toBeAttached({ timeout: 30_000 });
+  await openPractice(page);
+  await embellishDecided(page);
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight / 3);
+    document.querySelector<HTMLInputElement>('input[name="hands"][value="L"]')!.click();
+  });
+  // The pages built a frame later, where the reader is, are dimmed at rest: no sweep, no fade
+  // on any system in view.
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('.score-sheet g.system')].some((system) => {
+      const r = system.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    }),
+  );
+  expect(await page.locator('.score-sheet .is-muted').count()).toBeGreaterThan(0);
+  const arrived = await page.evaluate(
+    () =>
+      document.getAnimations().filter((a) => {
+        const target = (a.effect as KeyframeEffect | null)?.target;
+        const system = target?.closest('g.system');
+        if (!system) return false;
+        const r = system.getBoundingClientRect();
+        return r.bottom > 0 && r.top < window.innerHeight;
+      }).length,
+  );
+  expect(arrived, 'animations on the pages that arrived dimmed').toBe(0);
+  await expect(page.locator('.score-sheet .is-sweeping')).toHaveCount(0, { timeout: 5_000 });
+  // Back to both hands: the gray digits fade back in, and nothing stays dimmed.
+  const back = await page.evaluate(() => {
+    document.querySelector<HTMLInputElement>('input[name="hands"][value="both"]')!.click();
+    return document
+      .getAnimations()
+      .filter((a) => (a as CSSAnimation).animationName === 'digit-back').length;
+  });
+  expect(back, 'digits fading back from the gray they were at').toBeGreaterThan(0);
+  await expect(page.locator('.score-sheet .is-sweeping')).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator('.score-sheet .is-muted')).toHaveCount(0);
 });
 
 test('reduced motion: a hand switch is instant, nothing is swept', async ({ page }) => {

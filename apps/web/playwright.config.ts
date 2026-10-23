@@ -38,7 +38,7 @@ export default defineConfig({
       name: 'mobile',
       use: phone,
       testMatch:
-        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|scan-grand-staff|seek|embellish)\.spec\.ts/,
+        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|scan-grand-staff|seek|embellish|page-window)\.spec\.ts/,
     },
     // The camera loop (issue 156): local homr reads the page the camera made, and its threads slow
     // every other spec's timing (the throttled sweeps, K.545 within 8 s), so the loop is a project

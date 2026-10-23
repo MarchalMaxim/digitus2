@@ -29,6 +29,8 @@ import {
   sweepDimming,
   systemsOnScreen,
 } from './render/dom.js';
+import { quietPlaces } from './render/pageIndex.js';
+import { pageWindowOf } from './render/pageWindow.js';
 import { ScoreHeader, useLegendAbove } from './ScoreHeader.js';
 import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
@@ -202,10 +204,25 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // DOM order, and with it the tab order, is the order on screen at every width.
   const narrow = useMediaQuery(NARROW_QUERY);
 
-  // A re-solve publishes only the digits that changed: patch them into the pages in place.
+  // A re-solve publishes only the digits that changed: patch them into the pages in place. Only
+  // some pages are in the DOM on a long piece (issue 99), so the digits patched since the layout
+  // are kept, and written into each page as it is built (`decorate`). A new layout starts them
+  // afresh; the same changes never flash twice.
+  const patchesRef = useRef<{ pages: string[]; map: Map<string, string> }>({
+    pages: doc.pages,
+    map: new Map(),
+  });
+  const flashedRef = useRef<Map<string, string> | null>(null);
   useEffect(() => {
-    if (host && doc.digitChanges) setDigits(host, doc.digitChanges, flash);
-  }, [host, doc.digitChanges]);
+    if (patchesRef.current.pages !== doc.pages) {
+      patchesRef.current = { pages: doc.pages, map: new Map() };
+    }
+    const changes = doc.digitChanges;
+    if (!host || !changes || flashedRef.current === changes) return;
+    flashedRef.current = changes;
+    for (const [id, digit] of changes) patchesRef.current.map.set(id, digit);
+    setDigits(host, changes, flash);
+  }, [host, doc.digitChanges, doc.pages]);
 
   // Playback, the cursor and the keyboard. An error stops playback (the score is gone).
   const score = doc.status === 'error' ? null : doc.score;
@@ -227,33 +244,51 @@ export function ScoreView({ source }: { source: PieceSource }) {
     return { both: leftOut('both'), L: leftOut('L'), R: leftOut('R') };
   }, [score]);
   const mutedIds = mutedIdsBy[hands];
+  // What a page built later needs to look like the pages built with the layout (issue 99): the
+  // dimming of the hand left out, with the whole-staff rule decided across every page's markup
+  // (`quietPlaces`), and the digits patched since. A layout effect above everything that reads the
+  // pages, so a cursor that brings a page in finds it set.
+  const decorRef = useRef<{
+    pages: string[];
+    mutedIds: ReadonlySet<string>;
+    quiet: ReadonlySet<number> | undefined;
+  } | null>(null);
+  useLayoutEffect(() => {
+    const index = host ? pageWindowOf(host)?.index : undefined;
+    decorRef.current = {
+      pages: doc.pages,
+      mutedIds,
+      quiet: index ? quietPlaces(index, mutedIds) : undefined,
+    };
+  }, [host, doc.pages, mutedIds]);
+  const decorate = useCallback((page: SVGSVGElement, i: number) => {
+    const d = decorRef.current;
+    const patches = patchesRef.current;
+    const index = page.parentElement ? pageWindowOf(page.parentElement)?.index : undefined;
+    if (!d) return;
+    if (index && patches.pages === d.pages && patches.map.size > 0) {
+      const own = new Map([...patches.map].filter(([id]) => index.pageOfNote.get(id) === i));
+      if (own.size > 0) setDigits(page, own);
+    }
+    redim([], mutedElements(page, d.mutedIds, d.quiet));
+  }, []);
   // A hand switch on the same pages fades the hand left out (or back in) bar by bar, from the first
   // bar of each system to the last (`sweepDimming`), in the systems on screen; the rest of the
   // piece, and new pages, change at once. The systems are found before any class changes, while
-  // the layout is clean. What each selection dims is found once per layout (`mutedElements` walks
-  // every page), so a switch only moves the dimming between two lists (issue #79).
-  const dimmedRef = useRef<{
-    host: Element;
-    pages: string[];
-    lists: Map<ReadonlySet<string>, Element[]>;
-    shown: Element[];
-  } | null>(null);
+  // the layout is clean. What a selection dims is found over the pages in the DOM (`mutedElements`);
+  // a page built later is dimmed as it arrives (`decorate`).
+  const dimmedRef = useRef<{ host: Element; pages: string[] } | null>(null);
   useLayoutEffect(() => {
     if (!host) return;
     const last = dimmedRef.current;
     const switched = last !== null && last.host === host && last.pages === doc.pages;
-    const lists = switched ? last.lists : new Map<ReadonlySet<string>, Element[]>();
-    let shown = lists.get(mutedIds);
-    if (!shown) {
-      shown = mutedElements(host, mutedIds);
-      lists.set(mutedIds, shown);
-    }
+    const shown = mutedElements(host, mutedIds, decorRef.current?.quiet);
     const spread = prefersReducedMotion() ? 0 : HAND_SWEEP_MS;
     const onScreen = switched && spread > 0 ? systemsOnScreen(host) : new Set<Element>();
     // New pages arrive with nothing dimmed.
-    const before = switched ? last.shown : [];
+    const before = switched ? [...host.querySelectorAll('.is-muted')] : [];
     redim(before, shown);
-    dimmedRef.current = { host, pages: doc.pages, lists, shown };
+    dimmedRef.current = { host, pages: doc.pages };
     if (!switched) return;
     if (sweepDimming(host, new Set([...before, ...shown]), spread, onScreen) > 0) settleStill(host);
   }, [host, doc.pages, mutedIds]);
@@ -370,13 +405,15 @@ export function ScoreView({ source }: { source: PieceSource }) {
       if (!seekable) return;
       const target = clampBar(bar, barStarts.length, playback.loop);
       const sec = barStarts[target]!;
+      // A far seek brings the page of its bar in first: the red hops to notes it can find.
+      if (host) pageWindowOf(host)?.ensureBar(target);
       if (!playback.playing && sec <= 0) {
         if (!playback.atStart) playback.rewind(); // the red flies home
         return;
       }
       playback.seek(sec, { leadSec: red.hop(sec) });
     },
-    [seekable, barStarts, playback, red],
+    [seekable, barStarts, playback, red, host],
   );
 
   // "Add notes between" (issue #67). The switch swaps the score, which halts playback and drops
@@ -521,6 +558,8 @@ export function ScoreView({ source }: { source: PieceSource }) {
               pages={doc.pages}
               label={doc.title}
               onHost={setHost}
+              windowed
+              onPageBuilt={decorate}
               resting={!playback.playing && currentGroup >= 0 && !red.hopping}
               hopping={red.hopping}
             />

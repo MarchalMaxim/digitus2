@@ -129,6 +129,12 @@ export interface Playback {
    */
   leadingIn(): boolean;
   /**
+   * Whether the transport is playing now, read on every frame: `playing` follows the end of the
+   * piece in a later render, after the transport has already rewound to the start. False before
+   * the first Play.
+   */
+  playingNow(): boolean;
+  /**
    * While a lead-in runs, how long until its first note is heard, in seconds; null otherwise.
    * Read on every frame by the red's flight from Play to that note (RedFlight.tsx).
    */
@@ -579,6 +585,8 @@ export function usePlayback(score: Score | null): Playback {
 
   const leadingIn = useCallback(() => transportRef.current?.leadingIn() ?? false, []);
 
+  const playingNow = useCallback(() => transportRef.current?.state.playing ?? false, []);
+
   const leadInRemainingSec = useCallback(
     () => transportRef.current?.leadInRemainingSec() ?? null,
     [],
@@ -618,6 +626,7 @@ export function usePlayback(score: Score | null): Playback {
       positionSec,
       startSec,
       leadingIn,
+      playingNow,
       leadInRemainingSec,
       setLoop,
       strike,
@@ -638,6 +647,7 @@ export function usePlayback(score: Score | null): Playback {
       positionSec,
       startSec,
       leadingIn,
+      playingNow,
       leadInRemainingSec,
       setLoop,
       strike,

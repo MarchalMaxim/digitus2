@@ -5,7 +5,8 @@ import { useAppStore } from './store.js';
  * has loaded, on production builds only: `vite dev` serves no sw.js. `updateViaCache: 'none'`
  * makes the browser check sw.js itself for a new build. A failed registration (blocked site data,
  * an insecure origin) leaves the app as it was, online only: the reader sees nothing, and the
- * console gets one warning for whoever debugs it.
+ * console gets one warning for whoever debugs it. A register stubbed to resolve to nothing
+ * (Playwright's `serviceWorkers: 'block'`) is left alone silently.
  *
  * A newer build's worker waits until every window of the app has closed (sw.ts), which on a phone
  * that keeps the app open can be a long time. When one is waiting, the page offers it on the
@@ -49,10 +50,11 @@ export function registerServiceWorker(host: ServiceWorkerHost = browserHost()): 
  * once, whichever way the controller changes.
  */
 function offerWaitingUpdate(
-  registration: ServiceWorkerRegistration,
+  registration: ServiceWorkerRegistration | undefined,
   container: NonNullable<ServiceWorkerHost['serviceWorker']>,
   host: ServiceWorkerHost,
 ): void {
+  if (!registration) return; // a register stubbed to resolve to nothing (Playwright's serviceWorkers: block)
   let accepted = false;
   const reload = () => {
     // The waiting worker may be gone already (another window's Reload took it live): the page

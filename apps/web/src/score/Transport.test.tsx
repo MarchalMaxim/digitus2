@@ -48,6 +48,7 @@ function playback(
     positionSec: () => 0,
     startSec: () => 0,
     leadingIn: () => false,
+    playingNow: () => false,
     leadInRemainingSec: () => null,
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),

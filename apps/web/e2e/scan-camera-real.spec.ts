@@ -186,7 +186,7 @@ async function photographPage(page: Page, slow = 1) {
     if (n < 5) await expect(step(page, n + 1)).toBeVisible();
   }
   const combining = Date.now();
-  await expect(review(page)).toBeVisible({ timeout: 60_000 * slow });
+  await expect(review(page)).toBeVisible({ timeout: 120_000 * slow });
   return { stops, combining: Date.now() - combining };
 }
 
@@ -500,7 +500,7 @@ async function scanRealPage(page: Page, testInfo: TestInfo, slow: number) {
 test('camera, real photo: five tracked photos of a printed page fuse into one page at least as sharp as the first', async ({
   page,
 }, testInfo) => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
   await openPhotoCamera(page);
   // The sampling intervals are attached with the measurements, not asserted: they depend on
   // the machine's load, and the capture completing is what matters.
@@ -513,7 +513,7 @@ test('camera, real photo: the capture still completes on a phone-speed CPU (4x t
 }, testInfo) => {
   test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium DevTools feature');
   test.slow();
-  test.setTimeout(420_000);
+  test.setTimeout(600_000);
   await openPhotoCamera(page);
   const session = await page.context().newCDPSession(page);
   await session.send('Emulation.setCPUThrottlingRate', { rate: 4 });

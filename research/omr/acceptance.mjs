@@ -8,6 +8,9 @@
 //                                                     3 with the reason when not (verify: SKIP)
 //   node research/omr/acceptance.mjs                 run, compare with the floors
 //   node research/omr/acceptance.mjs --update-floor  run and rewrite floor.json (a measured change)
+//   node research/omr/acceptance.mjs --photos        only the photo routes (photos:as-taken, :rotated and
+//                                                     :perturbed), which need homr and nothing else; with
+//                                                     --update-floor it rewrites only their floors
 //   node research/omr/acceptance.mjs --service URL   run, recognising through a running scan service
 //                                                     (research/omr/service), and compare with the
 //                                                     same floors: the Linux build's equivalence check
@@ -46,10 +49,10 @@ export function toolchains(env = process.env) {
 }
 
 /** Why the gate cannot run here, or null when it can. */
-export function missing(tc = toolchains()) {
-  if (!existsSync(join(tc.bundle, 'portable/Audiveris')))
+export function missing(tc = toolchains(), { photosOnly = false } = {}) {
+  if (!photosOnly && !existsSync(join(tc.bundle, 'portable/Audiveris')))
     return `Audiveris not prepared (${tc.bundle}; docs/scanning.md)`;
-  if (!existsSync(join(tc.textModels, 'eng.traineddata')))
+  if (!photosOnly && !existsSync(join(tc.textModels, 'eng.traineddata')))
     return `English text model not prepared (${tc.textModels})`;
   if (!existsSync(join(tc.homr, 'venv')))
     return `homr not prepared (${tc.homr}; or set DIGITUS2_OMR_HOMR)`;
@@ -62,7 +65,7 @@ export function missing(tc = toolchains()) {
 
 // Recognitions at once on a cache miss (issue 134). Each job keeps the recognisers' own thread pools
 // (ONNX Runtime sizes its pool from the machine, not OMP_NUM_THREADS), so the jobs share the cores:
-// on 16 cores three workers take the 96 corpus and photo recognitions from 904 s to 532 s, and three
+// on 16 cores three workers take issue 134's 96 corpus and photo recognitions from 904 s to 532 s, and three
 // Audiveris JVMs with their 4 GiB heaps fit in 32 GB. DIGITUS2_OMR_WORKERS sets it.
 const WORKERS = Math.max(1, Number(process.env.DIGITUS2_OMR_WORKERS) || 3);
 
@@ -169,28 +172,47 @@ export function breaches(summary, floors) {
   return out;
 }
 
+/**
+ * The corpus floors a --photos --update-floor keeps. They were measured on the corpus version in
+ * floor.json: writing the current version over them would pass stale floors off as current.
+ */
+export function keptFloors(previous, version) {
+  if (previous.corpus !== version)
+    throw new Error(`floor.json was measured on corpus ${previous.corpus}, not ${version}: run --update-floor without --photos`);
+  return previous.floors;
+}
+
 const PHOTO_COUNTS = ['recognised', 'imported', 'barsRight', 'stavesRight', 'keyRight', 'timeRight'];
+const emptyTally = () => ({ pages: 0, ...Object.fromEntries([...PHOTO_COUNTS, 'twoParts'].map((k) => [k, 0])) });
+
+/**
+ * One photo page into a tally. Staves are right only for a single part with the page's staves: a
+ * page read as a treble part and a bass part has one staff in each, or two staves in each when
+ * homr draws a grand staff for both, and neither is the grand staff the page has (issue 163).
+ */
+function tally(g, row) {
+  g.pages++;
+  const f = row.facts;
+  if (!f) return;
+  g.recognised++;
+  if (f.imports) g.imported++;
+  if (f.parts > 1) g.twoParts++;
+  if (f.bars === row.expect.bars) g.barsRight++;
+  if (f.parts === 1 && f.staves === row.expect.staves) g.stavesRight++;
+  if (f.fifths === row.expect.fifths) g.keyRight++;
+  if (row.expect.time !== null && f.time === row.expect.time) g.timeRight++;
+}
 
 /**
  * Real phone photos have no MusicXML ground truth: each is checked on the facts read off the page
  * (research/omr/photos/manifest.json). Per variant ('as-taken', and 'rotated' for a photo taken
  * upside down and turned with Rotate): how many pages the recogniser returned at all, how many the
- * strict import accepts, and how many have exactly the page's bars, staves, key and time.
+ * strict import accepts, how many it read as more than one part, and how many have exactly the
+ * page's bars, staves (one part), key and time.
  */
 export function photoSummary(rows) {
   const out = {};
-  for (const row of rows) {
-    const g = (out[`photos:${row.variant}`] ??= { pages: 0, ...Object.fromEntries(PHOTO_COUNTS.map((k) => [k, 0])) });
-    g.pages++;
-    const f = row.facts;
-    if (!f) continue;
-    g.recognised++;
-    if (f.imports) g.imported++;
-    if (f.bars === row.expect.bars) g.barsRight++;
-    if (f.staves === row.expect.staves) g.stavesRight++;
-    if (f.fifths === row.expect.fifths) g.keyRight++;
-    if (row.expect.time !== null && f.time === row.expect.time) g.timeRight++;
-  }
+  for (const row of rows) tally((out[`photos:${row.variant}`] ??= emptyTally()), row);
   return out;
 }
 export function photoFloorsFrom(summary) {
@@ -212,6 +234,56 @@ export function photoBreaches(summary, floors) {
     }
   }
   return out;
+}
+
+/** The small capture changes of photos:perturbed, in the order perturb.py writes them. */
+export const PERTURBATIONS = ['q95', 'q80', 'crop3', 'rot05'];
+const PERTURBED = 'photos:perturbed';
+/** The checks of the perturbed photos, in the order their floors are written and compared. */
+const PERTURBED_FLOORS = [
+  ['recognised', 'recognisedMin'],
+  ['imported', 'importedMin'],
+  ['twoParts', 'twoPartsMax'],
+  ['barsRight', 'barsRightMin'],
+  ['stavesRight', 'stavesRightMin'],
+  ['keyRight', 'keyRightMin'],
+  ['timeRight', 'timeRightMin'],
+];
+
+/** Every perturbed photo together: one tally, because the question is how often a capture goes wrong. */
+export function perturbedSummary(rows) {
+  const g = emptyTally();
+  for (const row of rows) tally(g, row);
+  return g;
+}
+export function perturbedFloorsFrom(summary) {
+  return Object.fromEntries(PERTURBED_FLOORS.map(([k, floor]) => [floor, summary[k]]));
+}
+export function perturbedBreaches(summary, floors) {
+  const out = [];
+  for (const [k, floor] of PERTURBED_FLOORS) {
+    if (typeof floors[floor] !== 'number') out.push(`${PERTURBED}: floor.json lacks ${floor}`);
+    else if (floor.endsWith('Max') ? summary[k] > floors[floor] : summary[k] < floors[floor])
+      out.push(`${PERTURBED}: ${k} ${summary[k]} ${floor.endsWith('Max') ? 'above ceiling' : 'below floor'} ${floors[floor]}`);
+  }
+  return out;
+}
+
+/**
+ * Per photo, the layout of each reading: parts and bars (`2p/19b`), as taken (the turned copy for a
+ * photo taken upside down, as the gate recognises it) and under each perturbation; `none` is a
+ * recognition that failed and `-` one that did not run.
+ */
+export function perturbationTable(photoRows, perturbedRows) {
+  const cell = (row) => (!row ? '-' : row.facts ? `${row.facts.parts}p/${row.facts.bars}b` : 'none');
+  const ids = [...new Set(photoRows.map((r) => r.photo))];
+  const lines = [['photo', 'as taken', ...PERTURBATIONS].join(' | ')];
+  for (const id of ids) {
+    const taken = photoRows.filter((r) => r.photo === id);
+    const upright = taken.find((r) => r.variant === 'rotated') ?? taken[0];
+    lines.push([id, cell(upright), ...PERTURBATIONS.map((v) => cell(perturbedRows.find((r) => r.photo === id && r.variant === v)))].join(' | '));
+  }
+  return lines;
 }
 
 /** The origin the scan service admits: the app's own. */
@@ -294,27 +366,68 @@ export async function recognizeViaService(
   return { cachedFailures, uncached };
 }
 
-/** The photos as jobs: each as taken, and a turned copy (a PNG, as the app's Rotate makes) when needed. */
-function photoJobs(tc, pipeline, cache = join(RESULTS, 'cache')) {
-  const manifest = JSON.parse(readFileSync(join(PHOTOS, 'manifest.json'), 'utf8'));
+const manifestOfPhotos = () => JSON.parse(readFileSync(join(PHOTOS, 'manifest.json'), 'utf8'));
+
+/** A photo taken upside down, turned upright as the app's Rotate makes it (a PNG); made once. */
+function turnedCopy(tc, photo) {
   const turned = join(RESULTS, 'photos');
   mkdirSync(turned, { recursive: true });
+  // Named by the hash of the photo's bytes, so a photo re-shot under the same id is turned anew.
+  const target = join(turned, `${photo.id}-rotated-${photo.rotate}-${sha(readFileSync(join(PHOTOS, photo.file))).slice(0, 12)}.png`);
+  if (!existsSync(target)) {
+    // The homr environment has Pillow; the turn is exact (no resampling at 180 degrees).
+    const python = join(tc.homr, 'venv/Scripts/python.exe');
+    const r = spawnSync(python, ['-I', '-c', 'import sys;from PIL import Image;Image.open(sys.argv[1]).rotate(int(sys.argv[3]),expand=True).save(sys.argv[2])', join(PHOTOS, photo.file), target, String(-photo.rotate)], { encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`could not turn ${photo.file}: ${r.stderr}`);
+  }
+  return target;
+}
+
+/** The photos as jobs: each as taken, and a turned copy (a PNG, as the app's Rotate makes) when needed. */
+function photoJobs(tc, pipeline, cache = join(RESULTS, 'cache')) {
   const jobs = [];
-  for (const photo of manifest.photos) {
+  for (const photo of manifestOfPhotos().photos) {
     const variants = [['as-taken', join(PHOTOS, photo.file)]];
-    if (photo.rotate) {
-      const target = join(turned, `${photo.id}-rotated-${photo.rotate}.png`);
-      if (!existsSync(target)) {
-        // The homr environment has Pillow; the turn is exact (no resampling at 180 degrees).
-        const python = join(tc.homr, 'venv/Scripts/python.exe');
-        const r = spawnSync(python, ['-I', '-c', 'import sys;from PIL import Image;Image.open(sys.argv[1]).rotate(int(sys.argv[3]),expand=True).save(sys.argv[2])', join(PHOTOS, photo.file), target, String(-photo.rotate)], { encoding: 'utf8' });
-        if (r.status !== 0) throw new Error(`could not turn ${photo.file}: ${r.stderr}`);
-      }
-      variants.push(['rotated', target]);
-    }
+    if (photo.rotate) variants.push(['rotated', turnedCopy(tc, photo)]);
     for (const [variant, input] of variants) {
       const key = sha(Buffer.concat([readFileSync(input), Buffer.from(`homr:${pipeline}`)])).slice(0, 24);
       jobs.push({ id: `${photo.id}:homr:${variant}`, photo, recognizer: 'homr', variant, input, output: join(cache, `${key}.musicxml`) });
+    }
+  }
+  return jobs;
+}
+
+const PERTURB = join(HERE, 'acceptance/perturb.py');
+/** Where the perturbed copies are kept: named by perturb.py's hash, so a changed crop or turn writes new files. */
+export function perturbedDirectory(script = PERTURB) {
+  return join(RESULTS, 'photos-perturbed', sha(readFileSync(script)).slice(0, 12));
+}
+
+/** perturb.py's four small capture changes of one upright photo, as files (a file that exists is kept). */
+export function perturbedCopies(tc, input, dir, stem) {
+  const python = join(tc.homr, 'venv/Scripts/python.exe');
+  const r = spawnSync(python, ['-I', PERTURB, input, dir, stem], { encoding: 'utf8' });
+  if (r.status !== 0) throw new Error(`could not perturb ${input}: ${r.stderr}`);
+  return JSON.parse(r.stdout);
+}
+
+/**
+ * The photos:perturbed jobs (issue 163): every manifest photo, turned upright as photos:rotated does
+ * when it was taken upside down, re-encoded at JPEG quality 95 and 80, cropped by 3% on each side
+ * and rotated by 0.5 degrees, each recognised by the same adapter and cached by the hash of its
+ * bytes and the pipeline like the other photos. `turn` and `derive` stand in for Pillow in tests.
+ */
+export function perturbedJobs(tc, pipeline, cache = join(RESULTS, 'cache'), { dir = perturbedDirectory(), turn = turnedCopy, derive = perturbedCopies } = {}) {
+  const jobs = [];
+  for (const photo of manifestOfPhotos().photos) {
+    const upright = photo.rotate ? turn(tc, photo) : join(PHOTOS, photo.file);
+    // The stem carries the hash of the upright bytes: a photo re-shot under the same id is perturbed anew.
+    const copies = derive(tc, upright, dir, `${photo.id}-${sha(readFileSync(upright)).slice(0, 12)}`);
+    for (const variant of PERTURBATIONS) {
+      const input = copies[variant];
+      if (!input) throw new Error(`${photo.id}: no ${variant} copy`);
+      const key = sha(Buffer.concat([readFileSync(input), Buffer.from(`homr:${pipeline}`)])).slice(0, 24);
+      jobs.push({ id: `${photo.id}:homr:${variant}`, photo, recognizer: 'homr', variant, perturbed: true, input, output: join(cache, `${key}.musicxml`) });
     }
   }
   return jobs;
@@ -374,7 +487,8 @@ function score(E, reference, file) {
 
 export async function main(args = process.argv.slice(2)) {
   const tc = toolchains();
-  const reason = missing(tc);
+  const photosOnly = args.includes('--photos');
+  const reason = missing(tc, { photosOnly });
   if (args.includes('--check')) {
     if (reason) console.log(reason);
     return reason ? SKIP : 0;
@@ -399,23 +513,28 @@ export async function main(args = process.argv.slice(2)) {
     console.log(`Recognising through ${service}: ${about.recognizer}`);
   }
   const corpus = JSON.parse(readFileSync(CORPUS, 'utf8'));
-  const { dir, manifest } = await fixtures(corpus);
   const pipeline = pipelineHash();
   const jobs = [];
-  for (const piece of manifest.pieces) {
-    if (piece.pages.length !== 1) throw new Error(`${piece.id}: the gate scores one-page pieces only`);
-    for (const [recognizer, variants] of Object.entries(corpus.routes))
-      for (const variant of variants) {
-        const input = join(dir, variant === 'pdf' ? piece.pdf : piece.pages[0].images[variant]);
-        const key = sha(Buffer.concat([readFileSync(input), Buffer.from(`${recognizer}:${pipeline}`)])).slice(0, 24);
-        jobs.push({ id: `${piece.id}:${recognizer}:${variant}`, piece, recognizer, variant, input, output: join(cache, `${key}.musicxml`) });
-      }
+  let dir = null;
+  let manifest = { pieces: [] };
+  if (!photosOnly) {
+    ({ dir, manifest } = await fixtures(corpus));
+    for (const piece of manifest.pieces) {
+      if (piece.pages.length !== 1) throw new Error(`${piece.id}: the gate scores one-page pieces only`);
+      for (const [recognizer, variants] of Object.entries(corpus.routes))
+        for (const variant of variants) {
+          const input = join(dir, variant === 'pdf' ? piece.pdf : piece.pages[0].images[variant]);
+          const key = sha(Buffer.concat([readFileSync(input), Buffer.from(`${recognizer}:${pipeline}`)])).slice(0, 24);
+          jobs.push({ id: `${piece.id}:${recognizer}:${variant}`, piece, recognizer, variant, input, output: join(cache, `${key}.musicxml`) });
+        }
+    }
   }
   mkdirSync(cache, { recursive: true });
-  const photos = photoJobs(tc, pipeline, cache);
+  const photos = [...photoJobs(tc, pipeline, cache), ...perturbedJobs(tc, pipeline, cache)];
   if (service) await recognizeViaService([...jobs, ...photos], service);
   else {
-    const jobFile = join(RESULTS, 'jobs.json');
+    const jobFile = join(RESULTS, photosOnly ? 'jobs-photos.json' : 'jobs.json');
+    mkdirSync(RESULTS, { recursive: true });
     writeFileSync(jobFile, JSON.stringify([...jobs, ...photos].map(({ id, recognizer, input, output }) => ({ id, recognizer, input, output })), null, 1));
     const run = spawnSync(
       tc.python,
@@ -431,28 +550,38 @@ export async function main(args = process.argv.slice(2)) {
     return { id: job.id, piece: job.piece.id, recognizer: job.recognizer, variant: job.variant, ...score(E, reference, job.output) };
   });
   const summary = aggregate(rows);
-  const photoRows = photos.map((job) => ({
+  const photoRow = (job) => ({
     id: job.id,
+    photo: job.photo.id,
     variant: job.variant,
     expect: { bars: job.photo.bars, staves: job.photo.staves, fifths: job.photo.fifths, time: job.photo.time },
     facts: existsSync(job.output) ? photoFacts(E, readFileSync(job.output, 'utf8')) : null,
-  }));
+  });
+  const photoRows = photos.filter((job) => !job.perturbed).map(photoRow);
+  const perturbedRows = photos.filter((job) => job.perturbed).map(photoRow);
   const photoTotals = photoSummary(photoRows);
-  const card = { schemaVersion: 1, corpus: corpus.version, pipeline, recognitionExecuted: true, ...(recognizedBy && { recognizedBy }), summary, rows, photos: { summary: photoTotals, rows: photoRows } };
+  const perturbedTotals = perturbedSummary(perturbedRows);
+  const card = { schemaVersion: 1, corpus: corpus.version, pipeline, recognitionExecuted: true, ...(recognizedBy && { recognizedBy }), summary, rows, photos: { summary: photoTotals, rows: photoRows, perturbed: { summary: perturbedTotals, rows: perturbedRows } } };
   mkdirSync(RESULTS, { recursive: true });
-  writeFileSync(join(RESULTS, service ? 'latest-service.json' : 'latest.json'), JSON.stringify(card, null, 2));
+  writeFileSync(join(RESULTS, service ? 'latest-service.json' : photosOnly ? 'latest-photos.json' : 'latest.json'), JSON.stringify(card, null, 2));
 
   const pct = (x) => (x * 100).toFixed(2);
-  console.log('\nroute:variant          pages imported fullNote pitch  beams ties-missed dup wrong-staff');
-  for (const [key, s] of Object.entries(summary))
-    console.log(
-      `${key.padEnd(22)} ${String(s.pages).padStart(5)} ${String(s.imported).padStart(8)} ${pct(s.fullNoteF1).padStart(8)} ${pct(s.pitchF1).padStart(6)} ${pct(s.beamF1).padStart(6)} ${String(s.tiesMissed).padStart(11)} ${String(s.duplicates).padStart(3)} ${String(s.wrongStaff).padStart(11)}`,
-    );
-  console.log('\nphotos:variant      pages recognised imported bars staves key time');
-  for (const [key, p] of Object.entries(photoTotals))
-    console.log(`${key.padEnd(19)} ${String(p.pages).padStart(5)} ${String(p.recognised).padStart(10)} ${String(p.imported).padStart(8)} ${String(p.barsRight).padStart(4)} ${String(p.stavesRight).padStart(6)} ${String(p.keyRight).padStart(3)} ${String(p.timeRight).padStart(4)}`);
+  if (!photosOnly) {
+    console.log('\nroute:variant          pages imported fullNote pitch  beams ties-missed dup wrong-staff');
+    for (const [key, s] of Object.entries(summary))
+      console.log(
+        `${key.padEnd(22)} ${String(s.pages).padStart(5)} ${String(s.imported).padStart(8)} ${pct(s.fullNoteF1).padStart(8)} ${pct(s.pitchF1).padStart(6)} ${pct(s.beamF1).padStart(6)} ${String(s.tiesMissed).padStart(11)} ${String(s.duplicates).padStart(3)} ${String(s.wrongStaff).padStart(11)}`,
+      );
+  }
+  console.log('\nphotos:variant      pages recognised imported two-parts bars staves key time');
+  for (const [key, p] of [...Object.entries(photoTotals), [PERTURBED, perturbedTotals]])
+    console.log(`${key.padEnd(19)} ${String(p.pages).padStart(5)} ${String(p.recognised).padStart(10)} ${String(p.imported).padStart(8)} ${String(p.twoParts).padStart(9)} ${String(p.barsRight).padStart(4)} ${String(p.stavesRight).padStart(6)} ${String(p.keyRight).padStart(3)} ${String(p.timeRight).padStart(4)}`);
+  console.log('\n' + perturbationTable(photoRows, perturbedRows).join('\n'));
+  const note = 'Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact; the perturbed floors are the measured counts over the perturbed photos, with the pages read as two parts as a ceiling.';
   if (args.includes('--update-floor')) {
-    writeFileSync(FLOOR, JSON.stringify({ schemaVersion: 1, corpus: corpus.version, note: 'Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact.', floors: floorsFrom(summary), photoFloors: photoFloorsFrom(photoTotals) }, null, 2) + '\n');
+    // --photos measured no corpus page: it replaces only the photo floors of the floors already there.
+    const floors = photosOnly ? keptFloors(JSON.parse(readFileSync(FLOOR, 'utf8')), corpus.version) : floorsFrom(summary);
+    writeFileSync(FLOOR, JSON.stringify({ schemaVersion: 1, corpus: corpus.version, note, floors, photoFloors: photoFloorsFrom(photoTotals), photoPerturbedFloors: perturbedFloorsFrom(perturbedTotals) }, null, 2) + '\n');
     console.log(`\nFloors written to ${FLOOR}`);
     return 0;
   }
@@ -462,8 +591,10 @@ export async function main(args = process.argv.slice(2)) {
   }
   const floor = JSON.parse(readFileSync(FLOOR, 'utf8'));
   if (floor.corpus !== corpus.version) throw new Error('floor.json was measured on another corpus version');
-  const found = [...breaches(summary, floor.floors), ...photoBreaches(photoTotals, floor.photoFloors ?? {})];
+  const found = [...breaches(summary, photosOnly ? {} : floor.floors), ...photoBreaches(photoTotals, floor.photoFloors ?? {})];
   if (!floor.photoFloors) found.push('photos: floor.json has no photoFloors');
+  if (!floor.photoPerturbedFloors) found.push(`${PERTURBED}: floor.json has no photoPerturbedFloors`);
+  else found.push(...perturbedBreaches(perturbedTotals, floor.photoPerturbedFloors));
   if (found.length) {
     console.log('\nRegressions:\n' + found.map((line) => `  ${line}`).join('\n'));
     return 1;

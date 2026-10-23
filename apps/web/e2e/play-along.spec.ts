@@ -12,6 +12,7 @@ import {
   type FakeMidiOptions,
 } from './helpers/midi.js';
 import { closePractice, embellishDecided, openPractice, setLoopBars } from './helpers/practice.js';
+import { horizontalOverflow } from './helpers/overflow.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
@@ -337,6 +338,29 @@ test.describe('the score with a piano', () => {
   const play = (page: Page): Locator => page.getByRole('button', { name: 'Play' });
   const rewind = (page: Page): Locator => page.getByRole('button', { name: 'Rewind' });
 
+  /**
+   * A watcher in the page that sees even a flight home or a red Play that lasts a few frames,
+   * which a poll between two round trips could miss: `sawHome` reads whether one showed.
+   */
+  function watchForHome(page: Page): Promise<void> {
+    return page.evaluate(() => {
+      const w = window as unknown as { __sawHome?: boolean };
+      w.__sawHome = false;
+      const look = () => {
+        if (document.querySelector('.red-ghost, button.is-red')) w.__sawHome = true;
+      };
+      new MutationObserver(look).observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+      look();
+    });
+  }
+  const sawHome = (page: Page): Promise<boolean | undefined> =>
+    page.evaluate(() => (window as unknown as { __sawHome?: boolean }).__sawHome);
+
   /** The written second of the group the red marks (the test hook). */
   function cursorSec(page: Page): Promise<number> {
     return page.evaluate(() =>
@@ -367,29 +391,13 @@ test.describe('the score with a piano', () => {
     // Rewind has nowhere to go, and neither have Home and a click on bar 1: the red does not fly
     // home and come back, and Play is never red meanwhile. A watcher in the page sees even a
     // flight that lasts a few frames, which a poll between two round trips could miss.
-    await page.evaluate(() => {
-      const w = window as unknown as { __sawHome?: boolean };
-      w.__sawHome = false;
-      const look = () => {
-        if (document.querySelector('.red-ghost, button.is-red')) w.__sawHome = true;
-      };
-      new MutationObserver(look).observe(document.body, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        attributeFilter: ['class'],
-      });
-      look();
-    });
+    await watchForHome(page);
     await page.keyboard.press('Home');
     await seekBar(page, 0);
     const until = Date.now() + 600;
     while (Date.now() < until)
       await expectOneRed(page, 'Home and bar 1 while the first group waits');
-    expect(
-      await page.evaluate(() => (window as unknown as { __sawHome?: boolean }).__sawHome),
-      'the red flew home, or Play took it',
-    ).toBe(false);
+    expect(await sawHome(page), 'the red flew home, or Play took it').toBe(false);
     expect(await cursorSec(page)).toBe(0);
     expect(await midi.index()).toBe(0);
 
@@ -561,6 +569,86 @@ test.describe('the score with a piano', () => {
     await expect(page.locator('.end-burst .note-burst')).toHaveCount(0);
     await expect(play(page)).not.toHaveClass(/is-red/);
     await expectOneRed(page, 'the loop wrapped');
+  });
+
+  test("with a loop set, Rewind and Home have nowhere to go on the loop's first group (issue 196)", async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { tempo: FAST });
+    await setLoopBars(page, '2', '3');
+    await closePractice(page);
+    await expect.poll(() => midi.index()).toBe(4); // the loop's first group, not the piece's
+    await midi.waitForStep();
+    await expect(rewind(page)).toHaveAttribute('aria-disabled', 'true');
+    const at = await cursorSec(page);
+    expect(at).toBeGreaterThan(0);
+
+    // As on the piece's first group: the red does not fly home and come back, and Play is never
+    // red meanwhile.
+    await watchForHome(page);
+    await page.keyboard.press('Home');
+    await rewind(page).click({ force: true }); // aria-disabled: Playwright waits for it to end
+    const until = Date.now() + 600;
+    while (Date.now() < until) await expectOneRed(page, 'Home and Rewind on the loop first group');
+    expect(await sawHome(page), 'the red flew home, or Play took it').toBe(false);
+    await expect(rewind(page)).toHaveAttribute('aria-disabled', 'true');
+    expect(await cursorSec(page)).toBe(at);
+    expect(await midi.index()).toBe(4);
+    expect(await redBars(page)).toEqual([1]);
+
+    // A click on the loop's first bar, and Left at the loop's start (it clamps to that bar), land
+    // on the group the red already waits on: no flight there and back either.
+    await seekBar(page, 1);
+    await page.keyboard.press('ArrowLeft');
+    const again = Date.now() + 600;
+    while (Date.now() < again) await expectOneRed(page, 'the loop first bar again');
+    expect(await sawHome(page), 'a hop of no distance was planned').toBe(false);
+    await expect(rewind(page)).toHaveAttribute('aria-disabled', 'true');
+    expect(await cursorSec(page)).toBe(at);
+    expect(await midi.index()).toBe(4);
+
+    // One group on, Rewind is available again.
+    await midi.playRed();
+    await expect.poll(() => midi.index()).toBe(5);
+    await expect(rewind(page)).not.toHaveAttribute('aria-disabled', 'true');
+  });
+
+  test.describe('a loop below the first screen (issue 196)', () => {
+    test.use({ viewport: { width: 1280, height: 600 } });
+
+    test("Home on the loop's first group leaves the page where the red is", async ({ page }) => {
+      const midi = await twinkle(page, { tempo: FAST });
+      await setLoopBars(page, '9', '12');
+      await closePractice(page);
+      await expect.poll(() => midi.index()).toBe(28); // the loop's first group
+      await midi.waitForStep();
+      const redInView = () =>
+        page.evaluate(() => {
+          const reds = [...document.querySelectorAll('.score-sheet .is-red')];
+          return {
+            count: reds.length,
+            inView: reds.every((r) => {
+              const b = r.getBoundingClientRect();
+              return b.top >= 0 && b.bottom <= window.innerHeight;
+            }),
+            scrollY: window.scrollY,
+          };
+        });
+      // The page follows the red down to the loop, and settles with it on screen.
+      await expect
+        .poll(async () => {
+          const seen = await redInView();
+          return seen.count > 0 && seen.inView && seen.scrollY > 100;
+        })
+        .toBe(true);
+
+      await page.keyboard.press('Home');
+      await page.waitForTimeout(500); // a smooth scroll to the top would take this long
+      const after = await redInView();
+      expect(after.scrollY, 'the page jumped to the top').toBeGreaterThan(100);
+      expect(after.inView, 'the red went off screen').toBe(true);
+      expect(await midi.index()).toBe(28);
+    });
   });
 
   test("Play starts at the red group, the reader's keys show while it plays, and Pause leaves the red there", async ({
@@ -1585,6 +1673,239 @@ test.describe('the score with a piano', () => {
     await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
     await expectOneRed(page, 'playing with no piano');
   });
+
+  // ---------------------------------------------------------------------------------------
+  // Practice mode (issue 191): a switch heading the Practice panel while a piano is connected.
+  // Off, the score page is as with no piano; the piano stays connected and its keys still show.
+  // ---------------------------------------------------------------------------------------
+
+  const practiceSwitch = (page: Page): Locator =>
+    page.getByRole('switch', { name: 'Practice mode' });
+
+  /** Opens the panel, flips the switch with a click, and closes the panel again. */
+  async function flipPractice(page: Page, to: boolean): Promise<void> {
+    await openPractice(page);
+    await practiceSwitch(page).click();
+    if (to) await expect(practiceSwitch(page)).toBeChecked();
+    else await expect(practiceSwitch(page)).not.toBeChecked();
+    await closePractice(page);
+  }
+
+  test('the switch shows only while a piano is connected, on, and heads the panel', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page);
+    await openPractice(page);
+    await expect(practiceSwitch(page)).toBeChecked();
+    // The first control of the panel, before Tempo.
+    await expect(page.locator('.practice-panel input').first()).toHaveAttribute('role', 'switch');
+    await expectOneRed(page, 'the switch on');
+
+    // The piano goes while the switch has the focus: the focus moves to Tempo, not to the page.
+    await practiceSwitch(page).focus();
+    await midi.unplug();
+    await expect(practiceSwitch(page)).toHaveCount(0);
+    await expect(page.getByRole('slider', { name: 'Tempo' })).toBeFocused();
+    await midi.plug(PIANO);
+    await expect(practiceSwitch(page)).toBeChecked();
+    await expectOneRed(page, 'the piano back');
+  });
+
+  test('with no piano there is no switch', async ({ page }) => {
+    await twinkle(page, { playAlong: false });
+    await openPractice(page);
+    await expect(page.getByRole('slider', { name: 'Tempo' })).toBeVisible();
+    await expect(page.getByRole('switch')).toHaveCount(0);
+  });
+
+  test('off hands the page back: Play plays, the red follows the music, the keys still show', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page);
+    await midi.playRed();
+    await midi.playRed();
+    expect(await midi.waitForStep()).toEqual([67]);
+    const cue = await cursorSec(page);
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await practiceSwitch(page).click();
+    await expect(practiceSwitch(page)).not.toBeChecked();
+    await closePractice(page);
+
+    // The walk is off: nothing is asked, the cue stays, no level, no hint. Play is plain.
+    await expect.poll(() => midi.target()).toEqual([]);
+    expect(await cursorSec(page)).toBe(cue);
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    await expect(page.getByRole('status')).toHaveText('');
+    await expect(play(page)).not.toHaveClass(/is-red/);
+    await expectOneRed(page, 'Practice mode off, the cue stays');
+
+    // A key pressed shows on the keyboard and moves nothing.
+    await midi.noteOn(67);
+    await expect(heldBar(page, 67)).toHaveCount(1);
+    await page.waitForTimeout(500);
+    expect(await cursorSec(page)).toBe(cue);
+    expect(await midi.index()).toBe(-1);
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    await midi.noteOff(67);
+    await expect(heldBar(page, 67)).toHaveCount(0);
+
+    // Play plays past the cue; Pause keeps the red where the music was.
+    await play(page).click();
+    await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+    await expect.poll(() => cursorSec(page)).toBeGreaterThan(cue);
+    await expectOneRed(page, 'playing with Practice mode off');
+    await page.getByRole('button', { name: 'Pause' }).click();
+    await expect(play(page)).toBeVisible();
+    await expect(page.locator('.score-sheet .is-red').first()).toBeVisible();
+    await expect(play(page)).not.toHaveClass(/is-red/);
+    expect(await midi.target()).toEqual([]);
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'paused with Practice mode off');
+  });
+
+  test('on again the walk goes on from the red, and a key held through the switch does not count', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page);
+    await midi.playRed();
+    await midi.playRed();
+    expect(await midi.waitForStep()).toEqual([67]);
+    expect(await midi.index()).toBe(2);
+    await flipPractice(page, false);
+    await expect.poll(() => midi.target()).toEqual([]);
+    await midi.noteOn(67); // held while it is off, and through the switch
+    await flipPractice(page, true);
+    expect(await midi.waitForStep()).toEqual([67]);
+    expect(await midi.index()).toBe(2);
+    const hold = await midi.hold();
+    await page.waitForTimeout(hold + 600);
+    expect(await midi.index(), 'the key held through the switch counted').toBe(2);
+    await expect(page.locator('.keyboard rect.key-level')).toHaveCount(0);
+    await midi.noteOff(67);
+    await midi.playRed(); // a fresh press and its hold move it
+    expect(await midi.index()).toBe(3);
+    await expectOneRed(page, 'on again, one step on');
+  });
+
+  test('off stops digitus, and nothing more is handed over', async ({ page }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
+    await midi.pressStep(); // the step runs at the press: the other hand is handed over
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    const before = (await accompCancelled(page)).length;
+    await flipPractice(page, false);
+    await expect.poll(async () => (await accompCancelled(page)).length).toBeGreaterThan(before);
+    await expect.poll(() => midi.target()).toEqual([]);
+    await midi.noteOff(48);
+    await midi.noteOn(48);
+    await page.waitForTimeout(600);
+    expect(await accompanied(page)).toHaveLength(1);
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'off, digitus stopped');
+  });
+
+  test('off is remembered across a reload', async ({ page }) => {
+    const midi = await twinkle(page);
+    await flipPractice(page, false);
+    await page.reload();
+    await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
+      timeout: 20_000,
+    });
+    await expect(play(page)).toBeEnabled();
+    await openPractice(page);
+    await expect(practiceSwitch(page)).not.toBeChecked();
+    expect(await midi.target()).toEqual([]);
+    await expectOneRed(page, 'off after a reload');
+  });
+
+  // The switch drawn: ink and grays, both themes, a desktop's width and a phone's; at 360 px in
+  // French the row keeps its 44 px and its label stays beside the switch.
+  for (const [width, height, locale] of [
+    [1280, 900, 'en-US'],
+    [360, 740, 'en-US'],
+    [360, 740, 'fr-FR'],
+  ] as const) {
+    test.describe(`the switch at ${width} px, ${locale}`, () => {
+      test.use({ viewport: { width, height }, locale });
+
+      for (const scheme of ['light', 'dark'] as const) {
+        test(`in the ${scheme} theme it is drawn in ink and grays, one red throughout`, async ({
+          page,
+        }) => {
+          await page.emulateMedia({ colorScheme: scheme });
+          const french = locale === 'fr-FR';
+          if (french) {
+            // The page speaks French: twinkle() finds Play by its English name.
+            await installFakeMidi(page, { permission: 'granted', playAlong: true });
+            await page.goto(`/?audio=silent#/piece/${TWINKLE}`);
+            await expect(page.locator('.score-sheet g.fing')).toHaveCount(TWINKLE_NOTES, {
+              timeout: 20_000,
+            });
+            await embellishDecided(page, 'offered');
+          } else {
+            await (await twinkle(page)).waitForStep();
+          }
+          const name = french ? 'Mode exercice' : 'Practice mode';
+          const toggle = page.getByRole('switch', { name });
+          await openPractice(page);
+          await expect(toggle).toBeChecked();
+          const label = toggle.locator('xpath=..');
+          const looks = () =>
+            toggle.evaluate((input) => {
+              const tokenColour = (token: string): string => {
+                const probe = document.createElement('span');
+                probe.style.color = `var(${token})`;
+                document.body.appendChild(probe);
+                const colour = getComputedStyle(probe).color;
+                probe.remove();
+                return colour;
+              };
+              const track = getComputedStyle(input);
+              const thumb = getComputedStyle(input, '::before');
+              return {
+                appearance: track.appearance,
+                track: track.backgroundColor,
+                border: track.borderTopColor,
+                thumb: thumb.backgroundColor,
+                ink: tokenColour('--ink'),
+                paper: tokenColour('--paper'),
+                gray3: tokenColour('--gray-3'),
+              };
+            });
+
+          for (const on of [true, false, true]) {
+            if ((await toggle.isChecked()) !== on) await toggle.click();
+            // The thumb slides over --dur-fast (120 ms): read the colours once it has settled.
+            await page.waitForTimeout(250);
+            const seen = await looks();
+            const where = `${scheme}, ${width} px, ${locale}, switch ${on ? 'on' : 'off'}`;
+            expect(seen.appearance, where).toBe('none');
+            expect(seen.border, where).toBe(seen.ink);
+            expect(seen.track, where).toBe(on ? seen.ink : seen.paper);
+            expect(seen.thumb, where).toBe(on ? seen.paper : seen.gray3);
+            const box = (await label.boundingBox())!;
+            expect(box.height, where).toBeGreaterThanOrEqual(44);
+            // The words stay on one row beside the switch (a wrapped label would still be 44 px
+            // high): the switch's and every text line's vertical centres agree within 2 px.
+            const rows = await label.evaluate((el) => {
+              const range = document.createRange();
+              range.selectNodeContents(el);
+              const centres = [...range.getClientRects()]
+                .filter((r) => r.width > 0 && r.height > 0)
+                .map((r) => r.top + r.height / 2);
+              return { count: centres.length, spread: Math.max(...centres) - Math.min(...centres) };
+            });
+            expect(rows.count, where).toBeGreaterThanOrEqual(2); // the switch and the words
+            expect(rows.spread, `${where}, the label wraps`).toBeLessThanOrEqual(2);
+            expect(await horizontalOverflow(page), where).toBeLessThanOrEqual(0);
+            await expectOneRed(page, where);
+            await expectNoSeriousA11y(page, where);
+          }
+        });
+      }
+    });
+  }
 });
 
 /**

@@ -449,11 +449,32 @@ export function ScoreView({ source }: { source: PieceSource }) {
     flightShown: red.redAway,
   });
 
+  // The Practice mode switch (issue 191): in the Practice panel only while a piano is connected.
+  // The prop is memoised on the two booleans, so a MIDI message never renders the panel.
+  const practiceOn = useAppStore((s) => s.settings.practiceMode);
+  const setSettings = useAppStore((s) => s.setSettings);
+  const practiceMode = useMemo(
+    () =>
+      along.pianoConnected
+        ? { on: practiceOn, set: (on: boolean) => setSettings({ practiceMode: on }) }
+        : null,
+    [along.pianoConnected, practiceOn, setSettings],
+  );
+
   const seekToBar = useCallback(
     (bar: number) => {
       if (!seekable) return;
       const target = clampBar(bar, barStarts.length, playback.loop);
       const sec = barStarts[target]!;
+      // The red already waits on the walk's first step in that bar (the loop's first, a click on
+      // its bar or Left at the loop's start): the seek would cue the step it is on, so no hop
+      // of no distance (issue 196), as for Rewind and Home.
+      if (
+        !playback.playing &&
+        along.atFirst &&
+        barIndexAt(barStarts, playback.startSec()) === target
+      )
+        return;
       // A far seek brings the page of its bar in first: the red hops to notes it can find.
       if (host) pageWindowOf(host)?.ensureBar(target);
       if (!playback.playing && sec <= 0) {
@@ -474,7 +495,13 @@ export function ScoreView({ source }: { source: PieceSource }) {
       if (key === null || !seekable) return;
       if (key.kind === 'start') {
         // Like the Rewind button; the page goes to its top as Home does anywhere.
-        if (along.atFirst) return;
+        if (along.atFirst) {
+          // Nowhere to fly. On the piece's first group the red is at the top and the browser's own
+          // scroll to the top is harmless; on a loop's first group it can be far down the page, and
+          // the scroll would take the page, and the red with it, off screen (issue 196).
+          if (playback.loop) e.preventDefault();
+          return;
+        }
         if (playback.playing || !playback.atStart) playback.rewind();
         return;
       }
@@ -652,6 +679,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                 embellish={
                   doc.embellish === 'offered' ? { on: doc.embellished, set: toggleEmbellish } : null
                 }
+                practiceMode={practiceMode}
                 oneHanded={oneHanded(score)}
               />
             </div>

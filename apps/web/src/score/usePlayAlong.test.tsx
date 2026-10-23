@@ -1209,6 +1209,25 @@ describe('a loop', () => {
     expect(s.fake.finish).not.toHaveBeenCalled();
   });
 
+  it("is at the first step on the loop's first step, and again after the wrap (issue 196)", async () => {
+    await connect();
+    const s = setup({}, (f) => {
+      f.stretch = { from: 0.5, to: 1.5 }; // the steps at 0.5 and 1 are the loop's
+      f.cue = 0.5;
+      f.atStart = false;
+      f.start = 0.5;
+    });
+    expect(s.hook.result.current.atFirst).toBe(true); // the piece's first step is at 0, outside
+    s.press(62);
+    s.hold(500);
+    expect(s.cues()).toEqual([1]);
+    expect(s.hook.result.current.atFirst).toBe(false);
+    s.press(64);
+    s.hold(500);
+    expect(s.cues()).toEqual([1, 0.5]);
+    expect(s.hook.result.current.atFirst).toBe(true);
+  });
+
   it('puts the red on the loop first step when Play would start outside the loop', async () => {
     await connect();
     const s = setup({}, (f) => {
@@ -1226,6 +1245,7 @@ describe('a loop', () => {
     });
     expect(s.cues()).toEqual([]);
     expect(s.hook.result.current.hint).toBeNull();
+    expect(s.hook.result.current.atFirst).toBe(false);
   });
 });
 
@@ -1754,5 +1774,143 @@ describe('lost keys, late levels and a faster tempo', () => {
     expect(s.cues()).toEqual([0]); // slower: the hold is 1000 ms from the press
     s.hold(400);
     expect(s.cues()).toEqual([0, 0.5]);
+  });
+});
+
+// Practice mode (issue 191): off, the walk is "no piano" and nothing else. The piano stays
+// connected (`pianoConnected`), and the one gate is the inactive path of `decide`.
+describe('Practice mode (issue 191)', () => {
+  const practice = (on: boolean) =>
+    act(() => useAppStore.getState().setSettings({ practiceMode: on }));
+
+  it('starts inactive when it is off at mount, with the piano still connected', async () => {
+    practice(false);
+    await connect();
+    const s = setup();
+    expect(s.hook.result.current.active).toBe(false);
+    expect(s.hook.result.current.pianoConnected).toBe(true);
+    expect(s.cues()).toEqual([]);
+    expect(s.hook.result.current.hint).toBeNull();
+    expect(s.hook.result.current.atFirst).toBe(false);
+  });
+
+  it('says the piano is connected only when it is, whatever Practice mode says', async () => {
+    const s = setup();
+    expect(s.hook.result.current.pianoConnected).toBe(false);
+    await connect();
+    s.refresh();
+    expect(s.hook.result.current.pianoConnected).toBe(true);
+    practice(false);
+    s.refresh();
+    expect(s.hook.result.current.pianoConnected).toBe(true);
+    act(() => turnOffPiano());
+    s.refresh();
+    expect(s.hook.result.current.pianoConnected).toBe(false);
+  });
+
+  it('ends the walk when it goes off with a step running: the cue stays, no level, no timer', async () => {
+    await connect();
+    const s = setup();
+    const idle = vi.getTimerCount();
+    s.press(48, 60);
+    expect(s.hook.result.current.levels.get().size).toBe(2);
+    expect(vi.getTimerCount()).toBe(idle + 1);
+    practice(false);
+    s.refresh();
+    expect(s.hook.result.current.active).toBe(false);
+    expect(s.fake.cue).toBe(0);
+    expect(s.hook.result.current.levels.get().size).toBe(0);
+    expect(vi.getTimerCount()).toBe(idle);
+    s.hold(1000);
+    expect(s.cues()).toEqual([0]); // holding longer makes no cue
+  });
+
+  it('takes the hold hint away when it goes off after an early release', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(300);
+    s.release(48, 60);
+    expect(s.hook.result.current.hint).toEqual({ kind: 'hold', count: 2 });
+    practice(false);
+    s.refresh();
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('resumes at the red step when it comes on again, and a key held through the switch passes nothing', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5]);
+    s.press(62); // the second step runs
+    practice(false);
+    s.refresh();
+    practice(true);
+    s.refresh();
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.cues()).toEqual([0, 0.5]); // the red stands on the second step: nothing is cued again
+    s.hold(1000);
+    expect(s.cues()).toEqual([0, 0.5]); // 62 was held through the switch: it is spent
+    s.release(62);
+    s.press(62);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5, 1]); // a fresh press and a hold pass
+  });
+
+  it('does not count a key pressed while it was off', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.hold(500);
+    practice(false);
+    s.refresh();
+    s.press(62);
+    s.hold(1000);
+    expect(s.cues()).toEqual([0, 0.5]);
+    practice(true);
+    s.refresh();
+    s.hold(1000);
+    expect(s.cues()).toEqual([0, 0.5]);
+    s.release(62);
+    s.press(62);
+    s.hold(500);
+    expect(s.cues()).toEqual([0, 0.5, 1]);
+  });
+
+  it('resumes at the paused group after Play then Pause while it was off', async () => {
+    practice(false);
+    await connect();
+    const s = setup();
+    s.fake.playing = true;
+    s.refresh();
+    s.fake.playing = false; // Pause: after the note at 1 s was heard, the cursor marks that group
+    s.fake.atStart = false;
+    s.fake.start = 1;
+    s.fake.group = 2;
+    s.refresh();
+    expect(s.cues()).toEqual([]);
+    practice(true);
+    s.refresh();
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.cues()).toEqual([1]);
+    s.press(64);
+    s.hold(500);
+    expect(s.cues()).toEqual([1, 1.5]);
+  });
+
+  it('names no step to the Playwright check while it is off', async () => {
+    window.history.replaceState(null, '', '/?audio=silent');
+    const hook = () =>
+      (window as unknown as { __digitus2Along?: { target(): number[] } }).__digitus2Along;
+    await connect();
+    const s = setup();
+    expect(hook()?.target()).toEqual([48, 60]);
+    practice(false);
+    s.refresh();
+    expect(hook()?.target()).toEqual([]);
+    practice(true);
+    s.refresh();
+    expect(hook()?.target()).toEqual([48, 60]);
   });
 });

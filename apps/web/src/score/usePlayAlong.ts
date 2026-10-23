@@ -18,8 +18,9 @@
  * move it did not make itself, and when it goes inactive; its own cue and finish leave the tail
  * of the piece sounding.
  *
- * The walk is active only when it can own the red: the piano is on and connected, the score is
- * ready and playable, it has a step, and nothing plays or loads. It moves the red only while no
+ * The walk is active only when it can own the red: the piano is on and connected and Practice
+ * mode is on (issue 191; off, the score page is as with no piano and the piano stays connected),
+ * the score is ready and playable, it has a step, and nothing plays or loads. It moves the red only while no
  * flight or hop is on screen (`flightShown`), so there are never two reds: its align step is a
  * passive effect, which runs after the layout effects of RedFlight, EndBurst and the carry of
  * "Add notes between" in the same commit (ScoreView declares this hook after them).
@@ -55,6 +56,7 @@ import {
   anchorStep,
   holdSec,
   liftAt,
+  loopSpan,
   pressAt,
   pressKey,
   releaseKey,
@@ -94,9 +96,17 @@ export interface AlongHint {
 }
 
 export interface PlayAlong {
-  /** The piano is connected and the red is the walk's: stopped, ready, playable, with steps. */
+  /** The piano is connected, Practice mode is on and the red is the walk's: stopped, ready, playable, with steps. */
   active: boolean;
-  /** Active and the red waits on the piece's first step (Rewind has nowhere to go). */
+  /**
+   * The setting is on and the piano is connected, whatever Practice mode says: the Practice panel
+   * shows its switch while this holds (issue 191).
+   */
+  pianoConnected: boolean;
+  /**
+   * Active and the red waits on the walk's first step (Rewind has nowhere to go): the piece's
+   * first, or the loop's first when a loop is set (issue 196).
+   */
   atFirst: boolean;
   /** The status line's hint, or null when it is not shown. */
   hint: AlongHint | null;
@@ -184,9 +194,13 @@ export function usePlayAlong({
   flightShown,
 }: PlayAlongOptions): PlayAlong {
   const setting = useAppStore((s) => s.settings.playAlong);
+  const practiceMode = useAppStore((s) => s.settings.practiceMode);
   const factor = useAppStore(tempoFactorOf);
   const piano = usePianoSnapshot();
   const connected = setting && piano.status === 'connected';
+  // The one gate (issue 191): with Practice mode off the walk is as with no piano, and nothing
+  // else changes; the piano stays connected and its keys are still drawn.
+  const walking = connected && practiceMode;
   const { playing, loading, atStart, cue, loop } = playback;
   const marked = currentGroup >= 0;
 
@@ -195,23 +209,23 @@ export function usePlayAlong({
   const muteKey = [...new Set(mutedHands)].sort().join(',');
   const { steps, times } = useMemo(
     () =>
-      connected && score
+      walking && score
         ? alongPlan(performanceFor(score), muteKey ? (muteKey.split(',') as Hand[]) : [])
         : NO_PLAN,
-    [connected, score, muteKey],
+    [walking, score, muteKey],
   );
-  const active = connected && ready && playable && steps.length > 0 && !playing && !loading;
+  const active = walking && ready && playable && steps.length > 0 && !playing && !loading;
   // The other hand's notes (issue 184): only for a reader whose piano is connected and who left a
   // hand out. The events are the transport's own, so the hand sounds as it does in Play.
   const accompaniment = useMemo<Accompaniment | null>(() => {
-    if (!connected || !score || muteKey === '') return null;
+    if (!walking || !score || muteKey === '') return null;
     const perf = performanceFor(score);
     return {
       hands: muteKey.split(',') as Hand[],
       events: playEventsFor(perf.score),
       endSec: scoreEndSec(perf.score),
     };
-  }, [connected, score, muteKey]);
+  }, [walking, score, muteKey]);
 
   /** The index of the step the red waits on, -1 when none: state, so the render can read it. */
   const [index, setIndex] = useState(-1);
@@ -643,12 +657,24 @@ export function usePlayAlong({
     !atStart &&
     Math.abs(playback.startPerformanceSec() - step.perfSec) <= ALONG_EPS;
   const soundWaits = accompanying && playback.soundWaits;
+  const pianoConnected = connected;
+  // The walk's first step (issue 196): the loop's first when a loop is set, else the piece's. A
+  // loop that holds no step gives -1, which no index equals.
+  const stretch = playback.performanceLoop();
+  const first = stretch ? (loopSpan(steps, stretch)?.first ?? -1) : 0;
   return useMemo(() => {
     let hint: AlongHint | null = null;
     if (cuedHere && step) {
       if (early) hint = { kind: 'hold', count: step.pitches.length };
       else if (played === 0) hint = { kind: 'play', count: step.pitches.length };
     }
-    return { active, atFirst: cuedHere && index === 0, hint, levels, soundWaits };
-  }, [active, cuedHere, index, step, played, early, levels, soundWaits]);
+    return {
+      active,
+      pianoConnected,
+      atFirst: cuedHere && index === first,
+      hint,
+      levels,
+      soundWaits,
+    };
+  }, [active, pianoConnected, cuedHere, index, first, step, played, early, levels, soundWaits]);
 }

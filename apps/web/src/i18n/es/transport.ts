@@ -19,6 +19,7 @@ export const transport: Messages['transport'] = {
   loopToBar: 'Bucle hasta el compás',
   loopTo: 'a',
   addNotes: 'Añadir notas intermedias',
+  practiceMode: 'Modo práctica',
   seekHelp: 'Haz clic en un compás para ir allí. ← y → retroceden o avanzan un compás.',
   seekHelpTouch: 'Toca un compás para ir allí.',
   loopReversed: 'El inicio del bucle debe ir antes del final.',

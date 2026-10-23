@@ -424,6 +424,62 @@ fieldset {
   cursor: pointer;
 }
 
+/* A switch (the Practice panel's Practice mode, issue 191): a real checkbox with role="switch"
+   drawn as a track and a thumb, in ink and grays only. Off: an empty track and a gray thumb at
+   the left. On: an ink track and a paper thumb at the right. The thumb slides over --dur-fast,
+   which is 0 under reduced motion. The row is the .check label, 44 px high; the focus ring is
+   the app's own. */
+input[role='switch'] {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 2.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--ink);
+  border-radius: 0.625rem;
+  background: var(--paper);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+input[role='switch']::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--gray-3);
+  transition:
+    transform var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease);
+}
+
+input[role='switch']:checked {
+  background: var(--ink);
+}
+
+input[role='switch']:checked::before {
+  background: var(--paper);
+  transform: translateX(16px);
+}
+
+@media (forced-colors: active) {
+  input[role='switch']::before {
+    background: ButtonText;
+  }
+
+  input[role='switch']:checked {
+    background: ButtonText;
+  }
+
+  input[role='switch']:checked::before {
+    background: Canvas;
+  }
+}
+
 .field {
   display: grid;
   gap: 0.25rem;

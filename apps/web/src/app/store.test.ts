@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_SETTINGS,
   pieceKey,
@@ -34,6 +34,7 @@ describe('store', () => {
       legendSeen: false,
       favourites: [],
       playAlong: false,
+      practiceMode: true,
     });
   });
   it('opens a library piece, the about page, and goes back', () => {
@@ -461,6 +462,7 @@ describe('the default settings', () => {
       legendSeen: false,
       favourites: [],
       playAlong: false,
+      practiceMode: true,
     });
   });
 });
@@ -500,5 +502,54 @@ describe('playing along on a piano of your own (issue 182)', () => {
       await useAppStore.persist.rehydrate();
       expect(S().settings.playAlong, JSON.stringify(junk)).toBe(false);
     }
+  });
+});
+
+describe('Practice mode (issue 191)', () => {
+  const S = () => useAppStore.getState();
+  const stored = () =>
+    JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.settings;
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({ settings: { ...DEFAULT_SETTINGS } });
+  });
+  afterEach(() => vi.restoreAllMocks());
+  it('is on until the reader turns it off', () => {
+    expect(DEFAULT_SETTINGS.practiceMode).toBe(true);
+    expect(S().settings.practiceMode).toBe(true);
+  });
+  it('is kept in localStorage, off and on', async () => {
+    S().setSettings({ practiceMode: false });
+    expect(stored().practiceMode).toBe(false);
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.practiceMode).toBe(false);
+    S().setSettings({ practiceMode: true });
+    expect(stored().practiceMode).toBe(true);
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.practiceMode).toBe(true);
+  });
+  it('loads older settings with it on, and reads a value that is not a boolean as on', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { handSize: 'small' } }, version: 2 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings).toMatchObject({ handSize: 'small', practiceMode: true });
+    for (const junk of ['no', 0, null, {}]) {
+      useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, practiceMode: false } });
+      localStorage.setItem(
+        SETTINGS_STORAGE_KEY,
+        JSON.stringify({ state: { settings: { practiceMode: junk } }, version: 2 }),
+      );
+      await useAppStore.persist.rehydrate();
+      expect(S().settings.practiceMode, JSON.stringify(junk)).toBe(true);
+    }
+  });
+  it('still changes for the visit when the storage refuses the write', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+    S().setSettings({ practiceMode: false });
+    expect(S().settings.practiceMode).toBe(false);
   });
 });

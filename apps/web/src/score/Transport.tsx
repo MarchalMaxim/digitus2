@@ -93,6 +93,12 @@ export interface PracticeControlsProps {
    */
   embellish?: { on: boolean; set(on: boolean): void } | null;
   /**
+   * The Practice mode switch (issue 191), shaped like `embellish`: with a piano connected, on, the
+   * red waits for the reader's piano; off, the page plays as with no piano. Present only while a
+   * piano is connected; absent (undefined or null) the switch is not there at all.
+   */
+  practiceMode?: { on: boolean; set(on: boolean): void } | null;
+  /**
    * Every note is in one hand (issue 112): the piece plays with both hands whatever is saved, so
    * the Hands control has nothing to choose and is not there.
    */
@@ -328,7 +334,8 @@ function placeThumb(
 }
 
 /**
- * The practice controls: tempo, hands, metronome, count-in and the bar loop. Settings live in
+ * The practice controls: Practice mode (while a piano is connected, issue 191), tempo, hands,
+ * metronome, count-in and the bar loop. Settings live in
  * the store; the loop lives in usePlayback. The score view keeps them in the dock's Practice
  * panel at every width (UI batch, spec 13); the panel's toggle names them, so they are no group
  * of their own (a screen reader would announce "Practice" twice). The panel only hides them, so
@@ -353,6 +360,7 @@ export function PracticeControls({
   qpm = null,
   currentBar,
   embellish = null,
+  practiceMode = null,
   oneHanded = false,
 }: PracticeControlsProps) {
   const t = useT();
@@ -401,6 +409,17 @@ export function PracticeControls({
     };
   }, []);
 
+  // The Practice mode switch heads the panel while a piano is connected; when the piano goes
+  // while it has the focus, the focus moves to the Tempo slider, the next control, rather than
+  // falling to the page (the same ref-cleanup as above).
+  const tempoRef = useRef<HTMLInputElement>(null);
+  const practiceRef = useCallback((box: HTMLInputElement | null) => {
+    if (!box) return;
+    return () => {
+      if (document.activeElement === box) tempoRef.current?.focus();
+    };
+  }, []);
+
   // A tick box like Metronome, after the loop: there only once the embellished version exists.
   const addNotes = embellish && (
     <label className="check">
@@ -416,9 +435,22 @@ export function PracticeControls({
 
   return (
     <div className="transport no-print">
+      {practiceMode && (
+        <label className="check switch">
+          <input
+            ref={practiceRef}
+            type="checkbox"
+            role="switch"
+            checked={practiceMode.on}
+            onChange={(e) => practiceMode.set(e.currentTarget.checked)}
+          />{' '}
+          {t.transport.practiceMode}
+        </label>
+      )}
       <label className="tempo">
         {t.transport.tempo}
         <input
+          ref={tempoRef}
           type="range"
           min={50}
           max={150}

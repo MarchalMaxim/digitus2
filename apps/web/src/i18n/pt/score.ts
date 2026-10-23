@@ -31,6 +31,10 @@ export const score: Messages['score'] = {
     noNotes: 'Esta peça não tem notas para tocar.',
     playAlongHint: (count: number) =>
       count > 1 ? 'Toque as notas vermelhas no seu piano.' : 'Toque a nota vermelha no seu piano.',
+    playAlongSound: {
+      click: 'Clique uma vez para ouvir a outra mão.',
+      tap: 'Toque uma vez para ouvir a outra mão.',
+    },
     practice: 'Prática',
     scanSource: 'Origem da digitalização e reconhecimento',
     couldNotOpenFile: (name: string) =>

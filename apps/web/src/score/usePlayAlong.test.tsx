@@ -170,6 +170,11 @@ function makeFake() {
         },
         setLoop: () => {},
         strike: () => () => undefined,
+        prepare: () => {},
+        preparing: false,
+        soundWaits: false,
+        accompany: () => {},
+        stopAccompaniment: () => {},
       };
     },
   };
@@ -277,12 +282,22 @@ afterEach(() => {
 describe('connecting', () => {
   it('cues the first step once the piano connects, and says what to play', async () => {
     const s = setup();
-    expect(s.hook.result.current).toEqual({ active: false, atFirst: false, hint: null });
+    expect(s.hook.result.current).toEqual({
+      active: false,
+      atFirst: false,
+      hint: null,
+      soundWaits: false,
+    });
     expect(s.cues()).toEqual([]);
     await connect();
     s.refresh();
     expect(s.cues()).toEqual([0]);
-    expect(s.hook.result.current).toEqual({ active: true, atFirst: true, hint: 2 });
+    expect(s.hook.result.current).toEqual({
+      active: true,
+      atFirst: true,
+      hint: 2,
+      soundWaits: false,
+    });
   });
 
   it('cues the first step once when it mounts connected: running the align twice calls once', async () => {
@@ -521,7 +536,12 @@ describe('when the walk does not move', () => {
     const s = setup();
     s.fake.playing = true;
     s.refresh();
-    expect(s.hook.result.current).toEqual({ active: false, atFirst: false, hint: null });
+    expect(s.hook.result.current).toEqual({
+      active: false,
+      atFirst: false,
+      hint: null,
+      soundWaits: false,
+    });
     s.press(48, 60);
     expect(s.cues()).toEqual([0]);
     expect(s.fake.finish).not.toHaveBeenCalled();
@@ -584,7 +604,12 @@ describe('when the walk does not move', () => {
     s.release(48, 60);
     act(() => link.events!.inputs([]));
     s.refresh();
-    expect(s.hook.result.current).toEqual({ active: false, atFirst: false, hint: null });
+    expect(s.hook.result.current).toEqual({
+      active: false,
+      atFirst: false,
+      hint: null,
+      soundWaits: false,
+    });
     expect(s.fake.cue).toBe(0.5);
     act(() => link.events!.inputs(['GO:PIANO']));
     s.refresh();
@@ -672,16 +697,31 @@ describe('a hop to another bar', () => {
   it('does not call the red the first step, nor name its pitches, while the hop is on screen', async () => {
     await connect();
     const s = setup();
-    expect(s.hook.result.current).toEqual({ active: true, atFirst: true, hint: 2 });
+    expect(s.hook.result.current).toEqual({
+      active: true,
+      atFirst: true,
+      hint: 2,
+      soundWaits: false,
+    });
     // A click on a later bar: the playback is cued there, and the red hops (the walk waits).
     s.fake.cue = 1;
     s.fake.start = 1;
     s.fake.flight = true;
     s.refresh();
-    expect(s.hook.result.current).toEqual({ active: true, atFirst: false, hint: null });
+    expect(s.hook.result.current).toEqual({
+      active: true,
+      atFirst: false,
+      hint: null,
+      soundWaits: false,
+    });
     s.fake.flight = false;
     s.refresh();
-    expect(s.hook.result.current).toEqual({ active: true, atFirst: false, hint: 1 });
+    expect(s.hook.result.current).toEqual({
+      active: true,
+      atFirst: false,
+      hint: 1,
+      soundWaits: false,
+    });
     expect(s.cues()).toEqual([0]); // the walk found the playback cued on that step already
   });
 });
@@ -843,7 +883,12 @@ describe('with the real playback', () => {
     expect(result.current.pb.cue).toBe(0);
     expect(result.current.pb.atStart).toBe(false);
     expect(result.current.pb.startPerformanceSec()).toBe(0);
-    expect(result.current.along).toEqual({ active: true, atFirst: true, hint: 2 });
+    expect(result.current.along).toEqual({
+      active: true,
+      atFirst: true,
+      hint: 2,
+      soundWaits: false,
+    });
     rerender();
     rerender();
     expect(result.current.pb.cue).toBe(0);

@@ -660,4 +660,60 @@ describe('advance', () => {
     const r = advance(steps, 1, held(62), { from: 5, to: 9 });
     expect(r.move).toEqual({ kind: 'finish' });
   });
+
+  describe('last, the step passed last (issue 184)', () => {
+    const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
+
+    it('is the step a single pass left', () => {
+      expect(advance(steps, 0, held(60), null).last).toBe(0);
+      expect(advance(steps, 2, held(64), null).last).toBe(2);
+    });
+
+    it('is the end of a chain, not its start', () => {
+      const r = advance(steps, 0, held(60, 62, 64), null);
+      expect(r.passed).toBe(3);
+      expect(r.move).toEqual({ kind: 'cue', index: 3 });
+      expect(r.last).toBe(2);
+      const from = advance(steps, 1, held(62, 64), null);
+      expect(from.passed).toBe(2);
+      expect(from.last).toBe(2);
+    });
+
+    it('is the final step on finish', () => {
+      const r = advance(steps, 4, held(67), null);
+      expect(r.move).toEqual({ kind: 'finish' });
+      expect(r.last).toBe(4);
+      const chain = advance(steps, 3, held(65, 67), null);
+      expect(chain.move).toEqual({ kind: 'finish' });
+      expect(chain.last).toBe(4);
+    });
+
+    it("is the loop's last step when the pass wraps", () => {
+      const loop: PerfRange = { from: 2, to: 4 };
+      const r = advance(steps, 3, held(65), loop);
+      expect(r.move).toEqual({ kind: 'cue', index: 2 });
+      expect(r.last).toBe(3);
+      // A one-step loop wraps onto itself.
+      const lap = advance([step(0, 60), step(1, 62)], 1, held(62), { from: 1, to: 2 });
+      expect(lap.move).toEqual({ kind: 'cue', index: 1 });
+      expect(lap.last).toBe(1);
+    });
+
+    it('is the step before the wrap when a chain ends just after one', () => {
+      const loop: PerfRange = { from: 2, to: 4 };
+      // Passes step 3 (the loop's last), wraps to step 2, passes it: lands on step 3.
+      const r = advance(steps, 3, held(65, 64), loop);
+      expect(r.passed).toBe(2);
+      expect(r.move).toEqual({ kind: 'cue', index: 3 });
+      expect(r.last).toBe(2);
+    });
+
+    it('is -1 on stay', () => {
+      expect(advance(steps, 0, NO_KEYS, null).last).toBe(-1);
+      expect(advance(steps, 0, held(61), null).last).toBe(-1);
+      expect(advance(steps, -1, held(60), null).last).toBe(-1);
+      expect(advance(steps, 9, held(60), null).last).toBe(-1);
+      expect(advance([], 0, held(60), null).last).toBe(-1);
+    });
+  });
 });

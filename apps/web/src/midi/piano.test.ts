@@ -13,6 +13,7 @@ import {
   pianoSnapshot,
   resetPianoForTests,
   resumePiano,
+  SEARCHING_AFTER_MS,
   subscribeNotes,
   turnOffPiano,
   useHeldPitches,
@@ -513,6 +514,246 @@ describe('a later visit', () => {
       await resumePiano();
     });
     expect(access.open).not.toHaveBeenCalled();
+  });
+});
+
+describe('while Windows looks for the piano', () => {
+  // Chrome's WinRT backend leaves requestMIDIAccess pending for 20 s or more while a Bluetooth
+  // piano is off (issue 182). Every wait here is a fake timer: the watcher is a timer, not a clock.
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    resetPianoForTests();
+    vi.useRealTimers();
+  });
+
+  /** Lets the lazy import and the permission query settle without moving the clock noticeably. */
+  const settle = () => vi.advanceTimersByTimeAsync(1);
+
+  it('waits two seconds before it says so', () => {
+    expect(SEARCHING_AFTER_MS).toBe(2000);
+  });
+
+  it('moves a granted press that stays pending from asking to searching after 2000 ms', async () => {
+    permission('granted');
+    deferredOpen();
+    void askForPiano();
+    await settle();
+    expect(status()).toBe('asking');
+    await vi.advanceTimersByTimeAsync(SEARCHING_AFTER_MS - 100);
+    expect(status()).toBe('asking');
+    await vi.advanceTimersByTimeAsync(200);
+    expect(status()).toBe('searching');
+    expect(pianoSnapshot().names).toEqual([]);
+    // Nothing is polled any more once the line says so.
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('keeps asking while the prompt is open, and searches on the next poll once it is allowed', async () => {
+    permission('prompt');
+    const open = deferredOpen();
+    void askForPiano();
+    await settle();
+    await vi.advanceTimersByTimeAsync(4100);
+    expect(status()).toBe('asking');
+    expect(vi.getTimerCount()).toBe(1); // the watcher polls every second
+    // The reader allows; the request then hangs.
+    permission('granted');
+    await vi.advanceTimersByTimeAsync(900);
+    expect(status()).toBe('searching');
+    open.link.events!.inputs(['GO:PIANO MIDI 1']);
+    open.resolve();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(status()).toBe('connected');
+  });
+
+  it('polls every second after the first two, not faster', async () => {
+    const query = vi.fn(() => Promise.resolve({ state: 'prompt' as PermissionState }));
+    setNavigator('permissions', { query });
+    deferredOpen();
+    void askForPiano();
+    await settle();
+    await vi.advanceTimersByTimeAsync(1900);
+    expect(query).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(200);
+    expect(query).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(800); // 2.9 s
+    expect(query).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(300); // 3.2 s: the second poll came at 3 s
+    expect(query).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(3000); // 6.2 s: polls at 4, 5 and 6 s
+    expect(query).toHaveBeenCalledTimes(5);
+    expect(status()).toBe('asking');
+  });
+
+  it('moves a silent resume that stays pending from off to searching after 2000 ms', async () => {
+    permission('granted');
+    useAppStore.getState().setSettings({ playAlong: true });
+    const open = deferredOpen();
+    void resumePiano();
+    await settle();
+    expect(access.open).toHaveBeenCalledTimes(1);
+    expect(status()).toBe('off'); // nothing is asked, so the line never says asking
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(status()).toBe('off');
+    await vi.advanceTimersByTimeAsync(600);
+    expect(status()).toBe('searching');
+    // The piano is turned on at last.
+    open.link.events!.inputs(['GO:PIANO MIDI 1']);
+    open.resolve();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(pianoSnapshot()).toEqual({ status: 'connected', names: ['GO:PIANO MIDI 1'] });
+    expect(settings().playAlong).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('goes to searching at once on a press during a pending resume, sharing its request', async () => {
+    permission('granted');
+    useAppStore.getState().setSettings({ playAlong: true });
+    deferredOpen();
+    void resumePiano();
+    await settle();
+    expect(status()).toBe('off');
+    void askForPiano();
+    expect(status()).toBe('searching');
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(status()).toBe('searching');
+    expect(access.open).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves a second press during asking alone', async () => {
+    permission('prompt');
+    deferredOpen();
+    void askForPiano();
+    await settle();
+    void askForPiano();
+    expect(status()).toBe('asking');
+    expect(access.open).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives connected, or none, when the request resolves from searching', async () => {
+    permission('granted');
+    const first = deferredOpen();
+    void askForPiano();
+    await vi.advanceTimersByTimeAsync(2100);
+    expect(status()).toBe('searching');
+    first.link.events!.inputs(['Yamaha P-45']);
+    first.resolve();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(pianoSnapshot()).toEqual({ status: 'connected', names: ['Yamaha P-45'] });
+    expect(settings().playAlong).toBe(true);
+
+    turnOffPiano();
+    const second = deferredOpen();
+    void askForPiano();
+    await vi.advanceTimersByTimeAsync(2100);
+    expect(status()).toBe('searching');
+    second.resolve(); // access, but no input list
+    await vi.advanceTimersByTimeAsync(1);
+    expect(pianoSnapshot()).toEqual({ status: 'none', names: [] });
+    expect(settings().playAlong).toBe(true);
+  });
+
+  it('turns off while searching: off, the setting false, and a late answer is closed unused', async () => {
+    permission('granted');
+    const open = deferredOpen();
+    void askForPiano();
+    await vi.advanceTimersByTimeAsync(2100);
+    expect(status()).toBe('searching');
+    turnOffPiano();
+    expect(pianoSnapshot()).toEqual({ status: 'off', names: [] });
+    expect(settings().playAlong).toBe(false);
+    // The piano is turned on much later: the answer is closed and the line stays plain.
+    open.link.events!.inputs(['GO:PIANO MIDI 1']);
+    open.resolve();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(open.link.closes).toBe(1);
+    expect(pianoSnapshot()).toEqual({ status: 'off', names: [] });
+    expect(settings().playAlong).toBe(false);
+  });
+
+  it('shows denied when the pending request is refused after all', async () => {
+    permission('granted');
+    const open = deferredOpen();
+    void askForPiano();
+    await vi.advanceTimersByTimeAsync(2100);
+    expect(status()).toBe('searching');
+    open.reject('denied');
+    await vi.advanceTimersByTimeAsync(1);
+    expect(status()).toBe('denied');
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('leaves no timer after the request settles, at any moment', async () => {
+    permission('prompt');
+    const open = deferredOpen();
+    void askForPiano();
+    await settle();
+    expect(vi.getTimerCount()).toBe(1);
+    open.link.events!.inputs(['A']);
+    open.resolve();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(status()).toBe('connected');
+    expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(status()).toBe('connected');
+  });
+
+  it('leaves no timer after a dismissal', async () => {
+    permission('prompt');
+    const open = deferredOpen();
+    void askForPiano();
+    await vi.advanceTimersByTimeAsync(2500);
+    open.reject('dismissed');
+    await vi.advanceTimersByTimeAsync(1);
+    expect(status()).toBe('off');
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('leaves no timer after Turn off, and the old watcher does nothing to a new request', async () => {
+    permission('granted');
+    deferredOpen();
+    void askForPiano();
+    await vi.advanceTimersByTimeAsync(1500);
+    turnOffPiano();
+    expect(vi.getTimerCount()).toBe(0);
+    // A new press 1.5 s after the first: its watcher counts from its own start.
+    deferredOpen();
+    void askForPiano();
+    await settle();
+    expect(status()).toBe('asking');
+    await vi.advanceTimersByTimeAsync(1000); // 2.5 s after the first press, 1 s after the second
+    expect(status()).toBe('asking');
+    await vi.advanceTimersByTimeAsync(1200);
+    expect(status()).toBe('searching');
+  });
+
+  it('leaves no timer after resetPianoForTests, and nothing happens to the new store', async () => {
+    permission('granted');
+    deferredOpen();
+    void askForPiano();
+    await settle();
+    expect(vi.getTimerCount()).toBe(1);
+    resetPianoForTests();
+    expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(status()).toBe('off');
+  });
+
+  it('does not search once a piano is already there, or in a browser without Web MIDI', async () => {
+    permission('granted');
+    connectWith('A');
+    await askForPiano();
+    expect(status()).toBe('connected');
+    expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(status()).toBe('connected');
+    clearNavigator('requestMIDIAccess');
+    resetPianoForTests();
+    await askForPiano();
+    expect(vi.getTimerCount()).toBe(0);
+    expect(status()).toBe('unsupported');
   });
 });
 

@@ -135,6 +135,7 @@ describe('the score view in another language', () => {
       loading: false,
       countIn: null,
       alongHint: null,
+      alongSound: null,
     } as const;
     expect(scoreStatusLine({ ...ready, loading: true }, messages())).toEqual({
       text: 'De piano laden…',
@@ -142,6 +143,9 @@ describe('the score view in another language', () => {
     });
     expect(scoreStatusLine({ ...ready, playable: false, hands: 'L' })?.text).toBe(
       'Dit stuk heeft geen noten voor de linkerhand.',
+    );
+    expect(scoreStatusLine({ ...ready, alongSound: 'tap' })?.text).toBe(
+      'Tik één keer om de andere hand te horen.',
     );
   });
 });

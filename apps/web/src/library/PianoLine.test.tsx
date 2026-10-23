@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
@@ -296,5 +296,143 @@ describe('the piano line', () => {
     const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'library.css'), 'utf8');
     expect(css).toMatch(/\.piano-line\s*\{[^}]*display:\s*grid;[^}]*justify-items:\s*start;/);
     expect(css).toMatch(/\.piano-line p\s*\{[^}]*overflow-wrap:\s*anywhere;/);
+  });
+});
+
+describe('the piano line while Windows looks for the piano', () => {
+  // Access is granted but the browser has not answered (Chrome's WinRT backend, a Bluetooth piano
+  // that is off, issue 182): every wait is a fake timer, so no test depends on the wall clock.
+  const granted = () =>
+    setNavigator('permissions', { query: () => Promise.resolve({ state: 'granted' }) });
+  const wait = (ms: number) =>
+    act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+
+  // A synchronous click: userEvent pauses on timers, and these tests own the clock.
+  const press = (el: HTMLElement) => fireEvent.click(el);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    granted();
+  });
+  afterEach(() => {
+    cleanup();
+    resetPianoForTests();
+    vi.useRealTimers();
+  });
+
+  it('says it is looking after two seconds, with Turn off, and the button is not busy', async () => {
+    const prompt = promptOpen();
+    render(<PianoLine />);
+    press(button());
+    expect(sentence()).toHaveTextContent('Allow the browser to use your piano.');
+    expect(button()).toHaveAttribute('aria-busy', 'true');
+    await wait(2100);
+    expect(sentence()).toHaveTextContent('Looking for your piano. Make sure it is turned on.');
+    expect(sentence()).not.toHaveClass('visually-hidden');
+    expect(button()).toHaveTextContent('Turn off');
+    expect(button()).not.toHaveAttribute('aria-busy');
+    expect(button()).not.toHaveAttribute('aria-disabled');
+    expect(button()).toHaveAccessibleDescription(
+      'Looking for your piano. Make sure it is turned on.',
+    );
+    // The browser answers at last.
+    prompt.link.events!.inputs(['GO:PIANO MIDI 1']);
+    await act(async () => prompt.answer());
+    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is connected.');
+    expect(button()).toHaveTextContent('Turn off');
+  });
+
+  it('keeps the focus on the one button through asking, searching and connected', async () => {
+    const prompt = promptOpen();
+    render(<PianoLine />);
+    const first = button();
+    first.focus();
+    press(first);
+    expect(first).toHaveFocus();
+    await wait(2100);
+    expect(sentence()).toHaveTextContent('Looking for your piano.');
+    expect(button()).toBe(first);
+    expect(first).toHaveFocus();
+    prompt.link.events!.inputs(['GO:PIANO MIDI 1']);
+    await act(async () => prompt.answer());
+    expect(button()).toBe(first);
+    expect(first).toHaveTextContent('Turn off');
+    expect(first).toHaveFocus();
+  });
+
+  it('keeps asking while the prompt is open', async () => {
+    setNavigator('permissions', { query: () => Promise.resolve({ state: 'prompt' }) });
+    promptOpen();
+    render(<PianoLine />);
+    press(button());
+    await wait(4100);
+    expect(sentence()).toHaveTextContent('Allow the browser to use your piano.');
+    expect(button()).toHaveAttribute('aria-busy', 'true');
+  });
+
+  it('turns off from searching: the plain button, the setting off, and a late answer closed', async () => {
+    const prompt = promptOpen();
+    render(<PianoLine />);
+    press(button());
+    await wait(2100);
+    expect(button()).toHaveTextContent('Turn off');
+    press(button());
+    expect(sentence()).toHaveTextContent('');
+    expect(sentence()).toHaveClass('visually-hidden');
+    expect(button()).toHaveTextContent('Play along on your piano');
+    expect(useAppStore.getState().settings.playAlong).toBe(false);
+    await act(async () => prompt.answer());
+    expect(closes).toHaveBeenCalledTimes(1);
+    expect(sentence()).toHaveTextContent('');
+    expect(button()).toHaveTextContent('Play along on your piano');
+  });
+
+  it('says it too on a later visit that is still waiting, with no press', async () => {
+    useAppStore.getState().setSettings({ playAlong: true });
+    promptOpen();
+    render(<PianoLine />);
+    await wait(10); // the silent resume starts: nothing is asked
+    expect(access.open).toHaveBeenCalledTimes(1);
+    expect(sentence()).toHaveTextContent('');
+    await wait(2100);
+    expect(sentence()).toHaveTextContent('Looking for your piano. Make sure it is turned on.');
+    expect(button()).toHaveTextContent('Turn off');
+  });
+
+  it('goes to looking at once on a press while the resume waits', async () => {
+    useAppStore.getState().setSettings({ playAlong: true });
+    promptOpen();
+    render(<PianoLine />);
+    await wait(10);
+    expect(sentence()).toHaveTextContent('');
+    press(button());
+    expect(sentence()).toHaveTextContent('Looking for your piano. Make sure it is turned on.');
+    expect(button()).toHaveTextContent('Turn off');
+    expect(access.open).toHaveBeenCalledTimes(1);
+  });
+
+  it('is never red', async () => {
+    promptOpen();
+    const { container } = render(<PianoLine />);
+    press(button());
+    await wait(2100);
+    expect(sentence()).toHaveTextContent('Looking for your piano.');
+    expect(container.querySelectorAll('.is-red, [class*="red"]')).toHaveLength(0);
+  });
+
+  it.each([
+    ['es', 'Buscando tu piano. Comprueba que está encendido.'],
+    ['fr', 'Recherche de votre piano. Vérifiez qu’il est allumé.'],
+    ['nl', 'Je piano wordt gezocht. Controleer of hij aanstaat.'],
+    ['pt', 'Procurando seu piano. Verifique se ele está ligado.'],
+  ] as const)('speaks the language on screen (%s)', async (locale, expected) => {
+    await chooseLocale(locale);
+    promptOpen();
+    render(<PianoLine />);
+    press(button());
+    await wait(2100);
+    expect(sentence()).toHaveTextContent(expected);
   });
 });

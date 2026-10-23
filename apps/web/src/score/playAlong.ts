@@ -154,20 +154,23 @@ export type AlongMove = { kind: 'stay' } | { kind: 'cue'; index: number } | { ki
 /**
  * From step `index`: while the current step's pitches are all held and fresh, mark them used and
  * go to the next step (inside `loop`, after its last step back to its first; without a loop,
- * after the last step: finish, and stop). At most `steps.length` passes. `passed` counts them.
- * A step that does not pass leaves the keys as they are, so a chord can be played apart.
+ * after the last step: finish, and stop). At most `steps.length` passes. `passed` counts them,
+ * and `last` is the index of the last step passed (-1 when none): the step the other hand's
+ * accompaniment counts from (issue 184). A step that does not pass leaves the keys as they are,
+ * so a chord can be played apart.
  */
 export function advance(
   steps: readonly AlongStep[],
   index: number,
   keys: Keys,
   loop: PerfRange | null,
-): { keys: Keys; move: AlongMove; passed: number } {
-  const stay = { keys, move: { kind: 'stay' } as AlongMove, passed: 0 };
+): { keys: Keys; move: AlongMove; passed: number; last: number } {
+  const stay = { keys, move: { kind: 'stay' } as AlongMove, passed: 0, last: -1 };
   if (index < 0 || index >= steps.length) return stay;
   const span = loop ? loopSpan(steps, loop) : null;
   let at = index;
   let passed = 0;
+  let last = -1;
   let held = keys;
   while (passed < steps.length) {
     const step = steps[at]!;
@@ -176,10 +179,11 @@ export function advance(
     for (const midi of step.pitches) used.set(midi, false);
     held = used;
     passed++;
+    last = at;
     if (span) at = at >= span.last ? span.first : at + 1;
     else if (at + 1 < steps.length) at++;
-    else return { keys: held, move: { kind: 'finish' }, passed };
+    else return { keys: held, move: { kind: 'finish' }, passed, last };
   }
   if (passed === 0) return stay;
-  return { keys: held, move: { kind: 'cue', index: at }, passed };
+  return { keys: held, move: { kind: 'cue', index: at }, passed, last };
 }

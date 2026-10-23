@@ -114,6 +114,8 @@ export const library = {
     start: 'Play along on your piano',
     /** The line while the browser's permission prompt is open. */
     asking: 'Allow the browser to use your piano.',
+    /** Access is granted but the browser has not answered yet: Windows looking for a Bluetooth piano that is off. */
+    searching: 'Looking for your piano. Make sure it is turned on.',
     /** The line once a piano is connected; `name` is the first input's name, or `yourPiano`. */
     connected: (name: string) => `${name} is connected. Open a piece and play the red note.`,
     /** The name used when the connected input has none. */

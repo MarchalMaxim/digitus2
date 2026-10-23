@@ -36,6 +36,7 @@ function fakePlayback(
     positionSec: () => at,
     startSec: () => ((over.playing ?? false) ? 0 : at),
     leadingIn: () => false,
+    playingNow: () => over.playing ?? false,
     leadInRemainingSec: () => null,
     setLoop: (r) => calls.push(`setLoop(${JSON.stringify(r)})`),
     strike: () => () => undefined,

@@ -39,6 +39,8 @@
  * (Play after a pause, before the next note) still has the group heard before it to show; a
  * pause in any other lead-in (the count-in from the start, after Rewind while playing, a loop
  * wrap, a Play from a loop's start elsewhere) heard nothing of its pass, so nothing is marked.
+ * A frame that lands after the transport stops but before `playing` follows it marks nothing new
+ * (`playback.playingNow()`).
  *
  * Stopped after a seek (T13, `playback.cue`: a click on a bar, the arrow keys) it marks the first
  * group of the hands played at or after the position, the note Play starts with, with its keys
@@ -345,6 +347,10 @@ export function useCursor({
       // heard, but `waiting` only follows on the transport's next tick (up to 25 ms later): keep
       // the marks of the pass that just ended until then, never mark a note of the new pass early.
       if (pb.leadingIn()) return;
+      // The end of the piece: the transport has stopped and rewound, and `playing` follows in a
+      // later render. A frame meanwhile would read the start and mark bar 1, where the finish
+      // would then rise (issue 171).
+      if (!pb.playingNow()) return;
       const sec = pb.positionSec();
       // The muted hands' keys at the time heard, at their own onsets as well as the played
       // hands' (`mutedGroups`): a new array only when they change.

@@ -29,7 +29,7 @@ const TWO_BARS =
  * Plays a two-bar piece with the transport's own play held back (the audio context is a stub),
  * and hands back `end`, which reports the end as the transport's scheduler would.
  */
-async function playTwoBars() {
+async function playTwoBars({ play = true }: { play?: boolean } = {}) {
   instrument.load.mockImplementation(() => Promise.resolve());
   vi.stubGlobal(
     'AudioContext',
@@ -43,13 +43,22 @@ async function playTwoBars() {
   );
   useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, countIn: false, metronome: false } });
   let end: () => void = () => {};
+  // The stub keeps the transport's own `playing` flag as the real one does: set by play, cleared
+  // by the end before `onEnd` reports it, so `state.playing` is the live fact `playingNow` reads.
+  const flag = (t: Transport) => t as unknown as { playing: boolean };
   vi.spyOn(Transport.prototype, 'play').mockImplementation(function (this: Transport) {
-    end = () => this.onEnd?.();
+    flag(this).playing = true;
+    end = () => {
+      flag(this).playing = false;
+      this.onEnd?.();
+    };
   });
   const { score } = parseMusicXml(TWO_BARS);
   const hook = renderHook(() => usePlayback(score));
-  act(() => hook.result.current.play());
-  await waitFor(() => expect(hook.result.current.playing).toBe(true));
+  if (play) {
+    act(() => hook.result.current.play());
+    await waitFor(() => expect(hook.result.current.playing).toBe(true));
+  }
   return { ...hook, end: () => end() };
 }
 
@@ -66,6 +75,23 @@ it('counts the end of the piece, once per play-through', async () => {
   expect(result.current.ended).toBe(1); // nothing until the next end
   act(() => end());
   expect(result.current.ended).toBe(2);
+});
+
+it('reads the transport stopped at the end, before the render that sets playing false', async () => {
+  const { result, end } = await playTwoBars({ play: false });
+  expect(result.current.playingNow()).toBe(false); // before the first Play
+  act(() => result.current.play());
+  await waitFor(() => expect(result.current.playing).toBe(true));
+  expect(result.current.playingNow()).toBe(true);
+  // The end clears the transport's flag, then reports it: `playing` follows in React's render.
+  // A frame between the two reads the transport, not the stale `playing`.
+  let atEnd: boolean | null = null;
+  act(() => {
+    end();
+    atEnd = result.current.playingNow();
+  });
+  expect(atEnd).toBe(false);
+  expect(result.current.playing).toBe(false);
 });
 
 it('counts nothing on Pause, Rewind, a seek, a loop or a change of score', async () => {

@@ -50,7 +50,7 @@ function playing({
   countIn?: CountIn | null;
   waiting?: boolean;
   sec?: number;
-  clock?: { sec: number; leadingIn: boolean };
+  clock?: { sec: number; leadingIn: boolean; playing?: boolean };
 }): Playback {
   return {
     playing: true,
@@ -67,6 +67,7 @@ function playing({
     positionSec: () => clock?.sec ?? sec,
     startSec: () => clock?.sec ?? sec,
     leadingIn: () => clock?.leadingIn ?? waiting,
+    playingNow: () => clock?.playing ?? true,
     leadInRemainingSec: () => null,
     loop: null,
     setLoop: vi.fn(),
@@ -94,6 +95,7 @@ function stopped({
   return {
     ...playing({ sec }),
     playing: false,
+    playingNow: () => false,
     waiting: false,
     atStart,
     cue: cued ? sec : null,
@@ -291,6 +293,48 @@ describe('the cursor at a loop wrap', () => {
       rerender(playing({ clock, waiting: false }));
       expect(marked(host)).toEqual(first.ids);
       expect(result.current.pressed.map((k) => k.hand)).toEqual(['L']);
+      host.remove();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+// Issue 171: at the end of the piece the transport stops and rewinds to the start in one task,
+// and `playback.playing` follows in a later render. A frame in between read position 0, marked
+// bar 1, and the finish rose from there on a slow phone.
+describe('the cursor at the end of the piece (issue 171)', () => {
+  it('marks nothing new when a frame lands between the transport rewinding at the end and the render that stops it', () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb));
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    const nextFrame = () => act(() => frames.splice(0).forEach((cb) => cb(0)));
+    try {
+      const groups = BOTH_AT_ONCE.slice(0, 3);
+      const host = hostFor(groups);
+      const clock = { sec: groups[2]!.sec + 0.01, leadingIn: false, playing: true };
+      const { result, rerender } = renderHook(
+        (playback: Playback) =>
+          useCursor({ host, groups, playback, assignment: null, mutedHands: [] }),
+        { initialProps: playing({ clock }) },
+      );
+      expect(marked(host)).toEqual(groups[2]!.noteIds);
+      const group = result.current.currentGroup;
+      expect(group).toBe(2);
+
+      // The transport ends and rewinds while React still says it plays.
+      clock.sec = 0;
+      clock.playing = false;
+      nextFrame();
+      nextFrame();
+      expect(marked(host)).toEqual(groups[2]!.noteIds);
+      expect(result.current.currentGroup).toBe(group);
+      expect(marked(host)).not.toEqual(expect.arrayContaining(groups[0]!.noteIds));
+
+      // The render that stops it arrives: nothing is marked and Play is the red element.
+      rerender(stopped({ atStart: true }));
+      expect(marked(host)).toEqual([]);
+      expect(result.current.currentGroup).toBe(-1);
       host.remove();
     } finally {
       vi.unstubAllGlobals();

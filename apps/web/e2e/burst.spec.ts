@@ -101,3 +101,36 @@ test('under reduced motion the piece ends with no finish', async ({ page, isMobi
   await expect(page.locator('.end-burst .note-burst')).toHaveCount(0);
   await expectOneRed(page, 'ended under reduced motion');
 });
+
+// Issue 171: at the end the transport rewinds before React hears it stopped; on a slow CPU a
+// frame lands in that gap, reads the start and marked bar 1, where the finish then rose.
+test('at the end of the piece on a slow CPU (8x throttled), the finish still rises from the last bar', async ({
+  page,
+  isMobile,
+  browserName,
+}) => {
+  test.skip(isMobile, 'a mouse flow');
+  test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium DevTools feature');
+  test.setTimeout(120_000);
+  const last = await cueLastBar(page);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 8 });
+  try {
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect(page.locator('.end-burst .note-burst-note').first()).toBeAttached({
+      timeout: 60_000,
+    });
+    const at = await page.locator('.end-burst .note-burst').evaluate((el) => ({
+      x: parseFloat(el.style.left),
+      y: parseFloat(el.style.top),
+    }));
+    const bar = await page.locator('.score-sheet g.measure').nth(last).boundingBox();
+    const where = JSON.stringify({ at, bar });
+    expect(at.x, where).toBeGreaterThanOrEqual(bar!.x);
+    expect(at.x, where).toBeLessThanOrEqual(bar!.x + bar!.width);
+    expect(at.y, where).toBeGreaterThanOrEqual(bar!.y);
+    expect(at.y, where).toBeLessThanOrEqual(bar!.y + bar!.height);
+  } finally {
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  }
+});

@@ -137,6 +137,27 @@ describe('registerServiceWorker', () => {
       error.mockRestore();
     }
   });
+
+  it('stays quiet when register is stubbed to resolve to nothing (as Playwright blocks service workers)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      const blocked = fakeHost();
+      blocked.register.mockImplementation(() =>
+        Promise.resolve(undefined as unknown as ServiceWorkerRegistration),
+      );
+      registerServiceWorker(blocked.host);
+      blocked.load();
+      await vi.waitFor(() => expect(blocked.register).toHaveBeenCalledTimes(1));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(warn).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(blocked.offerUpdate).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+      error.mockRestore();
+    }
+  });
 });
 
 describe('a newer build', () => {

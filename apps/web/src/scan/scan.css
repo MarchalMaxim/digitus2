@@ -25,6 +25,11 @@
 .scan-intro > section:first-child {
   max-width: 36rem;
 }
+.scan-verdict {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
 .scan-source img {
   width: 100%;
   height: auto;
@@ -121,6 +126,10 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
   }
+  /* On a phone the recognition comes first and the original under it (issue 158). */
+  .scan-review > .scan-result {
+    order: -1;
+  }
   .scan-view {
     --gap: 1rem;
   }
@@ -157,7 +166,7 @@
   }
 }
 
-/* A pressed toggle (the review's view switch, the editor's pitch and length) is drawn inverted,
+/* A pressed toggle (the editor's pitch and length) is drawn inverted,
    as a chosen level pill is: the state is visible without colour. */
 .scan-result button[aria-pressed='true'] {
   color: var(--paper);

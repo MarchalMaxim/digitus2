@@ -44,6 +44,9 @@ test('scan: three recognised pages draw a grand staff in the review and in the s
   });
   const review = await expectReviewGrandStaff(page);
   console.log(`review: ${JSON.stringify(review)}`);
+  await expect(page.locator('.scan-verdict')).toHaveText(
+    `3 pages · ${review.measures} bars · both hands`,
+  );
   // Every bar of the three pages is there once, in two staves.
   expect(review.measures).toBe(pages.reduce((sum, xml) => sum + bars(xml), 0));
   expect(calls.filter((call) => call === 'POST /v1/recognize')).toHaveLength(3);

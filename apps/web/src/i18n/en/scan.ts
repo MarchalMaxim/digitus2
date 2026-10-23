@@ -1,4 +1,4 @@
-import { plural } from '../format.js';
+import { formatList, plural } from '../format.js';
 
 /** The scan texts in English, the source every other language must match (messages.ts). */
 export const scan = {
@@ -70,7 +70,7 @@ export const scan = {
     /** Shown instead of a file name when several page photos are scanned as one score. */
     pageImages: (n: number) => plural('en', n, { one: '# page image', other: '# page images' }),
     advice:
-      'Original PDFs and flat, high-resolution scans work best. Book photos can fail, even when well lit. Results open beside the original for review.',
+      'Original PDFs and flat, high-resolution scans work best. Results open beside the original for review.',
     where:
       'Recognition runs on the project’s scanner on Google Cloud (Netherlands). Your page is sent there, recognized and then deleted.',
     cancelScan: 'Cancel scan',
@@ -97,16 +97,15 @@ export const scan = {
     originalAlt: 'Original printed score',
   },
   review: {
-    caveat:
-      'Recognition may contain errors in notes, rhythms, ties or hands. Text and tempo may be incomplete. No fingerings have been added yet.',
     recognized: 'Recognized notation',
     /** Completes "Score of …" in the name of the notation (ScoreSheet). */
     sheetLabel: 'raw scan recognition',
-    viewLabel: 'Recognition view',
-    pageRecognition: 'Page recognition',
-    combinedScore: 'Combined score',
-    pageShown: (page: number) => `Recognition of page ${page}`,
-    allPages: 'All pages in reading order',
+    pageShown: (page: number, joined: boolean) =>
+      joined
+        ? `Recognition of page ${page}. Select it again for the whole score.`
+        : `Recognition of page ${page}`,
+    /** The thumbnails are the switch: a page shows its own recognition, the same page again the whole score. */
+    allPages: 'All pages in reading order. Select a page to see its recognition alone.',
     preparing: 'Preparing recognized notation…',
     /** `error` is the reason, already written as a sentence. */
     problem: (error: string) =>
@@ -123,15 +122,15 @@ export const scan = {
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Technical reason: ${reason}`,
     retained:
-      'Find retained originals and recognition in My scores. Keep your own original files; browser storage can be cleared. Recognition is not certified accurate; playback tempo may use an app default.',
+      'Find retained originals and recognition in My scores. Keep your own original files; browser storage can be cleared. Playback tempo may use an app default.',
     beamGrouping: 'Beam grouping is inferred and may differ from the original.',
     /** Shown when several scanned pages are joined into one score. */
     graphicSpanWarning:
       'Slurs and other notation spans are kept within each scanned page. Compare continuations at page edges; missing endpoints have not been repaired.',
-    /** The scanner found a piano page read as one staff: shown above the comparison. */
+    /** The scanner found a piano page read as one staff: shown under Recognition details; the verdict line says it above the comparison. */
     grandStaffWarning:
       'The staves were not paired into a grand staff, so both hands are read as one. Use for fingerings would give wrong hands: try a flatter, evenly lit photo or the original PDF.',
-    /** The scanner read only part of a line of music: shown above the comparison. */
+    /** The scanner read only part of a line of music: shown under Recognition details; the verdict line says it above the comparison. */
     partlyReadWarning:
       'A line of music was read only in part, so bars may be missing or added. Compare the result with the original before practising.',
     unknownWarning: 'The recognizer reported an unknown warning. Check the original carefully.',
@@ -143,6 +142,32 @@ export const scan = {
     downloadAll: 'Download everything',
     useForFingerings: 'Use for fingerings',
     scanAgain: 'Scan again',
+  },
+  /** The line under the review's title: what was read, as facts (verdict.ts). */
+  verdict: {
+    /** Joins the facts: "3 pages · 25 bars · both hands · 2 places to check". */
+    facts: (parts: string[]) => parts.join(' · '),
+    pages: (n: number) => plural('en', n, { one: '# page', other: '# pages' }),
+    bars: (n: number) => plural('en', n, { one: '# bar', other: '# bars' }),
+    bothHands: 'both hands',
+    /** A score of one staff: a melody, not a piano page. */
+    oneStaff: 'one staff',
+    notJoined:
+      'The pages did not join into one score: each is shown on its own and can be downloaded under Files. Replace the page that differs and scan again.',
+    /** `pages` are the numbers of the pages read as one staff; empty when the scanner did not say which. */
+    readAsOneStaff: (pages: number[]) =>
+      pages.length === 0
+        ? 'A page was read as one staff: the hands are mixed. Replace that photo and scan again.'
+        : pages.length === 1
+          ? `Page ${pages[0]} was read as one staff: the hands are mixed. Replace that photo and scan again.`
+          : `Pages ${formatList('en', pages.map(String))} were read as one staff: the hands are mixed. Replace those photos and scan again.`,
+    /** `pages` as above, for a line of music read only in part. */
+    readInPart: (pages: number[]) =>
+      pages.length === 0
+        ? 'Part of a line was not read, so bars are missing or added. Replace that photo and scan again.'
+        : pages.length === 1
+          ? `Part of a line on page ${pages[0]} was not read, so bars are missing or added. Replace that photo and scan again.`
+          : `Part of a line on pages ${formatList('en', pages.map(String))} was not read, so bars are missing or added. Replace those photos and scan again.`,
   },
   /** Correcting the recognised notation, note by note, inside the review. */
   edit: {

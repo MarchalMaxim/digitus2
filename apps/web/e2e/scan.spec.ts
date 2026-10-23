@@ -96,6 +96,16 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await page.getByRole('button', { name: 'Select page 1: first.png' }).click();
   await page.getByRole('button', { name: 'Select page 2: second.png' }).click();
   await expect(page.getByRole('img', { name: 'Original printed score, page 2' })).toBeVisible();
+  // The selected thumbnail again returns from that page's recognition to the whole score.
+  await expect(
+    page.getByText('Recognition of page 2. Select it again for the whole score.'),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Select page 2: second.png' }).click();
+  await expect(page.getByText(/All pages in reading order/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Select page 2: second.png' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
   const downloading = page.waitForEvent('download');
   await openFiles(page);
   await page.getByRole('button', { name: 'Download combined MusicXML' }).click();

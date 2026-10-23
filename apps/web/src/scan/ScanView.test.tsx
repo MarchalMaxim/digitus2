@@ -7,6 +7,7 @@ import { useAppStore } from '../app/store.js';
 import { en } from '../i18n/en/index.js';
 import { messages as fr } from '../i18n/fr/index.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
+import { GRAND_STAFF_WARNING } from './client.js';
 import type { ScanSession } from './model.js';
 import { BUSY_RETRY_MS, BUSY_WAIT_MS } from './client.js';
 import { ScanView } from './ScanView.js';
@@ -55,14 +56,16 @@ it('reopens complete individual recognition in page review when combining failed
     />,
   );
   expect(screen.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
-  expect(screen.getByRole('button', { name: 'Page recognition' })).toHaveAttribute(
+  expect(screen.getByRole('button', { name: 'Select page 1: source.png' })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
-  expect(screen.getByRole('button', { name: 'Combined score' })).toBeDisabled();
   expect(screen.queryByRole('button', { name: 'Scan this score' })).toBeNull();
-  expect(screen.getByRole('alert')).toHaveTextContent('their notation could not be combined');
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    'The pages did not join into one score: each is shown on its own and can be downloaded under Files. Replace the page that differs and scan again.',
+  );
   expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Scan again' })).toHaveClass('is-red');
 });
 
 it('offers correction in a refusal only where the notes can be corrected', async () => {
@@ -77,7 +80,7 @@ it('offers correction in a refusal only where the notes can be corrected', async
   expect(await screen.findByText(/do not fit together. Download the raw file/)).toBeVisible();
   unmount();
   render(<ScanView session={{ id: 'joined', file, pages, xml: '<score-partwise/>' }} />);
-  await userEvent.click(screen.getByRole('button', { name: 'Page recognition' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Select page 1: source.png' }));
   expect(
     await screen.findByText(/do not fit together. Correct the notes in the combined score/),
   ).toBeVisible();
@@ -172,8 +175,9 @@ it('speaks French, including a restored error and the page navigation', async ()
     />,
   );
   expect(screen.getByRole('heading', { name: 'Vérifiez la reconnaissance' })).toBeVisible();
-  expect(screen.getByRole('button', { name: 'Reconnaissance par page' })).toBeVisible();
-  expect(screen.getByRole('alert')).toHaveTextContent('leur notation n’a pas pu être combinée');
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    'Les pages n’ont pas été réunies en une seule partition',
+  );
   // Image pages are chosen by their thumbnails; the pager is only for a PDF's pages.
   expect(screen.getByRole('button', { name: 'Sélectionner la page 2 : source.png' })).toBeVisible();
   expect(screen.getByText('Reconnaissance de la page 1')).toBeVisible();
@@ -195,6 +199,88 @@ it('shows the file name, with no page-view toggle, for a single-page session', a
   expect(screen.queryByText(/page image/)).toBeNull();
   expect(screen.queryByRole('button', { name: 'Page recognition' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'Combined score' })).toBeNull();
+  expect(document.querySelector('.scan-verdict')).toHaveTextContent(/^1 page/);
+});
+
+it('a thumbnail is the view switch', async () => {
+  const file = new File(['source'], 'source.png', { type: 'image/png' });
+  render(
+    <ScanView
+      session={{
+        id: 'saved',
+        file,
+        pages: [
+          // Each page differs from the whole, as real pages do: a view switch renders afresh.
+          { id: 'first', file, xml: '<score-partwise><part/></score-partwise>' },
+          { id: 'second', file, xml: '<score-partwise><part-list/></score-partwise>' },
+        ],
+        xml: '<score-partwise/>',
+      }}
+    />,
+  );
+  const first = screen.getByRole('button', { name: 'Select page 1: source.png' });
+  const second = screen.getByRole('button', { name: 'Select page 2: source.png' });
+  const use = screen.getByRole('button', { name: 'Use for fingerings' });
+  expect(first).toHaveAttribute('aria-pressed', 'false');
+  expect(second).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByText(/All pages in reading order/)).toBeVisible();
+  await vi.waitFor(() => expect(use).toBeEnabled());
+  await userEvent.click(second);
+  expect(second).toHaveAttribute('aria-pressed', 'true');
+  expect(
+    screen.getByText('Recognition of page 2. Select it again for the whole score.'),
+  ).toBeVisible();
+  await vi.waitFor(() => expect(use).toBeEnabled());
+  await userEvent.click(second);
+  expect(screen.getByText(/All pages in reading order/)).toBeVisible();
+  expect(second).toHaveAttribute('aria-pressed', 'false');
+});
+
+it('switching between two pages with the same recognition keeps the sheet and Use', async () => {
+  const file = new File(['source'], 'source.png', { type: 'image/png' });
+  const same = '<score-partwise><part/></score-partwise>';
+  render(
+    <ScanView
+      session={{
+        id: 'saved',
+        file,
+        pages: [
+          { id: 'first', file, xml: same },
+          { id: 'second', file, xml: same },
+        ],
+        xml: '<score-partwise/>',
+      }}
+    />,
+  );
+  const use = screen.getByRole('button', { name: 'Use for fingerings' });
+  await userEvent.click(screen.getByRole('button', { name: 'Select page 1: source.png' }));
+  await vi.waitFor(() => expect(use).toBeEnabled());
+  await userEvent.click(screen.getByRole('button', { name: 'Select page 2: source.png' }));
+  expect(screen.getByText(/Recognition of page 2/)).toBeVisible();
+  await vi.waitFor(() => expect(use).toBeEnabled());
+  expect(document.querySelector('.scan-review svg')).not.toBeNull();
+});
+
+it('a page read as one staff puts the red on Scan again', async () => {
+  const file = new File(['source'], 'source.png', { type: 'image/png' });
+  render(
+    <ScanView
+      session={{
+        id: 'saved',
+        file,
+        pages: [{ id: 'p', file, xml: '<score-partwise/>', warnings: [GRAND_STAFF_WARNING] }],
+        xml: '<score-partwise/>',
+        warnings: [GRAND_STAFF_WARNING],
+      }}
+    />,
+  );
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    'Page 1 was read as one staff: the hands are mixed. Replace that photo and scan again.',
+  );
+  await vi.waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Scan again' })).toHaveClass('is-red'),
+  );
+  expect(screen.getByRole('button', { name: 'Use for fingerings' })).not.toHaveClass('is-red');
 });
 
 /** A scan service stub: `recognize` answers each POST; the health and DELETE answers are fixed. */

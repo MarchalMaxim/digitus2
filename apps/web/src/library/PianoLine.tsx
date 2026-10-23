@@ -3,6 +3,15 @@ import { useT } from '../i18n/i18n.js';
 import { askForPiano, bluetoothFlag, turnOffPiano, usePianoSnapshot } from '../midi/piano.js';
 
 /**
+ * The piano's name as the reader knows it: Windows names a paired Bluetooth piano's port
+ * "GO:PIANO MIDI 1 (Bluetooth MIDI IN)" (issue 182), so a trailing "(MIDI IN)" or "(Bluetooth MIDI
+ * IN)", the port's own label, is left out. Any other part of the name stays.
+ */
+export function pianoName(raw: string): string {
+  return raw.replace(/\s*\((?:bluetooth\s+)?midi\s+in(?:put)?\)\s*$/i, '').trim();
+}
+
+/**
  * The home line for playing along on the reader's own piano (issue 182), the last row of the end
  * line: one quiet sentence that says where the connection stands, and one text button that is the
  * same element in every state, so the focus survives every change of its label. The press is the
@@ -22,7 +31,7 @@ export function PianoLine() {
   const sentence = {
     off: '',
     asking: text.asking,
-    connected: text.connected(names[0] || text.yourPiano),
+    connected: text.connected(pianoName(names[0] ?? '') || text.yourPiano),
     none: flag === null ? text.none : `${text.none} ${text.bluetoothFlag(flag)}`,
     denied: text.denied,
   }[status];

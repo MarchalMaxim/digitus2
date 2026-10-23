@@ -8,7 +8,7 @@ import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { resetPianoForTests } from '../midi/piano.js';
 import type { AccessEvents, OpenedAccess } from '../midi/types.js';
-import { PianoLine } from './PianoLine.js';
+import { PianoLine, pianoName } from './PianoLine.js';
 
 // The lazy chunk is replaced by a fake the tests drive (the factory is not reached unless pressed).
 const access = vi.hoisted(() => ({
@@ -142,6 +142,26 @@ describe('the piano line', () => {
     expect(sentence()).toHaveTextContent(
       'Your piano is connected. Open a piece and play the red note.',
     );
+  });
+
+  it("leaves out the port's own label that Windows adds to a Bluetooth piano's name", async () => {
+    // The owner's Roland GO:PIANO paired with Windows 11 (issue 182).
+    answerWith('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
+    render(<PianoLine />);
+    await userEvent.click(button());
+    expect(sentence()).toHaveTextContent(
+      'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
+    );
+  });
+
+  it.each([
+    ['GO:PIANO MIDI 1 (Bluetooth MIDI IN)', 'GO:PIANO MIDI 1'],
+    ['Digital Piano (MIDI IN)', 'Digital Piano'],
+    ['Roland Digital Piano', 'Roland Digital Piano'],
+    ['Yamaha P-45 (USB)', 'Yamaha P-45 (USB)'],
+    [' (Bluetooth MIDI IN)', ''],
+  ])('the name %j reads %j', (raw, shown) => {
+    expect(pianoName(raw)).toBe(shown);
   });
 
   it('says no piano was found, and moves to connected when one is plugged in, with no reload', async () => {

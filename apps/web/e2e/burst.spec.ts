@@ -34,7 +34,7 @@ test('a click on nothing lets full-size notes rise; a drag adds none', async ({ 
   expect(await page.locator('.note-burst').count()).toBe(1);
 });
 
-// The finish (issue #97, score/EndBurst.tsx): when the piece has been played to its end, 3 to 5
+// The finish (issue 97 and issue 193, score/EndBurst.tsx): when the piece has been played to its end, 6 to 8
 // ink notes rise from the last group heard as the red flies home to Play. Twinkle, cued to its
 // last bar at 150 % with no count-in, ends about two seconds after Play.
 async function cueLastBar(page: Page): Promise<number> {
@@ -68,8 +68,8 @@ test('at the end of the piece, ink notes rise from the final notes as the red fl
     await expectOneRed(page, 'playing the last bar');
   }
   const count = await burstNotes.count();
-  expect(count).toBeGreaterThanOrEqual(3);
-  expect(count).toBeLessThanOrEqual(5);
+  expect(count).toBeGreaterThanOrEqual(6);
+  expect(count).toBeLessThanOrEqual(8);
   // It rises from the last bar, in ink only, while the red flies home (then Play has it).
   const bar = await page.locator('.score-sheet g.measure').nth(last).boundingBox();
   const at = await page.locator('.end-burst .note-burst').evaluate((el) => ({

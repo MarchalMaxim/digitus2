@@ -104,60 +104,131 @@ export interface BurstNote {
 }
 
 /**
- * A burst's shape: a click's, a double-click's, or the finish at the end of a piece (issue #97,
+ * A burst's shape: a click's, a double-click's, or the finish at the end of a piece (issue 97,
  * score/EndBurst.tsx).
  */
 export type BurstShape = 'click' | 'double' | 'end';
 
-/** How many notes each shape lets rise: a weighted draw. */
-const COUNTS: Record<BurstShape, readonly number[]> = {
-  click: [2, 3, 3, 3, 4],
-  double: [3, 5, 5, 5, 6],
-  end: [3, 4, 4, 4, 5],
+type Range = readonly [low: number, high: number];
+
+/** What one shape draws from: a weighted count and a range or limit for each of the rest. */
+interface BurstRow {
+  /** How many notes rise: a weighted draw. */
+  counts: readonly number[];
+  /** The fan's centre, within this many degrees of straight up; its width, in degrees. */
+  fanCenter: number;
+  fanWidth: Range;
+  /** How far each note rises from the click, in px, and how much farther again (its rise). */
+  distance: Range;
+  rise: Range;
+  /** The size at rest, and the sideways drift, within this many px. */
+  scale: Range;
+  drift: number;
+  /** Its length, as a fraction of --dur-flourish. */
+  time: Range;
+  /** Between two notes of a run (28 to 55 ms of 520 for a click) and of a chord. */
+  runGap: Range;
+  chordGap: Range;
+  /** The factors a double-click's wider, farther fan takes over the click's. */
+  widen: number;
+  farther: number;
+  /** Whether one note, picked at random, is drawn in the accent. */
+  accent: boolean;
+}
+
+const ROWS: Record<BurstShape, BurstRow> = {
+  click: {
+    counts: [2, 3, 3, 3, 4],
+    fanCenter: 25,
+    fanWidth: [50, 110],
+    distance: [22, 50],
+    rise: [0, 6],
+    scale: [0.78, 1.12],
+    drift: 9,
+    time: [0.81, 1.25],
+    runGap: [0.054, 0.106],
+    chordGap: [0, 0.02],
+    widen: 1,
+    farther: 1,
+    accent: false,
+  },
+  double: {
+    counts: [3, 5, 5, 5, 6],
+    fanCenter: 25,
+    fanWidth: [50, 110],
+    distance: [22, 50],
+    rise: [0, 6],
+    scale: [0.78, 1.12],
+    drift: 9,
+    time: [0.81, 1.25],
+    runGap: [0.054, 0.106],
+    chordGap: [0, 0.02],
+    widen: 1.2,
+    farther: 1.15,
+    accent: true,
+  },
+  // Issue 193: a stronger cheer, 6 to 8 notes in a fan almost as wide as the page lets them,
+  // 34 to 80 px out and up to 12 px more, larger and longer, ink only.
+  end: {
+    counts: [6, 7, 7, 8],
+    fanCenter: 15,
+    fanWidth: [120, 170],
+    distance: [34, 80],
+    rise: [0, 12],
+    scale: [0.9, 1.3],
+    drift: 14,
+    time: [1.05, 1.5],
+    runGap: [0.035, 0.06],
+    chordGap: [0, 0.02],
+    widen: 1,
+    farther: 1,
+    accent: false,
+  },
 };
 
 /**
- * One burst, drawn fresh so no two look alike: 2 to 4 notes in a fan of random direction and
- * width, each 22 to 50 px out, tilted outward, its own size, length and sideways drift. They rise
- * like a quick run, up or down, or now and then together like a chord. A double-click's burst
- * (`'double'`) has half as many notes again, 3 to 6, a little wider and farther out, and one of
- * them, picked at random, in the accent. The finish (`'end'`) has 3 to 5, as wide and as far as
- * the double-click's, and none in the accent: the red flying home is the screen's one red.
- * `random` is Math.random but for tests.
+ * One burst, drawn fresh so no two look alike, from the row of its shape (`ROWS`): a fan of random
+ * direction and width, each note out to its own distance, tilted outward, its own size, length and
+ * sideways drift. They rise like a quick run, up or down, or now and then together like a chord.
+ * A click's has 2 to 4 notes, 22 to 50 px out. A double-click's (`'double'`) has half as many
+ * notes again, 3 to 6, a little wider and farther out, and one of them, picked at random, in the
+ * accent. The finish (`'end'`) has 6 to 8, much wider and farther, larger and longer, none in the
+ * accent: the red flying home is the screen's one red. `random` is Math.random but for tests.
  */
 export function drawBurst(
   random: () => number = Math.random,
   shape: BurstShape = 'click',
 ): BurstNote[] {
+  const row = ROWS[shape];
   const between = (a: number, b: number) => a + random() * (b - a);
+  const within = ([a, b]: Range) => between(a, b);
   const pick = <T,>(xs: readonly T[]): T =>
     xs[Math.min(xs.length - 1, Math.floor(random() * xs.length))]!;
-  const double = shape !== 'click';
-  const count = pick(COUNTS[shape]);
+  const count = pick(row.counts);
   const chord = random() < 0.15;
-  const fanCenter = between(-25, 25);
-  const fanWidth = between(50, 110) * (double ? 1.2 : 1);
+  const fanCenter = between(-row.fanCenter, row.fanCenter);
+  const fanWidth = within(row.fanWidth) * row.widen;
   const upward = random() < 0.5;
-  /** Between two notes of the run, as a fraction of --dur-flourish (28 to 55 ms of 520). */
-  const step = chord ? between(0, 0.02) : between(0.054, 0.106);
-  const accent = shape === 'double' ? Math.min(count - 1, Math.floor(random() * count)) : -1;
+  /** Between two notes of the run, as a fraction of --dur-flourish. */
+  const step = within(chord ? row.chordGap : row.runGap);
+  const accent = row.accent ? Math.min(count - 1, Math.floor(random() * count)) : -1;
   const notes: BurstNote[] = [];
   for (let i = 0; i < count; i++) {
     const t = i / (count - 1);
     // Never past 85 degrees from straight up: every note rises.
     const degrees = Math.max(-85, Math.min(85, fanCenter + (t - 0.5) * fanWidth + between(-8, 8)));
     const angle = (degrees * Math.PI) / 180;
-    const dist = between(22, 50) * (chord ? 0.85 : 1) * (double ? 1.15 : 1);
+    const dist = within(row.distance) * (chord ? 0.85 : 1) * row.farther;
     const dx = Math.round(Math.sin(angle) * dist);
     const order = upward ? i : count - 1 - i;
     notes.push({
       kind: pick(KINDS),
       dx,
-      dy: Math.round(-Math.cos(angle) * dist - between(0, 6)),
+      dy: Math.round(-Math.cos(angle) * dist - within(row.rise)),
       rotate: Math.round((dx < 0 ? -1 : 1) * between(3, 18)),
-      scale: Math.round(between(0.78, 1.12) * 100) / 100,
-      drift: Math.round(between(-9, 9)),
-      time: Math.round(between(0.81, 1.25) * 100) / 100,
+      scale: Math.round(within(row.scale) * 100) / 100,
+      drift: Math.round(between(-row.drift, row.drift)),
+      time: Math.round(within(row.time) * 100) / 100,
       wait: Math.round((order * step + between(0, 0.023)) * 1000) / 1000,
       accent: i === accent,
     });

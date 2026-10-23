@@ -45,6 +45,11 @@ export const score = {
     /** The status line while the red waits for the reader's piano (issue 182); `count` is the notes of the step. */
     playAlongHint: (count: number): string =>
       count > 1 ? 'Play the red notes on your piano.' : 'Play the red note on your piano.',
+    /** The status line while the browser waits for a click before digitus can sound the other hand (issue 184). */
+    playAlongSound: {
+      click: 'Click the page once to hear the other hand.',
+      tap: 'Tap the page once to hear the other hand.',
+    },
     /** The button that opens and closes the practice settings (speed, loop, hands). */
     practice: 'Practice',
     /** The button back to the scan that produced this score. */

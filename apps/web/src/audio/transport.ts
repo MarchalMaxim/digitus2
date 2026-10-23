@@ -1,15 +1,13 @@
 import type { Hand, Score } from '@digitus2/engine';
-import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import type { Beat } from './beats.js';
 import { buildBeats, countInBar, measureStartSec } from './beats.js';
 import type { AudioClock } from './clock.js';
 import { audibleTime } from './clock.js';
-import { noteVelocity, type Instrument } from './instrument.js';
+import { playEvents, type PlayEvent } from './events.js';
+import type { Instrument } from './instrument.js';
 import {
-  pedalStops,
   performanceLoop,
   performanceOf,
-  rollDelays,
   scoreEndSec,
   toPerformanceSec,
   toWrittenSec,
@@ -35,19 +33,6 @@ export interface TransportState {
   loop: { from: number; to: number } | null;
 }
 
-/** A note ready to schedule: `sec` is the score time it sounds at (graces already moved earlier). */
-interface PlayEvent {
-  sec: number;
-  /** The note's onset, where the cursor marks it (a grace note's is its principal's). */
-  onset: number;
-  duration: number;
-  midi: number;
-  hand: Hand;
-  velocity: number;
-  /** The source ornament segment limits a tempo transition; tied principal tails are ordinary holds. */
-  ornamentEnd?: number;
-}
-
 /**
  * One piece of the context-time to score-time line: from context time `ctx` on, score time is
  * `score + (t - ctx) * factor`. Play and seek start a new line; a tempo change or a loop wrap
@@ -65,56 +50,9 @@ interface HeardNote {
   hand: Hand;
 }
 
-const GRACE_LEAD_SEC = 0.05;
-const GRACE_DURATION_SEC = 0.1;
-const MIN_DURATION_SEC = 0.05;
 const MAX_TEMPO_DEFERRAL_SEC = 0.25;
 /** Segments stay this long after they end: the audible time lags `currentTime` by the output latency. */
 const SEGMENT_KEEP_SEC = 2;
-
-function buildEvents(score: Score): PlayEvent[] {
-  // Graces sharing a principal are spread before it in document order, 50 ms apart.
-  const graceGroups = new Map<string, typeof score.notes>();
-  for (const n of score.notes) {
-    if (!n.isGrace) continue;
-    const key = `${n.hand}:${n.onsetTick}`;
-    const group = graceGroups.get(key);
-    if (group) group.push(n);
-    else graceGroups.set(key, [n]);
-  }
-  const graceSec = new Map<string, number>();
-  for (const group of graceGroups.values()) {
-    group.sort((a, b) => (a.sourceIndices[0] ?? 0) - (b.sourceIndices[0] ?? 0));
-    group.forEach((n, k) => {
-      graceSec.set(n.id, Math.max(0, n.onsetSec - GRACE_LEAD_SEC * (group.length - k)));
-    });
-  }
-  // A rolled chord starts late and a pedalled note rings on; the written onset stays for the cursor.
-  const roll = rollDelays(score);
-  const held = pedalStops(score);
-  const events = score.notes.flatMap((n) =>
-    ornamentAttacks(n).map((attack, index, attacks) => {
-      const plain = !n.isGrace && !n.ornament;
-      const sec = graceSec.get(n.id) ?? attack.onsetSec + (plain ? (roll.get(n.id) ?? 0) : 0);
-      return {
-        sec,
-        onset: attack.onsetSec,
-        duration: n.isGrace
-          ? GRACE_DURATION_SEC
-          : n.ornament
-            ? attack.offsetSec - attack.onsetSec
-            : Math.max(MIN_DURATION_SEC, (held.get(n.id) ?? n.offsetSec) - sec),
-        midi: attack.midi,
-        hand: n.hand,
-        velocity: noteVelocity(n),
-        ...(n.ornament && (index + 1 < attacks.length || attack.midi !== n.midi)
-          ? { ornamentEnd: Math.min(attack.offsetSec, n.ornament.endSec) }
-          : {}),
-      };
-    }),
-  );
-  return events.sort((a, b) => a.sec - b.sec); // stable: simultaneous notes keep score order
-}
 
 /** Index of the first item whose `sec` is >= `sec` (items sorted by `sec`). */
 function lowerBound(items: readonly { sec: number }[], sec: number): number {
@@ -238,7 +176,7 @@ export class Transport {
     this.lookAheadSec = opts.lookAheadSec ?? 0.15;
     this.tickMs = opts.tickMs ?? 25;
     this.startDelaySec = opts.startDelaySec ?? 0.05;
-    this.events = buildEvents(this.perf.score);
+    this.events = playEvents(this.perf.score);
     this.beats = buildBeats(this.perf.score);
     this.endSec = scoreEndSec(this.perf.score);
     this.writtenEndSec = scoreEndSec(deps.score);

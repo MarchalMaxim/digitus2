@@ -12,10 +12,26 @@ export interface NoteEvent {
   hand: Hand;
 }
 
+/**
+ * One note of the accompaniment (issue 184): when it sounds after the press that starts its
+ * stretch, and for how long, both in performance seconds (the scheduler divides by the tempo).
+ */
+export interface AccNote {
+  offsetSec: number;
+  durationSec: number;
+  midi: number;
+  velocity: number;
+  hand: Hand;
+}
+
 export interface Instrument {
   /** Fetch what the given pitches at the given velocities need; resolves when they can be played. */
   load(midis: number[], velocities: number[]): Promise<void>;
-  start(e: NoteEvent): void;
+  /**
+   * Schedules a note; returns its own stop (issue 184): called before `e.time` the note never
+   * sounds, called later it is released. Other notes of the same pitch are untouched.
+   */
+  start(e: NoteEvent): () => void;
   /**
    * Sounds `midi` now at `velocity`, for `maxSec` at most (a key clicked on the on-screen
    * keyboard, issue #96); the function returned stops it sooner (the release). Silent, and the
@@ -54,6 +70,8 @@ export const PIANO_SOFTEST = 41;
  */
 export function createPiano(ctx: AudioContext): Instrument {
   let piano: SplendidGrandPiano | null = null;
+  /** Counts `start()` calls: each note gets its own smplr `stopId` (it defaults to the pitch). */
+  let seq = 0;
   /** Counts `load()` calls: only the newest one may replace the piano. */
   let loads = 0;
   return {
@@ -87,12 +105,14 @@ export function createPiano(ctx: AudioContext): Instrument {
       piano = next;
     },
     start(e) {
-      piano?.start({
+      const stop = piano?.start({
         note: e.midi,
         velocity: floor(e.velocity),
         time: e.time,
         duration: e.duration,
+        stopId: `n${++seq}`,
       });
+      return () => stop?.();
     },
     strike(midi, velocity, maxSec) {
       const stop = piano?.start({ note: midi, velocity: floor(velocity), duration: maxSec });
@@ -114,16 +134,25 @@ export function createSilentInstrument(): Instrument & {
   /** The keys struck from the keyboard, and the pitches released since. */
   strikes: { midi: number; velocity: number; maxSec: number }[];
   released: number[];
+  /** The events whose own stop was called (issue 184), once each, in the order stopped. */
+  cancelled: NoteEvent[];
   stopAllCalls: number;
 } {
   const silent = {
     events: [] as NoteEvent[],
     strikes: [] as { midi: number; velocity: number; maxSec: number }[],
     released: [] as number[],
+    cancelled: [] as NoteEvent[],
     stopAllCalls: 0,
     load: () => Promise.resolve(),
     start(e: NoteEvent) {
       silent.events.push(e);
+      let stopped = false;
+      return () => {
+        if (stopped) return;
+        stopped = true;
+        silent.cancelled.push(e);
+      };
     },
     strike(midi: number, velocity: number, maxSec: number) {
       silent.strikes.push({ midi, velocity, maxSec });

@@ -61,6 +61,11 @@ export function bluetoothFlag(nav: Navigator | undefined = globalThis.navigator)
   return null;
 }
 
+/** How long a granted request may stay pending before the line says it is looking for the piano. */
+export const SEARCHING_AFTER_MS = 2000;
+/** How often the watcher asks the permission again while the first answer was not `granted`. */
+const SEARCHING_POLL_MS = 1000;
+
 let snapshot: PianoSnapshot | null = null;
 let held: readonly number[] = NO_KEYS;
 /** The lazy connection: null until access resolved, and again after Turn off. */
@@ -73,6 +78,8 @@ let pending: Promise<void> | null = null;
  */
 let generation = 0;
 let resumed = false;
+/** The watcher's one timer (null when none runs): see `watchForSearching`. */
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const snapshotListeners = new Set<() => void>();
 const heldListeners = new Set<() => void>();
@@ -177,12 +184,54 @@ function isRefusal(error: unknown): error is 'denied' | 'dismissed' {
   return error === 'denied' || error === 'dismissed';
 }
 
+function stopWatching(): void {
+  if (searchTimer !== null) clearTimeout(searchTimer);
+  searchTimer = null;
+}
+
+/**
+ * Started with each request, from a press or the silent resume. A request that stays pending
+ * after `SEARCHING_AFTER_MS` while the permission is already `granted` is the browser looking for
+ * a piano, not asking (Chrome's WinRT backend leaves it pending for 20 s or more while a Bluetooth
+ * piano is off), and the line says so (`searching`). With the prompt open the query says `prompt`,
+ * so the line keeps asking; the watcher then asks again every second, as the reader may allow it
+ * and the request then hang. It stops at the first `granted`, and when the request settles, is
+ * turned off or replaced (`mine` is no longer the generation). One timer at most.
+ */
+function watchForSearching(mine: number): void {
+  const poll = (afterMs: number) => {
+    searchTimer = setTimeout(() => {
+      searchTimer = null;
+      void check();
+    }, afterMs);
+  };
+  const stale = () => mine !== generation || pending === null;
+  const check = async () => {
+    if (stale()) return;
+    const permission = await midiPermission();
+    if (stale()) return;
+    if (permission !== 'granted') {
+      poll(SEARCHING_POLL_MS);
+      return;
+    }
+    const { status } = pianoSnapshot();
+    if (status === 'asking' || status === 'off') setSnapshot('searching');
+  };
+  stopWatching();
+  poll(SEARCHING_AFTER_MS);
+}
+
 function connect(asking: boolean): Promise<void> {
-  if (pending) return pending;
+  if (pending) {
+    // A resume is pending (the permission is granted) and the reader presses: it is not asking.
+    if (pianoSnapshot().status === 'off') setSnapshot('searching');
+    return pending;
+  }
   if (connection || !midiSupported()) return Promise.resolve();
   const mine = ++generation;
   const live = () => mine === generation;
   if (asking) setSnapshot('asking');
+  watchForSearching(mine);
   const events = {
     inputs: (names: readonly string[]) => {
       if (live()) applyInputs(names);
@@ -202,7 +251,8 @@ function connect(asking: boolean): Promise<void> {
       }
       connection = opened;
       // Access without an input list yet is access without a piano.
-      if (pianoSnapshot().status === 'asking' || pianoSnapshot().status === 'off') applyInputs([]);
+      const { status } = pianoSnapshot();
+      if (status === 'asking' || status === 'searching' || status === 'off') applyInputs([]);
       useAppStore.getState().setSettings({ playAlong: true });
     } catch (error) {
       if (!live()) return;
@@ -216,7 +266,10 @@ function connect(asking: boolean): Promise<void> {
         setSnapshot('off');
       }
     } finally {
-      if (live()) pending = null;
+      if (live()) {
+        pending = null;
+        stopWatching();
+      }
     }
   })();
   return pending;
@@ -226,6 +279,8 @@ function connect(asking: boolean): Promise<void> {
  * The press of the home line (the reader's consent): the status goes to `asking`, then the lazy
  * chunk opens `MIDIAccess`, which is where the browser asks. On success `settings.playAlong` is
  * set; a refusal leaves `denied` (the permission now says so) or `off` (the prompt was dismissed).
+ * A request the browser leaves pending with the permission granted turns the status to `searching`
+ * (`watchForSearching`).
  */
 export async function askForPiano(): Promise<void> {
   await connect(true);
@@ -239,6 +294,7 @@ export async function askForPiano(): Promise<void> {
 export function turnOffPiano(): void {
   generation++;
   pending = null;
+  stopWatching();
   const closing = connection;
   connection = null;
   try {
@@ -273,6 +329,7 @@ export async function resumePiano(): Promise<void> {
 export function resetPianoForTests(): void {
   generation++;
   pending = null;
+  stopWatching();
   try {
     connection?.close();
   } catch {

@@ -5,7 +5,14 @@
  * red moves on, and at the end of the piece the transport's own finish runs. The walk moves the
  * red only through `Playback.cueAt` and `Playback.finish`, in performance seconds, so a repeat is
  * walked as it is heard and the cursor, the page turn, the keys with their fingers and the plain
- * Play button are all the existing cue (useCursor.ts, Transport.tsx). The app makes no sound.
+ * Play button are all the existing cue (useCursor.ts, Transport.tsx). The app makes no sound for
+ * the reader's notes: nothing here strikes a key.
+ *
+ * With one hand left out (the Practice panel's Hands), digitus plays that hand (issue 184): after
+ * each pass the walk hands `Playback.accompany` the other hand's notes from the step the reader
+ * played to the next step the walk waits on (accompaniment.ts), counted from the press. It stops
+ * them (`Playback.stopAccompaniment`) on every move it did not make itself, and when it goes
+ * inactive; its own cue and finish leave the tail of the piece sounding.
  *
  * The walk is active only when it can own the red: the piano is on and connected, the score is
  * ready and playable, it has a step, and nothing plays or loads. It moves the red only while no
@@ -21,9 +28,11 @@
 import type { Hand, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '../app/store.js';
-import { performanceFor } from '../audio/performance.js';
+import { playEventsFor, type PlayEvent } from '../audio/events.js';
+import { performanceFor, scoreEndSec } from '../audio/performance.js';
 import { heldPitches, subscribeNotes, usePianoSnapshot } from '../midi/piano.js';
 import type { NoteMessage } from '../midi/types.js';
+import { accompanimentNotes, accompanimentStretches } from './accompaniment.js';
 import {
   ALONG_EPS,
   NO_KEYS,
@@ -59,9 +68,11 @@ export interface PlayAlong {
   atFirst: boolean;
   /** The status line's hint: the current step's pitch count, or null when it is not shown. */
   hint: number | null;
+  /** Active, digitus plays a hand, and the browser waits for a click to sound it (issue 184). */
+  soundWaits: boolean;
 }
 
-/** What the Playwright check reads (installed only with `?audio=silent`). */
+/** What the Playwright check reads (installed with `?audio=silent` or `?hooks=1`). */
 interface AlongHook {
   /**
    * The pitches of the step the red waits on; none when the walk is not active, and none while
@@ -79,6 +90,16 @@ interface Live {
   playback: Playback;
   steps: readonly AlongStep[];
   currentGroup: number;
+  /** What digitus plays: null when the reader plays both hands (or no piano is connected). */
+  accompaniment: Accompaniment | null;
+}
+
+/** The other hand's notes and the performance's end, made once per score and hands (issue 184). */
+interface Accompaniment {
+  /** The hands digitus plays: the hands left out of the walk. */
+  hands: readonly Hand[];
+  events: readonly PlayEvent[];
+  endSec: number;
 }
 
 const NO_STEPS: AlongStep[] = [];
@@ -92,11 +113,11 @@ function stretchKey(loop: PerfRange | null): string {
   return loop ? `${loop.from}:${loop.to}` : '';
 }
 
-function isSilentRun(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('audio') === 'silent'
-  );
+/** The Playwright hooks are on: `?audio=silent` (the silent instrument) or `?hooks=1` (the real one). */
+function hooksOn(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get('audio') === 'silent' || params.get('hooks') === '1';
 }
 
 export function usePlayAlong({
@@ -125,15 +146,33 @@ export function usePlayAlong({
     [connected, score, muteKey],
   );
   const active = connected && ready && playable && steps.length > 0 && !playing && !loading;
+  // The other hand's notes (issue 184): only for a reader whose piano is connected and who left a
+  // hand out. The events are the transport's own, so the hand sounds as it does in Play.
+  const accompaniment = useMemo<Accompaniment | null>(() => {
+    if (!connected || !score || muteKey === '') return null;
+    const perf = performanceFor(score);
+    return {
+      hands: muteKey.split(',') as Hand[],
+      events: playEventsFor(perf.score),
+      endSec: scoreEndSec(perf.score),
+    };
+  }, [connected, score, muteKey]);
 
   /** The index of the step the red waits on, -1 when none: state, so the render can read it. */
   const [index, setIndex] = useState(-1);
   /** Steps played in this view: the hint goes after the first pass and does not come back. */
   const [played, setPlayed] = useState(0);
 
-  const liveRef = useRef<Live>({ active, flightShown, playback, steps, currentGroup });
+  const liveRef = useRef<Live>({
+    active,
+    flightShown,
+    playback,
+    steps,
+    currentGroup,
+    accompaniment,
+  });
   useLayoutEffect(() => {
-    liveRef.current = { active, flightShown, playback, steps, currentGroup };
+    liveRef.current = { active, flightShown, playback, steps, currentGroup, accompaniment };
   });
   const keysRef = useRef<Keys>(NO_KEYS);
   /** The performance second the walk left the playback at; null while it is not walking. */
@@ -149,6 +188,11 @@ export function usePlayAlong({
    * before the finish. A key pressed in that gap is kept for the first step and moves nothing.
    */
   const homeRef = useRef(false);
+  /**
+   * The walk handed the playback notes since it last stopped them: it only stops what it started,
+   * so an idle walk calls nothing.
+   */
+  const accompaniedRef = useRef(false);
 
   /**
    * One procedure for a note and for the align (`event` null): spends the held keys on an
@@ -158,8 +202,15 @@ export function usePlayAlong({
   const decide = useCallback((event: NoteMessage | null) => {
     const o = liveRef.current;
     const pb = o.playback;
+    /** Stops what the walk had digitus play: the queue, the notes not started, the ones that ring. */
+    const stopAccompaniment = () => {
+      accompaniedRef.current = false;
+      pb.stopAccompaniment();
+    };
     if (!o.active) {
       // Not walking (playing, loading, no piano): the presses are kept, the walk starts afresh.
+      // The other hand stops too (Play stops it in its own click; the rest end here).
+      if (accompaniedRef.current) stopAccompaniment();
       atRef.current = null;
       homeRef.current = false;
       indexRef.current = -1;
@@ -176,6 +227,10 @@ export function usePlayAlong({
       stepsAtRef.current !== o.steps ||
       loopAtRef.current !== stretchKey(stretch);
     if (moved) {
+      // A move the walk did not make (a seek, Rewind, a loop or hands change, Play then Pause):
+      // the stretch that was sounding no longer leads to where the red is. The walk's own moves
+      // (its cue, its finish) leave `atRef` where they put the playback, so they land here never.
+      if (atRef.current !== null) stopAccompaniment();
       keys = spendAll(keys);
       atRef.current = start;
       stepsAtRef.current = o.steps;
@@ -198,7 +253,24 @@ export function usePlayAlong({
     }
     const result = advance(o.steps, here, keys, stretch);
     keysRef.current = result.keys;
-    if (result.passed > 0) setPlayed((n) => n + result.passed);
+    if (result.passed > 0) {
+      setPlayed((n) => n + result.passed);
+      // Digitus plays the other hand from the last step the reader played to the next one the
+      // walk waits on, counted from this press; what the stretch before left unstarted is dropped
+      // (an empty stretch drops it too). Before the cue or the finish, which do not stop it.
+      const plan = o.accompaniment;
+      if (plan) {
+        const stretches = accompanimentStretches(
+          o.steps,
+          result.last,
+          result.move,
+          stretch,
+          plan.endSec,
+        );
+        accompaniedRef.current = true;
+        pb.accompany(accompanimentNotes(plan.events, plan.hands, stretches, stretch));
+      }
+    }
     if (result.move.kind === 'finish') {
       pb.finish();
       homeRef.current = true;
@@ -255,9 +327,25 @@ export function usePlayAlong({
     return () => cancelAnimationFrame(frame);
   }, [decide, active, flightShown, playing, loading, atStart, cue, loop, steps, marked]);
 
+  // Digitus plays the hand the reader left out (issue 184): its samples load before any press,
+  // with no gesture, while the walk is active (`prepare` is once per score and never turns the
+  // walk off). The view being left stops what still sounds; the playback stops it too.
+  const accompanying = active && accompaniment !== null;
+  const { prepare } = playback;
+  useEffect(() => {
+    if (accompanying) prepare();
+  }, [accompanying, prepare, score]);
+  useEffect(
+    () => () => {
+      accompaniedRef.current = false;
+      liveRef.current.playback.stopAccompaniment();
+    },
+    [],
+  );
+
   // Playwright's check: the pitches of the step the red waits on.
   useEffect(() => {
-    if (!isSilentRun()) return;
+    if (!hooksOn()) return;
     const w = window as unknown as { __digitus2Along?: AlongHook };
     const hook: AlongHook = {
       target: () => {
@@ -287,12 +375,14 @@ export function usePlayAlong({
     cue !== null &&
     !atStart &&
     Math.abs(playback.startPerformanceSec() - step.perfSec) <= ALONG_EPS;
+  const soundWaits = accompanying && playback.soundWaits;
   return useMemo(
     () => ({
       active,
       atFirst: cuedHere && index === 0,
       hint: cuedHere && step && played === 0 ? step.pitches.length : null,
+      soundWaits,
     }),
-    [active, cuedHere, index, step, played],
+    [active, cuedHere, index, step, played, soundWaits],
   );
 }

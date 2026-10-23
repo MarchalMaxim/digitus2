@@ -6,8 +6,12 @@ export interface NoteMessage {
   midi: number;
 }
 
-/** Where the piano connection stands. */
-export type PianoStatus = 'unsupported' | 'off' | 'asking' | 'connected' | 'none' | 'denied';
+/**
+ * Where the piano connection stands. `searching`: access is granted but the browser has not
+ * answered yet (Chrome's WinRT backend while a Bluetooth piano is off).
+ */
+export type PianoStatus =
+  'unsupported' | 'off' | 'asking' | 'searching' | 'connected' | 'none' | 'denied';
 
 export interface PianoSnapshot {
   status: PianoStatus;

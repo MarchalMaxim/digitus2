@@ -21,6 +21,18 @@ export interface FakeMidiOptions {
   unsupported?: boolean;
   /** Merged into the stored settings on the first load of a test (a reload keeps what the app made of it). */
   playAlong?: boolean;
+  /**
+   * Further stored settings, merged on the first load of a test like `playAlong`, e.g. `hands`
+   * or a piece's tempo. A spec that needs the Hands control set before the page loads seeds it
+   * here and never clicks the Practice panel: a click is a user activation, and a flow about the
+   * browser's autoplay policy must not have one.
+   */
+  settings?: Record<string, unknown>;
+  /**
+   * `requestMIDIAccess` stays pending whatever the permission says, until `resolve` answers it:
+   * Chrome's WinRT backend while a Bluetooth piano is off (issue 182).
+   */
+  hang?: boolean;
 }
 
 type Answer = 'allow' | 'block' | 'dismiss';
@@ -55,8 +67,28 @@ interface AlongHook {
 type Windowed = {
   __fakeMidi?: FakeHost;
   __digitus2Along?: AlongHook;
-  __digitus2Keys?: { strikes(): number[] };
+  __digitus2Keys?: {
+    strikes(): number[];
+    accompanied(): AccompaniedNote[];
+    accompCancelled(): CancelledNote[];
+    audioState(): AudioContextState | 'none';
+  };
 };
+
+/** A note the accompaniment handed to the instrument (issue 184); `time` is on the audio clock. */
+export interface AccompaniedNote {
+  midi: number;
+  hand: 'L' | 'R';
+  time: number;
+  duration: number;
+  velocity: number;
+}
+
+/** A note the accompaniment dropped from its queue, cancelled before it sounded, or released. */
+export interface CancelledNote {
+  midi: number;
+  time: number;
+}
 
 /** Installs the fake before the page loads (call it before `goto`; it also serves every reload). */
 export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Promise<void> {
@@ -75,14 +107,18 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
       };
 
       // The stored settings, once per test: a reload keeps what the app did with them.
-      if (cfg.playAlong !== null && keep('seeded') === null) {
+      if ((cfg.playAlong !== null || cfg.settings !== null) && keep('seeded') === null) {
         keep('seeded', '1');
         try {
           const stored = JSON.parse(localStorage.getItem('digitus2.settings.v1') ?? 'null') as {
             state?: { settings?: Record<string, unknown> };
             version?: number;
           } | null;
-          const settings = { ...(stored?.state?.settings ?? {}), playAlong: cfg.playAlong };
+          const settings = {
+            ...(stored?.state?.settings ?? {}),
+            ...(cfg.settings ?? {}),
+            ...(cfg.playAlong !== null ? { playAlong: cfg.playAlong } : {}),
+          };
           localStorage.setItem(
             'digitus2.settings.v1',
             JSON.stringify({ ...stored, state: { ...stored?.state, settings }, version: 2 }),
@@ -271,7 +307,8 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
                 refuse(reject, 'SecurityError');
               } else refuse(reject, 'SecurityError');
             };
-            if (permission === 'granted') grant(resolve);
+            if (cfg.hang) host.pending.push(settle);
+            else if (permission === 'granted') grant(resolve);
             else if (permission === 'denied') refuse(reject, 'SecurityError');
             else if (cfg.answer === 'manual') host.pending.push(settle);
             else settle(cfg.answer);
@@ -288,11 +325,56 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
       platform: o.platform ?? null,
       unsupported: o.unsupported ?? false,
       playAlong: o.playAlong ?? null,
+      settings: o.settings ?? null,
+      hang: o.hang ?? false,
     },
   );
 }
 
-/** The walk's hook (`?audio=silent` only): the current step's pitches and index, once read. */
+/**
+ * Makes `page.evaluate` run without a user gesture, until the returned function is called.
+ *
+ * Playwright evaluates in the page with `userGesture: true`, and that gives the document sticky
+ * user activation: after the first `evaluate`, `locator.textContent()` or `expect(locator)`
+ * (they all evaluate), the browser's autoplay policy lets an AudioContext run, so a flow about a
+ * page that has had no click or key cannot look at the page at all. Under `quietly` the
+ * helpers here, and every helper that goes through `page.evaluate` (red.ts, seek.ts), read the
+ * page through the protocol with no gesture; only locators, `waitForFunction` and screenshots
+ * stay loud, and the flow keeps away from them until the click it means to make.
+ */
+export async function quietly(page: Page): Promise<() => void> {
+  const cdp = await page.context().newCDPSession(page);
+  const target = page as unknown as { evaluate: Page['evaluate'] };
+  const loud = target.evaluate;
+  // An `undefined` inside the argument (a list with a missing name) must stay `undefined`, which
+  // JSON would turn into `null`: it travels as a marker the page turns back.
+  const revive =
+    "(function revive(v){if(v&&typeof v==='object'){if(v.$undefined===true)return undefined;" +
+    'for(const k of Object.keys(v))v[k]=revive(v[k]);}return v;})';
+  target.evaluate = (async (fn: unknown, arg?: unknown) => {
+    const json = JSON.stringify(arg, (_key, value: unknown) =>
+      value === undefined ? { $undefined: true } : value,
+    );
+    const expression =
+      typeof fn === 'function' ? `(${fn.toString()})(${revive}(${json}))` : String(fn);
+    const { result, exceptionDetails } = await cdp.send('Runtime.evaluate', {
+      expression,
+      userGesture: false,
+      returnByValue: true,
+      awaitPromise: true,
+    });
+    if (exceptionDetails) {
+      throw new Error(exceptionDetails.exception?.description ?? exceptionDetails.text);
+    }
+    return result.value;
+  }) as Page['evaluate'];
+  return () => {
+    target.evaluate = loud;
+    cdp.detach().catch(() => undefined);
+  };
+}
+
+/** The walk's hook (`?audio=silent` or `?hooks=1`): the current step's pitches and index, once read. */
 function along(page: Page): Promise<{ target: number[]; index: number } | null> {
   return page.evaluate(() => {
     const hook = (window as unknown as Windowed).__digitus2Along;
@@ -302,23 +384,59 @@ function along(page: Page): Promise<{ target: number[]; index: number } | null> 
 
 /**
  * The strikes the silent instrument recorded (`?audio=silent`): nothing the reader plays on the
- * piano may be in them, as the app makes no sound for it.
+ * piano may be in them, as the app makes no sound for the reader's notes.
  */
 export function strikes(page: Page): Promise<number[]> {
   return page.evaluate(() => (window as unknown as Windowed).__digitus2Keys?.strikes() ?? []);
 }
 
+/**
+ * What the accompaniment handed to the instrument (`?audio=silent` or `?hooks=1`), in order:
+ * the notes of the hand digitus plays, never Play's notes (issue 184). `time` is on the audio
+ * clock: `press + offset / tempo`, so differences within one stretch are exact.
+ */
+export function accompanied(page: Page): Promise<AccompaniedNote[]> {
+  return page.evaluate(() => (window as unknown as Windowed).__digitus2Keys?.accompanied() ?? []);
+}
+
+/**
+ * What the accompaniment cancelled, in order: a note dropped from its queue before it was handed
+ * over, a handed note cancelled before it started, and a sounding note released by a stop.
+ */
+export function accompCancelled(page: Page): Promise<CancelledNote[]> {
+  return page.evaluate(
+    () => (window as unknown as Windowed).__digitus2Keys?.accompCancelled() ?? [],
+  );
+}
+
+/** The page's AudioContext state; 'none' before the app made one. */
+export function audioState(page: Page): Promise<AudioContextState | 'none'> {
+  return page.evaluate(
+    () => (window as unknown as Windowed).__digitus2Keys?.audioState() ?? 'none',
+  );
+}
+
 /** The helpers that drive the fake once it is installed. */
 export function fakeMidi(page: Page) {
+  // These poll `page.evaluate` rather than use `waitForFunction`, so that they also work on a
+  // page under `quietly` (whose `evaluate` makes no user gesture).
   /** Waits until the app has opened the access and attached its handler to an input. */
   const listening = () =>
-    page.waitForFunction(() => {
-      const host = (window as unknown as Windowed).__fakeMidi;
-      return !!host && [...host.inputs.values()].some((i) => typeof i.onmidimessage === 'function');
-    });
+    expect
+      .poll(() =>
+        page.evaluate(() => {
+          const host = (window as unknown as Windowed).__fakeMidi;
+          return (
+            !!host && [...host.inputs.values()].some((i) => typeof i.onmidimessage === 'function')
+          );
+        }),
+      )
+      .toBe(true);
   /** Waits until the access exists (the app's request was answered). */
   const opened = () =>
-    page.waitForFunction(() => (window as unknown as Windowed).__fakeMidi?.access != null);
+    expect
+      .poll(() => page.evaluate(() => (window as unknown as Windowed).__fakeMidi?.access != null))
+      .toBe(true);
 
   const api = {
     /** How many times the page called `requestMIDIAccess` in this document. */
@@ -331,9 +449,13 @@ export function fakeMidi(page: Page) {
       page.evaluate(() => (window as unknown as Windowed).__fakeMidi?.permission() ?? 'prompt'),
     /** Answers the browser's prompt held back by `answer: 'manual'`. */
     async resolve(answer: Answer): Promise<void> {
-      await page.waitForFunction(
-        () => ((window as unknown as Windowed).__fakeMidi?.pending.length ?? 0) > 0,
-      );
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () => ((window as unknown as Windowed).__fakeMidi?.pending.length ?? 0) > 0,
+          ),
+        )
+        .toBe(true);
       await page.evaluate((a) => {
         const host = (window as unknown as Windowed).__fakeMidi!;
         host.pending.shift()!(a);
@@ -407,6 +529,24 @@ export function fakeMidi(page: Page) {
         )
         .toBeGreaterThan(0);
       return found;
+    },
+    /**
+     * Presses every pitch of the step the red waits on and holds them: no release, so the next
+     * press follows at once (an early arrival, issue 184). With `wait` false it does not wait for
+     * the step to settle first, which is what a second press a few milliseconds after the first
+     * needs (the walk names the next step as soon as it has moved). Returns the step's index.
+     */
+    async pressStep(o: { wait?: boolean } = {}): Promise<number> {
+      if (o.wait !== false) await api.waitForStep();
+      await listening();
+      return page.evaluate(() => {
+        const w = window as unknown as Windowed;
+        const hook = w.__digitus2Along!;
+        const pitches = hook.target();
+        const index = hook.index();
+        for (const midi of pitches) w.__fakeMidi!.send([0x90, midi, 100]);
+        return index;
+      });
     },
     /**
      * Plays the step the red waits on: presses every pitch of it (`__digitus2Along.target()`),

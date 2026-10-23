@@ -33,6 +33,10 @@ export const score: Messages['score'] = {
       count > 1
         ? 'Jouez les notes rouges sur votre piano.'
         : 'Jouez la note rouge sur votre piano.',
+    playAlongSound: {
+      click: 'Cliquez une fois pour entendre l’autre main.',
+      tap: 'Touchez une fois pour entendre l’autre main.',
+    },
     practice: 'S’exercer',
     scanSource: 'Source du scan et reconnaissance',
     couldNotOpenFile: (name: string) =>

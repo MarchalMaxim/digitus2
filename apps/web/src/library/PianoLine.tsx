@@ -16,8 +16,11 @@ export function pianoName(raw: string): string {
  * line: one quiet sentence that says where the connection stands, and one text button that is the
  * same element in every state, so the focus survives every change of its label. The press is the
  * reader's consent: the browser is asked only then (a later visit connects silently, see
- * midi/piano.ts). Nothing here is red. Where the browser has no Web MIDI the line is absent. The
- * button is described by the sentence while there is one, so "Turn off" says what it turns off.
+ * midi/piano.ts). While the browser has granted access but not answered (Windows looking for a
+ * Bluetooth piano that is off) the line says it is looking, with Turn off as the way out; the
+ * button is busy only while the browser's prompt is open. Nothing here is red. Where the browser
+ * has no Web MIDI the line is absent. The button is described by the sentence while there is one,
+ * so "Turn off" says what it turns off.
  */
 export function PianoLine() {
   const t = useT();
@@ -27,10 +30,11 @@ export function PianoLine() {
   if (status === 'unsupported') return null;
   const text = t.library.piano;
   const asking = status === 'asking';
-  const on = status === 'connected' || status === 'none';
+  const on = status === 'connected' || status === 'none' || status === 'searching';
   const sentence = {
     off: '',
     asking: text.asking,
+    searching: text.searching,
     connected: text.connected(pianoName(names[0] ?? '') || text.yourPiano),
     none: flag === null ? text.none : `${text.none} ${text.bluetoothFlag(flag)}`,
     denied: text.denied,

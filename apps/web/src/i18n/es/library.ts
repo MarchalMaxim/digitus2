@@ -91,6 +91,7 @@ export const library: Messages['library'] = {
   piano: {
     start: 'Toca junto con tu piano',
     asking: 'Permite que el navegador use tu piano.',
+    searching: 'Buscando tu piano. Comprueba que está encendido.',
     connected: (name: string) => `${name} está conectado. Abre una pieza y toca la nota roja.`,
     yourPiano: 'Tu piano',
     none: 'No se encontró ningún piano. Conéctalo con un cable USB, o emparéjalo por Bluetooth y enciéndelo.',

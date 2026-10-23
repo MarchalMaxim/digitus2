@@ -19,6 +19,7 @@ export const transport: Messages['transport'] = {
   loopToBar: 'Herhalen tot maat',
   loopTo: 'tot',
   addNotes: 'Noten ertussen toevoegen',
+  practiceMode: 'Oefenmodus',
   seekHelp: 'Klik op een maat om erheen te gaan. ← en → gaan één maat terug of verder.',
   seekHelpTouch: 'Tik op een maat om erheen te gaan.',
   loopReversed: 'Het begin van de herhaling moet vóór het einde liggen.',

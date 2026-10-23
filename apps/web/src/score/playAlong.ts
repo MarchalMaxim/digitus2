@@ -124,7 +124,7 @@ function inLoop(loop: PerfRange, perfSec: number): boolean {
 }
 
 /** The first and last step of the loop's stretch, as indices into `steps`; null when it holds none. */
-function loopSpan(
+export function loopSpan(
   steps: readonly AlongStep[],
   loop: PerfRange,
 ): { first: number; last: number } | null {

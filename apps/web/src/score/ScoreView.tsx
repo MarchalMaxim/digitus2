@@ -449,6 +449,18 @@ export function ScoreView({ source }: { source: PieceSource }) {
     flightShown: red.redAway,
   });
 
+  // The Practice mode switch (issue 191): in the Practice panel only while a piano is connected.
+  // The prop is memoised on the two booleans, so a MIDI message never renders the panel.
+  const practiceOn = useAppStore((s) => s.settings.practiceMode);
+  const setSettings = useAppStore((s) => s.setSettings);
+  const practiceMode = useMemo(
+    () =>
+      along.pianoConnected
+        ? { on: practiceOn, set: (on: boolean) => setSettings({ practiceMode: on }) }
+        : null,
+    [along.pianoConnected, practiceOn, setSettings],
+  );
+
   const seekToBar = useCallback(
     (bar: number) => {
       if (!seekable) return;
@@ -652,6 +664,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                 embellish={
                   doc.embellish === 'offered' ? { on: doc.embellished, set: toggleEmbellish } : null
                 }
+                practiceMode={practiceMode}
                 oneHanded={oneHanded(score)}
               />
             </div>

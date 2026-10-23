@@ -19,6 +19,7 @@ export const transport: Messages['transport'] = {
   loopToBar: 'Repetir até o compasso',
   loopTo: 'até',
   addNotes: 'Adicionar notas intermediárias',
+  practiceMode: 'Modo de prática',
   seekHelp: 'Clique num compasso para ir até lá. ← e → recuam ou avançam um compasso.',
   seekHelpTouch: 'Toque num compasso para ir até lá.',
   loopReversed: 'O início da repetição deve vir antes do fim.',

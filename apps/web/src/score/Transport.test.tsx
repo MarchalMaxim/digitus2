@@ -467,6 +467,127 @@ describe('"Add notes between"', () => {
   });
 });
 
+// The Practice mode switch (issue 191): a real switch heading the panel, there only while a piano
+// is connected (the score view passes `practiceMode` then, and null before).
+describe('the Practice mode switch', () => {
+  const props = { measureCount: 12, currentBar: 1 };
+
+  it('is not there without the prop, or with null', () => {
+    const { rerender } = render(<PracticeControls playback={playback()} {...props} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+    rerender(<PracticeControls playback={playback()} {...props} practiceMode={null} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+  });
+
+  it('is one checked switch named Practice mode, before Tempo, drawn by the app', () => {
+    const { container } = render(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        practiceMode={{ on: true, set: vi.fn() }}
+      />,
+    );
+    const switches = screen.getAllByRole('switch');
+    expect(switches).toHaveLength(1);
+    const toggle = screen.getByRole('switch', { name: 'Practice mode' });
+    expect(toggle).toBeChecked();
+    expect(toggle.closest('label')).toHaveClass('check', 'switch');
+    expect(toggle.closest('label')!.parentElement).toBe(container.querySelector('.transport'));
+    // The first control of the panel: before the tempo slider.
+    const tempo = screen.getByRole('slider', { name: /Tempo/ });
+    expect(toggle.compareDocumentPosition(tempo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.querySelector('.transport input')).toBe(toggle);
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+  });
+
+  it('calls set(false) on a click or Space, and set(true) when it is off', async () => {
+    const set = vi.fn<(on: boolean) => void>();
+    const { rerender } = render(
+      <PracticeControls playback={playback()} {...props} practiceMode={{ on: true, set }} />,
+    );
+    await userEvent.click(screen.getByRole('switch', { name: 'Practice mode' }));
+    expect(set).toHaveBeenLastCalledWith(false);
+    screen.getByRole('switch', { name: 'Practice mode' }).focus();
+    await userEvent.keyboard(' ');
+    expect(set).toHaveBeenCalledTimes(2);
+    expect(set).toHaveBeenLastCalledWith(false);
+    set.mockClear();
+    rerender(
+      <PracticeControls playback={playback()} {...props} practiceMode={{ on: false, set }} />,
+    );
+    const off = screen.getByRole('switch', { name: 'Practice mode' });
+    expect(off).not.toBeChecked();
+    await userEvent.click(off);
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledWith(true);
+  });
+
+  it('moves the focus to Tempo when the switch goes while focused', () => {
+    const pb = playback();
+    const { rerender } = render(
+      <PracticeControls playback={pb} {...props} practiceMode={{ on: true, set: vi.fn() }} />,
+    );
+    screen.getByRole('switch', { name: 'Practice mode' }).focus();
+    rerender(<PracticeControls playback={pb} {...props} practiceMode={null} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.getByRole('slider', { name: /Tempo/ })).toHaveFocus();
+  });
+
+  it('leaves the focus where it is when the switch goes unfocused', () => {
+    const pb = playback();
+    const { rerender } = render(
+      <PracticeControls playback={pb} {...props} practiceMode={{ on: true, set: vi.fn() }} />,
+    );
+    const metronome = screen.getByRole('checkbox', { name: 'Metronome' });
+    metronome.focus();
+    rerender(<PracticeControls playback={pb} {...props} practiceMode={null} />);
+    expect(metronome).toHaveFocus();
+  });
+
+  it('keeps Hands, whatever the switch says', () => {
+    const { rerender } = render(<PracticeControls playback={playback()} {...props} />);
+    expect(screen.getByRole('radio', { name: 'Left hand' })).toBeInTheDocument();
+    rerender(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        practiceMode={{ on: true, set: vi.fn() }}
+      />,
+    );
+    expect(screen.getByRole('radio', { name: 'Left hand' })).toBeInTheDocument();
+    rerender(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        practiceMode={{ on: false, set: vi.fn() }}
+      />,
+    );
+    expect(screen.getByRole('radio', { name: 'Left hand' })).toBeInTheDocument();
+  });
+
+  it('is named in each language', async () => {
+    const names = {
+      en: 'Practice mode',
+      es: 'Modo práctica',
+      fr: 'Mode entraînement',
+      nl: 'Oefenmodus',
+      pt: 'Modo de prática',
+    } as const;
+    for (const [locale, name] of Object.entries(names) as [keyof typeof names, string][]) {
+      await act(() => chooseLocale(locale));
+      const { unmount } = render(
+        <PracticeControls
+          playback={playback()}
+          {...props}
+          practiceMode={{ on: true, set: vi.fn() }}
+        />,
+      );
+      expect(screen.getByRole('switch', { name }), locale).toBeChecked();
+      unmount();
+    }
+  });
+});
+
 describe('the loop as one checkbox (spec 13)', () => {
   it('prefills the bar at the cursor and the next, clamped to the piece', () => {
     expect(loopPrefill(3, 12)).toEqual(['3', '4']);

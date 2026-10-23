@@ -981,3 +981,38 @@ describe('a change of the Practice tempo in the middle of a run', () => {
     expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
   });
 });
+
+describe('Practice mode (issue 191)', () => {
+  const practice = (on: boolean) =>
+    act(() => useAppStore.getState().setSettings({ practiceMode: on }));
+
+  it('stops the other hand once when it goes off, and prepares nothing while it is off', async () => {
+    await connect();
+    const s = setup();
+    s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalled();
+    forget(s.fake);
+    practice(false);
+    s.refresh();
+    expect(s.hook.result.current.active).toBe(false);
+    expect(s.fake.stopAccompaniment).toHaveBeenCalledTimes(1);
+    s.refresh();
+    s.hold(1000);
+    expect(s.fake.stopAccompaniment).toHaveBeenCalledTimes(1);
+    expect(s.fake.prepare).not.toHaveBeenCalled();
+    expect(s.fake.accompany).not.toHaveBeenCalled();
+  });
+
+  it('does not stop it for its own first cue when it comes on again', async () => {
+    await connect();
+    const s = setup();
+    s.press(60);
+    practice(false);
+    s.refresh();
+    forget(s.fake);
+    practice(true);
+    s.refresh();
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+  });
+});

@@ -35,6 +35,12 @@ export interface Settings {
    * permission is separate; a later visit opens MIDI silently only when it is already granted.
    */
   playAlong: boolean;
+  /**
+   * With a piano connected, the red waits for the reader's piano (issue 191). Off, the score page
+   * behaves as with no piano: Play plays the piece and nothing waits. On by default; remembered
+   * per browser, not per piece.
+   */
+  practiceMode: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -48,6 +54,7 @@ export const DEFAULT_SETTINGS: Settings = {
   legendSeen: false,
   favourites: [],
   playAlong: false,
+  practiceMode: true,
 };
 
 export type PieceSource =
@@ -242,6 +249,7 @@ function pickSettings(value: unknown): Partial<Settings> {
   if (typeof raw.legendSeen === 'boolean') out.legendSeen = raw.legendSeen;
   if (Array.isArray(raw.favourites)) out.favourites = pickSlugs(raw.favourites);
   if (typeof raw.playAlong === 'boolean') out.playAlong = raw.playAlong;
+  if (typeof raw.practiceMode === 'boolean') out.practiceMode = raw.practiceMode;
   return out;
 }
 

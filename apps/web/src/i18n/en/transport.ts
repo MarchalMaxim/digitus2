@@ -24,6 +24,8 @@ export const transport = {
   loopTo: 'to',
   /** The Practice switch that plays and shows the piece with passing and neighbour notes added (docs/app.md). */
   addNotes: 'Add notes between',
+  /** The Practice switch shown while a piano is connected: on, the red waits for the reader's piano (issue 191). */
+  practiceMode: 'Practice mode',
   /** One line in the Practice panel: how to move through the piece (T13). With a mouse and keys. */
   seekHelp: 'Click a bar to go there. ← and → move one bar.',
   /** The same where fingers do the pointing (a phone, a tablet). */

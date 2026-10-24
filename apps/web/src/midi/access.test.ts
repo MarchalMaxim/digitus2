@@ -1,12 +1,16 @@
 // @vitest-environment node
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { openMidiAccess } from './access.js';
 import type { AccessEvents, AccessRefusal, NoteMessage } from './types.js';
+
+/** `performance.now()` while a test runs: every message without a usable event time gets it. */
+let now: number;
+const NOW = 20_000;
 
 /** A MIDIInput as the browser keeps it: it stays in the map when the piano is unplugged. */
 class FakeInput {
   connection: 'open' | 'closed' = 'closed';
-  onmidimessage: ((e: { data: Uint8Array | null }) => void) | null = null;
+  onmidimessage: ((e: { data: Uint8Array | null; timeStamp?: number }) => void) | null = null;
   closed = 0;
   constructor(
     readonly id: string,
@@ -21,7 +25,20 @@ class FakeInput {
   send(...bytes: number[]): void {
     this.onmidimessage?.({ data: new Uint8Array(bytes) });
   }
+  /** `send`, with the event's `timeStamp` (performance.now() ms of the key). */
+  sendAt(timeStamp: number, ...bytes: number[]): void {
+    this.onmidimessage?.({ data: new Uint8Array(bytes), timeStamp });
+  }
 }
+
+/** The merged note-on the access reports when the message carries no usable time. */
+const keyOn = (midi: number, velocity: number): NoteMessage => ({
+  on: true,
+  midi,
+  atMs: NOW,
+  velocity,
+});
+const keyOff = (midi: number): NoteMessage => ({ on: false, midi, atMs: NOW });
 
 class FakeAccess {
   readonly inputs = new Map<string, FakeInput>();
@@ -73,8 +90,14 @@ async function open(access: FakeAccess, events: AccessEvents = recorder()) {
 
 const piano = () => new FakeInput('p1', 'GO:PIANO MIDI 1');
 
+beforeEach(() => {
+  now = NOW;
+  vi.spyOn(performance, 'now').mockImplementation(() => now);
+});
+
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe('openMidiAccess', () => {
@@ -134,11 +157,49 @@ describe('openMidiAccess', () => {
     const input = piano();
     await open(new FakeAccess(input), events);
     input.send(0x90, 60, 100);
-    expect(events.notes).toEqual([[{ on: true, midi: 60 }, [60]]]);
+    expect(events.notes).toEqual([[keyOn(60, 100), [60]]]);
     input.send(0x90, 64, 90);
-    expect(events.notes[1]).toEqual([{ on: true, midi: 64 }, [60, 64]]);
+    expect(events.notes[1]).toEqual([keyOn(64, 90), [60, 64]]);
     input.send(0x80, 60, 0);
-    expect(events.notes[2]).toEqual([{ on: false, midi: 60 }, [64]]);
+    expect(events.notes[2]).toEqual([keyOff(60), [64]]);
+  });
+
+  describe('the time of a key (issue 192)', () => {
+    it("takes the event's timeStamp when it is plausible", async () => {
+      const events = recorder();
+      const input = piano();
+      await open(new FakeAccess(input), events);
+      now = 1010;
+      input.sendAt(1000, 0x90, 60, 100);
+      input.sendAt(1005, 0x80, 60, 0);
+      expect(events.notes).toEqual([
+        [{ on: true, midi: 60, atMs: 1000, velocity: 100 }, [60]],
+        [{ on: false, midi: 60, atMs: 1005 }, []],
+      ]);
+    });
+
+    it('takes the arrival time when the event has no timeStamp, or 0', async () => {
+      const events = recorder();
+      const input = piano();
+      await open(new FakeAccess(input), events);
+      now = 1010;
+      input.send(0x90, 60, 100);
+      input.sendAt(0, 0x90, 64, 80);
+      expect(events.notes.map(([e]) => e.atMs)).toEqual([1010, 1010]);
+    });
+
+    it('gives every note of one message the same time', async () => {
+      const events = recorder();
+      const input = piano();
+      await open(new FakeAccess(input), events);
+      now = 3000;
+      input.sendAt(2990, 0x90, 60, 100, 64, 90, 67, 80);
+      expect(events.notes.map(([e]) => [e.midi, e.atMs, e.velocity])).toEqual([
+        [60, 2990, 100],
+        [64, 2990, 90],
+        [67, 2990, 80],
+      ]);
+    });
   });
 
   it('reads running status, a velocity 0 off and active sensing', async () => {
@@ -189,7 +250,7 @@ describe('openMidiAccess', () => {
     access.plug(input);
     expect(events.names).toEqual([[], ['GO:PIANO MIDI 1']]);
     input.send(0x90, 67, 80);
-    expect(events.notes).toEqual([[{ on: true, midi: 67 }, [67]]]);
+    expect(events.notes).toEqual([[keyOn(67, 80), [67]]]);
   });
 
   it('does not report Midi Through plugged in later', async () => {
@@ -232,11 +293,13 @@ describe('openMidiAccess', () => {
     input.send(0x90, 60, 90);
     input.send(0x90, 64, 90);
     events.notes.length = 0;
+    now = NOW + 500;
     access.unplug('p1');
     expect(input.onmidimessage).toBeNull();
+    // The offs carry the time the port went away.
     expect(events.notes).toEqual([
-      [{ on: false, midi: 60 }, [64]],
-      [{ on: false, midi: 64 }, []],
+      [{ on: false, midi: 60, atMs: NOW + 500 }, [64]],
+      [{ on: false, midi: 64, atMs: NOW + 500 }, []],
     ]);
     expect(events.names).toEqual([['GO:PIANO MIDI 1'], []]);
   });
@@ -253,7 +316,7 @@ describe('openMidiAccess', () => {
     events.notes.length = 0;
     access.unplug('b');
     // 60 is still held by a; only 62 is released.
-    expect(events.notes).toEqual([[{ on: false, midi: 62 }, [60]]]);
+    expect(events.notes).toEqual([[keyOff(62), [60]]]);
     expect(events.names.at(-1)).toEqual(['A']);
   });
 
@@ -266,7 +329,7 @@ describe('openMidiAccess', () => {
     events.notes.length = 0;
     access.remove('p1');
     expect(input.onmidimessage).toBeNull();
-    expect(events.notes).toEqual([[{ on: false, midi: 60 }, []]]);
+    expect(events.notes).toEqual([[keyOff(60), []]]);
     expect(events.names.at(-1)).toEqual([]);
   });
 
@@ -283,7 +346,7 @@ describe('openMidiAccess', () => {
     input.send(64, 90);
     expect(events.notes).toEqual([]);
     input.send(0x90, 64, 90);
-    expect(events.notes).toEqual([[{ on: true, midi: 64 }, [64]]]);
+    expect(events.notes).toEqual([[keyOn(64, 90), [64]]]);
     expect(events.names).toEqual([['GO:PIANO MIDI 1'], [], ['GO:PIANO MIDI 1']]);
   });
 

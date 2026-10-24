@@ -1,8 +1,16 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { midiToSpelling, parseMusicXml, type Hand, type Note, type Score } from '@digitus2/engine';
+import {
+  midiToSpelling,
+  parseMusicXml,
+  ticksToSeconds,
+  type Hand,
+  type Note,
+  type Score,
+} from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
+import { beatTicksAt } from '../audio/beats.js';
 import { performanceOf, toWrittenSec } from '../audio/performance.js';
 import {
   ALONG_EPS,
@@ -11,6 +19,7 @@ import {
   NO_PRESSES,
   advance,
   alongPlan,
+  alongPlanNotes,
   alongSteps,
   anchorStep,
   holdSec,
@@ -27,6 +36,7 @@ import {
   type PerfRange,
   type Presses,
   type Settled,
+  type StepNotes,
   type StepTime,
 } from './playAlong.js';
 
@@ -37,6 +47,10 @@ const form = (name: string): string =>
     ),
     'utf8',
   );
+
+/** A fixture of the web app (`apps/web/fixtures`). */
+const fixture = (name: string): string =>
+  readFileSync(new URL(`../../fixtures/${name}.musicxml`, import.meta.url), 'utf8');
 
 /** Bars of four quarter notes: divisions 1 and 120 qpm, so a tick is half a second. */
 const BAR_TICKS = 4;
@@ -1017,6 +1031,181 @@ describe('alongPlan', () => {
     // The hold of the first hearing's last step is its shortest note (1 s), the gap to the
     // repeated bar's first step being just as long; the second hearing's is held to the next bar.
     expect(holdsOf(plan)).toEqual([0.5, 1, 0.5, 1, 0.5]);
+  });
+
+  describe('alongPlanNotes, the notes of each step (issue 192)', () => {
+    const unison = (): Score =>
+      scoreOf([
+        { midi: 60, tick: 0 },
+        { midi: 60, tick: 0, hand: 'L' },
+        { midi: 64, tick: 1 },
+        { midi: 64, tick: 1 },
+      ]);
+    const all: Array<[string, () => Score, Hand[]]> = [
+      ...scenarios,
+      ['a unison of both hands and of two voices', unison, []],
+      ['a unison with a hand muted', unison, ['R']],
+    ];
+
+    it.each(all)('gives exactly the steps and times of alongPlan: %s', (_name, build, muted) => {
+      const perf = performanceOf(build());
+      const plan = alongPlan(perf, muted);
+      const withNotes = alongPlanNotes(perf, muted);
+      expect(withNotes.steps).toEqual(plan.steps);
+      expect(withNotes.times).toEqual(plan.times);
+      expect(withNotes.notes).toHaveLength(plan.steps.length);
+      expect(Object.keys(plan).sort()).toEqual(['steps', 'times']);
+    });
+
+    it.each(all)(
+      'splits each step into its hands, whose pitches make up the step: %s',
+      (_name, build, muted) => {
+        const perf = performanceOf(build());
+        const { steps, notes } = alongPlanNotes(perf, muted);
+        notes.forEach((n, i) => {
+          expect(n.parts.length).toBeGreaterThan(0);
+          expect(n.parts.map((p) => p.hand)).toEqual(
+            (['L', 'R'] as const).filter((h) => n.parts.some((p) => p.hand === h)),
+          );
+          for (const p of n.parts) {
+            expect(muted).not.toContain(p.hand);
+            expect([...p.pitches]).toEqual([...new Set(p.pitches)].sort((a, b) => a - b));
+          }
+          const union = [...new Set(n.parts.flatMap((p) => p.pitches))].sort((a, b) => a - b);
+          expect(union).toEqual([...steps[i]!.pitches]);
+        });
+      },
+    );
+
+    it('lists the non-grace notes of each hand at the tick, in score order', () => {
+      const score = scoreOf([
+        { midi: 59, tick: 0, grace: true },
+        { midi: 64, tick: 0 },
+        { midi: 60, tick: 0 },
+        { midi: 48, tick: 0, hand: 'L', ticks: 2 },
+        { midi: 62, tick: 1 },
+        { midi: 62, tick: 1 },
+        { midi: 55, tick: 2, hand: 'L' },
+        { midi: 60, tick: 3 },
+        { midi: 60, tick: 3, hand: 'L' },
+      ]);
+      const id = score.notes.map((n) => n.id);
+      const parts = (muted: Hand[]) =>
+        alongPlanNotes(performanceOf(score), muted).notes.map((n) =>
+          n.parts.map((p) => ({ hand: p.hand, ids: [...p.ids], pitches: [...p.pitches] })),
+        );
+      expect(parts([])).toEqual([
+        [
+          { hand: 'L', ids: [id[3]], pitches: [48] },
+          { hand: 'R', ids: [id[1], id[2]], pitches: [60, 64] },
+        ],
+        // Both voices of a unison in one hand: one pitch, both notes.
+        [{ hand: 'R', ids: [id[4], id[5]], pitches: [62] }],
+        [{ hand: 'L', ids: [id[6]], pitches: [55] }],
+        // A unison across the hands: a part in each.
+        [
+          { hand: 'L', ids: [id[8]], pitches: [60] },
+          { hand: 'R', ids: [id[7]], pitches: [60] },
+        ],
+      ]);
+      // A muted hand has no part, and a step only in that hand is gone.
+      expect(parts(['L'])).toEqual([
+        [{ hand: 'R', ids: [id[1], id[2]], pitches: [60, 64] }],
+        [{ hand: 'R', ids: [id[4], id[5]], pitches: [62] }],
+        [{ hand: 'R', ids: [id[7]], pitches: [60] }],
+      ]);
+    });
+
+    it('asks a part for the pitch the keyboard shows: the upper start of a trill', () => {
+      const score = scoreOf([
+        { midi: 60, tick: 0, ticks: 4, ornament: trill },
+        { midi: 65, tick: 4 },
+      ]);
+      const { notes } = alongPlanNotes(performanceOf(score), []);
+      expect(notes[0]!.parts).toEqual([{ hand: 'R', ids: [score.notes[0]!.id], pitches: [62] }]);
+    });
+
+    it('gives the performance ids of a repeated bar, one per hearing', () => {
+      const perf = performanceOf(repeated());
+      const { notes } = alongPlanNotes(perf, []);
+      const ids = notes.flatMap((n) => n.parts.flatMap((p) => [...p.ids]));
+      expect(ids).toEqual(
+        [...perf.score.notes].sort((a, b) => a.onsetTick - b.onsetTick).map((n) => n.id),
+      );
+      expect(ids.every((id) => /@\d+$/.test(id))).toBe(true);
+    });
+
+    /** The tick of each step, read from its first note in the performance. */
+    const ticksOf = (perf: ReturnType<typeof performanceOf>, notes: StepNotes[]): number[] =>
+      notes.map((n) => perf.score.notes.find((x) => x.id === n.parts[0]!.ids[0])!.onsetTick);
+
+    /** What the beat and the bar should be at each step, from the beat and tempo helpers. */
+    const expectBeatsAndBars = (score: Score): StepNotes[] => {
+      const perf = performanceOf(score);
+      const { notes } = alongPlanNotes(perf, []);
+      const { tempoMap, divisions, measures } = perf.score;
+      const sec = (tick: number) => ticksToSeconds(tempoMap, divisions, tick);
+      ticksOf(perf, notes).forEach((tick, i) => {
+        const beatTicks = beatTicksAt(perf.score, tick);
+        const m = measures.find((x) => x.startTick <= tick && tick < x.startTick + x.lengthTicks)!;
+        expect(notes[i]!.beatSec).toBeCloseTo(sec(tick + beatTicks) - sec(tick), 9);
+        expect(notes[i]!.barSec).toBeCloseTo(
+          sec(m.startTick + m.lengthTicks) - sec(m.startTick),
+          9,
+        );
+      });
+      return notes;
+    };
+
+    it('gives the beat and the bar at each step in 3/4, with a one-beat pickup', () => {
+      const notes = expectBeatsAndBars(parseMusicXml(fixture('pickup-piano')).score);
+      // The pickup's bar is its one beat; the full bars are three.
+      expect(notes[0]!.barSec).toBeCloseTo(notes[0]!.beatSec, 9);
+      expect(notes[notes.length - 1]!.barSec).toBeCloseTo(3 * notes[notes.length - 1]!.beatSec, 9);
+    });
+
+    it('gives the beat and the bar at each step in 4/4', () => {
+      const notes = expectBeatsAndBars(parseMusicXml(fixture('short-piano')).score);
+      for (const n of notes) expect(n.barSec).toBeCloseTo(4 * n.beatSec, 9);
+    });
+
+    it('gives an eighth for the beat in 6/8, as the metronome counts', () => {
+      const sixEight: Score = {
+        ...scoreOf(
+          [
+            { midi: 60, tick: 0, ticks: 3 },
+            { midi: 62, tick: 3, ticks: 3 },
+          ],
+          1,
+        ),
+        divisions: 2,
+        measures: [{ index: 0, startTick: 0, lengthTicks: 6, number: '1' }],
+        timeSignatures: [{ tick: 0, beats: 6, beatType: 8 }],
+      };
+      const notes = expectBeatsAndBars(sixEight);
+      expect(notes).toHaveLength(2);
+      for (const n of notes) expect(n.barSec).toBeCloseTo(6 * n.beatSec, 9);
+    });
+
+    it('takes the tempo in force at the step', () => {
+      const changing: Score = {
+        ...scoreOf([
+          { midi: 60, tick: 0 },
+          { midi: 62, tick: 4 },
+          { midi: 64, tick: 6 },
+        ]),
+        tempoMap: [
+          { tick: 0, qpm: 120 },
+          { tick: 4, qpm: 60 },
+          { tick: 6, qpm: 90 },
+        ],
+      };
+      const notes = expectBeatsAndBars(changing);
+      // Half the tempo, twice the beat; the second bar holds two tempos.
+      expect(notes[1]!.beatSec).toBeCloseTo(2 * notes[0]!.beatSec, 9);
+      expect(notes[2]!.beatSec).toBeCloseTo((notes[1]!.beatSec * 60) / 90, 9);
+      expect(notes[2]!.barSec).toBe(notes[1]!.barSec);
+    });
   });
 });
 

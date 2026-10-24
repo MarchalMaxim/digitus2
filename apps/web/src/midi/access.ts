@@ -1,5 +1,5 @@
 // The lazy chunk (with parse.ts): reached only through `import('./access.js')` from piano.ts.
-import { createMidiParser, HeldKeys } from './parse.js';
+import { createMidiParser, eventTimeMs, HeldKeys } from './parse.js';
 import type { AccessEvents, AccessRefusal, OpenedAccess } from './types.js';
 
 export interface OpenOptions {
@@ -75,8 +75,10 @@ export async function openMidiAccess(
     // By property assignment: assigning again would replace the handler, never add a second.
     input.onmidimessage = (e) => {
       if (closed || !e.data || attached.get(input.id) !== entry) return;
+      // The key's time (issue 192): the event's, read once for every note in the message.
+      const atMs = eventTimeMs(e.timeStamp, performance.now());
       for (const n of entry.parse(e.data)) {
-        const message = held.apply(input.id, n);
+        const message = held.apply(input.id, n, atMs);
         if (message) events.note(message, held.held());
       }
     };
@@ -88,7 +90,7 @@ export async function openMidiAccess(
 
   /** Reports the offs of an input that went away, each with the pitches still held after it. */
   function release(id: string): void {
-    const offs = held.dropInput(id);
+    const offs = held.dropInput(id, performance.now());
     const still = held.held();
     offs.forEach((off, i) => {
       const rest = offs.slice(i + 1).map((o) => o.midi);

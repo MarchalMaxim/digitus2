@@ -6,6 +6,33 @@ export interface ParsedNote {
   /** 0..15 */
   channel: number;
   midi: number;
+  /** 1..127 on a note on; 0 on a note off (0x8n, or 0x9n at velocity 0). */
+  velocity: number;
+}
+
+/**
+ * The oldest event time taken, in ms before now (issue 192). A busy main thread can hold a message
+ * for tens to hundreds of milliseconds, which is when the event time matters; more than a second
+ * means another time base (some backends report 0 or an epoch time).
+ */
+export const EVENT_MAX_AGE_MS = 1000;
+
+/**
+ * The time of a key in performance.now() ms (issue 192): the event's `timeStamp` when it is
+ * plausible (finite, positive, not ahead of `nowMs` by more than a millisecond, and at most
+ * EVENT_MAX_AGE_MS old), else `nowMs`, the arrival.
+ */
+export function eventTimeMs(timeStamp: number | undefined, nowMs: number): number {
+  if (
+    typeof timeStamp === 'number' &&
+    Number.isFinite(timeStamp) &&
+    timeStamp > 0 &&
+    timeStamp <= nowMs + 1 &&
+    nowMs - timeStamp <= EVENT_MAX_AGE_MS
+  ) {
+    return timeStamp;
+  }
+  return nowMs;
 }
 
 /** The first byte of a realtime message; they run from here to 0xFF. */
@@ -67,11 +94,16 @@ export function createMidiParser(): (data: ArrayLike<number>) => ParsedNote[] {
       const midi = data[0]!;
       const velocity = data[1]!;
       data.length = 0;
-      if (kind === 0x90) out.push({ on: velocity > 0, channel: status & 0x0f, midi });
-      else if (kind === 0x80) out.push({ on: false, channel: status & 0x0f, midi });
+      if (kind === 0x90) out.push({ on: velocity > 0, channel: status & 0x0f, midi, velocity });
+      else if (kind === 0x80) out.push({ on: false, channel: status & 0x0f, midi, velocity: 0 });
     }
     return out;
   };
+}
+
+/** A note-off, with the key's time when there is one (issue 192). */
+function off(midi: number, atMs: number | undefined): NoteMessage {
+  return atMs === undefined ? { on: false, midi } : { on: false, midi, atMs };
 }
 
 /** Keys held per input and channel; a pitch is held while any of them holds it. */
@@ -82,9 +114,11 @@ export class HeldKeys {
 
   /**
    * A note from `inputId`: the merged message to report, or null (an off for a key still held
-   * elsewhere, or not down). A note-on always reports `on`, also when already held.
+   * elsewhere, or not down). A note-on always reports `on`, also when already held. Given the
+   * key's time `atMs` (issue 192), the message carries it, and a note-on its velocity too; without
+   * it the message is `{ on, midi }` alone.
    */
-  apply(inputId: string, n: ParsedNote): NoteMessage | null {
+  apply(inputId: string, n: ParsedNote, atMs?: number): NoteMessage | null {
     const hold = `${n.channel}:${inputId}`;
     if (n.on) {
       const set = this.holds.get(n.midi);
@@ -93,18 +127,19 @@ export class HeldKeys {
         this.holds.set(n.midi, new Set([hold]));
         this.changed();
       }
-      return { on: true, midi: n.midi };
+      if (atMs === undefined) return { on: true, midi: n.midi };
+      return { on: true, midi: n.midi, atMs, ...(n.velocity > 0 ? { velocity: n.velocity } : {}) };
     }
     const set = this.holds.get(n.midi);
     if (!set || !set.delete(hold)) return null;
     if (set.size > 0) return null;
     this.holds.delete(n.midi);
     this.changed();
-    return { on: false, midi: n.midi };
+    return off(n.midi, atMs);
   }
 
-  /** That input went away: the note-offs of the pitches no longer held. */
-  dropInput(inputId: string): NoteMessage[] {
+  /** That input went away: the note-offs of the pitches no longer held, at `atMs` when given. */
+  dropInput(inputId: string, atMs?: number): NoteMessage[] {
     const offs: NoteMessage[] = [];
     for (const [midi, set] of this.holds) {
       for (const hold of set) {
@@ -112,7 +147,7 @@ export class HeldKeys {
       }
       if (set.size === 0) {
         this.holds.delete(midi);
-        offs.push({ on: false, midi });
+        offs.push(off(midi, atMs));
       }
     }
     if (offs.length === 0) return offs;
@@ -121,9 +156,9 @@ export class HeldKeys {
     return offs;
   }
 
-  /** Turned off: a note-off for every held pitch. */
-  clear(): NoteMessage[] {
-    const offs = this.cache.map((midi) => ({ on: false, midi }));
+  /** Turned off: a note-off for every held pitch, at `atMs` when given. */
+  clear(atMs?: number): NoteMessage[] {
+    const offs = this.cache.map((midi) => off(midi, atMs));
     this.holds.clear();
     if (offs.length > 0) this.changed();
     return offs;

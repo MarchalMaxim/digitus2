@@ -1,6 +1,7 @@
-// Pure: types only, apart from the engine's ornament view and the beat length (both already in
-// the static bundle).
+// Pure: types only, apart from the engine's ornament view, its tick-to-second conversion and the
+// beat length (all already in the static bundle).
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
+import { ticksToSeconds } from '@digitus2/engine/score-build';
 import type { Hand, Note } from '@digitus2/engine';
 import { beatTicksAt } from '../audio/beats.js';
 import type { Performance } from '../audio/performance.js';
@@ -38,6 +39,27 @@ export interface StepTime {
   beats: readonly number[];
 }
 
+/** A step's notes in one hand (issue 192): what the timing judge asks of that hand. */
+export interface PartNotes {
+  hand: Hand;
+  /** Performance ids of this hand's non-grace notes starting at the step's tick, in score order. */
+  ids: readonly string[];
+  /** Their required pitches (alongPlan's rule), distinct and ascending. */
+  pitches: readonly number[];
+}
+
+/** The notes of one step (issue 192), aligned with `alongPlan`'s steps. */
+export interface StepNotes {
+  /** One per hand with notes at the step, 'L' before 'R'. */
+  parts: readonly PartNotes[];
+  /** The beat at the step's tick, in performance seconds (tempo map and time signature). */
+  beatSec: number;
+  /** The length of the performance measure holding the tick, in performance seconds. */
+  barSec: number;
+}
+
+const HANDS: readonly Hand[] = ['L', 'R'];
+
 /**
  * The steps and their times: `steps` is exactly `alongSteps(perf, mutedHands)`, built in the
  * same pass; `times[i]` belongs to `steps[i]`. A step is one per onset tick of the performance
@@ -51,11 +73,26 @@ export function alongPlan(
   perf: Performance,
   mutedHands: readonly Hand[],
 ): { steps: AlongStep[]; times: StepTime[] } {
+  const { steps, times } = alongPlanNotes(perf, mutedHands);
+  return { steps, times };
+}
+
+/**
+ * `alongPlan`, and for each step its notes per hand, its beat and its bar (issue 192): what the
+ * timing judge needs. `steps` and `times` are exactly `alongPlan`'s; `notes[i]` belongs to
+ * `steps[i]`, and the union of its parts' pitches is `steps[i].pitches`.
+ */
+export function alongPlanNotes(
+  perf: Performance,
+  mutedHands: readonly Hand[],
+): { steps: AlongStep[]; times: StepTime[]; notes: StepNotes[] } {
   interface Tick {
     perfSec: number;
     shortestSec: number;
     /** By required pitch: the longest note, in seconds and in ticks. */
     pitches: Map<number, { lengthSec: number; ticks: number }>;
+    /** By hand: its notes' ids in score order and their required pitches. */
+    hands: Map<Hand, { ids: string[]; pitches: Set<number> }>;
   }
   const byTick = new Map<number, Tick>();
   for (const n of perf.score.notes) {
@@ -63,7 +100,7 @@ export function alongPlan(
     const lengthSec = n.offsetSec - n.onsetSec;
     let tick = byTick.get(n.onsetTick);
     if (!tick) {
-      tick = { perfSec: n.onsetSec, shortestSec: lengthSec, pitches: new Map() };
+      tick = { perfSec: n.onsetSec, shortestSec: lengthSec, pitches: new Map(), hands: new Map() };
       byTick.set(n.onsetTick, tick);
     } else {
       if (n.onsetSec < tick.perfSec) tick.perfSec = n.onsetSec;
@@ -74,9 +111,39 @@ export function alongPlan(
     if (!longest || lengthSec > longest.lengthSec) {
       tick.pitches.set(midi, { lengthSec, ticks: n.offsetTick - n.onsetTick });
     }
+    let hand = tick.hands.get(n.hand);
+    if (!hand) {
+      hand = { ids: [], pitches: new Set() };
+      tick.hands.set(n.hand, hand);
+    }
+    hand.ids.push(n.id);
+    hand.pitches.add(midi);
   }
+  const { tempoMap, divisions, measures } = perf.score;
+  const secAt = (tick: number): number => ticksToSeconds(tempoMap, divisions, tick);
+  const barSecs = new Map<number, number>();
+  /** The length of the measure holding `tick`: the last that starts at or before it. */
+  const barSecAt = (tick: number): number => {
+    let lo = 0;
+    let hi = measures.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (measures[mid]!.startTick <= tick) lo = mid + 1;
+      else hi = mid;
+    }
+    const index = Math.max(0, lo - 1);
+    const m = measures[index];
+    if (!m) return 0;
+    let sec = barSecs.get(index);
+    if (sec === undefined) {
+      sec = secAt(m.startTick + m.lengthTicks) - secAt(m.startTick);
+      barSecs.set(index, sec);
+    }
+    return sec;
+  };
   const steps: AlongStep[] = [];
   const times: StepTime[] = [];
+  const notes: StepNotes[] = [];
   for (const [onsetTick, tick] of [...byTick.entries()].sort((a, b) => a[0] - b[0])) {
     const pitches = [...tick.pitches.keys()].sort((a, b) => a - b);
     const beatTicks = beatTicksAt(perf.score, onsetTick);
@@ -86,8 +153,19 @@ export function alongPlan(
       lengthSec: pitches.map((midi) => tick.pitches.get(midi)!.lengthSec),
       beats: pitches.map((midi) => (beatTicks > 0 ? tick.pitches.get(midi)!.ticks / beatTicks : 0)),
     });
+    const parts: PartNotes[] = [];
+    for (const hand of HANDS) {
+      const part = tick.hands.get(hand);
+      if (part)
+        parts.push({ hand, ids: part.ids, pitches: [...part.pitches].sort((a, b) => a - b) });
+    }
+    notes.push({
+      parts,
+      beatSec: secAt(onsetTick + beatTicks) - secAt(onsetTick),
+      barSec: barSecAt(onsetTick),
+    });
   }
-  return { steps, times };
+  return { steps, times, notes };
 }
 
 /** What there is to play: the steps of `alongPlan`. */

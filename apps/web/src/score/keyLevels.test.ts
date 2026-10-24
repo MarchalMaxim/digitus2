@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  NO_GLASS,
   NO_LEVELS,
   createLevelStore,
   levelAt,
@@ -312,6 +313,96 @@ describe('the level store', () => {
     expect(store.get().get(62)?.upMs).toBeNull();
   });
 
+  // The glass (issue 200): the keys let go too soon, outlined while the red waits.
+  describe('the glass', () => {
+    it('is the empty set to begin with, and the same set until a change', () => {
+      expect(store.glass()).toBe(NO_GLASS);
+      expect(store.glass()).toBe(store.glass());
+      store.mark(60);
+      const after = store.glass();
+      expect([...after]).toEqual([60]);
+      expect(store.glass()).toBe(after);
+      expect(NO_GLASS.size).toBe(0);
+    });
+
+    it('mark adds a key and notifies once; marking it again changes nothing and tells nobody', () => {
+      store.mark(60);
+      expect(heard).toHaveBeenCalledTimes(1);
+      const before = store.glass();
+      store.mark(60);
+      expect(store.glass()).toBe(before);
+      expect(heard).toHaveBeenCalledTimes(1);
+      store.mark(62);
+      expect([...store.glass()].sort()).toEqual([60, 62]);
+      expect(heard).toHaveBeenCalledTimes(2);
+    });
+
+    it('is not touched by a level that starts, drains or goes: it waits for the pass', () => {
+      start(60, 1000);
+      store.release(60, 2000);
+      store.mark(60);
+      vi.advanceTimersByTime(200);
+      expect(store.get().has(60)).toBe(false);
+      expect(store.glass().has(60)).toBe(true);
+      start(60, 3000);
+      expect(store.glass().has(60)).toBe(true);
+    });
+
+    it('clearGlass empties it and notifies; an empty one changes and tells nobody', () => {
+      store.clearGlass();
+      expect(store.glass()).toBe(NO_GLASS);
+      expect(heard).not.toHaveBeenCalled();
+      store.mark(60);
+      start(62, 1000);
+      heard.mockClear();
+      store.clearGlass();
+      expect(store.glass()).toBe(NO_GLASS);
+      expect(store.get().has(62)).toBe(true); // the levels stay
+      expect(heard).toHaveBeenCalledTimes(1);
+    });
+
+    it('clear takes the glass with the levels, in one notification', () => {
+      store.mark(60);
+      start(62, 1000);
+      heard.mockClear();
+      store.clear();
+      expect(store.glass()).toBe(NO_GLASS);
+      expect(store.get()).toBe(NO_LEVELS);
+      expect(heard).toHaveBeenCalledTimes(1);
+    });
+
+    it('clear takes the glass when there is no level', () => {
+      store.mark(60);
+      heard.mockClear();
+      store.clear();
+      expect(store.glass()).toBe(NO_GLASS);
+      expect(heard).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('end deletes a level at once, with no drain and no timer, whatever it had reached', () => {
+    start(60, 1000);
+    heard.mockClear();
+    store.end(60);
+    expect(store.get().has(60)).toBe(false);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('end of a draining level cancels its timer; of a key with no level changes nothing', () => {
+    start(60, 1000);
+    store.release(60, 2000);
+    expect(vi.getTimerCount()).toBe(1);
+    store.end(60);
+    expect(store.get().has(60)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+    const before = store.get();
+    heard.mockClear();
+    store.end(62);
+    expect(store.get()).toBe(before);
+    expect(heard).not.toHaveBeenCalled();
+  });
+
   it('clear deletes every level at once, draining ones too, and cancels their timers', () => {
     start(60, 1000);
     start(62, 1000);
@@ -342,12 +433,14 @@ describe('the level store', () => {
   });
 
   it('hands out methods that work unbound, as useSyncExternalStore calls them', () => {
-    const { get, start: begin, subscribe } = store;
+    const { get, glass, mark, start: begin, subscribe } = store;
     const other = vi.fn();
     const off = subscribe(other);
     begin(64, { atMs: 0, lengthMs: 100, beats: 1 });
     expect(get().has(64)).toBe(true);
-    expect(other).toHaveBeenCalledTimes(1);
+    mark(64);
+    expect(glass().has(64)).toBe(true);
+    expect(other).toHaveBeenCalledTimes(2);
     off();
   });
 });

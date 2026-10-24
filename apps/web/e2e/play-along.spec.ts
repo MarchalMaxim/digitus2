@@ -1906,6 +1906,309 @@ test.describe('the score with a piano', () => {
       }
     });
   }
+
+  // ---------------------------------------------------------------------------------------
+  // The key goes down and the glass (issue 200). A key held on the piano goes further down than
+  // the cue alone; a release that comes too soon leaves the outline of a full level on the key
+  // until the step passes; a release the walk forgives ends the level at once. The right hand
+  // alone keeps each step to one key, and the Practice tempo at 50 % doubles every hold (1200 ms
+  // for the first step), so every check below has a wide margin on a slow machine. The timed
+  // parts run inside the page.
+  // ---------------------------------------------------------------------------------------
+
+  const SLOW = { [TWINKLE]: 0.5 };
+  const RIGHT = { settings: { hands: 'R' }, tempo: SLOW };
+
+  /** The outline left on a key that was let go too soon. */
+  const glass = (page: Page, midi: number): Locator =>
+    page.locator(`.keyboard .key[data-midi="${midi}"] path.key-glass`);
+
+  /** The `scaleY` of a key as drawn now (its computed transform; 1 when it has none). */
+  function travel(page: Page, midi: number): Promise<number> {
+    return page.evaluate((m) => {
+      const key = document.querySelector(`.keyboard g.key[data-midi="${m}"]`)!;
+      const parsed = /^matrix\(([^)]+)\)$/.exec(getComputedStyle(key).transform);
+      return parsed ? Number(parsed[1]!.split(',')[3]) : 1;
+    }, midi);
+  }
+
+  test('a hold that comes too soon leaves the glass while the red waits; a new press fills it and the pass removes it', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, RIGHT);
+    expect(await midi.waitForStep()).toEqual([60]);
+    const hold = await midi.hold();
+    expect(hold, 'the first step at half tempo').toBe(1200);
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(0); // nothing before a miss
+
+    // Down for a third of the hold, then up, all in the page: the red stays and the key keeps the
+    // outline of a full level after its own level has drained.
+    const tapped = await midi.tap([60], Math.round(hold / 3));
+    expect(tapped, 'the page ran the short tap long: it is the PC, not the walk').toBeLessThan(
+      0.8 * hold,
+    );
+    await expect(glass(page, 60)).toHaveCount(1);
+    await expect(level(page, 60)).toHaveCount(0, { timeout: 2_000 }); // the level drained away
+    await page.waitForTimeout(300);
+    await expect(glass(page, 60)).toHaveCount(1); // and the glass stays while the red waits
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(1);
+    expect(await midi.index()).toBe(0);
+    expect(await midi.target()).toEqual([60]);
+    // The key came back up only to the cue's depth, never to rest: it is still the red note's.
+    await expect.poll(() => travel(page, 60)).toBeCloseTo(0.976, 3);
+    const outline = await page.evaluate(() => {
+      const path = document.querySelector('.keyboard g.key[data-midi="60"] path.key-glass')!;
+      const style = getComputedStyle(path);
+      const probe = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      probe.style.fill = 'var(--key-held)';
+      path.closest('svg')!.appendChild(probe);
+      const held = getComputedStyle(probe).fill;
+      probe.remove();
+      return {
+        stroke: style.stroke,
+        held,
+        width: style.strokeWidth,
+        fill: style.fill,
+        effect: style.vectorEffect,
+        hidden: path.getAttribute('aria-hidden'),
+        onCue: path.closest('g.key')!.classList.contains('is-pressed'),
+      };
+    });
+    expect(outline.stroke).toBe(outline.held);
+    expect(outline.width).toBe('1.5px');
+    expect(outline.fill).toBe('none');
+    expect(outline.effect).toBe('non-scaling-stroke');
+    expect(outline.hidden).toBe('true');
+    expect(outline.onCue).toBe(true);
+    await expectOneRed(page, 'the glass waiting');
+    await expectNoSeriousA11y(page, 'the glass waiting');
+
+    // Pressed again, the level rises inside the outline: the glass lies under the level.
+    const refilled = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      w.__fakeMidi.send([0x90, 60, 100]);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const key = document.querySelector('.keyboard g.key[data-midi="60"]')!;
+      const outline = key.querySelector('path.key-glass');
+      const fill = key.querySelector('rect.key-level');
+      return {
+        glass: outline !== null,
+        level: fill !== null,
+        under:
+          outline !== null &&
+          fill !== null &&
+          !!(outline.compareDocumentPosition(fill) & Node.DOCUMENT_POSITION_FOLLOWING),
+      };
+    });
+    expect(refilled).toEqual({ glass: true, level: true, under: true });
+
+    // Held for its time, the step passes and the glass goes with it.
+    await expect.poll(() => midi.index(), { timeout: 10_000 }).toBe(1);
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(0);
+    await midi.noteOff(60);
+    await expectOneRed(page, 'the glass removed by the pass');
+  });
+
+  test('a chord let go too soon leaves the glass on every key of it, and the pass removes them', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { tempo: SLOW });
+    expect(await midi.waitForStep()).toEqual([48, 60]);
+    const hold = await midi.hold();
+    expect(hold, 'the first step at half tempo').toBe(1200);
+    const tapped = await midi.tap([48, 60], Math.round(hold / 3));
+    expect(tapped, 'the page ran the short tap long: it is the PC, not the walk').toBeLessThan(
+      0.8 * hold,
+    );
+    await expect(glass(page, 48)).toHaveCount(1);
+    await expect(glass(page, 60)).toHaveCount(1);
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(2);
+    expect(await midi.index()).toBe(0);
+    await expectOneRed(page, 'a chord let go too soon');
+    // Held for its time, the chord passes and the glass goes from both keys.
+    await midi.playRedTimed();
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(0);
+  });
+
+  test('a release the walk forgives ends the level at once and shows no glass', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, RIGHT);
+    await midi.waitForStep();
+    const hold = await midi.hold();
+    expect(hold).toBe(1200);
+    // Down for nine tenths of the hold, then up, in the page: past four fifths, so the red moves
+    // on at the release; the page looks two frames later. A drain would still be there.
+    const seen = await page.evaluate(async (ms) => {
+      const w = window as unknown as {
+        __digitus2Along: { index(): number };
+        __fakeMidi: { send(bytes: number[]): void };
+      };
+      const was = w.__digitus2Along.index();
+      w.__fakeMidi.send([0x90, 60, 100]);
+      await new Promise((r) => setTimeout(r, ms * 0.9));
+      w.__fakeMidi.send([0x80, 60, 0]);
+      const letGo = performance.now();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return {
+        was,
+        now: w.__digitus2Along.index(),
+        waited: performance.now() - letGo,
+        level: document.querySelector('.keyboard g.key[data-midi="60"] rect.key-level') !== null,
+        glass: document.querySelectorAll('.keyboard path.key-glass').length,
+      };
+    }, hold);
+    expect(seen.now, 'the red moved on at the release').toBe(seen.was + 1);
+    expect(seen.level, `a level was still on the key ${seen.waited} ms after it came up`).toBe(
+      false,
+    );
+    expect(seen.glass).toBe(0);
+    await expect(page.getByRole('status')).toHaveText('');
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(0);
+    await expectOneRed(page, 'a forgiven release');
+  });
+
+  test('a wrong key goes down like any held key, with no level and no glass; a cued key goes further down than the cue', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, RIGHT);
+    await midi.waitForStep();
+    expect(await travel(page, 60)).toBeCloseTo(0.976, 3); // the cue alone
+    expect(await travel(page, 50)).toBe(1); // a key at rest
+
+    await midi.noteOn(50); // a white key the step does not ask for
+    await midi.noteOn(54); // and a black one
+    await expect.poll(() => travel(page, 50)).toBeCloseTo(0.94, 3);
+    await expect.poll(() => travel(page, 54)).toBeCloseTo(0.92, 3);
+    await expect(heldBar(page, 50)).toHaveCount(1);
+    await expect(level(page, 50)).toHaveCount(0);
+    await midi.noteOff(50);
+    await midi.noteOff(54);
+    await expect.poll(() => travel(page, 50)).toBe(1); // to rest: nothing asks for it
+    await expect.poll(() => travel(page, 54)).toBe(1);
+    await expect(page.locator('.keyboard path.key-glass')).toHaveCount(0); // a wrong key is no miss
+
+    // The red note's key, held: deeper than the cue, in the page; let go too soon, it rises only
+    // to the cue's depth and never above it.
+    const rise = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const key = document.querySelector('.keyboard g.key[data-midi="60"]')!;
+      const depth = (): number => {
+        const parsed = /^matrix\(([^)]+)\)$/.exec(getComputedStyle(key).transform);
+        return parsed ? Number(parsed[1]!.split(',')[3]) : 1;
+      };
+      const frame = () => new Promise((r) => requestAnimationFrame(r));
+      w.__fakeMidi.send([0x90, 60, 100]);
+      await new Promise((r) => setTimeout(r, 150)); // the press takes 50 ms
+      const down = depth();
+      w.__fakeMidi.send([0x80, 60, 0]);
+      const seen: number[] = [];
+      const started = performance.now();
+      while (performance.now() - started < 450) {
+        seen.push(depth());
+        await frame();
+      }
+      return { down, seen };
+    });
+    expect(rise.down, 'held, the cued key is deeper than the cue').toBeCloseTo(0.94, 3);
+    for (const d of rise.seen) expect(d, `depths: ${rise.seen}`).toBeLessThanOrEqual(0.9761);
+    for (let i = 1; i < rise.seen.length; i++)
+      expect(rise.seen[i]!).toBeGreaterThanOrEqual(rise.seen[i - 1]! - 1e-6);
+    expect(rise.seen.at(-1)!, `depths: ${rise.seen}`).toBeCloseTo(0.976, 3);
+    expect(rise.seen.length, 'the rise was seen over several frames').toBeGreaterThan(3);
+    await expectOneRed(page, 'a key let go too soon');
+  });
+
+  for (const [width, height] of [
+    [1280, 900],
+    [360, 740],
+  ] as const) {
+    test.describe(`the glass at ${width} px`, () => {
+      test.use({ viewport: { width, height } });
+
+      for (const scheme of ['light', 'dark'] as const) {
+        test(`in the ${scheme} theme the glass takes the bar's gray, one red throughout`, async ({
+          page,
+        }) => {
+          await page.emulateMedia({ colorScheme: scheme });
+          const midi = await twinkle(page, RIGHT);
+          await midi.waitForStep();
+          const hold = await midi.hold();
+          const tapped = await midi.tap([60], Math.round(hold / 3));
+          expect(tapped, 'the page ran the short tap long: it is the PC').toBeLessThan(0.8 * hold);
+          await expect(glass(page, 60)).toHaveCount(1);
+          await expect(level(page, 60)).toHaveCount(0, { timeout: 2_000 });
+          const grays = await page.evaluate(() => {
+            const path = document.querySelector('.keyboard g.key[data-midi="60"] path.key-glass')!;
+            const probe = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            probe.style.fill = 'var(--key-held)';
+            path.closest('svg')!.appendChild(probe);
+            const held = getComputedStyle(probe).fill;
+            probe.remove();
+            return { stroke: getComputedStyle(path).stroke, held };
+          });
+          expect(grays.stroke).toBe(grays.held);
+          expect(grays.held).toBe(scheme === 'light' ? 'rgb(102, 102, 102)' : 'rgb(61, 61, 61)');
+          const where = `${scheme}, ${width} px, the glass showing`;
+          await expectOneRed(page, where);
+          await expectNoSeriousA11y(page, where);
+          expect(await horizontalOverflow(page), where).toBeLessThanOrEqual(0);
+
+          // A wrong key held beside it goes down with its bar: still one red, still clean.
+          await midi.noteOn(50);
+          await expect.poll(() => travel(page, 50)).toBeCloseTo(0.94, 3);
+          await midi.noteOff(50);
+          await expectOneRed(page, `${where}, a wrong key`);
+        });
+      }
+    });
+  }
+
+  test('under reduced motion the glass appears alone and the keys move with no transition', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const midi = await twinkle(page, RIGHT);
+    await midi.waitForStep();
+    const hold = await midi.hold();
+    const tapped = await midi.tap([60], Math.round(hold / 3));
+    expect(tapped, 'the page ran the short tap long: it is the PC').toBeLessThan(0.8 * hold);
+    // A quarter note has no level until it is full, so nothing drains: the outline is the whole
+    // correction.
+    await expect(glass(page, 60)).toHaveCount(1);
+    await expect(level(page, 60)).toHaveCount(0);
+    const transitions = await page.evaluate(() => {
+      const key = document.querySelector('.keyboard g.key[data-midi="60"]')!;
+      const path = key.querySelector('path.key-glass')!;
+      return {
+        key: getComputedStyle(key).transitionDuration,
+        path: getComputedStyle(path).transitionDuration,
+      };
+    });
+    expect(
+      transitions.key.split(',').every((d) => parseFloat(d) === 0),
+      transitions.key,
+    ).toBe(true);
+    expect(
+      transitions.path.split(',').every((d) => parseFloat(d) === 0),
+      transitions.path,
+    ).toBe(true);
+    // A held key is shorter at once, two frames after the press and with nothing between.
+    const pressed = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const key = document.querySelector('.keyboard g.key[data-midi="50"]')!;
+      w.__fakeMidi.send([0x90, 50, 100]);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const parsed = /^matrix\(([^)]+)\)$/.exec(getComputedStyle(key).transform);
+      const depth = parsed ? Number(parsed[1]!.split(',')[3]) : 1;
+      w.__fakeMidi.send([0x80, 50, 0]);
+      return depth;
+    });
+    expect(pressed).toBeCloseTo(0.94, 3);
+    await expect(glass(page, 60)).toHaveCount(1);
+    await expectOneRed(page, 'reduced motion, the glass showing');
+    await expectNoSeriousA11y(page, 'reduced motion, the glass showing');
+  });
 });
 
 /**

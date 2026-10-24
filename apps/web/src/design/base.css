@@ -780,6 +780,24 @@ input[role='switch']:checked::before {
   transition: none;
 }
 
+/* The timing rings after a run of Play (issue 192, render/timingMarks.ts): thin gray rings beside
+   or around a note, never the accent and never translucent (issue 79: shape by shape), the same
+   1.5 px at every width. They sit outside the notes, so the dimmed hand never pales them, and
+   clicks and hovers pass through them to the bar. */
+.score-sheet svg .timing-mark,
+.score-sheet svg .timing-mark circle {
+  fill: none;
+  stroke: var(--gray-3);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+/* Dashes long enough to read as a dashed ring around the notehead, not a dotted halo. */
+.score-sheet svg .timing-mark[data-timing='missed'] circle {
+  stroke-dasharray: 3px 2px;
+}
+
 .score-error {
   --gap: 1rem;
 }
@@ -1921,6 +1939,11 @@ html:has(.dock) {
     fill-opacity: 1;
     stroke-opacity: 1;
     opacity: 1;
+  }
+
+  /* The timing rings are for the screen: a print is the music alone. */
+  .timing-mark {
+    display: none;
   }
 
   /* The accent prints in ink (tokens.css). A primary button or link also needs its fill and

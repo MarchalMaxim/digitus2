@@ -9,6 +9,10 @@ export interface NoteMessage {
    * key was not let go by the reader, so no reader of the notes may judge it as a release.
    */
   lost?: true;
+  /** The key's time in performance.now() ms: the event time when plausible, else arrival (issue 192). */
+  atMs?: number;
+  /** 1..127, on a note-on from the piano (issue 192). */
+  velocity?: number;
 }
 
 /**

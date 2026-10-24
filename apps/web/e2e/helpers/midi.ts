@@ -54,7 +54,8 @@ interface FakeHost {
   plug(name: string): void;
   unplug(name?: string): void;
   remove(name?: string): void;
-  send(bytes: number[], input?: string): void;
+  /** `atMs`: the event's `timeStamp` (performance.now() ms), as a piano's message carries it. */
+  send(bytes: number[], input?: string, atMs?: number): void;
 }
 
 interface FakeInput extends EventTarget {
@@ -72,14 +73,79 @@ interface AlongHook {
   hold(): number;
 }
 
+/** Where the transport is as the listener hears it (audio/timeline.ts, issue 192). */
+export interface HeardAt {
+  pass: number;
+  perfSec: number;
+  factor: number;
+}
+
+/** One pass of a run of Play (audio/timeline.ts). */
+export interface PassSpan {
+  pass: number;
+  fromSec: number;
+  toSec: number | null;
+  wrapped: boolean;
+  countedIn: boolean;
+}
+
+/** A note-on the timing run heard while armed (score/useTimingRun.ts). */
+export interface TimingLogEntry {
+  midi: number;
+  arrivalMs: number;
+  atMs: number;
+  pass: number | null;
+  perfSec: number | null;
+  factor: number | null;
+}
+
+/** A step of the hands played as the timing judge has it. */
+export interface TimingStepView {
+  perfSec: number;
+  pitches: number[];
+  parts: { hand: 'L' | 'R'; pitches: number[]; key: string }[];
+}
+
+/** One judged unit (score/timing.ts). */
+export interface UnitVerdictView {
+  key: string;
+  hand: 'L' | 'R';
+  ids: string[];
+  verdict: 'onTime' | 'early' | 'late' | 'missed';
+  offsetMs: number | null;
+  offsetSec: number | null;
+  tolMs: number;
+  hearings: number;
+}
+
+/** How the last run went (score/timing.ts's RunJudgement). */
+export interface JudgementView {
+  verdicts: UnitVerdictView[];
+  onTime: number;
+  total: number;
+  biasMs: number;
+  playedShare: number;
+}
+
+/** The timing run's hook (`?audio=silent` or `?hooks=1`, issue 192). */
+interface TimingHook {
+  presses(): TimingLogEntry[];
+  passes(): PassSpan[];
+  steps(): TimingStepView[];
+  heardNow(): HeardAt | null;
+  judgement(): JudgementView | null;
+}
+
 type Windowed = {
   __fakeMidi?: FakeHost;
   __digitus2Along?: AlongHook;
+  __digitus2Timing?: TimingHook;
   __digitus2Keys?: {
     strikes(): number[];
     accompanied(): AccompaniedNote[];
     accompCancelled(): CancelledNote[];
     audioState(): AudioContextState | 'none';
+    outputLatency(): number | null;
   };
 };
 
@@ -283,7 +349,7 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
             fire(input);
           }
         },
-        send(bytes, name) {
+        send(bytes, name, atMs) {
           const input = [...inputs.values()].find(
             (i) => i.state === 'connected' && (name === undefined || i.name === name),
           );
@@ -293,6 +359,8 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
             typeof MIDIMessageEvent === 'function'
               ? new MIDIMessageEvent('midimessage', { data })
               : Object.assign(new Event('midimessage'), { data });
+          // The time the key went down, as a piano's message carries it (issue 192).
+          if (atMs !== undefined) Object.defineProperty(event, 'timeStamp', { value: atMs });
           input.onmidimessage?.(event);
           input.dispatchEvent(event);
         },
@@ -634,4 +702,208 @@ export function fakeMidi(page: Page) {
     },
   };
   return api;
+}
+
+/** The timing run's hook (issue 192), read through the page; null when it is not installed. */
+export function timingHook(page: Page) {
+  return {
+    steps: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.steps() ?? []),
+    judgement: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.judgement() ?? null),
+    presses: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.presses() ?? []),
+    passes: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.passes() ?? []),
+  };
+}
+
+/** One hearing of a step to play in `playAlongTimed`. */
+export interface TimedHearing {
+  /** The pass's ordinal in the run (0 first). */
+  pass: number;
+  /** The step's index in `__digitus2Timing.steps()`. */
+  index: number;
+  /** How far from the beat the keys go down, in real milliseconds (negative early). */
+  offsetMs?: number;
+  /** Not played at all. */
+  skip?: boolean;
+}
+
+export interface TimedPlan {
+  hearings: TimedHearing[];
+  /**
+   * The passes the run goes through, in performance seconds: a loop's stretch per pass, or the
+   * piece's span (`toSec` null for an open end). They join end to start, as a loop's do.
+   */
+  passes: { fromSec: number; toSec: number | null }[];
+  /** How long each step's keys are held, in real milliseconds; default 150. */
+  holdMs?: number;
+  /** Clicks Pause from inside the page on the first frame at or after this point. */
+  pauseAt?: { pass: number; perfSec: number };
+  /** Clicks Play from inside the page first, so the run cannot start before the loop listens. */
+  play?: boolean;
+  /** Gives up after this many real milliseconds; default 45 000. */
+  timeoutMs?: number;
+}
+
+/** What `playAlongTimed` did, as the page measured it. */
+export interface TimedReport {
+  sent: {
+    pass: number;
+    index: number;
+    pitches: number[];
+    /** The target on the run axis (performance seconds) and the axis at the frame it was sent. */
+    target: number;
+    axis: number;
+    /** The event time stamped on the note-ons, and the page's clock when they were sent. */
+    atMs: number;
+    sentMs: number;
+  }[];
+  /**
+   * The page on the frame the run's first note-on goes out, read before it is sent (and on every
+   * playing frame until then): the timing rings drawn and the status line, so a check can see what
+   * Play cleared before any note. Null only when the run never played; with no hearing to send it
+   * is the last playing frame.
+   */
+  beforeFirstNote: { marks: number; status: string; perfSec: number } | null;
+  /** The axis at the frame Pause was clicked, null when it was not. */
+  pausedAxis: number | null;
+}
+
+/**
+ * Plays along with a run of Play on the fake piano, with set offsets (issue 192), timed in the
+ * page by a `requestAnimationFrame` loop that reads `__digitus2Timing.heardNow()`, never by
+ * Playwright round trips. Each hearing's target is on the run axis built from `plan.passes`
+ * (`axis(pass, step.perfSec) + offsetMs / 1000 * factor`), so an early press across a loop's wrap
+ * fires while the pass before is heard. On the first frame at or after a target the step's
+ * note-ons are sent stamped with the target's own instant (`now - (axisNow - target) / factor`),
+ * and the note-offs `holdMs` later. With `pauseAt` it clicks Pause; it returns once the transport
+ * has stopped (Pause or the end) and every key is up.
+ */
+export async function playAlongTimed(page: Page, plan: TimedPlan): Promise<TimedReport> {
+  return page.evaluate(async (p) => {
+    const w = window as unknown as Windowed;
+    const timing = w.__digitus2Timing;
+    const host = w.__fakeMidi;
+    if (!timing || !host) throw new Error('the timing hook and the fake piano are needed');
+    const steps = timing.steps();
+    const offsets: number[] = [];
+    let at = 0;
+    for (const pass of p.passes) {
+      offsets.push(at);
+      at += (pass.toSec ?? Infinity) - pass.fromSec;
+    }
+    const axis = (pass: number, perfSec: number) =>
+      offsets[pass]! + perfSec - p.passes[pass]!.fromSec;
+    const pending = p.hearings
+      .filter((h) => !h.skip)
+      .map((h) => {
+        const step = steps[h.index];
+        if (!step) throw new Error(`no step ${h.index} among ${steps.length}`);
+        return { ...h, pitches: step.pitches, base: axis(h.pass, step.perfSec) };
+      });
+    const report: TimedReport = { sent: [], beforeFirstNote: null, pausedAxis: null };
+    const releases: Promise<void>[] = [];
+    const holdMs = p.holdMs ?? 150;
+    const started = performance.now();
+    const playButton = () => document.querySelector<HTMLElement>('.dock .play-button');
+    if (p.play) {
+      const button = playButton();
+      if (!button) throw new Error('no Play button');
+      button.click();
+    }
+    await new Promise<void>((resolve, reject) => {
+      let heard = false;
+      const frame = () => {
+        try {
+          const now = performance.now();
+          if (now - started > (p.timeoutMs ?? 45_000)) {
+            reject(new Error(`the run did not stop; sent ${report.sent.length} steps`));
+            return;
+          }
+          const h = timing.heardNow();
+          if (!h) {
+            if (heard) resolve();
+            else requestAnimationFrame(frame);
+            return;
+          }
+          heard = true;
+          // Read on every playing frame until a note goes out, before this frame sends one: the
+          // last reading is the page as the first note-on is sent, wherever the start delay, a
+          // flight or a slow frame left the clock (a window inside the start delay alone can be
+          // missed by every frame when the page is loaded).
+          if (report.sent.length === 0) {
+            report.beforeFirstNote = {
+              marks: document.querySelectorAll('.timing-mark').length,
+              status: document.querySelector('.dock [role="status"]')?.textContent ?? '',
+              perfSec: h.perfSec,
+            };
+          }
+          const run = timing.passes();
+          const ordinal = run.findIndex((pass) => pass.pass === h.pass);
+          if (ordinal < 0 || ordinal >= p.passes.length) {
+            requestAnimationFrame(frame);
+            return;
+          }
+          const axisNow = axis(ordinal, h.perfSec);
+          for (let i = 0; i < pending.length;) {
+            const q = pending[i]!;
+            const target = q.base + ((q.offsetMs ?? 0) / 1000) * h.factor;
+            if (target > axisNow) {
+              i++;
+              continue;
+            }
+            pending.splice(i, 1);
+            const atMs = now - ((axisNow - target) / h.factor) * 1000;
+            for (const midi of q.pitches) host.send([0x90, midi, 100], undefined, atMs);
+            report.sent.push({
+              pass: q.pass,
+              index: q.index,
+              pitches: q.pitches,
+              target,
+              axis: axisNow,
+              atMs,
+              sentMs: performance.now(),
+            });
+            releases.push(
+              new Promise<void>((done) =>
+                setTimeout(() => {
+                  for (const midi of q.pitches) host.send([0x80, midi, 0]);
+                  done();
+                }, holdMs),
+              ),
+            );
+          }
+          if (
+            p.pauseAt &&
+            report.pausedAxis === null &&
+            axisNow >= axis(p.pauseAt.pass, p.pauseAt.perfSec)
+          ) {
+            report.pausedAxis = axisNow;
+            playButton()?.click();
+          }
+          requestAnimationFrame(frame);
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      };
+      requestAnimationFrame(frame);
+    });
+    await Promise.all(releases);
+    return report;
+  }, plan);
+}
+
+/** Hearings of the steps `indices` in pass `pass`, on time unless `offsets` or `skip` say. */
+export function timedHearings(
+  indices: readonly number[],
+  o: { pass?: number; offsets?: Record<number, number>; skip?: readonly number[] } = {},
+): TimedHearing[] {
+  return indices.map((index) => ({
+    pass: o.pass ?? 0,
+    index,
+    offsetMs: o.offsets?.[index] ?? 0,
+    skip: o.skip?.includes(index) ?? false,
+  }));
 }

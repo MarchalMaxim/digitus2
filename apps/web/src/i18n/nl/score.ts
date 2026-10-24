@@ -37,6 +37,27 @@ export const score: Messages['score'] = {
     },
     holdLonger: (count: number) =>
       count > 1 ? 'Houd de rode noten iets langer vast.' : 'Houd de rode noot iets langer vast.',
+    timingSummary: (onTime: number, total: number) => {
+      const line = plural('nl', total, {
+        one: `${formatNumber('nl', onTime)} van # noot op tijd.`,
+        other: `${formatNumber('nl', onTime)} van de # noten op tijd.`,
+      });
+      const rings = total - onTime;
+      if (rings <= 0) return line;
+      const show =
+        onTime === 0
+          ? plural('nl', rings, {
+              one: 'De cirkel wijst hem aan.',
+              other: 'De cirkels wijzen ze aan.',
+            })
+          : plural('nl', rings, {
+              one: 'De cirkel wijst de andere aan.',
+              other: 'De cirkels wijzen de andere aan.',
+            });
+      return `${line} ${show}`;
+    },
+    timingAllOnTime: 'Elke noot op tijd.',
+    timingAllOnTimeFaster: 'Elke noot op tijd. Probeer het iets sneller.',
     practice: 'Oefenen',
     scanSource: 'Scanbron en herkenning',
     couldNotOpenFile: (name: string) =>

@@ -1,17 +1,59 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { createMidiParser, HeldKeys, type ParsedNote } from './parse.js';
+import {
+  createMidiParser,
+  EVENT_MAX_AGE_MS,
+  eventTimeMs,
+  HeldKeys,
+  type ParsedNote,
+} from './parse.js';
 
-const on = (midi: number, channel = 0): ParsedNote => ({ on: true, channel, midi });
-const off = (midi: number, channel = 0): ParsedNote => ({ on: false, channel, midi });
+const on = (midi: number, channel = 0, velocity = 90): ParsedNote => ({
+  on: true,
+  channel,
+  midi,
+  velocity,
+});
+const off = (midi: number, channel = 0): ParsedNote => ({ on: false, channel, midi, velocity: 0 });
+
+describe('eventTimeMs (issue 192)', () => {
+  const NOW = 50_000;
+
+  it('keeps a plausible event time', () => {
+    expect(eventTimeMs(NOW - 12.5, NOW)).toBe(NOW - 12.5);
+    expect(eventTimeMs(NOW, NOW)).toBe(NOW);
+    // Up to a millisecond ahead of now: the two clocks are read apart.
+    expect(eventTimeMs(NOW + 1, NOW)).toBe(NOW + 1);
+    expect(eventTimeMs(NOW - EVENT_MAX_AGE_MS, NOW)).toBe(NOW - EVENT_MAX_AGE_MS);
+  });
+
+  it.each([
+    ['0', 0],
+    ['NaN', Number.NaN],
+    ['undefined', undefined],
+    ['negative', -5],
+    ['in the future', NOW + 1.5],
+    ['older than a second', NOW - EVENT_MAX_AGE_MS - 1],
+    ['infinite', Number.POSITIVE_INFINITY],
+  ])('falls back to now for a stamp that is %s', (_, stamp) => {
+    expect(eventTimeMs(stamp, NOW)).toBe(NOW);
+  });
+});
 
 describe('createMidiParser', () => {
   it('reads note on and note off on all 16 channels', () => {
     const parse = createMidiParser();
     for (let channel = 0; channel < 16; channel++) {
-      expect(parse([0x90 | channel, 60, 100])).toEqual([on(60, channel)]);
+      expect(parse([0x90 | channel, 60, 100])).toEqual([on(60, channel, 100)]);
       expect(parse([0x80 | channel, 60, 64])).toEqual([off(60, channel)]);
     }
+  });
+
+  it('reports the velocity of a note on, and 0 for either kind of note off (issue 192)', () => {
+    const parse = createMidiParser();
+    expect(parse([0x90, 0x3c, 0x64])).toEqual([{ on: true, channel: 0, midi: 60, velocity: 100 }]);
+    expect(parse([0x80, 0x3c, 0x40])).toEqual([{ on: false, channel: 0, midi: 60, velocity: 0 }]);
+    expect(parse([0x90, 0x3c, 0x00])).toEqual([{ on: false, channel: 0, midi: 60, velocity: 0 }]);
   });
 
   it('reads a note on at velocity 0 as an off', () => {
@@ -21,7 +63,12 @@ describe('createMidiParser', () => {
 
   it('reads a velocity 0 under running status as an off', () => {
     const parse = createMidiParser();
-    expect(parse([0x90, 60, 90, 60, 0, 62, 70, 62, 0])).toEqual([on(60), off(60), on(62), off(62)]);
+    expect(parse([0x90, 60, 90, 60, 0, 62, 70, 62, 0])).toEqual([
+      on(60),
+      off(60),
+      on(62, 0, 70),
+      off(62),
+    ]);
   });
 
   it('keeps running status within one call', () => {
@@ -47,7 +94,7 @@ describe('createMidiParser', () => {
 
   it('drops a message cut off by a new status byte', () => {
     const parse = createMidiParser();
-    expect(parse([0x90, 60, 0x91, 62, 80])).toEqual([on(62, 1)]);
+    expect(parse([0x90, 60, 0x91, 62, 80])).toEqual([on(62, 1, 80)]);
   });
 
   it.each([0xf8, 0xfa, 0xfe, 0xff])(
@@ -78,7 +125,7 @@ describe('createMidiParser', () => {
     const parse = createMidiParser();
     expect(parse([0xf0, 0x41, 0x10])).toEqual([]);
     expect(parse([0x42, 0x12, 0x40])).toEqual([]);
-    expect(parse([0x00, 0xf7, 0x90, 64, 80])).toEqual([on(64)]);
+    expect(parse([0x00, 0xf7, 0x90, 64, 80])).toEqual([on(64, 0, 80)]);
   });
 
   it('does not read data bytes inside a SysEx as notes, even ones that look like running status', () => {
@@ -160,7 +207,7 @@ describe('createMidiParser', () => {
     const a = createMidiParser();
     const b = createMidiParser();
     expect(a([0x90, 60])).toEqual([]);
-    expect(b([0x91, 62, 80])).toEqual([on(62, 1)]);
+    expect(b([0x91, 62, 80])).toEqual([on(62, 1, 80)]);
     expect(a([90])).toEqual([on(60)]);
   });
 
@@ -295,5 +342,47 @@ describe('HeldKeys', () => {
     expect(keys.apply('a', off(60))).toBeNull();
     expect(keys.apply('a', on(60))).toEqual({ on: true, midi: 60 });
     expect(keys.held()).toEqual([60]);
+  });
+
+  describe('with the key time (issue 192)', () => {
+    it('adds the time to a note on, with its velocity, and to the off that ends it', () => {
+      const keys = new HeldKeys();
+      expect(keys.apply('a', on(60, 0, 100), 1234.5)).toEqual({
+        on: true,
+        midi: 60,
+        atMs: 1234.5,
+        velocity: 100,
+      });
+      expect(keys.apply('a', off(60), 1400)).toEqual({ on: false, midi: 60, atMs: 1400 });
+    });
+
+    it('adds no velocity to a note on that has none', () => {
+      const keys = new HeldKeys();
+      expect(keys.apply('a', { on: true, channel: 0, midi: 62, velocity: 0 }, 10)).toEqual({
+        on: true,
+        midi: 62,
+        atMs: 10,
+      });
+    });
+
+    it('gives a key still held elsewhere no off, with or without the time', () => {
+      const keys = new HeldKeys();
+      keys.apply('a', on(64), 1);
+      keys.apply('b', on(64), 2);
+      expect(keys.apply('a', off(64), 3)).toBeNull();
+      expect(keys.apply('b', off(64), 4)).toEqual({ on: false, midi: 64, atMs: 4 });
+    });
+
+    it('adds the time to the offs of an input that went away, and to those of a clear', () => {
+      const keys = new HeldKeys();
+      keys.apply('a', on(60));
+      keys.apply('a', on(67));
+      keys.apply('b', on(72));
+      expect(keys.dropInput('a', 900)).toEqual([
+        { on: false, midi: 60, atMs: 900 },
+        { on: false, midi: 67, atMs: 900 },
+      ]);
+      expect(keys.clear(950)).toEqual([{ on: false, midi: 72, atMs: 950 }]);
+    });
   });
 });

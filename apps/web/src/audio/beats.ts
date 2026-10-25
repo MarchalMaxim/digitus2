@@ -1,5 +1,5 @@
 // The subpath, not the engine's index: the index would bring the whole engine onto the main thread.
-import { ticksToSeconds } from '@digitus2/engine/score-build';
+import { tickSeconds, ticksToSeconds } from '@digitus2/engine/score-build';
 import type { MeasureInfo, Score, TimeSigEvent } from '@digitus2/engine';
 
 export interface Beat {
@@ -63,6 +63,7 @@ function pickupLeadTicks(
  */
 export function buildBeats(score: Score): Beat[] {
   const sigs = sortedTimeSignatures(score);
+  const secAt = tickSeconds(score.tempoMap, score.divisions);
   const beats: Beat[] = [];
   score.measures.forEach((m, i) => {
     const sig = timeSignatureAt(sigs, m.startTick);
@@ -75,7 +76,7 @@ export function buildBeats(score: Score): Beat[] {
       const tick = m.startTick + Math.max(0, at);
       beats.push({
         tick,
-        sec: ticksToSeconds(score.tempoMap, score.divisions, tick),
+        sec: secAt(tick),
         accent: k === 0,
         measureIndex: m.index,
         beatInBar: k + 1,
@@ -83,6 +84,107 @@ export function buildBeats(score: Score): Beat[] {
     }
   });
   return beats;
+}
+
+/** A metronome click's step on the ladder: a bar's first beat, another beat, a sub-beat (issue 203). */
+export type ClickLevel = 'bar' | 'beat' | 'sub';
+
+/** One click of the metronome: a beat of `buildBeats`, or one of the sub-beats between its beats. */
+export interface Click {
+  tick: number;
+  /** Score seconds (tempo factor 1). */
+  sec: number;
+  level: ClickLevel;
+  /** Its quarter of the beat, 0 to 3: 0 the beat itself, 2 its half. */
+  part: number;
+  /**
+   * The shortest gap, in score seconds, from a click of its beat to the next point of the beat's
+   * grid, a quarter of the beat on. The same for every click of the beat, so they all agree on
+   * what a tempo mark in or after the beat does to its spacing.
+   */
+  quarterSec: number;
+  /**
+   * The shortest gap from the beat's click on the beat, or on its half, to the grid point two
+   * quarters on; shared like `quarterSec`. Infinity for a beat with neither click.
+   */
+  halfSec: number;
+}
+
+/** The clicks of a beat: the beat itself and three sub-beats at its quarters. */
+export const CLICKS_PER_BEAT = 4;
+
+/**
+ * The closest two clicks the metronome sounds, in heard seconds: nearer ones blur into a buzz
+ * (11 a second), so `clickHeard` thins a beat's sub-beats before they come closer.
+ */
+export const MIN_CLICK_GAP_SEC = 0.09;
+
+/**
+ * The metronome's clicks: `CLICKS_PER_BEAT` to every beat of `buildBeats`, on the same bar grid at
+ * steps of a quarter of the beat in ticks, so a pickup holds the sub-beats of the beats before it
+ * even when none of them is its own (an eighth-note pickup in 4/4 has the "and" and the "a" of 4,
+ * and no beat). The click on the beat itself is the beat of `buildBeats`, and the bar's first beat
+ * is the `bar` level. Each click takes its seconds from its own tick, so a tempo change inside a
+ * beat lands each of them right. Sorted by `sec`.
+ *
+ * The spacing a beat's clicks keep is read once per beat, from its five grid points (its four
+ * clicks and the next beat's first), each at most the bar's end: a bar that ends off the grid
+ * shortens the gap before its line, and a gap only counts from a click that exists, so a bar
+ * ending on the grid short of a whole beat has no zero gap to a click it does not have.
+ */
+export function buildClicks(score: Score): Click[] {
+  const sigs = sortedTimeSignatures(score);
+  const secAt = tickSeconds(score.tempoMap, score.divisions);
+  const clicks: Click[] = [];
+  score.measures.forEach((m, i) => {
+    const sig = timeSignatureAt(sigs, m.startTick);
+    const beatTicks = (score.divisions * 4) / sig.beatType;
+    if (!(beatTicks > 0)) return;
+    const subTicks = beatTicks / CLICKS_PER_BEAT;
+    const lead = pickupLeadTicks(score, i, sig, beatTicks);
+    const endTick = m.startTick + m.lengthTicks;
+    /** Where grid point `j` falls, in ticks from the measure start. */
+    const at = (j: number) => j * subTicks - lead;
+    const exists = (j: number) => at(j) >= -TICK_EPSILON && at(j) < m.lengthTicks - TICK_EPSILON;
+    const secs: number[] = [];
+    for (let first = 0; at(first) < m.lengthTicks - TICK_EPSILON; first += CLICKS_PER_BEAT) {
+      if (at(first + CLICKS_PER_BEAT - 1) < -TICK_EPSILON) continue; // before the pickup starts
+      for (let k = 0; k <= CLICKS_PER_BEAT; k++) {
+        secs[k] = secAt(Math.min(endTick, m.startTick + Math.max(0, at(first + k))));
+      }
+      let quarterSec = Infinity;
+      let halfSec = Infinity;
+      for (let k = 0; k < CLICKS_PER_BEAT; k++) {
+        if (!exists(first + k)) continue;
+        quarterSec = Math.min(quarterSec, secs[k + 1]! - secs[k]!);
+        if (k % 2 === 0) halfSec = Math.min(halfSec, secs[k + 2]! - secs[k]!);
+      }
+      for (let k = 0; k < CLICKS_PER_BEAT; k++) {
+        if (!exists(first + k)) continue;
+        clicks.push({
+          tick: m.startTick + Math.max(0, at(first + k)),
+          sec: secs[k]!,
+          level: first + k === 0 ? 'bar' : k === 0 ? 'beat' : 'sub',
+          part: k,
+          quarterSec,
+          halfSec,
+        });
+      }
+    }
+  });
+  return clicks;
+}
+
+/**
+ * Whether the metronome sounds `click` at tempo factor `factor`, so that no two clicks heard come
+ * closer than `MIN_CLICK_GAP_SEC`. The beat itself always sounds. Its quarters (parts 1 and 3)
+ * sound when the beat's shortest quarter gap, heard (`quarterSec / factor`), is at least that, its
+ * half (part 2) when the shortest half gap is. So a beat sounds all its clicks, its half and
+ * itself, or itself alone, and at the fast end it gives two clicks, then one.
+ */
+export function clickHeard(click: Click, factor: number): boolean {
+  if (click.part === 0) return true;
+  return (click.part === 2 ? click.halfSec : click.quarterSec) / factor >= MIN_CLICK_GAP_SEC;
 }
 
 function measureAt(score: Score, measureIndex: number): MeasureInfo | undefined {

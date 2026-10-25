@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseMusicXml, type Score } from '@digitus2/engine';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ClickLevel } from './beats.js';
 import { createPiano, createSilentInstrument, noteVelocity, PIANO_SOFTEST } from './instrument.js';
 import { Transport } from './transport.js';
 
@@ -67,7 +68,7 @@ vi.mock('smplr', () => ({
 
 let ctx: { currentTime: number };
 let instrument: ReturnType<typeof createSilentInstrument>;
-let clicks: { time: number; accent: boolean }[];
+let clicks: { time: number; level: ClickLevel; accent: boolean }[];
 function make({
   score: piece = score,
   ...opts
@@ -77,7 +78,9 @@ function make({
       ctx,
       instrument,
       score: piece,
-      click: (time, accent) => clicks.push({ time, accent }),
+      click: (time, level) => {
+        clicks.push({ time, level, accent: level === 'bar' });
+      },
       setInterval: (() => 0) as never,
       clearInterval: () => {},
     },
@@ -241,7 +244,9 @@ describe('Transport', () => {
     expect(clicks.slice(0, 4).map((c) => c.time)).toEqual([100, 100.625, 101.25, 101.875]);
     expect(clicks.slice(0, 4).map((c) => c.accent)).toEqual([true, false, false, false]);
     expect(instrument.events[0]!.time).toBeCloseTo(102.5, 6);
-    expect(clicks).toHaveLength(4 + 32);
+    // The beats alone: four in the count-in, then 8 bars of 4 (the sub-beats are in
+    // transport.metronome.test.ts).
+    expect(clicks.filter((c) => c.level !== 'sub')).toHaveLength(4 + 32);
   });
   it('loops bars 2 to 3 seamlessly', () => {
     const t = make();
@@ -534,7 +539,10 @@ describe('Transport', () => {
     expect(instrument.events[0]!.time - countIn[0]!.time).toBeCloseTo(2 * 0.6, 6);
     // The metronome goes on with beat 3 under the pickup, not accented, then the downbeat of
     // bar 1, accented, one beat later.
-    const metronome = clicks.slice(2, 4);
+    const metronome = clicks
+      .slice(2)
+      .filter((c) => c.level !== 'sub')
+      .slice(0, 2);
     expect(metronome.map((c) => c.accent)).toEqual([false, true]);
     expect(metronome[0]!.time).toBeCloseTo(101.2, 6);
     expect(metronome[1]!.time).toBeCloseTo(101.8, 6);
@@ -1033,14 +1041,14 @@ describe('Transport in performance order (repeats and jumps, issue 50)', () => {
     expect(heard().at(-1)![0]).toBe(60);
   });
 
-  it('counts the click-track beats of each hearing', () => {
+  it('counts the metronome clicks of each hearing, the sub-beats too', () => {
     const t = make({ score: repeat });
     t.setCountIn(false);
     t.setMetronome(true);
     t.play();
     run(t, 8.1);
-    // 4 beats a bar, 4 bars heard.
-    expect(clicks).toHaveLength(16);
+    // 4 clicks a beat, 4 beats a bar, 4 bars heard: the repeat clicks its own again.
+    expect(clicks).toHaveLength(64);
   });
 
   describe('the position in performance seconds (play along, issue 182)', () => {

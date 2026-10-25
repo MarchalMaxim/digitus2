@@ -39,6 +39,21 @@ export const score: Messages['score'] = {
       count > 1
         ? 'Segure as notas vermelhas um pouco mais.'
         : 'Segure a nota vermelha um pouco mais.',
+    timingSummary: (onTime: number, total: number) => {
+      const line = `${formatNumber('pt', onTime)} de ${notes(total)} no tempo.`;
+      const rings = total - onTime;
+      if (rings <= 0) return line;
+      const show =
+        onTime === 0
+          ? plural('pt', rings, { one: 'O círculo a mostra.', other: 'Os círculos as mostram.' })
+          : plural('pt', rings, {
+              one: 'O círculo mostra a outra.',
+              other: 'Os círculos mostram as outras.',
+            });
+      return `${line} ${show}`;
+    },
+    timingAllOnTime: 'Todas as notas no tempo.',
+    timingAllOnTimeFaster: 'Todas as notas no tempo. Tente um pouco mais rápido.',
     practice: 'Prática',
     scanSource: 'Origem da digitalização e reconhecimento',
     couldNotOpenFile: (name: string) =>

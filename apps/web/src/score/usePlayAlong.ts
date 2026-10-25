@@ -66,6 +66,7 @@ import {
   stepAfter,
   type AlongStep,
   type Keys,
+  type PassedRun,
   type PerfRange,
   type Presses,
   type StepTime,
@@ -83,6 +84,12 @@ export interface PlayAlongOptions {
   currentGroup: number;
   /** `red.redAway`: a flight or hop is on screen; the walk does not move meanwhile. */
   flightShown: boolean;
+  /**
+   * Issue 192: told of each settle that passed steps or saw a release too early, and of each
+   * break in the walk's own sequence (a move it did not make, going inactive, unmount). Read only:
+   * the walk never waits on it, and the listener catches its own errors.
+   */
+  onTiming?: (e: WalkTimingEvent) => void;
 }
 
 /**
@@ -94,6 +101,16 @@ export interface AlongHint {
   kind: 'play' | 'hold';
   count: number;
 }
+
+/**
+ * What the walk tells its timing (issue 192, useWalkTiming.ts). `settled`: the steps passed in one
+ * settle, each from the start of its run; `at`, the step the red is on after it (-1 on the finish);
+ * `early`, a release too early ended it; `finished`, the piece's last step passed. `break`: the
+ * walk's sequence broke (a move it did not make, inactive, unmount).
+ */
+export type WalkTimingEvent =
+  | { kind: 'settled'; runs: readonly PassedRun[]; at: number; early: boolean; finished: boolean }
+  | { kind: 'break' };
 
 export interface PlayAlong {
   /** The piano is connected, Practice mode is on and the red is the walk's: stopped, ready, playable, with steps. */
@@ -192,6 +209,7 @@ export function usePlayAlong({
   mutedHands,
   currentGroup,
   flightShown,
+  onTiming,
 }: PlayAlongOptions): PlayAlong {
   const setting = useAppStore((s) => s.settings.playAlong);
   const practiceMode = useAppStore((s) => s.settings.practiceMode);
@@ -268,6 +286,11 @@ export function usePlayAlong({
   const loopAtRef = useRef('');
   const indexRef = useRef(-1);
   const earlyRef = useRef(false);
+  /** The timing's listener (issue 192): the latest `onTiming`, called where the walk passes or breaks. */
+  const onTimingRef = useRef(onTiming);
+  useLayoutEffect(() => {
+    onTimingRef.current = onTiming;
+  });
   /** The one wake-up: calls `decide(null)` when the step the red waits on is due. */
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   /**
@@ -343,6 +366,7 @@ export function usePlayAlong({
         // Not walking (playing, loading, no piano): the presses are kept, the walk starts afresh.
         // The other hand stops too (Play stops it in its own click; the rest end here).
         if (accompaniedRef.current) stopAccompaniment();
+        onTimingRef.current?.({ kind: 'break' });
         atRef.current = null;
         homeRef.current = false;
         moveIndex(-1);
@@ -374,6 +398,7 @@ export function usePlayAlong({
         // (its cue, its finish) leave `atRef` where they put the playback, so they land here never.
         if (atRef.current !== null) stopAccompaniment();
         handedRef.current = null;
+        onTimingRef.current?.({ kind: 'break' });
         keys = spendAll(keys);
         atRef.current = start;
         stepsAtRef.current = o.steps;
@@ -492,6 +517,17 @@ export function usePlayAlong({
           pb.accompany(accompanimentNotes(plan.events, plan.hands, stretches, stretch));
         }
       }
+      // Issue 192: the steps passed just now, each from the press that started its run, and a
+      // release too early (its step is pressed again, and that press starts a new chain).
+      if (result.passed > 0 || result.early) {
+        onTimingRef.current?.({
+          kind: 'settled',
+          runs: result.passedRuns,
+          at: result.at,
+          early: result.early,
+          finished: result.move.kind === 'finish',
+        });
+      }
 
       // A level to each pitch held that has none (a draining one counts as none), from its own
       // press: for each step passed just now (a key pressed under a flight, or early, that the
@@ -565,6 +601,7 @@ export function usePlayAlong({
     return () => {
       unsubscribe();
       handedRef.current = null;
+      onTimingRef.current?.({ kind: 'break' });
       clearTimeout(timerRef.current);
       timerRef.current = undefined;
       levels.dispose();

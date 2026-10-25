@@ -53,24 +53,8 @@ export const score = {
     /** The status line after a release that came too early, while the red waits for the length (issue 185); `count` is the notes of the step. */
     holdLonger: (count: number): string =>
       count > 1 ? 'Hold the red notes a little longer.' : 'Hold the red note a little longer.',
-    /** The status line after a run of Play with the piano: how many notes came on time; the rings show the others (issue 192). */
-    timingSummary: (onTime: number, total: number): string => {
-      const line = `${formatNumber('en', onTime)} of ${notes(total)} on time.`;
-      const rings = total - onTime;
-      if (rings <= 0) return line;
-      const show =
-        onTime === 0
-          ? plural('en', rings, { one: 'The ring shows it.', other: 'The rings show them.' })
-          : plural('en', rings, {
-              one: 'The ring shows the other.',
-              other: 'The rings show the others.',
-            });
-      return `${line} ${show}`;
-    },
-    /** The status line after a run of Play in which every note came on time (issue 192). */
-    timingAllOnTime: 'Every note on time.',
-    /** The same after a run below full speed (Practice tempo under 100 %). */
-    timingAllOnTimeFaster: 'Every note on time. Try it a little faster.',
+    /** The status line the first time the timing rings appear in a score view (issue 192): what a ring before and after a note means. */
+    timingExplain: 'A ring before a note means it came early; after it, late.',
     /** The button that opens and closes the practice settings (speed, loop, hands). */
     practice: 'Practice',
     /** The button back to the scan that produced this score. */

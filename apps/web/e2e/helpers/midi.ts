@@ -73,79 +73,43 @@ interface AlongHook {
   hold(): number;
 }
 
-/** Where the transport is as the listener hears it (audio/timeline.ts, issue 192). */
-export interface HeardAt {
-  pass: number;
-  perfSec: number;
-  factor: number;
-}
-
-/** One pass of a run of Play (audio/timeline.ts). */
-export interface PassSpan {
-  pass: number;
-  fromSec: number;
-  toSec: number | null;
-  wrapped: boolean;
-  countedIn: boolean;
-}
-
-/** A note-on the timing run heard while armed (score/useTimingRun.ts). */
-export interface TimingLogEntry {
-  midi: number;
-  arrivalMs: number;
-  atMs: number;
-  pass: number | null;
-  perfSec: number | null;
-  factor: number | null;
-}
-
-/** A step of the hands played as the timing judge has it. */
-export interface TimingStepView {
-  perfSec: number;
-  pitches: number[];
-  parts: { hand: 'L' | 'R'; pitches: number[]; key: string }[];
-}
-
-/** One judged unit (score/timing.ts). */
-export interface UnitVerdictView {
-  key: string;
-  hand: 'L' | 'R';
-  ids: string[];
-  verdict: 'onTime' | 'early' | 'late' | 'missed';
-  offsetMs: number | null;
-  offsetSec: number | null;
-  tolMs: number;
-  hearings: number;
-}
-
-/** How the last run went (score/timing.ts's RunJudgement). */
-export interface JudgementView {
-  verdicts: UnitVerdictView[];
-  onTime: number;
-  total: number;
-  biasMs: number;
-  playedShare: number;
-}
-
-/** The timing run's hook (`?audio=silent` or `?hooks=1`, issue 192). */
-interface TimingHook {
-  presses(): TimingLogEntry[];
-  passes(): PassSpan[];
-  steps(): TimingStepView[];
-  heardNow(): HeardAt | null;
-  judgement(): JudgementView | null;
+/**
+ * The walk's timing hook (`?audio=silent` or `?hooks=1`, issue 192): the shape of
+ * `WalkTimingHook` in src/score/useWalkTiming.ts, declared here so the helpers stand alone.
+ */
+export interface WalkTimingHook {
+  /** The steps of the hands played, aligned with `__digitus2Along`'s indices. */
+  steps(): {
+    perfSec: number;
+    pitches: number[];
+    bar: number;
+    writtenBar: number;
+    ids: string[];
+    holdMs: number;
+  }[];
+  /** The onsets since the last clear, resolved. `ms` is the decisive key's event time. */
+  onsets(): { index: number; ms: number; chain: number }[];
+  /** Every judgement since the last clear, in order, with the performance bar judged. */
+  judged(): {
+    bar: number;
+    index: number;
+    verdict: 'onTime' | 'early' | 'late';
+    offsetMs: number;
+    tolMs: number;
+  }[];
+  /** Ringed steps kept now (the sheet draws one ring per staff of each). */
+  markCount(): number;
 }
 
 type Windowed = {
   __fakeMidi?: FakeHost;
   __digitus2Along?: AlongHook;
-  __digitus2Timing?: TimingHook;
+  __digitus2Timing?: WalkTimingHook;
   __digitus2Keys?: {
     strikes(): number[];
     accompanied(): AccompaniedNote[];
     accompCancelled(): CancelledNote[];
     audioState(): AudioContextState | 'none';
-    outputLatency(): number | null;
   };
 };
 
@@ -704,206 +668,178 @@ export function fakeMidi(page: Page) {
   return api;
 }
 
-/** The timing run's hook (issue 192), read through the page; null when it is not installed. */
-export function timingHook(page: Page) {
+/** The walk's timing hook (issue 192), read through the page; empty when it is not installed. */
+export function walkTiming(page: Page) {
   return {
     steps: () =>
       page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.steps() ?? []),
-    judgement: () =>
-      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.judgement() ?? null),
-    presses: () =>
-      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.presses() ?? []),
-    passes: () =>
-      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.passes() ?? []),
+    judged: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.judged() ?? []),
+    onsets: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.onsets() ?? []),
+    markCount: () =>
+      page.evaluate(() => (window as unknown as Windowed).__digitus2Timing?.markCount() ?? 0),
   };
 }
 
-/** One hearing of a step to play in `playAlongTimed`. */
-export interface TimedHearing {
-  /** The pass's ordinal in the run (0 first). */
-  pass: number;
-  /** The step's index in `__digitus2Timing.steps()`. */
-  index: number;
-  /** How far from the beat the keys go down, in real milliseconds (negative early). */
-  offsetMs?: number;
-  /** Not played at all. */
-  skip?: boolean;
-}
-
-export interface TimedPlan {
-  hearings: TimedHearing[];
-  /**
-   * The passes the run goes through, in performance seconds: a loop's stretch per pass, or the
-   * piece's span (`toSec` null for an open end). They join end to start, as a loop's do.
-   */
-  passes: { fromSec: number; toSec: number | null }[];
-  /** How long each step's keys are held, in real milliseconds; default 150. */
-  holdMs?: number;
-  /** Clicks Pause from inside the page on the first frame at or after this point. */
-  pauseAt?: { pass: number; perfSec: number };
-  /** Clicks Play from inside the page first, so the run cannot start before the loop listens. */
-  play?: boolean;
-  /** Gives up after this many real milliseconds; default 45 000. */
+/** A rhythm for `walkRhythm` to play on the fake piano. */
+export interface RhythmPlan {
+  /** The first step (the red must be waiting on it) and the last, inclusive, in walk order. */
+  from: number;
+  to: number;
+  /** The reader's tempo: real milliseconds per performance second. */
+  msPerSec: number;
+  /** Signed ms added to a step's press (negative: early). */
+  offsets?: Record<number, number>;
+  /** Extra ms before a step's press (a hesitation), carried to every later step. */
+  pauses?: Record<number, number>;
+  /** Gives up after this many real ms; default 60 000. */
   timeoutMs?: number;
 }
 
-/** What `playAlongTimed` did, as the page measured it. */
-export interface TimedReport {
+/** What `walkRhythm` did, as the page measured it. */
+export interface RhythmReport {
+  /** One per step pressed: the stamped time, when it went out, and the page at that moment. */
   sent: {
-    pass: number;
     index: number;
     pitches: number[];
-    /** The target on the run axis (performance seconds) and the axis at the frame it was sent. */
-    target: number;
-    axis: number;
-    /** The event time stamped on the note-ons, and the page's clock when they were sent. */
+    /** The event time stamped on the note-ons: the instant the press was scheduled for. */
     atMs: number;
+    /** The page's clock when they went out. */
     sentMs: number;
+    /** The timing rings drawn on the sheet (SVG groups, one per staff) just before the press. */
+    marks: number;
+    /** The status line's text just before the press. */
+    status: string;
   }[];
-  /**
-   * The page on the frame the run's first note-on goes out, read before it is sent (and on every
-   * playing frame until then): the timing rings drawn and the status line, so a check can see what
-   * Play cleared before any note. Null only when the run never played; with no hearing to send it
-   * is the last playing frame.
-   */
-  beforeFirstNote: { marks: number; status: string; perfSec: number } | null;
-  /** The axis at the frame Pause was clicked, null when it was not. */
-  pausedAxis: number | null;
 }
 
 /**
- * Plays along with a run of Play on the fake piano, with set offsets (issue 192), timed in the
- * page by a `requestAnimationFrame` loop that reads `__digitus2Timing.heardNow()`, never by
- * Playwright round trips. Each hearing's target is on the run axis built from `plan.passes`
- * (`axis(pass, step.perfSec) + offsetMs / 1000 * factor`), so an early press across a loop's wrap
- * fires while the pass before is heard. On the first frame at or after a target the step's
- * note-ons are sent stamped with the target's own instant (`now - (axisNow - target) / factor`),
- * and the note-offs `holdMs` later. With `pauseAt` it clicks Pause; it returns once the transport
- * has stopped (Pause or the end) and every key is up.
+ * Walks steps `from` to `to` on the fake piano in a set rhythm (issue 192), entirely in the page,
+ * so a round trip never lands in the reader's gaps. Step i is pressed at
+ * `t0 + (perfSec_i - perfSec_from) * msPerSec + offsets[i] + the pauses up to and including i`,
+ * every pitch stamped with that instant as its event time. A step is let go once it has been held
+ * past its hold by 200 ms (the walk counts holds from arrival, and the margin absorbs timer
+ * jitter), or 100 ms before the next press when that is later, so a step before a rushed one is
+ * held legato. Resolves once the red has left step `to`.
+ *
+ * Consecutive calls are one continuous chain unless a seek or Rewind comes between them: the gap
+ * between two calls is the hold plus a round trip, not the reader's rhythm, and it would be judged.
  */
-export async function playAlongTimed(page: Page, plan: TimedPlan): Promise<TimedReport> {
+export async function walkRhythm(page: Page, plan: RhythmPlan): Promise<RhythmReport> {
+  // The handler must be attached before the first key goes out.
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const host = (window as unknown as Windowed).__fakeMidi;
+        return (
+          !!host && [...host.inputs.values()].some((i) => typeof i.onmidimessage === 'function')
+        );
+      }),
+    )
+    .toBe(true);
   return page.evaluate(async (p) => {
     const w = window as unknown as Windowed;
     const timing = w.__digitus2Timing;
+    const walk = w.__digitus2Along;
     const host = w.__fakeMidi;
-    if (!timing || !host) throw new Error('the timing hook and the fake piano are needed');
+    if (!timing || !walk || !host) {
+      throw new Error('the timing hook, the walk hook and the fake piano are needed');
+    }
     const steps = timing.steps();
-    const offsets: number[] = [];
-    let at = 0;
-    for (const pass of p.passes) {
-      offsets.push(at);
-      at += (pass.toSec ?? Infinity) - pass.fromSec;
+    const first = steps[p.from];
+    const last = steps[p.to];
+    if (!first || !last || p.to < p.from) {
+      throw new Error(`no steps ${p.from} to ${p.to} among ${steps.length}`);
     }
-    const axis = (pass: number, perfSec: number) =>
-      offsets[pass]! + perfSec - p.passes[pass]!.fromSec;
-    const pending = p.hearings
-      .filter((h) => !h.skip)
-      .map((h) => {
-        const step = steps[h.index];
-        if (!step) throw new Error(`no step ${h.index} among ${steps.length}`);
-        return { ...h, pitches: step.pitches, base: axis(h.pass, step.perfSec) };
-      });
-    const report: TimedReport = { sent: [], beforeFirstNote: null, pausedAxis: null };
-    const releases: Promise<void>[] = [];
-    const holdMs = p.holdMs ?? 150;
-    const started = performance.now();
-    const playButton = () => document.querySelector<HTMLElement>('.dock .play-button');
-    if (p.play) {
-      const button = playButton();
-      if (!button) throw new Error('no Play button');
-      button.click();
+    if (walk.index() !== p.from) {
+      throw new Error(`the red waits on step ${walk.index()}, not on step ${p.from}`);
     }
-    await new Promise<void>((resolve, reject) => {
-      let heard = false;
-      const frame = () => {
-        try {
-          const now = performance.now();
-          if (now - started > (p.timeoutMs ?? 45_000)) {
-            reject(new Error(`the run did not stop; sent ${report.sent.length} steps`));
-            return;
-          }
-          const h = timing.heardNow();
-          if (!h) {
-            if (heard) resolve();
-            else requestAnimationFrame(frame);
-            return;
-          }
-          heard = true;
-          // Read on every playing frame until a note goes out, before this frame sends one: the
-          // last reading is the page as the first note-on is sent, wherever the start delay, a
-          // flight or a slow frame left the clock (a window inside the start delay alone can be
-          // missed by every frame when the page is loaded).
-          if (report.sent.length === 0) {
-            report.beforeFirstNote = {
-              marks: document.querySelectorAll('.timing-mark').length,
-              status: document.querySelector('.dock [role="status"]')?.textContent ?? '',
-              perfSec: h.perfSec,
-            };
-          }
-          const run = timing.passes();
-          const ordinal = run.findIndex((pass) => pass.pass === h.pass);
-          if (ordinal < 0 || ordinal >= p.passes.length) {
-            requestAnimationFrame(frame);
-            return;
-          }
-          const axisNow = axis(ordinal, h.perfSec);
-          for (let i = 0; i < pending.length;) {
-            const q = pending[i]!;
-            const target = q.base + ((q.offsetMs ?? 0) / 1000) * h.factor;
-            if (target > axisNow) {
-              i++;
-              continue;
-            }
-            pending.splice(i, 1);
-            const atMs = now - ((axisNow - target) / h.factor) * 1000;
-            for (const midi of q.pitches) host.send([0x90, midi, 100], undefined, atMs);
-            report.sent.push({
-              pass: q.pass,
-              index: q.index,
-              pitches: q.pitches,
-              target,
-              axis: axisNow,
-              atMs,
-              sentMs: performance.now(),
-            });
-            releases.push(
-              new Promise<void>((done) =>
-                setTimeout(() => {
-                  for (const midi of q.pitches) host.send([0x80, midi, 0]);
-                  done();
-                }, holdMs),
-              ),
+
+    // The presses (P) and the releases (R), in performance.now() ms.
+    const t0 = performance.now() + 50;
+    const press: number[] = [];
+    let paused = 0;
+    for (let i = p.from; i <= p.to; i++) {
+      if (i > p.from) paused += p.pauses?.[i] ?? 0;
+      press.push(
+        t0 + (steps[i]!.perfSec - first.perfSec) * p.msPerSec + (p.offsets?.[i] ?? 0) + paused,
+      );
+    }
+    for (let k = 1; k < press.length; k++) {
+      if (!(press[k]! > press[k - 1]!)) {
+        throw new Error(`the plan presses step ${p.from + k} before step ${p.from + k - 1}`);
+      }
+    }
+    const release = press.map((t, k) => {
+      const held = t + steps[p.from + k]!.holdMs + 200;
+      return k < press.length - 1 ? Math.max(press[k + 1]! - 100, held) : held;
+    });
+    for (let k = 0; k < press.length; k++) {
+      for (const midi of steps[p.from + k]!.pitches) {
+        for (let j = k + 1; j < press.length; j++) {
+          if (steps[p.from + j]!.pitches.includes(midi) && press[j]! < release[k]! + 30) {
+            throw new Error(
+              `the plan presses ${midi} again before it comes up (step ${p.from + j} after step ${p.from + k})`,
             );
           }
-          if (
-            p.pauseAt &&
-            report.pausedAxis === null &&
-            axisNow >= axis(p.pauseAt.pass, p.pauseAt.perfSec)
-          ) {
-            report.pausedAxis = axisNow;
-            playButton()?.click();
+        }
+      }
+    }
+
+    // The events in time order, a release before a press at the same instant.
+    const events: { t: number; on: boolean; index: number; pitches: number[] }[] = [];
+    press.forEach((t, k) => {
+      const { pitches } = steps[p.from + k]!;
+      events.push({ t, on: true, index: p.from + k, pitches });
+      events.push({ t: release[k]!, on: false, index: p.from + k, pitches });
+    });
+    events.sort((a, b) => a.t - b.t || (a.on === b.on ? 0 : a.on ? 1 : -1));
+
+    const report: RhythmReport = { sent: [] };
+    const deadline = performance.now() + (p.timeoutMs ?? 60_000);
+    await new Promise<void>((resolve, reject) => {
+      let next = 0;
+      const tick = () => {
+        try {
+          if (performance.now() > deadline) {
+            reject(new Error(`the plan did not finish; sent ${report.sent.length} steps`));
+            return;
           }
-          requestAnimationFrame(frame);
+          while (next < events.length && performance.now() >= events[next]!.t) {
+            const event = events[next++]!;
+            if (event.on) {
+              report.sent.push({
+                index: event.index,
+                pitches: [...event.pitches],
+                atMs: event.t,
+                sentMs: performance.now(),
+                marks: document.querySelectorAll('.timing-mark').length,
+                status: document.querySelector('.dock [role="status"]')?.textContent ?? '',
+              });
+            }
+            // The stamp is the scheduled instant, never later than now.
+            for (const midi of event.pitches) {
+              host.send(event.on ? [0x90, midi, 100] : [0x80, midi, 0], undefined, event.t);
+            }
+          }
+          if (next < events.length) setTimeout(tick, 2);
+          else resolve();
         } catch (error) {
           reject(error instanceof Error ? error : new Error(String(error)));
         }
       };
-      requestAnimationFrame(frame);
+      setTimeout(tick, 2);
     });
-    await Promise.all(releases);
+    await new Promise<void>((resolve, reject) => {
+      const look = () => {
+        if (walk.index() !== p.to) resolve();
+        else if (performance.now() > deadline) {
+          reject(new Error(`the red stayed on step ${p.to} after its last release`));
+        } else requestAnimationFrame(look);
+      };
+      look();
+    });
     return report;
   }, plan);
-}
-
-/** Hearings of the steps `indices` in pass `pass`, on time unless `offsets` or `skip` say. */
-export function timedHearings(
-  indices: readonly number[],
-  o: { pass?: number; offsets?: Record<number, number>; skip?: readonly number[] } = {},
-): TimedHearing[] {
-  return indices.map((index) => ({
-    pass: o.pass ?? 0,
-    index,
-    offsetMs: o.offsets?.[index] ?? 0,
-    skip: o.skip?.includes(index) ?? false,
-  }));
 }

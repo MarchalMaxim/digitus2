@@ -50,9 +50,6 @@ export const score = {
       click: 'Click the page once to hear the other hand.',
       tap: 'Tap the page once to hear the other hand.',
     },
-    /** The status line after a release that came too early, while the red waits for the length (issue 185); `count` is the notes of the step. */
-    holdLonger: (count: number): string =>
-      count > 1 ? 'Hold the red notes a little longer.' : 'Hold the red note a little longer.',
     /** The status line the first time the timing rings appear in a score view (issue 192): what a ring before and after a note means. */
     timingExplain: 'A ring before a note means it came early; after it, late.',
     /** The button that opens and closes the practice settings (speed, loop, hands). */

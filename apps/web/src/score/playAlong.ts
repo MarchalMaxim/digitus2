@@ -26,7 +26,10 @@ function requiredPitch(n: Note): number {
   return first && Math.abs(first.onsetSec - n.onsetSec) <= ALONG_EPS ? first.midi : n.midi;
 }
 
-/** A release after this fraction of a step's hold passes the step at the release (issue 185). */
+/**
+ * A release after this fraction of a key's own note is one the key levels forgive (issue 200). The
+ * walk does not read it: a release never passes a step (issue 204).
+ */
 export const HOLD_TOLERANCE = 0.8;
 
 /** The times of one step (issue 185), aligned with `alongSteps`' steps. Performance seconds. */
@@ -228,10 +231,28 @@ export function anchorStep(
 }
 
 /**
- * The step's hold in performance seconds (issue 185): the gap to the next step, never longer than
- * the step's shortest note, so a rest after a note is not waited out. The piece's last step has no
- * gap and holds its shortest note; the last step of `loop` has the time the note sounds before
- * Play would loop back, `loop.to - perfSec`. Never below 0, and 0 for an index outside the steps.
+ * The gap from step `index` to the next step in walk order, in performance seconds (issue 204): the
+ * next step's onset minus this one's; for the last step of `loop`, `loop.to` minus its onset (the
+ * time it sounds before Play would loop back). Null after the piece's last step (no loop holds it)
+ * and for an index outside the steps. A loop that holds no step counts as no loop.
+ */
+export function stepGapSec(
+  steps: readonly AlongStep[],
+  index: number,
+  loop: PerfRange | null,
+): number | null {
+  const step = steps[index];
+  if (!step) return null;
+  const span = loop ? loopSpan(steps, loop) : null;
+  if (loop && span && index === span.last) return loop.to - step.perfSec;
+  if (index + 1 < steps.length) return steps[index + 1]!.perfSec - step.perfSec;
+  return null;
+}
+
+/**
+ * Unchanged in what it returns: the gap (`stepGapSec`, Infinity when null) never longer than the
+ * step's shortest note, never below 0, and 0 for an index outside the steps. The timing judge's
+ * "note length up to the next step".
  */
 export function holdSec(
   steps: readonly AlongStep[],
@@ -239,14 +260,9 @@ export function holdSec(
   index: number,
   loop: PerfRange | null,
 ): number {
-  const step = steps[index];
   const time = times[index];
-  if (!step || !time) return 0;
-  const span = loop ? loopSpan(steps, loop) : null;
-  let gap = Infinity;
-  if (loop && span && index === span.last) gap = loop.to - step.perfSec;
-  else if (index + 1 < steps.length) gap = steps[index + 1]!.perfSec - step.perfSec;
-  return Math.max(0, Math.min(gap, time.shortestSec));
+  if (!steps[index] || !time) return 0;
+  return Math.max(0, Math.min(stepGapSec(steps, index, loop) ?? Infinity, time.shortestSec));
 }
 
 /** The step after `index` in walk order: the loop's span's first after its last, -1 after the end. */
@@ -321,9 +337,8 @@ export function liftAt(presses: Presses, midi: number): Presses {
 }
 
 /**
- * When the step starts running: every pitch held and fresh, counted from the latest press among
- * them; null while it does not run. Issue 184's accompaniment starts here. A key with no press
- * time counts as held since forever, which makes the untimed rule the timed one with no presses.
+ * When the step's run started: every pitch held and fresh, counted from the latest press among
+ * them; null while it does not run. A key with no press time counts as held since forever.
  */
 export function runSince(step: AlongStep, keys: Keys, presses: Presses): number | null {
   let since = -Infinity;
@@ -342,181 +357,71 @@ export interface PassedRun {
   sinceMs: number;
 }
 
-/** What the pass loop leaves behind (`walk`). */
-interface Walked {
+/** What `advance` leaves behind. */
+export interface Advanced {
   keys: Keys;
+  /** The press times, as given: a pass spends keys, it never lifts them. */
   presses: Presses;
   move: AlongMove;
   passed: number;
   /** The indices of the steps passed, in the order passed. */
   passedSteps: number[];
-  /** The same steps, each with the start of the run that passed it (`runSince`). */
+  /**
+   * The same steps, each with the start of the run that passed it (`runSince`, issue 192): a step
+   * pressed before the walk reached it counts from its own press, a chord from its last key.
+   * `passedRuns.map((r) => r.index)` equals `passedSteps`.
+   */
   passedRuns: PassedRun[];
   /** The last of `passedSteps`, -1 when none passed. */
   last: number;
-  early: boolean;
+  /** The step the walk is on after it: the cue's index; `index` when it stays; -1 on finish. */
   at: number;
 }
 
-/** A running step passes once it has been held for this long, less the float sum's slack. */
-const HOLD_SLACK_MS = 1e-6;
-
 /**
- * The pass loop of `advance` and `settle`. From step `index`: while the step runs (its pitches
- * all held and fresh) and has been held for its time at `nowMs` (`holdMsAt`), mark its pitches
- * used and go to the next step (inside `loop`, after its last step back to its first; without a
- * loop, after the last step: finish, and stop). At most `steps.length` passes.
- *
- * `releasing`, a key coming up now, is judged against the step the red would wait on had the
- * timer fired on time: the first step of the chain whose pitches include it. A release after
- * `HOLD_TOLERANCE` of that step's hold passes it before the key goes (the key is then spent, so no
- * later step is judged with it); an earlier one is `early` and ends the chain there, also after
- * earlier passes. The key is removed from `keys` and `presses` in the result.
- */
-function walk(
-  steps: readonly AlongStep[],
-  index: number,
-  keys: Keys,
-  presses: Presses,
-  loop: PerfRange | null,
-  nowMs: number,
-  holdMsAt: (index: number) => number,
-  releasing: number | undefined,
-): Walked {
-  const done = (
-    held: Keys,
-    move: AlongMove,
-    passed: number,
-    early: boolean,
-    at: number,
-  ): Walked => ({
-    keys: releasing === undefined ? held : releaseKey(held, releasing),
-    presses: releasing === undefined ? presses : liftAt(presses, releasing),
-    move,
-    passed,
-    passedSteps,
-    passedRuns,
-    last: passedSteps.length > 0 ? passedSteps[passedSteps.length - 1]! : -1,
-    early,
-    at,
-  });
-  const passedSteps: number[] = [];
-  const passedRuns: PassedRun[] = [];
-  if (index < 0 || index >= steps.length) return done(keys, { kind: 'stay' }, 0, false, index);
-  const span = loop ? loopSpan(steps, loop) : null;
-  let at = index;
-  let passed = 0;
-  let early = false;
-  let held = keys;
-  while (passed < steps.length) {
-    const step = steps[at]!;
-    const since = runSince(step, held, presses);
-    if (since === null) break;
-    const letGo = releasing !== undefined && step.pitches.includes(releasing);
-    const due = holdMsAt(at) * (letGo ? HOLD_TOLERANCE : 1);
-    if (!(nowMs - since >= due - HOLD_SLACK_MS)) {
-      early = letGo;
-      break;
-    }
-    const used = new Map(held);
-    for (const midi of step.pitches) used.set(midi, false);
-    held = used;
-    passed++;
-    passedSteps.push(at);
-    passedRuns.push({ index: at, sinceMs: since });
-    const next = nextStep(steps, at, span);
-    if (next < 0) return done(held, { kind: 'finish' }, passed, false, -1);
-    at = next;
-  }
-  if (passed === 0) return done(keys, { kind: 'stay' }, 0, early, index);
-  return done(held, { kind: 'cue', index: at }, passed, early, at);
-}
-
-/**
- * The untimed rule. From step `index`: while the current step's pitches are all held and fresh,
- * mark them used and go to the next step (inside `loop`, after its last step back to its first;
- * without a loop, after the last step: finish, and stop). At most `steps.length` passes. `passed`
- * counts them, and `last` is the index of the last step passed (-1 when none). A step that does
- * not pass leaves the keys as they are, so a chord can be played apart.
+ * The walk's one rule (issues 182 and 204). From step `index`: while the step's pitches are all held
+ * and fresh, mark them used and go to the next step (inside `loop`, after its last step back to its
+ * first; without a loop, after the last step: finish, and stop). At most `steps.length` passes. A
+ * step that does not pass leaves the keys as they are, so a chord can be played apart. Each step
+ * passed is recorded with `runSince` from `presses`; a key with no press time counts as held since
+ * forever.
  */
 export function advance(
   steps: readonly AlongStep[],
   index: number,
   keys: Keys,
+  presses: Presses,
   loop: PerfRange | null,
-): { keys: Keys; move: AlongMove; passed: number; last: number } {
-  const walked = walk(steps, index, keys, NO_PRESSES, loop, Infinity, () => 0, undefined);
-  return { keys: walked.keys, move: walked.move, passed: walked.passed, last: walked.last };
-}
-
-export interface SettleInput {
-  steps: readonly AlongStep[];
-  times: readonly StepTime[];
-  index: number;
-  keys: Keys;
-  presses: Presses;
-  loop: PerfRange | null;
-  nowMs: number;
-  /** The tempo factor: real seconds = performance seconds / factor. */
-  factor: number;
-  /** A key coming up now: judged against the running step before it is removed. */
-  releasing?: number;
-}
-
-export interface Settled {
-  keys: Keys;
-  presses: Presses;
-  move: AlongMove;
-  passed: number;
-  /** The indices of the steps passed, in the order passed (the steps of the chain). */
-  passedSteps: number[];
-  /**
-   * The steps passed, in the order passed, each with the start of the run that passed it (issue
-   * 192): a step pressed before the red reached it counts from its own press, a chord from its
-   * last key. `passedRuns.map((r) => r.index)` equals `passedSteps`.
-   */
-  passedRuns: PassedRun[];
-  /** The last of `passedSteps`, -1 when none passed. */
-  last: number;
-  /**
-   * A release of the running step's pitch before HOLD_TOLERANCE of its hold; also after passes,
-   * when the step the chain ends on is the one released from.
-   */
-  early: boolean;
-  /** The step the red is on after the settle (the cue's index; `index` when it stays; -1 on finish). */
-  at: number;
-  /** When the step at `at` is due (runSince + hold), null when it does not run. */
-  wakeAtMs: number | null;
-  /** The step at `at` running: its index and since when, else null. */
-  run: { index: number; sinceMs: number } | null;
-}
-
-/**
- * The timed rule (issue 185). A running step passes once it has been held for its hold, the
- * `holdSec` converted to real milliseconds at the tempo `factor`; a release of one of its pitches
- * after `HOLD_TOLERANCE` of that passes it at the release, an earlier one sets `early` and leaves
- * the red and the other keys. After a pass, the next step is checked at the same `nowMs` against
- * its own run, so a chain covers exactly the steps whose time is up. `advance` is this rule with
- * no hold. `releasing` is removed from `keys` and `presses` in the result.
- */
-export function settle(input: SettleInput): Settled {
-  const { steps, times, loop, factor } = input;
-  const holdMsAt = (index: number): number => (holdSec(steps, times, index, loop) * 1000) / factor;
-  const walked = walk(
-    steps,
-    input.index,
-    input.keys,
-    input.presses,
-    loop,
-    input.nowMs,
-    holdMsAt,
-    input.releasing,
-  );
-  const step = steps[walked.at];
-  const since = step ? runSince(step, walked.keys, walked.presses) : null;
-  return {
-    ...walked,
-    wakeAtMs: since === null ? null : since + holdMsAt(walked.at),
-    run: since === null ? null : { index: walked.at, sinceMs: since },
-  };
+): Advanced {
+  const passedSteps: number[] = [];
+  const passedRuns: PassedRun[] = [];
+  const done = (held: Keys, move: AlongMove, at: number): Advanced => ({
+    keys: held,
+    presses,
+    move,
+    passed: passedSteps.length,
+    passedSteps,
+    passedRuns,
+    last: passedSteps.length > 0 ? passedSteps[passedSteps.length - 1]! : -1,
+    at,
+  });
+  if (index < 0 || index >= steps.length) return done(keys, { kind: 'stay' }, index);
+  const span = loop ? loopSpan(steps, loop) : null;
+  let at = index;
+  let held = keys;
+  while (passedSteps.length < steps.length) {
+    const step = steps[at]!;
+    const since = runSince(step, held, presses);
+    if (since === null) break;
+    const used = new Map(held);
+    for (const midi of step.pitches) used.set(midi, false);
+    held = used;
+    passedSteps.push(at);
+    passedRuns.push({ index: at, sinceMs: since });
+    const next = nextStep(steps, at, span);
+    if (next < 0) return done(held, { kind: 'finish' }, -1);
+    at = next;
+  }
+  if (passedSteps.length === 0) return done(keys, { kind: 'stay' }, index);
+  return done(held, { kind: 'cue', index: at }, at);
 }

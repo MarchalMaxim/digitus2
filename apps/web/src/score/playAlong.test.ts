@@ -28,16 +28,14 @@ import {
   pressKey,
   releaseKey,
   runSince,
-  settle,
   spendAll,
   stepAfter,
+  stepGapSec,
   type AlongStep,
   type Keys,
   type PerfRange,
   type Presses,
-  type Settled,
   type StepNotes,
-  type StepTime,
 } from './playAlong.js';
 
 const form = (name: string): string =>
@@ -495,7 +493,7 @@ describe('advance', () => {
   const twinkle = [step(0, 60), step(1, 60), step(2, 67), step(3, 67), step(4, 69)];
 
   it('passes a single fresh key and marks it used', () => {
-    const r = advance([step(0, 60), step(1, 62)], 0, held(60), null);
+    const r = advance([step(0, 60), step(1, 62)], 0, held(60), NO_PRESSES, null);
     expect(r.move).toEqual({ kind: 'cue', index: 1 });
     expect(r.passed).toBe(1);
     expect(state(r.keys)).toEqual([[60, false]]);
@@ -503,22 +501,22 @@ describe('advance', () => {
 
   it('stays on a wrong key and spends nothing', () => {
     const keys = held(61);
-    const r = advance([step(0, 60), step(1, 62)], 0, keys, null);
+    const r = advance([step(0, 60), step(1, 62)], 0, keys, NO_PRESSES, null);
     expect(r.move).toEqual({ kind: 'stay' });
     expect(r.passed).toBe(0);
     expect(r.keys).toBe(keys);
   });
 
   it('stays with no key held', () => {
-    expect(advance([step(0, 60)], 0, NO_KEYS, null).move).toEqual({ kind: 'stay' });
+    expect(advance([step(0, 60)], 0, NO_KEYS, NO_PRESSES, null).move).toEqual({ kind: 'stay' });
   });
 
   it('stays on a chord with two of three keys, then the third passes', () => {
     const steps = [step(0, 60, 64, 67), step(1, 72)];
-    const two = advance(steps, 0, held(60, 64), null);
+    const two = advance(steps, 0, held(60, 64), NO_PRESSES, null);
     expect(two.move).toEqual({ kind: 'stay' });
     expect(two.passed).toBe(0);
-    const three = advance(steps, 0, pressKey(two.keys, 67), null);
+    const three = advance(steps, 0, pressKey(two.keys, 67), NO_PRESSES, null);
     expect(three.move).toEqual({ kind: 'cue', index: 1 });
     expect(three.passed).toBe(1);
     expect(state(three.keys)).toEqual([
@@ -533,45 +531,48 @@ describe('advance', () => {
     let keys = NO_KEYS;
     for (const midi of [60, 64]) {
       keys = pressKey(keys, midi);
-      const r = advance(steps, 0, keys, null);
+      const r = advance(steps, 0, keys, NO_PRESSES, null);
       expect(r.move).toEqual({ kind: 'stay' });
       keys = r.keys;
     }
     keys = pressKey(keys, 67);
-    expect(advance(steps, 0, keys, null).move).toEqual({ kind: 'cue', index: 1 });
+    expect(advance(steps, 0, keys, NO_PRESSES, null).move).toEqual({ kind: 'cue', index: 1 });
   });
 
   it('stays when a chord key was released before the last was down', () => {
     const steps = [step(0, 60, 64), step(1, 72)];
     let keys = held(60);
-    keys = advance(steps, 0, keys, null).keys;
+    keys = advance(steps, 0, keys, NO_PRESSES, null).keys;
     keys = releaseKey(keys, 60);
     keys = pressKey(keys, 64);
-    expect(advance(steps, 0, keys, null).move).toEqual({ kind: 'stay' });
+    expect(advance(steps, 0, keys, NO_PRESSES, null).move).toEqual({ kind: 'stay' });
     // Pressing the first key again completes it.
-    expect(advance(steps, 0, pressKey(keys, 60), null).move).toEqual({ kind: 'cue', index: 1 });
+    expect(advance(steps, 0, pressKey(keys, 60), NO_PRESSES, null).move).toEqual({
+      kind: 'cue',
+      index: 1,
+    });
   });
 
   it('needs a release and a fresh press for a repeated pitch (C C)', () => {
-    const first = advance(twinkle, 0, held(60), null);
+    const first = advance(twinkle, 0, held(60), NO_PRESSES, null);
     expect(first.move).toEqual({ kind: 'cue', index: 1 });
     expect(first.passed).toBe(1);
     // The same C, still held and used, does not pass the second C.
-    const again = advance(twinkle, 1, first.keys, null);
+    const again = advance(twinkle, 1, first.keys, NO_PRESSES, null);
     expect(again.move).toEqual({ kind: 'stay' });
     // Released and pressed again, it does.
     const fresh = pressKey(releaseKey(first.keys, 60), 60);
-    const second = advance(twinkle, 1, fresh, null);
+    const second = advance(twinkle, 1, fresh, NO_PRESSES, null);
     expect(second.move).toEqual({ kind: 'cue', index: 2 });
     expect(second.passed).toBe(1);
   });
 
   it('chains an early press of the next steps into one cue at the end of the chain', () => {
-    const r = advance(twinkle, 0, held(60, 67), null);
+    const r = advance(twinkle, 0, held(60, 67), NO_PRESSES, null);
     // Step 0 passes on C; step 1 (C again) needs a fresh C and stops the chain at step 1.
     expect(r.move).toEqual({ kind: 'cue', index: 1 });
     const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65)];
-    const chained = advance(steps, 0, held(60, 62, 64), null);
+    const chained = advance(steps, 0, held(60, 62, 64), NO_PRESSES, null);
     expect(chained.move).toEqual({ kind: 'cue', index: 3 });
     expect(chained.passed).toBe(3);
     expect(state(chained.keys)).toEqual([
@@ -583,14 +584,14 @@ describe('advance', () => {
 
   it('chains from a step other than the first', () => {
     const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65)];
-    const r = advance(steps, 1, held(62, 64), null);
+    const r = advance(steps, 1, held(62, 64), NO_PRESSES, null);
     expect(r.move).toEqual({ kind: 'cue', index: 3 });
     expect(r.passed).toBe(2);
   });
 
   it('finishes on the last step without a loop', () => {
     const steps = [step(0, 60), step(1, 62)];
-    const r = advance(steps, 1, held(62), null);
+    const r = advance(steps, 1, held(62), NO_PRESSES, null);
     expect(r.move).toEqual({ kind: 'finish' });
     expect(r.passed).toBe(1);
     expect(state(r.keys)).toEqual([[62, false]]);
@@ -598,7 +599,7 @@ describe('advance', () => {
 
   it('finishes at the end of a chain that runs off the piece', () => {
     const steps = [step(0, 60), step(1, 62), step(2, 64)];
-    const r = advance(steps, 0, held(60, 62, 64), null);
+    const r = advance(steps, 0, held(60, 62, 64), NO_PRESSES, null);
     expect(r.move).toEqual({ kind: 'finish' });
     expect(r.passed).toBe(3);
   });
@@ -606,28 +607,28 @@ describe('advance', () => {
   it('wraps from the last step of a loop to its first', () => {
     const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
     const loop: PerfRange = { from: 2, to: 4 };
-    const r = advance(steps, 3, held(65), loop);
+    const r = advance(steps, 3, held(65), NO_PRESSES, loop);
     expect(r.move).toEqual({ kind: 'cue', index: 2 });
     expect(r.passed).toBe(1);
     // Inside the loop it moves on as usual.
-    expect(advance(steps, 2, held(64), loop).move).toEqual({ kind: 'cue', index: 3 });
+    expect(advance(steps, 2, held(64), NO_PRESSES, loop).move).toEqual({ kind: 'cue', index: 3 });
   });
 
   it('never finishes inside a loop, also when the loop ends at the last step', () => {
     const steps = [step(0, 60), step(1, 62)];
-    const r = advance(steps, 1, held(62), { from: 0, to: 2 });
+    const r = advance(steps, 1, held(62), NO_PRESSES, { from: 0, to: 2 });
     expect(r.move).toEqual({ kind: 'cue', index: 0 });
   });
 
   it('needs a fresh press every lap of a one-step loop', () => {
     const steps = [step(0, 60), step(1, 62)];
     const loop: PerfRange = { from: 1, to: 2 };
-    const lap = advance(steps, 1, held(62), loop);
+    const lap = advance(steps, 1, held(62), NO_PRESSES, loop);
     expect(lap.move).toEqual({ kind: 'cue', index: 1 });
     expect(lap.passed).toBe(1);
-    const stuck = advance(steps, 1, lap.keys, loop);
+    const stuck = advance(steps, 1, lap.keys, NO_PRESSES, loop);
     expect(stuck.move).toEqual({ kind: 'stay' });
-    const next = advance(steps, 1, pressKey(releaseKey(lap.keys, 62), 62), loop);
+    const next = advance(steps, 1, pressKey(releaseKey(lap.keys, 62), 62), NO_PRESSES, loop);
     expect(next.move).toEqual({ kind: 'cue', index: 1 });
     expect(next.passed).toBe(1);
   });
@@ -635,17 +636,20 @@ describe('advance', () => {
   it('makes held keys need a fresh press after an external move (spendAll)', () => {
     const steps = [step(0, 60), step(1, 62)];
     const keys = spendAll(held(60));
-    expect(advance(steps, 0, keys, null).move).toEqual({ kind: 'stay' });
-    expect(advance(steps, 0, pressKey(releaseKey(keys, 60), 60), null).move).toEqual({
+    expect(advance(steps, 0, keys, NO_PRESSES, null).move).toEqual({ kind: 'stay' });
+    expect(advance(steps, 0, pressKey(releaseKey(keys, 60), 60), NO_PRESSES, null).move).toEqual({
       kind: 'cue',
       index: 1,
     });
     // Pressing the held key again, without a release, also refreshes it.
-    expect(advance(steps, 0, pressKey(keys, 60), null).move).toEqual({ kind: 'cue', index: 1 });
+    expect(advance(steps, 0, pressKey(keys, 60), NO_PRESSES, null).move).toEqual({
+      kind: 'cue',
+      index: 1,
+    });
   });
 
   it('ignores extra held keys and leaves them as they are', () => {
-    const r = advance([step(0, 60), step(1, 62)], 0, held(60, 90, 30), null);
+    const r = advance([step(0, 60), step(1, 62)], 0, held(60, 90, 30), NO_PRESSES, null);
     expect(r.move).toEqual({ kind: 'cue', index: 1 });
     expect(state(r.keys)).toEqual([
       [30, true],
@@ -658,32 +662,32 @@ describe('advance', () => {
     // Steps that need nothing always pass: the chain must still end.
     const empty = [step(0), step(1), step(2)];
     const loop: PerfRange = { from: 0, to: 3 };
-    const r = advance(empty, 1, NO_KEYS, loop);
+    const r = advance(empty, 1, NO_KEYS, NO_PRESSES, loop);
     expect(r.passed).toBe(empty.length);
     expect(r.move).toEqual({ kind: 'cue', index: 1 });
     // Without a loop the same steps run off the end.
-    const open = advance(empty, 0, NO_KEYS, null);
+    const open = advance(empty, 0, NO_KEYS, NO_PRESSES, null);
     expect(open.move).toEqual({ kind: 'finish' });
     expect(open.passed).toBe(empty.length);
   });
 
   it('stays for an index outside the steps', () => {
     const keys = held(60);
-    expect(advance([step(0, 60)], -1, keys, null).move).toEqual({ kind: 'stay' });
-    expect(advance([step(0, 60)], 1, keys, null).move).toEqual({ kind: 'stay' });
-    expect(advance([], 0, keys, null).move).toEqual({ kind: 'stay' });
+    expect(advance([step(0, 60)], -1, keys, NO_PRESSES, null).move).toEqual({ kind: 'stay' });
+    expect(advance([step(0, 60)], 1, keys, NO_PRESSES, null).move).toEqual({ kind: 'stay' });
+    expect(advance([], 0, keys, NO_PRESSES, null).move).toEqual({ kind: 'stay' });
   });
 
   it('never changes the map it was given', () => {
     const keys = held(60, 62);
     const before = state(keys);
-    advance([step(0, 60), step(1, 62), step(2, 64)], 0, keys, null);
+    advance([step(0, 60), step(1, 62), step(2, 64)], 0, keys, NO_PRESSES, null);
     expect(state(keys)).toEqual(before);
   });
 
   it('treats a loop that holds no step as no loop', () => {
     const steps = [step(0, 60), step(1, 62)];
-    const r = advance(steps, 1, held(62), { from: 5, to: 9 });
+    const r = advance(steps, 1, held(62), NO_PRESSES, { from: 5, to: 9 });
     expect(r.move).toEqual({ kind: 'finish' });
   });
 
@@ -691,36 +695,36 @@ describe('advance', () => {
     const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
 
     it('is the step a single pass left', () => {
-      expect(advance(steps, 0, held(60), null).last).toBe(0);
-      expect(advance(steps, 2, held(64), null).last).toBe(2);
+      expect(advance(steps, 0, held(60), NO_PRESSES, null).last).toBe(0);
+      expect(advance(steps, 2, held(64), NO_PRESSES, null).last).toBe(2);
     });
 
     it('is the end of a chain, not its start', () => {
-      const r = advance(steps, 0, held(60, 62, 64), null);
+      const r = advance(steps, 0, held(60, 62, 64), NO_PRESSES, null);
       expect(r.passed).toBe(3);
       expect(r.move).toEqual({ kind: 'cue', index: 3 });
       expect(r.last).toBe(2);
-      const from = advance(steps, 1, held(62, 64), null);
+      const from = advance(steps, 1, held(62, 64), NO_PRESSES, null);
       expect(from.passed).toBe(2);
       expect(from.last).toBe(2);
     });
 
     it('is the final step on finish', () => {
-      const r = advance(steps, 4, held(67), null);
+      const r = advance(steps, 4, held(67), NO_PRESSES, null);
       expect(r.move).toEqual({ kind: 'finish' });
       expect(r.last).toBe(4);
-      const chain = advance(steps, 3, held(65, 67), null);
+      const chain = advance(steps, 3, held(65, 67), NO_PRESSES, null);
       expect(chain.move).toEqual({ kind: 'finish' });
       expect(chain.last).toBe(4);
     });
 
     it("is the loop's last step when the pass wraps", () => {
       const loop: PerfRange = { from: 2, to: 4 };
-      const r = advance(steps, 3, held(65), loop);
+      const r = advance(steps, 3, held(65), NO_PRESSES, loop);
       expect(r.move).toEqual({ kind: 'cue', index: 2 });
       expect(r.last).toBe(3);
       // A one-step loop wraps onto itself.
-      const lap = advance([step(0, 60), step(1, 62)], 1, held(62), { from: 1, to: 2 });
+      const lap = advance([step(0, 60), step(1, 62)], 1, held(62), NO_PRESSES, { from: 1, to: 2 });
       expect(lap.move).toEqual({ kind: 'cue', index: 1 });
       expect(lap.last).toBe(1);
     });
@@ -728,55 +732,19 @@ describe('advance', () => {
     it('is the step before the wrap when a chain ends just after one', () => {
       const loop: PerfRange = { from: 2, to: 4 };
       // Passes step 3 (the loop's last), wraps to step 2, passes it: lands on step 3.
-      const r = advance(steps, 3, held(65, 64), loop);
+      const r = advance(steps, 3, held(65, 64), NO_PRESSES, loop);
       expect(r.passed).toBe(2);
       expect(r.move).toEqual({ kind: 'cue', index: 3 });
       expect(r.last).toBe(2);
     });
 
     it('is -1 on stay', () => {
-      expect(advance(steps, 0, NO_KEYS, null).last).toBe(-1);
-      expect(advance(steps, 0, held(61), null).last).toBe(-1);
-      expect(advance(steps, -1, held(60), null).last).toBe(-1);
-      expect(advance(steps, 9, held(60), null).last).toBe(-1);
-      expect(advance([], 0, held(60), null).last).toBe(-1);
+      expect(advance(steps, 0, NO_KEYS, NO_PRESSES, null).last).toBe(-1);
+      expect(advance(steps, 0, held(61), NO_PRESSES, null).last).toBe(-1);
+      expect(advance(steps, -1, held(60), NO_PRESSES, null).last).toBe(-1);
+      expect(advance(steps, 9, held(60), NO_PRESSES, null).last).toBe(-1);
+      expect(advance([], 0, held(60), NO_PRESSES, null).last).toBe(-1);
     });
-  });
-
-  it('is the untimed settle: times of zero, no presses, the clock at infinity (issue 185)', () => {
-    const zero: StepTime = { shortestSec: 0, lengthSec: [], beats: [] };
-    const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
-    const loop: PerfRange = { from: 2, to: 4 };
-    const cases: Array<[number, Keys, PerfRange | null]> = [
-      [0, held(60), null],
-      [0, held(60, 62, 64), null],
-      [1, held(62, 64), null],
-      [4, held(67), null],
-      [4, held(67), { from: 0, to: 5 }],
-      [3, held(65), loop],
-      [2, held(64, 65), loop],
-      [0, held(61), null],
-      [0, NO_KEYS, null],
-      [0, spendAll(held(60)), null],
-      [9, held(60), null],
-      [-1, held(60), null],
-    ];
-    for (const [index, keys, range] of cases) {
-      const plain = advance(steps, index, keys, range);
-      const timed = settle({
-        steps,
-        times: steps.map(() => zero),
-        index,
-        keys,
-        presses: NO_PRESSES,
-        loop: range,
-        nowMs: Infinity,
-        factor: 1,
-      });
-      expect(timed.keys).toEqual(plain.keys);
-      expect(timed.move).toEqual(plain.move);
-      expect(timed.passed).toBe(plain.passed);
-    }
   });
 });
 
@@ -1344,431 +1312,198 @@ describe('the hold of a step', () => {
   });
 });
 
-describe('settle', () => {
-  const quarters = (...midis: number[]): Plan =>
-    planOf(midis.map((midi, tick) => ({ midi, tick })));
-  /** The keys held, each with the time (performance.now ms) it went down. */
+describe('runSince', () => {
   const down = (...pressed: Array<[number, number]>): { keys: Keys; presses: Presses } => ({
     keys: pressed.reduce((keys, [midi]) => pressKey(keys, midi), NO_KEYS),
     presses: pressed.reduce((times, [midi, ms]) => pressAt(times, midi, ms), NO_PRESSES),
   });
-  const settleAt = (
-    plan: Plan,
-    held: { keys: Keys; presses: Presses },
-    nowMs: number,
-    o: { index?: number; loop?: PerfRange | null; factor?: number; releasing?: number } = {},
-  ): Settled =>
-    settle({
-      steps: plan.steps,
-      times: plan.times,
-      index: o.index ?? 0,
-      keys: held.keys,
-      presses: held.presses,
-      loop: o.loop ?? null,
-      nowMs,
-      factor: o.factor ?? 1,
-      ...(o.releasing === undefined ? {} : { releasing: o.releasing }),
-    });
-  const state = (keys: Keys): Array<[number, boolean]> => [...keys].sort((a, b) => a[0] - b[0]);
-  // Every step below holds 500 ms at 120 qpm and factor 1.
+  const chord: AlongStep = { perfSec: 0, pitches: [60, 64] };
 
-  describe('passedSteps', () => {
-    it('names the steps of the chain, in order', () => {
-      const plan = quarters(60, 62, 64, 65);
-      const r = settleAt(plan, down([60, 0], [62, 0], [64, 0]), 500);
-      expect(r.passed).toBe(3);
-      expect(r.passedSteps).toEqual([0, 1, 2]);
-      expect(r.at).toBe(3);
-    });
-
-    it('is empty when nothing passes, and names the last step on a finish', () => {
-      const plan = quarters(60, 62);
-      expect(settleAt(plan, down([60, 0]), 499).passedSteps).toEqual([]);
-      const done = settleAt(plan, down([62, 0]), 500, { index: 1 });
-      expect(done.move).toEqual({ kind: 'finish' });
-      expect(done.passedSteps).toEqual([1]);
-    });
-
-    it('names the step passed at a release', () => {
-      const plan = quarters(60, 62);
-      expect(settleAt(plan, down([60, 0]), 400, { releasing: 60 }).passedSteps).toEqual([0]);
-    });
+  it('is the latest press among the keys of the step', () => {
+    const a = down([60, 100], [64, 250]);
+    expect(runSince(chord, a.keys, a.presses)).toBe(250);
+    const b = down([64, 100], [60, 250]);
+    expect(runSince(chord, b.keys, b.presses)).toBe(250);
   });
 
-  describe('the runs that passed (issue 192)', () => {
-    // Four steps: [60] at 0, [62] at 0.5, [48 64] at 1 and [60] at 1.5, each held for 500 ms.
-    const four = (): Plan =>
-      planOf([
-        { midi: 60, tick: 0 },
-        { midi: 62, tick: 1 },
-        { midi: 48, tick: 2, hand: 'L' },
-        { midi: 64, tick: 2 },
-        { midi: 60, tick: 3 },
-      ]);
-    const runsOf = (r: Settled): Array<[number, number]> =>
-      r.passedRuns.map((run) => [run.index, run.sinceMs]);
-    /** The runs, which always name the steps of `passedSteps`. */
-    const expectRuns = (r: Settled, runs: Array<[number, number]>): void => {
-      expect(runsOf(r)).toEqual(runs);
-      expect(r.passedRuns.map((run) => run.index)).toEqual(r.passedSteps);
-    };
-
-    it('gives a held step with the press that started it', () => {
-      const r = settleAt(four(), down([60, 0]), 500);
-      expect(r.passedRuns).toEqual([{ index: 0, sinceMs: 0 }]);
-      expectRuns(r, [[0, 0]]);
-    });
-
-    it('gives nothing while no step has passed', () => {
-      const r = settleAt(four(), down([60, 0]), 499);
-      expect(r.passedRuns).toEqual([]);
-      expectRuns(r, []);
-    });
-
-    it('counts a legato step from its own press when it was pressed before the first passed', () => {
-      expectRuns(settleAt(four(), down([60, 0], [62, 100]), 600), [
-        [0, 0],
-        [1, 100],
-      ]);
-    });
-
-    it('counts a step pressed ahead from its own press', () => {
-      expectRuns(settleAt(four(), down([62, 50], [60, 200]), 700), [
-        [0, 200],
-        [1, 50],
-      ]);
-    });
-
-    it('counts a rolled chord from its last key', () => {
-      const r = settleAt(four(), down([48, 1000], [64, 1030]), 1530, { index: 2 });
-      expect(r.passedRuns).toEqual([{ index: 2, sinceMs: 1030 }]);
-      expectRuns(r, [[2, 1030]]);
-    });
-
-    it('gives a step passed at a release after four fifths of its hold', () => {
-      expectRuns(settleAt(four(), down([60, 0]), 400, { releasing: 60 }), [[0, 0]]);
-    });
-
-    it('keeps the passes before a release too early, which is early at the next step', () => {
-      const r = settleAt(four(), down([60, 0], [62, 450]), 600, { releasing: 62 });
-      expect(r.passedRuns).toEqual([{ index: 0, sinceMs: 0 }]);
-      expect(r.early).toBe(true);
-      expect(r.at).toBe(1);
-      expectRuns(r, [[0, 0]]);
-    });
-
-    it('gives the steps either side of a loop wrap, each from its own press', () => {
-      const loop: PerfRange = { from: 0.5, to: 1.5 };
-      const r = settleAt(four(), down([64, 0], [48, 0], [62, 10]), 1000, { index: 2, loop });
-      expect(r.passedRuns.map((run) => run.index)).toEqual([2, 1]);
-      expectRuns(r, [
-        [2, 0],
-        [1, 10],
-      ]);
-    });
-
-    it('gives the last step on the finish', () => {
-      const r = settleAt(four(), down([60, 0]), 500, { index: 3 });
-      expect(r.move.kind).toBe('finish');
-      expect(r.passedRuns).toEqual([{ index: 3, sinceMs: 0 }]);
-      expectRuns(r, [[3, 0]]);
-    });
+  it('is null while a key is missing or spent', () => {
+    const one = down([60, 100]);
+    expect(runSince(chord, one.keys, one.presses)).toBeNull();
+    const both = down([60, 100], [64, 250]);
+    expect(runSince(chord, spendAll(both.keys), both.presses)).toBeNull();
   });
 
-  describe('last, the step passed last (issue 184)', () => {
-    it('is the end of the chain, and -1 when nothing passes', () => {
-      const plan = quarters(60, 62, 64, 65);
-      expect(settleAt(plan, down([60, 0], [62, 0], [64, 0]), 500).last).toBe(2);
-      expect(settleAt(plan, down([60, 0]), 499).last).toBe(-1);
-      expect(settleAt(plan, down([60, 0]), 500).last).toBe(0);
-    });
-
-    it('is the final step on a finish, and the step passed at a release', () => {
-      const plan = quarters(60, 62);
-      expect(settleAt(plan, down([62, 0]), 500, { index: 1 }).last).toBe(1);
-      expect(settleAt(plan, down([60, 0]), 400, { releasing: 60 }).last).toBe(0);
-    });
-
-    it('is the same as advance gives with no hold', () => {
-      const plan = quarters(60, 62, 64);
-      const keys = pressKey(pressKey(NO_KEYS, 60), 62);
-      const untimed = advance(plan.steps, 0, keys, null);
-      const timed = settleAt(plan, { keys, presses: NO_PRESSES }, 0);
-      expect(timed.last).toBe(untimed.last);
-    });
+  it('ignores the keys the step does not ask for', () => {
+    const a = down([60, 100], [64, 250], [90, 900]);
+    expect(runSince(chord, a.keys, a.presses)).toBe(250);
   });
 
-  describe('runSince', () => {
-    const chord: AlongStep = { perfSec: 0, pitches: [60, 64] };
-
-    it('is the latest press among the keys of the step', () => {
-      const a = down([60, 100], [64, 250]);
-      expect(runSince(chord, a.keys, a.presses)).toBe(250);
-      const b = down([64, 100], [60, 250]);
-      expect(runSince(chord, b.keys, b.presses)).toBe(250);
-    });
-
-    it('is null while a key is missing or spent', () => {
-      const one = down([60, 100]);
-      expect(runSince(chord, one.keys, one.presses)).toBeNull();
-      const both = down([60, 100], [64, 250]);
-      expect(runSince(chord, spendAll(both.keys), both.presses)).toBeNull();
-    });
-
-    it('ignores the keys the step does not ask for', () => {
-      const a = down([60, 100], [64, 250], [90, 900]);
-      expect(runSince(chord, a.keys, a.presses)).toBe(250);
-    });
-
-    it('counts a key with no press time as held since forever, and an empty step too', () => {
-      expect(runSince(chord, pressKey(pressKey(NO_KEYS, 60), 64), NO_PRESSES)).toBe(-Infinity);
-      expect(runSince({ perfSec: 0, pitches: [] }, NO_KEYS, NO_PRESSES)).toBe(-Infinity);
-    });
+  it('counts a key with no press time as held since forever, and an empty step too', () => {
+    expect(runSince(chord, pressKey(pressKey(NO_KEYS, 60), 64), NO_PRESSES)).toBe(-Infinity);
+    expect(runSince({ perfSec: 0, pitches: [] }, NO_KEYS, NO_PRESSES)).toBe(-Infinity);
   });
+});
 
-  it('does not pass before the hold, and passes at it', () => {
-    const plan = quarters(60, 62);
-    const held = down([60, 100]);
-    const early = settleAt(plan, held, 599);
-    expect(early.move).toEqual({ kind: 'stay' });
-    expect(early.passed).toBe(0);
-    expect(early.early).toBe(false);
-    expect(early.at).toBe(0);
-    expect(early.keys).toBe(held.keys);
-    const due = settleAt(plan, held, 600);
-    expect(due.move).toEqual({ kind: 'cue', index: 1 });
-    expect(due.passed).toBe(1);
-    expect(due.at).toBe(1);
-    expect(state(due.keys)).toEqual([[60, false]]);
-    // The slack of a millionth of a millisecond covers the float sum.
-    expect(settleAt(plan, held, 600 - 1e-7).passed).toBe(1);
-  });
-
-  it('is due at the run start plus the hold, and not due while the step does not run', () => {
-    const plan = planOf([
+describe('advance with presses (issue 204)', () => {
+  // Four steps: [60] at 0, [62] at 0.5, [48 64] at 1 and [60] at 1.5.
+  const four = (): Plan =>
+    planOf([
       { midi: 60, tick: 0 },
-      { midi: 64, tick: 0 },
-      { midi: 67, tick: 1 },
+      { midi: 62, tick: 1 },
+      { midi: 48, tick: 2, hand: 'L' },
+      { midi: 64, tick: 2 },
+      { midi: 60, tick: 3 },
     ]);
-    const half = settleAt(plan, down([60, 0]), 100);
-    expect(half.wakeAtMs).toBeNull();
-    expect(half.run).toBeNull();
-    const whole = settleAt(plan, down([60, 0], [64, 50]), 100);
-    expect(whole.run).toEqual({ index: 0, sinceMs: 50 });
-    expect(whole.wakeAtMs).toBe(550);
-    expect(whole.move).toEqual({ kind: 'stay' });
+  const down = (...pressed: Array<[number, number]>): { keys: Keys; presses: Presses } => ({
+    keys: pressed.reduce((keys, [midi]) => pressKey(keys, midi), NO_KEYS),
+    presses: pressed.reduce((times, [midi, ms]) => pressAt(times, midi, ms), NO_PRESSES),
   });
+  const state = (keys: Keys): Array<[number, boolean]> => [...keys].sort((a, b) => a[0] - b[0]);
+  const run = (
+    held: { keys: Keys; presses: Presses },
+    index = 0,
+    loop: PerfRange | null = null,
+  ): ReturnType<typeof advance> => advance(four().steps, index, held.keys, held.presses, loop);
+  /** The invariants of every result. */
+  const expectNamed = (r: ReturnType<typeof advance>, held: { presses: Presses }): void => {
+    expect(r.passedRuns.map((p) => p.index)).toEqual(r.passedSteps);
+    expect(r.presses).toBe(held.presses);
+  };
 
-  it('scales the hold by the tempo factor: due at 2, 1 and 2/3 of it at 0.5, 1 and 1.5', () => {
-    const plan = quarters(60, 62);
-    const wake = (factor: number): number | null =>
-      settleAt(plan, down([60, 100]), 100, { factor }).wakeAtMs;
-    expect(wake(0.5)).toBeCloseTo(100 + 1000, 9);
-    expect(wake(1)).toBeCloseTo(100 + 500, 9);
-    expect(wake(1.5)).toBeCloseTo(100 + 500 / 1.5, 9);
-    // And the pass comes there: 1000 ms at half speed, 333 ms at one and a half.
-    expect(settleAt(plan, down([60, 100]), 1099, { factor: 0.5 }).passed).toBe(0);
-    expect(settleAt(plan, down([60, 100]), 1100, { factor: 0.5 }).passed).toBe(1);
-    expect(settleAt(plan, down([60, 100]), 100 + 330, { factor: 1.5 }).passed).toBe(0);
-    expect(settleAt(plan, down([60, 100]), 100 + 334, { factor: 1.5 }).passed).toBe(1);
-  });
-
-  it('passes a release after 4/5 of the hold at the release, taking the key away', () => {
-    expect(HOLD_TOLERANCE * 500).toBe(400);
-    const plan = quarters(60, 62);
-    const r = settleAt(plan, down([60, 0]), 400, { releasing: 60 });
+  it('passes at the press, with no clock', () => {
+    const held = down([60, 1000]);
+    const r = run(held);
     expect(r.move).toEqual({ kind: 'cue', index: 1 });
     expect(r.passed).toBe(1);
-    expect(r.early).toBe(false);
-    expect(r.keys.has(60)).toBe(false);
-    expect(r.presses.has(60)).toBe(false);
+    expect(r.passedRuns).toEqual([{ index: 0, sinceMs: 1000 }]);
+    expect(r.last).toBe(0);
+    expect(r.at).toBe(1);
+    expectNamed(r, held);
   });
 
-  it('leaves the red for a release before 4/5 of the hold, and the other keys fresh', () => {
-    const plan = planOf([
-      { midi: 60, tick: 0 },
-      { midi: 64, tick: 0 },
-      { midi: 67, tick: 1 },
-    ]);
-    const r = settleAt(plan, down([60, 0], [64, 0]), 399, { releasing: 64 });
+  it('moves nothing on a wrong key', () => {
+    const held = down([61, 0]);
+    const r = run(held);
     expect(r.move).toEqual({ kind: 'stay' });
     expect(r.passed).toBe(0);
-    expect(r.early).toBe(true);
     expect(r.at).toBe(0);
-    expect(state(r.keys)).toEqual([[60, true]]);
-    expect([...r.presses]).toEqual([[60, 0]]);
-    expect(r.run).toBeNull();
-    expect(r.wakeAtMs).toBeNull();
+    expect(state(r.keys)).toEqual(state(held.keys));
+    expect(r.passedRuns).toEqual([]);
+    expect(r.last).toBe(-1);
+    expectNamed(r, held);
   });
 
-  it('runs again from a re-press after an early release', () => {
-    const plan = planOf([
-      { midi: 60, tick: 0 },
-      { midi: 64, tick: 0 },
-      { midi: 67, tick: 1 },
+  it('chains from keys pressed ahead, each from its own press', () => {
+    const held = down([62, 50], [60, 200]);
+    const r = run(held);
+    expect(r.passedRuns).toEqual([
+      { index: 0, sinceMs: 200 },
+      { index: 1, sinceMs: 50 },
     ]);
-    const released = settleAt(plan, down([60, 0], [64, 0]), 300, { releasing: 64 });
-    expect(released.early).toBe(true);
-    const again = {
-      keys: pressKey(released.keys, 64),
-      presses: pressAt(released.presses, 64, 1000),
-    };
-    const r = settleAt(plan, again, 1000);
-    expect(r.run).toEqual({ index: 0, sinceMs: 1000 });
-    expect(r.wakeAtMs).toBe(1500);
-    expect(settleAt(plan, again, 1499).passed).toBe(0);
-    expect(settleAt(plan, again, 1500).passed).toBe(1);
+    expect(r.at).toBe(2);
+    expectNamed(r, held);
   });
 
-  it('counts an early press for the next step from its own press', () => {
-    const plan = quarters(60, 62, 64);
-    const held = down([60, 0], [62, 200]);
-    const first = settleAt(plan, held, 500);
-    expect(first.passed).toBe(1);
-    expect(first.move).toEqual({ kind: 'cue', index: 1 });
-    expect(first.run).toEqual({ index: 1, sinceMs: 200 });
-    expect(first.wakeAtMs).toBe(700);
-    const next = { keys: first.keys, presses: first.presses };
-    expect(settleAt(plan, next, 699, { index: 1 }).passed).toBe(0);
-    const second = settleAt(plan, next, 700, { index: 1 });
-    expect(second.passed).toBe(1);
-    expect(second.move).toEqual({ kind: 'cue', index: 2 });
+  it('counts a rolled chord from its last key', () => {
+    const held = down([48, 1000], [64, 1030]);
+    const r = run(held, 2);
+    expect(r.passedRuns).toEqual([{ index: 2, sinceMs: 1030 }]);
+    expectNamed(r, held);
   });
 
-  it('chains the steps whose time is up, as a timer that fires late would find them', () => {
-    const plan = quarters(60, 62, 64);
-    const held = down([60, 0], [62, 600], [64, 1200]);
-    const late = settleAt(plan, held, 1600);
-    expect(late.passed).toBe(2);
-    expect(late.move).toEqual({ kind: 'cue', index: 2 });
-    expect(late.at).toBe(2);
-    expect(late.run).toEqual({ index: 2, sinceMs: 1200 });
-    expect(late.wakeAtMs).toBe(1700);
-    const due = settleAt(plan, held, 1700);
-    expect(due.passed).toBe(3);
-    expect(due.move).toEqual({ kind: 'finish' });
-    expect(due.at).toBe(-1);
-    expect(due.wakeAtMs).toBeNull();
-    expect(due.run).toBeNull();
+  it('stays on a chord with one key missing', () => {
+    const held = down([48, 1000]);
+    const r = run(held, 2);
+    expect(r.move).toEqual({ kind: 'stay' });
+    expect(r.at).toBe(2);
+    expect(state(r.keys)).toEqual([[48, true]]);
+    expectNamed(r, held);
   });
 
-  it('takes a release that is neither a pass nor early when the key is not of the running step', () => {
-    const plan = quarters(60, 62);
-    const r = settleAt(plan, down([60, 0], [90, 0]), 100, { releasing: 90 });
-    expect(r.passed).toBe(0);
-    expect(r.early).toBe(false);
-    expect(state(r.keys)).toEqual([[60, true]]);
-    expect(r.presses.has(90)).toBe(false);
-    // An early press for the next step, let go while the red's step is not yet due, is no different.
-    const next = settleAt(quarters(60, 62, 64), down([60, 0], [62, 50]), 100, { releasing: 62 });
-    expect(next.passed).toBe(0);
-    expect(next.early).toBe(false);
-    expect(next.at).toBe(0);
-    expect(state(next.keys)).toEqual([[60, true]]);
+  it('wraps the loop', () => {
+    const held = down([64, 0], [48, 0], [62, 10]);
+    const r = run(held, 2, { from: 0.5, to: 1.5 });
+    expect(r.passedRuns.map((p) => [p.index, p.sinceMs])).toEqual([
+      [2, 0],
+      [1, 10],
+    ]);
+    expect(r.move).toEqual({ kind: 'cue', index: 2 });
+    expectNamed(r, held);
   });
 
-  it('judges a release the same whether the timer fired on time or late', () => {
-    const plan = quarters(60, 62, 64);
-    const held = down([60, 0], [62, 200]);
-    // 62 is held from 200, so 4/5 of its hold is up at 600.
-    for (const [releaseMs, passed, early] of [
-      [550, 1, true],
-      [600, 2, false],
-      [650, 2, false],
-    ] as const) {
-      const late = settleAt(plan, held, releaseMs, { releasing: 62 });
-      const timer = settleAt(plan, held, 500);
-      const release = settleAt(plan, timer, releaseMs, { index: timer.at, releasing: 62 });
-      expect(late.passed).toBe(passed);
-      expect(late.passed).toBe(timer.passed + release.passed);
-      expect(late.early).toBe(early);
-      expect(late.early).toBe(release.early);
-      expect(late.at).toBe(release.at);
-      expect(late.keys).toEqual(release.keys);
-      expect(late.presses).toEqual(release.presses);
+  it('finishes', () => {
+    const held = down([60, 0]);
+    const r = run(held, 3);
+    expect(r.move).toEqual({ kind: 'finish' });
+    expect(r.at).toBe(-1);
+    expect(r.last).toBe(3);
+    expect(r.passedRuns).toEqual([{ index: 3, sinceMs: 0 }]);
+    expectNamed(r, held);
+  });
+
+  it('names the same steps in passedSteps and passedRuns', () => {
+    const held = down([60, 5], [62, 6], [48, 7], [64, 8], [60, 9]);
+    const r = run(held);
+    expect(r.passedSteps).toEqual([0, 1, 2]);
+    expectNamed(r, held);
+  });
+
+  it('stays for an index outside the steps', () => {
+    const held = down([60, 0]);
+    for (const index of [-1, 9]) {
+      const r = run(held, index);
+      expect(r.move).toEqual({ kind: 'stay' });
+      expect(r.at).toBe(index);
+      expect(r.passed).toBe(0);
+      expectNamed(r, held);
     }
   });
 
-  it('takes a release while the step does not run as neither a pass nor early', () => {
-    const plan = planOf([
-      { midi: 60, tick: 0 },
-      { midi: 64, tick: 0 },
-      { midi: 67, tick: 1 },
-    ]);
-    const r = settleAt(plan, down([60, 0]), 100, { releasing: 60 });
-    expect(r.passed).toBe(0);
-    expect(r.early).toBe(false);
-    expect(r.keys.size).toBe(0);
-    // A spent key of the step (C C: the first C is still held) is no early release either.
-    const cc = quarters(60, 60);
-    const first = settleAt(cc, down([60, 0]), 500);
-    expect(first.move).toEqual({ kind: 'cue', index: 1 });
-    const letGo = settleAt(cc, { keys: first.keys, presses: first.presses }, 600, {
-      index: 1,
-      releasing: 60,
-    });
-    expect(letGo.passed).toBe(0);
-    expect(letGo.early).toBe(false);
-    expect(letGo.keys.size).toBe(0);
-  });
-
-  it('wraps the loop, finishes the piece, and bounds the chain', () => {
-    const plan = quarters(60, 62, 64, 65);
-    const loop: PerfRange = { from: 1, to: 2 };
-    const wrapped = settleAt(plan, down([65, 0]), 500, { index: 3, loop });
-    expect(wrapped.move).toEqual({ kind: 'cue', index: 2 });
-    expect(wrapped.passed).toBe(1);
-    expect(wrapped.at).toBe(2);
-    const done = settleAt(plan, down([65, 0]), 500, { index: 3 });
-    expect(done.move).toEqual({ kind: 'finish' });
-    expect(done.at).toBe(-1);
-    expect(done.passed).toBe(1);
-    // Steps that ask for nothing always pass: the chain still ends.
-    const none: StepTime = { shortestSec: 0, lengthSec: [], beats: [] };
-    const steps: AlongStep[] = [0, 1, 2].map((perfSec) => ({ perfSec, pitches: [] }));
-    const bounded = settle({
-      steps,
-      times: steps.map(() => none),
-      index: 1,
-      keys: NO_KEYS,
-      presses: NO_PRESSES,
-      loop: { from: 0, to: 3 },
-      nowMs: 0,
-      factor: 1,
-    });
-    expect(bounded.passed).toBe(3);
-    expect(bounded.move).toEqual({ kind: 'cue', index: 1 });
-  });
-
-  it('passes a step of no length at the press', () => {
-    const plan = planOf([
-      { midi: 60, tick: 0, ticks: 0 },
-      { midi: 62, tick: 1 },
-    ]);
-    const r = settleAt(plan, down([60, 100]), 100);
-    expect(r.passed).toBe(1);
-    expect(r.move).toEqual({ kind: 'cue', index: 1 });
-  });
-
-  it('stays for an index outside the steps, still taking the released key away', () => {
-    const plan = quarters(60);
-    const r = settleAt(plan, down([60, 0]), 900, { index: 4, releasing: 60 });
-    expect(r.move).toEqual({ kind: 'stay' });
-    expect(r.passed).toBe(0);
-    expect(r.early).toBe(false);
-    expect(r.keys.size).toBe(0);
-    expect(r.run).toBeNull();
-    expect(r.wakeAtMs).toBeNull();
-  });
-
   it('never changes the maps it was given', () => {
-    const plan = quarters(60, 62);
-    const held = down([60, 0], [62, 0]);
-    const keys = state(held.keys);
-    const presses = [...held.presses];
-    settleAt(plan, held, 900, { releasing: 62 });
-    settleAt(plan, held, 100, { releasing: 60 });
-    expect(state(held.keys)).toEqual(keys);
-    expect([...held.presses]).toEqual(presses);
+    const held = down([60, 0], [62, 10]);
+    const keysBefore = state(held.keys);
+    const pressesBefore = [...held.presses];
+    run(held);
+    expect(state(held.keys)).toEqual(keysBefore);
+    expect([...held.presses]).toEqual(pressesBefore);
+  });
+
+  it('keeps HOLD_TOLERANCE for the key levels (issue 200)', () => {
+    expect(HOLD_TOLERANCE).toBe(0.8);
+  });
+});
+
+describe('stepGapSec (issue 204)', () => {
+  const at = (...secs: number[]): AlongStep[] =>
+    secs.map((perfSec, i) => ({ perfSec, pitches: [60 + i] }));
+  const quarters = at(0, 0.5, 1, 1.5, 2);
+
+  it('is the gap to the next step', () => {
+    expect(stepGapSec(quarters, 1, null)).toBe(0.5);
+  });
+
+  it('counts a rest after the note in the gap', () => {
+    expect(stepGapSec(at(0, 1), 0, null)).toBe(1);
+  });
+
+  it("runs the loop's last step to the loop's end", () => {
+    expect(stepGapSec(quarters, 2, { from: 0, to: 1.25 })).toBeCloseTo(0.25, 12);
+  });
+
+  it("has none after the piece's last step", () => {
+    expect(stepGapSec(quarters, 4, null)).toBeNull();
+  });
+
+  it('runs inside a loop that ends at the last step', () => {
+    expect(stepGapSec(quarters, 4, { from: 0, to: 2.5 })).toBe(0.5);
+  });
+
+  it('has none for an index outside the steps', () => {
+    expect(stepGapSec(quarters, -1, null)).toBeNull();
+    expect(stepGapSec(quarters, 5, null)).toBeNull();
+  });
+
+  it('counts a loop that holds no step as no loop', () => {
+    expect(stepGapSec(quarters, 1, { from: 0.1, to: 0.2 })).toBe(0.5);
   });
 });

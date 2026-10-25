@@ -22,7 +22,7 @@ The event time is the `timeStamp` of the `MIDIMessageEvent`, a `DOMHighResTimeSt
 ## The method
 
 1. Open the app with `?hooks=1` (for example `https://marchalmaxim.github.io/digitus2/?hooks=1`), connect the piano from the library's line and open Twinkle, Twinkle, Little Star. Practice mode stays on.
-2. For each tempo of 60 %, 80 % and 100 % (the Practice panel's Tempo slider): walk the piece from the first step, holding each step for its time and trying to play evenly.
+2. For each tempo of 60 %, 80 % and 100 % (the Practice panel's Tempo slider): walk the piece from the first step, pressing each step in time and trying to play evenly.
 3. In the browser's console, read what the judge saw, for bars the owner calls even:
    - `__digitus2Timing.judged().map((j) => [j.bar, j.index, j.verdict, Math.round(j.offsetMs), Math.round(j.tolMs)])`, the deviation and the tolerance of every judged note since the last clear;
    - `__digitus2Timing.onsets()`, the onsets with their event times.

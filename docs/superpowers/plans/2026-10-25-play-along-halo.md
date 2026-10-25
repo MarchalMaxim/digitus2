@@ -98,16 +98,16 @@ Inside a loop the loop's last step cues the loop's first. Its halo, when the tim
 
 ### 1.10 What goes
 
-| Goes                                                                                                                                          | Where                            |
-| --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `settle`, `SettleInput`, `Settled`, `walk`, `Walked`, `HOLD_SLACK_MS`, `wakeAtMs`, `run`, `releasing`, `early` in the walk                    | `playAlong.ts`                   |
-| the wake-up timer (`timerRef`, its `clearTimeout`s and the `setTimeout` at the end of `decide`), `factor` in the align's dependencies        | `usePlayAlong.ts`                |
-| `LATE_MS`, `handedRef` with `doneSec`, the `result.run` branch and its `elapsedSec` / `heardSec` / `since` / `started` locals                 | `usePlayAlong.ts`                |
-| `early` state, `earlyRef`, `markEarly`, the `hold` hint kind, `AlongHint.kind`, the `lost` local, the `hold()` Playwright hook                | `usePlayAlong.ts`                |
-| `WalkTimingEvent.early`, and `if (e.early) chainRef.current++`                                                                                | `usePlayAlong.ts`, `useWalkTiming.ts` |
-| the `elapsedSec` and `heardSec` parameters of `accompanimentStretches`, `Stretch.heard` and its filter in `accompanimentNotes`                 | `accompaniment.ts`               |
-| `holdLonger` in five languages, the `hold` branch of `scoreStatusLine`                                                                       | `i18n/*/score.ts`, `ScoreView.tsx` |
-| `AlongHook.hold`, `hold()`, `playRedTimed`, `tap()`, `HOLD_MANY`                                                                              | e2e                              |
+| Goes                                                                                                                                  | Where                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `settle`, `SettleInput`, `Settled`, `walk`, `Walked`, `HOLD_SLACK_MS`, `wakeAtMs`, `run`, `releasing`, `early` in the walk            | `playAlong.ts`                        |
+| the wake-up timer (`timerRef`, its `clearTimeout`s and the `setTimeout` at the end of `decide`), `factor` in the align's dependencies | `usePlayAlong.ts`                     |
+| `LATE_MS`, `handedRef` with `doneSec`, the `result.run` branch and its `elapsedSec` / `heardSec` / `since` / `started` locals         | `usePlayAlong.ts`                     |
+| `early` state, `earlyRef`, `markEarly`, the `hold` hint kind, `AlongHint.kind`, the `lost` local, the `hold()` Playwright hook        | `usePlayAlong.ts`                     |
+| `WalkTimingEvent.early`, and `if (e.early) chainRef.current++`                                                                        | `usePlayAlong.ts`, `useWalkTiming.ts` |
+| the `elapsedSec` and `heardSec` parameters of `accompanimentStretches`, `Stretch.heard` and its filter in `accompanimentNotes`        | `accompaniment.ts`                    |
+| `holdLonger` in five languages, the `hold` branch of `scoreStatusLine`                                                                | `i18n/*/score.ts`, `ScoreView.tsx`    |
+| `AlongHook.hold`, `hold()`, `playRedTimed`, `tap()`, `HOLD_MANY`                                                                      | e2e                                   |
 
 ## 2. Pure: `apps/web/src/score/playAlong.ts` (Builder P)
 
@@ -206,32 +206,32 @@ Mechanical edits:
 
 New cases, in a new `describe('advance with presses (issue 204)')`. Use four steps: `[60]` at 0, `[62]` at 0.5, `[48, 64]` at 1 and `[60]` at 1.5 (the `four()` plan of the old runs block). Build keys and presses with `pressKey` and `pressAt`.
 
-| Case                                                           | Input                                                                           | Expected                                                                                 |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| passes at the press, with no clock                             | 60 pressed at 1000; `advance(…, 0, …, null)`                                    | `move` `{cue, 1}`, `passed` 1, `passedRuns` `[{0, 1000}]`, `last` 0, `at` 1              |
-| a wrong key moves nothing                                      | 61 pressed at 0, from 0                                                         | `move` stay, `passed` 0, `at` 0, `keys` the same map, `passedRuns` `[]`, `last` -1        |
-| a chain from keys pressed ahead, each from its own press       | 62 at 50 then 60 at 200, from 0                                                 | `passedRuns` `[{0, 200}, {1, 50}]`, `at` 2                                               |
-| a rolled chord counts from its last key                        | 48 at 1000, 64 at 1030, from 2                                                  | `passedRuns` `[{2, 1030}]`                                                               |
-| a chord with one key missing stays                             | 48 at 1000 alone, from 2                                                        | stay, `at` 2, 48 still fresh                                                             |
-| the loop wraps                                                 | loop `{0.5, 1.5}` (steps 1..2), from 2, 64 and 48 at 0, 62 at 10                | `passedRuns` indices `[2, 1]` with `sinceMs` 0 and 10, `move` `{cue, 2}`                 |
-| the finish                                                     | from 3, 60 at 0                                                                 | `move` finish, `at` -1, `last` 3, `passedRuns` `[{3, 0}]`                                |
-| presses come back as given                                     | any case above                                                                  | `result.presses` is the same object as the input                                         |
-| passedRuns names passedSteps                                   | every case above                                                                | `passedRuns.map((r) => r.index)` equals `passedSteps`                                    |
-| an index outside the steps                                     | from -1 and from 9                                                              | stay, `at` the index, nothing passed                                                     |
-| never changes the maps it was given                            | a chain                                                                         | the input `keys` and `presses` are unchanged                                             |
-| HOLD_TOLERANCE stays for the key levels (issue 200)            | none                                                                            | `HOLD_TOLERANCE` is 0.8                                                                  |
+| Case                                                     | Input                                                            | Expected                                                                           |
+| -------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| passes at the press, with no clock                       | 60 pressed at 1000; `advance(…, 0, …, null)`                     | `move` `{cue, 1}`, `passed` 1, `passedRuns` `[{0, 1000}]`, `last` 0, `at` 1        |
+| a wrong key moves nothing                                | 61 pressed at 0, from 0                                          | `move` stay, `passed` 0, `at` 0, `keys` the same map, `passedRuns` `[]`, `last` -1 |
+| a chain from keys pressed ahead, each from its own press | 62 at 50 then 60 at 200, from 0                                  | `passedRuns` `[{0, 200}, {1, 50}]`, `at` 2                                         |
+| a rolled chord counts from its last key                  | 48 at 1000, 64 at 1030, from 2                                   | `passedRuns` `[{2, 1030}]`                                                         |
+| a chord with one key missing stays                       | 48 at 1000 alone, from 2                                         | stay, `at` 2, 48 still fresh                                                       |
+| the loop wraps                                           | loop `{0.5, 1.5}` (steps 1..2), from 2, 64 and 48 at 0, 62 at 10 | `passedRuns` indices `[2, 1]` with `sinceMs` 0 and 10, `move` `{cue, 2}`           |
+| the finish                                               | from 3, 60 at 0                                                  | `move` finish, `at` -1, `last` 3, `passedRuns` `[{3, 0}]`                          |
+| presses come back as given                               | any case above                                                   | `result.presses` is the same object as the input                                   |
+| passedRuns names passedSteps                             | every case above                                                 | `passedRuns.map((r) => r.index)` equals `passedSteps`                              |
+| an index outside the steps                               | from -1 and from 9                                               | stay, `at` the index, nothing passed                                               |
+| never changes the maps it was given                      | a chain                                                          | the input `keys` and `presses` are unchanged                                       |
+| HOLD_TOLERANCE stays for the key levels (issue 200)      | none                                                             | `HOLD_TOLERANCE` is 0.8                                                            |
 
 New cases, in a new `describe('stepGapSec (issue 204)')` on quarters `[60] [62] [64] [65] [67]` at 0, 0.5, 1, 1.5 and 2:
 
-| Case                                         | Expected                                            |
-| -------------------------------------------- | --------------------------------------------------- |
-| the gap to the next step                     | `stepGapSec(steps, 1, null)` is 0.5                 |
-| a rest after the note is in the gap          | on `[60]@0, [62]@1`: 1                              |
-| the loop's last step runs to the loop's end  | loop `{0, 1.25}`: index 2 gives 0.25                |
-| the piece's last step has none               | index 4, no loop: null                              |
-| inside a loop ending at the last step        | loop `{0, 2.5}`: index 4 gives 0.5                  |
-| an index outside the steps                   | -1 and 5: null                                      |
-| a loop that holds no step is no loop         | loop `{0.1, 0.2}`: index 1 gives 0.5                |
+| Case                                        | Expected                             |
+| ------------------------------------------- | ------------------------------------ |
+| the gap to the next step                    | `stepGapSec(steps, 1, null)` is 0.5  |
+| a rest after the note is in the gap         | on `[60]@0, [62]@1`: 1               |
+| the loop's last step runs to the loop's end | loop `{0, 1.25}`: index 2 gives 0.25 |
+| the piece's last step has none              | index 4, no loop: null               |
+| inside a loop ending at the last step       | loop `{0, 2.5}`: index 4 gives 0.5   |
+| an index outside the steps                  | -1 and 5: null                       |
+| a loop that holds no step is no loop        | loop `{0.1, 0.2}`: index 1 gives 0.5 |
 
 `describe('the hold of a step')` stays as it is and must pass unchanged: it proves `holdSec` did not move.
 
@@ -241,7 +241,14 @@ New cases, in a new `describe('stepGapSec (issue 204)')` on quarters `[60] [62] 
 
 ```ts
 // Pure: the halo of the waiting walk (issue 204). Types and arithmetic only.
-import { ALONG_EPS, stepAfter, stepGapSec, type AlongStep, type PerfRange, type StepNotes } from './playAlong.js';
+import {
+  ALONG_EPS,
+  stepAfter,
+  stepGapSec,
+  type AlongStep,
+  type PerfRange,
+  type StepNotes,
+} from './playAlong.js';
 import { RED_HEAD_SCALE } from './render/timingMarks.js';
 
 /** A halo shorter than this in real time is not drawn: the pulse carries it. */
@@ -310,46 +317,46 @@ export function haloRadius(w: number, progress: number): number;
 
 Plans are plain arrays: `steps` from `(perfSec, ...pitches)` and `notes` as `{ beatSec }`. Factor 1 unless the case says otherwise; `nowMs` 1000.
 
-| Case                                                       | Input (gap, beatSec at `last`)                                    | Expected                                                     |
-| ---------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
-| a quarter in 4/4 has none                                  | 0.5, 0.5                                                          | null                                                         |
-| a half note rings the next step                            | 1.0, 0.5; `last` 0                                                | `{ index: 1, startMs: 1000, ms: 1000, beats: 2 }`            |
-| a dotted quarter in 4/4                                    | 0.75, 0.5                                                         | `ms` 750, `beats` 1.5                                        |
-| a dotted half in 3/4                                       | 1.5, 0.5                                                          | `beats` 3                                                    |
-| a 6/8 dotted quarter is one felt beat: none                | 0.75, 0.75                                                        | null                                                         |
-| a 6/8 dotted half                                          | 1.5, 0.75                                                         | `beats` 2                                                    |
-| a whole note                                               | 2.0, 0.5                                                          | `beats` 4                                                    |
-| a quarter and a quarter rest                               | `[60]@0, [62]@1.0`, 0.5                                           | `ms` 1000                                                    |
-| a chain counts from its last step                          | steps at 0, 0.5, 1, 2; `last` 2                                   | `index` 3, `ms` 1000                                         |
-| the loop's last step runs to the loop's end, wraps         | steps at 0, 0.5, 1; loop `{0, 2}`; `last` 2                       | `index` 0, `ms` 1000                                         |
-| the loop's last step a beat before the end: none           | loop `{0, 1.5}`; `last` 2                                         | null                                                         |
-| the piece's last step: none                                | `last` = last index, no loop                                      | null                                                         |
-| the tempo scales it                                        | half note at factor 1.5, and at 0.5                               | `ms` 666.67 (to 2 places), and 2000                          |
-| the floor at a fast tempo                                  | gap 0.5, beat 0.25: factor 1.5, and factor 1                      | null (333 ms), and `ms` 500                                  |
-| a gap within ALONG_EPS of the beat is the beat             | gap 0.5 + 1e-12, beat 0.5                                         | null                                                         |
-| nothing to ring                                            | `last` -1, `last` past the end, `beatSec` 0, factor 0             | null each                                                    |
+| Case                                               | Input (gap, beatSec at `last`)                        | Expected                                          |
+| -------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------- |
+| a quarter in 4/4 has none                          | 0.5, 0.5                                              | null                                              |
+| a half note rings the next step                    | 1.0, 0.5; `last` 0                                    | `{ index: 1, startMs: 1000, ms: 1000, beats: 2 }` |
+| a dotted quarter in 4/4                            | 0.75, 0.5                                             | `ms` 750, `beats` 1.5                             |
+| a dotted half in 3/4                               | 1.5, 0.5                                              | `beats` 3                                         |
+| a 6/8 dotted quarter is one felt beat: none        | 0.75, 0.75                                            | null                                              |
+| a 6/8 dotted half                                  | 1.5, 0.75                                             | `beats` 2                                         |
+| a whole note                                       | 2.0, 0.5                                              | `beats` 4                                         |
+| a quarter and a quarter rest                       | `[60]@0, [62]@1.0`, 0.5                               | `ms` 1000                                         |
+| a chain counts from its last step                  | steps at 0, 0.5, 1, 2; `last` 2                       | `index` 3, `ms` 1000                              |
+| the loop's last step runs to the loop's end, wraps | steps at 0, 0.5, 1; loop `{0, 2}`; `last` 2           | `index` 0, `ms` 1000                              |
+| the loop's last step a beat before the end: none   | loop `{0, 1.5}`; `last` 2                             | null                                              |
+| the piece's last step: none                        | `last` = last index, no loop                          | null                                              |
+| the tempo scales it                                | half note at factor 1.5, and at 0.5                   | `ms` 666.67 (to 2 places), and 2000               |
+| the floor at a fast tempo                          | gap 0.5, beat 0.25: factor 1.5, and factor 1          | null (333 ms), and `ms` 500                       |
+| a gap within ALONG_EPS of the beat is the beat     | gap 0.5 + 1e-12, beat 0.5                             | null                                              |
+| nothing to ring                                    | `last` -1, `last` past the end, `beatSec` 0, factor 0 | null each                                         |
 
 `haloProgress`, on `{ index: 1, startMs: 1000, ms: 1000, beats: 2 }`:
 
-| Case                                      | Expected                                                                  |
-| ----------------------------------------- | ------------------------------------------------------------------------- |
-| linear                                    | 0 at 1000, 0.25 at 1250, 0.5 at 1500, 0.999 at 1999                       |
-| gone at its end and after                 | null at 2000 and at 5000                                                  |
-| a clock before the start                  | 0 at 900                                                                  |
-| reduced: two beats, two radii             | 0 at 1000 and 1499, 0.5 at 1500 and 1999, null at 2000                    |
-| reduced: a dotted quarter (1.5 beats)     | `beats: 1.5`, `ms: 750`: 0 until 1000 + 500, then 2/3 until 1750, then null |
-| reduced: a whole note                     | `beats: 4`, `ms: 2000`: 0, 0.25, 0.5, 0.75 at 1000, 1500, 2000, 2500      |
-| float slack does not cost a step          | `beats: 3`, `ms: 300`, at 1100: 1/3                                       |
-| no length                                 | `ms: 0`: null                                                             |
+| Case                                  | Expected                                                                    |
+| ------------------------------------- | --------------------------------------------------------------------------- |
+| linear                                | 0 at 1000, 0.25 at 1250, 0.5 at 1500, 0.999 at 1999                         |
+| gone at its end and after             | null at 2000 and at 5000                                                    |
+| a clock before the start              | 0 at 900                                                                    |
+| reduced: two beats, two radii         | 0 at 1000 and 1499, 0.5 at 1500 and 1999, null at 2000                      |
+| reduced: a dotted quarter (1.5 beats) | `beats: 1.5`, `ms: 750`: 0 until 1000 + 500, then 2/3 until 1750, then null |
+| reduced: a whole note                 | `beats: 4`, `ms: 2000`: 0, 0.25, 0.5, 0.75 at 1000, 1500, 2000, 2500        |
+| float slack does not cost a step      | `beats: 3`, `ms: 300`, at 1100: 1/3                                         |
+| no length                             | `ms: 0`: null                                                               |
 
 `haloRadius`, with `w` 10:
 
-| Case                                  | Expected                                                     |
-| ------------------------------------- | ------------------------------------------------------------ |
-| it starts at HALO_FROM widths         | `haloRadius(10, 0)` is 21                                    |
-| linear                                | `haloRadius(10, 0.5)` is `(21 + 8.5) / 2`                    |
-| it closes in on HALO_TO widths        | `haloRadius(10, 1)` is 8.5                                   |
-| it clears the marked notehead         | `HALO_TO > RED_HEAD_SCALE / 2`                               |
+| Case                           | Expected                                  |
+| ------------------------------ | ----------------------------------------- |
+| it starts at HALO_FROM widths  | `haloRadius(10, 0)` is 21                 |
+| linear                         | `haloRadius(10, 0.5)` is `(21 + 8.5) / 2` |
+| it closes in on HALO_TO widths | `haloRadius(10, 1)` is 8.5                |
+| it clears the marked notehead  | `HALO_TO > RED_HEAD_SCALE / 2`            |
 
 ### 3.3 `apps/web/src/score/render/halo.ts` (new, Builder P)
 
@@ -404,17 +411,17 @@ export function clearHalos(root: Element): void;
 
 The host is built from markup: an `svg` holding `g.note#a > g.notehead`, and `g.chord.is-red` holding `g.note#b > g.notehead` and `g.note#c > g.notehead`. A `boxOf` map gives `b` the box `{x: 0, y: 30, width: 10, height: 8}` and `c` the box `{x: 0, y: 20, width: 10, height: 8}`.
 
-| Case                                                    | Expected                                                                                     |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| finds the topmost marked notehead                       | `note` is `#c`, `cx` 5, `cy` 24, `w` 10                                                      |
-| ignores notes that are not marked                       | `#a` with a smaller `y` is never chosen                                                      |
-| none marked                                             | no `.is-red`: null                                                                           |
-| none laid out                                           | every box 0 wide, or `boxOf` throws: null                                                    |
-| a lone marked note                                      | `g.note.is-red > g.notehead`: that note                                                      |
-| draws a circle in the note, last                        | `drawHalo` gives `circle.along-halo`, `aria-hidden` "true", last child of `#c`, `r` "21"     |
-| rounds to a hundredth                                   | `r` 21.456 is written "21.46"                                                                |
-| sets the radius                                         | `setHaloRadius(circle, 9)` gives `r` "9"                                                     |
-| clears every halo                                       | two drawn, `clearHalos(host)` leaves none                                                    |
+| Case                              | Expected                                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------------------------- |
+| finds the topmost marked notehead | `note` is `#c`, `cx` 5, `cy` 24, `w` 10                                                  |
+| ignores notes that are not marked | `#a` with a smaller `y` is never chosen                                                  |
+| none marked                       | no `.is-red`: null                                                                       |
+| none laid out                     | every box 0 wide, or `boxOf` throws: null                                                |
+| a lone marked note                | `g.note.is-red > g.notehead`: that note                                                  |
+| draws a circle in the note, last  | `drawHalo` gives `circle.along-halo`, `aria-hidden` "true", last child of `#c`, `r` "21" |
+| rounds to a hundredth             | `r` 21.456 is written "21.46"                                                            |
+| sets the radius                   | `setHaloRadius(circle, 9)` gives `r` "9"                                                 |
+| clears every halo                 | two drawn, `clearHalos(host)` leaves none                                                |
 
 ## 4. Pure: `apps/web/src/score/accompaniment.ts` (Builder P)
 
@@ -536,25 +543,25 @@ interface HaloShown {
 }
 ```
 
-  and, after `const [levels] = useState(…)`:
+and, after `const [levels] = useState(…)`:
 
 ```ts
-  /** The halo of the last pass (issue 204): state, so the render hands it to the drawing. */
-  const [haloShown, setHaloShown] = useState<HaloShown | null>(null);
-  const haloRef = useRef<HaloShown | null>(null);
+/** The halo of the last pass (issue 204): state, so the render hands it to the drawing. */
+const [haloShown, setHaloShown] = useState<HaloShown | null>(null);
+const haloRef = useRef<HaloShown | null>(null);
 ```
 
-  and, beside `moveIndex`:
+and, beside `moveIndex`:
 
 ```ts
-  const showHalo = useCallback((next: HaloShown | null) => {
-    if (haloRef.current === next) return;
-    haloRef.current = next;
-    setHaloShown(next);
-  }, []);
+const showHalo = useCallback((next: HaloShown | null) => {
+  if (haloRef.current === next) return;
+  haloRef.current = next;
+  setHaloShown(next);
+}, []);
 ```
 
-  `decide`'s dependencies become `[levels, moveIndex, showHalo]`.
+`decide`'s dependencies become `[levels, moveIndex, showHalo]`.
 
 ### 5.3 `decide`, in order
 
@@ -566,11 +573,11 @@ interface HaloShown {
 6. Replace `if (lost && letGo !== undefined) { … }` with:
 
 ```ts
-      // A key that comes up leaves the books here: a release never passes a step (issue 204).
-      if (letGo !== undefined) {
-        keys = releaseKey(keys, letGo);
-        presses = liftAt(presses, letGo);
-      }
+// A key that comes up leaves the books here: a release never passes a step (issue 204).
+if (letGo !== undefined) {
+  keys = releaseKey(keys, letGo);
+  presses = liftAt(presses, letGo);
+}
 ```
 
 7. `keysRef` / `pressesRef` assignment, and the `homeRef || flightShown || playingNow` gate with `drop()`, as today, plus `showHalo(null);` before `drop()` in that gate: a seek's hop, the flight home and Play end the halo for good, also a hop that lands on the step the red already waits on, which is no external move. The align runs when `flightShown` turns true, so the halo goes as the hop starts. The gate's comment becomes: "A press during a flight or hop is kept and passes when it lands (the align), counted from then; a release then is a plain one. A flight ends the halo (issue 204)."
@@ -579,68 +586,68 @@ interface HaloShown {
 10. The pass:
 
 ```ts
-      const result = advance(o.steps, here, keys, presses, stretch);
-      keysRef.current = result.keys;
-      pressesRef.current = result.presses;
-      if (result.passed > 0) {
-        setPlayed((n) => n + result.passed);
-        // The halo of the step cued now (issue 204), from this moment, or none; a look that passes
-        // nothing leaves the halo as it is.
-        const halo =
-          result.move.kind === 'cue'
-            ? haloFor({
-                steps: o.steps,
-                notes: o.notes,
-                last: result.last,
-                loop: stretch,
-                factor: o.factor,
-                nowMs: now,
-              })
-            : null;
-        showHalo(halo ? { halo, steps: o.steps, loop: stretchKey(stretch) } : null);
-      }
+const result = advance(o.steps, here, keys, presses, stretch);
+keysRef.current = result.keys;
+pressesRef.current = result.presses;
+if (result.passed > 0) {
+  setPlayed((n) => n + result.passed);
+  // The halo of the step cued now (issue 204), from this moment, or none; a look that passes
+  // nothing leaves the halo as it is.
+  const halo =
+    result.move.kind === 'cue'
+      ? haloFor({
+          steps: o.steps,
+          notes: o.notes,
+          last: result.last,
+          loop: stretch,
+          factor: o.factor,
+          nowMs: now,
+        })
+      : null;
+  showHalo(halo ? { halo, steps: o.steps, loop: stretchKey(stretch) } : null);
+}
 ```
 
 11. The hand-over replaces the whole `if (plan) { … }` block (current lines 457–519):
 
 ```ts
-      // Digitus plays the other hand (issue 184) from the step passed last to the next step of the
-      // walk, from now: the press that passed it, or the landing of a hop for a press made under
-      // it (issue 204). A new stretch drops what the one before left unstarted. Before the cue or
-      // the finish, which do not stop it.
-      const plan = o.accompaniment;
-      if (plan && result.passed > 0) {
-        const next = stepAfter(o.steps, result.last, stretch);
-        accompaniedRef.current = true;
-        pb.accompany(
-          accompanimentNotes(
-            plan.events,
-            plan.hands,
-            accompanimentStretches(
-              o.steps,
-              result.last,
-              next < 0 ? { kind: 'finish' } : { kind: 'cue', index: next },
-              stretch,
-              plan.endSec,
-            ),
-            stretch,
-          ),
-        );
-      }
+// Digitus plays the other hand (issue 184) from the step passed last to the next step of the
+// walk, from now: the press that passed it, or the landing of a hop for a press made under
+// it (issue 204). A new stretch drops what the one before left unstarted. Before the cue or
+// the finish, which do not stop it.
+const plan = o.accompaniment;
+if (plan && result.passed > 0) {
+  const next = stepAfter(o.steps, result.last, stretch);
+  accompaniedRef.current = true;
+  pb.accompany(
+    accompanimentNotes(
+      plan.events,
+      plan.hands,
+      accompanimentStretches(
+        o.steps,
+        result.last,
+        next < 0 ? { kind: 'finish' } : { kind: 'cue', index: next },
+        stretch,
+        plan.endSec,
+      ),
+      stretch,
+    ),
+  );
+}
 ```
 
 12. The timing tap:
 
 ```ts
-      // Issue 192: the steps passed just now, each from the press that started its run.
-      if (result.passed > 0) {
-        onTimingRef.current?.({
-          kind: 'settled',
-          runs: result.passedRuns,
-          at: result.at,
-          finished: result.move.kind === 'finish',
-        });
-      }
+// Issue 192: the steps passed just now, each from the press that started its run.
+if (result.passed > 0) {
+  onTimingRef.current?.({
+    kind: 'settled',
+    runs: result.passedRuns,
+    at: result.at,
+    finished: result.move.kind === 'finish',
+  });
+}
 ```
 
 13. The levels block, verbatim.
@@ -666,23 +673,45 @@ interface HaloShown {
 ### 5.5 The return
 
 ```ts
-  const stretch = playback.performanceLoop();
-  const stretchNow = stretchKey(stretch);
-  const first = stretch ? (loopSpan(steps, stretch)?.first ?? -1) : 0;
-  return useMemo(() => {
-    const hint: AlongHint | null =
-      cuedHere && step && played === 0 ? { count: step.pitches.length } : null;
-    const halo =
-      cuedHere &&
-      !flightShown &&
-      haloShown !== null &&
-      haloShown.steps === steps &&
-      haloShown.loop === stretchNow &&
-      haloShown.halo.index === index
-        ? haloShown.halo
-        : null;
-    return { active, pianoConnected, atFirst: cuedHere && index === first, hint, levels, soundWaits, halo };
-  }, [active, pianoConnected, cuedHere, index, first, step, played, levels, soundWaits, flightShown, haloShown, steps, stretchNow]);
+const stretch = playback.performanceLoop();
+const stretchNow = stretchKey(stretch);
+const first = stretch ? (loopSpan(steps, stretch)?.first ?? -1) : 0;
+return useMemo(() => {
+  const hint: AlongHint | null =
+    cuedHere && step && played === 0 ? { count: step.pitches.length } : null;
+  const halo =
+    cuedHere &&
+    !flightShown &&
+    haloShown !== null &&
+    haloShown.steps === steps &&
+    haloShown.loop === stretchNow &&
+    haloShown.halo.index === index
+      ? haloShown.halo
+      : null;
+  return {
+    active,
+    pianoConnected,
+    atFirst: cuedHere && index === first,
+    hint,
+    levels,
+    soundWaits,
+    halo,
+  };
+}, [
+  active,
+  pianoConnected,
+  cuedHere,
+  index,
+  first,
+  step,
+  played,
+  levels,
+  soundWaits,
+  flightShown,
+  haloShown,
+  steps,
+  stretchNow,
+]);
 ```
 
 This replaces the current lines from `const stretch = playback.performanceLoop();` (line 700) to the end of the hook; `step`, `cuedHere`, `soundWaits` and `pianoConnected` above them stay. `cuedHere` already requires `active`, a cue, `!atStart`, and the playback at the step's second.
@@ -709,64 +738,64 @@ Harness:
 
 Deleted or rewritten (current line, name → what replaces it):
 
-| Line | Test                                                                                   | Becomes                                                                                                                         |
-| ---- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 386  | moves on when every pitch of the step is held for its time, and not before            | "moves on at the press of every pitch of the step, and sets no timer": 48 alone moves nothing; 60 cues step 1's second at once; `vi.getTimerCount()` is 0 after each press |
-| 440  | chains an early press: one cue to where the chain ends                                 | same name: the keys of steps 1 and 2 held first, then step 0's: one `cueAt`, at step 3's second, at the last press               |
-| 523  | `describe('the hold')`, whole                                                         | deleted, except the two tests below, which move to `describe('the walk')` with `wait` for `hold`                               |
-| 695  | never keeps a key that was let go where the walk had no step                          | kept (moved)                                                                                                                    |
-| 717  | never keeps a key that was let go while the playback plays now                        | kept (moved)                                                                                                                    |
-| 768, 779 | the next step's pitch gets its own length when pressed early; levels when the red arrives | rewritten to the press rule with the same point: each key's level counts from its own press                                 |
-| 912, 929 | looks again a frame after the position went home; does not wait a frame when shown | kept; `s.hold(500)` → `s.wait(500)`                                                                                             |
-| 1252 | `describe('the Playwright check')`: `hold()` cases                                    | `Check` type gets `halo()` for `hold()`; "names the step the red waits on, only in a silent run" expects `halo()` 0 at the first step; "reports the hold at the Practice tempo" becomes "reports the halo's length at the Practice tempo, 0 when it is over" (half-note score, factor 1.5: 666.67 right after the pass, 0 after `wait(700)`); "names a step only while the playback is cued at it" expects `halo()` 0 after the cue moves |
-| 1638 | an unplugged piano passes no step                                                      | "a lost key leaves the books and drains, and moves nothing": a key of a two-key step pressed, the piano unplugged, the other key pressed after it returns: the step does not pass |
-| 1650 | Turn off passes no step either                                                         | deleted                                                                                                                         |
-| 1660 | an unplug on the last step does not finish the piece                                   | deleted                                                                                                                         |
-| 1679 | a key the reader lets go after four fifths still passes the step                      | deleted                                                                                                                         |
-| 1688, 1704 | keys pressed under a flight get their levels when the step passes on landing     | kept, with `wait`; the step passes at the landing, the level counts from the press                                             |
-| 1737 | a faster Practice tempo set in the middle of a hold moves the wake-up                 | "a tempo change sets no timer and moves nothing": `vi.getTimerCount()` 0 and no `cueAt` after the change                         |
-| 1758 | spends no key for a tempo change                                                       | kept: a key of the step held through a tempo change still counts with its partner                                              |
-| 1811 | ends the walk when it goes off with a step running: no timer                          | "ends the walk when it goes off: the cue stays, no level, no halo"                                                             |
-| 1828 | takes the hold hint away when it goes off after an early release                      | deleted                                                                                                                         |
-| 1945 | tells a release too early, with no step passed                                         | deleted                                                                                                                         |
-| 1932 | tells the steps a settle passed …                                                      | the expected event has no `early` field                                                                                         |
-| 2057, 2086, 2116 | "tells a loop's wrap as a pass", "tells the finish", "tells nothing for a press under a flight, and the press time at the landing" | kept; remove `early: false` from the expected events (lines 1940, 2057, 2086 and 2116 in all), or `toEqual` fails on the missing field |
+| Line             | Test                                                                                                                               | Becomes                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 386              | moves on when every pitch of the step is held for its time, and not before                                                         | "moves on at the press of every pitch of the step, and sets no timer": 48 alone moves nothing; 60 cues step 1's second at once; `vi.getTimerCount()` is 0 after each press                                                                                                                                                                                                                                                                |
+| 440              | chains an early press: one cue to where the chain ends                                                                             | same name: the keys of steps 1 and 2 held first, then step 0's: one `cueAt`, at step 3's second, at the last press                                                                                                                                                                                                                                                                                                                        |
+| 523              | `describe('the hold')`, whole                                                                                                      | deleted, except the two tests below, which move to `describe('the walk')` with `wait` for `hold`                                                                                                                                                                                                                                                                                                                                          |
+| 695              | never keeps a key that was let go where the walk had no step                                                                       | kept (moved)                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 717              | never keeps a key that was let go while the playback plays now                                                                     | kept (moved)                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 768, 779         | the next step's pitch gets its own length when pressed early; levels when the red arrives                                          | rewritten to the press rule with the same point: each key's level counts from its own press                                                                                                                                                                                                                                                                                                                                               |
+| 912, 929         | looks again a frame after the position went home; does not wait a frame when shown                                                 | kept; `s.hold(500)` → `s.wait(500)`                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1252             | `describe('the Playwright check')`: `hold()` cases                                                                                 | `Check` type gets `halo()` for `hold()`; "names the step the red waits on, only in a silent run" expects `halo()` 0 at the first step; "reports the hold at the Practice tempo" becomes "reports the halo's length at the Practice tempo, 0 when it is over" (half-note score, factor 1.5: 666.67 right after the pass, 0 after `wait(700)`); "names a step only while the playback is cued at it" expects `halo()` 0 after the cue moves |
+| 1638             | an unplugged piano passes no step                                                                                                  | "a lost key leaves the books and drains, and moves nothing": a key of a two-key step pressed, the piano unplugged, the other key pressed after it returns: the step does not pass                                                                                                                                                                                                                                                         |
+| 1650             | Turn off passes no step either                                                                                                     | deleted                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1660             | an unplug on the last step does not finish the piece                                                                               | deleted                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1679             | a key the reader lets go after four fifths still passes the step                                                                   | deleted                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1688, 1704       | keys pressed under a flight get their levels when the step passes on landing                                                       | kept, with `wait`; the step passes at the landing, the level counts from the press                                                                                                                                                                                                                                                                                                                                                        |
+| 1737             | a faster Practice tempo set in the middle of a hold moves the wake-up                                                              | "a tempo change sets no timer and moves nothing": `vi.getTimerCount()` 0 and no `cueAt` after the change                                                                                                                                                                                                                                                                                                                                  |
+| 1758             | spends no key for a tempo change                                                                                                   | kept: a key of the step held through a tempo change still counts with its partner                                                                                                                                                                                                                                                                                                                                                         |
+| 1811             | ends the walk when it goes off with a step running: no timer                                                                       | "ends the walk when it goes off: the cue stays, no level, no halo"                                                                                                                                                                                                                                                                                                                                                                        |
+| 1828             | takes the hold hint away when it goes off after an early release                                                                   | deleted                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1945             | tells a release too early, with no step passed                                                                                     | deleted                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1932             | tells the steps a settle passed …                                                                                                  | the expected event has no `early` field                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 2057, 2086, 2116 | "tells a loop's wrap as a pass", "tells the finish", "tells nothing for a press under a flight, and the press time at the landing" | kept; remove `early: false` from the expected events (lines 1940, 2057, 2086 and 2116 in all), or `toEqual` fails on the missing field                                                                                                                                                                                                                                                                                                    |
 
 Every other test is kept with `wait` for `hold`. A test that still fails was asserting the hold: rewrite it to the press rule, keeping what it is about.
 
 New `describe('the halo (issue 204)')` (write first, see it fail on the missing `halo` field, then do 5.1 to 5.5). The score is `scoreOf([{ midi: 60, tick: 0, ticks: 2 }, { midi: 62, tick: 2 }, { midi: 64, tick: 3 }, { midi: 65, tick: 4, ticks: 4 }])`: steps `[60]@0` (a half), `[62]@1`, `[64]@1.5`, `[65]@2`, with a 0.5 s beat.
 
-| Case                                                                                       | Expected                                                                                                                       |
-| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| rings the step after a half note, from the press, for the gap at the Practice tempo        | after `press(60)`: `halo` `{ index: 1, startMs: <performance.now() at the press>, ms: 1000, beats: 2 }`                        |
-| none after a quarter                                                                       | then `press(62)`: `halo` null                                                                                                 |
-| twice as long at half the Practice tempo                                                   | factor 0.5 in the store: `ms` 2000                                                                                             |
-| none at the finish                                                                         | the last step pressed: `halo` null                                                                                            |
-| stays through a wrong key, a release and the align's second look                           | after `press(60)`: `press(70)`, `release(60)`, `refresh()`: the same `halo` object                                            |
-| goes in the render that moves the cue, before the align                                    | the `renderHook` callback pushes each render's `halo` into a log, as `useWalkTiming.test` does with `log`; after `press(60)`: `fake.start` set to another step's second and `refresh()`: the first render logged after the change already has `halo` null (reading `result.current` after `act` would not prove it: the align has run by then) |
-| a tempo change leaves a live halo as it is                                                 | after `press(60)`: the factor changed in the store: the same `halo` object                                                    |
-| a hop to the step the red already waits on ends it                                         | after `press(60)`: `fake.flight` true and `refresh()`: `halo` null; `fake.flight` false and `refresh()`: still null           |
-| goes on a hands change, a loop change, Practice mode off, the piano unplugged and Play     | one sub-case each: `halo` null after it                                                                                       |
-| a press under a hop passes at the landing, with its halo from the landing                  | `fake.flight` true, `press(60)`: `halo` null, and `cues()` is still `[0]` (the mount's align cued step 0); `wait(300)`; `fake.flight` false and `refresh()`: `cues()` is `[0, 1]`, `halo.startMs` is the landing time; `refresh()` again: the same object |
-| the loop's last step rings the loop's first step, to the loop's end                        | `fake.stretch = { from: 0, to: 3 }` on the same score: the loop holds all four steps, its last the whole note `[65]@2`. Press 60, 62, 64 and 65, each followed by `refresh()`: `halo` `{ index: 0, ms: 1000, beats: 2 }` (gap `3 - 2` = 1 s against the 0.5 s beat), and the wrap adds one `cueAt(0)` |
+| Case                                                                                   | Expected                                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| rings the step after a half note, from the press, for the gap at the Practice tempo    | after `press(60)`: `halo` `{ index: 1, startMs: <performance.now() at the press>, ms: 1000, beats: 2 }`                                                                                                                                                                                                                                        |
+| none after a quarter                                                                   | then `press(62)`: `halo` null                                                                                                                                                                                                                                                                                                                  |
+| twice as long at half the Practice tempo                                               | factor 0.5 in the store: `ms` 2000                                                                                                                                                                                                                                                                                                             |
+| none at the finish                                                                     | the last step pressed: `halo` null                                                                                                                                                                                                                                                                                                             |
+| stays through a wrong key, a release and the align's second look                       | after `press(60)`: `press(70)`, `release(60)`, `refresh()`: the same `halo` object                                                                                                                                                                                                                                                             |
+| goes in the render that moves the cue, before the align                                | the `renderHook` callback pushes each render's `halo` into a log, as `useWalkTiming.test` does with `log`; after `press(60)`: `fake.start` set to another step's second and `refresh()`: the first render logged after the change already has `halo` null (reading `result.current` after `act` would not prove it: the align has run by then) |
+| a tempo change leaves a live halo as it is                                             | after `press(60)`: the factor changed in the store: the same `halo` object                                                                                                                                                                                                                                                                     |
+| a hop to the step the red already waits on ends it                                     | after `press(60)`: `fake.flight` true and `refresh()`: `halo` null; `fake.flight` false and `refresh()`: still null                                                                                                                                                                                                                            |
+| goes on a hands change, a loop change, Practice mode off, the piano unplugged and Play | one sub-case each: `halo` null after it                                                                                                                                                                                                                                                                                                        |
+| a press under a hop passes at the landing, with its halo from the landing              | `fake.flight` true, `press(60)`: `halo` null, and `cues()` is still `[0]` (the mount's align cued step 0); `wait(300)`; `fake.flight` false and `refresh()`: `cues()` is `[0, 1]`, `halo.startMs` is the landing time; `refresh()` again: the same object                                                                                      |
+| the loop's last step rings the loop's first step, to the loop's end                    | `fake.stretch = { from: 0, to: 3 }` on the same score: the loop holds all four steps, its last the whole note `[65]@2`. Press 60, 62, 64 and 65, each followed by `refresh()`: `halo` `{ index: 0, ms: 1000, beats: 2 }` (gap `3 - 2` = 1 s against the 0.5 s beat), and the wrap adds one `cueAt(0)`                                          |
 
 ### 5.8 `usePlayAlong.accompany.test.tsx` (Builder H1)
 
 - Header: "when a step starts running (every pitch of it held and fresh, at the press) the walk hands the playback the notes digitus plays, and stops them on every move it did not make. A step passes a note's length later (issue 185), by the fake clock (`hold`), and the pass hands over nothing." becomes "at every pass (the press that plays every pitch of a step, issue 204) the walk hands the playback the notes digitus plays, from that moment, and stops them on every move it did not make."
 - `hold` → `wait` as in 5.7.
 
-| Line | Test                                                                                              | Becomes                                                                                                  |
-| ---- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| 320  | hands the notes over at the press and not at the pass, which comes a note later                   | "hands the notes over once, at the press, which is the pass"                                              |
-| 337  | keeps playing when the reader lets go early, and a new press of the step counts afresh            | "keeps playing when the reader lets go: a release stops nothing and hands nothing over"                   |
-| 355  | hands nothing over again when a release after four fifths passes the step                        | deleted                                                                                                  |
-| 367  | hands a step pressed early over when the red reaches it, counted from its press                   | "the next step's press drops the notes not started and hands its own stretch over from that press"        |
-| 418  | hands over the last step of a chain that passes unseen, from its pass                             | kept: keys of step 1 held, then step 0 pressed: one `accompany`, from step 1, at offset 0                 |
-| 722  | `describe('what was handed over decides what is handed over')`, whole                            | replaced by: "a press under a flight is handed over once, at the landing, at offset 0" and "the align's second look hands nothing over" |
-| 802  | `describe('a step pressed before the red reaches it')`                                           | deleted                                                                                                  |
-| 822  | `describe('a step pressed a little before the red reaches it')`, three tests                     | deleted                                                                                                  |
-| 857  | `describe('a change of the Practice tempo in the middle of a run')`, four tests                  | replaced by one test: "a tempo change hands nothing over again; the next pass plays at the new tempo"     |
-| 344  | the `{ kind: 'hold', count: 1 }` assertion                                                        | gone with its test                                                                                       |
+| Line | Test                                                                                   | Becomes                                                                                                                                 |
+| ---- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 320  | hands the notes over at the press and not at the pass, which comes a note later        | "hands the notes over once, at the press, which is the pass"                                                                            |
+| 337  | keeps playing when the reader lets go early, and a new press of the step counts afresh | "keeps playing when the reader lets go: a release stops nothing and hands nothing over"                                                 |
+| 355  | hands nothing over again when a release after four fifths passes the step              | deleted                                                                                                                                 |
+| 367  | hands a step pressed early over when the red reaches it, counted from its press        | "the next step's press drops the notes not started and hands its own stretch over from that press"                                      |
+| 418  | hands over the last step of a chain that passes unseen, from its pass                  | kept: keys of step 1 held, then step 0 pressed: one `accompany`, from step 1, at offset 0                                               |
+| 722  | `describe('what was handed over decides what is handed over')`, whole                  | replaced by: "a press under a flight is handed over once, at the landing, at offset 0" and "the align's second look hands nothing over" |
+| 802  | `describe('a step pressed before the red reaches it')`                                 | deleted                                                                                                                                 |
+| 822  | `describe('a step pressed a little before the red reaches it')`, three tests           | deleted                                                                                                                                 |
+| 857  | `describe('a change of the Practice tempo in the middle of a run')`, four tests        | replaced by one test: "a tempo change hands nothing over again; the next pass plays at the new tempo"                                   |
+| 344  | the `{ kind: 'hold', count: 1 }` assertion                                             | gone with its test                                                                                                                      |
 
 Every stretch handed over in these tests has offset 0 in the notes' times: no note is left out for being late.
 
@@ -796,51 +825,51 @@ export function useAlongHalo(host: Element | null, halo: Halo | null, layoutKey:
 ### 6.2 The effect (deps `[host, halo, layoutKey]`)
 
 ```ts
-  useLayoutEffect(() => {
-    if (!host) return;
-    clearHalos(host);
-    if (!halo) return;
-    const progress = haloProgress(halo, performance.now(), prefersReducedMotion());
-    if (progress === null) return;
-    const anchor = haloAnchor(host);
-    if (!anchor) return; // the cued notes are not in the DOM: no halo
-    const circle = drawHalo(anchor, haloRadius(anchor.w, progress));
-    let frame = 0;
-    const step = () => {
-      frame = 0;
-      if (!circle.isConnected) return; // its page was rebuilt: no halo until the next pass
-      const p = haloProgress(halo, performance.now(), prefersReducedMotion());
-      if (p === null) {
-        circle.remove();
-        return;
-      }
-      setHaloRadius(circle, haloRadius(anchor.w, p));
-      frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
+useLayoutEffect(() => {
+  if (!host) return;
+  clearHalos(host);
+  if (!halo) return;
+  const progress = haloProgress(halo, performance.now(), prefersReducedMotion());
+  if (progress === null) return;
+  const anchor = haloAnchor(host);
+  if (!anchor) return; // the cued notes are not in the DOM: no halo
+  const circle = drawHalo(anchor, haloRadius(anchor.w, progress));
+  let frame = 0;
+  const step = () => {
+    frame = 0;
+    if (!circle.isConnected) return; // its page was rebuilt: no halo until the next pass
+    const p = haloProgress(halo, performance.now(), prefersReducedMotion());
+    if (p === null) {
       circle.remove();
-    };
-  }, [host, halo, layoutKey]);
+      return;
+    }
+    setHaloRadius(circle, haloRadius(anchor.w, p));
+    frame = requestAnimationFrame(step);
+  };
+  frame = requestAnimationFrame(step);
+  return () => {
+    if (frame) cancelAnimationFrame(frame);
+    circle.remove();
+  };
+}, [host, halo, layoutKey]);
 ```
 
 ### 6.3 `useAlongHalo.test.tsx` (new, write first, Builder H2)
 
 The environment is happy-dom under StrictMode, with fake `performance`, `requestAnimationFrame` and `cancelAnimationFrame` as in `usePlayAlong.test.tsx`. The host markup is the one in 3.4. `getBBox` is stubbed on `SVGElement.prototype` with `Object.defineProperty(…, 'getBBox', { configurable: true, value() { … } })`: it gives a box by the closest note's id and is removed in `afterEach`. Reduced motion is `vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true } as MediaQueryList)`. The halo is `{ index: 1, startMs: performance.now(), ms: 1000, beats: 2 }`.
 
-| Case                                                                                  | Expected                                                                                              |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| draws one ring in the g.note of the topmost marked notehead                           | one `.along-halo`, child of `#c`, `aria-hidden` "true", `r` `haloRadius(10, 0)`                       |
-| closes in linearly                                                                    | after about 250, 500 and 750 ms (each `advanceTimersByTime` then `advanceTimersToNextFrame`; the fake frames are 16 ms, so the clock lands a few ms past each mark): `r` is `String(Math.round(haloRadius(10, (performance.now() - halo.startMs) / 1000) * 100) / 100)`, read right after each advance, and the three values strictly decrease |
-| is gone when the gap is up, and the loop stops                                        | after 1000 ms and a frame: no `.along-halo`; `vi.getTimerCount()` 0                                   |
-| draws nothing for a halo already over                                                 | `startMs` 2000 ms ago: none                                                                           |
-| steps once per beat under reduced motion                                              | `r` is `haloRadius(10, 0)` at 0 and 499 ms, `haloRadius(10, 0.5)` at 500 and 999 ms, gone at 1000     |
-| goes when the halo goes                                                               | rerender with `null`: none                                                                            |
-| moves to the next note for the next halo                                              | `.is-red` moved to `#a`, rerender with a new halo: one ring, in `#a`                                  |
-| draws nothing when no notehead is marked                                              | no `.is-red` in the host: none, and no frame requested                                                |
-| one ring under StrictMode, none after unmount                                         | after mount: one `.along-halo`; after `unmount()`: none                                               |
-| stops when its page is rebuilt                                                        | `#c` removed from the DOM: the next frame requests no other                                           |
+| Case                                                        | Expected                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| draws one ring in the g.note of the topmost marked notehead | one `.along-halo`, child of `#c`, `aria-hidden` "true", `r` `haloRadius(10, 0)`                                                                                                                                                                                                                                                                |
+| closes in linearly                                          | after about 250, 500 and 750 ms (each `advanceTimersByTime` then `advanceTimersToNextFrame`; the fake frames are 16 ms, so the clock lands a few ms past each mark): `r` is `String(Math.round(haloRadius(10, (performance.now() - halo.startMs) / 1000) * 100) / 100)`, read right after each advance, and the three values strictly decrease |
+| is gone when the gap is up, and the loop stops              | after 1000 ms and a frame: no `.along-halo`; `vi.getTimerCount()` 0                                                                                                                                                                                                                                                                            |
+| draws nothing for a halo already over                       | `startMs` 2000 ms ago: none                                                                                                                                                                                                                                                                                                                    |
+| steps once per beat under reduced motion                    | `r` is `haloRadius(10, 0)` at 0 and 499 ms, `haloRadius(10, 0.5)` at 500 and 999 ms, gone at 1000                                                                                                                                                                                                                                              |
+| goes when the halo goes                                     | rerender with `null`: none                                                                                                                                                                                                                                                                                                                     |
+| moves to the next note for the next halo                    | `.is-red` moved to `#a`, rerender with a new halo: one ring, in `#a`                                                                                                                                                                                                                                                                           |
+| draws nothing when no notehead is marked                    | no `.is-red` in the host: none, and no frame requested                                                                                                                                                                                                                                                                                         |
+| one ring under StrictMode, none after unmount               | after mount: one `.along-halo`; after `unmount()`: none                                                                                                                                                                                                                                                                                        |
+| stops when its page is rebuilt                              | `#c` removed from the DOM: the next frame requests no other                                                                                                                                                                                                                                                                                    |
 
 ### 6.4 `apps/web/src/design/base.css` (Builder H2)
 
@@ -911,9 +940,9 @@ After the `.timing-mark` rule (current lines 787–794), add:
 - Right after `const along = usePlayAlong({ … });`, add:
 
 ```ts
-  // The halo (issue 204): a ring that closes in on the cued note over the time to it. After the
-  // cursor and the walk, so its layout effect runs once the cued notes are marked.
-  useAlongHalo(host, along.halo, doc.pages);
+// The halo (issue 204): a ring that closes in on the cued note over the time to it. After the
+// cursor and the walk, so its layout effect runs once the cued notes are marked.
+useAlongHalo(host, along.halo, doc.pages);
 ```
 
 Nothing else in ScoreView changes. `flightShown: red.redAway` stays. The status order is already busy, nothing playable, loading, count-in, sound, timing explanation, play hint once the `hold` line goes.
@@ -1010,20 +1039,20 @@ The states sweep then checks it at 1280 and 360 px, in light and dark, with axe 
 
 ### 9.4 `apps/web/e2e/play-along.spec.ts`
 
-| Current line / name                                                                                         | Change                                                                                                                                                                                                      |
-| ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 20–28, the header comment                                                                                   | "moves on when the reader holds them all" → "moves on at the press of them all"; "counted from the press that starts each step running" → "counted from the press that passes each step"                  |
-| 50, `HOLD_MANY`                                                                                             | deleted                                                                                                                                                                                                     |
-| 375, "the first group waits, red, and moves on only when every note of it is held"                         | renamed "… moves on at the press of every note of it"; the comments at 405–406 and 417 lose "for the step's time" and "and then its time"                                                                  |
-| 864, "the page scrolls once as the red enters the next system …"                                            | the tempo check reads `(await walkTiming(page).steps())[0]!.holdMs` `toBeCloseTo(400, 0)` instead of `midi.hold()` (import `walkTiming`); the rects read `.score-sheet .is-red .notehead`, so a halo inside the cued note does not grow the box; `system` still reads `marked[0].closest('g.system')` |
-| 918–931, the other hand's section comment                                                                   | "counted from the press that starts each step running" → "counted from the press that passes each step"                                                                                                   |
-| 1045, "a step pressed again drops the notes that have not started and counts from the new press"            | rewritten as "the next press drops the notes that have not started and counts from its own press": with `HALF`, `pressStep()` on step 0 (`[48]`): 60 sounds; at once `pressStep()` on step 1 (`[53]`): `accompCancelled()` midis `[60, 67, 67]` at 1200, 2400 and 3600 ms after the first note; the next note is 69, and the second 69 is 1200 ms after it |
-| 1076, "a step pressed early has its stretch counted from its press …"                                       | deleted                                                                                                                                                                                                     |
-| 1346, "a short hold does not pass and asks for a longer one; a held note passes at its time"                | replaced by "a step passes at its press, in the same task as the note, and a release asks for nothing": in one `page.evaluate`, send note-ons 48 and 60 and read `__digitus2Along.index()` right after: 1; then note-offs: the status line is empty, `index()` still 1, `expectOneRed`, axe |
-| 1378, "a key fills over its note's length, is full, and drains when let go early"                           | the in-page watch ends at `performance.now() - started > 700` (a quarter at 100 qpm is 600 ms) instead of when `index()` changes; `was` goes; drop `expect(watched.numbers[48])`, because 48 is no longer cued after the pass at the press; the other assertions stay |
-| 1512, "in the {scheme} theme the level and its number take their tokens, one red throughout"               | delete the hold-hint leg (`hold`, `tap`, `HOLD_MANY`, its `expectOneRed` and axe); the colour read waits for `copy(60)` only and drops `text48` and its expectation; `level48` stays                       |
-| 1767, "on again the walk goes on from the red, and a key held through the switch does not count"            | `const hold = await midi.hold(); await page.waitForTimeout(hold + 600);` → `await page.waitForTimeout(1_200);`; "a fresh press and its hold move it" → "a fresh press moves it"                           |
-| 1916, `staysAt`                                                                                             | waits a fixed `STAY_MS = 700` (`const` beside it) instead of `hold() + 300`; doc: "Waits a moment and checks that the walk is still on `index`: a key that does not count (the wrong one, one held through a move, a key without its partner) leaves the red where it is however long it is held." |
+| Current line / name                                                                              | Change                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 20–28, the header comment                                                                        | "moves on when the reader holds them all" → "moves on at the press of them all"; "counted from the press that starts each step running" → "counted from the press that passes each step"                                                                                                                                                                   |
+| 50, `HOLD_MANY`                                                                                  | deleted                                                                                                                                                                                                                                                                                                                                                    |
+| 375, "the first group waits, red, and moves on only when every note of it is held"               | renamed "… moves on at the press of every note of it"; the comments at 405–406 and 417 lose "for the step's time" and "and then its time"                                                                                                                                                                                                                  |
+| 864, "the page scrolls once as the red enters the next system …"                                 | the tempo check reads `(await walkTiming(page).steps())[0]!.holdMs` `toBeCloseTo(400, 0)` instead of `midi.hold()` (import `walkTiming`); the rects read `.score-sheet .is-red .notehead`, so a halo inside the cued note does not grow the box; `system` still reads `marked[0].closest('g.system')`                                                      |
+| 918–931, the other hand's section comment                                                        | "counted from the press that starts each step running" → "counted from the press that passes each step"                                                                                                                                                                                                                                                    |
+| 1045, "a step pressed again drops the notes that have not started and counts from the new press" | rewritten as "the next press drops the notes that have not started and counts from its own press": with `HALF`, `pressStep()` on step 0 (`[48]`): 60 sounds; at once `pressStep()` on step 1 (`[53]`): `accompCancelled()` midis `[60, 67, 67]` at 1200, 2400 and 3600 ms after the first note; the next note is 69, and the second 69 is 1200 ms after it |
+| 1076, "a step pressed early has its stretch counted from its press …"                            | deleted                                                                                                                                                                                                                                                                                                                                                    |
+| 1346, "a short hold does not pass and asks for a longer one; a held note passes at its time"     | replaced by "a step passes at its press, in the same task as the note, and a release asks for nothing": in one `page.evaluate`, send note-ons 48 and 60 and read `__digitus2Along.index()` right after: 1; then note-offs: the status line is empty, `index()` still 1, `expectOneRed`, axe                                                                |
+| 1378, "a key fills over its note's length, is full, and drains when let go early"                | the in-page watch ends at `performance.now() - started > 700` (a quarter at 100 qpm is 600 ms) instead of when `index()` changes; `was` goes; drop `expect(watched.numbers[48])`, because 48 is no longer cued after the pass at the press; the other assertions stay                                                                                      |
+| 1512, "in the {scheme} theme the level and its number take their tokens, one red throughout"     | delete the hold-hint leg (`hold`, `tap`, `HOLD_MANY`, its `expectOneRed` and axe); the colour read waits for `copy(60)` only and drops `text48` and its expectation; `level48` stays                                                                                                                                                                       |
+| 1767, "on again the walk goes on from the red, and a key held through the switch does not count" | `const hold = await midi.hold(); await page.waitForTimeout(hold + 600);` → `await page.waitForTimeout(1_200);`; "a fresh press and its hold move it" → "a fresh press moves it"                                                                                                                                                                            |
+| 1916, `staysAt`                                                                                  | waits a fixed `STAY_MS = 700` (`const` beside it) instead of `hold() + 300`; doc: "Waits a moment and checks that the walk is still on `index`: a key that does not count (the wrong one, one held through a move, a key without its partner) leaves the red where it is however long it is held."                                                         |
 
 Run `grep -n "hold\|held for its time" apps/web/e2e/play-along.spec.ts` after the edits. What remains is about keys held, not about a hold that gates the walk.
 
@@ -1042,14 +1071,14 @@ Run `grep -n "hold\|held for its time" apps/web/e2e/play-along.spec.ts` after th
 
 Desktop project (the mobile project's `testMatch` does not match it; the 360 px cases set their viewport). Twinkle with `?audio=silent`, the fake piano granted and `playAlong` on, as `twinkle()` in `play-along.spec.ts`. Copy into this file, from `play-along.spec.ts`: `TWINKLE`, `FAST`, `HALF`, `twinkle()` (line 323), `soundReady` and `dockStatus`, `flipPractice` (line 1686) and `playToTheEnd` (line 1953), with every local constant and helper `twinkle()` and those helpers use (the status texts and the cursor helpers among them); imports from `helpers/` stay imports. No new helper file. The steps with both hands are `[48 60] [60] [67] [67] [53 69] [69] [48 67] [53 65] [65] …`; step 6 is the half note G and step 7 the F after it.
 
-| Test                                                                                                       | What it checks                                                                                                                                                                                                                                                                          |
-| ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| no halo after a quarter; after the half note one ring on the next note, part of the red note              | `playRed()` six times: after each, `halo()` 0 and no `.along-halo`. The seventh: `waitForStep()` is `[53, 65]`; one `.along-halo`; `halo()` within 1 ms of 1200; in the page, the ring's parent matches `g.note`, has an `.is-red` ancestor, and holds the topmost of the `.score-sheet .is-red .notehead` (by `getBoundingClientRect().top`); `expectOneRed` |
-| it closes in, and is gone when the next note is due; the red note waits                                   | at the halo: `r` read twice 300 ms apart, the second smaller; `.along-halo` count 0 within `halo() + 500` ms; `index()` still 7; `.score-sheet .is-red` still there; `expectOneRed`                                                                                                     |
-| one red on every frame: a press, the ring's life, a press before it closes, and the finish                | at 150 % (`tempo: FAST`): `recordRedFrames`; `playRed()` seven times; 300 ms; `playRed()` on step 7 (before its 800 ms halo closes): no `.along-halo` after it; `playToTheEnd`; `redFrames`; `expectOneRedEveryFrame`; some frame had `halos === 1`                                    |
-| a seek and Practice mode off take the ring away at once                                                   | at the halo on step 7: `recordRedFrames`; `seekBar(page, 3)`; `.along-halo` count 0; `redSettled`; `expectOneRedEveryFrame(await redFrames(page))`. Then `playRed()` on steps 11, 12 and 13 (13 is the half note C): one `.along-halo`; `flipPractice(page, false)`: none, and `midi.target()` is `[]` |
-| the ring and the other hand count from the same press at the Practice tempo                               | `settings: { hands: 'L', tempoByPiece: { 'piece:<TWINKLE>': 0.5 } }`, audio running as `soundReady` in play-along.spec: `playRed()` on step 0: `halo()` within 1 ms of 4800; `accompanied()` midis `[60, 60, 67, 67]` at gaps `[0, 1200, 2400, 3600]`; the stretch ends at 4800 ms, where the halo closes |
-| under reduced motion the ring steps once per beat and is gone at the end                                  | `emulateMedia({ reducedMotion: 'reduce' })`; the seventh `playRed()`; in the page, `r` sampled every frame until the ring is gone: two distinct values (rounded to a hundredth), the first the larger, and gone 1200 ms ± 200 after the first sample                                 |
+| Test                                                                                                                                        | What it checks                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| no halo after a quarter; after the half note one ring on the next note, part of the red note                                                | `playRed()` six times: after each, `halo()` 0 and no `.along-halo`. The seventh: `waitForStep()` is `[53, 65]`; one `.along-halo`; `halo()` within 1 ms of 1200; in the page, the ring's parent matches `g.note`, has an `.is-red` ancestor, and holds the topmost of the `.score-sheet .is-red .notehead` (by `getBoundingClientRect().top`); `expectOneRed`                                                                                                 |
+| it closes in, and is gone when the next note is due; the red note waits                                                                     | at the halo: `r` read twice 300 ms apart, the second smaller; `.along-halo` count 0 within `halo() + 500` ms; `index()` still 7; `.score-sheet .is-red` still there; `expectOneRed`                                                                                                                                                                                                                                                                           |
+| one red on every frame: a press, the ring's life, a press before it closes, and the finish                                                  | at 150 % (`tempo: FAST`): `recordRedFrames`; `playRed()` seven times; 300 ms; `playRed()` on step 7 (before its 800 ms halo closes): no `.along-halo` after it; `playToTheEnd`; `redFrames`; `expectOneRedEveryFrame`; some frame had `halos === 1`                                                                                                                                                                                                           |
+| a seek and Practice mode off take the ring away at once                                                                                     | at the halo on step 7: `recordRedFrames`; `seekBar(page, 3)`; `.along-halo` count 0; `redSettled`; `expectOneRedEveryFrame(await redFrames(page))`. Then `playRed()` on steps 11, 12 and 13 (13 is the half note C): one `.along-halo`; `flipPractice(page, false)`: none, and `midi.target()` is `[]`                                                                                                                                                        |
+| the ring and the other hand count from the same press at the Practice tempo                                                                 | `settings: { hands: 'L', tempoByPiece: { 'piece:<TWINKLE>': 0.5 } }`, audio running as `soundReady` in play-along.spec: `playRed()` on step 0: `halo()` within 1 ms of 4800; `accompanied()` midis `[60, 60, 67, 67]` at gaps `[0, 1200, 2400, 3600]`; the stretch ends at 4800 ms, where the halo closes                                                                                                                                                     |
+| under reduced motion the ring steps once per beat and is gone at the end                                                                    | `emulateMedia({ reducedMotion: 'reduce' })`; six `playRed()`; the seventh press (the half note G) is made in the page, so the test's round trips do not count against the ring, and `r` is sampled every frame from that press until the ring is gone: two distinct values (rounded to a hundredth), the first the larger, and gone 1200 ms ± 200 after the press                                                                                             |
 | at {1280, 360} px in the {light, dark} theme the ring is drawn in the accent with no fill, one red, axe clean, no overflow, hidden in print | `emulateMedia({ colorScheme })`, the viewport; hands L at 50 %, `playRed()` on step 0; the ring's computed `stroke` is `ACCENT_RGB`, `fill` is `none`, `stroke-width` is `2px`; `expectOneRed` with every root in the sheet; `expectNoSeriousA11y`, then `.along-halo` count 1 (so this axe run is proven to happen while the ring is live); `horizontalOverflow(page) <= 0`; `emulateMedia({ media: 'print' })`: computed `display` `none`; back to `screen` |
 
 ## 10. Docs (Builder D)
@@ -1070,15 +1099,15 @@ D writes only `docs/app.md`, `docs/PROGRESS.md` and `docs/research/play-along-ti
 4. **The keys fill.** "or when the red arrives for a key already held" stays. "(to the end of the run it lies in, as the hold does)" becomes "(to the end of the run it lies in)". "for the hold and for the level" becomes "for the level". Add one sentence: the key fill shows how long a note is held, the halo when the next note comes.
 5. **New subsection "The halo" (issue 204)**, after The keys fill. State: when it shows (the formula, `HALO_MIN_MS`, the felt beat), that it rings the step after the long note, its look (2.1 to 0.85 notehead widths, linear, 2 px, no fill, a child of the cued `g.note` so part of the one red root, accent through `.is-red` only, hidden elsewhere, `aria-hidden`, `pointer-events: none`, hidden in print), its clock (from the pass, one `requestAnimationFrame` loop while drawn, right again after a hidden tab), what removes it (1.3), reduced motion (a step per felt beat), a tempo change, and that a rest after the note is inside the gap. Add a table:
 
-   | In the walk                                         | The halo                                                     |
-   | --------------------------------------------------- | ------------------------------------------------------------ |
-   | A step passed, the next one a beat or less away     | none                                                         |
-   | A step passed, the next one more than a beat away   | a ring around the next note, closing in over the time to it  |
-   | The next note pressed before it closes              | gone; the next note's halo, if any, starts                   |
-   | The time is up                                      | gone; the red note waits                                     |
-   | A seek, Rewind, a loop or hands change, Play, Practice mode off, the piano gone | gone at once                         |
-   | Rewind or Home on a loop's first step (they idle, issue 196) | as it was                                          |
-   | Reduced motion                                      | one step per felt beat, then gone                            |
+   | In the walk                                                                     | The halo                                                    |
+   | ------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+   | A step passed, the next one a beat or less away                                 | none                                                        |
+   | A step passed, the next one more than a beat away                               | a ring around the next note, closing in over the time to it |
+   | The next note pressed before it closes                                          | gone; the next note's halo, if any, starts                  |
+   | The time is up                                                                  | gone; the red note waits                                    |
+   | A seek, Rewind, a loop or hands change, Play, Practice mode off, the piano gone | gone at once                                                |
+   | Rewind or Home on a loop's first step (they idle, issue 196)                    | as it was                                                   |
+   | Reduced motion                                                                  | one step per felt beat, then gone                           |
 
 6. **The walk.** "It moves the red only when no flight or hop is on screen (`red.redAway`)" stays.
 7. **The walk's state table.** "A step held for its time" becomes "A step played", with "The next step's notes, by a class swap with no hop, at the press; the page is turned as for the playing cursor; the halo when the next step is more than a beat away." Delete the rows "A step held, its time not up" and "A step let go too early".
@@ -1143,13 +1172,13 @@ Order:
 
 Every file is in exactly one set.
 
-| Builder                | Files (create or edit)                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P (pure)               | `apps/web/src/score/playAlong.ts`, `apps/web/src/score/playAlong.test.ts`, `apps/web/src/score/halo.ts` (new), `apps/web/src/score/halo.test.ts` (new), `apps/web/src/score/render/halo.ts` (new), `apps/web/src/score/render/halo.test.ts` (new), `apps/web/src/score/accompaniment.ts`, `apps/web/src/score/accompaniment.test.ts`                                                                                                                           |
-| H1 (the walk)          | `apps/web/src/score/usePlayAlong.ts`, `apps/web/src/score/usePlayAlong.test.tsx`, `apps/web/src/score/usePlayAlong.accompany.test.tsx`                                                                                                                                                                                                                                                                                                                            |
-| H2 (drawing and view)  | `apps/web/src/score/useAlongHalo.ts` (new), `apps/web/src/score/useAlongHalo.test.tsx` (new), `apps/web/src/score/ScoreView.tsx`, `apps/web/src/score/ScoreView.status.test.tsx`, `apps/web/src/score/ScoreView.test.ts`, `apps/web/src/design/base.css`, `apps/web/src/i18n/{en,es,fr,nl,pt}/score.ts`, `apps/web/src/score/useWalkTiming.ts`, `apps/web/src/score/useWalkTiming.test.tsx`, `apps/web/src/score/walkTiming.ts`, `apps/web/src/score/walkTiming.test.ts`, `apps/web/src/score/noteKey.ts`, `apps/web/src/score/noteKey.test.ts` |
-| E (e2e)                | `apps/web/e2e/helpers/midi.ts`, `apps/web/e2e/helpers/red.ts`, `apps/web/e2e/helpers/states.ts`, `apps/web/e2e/play-along.spec.ts`, `apps/web/e2e/play-along-timing.spec.ts`, `apps/web/e2e/play-along-halo.spec.ts` (new)                                                                                                                                                                                                                                      |
-| D (docs)               | `docs/app.md`, `docs/PROGRESS.md`, `docs/research/play-along-timing.md`                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Builder               | Files (create or edit)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P (pure)              | `apps/web/src/score/playAlong.ts`, `apps/web/src/score/playAlong.test.ts`, `apps/web/src/score/halo.ts` (new), `apps/web/src/score/halo.test.ts` (new), `apps/web/src/score/render/halo.ts` (new), `apps/web/src/score/render/halo.test.ts` (new), `apps/web/src/score/accompaniment.ts`, `apps/web/src/score/accompaniment.test.ts`                                                                                                                                                                                                            |
+| H1 (the walk)         | `apps/web/src/score/usePlayAlong.ts`, `apps/web/src/score/usePlayAlong.test.tsx`, `apps/web/src/score/usePlayAlong.accompany.test.tsx`                                                                                                                                                                                                                                                                                                                                                                                                          |
+| H2 (drawing and view) | `apps/web/src/score/useAlongHalo.ts` (new), `apps/web/src/score/useAlongHalo.test.tsx` (new), `apps/web/src/score/ScoreView.tsx`, `apps/web/src/score/ScoreView.status.test.tsx`, `apps/web/src/score/ScoreView.test.ts`, `apps/web/src/design/base.css`, `apps/web/src/i18n/{en,es,fr,nl,pt}/score.ts`, `apps/web/src/score/useWalkTiming.ts`, `apps/web/src/score/useWalkTiming.test.tsx`, `apps/web/src/score/walkTiming.ts`, `apps/web/src/score/walkTiming.test.ts`, `apps/web/src/score/noteKey.ts`, `apps/web/src/score/noteKey.test.ts` |
+| E (e2e)               | `apps/web/e2e/helpers/midi.ts`, `apps/web/e2e/helpers/red.ts`, `apps/web/e2e/helpers/states.ts`, `apps/web/e2e/play-along.spec.ts`, `apps/web/e2e/play-along-timing.spec.ts`, `apps/web/e2e/play-along-halo.spec.ts` (new)                                                                                                                                                                                                                                                                                                                      |
+| D (docs)              | `docs/app.md`, `docs/PROGRESS.md`, `docs/research/play-along-timing.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 No builder touches `apps/web/src/score/keyLevels.ts`, `useKeyLevels.ts`, `Keyboard.tsx`, `PianoKeyboard.tsx`, `RedFlight.tsx`, `useCursor.ts`, `usePlayback.ts`, `tokens.css` or `scripts/check-colors.mjs`. No builder runs git, `pnpm verify`, the whole test suite, the build or e2e.
 
@@ -1181,21 +1210,21 @@ Run from the worktree root in Git Bash. Under load, vitest's 5 s timeout can dro
 
 ## 14. Risks, and the test that catches each
 
-| Risk                                                                                                                                                     | Caught by                                                                                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A second red root: the halo drawn outside the cued note, or left in a note that lost `.is-red` for a frame                                              | The halo is a child of the `g.note` (render/halo.test "draws a circle in the note"); CSS hides it outside `.is-red` (`visibility`); the render check drops it in the commit that moves the cue (5.7 "goes in the render that moves the cue, before the align"); e2e `expectOneRedEveryFrame` through a press, the ring's life, a press before it closes, a seek and the finish; the states sweep `score-along-halo` |
-| The accent reaching the page outside `.is-red`                                                                                                          | `stroke` is never set in base.css; `node scripts/check-colors.mjs`; the e2e theme test reads the computed stroke as the accent and the fill as `none`                                                                                          |
-| The halo filled solid: `svg .is-red *` and the hop's ink rule both set `fill`                                                                           | The two selectors of 6.4 and their specificities; the e2e theme test asserts `fill: none`                                                                                                                                                     |
-| The align or StrictMode looking twice: a second halo, a second hand-over, or a live halo cleared                                                        | `showHalo` runs only when `passed > 0`; 5.7 "stays through a wrong key, a release and the align's second look"; 5.8 "the align's second look hands nothing over"; useAlongHalo.test "one ring under StrictMode"                                |
-| A press under a hop: no halo, a halo counted from the press, or two hand-overs                                                                          | 5.7 "a press under a hop passes at the landing, with its halo from the landing"; 5.8 "a press under a flight is handed over once, at the landing, at offset 0"                                                                                |
-| The loop's last step: a gap read to the next index instead of `loop.to`, or a halo on the wrong step                                                    | `stepGapSec` tests (loop end, loop at the last step); halo.test "the loop's last step runs to the loop's end, wraps"; 5.7 loop case                                                                                                            |
-| The page window: the cued note not in the DOM                                                                                                            | `haloAnchor` gives null and nothing is drawn (render/halo.test "none marked", "none laid out"; useAlongHalo.test "draws nothing when no notehead is marked"); a rebuilt page stops the loop ("stops when its page is rebuilt")                |
-| A hidden tab: a halo frozen, or one never removed                                                                                                       | The radius is a function of `performance.now()` (halo.test `haloProgress`); useAlongHalo.test "is gone when the gap is up, and the loop stops"; the walk sets no timer (5.7 "sets no timer")                                                  |
-| The halo growing the cued note's box: the page-turn test and the band check read `.is-red` rects                                                        | The page-turn test reads `.is-red .notehead` (9.4). In the app, `followCursor` measures the marks in useCursor's layout effect, before useAlongHalo draws in the same commit, so the scroll never sees the ring                                |
-| The halo growing the cued note's hover box: `noteBoxes` measures each `g.note` with `getBoundingClientRect()`, cached per page and layout, and the hover is on in the walk | 6.5: `noteBoxes` leaves `.along-halo` out of the box; noteKey.test "a note holding a halo keeps its own box"                                                   |
+| Risk                                                                                                                                                                                                       | Caught by                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A second red root: the halo drawn outside the cued note, or left in a note that lost `.is-red` for a frame                                                                                                 | The halo is a child of the `g.note` (render/halo.test "draws a circle in the note"); CSS hides it outside `.is-red` (`visibility`); the render check drops it in the commit that moves the cue (5.7 "goes in the render that moves the cue, before the align"); e2e `expectOneRedEveryFrame` through a press, the ring's life, a press before it closes, a seek and the finish; the states sweep `score-along-halo`                                                                                                 |
+| The accent reaching the page outside `.is-red`                                                                                                                                                             | `stroke` is never set in base.css; `node scripts/check-colors.mjs`; the e2e theme test reads the computed stroke as the accent and the fill as `none`                                                                                                                                                                                                                                                                                                                                                               |
+| The halo filled solid: `svg .is-red *` and the hop's ink rule both set `fill`                                                                                                                              | The two selectors of 6.4 and their specificities; the e2e theme test asserts `fill: none`                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| The align or StrictMode looking twice: a second halo, a second hand-over, or a live halo cleared                                                                                                           | `showHalo` runs only when `passed > 0`; 5.7 "stays through a wrong key, a release and the align's second look"; 5.8 "the align's second look hands nothing over"; useAlongHalo.test "one ring under StrictMode"                                                                                                                                                                                                                                                                                                     |
+| A press under a hop: no halo, a halo counted from the press, or two hand-overs                                                                                                                             | 5.7 "a press under a hop passes at the landing, with its halo from the landing"; 5.8 "a press under a flight is handed over once, at the landing, at offset 0"                                                                                                                                                                                                                                                                                                                                                      |
+| The loop's last step: a gap read to the next index instead of `loop.to`, or a halo on the wrong step                                                                                                       | `stepGapSec` tests (loop end, loop at the last step); halo.test "the loop's last step runs to the loop's end, wraps"; 5.7 loop case                                                                                                                                                                                                                                                                                                                                                                                 |
+| The page window: the cued note not in the DOM                                                                                                                                                              | `haloAnchor` gives null and nothing is drawn (render/halo.test "none marked", "none laid out"; useAlongHalo.test "draws nothing when no notehead is marked"); a rebuilt page stops the loop ("stops when its page is rebuilt")                                                                                                                                                                                                                                                                                      |
+| A hidden tab: a halo frozen, or one never removed                                                                                                                                                          | The radius is a function of `performance.now()` (halo.test `haloProgress`); useAlongHalo.test "is gone when the gap is up, and the loop stops"; the walk sets no timer (5.7 "sets no timer")                                                                                                                                                                                                                                                                                                                        |
+| The halo growing the cued note's box: the page-turn test and the band check read `.is-red` rects                                                                                                           | The page-turn test reads `.is-red .notehead` (9.4). In the app, `followCursor` measures the marks in useCursor's layout effect, before useAlongHalo draws in the same commit, so the scroll never sees the ring                                                                                                                                                                                                                                                                                                     |
+| The halo growing the cued note's hover box: `noteBoxes` measures each `g.note` with `getBoundingClientRect()`, cached per page and layout, and the hover is on in the walk                                 | 6.5: `noteBoxes` leaves `.along-halo` out of the box; noteKey.test "a note holding a halo keeps its own box"                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Issue 200's pull request: its `usePlayAlong.ts` imports `HOLD_TOLERANCE` and reads `settle`, `result.early` and the glass on an early release; its `play-along.spec.ts` edits touch the level tests of 9.4 | `HOLD_TOLERANCE` stays exported with its value, with a test; `keyLevels.ts`, `useKeyLevels.ts`, `Keyboard.tsx` and `PianoKeyboard.tsx` are untouched; the levels block and the `levels.release` line stay verbatim. Whichever pull request merges second rebases: issue 200's glass on a release too soon has no `result.early` to hang on, so it must decide by the key's own fraction (`HOLD_TOLERANCE` of the level's length), which it already computes for the forgiven case. The typecheck catches the rebase |
-| The timing judge, now fed presses at the press                                                                                                          | `play-along-timing.spec.ts` unchanged apart from its first test; `useWalkTiming.test.tsx` and `walkTiming.test.ts` pass with only `early` removed                                                                                             |
-| A level test that waited for the red to move                                                                                                             | 9.4's edits to 1378 and 1512. Where a test needs keys held while the red stays put, it holds an incomplete chord (48 without 60)                                                                                                             |
+| The timing judge, now fed presses at the press                                                                                                                                                             | `play-along-timing.spec.ts` unchanged apart from its first test; `useWalkTiming.test.tsx` and `walkTiming.test.ts` pass with only `early` removed                                                                                                                                                                                                                                                                                                                                                                   |
+| A level test that waited for the red to move                                                                                                                                                               | 9.4's edits to 1378 and 1512. Where a test needs keys held while the red stays put, it holds an incomplete chord (48 without 60)                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ## 15. Decisions this plan makes where the spec leaves room
 

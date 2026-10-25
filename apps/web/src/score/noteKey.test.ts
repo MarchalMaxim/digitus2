@@ -72,6 +72,18 @@ describe('noteBoxes and noteAt', () => {
     expect(noteAt(boxes, 30, 14)).toBeNull();
     expect(noteAt(boxes, 15, 30)).toBeNull();
   });
+  it('a note holding a halo keeps its own box (issue 204)', () => {
+    const host = document.createElement('div');
+    host.innerHTML = '<svg><g class="note" id="n1"><use/><circle class="along-halo"/></g></svg>';
+    rect(host, 100, 50, 600, 800);
+    const n1 = host.querySelector('g.note')!;
+    rect(n1, 80, 30, 70, 70); // the union, the ring included
+    rect(n1.querySelector('use')!, 110, 60, 10, 8);
+    rect(n1.querySelector('circle')!, 80, 30, 70, 70);
+    expect(noteBoxes(host, host.firstElementChild!, 2)).toEqual([
+      { id: 'n1', left: 8, top: 8, right: 22, bottom: 20 },
+    ]);
+  });
   it('leaves out a note drawn nowhere', () => {
     const host = document.createElement('div');
     host.innerHTML = '<svg><g class="note" id="n1"><use/></g></svg>';

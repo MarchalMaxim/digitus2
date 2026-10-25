@@ -472,6 +472,29 @@ export const STATES: AppState[] = [
     expectTag: 'cursor',
   },
   {
+    // The halo (issue 204): the reader plays the left hand at 50 %, and the whole note of step 0
+    // passes at its press; a thin ring closes in on step 1's note for 4.8 s, part of the cued
+    // note, the one red. 4.8 s outlasts the sweep's checks as score-count-in's 4.8 s count-in at
+    // 50 % does; go() ends with the ring live.
+    name: 'score-along-halo',
+    go: async (page) => {
+      await installFakeMidi(page, {
+        permission: 'granted',
+        playAlong: true,
+        settings: { hands: 'L' },
+        tempo: { [TWINKLE]: 0.5 },
+      });
+      await twinkleReady(page, '?audio=silent');
+      const midi = fakeMidi(page);
+      expect(await midi.waitForStep()).toEqual([48]);
+      await midi.playRed();
+      await expect(page.locator('.score-sheet .is-red .along-halo')).toHaveCount(1);
+      await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
+      expect(await midi.halo()).toBeGreaterThan(0);
+    },
+    expectTag: 'cursor',
+  },
+  {
     // Timing in the waiting walk (issue 192): Twinkle at 75 %, steps 0 to 4 walked at 2,500 ms per
     // performance second with step 2 pressed 600 ms early. Bar 0 is judged as the red leaves it:
     // one gray ring left of the early note and the explanation on the line, the red waiting on

@@ -52,7 +52,10 @@ export interface PlanStep {
   beatSec: number;
   /** The performance bar holding the onset: the pass index into `perf.starts`. */
   bar: number;
-  /** How long the walk holds the red on it before moving on, in performance seconds (`holdSec` with no loop). */
+  /**
+   * The step's note length up to the next step, in performance seconds (`holdSec` with no loop):
+   * a longer gap is a rest after the note.
+   */
   holdSec: number;
   /** The felt beat is three of the time signature's beats (6/8, 9/8, 12/8, 12/16); false when left out. */
   compound?: boolean;
@@ -178,11 +181,11 @@ function median(xs: readonly number[]): number {
  * the written gap at the reader's own tempo (the median ratio of real to written gaps within
  * `TEMPO_WINDOW` gaps), so any speed is fine and a steady latency cancels. A hesitation (a gap
  * longer than the rhythm asks by the pause margin), a break of the chain and a jump end a
- * stretch; a gap the red does not wait out (a rest after the note) joins the stretch but is
- * neither judged nor counted in the tempo. A stretch of fewer than `MIN_FIT_ONSETS` onsets judges
- * nothing, a gap with fewer than `MIN_TEMPO_GAPS` timed gaps around it is not judged, and the
- * first gap of a stretch is never rung. A gap that only puts back the one before it is on time,
- * also when the one before is a gap the red does not wait out.
+ * stretch; a gap longer than the note (a rest after it: a beginner presses when the note ends)
+ * joins the stretch but is neither judged nor counted in the tempo. A stretch of fewer than
+ * `MIN_FIT_ONSETS` onsets judges nothing, a gap with fewer than `MIN_TEMPO_GAPS` timed gaps
+ * around it is not judged, and the first gap of a stretch is never rung. A gap that only puts
+ * back the one before it is on time, also when the one before is a gap longer than the note.
  */
 export function judgeBar(steps: readonly PlanStep[], onsets: readonly Onset[]): Judged[] {
   const n = onsets.length;
@@ -214,7 +217,8 @@ export function judgeBar(steps: readonly PlanStep[], onsets: readonly Onset[]): 
     written[k] = stepAt(k).perfSec - stepAt(k - 1).perfSec;
     base[k] =
       a.chain === b.chain && b.index === a.index + 1 && written[k]! > ALONG_EPS && real[k]! > 0;
-    // A gap the red does not wait out (a rest after the note): not judged, not in the tempo.
+    // A rest after the note: a beginner presses when the note ends, so the gap is not judged
+    // and not in the tempo.
     timed[k] = base[k]! && written[k]! <= stepAt(k - 1).holdSec + ALONG_EPS;
     if (timed[k]) rho[k] = real[k]! / written[k]!;
     link[k] = base[k]!;

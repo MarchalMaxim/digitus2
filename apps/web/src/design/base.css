@@ -793,6 +793,24 @@ input[role='switch']:checked::before {
   pointer-events: none;
 }
 
+/* The halo of the waiting walk (issue 204, score/useAlongHalo.ts): a thin ring that closes in on
+   the cued note over the time to it. It is a child of that note's g.note, so the accent reaches
+   it only through the .is-red rules (tokens.css) and it is part of the one accent element;
+   anywhere else it is hidden, so it never shows in ink beside the music. No fill, 2 px at every
+   width, and clicks and hovers pass through it to the bar. */
+.score-sheet svg .along-halo,
+.score-sheet.is-hopping svg .is-red .along-halo {
+  fill: none;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.score-sheet svg .is-red .along-halo {
+  visibility: visible;
+}
+
 .score-error {
   --gap: 1rem;
 }
@@ -1937,7 +1955,8 @@ html:has(.dock) {
   }
 
   /* The timing rings are for the screen: a print is the music alone. */
-  .timing-mark {
+  .timing-mark,
+  .along-halo {
     display: none;
   }
 

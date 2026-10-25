@@ -54,7 +54,6 @@ const RUSH_MS = 600;
 const PAUSE_MS = 3000;
 const EXPLAIN = 'A ring before a note means it came early; after it, late.';
 const HINT_MANY = 'Play the red notes on your piano.';
-const HOLD_MANY = 'Hold the red notes a little longer.';
 
 const status = (page: Page): Locator => page.locator('.dock [role="status"]');
 const rings = (page: Page, verdict?: string): Locator =>
@@ -135,28 +134,21 @@ function rushedBar(page: Page): Promise<RhythmReport> {
 }
 
 test.describe('timing in the waiting walk', () => {
-  test('the first step needs every key, held; a tap asks for a longer hold', async ({ page }) => {
+  test('the first step needs every key; the second key passes it at its press', async ({
+    page,
+  }) => {
     const { midi } = await twinkle(page);
-    const hold = await midi.hold();
 
-    // One key of [48 60], held for twice the step's time, moves nothing.
+    // One key of [48 60], held for 1.6 s, moves nothing.
     await midi.noteOn(60);
-    await page.waitForTimeout(2 * hold);
+    await page.waitForTimeout(1_600);
     expect(await midi.index()).toBe(0);
     await expect(status(page)).toHaveText(HINT_MANY);
-    // The other key, with the first still down: after the hold the red moves on.
+    // The other key, with the first still down: the red moves on at once.
     await midi.noteOn(48);
     await expect.poll(() => midi.index()).toBe(1);
     await midi.noteOff(60);
     await midi.noteOff(48);
-
-    // A tap of both keys, let go before four fifths of the hold, asks for a longer one.
-    await rewind(page, midi);
-    await midi.tap([48, 60], 100);
-    await expect(status(page)).toHaveText(HOLD_MANY);
-    expect(await midi.index()).toBe(0);
-    expect(await midi.playRed()).toBe(0);
-    await expect.poll(() => midi.index()).toBe(1);
     await expectOneRed(page, 'the first step');
   });
 

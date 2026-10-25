@@ -29,9 +29,9 @@ export interface FakeMidiOptions {
    */
   settings?: Record<string, unknown>;
   /**
-   * The Practice tempo of pieces, by library slug (issue 185): merged into the stored settings as
-   * `tempoByPiece`, like `playAlong`. A walk held for its time is long at the written tempo; 1.5,
-   * the top of the slider, makes every hold two thirds as long. It is the reader's own setting.
+   * The Practice tempo of pieces, by library slug: merged into the stored settings as
+   * `tempoByPiece`, like `playAlong`. It sets the halo's length and the other hand's pace
+   * (issue 204). It is the reader's own setting.
    */
   tempo?: Record<string, number>;
   /**
@@ -69,8 +69,11 @@ interface FakeInput extends EventTarget {
 interface AlongHook {
   target(): number[];
   index(): number;
-  /** The hold in real milliseconds of the step `target()` names, 0 when none (issue 185). */
-  hold(): number;
+  /**
+   * The whole length in real ms of the halo of the step `target()` names while it runs, 0 when
+   * there is none (issue 204).
+   */
+  halo(): number;
 }
 
 /**
@@ -582,15 +585,18 @@ export function fakeMidi(page: Page) {
         .toBeGreaterThan(0);
       return found;
     },
-    /** The hold in real milliseconds of the step the red waits on, 0 when it names none (issue 185). */
-    async hold(): Promise<number> {
-      return page.evaluate(() => (window as unknown as Windowed).__digitus2Along?.hold() ?? 0);
+    /**
+     * The whole length in real ms of the halo of the step the red waits on while it runs, 0 when
+     * there is none (issue 204).
+     */
+    async halo(): Promise<number> {
+      return page.evaluate(() => (window as unknown as Windowed).__digitus2Along?.halo() ?? 0);
     },
     /**
-     * Presses every pitch of the step the red waits on and holds them: no release, so the step
-     * runs from the press (the other hand starts there, issue 184) and passes only once it has been
-     * held for its time (issue 185). With `wait` false it does not wait for the step to settle
-     * first, which is what a press right after `waitForStep` needs. Returns the step's index.
+     * Presses every pitch of the step the red waits on and holds them: the step passes at the press
+     * (issue 204) and the other hand starts there (issue 184). With `wait` false it does not wait
+     * for the step to settle first, which is what a press right after `waitForStep` needs. Returns
+     * the step's index.
      */
     async pressStep(o: { wait?: boolean } = {}): Promise<number> {
       if (o.wait !== false) await api.waitForStep();
@@ -605,13 +611,12 @@ export function fakeMidi(page: Page) {
       });
     },
     /**
-     * Presses every pitch of the step the red waits on, holds them until the walk moves on from
-     * that step (a step passes once its keys have been held for its time, issue 185), and then
-     * lets go. Returns the index of the step it played and the milliseconds from the press to the
-     * walk's move, both taken in the page; the wait there polls on animation frames and throws
-     * after 10 s. Waits for a step first, so it also serves the moment after a finish or a seek.
+     * Presses every pitch of the step the red waits on, waits in the page (on animation frames, up
+     * to 10 s) until the walk has moved on, which it does at the press, and lets go. Waits for a
+     * step first, so it also serves the moment after a finish or a seek. Returns the index of the
+     * step it played.
      */
-    async playRedTimed(): Promise<{ index: number; ms: number }> {
+    async playRed(): Promise<number> {
       await api.waitForStep();
       await listening();
       return page.evaluate(async () => {
@@ -635,34 +640,8 @@ export function fakeMidi(page: Page) {
         } finally {
           for (const midi of pitches) host.send([0x80, midi, 0]);
         }
-        return { index, ms: performance.now() - started };
+        return index;
       });
-    },
-    /**
-     * Plays the step the red waits on: holds all of its pitches until the walk has left that
-     * step, then lets go (`playRedTimed`). Returns the index of the step it played.
-     */
-    async playRed(): Promise<number> {
-      return (await api.playRedTimed()).index;
-    },
-    /**
-     * Presses the pitches, holds them `ms` milliseconds and lets go, all in the page, so a slow
-     * round trip cannot make a short hold long. Returns the milliseconds the keys were down, as
-     * the page measured them: a test of a short hold checks that a busy PC did not make it long.
-     */
-    async tap(pitches: number[], ms: number): Promise<number> {
-      await listening();
-      return page.evaluate(
-        async ([ps, held]) => {
-          const host = (window as unknown as Windowed).__fakeMidi!;
-          const started = performance.now();
-          for (const midi of ps as number[]) host.send([0x90, midi, 100]);
-          await new Promise((r) => setTimeout(r, held as number));
-          for (const midi of ps as number[]) host.send([0x80, midi, 0]);
-          return performance.now() - started;
-        },
-        [pitches, ms] as const,
-      );
     },
   };
   return api;
@@ -718,13 +697,14 @@ export interface RhythmReport {
  * Walks steps `from` to `to` on the fake piano in a set rhythm (issue 192), entirely in the page,
  * so a round trip never lands in the reader's gaps. Step i is pressed at
  * `t0 + (perfSec_i - perfSec_from) * msPerSec + offsets[i] + the pauses up to and including i`,
- * every pitch stamped with that instant as its event time. A step is let go once it has been held
- * past its hold by 200 ms (the walk counts holds from arrival, and the margin absorbs timer
- * jitter), or 100 ms before the next press when that is later, so a step before a rushed one is
- * held legato. Resolves once the red has left step `to`.
+ * every pitch stamped with that instant as its event time. A step is let go 200 ms after its
+ * note's length up to the next step (`holdMs`), or 100 ms before the next press when that is
+ * later; the walk passes each step at its press, so the releases only shape the keys' levels.
+ * Resolves once the red has left step `to`.
  *
  * Consecutive calls are one continuous chain unless a seek or Rewind comes between them: the gap
- * between two calls is the hold plus a round trip, not the reader's rhythm, and it would be judged.
+ * between two calls is the last step's release (its note length plus 200 ms) plus a round trip,
+ * not the reader's rhythm, and it would be judged.
  */
 export async function walkRhythm(page: Page, plan: RhythmPlan): Promise<RhythmReport> {
   // The handler must be attached before the first key goes out.

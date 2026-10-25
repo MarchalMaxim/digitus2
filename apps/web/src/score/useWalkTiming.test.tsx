@@ -209,7 +209,7 @@ interface Setup {
   restart(): void;
   /**
    * Presses the step's pitch at its time in the script (+ `offsets[i]`; the note's event time is
-   * `lag` earlier), then tells the tap it passed, as the walk would a hold later.
+   * `lag` earlier), then tells the tap it passed, as the walk does at the press.
    */
   walk(indices: number[], o?: { offsets?: Record<number, number>; lag?: number }): void;
   tap(e: WalkTimingEvent): void;
@@ -267,7 +267,6 @@ function setup(over: Partial<WalkTimingOptions> = {}): Setup {
           kind: 'settled',
           runs: [{ index, sinceMs }],
           at: last ? -1 : index + 1,
-          early: false,
           finished: last,
         });
       }
@@ -384,7 +383,7 @@ describe('the judgement, bar by bar', () => {
       index,
       sinceMs: s.press(index, index === 2 ? -400 : 0),
     }));
-    s.tap({ kind: 'settled', runs, at: 5, early: false, finished: false });
+    s.tap({ kind: 'settled', runs, at: 5, finished: false });
     const judged = hook()!.judged();
     expect(judged.map((j) => [j.bar, j.index])).toEqual([
       [0, 2],
@@ -407,7 +406,7 @@ describe('the judgement, bar by bar', () => {
     const s = setup();
     s.walk([0, 1, 2], { offsets: RUSH });
     const runs = [3, 0].map((index) => ({ index, sinceMs: s.press(index, 0) }));
-    s.tap({ kind: 'settled', runs, at: 1, early: false, finished: false });
+    s.tap({ kind: 'settled', runs, at: 1, finished: false });
     expect(s.result().marks).toHaveLength(1);
     expect(s.result().explain).toBe(true);
   });
@@ -421,7 +420,6 @@ describe('the judgement, bar by bar', () => {
       kind: 'settled',
       runs: [{ index: 3, sinceMs }],
       at: 0,
-      early: false,
       finished: false,
     });
     expect(hook()!.judged().length).toBeGreaterThan(0);
@@ -432,19 +430,6 @@ describe('the judgement, bar by bar', () => {
       .onsets()
       .map((o) => o.chain);
     expect(chains.at(-1)).toBe(chains[0]! + 1);
-  });
-
-  it('starts a new chain after a release too early', async () => {
-    await connect();
-    const s = setup();
-    s.walk([0, 1]);
-    s.tap({ kind: 'settled', runs: [], at: 2, early: true, finished: false });
-    s.walk([2]);
-    const chains = hook()!
-      .onsets()
-      .map((o) => o.chain);
-    expect(chains[2]).toBe(chains[1]! + 1);
-    expect(chains[1]).toBe(chains[0]);
   });
 
   it('judges the last bar at the finish', async () => {
@@ -687,7 +672,6 @@ describe('the judgement, bar by bar', () => {
       kind: 'settled',
       runs: [{ index: 3, sinceMs: -Infinity }],
       at: 4,
-      early: false,
       finished: false,
     });
     s.walk([4]);
@@ -725,7 +709,6 @@ describe('the time of an onset', () => {
         kind: 'settled',
         runs: [{ index, sinceMs: arrival }],
         at: index + 1,
-        early: false,
         finished: false,
       });
     }
@@ -744,7 +727,6 @@ describe('the time of an onset', () => {
       kind: 'settled',
       runs: [{ index: 0, sinceMs: performance.now() }],
       at: 1,
-      early: false,
       finished: false,
     });
     expect(hook()!.onsets()[0]!.ms).toBe(BASE);
@@ -762,7 +744,6 @@ describe('the time of an onset', () => {
       kind: 'settled',
       runs: [{ index: 0, sinceMs: performance.now() }],
       at: 1,
-      early: false,
       finished: false,
     });
     expect(hook()!.onsets()[0]!.ms).toBe(BASE + 12 - 30);
@@ -1087,7 +1068,7 @@ describe('the walk and its timing together', () => {
       for (const midi of pitchesOf(i)) moments.push({ at: release, on: false, midi });
     }
     moments.sort((a, b) => a.at - b.at || Number(a.on) - Number(b.on));
-    /** Plays every moment up to `until`, then lets the clock reach it (the wake-ups fire on the way). */
+    /** Plays every moment up to `until`, then lets the clock reach it. */
     const run = (until: number) => {
       while (moments.length > 0 && moments[0]!.at <= until) {
         const m = moments.shift()!;
@@ -1106,10 +1087,10 @@ describe('the walk and its timing together', () => {
     ['the left hand muted', ['L'] as Hand[]],
   ])('judges both bars from the keys it heard, with %s', async (_name, muted) => {
     const w = await walkIt(muted);
-    w.run(BASE + 3499);
+    w.run(BASE + 2999);
     expect(w.result().explain).toBe(false);
     expect(w.result().marks).toBeNull();
-    w.run(BASE + 3501); // step 3 passed: the walk left bar 0
+    w.run(BASE + 3001); // step 3 passed at its press: the walk left bar 0
     expect(w.result().explain).toBe(true);
     expect(w.result().marks).toHaveLength(1);
     w.run(BASE + 12000);

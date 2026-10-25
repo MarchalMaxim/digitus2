@@ -37,6 +37,7 @@ import { ScoreHeader, useLegendAbove } from './ScoreHeader.js';
 import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
+import { useAlongHalo } from './useAlongHalo.js';
 import { useCursor } from './useCursor.js';
 import { useHoveredNote } from './useHoveredNote.js';
 import { usePlayAlong, type AlongHint } from './usePlayAlong.js';
@@ -105,9 +106,8 @@ export interface StatusInputs {
   loading: boolean;
   countIn: CountIn | null;
   /**
-   * The red waits for the reader's piano (issue 182): what to ask of them and how many pitches
-   * the step in front of them has (`play`, or `hold` after a release that came too early, issue
-   * 185), or null when the hint is not shown (usePlayAlong).
+   * The red waits for the reader's piano (issue 182): how many pitches the step in front of
+   * them has, or null when the hint is not shown (usePlayAlong).
    */
   alongHint: AlongHint | null;
   /**
@@ -139,9 +139,9 @@ export interface StatusLine {
  * "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4" then "1" when a whole bar comes
  * before a pickup), then, lowest of all, what the play-along asks of the reader: one click for
  * the browser to let digitus sound the other hand (issue 184), then what to play on their piano
- * while the red waits (issue 182). The explanation of the timing rings (issue 192) comes after the
- * walk's `hold` hint and before its `play` hint. Null when there is nothing to say (a ready score,
- * stopped or playing the music). Written in `t` (default: the language on screen).
+ * while the red waits (issue 182). The explanation of the timing rings (issue 192) comes before the
+ * walk's play hint. Null when there is nothing to say (a ready score, stopped or playing the
+ * music). Written in `t` (default: the language on screen).
  */
 export function scoreStatusLine(
   {
@@ -165,7 +165,6 @@ export function scoreStatusLine(
   if (loading) return info(t.score.view.loadingPiano);
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
   if (alongSound !== null) return info(t.score.view.playAlongSound[alongSound]);
-  if (alongHint?.kind === 'hold') return info(t.score.view.holdLonger(alongHint.count));
   if (timingExplain) return info(t.score.view.timingExplain);
   if (alongHint !== null) return info(t.score.view.playAlongHint(alongHint.count));
   return null;
@@ -482,6 +481,9 @@ export function ScoreView({ source }: { source: PieceSource }) {
     flightShown: red.redAway,
     onTiming: timing.tap,
   });
+  // The halo (issue 204): a ring that closes in on the cued note over the time to it. After the
+  // cursor and the walk, so its layout effect runs once the cued notes are marked.
+  useAlongHalo(host, along.halo, doc.pages);
   useLayoutEffect(() => {
     timingMarksRef.current = timing.marks;
     if (!host) return;

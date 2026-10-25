@@ -8,6 +8,7 @@
 import type { Assignment, Hand, Note, Score } from '@digitus2/engine';
 import { UNMARKED_VELOCITY } from '@digitus2/engine/score-build';
 import type { PressedKey } from './Keyboard.js';
+import { HALO_CLASS } from './render/halo.js';
 
 /** The key a note presses: its pitch, the finger on screen for it (none is fine), its hand. */
 export function keyForNote(note: Note, assignment: Assignment | null): PressedKey {
@@ -38,20 +39,44 @@ export interface NoteBox {
   bottom: number;
 }
 
+/** The note's box, without a halo among its children: the union of the other children's boxes. */
+function boxOfNote(
+  note: Element,
+): Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom' | 'width' | 'height'> | null {
+  const children = Array.from(note.children);
+  if (!children.some((c) => c.classList.contains(HALO_CLASS))) return note.getBoundingClientRect();
+  let left = Infinity;
+  let top = Infinity;
+  let right = -Infinity;
+  let bottom = -Infinity;
+  for (const child of children) {
+    if (child.classList.contains(HALO_CLASS)) continue;
+    const c = child.getBoundingClientRect();
+    if (!(c.width > 0) || !(c.height > 0)) continue;
+    left = Math.min(left, c.left);
+    top = Math.min(top, c.top);
+    right = Math.max(right, c.right);
+    bottom = Math.max(bottom, c.bottom);
+  }
+  if (left === Infinity) return null;
+  return { left, top, right, bottom, width: right - left, height: bottom - top };
+}
+
 /**
  * Where each note of `page` (an SVG in `host`) is drawn, from the top left corner of `host`, each
  * box widened by `pad` pixels on every side so a notehead a few pixels wide is not hard to hit.
  * A note without an id, or drawn nowhere, is left out. Read from layout, which draws the page
  * if it was not drawn: call it once per page and layout, for a page the pointer is over, never
- * per pointer move (a long piece has dozens of pages, issue #79).
+ * per pointer move (a long piece has dozens of pages, issue #79). A halo inside a note (issue 204)
+ * is left out of its box.
  */
 export function noteBoxes(host: Element, page: Element, pad: number): NoteBox[] {
   const origin = host.getBoundingClientRect();
   const out: NoteBox[] = [];
   for (const note of page.querySelectorAll('g.note')) {
     if (!note.id) continue;
-    const r = note.getBoundingClientRect();
-    if (!(r.width > 0) || !(r.height > 0)) continue;
+    const r = boxOfNote(note);
+    if (!r || !(r.width > 0) || !(r.height > 0)) continue;
     out.push({
       id: note.id,
       left: r.left - origin.left - pad,

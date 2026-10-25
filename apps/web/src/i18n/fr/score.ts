@@ -37,10 +37,6 @@ export const score: Messages['score'] = {
       click: 'Cliquez une fois pour entendre l’autre main.',
       tap: 'Touchez une fois pour entendre l’autre main.',
     },
-    holdLonger: (count: number) =>
-      count > 1
-        ? 'Tenez les notes rouges un peu plus longtemps.'
-        : 'Tenez la note rouge un peu plus longtemps.',
     timingExplain:
       'Un cercle avant une note signifie qu’elle a été jouée trop tôt\u00a0; après, trop tard.',
     practice: 'S’exercer',

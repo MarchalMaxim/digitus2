@@ -41,22 +41,8 @@ export const score: Messages['score'] = {
       count > 1
         ? 'Tenez les notes rouges un peu plus longtemps.'
         : 'Tenez la note rouge un peu plus longtemps.',
-    // French agrees the noun with the number before it: the notes on time.
-    timingSummary: (onTime: number, total: number) => {
-      const line = `${notes(onTime)} sur ${formatNumber('fr', total)} en rythme.`;
-      const rings = total - onTime;
-      if (rings <= 0) return line;
-      const show =
-        onTime === 0
-          ? plural('fr', rings, { one: 'Le cercle la montre.', other: 'Les cercles les montrent.' })
-          : plural('fr', rings, {
-              one: 'Le cercle montre l’autre.',
-              other: 'Les cercles montrent les autres.',
-            });
-      return `${line} ${show}`;
-    },
-    timingAllOnTime: 'Toutes les notes en rythme.',
-    timingAllOnTimeFaster: 'Toutes les notes en rythme. Essayez un peu plus vite.',
+    timingExplain:
+      'Un cercle avant une note signifie qu’elle a été jouée trop tôt\u00a0; après, trop tard.',
     practice: 'S’exercer',
     scanSource: 'Source du scan et reconnaissance',
     couldNotOpenFile: (name: string) =>

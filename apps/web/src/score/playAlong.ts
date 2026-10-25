@@ -2,7 +2,7 @@
 // beat length (all already in the static bundle).
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { ticksToSeconds } from '@digitus2/engine/score-build';
-import type { Hand, Note } from '@digitus2/engine';
+import type { Hand, Note, TimeSigEvent } from '@digitus2/engine';
 import { beatTicksAt } from '../audio/beats.js';
 import type { Performance } from '../audio/performance.js';
 
@@ -39,23 +39,18 @@ export interface StepTime {
   beats: readonly number[];
 }
 
-/** A step's notes in one hand (issue 192): what the timing judge asks of that hand. */
-export interface PartNotes {
-  hand: Hand;
-  /** Performance ids of this hand's non-grace notes starting at the step's tick, in score order. */
-  ids: readonly string[];
-  /** Their required pitches (alongPlan's rule), distinct and ascending. */
-  pitches: readonly number[];
-}
-
-/** The notes of one step (issue 192), aligned with `alongPlan`'s steps. */
+/** What the walk's timing needs of one step (issue 192), aligned with `alongPlan`'s steps. */
 export interface StepNotes {
-  /** One per hand with notes at the step, 'L' before 'R'. */
-  parts: readonly PartNotes[];
-  /** The beat at the step's tick, in performance seconds (tempo map and time signature). */
+  /**
+   * Performance ids of the non-grace notes starting at the step's tick in the hands played, the
+   * left hand's first, each hand's in score order.
+   */
+  ids: readonly string[];
+  /**
+   * The felt beat at the step in performance seconds (tempo map and time signature): a dotted
+   * quarter in 6/8, 9/8 and 12/8, else the time signature's beat.
+   */
   beatSec: number;
-  /** The length of the performance measure holding the tick, in performance seconds. */
-  barSec: number;
 }
 
 const HANDS: readonly Hand[] = ['L', 'R'];
@@ -78,9 +73,8 @@ export function alongPlan(
 }
 
 /**
- * `alongPlan`, and for each step its notes per hand, its beat and its bar (issue 192): what the
- * timing judge needs. `steps` and `times` are exactly `alongPlan`'s; `notes[i]` belongs to
- * `steps[i]`, and the union of its parts' pitches is `steps[i].pitches`.
+ * `alongPlan`, and for each step its note ids and its felt beat: what the walk's timing needs
+ * (issue 192). `steps` and `times` are exactly `alongPlan`'s; `notes[i]` belongs to `steps[i]`.
  */
 export function alongPlanNotes(
   perf: Performance,
@@ -91,8 +85,8 @@ export function alongPlanNotes(
     shortestSec: number;
     /** By required pitch: the longest note, in seconds and in ticks. */
     pitches: Map<number, { lengthSec: number; ticks: number }>;
-    /** By hand: its notes' ids in score order and their required pitches. */
-    hands: Map<Hand, { ids: string[]; pitches: Set<number> }>;
+    /** By hand: its notes' ids in score order. */
+    hands: Map<Hand, string[]>;
   }
   const byTick = new Map<number, Tick>();
   for (const n of perf.score.notes) {
@@ -111,35 +105,25 @@ export function alongPlanNotes(
     if (!longest || lengthSec > longest.lengthSec) {
       tick.pitches.set(midi, { lengthSec, ticks: n.offsetTick - n.onsetTick });
     }
-    let hand = tick.hands.get(n.hand);
-    if (!hand) {
-      hand = { ids: [], pitches: new Set() };
-      tick.hands.set(n.hand, hand);
-    }
-    hand.ids.push(n.id);
-    hand.pitches.add(midi);
+    const ids = tick.hands.get(n.hand);
+    if (ids) ids.push(n.id);
+    else tick.hands.set(n.hand, [n.id]);
   }
-  const { tempoMap, divisions, measures } = perf.score;
+  const { tempoMap, divisions } = perf.score;
   const secAt = (tick: number): number => ticksToSeconds(tempoMap, divisions, tick);
-  const barSecs = new Map<number, number>();
-  /** The length of the measure holding `tick`: the last that starts at or before it. */
-  const barSecAt = (tick: number): number => {
-    let lo = 0;
-    let hi = measures.length;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (measures[mid]!.startTick <= tick) lo = mid + 1;
-      else hi = mid;
+  const signatures = [...perf.score.timeSignatures].sort((a, b) => a.tick - b.tick);
+  /**
+   * The felt beat at `tick` in ticks: three beats of `beatTicks` in 6/8, 9/8, 12/8 and 6/16 (an
+   * eighth or shorter beat, a multiple of three of them, more than three), else the beat.
+   */
+  const feltTicksAt = (tick: number, beatTicks: number): number => {
+    let sig: TimeSigEvent | undefined;
+    for (const s of signatures) {
+      if (s.tick <= tick) sig = s;
+      else break;
     }
-    const index = Math.max(0, lo - 1);
-    const m = measures[index];
-    if (!m) return 0;
-    let sec = barSecs.get(index);
-    if (sec === undefined) {
-      sec = secAt(m.startTick + m.lengthTicks) - secAt(m.startTick);
-      barSecs.set(index, sec);
-    }
-    return sec;
+    const compound = !!sig && sig.beatType >= 8 && sig.beats % 3 === 0 && sig.beats > 3;
+    return compound ? 3 * beatTicks : beatTicks;
   };
   const steps: AlongStep[] = [];
   const times: StepTime[] = [];
@@ -153,16 +137,9 @@ export function alongPlanNotes(
       lengthSec: pitches.map((midi) => tick.pitches.get(midi)!.lengthSec),
       beats: pitches.map((midi) => (beatTicks > 0 ? tick.pitches.get(midi)!.ticks / beatTicks : 0)),
     });
-    const parts: PartNotes[] = [];
-    for (const hand of HANDS) {
-      const part = tick.hands.get(hand);
-      if (part)
-        parts.push({ hand, ids: part.ids, pitches: [...part.pitches].sort((a, b) => a - b) });
-    }
     notes.push({
-      parts,
-      beatSec: secAt(onsetTick + beatTicks) - secAt(onsetTick),
-      barSec: barSecAt(onsetTick),
+      ids: HANDS.flatMap((hand) => tick.hands.get(hand) ?? []),
+      beatSec: secAt(onsetTick + feltTicksAt(onsetTick, beatTicks)) - secAt(onsetTick),
     });
   }
   return { steps, times, notes };
@@ -353,6 +330,12 @@ export function runSince(step: AlongStep, keys: Keys, presses: Presses): number 
 
 export type AlongMove = { kind: 'stay' } | { kind: 'cue'; index: number } | { kind: 'finish' };
 
+/** A step the walk passed (issue 192): its index and when its run started (performance.now ms). */
+export interface PassedRun {
+  index: number;
+  sinceMs: number;
+}
+
 /** What the pass loop leaves behind (`walk`). */
 interface Walked {
   keys: Keys;
@@ -361,6 +344,8 @@ interface Walked {
   passed: number;
   /** The indices of the steps passed, in the order passed. */
   passedSteps: number[];
+  /** The same steps, each with the start of the run that passed it (`runSince`). */
+  passedRuns: PassedRun[];
   /** The last of `passedSteps`, -1 when none passed. */
   last: number;
   early: boolean;
@@ -404,11 +389,13 @@ function walk(
     move,
     passed,
     passedSteps,
+    passedRuns,
     last: passedSteps.length > 0 ? passedSteps[passedSteps.length - 1]! : -1,
     early,
     at,
   });
   const passedSteps: number[] = [];
+  const passedRuns: PassedRun[] = [];
   if (index < 0 || index >= steps.length) return done(keys, { kind: 'stay' }, 0, false, index);
   const span = loop ? loopSpan(steps, loop) : null;
   let at = index;
@@ -430,6 +417,7 @@ function walk(
     held = used;
     passed++;
     passedSteps.push(at);
+    passedRuns.push({ index: at, sinceMs: since });
     const next = nextStep(steps, at, span);
     if (next < 0) return done(held, { kind: 'finish' }, passed, false, -1);
     at = next;
@@ -476,6 +464,12 @@ export interface Settled {
   passed: number;
   /** The indices of the steps passed, in the order passed (the steps of the chain). */
   passedSteps: number[];
+  /**
+   * The steps passed, in the order passed, each with the start of the run that passed it (issue
+   * 192): a step pressed before the red reached it counts from its own press, a chord from its
+   * last key. `passedRuns.map((r) => r.index)` equals `passedSteps`.
+   */
+  passedRuns: PassedRun[];
   /** The last of `passedSteps`, -1 when none passed. */
   last: number;
   /**

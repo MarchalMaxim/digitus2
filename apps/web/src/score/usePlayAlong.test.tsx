@@ -11,7 +11,7 @@ import { askForPiano, resetPianoForTests, turnOffPiano } from '../midi/piano.js'
 import type { AccessEvents, OpenedAccess } from '../midi/types.js';
 import { PianoKeyboard } from './PianoKeyboard.js';
 import { alongPlan, alongSteps, holdSec, type PerfRange } from './playAlong.js';
-import { usePlayAlong, type PlayAlongOptions } from './usePlayAlong.js';
+import { usePlayAlong, type PlayAlongOptions, type WalkTimingEvent } from './usePlayAlong.js';
 import { usePlayback, type Playback } from './usePlayback.js';
 
 // The play-along's glue (issue 182): the piano store drives the hook through a fake lazy chunk,
@@ -1912,5 +1912,208 @@ describe('Practice mode (issue 191)', () => {
     practice(true);
     s.refresh();
     expect(hook()?.target()).toEqual([48, 60]);
+  });
+});
+
+// The tap for the walk's timing (issue 192, useWalkTiming.ts): the walk tells what it passed, from
+// the press that started each run, and where its own sequence broke. StrictMode doubles the align
+// on a mount, which adds `break` calls, so each test clears the mock right before its action and
+// counts exactly after it.
+describe('the timing tap (issue 192)', () => {
+  type Told = Extract<WalkTimingEvent, { kind: 'settled' }>;
+  const tapOf = () => vi.fn<(e: WalkTimingEvent) => void>();
+  type TapMock = ReturnType<typeof tapOf>;
+  const told = (tap: TapMock): WalkTimingEvent[] => tap.mock.calls.map(([e]) => e);
+  const passes = (tap: TapMock): Told[] => told(tap).filter((e): e is Told => e.kind === 'settled');
+  const breaks = (tap: TapMock): number => told(tap).filter((e) => e.kind === 'break').length;
+  const onlyBreaks = (tap: TapMock): boolean => told(tap).every((e) => e.kind === 'break');
+
+  it('tells the steps a settle passed, from the press that started the run', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    const t = performance.now();
+    s.press(48, 60);
+    s.hold(500);
+    expect(told(onTiming)).toEqual([
+      { kind: 'settled', runs: [{ index: 0, sinceMs: t }], at: 1, early: false, finished: false },
+    ]);
+  });
+
+  it('tells a release too early, with no step passed', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    s.press(48, 60);
+    s.hold(100);
+    s.release(60);
+    expect(told(onTiming)).toEqual([
+      { kind: 'settled', runs: [], at: 0, early: true, finished: false },
+    ]);
+  });
+
+  it('makes no break while the walk walks: one settle for each pass', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    const keys = [[48, 60], [62], [64], [60]];
+    keys.forEach((midis) => {
+      s.press(...midis);
+      s.hold(500);
+      s.release(...midis);
+    });
+    expect(breaks(onTiming)).toBe(0);
+    expect(passes(onTiming).map((e) => e.runs.map((r) => r.index))).toEqual([[0], [1], [2], [3]]);
+    expect(passes(onTiming).map((e) => e.at)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('breaks once on a seek', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    s.fake.cue = 0.5; // a seek (bar click) to the second step
+    s.fake.start = 0.5;
+    s.refresh();
+    expect(told(onTiming)).toEqual([{ kind: 'break' }]);
+  });
+
+  it('breaks while Play plays, and once more when Pause gives the walk back', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    s.fake.playing = true;
+    s.refresh();
+    expect(told(onTiming).length).toBeGreaterThan(0);
+    expect(onlyBreaks(onTiming)).toBe(true);
+    onTiming.mockClear();
+    s.fake.playing = false;
+    s.refresh();
+    expect(told(onTiming)).toEqual([{ kind: 'break' }]);
+  });
+
+  it('breaks once on a hands change, and once on a loop being set', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    s.refresh({ mutedHands: ['L'] });
+    expect(told(onTiming)).toEqual([{ kind: 'break' }]);
+    onTiming.mockClear();
+    s.fake.stretch = { from: 0.5, to: 1.5 };
+    s.fake.start = 0.5;
+    s.fake.pos = 0;
+    s.refresh();
+    expect(told(onTiming)).toEqual([{ kind: 'break' }]);
+  });
+
+  it('breaks when Practice mode goes off and when the piano is turned off', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    act(() => useAppStore.getState().setSettings({ practiceMode: false }));
+    s.refresh();
+    expect(told(onTiming).length).toBeGreaterThan(0);
+    expect(onlyBreaks(onTiming)).toBe(true);
+    act(() => useAppStore.getState().setSettings({ practiceMode: true }));
+    s.refresh();
+    onTiming.mockClear();
+    act(() => turnOffPiano());
+    s.refresh();
+    expect(told(onTiming).length).toBeGreaterThan(0);
+    expect(onlyBreaks(onTiming)).toBe(true);
+  });
+
+  it("tells a loop's wrap as a pass, with no break before the next pass", async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming }, (f) => {
+      f.stretch = { from: 0.5, to: 1.5 }; // the steps at 0.5 and 1: indices 1 and 2
+      f.cue = 0.5;
+      f.atStart = false;
+      f.start = 0.5;
+    });
+    onTiming.mockClear();
+    s.press(62);
+    s.hold(500);
+    const t = performance.now();
+    s.press(64);
+    s.hold(500);
+    s.release(62, 64);
+    s.press(62);
+    s.hold(500);
+    expect(breaks(onTiming)).toBe(0);
+    const [first, wrap, again] = passes(onTiming);
+    expect(first).toMatchObject({ runs: [{ index: 1 }], at: 2, finished: false });
+    expect(wrap).toEqual({
+      kind: 'settled',
+      runs: [{ index: 2, sinceMs: t }],
+      at: 1,
+      early: false,
+      finished: false,
+    });
+    expect(again).toMatchObject({ runs: [{ index: 1 }], at: 2, finished: false });
+    expect(passes(onTiming)).toHaveLength(3);
+  });
+
+  it('tells the finish: the last pass has finished set and the red nowhere', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    s.press(48, 60, 62, 64);
+    s.hold(500);
+    s.release(60);
+    s.press(60);
+    s.hold(500);
+    s.release(60);
+    s.press(60);
+    const t = performance.now();
+    s.hold(500);
+    expect(s.fake.finish).toHaveBeenCalledTimes(1);
+    const all = passes(onTiming);
+    expect(all.map((e) => e.runs.map((r) => r.index))).toEqual([[0, 1, 2], [3], [4]]);
+    expect(all.map((e) => e.finished)).toEqual([false, false, true]);
+    expect(all.at(-1)).toEqual({
+      kind: 'settled',
+      runs: [{ index: 4, sinceMs: t }],
+      at: -1,
+      early: false,
+      finished: true,
+    });
+    expect(breaks(onTiming)).toBe(0);
+  });
+
+  it('breaks once when the view unmounts', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    onTiming.mockClear();
+    s.hook.unmount();
+    expect(told(onTiming)).toEqual([{ kind: 'break' }]);
+  });
+
+  it('tells nothing for a press under a flight, and the press time at the landing', async () => {
+    await connect();
+    const onTiming = tapOf();
+    const s = setup({ onTiming });
+    s.fake.flight = true;
+    s.refresh();
+    onTiming.mockClear();
+    const t = performance.now();
+    s.press(48, 60);
+    s.hold(500);
+    s.hold(300);
+    expect(told(onTiming)).toEqual([]);
+    s.fake.flight = false;
+    s.refresh();
+    expect(told(onTiming)).toEqual([
+      { kind: 'settled', runs: [{ index: 0, sinceMs: t }], at: 1, early: false, finished: false },
+    ]);
   });
 });

@@ -2,14 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { mockService, RECOGNITION_WITH_ERRORS } from './scan.js';
-import {
-  fakeMidi,
-  installFakeMidi,
-  playAlongTimed,
-  timedHearings,
-  timingHook,
-  type FakeMidiOptions,
-} from './midi.js';
+import { fakeMidi, installFakeMidi, walkRhythm, type FakeMidiOptions } from './midi.js';
 import { embellishDecided, openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
 import { holdPianoSamples } from './samples.js';
@@ -479,33 +472,23 @@ export const STATES: AppState[] = [
     expectTag: 'cursor',
   },
   {
-    // Timing after a run of Play (issue 192): Twinkle at 75 % played along with the third note
-    // 300 ms early, the sixth 300 ms late and the eighth step not played, then Pause. Gray rings
-    // beside the early and the late note and around the missed step in both hands, the summary on
-    // the line, and the last group heard red as the cue.
+    // Timing in the waiting walk (issue 192): Twinkle at 75 %, steps 0 to 4 walked at 2,500 ms per
+    // performance second with step 2 pressed 600 ms early. Bar 0 is judged as the red leaves it:
+    // one gray ring left of the early note and the explanation on the line, the red waiting on
+    // step 5 as the one red.
     name: 'score-timing-marks',
     go: async (page) => {
       await installFakeMidi(page, {
         permission: 'granted',
         playAlong: true,
-        settings: { countIn: false },
         tempo: { [TWINKLE]: 0.75 },
       });
       await twinkleReady(page, '?audio=silent');
       await fakeMidi(page).waitForStep();
-      const steps = await timingHook(page).steps();
-      await playAlongTimed(page, {
-        play: true,
-        passes: [{ fromSec: steps[0]!.perfSec, toSec: null }],
-        hearings: timedHearings(
-          steps.slice(0, 11).map((_, i) => i),
-          { offsets: { 2: -300, 5: 300 }, skip: [7] },
-        ),
-        pauseAt: { pass: 0, perfSec: steps[10]!.perfSec + 0.6 },
-      });
-      await expect(page.locator('.timing-mark')).toHaveCount(4);
+      await walkRhythm(page, { from: 0, to: 4, msPerSec: 2500, offsets: { 2: -600 } });
+      await expect(page.locator('.timing-mark')).toHaveCount(1);
       await expect(page.getByRole('status')).toHaveText(
-        /^\d+ of \d+ notes on time\. The rings show the others\.$/,
+        'A ring before a note means it came early; after it, late.',
       );
       await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);
     },

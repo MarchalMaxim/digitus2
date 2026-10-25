@@ -1058,22 +1058,29 @@ describe('alongPlan', () => {
     });
 
     it.each(all)(
-      'splits each step into its hands, whose pitches make up the step: %s',
+      'lists the non-grace notes of the hands played at each step, left hand first: %s',
       (_name, build, muted) => {
         const perf = performanceOf(build());
-        const { steps, notes } = alongPlanNotes(perf, muted);
-        notes.forEach((n, i) => {
-          expect(n.parts.length).toBeGreaterThan(0);
-          expect(n.parts.map((p) => p.hand)).toEqual(
-            (['L', 'R'] as const).filter((h) => n.parts.some((p) => p.hand === h)),
-          );
-          for (const p of n.parts) {
-            expect(muted).not.toContain(p.hand);
-            expect([...p.pitches]).toEqual([...new Set(p.pitches)].sort((a, b) => a - b));
+        const { notes } = alongPlanNotes(perf, muted);
+        const byId = new Map(perf.score.notes.map((n) => [n.id, n]));
+        for (const n of notes) {
+          expect(n.ids.length).toBeGreaterThan(0);
+          const heard = n.ids.map((id) => byId.get(id)!);
+          expect(new Set(heard.map((x) => x.onsetTick)).size).toBe(1);
+          for (const x of heard) {
+            expect(muted).not.toContain(x.hand);
+            expect(x.isGrace).toBe(false);
           }
-          const union = [...new Set(n.parts.flatMap((p) => p.pitches))].sort((a, b) => a - b);
-          expect(union).toEqual([...steps[i]!.pitches]);
-        });
+          const hands = heard.map((x) => x.hand);
+          expect(hands).toEqual([...hands].sort());
+        }
+        // Every non-grace note of the hands played is in exactly one step.
+        expect(notes.flatMap((n) => [...n.ids]).sort()).toEqual(
+          perf.score.notes
+            .filter((n) => !n.isGrace && !muted.includes(n.hand))
+            .map((n) => n.id)
+            .sort(),
+        );
       },
     );
 
@@ -1090,45 +1097,35 @@ describe('alongPlan', () => {
         { midi: 60, tick: 3, hand: 'L' },
       ]);
       const id = score.notes.map((n) => n.id);
-      const parts = (muted: Hand[]) =>
-        alongPlanNotes(performanceOf(score), muted).notes.map((n) =>
-          n.parts.map((p) => ({ hand: p.hand, ids: [...p.ids], pitches: [...p.pitches] })),
-        );
-      expect(parts([])).toEqual([
-        [
-          { hand: 'L', ids: [id[3]], pitches: [48] },
-          { hand: 'R', ids: [id[1], id[2]], pitches: [60, 64] },
-        ],
-        // Both voices of a unison in one hand: one pitch, both notes.
-        [{ hand: 'R', ids: [id[4], id[5]], pitches: [62] }],
-        [{ hand: 'L', ids: [id[6]], pitches: [55] }],
-        // A unison across the hands: a part in each.
-        [
-          { hand: 'L', ids: [id[8]], pitches: [60] },
-          { hand: 'R', ids: [id[7]], pitches: [60] },
-        ],
+      const idsOf = (muted: Hand[]) =>
+        alongPlanNotes(performanceOf(score), muted).notes.map((n) => [...n.ids]);
+      expect(idsOf([])).toEqual([
+        // The left hand's note, then the right hand's two in score order; the grace note is out.
+        [id[3], id[1], id[2]],
+        // Both voices of a unison in one hand: both notes.
+        [id[4], id[5]],
+        [id[6]],
+        // A unison across the hands: the left hand's first.
+        [id[8], id[7]],
       ]);
-      // A muted hand has no part, and a step only in that hand is gone.
-      expect(parts(['L'])).toEqual([
-        [{ hand: 'R', ids: [id[1], id[2]], pitches: [60, 64] }],
-        [{ hand: 'R', ids: [id[4], id[5]], pitches: [62] }],
-        [{ hand: 'R', ids: [id[7]], pitches: [60] }],
-      ]);
+      // A muted hand has no notes, and a step only in that hand is gone.
+      expect(idsOf(['L'])).toEqual([[id[1], id[2]], [id[4], id[5]], [id[7]]]);
     });
 
-    it('asks a part for the pitch the keyboard shows: the upper start of a trill', () => {
+    it('lists the note of the upper start of a trill, which asks for its upper pitch', () => {
       const score = scoreOf([
         { midi: 60, tick: 0, ticks: 4, ornament: trill },
         { midi: 65, tick: 4 },
       ]);
-      const { notes } = alongPlanNotes(performanceOf(score), []);
-      expect(notes[0]!.parts).toEqual([{ hand: 'R', ids: [score.notes[0]!.id], pitches: [62] }]);
+      const { steps, notes } = alongPlanNotes(performanceOf(score), []);
+      expect(steps[0]!.pitches).toEqual([62]);
+      expect(notes[0]!.ids).toEqual([score.notes[0]!.id]);
     });
 
     it('gives the performance ids of a repeated bar, one per hearing', () => {
       const perf = performanceOf(repeated());
       const { notes } = alongPlanNotes(perf, []);
-      const ids = notes.flatMap((n) => n.parts.flatMap((p) => [...p.ids]));
+      const ids = notes.flatMap((n) => [...n.ids]);
       expect(ids).toEqual(
         [...perf.score.notes].sort((a, b) => a.onsetTick - b.onsetTick).map((n) => n.id),
       );
@@ -1137,39 +1134,44 @@ describe('alongPlan', () => {
 
     /** The tick of each step, read from its first note in the performance. */
     const ticksOf = (perf: ReturnType<typeof performanceOf>, notes: StepNotes[]): number[] =>
-      notes.map((n) => perf.score.notes.find((x) => x.id === n.parts[0]!.ids[0])!.onsetTick);
+      notes.map((n) => perf.score.notes.find((x) => x.id === n.ids[0])!.onsetTick);
 
-    /** What the beat and the bar should be at each step, from the beat and tempo helpers. */
-    const expectBeatsAndBars = (score: Score): StepNotes[] => {
+    /** The felt beat at `tick` in ticks: three beats in 6/8, 9/8, 12/8 and 6/16, else the beat. */
+    const feltTicks = (score: Score, tick: number): number => {
+      const sigs = score.timeSignatures
+        .filter((s) => s.tick <= tick)
+        .sort((a, b) => a.tick - b.tick);
+      const sig = sigs[sigs.length - 1];
+      const compound = !!sig && sig.beatType >= 8 && sig.beats > 3 && sig.beats % 3 === 0;
+      return compound ? 3 * beatTicksAt(score, tick) : beatTicksAt(score, tick);
+    };
+
+    /** What the felt beat should be at each step, from the beat and tempo helpers. */
+    const expectFeltBeats = (score: Score): StepNotes[] => {
       const perf = performanceOf(score);
       const { notes } = alongPlanNotes(perf, []);
-      const { tempoMap, divisions, measures } = perf.score;
+      const { tempoMap, divisions } = perf.score;
       const sec = (tick: number) => ticksToSeconds(tempoMap, divisions, tick);
       ticksOf(perf, notes).forEach((tick, i) => {
-        const beatTicks = beatTicksAt(perf.score, tick);
-        const m = measures.find((x) => x.startTick <= tick && tick < x.startTick + x.lengthTicks)!;
-        expect(notes[i]!.beatSec).toBeCloseTo(sec(tick + beatTicks) - sec(tick), 9);
-        expect(notes[i]!.barSec).toBeCloseTo(
-          sec(m.startTick + m.lengthTicks) - sec(m.startTick),
+        expect(notes[i]!.beatSec).toBeCloseTo(
+          sec(tick + feltTicks(perf.score, tick)) - sec(tick),
           9,
         );
       });
       return notes;
     };
 
-    it('gives the beat and the bar at each step in 3/4, with a one-beat pickup', () => {
-      const notes = expectBeatsAndBars(parseMusicXml(fixture('pickup-piano')).score);
-      // The pickup's bar is its one beat; the full bars are three.
-      expect(notes[0]!.barSec).toBeCloseTo(notes[0]!.beatSec, 9);
-      expect(notes[notes.length - 1]!.barSec).toBeCloseTo(3 * notes[notes.length - 1]!.beatSec, 9);
+    it('gives the beat at each step in 3/4, with a one-beat pickup', () => {
+      const notes = expectFeltBeats(parseMusicXml(fixture('pickup-piano')).score);
+      expect(notes.length).toBeGreaterThan(1);
     });
 
-    it('gives the beat and the bar at each step in 4/4', () => {
-      const notes = expectBeatsAndBars(parseMusicXml(fixture('short-piano')).score);
-      for (const n of notes) expect(n.barSec).toBeCloseTo(4 * n.beatSec, 9);
+    it('gives the beat at each step in 4/4', () => {
+      const notes = expectFeltBeats(parseMusicXml(fixture('short-piano')).score);
+      expect(notes.length).toBeGreaterThan(1);
     });
 
-    it('gives an eighth for the beat in 6/8, as the metronome counts', () => {
+    it('gives a dotted quarter for the felt beat in 6/8', () => {
       const sixEight: Score = {
         ...scoreOf(
           [
@@ -1182,9 +1184,52 @@ describe('alongPlan', () => {
         measures: [{ index: 0, startTick: 0, lengthTicks: 6, number: '1' }],
         timeSignatures: [{ tick: 0, beats: 6, beatType: 8 }],
       };
-      const notes = expectBeatsAndBars(sixEight);
+      const notes = expectFeltBeats(sixEight);
       expect(notes).toHaveLength(2);
-      for (const n of notes) expect(n.barSec).toBeCloseTo(6 * n.beatSec, 9);
+      // At divisions 2 and 120 qpm a tick is a quarter of a second: three of them.
+      for (const n of notes) expect(n.beatSec).toBeCloseTo(0.75, 9);
+    });
+
+    it.each([
+      [6, 8, 6],
+      [9, 8, 6],
+      [12, 8, 6],
+      [6, 16, 3],
+      [3, 8, 2],
+      [3, 4, 4],
+      [4, 4, 4],
+      [2, 2, 8],
+      [6, 4, 4],
+    ])('feels %i/%i with a beat of %i ticks at divisions 4', (beats, beatType, ticks) => {
+      const score: Score = {
+        ...scoreOf([{ midi: 60, tick: 0 }]),
+        divisions: 4,
+        timeSignatures: [{ tick: 0, beats, beatType }],
+      };
+      const { notes } = alongPlanNotes(performanceOf(score), []);
+      // 120 qpm at divisions 4: a tick is 0.125 s.
+      expect(notes[0]!.beatSec).toBeCloseTo(ticks * 0.125, 9);
+    });
+
+    it('feels the time signature in force at the step', () => {
+      const changing: Score = {
+        ...scoreOf(
+          [
+            { midi: 60, tick: 0 },
+            { midi: 62, tick: 4 },
+          ],
+          2,
+        ),
+        divisions: 2,
+        timeSignatures: [
+          { tick: 0, beats: 4, beatType: 4 },
+          { tick: 4, beats: 6, beatType: 8 },
+        ],
+      };
+      const { notes } = alongPlanNotes(performanceOf(changing), []);
+      // A quarter (two ticks of 0.25 s) in 4/4, then a dotted quarter (three ticks) in 6/8.
+      expect(notes[0]!.beatSec).toBeCloseTo(0.5, 9);
+      expect(notes[1]!.beatSec).toBeCloseTo(0.75, 9);
     });
 
     it('takes the tempo in force at the step', () => {
@@ -1200,11 +1245,10 @@ describe('alongPlan', () => {
           { tick: 6, qpm: 90 },
         ],
       };
-      const notes = expectBeatsAndBars(changing);
-      // Half the tempo, twice the beat; the second bar holds two tempos.
+      const notes = expectFeltBeats(changing);
+      // Half the tempo, twice the beat.
       expect(notes[1]!.beatSec).toBeCloseTo(2 * notes[0]!.beatSec, 9);
       expect(notes[2]!.beatSec).toBeCloseTo((notes[1]!.beatSec * 60) / 90, 9);
-      expect(notes[2]!.barSec).toBe(notes[1]!.barSec);
     });
   });
 });
@@ -1342,6 +1386,86 @@ describe('settle', () => {
     it('names the step passed at a release', () => {
       const plan = quarters(60, 62);
       expect(settleAt(plan, down([60, 0]), 400, { releasing: 60 }).passedSteps).toEqual([0]);
+    });
+  });
+
+  describe('the runs that passed (issue 192)', () => {
+    // Four steps: [60] at 0, [62] at 0.5, [48 64] at 1 and [60] at 1.5, each held for 500 ms.
+    const four = (): Plan =>
+      planOf([
+        { midi: 60, tick: 0 },
+        { midi: 62, tick: 1 },
+        { midi: 48, tick: 2, hand: 'L' },
+        { midi: 64, tick: 2 },
+        { midi: 60, tick: 3 },
+      ]);
+    const runsOf = (r: Settled): Array<[number, number]> =>
+      r.passedRuns.map((run) => [run.index, run.sinceMs]);
+    /** The runs, which always name the steps of `passedSteps`. */
+    const expectRuns = (r: Settled, runs: Array<[number, number]>): void => {
+      expect(runsOf(r)).toEqual(runs);
+      expect(r.passedRuns.map((run) => run.index)).toEqual(r.passedSteps);
+    };
+
+    it('gives a held step with the press that started it', () => {
+      const r = settleAt(four(), down([60, 0]), 500);
+      expect(r.passedRuns).toEqual([{ index: 0, sinceMs: 0 }]);
+      expectRuns(r, [[0, 0]]);
+    });
+
+    it('gives nothing while no step has passed', () => {
+      const r = settleAt(four(), down([60, 0]), 499);
+      expect(r.passedRuns).toEqual([]);
+      expectRuns(r, []);
+    });
+
+    it('counts a legato step from its own press when it was pressed before the first passed', () => {
+      expectRuns(settleAt(four(), down([60, 0], [62, 100]), 600), [
+        [0, 0],
+        [1, 100],
+      ]);
+    });
+
+    it('counts a step pressed ahead from its own press', () => {
+      expectRuns(settleAt(four(), down([62, 50], [60, 200]), 700), [
+        [0, 200],
+        [1, 50],
+      ]);
+    });
+
+    it('counts a rolled chord from its last key', () => {
+      const r = settleAt(four(), down([48, 1000], [64, 1030]), 1530, { index: 2 });
+      expect(r.passedRuns).toEqual([{ index: 2, sinceMs: 1030 }]);
+      expectRuns(r, [[2, 1030]]);
+    });
+
+    it('gives a step passed at a release after four fifths of its hold', () => {
+      expectRuns(settleAt(four(), down([60, 0]), 400, { releasing: 60 }), [[0, 0]]);
+    });
+
+    it('keeps the passes before a release too early, which is early at the next step', () => {
+      const r = settleAt(four(), down([60, 0], [62, 450]), 600, { releasing: 62 });
+      expect(r.passedRuns).toEqual([{ index: 0, sinceMs: 0 }]);
+      expect(r.early).toBe(true);
+      expect(r.at).toBe(1);
+      expectRuns(r, [[0, 0]]);
+    });
+
+    it('gives the steps either side of a loop wrap, each from its own press', () => {
+      const loop: PerfRange = { from: 0.5, to: 1.5 };
+      const r = settleAt(four(), down([64, 0], [48, 0], [62, 10]), 1000, { index: 2, loop });
+      expect(r.passedRuns.map((run) => run.index)).toEqual([2, 1]);
+      expectRuns(r, [
+        [2, 0],
+        [1, 10],
+      ]);
+    });
+
+    it('gives the last step on the finish', () => {
+      const r = settleAt(four(), down([60, 0]), 500, { index: 3 });
+      expect(r.move.kind).toBe('finish');
+      expect(r.passedRuns).toEqual([{ index: 3, sinceMs: 0 }]);
+      expectRuns(r, [[3, 0]]);
     });
   });
 

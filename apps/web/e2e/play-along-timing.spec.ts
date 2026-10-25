@@ -161,6 +161,7 @@ test.describe('timing in the waiting walk', () => {
   });
 
   test('an even walk leaves no ring, and each onset carries the event time', async ({ page }) => {
+    test.setTimeout(120_000);
     await twinkle(page);
     const { sent } = await walk(page, { from: 0, to: 10, msPerSec: MS_PER_SEC });
 

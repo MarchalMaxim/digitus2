@@ -1191,25 +1191,30 @@ describe('alongPlan', () => {
     });
 
     it.each([
-      [6, 8, 6],
-      [9, 8, 6],
-      [12, 8, 6],
-      [6, 16, 3],
-      [3, 8, 2],
-      [3, 4, 4],
-      [4, 4, 4],
-      [2, 2, 8],
-      [6, 4, 4],
-    ])('feels %i/%i with a beat of %i ticks at divisions 4', (beats, beatType, ticks) => {
-      const score: Score = {
-        ...scoreOf([{ midi: 60, tick: 0 }]),
-        divisions: 4,
-        timeSignatures: [{ tick: 0, beats, beatType }],
-      };
-      const { notes } = alongPlanNotes(performanceOf(score), []);
-      // 120 qpm at divisions 4: a tick is 0.125 s.
-      expect(notes[0]!.beatSec).toBeCloseTo(ticks * 0.125, 9);
-    });
+      [6, 8, 6, true],
+      [9, 8, 6, true],
+      [12, 8, 6, true],
+      [12, 16, 3, true],
+      [6, 16, 3, true],
+      [3, 8, 2, false],
+      [3, 4, 4, false],
+      [4, 4, 4, false],
+      [2, 2, 8, false],
+      [6, 4, 4, false],
+    ])(
+      'feels %i/%i with a beat of %i ticks at divisions 4 (compound: %s)',
+      (beats, beatType, ticks, compound) => {
+        const score: Score = {
+          ...scoreOf([{ midi: 60, tick: 0 }]),
+          divisions: 4,
+          timeSignatures: [{ tick: 0, beats, beatType }],
+        };
+        const { notes } = alongPlanNotes(performanceOf(score), []);
+        // 120 qpm at divisions 4: a tick is 0.125 s.
+        expect(notes[0]!.beatSec).toBeCloseTo(ticks * 0.125, 9);
+        expect(notes[0]!.compound).toBe(compound);
+      },
+    );
 
     it('feels the time signature in force at the step', () => {
       const changing: Score = {
@@ -1230,6 +1235,7 @@ describe('alongPlan', () => {
       // A quarter (two ticks of 0.25 s) in 4/4, then a dotted quarter (three ticks) in 6/8.
       expect(notes[0]!.beatSec).toBeCloseTo(0.5, 9);
       expect(notes[1]!.beatSec).toBeCloseTo(0.75, 9);
+      expect(notes.map((n) => n.compound)).toEqual([false, true]);
     });
 
     it('takes the tempo in force at the step', () => {

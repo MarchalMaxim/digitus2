@@ -117,7 +117,8 @@ export interface StatusInputs {
   alongSound: 'click' | 'tap' | null;
   /**
    * The one-time explanation of the timing rings (issue 192, useWalkTiming): shown the first time
-   * rings appear in this view, until two more bars are judged, a break or a clear. Left out: false.
+   * rings appear in this view, until two more bars are judged while it is on the line, a break or
+   * a clear. Left out: false.
    */
   timingExplain?: boolean;
 }

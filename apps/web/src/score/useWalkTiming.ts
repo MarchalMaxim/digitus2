@@ -48,7 +48,10 @@ export interface WalkTiming {
   tap: (e: WalkTimingEvent) => void;
   /** The rings of every judged bar not replayed or cleared since; null when none. */
   marks: readonly TimingMark[] | null;
-  /** The one-time explanation is on the status line (docs/app.md, Timing in the walk). */
+  /**
+   * The one-time explanation is due on the status line (docs/app.md, Timing in the walk); a line
+   * that ranks above it (the piano loading, the sound sentence) can still hold the line.
+   */
   explain: boolean;
 }
 
@@ -167,8 +170,19 @@ export function useWalkTiming({
   const explainedRef = useRef(false);
   const explainBarsRef = useRef(0);
   const explainRef = useRef(false);
+  /** The explanation has been on the status line, not under a line that ranks above it. */
+  const seenRef = useRef(false);
   const [rings, setRings] = useState<Rings>(NO_RINGS);
   const [explain, setExplain] = useState(false);
+
+  // The lines that rank above the explanation on the status line (scoreStatusLine): the piano
+  // loading, the count-in, and the sound sentence, which the walk shows only for a reader with a
+  // hand left out. The walk's hold hint goes with the next pass, so it is not one of them.
+  const { loading, preparing, countIn, soundWaits } = playback;
+  const held = loading || preparing || countIn !== null || (soundWaits && muteKey !== '');
+  useLayoutEffect(() => {
+    if (explain && !held) seenRef.current = true;
+  }, [explain, held]);
 
   // Every note-on, logged as it arrives: the walk passes a step a hold after the press, and the
   // event time of the press is needed then. Subscribed once and never again, so it stays ahead of
@@ -190,6 +204,12 @@ export function useWalkTiming({
     explainRef.current = on;
     setExplain(on);
   }, []);
+  /** The explanation leaves; one that never reached the line (a higher line held it) is due again. */
+  const endExplain = useCallback(() => {
+    if (!explainRef.current) return;
+    if (!seenRef.current) explainedRef.current = false;
+    showExplain(false);
+  }, [showExplain]);
 
   const tap = useCallback(
     (e: WalkTimingEvent) => {
@@ -203,7 +223,7 @@ export function useWalkTiming({
         if (!walk) return;
         if (e.kind === 'break') {
           broken();
-          showExplain(false);
+          endExplain();
           return;
         }
         const byBar =
@@ -224,9 +244,14 @@ export function useWalkTiming({
           const onsets = entries.map((entry) => onsetOf(entry, walk, logRef.current));
           const last = walk.steps[lastEntry.index]!;
           let judged = judgeBar(walk.steps, onsets);
-          // A written rit. at the end is text the tempo map does not carry: a reader who slows
-          // down as written must not get late rings.
-          if (finishing) judged = judged.filter((j) => j.verdict !== 'late');
+          // A written rit. or rall. at the end is text the tempo map does not carry: a reader who
+          // slows down as written must not get late rings. The last two bars of the performance
+          // keep only early, in the order heard (the pass index of the last step, and the one
+          // before it), wherever they are judged: moving into the last bar, at the finish, and at
+          // the wrap of a loop over the ending, which never finishes.
+          const lastPass = walk.steps[walk.steps.length - 1]!.bar;
+          const atEnd = finishing || last.bar >= lastPass - 1;
+          if (atEnd) judged = judged.filter((j) => j.verdict !== 'late');
           const kept = judgedRef.current;
           for (const j of judged) kept.push({ ...j, bar: last.bar });
           if (kept.length > JUDGED_CAP) kept.splice(0, kept.length - JUDGED_CAP);
@@ -293,15 +318,17 @@ export function useWalkTiming({
           ringsRef.current = { plan: walk, byBar: byBar.size > 0 ? byBar : NO_MARKS };
           setRings(ringsRef.current);
         }
-        // The explanation, decided once per tap from the rings this tap left on screen.
+        // The explanation, decided once per tap from the rings this tap left on screen. Only bars
+        // judged while it is on the status line count toward its leaving.
         const shown = [...ringedNow].some((bar) => byBar.has(bar));
         if (shown && !explainedRef.current) {
           explainedRef.current = true;
           explainBarsRef.current = 0;
+          seenRef.current = false;
           showExplain(true);
-        } else if (explainRef.current && judgedNow.size > 0) {
+        } else if (explainRef.current && seenRef.current && judgedNow.size > 0) {
           explainBarsRef.current += judgedNow.size;
-          if (explainBarsRef.current >= EXPLAIN_BARS) showExplain(false);
+          if (explainBarsRef.current >= EXPLAIN_BARS) endExplain();
         }
       } catch (error) {
         // A timing fault never reaches the walk: the chain starts afresh.
@@ -309,11 +336,11 @@ export function useWalkTiming({
         broken();
       }
     },
-    [showExplain],
+    [showExplain, endExplain],
   );
 
   // Clears: the onsets, the chain, the judgements, the rings and the explanation on screen (the
-  // explanation is said once per view, so `explainedRef` stays).
+  // explanation is said once per view, so `explainedRef` stays once it has been on the line).
   const reset = useCallback(() => {
     entriesRef.current = [];
     chainRef.current++;
@@ -322,8 +349,8 @@ export function useWalkTiming({
     judgedRef.current = [];
     ringsRef.current = { plan: liveRef.current.plan, byBar: NO_MARKS };
     setRings(ringsRef.current);
-    showExplain(false);
-  }, [showExplain]);
+    endExplain();
+  }, [endExplain]);
   // A new score, a hands change, Practice mode off, the piano lost, the setting off.
   useEffect(() => {
     reset();

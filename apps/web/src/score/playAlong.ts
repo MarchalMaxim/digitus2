@@ -47,10 +47,13 @@ export interface StepNotes {
    */
   ids: readonly string[];
   /**
-   * The felt beat at the step in performance seconds (tempo map and time signature): a dotted
-   * quarter in 6/8, 9/8 and 12/8, else the time signature's beat.
+   * The felt beat at the step in performance seconds (tempo map and time signature): three of
+   * the time signature's beats when it counts more than three of an eighth or shorter, a multiple
+   * of three (6/8, 9/8, 12/8, 12/16), else the time signature's beat.
    */
   beatSec: number;
+  /** The felt beat is three of the time signature's beats (6/8, 9/8, 12/8, 12/16), not its own. */
+  compound: boolean;
 }
 
 const HANDS: readonly Hand[] = ['L', 'R'];
@@ -113,18 +116,20 @@ export function alongPlanNotes(
   const secAt = (tick: number): number => ticksToSeconds(tempoMap, divisions, tick);
   const signatures = [...perf.score.timeSignatures].sort((a, b) => a.tick - b.tick);
   /**
-   * The felt beat at `tick` in ticks: three beats of `beatTicks` in 6/8, 9/8, 12/8 and 6/16 (an
-   * eighth or shorter beat, a multiple of three of them, more than three), else the beat.
+   * Whether the felt beat at `tick` is three of the time signature's beats, as in 6/8, 9/8, 12/8
+   * and 6/16 (an eighth or shorter beat, a multiple of three of them, more than three).
    */
-  const feltTicksAt = (tick: number, beatTicks: number): number => {
+  const compoundAt = (tick: number): boolean => {
     let sig: TimeSigEvent | undefined;
     for (const s of signatures) {
       if (s.tick <= tick) sig = s;
       else break;
     }
-    const compound = !!sig && sig.beatType >= 8 && sig.beats % 3 === 0 && sig.beats > 3;
-    return compound ? 3 * beatTicks : beatTicks;
+    return !!sig && sig.beatType >= 8 && sig.beats % 3 === 0 && sig.beats > 3;
   };
+  /** The felt beat at `tick` in ticks: three beats of `beatTicks` in a compound meter, else the beat. */
+  const feltTicksAt = (tick: number, beatTicks: number): number =>
+    compoundAt(tick) ? 3 * beatTicks : beatTicks;
   const steps: AlongStep[] = [];
   const times: StepTime[] = [];
   const notes: StepNotes[] = [];
@@ -140,6 +145,7 @@ export function alongPlanNotes(
     notes.push({
       ids: HANDS.flatMap((hand) => tick.hands.get(hand) ?? []),
       beatSec: secAt(onsetTick + feltTicksAt(onsetTick, beatTicks)) - secAt(onsetTick),
+      compound: compoundAt(onsetTick),
     });
   }
   return { steps, times, notes };

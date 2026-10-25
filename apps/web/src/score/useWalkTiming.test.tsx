@@ -9,6 +9,7 @@ import type { PerfRange } from './playAlong.js';
 import { usePlayAlong, type WalkTimingEvent } from './usePlayAlong.js';
 import type { Playback } from './usePlayback.js';
 import { useWalkTiming, type WalkTimingHook, type WalkTimingOptions } from './useWalkTiming.js';
+import type * as WalkTimingModule from './walkTiming.js';
 
 // The timing of the waiting walk (issue 192): the hook's listener, bar by bar. The judge itself is
 // walkTiming.test.ts; here the hook must hand it the right onsets at the right moments, keep the
@@ -22,6 +23,19 @@ const access = vi.hoisted(() => ({
 vi.mock('../midi/access.js', () => ({
   openMidiAccess: (events: AccessEvents) => access.open(events),
 }));
+
+/** The judge as it is, unless a test makes it throw: for the fault the hook must keep to itself. */
+const fault = vi.hoisted(() => ({ judge: false }));
+vi.mock('./walkTiming.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof WalkTimingModule>();
+  return {
+    ...actual,
+    judgeBar: (...args: Parameters<typeof actual.judgeBar>) => {
+      if (fault.judge) throw new Error('judge fault');
+      return actual.judgeBar(...args);
+    },
+  };
+});
 
 /** Bars of four quarter notes: divisions 1 and 120 qpm, so a tick is half a second. */
 const BAR_TICKS = 4;
@@ -65,10 +79,13 @@ function scoreOf(notes: Note[], bars: number): Score {
   };
 }
 
-/** The right hand's quarters, one step each: 60 62 64 65 | 67 65 64 62 | 60 62 64 65. */
-const MELODY = [60, 62, 64, 65, 67, 65, 64, 62, 60, 62, 64, 65];
+/**
+ * The right hand's quarters, one step each, five bars: 60 62 64 65 | 67 65 64 62 | 60 62 64 65 |
+ * 67 65 64 62 | 60 62 64 65.
+ */
+const MELODY = [60, 62, 64, 65, 67, 65, 64, 62, 60, 62, 64, 65, 67, 65, 64, 62, 60, 62, 64, 65];
 
-/** `steps` right-hand quarters over `steps / 4` bars (8 or 12). */
+/** `steps` right-hand quarters over `steps / 4` bars (8, 12 or 20). */
 function melody(steps: number): Score {
   return scoreOf(
     MELODY.slice(0, steps).map((midi, tick) => note(midi, tick)),
@@ -80,6 +97,9 @@ function melody(steps: number): Score {
 function makeFake() {
   const f = {
     playing: false,
+    /** The browser holds the sound back, and the other hand's samples are loading. */
+    soundWaits: false,
+    preparing: false,
     atStart: true,
     cue: null as number | null,
     start: 0,
@@ -125,8 +145,12 @@ function makeFake() {
         setLoop: () => {},
         strike: () => () => undefined,
         prepare: () => {},
-        preparing: false,
-        soundWaits: false,
+        get preparing() {
+          return f.preparing;
+        },
+        get soundWaits() {
+          return f.soundWaits;
+        },
         accompany: () => {},
         stopAccompaniment: () => {},
       };
@@ -268,6 +292,7 @@ function openAtTempo(factor: number): void {
 }
 
 beforeEach(() => {
+  fault.judge = false;
   vi.useFakeTimers({
     toFake: [
       'setTimeout',
@@ -452,6 +477,208 @@ describe('the judgement, bar by bar', () => {
     expect(s.result().marks).toBeNull();
   });
 
+  describe("the piece's last bar at a loop's wrap", () => {
+    // A loop over the ending never finishes: the walk wraps from the last step to the loop's
+    // first (here step 4), and the last bar is judged at the wrap as it is at the finish.
+    const lates = () =>
+      hook()!
+        .judged()
+        .filter((j) => j.verdict === 'late');
+
+    it('drops late: a written rit. is not the reader dragging', async () => {
+      await connect();
+      const s = setup({ score: melody(12) });
+      s.walk([4, 5, 6, 7, 8, 9, 10]);
+      const sinceMs = s.press(11, 300);
+      s.tap({
+        kind: 'settled',
+        runs: [{ index: 11, sinceMs }],
+        at: 4,
+        early: false,
+        finished: false,
+      });
+      expect(
+        hook()!
+          .judged()
+          .filter((j) => j.bar === 2)
+          .map((j) => j.index),
+      ).toEqual([8, 9, 10]);
+      expect(lates()).toEqual([]);
+      expect(s.result().marks).toBeNull();
+    });
+
+    it('drops late for a legato wrap, which settles the last step and the first together', async () => {
+      await connect();
+      const s = setup({ score: melody(12) });
+      s.walk([4, 5, 6, 7, 8, 9, 10]);
+      const runs = [11, 4].map((index) => ({
+        index,
+        sinceMs: s.press(index, index === 11 ? 300 : 0),
+      }));
+      s.tap({ kind: 'settled', runs, at: 5, early: false, finished: false });
+      expect(lates()).toEqual([]);
+      expect(s.result().marks).toBeNull();
+    });
+
+    it('still rings an early note', async () => {
+      await connect();
+      const shown = melody(12);
+      const s = setup({ score: shown });
+      s.walk([4, 5, 6, 7, 8, 9, 10], { offsets: { 9: -400 } });
+      const sinceMs = s.press(11, 0);
+      s.tap({
+        kind: 'settled',
+        runs: [{ index: 11, sinceMs }],
+        at: 4,
+        early: false,
+        finished: false,
+      });
+      expect(s.result().marks).toHaveLength(1);
+      expect(s.result().marks![0]).toMatchObject({ verdict: 'early', ids: [idOf(shown, 9)] });
+    });
+
+    it('keeps late in a bar that is not one of the last two', async () => {
+      await connect();
+      const s = setup({ score: melody(20) });
+      // A loop over bars 1 and 2 of five wraps at step 7, the end of bar 1.
+      s.walk([4, 5, 6]);
+      const sinceMs = s.press(7, 300);
+      s.tap({
+        kind: 'settled',
+        runs: [{ index: 7, sinceMs }],
+        at: 4,
+        early: false,
+        finished: false,
+      });
+      expect(lates().map((j) => j.index)).toEqual([7]);
+    });
+
+    it('drops late in the bar before the last, which a loop over the ending wraps at its end', async () => {
+      await connect();
+      const s = setup({ score: melody(12) });
+      // A loop over bars 1 and 2 of three wraps at step 7, the end of bar 1: the last bar but one.
+      s.walk([4, 5, 6]);
+      const sinceMs = s.press(7, 300);
+      s.tap({
+        kind: 'settled',
+        runs: [{ index: 7, sinceMs }],
+        at: 4,
+        early: false,
+        finished: false,
+      });
+      expect(
+        hook()!
+          .judged()
+          .filter((j) => j.bar === 1)
+          .map((j) => j.index),
+      ).toEqual([6]);
+      expect(lates()).toEqual([]);
+      expect(s.result().marks).toBeNull();
+    });
+  });
+
+  describe('the last two bars of the piece', () => {
+    // A written rit. or rall. slows the end and the tempo map does not carry it, so a reader who
+    // slows down as written must not get a late ring in the last bar or the one before it. Five
+    // bars of four steps: bar 4 is the last, bar 3 the one before it, bar 2 the third from the end.
+    const lates = () =>
+      hook()!
+        .judged()
+        .filter((j) => j.verdict === 'late');
+    const through = (last: number): number[] => Array.from({ length: last + 1 }, (_, i) => i);
+
+    it('drops late in the bar before the last', async () => {
+      await connect();
+      const s = setup({ score: melody(20) });
+      s.walk(through(15), { offsets: { 15: 300 } }); // the tap for step 15 leaves bar 3
+      expect(
+        hook()!
+          .judged()
+          .filter((j) => j.bar === 3)
+          .map((j) => j.index),
+      ).toEqual([12, 13, 14]);
+      expect(lates()).toEqual([]);
+      expect(s.result().marks).toBeNull();
+      expect(hook()!.markCount()).toBe(0);
+    });
+
+    it('still rings an early note in the bar before the last', async () => {
+      await connect();
+      const shown = melody(20);
+      const s = setup({ score: shown });
+      s.walk(through(15), { offsets: { 14: -400 } });
+      expect(s.result().marks).toHaveLength(1);
+      expect(s.result().marks![0]).toMatchObject({ verdict: 'early', ids: [idOf(shown, 14)] });
+    });
+
+    it('still rings a late note in the third bar from the end', async () => {
+      await connect();
+      const shown = melody(20);
+      const s = setup({ score: shown });
+      s.walk(through(11), { offsets: { 11: 300 } }); // the tap for step 11 leaves bar 2
+      expect(lates().map((j) => [j.bar, j.index])).toEqual([[2, 11]]);
+      expect(s.result().marks).toHaveLength(1);
+      expect(s.result().marks![0]).toMatchObject({ verdict: 'late', ids: [idOf(shown, 11)] });
+    });
+
+    describe('in a repeated piece', () => {
+      // The bars as heard: A B | A B | C, the second bar repeating back to the top, so written bar
+      // 1 is heard in passes 1 and 3 and the last two passes are 3 and 4. The steps are
+      // MELODY's twenty, the first twelve of them written.
+      const repeated = (): Score => {
+        const written = melody(12);
+        return {
+          ...written,
+          measures: written.measures.map((m, i) =>
+            i === 1 ? { ...m, form: { repeatEnd: 2 } } : m,
+          ),
+        };
+      };
+      /** The tap for each step from 0 to `last`, in order heard (`walk` takes the written notes for the whole piece). */
+      const heard = (s: Setup, last: number, offsets: Record<number, number>) => {
+        for (let index = 0; index <= last; index++) {
+          const sinceMs = s.press(index, offsets[index] ?? 0);
+          s.tap({
+            kind: 'settled',
+            runs: [{ index, sinceMs }],
+            at: index + 1,
+            early: false,
+            finished: false,
+          });
+        }
+      };
+
+      it('counts the last passes in the order heard', async () => {
+        await connect();
+        const s = setup({ score: repeated() });
+        expect(
+          hook()!
+            .steps()
+            .map((step) => step.bar),
+        ).toEqual(Array.from({ length: 20 }, (_, i) => i >> 2));
+        heard(s, 15, { 15: 300 }); // pass 3, the second hearing of written bar 1
+        expect(
+          hook()!
+            .judged()
+            .filter((j) => j.bar === 3)
+            .map((j) => j.index),
+        ).toEqual([12, 13, 14]);
+        expect(lates()).toEqual([]);
+        expect(s.result().marks).toBeNull();
+      });
+
+      it('still rings a late note in the first hearing of the same written bar', async () => {
+        await connect();
+        const shown = repeated();
+        const s = setup({ score: shown });
+        heard(s, 7, { 7: 300 }); // pass 1: the third from the end
+        expect(lates().map((j) => [j.bar, j.index])).toEqual([[1, 7]]);
+        expect(s.result().marks).toHaveLength(1);
+        expect(s.result().marks![0]).toMatchObject({ verdict: 'late', ids: [idOf(shown, 7)] });
+      });
+    });
+  });
+
   it('skips a run start that is not finite and starts a new chain after it', async () => {
     await connect();
     const s = setup();
@@ -471,16 +698,14 @@ describe('the judgement, bar by bar', () => {
 
   it('keeps a fault in the judge in the hook: the walk goes on judging', async () => {
     await connect();
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const s = setup();
-    expect(() =>
-      s.tap({
-        kind: 'settled',
-        runs: [{ index: 99, sinceMs: 0 }],
-        at: 100,
-        early: false,
-        finished: false,
-      }),
-    ).not.toThrow();
+    fault.judge = true;
+    // Leaving bar 0 judges it, and the judge throws.
+    expect(() => s.walk([0, 1, 2, 3])).not.toThrow();
+    expect(logged).toHaveBeenCalledWith(expect.objectContaining({ message: 'judge fault' }));
+    expect(hook()!.judged()).toEqual([]);
+    fault.judge = false;
     s.restart();
     s.walk([0, 1, 2, 3, 4, 5, 6, 7], { offsets: RUSH });
     expect(hook()!.judged().length).toBeGreaterThan(0);
@@ -600,6 +825,95 @@ describe('the explanation', () => {
     const fresh = setup({ score: melody(12) });
     fresh.walk([0, 1, 2, 3], { offsets: RUSH });
     expect(fresh.result().explain).toBe(true);
+  });
+
+  describe('under a line that ranks above it on the status line', () => {
+    // The sound sentence (a hand is left out and the browser holds the sound back) and the piano
+    // loading rank above the explanation: bars judged while they hold the line are not bars the
+    // reader read it in.
+    async function held(over: 'soundWaits' | 'preparing') {
+      await connect();
+      const s = setup({ score: melody(12), mutedHands: over === 'soundWaits' ? ['L'] : [] });
+      s.fake[over] = true;
+      s.rerender();
+      return s;
+    }
+    const free = (s: Awaited<ReturnType<typeof held>>, over: 'soundWaits' | 'preparing') => {
+      s.fake[over] = false;
+      s.rerender();
+    };
+
+    it.each(['soundWaits', 'preparing'] as const)(
+      'is not spent while %s holds the line',
+      async (over) => {
+        const s = await held(over);
+        s.walk([0, 1, 2, 3], { offsets: RUSH });
+        expect(s.result().explain).toBe(true);
+        s.walk([4, 5, 6, 7, 8, 9, 10, 11]); // two bars judged, and the line never showed it
+        expect(s.result().explain).toBe(true);
+        free(s, over);
+        expect(s.result().explain).toBe(true); // it shows now
+      },
+    );
+
+    it('leaves after two bars judged since the line showed it', async () => {
+      const s = await held('soundWaits');
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      s.walk([4, 5, 6, 7]); // judged while the sound sentence holds the line
+      free(s, 'soundWaits');
+      s.walk([8, 9, 10]);
+      expect(s.result().explain).toBe(true);
+      s.walk([11]); // the finish judges bar 2: one bar since it showed
+      expect(s.result().explain).toBe(true);
+      s.restart();
+      s.walk([0, 1, 2, 3]); // bar 0 judged: two
+      expect(s.result().explain).toBe(false);
+    });
+
+    it('is said again after a break that came before it was on the line', async () => {
+      const s = await held('soundWaits');
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      expect(s.result().explain).toBe(true);
+      s.tap({ kind: 'break' }); // a click on a bar wakes the sound and seeks
+      free(s, 'soundWaits');
+      expect(s.result().explain).toBe(false);
+      s.restart();
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      expect(s.result().explain).toBe(true);
+    });
+
+    it('is said again after a clear that came before it was on the line', async () => {
+      const s = await held('soundWaits');
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      s.rerender({ mutedHands: ['L', 'R'] }); // a hands change clears
+      s.rerender({ mutedHands: ['L'] });
+      free(s, 'soundWaits');
+      expect(s.result().explain).toBe(false);
+      s.restart();
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      expect(s.result().explain).toBe(true);
+    });
+
+    it('does not say the sound sentence holds the line when no hand is left out', async () => {
+      await connect();
+      const s = setup({ score: melody(12) });
+      s.fake.soundWaits = true; // the walk plays every hand: the sentence is not shown
+      s.rerender();
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      s.walk([4, 5, 6, 7, 8, 9, 10, 11]);
+      expect(s.result().explain).toBe(false);
+    });
+
+    it('is not said again once it has been on the line', async () => {
+      await connect();
+      const s = setup({ score: melody(12) });
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      s.tap({ kind: 'break' });
+      s.restart();
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      expect(s.result().marks).not.toBeNull();
+      expect(s.result().explain).toBe(false);
+    });
   });
 });
 

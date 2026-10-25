@@ -11,8 +11,20 @@ import type { TimingMark } from './render/timingMarks.js';
 export const TOLERANCE_FLOOR_MS = 120;
 /** The tolerance in felt beats at the reader's own tempo. */
 export const TOLERANCE_BEATS = 0.25;
-/** The tolerance as a share of the written gap at the reader's tempo (long notes spread more). */
-export const TOLERANCE_GAP = 0.15;
+/**
+ * The same for a gap shorter than the felt beat in a simple meter. A dotted eighth and sixteenth
+ * played as two even eighths move the sixteenth by exactly `TOLERANCE_BEATS`, so a few
+ * milliseconds would decide whether it is rung; this keeps dotted and triplet subdivisions clear
+ * of the edge. A compound meter keeps `TOLERANCE_BEATS`: its felt beat is three of its beats, and a
+ * third of that would make a note held one beat too long a tie.
+ */
+export const TOLERANCE_SUBBEAT_BEATS = 1 / 3;
+/**
+ * The tolerance as a share of the written gap at the reader's tempo (long notes spread more). A
+ * fifth gives a half note 0.4 beat and a whole note 0.8 beat, against 0.25 beat for a quarter: a
+ * whole note held a beat too long and a half note cut short by half a beat are still rung.
+ */
+export const TOLERANCE_GAP = 0.2;
 /** A gap up to one beat is a pause past this many times the expected one plus the floor. */
 export const PAUSE_RATIO = 2;
 /** The pause test's floor, in real milliseconds. */
@@ -42,6 +54,8 @@ export interface PlanStep {
   bar: number;
   /** How long the walk holds the red on it before moving on, in performance seconds (`holdSec` with no loop). */
   holdSec: number;
+  /** The felt beat is three of the time signature's beats (6/8, 9/8, 12/8, 12/16); false when left out. */
+  compound?: boolean;
 }
 
 /** A step of the walk as its timing sees it, aligned with `alongPlan`'s steps. */
@@ -122,6 +136,7 @@ export function walkTimingPlan(perf: Performance, mutedHands: readonly Hand[]): 
         beatSec: notes[i]!.beatSec,
         bar,
         holdSec: holdSec(steps, times, i, null),
+        compound: notes[i]!.compound,
         writtenBar: perf.written[bar] ?? bar,
         pitches: step.pitches,
         ids: [...new Set(notes[i]!.ids.map((id) => writtenNoteId(perf, id)))],
@@ -166,7 +181,8 @@ function median(xs: readonly number[]): number {
  * stretch; a gap the red does not wait out (a rest after the note) joins the stretch but is
  * neither judged nor counted in the tempo. A stretch of fewer than `MIN_FIT_ONSETS` onsets judges
  * nothing, a gap with fewer than `MIN_TEMPO_GAPS` timed gaps around it is not judged, and the
- * first gap of a stretch is never rung. A gap that only puts back the one before it is on time.
+ * first gap of a stretch is never rung. A gap that only puts back the one before it is on time,
+ * also when the one before is a gap the red does not wait out.
  */
 export function judgeBar(steps: readonly PlanStep[], onsets: readonly Onset[]): Judged[] {
   const n = onsets.length;
@@ -234,10 +250,6 @@ export function judgeBar(steps: readonly PlanStep[], onsets: readonly Onset[]): 
     if (e - s + 1 >= MIN_FIT_ONSETS) {
       let prev: { d: number; undone: boolean } | null = null;
       for (let k = s + 1; k <= e; k++) {
-        if (!timed[k]) {
-          prev = null;
-          continue;
-        }
         const ratios: number[] = [];
         for (let l = Math.max(s + 1, k - TEMPO_WINDOW); l <= Math.min(e, k + TEMPO_WINDOW); l++) {
           if (timed[l]) ratios.push(rho[l]!);
@@ -248,9 +260,18 @@ export function judgeBar(steps: readonly PlanStep[], onsets: readonly Onset[]): 
         }
         const tempo = median(ratios); // ms per performance second
         const d = real[k]! - tempo * written[k]!;
+        if (!timed[k]) {
+          // A gap the red does not wait out is not judged, but the gap after it may only put it
+          // back (the cue moves the red early, and the reader returns to the count).
+          prev = { d, undone: false };
+          continue;
+        }
+        const beatSec = stepAt(k).beatSec;
+        const inBeat = !stepAt(k).compound && written[k]! < beatSec - ALONG_EPS;
+        const beats = inBeat ? TOLERANCE_SUBBEAT_BEATS : TOLERANCE_BEATS;
         const tolMs = Math.max(
           TOLERANCE_FLOOR_MS,
-          TOLERANCE_BEATS * tempo * stepAt(k).beatSec,
+          beats * tempo * beatSec,
           TOLERANCE_GAP * tempo * written[k]!,
         );
         let verdict: Verdict = d < -tolMs ? 'early' : d > tolMs ? 'late' : 'onTime';

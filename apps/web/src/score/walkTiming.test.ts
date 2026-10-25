@@ -49,6 +49,8 @@ function planOf(
     pickup?: number;
     beatSec?: number;
     holds?: Record<number, number>;
+    /** The felt beat is three of the time signature's beats (6/8). */
+    compound?: boolean;
   } = {},
 ): PlanStep[] {
   const secPerBeat = o.secPerBeat ?? 0.5;
@@ -66,6 +68,7 @@ function planOf(
       beatSec: o.beatSec ?? secPerBeat,
       bar,
       holdSec: (o.holds?.[i] ?? length) * secPerBeat,
+      ...(o.compound ? { compound: true } : {}),
     };
     pos += length;
     return step;
@@ -136,6 +139,22 @@ const indices = (r: Judged[]): number[] => r.map((x) => x.index);
 const range = (from: number, to: number): number[] =>
   Array.from({ length: to - from + 1 }, (_, i) => from + i);
 const allOnTime = (r: Judged[]): boolean => r.every((x) => x.verdict === 'onTime');
+
+/** A seeded uniform generator (mulberry32), so a jitter test gives the same answer every run. */
+function seeded(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+/** A normal deviate with the standard deviation `sigma` (Box-Muller). */
+function gaussian(uniform: () => number, sigma: number): number {
+  return sigma * Math.sqrt(-2 * Math.log(1 - uniform())) * Math.cos(2 * Math.PI * uniform());
+}
 
 /** What `off(result)` must be: exactly these entries, in this order (`offsetMs` within 1, `tolMs` within 0.5). */
 interface Want {
@@ -239,7 +258,8 @@ describe('judgeBar', () => {
     it('rings one eighth rushed in a bar', () => {
       const plan = planOf(QEE);
       const r = judgeBar(plan, play(plan, 2000, { upTo: 11, offsets: { 8: -400 } }));
-      expectOff(r, [{ index: 8, verdict: 'early', offsetMs: -400, tolMs: 250 }]);
+      // The gap into an eighth is shorter than the beat: its tolerance is a third of the beat.
+      expectOff(r, [{ index: 8, verdict: 'early', offsetMs: -400, tolMs: 1000 / 3 }]);
       const entry = off(r)[0]!;
       expect(entry.offsetSec).toBeCloseTo(-0.2, 3);
     });
@@ -255,7 +275,7 @@ describe('judgeBar', () => {
       const plan = planOf([2, 1, 1, 2, 1, 1, 2, 1, 1]);
       const r = judgeBar(plan, play(plan, 2000, { upTo: 5, offsets: { 4: -500 } }));
       expect(indices(r)).toEqual([3, 4, 5]);
-      expectOff(r, [{ index: 4, verdict: 'early', offsetMs: -500, tolMs: 300 }]);
+      expectOff(r, [{ index: 4, verdict: 'early', offsetMs: -500, tolMs: 400 }]);
     });
 
     it('rings the dragged note once: the gap that puts it back is undone', () => {
@@ -342,8 +362,8 @@ describe('judgeBar', () => {
 
     it('rings a note after a long one against its own gap', () => {
       const plan = planOf(TW);
-      const r = judgeEach(plan, play(plan, 2000, { extra: { 7: -400 } }));
-      expectOff(r, [{ index: 7, verdict: 'early', offsetMs: -400, tolMs: 300 }]);
+      const r = judgeEach(plan, play(plan, 2000, { extra: { 7: -500 } }));
+      expectOff(r, [{ index: 7, verdict: 'early', offsetMs: -500, tolMs: 400 }]);
     });
   });
 
@@ -357,13 +377,13 @@ describe('judgeBar', () => {
       expectOff(fast, [{ index: 5, verdict: 'early', tolMs: 120 }]);
     });
 
-    it('grows with a long note: 500 ms past a whole note passes, 700 ms rings', () => {
+    it('grows with a long note: 500 ms past a whole note passes, 900 ms rings', () => {
       const plan = planOf([1, 1, 1, 1, 4, 1, 1, 1, 1]);
       const passes = judgeEach(plan, play(plan, 2000, { extra: { 5: 500 } }));
       expect(indices(passes)).toContain(5);
       expect(off(passes)).toEqual([]);
-      expectOff(judgeEach(plan, play(plan, 2000, { extra: { 5: 700 } })), [
-        { index: 5, verdict: 'late', tolMs: 600 },
+      expectOff(judgeEach(plan, play(plan, 2000, { extra: { 5: 900 } })), [
+        { index: 5, verdict: 'late', tolMs: 800 },
       ]);
     });
 
@@ -376,15 +396,54 @@ describe('judgeBar', () => {
 
     it('takes the felt beat in 6/8 as the dotted quarter, not the eighth', () => {
       const bars = [2, 1, 2, 1, 3, 3, 2, 1, 2, 1, 3, 3];
-      const felt = planOf(bars, { secPerBeat: 0.25, beatsPerBar: 6, beatSec: 0.75 });
+      const felt = planOf(bars, {
+        secPerBeat: 0.25,
+        beatsPerBar: 6,
+        beatSec: 0.75,
+        compound: true,
+      });
       // 3 * 0.25 s at 2000 ms per second: the felt beat is 1500 ms, a quarter of it is 375 ms.
-      const dotted = judgeEach(felt, play(felt, 2000, { offsets: { 3: 200 } }));
+      const dotted = judgeEach(felt, play(felt, 2000, { offsets: { 3: 250 } }));
       expect(indices(dotted)).toContain(3);
       expect(off(dotted)).toEqual([]);
+      // The eighth as the beat: the gap into step 3 is a half note's (1000 ms), and a fifth of it
+      // is the tolerance.
       const eighth = planOf(bars, { secPerBeat: 0.25, beatsPerBar: 6, beatSec: 0.25 });
-      expectOff(judgeEach(eighth, play(eighth, 2000, { offsets: { 3: 200 } })), [
-        { index: 3, verdict: 'late', tolMs: 150 },
+      expectOff(judgeEach(eighth, play(eighth, 2000, { offsets: { 3: 250 } })), [
+        { index: 3, verdict: 'late', tolMs: 200 },
       ]);
+    });
+  });
+
+  describe('the tolerance of a gap inside a beat', () => {
+    it('is a third of a beat in a simple meter: an eighth 330 ms too long passes, 340 rings', () => {
+      // 1000 ms to the beat: the gap into an eighth is 500 ms, and a third of a beat is 333 ms.
+      const plan = planOf(QEE);
+      for (const held of [200, 330]) {
+        const r = judgeEach(plan, play(plan, 2000, { extra: { 8: held } }));
+        expect(off(r), `${held}`).toEqual([]);
+      }
+      for (const held of [340, 500]) {
+        expectOff(judgeEach(plan, play(plan, 2000, { extra: { 8: held } })), [
+          { index: 8, verdict: 'late', offsetMs: held, tolMs: 1000 / 3 },
+        ]);
+      }
+    });
+
+    it('stays a quarter of the felt beat in a compound meter: an eighth held as a quarter in 6/8 rings', () => {
+      // Six eighths a bar, the felt beat three of them (1500 ms at 2000 ms per second): an eighth
+      // gap is 500 ms, a third of a beat would be exactly an eighth and make the slip a tie.
+      const plan = planOf(Array(18).fill(1), {
+        secPerBeat: 0.25,
+        beatsPerBar: 6,
+        beatSec: 0.75,
+        compound: true,
+      });
+      for (const held of [495, 500, 505]) {
+        expectOff(judgeEach(plan, play(plan, 2000, { extra: { 9: held } })), [
+          { index: 9, verdict: 'late', offsetMs: held, tolMs: 375 },
+        ]);
+      }
     });
   });
 
@@ -432,6 +491,137 @@ describe('judgeBar', () => {
       expect(off(r)).toEqual([]);
       for (const skipped of [3, 6, 9]) expect(indices(r)).not.toContain(skipped);
       expect(indices(r)).toEqual([4, 5, 7, 8, 10, 11]);
+    });
+
+    describe('the note after a rest the red does not wait out', () => {
+      // Two bars of q q q q, a bar of q q (q + a quarter rest) whose last step the red leaves after
+      // one beat, then two more bars of q q q q: step 10 holds one beat of its two, step 11 is the
+      // note after the rest, step 12 the one after it. 1000 ms to the beat.
+      const restPlan = (): PlanStep[] =>
+        planOf([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1], { holds: { 10: 1 } });
+
+      it('does not blame the note on the count for the note that came at the red', () => {
+        // The cue moves the red as the note before the rest ends, a whole beat early: the reader
+        // who presses then and goes on counting is not late on the next note.
+        const plan = restPlan();
+        for (const early of [1000, 400]) {
+          const r = judgeEach(plan, play(plan, 2000, { offsets: { 11: -early } }));
+          expect(off(r), `${early}`).toEqual([]);
+          expect(indices(r), `${early}`).toContain(12);
+        }
+      });
+
+      it('does not blame the note on the count for a rest waited out too long', () => {
+        const plan = restPlan();
+        const r = judgeEach(plan, play(plan, 2000, { offsets: { 11: 500 } }));
+        expect(off(r)).toEqual([]);
+        expect(indices(r)).toContain(12);
+      });
+
+      it('still rings a note really late after a rest waited out', () => {
+        const plan = restPlan();
+        expectOff(judgeEach(plan, play(plan, 2000, { offsets: { 12: 500 } })), [
+          { index: 12, verdict: 'late', offsetMs: 500, tolMs: 250 },
+        ]);
+      });
+
+      it('still rings a note that drags after one pressed early at the red', () => {
+        // Step 11 400 ms early, step 12 and the rest 500 ms late: the gap into 12 is 900 ms too
+        // long, which does not only put the early press back.
+        const plan = restPlan();
+        expectOff(
+          judgeEach(plan, play(plan, 2000, { offsets: { 11: -400 }, extra: { 12: 500 } })),
+          [{ index: 12, verdict: 'late', offsetMs: 900, tolMs: 250 }],
+        );
+      });
+
+      it('does not judge a long search for the key after the rest', () => {
+        // The search is a hesitation (the rest was waited out and then some); the pulse resumes
+        // from the key found.
+        const plan = restPlan();
+        const r = judgeEach(plan, play(plan, 2000, { extra: { 11: 2500 } }));
+        expect(off(r)).toEqual([]);
+        const dragged = judgeEach(plan, play(plan, 2000, { extra: { 12: 2500 } }));
+        expect(off(dragged)).toEqual([]);
+      });
+    });
+  });
+
+  describe('dotted and triplet subdivisions inside a beat', () => {
+    // Bars of q q (dotted eighth, sixteenth) q in 4/4: five steps a bar, the sixteenth the fourth.
+    const BARS = 8;
+    const dotted = (secPerBeat: number): PlanStep[] =>
+      planOf(Array.from({ length: BARS }, () => [1, 1, 0.75, 0.25, 1]).flat(), { secPerBeat });
+    const sixteenths = range(0, BARS - 1).map((bar) => bar * 5 + 3);
+    /** Every onset jittered by `sigma` ms; the sixteenth moved by `shift` beats. */
+    function jittered(plan: PlanStep[], bpm: number, shift: number, sigma: number, seed: number) {
+      const uniform = seeded(seed);
+      const beatMs = 60000 / bpm;
+      const offsets: Record<number, number> = {};
+      plan.forEach((_, i) => {
+        offsets[i] = gaussian(uniform, sigma) + (i % 5 === 3 ? shift * beatMs : 0);
+      });
+      return judgeEach(plan, play(plan, 1000, { offsets }));
+    }
+
+    it('does not ring a dotted pair played as two even notes, at any tempo a beginner walks', () => {
+      // The sixteenth comes a quarter of a beat early. With a pulse of 10 to 15 ms in every onset
+      // (a careful reader on a good connection), it is not rung from 50 to 120 beats a minute;
+      // the same pair played right is never rung.
+      for (const bpm of [50, 60, 80, 100, 120]) {
+        const plan = dotted(60 / bpm);
+        let rung = 0;
+        let judgedPairs = 0;
+        let wrong = 0;
+        for (let trial = 0; trial < 100; trial++) {
+          const flat = jittered(plan, bpm, -0.25, 15, bpm * 1000 + trial);
+          judgedPairs += flat.filter((x) => sixteenths.includes(x.index)).length;
+          rung += off(flat).length;
+          wrong += off(jittered(plan, bpm, 0, 15, bpm * 7000 + trial)).length;
+        }
+        expect(judgedPairs, `${bpm}`).toBeGreaterThan(0);
+        expect(rung / judgedPairs, `${bpm}`).toBeLessThan(0.03);
+        expect(wrong, `${bpm}`).toBe(0);
+      }
+    });
+
+    it('does not tip over at the old edge: a few milliseconds either way of an even pair', () => {
+      // 60 bpm: an even pair puts the sixteenth 250 ms early, which was exactly the tolerance.
+      const plan = dotted(1);
+      for (const nudge of [-40, -5, 0, 5, 40]) {
+        const offsets = Object.fromEntries(sixteenths.map((i) => [i, -250 + nudge]));
+        const r = judgeEach(plan, play(plan, 1000, { offsets }));
+        expect(indices(r), `${nudge}`).toEqual(expect.arrayContaining(sixteenths));
+        expect(off(r), `${nudge}`).toEqual([]);
+      }
+    });
+
+    it('still rings a sixteenth clearly early: played as two sixteenths', () => {
+      // 60 bpm: the sixteenth comes half a beat early, 500 ms against a third of a beat.
+      const plan = dotted(1);
+      const r = judgeEach(
+        plan,
+        play(plan, 1000, { offsets: Object.fromEntries(sixteenths.map((i) => [i, -500])) }),
+      );
+      expect(off(r).map((x) => [x.index, x.verdict])).toEqual(sixteenths.map((i) => [i, 'early']));
+    });
+
+    it('does not ring a triplet played with a long first note', () => {
+      // Bars of q q and a beat of three triplet notes, then q; the second triplet note comes a
+      // sixth of a beat late (long, short, short) at 60 beats a minute.
+      const plan = planOf(
+        Array.from({ length: BARS }, () => [1, 1, 1 / 3, 1 / 3, 1 / 3, 1]).flat(),
+        {
+          secPerBeat: 1,
+        },
+      );
+      const second = range(0, BARS - 1).map((bar) => bar * 6 + 3);
+      const r = judgeEach(
+        plan,
+        play(plan, 1000, { offsets: Object.fromEntries(second.map((i) => [i, 1000 / 6])) }),
+      );
+      expect(indices(r)).toEqual(expect.arrayContaining(second.slice(1)));
+      expect(off(r)).toEqual([]);
     });
   });
 
@@ -748,6 +938,12 @@ describe('walkTimingPlan', () => {
     const plan = walkTimingPlan(performanceOf(sixEight), []);
     expect(plan.steps).toHaveLength(2);
     for (const s of plan.steps) expect(s.beatSec).toBeCloseTo(0.75, 9);
+    expect(plan.steps.map((s) => s.compound)).toEqual([true, true]);
+  });
+
+  it('does not call a simple meter compound', () => {
+    const plan = walkTimingPlan(performanceOf(scoreOf([{ midi: 60, tick: 0 }], 1)), []);
+    expect(plan.steps.map((s) => s.compound)).toEqual([false]);
   });
 
   it('writes the two hearings of a repeated bar with the written ids and bar', () => {

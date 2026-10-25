@@ -49,7 +49,6 @@ import {
   toPerformanceSec,
   toWrittenSec,
 } from '../audio/performance.js';
-import type { HeardAt, PassSpan } from '../audio/timeline.js';
 import type * as TransportExports from '../audio/transport.js';
 
 type TransportModule = typeof TransportExports;
@@ -214,21 +213,6 @@ export interface Playback {
   accompany(notes: readonly AccNote[]): void;
   /** Stops the accompaniment (Accompanist.stop). Idempotent; never touches Play's notes or a struck key. */
   stopAccompaniment(): void;
-  /**
-   * Issue 192: the transport's `heardAt`, where the listener was at `atMs` (a performance.now()
-   * millisecond, now when omitted); null while stopped. Always set by usePlayback: optional only so
-   * hand-made fakes need not have it, and a reader treats it missing as nothing to time against.
-   */
-  heardAt?: (atMs?: number) => HeardAt | null;
-  /** Issue 192: the current or last run's passes; empty before the first Play. Always set by usePlayback. */
-  runPasses?: () => readonly PassSpan[];
-  /**
-   * Issue 192: how many times the transport has started playing, one more at every start. A play
-   * carried across "Add notes between" halts the old transport and starts the new one in the same
-   * commit, so `playing` stays true while a new run begins; this tells the runs apart. Always set
-   * by usePlayback; a fake without it counts as one run per stretch of `playing`.
-   */
-  playId?: number;
 }
 
 /** How long a key clicked on the keyboard sounds at most, in seconds (a pointer held down). */
@@ -389,8 +373,6 @@ export function usePlayback(score: Score | null): Playback {
   const countInOn = useAppStore((s) => s.settings.countIn);
 
   const [playing, setPlaying] = useState(false);
-  /** One more at every start of the transport (issue 192): `Playback.playId`. */
-  const [playId, setPlayId] = useState(0);
   const [loading, setLoading] = useState(false);
   const [countIn, setCountIn] = useState<CountIn | null>(null);
   const [waiting, setWaiting] = useState(false);
@@ -518,8 +500,7 @@ export function usePlayback(score: Score | null): Playback {
 
   // Playwright's checks (`?audio=silent` or `?hooks=1`): the pitches the silent instrument was
   // asked to strike, in order; what the accompaniment handed to the instrument and cancelled
-  // (never Play's notes); the AudioContext's state; and its output latency in seconds, which the
-  // play-along timing's latency notes read (issue 192).
+  // (never Play's notes); and the AudioContext's state.
   useEffect(() => {
     if (!hooksOn()) return;
     const w = window as unknown as {
@@ -528,7 +509,6 @@ export function usePlayback(score: Score | null): Playback {
         accompanied(): AccompaniedNote[];
         accompCancelled(): { midi: number; time: number }[];
         audioState(): AudioContextState | 'none';
-        outputLatency(): number | null;
       };
     };
     const hook = {
@@ -539,7 +519,6 @@ export function usePlayback(score: Score | null): Playback {
       accompanied: () => accompaniedRef.current.map((n) => ({ ...n })),
       accompCancelled: () => accompCancelledRef.current.map((n) => ({ ...n })),
       audioState: () => ctxRef.current?.state ?? 'none',
-      outputLatency: () => ctxRef.current?.outputLatency ?? null,
     };
     w.__digitus2Keys = hook;
     return () => {
@@ -677,7 +656,6 @@ export function usePlayback(score: Score | null): Playback {
         // in the same render as playing: Pause takes the red from Play, and no note is marked.
         t.play(resume ? { countIn: false } : travels ? { leadSec: RED_FLIGHT_MS / 1000 } : {});
         setPlaying(true);
-        setPlayId((n) => n + 1);
         setAtStart(false);
         // Every Play marks the legend as seen and, for a library piece, makes it the one the
         // library offers to continue (spec 12 and 16).
@@ -974,12 +952,6 @@ export function usePlayback(score: Score | null): Playback {
     [],
   );
 
-  // Issue 192: the timeline the play-along's timing maps each key to, and the passes of a run. A
-  // new score drops the transport, and its run with it.
-  const heardAt = useCallback((atMs?: number) => transportRef.current?.heardAt(atMs) ?? null, []);
-
-  const runPasses = useCallback(() => transportRef.current?.runPasses() ?? [], []);
-
   // The loop state changes at once; a playing transport gets a new range once the typing settles
   // (clearing the loop never seeks, so it applies at once).
   const setLoop = useCallback(
@@ -1032,9 +1004,6 @@ export function usePlayback(score: Score | null): Playback {
       soundWaits,
       accompany,
       stopAccompaniment,
-      heardAt,
-      runPasses,
-      playId,
     }),
     [
       playing,
@@ -1065,9 +1034,6 @@ export function usePlayback(score: Score | null): Playback {
       soundWaits,
       accompany,
       stopAccompaniment,
-      heardAt,
-      runPasses,
-      playId,
     ],
   );
 }

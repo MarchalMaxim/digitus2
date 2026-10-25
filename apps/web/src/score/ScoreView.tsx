@@ -42,7 +42,7 @@ import { useHoveredNote } from './useHoveredNote.js';
 import { usePlayAlong, type AlongHint } from './usePlayAlong.js';
 import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
-import { useTimingRun, type TimingSummary } from './useTimingRun.js';
+import { useWalkTiming } from './useWalkTiming.js';
 
 /** The status line's text while the score is busy, by status. */
 /** No keys to follow: nothing is marked. */
@@ -116,62 +116,11 @@ export interface StatusInputs {
    */
   alongSound: 'click' | 'tap' | null;
   /**
-   * How the timing went in the last run of Play with the piano (issue 192), while the summary
-   * keeps the line (`summaryLifetime`); null or left out when none is shown.
+   * The one-time explanation of the timing rings (issue 192, useWalkTiming): shown the first time
+   * rings appear in this view, until two more bars are judged while it is on the line, a break or
+   * a clear. Left out: false.
    */
-  timing?: TimingSummary | null;
-}
-
-/**
- * The summary's life on the status line (issue 192). It shows when a judgement arrives and leaves
- * for good at the first of: a line above it taking the line, the transport playing, or the red
- * moving while stopped (a walk pass or a seek), seen as `currentGroup` changing from the group the
- * red settled on with the summary. Settled means a group is marked and no flight home is on screen:
- * after the piece's end the red flies home and the walk cues the first step a frame later, and
- * that landing is not a move. A group of -1 is never a move.
- */
-export interface SummaryLife {
-  /** The summary this life follows (the last one seen); null when there is none. */
-  summary: TimingSummary | null;
-  /** The summary object on the line, or null once it has left. */
-  shown: TimingSummary | null;
-  /** The red's group once settled with the summary; null while it waits to settle. */
-  baseline: number | null;
-}
-
-export const NO_SUMMARY_LIFE: SummaryLife = { summary: null, shown: null, baseline: null };
-
-/**
- * The next `SummaryLife`, from the latest render's inputs. Returns `prev` itself when nothing
- * changes, and the same answer when fed the same input twice.
- */
-export function summaryLifetime(
-  prev: SummaryLife,
-  input: {
-    summary: TimingSummary | null;
-    /** A line above the summary would show (busy, nothing to play, loading, count-in, sound, hold). */
-    higherLine: boolean;
-    currentGroup: number;
-    playing: boolean;
-    /** The red is flying home (after the end, or Rewind). */
-    flyingHome: boolean;
-  },
-): SummaryLife {
-  const { summary, currentGroup } = input;
-  if (summary === null) return prev.summary === null ? prev : NO_SUMMARY_LIFE;
-  const life = summary === prev.summary ? prev : { summary, shown: summary, baseline: null };
-  if (life.shown === null) return life;
-  if (input.playing || input.higherLine) return { ...life, shown: null };
-  if (currentGroup < 0 || input.flyingHome) return life;
-  if (life.baseline === null) return { ...life, baseline: currentGroup };
-  return currentGroup === life.baseline ? life : { ...life, shown: null };
-}
-
-/** The timing summary's sentence (issue 192). */
-function timingText(timing: TimingSummary, t: Messages): string {
-  const view = t.score.view;
-  if (timing.onTime < timing.total) return view.timingSummary(timing.onTime, timing.total);
-  return timing.belowFullTempo ? view.timingAllOnTimeFaster : view.timingAllOnTime;
+  timingExplain?: boolean;
 }
 
 /**
@@ -190,13 +139,21 @@ export interface StatusLine {
  * "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4" then "1" when a whole bar comes
  * before a pickup), then, lowest of all, what the play-along asks of the reader: one click for
  * the browser to let digitus sound the other hand (issue 184), then what to play on their piano
- * while the red waits (issue 182). The timing summary after a run (issue 192) comes after the
- * walk's `hold` hint and before its `play` hint: after a Pause the first-step hint returns and
- * would hide the result. Null when there is nothing to say (a ready score, stopped or playing the
- * music). Written in `t` (default: the language on screen).
+ * while the red waits (issue 182). The explanation of the timing rings (issue 192) comes after the
+ * walk's `hold` hint and before its `play` hint. Null when there is nothing to say (a ready score,
+ * stopped or playing the music). Written in `t` (default: the language on screen).
  */
 export function scoreStatusLine(
-  { docStatus, playable, hands, loading, countIn, alongHint, alongSound, timing }: StatusInputs,
+  {
+    docStatus,
+    playable,
+    hands,
+    loading,
+    countIn,
+    alongHint,
+    alongSound,
+    timingExplain,
+  }: StatusInputs,
   t: Messages = messages(),
 ): StatusLine | null {
   const info = (text: string): StatusLine => ({ text, kind: 'info' });
@@ -209,7 +166,7 @@ export function scoreStatusLine(
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
   if (alongSound !== null) return info(t.score.view.playAlongSound[alongSound]);
   if (alongHint?.kind === 'hold') return info(t.score.view.holdLonger(alongHint.count));
-  if (timing) return info(timingText(timing, t));
+  if (timingExplain) return info(t.score.view.timingExplain);
   if (alongHint !== null) return info(t.score.view.playAlongHint(alongHint.count));
   return null;
 }
@@ -346,8 +303,8 @@ export function ScoreView({ source }: { source: PieceSource }) {
       quiet: index ? quietPlaces(index, mutedIds) : undefined,
     };
   }, [host, doc.pages, mutedIds]);
-  // The timing rings of the last run (issue 192), for a page built later: a torn page is rebuilt
-  // from markup, without them. Set with the rings' own layout effect below.
+  // The timing rings (issue 192), for a page built later: a torn page is rebuilt from markup,
+  // without them.
   const timingMarksRef = useRef<readonly TimingMark[] | null>(null);
   const decorate = useCallback((page: SVGSVGElement, i: number) => {
     const d = decorRef.current;
@@ -500,6 +457,17 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // for the new score has run first.
   const toggleEmbellish = useEmbellishCarry(doc, score, playback, barStarts);
 
+  // How the reader's own rhythm went (issue 192): after the walk leaves a bar, a gray ring at the
+  // note that came clearly early or late against the reader's own pulse. The walk tells it what it
+  // passed (`onTiming`); the rings stay until the bar is played again or a clear, on new pages too.
+  // It must come before usePlayAlong: its note listener has to hear each key first.
+  const timing = useWalkTiming({
+    score,
+    ready: doc.status === 'ready',
+    playback,
+    mutedHands,
+  });
+
   // Playing along on the reader's own piano (issue 182): while one is connected and the score is
   // stopped, the red waits on the next step to play and moves on when the reader plays it. Called
   // after the carry above and after the cursor and the flights, so its passive align effect runs
@@ -512,18 +480,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
     mutedHands,
     currentGroup,
     flightShown: red.redAway,
-  });
-
-  // How the timing went in a run of Play with the piano (issue 192): gray rings at the notes that
-  // came clearly early, late or not at all, drawn after the run stops and kept until the next
-  // Play, on new pages too (`decorate`); and one line, which keeps the status line only until
-  // something else needs it (`summaryLifetime`, set during the render below).
-  const timing = useTimingRun({
-    score,
-    ready: doc.status === 'ready',
-    playable,
-    playback,
-    mutedHands,
+    onTiming: timing.tap,
   });
   useLayoutEffect(() => {
     timingMarksRef.current = timing.marks;
@@ -531,7 +488,6 @@ export function ScoreView({ source }: { source: PieceSource }) {
     clearTimingMarks(host);
     if (timing.marks) drawTimingMarks(host, timing.marks);
   }, [host, doc.pages, timing.marks]);
-  const [summaryLife, setSummaryLife] = useState<SummaryLife>(NO_SUMMARY_LIFE);
 
   // The Practice mode switch (issue 191): in the Practice panel only while a piano is connected.
   // The prop is memoised on the two booleans, so a MIDI message never renders the panel.
@@ -642,30 +598,19 @@ export function ScoreView({ source }: { source: PieceSource }) {
   }
 
   const tune = loaderTune(doc.status, doc.pages.length);
-  const statusInputs: StatusInputs = {
-    docStatus: doc.status,
-    playable,
-    hands,
-    loading: playback.loading || playback.preparing,
-    countIn: playback.countIn,
-    alongHint: along.hint,
-    alongSound: along.soundWaits ? (touch ? 'tap' : 'click') : null,
-  };
-  // The timing summary's life (issue 192), kept from render to render: a line above it, Play, or
-  // the red moving while stopped ends it for good.
-  const life = summaryLifetime(summaryLife, {
-    summary: timing.summary,
-    higherLine:
-      scoreStatusLine(
-        { ...statusInputs, alongHint: along.hint?.kind === 'hold' ? along.hint : null },
-        t,
-      ) !== null,
-    currentGroup,
-    playing: playback.playing,
-    flyingHome: red.flight?.dir === 'home',
-  });
-  if (life !== summaryLife) setSummaryLife(life);
-  const status = scoreStatusLine({ ...statusInputs, timing: life.shown }, t);
+  const status = scoreStatusLine(
+    {
+      docStatus: doc.status,
+      playable,
+      hands,
+      loading: playback.loading || playback.preparing,
+      countIn: playback.countIn,
+      alongHint: along.hint,
+      alongSound: along.soundWaits ? (touch ? 'tap' : 'click') : null,
+      timingExplain: timing.explain,
+    },
+    t,
+  );
   // One toggle, rendered where it stands on screen: first in the dock from 480 px, after Rewind
   // below (the dock's comment).
   const practiceToggle = (

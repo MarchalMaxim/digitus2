@@ -10,7 +10,6 @@ import type * as PlaybackModule from './usePlayback.js';
 import type { Playback } from './usePlayback.js';
 import type * as DocumentModule from './useScoreDocument.js';
 import type { ScoreDocument } from './useScoreDocument.js';
-import type { TimingSummary } from './useTimingRun.js';
 
 // What the score view hands to the status line (issue 184): the player's `preparing`, the
 // samples loading for the other hand, reaches the dock as `Loading the piano…`. The ranking of
@@ -85,8 +84,7 @@ vi.mock('./usePlayback.js', async (importOriginal) => ({
   usePlayback: () => playback,
 }));
 
-const { ScoreView, scoreStatusLine, summaryLifetime, NO_SUMMARY_LIFE } =
-  await import('./ScoreView.js');
+const { ScoreView, scoreStatusLine } = await import('./ScoreView.js');
 
 beforeEach(() => {
   playback.loading = false;
@@ -123,9 +121,9 @@ describe('the status line in the score view', () => {
   });
 });
 
-// The timing summary after a run of Play with the piano (issue 192): its sentence, where it ranks
-// on the line, and how long it keeps the line.
-describe('the timing summary on the status line', () => {
+// The explanation of the timing rings (issue 192) ranks below the walk's `hold` hint and above its
+// `play` hint, and below everything that is busier: the line is `scoreStatusLine` itself.
+describe('the timing explanation on the status line (issue 192)', () => {
   const ready: StatusInputs = {
     docStatus: 'ready',
     playable: true,
@@ -135,129 +133,39 @@ describe('the timing summary on the status line', () => {
     alongHint: null,
     alongSound: null,
   };
-  const summary = (onTime: number, total: number, belowFullTempo = false): TimingSummary => ({
-    onTime,
-    total,
-    belowFullTempo,
-  });
-  const line = (inputs: Partial<StatusInputs>, t = en) =>
-    scoreStatusLine({ ...ready, ...inputs }, t)?.text ?? null;
+  const line = (over: Partial<StatusInputs>, t = en) => scoreStatusLine({ ...ready, ...over }, t);
+  const EXPLAIN = 'A ring before a note means it came early; after it, late.';
 
-  it('counts the notes on time and names the rings, one or several', () => {
-    expect(line({ timing: summary(15, 16) })).toBe(
-      '15 of 16 notes on time. The ring shows the other.',
-    );
-    expect(line({ timing: summary(12, 16) })).toBe(
-      '12 of 16 notes on time. The rings show the others.',
-    );
-    expect(scoreStatusLine({ ...ready, timing: summary(12, 16) })?.kind).toBe('info');
+  it('says it when the hook asks for it', () => {
+    expect(line({ timingExplain: true })).toEqual({ text: EXPLAIN, kind: 'info' });
   });
 
-  it('says every note was on time, and below 100 % asks for a little faster', () => {
-    expect(line({ timing: summary(16, 16) })).toBe('Every note on time.');
-    expect(line({ timing: summary(16, 16, true) })).toBe(
-      'Every note on time. Try it a little faster.',
+  it('gives way to the hold hint, and wins over the play hint', () => {
+    expect(line({ timingExplain: true, alongHint: { kind: 'hold', count: 1 } })?.text).toBe(
+      'Hold the red note a little longer.',
+    );
+    expect(line({ timingExplain: true, alongHint: { kind: 'play', count: 1 } })?.text).toBe(
+      EXPLAIN,
     );
   });
 
-  it('beats the play hint; the hold hint, the count-in and loading beat it', () => {
-    const timing = summary(12, 16);
-    expect(line({ timing, alongHint: { kind: 'play', count: 2 } })).toBe(
-      '12 of 16 notes on time. The rings show the others.',
-    );
-    expect(line({ timing, alongHint: { kind: 'hold', count: 2 } })).toBe(
-      'Hold the red notes a little longer.',
-    );
-    expect(line({ timing, countIn: { beat: 0, beats: 4, beatInBar: 1 } })).toBe('1');
-    expect(line({ timing, loading: true })).toBe('Loading the piano…');
-    expect(line({ timing, docStatus: 'rendering' })).toBe('Preparing the score…');
-    expect(line({ timing, playable: false })).toBe(en.score.view.noNotes);
-  });
-
-  it('is written in the language on screen', () => {
-    expect(line({ timing: summary(12, 16) }, fr)).toBe(
-      '12 notes sur 16 en rythme. Les cercles montrent les autres.',
-    );
-    expect(line({ timing: summary(16, 16, true) }, fr)).toBe(
-      'Toutes les notes en rythme. Essayez un peu plus vite.',
+  it('gives way to the count-in, the loading line and the sound sentence', () => {
+    const countIn = { beat: 2, beats: 4, beatInBar: 2 };
+    expect(line({ timingExplain: true, countIn })).toEqual({ text: '2', kind: 'count' });
+    expect(line({ timingExplain: true, loading: true })?.text).toBe('Loading the piano…');
+    expect(line({ timingExplain: true, alongSound: 'click' })?.text).toBe(
+      en.score.view.playAlongSound.click,
     );
   });
-});
 
-describe('summaryLifetime', () => {
-  type Input = Parameters<typeof summaryLifetime>[1];
-  const s1 = { onTime: 12, total: 16, belowFullTempo: false };
-  const base: Input = {
-    summary: null,
-    higherLine: false,
-    currentGroup: 5,
-    playing: false,
-    flyingHome: false,
-  };
-  /** Feeds the inputs in turn and returns what the line shows after each. */
-  function run(inputs: Partial<Input>[]) {
-    let life = NO_SUMMARY_LIFE;
-    return inputs.map((over) => {
-      const next = summaryLifetime(life, { ...base, ...over });
-      // Fed the same input again (a second render), nothing changes.
-      expect(summaryLifetime(next, { ...base, ...over })).toBe(next);
-      life = next;
-      return life.shown;
-    });
-  }
-
-  it('shows the summary from the moment it arrives', () => {
-    expect(run([{}, { summary: s1 }, { summary: s1 }])).toEqual([null, s1, s1]);
+  it('says nothing when it is off or left out', () => {
+    expect(line({ timingExplain: false })).toBeNull();
+    expect(line({})).toBeNull();
   });
 
-  it('leaves for good when a hold hint takes the line: after it, the line is empty', () => {
-    expect(
-      run([
-        { summary: s1 },
-        { summary: s1, higherLine: true }, // the hold hint
-        { summary: s1, currentGroup: 6 }, // the walk passed the step: the hint went
-        { summary: s1, currentGroup: 6 },
-      ]),
-    ).toEqual([s1, null, null, null]);
-  });
-
-  it('leaves for good when the red moves while stopped (a walk pass or a seek)', () => {
-    expect(
-      run([{ summary: s1 }, { summary: s1, currentGroup: 6 }, { summary: s1, currentGroup: 5 }]),
-    ).toEqual([s1, null, null]);
-  });
-
-  it('leaves when Play is pressed, before the run clears it', () => {
-    expect(run([{ summary: s1 }, { summary: s1, playing: true }])).toEqual([s1, null]);
-  });
-
-  it('at the end of the piece the flight home and the first-step cue are not a move', () => {
-    expect(
-      run([
-        { summary: s1, currentGroup: -1, flyingHome: true }, // the red flies home
-        { summary: s1, currentGroup: -1 }, // landed: the walk cues a frame later
-        { summary: s1, currentGroup: 0 }, // the first step is cued: the baseline
-        { summary: s1, currentGroup: 0 },
-        { summary: s1, currentGroup: 1 }, // the reader plays it: a move
-      ]),
-    ).toEqual([s1, s1, s1, s1, null]);
-  });
-
-  it('a group of -1 is never a move', () => {
-    expect(
-      run([{ summary: s1 }, { summary: s1, currentGroup: -1 }, { summary: s1, currentGroup: 5 }]),
-    ).toEqual([s1, s1, s1]);
-  });
-
-  it('a new summary object shows again; a cleared one goes', () => {
-    const s2 = { ...s1, onTime: 13 };
-    expect(
-      run([
-        { summary: s1 },
-        { summary: s1, currentGroup: 6 },
-        { summary: s2, currentGroup: 6 },
-        { summary: null, currentGroup: 6 },
-      ]),
-    ).toEqual([s1, null, s2, null]);
+  it('says it in French, with the no-break space before the semicolon', () => {
+    expect(line({ timingExplain: true }, fr)?.text).toBe(
+      'Un cercle avant une note signifie qu’elle a été jouée trop tôt\u00a0; après, trop tard.',
+    );
   });
 });

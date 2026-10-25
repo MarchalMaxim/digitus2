@@ -13,7 +13,6 @@ import {
   toWrittenSec,
   type Performance,
 } from './performance.js';
-import type { HeardAt, PassSpan } from './timeline.js';
 
 export interface TransportDeps {
   ctx: AudioClock;
@@ -47,19 +46,7 @@ interface Segment {
   ctx: number;
   score: number;
   factor: number;
-  /**
-   * The pass of the run it belongs to (issue 192): play(), a seek while playing, a resync and a
-   * loop wrap start a new one; a tempo change keeps the pass of the segment it follows.
-   */
-  pass: number;
 }
-
-/**
- * The last pass number given (issue 192). Module-level, never reset: the transport is rebuilt per
- * score, and a pass number must be unique across every Transport of the page's life, so the presses
- * of an earlier score never feed a later run.
- */
-let passSeq = 0;
 
 /** A scheduled note as a lead-in waits for it: its hand, and the context time its onset is heard. */
 interface HeardNote {
@@ -178,11 +165,6 @@ export class Transport {
    * at, and the notes scheduled in that pass so far (`followWraps`).
    */
   private wraps: { ctx: number; notes: HeardNote[] }[] = [];
-  /**
-   * The passes of the current or last run (issue 192), oldest first; the open one, still heard, is
-   * last. Rebuilt by play(), kept through the stop (`runPasses`).
-   */
-  private runLog: PassSpan[] = [];
   private timer: ReturnType<typeof setInterval> | undefined;
 
   constructor(
@@ -267,11 +249,7 @@ export class Transport {
         t0 += bar.lengthSec / factor;
       }
     }
-    const pass = ++passSeq;
-    this.segments = [{ ctx: t0, score: start, factor, pass }];
-    // Read before step() hands out the first clicks: true exactly when a count-in was scheduled.
-    const countedIn = this.countInClicks.length > 0;
-    this.runLog = [{ pass, fromSec: start, toSec: null, wrapped: false, countedIn }];
+    this.segments = [{ ctx: t0, score: start, factor }];
     this.scheduledTo = start;
     this.wraps = [];
     this.playing = true;
@@ -288,7 +266,6 @@ export class Transport {
   pause(): void {
     if (!this.playing) return;
     this.position = this.perfPositionSec();
-    this.closeRunAt(this.heardAt());
     this.halt();
     this.instrument.stopAll();
     this.stopClicks();
@@ -325,12 +302,8 @@ export class Transport {
     this.countInClicks = [];
     this.endCountIn(); // a seek cuts the count-in short: the music starts at the target now
     const delay = Math.max(this.startDelaySec, opts.leadSec ?? 0);
-    // The pass heard so far ends here; the target starts a new one, never counted in.
-    this.closeRunAt(this.heardAt());
-    const pass = ++passSeq;
-    this.runLog.push({ pass, fromSec: target, toSec: null, wrapped: false, countedIn: false });
     this.segments = [
-      { ctx: this.ctx.currentTime + delay, score: target, factor: this.tempoFactor, pass },
+      { ctx: this.ctx.currentTime + delay, score: target, factor: this.tempoFactor },
     ];
     this.scheduledTo = target;
     this.wraps = []; // the wraps scheduled before the seek will not sound
@@ -368,22 +341,13 @@ export class Transport {
     }
     this.schedule(seg, this.scheduledTo, boundary);
     this.scheduledTo = boundary;
-    this.segments.push({
-      ctx: toCtx(seg, this.scheduledTo),
-      score: this.scheduledTo,
-      factor: f,
-      pass: seg.pass,
-    });
+    this.segments.push({ ctx: toCtx(seg, this.scheduledTo), score: this.scheduledTo, factor: f });
   }
 
   /** Rare off-grid fallback: a brief rearticulation is preferable to a long stale tempo. */
   private resyncTempo(): void {
     const position = this.perfPositionSec();
     this.seekPerformance(position);
-    // The resync continues the pass (issue 192): the one heard so far ends exactly where the new
-    // one starts, so the run has no gap there.
-    const n = this.runLog.length;
-    if (n >= 2) this.runLog[n - 2]!.toSec = this.runLog[n - 1]!.fromSec;
     const seg = this.current();
     const end = this.performanceLoop()?.to ?? Infinity;
     for (const event of this.events) {
@@ -451,34 +415,6 @@ export class Transport {
   }
 
   /**
-   * Where the listener was at `nowMs`, a performance.now() millisecond (now when omitted), for
-   * the play-along's timing (issue 192): the pass of the run and the performance second, never
-   * clamped or folded. A key in the start delay, the count-in or a seek's lead reads before the
-   * pass start; a key just before a loop wrap reads in the pass it was heard in. Null while
-   * stopped. The instant is counted back from the audible time now rather than handed to
-   * `audibleTime`, which without an output timestamp returns `currentTime` whatever it is given.
-   */
-  heardAt(nowMs?: number): HeardAt | null {
-    if (!this.playing || this.segments.length === 0) return null;
-    const now = performance.now();
-    const t = audibleTime(this.ctx, now) - (now - (nowMs ?? now)) / 1000;
-    let seg = this.segments[0]!;
-    for (const s of this.segments) {
-      if (s.ctx <= t) seg = s;
-      else break;
-    }
-    return { pass: seg.pass, perfSec: seg.score + (t - seg.ctx) * seg.factor, factor: seg.factor };
-  }
-
-  /**
-   * The passes of the current or last run of Play (issue 192), oldest first, as copies; empty
-   * before the first Play. They stay after the stop until the next play().
-   */
-  runPasses(): PassSpan[] {
-    return this.runLog.map((p) => ({ ...p }));
-  }
-
-  /**
    * Whether a lead-in runs at the audible time now (`now` as in `audibleTime`): the playback
    * cursor asks on every frame. It is the lead-in `onLeadInChange` reports, and also, from the
    * moment it is heard, a loop wrap's lead-in that the next scheduler tick will report: until
@@ -524,11 +460,9 @@ export class Transport {
     if (range) {
       while (horizon >= range.to) {
         this.schedule(seg, this.scheduledTo, range.to);
-        const pass = ++passSeq;
-        seg = { ctx: toCtx(seg, range.to), score: range.from, factor: seg.factor, pass };
+        seg = { ctx: toCtx(seg, range.to), score: range.from, factor: seg.factor };
         this.segments.push(seg);
         this.wraps.push({ ctx: seg.ctx, notes: [] }); // the new pass collects its notes
-        this.wrapRun(pass, range);
         this.scheduledTo = range.from;
         horizon = seg.score + (until - seg.ctx) * seg.factor;
       }
@@ -556,8 +490,6 @@ export class Transport {
       audibleTime(this.ctx) >= toCtx(seg, this.endSec)
     ) {
       this.position = this.endSec;
-      const open = this.runLog[this.runLog.length - 1];
-      if (open) open.toSec = this.endSec;
       this.halt();
       this.onEnd?.();
     }
@@ -569,40 +501,10 @@ export class Transport {
     this.onCountInEnd = null;
     this.onLeadInChange = null;
     if (this.playing) {
-      this.closeRunAt(this.heardAt());
       this.halt();
       this.instrument.stopAll();
       this.stopClicks();
     }
-  }
-
-  /**
-   * A loop wrap was scheduled (issue 192): the open pass ends at the loop's end, wrapped, and pass
-   * `pass` follows from its start, counted in when the pass before it was.
-   */
-  private wrapRun(pass: number, range: { from: number; to: number }): void {
-    const open = this.runLog[this.runLog.length - 1];
-    if (open) {
-      open.toSec = range.to;
-      open.wrapped = true;
-    }
-    const countedIn = open?.countedIn ?? false;
-    this.runLog.push({ pass, fromSec: range.from, toSec: null, wrapped: false, countedIn });
-  }
-
-  /**
-   * The run stops or jumps where the listener is, `h` (issue 192). A pass scheduled but never
-   * heard (a wrap or a seek in the look-ahead or the output latency) is dropped, and the pass heard
-   * ends at the heard second, not before its start. It is not wrapped: a wrap marks its pass when
-   * it is scheduled, so a stop before the wrap is heard cut that pass short.
-   */
-  private closeRunAt(h: HeardAt | null): void {
-    if (!h) return;
-    this.runLog = this.runLog.filter((p) => p.pass <= h.pass);
-    const heard = this.runLog.find((p) => p.pass === h.pass);
-    if (!heard) return;
-    heard.toSec = Math.max(heard.fromSec, h.perfSec);
-    heard.wrapped = false;
   }
 
   /**

@@ -6,7 +6,6 @@ import {
   drawTimingMarks,
   markShape,
   MARK_CLASS,
-  MISSED_RING_SCALE,
   RED_HEAD_SCALE,
   RING_CLEARANCE,
   RING_MIN_SHIFT,
@@ -37,7 +36,6 @@ describe('ringFor', () => {
     expect(ring.cy).toBe(50);
     expect(ring.r).toBeCloseTo(RING_SCALE * 10);
     expect(ring.r).toBeCloseTo(6);
-    expect(ring.dashed).toBe(false);
   });
 
   it('keeps the ring clear of its own red notehead and at most half the gap to the neighbour', () => {
@@ -65,7 +63,6 @@ describe('ringFor', () => {
   it('puts an early ring left of the note, scaled from the previous onset', () => {
     const ring = ringFor(at({ verdict: 'early', offsetSec: -0.2, prev: { x: 40, dSec: 0.6 } }));
     expect(ring.cx).toBeCloseTo(80);
-    expect(ring.dashed).toBe(false);
   });
 
   it('lets the least shift win when half the gap is narrower', () => {
@@ -81,23 +78,11 @@ describe('ringFor', () => {
     expect(ringFor(at({})).cx).toBeCloseTo(115.5);
     expect(ringFor(at({ verdict: 'early', offsetSec: -0.2 })).cx).toBeCloseTo(84.5);
   });
-
-  it('draws a missed note as a dashed ring around the notehead, clear of it red', () => {
-    const ring = ringFor(
-      at({ verdict: 'missed', offsetSec: null, prev: { x: 40, dSec: 0.6 }, next: null }),
-    );
-    expect(ring.cx).toBe(100);
-    expect(ring.cy).toBe(50);
-    expect(ring.r).toBeCloseTo(MISSED_RING_SCALE * 10);
-    expect(ring.r).toBeCloseTo(8.5);
-    expect(ring.r).toBeGreaterThan((RED_HEAD_SCALE / 2) * 10);
-    expect(ring.dashed).toBe(true);
-  });
 });
 
 describe('markShape', () => {
   it('is one svg circle in a group the stylesheet finds', () => {
-    const el = markShape(document, { cx: 12.5, cy: 30, r: 6, dashed: false });
+    const el = markShape(document, { cx: 12.5, cy: 30, r: 6 });
     expect(el.namespaceURI).toBe(SVG_NS);
     expect(el.getAttribute('class')).toBe(MARK_CLASS);
     expect(el.getAttribute('aria-hidden')).toBe('true');
@@ -108,13 +93,6 @@ describe('markShape', () => {
     expect(Number(circle.getAttribute('cx'))).toBeCloseTo(12.5);
     expect(Number(circle.getAttribute('cy'))).toBeCloseTo(30);
     expect(Number(circle.getAttribute('r'))).toBeCloseTo(6);
-    expect(el.matches(`.${MARK_CLASS}[data-timing='missed']`)).toBe(false);
-  });
-
-  it("marks a dashed ring with the attribute base.css dashes (data-timing='missed')", () => {
-    const el = markShape(document, { cx: 1, cy: 2, r: 3, dashed: true });
-    expect(el.matches(`.${MARK_CLASS}[data-timing='missed']`)).toBe(true);
-    expect(css).toContain(".score-sheet svg .timing-mark[data-timing='missed'] circle");
   });
 });
 
@@ -184,7 +162,7 @@ function sheet() {
 }
 
 function mark(over: Partial<TimingMark> & Pick<TimingMark, 'ids' | 'verdict'>): TimingMark {
-  return { offsetSec: null, prev: null, next: null, ...over };
+  return { offsetSec: 0, prev: null, next: null, ...over };
 }
 
 const rings = (root: Element) => Array.from(root.querySelectorAll(`.${MARK_CLASS}`));
@@ -251,21 +229,13 @@ describe('drawTimingMarks', () => {
     expect(c.r).toBeCloseTo(6);
   });
 
-  it('draws a missed note as a dashed ring around it', () => {
-    const { host, boxOf } = sheet();
-    drawTimingMarks(host, [mark({ ids: ['l1'], verdict: 'missed' })], boxOf);
-    const [ring] = rings(host);
-    expect(ring!.parentElement!.id).toBe('s1b');
-    expect(ring!.matches(`.${MARK_CLASS}[data-timing='missed']`)).toBe(true);
-    const c = centre(ring!);
-    expect(c.cx).toBeCloseTo(100);
-    expect(c.cy).toBeCloseTo(150);
-    expect(c.r).toBeCloseTo(8.5);
-  });
-
   it('draws one ring per staff for a part across two staves', () => {
     const { host, boxOf } = sheet();
-    const drawn = drawTimingMarks(host, [mark({ ids: ['a', 'l1'], verdict: 'missed' })], boxOf);
+    const drawn = drawTimingMarks(
+      host,
+      [mark({ ids: ['a', 'l1'], verdict: 'late', offsetSec: 0.1 })],
+      boxOf,
+    );
     expect(drawn).toBe(2);
     const all = rings(host);
     expect(all.map((r) => r.parentElement!.id).sort()).toEqual(['s1a', 's1b']);
@@ -302,7 +272,7 @@ describe('drawTimingMarks', () => {
     const drawn = drawTimingMarks(
       host,
       [
-        mark({ ids: ['nowhere'], verdict: 'missed' }),
+        mark({ ids: ['nowhere'], verdict: 'late', offsetSec: 0.1 }),
         mark({ ids: ['d'], verdict: 'late', offsetSec: 0.1, next: { ids: ['gone'], dSec: 0.5 } }),
       ],
       boxOf,
@@ -315,7 +285,7 @@ describe('drawTimingMarks', () => {
   it('clears every ring, and draws one set again after a clear', () => {
     const { host, boxOf } = sheet();
     const marks = [
-      mark({ ids: ['a'], verdict: 'missed' }),
+      mark({ ids: ['a'], verdict: 'early', offsetSec: -0.1 }),
       mark({ ids: ['e'], verdict: 'late', offsetSec: 0.2 }),
     ];
     drawTimingMarks(host, marks, boxOf);
@@ -361,11 +331,6 @@ describe('the timing marks in base.css', () => {
     expect(ring!.body).toMatch(/pointer-events:\s*none/);
   });
 
-  it('dashes the missed ring', () => {
-    const missed = markRules(css).find((r) => r.selector.includes("[data-timing='missed']"));
-    expect(missed?.body).toMatch(/stroke-dasharray:\s*\S/);
-  });
-
   it('hides the rings in print', () => {
     const print = markRules(printBlock(css));
     expect(print.some((r) => /display:\s*none/.test(r.body))).toBe(true);
@@ -373,7 +338,7 @@ describe('the timing marks in base.css', () => {
 
   it('never makes a ring translucent or filtered (issue 79)', () => {
     const rules = markRules(css);
-    expect(rules.length).toBeGreaterThanOrEqual(3);
+    expect(rules.length).toBeGreaterThanOrEqual(2);
     for (const r of rules) {
       expect(r.body, r.selector).not.toMatch(/opacity/);
       expect(r.body, r.selector).not.toMatch(/filter/);

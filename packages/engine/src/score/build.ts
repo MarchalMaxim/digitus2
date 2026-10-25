@@ -12,24 +12,47 @@ const DEFAULT_QPM = 120;
  */
 export const UNMARKED_VELOCITY: Record<Hand, number> = { R: 96, L: 88 };
 
-export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number {
+/**
+ * The seconds at a tick through `tempoMap` (events in any order; 120 qpm before the first mark and
+ * when there is none), as a function of the tick. The map is sorted once and the state after each
+ * event (seconds, cursor and qpm) is kept, so a tick costs a binary search and one step of
+ * arithmetic: the converter to make once for a score and ask many times.
+ */
+export function tickSeconds(tempoMap: TempoEvent[], divisions: number): (tick: number) => number {
   const map =
     tempoMap.length > 0
       ? [...tempoMap].sort((a, b) => a.tick - b.tick)
       : [{ tick: 0, qpm: DEFAULT_QPM }];
-  let seconds = 0;
-  let cursor = 0;
-  let qpm = map[0]!.tick <= 0 ? map[0]!.qpm : DEFAULT_QPM;
-  for (const ev of map) {
-    if (ev.tick >= tick) break;
-    if (ev.tick > cursor) {
-      seconds += ((ev.tick - cursor) / divisions) * (60 / qpm);
-      cursor = ev.tick;
+  // Entry i is the state after the first i events: what a walk that stops there holds.
+  const seconds = new Float64Array(map.length + 1);
+  const cursor = new Float64Array(map.length + 1);
+  const qpm = new Float64Array(map.length + 1);
+  qpm[0] = map[0]!.tick <= 0 ? map[0]!.qpm : DEFAULT_QPM;
+  map.forEach((ev, i) => {
+    seconds[i + 1] = seconds[i]!;
+    cursor[i + 1] = cursor[i]!;
+    if (ev.tick > cursor[i]!) {
+      seconds[i + 1] = seconds[i]! + ((ev.tick - cursor[i]!) / divisions) * (60 / qpm[i]!);
+      cursor[i + 1] = ev.tick;
     }
-    qpm = ev.qpm;
-  }
-  seconds += ((tick - cursor) / divisions) * (60 / qpm);
-  return seconds;
+    qpm[i + 1] = ev.qpm;
+  });
+  return (tick) => {
+    // The events before the tick: the first whose tick is >= it ends the walk.
+    let lo = 0;
+    let hi = map.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (map[mid]!.tick < tick) lo = mid + 1;
+      else hi = mid;
+    }
+    return seconds[lo]! + ((tick - cursor[lo]!) / divisions) * (60 / qpm[lo]!);
+  };
+}
+
+/** Seconds at `tick` through `tempoMap`; for many ticks of one map, make a `tickSeconds` once. */
+export function ticksToSeconds(tempoMap: TempoEvent[], divisions: number, tick: number): number {
+  return tickSeconds(tempoMap, divisions)(tick);
 }
 
 export function sortNotes(notes: Note[]): Note[] {
@@ -69,9 +92,10 @@ export function handEvents(score: Score, hand: Hand): HandEvent[] {
 export function finalizeScore(partial: Omit<Score, 'notes'> & { notes: Note[] }): Score {
   const notes = sortNotes(partial.notes);
   assignChordIds(notes);
+  const secAt = tickSeconds(partial.tempoMap, partial.divisions);
   for (const n of notes) {
-    n.onsetSec = ticksToSeconds(partial.tempoMap, partial.divisions, n.onsetTick);
-    n.offsetSec = ticksToSeconds(partial.tempoMap, partial.divisions, n.offsetTick);
+    n.onsetSec = secAt(n.onsetTick);
+    n.offsetSec = secAt(n.offsetTick);
   }
   return { ...partial, notes };
 }

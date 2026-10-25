@@ -479,7 +479,6 @@ describe('the judgement, bar by bar', () => {
         kind: 'settled',
         runs: [{ index: 11, sinceMs }],
         at: 4,
-        early: false,
         finished: false,
       });
       expect(
@@ -500,7 +499,7 @@ describe('the judgement, bar by bar', () => {
         index,
         sinceMs: s.press(index, index === 11 ? 300 : 0),
       }));
-      s.tap({ kind: 'settled', runs, at: 5, early: false, finished: false });
+      s.tap({ kind: 'settled', runs, at: 5, finished: false });
       expect(lates()).toEqual([]);
       expect(s.result().marks).toBeNull();
     });
@@ -515,7 +514,6 @@ describe('the judgement, bar by bar', () => {
         kind: 'settled',
         runs: [{ index: 11, sinceMs }],
         at: 4,
-        early: false,
         finished: false,
       });
       expect(s.result().marks).toHaveLength(1);
@@ -532,7 +530,6 @@ describe('the judgement, bar by bar', () => {
         kind: 'settled',
         runs: [{ index: 7, sinceMs }],
         at: 4,
-        early: false,
         finished: false,
       });
       expect(lates().map((j) => j.index)).toEqual([7]);
@@ -548,7 +545,6 @@ describe('the judgement, bar by bar', () => {
         kind: 'settled',
         runs: [{ index: 7, sinceMs }],
         at: 4,
-        early: false,
         finished: false,
       });
       expect(
@@ -627,7 +623,6 @@ describe('the judgement, bar by bar', () => {
             kind: 'settled',
             runs: [{ index, sinceMs }],
             at: index + 1,
-            early: false,
             finished: false,
           });
         }

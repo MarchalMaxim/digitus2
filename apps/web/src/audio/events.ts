@@ -4,10 +4,9 @@ import { noteVelocity } from './instrument.js';
 import { pedalStops, rollDelays } from './performance.js';
 
 /**
- * The note list the transport plays and the accompaniment of the play-along sounds (issue 184):
- * graces, rolls, ornaments, pedal and velocity, so the other hand sounds exactly as it does in
- * Play. Static and small: it imports nothing from transport.ts, which keeps the lazy transport
- * chunk out of the entry chunk.
+ * The note list the transport plays: graces, rolls, ornaments, pedal and velocity. Static and
+ * small: it imports nothing from transport.ts, which keeps the lazy transport chunk out of the
+ * entry chunk.
  */
 
 /** Graces sharing a principal sound this long before it (one step each), and for this long. */
@@ -71,16 +70,4 @@ export function playEvents(score: Score): PlayEvent[] {
     }),
   );
   return events.sort((a, b) => a.sec - b.sec); // stable: simultaneous notes keep score order
-}
-
-const cache = new WeakMap<Score, PlayEvent[]>();
-
-/** `playEvents`, kept per score (a score is never edited): the same array for the same score. */
-export function playEventsFor(score: Score): PlayEvent[] {
-  let events = cache.get(score);
-  if (!events) {
-    events = playEvents(score);
-    cache.set(score, events);
-  }
-  return events;
 }

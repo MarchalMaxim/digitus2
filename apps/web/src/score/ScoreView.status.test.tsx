@@ -11,10 +11,10 @@ import type { Playback } from './usePlayback.js';
 import type * as DocumentModule from './useScoreDocument.js';
 import type { ScoreDocument } from './useScoreDocument.js';
 
-// What the score view hands to the status line (issue 184): the player's `preparing`, the
-// samples loading for the other hand, reaches the dock as `Loading the piano…`. The ranking of
-// the lines is ScoreView.test.ts; this renders the view on Happy Birthday with a stand-in
-// document and player, to guard the wiring between them.
+// What the score view hands to the status line: the player's `loading`, the samples being
+// fetched, reaches the dock as `Loading the piano…`. The ranking of the lines is
+// ScoreView.test.ts; this renders the view on Happy Birthday with a stand-in document and player,
+// to guard the wiring between them.
 
 // A path held in a variable stays a file URL (Vite rewrites a literal one into an asset URL).
 const path = '../../../../content/scores/happy-birthday.musicxml';
@@ -72,11 +72,6 @@ const playback: Playback = {
   loop: null,
   setLoop: () => {},
   strike: () => () => undefined,
-  prepare: () => {},
-  preparing: false,
-  soundWaits: false,
-  accompany: () => {},
-  stopAccompaniment: () => {},
 };
 
 vi.mock('./usePlayback.js', async (importOriginal) => ({
@@ -88,7 +83,6 @@ const { ScoreView, scoreStatusLine } = await import('./ScoreView.js');
 
 beforeEach(() => {
   playback.loading = false;
-  playback.preparing = false;
   useAppStore.setState({
     view: { name: 'library' },
     settings: { ...DEFAULT_SETTINGS },
@@ -110,11 +104,6 @@ describe('the status line in the score view', () => {
     expect(await dockStatus()).toBe('');
   });
 
-  it('says Loading the piano… while the player prepares the samples for the other hand', async () => {
-    playback.preparing = true;
-    expect(await dockStatus()).toBe('Loading the piano…');
-  });
-
   it('says Loading the piano… while the first Play loads them', async () => {
     playback.loading = true;
     expect(await dockStatus()).toBe('Loading the piano…');
@@ -131,7 +120,6 @@ describe('the timing explanation on the status line (issue 192)', () => {
     loading: false,
     countIn: null,
     alongHint: null,
-    alongSound: null,
   };
   const line = (over: Partial<StatusInputs>, t = en) => scoreStatusLine({ ...ready, ...over }, t);
   const EXPLAIN = 'A ring before a note means it came early; after it, late.';
@@ -144,13 +132,10 @@ describe('the timing explanation on the status line (issue 192)', () => {
     expect(line({ timingExplain: true, alongHint: { count: 1 } })?.text).toBe(EXPLAIN);
   });
 
-  it('gives way to the count-in, the loading line and the sound sentence', () => {
+  it('gives way to the count-in and the loading line', () => {
     const countIn = { beat: 2, beats: 4, beatInBar: 2 };
     expect(line({ timingExplain: true, countIn })).toEqual({ text: '2', kind: 'count' });
     expect(line({ timingExplain: true, loading: true })?.text).toBe('Loading the piano…');
-    expect(line({ timingExplain: true, alongSound: 'click' })?.text).toBe(
-      en.score.view.playAlongSound.click,
-    );
   });
 
   it('says nothing when it is off or left out', () => {

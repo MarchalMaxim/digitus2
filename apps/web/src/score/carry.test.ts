@@ -44,11 +44,6 @@ function fakePlayback(
     leadInRemainingSec: () => null,
     setLoop: (r) => calls.push(`setLoop(${JSON.stringify(r)})`),
     strike: () => () => undefined,
-    prepare: () => {},
-    preparing: false,
-    soundWaits: false,
-    accompany: () => {},
-    stopAccompaniment: () => {},
   };
 }
 

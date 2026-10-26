@@ -43,6 +43,18 @@ Empty until the owner's sessions. Offsets in milliseconds; a negative deviation 
 | Bluetooth (Chrome, WinRT flag) |           80 % |                           |                    |                                |                   |                 |               |
 | Bluetooth (Chrome, WinRT flag) |          100 % |                           |                    |                                |                   |                 |               |
 
+The link itself, measured with a microphone on the owner's GO:PIANO over Bluetooth (Chrome, WinRT flag, Windows): single keys about once a second, each key's sound in the recording set against the moment the page heard it.
+
+| Quantity                                                   | Measured                  |
+| ---------------------------------------------------------- | ------------------------- |
+| Presses timed                                              | 9 of 12                   |
+| Spread of the key-to-page delay, middle 80 %               | 13 ms                     |
+| Range of the key-to-page delay                             | 13 ms                     |
+| Handler time minus the event's `timeStamp`, median and max | 0.2 ms                    |
+| Key-to-page delay                                          | about 37 ms, steady part  |
+
+The steady part cancels in the gaps; the spread is far under `TOLERANCE_FLOOR_MS`, so Bluetooth jitter alone does not crowd the floor.
+
 ## How the constants get set
 
 The constants are exported from `apps/web/src/score/walkTiming.ts`. Their starting values and what each sets are in `docs/app.md` (Timing in the walk).

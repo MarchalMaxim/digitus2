@@ -74,11 +74,6 @@ const playback: Playback = {
   loop: null,
   setLoop: () => {},
   strike: () => () => undefined,
-  prepare: () => {},
-  preparing: false,
-  soundWaits: false,
-  accompany: () => {},
-  stopAccompaniment: () => {},
 };
 
 vi.mock('./usePlayback.js', async (importOriginal) => ({

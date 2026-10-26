@@ -121,8 +121,8 @@ describe('the status line in the score view', () => {
   });
 });
 
-// The explanation of the timing rings (issue 192) ranks below the walk's `hold` hint and above its
-// `play` hint, and below everything that is busier: the line is `scoreStatusLine` itself.
+// The explanation of the timing rings (issue 192) ranks above the walk's play hint, and below
+// everything that is busier: the line is `scoreStatusLine` itself.
 describe('the timing explanation on the status line (issue 192)', () => {
   const ready: StatusInputs = {
     docStatus: 'ready',
@@ -140,13 +140,8 @@ describe('the timing explanation on the status line (issue 192)', () => {
     expect(line({ timingExplain: true })).toEqual({ text: EXPLAIN, kind: 'info' });
   });
 
-  it('gives way to the hold hint, and wins over the play hint', () => {
-    expect(line({ timingExplain: true, alongHint: { kind: 'hold', count: 1 } })?.text).toBe(
-      'Hold the red note a little longer.',
-    );
-    expect(line({ timingExplain: true, alongHint: { kind: 'play', count: 1 } })?.text).toBe(
-      EXPLAIN,
-    );
+  it('wins over the play hint', () => {
+    expect(line({ timingExplain: true, alongHint: { count: 1 } })?.text).toBe(EXPLAIN);
   });
 
   it('gives way to the count-in, the loading line and the sound sentence', () => {

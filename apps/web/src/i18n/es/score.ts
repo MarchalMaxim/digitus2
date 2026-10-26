@@ -35,8 +35,6 @@ export const score: Messages['score'] = {
       click: 'Haz clic una vez para oír la otra mano.',
       tap: 'Toca una vez para oír la otra mano.',
     },
-    holdLonger: (count: number) =>
-      count > 1 ? 'Mantén las notas rojas un poco más.' : 'Mantén la nota roja un poco más.',
     timingExplain:
       'Un círculo antes de una nota significa que llegó antes de tiempo; después, tarde.',
     practice: 'Práctica',

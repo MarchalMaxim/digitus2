@@ -447,7 +447,7 @@ describe('judgeBar', () => {
     });
   });
 
-  describe('pauses and gaps the red does not wait out', () => {
+  describe('pauses and rests after a note', () => {
     it('does not judge across a 3 s hesitation: it starts a new stretch', () => {
       const plan = planOf(Q16);
       const short = judgeBar(plan, play(plan, 2000, { upTo: 7, extra: { 6: 3000 } }));
@@ -474,8 +474,8 @@ describe('judgeBar', () => {
       expect(indices(r)).toEqual([2, 3, 4, 5, 6, 9, 10]);
     });
 
-    it('does not judge a rest the red does not wait out', () => {
-      // Bars of q q (q + a quarter rest); the red leaves the third step after one beat, and the
+    it('does not judge a rest after a note', () => {
+      // Bars of q q (q + a quarter rest); the third note lasts one beat, and the
       // reader presses the next bar's first step at 0.7 of the written gap.
       const plan = planOf(Array.from({ length: 4 }, () => [1, 1, 2]).flat(), {
         holds: { 2: 1, 5: 1, 8: 1, 11: 1 },

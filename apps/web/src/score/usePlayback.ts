@@ -606,7 +606,7 @@ export function usePlayback(score: Score | null): Playback {
             ctx: audio,
             instrument,
             score: s,
-            click: (time, level) => scheduleClick(audio, time, level),
+            click: (time, accent) => scheduleClick(audio, time, accent),
           });
           const state = useAppStore.getState();
           const settings = state.settings;

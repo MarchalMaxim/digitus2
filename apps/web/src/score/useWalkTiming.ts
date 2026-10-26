@@ -1,13 +1,13 @@
 /**
  * Timing in the waiting walk (issue 192): while the reader walks the piece on their piano, this
  * hook compares their rhythm with the written one, against their own pulse (walkTiming.ts), and
- * after each bar it hands ScoreView the rings of the note that came clearly early or late. The
- * red still waits; Play judges nothing.
+ * after each bar it hands ScoreView the rings of the note that came clearly early or late.
+ * Play judges nothing.
  *
  * The walk (usePlayAlong.ts) tells what it passed through `tap`: each step with the start of the
  * run that passed it, and every break in its own sequence (a seek, going inactive, a loop's wrap,
- * a release too early, the finish). This hook keeps the passed steps as timed onsets, in chains
- * the breaks cut, and judges a bar the moment the walk leaves it. Its own note-on log gives each
+ * the finish). This hook keeps the passed steps as timed onsets, in chains the breaks cut, and
+ * judges a bar the moment the walk leaves it. Its own note-on log gives each
  * onset the event time of the key that started the run (`NoteMessage.atMs`); that listener must
  * subscribe before the walk's, so ScoreView calls this hook first.
  *
@@ -177,15 +177,15 @@ export function useWalkTiming({
 
   // The lines that rank above the explanation on the status line (scoreStatusLine): the piano
   // loading, the count-in, and the sound sentence, which the walk shows only for a reader with a
-  // hand left out. The walk's hold hint goes with the next pass, so it is not one of them.
+  // hand left out.
   const { loading, preparing, countIn, soundWaits } = playback;
   const held = loading || preparing || countIn !== null || (soundWaits && muteKey !== '');
   useLayoutEffect(() => {
     if (explain && !held) seenRef.current = true;
   }, [explain, held]);
 
-  // Every note-on, logged as it arrives: the walk passes a step a hold after the press, and the
-  // event time of the press is needed then. Subscribed once and never again, so it stays ahead of
+  // Every note-on, logged as it arrives: the walk passes a step at its press, and the event time
+  // of the decisive key is looked up then. Subscribed once and never again, so it stays ahead of
   // the walk's listener, which ScoreView declares after this hook.
   useEffect(
     () =>
@@ -298,9 +298,6 @@ export function useWalkTiming({
           if (entries.length > ONSET_CAP) entries.splice(0, entries.length - ONSET_CAP);
           lastRef.current = run.index;
         }
-        // A release too early: the step is pressed again, and that press is a correction, not
-        // rhythm.
-        if (e.early) chainRef.current++;
         const open = openBarRef.current;
         if (open !== null) {
           const next = e.at >= 0 ? walk.steps[e.at] : undefined;

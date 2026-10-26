@@ -1,6 +1,6 @@
 import type { Hand, Score } from '@digitus2/engine';
-import type { Beat, Click, ClickLevel } from './beats.js';
-import { buildBeats, buildClicks, clickHeard, countInBar, measureStartSec } from './beats.js';
+import type { Beat } from './beats.js';
+import { buildBeats, countInBar, measureStartSec } from './beats.js';
 import type { AudioClock } from './clock.js';
 import { audibleTime } from './clock.js';
 import { playEvents, type PlayEvent } from './events.js';
@@ -18,11 +18,7 @@ export interface TransportDeps {
   ctx: AudioClock;
   instrument: Instrument;
   score: Score;
-  /**
-   * Sounds a metronome or count-in click at context time `time`. It may return the click's stop:
-   * the transport calls it when the music stops before the click is heard (Pause, a seek).
-   */
-  click?: (time: number, level: ClickLevel) => (() => void) | void;
+  click?: (time: number, accent: boolean) => void;
   setInterval?: typeof setInterval;
   clearInterval?: typeof clearInterval;
 }
@@ -118,7 +114,7 @@ export class Transport {
   private readonly ctx: AudioClock;
   private readonly instrument: Instrument;
   private readonly perf: Performance;
-  private readonly click: TransportDeps['click'];
+  private readonly click: ((time: number, accent: boolean) => void) | undefined;
   private readonly startTimer: (fn: () => void, ms: number) => ReturnType<typeof setInterval>;
   private readonly stopTimer: (id: ReturnType<typeof setInterval>) => void;
   private readonly lookAheadSec: number;
@@ -126,7 +122,6 @@ export class Transport {
   private readonly startDelaySec: number;
   private readonly events: PlayEvent[];
   private readonly beats: Beat[];
-  private readonly clicks: Click[];
   private readonly endSec: number;
   /** The end of the written score: a seek may go to any bar, including one the order never ends on. */
   private readonly writtenEndSec: number;
@@ -142,8 +137,6 @@ export class Transport {
   /** The stretch of the performance the loop plays, fixed when the loop is set (`setLoop`). */
   private loopPerf: { from: number; to: number } | null = null;
   private segments: Segment[] = [];
-  /** The stops of the clicks handed out and not yet heard, with their context times. */
-  private clickStops: { time: number; stop: () => void }[] = [];
   /** Everything before this score time has been scheduled (the previous horizon). */
   private scheduledTo = 0;
   /** The count-in clicks still to schedule. */
@@ -185,7 +178,6 @@ export class Transport {
     this.startDelaySec = opts.startDelaySec ?? 0.05;
     this.events = playEvents(this.perf.score);
     this.beats = buildBeats(this.perf.score);
-    this.clicks = buildClicks(this.perf.score);
     this.endSec = scoreEndSec(this.perf.score);
     this.writtenEndSec = scoreEndSec(deps.score);
   }
@@ -268,7 +260,6 @@ export class Transport {
     this.position = this.perfPositionSec();
     this.halt();
     this.instrument.stopAll();
-    this.stopClicks();
   }
 
   /**
@@ -298,7 +289,6 @@ export class Transport {
     const range = this.performanceLoop();
     if (range && (target < range.from || target >= range.to)) target = range.from;
     this.instrument.stopAll();
-    this.stopClicks();
     this.countInClicks = [];
     this.endCountIn(); // a seek cuts the count-in short: the music starts at the target now
     const delay = Math.max(this.startDelaySec, opts.leadSec ?? 0);
@@ -452,7 +442,7 @@ export class Transport {
     const until = now + this.lookAheadSec;
     while (this.countInClicks.length > 0 && this.countInClicks[0]!.time < until) {
       const c = this.countInClicks.shift()!;
-      this.ring(c.time, c.accent ? 'bar' : 'beat');
+      this.click?.(c.time, c.accent);
     }
     const range = this.performanceLoop();
     let seg = this.current();
@@ -473,10 +463,6 @@ export class Transport {
     }
     while (this.segments.length > 1 && this.segments[1]!.ctx < now - SEGMENT_KEEP_SEC) {
       this.segments.shift();
-    }
-    if (this.clickStops.length > 0) {
-      const heard = audibleTime(this.ctx);
-      this.clickStops = this.clickStops.filter((c) => c.time > heard);
     }
     this.followCountIn();
     // The lead-in first: a note heard before a wrap ends it, then the wrap may start a new one.
@@ -503,14 +489,10 @@ export class Transport {
     if (this.playing) {
       this.halt();
       this.instrument.stopAll();
-      this.stopClicks();
     }
   }
 
-  /**
-   * Schedules the notes and metronome clicks whose score time lies in `[from, to)`. A sub-beat
-   * sounds when its beat's heard spacing, under the tempo factor of `seg`, allows it (`clickHeard`).
-   */
+  /** Schedules the notes and metronome beats whose score time lies in `[from, to)`. */
   private schedule(seg: Segment, from: number, to: number): void {
     if (!(to > from)) return;
     const loopEnd = this.performanceLoop()?.to ?? Infinity;
@@ -530,24 +512,11 @@ export class Transport {
       this.wraps[this.wraps.length - 1]?.notes.push(note);
     }
     if (!this.metronome || !this.click) return;
-    for (let i = lowerBound(this.clicks, from); i < this.clicks.length; i++) {
-      const c = this.clicks[i]!;
-      if (c.sec >= to) break;
-      if (clickHeard(c, seg.factor)) this.ring(toCtx(seg, c.sec), c.level);
+    for (let i = lowerBound(this.beats, from); i < this.beats.length; i++) {
+      const b = this.beats[i]!;
+      if (b.sec >= to) break;
+      this.click(toCtx(seg, b.sec), b.accent);
     }
-  }
-
-  /** Hands a click to the callback and keeps the stop it returns, until the click is heard. */
-  private ring(time: number, level: ClickLevel): void {
-    const stop = this.click?.(time, level);
-    if (stop) this.clickStops.push({ time, stop });
-  }
-
-  /** Stops the clicks handed out and not yet heard, as the notes are stopped. */
-  private stopClicks(): void {
-    const stops = this.clickStops;
-    this.clickStops = [];
-    for (const c of stops) c.stop();
   }
 
   private current(): Segment {

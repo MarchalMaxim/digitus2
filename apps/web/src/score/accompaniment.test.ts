@@ -145,20 +145,20 @@ describe('accompanimentStretches', () => {
     ]);
   });
 
-  it('starts a stretch handed over after its press that much earlier, and keeps what sounded', () => {
-    const move = { kind: 'cue', index: 2 } as const;
-    // Handed over 0.4 s into the stretch: it started 0.4 s before, and the first 0.4 s sounded.
-    expect(accompanimentStretches(steps, 1, move, null, 9, 0.4)).toEqual([
-      { from: 1, to: 2, offset: -0.4, heard: 0.4 },
-    ]);
-    // After a tempo change what sounded (0.1 s of music) is less than the time at the new tempo.
-    expect(accompanimentStretches(steps, 1, move, null, 9, 0.2, 0.1)).toEqual([
-      { from: 1, to: 2, offset: -0.2, heard: 0.1 },
-    ]);
-    // Nothing elapsed gives the stretch as before, with no `heard`.
-    expect(accompanimentStretches(steps, 1, move, null, 9, 0)).toEqual([
-      { from: 1, to: 2, offset: 0 },
-    ]);
+  it('gives every stretch at offset 0, with no field beyond from, to and offset', () => {
+    const loop: PerfRange = { from: 2, to: 4 };
+    const cases = [
+      accompanimentStretches(steps, 1, { kind: 'cue', index: 2 }, null, 9),
+      accompanimentStretches(steps, 3, { kind: 'cue', index: 2 }, loop, 9),
+      accompanimentStretches(steps, 4, { kind: 'finish' }, null, 6.5),
+    ];
+    for (const stretches of cases) {
+      expect(stretches).toHaveLength(1);
+      for (const stretch of stretches) {
+        expect(Object.keys(stretch).sort()).toEqual(['from', 'offset', 'to']);
+        expect(stretch.offset).toBe(0);
+      }
+    }
   });
 
   it('gives none for stay, for no step passed, or a stretch with no length', () => {
@@ -399,46 +399,6 @@ describe('accompanimentNotes', () => {
       [48, 0],
       [50, 0.5],
     ]);
-  });
-
-  it('leaves out the notes that already sounded in a stretch handed over after its press', () => {
-    const events = eventsOf([
-      { midi: 48, tick: 1, hand: 'L' },
-      { midi: 50, tick: 1.5, hand: 'L' },
-      { midi: 52, tick: 1.9, hand: 'L' },
-    ]);
-    // [0.5, 1) handed over 0.4 s in: the notes at 0 and 0.25 s are over, the one at 0.45 s is next.
-    const early = accompanimentNotes(
-      events,
-      ['L'],
-      [{ from: 0.5, to: 1, offset: -0.4, heard: 0.4 }],
-      null,
-    );
-    expect(midis(early)).toEqual([52]);
-    expect(offsets(early)[0]).toBeCloseTo(0.05, 9);
-    // A note exactly where the hand-over is, not yet struck, sounds at once.
-    const at = accompanimentNotes(
-      events,
-      ['L'],
-      [{ from: 0.5, to: 1, offset: -0.25, heard: 0.25 }],
-      null,
-    );
-    expect(midis(at)).toEqual([50, 52]);
-    expect(offsets(at)[0]).toBe(0);
-    // A faster tempo made the stretch older than what sounded: the notes in between sound at once.
-    const caught = accompanimentNotes(
-      events,
-      ['L'],
-      [{ from: 0.5, to: 1, offset: -0.4, heard: 0.2 }],
-      null,
-    );
-    expect(midis(caught)).toEqual([50, 52]);
-    expect(offsets(caught)[0]).toBe(0);
-    expect(offsets(caught)[1]).toBeCloseTo(0.05, 9);
-    // A stretch with no `heard` keeps every note, clamped at the press, as before.
-    const all = accompanimentNotes(events, ['L'], [{ from: 0.5, to: 1, offset: -0.4 }], null);
-    expect(midis(all)).toEqual([48, 50, 52]);
-    expect(offsets(all)[0]).toBe(0);
   });
 
   it('gives nothing without stretches, or for a stretch where the hand is silent', () => {

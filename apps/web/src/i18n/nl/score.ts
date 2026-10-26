@@ -35,8 +35,6 @@ export const score: Messages['score'] = {
       click: 'Klik één keer om de andere hand te horen.',
       tap: 'Tik één keer om de andere hand te horen.',
     },
-    holdLonger: (count: number) =>
-      count > 1 ? 'Houd de rode noten iets langer vast.' : 'Houd de rode noot iets langer vast.',
     timingExplain: 'Een cirkel vóór een noot betekent dat die te vroeg kwam; erna, te laat.',
     practice: 'Oefenen',
     scanSource: 'Scanbron en herkenning',

@@ -1,6 +1,6 @@
 # Shared library of readers' scores: options
 
-**Open decision: [#132](https://github.com/MarchalMaxim/digitus2/issues/132).** The owner asks to "allow the user to store their scores in a shared library", free, on Google Cloud, with a light copyright notice. Section 7 recommends a pre-moderated store on Firestore in a Google Cloud project without billing (option 3). Section 8 states the decision. Nothing is built until the owner picks.
+**Open decision: [#132](https://github.com/MarchalMaxim/digitus2/issues/132).** The owner asks to "allow the user to store their scores in a shared library", free, on Google Cloud, with a light copyright notice. Section 7 recommends a pre-moderated store on Firestore in a Google Cloud project of its own without billing. Section 8 states the decision. Nothing is built until the owner picks.
 
 The owner closed the first request for this, [#41](https://github.com/MarchalMaxim/digitus2/issues/41), with "no shared library" (option (c) of the first study, section 9). #132 reopens the question, so the study names the decisions it touches and what each option makes of them.
 
@@ -9,8 +9,11 @@ The owner closed the first request for this, [#41](https://github.com/MarchalMax
 The owner's words:
 
 > Allow the user to store their scores in a shared library.
+>
 > Think about shared library design: consult design agent
+>
 > Think about costs and cloud infrastructure: use something free, halt development if costs are going to play a role (use google cloud platform, the current choice for our cloud infra)
+>
 > Think about a copyright disclaimer yada yada (this is a private application, so don't worry about it too much)
 
 Three recorded decisions stand against it:
@@ -47,21 +50,23 @@ So a light copyright notice is enough only when two things stand behind it: noth
 
 **Deletion and takedown.** Three kinds of removal are needed:
 
-| Who | How | Option 3 |
+| Who | How | In the pre-moderated store |
 |---|---|---|
 | The uploader, while the score waits | **Withdraw** on their My scores row | The upload's id is a random 128-bit key kept only in their browser; the rules let whoever holds it delete a waiting upload |
-| A rights holder or any reader, once it is shared | **Report** in the score view, no account | A report document in the store; the owner reads reports and deletes the score |
+| A rights holder or any reader, once it is shared | **Report** in the score view, no account | A report document in the store; the owner reads reports and deletes the score. When the store does not answer, the report sheet points to a channel outside it: a "Remove a score" issue form and the owner's address |
 | The owner | One command, or the Firebase console | Deleting a document removes it for good; nothing stays in git history |
 
 **Personal data.** An upload stores no name, file name, address or IP address. A copyright report asks for a way to reply (an e-mail address), because a rights holder's notice needs an answer; the owner deletes the report once it is handled.
 
-**Judgement.** Anonymous uploads with a light notice are acceptable only pre-moderated, with a report path, and with removal that really deletes. Published-at-once uploads (option 4) are not: they make the owner the host of whatever arrives, in front of beginners, with the notice as the only filter. The price of pre-moderation is the owner's time on every upload and a high refusal rate for scans of modern editions.
+**Judgement.** Anonymous uploads with a light notice are acceptable only pre-moderated, with a report path, and with removal that really deletes. Uploads published at once are not: they make the owner the host of whatever arrives, in front of beginners, with the notice as the only filter. The price of pre-moderation is the owner's time on every upload and a high refusal rate for scans of modern editions.
 
 ## 4. Options
 
-| | 1 Do not build | 2 GitHub issue submissions | 3 Pre-moderated store on Firestore | 4 Published at once on Firestore |
+Four options, named the same way everywhere in this study and in #132. The pre-moderated store can live in a project of its own or in `digitus2-scan` (section 5).
+
+| | Do not build | GitHub issues | Pre-moderated store (Firestore) | Published at once (Firestore) |
 |---|---|---|---|---|
-| How a reader shares | Saves the MusicXML and sends it themselves | **Share** saves a file and opens a GitHub issue form; the reader signs in on github.com and attaches it | **Share** opens a sheet: title, composer, one tick; the score waits for the owner | As 3, listed at once |
+| How a reader shares | Saves the MusicXML and sends it themselves | **Share** saves a file and opens a GitHub issue form; the reader signs in on github.com and attaches it | **Share** opens a sheet: title, composer, one tick; the score waits for the owner | As the pre-moderated store, listed at once |
 | Others can find it | no | yes, once ingested into the library | yes, on a "Shared by readers" shelf | yes, at once |
 | Reader needs an account | no | GitHub | no | no |
 | Public before review | n/a | yes (issue attachments are public) | no | yes |
@@ -71,18 +76,18 @@ So a light copyright notice is enough only when two things stand behind it: noth
 | Money | 0 | 0 | 0 (section 5) | 0 (section 5) |
 | Owner time per upload (estimate) | 0 | about 10 min | 1 to 3 min | per report only |
 
-Option 2 is option (a) of the first study (section 9), which remains valid: it is free and keeps every fixed decision, at the price of a GitHub account for every reader who shares.
+GitHub issues is option (a) of the first study (section 9), which remains valid: it is free and keeps every fixed decision, at the price of a GitHub account for every reader who shares.
 
 ### What each recorded decision becomes
 
-| Decision | 1 Do not build | 2 GitHub issues | 3 Pre-moderated Firestore | 4 Published at once |
+| Decision | Do not build | GitHub issues | Pre-moderated store | Published at once |
 |---|---|---|---|---|
 | #41 "no shared library" | stands; #132 is closed with the reason | reversed; #132 supersedes it | reversed; #132 supersedes it | reversed; #132 supersedes it |
-| `docs/PROGRESS.md` "No shared library of uploads" | unchanged | "Readers share through a GitHub issue form; the owner admits scores into the library through the gates" | "Readers share anonymously into a pre-moderated store on Firestore; the owner approves each score; anyone can report one" | as 3, without approval |
-| `CLAUDE.md` "GitHub Pages only" | unchanged | unchanged | holds for the app; the app also reads and writes Firestore through Google's REST API; no server code of the project's own | as 3 |
-| `CLAUDE.md` "no login" | unchanged | unchanged in the app; publishers sign in on github.com | unchanged for readers; the owner moderates with their own Google credentials outside the app | as 3 |
-| `CLAUDE.md` "one server, the scan service" | unchanged | unchanged | a second Google service: a Firestore database, with no code running on it | as 3 |
-| `docs/scanning.md` "files go only to the scan service" | unchanged | unchanged; the reader uploads on github.com | the photo still goes only to the scan service; a score's MusicXML goes to Firestore when the reader presses **Share** | as 3 |
+| `docs/PROGRESS.md` "No shared library of uploads" | unchanged | "Readers share through a GitHub issue form; the owner admits scores into the library through the gates" | "Readers share anonymously into a pre-moderated store on Firestore; the owner approves each score; anyone can report one" | as the pre-moderated store, without approval |
+| `CLAUDE.md` "GitHub Pages only" | unchanged | unchanged | holds for the app; the app also reads and writes Firestore through Google's REST API; no server code of the project's own | the same |
+| `CLAUDE.md` "no login" | unchanged | unchanged in the app; publishers sign in on github.com | unchanged for readers; the owner moderates with their own Google credentials outside the app | the same |
+| `CLAUDE.md` "one server, the scan service" | unchanged | unchanged | a second Google service: a Firestore database, with no code running on it | the same |
+| `docs/scanning.md` "files go only to the scan service" | unchanged | unchanged; the reader uploads on github.com | the photo still goes only to the scan service; a score's MusicXML goes to Firestore when the reader presses **Share** | the same |
 
 ## 5. Cost on Google Cloud
 
@@ -110,16 +115,16 @@ Table 2. Price beyond the free tier, Firestore Standard, Netherlands (europe-wes
 
 **Where the store lives decides the worst case.** The owner asked for Google Cloud, the current choice; there are two ways to use it.
 
-| | 3a: a sibling project with no billing account (recommended) | 3b: the existing `digitus2-scan` project |
+| | Own project, no billing account (recommended) | In the existing `digitus2-scan` project |
 |---|---|---|
 | Can it cost money | No. A project without a billing account runs on the no-cost quota only ("No payment method needed" [5]) | Yes, beyond the free tier, up to the 10-a-month budget and its kill switch (`docs/scan-service.md`) |
-| Worst case: a script writes 100 junk documents a second at the 100,000-character cap | Writes stop at 20,000 for the day; the pricing-plans page says a product that exceeds its no-cost quota is shut off for the rest of the month [6], the quota page says quotas reset daily [4]. The library stops taking uploads; nothing is billed | 8.64 million writes a day ($8.81) and about 805 GiB stored ($4.50 for each day kept): over the budget within about a day. The kill switch then unlinks billing for the whole project [19], and **scanning stops too**, for the rest of the month |
+| Worst case: a script writes 100 junk documents a second at the 100,000-character cap | After 20,000 writes the quota is spent. The pricing-plans page says a product that exceeds its no-cost quota is shut off for the rest of the month [6]; the quota page says quotas reset around midnight [4]. Taking the harder reading: **all of the shared library goes dark for the rest of the month**, the shelf, sharing and the report sheet included. Nothing is billed, and scanning is untouched | 8.64 million writes a day ($8.81) and about 805 GiB stored ($4.50 for each day kept): over the budget within about a day. The kill switch then unlinks billing for the whole project [19], and **scanning stops too**, for the rest of the month |
 | Scanning's free grant | Untouched: Firestore needs no Cloud Run | Untouched by Firestore itself; any Cloud Run endpoint would share the 180,000 free vCPU-seconds with scanning, because that grant is per billing account [2][7] |
-| Reads exhausted by a script | The shelf is empty until the quota resets | Billed at $0.034 per 100,000 until the kill switch |
+| Reads exhausted by a script | The same: the library is dark for the rest of the month | Billed at $0.034 per 100,000 until the kill switch |
 
-Option 3a stays free by construction, not by monitoring, which is the "halt if costs play a role" the owner asked for, enforced by Google. Its failure is a library that stops taking uploads until the quota resets; the owner then deletes the junk (deletes are free up to 20,000 a day). If abuse becomes a habit, App Check with reCAPTCHA is free on the no-cost plan [5] and blocks scripts; it costs a third-party widget and the colour guard's attention, so it is not in the first version.
+The own project stays free by construction, not by monitoring, which is the "halt if costs play a role" the owner asked for, enforced by Google. Its failure is a shared library that is switched off until the quota resets, possibly for the rest of the month; the app then hides the shelf and the Share button, and the report sheet points to the channel outside the store (section 3). The owner deletes the junk once the store answers again. The first hardening step, if abuse happens, is App Check with reCAPTCHA, free on the no-cost plan [5], which blocks scripts; it costs a third-party widget and the colour guard's attention, so it is not in the first version.
 
-Option 2 costs nothing on Google Cloud. Option 4 has option 3's costs.
+GitHub issues costs nothing on Google Cloud. Published at once has the pre-moderated store's costs.
 
 ## 6. Design
 
@@ -138,24 +143,25 @@ The copyright notice is the one sentence on the share sheet and the report reaso
 
 ## 7. Recommendation
 
-**Option 3a: a pre-moderated store on Firestore, in a sibling Google Cloud project with no billing account.**
+**Pre-moderated store, in a Google Cloud project of its own with no billing account.**
 
 - It does what #132 asks: anyone shares in two fields and a tick, with no account, and others find approved scores on a shelf.
-- It is free by construction. The worst a script can do is stop uploads until the quota resets; it cannot spend money or take scanning down. In `digitus2-scan` (3b) the same script would trip the kill switch and stop scanning for the month.
+- It is free by construction. The worst a script can do is switch the shared library off until the quota resets, possibly for the rest of the month; it cannot spend money or take scanning down. In `digitus2-scan` the same script would trip the kill switch and stop scanning for the month. The existing project is the owner's stated place; a project of its own is still Google Cloud, under the same billing account's owner, and it is the only way "free" holds without watching it.
 - It keeps the owner's light notice honest: nothing is public before the owner has read it, anyone can report, and removal deletes. That is what the hosting rules ask of a host, whatever the notice says.
 - It changes three recorded decisions (section 4): #41 and the PROGRESS line are reversed, and "one server" becomes "one server and one database". The app stays on GitHub Pages with no login for readers.
 
-What it costs the owner is time: every upload waits for them, and most scans of modern editions will be refused. **If the owner does not want to read every upload, the recommendation is option 1: do not build it**, keep #41's decision and close #132 with that reason. Option 4 (published at once) is not recommended at any price, and option 2 remains the choice if readers needing a GitHub account is acceptable and Google Cloud is not wanted.
+What it costs the owner is time: every upload waits for them, and most scans of modern editions will be refused. **If the owner does not want to read every upload, the recommendation is Do not build**: keep #41's decision and close #132 with that reason. Published at once is not recommended at any price. GitHub issues remains the choice if readers needing a GitHub account is acceptable and Google Cloud is not wanted.
 
 ## 8. The decision for the owner
 
 > Is a shared library wanted, and if so, how?
-> 1. **Yes, pre-moderated, on Firestore in a project without billing (3a, recommended).** You approve every upload; it can never cost money; scanning is unaffected.
-> 2. **Yes, pre-moderated, in the existing `digitus2-scan` project (3b).** As 3a, but abuse can reach the 10-a-month budget and stop scanning for the month.
-> 3. **Yes, through GitHub issues (2).** Readers need a GitHub account; no Google Cloud.
-> 4. **No (1).** Close #132; #41's decision stands.
+>
+> - **Pre-moderated store, own project (recommended).** You approve every upload; it can never cost money; scanning is unaffected.
+> - **Pre-moderated store, in `digitus2-scan`.** The same, but abuse can reach the 10-a-month budget and stop scanning for the month.
+> - **GitHub issues.** Readers need a GitHub account; no Google Cloud.
+> - **Do not build.** Close #132; #41's decision stands.
 
-### Implementation sketch for option 3
+### Implementation sketch for the pre-moderated store
 
 | Piece | What it is |
 |---|---|
@@ -164,12 +170,13 @@ What it costs the owner is time: every upload waits for them, and most scans of 
 | Document `index/shared` | The approved list (id, title, composer, level, length), one read per visit; rewritten by the owner's command |
 | Collection `reports/{id}` | `score`, `reason`, `note`, `reply` (only for copyright), `created` |
 | Security rules | Anyone may create a `shared` document with exactly these fields, `status == 'waiting'`, `created == request.time` and `score` under 100,000 characters; anyone may get one by id (only its uploader knows a waiting id); listing is denied; delete only while `waiting`; no updates. Anyone may create a report with the same shape checks; nobody may read reports. Anyone may read `index/shared` |
-| `apps/web/src/library/shared/` (new) | REST calls (create, get, delete, read the index, create a report), the share and report sheets, the shelf; strict import for every opened score, as for a reader's own file |
+| `apps/web/src/library/shared/` (new) | REST calls (create, get, delete, read the index, create a report), the share and report sheets, the shelf; strict import for every opened score, as for a reader's own file. When the store does not answer, the shelf and **Share** are hidden and the report sheet shows the channel outside the store |
+| `.github/ISSUE_TEMPLATE/remove-a-score.yml` | The removal form outside the store, with the owner's address beside it |
 | `apps/web/src/library/local/MyScores.tsx` | **Share**, **Withdraw** and the row states |
 | `content/tools/library.py` (new) | The owner's command: `waiting` lists uploads, `show ID` writes the MusicXML to open in the app, `approve ID` and `remove ID` set the status or delete and rewrite the index, `reports` lists and clears reports. Runs with the owner's Google credentials |
 | Docs | `docs/scanning.md` (where a score goes on Share), `docs/app.md` (Library), `docs/PROGRESS.md` and `CLAUDE.md` (the decisions in section 4), a short page for the shared library's rules and the owner's commands |
 
-Checklist for #132, once the owner picks option 3:
+Checklist for #132, once the owner picks a pre-moderated store:
 
 - [ ] The project, database and rules, with rule tests in the Firestore emulator (every refused shape, every allowed one).
 - [ ] The share sheet, the row states and Withdraw, in all five locales.
@@ -182,13 +189,13 @@ Verification: vitest for the REST client and the payload (no file name, the size
 
 ## 9. The first study ([#41](https://github.com/MarchalMaxim/digitus2/issues/41))
 
-The first study weighed four options under Pages-only and no login. The owner chose (c) and closed #41; #132 reopens the question. Its findings still hold and inform section 4.
+The first study weighed four options under Pages-only and no login. The owner chose (c) and closed #41; #132 reopens the question. Its findings still hold and inform section 4; its option (a) is GitHub issues here.
 
 **(a) Publish through GitHub.** A **Share** text button in a My scores row saves `score.digitus2.json` (the MusicXML, kind, recogniser and app version; no file names) and opens a prefilled issue form, `share-a-score.yml`, with the title only: an `upload` field cannot be filled from a URL [13], and the score cannot travel in the URL (an over-long URL gets `414 URI Too Long` [12]; table 3). The reader fills title, composer, arranger, source, a licence from the four `build.py` accepts (public domain, CC0, CC BY, CC BY-SA) and two required checkboxes, then attaches the file. The owner runs an ingest (`content/tools/submission.py`) that downloads the attachment as untrusted input, builds it with `build.py --source community` and runs `gates.py` and `dedupe.py`; a PR lands it under "Shared by readers". A **Remove a score** form and GitHub's DMCA process [18] handle removal, though git history keeps old blobs. Every publisher needs a GitHub account [16]; attachments in a public repository are readable before review [11]; only the account owner can delete an issue [14]; interaction limits curb spam [15]. Cost: none in money, about 10 minutes of owner time per submission (estimate).
 
-**(b) A third-party store with anonymous writes.** Cloudflare Workers, R2 and Turnstile [20][21][22]; a form service is weaker (Formspree's free plan has no file uploads [23]). It reverses "no server" and needs a moderator login. #132's choice of Google Cloud replaces it with options 3 and 4.
+**(b) A third-party store with anonymous writes.** Cloudflare Workers, R2 and Turnstile [20][21][22]; a form service is weaker (Formspree's free plan has no file uploads [23]). It reverses "no server" and needs a moderator login. #132's choice of Google Cloud replaces it with the two Firestore options.
 
-**(c) Pull-only.** Readers download the MusicXML and send it themselves, by the Web Share API on phones [24]. Nothing new is stored. This is the decision #41 records and option 1 here.
+**(c) Pull-only.** Readers download the MusicXML and send it themselves, by the Web Share API on phones [24]. Nothing new is stored. This is the decision #41 records, and Do not build here.
 
 **(d) A score link.** **Copy link** puts the deflated MusicXML in the URL fragment, which never reaches the server [17]. Nothing is stored; links work best for short pieces (table 3). It can be requested on its own, under any option.
 

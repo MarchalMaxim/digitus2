@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from 'react';
 import { messageOf } from '../app/errors.js';
 import { useT } from '../i18n/i18n.js';
 import type { Phrase } from '../i18n/messages.js';
@@ -56,6 +63,7 @@ export function ImagePages({
   onRotating,
   recognized,
   camera = false,
+  overlay,
 }: {
   pages: ScanPage[];
   editable: boolean;
@@ -71,6 +79,8 @@ export function ImagePages({
   onSelect(index: number): void;
   onChange(pages: ScanPage[]): void;
   onRotating?(value: boolean): void;
+  /** Drawn over the shown page at its natural size, once the image has loaded (issue 130). */
+  overlay?: ((size: { width: number; height: number }) => ReactNode) | undefined;
 }) {
   const t = useT();
   const [error, setErrorPhrase] = useState<Phrase | null>(null);
@@ -79,6 +89,11 @@ export function ImagePages({
     setErrorPhrase(() => phrase);
   };
   const [rotating, setRotating] = useState(false);
+  const [natural, setNatural] = useState<{
+    url: string | undefined;
+    width: number;
+    height: number;
+  }>();
   const rotation = useRef<AbortController | undefined>(undefined);
   const dragged = useRef<string | undefined>(undefined);
   const latest = useRef({ pages, busy, editable, onChange, onRotating });
@@ -310,11 +325,18 @@ export function ImagePages({
       {selectedPage.error && (
         <p role="status">{t.scan.pages.pageError(selected + 1, selectedPage.error)}</p>
       )}
-      <img
-        className="scan-original-image"
-        src={url}
-        alt={pages.length > 1 ? t.scan.pages.altPage(selected + 1) : t.scan.pages.alt}
-      />
+      <div className="scan-photo">
+        <img
+          className="scan-original-image"
+          src={url}
+          alt={pages.length > 1 ? t.scan.pages.altPage(selected + 1) : t.scan.pages.alt}
+          onLoad={(event) => {
+            const { naturalWidth: width, naturalHeight: height } = event.currentTarget;
+            setNatural(width && height ? { url, width, height } : undefined);
+          }}
+        />
+        {overlay && natural && natural.url === url && overlay(natural)}
+      </div>
       {!!selectedPage.quarterTurns && (
         <p className="small muted">{t.scan.pages.rotated(selectedPage.quarterTurns * 90)}</p>
       )}

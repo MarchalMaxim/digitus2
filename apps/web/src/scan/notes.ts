@@ -52,7 +52,15 @@ export interface ScanNote {
    * it was given, written as `<!-- imgpos: x, y -->` (issue 161). Absent for other recognisers.
    */
   imgpos?: { x: number; y: number } | undefined;
+  /**
+   * How sure homr was (issue 130): the three most probable tokens of its rhythm, pitch and
+   * accidental heads, most probable first, with their probabilities, written as
+   * `<!-- conf: rhythm note_4 0.981 ...; pitch C5 0.410 ...; lift _ 0.990 ... -->`.
+   */
+  confidence?: Confidence | undefined;
 }
+
+export type Confidence = Partial<Record<'rhythm' | 'pitch' | 'lift', [string, number][]>>;
 
 export interface ScanBar {
   part: number;
@@ -113,6 +121,29 @@ function count(value: string): number {
 
 const COMMENT_NODE = 8;
 const IMGPOS = /^\s*imgpos:\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/;
+const CONF = /^\s*conf:([\s\S]*)$/;
+/** homr's confidence in a note: the comment the confidence patch writes inside the `<note>`. */
+export function noteConfidence(note: Element): Confidence | undefined {
+  for (const node of note.childNodes) {
+    if (node.nodeType !== COMMENT_NODE) continue;
+    const match = CONF.exec(node.nodeValue ?? '');
+    if (!match) continue;
+    const heads: Confidence = {};
+    for (const part of match[1]!.split(';')) {
+      const [head, ...words] = part.trim().split(/\s+/);
+      if (head !== 'rhythm' && head !== 'pitch' && head !== 'lift') continue;
+      const tokens: [string, number][] = [];
+      for (let i = 0; i + 1 < words.length; i += 2) {
+        const p = Number(words[i + 1]);
+        if (Number.isFinite(p) && p >= 0 && p <= 1) tokens.push([words[i]!, p]);
+      }
+      if (tokens.length) heads[head] = tokens;
+    }
+    return heads;
+  }
+  return undefined;
+}
+
 /** homr's image position of a note: the comment it writes inside the `<note>`. */
 function imagePosition(note: Element): ScanNote['imgpos'] {
   for (const node of note.childNodes) {
@@ -256,6 +287,7 @@ export function readScanScore(doc: XMLDocument): ScanScore {
             tieStop: marks.includes('stop'),
             page,
             imgpos: imagePosition(el),
+            confidence: noteConfidence(el),
           });
           ordinal++;
         }

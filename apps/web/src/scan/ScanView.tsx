@@ -1,5 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+} from 'react';
 import { build, formatBuildDay } from '../app/build.js';
 import { messageOf } from '../app/errors.js';
 import { useFocusOnArrival } from '../app/focus.js';
@@ -39,8 +43,11 @@ import {
 } from './join.js';
 import type { ScanPage, ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore, type ScanNote } from './notes.js';
-import { NoteCrop } from './NoteCrop.js';
+import { NoteCrop, pageImage } from './NoteCrop.js';
+import { fallbackSpace } from './crop.js';
+import { useHoverMark, useScanMarks } from './linked.js';
 import { isTouchOnly } from './phone.js';
+import { PhotoMarks } from './PhotoMarks.js';
 import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
 import { ScanProgress } from './ScanProgress.js';
 import { blocks, verdict as readVerdict, verdictText } from './verdict.js';
@@ -234,6 +241,53 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           ? 'problem'
           : 'again';
   useSelectedMark(sheetHost, selectedNote ? note : null, pages);
+  // The photo and the notation are linked (issue 130): the notes to check are ringed in both, and
+  // the note pointed at in one is framed in the other.
+  const marked = useMemo(() => {
+    if (!editable || !corrected) return [];
+    const out = new Set<number>();
+    for (const problem of problems) {
+      const target = problemNote(corrected.score, problem);
+      if (target !== undefined) out.add(target);
+    }
+    return [...out];
+  }, [editable, corrected, problems]);
+  const markedSet = useMemo(() => new Set(marked), [marked]);
+  useScanMarks(sheetHost, marked, pages);
+  const [pointed, setPointed] = useState<{ ordinal: number; from: 'photo' | 'sheet' } | null>(null);
+  useHoverMark(sheetHost, pointed?.from === 'photo' ? pointed.ordinal : null, pages);
+  // The page whose photo is shown follows the note in hand (pointed at in the notation, else
+  // selected) while the whole score is reviewed.
+  const inHand = pointed?.from === 'sheet' ? pointed.ordinal : selectedNote ? note : null;
+  useEffect(() => {
+    if (inHand === null || pageMode || !corrected) return;
+    const n = corrected.score.notes.find((x) => x.ordinal === inHand);
+    if (n && photoOf(n) && n.page !== selected) setSelected(n.page);
+    // Only a new note in hand moves the photo; the reader's own page choice stays otherwise.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inHand]);
+  // The shown photo's staff space, for the size of its rings; a guess until the page is analysed.
+  const [space, setSpace] = useState<{ file: Blob; space: number }>();
+  const shownPhoto = isImage && editable ? sourcePages[selected]?.file : undefined;
+  useEffect(() => {
+    if (!shownPhoto) return;
+    let live = true;
+    void pageImage(shownPhoto).then((image) => {
+      if (live && image) setSpace({ file: shownPhoto, space: image.space });
+    });
+    return () => {
+      live = false;
+    };
+  }, [shownPhoto]);
+  const photoPoints = useMemo(
+    () =>
+      editable && corrected && corrected.score.pages === sourcePages.length
+        ? corrected.score.notes.flatMap((n) =>
+            n.page === selected && n.imgpos ? [{ ordinal: n.ordinal, ...n.imgpos }] : [],
+          )
+        : [],
+    [editable, corrected, selected, sourcePages.length],
+  );
 
   useEffect(() => {
     // The scan's controls go away when the review opens: the heading takes the focus.
@@ -621,6 +675,20 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     const ordinal = noteAt(sheetHost, event);
     if (ordinal !== undefined) select(ordinal);
   };
+  // A mouse over the notation points at a note: its place in the photo is framed (issue 130).
+  const onSheetPoint = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || !editable || !sheetHost || !photoPoints.length) return;
+    const ordinal = noteAt(sheetHost, event);
+    setPointed((p) =>
+      ordinal === undefined
+        ? p?.from === 'sheet'
+          ? null
+          : p
+        : p?.ordinal === ordinal && p.from === 'sheet'
+          ? p
+          : { ordinal, from: 'sheet' },
+    );
+  };
   const closeEditor = () => {
     select(null);
     sheetRef.current?.focus();
@@ -878,6 +946,31 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   editable={false}
                   busy={false}
                   onChange={arrange}
+                  overlay={
+                    photoPoints.length
+                      ? (size) => (
+                          <PhotoMarks
+                            width={size.width}
+                            height={size.height}
+                            space={
+                              space && space.file === shownPhoto
+                                ? space.space
+                                : fallbackSpace(size.width)
+                            }
+                            points={photoPoints}
+                            marked={markedSet}
+                            focus={pointed?.ordinal ?? (selectedNote ? note : null)}
+                            onPoint={(ordinal) =>
+                              setPointed(ordinal === null ? null : { ordinal, from: 'photo' })
+                            }
+                            onPick={(ordinal) => {
+                              setPointed(null);
+                              select(ordinal);
+                            }}
+                          />
+                        )
+                      : undefined
+                  }
                 />
               ) : (
                 sourceUrl && (
@@ -970,6 +1063,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   aria-label={editable ? t.scan.review.recognized : undefined}
                   aria-describedby={editable ? 'scan-edit-keys' : undefined}
                   onClick={onSheetClick}
+                  onPointerMove={onSheetPoint}
+                  onPointerLeave={() => setPointed((p) => (p?.from === 'sheet' ? null : p))}
                 >
                   <ScoreSheet
                     pages={pages}

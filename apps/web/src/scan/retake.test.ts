@@ -31,9 +31,7 @@ describe('one page photographed again (issue 130)', () => {
   const first = pitched(old.notes, 0)[3]!;
   const middle = pitched(old.notes, 1)[2]!;
   const last = pitched(old.notes, 2)[5]!;
-  const lastBar = old.bars.find(
-    (b) => b.part === last.part && b.index === last.measure,
-  )!;
+  const lastBar = old.bars.find((b) => b.part === last.part && b.index === last.measure)!;
   const corrections: Correction[] = [
     { kind: 'pitch', note: first.ordinal, step: 'D', alter: 0, octave: first.octave },
     { kind: 'pitch', note: middle.ordinal, step: 'E', alter: 0, octave: middle.octave },

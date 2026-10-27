@@ -14,8 +14,11 @@ export interface PhotoPoint {
   y: number;
 }
 
-/** A ring's radius and a pointer's reach, in staff spaces. */
-export const RING_SPACES = 1.1;
+/**
+ * A ring's radius and a pointer's reach, in staff spaces. homr's position is good to about one and
+ * a half staff spaces (research/omr/imgpos.mjs), so the ring is drawn wide enough to hold the note.
+ */
+export const RING_SPACES = 2;
 export const REACH_SPACES = 2;
 
 /** The point nearest `at` within `reach`, or undefined. */

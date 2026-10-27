@@ -1505,6 +1505,230 @@ test.describe('the score with a piano', () => {
       }
     });
   }
+
+  // ---------------------------------------------------------------------------------------
+  // The key goes down (issue 200), and a release the key levels forgive leaves no drain (issue
+  // 195). A key held on the piano goes further down than the cue alone: 0.94 for a white key,
+  // 0.92 for a black one, and comes back to the cue's depth, or to rest. A release at four fifths
+  // of the key's own note or later ends its level at once; an earlier one drains. The right hand
+  // alone keeps each step to one key, and the Practice tempo at 50 % doubles every hold (1200 ms
+  // for the first step), so every check has a wide margin on a slow machine. The timed parts run
+  // inside the page.
+  // ---------------------------------------------------------------------------------------
+
+  const SLOW = { [TWINKLE]: 0.5 };
+  const RIGHT = { settings: { hands: 'R' }, tempo: SLOW };
+  const MINUET = 'bach-minuet-g-major-bwv-anh-114';
+
+  /** The `scaleY` of a key as drawn now (its computed transform; 1 when it has none). */
+  function travel(page: Page, midi: number): Promise<number> {
+    return page.evaluate((m) => {
+      const key = document.querySelector(`.keyboard g.key[data-midi="${m}"]`)!;
+      const parsed = /^matrix\(([^)]+)\)$/.exec(getComputedStyle(key).transform);
+      return parsed ? Number(parsed[1]!.split(',')[3]) : 1;
+    }, midi);
+  }
+
+  /** Down for `ms` in the page, then up, then two frames: whether the key still has a level, and the elapsed ms. */
+  function tapFor(
+    page: Page,
+    midi: number,
+    ms: number,
+  ): Promise<{ elapsed: number; level: boolean }> {
+    return page.evaluate(
+      async ([m, hold]) => {
+        const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+        const started = performance.now();
+        w.__fakeMidi.send([0x90, m!, 100]);
+        await new Promise((r) => setTimeout(r, hold));
+        const elapsed = performance.now() - started;
+        w.__fakeMidi.send([0x80, m!, 0]);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return {
+          elapsed,
+          level:
+            document.querySelector(`.keyboard g.key[data-midi="${m}"] rect.key-level`) !== null,
+        };
+      },
+      [midi, ms] as const,
+    );
+  }
+
+  test('a release at four fifths of its note ends the level at once; one that came too soon drains (issue 195)', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, RIGHT);
+    expect(await midi.waitForStep()).toEqual([60]);
+    // A 1200 ms note, let go at 0.9 of it: the level is gone two frames later (a drain lasts 200 ms).
+    const late = await tapFor(page, 60, 1080);
+    expect(late.elapsed, 'the page ran the tap long: it is the PC').toBeLessThan(1_200);
+    expect(late.level, 'a level lingered after a release past four fifths').toBe(false);
+    await expect(level(page, 60)).toHaveCount(0);
+    await expect.poll(() => midi.index()).toBe(1); // it passed at the press
+
+    // The next step, let go at a third of its note: the level drains, then goes.
+    const next = (await midi.waitForStep())[0]!;
+    const soon = await tapFor(page, next, 400);
+    expect(soon.elapsed, 'the page ran the tap long: it is the PC').toBeLessThan(0.8 * 1200);
+    expect(soon.level, 'a release that came too soon did not drain').toBe(true);
+    await expect(level(page, next)).toHaveCount(0, { timeout: 2_000 });
+    await expectOneRed(page, 'a drain and a forgiven release');
+  });
+
+  test('a held key goes down further than the cue, a cued key let go returns to the cue depth, a wrong key travels too', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, RIGHT);
+    await midi.waitForStep();
+    await expect.poll(() => travel(page, 60)).toBeCloseTo(0.976, 3); // the cue alone
+    expect(await travel(page, 50)).toBe(1); // a key at rest
+
+    await midi.noteOn(50); // a white key the step does not ask for
+    await midi.noteOn(54); // and a black one
+    await expect.poll(() => travel(page, 50)).toBeCloseTo(0.94, 3);
+    await expect.poll(() => travel(page, 54)).toBeCloseTo(0.92, 3);
+    await expect(level(page, 50)).toHaveCount(0);
+    await midi.noteOff(50);
+    await midi.noteOff(54);
+    await expect.poll(() => travel(page, 50)).toBe(1); // to rest: nothing asks for it
+    await expect.poll(() => travel(page, 54)).toBe(1);
+
+    // The red note's key, held: deeper than the cue, in the page; let go too soon, it rises only
+    // to the cue's depth and never above it.
+    const rise = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const key = document.querySelector('.keyboard g.key[data-midi="60"]')!;
+      const depth = (): number => {
+        const parsed = /^matrix\(([^)]+)\)$/.exec(getComputedStyle(key).transform);
+        return parsed ? Number(parsed[1]!.split(',')[3]) : 1;
+      };
+      const frame = () => new Promise((r) => requestAnimationFrame(r));
+      w.__fakeMidi.send([0x90, 60, 100]);
+      // The press moves the cue to the next step, C4 again, which strikes the key once more
+      // (110 ms): read the depth when no animation runs and it has stopped changing.
+      let down = depth();
+      let still = 0;
+      const waited = performance.now();
+      while (still < 4 && performance.now() - waited < 3_000) {
+        await frame();
+        const now = depth();
+        still = key.getAnimations().length === 0 && Math.abs(now - down) < 1e-6 ? still + 1 : 0;
+        down = now;
+      }
+      w.__fakeMidi.send([0x80, 60, 0]);
+      const seen: number[] = [];
+      const started = performance.now();
+      while (performance.now() - started < 450) {
+        seen.push(depth());
+        await frame();
+      }
+      return { down, seen };
+    });
+    expect(rise.down, 'held, the cued key is deeper than the cue').toBeCloseTo(0.94, 3);
+    for (const d of rise.seen) expect(d, `depths: ${rise.seen}`).toBeLessThanOrEqual(0.9761);
+    for (let i = 1; i < rise.seen.length; i++)
+      expect(rise.seen[i]!).toBeGreaterThanOrEqual(rise.seen[i - 1]! - 1e-6);
+    expect(rise.seen.at(-1)!, `depths: ${rise.seen}`).toBeCloseTo(0.976, 3);
+    expect(rise.seen.length, 'the rise was seen over several frames').toBeGreaterThan(3);
+    await expectOneRed(page, 'a key let go');
+  });
+
+  test('on a piece with a moving left hand every key of the step goes down', async ({ page }) => {
+    await installFakeMidi(page, { permission: 'granted', playAlong: true });
+    await page.goto(`/?audio=silent#/piece/${MINUET}`);
+    await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+    const midi = fakeMidi(page);
+    const isBlack = (p: number): boolean => [1, 3, 6, 8, 10].includes(p % 12);
+    for (let step = 0; step < 4; step++) {
+      const pitches = await midi.waitForStep();
+      for (const p of pitches)
+        await expect
+          .poll(() => travel(page, p), `${p} cued`)
+          .toBeCloseTo(isBlack(p) ? 0.96 : 0.976, 3);
+      await midi.pressStep({ wait: false });
+      for (const p of pitches)
+        await expect
+          .poll(() => travel(page, p), `${p} held`)
+          .toBeCloseTo(isBlack(p) ? 0.92 : 0.94, 3);
+      await expectOneRed(page, `minuet step ${step}, held`);
+      for (const p of pitches) await midi.noteOff(p);
+      await expect.poll(() => midi.index()).toBeGreaterThan(step);
+    }
+  });
+
+  for (const [width, height] of [
+    [1280, 900],
+    [360, 740],
+  ] as const) {
+    test.describe(`the key goes down at ${width} px`, () => {
+      test.use({ viewport: { width, height } });
+
+      for (const scheme of ['light', 'dark'] as const) {
+        test(`in the ${scheme} theme a held wrong key travels and takes no gray, one red throughout`, async ({
+          page,
+        }) => {
+          await page.emulateMedia({ colorScheme: scheme });
+          const midi = await twinkle(page, RIGHT);
+          await midi.waitForStep();
+          const where = `${scheme}, ${width} px, keys down`;
+          const fill = (m: number): Promise<string> =>
+            page.evaluate(
+              (k) =>
+                getComputedStyle(
+                  document.querySelector(`.keyboard g.key[data-midi="${k}"] > rect`)!,
+                ).fill,
+              m,
+            );
+          const [rest50, rest54] = [await fill(50), await fill(54)];
+          await midi.noteOn(50);
+          await midi.noteOn(54);
+          await expect.poll(() => travel(page, 50)).toBeCloseTo(0.94, 3);
+          await expect.poll(() => travel(page, 54)).toBeCloseTo(0.92, 3);
+          await page.waitForTimeout(300); // past every fill transition
+          expect(await fill(50), 'a held white key took a gray').toBe(rest50);
+          expect(await fill(54), 'a held black key took a gray').toBe(rest54);
+          await expectOneRed(page, where);
+          await expectNoSeriousA11y(page, where);
+          expect(await horizontalOverflow(page), where).toBeLessThanOrEqual(0);
+          await midi.noteOff(50);
+          await midi.noteOff(54);
+        });
+      }
+    });
+  }
+
+  test('under reduced motion the held key is shorter at once, with no transition, and nothing lingers', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const midi = await twinkle(page, RIGHT);
+    await midi.waitForStep();
+    const transition = await page.evaluate(
+      () =>
+        getComputedStyle(document.querySelector('.keyboard g.key[data-midi="60"]')!)
+          .transitionDuration,
+    );
+    expect(
+      transition.split(',').every((d) => parseFloat(d) === 0),
+      transition,
+    ).toBe(true);
+    const pressed = await page.evaluate(async () => {
+      const w = window as unknown as { __fakeMidi: { send(bytes: number[]): void } };
+      const key = document.querySelector('.keyboard g.key[data-midi="50"]')!;
+      w.__fakeMidi.send([0x90, 50, 100]);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const parsed = /^matrix\(([^)]+)\)$/.exec(getComputedStyle(key).transform);
+      const depth = parsed ? Number(parsed[1]!.split(',')[3]) : 1;
+      w.__fakeMidi.send([0x80, 50, 0]);
+      return depth;
+    });
+    expect(pressed).toBeCloseTo(0.94, 3);
+    const late = await tapFor(page, 60, 1080);
+    expect(late.level).toBe(false);
+    await expectOneRed(page, 'reduced motion, keys down');
+    await expectNoSeriousA11y(page, 'reduced motion, keys down');
+  });
 });
 
 /** How long `staysAt` waits. */

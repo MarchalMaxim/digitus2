@@ -1034,3 +1034,162 @@ describe('Keyboard: how long a held key has been held (issue 185)', () => {
     });
   });
 });
+
+describe('Keyboard: the key goes down (issue 200)', () => {
+  const C4 = { midi: 60, finger: 1, hand: 'R' } as const;
+  const keyboard = (rest: Partial<KeyboardProps> = {}) => (
+    <Keyboard lowMidi={48} highMidi={71} pressed={[]} {...rest} />
+  );
+
+  beforeEach(() => {
+    vi.useFakeTimers({
+      toFake: [
+        'performance',
+        'requestAnimationFrame',
+        'cancelAnimationFrame',
+        'setTimeout',
+        'clearTimeout',
+      ],
+    });
+    vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: false } as MediaQueryList);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('goes down further for a key held on the piano than the cue alone does', () => {
+    const { container } = render(keyboard({ pressed: [C4], held: [60, 62, 61] }));
+    const key = (midi: number) => container.querySelector(`g.key[data-midi="${midi}"]`)!;
+    expect(key(60)).toHaveClass('is-pressed', 'is-down'); // cued and held
+    expect(key(62)).toHaveClass('is-down'); // a wrong key goes down too
+    expect(key(62)).not.toHaveClass('is-pressed');
+    expect(key(61)).toHaveClass('is-down', 'is-black');
+    expect(key(64)).not.toHaveClass('is-down'); // not held
+    cleanup();
+    const cued = render(keyboard({ pressed: [C4] }));
+    expect(cued.container.querySelector('g.key.is-down')).toBeNull(); // the cue alone
+  });
+
+  it('draws a dimmed key held on the piano as it was: its bar beside it, and no travel', () => {
+    const { container } = render(
+      keyboard({ muted: [{ midi: 62, finger: 2, hand: 'L' }], held: [62] }),
+    );
+    expect(container.querySelector('g.key[data-midi="62"]')).not.toHaveClass('is-down');
+    expect(container.querySelector('rect.key-held.is-dimmed[data-for-midi="62"]')).not.toBeNull();
+  });
+
+  it('gives each key its own lift time: a later release does not extend an earlier key', () => {
+    const { container, rerender } = render(keyboard({ pressed: [C4], held: [60, 62] }));
+    const key = (m: number) => container.querySelector(`g.key[data-midi="${m}"]`)!;
+    rerender(keyboard({ pressed: [C4], held: [62] })); // 60 up at t = 0
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    rerender(keyboard({ pressed: [C4], held: [] })); // 62 up at t = 150
+    expect(key(60)).toHaveClass('is-lifting');
+    act(() => {
+      vi.advanceTimersByTime(100); // t = 250: 60's 220 ms are over, 62's are not
+    });
+    expect(key(60)).not.toHaveClass('is-lifting');
+    expect(key(62)).toHaveClass('is-lifting');
+    act(() => {
+      vi.advanceTimersByTime(130); // t = 380
+    });
+    expect(key(62)).not.toHaveClass('is-lifting');
+  });
+
+  it('lets a key come up at the damper time for a moment, and not a key held again', () => {
+    const { container, rerender } = render(keyboard({ pressed: [C4], held: [60] }));
+    const c4 = () => container.querySelector('g.key[data-midi="60"]')!;
+    expect(c4()).not.toHaveClass('is-lifting');
+    rerender(keyboard({ pressed: [C4], held: [] })); // let go: back to the cue's depth, slowly
+    expect(c4()).toHaveClass('is-pressed');
+    expect(c4()).not.toHaveClass('is-down');
+    expect(c4()).toHaveClass('is-lifting');
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(c4()).not.toHaveClass('is-lifting');
+    // Let go and pressed again before the class is gone: held again, it is not lifting.
+    rerender(keyboard({ pressed: [C4], held: [60] }));
+    rerender(keyboard({ pressed: [C4], held: [] }));
+    expect(c4()).toHaveClass('is-lifting');
+    rerender(keyboard({ pressed: [C4], held: [60] }));
+    expect(c4()).not.toHaveClass('is-lifting');
+    expect(c4()).toHaveClass('is-down');
+  });
+
+  it('presses a key cued while it is still rising in the quick press time, not the damper time', () => {
+    const { container, rerender } = render(keyboard({ held: [60] }));
+    const c4 = () => container.querySelector('g.key[data-midi="60"]')!;
+    rerender(keyboard({ held: [] })); // let go, nothing cued: rising to rest
+    expect(c4()).toHaveClass('is-lifting');
+    expect(c4()).not.toHaveClass('is-pressed');
+    rerender(keyboard({ pressed: [C4], held: [] })); // the cue arrives meanwhile
+    expect(c4()).toHaveClass('is-pressed');
+    expect(c4()).not.toHaveClass('is-lifting');
+    // A key cued when it came up keeps rising slowly to the cue's depth.
+    rerender(keyboard({ pressed: [C4], held: [60] }));
+    rerender(keyboard({ pressed: [C4], held: [] }));
+    expect(c4()).toHaveClass('is-lifting');
+    rerender(keyboard({ pressed: [C4], held: [] }));
+    expect(c4()).toHaveClass('is-lifting');
+  });
+
+  it('does not mark a key that was never held as lifting', () => {
+    const { container, rerender } = render(keyboard({ pressed: [C4] }));
+    rerender(keyboard({ pressed: [C4], held: [62] }));
+    rerender(keyboard({ pressed: [C4], held: [] }));
+    expect(container.querySelector('g.key[data-midi="60"]')).not.toHaveClass('is-lifting');
+  });
+
+  it('exports the held travel that base.css gives a key held on the piano', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/design/base.css'), 'utf8');
+    const scaleOf = (selector: string) => {
+      const at = css.indexOf(`${selector} {`);
+      expect(at, selector).toBeGreaterThanOrEqual(0);
+      const body = css.slice(at, css.indexOf('}', at));
+      return Number(/scaleY\(([\d.]+)\)/.exec(body)![1]);
+    };
+    expect(scaleOf('.keyboard-svg .key.is-down')).toBe(KEY_TRAVEL.held.white);
+    expect(scaleOf('.keyboard-svg .key.is-black.is-down')).toBe(KEY_TRAVEL.held.black);
+    // Deeper than the cue's, and a black key deeper than a white one.
+    expect(KEY_TRAVEL.held.white).toBeLessThan(KEY_TRAVEL.white);
+    expect(KEY_TRAVEL.held.black).toBeLessThan(KEY_TRAVEL.black);
+    expect(KEY_TRAVEL.held.black).toBeLessThan(KEY_TRAVEL.held.white);
+  });
+
+  it('clips the letter over the level by the travel the held key has', () => {
+    const level: KeyLevel = {
+      atMs: performance.now(),
+      lengthMs: 1600,
+      beats: 4,
+      upMs: null,
+      fromLevel: 0,
+      drainMs: 0,
+    };
+    const levels = new Map([[60, level]]);
+    const { container, rerender } = render(
+      keyboard({ pressed: [C4], handLetters: true, levels, held: [60] }),
+    );
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    const clip = () => container.querySelector('clipPath rect[data-hand-clip-for="60"]')!;
+    const num = (a: string) => Number(clip().getAttribute(a));
+    // Half full: the level is 49.5 high, from 47.5; the held key shortens to 0.94.
+    expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.held.white, 6);
+    expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.held.white, 6);
+    // Let go: the key rises, and the clip keeps the held travel for as long as it does, so it
+    // does not jump at the release; then it is the cue's depth.
+    rerender(keyboard({ pressed: [C4], handLetters: true, levels, held: [] }));
+    expect(num('y')).toBeCloseTo(47.5 * KEY_TRAVEL.held.white, 6);
+    expect(num('height')).toBeCloseTo(49.5 * KEY_TRAVEL.held.white, 6);
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    const high = 5 + 89 * (1050 / 1600);
+    expect(num('y')).toBeCloseTo((97 - high) * KEY_TRAVEL.white, 6);
+    expect(num('height')).toBeCloseTo(high * KEY_TRAVEL.white, 6);
+  });
+});

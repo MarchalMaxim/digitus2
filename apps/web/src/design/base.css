@@ -1256,6 +1256,25 @@ html:has(.dock) {
   transition-duration: var(--dur-press);
 }
 
+/* A key held on the reader's own piano goes further down than the cue alone, 6 % for a white key
+   and 8 % for a black one, in the same press time (issue 200): the drawn key answers the real one.
+   It takes no gray of its own: a wrong key goes down and stays white. Let go, it comes back up in
+   the damper time; a key the cue still asks for rises only to the cue's depth above, and
+   `is-lifting` (Keyboard.tsx, for as long as the rise takes) keeps the cue's quick press time from
+   cutting that rise short. */
+.keyboard-svg .key.is-down {
+  transform: scaleY(0.94);
+  transition-duration: var(--dur-press);
+}
+
+.keyboard-svg .key.is-black.is-down {
+  transform: scaleY(0.92);
+}
+
+.keyboard-svg .key.is-pressed.is-lifting {
+  transition-duration: var(--dur-slow);
+}
+
 /* The finger number comes up with the key: 2 px and a fade. */
 .keyboard-svg .key.is-pressed text {
   animation: key-digit var(--dur-fast) var(--ease);

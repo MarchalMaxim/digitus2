@@ -1,4 +1,5 @@
 import { durationMs, prefersReducedMotion } from '../design/motion.js';
+import { HOLD_TOLERANCE } from './playAlong.js';
 
 /**
  * The level of a key held on the reader's own piano (issue 185): how much of its note's written
@@ -78,7 +79,11 @@ export interface LevelStore {
   get(): KeyLevels;
   /** A key's level starts (or starts again, replacing a drain). */
   start(midi: number, level: Omit<KeyLevel, 'upMs' | 'fromLevel' | 'drainMs'>): void;
-  /** The key is let go at `nowMs`: drains from where it is, or goes now when full or drainMs is 0. */
+  /**
+   * The key is let go at `nowMs`: a release at `HOLD_TOLERANCE` of the note's real length or later
+   * goes now, with no drain (issue 195); an earlier one drains from where it is, or goes now when
+   * drainMs is 0.
+   */
   release(midi: number, nowMs: number): void;
   /** Every level goes at once (an external move, the walk inactive). */
   clear(): void;
@@ -133,6 +138,14 @@ export function createLevelStore(
       const l = levels.get(midi);
       // No level, or already draining (a key comes up once): nothing changes.
       if (!l || l.upMs !== null) return;
+      // The release the levels forgive: judged on the real fraction of the note, not the stepped
+      // level of reduced motion.
+      const held = l.lengthMs > 0 ? (nowMs - l.atMs) / l.lengthMs : 1;
+      if (held >= HOLD_TOLERANCE) {
+        stopTimer(midi);
+        publish(without(midi));
+        return;
+      }
       const fromLevel = levelAt(l, nowMs, isReduced());
       const drainMs = drainOf();
       if (fromLevel >= 1 || fromLevel <= 0 || !(drainMs > 0)) {

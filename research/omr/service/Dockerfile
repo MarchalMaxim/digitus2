@@ -51,7 +51,7 @@ RUN mkdir -p /opt/text-models \
 # pip waits up to two minutes for a stalled download instead of 15 s, so a slow link does not fail
 # the build; the wheels are pinned either way.
 ARG PIP_DEFAULT_TIMEOUT=120
-# homr: pinned source, locked CPU dependencies, pinned models, the five patches. The setup
+# homr: pinned source, locked CPU dependencies, pinned models, the patches listed in homr-photo/README.md. The setup
 # imports homr.py, which imports the adapter's three standard-library neighbours.
 COPY prototypes/homr-photo /app/research/omr/prototypes/homr-photo
 COPY prototypes/photo-recovery /app/research/omr/prototypes/photo-recovery

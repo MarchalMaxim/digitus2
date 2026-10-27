@@ -310,7 +310,7 @@ The owner's first two photos of a printed continuation page (768Ã—1024 and 1200Ã
 | oemer with dewarping (smaller photo)                      | Parses, but the bass is put on the upper staff and the rhythm and bars are wrong; no meter or beams |
 | homr with the first three patches below                         | All 13 main bars and both hands on both photos (156 and 157 notes imported)               |
 
-homr ([commit ab369ac](https://github.com/liebharc/homr/tree/ab369ac54277afab582afa4725441f7cbba76593)) runs on the CPU with three ONNX models (about 139 MB of downloads). The setup applies five source patches:
+homr ([commit ab369ac](https://github.com/liebharc/homr/tree/ab369ac54277afab582afa4725441f7cbba76593)) runs on the CPU with three ONNX models (about 139 MB of downloads). The setup applies these source patches:
 
 1. Detect short, far-inset single-staff examples on a piano page before layout and decoding.
 2. Mask a detached, smaller five-line staff that intrudes into a grand staff's decoder margin.
@@ -347,8 +347,8 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 | One second of the service (4 vCPU, 8 GiB) beyond the grant | $0.000116 |
 | Free recognition time a month at that size | 45,000 s, about 1,300 photos of 35 s |
 | Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 10 a month plus what the hours of alert lag cost |
-| A phone photo, in the container at 4 vCPU on the owner's PC, warm | PHOTO_AFTER |
-| A corpus PDF, in the container at 4 vCPU on the owner's PC | PDF_AFTER |
+| A phone photo, in the container at 4 vCPU on the owner's PC, warm | 8.5 s (11.5 s before the changes of issue 73) |
+| A corpus PDF, in the container at 4 vCPU on the owner's PC | 6.3 s (9.9 s before) |
 | The same photo and PDF on the deployed service without the speed changes, warm | 35.2 s and 16.2 s |
 | The deployed service's cold start, a health request with no instance left | 4.5 s |
 
@@ -392,7 +392,7 @@ A photo (homr), warm, 9.9 s:
 
 A PDF page (Audiveris), 8.8 s: JVM start 0.37 s, book open and first save 0.36 s, then the recognition steps, led by BEAMS (2.45 s), HEADS (1.47 s) and CURVES (0.75 s). The JVM keeps about 2 cores busy. A second book in the same JVM takes 5.5 s instead of 8.45 s, so about 3 s of each page is class loading and JIT warm-up.
 
-What the service runs, each with identical output on the acceptance gate's 93 pages (80 corpus recognitions and 13 photos, on Windows and in the container). Together they take the reference photo from 9.6 to 8.4 s and the PDF from 8.5 to 6.2 s in the container, warm (`docs/scan-service.md`, Timings). How the savings split:
+What the service runs, each with identical output on the acceptance gate: 152 recognitions of its 30 pages (the 16 corpus pieces through four homr routes and Audiveris, the 14 photos as taken and two of them rotated, and 56 perturbed copies), 28,700 staff positions among them, on Windows and in the container. Together they take the reference photo from 11.5 to 8.5 s and the PDF from 9.9 to 6.3 s in the container, the median of six requests each (`docs/scan-service.md`, Timings). How the savings split:
 
 | Change | Saves in the container | Why it is safe |
 | --- | ---: | --- |
@@ -415,7 +415,7 @@ Measured and not adopted:
 | 8 vCPU on Cloud Run | neither recogniser is faster locally, and the cost per page rises 83% ([Cloud Run pricing](https://cloud.google.com/run/pricing)) |
 | A GPU on Cloud Run | needs instance-based billing and at least 4 CPU and 16 GiB ([Cloud Run GPU](https://docs.cloud.google.com/run/docs/configuring/services/gpu)) |
 
-The larger options in #73 are measured but not built: a long-lived homr process with the models loaded (about 3.5 s a photo), a second staff search that reuses the first (2 to 3.5 s), and quantised models, which change pinned models. A photo takes about 3.5 times longer on Cloud Run than in this container and a PDF page about 1.9 times; this PC cannot reproduce Cloud Run's CPUs, so that gap is unexplained.
+The larger options are measured but not built ([issue 211](https://github.com/MarchalMaxim/digitus2/issues/211)): a long-lived homr process with the models loaded (about 3.5 s a photo), a second staff search that reuses the first (2 to 3.5 s), and quantised models, which change pinned models. A photo takes about 3.5 times longer on Cloud Run than in this container and a PDF page about 1.9 times; this PC cannot reproduce Cloud Run's CPUs, so that gap is unexplained.
 
 ## Browser to research worker connection
 

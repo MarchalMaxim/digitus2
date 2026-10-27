@@ -164,10 +164,12 @@ export const scan: Messages['scan'] = {
         : pages.length === 1
           ? `Une partie d’une ligne de la page ${pages[0]} n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez cette photo et numérisez à nouveau.`
           : `Une partie d’une ligne des pages ${formatList('fr', pages.map(String))} n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez ces photos et numérisez à nouveau.`,
-    readUnclearly: (pages: number[]) =>
-      pages.length === 1
-        ? `La page ${pages[0]} n’a pas pu être lue clairement. Photographiez-la à nouveau\u00a0: à plat, bien éclairée, la page entière dans le cadre.`
-        : `Les pages ${formatList('fr', pages.map(String))} n’ont pas pu être lues clairement. Photographiez-les à nouveau\u00a0: à plat, bien éclairées, chaque page entière dans le cadre.`,
+    readUnclearly: (pages: number[], of: number) =>
+      of === 1
+        ? 'La page n’a pas pu être lue clairement. Photographiez-la à nouveau\u00a0: à plat, bien éclairée, la page entière dans le cadre.'
+        : pages.length === 1
+          ? `La page ${pages[0]} n’a pas pu être lue clairement. Photographiez-la à nouveau\u00a0: à plat, bien éclairée, la page entière dans le cadre.`
+          : `Les pages ${formatList('fr', pages.map(String))} n’ont pas pu être lues clairement. Photographiez-les à nouveau\u00a0: à plat, bien éclairées, chaque page entière dans le cadre.`,
   },
   edit: {
     hint: 'Sélectionnez une note pour la corriger.',

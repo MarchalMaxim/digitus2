@@ -13,6 +13,7 @@ import { joinScanPages } from './join.js';
 import { parseScanXml, readScanScore } from './notes.js';
 import {
   blocks,
+  MIN_DOUBT_NOTES,
   pageDoubt,
   UNCLEAR_DOUBT,
   verdict,
@@ -247,12 +248,19 @@ describe('a page homr read with too little certainty (issue 130)', () => {
   it('measures the doubt of a page as the mean of one minus each note’s probability', () => {
     expect(pageDoubt(scoreOf(withConfidence(pages[0]!, 0.9)))).toBeCloseTo(0.1, 6);
     expect(pageDoubt(scoreOf(withConfidence(pages[0]!, 0.5)))).toBeCloseTo(0.5, 6);
+    // A page of a few notes says nothing: one or two hesitant notes would flag it.
+    let kept = 0;
+    const few = withConfidence(pages[0]!, 0.5).replace(/<!-- conf:[^>]*-->/g, (c) =>
+      kept++ < 3 ? c : '',
+    );
+    expect(pageDoubt(scoreOf(few))).toBeUndefined();
+    expect(MIN_DOUBT_NOTES).toBeGreaterThan(3);
   });
 
   it('names the pages at or past the threshold, after the warnings that say more', () => {
     const doubt = [0.1, UNCLEAR_DOUBT + 0.01, 0.1];
     const v = verdict(facts({ pages: doubt.map((d) => ({ doubt: d })) }));
-    expect(v).toEqual({ kind: 'unclear', pages: [2] });
+    expect(v).toEqual({ kind: 'unclear', pages: [2], of: 3 });
     expect(blocks(v)).toBe(true);
     const partly = verdict(
       facts({
@@ -266,11 +274,14 @@ describe('a page homr read with too little certainty (issue 130)', () => {
 
   it('says so in every language, naming the page and what to do', () => {
     for (const t of [en, fr, nl, es, pt]) {
-      const one = verdictText(t, { kind: 'unclear', pages: [2] });
-      const two = verdictText(t, { kind: 'unclear', pages: [2, 4] });
+      const one = verdictText(t, { kind: 'unclear', pages: [2], of: 3 });
+      const two = verdictText(t, { kind: 'unclear', pages: [2, 4], of: 5 });
+      const only = verdictText(t, { kind: 'unclear', pages: [1], of: 1 });
       expect(one).toContain('2');
       expect(two).toContain('4');
       expect(one).not.toBe(two);
+      // A single photo is not named by a number.
+      expect(only).not.toMatch(/1/);
     }
   });
 });

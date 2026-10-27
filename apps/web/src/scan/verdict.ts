@@ -37,7 +37,7 @@ export type Verdict =
   /** Pages with a line read only in part, so bars are missing or added. */
   | { kind: 'partlyRead'; pages: number[] }
   /** Pages homr read with too little certainty to correct sensibly: photograph them again. */
-  | { kind: 'unclear'; pages: number[] }
+  | { kind: 'unclear'; pages: number[]; of: number }
   | {
       kind: 'read';
       pages: number | undefined;
@@ -74,12 +74,15 @@ function handsOf(score: ScanScore): 'both' | 'single' | undefined {
  * docs/research/omr.md). homr's rhythm head never goes much past 0.9, so a clean page sits near 0.1.
  */
 export const UNCLEAR_DOUBT = 0.1282;
+/** The fewest notes a page's doubt is measured on: one or two hesitant notes say nothing. */
+export const MIN_DOUBT_NOTES = 8;
 
 /**
  * How unsure homr was of a page: over its sounding notes (no rests, grace notes or tie
  * continuations, as the benchmark counts them), the mean of one minus the probability of the note
  * as read, the product of its chosen rhythm, pitch and accidental tokens. Undefined when homr wrote
- * no confidence (another recogniser, or a scan from before it did).
+ * no confidence (another recogniser, or a scan from before it did) or the page has fewer than
+ * MIN_DOUBT_NOTES such notes.
  */
 export function pageDoubt(score: ScanScore): number | undefined {
   let sum = 0;
@@ -91,7 +94,7 @@ export function pageDoubt(score: ScanScore): number | undefined {
     sum += 1 - p;
     count++;
   }
-  return count ? sum / count : undefined;
+  return count >= MIN_DOUBT_NOTES ? sum / count : undefined;
 }
 
 export function verdict(facts: VerdictFacts): Verdict {
@@ -103,7 +106,7 @@ export function verdict(facts: VerdictFacts): Verdict {
   const unclear = (facts.pages ?? []).flatMap((page, index) =>
     page.doubt !== undefined && page.doubt >= UNCLEAR_DOUBT ? [index + 1] : [],
   );
-  if (unclear.length) return { kind: 'unclear', pages: unclear };
+  if (unclear.length) return { kind: 'unclear', pages: unclear, of: facts.pages!.length };
   return {
     kind: 'read',
     pages: facts.pages?.length,
@@ -124,7 +127,7 @@ export function verdictText(t: Messages, v: Verdict): string {
     case 'partlyRead':
       return say.readInPart(v.pages);
     case 'unclear':
-      return say.readUnclearly(v.pages);
+      return say.readUnclearly(v.pages, v.of);
     case 'read':
       return say.facts(
         [

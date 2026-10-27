@@ -171,10 +171,13 @@ export const scan = {
           ? `Part of a line on page ${pages[0]} was not read, so bars are missing or added. Replace that photo and scan again.`
           : `Part of a line on pages ${formatList('en', pages.map(String))} was not read, so bars are missing or added. Replace those photos and scan again.`,
     /** `pages` are the numbers of the pages homr read with too little certainty (issue 130). */
-    readUnclearly: (pages: number[]) =>
-      pages.length === 1
-        ? `Page ${pages[0]} could not be read clearly. Photograph it again: flat, evenly lit, the whole page in the frame.`
-        : `Pages ${formatList('en', pages.map(String))} could not be read clearly. Photograph them again: flat, evenly lit, each whole page in the frame.`,
+    /** `of` is the number of pages scanned: a single photo is not named by its number. */
+    readUnclearly: (pages: number[], of: number) =>
+      of === 1
+        ? 'The page could not be read clearly. Photograph it again: flat, evenly lit, the whole page in the frame.'
+        : pages.length === 1
+          ? `Page ${pages[0]} could not be read clearly. Photograph it again: flat, evenly lit, the whole page in the frame.`
+          : `Pages ${formatList('en', pages.map(String))} could not be read clearly. Photograph them again: flat, evenly lit, each whole page in the frame.`,
   },
   /** Correcting the recognised notation, note by note, inside the review. */
   edit: {

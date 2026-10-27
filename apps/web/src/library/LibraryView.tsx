@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -37,6 +39,9 @@ import { PieceList } from './PieceList.js';
 import { SearchField } from './SearchField.js';
 import { MyScores } from './local/MyScores.js';
 import './library.css';
+
+// The shared library's shelf (issue 132) is code and a request of its own, kept off the first paint.
+const SharedShelf = lazy(() => import('./shared/SharedShelf.js'));
 
 /** The announcement waits for the reader to stop changing the list (arrowing through the pills). */
 export const ANNOUNCE_DELAY_MS = 500;
@@ -173,9 +178,24 @@ function useFocusAfterChange(
   });
 }
 
+/** True once the page has painted and the browser is idle: the shared shelf is asked for only then. */
+function useAfterFirstPaint(): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (typeof requestIdleCallback === 'function') {
+      const handle = requestIdleCallback(() => setReady(true), { timeout: 2000 });
+      return () => cancelIdleCallback(handle);
+    }
+    const timer = setTimeout(() => setReady(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+  return ready;
+}
+
 export function LibraryView() {
   const t = useT();
   useWarmUpWhenIdle();
+  const afterPaint = useAfterFirstPaint();
   const openScan = useAppStore((s) => s.openScan);
   const scan = (files: File[]) => {
     rememberScroll();
@@ -384,6 +404,16 @@ export function LibraryView() {
           />
         )}
       </div>
+      {afterPaint && (layout.kind === 'shelves' || layout.kind === 'all') && (
+        <Suspense fallback={null}>
+          <SharedShelf
+            onOpen={(id) => {
+              rememberScroll();
+              void import('./shared/open.js').then((m) => m.openShared(id));
+            }}
+          />
+        </Suspense>
+      )}
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
         {announcement}
       </p>

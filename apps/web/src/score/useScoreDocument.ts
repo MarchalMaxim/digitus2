@@ -405,10 +405,13 @@ export function useScoreDocument(
   servicesArg?: ScoreServices,
 ): ScoreDocument & { reRender(): void; setSplitMidi(value: number | null): void } {
   // The source's identity: the slug, or the dropped file's name and content.
-  const scanImport = source.kind === 'file' && !!source.scan;
+  // A shared score is opened as a file; one that began as a scan is read as a scan is.
+  const scanImport =
+    (source.kind === 'file' && !!source.scan) ||
+    (source.kind === 'shared' && source.origin === 'scan');
   const slug = source.kind === 'library' ? source.slug : null;
-  const fileName = source.kind === 'file' ? source.name : null;
-  const fileBytes = source.kind === 'file' ? source.bytes : null;
+  const fileName = source.kind === 'library' ? null : source.name;
+  const fileBytes = source.kind === 'library' ? null : source.bytes;
   const fileKey = fileBytes ? fileIdentity(fileBytes) : null;
   const sourceKey = JSON.stringify([slug, fileName, fileKey, scanImport]);
 

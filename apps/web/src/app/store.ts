@@ -59,7 +59,20 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export type PieceSource =
   | { kind: 'library'; slug: string }
-  | { kind: 'file'; name: string; bytes: Uint8Array; scan?: ScanSession };
+  | { kind: 'file'; name: string; bytes: Uint8Array; scan?: ScanSession }
+  /**
+   * Another reader's score from the shared library (issue 132): opened by its id, never saved to
+   * My scores. `origin` says whether it came from a scan, which the importer must read as one.
+   */
+  | {
+      kind: 'shared';
+      id: string;
+      name: string;
+      bytes: Uint8Array;
+      title: string;
+      composer: string;
+      origin: 'scan' | 'file';
+    };
 export type View =
   | { name: 'library' }
   | { name: 'about' }
@@ -177,13 +190,15 @@ export function fileIdentity(bytes: Uint8Array): string {
 
 /**
  * A piece's identity: `piece:<slug>` for a library piece, `file:<name>:<fileIdentity>` for a
- * dropped file (two files of the same name are two pieces). The key of its own settings (its
- * tempo) and of its score view (App.tsx).
+ * dropped file (two files of the same name are two pieces), `shared:<id>` for a shared score. The
+ * key of its own settings (its tempo) and of its score view (App.tsx).
  */
 export function pieceKey(source: PieceSource): string {
   return source.kind === 'library'
     ? `piece:${source.slug}`
-    : `file:${source.name}:${fileIdentity(source.bytes)}`;
+    : source.kind === 'shared'
+      ? `shared:${source.id}`
+      : `file:${source.name}:${fileIdentity(source.bytes)}`;
 }
 
 /**

@@ -24,7 +24,15 @@ export default defineConfig({
     // not see the requests a service worker answers, so every spec blocks it; e2e/pwa.spec.ts
     // alone allows it.
     serviceWorkers: 'block',
-    launchOptions: { args: ['--autoplay-policy=no-user-gesture-required', '--mute-audio'] },
+    // The shared library's real store is out of reach, so a score the owner shares never shows up
+    // in an unrelated spec; e2e/shared-library.spec.ts answers for the store with page.route.
+    launchOptions: {
+      args: [
+        '--autoplay-policy=no-user-gesture-required',
+        '--mute-audio',
+        '--host-resolver-rules=MAP firestore.googleapis.com ~NOTFOUND',
+      ],
+    },
   },
   webServer: {
     command: `pnpm exec vite preview --port ${port} --strictPort`,

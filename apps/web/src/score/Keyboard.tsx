@@ -13,7 +13,7 @@ import {
 } from 'react';
 import { durationMs, restrike } from '../design/motion.js';
 import { useT } from '../i18n/i18n.js';
-import { handLetter } from './handLetters.js';
+import { handLetter, hiddenHand } from './handLetters.js';
 import { levelRect, NO_LEVELS, type KeyLevels } from './keyLevels.js';
 import { useKeyLevels, type KeyGeometry } from './useKeyLevels.js';
 import { useKeyPress } from './useKeyPress.js';
@@ -50,6 +50,12 @@ export interface KeyboardProps {
    * come close). Default false.
    */
   handLetters?: boolean;
+  /**
+   * Called when the keyboard scrolls and one hand's keys at the cursor lie wholly out of view while
+   * the other's show (spec 15, rule 5): the score view then keeps the letters on to the end of the bar.
+   * Called from a layout effect, so the letters come in the same paint. Default none.
+   */
+  onHandOutOfView?: () => void;
   /**
    * The key of the note under the mouse pointer in the score (issue #96), pressed with its finger
    * like a cue while the pointer rests there; a key the cursor already holds keeps the cursor's
@@ -315,6 +321,7 @@ export function Keyboard({
   struckCount = 0,
   muted = NO_KEYS,
   handLetters = false,
+  onHandOutOfView,
   hovered = null,
   onStrike,
   barKeys,
@@ -490,6 +497,25 @@ export function Keyboard({
     if (left !== el.scrollLeft) el.scrollLeft = left;
   }, [followed, shapeOf, width]);
 
+  // A hand out of view (spec 15, rule 5): on a keyboard that scrolls, the view chosen above can
+  // leave one hand's keys at the cursor wholly outside it, and a number alone does not say whose it
+  // is. Only the cursor's keys count (never a dimmed hand's, never a hovered key). After the scroll
+  // above, in the same layout phase, so the score view's letters render before the paint.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    const svg = svgRef.current;
+    if (!onHandOutOfView || !el || !svg || el.scrollWidth <= el.clientWidth + 1) return;
+    const view = el.getBoundingClientRect();
+    const keys = [...cursorByMidi.values()].flatMap((p) => {
+      const rect = svg.querySelector(`g.key[data-midi="${p.midi}"]`)?.getBoundingClientRect();
+      if (!rect) return [];
+      const centre = (rect.left + rect.right) / 2;
+      return [{ hand: p.hand, visible: centre >= view.left && centre <= view.right }];
+    });
+    if (hiddenHand(keys) !== null) onHandOutOfView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- cursorByMidi is `pressed`, rebuilt
+  }, [pressed, followed, onHandOutOfView]);
+
   // The levels move from the clock, not from React (issue 185): see useKeyLevels.
   useKeyLevels(svgRef, levels, geometry, levelShape);
 
@@ -570,7 +596,8 @@ export function Keyboard({
 
   // The hand over each pressed or dimmed key, the played hand's first, drawn only while
   // `handLetters` (T11). A layer of its own above the keys, so a key's own text stays its finger
-  // number alone. The keyboard's scroll position decides nothing here (spec 15, rule 5).
+  // number alone. Whether they show is the score view's call (`handLetters`): the score's close bars,
+  // and the bar where the scroll puts a hand out of view (`onHandOutOfView`, spec 15, rule 5).
   const handMark = (p: PressedKey, dimmed: boolean) => {
     const k = shapeOf.get(p.midi);
     if (!k) return null;

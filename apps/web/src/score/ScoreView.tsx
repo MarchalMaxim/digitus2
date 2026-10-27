@@ -14,7 +14,7 @@ import { SharedLine } from '../library/shared/SharedLine.js';
 import { BarSeek, type BarSeekHandle } from './BarSeek.js';
 import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
 import { useEmbellishCarry } from './carry.js';
-import { letteredBars, lettersShown } from './handLetters.js';
+import { latchApplies, letteredBars, lettersShown } from './handLetters.js';
 import { keyboardRange } from './Keyboard.js';
 import { handOfKey, keyForNote } from './noteKey.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
@@ -357,6 +357,33 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // T11: the hand letters show only in bars where the hands come within a fifth. Decided from
   // the full groups (both hands, whatever is muted), never from the cursor's filtered ones.
   const lettered = useMemo(() => letteredBars(groups), [groups]);
+  // A keyboard that scrolls can put one hand wholly out of view (spec 15, rule 5): the bar where
+  // it did keeps the letters to its end. The latch lives for one visit: it is dropped with a new
+  // piece or another choice of hands, and as soon as the cursor leaves the bar (and the bridged bar
+  // after it), so coming back (a loop wrap, a rewind, a seek) latches anew where the hand leaves.
+  const cursorBar =
+    currentGroup >= 0 ? (groups[currentGroup]?.notes[0]?.measureIndex ?? null) : null;
+  const latchKey = mutedHands.join();
+  const [hidden, setHidden] = useState<{ groups: typeof groups; key: string; bar: number } | null>(
+    null,
+  );
+  const latched =
+    hidden !== null &&
+    hidden.groups === groups &&
+    hidden.key === latchKey &&
+    latchApplies(hidden.bar, cursorBar, lettered);
+  // Setting state while rendering drops the stale latch before anything is drawn from it.
+  if (hidden !== null && !latched) setHidden(null);
+  const hiddenBar = latched ? hidden.bar : null;
+  const latchedRef = useRef<{ groups: typeof groups; key: string; bar: number } | null>(null);
+  latchedRef.current = latched ? hidden : null;
+  const handOutOfView = useCallback(() => {
+    if (cursorBar === null) return;
+    const was = latchedRef.current;
+    // Reported at every onset of a bar already latched: nothing to change.
+    if (was?.groups === groups && was.key === latchKey && was.bar === cursorBar) return;
+    setHidden({ groups, key: latchKey, bar: cursorBar });
+  }, [groups, latchKey, cursorBar]);
   // The bar the cursor is in (1-based; 1 when nothing is marked): where "Loop bars" starts.
   const currentBar =
     currentGroup >= 0 ? (groups[currentGroup]?.notes[0]?.measureIndex ?? 0) + 1 : 1;
@@ -725,7 +752,8 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   pressed={pressed}
                   struckCount={struckCount}
                   muted={muted}
-                  handLetters={lettersShown(groups, currentGroup, lettered)}
+                  handLetters={lettersShown(groups, currentGroup, lettered, hiddenBar)}
+                  onHandOutOfView={handOutOfView}
                   hovered={hoveredKey}
                   onStrike={strikeKey}
                   barKeys={barKeys}

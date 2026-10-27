@@ -54,26 +54,37 @@ jobs:
           docker build -f research/omr/service/Dockerfile -t "$IMAGE" research/omr
           docker push "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      # The Action only updates an existing service; a revision without traffic cannot create one.
+      - name: Check the service exists
+        run: |
+          if ! gcloud run services describe "$SERVICE" --region "$REGION" --project "$PROJECT" > /dev/null 2>&1; then
+            echo "The service does not exist; the first deploy is research/omr/service/deploy.ps1." >&2
+            exit 1
+          fi
       # The same settings as research/omr/service/deploy.ps1, with no traffic and the tag "candidate".
+      # No --allow-unauthenticated: the deployer cannot set IAM policy, and an update keeps the service's public binding.
       - name: Deploy a revision without traffic
         run: |
           gcloud run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --project "$PROJECT" \
             --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 \
-            --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080 \
+            --cpu-boost --execution-environment gen2 --ingress all --port 8080 \
             --set-env-vars DIGITUS2_OMR_THREADS=4 \
             --service-account "$SERVICE-run@$PROJECT.iam.gserviceaccount.com" \
             --no-traffic --tag candidate --quiet
       - name: Read the candidate URL
         run: |
-          URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --project "$PROJECT" --format json \
-            | jq -r '.status.traffic[] | select(.tag == "candidate") | .url')
+          DESCRIPTION=$(gcloud run services describe "$SERVICE" --region "$REGION" --project "$PROJECT" --format json)
+          URL=$(echo "$DESCRIPTION" | jq -r '.status.traffic[] | select(.tag == "candidate") | .url')
+          REVISION=$(echo "$DESCRIPTION" | jq -r '.status.traffic[] | select(.tag == "candidate") | .revisionName')
           if [ -z "$URL" ] || [ "$URL" = "null" ]; then echo "No candidate URL" >&2; exit 1; fi
+          if [ -z "$REVISION" ] || [ "$REVISION" = "null" ]; then echo "No candidate revision" >&2; exit 1; fi
           echo "CANDIDATE_URL=$URL" >> "$GITHUB_ENV"
+          echo "CANDIDATE_REVISION=$REVISION" >> "$GITHUB_ENV"
       - name: Smoke the candidate
         run: node research/omr/service/smoke.mjs "$CANDIDATE_URL" --pdf research/omr/service/aot-training.pdf
       - name: Move the traffic to the new revision
         run: |
-          gcloud run services update-traffic "$SERVICE" --to-latest --region "$REGION" --project "$PROJECT"
+          gcloud run services update-traffic "$SERVICE" --to-revisions "$CANDIDATE_REVISION=100" --region "$REGION" --project "$PROJECT"
           gcloud run services update-traffic "$SERVICE" --remove-tags candidate --region "$REGION" --project "$PROJECT"
       # The serving image keeps the tag live, so the cleanup policy, which keeps the newest version and
       # the live one, never deletes it; after a failed smoke the previous image stays live.

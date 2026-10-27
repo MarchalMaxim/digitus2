@@ -1,8 +1,10 @@
 # One-time setup of the GitHub Actions deploy of the scan service (.github/workflows/scan-service.yml).
-# The owner runs it once, with gcloud and gh signed in. It creates a deployer service account with the
-# three roles a deploy needs, a Workload Identity pool and provider that trust GitHub's OIDC tokens for
-# pushes to main of this repository only, and the two repository variables the workflow reads. It creates
-# no key: the workflow authenticates keylessly. Safe to run again.
+# The owner runs it once, with gcloud and gh signed in, after deploy.ps1 has run: deploy.ps1 creates the
+# repository, the run account and the service that this script grants access to and tags. It creates a
+# deployer service account with the three roles a deploy needs, a Workload Identity pool and provider that
+# trust GitHub's OIDC tokens for runs on main of this repository only, and the two repository variables the
+# workflow reads. It creates no key: the workflow authenticates keylessly. Safe to run again; a re-run
+# applies a changed provider condition.
 # Cost: everything here is free except Artifact Registry storage above 0.5 GB; one image of about 0.7 GB
 # is about 0.03 USD a month.
 param(
@@ -56,13 +58,20 @@ if (-not (Test-Native { gcloud iam workload-identity-pools describe github --loc
     gcloud iam workload-identity-pools create github --location global --display-name 'GitHub Actions' --project $Project
   }
 }
-# Only tokens of pushes to main of this repository are accepted.
+# Only tokens of runs on main of this repository are accepted (pushes and manual runs).
 $Condition = "assertion.repository=='$GitHubRepo' && assertion.ref=='refs/heads/main'"
+$Mapping = 'google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref'
 if (-not (Test-Native { gcloud iam workload-identity-pools providers describe github --workload-identity-pool github --location global --project $Project })) {
   Invoke-Checked 'Creating the OIDC provider' {
     gcloud iam workload-identity-pools providers create-oidc github --workload-identity-pool github --location global --project $Project `
       --issuer-uri 'https://token.actions.githubusercontent.com' `
-      --attribute-mapping 'google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref' `
+      --attribute-mapping $Mapping `
+      --attribute-condition $Condition
+  }
+} else {
+  Invoke-Checked 'Updating the OIDC provider' {
+    gcloud iam workload-identity-pools providers update-oidc github --workload-identity-pool github --location global --project $Project `
+      --attribute-mapping $Mapping `
       --attribute-condition $Condition
   }
 }
@@ -73,6 +82,14 @@ $ProjectNumber = "$ProjectNumber".Trim()
 $Principal = "principalSet://iam.googleapis.com/projects/$ProjectNumber/locations/global/workloadIdentityPools/github/attribute.repository/$GitHubRepo"
 Invoke-Checked 'Letting the repository act as the deployer' {
   gcloud iam service-accounts add-iam-policy-binding $Deployer --project $Project --role roles/iam.workloadIdentityUser --member $Principal --quiet | Out-Null
+}
+
+# The image of the serving revision gets the tag live before the policy runs, so the policy keeps it.
+$ServingImage = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(spec.template.spec.containers[0].image)')
+if ($LASTEXITCODE -ne 0 -or -not $ServingImage) { throw "No service or image found for $Service. Run deploy.ps1 first." }
+$ServingImage = "$ServingImage".Trim()
+Invoke-Checked 'Tagging the serving image live' {
+  gcloud artifacts docker tags add $ServingImage "$Region-docker.pkg.dev/$Project/$Repository/${Service}:live" --quiet
 }
 
 # Keep the most recent version of each image and the one tagged live (the image the serving revision

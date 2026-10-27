@@ -41,6 +41,18 @@ if (-not (Test-Native { gcloud artifacts repositories describe $Repository --loc
   }
 }
 
+# The image the service serves now keeps the tag live, so the policy below keeps it; on the first
+# deploy there is no service yet and nothing to tag.
+if (Test-Native { gcloud run services describe $Service --region $Region --project $Project }) {
+  $ServingImage = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(spec.template.spec.containers[0].image)')
+  if ($LASTEXITCODE -eq 0 -and $ServingImage) {
+    $ServingImage = "$ServingImage".Trim()
+    Invoke-Checked 'Tagging the serving image live' {
+      gcloud artifacts docker tags add $ServingImage "$Registry/$Project/$Repository/${Service}:live" --quiet
+    }
+  }
+}
+
 # Keep the most recent version of each image and the one tagged live (the image the serving revision
 # runs, which a revision needs to start an instance), and delete the rest; Keep wins over Delete.
 $Policy = @'

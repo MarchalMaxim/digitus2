@@ -37,7 +37,7 @@ import type { Hand, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore } from '../app/store.js';
 import { performanceFor } from '../audio/performance.js';
-import { heldPitches, subscribeNotes, usePianoSnapshot } from '../midi/piano.js';
+import { heldPitches, subscribeNotes, usePianoHealer, usePianoSnapshot } from '../midi/piano.js';
 import type { NoteMessage } from '../midi/types.js';
 import { haloFor, type Halo } from './halo.js';
 import { createLevelStore, type LevelStore } from './keyLevels.js';
@@ -211,6 +211,8 @@ export function usePlayAlong({
   // The one gate (issue 191): with Practice mode off the walk is as with no piano, and nothing
   // else changes; the piano stays connected and its keys are still drawn.
   const walking = connected && practiceMode;
+  // A connection that stays silent while a score is open is reopened until a note comes.
+  usePianoHealer(connected);
   const { playing, loading, atStart, cue, loop } = playback;
   const marked = currentGroup >= 0;
 

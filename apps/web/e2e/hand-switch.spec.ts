@@ -103,8 +103,11 @@ test('the hand left out is dimmed shape by shape, never by a translucent group o
         groups.push(`${el.tagName}.${el.getAttribute('class') ?? ''}#${el.id}`);
       }
     }
-    // A dimmed digit at rest is gray text through its own group opacity (no colour fringes).
-    const digits = [...document.querySelectorAll('.score-sheet g.fing.is-muted')].map((d) => {
+    // A dimmed digit at rest is gray text through its own group opacity (no colour fringes). The
+    // digits the edition leaves out are hidden whole (issue 94) and are not among them.
+    const digits = [
+      ...document.querySelectorAll('.score-sheet g.fing.is-muted:not(.is-spare)'),
+    ].map((d) => {
       const cs = getComputedStyle(d);
       return `${cs.opacity} ${cs.fillOpacity}`;
     });

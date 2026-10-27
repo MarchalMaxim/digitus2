@@ -1,6 +1,6 @@
 // The lazy chunk (with parse.ts): reached only through `import('./access.js')` from piano.ts.
 import { createMidiParser, eventTimeMs, HeldKeys } from './parse.js';
-import type { AccessEvents, AccessRefusal, OpenedAccess } from './types.js';
+import type { AccessEvents, AccessRefusal, OpenedAccess, PortReport } from './types.js';
 
 export interface OpenOptions {
   /** Default `(o) => navigator.requestMIDIAccess(o)`. */
@@ -113,6 +113,18 @@ export async function openMidiAccess(
     // A listener may have closed the access while it was told of the offs.
     if (closed) return;
     for (const input of now) if (!attached.has(input.id)) attach(input);
+    if (events.ports) {
+      const ports: PortReport[] = [];
+      access.inputs.forEach((input) =>
+        ports.push({
+          id: input.id,
+          name: input.name ?? '',
+          state: input.state,
+          connection: input.connection,
+        }),
+      );
+      events.ports(ports);
+    }
     const names = now.map((input) => input.name ?? '');
     const key = JSON.stringify(names);
     if (key === reported) return;

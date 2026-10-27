@@ -189,11 +189,6 @@ function makeFake() {
         },
         setLoop: () => {},
         strike: () => () => undefined,
-        prepare: () => {},
-        preparing: false,
-        soundWaits: false,
-        accompany: () => {},
-        stopAccompaniment: () => {},
       };
     },
   };
@@ -282,8 +277,8 @@ function setup(over: Partial<PlayAlongOptions> = {}, prepare?: (f: Fake) => void
 }
 
 /** The hook's result without its store: what the walk shows. */
-function seen(h: { active: boolean; atFirst: boolean; hint: unknown; soundWaits: boolean }) {
-  return { active: h.active, atFirst: h.atFirst, hint: h.hint, soundWaits: h.soundWaits };
+function seen(h: { active: boolean; atFirst: boolean; hint: unknown }) {
+  return { active: h.active, atFirst: h.atFirst, hint: h.hint };
 }
 
 /** Lets `ms` of the fake clock go by: the timers due in it fire. */
@@ -337,7 +332,6 @@ describe('connecting', () => {
       active: false,
       atFirst: false,
       hint: null,
-      soundWaits: false,
     });
     expect(s.cues()).toEqual([]);
     await connect();
@@ -347,7 +341,6 @@ describe('connecting', () => {
       active: true,
       atFirst: true,
       hint: { count: 2 },
-      soundWaits: false,
     });
   });
 
@@ -784,7 +777,6 @@ describe('when the walk does not move', () => {
       active: false,
       atFirst: false,
       hint: null,
-      soundWaits: false,
     });
     s.press(48, 60);
     s.wait(1000);
@@ -860,7 +852,6 @@ describe('when the walk does not move', () => {
       active: false,
       atFirst: false,
       hint: null,
-      soundWaits: false,
     });
     expect(s.fake.cue).toBe(0.5);
     act(() => link.events!.inputs(['GO:PIANO']));
@@ -975,7 +966,6 @@ describe('a hop to another bar', () => {
       active: true,
       atFirst: true,
       hint: { count: 2 },
-      soundWaits: false,
     });
     // A click on a later bar: the playback is cued there, and the red hops (the walk waits).
     s.fake.cue = 1;
@@ -986,7 +976,6 @@ describe('a hop to another bar', () => {
       active: true,
       atFirst: false,
       hint: null,
-      soundWaits: false,
     });
     s.fake.flight = false;
     s.refresh();
@@ -994,7 +983,6 @@ describe('a hop to another bar', () => {
       active: true,
       atFirst: false,
       hint: { count: 1 },
-      soundWaits: false,
     });
     expect(s.cues()).toEqual([0]); // the walk found the playback cued on that step already
   });
@@ -1252,7 +1240,6 @@ describe('with the real playback', () => {
       active: true,
       atFirst: true,
       hint: { count: 2 },
-      soundWaits: false,
     });
     rerender();
     rerender();

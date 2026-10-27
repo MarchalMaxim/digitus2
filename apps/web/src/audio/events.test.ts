@@ -2,16 +2,10 @@
 import { readFileSync } from 'node:fs';
 import { parseMusicXml } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
-import {
-  GRACE_DURATION_SEC,
-  GRACE_LEAD_SEC,
-  MIN_DURATION_SEC,
-  playEvents,
-  playEventsFor,
-} from './events.js';
+import { GRACE_DURATION_SEC, GRACE_LEAD_SEC, MIN_DURATION_SEC, playEvents } from './events.js';
 import { noteVelocity } from './instrument.js';
 
-/** The note list the transport and the accompaniment share (issue 184), moved out of transport.ts. */
+/** The note list the transport plays, moved out of transport.ts. */
 
 const shortPiano = parseMusicXml(
   readFileSync(new URL('../../fixtures/short-piano.musicxml', import.meta.url), 'utf8'),
@@ -125,16 +119,5 @@ describe('playEvents', () => {
     expect(playEvents(shortPiano).map((e) => e.sec)).toEqual(
       [...playEvents(shortPiano).map((e) => e.sec)].sort((a, b) => a - b),
     );
-  });
-});
-
-describe('playEventsFor', () => {
-  it('returns the same array for the same score, and its own for another', () => {
-    const a = playEventsFor(shortPiano);
-    expect(playEventsFor(shortPiano)).toBe(a);
-    expect(a).toEqual(playEvents(shortPiano));
-    const other = parseMusicXml(piece([note('C')])).score;
-    expect(playEventsFor(other)).not.toBe(a);
-    expect(playEventsFor(other)).toHaveLength(1);
   });
 });

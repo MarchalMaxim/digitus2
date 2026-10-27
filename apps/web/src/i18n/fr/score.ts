@@ -33,10 +33,6 @@ export const score: Messages['score'] = {
       count > 1
         ? 'Jouez les notes rouges sur votre piano.'
         : 'Jouez la note rouge sur votre piano.',
-    playAlongSound: {
-      click: 'Cliquez une fois pour entendre l’autre main.',
-      tap: 'Touchez une fois pour entendre l’autre main.',
-    },
     timingExplain:
       'Un cercle avant une note signifie qu’elle a été jouée trop tôt\u00a0; après, trop tard.',
     practice: 'S’exercer',

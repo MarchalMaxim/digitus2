@@ -45,11 +45,6 @@ export const score = {
     /** The status line while the red waits for the reader's piano (issue 182); `count` is the notes of the step. */
     playAlongHint: (count: number): string =>
       count > 1 ? 'Play the red notes on your piano.' : 'Play the red note on your piano.',
-    /** The status line while the browser waits for a click before digitus can sound the other hand (issue 184). */
-    playAlongSound: {
-      click: 'Click the page once to hear the other hand.',
-      tap: 'Tap the page once to hear the other hand.',
-    },
     /** The status line the first time the timing rings appear in a score view (issue 192): what a ring before and after a note means. */
     timingExplain: 'A ring before a note means it came early; after it, late.',
     /** The button that opens and closes the practice settings (speed, loop, hands). */

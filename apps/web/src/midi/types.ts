@@ -34,6 +34,19 @@ export interface AccessEvents {
   inputs(names: readonly string[]): void;
   /** A merged note-on or note-off, after `held` was updated. */
   note(e: NoteMessage, held: readonly number[]): void;
+  /**
+   * Every input the browser lists, with its state and connection, at the open and at each state
+   * change (the black box, blackBox.ts).
+   */
+  ports?(ports: readonly PortReport[]): void;
+}
+
+/** One input as the browser reports it. */
+export interface PortReport {
+  id: string;
+  name: string;
+  state: string;
+  connection: string;
 }
 
 export interface OpenedAccess {

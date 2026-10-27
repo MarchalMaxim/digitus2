@@ -15,7 +15,6 @@ const ready: StatusInputs = {
   loading: false,
   countIn: null,
   alongHint: null,
-  alongSound: null,
 };
 
 const info = (text: string) => ({ text, kind: 'info' });
@@ -75,63 +74,6 @@ describe('the status line', () => {
       }),
     ).toEqual(info('This piece has no notes for the right hand.'));
     expect(scoreStatusLine({ ...ready, docStatus: 'error', loading: true })).toBeNull();
-  });
-
-  // The click the browser asks for before digitus can sound the other hand (issue 184): it ranks
-  // under the count-in and over the hint.
-  describe('the click the browser asks for', () => {
-    it('says click on a computer and tap on a touch screen', () => {
-      expect(en.score.view.playAlongSound.click).toBe(
-        'Click the page once to hear the other hand.',
-      );
-      expect(en.score.view.playAlongSound.tap).toBe('Tap the page once to hear the other hand.');
-      expect(scoreStatusLine({ ...ready, alongSound: 'click' })).toEqual(
-        info('Click the page once to hear the other hand.'),
-      );
-      expect(scoreStatusLine({ ...ready, alongSound: 'tap' })).toEqual(
-        info('Tap the page once to hear the other hand.'),
-      );
-    });
-
-    it('is in every language, click and tap, each its own', () => {
-      const lines = [en, es, fr, nl, pt].flatMap((m) => [
-        m.score.view.playAlongSound.click,
-        m.score.view.playAlongSound.tap,
-      ]);
-      expect(lines.every((line) => line.trim() !== '')).toBe(true);
-      expect(new Set(lines).size).toBe(lines.length);
-    });
-
-    it('goes over the hint and under the count-in, the piano loading and the rest', () => {
-      const both = {
-        ...ready,
-        alongSound: 'click' as const,
-        alongHint: { count: 1 },
-      };
-      expect(scoreStatusLine(both)).toEqual(info('Click the page once to hear the other hand.'));
-      expect(scoreStatusLine({ ...both, countIn: { beat: 0, beats: 4, beatInBar: 1 } })).toEqual({
-        text: '1',
-        kind: 'count',
-      });
-      expect(scoreStatusLine({ ...both, loading: true })).toEqual(info('Loading the piano…'));
-      expect(scoreStatusLine({ ...both, playable: false, hands: 'L' })).toEqual(
-        info('This piece has no notes for the left hand.'),
-      );
-      expect(scoreStatusLine({ ...both, docStatus: 'fingering' })).toEqual(info('Fingering…'));
-      expect(scoreStatusLine({ ...both, docStatus: 'error' })).toBeNull();
-    });
-
-    it('ranks Loading the piano… over the tap sentence and the hint', () => {
-      // That usePlayback's `preparing` reaches the line as `loading` is ScoreView.status.test.tsx.
-      expect(
-        scoreStatusLine({
-          ...ready,
-          loading: true,
-          alongSound: 'tap',
-          alongHint: { count: 2 },
-        }),
-      ).toEqual(info('Loading the piano…'));
-    });
   });
 
   // The play-along's hint (issue 182) is the lowest line of all: it never covers a line that

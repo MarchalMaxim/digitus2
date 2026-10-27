@@ -3,9 +3,9 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { Correction } from './corrections.js';
 import { joinScanPages } from './join.js';
-import { parseScanXml, readScanScore, type ScanNote } from './notes.js';
-import { carryCorrections } from './retake.js';
-import { correct } from './ScanEditor.js';
+import { parseScanXml, readScanScore, tieTarget, type ScanNote } from './notes.js';
+import { carryCorrections, carryOver } from './retake.js';
+import { correct, tryCorrection } from './ScanEditor.js';
 
 // happy-dom cannot parse a single-quoted XML declaration, which homr writes.
 const owner = (n: number) =>
@@ -75,5 +75,61 @@ describe('one page photographed again (issue 130)', () => {
     // Page 1 itself changed here, so its note is not the same note any more.
     const carried = carryCorrections(old, shifted, corrections, 1);
     expect(carried.some((c) => 'note' in c && c.note === first.ordinal)).toBe(false);
+  });
+
+  it('drops the corrections of a page whose parts and staves are laid out another way', () => {
+    const repaired = {
+      ...fresh,
+      notes: fresh.notes.map((n) => (n.page === 0 ? { ...n, staves: 1 } : n)),
+    };
+    const carried = carryCorrections(old, repaired, corrections, 1);
+    // The pitch on the first page goes; the other pages' hand and meter stay.
+    expect(carried.map((c) => c.kind)).toEqual(['hand', 'meter']);
+  });
+});
+
+describe('a correction that no longer applies after a page is photographed again (issue 130)', () => {
+  // A tie from the last note of page 1 into the first note of page 2 exists in this join only.
+  const before = joinScanPages([owner(3), owner(1), owner(3)]);
+  const after = joinScanPages([owner(3), owner(2), owner(3)]);
+  const old = read(before);
+  const tied = old.notes.find(
+    (n) =>
+      n.page === 0 &&
+      !n.chord &&
+      n.midi !== undefined &&
+      !n.tieStart &&
+      !n.tieStop &&
+      tieTarget(old, n)?.page === 1,
+  )!;
+  const later = pitched(old.notes, 2)[4]!;
+  const corrections: Correction[] = [
+    { kind: 'tie', note: tied.ordinal, tied: true },
+    { kind: 'pitch', note: later.ordinal, step: 'D', alter: 0, octave: later.octave },
+  ];
+
+  it('is a tie that the old recognition accepts and the new one refuses', () => {
+    expect(tryCorrection(before, [], corrections[0]!)).toBeNull();
+    expect(tryCorrection(after, [], corrections[0]!)).not.toBeNull();
+  });
+
+  it('is dropped alone: the correction after it on the third page survives', () => {
+    const carried = carryOver(before, after, corrections, 1);
+    expect(carried.map((c) => c.kind)).toEqual(['pitch']);
+    expect(correct(after, carried)?.applied).toBe(1);
+    // Carried without the replay, the refused tie would cut off everything after it.
+    const naive = carryCorrections(old, read(after), corrections, 1);
+    expect(naive).toHaveLength(2);
+    expect(correct(after, naive)?.applied).toBe(0);
+  });
+
+  it('carries the corrections of every page photographed again so far', () => {
+    const both = carryOver(
+      before,
+      joinScanPages([owner(3), owner(2), owner(2)]),
+      corrections,
+      [1, 2],
+    );
+    expect(both).toEqual([]);
   });
 });

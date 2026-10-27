@@ -89,8 +89,11 @@ export function ImagePages({
     setErrorPhrase(() => phrase);
   };
   const [rotating, setRotating] = useState(false);
+  // The size belongs to the image of one file: for a frame after the page changes, the old image
+  // is still on screen and the new page's rings must not be drawn over it.
   const [natural, setNatural] = useState<{
     url: string | undefined;
+    file: Blob;
     width: number;
     height: number;
   }>();
@@ -332,10 +335,16 @@ export function ImagePages({
           alt={pages.length > 1 ? t.scan.pages.altPage(selected + 1) : t.scan.pages.alt}
           onLoad={(event) => {
             const { naturalWidth: width, naturalHeight: height } = event.currentTarget;
-            setNatural(width && height ? { url, width, height } : undefined);
+            setNatural(
+              width && height ? { url, file: selectedPage.file, width, height } : undefined,
+            );
           }}
         />
-        {overlay && natural && natural.url === url && overlay(natural)}
+        {overlay &&
+          natural &&
+          natural.url === url &&
+          natural.file === selectedPage.file &&
+          overlay(natural)}
       </div>
       {!!selectedPage.quarterTurns && (
         <p className="small muted">{t.scan.pages.rotated(selectedPage.quarterTurns * 90)}</p>

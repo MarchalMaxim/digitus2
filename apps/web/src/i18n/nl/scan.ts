@@ -352,6 +352,9 @@ export const scan: Messages['scan'] = {
       `${degrees}° rechtsom gedraaid voor het scannen. Het originele bestand blijft bewaard.`,
     retake: (page: number) => `Pagina ${page} vervangen door een nieuwe foto`,
     retakeTouch: (page: number) => `Pagina ${page} opnieuw fotograferen`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'Vervangen door een nieuwe foto',
+    retakeOnlyTouch: 'Opnieuw fotograferen',
   },
   files: {
     pageLimit: 'Kies maximaal 20 pagina-afbeeldingen tegelijk.',

@@ -373,6 +373,9 @@ export const scan = {
     /** One page photographed again; only it is scanned again (issue 130). */
     retake: (page: number) => `Replace page ${page} with a new photo`,
     retakeTouch: (page: number) => `Photograph page ${page} again`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'Replace it with a new photo',
+    retakeOnlyTouch: 'Photograph it again',
   },
   files: {
     pageLimit: 'Choose up to 20 page images at a time.',

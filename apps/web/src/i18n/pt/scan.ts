@@ -353,6 +353,9 @@ export const scan: Messages['scan'] = {
       `Girada ${degrees}° para a direita para digitalizar. O arquivo original foi mantido.`,
     retake: (page: number) => `Substituir a página ${page} por uma foto nova`,
     retakeTouch: (page: number) => `Fotografar de novo a página ${page}`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'Substituí-la por uma foto nova',
+    retakeOnlyTouch: 'Fotografá-la de novo',
   },
   files: {
     pageLimit: 'Escolha até 20 imagens de páginas por vez.',

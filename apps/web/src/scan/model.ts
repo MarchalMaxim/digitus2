@@ -16,6 +16,19 @@ export interface ScanSession {
    * raw `xml` itself never changes; the corrected copy is `xml` with these replayed (corrections.ts).
    */
   corrections?: Correction[] | undefined;
+  /**
+   * Pages photographed again whose recognition is not stored yet (issue 130): the combined
+   * recognition and corrections they replace, kept with the session so a Back, a reload, a cancel or
+   * a refused scan does not lose the reader's corrections on the other pages (retake.ts).
+   */
+  retake?: PendingRetake | undefined;
+}
+export interface PendingRetake {
+  /** The raw combined recognition the corrections were made on. */
+  xml: string;
+  corrections: Correction[];
+  /** The pages replaced since, 0-based; their corrections are dropped. */
+  pages: number[];
 }
 export interface ScanPage {
   id: string;

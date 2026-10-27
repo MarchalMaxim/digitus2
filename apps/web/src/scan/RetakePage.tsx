@@ -10,6 +10,7 @@ import { CameraEntry } from './camera/CameraEntry.js';
 
 export function RetakePage({
   page,
+  single = false,
   touch,
   primary = false,
   disabled = false,
@@ -17,6 +18,8 @@ export function RetakePage({
 }: {
   /** The page, counted from 1. */
   page: number;
+  /** The only page of the scan: the message does not number it. */
+  single?: boolean;
   touch: boolean;
   primary?: boolean;
   disabled?: boolean;
@@ -24,10 +27,17 @@ export function RetakePage({
 }) {
   const t = useT();
   const input = useRef<HTMLInputElement>(null);
+  const label = single
+    ? touch
+      ? t.scan.pages.retakeOnlyTouch
+      : t.scan.pages.retakeOnly
+    : touch
+      ? t.scan.pages.retakeTouch(page)
+      : t.scan.pages.retake(page);
   if (touch)
     return (
       <CameraEntry
-        label={t.scan.pages.retakeTouch(page)}
+        label={label}
         maxPages={1}
         primary={primary}
         disabled={disabled}
@@ -44,14 +54,14 @@ export function RetakePage({
         disabled={disabled}
         onClick={() => input.current?.click()}
       >
-        {t.scan.pages.retake(page)}
+        {label}
       </Button>
       <input
         ref={input}
         hidden
         type="file"
         accept=".png,.jpg,.jpeg,image/jpeg,image/png"
-        aria-label={t.scan.pages.retake(page)}
+        aria-label={label}
         disabled={disabled}
         onChange={(event) => {
           const file = event.currentTarget.files?.[0];

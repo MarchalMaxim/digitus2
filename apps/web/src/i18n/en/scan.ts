@@ -208,6 +208,8 @@ export const scan = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'Correct the selected note',
     pitchLabel: 'Pitch',
+    /** homr's other readings of the pitch, offered as one-tap corrections (issue 130). */
+    suggestedLabel: 'Also read as',
     lower: 'Lower',
     lowerLabel: 'Lower by one step',
     higher: 'Higher',

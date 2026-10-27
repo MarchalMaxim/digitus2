@@ -196,6 +196,7 @@ export const scan: Messages['scan'] = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'Corriger la note sélectionnée',
     pitchLabel: 'Hauteur',
+    suggestedLabel: 'Lue aussi comme',
     lower: 'Plus bas',
     lowerLabel: 'Descendre d’un degré',
     higher: 'Plus haut',

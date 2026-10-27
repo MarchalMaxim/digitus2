@@ -193,6 +193,7 @@ export const scan: Messages['scan'] = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'De gekozen noot corrigeren',
     pitchLabel: 'Toonhoogte',
+    suggestedLabel: 'Ook gelezen als',
     lower: 'Lager',
     lowerLabel: 'Eén stap lager',
     higher: 'Hoger',

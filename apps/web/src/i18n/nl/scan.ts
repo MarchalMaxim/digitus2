@@ -346,6 +346,8 @@ export const scan: Messages['scan'] = {
     alt: 'Originele gedrukte partituur',
     rotated: (degrees: number) =>
       `${degrees}° rechtsom gedraaid voor het scannen. Het originele bestand blijft bewaard.`,
+    retake: (page: number) => `Pagina ${page} vervangen door een nieuwe foto`,
+    retakeTouch: (page: number) => `Pagina ${page} opnieuw fotograferen`,
   },
   files: {
     pageLimit: 'Kies maximaal 20 pagina-afbeeldingen tegelijk.',

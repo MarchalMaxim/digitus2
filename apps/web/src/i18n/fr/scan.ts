@@ -350,6 +350,8 @@ export const scan: Messages['scan'] = {
     alt: 'Partition imprimée d’origine',
     rotated: (degrees: number) =>
       `Pivotée de ${degrees}° vers la droite pour la numérisation. Le fichier d’origine est conservé.`,
+    retake: (page: number) => `Remplacer la page ${page} par une nouvelle photo`,
+    retakeTouch: (page: number) => `Photographier à nouveau la page ${page}`,
   },
   files: {
     pageLimit: 'Choisissez jusqu’à 20 images de pages à la fois.',

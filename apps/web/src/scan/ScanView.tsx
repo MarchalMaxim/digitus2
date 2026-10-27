@@ -41,13 +41,15 @@ import {
   PAIRED_STAVES_WARNING,
   stavesWerePaired,
 } from './join.js';
-import type { ScanPage, ScanSession } from './model.js';
+import { validateScanImages, type ScanPage, type ScanSession } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore, type ScanNote } from './notes.js';
 import { NoteCrop, pageImage } from './NoteCrop.js';
 import { fallbackSpace } from './crop.js';
 import { useHoverMark, useScanMarks } from './linked.js';
 import { isTouchOnly } from './phone.js';
 import { PhotoMarks } from './PhotoMarks.js';
+import { carryCorrections } from './retake.js';
+import { RetakePage } from './RetakePage.js';
 import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
 import { ScanProgress } from './ScanProgress.js';
 import { blocks, verdict as readVerdict, verdictText } from './verdict.js';
@@ -226,6 +228,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     score: corrected?.score,
     problems: problems.length,
   });
+  // The page the verdict names, in an image batch: it alone is photographed again (issue 130).
+  const flaggedPages = found.kind === 'oneStaff' || found.kind === 'partlyRead' ? found.pages : [];
+  const retakePage = isImage && batch && flaggedPages.length ? flaggedPages[0]! - 1 : undefined;
   // The one red: on the next action. A selected note first; Scan again when the verdict says the
   // scan itself needs another go (a verdict that says "scan again" must not leave the red on
   // Use); else Use for fingerings while it can be used (or is still being checked), else the
@@ -390,8 +395,45 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     useAppStore.setState({ view: { name: 'scan', session: next } });
     setSession(next);
   };
+  // A page photographed again (issue 130): the recognition and corrections it replaces, so the
+  // corrections of the other pages carry over to the new recognition (retake.ts).
+  const carry = useRef<{ xml: string; corrections: Correction[]; page: number }>(undefined);
+  const [pendingScan, setPendingScan] = useState(false);
+  const retake = (index: number, file: File) => {
+    if (busy) return;
+    void validateScanImages([file]).then(
+      ([valid]) => {
+        if (!alive.current || !valid) return;
+        const pages = sourcePages.map((p, i) =>
+          i === index ? { id: crypto.randomUUID(), file: valid } : p,
+        );
+        carry.current = session.xml
+          ? { xml: session.xml, corrections: kept, page: index }
+          : undefined;
+        select(null);
+        setReviewMode('combined');
+        setUndoStack([]);
+        setError(null);
+        retain({ ...session, file: pages[0]!.file, pages, xml: undefined, corrections: undefined });
+        setPhase('ready');
+        setPendingScan(true);
+      },
+      (cause: unknown) => {
+        if (alive.current) setError((m) => messageOf(cause, m));
+      },
+    );
+  };
+  // The retaken page is scanned at once: the reader's press was the consent, as for the first scan.
+  useEffect(() => {
+    if (!pendingScan || phase !== 'ready') return;
+    setPendingScan(false);
+    void scan();
+    // scan() reads the session of this render, the one with the new page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingScan, phase]);
   const arrange = (next: ScanPage[]) => {
     if (busy) return;
+    carry.current = undefined;
     setError(null);
     retain({
       ...session,
@@ -562,11 +604,26 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       if (batch) setCombineDetail(messageOf(cause));
       setReviewMode('page');
     }
+    // After a page was photographed again, the other pages' corrections follow their notes.
+    const before = carry.current;
+    carry.current = undefined;
+    let carried: Correction[] | undefined;
+    if (before && xml && before.corrections.length)
+      try {
+        carried = carryCorrections(
+          readScanScore(parseScanXml(before.xml)),
+          readScanScore(parseScanXml(xml)),
+          before.corrections,
+          before.page,
+        );
+      } catch {
+        carried = undefined;
+      }
     retain({
       ...session,
       pages: results,
       xml,
-      corrections: undefined,
+      corrections: carried?.length ? carried : undefined,
       recognizedAt: new Date().toISOString(),
       recognizer: [...new Set(results.map((p) => p.recognizer).filter(Boolean))].join(', '),
       warnings: [
@@ -906,9 +963,18 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             >
               {t.scan.review.useForFingerings}
             </Button>
+            {retakePage !== undefined && (
+              <RetakePage
+                page={retakePage + 1}
+                touch={touchOnly}
+                primary={nextRed === 'again'}
+                onFile={(file) => retake(retakePage, file)}
+              />
+            )}
             <Button
-              primary={nextRed === 'again'}
+              primary={nextRed === 'again' && retakePage === undefined}
               onClick={() => {
+                carry.current = undefined;
                 setPhase('ready');
                 setError(null);
                 setReviewMode('combined');
@@ -989,6 +1055,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     )}
                   </>
                 )
+              )}
+              {/* A page shown on its own can be photographed again, unless the verdict offers it. */}
+              {isImage && pageMode && retakePage !== selected && (
+                <RetakePage
+                  page={selected + 1}
+                  touch={touchOnly}
+                  onFile={(file) => retake(selected, file)}
+                />
               )}
             </section>
             <section className="stack scan-result" ref={resultHost} onKeyDown={onEditKey}>

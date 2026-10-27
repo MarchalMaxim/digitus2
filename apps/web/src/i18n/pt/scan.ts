@@ -347,6 +347,8 @@ export const scan: Messages['scan'] = {
     alt: 'Partitura impressa original',
     rotated: (degrees: number) =>
       `Girada ${degrees}° para a direita para digitalizar. O arquivo original foi mantido.`,
+    retake: (page: number) => `Substituir a página ${page} por uma foto nova`,
+    retakeTouch: (page: number) => `Fotografar de novo a página ${page}`,
   },
   files: {
     pageLimit: 'Escolha até 20 imagens de páginas por vez.',

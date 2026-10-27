@@ -12,7 +12,13 @@ export interface VerdictFacts {
    * The pages in reading order, each with its own warnings. Absent for a PDF, whose page count the
    * scan does not know and whose warnings name no page.
    */
-  pages?: readonly { warnings?: readonly string[] | undefined }[] | undefined;
+  pages?:
+    | readonly {
+        warnings?: readonly string[] | undefined;
+        /** How unsure homr was of the page (`pageDoubt`); absent without homr's confidence. */
+        doubt?: number | undefined;
+      }[]
+    | undefined;
   /** Every warning of the scan. */
   warnings: readonly string[];
   /** False when the pages did not join into one score. */
@@ -30,6 +36,8 @@ export type Verdict =
   | { kind: 'oneStaff'; pages: number[] }
   /** Pages with a line read only in part, so bars are missing or added. */
   | { kind: 'partlyRead'; pages: number[] }
+  /** Pages homr read with too little certainty to correct sensibly: photograph them again. */
+  | { kind: 'unclear'; pages: number[] }
   | {
       kind: 'read';
       pages: number | undefined;
@@ -60,12 +68,42 @@ function handsOf(score: ScanScore): 'both' | 'single' | undefined {
   return staves.size === 1 ? 'single' : undefined;
 }
 
+/**
+ * The doubt at which a page is photographed again rather than corrected (issue 130): just above
+ * every page as taken that homr read right on the confidence benchmark (research/omr/confidence.mjs,
+ * docs/research/omr.md). homr's rhythm head never goes much past 0.9, so a clean page sits near 0.1.
+ */
+export const UNCLEAR_DOUBT = 0.1282;
+
+/**
+ * How unsure homr was of a page: over its sounding notes (no rests, grace notes or tie
+ * continuations, as the benchmark counts them), the mean of one minus the probability of the note
+ * as read, the product of its chosen rhythm, pitch and accidental tokens. Undefined when homr wrote
+ * no confidence (another recogniser, or a scan from before it did).
+ */
+export function pageDoubt(score: ScanScore): number | undefined {
+  let sum = 0;
+  let count = 0;
+  for (const note of score.notes) {
+    if (note.rest || note.grace || note.tieStop || !note.confidence) continue;
+    const c = note.confidence;
+    const p = (c.rhythm?.[0]?.[1] ?? 1) * (c.pitch?.[0]?.[1] ?? 1) * (c.lift?.[0]?.[1] ?? 1);
+    sum += 1 - p;
+    count++;
+  }
+  return count ? sum / count : undefined;
+}
+
 export function verdict(facts: VerdictFacts): Verdict {
   if (!facts.joined) return { kind: 'notJoined' };
   if (facts.warnings.includes(GRAND_STAFF_WARNING))
     return { kind: 'oneStaff', pages: flagged(facts, GRAND_STAFF_WARNING) };
   if (facts.warnings.includes(PARTLY_READ_WARNING))
     return { kind: 'partlyRead', pages: flagged(facts, PARTLY_READ_WARNING) };
+  const unclear = (facts.pages ?? []).flatMap((page, index) =>
+    page.doubt !== undefined && page.doubt >= UNCLEAR_DOUBT ? [index + 1] : [],
+  );
+  if (unclear.length) return { kind: 'unclear', pages: unclear };
   return {
     kind: 'read',
     pages: facts.pages?.length,
@@ -85,6 +123,8 @@ export function verdictText(t: Messages, v: Verdict): string {
       return say.readAsOneStaff(v.pages);
     case 'partlyRead':
       return say.readInPart(v.pages);
+    case 'unclear':
+      return say.readUnclearly(v.pages);
     case 'read':
       return say.facts(
         [

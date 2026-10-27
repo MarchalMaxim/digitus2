@@ -160,6 +160,10 @@ export const scan: Messages['scan'] = {
         : pages.length === 1
           ? `Een deel van een regel op pagina ${pages[0]} is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto en scan opnieuw.`
           : `Een deel van een regel op pagina’s ${formatList('nl', pages.map(String))} is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto’s en scan opnieuw.`,
+    readUnclearly: (pages: number[]) =>
+      pages.length === 1
+        ? `Pagina ${pages[0]} kon niet duidelijk worden gelezen. Fotografeer haar opnieuw: plat, gelijkmatig belicht, de hele pagina in beeld.`
+        : `Pagina’s ${formatList('nl', pages.map(String))} konden niet duidelijk worden gelezen. Fotografeer ze opnieuw: plat, gelijkmatig belicht, elke pagina helemaal in beeld.`,
   },
   edit: {
     hint: 'Selecteer een noot om die te corrigeren.',

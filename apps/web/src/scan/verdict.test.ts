@@ -11,7 +11,14 @@ import { GRAND_STAFF_WARNING, PARTLY_READ_WARNING } from './client.js';
 import { findProblems } from './corrections.js';
 import { joinScanPages } from './join.js';
 import { parseScanXml, readScanScore } from './notes.js';
-import { verdict, verdictText, type VerdictFacts } from './verdict.js';
+import {
+  blocks,
+  pageDoubt,
+  UNCLEAR_DOUBT,
+  verdict,
+  verdictText,
+  type VerdictFacts,
+} from './verdict.js';
 
 // The join and the note reader use the browser's parser; in Node happy-dom supplies it.
 const dom = new Window();
@@ -222,5 +229,48 @@ describe('in every language', () => {
         if (pagesList.length) expect(text).toContain(String(pagesList[0]));
       }
     expect(verdictText(m, { kind: 'notJoined' }).length).toBeGreaterThan(10);
+  });
+});
+
+describe('a page homr read with too little certainty (issue 130)', () => {
+  /** Every note of a page given homr's confidence comment, with this rhythm probability. */
+  const withConfidence = (xml: string, rhythm: number) =>
+    xml.replace(
+      /<\/note>/g,
+      `<!-- conf: rhythm note_4 ${rhythm} note_8 0.01; pitch C5 1 D5 1e-07; lift _ 1 # 1e-08 --></note>`,
+    );
+
+  it('has no doubt without homr’s confidence', () => {
+    expect(pageDoubt(scoreOf(pages[0]!))).toBeUndefined();
+  });
+
+  it('measures the doubt of a page as the mean of one minus each note’s probability', () => {
+    expect(pageDoubt(scoreOf(withConfidence(pages[0]!, 0.9)))).toBeCloseTo(0.1, 6);
+    expect(pageDoubt(scoreOf(withConfidence(pages[0]!, 0.5)))).toBeCloseTo(0.5, 6);
+  });
+
+  it('names the pages at or past the threshold, after the warnings that say more', () => {
+    const doubt = [0.1, UNCLEAR_DOUBT + 0.01, 0.1];
+    const v = verdict(facts({ pages: doubt.map((d) => ({ doubt: d })) }));
+    expect(v).toEqual({ kind: 'unclear', pages: [2] });
+    expect(blocks(v)).toBe(true);
+    const partly = verdict(
+      facts({
+        warnings: [PARTLY_READ_WARNING],
+        pages: [{ doubt: 0.1, warnings: [PARTLY_READ_WARNING] }, { doubt: 0.9 }],
+      }),
+    );
+    expect(partly.kind).toBe('partlyRead');
+    expect(verdict(facts({ pages: [{ doubt: 0.1 }, {}] })).kind).toBe('read');
+  });
+
+  it('says so in every language, naming the page and what to do', () => {
+    for (const t of [en, fr, nl, es, pt]) {
+      const one = verdictText(t, { kind: 'unclear', pages: [2] });
+      const two = verdictText(t, { kind: 'unclear', pages: [2, 4] });
+      expect(one).toContain('2');
+      expect(two).toContain('4');
+      expect(one).not.toBe(two);
+    }
   });
 });

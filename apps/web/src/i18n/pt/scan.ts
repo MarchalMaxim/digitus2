@@ -160,6 +160,10 @@ export const scan: Messages['scan'] = {
         : pages.length === 1
           ? `Parte de uma linha da página ${pages[0]} não foi lida, então faltam ou sobram compassos. Troque essa foto e digitalize de novo.`
           : `Parte de uma linha das páginas ${formatList('pt', pages.map(String))} não foi lida, então faltam ou sobram compassos. Troque essas fotos e digitalize de novo.`,
+    readUnclearly: (pages: number[]) =>
+      pages.length === 1
+        ? `A página ${pages[0]} não pôde ser lida com clareza. Fotografe-a de novo: plana, com luz uniforme, a página inteira no enquadramento.`
+        : `As páginas ${formatList('pt', pages.map(String))} não puderam ser lidas com clareza. Fotografe-as de novo: planas, com luz uniforme, cada página inteira no enquadramento.`,
   },
   edit: {
     hint: 'Selecione uma nota para corrigi-la.',

@@ -52,7 +52,7 @@ import { carryCorrections } from './retake.js';
 import { RetakePage } from './RetakePage.js';
 import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
 import { ScanProgress } from './ScanProgress.js';
-import { blocks, verdict as readVerdict, verdictText } from './verdict.js';
+import { blocks, pageDoubt, verdict as readVerdict, verdictText } from './verdict.js';
 import {
   correct,
   timingIssue,
@@ -221,16 +221,40 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   // Saved corrections that no longer apply are dropped by the next change, never replayed.
   const kept = corrected ? corrections.slice(0, corrected.applied) : corrections;
   // The verdict line (issue 158): what was read, from the facts the session holds.
+  // How unsure homr was of each page, from the page's own recognition (issue 130).
+  const doubts = useMemo(
+    () =>
+      sourcePages.map((page) => {
+        if (!page.xml) return undefined;
+        try {
+          return pageDoubt(readScanScore(parseScanXml(page.xml)));
+        } catch {
+          return undefined;
+        }
+      }),
+    // sourcePages is rebuilt each render for a single file; its contents are these two.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [session.pages, session.xml],
+  );
   const found = readVerdict({
-    pages: isImage ? sourcePages : undefined,
+    pages: isImage
+      ? sourcePages.map((page, index) => ({ warnings: page.warnings, doubt: doubts[index] }))
+      : undefined,
     warnings: session.warnings ?? [],
     joined: !!session.xml || !batch,
     score: corrected?.score,
     problems: problems.length,
   });
-  // The page the verdict names, in an image batch: it alone is photographed again (issue 130).
-  const flaggedPages = found.kind === 'oneStaff' || found.kind === 'partlyRead' ? found.pages : [];
-  const retakePage = isImage && batch && flaggedPages.length ? flaggedPages[0]! - 1 : undefined;
+  // The page the verdict names, in an image batch: it alone is photographed again (issue 130). A
+  // single photo read unclearly is photographed again too, rather than scanned again as it is.
+  const flaggedPages =
+    found.kind === 'oneStaff' || found.kind === 'partlyRead' || found.kind === 'unclear'
+      ? found.pages
+      : [];
+  const retakePage =
+    isImage && flaggedPages.length && (batch || found.kind === 'unclear')
+      ? flaggedPages[0]! - 1
+      : undefined;
   // The one red: on the next action. A selected note first; Scan again when the verdict says the
   // scan itself needs another go (a verdict that says "scan again" must not leave the red on
   // Use); else Use for fingerings while it can be used (or is still being checked), else the

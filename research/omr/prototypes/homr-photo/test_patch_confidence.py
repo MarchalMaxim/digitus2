@@ -60,11 +60,11 @@ class ConfidencePatchTests(unittest.TestCase):
         self.assertEqual([t for t, _ in top], ["b", "d", "c"])
         self.assertAlmostEqual(sum(p for _, p in scope["_most_probable"](np.array([1.0, 1.0]), {0: "x", 1: "y"})), 1.0)
         class Symbol:
-            confidence = {"rhythm": [("note_4", 0.98), ("note_8", 0.01)], "pitch": [("C5", 0.6), ("D5", 0.3)]}
+            confidence = {"rhythm": [("note_4", 0.98), ("note_8", 0.01)], "pitch": [("C5", 0.99999987), ("D5", 1.2345678e-07)]}
         note = ET.Element("note")
         scope["build_confidence"](note, Symbol())
         text = ET.tostring(note, encoding="unicode")
-        self.assertEqual(text, "<note><!-- conf: rhythm note_4 0.980 note_8 0.010; pitch C5 0.600 D5 0.300 --></note>")
+        self.assertEqual(text, "<note><!-- conf: rhythm note_4 0.98 note_8 0.01; pitch C5 1 D5 1.23457e-07 --></note>")
         bare = ET.Element("note")
         scope["build_confidence"](bare, object())
         self.assertEqual(ET.tostring(bare, encoding="unicode"), "<note />")

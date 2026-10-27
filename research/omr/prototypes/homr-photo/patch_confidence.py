@@ -2,9 +2,10 @@
 
 The decoder already computes a score for every token of the rhythm, pitch and accidental heads and
 keeps only the highest (greedy decoding). The patch keeps the three most probable tokens of each
-head with their softmax probabilities and writes them as a comment in the note, beside imgpos:
+head with their softmax probabilities (six significant digits, so a near-certain token is still
+ordered against the others) and writes them as a comment in the note, beside imgpos:
 
-    <!-- conf: rhythm note_4 0.981 note_8 0.012 note_2 0.004; pitch C5 0.410 D5 0.380 B4 0.120; lift _ 0.990 # 0.007 N 0.002 -->
+    <!-- conf: rhythm note_4 0.981042 note_8 0.0120313 note_2 0.00412; pitch C5 0.999987 D5 1.2e-05 B4 3.1e-07; lift _ 0.99 # 0.00701 N 0.00208 -->
 
 Decoding is untouched: the chosen tokens are the same argmax as before, so the score with the
 comment removed is byte-identical to the unpatched output.
@@ -54,7 +55,7 @@ def build_confidence(xml: ET.Element, symbol: EncodedSymbol) -> None:
     if not confidence:
         return
     heads = "; ".join(
-        head + "".join(f" {token} {probability:.3f}" for token, probability in tokens)
+        head + "".join(f" {token} {probability:.6g}" for token, probability in tokens)
         for head, tokens in confidence.items()
     )
     xml.append(ET.Comment(f" conf: {heads} "))

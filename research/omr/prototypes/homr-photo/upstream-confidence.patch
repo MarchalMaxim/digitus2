@@ -58,7 +58,7 @@
 +    if not confidence:
 +        return
 +    heads = "; ".join(
-+        head + "".join(f" {token} {probability:.3f}" for token, probability in tokens)
++        head + "".join(f" {token} {probability:.6g}" for token, probability in tokens)
 +        for head, tokens in confidence.items()
 +    )
 +    xml.append(ET.Comment(f" conf: {heads} "))

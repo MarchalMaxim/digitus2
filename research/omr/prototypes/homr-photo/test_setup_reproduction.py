@@ -34,7 +34,7 @@ class CheckoutReproductionTests(unittest.TestCase):
             result=subprocess.run(command,capture_output=True,text=True,timeout=30)
             self.assertEqual(result.returncode,0,result.stdout+"\n"+result.stderr)
             record=json.loads((toolchain/"setup-source-provenance.json").read_text())
-            self.assertEqual(record["patchedTreeSha256"],"98d63faa7addc228ecaaa8ee1695f2e14aba9f71b50805417c3cd5c8ef381be4")
+            self.assertEqual(record["patchedTreeSha256"],"aebd33e275aead8dc02d0c77bb7a431c87a6c949f1dc7f8449e041c1ac833158")
 
 if __name__=="__main__":
     unittest.main()

@@ -9,6 +9,7 @@
 //   node research/omr/confidence.mjs --parallel 2      recognize.py processes side by side
 //   node research/omr/confidence.mjs --no-recognize    score the cached recognitions only
 //   node research/omr/confidence.mjs --variants g0,g2  only these blur variants
+//   node research/omr/confidence.mjs --no-recognize --pipeline HASH   score an earlier pipeline's cache
 //
 // Pages and variants are blur-sweep.mjs's (run it, or `--no-recognize --no-measure`, first so the
 // variant images exist): the 8 one-page truth pieces of camera-fusion.mjs, rendered clean, and the
@@ -46,6 +47,32 @@ const log = (...a) => console.error(...a);
  * confidence when it separates pages that cannot be read from pages that can.
  */
 export const GATES = { marksAuroc: 0.8, suggestionsTop3: 0.5, pageAuroc: 0.85 };
+/*
+ * Fixed before the blurred rows were seen (after the sharp pages had shown how flat the scores
+ * are): marks also need a within-page AUROC of at least marksAuroc (each page's scores centred on
+ * its own median, pooled over the pages with at least two wrong and two right notes), because a
+ * pooled AUROC also rewards telling a blurred page from a sharp one. `doubt`, the summed
+ * probabilities of each head's second token, is exploratory: it is judged on the confirm half (the
+ * last four truth pieces and the invention photos) only. The page verdict's threshold is the
+ * lowest that flags no page as taken (g0) that reads right; it is then judged on every variant.
+ */
+const CHOOSE = new Set(DEFAULT_PIECES.slice(0, 4));
+/** The summed probabilities of each head's second most probable token. */
+export const doubtOf = (c) => (c.rhythm?.[1]?.[1] ?? 0) + (c.pitch?.[1]?.[1] ?? 0) + (c.lift?.[1]?.[1] ?? 0);
+/** AUROC within pages: each page's scores minus its median, pooled over pages with 2+ of each kind. */
+export function withinPageAuroc(rows, score, positive, pageOf) {
+  const groups = new Map();
+  for (const r of rows) (groups.get(pageOf(r)) ?? groups.set(pageOf(r), []).get(pageOf(r))).push(r);
+  const items = [];
+  for (const group of groups.values()) {
+    const pos = group.filter(positive).length;
+    if (pos < 2 || group.length - pos < 2) continue;
+    const sorted = group.map(score).sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    for (const r of group) items.push({ score: score(r) - median, positive: positive(r) });
+  }
+  return { pages: [...groups.values()].filter((g) => g.filter(positive).length >= 2 && g.length - g.filter(positive).length >= 2).length, auroc: auroc(items) };
+}
 
 /** Every `<note>`'s confidence in document order: `{rhythm, pitch, lift}` lists of [token, p], or null. */
 export function confidences(xml) {
@@ -162,12 +189,14 @@ async function recognize(jobs, homr, parallel) {
 }
 
 function parseArgs(args) {
-  const o = { parallel: 1, recognize: true, variants: null };
+  const o = { parallel: 1, recognize: true, variants: null, pipeline: null };
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
     if (a === '--parallel') o.parallel = Math.max(1, Number(args[++i]));
     else if (a === '--no-recognize') o.recognize = false;
     else if (a === '--variants') o.variants = new Set(args[++i].split(','));
+    // Scores the cache of an earlier pipeline (its hash from a scorecard), without recognising.
+    else if (a === '--pipeline') o.pipeline = args[++i];
     else throw new Error(`unknown argument ${a}`);
   }
   return o;
@@ -206,7 +235,7 @@ function scoreNotes(E, ref, xml) {
   const used = new Set(pairs.values());
   for (const { n, c } of all) {
     const truth = pairs.get(n);
-    const row = { joint: jointOf(c), rhythm: c.rhythm?.[0]?.[1] ?? 1, pitch: c.pitch?.[0]?.[1] ?? 1, lift: c.lift?.[0]?.[1] ?? 1, pitchRight: !!truth };
+    const row = { ordinal: n.sourceIndices[0], joint: jointOf(c), doubt: doubtOf(c), rhythm: c.rhythm?.[0]?.[1] ?? 1, pitch: c.pitch?.[0]?.[1] ?? 1, lift: c.lift?.[0]?.[1] ?? 1, pitchRight: !!truth };
     const local = (note, score, bars) => q(note.onsetTick - score.measures[bars.get(note.measureIndex)].startTick, score);
     if (truth) {
       const length = q(truth.offsetTick - truth.onsetTick, ref);
@@ -237,7 +266,7 @@ function scoreNotes(E, ref, xml) {
 export async function main(argv = process.argv.slice(2)) {
   const opts = parseArgs(argv);
   const homr = resolve(process.env.DIGITUS2_OMR_HOMR || 'C:/Users/maxim/omr/homr');
-  const pipeline = pipelineHash();
+  const pipeline = opts.pipeline ?? pipelineHash();
   mkdirSync(join(OUT, 'cache'), { recursive: true });
   const fx = await fixtures(DEFAULT_PIECES);
   const byId = new Map(fx.manifest.pieces.map((p) => [p.id, p]));
@@ -276,7 +305,7 @@ export async function main(argv = process.argv.slice(2)) {
     }
     const xml = readFileSync(job.output, 'utf8');
     const facts = photoFacts(E, xml);
-    let row = { page: page.id, variant, kind: page.kind, status: facts.imports ? 'parsed' : 'invalid' };
+    let row = { page: page.id, variant, kind: page.kind, output: job.output, status: facts.imports ? 'parsed' : 'invalid' };
     let ref = null;
     if (page.kind === 'truth') ref = refOf(page.id);
     else if (invention[page.id]) ref = sliceScore(refOf(INVENTION), ...invention[page.id]);
@@ -314,6 +343,16 @@ export async function main(argv = process.argv.slice(2)) {
       rhythm: auroc(noteRows.map((n) => ({ score: 1 - n.rhythm, positive: wrong(n) }))),
       lift: auroc(noteRows.map((n) => ({ score: 1 - n.lift, positive: wrong(n) }))),
     },
+    withinPage: {
+      joint: withinPageAuroc(noteRows, (n) => 1 - n.joint, wrong, (n) => `${n.page}:${n.variant}`),
+      doubt: withinPageAuroc(noteRows, (n) => n.doubt, wrong, (n) => `${n.page}:${n.variant}`),
+    },
+    doubtExploratory: Object.fromEntries(
+      [['choose', (n) => CHOOSE.has(n.page)], ['confirm', (n) => !CHOOSE.has(n.page)]].map(([name, keep]) => {
+        const rows = noteRows.filter(keep);
+        return [name, { notes: rows.length, wrong: rows.filter(wrong).length, auroc: auroc(rows.map((n) => ({ score: n.doubt, positive: wrong(n) }))), withinPage: withinPageAuroc(rows, (n) => n.doubt, wrong, (n) => `${n.page}:${n.variant}`) }];
+      }),
+    ),
     thresholds: [0.3, 0.5, 0.6, 0.7, 0.8, 0.85].map((t) => {
       const marked = noteRows.filter((n) => n.joint < t);
       return { joint: t, marked: marked.length, wrongMarked: marked.filter(wrong).length, rightMarked: marked.filter((n) => !wrong(n)).length };
@@ -339,15 +378,29 @@ export async function main(argv = process.argv.slice(2)) {
     auroc: auroc(judged.map((r) => ({ score: r.uncertainty, positive: !r.read }))),
     rows: judged.map(({ page, variant, read, uncertainty, pitchF1 }) => ({ page, variant, read, uncertainty, pitchF1 })),
   };
+  // The page verdict's threshold: just above every page as taken (g0) that reads right.
+  const asTaken = judged.filter((r) => r.variant === 'g0' && r.read).map((r) => r.uncertainty);
+  const threshold = asTaken.length ? Math.max(...asTaken) + 1e-6 : null;
+  page.threshold = threshold;
+  page.atThreshold = threshold === null ? null : {
+    unreadableFlagged: judged.filter((r) => !r.read && r.uncertainty >= threshold).length,
+    unreadable: page.unreadable,
+    readableFlagged: judged.filter((r) => r.read && r.uncertainty >= threshold).length,
+    readable: judged.filter((r) => r.read).length,
+    byVariant: Object.fromEntries([...new Set(judged.map((r) => r.variant))].map((v) => {
+      const rows = judged.filter((r) => r.variant === v);
+      return [v, { pages: rows.length, unreadable: rows.filter((r) => !r.read).length, unreadableFlagged: rows.filter((r) => !r.read && r.uncertainty >= threshold).length, readableFlagged: rows.filter((r) => r.read && r.uncertainty >= threshold).length }];
+    })),
+  };
   const decision = {
-    marks: (marks.auroc.joint ?? 0) >= GATES.marksAuroc,
+    marks: (marks.auroc.joint ?? 0) >= GATES.marksAuroc && (marks.withinPage.joint.auroc ?? 0) >= GATES.marksAuroc,
     pitchSuggestions: (suggestions.pitchTop3 ?? 0) >= GATES.suggestionsTop3,
     lengthSuggestions: (suggestions.lengthTop3 ?? 0) >= GATES.suggestionsTop3,
     pageVerdict: (page.auroc ?? 0) >= GATES.pageAuroc,
   };
   const card = { schemaVersion: 1, generated: new Date().toISOString(), pipeline, homr, gates: GATES, decision, marks, suggestions, page, pageRows, noteRows };
   writeFileSync(join(OUT, 'latest.json'), JSON.stringify(card, null, 1));
-  console.log(JSON.stringify({ decision, marks: { ...marks }, suggestions, page: { pages: page.pages, unreadable: page.unreadable, auroc: page.auroc } }, null, 2));
+  console.log(JSON.stringify({ decision, marks: { ...marks }, suggestions, page: { pages: page.pages, unreadable: page.unreadable, auroc: page.auroc, threshold: page.threshold, atThreshold: page.atThreshold } }, null, 2));
   return 0;
 }
 

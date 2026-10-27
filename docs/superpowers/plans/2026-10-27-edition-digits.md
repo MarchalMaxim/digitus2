@@ -13,12 +13,12 @@ panel's editor comparison stay in issue 42 and are not built here.
 
 ## What changed since the M5 plan
 
-| M5 plan assumed | The app now |
-| --- | --- |
-| A "Show all fingers" checkbox and a "Printed n of m" line in the side panel | No new permanent control (issue 94). The reveal in the played, cued and hovered bar replaces "show all". |
-| Inferability 100 by construction, density gated at 1.5 times the editor | The issue's rule is "never more digits than the editor"; the 8 editorial core30 pieces print 9 to 29 percent while a complete fingering needs 33 to 39 percent for the reader (`readability.md` 5.5). A budget is needed; reconstruction at rest is measured, not forced to 100. The reveal covers the rest: the bar being played always shows every digit. |
-| Its own `findRepeats` port of `repeats.py` (transpositions included) | The engine has `fingering/repeats.ts` (identical passages, bar-position aware) and the solver already fingers identical copies alike (`identicalPassages`). R5 uses `repeatPairs` from there; transposed copies are re-read with R0 to R4 (editors re-print transpositions anyway, study section 4). |
-| Patching digits only | Pages are windowed (issue 99), digits are patched after a re-solve, a hand switch dims digits (issue 79), play-along cues a step (issues 182, 204), print installs its own copy of the pages. Each needs the spare-digit class. |
+| M5 plan assumed                                                             | The app now                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A "Show all fingers" checkbox and a "Printed n of m" line in the side panel | No new permanent control (issue 94). The reveal in the played, cued and hovered bar replaces "show all".                                                                                                                                                                                                                                                    |
+| Inferability 100 by construction, density gated at 1.5 times the editor     | The issue's rule is "never more digits than the editor"; the 8 editorial core30 pieces print 9 to 29 percent while a complete fingering needs 33 to 39 percent for the reader (`readability.md` 5.5). A budget is needed; reconstruction at rest is measured, not forced to 100. The reveal covers the rest: the bar being played always shows every digit. |
+| Its own `findRepeats` port of `repeats.py` (transpositions included)        | The engine has `fingering/repeats.ts` (identical passages, bar-position aware) and the solver already fingers identical copies alike (`identicalPassages`). R5 uses `repeatPairs` from there; transposed copies are re-read with R0 to R4 (editors re-print transpositions anyway, study section 4).                                                        |
+| Patching digits only                                                        | Pages are windowed (issue 99), digits are patched after a re-solve, a hand switch dims digits (issue 79), play-along cues a step (issues 182, 204), print installs its own copy of the pages. Each needs the spare-digit class.                                                                                                                             |
 
 ## Engine
 
@@ -50,19 +50,28 @@ R5 on a hand-built repeat, black-key `steps` cases.
 ### The reduction (`reduce.ts`)
 
 ```ts
-export type PrintReason = 'pinned' | 'first' | 'none' | 'position' | 'chord' | 'step' | 'repeat' | 'memory' | 'lowConfidence';
+export type PrintReason =
+  | 'pinned'
+  | 'first'
+  | 'none'
+  | 'position'
+  | 'chord'
+  | 'step'
+  | 'repeat'
+  | 'memory'
+  | 'lowConfidence';
 export interface ReduceOptions {
-  level?: number;          // library level 1..6; unknown: the level-3 row
-  editorDigits?: number;   // digits the editor prints on this piece, when known: the cap
+  level?: number; // library level 1..6; unknown: the level-3 row
+  editorDigits?: number; // digits the editor prints on this piece, when known: the cap
   confidenceFloor?: number; // default 0.6
 }
 export interface ReduceResult {
-  printed: Set<string>;             // note ids printed at rest
+  printed: Set<string>; // note ids printed at rest
   reasons: Record<string, PrintReason>;
-  notes: number;                    // notes with a finger
+  notes: number; // notes with a finger
   budget: number;
-  necessary: number;                // what the unbudgeted greedy pass prints
-  reconstruction: number;           // percent of notes the reader gets right from `printed`
+  necessary: number; // what the unbudgeted greedy pass prints
+  reconstruction: number; // percent of notes the reader gets right from `printed`
 }
 export const DENSITY_TARGET: Record<number, number>; // 1-2: 20, 3: 25, 4-6: 30 (readability.md 7.3)
 export function reduceFingering(score: Score, full: Assignment, opts?: ReduceOptions): ReduceResult;
@@ -144,7 +153,7 @@ reconstruction) that goes into `readability.md`.
 ### Worker and document
 
 - `solve` request gains `level?: number` and `editorDigits?: number`; the reply gains `printed:
-  string[]`. The embellish reply's `assignments` gain `printed` per hand size the same way.
+string[]`. The embellish reply's `assignments` gain `printed` per hand size the same way.
 - `useScoreDocument` passes the library level and, only for library pieces with
   `hasEditorialFingering`, the editor's digit count. Uploads and scans never pass a cap: a file
   with three stray fingerings would otherwise print three digits on the whole piece; they get the
@@ -170,7 +179,7 @@ reconstruction) that goes into `readability.md`.
   (tokens), so nothing fades there. The muted spare digit, once open, shows at its gray
   (`opacity: 0.4`, fill 1) like any muted digit.
 - **The hand switch must not resurrect spare digits.** `.is-returning` runs `digit-back` (`from {
-  fill-opacity: 0.4 }`) and an animation beats normal declarations, so every spare digit on screen
+fill-opacity: 0.4 }`) and an animation beats normal declarations, so every spare digit on screen
   would flash at 40 % on a switch; `.is-sweeping` transitions fill opacity too. Spare digits
   outside an open bar are excluded from `.is-returning` and `.is-sweeping` (`:not(.is-spare)` in
   those selectors, or `sweepDimming` skipping them). A unit test computes the style of a digit for
@@ -227,8 +236,7 @@ can differ.
 - The hand switch: sampled during a sweep, no spare digit outside an open bar has a computed
   `fill-opacity` above 0.
 - Print: the print root holds exactly `printed.length` digits.
-- The reveal: hover a bar → every digit in it has computed `fill-opacity` 1 after `--dur`; leave →
-  0. Click a bar (cue) → its digits show; Play → the cursor's bar shows all its digits and the
+- The reveal: hover a bar → every digit in it has computed `fill-opacity` 1 after `--dur`; leave → 0. Click a bar (cue) → its digits show; Play → the cursor's bar shows all its digits and the
   previous bar returns to the edition.
 - One red at every step (`expectOneRed`).
 - Reduced motion: computed `transition-duration` of a spare digit is `0s`.

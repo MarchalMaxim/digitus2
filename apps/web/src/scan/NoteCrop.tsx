@@ -4,7 +4,7 @@
  * hunting for it on the page. Black and white: the photo is shown in grey and the thin frame is
  * black, so it never takes the screen's one red.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { analyzeStaffGeometry } from './camera/staffGeometry.js';
 import {
   CROP_HALF_HEIGHT_SPACES,
@@ -146,7 +146,9 @@ export function NoteCrop({
   }, [file]);
   const { width, height } = SIZES[size];
   const { x, y } = at;
-  useEffect(() => {
+  // Sized and drawn in the commit that shows the crop, so nothing (a paint, a reader of the page)
+  // ever sees the canvas at its default 300 x 150.
+  useLayoutEffect(() => {
     const target = canvas.current;
     const context = target?.getContext('2d');
     if (!image || !target || !context) return;

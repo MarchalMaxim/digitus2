@@ -19,9 +19,10 @@
 // Recognition is local homr through acceptance/recognize.py (the shipped adapter), cached under
 // research/omr/results/confidence/cache by the input's hash and the acceptance pipeline's.
 //
-// Notes are paired with the truth as evaluateOmr pairs them (imgpos.mjs, pairNotes): bar by
-// ordinal, then bar-local onset and MIDI pitch. Only pages whose bar count is the truth's give note
-// labels, so a missed bar does not mislabel every note after it.
+// Notes are labelled against the truth bar by bar (bars by ordinal) and staff by staff: the
+// recognised and true notes are aligned in order on pitch and length (alignNotes), so a note that
+// an earlier misread length pushed later still counts as read right. Only pages whose bar count is
+// the truth's give note labels. A page's doubt is computed as the review computes it (pageDoubtOf).
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -30,7 +31,6 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pipelineHash } from './acceptance.mjs';
 import { DEFAULT_PIECES, fixtures, sliceScore } from './camera-fusion.mjs';
 import { photoFacts } from './diagnose.mjs';
-import { pairNotes } from './imgpos.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
@@ -108,25 +108,25 @@ export function quartersOf(token) {
 }
 
 const STEP = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-const SHARPS = 'FCGDAEB';
-const LIFT = { '#': 1, '##': 2, b: -1, bb: -2, N: 0 };
-/** The MIDI number of a pitch token with an accidental token, under a key of `fifths`. */
-export function midiOf(pitch, lift, fifths) {
-  const m = /^([A-G])(\d)$/.exec(pitch);
-  if (!m) return null;
-  const letter = m[1];
-  const key = fifths > 0 ? (SHARPS.slice(0, fifths).includes(letter) ? 1 : 0) : fifths < 0 ? (SHARPS.slice(7 + fifths).includes(letter) ? -1 : 0) : 0;
-  const alter = lift in LIFT ? LIFT[lift] : key;
-  return 12 * (Number(m[2]) + 1) + STEP[letter] + alter;
+/**
+ * homr's accidental head is the sounding alteration, not the written sign: '_' is natural, as
+ * homr's music_xml_generator writes no <alter> for it (the key signature is never applied to it).
+ */
+const LIFT = { _: 0, '#': 1, '##': 2, b: -1, bb: -2, N: 0 };
+/** The MIDI number of a pitch token with an accidental token, or null. */
+export function midiOf(pitch, lift) {
+  const m = /^([A-G])(\d)$/.exec(pitch ?? '');
+  if (!m || !(lift in LIFT)) return null;
+  return 12 * (Number(m[2]) + 1) + STEP[m[1]] + LIFT[lift];
 }
 
 /** Pitch readings other than the chosen one, most probable first: [midi, p] from the top 3 x 3. */
-export function pitchAlternatives(c, fifths) {
-  const chosen = midiOf(c.pitch?.[0]?.[0], c.lift?.[0]?.[0], fifths);
+export function pitchAlternatives(c) {
+  const chosen = midiOf(c.pitch?.[0]?.[0], c.lift?.[0]?.[0]);
   const seen = new Map();
   for (const [p, pp] of c.pitch ?? [])
     for (const [l, pl] of c.lift ?? []) {
-      const midi = midiOf(p, l, fifths);
+      const midi = midiOf(p, l);
       if (midi === null || midi === chosen) continue;
       seen.set(midi, Math.max(seen.get(midi) ?? 0, pp * pl));
     }
@@ -153,15 +153,49 @@ export function auroc(items) {
   return wins / (pos.length * neg.length);
 }
 
-/** The key signature in force at each `<note>`, in document order. */
-function fifthsPerNote(xml) {
-  const out = [];
-  let fifths = 0;
-  for (const m of xml.matchAll(/<fifths>(-?\d+)<\/fifths>|<note(?:\s[^>]*)?>/g)) {
-    if (m[1] !== undefined) fifths = Number(m[1]);
-    else out.push(fifths);
+/** The fewest notes a page's doubt is measured on: a page of one or two notes says nothing. */
+export const MIN_NOTES = 8;
+/**
+ * A page's doubt exactly as the review computes it (apps/web/src/scan/verdict.ts, pageDoubt): over
+ * its `<note>` elements that are not rests, grace notes or tie continuations and carry homr's
+ * confidence, the mean of one minus the note's probability as read; null under MIN_NOTES notes.
+ */
+export function pageDoubtOf(xml) {
+  let sum = 0;
+  let count = 0;
+  for (const match of xml.matchAll(/<note(?:\s[^>]*)?>([\s\S]*?)<\/note>/g)) {
+    const body = match[1];
+    if (/<rest\b/.test(body) || /<grace\b/.test(body) || /<tie\s+type="stop"/.test(body)) continue;
+    const found = /<!--\s*conf:([\s\S]*?)-->/.exec(body);
+    if (!found) continue;
+    sum += 1 - jointOf(parseConfidence(found[1]));
+    count++;
   }
-  return out;
+  return count >= MIN_NOTES ? sum / count : null;
+}
+
+/**
+ * Recognised and true notes of one bar and staff, aligned in order (onset, then pitch) by edit
+ * distance: a pair costs 0 when pitch and length agree, 1 when one of them differs, 1.5 when both
+ * do, and a note left out costs 1. Onsets are not compared, so a note pushed later by an earlier
+ * misread length still pairs with its own true note. Returns [recognised, truth or null] pairs.
+ */
+export function alignNotes(rec, ref, lengthOf) {
+  const cost = (r, t) => (r.midi !== t.midi ? 1 : 0) + (Math.abs(lengthOf(r, 'rec') - lengthOf(t, 'ref')) > 1e-6 ? 1 : 0);
+  const pair = (r, t) => { const c = cost(r, t); return c === 2 ? 1.5 : c; };
+  const n = rec.length, m = ref.length;
+  const d = Array.from({ length: n + 1 }, (_, i) => Array.from({ length: m + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));
+  for (let i = 1; i <= n; i++)
+    for (let j = 1; j <= m; j++)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + pair(rec[i - 1], ref[j - 1]));
+  const out = [];
+  let i = n, j = m;
+  while (i > 0) {
+    if (j > 0 && d[i][j] === d[i - 1][j - 1] + pair(rec[i - 1], ref[j - 1])) { out.push([rec[i - 1], ref[j - 1]]); i--; j--; }
+    else if (d[i][j] === d[i - 1][j] + 1) { out.push([rec[i - 1], null]); i--; }
+    else j--;
+  }
+  return out.reverse();
 }
 
 const sha = (...parts) => {
@@ -196,7 +230,10 @@ function parseArgs(args) {
     else if (a === '--no-recognize') o.recognize = false;
     else if (a === '--variants') o.variants = new Set(args[++i].split(','));
     // Scores the cache of an earlier pipeline (its hash from a scorecard), without recognising.
-    else if (a === '--pipeline') o.pipeline = args[++i];
+    else if (a === '--pipeline') {
+      o.pipeline = args[++i];
+      o.recognize = false;
+    }
     else throw new Error(`unknown argument ${a}`);
   }
   return o;
@@ -218,47 +255,47 @@ function variantFiles(pageId, original, only) {
 function scoreNotes(E, ref, xml) {
   const rec = E.parseMusicXml(xml, { preserveNotation: true }).score;
   const conf = confidences(xml);
-  const fifths = fifthsPerNote(xml);
   const ev = E.evaluateOmr(ref, rec);
   const barsRight = ev.recognizedBars === ev.referenceBars;
   const page = { barsRight, pitchF1: ev.metrics.pitch.f1, fullNoteF1: ev.metrics.fullNote.f1, notes: [] };
-  const all = rec.notes.filter((n) => !n.isGrace).map((n) => ({ n, c: conf[n.sourceIndices?.[0]] })).filter((x) => x.c);
-  page.uncertainty = all.length ? all.reduce((a, x) => a + (1 - jointOf(x.c)), 0) / all.length : null;
-  page.notesWithConfidence = all.length;
   if (!barsRight) return page;
-  const pairs = new Map(pairNotes(ref, rec).map(([r, t]) => [r, t]));
-  const div = (score) => score.divisions;
-  const q = (ticks, score) => ticks / div(score);
-  const barOf = (score) => new Map(score.measures.map((m, i) => [m.index, i]));
-  const refBar = barOf(ref);
-  const recBar = barOf(rec);
-  const used = new Set(pairs.values());
-  for (const { n, c } of all) {
-    const truth = pairs.get(n);
-    const row = { ordinal: n.sourceIndices[0], joint: jointOf(c), doubt: doubtOf(c), rhythm: c.rhythm?.[0]?.[1] ?? 1, pitch: c.pitch?.[0]?.[1] ?? 1, lift: c.lift?.[0]?.[1] ?? 1, pitchRight: !!truth };
-    const local = (note, score, bars) => q(note.onsetTick - score.measures[bars.get(note.measureIndex)].startTick, score);
-    if (truth) {
-      const length = q(truth.offsetTick - truth.onsetTick, ref);
-      row.lengthRight = Math.abs(q(n.offsetTick - n.onsetTick, rec) - length) < 1e-6;
-      if (!row.lengthRight) {
-        const alts = rhythmAlternatives(c);
-        row.lengthTruthRank = alts.findIndex(([qq]) => Math.abs(qq - length) < 1e-6);
-      }
-    } else {
-      // A substitution: an unpaired truth note in the same bar at the same onset, on the same staff first.
-      const bar = recBar.get(n.measureIndex);
-      const at = local(n, rec, recBar);
-      const candidates = ref.notes.filter((t) => !t.isGrace && !used.has(t) && refBar.get(t.measureIndex) === bar && Math.abs(local(t, ref, refBar) - at) < 1e-6);
-      const t = candidates.find((x) => x.staff === n.staff) ?? candidates[0];
-      if (t) {
-        used.add(t);
-        const alts = pitchAlternatives(c, fifths[n.sourceIndices[0]] ?? 0);
+  const quarters = (note, score) => (note.offsetTick - note.onsetTick) / score.divisions;
+  const lengthOf = (note, side) => quarters(note, side === 'rec' ? rec : ref);
+  const groups = (score) => {
+    const bars = new Map(score.measures.map((m, i) => [m.index, i]));
+    const out = new Map();
+    for (const note of score.notes) {
+      if (note.isGrace) continue;
+      const key = `${bars.get(note.measureIndex)}|${note.staff}`;
+      (out.get(key) ?? out.set(key, []).get(key)).push(note);
+    }
+    for (const list of out.values()) list.sort((a, b) => a.onsetTick - b.onsetTick || a.midi - b.midi);
+    return out;
+  };
+  const truth = groups(ref);
+  for (const [key, notes] of groups(rec)) {
+    for (const [n, t] of alignNotes(notes, truth.get(key) ?? [], lengthOf)) {
+      const c = conf[n.sourceIndices?.[0]];
+      if (!c) continue;
+      const alternatives = pitchAlternatives(c);
+      const row = { ordinal: n.sourceIndices[0], joint: jointOf(c), doubt: doubtOf(c), rhythm: c.rhythm?.[0]?.[1] ?? 1, pitch: c.pitch?.[0]?.[1] ?? 1, lift: c.lift?.[0]?.[1] ?? 1, altP: alternatives[0]?.[1] ?? 0 };
+      row.pitchRight = !!t && t.midi === n.midi;
+      if (t && t.midi === n.midi) {
+        const length = quarters(t, ref);
+        row.lengthRight = Math.abs(quarters(n, rec) - length) < 1e-6;
+        // A tie chain is one sounding note of several written ones: no single token names its length.
+        if (!row.lengthRight && n.sourceIndices.length === 1)
+          row.lengthTruthRank = rhythmAlternatives(c).findIndex(([q]) => Math.abs(q - length) < 1e-6);
+        if (!row.lengthRight && n.sourceIndices.length > 1) row.tied = true;
+      } else if (t) {
+        // A substitution: aligned with a true note of another pitch.
         row.substitution = true;
-        row.pitchTruthRank = alts.findIndex(([midi]) => midi === t.midi);
+        row.pitchTruthRank = alternatives.findIndex(([midi]) => midi === t.midi);
+        row.pitchTruthP = alternatives.find(([midi]) => midi === t.midi)?.[1] ?? 0;
         row.semitones = n.midi - t.midi;
       }
+      page.notes.push(row);
     }
-    page.notes.push(row);
   }
   return page;
 }
@@ -312,13 +349,12 @@ export async function main(argv = process.argv.slice(2)) {
     try {
       if (ref) {
         const scored = scoreNotes(E, ref, xml);
+        scored.uncertainty = pageDoubtOf(xml);
         for (const n of scored.notes) noteRows.push({ page: page.id, variant, ...n });
         const { notes: _, ...rest } = scored;
         row = { ...row, ...rest, truth: true };
       } else {
-        const conf = confidences(xml).filter(Boolean);
-        row.uncertainty = conf.length ? conf.reduce((a, c) => a + (1 - jointOf(c)), 0) / conf.length : null;
-        row.notesWithConfidence = conf.length;
+        row.uncertainty = pageDoubtOf(xml);
       }
     } catch (error) {
       row.status = 'invalid';
@@ -359,7 +395,7 @@ export async function main(argv = process.argv.slice(2)) {
     }),
   };
   const subs = noteRows.filter((n) => n.substitution);
-  const lengths = noteRows.filter((n) => n.lengthRight === false);
+  const lengths = noteRows.filter((n) => n.lengthRight === false && !n.tied);
   const share = (rows, k) => (rows.length ? rows.filter((r) => r[k] >= 0 && r[k] < 3).length / rows.length : null);
   const suggestions = {
     errors: marks.wrong,
@@ -371,6 +407,24 @@ export async function main(argv = process.argv.slice(2)) {
     lengthTop3: share(lengths, 'lengthTruthRank'),
     otherErrors: noteRows.filter((n) => !n.pitchRight && !n.substitution).length,
   };
+  // The review offers at most two pitch readings, each only at or above a floor: what share of
+  // pitch misreadings would it offer the right pitch for, and on what share of right notes would it
+  // offer anything? The floor is chosen on the choose half and confirmed on the other.
+  const FLOORS = [1e-4, 1e-3, 3e-3, 1e-2, 3e-2, 0.1, 0.2];
+  const offers = (rows) =>
+    FLOORS.map((floor) => {
+      const s = rows.filter((n) => n.substitution);
+      const right = rows.filter((n) => !wrong(n));
+      return {
+        floor,
+        substitutions: s.length,
+        rightOffered: s.length ? s.filter((n) => n.pitchTruthRank >= 0 && n.pitchTruthRank < 2 && n.pitchTruthP >= floor).length / s.length : null,
+        rightNotes: right.length,
+        offeredOnRightNotes: right.length ? right.filter((n) => n.altP >= floor).length / right.length : null,
+        wrongNotesOffered: rows.filter(wrong).length ? rows.filter((n) => wrong(n) && n.altP >= floor).length / rows.filter(wrong).length : null,
+      };
+    });
+  suggestions.offers = { choose: offers(noteRows.filter((n) => CHOOSE.has(n.page))), confirm: offers(noteRows.filter((n) => !CHOOSE.has(n.page))) };
   const judged = pageRows.filter((r) => r.uncertainty != null);
   const page = {
     pages: judged.length,

@@ -154,3 +154,35 @@ export type { HandEval } from './eval/hands.js';
 export { evaluateOmr } from './eval/omr.js';
 export type { OmrMetric, OmrMetrics, OmrBarEvaluation, OmrEvaluation } from './eval/omr.js';
 export * from './embellish/index.js';
+export {
+  buildHandModel,
+  handSign,
+  inferFingering,
+  INITIAL_PLAYER_STATE,
+  nearest,
+  readEvent,
+  readEvents,
+  readHand,
+  steps,
+} from './readability/player.js';
+export type {
+  EventReading,
+  HandModel,
+  HandReading,
+  InferResult,
+  Pitched,
+  PlayerState,
+  ReaderRule,
+  ReadContext,
+  Seen,
+} from './readability/player.js';
+export {
+  DEFAULT_CONFIDENCE_FLOOR,
+  DENSITY_TARGET,
+  digitBudget,
+  greedyReduction,
+  reduceFingering,
+} from './readability/reduce.js';
+export type { PrintReason, ReduceOptions, ReduceResult } from './readability/reduce.js';
+export { editorDigits } from './readability/editorDigits.js';
+export type { EditorDigits } from './readability/editorDigits.js';

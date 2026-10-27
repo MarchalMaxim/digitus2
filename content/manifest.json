@@ -2903,6 +2903,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 46,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings.",
     "files": {
@@ -2941,6 +2942,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 27,
     "excerpt": null,
     "notes": "Mutopia title 'Mélodie'. Engraved from the Peters edition. The engraving is CC BY-SA 2.5 (attribution: Philippe Hézaine / Mutopia Project); this MusicXML is shared under the same license.",
     "files": {
@@ -2979,6 +2981,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 43,
     "excerpt": null,
     "notes": "Mutopia title 'Chanson fredonnée' (German 'Trällerliedchen'). Engraved from the Peters edition, including its fingerings. The engraving is CC BY-SA 3.0 (attribution: Philippe Hézaine / Mutopia Project); this MusicXML is shared under the same license.",
     "files": {
@@ -3017,6 +3020,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 31,
     "excerpt": null,
     "notes": "Mutopia title 'Petite pièce' (German 'Stückchen'). Engraved from the Peters edition, including its fingerings. The engraving is CC BY-SA 2.5 (attribution: Philippe Hézaine / Mutopia Project); this MusicXML is shared under the same license.",
     "files": {
@@ -10725,6 +10729,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 26,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings.",
     "files": {
@@ -10763,6 +10768,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 52,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings.",
     "files": {
@@ -10801,6 +10807,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 44,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings.",
     "files": {
@@ -10839,6 +10846,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 86,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Kleine Gesellschaft, Festive Gathering.",
     "files": {
@@ -10877,6 +10885,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 87,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Fortschritt, Progress.",
     "files": {
@@ -10915,6 +10924,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 28,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Rieselnder Bach, The limpid Stream. One catalog patch replaces the source's two \\override TupletBracket.bracket-visibility = ##f with \\override TupletBracket.stencil = ##f, which LilyPond engraves the same (no brackets) but which the converter reads, so the MusicXML no longer shows brackets under the triplets that start with a rest (bars 9 to 15); the notes are unchanged.",
     "files": {
@@ -10953,6 +10963,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 44,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Anmut, Gracefulness.",
     "files": {
@@ -10991,6 +11002,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 87,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Die Jagd, The Chase. One catalog patch: the right hand's full-bar rest with a fermata in bar 4 (R\\fermata) is written as a dotted half rest with the fermata (r2.\\fermata), because the converter drops articulations on full-bar rests; the notes and the MIDI are unchanged.",
     "files": {
@@ -11029,6 +11041,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 66,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Zartes Blümlein, A dainty Flower.",
     "files": {
@@ -11067,6 +11080,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 48,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Die Schäferin, The Shepherdess (a bergeronnette is a wagtail, the title Henle and most English editions use).",
     "files": {
@@ -11105,6 +11119,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 97,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Abschied, Farewell. In A minor; the source declares the key signature as C major.",
     "files": {
@@ -11143,6 +11158,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 55,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Trost.",
     "files": {
@@ -11181,6 +11197,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 47,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Steierischer Tanz, Styrian Dance. The two catalog patches change only LilyPond's MIDI, not the score: the piece opens with a grace note in each staff (a slashed C# and a spacer), which shifts LilyPond's whole MIDI timeline by 43/384 of a quarter, so the MIDI is rendered from a second \\score block without those two grace events (tagged layout). The MusicXML is byte-identical with and without the patches; the published Mutopia MIDI keeps the same constant shift (0 of 310 onsets match, an accepted difference).",
     "files": {
@@ -11219,6 +11236,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 70,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Klagelied, Lamentation.",
     "files": {
@@ -11257,6 +11275,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 106,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Plappermäulchen, Chatterbox.",
     "files": {
@@ -11485,6 +11504,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 14,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -11675,6 +11695,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 89,
     "excerpt": null,
     "notes": "Engraved by Rem Zolotykh from the Schirmer edition (1904), including its fingerings; the typesetter placed the engraving in the public domain. One catalog patch removes the source's hidden playback dynamic in bar 5 (an 'mp' with no stencil, which the converter would print).",
     "files": {
@@ -12017,6 +12038,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 45,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12055,6 +12077,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 27,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12093,6 +12116,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 36,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12131,6 +12155,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 34,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12169,6 +12194,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 23,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12207,6 +12233,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 55,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12245,6 +12272,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 75,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12283,6 +12311,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 27,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12321,6 +12350,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 37,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12359,6 +12389,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 64,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12397,6 +12428,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 56,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12435,6 +12467,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 43,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -12473,6 +12506,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 245,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -58322,6 +58356,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 63,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. One catalog patch removes the \\bar \"||\" that the source writes just before \\repeat volta 2 at bar 31, because it hid the start-repeat bar from which the converter derives the repeat, so the MusicXML now has the forward repeat (unfolded order: bars 1 to 46, 31 to 46, 47 to 96) and the notes are unchanged.",
     "files": {
@@ -58360,6 +58395,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 38,
     "excerpt": null,
     "notes": "Engraved from the Collection Litolff edition, including its fingerings. Litolff subtitle: Unruhe, Restlessness.",
     "files": {
@@ -58550,6 +58586,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 378,
     "excerpt": null,
     "notes": "Complete first movement. The engraving is CC BY-SA 3.0 (attribution: Alejandro Sierra / Mutopia Project); this MusicXML is shared under the same license. Editorial fingerings are kept in the .fingered copy.",
     "files": {
@@ -58588,6 +58625,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 58,
     "excerpt": null,
     "notes": "Mutopia title 'Sonatine I - Allegro'. Engraved from a 19th-century B. Schott's Söhne edition (Drei Sonatinen, Op. 20), including its fingerings.",
     "files": {
@@ -58626,6 +58664,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 14,
     "excerpt": null,
     "notes": "Mutopia title 'Sonatine I - Rondo'. Engraved from a 19th-century B. Schott's Söhne edition (Drei Sonatinen, Op. 20), including its fingerings.",
     "files": {
@@ -58664,6 +58703,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 124,
     "excerpt": "Bars 1-32 of 74: the theme section, two repeated halves that both end on the tonic (G major); the G minor middle section, the return and the coda are left out. The whole movement plays 5:18 with its repeats at the default tempo, over the 4:15 limit.",
     "notes": "Mutopia title 'Sonata Facile - Second movement'. Engraved from an IMSLP scan (edition not named), including its fingerings. The engraving is CC BY-SA 3.0 (attribution: Alejandro Sierra / Mutopia Project); this MusicXML is shared under the same license.",
     "files": {
@@ -58702,6 +58742,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 284,
     "excerpt": null,
     "notes": "Mutopia title 'Sonata Facile - Third movement'. Engraved from an IMSLP scan (edition not named), including its fingerings. The engraving is CC BY-SA 3.0 (attribution: Alejandro Sierra / Mutopia Project); this MusicXML is shared under the same license. Two left-hand slurs that start inside a two-voice passage and end in the main voice (a phrasing slur in bars 15-16 and a slur in bars 46-47) were removed before conversion: LilyPond 2.24 cannot end such a slur and drops it from its own engraving ('unterminated slur'), and the killed slur crashed the converter's dump engraver. Notes and MIDI are unchanged.",
     "files": {
@@ -59120,6 +59161,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 73,
     "excerpt": null,
     "notes": "Mutopia title 'Kinderscenen - Von fremden Ländern und Menschen'. Engraved from 'Leichte Stücke' (1900), including its fingerings (kept in the .fingered copy). The MIDI Mutopia published in 2006 (LilyPond 2.6) lacks two left-hand G3 re-strikes (bars 6 and 20), where the triplet voice strikes a G3 that another voice is holding; the LilyPond 2.24 MIDI of the same source matches the MusicXML exactly. The source writes its repeats as \\repeat volta 1 (printed, played once), which LilyPond 2.24 no longer prints; a catalog patch makes them volta 2, so the repeat sign after bar 8 appears as in the Mutopia engraving. A second patch turns the source's final \\bar \"|.\" into \\bar \":|.\": the Mutopia engraving ends on a plain final bar line, which leaves its start-repeat sign at bar 9 without an end, while Schumann repeats bars 9 to 22 as well (form A A B A B A, https://harmony.org.uk/book/schumann_analysis/schumann_formal_analysis.htm).",
     "files": {
@@ -59348,6 +59390,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 25,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -59386,6 +59429,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 33,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -59424,6 +59468,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 50,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -83288,6 +83333,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 117,
     "excerpt": "Bars 1-27 of 69: introduction and exposition (the development starts at bar 28).",
     "notes": "Engraved from the Berners edition (1908, ed. A. Winterberger), including its fingerings. The engraving is CC BY-SA 2.5 (attribution: Stewart Holmes / Mutopia Project); this MusicXML is shared under the same license. LilyPond 2.10 auto-beam commands were replaced by their 2.24 equivalent (triplets beamed per quarter-note beat) before conversion.",
     "files": {
@@ -83326,6 +83372,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 136,
     "excerpt": null,
     "notes": "Mutopia title 'Sonate Opus KV 331 - Rondo Alla Turca'. Complete movement (3:28 with its repeats at the default tempo). Engraved from an IMSLP scan (edition not named), including its fingerings. The source is a zip of two files: KV331_3_RondoAllaTurca.ly includes KV331_3_RondoAllaTurcaNotes.ly (SHA-256 281da85484e82f2c874d8ab6d710868b70b54d44b3a01b5b7d396b4086125d89); sourceSha256 is that of the main .ly, and the zip's is ac2eba084c584b5e820e8a4554efdf630fa63e661b61ad064a85c041ce92fb24.",
     "files": {
@@ -83364,6 +83411,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 71,
     "excerpt": "Bars 1-16 of 73: the theme and its restatement an octave higher, ending on the tonic (A-flat major); the last bar keeps its run-up into the first episode.",
     "notes": "Mutopia title 'Sonata No. 8 “Pathétique” (2nd Movement: Adagio cantabile)'. Engraved by Chris Sawer from the Berners edition (1908, ed. A. Winterberger), with fingerings and dynamics added by Javier Ruiz-Alma from the Köhler and Ruthardt Peters edition (1910), including those fingerings.",
     "files": {
@@ -83554,6 +83602,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 98,
     "excerpt": null,
     "notes": "Mutopia title 'Kinderscenen - Wichtige Begebenheit'. Engraved from 'Leichte Stücke' (1900), including its fingerings (kept in the .fingered copy). The engraving is CC BY 3.0 (attribution: Ying-Chun Liu / Mutopia Project); this MusicXML is shared under the same license. The source writes its repeat as \\repeat volta 1 (printed, played once), which LilyPond 2.24 no longer prints; a catalog patch makes it volta 2, so the repeat of bars 8 to 16, which starts and ends mid-bar, appears as in the Mutopia engraving (bars 8/8a and 16/16a).",
     "files": {
@@ -83592,6 +83641,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 60,
     "excerpt": "Pickup and bars 1-32 of 146: the main waltz theme (A section), ending on the tonic; the last bar keeps its run-up to the B section.",
     "notes": "Engraved from the Peters edition (ed. Herrmann Scholtz), including its fingerings. Moderato, quarter = 152 as printed in that edition.",
     "files": {
@@ -85859,6 +85909,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 126,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -85897,6 +85948,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 14,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -86467,6 +86519,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 75,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {
@@ -87645,6 +87698,7 @@
     },
     "arranger": null,
     "hasEditorialFingering": true,
+    "editorDigits": 68,
     "excerpt": null,
     "notes": "Complete source edition, with no excerpt or simplification. Both regenerated LilyPond 2.24 and independently published Mutopia MIDI checks are exact. MusicXML schema/readers/rendering, piano span, and medium/large fingering-law gates pass. Source edition, contributor, licence and attribution are preserved in the embedded rights.",
     "files": {

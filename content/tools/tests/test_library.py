@@ -170,3 +170,19 @@ def test_archive_genres():
     assert counts["songs"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-songs")
     assert counts["modern"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-modern")
     assert counts["folk"] == sum(1 for e in MANIFEST if e["collectionId"] == "pdmx-folk")
+
+
+def test_keep_editor_digits_carries_the_field_in_place():
+    entry = {"slug": "x", "hasEditorialFingering": True, "excerpt": None}
+    kept = build.keep_editor_digits(entry, {"slug": "x", "hasEditorialFingering": True, "editorDigits": 7})
+    assert list(kept) == ["slug", "hasEditorialFingering", "editorDigits", "excerpt"] and kept["editorDigits"] == 7
+    assert build.keep_editor_digits(entry, None) == entry
+    assert build.keep_editor_digits(entry, {"slug": "x"}) == entry
+    plain = {"slug": "y", "hasEditorialFingering": False}
+    assert build.keep_editor_digits(plain, {"editorDigits": 3}) == plain
+
+
+def test_editorial_entries_carry_editor_digits():
+    # written by `pnpm --filter @digitus2/engine run editor-digits`
+    missing = [e["slug"] for e in MANIFEST if e["hasEditorialFingering"] and "editorDigits" not in e]
+    assert missing == [], "run pnpm --filter @digitus2/engine run editor-digits"

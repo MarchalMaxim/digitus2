@@ -878,6 +878,76 @@ levels 4 and 5 and too loose for levels 1 to 3, where editors print half as much
 editor level is confirmed for pieces (library median 18, Burgmüller 12 to 17, Czerny 23) but not
 for exercise collections (Diabelli 34, Clementi 49), which the app does not ship.
 
+### 7.4 The engine's reduction on core30
+
+The engine implements this reader and reduction in `packages/engine/src/readability/`
+(`player.ts`, `reduce.ts`; [issue 94](https://github.com/MarchalMaxim/digitus2/issues/94)). Two
+things differ from 7.1 and 7.2, both measured on core30:
+
+* **A budget.** A complete fingering needs more digits than editors print (the greedy pass needs
+  27 to 306 digits where the editors of the 8 fingered core30 pieces print 26 to 378), so the
+  greedy set is cut to a budget: the level target of 7.3 (20, 25 or 30 percent of notes) and never
+  more than the editor prints on the same piece (`editorDigits` in `content/manifest.json`, one per
+  note the engine fingers, ties merged). Digits are removed by least loss: the digit whose absence
+  makes the reader misread the fewest notes goes first, and a digit that changes no reading is
+  never printed (first notes and pins excepted). The bar being played shows every digit in the
+  app, so what the budget leaves out is never missing while it is played.
+* **No confidence trigger by default.** The engine's per-note confidence is below 0.6 on most
+  core30 notes, so the trigger printed digits the reader infers anyway (56 on Twinkle, where 4
+  suffice). It stays an option (`confidenceFloor`).
+
+R5 reads identical copies only (`repeatPairs` in `fingering/repeats.ts`, same place in the bar)
+and applies the memory first, until the copy's first printed digit. The R0 to R4 reader matches
+the Python reference note for note on the right hand of the 6 fingered core30 pieces without grace
+notes (`reduce.oracle.test.ts`).
+
+Solved as the app solves (recommended weight set, medium hand). *Necessary* is the unbudgeted
+greedy pass; *reconstruction* is the share of the engine's fingers the reader gets right from the
+printed digits; *editor's places* is the same reader given the engine's fingers printed on the
+notes the editor fingered (same count, only the placement differs). Command:
+`pnpm --filter @digitus2/engine exec vitest run src/readability/reduce.library.test.ts`.
+
+| Piece | Level | Notes | Editor | Necessary | Printed | Density | Reconstruction | Editor's places |
+|---|---|---|---|---|---|---|---|---|
+| Twinkle | 1 | 64 | | 4 | 4 | 6.3 | 100 | |
+| Mary Had a Little Lamb | 1 | 34 | | 5 | 5 | 14.7 | 100 | |
+| Frère Jacques | 1 | 46 | | 7 | 7 | 15.2 | 100 | |
+| Jingle Bells | 1 | 82 | | 6 | 6 | 7.3 | 100 | |
+| Ode to Joy | 1 | 83 | | 2 | 2 | 2.4 | 100 | |
+| Scarborough Fair | 2 | 68 | | 18 | 14 | 20.6 | 92.6 | |
+| Greensleeves | 2 | 106 | | 29 | 21 | 19.8 | 94.3 | |
+| Amazing Grace | 2 | 69 | | 23 | 14 | 20.3 | 88.4 | |
+| Happy Birthday | 2 | 43 | | 15 | 8 | 18.6 | 88.4 | |
+| Pachelbel, Canon | 2 | 42 | | 7 | 7 | 16.7 | 100 | |
+| Minuet in G, BWV Anh. 114 | 2 | 204 | | 55 | 41 | 20.1 | 94.1 | |
+| Minuet in G minor, BWV Anh. 115 | 2 | 199 | | 52 | 40 | 20.1 | 95.0 | |
+| Mozart, Minuet K. 2 | 2 | 130 | | 41 | 25 | 19.2 | 90.0 | |
+| Burgmüller, La Candeur | 2 | 241 | 46 | 50 | 46 | 19.1 | 98.8 | 65.6 |
+| Schumann, Melody | 2 | 254 | 27 | 27 | 27 | 10.6 | 100 | 78.7 |
+| Burgmüller, Arabesque | 3 | 283 | 26 | 36 | 26 | 9.2 | 96.5 | 48.1 |
+| Burgmüller, Pastorale | 3 | 355 | 52 | 52 | 52 | 14.6 | 100 | 74.9 |
+| Burgmüller, Innocence | 3 | 215 | 44 | 42 | 42 | 19.5 | 100 | 72.1 |
+| Schumann, Wild Rider | 3 | 312 | | 51 | 51 | 16.3 | 100 | |
+| Clementi, Sonatina Op. 36 No. 1 | 3 | 333 | | 110 | 83 | 24.9 | 93.4 | |
+| Bach, Prelude in C | 3 | 549 | | 245 | 136 | 24.8 | 88.2 | |
+| Satie, Gymnopédie No. 1 | 3 | 282 | | 178 | 70 | 24.8 | 67.7 | |
+| Mozart, K. 545 i | 4 | 1,288 | 378 | 379 | 378 | 29.3 | 99.9 | 64.3 |
+| Bach, Invention No. 1 | 4 | 458 | | 101 | 101 | 22.1 | 100 | |
+| Chopin, Prelude Op. 28 No. 7 | 4 | 168 | | 82 | 50 | 29.8 | 85.1 | |
+| Chopin, Prelude Op. 28 No. 4 | 4 | 600 | | 126 | 126 | 21.0 | 100 | |
+| Beethoven, Für Elise | 4 | 905 | | 177 | 177 | 19.6 | 100 | |
+| Beethoven, Moonlight i | 5 | 476 | 117 | 306 | 117 | 24.6 | 71.0 | 37.6 |
+| Chopin, Waltz Op. 69 No. 2 | 5 | 341 | 60 | 86 | 60 | 17.6 | 90.9 | 30.2 |
+| Joplin, The Entertainer | 5 | 1,572 | | 541 | 472 | 30.0 | 96.1 | |
+
+Every piece prints at or under its level target and under the editor's count; on all 8 fingered
+pieces the reduction's digits explain the engine's fingering better than the same number of
+digits at the editor's places. The gate (`benchmarks/floor.json`, `readability`) holds the mean
+reconstruction per level group (levels 1-2: 96.1, level 3: 92.3, levels 4-5: 92.9, the 8
+fingered pieces: 94.6) at the measurement minus 0.5. The pieces where the reader needs the most
+(Gymnopédie, Moonlight: wide left-hand leaps and arpeggios, where the reader's position rule
+fails) are where the budget costs the most at rest.
+
 ## 8. Limitations
 
 * **Selection bias.** Editors finger what they consider hard or non-obvious, and they finger

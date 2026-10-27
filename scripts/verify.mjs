@@ -8,7 +8,7 @@
 //                          says what it ran and what it skipped. The full run stays the gate
 //                          before the pull request.
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
-//                          omr (requires build), omr:service, omr:acceptance (requires build), bundle, e2e,
+//                          omr (requires build), omr:service, library:rules, omr:acceptance (requires build), bundle, e2e,
 //                          e2e:loop (requires build), benchmark, benchmark:mutopia, hands, embellish)
 //
 // Steps run as a graph (scripts/verify-graph.mjs): a step starts once the steps it needs have
@@ -129,6 +129,15 @@ const steps = [
   { name: 'build', prepare: () => cmd('pnpm', ['build']) },
   // Research OMR runner tests use the freshly built parser/evaluator, as external recognizers do.
   { name: 'omr', deps: ['build'], prepare: () => cmd('pnpm', ['test:omr']) },
+  // The shared library's Firestore rules (library-store/), in the emulator inside Docker; SKIP
+  // where Docker is not running.
+  {
+    name: 'library:rules',
+    prepare: () =>
+      spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0
+        ? { skip: 'docker is not running' }
+        : cmd('node', ['library-store/run-rules-tests.mjs']),
+  },
   // The scan service and the loopback worker's Python tests; SKIP where Python or pytest is missing.
   {
     name: 'omr:service',

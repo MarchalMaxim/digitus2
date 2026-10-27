@@ -9,7 +9,7 @@ concurrency:
   group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 jobs:
-  # Seven jobs run side by side (issue #83): the wall time is the longest of them, about four
+  # Eight jobs run side by side (issue #83): the wall time is the longest of them, about four
   # minutes, instead of the sum of every step in one job, which was 12 to 17 minutes with the
   # Playwright suite alone taking 10 to 14 on two workers.
   checks:
@@ -28,6 +28,15 @@ jobs:
       - run: pnpm format:check
       - run: pnpm build
       - run: pnpm test:omr
+  # The shared library's Firestore rules in the emulator, inside Docker (library-store/).
+  library-rules:
+    name: library rules
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node library-store/run-rules-tests.mjs
   unit:
     name: unit tests
     runs-on: ubuntu-26.04

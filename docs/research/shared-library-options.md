@@ -1,6 +1,6 @@
 # Shared library of readers' scores: options
 
-**Open decision: [#132](https://github.com/MarchalMaxim/digitus2/issues/132).** The owner asks to "allow the user to store their scores in a shared library", free, on Google Cloud, with a light copyright notice. Section 7 recommends a pre-moderated store on Firestore in a Google Cloud project of its own without billing. Section 8 states the decision. Nothing is built until the owner picks.
+**Decision: the pre-moderated store, in a project of its own ([#132](https://github.com/MarchalMaxim/digitus2/issues/132)).** The owner asked to "allow the user to store their scores in a shared library", free, on Google Cloud, with a light copyright notice, and chose the recommendation of section 7, moderated in the Firebase console alone. What is built is described in `docs/shared-library.md`; this study stays as the record of the options weighed.
 
 The owner closed the first request for this, [#41](https://github.com/MarchalMaxim/digitus2/issues/41), with "no shared library" (option (c) of the first study, section 9). #132 reopens the question, so the study names the decisions it touches and what each option makes of them.
 

@@ -1,0 +1,28 @@
+name: Remove a shared score
+description: Ask for a score shared by a reader to be removed, for example because it is under copyright.
+title: 'Remove a shared score'
+labels: ['removal']
+body:
+  - type: input
+    id: link
+    attributes:
+      label: The score's address
+      description: The address of the shared score, ending in /#/shared/ and a code.
+      placeholder: https://marchalmaxim.github.io/digitus2/#/shared/...
+    validations:
+      required: true
+  - type: dropdown
+    id: reason
+    attributes:
+      label: What is wrong?
+      options:
+        - It is under copyright
+        - It is offensive or spam
+        - It does not play right
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Anything else
+      description: For a copyright notice, name the work and who holds the rights.

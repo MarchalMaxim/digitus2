@@ -491,6 +491,21 @@ def index_slug(slug: str, title: str) -> str:
     return "-" + hash8 if slug == f"pdmx-{pdmx_fragments.ascii_slug(title)}-{hash8}" else slug
 
 
+def keep_editor_digits(entry: dict, previous: dict | None) -> dict:
+    """`entry` with the `editorDigits` of the previous manifest entry of the piece, placed right after
+    `hasEditorialFingering`. The engine writes the field (`pnpm --filter @digitus2/engine run
+    editor-digits`), so a rebuild carries it over instead of dropping it; the engine's library test
+    fails when it no longer matches the edition's file."""
+    if previous is None or "editorDigits" not in previous or not entry["hasEditorialFingering"]:
+        return entry
+    out: dict = {}
+    for k, v in entry.items():
+        out[k] = v
+        if k == "hasEditorialFingering":
+            out["editorDigits"] = previous["editorDigits"]
+    return out
+
+
 def library_index(manifest: list[dict]) -> dict:
     """The library list in its compact columnar form (version 2; apps/web decodeLibraryIndex reads it):
 
@@ -578,7 +593,7 @@ def merge_results(results: dict[str, tuple[dict | None, dict]]) -> list[dict]:
             if entry is None:
                 by_slug.pop(slug, None)
             else:
-                by_slug[slug] = entry
+                by_slug[slug] = keep_editor_digits(entry, by_slug.get(slug))
             verification[slug] = record
         manifest = sorted((e for s, e in by_slug.items() if s in catalog_index),
                           key=lambda e: sort_key(e, catalog_index, collection_index))
@@ -605,10 +620,12 @@ def manifest_only() -> int:
                    if p["slug"] not in old or "stats" not in (verification.get(p["slug"]) or {})]
         if missing:
             raise SystemExit(f"build it first: no manifest entry or verification stats for {', '.join(missing)}")
-        manifest = [manifest_entry(p, {"source": old[p["slug"]]["source"],
-                                       "hasEditorialFingering": old[p["slug"]]["hasEditorialFingering"],
-                                       "scorePath": old[p["slug"]]["files"]["score"]},
-                                   verification[p["slug"]]["stats"], titles, genres=genres)
+        manifest = [keep_editor_digits(
+                        manifest_entry(p, {"source": old[p["slug"]]["source"],
+                                           "hasEditorialFingering": old[p["slug"]]["hasEditorialFingering"],
+                                           "scorePath": old[p["slug"]]["files"]["score"]},
+                                       verification[p["slug"]]["stats"], titles, genres=genres),
+                        old[p["slug"]])
                     for p in catalog]
         manifest.sort(key=lambda e: sort_key(e, catalog_index, collection_index))
         jsonio.write_json(MANIFEST, manifest)

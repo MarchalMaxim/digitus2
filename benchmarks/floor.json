@@ -50,6 +50,15 @@
     "accuracyMin": 91,
     "note": "Hand separation (digitus2 evalhands): macro accuracy in percent on the PIG test split, first annotation of each piece, channel = truth. Set by M6 Task 9 to the measured value minus 1.0. Set 2026-10-14 by M6 Task 9 from 92.05 (commit 86ea924, measured on the uncommitted M6 Tasks 3-6 tree over it; label m6-hands; macro 92.0499 minus 1.0, rounded down to one decimal; note-weighted 91.89; shipped tables from the library and the Mutopia train half, no PIG data)."
   },
+  "readability": {
+    "reconstruction": {
+      "levels12": 95.6,
+      "level3": 91.7,
+      "levels45": 92.3,
+      "editorial": 94.1
+    },
+    "note": "Edition digits (issue 94): the share of the engine's fingers a forward reader (packages/engine/src/readability/player.ts) recovers from the digits the reduction prints at rest, macro-averaged over the core30 pieces, by library level group, and over the 8 core30 pieces that carry an editor's fingering. Gated by packages/engine/src/readability/reduce.library.test.ts. Each piece is solved as the app solves it (medium hand, learned-open weight set, the solver's default level) and reduced with its manifest level and, for the 8 editorial pieces, the editor's digit count as the cap. The low-confidence trigger is off (the engine's confidence is below 0.6 on most core30 notes), the reduction keeps no digit that changes no reading. Set from the first measurement minus 0.5, rounded down to one decimal: levels12 96.107 -> 95.6 (15 pieces), level3 92.250 -> 91.7 (7), levels45 92.885 -> 92.3 (8), editorial 94.633 -> 94.1 (8)."
+  },
   "embellish": {
     "levels": [1, 2],
     "offeredMin": 176,

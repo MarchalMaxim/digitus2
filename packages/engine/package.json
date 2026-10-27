@@ -29,7 +29,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.src.json",
     "build": "tsc",
-    "cli": "tsx cli/main.ts"
+    "cli": "tsx cli/main.ts",
+    "editor-digits": "tsx cli/editorDigits.ts"
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.9.0",

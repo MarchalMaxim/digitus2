@@ -73,7 +73,7 @@ function handsOf(score: ScanScore): 'both' | 'single' | undefined {
  * every page as taken that homr read right on the confidence benchmark (research/omr/confidence.mjs,
  * docs/research/omr.md). homr's rhythm head never goes much past 0.9, so a clean page sits near 0.1.
  */
-export const UNCLEAR_DOUBT = 0.1282;
+export const UNCLEAR_DOUBT = 0.1264;
 /** The fewest notes a page's doubt is measured on: one or two hesitant notes say nothing. */
 export const MIN_DOUBT_NOTES = 8;
 

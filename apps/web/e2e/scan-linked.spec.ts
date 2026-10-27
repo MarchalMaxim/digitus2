@@ -32,8 +32,9 @@ function placed(xml: string): { xml: string; at: Array<{ x: number; y: number }>
   return { xml: out, at };
 }
 
-/** The point of the photo element over the photo pixel `p`. */
-async function onPhoto(photo: Locator, p: { x: number; y: number }) {
+/** The point of the photo element over the photo pixel `p`, scrolled into view (at 360 px the photo comes after the notation). */
+async function onPhoto(photo: Locator, p: { x: number; y: number }, scroll = true) {
+  if (scroll) await photo.evaluate((el) => el.scrollIntoView({ block: 'start' }));
   const box = (await photo.boundingBox())!;
   return { x: box.x + (p.x / WIDTH) * box.width, y: box.y + (p.y / HEIGHT) * box.height };
 }
@@ -71,7 +72,8 @@ test('scan linked: places to check are ringed on the photo and in the notation, 
   await page.locator('.scan-sheet [id="s1"]').hover({ force: true });
   await expect(page.locator('.scan-photo-focus')).toHaveCount(1);
   const frame = await page.locator('.scan-photo-focus').boundingBox();
-  const second = await onPhoto(photo(page), at[1]!);
+  // Measured where the photo is now, wherever the hover scrolled the page.
+  const second = await onPhoto(photo(page), at[1]!, false);
   expect(Math.abs(frame!.x + frame!.width / 2 - second.x)).toBeLessThan(4);
   expect(Math.abs(frame!.y + frame!.height / 2 - second.y)).toBeLessThan(4);
 

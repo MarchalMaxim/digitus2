@@ -182,7 +182,7 @@
 /* The photo and the notation are linked (issue 130): over the photo, a thin gray ring where a
    note is to be checked and an ink frame on the note in hand; in the notation, the same gray ring
    around the notehead and a gray frame on the note pointed at in the photo. Gray, never the
-   accent: the one red stays on the selected note. */
+   accent: the one accent stays on the selected note. */
 .scan-photo {
   position: relative;
 }

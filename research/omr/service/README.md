@@ -74,7 +74,7 @@ Both scripts stop at the first failing command and are safe to run again: they c
 
 ### Deploy
 
-`deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2]` enables the Cloud Run and Artifact Registry APIs, creates the Docker repository `<region>-docker.pkg.dev/<project>/<repository>` when missing and gives it a cleanup policy that keeps the 2 most recent versions of the image and deletes older ones (Artifact Registry applies it about once a day). It tags the image with the short git commit, with `-dirty` added when `research/omr` has uncommitted changes, and deploys it with these settings:
+`deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2]` enables the Cloud Run and Artifact Registry APIs, creates the Docker repository `<region>-docker.pkg.dev/<project>/<repository>` when missing and gives it a cleanup policy that keeps the most recent version of the image and the one tagged `live`, and deletes older ones (Artifact Registry applies it about once a day); after the smoke test it tags the deployed image `live`, because a revision needs its image to start an instance. It tags the image with the short git commit, with `-dirty` added when `research/omr` has uncommitted changes, and deploys it with these settings:
 
 | Setting               | Value                                                        |
 | --------------------- | ------------------------------------------------------------ |
@@ -87,6 +87,19 @@ Both scripts stop at the first failing command and are safe to run again: they c
 | Access                | public (`--allow-unauthenticated`, ingress all), port 8080   |
 
 It then prints the service URL and runs `smoke.mjs` against it, passing the first PDF under `research/omr/results/acceptance/fixtures-v1/` with `--pdf`; without one it says the PDF route was not smoked.
+
+### Deploying on merge
+
+`.github/workflows/scan-service.yml` deploys on a push to `main` that changes this directory, `prototypes/homr-photo`, `prototypes/photo-recovery`, `prototypes/local-worker`, `research/omr/.dockerignore` or the workflow, and on demand. It builds and pushes the image as `deploy.ps1` does, deploys a revision with the same settings, no traffic and the tag `candidate`, runs `smoke.mjs` against the tagged URL (the default photo and `aot-training.pdf`), and only then moves the traffic, removes the tag and tags the image `live`; a failed smoke leaves the previous revision serving and its image `live`. Authentication is keyless (GitHub OIDC through Workload Identity Federation, no JSON key), limited to pushes to `main` of `MarchalMaxim/digitus2`. The job is skipped until the repository variable `SCAN_DEPLOY_PROVIDER` is set.
+
+The owner runs `setup-github-deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2] [-GitHubRepo MarchalMaxim/digitus2]` once, with gcloud and `gh` signed in. It enables the IAM Credentials and Security Token Service APIs, creates the service account `digitus2-scan-deploy` (Cloud Run Developer on the project, Artifact Registry Writer on the repository, Service Account User on the run account), the pool and provider `github`, the binding that lets the repository act as the account, the cleanup policy that keeps one image, and the variables `SCAN_DEPLOY_PROVIDER` and `SCAN_DEPLOY_ACCOUNT`. It is safe to run again.
+
+| Item                                  | Cost                                                                                                                                                                         |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Image in Artifact Registry            | About 0.7 GB (690 MB measured); 0.5 GB a month is free, then 0.10 USD per GB a month ([pricing](https://cloud.google.com/artifact-registry/pricing)); with the kill-switch's function images (0.05 GB) about 0.03 USD a month with one image kept |
+| GitHub-hosted runner                  | Free minutes for public repositories ([billing](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions)) |
+| Workload Identity Federation          | Free                                                                                                                                                                         |
+| Smoke (about 50 s, one photo, one PDF) | Inside Cloud Run's free grant                                                                                                                                                |
 
 ### Budget and kill-switch
 

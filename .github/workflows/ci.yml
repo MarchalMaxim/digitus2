@@ -74,8 +74,10 @@ jobs:
       - run: pnpm --filter @digitus2/web build
       # Playwright is a dependency of apps/web only; the root has no playwright binary.
       # WebKit only where the iphone project's camera specs run (issue 145): the other groups name
-      # specs it does not match.
+      # specs it does not match. The download takes a minute or two; a stalled one fails after 10
+      # minutes, so it can be re-run, instead of holding the job for GitHub's 6 hours (issue 188).
       - run: pnpm --filter @digitus2/web exec playwright install --with-deps chromium ${{ matrix.slug == 'other-specs' && 'webkit' || '' }}
+        timeout-minutes: 10
       # Each group runs on the two workers the runner's four cores give (playwright.config.ts
       # leaves the worker count at Playwright's default on purpose: the playback checks sample
       # frames in real time and a crowded runner stretches them).

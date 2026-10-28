@@ -2,6 +2,16 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import { libraryScore, utf16leOf } from './helpers/files.js';
 
+/**
+ * Note ids split into the engine's (`n` and a number, written into the MusicXML) and how many
+ * others there are: Verovio draws a few notes the engine has no id for under ids of its own, new
+ * for each engraving, and paper is engraved from its own text (the printed digits only, issue 94).
+ */
+function noteIdSplit(ids: string[]): { engine: string[]; others: number } {
+  const engine = ids.filter((id) => /^n\d+$/.test(id)).sort();
+  return { engine, others: ids.length - engine.length };
+}
+
 // Simulate a nonblocking native dialog that retains active print media until afterprint.
 async function holdPrintDialog(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -90,11 +100,32 @@ for (const width of [390, 1280]) {
       const notes = await page
         .locator('.score-sheet g.note')
         .evaluateAll((els) => els.map((e) => e.id).sort());
-      const digits = await page
-        .locator('.score-sheet g.fing')
-        .evaluateAll((els) =>
-          els.map((e) => `${e.getAttribute('data-startid')}:${e.textContent}`).sort(),
-        );
+      // The paper shows the edition (issue 94): the notes the engine printed (the hook's set), and
+      // every note is engraved. The editor's own fingering, when shown, prints whole.
+      const digits = await page.evaluate(() => {
+        const hook = (
+          window as unknown as {
+            __digitus2Edition: { printed(): string[] | null; buildAll(): void };
+          }
+        ).__digitus2Edition;
+        hook.buildAll();
+        const ids =
+          hook.printed() ??
+          [...document.querySelectorAll('.score-sheet g.fing')].map((f) =>
+            f.getAttribute('data-startid')!.replace(/^#/, ''),
+          );
+        return [...ids].sort();
+      });
+      expect(digits.length).toBeGreaterThan(0);
+      // The screen still holds every digit's text, spare or not, once all pages are built.
+      const screenText = await page.evaluate(() =>
+        Object.fromEntries(
+          [...document.querySelectorAll('.score-sheet g.fing')].map((f) => [
+            f.getAttribute('data-startid')!.replace(/^#/, ''),
+            f.textContent,
+          ]),
+        ),
+      );
       const original = await page.locator('.score-sheet').innerHTML();
       await holdPrintDialog(page);
       if (width === 1280 && slug.startsWith('twinkle')) await page.keyboard.press('Control+p');
@@ -104,15 +135,24 @@ for (const width of [390, 1280]) {
       });
       await page.emulateMedia({ media: 'print' });
       expect(
-        await page.locator('.print-score g.note').evaluateAll((els) => els.map((e) => e.id).sort()),
-      ).toEqual(notes);
+        noteIdSplit(
+          await page.locator('.print-score g.note').evaluateAll((els) => els.map((e) => e.id)),
+        ),
+      ).toEqual(noteIdSplit(notes));
       expect(
         await page
           .locator('.print-score g.fing')
           .evaluateAll((els) =>
-            els.map((e) => `${e.getAttribute('data-startid')}:${e.textContent}`).sort(),
+            els.map((e) => e.getAttribute('data-startid')!.replace(/^#/, '')).sort(),
           ),
       ).toEqual(digits);
+      expect(
+        await page
+          .locator('.print-score g.fing')
+          .evaluateAll((els) =>
+            els.map((e) => [e.getAttribute('data-startid')!.replace(/^#/, ''), e.textContent]),
+          ),
+      ).toEqual(expect.arrayContaining(digits.map((id) => [id, screenText[id]])));
       await expect(page.locator('.print-score .is-muted')).toHaveCount(0);
       if (!slug.startsWith('schumann'))
         await expect(page.locator('.print-heading').first()).toContainText(

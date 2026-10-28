@@ -4,12 +4,29 @@ import { pieceKey, useAppStore, type View } from './store.js';
 import { NoteBurst } from './NoteBurst.js';
 import { Notice } from './Notice.js';
 import { LibraryView } from '../library/LibraryView.js';
-import { ScoreView } from '../score/ScoreView.js';
 
 // A lazy chunk: the About view reads ENGINE_VERSION from the engine's public API, and that import
 // keeps @xmldom/xmldom (CommonJS, so the bundler cannot drop it) in whatever chunk holds the view.
 // Imported eagerly it pushed the library page's initial JavaScript from 85 to 151 KB gzip.
 const ScanView = lazy(() => import('../scan/ScanView.js').then((m) => ({ default: m.ScanView })));
+
+// A lazy chunk too: the score view (transport, keyboard, cursor, the edition's open bars of
+// issue 94) is not needed to show the library, and in the first load it took the library page
+// past its 150 KB gzip budget. The library warms it while the page is idle (`warmScoreView`),
+// so a piece opened from the list does not wait for it.
+const loadScoreView = () => import('../score/ScoreView.js');
+const ScoreView = lazy(() => loadScoreView().then((m) => ({ default: m.ScoreView })));
+
+/** Fetches the score view's chunk once the page is idle, before the reader opens a piece. */
+function warmScoreView(): () => void {
+  const warm = () => void loadScoreView().catch(() => undefined);
+  if (typeof window.requestIdleCallback === 'function') {
+    const id = window.requestIdleCallback(warm, { timeout: 3000 });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = window.setTimeout(warm, 1500);
+  return () => window.clearTimeout(id);
+}
 
 const AboutView = lazy(() =>
   import('../about/AboutView.js').then((m) => ({ default: m.AboutView })),
@@ -58,6 +75,7 @@ export function App() {
   useEffect(() => {
     void import('../library/local/library.js').then((m) => m.installLocalLibrary());
   }, []);
+  useEffect(warmScoreView, []);
   const view = useAppStore((s) => s.view);
   const key = viewKey(view);
   useScrollOnViewChange(key);
@@ -65,7 +83,11 @@ export function App() {
     <>
       <Notice />
       {view.name === 'library' && <LibraryView />}
-      {view.name === 'score' && <ScoreView key={key} source={view.source} />}
+      {view.name === 'score' && (
+        <Suspense fallback={null}>
+          <ScoreView key={key} source={view.source} />
+        </Suspense>
+      )}
       {view.name === 'scan' && (
         <Suspense fallback={<p className="page">{t.app.openingScan}</p>}>
           <ScanView key={key} session={view.session} />

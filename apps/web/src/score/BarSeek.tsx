@@ -46,6 +46,11 @@ export interface BarSeekProps {
   canSeek: (bar: number) => boolean;
   onSeek: (bar: number) => void;
   handle?: Ref<BarSeekHandle>;
+  /**
+   * The bar (0-based) under a mouse pointer, or null when none is: the bar shows every digit
+   * (issue 94). Never called for touch, where nothing hovers.
+   */
+  onHover?: (bar: number | null) => void;
   children: ReactNode;
 }
 
@@ -59,6 +64,7 @@ export function BarSeek({
   canSeek,
   onSeek,
   handle,
+  onHover,
   children,
 }: BarSeekProps): JSX.Element {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -66,6 +72,15 @@ export function BarSeek({
   const pressRef = useRef<Press | null>(null);
   const [hover, setHover] = useState<BarBox | null>(null);
   const [print, setPrint] = useState<{ box: BarBox; key: number } | null>(null);
+
+  const hoverRef = useRef(onHover);
+  useEffect(() => {
+    hoverRef.current = onHover;
+  });
+  const hoveredBar = hover?.bar ?? null;
+  useEffect(() => {
+    hoverRef.current?.(hoveredBar);
+  }, [hoveredBar]);
 
   // New pages or a new width: the bars are measured again when next needed.
   useEffect(() => {

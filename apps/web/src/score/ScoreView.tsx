@@ -22,6 +22,7 @@ import { PianoKeyboard } from './PianoKeyboard.js';
 import { EndBurst } from './EndBurst.js';
 import { RedGhost, useRedFlight } from './RedFlight.js';
 import {
+  markSpare,
   mutedElements,
   redim,
   setDigits,
@@ -40,6 +41,7 @@ import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useAlongHalo } from './useAlongHalo.js';
 import { useCursor } from './useCursor.js';
+import { useOpenBars } from './useOpenBars.js';
 import { useHoveredNote } from './useHoveredNote.js';
 import { usePlayAlong, type AlongHint } from './usePlayAlong.js';
 import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
@@ -243,7 +245,10 @@ export function ScoreView({ source }: { source: PieceSource }) {
     if (!host || !changes || flashedRef.current === changes) return;
     flashedRef.current = changes;
     for (const [id, digit] of changes) patchesRef.current.map.set(id, digit);
-    setDigits(host, changes, flash);
+    // A digit the edition leaves out (spare) is hidden: it does not flash.
+    setDigits(host, changes, (el) => {
+      if (!el.classList.contains('is-spare')) flash(el);
+    });
   }, [host, doc.digitChanges, doc.pages]);
 
   // Playback, the cursor and the keyboard. An error stops playback (the score is gone).
@@ -274,6 +279,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
     pages: string[];
     mutedIds: ReadonlySet<string>;
     quiet: ReadonlySet<number> | undefined;
+    printed: ReadonlySet<string> | null;
   } | null>(null);
   useLayoutEffect(() => {
     const index = host ? pageWindowOf(host)?.index : undefined;
@@ -281,16 +287,26 @@ export function ScoreView({ source }: { source: PieceSource }) {
       pages: doc.pages,
       mutedIds,
       quiet: index ? quietPlaces(index, mutedIds) : undefined,
+      printed: doc.printed,
     };
-  }, [host, doc.pages, mutedIds]);
+  }, [host, doc.pages, mutedIds, doc.printed]);
+  // The digits the edition leaves out are marked spare (base.css hides them outside an open bar):
+  // on the pages in the DOM here, on a page built later in `decorate`. After the layout effect
+  // that wrote the pages, and in the same commit as the digits a re-solve patches.
+  useLayoutEffect(() => {
+    if (host) markSpare(host, doc.printed);
+  }, [host, doc.pages, doc.printed]);
   // The timing rings (issue 192), for a page built later: a torn page is rebuilt from markup,
   // without them.
   const timingMarksRef = useRef<readonly TimingMark[] | null>(null);
+  const openBarsOnPageRef = useRef<(page: SVGSVGElement) => void>(() => {});
   const decorate = useCallback((page: SVGSVGElement, i: number) => {
     const d = decorRef.current;
     const patches = patchesRef.current;
     const index = page.parentElement ? pageWindowOf(page.parentElement)?.index : undefined;
     if (!d) return;
+    markSpare(page, d.printed);
+    openBarsOnPageRef.current(page);
     if (index && patches.pages === d.pages && patches.map.size > 0) {
       const own = new Map([...patches.map].filter(([id]) => index.pageOfNote.get(id) === i));
       if (own.size > 0) setDigits(page, own);
@@ -354,6 +370,41 @@ export function ScoreView({ source }: { source: PieceSource }) {
     [dock],
   );
   const red = useRedFlight({ host, playButton, playback, groups, mutedHands, currentGroup });
+  // Playwright's check of the edition (a silent run only): the notes whose digits are printed at
+  // rest, and every page of a windowed sheet built, so a count covers the whole piece.
+  const printedRef = useRef(doc.printed);
+  useEffect(() => {
+    printedRef.current = doc.printed;
+  });
+  useEffect(() => {
+    if (!host || new URLSearchParams(window.location.search).get('audio') !== 'silent') return;
+    const w = window as unknown as { __digitus2Edition?: object };
+    const hook = {
+      printed: () => (printedRef.current ? [...printedRef.current] : null),
+      buildAll: () => pageWindowOf(host)?.buildAll(),
+    };
+    w.__digitus2Edition = hook;
+    return () => {
+      if (w.__digitus2Edition === hook) delete w.__digitus2Edition;
+    };
+  }, [host]);
+  // The bars that show every digit (issue 94): the cursor's, the next one while playing, and the
+  // one under a mouse pointer. After the cursor and the flight, so the marks they made are read.
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const openBarsOnPage = useOpenBars({
+    host,
+    pages: doc.pages,
+    groups,
+    currentGroup,
+    hopping: red.hopping,
+    playing: playback.playing,
+    hovered: hoveredBar,
+    mutedHands,
+    loop: playback.loop,
+  });
+  useLayoutEffect(() => {
+    openBarsOnPageRef.current = openBarsOnPage;
+  }, [openBarsOnPage]);
   // T11: the hand letters show only in bars where the hands come within a fifth. Decided from
   // the full groups (both hands, whatever is muted), never from the cursor's filtered ones.
   const lettered = useMemo(() => letteredBars(groups), [groups]);
@@ -679,6 +730,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
             canSeek={canSeek}
             onSeek={seekToBar}
             handle={barSeekRef}
+            onHover={setHoveredBar}
           >
             <ScoreSheet
               pages={doc.pages}

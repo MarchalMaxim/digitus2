@@ -46,8 +46,8 @@ if (-not (Test-Native { gcloud iam service-accounts describe $Deployer --project
 Invoke-Checked 'Granting Cloud Run Developer' {
   gcloud projects add-iam-policy-binding $Project --member "serviceAccount:$Deployer" --role roles/run.developer --condition None --quiet | Out-Null
 }
-Invoke-Checked 'Granting Artifact Registry Writer on the repository' {
-  gcloud artifacts repositories add-iam-policy-binding $Repository --location $Region --project $Project --member "serviceAccount:$Deployer" --role roles/artifactregistry.writer --quiet | Out-Null
+Invoke-Checked 'Granting Artifact Registry Repository Administrator on the repository (moving the tag live deletes it from the previous image)' {
+  gcloud artifacts repositories add-iam-policy-binding $Repository --location $Region --project $Project --member "serviceAccount:$Deployer" --role roles/artifactregistry.repoAdmin --quiet | Out-Null
 }
 Invoke-Checked 'Granting Service Account User on the run account' {
   gcloud iam service-accounts add-iam-policy-binding $RunAccount --project $Project --member "serviceAccount:$Deployer" --role roles/iam.serviceAccountUser --quiet | Out-Null

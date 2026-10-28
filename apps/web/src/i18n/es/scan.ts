@@ -132,6 +132,22 @@ export const scan: Messages['scan'] = {
     partlyReadWarning:
       'Una línea de música se leyó solo en parte, así que pueden faltar o sobrar compases. Compara el resultado con el original antes de practicar.',
     unknownWarning: 'El reconocedor indicó una advertencia desconocida. Revisa bien el original.',
+    tiesFromSlurs: (n: number) =>
+      plural('es', n, {
+        one: '# ligadura de expresión entre una nota y su repetición se leyó como ligadura de unión.',
+        other:
+          '# ligaduras de expresión entre una nota y su repetición se leyeron como ligaduras de unión.',
+      }),
+    emptyBarsJoined: (n: number) =>
+      plural('es', n, {
+        one: '# compás vacío se unió al compás contiguo.',
+        other: '# compases vacíos se unieron a los compases contiguos.',
+      }),
+    staffRegionsOmitted: (n: number) =>
+      plural('es', n, {
+        one: '# pentagrama pequeño adicional se dejó fuera de la lectura.',
+        other: '# pentagramas pequeños adicionales se dejaron fuera de la lectura.',
+      }),
     downloadPagesSummary: 'Descargar los archivos de cada página',
     downloadPage: (page: number) => `Descargar el MusicXML de la página ${page}`,
     downloadCombined: 'Descargar el MusicXML combinado',
@@ -146,8 +162,10 @@ export const scan: Messages['scan'] = {
     bars: (n: number) => plural('es', n, { one: '# compás', other: '# compases' }),
     bothHands: 'ambas manos',
     oneStaff: 'un solo pentagrama',
-    notJoined:
-      'Las páginas no se unieron en una sola partitura: cada una se muestra por separado y se puede descargar en Archivos. Sustituye la página que difiere y escanea de nuevo.',
+    notJoined: (page: number | undefined, reason: string | undefined) =>
+      page === undefined
+        ? 'Las páginas no se unieron en una sola partitura: cada una se muestra por separado y se puede descargar en Archivos. Sustituye la página que difiere y escanea de nuevo.'
+        : `La página ${page} no se pudo combinar con las demás páginas${reason ? `: ${reason}` : ''}. Fotografíala de nuevo, plana y con la página entera en el encuadre.`,
     readAsOneStaff: (pages: number[]) =>
       pages.length === 0
         ? 'Una página se leyó como un solo pentagrama: las manos están mezcladas. Cambia esa foto y escanea de nuevo.'
@@ -242,8 +260,11 @@ export const scan: Messages['scan'] = {
       removed: (where: string, pitch: string) => `${where}: ${pitch} quitada`,
       meter: (bar: string, from: string | undefined, to: string) =>
         `Desde el compás ${bar}: indicación de compás ${from ? `${from} → ` : ''}${to}`,
+      barline: (bar: string) => `Compás ${bar}: marcas de repetición quitadas`,
     },
     setMeter: (meter: string, bar: string) => `Usar ${meter} desde el compás ${bar}`,
+    removeMark: (mark: 'ending' | 'repeat') =>
+      mark === 'ending' ? 'Quitar la casilla de repetición' : 'Quitar el signo de repetición',
     stale: (kept: number) =>
       `Algunas correcciones guardadas ya no se aplican a este reconocimiento. Se conservan las primeras ${kept}.`,
     problemsSummary: (n: number) =>
@@ -257,6 +278,10 @@ export const scan: Messages['scan'] = {
         `${where}: una ligadura en ${pitch} no tiene nota que le corresponda.`,
       barTiming: (timing: string) => `Las manos no coinciden. ${timing}`,
       barLong: (timing: string) => `El compás es más largo que su indicación de compás. ${timing}`,
+      endingWithoutRepeat: (where: string) =>
+        `${where}: aquí se leyó una casilla de repetición, pero la partitura no tiene signo de repetición.`,
+      repeatWithoutEnd: (where: string) =>
+        `${where}: aquí se abre un signo de repetición y ningún signo de repetición lo cierra.`,
     },
     gap: (beats: number) => plural('es', beats, { one: '# tiempo', other: '# tiempos' }),
     downloadCorrected: 'Descargar MusicXML corregido',
@@ -282,6 +307,7 @@ export const scan: Messages['scan'] = {
       meter: 'Esa indicación de compás no se puede escribir aquí.',
       noBar: 'Este compás ya no está en la partitura.',
       sameMeter: (meter: string) => `El compás ya está en ${meter}.`,
+      noMark: 'Este compás no tiene marca de repetición.',
     },
   },
   phone: {
@@ -387,31 +413,32 @@ export const scan: Messages['scan'] = {
     invalidJob: 'Tarea de escaneo no válida.',
   },
   join: {
-    refused: (reason: string) =>
-      `Estas páginas no se pueden combinar con seguridad: ${reason}. Descarga cada página para corregirla en un editor de partituras.`,
+    refused: (page: number | undefined, reason: string) =>
+      page === undefined
+        ? `Estas páginas no se pueden combinar: ${reason}.`
+        : `La página ${page} no se puede combinar con las demás páginas: ${reason}.`,
     reasons: {
-      noPages: 'no hay páginas reconocidas',
-      entities: 'no se admiten entidades XML',
-      notPartwise: 'se esperaba MusicXML «partwise»',
-      repeats: 'las repeticiones o los saltos necesitan revisión manual',
-      transposition:
-        'la transposición o los atributos especiales de pentagrama o de compás necesitan revisión manual',
-      partLayout: 'disposición de las partes incompleta',
-      partOrder: 'el orden de las partes difiere de la lista de partes',
-      measureCounts: 'las partes tienen un número distinto de compases',
-      startingSetup: (page: number) =>
-        `la página ${page} necesita divisiones, armadura, indicación de compás y claves explícitos al principio`,
-      staffLayout: 'disposición inicial de los pentagramas incompleta',
-      staffChange: 'la disposición de los pentagramas cambia dentro de una página',
-      instrumentUndeclared: 'una referencia de instrumento no tiene declaración',
-      partCounts: 'el número de partes difiere',
-      layoutsDiffer: 'las disposiciones de partes o pentagramas difieren',
-      instrumentsDiffer: 'las disposiciones de instrumentos difieren',
-      duplicateIds: 'identificadores XML duplicados dentro de una página',
-      unresolvedId: 'referencia a un identificador XML que no existe',
-      spanNumber: 'número de signo gráfico no válido',
-      spanOverflow:
-        'más de 16 números propios de la página para un mismo tipo de signo de notación',
+      noPages: 'no se reconoció ninguna página',
+      entities: 'su archivo usa entidades XML',
+      notPartwise: 'su archivo no es MusicXML «partwise»',
+      transposition: 'incluye una transposición o atributos especiales de pentagrama o de compás',
+      partLayout: 'su lista de partes está incompleta',
+      partOrder: 'sus partes no están en el orden de su lista de partes',
+      measureCounts: (counts: number[]) =>
+        `se leyó como ${plural('es', counts.length, { one: '# parte', other: '# partes' })} con ${formatList('es', counts.map(String))} compases`,
+      startingSetup:
+        'al principio no tiene divisiones, armadura, indicación de compás ni claves explícitas',
+      staffLayout: 'la disposición inicial de sus pentagramas está incompleta',
+      staffChange: 'la disposición de sus pentagramas cambia dentro de la página',
+      instrumentUndeclared: 'hace referencia a un instrumento que no está declarado',
+      partCounts: (found: number, first: number) =>
+        `se leyó como ${plural('es', found, { one: '# parte', other: '# partes' })}, mientras que la página 1 tiene ${first}`,
+      layoutsDiffer: 'sus partes o pentagramas difieren de los de la página 1',
+      instrumentsDiffer: 'sus instrumentos difieren de los de la página 1',
+      duplicateIds: 'tiene identificadores XML duplicados',
+      unresolvedId: 'hace referencia a un identificador XML que no existe',
+      spanNumber: 'tiene un número no válido en un signo de notación',
+      spanOverflow: 'necesita más de 16 números para un mismo tipo de signo de notación',
     },
   },
 };

@@ -134,6 +134,10 @@ export function restPitch(score: ScanScore, rest: ScanNote) {
 
 /** A correction as listed for review, described from the raw recognition it applies to. */
 export function describeCorrection(t: Messages, raw: ScanScore, c: Correction): string {
+  if (c.kind === 'barline') {
+    const bar = raw.bars.find((b) => b.part === 0 && b.index === c.bar);
+    return bar ? t.scan.edit.changed.barline(bar.number) : '';
+  }
   if (c.kind === 'meter') {
     const bar = raw.bars.find((b) => b.part === 0 && b.index === c.bar);
     if (!bar) return '';
@@ -174,6 +178,14 @@ export function describeCorrection(t: Messages, raw: ScanScore, c: Correction): 
 }
 
 export function describeProblem(t: Messages, score: ScanScore, problem: Problem): string {
+  if (problem.kind === 'form') {
+    const bar = score.bars.find((b) => b.part === problem.part && b.index === problem.bar);
+    if (!bar) return '';
+    const at = t.scan.edit.bar(bar.number);
+    return problem.mark === 'ending'
+      ? t.scan.edit.problems.endingWithoutRepeat(at)
+      : t.scan.edit.problems.repeatWithoutEnd(at);
+  }
   if (problem.kind === 'bar-timing') {
     const used = problem.timing.staves.filter((s) => s.beats > 0);
     const disagree = used.some((s) => Math.abs(s.beats - used[0]!.beats) > 1e-9);
@@ -193,7 +205,7 @@ export function describeProblem(t: Messages, score: ScanScore, problem: Problem)
 
 /** The note a problem points at: its note, or the first note of its bar. */
 export function problemNote(score: ScanScore, problem: Problem): number | undefined {
-  if (problem.kind !== 'bar-timing') return problem.note;
+  if (problem.kind !== 'bar-timing' && problem.kind !== 'form') return problem.note;
   return readingOrder(score).find((n) => n.part === problem.part && n.measure === problem.bar)
     ?.ordinal;
 }

@@ -23,24 +23,30 @@ import {
   BusyError,
   BUSY_WAIT_MS,
   createScanClient,
-  GRAND_STAFF_WARNING,
   LIMITED,
   newJobId,
-  PARTLY_READ_WARNING,
   pause,
-  UNKNOWN_WARNING,
   type ScanServiceMetadata,
 } from './client.js';
 import { makeScanArchive } from './bundle.js';
-import { meterOffers, type Correction } from './corrections.js';
+import {
+  formOffers,
+  meterOffers,
+  type BarlineCorrection,
+  type Correction,
+  type MeterCorrection,
+  type Problem,
+} from './corrections.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import {
   GRAPHIC_SPAN_TAGS,
   GRAPHIC_SPAN_WARNING,
+  JoinRefusal,
   joinScanPages,
   PAIRED_STAVES_WARNING,
   stavesWerePaired,
 } from './join.js';
+import { reviewWarnings } from './warnings.js';
 import {
   validateScanImages,
   type PendingRetake,
@@ -135,7 +141,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     detail?: string;
   }>();
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [combineDetail, setCombineDetail] = useState<string>();
   const [selected, setSelected] = useState(0);
   const [reviewMode, setReviewMode] = useState<'combined' | 'page'>(
     hasPageRecognition && !initial.xml ? 'page' : 'combined',
@@ -195,9 +200,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const renderXml = pageMode ? sourcePages[selected]?.xml : (corrected?.renderXml ?? session.xml);
   // Counted whichever page is on screen: the verdict says how many places to check there are.
   const problems = useMemo(() => (corrected ? findProblems(corrected.score) : []), [corrected]);
-  // A misread meter is fixed from its place to check, offered only where the hands agree.
+  // A misread meter is fixed from its place to check, offered only where the hands agree; a
+  // repeat mark the score cannot carry offers its removal (issue 230).
   const offers = useMemo(
-    () => (corrected ? meterOffers(corrected.score, problems) : new Map()),
+    () =>
+      new Map<Problem, MeterCorrection | BarlineCorrection>([
+        ...(corrected ? meterOffers(corrected.score, problems) : []),
+        ...formOffers(problems),
+      ]),
     [corrected, problems],
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
@@ -242,12 +252,29 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [session.pages, session.xml],
   );
+  // Why the pages did not join, read from the pages themselves whenever there is no joined score
+  // (issue 230): it names the page, for the verdict line and Recognition details, in the language
+  // on screen, and a saved scan keeps it.
+  const refusal = useMemo(() => {
+    if (session.xml || !batch) return undefined;
+    const xmls = sourcePages.map((page) => page.xml);
+    if (!xmls.length || xmls.some((xml) => !xml)) return undefined;
+    try {
+      joinScanPages(xmls as string[]);
+    } catch (cause) {
+      return cause instanceof JoinRefusal ? cause : undefined;
+    }
+    return undefined;
+    // A batch's pages are session.pages (sourcePages is rebuilt each render for a single file).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.pages, session.xml, batch]);
   const found = readVerdict({
     pages: isImage
       ? sourcePages.map((page, index) => ({ warnings: page.warnings, doubt: doubts[index] }))
       : undefined,
     warnings: session.warnings ?? [],
     joined: !!session.xml || !batch,
+    refusal: refusal && { page: refusal.page, reason: refusal.reason },
     score: corrected?.score,
     problems: problems.length,
   });
@@ -256,7 +283,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const flaggedPages =
     found.kind === 'oneStaff' || found.kind === 'partlyRead' || found.kind === 'unclear'
       ? found.pages
-      : [];
+      : found.kind === 'notJoined' && found.page !== undefined
+        ? [found.page]
+        : [];
   const retakePage =
     isImage && flaggedPages.length && (batch || found.kind === 'unclear')
       ? flaggedPages[0]! - 1
@@ -668,9 +697,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     try {
       xml = joinScanPages(results.map((page) => page.xml!));
     } catch (cause) {
+      // The join's own reason is read again from the pages, for the verdict line and Recognition
+      // details.
       setError(batch ? NOT_COMBINED : (m) => messageOf(cause, m));
-      // The joiner's own reason goes under Recognition details.
-      if (batch) setCombineDetail(messageOf(cause));
       setReviewMode('page');
     }
     // After a page was photographed again, the other pages' corrections follow their notes.
@@ -707,18 +736,6 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setUndoStack([]);
     setPhase('review');
   };
-  const warningText = (warning: string) =>
-    warning === GRAPHIC_SPAN_WARNING
-      ? t.scan.review.graphicSpanWarning
-      : warning === UNKNOWN_WARNING
-        ? t.scan.review.unknownWarning
-        : warning === GRAND_STAFF_WARNING
-          ? t.scan.review.grandStaffWarning
-          : warning === PAIRED_STAVES_WARNING
-            ? t.scan.review.pairedStavesNote
-            : warning === PARTLY_READ_WARNING
-              ? t.scan.review.partlyReadWarning
-              : warning;
   const useResult = () => {
     if (!canUseResult) return;
     useAppStore.getState().openPiece({
@@ -749,7 +766,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       if (neighbour) setNote(neighbour.ordinal);
     }
     setUndoStack((stack) => [...stack, kept]);
-    if (correction.kind === 'meter') {
+    if (correction.kind === 'meter' || correction.kind === 'barline') {
       // The place to check it came from goes away: say what changed, and keep the focus nearby.
       const score = corrected.score;
       setEditStatus((m) => `${describeCorrection(m, score, correction)}.`);
@@ -1206,10 +1223,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                             </button>
                             {offer && bar && (
                               <button onClick={() => applyCorrection(offer)}>
-                                {t.scan.edit.setMeter(
-                                  `${offer.beats}/${offer.beatType}`,
-                                  bar.number,
-                                )}
+                                {offer.kind === 'meter'
+                                  ? t.scan.edit.setMeter(
+                                      `${offer.beats}/${offer.beatType}`,
+                                      bar.number,
+                                    )
+                                  : t.scan.edit.removeMark(
+                                      problem.kind === 'form' ? problem.mark : 'repeat',
+                                    )}
                               </button>
                             )}
                           </div>
@@ -1309,10 +1330,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 {sourcePages.some((p) => /<software>\s*homr\s*<\/software>/i.test(p.xml ?? '')) && (
                   <p>{t.scan.review.beamGrouping}</p>
                 )}
-                {[...(session.warnings ?? []), ...warnings].map((warning, i) => (
-                  <p key={i}>{warningText(warning)}</p>
+                {reviewWarnings(t, [...(session.warnings ?? []), ...warnings]).map((line, i) => (
+                  <p key={i}>{line}</p>
                 ))}
-                {combineDetail && <p>{t.scan.review.technical(combineDetail)}</p>}
+                {refusal && <p>{t.scan.review.technical(refusal.phrase(t))}</p>}
                 {[rendered, imported].map(
                   (state, i) =>
                     state?.detail &&

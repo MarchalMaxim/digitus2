@@ -196,6 +196,31 @@ describe('a verdict that blocks', () => {
     );
   });
 
+  it('names the page the join refused and what was read there (issue 230)', () => {
+    const v = verdict(
+      facts({
+        pages: [{}, {}, {}],
+        joined: false,
+        refusal: { page: 1, reason: (m) => m.scan.join.reasons.measureCounts([17, 19]) },
+      }),
+    );
+    expect(v).toMatchObject({ kind: 'notJoined', page: 2 });
+    expect(blocks(v)).toBe(true);
+    expect(verdictText(en, v)).toBe(
+      'Page 2 could not be combined with the other pages: it was read as 2 parts with 17 and 19 bars. Photograph it again, flat and with the whole page in view.',
+    );
+    expect(verdictText(nl, v)).toContain('Pagina 2');
+    // A refusal that concerns no page in particular keeps the plain line.
+    const whole = verdict(
+      facts({
+        pages: [{}],
+        joined: false,
+        refusal: { reason: (m) => m.scan.join.reasons.noPages },
+      }),
+    );
+    expect(verdictText(en, whole)).toMatch(/^The pages did not join into one score/);
+  });
+
   it('blocks only when it is not a plain reading', () => {
     expect(verdict(facts({ pages: [{}], score })).kind).toBe('read');
   });

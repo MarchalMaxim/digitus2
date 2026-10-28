@@ -1,4 +1,4 @@
-import type { Messages } from '../i18n/messages.js';
+import type { Messages, Phrase } from '../i18n/messages.js';
 import { GRAND_STAFF_WARNING, PARTLY_READ_WARNING } from './client.js';
 import type { ScanScore } from './notes.js';
 
@@ -23,6 +23,8 @@ export interface VerdictFacts {
   warnings: readonly string[];
   /** False when the pages did not join into one score. */
   joined: boolean;
+  /** Why they did not, and the page (0-based) the join refused when it named one (issue 230). */
+  refusal?: { page?: number | undefined; reason: Phrase } | undefined;
   /** The joined score as corrected; absent when it cannot be read. */
   score?: ScanScore | undefined;
   /** The places to check in that score. */
@@ -30,8 +32,8 @@ export interface VerdictFacts {
 }
 
 export type Verdict =
-  /** The pages did not join: each is shown on its own. */
-  | { kind: 'notJoined' }
+  /** The pages did not join: each is shown on its own. The page (1-based) and the reason, when the join named them. */
+  | { kind: 'notJoined'; page?: number | undefined; reason?: Phrase | undefined }
   /** Pages the scanner read as one staff, so the hands are mixed; none named when it did not say. */
   | { kind: 'oneStaff'; pages: number[] }
   /** Pages with a line read only in part, so bars are missing or added. */
@@ -98,7 +100,13 @@ export function pageDoubt(score: ScanScore): number | undefined {
 }
 
 export function verdict(facts: VerdictFacts): Verdict {
-  if (!facts.joined) return { kind: 'notJoined' };
+  if (!facts.joined) {
+    const refusal = facts.refusal;
+    if (!refusal) return { kind: 'notJoined' };
+    return refusal.page === undefined
+      ? { kind: 'notJoined', reason: refusal.reason }
+      : { kind: 'notJoined', page: refusal.page + 1, reason: refusal.reason };
+  }
   if (facts.warnings.includes(GRAND_STAFF_WARNING))
     return { kind: 'oneStaff', pages: flagged(facts, GRAND_STAFF_WARNING) };
   if (facts.warnings.includes(PARTLY_READ_WARNING))
@@ -121,7 +129,7 @@ export function verdictText(t: Messages, v: Verdict): string {
   const say = t.scan.verdict;
   switch (v.kind) {
     case 'notJoined':
-      return say.notJoined;
+      return say.notJoined(v.page, v.reason?.(t));
     case 'oneStaff':
       return say.readAsOneStaff(v.pages);
     case 'partlyRead':

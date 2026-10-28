@@ -132,6 +132,22 @@ export const scan: Messages['scan'] = {
       'Een regel muziek is maar gedeeltelijk gelezen, dus er kunnen maten ontbreken of bijgekomen zijn. Vergelijk het resultaat met het origineel voordat je gaat oefenen.',
     unknownWarning:
       'De herkenner meldde een onbekende waarschuwing. Controleer het origineel goed.',
+    tiesFromSlurs: (n: number) =>
+      plural('nl', n, {
+        one: '# legatoboog tussen een noot en de herhaling ervan is als overbinding gelezen.',
+        other:
+          '# legatobogen tussen een noot en de herhaling ervan zijn als overbindingen gelezen.',
+      }),
+    emptyBarsJoined: (n: number) =>
+      plural('nl', n, {
+        one: '# lege maat is samengevoegd met de maat ernaast.',
+        other: '# lege maten zijn samengevoegd met de maat ernaast.',
+      }),
+    staffRegionsOmitted: (n: number) =>
+      plural('nl', n, {
+        one: '# kleine extra notenbalk is buiten de herkenning gelaten.',
+        other: '# kleine extra notenbalken zijn buiten de herkenning gelaten.',
+      }),
     downloadPagesSummary: 'Bestanden per pagina downloaden',
     downloadPage: (page: number) => `MusicXML van pagina ${page} downloaden`,
     downloadCombined: 'Gecombineerde MusicXML downloaden',
@@ -146,8 +162,10 @@ export const scan: Messages['scan'] = {
     bars: (n: number) => plural('nl', n, { one: '# maat', other: '# maten' }),
     bothHands: 'beide handen',
     oneStaff: 'één notenbalk',
-    notJoined:
-      'De pagina’s zijn niet tot één partituur samengevoegd: elke pagina staat apart en is te downloaden onder Bestanden. Vervang de pagina die afwijkt en scan opnieuw.',
+    notJoined: (page: number | undefined, reason: string | undefined) =>
+      page === undefined
+        ? 'De pagina’s zijn niet tot één partituur samengevoegd: elke pagina staat apart en is te downloaden onder Bestanden. Vervang de pagina die afwijkt en scan opnieuw.'
+        : `Pagina ${page} kon niet met de andere pagina’s worden samengevoegd${reason ? `: ${reason}` : ''}. Fotografeer haar opnieuw, plat en met de hele pagina in beeld.`,
     readAsOneStaff: (pages: number[]) =>
       pages.length === 0
         ? 'Een pagina is als één notenbalk gelezen: de handen lopen door elkaar. Vervang die foto en scan opnieuw.'
@@ -243,8 +261,11 @@ export const scan: Messages['scan'] = {
       removed: (where: string, pitch: string) => `${where}: ${pitch} verwijderd`,
       meter: (bar: string, from: string | undefined, to: string) =>
         `Vanaf maat ${bar}: maatsoort ${from ? `${from} → ` : ''}${to}`,
+      barline: (bar: string) => `Maat ${bar}: herhalingstekens verwijderd`,
     },
     setMeter: (meter: string, bar: string) => `Gebruik ${meter} vanaf maat ${bar}`,
+    removeMark: (mark: 'ending' | 'repeat') =>
+      mark === 'ending' ? 'Volta verwijderen' : 'Herhalingsteken verwijderen',
     stale: (kept: number) =>
       `Sommige opgeslagen correcties passen niet meer bij deze herkenning. De eerste ${kept} blijven behouden.`,
     problemsSummary: (n: number) =>
@@ -258,6 +279,10 @@ export const scan: Messages['scan'] = {
         `${where}: een overbinding op ${pitch} heeft geen bijpassende noot.`,
       barTiming: (timing: string) => `De handen lopen niet gelijk. ${timing}`,
       barLong: (timing: string) => `De maat is langer dan de maatsoort. ${timing}`,
+      endingWithoutRepeat: (where: string) =>
+        `${where}: hier is een volta gelezen, maar de partituur heeft geen herhalingsteken.`,
+      repeatWithoutEnd: (where: string) =>
+        `${where}: hier begint een herhaling, maar geen herhalingsteken sluit haar af.`,
     },
     gap: (beats: number) => plural('nl', beats, { one: '# tel', other: '# tellen' }),
     downloadCorrected: 'Gecorrigeerde MusicXML downloaden',
@@ -283,6 +308,7 @@ export const scan: Messages['scan'] = {
       meter: 'Die maatsoort kan hier niet geschreven worden.',
       noBar: 'Deze maat staat niet meer in de partituur.',
       sameMeter: (meter: string) => `De maat staat al in ${meter}.`,
+      noMark: 'Deze maat heeft geen herhalingsteken.',
     },
   },
   phone: {
@@ -389,30 +415,32 @@ export const scan: Messages['scan'] = {
     invalidJob: 'Ongeldige scantaak.',
   },
   join: {
-    refused: (reason: string) =>
-      `Deze pagina’s kunnen niet veilig worden samengevoegd: ${reason}. Download elke pagina om die in een notatie-editor te corrigeren.`,
+    refused: (page: number | undefined, reason: string) =>
+      page === undefined
+        ? `Deze pagina’s kunnen niet worden samengevoegd: ${reason}.`
+        : `Pagina ${page} kan niet met de andere pagina’s worden samengevoegd: ${reason}.`,
     reasons: {
-      noPages: 'geen herkende pagina’s',
-      entities: 'XML-entiteiten worden niet ondersteund',
-      notPartwise: 'partwise MusicXML verwacht',
-      repeats: 'herhalingen of sprongen moeten handmatig worden nagekeken',
-      transposition:
-        'transpositie of bijzondere notenbalk- of maatkenmerken moeten handmatig worden nagekeken',
-      partLayout: 'onvolledige indeling van de partijen',
-      partOrder: 'de volgorde van de partijen wijkt af van de partijlijst',
-      measureCounts: 'partijen hebben een ongelijk aantal maten',
-      startingSetup: (page: number) =>
-        `pagina ${page} heeft een expliciete begin-indeling (divisions), toonsoort, maatsoort en sleutels nodig`,
-      staffLayout: 'onvolledige beginindeling van de notenbalken',
-      staffChange: 'de indeling van de notenbalken verandert binnen een pagina',
-      instrumentUndeclared: 'verwijzing naar een instrument zonder declaratie',
-      partCounts: 'het aantal partijen verschilt',
-      layoutsDiffer: 'de indeling van partijen of notenbalken verschilt',
-      instrumentsDiffer: 'de indeling van instrumenten verschilt',
-      duplicateIds: 'dubbele XML-id’s binnen één pagina',
-      unresolvedId: 'verwijzing naar een XML-id die niet bestaat',
-      spanNumber: 'ongeldig nummer van een notatieboog',
-      spanOverflow: 'meer dan 16 paginaspecifieke nummers voor één soort notatieboog',
+      noPages: 'er is geen pagina herkend',
+      entities: 'haar bestand gebruikt XML-entiteiten',
+      notPartwise: 'haar bestand is geen partwise MusicXML',
+      transposition: 'ze bevat een transpositie of bijzondere notenbalk- of maatkenmerken',
+      partLayout: 'haar partijlijst is onvolledig',
+      partOrder: 'haar partijen staan niet in de volgorde van de partijlijst',
+      measureCounts: (counts: number[]) =>
+        `ze is gelezen als ${plural('nl', counts.length, { one: '# partij', other: '# partijen' })} met ${formatList('nl', counts.map(String))} maten`,
+      startingSetup:
+        'ze heeft aan het begin geen expliciete divisions, toonsoort, maatsoort en sleutels',
+      staffLayout: 'haar beginindeling van de notenbalken is onvolledig',
+      staffChange: 'de indeling van haar notenbalken verandert binnen de pagina',
+      instrumentUndeclared: 'ze verwijst naar een instrument zonder declaratie',
+      partCounts: (found: number, first: number) =>
+        `ze is gelezen als ${plural('nl', found, { one: '# partij', other: '# partijen' })}, terwijl pagina 1 er ${first} heeft`,
+      layoutsDiffer: 'haar partijen of notenbalken verschillen van die van pagina 1',
+      instrumentsDiffer: 'haar instrumenten verschillen van die van pagina 1',
+      duplicateIds: 'ze heeft dubbele XML-id’s',
+      unresolvedId: 'ze verwijst naar een XML-id die niet bestaat',
+      spanNumber: 'ze heeft een ongeldig nummer voor een notatieboog',
+      spanOverflow: 'ze heeft meer dan 16 nummers nodig voor één soort notatieboog',
     },
   },
 };

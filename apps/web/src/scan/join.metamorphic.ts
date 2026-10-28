@@ -99,8 +99,8 @@ const NOT_CONTENT = ['note', 'backup', 'forward'];
 
 /**
  * What homr never writes, taken out of the piece before it is cut: directions, sounds, harmonies,
- * barlines (and with them repeats and endings, which the join refuses), beams, slurs, lyrics and
- * part abbreviations.
+ * barlines (and with them repeats and endings, which the join keeps as read and the relations do
+ * not compare), beams, slurs, lyrics and part abbreviations.
  * Both versions of every page lack them, so the relations compare the same notation.
  */
 function homrLike(xml: string): Document {

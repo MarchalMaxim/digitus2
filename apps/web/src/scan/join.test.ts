@@ -127,10 +127,6 @@ describe('joining separately recognized pages', () => {
     ['staff layout', page().replace('<staves>2', '<staves>1')],
     ['attributes', page().replace('<divisions>4</divisions>', '')],
     ['attributes', page().replace('<key><fifths>0</fifths></key>', '')],
-    [
-      'navigation',
-      page().replace('</measure>', '<barline><repeat direction="backward"/></barline></measure>'),
-    ],
     ['IDs', page().replace('id="n2"', 'id="n1"')],
     [
       'instrument reference',
@@ -154,9 +150,40 @@ describe('joining separately recognized pages', () => {
     expect(xml).toContain('<duration>0</duration>');
     expect(() => parseMusicXml(xml, { preserveNotation: true })).toThrow();
   });
-  it('refuses a part without measures, naming the measure counts', () => {
+  it('keeps repeat signs and volta brackets as read, with the bar they are on (issue 230)', () => {
+    // A stray first ending on page 1 and a repeat sign on page 2: the join is not the place to judge
+    // them, the review is, so both come through on their own bars.
+    const bracket = page().replace(
+      '<measure number="1">',
+      '<measure number="1"><barline location="left"><ending type="start" number="1"/></barline>',
+    );
+    const repeat = page().replace(
+      '</measure>',
+      '<barline location="right"><repeat direction="backward"/></barline></measure>',
+    );
+    const doc = new DOMParser().parseFromString(joinScanPages([bracket, repeat]), 'text/xml');
+    const measures = [...doc.querySelectorAll('measure')];
+    expect(measures).toHaveLength(2);
+    expect(measures[0]!.querySelector('barline > ending')?.getAttribute('number')).toBe('1');
+    expect(measures[1]!.querySelector('barline > repeat')?.getAttribute('direction')).toBe(
+      'backward',
+    );
+  });
+  it('names the page a refusal concerns, so the review can point at it (issue 230)', () => {
+    const violin = page().replace('<part-name>Piano', '<part-name>Violin');
+    expect(() => joinScanPages([page(), page(), violin])).toThrow(
+      /^Page 3 cannot be combined with the other pages: its parts or staves differ from page 1’s\.$/,
+    );
+    expect(() => joinScanPages([page(), page().replace('<divisions>4</divisions>', '')])).toThrow(
+      /^Page 2 cannot be combined/,
+    );
+    expect(() => joinScanPages([])).toThrow(/^These pages cannot be combined: no page/);
+  });
+  it('refuses a part without measures, naming the page and its bar counts', () => {
     const empty = page().replace(/<measure[\s\S]*<\/measure>/, '');
-    expect(() => joinScanPages([page(), empty])).toThrow(/measure counts/);
+    expect(() => joinScanPages([page(), empty])).toThrow(
+      'Page 2 cannot be combined with the other pages: it was read as 1 part with 0 bars.',
+    );
   });
   it('refuses parts of one page that hold different numbers of measures', () => {
     const measure =
@@ -170,7 +197,9 @@ describe('joining separately recognized pages', () => {
         '</score-partwise>',
         `<part id="P2">${measure}${measure.replace('"1"', '"2"')}</part></score-partwise>`,
       );
-    expect(() => joinScanPages([uneven, uneven])).toThrow(/measure counts/);
+    expect(() => joinScanPages([uneven, uneven])).toThrow(
+      'Page 1 cannot be combined with the other pages: it was read as 2 parts with 1 and 2 bars.',
+    );
   });
 });
 

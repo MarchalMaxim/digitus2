@@ -98,7 +98,7 @@ export function carryCorrections(
   const oldNotes = new Map(before.notes.map((n) => [n.ordinal, n]));
   const out: Correction[] = [];
   for (const c of corrections) {
-    if (c.kind === 'meter') {
+    if (c.kind === 'meter' || c.kind === 'barline') {
       const place = oldBars.byIndex.get(`0|${c.bar}`);
       const page = place ? Number(place.split('|')[0]) : undefined;
       if (!place || page === undefined || gone.has(page) || !sameLayout(page)) continue;

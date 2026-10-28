@@ -59,7 +59,7 @@ describe('where homr saw each note (issue 161)', () => {
     const pitched = before.find((n) => !n.rest && n.midi !== undefined)!;
     const rest = before.find((n) => n.rest && !n.chord)!;
     const lower = before.find((n) => !n.rest && n.staff === 1 && n.staves === 2)!;
-    const corrections: Exclude<Correction, { kind: 'meter' }>[] = [
+    const corrections: Exclude<Correction, { kind: 'meter' } | { kind: 'barline' }>[] = [
       { kind: 'pitch', note: pitched.ordinal, step: 'C', alter: 0, octave: 4 },
       { kind: 'duration', note: pitched.ordinal, type: 'half', dots: 0 },
       { kind: 'hand', note: lower.ordinal, staff: 2 },

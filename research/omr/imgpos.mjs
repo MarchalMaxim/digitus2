@@ -16,6 +16,13 @@
 // pairs them: bar by ordinal, then onset in the bar and MIDI pitch (staff breaks a tie), so only
 // notes recognised at the right time and pitch are measured. Distances are in the page's staff
 // spaces (the distance between two staff lines).
+//
+// The app does not draw its frame at homr's point (issue 226): apps/web/src/scan/heads.ts looks for
+// the notehead on the photo, at the note's pitch on the traced staff, near homr's point. This also
+// measures that placement, in Chromium, with the app's own code bundled by esbuild and run on each
+// page image decoded in the page as the review decodes it; a note it cannot place keeps homr's
+// point, as in the review. --variant=NAME measures another image variant (clean, shadow,
+// lowContrast, skew); the floor applies to clean.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -29,7 +36,7 @@ const REPO = resolve(HERE, '../..');
 const RESULTS = join(REPO, 'research/omr/results/acceptance');
 const CORPUS = join(HERE, 'acceptance/corpus.json');
 const FLOOR = join(HERE, 'acceptance/floor.json');
-const VARIANT = 'clean';
+const VARIANT = (process.argv.find((a) => a.startsWith('--variant=')) ?? '--variant=clean').slice(10);
 /** The thresholds reported, in staff spaces; 1.5 is half the review's crop height. */
 export const THRESHOLDS = [0.5, 0.75, 1, 1.5, 2, 3];
 
@@ -87,6 +94,74 @@ export function insideShare(dx, dy, halfHeight) {
 /** The half heights tried, in staff spaces: the crop is 2H high and 4H wide. */
 export const HALF_HEIGHTS = [1, 1.5, 2, 2.5, 3];
 
+/**
+ * The page's notes placed on their noteheads by the app's own code: `{piece id -> {ordinal -> {x, y}}}`.
+ * The code (heads.ts, the staff tracer, the note model) is bundled for the browser and run on each
+ * page image drawn in a canvas as NoteCrop's decode does, with the recognition's pitches and clefs.
+ */
+export async function placedPositions(jobs) {
+  const appRequire = createRequire(join(REPO, 'apps/web/package.json'));
+  const esbuild = await import(
+    pathToFileURL(createRequire(appRequire.resolve('vite')).resolve('esbuild')).href
+  );
+  const web = join(REPO, 'apps/web/src/scan');
+  const bundle = await (esbuild.default ?? esbuild).build({
+    stdin: {
+      contents: `
+        import { analyzeStaffGeometry } from './camera/staffGeometry.ts';
+        import { headPageFrom, placeHead } from './heads.ts';
+        import { parseScanXml, readScanScore } from './notes.ts';
+        const ANALYSIS_WIDTH = 1000, ANALYSIS_HEIGHT = 1800; // NoteCrop.tsx
+        window.placeAll = async (base64, mime, xml) => {
+          const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+          const bitmap = await createImageBitmap(new Blob([bytes], { type: mime }));
+          const { width, height } = bitmap;
+          const analysis = Math.min(1, ANALYSIS_WIDTH / width, ANALYSIS_HEIGHT / height);
+          const small = document.createElement('canvas');
+          small.width = Math.max(1, Math.round(width * analysis));
+          small.height = Math.max(1, Math.round(height * analysis));
+          const context = small.getContext('2d', { willReadFrequently: true });
+          context.drawImage(bitmap, 0, 0, small.width, small.height);
+          const data = context.getImageData(0, 0, small.width, small.height);
+          const start = performance.now();
+          const heads = headPageFrom(data, analyzeStaffGeometry(data), small.width / width);
+          const placed = {};
+          let count = 0;
+          for (const note of readScanScore(parseScanXml(xml)).notes) {
+            const at = heads && placeHead(heads, note);
+            if (at) placed[note.ordinal] = at;
+            count++;
+          }
+          return { placed, staves: heads ? heads.staves.length : 0, notes: count, ms: performance.now() - start };
+        };`,
+      resolveDir: web,
+      loader: 'ts',
+    },
+    bundle: true,
+    write: false,
+    format: 'iife',
+    platform: 'browser',
+    logLevel: 'silent',
+  });
+  const { chromium } = await import(pathToFileURL(appRequire.resolve('@playwright/test')).href).then((m) => m.default ?? m);
+  const browser = await chromium.launch({ headless: true });
+  const out = new Map();
+  try {
+    const page = await browser.newPage();
+    await page.addScriptTag({ content: bundle.outputFiles[0].text });
+    for (const { id, image, xml } of jobs) {
+      const result = await page.evaluate(
+        ({ base64, mime, xml }) => window.placeAll(base64, mime, xml),
+        { base64: readFileSync(image).toString('base64'), mime: image.endsWith('.png') ? 'image/png' : 'image/jpeg', xml },
+      );
+      out.set(id, result);
+    }
+  } finally {
+    await browser.close();
+  }
+  return out;
+}
+
 /** Signed offsets (recognised minus true, in staff spaces) per axis: signed median, absolute median and 90th percentile, crop shares. */
 function axes(dx, dy) {
   const round = (x) => (x === null ? null : Math.round(x * 1000) / 1000);
@@ -101,6 +176,22 @@ function axes(dx, dy) {
     p90AbsDx: summarise(adx).p90,
     p90AbsDy: summarise(ady).p90,
     insideCrop: Object.fromEntries(HALF_HEIGHTS.map((h) => [h, insideShare(adx, ady, h)])),
+  };
+}
+
+/**
+ * How the points land, per axis in staff spaces (dx, dy are signed): the share within each half
+ * side `framed` of the head in both axes, and the share that ends farther from the head than
+ * `before` did by more than a quarter space.
+ */
+export const FRAMED = [0.5, 0.75];
+export function framing(dx, dy, beforeDx, beforeDy) {
+  const share = (hits) => (dx.length ? Math.round((hits / dx.length) * 1000) / 1000 : null);
+  const within = (half, ex, ey) => ex.filter((x, i) => Math.abs(x) <= half && Math.abs(ey[i]) <= half).length;
+  return {
+    framed: Object.fromEntries(FRAMED.map((h) => [h, share(within(h, dx, dy))])),
+    framedBefore: Object.fromEntries(FRAMED.map((h) => [h, share(within(h, beforeDx, beforeDy))])),
+    worse: share(dx.filter((x, i) => Math.hypot(x, dy[i]) > Math.hypot(beforeDx[i], beforeDy[i]) + 0.25).length),
   };
 }
 
@@ -264,12 +355,18 @@ export async function main(args = process.argv.slice(2)) {
   const E = await import(pathToFileURL(join(REPO, 'packages/engine/dist/src/index.js')).href);
   const truth = await truthPositions(dir, manifest);
   const rows = [];
-  const all = { distances: [], dx: [], dy: [] };
+  const all = { distances: [], dx: [], dy: [], placedDx: [], placedDy: [] };
+  const placements = await placedPositions(
+    jobs
+      .filter((job) => existsSync(job.output))
+      .map((job) => ({ id: job.piece.id, image: job.input, xml: readFileSync(job.output, 'utf8') })),
+  );
   for (const job of jobs) {
     const row = { piece: job.piece.id, status: 'missing' };
     rows.push(row);
     if (!existsSync(job.output)) continue;
     const xml = readFileSync(job.output, 'utf8');
+    const placement = placements.get(job.piece.id);
     const positions = imagePositions(xml);
     const { heads, space } = truth.get(job.piece.id);
     let reference, recognized;
@@ -286,7 +383,10 @@ export async function main(args = process.argv.slice(2)) {
     const distances = [];
     const dx = [];
     const dy = [];
+    const placedDx = [];
+    const placedDy = [];
     let unplaced = 0;
+    let found = 0;
     for (const [rec, ref] of pairs) {
       const at = positions[rec.sourceIndices[0]];
       const head = heads[ref.sourceIndices[0]];
@@ -297,6 +397,11 @@ export async function main(args = process.argv.slice(2)) {
       distances.push(Math.hypot(at.x - head.x, at.y - head.y) / space);
       dx.push((at.x - head.x) / space);
       dy.push((at.y - head.y) / space);
+      // The app's frame: the head found on the photo, else homr's point.
+      const placed = placement.placed[rec.sourceIndices[0]];
+      if (placed) found++;
+      placedDx.push(((placed ?? at).x - head.x) / space);
+      placedDy.push(((placed ?? at).y - head.y) / space);
     }
     Object.assign(row, {
       staffSpacePx: Math.round(space * 100) / 100,
@@ -306,10 +411,15 @@ export async function main(args = process.argv.slice(2)) {
       unplaced,
       ...summarise(distances),
       ...axes(dx, dy),
+      staffTraces: placement.staves,
+      headFound: found,
+      ...framing(placedDx, placedDy, dx, dy),
     });
     all.distances.push(...distances);
     all.dx.push(...dx);
     all.dy.push(...dy);
+    all.placedDx.push(...placedDx);
+    all.placedDy.push(...placedDy);
   }
   const total = {
     pages: rows.length,
@@ -319,9 +429,11 @@ export async function main(args = process.argv.slice(2)) {
     unplaced: rows.reduce((s, r) => s + (r.unplaced ?? 0), 0),
     ...summarise(all.distances),
     ...axes(all.dx, all.dy),
+    headFound: rows.reduce((s, r) => s + (r.headFound ?? 0), 0),
+    ...framing(all.placedDx, all.placedDy, all.dx, all.dy),
   };
   const card = { schemaVersion: 1, corpus: corpus.version, variant: VARIANT, pipeline, total, rows };
-  writeFileSync(join(RESULTS, 'imgpos.json'), JSON.stringify(card, null, 2));
+  writeFileSync(join(RESULTS, VARIANT === 'clean' ? 'imgpos.json' : `imgpos-${VARIANT}.json`), JSON.stringify(card, null, 2));
 
   const fmt = (x) => (x === null || x === undefined ? '-' : String(x));
   console.log('\npiece                                    sp px  paired  median   p90  <=1   <=1.5 <=2   crop1.5');
@@ -331,10 +443,24 @@ export async function main(args = process.argv.slice(2)) {
     );
   console.log(`\nall: ${JSON.stringify(total)}`);
 
+  console.log(`
+${VARIANT}: share of notes within half a staff space (and ${FRAMED[1]}) of the head in both axes, homr's point -> the app's frame`);
+  console.log('piece                                    staves  found/paired   <=0.5 before -> after   <=0.75 before -> after   worse');
+  const line = (name, r, staves) =>
+    `${name.slice(0, 40).padEnd(40)} ${staves.padStart(6)} ${`${r.headFound}/${r.paired}`.padStart(12)}   ${`${r.framedBefore[0.5]} -> ${r.framed[0.5]}`.padStart(21)}   ${`${r.framedBefore[0.75]} -> ${r.framed[0.75]}`.padStart(22)}   ${r.worse}`;
+  for (const r of rows) if (r.framed) console.log(line(r.piece, r, String(r.staffTraces)));
+  console.log(line('all', total, ''));
+
   const floor = existsSync(FLOOR) ? JSON.parse(readFileSync(FLOOR, 'utf8')).imgpos : undefined;
   if (!floor) {
     console.log('\nfloor.json sets no imgpos floor: measured only.');
     return 0;
+  }
+  // The placed frame is checked on the clean pages, the floor's own.
+  if (VARIANT === 'clean' && floor.placedFramedMin !== undefined && total.framed[0.5] < floor.placedFramedMin) {
+    console.log(`
+Regression: ${total.framed[0.5]} of notes framed within half a staff space of the head, floor ${floor.placedFramedMin}`);
+    return 1;
   }
   const share = total.insideCrop[floor.halfHeightSpaces];
   if (typeof share !== 'number' || share < floor.insideCropMin) {

@@ -4,7 +4,7 @@
  * hunting for it on the page. Black and white: the photo is shown in grey and the thin frame is
  * black, so it never takes the screen's one red.
  */
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { analyzeStaffGeometry } from './camera/staffGeometry.js';
 import {
   CROP_HALF_HEIGHT_SPACES,
@@ -14,6 +14,7 @@ import {
   FRAME_SPACES,
   staffSpaceFrom,
 } from './crop.js';
+import { headPageFrom, placeHead, type HeadNote, type HeadPage } from './heads.js';
 
 /** The page photo, decoded once: a canvas of at most 2048 px a side that every crop of it draws from. */
 export interface PageImage {
@@ -24,6 +25,8 @@ export interface PageImage {
   height: number;
   /** The page's staff space in uploaded pixels. */
   space: number;
+  /** The page as noteheads are looked for on it; absent when no staves were traced. */
+  heads?: HeadPage | undefined;
 }
 
 const DRAW_SIDE = 2048;
@@ -49,12 +52,15 @@ async function decode(file: Blob): Promise<PageImage | null> {
       small.height = Math.max(1, Math.round(height * analysis));
       const smallContext = small.getContext('2d', { willReadFrequently: true });
       let space: number | undefined;
+      let heads: HeadPage | undefined;
       if (smallContext) {
         smallContext.drawImage(bitmap, 0, 0, small.width, small.height);
         const data = smallContext.getImageData(0, 0, small.width, small.height);
-        space = staffSpaceFrom(analyzeStaffGeometry(data), small.width / width);
+        const geometry = analyzeStaffGeometry(data);
+        space = staffSpaceFrom(geometry, small.width / width);
+        heads = headPageFrom(data, geometry, small.width / width);
       }
-      return { canvas, scale, width, height, space: space ?? fallbackSpace(width) };
+      return { canvas, scale, width, height, space: space ?? fallbackSpace(width), heads };
     } finally {
       bitmap.close?.();
     }
@@ -122,12 +128,16 @@ const FRAME_HEIGHT = FRAME_SPACES / (2 * CROP_HALF_HEIGHT_SPACES);
 
 export function NoteCrop({
   image: file,
-  at,
+  at: homr,
+  note,
   label,
   size,
 }: {
   image: Blob;
+  /** Where homr saw the note: the crop is centred here until the note's head is found. */
   at: { x: number; y: number };
+  /** The note, so its head can be looked for on the photo (issue 226). */
+  note?: HeadNote;
   label: string;
   size: 'large' | 'small';
 }) {
@@ -145,7 +155,12 @@ export function NoteCrop({
     };
   }, [file]);
   const { width, height } = SIZES[size];
-  const { x, y } = at;
+  // The crop is centred on the note's head where the photo shows one, else on homr's point.
+  const placed = useMemo(
+    () => (image?.heads && note ? placeHead(image.heads, note) : undefined),
+    [image, note],
+  );
+  const { x, y } = placed ?? homr;
   // Sized and drawn in the commit that shows the crop, so nothing (a paint, a reader of the page)
   // ever sees the canvas at its default 300 x 150.
   useLayoutEffect(() => {
@@ -183,7 +198,12 @@ export function NoteCrop({
   }, [file, image, x, y, width, height]);
   if (!image) return null;
   return (
-    <span className={`note-crop note-crop-${size}`} role="img" aria-label={label}>
+    <span
+      className={`note-crop note-crop-${size}`}
+      role="img"
+      aria-label={label}
+      data-at={`${Math.round(x * 10) / 10},${Math.round(y * 10) / 10}`}
+    >
       <canvas ref={canvas} aria-hidden="true" />
       <span
         className="note-crop-frame"

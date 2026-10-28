@@ -48,7 +48,8 @@ import {
   type ScanSession,
 } from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore, type ScanNote } from './notes.js';
-import { NoteCrop, pageImage } from './NoteCrop.js';
+import { NoteCrop, pageImage, type PageImage } from './NoteCrop.js';
+import { placeHead } from './heads.js';
 import { fallbackSpace } from './crop.js';
 import { useHoverMark, useScanMarks } from './linked.js';
 import { isTouchOnly } from './phone.js';
@@ -304,27 +305,32 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   useEffect(() => {
     setPointed(null);
   }, [selected]);
-  // The shown photo's staff space, for the size of its rings; a guess until the page is analysed.
-  const [space, setSpace] = useState<{ file: Blob; space: number }>();
+  // The shown photo, once decoded: its staff space sizes the rings (a guess until then) and its
+  // staves place each note's frame on the notehead (issue 226).
+  const [shown, setShown] = useState<{ file: Blob; image: PageImage }>();
   const shownPhoto = isImage && editable ? sourcePages[selected]?.file : undefined;
   useEffect(() => {
     if (!shownPhoto) return;
     let live = true;
     void pageImage(shownPhoto).then((image) => {
-      if (live && image) setSpace({ file: shownPhoto, space: image.space });
+      if (live && image) setShown({ file: shownPhoto, image });
     });
     return () => {
       live = false;
     };
   }, [shownPhoto]);
+  const heads = shown?.file === shownPhoto ? shown?.image.heads : undefined;
   const photoPoints = useMemo(
     () =>
       editable && corrected && corrected.score.pages === sourcePages.length
-        ? corrected.score.notes.flatMap((n) =>
-            n.page === selected && n.imgpos ? [{ ordinal: n.ordinal, ...n.imgpos }] : [],
-          )
+        ? corrected.score.notes.flatMap((n) => {
+            if (n.page !== selected || !n.imgpos) return [];
+            // Where homr saw the note, until the photo has been read for its notehead.
+            const at = (heads && placeHead(heads, n)) ?? n.imgpos;
+            return [{ ordinal: n.ordinal, x: at.x, y: at.y }];
+          })
         : [],
-    [editable, corrected, selected, sourcePages.length],
+    [editable, corrected, selected, sourcePages.length, heads],
   );
   // The ink frame: the note pointed at when it is on the photo shown, else the selected one.
   const focus =
@@ -1102,8 +1108,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                             width={size.width}
                             height={size.height}
                             space={
-                              space && space.file === shownPhoto
-                                ? space.space
+                              shown && shown.file === shownPhoto
+                                ? shown.image.space
                                 : fallbackSpace(size.width)
                             }
                             points={photoPoints}
@@ -1181,6 +1187,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                             <NoteCrop
                               image={photo}
                               at={where.imgpos}
+                              note={where}
                               size="small"
                               label={t.scan.edit.photoAt(t.scan.edit.bar(where.measureNumber))}
                             />

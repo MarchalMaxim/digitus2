@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "corpus": "v1",
-  "note": "Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact; the perturbed floors are the measured counts over the perturbed photos, with the pages read as two parts as a ceiling; the imgpos floor is set by node research/omr/imgpos.mjs and kept when these are rewritten.",
+  "note": "Measured by node research/omr/acceptance.mjs --update-floor: F1 floors are the measurement in percent minus 0.5, rounded down; error ceilings are the measured counts; photo floors are the measured counts of pages right on each fact; the perturbed floors are the measured counts over the perturbed photos, with the pages read as two parts as a ceiling; the imgpos floors (the crop's share of homr's points, and the share of notes whose placed frame is within half a staff space of the head on the clean pages) are set by node research/omr/imgpos.mjs and kept when these are rewritten.",
   "floors": {
     "homr:clean": {
       "importedMin": 16,
@@ -83,6 +83,7 @@
   },
   "imgpos": {
     "halfHeightSpaces": 2,
-    "insideCropMin": 0.95
+    "insideCropMin": 0.95,
+    "placedFramedMin": 0.95
   }
 }

@@ -2,8 +2,9 @@
  * The page photo's half of the linked review (issue 130): over the photo, a thin gray ring where
  * homr read a note the review asks the reader to check, and an ink frame on the note in hand (the
  * one pointed at in either view, else the selected one). Pointing at the photo names the nearest
- * note homr placed there; a click or tap selects it. Positions are homr's imgpos, in the pixels of
- * the photo as uploaded, which is the image's natural size, so the drawing scales with the image.
+ * note homr placed there; a click or tap selects it. Positions are the notes' heads found on the
+ * photo (heads.ts), else homr's imgpos, in the pixels of the photo as uploaded, which is the
+ * image's natural size, so the drawing scales with the image.
  */
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { FRAME_SPACES } from './crop.js';
@@ -16,7 +17,8 @@ export interface PhotoPoint {
 
 /**
  * A ring's radius and a pointer's reach, in staff spaces. homr's position is good to about one and
- * a half staff spaces (research/omr/imgpos.mjs), so the ring is drawn wide enough to hold the note.
+ * a half staff spaces (research/omr/imgpos.mjs) where no head was found on the photo, so the ring is
+ * drawn wide enough to hold the note.
  */
 export const RING_SPACES = 2;
 export const REACH_SPACES = 2;

@@ -11,7 +11,7 @@ import {
   useState,
   type JSX,
 } from 'react';
-import { restrike } from '../design/motion.js';
+import { durationMs, restrike } from '../design/motion.js';
 import { useT } from '../i18n/i18n.js';
 import { handLetter } from './handLetters.js';
 import { levelRect, NO_LEVELS, type KeyLevels } from './keyLevels.js';
@@ -70,7 +70,7 @@ export interface KeyboardProps {
   barKeys?: readonly number[];
   /**
    * The keys held on the reader's own piano (issue 182): a gray bar along each key's front edge,
-   * never red, never pressed. It is added to whatever the key shows (a cued key held on the piano
+   * never red; a held key travels (issue 200) but takes no gray. It is added to whatever the key shows (a cued key held on the piano
    * keeps its fill and finger), moves with the key's travel, and takes no part in the view or in
    * what the pointer presses. A pitch outside the drawn range is not shown. Default none.
    */
@@ -91,10 +91,22 @@ export const KEY_HOLD_MS = 2000;
 
 /**
  * How far a pressed key shortens from its back edge: the `scaleY` of base.css
- * (`.keyboard-svg .key.is-pressed`), which a test keeps equal. The hand letters are not in a key's
- * group and do not travel, so the clip of a level's letter takes the level's rectangle through it.
+ * (`.keyboard-svg .key.is-pressed`), which a test keeps equal. A key held on the reader's own
+ * piano goes further down (`held`, `.key.is-down`, issue 200). The hand letters are not in a key's
+ * group and do not travel, so the clip of a level's letter takes the level's rectangle through the
+ * travel the key has.
  */
-export const KEY_TRAVEL = { white: 0.976, black: 0.96 } as const;
+export const KEY_TRAVEL = {
+  white: 0.976,
+  black: 0.96,
+  held: { white: 0.94, black: 0.92 },
+} as const;
+
+/**
+ * How long a key let go keeps `is-lifting` past the damper time, so the class is never taken off
+ * while its rise is still running (ms).
+ */
+const LIFT_SLACK_MS = 20;
 
 /** A horizontal stretch of the drawn keyboard, in CSS pixels from its left edge. */
 export interface Span {
@@ -212,6 +224,29 @@ function oneByKey(keys: readonly PressedKey[]): Map<number, PressedKey> {
 const NO_KEYS: PressedKey[] = [];
 const NO_HOVER: PressedKey[] = [];
 const NO_HELD: readonly number[] = [];
+const NO_LIFTING: ReadonlyMap<number, boolean> = new Map();
+
+/**
+ * The keys rising after a release (issue 200), each with whether the cue held it down when it came
+ * up. A key held again leaves; so does a key the cue pressed after it came up uncued, which goes
+ * down in the quick press time, not the damper's. The same map when nothing changed.
+ */
+function liftingAfter(
+  lifting: ReadonlyMap<number, boolean>,
+  before: ReadonlySet<number>,
+  held: ReadonlySet<number>,
+  cued: ReadonlyMap<number, unknown>,
+): ReadonlyMap<number, boolean> {
+  const next = new Map<number, boolean>();
+  for (const [midi, wasCued] of lifting) {
+    if (held.has(midi) || (!wasCued && cued.has(midi))) continue;
+    next.set(midi, cued.has(midi));
+  }
+  for (const midi of before) if (!held.has(midi)) next.set(midi, cued.has(midi));
+  const same =
+    next.size === lifting.size && [...next].every(([midi, cue]) => lifting.get(midi) === cue);
+  return same ? lifting : next;
+}
 
 /** The bar along the front edge of a held key (issue 182): 5 px high on a white key, 4 on a black. */
 function heldBar(k: KeyShape, w: number, h: number) {
@@ -315,21 +350,76 @@ export function Keyboard({
   const byMidi = oneByKey([...pressed, ...hoverKeys, ...downKeys]);
   const mutedByMidi = oneByKey(muted.filter((m) => !byMidi.has(m.midi)));
   const heldSet = useMemo(() => new Set(held), [held]);
+  // The keys that came up a moment ago (issue 200): a key held on the piano is drawn further down
+  // than the cue, and one let go rises back to the cue's depth in the damper time, which the cue's
+  // own quick press would otherwise cut short (`is-lifting`, base.css). Worked out during the render
+  // that sees the key let go, so no frame draws it rising at the press time.
+  const [heldSeen, setHeldSeen] = useState<ReadonlySet<number>>(heldSet);
+  const [lifting, setLifting] = useState<ReadonlyMap<number, boolean>>(NO_LIFTING);
+  const nextLifting = liftingAfter(lifting, heldSeen, heldSet, byMidi);
+  if (heldSeen !== heldSet) setHeldSeen(heldSet);
+  if (nextLifting !== lifting) setLifting(nextLifting);
+  // One timeout per key, started when the key begins to rise: a later release of another key never
+  // extends this one's.
+  const liftTimers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  useEffect(() => {
+    const timers = liftTimers.current;
+    for (const [midi, timer] of timers) {
+      if (lifting.has(midi)) continue;
+      clearTimeout(timer);
+      timers.delete(midi);
+    }
+    for (const midi of lifting.keys()) {
+      if (timers.has(midi)) continue;
+      timers.set(
+        midi,
+        setTimeout(
+          () => {
+            timers.delete(midi);
+            setLifting((now) => {
+              if (!now.has(midi)) return now;
+              const rest = new Map(now);
+              rest.delete(midi);
+              return rest.size === 0 ? NO_LIFTING : rest;
+            });
+          },
+          durationMs('--dur-slow') + LIFT_SLACK_MS,
+        ),
+      );
+    }
+  }, [lifting]);
+  useEffect(() => {
+    const timers = liftTimers.current;
+    return () => {
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
+  // The dimmed keys, as a value the geometry can depend on: a dimmed key does not move.
+  const dimmedKey = [...mutedByMidi.keys()].join(',');
   const width = Math.max(1, whiteCount) * WHITE_W;
-  // What a key's level grows from (issue 185): the held bar, and the scale the key takes pressed.
+  // What a key's level grows from (issue 185): the held bar, and the scale the key takes: the
+  // cue's, or the deeper one of a key held on the piano (issue 200).
   const geometry = useMemo(
     () =>
       new Map<number, KeyGeometry>(
-        keys.map((k) => [
-          k.midi,
-          {
-            black: k.black,
-            bar: heldBar(k, k.black ? BLACK_W : WHITE_W, k.black ? BLACK_H : WHITE_H),
-            travel: k.black ? KEY_TRAVEL.black : KEY_TRAVEL.white,
-          },
-        ]),
+        keys.map((k) => {
+          // A key rising keeps the held travel for the rise, so the letter's clip does not jump.
+          const deep =
+            (heldSet.has(k.midi) || lifting.has(k.midi)) &&
+            !dimmedKey.split(',').includes(`${k.midi}`);
+          const travel = deep ? KEY_TRAVEL.held : KEY_TRAVEL;
+          return [
+            k.midi,
+            {
+              black: k.black,
+              bar: heldBar(k, k.black ? BLACK_W : WHITE_W, k.black ? BLACK_H : WHITE_H),
+              travel: k.black ? travel.black : travel.white,
+            },
+          ];
+        }),
       ),
-    [keys],
+    [keys, heldSet, lifting, dimmedKey],
   );
   // The keys that draw a level: one in `levels`, on the keyboard, not dimmed (`mutedByMidi` holds
   // the dimmed keys only), with an `h` for those that also draw a letter's copy. The rectangles
@@ -410,7 +500,15 @@ export function Keyboard({
     const w = k.black ? BLACK_W : WHITE_W;
     const h = k.black ? BLACK_H : WHITE_H;
     const state = p ? ' is-pressed' : m ? ' is-muted' : '';
-    const cls = `key ${k.black ? 'is-black' : 'is-white'}${state}`;
+    // A key held on the piano goes down further than the cue (issue 200); a dimmed key does not move.
+    const down = m
+      ? ''
+      : heldSet.has(k.midi)
+        ? ' is-down'
+        : lifting.has(k.midi)
+          ? ' is-lifting'
+          : '';
+    const cls = `key ${k.black ? 'is-black' : 'is-white'}${state}${down}`;
     // The key's level (issue 185): never on a dimmed key, and whether or not the key is still held
     // (a level let go before it is full drains after the key is up). Drawn empty: useKeyLevels
     // sets the size of this rectangle and of its clip from the clock, before the paint.

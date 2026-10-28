@@ -649,6 +649,39 @@ describe('the levels of the held keys', () => {
     expect(s.hook.result.current.levels.get().has(48)).toBe(true);
   });
 
+  it('ends the level of a release at four fifths of its note at once, with no drain', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.wait(400); // four fifths of the 500 ms note
+    s.release(60);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0); // no drain left to wait for
+  });
+
+  it('drains a release that came before four fifths of its note', async () => {
+    await connect();
+    const s = setup({ mutedHands: ['L'] });
+    s.press(60);
+    s.wait(350); // seven tenths of the 500 ms note
+    s.release(60);
+    expect(s.hook.result.current.levels.get().get(60)?.upMs).not.toBeNull();
+    elapse(DUR_SLOW_FALLBACK_MS);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+  });
+
+  it('ends a key past four fifths of its note at once, and drains its chord-mate that is not', async () => {
+    await connect();
+    const s = setup();
+    s.press(48, 60);
+    s.wait(450); // nine tenths of the 500 ms note, under a quarter of the bass's 2000 ms
+    s.release(60);
+    s.wait(5);
+    s.release(48);
+    expect(s.hook.result.current.levels.get().has(60)).toBe(false);
+    expect(s.hook.result.current.levels.get().get(48)?.upMs).not.toBeNull();
+  });
+
   it('draws a level again from a press during the drain', async () => {
     await connect();
     const s = setup();

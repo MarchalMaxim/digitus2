@@ -250,6 +250,47 @@ describe('the level store', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('release at four fifths of the note or later ends the level at once, with no drain', () => {
+    start(60, 1000); // 2000 ms long: four fifths is at 2600
+    heard.mockClear();
+    store.release(60, 2600);
+    expect(store.get().has(60)).toBe(false);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+    start(62, 1000);
+    store.release(62, 3500);
+    expect(store.get().has(62)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('release just before four fifths still drains from where it was', () => {
+    start(60, 1000);
+    store.release(60, 2599);
+    expect(store.get().get(60)).toMatchObject({ upMs: 2599, drainMs: 200 });
+    expect(store.get().get(60)?.fromLevel).toBeCloseTo(0.7995, 6);
+    vi.advanceTimersByTime(200);
+    expect(store.get().has(60)).toBe(false);
+  });
+
+  it('forgives by real elapsed time, not the stepped level of reduced motion', () => {
+    reduced = true;
+    start(60, 1000); // 4 beats: at 0.85 the stepped level is 0.75, the real fraction 0.85
+    store.release(60, 2700);
+    expect(store.get().has(60)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('ends every key of a chord lifted a few ms apart once each is past four fifths', () => {
+    start(60, 1000);
+    start(64, 1000);
+    start(67, 1000);
+    store.release(60, 2650);
+    store.release(64, 2655);
+    store.release(67, 2661);
+    expect(store.get().size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('release counts the stepped level under reduced motion', () => {
     reduced = true;
     start(60, 1000);

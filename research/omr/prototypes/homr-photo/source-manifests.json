@@ -61,7 +61,7 @@
     "homr/image_utils.py": "b293ffad901fee69e11fcee672f2fc7aa61a44216143b95b8a916655400eea06",
     "homr/main.py": "64ed7e1d3904cf8eddc848649a4e8e903616aaecd63ed1fc6415b530488650a3",
     "homr/model.py": "a6a54044f6e4b3381646b0f1d593be1da7f332fb6c37b2d423bf00cf83b26933",
-    "homr/music_xml_generator.py": "f17c562f27a9675d8888f31d2f2efaf86e70d9231a58e3946da9a9e231a805cc",
+    "homr/music_xml_generator.py": "60bc60449545715a0247d201666b2941c84618a8802cf47f5b6c3c48dbac5ec0",
     "homr/noise_filtering.py": "0752bba4acca214407408b8f4e4f0540893e07a288f1272f3bfbd4395eca724b",
     "homr/note_detection.py": "7dc0b3f8038c47d5b4f263ae16b241ac358e12e2d13055aaa6593aaf0be1014b",
     "homr/onnx_providers.py": "f25106805b3dbf52878b13c0ef3dd78be63442aaf1ba9c0bae1830e9221d8fa7",
@@ -85,7 +85,7 @@
     "homr/title_detection.py": "93d8c60bd5c79c989a30ed920e66422f59b25c503872461409614065159b4bea",
     "homr/transformer/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "homr/transformer/configs.py": "2fdac1d1b961c8a5304d6ff34891848469507217c467aa313e8fd2d98385fc64",
-    "homr/transformer/decoder_inference.py": "8f91d0062bbd90687fa4c4e7abcd8ebe6fec250b013789b1121de6a4b50d7323",
+    "homr/transformer/decoder_inference.py": "30f86aff3f08c54edff2e134b3909af567ade55b23962e5622b92320897602fd",
     "homr/transformer/encoder_inference.py": "27851bd0719d703218def26d8c830dbb708788f7e6b968662a6538ce0fd7b602",
     "homr/transformer/staff2score.py": "ef6bc035a497c440b52f4d31b2757361a97dcc91ad1c7656d1fda7649a319e0c",
     "homr/transformer/utils.py": "4ac26b2a45b94c573c7c1b5d261f8ef49986c18fad508d0cc295812307d340da",
@@ -97,7 +97,8 @@
     "upstream-accidentals.patch": "18b57997f8b37e56fc7ab1fca3fa8aa85dca46b2c63a4b1443a5361d61b892f6",
     "upstream-boundaries.patch": "7f6008cd5facf14e2e524e8d06974ff29c199f7d4be512dab372139a9b4de260",
     "upstream-coverage.patch": "58a693e82d8e87036d344bbe6455f3d9c55bdf82326fdc53df1db8f58ed3bda7",
-    "upstream-speed.patch": "7ed35241733b656e48d28e6f048282ba170f6c8031a86c6697cc1f822ae85bfe"
+    "upstream-speed.patch": "7ed35241733b656e48d28e6f048282ba170f6c8031a86c6697cc1f822ae85bfe",
+    "upstream-confidence.patch": "a465a97939ea070327f9635cc9e092d83f0485d0ff2558c92867876d95023f39"
   },
   "patchDigestEncoding": "UTF-8 text with LF-normalized line endings"
 }

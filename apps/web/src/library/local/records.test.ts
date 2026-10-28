@@ -191,3 +191,35 @@ describe('saved corrections', () => {
     );
   });
 });
+
+describe('a page photographed again, not recognised yet', () => {
+  const retake = {
+    xml: '<score-partwise/>',
+    corrections: [{ kind: 'remove' as const, note: 7 }],
+    pages: [0],
+  };
+  const row = (value: unknown) => ({
+    version: 1,
+    id: 'scan:x',
+    updatedAt: 1,
+    kind: 'scan',
+    session: value,
+  });
+  const draft = { ...session, xml: undefined, retake };
+  it('keeps the recognition and corrections it replaces', () => {
+    const stored = storeSession(draft);
+    expect(restoreSession(stored).retake).toEqual(retake);
+    expect(isLocalScoreRecord(row(stored))).toBe(true);
+    expect(storeSession(session).retake).toBeUndefined();
+  });
+  it.each([
+    ['an extra field', { ...retake, token: 'x' }],
+    ['no recognition', { ...retake, xml: '' }],
+    ['a malformed correction', { ...retake, corrections: [{ kind: 'remove', note: -1 }] }],
+    ['no page', { ...retake, pages: [] }],
+    ['a page the session does not have', { ...retake, pages: [1] }],
+    ['a page twice', { ...retake, pages: [0, 0] }],
+  ])('refuses a row with %s', (_label, bad) => {
+    expect(isLocalScoreRecord(row({ ...storeSession(draft), retake: bad }))).toBe(false);
+  });
+});

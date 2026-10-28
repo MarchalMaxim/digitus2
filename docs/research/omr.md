@@ -229,6 +229,64 @@ Two other rules answer the two weaknesses above, a partial trace and no trace. T
 
 The second rule is the only one that passes none of the 25 staves-losing variants over all 204, and it is infeasible: it rejects the cut-off page 4 photo as taken (no staff is traced on it, and homr misreads it anyway) and 29 of the 113 variants homr reads right, so it fails the zero-photos-rejected constraint and the agreement is 84.3%. The third reaches 93.1% by leaving 102 variants unjudged, among them 24 of the 25 that lose their staves, so its zero false passes rest on one variant. No rule reaches the 95% agreement with zero false passes and zero photos rejected, and no capture gate is built on any of them. Reproduce with `DIGITUS2_OMR_HOMR=... node research/omr/blur-sweep.mjs` after `pnpm --filter @digitus2/engine build`; the first run takes about 55 minutes on the recognitions, later runs read them from the cache. The open work is [issue 162](https://github.com/MarchalMaxim/digitus2/issues/162).
 
+### Confidence
+
+Does homr know when it is wrong ([issue 130](https://github.com/MarchalMaxim/digitus2/issues/130))? homr's decoder scores every token of its rhythm, pitch and accidental heads and keeps the highest. The confidence patch (`research/omr/prototypes/homr-photo/patch_confidence.py`) keeps the three most probable tokens of each head with their softmax probabilities, to six significant digits, and writes them in each note beside `imgpos`; decoding is untouched. `node research/omr/confidence.mjs` recognises the blur sweep's pages with it and scores them against truth (its tests are `confidence.test.mjs`).
+
+Pages: the 8 one-page truth pieces of the blur sweep and the 14 phone photos, each as taken (`g0`) and in nine blurs (Gaussian sigma 1, 1.5, 2, 2.5 and 3 px; motion of 3 and 6 px across and along the staff lines): 220 recognitions, of which 219 finished. Note-level truth is the truth pieces' library MusicXML and, for the three PhotoScan photos of Bach's Invention 13, each photo's own bars of the library piece; the other photos count for the page verdict only. A note is labelled on pages whose bar count is the truth's, bar by bar and staff by staff: the recognised and true notes are aligned in order on pitch and length, so a note that an earlier misread length pushed later still counts as read right. homr's accidental token is the sounding alteration (`_` is natural; homr writes no `<alter>` for it). The pass marks were fixed before the numbers were seen; the within-page condition, the held-out half and the threshold rule were fixed after the sharp pages and before the blurred ones.
+
+| Notes on 69 pages | Count |
+| --- | ---: |
+| Labelled | 16,597 |
+| Misread | 470 |
+| Pitch misread (aligned with a true note of another pitch) | 304 |
+| Length misread (95 of them a single written note) | 102 |
+| Extra notes | 64 |
+
+**Marks on single notes: not built.** A note's doubt is one minus the product of its three chosen tokens' probabilities. Pooled over all pages it separates misread notes from right ones with an AUROC of 0.816, but much of that is telling a blurred page from a sharp one; within a page (each page's scores centred on its median, over the 36 pages with at least two misread and two right notes) it is 0.728, under the 0.80 required. On the sharp pages it is chance (2,624 notes, 29 misread: 0.554 pooled, 0.505 within 4 pages): homr's rhythm head never goes much past 0.9, right or wrong, and a misread pitch is as sure as a right one. An exploratory score, the summed probabilities of each head's second token, chosen on the first four truth pieces (within-page 0.960 over 7 pages), gives 0.710 within 29 pages on the held-out four pieces and the invention photos.
+
+| Score | Pooled AUROC | Within-page AUROC |
+| --- | ---: | ---: |
+| One minus the note's probability | 0.816 | 0.728 (36 pages) |
+| Pitch head alone | 0.828 | |
+| Accidental head alone | 0.763 | |
+| Rhythm head alone | 0.573 | |
+| Second tokens summed, held-out half | 0.819 | 0.710 (29 pages) |
+
+**Pitch suggestions: built.** For a misread pitch, the true pitch is homr's first other reading for 63.8% of the 304 and among its three most probable others for 87.2% (the pass mark was 50%). The review offers at most two, each only at or above a floor: what the floor costs is the share of right notes that show an offer. The floor was chosen on the first four truth pieces as the lowest that offers something on under 2% of right notes, and confirmed on the held-out half:
+
+| Floor | Misread pitches offered the true one, chosen half (52) | Right notes offered something, chosen half (8,020) | Misread pitches offered the true one, held-out half (252) | Right notes offered something, held-out half (8,107) |
+| ---: | ---: | ---: | ---: | ---: |
+| 0.001 | 90.4% | 3.6% | 68.7% | 4.6% |
+| 0.003 | 88.5% | 2.7% | 61.5% | 3.4% |
+| **0.01** | **86.5%** | **1.8%** | **52.8%** | **2.3%** |
+| 0.03 | 75.0% | 1.3% | 39.3% | 1.5% |
+| 0.1 | 63.5% | 0.8% | 25.8% | 0.8% |
+
+**Length suggestions: not built.** For the 95 misread lengths of a single written note, the true length is homr's first other reading for 46.3% and among its top three for 50.5%: at the pass mark, and the panel already sets any length in one tap.
+
+**Suggestions from Places to check: not built.** Only 30 of the 470 misread notes sit in a bar that Places to check flags (13 of the 304 pitches, 17 of the 102 lengths, none of the 64 extra notes): homr infers the meter from the bars it reads, so most misreadings leave a bar that adds up.
+
+**The page verdict: built.** A page's doubt is the mean doubt of its notes that are not rests, grace notes or tie continuations, on pages of at least eight of them, computed exactly as the review computes it (`pageDoubt` in `apps/web/src/scan/verdict.ts`, `pageDoubtOf` in the benchmark). A page that cannot be read has its bars or staves wrong, or, with truth, under 90% of its pitches right. Over the 215 pages measured it separates the two with an AUROC of 0.903 (pass mark 0.85). The threshold is the rule fixed before the blurred pages were scored: just above every page as taken that reads right, which is the warm-light book page at 0.1263, so `UNCLEAR_DOUBT` is 0.1264. Clean pages sit near 0.10.
+
+| Variant | Pages | Cannot be read | Of those, named | Readable pages named |
+| --- | ---: | ---: | ---: | ---: |
+| as taken | 22 | 5 | 4 | 0 |
+| Gaussian 1 | 22 | 5 | 4 | 2 |
+| Gaussian 1.5 | 22 | 6 | 6 | 3 |
+| Gaussian 2 | 22 | 12 | 9 | 3 |
+| Gaussian 2.5 | 21 | 19 | 18 | 1 |
+| Gaussian 3 | 20 | 20 | 20 | 0 |
+| Across, 3 px | 22 | 5 | 4 | 3 |
+| Across, 6 px | 22 | 14 | 12 | 4 |
+| Along, 3 px | 22 | 10 | 6 | 1 |
+| Along, 6 px | 20 | 20 | 13 | 0 |
+| **All** | **215** | **116** | **96** | **17** |
+
+As taken, the page it misses is the photo with the last staff cut off (0.1262), and the pages it names are the two upside-down photos, the torn corner and the cut-off perspective. The 17 readable pages it names are blurred copies: still a bar and staff count right, but a fresh photo serves the reader better there. Motion along the staff lines is the weak spot here too: 13 of the 20 unreadable pages of 6 px along the lines are named.
+
+Limits: the blur is synthetic, and the note-level truth on real optics is three PhotoScan pages of one piece. The owner's deliberately bad phone photos of library pieces will be measured the same way. Reproduce with `DIGITUS2_OMR_HOMR=<a toolchain prepared with the five patches> node research/omr/confidence.mjs --variants g0,g1,g1.5,g2,g2.5,g3,mv3,mv6,mh3,mh6 --parallel 2` after `node research/omr/blur-sweep.mjs` has made the variants; about 90 minutes on the owner's PC with other work running, cached afterwards. The scorecard (git-ignored) is `research/omr/results/confidence/latest.json`.
+
 ## Routes evaluated
 
 | Route                                                                                                                                                                                                                | Runs where                                       | Result                                                                                                                                                                     | Decision                                       |

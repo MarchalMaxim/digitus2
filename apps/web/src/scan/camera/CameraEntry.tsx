@@ -96,11 +96,14 @@ export function CameraEntry({
   onFiles,
   maxPages = SCAN_PAGE_LIMIT,
   disabled = false,
+  primary = false,
 }: {
   label: string;
   onFiles(files: File[]): void;
   maxPages?: number;
   disabled?: boolean;
+  /** The screen's next action: it carries the one red (a page to photograph again, issue 130). */
+  primary?: boolean;
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -148,7 +151,7 @@ export function CameraEntry({
     <>
       <button
         ref={trigger}
-        className="text-button own-file camera-entry"
+        className={primary ? 'is-red camera-entry' : 'text-button own-file camera-entry'}
         disabled={disabled || maxPages < 1}
         onClick={() => {
           setOverLimit(false);

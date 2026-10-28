@@ -170,6 +170,14 @@ export const scan = {
         : pages.length === 1
           ? `Part of a line on page ${pages[0]} was not read, so bars are missing or added. Replace that photo and scan again.`
           : `Part of a line on pages ${formatList('en', pages.map(String))} was not read, so bars are missing or added. Replace those photos and scan again.`,
+    /** `pages` are the numbers of the pages homr read with too little certainty (issue 130). */
+    /** `of` is the number of pages scanned: a single photo is not named by its number. */
+    readUnclearly: (pages: number[], of: number) =>
+      of === 1
+        ? 'The page could not be read clearly. Photograph it again: flat, evenly lit, the whole page in the frame.'
+        : pages.length === 1
+          ? `Page ${pages[0]} could not be read clearly. Photograph it again: flat, evenly lit, the whole page in the frame.`
+          : `Pages ${formatList('en', pages.map(String))} could not be read clearly. Photograph them again: flat, evenly lit, each whole page in the frame.`,
   },
   /** Correcting the recognised notation, note by note, inside the review. */
   edit: {
@@ -200,6 +208,8 @@ export const scan = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'Correct the selected note',
     pitchLabel: 'Pitch',
+    /** homr's other readings of the pitch, offered as one-tap corrections (issue 130). */
+    suggestedLabel: 'Also read as',
     lower: 'Lower',
     lowerLabel: 'Lower by one step',
     higher: 'Higher',
@@ -365,6 +375,12 @@ export const scan = {
     altPage: (page: number) => `Original printed score, page ${page}`,
     alt: 'Original printed score',
     rotated: (degrees: number) => `Rotated ${degrees}° clockwise for scanning. Original file kept.`,
+    /** One page photographed again; only it is scanned again (issue 130). */
+    retake: (page: number) => `Replace page ${page} with a new photo`,
+    retakeTouch: (page: number) => `Photograph page ${page} again`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'Replace it with a new photo',
+    retakeOnlyTouch: 'Photograph it again',
   },
   files: {
     pageLimit: 'Choose up to 20 page images at a time.',

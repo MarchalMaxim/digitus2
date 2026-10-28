@@ -164,6 +164,12 @@ export const scan: Messages['scan'] = {
         : pages.length === 1
           ? `Une partie d’une ligne de la page ${pages[0]} n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez cette photo et numérisez à nouveau.`
           : `Une partie d’une ligne des pages ${formatList('fr', pages.map(String))} n’a pas été lue\u00a0: des mesures manquent ou sont en trop. Remplacez ces photos et numérisez à nouveau.`,
+    readUnclearly: (pages: number[], of: number) =>
+      of === 1
+        ? 'La page n’a pas pu être lue clairement. Photographiez-la à nouveau\u00a0: à plat, bien éclairée, la page entière dans le cadre.'
+        : pages.length === 1
+          ? `La page ${pages[0]} n’a pas pu être lue clairement. Photographiez-la à nouveau\u00a0: à plat, bien éclairée, la page entière dans le cadre.`
+          : `Les pages ${formatList('fr', pages.map(String))} n’ont pas pu être lues clairement. Photographiez-les à nouveau\u00a0: à plat, bien éclairées, chaque page entière dans le cadre.`,
   },
   edit: {
     hint: 'Sélectionnez une note pour la corriger.',
@@ -190,6 +196,7 @@ export const scan: Messages['scan'] = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'Corriger la note sélectionnée',
     pitchLabel: 'Hauteur',
+    suggestedLabel: 'Lue aussi comme',
     lower: 'Plus bas',
     lowerLabel: 'Descendre d’un degré',
     higher: 'Plus haut',
@@ -350,6 +357,11 @@ export const scan: Messages['scan'] = {
     alt: 'Partition imprimée d’origine',
     rotated: (degrees: number) =>
       `Pivotée de ${degrees}° vers la droite pour la numérisation. Le fichier d’origine est conservé.`,
+    retake: (page: number) => `Remplacer la page ${page} par une nouvelle photo`,
+    retakeTouch: (page: number) => `Photographier à nouveau la page ${page}`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'La remplacer par une nouvelle photo',
+    retakeOnlyTouch: 'La photographier à nouveau',
   },
   files: {
     pageLimit: 'Choisissez jusqu’à 20 images de pages à la fois.',

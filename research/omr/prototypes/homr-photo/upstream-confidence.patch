@@ -1,0 +1,67 @@
+--- a/homr/transformer/decoder_inference.py
++++ b/homr/transformer/decoder_inference.py
+@@ -6,6 +6,7 @@
+ from homr.onnx_providers import gpu_providers
+ from homr.simple_logging import eprint
+ from homr.transformer.configs import Config
++from homr.transformer.utils import softmax
+ from homr.transformer.vocabulary import EncodedSymbol
+ from homr.type_definitions import NDArray
+ 
+@@ -142,6 +143,11 @@
+                 position=position_token[0],
+                 coordinates=attention,
+             )
++            symbol.confidence = {  # type: ignore[attr-defined]
++                "rhythm": _most_probable(rhythmsp[0, -1, :], self.inv_rhythm_vocab),
++                "pitch": _most_probable(pitchsp[0, -1, :], self.inv_pitch_vocab),
++                "lift": _most_probable(liftsp[0, -1, :], self.inv_lift_vocab),
++            }
+             symbols.append(symbol)
+ 
+             out_lift = np.concatenate((out_lift, lift_sample), axis=-1)
+@@ -178,6 +184,13 @@
+             input_names.append(f"cache_in{i}")
+             output_names.append(f"cache_out{i}")
+         return cache, input_names, output_names
++
++
++def _most_probable(logits: NDArray, vocab: dict[int, str], count: int = 3) -> list[tuple[str, float]]:
++    """The most probable tokens of one head, most probable first, with their probabilities."""
++    probabilities = softmax(logits.astype(np.float64))
++    order = np.argsort(-probabilities, kind="stable")[:count]
++    return [(vocab[int(i)], float(probabilities[i])) for i in order]
+ 
+ 
+ def detokenize(tokens: NDArray, vocab: dict[int, str]) -> list[str]:
+--- a/homr/music_xml_generator.py
++++ b/homr/music_xml_generator.py
+@@ -754,6 +754,7 @@
+     build_articulations(note, model_note.articulation, tuplet_mark, state)
+     build_slurs(note, model_note.slur, slur_number)
+     build_image_position(note, model_note)
++    build_confidence(note, model_note)
+ 
+     return note
+ 
+@@ -767,6 +768,20 @@
+         return
+     x, y = symbol.image_coordinates
+     xml.append(ET.Comment(f" imgpos: {round(x)}, {round(y)} "))
++
++
++def build_confidence(xml: ET.Element, symbol: EncodedSymbol) -> None:
++    """
++    Adds the decoder's most probable tokens per head, with their probabilities, as a comment.
++    """
++    confidence = getattr(symbol, "confidence", None)
++    if not confidence:
++        return
++    heads = "; ".join(
++        head + "".join(f" {token} {probability:.6g}" for token, probability in tokens)
++        for head, tokens in confidence.items()
++    )
++    xml.append(ET.Comment(f" conf: {heads} "))
+ 
+ 
+ def build_multi_measure_rest(symbol: EncodedSymbol, attributes: ET.Element) -> None:

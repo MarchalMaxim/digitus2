@@ -1,5 +1,5 @@
 import type { Correction } from '../../scan/corrections.js';
-import type { ScanPage, ScanSession } from '../../scan/model.js';
+import type { PendingRetake, ScanPage, ScanSession } from '../../scan/model.js';
 
 interface StoredFile {
   blob: Blob;
@@ -26,6 +26,8 @@ interface StoredSession {
   warnings?: string[] | undefined;
   /** The reader's corrections of `xml`; the raw `xml` itself is kept unchanged. */
   corrections?: Correction[] | undefined;
+  /** A page photographed again, not recognised yet: what its corrections are carried from. */
+  retake?: PendingRetake | undefined;
 }
 export type LocalScoreRecord = {
   version: 1;
@@ -57,6 +59,11 @@ export function storeSession(session: ScanSession): StoredSession {
     recognizer: session.recognizer,
     warnings: session.warnings,
     corrections: session.corrections?.map((c) => ({ ...c })),
+    retake: session.retake && {
+      xml: session.retake.xml,
+      corrections: session.retake.corrections.map((c) => ({ ...c })),
+      pages: [...session.retake.pages],
+    },
     pages: session.pages?.map((page) => ({
       id: page.id,
       file: storeFile(page.file),
@@ -76,6 +83,7 @@ export function restoreSession(session: StoredSession): ScanSession {
     recognizer: session.recognizer,
     warnings: session.warnings,
     corrections: session.corrections,
+    retake: session.retake,
     file: restoreFile(session.file),
     pages: session.pages?.map((page): ScanPage => ({
       id: page.id,
@@ -164,23 +172,39 @@ function validCorrection(value: unknown): value is Correction {
       return false;
   }
 }
+const validCorrections = (value: unknown) =>
+  Array.isArray(value) && value.length <= 10_000 && value.every(validCorrection);
+/** A pending retake names pages of the session and holds the recognition it was made from. */
+function validRetake(value: unknown, pageCount: number): value is PendingRetake {
+  return (
+    object(value) &&
+    Object.keys(value).sort().join(',') === 'corrections,pages,xml' &&
+    text(value.xml) &&
+    value.xml.length > 0 &&
+    validCorrections(value.corrections) &&
+    Array.isArray(value.pages) &&
+    value.pages.length > 0 &&
+    value.pages.length <= 20 &&
+    value.pages.every((page) => int(page, 0, pageCount - 1)) &&
+    new Set(value.pages).size === value.pages.length
+  );
+}
 function validSession(value: unknown): value is StoredSession {
   return (
     object(value) &&
     identity(value.id) &&
     validFile(value.file) &&
     notation(value) &&
-    (value.corrections === undefined ||
-      (Array.isArray(value.corrections) &&
-        value.corrections.length <= 10_000 &&
-        value.corrections.every(validCorrection))) &&
+    (value.corrections === undefined || validCorrections(value.corrections)) &&
     optionalText(value.recognizedAt) &&
     (value.pages === undefined ||
       (Array.isArray(value.pages) &&
         value.pages.length > 0 &&
         value.pages.length <= 20 &&
         value.pages.every(validPage) &&
-        new Set(value.pages.map((page) => page.id)).size === value.pages.length))
+        new Set(value.pages.map((page) => page.id)).size === value.pages.length)) &&
+    (value.retake === undefined ||
+      (Array.isArray(value.pages) && validRetake(value.retake, value.pages.length)))
   );
 }
 /** Unsupported versions or malformed rows cannot enter app state. */

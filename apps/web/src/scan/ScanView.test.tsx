@@ -1055,3 +1055,23 @@ it('shows no photo for a PDF page or a recognition without positions', async () 
   await act(() => new Promise((done) => setTimeout(done, 30)));
   expect(screen.queryByRole('img', { name: /in the photo/ })).toBeNull();
 });
+
+it("offers homr's other readings of the selected note's pitch, and one tap corrects it (issue 130)", async () => {
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  const conf =
+    '<!-- conf: rhythm note_4 0.9 note_8 0.01; pitch C4 0.7 D4 0.29 B3 0.001; lift _ 1 # 1e-06 -->';
+  render(
+    <ScanView session={{ id: 'suggest', file, xml: overlongBar(conf), recognizer: 'homr' }} />,
+  );
+  await userEvent.click(await screen.findByRole('button', { name: /Bar 1/ }));
+  const panel = await screen.findByRole('region', { name: 'Correct the selected note' });
+  const offered = within(panel).getByRole('group', { name: 'Also read as' });
+  // B3 is under the floor; C4 is the reading itself.
+  expect(
+    within(offered)
+      .getAllByRole('button')
+      .map((b) => b.textContent),
+  ).toEqual(['D4']);
+  await userEvent.click(within(offered).getByRole('button', { name: 'D4' }));
+  expect(await screen.findByText('1 correction')).toBeInTheDocument();
+});

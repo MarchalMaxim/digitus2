@@ -28,6 +28,7 @@ import {
   type Step,
 } from './notes.js';
 import { NoteCrop } from './NoteCrop.js';
+import { pitchSuggestions } from './suggestions.js';
 
 export interface Corrected extends CorrectionResult {
   score: ScanScore;
@@ -254,6 +255,8 @@ export function NoteEditor({
   const chord = chordOf(score, note);
   const pitched = !note.rest && note.step !== undefined;
   const tiedFrom = note.tieStop;
+  // homr's other readings of the pitch, when it thought them likely enough (issue 130).
+  const suggestions = pitched ? pitchSuggestions(note) : [];
   const step = (direction: 1 | -1) => {
     const next = stepPitch(score, note, direction);
     onCorrect({ kind: 'pitch', note: ordinal, ...next });
@@ -289,6 +292,27 @@ export function NoteEditor({
           size="large"
           label={t.scan.edit.photoAt(t.scan.edit.bar(note.measureNumber))}
         />
+      )}
+      {pitched && suggestions.length > 0 && (
+        <div className="note-editor-row" role="group" aria-label={t.scan.edit.suggestedLabel}>
+          <span className="note-editor-label">{t.scan.edit.suggestedLabel}</span>
+          {suggestions.map((s) => (
+            <button
+              key={`${s.step}${s.alter}${s.octave}`}
+              onClick={() =>
+                onCorrect({
+                  kind: 'pitch',
+                  note: ordinal,
+                  step: s.step,
+                  alter: s.alter,
+                  octave: s.octave,
+                })
+              }
+            >
+              {t.scan.edit.pitch(s.step, s.alter, s.octave)}
+            </button>
+          ))}
+        </div>
       )}
       {pitched && (
         <div className="note-editor-row" role="group" aria-label={t.scan.edit.pitchLabel}>

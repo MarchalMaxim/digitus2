@@ -86,6 +86,7 @@ const PIPELINE = [
   'research/omr/prototypes/photo-recovery/upstream-accidentals.patch',
   'research/omr/prototypes/photo-recovery/upstream-coverage.patch',
   'research/omr/prototypes/homr-photo/upstream-speed.patch',
+  'research/omr/prototypes/homr-photo/upstream-confidence.patch',
 ];
 export function pipelineHash(repo = REPO) {
   const h = createHash('sha256');

@@ -160,6 +160,12 @@ export const scan: Messages['scan'] = {
         : pages.length === 1
           ? `Een deel van een regel op pagina ${pages[0]} is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto en scan opnieuw.`
           : `Een deel van een regel op pagina’s ${formatList('nl', pages.map(String))} is niet gelezen, dus er ontbreken maten of er zijn er te veel. Vervang die foto’s en scan opnieuw.`,
+    readUnclearly: (pages: number[], of: number) =>
+      of === 1
+        ? 'De pagina kon niet duidelijk worden gelezen. Fotografeer haar opnieuw: plat, gelijkmatig belicht, de hele pagina in beeld.'
+        : pages.length === 1
+          ? `Pagina ${pages[0]} kon niet duidelijk worden gelezen. Fotografeer haar opnieuw: plat, gelijkmatig belicht, de hele pagina in beeld.`
+          : `Pagina’s ${formatList('nl', pages.map(String))} konden niet duidelijk worden gelezen. Fotografeer ze opnieuw: plat, gelijkmatig belicht, elke pagina helemaal in beeld.`,
   },
   edit: {
     hint: 'Selecteer een noot om die te corrigeren.',
@@ -187,6 +193,7 @@ export const scan: Messages['scan'] = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'De gekozen noot corrigeren',
     pitchLabel: 'Toonhoogte',
+    suggestedLabel: 'Ook gelezen als',
     lower: 'Lager',
     lowerLabel: 'Eén stap lager',
     higher: 'Hoger',
@@ -346,6 +353,11 @@ export const scan: Messages['scan'] = {
     alt: 'Originele gedrukte partituur',
     rotated: (degrees: number) =>
       `${degrees}° rechtsom gedraaid voor het scannen. Het originele bestand blijft bewaard.`,
+    retake: (page: number) => `Pagina ${page} vervangen door een nieuwe foto`,
+    retakeTouch: (page: number) => `Pagina ${page} opnieuw fotograferen`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'Vervangen door een nieuwe foto',
+    retakeOnlyTouch: 'Opnieuw fotograferen',
   },
   files: {
     pageLimit: 'Kies maximaal 20 pagina-afbeeldingen tegelijk.',

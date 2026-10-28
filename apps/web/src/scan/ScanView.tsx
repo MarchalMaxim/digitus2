@@ -1,5 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+} from 'react';
 import { build, formatBuildDay } from '../app/build.js';
 import { messageOf } from '../app/errors.js';
 import { useFocusOnArrival } from '../app/focus.js';
@@ -37,13 +41,23 @@ import {
   PAIRED_STAVES_WARNING,
   stavesWerePaired,
 } from './join.js';
-import type { ScanPage, ScanSession } from './model.js';
+import {
+  validateScanImages,
+  type PendingRetake,
+  type ScanPage,
+  type ScanSession,
+} from './model.js';
 import { chordOf, parseScanXml, readingOrder, readScanScore, type ScanNote } from './notes.js';
-import { NoteCrop } from './NoteCrop.js';
+import { NoteCrop, pageImage } from './NoteCrop.js';
+import { fallbackSpace } from './crop.js';
+import { useHoverMark, useScanMarks } from './linked.js';
 import { isTouchOnly } from './phone.js';
+import { PhotoMarks } from './PhotoMarks.js';
+import { carryOver } from './retake.js';
+import { RetakePage } from './RetakePage.js';
 import { barAt, expectedBatchMs, pdfPageCount, type Stretch } from './progress.js';
 import { ScanProgress } from './ScanProgress.js';
-import { blocks, verdict as readVerdict, verdictText } from './verdict.js';
+import { blocks, pageDoubt, verdict as readVerdict, verdictText } from './verdict.js';
 import {
   correct,
   timingIssue,
@@ -212,13 +226,40 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   // Saved corrections that no longer apply are dropped by the next change, never replayed.
   const kept = corrected ? corrections.slice(0, corrected.applied) : corrections;
   // The verdict line (issue 158): what was read, from the facts the session holds.
+  // How unsure homr was of each page, from the page's own recognition (issue 130).
+  const doubts = useMemo(
+    () =>
+      sourcePages.map((page) => {
+        if (!page.xml) return undefined;
+        try {
+          return pageDoubt(readScanScore(parseScanXml(page.xml)));
+        } catch {
+          return undefined;
+        }
+      }),
+    // sourcePages is rebuilt each render for a single file; its contents are these two.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [session.pages, session.xml],
+  );
   const found = readVerdict({
-    pages: isImage ? sourcePages : undefined,
+    pages: isImage
+      ? sourcePages.map((page, index) => ({ warnings: page.warnings, doubt: doubts[index] }))
+      : undefined,
     warnings: session.warnings ?? [],
     joined: !!session.xml || !batch,
     score: corrected?.score,
     problems: problems.length,
   });
+  // The page the verdict names, in an image batch: it alone is photographed again (issue 130). A
+  // single photo read unclearly is photographed again too, rather than scanned again as it is.
+  const flaggedPages =
+    found.kind === 'oneStaff' || found.kind === 'partlyRead' || found.kind === 'unclear'
+      ? found.pages
+      : [];
+  const retakePage =
+    isImage && flaggedPages.length && (batch || found.kind === 'unclear')
+      ? flaggedPages[0]! - 1
+      : undefined;
   // The one red: on the next action. A selected note first; Scan again when the verdict says the
   // scan itself needs another go (a verdict that says "scan again" must not leave the red on
   // Use); else Use for fingerings while it can be used (or is still being checked), else the
@@ -234,6 +275,64 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           ? 'problem'
           : 'again';
   useSelectedMark(sheetHost, selectedNote ? note : null, pages);
+  // The photo and the notation are linked (issue 130): the notes to check are ringed in both, and
+  // the note pointed at in one is framed in the other.
+  const marked = useMemo(() => {
+    if (!editable || !corrected) return [];
+    const out = new Set<number>();
+    for (const problem of problems) {
+      const target = problemNote(corrected.score, problem);
+      if (target !== undefined) out.add(target);
+    }
+    return [...out];
+  }, [editable, corrected, problems]);
+  const markedSet = useMemo(() => new Set(marked), [marked]);
+  useScanMarks(sheetHost, marked, pages);
+  const [pointed, setPointed] = useState<{ ordinal: number; from: 'photo' | 'sheet' } | null>(null);
+  useHoverMark(sheetHost, pointed?.from === 'photo' ? pointed.ordinal : null, pages);
+  // The page whose photo is shown follows the selected note while the whole score is reviewed.
+  // A note only pointed at moves nothing: the mouse may be on its way to the photo.
+  const inHand = selectedNote ? note : null;
+  useEffect(() => {
+    if (inHand === null || pageMode || !corrected) return;
+    const n = corrected.score.notes.find((x) => x.ordinal === inHand);
+    if (n && photoOf(n) && n.page !== selected) setSelected(n.page);
+    // Only a new note in hand moves the photo; the reader's own page choice stays otherwise.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inHand]);
+  // A note pointed at belongs to the page it was pointed at on.
+  useEffect(() => {
+    setPointed(null);
+  }, [selected]);
+  // The shown photo's staff space, for the size of its rings; a guess until the page is analysed.
+  const [space, setSpace] = useState<{ file: Blob; space: number }>();
+  const shownPhoto = isImage && editable ? sourcePages[selected]?.file : undefined;
+  useEffect(() => {
+    if (!shownPhoto) return;
+    let live = true;
+    void pageImage(shownPhoto).then((image) => {
+      if (live && image) setSpace({ file: shownPhoto, space: image.space });
+    });
+    return () => {
+      live = false;
+    };
+  }, [shownPhoto]);
+  const photoPoints = useMemo(
+    () =>
+      editable && corrected && corrected.score.pages === sourcePages.length
+        ? corrected.score.notes.flatMap((n) =>
+            n.page === selected && n.imgpos ? [{ ordinal: n.ordinal, ...n.imgpos }] : [],
+          )
+        : [],
+    [editable, corrected, selected, sourcePages.length],
+  );
+  // The ink frame: the note pointed at when it is on the photo shown, else the selected one.
+  const focus =
+    pointed && photoPoints.some((p) => p.ordinal === pointed.ordinal)
+      ? pointed.ordinal
+      : selectedNote
+        ? note
+        : null;
 
   useEffect(() => {
     // The scan's controls go away when the review opens: the heading takes the focus.
@@ -336,11 +435,71 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     useAppStore.setState({ view: { name: 'scan', session: next } });
     setSession(next);
   };
+  // A page photographed again (issue 130): the recognition and corrections it replaces, so the
+  // corrections of the other pages carry over to the new recognition (retake.ts).
+  // The session keeps them (ScanSession.retake) until the joined recognition is stored.
+  const [pendingScan, setPendingScan] = useState(false);
+  const retake = (index: number, file: File) => {
+    if (busy) return;
+    void validateScanImages([file]).then(
+      ([valid]) => {
+        if (!alive.current || !valid) return;
+        const pages = sourcePages.map((p, i) =>
+          i === index ? { id: crypto.randomUUID(), file: valid } : p,
+        );
+        // Pages already photographed again whose scan did not finish keep what they replaced.
+        const pending: PendingRetake | undefined = session.xml
+          ? kept.length
+            ? { xml: session.xml, corrections: kept, pages: [index] }
+            : undefined
+          : session.retake && {
+              ...session.retake,
+              pages: [...new Set([...session.retake.pages, index])],
+            };
+        select(null);
+        setReviewMode('combined');
+        setUndoStack([]);
+        setError(null);
+        retain({
+          ...session,
+          file: pages[0]!.file,
+          pages,
+          xml: undefined,
+          corrections: undefined,
+          retake: pending,
+        });
+        setPhase('ready');
+        setPendingScan(true);
+      },
+      (cause: unknown) => {
+        if (alive.current) setError((m) => messageOf(cause, m));
+      },
+    );
+  };
+  // The retaken page is scanned at once: the reader's press was the consent, as for the first scan.
+  useEffect(() => {
+    if (!pendingScan || phase !== 'ready') return;
+    setPendingScan(false);
+    void scan();
+    // scan() reads the session of this render, the one with the new page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingScan, phase]);
   const arrange = (next: ScanPage[]) => {
     if (busy) return;
+    // A pending retake stays while only the retaken pages change; any other change ends it.
+    const pending = session.retake;
+    const onlyRetaken =
+      pending &&
+      next.length === sourcePages.length &&
+      next.every(
+        (p, i) =>
+          pending.pages.includes(i) ||
+          (p.id === sourcePages[i]!.id && p.file === sourcePages[i]!.file),
+      );
     setError(null);
     retain({
       ...session,
+      retake: onlyRetaken ? pending : undefined,
       file: next[0]!.file,
       pages: next,
       xml: undefined,
@@ -508,11 +667,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       if (batch) setCombineDetail(messageOf(cause));
       setReviewMode('page');
     }
+    // After a page was photographed again, the other pages' corrections follow their notes.
+    // They are settled once the joined recognition is stored; pages that did not join keep them.
+    const before = session.retake;
+    let carried: Correction[] | undefined;
+    if (before && xml && before.corrections.length)
+      try {
+        carried = carryOver(before.xml, xml, before.corrections, before.pages);
+      } catch {
+        carried = undefined;
+      }
     retain({
       ...session,
       pages: results,
       xml,
-      corrections: undefined,
+      retake: xml ? undefined : before,
+      corrections: carried?.length ? carried : undefined,
       recognizedAt: new Date().toISOString(),
       recognizer: [...new Set(results.map((p) => p.recognizer).filter(Boolean))].join(', '),
       warnings: [
@@ -602,6 +772,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const select = useCallback(
     (ordinal: number | null) => {
       setNote(ordinal);
+      setPointed(null);
       setEditStatus(null);
       if (ordinal === null || !sheetHost) return;
       requestAnimationFrame(() =>
@@ -620,6 +791,42 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     }
     const ordinal = noteAt(sheetHost, event);
     if (ordinal !== undefined) select(ordinal);
+  };
+  // A mouse over the notation points at a note: its place in the photo is framed (issue 130).
+  // Searching every note's box is done once per frame, for where the mouse is by then.
+  const sheetFrame = useRef<number | undefined>(undefined);
+  const sheetMouse = useRef<{ target: EventTarget | null; clientX: number; clientY: number }>(
+    undefined,
+  );
+  const stopSheetFrame = () => {
+    if (sheetFrame.current !== undefined) cancelAnimationFrame(sheetFrame.current);
+    sheetFrame.current = undefined;
+  };
+  useEffect(() => stopSheetFrame, []);
+  const onSheetPoint = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || !editable || !sheetHost || !photoPoints.length) return;
+    const { target, clientX, clientY } = event;
+    sheetMouse.current = { target, clientX, clientY };
+    if (sheetFrame.current !== undefined) return;
+    sheetFrame.current = requestAnimationFrame(() => {
+      sheetFrame.current = undefined;
+      const mouse = sheetMouse.current;
+      if (!mouse) return;
+      const ordinal = noteAt(sheetHost, mouse);
+      setPointed((p) =>
+        ordinal === undefined
+          ? p?.from === 'sheet'
+            ? null
+            : p
+          : p?.ordinal === ordinal && p.from === 'sheet'
+            ? p
+            : { ordinal, from: 'sheet' },
+      );
+    });
+  };
+  const onSheetLeave = () => {
+    stopSheetFrame();
+    setPointed((p) => (p?.from === 'sheet' ? null : p));
   };
   const closeEditor = () => {
     select(null);
@@ -838,8 +1045,17 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             >
               {t.scan.review.useForFingerings}
             </Button>
+            {retakePage !== undefined && (
+              <RetakePage
+                page={retakePage + 1}
+                single={!batch}
+                touch={touchOnly}
+                primary={nextRed === 'again'}
+                onFile={(file) => retake(retakePage, file)}
+              />
+            )}
             <Button
-              primary={nextRed === 'again'}
+              primary={nextRed === 'again' && retakePage === undefined}
               onClick={() => {
                 setPhase('ready');
                 setError(null);
@@ -850,6 +1066,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   ...session,
                   xml: undefined,
                   corrections: undefined,
+                  retake: undefined,
                   pages: sourcePages.map((p) => ({ ...p, xml: undefined, error: undefined })),
                 });
               }}
@@ -878,6 +1095,34 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   editable={false}
                   busy={false}
                   onChange={arrange}
+                  overlay={
+                    photoPoints.length
+                      ? (size) => (
+                          <PhotoMarks
+                            width={size.width}
+                            height={size.height}
+                            space={
+                              space && space.file === shownPhoto
+                                ? space.space
+                                : fallbackSpace(size.width)
+                            }
+                            points={photoPoints}
+                            marked={markedSet}
+                            focus={focus}
+                            onPoint={(ordinal) =>
+                              setPointed((p) =>
+                                ordinal === null
+                                  ? null
+                                  : p?.ordinal === ordinal && p.from === 'photo'
+                                    ? p
+                                    : { ordinal, from: 'photo' },
+                              )
+                            }
+                            onPick={select}
+                          />
+                        )
+                      : undefined
+                  }
                 />
               ) : (
                 sourceUrl && (
@@ -896,6 +1141,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                     )}
                   </>
                 )
+              )}
+              {/* A page shown on its own can be photographed again, unless the verdict offers it. */}
+              {isImage && pageMode && retakePage !== selected && (
+                <RetakePage
+                  page={selected + 1}
+                  single={!batch}
+                  touch={touchOnly}
+                  onFile={(file) => retake(selected, file)}
+                />
               )}
             </section>
             <section className="stack scan-result" ref={resultHost} onKeyDown={onEditKey}>
@@ -970,6 +1224,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   aria-label={editable ? t.scan.review.recognized : undefined}
                   aria-describedby={editable ? 'scan-edit-keys' : undefined}
                   onClick={onSheetClick}
+                  onPointerMove={onSheetPoint}
+                  onPointerLeave={onSheetLeave}
                 >
                   <ScoreSheet
                     pages={pages}

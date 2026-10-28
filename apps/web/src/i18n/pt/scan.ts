@@ -160,6 +160,12 @@ export const scan: Messages['scan'] = {
         : pages.length === 1
           ? `Parte de uma linha da página ${pages[0]} não foi lida, então faltam ou sobram compassos. Troque essa foto e digitalize de novo.`
           : `Parte de uma linha das páginas ${formatList('pt', pages.map(String))} não foi lida, então faltam ou sobram compassos. Troque essas fotos e digitalize de novo.`,
+    readUnclearly: (pages: number[], of: number) =>
+      of === 1
+        ? 'A página não pôde ser lida com clareza. Fotografe-a de novo: plana, com luz uniforme, a página inteira no enquadramento.'
+        : pages.length === 1
+          ? `A página ${pages[0]} não pôde ser lida com clareza. Fotografe-a de novo: plana, com luz uniforme, a página inteira no enquadramento.`
+          : `As páginas ${formatList('pt', pages.map(String))} não puderam ser lidas com clareza. Fotografe-as de novo: planas, com luz uniforme, cada página inteira no enquadramento.`,
   },
   edit: {
     hint: 'Selecione uma nota para corrigi-la.',
@@ -186,6 +192,7 @@ export const scan: Messages['scan'] = {
     describe: (parts: string[]) => parts.join(' · '),
     panelLabel: 'Corrigir a nota selecionada',
     pitchLabel: 'Altura',
+    suggestedLabel: 'Também lida como',
     lower: 'Mais grave',
     lowerLabel: 'Descer um grau',
     higher: 'Mais aguda',
@@ -347,6 +354,11 @@ export const scan: Messages['scan'] = {
     alt: 'Partitura impressa original',
     rotated: (degrees: number) =>
       `Girada ${degrees}° para a direita para digitalizar. O arquivo original foi mantido.`,
+    retake: (page: number) => `Substituir a página ${page} por uma foto nova`,
+    retakeTouch: (page: number) => `Fotografar de novo a página ${page}`,
+    /** A one-page scan: the page is "it". */
+    retakeOnly: 'Substituí-la por uma foto nova',
+    retakeOnlyTouch: 'Fotografá-la de novo',
   },
   files: {
     pageLimit: 'Escolha até 20 imagens de páginas por vez.',

@@ -46,7 +46,7 @@ export default defineConfig({
       name: 'mobile',
       use: phone,
       testMatch:
-        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-phone|scan-camera|scan-grand-staff|seek|embellish|page-window|play-along)\.spec\.ts/,
+        /(library|states|hand-letters|keyboard-view|scan|scan-rotation|scan-edit|scan-linked|scan-phone|scan-camera|scan-grand-staff|seek|embellish|page-window|play-along)\.spec\.ts/,
     },
     // The camera loop (issue 156): local homr reads the page the camera made, and its threads slow
     // every other spec's timing (the throttled sweeps, K.545 within 8 s), so the loop is a project
@@ -63,7 +63,8 @@ export default defineConfig({
           {
             name: 'iphone',
             use: { ...devices['iPhone 15'], launchOptions: { args: [] } },
-            testMatch: /(scan-camera(-real)?|scan-grand-staff|play-along-home)\.spec\.ts/,
+            testMatch:
+              /(scan-camera(-real)?|scan-grand-staff|scan-linked|play-along-home)\.spec\.ts/,
           },
         ]),
   ],

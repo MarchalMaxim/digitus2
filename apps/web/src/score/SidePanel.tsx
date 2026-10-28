@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import type { Assignment } from '@digitus2/engine';
 import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandSize, type PieceSource } from '../app/store.js';
 import { downloadText, exportFilename } from '../export/download.js';
@@ -13,12 +12,6 @@ import { keyName } from './keyName.js';
 import { services, type ScoreDocument } from './useScoreDocument.js';
 import { injectNoteIds } from './render/injectIds.js';
 import { createRenderer, type ScoreRenderer } from './render/renderer.js';
-
-/** The fingering cut to the notes the edition prints; the whole of it when none are named. */
-function editionOf(assignment: Assignment, printed: ReadonlySet<string> | null): Assignment {
-  if (!printed) return assignment;
-  return Object.fromEntries(Object.entries(assignment).filter(([id]) => printed.has(id)));
-}
 
 const HAND_SIZES: readonly HandSize[] = ['large', 'medium', 'small', 'child'];
 
@@ -67,7 +60,7 @@ export function SidePanel({
       printRequest.current?.abort();
       paper.current = null;
     };
-  }, [doc.printXml, doc.xml, doc.score, doc.assignment, doc.printed, doc.status]);
+  }, [doc.printXml, doc.xml, doc.score, doc.assignment, doc.status]);
   const handSizeHelpId = useId();
 
   // A library piece's editorial file loads only when the toggle is first switched on, so the
@@ -123,15 +116,12 @@ export function SidePanel({
       const xml = doc.printXml ?? doc.xml;
       if (!xml || !doc.score || !doc.assignment) return null;
       // An independent renderer means a resize cannot supersede print, or print replace the
-      // screen's layout. Both hands get their current (including editorial) fingering; the
-      // engine's is cut to the edition's digits (issue 94), so the paper has no gaps where the
-      // screen's spare digits sit. The editor's own fingering prints whole: an edition already.
-      const assignment = editionOf(doc.assignment, doc.printed);
+      // screen's layout. Both hands get their full, current (including editorial) fingering.
       let renderer: ScoreRenderer | undefined;
       try {
         renderer = createRenderer();
         signal.addEventListener('abort', () => renderer?.dispose(), { once: true });
-        const fingered = await services.engine.fingeredXml(xml, doc.score, assignment);
+        const fingered = await services.engine.fingeredXml(xml, doc.score, doc.assignment);
         if (signal.aborted) return null;
         const { pages } = await renderer.render({
           xml: injectNoteIds(fingered, doc.score),
@@ -144,7 +134,7 @@ export function SidePanel({
         renderer?.dispose();
       }
     },
-    [doc.printXml, doc.xml, doc.score, doc.assignment, doc.printed],
+    [doc.printXml, doc.xml, doc.score, doc.assignment],
   );
 
   useEffect(() => {

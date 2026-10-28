@@ -14,12 +14,6 @@ import {
   type EngineResponse,
 } from './protocol.js';
 
-/** What the printed digits depend on besides the fingering (issue 94). */
-export interface EditionOptions {
-  level?: number;
-  editorDigits?: number;
-}
-
 export interface EngineClient {
   /**
    * Parses a MusicXML file, or imports a MIDI file (decided by `sourceKind(source)`); for MIDI,
@@ -36,16 +30,11 @@ export interface EngineClient {
     xml: string;
     midiInfo: MidiInfo | null;
   }>;
-  /**
-   * `edition` tunes the digits printed at rest (issue 94): the library level and, for a library
-   * piece with an editor's fingering, the editor's digit count as the cap. Uploads pass neither.
-   */
   solve(
     score: Score,
     profile: HandSize,
     pins?: Assignment,
-    edition?: EditionOptions,
-  ): Promise<{ assignment: Assignment; printed: string[]; ms: number }>;
+  ): Promise<{ assignment: Assignment; ms: number }>;
   fingeredXml(xml: string, score: Score, assignment: Assignment): Promise<string>;
   /**
    * "Add notes between": the guarded light embellishment of a plain MusicXML text, or null with
@@ -53,7 +42,6 @@ export interface EngineClient {
    */
   embellish(
     xml: string,
-    level?: number,
   ): Promise<{ offered: EmbellishedDoc | null; reason: string | null; ms: number }>;
   /** Terminates the worker and rejects every pending call. */
   dispose(): void;
@@ -225,25 +213,18 @@ export function createEngineClient(
         midiInfo,
       }));
     },
-    solve(score, profile, pins, edition) {
-      // exactOptionalPropertyTypes: leave what is absent out rather than send it as undefined.
-      const body: Extract<RequestBody, { type: 'solve' }> = {
-        type: 'solve',
-        score,
-        profile,
-        ...(pins ? { pins } : {}),
-        ...(edition?.level !== undefined ? { level: edition.level } : {}),
-        ...(edition?.editorDigits !== undefined ? { editorDigits: edition.editorDigits } : {}),
-      };
-      return call(body).then(({ assignment, printed, ms }) => ({ assignment, printed, ms }));
+    solve(score, profile, pins) {
+      // exactOptionalPropertyTypes: leave `pins` out rather than send `pins: undefined`.
+      const body: Extract<RequestBody, { type: 'solve' }> = pins
+        ? { type: 'solve', score, profile, pins }
+        : { type: 'solve', score, profile };
+      return call(body).then(({ assignment, ms }) => ({ assignment, ms }));
     },
     fingeredXml(xml, score, assignment) {
       return call({ type: 'fingeredXml', xml, score, assignment }).then((res) => res.xml);
     },
-    embellish(xml, level) {
-      return call(
-        level !== undefined ? { type: 'embellish', xml, level } : { type: 'embellish', xml },
-      ).then(({ offered, reason, ms }) => ({
+    embellish(xml) {
+      return call({ type: 'embellish', xml }).then(({ offered, reason, ms }) => ({
         offered,
         reason,
         ms,

@@ -3,16 +3,6 @@ import { closePractice, openPractice } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
 import { redBars, redSettled, seekBar } from './helpers/seek.js';
 
-/**
- * Note ids split into the engine's (`n` and a number, written into the MusicXML) and how many
- * others there are: Verovio draws a few notes the engine has no id for under ids of its own, new
- * for each engraving, and paper is engraved from its own text (the printed digits only, issue 94).
- */
-function noteIdSplit(ids: string[]): { engine: string[]; others: number } {
-  const engine = ids.filter((id) => /^n\d+$/.test(id)).sort();
-  return { engine, others: ids.length - engine.length };
-}
-
 // Issue 99 (docs/research/ram-usage.md): on a piece of six pages or more only the pages near the
 // screen are in the DOM. Every page stands as an empty SVG with its viewBox, so the scroll height
 // never changes; everything that reads the pages (the cursor, a seek, the dimming of a hand, the
@@ -367,15 +357,6 @@ test('print draws every note of the piece, whichever pages are in the DOM', asyn
     window.scrollTo(0, 0);
     return [...ids].sort();
   });
-  // The digits the engine printed for the edition (issue 94): the paper holds exactly these.
-  const edition = await page.evaluate(() =>
-    [
-      ...(
-        window as unknown as { __digitus2Edition: { printed(): string[] } }
-      ).__digitus2Edition.printed(),
-    ].sort(),
-  );
-  expect(edition.length).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: 'Print', exact: true })).toBeEnabled({
     timeout: 30_000,
   });
@@ -403,10 +384,6 @@ test('print draws every note of the piece, whichever pages are in the DOM', asyn
     .locator('.print-score g.note')
     .evaluateAll((els) => els.map((e) => e.id).sort());
   expect(printed.length).toBeGreaterThan(1000);
-  expect(noteIdSplit(printed)).toEqual(noteIdSplit(notes));
-  const paperDigits = await page
-    .locator('.print-score g.fing')
-    .evaluateAll((els) => els.map((e) => e.getAttribute('data-startid')!.replace(/^#/, '')).sort());
-  expect(paperDigits).toEqual(edition);
+  expect(printed).toEqual(notes);
   await page.emulateMedia({ media: 'screen' });
 });

@@ -28,7 +28,6 @@ const doc: ScoreDocument = {
   score,
   xml: null,
   assignment: null,
-  printed: null,
   editorial: null,
   pages: [],
   solveMs: null,

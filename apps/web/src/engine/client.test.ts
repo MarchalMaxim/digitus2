@@ -80,12 +80,12 @@ describe('engine client', () => {
     const c = createEngineClient(() =>
       fakeWorker((req) => {
         sent.push(req);
-        return { id: req.id, ok: true, type: 'solve', assignment: {}, printed: [], ms: 1 };
+        return { id: req.id, ok: true, type: 'solve', assignment: {}, ms: 1 };
       }),
     );
     const score = { notes: [] } as never;
     const pins = { n1: { finger: 2 as const, pinned: true, source: 'user' as const } };
-    await expect(c.solve(score, 'small')).resolves.toEqual({ assignment: {}, printed: [], ms: 1 });
+    await expect(c.solve(score, 'small')).resolves.toEqual({ assignment: {}, ms: 1 });
     await c.solve(score, 'child', pins);
     expect(sent[0]).toEqual({ id: 1, type: 'solve', score, profile: 'small' });
     expect('pins' in sent[0]!).toBe(false);
@@ -115,7 +115,6 @@ describe('engine client', () => {
       score: { notes: [] } as never,
       editorial: {},
       assignments: { large: {}, medium: {}, small: {}, child: {} },
-      printed: { large: [], medium: [], small: [], child: [] },
       figures: 3,
     };
     const c = createEngineClient(() =>
@@ -139,7 +138,7 @@ describe('engine client: releasing the worker after work on a long piece', () =>
     const spawned: ReturnType<typeof fakeWorker>[] = [];
     const spawn = () => {
       const w = fakeWorker(
-        (req) => ({ id: req.id, ok: true, type: 'solve', assignment: {}, printed: [], ms: 1 }),
+        (req) => ({ id: req.id, ok: true, type: 'solve', assignment: {}, ms: 1 }),
         delays,
       );
       spawned.push(w);
@@ -157,14 +156,14 @@ describe('engine client: releasing the worker after work on a long piece', () =>
     expect(spawned).toHaveLength(1); // spawned at once, so the library's warm-up loads it
     const solved = c.solve(long, 'medium');
     await vi.advanceTimersByTimeAsync(0);
-    await expect(solved).resolves.toEqual({ assignment: {}, printed: [], ms: 1 });
+    await expect(solved).resolves.toEqual({ assignment: {}, ms: 1 });
     await vi.advanceTimersByTimeAsync(IDLE - 1);
     expect(spawned[0]!.terminated).toBe(false);
     await vi.advanceTimersByTimeAsync(1);
     expect(spawned[0]!.terminated).toBe(true);
     const again = c.solve(short, 'small');
     await vi.advanceTimersByTimeAsync(0);
-    await expect(again).resolves.toEqual({ assignment: {}, printed: [], ms: 1 });
+    await expect(again).resolves.toEqual({ assignment: {}, ms: 1 });
     expect(spawned).toHaveLength(2);
   });
 
@@ -265,6 +264,6 @@ describe('engine client: releasing the worker after work on a long piece', () =>
     expect(failures).toEqual([]);
     const again = c.solve(short, 'medium');
     await vi.advanceTimersByTimeAsync(0);
-    await expect(again).resolves.toEqual({ assignment: {}, printed: [], ms: 1 });
+    await expect(again).resolves.toEqual({ assignment: {}, ms: 1 });
   });
 });

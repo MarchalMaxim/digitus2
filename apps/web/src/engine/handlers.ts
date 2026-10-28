@@ -8,11 +8,9 @@ import {
   injectFingerings,
   parseMusicXml,
   RECOMMENDED_WEIGHT_SET,
-  reduceFingering,
   solveFingering,
   unpackMusicXml,
 } from '@digitus2/engine';
-import type { HandSize } from '../app/store.js';
 import type { EngineRequest, EngineResponse } from './protocol.js';
 
 /** 'folder/Twinkle.mid' -> 'Twinkle': the title of a MIDI import. */
@@ -80,20 +78,7 @@ export function handle(req: EngineRequest): EngineResponse {
           req.score,
           req.pins ? { ...options, pins: req.pins } : options,
         );
-        // The edition's digits: the fewest a reader needs, at the level's density and never more
-        // than the editor prints (issue 94). The cap comes only for a library piece.
-        const { printed } = reduceFingering(req.score, assignment, {
-          ...(req.level !== undefined ? { level: req.level } : {}),
-          ...(req.editorDigits !== undefined ? { editorDigits: req.editorDigits } : {}),
-        });
-        return {
-          id: req.id,
-          ok: true,
-          type: 'solve',
-          assignment,
-          printed: [...printed],
-          ms: performance.now() - t0,
-        };
+        return { id: req.id, ok: true, type: 'solve', assignment, ms: performance.now() - t0 };
       }
       case 'fingeredXml':
         return {
@@ -109,15 +94,6 @@ export function handle(req: EngineRequest): EngineResponse {
         const { offered: o, reason } = guardEmbellishment(req.xml, {
           weightSet: RECOMMENDED_WEIGHT_SET,
         });
-        // The level's density only: the editor's cap counts the plain notes (issue 94).
-        const printedAt = (size: HandSize): string[] =>
-          o
-            ? [
-                ...reduceFingering(o.score, o.assignments[size], {
-                  ...(req.level !== undefined ? { level: req.level } : {}),
-                }).printed,
-              ]
-            : [];
         return {
           id: req.id,
           ok: true,
@@ -128,9 +104,6 @@ export function handle(req: EngineRequest): EngineResponse {
                 score: o.score,
                 editorial: o.editorial,
                 assignments: o.assignments,
-                printed: Object.fromEntries(
-                  (Object.keys(o.assignments) as HandSize[]).map((s) => [s, printedAt(s)]),
-                ) as Record<HandSize, string[]>,
                 figures: o.figures,
               }
             : null,

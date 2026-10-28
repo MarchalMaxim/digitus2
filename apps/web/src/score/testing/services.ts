@@ -15,15 +15,9 @@ type LoadOpts = Parameters<EngineClient['load']>[2];
  * An engine client that runs the real handlers synchronously inside promises. `calls` lists the
  * request types in the order they were made; `loads` the options of every load.
  */
-export function inlineEngine(): EngineClient & {
-  calls: string[];
-  loads: LoadOpts[];
-  /** The edition options each `solve` was given (undefined: none, as for a dropped file). */
-  solves: Array<Parameters<EngineClient['solve']>[3]>;
-} {
+export function inlineEngine(): EngineClient & { calls: string[]; loads: LoadOpts[] } {
   let id = 0;
   const calls: string[] = [];
-  const solves: Array<Parameters<EngineClient['solve']>[3]> = [];
   const loads: LoadOpts[] = [];
   const run = (req: Parameters<typeof handle>[0]) => {
     calls.push(req.type);
@@ -33,7 +27,6 @@ export function inlineEngine(): EngineClient & {
   return {
     calls,
     loads,
-    solves,
     load: (input, source, opts) => {
       loads.push(opts);
       return run({
@@ -48,26 +41,15 @@ export function inlineEngine(): EngineClient & {
           : {}),
       }).then((r) => r as never);
     },
-    solve: (score, profile, pins, edition) => {
-      solves.push(edition);
-      return run({
-        id: ++id,
-        type: 'solve',
-        score,
-        profile,
-        ...(pins ? { pins } : {}),
-        ...(edition?.level !== undefined ? { level: edition.level } : {}),
-        ...(edition?.editorDigits !== undefined ? { editorDigits: edition.editorDigits } : {}),
-      }).then((r) => r as never);
-    },
+    solve: (score, profile, pins) =>
+      run({ id: ++id, type: 'solve', score, profile, ...(pins ? { pins } : {}) }).then(
+        (r) => r as never,
+      ),
     fingeredXml: (xml, score, assignment) =>
       run({ id: ++id, type: 'fingeredXml', xml, score, assignment }).then(
         (r) => (r as { xml: string }).xml,
       ),
-    embellish: (xml, level) =>
-      run({ id: ++id, type: 'embellish', xml, ...(level !== undefined ? { level } : {}) }).then(
-        (r) => r as never,
-      ),
+    embellish: (xml) => run({ id: ++id, type: 'embellish', xml }).then((r) => r as never),
     dispose: () => {},
   };
 }

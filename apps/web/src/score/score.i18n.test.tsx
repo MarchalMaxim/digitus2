@@ -35,7 +35,6 @@ const doc: ScoreDocument = {
   score: null,
   xml: null,
   assignment: null,
-  printed: null,
   editorial: null,
   pages: [],
   solveMs: 6,

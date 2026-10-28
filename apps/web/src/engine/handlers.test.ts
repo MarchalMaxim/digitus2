@@ -216,12 +216,11 @@ describe('engine handlers: MIDI', () => {
       'medium',
       'small',
     ]);
-    // Only the six fields of the protocol cross to the main thread.
+    // Only the five fields of the protocol cross to the main thread.
     expect(Object.keys(r.offered!).sort()).toEqual([
       'assignments',
       'editorial',
       'figures',
-      'printed',
       'score',
       'xml',
     ]);
@@ -232,40 +231,5 @@ describe('engine handlers: MIDI', () => {
     if (!r.ok || r.type !== 'embellish') throw new Error('embellish failed');
     expect(r.offered).toBeNull();
     expect(r.reason).toMatch(/2 figures/);
-  });
-});
-
-describe('the edition in the worker', () => {
-  const solve = (extra: { level?: number; editorDigits?: number } = {}) => {
-    const { score } = load();
-    const r = handle({ id: 2, type: 'solve', score, profile: 'medium', ...extra });
-    if (!r.ok || r.type !== 'solve') throw new Error('solve failed');
-    return r;
-  };
-  it('answers a solve with the notes whose digits the edition prints', () => {
-    const r = solve();
-    expect(r.printed.length).toBeGreaterThan(0);
-    expect(r.printed.length).toBeLessThan(Object.keys(r.assignment).length);
-    for (const id of r.printed) expect(r.assignment[id]).toBeDefined();
-  });
-  it('cuts the printed digits to the editor count and follows the level', () => {
-    expect(solve({ editorDigits: 3 }).printed.length).toBeLessThanOrEqual(3);
-    expect(solve({ level: 1 }).printed.length).toBeLessThanOrEqual(
-      solve({ level: 5 }).printed.length,
-    );
-  });
-  it('answers an embellish with printed notes for every hand size, at the level only', () => {
-    const r = handle({
-      id: 3,
-      type: 'embellish',
-      xml: scoreText('twinkle-twinkle-little-star'),
-      level: 1,
-    });
-    if (!r.ok || r.type !== 'embellish' || !r.offered) throw new Error('no offer');
-    for (const size of ['large', 'medium', 'small', 'child'] as const) {
-      const printed = r.offered.printed[size];
-      expect(printed.length).toBeGreaterThan(0);
-      for (const id of printed) expect(r.offered.assignments[size][id]).toBeDefined();
-    }
   });
 });

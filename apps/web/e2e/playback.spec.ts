@@ -508,10 +508,6 @@ interface ScoreMark {
    */
   shown: number;
   red: boolean;
-  /** A digit the edition leaves out (issue 94). */
-  spare: boolean;
-  /** Its bar is open, showing every digit. */
-  open: boolean;
 }
 
 /** Every note (`g.note`) and digit (`g.fing`, by its note) of the sheet, with its staff. */
@@ -535,8 +531,6 @@ function scoreMarks(page: Page): Promise<{ notes: ScoreMark[]; digits: ScoreMark
       fillOpacity: getComputedStyle(el).fillOpacity,
       shown: shown(el),
       red: el.closest('.is-red') !== null,
-      spare: el.classList.contains('is-spare'),
-      open: el.closest('g.measure.is-open') !== null,
     });
     const notes = [...sheet.querySelectorAll('g.note')].map((n) => mark(n, n));
     const digits = [...sheet.querySelectorAll('g.fing')].map((f) =>
@@ -561,12 +555,6 @@ async function expectScoreDimmed(page: Page, left: boolean, label: string): Prom
     expect(n.shown, `${label} ${JSON.stringify(n)}`).toBe(n.staff === out && !n.red ? 0.4 : 1);
   }
   for (const d of digits) {
-    // A digit the edition leaves out is not drawn outside an open bar, whichever hand it is;
-    // inside an open bar it may still be fading in, so only the printed digits are timed here.
-    if (d.spare) {
-      if (!d.open) expect(d.shown, `${label} ${JSON.stringify(d)}`).toBe(0);
-      continue;
-    }
     expect(d.shown, `${label} ${JSON.stringify(d)}`).toBe(d.staff === out ? 0.4 : 1);
   }
 }

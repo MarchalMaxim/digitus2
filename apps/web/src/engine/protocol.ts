@@ -26,20 +26,10 @@ export type EngineRequest =
       /** Scan imports must not repair invalid recognition silently. */
       preserveNotation?: boolean;
     }
-  | {
-      id: number;
-      type: 'solve';
-      score: Score;
-      profile: HandSize;
-      pins?: Assignment;
-      /** The library level, for the density of the printed digits (issue 94); absent: level 3. */
-      level?: number;
-      /** The digits the editor prints on a library piece, the cap of the printed digits. */
-      editorDigits?: number;
-    }
+  | { id: number; type: 'solve'; score: Score; profile: HandSize; pins?: Assignment }
   | { id: number; type: 'fingeredXml'; xml: string; score: Score; assignment: Assignment }
   /** "Add notes between": the guarded light embellishment of a plain MusicXML text. */
-  | { id: number; type: 'embellish'; xml: string; level?: number };
+  | { id: number; type: 'embellish'; xml: string };
 
 export type EngineResponse =
   | {
@@ -53,15 +43,7 @@ export type EngineResponse =
       /** The import facts of a MIDI file; null for MusicXML. */
       midiInfo: MidiInfo | null;
     }
-  | {
-      id: number;
-      ok: true;
-      type: 'solve';
-      assignment: Assignment;
-      /** The notes whose digits the edition prints at rest (`reduceFingering`, issue 94). */
-      printed: string[];
-      ms: number;
-    }
+  | { id: number; ok: true; type: 'solve'; assignment: Assignment; ms: number }
   | { id: number; ok: true; type: 'fingeredXml'; xml: string }
   | {
       id: number;
@@ -77,8 +59,6 @@ export type EngineResponse =
         score: Score;
         editorial: Assignment;
         assignments: Record<HandSize, Assignment>;
-        /** The printed notes of each hand size's fingering, at the level's density, no editor cap. */
-        printed: Record<HandSize, string[]>;
         figures: number;
       } | null;
       reason: string | null;

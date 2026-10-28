@@ -12,9 +12,6 @@ const ONSET = 'data-onset-tick';
 const MUTED = 'is-muted';
 const SWEEPING = 'is-sweeping';
 const RETURNING = 'is-returning';
-const SPARE = 'is-spare';
-const OPEN = 'is-open';
-const CLOSING = 'is-closing';
 
 function escapeId(id: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return `#${CSS.escape(id)}`;
@@ -214,9 +211,6 @@ export function sweepDimming(
     const system = el.closest('g.system');
     if (!system || !systems.has(system)) continue;
     const measure = el.closest('g.measure');
-    // A spare digit in a bar that is not open is hidden whatever the hand does: nothing sweeps it
-    // or brings it back, so a hand switch never flashes the digits the edition leaves out.
-    if (el.classList.contains(SPARE) && !measure?.classList.contains(OPEN)) continue;
     const at = measure ? placeOf(measure) : 0;
     el.classList.add(SWEEPING);
     if (el.matches('g.fing') && !el.classList.contains(MUTED) && !fading.has(el)) {
@@ -293,113 +287,4 @@ export function setDigits(
 export function noteIdAt(target: EventTarget | null): string | null {
   if (!(target instanceof Element)) return null;
   return target.closest('g.note')?.id || null;
-}
-
-/**
- * Marks the digits the edition leaves out (issue 94): every `g.fing` whose note (`data-startid`)
- * is not in `printed` gets `.is-spare`, the others lose it; null (the editor's fingering is shown,
- * which is an edition already) removes the mark everywhere. The digits stay in the SVG: base.css
- * hides a spare digit outside an open bar, so the bar played, cued or under the pointer shows all.
- * Returns how many digits are spare.
- */
-export function markSpare(host: Element, printed: ReadonlySet<string> | null): number {
-  let spare = 0;
-  for (const fing of Array.from(host.querySelectorAll('g.fing'))) {
-    const id = fing.getAttribute('data-startid')?.replace(/^#/, '');
-    const isSpare = printed !== null && id !== undefined && !printed.has(id);
-    if (isSpare) spare++;
-    if (fing.classList.contains(SPARE) !== isSpare) fing.classList.toggle(SPARE, isSpare);
-  }
-  return spare;
-}
-
-/**
- * The first bar and the number of bars of page `page` of `host`, counted across the pages as the
- * bar seek counts them: a windowed sheet states them on every page (`data-first-bar`, `data-bars`)
- * whether the page is built or not, any other sheet has every page built and they are counted.
- */
-function pageBarRange(
-  host: Element,
-  upTo?: Element,
-): { page: Element; first: number; count: number }[] {
-  const out: { page: Element; first: number; count: number }[] = [];
-  let first = 0;
-  for (const page of Array.from(host.children)) {
-    const stated = page.getAttribute('data-first-bar');
-    const f = stated !== null ? Number(stated) : first;
-    const count =
-      page.getAttribute('data-bars') !== null
-        ? Number(page.getAttribute('data-bars'))
-        : page.querySelectorAll('g.measure').length;
-    out.push({ page, first: f, count });
-    first = f + count;
-    if (page === upTo) break;
-  }
-  return out;
-}
-
-/** The drawn bar (`g.measure`) with ordinal `bar` among the pages in `host`; null when its page is not built. */
-export function barElement(host: Element, bar: number): Element | null {
-  for (const { page, first, count } of pageBarRange(host)) {
-    if (bar < first || bar >= first + count) continue;
-    return page.querySelectorAll('g.measure')[bar - first] ?? null;
-  }
-  return null;
-}
-
-/** The ordinal of the drawn bar holding `el` among the bars of every page; null outside a bar. */
-export function barOrdinal(host: Element, el: Element): number | null {
-  const measure = el.closest('g.measure');
-  if (!measure) return null;
-  let page: Element | null = measure;
-  while (page && page.parentElement !== host) page = page.parentElement;
-  if (!page) return null;
-  const range = pageBarRange(host, page).find((r) => r.page === page);
-  if (!range) return null;
-  const i = Array.from(page.querySelectorAll('g.measure')).indexOf(measure);
-  return i < 0 ? null : range.first + i;
-}
-
-/** Opens the bars `bars` (ordinals) and closes the ones that were open and are not: see `useOpenBars`. */
-export function setOpenBars(
-  host: Element,
-  was: ReadonlySet<number>,
-  now: ReadonlySet<number>,
-  fade: boolean,
-): Element[] {
-  const closing: Element[] = [];
-  for (const bar of was) {
-    if (now.has(bar)) continue;
-    const el = barElement(host, bar);
-    if (!el) continue;
-    el.classList.remove(OPEN);
-    if (fade) {
-      el.classList.add(CLOSING);
-      closing.push(el);
-    }
-  }
-  for (const bar of now) {
-    if (was.has(bar)) continue;
-    const el = barElement(host, bar);
-    if (!el) continue;
-    el.classList.remove(CLOSING);
-    el.classList.add(OPEN);
-  }
-  return closing;
-}
-
-/** Ends the short fade-out of bars closed by `setOpenBars`. */
-export function settleClosing(els: Iterable<Element>): void {
-  for (const el of els) el.classList.remove(CLOSING);
-}
-
-/** The ordinal of the drawn bar holding note `id`, building its page first on a windowed sheet. */
-export function barOfNote(host: Element, id: string): number | null {
-  // The page is built directly: `ensureNotes` would also move the window's red page and schedule
-  // a window update at every onset group.
-  const pw = pageWindowOf(host);
-  const page = pw?.index.pageOfNote.get(id);
-  if (pw && page !== undefined) pw.ensurePage(page);
-  const note = host.querySelector(escapeId(id));
-  return note ? barOrdinal(host, note) : null;
 }

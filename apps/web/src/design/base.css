@@ -775,35 +775,6 @@ input[role='switch']:checked::before {
   }
 }
 
-/* The edition's digits (issue 94). A digit the edition leaves out is spare (render/dom.ts,
-   markSpare): it stays in the SVG, and is drawn only in an open bar (useOpenBars.ts: the bar being
-   played, the bar a click cued, the bar under a mouse pointer). Hidden by fill opacity alone, on
-   the text, no layer and no layout (issue 79); the specificity beats the muted digit's gray above.
-   Inside an open bar nothing is set, so the normal cascade (gray, sweep, the accent) applies. */
-.score-sheet svg g.measure:not(.is-open) g.fing.is-spare {
-  fill-opacity: 0;
-}
-
-/* The fade is declared on the open bar and, for a moment, on the bar just closed, never on every
-   spare digit: a re-solve that flips hundreds of digits starts no transition and fires no
-   transition event (issue 79 measured 25,000 of them). --dur is 0 under reduced motion, and the
-   closing class is not added there. The same shorthand as a sweep, so a digit swept inside an open
-   bar keeps its delay. */
-.score-sheet svg g.measure.is-open g.fing.is-spare,
-.score-sheet svg g.measure.is-closing g.fing.is-spare {
-  transition: fill-opacity var(--dur) var(--ease) var(--sweep, 0ms);
-}
-
-/* A hand switch never shows the digits the edition leaves out: outside an open bar they neither
-   sweep nor come back from 40 % (dom.ts skips them too; this holds if a mark is left over). */
-.score-sheet svg g.measure:not(.is-open) g.fing.is-spare.is-returning {
-  animation: none;
-}
-
-.score-sheet svg g.measure:not(.is-open) g.fing.is-spare.is-sweeping {
-  transition: none;
-}
-
 .score-sheet svg .is-red,
 .score-sheet svg .is-red * {
   transition: none;
@@ -2000,12 +1971,6 @@ html:has(.dock) {
     fill-opacity: 1;
     stroke-opacity: 1;
     opacity: 1;
-  }
-
-  /* The edition's spare digits stay hidden on paper too (the print root holds none; this holds if
-     the screen's pages are ever printed as they are). */
-  .score-sheet svg g.measure g.fing.is-spare {
-    fill-opacity: 0;
   }
 
   /* The timing rings are for the screen: a print is the music alone. */

@@ -189,6 +189,15 @@ test('library: a shelf opens in place in pages of 40; Escape goes back to the sh
   await showMoreButton(page).click();
   await expect(pieceRows(page)).toHaveCount(80);
   await expect(pieceRows(page).nth(40)).toBeFocused();
+  // The rows just shown fade in: axe reads their text through the opacity, so it waits for the
+  // fade to end (gray-3, 4.5:1 on white, reads 4.47:1 just before it does).
+  await page.evaluate(() =>
+    Promise.all(
+      [...document.querySelectorAll('.piece-list > .is-new')]
+        .flatMap((el) => el.getAnimations())
+        .map((a) => a.finished),
+    ),
+  );
   await expectNoSeriousA11y(page, 'shelf open');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(

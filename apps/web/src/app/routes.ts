@@ -4,9 +4,13 @@ import type { useAppStore, View } from './store.js';
 
 const FILE_HASH = '#/piece/file';
 const PIECE_PREFIX = '#/piece/';
+const SHARED_PREFIX = '#/shared/';
 
 /** Uploaded scores reopen explicitly from the local collection, without starting a scan. */
 export const FILE_NOT_RESTORABLE_NOTICE: Phrase = (t) => t.app.fileNotRestorable;
+
+/** A shared score's address names nothing the shared library can give (issue 132). */
+export const SHARED_NOT_LOADED_NOTICE: Phrase = (t) => t.library.shared.notLoaded;
 
 /** An address names a piece the library does not hold (issue 59, review L4). */
 export const UNKNOWN_PIECE_NOTICE: Phrase = (t) => t.app.unknownPiece;
@@ -20,11 +24,24 @@ export function viewToHash(view: View): string {
     case 'scan':
       return '#/scan';
     case 'score':
-      return view.source.kind === 'library' ? `${PIECE_PREFIX}${view.source.slug}` : FILE_HASH;
+      return view.source.kind === 'library'
+        ? `${PIECE_PREFIX}${view.source.slug}`
+        : view.source.kind === 'shared'
+          ? `${SHARED_PREFIX}${view.source.id}`
+          : FILE_HASH;
   }
 }
 
-/** The view a hash names, or null for '#/piece/file' (not restorable) and unknown hashes. */
+/** The id a '#/shared/<id>' address names: 32 lowercase hex characters, else null. */
+export function sharedIdFromHash(hash: string): string | null {
+  const id = hash.startsWith(SHARED_PREFIX) ? hash.slice(SHARED_PREFIX.length) : '';
+  return /^[0-9a-f]{32}$/.test(id) ? id : null;
+}
+
+/**
+ * The view a hash names, or null for '#/piece/file' (not restorable), unknown hashes and a shared
+ * score's address (its score has to be fetched first: `sharedIdFromHash`).
+ */
 export function hashToView(hash: string): View | null {
   if (hash === '' || hash === '#' || hash === '#/') return { name: 'library' };
   if (hash === '#/about') return { name: 'about' };
@@ -46,10 +63,16 @@ export function installHashSync(store: typeof useAppStore): () => void {
     if (hash !== location.hash) history.replaceState(history.state, '', hash);
   };
 
-  const applyHash = () => {
+  // True while a shared score named by the address is being fetched: the address stays as it is.
+  const applyHash = (): boolean => {
     const hash = location.hash;
     const { view } = store.getState();
-    if (viewToHash(view) === hash) return;
+    if (viewToHash(view) === hash) return false;
+    const sharedId = sharedIdFromHash(hash);
+    if (sharedId) {
+      void import('../library/shared/open.js').then((m) => m.openSharedAt(store, sharedId, hash));
+      return true;
+    }
     // A scan-derived score retains its source. Back restores that review; after a reload
     // the reader chooses the saved item explicitly from My scores.
     if (
@@ -59,34 +82,36 @@ export function installHashSync(store: typeof useAppStore): () => void {
       view.source.scan
     ) {
       store.setState({ view: { name: 'scan', session: view.source.scan } });
-      return;
+      return false;
     }
     const next = hashToView(hash);
     if (next) {
       store.setState({ view: next });
-      return;
+      return false;
     }
     // Not restorable or unknown: fall back to the library. Correct the hash first so the view
     // change below finds it already in place and does not push a second history entry.
     if (hash === FILE_HASH || hash === '#/scan')
       store.setState({ notice: FILE_NOT_RESTORABLE_NOTICE });
     else if (hash.startsWith(PIECE_PREFIX)) store.setState({ notice: UNKNOWN_PIECE_NOTICE });
+    else if (hash.startsWith(SHARED_PREFIX)) store.setState({ notice: SHARED_NOT_LOADED_NOTICE });
     replaceHash(viewToHash({ name: 'library' }));
     if (view.name !== 'library') store.setState({ view: { name: 'library' } });
+    return false;
   };
 
-  applyHash();
-  replaceHash(viewToHash(store.getState().view));
+  if (!applyHash()) replaceHash(viewToHash(store.getState().view));
 
+  const onHashChange = () => void applyHash();
   const unsubscribe = store.subscribe((state, prev) => {
     if (state.view === prev.view) return;
     const hash = viewToHash(state.view);
     if (hash !== location.hash) location.hash = hash;
   });
-  window.addEventListener('hashchange', applyHash);
+  window.addEventListener('hashchange', onHashChange);
 
   return () => {
     unsubscribe();
-    window.removeEventListener('hashchange', applyHash);
+    window.removeEventListener('hashchange', onHashChange);
   };
 }

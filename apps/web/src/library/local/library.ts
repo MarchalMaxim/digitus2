@@ -1,7 +1,8 @@
 import { useAppStore, type View } from '../../app/store.js';
+import type { Shareable } from '../shared/eligibility.js';
 import { LocalScoreDatabase } from './database.js';
 import { restoreSession, storeSession, type LocalScoreRecord } from './records.js';
-import { useLocalLibrary } from './state.js';
+import { useLocalLibrary, type LocalScoreSummary } from './state.js';
 
 const records = new Map<string, LocalScoreRecord>();
 const saved = new Set<string>();
@@ -13,6 +14,22 @@ let queue = Promise.resolve();
 let failed = false;
 let installed = false;
 let openRequest = 0;
+// Sharing (issue 132). What the shared library said about a record's upload this visit, and what
+// the engine made of a record's source (null: it cannot be shared); both are read when My scores
+// is opened, never at page load.
+const remote = new Map<string, 'waiting' | 'shared' | 'none'>();
+const verdicts = new WeakMap<object, Shareable | null>();
+const statusChecked = new Set<string>();
+let checking = Promise.resolve();
+const sourceOf = (record: LocalScoreRecord): object =>
+  record.kind === 'file' ? record.blob : record.session;
+
+function sharingOf(record: LocalScoreRecord): LocalScoreSummary['sharing'] {
+  const state = remote.get(record.id);
+  if (record.shared) return state === 'waiting' || state === 'shared' ? state : undefined;
+  if (!verdicts.get(sourceOf(record))) return undefined;
+  return state === 'none' ? 'again' : 'can';
+}
 
 function publish() {
   useLocalLibrary.setState({
@@ -34,6 +51,7 @@ function publish() {
                 ? 'corrected'
                 : 'recognition',
         saved: saved.has(record.id),
+        ...(sharingOf(record) ? { sharing: sharingOf(record) } : {}),
       })),
   });
 }
@@ -101,6 +119,9 @@ function capture(view: View) {
       blob: new Blob([new Uint8Array(source.bytes)]),
     };
   } else return;
+  // A corrected scan stays the upload it was shared as.
+  const shared = records.get(record.id)?.shared;
+  if (shared) record = { ...record, shared };
   snapshots.set(record.id, snapshot);
   records.set(record.id, record);
   saved.delete(record.id);
@@ -166,4 +187,102 @@ export function removeLocalScore(id: string) {
   snapshots.delete(id);
   publish();
   write(id);
+}
+
+function replace(record: LocalScoreRecord, next: LocalScoreRecord) {
+  records.set(record.id, next);
+  write(next);
+  publish();
+}
+function withoutShared(record: LocalScoreRecord): LocalScoreRecord {
+  const next = { ...record };
+  delete next.shared;
+  return next;
+}
+
+/**
+ * On the first opening of My scores in a visit: asks the shared library once what became of each
+ * upload, and has the engine read each candidate row once, so Share shows only where it can work.
+ * A store that cannot be reached says nothing and is asked again at the next opening.
+ */
+export function checkSharing(): Promise<void> {
+  checking = checking.then(async () => {
+    const [{ getShared }, { shareableOf }, { services }] = await Promise.all([
+      import('../shared/store.js'),
+      import('../shared/eligibility.js'),
+      import('../../score/useScoreDocument.js'),
+    ]);
+    for (const record of [...records.values()]) {
+      if (records.get(record.id) !== record) continue;
+      if (record.shared && !statusChecked.has(record.id)) {
+        statusChecked.add(record.id);
+        try {
+          const found = await getShared(record.shared.id);
+          if (records.get(record.id) !== record) continue;
+          if (found) remote.set(record.id, found.status === 'shared' ? 'shared' : 'waiting');
+          else {
+            remote.set(record.id, 'none');
+            replace(record, withoutShared(record));
+          }
+        } catch {
+          statusChecked.delete(record.id);
+        }
+        publish();
+      }
+      const current = records.get(record.id);
+      if (current && !current.shared && !verdicts.has(sourceOf(current))) {
+        verdicts.set(sourceOf(current), await shareableOf(current, services.engine));
+        publish();
+      }
+    }
+  });
+  return checking;
+}
+
+/** What the share sheet starts from: the title and composer the MusicXML names. */
+export async function shareDraft(id: string): Promise<{ title: string; composer: string } | null> {
+  const record = records.get(id);
+  const verdict = record && verdicts.get(sourceOf(record));
+  if (!verdict) return null;
+  return (await import('../shared/payload.js')).prefill(verdict.xml);
+}
+
+/** Uploads the score for review; the row then reads Waiting. Throws `ScoreTooLarge` or `StoreError`. */
+export async function shareLocalScore(id: string, title: string, composer: string): Promise<void> {
+  const record = records.get(id);
+  const verdict = record && verdicts.get(sourceOf(record));
+  if (!record || !verdict) throw new Error('this score cannot be shared');
+  const [{ buildShare }, { createShared, deleteShared, newId }] = await Promise.all([
+    import('../shared/payload.js'),
+    import('../shared/store.js'),
+  ]);
+  const shareId = newId();
+  const fields = await buildShare(shareId, {
+    title,
+    composer,
+    xml: verdict.xml,
+    kind: verdict.kind,
+  });
+  await createShared(shareId, fields);
+  const current = records.get(id);
+  if (!current) {
+    // Removed from My scores while it was being sent: nothing could withdraw it later.
+    void deleteShared(shareId).catch(() => {});
+    return;
+  }
+  statusChecked.add(id);
+  remote.set(id, 'waiting');
+  replace(current, { ...current, shared: { id: shareId } });
+}
+
+/** Takes the waiting upload back; the row returns to its plain state. Throws `StoreError`. */
+export async function withdrawLocalScore(id: string): Promise<void> {
+  const record = records.get(id);
+  if (!record?.shared) return;
+  const { deleteShared } = await import('../shared/store.js');
+  await deleteShared(record.shared.id);
+  const current = records.get(id);
+  remote.delete(id);
+  statusChecked.delete(id);
+  if (current) replace(current, withoutShared(current));
 }

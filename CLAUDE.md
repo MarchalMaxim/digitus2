@@ -5,7 +5,7 @@ Read `docs/PROGRESS.md` (current state, the owner's standing rules, decisions, w
 ## Fixed decisions (do not re-litigate)
 
 - Product: piano fingering engine plus a web app for beginners. Spec: `docs/superpowers/specs/2026-10-13-digitus2-design.md`.
-- Stack: pnpm monorepo, TypeScript everywhere in the product, engine runs in the browser with no server, except the scan recognition service on Cloud Run (`docs/scan-service.md`). Python 3.11 only under `research/` and `content/tools/`.
+- Stack: pnpm monorepo, TypeScript everywhere in the product, engine runs in the browser with no server, except the scan recognition service on Cloud Run (`docs/scan-service.md`) and the shared library's store on Firestore, which runs no code of ours (`docs/shared-library.md`). Python 3.11 only under `research/` and `content/tools/`.
 - Inputs: MusicXML (primary), built-in library, MIDI import.
 - UI: black and white, exactly one red element on screen at a time, no other chromatic color.
 - UI minimalism: the UI stays pristine and uncluttered; be brutal. A feature earns a visible control only if a beginner needs it at that moment; otherwise it is folded away, made automatic, or not built. Every UI change is judged on what it removes as much as on what it adds. Progressive disclosure, Apple-style: a control appears only in the context that needs it, never permanently "just in case"; filters and search appear only when a list is long enough to need them.

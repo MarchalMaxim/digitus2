@@ -123,6 +123,9 @@ test('the first visit installs a service worker that controls the page, with no 
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => {
+    // The shared library's store is out of reach in every spec (playwright.config.ts), so the
+    // shelf's request fails by design; the shelf then draws nothing.
+    if (m.location().url.startsWith('https://firestore.googleapis.com/')) return;
     if (m.type() === 'error') errors.push(m.text());
   });
   await page.goto('/');

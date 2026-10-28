@@ -10,6 +10,7 @@ import { flash, prefersReducedMotion } from '../design/motion.js';
 import { messages, useT } from '../i18n/i18n.js';
 import type { Messages } from '../i18n/messages.js';
 import { useLibraryPiece } from '../library/useLibraryPiece.js';
+import { SharedLine } from '../library/shared/SharedLine.js';
 import { BarSeek, type BarSeekHandle } from './BarSeek.js';
 import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
 import { useEmbellishCarry } from './carry.js';
@@ -560,7 +561,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
         />
         <main className="score-error stack">
           <p role="alert">
-            {source.kind === 'file'
+            {source.kind !== 'library'
               ? t.score.view.couldNotOpenFile(name)
               : t.score.view.couldNotOpenPiece(name)}
           </p>
@@ -609,13 +610,14 @@ export function ScoreView({ source }: { source: PieceSource }) {
   return (
     <div className="page score-view">
       <ScoreHeader
-        title={doc.title}
-        composer={doc.composer}
+        title={source.kind === 'shared' ? source.title || doc.title : doc.title}
+        composer={source.kind === 'shared' ? source.composer : doc.composer}
         piece={piece}
         onBack={openLibrary}
         legend={legendAbove}
         favourite={source.kind === 'library' ? source.slug : null}
       />
+      {source.kind === 'shared' && <SharedLine id={source.id} />}
       {source.kind === 'file' && source.scan && (
         <p className="no-print">
           <button

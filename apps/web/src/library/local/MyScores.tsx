@@ -1,18 +1,41 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react';
 import { useAppStore } from '../../app/store.js';
 import { useT } from '../../i18n/i18n.js';
 import { useLocalLibrary } from './state.js';
+
+const ShareSheet = lazy(() => import('../shared/ShareSheet.js'));
 
 export function MyScores({ onOpen, onFocusFallback }: { onOpen(): void; onFocusFallback(): void }) {
   const t = useT();
   const items = useLocalLibrary((s) => s.items);
   const failed = useLocalLibrary((s) => s.failed);
-  const say = t.library.myScores;
+  const say = { ...t.library.myScores, shared: t.library.shared };
   const rows = useRef<HTMLDetailsElement>(null);
   const live = useRef<HTMLParagraphElement>(null);
   const pending = useRef<{ button: HTMLButtonElement; index: number } | null>(null);
   const removing = useRef(new Set<string>());
   const [announcement, setAnnouncement] = useState({ name: '', count: 0 });
+  // Sharing (issue 132): the sheet being filled in, and whether a score was just sent for review.
+  const [sheet, setSheet] = useState<{
+    id: string;
+    initial: { title: string; composer: string };
+  } | null>(null);
+  const [sent, setSent] = useState(false);
+  const share = say.shared;
+  const fail = (phrase: (texts: typeof t) => string) => useAppStore.getState().setNotice(phrase);
+  const send = async (id: string, title: string, composer: string) => {
+    try {
+      await import('./library.js').then((m) => m.shareLocalScore(id, title, composer));
+      setSent(true);
+    } catch (cause) {
+      fail((texts) =>
+        cause instanceof Error && cause.name === 'ScoreTooLarge'
+          ? texts.library.shared.tooLarge
+          : texts.library.shared.unavailable,
+      );
+    }
+    setSheet(null);
+  };
   useLayoutEffect(() => {
     const wanted = pending.current;
     if (!wanted || wanted.button.isConnected) return;
@@ -30,9 +53,22 @@ export function MyScores({ onOpen, onFocusFallback }: { onOpen(): void; onFocusF
   return (
     <>
       {items.length > 0 && (
-        <details ref={rows} className="local-scores">
+        <details
+          ref={rows}
+          className="local-scores"
+          onToggle={(event) => {
+            // Opening My scores asks what became of each upload and which rows can be shared.
+            if (event.currentTarget.open)
+              void import('./library.js').then((m) => m.checkSharing()).catch(() => {});
+          }}
+        >
           <summary>{say.heading}</summary>
           <p className="small muted">{storageLabel}</p>
+          {sent && (
+            <p className="small muted sharing-status" role="status">
+              {share.sent}
+            </p>
+          )}
           <ul className="piece-list">
             {items.map((item) => (
               <li key={item.id} className="local-score-row">
@@ -47,9 +83,40 @@ export function MyScores({ onOpen, onFocusFallback }: { onOpen(): void; onFocusF
                 >
                   <span className="title">{item.name}</span>
                   <span className="composer small muted">
-                    {!failed && !item.saved ? say.saving : say.detail[item.detail]}
+                    {!failed && !item.saved
+                      ? say.saving
+                      : item.sharing === 'waiting'
+                        ? share.detail.waiting
+                        : item.sharing === 'shared'
+                          ? share.detail.shared
+                          : item.sharing === 'again'
+                            ? share.detail.notShared
+                            : say.detail[item.detail]}
                   </span>
                 </button>
+                {item.sharing && item.sharing !== 'shared' && (
+                  <button
+                    className="text-button small"
+                    aria-label={
+                      item.sharing === 'waiting'
+                        ? share.withdrawLabel(item.name)
+                        : share.shareLabel(item.name)
+                    }
+                    onClick={() => {
+                      if (item.sharing === 'waiting') {
+                        setSent(false);
+                        void import('./library.js')
+                          .then((m) => m.withdrawLocalScore(item.id))
+                          .catch(() => fail((texts) => texts.library.shared.withdrawFailed));
+                      } else
+                        void import('./library.js')
+                          .then((m) => m.shareDraft(item.id))
+                          .then((initial) => initial && setSheet({ id: item.id, initial }));
+                    }}
+                  >
+                    {item.sharing === 'waiting' ? share.withdraw : share.share}
+                  </button>
+                )}
                 <button
                   className="text-button small"
                   aria-label={say.removeLabel(item.name)}
@@ -89,6 +156,15 @@ export function MyScores({ onOpen, onFocusFallback }: { onOpen(): void; onFocusF
             ))}
           </ul>
         </details>
+      )}
+      {sheet && (
+        <Suspense fallback={null}>
+          <ShareSheet
+            initial={sheet.initial}
+            onShare={(title, composer) => send(sheet.id, title, composer)}
+            onClose={() => setSheet(null)}
+          />
+        </Suspense>
       )}
       <p
         ref={live}

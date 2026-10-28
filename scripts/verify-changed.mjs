@@ -98,6 +98,7 @@ export const RULES = [
     ...web([
       'library.spec.ts',
       'local-library.spec.ts',
+      'shared-library.spec.ts',
       'smoke.spec.ts',
       'states.spec.ts',
       'import-lifetime.spec.ts',
@@ -114,6 +115,7 @@ export const RULES = [
     specs: ['pwa.spec.ts', 'smoke.spec.ts'],
   },
   { test: [/^research\/omr\/(service|prototypes)\//], gates: ['omr:service', 'omr:acceptance'] },
+  { test: [/^library-store\//], gates: ['library:rules'] },
   // The photos the camera specs film and the acceptance floors count.
   {
     test: [/^research\/omr\/photos\//],

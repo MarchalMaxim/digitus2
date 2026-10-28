@@ -1,91 +1,205 @@
 # Shared library of readers' scores: options
 
-**Decision: option (c).** The owner declined a shared library; the document stays as the record of the options weighed.
+**Decision: the pre-moderated store, in a project of its own ([#132](https://github.com/MarchalMaxim/digitus2/issues/132)).** The owner asked to "allow the user to store their scores in a shared library", free, on Google Cloud, with a light copyright notice, and chose the recommendation of section 7, moderated in the Firebase console alone. What is built is described in `docs/shared-library.md`; this study stays as the record of the options weighed.
 
-This study answers [#41](https://github.com/MarchalMaxim/digitus2/issues/41): "Make uploaded or recognised scores available to other people", with explicit publishing, provenance and redistribution permission per score, and removal and moderation. It also asks whether this is still wanted under the Pages-only, no-login decision. Section 4 states the decision the owner has to take.
+The owner closed the first request for this, [#41](https://github.com/MarchalMaxim/digitus2/issues/41), with "no shared library" (option (c) of the first study, section 9). #132 reopens the question, so the study names the decisions it touches and what each option makes of them.
 
-## 1. Constraints
+## 1. What #132 asks, and what it conflicts with
 
-The site is GitHub Pages only: static files, public, no VPS and no login (CLAUDE.md, `docs/PROGRESS.md`); the one server process is the scan service on Cloud Run, which recognises a page and keeps nothing (`docs/scan-service.md`). The owner closed the login request with "I ONLY want it on github pages" and asked for no big-tech OAuth (request T4). `docs/scanning.md` promises that a page goes only to the scan service, and only when the reader presses **Scan this score**; uploads stay in IndexedDB ("My scores"), and nothing is published automatically. Library pieces enter the repository only through `content/tools`: a catalog entry with a `source` block (`name`, `url`, `license`, `licenseUrl`, `retrievedAt`), `build.py`, which refuses every licence except public domain, CC0, CC BY and CC BY-SA, and the gates (XSD, two-staff rule, validator, spans, zero lint law errors, level, dedupe). The repository is public and MIT, the project is non-commercial, and the repository budget is 100 MB with 1.5 MB per score (`scripts/check-repo-size.mjs`). The UI rule allows a control only where a beginner needs it, and only one red element on screen. The fixed decisions therefore allow anything that runs in the browser, or on github.com through the reader's own action, plus an offline step by the owner. They forbid any other server of the project's own, a login in the app, and any automatic upload.
+The owner's words:
 
-## 2. Options
+> Allow the user to store their scores in a shared library.
+>
+> Think about shared library design: consult design agent
+>
+> Think about costs and cloud infrastructure: use something free, halt development if costs are going to play a role (use google cloud platform, the current choice for our cloud infra)
+>
+> Think about a copyright disclaimer yada yada (this is a private application, so don't worry about it too much)
 
-Two facts apply to every option.
+Three recorded decisions stand against it:
 
-- **Who can publish.** My scores holds three kinds of entry (`apps/web/src/library/local/records.ts`): scans, plain MusicXML imports and MIDI imports. Publishing is offered only for entries whose MusicXML passes the strict import, the same condition that enables **Use for fingerings**. MIDI imports are left out, because they capture a performance, and imported MIDI cuts held notes short (#34).
-- **Licence.** The redistribution licence is one of the four that `build.py` already accepts: public domain, CC0, CC BY and CC BY-SA. Widening the list to NC licences is a decision for #37. A recognised score also records its source edition (publisher and year), because a photo of a modern printed edition is not the photographer's to license. The admission rule follows the PDMX precedent the owner accepted: the uploader's declaration plus content exclusions.
+| Decision | Where | What it says |
+|---|---|---|
+| No shared library | #41, closed by the owner | "Owner's decision: no shared library. … readers share files themselves, the library stays curated by the owner, and the app stays Pages-only with no login and no upload." |
+| No shared library of uploads | `docs/PROGRESS.md`, Decisions | "readers share files themselves and the library stays curated" |
+| GitHub Pages only, no login, one server | `CLAUDE.md`, Fixed decisions; `docs/PROGRESS.md` | The app is static on GitHub Pages, public, with no login; the scan service on Cloud Run is the one server |
+| Files go only to the scan service | `docs/scanning.md` | A page goes to the scan service only when the reader presses **Scan this score**; nothing is published automatically |
 
-### (a) Publish through GitHub: a prefilled issue form, reviewed by the owner, ingested through the gates
+One premise of #132 does not hold: the app is not private. It is public at https://marchalmaxim.github.io/digitus2/ with no login, so a shared library is readable and writable by anyone on the internet. Every judgement below follows from that.
 
-How a reader publishes:
+## 2. Who shares, and what arrives
 
-1. In **My scores**, an eligible row shows one more text button, **Share**, next to **Remove**.
-2. Pressing it saves one file, `score.digitus2.json`, and opens `github.com/MarchalMaxim/digitus2/issues/new?template=share-a-score.yml&title=...` in a new tab. The file holds the MusicXML as a string and the provenance the app knows: kind (scan or file), recogniser name and version, and the app version. It holds no file names, photos or IndexedDB ids, because a file name can be personal. The prefilled title comes only from the MusicXML `<work-title>` or `<movement-title>` and is left blank otherwise. It never comes from the My scores label, which is the file name.
-3. On GitHub, signed in, the reader fills the form: title, composer, arranger, and source (own work, printed edition with publisher and year, or a website URL). They pick a licence from a dropdown of the four. For CC BY and CC BY-SA they also fill **Credit as**, the name the licence requires to be credited. Then they tick two required checkboxes ("the music is in the public domain or mine to license"; "I license this MusicXML under the chosen licence"), then drag the saved file into the form's `upload` field and submit.
+My scores holds three kinds of entry (`apps/web/src/library/local/records.ts`): scans, MusicXML imports and MIDI imports. Sharing is offered only for entries whose MusicXML passes the strict import, the same condition that enables **Use for fingerings**. MIDI imports are left out: they capture a performance, and imported MIDI cuts held notes short (#34).
 
-Publishing takes two steps, not one click. An `upload` field cannot be filled from a URL [3], and the score cannot travel in the URL either: an over-long URL gets `414 URI Too Long` [2], and the measured median library score is 7,819 characters after deflate and base64 (table 2). The prefill carries only the title. A fork-and-PR route exists for experienced contributors; it needs the same account and is not linked from the app.
+What arrives is mostly someone else's music. A beginner scans the page in front of them: a method book, a teacher's handout, a pop arrangement. Those are modern printed editions under copyright. The public-domain classics a beginner plays are already in the library (3,245 pieces), so the uploads that add something are the ones most likely to be under copyright.
 
-- **Data.** The issue and its attachment live on github.com. An admitted score lives in the repository like any other piece: `catalog.d/community.json`, `scores/<slug>.musicxml.gz` and a manifest entry with `source.name` "Shared by a reader" and `source.url` set to the issue.
-- **Provenance and licence.** The declaration is the form: the dropdown licence, the source field, the credit and the required checkboxes. The declaration sits in the form rather than the package because the form is where the checkboxes are enforced: required checkboxes work only in public repositories [3], and this one is public. The issue ties the declaration to a GitHub account and a timestamp. A CC BY or CC BY-SA credit goes into the manifest entry and the score's `<rights>`, in the same place the Mutopia typesetter goes today (`build.rights_text`).
-- **Moderation and removal.** The form applies a `submission` label. The owner reads the issue, checks the licence, the source and the content exclusions of the PDMX lanes, then runs the ingest. The ingest downloads the attachment into `content/_raw/submissions/<n>/`, treats it as untrusted, builds it with `build.py --source community` (fingerings stripped, `validate.check_file`, gzip) and runs `gates.py` and `dedupe.py`; a PR with "Closes #n" then lands it. A refused submission gets a comment and is closed. A **Remove a score** form is open to anyone, including rights holders; the owner moves the entry to the fragment's `rejected` list with the reason, and the next deploy drops it. That form needs an account too; a rights holder without one can use GitHub's DMCA process, which covers the repository [8]. Git history keeps old blobs.
-- **App change.** One text button in a My scores row, never on library pieces and never in the score view. My scores is already folded away (`<details>`) and appears only when it has entries. No new red. Five locales (en, es, fr, nl, pt) get two strings. Admitted pieces appear under one collection, "Shared by readers", with the existing disclosure thresholds.
-- **Cost.** No money. Maintenance: two issue forms, one ingest script, one build source. Owner time per submission: an estimate of about 10 minutes to read the issue, run the ingest and merge the PR (not measured).
-- **Privacy.** The app sends nothing. It saves a file and opens a link whose only data is the score's title. The reader uploads on github.com by their own action. The submitter's GitHub username becomes public. **The attachment is public before review**: in public repositories uploaded files can be read without authentication [1], so review controls entry into the library, not exposure. Only the account owner can delete an issue [4]; the docs do not say whether an attachment URL stops resolving after deletion [1], so the study does not claim it.
-- **Abuse surface.** Spam issues, which GitHub's own spam handling and interaction limits cover (24 hours to 6 months, for example "prior contributors only" [5]). Malicious files: the ingest parses with entity resolution off, refuses a DOCTYPE, and enforces the 1.5 MB budget before the XSD runs. A false licence declaration is the same risk the owner accepted for PDMX.
-- **Fixed decisions.** Pages-only and no-login in the app hold. Every publisher needs a GitHub account ("To get started with GitHub.com, you need to have a personal account and a verified email address" [6]), which is a Microsoft-owned account. That is not OAuth in the app, but it is the closest this option comes to what T4 refused, and it is this option's main cost.
+## 3. Anonymous uploads: the judgement
 
-### (b) A third-party hosted store with anonymous writes, moderated by the owner
+Cost is the smaller question (section 5). The larger one is that the project becomes the host of what strangers upload.
 
-How a reader publishes: **Share** in a My scores row opens a small sheet in the app with title, composer, source, a licence choice, the attestation and a bot check (Cloudflare Turnstile). Submit sends the MusicXML and the declaration to a serverless function (a Cloudflare Worker) that writes it to object storage (R2) in a "pending" queue. The owner approves or rejects it on a moderator page, and approved scores are listed in a public index that the app fetches at start.
+**Copyright.** The project's MIT licence covers its code, not the scores it hosts, and being non-commercial is no defence against a rights holder. Two EU rules decide the exposure:
 
-- **Data.** A Cloudflare account outside the repository. Approved scores are served from R2, or pulled into the repository by the owner. Pulling them in reproduces (a) with more infrastructure; serving them from R2 bypasses the Python gates, because the Worker can run only TypeScript checks.
-- **Provenance and licence.** The same fields as (a), stored as JSON next to the score. With no account, an attestation is tied only to an IP address and a timestamp.
-- **Moderation and removal.** The owner works through the queue. The moderator page needs a login (Cloudflare Access or a secret), which brings back a login, even if only the owner's. The owner is the host of anonymous uploads and needs a notice-and-action channel for illegal content (EU Digital Services Act, Article 16 [9]).
-- **App change.** A new sheet with five fields and a submit button: the largest UI addition of the four options. Turnstile is a third-party widget whose colours the colour guard has to check. The app gains a network dependency at start for the shared index.
-- **Cost.** Workers free plan: 100,000 requests a day, 10 ms of CPU per request; the paid plan has a $5 monthly minimum [10]. R2: 10 GB-month free, no egress fee [11]. Turnstile: free [12]. A form service is weaker: Formspree's free plan has no file uploads, and Personal costs $15 a month for 1 GB [13]. Maintenance: a deployed function, keys, quota alerts, dependency updates, and the queue. Owner time per submission: about the same review as (a), plus operations.
-- **Privacy.** The score, the declaration and the reader's IP address go to Cloudflare on submit. The guarantee in `docs/scanning.md` that a page goes only to the scan service has to name a second destination.
-- **Abuse surface.** The largest: anonymous writes to storage the owner pays for and answers for, quota exhaustion, illegal files stored before review, and a moderator endpoint on the internet.
-- **Fixed decisions.** Reverses two: "no server" (a function and a store of the project's own) and Pages-only for the shipped app.
+- The upload-filter duty of the Copyright Directive (Article 17) binds "online content-sharing service providers", which Article 2(6) defines by organising and promoting content "for profit-making purposes" [9]. A non-commercial hobby site falls outside it.
+- What remains is the hosting rule of the Digital Services Act (Article 6) [8]: a host is not liable for what a user stores as long as it has no actual knowledge of illegal content and, once it learns of it, acts expeditiously to remove or disable it. Article 16 asks hosts for a notice mechanism that anyone can use electronically. Article 19 exempts micro and small enterprises only from the online-platform section, not from Article 16. Whether a free, non-commercial site is an "information society service" at all (one "normally provided for remuneration" [10]) is not settled for hobby sites; the design follows Article 16 either way, because a working notice-and-removal path is what keeps the liability rule on the owner's side.
 
-### (c) Pull-only: decline the shared store
+So a light copyright notice is enough only when two things stand behind it: nothing becomes public before someone looks, and anyone can report a score and see it removed. Without those, the notice protects nobody.
 
-How a reader shares: **Download** saves the score's MusicXML (scans already offer **Download raw MusicXML**). The reader sends it however they like. On phones, the Web Share API can hand the file straight to a chat app [14]. The recipient drops it on the app. A link to the app carries no data. The library stays curated by the owner through the existing lanes, and a reader who wants a piece in the library can open an ordinary issue.
+**The PDMX precedent does not carry over.** The owner accepted the archive lanes' broad reading: a score is admitted on its uploader's declaration to MuseScore (`docs/PROGRESS.md`). There a third party collected the declaration, tied to an account, and the owner chooses which pieces to copy. Here the declaration is an anonymous tick, and the project is the first host.
 
-- **Data.** Nowhere new. **Provenance.** None is captured, because nothing is published. **Moderation.** None needed.
-- **App change.** None, or one **Download** text button in a My scores row for plain imports.
-- **Cost.** None. **Privacy.** The guarantee holds unchanged. **Abuse surface.** None added.
-- **Fixed decisions.** Holds all of them. It does not meet #41's need, because nothing becomes available to people the reader does not know.
+**Moderation and abuse.** An open write endpoint on a beginners' site attracts spam titles, slurs and junk files; a MusicXML file can carry any text in its title, lyrics and credits. An upload that is listed at once puts that in front of children before anyone sees it. An upload that waits for the owner reaches no one but the owner.
 
-### (d) A score link: the score travels in the URL fragment
+**Deletion and takedown.** Three kinds of removal are needed:
 
-How a reader shares: **Copy link** in a My scores row copies `https://marchalmaxim.github.io/digitus2/#/shared/<deflated base64url MusicXML>`. Whoever opens the link sees the score in the normal score view, put through the strict import, and can keep it in their own My scores. The fragment is never sent to the server [7], so GitHub Pages never sees the score.
+| Who | How | In the pre-moderated store |
+|---|---|---|
+| The uploader, while the score waits | **Withdraw** on their My scores row | The upload's id is a random 128-bit key kept only in their browser; the rules let whoever holds it delete a waiting upload |
+| A rights holder or any reader, once it is shared | **Report** in the score view, no account | A report document in the store; the owner reads reports and deletes the score. When the store does not answer, the report sheet points to a channel outside it: a "Remove a score" issue form and the owner's address |
+| The owner | One command, or the Firebase console | Deleting a document removes it for good; nothing stays in git history |
 
-- **Data.** Only inside the link. **Provenance.** None beyond what the MusicXML carries. **Moderation.** None is possible and none is needed, because nothing is stored or listed. A crafted link can show any title text under the project's domain, so the strict import, escaping and a plain "shared link" label matter.
-- **App change.** One text button in a My scores row, plus a new `#/shared/` route in the hash router (`apps/web/src/app/routes.ts`).
-- **Size.** Table 2 measures the 2,702 library scores. Half of them need more than about 8,000 characters, and chat and mail clients may truncate links that long, so links work best for short pieces.
-- **Cost.** None. **Privacy.** The app sends nothing; the reader shares the link by hand. **Fixed decisions.** Holds all of them. Like (c), it is person-to-person sharing, not discovery.
+**Personal data.** An upload stores no name, file name, address or IP address. A copyright report asks for a way to reply (an e-mail address), because a rights holder's notice needs an answer; the owner deletes the report once it is handled.
 
-## 3. Comparison
+**Judgement.** Anonymous uploads with a light notice are acceptable only pre-moderated, with a report path, and with removal that really deletes. Uploads published at once are not: they make the owner the host of whatever arrives, in front of beginners, with the notice as the only filter. The price of pre-moderation is the owner's time on every upload and a high refusal rate for scans of modern editions.
 
-Table 1. The options against the needs and the fixed decisions
+## 4. Options
 
-| | (a) GitHub issue | (b) Hosted store | (c) Pull-only | (d) Score link |
+Four options, named the same way everywhere in this study and in #132. The pre-moderated store can live in a project of its own or in `digitus2-scan` (section 5).
+
+| | Do not build | GitHub issues | Pre-moderated store (Firestore) | Published at once (Firestore) |
 |---|---|---|---|---|
-| Meets #41 (others can find it) | yes, in the library | yes | no | no, only who gets the link |
-| Pages-only, no server | holds | reversed | holds | holds |
-| Login in the app | none | none for readers; owner's moderator login | none | none |
-| Publisher needs | GitHub account | nothing | nothing | nothing |
-| Explicit publishing | yes, two steps | yes, one step | n/a | yes, by sharing the link |
-| Provenance and licence | form fields, required checkboxes, tied to an account | form fields, tied to an IP address | none | none |
-| Public before review | yes (the attachment) | no (pending queue) | n/a | n/a |
-| Gates (XSD, spans, lint, dedupe) | all, through `content/tools` | only if pulled into the repository | n/a | strict import only |
-| Moderation | owner, via issues and PRs | owner, via a queue | none | none possible |
-| App change | 1 text button | 1 sheet, 5 fields, bot check | 0 or 1 text button | 1 text button, 1 route |
-| Money | 0 | 0 on free tiers; $5 a month minimum when paid [10] | 0 | 0 |
-| Owner time per submission (estimate) | about 10 min | about 10 min plus operations | 0 | 0 |
-| Files go only to the scan service (`docs/scanning.md`) | holds (the reader uploads on github.com) | rewritten | holds | holds |
+| How a reader shares | Saves the MusicXML and sends it themselves | **Share** saves a file and opens a GitHub issue form; the reader signs in on github.com and attaches it | **Share** opens a sheet: title, composer, one tick; the score waits for the owner | As the pre-moderated store, listed at once |
+| Others can find it | no | yes, once ingested into the library | yes, on a "Shared by readers" shelf | yes, at once |
+| Reader needs an account | no | GitHub | no | no |
+| Public before review | n/a | yes (issue attachments are public) | no | yes |
+| Moderation | none needed | the owner reviews issues and runs the library gates | the owner approves each upload | reports only, after the fact |
+| Removal | n/a | git history keeps old blobs | real deletion | real deletion |
+| Gates (XSD, spans, lint, dedupe) | n/a | all, through `content/tools` | strict import only | strict import only |
+| Money | 0 | 0 | 0 (section 5) | 0 (section 5) |
+| Owner time per upload (estimate) | 0 | about 10 min | 1 to 3 min | per report only |
 
-Table 2. Library scores as a link fragment (MusicXML, raw deflate level 9, base64; 2,702 scores in `content/scores/`)
+GitHub issues is option (a) of the first study (section 9), which remains valid: it is free and keeps every fixed decision, at the price of a GitHub account for every reader who shares.
+
+### What each recorded decision becomes
+
+| Decision | Do not build | GitHub issues | Pre-moderated store | Published at once |
+|---|---|---|---|---|
+| #41 "no shared library" | stands; #132 is closed with the reason | reversed; #132 supersedes it | reversed; #132 supersedes it | reversed; #132 supersedes it |
+| `docs/PROGRESS.md` "No shared library of uploads" | unchanged | "Readers share through a GitHub issue form; the owner admits scores into the library through the gates" | "Readers share anonymously into a pre-moderated store on Firestore; the owner approves each score; anyone can report one" | as the pre-moderated store, without approval |
+| `CLAUDE.md` "GitHub Pages only" | unchanged | unchanged | holds for the app; the app also reads and writes Firestore through Google's REST API; no server code of the project's own | the same |
+| `CLAUDE.md` "no login" | unchanged | unchanged in the app; publishers sign in on github.com | unchanged for readers; the owner moderates with their own Google credentials outside the app | the same |
+| `CLAUDE.md` "one server, the scan service" | unchanged | unchanged | a second Google service: a Firestore database, with no code running on it | the same |
+| `docs/scanning.md` "files go only to the scan service" | unchanged | unchanged; the reader uploads on github.com | the photo still goes only to the scan service; a score's MusicXML goes to Firestore when the reader presses **Share** | the same |
+
+## 5. Cost on Google Cloud
+
+The store is Firestore (Standard edition) in `europe-west4`, the scan service's region. Firestore keeps each score as one document; Cloud Storage is left out because its free tier exists only in three US regions [2]. The app talks to Firestore through its REST API, not the Firebase SDK, so the library page stays within its 150 KB budget; there is no Cloud Run endpoint and no function.
+
+Table 1. Free tiers used (Firestore's are per project; one free database per project [3])
+
+| Resource | Free | Library use |
+|---|---:|---|
+| Stored data | 1 GiB [2][3] | A score is stored deflated: the library's median is 7,819 characters, its largest 60,286 (table 3). 1 GiB holds over 100,000 median scores |
+| Document writes | 20,000 a day [2][3] | One per upload, one per report, one per approval |
+| Document reads | 50,000 a day [2][3] | One index document per library visit, one score per opening; a query costs at least one read even when empty [3] |
+| Document deletes | 20,000 a day [2][3] | Withdrawals and removals |
+| Outbound data | 10 GiB a month [2][3] | About a million openings of a 10 KB score |
+| Document size | 1 MiB limit [4] | The rules cap a score at 100,000 characters, above the library's largest |
+
+Table 2. Price beyond the free tier, Firestore Standard, Netherlands (europe-west4), US dollars [1]
+
+| Item | Price |
+|---|---:|
+| Reads | $0.034 per 100,000 |
+| Writes | $0.102 per 100,000 |
+| Deletes | $0.011 per 100,000 |
+| Stored data | $0.17 per GiB-month |
+
+**Where the store lives decides the worst case.** The owner asked for Google Cloud, the current choice; there are two ways to use it.
+
+| | Own project, no billing account (recommended) | In the existing `digitus2-scan` project |
+|---|---|---|
+| Can it cost money | No. A project without a billing account runs on the no-cost quota only ("No payment method needed" [5]) | Yes, beyond the free tier, up to the 10-a-month budget and its kill switch (`docs/scan-service.md`) |
+| Worst case: a script writes 100 junk documents a second at the 100,000-character cap | After 20,000 writes the quota is spent. The pricing-plans page says a product that exceeds its no-cost quota is shut off for the rest of the month [6]; the quota page says quotas reset around midnight [4]. Taking the harder reading: **all of the shared library goes dark for the rest of the month**, the shelf, sharing and the report sheet included. Nothing is billed, and scanning is untouched | 8.64 million writes a day ($8.81) and about 805 GiB stored ($4.50 for each day kept): over the budget within about a day. The kill switch then unlinks billing for the whole project [19], and **scanning stops too**, for the rest of the month |
+| Scanning's free grant | Untouched: Firestore needs no Cloud Run | Untouched by Firestore itself; any Cloud Run endpoint would share the 180,000 free vCPU-seconds with scanning, because that grant is per billing account [2][7] |
+| Reads exhausted by a script | The same: the library is dark for the rest of the month | Billed at $0.034 per 100,000 until the kill switch |
+
+The own project stays free by construction, not by monitoring, which is the "halt if costs play a role" the owner asked for, enforced by Google. Its failure is a shared library that is switched off until the quota resets, possibly for the rest of the month; the app then hides the shelf and the Share button, and the report sheet points to the channel outside the store (section 3). The owner deletes the junk once the store answers again. The first hardening step, if abuse happens, is App Check with reCAPTCHA, free on the no-cost plan [5], which blocks scripts; it costs a third-party widget and the colour guard's attention, so it is not in the first version.
+
+GitHub issues costs nothing on Google Cloud. Published at once has the pre-moderated store's costs.
+
+## 6. Design
+
+Mock-ups, interactive, in light and dark at 1280 and 360 px: https://claude.ai/artifact/MwN2J2jY2RDQGVUDk2jCyb (private to the owner). They use the app's own tokens; each screen has exactly one red, and each lists what it adds and what stays out.
+
+| Screen | What appears | What stays out |
+|---|---|---|
+| My scores | One text button, **Share**, on eligible rows, beside **Remove**. My scores stays folded and appears only when it has entries | Nothing on the library page, the score view or the scan page. The red stays on Start |
+| Share sheet | Title and composer, prefilled from the MusicXML (never from the file name); one sentence: "Share only music that is out of copyright or that you wrote. The owner reads each score before anyone else can find it."; one required tick, "This music is free to share"; **Share** is the red while the sheet is open. A bottom sheet on phones | No licence menu, no source field, no account, no bot check |
+| Waiting | The row reads "Waiting for review"; **Share** becomes **Withdraw**. Later "Shared", or "Not shared" with **Share** again | No inbox, no notifications |
+| Shared shelf | "Shared by readers", after the curated shelves of the chosen level, newest first, five rows like every shelf; it appears only once one score is approved. Search includes shared pieces when the list is long enough for search to appear | No uploader names, counts, likes or comments |
+| Shared score | One gray line under the composer, "Shared by a reader", and a **Report** text button. The red stays on the note to play | No licence badge, no disclaimer banner |
+| Report | Three reasons (under copyright; offensive or spam; does not play right) and an optional note; "How can the owner reply to you?" appears only for copyright. **Send report** is the red | No account; the score stays up until the owner acts |
+
+The copyright notice is the one sentence on the share sheet and the report reason: light, as the owner wants, and placed where a reader decides something.
+
+## 7. Recommendation
+
+**Pre-moderated store, in a Google Cloud project of its own with no billing account.**
+
+- It does what #132 asks: anyone shares in two fields and a tick, with no account, and others find approved scores on a shelf.
+- It is free by construction. The worst a script can do is switch the shared library off until the quota resets, possibly for the rest of the month; it cannot spend money or take scanning down. In `digitus2-scan` the same script would trip the kill switch and stop scanning for the month. The existing project is the owner's stated place; a project of its own is still Google Cloud, under the same billing account's owner, and it is the only way "free" holds without watching it.
+- It keeps the owner's light notice honest: nothing is public before the owner has read it, anyone can report, and removal deletes. That is what the hosting rules ask of a host, whatever the notice says.
+- It changes three recorded decisions (section 4): #41 and the PROGRESS line are reversed, and "one server" becomes "one server and one database". The app stays on GitHub Pages with no login for readers.
+
+What it costs the owner is time: every upload waits for them, and most scans of modern editions will be refused. **If the owner does not want to read every upload, the recommendation is Do not build**: keep #41's decision and close #132 with that reason. Published at once is not recommended at any price. GitHub issues remains the choice if readers needing a GitHub account is acceptable and Google Cloud is not wanted.
+
+## 8. The decision for the owner
+
+> Is a shared library wanted, and if so, how?
+>
+> - **Pre-moderated store, own project (recommended).** You approve every upload; it can never cost money; scanning is unaffected.
+> - **Pre-moderated store, in `digitus2-scan`.** The same, but abuse can reach the 10-a-month budget and stop scanning for the month.
+> - **GitHub issues.** Readers need a GitHub account; no Google Cloud.
+> - **Do not build.** Close #132; #41's decision stands.
+
+### Implementation sketch for the pre-moderated store
+
+| Piece | What it is |
+|---|---|
+| Google Cloud project `digitus2-library` | Firestore Standard, `europe-west4`, no billing account; created by a script in `research/library/` like the scan service's `deploy.ps1` |
+| Collection `shared/{id}` | `id`: 128 random bits from the browser. Fields: `title`, `composer`, `score` (deflated base64 MusicXML), `kind` (scan or file), `app` (version), `status` (`waiting`, `shared`), `created` (server time). No name, file name or address |
+| Document `index/shared` | The approved list (id, title, composer, level, length), one read per visit; rewritten by the owner's command |
+| Collection `reports/{id}` | `score`, `reason`, `note`, `reply` (only for copyright), `created` |
+| Security rules | Anyone may create a `shared` document with exactly these fields, `status == 'waiting'`, `created == request.time` and `score` under 100,000 characters; anyone may get one by id (only its uploader knows a waiting id); listing is denied; delete only while `waiting`; no updates. Anyone may create a report with the same shape checks; nobody may read reports. Anyone may read `index/shared` |
+| `apps/web/src/library/shared/` (new) | REST calls (create, get, delete, read the index, create a report), the share and report sheets, the shelf; strict import for every opened score, as for a reader's own file. When the store does not answer, the shelf and **Share** are hidden and the report sheet shows the channel outside the store |
+| `.github/ISSUE_TEMPLATE/remove-a-score.yml` | The removal form outside the store, with the owner's address beside it |
+| `apps/web/src/library/local/MyScores.tsx` | **Share**, **Withdraw** and the row states |
+| `content/tools/library.py` (new) | The owner's command: `waiting` lists uploads, `show ID` writes the MusicXML to open in the app, `approve ID` and `remove ID` set the status or delete and rewrite the index, `reports` lists and clears reports. Runs with the owner's Google credentials |
+| Docs | `docs/scanning.md` (where a score goes on Share), `docs/app.md` (Library), `docs/PROGRESS.md` and `CLAUDE.md` (the decisions in section 4), a short page for the shared library's rules and the owner's commands |
+
+Checklist for #132, once the owner picks a pre-moderated store:
+
+- [ ] The project, database and rules, with rule tests in the Firestore emulator (every refused shape, every allowed one).
+- [ ] The share sheet, the row states and Withdraw, in all five locales.
+- [ ] The shelf and the shared score's line and Report, in all five locales.
+- [ ] The owner's command, with pytest on fixture documents.
+- [ ] Docs and the decisions in section 4.
+- [ ] One upload end to end: shared, approved, found on the shelf, reported, removed.
+
+Verification: vitest for the REST client and the payload (no file name, the size cap, MIDI refused); Playwright against the Firestore emulator for share, withdraw, shelf, report, and that no request leaves the app before **Share** or **Send report**; the colour guard (one red per screen); the bundle budget (no Firebase SDK); `pnpm verify`.
+
+## 9. The first study ([#41](https://github.com/MarchalMaxim/digitus2/issues/41))
+
+The first study weighed four options under Pages-only and no login. The owner chose (c) and closed #41; #132 reopens the question. Its findings still hold and inform section 4; its option (a) is GitHub issues here.
+
+**(a) Publish through GitHub.** A **Share** text button in a My scores row saves `score.digitus2.json` (the MusicXML, kind, recogniser and app version; no file names) and opens a prefilled issue form, `share-a-score.yml`, with the title only: an `upload` field cannot be filled from a URL [13], and the score cannot travel in the URL (an over-long URL gets `414 URI Too Long` [12]; table 3). The reader fills title, composer, arranger, source, a licence from the four `build.py` accepts (public domain, CC0, CC BY, CC BY-SA) and two required checkboxes, then attaches the file. The owner runs an ingest (`content/tools/submission.py`) that downloads the attachment as untrusted input, builds it with `build.py --source community` and runs `gates.py` and `dedupe.py`; a PR lands it under "Shared by readers". A **Remove a score** form and GitHub's DMCA process [18] handle removal, though git history keeps old blobs. Every publisher needs a GitHub account [16]; attachments in a public repository are readable before review [11]; only the account owner can delete an issue [14]; interaction limits curb spam [15]. Cost: none in money, about 10 minutes of owner time per submission (estimate).
+
+**(b) A third-party store with anonymous writes.** Cloudflare Workers, R2 and Turnstile [20][21][22]; a form service is weaker (Formspree's free plan has no file uploads [23]). It reverses "no server" and needs a moderator login. #132's choice of Google Cloud replaces it with the two Firestore options.
+
+**(c) Pull-only.** Readers download the MusicXML and send it themselves, by the Web Share API on phones [24]. Nothing new is stored. This is the decision #41 records, and Do not build here.
+
+**(d) A score link.** **Copy link** puts the deflated MusicXML in the URL fragment, which never reaches the server [17]. Nothing is stored; links work best for short pieces (table 3). It can be requested on its own, under any option.
+
+Table 3. Library scores as deflated text (MusicXML, raw deflate level 9, base64; 2,702 scores in `content/scores/`)
 
 | Measure | Characters |
 |---|---:|
@@ -100,62 +214,29 @@ Table 2. Library scores as a link fragment (MusicXML, raw deflate level 9, base6
 | 8,000 characters | 1,407 |
 | 32,000 characters | 2,638 |
 
-## 4. Recommendation and the decision
-
-**Recommendation: (a).** It is the only option that puts readers' scores in front of people they do not know and keeps every fixed decision: no server, Pages-only, no login in the app. Every shared score goes through the same gates and the same `source` provenance as the 2,702 library pieces, and the owner's review of an issue is the moderation. Its costs are a GitHub account for each publisher and an attachment that is public before review, and both are stated plainly in the form. Option (b) buys a one-step submission by reversing "no server", and makes the owner the host of anonymous uploads. If the owner does not want readers to need a GitHub account, the honest answer is (c): close #41. (d) can be added later as a separate request if friend-to-friend sharing is wanted.
-
-The decision for the owner:
-
-> Is a shared library still wanted, and if so, how?
-> 1. **Yes, through GitHub issues (a).** Publishers need a GitHub account; the app stays Pages-only and login-free; the owner reviews each submission.
-> 2. **Yes, through a hosted store (b).** One-step anonymous submissions; this reverses "no server" and Pages-only, and the owner runs a moderation queue.
-> 3. **No: close #41 (c).** Readers share files themselves; the library stays curated. Optionally add score links (d) as a separate issue.
-
-## 5. Implementation sketch for (a)
-
-Files and tools:
-
-| Path | Change |
-|---|---|
-| `.github/ISSUE_TEMPLATE/share-a-score.yml` | Issue form: title, composer, arranger, source, licence dropdown (4 values), credit (required for CC BY and CC BY-SA, checked by the ingest), 2 required checkboxes, `upload` with `accept: .json`, label `submission` |
-| `.github/ISSUE_TEMPLATE/remove-a-score.yml` | Removal form: piece link, reason, contact on the issue |
-| `apps/web/src/library/local/share.ts` (new) | Builds the `.digitus2.json` package (schema version, kind, recogniser, app version, MusicXML) and the issue URL with the title only |
-| `apps/web/src/library/local/MyScores.tsx` | **Share** text button on eligible rows |
-| `apps/web/src/i18n/{en,es,fr,nl,pt}/library.ts` | Button label and accessible label |
-| `content/tools/submission.py` (new) | `gh issue view N --json body,labels`, parses the form, downloads the one attachment into `content/_raw/submissions/N/`, checks the schema, size and DOCTYPE, writes the catalog entry into `catalog.d/community.json` |
-| `content/tools/build.py` | `--source community`, reusing the PDMX path (`strip_fingerings`, `validate.check_file`, gzip). It adds a small table that maps the 4 dropdown values to a licence id and URL, because the existing tables read Mutopia RDF text and PDMX CSV values. The credit goes into `<rights>` |
-| `content/tools/README.md`, `docs/scanning.md` | The new lane; "My scores" and the guarantees explain sharing and that the attachment is public on submit |
-
-Checklist for #41:
-
-- [ ] The owner chooses an option (section 4).
-- [ ] The issue forms for sharing and removal.
-- [ ] The package builder and the **Share** control, eligible entries only, in all five locales.
-- [ ] `submission.py` and `build.py --source community`, with untrusted-input handling.
-- [ ] The "Shared by readers" collection in `catalog.json`.
-- [ ] Docs: the lane in `content/tools/README.md` and the guarantees in `docs/scanning.md`.
-- [ ] One test submission end to end, from the app to the library, on a test issue.
-
-Verification:
-
-- **vitest** (`share.test.ts`): the package's shape and schema version; no file names or ids in it; the issue URL holds only the template and the MusicXML title, never contains the record's file name, and stays short for a long title; MIDI imports and entries that fail the strict import are refused.
-- **Playwright e2e**: **Share** appears only on eligible My scores rows, never on library pieces or in the score view. Pressing it starts a download and opens the github.com URL without any other network request from the app.
-- **pytest** (`content/tools/tests/test_submission.py`, fixture issue bodies): a missing checkbox, an unknown licence, a CC BY or CC BY-SA submission without a credit, a second attachment, an oversized file, a DOCTYPE or entity and a malformed package are each refused; a good fixture produces a catalog entry whose `source` has the manifest's five fields. A CC BY fixture also carries its credit into the manifest entry and `<rights>`.
-- **Gates and loop**: `gates.py --only <slug>` and `dedupe.py` on the test piece; the colour guard (no new red); the bundle budget (the package builder uses no zip library); `pnpm verify` as the definition of done.
-
 ## Sources
 
-1. GitHub Docs, Attaching files: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files
-2. GitHub Docs, Creating an issue (URL query parameters, 414): https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue
-3. GitHub Docs, Syntax for GitHub's form schema (`upload`, required checkboxes): https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
-4. GitHub Docs, Deleting an issue: https://docs.github.com/en/issues/tracking-your-work-with-issues/administering-issues/deleting-an-issue
-5. GitHub Docs, Limiting interactions in your repository: https://docs.github.com/en/communities/moderating-comments-and-conversations/limiting-interactions-in-your-repository
-6. GitHub Docs, Creating an account on GitHub: https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github
-7. MDN, URI fragment: https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment
-8. GitHub DMCA Takedown Policy: https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy
-9. Regulation (EU) 2022/2065 (Digital Services Act), Article 16: https://eur-lex.europa.eu/eli/reg/2022/2065/oj
-10. Cloudflare Workers pricing: https://developers.cloudflare.com/workers/platform/pricing/
-11. Cloudflare R2 pricing: https://developers.cloudflare.com/r2/pricing/
-12. Cloudflare Turnstile plans: https://developers.cloudflare.com/turnstile/plans/
-13. Formspree plans: https://formspree.io/plans
-14. MDN, Navigator.share(): https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
+1. Firestore pricing (Standard edition, pricing by location): https://cloud.google.com/firestore/pricing
+2. Google Cloud free tier (Cloud Run, Cloud Storage regions, Firestore; per billing account): https://docs.cloud.google.com/free/docs/free-cloud-features
+3. Firestore billing and free quota (one free database per project; minimum one read per query): https://firebase.google.com/docs/firestore/pricing
+4. Firestore usage and limits (1 MiB document; quotas reset around midnight Pacific time): https://firebase.google.com/docs/firestore/quotas
+5. Firebase pricing (no-cost plan: Firestore quotas, "No payment method needed", App Check): https://firebase.google.com/pricing
+6. Firebase pricing plans (a product over its no-cost quota is shut off for the rest of the month): https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+7. Cloud Run pricing: https://cloud.google.com/run/pricing
+8. Regulation (EU) 2022/2065 (Digital Services Act), Articles 6, 16 and 19: https://eur-lex.europa.eu/eli/reg/2022/2065/oj
+9. Directive (EU) 2019/790 (Copyright in the Digital Single Market), Articles 2(6) and 17: https://eur-lex.europa.eu/eli/dir/2019/790/oj
+10. Directive (EU) 2015/1535, Article 1(1)(b) (information society service): https://eur-lex.europa.eu/eli/dir/2015/1535/oj
+11. GitHub Docs, Attaching files: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files
+12. GitHub Docs, Creating an issue (URL query parameters, 414): https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue
+13. GitHub Docs, Syntax for GitHub's form schema (`upload`, required checkboxes): https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+14. GitHub Docs, Deleting an issue: https://docs.github.com/en/issues/tracking-your-work-with-issues/administering-issues/deleting-an-issue
+15. GitHub Docs, Limiting interactions in your repository: https://docs.github.com/en/communities/moderating-comments-and-conversations/limiting-interactions-in-your-repository
+16. GitHub Docs, Creating an account on GitHub: https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github
+17. MDN, URI fragment: https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment
+18. GitHub DMCA Takedown Policy: https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy
+19. Google Cloud, Disable billing usage with notifications: https://docs.cloud.google.com/billing/docs/how-to/disable-billing-with-notifications
+20. Cloudflare Workers pricing: https://developers.cloudflare.com/workers/platform/pricing/
+21. Cloudflare R2 pricing: https://developers.cloudflare.com/r2/pricing/
+22. Cloudflare Turnstile plans: https://developers.cloudflare.com/turnstile/plans/
+23. Formspree plans: https://formspree.io/plans
+24. MDN, Navigator.share(): https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share

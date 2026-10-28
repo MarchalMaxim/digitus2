@@ -77,16 +77,16 @@ Without the Beringer corpus the corpora tests skip, so `unit` takes about 20 s i
 
 ### Per spec
 
-The e2e suite per spec file, measured on the dev machine under the verify lock (no other checkout's verify, only light work beside it): `playwright test --reporter=json` on the build's output, Playwright's default of 8 workers on 16 cores, both projects (`desktop` at 1280 px, `mobile` at 360 px). Time is worker-seconds, the sum of the spec's test durations, so it is the share of the run's capacity a spec takes, not its wall time. The times are one full run, less the tests the review below removed; the two spec files it changed, timed back to back before and after, went from 525 to about 335 worker-seconds. The suite is 628 tests (71 skip by design: a project or browser a test does not apply to), 2,643 worker-seconds, about 330 s of wall time on 8 workers.
+The e2e suite per spec file, measured on the dev machine under the verify lock (no other checkout's verify, only light work beside it): `playwright test --reporter=json` on the build's output, Playwright's default of 8 workers on 16 cores, both projects (`desktop` at 1280 px, `mobile` at 360 px). Time is worker-seconds, the sum of the spec's test durations, so it is the share of the run's capacity a spec takes, not its wall time. The times are one full run, less the tests the review below removed, with the play-along and MIDI specs timed again on their own after play along lost its sound; the two spec files it changed, timed back to back before and after, went from 525 to about 335 worker-seconds. The suite is 603 tests (59 skip by design: a project or browser a test does not apply to), 2,560 worker-seconds, about 320 s of wall time on 8 workers.
 
 | Spec                              | Tests (desktop + phone) | Desktop | Phone | Total |
 | --------------------------------- | ----------------------- | ------- | ----- | ----- |
 | `states.spec.ts`                  | 82 + 82                 | 256 s   | 216 s | 472 s |
-| `play-along.spec.ts`              | 64 + 64                 | 278 s   | 23 s  | 301 s |
 | `playback.spec.ts`                | 35 + 0                  | 291 s   | –     | 291 s |
 | `scan-camera.spec.ts`             | 14 + 14                 | 79 s    | 138 s | 218 s |
+| `play-along.spec.ts`              | 52 + 52                 | 184 s   | 20 s  | 204 s |
 | `page-window.spec.ts`             | 7 + 7                   | 81 s    | 121 s | 202 s |
-| `play-along-timing.spec.ts`       | 11 + 0                  | 152 s   | –     | 152 s |
+| `play-along-timing.spec.ts`       | 11 + 0                  | 147 s   | –     | 147 s |
 | `scan-camera-real.spec.ts`        | 2 + 0                   | 142 s   | –     | 142 s |
 | `library.spec.ts`                 | 25 + 25                 | 48 s    | 44 s  | 93 s  |
 | `hand-letters.spec.ts`            | 3 + 3                   | 44 s    | 41 s  | 85 s  |
@@ -95,9 +95,9 @@ The e2e suite per spec file, measured on the dev machine under the verify lock (
 | `scan-edit.spec.ts`               | 6 + 6                   | 28 s    | 26 s  | 53 s  |
 | `export.spec.ts`                  | 12 + 0                  | 50 s    | –     | 50 s  |
 | `local-library.spec.ts`           | 8 + 8                   | 24 s    | 26 s  | 50 s  |
+| `play-along-halo.spec.ts`         | 10 + 0                  | 50 s    | –     | 50 s  |
 | `seek.spec.ts`                    | 9 + 9                   | 38 s    | 5 s   | 43 s  |
 | `i18n.spec.ts`                    | 7 + 0                   | 41 s    | –     | 41 s  |
-| `play-along-halo.spec.ts`         | 10 + 0                  | 41 s    | –     | 41 s  |
 | `score.spec.ts`                   | 15 + 0                  | 39 s    | –     | 39 s  |
 | `keyboard-view.spec.ts`           | 1 + 1                   | 17 s    | 17 s  | 34 s  |
 | `scan-grand-staff.spec.ts`        | 3 + 3                   | 16 s    | 14 s  | 30 s  |
@@ -106,15 +106,15 @@ The e2e suite per spec file, measured on the dev machine under the verify lock (
 | `keyboard.spec.ts`                | 5 + 0                   | 22 s    | –     | 22 s  |
 | `hand-switch.spec.ts`             | 5 + 0                   | 22 s    | –     | 22 s  |
 | `about.spec.ts`                   | 2 + 0                   | 16 s    | –     | 16 s  |
+| `midi.spec.ts`                    | 4 + 0                   | 12 s    | –     | 12 s  |
+| `play-along-heal.spec.ts`         | 1 + 0                   | 12 s    | –     | 12 s  |
 | `theme.spec.ts`                   | 8 + 0                   | 11 s    | –     | 11 s  |
-| `midi.spec.ts`                    | 4 + 0                   | 10 s    | –     | 10 s  |
 | `memory.spec.ts`                  | 1 + 0                   | 10 s    | –     | 10 s  |
 | `scan-rotation.spec.ts`           | 3 + 3                   | 5 s     | 3 s   | 8 s   |
 | `scan-camera-real-device.spec.ts` | 2 + 0                   | 8 s     | –     | 8 s   |
 | `red.spec.ts`                     | 2 + 0                   | 6 s     | –     | 6 s   |
 | `import-lifetime.spec.ts`         | 3 + 0                   | 6 s     | –     | 6 s   |
 | `ornaments.spec.ts`               | 1 + 0                   | 4 s     | –     | 4 s   |
-| `play-along-sound.spec.ts`        | 2 + 0                   | 4 s     | –     | 4 s   |
 | `scan-phone.spec.ts`              | 1 + 1                   | 0 s     | 4 s   | 4 s   |
 | `smoke.spec.ts`                   | 1 + 0                   | 0 s     | –     | 0 s   |
 | `play-along-home.spec.ts`         | 1 + 0                   | 0 s     | –     | 0 s   |
@@ -125,7 +125,7 @@ The single longest test is the real-photo capture on a 4× throttled CPU (`scan-
 | -------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `states`, every application state, light and dark, desktop and phone | 472            | one red element and axe in every state at both widths: the product's rules                                                                                                           |
 | `playback`                                                           | 291            | the cursor against the audio clock and the dock, sampled in real time                                                                                                                |
-| `play-along`, `play-along-timing`                                    | 301, 152       | the walk and its timing against the reader's pulse, in real time                                                                                                                     |
+| `play-along`, `play-along-timing`                                    | 204, 147       | the walk and its timing against the reader's pulse, in real time                                                                                                                     |
 | `scan-camera`, the slow-phone sweeps on a 6× throttled CPU           | 69             | the five photographs still taken on a phone's speed; the phone project runs them, the desktop project does not repeat them, since the throttle does not depend on the window's width |
 | `scan-camera-real`, the capture on a 4× throttled CPU                | 120            | the real-photo pipeline at a phone's speed, once                                                                                                                                     |
 | `page-window`                                                        | 202            | which pages the DOM builds depends on the window's height, so both widths                                                                                                            |
@@ -198,7 +198,7 @@ Browser jobs use Ubuntu 24.04, supported by the pinned Playwright version. Keep 
 
 `.github/workflows/ci.yml` runs on every push to `main` and on pull requests, as seven jobs side by side so the wall time is the longest job, about four minutes, not the sum: `typecheck, lint, format, build, omr`; `unit tests`; and five `e2e` jobs named for the specs they run (`playback`; `states on desktop`; `states on the phone`; `library, score, hands, embellish`; `the other specs`, which runs with `--grep-invert` so a new spec runs without being listed), each against the web build with `CI=true`: one retry, the group's HTML report uploaded on failure. The groups are balanced by measured time, and keep Playwright's default worker count, two on the runner's four cores, because the playback checks sample frames in real time and more browsers per runner would stretch them; speed comes from the number of jobs. A new push to a pull request cancels the run it supersedes. The hygiene, design, bundle, benchmark and hands steps run only under `pnpm verify`: PIG cannot be redistributed, so CI has no benchmark data. The solver's random-walk timing test has one budget everywhere: a ratio to a reference workload timed in the same moments, so a slower or busier machine does not move it.
 
-Where the time goes: the e2e suite is about 2,600 worker-seconds on the dev machine (628 tests; per spec under Per spec above), and the runner, two to three times slower, splits it over the five e2e jobs. The unit suites are 50 s each on the runner; two thirds of the web suite's time is worker start-up, happy-dom and the setup file per test file, so it runs in vitest's `threads` pool (`apps/web/vite.config.ts`). Every e2e test states a product rule (one red, contrast, axe, geometry, timing); the slow ones (the cursor sampled against the dock for 18 s, Amazing Grace played to the end) are slow because the rule is about time. A check a browser adds nothing to lives in a unit test instead (Per spec above).
+Where the time goes: the e2e suite is about 2,560 worker-seconds on the dev machine (603 tests; per spec under Per spec above), and the runner, two to three times slower, splits it over the five e2e jobs. The unit suites are 50 s each on the runner; two thirds of the web suite's time is worker start-up, happy-dom and the setup file per test file, so it runs in vitest's `threads` pool (`apps/web/vite.config.ts`). Every e2e test states a product rule (one red, contrast, axe, geometry, timing); the slow ones (the cursor sampled against the dock for 18 s, Amazing Grace played to the end) are slow because the rule is about time. A check a browser adds nothing to lives in a unit test instead (Per spec above).
 
 `.github/workflows/pages.yml` builds and deploys the app to GitHub Pages on every push to `main`. Before the build it fetches the pinned piano samples (`node scripts/fetch-piano-samples.mjs`, which checks the release asset against `scripts/piano-samples.lock.json`; cached by the lock's hash), and after it fails unless `dist` holds the samples, `sw.js` and the web app manifest. `ci.yml` and `pnpm verify` do not fetch the samples; the service worker's precache budget (24 MiB) fails the `build` step, in CI and locally.
 

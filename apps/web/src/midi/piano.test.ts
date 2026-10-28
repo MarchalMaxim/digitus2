@@ -950,6 +950,25 @@ describe('the healer: a connection that stays silent is opened again', () => {
     expect(events()).toEqual(['connect', 'opened', 'reconnect', 'connect', 'opened', 'first note']);
   });
 
+  it('counts the silence from when the score is ready, not from the page load', async () => {
+    connectWith('GO:PIANO MIDI 1');
+    await askForPiano();
+    // The port opened at page load; the score takes longer than the healer's wait to be ready.
+    const hook = renderHook(({ on }) => usePianoHealer(on), { initialProps: { on: false } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(HEAL_FIRST_MS * 2);
+    });
+    hook.rerender({ on: true });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(HEAL_FIRST_MS - 1000);
+    });
+    expect(access.open).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1500);
+    });
+    expect(access.open).toHaveBeenCalledTimes(2);
+  });
+
   it('leaves a connection alone once a note came', async () => {
     const link = connectWith('A');
     await askForPiano();

@@ -211,8 +211,9 @@ export function usePlayAlong({
   // The one gate (issue 191): with Practice mode off the walk is as with no piano, and nothing
   // else changes; the piano stays connected and its keys are still drawn.
   const walking = connected && practiceMode;
-  // A connection that stays silent while a score is open is reopened until a note comes.
-  usePianoHealer(connected);
+  // A connection that stays silent while a score is open (and ready to play) is reopened until a
+  // note comes.
+  usePianoHealer(connected && ready);
   const { playing, loading, atStart, cue, loop } = playback;
   const marked = currentGroup >= 0;
 

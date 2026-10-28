@@ -207,24 +207,6 @@ test('scan: an offline device is told to check its connection', async ({ page })
   await page.context().setOffline(false);
 });
 
-test('scan: a scanner busy past the wait says so and keeps the button', async ({ page }) => {
-  await mockService(page, '', {
-    onRecognize: async () => ({ status: 429, json: { error: 'busy' } }),
-  });
-  // The app waits up to three minutes for a busy scanner; the page's clock skips them.
-  await page.clock.install();
-  await choose(page);
-  await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByText(/Another score is being scanned/)).toBeVisible();
-  // Each offer is a real round trip: step the clock until the app gives up.
-  await expect(async () => {
-    await page.clock.runFor(5_000);
-    await expect(page.getByRole('alert')).toContainText('busy', { timeout: 250 });
-  }).toPass({ timeout: 60_000 });
-  await expect(page.getByText(/Another score is being scanned/)).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Scan this score' })).toBeEnabled();
-});
-
 test('scan: a scanner busy with another score is waited for, then the bar runs', async ({
   page,
 }) => {

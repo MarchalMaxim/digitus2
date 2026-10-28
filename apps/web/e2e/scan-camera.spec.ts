@@ -146,14 +146,22 @@ test('camera: a frozen video cannot count as a pause', async ({ page }) => {
 // DevTools slows the page's main thread only, not the tracker's worker, so the second test also
 // keeps the worker from starting: every frame is then analysed on the slowed main thread, at
 // least as slowly as a phone's worker would, and the views must still be taken (issue 143).
+// They run in the phone project only.
 test.describe('slow phone', () => {
   // Each saturates a CPU core for most of a minute: one after the other, never side by side.
   test.describe.configure({ mode: 'serial' });
+  test.skip(
+    ({ browserName }) => browserName !== 'chromium',
+    'CPU throttling is a Chromium DevTools feature',
+  );
   for (const worker of [true, false])
     test(`camera: a slow phone (a CPU ${SLOW_PHONE} times slower) still takes all five photographs${
       worker ? '' : ', without a worker'
-    }`, async ({ page, browserName }) => {
-      test.skip(browserName !== 'chromium', 'CPU throttling is a Chromium DevTools feature');
+    }`, async ({ page }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== 'mobile',
+        'a slow phone is a phone: the phone project runs it',
+      );
       test.setTimeout(300_000);
       if (!worker)
         await page.addInitScript(() => {

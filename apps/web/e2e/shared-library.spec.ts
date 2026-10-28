@@ -5,7 +5,13 @@ import { expect, test, type Page, type Route } from '@playwright/test';
 import { LIBRARY_STORE } from '../src/library/shared/store.js';
 import { libraryScore } from './helpers/files.js';
 import { horizontalOverflow } from './helpers/overflow.js';
-import { expectOneRed, redRoots } from './helpers/red.js';
+import { expectOneRed as expectOneRedNow, redRoots } from './helpers/red.js';
+
+/** One red, once the buttons' colour transitions have finished (a sheet opening or closing fades them). */
+async function expectOneRed(page: Page, label: string) {
+  await expect.poll(async () => (await redRoots(page)).length, { message: label }).toBe(1);
+  return expectOneRedNow(page, label);
+}
 
 // These flows run as a PC window; the phone's width is a viewport of its own below.
 test.use({ hasTouch: false, isMobile: false });

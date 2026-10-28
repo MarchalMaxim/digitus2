@@ -112,19 +112,15 @@ describe('runMetamorphic', () => {
     const r = runMetamorphic(score);
     expect(r.checks.filter((c) => !c.passed).map((c) => `${c.id}:${c.details}`)).toEqual([]);
   });
-  it.skipIf(library.length === 0)(
-    'passes on built-in library pieces',
-    () => {
-      for (const f of library) {
-        const { score } = parseMusicXml(readFileSync(join(scoresDir, f)));
-        const r = runMetamorphic(score);
-        expect(r.checks.filter((c) => !c.passed).map((c) => `${f} ${c.id}: ${c.details}`)).toEqual(
-          [],
-        );
-      }
-      // About ten solves per piece; with the consistency pass (M3 Task 7) about 3 s alone and more in
-      // the parallel suite, past vitest's default 5 s.
-    },
-    20_000,
-  );
+  it.skipIf(library.length === 0)('passes on built-in library pieces', () => {
+    for (const f of library) {
+      const { score } = parseMusicXml(readFileSync(join(scoresDir, f)));
+      const r = runMetamorphic(score);
+      expect(r.checks.filter((c) => !c.passed).map((c) => `${f} ${c.id}: ${c.details}`)).toEqual(
+        [],
+      );
+    }
+    // About ten solves per piece; with the consistency pass (M3 Task 7) about 3 s alone and more in
+    // the parallel suite: the suite's hang guard (vitest.config.ts) is far above it.
+  });
 });

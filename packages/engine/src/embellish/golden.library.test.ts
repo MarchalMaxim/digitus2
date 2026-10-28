@@ -49,5 +49,5 @@ describe('the light embellisher on the library', () => {
     expect(golden.pieces).toHaveLength(268);
     expect(refused).toBe(9);
     expect(byRule).toEqual({ passing: 1059, 'neighbour-repeated': 473 });
-  }, 60_000);
+  });
 });

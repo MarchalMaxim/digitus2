@@ -26,6 +26,7 @@ import { buildHandSequence } from './sequence.js';
 import type { SeqNote } from './sequence.js';
 import { loadWeightSet, RECOMMENDED_WEIGHT_SET } from './params/weightSets.js';
 import { solveFingering, solveHand } from './solve.js';
+import { notesDecoded } from './viterbi.js';
 import { HAND_PROFILES, span } from './spans.js';
 import { benchmarkEntries } from '../library/benchmarkSet.js';
 
@@ -306,47 +307,17 @@ describe('constraints', () => {
 });
 
 /**
- * The yardstick of the solver's timing test: a second-order min-sum decode with the solver's shape
- * (25 states and 125 transitions per note, costs from callbacks, Float64Array rows) over 150,000
- * notes, written out here so that no change to the solver changes it. Returns the optimum, so the
- * work cannot be optimised away.
- */
-function referenceDecode(): number {
-  const n = 150_000;
-  const unary = (i: number, f: number) => ((i * 7 + f * 13) % 11) * 0.5;
-  const pair = (i: number, g: number, f: number) => Math.abs(g - f) * (1 + (i % 3));
-  const triple = (i: number, h: number, g: number, f: number) =>
-    h === f ? 0.25 : ((h + g + f + i) % 5) * 0.125;
-  let prev = new Float64Array(25);
-  let next = new Float64Array(25);
-  for (let g = 0; g < 5; g++)
-    for (let f = 0; f < 5; f++) prev[g * 5 + f] = unary(0, g) + unary(1, f) + pair(1, g, f);
-  for (let i = 2; i < n; i++) {
-    for (let g = 0; g < 5; g++)
-      for (let f = 0; f < 5; f++) {
-        let best = Number.POSITIVE_INFINITY;
-        for (let h = 0; h < 5; h++) best = Math.min(best, prev[h * 5 + g]! + triple(i, h, g, f));
-        next[g * 5 + f] = best + unary(i, f) + pair(i, g, f);
-      }
-    [prev, next] = [next, prev];
-  }
-  return Math.min(...prev);
-}
-
-/**
- * The solver's warm solve of the 2,000-note walk may take at most this many reference decodes
- * (`referenceDecode`). Measured on a 16-core Windows machine, for both weight sets:
+ * The solver's work on the 2,000-note walk, in notes decoded (`notesDecoded`), for either weight
+ * set: two decodes of the 2,000 notes, the second when the consistency pass pins the repeated
+ * passages. A solver that decodes the walk again fails the bound; one whose cost terms grow
+ * slower per note is caught by the suite's hang guard, not here.
  *
- * | condition                          | solve (ms) | reference (ms) | ratio     |
- * | ---------------------------------- | ---------- | -------------- | --------- |
- * | the test alone                     | 150–158    | 29.6–30.2      | 4.98–5.20 |
- * | beside 24 CPU-bound processes      | 871–979    | 190–202        | 4.57–5.00 |
- * | inside `pnpm test` (all suites)    | 236–359    | 48–59          | 4.95–6.08 |
- * | the solver made to solve twice     | 305        | 30.0           | 10.19     |
- *
- * The last row is a doubled solver: it fails the bound, which the old 500 ms budget let through.
+ * Counted, not timed. The bound was a ratio of the solve's time to a reference workload, and a
+ * clock measures the machine as much as the solver: the same solve took 130 ms alone, 1,028 ms
+ * beside the other suites, and under load its ratio reached 10.03 where a solver doing double the
+ * work measured 10.19. The count is the same on every machine.
  */
-const SOLVE_REFERENCE_RATIO = 10;
+const WALK_NOTES_DECODED = 4000;
 
 describe('outputs', () => {
   it('solves both hands, gives confidences, alternatives and explanations', () => {
@@ -374,7 +345,7 @@ describe('outputs', () => {
     expect(d4.alternatives![0]!.cost).toBeGreaterThanOrEqual(0);
     expect(d4.alternatives!.every((alt) => alt.finger !== d4.finger)).toBe(true);
   });
-  it('is deterministic and fast on a 2000-note random walk', () => {
+  it('is deterministic and does a bounded amount of work on a 2000-note random walk', () => {
     let p = 60;
     const rows: string[] = [];
     let s = 12345;
@@ -387,38 +358,19 @@ describe('outputs', () => {
       rows.push(line(i, i * 0.25, (i + 1) * 0.25, name, 0));
     }
     const { score } = parsePig(H + rows.join('\n') + '\n');
-    // The budget is for a warm solve: the first call also pays for the JIT. The walk has repeated
-    // passages, so the consistency pass runs (75 repeated passages, about twice the work). Every
-    // solve must give the same fingering. The budget holds for the solver's default set (parncutt)
-    // and for RECOMMENDED_WEIGHT_SET, the set the CLI and the gate solve with.
-    //
-    // A budget in milliseconds times the machine, not the solver: the same solve measured 130 ms
-    // alone, up to 1,028 ms beside the other suites and 542 ms on the GitHub runner. So the
-    // budget is a ratio to a reference workload measured in the same moments: each round times
-    // one reference run and one solve back to back, and the test takes the fastest of each over
-    // five rounds. Load slows both alike and the ratio stays; a slower solver moves only the
-    // solve, so a solve that takes twice its work fails on every machine.
+    // The walk has repeated passages, so the consistency pass runs (75 repeated passages, about
+    // twice the work). Every solve must give the same fingering, and the work bound holds for the
+    // solver's default set (parncutt) and for RECOMMENDED_WEIGHT_SET, the set the CLI and the gate
+    // solve with.
     for (const weightSet of ['parncutt', RECOMMENDED_WEIGHT_SET] as const) {
+      const before = notesDecoded();
       const a = solveFingering(score, { hands: ['R'], weightSet });
-      referenceDecode(); // warm, as the solve above is
-      let solveMs = Infinity;
-      let referenceMs = Infinity;
-      for (let k = 0; k < 5; k++) {
-        let t0 = performance.now();
-        referenceDecode();
-        referenceMs = Math.min(referenceMs, performance.now() - t0);
-        t0 = performance.now();
-        const b = solveFingering(score, { hands: ['R'], weightSet });
-        solveMs = Math.min(solveMs, performance.now() - t0);
-        expect(JSON.stringify(b.assignment), weightSet).toBe(JSON.stringify(a.assignment));
-      }
-      const ratio = solveMs / referenceMs;
-      expect(
-        ratio,
-        `${weightSet}: ${solveMs.toFixed(1)} ms / ${referenceMs.toFixed(1)} ms`,
-      ).toBeLessThan(SOLVE_REFERENCE_RATIO);
+      const work = notesDecoded() - before;
+      expect(work, weightSet).toBeLessThanOrEqual(WALK_NOTES_DECODED);
+      const b = solveFingering(score, { hands: ['R'], weightSet });
+      expect(JSON.stringify(b.assignment), weightSet).toBe(JSON.stringify(a.assignment));
     }
-  }, 30_000);
+  });
 });
 
 // M2 hardening (docs/experiments.md, solver rules and weights).
@@ -1067,7 +1019,7 @@ describe('consistent repeats (M3 Task 7, H4: the copies of a passage take one fi
     expect(r.assignment[last]!.finger).toBe(4);
     expect(r.assignment[last]!.pinned).toBe(true);
   });
-  // Solves the 30 library pieces twice: a longer timeout.
+  // Solves the 30 library pieces twice, under the suite's hang guard.
   it('on the library, repeated passages are fingered alike and no hand breaks more laws', () => {
     const files = LIBRARY_FILES;
     let groups = 0;
@@ -1112,5 +1064,5 @@ describe('consistent repeats (M3 Task 7, H4: the copies of a passage take one fi
     expect(groups).toBeGreaterThan(100);
     expect(consistentOn / groups).toBeGreaterThanOrEqual(0.98);
     expect(consistentOff / groups).toBeLessThan(0.7);
-  }, 20_000);
+  });
 });

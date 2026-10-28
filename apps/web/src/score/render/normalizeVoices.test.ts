@@ -59,7 +59,7 @@ describe('HOMR voice serialization for Verovio', () => {
     } finally {
       tk.destroy();
     }
-  }, 30_000);
+  });
 
   it('retains chords, note ids and notations exactly while regrouping voices', () => {
     const chord = note('chord', 'E', 5, 2, '1', '1', '<chord/>');

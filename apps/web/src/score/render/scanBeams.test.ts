@@ -47,7 +47,7 @@ describe('HOMR engraving fallback', () => {
     } finally {
       tk.destroy();
     }
-  }, 30_000);
+  });
 
   it('connects six 3/4 eighths in beat pairs without changing any musical data', () => {
     const xml = score(sixEighths);

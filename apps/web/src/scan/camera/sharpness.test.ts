@@ -92,27 +92,23 @@ function blur(src: Float32Array, width: number, height: number, sigma: number): 
 const SIGMAS = [0, 0.5, 1, 1.5, 2, 2.5, 3];
 
 describe('staff-line sharpness (edge width per interline)', () => {
-  it(
-    'is strictly increasing with blur, small for a sharp page and about 2.5 sigma per interline',
-    { timeout: 60_000 },
-    () => {
-      const values = SIGMAS.map((sigma) => {
-        const m = staffSharpness(page({ sigma }));
-        expect(m, `sigma ${sigma}`).not.toBeNull();
-        expect(m!.staves).toBe(8);
-        return m!.value;
-      });
-      for (let i = 1; i < values.length; i++)
-        expect(values[i]!, `sigma ${SIGMAS[i]}`).toBeGreaterThan(values[i - 1]!);
-      // A sharp line is as wide as it is thick: 1.2 px of a 10 px interline, plus the pixel grid.
-      expect(values[0]!).toBeLessThan(0.2);
-      // Blur conserves the line's ink and lowers its depth: the width is 2.5 sigma, 0.5 interline at sigma 2.
-      expect(values[4]!).toBeGreaterThan(0.45);
-      expect(values[4]!).toBeLessThan(0.6);
-    },
-  );
+  it('is strictly increasing with blur, small for a sharp page and about 2.5 sigma per interline', () => {
+    const values = SIGMAS.map((sigma) => {
+      const m = staffSharpness(page({ sigma }));
+      expect(m, `sigma ${sigma}`).not.toBeNull();
+      expect(m!.staves).toBe(8);
+      return m!.value;
+    });
+    for (let i = 1; i < values.length; i++)
+      expect(values[i]!, `sigma ${SIGMAS[i]}`).toBeGreaterThan(values[i - 1]!);
+    // A sharp line is as wide as it is thick: 1.2 px of a 10 px interline, plus the pixel grid.
+    expect(values[0]!).toBeLessThan(0.2);
+    // Blur conserves the line's ink and lowers its depth: the width is 2.5 sigma, 0.5 interline at sigma 2.
+    expect(values[4]!).toBeGreaterThan(0.45);
+    expect(values[4]!).toBeLessThan(0.6);
+  });
 
-  it('stays within 10% across ink darkness and note density', { timeout: 60_000 }, () => {
+  it('stays within 10% across ink darkness and note density', () => {
     for (const sigma of [1, 2]) {
       const values = [25, 90].flatMap((ink) =>
         (['dense', 'sparse'] as const).map(
@@ -125,15 +121,11 @@ describe('staff-line sharpness (edge width per interline)', () => {
     }
   });
 
-  it(
-    'is independent of scale: the same page twice as large and twice as blurred',
-    { timeout: 60_000 },
-    () => {
-      const one = staffSharpness(page({ sigma: 1.5 }))!.value;
-      const two = staffSharpness(page({ sigma: 3, scale: 2 }))!.value;
-      expect(Math.abs(two / one - 1)).toBeLessThan(0.1);
-    },
-  );
+  it('is independent of scale: the same page twice as large and twice as blurred', () => {
+    const one = staffSharpness(page({ sigma: 1.5 }))!.value;
+    const two = staffSharpness(page({ sigma: 3, scale: 2 }))!.value;
+    expect(Math.abs(two / one - 1)).toBeLessThan(0.1);
+  });
 
   it('reports the interline and the staves it measured', () => {
     const m = staffSharpness(page({ sigma: 1 }))!;
@@ -149,29 +141,25 @@ describe('staff-line sharpness (edge width per interline)', () => {
     expect(staffSharpness({ width: 1000, height: 1400, data })).toBeNull();
   });
 
-  it(
-    'traces a sharp page as it is and a page blurred past the tracer by raising its contrast',
-    { timeout: 60_000 },
-    () => {
-      expect(traceStaves(page({ sigma: 0 }))?.traced).toBe('plain');
-      const soft = page({ sigma: 3 });
-      // Only the raised-contrast copy has staves the tracer accepts; the measure itself reads the original pixels.
-      const tracing = traceStaves(soft);
-      expect(tracing?.traced).toBe('boosted');
-      expect(tracing!.geometry.staves).toHaveLength(8);
-      const m = staffSharpness(soft, tracing)!;
-      expect(m.traced).toBe('boosted');
-      expect(m.staves).toBe(8);
-      expect(m.value).toBeGreaterThan(0.6);
-      expect(m.value).toBeLessThan(0.8);
-    },
-  );
+  it('traces a sharp page as it is and a page blurred past the tracer by raising its contrast', () => {
+    expect(traceStaves(page({ sigma: 0 }))?.traced).toBe('plain');
+    const soft = page({ sigma: 3 });
+    // Only the raised-contrast copy has staves the tracer accepts; the measure itself reads the original pixels.
+    const tracing = traceStaves(soft);
+    expect(tracing?.traced).toBe('boosted');
+    expect(tracing!.geometry.staves).toHaveLength(8);
+    const m = staffSharpness(soft, tracing)!;
+    expect(m.traced).toBe('boosted');
+    expect(m.staves).toBe(8);
+    expect(m.value).toBeGreaterThan(0.6);
+    expect(m.value).toBeLessThan(0.8);
+  });
 });
 
 /** Pages without a single staff: whatever the raised-contrast retrace amplifies, it must not trace these. */
 describe('no staves where there are none (the retrace does not invent them)', () => {
   const noStaves = (name: string, frame: Frame) =>
-    it(name, { timeout: 60_000 }, () => {
+    it(name, () => {
       expect(traceStaves(frame)).toBeNull();
       expect(staffSharpness(frame)).toBeNull();
     });

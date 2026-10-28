@@ -27,6 +27,13 @@ const F = 5;
 const S = F * F;
 const INF = Number.POSITIVE_INFINITY;
 
+let decodedNotes = 0;
+/**
+ * Notes decoded since the module loaded, summed over every decode. Each costs the same 125 triple
+ * evaluations, so the count measures the solver's work where a clock would measure the machine.
+ */
+export const notesDecoded = (): number => decodedNotes;
+
 /**
  * Minimises the sum of unary(i, f_i) over all notes, pair(i, f_{i-1}, f_i) for i >= 1 and
  * triple(i, f_{i-2}, f_{i-1}, f_i) for i >= 2. The callbacks must be pure.
@@ -43,6 +50,7 @@ const INF = Number.POSITIVE_INFINITY;
  */
 export function decode(p: DecodeProblem): DecodeResult {
   const n = p.n;
+  decodedNotes += n;
   if (n === 0) return { fingers: [], cost: 0, marginals: [] };
   if (n === 1) {
     const u = Array.from({ length: F }, (_, f) => p.unary(0, f));

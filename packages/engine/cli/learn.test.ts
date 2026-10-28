@@ -91,7 +91,7 @@ describe.skipIf(!have)('learn', () => {
     // The training log is written next to an explicit --out.
     expect(existsSync(join(dir, 'training-log.json'))).toBe(true);
     rmSync(dir, { recursive: true, force: true });
-  }, 300_000);
+  });
   it('pig: one run per seed, the median seed on validation is written, as a research set', () => {
     const dir = mkdtempSync(join(tmpdir(), 'digitus2-learn-pig-'));
     try {
@@ -131,7 +131,7 @@ describe.skipIf(!have)('learn', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
-  }, 300_000);
+  });
   it('open without validation prints a dash where the validation accuracy is missing', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'digitus2-learn-novalidation-'));
     try {
@@ -153,5 +153,5 @@ describe.skipIf(!have)('learn', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
-  }, 300_000);
+  });
 });

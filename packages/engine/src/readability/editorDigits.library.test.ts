@@ -28,5 +28,5 @@ describe('the editor digits in the library manifest', () => {
     expect(entries.filter((e) => !e.hasEditorialFingering && e.editorDigits !== undefined)).toEqual(
       [],
     );
-  }, 300_000);
+  });
 });

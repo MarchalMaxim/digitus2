@@ -346,7 +346,7 @@ describe('multi-view fusion against a known page (issue 143)', () => {
     // No staff line drawn twice or moved, beyond what the best photograph alone shows.
     expect(fused.lines.doubled).toBeLessThanOrEqual(best.doubled + 3);
     expect(fused.lines.moved).toBeLessThanOrEqual(best.moved + 3);
-  }, 60_000);
+  });
 
   it('draws each line once where one photograph is misregistered by a local bump', async () => {
     const { fused, single, best, result } = await scenario(true);
@@ -374,5 +374,5 @@ describe('multi-view fusion against a known page (issue 143)', () => {
     // The bump costs only its own neighbourhood: the page still beats every photograph.
     expect(fused.error).toBeLessThan(best.error * 0.8);
     expect(fused.inkError).toBeLessThan(best.inkError);
-  }, 60_000);
+  });
 });

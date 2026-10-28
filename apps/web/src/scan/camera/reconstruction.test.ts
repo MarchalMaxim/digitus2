@@ -200,7 +200,7 @@ describe('score page reconstruction', () => {
     // Fusion takes the mark's detail from the one sharp view but the paper's local mean from
     // all views (issue 143), so the reference-only mark survives a few levels above black.
     expect(result.frame.data[annotation]).toBeLessThan(30);
-  }, 30_000);
+  });
   it('rejects a different page with the same staff layout and unsupported featureless extra views', async () => {
     await expect(
       reconstructPage(

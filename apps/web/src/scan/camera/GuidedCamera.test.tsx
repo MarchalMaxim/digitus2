@@ -103,10 +103,7 @@ async function liveCamera({
     },
     cancelVideoFrameCallback: { value: () => {} },
   });
-  const ready = () =>
-    waitFor(() => expect(nextFrame).toBeTypeOf('function'), {
-      timeout: 2000 + 1500 * attachesNeeded,
-    });
+  const ready = () => waitFor(() => expect(nextFrame).toBeTypeOf('function'));
   await ready();
   const sample = (time: number, metadata?: Partial<VideoFrameCallbackMetadata>) =>
     act(() => {
@@ -301,13 +298,9 @@ it('a blurred press says so; a second one keeps the single photograph for review
   const t = getT().scan.camera;
   fireEvent.click(screen.getByRole('button', { name: t.capture }));
   sample(120);
-  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(t.retryBlurry), {
-    timeout: 3000,
-  });
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(t.retryBlurry));
   fireEvent.click(screen.getByRole('button', { name: t.capture }));
-  await waitFor(() => expect(screen.queryByRole('button', { name: t.capture })).toBeNull(), {
-    timeout: 3000,
-  });
+  await waitFor(() => expect(screen.queryByRole('button', { name: t.capture })).toBeNull());
 });
 
 it('offers the light only when the camera has one, and asks for it when the page is dark', async () => {
@@ -559,7 +552,7 @@ it('issue 143: with every page kept, an interruption leaves finishing as the one
   fireEvent.click(finish);
   expect(completed).toHaveLength(1);
   expect(completed[0]).toHaveLength(1);
-}, 15000);
+});
 
 it('issue 143: Keep on a batch that is already full says so instead of doing nothing', async () => {
   blurryFrames();
@@ -575,7 +568,7 @@ it('issue 143: Keep on a batch that is already full says so instead of doing not
   expect(screen.getByRole('alert')).toHaveTextContent(t.tooMany);
   expect(screen.getByRole('button', { name: t.keep })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: t.finish(1) })).toBeNull();
-}, 15000);
+});
 
 it('issue 143: a restarted camera forgets the blurred press of the session before it', async () => {
   blurryFrames();
@@ -594,7 +587,7 @@ it('issue 143: a restarted camera forgets the blurred press of the session befor
   pressThroughBurst(sample, 1120);
   expect(screen.getByRole('status')).toHaveTextContent(t.retryBlurry);
   expect(screen.getByRole('button', { name: t.capture })).toBeInTheDocument();
-}, 15000);
+});
 
 it('issue 143: corner editing from a failed page does not follow the reader into the next one', async () => {
   blurryFrames();
@@ -620,7 +613,7 @@ it('issue 143: corner editing from a failed page does not follow the reader into
   expect(dialog.querySelectorAll('.camera-corner')).toHaveLength(0);
   expect(screen.queryByText(t.cornerHint)).toBeNull();
   expect(screen.getByRole('status')).toHaveTextContent(t.taken(1, 5));
-}, 15000);
+});
 
 it('issue 143: the light goes off while a page is prepared and comes back for the next one', async () => {
   blurryFrames();
@@ -643,7 +636,7 @@ it('issue 143: the light goes off while a page is prepared and comes back for th
   await act(async () => fireEvent.click(screen.getByRole('button', { name: t.nextPage })));
   expect(applied).toEqual([LIGHT_ON, LIGHT_OFF, LIGHT_ON]);
   expect(screen.getByRole('button', { name: t.light })).toHaveAttribute('aria-pressed', 'true');
-}, 15000);
+});
 
 it('issue 143: a quick second tap on the light waits for the first request', async () => {
   sharpFrames();

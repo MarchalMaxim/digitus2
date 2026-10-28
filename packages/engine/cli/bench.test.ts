@@ -397,7 +397,7 @@ describe('runBench', () => {
     expect(main([...args, '--subset', 'validation', '--floor', floor], io)).toBe(2);
   });
 
-  // Solves the 30 library pieces twice (about 2.5 s on a quiet machine): a longer timeout.
+  // Solves the 30 library pieces twice (about 2.5 s on a quiet machine), under the suite's hang guard.
   it('--library reports repeat consistency on the library pieces (M3 Task 7, H4)', () => {
     const root = mkdtempSync(join(tmpdir(), 'digitus2-bench-'));
     const gold = join(root, 'gold');
@@ -437,7 +437,7 @@ describe('runBench', () => {
       main(['bench', '--gold', gold, '--split', split, '--out', out, '--library', library], io),
     ).toBe(0);
     expect(lines.join('')).toMatch(/library repeat consistency/);
-  }, 20_000);
+  });
 
   it('bench --weights --compare --against prints the weight set and the comparison lines', () => {
     const { root, gold, split } = toySet();

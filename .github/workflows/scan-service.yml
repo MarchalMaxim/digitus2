@@ -1,0 +1,92 @@
+name: scan-service
+# Deploys the scan recognition service to Cloud Run when a merge to main changes what its image is
+# built from (issue 73). The image is built and pushed, a new revision is created without traffic and
+# reachable under the tag "candidate", research/omr/service/smoke.mjs posts one phone photo and one
+# corpus PDF to it, and only then does the revision take the traffic and lose the tag. If the smoke
+# fails the job fails and the previous revision keeps serving.
+# Authentication is keyless: GitHub's OIDC token is exchanged through Workload Identity Federation for
+# the deployer service account; no JSON key exists anywhere. research/omr/service/setup-github-deploy.ps1
+# creates the pool, the account and the two repository variables once; until it ran, SCAN_DEPLOY_PROVIDER
+# is empty and the job is skipped.
+# The minutes of a GitHub-hosted runner are free for a public repository. The image is about 0.7 GB; the
+# repository's cleanup policy in Artifact Registry keeps the newest version and the live one, which
+# are the same image except after a failed smoke.
+on:
+  push:
+    branches: [main]
+    paths:
+      - research/omr/service/**
+      - research/omr/prototypes/homr-photo/**
+      - research/omr/prototypes/photo-recovery/**
+      - research/omr/prototypes/local-worker/**
+      - research/omr/.dockerignore
+      - .github/workflows/scan-service.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: scan-service
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: vars.SCAN_DEPLOY_PROVIDER != ''
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: digitus2-scan
+      REGION: europe-west4
+      SERVICE: digitus2-scan
+      REPOSITORY: digitus2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.SCAN_DEPLOY_PROVIDER }}
+          service_account: ${{ vars.SCAN_DEPLOY_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+      - name: Build and push the image
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/$SERVICE:${GITHUB_SHA::7}"
+          docker build -f research/omr/service/Dockerfile -t "$IMAGE" research/omr
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      # The Action only updates an existing service; a revision without traffic cannot create one.
+      - name: Check the service exists
+        run: |
+          if ! gcloud run services describe "$SERVICE" --region "$REGION" --project "$PROJECT" > /dev/null 2>&1; then
+            echo "The service does not exist; the first deploy is research/omr/service/deploy.ps1." >&2
+            exit 1
+          fi
+      # The same settings as research/omr/service/deploy.ps1, with no traffic and the tag "candidate".
+      # No --allow-unauthenticated: the deployer cannot set IAM policy, and an update keeps the service's public binding.
+      - name: Deploy a revision without traffic
+        run: |
+          gcloud run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --project "$PROJECT" \
+            --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 \
+            --cpu-boost --execution-environment gen2 --ingress all --port 8080 \
+            --set-env-vars DIGITUS2_OMR_THREADS=4 \
+            --service-account "$SERVICE-run@$PROJECT.iam.gserviceaccount.com" \
+            --no-traffic --tag candidate --quiet
+      - name: Read the candidate URL
+        run: |
+          DESCRIPTION=$(gcloud run services describe "$SERVICE" --region "$REGION" --project "$PROJECT" --format json)
+          URL=$(echo "$DESCRIPTION" | jq -r '.status.traffic[] | select(.tag == "candidate") | .url')
+          REVISION=$(echo "$DESCRIPTION" | jq -r '.status.traffic[] | select(.tag == "candidate") | .revisionName')
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then echo "No candidate URL" >&2; exit 1; fi
+          if [ -z "$REVISION" ] || [ "$REVISION" = "null" ]; then echo "No candidate revision" >&2; exit 1; fi
+          echo "CANDIDATE_URL=$URL" >> "$GITHUB_ENV"
+          echo "CANDIDATE_REVISION=$REVISION" >> "$GITHUB_ENV"
+      - name: Smoke the candidate
+        run: node research/omr/service/smoke.mjs "$CANDIDATE_URL" --pdf research/omr/service/aot-training.pdf
+      - name: Move the traffic to the new revision
+        run: |
+          gcloud run services update-traffic "$SERVICE" --to-revisions "$CANDIDATE_REVISION=100" --region "$REGION" --project "$PROJECT"
+          gcloud run services update-traffic "$SERVICE" --remove-tags candidate --region "$REGION" --project "$PROJECT"
+      # The serving image keeps the tag live, so the cleanup policy, which keeps the newest version and
+      # the live one, never deletes it; after a failed smoke the previous image stays live.
+      - name: Tag the image live
+        run: gcloud artifacts docker tags add "$IMAGE" "${IMAGE%:*}:live" --quiet

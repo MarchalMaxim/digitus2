@@ -310,12 +310,13 @@ The owner's first two photos of a printed continuation page (768×1024 and 1200�
 | oemer with dewarping (smaller photo)                      | Parses, but the bass is put on the upper staff and the rhythm and bars are wrong; no meter or beams |
 | homr with the first three patches below                         | All 13 main bars and both hands on both photos (156 and 157 notes imported)               |
 
-homr ([commit ab369ac](https://github.com/liebharc/homr/tree/ab369ac54277afab582afa4725441f7cbba76593)) runs on the CPU with three ONNX models (about 139 MB of downloads). The setup applies four source patches:
+homr ([commit ab369ac](https://github.com/liebharc/homr/tree/ab369ac54277afab582afa4725441f7cbba76593)) runs on the CPU with three ONNX models (about 139 MB of downloads). The setup applies these source patches:
 
 1. Detect short, far-inset single-staff examples on a piano page before layout and decoding.
 2. Mask a detached, smaller five-line staff that intrudes into a grand staff's decoder margin.
 3. Write accidental display glyphs that match the recognised pitch alterations (pitches unchanged).
 4. Let a staff that homr finds by its lines alone replace the one partial staff it overlaps, when it contains that staff, adds at least a tenth of the page column, the partial staff spans less than 75 percent of the column, and four of the five lines agree within half a staff space (issue 129).
+5. Speed only, output unchanged: load title OCR only when title detection is on, and compute each bounding box's centre and major axis once for the touch pre-check (Scan speed, below).
 
 On the public clean piano and single-melody controls the output is byte-identical before and after the first three patches. The coverage patch changes Invention 13 p. 1 only: the other thirteen photos are byte-identical, and the library corpus routes keep their recorded figures. The remaining errors are listed in `docs/scanning.md`. The pinned homr exporter writes no beams.
 
@@ -346,9 +347,9 @@ The numbers behind the choice (the full cost table and its sources are in `docs/
 | One second of the service (4 vCPU, 8 GiB) beyond the grant | $0.000116 |
 | Free recognition time a month at that size | 45,000 s, about 1,300 photos of 35 s |
 | Worst case, one instance busy around the clock | about $10 a day; the budget caps it at 10 a month plus what the hours of alert lag cost |
-| A phone photo, in the container at 4 vCPU on the owner's PC, warm | 10.1 s |
-| A corpus PDF, in the container at 4 vCPU on the owner's PC | 8.6 s |
-| The same photo and PDF on the deployed service, warm | 35.2 s and 16.2 s |
+| A phone photo, in the container at 4 vCPU on the owner's PC, warm | 8.5 s (11.5 s before the changes of issue 73) |
+| A corpus PDF, in the container at 4 vCPU on the owner's PC | 6.3 s (9.9 s before) |
+| The same photo and PDF on the deployed service without the speed changes, warm | 35.2 s and 16.2 s |
 | The deployed service's cold start, a health request with no instance left | 4.5 s |
 
 The Linux build is a different build of the same pinned libraries: Python 3.12 from Ubuntu 24.04 installs the locked `homr-photo/requirements-cpu.txt` unchanged, the patched homr source matches `source-manifests.json`, and Audiveris 5.11.0 comes from its Ubuntu package. Its adapter's class path is `lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first and Audiveris exports nothing. On a headless Linux Audiveris also needs fontconfig with one font and `GDK_SCALE` set, which its package does not declare (`research/omr/service/README.md`).
@@ -368,6 +369,53 @@ The container's results against the floors, with the Windows gate's numbers besi
 | Photos rotated (2 pages) | 2, 1, 1, 2, 2, 2 | 2, 1, 1, 2, 2, 2 | 2, 1, 1, 2, 2, 2 |
 
 In the container a corpus page takes 13 s at the median and 28 s at most (the dense Schumann page and the Chopin waltz), well inside the 180 s limit; without the thread budget the same dense pages took 76 s to over 180 s, because ONNX Runtime sized its thread pool from the host's cores rather than the container's quota.
+
+### Scan speed
+
+Where a page's seconds go, measured in the container at `--cpus 4` with the thread budget of 4 on a Ryzen 7 7800X3D, on the reference photo and PDF of `docs/scan-service.md` (#73). Each option was timed A/B/A/B against a baseline, because other work on the same PC slowed pure-Python stages by 1.5 to 2 times.
+
+A photo (homr), warm, 9.9 s:
+
+| Stage | Seconds | Faster with more cores |
+| --- | ---: | --- |
+| Python start and imports (title OCR alone 0.33) | 0.69 | no |
+| ONNX session creation, three models | 0.28 | no |
+| Read, autocrop, resize to 1,920 px wide, contrast | 0.15 | no |
+| Segmentation, 48 patches of 320×320 | 2.05 | yes (6.3 s at 1 thread) |
+| Symbol bounding boxes | 0.47 | no |
+| Staff detection, pure Python (the second staff search for staves without a clef 1.15) | 1.98 | no |
+| Other detection: bar lines, braces, notes, filters | 0.33 | no |
+| Staff dewarping, 10 staves | 0.63 | no |
+| Encoder, 10 staves | 0.70 | yes (2.2 s at 1 thread) |
+| Decoder, 834 steps | 1.91 | barely (2.7 s at 1 thread) |
+| MusicXML, adapter and HTTP | about 0.5 | no |
+
+A PDF page (Audiveris), 8.8 s: JVM start 0.37 s, book open and first save 0.36 s, then the recognition steps, led by BEAMS (2.45 s), HEADS (1.47 s) and CURVES (0.75 s). The JVM keeps about 2 cores busy. A second book in the same JVM takes 5.5 s instead of 8.45 s, so about 3 s of each page is class loading and JIT warm-up.
+
+What the service runs, each with identical output on the acceptance gate: 152 recognitions of its 30 pages (the 16 corpus pieces through four homr routes and Audiveris, the 14 photos as taken and two of them rotated, and 56 perturbed copies), 28,700 staff positions among them, on Windows and in the container. Together they take the reference photo from 11.5 to 8.5 s and the PDF from 9.9 to 6.3 s in the container, the median of six requests each (`docs/scan-service.md`, Timings). How the savings split:
+
+| Change | Saves in the container | Why it is safe |
+| --- | ---: | --- |
+| Audiveris without `-save` | about 0.9 s a PDF (the 2.3 s total less the cache's share) | It rewrote the `.omr` book after every step, and nothing reads it. |
+| A JDK 25 ahead-of-time class cache for Audiveris ([JEP 483](https://openjdk.org/jeps/483), [JEP 514](https://openjdk.org/jeps/514)) | 1.4 s a PDF (Audiveris alone, 7.8 to 6.4 s, three runs each) | Recorded in the image from one recognition through the adapter; the build fails unless a run in strict mode maps it and gives the same MusicXML. In the service's default mode the JVM ignores a cache it cannot use. 65 MB. |
+| homr loads title OCR (rapidocr) only when title detection is on | 1.2 s a photo, the two homr changes together | The adapter passes `--no-title`. |
+| homr computes each bounding box's centre and major axis once for the touch pre-check | (in the 1.2 s above) | About 1.1 million calls a page; the arithmetic is upstream's, and 850,000 random box pairs give the same answers. |
+
+Measured one at a time during the investigation, on a PC that other work was slowing, the four changes saved 2.4, 3.2, 1.2 and 1.3 s. Those figures do not add up to the totals measured here, so the table gives the A/B measurements.
+
+Measured and not adopted:
+
+| Option | Result |
+| --- | --- |
+| ONNX Runtime graph optimisation | already at `ORT_ENABLE_ALL` by default ([ORT graph optimisations](https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html)) |
+| Memory pattern or arena off; `ORT_PARALLEL`; staves in parallel; the decoder at 1 or 2 threads | noise or slower |
+| `allow_spinning=0` ([ORT threading](https://onnxruntime.ai/docs/performance/tune-performance/threading.html)) | 12.1 s instead of 8.9 s here |
+| The photo at its own width, or at 1,600 px, instead of 1,920 px | 20 to 45% faster, but the photo's bars fall below the floor (8 to 5 or 6) |
+| `-XX:TieredStopAtLevel=1`; a pre-filled JavaCPP cache | 13.0 s instead of 8.8 s; noise |
+| 8 vCPU on Cloud Run | neither recogniser is faster locally, and the cost per page rises 83% ([Cloud Run pricing](https://cloud.google.com/run/pricing)) |
+| A GPU on Cloud Run | needs instance-based billing and at least 4 CPU and 16 GiB ([Cloud Run GPU](https://docs.cloud.google.com/run/docs/configuring/services/gpu)) |
+
+The larger options are measured but not built ([issue 211](https://github.com/MarchalMaxim/digitus2/issues/211)): a long-lived homr process with the models loaded (about 3.5 s a photo), a second staff search that reuses the first (2 to 3.5 s), and quantised models, which change pinned models. A photo takes about 3.5 times longer on Cloud Run than in this container and a PDF page about 1.9 times; this PC cannot reproduce Cloud Run's CPUs, so that gap is unexplained.
 
 ## Browser to research worker connection
 

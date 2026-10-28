@@ -53,6 +53,12 @@ export interface ScanNote {
    */
   imgpos?: { x: number; y: number } | undefined;
   /**
+   * The clef in force on the note's staff, as the diatonic number of the staff's bottom line
+   * (C = 0 .. B = 6, plus 7 per octave): E4 = 30 for a treble clef, G2 = 18 for a bass clef. It
+   * says where on the staff the note's pitch is printed.
+   */
+  clef: number;
+  /**
    * How sure homr was (issue 130): the three most probable tokens of its rhythm, pitch and
    * accidental heads, most probable first, with their probabilities, written as
    * `<!-- conf: rhythm note_4 0.981 ...; pitch C5 0.410 ...; lift _ 0.990 ... -->`.
@@ -114,6 +120,21 @@ export function parseScanXml(xml: string): XMLDocument {
   return doc;
 }
 
+/** The diatonic number of the pitch a clef's line holds: G4, F3 and C4 (middle C). */
+const CLEF_LINE: Record<string, number> = { G: 32, F: 24, C: 28 };
+/** The bottom line of a treble clef, which a staff without a clef is read with. */
+const TREBLE_BOTTOM = 30;
+
+/** The diatonic number of the bottom line of the staff a `<clef>` opens, or undefined for a clef this does not know. */
+function clefBottom(clef: Element): number | undefined {
+  const reference = CLEF_LINE[text(clef, 'sign')];
+  const line = Number(text(clef, 'line') || '2');
+  const shift = Number(text(clef, 'clef-octave-change') || '0');
+  if (reference === undefined || !Number.isInteger(line) || !Number.isInteger(shift))
+    return undefined;
+  return reference + 7 * shift - 2 * (line - 1);
+}
+
 /** Positive integer content, or NaN. */
 function count(value: string): number {
   return /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : NaN;
@@ -172,6 +193,8 @@ export function readScanScore(doc: XMLDocument): ScanScore {
     let staves = 1;
     let meter: ScanBar['meter'];
     const fifths = new Map<number, number>();
+    // The clef in force per staff, carried across bars; a change applies to the notes after it.
+    const clefs = new Map<number, number>();
     let page = 0;
     kids(part, 'measure').forEach((measure, measureIndex) => {
       if (
@@ -223,6 +246,10 @@ export function readScanScore(doc: XMLDocument): ScanScore {
               fifths.set(staff, value);
               if (!sawNote) bar.fifths.set(staff, value);
             }
+          }
+          for (const clef of kids(el, 'clef')) {
+            const bottom = clefBottom(clef);
+            if (bottom !== undefined) clefs.set(Number(clef.getAttribute('number') ?? 1), bottom);
           }
           const time = kid(el, 'time');
           if (time) {
@@ -287,6 +314,7 @@ export function readScanScore(doc: XMLDocument): ScanScore {
             tieStop: marks.includes('stop'),
             page,
             imgpos: imagePosition(el),
+            clef: clefs.get(staff) ?? TREBLE_BOTTOM,
             confidence: noteConfidence(el),
           });
           ordinal++;

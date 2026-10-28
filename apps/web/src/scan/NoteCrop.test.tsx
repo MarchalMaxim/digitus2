@@ -189,3 +189,34 @@ it('decodes one page at a time and keeps only the last three', async () => {
   expect((await pageImage(files[0]!))!.canvas.width).toBeGreaterThan(0);
   expect(bitmaps).toBe(before + 1);
 });
+
+it('centres the crop on the head found at the note, not on homr’s point (issue 226)', async () => {
+  vi.stubGlobal(
+    'createImageBitmap',
+    vi.fn(async () => ({ width: 1500, height: 2000, close: () => {} })),
+  );
+  // The second of four staves holds an F4 head at (500, 543) in the 1000 x 1333 copy.
+  analysisPage = (width, height) => {
+    const data = stavesPage(width, height, 7);
+    for (let y = 539; y <= 547; y++)
+      for (let x = 494; x <= 506; x++) {
+        const u = ((x - 500) * Math.cos(0.35) + (y - 543) * Math.sin(-0.35)) / 4.3;
+        const v = ((x - 500) * Math.sin(0.35) + (y - 543) * Math.cos(0.35)) / 3.2;
+        if (u * u + v * v <= 1) data[(y * width + x) * 4] = data[(y * width + x) * 4 + 1] = 20;
+      }
+    return data;
+  };
+  const file = photo();
+  // homr's point is 6 and 8 pixels of the copy off; the photo is 1.5 times the copy.
+  const homr = { x: (500 + 6) * 1.5, y: (543 - 8) * 1.5 };
+  const f4 = { step: 'F', octave: 4, rest: false, clef: 30, imgpos: homr } as const;
+  render(<NoteCrop image={file} at={homr} note={f4} label="Bar 1 in the photo" size="large" />);
+  const crop = await screen.findByRole('img', { name: 'Bar 1 in the photo' });
+  const [x, y] = crop.getAttribute('data-at')!.split(',').map(Number);
+  expect(Math.hypot(x! - 500 * 1.5, y! - 543.5 * 1.5)).toBeLessThan(0.3 * 7 * 1.5);
+  // Without the note there is nothing to look for: the crop stays on homr's point.
+  cleanup();
+  render(<NoteCrop image={file} at={homr} label="Bar 2 in the photo" size="large" />);
+  const plain = await screen.findByRole('img', { name: 'Bar 2 in the photo' });
+  expect(plain.getAttribute('data-at')).toBe(`${homr.x},${homr.y}`);
+});

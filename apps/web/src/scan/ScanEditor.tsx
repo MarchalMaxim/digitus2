@@ -289,6 +289,7 @@ export function NoteEditor({
         <NoteCrop
           image={photo}
           at={note.imgpos}
+          note={note}
           size="large"
           label={t.scan.edit.photoAt(t.scan.edit.bar(note.measureNumber))}
         />

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { imagePositions, insideShare, pairNotes, quantile, summarise } from './imgpos.mjs';
+import { framing, imagePositions, insideShare, pairNotes, quantile, summarise } from './imgpos.mjs';
 
 test('each note takes the position in its own comment, null without one', () => {
   const xml = `<score-partwise><part><measure>
@@ -54,4 +54,14 @@ test('notes pair by onset in the bar and pitch; a wrong pitch does not pair; gra
   assert.equal(pairs.length, 1);
   assert.equal(pairs[0][0].midi, 62);
   assert.equal(pairs[0][1].sourceIndices[0], 1);
+});
+
+test('framing counts the notes within half a space of the head in both axes, and those that end farther away', () => {
+  // Four notes: near the head, 0.6 off in one axis (unchanged), far and moved onto the head, near and moved away.
+  const before = { dx: [0.4, 0.6, 0.9, 0.1], dy: [0.4, 0, 0.9, 0.1] };
+  const after = { dx: [0.1, 0.6, 0.1, 0.8], dy: [0.1, 0, 0.1, 0.8] };
+  const f = framing(after.dx, after.dy, before.dx, before.dy);
+  assert.deepEqual(f.framed, { 0.5: 0.5, 0.75: 0.75 });
+  assert.deepEqual(f.framedBefore, { 0.5: 0.5, 0.75: 0.75 });
+  assert.equal(f.worse, 0.25);
 });

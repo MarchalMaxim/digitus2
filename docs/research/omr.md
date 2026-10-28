@@ -102,12 +102,27 @@ homr writes each note's estimated centre as `<!-- imgpos: x, y -->`, in the pixe
 | Inside a crop of H = 2.5                      |             99.0% |
 | Inside a crop of H = 3                        |             99.5% |
 
-The vertical axis is the weak one: a position is nearer the right bar and beat than the right line or space. The crop is the smallest of H = 1.5, 2, 2.5 and 3 that holds at least 90% of the notes, so it is 4 staff spaces high and 8 wide (H = 2); H = 1.5 holds 89.1%. The signed medians are under 0.3 staff spaces, so the app applies no correction. Per page, the share inside the H = 2 crop is lowest for Ode to Joy (86.7%), Czerny Op. 821 No. 5 (88.9%) and Tchaikovsky Op. 39 No. 1 (90.8%); the others reach 93.5% to 100%. `research/omr/acceptance/floor.json` holds `imgpos: {halfHeightSpaces: 2, insideCropMin: 0.95}`, and the benchmark fails below it.
+The vertical axis is the weak one: a position is nearer the right bar and beat than the right line or space. The crop is the smallest of H = 1.5, 2, 2.5 and 3 that holds at least 90% of the notes, so it is 4 staff spaces high and 8 wide (H = 2); H = 1.5 holds 89.1%. The signed medians are under 0.3 staff spaces, so no one shift corrects the point (the app places the head instead, below). Per page, the share inside the H = 2 crop is lowest for Ode to Joy (86.7%), Czerny Op. 821 No. 5 (88.9%) and Tchaikovsky Op. 39 No. 1 (90.8%); the others reach 93.5% to 100%. `research/omr/acceptance/floor.json` holds `imgpos: {halfHeightSpaces: 2, insideCropMin: 0.95}`, and the benchmark fails below it.
 
 ```sh
 DIGITUS2_OMR_HOMR=<homr toolchain> node research/omr/imgpos.mjs          # measure, compare with the floor
 node research/omr/imgpos.mjs --check                                      # 0, or 3 with the reason homr is missing
 ```
+
+#### Placement on the notehead
+
+homr's point is its transformer's attention centre of mass, not a detected notehead: only 32% of the points on the clean pages lie within half a staff space of the head in both axes, which is the size of the frame the review draws around a note (1.5 spaces). The notes themselves are read right (the pairing above needs the right pitch), so the review looks for the head on the photo and draws the frame there (`apps/web/src/scan/heads.ts`, `docs/scanning.md`):
+
+1. **The row.** The note's diatonic number (step and octave) and the clef in force on its staff (`ScanNote.clef`, the diatonic number of the staff's bottom line) give the row the head sits on, counted in half staff spaces from the staff's bottom line. The staff is the one the staff tracer (`camera/staffGeometry.ts`) traced whose row for that pitch is nearest the point, which also settles which staff of a grand staff. Where the tracer found no staff within 2.5 spaces of the point (it finds about half of a soft photo's staves), the five lines are read from the photo around the note: the peaks of the rows' ink over a Gaussian background, read along the slope that makes them sharpest, in columns 12, then 6, then 3 spaces either side.
+2. **The head.** The page is first stretched so that its paper reads white and its darkest ink black (a phone photo's paper is grey and its ink is not black), so a head on a dim photo scores as one on a printed page. Along that row (0.3 spaces either side), within 2 spaces of the point, a filled ellipse (0.62 by 0.46 spaces, tilted 20 degrees) over its ring of paper, or a hollow one, scores each column. Among the columns that score at least 0.25, the local maxima at least half as strong as the strongest compete, and the one nearest the point wins: nearest, not strongest, because a strong neighbour must not win. A head not found on the pitch's row is looked for one and then two steps away (a misread pitch). A note with no head found keeps homr's point.
+
+| Variant (16 pages) | Paired notes | Within 0.5 spaces, homr's point -> placed | Within 0.75 spaces | Placed farther than homr's point by over 0.25 | Heads found |
+| ------------------ | -----------: | ----------------------------------------: | -----------------: | --------------------------------------------: | ----------: |
+| clean              |        2,986 |                          32.0% -> 96.0% |    56.4% -> 97.1% |                                         1.3% |       2,957 |
+| shadow             |        2,990 |                          31.8% -> 95.5% |    57.4% -> 96.9% |                                         0.8% |       2,888 |
+| lowContrast        |        3,008 |                          31.1% -> 96.1% |    54.7% -> 96.9% |                                         1.0% |       2,977 |
+
+The weak pages are Czerny Op. 821 No. 5 (83.8% on clean) and Burgmuller Op. 100 No. 5 (89.2%), and on shadow the Bach Minuet BWV Anh. 120 page that homr read as one staff with alternating clefs (76.9%: the clef of the note is then not the clef printed). The review's own check is a real photo (`apps/web/e2e/scan-heads.spec.ts`): on the Bach Invention 13 photo, three notes whose heads were read off by eye (homr's points lie 5 to 10 pixels, about a staff space, from them) are framed within 4 pixels. `floor.json` holds `imgpos.placedFramedMin` (0.95), checked on the clean pages. `--variant=NAME` measures another variant.
 
 It reuses the acceptance gate's recognition cache and recognises the pages that are not cached. It is run by hand, not by `pnpm verify`.
 

@@ -75,3 +75,41 @@ describe('where homr saw each note (issue 161)', () => {
     }
   });
 });
+
+describe('the clef a note is printed under (issue 226)', () => {
+  const note = (staff: number, step = 'C', octave = 4) =>
+    `<note><pitch><step>${step}</step><octave>${octave}</octave></pitch><duration>4</duration><voice>1</voice><staff>${staff}</staff></note>`;
+  const score = (...bars: string[]) =>
+    `<?xml version="1.0" encoding="utf-8"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>P</part-name></score-part></part-list><part id="P1">${bars
+      .map((b, i) => `<measure number="${i + 1}">${b}</measure>`)
+      .join('')}</part></score-partwise>`;
+  const clefs = (xml: string) => read(xml).notes.map((n) => n.clef);
+
+  it('is the diatonic number of the staff bottom line: E4 for G2, G2 for F4, F3 for C3', () => {
+    const xml = score(
+      `<attributes><divisions>4</divisions><staves>3</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef><clef number="3"><sign>C</sign><line>3</line></clef></attributes>${note(1)}${note(2)}${note(3)}`,
+    );
+    expect(clefs(xml)).toEqual([30, 18, 24]);
+  });
+
+  it('reads a treble clef when the staff has none', () => {
+    expect(clefs(score(`<attributes><divisions>4</divisions></attributes>${note(1)}`))).toEqual([
+      30,
+    ]);
+  });
+
+  it('carries a clef across bars, and a change applies to the notes after it', () => {
+    const xml = score(
+      `<attributes><divisions>4</divisions><clef><sign>G</sign><line>2</line></clef></attributes>${note(1)}<attributes><clef><sign>F</sign><line>4</line></clef></attributes>${note(1)}`,
+      note(1),
+    );
+    expect(clefs(xml)).toEqual([30, 18, 18]);
+  });
+
+  it('shifts an octave for a clef that sounds higher or lower', () => {
+    const xml = score(
+      `<attributes><divisions>4</divisions><staves>2</staves><clef number="1"><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef><clef number="2"><sign>F</sign><line>4</line><clef-octave-change>1</clef-octave-change></clef></attributes>${note(1)}${note(2)}`,
+    );
+    expect(clefs(xml)).toEqual([23, 25]);
+  });
+});

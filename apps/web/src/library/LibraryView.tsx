@@ -163,18 +163,25 @@ function useFocusAfterChange(
   useEffect(() => {
     const wanted = target.current;
     const root = list.current;
-    target.current = null;
     if (!wanted || !root) return;
+    // The element may arrive a render later (the shelves are drawn again once the shared shelf or
+    // the level's pieces are in): the target waits for it rather than being dropped on a render
+    // that does not have it yet.
+    let element: HTMLElement | null | undefined;
+    if (wanted.kind === 'heading') element = root.querySelector<HTMLElement>('#shelf-open');
+    else if (wanted.kind === 'shelf-button')
+      element = root.querySelector<HTMLElement>(`[data-shelf-all="${wanted.shelf}"]`);
+    else {
+      const scope = wanted.within === null ? root : root.querySelector(wanted.within);
+      element = scope?.querySelectorAll<HTMLElement>('.piece-row')[wanted.index];
+    }
+    if (!element) return;
+    target.current = null;
     if (wanted.kind === 'heading') {
       const top = root.getBoundingClientRect().top;
       if (top < 0) window.scrollBy(0, top);
-      root.querySelector<HTMLElement>('#shelf-open')?.focus({ preventScroll: true });
-    } else if (wanted.kind === 'shelf-button') {
-      root.querySelector<HTMLElement>(`[data-shelf-all="${wanted.shelf}"]`)?.focus();
-    } else {
-      const scope = wanted.within === null ? root : root.querySelector(wanted.within);
-      scope?.querySelectorAll<HTMLElement>('.piece-row')[wanted.index]?.focus();
-    }
+      element.focus({ preventScroll: true });
+    } else element.focus();
   });
 }
 

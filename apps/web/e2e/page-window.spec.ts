@@ -227,11 +227,19 @@ test('playing across a page boundary carries the red onto the next page', async 
   await expect(slots(page).nth(2).locator('.is-red').first()).toBeAttached({ timeout: 20_000 });
   await expectOneRed(page, 'playing on page 3');
   await page.getByRole('button', { name: 'Pause' }).click();
+  // Where the red stops depends on how long it played: a slow runner can reach the exposition's
+  // repeat and be back on the first page by the pause. So the test reads the page holding it.
+  const redPage = await page.evaluate(() =>
+    [...document.querySelectorAll('.score-sheet > svg')].findIndex(
+      (s) => s.querySelector('.is-red') !== null,
+    ),
+  );
+  expect(redPage).toBeGreaterThanOrEqual(0);
   // Far down the piece, the page the red left (the second) is beyond two window heights and goes,
   // while the page holding the red stays.
   await scrollTo(page, await page.evaluate(() => document.documentElement.scrollHeight));
-  await expect.poll(async () => (await built(page)).includes(1)).toBe(false);
-  expect(await built(page)).toContain(2);
+  if (redPage !== 1) await expect.poll(async () => (await built(page)).includes(1)).toBe(false);
+  expect(await built(page)).toContain(redPage);
   expect((await redBars(page)).length).toBeGreaterThan(0);
 });
 

@@ -6,6 +6,10 @@ import { expect, test } from '@playwright/test';
 // score is open and nothing has been heard (`usePianoHealer`). The fake here gives the first access
 // a deaf port and every later one a live port, and the page opens on a score straight from its
 // address, so the access is the silent one made at page load, with no press.
+//
+// The healer counts from the moment the access opened, and a slow runner can take longer than its
+// first wait to show the score. So the page starts hidden, where the healer waits, and the test
+// shows it when the deaf press is done; showing the page starts the healer's wait afresh.
 
 const MINUET = 'bach-minuet-g-major-bwv-anh-114';
 
@@ -43,6 +47,12 @@ test('a piano port that stays silent after the page loads is opened again, and t
       }
     }
     w.__deaf = fake;
+    let hidden = true;
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+    (window as unknown as { __show(): void }).__show = () => {
+      hidden = false;
+      document.dispatchEvent(new Event('visibilitychange'));
+    };
     Object.defineProperty(navigator, 'requestMIDIAccess', {
       configurable: true,
       value: () => {
@@ -124,7 +134,8 @@ test('a piano port that stays silent after the page loads is opened again, and t
   await page.waitForTimeout(500);
   expect(await index()).toBe(0);
 
-  // The page opens the access again by itself, within the healer's first wait.
+  // Shown, the page opens the access again by itself, within the healer's first wait.
+  await page.evaluate(() => (window as unknown as { __show(): void }).__show());
   await expect.poll(requests, { timeout: 10_000 }).toBe(2);
 
   // Heard: every press moves the red on.
@@ -150,6 +161,7 @@ test('a piano port that stays silent after the page loads is opened again, and t
     ['connect', 'page load'],
     ['ports', ''],
     ['opened', 'page load'],
+    ['shown again', ''],
     ['reconnect', 'silent'],
     ['connect', 'silent'],
     ['ports', ''],

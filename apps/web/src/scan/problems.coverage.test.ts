@@ -49,7 +49,9 @@ describe.skipIf(!usable)('places to check against homr misreadings (research)', 
       );
       const score = readScanScore(parseScanXml(xml));
       const flagged = new Set(
-        findProblems(score).map((p) => `${p.part}|${p.kind === 'bar-timing' ? p.bar : p.measure}`),
+        findProblems(score).map(
+          (p) => `${p.part}|${p.kind === 'bar-timing' || p.kind === 'form' ? p.bar : p.measure}`,
+        ),
       );
       for (const n of rows) {
         const note = score.notes.find((x) => x.ordinal === n.ordinal);

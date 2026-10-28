@@ -132,6 +132,22 @@ export const scan: Messages['scan'] = {
     partlyReadWarning:
       'Uma linha de música foi lida só em parte, então podem faltar ou sobrar compassos. Compare o resultado com o original antes de praticar.',
     unknownWarning: 'O reconhecedor indicou um aviso desconhecido. Confira bem o original.',
+    tiesFromSlurs: (n: number) =>
+      plural('pt', n, {
+        one: '# ligadura de expressão entre uma nota e a sua repetição foi lida como ligadura de valor.',
+        other:
+          '# ligaduras de expressão entre uma nota e a sua repetição foram lidas como ligaduras de valor.',
+      }),
+    emptyBarsJoined: (n: number) =>
+      plural('pt', n, {
+        one: '# compasso vazio foi unido ao compasso vizinho.',
+        other: '# compassos vazios foram unidos aos compassos vizinhos.',
+      }),
+    staffRegionsOmitted: (n: number) =>
+      plural('pt', n, {
+        one: '# pauta pequena adicional foi deixada de fora da leitura.',
+        other: '# pautas pequenas adicionais foram deixadas de fora da leitura.',
+      }),
     downloadPagesSummary: 'Baixar os arquivos de cada página',
     downloadPage: (page: number) => `Baixar o MusicXML da página ${page}`,
     downloadCombined: 'Baixar o MusicXML combinado',
@@ -146,8 +162,10 @@ export const scan: Messages['scan'] = {
     bars: (n: number) => plural('pt', n, { one: '# compasso', other: '# compassos' }),
     bothHands: 'ambas as mãos',
     oneStaff: 'uma só pauta',
-    notJoined:
-      'As páginas não foram unidas em uma só partitura: cada uma é mostrada separadamente e pode ser baixada em Arquivos. Substitua a página que difere e digitalize de novo.',
+    notJoined: (page: number | undefined, reason: string | undefined) =>
+      page === undefined
+        ? 'As páginas não foram unidas em uma só partitura: cada uma é mostrada separadamente e pode ser baixada em Arquivos. Substitua a página que difere e digitalize de novo.'
+        : `A página ${page} não pôde ser combinada com as outras páginas${reason ? `: ${reason}` : ''}. Fotografe-a de novo, plana e com a página inteira no enquadramento.`,
     readAsOneStaff: (pages: number[]) =>
       pages.length === 0
         ? 'Uma página foi lida como uma só pauta: as mãos estão misturadas. Troque essa foto e digitalize de novo.'
@@ -242,8 +260,11 @@ export const scan: Messages['scan'] = {
       removed: (where: string, pitch: string) => `${where}: ${pitch} removida`,
       meter: (bar: string, from: string | undefined, to: string) =>
         `A partir do compasso ${bar}: fórmula de compasso ${from ? `${from} → ` : ''}${to}`,
+      barline: (bar: string) => `Compasso ${bar}: marcas de repetição removidas`,
     },
     setMeter: (meter: string, bar: string) => `Usar ${meter} a partir do compasso ${bar}`,
+    removeMark: (mark: 'ending' | 'repeat') =>
+      mark === 'ending' ? 'Remover a casa de repetição' : 'Remover o sinal de repetição',
     stale: (kept: number) =>
       `Algumas correções salvas não se aplicam mais a este reconhecimento. As primeiras ${kept} foram mantidas.`,
     problemsSummary: (n: number) =>
@@ -258,6 +279,10 @@ export const scan: Messages['scan'] = {
       barTiming: (timing: string) => `As mãos não coincidem. ${timing}`,
       barLong: (timing: string) =>
         `O compasso é mais longo que a sua fórmula de compasso. ${timing}`,
+      endingWithoutRepeat: (where: string) =>
+        `${where}: foi lida aqui uma casa de repetição, mas a partitura não tem sinal de repetição.`,
+      repeatWithoutEnd: (where: string) =>
+        `${where}: um sinal de repetição abre aqui, e nenhum sinal de repetição o fecha.`,
     },
     gap: (beats: number) => plural('pt', beats, { one: '# tempo', other: '# tempos' }),
     downloadCorrected: 'Baixar MusicXML corrigido',
@@ -283,6 +308,7 @@ export const scan: Messages['scan'] = {
       meter: 'Essa fórmula de compasso não pode ser escrita aqui.',
       noBar: 'Este compasso já não está na partitura.',
       sameMeter: (meter: string) => `O compasso já está em ${meter}.`,
+      noMark: 'Este compasso não tem marca de repetição.',
     },
   },
   phone: {
@@ -390,30 +416,32 @@ export const scan: Messages['scan'] = {
     invalidJob: 'Tarefa de digitalização inválida.',
   },
   join: {
-    refused: (reason: string) =>
-      `Estas páginas não podem ser combinadas com segurança: ${reason}. Baixe cada página para corrigi-la em um editor de partituras.`,
+    refused: (page: number | undefined, reason: string) =>
+      page === undefined
+        ? `Estas páginas não podem ser combinadas: ${reason}.`
+        : `A página ${page} não pode ser combinada com as outras páginas: ${reason}.`,
     reasons: {
-      noPages: 'nenhuma página reconhecida',
-      entities: 'entidades XML não são compatíveis',
-      notPartwise: 'era esperado MusicXML “partwise”',
-      repeats: 'repetições ou saltos precisam de revisão manual',
-      transposition:
-        'transposição ou atributos especiais de pauta ou de compasso precisam de revisão manual',
-      partLayout: 'disposição das partes incompleta',
-      partOrder: 'a ordem das partes difere da lista de partes',
-      measureCounts: 'as partes têm números diferentes de compassos',
-      startingSetup: (page: number) =>
-        `a página ${page} precisa de divisões, armadura, fórmula de compasso e claves explícitas no início`,
-      staffLayout: 'disposição inicial das pautas incompleta',
-      staffChange: 'a disposição das pautas muda dentro de uma página',
-      instrumentUndeclared: 'uma referência de instrumento não tem declaração',
-      partCounts: 'o número de partes difere',
-      layoutsDiffer: 'as disposições de partes ou pautas diferem',
-      instrumentsDiffer: 'as disposições de instrumentos diferem',
-      duplicateIds: 'identificadores XML duplicados dentro de uma página',
-      unresolvedId: 'referência a um identificador XML que não existe',
-      spanNumber: 'número de sinal gráfico inválido',
-      spanOverflow: 'mais de 16 números próprios da página para um mesmo tipo de sinal de notação',
+      noPages: 'nenhuma página foi reconhecida',
+      entities: 'o arquivo dela usa entidades XML',
+      notPartwise: 'o arquivo dela não é MusicXML “partwise”',
+      transposition: 'ela traz uma transposição ou atributos especiais de pauta ou de compasso',
+      partLayout: 'a lista de partes dela está incompleta',
+      partOrder: 'as partes dela não estão na ordem da lista de partes',
+      measureCounts: (counts: number[]) =>
+        `ela foi lida como ${plural('pt', counts.length, { one: '# parte', other: '# partes' })} com ${formatList('pt', counts.map(String))} compassos`,
+      startingSetup:
+        'ela não tem divisões, armadura, fórmula de compasso nem claves explícitas no início',
+      staffLayout: 'a disposição inicial das pautas dela está incompleta',
+      staffChange: 'a disposição das pautas dela muda dentro da página',
+      instrumentUndeclared: 'ela faz referência a um instrumento que não foi declarado',
+      partCounts: (found: number, first: number) =>
+        `ela foi lida como ${plural('pt', found, { one: '# parte', other: '# partes' })}, enquanto a página 1 tem ${first}`,
+      layoutsDiffer: 'as partes ou pautas dela diferem das da página 1',
+      instrumentsDiffer: 'os instrumentos dela diferem dos da página 1',
+      duplicateIds: 'ela tem identificadores XML duplicados',
+      unresolvedId: 'ela faz referência a um identificador XML que não existe',
+      spanNumber: 'ela tem um número inválido num sinal de notação',
+      spanOverflow: 'ela precisa de mais de 16 números para um mesmo tipo de sinal de notação',
     },
   },
 };

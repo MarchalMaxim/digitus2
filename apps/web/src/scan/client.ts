@@ -39,9 +39,20 @@ export interface Recognition {
   capabilities?: ScanServiceMetadata['capabilities'];
 }
 
+/** The scanner's disclaimers (homr.py), which the review does not show (issue 230). */
+const DISCLAIMER_CODES = ['recognition-experimental', 'recognition-meter-unverified'];
+
 function warningsOf(value: unknown): string[] {
-  return (Array.isArray(value) ? value : []).map((warning: unknown) => {
+  return (Array.isArray(value) ? value : []).flatMap((warning: unknown) => {
     if (typeof warning === 'string') return warning;
+    if (
+      typeof warning === 'object' &&
+      warning !== null &&
+      'code' in warning &&
+      typeof warning.code === 'string' &&
+      DISCLAIMER_CODES.includes(warning.code)
+    )
+      return [];
     if (
       typeof warning === 'object' &&
       warning !== null &&

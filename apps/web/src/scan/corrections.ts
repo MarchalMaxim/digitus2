@@ -56,8 +56,11 @@ export type Correction =
   | { kind: 'hand'; note: number; staff: number }
   | { kind: 'remove'; note: number }
   /** The time signature from bar index `bar` on, in every part. */
-  | { kind: 'meter'; bar: number; beats: number; beatType: number };
+  | { kind: 'meter'; bar: number; beats: number; beatType: number }
+  /** The repeat signs and volta brackets of bar index `bar` removed, in every part (issue 230). */
+  | { kind: 'barline'; bar: number };
 export type MeterCorrection = Extract<Correction, { kind: 'meter' }>;
+export type BarlineCorrection = Extract<Correction, { kind: 'barline' }>;
 
 export class CorrectionError extends Error {
   constructor(readonly phrase: Phrase) {
@@ -579,7 +582,30 @@ function applyMeter(doc: XMLDocument, score: ScanScore, c: MeterCorrection) {
   if (!changed) refuse((t) => t.scan.edit.refused.sameMeter(meterText(c)));
 }
 
+/**
+ * Issue 230: the repeat signs and volta brackets of one bar go, in every part. A barline left
+ * with nothing to say goes with them; one that still draws a bar style stays.
+ */
+function applyBarline(doc: XMLDocument, c: Extract<Correction, { kind: 'barline' }>) {
+  let removed = 0;
+  for (const part of kids(doc.documentElement, 'part')) {
+    const measure = Number.isInteger(c.bar) ? kids(part, 'measure')[c.bar] : undefined;
+    if (!measure) return refuse((t) => t.scan.edit.refused.noBar);
+    for (const barline of kids(measure, 'barline')) {
+      for (const mark of kids(barline).filter((el) =>
+        ['repeat', 'ending'].includes(el.localName),
+      )) {
+        mark.remove();
+        removed++;
+      }
+      if (!kids(barline).length) barline.remove();
+    }
+  }
+  if (!removed) refuse((t) => t.scan.edit.refused.noMark);
+}
+
 function apply(doc: XMLDocument, correction: Correction) {
+  if (correction.kind === 'barline') return applyBarline(doc, correction);
   const score = readScanScore(doc);
   switch (correction.kind) {
     case 'pitch':
@@ -694,7 +720,9 @@ export type Problem =
       measure: number;
     }
   | { kind: 'tie-unmatched'; note: number; part: number; measure: number }
-  | { kind: 'bar-timing'; part: number; bar: number; timing: BarTiming };
+  | { kind: 'bar-timing'; part: number; bar: number; timing: BarTiming }
+  /** A repeat mark the score cannot carry: a volta bracket with no repeat sign, or a repeat sign no repeat closes. */
+  | { kind: 'form'; part: number; bar: number; mark: 'ending' | 'repeat' };
 
 /**
  * Places a reader should check, found by rules that can be verified on the file itself. They
@@ -756,7 +784,36 @@ export function findProblems(score: ScanScore): Problem[] {
     if (disagree || long)
       problems.push({ kind: 'bar-timing', part: bar.part, bar: bar.index, timing });
   }
-  return problems;
+  // A repeat mark the score cannot carry (issue 230): a volta bracket where no bar repeats, or a
+  // forward repeat that no later backward repeat answers. A scanner reads such a mark into a page
+  // that has none. Marked once per bar, on the first part that carries it; the removal offered
+  // clears every part.
+  const backward = score.bars.filter((b) => b.repeatBackward);
+  const flaggedBars = new Set<number>();
+  for (const bar of score.bars) {
+    if (flaggedBars.has(bar.index)) continue;
+    const mark =
+      bar.ending && !backward.length
+        ? 'ending'
+        : bar.repeatForward && !backward.some((b) => b.index > bar.index)
+          ? 'repeat'
+          : undefined;
+    if (!mark) continue;
+    flaggedBars.add(bar.index);
+    problems.push({ kind: 'form', part: bar.part, bar: bar.index, mark });
+  }
+  // In reading order: by part, then by bar, the rules of one bar in the order above.
+  const barOfProblem = (p: Problem) =>
+    p.kind === 'bar-timing' || p.kind === 'form' ? p.bar : p.measure;
+  return problems.sort((a, b) => a.part - b.part || barOfProblem(a) - barOfProblem(b));
+}
+
+/** The removal offered on a place to check for a repeat mark the score cannot carry (issue 230). */
+export function formOffers(problems: readonly Problem[]): Map<Problem, BarlineCorrection> {
+  const offers = new Map<Problem, BarlineCorrection>();
+  for (const problem of problems)
+    if (problem.kind === 'form') offers.set(problem, { kind: 'barline', bar: problem.bar });
+  return offers;
 }
 
 /** A meter `quarters` long: whole beats as quarters, else eighths, else sixteenths. */

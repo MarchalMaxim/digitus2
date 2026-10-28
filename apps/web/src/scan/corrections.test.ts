@@ -5,6 +5,7 @@ import {
   barTiming,
   CorrectionError,
   findProblems,
+  formOffers,
   meterOffers,
   type Correction,
 } from './corrections.js';
@@ -685,6 +686,75 @@ describe('time signature corrections', () => {
     const raw = readScanScore(parseScanXml(score([NINE, NINE], 4)));
     expect(describeCorrection(en, raw, meter(0, 9, 8))).toBe(
       'From bar 1: time signature 4/4 → 9/8',
+    );
+  });
+});
+
+describe('repeat marks the score cannot carry (issue 230)', () => {
+  const bracket = (xml: string, bar: number) =>
+    xml.replace(
+      `<measure number="${bar}">`,
+      `<measure number="${bar}"><barline location="left"><ending type="start" number="1"/></barline>`,
+    );
+  const repeat = (xml: string, bar: number, direction: 'forward' | 'backward') =>
+    xml.replace(
+      `<measure number="${bar}">`,
+      `<measure number="${bar}"><barline location="${direction === 'forward' ? 'left' : 'right'}"><repeat direction="${direction}"/></barline>`,
+    );
+
+  it('flags a volta bracket in a score with no repeat sign, once, and offers its removal', () => {
+    const raw = bracket(score([BAR, BAR, BAR]), 2);
+    const parsed = readScanScore(parseScanXml(raw));
+    const problems = findProblems(parsed);
+    expect(problems).toEqual([{ kind: 'form', part: 0, bar: 1, mark: 'ending' }]);
+    expect(describeProblem(en, parsed, problems[0]!)).toBe(
+      'Bar 2: a repeat ending was read here, but the score has no repeat sign.',
+    );
+    const offer = formOffers(problems).get(problems[0]!)!;
+    expect(offer).toEqual({ kind: 'barline', bar: 1 });
+    const result = applyCorrections(raw, [offer]);
+    expect(result.applied).toBe(1);
+    expect(result.xml).not.toContain('<ending');
+    // The barline had nothing else to say, so it goes too; the notes are untouched.
+    expect(result.xml).not.toContain('<barline');
+    expect(findProblems(readScanScore(parseScanXml(result.xml)))).toEqual([]);
+    expect(sounding(result.xml)).toEqual(sounding(score([BAR, BAR, BAR])));
+    expect(describeCorrection(en, parsed, offer)).toBe('Bar 2: repeat marks removed');
+  });
+
+  it('keeps a repeat sign with its ending, and flags a repeat sign no repeat closes', () => {
+    const proper = bracket(repeat(repeat(score([BAR, BAR, BAR]), 1, 'forward'), 2, 'backward'), 2);
+    expect(findProblems(readScanScore(parseScanXml(proper)))).toEqual([]);
+    // A backward repeat on its own returns to the top: nothing to flag.
+    expect(
+      findProblems(readScanScore(parseScanXml(repeat(score([BAR, BAR]), 2, 'backward')))),
+    ).toEqual([]);
+    const open = repeat(score([BAR, BAR, BAR]), 2, 'forward');
+    const parsed = readScanScore(parseScanXml(open));
+    const problems = findProblems(parsed);
+    expect(problems).toEqual([{ kind: 'form', part: 0, bar: 1, mark: 'repeat' }]);
+    expect(describeProblem(en, parsed, problems[0]!)).toBe(
+      'Bar 2: a repeat sign opens here, and no repeat sign closes it.',
+    );
+  });
+
+  it('keeps the bar style when the marks go, and refuses a bar without marks or no longer there', () => {
+    const styled = score([BAR, BAR]).replace(
+      '</measure></part>',
+      '<barline location="right"><bar-style>light-heavy</bar-style><repeat direction="backward"/></barline></measure></part>',
+    );
+    const result = applyCorrections(styled, [{ kind: 'barline', bar: 1 }]);
+    expect(result.applied).toBe(1);
+    expect(result.xml).toContain('<bar-style>light-heavy</bar-style>');
+    expect(result.xml).not.toContain('<repeat');
+    expect(() =>
+      applyCorrections(score([BAR, BAR]), [{ kind: 'barline', bar: 0 }], { strict: true }),
+    ).toThrow(CorrectionError);
+    expect(applyCorrections(score([BAR, BAR]), [{ kind: 'barline', bar: 0 }]).refusal!(en)).toBe(
+      'This bar has no repeat mark.',
+    );
+    expect(applyCorrections(score([BAR, BAR]), [{ kind: 'barline', bar: 5 }]).refusal!(en)).toBe(
+      'This bar is no longer in the score.',
     );
   });
 });

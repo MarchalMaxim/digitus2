@@ -58,6 +58,21 @@ describe('one page photographed again (issue 130)', () => {
     expect(barNotes.some((n) => describeNote(n) === describeNote(last))).toBe(true);
   });
 
+  it('carries the removal of a bar’s repeat marks to the same bar, like a meter change (issue 230)', () => {
+    const carried = carryCorrections(old, fresh, [{ kind: 'barline', bar: lastBar.index }], 1);
+    expect(carried).toHaveLength(1);
+    const bar = carried[0] as Extract<Correction, { kind: 'barline' }>;
+    const barNotes = fresh.notes.filter((n) => n.part === 0 && n.measure === bar.bar);
+    expect(barNotes.some((n) => describeNote(n) === describeNote(last))).toBe(true);
+    // A bar of the page photographed again goes with it.
+    const onRetaken = old.bars.find(
+      (b) => b.part === 0 && old.notes.some((n) => n.page === 1 && n.measure === b.index),
+    )!;
+    expect(carryCorrections(old, fresh, [{ kind: 'barline', bar: onRetaken.index }], 1)).toEqual(
+      [],
+    );
+  });
+
   it('replays on the new recognition', () => {
     const carried = carryCorrections(old, fresh, corrections, 1);
     const result = correct(after, carried);

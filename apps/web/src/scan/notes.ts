@@ -89,6 +89,10 @@ export interface ScanBar {
    */
   opensEnding: boolean;
   jumpsBack: boolean;
+  /** The bar's repeat marks as read: a forward or backward repeat sign, a volta bracket (issue 230). */
+  repeatForward: boolean;
+  repeatBackward: boolean;
+  ending: boolean;
   /** Key signature fifths in force at the bar's start, per staff (0 when none is written). */
   fifths: Map<number, number>;
 }
@@ -225,6 +229,13 @@ export function readScanScore(doc: XMLDocument): ScanScore {
             kids(b, 'repeat').some((r) => r.getAttribute('direction') === 'backward') ||
             kids(b, 'ending').some((e) => e.getAttribute('type') !== 'start'),
         ),
+        repeatForward: kids(measure, 'barline').some((b) =>
+          kids(b, 'repeat').some((r) => r.getAttribute('direction') === 'forward'),
+        ),
+        repeatBackward: kids(measure, 'barline').some((b) =>
+          kids(b, 'repeat').some((r) => r.getAttribute('direction') === 'backward'),
+        ),
+        ending: kids(measure, 'barline').some((b) => kids(b, 'ending').length > 0),
         fifths: new Map(fifths),
       };
       let sawNote = false;

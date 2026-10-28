@@ -136,6 +136,22 @@ export const scan = {
     partlyReadWarning:
       'A line of music was read only in part, so bars may be missing or added. Compare the result with the original before practising.',
     unknownWarning: 'The recognizer reported an unknown warning. Check the original carefully.',
+    /** The scanner's export notes, added up over the pages (issue 230): what its file holds that the page does not show. */
+    tiesFromSlurs: (n: number) =>
+      plural('en', n, {
+        one: '# slur between a note and its repetition was read as a tie.',
+        other: '# slurs between a note and its repetition were read as ties.',
+      }),
+    emptyBarsJoined: (n: number) =>
+      plural('en', n, {
+        one: '# empty bar was joined to its neighbour.',
+        other: '# empty bars were joined to their neighbours.',
+      }),
+    staffRegionsOmitted: (n: number) =>
+      plural('en', n, {
+        one: '# small extra staff was left out of the reading.',
+        other: '# small extra staves were left out of the reading.',
+      }),
     downloadPagesSummary: 'Download individual page files',
     downloadPage: (page: number) => `Download page ${page} MusicXML`,
     downloadCombined: 'Download combined MusicXML',
@@ -154,8 +170,11 @@ export const scan = {
     bothHands: 'both hands',
     /** A score of one staff: a melody, not a piano page. */
     oneStaff: 'one staff',
-    notJoined:
-      'The pages did not join into one score: each is shown on its own and can be downloaded under Files. Replace the page that differs and scan again.',
+    /** `page` is the page the join refused and `reason` a clause from `join.reasons`; both absent when it named none (issue 230). */
+    notJoined: (page: number | undefined, reason: string | undefined) =>
+      page === undefined
+        ? 'The pages did not join into one score: each is shown on its own and can be downloaded under Files. Replace the page that differs and scan again.'
+        : `Page ${page} could not be combined with the other pages${reason ? `: ${reason}` : ''}. Photograph it again, flat and with the whole page in view.`,
     /** `pages` are the numbers of the pages read as one staff; empty when the scanner did not say which. */
     readAsOneStaff: (pages: number[]) =>
       pages.length === 0
@@ -264,9 +283,13 @@ export const scan = {
       /** `bar` is the bar's printed number; `from` is absent when no meter was recognised. */
       meter: (bar: string, from: string | undefined, to: string) =>
         `From bar ${bar}: time signature ${from ? `${from} → ` : ''}${to}`,
+      barline: (bar: string) => `Bar ${bar}: repeat marks removed`,
     },
     /** Offered on a place to check when the hands agree but overrun the time signature. */
     setMeter: (meter: string, bar: string) => `Set ${meter} time from bar ${bar}`,
+    /** Offered on a place to check for a repeat mark the score cannot carry (issue 230). */
+    removeMark: (mark: 'ending' | 'repeat'): string =>
+      mark === 'ending' ? 'Remove the repeat ending' : 'Remove the repeat sign',
     stale: (kept: number) =>
       `Some saved corrections no longer apply to this recognition. The first ${kept} are kept.`,
     problemsSummary: (n: number) =>
@@ -282,6 +305,11 @@ export const scan = {
       barTiming: (timing: string) => `The hands disagree. ${timing}`,
       /** The hands agree, but the bar runs past the time signature. */
       barLong: (timing: string) => `The bar is longer than its time signature. ${timing}`,
+      /** A volta bracket read into a score with no repeat sign; `where` names the bar. */
+      endingWithoutRepeat: (where: string) =>
+        `${where}: a repeat ending was read here, but the score has no repeat sign.`,
+      repeatWithoutEnd: (where: string) =>
+        `${where}: a repeat sign opens here, and no repeat sign closes it.`,
     },
     /** A gap as a length: "a quarter note", "2 beats". */
     gap: (beats: number) => plural('en', beats, { one: '# beat', other: '# beats' }),
@@ -308,6 +336,7 @@ export const scan = {
       meter: 'That time signature cannot be written here.',
       noBar: 'This bar is no longer in the score.',
       sameMeter: (meter: string) => `The bar is already in ${meter}.`,
+      noMark: 'This bar has no repeat mark.',
     },
   },
   /** The camera entry on a phone or tablet. */
@@ -410,30 +439,35 @@ export const scan = {
     invalidJob: 'Invalid scan job.',
   },
   join: {
-    /** `reason` is a short explanation from the list below. */
-    refused: (reason: string) =>
-      `These pages cannot be combined safely: ${reason}. Download each page for correction in a notation editor.`,
+    /** `page` is the page the join refused (issue 230), absent when it named none; `reason` is a clause from the list below. */
+    refused: (page: number | undefined, reason: string) =>
+      page === undefined
+        ? `These pages cannot be combined: ${reason}.`
+        : `Page ${page} cannot be combined with the other pages: ${reason}.`,
+    /** Each completes "Page 2 cannot be combined with the other pages: …". */
     reasons: {
-      noPages: 'no recognized pages',
-      entities: 'XML entities are unsupported',
-      notPartwise: 'expected partwise MusicXML',
-      repeats: 'repeat or jump navigation needs manual review',
-      transposition: 'transposition or special staff/measure attributes need manual review',
-      partLayout: 'incomplete part layout',
-      partOrder: 'part order differs from the part list',
-      measureCounts: 'parts have unequal measure counts',
-      startingSetup: (page: number) =>
-        `page ${page} needs explicit starting divisions, key, time and clefs`,
-      staffLayout: 'incomplete starting staff layout',
-      staffChange: 'staff layout changes inside a page',
-      instrumentUndeclared: 'instrument reference has no declaration',
-      partCounts: 'part counts differ',
-      layoutsDiffer: 'part or staff layouts differ',
-      instrumentsDiffer: 'instrument layouts differ',
-      duplicateIds: 'duplicate XML IDs inside one page',
-      unresolvedId: 'unresolved XML ID reference',
-      spanNumber: 'invalid graphic span number',
-      spanOverflow: 'more than 16 page-specific numbers for one notation span type',
+      noPages: 'no page was recognized',
+      entities: 'its file uses XML entities',
+      notPartwise: 'its file is not partwise MusicXML',
+      transposition: 'it carries a transposition or special staff or bar attributes',
+      partLayout: 'its part list is incomplete',
+      partOrder: 'its parts are not in the order of its part list',
+      /** `counts` are the bars read in each part of the page. */
+      measureCounts: (counts: number[]) =>
+        `it was read as ${plural('en', counts.length, { one: '# part', other: '# parts' })} with ${formatList('en', counts.map(String))} bars`,
+      startingSetup: 'it has no explicit starting divisions, key, time and clefs',
+      staffLayout: 'its starting staff layout is incomplete',
+      staffChange: 'its staff layout changes inside the page',
+      instrumentUndeclared: 'it refers to an instrument that is not declared',
+      /** `found` parts on the page, `first` on page 1. */
+      partCounts: (found: number, first: number) =>
+        `it was read as ${plural('en', found, { one: '# part', other: '# parts' })} where page 1 has ${first}`,
+      layoutsDiffer: 'its parts or staves differ from page 1’s',
+      instrumentsDiffer: 'its instruments differ from page 1’s',
+      duplicateIds: 'it has duplicate XML IDs',
+      unresolvedId: 'it refers to an XML ID that does not exist',
+      spanNumber: 'it has an invalid notation span number',
+      spanOverflow: 'it needs more than 16 numbers for one kind of notation span',
     },
   },
 };

@@ -136,6 +136,22 @@ export const scan: Messages['scan'] = {
       'Une ligne de musique n’a été lue qu’en partie, donc des mesures peuvent manquer ou être en trop. Comparez le résultat avec l’original avant de vous exercer.',
     unknownWarning:
       'Le programme de reconnaissance a signalé un avertissement inconnu. Vérifiez bien l’original.',
+    tiesFromSlurs: (n: number) =>
+      plural('fr', n, {
+        one: '# liaison de phrasé entre une note et sa répétition a été lue comme une liaison de prolongation.',
+        other:
+          '# liaisons de phrasé entre une note et sa répétition ont été lues comme des liaisons de prolongation.',
+      }),
+    emptyBarsJoined: (n: number) =>
+      plural('fr', n, {
+        one: '# mesure vide a été réunie à la mesure voisine.',
+        other: '# mesures vides ont été réunies aux mesures voisines.',
+      }),
+    staffRegionsOmitted: (n: number) =>
+      plural('fr', n, {
+        one: '# petite portée supplémentaire a été écartée de la lecture.',
+        other: '# petites portées supplémentaires ont été écartées de la lecture.',
+      }),
     downloadPagesSummary: 'Télécharger les fichiers de chaque page',
     downloadPage: (page: number) => `Télécharger le MusicXML de la page ${page}`,
     downloadCombined: 'Télécharger le MusicXML combiné',
@@ -150,8 +166,10 @@ export const scan: Messages['scan'] = {
     bars: (n: number) => plural('fr', n, { one: '# mesure', other: '# mesures' }),
     bothHands: 'deux mains',
     oneStaff: 'une seule portée',
-    notJoined:
-      'Les pages n’ont pas été réunies en une seule partition\u00a0: chacune est montrée seule et se télécharge dans Fichiers. Remplacez la page qui diffère et numérisez à nouveau.',
+    notJoined: (page: number | undefined, reason: string | undefined) =>
+      page === undefined
+        ? 'Les pages n’ont pas été réunies en une seule partition\u00a0: chacune est montrée seule et se télécharge dans Fichiers. Remplacez la page qui diffère et numérisez à nouveau.'
+        : `La page ${page} n’a pas pu être combinée avec les autres pages${reason ? `\u00a0: ${reason}` : ''}. Photographiez-la à nouveau, à plat et avec la page entière dans le cadre.`,
     readAsOneStaff: (pages: number[]) =>
       pages.length === 0
         ? 'Une page a été lue comme une seule portée\u00a0: les mains sont mélangées. Remplacez cette photo et numérisez à nouveau.'
@@ -246,8 +264,11 @@ export const scan: Messages['scan'] = {
       removed: (where: string, pitch: string) => `${where}\u00a0: ${pitch} supprimée`,
       meter: (bar: string, from: string | undefined, to: string) =>
         `À partir de la mesure ${bar}\u00a0: chiffrage ${from ? `${from} → ` : ''}${to}`,
+      barline: (bar: string) => `Mesure ${bar}\u00a0: marques de reprise supprimées`,
     },
     setMeter: (meter: string, bar: string) => `Passer en ${meter} à partir de la mesure ${bar}`,
+    removeMark: (mark: 'ending' | 'repeat') =>
+      mark === 'ending' ? 'Supprimer la volta' : 'Supprimer le signe de reprise',
     stale: (kept: number) =>
       `Certaines corrections enregistrées ne s’appliquent plus à cette reconnaissance. Les ${kept} premières sont conservées.`,
     problemsSummary: (n: number) =>
@@ -261,6 +282,10 @@ export const scan: Messages['scan'] = {
         `${where}\u00a0: une liaison sur ${pitch} n’a pas de note correspondante.`,
       barTiming: (timing: string) => `Les mains ne concordent pas. ${timing}`,
       barLong: (timing: string) => `La mesure est plus longue que son chiffrage. ${timing}`,
+      endingWithoutRepeat: (where: string) =>
+        `${where}\u00a0: une volta a été lue ici, mais la partition n’a pas de signe de reprise.`,
+      repeatWithoutEnd: (where: string) =>
+        `${where}\u00a0: un signe de reprise s’ouvre ici, et aucun signe de reprise ne le ferme.`,
     },
     gap: (beats: number) => plural('fr', beats, { one: '# temps', other: '# temps' }),
     downloadCorrected: 'Télécharger le MusicXML corrigé',
@@ -286,6 +311,7 @@ export const scan: Messages['scan'] = {
       meter: 'Ce chiffrage ne peut pas être écrit ici.',
       noBar: 'Cette mesure n’est plus dans la partition.',
       sameMeter: (meter: string) => `La mesure est déjà en ${meter}.`,
+      noMark: 'Cette mesure n’a pas de marque de reprise.',
     },
   },
   phone: {
@@ -393,30 +419,33 @@ export const scan: Messages['scan'] = {
     invalidJob: 'Tâche de numérisation non valide.',
   },
   join: {
-    refused: (reason: string) =>
-      `Ces pages ne peuvent pas être combinées en toute sécurité\u00a0: ${reason}. Téléchargez chaque page pour la corriger dans un éditeur de partitions.`,
+    refused: (page: number | undefined, reason: string) =>
+      page === undefined
+        ? `Ces pages ne peuvent pas être combinées\u00a0: ${reason}.`
+        : `La page ${page} ne peut pas être combinée avec les autres pages\u00a0: ${reason}.`,
     reasons: {
-      noPages: 'aucune page reconnue',
-      entities: 'les entités XML ne sont pas prises en charge',
-      notPartwise: 'MusicXML «\u00a0partwise\u00a0» attendu',
-      repeats: 'les reprises ou les sauts demandent une vérification manuelle',
+      noPages: 'aucune page n’a été reconnue',
+      entities: 'son fichier utilise des entités XML',
+      notPartwise: 'son fichier n’est pas du MusicXML «\u00a0partwise\u00a0»',
       transposition:
-        'la transposition ou des attributs particuliers de portée ou de mesure demandent une vérification manuelle',
-      partLayout: 'disposition des parties incomplète',
-      partOrder: 'l’ordre des parties diffère de la liste des parties',
-      measureCounts: 'les parties n’ont pas le même nombre de mesures',
-      startingSetup: (page: number) =>
-        `la page ${page} a besoin de divisions, d’une armure, d’un chiffrage et de clés explicites au début`,
-      staffLayout: 'disposition initiale des portées incomplète',
-      staffChange: 'la disposition des portées change à l’intérieur d’une page',
-      instrumentUndeclared: 'une référence d’instrument n’a pas de déclaration',
-      partCounts: 'le nombre de parties diffère',
-      layoutsDiffer: 'les dispositions des parties ou des portées diffèrent',
-      instrumentsDiffer: 'les dispositions des instruments diffèrent',
-      duplicateIds: 'identifiants XML en double dans une même page',
-      unresolvedId: 'référence à un identifiant XML introuvable',
-      spanNumber: 'numéro de signe graphique non valide',
-      spanOverflow: 'plus de 16 numéros propres à la page pour un même type de signe de notation',
+        'elle comporte une transposition ou des attributs particuliers de portée ou de mesure',
+      partLayout: 'sa liste de parties est incomplète',
+      partOrder: 'ses parties ne suivent pas l’ordre de sa liste de parties',
+      measureCounts: (counts: number[]) =>
+        `elle a été lue comme ${plural('fr', counts.length, { one: '# partie', other: '# parties' })} avec ${formatList('fr', counts.map(String))} mesures`,
+      startingSetup:
+        'elle n’a pas de divisions, d’armure, de chiffrage ni de clés explicites au début',
+      staffLayout: 'la disposition initiale de ses portées est incomplète',
+      staffChange: 'la disposition de ses portées change à l’intérieur de la page',
+      instrumentUndeclared: 'elle fait référence à un instrument qui n’est pas déclaré',
+      partCounts: (found: number, first: number) =>
+        `elle a été lue comme ${plural('fr', found, { one: '# partie', other: '# parties' })}, alors que la page 1 en a ${first}`,
+      layoutsDiffer: 'ses parties ou ses portées diffèrent de celles de la page 1',
+      instrumentsDiffer: 'ses instruments diffèrent de ceux de la page 1',
+      duplicateIds: 'elle contient des identifiants XML en double',
+      unresolvedId: 'elle fait référence à un identifiant XML qui n’existe pas',
+      spanNumber: 'elle contient un numéro de signe de notation non valide',
+      spanOverflow: 'elle demande plus de 16 numéros pour un même type de signe de notation',
     },
   },
 };

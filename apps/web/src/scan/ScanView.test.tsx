@@ -63,11 +63,16 @@ it('reopens complete individual recognition in page review when combining failed
     'true',
   );
   expect(screen.queryByRole('button', { name: 'Scan this score' })).toBeNull();
+  // The join is read again from the saved pages: the verdict names the page it refused and
+  // what it found there, and the action on that page carries the red (issue 230).
   expect(screen.getByRole('alert')).toHaveTextContent(
-    'The pages did not join into one score: each is shown on its own and can be downloaded under Files. Replace the page that differs and scan again.',
+    'Page 1 could not be combined with the other pages: its part list is incomplete. Photograph it again, flat and with the whole page in view.',
   );
   expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: 'Scan again' })).toHaveClass('is-red');
+  expect(screen.getByRole('button', { name: 'Replace page 1 with a new photo' })).toHaveClass(
+    'is-red',
+  );
+  expect(screen.getByRole('button', { name: 'Scan again' })).not.toHaveClass('is-red');
 });
 
 it('offers correction in a refusal only where the notes can be corrected', async () => {
@@ -177,8 +182,9 @@ it('speaks French, including a restored error and the page navigation', async ()
     />,
   );
   expect(screen.getByRole('heading', { name: 'Vérifiez la reconnaissance' })).toBeVisible();
+  // The join is read again from the saved pages and names the page it refused (issue 230).
   expect(screen.getByRole('alert')).toHaveTextContent(
-    'Les pages n’ont pas été réunies en une seule partition',
+    'La page 1 n’a pas pu être combinée avec les autres pages',
   );
   // Image pages are chosen by their thumbnails; the pager is only for a PDF's pages.
   expect(screen.getByRole('button', { name: 'Sélectionner la page 2 : source.png' })).toBeVisible();

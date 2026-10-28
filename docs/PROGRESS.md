@@ -71,7 +71,7 @@ All scanner implementation paths have returned to the coordinator; no concurrent
 - **Verification.** Iterate with `pnpm verify --changed` (only the steps the diff against origin/main touches); one full `pnpm verify` before the pull request, and green CI, is the definition of done. Readability for intermediate players is a first-class metric. A qualitative UI review by an Opus subagent (verification spec 3.10) accompanies UI work.
 - **UI minimalism.** "Make sure that the UI stays very pristine and not cluttered. I very much like it right now. Do not overclutter it with features and be brutal with this." Controls appear only in the context that needs them (progressive disclosure).
 - **Merging.** Never merge into `main` without the owner's explicit confirmation. Work goes on a branch and a pull request; the owner merges.
-- **Requests.** Every request or bug report the owner posts becomes a GitHub issue with the owner's words, a judgement, the agreed approach and a checklist. The pull request that does it closes the issue; a request the owner rejects is closed with the reason.
+- **Requests.** Every request or bug report the owner posts becomes a GitHub issue that describes the problem in neutral words (never the owner's own words or how the work is run), with a judgement, the agreed approach and a checklist; one issue per topic. The pull request that does it closes the issue; a request the owner rejects is closed with the reason.
 - **This file.** Keep it current; it is what a new session reads first.
 
 ## Milestones

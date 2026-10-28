@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// The shared library of readers' scores (docs/shared-library.md). Readers are anonymous: these
+// rules are the whole of the store's checks. The owner moderates in the Firebase console, which
+// is not bound by them.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function text(value, min, max) {
+      return value is string && value.size() >= min && value.size() <= max;
+    }
+    function hexId(id) {
+      return id.matches('^[0-9a-f]{32}$');
+    }
+
+    // An upload. Its id is 128 random bits chosen by the uploader's browser and kept only there,
+    // so a waiting upload is reachable by its uploader and by the owner, who opens it by `link`.
+    match /shared/{id} {
+      allow get: if true;
+      allow list: if resource.data.status == 'shared' && request.query.limit <= 50;
+      allow create: if hexId(id)
+        && request.resource.data.keys().hasOnly(['title', 'composer', 'score', 'kind', 'app', 'status', 'created', 'link'])
+        && request.resource.data.keys().hasAll(['title', 'composer', 'score', 'kind', 'app', 'status', 'created', 'link'])
+        && text(request.resource.data.title, 1, 120)
+        && text(request.resource.data.composer, 0, 120)
+        && text(request.resource.data.score, 1, 100000)
+        && request.resource.data.kind in ['scan', 'file']
+        && text(request.resource.data.app, 0, 40)
+        && request.resource.data.status == 'waiting'
+        && request.resource.data.created == request.time
+        && request.resource.data.link == 'https://marchalmaxim.github.io/digitus2/#/shared/' + id;
+      // The uploader withdraws while it waits; once shared, removal goes through the owner.
+      allow delete: if resource.data.status == 'waiting';
+      allow update: if false;
+    }
+
+    // A report on a shared score. Nobody but the owner reads reports.
+    match /reports/{id} {
+      allow create: if hexId(id)
+        && request.resource.data.keys().hasOnly(['score', 'reason', 'note', 'reply', 'created'])
+        && request.resource.data.keys().hasAll(['score', 'reason', 'note', 'reply', 'created'])
+        && request.resource.data.score is string && hexId(request.resource.data.score)
+        && request.resource.data.reason in ['copyright', 'abuse', 'broken']
+        && text(request.resource.data.note, 0, 1000)
+        && text(request.resource.data.reply, request.resource.data.reason == 'copyright' ? 1 : 0, 200)
+        && request.resource.data.created == request.time;
+      allow read, update, delete: if false;
+    }
+  }
+}

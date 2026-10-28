@@ -91,6 +91,20 @@ describe('local score records', () => {
     ).toBe(false);
     expect(isLocalScoreRecord({ ...record, updatedAt: NaN })).toBe(false);
   });
+  it('accepts a record that was shared, and only with a 32-hex upload id', () => {
+    const row = {
+      version: 1,
+      id: 'f',
+      updatedAt: 1,
+      kind: 'file',
+      name: 'a.xml',
+      blob: new Blob(['x']),
+    };
+    expect(isLocalScoreRecord({ ...row, shared: { id: 'ab'.repeat(16) } })).toBe(true);
+    expect(isLocalScoreRecord(row)).toBe(true);
+    expect(isLocalScoreRecord({ ...row, shared: { id: 'nope' } })).toBe(false);
+    expect(isLocalScoreRecord({ ...row, shared: 'ab'.repeat(16) })).toBe(false);
+  });
   it('accepts every quarter turn from 0 to 3', () => {
     for (const quarterTurns of [0, 1, 2, 3]) {
       const stored = storeSession({

@@ -41,10 +41,24 @@ if (-not (Test-Native { gcloud artifacts repositories describe $Repository --loc
   }
 }
 
-# Keep the two most recent versions of each image and delete the rest; Keep wins over Delete.
+# The image the service serves now keeps the tag live, so the policy below keeps it; on the first
+# deploy there is no service yet and nothing to tag.
+if (Test-Native { gcloud run services describe $Service --region $Region --project $Project }) {
+  $ServingImage = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(spec.template.spec.containers[0].image)')
+  if ($LASTEXITCODE -eq 0 -and $ServingImage) {
+    $ServingImage = "$ServingImage".Trim()
+    Invoke-Checked 'Tagging the serving image live' {
+      gcloud artifacts docker tags add $ServingImage "$Registry/$Project/$Repository/${Service}:live" --quiet
+    }
+  }
+}
+
+# Keep the most recent version of each image and the one tagged live (the image the serving revision
+# runs, which a revision needs to start an instance), and delete the rest; Keep wins over Delete.
 $Policy = @'
 [
-  { "name": "keep-two-most-recent", "action": { "type": "Keep" }, "mostRecentVersions": { "keepCount": 2 } },
+  { "name": "keep-most-recent", "action": { "type": "Keep" }, "mostRecentVersions": { "keepCount": 1 } },
+  { "name": "keep-live", "action": { "type": "Keep" }, "condition": { "tagState": "tagged", "tagPrefixes": ["live"] } },
   { "name": "delete-older", "action": { "type": "Delete" }, "condition": { "tagState": "any" } }
 ]
 '@
@@ -94,3 +108,5 @@ $Pdf = Get-ChildItem -LiteralPath "$RepoRoot/research/omr/results/acceptance/fix
   Sort-Object FullName | Select-Object -First 1
 if ($Pdf) { $SmokeArgs += @('--pdf', $Pdf.FullName) } else { Write-Host 'No PDF fixture under research/omr/results/acceptance/fixtures-v1: the PDF route was not smoked.' }
 Invoke-Checked 'The smoke test' { node @SmokeArgs }
+# The serving image keeps the tag live, so the cleanup policy never deletes it.
+Invoke-Checked 'Tagging the image live' { gcloud artifacts docker tags add $Image "$Registry/$Project/$Repository/${Service}:live" --quiet }

@@ -48,7 +48,10 @@ RUN mkdir -p /opt/text-models \
     | sha256sum -c - \
  && chmod 644 eng.traineddata LICENSE
 
-# homr: pinned source, locked CPU dependencies, pinned models, the patches of homr-photo/README.md. The setup
+# pip waits up to two minutes for a stalled download instead of 15 s, so a slow link does not fail
+# the build; the wheels are pinned either way.
+ARG PIP_DEFAULT_TIMEOUT=120
+# homr: pinned source, locked CPU dependencies, pinned models, the patches listed in homr-photo/README.md. The setup
 # imports homr.py, which imports the adapter's three standard-library neighbours.
 COPY prototypes/homr-photo /app/research/omr/prototypes/homr-photo
 COPY prototypes/photo-recovery /app/research/omr/prototypes/photo-recovery
@@ -58,6 +61,15 @@ COPY prototypes/local-worker/homr.py prototypes/local-worker/audiveris.py \
 COPY service/setup-homr.py /app/research/omr/service/setup-homr.py
 RUN python3 /app/research/omr/service/setup-homr.py --root /opt/homr --python /usr/bin/python3 \
  && rm -rf /opt/homr/pip-cache /opt/homr/downloads
+
+# Audiveris's JDK ahead-of-time class cache (65 MB, about 1.4 s less per PDF), recorded from one
+# recognition through the adapter; train-aot.py fails the build unless a strict run maps it and
+# gives the same MusicXML. The adapter uses /opt/audiveris/audiveris.aot when the file exists.
+COPY service/train-aot.py service/aot-training.pdf /app/research/omr/service/
+RUN python3 /app/research/omr/service/train-aot.py --bundle /opt/audiveris --text-models /opt/text-models \
+      --pdf /app/research/omr/service/aot-training.pdf \
+ && rm -f /opt/audiveris/audiveris.aot.config \
+ && chmod 644 /opt/audiveris/audiveris.aot
 
 # The worker and the service; a code change rebuilds only these layers.
 COPY prototypes/local-worker /app/research/omr/prototypes/local-worker

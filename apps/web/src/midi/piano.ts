@@ -370,8 +370,8 @@ export function reconnectPiano(reason: string): void {
 }
 
 /**
- * While `on` (a score is open and the piano connected), a connection that has heard no note for
- * `HEAL_FIRST_MS` since it opened is reopened (`reconnectPiano`), then again after twice as long,
+ * While `on` (a score is open and ready, and the piano connected), a connection that has heard no
+ * note for `HEAL_FIRST_MS` since it opened, or since `on` if that came later, is reopened (`reconnectPiano`), then again after twice as long,
  * up to `HEAL_MAX_MS`, until a note comes. The page shown again after being hidden (a sleep, another
  * tab) asks the connection to prove itself the same way. Nothing shows: a reader who is not playing
  * loses nothing by a reopen, and one whose keys go unheard is heard after the next.
@@ -380,9 +380,12 @@ export function usePianoHealer(on: boolean): void {
   useEffect(() => {
     if (!on) return;
     healAfterMs = HEAL_FIRST_MS;
+    // The reader can play only once the score is on screen: a port opened at page load, while the
+    // score was still loading, has been silent only since then.
+    const onAtMs = performance.now();
     const tick = setInterval(() => {
       if (!connection || pending || heard > 0 || document.hidden) return;
-      if (performance.now() - openedAtMs < healAfterMs) return;
+      if (performance.now() - Math.max(openedAtMs, onAtMs) < healAfterMs) return;
       healAfterMs = Math.min(healAfterMs * 2, HEAL_MAX_MS);
       reconnectPiano('silent');
     }, 1000);

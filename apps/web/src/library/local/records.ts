@@ -33,6 +33,8 @@ export type LocalScoreRecord = {
   version: 1;
   id: string;
   updatedAt: number;
+  /** Set once the reader has shared this score (issue 132): the id of the upload in the shared library. */
+  shared?: { id: string };
 } & ({ kind: 'scan'; session: StoredSession } | { kind: 'file'; name: string; blob: Blob });
 
 const storeFile = (file: File): StoredFile => ({
@@ -213,6 +215,8 @@ export function isLocalScoreRecord(value: unknown): value is LocalScoreRecord {
     identity(value.id) &&
     typeof value.updatedAt === 'number' &&
     Number.isFinite(value.updatedAt) &&
+    (value.shared === undefined ||
+      (object(value.shared) && text(value.shared.id) && /^[0-9a-f]{32}$/.test(value.shared.id))) &&
     ((value.kind === 'file' &&
       identity(value.name) &&
       value.blob instanceof Blob &&

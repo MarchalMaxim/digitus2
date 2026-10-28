@@ -392,3 +392,16 @@ h2[tabindex='-1']:focus {
   color: var(--ink);
   text-decoration: none;
 }
+
+/* The shared score's gray line under its header: who it is from, and Report. */
+.shared-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.75rem;
+  margin: 0;
+}
+
+.shared-line .text-button {
+  min-height: 44px;
+}

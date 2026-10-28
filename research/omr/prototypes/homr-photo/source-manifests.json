@@ -49,7 +49,7 @@
     "homr/accidental_display.py": "81e53bd6c6cafc9bc4ddb5629d52050a521abd0762452aa3a7c68087fc37d912",
     "homr/autocrop.py": "807750bf7cc3011a498746f43045eaa973c6235c42327c2db91e821afba23694",
     "homr/bar_line_detection.py": "0fd0ec988d240842a72348770769ef1a2c3a47a95da8996017aed04455589a6d",
-    "homr/bounding_boxes.py": "cf5c27212f3b9763dd460cbefe99fd0a66e8f7bf53ea50d02d8849482a02a51f",
+    "homr/bounding_boxes.py": "8fa21b281bbac56717f72040d3ad130ca3d42d22ac1cf84c191d6aa18305a914",
     "homr/brace_dot_detection.py": "ab5aade1a8653b3a44b300217404618f2bd8319d34173e7cd4dc26d66d45a7b7",
     "homr/circle_of_fifths.py": "3974ab21de851225a3f23f27868165c9b9ea9730984c3589ef180f1162056ae9",
     "homr/color_adjust.py": "01d971bded1397042bfa76ab9d691e6a3e6bf9bb4283f9d1dab382b0088d96fc",
@@ -59,7 +59,7 @@
     "homr/find_peaks.py": "6fd390137077cab7d64104931e3d06b0149581d7217b855ae4080addad21e8f2",
     "homr/foreign_staff.py": "6509452be86b5f1e3f5e3acdad92daf389e05abee557a7392240dc841479949e",
     "homr/image_utils.py": "b293ffad901fee69e11fcee672f2fc7aa61a44216143b95b8a916655400eea06",
-    "homr/main.py": "0896bc51c47fdd6d9c6b3d3fa43b4004387fab99f8f8a27607578814850a3672",
+    "homr/main.py": "64ed7e1d3904cf8eddc848649a4e8e903616aaecd63ed1fc6415b530488650a3",
     "homr/model.py": "a6a54044f6e4b3381646b0f1d593be1da7f332fb6c37b2d423bf00cf83b26933",
     "homr/music_xml_generator.py": "60bc60449545715a0247d201666b2941c84618a8802cf47f5b6c3c48dbac5ec0",
     "homr/noise_filtering.py": "0752bba4acca214407408b8f4e4f0540893e07a288f1272f3bfbd4395eca724b",
@@ -97,6 +97,7 @@
     "upstream-accidentals.patch": "18b57997f8b37e56fc7ab1fca3fa8aa85dca46b2c63a4b1443a5361d61b892f6",
     "upstream-boundaries.patch": "7f6008cd5facf14e2e524e8d06974ff29c199f7d4be512dab372139a9b4de260",
     "upstream-coverage.patch": "58a693e82d8e87036d344bbe6455f3d9c55bdf82326fdc53df1db8f58ed3bda7",
+    "upstream-speed.patch": "7ed35241733b656e48d28e6f048282ba170f6c8031a86c6697cc1f822ae85bfe",
     "upstream-confidence.patch": "a465a97939ea070327f9635cc9e092d83f0485d0ff2558c92867876d95023f39"
   },
   "patchDigestEncoding": "UTF-8 text with LF-normalized line endings"

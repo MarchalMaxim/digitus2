@@ -49,6 +49,12 @@ export interface ScoreDocument {
   /** What is shown: the engine's fingering, or the editorial one when showEditorial is on. */
   assignment: Assignment | null;
   /**
+   * The notes whose digits the edition prints at rest (issue 94), for the fingering shown; the
+   * rest are spare and the view hides them outside the bar played, cued or hovered. Null while the
+   * editor's fingering is shown (an edition already) and until the first solve has answered.
+   */
+  printed: ReadonlySet<string> | null;
+  /**
    * The editorial fingering of the version shown (library .fingered file, or <fingering> in a
    * dropped file; on the embellished version, on its original notes only).
    */
@@ -240,6 +246,8 @@ interface Version {
   engine: Assignment | null;
   /** Plain: the file's or the library's. Embellished: the file's, or the library's carried over. */
   editorial: Assignment | null;
+  /** The printed notes (issue 94) of each engine fingering solved so far; the editor's has none. */
+  printedOf: WeakMap<Assignment, ReadonlySet<string>>;
   /**
    * The text given to the renderer (fingered, with our note ids) for each fingering laid out so
    * far. A new width, or switching back to a fingering shown before, lays the same text out
@@ -257,6 +265,12 @@ interface OpenDoc {
   embellished: Version | null;
   /** A library piece's grade; null for a dropped file. */
   grade: number | null;
+  /**
+   * What the printed digits depend on besides the fingering (issue 94): a library piece's level
+   * and, with an editor's fingering, the editor's digit count as the cap. A dropped file or a scan
+   * has neither: three stray fingerings must not cap a whole piece at three digits.
+   */
+  edition: { level?: number; editorDigits?: number } | undefined;
   /** A library piece's `.fingered` file, loaded once, when the editor's fingering is first shown. */
   fingeredPath: string | null;
   editorialLoad: Promise<Assignment | null> | null;
@@ -320,6 +334,11 @@ async function laidOutText(
   return xml;
 }
 
+/** Records which notes the edition prints for `assignment` (the worker's `printed`, when it sent it). */
+function keepPrinted(v: Version, assignment: Assignment, printed: readonly string[] | undefined) {
+  if (printed) v.printedOf.set(assignment, new Set(printed));
+}
+
 /** The fingering the plain pages show or would show: the editor's when shown, else the engine's. */
 function plainFingering(doc: OpenDoc, showEditorial: boolean): Assignment | null {
   return (showEditorial ? doc.plain.editorial : null) ?? doc.plain.engine;
@@ -336,7 +355,7 @@ function plainOnScreen(
   shownVersion: VersionName,
   widthBucket: number,
   showEditorial: boolean,
-): Pick<DocState, 'score' | 'assignment' | 'editorial' | 'pages'> | null {
+): Pick<DocState, 'score' | 'assignment' | 'editorial' | 'pages' | 'printed'> | null {
   if (!doc || shownVersion !== 'embellished') return null;
   const want = plainFingering(doc, showEditorial);
   const exact = pagesKey('plain', widthBucket, showEditorial && doc.plain.editorial !== null);
@@ -346,10 +365,12 @@ function plainOnScreen(
     laid.find(([, e]) => e.assignment === want) ??
     laid.find(([k]) => k.startsWith(`plain|${widthBucket}|`)) ??
     laid[0];
+  const assignment = hit?.[1].assignment ?? want;
   return {
     score: doc.plain.score,
     editorial: doc.plain.editorial,
-    assignment: hit?.[1].assignment ?? want,
+    assignment,
+    printed: assignment ? (doc.plain.printedOf.get(assignment) ?? null) : null,
     pages: hit?.[1].pages ?? [],
   };
 }
@@ -362,6 +383,7 @@ function initialDoc(slug: string | null, fileName: string | null): DocState {
     score: null,
     xml: null,
     assignment: null,
+    printed: null,
     editorial: null,
     pages: [],
     solveMs: null,
@@ -405,10 +427,13 @@ export function useScoreDocument(
   servicesArg?: ScoreServices,
 ): ScoreDocument & { reRender(): void; setSplitMidi(value: number | null): void } {
   // The source's identity: the slug, or the dropped file's name and content.
-  const scanImport = source.kind === 'file' && !!source.scan;
+  // A shared score is opened as a file; one that began as a scan is read as a scan is.
+  const scanImport =
+    (source.kind === 'file' && !!source.scan) ||
+    (source.kind === 'shared' && source.origin === 'scan');
   const slug = source.kind === 'library' ? source.slug : null;
-  const fileName = source.kind === 'file' ? source.name : null;
-  const fileBytes = source.kind === 'file' ? source.bytes : null;
+  const fileName = source.kind === 'library' ? null : source.name;
+  const fileBytes = source.kind === 'library' ? null : source.bytes;
   const fileKey = fileBytes ? fileIdentity(fileBytes) : null;
   const sourceKey = JSON.stringify([slug, fileName, fileKey, scanImport]);
 
@@ -521,6 +546,7 @@ export function useScoreDocument(
         let sourceName: string;
         let fingeredPath: string | null = null;
         let grade: number | null = null;
+        let edition: OpenDoc['edition'];
         if (slug !== null) {
           const piece = await loadPiece(slug);
           if (!piece) throw new PhraseError((t) => t.score.doc.noPiece(slug));
@@ -528,6 +554,12 @@ export function useScoreDocument(
           sourceName = piece.files.score;
           fingeredPath = piece.files.fingered;
           grade = piece.level;
+          // The cap is the editor's count, and only a library piece with an editor's fingering has
+          // one; the level sets the density for every library piece.
+          edition = {
+            level: piece.level,
+            ...(piece.editorDigits !== undefined ? { editorDigits: piece.editorDigits } : {}),
+          };
         } else {
           input = bytes ?? new Uint8Array();
           sourceName = fileName ?? 'score.musicxml';
@@ -545,10 +577,12 @@ export function useScoreDocument(
             xml: loaded.xml,
             engine: null,
             editorial,
+            printedOf: new WeakMap(),
             laidOut: new WeakMap(),
           },
           embellished: null,
           grade,
+          edition,
           fingeredPath,
           editorialLoad: null,
           embellishAsked: false,
@@ -586,10 +620,11 @@ export function useScoreDocument(
     const live = () => !session.cancelled;
     const profile = useAppStore.getState().settings.handSize;
     solvedForRef.current = profile;
-    svcRef.current.engine.solve(doc.plain.score, profile).then(
+    solveFor(svcRef.current.engine, doc, profile).then(
       (solved) => {
         if (!live()) return;
         doc.plain.engine = solved.assignment;
+        keepPrinted(doc.plain, solved.assignment, solved.printed);
         setState((s) => ({ ...s, status: 'rendering', solveMs: solved.ms }));
       },
       (e: unknown) => {
@@ -698,6 +733,7 @@ export function useScoreDocument(
           pages: result.pages,
           renderMs: result.ms,
           assignment: latest,
+          printed: useEditorial ? null : (v.printedOf.get(latest) ?? null),
           editorial,
           shownVersion: version,
           plain,
@@ -747,10 +783,13 @@ export function useScoreDocument(
         return;
       }
       shownRef.current = next;
+      const v = shownVersionRef.current === 'embellished' ? doc.embellished : doc.plain;
       setState((s) => ({
         ...s,
         ...extra,
         assignment: next,
+        // With the digits that changed: the spare marks and the patched digits move together.
+        printed: v?.printedOf.get(next) ?? null,
         digitChanges: diff.changes.size > 0 ? diff.changes : null,
       }));
     };
@@ -768,9 +807,10 @@ export function useScoreDocument(
     }
     void (async () => {
       try {
-        const solved = await svc.engine.solve(doc.plain.score, handSize);
+        const solved = await solveFor(svc.engine, doc, handSize);
         if (!current()) return;
         doc.plain.engine = solved.assignment;
+        keepPrinted(doc.plain, solved.assignment, solved.printed);
         const plain = {
           score: doc.plain.score,
           assignment: plainFingering(doc, useAppStore.getState().settings.showEditorial),
@@ -815,7 +855,9 @@ export function useScoreDocument(
       let xml: string | null;
       let notes: number;
       try {
-        const { offered } = await svc.engine.embellish(doc.plain.xml);
+        const { offered } = await (doc.edition?.level !== undefined
+          ? svc.engine.embellish(doc.plain.xml, doc.edition.level)
+          : svc.engine.embellish(doc.plain.xml));
         if (!live()) return;
         if (!offered) {
           publish('none');
@@ -829,9 +871,13 @@ export function useScoreDocument(
           xml: offered.xml,
           engine,
           editorial: nonEmpty(offered.editorial),
+          printedOf: new WeakMap(),
           laidOut: new WeakMap(),
           assignments: offered.assignments,
         };
+        for (const size of Object.keys(offered.assignments) as HandSize[]) {
+          keepPrinted(v, offered.assignments[size], offered.printed?.[size]);
+        }
         // Set before the next await, so a hand-size change meanwhile re-fingers it (effect 4).
         doc.embellished = v;
         xml = await laidOutText(v, engine, svc, live);
@@ -872,6 +918,13 @@ export function useScoreDocument(
     setSplitMidi,
     setEmbellished,
   };
+}
+
+/** Solves the plain score at a hand size, with what the printed digits depend on (issue 94). */
+function solveFor(engine: EngineClient, doc: OpenDoc, profile: HandSize) {
+  return doc.edition
+    ? engine.solve(doc.plain.score, profile, undefined, doc.edition)
+    : engine.solve(doc.plain.score, profile);
 }
 
 /** The plain editorial fingering, loading a library piece's `.fingered` file on first use. */

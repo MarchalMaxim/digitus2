@@ -47,6 +47,11 @@ export interface LibraryPiece {
   source: PieceSourceInfo;
   arranger: string | null;
   hasEditorialFingering: boolean;
+  /**
+   * The digits the editor prints on the piece, for every piece with an editorial fingering: the
+   * cap of the edition's digits at rest (issue 94). Absent on a piece without one.
+   */
+  editorDigits?: number;
   excerpt: string | null;
   notes: string;
   files: { score: string; fingered: string | null };

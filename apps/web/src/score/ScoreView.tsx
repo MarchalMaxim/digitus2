@@ -10,10 +10,11 @@ import { flash, prefersReducedMotion } from '../design/motion.js';
 import { messages, useT } from '../i18n/i18n.js';
 import type { Messages } from '../i18n/messages.js';
 import { useLibraryPiece } from '../library/useLibraryPiece.js';
+import { SharedLine } from '../library/shared/SharedLine.js';
 import { BarSeek, type BarSeekHandle } from './BarSeek.js';
 import { barIndexAt, barStartSecs, clampBar, seekKey } from './bars.js';
 import { useEmbellishCarry } from './carry.js';
-import { letteredBars, lettersShown } from './handLetters.js';
+import { latchApplies, letteredBars, lettersShown } from './handLetters.js';
 import { keyboardRange } from './Keyboard.js';
 import { handOfKey, keyForNote } from './noteKey.js';
 import { buildOnsetGroups, hasNotesFor } from './onsetGroups.js';
@@ -21,6 +22,7 @@ import { PianoKeyboard } from './PianoKeyboard.js';
 import { EndBurst } from './EndBurst.js';
 import { RedGhost, useRedFlight } from './RedFlight.js';
 import {
+  markSpare,
   mutedElements,
   redim,
   setDigits,
@@ -39,6 +41,7 @@ import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useAlongHalo } from './useAlongHalo.js';
 import { useCursor } from './useCursor.js';
+import { useOpenBars } from './useOpenBars.js';
 import { useHoveredNote } from './useHoveredNote.js';
 import { usePlayAlong, type AlongHint } from './usePlayAlong.js';
 import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
@@ -242,7 +245,10 @@ export function ScoreView({ source }: { source: PieceSource }) {
     if (!host || !changes || flashedRef.current === changes) return;
     flashedRef.current = changes;
     for (const [id, digit] of changes) patchesRef.current.map.set(id, digit);
-    setDigits(host, changes, flash);
+    // A digit the edition leaves out (spare) is hidden: it does not flash.
+    setDigits(host, changes, (el) => {
+      if (!el.classList.contains('is-spare')) flash(el);
+    });
   }, [host, doc.digitChanges, doc.pages]);
 
   // Playback, the cursor and the keyboard. An error stops playback (the score is gone).
@@ -273,6 +279,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
     pages: string[];
     mutedIds: ReadonlySet<string>;
     quiet: ReadonlySet<number> | undefined;
+    printed: ReadonlySet<string> | null;
   } | null>(null);
   useLayoutEffect(() => {
     const index = host ? pageWindowOf(host)?.index : undefined;
@@ -280,16 +287,26 @@ export function ScoreView({ source }: { source: PieceSource }) {
       pages: doc.pages,
       mutedIds,
       quiet: index ? quietPlaces(index, mutedIds) : undefined,
+      printed: doc.printed,
     };
-  }, [host, doc.pages, mutedIds]);
+  }, [host, doc.pages, mutedIds, doc.printed]);
+  // The digits the edition leaves out are marked spare (base.css hides them outside an open bar):
+  // on the pages in the DOM here, on a page built later in `decorate`. After the layout effect
+  // that wrote the pages, and in the same commit as the digits a re-solve patches.
+  useLayoutEffect(() => {
+    if (host) markSpare(host, doc.printed);
+  }, [host, doc.pages, doc.printed]);
   // The timing rings (issue 192), for a page built later: a torn page is rebuilt from markup,
   // without them.
   const timingMarksRef = useRef<readonly TimingMark[] | null>(null);
+  const openBarsOnPageRef = useRef<(page: SVGSVGElement) => void>(() => {});
   const decorate = useCallback((page: SVGSVGElement, i: number) => {
     const d = decorRef.current;
     const patches = patchesRef.current;
     const index = page.parentElement ? pageWindowOf(page.parentElement)?.index : undefined;
     if (!d) return;
+    markSpare(page, d.printed);
+    openBarsOnPageRef.current(page);
     if (index && patches.pages === d.pages && patches.map.size > 0) {
       const own = new Map([...patches.map].filter(([id]) => index.pageOfNote.get(id) === i));
       if (own.size > 0) setDigits(page, own);
@@ -353,9 +370,71 @@ export function ScoreView({ source }: { source: PieceSource }) {
     [dock],
   );
   const red = useRedFlight({ host, playButton, playback, groups, mutedHands, currentGroup });
+  // Playwright's check of the edition (a silent run only): the notes whose digits are printed at
+  // rest, and every page of a windowed sheet built, so a count covers the whole piece.
+  const printedRef = useRef(doc.printed);
+  useEffect(() => {
+    printedRef.current = doc.printed;
+  });
+  useEffect(() => {
+    if (!host || new URLSearchParams(window.location.search).get('audio') !== 'silent') return;
+    const w = window as unknown as { __digitus2Edition?: object };
+    const hook = {
+      printed: () => (printedRef.current ? [...printedRef.current] : null),
+      buildAll: () => pageWindowOf(host)?.buildAll(),
+    };
+    w.__digitus2Edition = hook;
+    return () => {
+      if (w.__digitus2Edition === hook) delete w.__digitus2Edition;
+    };
+  }, [host]);
+  // The bars that show every digit (issue 94): the cursor's, the next one while playing, and the
+  // one under a mouse pointer. After the cursor and the flight, so the marks they made are read.
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const openBarsOnPage = useOpenBars({
+    host,
+    pages: doc.pages,
+    groups,
+    currentGroup,
+    hopping: red.hopping,
+    playing: playback.playing,
+    hovered: hoveredBar,
+    mutedHands,
+    loop: playback.loop,
+  });
+  useLayoutEffect(() => {
+    openBarsOnPageRef.current = openBarsOnPage;
+  }, [openBarsOnPage]);
   // T11: the hand letters show only in bars where the hands come within a fifth. Decided from
   // the full groups (both hands, whatever is muted), never from the cursor's filtered ones.
   const lettered = useMemo(() => letteredBars(groups), [groups]);
+  // A keyboard that scrolls can put one hand wholly out of view (spec 15, rule 5): the bar where
+  // it did keeps the letters to its end. The latch lives for one visit: it is dropped with a new
+  // piece or another choice of hands, and as soon as the cursor leaves the bar (and the bridged bar
+  // after it), so coming back (a loop wrap, a rewind, a seek) latches anew where the hand leaves.
+  const cursorBar =
+    currentGroup >= 0 ? (groups[currentGroup]?.notes[0]?.measureIndex ?? null) : null;
+  const latchKey = mutedHands.join();
+  const [hidden, setHidden] = useState<{ groups: typeof groups; key: string; bar: number } | null>(
+    null,
+  );
+  const latched =
+    hidden !== null &&
+    hidden.groups === groups &&
+    hidden.key === latchKey &&
+    latchApplies(hidden.bar, cursorBar, lettered);
+  // Setting state while rendering drops the stale latch before anything is drawn from it.
+  if (hidden !== null && !latched) setHidden(null);
+  const hiddenBar = latched ? hidden.bar : null;
+  const latchedRef = useRef<{ groups: typeof groups; key: string; bar: number } | null>(null);
+  latchedRef.current = latched ? hidden : null;
+  const handOutOfView = useCallback(() => {
+    if (cursorBar === null) return;
+    const was = latchedRef.current;
+    // Reported at every onset of a bar already latched: nothing to change.
+    if (was?.groups === groups && was.key === latchKey && was.bar === cursorBar) return;
+    setHidden({ groups, key: latchKey, bar: cursorBar });
+  }, [groups, latchKey, cursorBar]);
   // The bar the cursor is in (1-based; 1 when nothing is marked): where "Loop bars" starts.
   const currentBar =
     currentGroup >= 0 ? (groups[currentGroup]?.notes[0]?.measureIndex ?? 0) + 1 : 1;
@@ -560,7 +639,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
         />
         <main className="score-error stack">
           <p role="alert">
-            {source.kind === 'file'
+            {source.kind !== 'library'
               ? t.score.view.couldNotOpenFile(name)
               : t.score.view.couldNotOpenPiece(name)}
           </p>
@@ -609,13 +688,14 @@ export function ScoreView({ source }: { source: PieceSource }) {
   return (
     <div className="page score-view">
       <ScoreHeader
-        title={doc.title}
-        composer={doc.composer}
+        title={source.kind === 'shared' ? source.title || doc.title : doc.title}
+        composer={source.kind === 'shared' ? source.composer : doc.composer}
         piece={piece}
         onBack={openLibrary}
         legend={legendAbove}
         favourite={source.kind === 'library' ? source.slug : null}
       />
+      {source.kind === 'shared' && <SharedLine id={source.id} />}
       {source.kind === 'file' && source.scan && (
         <p className="no-print">
           <button
@@ -650,6 +730,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
             canSeek={canSeek}
             onSeek={seekToBar}
             handle={barSeekRef}
+            onHover={setHoveredBar}
           >
             <ScoreSheet
               pages={doc.pages}
@@ -723,7 +804,8 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   pressed={pressed}
                   struckCount={struckCount}
                   muted={muted}
-                  handLetters={lettersShown(groups, currentGroup, lettered)}
+                  handLetters={lettersShown(groups, currentGroup, lettered, hiddenBar)}
+                  onHandOutOfView={handOutOfView}
                   hovered={hoveredKey}
                   onStrike={strikeKey}
                   barKeys={barKeys}

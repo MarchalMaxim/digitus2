@@ -21,9 +21,11 @@ The build context is `research/omr`; `research/omr/.dockerignore` keeps results,
 | homr source archive at the pinned commit                         | `setup-homr.py` `ARCHIVE_SHA256`                                                                  |
 | homr's three ONNX models                                         | `local-worker/homr.py` `MODELS`                                                                   |
 
-`setup-homr.py --root DIR [--python PATH]` is the Linux twin of `homr-photo/setup.ps1`: it downloads and checks the archive, creates the virtual environment with `--copies` (the adapter refuses a symlinked interpreter), installs the locked requirements, writes `installed.txt`, verifies the pristine source, downloads the models with `homr.main --init`, checks their digests, writes `models.json` and applies the source patches listed in `homr-photo/README.md` with `homr-photo/prepare_patched.py`. The adapter repeats the source, dependency and model checks at start and before every photo. The Python wheels themselves come from PyPI by version, not by hash, because `requirements-cpu.txt` carries none; the apt packages come from the Ubuntu archive at build time.
+`setup-homr.py --root DIR [--python PATH]` is the Linux twin of `homr-photo/setup.ps1`: it downloads and checks the archive, creates the virtual environment with `--copies` (the adapter refuses a symlinked interpreter), installs the locked requirements, writes `installed.txt`, verifies the pristine source, downloads the models with `homr.main --init`, checks their digests, writes `models.json` and applies the patches listed in `homr-photo/README.md` with `homr-photo/prepare_patched.py`. The adapter repeats the source, dependency and model checks at start and before every photo. The Python wheels themselves come from PyPI by version, not by hash, because `requirements-cpu.txt` carries none; the apt packages come from the Ubuntu archive at build time.
 
 Audiveris on a headless Linux needs two things its package does not declare: fontconfig with one font (Java's font manager fails without them) and `GDK_SCALE` set, because otherwise it probes the monitor scale through GTK and aborts when `libgtk-3` is missing. The package's post-install registers a desktop menu entry and a MIME type, so the image creates the empty system menu and MIME directories first. The adapter's class path is `/opt/audiveris/lib/app/*` only: with `lib/app` itself on it, the package's loose classes load first, and Audiveris then resolves its resources in the job directory and exports nothing.
+
+The build records a JDK ahead-of-time class cache for Audiveris, `/opt/audiveris/audiveris.aot` (65 MB), with `train-aot.py`: one recognition of `aot-training.pdf` (the library's Amazing Grace, CC0, as the acceptance corpus renders it) through the adapter with `-XX:AOTCacheOutput`, then a second run with `-XX:AOTMode=on`, which exits when the cache is unusable, and must give the same MusicXML; otherwise the build fails. The adapter adds `-XX:AOTCache` when the file exists and runs without it otherwise, as on Windows. It saves about 1.4 s a PDF in the container (Audiveris alone, 7.8 to 6.4 s).
 
 ## Run locally
 
@@ -72,7 +74,7 @@ Both scripts stop at the first failing command and are safe to run again: they c
 
 ### Deploy
 
-`deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2]` enables the Cloud Run and Artifact Registry APIs, creates the Docker repository `<region>-docker.pkg.dev/<project>/<repository>` when missing and gives it a cleanup policy that keeps the 2 most recent versions of the image and deletes older ones (Artifact Registry applies it about once a day). It tags the image with the short git commit, with `-dirty` added when `research/omr` has uncommitted changes, and deploys it with these settings:
+`deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2]` enables the Cloud Run and Artifact Registry APIs, creates the Docker repository `<region>-docker.pkg.dev/<project>/<repository>` when missing and gives it a cleanup policy that keeps the most recent version of the image and the one tagged `live`, and deletes older ones (Artifact Registry applies it about once a day); after the smoke test it tags the deployed image `live`, because a revision needs its image to start an instance. It tags the image with the short git commit, with `-dirty` added when `research/omr` has uncommitted changes, and deploys it with these settings:
 
 | Setting               | Value                                                        |
 | --------------------- | ------------------------------------------------------------ |
@@ -85,6 +87,19 @@ Both scripts stop at the first failing command and are safe to run again: they c
 | Access                | public (`--allow-unauthenticated`, ingress all), port 8080   |
 
 It then prints the service URL and runs `smoke.mjs` against it, passing the first PDF under `research/omr/results/acceptance/fixtures-v1/` with `--pdf`; without one it says the PDF route was not smoked.
+
+### Deploying on merge
+
+`.github/workflows/scan-service.yml` deploys on a push to `main` that changes this directory, `prototypes/homr-photo`, `prototypes/photo-recovery`, `prototypes/local-worker`, `research/omr/.dockerignore` or the workflow, and on demand. It builds and pushes the image as `deploy.ps1` does, deploys a revision with the same settings, no traffic and the tag `candidate`, runs `smoke.mjs` against the tagged URL (the default photo and `aot-training.pdf`), and only then moves the traffic to that revision by name, removes the tag and tags the image `live`; a failed smoke leaves the previous revision serving and its image `live`. Authentication is keyless (GitHub OIDC through Workload Identity Federation, no JSON key), limited to runs on `main` of `MarchalMaxim/digitus2` (pushes and manual runs). The Action updates an existing service: the first deploy, and the way back after Google removed the service, is `deploy.ps1`. The job is skipped until the repository variable `SCAN_DEPLOY_PROVIDER` is set.
+
+The owner runs `setup-github-deploy.ps1 -Project ID [-Region europe-west4] [-Service digitus2-scan] [-Repository digitus2] [-GitHubRepo MarchalMaxim/digitus2]` once, after `deploy.ps1` has run, with gcloud and `gh` signed in. It enables the IAM Credentials and Security Token Service APIs, creates the service account `digitus2-scan-deploy` (Cloud Run Developer on the project, Artifact Registry Writer on the repository, Service Account User on the run account), the pool and provider `github`, the binding that lets the repository act as the account, the tag `live` on the serving image, the cleanup policy that keeps the newest image and the one tagged `live`, and the variables `SCAN_DEPLOY_PROVIDER` and `SCAN_DEPLOY_ACCOUNT`. It is safe to run again.
+
+| Item                                  | Cost                                                                                                                                                                         |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Image in Artifact Registry            | About 0.7 GB (690 MB measured); 0.5 GB a month is free, then 0.10 USD per GB a month ([pricing](https://cloud.google.com/artifact-registry/pricing)); with the kill-switch's function images (0.05 GB) about 0.03 USD a month with the newest and the live image kept |
+| GitHub-hosted runner                  | Free minutes for public repositories ([billing](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions)) |
+| Workload Identity Federation          | Free                                                                                                                                                                         |
+| Smoke (about 50 s, one photo, one PDF) | Inside Cloud Run's free grant                                                                                                                                                |
 
 ### Budget and kill-switch
 

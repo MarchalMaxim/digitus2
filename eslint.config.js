@@ -55,6 +55,11 @@ export default tseslint.config(
     },
   },
   {
+    // The shared library's rules tests and their runner are Node scripts.
+    files: ['library-store/**/*.mjs'],
+    languageOptions: { globals: { process: 'readonly', fetch: 'readonly' } },
+  },
+  {
     // Only the two classic hook rules: eslint-plugin-react-hooks 7 also ships React Compiler
     // rules in its recommended preset, which this app does not use.
     files: ['apps/web/src/**/*.{ts,tsx}'],

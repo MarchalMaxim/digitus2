@@ -4,8 +4,10 @@ import { DEFAULT_SETTINGS, useAppStore } from './store.js';
 import {
   FILE_NOT_RESTORABLE_NOTICE,
   UNKNOWN_PIECE_NOTICE,
+  SHARED_NOT_LOADED_NOTICE,
   hashToView,
   installHashSync,
+  sharedIdFromHash,
   viewToHash,
 } from './routes.js';
 
@@ -105,6 +107,45 @@ describe('routes', () => {
     expect(location.hash).toBe('#/');
     expect(useAppStore.getState().notice).toBeNull();
     expect(history.length).toBe(entries);
+    uninstall();
+  });
+  it('names a shared score by 32 lowercase hex characters, and only those', () => {
+    const id = 'ab01'.repeat(8);
+    expect(sharedIdFromHash(`#/shared/${id}`)).toBe(id);
+    for (const bad of [
+      '#/shared/',
+      '#/shared/abc',
+      `#/shared/${id}0`,
+      `#/shared/${id.toUpperCase()}`,
+      `#/shared/${'g'.repeat(32)}`,
+      `#/shared/${id}/x`,
+      `#/piece/${id}`,
+    ])
+      expect(sharedIdFromHash(bad), bad).toBeNull();
+    expect(
+      viewToHash({
+        name: 'score',
+        source: {
+          kind: 'shared',
+          id,
+          name: 'x.musicxml',
+          bytes: new Uint8Array(),
+          title: 'x',
+          composer: '',
+          origin: 'file',
+        },
+      }),
+    ).toBe(`#/shared/${id}`);
+    // The score has to be fetched before there is a view to show.
+    expect(hashToView(`#/shared/${id}`)).toBeNull();
+  });
+  it('falls back to the library with a notice for a shared address that is not an id', () => {
+    location.hash = '#/shared/nonsense';
+    const uninstall = installHashSync(useAppStore);
+    expect(useAppStore.getState().view).toEqual({ name: 'library' });
+    expect(location.hash).toBe('#/');
+    expect(useAppStore.getState().notice).toBe(SHARED_NOT_LOADED_NOTICE);
+    expect(SHARED_NOT_LOADED_NOTICE(en)).toBe('This shared score could not be loaded.');
     uninstall();
   });
 });

@@ -57,6 +57,11 @@ function playback(
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),
     strike: () => () => undefined,
+    prepare: () => {},
+    preparing: false,
+    soundWaits: false,
+    accompany: () => {},
+    stopAccompaniment: () => {},
   };
 }
 afterEach(() => {

@@ -5,7 +5,7 @@ import { messageOf } from '../app/errors.js';
 import { useAppStore, type HandsMode, type PieceSource } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { Loader, type LoaderTune } from '../design/Loader.js';
-import { NARROW_QUERY, useMediaQuery } from '../design/media.js';
+import { NARROW_QUERY, TOUCH_QUERY, useMediaQuery } from '../design/media.js';
 import { flash, prefersReducedMotion } from '../design/motion.js';
 import { messages, useT } from '../i18n/i18n.js';
 import type { Messages } from '../i18n/messages.js';
@@ -100,7 +100,10 @@ export interface StatusInputs {
   /** Whether the selected hands have notes in this piece. */
   playable: boolean;
   hands: HandsMode;
-  /** The player is fetching the piano's samples, after the first Play or a key clicked on the keyboard. */
+  /**
+   * The player is fetching the piano's samples: after the first Play, or for the other hand of
+   * the play-along (issue 184).
+   */
   loading: boolean;
   countIn: CountIn | null;
   /**
@@ -108,6 +111,11 @@ export interface StatusInputs {
    * them has, or null when the hint is not shown (usePlayAlong).
    */
   alongHint: AlongHint | null;
+  /**
+   * The browser waits for a click before digitus can sound the other hand (issue 184): what the
+   * sentence asks for ('tap' on a touch screen), or null when it is not shown (usePlayAlong).
+   */
+  alongSound: 'click' | 'tap' | null;
   /**
    * The one-time explanation of the timing rings (issue 192, useWalkTiming): shown the first time
    * rings appear in this view, until two more bars are judged while it is on the line, a break or
@@ -128,16 +136,25 @@ export interface StatusLine {
 /**
  * The status line: what the score is busy with (loading, fingering, laying out), else why Play is
  * unavailable (no notes in the selected hand), else what the player is busy with: loading the
- * piano (after the first Play or a key clicked on the keyboard), then the count-in, each click's
- * beat in its bar ("1", "2", "3", "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4"
- * then "1" when a whole bar comes before a pickup), then, lowest of all, what the play-along asks
- * of the reader: what to play on their piano while the red waits (issue 182). The explanation of
- * the timing rings (issue 192) comes before the walk's play hint. Null when there is nothing to
- * say (a ready score, stopped or playing the music). Written in `t` (default: the language on
- * screen).
+ * piano (after the first Play, or for the other hand), then the count-in, each click's beat in its bar ("1", "2", "3",
+ * "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4" then "1" when a whole bar comes
+ * before a pickup), then, lowest of all, what the play-along asks of the reader: one click for
+ * the browser to let digitus sound the other hand (issue 184), then what to play on their piano
+ * while the red waits (issue 182). The explanation of the timing rings (issue 192) comes before the
+ * walk's play hint. Null when there is nothing to say (a ready score, stopped or playing the
+ * music). Written in `t` (default: the language on screen).
  */
 export function scoreStatusLine(
-  { docStatus, playable, hands, loading, countIn, alongHint, timingExplain }: StatusInputs,
+  {
+    docStatus,
+    playable,
+    hands,
+    loading,
+    countIn,
+    alongHint,
+    alongSound,
+    timingExplain,
+  }: StatusInputs,
   t: Messages = messages(),
 ): StatusLine | null {
   const info = (text: string): StatusLine => ({ text, kind: 'info' });
@@ -148,6 +165,7 @@ export function scoreStatusLine(
   if (!playable) return info(nothingToPlayText(hands, t));
   if (loading) return info(t.score.view.loadingPiano);
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
+  if (alongSound !== null) return info(t.score.view.playAlongSound[alongSound]);
   if (timingExplain) return info(t.score.view.timingExplain);
   if (alongHint !== null) return info(t.score.view.playAlongHint(alongHint.count));
   return null;
@@ -225,6 +243,8 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // Below 480 px the Practice toggle sits after Rewind (spec 13): it is rendered there, so the
   // DOM order, and with it the tab order, is the order on screen at every width.
   const narrow = useMediaQuery(NARROW_QUERY);
+  // The sentence that asks for one click says tap on a screen nothing hovers on (issue 184).
+  const touch = useMediaQuery(TOUCH_QUERY);
 
   // A re-solve publishes only the digits that changed: patch them into the pages in place. Only
   // some pages are in the DOM on a long piece (issue 99), so the digits patched since the layout
@@ -613,9 +633,10 @@ export function ScoreView({ source }: { source: PieceSource }) {
       docStatus: doc.status,
       playable,
       hands,
-      loading: playback.loading,
+      loading: playback.loading || playback.preparing,
       countIn: playback.countIn,
       alongHint: along.hint,
+      alongSound: along.soundWaits ? (touch ? 'tap' : 'click') : null,
       timingExplain: timing.explain,
     },
     t,

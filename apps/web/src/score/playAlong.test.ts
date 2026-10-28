@@ -691,7 +691,7 @@ describe('advance', () => {
     expect(r.move).toEqual({ kind: 'finish' });
   });
 
-  describe('last, the step passed last', () => {
+  describe('last, the step passed last (issue 184)', () => {
     const steps = [step(0, 60), step(1, 62), step(2, 64), step(3, 65), step(4, 67)];
 
     it('is the step a single pass left', () => {

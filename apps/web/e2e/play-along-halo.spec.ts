@@ -1,6 +1,12 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
-import { fakeMidi, installFakeMidi, type FakeMidiOptions } from './helpers/midi.js';
+import {
+  accompanied,
+  audioState,
+  fakeMidi,
+  installFakeMidi,
+  type FakeMidiOptions,
+} from './helpers/midi.js';
 import { horizontalOverflow } from './helpers/overflow.js';
 import { closePractice, embellishDecided, openPractice } from './helpers/practice.js';
 import {
@@ -26,7 +32,10 @@ const TWINKLE_NOTES = 64;
 const FAST = { [TWINKLE]: 1.5 };
 /** The reader plays the left hand, and the Practice tempo is 50 % (stored, never clicked). */
 const HALF = { hands: 'L', tempoByPiece: { [`piece:${TWINKLE}`]: 0.5 } };
+const LOADING_THE_PIANO = 'Loading the piano…';
 
+/** The status line in the dock (a notice elsewhere is a status too). */
+const dockStatus = (page: Page): Locator => page.locator('.dock').getByRole('status');
 const rings = (page: Page): Locator => page.locator('.along-halo');
 const practiceSwitch = (page: Page): Locator => page.getByRole('switch', { name: 'Practice mode' });
 
@@ -49,6 +58,12 @@ async function twinkle(
   return fakeMidi(page);
 }
 
+/** The audio is running and the samples are in: digitus can sound. */
+async function soundReady(page: Page): Promise<void> {
+  await expect.poll(() => audioState(page)).toBe('running');
+  await expect(dockStatus(page)).not.toHaveText(LOADING_THE_PIANO);
+}
+
 /**
  * Plays the steps the red waits on until the piece is finished: the walk has left its steps
  * (the flight home), or is back on an earlier one (under reduced motion the first group returns
@@ -62,6 +77,11 @@ async function playToTheEnd(midi: ReturnType<typeof fakeMidi>): Promise<void> {
   }
   throw new Error('the piece did not finish');
 }
+
+/** The time of each note after the first, in milliseconds. */
+const gaps = (notes: readonly { time: number }[]): number[] =>
+  notes.map((n) => Math.round((n.time - notes[0]!.time) * 1000));
+const ms = (sec: number): number => Math.round(sec * 1000);
 
 /** Plays steps 0 to 6 (the seventh press is the half note G) and waits for the red on step 7. */
 async function playToTheHalo(midi: ReturnType<typeof fakeMidi>): Promise<void> {
@@ -208,11 +228,21 @@ test.describe('the halo of the waiting walk', () => {
     await expect.poll(() => midi.target()).toEqual([]);
   });
 
-  test('the ring closes over the time to the next note at the Practice tempo', async ({ page }) => {
+  test('the ring and the other hand count from the same press at the Practice tempo', async ({
+    page,
+  }) => {
     const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
     expect(await midi.waitForStep()).toEqual([48]);
     await midi.playRed();
     expect(Math.abs((await midi.halo()) - 4800)).toBeLessThanOrEqual(1);
+    await expect.poll(() => accompanied(page)).toHaveLength(4);
+    const notes = await accompanied(page);
+    expect(notes.map((n) => n.midi)).toEqual([60, 60, 67, 67]);
+    expect(gaps(notes)).toEqual([0, 1200, 2400, 3600]);
+    // The stretch ends 4800 ms after the press, where the ring closes.
+    const last = notes[3]!;
+    expect(ms(last.time - notes[0]!.time + last.duration)).toBe(4800);
     await expect(rings(page)).toHaveCount(0, { timeout: 6_000 });
   });
 

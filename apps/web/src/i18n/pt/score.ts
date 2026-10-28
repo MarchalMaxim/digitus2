@@ -31,6 +31,10 @@ export const score: Messages['score'] = {
     noNotes: 'Esta peça não tem notas para tocar.',
     playAlongHint: (count: number) =>
       count > 1 ? 'Toque as notas vermelhas no seu piano.' : 'Toque a nota vermelha no seu piano.',
+    playAlongSound: {
+      click: 'Clique uma vez para ouvir a outra mão.',
+      tap: 'Toque uma vez para ouvir a outra mão.',
+    },
     timingExplain:
       'Um círculo antes de uma nota significa que ela veio cedo demais; depois, tarde demais.',
     practice: 'Prática',

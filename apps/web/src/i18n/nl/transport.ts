@@ -20,6 +20,8 @@ export const transport: Messages['transport'] = {
   loopTo: 'tot',
   addNotes: 'Noten ertussen toevoegen',
   practiceMode: 'Oefenmodus',
+  hearLeft: 'Linkerhand horen',
+  hearRight: 'Rechterhand horen',
   seekHelp: 'Klik op een maat om erheen te gaan. ← en → gaan één maat terug of verder.',
   seekHelpTouch: 'Tik op een maat om erheen te gaan.',
   loopReversed: 'Het begin van de herhaling moet vóór het einde liggen.',

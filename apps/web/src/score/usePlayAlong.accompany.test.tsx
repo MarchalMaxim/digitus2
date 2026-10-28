@@ -7,11 +7,12 @@ import type { AccNote } from '../audio/instrument.js';
 import { performanceFor, scoreEndSec } from '../audio/performance.js';
 import { askForPiano, resetPianoForTests, turnOffPiano } from '../midi/piano.js';
 import type { AccessEvents, OpenedAccess } from '../midi/types.js';
+import { importOtherHand, loadOtherHand, resetOtherHandForTests } from './otherHandLoad.js';
 import type { PerfRange } from './playAlong.js';
 import { usePlayAlong, type PlayAlongOptions } from './usePlayAlong.js';
 import type { Playback } from './usePlayback.js';
 
-// The play-along's other hand (issue 184): at every pass (the press that plays every pitch of a
+// The play-along's other hand (issue 184, behind the reader's switch, issue 231): at every pass (the press that plays every pitch of a
 // step, issue 204) the walk hands the playback the notes digitus plays, from that moment, and stops
 // them on every move it did not make. The piano store is driven through a fake lazy chunk and the
 // playback is a fake with a position of its own (usePlayAlong.test.tsx has the same); the five
@@ -265,7 +266,10 @@ function forget(f: Fake) {
   f.prepare.mockClear();
 }
 
-beforeEach(() => {
+beforeEach(async () => {
+  // The other hand's code is a lazy chunk the walk asks for (otherHand.ts): in unless a test says not.
+  resetOtherHandForTests();
+  await loadOtherHand();
   vi.useFakeTimers({
     toFake: [
       'setTimeout',
@@ -276,7 +280,8 @@ beforeEach(() => {
     ],
   });
   localStorage.clear();
-  useAppStore.setState({ settings: { ...DEFAULT_SETTINGS } });
+  // Off by default (issue 231): every test here but the switch's own is of a reader who turned it on.
+  useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, hearOtherHand: true } });
   access.open.mockReset();
   down.clear();
   link.events = null;
@@ -749,7 +754,7 @@ describe('a change of the Practice tempo', () => {
   const open = () =>
     useAppStore.setState({
       view: { name: 'score', source: { kind: 'library', slug: 'fast' } },
-      settings: { ...DEFAULT_SETTINGS, tempoByPiece: {} },
+      settings: { ...DEFAULT_SETTINGS, hearOtherHand: true, tempoByPiece: {} },
     });
   const tempo = (factor: number) =>
     act(() =>
@@ -815,5 +820,154 @@ describe('Practice mode (issue 191)', () => {
     s.refresh();
     expect(s.hook.result.current.active).toBe(true);
     expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+  });
+});
+
+describe('the switch that lets the reader hear the other hand (issue 231)', () => {
+  const hear = (on: boolean) =>
+    act(() => useAppStore.getState().setSettings({ hearOtherHand: on }));
+
+  it('with it off and one hand chosen, passing steps hands nothing over and prepares nothing', async () => {
+    hear(false);
+    await connect();
+    const s = setup();
+    s.fake.soundWaits = true; // the context would wait for a gesture, but nothing needs it
+    forget(s.fake);
+    s.press(60);
+    s.wait(500);
+    s.press(62);
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.fake.cueAt).toHaveBeenCalled(); // the walk walks all the same
+    expect(s.fake.accompany).not.toHaveBeenCalled();
+    expect(s.fake.prepare).not.toHaveBeenCalled();
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+    expect(s.hook.result.current.soundWaits).toBe(false);
+  });
+
+  it('turning it off after a pass stops the other hand once, and a later pass hands nothing over', async () => {
+    await connect();
+    const s = setup();
+    s.press(60);
+    expect(s.fake.accompany).toHaveBeenCalled();
+    forget(s.fake);
+    hear(false);
+    s.refresh();
+    expect(s.hook.result.current.active).toBe(true); // Practice mode is still on
+    expect(s.fake.stopAccompaniment).toHaveBeenCalledTimes(1);
+    s.refresh();
+    s.wait(1000);
+    expect(s.fake.stopAccompaniment).toHaveBeenCalledTimes(1);
+    s.press(62); // the next step passes, in silence
+    expect(s.fake.accompany).not.toHaveBeenCalled();
+    expect(s.fake.prepare).not.toHaveBeenCalled();
+    expect(s.fake.stopAccompaniment).toHaveBeenCalledTimes(1);
+  });
+
+  it('turning it off before anything was handed over stops nothing: an idle walk calls nothing', async () => {
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    hear(false);
+    s.refresh();
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+  });
+
+  it('turning it on prepares the samples, and the next pass hands the other hand over', async () => {
+    hear(false);
+    await connect();
+    const s = setup();
+    s.press(60);
+    forget(s.fake);
+    hear(true);
+    s.refresh();
+    expect(s.fake.prepare).toHaveBeenCalled();
+    expect(s.fake.accompany).not.toHaveBeenCalled(); // nothing is handed over until a step passes
+    s.wait(500);
+    s.press(62);
+    expect(s.played()).toEqual([[[43, 0, 'L']]]);
+  });
+});
+
+describe("the other hand's code, a lazy chunk (otherHand.ts)", () => {
+  /** The chunk, held back until `release()`: the walk asked for it and it is on its way. */
+  function held() {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    resetOtherHandForTests(() => gate.then(importOtherHand));
+    return release;
+  }
+  const arrived = () => act(() => Promise.resolve());
+
+  it('hands nothing over and prepares nothing until the chunk is in; the next pass then hands over', async () => {
+    const release = held();
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60); // step 0 passes, in silence: there is no plan yet
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.fake.cueAt).toHaveBeenCalled();
+    expect(s.fake.accompany).not.toHaveBeenCalled();
+    expect(s.fake.prepare).not.toHaveBeenCalled();
+    expect(s.hook.result.current.soundWaits).toBe(false);
+    release();
+    await act(async () => {
+      await loadOtherHand();
+    });
+    await arrived();
+    s.refresh();
+    expect(s.fake.prepare).toHaveBeenCalled();
+    s.wait(500);
+    s.press(62); // step 1: [0.5, 1)
+    expect(s.played()).toEqual([[[43, 0, 'L']]]);
+  });
+
+  it('asks for the chunk only when the switch is on and a hand is left out', async () => {
+    const chunk = vi.fn(importOtherHand);
+    resetOtherHandForTests(chunk);
+    act(() => useAppStore.getState().setSettings({ hearOtherHand: false }));
+    await connect();
+    const s = setup();
+    s.press(60);
+    s.wait(500);
+    s.press(62);
+    expect(chunk).not.toHaveBeenCalled(); // off: the walk never fetches it
+    s.refresh({ mutedHands: [] });
+    act(() => useAppStore.getState().setSettings({ hearOtherHand: true }));
+    expect(chunk).not.toHaveBeenCalled(); // on, but both hands: nothing is left out
+    s.refresh({ mutedHands: ['L'] });
+    expect(chunk).toHaveBeenCalledTimes(1); // on, one hand
+    await arrived();
+  });
+
+  it('goes on without the other hand when the chunk does not come, and asks again when the switch is turned on again', async () => {
+    const chunk = vi.fn(importOtherHand).mockRejectedValueOnce(new Error('offline') as never);
+    resetOtherHandForTests(chunk);
+    await connect();
+    const s = setup();
+    forget(s.fake);
+    s.press(60);
+    await arrived();
+    s.wait(500);
+    s.press(62);
+    expect(s.fake.cueAt.mock.calls.length).toBeGreaterThan(1); // the walk walks
+    expect(s.fake.accompany).not.toHaveBeenCalled();
+    expect(s.fake.prepare).not.toHaveBeenCalled();
+    expect(s.fake.stopAccompaniment).not.toHaveBeenCalled();
+    expect(chunk).toHaveBeenCalledTimes(1);
+
+    act(() => useAppStore.getState().setSettings({ hearOtherHand: false }));
+    s.refresh();
+    act(() => useAppStore.getState().setSettings({ hearOtherHand: true }));
+    s.refresh();
+    await act(async () => {
+      await loadOtherHand();
+    });
+    s.refresh();
+    expect(chunk).toHaveBeenCalledTimes(2);
+    s.wait(500);
+    s.press(64);
+    expect(s.played().length).toBeGreaterThan(0);
   });
 });

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import type * as InstrumentExports from '../audio/instrument.js';
 import type { AccNote } from '../audio/instrument.js';
+import { loadOtherHand, resetOtherHandForTests } from './otherHandLoad.js';
 import { SAMPLES_FAILED_NOTICE, usePlayback } from './usePlayback.js';
 
 // The other hand of the play-along (issue 184) in the playback hook: `prepare` loads the samples
@@ -98,7 +99,10 @@ interface Keys {
 }
 const keysHook = () => (window as unknown as { __digitus2Keys?: Keys }).__digitus2Keys;
 
-beforeEach(() => {
+beforeEach(async () => {
+  // The walk fetches the other hand's lazy chunk before it hands any notes over (otherHand.ts).
+  resetOtherHandForTests();
+  await loadOtherHand();
   initialState = 'running';
   contexts = [];
   instrument.log.length = 0;
@@ -287,6 +291,30 @@ describe('accompany', () => {
     });
     act(() => result.current.accompany([note(0)]));
     expect(instrument.start).toHaveBeenCalledTimes(1);
+  });
+
+  it("does nothing before the other hand's code is in, and plays once it is", async () => {
+    const { score } = parseMusicXml(ONE_NOTE);
+    const { result } = renderHook(() => usePlayback(score));
+    await prepared(result);
+    resetOtherHandForTests(); // the lazy chunk (otherHand.ts) has not been fetched
+    act(() => result.current.accompany([note(0)]));
+    expect(instrument.start).not.toHaveBeenCalled();
+    await loadOtherHand();
+    act(() => result.current.accompany([note(0)]));
+    expect(instrument.start).toHaveBeenCalledTimes(1);
+  });
+
+  it("prepares nothing before the other hand's code is in: the walk asks only once it is", async () => {
+    resetOtherHandForTests();
+    const { score } = parseMusicXml(ONE_NOTE);
+    const { result } = renderHook(() => usePlayback(score));
+    act(() => result.current.prepare());
+    expect(contexts).toHaveLength(0);
+    expect(result.current.preparing).toBe(false);
+    await loadOtherHand();
+    act(() => result.current.prepare());
+    expect(contexts).toHaveLength(1);
   });
 
   it('never makes the context itself', () => {

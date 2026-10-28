@@ -69,7 +69,10 @@ export default defineConfig({
   },
   server: { fs: { allow: [repoRoot] } },
   worker: { format: 'es' },
-  build: { target: 'es2022', sourcemap: true, manifest: true },
+  // Hidden source maps: still written next to every chunk (attach one in the devtools to read a
+  // production stack), but no file points at them. The `//# sourceMappingURL` line of each of the
+  // library page's 15 files is about 0.5 KB gzip of its 150 KB budget (scripts/check-bundle-size.mjs).
+  build: { target: 'es2022', sourcemap: 'hidden', manifest: true },
   test: {
     environment: 'happy-dom',
     setupFiles: ['src/test/setup.ts'],

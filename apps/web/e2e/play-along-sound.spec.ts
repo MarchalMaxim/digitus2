@@ -1,6 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
-import { audioState, fakeMidi, installFakeMidi, quietly } from './helpers/midi.js';
+import {
+  accompanied,
+  accompCancelled,
+  audioState,
+  fakeMidi,
+  installFakeMidi,
+  quietly,
+} from './helpers/midi.js';
 import { horizontalOverflow } from './helpers/overflow.js';
+import { openPractice } from './helpers/practice.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples } from './helpers/samples.js';
 
@@ -109,7 +117,7 @@ test('a fresh load straight onto a score: the walk works, the sound waits for on
   await installFakeMidi(page, {
     permission: 'granted',
     playAlong: true,
-    settings: { hands: 'R' }, // seeded: a click on the Practice panel would be a user activation
+    settings: { hands: 'R', hearOtherHand: true }, // seeded: a click on the Practice panel would be a user activation
   });
   await page.goto(`/?hooks=1#/piece/${TWINKLE}`);
   const loud = await quietly(page);
@@ -174,7 +182,7 @@ test('after the click that opens a piece from the library: no sentence, and the 
   await installFakeMidi(page, {
     permission: 'granted',
     playAlong: true,
-    settings: { hands: 'R' },
+    settings: { hands: 'R', hearOtherHand: true },
   });
   await page.goto('/?hooks=1');
   const loud = await quietly(page);
@@ -216,4 +224,89 @@ test('after the click that opens a piece from the library: no sentence, and the 
   // The sentence never showed, not even for the instant a permitted context takes to start.
   expect(await saidClick(page)).toBe(false);
   await expectOneRed(page, 'from the library, the left hand sounding');
+});
+
+// The reader's switch (issue 231): `Hear the left hand` is off until they turn it on. Off, one hand
+// chosen, the walk works and the app makes no sound: no AudioContext, no sentence about a click.
+// Opening the Practice panel to reach the switch is the page's first click, so the context the
+// switch then makes runs at once and the sentence never shows; turning it off stops what sounds,
+// and the steps that follow hand over nothing. On Minuet in G, whose left hand moves; Twinkle's
+// sparse left hand would prove too little.
+const MINUET = 'bach-minuet-g-major-bwv-anh-114';
+/** Every pitch the left hand of Minuet in G plays. */
+const MINUET_LEFT_HAND = [43, 45, 47, 50, 52, 54, 55, 57, 59, 60, 61, 62, 64];
+
+test('turning the switch on with a click makes the other hand sound; turning it off stops it', async ({
+  page,
+}) => {
+  await watchAudio(page);
+  await watchStatus(page, CLICK);
+  await delayPianoSamples(page, 0);
+  await installFakeMidi(page, {
+    permission: 'granted',
+    playAlong: true,
+    settings: { hands: 'R' }, // seeded: the switch is off, as for a reader who never touched it
+    tempo: { [MINUET]: 0.5 }, // the slow side of the Practice tempo: a stretch is long enough to cut
+  });
+  await page.goto(`/?hooks=1#/piece/${MINUET}`);
+  const loud = await quietly(page);
+  const midi = fakeMidi(page);
+
+  await expect
+    .poll(() => page.evaluate(() => document.querySelectorAll('.score-sheet g.fing').length), {
+      timeout: 20_000,
+    })
+    .toBeGreaterThan(0);
+  const first = await midi.waitForStep();
+  expect(first.length).toBeGreaterThan(0);
+  expect(await activated(page)).toBe(false);
+
+  // Off: the red moves on every press, and the app makes no sound and makes no context to hold.
+  for (let i = 0; i < 3; i++) await midi.playRed();
+  expect(await midi.index()).toBe(3);
+  expect(await audioState(page)).toBe('none');
+  expect(await sources(page)).toBe(0);
+  expect(await accompanied(page)).toEqual([]);
+  expect(await saidClick(page)).toBe(false);
+  expect(await activated(page)).toBe(false);
+  await expectOneRed(page, 'the switch off, three steps');
+
+  // The panel, and the switch in it: off. Playwright's own clicks activate the page from here on,
+  // so what follows is read with the page active; the context is made only by the switch.
+  loud();
+  await openPractice(page);
+  const hear = page.getByRole('switch', { name: 'Hear the left hand' });
+  await expect(hear).not.toBeChecked();
+  await hear.click();
+  await expect(hear).toBeChecked();
+  await expect.poll(() => audioState(page)).toBe('running');
+  expect(await contexts(page)).toEqual(['running']);
+  await expect(page.getByRole('status')).not.toHaveText(CLICK);
+  await expect(page.getByRole('status')).not.toHaveText(/Loading the piano/, { timeout: 20_000 });
+  expect(await saidClick(page)).toBe(false);
+  await expectOneRed(page, 'the switch on');
+
+  // The next steps hand the left hand over, and only the left hand's notes.
+  for (let i = 0; i < 4; i++) await midi.playRed();
+  await expect.poll(async () => (await accompanied(page)).length).toBeGreaterThan(0);
+  const played = await accompanied(page);
+  expect(played.every((n) => n.hand === 'L')).toBe(true);
+  expect(played.every((n) => MINUET_LEFT_HAND.includes(n.midi))).toBe(true);
+  await expect.poll(() => sources(page)).toBeGreaterThan(0);
+  await expectOneRed(page, 'the left hand sounding');
+
+  // Off again, right after a press: what sounds is cancelled, and the later presses hand over
+  // nothing.
+  await midi.playRed();
+  const cancelled = (await accompCancelled(page)).length;
+  await hear.click();
+  await expect(hear).not.toBeChecked();
+  await expect.poll(async () => (await accompCancelled(page)).length).toBeGreaterThan(cancelled);
+  // Stopped: its queue is cleared, so nothing more reaches the instrument but through a new pass.
+  // A pass hands its stretch over in the look that passes the step, so once `playRed` returns
+  // the notes of a stretch handed over then are in the log.
+  const handedOver = (await accompanied(page)).length;
+  for (let i = 0; i < 3; i++) await midi.playRed();
+  expect(await accompanied(page)).toHaveLength(handedOver);
+  await expectOneRed(page, 'the switch off again');
 });

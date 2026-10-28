@@ -899,6 +899,32 @@ input[role='switch']:checked::before {
   gap: 0.5rem 1.25rem;
 }
 
+/* The Hands control with the switch that lets the reader hear the hand left out (issue 231)
+   stacked on top of it, left edges together. The Hands control stands at the bottom of the
+   wrapper, so the switch appearing adds a row above Hands and Hands does not move: the panel
+   grows upward from Play. */
+.hands {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* The items that share a line with the taller wrapper sit at the line's bottom, level with the
+   Hands control, not at the middle of the line. While every item of a line is 44 px high this
+   changes nothing; `.transport` keeps `center` for the rest (the taller reversed-loop message). */
+.transport > .check.switch,
+.transport > .tempo,
+.transport > .hands {
+  align-self: flex-end;
+}
+
+/* The switch fades in as the panel does when it appears under the reader's hand; --dur is 0
+   under reduced motion. */
+.hands > .check.switch {
+  animation: practice-in var(--dur) var(--ease);
+}
+
 .transport-group {
   display: flex;
   gap: 0.5rem;

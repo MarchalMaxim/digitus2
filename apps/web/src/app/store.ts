@@ -41,6 +41,13 @@ export interface Settings {
    * per browser, not per piece.
    */
   practiceMode: boolean;
+  /**
+   * With one hand chosen on a two-handed piece, digitus plays the hand left out while the reader
+   * plays the chosen one (issue 231): the Practice panel's `Hear the left hand` / `Hear the right
+   * hand` switch. Off by default, because that hand starts about 89 ms after the reader's notes
+   * (issue 184); remembered per browser, not per piece.
+   */
+  hearOtherHand: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -55,6 +62,7 @@ export const DEFAULT_SETTINGS: Settings = {
   favourites: [],
   playAlong: false,
   practiceMode: true,
+  hearOtherHand: false,
 };
 
 export type PieceSource =
@@ -265,6 +273,7 @@ function pickSettings(value: unknown): Partial<Settings> {
   if (Array.isArray(raw.favourites)) out.favourites = pickSlugs(raw.favourites);
   if (typeof raw.playAlong === 'boolean') out.playAlong = raw.playAlong;
   if (typeof raw.practiceMode === 'boolean') out.practiceMode = raw.practiceMode;
+  if (typeof raw.hearOtherHand === 'boolean') out.hearOtherHand = raw.hearOtherHand;
   return out;
 }
 

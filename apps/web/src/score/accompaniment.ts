@@ -2,7 +2,8 @@
 import type { Hand } from '@digitus2/engine';
 import type { PlayEvent } from '../audio/events.js';
 import type { AccNote } from '../audio/instrument.js';
-import { ALONG_EPS, type AlongMove, type AlongStep, type PerfRange } from './playAlong.js';
+import { ALONG_EPS } from './alongEps.js';
+import type { AlongMove, AlongStep, PerfRange } from './playAlong.js';
 
 /**
  * The other hand's accompaniment for the play-along (issue 184): from the last step the walk passed

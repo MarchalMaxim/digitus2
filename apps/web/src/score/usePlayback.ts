@@ -16,8 +16,9 @@
  * seconds, the order heard, for the play-along (issue 182): it can name the second hearing of a
  * repeated bar, which a written second cannot.
  *
- * The other hand of the play-along (issue 184) sounds through an `Accompanist` (audio/accompanist.ts)
- * over the same context and instrument. `prepare` loads the samples before any press, with no
+ * The other hand of the play-along (issue 184) sounds through an `Accompanist` (audio/accompanist.ts,
+ * a lazy chunk with the choice of its notes, otherHand.ts, that the walk fetches when the reader's
+ * switch is on) over the same context and instrument. `prepare` loads the samples before any press, with no
  * gesture, under `preparing` (never `loading`, which would turn the walk off). The browser may hold
  * the context suspended until a click: `accompany` waits for it to run, `soundWaits` says so, and a
  * capture listener resumes it on the first pointer or key press.
@@ -33,7 +34,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import type { Phrase } from '../i18n/messages.js';
 import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
-import { Accompanist } from '../audio/accompanist.js';
+import type { Accompanist } from '../audio/accompanist.js';
 import {
   instrumentFromLocation,
   noteVelocity,
@@ -41,6 +42,8 @@ import {
   type Instrument,
 } from '../audio/instrument.js';
 import { keyVelocity } from './noteKey.js';
+import type { AccompaniedNote, OtherHandHost } from './otherHand.js';
+import { otherHandLoaded } from './otherHandLoad.js';
 import { scheduleClick } from '../audio/metronome.js';
 import {
   loopStartSec,
@@ -253,9 +256,6 @@ export function handsFor(score: Score | null, hands: HandsMode): HandsMode {
   return oneHanded(score) ? 'both' : hands;
 }
 
-/** The events the resume listener waits for: any of them is a user activation (a click, a key). */
-const ACTIVATION_EVENTS = ['pointerdown', 'pointerup', 'keydown'] as const;
-
 /** Whether the page has had a click or a key press; a browser without the API counts as not. */
 function userHasBeenActive(): boolean {
   const activation = (navigator as { userActivation?: { hasBeenActive?: boolean } }).userActivation;
@@ -271,51 +271,6 @@ function hooksOn(): boolean {
   return params.get('audio') === 'silent' || params.get('hooks') === '1';
 }
 
-/** What the accompaniment handed to the instrument (a test hook). */
-interface AccompaniedNote {
-  midi: number;
-  hand: Hand;
-  time: number;
-  duration: number;
-  velocity: number;
-}
-
-/** The scores whose `prepare` failed: it is not tried again for them. */
-const prepareFailed = new WeakSet<Score>();
-
-/**
- * The instrument as the Accompanist sees it under the test hooks: what the accompaniment hands
- * over and what it cancels or releases are logged, and nothing of Play's or a struck key's. The
- * silent instrument's own events also hold Play's notes, so the specs never read those.
- */
-function recorded(
-  inner: Instrument,
-  handed: AccompaniedNote[],
-  cancelled: { midi: number; time: number }[],
-): Instrument {
-  return {
-    load: (midis, velocities) => inner.load(midis, velocities),
-    start(e) {
-      handed.push({
-        midi: e.midi,
-        hand: e.hand,
-        time: e.time,
-        duration: e.duration,
-        velocity: e.velocity,
-      });
-      const stop = inner.start(e);
-      let stopped = false;
-      return () => {
-        if (!stopped) cancelled.push({ midi: e.midi, time: e.time });
-        stopped = true;
-        stop();
-      };
-    },
-    strike: (midi, velocity, maxSec) => inner.strike(midi, velocity, maxSec),
-    stopAll: () => inner.stopAll(),
-  };
-}
-
 function uniqueMidis(score: Score): number[] {
   return [...new Set(score.notes.flatMap((n) => ornamentAttacks(n).map((attack) => attack.midi)))];
 }
@@ -325,7 +280,7 @@ function uniqueVelocities(score: Score): number[] {
 }
 
 /** What the instrument needs to play a score: its pitches, and its velocities' span. */
-interface Samples {
+export interface Samples {
   midis: number[];
   velocities: number[];
   low: number;
@@ -531,14 +486,10 @@ export function usePlayback(score: Score | null): Playback {
   // click that something below handles still counts.
   useEffect(() => {
     if (audioState !== 'suspended') return;
-    const resume = () => {
+    return otherHandLoaded()?.onActivation(() => {
       ctxRef.current?.resume().catch(() => undefined);
       setActivated(userHasBeenActive());
-    };
-    for (const type of ACTIVATION_EVENTS) document.addEventListener(type, resume, true);
-    return () => {
-      for (const type of ACTIVATION_EVENTS) document.removeEventListener(type, resume, true);
-    };
+    });
   }, [audioState]);
 
   // The store's transport settings, mirrored into a transport that exists (new ones copy them).
@@ -744,81 +695,41 @@ export function usePlayback(score: Score | null): Playback {
     [openAudio, trackLoad],
   );
 
-  // Issue 184. The samples for the other hand, before any press and with no gesture. The newest
-  // load of the instrument is the one that counts (`loadSeqRef`), so this leaves the samples to a
-  // Play or a struck key that is loading them: a second load would make the instrument drop
-  // theirs. A Play or a key that comes after wins the load; this one is then ignored and only
-  // clears `preparing`. A failure is told once and is not tried again for the score.
-  const prepare = useCallback(() => {
-    const s = scoreRef.current;
-    if (!s || prepareFailed.has(s) || preparingScoreRef.current === s) return;
-    if (loadsRunningRef.current > 0) return;
-    const needed = samplesFor(s);
-    if (covers(loadedRef.current, needed)) return;
-    let opened: { audio: AudioContext; instrument: Instrument };
-    try {
-      opened = openAudio();
-    } catch {
-      prepareFailed.add(s); // no Web Audio here: the walk goes on without sound, as a failed load
-      return;
-    }
-    const { audio, instrument } = opened;
-    const seq = ++prepSeqRef.current;
-    const load = ++loadSeqRef.current;
-    preparingScoreRef.current = s;
-    setPreparing(true);
-    const settle = () => {
-      if (seq !== prepSeqRef.current) return;
-      preparingScoreRef.current = null;
-      setPreparing(false);
-    };
-    instrument.load(needed.midis, needed.velocities).then(
-      () => {
-        if (ctxRef.current === audio && load === loadSeqRef.current) loadedRef.current = needed;
-        settle();
+  // Issue 184. The other hand's sound: the samples before any press (no gesture) and the notes
+  // from now. The code is the other hand's lazy chunk (otherHand.ts), which the walk has fetched
+  // before it asks, so without it there is nothing to prepare or play. It works on the playback's
+  // own refs and state, through this one object.
+  const otherHand = useMemo<OtherHandHost>(
+    () => ({
+      scoreRef,
+      ctxRef,
+      instrumentRef,
+      loadedRef,
+      loadSeqRef,
+      loadsRunningRef,
+      prepSeqRef,
+      preparingScoreRef,
+      accompanistRef,
+      accompaniedRef,
+      accompCancelledRef,
+      openAudio,
+      setPreparing,
+      samplesFor,
+      covers,
+      hooks: hooksOn,
+      tempoFactor: () => tempoFactorOf(useAppStore.getState()),
+      failed: (s) => {
+        setFailedScore(s);
+        if (scoreRef.current === s) useAppStore.getState().setNotice(SAMPLES_FAILED_NOTICE);
       },
-      () => {
-        if (ctxRef.current === audio && load === loadSeqRef.current) {
-          prepareFailed.add(s);
-          setFailedScore(s);
-          if (scoreRef.current === s) useAppStore.getState().setNotice(SAMPLES_FAILED_NOTICE);
-        }
-        settle();
-      },
-    );
-  }, [openAudio]);
-
-  // Plays the other hand from now. It never makes the context: with no samples that cover the
-  // score, or a context the browser still holds, there is nothing to sound and nothing is queued
-  // (notes kept would all sound together on the first click). A context held stops what an
-  // earlier press left queued, which would otherwise sound out of step when the audio returns.
-  const accompany = useCallback((notes: readonly AccNote[]) => {
-    const s = scoreRef.current;
-    const ctx = ctxRef.current;
-    const instrument = instrumentRef.current;
-    if (!s || !ctx || !instrument) return;
-    if (ctx.state !== 'running') {
-      accompanistRef.current?.stop(); // never creates the Accompanist; what is queued must not wait
-      return;
-    }
-    if (!covers(loadedRef.current, samplesFor(s))) return;
-    let accompanist = accompanistRef.current;
-    if (!accompanist) {
-      const hooks = hooksOn();
-      accompanist = new Accompanist({
-        ctx,
-        instrument: hooks
-          ? recorded(instrument, accompaniedRef.current, accompCancelledRef.current)
-          : instrument,
-        // A note dropped from the queue never reaches the instrument: the hooks log it as cancelled.
-        onDrop: hooks
-          ? (e) => accompCancelledRef.current.push({ midi: e.midi, time: e.time })
-          : undefined,
-      });
-      accompanistRef.current = accompanist;
-    }
-    accompanist.play(notes, tempoFactorOf(useAppStore.getState()));
-  }, []);
+    }),
+    [openAudio],
+  );
+  const prepare = useCallback(() => otherHandLoaded()?.prepareSamples(otherHand), [otherHand]);
+  const accompany = useCallback(
+    (notes: readonly AccNote[]) => otherHandLoaded()?.accompanyNotes(otherHand, notes),
+    [otherHand],
+  );
 
   const pause = useCallback(() => {
     playSeqRef.current++;

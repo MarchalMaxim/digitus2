@@ -31,7 +31,7 @@ const TWINKLE_NOTES = 64;
 /** The Practice tempo at its top, 150 %: every gap is two thirds as long. */
 const FAST = { [TWINKLE]: 1.5 };
 /** The reader plays the left hand, and the Practice tempo is 50 % (stored, never clicked). */
-const HALF = { hands: 'L', tempoByPiece: { [`piece:${TWINKLE}`]: 0.5 } };
+const HALF = { hands: 'L', hearOtherHand: true, tempoByPiece: { [`piece:${TWINKLE}`]: 0.5 } };
 const LOADING_THE_PIANO = 'Loading the piano…';
 
 /** The status line in the dock (a notice elsewhere is a status too). */

@@ -35,6 +35,7 @@ describe('store', () => {
       favourites: [],
       playAlong: false,
       practiceMode: true,
+      hearOtherHand: false,
     });
   });
   it('opens a library piece, the about page, and goes back', () => {
@@ -463,6 +464,7 @@ describe('the default settings', () => {
       favourites: [],
       playAlong: false,
       practiceMode: true,
+      hearOtherHand: false,
     });
   });
 });
@@ -551,5 +553,46 @@ describe('Practice mode (issue 191)', () => {
     });
     S().setSettings({ practiceMode: false });
     expect(S().settings.practiceMode).toBe(false);
+  });
+});
+
+describe('hearing the hand left out (issue 231)', () => {
+  const S = () => useAppStore.getState();
+  const stored = () =>
+    JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state.settings;
+  beforeEach(() => {
+    localStorage.clear();
+    useAppStore.setState({ settings: { ...DEFAULT_SETTINGS } });
+  });
+  it('is off until the reader turns it on', () => {
+    expect(DEFAULT_SETTINGS.hearOtherHand).toBe(false);
+    expect(S().settings.hearOtherHand).toBe(false);
+  });
+  it('is kept in localStorage, on and off', async () => {
+    S().setSettings({ hearOtherHand: true });
+    expect(stored().hearOtherHand).toBe(true);
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.hearOtherHand).toBe(true);
+    S().setSettings({ hearOtherHand: false });
+    expect(stored().hearOtherHand).toBe(false);
+    await useAppStore.persist.rehydrate();
+    expect(S().settings.hearOtherHand).toBe(false);
+  });
+  it('loads older settings with it off, and drops a value that is not a boolean', async () => {
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ state: { settings: { handSize: 'small' } }, version: 2 }),
+    );
+    await useAppStore.persist.rehydrate();
+    expect(S().settings).toMatchObject({ handSize: 'small', hearOtherHand: false });
+    for (const junk of ['yes', 1, null, [true]]) {
+      useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, hearOtherHand: true } });
+      localStorage.setItem(
+        SETTINGS_STORAGE_KEY,
+        JSON.stringify({ state: { settings: { hearOtherHand: junk } }, version: 2 }),
+      );
+      await useAppStore.persist.rehydrate();
+      expect(S().settings.hearOtherHand, JSON.stringify(junk)).toBe(false);
+    }
   });
 });

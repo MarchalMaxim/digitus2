@@ -5,9 +5,9 @@ import { ticksToSeconds } from '@digitus2/engine/score-build';
 import type { Hand, Note, TimeSigEvent } from '@digitus2/engine';
 import { beatTicksAt } from '../audio/beats.js';
 import type { Performance } from '../audio/performance.js';
+import { ALONG_EPS } from './alongEps.js';
 
-/** Two times closer than this are the same instant (the cursor's own slack). */
-export const ALONG_EPS = 1e-9;
+export { ALONG_EPS };
 
 /** One step to play (issue 182): where it starts in the performance, and the pitches it needs. */
 export interface AlongStep {

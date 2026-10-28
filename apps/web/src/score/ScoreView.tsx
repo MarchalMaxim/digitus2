@@ -1,4 +1,4 @@
-import type { Note } from '@digitus2/engine';
+import type { Hand, Note } from '@digitus2/engine';
 import { ornamentAttacks } from '@digitus2/engine/ornaments';
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
@@ -530,6 +530,18 @@ export function ScoreView({ source }: { source: PieceSource }) {
         : null,
     [along.pianoConnected, practiceOn, setSettings],
   );
+  // The switch above Hands (issue 231): the hand left out is the one digitus would play, so it
+  // needs a piano, Practice mode and one hand chosen on a two-handed piece (`hands` is 'both' on a
+  // one-handed one). Memoised on the booleans and the hand, like the switch above.
+  const hearOn = useAppStore((s) => s.settings.hearOtherHand);
+  const hearHand: Hand | null = hands === 'R' ? 'L' : hands === 'L' ? 'R' : null;
+  const hearOtherHand = useMemo(
+    () =>
+      along.pianoConnected && practiceOn && hearHand
+        ? { on: hearOn, hand: hearHand, set: (on: boolean) => setSettings({ hearOtherHand: on }) }
+        : null,
+    [along.pianoConnected, practiceOn, hearHand, hearOn, setSettings],
+  );
 
   const seekToBar = useCallback(
     (bar: number) => {
@@ -752,6 +764,7 @@ export function ScoreView({ source }: { source: PieceSource }) {
                   doc.embellish === 'offered' ? { on: doc.embellished, set: toggleEmbellish } : null
                 }
                 practiceMode={practiceMode}
+                hearOtherHand={hearOtherHand}
                 oneHanded={oneHanded(score)}
               />
             </div>

@@ -75,14 +75,14 @@ describe('guardEmbellishment', () => {
       guardErrors(lintFingering(e.score, e.assignments.child, { profile: 'child', beginner: true }))
         .law,
     ).toEqual([]);
-  }, 20_000);
+  });
 
   it('refuses fewer than three figures', () => {
     const out = guardEmbellishment(fixtureScore([CEDC, [['C4', 4]]]));
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/1 figure/);
     expect(out.kind).toBe('few-figures');
-  }, 20_000);
+  });
 
   it("passes the embellisher's refusal through", () => {
     const out = guardEmbellishment(
@@ -100,7 +100,7 @@ describe('guardEmbellishment', () => {
     expect(out.offered).toBeNull();
     expect(out.reason).toContain('staff');
     expect(out.kind).toBe('embellisher');
-  }, 20_000);
+  });
 
   it('refuses unreadable input instead of throwing', () => {
     const broken = SIX.replace('<octave>4</octave>', '');
@@ -109,7 +109,7 @@ describe('guardEmbellishment', () => {
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/^unreadable input: /);
     expect(out.kind).toBe('embellisher');
-  }, 20_000);
+  });
 
   it('drops the figures of an offending bar and checks again', () => {
     const first = plainNotes(EIGHT) + 4;
@@ -122,7 +122,7 @@ describe('guardEmbellishment', () => {
     expect(e.figures).toBe(3);
     expect(e.inserted.map((i) => i.measureIndex)).toEqual([0, 4, 6]);
     expect(e.inserted.some((i) => i.measureIndex === 2)).toBe(false);
-  }, 20_000);
+  });
 
   it('refuses when the offending bar has no figure', () => {
     const lint = stubLint(EIGHT, 'L01', [1], () => true);
@@ -130,7 +130,7 @@ describe('guardEmbellishment', () => {
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/no figure/);
     expect(out.kind).toBe('guard');
-  }, 20_000);
+  });
 
   it('refuses when the retry still fails', () => {
     const lint = stubLint(EIGHT, 'L01', [2], () => true);
@@ -138,7 +138,7 @@ describe('guardEmbellishment', () => {
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/after dropping/);
     expect(out.kind).toBe('guard');
-  }, 20_000);
+  });
 
   it('refuses when the retry leaves fewer than three figures', () => {
     const lint = stubLint(SIX, 'L01', [0, 2], (s) => s.notes.length === plainNotes(SIX) + 3);
@@ -146,7 +146,7 @@ describe('guardEmbellishment', () => {
     expect(out.offered).toBeNull();
     expect(out.reason).toMatch(/^1 figure \(at least 3\) after dropping the figures of bars 0, 2$/);
     expect(out.kind).toBe('guard');
-  }, 20_000);
+  });
 
   it('drops the bars of every note an issue names', () => {
     const first = plainNotes(EIGHT) + 4;
@@ -168,7 +168,7 @@ describe('guardEmbellishment', () => {
     const out = guardEmbellishment(EIGHT, { lint });
     expect(out.offered).toBeNull();
     expect(out.reason).toBe('2 figures (at least 3) after dropping the figures of bars 2, 4');
-  }, 20_000);
+  });
 
   it('checks the reduced embellishment again', () => {
     const first = plainNotes(EIGHT) + 4;
@@ -186,7 +186,7 @@ describe('guardEmbellishment', () => {
     expect(calls).toBe(2);
     expect(out.offered).toBeNull();
     expect(out.reason).toBe('check: y');
-  }, 20_000);
+  });
 
   it('a failing independent check refuses', () => {
     const out = guardEmbellishment(SIX, {
@@ -195,7 +195,7 @@ describe('guardEmbellishment', () => {
     expect(out.offered).toBeNull();
     expect(out.reason).toBe('check: x');
     expect(out.kind).toBe('guard');
-  }, 20_000);
+  });
 });
 
 describe('guardErrors', () => {

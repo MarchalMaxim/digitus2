@@ -41,7 +41,7 @@ describe('verovio render contract', () => {
       expect(digit, id).toBe(String(editorial[id]?.finger));
     }
     tk.destroy();
-  }, 30_000);
+  });
 
   it('writes no whitespace between elements, and shows its heap', async () => {
     const { default: createVerovioModule } = await import('verovio/wasm');
@@ -58,5 +58,5 @@ describe('verovio render contract', () => {
     // about 230,000 nodes on a 30-page piece (docs/research/ram-usage.md).
     expect(svg.match(/>\s+</g) ?? []).toEqual([]);
     tk.destroy();
-  }, 30_000);
+  });
 });

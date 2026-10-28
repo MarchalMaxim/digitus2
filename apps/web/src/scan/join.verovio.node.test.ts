@@ -27,22 +27,18 @@ describe('issue 156: the joined owner pages as Verovio draws them', () => {
   it.each([
     ['the split page first', [3, 1, 2]],
     ['the split page last', [1, 2, 3]],
-  ])(
-    'draws two staves per measure under a brace, %s',
-    async (_name, order) => {
-      const xml = joinScanPages(order.map(fixture));
-      const { default: createVerovioModule } = await import('verovio/wasm');
-      const { VerovioToolkit } = await import('verovio/esm');
-      const tk = new VerovioToolkit(await createVerovioModule());
-      tk.setOptions(verovioOptions(900));
-      expect(tk.loadData(xml)).toBeTruthy();
-      const svg = tk.renderToSVG(1);
-      const measures = count(svg, 'measure');
-      expect(measures).toBeGreaterThan(0);
-      expect(count(svg, 'staff')).toBe(2 * measures);
-      expect(count(svg, 'grpSym')).toBeGreaterThan(0);
-      tk.destroy();
-    },
-    60_000,
-  );
+  ])('draws two staves per measure under a brace, %s', async (_name, order) => {
+    const xml = joinScanPages(order.map(fixture));
+    const { default: createVerovioModule } = await import('verovio/wasm');
+    const { VerovioToolkit } = await import('verovio/esm');
+    const tk = new VerovioToolkit(await createVerovioModule());
+    tk.setOptions(verovioOptions(900));
+    expect(tk.loadData(xml)).toBeTruthy();
+    const svg = tk.renderToSVG(1);
+    const measures = count(svg, 'measure');
+    expect(measures).toBeGreaterThan(0);
+    expect(count(svg, 'staff')).toBe(2 * measures);
+    expect(count(svg, 'grpSym')).toBeGreaterThan(0);
+    tk.destroy();
+  });
 });

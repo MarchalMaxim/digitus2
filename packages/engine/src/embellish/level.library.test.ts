@@ -50,5 +50,5 @@ describe('the level heuristic on the library', () => {
     expect(levelOff).toEqual([]);
     expect(farOff).toEqual([]);
     expect(scoreOff.sort()).toEqual([...FEWER_NOTES].sort());
-  }, 60_000);
+  });
 });

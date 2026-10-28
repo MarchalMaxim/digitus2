@@ -36,6 +36,5 @@ describe('engraving round trip on the built-in library', () => {
       );
       expect(warnings.filter((w) => /tie/.test(w))).toEqual([]);
     },
-    20_000,
   );
 });

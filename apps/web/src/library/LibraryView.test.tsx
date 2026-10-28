@@ -263,10 +263,8 @@ describe('LibraryView: the level pills (shelves spec 3, 7)', () => {
     expect(screen.getByRole('radio', { name: 'Medium' })).toBeChecked();
     expect(h2s()).toEqual(['Songs', 'Classical', 'Baroque', 'Romantic']);
     expect(useAppStore.getState().libraryLevel).toBe('medium');
-    await waitFor(
-      () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Medium: 95 pieces'),
-      { timeout: 2000 },
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent('Medium: 95 pieces'),
     );
   });
   it('says nothing on arrival', async () => {
@@ -316,10 +314,8 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     expect(rows()).toHaveLength(80);
     expect(rows()[40]).toHaveFocus();
     expect(useAppStore.getState().libraryPages).toBe(2);
-    await waitFor(
-      () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 250'),
-      { timeout: 2000 },
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 250'),
     );
     await open('Show 40 more');
     await open('Show 40 more');
@@ -371,10 +367,8 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
   it('announces the shelf and its count', async () => {
     render(<LibraryView />);
     await open('All 42 songs');
-    await waitFor(
-      () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent('Songs: 42 pieces'),
-      { timeout: 2000 },
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent('Songs: 42 pieces'),
     );
   });
 });
@@ -692,9 +686,8 @@ describe('LibraryView: search (UI batch 6.3; shelves spec 4.4)', () => {
     // 14 pieces; the one section that holds more than 7 shows 7 and an All button
     expect(screen.getAllByRole('button', { name: /^Open / })).toHaveLength(13);
     expect(container.querySelectorAll('.is-red')).toHaveLength(1);
-    await waitFor(
-      () => expect(screen.getByTestId('library-announcement')).toHaveTextContent('14 pieces'),
-      { timeout: 2000 },
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent('14 pieces'),
     );
     await userEvent.click(screen.getByRole('button', { name: 'Clear the search' }));
     expect(screen.getByRole('searchbox')).toHaveValue('');
@@ -716,12 +709,10 @@ describe('LibraryView: search (UI batch 6.3; shelves spec 4.4)', () => {
     expect(screen.getByText('Search looks in titles, composers and collections.')).toHaveClass(
       'muted',
     );
-    await waitFor(
-      () =>
-        expect(screen.getByTestId('library-announcement')).toHaveTextContent(
-          'No piece matches “fur elize”.',
-        ),
-      { timeout: 2000 },
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent(
+        'No piece matches “fur elize”.',
+      ),
     );
   });
   it('keeps the search for the visit', async () => {

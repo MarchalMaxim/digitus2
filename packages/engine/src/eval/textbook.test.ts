@@ -242,48 +242,44 @@ describe('textbook oracle (benchmarks/textbook)', () => {
   // Solves the 672 entries at both tempos and per hand: about 4 s alone since the consistent-repeats
   // pass (M3 Task 7), so the default 5 s timed out under the parallel `pnpm test` (M3 Task 9). Its
   // time is not a measure; the floors are.
-  it.skipIf(files.length === 0)(
-    'reports accuracy per family and keeps its floors',
-    () => {
-      const FLOOR = floors();
-      const { all, quarter } = oracle();
-      expect(all.length).toBeGreaterThan(0);
-      console.info('textbook oracle:', JSON.stringify(summary(quarter)));
-      const fast = evaluateTextbook(all, {}, SIXTEENTHS);
-      const byHand = (qpm?: { qpm: number }) =>
-        Object.fromEntries(
-          (['R', 'L'] as const).map((h) => [
-            h,
-            evaluateTextbook(
-              all.filter((e) => e.hand === h),
-              {},
-              qpm ?? {},
-            ).noteAccuracy,
-          ]),
-        ) as Record<'R' | 'L', number>;
-      const quarterHands = byHand();
-      const fastHands = byHand(SIXTEENTHS);
-      console.info('textbook oracle by hand (quarter = 120):', JSON.stringify(quarterHands));
-      console.info(
-        'textbook oracle (sixteenths, IOI 0.125 s):',
-        JSON.stringify({ ...summary(fast), byHand: fastHands }),
-      );
-      expect(quarter.noteAccuracy).toBeGreaterThanOrEqual(FLOOR.quarter.note);
-      expect(fast.noteAccuracy).toBeGreaterThanOrEqual(FLOOR.sixteenths.note);
-      for (const fam of ['scale', 'arpeggio', 'chromatic'] as const) {
-        expect(quarter.byFamily[fam]!.noteAccuracy, fam).toBeGreaterThanOrEqual(FLOOR.quarter[fam]);
-        expect(fast.byFamily[fam]!.noteAccuracy, fam).toBeGreaterThanOrEqual(FLOOR.sixteenths[fam]);
-      }
-      // Each hand on its own guards the left-hand mirror: solving the left-hand entries without the
-      // mirror (as right-hand notes) scored 0.28 at sixteenths after Task 8, against 0.75 with it
-      // (0.26 against 0.55 on the rules alone).
-      for (const h of ['R', 'L'] as const) {
-        expect(quarterHands[h], `quarter ${h}`).toBeGreaterThanOrEqual(FLOOR.quarter[h]);
-        expect(fastHands[h], `sixteenths ${h}`).toBeGreaterThanOrEqual(FLOOR.sixteenths[h]);
-      }
-    },
-    30_000,
-  );
+  it.skipIf(files.length === 0)('reports accuracy per family and keeps its floors', () => {
+    const FLOOR = floors();
+    const { all, quarter } = oracle();
+    expect(all.length).toBeGreaterThan(0);
+    console.info('textbook oracle:', JSON.stringify(summary(quarter)));
+    const fast = evaluateTextbook(all, {}, SIXTEENTHS);
+    const byHand = (qpm?: { qpm: number }) =>
+      Object.fromEntries(
+        (['R', 'L'] as const).map((h) => [
+          h,
+          evaluateTextbook(
+            all.filter((e) => e.hand === h),
+            {},
+            qpm ?? {},
+          ).noteAccuracy,
+        ]),
+      ) as Record<'R' | 'L', number>;
+    const quarterHands = byHand();
+    const fastHands = byHand(SIXTEENTHS);
+    console.info('textbook oracle by hand (quarter = 120):', JSON.stringify(quarterHands));
+    console.info(
+      'textbook oracle (sixteenths, IOI 0.125 s):',
+      JSON.stringify({ ...summary(fast), byHand: fastHands }),
+    );
+    expect(quarter.noteAccuracy).toBeGreaterThanOrEqual(FLOOR.quarter.note);
+    expect(fast.noteAccuracy).toBeGreaterThanOrEqual(FLOOR.sixteenths.note);
+    for (const fam of ['scale', 'arpeggio', 'chromatic'] as const) {
+      expect(quarter.byFamily[fam]!.noteAccuracy, fam).toBeGreaterThanOrEqual(FLOOR.quarter[fam]);
+      expect(fast.byFamily[fam]!.noteAccuracy, fam).toBeGreaterThanOrEqual(FLOOR.sixteenths[fam]);
+    }
+    // Each hand on its own guards the left-hand mirror: solving the left-hand entries without the
+    // mirror (as right-hand notes) scored 0.28 at sixteenths after Task 8, against 0.75 with it
+    // (0.26 against 0.55 on the rules alone).
+    for (const h of ['R', 'L'] as const) {
+      expect(quarterHands[h], `quarter ${h}`).toBeGreaterThanOrEqual(FLOOR.quarter[h]);
+      expect(fastHands[h], `sixteenths ${h}`).toBeGreaterThanOrEqual(FLOOR.sixteenths[h]);
+    }
+  });
   // The planned Task 7 sanity floor. It held after Task 8 only once runs were aligned to their
   // tonic: 0.527 (0.497 when matched in file order whatever the key).
   it.skipIf(files.length === 0)('note accuracy above 0.5 at quarter = 120', () => {

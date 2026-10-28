@@ -59,7 +59,7 @@ describe('page index against Verovio pages as DOM', () => {
     expect(seen.size).toBeGreaterThan(20);
     expect(index.staffNotes).toEqual(staffNotes);
     expect(staffNotes.length).toBeGreaterThanOrEqual(2);
-  }, 30_000);
+  });
 
   // The whole-staff rule across pages: what a hand switch dims on each page built alone, with the
   // staff places the markup of every page says are quiet, is what it dims with every page in the DOM.
@@ -111,5 +111,5 @@ describe('page index against Verovio pages as DOM', () => {
       expect(perPage, name).toEqual(whole);
     }
     expect(wholeStaffSeen).toBe(true);
-  }, 30_000);
+  });
 });

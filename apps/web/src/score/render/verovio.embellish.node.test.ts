@@ -42,5 +42,5 @@ describe('verovio render contract, embellished', () => {
     }
     expect(tagged.size).toBe(70);
     tk.destroy();
-  }, 30_000);
+  });
 });

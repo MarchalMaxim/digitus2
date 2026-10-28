@@ -52,7 +52,7 @@ beforeAll(async () => {
     if (repeats) pieces.push(piece);
     if (jumps) jumpPieces.set(p.slug, piece);
   }
-}, 240_000);
+});
 
 const quarters = (piece: Piece, order: number[]): number =>
   order.reduce((sum, i) => sum + piece.measures[i]!.lengthTicks, 0) / piece.divisions;
@@ -163,7 +163,7 @@ describe('the performance order on the library', () => {
     // A piece that differs is listed with its figure and cause; a listed piece that has come to
     // agree with the reference is a stale entry and fails here too.
     expect(off).toEqual(DIFFERS_FROM_REFERENCE);
-  }, 240_000);
+  });
 
   it('plays every bar of every piece at least once, jumps left out', () => {
     const lost: Record<string, number[]> = {};
@@ -173,7 +173,7 @@ describe('the performance order on the library', () => {
       if (missing.length > 0) lost[p.slug] = missing;
     }
     expect(lost).toEqual(BARS_NEVER_HEARD);
-  }, 240_000);
+  });
 
   it('plays all ten passes of a Hanon exercise, and its last bar', () => {
     // 30 bars, a backward repeat of ten on bar 29: 29 bars ten times, then bar 30.

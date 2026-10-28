@@ -419,7 +419,7 @@ describe('score page fusion', () => {
       }
     expect(stems).toBeGreaterThan(15);
     expect(maxStemError).toBeLessThan(1);
-  }, 30000);
+  });
   it('retains phase-sensitive single-row staff ink during full-resolution refinement', async () => {
     const source = notation(),
       frame = blank(900, 1080, 255);
@@ -443,7 +443,7 @@ describe('score page fusion', () => {
     let changed = 0;
     for (let i = 0; i < frame.data.length; i++) if (output.data[i] !== frame.data[i]) changed++;
     expect(changed).toBe(0);
-  }, 30000);
+  });
   it('bilinearly samples fractional page coordinates while retaining integer samples', async () => {
     const frame = blank(120, 100);
     for (let y = 0; y < 100; y++) for (let x = 0; x < 120; x++) ink(frame, x, y, x + y);

@@ -101,5 +101,5 @@ describe('evaluateHands', () => {
       macro,
       rows.map((r) => `${r.slug} ${r.accuracy.toFixed(1)}`).join('\n'),
     ).toBeGreaterThanOrEqual(85);
-  }, 60_000);
+  });
 });

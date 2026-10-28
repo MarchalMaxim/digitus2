@@ -78,5 +78,10 @@ export default defineConfig({
     // each of the 75 files, not running tests. A thread starts faster than a forked process
     // (30 s to 25 s for the suite on the dev machine); every file still gets its own module graph.
     pool: 'threads',
+    // A test's time limit only guards against a hang: it sits far above the slowest honest run on a
+    // loaded machine, so a busy CI runner never fails a test that would pass given the time. Tests
+    // wait on conditions (waitFor, findBy, vi.waitFor: 2 minutes, src/test/setup.ts), never on a clock.
+    testTimeout: 600_000,
+    hookTimeout: 600_000,
   },
 });

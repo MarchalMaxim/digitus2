@@ -76,7 +76,7 @@ describe('digitus2 embellish <file>', () => {
     expect(Object.keys(records[0]!).sort()).toEqual(
       ['bar', 'beat', 'length', 'measureIndex', 'midi', 'onset', 'pitch', 'role', 'rule'].sort(),
     );
-  }, 30_000);
+  });
 
   it('takes either a file or --library', () => {
     expect(main(['embellish'], capture().io)).toBe(2);
@@ -129,7 +129,7 @@ describe('digitus2 embellish --library', () => {
     expect(twinkleRow).toMatchObject({ offered: true, figures: 6, droppedBars: [], plainLevel: 1 });
     expect(JSON.parse(readFileSync(out, 'utf8'))).toMatchObject({ offered: 1, pieces: 2 });
     expect(formatEmbellishScorecard(scorecard)).toMatch(/offered 1 of 2/);
-  }, 60_000);
+  });
 
   it('fails below the floor, and on a missing floor file', () => {
     const f = twoPieces(2);
@@ -144,7 +144,7 @@ describe('digitus2 embellish --library', () => {
       main(['embellish', '--library', f.library, '--floor', join(f.dir, 'none.json')], missing.io),
     ).toBe(1);
     expect(missing.err.join('')).toMatch(/floor file not found/);
-  }, 60_000);
+  });
 
   it('prints the scorecard as JSON with --json', () => {
     const f = twoPieces(1);
@@ -152,5 +152,5 @@ describe('digitus2 embellish --library', () => {
     expect(main(['embellish', '--library', f.library, '--levels', '1', '--json'], c.io)).toBe(0);
     expect(JSON.parse(c.out.join(''))).toMatchObject({ pieces: 2, offered: 1, levels: [1] });
     expect(main(['embellish', '--library', f.library, '--levels', '1,x'], capture().io)).toBe(2);
-  }, 60_000);
+  });
 });

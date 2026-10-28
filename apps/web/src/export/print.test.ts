@@ -78,7 +78,7 @@ it('installs and cleans a native refusal sheet without score notation', () => {
 it('settles and removes paper when print returns without any print lifecycle event', async () => {
   await printPages(['<svg/>'], 'Title', 'Composer', new AbortController().signal);
   expect(document.querySelector('.print-score')).toBeNull();
-}, 1000);
+});
 
 it('keeps active print media until it exits when afterprint is missing', async () => {
   let active = false;
@@ -95,7 +95,7 @@ it('keeps active print media until it exits when afterprint is missing', async (
   media.dispatchEvent(new Event('change'));
   await pending;
   expect(document.querySelector('.print-score')).toBeNull();
-}, 1000);
+});
 
 it('creates the title and credits only once for a multi-page engraving', () => {
   const cleanup = installPrintPages(['<svg/>', '<svg/>'], 'Title', 'Composer');

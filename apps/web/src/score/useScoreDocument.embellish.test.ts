@@ -95,7 +95,7 @@ async function openOffered(source: PieceSource = twinkle, width = 800) {
     { initialProps: { src: source, w: width } },
   );
   // A longer piece is solved and linted at four hand sizes twice: give the guard time.
-  await waitFor(() => expect(hook.result.current.embellish).toBe('offered'), { timeout: 15_000 });
+  await waitFor(() => expect(hook.result.current.embellish).toBe('offered'));
   return { ...hook, engine, renderer };
 }
 
@@ -109,7 +109,7 @@ describe('"Add notes between" in the score document', () => {
       seen.push([d.status, d.embellish]);
       return d;
     });
-    await waitFor(() => expect(result.current.embellish).toBe('offered'), { timeout: 15_000 });
+    await waitFor(() => expect(result.current.embellish).toBe('offered'));
     const ready = seen.findIndex(([s]) => s === 'ready');
     const statuses = seen.slice(0, ready + 1).map(([s]) => s);
     expect(statuses.filter((s, i) => statuses[i - 1] !== s)).toEqual([
@@ -340,7 +340,7 @@ describe('"Add notes between" in the score document', () => {
         fetchText: fetchFlaky,
       }),
     );
-    await waitFor(() => expect(result.current.embellish).toBe('offered'), { timeout: 15_000 });
+    await waitFor(() => expect(result.current.embellish).toBe('offered'));
     failFingered = true;
     act(() => {
       useAppStore.getState().setSettings({ showEditorial: true });
@@ -350,7 +350,7 @@ describe('"Add notes between" in the score document', () => {
     expect(result.current.error).toBe('the fingered file could not be fetched');
     // Not an embellished layout failure: the switch is not withdrawn.
     expect(result.current.embellish).toBe('offered');
-  }, 30_000);
+  });
   it('a hand-size change re-fingers both versions', async () => {
     const { result, engine, renderer } = await openOffered();
     const offered = offerFor(result.current.xml!);
@@ -400,7 +400,7 @@ describe('"Add notes between" in the score document', () => {
     expect(Object.keys(editorial!)).toHaveLength(Object.keys(plainEditorial).length);
     // The plain fingering for export stays the editor's.
     expect(result.current.plain!.assignment).toBe(plainEditorial);
-  }, 30_000);
+  });
 });
 
 describe('which pieces are tried', () => {
@@ -449,14 +449,14 @@ describe('which pieces are tried', () => {
       const { result, unmount } = renderHook(() =>
         useScoreDocument(melodyOf(n), 800, { engine, renderer: fakeRenderer() }),
       );
-      await waitFor(() => expect(result.current.embellish).toBe('none'), { timeout: 15_000 });
+      await waitFor(() => expect(result.current.embellish).toBe('none'));
       expect(result.current.score!.notes).toHaveLength(n);
       unmount();
       return posted.length;
     };
     expect(await open(901)).toBe(0);
     expect(await open(900)).toBe(1);
-  }, 30_000);
+  });
   it('never asks for a scan import', async () => {
     const engine = inlineEngine();
     const { result } = renderHook(() =>

@@ -54,7 +54,7 @@ function deviation(image: Float64Array, width: number, inside: (x: number, y: nu
   return Math.sqrt(squares / n - (sum / n) ** 2);
 }
 
-describe('a view misregistered in one quadrant (issue 143)', { timeout: 60_000 }, () => {
+describe('a view misregistered in one quadrant (issue 143)', () => {
   const W = 256,
     H = 256,
     PAPER = 240,
@@ -198,7 +198,7 @@ describe('a view misregistered in one quadrant (issue 143)', { timeout: 60_000 }
   });
 });
 
-describe('fusion weights (issue 143)', { timeout: 60_000 }, () => {
+describe('fusion weights (issue 143)', () => {
   it('keeps the ink of the one clean view under glare in most photographs', async () => {
     const W = 120,
       H = 120;

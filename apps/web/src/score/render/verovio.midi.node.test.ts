@@ -94,7 +94,7 @@ describe('verovio renders generated MusicXML', () => {
       [];
     expect(digits).toHaveLength(64);
     tk.destroy();
-  }, 30_000);
+  });
   it('renders tuplets, dotted values, ties across barlines and odd lengths written as tied notes', async () => {
     const tk = await toolkit();
     const score = awkwardScore();
@@ -104,5 +104,5 @@ describe('verovio renders generated MusicXML', () => {
     expect(svg).toMatch(/class="tie"/);
     expect(svg).toMatch(/class="dots?"/);
     tk.destroy();
-  }, 30_000);
+  });
 });

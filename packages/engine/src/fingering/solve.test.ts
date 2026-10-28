@@ -418,7 +418,7 @@ describe('outputs', () => {
         `${weightSet}: ${solveMs.toFixed(1)} ms / ${referenceMs.toFixed(1)} ms`,
       ).toBeLessThan(SOLVE_REFERENCE_RATIO);
     }
-  }, 30_000);
+  });
 });
 
 // M2 hardening (docs/experiments.md, solver rules and weights).
@@ -1067,7 +1067,7 @@ describe('consistent repeats (M3 Task 7, H4: the copies of a passage take one fi
     expect(r.assignment[last]!.finger).toBe(4);
     expect(r.assignment[last]!.pinned).toBe(true);
   });
-  // Solves the 30 library pieces twice: a longer timeout.
+  // Solves the 30 library pieces twice, under the suite's hang guard.
   it('on the library, repeated passages are fingered alike and no hand breaks more laws', () => {
     const files = LIBRARY_FILES;
     let groups = 0;
@@ -1112,5 +1112,5 @@ describe('consistent repeats (M3 Task 7, H4: the copies of a passage take one fi
     expect(groups).toBeGreaterThan(100);
     expect(consistentOn / groups).toBeGreaterThanOrEqual(0.98);
     expect(consistentOff / groups).toBeLessThan(0.7);
-  }, 20_000);
+  });
 });

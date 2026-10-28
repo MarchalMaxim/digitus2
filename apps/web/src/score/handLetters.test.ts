@@ -1,7 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { parseMusicXml, type Hand, type Note } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
-import { CLOSE_SEMITONES, handGap, letteredBars, lettersShown } from './handLetters.js';
+import {
+  CLOSE_SEMITONES,
+  handGap,
+  hiddenHand,
+  latchApplies,
+  letteredBars,
+  lettersShown,
+} from './handLetters.js';
 import { buildOnsetGroups, type OnsetGroup } from './onsetGroups.js';
 
 /** A library score, parsed as the app parses it. A path held in a variable stays a file URL. */
@@ -123,5 +130,74 @@ describe('whether the keyboard shows letters now', () => {
     expect(lettersShown(g, 0, bars)).toBe(true);
     expect(lettersShown(g, 1, bars)).toBe(false);
     expect(lettersShown(g, -1, bars)).toBe(false);
+  });
+});
+
+describe('the hand out of view (spec 15, rule 5)', () => {
+  const key = (hand: Hand, visible: boolean) => ({ hand, visible });
+  it('names the hand whose keys are all out of view while the other has one in view', () => {
+    expect(hiddenHand([key('L', false), key('R', true)])).toBe('L');
+    expect(hiddenHand([key('L', true), key('R', false), key('R', false)])).toBe('R');
+    expect(hiddenHand([key('L', false), key('R', true), key('R', false)])).toBe('L');
+  });
+  it('is null with one hand only, both in view, a hand part in view, or nothing in view', () => {
+    expect(hiddenHand([])).toBeNull();
+    expect(hiddenHand([key('R', false), key('R', false)])).toBeNull();
+    expect(hiddenHand([key('L', true), key('R', true)])).toBeNull();
+    expect(hiddenHand([key('L', false), key('L', true), key('R', true)])).toBeNull();
+    expect(hiddenHand([key('L', false), key('R', false)])).toBeNull();
+  });
+
+  // bars 0 to 4: bar 2 has two onsets (groups 2 and 3); the score letters bar 0 only
+  const g = groups(
+    n('R', 60, 0, 0),
+    n('R', 60, 1, 4),
+    n('R', 60, 2, 8),
+    n('R', 60, 2, 9),
+    n('R', 60, 3, 12),
+    n('R', 60, 4, 16),
+  );
+  const bars = new Set([0]);
+  it('with no hidden bar it behaves as before', () => {
+    for (let i = -1; i < 6; i++)
+      expect(lettersShown(g, i, bars, null)).toBe(lettersShown(g, i, bars));
+    expect(lettersShown(g, 2, bars, null)).toBe(false);
+  });
+  it('the latch shows in its bar only, onset after onset, and not in the next bar', () => {
+    expect(lettersShown(g, 2, bars, 2)).toBe(true);
+    expect(lettersShown(g, 3, bars, 2)).toBe(true); // the second onset of bar 2
+    expect(lettersShown(g, 4, bars, 2)).toBe(false); // the next bar: the latch has ended
+    expect(lettersShown(g, 1, bars, 2)).toBe(false); // the bar before
+    expect(lettersShown(g, -1, bars, 2)).toBe(false); // nothing marked
+  });
+  it('a lone bar between a latched bar and a lettered bar shows too (the one-bar bridge)', () => {
+    expect(lettersShown(g, 4, new Set([0, 4]), 2)).toBe(true); // bar 3 sits between 2 and 4
+    expect(lettersShown(g, 4, new Set([0, 5]), 2)).toBe(false); // bar 4 is not lettered
+    expect(lettersShown(g, 1, new Set([0]), 2)).toBe(false); // the bridge goes forward only
+  });
+  it('a seek within the same bar keeps the latch; a seek to another bar drops it', () => {
+    expect(lettersShown(g, 3, bars, 2)).toBe(true);
+    expect(lettersShown(g, 2, bars, 2)).toBe(true);
+    expect(lettersShown(g, 5, bars, 2)).toBe(false);
+    expect(lettersShown(g, 1, bars, 2)).toBe(false);
+  });
+});
+
+describe('whether a latched bar still applies (one continuous visit)', () => {
+  const bars = new Set([0, 4]);
+  it('holds in its own bar', () => {
+    expect(latchApplies(2, 2, bars)).toBe(true);
+  });
+  it('holds in the next bar only when the bridge applies there (a lettered bar after it)', () => {
+    expect(latchApplies(2, 3, bars)).toBe(true); // bar 4 is lettered: the lone bar 3 is bridged
+    expect(latchApplies(2, 3, new Set([0, 5]))).toBe(false);
+    expect(latchApplies(3, 4, new Set([0, 5]))).toBe(true);
+    expect(latchApplies(2, 3, new Set([0, 4]))).toBe(true);
+  });
+  it('ends on a seek away, a loop wrap or a rewind to another bar, and with no cursor', () => {
+    expect(latchApplies(2, 0, bars)).toBe(false); // wrap or rewind to an earlier bar
+    expect(latchApplies(2, 5, bars)).toBe(false); // a seek ahead
+    expect(latchApplies(2, 1, bars)).toBe(false); // the bridge goes forward only
+    expect(latchApplies(2, null, bars)).toBe(false);
   });
 });

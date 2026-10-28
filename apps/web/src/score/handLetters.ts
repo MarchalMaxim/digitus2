@@ -39,14 +39,47 @@ export function letteredBars(groups: readonly OnsetGroup[]): Set<number> {
   return out;
 }
 
-/** Whether the cursor's group (playing, or paused under T10) sits in a lettered bar. */
+/**
+ * The hand whose keys at the cursor are all out of view of a scrolling keyboard while the other
+ * hand has a key in view (spec 15, rule 5); null when one hand sounds alone, both show, or none.
+ */
+export function hiddenHand(keys: readonly { hand: Hand; visible: boolean }[]): Hand | null {
+  const seen = { L: false, R: false };
+  const out = { L: false, R: false };
+  for (const k of keys) (k.visible ? seen : out)[k.hand] = true;
+  if (out.L && !seen.L && seen.R) return 'L';
+  if (out.R && !seen.R && seen.L) return 'R';
+  return null;
+}
+
+/**
+ * Whether the cursor's group (playing, or paused under T10) sits in a lettered bar. `hiddenBar` is
+ * the bar where a hand went out of view (rule 5): it keeps the letters to its end, and a lone bar
+ * between it and a lettered bar shows them too, as the score's own bridge does.
+ */
 export function lettersShown(
   groups: readonly OnsetGroup[],
   currentGroup: number,
   bars: ReadonlySet<number>,
+  hiddenBar: number | null = null,
 ): boolean {
   const g = currentGroup >= 0 ? groups[currentGroup] : undefined;
-  return g !== undefined && bars.has(g.notes[0]!.measureIndex);
+  if (g === undefined) return false;
+  const m = g.notes[0]!.measureIndex;
+  return bars.has(m) || m === hiddenBar || (hiddenBar === m - 1 && bars.has(m + 1));
+}
+
+/**
+ * Whether a latched bar still applies with the cursor in `cursorBar`: in the latched bar, and in
+ * the lone bar after it when a lettered bar follows (the bridge). Anywhere else, or with nothing
+ * marked, the visit is over: coming back (a loop wrap, a rewind, a seek) latches anew.
+ */
+export function latchApplies(
+  hiddenBar: number,
+  cursorBar: number | null,
+  bars: ReadonlySet<number>,
+): boolean {
+  return cursorBar === hiddenBar || (cursorBar === hiddenBar + 1 && bars.has(hiddenBar + 2));
 }
 
 /** The letter that names a hand on the keyboard, in the language of `t`: L and R, G and D, I and D. */

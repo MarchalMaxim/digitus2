@@ -55,7 +55,7 @@ export default defineConfig({
           {
             name: 'iphone',
             use: { ...devices['iPhone 15'], launchOptions: { args: [] } },
-            testMatch: /(scan-camera(-real)?|scan-grand-staff|play-along-home)\.spec\.ts/,
+            testMatch: /(scan-camera(-real)?|scan-grand-staff|scan-linked|play-along-home)\.spec\.ts/,
           },
         ]),
   ],

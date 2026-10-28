@@ -10,7 +10,7 @@ From the repository root, with Python 3.11 or later:
 powershell -File research/omr/prototypes/homr-photo/setup.ps1
 ```
 
-The script downloads homr at commit `ab369ac` and creates an isolated CPU-only virtual environment with the locked inference dependencies (`requirements-cpu.txt`). It fetches three pinned ONNX models (about 139 MB of downloads, 157 MB unpacked), applies the five source patches below and verifies the 46 inference source files. No PyTorch, GPU or global package is needed. A second run re-verifies the prepared source, and any unexpected edit or added file fails it. The toolchain lands in the ignored `research/omr/results/photo-options/toolchain` (override with `-Root`). Pass that directory to the worker with `--homr-toolchain`.
+The script downloads homr at commit `ab369ac` and creates an isolated CPU-only virtual environment with the locked inference dependencies (`requirements-cpu.txt`). It fetches three pinned ONNX models (about 139 MB of downloads, 157 MB unpacked), applies the source patches below and verifies the 46 inference source files. No PyTorch, GPU or global package is needed. A second run re-verifies the prepared source, and any unexpected edit or added file fails it. The toolchain lands in the ignored `research/omr/results/photo-options/toolchain` (override with `-Root`). Pass that directory to the worker with `--homr-toolchain`.
 
 At recognition time the adapter (`../local-worker/homr.py`) re-checks the source and model pins. It runs homr in a child Python process with networking disabled and title OCR off, and rejects images above 25 megapixels before decoding. It keeps the original image bytes and uses the worker's timeout, cancellation and log bounds.
 

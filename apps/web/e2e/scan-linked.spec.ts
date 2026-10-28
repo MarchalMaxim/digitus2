@@ -39,6 +39,17 @@ async function onPhoto(photo: Locator, p: { x: number; y: number }, scroll = tru
   return { x: box.x + (p.x / WIDTH) * box.width, y: box.y + (p.y / HEIGHT) * box.height };
 }
 const photo = (page: Page) => page.locator('.scan-photo .scan-original-image');
+/**
+ * The centre of a note in the notation, scrolled into view: WebKit's Playwright refuses to hover or
+ * click an SVG group as outside the viewport, so the mouse goes to the point instead.
+ */
+async function centreOf(note: Locator) {
+  await note.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  return note.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  });
+}
 
 test('scan linked: places to check are ringed on the photo and in the notation, and each view points into the other', async ({
   page,
@@ -69,7 +80,8 @@ test('scan linked: places to check are ringed on the photo and in the notation, 
   await expect(page.locator('.scan-hover-box')).toHaveCount(0);
 
   // Pointing at a note in the notation frames it on the photo.
-  await page.locator('.scan-sheet [id="s1"]').hover({ force: true });
+  const s1 = await centreOf(page.locator('.scan-sheet [id="s1"]'));
+  await page.mouse.move(s1.x, s1.y);
   await expect(page.locator('.scan-photo-focus')).toHaveCount(1);
   const frame = await page.locator('.scan-photo-focus').boundingBox();
   // Measured where the photo is now, wherever the hover scrolled the page.
@@ -118,7 +130,8 @@ test('scan linked: one page of three is photographed again, alone, and the other
   // A correction on the last page: its last note one step higher.
   const last = page.locator('.scan-sheet g.note').last();
   const id = await last.getAttribute('id');
-  await last.click({ force: true });
+  const at = await centreOf(last);
+  await page.mouse.click(at.x, at.y);
   await page.getByRole('button', { name: 'Higher' }).click();
   await expect(page.getByText('Review corrections')).toBeVisible();
 

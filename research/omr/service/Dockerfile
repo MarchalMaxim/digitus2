@@ -48,7 +48,7 @@ RUN mkdir -p /opt/text-models \
     | sha256sum -c - \
  && chmod 644 eng.traineddata LICENSE
 
-# homr: pinned source, locked CPU dependencies, pinned models, the four patches. The setup
+# homr: pinned source, locked CPU dependencies, pinned models, the patches of homr-photo/README.md. The setup
 # imports homr.py, which imports the adapter's three standard-library neighbours.
 COPY prototypes/homr-photo /app/research/omr/prototypes/homr-photo
 COPY prototypes/photo-recovery /app/research/omr/prototypes/photo-recovery

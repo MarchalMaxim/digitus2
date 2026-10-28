@@ -113,7 +113,7 @@ describe('the edition on the core pieces', () => {
         ...rows.map(line),
       ].join('\n'),
     );
-  }, 600_000);
+  });
 
   it('prints at most what the editor prints and stays inside the level ceiling', () => {
     expect(rows.length).toBe(30);

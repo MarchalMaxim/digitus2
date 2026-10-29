@@ -249,7 +249,7 @@ test('scan: a scanner busy with another score is waited for, then the bar runs',
 test('scan: importer refusal retains raw output and blocks fingering use', async ({ page }) => {
   await mockService(
     page,
-    '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes><note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><tie type="stop"/></note></measure></part></score-partwise>',
+    '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes><note><pitch><step>H</step><octave>4</octave></pitch><duration>1</duration></note></measure></part></score-partwise>',
   );
   await choose(page);
   await page.getByRole('button', { name: 'Scan this score' }).click();

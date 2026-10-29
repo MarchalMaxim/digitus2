@@ -1,12 +1,14 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
+import { en } from '../i18n/en/index.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
 import { FINGER_LEGEND } from '../score/FingerLegend.js';
 import type * as ScoreDocumentModule from '../score/useScoreDocument.js';
 import type * as ManifestModule from './manifest.js';
-import { shelfOfGenre } from './levels.js';
+import { SHELVES, shelfOfGenre, tierOf, TIERS, type ShelfId, type Tier } from './levels.js';
 import { libraryPieces } from './manifest.js';
 import { LibraryView } from './LibraryView.js';
 import { useLocalLibrary } from './local/state.js';
@@ -336,6 +338,79 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     await userEvent.keyboard('{Escape}');
     expect(h2s()).toHaveLength(5);
     expect(screen.getByRole('button', { name: 'All 42 songs' })).toHaveFocus();
+  });
+  it('focuses the All button after Escape that lands between a later render and its effects', async () => {
+    // The shared shelf is asked for once the browser is idle: that render is not urgent, so React
+    // commits it, yields for a paint and runs its effects in a later task. An Escape pressed in
+    // between makes React run those effects first, while the open shelf is still drawn. (happy-dom
+    // has no requestIdleCallback: its 200 ms stand-in timer did this to the test above under load.)
+    const idle: Array<() => void> = [];
+    vi.stubGlobal('requestIdleCallback', (callback: () => void) => idle.push(callback));
+    vi.stubGlobal('cancelIdleCallback', () => {});
+    // Renders in the same commit as the library and says when that commit's effects have run.
+    const commit = { bump: (_: number) => {}, drawn: 0, settled: 0 };
+    function Commit() {
+      const [n, setN] = useState(0);
+      commit.bump = setN;
+      useLayoutEffect(() => void (commit.drawn = n));
+      useEffect(() => void (commit.settled = n));
+      return null;
+    }
+    render(
+      <>
+        <LibraryView />
+        <Commit />
+      </>,
+    );
+    await open('All 42 songs');
+    const actEnvironment = Reflect.get(globalThis, 'IS_REACT_ACT_ENVIRONMENT');
+    Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', false); // React's own scheduler, as in a browser
+    try {
+      commit.bump(1);
+      idle.forEach((callback) => callback());
+      for (let task = 0; task < 100 && commit.drawn === 0; task++)
+        await new Promise((resolve) => setImmediate(resolve));
+      expect(commit).toMatchObject({ drawn: 1, settled: 0 });
+      document.activeElement!.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+      );
+      await waitFor(() => expect(h2s()).toHaveLength(5));
+    } finally {
+      Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', actEnvironment);
+    }
+    expect(screen.getByRole('button', { name: 'All 42 songs' })).toHaveFocus();
+  });
+  it('closes a shelf that has no All button on this level onto its first row, and leaves the focus alone after', async () => {
+    // A shelf with more than 5 pieces on one level and 1 to 5 on another: it stays open across
+    // the change, and closing it there draws no All button to land on.
+    const counts = new Map<string, number>();
+    for (const p of libraryPieces()) {
+      const key = `${tierOf(p.level)}|${shelfOfGenre(p.genre)}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    const count = (tier: Tier, shelf: ShelfId) => counts.get(`${tier}|${shelf}`) ?? 0;
+    const cases = SHELVES.flatMap(({ id: shelf }) =>
+      TIERS.flatMap((big) =>
+        TIERS.filter((small) => count(big, shelf) > 5 && count(small, shelf) > 0)
+          .filter((small) => count(small, shelf) <= 5)
+          .map((small) => ({ shelf, big, small })),
+      ),
+    );
+    const { shelf, big, small } = cases[0]!;
+    useAppStore.setState({ libraryLevel: big });
+    const { container } = render(<LibraryView />);
+    await userEvent.click(container.querySelector<HTMLElement>(`[data-shelf-all="${shelf}"]`)!);
+    await userEvent.click(screen.getByRole('radio', { name: en.library.tiers[small] }));
+    expect(useAppStore.getState().libraryShelf).toBe(shelf);
+    await userEvent.keyboard('{Escape}');
+    expect(useAppStore.getState().libraryShelf).toBeNull();
+    const closed = container.querySelector(`[aria-labelledby="shelf-${shelf}"]`)!;
+    expect(closed.querySelector('[data-shelf-all]')).toBeNull();
+    expect(closed.querySelector('.piece-row')).toHaveFocus();
+    // Back on the first level, the shelf's All button is drawn again and must not take the focus.
+    await userEvent.click(screen.getByRole('radio', { name: en.library.tiers[big] }));
+    expect(container.querySelector(`[data-shelf-all="${shelf}"]`)).not.toBeNull();
+    expect(screen.getByRole('radio', { name: en.library.tiers[big] })).toHaveFocus();
   });
   it('keeps the shelf open on a level that has it, and returns to the shelves on one that has not', async () => {
     useAppStore.setState({ libraryLevel: 'challenging' });

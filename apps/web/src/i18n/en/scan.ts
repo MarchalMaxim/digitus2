@@ -121,6 +121,19 @@ export const scan = {
     filesSummary: 'Files for a notation editor',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Technical reason: ${reason}`,
+    /** `error` says the notation could not be drawn: it is scanned again, or its files used elsewhere. */
+    notDrawnProblem: (error: string): string =>
+      `${error} Scan again, or download the files for a notation editor below.`,
+    /** Said after Fix all (issue 233). */
+    fixedAll: (n: number): string =>
+      plural('en', n, {
+        one: '# correction made. Undo takes it back.',
+        other: '# corrections made. Undo takes them all back.',
+      }),
+    /** Under Recognition details on a device that keeps its scans as validation cases (issue 233). */
+    kept: 'Scans from this device are kept to improve recognition.',
+    /** Selects the first note of the bar an import refusal names (issue 233). */
+    showBar: (bar: string): string => `Show bar ${bar}`,
     retained:
       'Find retained originals and recognition in My scores. Keep your own original files; browser storage can be cleared. Playback tempo may use an app default.',
     beamGrouping: 'Beam grouping is inferred and may differ from the original.',
@@ -290,6 +303,16 @@ export const scan = {
     /** Offered on a place to check for a repeat mark the score cannot carry (issue 230). */
     removeMark: (mark: 'ending' | 'repeat'): string =>
       mark === 'ending' ? 'Remove the repeat ending' : 'Remove the repeat sign',
+    /**
+     * Offered on a tie that ends before its next note (issue 233): the length that makes it reach.
+     * `length` is one of `lengths` above; `bar` the bar's printed number.
+     */
+    lengthenTie: (pitch: string, bar: string, length: string, dotted: boolean): string =>
+      `Make the ${pitch} in bar ${bar} ${dotted ? 'a dotted ' : /^[aeiou]/.test(length) ? 'an ' : 'a '}${length} so the tie reaches`,
+    /** Offered on a tie the score cannot keep (issue 233). */
+    removeTie: 'Remove the tie',
+    /** Applies the offer of every place that follows from the file alone (issue 233). */
+    fixAll: (n: number): string => `Fix all ${n}`,
     stale: (kept: number) =>
       `Some saved corrections no longer apply to this recognition. The first ${kept} are kept.`,
     problemsSummary: (n: number) =>
@@ -299,8 +322,30 @@ export const scan = {
         `${where}: the tied ${pitch} ends ${gap} before the next ${pitch} begins. Check the note lengths.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
         `${where}: the tied ${pitch} runs ${gap} into the next ${pitch}. Check the note lengths.`,
-      tieUnmatched: (where: string, pitch: string) =>
-        `${where}: a tie on ${pitch} has no matching note.`,
+      /** `side`: the note's tie start, or its tie stop, has no matching note. */
+      tieUnmatched: (where: string, pitch: string, side: 'start' | 'stop'): string =>
+        side === 'start'
+          ? `${where}: a tie on ${pitch} has no matching note.`
+          : `${where}: the tie into ${pitch} comes from no matching earlier note.`,
+      /** A tie read on a grace note (issue 233). */
+      tieGrace: (where: string, pitch: string): string =>
+        `${where}: the grace note ${pitch} is tied, but a grace note takes no time to hold.`,
+      /** A tie the import played as separate notes, with why (issue 233). */
+      tieRepaired: (
+        where: string,
+        pitch: string,
+        reason: 'gap' | 'unmatchedStart' | 'unmatchedStop' | 'grace',
+      ): string =>
+        reason === 'gap'
+          ? `${where}: the tie on ${pitch} does not reach the next ${pitch}. It is played as two notes.`
+          : reason === 'unmatchedStart'
+            ? `${where}: the tie on ${pitch} leads to no next ${pitch}. It is played without the tie.`
+            : reason === 'unmatchedStop'
+              ? `${where}: the tie into ${pitch} comes from no earlier ${pitch}. It is played as a new note.`
+              : `${where}: the grace note ${pitch} is tied. It is played as two notes.`,
+      /** The same, when the import's note cannot be found in the review: the bar alone. */
+      tieRepairedBar: (where: string): string =>
+        `${where}: a tie does not fit its notes. It is played without the tie.`,
       /** `timing` is the sentence from `timing` above. */
       barTiming: (timing: string) => `The hands disagree. ${timing}`,
       /** The hands agree, but the bar runs past the time signature. */
@@ -349,11 +394,23 @@ export const scan = {
       'The pages were recognized, but their notation could not be combined. Individual page files are available below.',
     somePagesFailed: 'Some pages need another scan. Recognized pages are kept.',
     recognitionFailed: 'Recognition failed.',
-    notationNotShown:
-      'Notation could not be displayed. The technical reason is under Recognition details.',
+    /** The notation could not be drawn; `page` is the page shown on its own, absent for the whole scan. */
+    notDrawn: (page: number | undefined): string =>
+      page === undefined
+        ? 'The recognized notation could not be drawn.'
+        : `Page ${page}: the recognized notation could not be drawn.`,
+    /** The recognition holds no music to draw; `page` as above. */
+    noMusic: (page: number | undefined): string =>
+      page === undefined ? 'No music was read from this scan.' : `Page ${page}: no music was read.`,
     noNotes: 'No playable notes were recognized.',
     notUsable:
       'This recognition cannot be used for fingerings yet: some of its notes do not fit together.',
+    /** The import refused `bar`, the bar's printed number as the engine named it (issue 233). */
+    notUsableAt: (bar: string): string =>
+      `Bar ${bar} could not be read as written, so this recognition cannot be used for fingerings yet.`,
+    /** The engine's worker stopped twice, so the notes were never checked (issue 233). */
+    notChecked:
+      'The notes could not be checked for fingerings in this tab. Reload the page and open this scan from My scores.',
     offline: 'Could not reach the scanner. Check your connection and try again.',
     cancelFailed:
       'Cancellation could not be confirmed. The scanner stops by itself within three minutes.',

@@ -129,25 +129,43 @@ function normalizeMeasure(measure: Element): boolean {
   return true;
 }
 
+/** Regroups a copy of `measure` and puts it in its place; a bar it cannot read stays as it is. */
+function normalizeInPlace(measure: Element): boolean {
+  const copy = measure.cloneNode(true) as Element;
+  try {
+    if (!normalizeMeasure(copy)) return false;
+  } catch {
+    return false;
+  }
+  measure.replaceWith(copy);
+  return true;
+}
+
 /**
  * Render-only workaround for HOMR's interleaved MusicXML voices. The original XML still feeds
  * the engine and downloads; IDs have already been injected before this copy is regrouped.
  * Skip unknown notation rather than moving position-sensitive directions or changing music.
+ * It never throws: recognition this does not expect is drawn as it was read (issue 233).
  */
 export function normalizeVoices(xml: string): string {
   if (!xml.includes('homr')) return xml;
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  if (
-    doc.documentElement.localName !== 'score-partwise' ||
-    doc.querySelector('parsererror') ||
-    ![...doc.querySelectorAll('identification > encoding > software')].some(
-      (el) => el.textContent?.trim() === 'homr',
+  try {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    if (
+      doc.documentElement.localName !== 'score-partwise' ||
+      doc.querySelector('parsererror') ||
+      ![...doc.querySelectorAll('identification > encoding > software')].some(
+        (el) => el.textContent?.trim() === 'homr',
+      )
     )
-  )
+      return xml;
+    let changed = false;
+    for (const part of children(doc.documentElement, 'part')) {
+      for (const measure of children(part, 'measure'))
+        changed = normalizeInPlace(measure) || changed;
+    }
+    return changed ? new XMLSerializer().serializeToString(doc) : xml;
+  } catch {
     return xml;
-  let changed = false;
-  for (const part of children(doc.documentElement, 'part')) {
-    for (const measure of children(part, 'measure')) changed = normalizeMeasure(measure) || changed;
   }
-  return changed ? new XMLSerializer().serializeToString(doc) : xml;
 }

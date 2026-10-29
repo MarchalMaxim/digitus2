@@ -1,3 +1,4 @@
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { parseMusicXml } from '@digitus2/engine';
 import { describe, expect, it } from 'vitest';
 import {
@@ -5,13 +6,25 @@ import {
   barTiming,
   CorrectionError,
   findProblems,
+  fixAll,
   formOffers,
+  inReadingOrder,
   meterOffers,
+  offersFor,
+  placesFromRepairs,
   type Correction,
+  type Problem,
 } from './corrections.js';
 import { en } from '../i18n/en/index.js';
+import { joinScanPages } from './join.js';
 import { parseScanXml, readScanScore } from './notes.js';
-import { describeCorrection, describeProblem } from './ScanEditor.js';
+import {
+  correct,
+  describeCorrection,
+  describeProblem,
+  offerLabel,
+  problemNote,
+} from './ScanEditor.js';
 
 /** One note element: `p` is a pitch like C5 or Bb4, or `r` for a rest. */
 function n(
@@ -756,5 +769,498 @@ describe('repeat marks the score cannot carry (issue 230)', () => {
     expect(applyCorrections(score([BAR, BAR]), [{ kind: 'barline', bar: 5 }]).refusal!(en)).toBe(
       'This bar is no longer in the score.',
     );
+  });
+});
+
+describe('ties the import cannot keep, with one-click fixes (issue 233)', () => {
+  const read = (xml: string) => readScanScore(parseScanXml(xml));
+  /** The ties the scan import plays as separate notes. */
+  const repairsOf = (xml: string) => {
+    try {
+      return parseMusicXml(xml, { preserveNotation: true, tolerateScanTies: true }).tieRepairs;
+    } catch {
+      return [];
+    }
+  };
+  /**
+   * The review's whole loop as the scan view runs it: places (with the ties the import played as
+   * separate notes), offers, and the fixes "Fix all" applies.
+   */
+  const review = (xml: string) => {
+    const parsed = read(xml);
+    const repairs = repairsOf(xml);
+    const checked = findProblems(parsed);
+    const problems = inReadingOrder([...checked, ...placesFromRepairs(parsed, checked, repairs)]);
+    const offers = offersFor(parsed, problems, repairs);
+    return { parsed, problems, offers, fixes: fixAll(parsed, problems, offers) };
+  };
+  const labels = (xml: string) => {
+    const { parsed, problems, offers } = review(xml);
+    return problems.map((p) => (offers.get(p) ?? []).map((c) => offerLabel(en, parsed, p, c)));
+  };
+  /** A grace note, which has no duration of its own. */
+  const grace = (step: string, octave: number, tie?: 'start' | 'stop') =>
+    `<note><grace/><pitch><step>${step}</step><octave>${octave}</octave></pitch>${tie ? `<tie type="${tie}"/>` : ''}<voice>1</voice><type>16th</type><staff>1</staff>${tie ? `<notations><tied type="${tie}"/></notations>` : ''}</note>`;
+  const LEFT =
+    backup(9) +
+    n('C3', 6, 'half', { staff: 2, dots: 1 }) +
+    n('G3', 3, 'quarter', { staff: 2, dots: 1 });
+  // A 9/8 bar laid out as homr writes it: an A4 read as a half where the page has a dotted half,
+  // tied to the A4 a quarter later, with the other voice's rests between.
+  const LATE =
+    n('A4', 4, 'half', { tie: 'start' }) +
+    backup(4) +
+    n('r', 3, 'quarter', { voice: 2, dots: 1 }) +
+    n('r', 3, 'quarter', { voice: 2, dots: 1 }) +
+    n('A4', 2, 'quarter', { tie: 'stop' }) +
+    n('C5', 1, 'eighth') +
+    LEFT;
+
+  it('a late tie offers the length that makes it reach, then its removal; Fix all takes the length', () => {
+    const raw = score([LATE], 9, 0, 8);
+    expect(() => strict(raw)).toThrow(/contiguous/);
+    const { parsed, problems, offers, fixes } = review(raw);
+    expect(problems).toEqual([expect.objectContaining({ kind: 'tie-gap', note: 0, target: 3 })]);
+    expect(offers.get(problems[0]!)).toEqual([
+      { kind: 'duration', note: 0, type: 'half', dots: 1 },
+      { kind: 'tie', note: 0, tied: false },
+    ]);
+    expect(labels(raw)).toEqual([
+      ['Make the A4 in bar 1 a dotted half so the tie reaches', 'Remove the tie'],
+    ]);
+    expect(fixes).toEqual([{ kind: 'duration', note: 0, type: 'half', dots: 1 }]);
+    expect(describeCorrection(en, parsed, fixes[0]!)).toBe(
+      'Bar 1, right hand: A4 half note → dotted half note',
+    );
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    // One press, held through the tie; every other note where it was.
+    expect(sounding(xml)).toEqual([
+      [69, 0, 8, 'R'],
+      [72, 8, 1, 'R'],
+      [48, 0, 6, 'L'],
+      [55, 6, 3, 'L'],
+    ]);
+    expect(findProblems(read(xml))).toEqual([]);
+    // The removal also passes the import, as two presses.
+    const untied = applyCorrections(raw, [offers.get(problems[0]!)![1]!], { strict: true }).xml;
+    expect(strict(untied).notes.filter((note) => note.midi === 69)).toHaveLength(2);
+  });
+
+  it('offers no length when a note of the voice sits in the gap, or when the bar would run long', () => {
+    const between =
+      n('A4', 4, 'half', { tie: 'start' }) +
+      n('B4', 2, 'quarter') +
+      n('A4', 2, 'quarter', { tie: 'stop' }) +
+      n('C5', 1, 'eighth') +
+      LEFT;
+    expect(labels(score([between], 9, 0, 8))).toEqual([['Remove the tie']]);
+    // The B4 reaches its own bar's end; the left hand's whole note makes the bar longer, so only a
+    // whole note would reach, and it would run past 3/4 too (page 2, crop3).
+    const long = score([
+      n('B4', 6, 'half', { tie: 'start', dots: 1 }) + backup(6) + n('C3', 8, 'whole', { staff: 2 }),
+      n('B4', 2, 'quarter', { tie: 'stop' }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() => strict(long)).toThrow(/contiguous/);
+    const { problems, fixes } = review(long);
+    expect(problems.map((p) => p.kind)).toEqual(['tie-gap', 'bar-timing']);
+    expect(labels(long)).toEqual([['Remove the tie'], []]);
+    expect(fixes).toEqual([{ kind: 'tie', note: 0, tied: false }]);
+    expect(() => strict(applyCorrections(long, fixes, { strict: true }).xml)).not.toThrow();
+  });
+
+  it('flags a tie on a grace note, which had no place at all, and removes it', () => {
+    const raw = score([
+      grace('C', 6, 'start') +
+        n('E5', 2, 'quarter') +
+        n('C6', 2, 'quarter', { tie: 'stop' }) +
+        n('G5', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() => strict(raw)).toThrow(/contiguous/);
+    const { parsed, problems, fixes } = review(raw);
+    expect(problems).toEqual([{ kind: 'tie-grace', note: 0, part: 0, measure: 0 }]);
+    expect(describeProblem(en, parsed, problems[0]!)).toBe(
+      'Bar 1, right hand: the grace note C6 is tied, but a grace note takes no time to hold.',
+    );
+    expect(labels(raw)).toEqual([['Remove the tie']]);
+    expect(fixes).toEqual([{ kind: 'tie', note: 0, tied: false }]);
+    expect(describeCorrection(en, parsed, fixes[0]!)).toBe('Bar 1, right hand: tie on C6 removed');
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    expect(xml).not.toContain('<tie ');
+    expect(strict(xml).notes.filter((note) => note.midi === 84)).toHaveLength(2);
+    expect(findProblems(read(xml))).toEqual([]);
+    // A grace note still cannot be given a tie.
+    expect(() =>
+      applyCorrections(raw, [...fixes, { kind: 'tie', note: 0, tied: true }], { strict: true }),
+    ).toThrow(CorrectionError);
+  });
+
+  it('pairs a grace note with the note it ornaments at the same onset: one place, both marks go', () => {
+    const raw = score([
+      grace('C', 5, 'start') +
+        n('C5', 2, 'quarter', { tie: 'stop' }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { problems, fixes } = review(raw);
+    expect(problems).toEqual([{ kind: 'tie-grace', note: 0, part: 0, measure: 0 }]);
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    expect(xml).not.toContain('<tie');
+    expect(xml).not.toContain('<tied');
+  });
+
+  it('removes a tie that has no partner at all, from the side it is on', () => {
+    const raw = score([
+      n('C5', 2, 'quarter', { tie: 'stop' }) +
+        n('D5', 4, 'half') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() => strict(raw)).toThrow(/stop without a start/);
+    const { fixes } = review(raw);
+    expect(fixes).toEqual([{ kind: 'tie', note: 0, tied: false, side: 'previous' }]);
+    expect(() => strict(applyCorrections(raw, fixes, { strict: true }).xml)).not.toThrow();
+  });
+
+  it('a note tied into a grace note is one place, and Fix all removes its tie once', () => {
+    // The import reports the tie on the C5 that starts it; the review names the grace note.
+    const raw = score([
+      n('C5', 2, 'quarter', { tie: 'start' }) +
+        grace('C', 5, 'stop') +
+        n('D5', 2, 'quarter') +
+        n('E5', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(repairsOf(raw)).toEqual([expect.objectContaining({ note: 0, reason: 'grace' })]);
+    const { problems, fixes } = review(raw);
+    expect(problems).toEqual([{ kind: 'tie-grace', note: 1, part: 0, measure: 0 }]);
+    expect(fixes).toEqual([{ kind: 'tie', note: 1, tied: false, side: 'previous' }]);
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    expect(xml).not.toContain('<tie');
+    expect(repairsOf(xml)).toEqual([]);
+  });
+
+  it('removes the earlier of two tie starts that compete for one stop, as the import plays it', () => {
+    const raw = score([
+      n('C5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: 'start' }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('A4', 6, 'half', { tie: 'start', dots: 1 }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      n('A4', 6, 'half', { tie: 'stop', dots: 1 }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() => strict(raw)).toThrow(/tie already open/);
+    expect(repairsOf(raw)).toEqual([
+      expect.objectContaining({ note: 2, reason: 'unmatchedStart' }),
+    ]);
+    const { problems, offers, fixes } = review(raw);
+    expect(problems).toEqual([
+      { kind: 'tie-unmatched', note: 2, part: 0, measure: 0, side: 'start' },
+    ]);
+    expect(offers.get(problems[0]!)).toEqual([{ kind: 'tie', note: 2, tied: false }]);
+    expect(fixes).toEqual([{ kind: 'tie', note: 2, tied: false }]);
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    expect(repairsOf(xml)).toEqual([]);
+    // The later tie still holds its A4 through bar 3.
+    expect(strict(xml).notes.filter((note) => note.midi === 69)).toHaveLength(2);
+    // Without the import's word, the review alone cannot tell which start to remove.
+    const parsed = read(raw);
+    expect(offersFor(parsed, findProblems(parsed)).size).toBe(0);
+  });
+
+  it('removes the stop of a continuation note that nothing ties into', () => {
+    // The first A4 of A4~A4~A4 read as another pitch leaves the middle one's stop without a source.
+    const raw = score([
+      n('C5', 2, 'quarter', { tie: 'both' }) +
+        n('C5', 2, 'quarter', { tie: 'stop' }) +
+        n('E5', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    expect(() => strict(raw)).toThrow(/stop without a start/);
+    const { parsed, problems, fixes } = review(raw);
+    expect(problems).toEqual([
+      { kind: 'tie-unmatched', note: 0, part: 0, measure: 0, side: 'stop' },
+    ]);
+    expect(describeProblem(en, parsed, problems[0]!)).toBe(
+      'Bar 1, right hand: the tie into C5 comes from no matching earlier note.',
+    );
+    expect(fixes).toEqual([{ kind: 'tie', note: 0, tied: false, side: 'previous' }]);
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    // The tie it starts still joins the two C5s into one press.
+    expect(strict(xml).notes.filter((note) => note.midi === 72)).toHaveLength(1);
+  });
+
+  it('a lone note with a stop and a start has a place for each, and Fix all clears both', () => {
+    const raw = score([
+      n('C5', 2, 'quarter', { tie: 'both' }) +
+        n('D5', 2, 'quarter') +
+        n('E5', 2, 'quarter') +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+    const { parsed, problems, offers, fixes } = review(raw);
+    expect(problems.map((p) => describeProblem(en, parsed, p))).toEqual([
+      'Bar 1, right hand: a tie on C5 has no matching note.',
+      'Bar 1, right hand: the tie into C5 comes from no matching earlier note.',
+    ]);
+    expect(problems.map((p) => offers.get(p))).toEqual([
+      [{ kind: 'tie', note: 0, tied: false }],
+      [{ kind: 'tie', note: 0, tied: false, side: 'previous' }],
+    ]);
+    expect(fixes).toHaveLength(2);
+    const { xml } = applyCorrections(raw, fixes, { strict: true });
+    expect(xml).not.toContain('<tie');
+    expect(findProblems(read(xml))).toEqual([]);
+  });
+
+  it('says "an eighth" in the length that makes a tie reach', () => {
+    const raw = score([LATE], 9, 0, 8);
+    const { parsed, problems } = review(raw);
+    expect(
+      offerLabel(en, parsed, problems[0]!, { kind: 'duration', note: 0, type: 'eighth', dots: 0 }),
+    ).toBe('Make the A4 in bar 1 an eighth so the tie reaches');
+    expect(
+      offerLabel(en, parsed, problems[0]!, { kind: 'duration', note: 0, type: 'eighth', dots: 1 }),
+    ).toBe('Make the A4 in bar 1 a dotted eighth so the tie reaches');
+  });
+
+  it('never guesses a meter: Fix all leaves a misread time signature to the reader', () => {
+    const nine =
+      n('C5', 3, 'quarter', { dots: 1 }) +
+      n('D5', 3, 'quarter', { dots: 1 }) +
+      n('E5', 3, 'quarter', { dots: 1 }) +
+      LEFT;
+    const raw = score([nine, nine, LATE], 4);
+    const { problems, offers, fixes } = review(raw);
+    expect([...offers.values()].flat().map((c) => c.kind)).toContain('meter');
+    expect(fixes.map((c) => c.kind)).not.toContain('meter');
+    expect(problems.filter((p) => offers.get(p)?.[0]?.kind === 'meter')).toHaveLength(1);
+  });
+
+  describe('places for the ties the import played as separate notes', () => {
+    // A tie into both endings: right on the page, and the review lets it skip to the second
+    // ending, but the import closes it in the first and finds the second one without a start.
+    const endings = score([
+      n('C5', 2, 'quarter') +
+        n('D5', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: 'start' }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+      '<barline location="left"><ending number="1" type="start"/></barline>' +
+        n('A4', 6, 'half', { tie: 'stop', dots: 1 }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }) +
+        '<barline location="right"><ending number="1" type="stop"/><repeat direction="backward"/></barline>',
+      '<barline location="left"><ending number="2" type="start"/></barline>' +
+        n('A4', 6, 'half', { tie: 'stop', dots: 1 }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 }),
+    ]);
+
+    it('names the bar and pitch of a repair no place names, with the removal that clears it', () => {
+      expect(() => strict(endings)).toThrow(/note 6: tie stop without a start/);
+      const parsed = read(endings);
+      const problems = findProblems(parsed);
+      expect(problems).toEqual([]);
+      const places = placesFromRepairs(parsed, problems, [
+        { note: 6, part: 0, measure: 2, reason: 'unmatchedStop' },
+      ]);
+      expect(places).toEqual([
+        { kind: 'tie-repaired', note: 6, part: 0, measure: 2, reason: 'unmatchedStop' },
+      ]);
+      expect(describeProblem(en, parsed, places[0]!)).toBe(
+        'Bar 3, right hand: the tie into A4 comes from no earlier A4. It is played as a new note.',
+      );
+      const offers = offersFor(parsed, places);
+      expect(offers.get(places[0]!)).toEqual([
+        { kind: 'tie', note: 6, tied: false, side: 'previous' },
+      ]);
+      const fixes = fixAll(parsed, places, offers);
+      expect(() => strict(applyCorrections(endings, fixes, { strict: true }).xml)).not.toThrow();
+    });
+
+    it('adds nothing for a repair a place already names', () => {
+      const raw = score([LATE], 9, 0, 8);
+      const parsed = read(raw);
+      const problems = findProblems(parsed);
+      expect(
+        placesFromRepairs(parsed, problems, [{ note: 0, part: 0, measure: 0, reason: 'gap' }]),
+      ).toEqual([]);
+      expect(
+        placesFromRepairs(parsed, problems, [{ note: 3, part: 0, measure: 0, reason: 'gap' }]),
+      ).toEqual([]);
+    });
+
+    it('says the plain words for each reason', () => {
+      const parsed = read(score([BAR]));
+      const place = (reason: 'gap' | 'unmatchedStart' | 'grace'): Problem => ({
+        kind: 'tie-repaired',
+        note: 1,
+        part: 0,
+        measure: 0,
+        reason,
+      });
+      expect(describeProblem(en, parsed, place('gap'))).toBe(
+        'Bar 1, right hand: the tie on D5 does not reach the next D5. It is played as two notes.',
+      );
+      expect(describeProblem(en, parsed, place('unmatchedStart'))).toBe(
+        'Bar 1, right hand: the tie on D5 leads to no next D5. It is played without the tie.',
+      );
+      expect(describeProblem(en, parsed, place('grace'))).toBe(
+        'Bar 1, right hand: the grace note D5 is tied. It is played as two notes.',
+      );
+    });
+
+    it('finds the note by its place in the imported file, which a removed note shortens', () => {
+      // The E5 of the opening chord was removed, so the import counts the tied A4 as note 2,
+      // while the review knows it as ordinal 3.
+      const chord =
+        n('C5', 2, 'quarter') +
+        n('E5', 2, 'quarter', { chord: true }) +
+        n('D5', 2, 'quarter') +
+        n('A4', 2, 'quarter', { tie: 'start' }) +
+        backup(6) +
+        n('C3', 6, 'half', { staff: 2, dots: 1 });
+      const corrected = correct(score([chord, BAR]), [{ kind: 'remove', note: 1 }])!;
+      const places = placesFromRepairs(
+        corrected.score,
+        [],
+        [{ note: 2, part: 0, measure: 0, reason: 'unmatchedStart' }],
+      );
+      expect(places).toEqual([expect.objectContaining({ kind: 'tie-repaired', note: 3 })]);
+      expect(describeProblem(en, corrected.score, places[0]!)).toBe(
+        'Bar 1, right hand: the tie on A4 leads to no next A4. It is played without the tie.',
+      );
+    });
+
+    it('names the bar when the note cannot be found, and points at its first note', () => {
+      const parsed = read(score([BAR, BAR]));
+      const places = placesFromRepairs(
+        parsed,
+        [],
+        [{ note: 99, part: 0, measure: 1, reason: 'gap' }],
+      );
+      expect(places).toHaveLength(1);
+      expect(describeProblem(en, parsed, places[0]!)).toBe(
+        'Bar 2: a tie does not fit its notes. It is played without the tie.',
+      );
+      expect(problemNote(parsed, places[0]!)).toBe(4);
+    });
+  });
+
+  // Real recognitions (issue 233). homr writes a single-quoted XML declaration, which happy-dom's
+  // parser rejects.
+  const readXml = (path: string) =>
+    readFileSync(path, 'utf8').replace(/^<\?xml[^>]*\?>/, '<?xml version="1.0" encoding="utf-8"?>');
+  const refuses = (xml: string) => {
+    try {
+      strict(xml);
+      return false;
+    } catch {
+      return true;
+    }
+  };
+  /**
+   * After Fix all the strict import passes; anything else names what still refuses, so a refusal
+   * the reader cannot clear with a click fails the test.
+   */
+  const settles = (xml: string) => {
+    const { fixes } = review(xml);
+    const fixed = applyCorrections(xml, fixes, { strict: true }).xml;
+    try {
+      strict(fixed);
+      return 'passes';
+    } catch (cause) {
+      return cause instanceof Error ? cause.message : String(cause);
+    }
+  };
+  /**
+   * `settles` on every recognition the import refuses, each in a window of its own that is closed
+   * after: the test DOM keeps every document a window made, and a cache of them outgrows the heap.
+   */
+  const settleAll = async (recognitions: Iterable<[string, () => string]>) => {
+    const { Window } = await import('happy-dom');
+    const global = globalThis as { DOMParser: unknown; XMLSerializer: unknown };
+    const own = { DOMParser: global.DOMParser, XMLSerializer: global.XMLSerializer };
+    const results: Record<string, string> = {};
+    for (const [name, load] of recognitions) {
+      const window = new Window();
+      Object.assign(global, { DOMParser: window.DOMParser, XMLSerializer: window.XMLSerializer });
+      try {
+        const xml = load();
+        if (xml && refuses(xml)) results[name] = settles(xml);
+      } finally {
+        Object.assign(global, own);
+        await window.happyDOM.close();
+      }
+    }
+    return results;
+  };
+
+  it('removes no tie from the joined owner pages, whose ties only the review pairs differently', () => {
+    const page = (n: number) =>
+      readXml(`${process.cwd()}/fixtures/scan/boellmann-op28-no1-page-${n}.musicxml`);
+    const joined = joinScanPages([page(1), page(3)]);
+    expect(refuses(joined)).toBe(false);
+    const { problems, fixes } = review(joined);
+    expect(problems.some((p) => p.kind === 'tie-unmatched')).toBe(true);
+    expect(fixes.filter((c) => c.kind === 'tie')).toEqual([]);
+  });
+
+  // The homr acceptance cache (git-ignored) holds the recognitions of the acceptance photos.
+  const CACHE = `${process.cwd()}/../../research/omr/results/acceptance/cache`;
+  describe.skipIf(!existsSync(CACHE))('on the homr acceptance cache', () => {
+    it('settles every recognition the import refuses', async () => {
+      const files = readdirSync(CACHE).filter((f) => f.endsWith('.musicxml'));
+      const results = await settleAll(
+        files.map((name) => [name, () => readXml(`${CACHE}/${name}`)] as [string, () => string]),
+      );
+      expect(Object.entries(results).filter(([, r]) => r !== 'passes')).toEqual([]);
+    });
+  });
+
+  // Validation cases (private, never committed): a folder per scan with page-N-recognized.musicxml.
+  const CASES = process.env.DIGITUS2_SCAN_CASES;
+  describe.skipIf(!CASES || !existsSync(CASES))('on the kept scan cases', () => {
+    it('settles every page, and every joined scan, the import refuses', async () => {
+      const recognitions: [string, () => string][] = [];
+      for (const id of readdirSync(CASES!)) {
+        const dir = `${CASES}/${id}`;
+        if (!statSync(dir).isDirectory()) continue;
+        const pages = readdirSync(dir)
+          .map((f) => /^page-(\d+)-recognized\.musicxml$/.exec(f))
+          .filter((m) => m !== null)
+          .sort((a, b) => Number(a[1]) - Number(b[1]))
+          .map((m) => `${dir}/${m[0]}`);
+        for (const path of pages)
+          recognitions.push([`${id}/${path.slice(dir.length + 1)}`, () => readXml(path)]);
+        if (pages.length > 1)
+          recognitions.push([
+            `${id}/joined`,
+            () => {
+              try {
+                return joinScanPages(pages.map(readXml));
+              } catch {
+                // A batch that cannot be joined is said by the verdict, not here.
+                return '';
+              }
+            },
+          ]);
+      }
+      const results = await settleAll(recognitions);
+      expect(Object.entries(results).filter(([, r]) => r !== 'passes')).toEqual([]);
+    });
   });
 });

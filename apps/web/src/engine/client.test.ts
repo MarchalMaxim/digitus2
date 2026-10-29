@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEngineClient, HEAVY_NOTES, type WorkerLike } from './client.js';
+import { handle } from './handlers.js';
 import type { EngineRequest, EngineResponse } from './protocol.js';
 
 /** A worker that answers from a table, asynchronously, possibly out of order. */
@@ -36,6 +37,25 @@ describe('engine client', () => {
     ]);
     expect(a).toBe('xml-1');
     expect(b).toBe('xml-2');
+  });
+  it('passes the options of a scan load to the worker and its tie repairs back', async () => {
+    const requests: EngineRequest[] = [];
+    const c = createEngineClient(() =>
+      fakeWorker((req) => {
+        requests.push(req);
+        return handle(req);
+      }),
+    );
+    const input =
+      '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name/></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions></attributes><note><pitch><step>C</step><octave>4</octave></pitch><duration>1</duration><tie type="stop"/></note></measure></part></score-partwise>';
+    const loaded = await c.load(input, 'scan.musicxml', {
+      preserveNotation: true,
+      tolerateScanTies: true,
+    });
+    expect(requests[0]).toMatchObject({ preserveNotation: true, tolerateScanTies: true });
+    expect(loaded.score.notes).toHaveLength(1);
+    expect(loaded.tieRepairs).toEqual([{ note: 0, part: 0, measure: 0, reason: 'unmatchedStop' }]);
+    c.dispose();
   });
   it('rejects with the worker error message', async () => {
     const c = createEngineClient(() =>
@@ -178,6 +198,7 @@ describe('engine client: releasing the worker after work on a long piece', () =>
           score: long,
           editorial: {},
           warnings: [],
+          tieRepairs: [],
           xml: '<x/>',
           midiInfo: null,
         }));

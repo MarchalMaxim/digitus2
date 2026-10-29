@@ -36,6 +36,26 @@ describe('engine handlers', () => {
     expect(handle(request).ok).toBe(true);
     expect(handle({ ...request, preserveNotation: true }).ok).toBe(false);
   });
+  it('reads a scan tie it cannot join as separate presses and returns the repair', () => {
+    const tie = (type: string) =>
+      `<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><tie type="${type}"/><voice>1</voice></note>`;
+    const input = `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="7"><attributes><divisions>4</divisions></attributes>${tie('start')}<note><rest/><duration>4</duration></note>${tie('stop')}</measure></part></score-partwise>`;
+    const request = {
+      id: 1,
+      type: 'load' as const,
+      kind: 'musicxml' as const,
+      input,
+      source: 'scan.musicxml',
+      preserveNotation: true,
+    };
+    const strict = handle(request);
+    expect(strict.ok || strict.error).toMatch(/note 0: .*contiguous.* \(part 1, bar 7\)/);
+    const r = handle({ ...request, tolerateScanTies: true });
+    if (!r.ok || r.type !== 'load') throw new Error('load failed');
+    expect(r.score.notes).toHaveLength(2);
+    expect(r.tieRepairs).toEqual([{ note: 0, part: 0, measure: 0, reason: 'gap' }]);
+    expect(load().tieRepairs).toEqual([]);
+  });
   it('loads the fixture: 67 notes, 67 editorial fingerings, the XML text', () => {
     const r = load();
     expect(r.score.notes).toHaveLength(67);

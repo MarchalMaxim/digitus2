@@ -51,7 +51,10 @@ async function handle(req: RenderWorkerRequest): Promise<RenderWorkerResponse> {
     const pages = Array.from({ length: tk.getPageCount() }, (_, i) => tk.renderToSVG(i + 1));
     return { id: req.id, ok: true, pages, ms: performance.now() - t0, grown: heapGrown() };
   } catch (e) {
-    return { id: req.id, ok: false, error: e instanceof Error ? e.message : String(e) };
+    const error = e instanceof Error ? e.message : String(e);
+    // A trap or an abort leaves the WASM module unusable: the renderer retires this worker, so
+    // the next layout starts a fresh one instead of failing the same way.
+    return { id: req.id, ok: false, error, broken: e instanceof WebAssembly.RuntimeError };
   }
 }
 

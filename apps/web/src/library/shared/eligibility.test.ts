@@ -74,6 +74,7 @@ describe('which rows can be shared', () => {
     expect(await shareableOf(scan(XML), asEngine(e))).toEqual({ xml: XML, kind: 'scan' });
     expect(e.load).toHaveBeenCalledWith(expect.any(String), 'scan.musicxml', {
       preserveNotation: true,
+      tolerateScanTies: true,
     });
     expect(await shareableOf(scan(XML), asEngine(engine(0)))).toBeNull();
   });

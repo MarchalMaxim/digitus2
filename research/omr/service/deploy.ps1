@@ -4,7 +4,9 @@ param(
   [Parameter(Mandatory = $true)][string]$Project,
   [string]$Region = 'europe-west4',
   [string]$Service = 'digitus2-scan',
-  [string]$Repository = 'digitus2'
+  [string]$Repository = 'digitus2',
+  # The bucket opted-in devices' scans are kept in (setup-cases.ps1); '' keeps nothing.
+  [string]$CasesBucket = 'digitus2-scan-cases'
 )
 $ErrorActionPreference = 'Stop'
 $RepoRoot = [IO.Path]::GetFullPath("$PSScriptRoot/../../..")
@@ -72,7 +74,8 @@ try {
   Remove-Item -LiteralPath $PolicyFile -ErrorAction SilentlyContinue
 }
 
-# The service runs as its own account with no role at all. The Compute Engine default account, which
+# The service runs as its own account with no project role; its one grant, from setup-cases.ps1, is to
+# create objects in the cases bucket. The Compute Engine default account, which
 # Cloud Run would use otherwise, is Editor on a project without an organization: code reached through a
 # recogniser could then take its token and reach the kill-switch or the budget.
 $RunAccount = "$Service-run@$Project.iam.gserviceaccount.com"
@@ -90,11 +93,12 @@ Invoke-Checked 'Pushing the image' { docker push $Image }
 
 Invoke-Checked 'Deploying to Cloud Run' {
   # Cloud Run does not expose the 4 vCPU allotment through the cgroup or the affinity mask (the
-  # service detected 9), so the thread budget is set explicitly to the vCPU count.
+  # service detected 9), so the thread budget is set explicitly to the vCPU count. --set-env-vars
+  # replaces the whole list, so the cases bucket is named here too.
   gcloud run deploy $Service --image $Image --region $Region --project $Project `
     --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 `
     --cpu-boost --execution-environment gen2 --allow-unauthenticated --ingress all --port 8080 `
-    --set-env-vars DIGITUS2_OMR_THREADS=4 --service-account $RunAccount --quiet
+    --set-env-vars "DIGITUS2_OMR_THREADS=4,DIGITUS2_CASES_BUCKET=$CasesBucket" --service-account $RunAccount --quiet
 }
 
 $Url = (& gcloud run services describe $Service --region $Region --project $Project --format 'value(status.url)')

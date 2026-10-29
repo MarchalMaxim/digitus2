@@ -384,6 +384,15 @@ export function tieTarget(score: ScanScore, note: ScanNote): ScanNote | undefine
   return candidates.find((n) => n.voice === note.voice) ?? candidates[0];
 }
 
+/**
+ * `a` comes before `b`: earlier in time, or, for a grace note (which takes no time), at the same
+ * onset and earlier in the file, as a grace note tied into the note it ornaments.
+ */
+function before(score: ScanScore, a: ScanNote, b: ScanNote) {
+  if (a.onset !== b.onset) return a.onset < b.onset;
+  return a.grace && score.notes.indexOf(a) < score.notes.indexOf(b);
+}
+
 /** The note a tie start actually pairs with in the file: the next same-pitch note with a stop. */
 export function tiePartner(score: ScanScore, note: ScanNote): ScanNote | undefined {
   if (note.midi === undefined) return;
@@ -393,7 +402,7 @@ export function tiePartner(score: ScanScore, note: ScanNote): ScanNote | undefin
       n.staff === note.staff &&
       n.midi === note.midi &&
       n.tieStop &&
-      n.onset > note.onset,
+      before(score, note, n),
   );
   later.sort((a, b) => a.onset - b.onset);
   return later.find((n) => n.voice === note.voice) ?? later[0];
@@ -408,7 +417,7 @@ export function tieSource(score: ScanScore, note: ScanNote): ScanNote | undefine
       n.staff === note.staff &&
       n.midi === note.midi &&
       n.tieStart &&
-      n.onset < note.onset,
+      before(score, n, note),
   );
   earlier.sort((a, b) => b.onset - a.onset);
   return earlier.find((n) => n.voice === note.voice) ?? earlier[0];

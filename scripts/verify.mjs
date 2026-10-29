@@ -9,12 +9,13 @@
 //                          before the pull request.
 //   pnpm verify unit       run only the named steps (hygiene, design, typecheck, lint, unit, build,
 //                          omr (requires build), omr:service, library:rules, omr:acceptance (requires build), bundle, e2e,
-//                          e2e:loop (requires build), benchmark, benchmark:mutopia, hands, embellish)
+//                          e2e:loop (requires build), scan:cases (requires build), benchmark,
+//                          benchmark:mutopia, hands, embellish)
 //
 // Steps run as a graph (scripts/verify-graph.mjs): a step starts once the steps it needs have
-// passed, and the heavy ones (unit, omr:acceptance, e2e) never overlap. Each step's output goes to
-// benchmarks/runs/verify-logs/<step>.log; the console shows each start and end, the summary, and
-// the end of the log of every step that failed.
+// passed, and the heavy ones (unit, omr:acceptance, e2e, e2e:loop, scan:cases) never overlap. Each
+// step's output goes to benchmarks/runs/verify-logs/<step>.log; the console shows each start and
+// end, the summary, and the end of the log of every step that failed.
 //
 // Exit code is non-zero if any step fails. The bundle step (after build) fails when the library
 // page's initial JavaScript and CSS exceed 150 KB gzip or Verovio is statically imported
@@ -39,7 +40,7 @@
 // written only by labelled runs (`bench --label m3-open ...`; `evalhands --label m6-hands --out
 // benchmarks/latest-hands.json`); see docs/verification-loop.md.
 import { spawn, spawnSync } from 'node:child_process';
-import { createWriteStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runGraph } from './verify-graph.mjs';
 import { changedFiles, goldMissing, planChanged } from './verify-changed.mjs';
@@ -185,15 +186,12 @@ const steps = [
       if (!existsSync('apps/web/playwright.config.ts'))
         return { skip: 'no apps/web/playwright.config.ts yet' };
       // --changed names the specs the diff maps to (build is in the run, so they use its output).
-      if (selection?.specs)
-        return cmd('pnpm', [
-          '--filter',
-          '@digitus2/web',
-          'exec',
-          'playwright',
-          'test',
-          ...selection.specs,
-        ]);
+      // The scan cases spec runs in its own step (scan:cases): here Playwright would find no test.
+      if (selection?.specs) {
+        const specs = selection.specs.filter((spec) => spec !== 'scan-cases.spec.ts');
+        if (!specs.length) return { skip: 'scan-cases.spec.ts runs in the scan:cases step' };
+        return cmd('pnpm', ['--filter', '@digitus2/web', 'exec', 'playwright', 'test', ...specs]);
+      }
       return want('build')
         ? cmd('pnpm', ['--filter', '@digitus2/web', 'exec', 'playwright', 'test'])
         : cmd('pnpm', ['--filter', '@digitus2/web', 'e2e']);
@@ -215,6 +213,38 @@ const steps = [
         ['--filter', '@digitus2/web', 'exec', 'playwright', 'test', '--project=loop'],
         undefined,
         { DIGITUS2_E2E_LOOP: '1' },
+      );
+    },
+  },
+  // The scan validation cases (docs/scanning.md, Validation cases): every scan the owner kept,
+  // replayed through the built app with the scanner's own answers; a case fails when Use for
+  // fingerings is refused without naming the page or bar and a fix. Heavy: one browser per case.
+  // SKIP, not a pass, without the owner's private cases (DIGITUS2_SCAN_CASES).
+  {
+    name: 'scan:cases',
+    deps: ['build'],
+    heavy: true,
+    prepare: () => {
+      const root = process.env.DIGITUS2_SCAN_CASES;
+      if (!root) return { skip: 'DIGITUS2_SCAN_CASES is not set' };
+      if (!existsSync(root)) return { skip: `no folder ${root} (DIGITUS2_SCAN_CASES)` };
+      const isCase = (name) =>
+        existsSync(join(root, name, 'page-1-recognized.musicxml')) &&
+        ['jpg', 'jpeg', 'png'].some((ext) => existsSync(join(root, name, `page-1.${ext}`)));
+      if (!readdirSync(root).some(isCase)) return { skip: `no scan cases in ${root}` };
+      return cmd(
+        'pnpm',
+        [
+          '--filter',
+          '@digitus2/web',
+          'exec',
+          'playwright',
+          'test',
+          '--project=desktop',
+          'scan-cases.spec.ts',
+        ],
+        undefined,
+        { DIGITUS2_E2E_CASES: '1' },
       );
     },
   },

@@ -117,6 +117,18 @@ export const scan: Messages['scan'] = {
     filesSummary: 'Archivos para un editor de partituras',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Motivo técnico: ${reason}`,
+    /** `error` says the notation could not be drawn: it is scanned again, or its files used elsewhere. */
+    notDrawnProblem: (error: string): string =>
+      `${error} Escanea de nuevo o descarga abajo los archivos para un editor de partituras.`,
+    /** Said after Fix all (issue 233). */
+    fixedAll: (n: number): string =>
+      plural('es', n, {
+        one: '# corrección hecha. Deshacer la quita.',
+        other: '# correcciones hechas. Deshacer las quita todas.',
+      }),
+    /** Under Recognition details on a device that keeps its scans as validation cases (issue 233). */
+    kept: 'Los escaneos de este dispositivo se guardan para mejorar el reconocimiento.',
+    showBar: (bar: string) => `Mostrar el compás ${bar}`,
     retained:
       'Encuentra los originales y los reconocimientos guardados en Mis partituras. Conserva tus propios archivos originales; el almacenamiento del navegador puede borrarse. La reproducción puede usar un tempo predeterminado de la app.',
     beamGrouping: 'La agrupación de las barras se deduce y puede diferir del original.',
@@ -265,6 +277,10 @@ export const scan: Messages['scan'] = {
     setMeter: (meter: string, bar: string) => `Usar ${meter} desde el compás ${bar}`,
     removeMark: (mark: 'ending' | 'repeat') =>
       mark === 'ending' ? 'Quitar la casilla de repetición' : 'Quitar el signo de repetición',
+    lengthenTie: (pitch: string, bar: string, length: string, dotted: boolean) =>
+      `Hacer del ${pitch} del compás ${bar} una ${length}${dotted ? ' con puntillo' : ''} para que la ligadura llegue`,
+    removeTie: 'Quitar la ligadura',
+    fixAll: (n: number) => `Corregir los ${n}`,
     stale: (kept: number) =>
       `Algunas correcciones guardadas ya no se aplican a este reconocimiento. Se conservan las primeras ${kept}.`,
     problemsSummary: (n: number) =>
@@ -274,8 +290,26 @@ export const scan: Messages['scan'] = {
         `${where}: el ${pitch} ligado termina ${gap} antes de que empiece el siguiente ${pitch}. Revisa las duraciones.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
         `${where}: el ${pitch} ligado se mete ${gap} en el siguiente ${pitch}. Revisa las duraciones.`,
-      tieUnmatched: (where: string, pitch: string) =>
-        `${where}: una ligadura en ${pitch} no tiene nota que le corresponda.`,
+      tieUnmatched: (where: string, pitch: string, side: 'start' | 'stop') =>
+        side === 'start'
+          ? `${where}: una ligadura en ${pitch} no tiene nota que le corresponda.`
+          : `${where}: la ligadura hacia ${pitch} no viene de ninguna nota anterior que le corresponda.`,
+      tieGrace: (where: string, pitch: string) =>
+        `${where}: la nota de adorno ${pitch} está ligada, pero una nota de adorno no ocupa tiempo que sostener.`,
+      tieRepaired: (
+        where: string,
+        pitch: string,
+        reason: 'gap' | 'unmatchedStart' | 'unmatchedStop' | 'grace',
+      ) =>
+        reason === 'gap'
+          ? `${where}: la ligadura en ${pitch} no llega al siguiente ${pitch}. Se tocan como dos notas.`
+          : reason === 'unmatchedStart'
+            ? `${where}: la ligadura en ${pitch} no lleva a ningún ${pitch} siguiente. La nota se toca sin ligadura.`
+            : reason === 'unmatchedStop'
+              ? `${where}: la ligadura hacia ${pitch} no viene de ningún ${pitch} anterior. La nota se toca de nuevo.`
+              : `${where}: la nota de adorno ${pitch} está ligada. Se tocan como dos notas.`,
+      tieRepairedBar: (where: string) =>
+        `${where}: una ligadura no encaja con sus notas. Se toca sin ligadura.`,
       barTiming: (timing: string) => `Las manos no coinciden. ${timing}`,
       barLong: (timing: string) => `El compás es más largo que su indicación de compás. ${timing}`,
       endingWithoutRepeat: (where: string) =>
@@ -320,11 +354,24 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Algunas páginas necesitan otro escaneo. Las páginas reconocidas se conservan.',
     recognitionFailed: 'El reconocimiento falló.',
-    notationNotShown:
-      'No se pudo mostrar la notación. El motivo técnico está en Detalles del reconocimiento.',
+    /** The notation could not be drawn; `page` is the page shown on its own, absent for the whole scan. */
+    notDrawn: (page: number | undefined): string =>
+      page === undefined
+        ? 'No se pudo dibujar la notación reconocida.'
+        : `Página ${page}: no se pudo dibujar la notación reconocida.`,
+    /** The recognition holds no music to draw; `page` as above. */
+    noMusic: (page: number | undefined): string =>
+      page === undefined
+        ? 'No se leyó música en este escaneo.'
+        : `Página ${page}: no se leyó música.`,
     noNotes: 'No se reconoció ninguna nota que se pueda tocar.',
     notUsable:
       'Este reconocimiento todavía no se puede usar para la digitación: algunas de sus notas no encajan.',
+    /** The import refused `bar`, the bar's printed number as the engine named it (issue 233). */
+    notUsableAt: (bar: string): string =>
+      `El compás ${bar} no se pudo leer tal como está escrito, así que este reconocimiento todavía no se puede usar para la digitación.`,
+    notChecked:
+      'Las notas no se pudieron comprobar para la digitación en esta pestaña. Recarga la página y abre este escaneo desde Mis partituras.',
     offline: 'No se pudo conectar con el escáner. Comprueba tu conexión e inténtalo de nuevo.',
     cancelFailed:
       'No se pudo confirmar la cancelación. El escáner se detiene solo en un máximo de tres minutos.',

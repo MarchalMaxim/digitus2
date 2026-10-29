@@ -8,7 +8,7 @@ export { parsePig, parseFingerField, PIG_HEADER, PIG_DIVISIONS, PIG_QPM } from '
 export type { ParsedPig } from './io/pig/read.js';
 export { writePig } from './io/pig/write.js';
 export { parseMusicXml } from './io/musicxml/read.js';
-export type { ParsedMusicXml } from './io/musicxml/read.js';
+export type { ParsedMusicXml, TieRepair } from './io/musicxml/read.js';
 export { unpackMusicXml } from './io/musicxml/unpack.js';
 export { injectFingerings } from './io/musicxml/write.js';
 // The xmldom helpers in io/musicxml/dom.ts (parseXml, serializeXml, childElements, ...) stay

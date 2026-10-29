@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "pnpm -r --if-present test && node --test scripts/verify-graph.test.mjs",
-    "test:omr": "node --test research/omr/*.test.mjs",
+    "test:omr": "node --test research/omr/*.test.mjs research/omr/diagnostics/*.test.mjs",
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",

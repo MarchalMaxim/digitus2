@@ -154,39 +154,57 @@ function beamMeasure(measure: Element, divisions: number, meter: Meter): number 
   return added;
 }
 
+/** Beams a copy of `measure` and puts it in its place; a bar it cannot read stays as it is. */
+function beamInPlace(measure: Element, divisions: number, meter: Meter): number {
+  const copy = measure.cloneNode(true) as Element;
+  let added: number;
+  try {
+    added = beamMeasure(copy, divisions, meter);
+  } catch {
+    return 0;
+  }
+  if (added) measure.replaceWith(copy);
+  return added;
+}
+
 /**
  * HOMR currently omits beam data. Infer conventional beat groups solely for display;
  * these are not recovered source beams. Never pass this copy to parsing or downloads.
  * Ordinary imports, explicit beams and unsupported/ambiguous notation remain untouched.
  * Run on the main thread because workers do not provide DOMParser.
+ * It never throws: recognition this does not expect is drawn as it was read (issue 233).
  */
 export function prepareScanBeams(xml: string): string {
   if (!xml.includes('homr')) return xml;
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  if (
-    doc.documentElement.localName !== 'score-partwise' ||
-    doc.querySelector('parsererror') ||
-    ![...doc.querySelectorAll('identification > encoding > software')].some(
-      (el) => el.textContent?.trim() === 'homr',
+  try {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    if (
+      doc.documentElement.localName !== 'score-partwise' ||
+      doc.querySelector('parsererror') ||
+      ![...doc.querySelectorAll('identification > encoding > software')].some(
+        (el) => el.textContent?.trim() === 'homr',
+      )
     )
-  )
-    return xml;
-  let added = 0;
-  for (const part of children(doc.documentElement, 'part')) {
-    let divisions = NaN;
-    let meter: Meter | undefined;
-    for (const measure of children(part, 'measure')) {
-      for (const attributes of children(measure, 'attributes')) {
-        if (first(attributes, 'divisions')) divisions = positive(text(attributes, 'divisions'));
-        const times = children(attributes, 'time');
-        if (times.length)
-          meter =
-            times.length === 1 && !times[0]!.hasAttribute('number')
-              ? readMeter(times[0]!)
-              : undefined;
+      return xml;
+    let added = 0;
+    for (const part of children(doc.documentElement, 'part')) {
+      let divisions = NaN;
+      let meter: Meter | undefined;
+      for (const measure of children(part, 'measure')) {
+        for (const attributes of children(measure, 'attributes')) {
+          if (first(attributes, 'divisions')) divisions = positive(text(attributes, 'divisions'));
+          const times = children(attributes, 'time');
+          if (times.length)
+            meter =
+              times.length === 1 && !times[0]!.hasAttribute('number')
+                ? readMeter(times[0]!)
+                : undefined;
+        }
+        if (meter && Number.isFinite(divisions)) added += beamInPlace(measure, divisions, meter);
       }
-      if (meter && Number.isFinite(divisions)) added += beamMeasure(measure, divisions, meter);
     }
+    return added ? new XMLSerializer().serializeToString(doc) : xml;
+  } catch {
+    return xml;
   }
-  return added ? new XMLSerializer().serializeToString(doc) : xml;
 }

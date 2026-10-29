@@ -46,11 +46,15 @@ const SharedShelf = lazy(() => import('./shared/SharedShelf.js'));
 /** The announcement waits for the reader to stop changing the list (arrowing through the pills). */
 export const ANNOUNCE_DELAY_MS = 500;
 
-/** Where the focus goes once the list has changed: the clicked control is gone or the rows are new. */
-type FocusTarget =
+/**
+ * Where the focus goes once the list has changed: the clicked control is gone or the rows are new.
+ * `from` is the list (its `listKey`) drawn when the target was set.
+ */
+type FocusTarget = { from: string } & (
   | { kind: 'heading' }
   | { kind: 'shelf-button'; shelf: ShelfId }
-  | { kind: 'row'; within: string | null; index: number };
+  | { kind: 'row'; within: string | null; index: number }
+);
 
 /** True once `key` has differed from its first value: the list fades in on changes, never on arrival. */
 function useChanged(key: string): boolean {
@@ -154,19 +158,18 @@ function useAnchoredLibraryScroll(list: RefObject<HTMLElement | null>) {
  * Moves the focus once a list change has rendered: to the opened shelf's heading, back to the
  * shelf's `All N` button, or to the first row a page appended. The clicked button is gone by
  * then, and without this the focus falls to <body>. The heading of an opened shelf is also
- * brought to the top of the screen when the reader had scrolled past it.
+ * brought to the top of the screen when the reader had scrolled past it. A shelf with no `All N`
+ * button on the level in view (5 pieces or fewer there) hands the focus to its first row.
  */
 function useFocusAfterChange(
   list: RefObject<HTMLElement | null>,
   target: RefObject<FocusTarget | null>,
+  listKey: string,
 ) {
   useEffect(() => {
     const wanted = target.current;
     const root = list.current;
     if (!wanted || !root) return;
-    // The element may arrive a render later (the shelves are drawn again once the shared shelf or
-    // the level's pieces are in): the target waits for it rather than being dropped on a render
-    // that does not have it yet.
     let element: HTMLElement | null | undefined;
     if (wanted.kind === 'heading') element = root.querySelector<HTMLElement>('#shelf-open');
     else if (wanted.kind === 'shelf-button')
@@ -175,7 +178,18 @@ function useFocusAfterChange(
       const scope = wanted.within === null ? root : root.querySelector(wanted.within);
       element = scope?.querySelectorAll<HTMLElement>('.piece-row')[wanted.index];
     }
-    if (!element) return;
+    if (!element && wanted.kind === 'shelf-button' && listKey !== wanted.from)
+      element = root.querySelector<HTMLElement>(
+        `[aria-labelledby="shelf-${wanted.shelf}"] .piece-row`,
+      );
+    if (!element) {
+      // A render that comes before the change (it committed, and its effects waited for a paint
+      // while the reader pressed Escape) still draws the list the target was set on: the target
+      // waits for the next one. A new list without the element drops it, so a later render that
+      // happens to draw the element does not pull the focus away from where the reader is.
+      if (listKey !== wanted.from) target.current = null;
+      return;
+    }
     target.current = null;
     if (wanted.kind === 'heading') {
       const top = root.getBoundingClientRect().top;
@@ -278,7 +292,7 @@ export function LibraryView() {
   useEffect(() => {
     if (lengthInEffect !== length) setLibraryLength(lengthInEffect);
   }, [lengthInEffect, length, setLibraryLength]);
-  useFocusAfterChange(list, focusAfter);
+  useFocusAfterChange(list, focusAfter, listKey);
   // The last favourite taken off its shelf: the shelf leaves with the focused heart, and the
   // focus goes to the next unit's control (the chosen level pill, or the small library's first row).
   const focusAfterFavourites = useRef(false);
@@ -322,15 +336,15 @@ export function LibraryView() {
     if (shelf !== null && !shelfHasPieces(pieces, next, shelf)) setLibraryShelf(null);
   };
   const openShelfAt = (id: ShelfId) => {
-    focusAfter.current = { kind: 'heading' };
+    focusAfter.current = { from: listKey, kind: 'heading' };
     setLibraryShelf(id);
   };
   // Stable, so the Escape listener is not added again on every render.
   const closeShelf = useCallback(() => {
     if (openShelf === null) return;
-    focusAfter.current = { kind: 'shelf-button', shelf: openShelf };
+    focusAfter.current = { from: listKey, kind: 'shelf-button', shelf: openShelf };
     setLibraryShelf(null);
-  }, [openShelf, setLibraryShelf]);
+  }, [openShelf, listKey, setLibraryShelf]);
   useEffect(() => {
     if (openShelf === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -341,12 +355,13 @@ export function LibraryView() {
   }, [openShelf, closeShelf]);
   const showMore = () => {
     if (layout.kind !== 'shelf') return;
-    focusAfter.current = { kind: 'row', within: null, index: layout.shown };
+    focusAfter.current = { from: listKey, kind: 'row', within: null, index: layout.shown };
     setAppended({ key: listKey, from: layout.shown });
     setLibraryPages(pages + 1);
   };
   const sectionAction = (s: Section) => {
     focusAfter.current = {
+      from: listKey,
       kind: 'row',
       within: `[data-section="${s.tier}"]`,
       index: s.action?.kind === 'open' ? SECTION_ROWS : s.shown,

@@ -1,13 +1,15 @@
 import { strToU8, zipSync, type Zippable } from 'fflate';
 import type { Build } from '../app/build.js';
+import type { ReviewFacts } from './facts.js';
 import type { ScanPage, ScanSession } from './model.js';
 
 /**
  * "Download everything" (issue 156): one ZIP holding what a scan did, so the owner can hand a
  * phone's evidence over in one tap and look at it on a PC. The page images are exactly as the
  * scanner received them, each page's recognition and the combined file are the scanner's raw
- * answers, and scan.json says the rest: recognizer, time, warnings, corrections, the build of the
- * app and the browser it ran in.
+ * answers, and scan.json says the rest: recognizer, time, warnings, corrections, what the review
+ * told the reader (issue 233), the build of the app and the browser it ran in. An archive is a
+ * validation case as it is (docs/scanning.md).
  */
 
 /** The ZIP's entries; the page files and each page's recognition are numbered from 1. */
@@ -43,13 +45,15 @@ export interface ScanBundle {
   correctedXml?: string | undefined;
   /** Every warning the review shows: the scanner's and the importer's. */
   warnings: readonly string[];
+  /** What the review told the reader, in English (facts.ts); absent before it was read. */
+  review?: ReviewFacts | undefined;
   build: Build;
   userAgent: string;
 }
 
 /** The ZIP of a scan. Pure: the caller reads the page files (readPageBytes) and the browser. */
 export function bundleScan(input: ScanBundle): Uint8Array {
-  const { session, pageBytes, correctedXml, warnings, build, userAgent } = input;
+  const { session, pageBytes, correctedXml, warnings, review, build, userAgent } = input;
   const pages = pagesOf(session);
   const entries: Zippable = {};
   const summaries = pages.map((page, index) => {
@@ -80,6 +84,7 @@ export function bundleScan(input: ScanBundle): Uint8Array {
         recognizedAt: session.recognizedAt ?? null,
         warnings,
         corrections: session.corrections ?? [],
+        review: review ?? null,
         combined: session.xml ? COMBINED_ENTRY : null,
         corrected: correctedXml ? CORRECTED_ENTRY : null,
         pages: summaries,

@@ -47,16 +47,20 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
 }, testInfo) => {
   await mockService(page, RECOGNITION_WITH_ERRORS);
   await scanOnePage(page);
-  // The strict import refuses the late tie; the raw result stays visible and downloadable.
-  await expect(page.getByRole('alert').first()).toContainText('cannot be used for fingerings');
-  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+  // The scan import plays the late tie as two notes (issue 233): Use for fingerings is open and
+  // keeps the red, and the place to check waits, folded, with its fix.
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  await expect(page.getByRole('alert')).toHaveCount(0);
   await expect(page.getByText('Select a note to correct it.')).toBeVisible();
   await expect(editor(page)).toHaveCount(0);
-  await expectOneRed(page, 'refused recognition before editing');
+  await expectOneRed(page, 'late tie before editing');
 
-  // The place to check points at the tie and explains it.
-  // Refused, the places to check open by themselves and the first one carries the red.
-  await expect(page.locator('details.scan-problems')).toHaveAttribute('open', '');
+  // The place to check points at the tie, explains it and offers its removal.
+  const problems = page.locator('details.scan-problems');
+  await expect(problems).not.toHaveAttribute('open', '');
+  await problems.locator('summary').click();
+  await expect(problems.getByRole('button', { name: 'Remove the tie' })).toBeVisible();
+  await expectOneRed(page, 'late tie with its fix');
   await page
     .getByRole('button', {
       name: 'Bar 1, right hand: the tied A4 ends 1 beat before the next A4 begins. Check the note lengths.',
@@ -131,7 +135,9 @@ test('scan edit: the late bar-2 tie is found, corrected explicitly, undone, rese
   await expect(page.locator('.scan-result p[aria-hidden="true"]')).toContainText(
     'All corrections removed.',
   );
-  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+  // The raw recognition is usable too: its late tie is played as two notes.
+  await expect(page.locator('.scan-problems summary')).toHaveText('1 place to check');
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Download corrected MusicXML' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByText('2 corrections', { exact: true })).toBeVisible();
@@ -333,12 +339,14 @@ test('scan edit: a place to check shows the photo at its note, above its text on
   });
   await mockService(page, xml);
   await scanOnePage(page, 'places.png', Buffer.from(dataUrl.split(',')[1]!, 'base64'));
-  // Refused, the places to check open by themselves and the first one carries the red.
+  // Usable, the places to check wait folded under their count (issue 233): opened, each shows
+  // its photo.
+  await page.locator('.scan-problems summary').click();
   const entry = page.locator('.scan-problems li').first();
   const crop = entry.locator('.note-crop-small');
   await expect(crop).toBeVisible();
   const text = entry.locator('.scan-problem-body');
-  await expect(text.locator('.is-red')).toBeVisible();
+  await expect(text).toBeVisible();
   const [photo, body] = await Promise.all([crop.boundingBox(), text.boundingBox()]);
   expect(photo!.width).toBeGreaterThan(0);
   if ((page.viewportSize()?.width ?? 1280) <= 600) {

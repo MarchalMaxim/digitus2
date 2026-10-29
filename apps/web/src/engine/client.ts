@@ -4,7 +4,7 @@
  * section 4). Requests carry an incrementing id and responses are matched by it, so answers may
  * arrive in any order.
  */
-import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
+import type { Assignment, MidiInfo, Score, TieRepair } from '@digitus2/engine';
 import type { HandSize } from '../app/store.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
@@ -14,19 +14,29 @@ import {
   type EngineResponse,
 } from './protocol.js';
 
+/**
+ * How a scan loads, wherever it is read as the app plays it: strictly, except that a tie the
+ * recognition could not join is read as separate presses (issue 233). An ordinary file loads
+ * without options.
+ */
+export const SCAN_LOAD = { preserveNotation: true, tolerateScanTies: true } as const;
+
 export interface EngineClient {
   /**
    * Parses a MusicXML file, or imports a MIDI file (decided by `sourceKind(source)`); for MIDI,
-   * `opts.splitMidi` replaces the learned hand separation with a fixed split point.
+   * `opts.splitMidi` replaces the learned hand separation with a fixed split point. A scan loads
+   * with `preserveNotation` and `tolerateScanTies`, and `tieRepairs` lists the ties it read as
+   * separate presses.
    */
   load(
     input: string | Uint8Array,
     source: string,
-    opts?: { splitMidi?: number; preserveNotation?: boolean },
+    opts?: { splitMidi?: number; preserveNotation?: boolean; tolerateScanTies?: boolean },
   ): Promise<{
     score: Score;
     editorial: Assignment;
     warnings: string[];
+    tieRepairs: TieRepair[];
     xml: string;
     midiInfo: MidiInfo | null;
   }>;
@@ -204,11 +214,15 @@ export function createEngineClient(
         ...(opts?.preserveNotation !== undefined
           ? { preserveNotation: opts.preserveNotation }
           : {}),
+        ...(opts?.tolerateScanTies !== undefined
+          ? { tolerateScanTies: opts.tolerateScanTies }
+          : {}),
         ...(opts?.splitMidi !== undefined ? { splitMidi: opts.splitMidi } : {}),
-      }).then(({ score, editorial, warnings, xml, midiInfo }) => ({
+      }).then(({ score, editorial, warnings, tieRepairs, xml, midiInfo }) => ({
         score,
         editorial,
         warnings,
+        tieRepairs,
         xml,
         midiInfo,
       }));

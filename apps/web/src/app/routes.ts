@@ -1,5 +1,6 @@
 import type { Phrase } from '../i18n/messages.js';
 import { pieceBySlug } from '../library/manifest.js';
+import { keepScansFromHash } from '../scan/diagnostics.js';
 import type { useAppStore, View } from './store.js';
 
 const FILE_HASH = '#/piece/file';
@@ -100,9 +101,18 @@ export function installHashSync(store: typeof useAppStore): () => void {
     return false;
   };
 
+  // '#keep-scans' and '#keep-scans-off' switch this device's scan keeping (diagnostics.ts) and leave
+  // the address where it was, without a history entry; the view stays as it is.
+  const keepFromHash = (): boolean => {
+    if (!keepScansFromHash(location.hash)) return false;
+    replaceHash(viewToHash(store.getState().view));
+    return true;
+  };
+
+  keepFromHash();
   if (!applyHash()) replaceHash(viewToHash(store.getState().view));
 
-  const onHashChange = () => void applyHash();
+  const onHashChange = () => void (keepFromHash() || applyHash());
   const unsubscribe = store.subscribe((state, prev) => {
     if (state.view === prev.view) return;
     const hash = viewToHash(state.view);

@@ -10,6 +10,7 @@ import {
   sharedIdFromHash,
   viewToHash,
 } from './routes.js';
+import { keepScans } from '../scan/diagnostics.js';
 
 afterEach(() => {
   location.hash = '';
@@ -146,6 +147,25 @@ describe('routes', () => {
     expect(location.hash).toBe('#/');
     expect(useAppStore.getState().notice).toBe(SHARED_NOT_LOADED_NOTICE);
     expect(SHARED_NOT_LOADED_NOTICE(en)).toBe('This shared score could not be loaded.');
+    uninstall();
+  });
+  it('turns scan keeping on and off from its address, without moving the reader or a history entry', () => {
+    const entries = history.length;
+    location.hash = '#keep-scans';
+    const uninstall = installHashSync(useAppStore);
+    expect(keepScans()).toBe(true);
+    expect(location.hash).toBe('#/');
+    expect(useAppStore.getState().view).toEqual({ name: 'library' });
+    expect(useAppStore.getState().notice).toBeNull();
+    useAppStore.getState().openAbout();
+    const before = history.length;
+    history.replaceState(history.state, '', '#keep-scans-off');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    expect(keepScans()).toBe(false);
+    expect(location.hash).toBe('#/about');
+    expect(useAppStore.getState().view).toEqual({ name: 'about' });
+    expect(history.length).toBe(before);
+    expect(before).toBeGreaterThanOrEqual(entries);
     uninstall();
   });
 });

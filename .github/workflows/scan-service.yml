@@ -37,6 +37,8 @@ jobs:
       REGION: europe-west4
       SERVICE: digitus2-scan
       REPOSITORY: digitus2
+      # Where opted-in devices' scans are kept (research/omr/service/setup-cases.ps1, issue 233).
+      CASES_BUCKET: digitus2-scan-cases
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,7 +70,7 @@ jobs:
           gcloud run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --project "$PROJECT" \
             --cpu 4 --memory 8Gi --concurrency 4 --max-instances 1 --min-instances 0 --timeout 240 \
             --cpu-boost --execution-environment gen2 --ingress all --port 8080 \
-            --set-env-vars DIGITUS2_OMR_THREADS=4 \
+            --set-env-vars DIGITUS2_OMR_THREADS=4,DIGITUS2_CASES_BUCKET=$CASES_BUCKET \
             --service-account "$SERVICE-run@$PROJECT.iam.gserviceaccount.com" \
             --no-traffic --tag candidate --quiet
       - name: Read the candidate URL

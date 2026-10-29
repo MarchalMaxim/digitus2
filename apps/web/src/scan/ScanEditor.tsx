@@ -193,9 +193,20 @@ export function describeProblem(t: Messages, score: ScanScore, problem: Problem)
     return disagree ? t.scan.edit.problems.barTiming(timing) : t.scan.edit.problems.barLong(timing);
   }
   const note = score.notes.find((n) => n.ordinal === problem.note);
+  if (problem.kind === 'tie-repaired') {
+    if (note)
+      return t.scan.edit.problems.tieRepaired(where(t, note), pitchOf(t, note), problem.reason);
+    // The import's count found no note here: the bar alone is named.
+    const bar = score.bars.find((b) => b.part === problem.part && b.index === problem.measure);
+    return t.scan.edit.problems.tieRepairedBar(
+      t.scan.edit.bar(bar?.number ?? String(problem.measure + 1)),
+    );
+  }
   if (!note) return '';
   if (problem.kind === 'tie-unmatched')
-    return t.scan.edit.problems.tieUnmatched(where(t, note), pitchOf(t, note));
+    return t.scan.edit.problems.tieUnmatched(where(t, note), pitchOf(t, note), problem.side);
+  if (problem.kind === 'tie-grace')
+    return t.scan.edit.problems.tieGrace(where(t, note), pitchOf(t, note));
   const beats = Math.abs(problem.gapTicks) / score.ticksPerQuarter;
   const gap = t.scan.edit.gap(Math.round(beats * 1000) / 1000);
   return problem.gapTicks > 0
@@ -203,11 +214,52 @@ export function describeProblem(t: Messages, score: ScanScore, problem: Problem)
     : t.scan.edit.problems.tieEarly(where(t, note), pitchOf(t, note), gap);
 }
 
+/**
+ * The button text of a correction offered on a place to check (`offersFor`): "Set 9/8 time from
+ * bar 3", "Remove the repeat sign", "Make the A4 in bar 11 a dotted half so the tie reaches",
+ * "Remove the tie".
+ */
+export function offerLabel(
+  t: Messages,
+  score: ScanScore,
+  problem: Problem,
+  offer: Correction,
+): string {
+  switch (offer.kind) {
+    case 'meter': {
+      const bar = score.bars.find((b) => b.part === problem.part && b.index === offer.bar);
+      return t.scan.edit.setMeter(
+        `${offer.beats}/${offer.beatType}`,
+        bar?.number ?? String(offer.bar + 1),
+      );
+    }
+    case 'barline':
+      return t.scan.edit.removeMark(problem.kind === 'form' ? problem.mark : 'repeat');
+    case 'duration': {
+      const note = score.notes.find((n) => n.ordinal === offer.note);
+      if (!note) return '';
+      return t.scan.edit.lengthenTie(
+        pitchOf(t, note),
+        note.measureNumber,
+        t.scan.edit.lengths[offer.type]!,
+        offer.dots > 0,
+      );
+    }
+    case 'tie':
+      return t.scan.edit.removeTie;
+    default:
+      return '';
+  }
+}
+
 /** The note a problem points at: its note, or the first note of its bar. */
 export function problemNote(score: ScanScore, problem: Problem): number | undefined {
-  if (problem.kind !== 'bar-timing' && problem.kind !== 'form') return problem.note;
-  return readingOrder(score).find((n) => n.part === problem.part && n.measure === problem.bar)
-    ?.ordinal;
+  const firstOf = (measure: number) =>
+    readingOrder(score).find((n) => n.part === problem.part && n.measure === measure)?.ordinal;
+  if (problem.kind === 'bar-timing' || problem.kind === 'form') return firstOf(problem.bar);
+  // A note the import named that the review cannot find: its bar's first note.
+  if (score.notes.some((n) => n.ordinal === problem.note)) return problem.note;
+  return firstOf(problem.measure);
 }
 
 /** A diatonic step from `note`, taking the key signature's alteration for the new letter. */

@@ -158,7 +158,9 @@ function segments(run: readonly Voiced[]): Segment[] {
     if (p < 0) break; // nothing settles before the stretch ends: the tail is a slip
     const next = median(run.slice(p, p + SETTLED_FRAMES).map((v) => v.m));
     if (Math.abs(next - reference) < JUMP) {
-      j = p - 1; // it comes back to the same note: the frames between were a glitch
+      // It comes back to the same note: the frames between were a glitch. When it settles from
+      // this very frame, the frame alone is passed over, so the walk always moves on.
+      j = Math.max(p, j + 1) - 1;
       continue;
     }
     cur.moves = true;

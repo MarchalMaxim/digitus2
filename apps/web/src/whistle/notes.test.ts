@@ -90,4 +90,21 @@ describe('notesOf', () => {
     const hiss = synthesize([], { sampleRate: RATE, length: 2, noiseDb: 0 });
     expect(notesOf(pitchTrack(hiss, RATE))).toEqual([]);
   });
+
+  it('comes to an end on a wavering pitch that leaves its note for one frame and settles back', () => {
+    // A real whistle drifting by about a semitone: at the frame of 74.3 the pitch is off its note,
+    // and from that very frame it settles where the note was. Reading it once hung the page on
+    // "Writing the notes" (issue 237).
+    const wavering = [
+      76, 76.2, 76.1, 76.2, 76.3, 75.5, 75.6, 75.1, 75.4, 75.2, 74.3, 75.7, 75.6, 76.3, 75.6, 75.6,
+      75.6, 75.6, 75.5, 75.5, 75.6, 74.3, 74.1, 74, 74.1, 73.9, 73.9, 74, 73.9, 74.6, 75, 74.8,
+    ];
+    const frames = wavering.map((m, i) => ({
+      t: i * 0.01,
+      hz: 440 * 2 ** ((m - 69) / 12),
+      clarity: 0.9,
+      rms: 0.1,
+    }));
+    expect(notesOf(frames).length).toBeGreaterThan(0);
+  }, 2000);
 });

@@ -6,10 +6,16 @@
  * transport's own finish runs. The walk moves the red only through `Playback.cueAt` and
  * `Playback.finish`, in performance seconds, so a repeat is walked as it is heard and the cursor,
  * the page turn, the keys with their fingers and the plain Play button are all the existing cue
- * (useCursor.ts, Transport.tsx). The app makes no sound: the reader's own piano sounds its notes,
- * and nothing here strikes a key. The Practice panel's Hands chooses the steps the reader plays;
- * the hand left out is not asked for and is not played. Nothing in the walk waits on time: there
- * is no timer.
+ * (useCursor.ts, Transport.tsx). The app makes no sound for the reader's notes: nothing here
+ * strikes a key. Nothing in the walk waits on time: there is no timer.
+ *
+ * With one hand left out (the Practice panel's Hands) and the reader's `Hear the left hand` or
+ * `Hear the right hand` switch on (issue 231; it is off until they turn it on), digitus plays that
+ * hand (issue 184): every look that passes a step hands `Playback.accompany` the other hand's notes
+ * from the last step passed to the next step of the walk (accompaniment.ts, a lazy chunk with the
+ * Accompanist, fetched when the switch is on), from that moment. It stops them
+ * (`Playback.stopAccompaniment`) on every move it did not make itself, when the switch goes off,
+ * and when it goes inactive; its own cue and finish leave the tail of the piece sounding.
  *
  * A pass whose gap to the next step is longer than a felt beat makes a halo (halo.ts), a ring that
  * closes in on the cued note over that time. The render hands it to useAlongHalo.ts only while the
@@ -36,11 +42,13 @@
 import type { Hand, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { tempoFactorOf, useAppStore } from '../app/store.js';
-import { performanceFor } from '../audio/performance.js';
+import type { PlayEvent } from '../audio/events.js';
+import { performanceFor, scoreEndSec } from '../audio/performance.js';
 import { heldPitches, subscribeNotes, usePianoHealer, usePianoSnapshot } from '../midi/piano.js';
 import type { NoteMessage } from '../midi/types.js';
 import { haloFor, type Halo } from './halo.js';
 import { createLevelStore, type LevelStore } from './keyLevels.js';
+import { loadOtherHand, otherHandLoaded, type OtherHand } from './otherHandLoad.js';
 import {
   ALONG_EPS,
   NO_KEYS,
@@ -119,6 +127,8 @@ export interface PlayAlong {
   hint: AlongHint | null;
   /** The levels of the held keys (issue 185): the same store for the life of the hook. */
   levels: LevelStore;
+  /** Active, digitus plays a hand, and the browser waits for a click to sound it (issue 184). */
+  soundWaits: boolean;
   /**
    * The halo to draw around the cued step's note (issue 204), or null: only while the playback is
    * cued at its step, in the steps and loop it was made for, with no flight on screen. Drawn by
@@ -155,6 +165,18 @@ interface Live {
   /** The open piece's Practice tempo: real seconds = performance seconds / factor. */
   factor: number;
   currentGroup: number;
+  /** What digitus plays: null when the reader plays both hands (or no piano is connected). */
+  accompaniment: Accompaniment | null;
+}
+
+/** The other hand's notes and the performance's end, made once per score and hands (issue 184). */
+interface Accompaniment {
+  /** The lazy chunk that chooses the stretches and the notes (otherHand.ts), already in. */
+  code: OtherHand;
+  /** The hands digitus plays: the hands left out of the walk. */
+  hands: readonly Hand[];
+  events: readonly PlayEvent[];
+  endSec: number;
 }
 
 /** The halo the last pass made, with the steps and loop it was made against (issue 204). */
@@ -205,6 +227,7 @@ export function usePlayAlong({
 }: PlayAlongOptions): PlayAlong {
   const setting = useAppStore((s) => s.settings.playAlong);
   const practiceMode = useAppStore((s) => s.settings.practiceMode);
+  const hearOtherHand = useAppStore((s) => s.settings.hearOtherHand);
   const factor = useAppStore(tempoFactorOf);
   const piano = usePianoSnapshot();
   const connected = setting && piano.status === 'connected';
@@ -228,6 +251,37 @@ export function usePlayAlong({
     [walking, score, muteKey],
   );
   const active = walking && ready && playable && steps.length > 0 && !playing && !loading;
+  // The other hand's notes (issue 184): only for a reader whose piano is connected, who left a
+  // hand out and turned the switch on (issue 231). Its code is a lazy chunk (otherHand.ts), asked
+  // for here as soon as it is wanted; until it is in, there is no plan and nothing is handed over
+  // or prepared, and a chunk that does not come leaves the walk working without the other hand
+  // (turning the switch off and on asks again). The events are the transport's own, so the hand
+  // sounds as it does in Play.
+  const wantsOtherHand = walking && hearOtherHand && score !== null && muteKey !== '';
+  const [code, setCode] = useState<OtherHand | null>(otherHandLoaded);
+  useEffect(() => {
+    if (!wantsOtherHand || code) return;
+    let live = true;
+    loadOtherHand().then(
+      (loaded) => {
+        if (live) setCode(loaded);
+      },
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [wantsOtherHand, code]);
+  const accompaniment = useMemo<Accompaniment | null>(() => {
+    if (!wantsOtherHand || !code) return null;
+    const perf = performanceFor(score);
+    return {
+      code,
+      hands: muteKey.split(',') as Hand[],
+      events: code.playEventsFor(perf.score),
+      endSec: scoreEndSec(perf.score),
+    };
+  }, [wantsOtherHand, code, score, muteKey]);
 
   /** The index of the step the red waits on, -1 when none: state, so the render can read it. */
   const [index, setIndex] = useState(-1);
@@ -248,6 +302,7 @@ export function usePlayAlong({
     notes,
     factor,
     currentGroup,
+    accompaniment,
   });
   useLayoutEffect(() => {
     liveRef.current = {
@@ -259,6 +314,7 @@ export function usePlayAlong({
       notes,
       factor,
       currentGroup,
+      accompaniment,
     };
   });
   const keysRef = useRef<Keys>(NO_KEYS);
@@ -282,6 +338,11 @@ export function usePlayAlong({
    * before the finish. A key pressed in that gap is kept for the first step and moves nothing.
    */
   const homeRef = useRef(false);
+  /**
+   * The walk handed the playback notes since it last stopped them: it only stops what it started,
+   * so an idle walk calls nothing.
+   */
+  const accompaniedRef = useRef(false);
 
   /** Each state is set only on a change, so a note that changes nothing renders nothing. */
   const moveIndex = useCallback((to: number) => {
@@ -306,6 +367,11 @@ export function usePlayAlong({
       const o = liveRef.current;
       const pb = o.playback;
       const now = performance.now();
+      /** Stops what the walk had digitus play: the queue, the notes not started, the ones that ring. */
+      const stopAccompaniment = () => {
+        accompaniedRef.current = false;
+        pb.stopAccompaniment();
+      };
       const letGo = event && !event.on ? event.midi : undefined;
       /** A key let go that the settle does not judge: out of the books, its level draining. */
       const drop = () => {
@@ -316,6 +382,8 @@ export function usePlayAlong({
       };
       if (!o.active) {
         // Not walking (playing, loading, no piano): the presses are kept, the walk starts afresh.
+        // The other hand stops too (Play stops it in its own click; the rest end here).
+        if (accompaniedRef.current) stopAccompaniment();
         onTimingRef.current?.({ kind: 'break' });
         atRef.current = null;
         homeRef.current = false;
@@ -342,9 +410,10 @@ export function usePlayAlong({
         stepsAtRef.current !== o.steps ||
         loopAtRef.current !== stretchKey(stretch);
       if (moved) {
-        // A move the walk did not make (a seek, Rewind, a loop or hands change, Play then Pause).
-        // The walk's own moves (its cue, its finish) leave `atRef` where they put the playback, so
-        // they land here never.
+        // A move the walk did not make (a seek, Rewind, a loop or hands change, Play then Pause):
+        // the stretch that was sounding no longer leads to where the red is. The walk's own moves
+        // (its cue, its finish) leave `atRef` where they put the playback, so they land here never.
+        if (atRef.current !== null) stopAccompaniment();
         onTimingRef.current?.({ kind: 'break' });
         keys = spendAll(keys);
         atRef.current = start;
@@ -401,6 +470,29 @@ export function usePlayAlong({
               })
             : null;
         showHalo(halo ? { halo, steps: o.steps, loop: stretchKey(stretch) } : null);
+      }
+      // Digitus plays the other hand (issue 184) from the step passed last to the next step of the
+      // walk, from now: the press that passed it, or the landing of a hop for a press made under
+      // it (issue 204). A new stretch drops what the one before left unstarted. Before the cue or
+      // the finish, which do not stop it.
+      const plan = o.accompaniment;
+      if (plan && result.passed > 0) {
+        const next = stepAfter(o.steps, result.last, stretch);
+        accompaniedRef.current = true;
+        pb.accompany(
+          plan.code.accompanimentNotes(
+            plan.events,
+            plan.hands,
+            plan.code.accompanimentStretches(
+              o.steps,
+              result.last,
+              next < 0 ? { kind: 'finish' } : { kind: 'cue', index: next },
+              stretch,
+              plan.endSec,
+            ),
+            stretch,
+          ),
+        );
       }
       // Issue 192: the steps passed just now, each from the press that started its run.
       if (result.passed > 0) {
@@ -500,6 +592,29 @@ export function usePlayAlong({
     return () => cancelAnimationFrame(frame);
   }, [decide, active, flightShown, playing, loading, atStart, cue, loop, steps, marked]);
 
+  // Digitus plays the hand the reader left out (issue 184): its samples load before any press,
+  // with no gesture, while the walk is active (`prepare` is once per score and never turns the
+  // walk off). The view being left stops what still sounds; the playback stops it too.
+  const accompanying = active && accompaniment !== null;
+  const { prepare } = playback;
+  useEffect(() => {
+    if (accompanying) prepare();
+  }, [accompanying, prepare, score]);
+  useEffect(
+    () => () => {
+      accompaniedRef.current = false;
+      liveRef.current.playback.stopAccompaniment();
+    },
+    [],
+  );
+  // The switch turned off while the other hand sounds: it stops at once, mid-stretch. No look
+  // passes a step then, so nothing else would stop it.
+  useEffect(() => {
+    if (accompaniment !== null || !accompaniedRef.current) return;
+    accompaniedRef.current = false;
+    liveRef.current.playback.stopAccompaniment();
+  }, [accompaniment]);
+
   // Playwright's check: the pitches of the step the red waits on.
   useEffect(() => {
     if (!hooksOn()) return;
@@ -545,6 +660,7 @@ export function usePlayAlong({
     cue !== null &&
     !atStart &&
     Math.abs(playback.startPerformanceSec() - step.perfSec) <= ALONG_EPS;
+  const soundWaits = accompanying && playback.soundWaits;
   const pianoConnected = connected;
   // The walk's first step (issue 196): the loop's first when a loop is set, else the piece's. A
   // loop that holds no step gives -1, which no index equals.
@@ -569,6 +685,7 @@ export function usePlayAlong({
       atFirst: cuedHere && index === first,
       hint,
       levels,
+      soundWaits,
       halo,
     };
   }, [
@@ -580,6 +697,7 @@ export function usePlayAlong({
     step,
     played,
     levels,
+    soundWaits,
     flightShown,
     haloShown,
     steps,

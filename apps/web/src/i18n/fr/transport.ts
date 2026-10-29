@@ -20,6 +20,8 @@ export const transport: Messages['transport'] = {
   loopTo: 'à',
   addNotes: 'Ajouter des notes intermédiaires',
   practiceMode: 'Mode exercice',
+  hearLeft: 'Entendre la main gauche',
+  hearRight: 'Entendre la main droite',
   seekHelp: 'Cliquez sur une mesure pour y aller. ← et → avancent ou reculent d’une mesure.',
   seekHelpTouch: 'Touchez une mesure pour y aller.',
   loopReversed: 'Le début de la boucle doit précéder la fin.',

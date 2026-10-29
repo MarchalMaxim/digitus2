@@ -12,12 +12,24 @@ export interface NoteEvent {
   hand: Hand;
 }
 
+/**
+ * One note of the accompaniment (issue 184): when it sounds after the press that starts its
+ * stretch, and for how long, both in performance seconds (the scheduler divides by the tempo).
+ */
+export interface AccNote {
+  offsetSec: number;
+  durationSec: number;
+  midi: number;
+  velocity: number;
+  hand: Hand;
+}
+
 export interface Instrument {
   /** Fetch what the given pitches at the given velocities need; resolves when they can be played. */
   load(midis: number[], velocities: number[]): Promise<void>;
   /**
-   * Schedules a note; returns its own stop: called before `e.time` the note never sounds, called
-   * later it is released. Other notes of the same pitch are untouched.
+   * Schedules a note; returns its own stop (issue 184): called before `e.time` the note never
+   * sounds, called later it is released. Other notes of the same pitch are untouched.
    */
   start(e: NoteEvent): () => void;
   /**
@@ -32,7 +44,7 @@ export interface Instrument {
 
 /**
  * The velocity a note plays at: its own (a dynamics mark or hairpin, MIDI), else its hand's
- * (`UNMARKED_VELOCITY`, the left hand slightly softer than the melody).
+ * (`UNMARKED_VELOCITY`, the accompaniment slightly softer than the melody).
  */
 export function noteVelocity(note: { velocity?: number; hand: Hand }): number {
   return note.velocity ?? UNMARKED_VELOCITY[note.hand];
@@ -122,7 +134,7 @@ export function createSilentInstrument(): Instrument & {
   /** The keys struck from the keyboard, and the pitches released since. */
   strikes: { midi: number; velocity: number; maxSec: number }[];
   released: number[];
-  /** The events whose own stop was called, once each, in the order stopped. */
+  /** The events whose own stop was called (issue 184), once each, in the order stopped. */
   cancelled: NoteEvent[];
   stopAllCalls: number;
 } {

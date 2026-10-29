@@ -14,6 +14,13 @@ import {
   type Performance,
 } from './performance.js';
 
+/**
+ * The transport's own note list, kept per score: the play-along's other hand (issue 184) sounds
+ * the same list as Play, and fetches it through this chunk (score/otherHandLoad.ts), so the list's
+ * code stays out of the library page's first load.
+ */
+export { playEventsFor } from './events.js';
+
 export interface TransportDeps {
   ctx: AudioClock;
   instrument: Instrument;

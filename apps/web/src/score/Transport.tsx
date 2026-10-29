@@ -99,6 +99,14 @@ export interface PracticeControlsProps {
    */
   practiceMode?: { on: boolean; set(on: boolean): void } | null;
   /**
+   * The switch that lets the reader hear the hand left out (issue 231), shaped like `practiceMode`;
+   * `hand` is the hand that would sound ('L' when the reader plays the right). Stacked right over
+   * the Hands control, so the control stays where the pointer is when the switch appears. Present
+   * only while a piano is connected, Practice mode is on, the piece has two hands and one is
+   * chosen; absent (undefined or null) the switch is not there at all.
+   */
+  hearOtherHand?: { on: boolean; set(on: boolean): void; hand: 'L' | 'R' } | null;
+  /**
    * Every note is in one hand (issue 112): the piece plays with both hands whatever is saved, so
    * the Hands control has nothing to choose and is not there.
    */
@@ -334,12 +342,12 @@ function placeThumb(
 }
 
 /**
- * The practice controls: Practice mode (while a piano is connected, issue 191), tempo, hands,
- * metronome, count-in and the bar loop. Settings live in
- * the store; the loop lives in usePlayback. The score view keeps them in the dock's Practice
- * panel at every width (UI batch, spec 13); the panel's toggle names them, so they are no group
- * of their own (a screen reader would announce "Practice" twice). The panel only hides them, so
- * what was typed survives closing and opening it.
+ * The practice controls: Practice mode (while a piano is connected, issue 191), tempo, hands (with
+ * the switch to hear the hand left out stacked over them, issue 231), metronome, count-in and the
+ * bar loop. Settings live in the store; the loop lives in usePlayback. The score view keeps them
+ * in the dock's Practice panel at every width (UI batch, spec 13); the panel's toggle names them,
+ * so they are no group of their own (a screen reader would announce "Practice" twice). The panel
+ * only hides them, so what was typed survives closing and opening it.
  *
  * The loop is one checkbox, "Loop bars": its two bar fields show only while it is ticked. Ticking
  * it fills them with the bar the cursor is in and the next (`loopPrefill`) and loops at once;
@@ -361,6 +369,7 @@ export function PracticeControls({
   currentBar,
   embellish = null,
   practiceMode = null,
+  hearOtherHand = null,
   oneHanded = false,
 }: PracticeControlsProps) {
   const t = useT();
@@ -420,6 +429,20 @@ export function PracticeControls({
     };
   }, []);
 
+  // The switch above Hands goes with the piano, Practice mode or the chosen hand; when it goes
+  // while it has the focus, the focus moves to the checked hand, the control under it (the same
+  // ref-cleanup).
+  const hearRef = useCallback(
+    (box: HTMLInputElement | null) => {
+      if (!box) return;
+      return () => {
+        if (document.activeElement === box)
+          handsRef.current?.querySelector<HTMLInputElement>('input:checked')?.focus();
+      };
+    },
+    [handsRef],
+  );
+
   // A tick box like Metronome, after the loop: there only once the embellished version exists.
   const addNotes = embellish && (
     <label className="check">
@@ -467,22 +490,36 @@ export function PracticeControls({
       </label>
 
       {!oneHanded && (
-        <fieldset className="segmented" ref={handsRef}>
-          <legend className="visually-hidden">{t.transport.hands}</legend>
-          <span className="segmented-thumb" aria-hidden="true" />
-          {HANDS.map((h) => (
-            <label key={h.value}>
+        <div className="hands">
+          {hearOtherHand && (
+            <label className="check switch">
               <input
-                type="radio"
-                name="hands"
-                value={h.value}
-                checked={settings.hands === h.value}
-                onChange={() => setSettings({ hands: h.value })}
-              />
-              <span>{h.label(t)}</span>
+                ref={hearRef}
+                type="checkbox"
+                role="switch"
+                checked={hearOtherHand.on}
+                onChange={(e) => hearOtherHand.set(e.currentTarget.checked)}
+              />{' '}
+              {hearOtherHand.hand === 'L' ? t.transport.hearLeft : t.transport.hearRight}
             </label>
-          ))}
-        </fieldset>
+          )}
+          <fieldset className="segmented" ref={handsRef}>
+            <legend className="visually-hidden">{t.transport.hands}</legend>
+            <span className="segmented-thumb" aria-hidden="true" />
+            {HANDS.map((h) => (
+              <label key={h.value}>
+                <input
+                  type="radio"
+                  name="hands"
+                  value={h.value}
+                  checked={settings.hands === h.value}
+                  onChange={() => setSettings({ hands: h.value })}
+                />
+                <span>{h.label(t)}</span>
+              </label>
+            ))}
+          </fieldset>
+        </div>
       )}
 
       <label className="check">

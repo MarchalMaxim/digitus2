@@ -2,8 +2,8 @@
  * Playback for the score view: owns the AudioContext, the instrument and the look-ahead
  * Transport (audio/transport.ts), and mirrors the transport settings from the store into it.
  *
- * The AudioContext is created on the first Play or struck key, inside the click that asked for
- * it, so the browser lets it start. The instrument loads the piece's pitches and velocity layers once per score; Play is
+ * The AudioContext is created on the first play(), inside the click that asked for it, so the
+ * browser lets it start. The instrument loads the piece's pitches and velocity layers once per score; Play is
  * unavailable and busy while it does. A new score stops playback and drops the transport and the
  * loop; unmounting also closes the context. A loop changed while playing reaches the transport
  * once the typing settles (LOOP_SETTLE_MS). The transport's count-in reports become `countIn`,
@@ -16,6 +16,13 @@
  * seconds, the order heard, for the play-along (issue 182): it can name the second hearing of a
  * repeated bar, which a written second cannot.
  *
+ * The other hand of the play-along (issue 184) sounds through an `Accompanist` (audio/accompanist.ts,
+ * a lazy chunk with the choice of its notes, otherHand.ts, that the walk fetches when the reader's
+ * switch is on) over the same context and instrument. `prepare` loads the samples before any press, with no
+ * gesture, under `preparing` (never `loading`, which would turn the walk off). The browser may hold
+ * the context suspended until a click: `accompany` waits for it to run, `soundWaits` says so, and a
+ * capture listener resumes it on the first pointer or key press.
+ *
  * The transport module is a lazy chunk, fetched as soon as a score is open: it reads the beat
  * grid through the engine's public API, and any runtime import of the engine brings
  * @xmldom/xmldom (CommonJS, which the bundler cannot drop) into the chunk that holds it. Imported
@@ -27,8 +34,16 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import type { Phrase } from '../i18n/messages.js';
 import { prefersReducedMotion, RED_FLIGHT_MS } from '../design/motion.js';
-import { instrumentFromLocation, noteVelocity, type Instrument } from '../audio/instrument.js';
+import type { Accompanist } from '../audio/accompanist.js';
+import {
+  instrumentFromLocation,
+  noteVelocity,
+  type AccNote,
+  type Instrument,
+} from '../audio/instrument.js';
 import { keyVelocity } from './noteKey.js';
+import type { AccompaniedNote, OtherHandHost } from './otherHand.js';
+import { otherHandLoaded } from './otherHandLoad.js';
 import { scheduleClick } from '../audio/metronome.js';
 import {
   loopStartSec,
@@ -177,6 +192,30 @@ export interface Playback {
    * goes on, stopped stays stopped.
    */
   strike(midi: number, hand: Hand): () => void;
+  /**
+   * Issue 184: the samples for the other hand, loaded while the walk is active and before any
+   * press, with no gesture: the AudioContext is made (suspended where the browser waits for a
+   * click) and the piece's samples load under `preparing`, never `loading`. Once per score; a
+   * failure shows SAMPLES_FAILED_NOTICE and is not tried again for that score.
+   */
+  prepare(): void;
+  /** `prepare` is loading the samples: the status line says Loading the piano…; the walk goes on. */
+  preparing: boolean;
+  /**
+   * The AudioContext exists and the browser holds it suspended until a click or key on the page
+   * (autoplay, no user activation yet). Meanwhile a capture listener resumes it on the first
+   * pointerdown, pointerup or keydown. False once the samples for the open score failed to load:
+   * a click would sound nothing.
+   */
+  soundWaits: boolean;
+  /**
+   * Plays the other hand's notes from now (Accompanist.play at the Practice tempo factor). A no-op
+   * while the samples do not cover the score or the context is not running; a context that is not
+   * running (or that stops running) also stops what an earlier call left queued.
+   */
+  accompany(notes: readonly AccNote[]): void;
+  /** Stops the accompaniment (Accompanist.stop). Idempotent; never touches Play's notes or a struck key. */
+  stopAccompaniment(): void;
 }
 
 /** How long a key clicked on the keyboard sounds at most, in seconds (a pointer held down). */
@@ -217,6 +256,12 @@ export function handsFor(score: Score | null, hands: HandsMode): HandsMode {
   return oneHanded(score) ? 'both' : hands;
 }
 
+/** Whether the page has had a click or a key press; a browser without the API counts as not. */
+function userHasBeenActive(): boolean {
+  const activation = (navigator as { userActivation?: { hasBeenActive?: boolean } }).userActivation;
+  return activation?.hasBeenActive === true;
+}
+
 /**
  * Whether the test hooks are on (`?audio=silent` or `?hooks=1`): the Playwright checks of what
  * the app handed to the instrument. `?hooks=1` changes nothing else: the real instrument loads.
@@ -235,7 +280,7 @@ function uniqueVelocities(score: Score): number[] {
 }
 
 /** What the instrument needs to play a score: its pitches, and its velocities' span. */
-interface Samples {
+export interface Samples {
   midis: number[];
   velocities: number[];
   low: number;
@@ -290,6 +335,16 @@ export function usePlayback(score: Score | null): Playback {
   const [ended, setEnded] = useState(0);
   const [loop, setLoopState] = useState<LoopRange | null>(null);
   const [cue, setCue] = useState<number | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  /** The AudioContext's state ('none' before it exists); the resume listener follows it. */
+  const [audioState, setAudioState] = useState<AudioContextState | 'none'>('none');
+  /** The page has had a click or a key press (`navigator.userActivation`), as of the last look. */
+  const [activated, setActivated] = useState(false);
+  /**
+   * The score whose `prepare` could not load the samples. A click would sound nothing for it, so
+   * the status line does not ask for one (`soundWaits`).
+   */
+  const [failedScore, setFailedScore] = useState<Score | null>(null);
   /** `atStart` for play(), which runs in a click: a Play from the start lets the red travel. */
   const atStartRef = useRef(atStart);
   useLayoutEffect(() => {
@@ -308,6 +363,17 @@ export function usePlayback(score: Score | null): Playback {
   const loadSeqRef = useRef(0);
   const scoreRef = useRef<Score | null>(score);
   const loopRef = useRef<LoopRange | null>(null);
+  /** The other hand's scheduler, made on the first `accompany` over the opened audio. */
+  const accompanistRef = useRef<Accompanist | null>(null);
+  /** How many loads Play or a struck key have running: `prepare` leaves the samples to them. */
+  const loadsRunningRef = useRef(0);
+  /** Counts `prepare` loads: only the newest clears `preparing`. */
+  const prepSeqRef = useRef(0);
+  /** The score the running `prepare` loads for. */
+  const preparingScoreRef = useRef<Score | null>(null);
+  /** The test hooks' logs of what the accompaniment handed to the instrument and cancelled. */
+  const accompaniedRef = useRef<AccompaniedNote[]>([]);
+  const accompCancelledRef = useRef<{ midi: number; time: number }[]>([]);
   /** A seek before the first Play, while there is no transport yet: where it will start. */
   const pendingSecRef = useRef<number | null>(null);
   /**
@@ -332,9 +398,18 @@ export function usePlayback(score: Score | null): Playback {
     transportRef.current?.setLoop(loopRef.current);
   }, [cancelLoopPush]);
 
+  /** Stops the accompaniment: its queue, the notes not started, and the ones that ring. */
+  const stopAccompaniment = useCallback(() => {
+    accompanistRef.current?.stop();
+  }, []);
+
   /** Stops for good: cancels a pending start, drops the transport and forgets the loop. */
   const halt = useCallback(() => {
     playSeqRef.current++;
+    stopAccompaniment();
+    prepSeqRef.current++; // a prepare running for the old score no longer counts
+    preparingScoreRef.current = null;
+    setPreparing(false);
     cancelLoopPush();
     transportRef.current?.dispose();
     transportRef.current = null;
@@ -348,15 +423,22 @@ export function usePlayback(score: Score | null): Playback {
     setAtStart(true);
     setCue(null);
     setLoopState(null);
-  }, [cancelLoopPush]);
+  }, [cancelLoopPush, stopAccompaniment]);
 
   /** Silences the instrument and releases the audio device. */
   const release = useCallback(() => {
+    accompanistRef.current?.dispose();
+    accompanistRef.current = null;
+    prepSeqRef.current++;
+    preparingScoreRef.current = null;
+    setPreparing(false);
     instrumentRef.current?.stopAll();
     instrumentRef.current = null;
     loadedRef.current = null;
     const ctx = ctxRef.current;
     ctxRef.current = null;
+    setAudioState('none');
+    if (ctx) ctx.onstatechange = null;
     if (ctx && ctx.state !== 'closed') ctx.close().catch(() => undefined);
   }, []);
 
@@ -372,12 +454,15 @@ export function usePlayback(score: Score | null): Playback {
   useEffect(() => release, [release]);
 
   // Playwright's checks (`?audio=silent` or `?hooks=1`): the pitches the silent instrument was
-  // asked to strike, in order, and the AudioContext's state ('none' before it exists).
+  // asked to strike, in order; what the accompaniment handed to the instrument and cancelled
+  // (never Play's notes); and the AudioContext's state.
   useEffect(() => {
     if (!hooksOn()) return;
     const w = window as unknown as {
       __digitus2Keys?: {
         strikes(): number[];
+        accompanied(): AccompaniedNote[];
+        accompCancelled(): { midi: number; time: number }[];
         audioState(): AudioContextState | 'none';
       };
     };
@@ -386,6 +471,8 @@ export function usePlayback(score: Score | null): Playback {
         (instrumentRef.current as { strikes?: { midi: number }[] } | null)?.strikes?.map(
           (k) => k.midi,
         ) ?? [],
+      accompanied: () => accompaniedRef.current.map((n) => ({ ...n })),
+      accompCancelled: () => accompCancelledRef.current.map((n) => ({ ...n })),
       audioState: () => ctxRef.current?.state ?? 'none',
     };
     w.__digitus2Keys = hook;
@@ -393,6 +480,17 @@ export function usePlayback(score: Score | null): Playback {
       if (w.__digitus2Keys === hook) delete w.__digitus2Keys;
     };
   }, []);
+
+  // The browser may hold the context suspended until a click or a key (autoplay): whenever it is,
+  // the first pointer or key press anywhere on the page resumes it. A capture listener, so a
+  // click that something below handles still counts.
+  useEffect(() => {
+    if (audioState !== 'suspended') return;
+    return otherHandLoaded()?.onActivation(() => {
+      ctxRef.current?.resume().catch(() => undefined);
+      setActivated(userHasBeenActive());
+    });
+  }, [audioState]);
 
   // The store's transport settings, mirrored into a transport that exists (new ones copy them).
   useEffect(() => {
@@ -415,9 +513,30 @@ export function usePlayback(score: Score | null): Playback {
       ctxRef.current = ctx;
       instrumentRef.current = instrumentFromLocation(ctx, window.location.search);
       loadedRef.current = null;
+      const made = ctx;
+      made.onstatechange = () => {
+        if (ctxRef.current !== made) return;
+        // Held (suspended, interrupted): the clock stands still, so what the other hand has queued
+        // would sound out of step once the audio comes back. It goes now.
+        if (made.state !== 'running') accompanistRef.current?.stop();
+        setAudioState(made.state);
+        setActivated(userHasBeenActive());
+      };
+      setAudioState(made.state);
+      setActivated(userHasBeenActive());
     }
     if (ctx.state === 'suspended') ctx.resume().catch(() => undefined);
     return { audio: ctx, instrument: instrumentRef.current! };
+  }, []);
+
+  /** Counts a Play's or a key's load while it runs, so `prepare` does not start a second one. */
+  const trackLoad = useCallback(<T>(load: Promise<T>): Promise<T> => {
+    loadsRunningRef.current++;
+    const done = () => {
+      loadsRunningRef.current--;
+    };
+    load.then(done, done);
+    return load;
   }, []);
 
   const play = useCallback(
@@ -425,6 +544,7 @@ export function usePlayback(score: Score | null): Playback {
       const resume = opts.resume === true;
       const s = scoreRef.current;
       if (!s || transportRef.current?.state.playing) return;
+      stopAccompaniment(); // in the click, before the transport schedules anything
       const seq = ++playSeqRef.current;
       const { audio, instrument } = openAudio();
 
@@ -504,7 +624,7 @@ export function usePlayback(score: Score | null): Playback {
       const load = loaded ? loadSeqRef.current : ++loadSeqRef.current;
       const samples = loaded
         ? Promise.resolve()
-        : instrument.load(needed.midis, needed.velocities).then(
+        : trackLoad(instrument.load(needed.midis, needed.velocities)).then(
             () => {
               if (ctxRef.current === audio && load === loadSeqRef.current) {
                 loadedRef.current = needed;
@@ -529,7 +649,7 @@ export function usePlayback(score: Score | null): Playback {
         },
       );
     },
-    [openAudio, pushLoop],
+    [openAudio, pushLoop, stopAccompaniment, trackLoad],
   );
 
   // A key clicked on the keyboard (issue #96). The samples it needs are the score's (the keyboard
@@ -553,7 +673,7 @@ export function usePlayback(score: Score | null): Playback {
       } else {
         setLoading(true);
         const load = ++loadSeqRef.current;
-        instrument.load(needed.midis, needed.velocities).then(
+        trackLoad(instrument.load(needed.midis, needed.velocities)).then(
           () => {
             if (ctxRef.current !== audio || load !== loadSeqRef.current) return;
             loadedRef.current = needed;
@@ -572,7 +692,43 @@ export function usePlayback(score: Score | null): Playback {
         stop?.();
       };
     },
+    [openAudio, trackLoad],
+  );
+
+  // Issue 184. The other hand's sound: the samples before any press (no gesture) and the notes
+  // from now. The code is the other hand's lazy chunk (otherHand.ts), which the walk has fetched
+  // before it asks, so without it there is nothing to prepare or play. It works on the playback's
+  // own refs and state, through this one object.
+  const otherHand = useMemo<OtherHandHost>(
+    () => ({
+      scoreRef,
+      ctxRef,
+      instrumentRef,
+      loadedRef,
+      loadSeqRef,
+      loadsRunningRef,
+      prepSeqRef,
+      preparingScoreRef,
+      accompanistRef,
+      accompaniedRef,
+      accompCancelledRef,
+      openAudio,
+      setPreparing,
+      samplesFor,
+      covers,
+      hooks: hooksOn,
+      tempoFactor: () => tempoFactorOf(useAppStore.getState()),
+      failed: (s) => {
+        setFailedScore(s);
+        if (scoreRef.current === s) useAppStore.getState().setNotice(SAMPLES_FAILED_NOTICE);
+      },
+    }),
     [openAudio],
+  );
+  const prepare = useCallback(() => otherHandLoaded()?.prepareSamples(otherHand), [otherHand]);
+  const accompany = useCallback(
+    (notes: readonly AccNote[]) => otherHandLoaded()?.accompanyNotes(otherHand, notes),
+    [otherHand],
   );
 
   const pause = useCallback(() => {
@@ -724,6 +880,11 @@ export function usePlayback(score: Score | null): Playback {
     [cancelLoopPush, pushLoop],
   );
 
+  // The sentence that asks for a click: the browser holds the context, the page has had no click
+  // or key yet, and the samples did not fail (after a failure the click would sound nothing).
+  const soundWaits =
+    audioState === 'suspended' && !activated && (failedScore === null || failedScore !== score);
+
   return useMemo(
     () => ({
       playing,
@@ -749,6 +910,11 @@ export function usePlayback(score: Score | null): Playback {
       leadInRemainingSec,
       setLoop,
       strike,
+      prepare,
+      preparing,
+      soundWaits,
+      accompany,
+      stopAccompaniment,
     }),
     [
       playing,
@@ -774,6 +940,11 @@ export function usePlayback(score: Score | null): Playback {
       leadInRemainingSec,
       setLoop,
       strike,
+      prepare,
+      preparing,
+      soundWaits,
+      accompany,
+      stopAccompaniment,
     ],
   );
 }

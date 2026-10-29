@@ -57,6 +57,11 @@ function playback(
     loop: null,
     setLoop: vi.fn<Playback['setLoop']>(),
     strike: () => () => undefined,
+    prepare: () => {},
+    preparing: false,
+    soundWaits: false,
+    accompany: () => {},
+    stopAccompaniment: () => {},
   };
 }
 afterEach(() => {
@@ -579,6 +584,177 @@ describe('the Practice mode switch', () => {
       );
       expect(screen.getByRole('switch', { name }), locale).toBeChecked();
       unmount();
+    }
+  });
+});
+
+// The switch that lets the reader hear the hand left out (issue 231): a real switch stacked on top
+// of the Hands control, there only while the score view passes `hearOtherHand`.
+describe('the Hear the other hand switch', () => {
+  const props = { measureCount: 12, currentBar: 1 };
+
+  it('is not there without the prop, or with null, and Hands stands in its wrapper all the same', () => {
+    const { container, rerender } = render(<PracticeControls playback={playback()} {...props} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+    rerender(<PracticeControls playback={playback()} {...props} hearOtherHand={null} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+    expect(container.querySelector('.hands > fieldset.segmented')).not.toBeNull();
+  });
+
+  it('is one unticked switch, in the Hands wrapper before the Hands group, drawn by the app', () => {
+    const { container } = render(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        hearOtherHand={{ on: false, set: vi.fn(), hand: 'L' }}
+      />,
+    );
+    expect(screen.getAllByRole('switch')).toHaveLength(1);
+    const toggle = screen.getByRole('switch', { name: 'Hear the left hand' });
+    expect(toggle).not.toBeChecked();
+    const label = toggle.closest('label')!;
+    expect(label).toHaveClass('check', 'switch');
+    const hands = container.querySelector('.transport > .hands')!;
+    expect(label.parentElement).toBe(hands);
+    // Stacked right over the Hands control: the wrapper holds the switch, then the group.
+    expect(hands.children).toHaveLength(2);
+    expect(hands.firstElementChild).toBe(label);
+    const group = screen.getByRole('group', { name: 'Hands' });
+    expect(hands.lastElementChild).toBe(group);
+    expect(toggle.compareDocumentPosition(group) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.querySelectorAll('.is-red')).toHaveLength(0);
+  });
+
+  it('comes after the Practice mode switch and the tempo', () => {
+    render(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        practiceMode={{ on: true, set: vi.fn() }}
+        hearOtherHand={{ on: false, set: vi.fn(), hand: 'L' }}
+      />,
+    );
+    const switches = screen.getAllByRole('switch');
+    expect(switches.map((s) => s.closest('label')!.textContent!.trim())).toEqual([
+      'Practice mode',
+      'Hear the left hand',
+    ]);
+    const tempo = screen.getByRole('slider', { name: /Tempo/ });
+    expect(
+      tempo.compareDocumentPosition(switches[1]!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('calls set(true) on a click, and set(false) on a click when it is on', async () => {
+    const set = vi.fn<(on: boolean) => void>();
+    const { rerender } = render(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        hearOtherHand={{ on: false, set, hand: 'L' }}
+      />,
+    );
+    await userEvent.click(screen.getByRole('switch', { name: 'Hear the left hand' }));
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenLastCalledWith(true);
+    set.mockClear();
+    rerender(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        hearOtherHand={{ on: true, set, hand: 'L' }}
+      />,
+    );
+    const on = screen.getByRole('switch', { name: 'Hear the left hand' });
+    expect(on).toBeChecked();
+    await userEvent.click(on);
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenLastCalledWith(false);
+  });
+
+  it('reads Hear the right hand when the right hand is the one that would sound', () => {
+    render(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        hearOtherHand={{ on: false, set: vi.fn(), hand: 'R' }}
+      />,
+    );
+    expect(screen.getByRole('switch', { name: 'Hear the right hand' })).toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: 'Hear the left hand' })).toBeNull();
+  });
+
+  it('moves the focus to the hand that is chosen when the switch goes while focused', () => {
+    useAppStore.getState().setSettings({ hands: 'R' });
+    const pb = playback();
+    const { rerender } = render(
+      <PracticeControls
+        playback={pb}
+        {...props}
+        hearOtherHand={{ on: true, set: vi.fn(), hand: 'L' }}
+      />,
+    );
+    screen.getByRole('switch', { name: 'Hear the left hand' }).focus();
+    rerender(<PracticeControls playback={pb} {...props} hearOtherHand={null} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.getByRole('radio', { name: 'Right hand' })).toHaveFocus();
+  });
+
+  it('leaves the focus where it is when the switch goes unfocused', () => {
+    const pb = playback();
+    const { rerender } = render(
+      <PracticeControls
+        playback={pb}
+        {...props}
+        hearOtherHand={{ on: true, set: vi.fn(), hand: 'L' }}
+      />,
+    );
+    const metronome = screen.getByRole('checkbox', { name: 'Metronome' });
+    metronome.focus();
+    rerender(<PracticeControls playback={pb} {...props} hearOtherHand={null} />);
+    expect(metronome).toHaveFocus();
+  });
+
+  it('has no wrapper on a one-hand piece, which has no Hands control to stack it on', () => {
+    const { container } = render(
+      <PracticeControls
+        playback={playback()}
+        {...props}
+        oneHanded
+        hearOtherHand={{ on: false, set: vi.fn(), hand: 'L' }}
+      />,
+    );
+    expect(container.querySelector('.hands')).toBeNull();
+    expect(screen.queryByRole('switch')).toBeNull();
+  });
+
+  it('is named in each language', async () => {
+    const names = {
+      en: ['Hear the left hand', 'Hear the right hand'],
+      es: ['Oír la mano izquierda', 'Oír la mano derecha'],
+      fr: ['Entendre la main gauche', 'Entendre la main droite'],
+      nl: ['Linkerhand horen', 'Rechterhand horen'],
+      pt: ['Ouvir a mão esquerda', 'Ouvir a mão direita'],
+    } as const;
+    for (const [locale, [left, right]] of Object.entries(names) as [
+      keyof typeof names,
+      readonly [string, string],
+    ][]) {
+      await act(() => chooseLocale(locale));
+      for (const [hand, name] of [
+        ['L', left],
+        ['R', right],
+      ] as const) {
+        const { unmount } = render(
+          <PracticeControls
+            playback={playback()}
+            {...props}
+            hearOtherHand={{ on: false, set: vi.fn(), hand }}
+          />,
+        );
+        expect(screen.getByRole('switch', { name }), `${locale} ${hand}`).not.toBeChecked();
+        unmount();
+      }
     }
   });
 });

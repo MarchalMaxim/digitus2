@@ -76,6 +76,11 @@ function playing({
     loop: null,
     setLoop: vi.fn(),
     strike: () => () => undefined,
+    prepare: () => {},
+    preparing: false,
+    soundWaits: false,
+    accompany: () => {},
+    stopAccompaniment: () => {},
   };
 }
 

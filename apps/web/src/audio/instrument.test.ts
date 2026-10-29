@@ -21,7 +21,7 @@ afterEach(() => vi.clearAllMocks());
 
 const NOTE = { midi: 60, time: 10, duration: 1, velocity: 80, hand: 'R' as const };
 
-describe('start (a scheduled note keeps its own stop)', () => {
+describe('start (a scheduled note keeps its own stop, issue 184)', () => {
   it('gives every start its own stopId, so a stop touches that voice alone', async () => {
     const piano = createPiano({} as AudioContext);
     expect(piano.start(NOTE)).toBeTypeOf('function'); // before load: silent, harmless

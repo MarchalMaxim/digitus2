@@ -97,8 +97,9 @@ function melody(steps: number): Score {
 function makeFake() {
   const f = {
     playing: false,
-    /** The piano's samples are loading. */
-    loading: false,
+    /** The browser holds the sound back, and the other hand's samples are loading. */
+    soundWaits: false,
+    preparing: false,
     atStart: true,
     cue: null as number | null,
     start: 0,
@@ -117,9 +118,7 @@ function makeFake() {
         get playing() {
           return f.playing;
         },
-        get loading() {
-          return f.loading;
-        },
+        loading: false,
         countIn: null,
         waiting: false,
         get atStart() {
@@ -145,6 +144,15 @@ function makeFake() {
         loop: null,
         setLoop: () => {},
         strike: () => () => undefined,
+        prepare: () => {},
+        get preparing() {
+          return f.preparing;
+        },
+        get soundWaits() {
+          return f.soundWaits;
+        },
+        accompany: () => {},
+        stopAccompaniment: () => {},
       };
     },
   };
@@ -796,35 +804,39 @@ describe('the explanation', () => {
   });
 
   describe('under a line that ranks above it on the status line', () => {
-    // The piano loading ranks above the explanation: bars judged while it holds the line are not
-    // bars the reader read it in.
-    async function held() {
+    // The sound sentence (a hand is left out and the browser holds the sound back) and the piano
+    // loading rank above the explanation: bars judged while they hold the line are not bars the
+    // reader read it in.
+    async function held(over: 'soundWaits' | 'preparing') {
       await connect();
-      const s = setup({ score: melody(12) });
-      s.fake.loading = true;
+      const s = setup({ score: melody(12), mutedHands: over === 'soundWaits' ? ['L'] : [] });
+      s.fake[over] = true;
       s.rerender();
       return s;
     }
-    const free = (s: Awaited<ReturnType<typeof held>>) => {
-      s.fake.loading = false;
+    const free = (s: Awaited<ReturnType<typeof held>>, over: 'soundWaits' | 'preparing') => {
+      s.fake[over] = false;
       s.rerender();
     };
 
-    it('is not spent while the piano loading holds the line', async () => {
-      const s = await held();
-      s.walk([0, 1, 2, 3], { offsets: RUSH });
-      expect(s.result().explain).toBe(true);
-      s.walk([4, 5, 6, 7, 8, 9, 10, 11]); // two bars judged, and the line never showed it
-      expect(s.result().explain).toBe(true);
-      free(s);
-      expect(s.result().explain).toBe(true); // it shows now
-    });
+    it.each(['soundWaits', 'preparing'] as const)(
+      'is not spent while %s holds the line',
+      async (over) => {
+        const s = await held(over);
+        s.walk([0, 1, 2, 3], { offsets: RUSH });
+        expect(s.result().explain).toBe(true);
+        s.walk([4, 5, 6, 7, 8, 9, 10, 11]); // two bars judged, and the line never showed it
+        expect(s.result().explain).toBe(true);
+        free(s, over);
+        expect(s.result().explain).toBe(true); // it shows now
+      },
+    );
 
     it('leaves after two bars judged since the line showed it', async () => {
-      const s = await held();
+      const s = await held('soundWaits');
       s.walk([0, 1, 2, 3], { offsets: RUSH });
-      s.walk([4, 5, 6, 7]); // judged while the piano loading holds the line
-      free(s);
+      s.walk([4, 5, 6, 7]); // judged while the sound sentence holds the line
+      free(s, 'soundWaits');
       s.walk([8, 9, 10]);
       expect(s.result().explain).toBe(true);
       s.walk([11]); // the finish judges bar 2: one bar since it showed
@@ -835,11 +847,11 @@ describe('the explanation', () => {
     });
 
     it('is said again after a break that came before it was on the line', async () => {
-      const s = await held();
+      const s = await held('soundWaits');
       s.walk([0, 1, 2, 3], { offsets: RUSH });
       expect(s.result().explain).toBe(true);
-      s.tap({ kind: 'break' }); // a click on a bar seeks
-      free(s);
+      s.tap({ kind: 'break' }); // a click on a bar wakes the sound and seeks
+      free(s, 'soundWaits');
       expect(s.result().explain).toBe(false);
       s.restart();
       s.walk([0, 1, 2, 3], { offsets: RUSH });
@@ -847,15 +859,25 @@ describe('the explanation', () => {
     });
 
     it('is said again after a clear that came before it was on the line', async () => {
-      const s = await held();
+      const s = await held('soundWaits');
       s.walk([0, 1, 2, 3], { offsets: RUSH });
       s.rerender({ mutedHands: ['L', 'R'] }); // a hands change clears
       s.rerender({ mutedHands: ['L'] });
-      free(s);
+      free(s, 'soundWaits');
       expect(s.result().explain).toBe(false);
       s.restart();
       s.walk([0, 1, 2, 3], { offsets: RUSH });
       expect(s.result().explain).toBe(true);
+    });
+
+    it('does not say the sound sentence holds the line when no hand is left out', async () => {
+      await connect();
+      const s = setup({ score: melody(12) });
+      s.fake.soundWaits = true; // the walk plays every hand: the sentence is not shown
+      s.rerender();
+      s.walk([0, 1, 2, 3], { offsets: RUSH });
+      s.walk([4, 5, 6, 7, 8, 9, 10, 11]);
+      expect(s.result().explain).toBe(false);
     });
 
     it('is not said again once it has been on the line', async () => {

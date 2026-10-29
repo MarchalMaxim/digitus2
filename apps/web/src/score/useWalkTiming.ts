@@ -50,7 +50,7 @@ export interface WalkTiming {
   marks: readonly TimingMark[] | null;
   /**
    * The one-time explanation is due on the status line (docs/app.md, Timing in the walk); a line
-   * that ranks above it (the piano loading, the count-in) can still hold the line.
+   * that ranks above it (the piano loading, the sound sentence) can still hold the line.
    */
   explain: boolean;
 }
@@ -176,9 +176,10 @@ export function useWalkTiming({
   const [explain, setExplain] = useState(false);
 
   // The lines that rank above the explanation on the status line (scoreStatusLine): the piano
-  // loading and the count-in.
-  const { loading, countIn } = playback;
-  const held = loading || countIn !== null;
+  // loading, the count-in, and the sound sentence, which the walk shows only for a reader with a
+  // hand left out.
+  const { loading, preparing, countIn, soundWaits } = playback;
+  const held = loading || preparing || countIn !== null || (soundWaits && muteKey !== '');
   useLayoutEffect(() => {
     if (explain && !held) seenRef.current = true;
   }, [explain, held]);

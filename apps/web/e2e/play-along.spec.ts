@@ -2,16 +2,20 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectNoSeriousA11y } from './helpers/axe.js';
 import { libraryReady } from './helpers/library.js';
 import {
+  accompCancelled,
+  accompanied,
   audioState,
   fakeMidi,
   installFakeMidi,
   strikes,
   walkTiming,
+  type AccompaniedNote,
   type FakeMidiOptions,
 } from './helpers/midi.js';
 import { closePractice, embellishDecided, openPractice, setLoopBars } from './helpers/practice.js';
 import { horizontalOverflow } from './helpers/overflow.js';
 import { expectOneRed } from './helpers/red.js';
+import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
 
 // Playing along on the reader's own piano (issue 182): a digital piano over Web MIDI, here a
@@ -20,10 +24,16 @@ import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
 // them all. Twinkle's steps, in performance order, start [48 60] [60] [67] [67] [53 69] [69]
 // [48 67] [53 65] [65] [48 64] [64] [55 62] [62] [48 60] (bars 1 to 4); every score flow runs
 // with `?audio=silent`, and `strikes()` stays empty throughout: the app makes no sound for the
-// reader's notes, and none for the hand left out either: no AudioContext is made.
+// reader's notes. With one hand left out and the Practice panel's `Hear the left hand` / `Hear
+// the right hand` switch on (issue 231; off by default), digitus plays that hand (issue 184)
+// between the reader's steps, counted from the press that passes each step; `accompanied()` and
+// `accompCancelled()` read what it handed to the instrument and what it dropped (helpers/midi.ts).
+// The tests that expect that sound seed the switch on (`HEAR`).
 
 const TWINKLE = 'twinkle-twinkle-little-star';
 const TWINKLE_NOTES = 64;
+/** A two-handed piece whose left hand moves: bars of its own, not Twinkle's sparse one. */
+const MINUET = 'bach-minuet-g-major-bwv-anh-114';
 const BWV994 = 'bach-applicatio-c-major-bwv-994';
 /** The Practice tempo at its top, 150 %: every gap is two thirds as long (issue 204). */
 const FAST = { [TWINKLE]: 1.5 };
@@ -41,6 +51,7 @@ const DENIED =
   'The browser blocked MIDI for this site. Allow it in the site settings, then press again.';
 const HINT_MANY = 'Play the red notes on your piano.';
 const SEARCHING = 'Looking for your piano. Make sure it is turned on.';
+const LOADING_THE_PIANO = 'Loading the piano…';
 
 /** The home line's sentence (the library page has another status, the notice) and its button. */
 const sentence = (page: Page): Locator => page.locator('.piano-line [role="status"]');
@@ -935,6 +946,353 @@ test.describe('the score with a piano', () => {
     await expect.poll(() => audioState(page)).not.toBe('none');
   });
 
+  // ---------------------------------------------------------------------------------------
+  // The other hand (issue 184). With one hand left out and the switch on, digitus plays it between
+  // the reader's steps, counted from the press that passes each step. The fixture is Twinkle at 100 qpm, a
+  // quarter note 0.6 s, a bar 2.4 s. Right hand chosen (the reader plays the right, digitus the left): every left-hand
+  // note falls on a step of the right hand, so each stretch holds at most one note, at the
+  // press. Left hand chosen (the reader plays the left, digitus the right): the steps are
+  // [48]@0, [53]@2.4, [48]@3.6, [53]@4.8, [48]@6.0 ... and the right hand between them gives
+  // stretches with several notes. Stretch of step 0, [0, 2.4): 60@0, 60@0.6, 67@1.2, 67@1.8.
+  // Stretch of step 1, [2.4, 3.6): 69@2.4, 69@3.0. Of step 3, [4.8, 6.0): 65@4.8, 65@5.4. The
+  // times are on the audio clock: press + offset / tempo, so differences are exact (asserted to
+  // the millisecond). `accompCancelled()` holds the notes dropped from the queue before they
+  // were handed over, then those cancelled or released after.
+  // ---------------------------------------------------------------------------------------
+
+  /** The reader turned on `Hear the left hand` / `Hear the right hand` (issue 231), seeded. */
+  const HEAR = { hearOtherHand: true };
+
+  /** The reader plays the left hand, and the Practice tempo is 50 % (stored, never clicked). */
+  const HALF = { hands: 'L', ...HEAR, tempoByPiece: { [`piece:${TWINKLE}`]: 0.5 } };
+
+  /** The status line in the dock (a notice elsewhere is a status too). */
+  const dockStatus = (page: Page): Locator => page.locator('.dock').getByRole('status');
+
+  /** The audio is running and the samples are in: digitus can sound. */
+  async function soundReady(page: Page): Promise<void> {
+    await expect.poll(() => audioState(page)).toBe('running');
+    await expect(dockStatus(page)).not.toHaveText(LOADING_THE_PIANO);
+  }
+
+  /** The time of each note after the first, in milliseconds. */
+  const gaps = (notes: readonly { time: number }[]): number[] =>
+    notes.map((n) => Math.round((n.time - notes[0]!.time) * 1000));
+  const ms = (sec: number): number => Math.round(sec * 1000);
+
+  test('with the right hand chosen, digitus plays the left: after the reader presses, never before', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { settings: { hands: 'R', ...HEAR } });
+    await soundReady(page);
+    expect(await midi.waitForStep()).toEqual([60]);
+    // Nothing before the first press: the left hand's opening is the reader's lead.
+    for (let i = 0; i < 4; i++) {
+      expect(await accompanied(page)).toEqual([]);
+      await page.waitForTimeout(125);
+    }
+    await expectOneRed(page, 'right hand, before the first press');
+
+    await midi.playRed();
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    expect((await accompanied(page))[0]).toMatchObject({ midi: 48, hand: 'L' });
+    // Steps 1 to 9: the left hand sounds at steps 4, 6, 7 and 9 only (its notes at 2.4, 3.6,
+    // 4.8 and 6.0 s), each as it is written, and never a note of the right hand.
+    for (let i = 1; i < 10; i++) await midi.playRed();
+    const played = await accompanied(page);
+    expect(played.map((n) => [n.midi, n.hand])).toEqual([
+      [48, 'L'],
+      [53, 'L'],
+      [48, 'L'],
+      [53, 'L'],
+      [48, 'L'],
+    ]);
+    expect(played.map((n) => ms(n.duration))).toEqual([2400, 1200, 1200, 1200, 1200]);
+    expect(played.every((n) => n.velocity > 0)).toBe(true);
+    expect(played.map((n) => n.time)).toEqual([...played.map((n) => n.time)].sort((a, b) => a - b));
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'right hand, after ten steps');
+  });
+
+  test('with the left hand chosen, digitus plays the right hand as it is written, from the press', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { settings: { hands: 'L', ...HEAR } });
+    await soundReady(page);
+    expect(await midi.waitForStep()).toEqual([48]);
+    expect(await accompanied(page)).toEqual([]);
+    await midi.playRed(); // step 0: the right hand until the reader's next step, 2.4 s away
+    await expect.poll(() => accompanied(page)).toHaveLength(4);
+    const first = await accompanied(page);
+    expect(first.map((n) => [n.midi, n.hand])).toEqual([
+      [60, 'R'],
+      [60, 'R'],
+      [67, 'R'],
+      [67, 'R'],
+    ]);
+    expect(gaps(first)).toEqual([0, 600, 1200, 1800]);
+    expect(first.map((n) => ms(n.duration))).toEqual([600, 600, 600, 600]);
+    // The next step, pressed: its stretch counts from that press.
+    await midi.playRed();
+    await expect.poll(() => accompanied(page)).toHaveLength(6);
+    const second = (await accompanied(page)).slice(4);
+    expect(second.map((n) => n.midi)).toEqual([69, 69]);
+    expect(gaps(second)).toEqual([0, 600]);
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'left hand, two steps');
+  });
+
+  test('with both hands chosen digitus plays nothing, and loads nothing', async ({ page }) => {
+    const midi = await twinkle(page);
+    await midi.waitForStep();
+    for (let i = 0; i < 6; i++) await midi.playRed();
+    expect(await accompanied(page)).toEqual([]);
+    expect(await accompCancelled(page)).toEqual([]);
+    // No hand to play: no audio was made for it, and the status line never asked for the piano.
+    expect(await audioState(page)).toBe('none');
+    await expect(dockStatus(page)).not.toHaveText(LOADING_THE_PIANO);
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'both hands');
+  });
+
+  test('the Practice tempo sets the pace: at 50 % the same stretch takes twice as long', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { settings: { hands: 'L', ...HEAR } });
+    await soundReady(page);
+    await openPractice(page);
+    await page.getByRole('slider', { name: 'Tempo' }).fill('50');
+    await expect(page.locator('.tempo-value')).toHaveText('50 % · ♩ = 50');
+    await closePractice(page);
+    await midi.playRed();
+    await expect.poll(() => accompanied(page)).toHaveLength(4);
+    const notes = await accompanied(page);
+    expect(notes.map((n) => n.midi)).toEqual([60, 60, 67, 67]);
+    expect(gaps(notes)).toEqual([0, 1200, 2400, 3600]);
+    expect(notes.map((n) => ms(n.duration))).toEqual([1200, 1200, 1200, 1200]);
+    await expectOneRed(page, 'at 50 %');
+  });
+
+  test('the next press drops the notes that have not started and counts from its own press', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
+    // The step passes at the press (issue 204) and its stretch starts there: 60 sounds now; 60, 67
+    // and 67 wait 1.2, 2.4 and 3.6 s at 50 %.
+    await midi.pressStep();
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    expect(await accompCancelled(page)).toEqual([]);
+    // The next step, pressed at once, hands over its own stretch from its press.
+    await midi.pressStep();
+    await expect.poll(() => accompanied(page)).toHaveLength(2);
+    const [first, second] = await accompanied(page);
+    expect(first).toMatchObject({ midi: 60, hand: 'R' });
+    expect(second).toMatchObject({ midi: 69, hand: 'R' });
+    // The queue's three notes were dropped; the note that had started is not among them.
+    const dropped = await accompCancelled(page);
+    expect(dropped.map((n) => n.midi)).toEqual([60, 67, 67]);
+    expect(dropped.map((n) => ms(n.time - first!.time))).toEqual([1200, 2400, 3600]);
+    // The second stretch counts from the second press: 69 again 0.6 s on, at 50 %.
+    await expect.poll(() => accompanied(page)).toHaveLength(3);
+    const all = await accompanied(page);
+    expect(all[2]).toMatchObject({ midi: 69 });
+    expect(ms(all[2]!.time - second!.time)).toBe(1200);
+    await expectOneRed(page, 'after the second press');
+  });
+
+  test('a click on a bar drops them, and nothing sounds until the next press', async ({ page }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
+    // The step passes at the press (issue 204) and its stretch starts there; the red waits on step 1
+    // when the reader clicks the bar.
+    const held = await midi.waitForStep();
+    await midi.pressStep({ wait: false });
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    const [first] = await accompanied(page);
+    await seekBar(page, 2);
+    await redSettled(page);
+    expect(await midi.waitForStep()).toEqual([53]); // bar 3 starts at 4.8 s
+    for (const pitch of held) await midi.noteOff(pitch);
+    // The three notes still waiting were dropped, and the one that sounds was released.
+    const cancelled = await accompCancelled(page);
+    expect(cancelled.map((n) => n.midi)).toEqual([60, 67, 67, 60]);
+    expect(cancelled.slice(0, 3).map((n) => ms(n.time - first!.time))).toEqual([1200, 2400, 3600]);
+    expect(cancelled[3]!.time).toBe(first!.time);
+    expect(await accompanied(page)).toHaveLength(1);
+    await expectOneRed(page, 'after the seek');
+    // The step of bar 3 pressed: its stretch, [4.8, 6.0), from this press.
+    await midi.pressStep();
+    await expect.poll(() => accompanied(page)).toHaveLength(2);
+    expect((await accompanied(page))[1]).toMatchObject({ midi: 65, hand: 'R' });
+  });
+
+  // That Play stops it in the click itself, before the transport schedules anything, is the
+  // ordering usePlayback.accompany.test.ts guards ('is done by play() in the click'); here the
+  // walk's own stop would also catch it one render later, so this checks the outcome.
+  test('Play stops it, plays by itself, and Pause gives the walk back', async ({ page }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await openPractice(page);
+    await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
+    await closePractice(page);
+    await soundReady(page);
+    const held = await midi.waitForStep();
+    await midi.pressStep({ wait: false }); // the step passes at the press: the stretch is handed over
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    await play(page).click();
+    await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+    const cancelled = await accompCancelled(page);
+    expect(cancelled.map((n) => n.midi)).toEqual([60, 67, 67, 60]);
+    // The cursor runs as it always did, and nothing of the accompaniment is scheduled.
+    const start = await positionSec(page);
+    await expect.poll(() => positionSec(page)).toBeGreaterThan(start + 0.3);
+    expect(await accompanied(page)).toHaveLength(1);
+    expect(await midi.index(), 'the walk is quiet while it plays').toBe(-1);
+    await expectOneRed(page, 'playing, after the accompaniment');
+
+    await page.getByRole('button', { name: 'Pause' }).click();
+    await expect(play(page)).toBeVisible();
+    for (const pitch of held) await midi.noteOff(pitch);
+    await midi.waitForStep();
+    await midi.pressStep();
+    await expect.poll(() => accompanied(page)).toHaveLength(2);
+    await expectOneRed(page, 'paused, and the walk went on');
+  });
+
+  test('the last step plays the tail while the burst rises, and the red coming home does not cut it', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
+    const last = (await page.locator('.score-sheet g.measure').count()) - 1;
+    await seekBar(page, last);
+    await redSettled(page);
+    await midi.waitForStep();
+    const stopSampling = sampleRed(page, 'through the finish and the tail');
+    let tail: AccompaniedNote | undefined;
+    try {
+      await playToTheEnd(midi);
+      tail = (await accompanied(page)).at(-1);
+      const burst = page.locator('.end-burst .note-burst-note');
+      await expect(burst.first()).toBeAttached();
+      await expect.poll(() => midi.index(), { timeout: 15_000 }).toBe(0);
+      await midi.waitForStep();
+    } finally {
+      await stopSampling();
+    }
+    // The last bar's last step is the left hand's 48 at 27.6 s; the tail until 28.8 s is the
+    // right hand's 60, a minim at 50 %: it rings for 2.4 s, from the press.
+    expect(tail).toMatchObject({ midi: 60, hand: 'R' });
+    expect(ms(tail!.duration)).toBe(2400);
+    // Neither the finish nor the re-cue of the first step cut it: it was never cancelled.
+    const cancelled = await accompCancelled(page);
+    expect(cancelled.some((n) => n.midi === 60 && n.time === tail!.time)).toBe(false);
+    await expectOneRed(page, 'home again, the tail ringing');
+  });
+
+  test('a loop plays to the loop end and waits there; its first step starts it again', async ({
+    page,
+  }) => {
+    const midi = await twinkle(page, { settings: { hands: 'L', ...HEAR } });
+    await soundReady(page);
+    await setLoopBars(page, '2', '3'); // [2.4, 7.2): the steps 1 to 4
+    await closePractice(page);
+    await expect.poll(() => midi.index()).toBe(1);
+    await midi.waitForStep();
+    for (let guard = 0; (await midi.index()) !== 4 && guard < 20; guard++) await midi.playRed();
+    expect(await midi.index()).toBe(4);
+    await midi.waitForStep();
+    const sixtyFours = async () => (await accompanied(page)).filter((n) => n.midi === 64);
+    expect(await sixtyFours()).toEqual([]);
+    await midi.playRed(); // the loop's last step, 6.0 s: it wraps to the first
+    // The right hand until the loop's end, 7.2 s: 64 at 6.0 and 64 at 6.6, a quarter each.
+    await expect.poll(async () => (await sixtyFours()).length).toBe(2);
+    const wrap = await sixtyFours();
+    expect(gaps(wrap)).toEqual([0, 600]);
+    expect(wrap.map((n) => ms(n.duration))).toEqual([600, 600]);
+    expect(await midi.waitForStep()).toEqual([53]); // the loop's first step
+    await expect.poll(() => redBars(page)).toEqual([1]);
+    // Nothing of bar 2 sounds until its first step is played.
+    expect((await accompanied(page)).at(-1)!.midi).toBe(64);
+    await midi.playRed();
+    await expect.poll(async () => (await accompanied(page)).at(-1)!.midi).toBe(69);
+    await expectOneRed(page, 'the loop wrapped');
+  });
+
+  test('an unplugged piano stops it mid-stretch; the red and the cue stay', async ({ page }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
+    await midi.pressStep(); // the step passes at the press (issue 204): its stretch is handed over and the red moves to step 1
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    const cue = await cursorSec(page);
+    await midi.unplug();
+    await expect.poll(() => midi.target()).toEqual([]);
+    await expect.poll(() => accompCancelled(page)).toHaveLength(4);
+    expect((await accompCancelled(page)).map((n) => n.midi)).toEqual([60, 67, 67, 60]);
+    expect(await cursorSec(page)).toBe(cue);
+    await expect(play(page)).not.toHaveClass(/is-red/);
+    await expect(page.locator('.score-sheet .is-red').first()).toBeVisible();
+    await expectOneRed(page, 'unplugged mid-stretch');
+
+    await midi.plug(PIANO);
+    expect(await midi.waitForStep()).toEqual([53]); // the step the press moved the red to
+    expect(await cursorSec(page)).toBe(cue);
+    expect(await accompanied(page)).toHaveLength(1);
+  });
+
+  // The real instrument (`?hooks=1`) with the samples served late. Loading them for the other
+  // hand is `preparing`, never `loading`: the walk is not turned off, Play is not busy.
+  test('while the piano loads for the other hand the line says so and the red goes on moving', async ({
+    page,
+  }) => {
+    const requested = await delayPianoSamples(page, 3_000);
+    const midi = await twinkle(page, { settings: { hands: 'R', ...HEAR } }, 'hooks=1');
+    const status = dockStatus(page);
+    await expect(status).toHaveText(LOADING_THE_PIANO);
+    await expect.poll(() => midi.target()).toEqual([60]); // the walk is active
+    await expect(play(page)).not.toHaveAttribute('aria-busy');
+    await expect(play(page)).not.toHaveClass(/is-red/);
+    await expectOneRed(page, 'loading the piano for the other hand');
+    expect(requested.length).toBeGreaterThan(0);
+
+    await midi.playRed(); // moves the red during the load
+    expect(await midi.index()).toBe(1);
+    expect(await accompanied(page)).toEqual([]); // nothing to sound it with yet
+    await expectOneRed(page, 'the red moved during the load');
+
+    // Once the samples are in, the first stretch with a left-hand note sounds: step 4.
+    await expect(status).not.toHaveText(LOADING_THE_PIANO, { timeout: 20_000 });
+    for (let i = 0; i < 8 && (await accompanied(page)).length === 0; i++) await midi.playRed();
+    expect((await accompanied(page))[0]).toMatchObject({ midi: 53, hand: 'L' });
+    expect(await strikes(page)).toEqual([]);
+  });
+
+  test('a piano that cannot load tells it once, and the walk goes on without sound', async ({
+    page,
+  }) => {
+    let requests = 0;
+    await page.route(PIANO_SAMPLES, (route) => {
+      requests++;
+      return route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: '<!doctype html><title>digitus2</title>',
+      });
+    });
+    const midi = await twinkle(page, { settings: { hands: 'R', ...HEAR } }, 'hooks=1');
+    const notice = page.getByText(/piano sounds could not be loaded/);
+    await expect(notice).toBeVisible({ timeout: 20_000 });
+    await expect(notice).toHaveCount(1);
+    await expect(dockStatus(page)).not.toHaveText(LOADING_THE_PIANO);
+    const asked = requests;
+    expect(asked).toBeGreaterThan(0);
+    for (let i = 0; i < 6; i++) await midi.playRed();
+    expect(await midi.index()).toBe(6);
+    expect(await accompanied(page)).toEqual([]);
+    expect(requests, 'the samples are not asked for again').toBe(asked);
+    await expectOneRed(page, 'no sound, the walk went on');
+  });
+
   test('"Add notes between" keeps the red in its bar', async ({ page }) => {
     const midi = await twinkle(page);
     await seekBar(page, 2);
@@ -1404,6 +1762,23 @@ test.describe('the score with a piano', () => {
     await expectOneRed(page, 'on again, one step on');
   });
 
+  test('off stops digitus, and nothing more is handed over', async ({ page }) => {
+    const midi = await twinkle(page, { settings: HALF });
+    await soundReady(page);
+    await midi.pressStep(); // the step passes at the press: the other hand is handed over
+    await expect.poll(() => accompanied(page)).toHaveLength(1);
+    const before = (await accompCancelled(page)).length;
+    await flipPractice(page, false);
+    await expect.poll(async () => (await accompCancelled(page)).length).toBeGreaterThan(before);
+    await expect.poll(() => midi.target()).toEqual([]);
+    await midi.noteOff(48);
+    await midi.noteOn(48);
+    await page.waitForTimeout(600);
+    expect(await accompanied(page)).toHaveLength(1);
+    expect(await strikes(page)).toEqual([]);
+    await expectOneRed(page, 'off, digitus stopped');
+  });
+
   test('off is remembered across a reload', async ({ page }) => {
     const midi = await twinkle(page);
     await flipPractice(page, false);
@@ -1507,6 +1882,259 @@ test.describe('the score with a piano', () => {
   }
 
   // ---------------------------------------------------------------------------------------
+  // `Hear the left hand` / `Hear the right hand` (issue 231): the switch that lets digitus play the
+  // hand the reader left out. It is stacked right over the Hands control, in the Practice panel,
+  // and there only with a piano connected, Practice mode on, a two-handed piece and one hand
+  // chosen; it is off until the reader turns it on, and saved. The sound itself is in
+  // play-along-sound.spec.ts and above (those tests seed it on).
+  // ---------------------------------------------------------------------------------------
+
+  /** Minuet in G open with the fake piano: a left hand that moves, as the owner's rule asks. */
+  async function minuet(
+    page: Page,
+    fake: FakeMidiOptions = {},
+  ): Promise<ReturnType<typeof fakeMidi>> {
+    await installFakeMidi(page, { permission: 'granted', playAlong: true, ...fake });
+    await page.goto(`/?audio=silent#/piece/${MINUET}`);
+    await minuetReady(page);
+    return fakeMidi(page);
+  }
+  /** The score is drawn and Play can start: the same after a reload. */
+  async function minuetReady(page: Page): Promise<void> {
+    await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 20_000 });
+    await expect(play(page)).toBeEnabled();
+    await embellishDecided(page);
+  }
+
+  const hearSwitch = (page: Page, hand: 'left' | 'right'): Locator =>
+    page.getByRole('switch', { name: `Hear the ${hand} hand` });
+  const anyHearSwitch = (page: Page): Locator =>
+    page.getByRole('switch', { name: /^Hear the (left|right) hand$/ });
+
+  test('the Hear switch shows only with a piano, Practice mode on and one hand chosen, off at first', async ({
+    page,
+  }) => {
+    const midi = await minuet(page);
+    await openPractice(page);
+    // Both hands: nothing is left out, so nothing to hear.
+    await expect(page.getByRole('radio', { name: 'Both hands' })).toBeChecked();
+    await expect(anyHearSwitch(page)).toHaveCount(0);
+
+    // The reader plays the right hand: the left is the one that would sound.
+    await page.getByRole('radio', { name: 'Right hand' }).check();
+    await expect(hearSwitch(page, 'left')).toBeVisible();
+    await expect(hearSwitch(page, 'left')).not.toBeChecked();
+    await expect(anyHearSwitch(page)).toHaveCount(1);
+    await expectOneRed(page, 'the right hand chosen, the switch off');
+    // The left hand chosen: the right hand is the one that would sound; still off.
+    await page.getByRole('radio', { name: 'Left hand' }).check();
+    await expect(hearSwitch(page, 'right')).toBeVisible();
+    await expect(hearSwitch(page, 'right')).not.toBeChecked();
+    await expect(anyHearSwitch(page)).toHaveCount(1);
+    await page.getByRole('radio', { name: 'Both hands' }).check();
+    await expect(anyHearSwitch(page)).toHaveCount(0);
+
+    // Practice mode off: the page is as with no piano, and the switch goes.
+    await page.getByRole('radio', { name: 'Right hand' }).check();
+    await expect(hearSwitch(page, 'left')).toBeVisible();
+    await practiceSwitch(page).click();
+    await expect(practiceSwitch(page)).not.toBeChecked();
+    await expect(anyHearSwitch(page)).toHaveCount(0);
+    await practiceSwitch(page).click();
+    await expect(hearSwitch(page, 'left')).toBeVisible();
+
+    // The piano goes while the switch has the focus: the focus moves to the checked hand.
+    await hearSwitch(page, 'left').focus();
+    await midi.unplug();
+    await expect(anyHearSwitch(page)).toHaveCount(0);
+    await expect(page.getByRole('radio', { name: 'Right hand' })).toBeFocused();
+    await midi.plug(PIANO);
+    await expect(hearSwitch(page, 'left')).toBeVisible();
+    await expectOneRed(page, 'the piano back');
+  });
+
+  test('with no piano there is no Hear switch, whatever hand is chosen', async ({ page }) => {
+    await minuet(page, { playAlong: false, settings: { hands: 'R' } });
+    await openPractice(page);
+    await expect(page.getByRole('radio', { name: 'Right hand' })).toBeChecked();
+    await expect(anyHearSwitch(page)).toHaveCount(0);
+  });
+
+  test('the Hear switch is saved: on stays on across a reload, with a click it goes off again', async ({
+    page,
+  }) => {
+    const midi = await minuet(page, { settings: { hands: 'R' } });
+    await openPractice(page);
+    await expect(hearSwitch(page, 'left')).not.toBeChecked();
+    await hearSwitch(page, 'left').click();
+    await expect(hearSwitch(page, 'left')).toBeChecked();
+    await page.reload();
+    await minuetReady(page);
+    await midi.waitForStep();
+    await openPractice(page);
+    await expect(hearSwitch(page, 'left')).toBeChecked();
+    await hearSwitch(page, 'left').click();
+    await expect(hearSwitch(page, 'left')).not.toBeChecked();
+    await page.reload();
+    await minuetReady(page);
+    await midi.waitForStep();
+    await openPractice(page);
+    await expect(hearSwitch(page, 'left')).not.toBeChecked();
+    await expectOneRed(page, 'off after a reload');
+  });
+
+  // The switch is stacked over the Hands control, and the Hands control does not move when it
+  // appears: the reader's pointer is on `Right hand` the moment it does. The panel grows upward
+  // from Play, so the line that holds Hands grows at its top and every line after it stays. Read
+  // on Minuet in G (a moving left hand), at a desktop's width and a phone's, in English and in
+  // French (`Entendre la main gauche` against `Les deux | Droite | Gauche`).
+  //
+  // At 360 px choosing a hand also scrolls the page (the red is brought above the dock, whatever
+  // the switch), and that moves everything on it by as much. So the switch's own effect is read
+  // from the dock's bottom edge, which the panel grows away from: `Both hands` against `Right hand`
+  // (the switch there), and `Right hand` against `Both hands` again (not there), with the page at
+  // the same scroll. At 1280 px the page does not scroll, and the Hands box in the page itself
+  // must be the same one before and after.
+  for (const [width, height, locale] of [
+    [1280, 900, 'en-US'],
+    [360, 740, 'en-US'],
+    [1280, 900, 'fr-FR'],
+    [360, 740, 'fr-FR'],
+  ] as const) {
+    test.describe(`the Hear switch appears over Hands at ${width} px, ${locale}`, () => {
+      test.use({ viewport: { width, height }, locale });
+
+      test('the Hands control keeps its box when the switch appears', async ({ page }) => {
+        const french = locale === 'fr-FR';
+        const names = french
+          ? {
+              hands: 'Mains',
+              both: 'Les deux',
+              right: 'Droite',
+              hear: 'Entendre la main gauche',
+              metronome: 'Métronome',
+              countIn: 'Décompte',
+              loop: 'Boucle de mesures',
+            }
+          : {
+              hands: 'Hands',
+              both: 'Both hands',
+              right: 'Right hand',
+              hear: 'Hear the left hand',
+              metronome: 'Metronome',
+              countIn: 'Count-in',
+              loop: 'Loop bars',
+            };
+        await installFakeMidi(page, { permission: 'granted', playAlong: true });
+        await page.goto(`/?audio=silent#/piece/${MINUET}`);
+        await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 20_000 });
+        await expect(page.locator('.dock .practice-toggle')).toBeVisible();
+        await embellishDecided(page);
+        await fakeMidi(page).waitForStep();
+        await openPractice(page);
+
+        const handsGroup = page.getByRole('group', { name: names.hands });
+        const hear = page.getByRole('switch', { name: names.hear });
+        // The rows of the controls that may share a line with Hands (Practice mode and Tempo), and
+        // the rows after it (Metronome, Count-in, Loop bars), each 44 px high.
+        const besideRows = [
+          page.locator('.transport > .check.switch'),
+          page.locator('.transport > .tempo'),
+        ];
+        const afterRows = [names.metronome, names.countIn, names.loop].map((name) =>
+          page.getByRole('checkbox', { name }).locator('xpath=..'),
+        );
+        /** The page has stopped scrolling (five frames at one position), so boxes can be read. */
+        const settle = () =>
+          page.evaluate(
+            () =>
+              new Promise<void>((resolve) => {
+                let last = -1;
+                let still = 0;
+                const tick = () => {
+                  still = window.scrollY === last ? still + 1 : 0;
+                  last = window.scrollY;
+                  if (still >= 5) resolve();
+                  else requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+              }),
+          );
+        const read = async (l: Locator) => (await l.boundingBox())!;
+        const dock = page.locator('.dock');
+        /** The boxes, in the page and as distances above the dock's bottom edge. */
+        const boxes = async () => {
+          await settle();
+          const box = await read(dock);
+          const edge = box.y + box.height;
+          const hands = await read(handsGroup);
+          const beside = await Promise.all(besideRows.map(read));
+          const after = await Promise.all(afterRows.map(read));
+          const up = (b: { y: number; height: number }) => edge - (b.y + b.height);
+          return {
+            scrollY: await page.evaluate(() => window.scrollY),
+            hands,
+            beside,
+            after,
+            rel: { hands: up(hands), beside: beside.map(up), after: after.map(up) },
+          };
+        };
+
+        // Both hands: no switch yet. This is the box the reader's pointer is over.
+        await expect(hear).toHaveCount(0);
+        const was = await boxes();
+        expect(was.hands.height).toBeGreaterThanOrEqual(44);
+        await page.getByRole('radio', { name: names.right }).check();
+        await expect(hear).toBeVisible();
+        const now = await boxes();
+        const row = await read(hear.locator('xpath=..'));
+        await page.getByRole('radio', { name: names.both }).check();
+        await expect(hear).toHaveCount(0);
+        const without = await boxes();
+
+        // The switch is right over Hands: left edges together, one row and the panel's gap above.
+        expect(row.x).toBe(now.hands.x);
+        expect(row.height).toBeGreaterThanOrEqual(44);
+        expect(row.y + row.height + 8).toBeCloseTo(now.hands.y, 0);
+        const stack = row.height + 8;
+        // The plan's transition, `Both hands` to `Right hand`, in the frame the page's own scroll
+        // does not move: Hands is as far above the dock's bottom edge as it was, at both widths.
+        expect(now.rel.hands).toBeCloseTo(was.rel.hands, 1);
+        expect(now.rel.after.map((n) => Math.round(n))).toEqual(
+          was.rel.after.map((n) => Math.round(n)),
+        );
+        // Hands does not move for it: as far above the dock's bottom as without it, and the same
+        // across; nothing below it rewraps.
+        expect(now.hands.x).toBe(without.hands.x);
+        expect(now.hands.width).toBe(without.hands.width);
+        expect(now.rel.hands).toBeCloseTo(without.rel.hands, 1);
+        expect(now.rel.after.map((n) => Math.round(n))).toEqual(
+          without.rel.after.map((n) => Math.round(n)),
+        );
+        expect(now.after.map((a) => a.x)).toEqual(without.after.map((a) => a.x));
+        // What shares Hands' line (Practice mode and Tempo at 1280 px) sits at its bottom, level
+        // with Hands, and stays; what stands on a line above (360 px) goes up by the row.
+        for (const [i, gap] of without.rel.beside.entries()) {
+          const sameLine = Math.abs(gap - without.rel.hands) < 1;
+          if (sameLine)
+            expect(now.rel.beside[i], `control ${i} level with Hands`).toBeCloseTo(gap, 1);
+          else expect(now.rel.beside[i]!, `control ${i} above Hands`).toBeCloseTo(gap + stack, 1);
+        }
+        // Where the page does not scroll (1280 px), the boxes are the same ones in the page, and
+        // the same as before the first click on Right hand.
+        if (width === 1280) {
+          expect(now.scrollY).toBe(was.scrollY);
+          expect(without.hands).toEqual(was.hands);
+          expect(now.hands).toEqual(was.hands);
+          expect(now.after).toEqual(was.after);
+        }
+        expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
+        await expectOneRed(page, 'the switch over Hands');
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------------------------
   // The key goes down (issue 200), and a release the key levels forgive leaves no drain (issue
   // 195). A key held on the piano goes further down than the cue alone: 0.94 for a white key,
   // 0.92 for a black one, and comes back to the cue's depth, or to rest. A release at four fifths
@@ -1518,7 +2146,6 @@ test.describe('the score with a piano', () => {
 
   const SLOW = { [TWINKLE]: 0.5 };
   const RIGHT = { settings: { hands: 'R' }, tempo: SLOW };
-  const MINUET = 'bach-minuet-g-major-bwv-anh-114';
 
   /** The `scaleY` of a key as drawn now (its computed transform; 1 when it has none). */
   function travel(page: Page, midi: number): Promise<number> {

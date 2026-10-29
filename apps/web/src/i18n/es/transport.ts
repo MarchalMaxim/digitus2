@@ -20,6 +20,8 @@ export const transport: Messages['transport'] = {
   loopTo: 'a',
   addNotes: 'Añadir notas intermedias',
   practiceMode: 'Modo práctica',
+  hearLeft: 'Oír la mano izquierda',
+  hearRight: 'Oír la mano derecha',
   seekHelp: 'Haz clic en un compás para ir allí. ← y → retroceden o avanzan un compás.',
   seekHelpTouch: 'Toca un compás para ir allí.',
   loopReversed: 'El inicio del bucle debe ir antes del final.',

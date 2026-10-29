@@ -31,6 +31,10 @@ export const score: Messages['score'] = {
     noNotes: 'Dit stuk heeft geen noten om te spelen.',
     playAlongHint: (count: number) =>
       count > 1 ? 'Speel de rode noten op je piano.' : 'Speel de rode noot op je piano.',
+    playAlongSound: {
+      click: 'Klik één keer om de andere hand te horen.',
+      tap: 'Tik één keer om de andere hand te horen.',
+    },
     timingExplain: 'Een cirkel vóór een noot betekent dat die te vroeg kwam; erna, te laat.',
     practice: 'Oefenen',
     scanSource: 'Scanbron en herkenning',

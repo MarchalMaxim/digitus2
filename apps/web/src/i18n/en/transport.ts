@@ -26,6 +26,13 @@ export const transport = {
   addNotes: 'Add notes between',
   /** The Practice switch shown while a piano is connected: on, the red waits for the reader's piano (issue 191). */
   practiceMode: 'Practice mode',
+  /**
+   * The Practice switch under which digitus plays the hand the reader left out (issue 231), named
+   * for the hand that would sound: with the right hand chosen, `Hear the left hand`. Shown with a
+   * piano connected, Practice mode on, a two-handed piece and one hand chosen; off until turned on.
+   */
+  hearLeft: 'Hear the left hand',
+  hearRight: 'Hear the right hand',
   /** One line in the Practice panel: how to move through the piece (T13). With a mouse and keys. */
   seekHelp: 'Click a bar to go there. ← and → move one bar.',
   /** The same where fingers do the pointing (a phone, a tablet). */

@@ -4,12 +4,17 @@ import { pieceKey, useAppStore, type View } from './store.js';
 import { NoteBurst } from './NoteBurst.js';
 import { Notice } from './Notice.js';
 import { LibraryView } from '../library/LibraryView.js';
-import { ScoreView } from '../score/ScoreView.js';
 
 // A lazy chunk: the About view reads ENGINE_VERSION from the engine's public API, and that import
 // keeps @xmldom/xmldom (CommonJS, so the bundler cannot drop it) in whatever chunk holds the view.
 // Imported eagerly it pushed the library page's initial JavaScript from 85 to 151 KB gzip.
 const ScanView = lazy(() => import('../scan/ScanView.js').then((m) => ({ default: m.ScanView })));
+
+// A lazy chunk as well: the score view (playback, keyboard, play-along, printing) is not needed to
+// draw the library, which keeps the library page's first load within its budget. It is fetched as
+// soon as the library has drawn (App, below), so opening a piece does not wait for it.
+const loadScoreView = () => import('../score/ScoreView.js');
+const ScoreView = lazy(() => loadScoreView().then((m) => ({ default: m.ScoreView })));
 
 const AboutView = lazy(() =>
   import('../about/AboutView.js').then((m) => ({ default: m.AboutView })),
@@ -57,6 +62,7 @@ export function App() {
   const t = useT();
   useEffect(() => {
     void import('../library/local/library.js').then((m) => m.installLocalLibrary());
+    void loadScoreView();
   }, []);
   const view = useAppStore((s) => s.view);
   const key = viewKey(view);
@@ -65,7 +71,11 @@ export function App() {
     <>
       <Notice />
       {view.name === 'library' && <LibraryView />}
-      {view.name === 'score' && <ScoreView key={key} source={view.source} />}
+      {view.name === 'score' && (
+        <Suspense fallback={null}>
+          <ScoreView key={key} source={view.source} />
+        </Suspense>
+      )}
       {view.name === 'scan' && (
         <Suspense fallback={<p className="page">{t.app.openingScan}</p>}>
           <ScanView key={key} session={view.session} />

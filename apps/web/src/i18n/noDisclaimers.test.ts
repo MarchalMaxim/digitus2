@@ -6,8 +6,9 @@ import { describe, expect, it } from 'vitest';
  * The scan states what it read, never how far to trust it (issue 158): no accuracy disclaimer in
  * the app's texts in any language, nor in the scanning guide. The same holds for the lines of
  * playing along on a piano (issue 182), in the library and the score view: a connection
- * instruction is not a disclaimer, but the lines never hedge the feature. Each file has an anchor
- * that proves the right file was read whole.
+ * instruction is not a disclaimer, but the lines never hedge the feature. So do the texts and the
+ * page of whistling a tune (issue 237). Each file has an anchor that proves the right file was
+ * read whole.
  */
 const files = [
   ['en', './en/scan.ts', 'useForFingerings'],
@@ -21,11 +22,21 @@ const files = [
   ['nl library', './nl/library.ts', 'piano: {'],
   ['es library', './es/library.ts', 'piano: {'],
   ['pt library', './pt/library.ts', 'piano: {'],
+  ['docs/whistle.md', '../../../../docs/whistle.md', '# Whistle a tune'],
   ['en score', './en/score.ts', 'playAlongHint'],
   ['fr score', './fr/score.ts', 'playAlongHint'],
   ['nl score', './nl/score.ts', 'playAlongHint'],
   ['es score', './es/score.ts', 'playAlongHint'],
   ['pt score', './pt/score.ts', 'playAlongHint'],
+] as const;
+
+/** The whistle texts (issue 237) are short files: a floor of their own, and the same hedges barred. */
+const short = [
+  ['en whistle', './whistle/en.ts', 'noNotes'],
+  ['fr whistle', './whistle/fr.ts', 'noNotes'],
+  ['nl whistle', './whistle/nl.ts', 'noNotes'],
+  ['es whistle', './whistle/es.ts', 'noNotes'],
+  ['pt whistle', './whistle/pt.ts', 'noNotes'],
 ] as const;
 
 const phrases = [
@@ -67,7 +78,13 @@ describe('no accuracy disclaimers', () => {
     expect(text).toContain(anchor);
   });
 
-  it.each(files)('%s has none', (name, path) => {
+  it.each(short)('%s is read whole', (name, path, anchor) => {
+    const text = readFileSync(new URL(path, import.meta.url), 'utf8');
+    expect(text.length, `${name} is empty or the path is wrong`).toBeGreaterThan(500);
+    expect(text).toContain(anchor);
+  });
+
+  it.each([...files, ...short])('%s has none', (name, path) => {
     const text = readFileSync(new URL(path, import.meta.url), 'utf8').toLowerCase();
     for (const phrase of phrases)
       expect(text.includes(phrase), `${name} says "${phrase}"`).toBe(false);

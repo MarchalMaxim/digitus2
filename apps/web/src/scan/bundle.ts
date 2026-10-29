@@ -24,6 +24,7 @@ const EXTENSIONS: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'application/pdf': 'pdf',
+  'audio/wav': 'wav',
 };
 
 /** A page file's extension: by its type, else the one its name has, else `bin`. */

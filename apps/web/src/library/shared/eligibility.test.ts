@@ -43,6 +43,10 @@ describe('which rows can be shared', () => {
   it('a recognised scan and a MusicXML file are candidates; a MIDI file and an unread scan are not', () => {
     expect(candidate(scan(XML))).toBe(true);
     expect(candidate(scan())).toBe(false);
+    const whistled = scan(XML);
+    if (whistled.kind === 'scan')
+      whistled.session.file = { ...whistled.session.file, type: 'audio/wav' };
+    expect(candidate(whistled)).toBe(false);
     expect(candidate(file('a.mxl'))).toBe(true);
     expect(candidate(file('a.musicxml'))).toBe(true);
     expect(candidate(file('a.xml'))).toBe(true);

@@ -9,9 +9,15 @@ export interface Shareable {
   kind: 'scan' | 'file';
 }
 
-/** A row the engine has not read yet could be shared: a recognised scan, or a MusicXML file. */
+/**
+ * A row the engine has not read yet could be shared: a recognised scan, or a MusicXML file. A
+ * whistled tune (issue 237) is a recording read as notes, not a page of music, and stays with its
+ * reader.
+ */
 export function candidate(record: LocalScoreRecord): boolean {
-  return record.kind === 'scan' ? !!record.session.xml : SHAREABLE_FILE.test(record.name);
+  return record.kind === 'scan'
+    ? !!record.session.xml && !record.session.file.type.startsWith('audio/')
+    : SHAREABLE_FILE.test(record.name);
 }
 
 /**

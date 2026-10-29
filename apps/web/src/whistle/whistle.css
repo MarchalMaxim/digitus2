@@ -1,0 +1,40 @@
+/* Whistle a tune (issue 237): one quiet line in the end line, and the recording in its place.
+   Ink only: the library keeps its one red. */
+.whistle-line {
+  display: grid;
+  justify-items: start;
+}
+
+.whistle-entry {
+  gap: 0.5rem;
+}
+
+.whistle-recording {
+  display: grid;
+  grid-template-columns: minmax(0, 18rem) auto auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  justify-content: start;
+  min-height: 44px;
+}
+
+.whistle-trace {
+  height: 2.75rem;
+  width: 100%;
+  color: var(--ink);
+  border-bottom: 1px solid var(--gray-2);
+}
+
+.whistle-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.whistle-hint {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+  .whistle-recording {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}

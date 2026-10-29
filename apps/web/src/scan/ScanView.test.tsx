@@ -13,6 +13,7 @@ import { PhraseError } from '../i18n/PhraseError.js';
 import { GRAND_STAFF_WARNING } from './client.js';
 import type { ScanSession } from './model.js';
 import { BUSY_RETRY_MS, BUSY_WAIT_MS } from './client.js';
+import { takeWhistleAgain } from '../whistle/again.js';
 import { ScanView } from './ScanView.js';
 
 const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -1746,4 +1747,54 @@ it('takes the new photo away with the refusal when the pages are moved or remove
   await userEvent.click(screen.getByRole('button', { name: 'Remove page 2' }));
   expect(screen.queryByRole('alert')).toBeNull();
   expect(screen.queryByRole('button', { name: /new photo/ })).toBeNull();
+});
+
+it('reviews a whistled tune beside its recording, and goes back to the library to whistle again', async () => {
+  vi.stubGlobal('AudioWorkletNode', class {});
+  vi.stubGlobal(
+    'AudioContext',
+    class {
+      close = vi.fn().mockResolvedValue(undefined);
+    },
+  );
+  Object.defineProperty(navigator, 'mediaDevices', {
+    value: { getUserMedia: vi.fn() },
+    configurable: true,
+  });
+  const session: ScanSession = {
+    id: 'tune',
+    file: new File(['RIFF'], 'Whistled tune 14.05.31.wav', { type: 'audio/wav' }),
+    xml: '<score-partwise/>',
+    recognizer: 'digitus2-whistle/1',
+  };
+  render(<ScanView session={session} />);
+  expect(screen.getByRole('heading', { name: 'Recording' })).toBeVisible();
+  expect(screen.getByLabelText('Recording', { selector: 'audio' })).toHaveAttribute('controls');
+  expect(screen.getByText('Whistled tune 14.05.31.wav')).toBeVisible();
+  expect(screen.queryByText('Experimental scan')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Scan again' })).toBeNull();
+  expect(screen.queryByRole('link', { name: 'Open original image' })).toBeNull();
+  expect(screen.queryByRole('img')).toBeNull();
+  await vi.waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Whistle again' }));
+  expect(useAppStore.getState().view.name).toBe('library');
+  // The press made the audio context the library's line will record with.
+  expect(takeWhistleAgain()).toBeInstanceOf(AudioContext);
+  delete (navigator as unknown as Record<string, unknown>).mediaDevices;
+});
+
+it('offers no way to whistle again where the browser has no microphone', () => {
+  render(
+    <ScanView
+      session={{
+        id: 'tune',
+        file: new File(['RIFF'], 'Whistled tune 14.05.31.wav', { type: 'audio/wav' }),
+        xml: '<score-partwise/>',
+      }}
+    />,
+  );
+  expect(screen.queryByRole('button', { name: 'Whistle again' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Scan again' })).toBeNull();
 });

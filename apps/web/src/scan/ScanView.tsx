@@ -26,6 +26,7 @@ import { createRenderer, NO_MUSIC, type ScoreRenderer } from '../score/render/re
 import { ScoreSheet } from '../score/ScoreSheet.js';
 import { en } from '../i18n/en/index.js';
 import { useLocale, useT } from '../i18n/i18n.js';
+import { useWhistleText } from '../i18n/whistle/index.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
@@ -101,6 +102,8 @@ import {
   tryCorrection,
   useSelectedMark,
 } from './ScanEditor.js';
+import { askToWhistleAgain } from '../whistle/again.js';
+import { whistleSupported } from '../whistle/support.js';
 import './scan.css';
 
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
@@ -162,6 +165,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [session, setSession] = useState(initial);
   const hasPageRecognition = !!initial.pages?.length && initial.pages.every((page) => !!page.xml);
   const t = useT();
+  const whistle = useWhistleText();
   const [locale] = useLocale();
   // Waiting: the scanner is busy with another reader's page, and this page is offered again.
   const [phase, setPhase] = useState<'ready' | 'waiting' | 'scanning' | 'cancelling' | 'review'>(
@@ -245,7 +249,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const sourceUrl = useBlobUrl(session.file);
   const sourcePages = session.pages ?? [{ id: session.id, file: session.file, xml: session.xml }];
   const batch = sourcePages.length > 1;
-  const isImage = session.file.type !== 'application/pdf';
+  // A whistled tune (issue 237) is a session whose source is its recording, already read.
+  const isAudio = session.file.type.startsWith('audio/');
+  const isImage = session.file.type !== 'application/pdf' && !isAudio;
   const corrections = session.corrections ?? NO_CORRECTIONS;
   const corrected = useMemo(
     () => (session.xml ? correct(session.xml, corrections) : undefined),
@@ -956,6 +962,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setUndoStack([]);
     setPhase('review');
   };
+  // A recording has no scanner to ask again: the library's line records a new one, and this one
+  // stays in My scores.
+  const whistleAgain = () => {
+    askToWhistleAgain();
+    openLibrary();
+  };
   const useResult = () => {
     if (!canUseResult) return;
     useAppStore.getState().openPiece({
@@ -1250,7 +1262,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           {t.scan.view.back}
         </button>
         <ThemeToggle />
-        <p className="small muted">{t.scan.view.experimental}</p>
+        {!isAudio && <p className="small muted">{t.scan.view.experimental}</p>}
         <h1 ref={heading} tabIndex={-1}>
           {phase === 'review' ? t.scan.view.titleReview : t.scan.view.titleStart}
         </h1>
@@ -1389,25 +1401,35 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 onFile={(file) => retake(retakePage, file)}
               />
             )}
-            <Button
-              primary={nextRed === 'again' && retakePage === undefined}
-              onClick={() => {
-                setPhase('ready');
-                setError(null);
-                setReviewMode('combined');
-                select(null);
-                setUndoStack([]);
-                retain({
-                  ...session,
-                  xml: undefined,
-                  corrections: undefined,
-                  retake: undefined,
-                  pages: sourcePages.map((p) => ({ ...p, xml: undefined, error: undefined })),
-                });
-              }}
-            >
-              {t.scan.review.scanAgain}
-            </Button>
+            {(!isAudio || whistleSupported()) && (
+              <Button
+                primary={nextRed === 'again' && retakePage === undefined}
+                onClick={
+                  isAudio
+                    ? whistleAgain
+                    : () => {
+                        setPhase('ready');
+                        setError(null);
+                        setReviewMode('combined');
+                        select(null);
+                        setUndoStack([]);
+                        retain({
+                          ...session,
+                          xml: undefined,
+                          corrections: undefined,
+                          retake: undefined,
+                          pages: sourcePages.map((p) => ({
+                            ...p,
+                            xml: undefined,
+                            error: undefined,
+                          })),
+                        });
+                      }
+                }
+              >
+                {isAudio ? whistle.again : t.scan.review.scanAgain}
+              </Button>
+            )}
           </div>
           {reviewError && <p role="alert">{reviewAlert(t)}</p>}
           {refusedAt && (
@@ -1420,8 +1442,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           )}
           <div className="scan-review">
             <section className="scan-source stack">
-              <h2>{t.scan.view.original}</h2>
-              {isImage ? (
+              <h2>{isAudio ? whistle.recording : t.scan.view.original}</h2>
+              {isAudio ? (
+                sourceUrl && <audio controls src={sourceUrl} aria-label={whistle.recording} />
+              ) : isImage ? (
                 <ImagePages
                   pages={sourcePages}
                   selected={selected}

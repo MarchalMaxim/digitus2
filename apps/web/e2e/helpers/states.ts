@@ -5,6 +5,7 @@ import { mockService, RECOGNITION_REFUSED } from './scan.js';
 import { fakeMidi, installFakeMidi, walkRhythm, type FakeMidiOptions } from './midi.js';
 import { embellishDecided, openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
+import { installToneMicrophone, traceInk } from './whistle.js';
 import { holdPianoSamples } from './samples.js';
 import {
   arrivalRows,
@@ -308,6 +309,35 @@ export const STATES: AppState[] = [
           'On Windows, a Bluetooth piano also needs chrome://flags/#use-winrt-midi-api set to Enabled.',
       );
       await expect(page.locator('.piano-line button')).toHaveText('Turn off');
+    },
+    expectTag: 'button',
+  },
+  {
+    // Whistle a tune (issue 237): the line is the live trace, the time, Stop and one gray sentence;
+    // the library's start button stays the one red element.
+    name: 'whistle-recording',
+    go: async (page) => {
+      await installToneMicrophone(page);
+      await library(page);
+      await page.getByRole('button', { name: 'Whistle a tune' }).click();
+      await expect(page.getByRole('group', { name: 'Recording' })).toBeVisible();
+      await expect.poll(() => traceInk(page)).toBeGreaterThan(0);
+    },
+    expectTag: 'button',
+  },
+  {
+    // The review of a recording: the player where a scan shows its photo, the notes beside it.
+    name: 'whistle-review',
+    go: async (page) => {
+      await installToneMicrophone(page);
+      await library(page);
+      await page.getByRole('button', { name: 'Whistle a tune' }).click();
+      const recording = page.getByRole('group', { name: 'Recording' });
+      await expect(recording).toContainText('0:02');
+      await recording.getByRole('button', { name: 'Stop' }).click();
+      await expect(page.getByRole('heading', { name: 'Recording' })).toBeVisible();
+      await expect(page.locator('audio[controls]')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
     },
     expectTag: 'button',
   },

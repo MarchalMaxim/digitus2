@@ -130,9 +130,18 @@ const bass = backup(6) + note('C3', 6, 'half', { staff: 2, dots: true });
 /**
  * A three-bar recognition in 3/4 with the errors of the test page in miniature: in bar 2 a
  * genuine A4 tie whose continuation arrives a quarter late (a stray quarter rest), which the
- * strict import refuses, and in bar 3 a misread D5 where the page has E5.
+ * import plays as two notes and lists as a place to check, and in bar 3 a misread D5 where the page
+ * has E5.
  */
 export const RECOGNITION_WITH_ERRORS = `<?xml version="1.0" encoding="UTF-8"?><score-partwise version="4.0"><identification><encoding><software>test recognizer</software></encoding></identification><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>2</divisions><key><fifths>0</fifths></key><time><beats>3</beats><beat-type>4</beat-type></time><staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes>${note('C5', 2, 'quarter')}${note('D5', 2, 'quarter')}${note('A4', 2, 'quarter', { tie: 'start' })}${bass}</measure><measure number="2">${note('r', 2, 'quarter')}${note('A4', 2, 'quarter', { tie: 'stop' })}${note('B4', 2, 'quarter')}${bass}</measure><measure number="3">${note('C5', 2, 'quarter')}${note('D5', 2, 'quarter')}${note('C5', 2, 'quarter')}${bass}</measure></part></score-partwise>`;
+/**
+ * The same page with a note in bar 3 whose pitch cannot be read (step H): the import refuses it, so
+ * Use for fingerings stays unavailable, while the bar 2 tie is still a place to check.
+ */
+export const RECOGNITION_REFUSED = RECOGNITION_WITH_ERRORS.replace(
+  '<measure number="3"><note><pitch><step>C</step>',
+  '<measure number="3"><note><pitch><step>H</step>',
+);
 
 // Nine eighths in both hands: a bar of 9/8.
 const nine =

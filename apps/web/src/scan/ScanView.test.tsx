@@ -1410,6 +1410,7 @@ it('says what the whole score showed while a page is shown alone (issue 233)', a
       technical: [],
       places: [],
       corrections: 0,
+      pages: ['first', 'second'],
     });
   } finally {
     withoutShare();
@@ -1449,6 +1450,7 @@ it('says under Recognition details that this device keeps its scans, and reports
       technical: [],
       places: [],
       corrections: 0,
+      pages: ['first', 'second'],
     });
   } finally {
     localStorage.removeItem('digitus2.keepScans');
@@ -1479,6 +1481,7 @@ it('writes what the review said into scan.json, in English whatever the language
       technical: [],
       places: [],
       corrections: 0,
+      pages: ['first', 'second'],
     });
   } finally {
     withoutShare();

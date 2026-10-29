@@ -1,6 +1,5 @@
 import type { Phrase } from '../i18n/messages.js';
 import { pieceBySlug } from '../library/manifest.js';
-import { keepScansFromHash } from '../scan/diagnostics.js';
 import type { useAppStore, View } from './store.js';
 
 const FILE_HASH = '#/piece/file';
@@ -102,9 +101,12 @@ export function installHashSync(store: typeof useAppStore): () => void {
   };
 
   // '#keep-scans' and '#keep-scans-off' switch this device's scan keeping (diagnostics.ts) and leave
-  // the address where it was, without a history entry; the view stays as it is.
+  // the address where it was, without a history entry; the view stays as it is. The switch loads only
+  // when one of them is opened, so the library's first load does not carry it.
   const keepFromHash = (): boolean => {
-    if (!keepScansFromHash(location.hash)) return false;
+    const hash = location.hash;
+    if (hash !== '#keep-scans' && hash !== '#keep-scans-off') return false;
+    void import('../scan/diagnostics.js').then(({ keepScansFromHash }) => keepScansFromHash(hash));
     replaceHash(viewToHash(store.getState().view));
     return true;
   };

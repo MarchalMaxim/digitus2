@@ -1,5 +1,5 @@
 import { en } from '../i18n/en/index.js';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from './store.js';
 import {
   FILE_NOT_RESTORABLE_NOTICE,
@@ -149,11 +149,11 @@ describe('routes', () => {
     expect(SHARED_NOT_LOADED_NOTICE(en)).toBe('This shared score could not be loaded.');
     uninstall();
   });
-  it('turns scan keeping on and off from its address, without moving the reader or a history entry', () => {
+  it('turns scan keeping on and off from its address, without moving the reader or a history entry', async () => {
     const entries = history.length;
     location.hash = '#keep-scans';
     const uninstall = installHashSync(useAppStore);
-    expect(keepScans()).toBe(true);
+    await vi.waitFor(() => expect(keepScans()).toBe(true));
     expect(location.hash).toBe('#/');
     expect(useAppStore.getState().view).toEqual({ name: 'library' });
     expect(useAppStore.getState().notice).toBeNull();
@@ -161,7 +161,7 @@ describe('routes', () => {
     const before = history.length;
     history.replaceState(history.state, '', '#keep-scans-off');
     window.dispatchEvent(new HashChangeEvent('hashchange'));
-    expect(keepScans()).toBe(false);
+    await vi.waitFor(() => expect(keepScans()).toBe(false));
     expect(location.hash).toBe('#/about');
     expect(useAppStore.getState().view).toEqual({ name: 'about' });
     expect(history.length).toBe(before);

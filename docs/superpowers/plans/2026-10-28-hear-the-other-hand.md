@@ -75,12 +75,12 @@ The panel grows upward from Play, and `.transport` is a wrapping flex row. When 
 
 - Measure it in e2e: Minuet in G (`bach-minuet-g-major-bwv-anh-114`), piano connected, panel open. Read the Hands fieldset's `boundingBox()` with `Both hands`, click `Right hand`, then read it again once the switch is visible.
 - Do this at 1280 × 900 and at 360 × 740.
-What the probe of today's panel measured:
+  What the probe of today's panel measured:
 
-| Width | Line 1                           | Line 2                                   |
-| ----- | -------------------------------- | ---------------------------------------- |
-| 1280  | Practice mode, Tempo, Hands      | Metronome, Count-in, Loop bars, Add notes between |
-| 360   | One control per line, Hands third | Metronome, Count-in                     |
+| Width | Line 1                            | Line 2                                            |
+| ----- | --------------------------------- | ------------------------------------------------- |
+| 1280  | Practice mode, Tempo, Hands       | Metronome, Count-in, Loop bars, Add notes between |
+| 360   | One control per line, Hands third | Metronome, Count-in                               |
 
 The panel's content box is 832 px wide at 1280 and 328 px at 360.
 
@@ -122,21 +122,21 @@ These describe the current state, in present tense, with no dates or branch name
 
 - `docs/app.md`. The issue 184 text is in `git show cb63531:docs/app.md`; lift it and add the switch. The passages to lift:
 
-  | Line in cb63531 | Passage                                               |
-  | --------------- | ----------------------------------------------------- |
-  | 92              | Audio, Accompaniment                                  |
-  | 113             | MIDI input                                            |
-  | 292             | Playing along on a piano, opening paragraph           |
-  | 371, 376        | Practice mode off, and the Status line rows           |
-  | 418 to 447      | **The other hand**, with its bullets and state table  |
-  | 466, 470        | The dock's Status line and Hands bullets              |
+  | Line in cb63531 | Passage                                                      |
+  | --------------- | ------------------------------------------------------------ |
+  | 92              | Audio, Accompaniment                                         |
+  | 113             | MIDI input                                                   |
+  | 292             | Playing along on a piano, opening paragraph                  |
+  | 371, 376        | Practice mode off, and the Status line rows                  |
+  | 418 to 447      | **The other hand**, with its bullets and state table         |
+  | 466, 470        | The dock's Status line and Hands bullets                     |
   | 625 to 628      | Testing: `play-along`, `play-along-sound`, `play-along-halo` |
-
   - MIDI input, around line 110 today: "Playing along makes no sound at all" becomes "it makes no sound for the reader's notes; the hand left out sounds only with `Hear the left hand` on".
   - Playing along on a piano: the opening paragraph.
   - **One hand** becomes **The other hand**: the issue 184 section, with the switch as its one control and Hands choosing which hand the switch would sound. Keep the 89 ms table as the measured lag, and say the switch is off by default because of it. No UI disclaimer.
   - The Practice panel list: a bullet for the switch, saying where it is, when it shows, that it is above Hands so the Hands control stays still, that it is saved, and its focus rule.
   - Known limitations: the lag of notes that start with the reader's.
+
 - `docs/PROGRESS.md`:
   - Line 11: playing along makes no sound unless the reader turns on `Hear the left hand` or `Hear the right hand` (issue 231).
   - The decision near line 170, "Digitus does not play the hand left out": rewrite it as a decision. Digitus plays the hand left out only when the reader turns the switch on, off by default. The 89 ms lag is why it is off by default. The owner's words: "I kinda liked the idea … implement this as a toggle".

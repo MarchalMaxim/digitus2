@@ -235,8 +235,11 @@ const FACTS = [
  * How the bars moved, page by page against one truth: 'worse' when a page's distance from its
  * truth grew (a page refused or absent reads 0), or, on a page without a truth, when a case usable
  * on both sides reads fewer bars there; 'better' when a page came closer and none moved away;
- * null otherwise. A cut-off page is judged first by the bars it reads over its whole page's, then
- * by how many it reads.
+ * null otherwise. A cut-off page only ever moves away: when it reads more bars over its whole
+ * page's, or fewer under them than it read right before (its bars up to the page's, less those it
+ * read over). So 28/24 -> 20/24 stays (the 4 over may have stood for 4 under), while 28/24 -> 3/24
+ * and 9/11 -> 3/11 are bars lost. Fewer bars on it may be what the photo shows, so they never call
+ * a case better.
  */
 function barsMove(was, is, truth, bothUsable) {
   let away = false;
@@ -249,12 +252,16 @@ function barsMove(was, is, truth, bothUsable) {
       if (bothUsable && after < before) away = true;
       continue;
     }
-    // A cut-off photo shows fewer bars than its page holds: bars over the page's are wrong, and
-    // under them more is closer to what the photo shows.
-    const excess = (read) => Math.max(0, read - want);
-    const d = truth.pages[i].cutOff
-      ? excess(after) - excess(before) || before - after
-      : Math.abs(after - want) - Math.abs(before - want);
+    if (truth.pages[i].cutOff) {
+      // A cut-off photo shows fewer bars than its page holds: bars over the page's are wrong, and
+      // bars under it are lost only beyond what was read over before.
+      const excess = (read) => Math.max(0, read - want);
+      const under = (read) => Math.min(read, want);
+      if (excess(after) > excess(before) || under(after) < under(before) - excess(before))
+        away = true;
+      continue;
+    }
+    const d = Math.abs(after - want) - Math.abs(before - want);
     if (d > 0) away = true;
     else if (d < 0) closer = true;
   }
@@ -286,12 +293,14 @@ function acceptance(pages, truth) {
  * are read against one truth (the photos are the same): the second run's expect.json, else the
  * first's. Worse: the outcome drops; a page's bars move away from its truth (or, without a truth,
  * a case usable on both sides reads fewer bars); a count of pages agreeing on staves, key or time
- * drops (both rows with the same truth); a retake is asked of a case usable on both sides; or a
- * case refused before (explained, failed or unrecognized) is usable with a page short of its bars
- * ("accepted short") or over them ("accepted with extra bars"). Better: the reverse, with nothing
- * worse; but a case refused before and usable now with a page no truth checks is at most the same
- * ("usable unchecked"). Each rule judges only rows that carry its fields, so a row of an older gate
- * compares on its outcome.
+ * drops (both rows with the same truth); a retake is asked of a case usable on both sides, or, when
+ * every page of the case is cut off in the truth, a retake is dropped, whatever the outcome (that
+ * photo is to be taken again; the row does not name the retake's page); or a case refused before (explained, failed or unrecognized) is usable with a page
+ * short of its bars ("accepted short") or over them ("accepted with extra bars"). Better: the
+ * reverse, with nothing worse, except that the bars of a cut-off page never count better; but a
+ * case refused before and usable now with a page no truth checks is at most the same ("usable
+ * unchecked"). Each rule judges only rows that carry its fields, so a row of an older gate compares
+ * on its outcome.
  */
 function judge(was, is) {
   if (!was) return { change: 'new', moved: [] };
@@ -345,8 +354,21 @@ function judge(was, is) {
     typeof is.retake === 'boolean' &&
     was.retake !== is.retake
   ) {
-    moved.push(is.retake ? 'retake asked' : 'retake dropped');
-    if (bothUsable) (is.retake ? worse : better).push('retake');
+    // A photo that does not show the whole page is to be taken again: asking for that is right.
+    // The row does not say which page the retake names, so this holds only when every page the
+    // case reads is cut off; otherwise the retake may name a page that reads right.
+    const listed = truth?.pages ?? [];
+    const cutOff =
+      listed.length > 0 &&
+      listed.every((page) => page?.cutOff === true) &&
+      Math.max(wasPages?.length ?? 0, isPages?.length ?? 0) <= listed.length;
+    if (cutOff) {
+      moved.push(`retake ${is.retake ? 'asked' : 'dropped'} on a cut-off page`);
+      (is.retake ? better : worse).push('retake');
+    } else {
+      moved.push(is.retake ? 'retake asked' : 'retake dropped');
+      if (bothUsable) (is.retake ? worse : better).push('retake');
+    }
   }
   let unchecked = false;
   if (rank(was) < RANK.usable && is.outcome === 'usable' && isPages) {

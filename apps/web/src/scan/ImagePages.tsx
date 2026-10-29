@@ -62,6 +62,7 @@ export function ImagePages({
   onChange,
   onRotating,
   recognized,
+  said = -1,
   camera = false,
   overlay,
 }: {
@@ -76,6 +77,8 @@ export function ImagePages({
    * pressed one, and none is pressed while the whole score is. Absent, the selected page is.
    */
   recognized?: number | null;
+  /** The page whose error the view's alert already says: its own line is not repeated here. */
+  said?: number;
   onSelect(index: number): void;
   onChange(pages: ScanPage[]): void;
   onRotating?(value: boolean): void;
@@ -325,7 +328,7 @@ export function ImagePages({
           {error && <p role="alert">{error(t)}</p>}
         </div>
       )}
-      {selectedPage.error && (
+      {selectedPage.error && selected !== said && (
         <p role="status">{t.scan.pages.pageError(selected + 1, selectedPage.error)}</p>
       )}
       <div className="scan-photo">

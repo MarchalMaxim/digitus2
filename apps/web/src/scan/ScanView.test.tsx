@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -1487,4 +1487,263 @@ it('writes what the review said into scan.json, in English whatever the language
     withoutShare();
     downloads.restore();
   }
+});
+
+/** The scanner's refusal of a photo: a 422 with its sentence, or without one. */
+const refusedAnswer = (message?: string) =>
+  Promise.resolve(
+    new Response(
+      JSON.stringify({
+        state: 'failed',
+        failure: message ? { code: 'not-recognized', message } : { code: 'not-recognized' },
+      }),
+      { status: 422 },
+    ),
+  );
+
+it('offers a new photo for the page the scanner refused, with the red, and scans it at once (issue 233)', async () => {
+  const replacement = new File([png, 'new'], 'again.png', { type: 'image/png' });
+  const service = stubService({
+    recognize: (init) =>
+      (init.body as File).name === 'two.png'
+        ? refusedAnswer('Page too blurry.')
+        : Promise.resolve(ready()),
+  });
+  const { container } = render(<ScanView session={batchOf('one.png', 'two.png', 'three.png')} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/^Page 2: Page too blurry\.$/);
+  // Said once: the line under the thumbnails does not repeat the alert.
+  expect(screen.getAllByText(/Page too blurry\./)).toHaveLength(1);
+  expect(screen.getByRole('button', { name: 'Replace page 2 with a new photo' })).toHaveClass(
+    'is-red',
+  );
+  expect(screen.getByRole('button', { name: 'Retry failed pages' })).not.toHaveClass('is-red');
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+  expect(service.calls('POST')).toHaveLength(3);
+  await userEvent.upload(screen.getByLabelText('Replace page 2 with a new photo'), replacement);
+  expect(await screen.findByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  // Only the new photo is sent; the other pages keep their recognition and their places.
+  const posts = service.calls('POST');
+  expect(posts).toHaveLength(4);
+  expect((posts[3]![1]!.body as File).name).toBe('again.png');
+  const view = useAppStore.getState().view;
+  const pages = view.name === 'scan' ? view.session.pages : undefined;
+  expect(pages?.map((page) => page.file.name)).toEqual(['one.png', 'again.png', 'three.png']);
+  expect(pages?.every((page) => !!page.xml)).toBe(true);
+});
+
+it('offers a new photo for a one-photo scan the scanner refused, in its own sentence (issue 233)', async () => {
+  stubService({ recognize: () => refusedAnswer() });
+  const { container } = render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(en.scan.errors.notRecognized);
+  expect(screen.getByRole('button', { name: 'Replace it with a new photo' })).toHaveClass('is-red');
+  expect(screen.getByRole('button', { name: 'Scan this score' })).not.toHaveClass('is-red');
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+});
+
+it('says a refusal in the language on screen when it changes (issue 233)', async () => {
+  stubService({ recognize: () => refusedAnswer() });
+  render(<ScanView session={batchOf('one.png', 'two.png')} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  // Page 2 was refused too: the first is named, and the others are said.
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    `${en.scan.pages.pageError(1, en.scan.errors.notRecognized)} ${en.scan.errors.somePagesFailed}`,
+  );
+  await act(async () => {
+    await chooseLocale('fr');
+  });
+  // Read as written: the French colon follows a no-break space.
+  expect(screen.getByRole('alert').textContent).toBe(
+    `${fr.scan.pages.pageError(1, fr.scan.errors.notRecognized)} ${fr.scan.errors.somePagesFailed}`,
+  );
+  expect(screen.getByRole('button', { name: fr.scan.pages.retake(1) })).toHaveClass('is-red');
+});
+
+it('offers no new photo when the scanner was out of reach, limited or refused a PDF (issue 233)', async () => {
+  stubService({ recognize: () => Promise.reject(new TypeError('Failed to fetch')) });
+  const { unmount } = render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  await screen.findByRole('alert');
+  expect(screen.queryByRole('button', { name: /new photo/ })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Scan this score' })).toHaveClass('is-red');
+  unmount();
+
+  let answered = 0;
+  stubService({
+    recognize: () =>
+      ++answered === 1
+        ? refusedAnswer('Page too blurry.')
+        : Promise.resolve(new Response(JSON.stringify({ error: 'rate-limited' }), { status: 429 })),
+  });
+  const second = render(<ScanView session={batchOf('one.png', 'two.png')} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(en.scan.client.limited);
+  expect(screen.queryByRole('button', { name: /new photo/ })).toBeNull();
+  second.unmount();
+
+  stubService({ recognize: () => refusedAnswer('Page too blurry.') });
+  render(
+    <ScanView
+      session={{
+        id: 'pdf',
+        file: new File(['%PDF-1.7'], 'score.pdf', { type: 'application/pdf' }),
+      }}
+    />,
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Page too blurry.');
+  expect(screen.queryByRole('button', { name: /new photo|again/ })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Scan this score' })).toHaveClass('is-red');
+});
+
+it('opens the camera for the refused page on a touch-only device (issue 233)', async () => {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(any-pointer: coarse)',
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+  stubService({
+    recognize: (init) =>
+      (init.body as File).name === 'two.png'
+        ? refusedAnswer('Page too blurry.')
+        : Promise.resolve(ready()),
+  });
+  const { container } = render(<ScanView session={batchOf('one.png', 'two.png')} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/^Page 2: Page too blurry\.$/);
+  expect(screen.getByRole('button', { name: 'Photograph page 2 again' })).toHaveClass('is-red');
+  expect(screen.getByRole('button', { name: 'Retry failed pages' })).not.toHaveClass('is-red');
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+});
+
+/** The scanner refuses page 2 of three: the start screen names it and offers its new photo. */
+async function refusePage2(recognize?: (init: RequestInit) => Promise<Response>) {
+  const service = stubService({
+    recognize:
+      recognize ??
+      ((init) =>
+        (init.body as File).name === 'one.png' || (init.body as File).name === 'three.png'
+          ? Promise.resolve(ready())
+          : refusedAnswer('Page too blurry.')),
+  });
+  const view = render(<ScanView session={batchOf('one.png', 'two.png', 'three.png')} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  await screen.findByRole('button', { name: 'Replace page 2 with a new photo' });
+  return { service, ...view };
+}
+
+it('keeps the new photo offered when the photo chosen for it is not one the scanner takes (issue 233)', async () => {
+  const { container } = await refusePage2();
+  await userEvent.upload(
+    screen.getByLabelText('Replace page 2 with a new photo'),
+    new File(['not a png'], 'bad.png', { type: 'image/png' }),
+  );
+  expect(await screen.findByRole('alert')).toHaveTextContent(en.scan.files.contentMismatch);
+  expect(screen.getByRole('button', { name: 'Replace page 2 with a new photo' })).toHaveClass(
+    'is-red',
+  );
+  expect(screen.getByRole('button', { name: 'Retry failed pages' })).not.toHaveClass('is-red');
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+});
+
+it('does not start a second scan for a new photo chosen while a retry already runs (issue 233)', async () => {
+  const { service } = await refusePage2();
+  // The photo is checked asynchronously; the retry is pressed before that check answers.
+  fireEvent.change(screen.getByLabelText('Replace page 2 with a new photo'), {
+    target: { files: [new File([png, 'new'], 'again.png', { type: 'image/png' })] },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Retry failed pages' }));
+  await vi.waitFor(() => expect(service.calls('POST')).toHaveLength(4));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/^Page 2: Page too blurry\.$/);
+  await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
+  const sent = service.calls('POST').map(([, init]) => (init!.body as File).name);
+  expect(sent).toEqual(['one.png', 'two.png', 'three.png', 'two.png']);
+  const view = useAppStore.getState().view;
+  expect(
+    view.name === 'scan' ? view.session.pages?.map((page) => page.file.name) : undefined,
+  ).toEqual(['one.png', 'two.png', 'three.png']);
+});
+
+it('keeps the focus on the scan’s controls while a new photo of a refused page is scanned (issue 233)', async () => {
+  let answer!: (response: Response) => void;
+  await refusePage2((init) => {
+    const name = (init.body as File).name;
+    if (name === 'again.png')
+      return new Promise((resolve) => {
+        answer = resolve;
+      });
+    return name === 'two.png' ? refusedAnswer('Page too blurry.') : Promise.resolve(ready());
+  });
+  await userEvent.upload(
+    screen.getByLabelText('Replace page 2 with a new photo'),
+    new File([png, 'new'], 'again.png', { type: 'image/png' }),
+  );
+  const cancel = await screen.findByRole('button', { name: 'Cancel scan' });
+  await vi.waitFor(() => expect(document.activeElement).toBe(cancel));
+  answer(
+    new Response(
+      JSON.stringify({ state: 'failed', failure: { code: 'x', message: 'Still blurry.' } }),
+      { status: 422 },
+    ),
+  );
+  expect(await screen.findByRole('alert')).toHaveTextContent(/^Page 2: Still blurry\.$/);
+  expect(document.activeElement).not.toBe(document.body);
+  expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Retry failed pages' }));
+});
+
+it('offers a new photo for a page the scanner timed out on, with or without its sentence (issue 233)', async () => {
+  const sentence = 'Recognition timed out before a complete score was produced.';
+  stubService({
+    recognize: () =>
+      Promise.resolve(
+        new Response(JSON.stringify({ state: 'timed_out', failure: { message: sentence } }), {
+          status: 504,
+        }),
+      ),
+  });
+  const { unmount } = render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(sentence);
+  expect(screen.getByRole('button', { name: 'Replace it with a new photo' })).toHaveClass('is-red');
+  unmount();
+
+  stubService({
+    recognize: () =>
+      Promise.resolve(new Response(JSON.stringify({ state: 'timed_out' }), { status: 504 })),
+  });
+  render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(en.scan.errors.timedOut);
+  expect(screen.getByRole('button', { name: 'Replace it with a new photo' })).toHaveClass('is-red');
+});
+
+it('says the other failed pages too when one page was refused and another not answered (issue 233)', async () => {
+  const { container } = await refusePage2((init) => {
+    const name = (init.body as File).name;
+    if (name === 'three.png') return Promise.reject(new TypeError('Failed to fetch'));
+    return name === 'two.png' ? refusedAnswer('Page too blurry.') : Promise.resolve(ready());
+  });
+  expect(screen.getByRole('alert').textContent).toBe(
+    `Page 2: Page too blurry. ${en.scan.errors.somePagesFailed}`,
+  );
+  expect(screen.getByRole('button', { name: 'Replace page 2 with a new photo' })).toHaveClass(
+    'is-red',
+  );
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+});
+
+it('takes the new photo away with the refusal when the pages are moved or removed (issue 233)', async () => {
+  const first = await refusePage2();
+  await userEvent.click(screen.getByRole('button', { name: 'Move page 2 later' }));
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.queryByRole('button', { name: /new photo/ })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Retry failed pages' })).toHaveClass('is-red');
+  first.unmount();
+
+  await refusePage2();
+  await userEvent.click(screen.getByRole('button', { name: 'Remove page 2' }));
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.queryByRole('button', { name: /new photo/ })).toBeNull();
 });

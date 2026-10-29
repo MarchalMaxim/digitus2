@@ -86,7 +86,7 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await expectNoSeriousA11y(page, 'image page ordering');
   await page.screenshot({ path: testInfo.outputPath('image-ordering.png'), fullPage: true });
   await page.getByRole('button', { name: 'Scan this score' }).click();
-  await expect(page.getByText('Page too blurry.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveText('Page 2: Page too blurry.');
   await expect(page.locator('.scan-page-list li').first()).toContainText('Recognized');
   await expect(page.getByRole('button', { name: 'Retry failed pages' })).toBeVisible();
   await page.getByRole('button', { name: 'Retry failed pages' }).click();
@@ -117,6 +117,66 @@ test('scan: ordered image pages, accessible moves, partial retry and combined re
   await expectNoSeriousA11y(page, 'combined scan review');
   await page.screenshot({ path: testInfo.outputPath('combined-review.png'), fullPage: true });
   expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
+});
+
+test('scan: a photo the scanner refused is named, and a new photo of it is scanned (issue 233)', async ({
+  page,
+}, testInfo) => {
+  const uploads: Buffer[] = [];
+  const firstPhoto = Buffer.concat([png, Buffer.from('first')]);
+  const blurryPhoto = Buffer.concat([png, Buffer.from('blurry')]);
+  const newPhoto = Buffer.concat([png, Buffer.from('new')]);
+  const xml = (step: string) =>
+    `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes><note><pitch><step>${step}</step><octave>4</octave></pitch><duration>16</duration><type>whole</type></note></measure></part></score-partwise>`;
+  await mockService(
+    page,
+    (request) => xml(request.postDataBuffer()!.equals(firstPhoto) ? 'C' : 'D'),
+    {
+      onRecognize: async (request) => {
+        const upload = request.postDataBuffer()!;
+        uploads.push(upload);
+        // The scanner refuses the blurry photo every time: sending it again cannot help.
+        if (upload.equals(blurryPhoto))
+          return {
+            status: 422,
+            json: {
+              state: 'failed',
+              failure: {
+                code: 'recognition-incomplete',
+                message:
+                  'The recognizer stopped before producing a complete score. Try the original PDF or a flatter, higher-resolution image.',
+              },
+            },
+          };
+      },
+    },
+  );
+  await page.goto('/');
+  await page.locator('input[type=file]').setInputFiles([
+    { name: 'first.png', mimeType: 'image/png', buffer: firstPhoto },
+    { name: 'blurry.png', mimeType: 'image/png', buffer: blurryPhoto },
+  ]);
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page.getByRole('alert')).toHaveText(
+    'Page 2: The recognizer stopped before producing a complete score. Try the original PDF or a flatter, higher-resolution image.',
+  );
+  // The new photo of page 2 is the fix, and carries the one red; sending the same photo is plain.
+  const replace = page.getByRole('button', { name: 'Replace page 2 with a new photo' });
+  await expect(replace).toHaveClass(/is-red/);
+  await expect(page.getByRole('button', { name: 'Retry failed pages' })).not.toHaveClass(/is-red/);
+  await expectOneRed(page, 'refused photo');
+  await expectNoSeriousA11y(page, 'refused photo');
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
+  await page.screenshot({ path: testInfo.outputPath('refused-photo.png'), fullPage: true });
+  await page
+    .getByLabel('Replace page 2 with a new photo')
+    .setInputFiles({ name: 'again.png', mimeType: 'image/png', buffer: newPhoto });
+  // Only the new photo is sent, at once; page 1 keeps its recognition and page 2 its place.
+  await expect(page.locator('.scan-review svg').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  expect(uploads).toEqual([firstPhoto, blurryPhoto, newPhoto]);
+  await expect(page.locator('.scan-page-list li').nth(1)).toContainText('again.png');
+  await expectOneRed(page, 'review after a new photo');
 });
 
 test('scan: the warm-up happens on arrival, the page goes only on Scan', async ({

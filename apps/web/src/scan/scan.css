@@ -135,6 +135,12 @@
   }
 }
 
+/* A new photo of the page the scanner refused, under its refusal: the help link after it is
+   inline, so the space below is the row's own. */
+.scan-refused {
+  margin-bottom: var(--gap, 0.75rem);
+}
+
 /* The loader while a page is recognised (design/Loader.tsx), above the status line. */
 .scan-loader {
   width: 10rem;

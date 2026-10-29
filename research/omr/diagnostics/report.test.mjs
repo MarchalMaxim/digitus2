@@ -600,13 +600,129 @@ test('--against judges the bars by their distance from the truth, page by page',
     ],
     'case-cut-lost': ['worse', 'bars 9/11 -> 3/11'],
     'case-cut-over': ['worse', 'bars 20/24 -> 28/24'],
-    'case-cut-under': ['better', 'bars 28/24 -> 20/24'],
+    // Fewer bars on a cut-off photo may be what it shows, or bars lost: no gain either way.
+    'case-cut-under': ['same', 'bars 28/24 -> 20/24'],
     'case-extra': [
       'worse',
       'explained -> usable, bars 0/24 -> 26/24, staves found, key found, time found, page 1 read, accepted with extra bars',
     ],
     'case-unchecked': ['same', 'explained -> usable, bars 0 -> 3, page 1 read, usable unchecked'],
     'case-half': ['same', 'explained -> usable, page 2 read, usable unchecked'],
+  });
+});
+
+test('--against: on a cut-off page the retake is the right answer, and its bars never call it better', () => {
+  const page = (bars, cutOff) => ({
+    bars,
+    staves: 2,
+    fifths: 1,
+    time: '3/4',
+    ...(cutOff && { cutOff }),
+  });
+  const cut = (...pages) => ({ pages });
+  const before = {
+    cases: [
+      row('case-dropped', 'usable', {
+        pages: [read(28)],
+        expect: cut(page(24, true)),
+        retake: true,
+      }),
+      row('case-asked', 'usable', { pages: [read(20)], expect: cut(page(24, true)) }),
+      row('case-asked-refused', 'explained', {
+        pages: [refusedPage()],
+        expect: cut(page(24, true)),
+      }),
+      row('case-mixed', 'usable', {
+        pages: [read(17), read(28)],
+        expect: cut(page(19), page(24, true)),
+      }),
+    ],
+  };
+  const after = {
+    cases: [
+      // The measured case: closer to the page's bars, but the photo is still cut off.
+      row('case-dropped', 'usable', { pages: [read(20)], expect: cut(page(24, true)) }),
+      row('case-asked', 'usable', { pages: [read(20)], expect: cut(page(24, true)), retake: true }),
+      row('case-asked-refused', 'explained', {
+        pages: [refusedPage()],
+        expect: cut(page(24, true)),
+        retake: true,
+      }),
+      // Page 1 comes closer to its truth; page 2, cut off, reads fewer and is not counted.
+      row('case-mixed', 'usable', {
+        pages: [read(19), read(20)],
+        expect: cut(page(19), page(24, true)),
+      }),
+    ],
+  };
+  const by = Object.fromEntries(
+    compareRuns(before, after).map((r) => [r.case, [r.change, r.moved]]),
+  );
+  assert.deepEqual(by, {
+    'case-dropped': ['worse', 'bars 28/24 -> 20/24, retake dropped on a cut-off page'],
+    'case-asked': ['better', 'retake asked on a cut-off page'],
+    'case-asked-refused': ['better', 'retake asked on a cut-off page'],
+    'case-mixed': ['better', 'bars 45/43 -> 39/43 (0/2 -> 1/2)'],
+  });
+});
+
+test('--against: a cut-off page that loses its bars is worse, and a retake is judged by its page', () => {
+  const page = (bars, cutOff) => ({
+    bars,
+    staves: 2,
+    fifths: 1,
+    time: '3/4',
+    ...(cutOff && { cutOff }),
+  });
+  const cut = (...pages) => ({ pages });
+  const before = {
+    cases: [
+      row('case-collapse', 'usable', { pages: [read(28)], expect: cut(page(24, true)) }),
+      row('case-empty', 'usable', { pages: [read(25)], expect: cut(page(24, true)) }),
+      row('case-lost-asked', 'usable', { pages: [read(25)], expect: cut(page(24, true)) }),
+      // The retake named page 1, which is not cut off; page 2 is.
+      row('case-other-page', 'usable', {
+        pages: [read(12), read(20)],
+        expect: cut(page(19), page(24, true)),
+        retake: true,
+      }),
+      row('case-other-asked', 'usable', {
+        pages: [read(19), read(20)],
+        expect: cut(page(19), page(24, true)),
+      }),
+    ],
+  };
+  const after = {
+    cases: [
+      // Over the page's bars before, almost none now: bars lost, not what the photo shows.
+      row('case-collapse', 'usable', { pages: [read(3)], expect: cut(page(24, true)) }),
+      row('case-empty', 'usable', { pages: [read(0)], expect: cut(page(24, true)) }),
+      row('case-lost-asked', 'usable', {
+        pages: [read(3)],
+        expect: cut(page(24, true)),
+        retake: true,
+      }),
+      row('case-other-page', 'usable', {
+        pages: [read(19), read(20)],
+        expect: cut(page(19), page(24, true)),
+      }),
+      // The retake may name page 1, which reads right: asking it of a usable case is no gain.
+      row('case-other-asked', 'usable', {
+        pages: [read(19), read(20)],
+        expect: cut(page(19), page(24, true)),
+        retake: true,
+      }),
+    ],
+  };
+  const by = Object.fromEntries(
+    compareRuns(before, after).map((r) => [r.case, [r.change, r.moved]]),
+  );
+  assert.deepEqual(by, {
+    'case-collapse': ['worse', 'bars 28/24 -> 3/24'],
+    'case-empty': ['worse', 'bars 25/24 -> 0/24'],
+    'case-lost-asked': ['worse', 'bars 25/24 -> 3/24, retake asked on a cut-off page'],
+    'case-other-page': ['better', 'bars 32/43 -> 39/43 (0/2 -> 1/2), retake dropped'],
+    'case-other-asked': ['worse', 'retake asked'],
   });
 });
 

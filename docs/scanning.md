@@ -119,6 +119,18 @@ Cases come in two ways, both from `research/omr/diagnostics` (its `README.md` ha
 
 Each run writes `report.md` and `report.json` into the cases folder (one row per case: outcome and why, verdict, alert, places to check, fingerings drawn, seconds), the explained cases first, because they are the work list; the run before stays as `report-previous.json`. Each case folder gets the review's screenshot, `review.png`, and for a usable case the score view's, `score.png`. `node research/omr/diagnostics/report.mjs` prints the last report, and `--diff` names the cases whose outcome changed since the run before. Without `DIGITUS2_SCAN_CASES`, or with no case in it, the step reports SKIP, which is not a pass. The plain `e2e` step never replays the cases: the spec runs only when the step sets `DIGITUS2_E2E_CASES`.
 
+A change to the scanner (the recogniser, the preparation of the photo, the export rules) is measured on every case before it ships. `node research/omr/diagnostics/recognize.mjs` reads every case's photos again through the scan service's own code, with a prepared homr, into a parallel store: the photos byte for byte, and for each page the MusicXML and the record the live service would answer and keep. `--photos research/omr/photos` adds each committed photo as a one-page case `photo-<id>`, turned upright as **Rotate** turns it, with `expect.json` holding the bars, staves, key and time read off the page. The baseline is recognised again too, not taken from the kept store, whose answers may come from older versions of the service. Then:
+
+```bash
+node research/omr/diagnostics/recognize.mjs --homr <toolchain> --cases <cases> --photos research/omr/photos --out <before>
+node research/omr/diagnostics/recognize.mjs --homr <toolchain> --cases <cases> --photos research/omr/photos --prepare <module.py> --out <after>
+DIGITUS2_SCAN_CASES=<before> pnpm verify scan:cases
+DIGITUS2_SCAN_CASES=<after> pnpm verify scan:cases
+node research/omr/diagnostics/report.mjs --against <before> <after>
+```
+
+`--against` lists every case with its outcome and fingerings on each side and the change: better, worse, same, or new. A case whose outcome drops (usable, explained, failed, then a page the scanner refused), or that the new run lost, is worse, and one worse case fails the comparison with exit 1. A page the scanner refuses is kept in its case as `recognition-failed.json` with the service's answer; the gate cannot replay it yet, and `--against` counts its case below failed. The outcome does not see a case that stays usable with fewer bars or a retake verdict, so the bars of each page (`rerecognition.json` in the store) are read against `expect.json`, and the verdicts in the two `report.md`. A page takes 5 to 12 seconds to recognise, and a case about 6 seconds to replay. The measurement of the photo cleaning is in `docs/research/omr.md` (Photo cleaning on the validation cases).
+
 ### Recognize and review
 
 1. At the end of the library, choose **Open your own score**, or drop files onto the library. Choose up to 20 PNG or JPEG page images together (10 MB each), or one PDF (10 MB). Drag the thumbnails into reading order. Selecting a page shows keyboard-accessible move and remove controls and **Rotate 90° clockwise**. Rotate a sideways or upside-down photo before scanning.

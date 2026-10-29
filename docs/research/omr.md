@@ -183,6 +183,44 @@ A phone never gives the same bytes twice, and the same paper was paired on one c
 
 Totals over 56 readings: 56 recognised, 48 import, 11 read as two parts, 42 have the page's bars, 44 its staves, 49 its key, 30 its time. Four of the 14 photos are read as two parts under at least one change (No. I p. 2 shadow, cut off: all four; No. I p. 3 perspective: three; No. II p. 4 cut off and No. II p. 5 torn: two each); the other ten stay one part. Where a page splits, its bars are counted over the whole score: on No. I p. 3 perspective two grand-staff parts of 12 bars each add up to the 24-bar page, while on No. I p. 2 shadow, cut off a 19-bar one-staff part beside a 24-bar grand staff counts 24, the longest part, since a sum would count the same bars twice. The 3% crop of No. I p. 1 reads one staff and key -3. Six photos read the same under every change (No. I p. 2 flat, No. I p. 3 turned, book p. 25 warm light, the three PhotoScan pages). These are the gate's `photoPerturbedFloors` (two-part readings as a ceiling). The changes are a proxy for capture variability, not a copy of it.
 
+### Photo cleaning on the validation cases
+
+A cleaning step before recognition is measured on the scan validation cases (`docs/scanning.md`, Validation cases; [issue 233](https://github.com/MarchalMaxim/digitus2/issues/233)): the light is evened (the page divided by its background, a median then a Gaussian blur about a fiftieth of the page's width wide) and the light greys whitened (after evening, 90 is black and 175 white, linear between). It keeps the size and every position. Both runs recognise the owner's two private cases and the 14 committed photos (upside-down photos turned) with local homr through the scan service's own code, and the gate replays both stores. The run without cleaning reproduces the live service: the private cases' five pages give the MusicXML the service kept, apart from a carriage return in the XML declaration on pages the export rules leave unchanged.
+
+| Case (page bars)                       | Without cleaning                            | With cleaning                                      | Effect         |
+| -------------------------------------- | ------------------------------------------- | -------------------------------------------------- | -------------- |
+| Private case A, two pages (41)         | usable, 41 bars                             | usable, 41 bars                                    | unchanged      |
+| Private case B, three pages (67)       | explained: page 2 read as two parts, retake | usable, 63 bars, no retake                         | accepted short |
+| Invention 13 p. 1, PhotoScan (12)      | usable, 12 bars                             | refused (422)                                      | hurt           |
+| Invention 13 p. 2, PhotoScan (10)      | usable, 10 bars                             | refused (422)                                      | hurt           |
+| Invention 13 p. 3, PhotoScan (3)       | usable, 3 bars                              | refused (422)                                      | hurt           |
+| No. I p. 1, hand shadow (19)           | usable, 19 bars                             | usable, 19 bars                                    | unchanged      |
+| No. I p. 2, flat (24)                  | usable, 24 bars                             | usable, 9 bars, key lost, retake                   | hurt           |
+| No. I p. 2, shadow, cut off (24)       | usable, 28 bars, partly read, retake        | usable, 20 bars, no retake                         | accepted short |
+| No. I p. 3, perspective (24)           | usable, 24 bars                             | usable, 24 bars                                    | unchanged      |
+| No. I p. 3, upside down, turned (24)   | usable, 24 bars                             | usable, 18 bars, partly read, retake               | hurt           |
+| No. II p. 4, perspective, cut off (11) | usable, 14 bars, partly read, retake        | usable, 10 bars, key and time lost, retake         | hurt           |
+| No. II p. 4, upside down, turned (11)  | usable, 16 bars, partly read, retake        | usable, 11 bars                                    | helped         |
+| No. II p. 5, flat (15)                 | usable, 15 bars                             | usable, 14 bars, key lost, retake                  | hurt           |
+| No. II p. 5, shadow, torn (15)         | usable, 26 bars, partly read, retake        | usable, 15 bars                                    | helped         |
+| Book p. 25, dim (13)                   | usable, 13 bars                             | usable, 13 bars                                    | unchanged      |
+| Book p. 25, warm light (13)            | usable, 13 bars                             | usable, 13 bars, could not be read clearly, retake | hurt           |
+
+On the 14 photos, against the facts read off each page:
+
+| Photos right      | Without cleaning | With cleaning |
+| ----------------- | ---------------: | ------------: |
+| Bars              |               10 |             6 |
+| Two staves        |               14 |            11 |
+| Bars and staves   |               10 |             6 |
+| Key               |               14 |             8 |
+| Time (10 printed) |                8 |             6 |
+| Refused           |                0 |             3 |
+
+Over the 16 cases the cleaning helps 2, hurts 8, lets 2 short readings through without the retake they had, and leaves 4 unchanged. `report.mjs --against` counts 1 better, 3 worse and 12 same and fails (exit 1); the outcome alone misses the bars lost inside usable cases, and counts private case B's short acceptance as better. The three PhotoScan pages stop in homr after about 4 seconds. On the cleaned copy of Invention 13 p. 1 homr finds staff-line fragments but no clef and no staff, while the light evening alone reads normally (10 staves): the whitening is the step that removes the staves. That split is measured on that page only.
+
+**Decision.** This cleaning does not ship: it costs more cases than it fixes, and it removes the staves of clean, evenly lit pages. A next version (the light evening alone, or whitening set from the page) is measured on every case the same way before it ships.
+
 ### Blur sweep
 
 `node research/omr/blur-sweep.mjs` blurs the 8 one-page truth pieces of `camera-fusion.mjs` (page 1 rendered clean, 1260 × 1782 px, interline 10.7 px) and the 14 phone photos above (interline 8.1 to 11.7 px) at the page's own pixel scale, recognises every variant with local homr (cached by the hash of its bytes and of the acceptance pipeline), and scores it: truth pages with `evaluateOmr` (pitch F1, exact bars, staves), photos with the manifest facts (bars, staves). Variants: Gaussian blur of sigma 0 to 3 px, motion blur of 3, 6 and 9 px across the staff lines (vertical) and along them (horizontal), and on the truth pages Gaussian blur of 0.25, 0.3 and 0.4 interline (2.7, 3.2 and 4.3 px). A page counts as read when its bars and its staves are right. Only pages that read right unblurred take part in the calibration: 18 of 22 (the two cut-off photos, the upside-down page 3 and the torn page 5 do not). The scorecard, with every row, is `research/omr/results/blur-sweep/latest.json` (git-ignored).

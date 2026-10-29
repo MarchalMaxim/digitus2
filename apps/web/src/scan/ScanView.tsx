@@ -1,4 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
@@ -112,6 +121,25 @@ const FULL_HOLD_MS = 400;
 /** Said by the review's verdict line (verdict.ts), so the alert that would repeat it is not shown. */
 const NOT_COMBINED: Phrase = (m) => m.scan.errors.notCombinedSaved;
 
+/**
+ * The scanner's own refusal of a page (a 422 or 504, client.ts), in the reader's words: the page
+ * reached it and was not read, so a new photo is the fix (issue 233). Busy, limited, offline, an
+ * unanswered request and a cancel are not: they are answers about the scanner, not the page.
+ */
+function pageRefusal(cause: unknown): Phrase | undefined {
+  if (cause instanceof PhraseError)
+    return cause.message === en.scan.errors.notRecognized ||
+      cause.message === en.scan.errors.timedOut
+      ? cause.phrase
+      : undefined;
+  // Only the service's own sentence comes as a plain Error: any other kind is not the scanner's.
+  if (cause instanceof Error && Object.getPrototypeOf(cause) === Error.prototype) {
+    const sentence = cause.message;
+    return () => sentence;
+  }
+  return undefined;
+}
+
 /** The printed number of the bar a place to check points at. */
 function placeBar(score: ScanScore, problem: Problem): string | undefined {
   const measure =
@@ -143,8 +171,16 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const [error, setErrorPhrase] = useState<Phrase | null>(() =>
     hasPageRecognition && !initial.xml && initial.pages!.length > 1 ? NOT_COMBINED : null,
   );
-  const setError = (phrase: Phrase | null) => {
+  // The page (its id) the error is the scanner's refusal of: a new photo of it is offered beside
+  // the error, and goes with it (issue 233).
+  const [refusedPage, setRefusedPage] = useState<string>();
+  // True while the error is that refusal itself, so the page's own line under the thumbnails is not
+  // said a second time.
+  const [refusalSaid, setRefusalSaid] = useState(false);
+  const setError = (phrase: Phrase | null, page?: string, said = false) => {
     setErrorPhrase(() => phrase);
+    setRefusedPage(page);
+    setRefusalSaid(said && page !== undefined);
   };
   const [health, setHealth] = useState<ScanServiceMetadata>();
   // Read by a scan that started before the warm-up answered.
@@ -263,6 +299,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
   const busy = phase === 'waiting' || phase === 'scanning' || phase === 'cancelling';
+  // The photo the scanner refused, while its refusal is on screen: -1 when there is none.
+  const refusedIndex =
+    error && refusedPage !== undefined && isImage && !busy
+      ? sourcePages.findIndex((page) => page.id === refusedPage)
+      : -1;
   const renderError = rendered && rendered.xml === renderXml ? rendered.error : null;
   const importError = imported && imported.xml === importXml ? imported.error : null;
   const reviewError = renderError ?? importError;
@@ -299,6 +340,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   };
   // Saved corrections that no longer apply are dropped by the next change, never replayed.
   const kept = corrected ? corrections.slice(0, corrected.applied) : corrections;
+  // Read by a new photo once it is checked, which answers after the render that chose it.
+  const latest = useRef({ busy, session, sourcePages, kept });
+  useLayoutEffect(() => {
+    latest.current = { busy, session, sourcePages, kept };
+  });
   // The verdict line (issue 158): what was read, from the facts the session holds.
   // How unsure homr was of each page, from the page's own recognition (issue 130).
   const doubts = useMemo(
@@ -443,6 +489,13 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     // The scan's controls go away when the review opens: the heading takes the focus.
     if (phase === 'review') heading.current?.focus();
   }, [phase]);
+  const scanActions = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // A scan started by a new photo removes the control that chose it: the focus goes to Cancel
+    // scan, which stays in place (as Retry) when the scan ends, rather than to the page.
+    const lost = !document.activeElement || document.activeElement === document.body;
+    if (busy && lost) scanActions.current?.querySelector('button')?.focus();
+  }, [busy]);
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -597,11 +650,23 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   // corrections of the other pages carry over to the new recognition (retake.ts).
   // The session keeps them (ScanSession.retake) until the joined recognition is stored.
   const [pendingScan, setPendingScan] = useState(false);
-  const retake = (index: number, file: File) => {
+  const retake = (page: number, file: File) => {
     if (busy) return;
+    const id = sourcePages[page]?.id;
+    // A photo that cannot be sent leaves the refusal's new photo offered, with its own reason.
+    const refused = id !== undefined && id === refusedPage ? id : undefined;
     void validateScanImages([file]).then(
       ([valid]) => {
         if (!alive.current || !valid) return;
+        // Checked against the screen as it is now: a scan started meanwhile, or the pages
+        // arranged meanwhile, are not overwritten.
+        const { busy: running, session, sourcePages, kept } = latest.current;
+        if (running) {
+          setError((m) => m.scan.pages.finishFirst);
+          return;
+        }
+        const index = sourcePages.findIndex((p) => p.id === id);
+        if (index < 0) return;
         const pages = sourcePages.map((p, i) =>
           i === index ? { id: crypto.randomUUID(), file: valid } : p,
         );
@@ -630,7 +695,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         setPendingScan(true);
       },
       (cause: unknown) => {
-        if (alive.current) setError((m) => messageOf(cause, m));
+        if (alive.current) setError((m) => messageOf(cause, m), refused);
       },
     );
   };
@@ -689,6 +754,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setBar(undefined);
     setPhase('scanning');
     const results = sourcePages.map((page) => ({ ...page }));
+    // The pages the scanner refused in this run, with its reason: a photo can be taken again.
+    const refused = new Map<number, Phrase>();
     // One request reads every page of a PDF, so the bar counts them.
     const pdfPages = await Promise.all(
       results.map((page) => (page.xml ? 1 : pdfPageCount(page.file))),
@@ -722,6 +789,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
         setBar({ stretch: track.stretch, done: false });
         setPhase('scanning');
       };
+      // The scanner's own answer, as against a failure of this page's handling of it.
+      let answer: unknown;
       try {
         // A busy scanner is waited for: the same job is offered again until it is taken, for at
         // most BUSY_WAIT_MS, then the busy answer stands as this page's failure.
@@ -746,8 +815,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             );
             break;
           } catch (cause) {
-            if (!(cause instanceof BusyError) || Date.now() + cause.retryAfterMs > giveUp)
+            if (!(cause instanceof BusyError) || Date.now() + cause.retryAfterMs > giveUp) {
+              answer = cause;
               throw cause;
+            }
             again = cause.retryAfterMs;
             if (shown) base = barAt(shown, Date.now());
             shown = undefined;
@@ -782,6 +853,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           return;
         }
         page.error = messageOf(cause);
+        const notRead = isImage && cause === answer ? pageRefusal(cause) : undefined;
+        if (notRead) refused.set(index, notRead);
         const refusal =
           cause instanceof PhraseError && (cause.phrase === BUSY || cause.phrase === LIMITED)
             ? cause.phrase
@@ -806,20 +879,37 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     if (run.cancelled || !alive.current) return;
     active.current = { cancelled: false };
     if (results.some((page) => !page.xml)) {
+      // The first page the scanner refused is named, with a new photo of it as the fix.
+      const [first, notRead] = [...refused].find(([i]) => !results[i]!.xml) ?? [];
       setSelected(
-        Math.max(
-          0,
-          results.findIndex((page) => !page.xml),
-        ),
+        first ??
+          Math.max(
+            0,
+            results.findIndex((page) => !page.xml),
+          ),
       );
       const reason = results[0]!.error;
-      setError(
-        batch
-          ? (m) => m.scan.errors.somePagesFailed
-          : reason
-            ? () => reason
-            : (m) => m.scan.errors.recognitionFailed,
-      );
+      // Other pages left unread are said too: a retry may read them.
+      const others = results.some((page, i) => !page.xml && i !== first);
+      if (first !== undefined && notRead)
+        setError(
+          batch
+            ? (m) =>
+                others
+                  ? `${m.scan.pages.pageError(first + 1, notRead(m))} ${m.scan.errors.somePagesFailed}`
+                  : m.scan.pages.pageError(first + 1, notRead(m))
+            : notRead,
+          results[first]!.id,
+          true,
+        );
+      else
+        setError(
+          batch
+            ? (m) => m.scan.errors.somePagesFailed
+            : reason
+              ? () => reason
+              : (m) => m.scan.errors.recognitionFailed,
+        );
       setPhase('ready');
       return;
     }
@@ -1173,7 +1263,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           <section className="stack">
             <p>{t.scan.view.advice}</p>
             <p className="small muted">{t.scan.view.where}</p>
-            <div className="row">
+            <div className="row" ref={scanActions}>
               {busy ? (
                 // Plain while the loader below carries the screen's one red.
                 <Button
@@ -1185,8 +1275,9 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                   {phase === 'cancelling' ? t.scan.view.cancelling : t.scan.view.cancelScan}
                 </Button>
               ) : (
+                // Plain while a new photo of a refused page carries the red.
                 <Button
-                  primary
+                  primary={refusedIndex < 0}
                   disabled={rotating}
                   onClick={() => {
                     void scan();
@@ -1217,6 +1308,18 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               <p role="status">{t.scan.view.textModelMissing}</p>
             )}
             {error && <p role="alert">{error(t)}</p>}
+            {refusedIndex >= 0 && (
+              <div className="row scan-refused">
+                <RetakePage
+                  page={refusedIndex + 1}
+                  single={!batch}
+                  touch={touchOnly}
+                  primary
+                  disabled={rotating}
+                  onFile={(file) => retake(refusedIndex, file)}
+                />
+              </div>
+            )}
             <a
               href="https://github.com/MarchalMaxim/digitus2/blob/main/docs/scanning.md"
               target="_blank"
@@ -1231,6 +1334,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               <ImagePages
                 pages={sourcePages}
                 selected={selected}
+                said={refusalSaid ? refusedIndex : -1}
                 onSelect={setSelected}
                 editable
                 busy={busy}

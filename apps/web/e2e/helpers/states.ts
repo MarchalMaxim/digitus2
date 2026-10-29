@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
-import { mockService, RECOGNITION_WITH_ERRORS } from './scan.js';
+import { mockService, RECOGNITION_REFUSED } from './scan.js';
 import { fakeMidi, installFakeMidi, walkRhythm, type FakeMidiOptions } from './midi.js';
 import { embellishDecided, openPractice, setLoopBars } from './practice.js';
 import { seekBar } from './seek.js';
@@ -606,7 +606,7 @@ export const STATES: AppState[] = [
   {
     name: 'scan-refused',
     go: async (page) => {
-      await scanReview(page, RECOGNITION_WITH_ERRORS);
+      await scanReview(page, RECOGNITION_REFUSED);
       await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
       await expect(page.locator('details.scan-problems')).toHaveAttribute('open', '');
     },

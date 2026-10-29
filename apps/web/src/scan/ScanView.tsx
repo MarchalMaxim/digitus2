@@ -12,11 +12,12 @@ import { Button } from '../design/Button.js';
 import { Loader } from '../design/Loader.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import { downloadText, shareOrDownload } from '../export/download.js';
-import { createEngineClient, type EngineClient } from '../engine/client.js';
-import { createRenderer, type ScoreRenderer } from '../score/render/renderer.js';
+import { createEngineClient, SCAN_LOAD, type EngineClient } from '../engine/client.js';
+import { createRenderer, NO_MUSIC, type ScoreRenderer } from '../score/render/renderer.js';
 import { ScoreSheet } from '../score/ScoreSheet.js';
+import { en } from '../i18n/en/index.js';
 import { useLocale, useT } from '../i18n/i18n.js';
-import type { Phrase } from '../i18n/messages.js';
+import type { Messages, Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import {
   BUSY,
@@ -30,13 +31,16 @@ import {
 } from './client.js';
 import { makeScanArchive } from './bundle.js';
 import {
-  formOffers,
-  meterOffers,
-  type BarlineCorrection,
+  fixAll,
+  inReadingOrder,
+  offersFor,
+  placesFromRepairs,
   type Correction,
-  type MeterCorrection,
   type Problem,
+  type TieRepair,
 } from './corrections.js';
+import { keepScans, reportCase, scanIdOf } from './diagnostics.js';
+import type { ReviewFacts } from './facts.js';
 import { ImagePages, useBlobUrl } from './ImagePages.js';
 import {
   GRAPHIC_SPAN_TAGS,
@@ -53,7 +57,14 @@ import {
   type ScanPage,
   type ScanSession,
 } from './model.js';
-import { chordOf, parseScanXml, readingOrder, readScanScore, type ScanNote } from './notes.js';
+import {
+  chordOf,
+  parseScanXml,
+  readingOrder,
+  readScanScore,
+  type ScanNote,
+  type ScanScore,
+} from './notes.js';
 import { NoteCrop, pageImage, type PageImage } from './NoteCrop.js';
 import { placeHead } from './heads.js';
 import { fallbackSpace } from './crop.js';
@@ -74,6 +85,7 @@ import {
   findProblems,
   NoteEditor,
   noteAt,
+  offerLabel,
   problemNote,
   stepPitch,
   timingText,
@@ -85,6 +97,11 @@ import './scan.css';
 const PdfPreview = lazy(() => import('./PdfPreview.js').then((m) => ({ default: m.PdfPreview })));
 
 const NO_CORRECTIONS: Correction[] = [];
+const NO_REPAIRS: TieRepair[] = [];
+/** Where the engine's refusal names its place, "(part 1, bar 12)": the first one is said. */
+const ENGINE_PLACE = /\(part (\d+), bar ([^)]+)\)/;
+/** Renderer failures that come out the same however often they are tried. */
+const RENDER_FINAL = new Set([NO_MUSIC, 'the score could not be laid out', 'renderer disposed']);
 /**
  * While waiting, an offer of the job that is not answered busy within this time has been taken
  * by the scanner: the bar replaces the waiting line. A busy answer comes back at once.
@@ -94,6 +111,13 @@ const TAKEN_AFTER_MS = 2_000;
 const FULL_HOLD_MS = 400;
 /** Said by the review's verdict line (verdict.ts), so the alert that would repeat it is not shown. */
 const NOT_COMBINED: Phrase = (m) => m.scan.errors.notCombinedSaved;
+
+/** The printed number of the bar a place to check points at. */
+function placeBar(score: ScanScore, problem: Problem): string | undefined {
+  const measure =
+    problem.kind === 'bar-timing' || problem.kind === 'form' ? problem.bar : problem.measure;
+  return score.bars.find((b) => b.part === problem.part && b.index === measure)?.number;
+}
 
 /** The scan in progress: the page on the scanner is named by its job, and stopped by both. */
 interface ScanRun {
@@ -129,16 +153,22 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   const warmingUp = useRef(false);
   const [pages, setPages] = useState<string[]>([]);
   // The XML each worker last finished with: use waits until both match what is on screen.
-  // `detail` is the worker's own message, shown only under Recognition details.
+  // `detail` is the worker's own message, shown only under Recognition details; `page` is the page
+  // a failure names (1-based), when one is.
   const [rendered, setRendered] = useState<{
     xml: string;
     error: Phrase | null;
     detail?: string;
+    page?: number | undefined;
   }>();
+  // `repairs` are the ties the import played as separate notes (issue 233). `stopped`: the
+  // engine's worker stopped, twice, so the notes were never checked.
   const [imported, setImported] = useState<{
     xml: string;
     error: Phrase | null;
     detail?: string;
+    stopped?: boolean;
+    repairs: TieRepair[];
   }>();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selected, setSelected] = useState(0);
@@ -157,7 +187,12 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     setEditStatusPhrase(() => phrase);
   };
   const [undoStack, setUndoStack] = useState<Correction[][]>([]);
+  // The places list stays as the reader left it while a fix is checked again and the list,
+  // empty for that moment, is gone from the screen.
+  const [placesOpen, setPlacesOpen] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  // This device keeps its scans as validation cases (diagnostics.ts); read once per review.
+  const [keeping] = useState(keepScans);
   const [sheetHost, setSheetHost] = useState<HTMLDivElement | null>(null);
   const resultHost = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -198,17 +233,33 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ? sourcePages[selected]?.xml
       : undefined;
   const renderXml = pageMode ? sourcePages[selected]?.xml : (corrected?.renderXml ?? session.xml);
+  // The ties the import played as separate notes, while they are of the score corrected here (a
+  // page that did not join imports another document, and a correction waits for its import).
+  const repairs =
+    imported && corrected && imported.xml === corrected.xml ? imported.repairs : NO_REPAIRS;
   // Counted whichever page is on screen: the verdict says how many places to check there are.
-  const problems = useMemo(() => (corrected ? findProblems(corrected.score) : []), [corrected]);
-  // A misread meter is fixed from its place to check, offered only where the hands agree; a
-  // repeat mark the score cannot carry offers its removal (issue 230).
+  // Every tie the import played as separate notes is one of them (issue 233).
+  const checked = useMemo(() => (corrected ? findProblems(corrected.score) : []), [corrected]);
+  const problems = useMemo(
+    () =>
+      corrected && repairs.length
+        ? inReadingOrder([...checked, ...placesFromRepairs(corrected.score, checked, repairs)])
+        : checked,
+    [corrected, checked, repairs],
+  );
+  // Each place's corrections, in the order they are offered (corrections.ts `offersFor`).
   const offers = useMemo(
     () =>
-      new Map<Problem, MeterCorrection | BarlineCorrection>([
-        ...(corrected ? meterOffers(corrected.score, problems) : []),
-        ...formOffers(problems),
-      ]),
-    [corrected, problems],
+      corrected ? offersFor(corrected.score, problems, repairs) : new Map<Problem, Correction[]>(),
+    [corrected, problems, repairs],
+  );
+  // Fix all: the offers that follow from the file alone, when there are two or more of them.
+  const fixes = useMemo(
+    () =>
+      editable && problems.length > 1 && corrected
+        ? fixAll(corrected.score, problems, offers)
+        : NO_CORRECTIONS,
+    [editable, corrected, problems, offers],
   );
   const openLibrary = useAppStore((s) => s.openLibrary);
   const busy = phase === 'waiting' || phase === 'scanning' || phase === 'cancelling';
@@ -224,6 +275,18 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     !reviewError;
   const selectedNote =
     note !== null && editable ? corrected.score.notes.find((n) => n.ordinal === note) : undefined;
+  // The bar an import refusal names, with its first note, so the alert leads there (issue 233).
+  const refusedAt = (() => {
+    const at =
+      editable && !renderError && importError && !imported?.stopped && imported?.detail
+        ? ENGINE_PLACE.exec(imported.detail)
+        : null;
+    if (!at || !corrected) return undefined;
+    const part = Number(at[1]) - 1;
+    const bar = at[2]!;
+    const first = corrected.score.notes.find((n) => n.part === part && n.measureNumber === bar);
+    return first && { bar, ordinal: first.ordinal };
+  })();
   // The photo a note was read from, when homr placed it there (issue 161). The joined score reads
   // its pages in the order of the results, so a score of another page count (an old saved session,
   // a page that failed) shows no photo rather than the wrong one.
@@ -286,14 +349,19 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       : found.kind === 'notJoined' && found.page !== undefined
         ? [found.page]
         : [];
+  // Else the page whose notation could not be drawn, in a batch of photos.
+  const undrawnPage = renderError ? rendered?.page : undefined;
   const retakePage =
     isImage && flaggedPages.length && (batch || found.kind === 'unclear')
       ? flaggedPages[0]! - 1
-      : undefined;
+      : isImage && batch && undrawnPage !== undefined
+        ? undrawnPage - 1
+        : undefined;
   // The one red: on the next action. A selected note first; Scan again when the verdict says the
   // scan itself needs another go (a verdict that says "scan again" must not leave the red on
   // Use); else Use for fingerings while it can be used (or is still being checked), else the
-  // first place to check, else Scan again.
+  // first place to check, else the bar the import refused, else Scan again.
+  // Notation that could not be drawn has nothing to correct on: Scan again.
   const useLive = canUseResult || (!settled && !!session.xml && !reviewError);
   const nextRed = selectedNote
     ? 'note'
@@ -301,9 +369,11 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       ? 'again'
       : useLive
         ? 'use'
-        : editable && problems.length
+        : !renderError && editable && problems.length
           ? 'problem'
-          : 'again';
+          : refusedAt
+            ? 'bar'
+            : 'again';
   useSelectedMark(sheetHost, selectedNote ? note : null, pages);
   // The photo and the notation are linked (issue 130): the notes to check are ringed in both, and
   // the note pointed at in one is framed in the other.
@@ -419,22 +489,52 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   useEffect(() => {
     if (!renderXml || phase !== 'review') return;
     let current = true;
+    // The page a failure names: the one shown on its own, else none (the whole scan).
+    const shownPage = pageMode ? selected + 1 : undefined;
+    // The whole score of a batch that cannot be drawn: the first page that cannot be drawn on its
+    // own is the one named (issue 233), else none.
+    const failingPage = async (): Promise<number | undefined> => {
+      if (pageMode || !batch) return undefined;
+      for (const [index, source] of sourcePages.entries()) {
+        if (!current || !source.xml) return undefined;
+        try {
+          await getWorkers().renderer.render({ xml: source.xml, widthPx: width });
+        } catch (cause) {
+          // A newer render (a resize) has taken over: it says what it finds itself.
+          if ((cause as Error)?.name === 'SupersededError') return undefined;
+          return index + 1;
+        }
+      }
+      return undefined;
+    };
     // Render independently of import: an importer refusal must not erase the raw result.
-    getWorkers()
-      .renderer.render({ xml: renderXml, widthPx: width })
-      .then((result) => {
-        if (!current) return;
-        setPages(result.pages);
-        setRendered({ xml: renderXml, error: null });
-      })
-      .catch((cause: unknown) => {
-        if (!current || (cause as Error)?.name === 'SupersededError') return;
-        setRendered({
-          xml: renderXml,
-          error: (m) => m.scan.errors.notationNotShown,
-          detail: messageOf(cause),
+    const draw = (again: boolean): Promise<void> =>
+      getWorkers()
+        .renderer.render({ xml: renderXml, widthPx: width })
+        .then((result) => {
+          if (!current) return;
+          setPages(result.pages);
+          setRendered({ xml: renderXml, error: null });
+        })
+        .catch(async (cause: unknown) => {
+          if (!current || (cause as Error)?.name === 'SupersededError') return;
+          const detail = messageOf(cause, en);
+          // A worker that died or aborted is replaced by the next render: the notation is drawn
+          // once more. A layout that is refused as such would be refused again.
+          if (again && !RENDER_FINAL.has(detail)) return draw(false);
+          const page = shownPage ?? (detail === NO_MUSIC ? undefined : await failingPage());
+          if (!current) return;
+          setRendered({
+            xml: renderXml,
+            error:
+              detail === NO_MUSIC
+                ? (m) => m.scan.errors.noMusic(page)
+                : (m) => m.scan.errors.notDrawn(page),
+            detail,
+            page,
+          });
         });
-      });
+    void draw(true);
     return () => {
       current = false;
     };
@@ -442,24 +542,47 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   useEffect(() => {
     if (!importXml || phase !== 'review') return;
     let current = true;
-    getWorkers()
-      .engine.load(importXml, 'scan.musicxml', { preserveNotation: true })
-      .then((result) => {
-        if (!current) return;
-        setWarnings(result.warnings);
-        setImported({
-          xml: importXml,
-          error: result.score.notes.length ? null : (m) => m.scan.errors.noNotes,
-        });
-      })
-      .catch((cause: unknown) => {
-        if (current)
+    // The scan import plays a tie it cannot keep as separate notes and lists it (issue 233): a
+    // tie never stops Use for fingerings, and each one so played is a place to check.
+    const load = (again: boolean): Promise<void> =>
+      getWorkers()
+        .engine.load(importXml, 'scan.musicxml', SCAN_LOAD)
+        .then((result) => {
+          if (!current) return;
+          setWarnings(result.warnings);
           setImported({
             xml: importXml,
-            error: (m) => m.scan.errors.notUsable,
-            detail: messageOf(cause),
+            error: result.score.notes.length ? null : (m) => m.scan.errors.noNotes,
+            repairs: result.tieRepairs,
           });
-      });
+        })
+        .catch((cause: unknown) => {
+          if (!current) return;
+          // English, as the engine's own refusals are: the detail is also a validation case's.
+          const detail = messageOf(cause, en);
+          // The worker itself stopped (the client says so with a phrase; a refusal is a plain
+          // error), and the client stays closed: a fresh one reads the notes once more.
+          const stopped = cause instanceof PhraseError;
+          if (stopped && workers.current) {
+            workers.current.engine.dispose();
+            workers.current.engine = createEngineClient();
+            if (again) return load(false);
+          }
+          // The engine names the bar it refused; the reader is told that bar.
+          const bar = stopped ? undefined : ENGINE_PLACE.exec(detail)?.[2];
+          setImported({
+            xml: importXml,
+            error: stopped
+              ? (m) => m.scan.errors.notChecked
+              : bar === undefined
+                ? (m) => m.scan.errors.notUsable
+                : (m) => m.scan.errors.notUsableAt(bar),
+            detail,
+            stopped,
+            repairs: NO_REPAIRS,
+          });
+        });
+    void load(true);
     return () => {
       current = false;
     };
@@ -613,7 +736,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           if (!waiting) begin(sent);
           let again: number;
           try {
-            recognition = await client.recognize(page.file, job, controller.signal);
+            // Named by its scan: a device that opted in keeps it as a validation case (issue 233).
+            recognition = await client.recognize(
+              page.file,
+              job,
+              controller.signal,
+              scanIdOf(session.id),
+              scanIdOf(page.id),
+            );
             break;
           } catch (cause) {
             if (!(cause instanceof BusyError) || Date.now() + cause.retryAfterMs > giveUp)
@@ -747,7 +877,8 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
   };
 
   // Corrections: each one is checked before it is recorded, and recorded only when it applies.
-  const applyCorrection = (correction: Correction) => {
+  // `fromPlace`: offered on a place to check, which goes away once it is made.
+  const applyCorrection = (correction: Correction, fromPlace = false) => {
     if (!session.xml || !corrected) return;
     const refusal = tryCorrection(session.xml, kept, correction);
     if (refusal) {
@@ -766,13 +897,26 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       if (neighbour) setNote(neighbour.ordinal);
     }
     setUndoStack((stack) => [...stack, kept]);
-    if (correction.kind === 'meter' || correction.kind === 'barline') {
+    if (fromPlace || correction.kind === 'meter' || correction.kind === 'barline') {
       // The place to check it came from goes away: say what changed, and keep the focus nearby.
       const score = corrected.score;
       setEditStatus((m) => `${describeCorrection(m, score, correction)}.`);
       sheetRef.current?.focus();
     } else setEditStatus(null);
     retain({ ...session, corrections: [...kept, correction] });
+  };
+  // Fix all (issue 233): every fix that follows from the file alone, as one step that one Undo
+  // takes back. Each is checked on the ones before it, as a single correction is.
+  const applyFixes = () => {
+    if (!session.xml || !corrected) return;
+    const made: Correction[] = [];
+    for (const fix of fixes)
+      if (!tryCorrection(session.xml, [...kept, ...made], fix)) made.push(fix);
+    if (!made.length) return;
+    setUndoStack((stack) => [...stack, kept]);
+    setEditStatus((m) => m.scan.review.fixedAll(made.length));
+    sheetRef.current?.focus();
+    retain({ ...session, corrections: [...kept, ...made] });
   };
   const undo = () => {
     if (!corrections.length && !undoStack.length) return;
@@ -917,6 +1061,69 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       resultHost.current?.scrollIntoView?.({ block: 'start' });
   };
   const baseName = session.file.name.replace(/\.[^.]+$/, '');
+  // The alert under the buttons: what failed and where, in the reader's words, then what to do.
+  // Notation that could not be drawn has no notes to correct: it is scanned again or downloaded.
+  const reviewAlert = (m: Messages): string | undefined => {
+    if (!reviewError) return undefined;
+    const reason = reviewError(m);
+    if (renderError) return m.scan.review.notDrawnProblem(reason);
+    // The notes were never checked: nothing here blames them, and the reason says what to do.
+    if (imported?.stopped) return reason;
+    return (
+      editable
+        ? m.scan.review.problem
+        : pageMode && session.xml
+          ? m.scan.review.problemInCombined
+          : m.scan.review.problemReadOnly
+    )(reason);
+  };
+  // Under Recognition details only: the join's and the workers' own messages, as a supplement.
+  const technicalLines = (m: Messages): string[] => [
+    ...(refusal ? [m.scan.review.technical(refusal.phrase(m))] : []),
+    ...[rendered, imported].flatMap((state, i) =>
+      state?.detail && state.xml === (i === 0 ? renderXml : importXml)
+        ? [m.scan.review.technical(state.detail)]
+        : [],
+    ),
+  ];
+  // What the review told the reader (issue 233), in English whatever the language on screen, so
+  // validation cases compare across devices: kept in the scan's archive and, on a device that
+  // opted in, with the scan's pages at the scan service. They are the facts of what Use opens:
+  // while a page of a joined batch is shown alone, the whole score's last ones stand.
+  const placeFacts = useMemo(
+    () =>
+      corrected
+        ? problems.map((problem) => ({
+            text: describeProblem(en, corrected.score, problem),
+            bar: placeBar(corrected.score, problem),
+          }))
+        : [],
+    [corrected, problems],
+  );
+  const shownError = error && error !== NOT_COMBINED ? error : null;
+  const facts: ReviewFacts = {
+    verdict: verdictText(en, found),
+    usable: canUseResult,
+    alert: reviewAlert(en) ?? shownError?.(en),
+    technical: technicalLines(en),
+    places: placeFacts,
+    page:
+      found.kind === 'notJoined' ? found.page : found.kind === 'read' ? undefined : found.pages[0],
+    corrections: kept.length,
+    pages: sourcePages.map((source) => scanIdOf(source.id)),
+  };
+  const factsKey = JSON.stringify(facts);
+  const wholeScan = !(pageMode && session.xml);
+  const scanFacts = useRef<ReviewFacts | undefined>(undefined);
+  // Reported once the review has settled, and again whenever what it says changes.
+  const reportable = phase === 'review' && settled && wholeScan;
+  useEffect(() => {
+    if (!reportable) return;
+    scanFacts.current = facts;
+    void reportCase(scanIdOf(session.id), facts);
+    // The facts are rebuilt each render; their text says when they changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportable, factsKey, session.id]);
   // Everything the scan did in one file: the phone's share sheet where it has one, else a download.
   const downloadAll = async () => {
     if (archiving) return;
@@ -925,6 +1132,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
       const archive = await makeScanArchive(session, {
         correctedXml: corrected && kept.length > 0 ? corrected.xml : undefined,
         warnings: [...new Set([...(session.warnings ?? []), ...warnings])],
+        review: wholeScan ? facts : scanFacts.current,
         build,
         userAgent: navigator.userAgent,
       });
@@ -1054,7 +1262,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
           <p className="scan-verdict" role={blocks(found) ? 'alert' : undefined}>
             {verdictText(t, found)}
           </p>
-          {error && error !== NOT_COMBINED && <p role="alert">{error(t)}</p>}
+          {shownError && <p role="alert">{shownError(t)}</p>}
           {corrected && corrected.applied < corrections.length && (
             <p role="alert">{t.scan.edit.stale(corrected.applied)}</p>
           )}
@@ -1097,14 +1305,14 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               {t.scan.review.scanAgain}
             </Button>
           </div>
-          {reviewError && (
-            <p role="alert">
-              {(editable
-                ? t.scan.review.problem
-                : pageMode && session.xml
-                  ? t.scan.review.problemInCombined
-                  : t.scan.review.problemReadOnly)(reviewError(t))}
-            </p>
+          {reviewError && <p role="alert">{reviewAlert(t)}</p>}
+          {refusedAt && (
+            <button
+              className={`scan-show-bar ${nextRed === 'bar' ? 'is-red' : 'text-button'}`}
+              onClick={() => select(refusedAt.ordinal)}
+            >
+              {t.scan.review.showBar(refusedAt.bar)}
+            </button>
           )}
           <div className="scan-review">
             <section className="scan-source stack">
@@ -1185,19 +1393,27 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 </p>
               )}
               {editable && problems.length > 0 && corrected && (
-                <details className="scan-problems" open={nextRed === 'problem' || undefined}>
+                <details
+                  className="scan-problems"
+                  open={placesOpen || nextRed === 'problem' || undefined}
+                  onToggle={(event) => setPlacesOpen(event.currentTarget.open)}
+                >
                   <summary>{t.scan.edit.problemsSummary(problems.length)}</summary>
+                  {/* One step for every fix the file decides alone; Undo takes it back whole. */}
+                  {fixes.length > 1 && (
+                    <button className="scan-fix-all" onClick={applyFixes}>
+                      {t.scan.edit.fixAll(fixes.length)}
+                    </button>
+                  )}
                   <ul className="stack">
                     {problems.map((problem, index) => {
                       const target = problemNote(corrected.score, problem);
-                      const offer = offers.get(problem);
-                      const bar =
-                        offer &&
-                        corrected.score.bars.find(
-                          (b) => b.part === problem.part && b.index === offer.bar,
-                        );
+                      const choices = offers.get(problem) ?? NO_CORRECTIONS;
+                      const offer = choices.length > 0;
                       const where = corrected.score.notes.find((n) => n.ordinal === target);
                       const photo = photoOf(where);
+                      // The first place carries the red on its first fix, else on its note.
+                      const red = index === 0 && nextRed === 'problem';
                       return (
                         <li key={index}>
                           {photo && where?.imgpos && (
@@ -1211,9 +1427,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                           )}
                           <div className={`scan-problem-body${offer ? ' has-offer' : ''}`}>
                             <button
-                              className={
-                                index === 0 && nextRed === 'problem' ? 'is-red' : 'text-button'
-                              }
+                              className={red && !offer ? 'is-red' : 'text-button'}
                               disabled={target === undefined}
                               onClick={() => {
                                 if (target !== undefined) select(target);
@@ -1221,18 +1435,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                             >
                               {describeProblem(t, corrected.score, problem)}
                             </button>
-                            {offer && bar && (
-                              <button onClick={() => applyCorrection(offer)}>
-                                {offer.kind === 'meter'
-                                  ? t.scan.edit.setMeter(
-                                      `${offer.beats}/${offer.beatType}`,
-                                      bar.number,
-                                    )
-                                  : t.scan.edit.removeMark(
-                                      problem.kind === 'form' ? problem.mark : 'repeat',
-                                    )}
+                            {choices.map((choice, at) => (
+                              <button
+                                key={at}
+                                className={red && at === 0 ? 'is-red' : undefined}
+                                onClick={() => applyCorrection(choice, true)}
+                              >
+                                {offerLabel(t, corrected.score, problem, choice)}
                               </button>
-                            )}
+                            ))}
                           </div>
                         </li>
                       );
@@ -1333,18 +1544,15 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
                 {reviewWarnings(t, [...(session.warnings ?? []), ...warnings]).map((line, i) => (
                   <p key={i}>{line}</p>
                 ))}
-                {refusal && <p>{t.scan.review.technical(refusal.phrase(t))}</p>}
-                {[rendered, imported].map(
-                  (state, i) =>
-                    state?.detail &&
-                    state.xml === (i === 0 ? renderXml : importXml) && (
-                      <p key={`detail-${i}`}>{t.scan.review.technical(state.detail)}</p>
-                    ),
-                )}
+                {technicalLines(t).map((line, i) => (
+                  <p key={`detail-${i}`}>{line}</p>
+                ))}
+                {keeping && <p>{t.scan.review.kept}</p>}
               </div>
             </details>
             {(session.xml || sourcePages.some((p) => p.xml)) && (
-              <details className="scan-files">
+              // Open by itself when the notation could not be drawn: the files are the way on.
+              <details className="scan-files" open={!!renderError || undefined}>
                 <summary>{t.scan.review.filesSummary}</summary>
                 <div className="stack">
                   <button

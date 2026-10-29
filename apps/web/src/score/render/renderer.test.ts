@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { HEAVY_NOTES } from '../../engine/client.js';
-import { createRenderer, SupersededError } from './renderer.js';
+import { createRenderer, NO_MUSIC, SupersededError } from './renderer.js';
 // renderer.ts re-exports the engine client's WorkerLike, so one fake worker type serves both.
 import type { WorkerLike } from './renderer.js';
 
 /**
  * A Verovio worker that answers each render after `delays` (ms); `grown` says, per answer, whether
  * its WASM heap has grown by then (default no). `posted` keeps the request types it was sent.
+ * `answer`, when given, replaces the answer to a render.
  */
 function fakeWorker(
   delays: number[],
   grown: boolean[] = [],
+  answer?: (id: number) => unknown,
 ): WorkerLike & { terminated: boolean; posted: string[] } {
   const w: WorkerLike & { terminated: boolean; posted: string[] } = {
     terminated: false,
@@ -25,7 +27,7 @@ function fakeWorker(
       setTimeout(
         () =>
           w.onmessage?.({
-            data: {
+            data: answer?.(req.id) ?? {
               id: req.id,
               ok: true,
               pages: [`<svg data-w="${req.widthPx}"/>`],
@@ -56,22 +58,69 @@ describe('renderer', () => {
     await expect(first).rejects.toBeInstanceOf(SupersededError);
     expect((await second).pages).toEqual(['<svg data-w="600"/>']);
   });
-  it('rejects pending and later renders when the worker fails, and tells its owner once', async () => {
-    const w = fakeWorker([1000]);
+  it('rejects the pending render when the worker fails, tells its owner once, and lays out the next one in a fresh worker', async () => {
+    const spawned: ReturnType<typeof fakeWorker>[] = [];
     const failures: Error[] = [];
     const r = createRenderer(
-      () => w,
+      () => {
+        const w = fakeWorker([spawned.length ? 0 : 1000]);
+        spawned.push(w);
+        return w;
+      },
       (e) => failures.push(e),
     );
     const pending = r.render({ xml: '<x/>', widthPx: 800 });
     // A module worker whose script did not load reports a plain Event, without a message.
-    w.onerror?.(new Event('error') as ErrorEvent);
+    spawned[0]!.onerror?.(new Event('error') as ErrorEvent);
     await expect(pending).rejects.toThrow('the score renderer failed');
     await expect(pending).rejects.not.toBeInstanceOf(SupersededError);
-    expect(w.terminated).toBe(true);
-    await expect(r.render({ xml: '<x/>', widthPx: 800 })).rejects.toThrow(/renderer failed/);
-    w.onerror?.({ message: 'again' } as ErrorEvent);
+    expect(spawned[0]!.terminated).toBe(true);
+    spawned[0]!.onerror?.({ message: 'again' } as ErrorEvent);
     expect(failures.map((e) => e.message)).toEqual(['the score renderer failed']);
+    expect((await r.render({ xml: '<x/>', widthPx: 640 })).pages).toEqual(['<svg data-w="640"/>']);
+    expect(spawned).toHaveLength(2);
+    expect(spawned[1]!.terminated).toBe(false);
+  });
+  it('ignores a late failure of the dead worker while the fresh one lays out', async () => {
+    const spawned: ReturnType<typeof fakeWorker>[] = [];
+    const r = createRenderer(() => {
+      const w = fakeWorker([spawned.length ? 30 : 1000]);
+      spawned.push(w);
+      return w;
+    });
+    const first = r.render({ xml: '<x/>', widthPx: 800 });
+    spawned[0]!.onerror?.({ message: 'crashed' } as ErrorEvent);
+    await expect(first).rejects.toThrow('the score renderer failed: crashed');
+    const next = r.render({ xml: '<x/>', widthPx: 640 });
+    spawned[0]!.onerror?.({ message: 'late' } as ErrorEvent);
+    expect((await next).pages).toEqual(['<svg data-w="640"/>']);
+    expect(spawned[1]!.terminated).toBe(false);
+  });
+  it('lets the library warm a fresh worker up after a failure', () => {
+    const spawned: ReturnType<typeof fakeWorker>[] = [];
+    const r = createRenderer(() => {
+      const w = fakeWorker([1000]);
+      spawned.push(w);
+      return w;
+    });
+    void r.render({ xml: '<x/>', widthPx: 800 }).catch(() => undefined);
+    spawned[0]!.onerror?.({ message: 'crashed' } as ErrorEvent);
+    r.warmUp();
+    expect(spawned).toHaveLength(2);
+    expect(spawned[1]!.posted).toEqual(['init']);
+    r.dispose();
+  });
+  it('rejects a layout without a page, so the review never waits on it', async () => {
+    const r = createRenderer(() =>
+      fakeWorker([0], [], (id) => ({ id, ok: true, pages: [], ms: 1 })),
+    );
+    await expect(r.render({ xml: '<x/>', widthPx: 800 })).rejects.toThrow(NO_MUSIC);
+    expect(NO_MUSIC).toBe('the score has no music to draw');
+  });
+  it('rejects every render after dispose', async () => {
+    const r = createRenderer(() => fakeWorker([0]));
+    r.dispose();
+    await expect(r.render({ xml: '<x/>', widthPx: 800 })).rejects.toThrow('renderer disposed');
   });
   it('names the worker error when there is one', async () => {
     const w = fakeWorker([1000]);
@@ -168,6 +217,34 @@ describe('renderer: a worker whose heap grew, or that laid out a long piece', ()
     const { spawn, spawned } = spawner(() => fakeWorker([0]));
     const r = createRenderer(spawn);
     await r.render({ xml: '<x/>', widthPx: 800, notes: HEAVY_NOTES - 1 });
+    expect(spawned).toHaveLength(1);
+    expect(spawned[0]!.terminated).toBe(false);
+  });
+
+  it('is retired when its WASM module aborted, and the next layout runs in a fresh one', async () => {
+    const broken = [true, false];
+    const { spawn, spawned } = spawner(() =>
+      fakeWorker([0], [], (id) =>
+        broken.shift() ? { id, ok: false, error: 'Aborted(OOM)', broken: true } : undefined,
+      ),
+    );
+    const r = createRenderer(spawn);
+    await expect(r.render({ xml: '<x/>', widthPx: 800 })).rejects.toThrow('Aborted(OOM)');
+    expect(spawned[0]!.terminated).toBe(true);
+    expect((await r.render({ xml: '<x/>', widthPx: 640 })).pages).toEqual(['<svg data-w="640"/>']);
+    expect(spawned).toHaveLength(2);
+  });
+
+  it('is kept when a layout failed without breaking its module', async () => {
+    const failed = [true, false];
+    const { spawn, spawned } = spawner(() =>
+      fakeWorker([0, 0], [], (id) =>
+        failed.shift() ? { id, ok: false, error: 'the score could not be laid out' } : undefined,
+      ),
+    );
+    const r = createRenderer(spawn);
+    await expect(r.render({ xml: '<x/>', widthPx: 800 })).rejects.toThrow(/could not be laid out/);
+    await r.render({ xml: '<x/>', widthPx: 640 });
     expect(spawned).toHaveLength(1);
     expect(spawned[0]!.terminated).toBe(false);
   });

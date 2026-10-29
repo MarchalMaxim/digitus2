@@ -1,4 +1,4 @@
-import type { EngineClient } from '../../engine/client.js';
+import { SCAN_LOAD, type EngineClient } from '../../engine/client.js';
 import { applyCorrections } from '../../scan/corrections.js';
 import type { LocalScoreRecord } from '../local/records.js';
 import { SHAREABLE_FILE } from './payload.js';
@@ -28,7 +28,7 @@ export async function shareableOf(
     if (record.kind === 'scan') {
       const raw = record.session.xml!;
       const xml = applyCorrections(raw, record.session.corrections ?? []).xml;
-      const loaded = await engine.load(xml, 'scan.musicxml', { preserveNotation: true });
+      const loaded = await engine.load(xml, 'scan.musicxml', SCAN_LOAD);
       return loaded.score.notes.length ? { xml: loaded.xml, kind: 'scan' } : null;
     }
     const bytes = new Uint8Array(await record.blob.arrayBuffer());

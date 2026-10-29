@@ -1,5 +1,6 @@
 import type { Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
+import { keepHeader } from './diagnostics.js';
 import { SCAN_SERVICE } from './service.js';
 
 /**
@@ -216,7 +217,18 @@ export function createScanClient(fetcher: typeof fetch = fetch, base: string = S
       if (body.protocol !== PROTOCOL) throw new Error(`Unknown protocol ${String(body.protocol)}`);
       return { ...body, warnings: warningsOf(body.warnings) } as ScanServiceMetadata;
     },
-    async recognize(file: File, job: string, signal?: AbortSignal): Promise<Recognition> {
+    /**
+     * `scan` names the scan the page belongs to (`scanIdOf` its session id): on a device that opted
+     * in, the service keeps the page as part of that scan's validation case (diagnostics.ts), with
+     * `page` (`scanIdOf` the page's id) when given, so a retaken page is told apart.
+     */
+    async recognize(
+      file: File,
+      job: string,
+      signal?: AbortSignal,
+      scan?: string,
+      page?: string,
+    ): Promise<Recognition> {
       checked(job);
       if (signal?.aborted) throw signal.reason ?? new DOMException('aborted', 'AbortError');
       const { response, body } = await send(
@@ -227,6 +239,7 @@ export function createScanClient(fetcher: typeof fetch = fetch, base: string = S
             'Content-Type': file.type,
             'X-Digitus2-Client': '1',
             'X-Digitus2-Job': job,
+            ...(scan ? keepHeader(scan, page) : {}),
           },
           body: file,
         },

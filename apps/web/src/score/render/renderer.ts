@@ -2,8 +2,10 @@
  * The renderer adapter: lays out MusicXML to SVG pages in the Verovio worker. Only the newest
  * render request counts: a newer `render()` rejects every older pending one with
  * `SupersededError`, and their late results are dropped, so a resize never shows a stale layout.
- * A worker that fails (its script did not load, it crashed) rejects every pending and later
- * request, so the score view shows an error instead of waiting forever.
+ * A layout with no page rejects with `NO_MUSIC`, so a view never waits on a score that draws
+ * nothing. A worker that fails (its script did not load, it crashed) rejects every pending request,
+ * so the score view shows an error instead of waiting forever, and the next request starts a fresh
+ * worker: one crash does not refuse every later layout (issue 233).
  *
  * The worker (its 128 MB WASM heap and some 50 MB of code) is kept warm between pieces, except
  * after a long one: once it has laid out a piece of `HEAVY_NOTES` or more, or its heap has grown
@@ -42,6 +44,9 @@ export interface ScoreRenderer {
   dispose(): void;
 }
 
+/** The message of a layout that has no page: the score holds nothing Verovio can draw. */
+export const NO_MUSIC = 'the score has no music to draw';
+
 export class SupersededError extends Error {
   constructor() {
     super('render superseded by a newer request');
@@ -56,10 +61,11 @@ export type RenderWorkerRequest =
 
 /**
  * Messages from the worker. `grown`: the worker's WASM heap is larger now than when it started.
+ * `broken`: the WASM module aborted, so every later layout in it would fail too.
  */
 export type RenderWorkerResponse =
   | { id: number; ok: true; pages: string[]; ms: number; grown?: boolean }
-  | { id: number; ok: false; error: string };
+  | { id: number; ok: false; error: string; broken?: boolean };
 
 interface Pending {
   resolve(r: RenderResult): void;
@@ -71,9 +77,8 @@ function defaultWorker(): WorkerLike {
 }
 
 /**
- * `spawn` makes the worker: one at once, and another after one is retired. `onFail` is told once
- * when a worker fails, so the owner can make a fresh renderer for the next piece (this one stays
- * closed).
+ * `spawn` makes the worker: one at once, and another after one is retired or has failed. `onFail`
+ * is told once each time a worker fails; the next request runs in a fresh worker.
  */
 export function createRenderer(
   spawn: () => WorkerLike = defaultWorker,
@@ -83,8 +88,6 @@ export function createRenderer(
   let nextId = 0;
   let warmed = false;
   let disposed = false;
-  // Set once the worker has failed: every request after that rejects with it.
-  let failure: Error | undefined;
   // The worker running now; undefined once retired, until the next render or warm-up.
   let worker: WorkerLike | undefined;
   // The worker has laid out a long piece, or its heap has grown: retire it once nothing is pending.
@@ -99,13 +102,15 @@ export function createRenderer(
     const w = spawn();
     w.onmessage = (e: MessageEvent) => {
       const res = e.data as RenderWorkerResponse;
-      // A superseded layout still tells whether the heap grew.
-      if (res.ok && res.grown) retire = true;
+      // A superseded layout still tells whether the heap grew; an aborted module cannot lay out
+      // again, so its worker is retired as well.
+      if (res.ok ? res.grown : res.broken) retire = true;
       const p = pending.get(res.id);
       if (p) {
         pending.delete(res.id);
-        if (res.ok) p.resolve({ pages: res.pages, ms: res.ms });
-        else p.reject(new Error(res.error));
+        if (!res.ok) p.reject(new Error(res.error));
+        else if (res.pages.length) p.resolve({ pages: res.pages, ms: res.ms });
+        else p.reject(new Error(NO_MUSIC));
       }
       if (retire && pending.size === 0 && w === worker && !disposed) {
         w.terminate();
@@ -114,14 +119,16 @@ export function createRenderer(
         warmed = false;
       }
     };
-    // A worker already retired is gone: whatever it reports is not this renderer's.
+    // A worker already retired or replaced is gone: whatever it reports is not this renderer's.
     w.onerror = (e: ErrorEvent) => {
       if (disposed || w !== worker) return;
       // A failed module load reports a plain Event, without a message.
       const message = typeof e.message === 'string' && e.message ? `: ${e.message}` : '';
-      failure = new Error(`the score renderer failed${message}`);
-      disposed = true;
+      const failure = new Error(`the score renderer failed${message}`);
       w.terminate();
+      worker = undefined;
+      retire = false;
+      warmed = false;
       rejectAll(failure);
       onFail?.(failure);
     };
@@ -133,7 +140,7 @@ export function createRenderer(
 
   return {
     render({ xml, widthPx, notes = 0, layout = 'screen' }) {
-      if (disposed) return Promise.reject(failure ?? new Error('renderer disposed'));
+      if (disposed) return Promise.reject(new Error('renderer disposed'));
       const id = ++nextId;
       for (const [older, p] of pending) {
         if (older < id) {

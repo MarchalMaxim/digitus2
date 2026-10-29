@@ -1,5 +1,5 @@
 import { parseMusicXml } from '@digitus2/engine';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { normalizeVoices } from './normalizeVoices.js';
 import { verovioOptions } from './options.js';
 
@@ -135,5 +135,47 @@ describe('HOMR voice serialization refusals', () => {
     const orphan = note('orphan', 'C', 3, 1, '5', '2', '<chord/>');
     const xml = score(upper1 + backup(2) + orphan + rest + lower1 + upper2 + backup(1) + lower2);
     expect(normalizeVoices(xml)).toBe(xml);
+  });
+});
+
+describe('HOMR voice serialization on recognition it does not expect', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  /** Two interleaved bars; `measure` finds bar `n` of a serialization. */
+  const twoBars = score(interleaved).replace(
+    '</part>',
+    '<measure number="2">' + interleaved.replace(/id="(\w+)"/g, 'id="$1b"') + '</measure></part>',
+  );
+  const measure = (xml: string, n: string) =>
+    new XMLSerializer().serializeToString(
+      new DOMParser().parseFromString(xml, 'text/xml').querySelector(`measure[number="${n}"]`)!,
+    );
+
+  it('leaves a bar that throws as it was read and still regroups the others', () => {
+    const insert = Node.prototype.insertBefore;
+    const spy = vi.spyOn(Node.prototype, 'insertBefore').mockImplementation(function <
+      T extends Node,
+    >(this: Node, node: T, child: Node | null): T {
+      if (this instanceof Element && this.getAttribute('number') === '2')
+        throw new TypeError('unexpected shape');
+      return insert.call(this, node, child) as T;
+    });
+    const out = normalizeVoices(twoBars);
+    expect(spy).toHaveBeenCalled();
+    expect(measure(out, '2')).toBe(measure(twoBars, '2'));
+    spy.mockRestore();
+    expect(measure(out, '1')).toBe(measure(normalizeVoices(twoBars), '1'));
+    expect(measure(out, '1')).not.toBe(measure(twoBars, '1'));
+  });
+
+  it('returns the XML as it is when parsing or serializing throws', () => {
+    vi.spyOn(XMLSerializer.prototype, 'serializeToString').mockImplementation(() => {
+      throw new Error('unexpected shape');
+    });
+    expect(normalizeVoices(twoBars)).toBe(twoBars);
+    vi.spyOn(DOMParser.prototype, 'parseFromString').mockImplementation(() => {
+      throw new Error('unexpected shape');
+    });
+    expect(normalizeVoices(twoBars)).toBe(twoBars);
   });
 });

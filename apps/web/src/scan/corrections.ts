@@ -398,7 +398,9 @@ function clearTie(note: ScanNote, type: 'start' | 'stop') {
 
 function applyTie(score: ScanScore, c: Extract<Correction, { kind: 'tie' }>) {
   const note = find(score, c.note);
-  if (note.rest || note.midi === undefined || note.grace) refuse((t) => t.scan.edit.refused.rest);
+  // A grace note can lose a tie it was read with (issue 233), never gain one.
+  if (note.rest || note.midi === undefined || (note.grace && c.tied))
+    refuse((t) => t.scan.edit.refused.rest);
   const name = { step: note.step!, alter: note.alter, octave: note.octave };
   if ((c.side ?? 'next') === 'next') {
     if (!c.tied) {
@@ -719,10 +721,36 @@ export type Problem =
       part: number;
       measure: number;
     }
-  | { kind: 'tie-unmatched'; note: number; part: number; measure: number }
+  /** A tie that pairs with no note: `side` says which of the note's marks, its start or its stop. */
+  | { kind: 'tie-unmatched'; note: number; part: number; measure: number; side: 'start' | 'stop' }
+  /** A tie that starts or ends on a grace note, which takes no time to hold (issue 233). */
+  | { kind: 'tie-grace'; note: number; part: number; measure: number }
+  /**
+   * A tie the import played as separate notes that no other place names (issue 233): `note` is
+   * the note that starts it, or ends it for an `unmatchedStop`.
+   */
+  | {
+      kind: 'tie-repaired';
+      note: number;
+      part: number;
+      measure: number;
+      reason: TieRepair['reason'];
+    }
   | { kind: 'bar-timing'; part: number; bar: number; timing: BarTiming }
   /** A repeat mark the score cannot carry: a volta bracket with no repeat sign, or a repeat sign no repeat closes. */
   | { kind: 'form'; part: number; bar: number; mark: 'ending' | 'repeat' };
+
+/**
+ * A tie the engine's scan import could not keep and played as separate notes instead (issue 233).
+ * `note` is the engine's index among the `<note>` elements of the imported document, `part` and
+ * `measure` 0-based.
+ */
+export interface TieRepair {
+  note: number;
+  part: number;
+  measure: number;
+  reason: 'gap' | 'unmatchedStart' | 'unmatchedStop' | 'grace';
+}
 
 /**
  * Places a reader should check, found by rules that can be verified on the file itself. They
@@ -736,11 +764,24 @@ export function findProblems(score: ScanScore): Problem[] {
   const acrossRepeat = (start: ScanNote | undefined, stop: ScanNote | undefined) =>
     (!!start && !!barOf(start)?.jumpsBack) || (!!stop && !!barOf(stop)?.opensEnding);
   for (const note of score.notes) {
-    if (note.midi === undefined || note.grace) continue;
+    if (note.midi === undefined) continue;
+    if (note.grace) {
+      // A grace note takes no time, so a tie on it holds nothing; the import cannot keep it.
+      if (note.tieStart || note.tieStop)
+        problems.push({
+          kind: 'tie-grace',
+          note: note.ordinal,
+          part: note.part,
+          measure: note.measure,
+        });
+      continue;
+    }
     if (note.tieStart) {
       const partner = tiePartner(score, note);
       const paired = !!partner && tieSource(score, partner) === note;
       const end = note.onset + note.duration;
+      // A tie into a grace note is that grace note's place.
+      if (paired && partner.grace) continue;
       if (paired && partner.onset !== end && !acrossRepeat(note, partner))
         problems.push({
           kind: 'tie-gap',
@@ -756,6 +797,7 @@ export function findProblems(score: ScanScore): Problem[] {
           note: note.ordinal,
           part: note.part,
           measure: note.measure,
+          side: 'start',
         });
     }
     if (note.tieStop) {
@@ -766,6 +808,7 @@ export function findProblems(score: ScanScore): Problem[] {
           note: note.ordinal,
           part: note.part,
           measure: note.measure,
+          side: 'stop',
         });
     }
   }
@@ -802,9 +845,13 @@ export function findProblems(score: ScanScore): Problem[] {
     flaggedBars.add(bar.index);
     problems.push({ kind: 'form', part: bar.part, bar: bar.index, mark });
   }
-  // In reading order: by part, then by bar, the rules of one bar in the order above.
-  const barOfProblem = (p: Problem) =>
-    p.kind === 'bar-timing' || p.kind === 'form' ? p.bar : p.measure;
+  return inReadingOrder(problems);
+}
+
+const barOfProblem = (p: Problem) =>
+  p.kind === 'bar-timing' || p.kind === 'form' ? p.bar : p.measure;
+/** Places in reading order: by part, then by bar; the places of one bar keep their order. */
+export function inReadingOrder(problems: Problem[]): Problem[] {
   return problems.sort((a, b) => a.part - b.part || barOfProblem(a) - barOfProblem(b));
 }
 
@@ -859,4 +906,284 @@ export function meterOffers(
       offers.set(first.problem, { kind: 'meter', bar: first.problem.bar, ...first.proposed });
   }
   return offers;
+}
+
+type DurationCorrection = Extract<Correction, { kind: 'duration' }>;
+type TieCorrection = Extract<Correction, { kind: 'tie' }>;
+
+/** The written value `quarters` long: a standard value, plain or with one dot. */
+function valueOfLength(quarters: number): { type: NoteType; dots: 0 | 1 } | undefined {
+  for (const type of NOTE_TYPES)
+    for (const dots of [0, 1] as const)
+      if (Math.abs(QUARTERS[type] * (dots ? 1.5 : 1) - quarters) < 1e-9) return { type, dots };
+}
+
+/** The document a score was read from, which carries every note's ordinal. */
+const documentOf = (score: ScanScore) =>
+  score.notes[0]?.element.ownerDocument as XMLDocument | undefined;
+
+/** `correction` applied to a copy of `doc`, or undefined when it is refused. */
+function tryApply(doc: XMLDocument, correction: Correction): XMLDocument | undefined {
+  const scratch = doc.cloneNode(true) as XMLDocument;
+  // A score read straight from a file has no ordinals written yet: its positions are its ordinals.
+  tagOrdinals(scratch);
+  try {
+    apply(scratch, correction);
+    return scratch;
+  } catch (cause) {
+    if (cause instanceof CorrectionError) return undefined;
+    throw cause;
+  }
+}
+
+/** The tie from `note` to `target` joins them, and the first ends exactly where the second begins. */
+function tieReaches(score: ScanScore, note: number, target: number) {
+  const start = score.notes.find((n) => n.ordinal === note);
+  const end = score.notes.find((n) => n.ordinal === target);
+  return (
+    !!start &&
+    !!end &&
+    start.onset + start.duration === end.onset &&
+    tiePartner(score, start) === end &&
+    tieSource(score, end) === start
+  );
+}
+
+/**
+ * What the places to check say about bars: each bar they name, and each hand that runs past its
+ * time signature there.
+ */
+const barPlaces = (score: ScanScore) =>
+  new Set(
+    findProblems(score).flatMap((p) => {
+      if (p.kind === 'form') return [`form:${p.part}:${p.bar}`];
+      if (p.kind !== 'bar-timing') return [];
+      const { expected, staves } = p.timing;
+      const long = staves.filter((s) => expected !== undefined && s.beats > expected + 1e-9);
+      return [`bar:${p.part}:${p.bar}`, ...long.map((s) => `long:${p.part}:${p.bar}:${s.staff}`)];
+    }),
+  );
+
+/**
+ * The length that lets a late tie reach (issue 233): the standard written value, plain or dotted,
+ * that makes the tied note end exactly where its continuation begins. Offered only when nothing
+ * of its voice starts in the gap, and when the change, made, joins the tie without moving the
+ * continuation or opening a new place to check (a bar made longer than its time signature).
+ */
+function reachingLength(
+  score: ScanScore,
+  problem: Extract<Problem, { kind: 'tie-gap' }>,
+  bars: () => Set<string>,
+): DurationCorrection | undefined {
+  if (problem.gapTicks <= 0) return;
+  const note = score.notes.find((n) => n.ordinal === problem.note);
+  const target = score.notes.find((n) => n.ordinal === problem.target);
+  const doc = documentOf(score);
+  if (!note || !target || !doc) return;
+  const value = valueOfLength((target.onset - note.onset) / score.ticksPerQuarter);
+  if (!value) return;
+  const end = note.onset + note.duration;
+  const inGap = score.notes.some(
+    (n) =>
+      n.part === note.part && n.voice === note.voice && n.onset >= end && n.onset < target.onset,
+  );
+  if (inGap) return;
+  const correction: DurationCorrection = { kind: 'duration', note: note.ordinal, ...value };
+  const changed = tryApply(doc, correction);
+  if (!changed) return;
+  const after = readScanScore(changed);
+  if (!tieReaches(after, note.ordinal, target.ordinal)) return;
+  const known = bars();
+  for (const place of barPlaces(after)) if (!known.has(place)) return;
+  return correction;
+}
+
+/**
+ * The tie removal offered on a place, from the side the place names. A tie the review alone
+ * cannot pair (`tie-unmatched`) is offered only when it has no partner at all, or when the import
+ * played that very mark as separate notes (`repaired`): the import pairs ties in the file's order
+ * and may still join one the review cannot.
+ */
+function tieRemoval(
+  score: ScanScore,
+  problem: Problem,
+  repaired: ReadonlyMap<number, ReadonlySet<TieRepair['reason']>>,
+): TieCorrection | undefined {
+  if (problem.kind === 'bar-timing' || problem.kind === 'form') return;
+  const note = score.notes.find((n) => n.ordinal === problem.note);
+  if (!note || note.midi === undefined) return;
+  const next: TieCorrection = { kind: 'tie', note: note.ordinal, tied: false };
+  const previous: TieCorrection = { ...next, side: 'previous' };
+  switch (problem.kind) {
+    case 'tie-gap':
+      return next;
+    case 'tie-unmatched': {
+      // The import reports an unmatched stop on its own note, every other repair on the start.
+      const reasons = [...(repaired.get(note.ordinal) ?? [])];
+      if (problem.side === 'start')
+        return note.tieStart &&
+          (!tiePartner(score, note) || reasons.some((r) => r !== 'unmatchedStop'))
+          ? next
+          : undefined;
+      return note.tieStop && (!tieSource(score, note) || reasons.includes('unmatchedStop'))
+        ? previous
+        : undefined;
+    }
+    case 'tie-repaired':
+      if (problem.reason === 'unmatchedStop' && note.tieStop) return previous;
+      break;
+  }
+  return note.tieStart ? next : note.tieStop ? previous : undefined;
+}
+
+/**
+ * The corrections offered on each place to check, in display order (issue 233). A late tie: the
+ * length that makes it reach, when a standard value does, then the tie's removal. A tie on a
+ * grace note, a tie the import played as separate notes, and a tie with no partner at all or
+ * that the import played as separate notes (`tieRepairs`): its removal. A misread meter: the meter
+ * its bars agree on (`meterOffers`). A repeat mark the score cannot carry: its removal
+ * (`formOffers`). Nothing is applied until the reader asks.
+ */
+export function offersFor(
+  score: ScanScore,
+  problems: readonly Problem[],
+  tieRepairs: readonly TieRepair[] = [],
+): Map<Problem, Correction[]> {
+  const offers = new Map<Problem, Correction[]>();
+  const add = (problem: Problem, correction: Correction | undefined) => {
+    if (correction) offers.set(problem, [...(offers.get(problem) ?? []), correction]);
+  };
+  for (const [problem, correction] of meterOffers(score, problems)) add(problem, correction);
+  for (const [problem, correction] of formOffers(problems)) add(problem, correction);
+  const repaired = new Map<number, Set<TieRepair['reason']>>();
+  for (const repair of tieRepairs) {
+    const ordinal = repairedOrdinal(score, repair);
+    repaired.set(ordinal, (repaired.get(ordinal) ?? new Set()).add(repair.reason));
+  }
+  let known: Set<string> | undefined;
+  const bars = () => (known ??= barPlaces(score));
+  for (const problem of problems) {
+    if (problem.kind === 'tie-gap') add(problem, reachingLength(score, problem, bars));
+    add(problem, tieRemoval(score, problem, repaired));
+  }
+  return offers;
+}
+
+/**
+ * The review's note for a repair: the engine counts notes in the imported document, which a
+ * removed note shortens, so its position first (in the bar the engine names), else the ordinal.
+ */
+function repairedNote(score: ScanScore, repair: TieRepair): ScanNote | undefined {
+  const at = score.notes[repair.note];
+  return at && at.part === repair.part && at.measure === repair.measure
+    ? at
+    : score.notes.find((n) => n.ordinal === repair.note);
+}
+const repairedOrdinal = (score: ScanScore, repair: TieRepair) =>
+  repairedNote(score, repair)?.ordinal ?? repair.note;
+
+/**
+ * A place for every tie the import played as separate notes that no place to check names yet
+ * (issue 233), so no such change goes unsaid. The engine counts notes in the imported document,
+ * which a removed note shortens; the review's notes are in that same order.
+ */
+export function placesFromRepairs(
+  score: ScanScore,
+  problems: readonly Problem[],
+  tieRepairs: readonly TieRepair[],
+): Problem[] {
+  const ends = (ordinal: number) => {
+    // The import reports a tie on a grace note on the note that starts it, which may be the
+    // grace note's partner: both ends are that one place's.
+    const note = score.notes.find((n) => n.ordinal === ordinal);
+    if (!note) return [ordinal];
+    const source = note.tieStop ? tieSource(score, note) : undefined;
+    const partner = note.tieStart ? tiePartner(score, note) : undefined;
+    return [ordinal, ...[source, partner].flatMap((n) => (n ? [n.ordinal] : []))];
+  };
+  const named = new Set(
+    problems.flatMap((p) =>
+      p.kind === 'bar-timing' || p.kind === 'form'
+        ? []
+        : p.kind === 'tie-gap'
+          ? [p.note, p.target]
+          : p.kind === 'tie-grace'
+            ? ends(p.note)
+            : [p.note],
+    ),
+  );
+  const places: Problem[] = [];
+  for (const repair of tieRepairs) {
+    const note = repairedNote(score, repair);
+    const ordinal = note?.ordinal ?? repair.note;
+    if (named.has(ordinal)) continue;
+    named.add(ordinal);
+    places.push({
+      kind: 'tie-repaired',
+      note: ordinal,
+      part: note?.part ?? repair.part,
+      measure: note?.measure ?? repair.measure,
+      reason: repair.reason,
+    });
+  }
+  return inReadingOrder(places);
+}
+
+/** An offer that follows from the file alone: a length that makes a tie reach, or a removal. */
+const deterministic = (c: Correction) =>
+  c.kind === 'duration' || c.kind === 'barline' || (c.kind === 'tie' && !c.tied);
+
+/**
+ * "Fix all" (issue 233): for every place, the first of its offers that follows from the file
+ * alone (never a meter, a guess the reader confirms) and still applies after the ones before it.
+ * Repeat marks go first, then lengths, then tie removals, each checked as the review checks a
+ * single correction; one that is refused, or a length that no longer makes its tie reach, gives
+ * way to the place's next offer, or leaves the place to the reader.
+ */
+export function fixAll(
+  score: ScanScore,
+  problems: readonly Problem[],
+  offers: ReadonlyMap<Problem, readonly Correction[]>,
+): Correction[] {
+  const read = documentOf(score);
+  if (!read) return [];
+  // Tagged once, so every note of the working copy carries its ordinal.
+  let doc = read.cloneNode(true) as XMLDocument;
+  tagOrdinals(doc);
+  /** A tie removal whose mark an earlier fix already took changes nothing, so it is not counted. */
+  const removes = (c: Correction) => {
+    if (c.kind !== 'tie' || c.tied) return true;
+    const el = [...doc.getElementsByTagName('note')].find(
+      (n) => n.getAttribute(ORDINAL) === String(c.note),
+    );
+    if (!el) return false;
+    const type = (c.side ?? 'next') === 'next' ? 'start' : 'stop';
+    return [...kids(el, 'tie'), ...kids(kid(el, 'notations') ?? el, 'tied')].some(
+      (t) => t.getAttribute('type') === type,
+    );
+  };
+  const rank = (c: Correction) => (c.kind === 'barline' ? 0 : c.kind === 'duration' ? 1 : 2);
+  const places = problems
+    .map((problem) => ({ problem, choices: (offers.get(problem) ?? []).filter(deterministic) }))
+    .filter((place) => place.choices.length)
+    .sort((a, b) => rank(a.choices[0]!) - rank(b.choices[0]!));
+  const fixes: Correction[] = [];
+  const same = (a: Correction, b: Correction) => JSON.stringify(a) === JSON.stringify(b);
+  for (const { problem, choices } of places)
+    for (const correction of choices) {
+      if (fixes.some((c) => same(c, correction))) break;
+      if (!removes(correction)) break;
+      const changed = tryApply(doc, correction);
+      if (!changed) continue;
+      if (
+        correction.kind === 'duration' &&
+        problem.kind === 'tie-gap' &&
+        !tieReaches(readScanScore(changed), problem.note, problem.target)
+      )
+        continue;
+      doc = changed;
+      fixes.push(correction);
+      break;
+    }
+  return fixes;
 }

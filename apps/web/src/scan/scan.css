@@ -394,3 +394,7 @@
   align-items: flex-start;
   gap: 0.25rem;
 }
+/* Fix all (issue 233): one step above the places it fixes. */
+.scan-fix-all {
+  margin: 0.5rem 0;
+}

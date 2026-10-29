@@ -23,7 +23,7 @@ import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { messageOf } from '../app/errors.js';
 import { fileIdentity, useAppStore, type HandSize, type PieceSource } from '../app/store.js';
-import { createEngineClient, type EngineClient } from '../engine/client.js';
+import { createEngineClient, SCAN_LOAD, type EngineClient } from '../engine/client.js';
 import { PhraseError } from '../i18n/PhraseError.js';
 import { loadPiece, pieceBySlug, readScoreFile } from '../library/manifest.js';
 import { injectNoteIds } from './render/injectIds.js';
@@ -535,8 +535,9 @@ export function useScoreDocument(
           input = bytes ?? new Uint8Array();
           sourceName = fileName ?? 'score.musicxml';
         }
+        // A scan's tie that cannot be joined plays as separate presses (issue 233).
         const loaded = scanImport
-          ? await svc.engine.load(input, sourceName, { preserveNotation: true })
+          ? await svc.engine.load(input, sourceName, SCAN_LOAD)
           : splitMidi === null
             ? await svc.engine.load(input, sourceName)
             : await svc.engine.load(input, sourceName, { splitMidi });

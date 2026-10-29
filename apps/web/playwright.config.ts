@@ -7,6 +7,11 @@ const phone = { ...desktop, viewport: { width: 360, height: 740 }, isMobile: tru
 const LOOP_SPEC = /scan-camera-loop\.spec\.ts/;
 /** The loop project exists only when asked for: Playwright's workers read the config again. */
 const loopAsked = !!process.env.DIGITUS2_E2E_LOOP;
+// The scan validation cases (issue 233) are the owner's private scans, replayed by the
+// `scan:cases` step of `pnpm verify` alone (DIGITUS2_E2E_CASES): with DIGITUS2_SCAN_CASES set for
+// good, the plain e2e run would replay them again.
+const CASES_SPEC = /scan-cases\.spec\.ts/;
+const casesAsked = !!process.env.DIGITUS2_E2E_CASES;
 
 export default defineConfig({
   testDir: './e2e',
@@ -41,7 +46,7 @@ export default defineConfig({
     timeout: 60_000,
   },
   projects: [
-    { name: 'desktop', use: desktop, testIgnore: LOOP_SPEC },
+    { name: 'desktop', use: desktop, testIgnore: casesAsked ? LOOP_SPEC : [LOOP_SPEC, CASES_SPEC] },
     {
       name: 'mobile',
       use: phone,

@@ -77,10 +77,20 @@ export const RULES = [
     gates: 'all',
   },
   { test: [/^apps\/web\/e2e\/scan-camera-loop\.spec\.ts$/], gates: ['e2e:loop'] },
+  // The validation cases' replay and the tools that bring cases in (issue 233).
+  {
+    test: [
+      /^apps\/web\/e2e\/scan-cases\.spec\.ts$/,
+      /^apps\/web\/e2e\/helpers\/cases\.ts$/,
+      /^research\/omr\/diagnostics\//,
+    ],
+    gates: ['omr', 'scan:cases'],
+  },
   { test: [/^apps\/web\/e2e\/[^/]+\.spec\.ts$/], gates: ['e2e'], specs: 'self' },
   { test: [/^apps\/web\/(e2e|fixtures)\//], gates: ['unit', 'e2e'], specs: 'all' },
   { test: [/^apps\/web\/src\/scan\/camera\//], gates: SCAN_GATES, specs: CAMERA_SPECS },
-  { test: [/^apps\/web\/src\/scan\//], gates: SCAN_GATES, specs: SCAN_SPECS },
+  // A review change replays the validation cases too (issue 233).
+  { test: [/^apps\/web\/src\/scan\//], gates: [...SCAN_GATES, 'scan:cases'], specs: SCAN_SPECS },
   { test: [/^apps\/web\/src\/score\//], ...web(SCORE_SPECS) },
   {
     test: [/^apps\/web\/src\/audio\//],

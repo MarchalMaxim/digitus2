@@ -9,6 +9,7 @@ import {
   readPageBytes,
   SUMMARY_ENTRY,
 } from './bundle.js';
+import type { ReviewFacts } from './facts.js';
 import type { ScanSession } from './model.js';
 
 const BUILD = { commit: 'c581d66', date: '2026-10-22T09:30:00.000Z' };
@@ -16,6 +17,20 @@ const AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)';
 const JPEG = new Uint8Array([255, 216, 255, 224, 1, 2, 3]);
 const PNG = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 9]);
 const PDF = new TextEncoder().encode('%PDF-1.7 body');
+/** What the review said about the scan below (issue 233). */
+const REVIEW: ReviewFacts = {
+  verdict: '2 pages · 12 bars · both hands · 1 place to check',
+  usable: true,
+  technical: [],
+  places: [
+    {
+      text: 'Bar 3, right hand: the tie on A4 does not reach the next A4. It is played as two notes.',
+      bar: '3',
+    },
+  ],
+  corrections: 1,
+  pages: ['0123456789abcdef0123456789abcdef', 'fedcba9876543210fedcba9876543210'],
+};
 
 const file = (bytes: Uint8Array, name: string, type: string) =>
   new File([new Uint8Array(bytes)], name, { type });
@@ -91,6 +106,7 @@ describe('bundleScan', () => {
         pageBytes: await readPageBytes(session),
         correctedXml: '<c/>',
         warnings: ['grand-staff', 'from the importer'],
+        review: REVIEW,
         build: BUILD,
         userAgent: AGENT,
       }),
@@ -102,6 +118,8 @@ describe('bundleScan', () => {
       recognizedAt: '2026-10-22T20:30:00.000Z',
       warnings: ['grand-staff', 'from the importer'],
       corrections: [{ kind: 'remove', note: 3 }],
+      // What the review told the reader, in English: the archive is a validation case as it is.
+      review: REVIEW,
       combined: 'combined-recognized.musicxml',
       corrected: 'corrected.musicxml',
       pages: [
@@ -159,12 +177,14 @@ describe('bundleScan', () => {
       corrected: unknown;
       corrections: unknown;
       recognizer: unknown;
+      review: unknown;
       pages: { recognized: unknown; error: unknown }[];
     };
     expect(summary.combined).toBeNull();
     expect(summary.corrected).toBeNull();
     expect(summary.corrections).toEqual([]);
     expect(summary.recognizer).toBeNull();
+    expect(summary.review).toBeNull();
     expect(summary.pages.map((p) => [p.recognized, p.error])).toEqual([
       ['page-1-recognized.musicxml', null],
       [null, 'The scanner is busy.'],

@@ -120,6 +120,18 @@ export const scan: Messages['scan'] = {
     filesSummary: 'Fichiers pour un éditeur de partitions',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Raison technique\u00a0: ${reason}`,
+    /** `error` says the notation could not be drawn: it is scanned again, or its files used elsewhere. */
+    notDrawnProblem: (error: string): string =>
+      `${error} Numérisez à nouveau, ou téléchargez ci-dessous les fichiers pour un éditeur de partitions.`,
+    /** Said after Fix all (issue 233). */
+    fixedAll: (n: number): string =>
+      plural('fr', n, {
+        one: '# correction faite. Annuler la retire.',
+        other: '# corrections faites. Annuler les retire toutes.',
+      }),
+    /** Under Recognition details on a device that keeps its scans as validation cases (issue 233). */
+    kept: 'Les numérisations de cet appareil sont conservées pour améliorer la reconnaissance.',
+    showBar: (bar: string) => `Afficher la mesure ${bar}`,
     retained:
       'Retrouvez les originaux et les reconnaissances conservés dans Mes partitions. Gardez vos fichiers d’origine\u00a0; le stockage du navigateur peut être effacé. La lecture peut utiliser un tempo par défaut de l’application.',
     beamGrouping: 'Le regroupement par ligatures est déduit et peut différer de l’original.',
@@ -269,6 +281,10 @@ export const scan: Messages['scan'] = {
     setMeter: (meter: string, bar: string) => `Passer en ${meter} à partir de la mesure ${bar}`,
     removeMark: (mark: 'ending' | 'repeat') =>
       mark === 'ending' ? 'Supprimer la volta' : 'Supprimer le signe de reprise',
+    lengthenTie: (pitch: string, bar: string, length: string, dotted: boolean) =>
+      `Faire du ${pitch} de la mesure ${bar} une ${length}${dotted ? ' pointée' : ''} pour que la liaison atteigne la note suivante`,
+    removeTie: 'Retirer la liaison',
+    fixAll: (n: number) => `Tout corriger (${n})`,
     stale: (kept: number) =>
       `Certaines corrections enregistrées ne s’appliquent plus à cette reconnaissance. Les ${kept} premières sont conservées.`,
     problemsSummary: (n: number) =>
@@ -278,8 +294,26 @@ export const scan: Messages['scan'] = {
         `${where}\u00a0: le ${pitch} lié finit ${gap} avant le début du ${pitch} suivant. Vérifiez les durées.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
         `${where}\u00a0: le ${pitch} lié déborde de ${gap} sur le ${pitch} suivant. Vérifiez les durées.`,
-      tieUnmatched: (where: string, pitch: string) =>
-        `${where}\u00a0: une liaison sur ${pitch} n’a pas de note correspondante.`,
+      tieUnmatched: (where: string, pitch: string, side: 'start' | 'stop') =>
+        side === 'start'
+          ? `${where}\u00a0: une liaison sur ${pitch} n’a pas de note correspondante.`
+          : `${where}\u00a0: la liaison vers ${pitch} ne part d’aucune note correspondante avant elle.`,
+      tieGrace: (where: string, pitch: string) =>
+        `${where}\u00a0: l’appoggiature ${pitch} est liée, mais une appoggiature ne dure pas assez pour être tenue.`,
+      tieRepaired: (
+        where: string,
+        pitch: string,
+        reason: 'gap' | 'unmatchedStart' | 'unmatchedStop' | 'grace',
+      ) =>
+        reason === 'gap'
+          ? `${where}\u00a0: la liaison de ${pitch} n’atteint pas le ${pitch} suivant. Les deux notes sont jouées séparément.`
+          : reason === 'unmatchedStart'
+            ? `${where}\u00a0: la liaison de ${pitch} ne mène à aucun ${pitch} suivant. La note est jouée sans liaison.`
+            : reason === 'unmatchedStop'
+              ? `${where}\u00a0: la liaison vers ${pitch} ne part d’aucun ${pitch} précédent. La note est rejouée.`
+              : `${where}\u00a0: l’appoggiature ${pitch} est liée. Les deux notes sont jouées séparément.`,
+      tieRepairedBar: (where: string) =>
+        `${where}\u00a0: une liaison ne correspond pas à ses notes. La note est jouée sans liaison.`,
       barTiming: (timing: string) => `Les mains ne concordent pas. ${timing}`,
       barLong: (timing: string) => `La mesure est plus longue que son chiffrage. ${timing}`,
       endingWithoutRepeat: (where: string) =>
@@ -324,11 +358,24 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Certaines pages doivent être numérisées à nouveau. Les pages reconnues sont conservées.',
     recognitionFailed: 'La reconnaissance a échoué.',
-    notationNotShown:
-      'La notation n’a pas pu être affichée. La raison technique figure dans les détails de la reconnaissance.',
+    /** The notation could not be drawn; `page` is the page shown on its own, absent for the whole scan. */
+    notDrawn: (page: number | undefined): string =>
+      page === undefined
+        ? 'La notation reconnue n’a pas pu être dessinée.'
+        : `Page ${page}\u00a0: la notation reconnue n’a pas pu être dessinée.`,
+    /** The recognition holds no music to draw; `page` as above. */
+    noMusic: (page: number | undefined): string =>
+      page === undefined
+        ? 'Aucune musique n’a été lue dans cette numérisation.'
+        : `Page ${page}\u00a0: aucune musique n’a été lue.`,
     noNotes: 'Aucune note jouable n’a été reconnue.',
     notUsable:
       'Cette reconnaissance ne peut pas encore servir au doigté\u00a0: certaines de ses notes ne s’accordent pas.',
+    /** The import refused `bar`, the bar's printed number as the engine named it (issue 233). */
+    notUsableAt: (bar: string): string =>
+      `La mesure ${bar} n’a pas pu être lue telle qu’elle est écrite, donc cette reconnaissance ne peut pas encore servir au doigté.`,
+    notChecked:
+      'Les notes n’ont pas pu être vérifiées pour le doigté dans cet onglet. Rechargez la page et rouvrez cette numérisation depuis Mes partitions.',
     offline:
       'Impossible de joindre le service de numérisation. Vérifiez votre connexion et réessayez.',
     cancelFailed:

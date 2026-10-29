@@ -221,6 +221,7 @@ const GATES = [
   'bundle',
   'e2e',
   'e2e:loop',
+  'scan:cases',
   'benchmark',
   'benchmark:mutopia',
   'hands',
@@ -232,6 +233,7 @@ const DEPS = {
   bundle: ['build'],
   e2e: ['build'],
   'e2e:loop': ['build'],
+  'scan:cases': ['build'],
   benchmark: ['build'],
   'benchmark:mutopia': ['build'],
   hands: ['build'],
@@ -246,7 +248,7 @@ const whyOf = (p, gate) => p.run.find((r) => r.gate === gate).why;
 test('a docs-only change runs only the always gates', () => {
   const p = plan(['docs/verification-loop.md']);
   assert.deepEqual(ran(p), ALWAYS);
-  assert.equal(p.skip.length, 13);
+  assert.equal(p.skip.length, 14);
   assert.equal(p.skip.find((s) => s.gate === 'e2e').why, 'no changed path maps to it');
 });
 

@@ -48,6 +48,7 @@ export function handle(req: EngineRequest): EngineResponse {
             score,
             editorial: {},
             warnings: info.warnings,
+            tieRepairs: [],
             xml,
             midiInfo: info,
           };
@@ -55,9 +56,10 @@ export function handle(req: EngineRequest): EngineResponse {
         // Plain text for the renderer and the exporter: an .mxl archive or a UTF-16 file is
         // decoded once here, and parseMusicXml then reads the same text, which declares UTF-8.
         const xml = declareUtf8(unpackMusicXml(req.input));
-        const { score, editorial, warnings } = parseMusicXml(xml, {
+        const { score, editorial, warnings, tieRepairs } = parseMusicXml(xml, {
           source: req.source,
           ...(req.preserveNotation ? { preserveNotation: true } : {}),
+          ...(req.tolerateScanTies ? { tolerateScanTies: true } : {}),
         });
         return {
           id: req.id,
@@ -66,6 +68,7 @@ export function handle(req: EngineRequest): EngineResponse {
           score,
           editorial,
           warnings,
+          tieRepairs,
           xml,
           midiInfo: null,
         };

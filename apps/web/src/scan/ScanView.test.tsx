@@ -9,6 +9,7 @@ import { useAppStore } from '../app/store.js';
 import { en } from '../i18n/en/index.js';
 import { messages as fr } from '../i18n/fr/index.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
+import { PhraseError } from '../i18n/PhraseError.js';
 import { GRAND_STAFF_WARNING } from './client.js';
 import type { ScanSession } from './model.js';
 import { BUSY_RETRY_MS, BUSY_WAIT_MS } from './client.js';
@@ -19,12 +20,14 @@ const { load, renderNotation } = vi.hoisted(() => ({ load: vi.fn(), renderNotati
 
 // DOM tests have no browser workers; pixel/upload behavior is covered by Playwright.
 vi.mock('../engine/client.js', () => ({
+  SCAN_LOAD: { preserveNotation: true, tolerateScanTies: true },
   createEngineClient: () => ({
     load,
     dispose: () => {},
   }),
 }));
 vi.mock('../score/render/renderer.js', () => ({
+  NO_MUSIC: 'the score has no music to draw',
   createRenderer: () => ({
     render: renderNotation,
     dispose: () => {},
@@ -33,7 +36,7 @@ vi.mock('../score/render/renderer.js', () => ({
 // pdf.js does not run under jsdom; a PDF page's preview is covered by Playwright.
 vi.mock('./PdfPreview.js', () => ({ PdfPreview: () => null }));
 beforeEach(() => {
-  load.mockReset().mockResolvedValue({ warnings: [], score: { notes: [{}] } });
+  load.mockReset().mockResolvedValue({ warnings: [], score: { notes: [{}] }, tieRepairs: [] });
   renderNotation.mockReset().mockResolvedValue({ pages: ['<svg/>'] });
 });
 afterEach(() => {
@@ -117,7 +120,7 @@ it('waits for valid import and displayed notation before enabling use', async ()
   );
   const use = screen.getByRole('button', { name: 'Use for fingerings' });
   expect(use).toBeDisabled();
-  finishImport({ warnings: [], score: { notes: [{}] } });
+  finishImport({ warnings: [], score: { notes: [{}] }, tieRepairs: [] });
   await vi.waitFor(() => expect(use).toBeDisabled());
   finishRender({ pages: ['<svg/>'] });
   await vi.waitFor(() => expect(use).toBeEnabled());
@@ -148,7 +151,8 @@ it.each(['import', 'render', 'empty'] as const)(
   async (failure) => {
     if (failure === 'import') load.mockRejectedValue(new Error('Unsupported notation'));
     if (failure === 'render') renderNotation.mockRejectedValue(new Error('Cannot render notation'));
-    if (failure === 'empty') load.mockResolvedValue({ warnings: [], score: { notes: [] } });
+    if (failure === 'empty')
+      load.mockResolvedValue({ warnings: [], score: { notes: [] }, tieRepairs: [] });
     render(
       <ScanView
         session={{
@@ -1080,4 +1084,404 @@ it("offers homr's other readings of the selected note's pitch, and one tap corre
   ).toEqual(['D4']);
   await userEvent.click(within(offered).getByRole('button', { name: 'D4' }));
   expect(await screen.findByText('1 correction')).toBeInTheDocument();
+});
+
+/**
+ * A page in 3/4 whose tied notes end a beat before their continuation, as homr reads a missing
+ * dot (issue 233): `ties` such ties, the first from bar 1's A4, the next from bar 2's B4.
+ */
+function lateTies(ties: number): string {
+  const n = (step: string, tie?: 'start' | 'stop') =>
+    `<note><pitch><step>${step}</step><octave>4</octave></pitch><duration>1</duration>${tie ? `<tie type="${tie}"/>` : ''}<type>quarter</type>${tie ? `<notations><tied type="${tie}"/></notations>` : ''}</note>`;
+  const rest = '<note><rest/><duration>1</duration><type>quarter</type></note>';
+  const steps = ['A', 'B', 'C'];
+  const bars = [`${n('C')}${n('D')}${n('A', 'start')}`];
+  for (let i = 1; i <= ties; i++)
+    bars.push(`${rest}${n(steps[i - 1]!, 'stop')}${i < ties ? n(steps[i]!, 'start') : n('E')}`);
+  const start =
+    '<attributes><divisions>1</divisions><time><beats>3</beats><beat-type>4</beat-type></time></attributes>';
+  return `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1">${bars
+    .map((bar, i) => `<measure number="${i + 1}">${i === 0 ? start : ''}${bar}</measure>`)
+    .join('')}</part></score-partwise>`;
+}
+
+it('uses a recognition whose only problem is a tie played as two notes, and lists the place with its fix (issue 233)', async () => {
+  // The import plays the late tie as two notes, as the engine's scan import does.
+  load.mockImplementation((xml: string) =>
+    Promise.resolve({
+      warnings: [],
+      score: { notes: [{}] },
+      tieRepairs: xml.includes('<tie type="start"/>')
+        ? [{ note: 2, part: 0, measure: 0, reason: 'gap' }]
+        : [],
+    }),
+  );
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  render(<ScanView session={{ id: 'late-tie', file, xml: lateTies(1) }} />);
+  const use = screen.getByRole('button', { name: 'Use for fingerings' });
+  await vi.waitFor(() => expect(use).toBeEnabled());
+  expect(load).toHaveBeenCalledWith(expect.any(String), 'scan.musicxml', {
+    preserveNotation: true,
+    tolerateScanTies: true,
+  });
+  // Usable: the red stays on Use, and the place waits under its count with its fix.
+  expect(use).toHaveClass('is-red');
+  expect(screen.getByText('1 place to check')).toBeInTheDocument();
+  expect(screen.queryByRole('alert')).toBeNull();
+  const place = screen.getByRole('button', {
+    name: /the tied A4 ends 1 beat before the next A4 begins/,
+  });
+  expect(place).not.toHaveClass('is-red');
+  // A half note would run past the bar: only the removal is offered, and Fix all needs two.
+  expect(screen.getByRole('button', { name: 'Remove the tie' })).not.toHaveClass('is-red');
+  expect(screen.queryByRole('button', { name: /^Make the/ })).toBeNull();
+  expect(screen.queryByRole('button', { name: /^Fix all/ })).toBeNull();
+  await userEvent.click(screen.getByRole('button', { name: 'Remove the tie' }));
+  expect(await screen.findByText('1 correction')).toBeInTheDocument();
+  await vi.waitFor(() => expect(screen.queryByText('1 place to check')).toBeNull());
+  await vi.waitFor(() => expect(use).toBeEnabled());
+});
+
+/** One bar of 4/4 whose C4 and D4 are each tied to the next, as written: no place to check. */
+function twoTies(): string {
+  const n = (step: string, tie?: 'start' | 'stop') =>
+    `<note><pitch><step>${step}</step><octave>4</octave></pitch><duration>1</duration>${tie ? `<tie type="${tie}"/>` : ''}<type>quarter</type>${tie ? `<notations><tied type="${tie}"/></notations>` : ''}</note>`;
+  return `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>${n('C', 'start')}${n('C', 'stop')}${n('D', 'start')}${n('D', 'stop')}</measure></part></score-partwise>`;
+}
+
+it('keeps the places list open across a fix while the import checks it again (issue 233)', async () => {
+  // Two ties only the import repairs: the review itself names neither place.
+  const xml = twoTies();
+  const tied = (step: string, x: string) =>
+    new RegExp(`<step>${step}</step>(?:(?!</note>).)*<tie type="start"/>`).test(x);
+  load.mockImplementation((x: string) =>
+    Promise.resolve({
+      warnings: [],
+      score: { notes: [{}] },
+      tieRepairs: [
+        ...(tied('C', x) ? [{ note: 0, part: 0, measure: 0, reason: 'unmatchedStart' }] : []),
+        ...(tied('D', x) ? [{ note: 2, part: 0, measure: 0, reason: 'unmatchedStart' }] : []),
+      ],
+    }),
+  );
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  const { container } = render(<ScanView session={{ id: 'kept-open', file, xml }} />);
+  expect(await screen.findByText('2 places to check')).toBeInTheDocument();
+  // The reader opens the list (usable, so it starts folded).
+  const list = container.querySelector<HTMLDetailsElement>('details.scan-problems')!;
+  expect(list.open).toBe(false);
+  act(() => {
+    list.open = true;
+    list.dispatchEvent(new Event('toggle'));
+  });
+  await userEvent.click(screen.getAllByRole('button', { name: 'Remove the tie' })[0]!);
+  expect(await screen.findByText('1 place to check')).toBeInTheDocument();
+  expect(container.querySelector<HTMLDetailsElement>('details.scan-problems')!.open).toBe(true);
+});
+
+it('makes every tie the import played as separate notes a place to check (issue 233)', async () => {
+  // A repair no place names yet: the C4 the import read as a tie that leads nowhere.
+  load.mockResolvedValue({
+    warnings: [],
+    score: { notes: [{}] },
+    tieRepairs: [
+      { note: 2, part: 0, measure: 0, reason: 'gap' },
+      { note: 0, part: 0, measure: 0, reason: 'unmatchedStart' },
+    ],
+  });
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  render(<ScanView session={{ id: 'repaired', file, xml: lateTies(1) }} />);
+  expect(await screen.findByText('2 places to check')).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', {
+      name: /the tie on C4 leads to no next C4\. It is played without the tie\.$/,
+    }),
+  ).toBeInTheDocument();
+  await vi.waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+  );
+});
+
+it('fixes every place the file decides as one step, which one Undo takes back (issue 233)', async () => {
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  const { container } = render(<ScanView session={{ id: 'fix-all', file, xml: lateTies(2) }} />);
+  expect(await screen.findByText('2 places to check')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Fix all 2' }));
+  expect(await screen.findByText('2 corrections')).toBeInTheDocument();
+  expect(screen.queryByText(/places? to check/)).toBeNull();
+  expect(screen.queryByRole('button', { name: /^Fix all/ })).toBeNull();
+  // Each fix is listed under Review corrections.
+  expect(
+    [...container.querySelectorAll('.scan-corrections ol li')].map((li) => li.textContent),
+  ).toEqual(['Bar 1, staff 1: tie on A4 removed', 'Bar 2, staff 1: tie on B4 removed']);
+  await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
+  expect(await screen.findByText('2 places to check')).toBeInTheDocument();
+  expect(screen.queryByText(/^\d+ corrections?$/)).toBeNull();
+});
+
+it('says the notation could not be drawn, and offers Scan again and the files (issue 233)', async () => {
+  renderNotation.mockRejectedValue(new Error('the score could not be laid out'));
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  const { container } = render(<ScanView session={{ id: 'undrawn', file, xml: lateTies(1) }} />);
+  const alert = await screen.findByText(
+    'The recognized notation could not be drawn. Scan again, or download the files for a notation editor below.',
+  );
+  expect(alert).toHaveAttribute('role', 'alert');
+  // Nothing drawn, nothing to correct on: the red is on Scan again, not on a place.
+  expect(screen.getByRole('button', { name: 'Scan again' })).toHaveClass('is-red');
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+  expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+  expect(container.querySelector('details.scan-files')).toHaveAttribute('open');
+  // The renderer's own words stay under Recognition details, as a supplement.
+  expect(screen.getByText('Technical reason: the score could not be laid out')).toBeInTheDocument();
+});
+
+it('names the page that holds no music to draw (issue 233)', async () => {
+  renderNotation.mockRejectedValue(new Error('the score has no music to draw'));
+  render(<ScanView session={reviewed()} />);
+  // In the whole score, the scan; on a page shown alone, that page.
+  expect(await screen.findByText(/^No music was read from this scan\. Scan again/)).toHaveAttribute(
+    'role',
+    'alert',
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Select page 2: second.png' }));
+  expect(await screen.findByText(/^Page 2: no music was read\. Scan again/)).toHaveAttribute(
+    'role',
+    'alert',
+  );
+});
+
+it('draws the notation once more after the renderer died (issue 233)', async () => {
+  // A stable column: the one render the review starts is the one that meets the dead worker.
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get: () => 640,
+  });
+  let dead = true;
+  renderNotation.mockImplementation(() => {
+    if (!dead) return Promise.resolve({ pages: ['<svg/>'] });
+    dead = false;
+    return Promise.reject(new Error('the score renderer failed: out of memory'));
+  });
+  try {
+    const file = new File([png], 'page.png', { type: 'image/png' });
+    render(<ScanView session={{ id: 'revived', file, xml: '<score-partwise/>' }} />);
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+    );
+    expect(renderNotation).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).toBeNull();
+  } finally {
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth;
+  }
+});
+
+it('names the bar an import refusal names, in the reader’s words (issue 233)', async () => {
+  load.mockRejectedValue(
+    new Error(
+      'cannot preserve notation: note 3: invalid or missing duration (part 1, bar 12); note 9: no pitch (part 1, bar 14)',
+    ),
+  );
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  render(<ScanView session={{ id: 'bar-12', file, xml: '<score-partwise/>' }} />);
+  expect(
+    await screen.findByText(
+      /^Bar 12 could not be read as written, so this recognition cannot be used for fingerings yet\. Correct the notes here/,
+    ),
+  ).toHaveAttribute('role', 'alert');
+  expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeDisabled();
+});
+
+it('leads from the bar an import refusal names to that bar’s first note (issue 233)', async () => {
+  load.mockRejectedValue(
+    new Error('cannot preserve notation: note 2: invalid or missing duration (part 1, bar 1)'),
+  );
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  const { container } = render(<ScanView session={{ id: 'bar-1', file, xml: twoTies() }} />);
+  const show = await screen.findByRole('button', { name: 'Show bar 1' });
+  // Nothing else to correct: the way to the bar carries the one red.
+  await vi.waitFor(() => expect(show).toHaveClass('is-red'));
+  expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+  await userEvent.click(show);
+  // The bar's first note is in hand: the red is the note's now, on the sheet.
+  expect(show).not.toHaveClass('is-red');
+  expect(screen.getByRole('button', { name: 'Use for fingerings' })).not.toHaveClass('is-red');
+  expect(screen.getByRole('button', { name: 'Scan again' })).not.toHaveClass('is-red');
+});
+
+it('reads the notes again in a fresh engine after its worker stopped (issue 233)', async () => {
+  const stopped = new PhraseError((t) => t.app.engineFailed('out of memory'));
+  load.mockRejectedValueOnce(stopped);
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  render(<ScanView session={{ id: 'engine-revived', file, xml: lateTies(1) }} />);
+  await vi.waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+  );
+  expect(load).toHaveBeenCalledTimes(2);
+  expect(screen.queryByRole('alert')).toBeNull();
+});
+
+it('does not blame the notes when the engine stops twice (issue 233)', async () => {
+  load.mockRejectedValue(new PhraseError((t) => t.app.engineFailed('out of memory')));
+  const file = new File([png], 'page.png', { type: 'image/png' });
+  render(<ScanView session={{ id: 'engine-stopped', file, xml: lateTies(1) }} />);
+  expect(
+    await screen.findByText(
+      'The notes could not be checked for fingerings in this tab. Reload the page and open this scan from My scores.',
+    ),
+  ).toHaveAttribute('role', 'alert');
+  expect(load).toHaveBeenCalledTimes(2);
+  expect(screen.queryByText(/do not fit together|Correct the notes/)).toBeNull();
+  expect(
+    screen.getByText('Technical reason: the engine worker failed: out of memory'),
+  ).toBeInTheDocument();
+});
+
+it('draws the notation once more after the renderer’s module aborted (issue 233)', async () => {
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get: () => 640,
+  });
+  // The worker answers with the trap's own words, and the renderer retires it.
+  renderNotation.mockRejectedValueOnce(new Error('unreachable'));
+  try {
+    const file = new File([png], 'page.png', { type: 'image/png' });
+    render(<ScanView session={{ id: 'aborted', file, xml: '<score-partwise/>' }} />);
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+    );
+    expect(renderNotation).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).toBeNull();
+  } finally {
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth;
+  }
+});
+
+it('names the page whose notation keeps the whole score from being drawn, with its new photo as the fix (issue 233)', async () => {
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get: () => 640,
+  });
+  // Page 2 cannot be drawn alone, and so neither can the whole score.
+  renderNotation.mockImplementation(({ xml }: { xml: string }) =>
+    xml.includes('<!--one-->')
+      ? Promise.resolve({ pages: ['<svg/>'] })
+      : Promise.reject(new Error('the score could not be laid out')),
+  );
+  const session = reviewed();
+  session.pages = session.pages!.map((page, i) => ({
+    ...page,
+    xml: `<score-partwise><!--${i ? 'two' : 'one'}--></score-partwise>`,
+  }));
+  try {
+    const { container } = render(<ScanView session={session} />);
+    expect(
+      await screen.findByText(/^Page 2: the recognized notation could not be drawn\. Scan again/),
+    ).toHaveAttribute('role', 'alert');
+    expect(screen.getByRole('button', { name: /^Replace page 2/ })).toHaveClass('is-red');
+    expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+  } finally {
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth;
+  }
+});
+
+it('says what the whole score showed while a page is shown alone (issue 233)', async () => {
+  const downloads = spyDownloads();
+  stubShare(false);
+  try {
+    render(<ScanView session={reviewed()} />);
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+    );
+    // Page 2 alone holds no music to draw; the whole score, which Use opens, is usable.
+    renderNotation.mockRejectedValue(new Error('the score has no music to draw'));
+    await userEvent.click(screen.getByRole('button', { name: 'Select page 2: second.png' }));
+    expect(await screen.findAllByText(/^Page 2: no music was read\./)).not.toHaveLength(0);
+    await userEvent.click(screen.getByRole('button', { name: en.scan.review.downloadAll }));
+    await vi.waitFor(() => expect(downloads.names).toEqual(['source-scan.zip']));
+    const archive = downloads.blobs.find((b) => (b as File).name === 'source-scan.zip')!;
+    const entries = unzipSync(new Uint8Array(await archive.arrayBuffer()));
+    const summary = JSON.parse(new TextDecoder().decode(entries['scan.json'])) as {
+      review: unknown;
+    };
+    expect(summary.review).toEqual({
+      verdict: en.scan.verdict.pages(2),
+      usable: true,
+      technical: [],
+      places: [],
+      corrections: 0,
+    });
+  } finally {
+    withoutShare();
+    downloads.restore();
+  }
+});
+
+it('says under Recognition details that this device keeps its scans, and reports what the review said (issue 233)', async () => {
+  const sent = vi.fn((_url: string, _init?: RequestInit) =>
+    Promise.resolve(new Response(null, { status: 204 })),
+  );
+  vi.stubGlobal('fetch', sent);
+  // The same id both times, one a case could be kept under: only the opt-in tells them apart.
+  const id = '0a1b2c3d-4e5f-4a6b-8c7d-8e9f0a1b2c3d';
+  const { unmount } = render(<ScanView session={{ ...reviewed(), id }} />);
+  await vi.waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+  );
+  // Not opted in: no line, nothing sent.
+  expect(screen.queryByText(/kept to improve recognition/)).toBeNull();
+  expect(sent).not.toHaveBeenCalled();
+  unmount();
+  localStorage.setItem('digitus2.keepScans', '1');
+  try {
+    render(<ScanView session={{ ...reviewed(), id }} />);
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled(),
+    );
+    expect(
+      screen.getByText('Scans from this device are kept to improve recognition.'),
+    ).toBeInTheDocument();
+    await vi.waitFor(() => expect(sent).toHaveBeenCalled());
+    const [url, init] = sent.mock.calls.at(-1)!;
+    expect(url).toMatch(/\/v1\/cases\/0a1b2c3d4e5f4a6b8c7d8e9f0a1b2c3d$/);
+    expect(JSON.parse(init!.body as string)).toMatchObject({
+      usable: true,
+      technical: [],
+      places: [],
+      corrections: 0,
+    });
+  } finally {
+    localStorage.removeItem('digitus2.keepScans');
+  }
+});
+
+it('writes what the review said into scan.json, in English whatever the language on screen (issue 233)', async () => {
+  await act(async () => {
+    await chooseLocale('fr');
+  });
+  const downloads = spyDownloads();
+  stubShare(false);
+  try {
+    render(<ScanView session={reviewed()} />);
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: fr.scan.review.useForFingerings })).toBeEnabled(),
+    );
+    await userEvent.click(screen.getByRole('button', { name: fr.scan.review.downloadAll }));
+    await vi.waitFor(() => expect(downloads.names).toEqual(['source-scan.zip']));
+    const archive = downloads.blobs.find((b) => (b as File).name === 'source-scan.zip')!;
+    const entries = unzipSync(new Uint8Array(await archive.arrayBuffer()));
+    const summary = JSON.parse(new TextDecoder().decode(entries['scan.json'])) as {
+      review: unknown;
+    };
+    expect(summary.review).toEqual({
+      verdict: en.scan.verdict.pages(2),
+      usable: true,
+      technical: [],
+      places: [],
+      corrections: 0,
+    });
+  } finally {
+    withoutShare();
+    downloads.restore();
+  }
 });

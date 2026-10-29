@@ -39,6 +39,9 @@ export function inlineEngine(): EngineClient & { calls: string[]; loads: LoadOpt
         ...(opts?.preserveNotation !== undefined
           ? { preserveNotation: opts.preserveNotation }
           : {}),
+        ...(opts?.tolerateScanTies !== undefined
+          ? { tolerateScanTies: opts.tolerateScanTies }
+          : {}),
       }).then((r) => r as never);
     },
     solve: (score, profile, pins) =>

@@ -3,7 +3,7 @@
  * fingered MusicXML all run in the worker (spec section 4); every request carries an id that its
  * response echoes, so the client can match answers that arrive out of order.
  */
-import type { Assignment, MidiInfo, Score } from '@digitus2/engine';
+import type { Assignment, MidiInfo, Score, TieRepair } from '@digitus2/engine';
 import type { HandSize } from '../app/store.js';
 
 /** What a loaded file is: MusicXML (plain or `.mxl`) or a Standard MIDI File. */
@@ -25,6 +25,8 @@ export type EngineRequest =
       splitMidi?: number;
       /** Scan imports must not repair invalid recognition silently. */
       preserveNotation?: boolean;
+      /** A scan's ties that cannot be joined become separate presses, listed in `tieRepairs`. */
+      tolerateScanTies?: boolean;
     }
   | { id: number; type: 'solve'; score: Score; profile: HandSize; pins?: Assignment }
   | { id: number; type: 'fingeredXml'; xml: string; score: Score; assignment: Assignment }
@@ -39,6 +41,8 @@ export type EngineResponse =
       score: Score;
       editorial: Assignment;
       warnings: string[];
+      /** The ties a scan import read as separate presses (`tolerateScanTies`); else empty. */
+      tieRepairs: TieRepair[];
       xml: string;
       /** The import facts of a MIDI file; null for MusicXML. */
       midiInfo: MidiInfo | null;

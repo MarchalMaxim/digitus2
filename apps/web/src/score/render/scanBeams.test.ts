@@ -1,5 +1,5 @@
 import { parseMusicXml } from '@digitus2/engine';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { prepareScanBeams } from './scanBeams.js';
 import { verovioOptions } from './options.js';
 
@@ -199,5 +199,47 @@ describe('HOMR engraving fallback', () => {
     ],
   ])('leaves %s unchanged', (_name, xml) => {
     expect(prepareScanBeams(xml)).toBe(xml);
+  });
+});
+
+describe('HOMR engraving fallback on recognition it does not expect', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  const twoBars = score(sixEighths).replace(
+    '</part>',
+    '<measure number="2">' + sixEighths.replace(/id="(\w+)"/g, 'id="$1b"') + '</measure></part>',
+  );
+
+  it('leaves a bar that throws as it was read and still beams the others', () => {
+    const insert = Node.prototype.insertBefore;
+    const spy = vi.spyOn(Node.prototype, 'insertBefore').mockImplementation(function <
+      T extends Node,
+    >(this: Node, node: T, child: Node | null): T {
+      // The third beam of bar 2 throws, after two have been added to its copy.
+      if (this instanceof Element && this.id === 'n2b') throw new TypeError('unexpected shape');
+      return insert.call(this, node, child) as T;
+    });
+    const out = prepareScanBeams(twoBars);
+    expect(spy).toHaveBeenCalled();
+    expect(beams(out)).toEqual([
+      ['n0', ['1:begin']],
+      ['n1', ['1:end']],
+      ['n2', ['1:begin']],
+      ['n3', ['1:end']],
+      ['n4', ['1:begin']],
+      ['n5', ['1:end']],
+      ...Array.from({ length: 6 }, (_, i) => [`n${i}b`, []]),
+    ]);
+  });
+
+  it('returns the XML as it is when parsing or serializing throws', () => {
+    vi.spyOn(XMLSerializer.prototype, 'serializeToString').mockImplementation(() => {
+      throw new Error('unexpected shape');
+    });
+    expect(prepareScanBeams(twoBars)).toBe(twoBars);
+    vi.spyOn(DOMParser.prototype, 'parseFromString').mockImplementation(() => {
+      throw new Error('unexpected shape');
+    });
+    expect(prepareScanBeams(twoBars)).toBe(twoBars);
   });
 });

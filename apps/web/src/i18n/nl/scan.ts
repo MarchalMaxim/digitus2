@@ -116,6 +116,18 @@ export const scan: Messages['scan'] = {
     filesSummary: 'Bestanden voor een notatieprogramma',
     /** Under Recognition details: the importer's or renderer's own message. */
     technical: (reason: string) => `Technische reden: ${reason}`,
+    /** `error` says the notation could not be drawn: it is scanned again, or its files used elsewhere. */
+    notDrawnProblem: (error: string): string =>
+      `${error} Scan opnieuw, of download hieronder de bestanden voor een notatieprogramma.`,
+    /** Said after Fix all (issue 233). */
+    fixedAll: (n: number): string =>
+      plural('nl', n, {
+        one: '# correctie gemaakt. Ongedaan maken zet haar terug.',
+        other: '# correcties gemaakt. Ongedaan maken zet ze allemaal terug.',
+      }),
+    /** Under Recognition details on a device that keeps its scans as validation cases (issue 233). */
+    kept: 'Scans van dit apparaat worden bewaard om de herkenning te verbeteren.',
+    showBar: (bar: string) => `Toon maat ${bar}`,
     retained:
       'Bewaarde originelen en herkenningen vind je in Mijn partituren. Bewaar zelf ook je originele bestanden; de opslag van je browser kan worden gewist. Bij het afspelen kan een standaardtempo van de app gelden.',
     beamGrouping: 'De balkgroepering is afgeleid en kan afwijken van het origineel.',
@@ -266,6 +278,10 @@ export const scan: Messages['scan'] = {
     setMeter: (meter: string, bar: string) => `Gebruik ${meter} vanaf maat ${bar}`,
     removeMark: (mark: 'ending' | 'repeat') =>
       mark === 'ending' ? 'Volta verwijderen' : 'Herhalingsteken verwijderen',
+    lengthenTie: (pitch: string, bar: string, length: string, dotted: boolean) =>
+      `Maak de ${pitch} in maat ${bar} een ${dotted ? 'gepunteerde ' : ''}${length} noot, zodat de overbinding reikt`,
+    removeTie: 'Overbinding weghalen',
+    fixAll: (n: number) => `Alle ${n} herstellen`,
     stale: (kept: number) =>
       `Sommige opgeslagen correcties passen niet meer bij deze herkenning. De eerste ${kept} blijven behouden.`,
     problemsSummary: (n: number) =>
@@ -275,8 +291,26 @@ export const scan: Messages['scan'] = {
         `${where}: de overgebonden ${pitch} eindigt ${gap} voordat de volgende ${pitch} begint. Controleer de duren.`,
       tieEarly: (where: string, pitch: string, gap: string) =>
         `${where}: de overgebonden ${pitch} loopt ${gap} door in de volgende ${pitch}. Controleer de duren.`,
-      tieUnmatched: (where: string, pitch: string) =>
-        `${where}: een overbinding op ${pitch} heeft geen bijpassende noot.`,
+      tieUnmatched: (where: string, pitch: string, side: 'start' | 'stop') =>
+        side === 'start'
+          ? `${where}: een overbinding op ${pitch} heeft geen bijpassende noot.`
+          : `${where}: de overbinding naar ${pitch} komt van geen bijpassende eerdere noot.`,
+      tieGrace: (where: string, pitch: string) =>
+        `${where}: de voorslag ${pitch} is overgebonden, maar een voorslag duurt geen tijd om aan te houden.`,
+      tieRepaired: (
+        where: string,
+        pitch: string,
+        reason: 'gap' | 'unmatchedStart' | 'unmatchedStop' | 'grace',
+      ) =>
+        reason === 'gap'
+          ? `${where}: de overbinding op ${pitch} reikt niet tot de volgende ${pitch}. Ze worden als twee noten gespeeld.`
+          : reason === 'unmatchedStart'
+            ? `${where}: de overbinding op ${pitch} leidt naar geen volgende ${pitch}. De noot wordt zonder overbinding gespeeld.`
+            : reason === 'unmatchedStop'
+              ? `${where}: de overbinding naar ${pitch} komt van geen eerdere ${pitch}. De noot wordt opnieuw aangeslagen.`
+              : `${where}: de voorslag ${pitch} is overgebonden. Ze worden als twee noten gespeeld.`,
+      tieRepairedBar: (where: string) =>
+        `${where}: een overbinding past niet bij haar noten. Er wordt zonder overbinding gespeeld.`,
       barTiming: (timing: string) => `De handen lopen niet gelijk. ${timing}`,
       barLong: (timing: string) => `De maat is langer dan de maatsoort. ${timing}`,
       endingWithoutRepeat: (where: string) =>
@@ -321,11 +355,24 @@ export const scan: Messages['scan'] = {
     somePagesFailed:
       'Sommige pagina’s moeten opnieuw worden gescand. Herkende pagina’s blijven bewaard.',
     recognitionFailed: 'Herkenning mislukt.',
-    notationNotShown:
-      'De notatie kon niet worden getoond. De technische reden staat bij de herkenningsdetails.',
+    /** The notation could not be drawn; `page` is the page shown on its own, absent for the whole scan. */
+    notDrawn: (page: number | undefined): string =>
+      page === undefined
+        ? 'De herkende notatie kon niet worden getekend.'
+        : `Pagina ${page}: de herkende notatie kon niet worden getekend.`,
+    /** The recognition holds no music to draw; `page` as above. */
+    noMusic: (page: number | undefined): string =>
+      page === undefined
+        ? 'Er is geen muziek gelezen in deze scan.'
+        : `Pagina ${page}: er is geen muziek gelezen.`,
     noNotes: 'Er zijn geen speelbare noten herkend.',
     notUsable:
       'Deze herkenning kan nog niet voor vingerzettingen worden gebruikt: sommige noten passen niet bij elkaar.',
+    /** The import refused `bar`, the bar's printed number as the engine named it (issue 233). */
+    notUsableAt: (bar: string): string =>
+      `Maat ${bar} kon niet worden gelezen zoals hij geschreven staat, dus deze herkenning kan nog niet voor vingerzettingen worden gebruikt.`,
+    notChecked:
+      'De noten konden in dit tabblad niet worden gecontroleerd voor vingerzettingen. Laad de pagina opnieuw en open deze scan in Mijn partituren.',
     offline: 'Kon de scanner niet bereiken. Controleer je verbinding en probeer het opnieuw.',
     cancelFailed:
       'Kon het annuleren niet bevestigen. De scanner stopt binnen drie minuten vanzelf.',

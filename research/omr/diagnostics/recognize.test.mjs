@@ -453,7 +453,66 @@ test('the photo cases: one page each, turned when the manifest says so, with exp
   }
 });
 
-test('a page the service refuses is recorded as the service answered, and the run says the gate cannot replay it', () => {
+test("a store case's expect.json is carried into --out unchanged, in either form", () => {
+  const s = scratch();
+  try {
+    // The truth of a scan of one photo, and of a scan of two pages, as the owner wrote them.
+    const single = '{"photo":"x","bars":12,"staves":2,"fifths":0,"time":"4/4","cutOff":true}\n';
+    const paged =
+      '{"pages":[{"bars":19,"staves":2,"fifths":1,"time":"3/4"},{"bars":24,"staves":2,"fifths":1,"time":"3/4"}]}';
+    writeFileSync(join(writeCase(s.cases, 'case-x', 1), 'expect.json'), single);
+    writeFileSync(join(writeCase(s.cases, 'case-y', 2), 'expect.json'), paged);
+    writeCase(s.cases, 'case-z', 1);
+    // A truth an earlier run left beside a case whose store has none is not the case's.
+    mkdirSync(join(s.out, 'case-z'), { recursive: true });
+    writeFileSync(join(s.out, 'case-z', 'expect.json'), '{"bars":99}');
+    const lines = [];
+    recognizeAll(
+      { cases: s.cases, out: s.out, names: [] },
+      { recognizePage: fake().recognizePage, log: (line) => lines.push(line) },
+    );
+    assert.equal(readFileSync(join(s.out, 'case-x', 'expect.json'), 'utf8'), single);
+    assert.equal(readFileSync(join(s.out, 'case-y', 'expect.json'), 'utf8'), paged);
+    assert.equal(existsSync(join(s.out, 'case-z', 'expect.json')), false);
+    // The cases keep their truth in the store they were read from.
+    assert.equal(readFileSync(join(s.cases, 'case-y', 'expect.json'), 'utf8'), paged);
+    // Each page's line says what that page should hold.
+    assert.match(lines[0], /^case-x page 1\/1: .* \(expected 12 bars\)/);
+    assert.match(lines[1], /^case-y page 1\/2: .* \(expected 19 bars\)/);
+    assert.match(lines[2], /^case-y page 2\/2: .* \(expected 24 bars\)/);
+    assert.doesNotMatch(lines[3], /expected/);
+  } finally {
+    s.done();
+  }
+});
+
+test("a store case's expect.json that is not JSON is refused before anything is written", () => {
+  const s = scratch();
+  try {
+    writeFileSync(join(writeCase(s.cases, 'case-x', 1), 'expect.json'), '{"bars": 12');
+    writeFileSync(join(writeCase(s.cases, 'case-y', 1), 'expect.json'), '{"bars": 3}');
+    // A run of another case is not held up by it.
+    const other = join(s.root, 'other');
+    recognizeAll(
+      { cases: s.cases, out: other, names: ['case-y'] },
+      { recognizePage: fake().recognizePage, log: quiet },
+    );
+    assert.equal(readFileSync(join(other, 'case-y', 'expect.json'), 'utf8'), '{"bars": 3}');
+    assert.throws(
+      () =>
+        recognizeAll(
+          { cases: s.cases, out: s.out, names: [] },
+          { recognizePage: fake().recognizePage, log: quiet },
+        ),
+      (error) => error instanceof Usage && /case-x/.test(error.message),
+    );
+    assert.equal(existsSync(s.out), false);
+  } finally {
+    s.done();
+  }
+});
+
+test('a page the service refuses is recorded as the service answered, for the gate to replay', () => {
   const s = scratch();
   try {
     writeCase(s.cases, 'case-a', 3);
@@ -482,7 +541,11 @@ test('a page the service refuses is recorded as the service answered, and the ru
     assert.match(lines[1], /^case-a page 2\/3: refused 422 recognition-failed, \d+\.\d s$/);
     assert.match(lines[2], /^case-a page 3\/3: refused 504 recognition-timeout, \d+\.\d s$/);
     assert.equal(summary.failed, 2);
-    assert.ok(lines.some((l) => /recognition-failed\.json/.test(l) && /case-a/.test(l)));
+    assert.equal(
+      lines.at(-1),
+      "recognition-failed.json holds the service's answer to each refused page in case-a; the gate replays it.",
+    );
+    assert.ok(!lines.some((l) => /cannot replay/.test(l)));
   } finally {
     s.done();
   }

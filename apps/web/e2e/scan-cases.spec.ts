@@ -2,10 +2,12 @@ import { existsSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test, type Browser, type Page, type Request } from '@playwright/test';
 import {
+  caseFacts,
   caseFolders,
   decide,
   readCase,
   reportMarkdown,
+  retakeAsked,
   type CaseResult,
   type CaseScreen,
   type CasesReport,
@@ -16,8 +18,12 @@ import { HEALTH, mockService } from './helpers/scan.js';
 // The scan validation gate (issue 233): every scan the owner keeps is a case (docs/scanning.md,
 // Validation cases), replayed here through the built app with the scanner's own answers. A clean
 // photo whose notes are read right must reach Use for fingerings; a refusal must name the page or
-// the bar and offer a fix to press. The cases are private and live outside the repository, in the
-// folder DIGITUS2_SCAN_CASES names; `pnpm verify` runs this spec as its `scan:cases` step.
+// the bar and offer a fix to press. A page the scanner refused is answered with its refusal again,
+// and the case is judged by what the app shows for it. Each row also keeps what every page read
+// (bars, staves, key, time) against `expect.json`, and whether a page is to be photographed again;
+// an `expect.json` that cannot be read fails its case, which would otherwise go unmeasured.
+// The cases are private and live outside the repository, in the folder DIGITUS2_SCAN_CASES names;
+// `pnpm verify` runs this spec as its `scan:cases` step.
 const ROOT = process.env.DIGITUS2_SCAN_CASES;
 const CASES = caseFolders(ROOT);
 /** How long a review may take to settle after Scan this score. */
@@ -51,6 +57,11 @@ async function readScreen(page: Page): Promise<Omit<CaseScreen, 'settled'> & { b
     const technical = [...document.querySelectorAll('p')]
       .map(text)
       .filter((line) => line.startsWith('Technical reason'));
+    // A page the scanner did not read keeps the scan on its start screen, with its reason under it.
+    const pageErrors = [...document.querySelectorAll('[role=status]')]
+      .filter(shown)
+      .map(text)
+      .filter((line) => /^Page \d+: /.test(line));
     // A place's first button selects its note; the ones after it are the corrections offered.
     const places = [...document.querySelectorAll('details.scan-problems li')].map((li) => {
       const buttons = [...li.querySelectorAll<HTMLButtonElement>('.scan-problem-body button')];
@@ -87,6 +98,7 @@ async function readScreen(page: Page): Promise<Omit<CaseScreen, 'settled'> & { b
       verdict: text(verdictEl),
       blocking,
       alerts,
+      pageErrors,
       technical,
       places,
       usable,
@@ -132,8 +144,10 @@ async function replay(browser: Browser, baseURL: string, scan: ScanCase): Promis
       onRecognize: async (request) => {
         const index = pageOf(request, scan) ?? Math.min(calls, scan.pages.length - 1);
         calls++;
+        const { answer, xml, refused } = scan.pages[index]!;
+        // A page the scanner refused gets its refusal again: the 422 or 504 and the body it sent.
+        if (refused) return { status: refused.status, json: refused.answer };
         // As the service answers: the recognizer's record (recognizer, warnings) beside the notation.
-        const { answer, xml } = scan.pages[index]!;
         return { json: { state: 'ready', ...HEALTH, ...answer, xml } };
       },
     });
@@ -161,10 +175,16 @@ async function replay(browser: Browser, baseURL: string, scan: ScanCase): Promis
       }
       await page.screenshot({ path: join(scan.dir, 'score.png'), fullPage: true });
     }
-    const { outcome, why, fixes } = decide(screen, fingerings, scan.pages.length);
+    const facts = caseFacts(scan);
+    const { outcome, why, fixes } = decide(
+      screen,
+      fingerings,
+      scan.pages.length,
+      facts.pages,
+      scan.expectProblem,
+    );
     return {
       case: scan.name,
-      pages: scan.pages.length,
       outcome,
       why,
       verdict: screen.verdict,
@@ -174,6 +194,8 @@ async function replay(browser: Browser, baseURL: string, scan: ScanCase): Promis
       fixes,
       fingerings,
       seconds,
+      ...facts,
+      retake: retakeAsked(screen),
     };
   } finally {
     await context.close();
@@ -199,7 +221,6 @@ test('scan cases: every kept scan is usable, or its refusal names the place and 
       } catch (error) {
         results.push({
           case: name,
-          pages: scan.pages.length,
           outcome: 'failed',
           why: `the replay broke: ${String(error).split('\n')[0]}`,
           verdict: '',
@@ -209,6 +230,8 @@ test('scan cases: every kept scan is usable, or its refusal names the place and 
           fixes: [],
           fingerings: 0,
           seconds: (Date.now() - started) / 1000,
+          ...caseFacts(scan),
+          retake: false,
         });
       }
       const result = results[results.length - 1]!;

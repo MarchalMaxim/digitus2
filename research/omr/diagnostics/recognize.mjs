@@ -11,7 +11,8 @@
 // lands in --out under its own name: its photos byte for byte, and for each page
 // page-N-recognized.musicxml and page-N-recognition.json as the service's Keeper keeps them, so the
 // gate replays the new answers. scan.json is not copied, and one left in --out is removed: the gate
-// prefers it to the records and it carries the old recognizer's answers. --photos adds a one-page
+// prefers it to the records and it carries the old recognizer's answers. A case's expect.json, its
+// truth, is copied unchanged, so the new store is measured against it too. --photos adds a one-page
 // case photo-<id> for each photo of a committed photo set, turned upright when the manifest says
 // so, with expect.json holding the facts read off the page. --prepare names a Python module whose
 // clean_file(path) rewrites a photo in place: it runs on a copy of each photo before recognition,
@@ -140,7 +141,9 @@ export function planCases({ cases, photos, names = [] }) {
       const dir = join(cases, name);
       if (name.startsWith('.') || !isDir(dir)) continue;
       const pages = casePages(dir);
-      if (pages.length) plan.push({ name, pages });
+      // The case's truth goes with it as it is: a scan of one photo, or {pages: [...]}.
+      const expectFile = join(dir, 'expect.json');
+      if (pages.length) plan.push({ name, pages, ...(existsSync(expectFile) && { expectFile }) });
     }
   }
   if (photos) {
@@ -167,6 +170,13 @@ export function planCases({ cases, photos, names = [] }) {
   const chosen = names.length ? plan.filter((c) => names.includes(c.name)) : plan;
   if (!chosen.length)
     throw new Usage(`No case to recognise in ${[cases, photos].filter(Boolean).join(' or ')}.`);
+  for (const scan of chosen)
+    if (scan.expectFile)
+      try {
+        scan.expect = JSON.parse(readFileSync(scan.expectFile, 'utf8'));
+      } catch (error) {
+        throw new Usage(`The expect.json of ${scan.name} is not JSON: ${error.message}`);
+      }
   return chosen;
 }
 
@@ -224,14 +234,16 @@ export function recognizeAll(options, deps) {
   const run = { ranAt: new Date(now()).toISOString(), prepare: prepare ?? null, cases: [] };
   let pages = 0;
   let failed = 0;
-  const unreplayable = [];
+  const refusedCases = [];
   let current;
   try {
     for (const scan of plan) {
       const dir = join(out, scan.name);
       current = dir;
       clearCase(dir);
-      if (scan.expect)
+      // A store case's truth byte for byte; a photo case's from the manifest.
+      if (scan.expectFile) copyFileSync(scan.expectFile, join(dir, 'expect.json'));
+      else if (scan.expect)
         writeFileSync(join(dir, 'expect.json'), JSON.stringify(scan.expect, null, 2) + '\n');
       const kept = { case: scan.name, pages: [] };
       const failures = [];
@@ -279,8 +291,12 @@ export function recognizeAll(options, deps) {
           Object.assign(entry, counts, {
             warnings: (answer.body.warnings ?? []).map((w) => w?.code ?? w),
           });
-          const expected =
-            scan.expect?.bars !== undefined ? ` (expected ${plural(scan.expect.bars, 'bar')})` : '';
+          const bars = Array.isArray(scan.expect?.pages)
+            ? scan.expect.pages[page.n - 1]?.bars
+            : page.n === 1
+              ? scan.expect?.bars
+              : undefined;
+          const expected = typeof bars === 'number' ? ` (expected ${plural(bars, 'bar')})` : '';
           log(
             `${label}: ${plural(counts.parts, 'part')}, ${plural(counts.bars, 'bar')}, ${plural(counts.notes, 'note')}${expected}, ${seconds(took)}`,
           );
@@ -303,7 +319,7 @@ export function recognizeAll(options, deps) {
           join(dir, 'recognition-failed.json'),
           JSON.stringify({ pages: failures }, null, 2) + '\n',
         );
-        unreplayable.push(scan.name);
+        refusedCases.push(scan.name);
       }
       run.cases.push(kept);
       current = undefined;
@@ -324,9 +340,9 @@ export function recognizeAll(options, deps) {
   log(
     `${plural(plan.length, 'case')}, ${plural(pages, 'page')}: ${pages - failed} read, ${failed} failed. Cases in ${out}.`,
   );
-  if (unreplayable.length)
+  if (refusedCases.length)
     log(
-      `The gate cannot replay a refused page yet; recognition-failed.json holds the service's answer in ${unreplayable.join(', ')}.`,
+      `recognition-failed.json holds the service's answer to each refused page in ${refusedCases.join(', ')}; the gate replays it.`,
     );
   return { cases: plan.length, pages, failed };
 }

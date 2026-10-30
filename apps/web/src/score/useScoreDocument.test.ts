@@ -222,12 +222,34 @@ describe('score document helpers', () => {
   });
   it('lists the changed digits, and calls a gained digit or substitution structural', () => {
     const prev: Assignment = { n0: fing(1), n1: fing(2), n2: fing(3) };
-    expect(diffDigits(prev, { n0: fing(1), n1: fing(4), n2: fing(3) })).toEqual({
+    const score = scoreOf([]);
+    expect(diffDigits(prev, { n0: fing(1), n1: fing(4), n2: fing(3) }, score)).toEqual({
       changes: new Map([['n1', '4']]),
       structural: false,
     });
-    expect(diffDigits(prev, { n0: fing(1), n1: fing(2) }).structural).toBe(true);
-    expect(diffDigits(prev, { ...prev, n2: fing(3, 1) }).structural).toBe(true);
+    expect(diffDigits(prev, { n0: fing(1), n1: fing(2) }, score).structural).toBe(true);
+    expect(diffDigits(prev, { ...prev, n2: fing(3, 1) }, score).structural).toBe(true);
+  });
+  it('calls a chord that starts or stops repeating the one before it structural', () => {
+    // Two right-hand chords in one bar: a0 a1, then b0 b1 on the same pitches.
+    const score = {
+      notes: [
+        ['a0', 0, 60],
+        ['a1', 0, 64],
+        ['b0', 4, 60],
+        ['b1', 4, 64],
+      ].map(([id, onsetTick, midi]) => ({ id, onsetTick, midi, hand: 'R', measureIndex: 0 })),
+    } as unknown as Score;
+    const repeat: Assignment = { a0: fing(1), a1: fing(3), b0: fing(1), b1: fing(3) };
+    const broken: Assignment = { ...repeat, b1: fing(4) };
+    expect(diffDigits(repeat, broken, score).structural).toBe(true);
+    expect(diffDigits(broken, repeat, score).structural).toBe(true);
+    // Both chords change alike: still a repeat, and only the first chord has digits to patch.
+    const moved: Assignment = { a0: fing(1), a1: fing(4), b0: fing(1), b1: fing(4) };
+    expect(diffDigits(repeat, moved, score)).toEqual({
+      changes: new Map([['a1', '4']]),
+      structural: false,
+    });
   });
   it('moves an editorial fingering onto the stripped score by note index, skipping pitch clashes', () => {
     const fingered = scoreOf([

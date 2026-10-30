@@ -359,7 +359,11 @@ describe('"Add notes between" in the score document', () => {
     const solves = () => engine.calls.filter((c) => c === 'solve').length;
     const before = solves();
     const renders = renderer.renders;
-    const expected = diffDigits(offered.assignments.medium, offered.assignments.child);
+    const expected = diffDigits(
+      offered.assignments.medium,
+      offered.assignments.child,
+      offered.score,
+    );
     expect(expected.structural).toBe(false);
     expect(expected.changes.size).toBeGreaterThan(0);
     act(() => useAppStore.getState().setSettings({ handSize: 'child' }));

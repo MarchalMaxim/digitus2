@@ -41,6 +41,17 @@ describe('injectFingerings', () => {
     );
     expect((kept.match(/<fingering[^>]*>/g) ?? []).length).toBe(2);
   });
+  it('leaves the bare notes without a digit, the file own one removed', () => {
+    const out = injectFingerings(
+      xml,
+      score,
+      { n0: { finger: 3, source: 'engine' }, n1: { finger: 2, source: 'engine' } },
+      { bare: new Set(['n0']) },
+    );
+    const { editorial } = parseMusicXml(out);
+    expect(Object.keys(editorial)).toEqual(['n1']);
+    expect((out.match(/<fingering[^>]*>/g) ?? []).length).toBe(1);
+  });
   it('writes substitutions as a second fingering element', () => {
     const out = injectFingerings(xml, score, {
       n1: { finger: 3, substitution: 1, source: 'engine' },

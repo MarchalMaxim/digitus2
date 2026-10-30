@@ -116,12 +116,18 @@ export function SidePanel({
       const xml = doc.printXml ?? doc.xml;
       if (!xml || !doc.score || !doc.assignment) return null;
       // An independent renderer means a resize cannot supersede print, or print replace the
-      // screen's layout. Both hands get their full, current (including editorial) fingering.
+      // screen's layout. Both hands get their full, current (including editorial) fingering,
+      // the engine's with the repeats of a chord bare, as on screen.
       let renderer: ScoreRenderer | undefined;
       try {
         renderer = createRenderer();
         signal.addEventListener('abort', () => renderer?.dispose(), { once: true });
-        const fingered = await services.engine.fingeredXml(xml, doc.score, doc.assignment);
+        const fingered = await services.engine.fingeredXml(
+          xml,
+          doc.score,
+          doc.assignment,
+          doc.assignment !== doc.editorial,
+        );
         if (signal.aborted) return null;
         const { pages } = await renderer.render({
           xml: injectNoteIds(fingered, doc.score),
@@ -134,7 +140,7 @@ export function SidePanel({
         renderer?.dispose();
       }
     },
-    [doc.printXml, doc.xml, doc.score, doc.assignment],
+    [doc.printXml, doc.xml, doc.score, doc.assignment, doc.editorial],
   );
 
   useEffect(() => {

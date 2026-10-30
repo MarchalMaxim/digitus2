@@ -48,10 +48,15 @@ export function inlineEngine(): EngineClient & { calls: string[]; loads: LoadOpt
       run({ id: ++id, type: 'solve', score, profile, ...(pins ? { pins } : {}) }).then(
         (r) => r as never,
       ),
-    fingeredXml: (xml, score, assignment) =>
-      run({ id: ++id, type: 'fingeredXml', xml, score, assignment }).then(
-        (r) => (r as { xml: string }).xml,
-      ),
+    fingeredXml: (xml, score, assignment, bareRepeatedChords) =>
+      run({
+        id: ++id,
+        type: 'fingeredXml',
+        xml,
+        score,
+        assignment,
+        ...(bareRepeatedChords ? { bareRepeatedChords: true as const } : {}),
+      }).then((r) => (r as { xml: string }).xml),
     embellish: (xml) => run({ id: ++id, type: 'embellish', xml }).then((r) => r as never),
     dispose: () => {},
   };

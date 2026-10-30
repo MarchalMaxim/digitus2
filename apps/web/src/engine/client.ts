@@ -45,7 +45,13 @@ export interface EngineClient {
     profile: HandSize,
     pins?: Assignment,
   ): Promise<{ assignment: Assignment; ms: number }>;
-  fingeredXml(xml: string, score: Score, assignment: Assignment): Promise<string>;
+  /** `bareRepeatedChords`: the repeats of a chord in a bar get no digits (the engine's fingering on the page). */
+  fingeredXml(
+    xml: string,
+    score: Score,
+    assignment: Assignment,
+    bareRepeatedChords?: boolean,
+  ): Promise<string>;
   /**
    * "Add notes between": the guarded light embellishment of a plain MusicXML text, or null with
    * the guard's reason.
@@ -234,8 +240,14 @@ export function createEngineClient(
         : { type: 'solve', score, profile };
       return call(body).then(({ assignment, ms }) => ({ assignment, ms }));
     },
-    fingeredXml(xml, score, assignment) {
-      return call({ type: 'fingeredXml', xml, score, assignment }).then((res) => res.xml);
+    fingeredXml(xml, score, assignment, bareRepeatedChords) {
+      return call({
+        type: 'fingeredXml',
+        xml,
+        score,
+        assignment,
+        ...(bareRepeatedChords ? { bareRepeatedChords: true as const } : {}),
+      }).then((res) => res.xml);
     },
     embellish(xml) {
       return call({ type: 'embellish', xml }).then(({ offered, reason, ms }) => ({

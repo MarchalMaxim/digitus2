@@ -96,6 +96,39 @@ describe('engine handlers', () => {
     if (!r.ok || r.type !== 'fingeredXml') throw new Error('inject failed');
     expect(r.xml.match(/<fingering/g)).toHaveLength(67);
   });
+  it('writes the repeats of a chord in a bar without digits on request', () => {
+    const chord = ['C', 'E', 'G']
+      .map(
+        (step, i) =>
+          `<note>${i > 0 ? '<chord/>' : ''}<pitch><step>${step}</step><octave>4</octave></pitch><duration>1</duration><voice>1</voice><type>quarter</type></note>`,
+      )
+      .join('');
+    const xml = `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions><time><beats>3</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>${chord.repeat(3)}</measure></part></score-partwise>`;
+    const loaded = handle({ id: 1, type: 'load', kind: 'musicxml', input: xml, source: 'c.xml' });
+    if (!loaded.ok || loaded.type !== 'load') throw new Error('load failed');
+    const { score } = loaded;
+    const finger = { 60: 1, 64: 3, 67: 5 } as const;
+    const assignment = Object.fromEntries(
+      score.notes.map((n) => [
+        n.id,
+        { finger: finger[n.midi as 60 | 64 | 67], source: 'engine' as const },
+      ]),
+    );
+    const write = (bareRepeatedChords?: true) => {
+      const r = handle({
+        id: 2,
+        type: 'fingeredXml',
+        xml: loaded.xml,
+        score,
+        assignment,
+        ...(bareRepeatedChords ? { bareRepeatedChords } : {}),
+      });
+      if (!r.ok || r.type !== 'fingeredXml') throw new Error('inject failed');
+      return r.xml.match(/<fingering/g)?.length;
+    };
+    expect(write()).toBe(9);
+    expect(write(true)).toBe(3);
+  });
   it('declares UTF-8 in the text of a UTF-16 file, so the export is read as what it is', () => {
     const text = new TextDecoder().decode(bytes).replace('encoding="UTF-8"', 'encoding="UTF-16"');
     const le = Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(text, 'utf16le')]);

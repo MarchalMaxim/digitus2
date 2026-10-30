@@ -27,6 +27,7 @@ import { createEngineClient, SCAN_LOAD, type EngineClient } from '../engine/clie
 import { PhraseError } from '../i18n/PhraseError.js';
 import { loadPiece, pieceBySlug, readScoreFile } from '../library/manifest.js';
 import { injectNoteIds } from './render/injectIds.js';
+import { repeatedChordIds } from './repeatedChords.js';
 import { createRenderer, SupersededError, type ScoreRenderer } from './render/renderer.js';
 
 /** 'idle' is reserved (the plan's interface; nothing sets it yet): a document starts 'loading'. */
@@ -205,15 +206,20 @@ export function carryAssignment(from: Score, a: Assignment, onto: Score): Assign
 }
 
 /**
- * The digits that differ between two fingerings of the same score. `structural` is true when a
- * note gains or loses a digit or a substitution: those need a new layout, not a text patch.
+ * The digits that differ between two engine fingerings of `score`, as the page draws them (a
+ * repeated chord bare, `repeatedChordIds`). `structural` is true when a note gains or loses a
+ * digit or a substitution, a chord starting or stopping to repeat included: those need a new
+ * layout, not a text patch.
  */
 export function diffDigits(
   prev: Assignment,
   next: Assignment,
+  score: Score,
 ): { changes: Map<string, string>; structural: boolean } {
   const changes = new Map<string, string>();
-  let structural = false;
+  const barePrev = repeatedChordIds(score, prev);
+  const bareNext = repeatedChordIds(score, next);
+  let structural = barePrev.size !== bareNext.size || [...barePrev].some((id) => !bareNext.has(id));
   for (const id of new Set([...Object.keys(prev), ...Object.keys(next)])) {
     const a = prev[id];
     const b = next[id];
@@ -221,7 +227,7 @@ export function diffDigits(
       structural = true;
       continue;
     }
-    if (a.finger !== b.finger) changes.set(id, String(b.finger));
+    if (a.finger !== b.finger && !bareNext.has(id)) changes.set(id, String(b.finger));
   }
   return { changes, structural };
 }
@@ -302,18 +308,20 @@ function layoutWidth(widthPx: number): number {
 
 /**
  * The text the renderer lays out for `assignment` on version `v` (fingered, with our note ids):
- * written by the engine once per fingering, then kept in `v.laidOut`. Null when `live()` turned
- * false while the engine wrote it.
+ * written by the engine once per fingering, then kept in `v.laidOut`. The engine's fingering
+ * (`engine`) leaves the repeats of a chord in a bar bare; the editor's is written as published.
+ * Null when `live()` turned false while the engine wrote it.
  */
 async function laidOutText(
   v: Version,
   assignment: Assignment,
+  engine: boolean,
   svc: ScoreServices,
   live: () => boolean,
 ): Promise<string | null> {
   const kept = v.laidOut.get(assignment);
   if (kept !== undefined) return kept;
-  const fingered = await svc.engine.fingeredXml(v.xml, v.score, assignment);
+  const fingered = await svc.engine.fingeredXml(v.xml, v.score, assignment, engine);
   if (!live()) return null;
   const xml = injectNoteIds(fingered, v.score);
   v.laidOut.set(assignment, xml);
@@ -651,7 +659,7 @@ export function useScoreDocument(
         if (cached && cached.assignment === shown) {
           result = cached;
         } else {
-          const xml = await laidOutText(v, shown, svc, current);
+          const xml = await laidOutText(v, shown, !useEditorial, svc, current);
           if (xml === null) return;
           let rendered: { pages: string[]; ms: number } | undefined;
           let width = FALLBACK_WIDTH_PX;
@@ -681,7 +689,7 @@ export function useScoreDocument(
         }
         // A re-solve may have landed while this layout was in flight: patch its digits next.
         const latest = useEditorial ? shown : (v.engine ?? shown);
-        const diff = latest === shown ? null : diffDigits(shown, latest);
+        const diff = latest === shown ? null : diffDigits(shown, latest, v.score);
         if (diff?.structural) {
           setNonce((n) => n + 1);
           return;
@@ -740,11 +748,16 @@ export function useScoreDocument(
     const svc = svcRef.current;
     /**
      * Shows `next` in place of the fingering on screen: its changed digits are patched into the
-     * pages, or, when a digit or a substitution comes or goes, the pages are laid out again.
-     * `extra` is published either way.
+     * pages of `score`, or, when a digit or a substitution comes or goes, the pages are laid out
+     * again. `extra` is published either way.
      */
-    const patchShown = (shown: Assignment, next: Assignment, extra: Partial<DocState>) => {
-      const diff = diffDigits(shown, next);
+    const patchShown = (
+      score: Score,
+      shown: Assignment,
+      next: Assignment,
+      extra: Partial<DocState>,
+    ) => {
+      const diff = diffDigits(shown, next, score);
       if (diff.structural) {
         if (Object.keys(extra).length > 0) setState((s) => ({ ...s, ...extra }));
         setNonce((n) => n + 1);
@@ -768,7 +781,7 @@ export function useScoreDocument(
         shownVersionRef.current === 'embellished' &&
         shown !== null &&
         shown !== embellished.editorial;
-      if (showingEngine) patchShown(shown, next, {});
+      if (showingEngine) patchShown(embellished.score, shown, next, {});
     }
     void (async () => {
       try {
@@ -786,7 +799,7 @@ export function useScoreDocument(
         const showingEngine =
           shownVersionRef.current === 'plain' && shown !== null && shown !== doc.plain.editorial;
         if (!showingEngine) setState((s) => ({ ...s, solveMs: solved.ms, plain }));
-        else patchShown(shown, solved.assignment, { solveMs: solved.ms, plain });
+        else patchShown(doc.plain.score, shown, solved.assignment, { solveMs: solved.ms, plain });
       } catch (e) {
         if (current())
           setState((s) => ({ ...s, status: 'error', error: messageOf(e), errorCause: e }));
@@ -838,7 +851,7 @@ export function useScoreDocument(
         };
         // Set before the next await, so a hand-size change meanwhile re-fingers it (effect 4).
         doc.embellished = v;
-        xml = await laidOutText(v, engine, svc, live);
+        xml = await laidOutText(v, engine, true, svc, live);
         if (xml === null) return;
       } catch {
         // The switch is an extra: a failure here only means the piece does not get one.

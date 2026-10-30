@@ -11,7 +11,8 @@ const AFTER_NOTATIONS = new Set(['lyric', 'play', 'listen']);
  * new MusicXML text. Each fingering goes on the `<note>` element that starts the sounding note
  * (`sourceIndices[0]`, so a tied note is fingered once), placed above for the right hand and
  * below for the left; a substitution becomes a second `<fingering substitution="yes">`.
- * Existing fingerings on those notes are replaced unless `opts.replace` is false. Everything
+ * Existing fingerings on those notes are replaced unless `opts.replace` is false. The notes in
+ * `opts.bare` get no fingering (an existing one is still removed when replacing). Everything
  * else in the document is kept.
  *
  * Two inputs do not come back in their original form: a `score-timewise` document is written
@@ -22,9 +23,10 @@ export function injectFingerings(
   xml: string | Uint8Array,
   score: Score,
   assignment: Assignment,
-  opts: { replace?: boolean } = {},
+  opts: { replace?: boolean; bare?: ReadonlySet<string> } = {},
 ): string {
   const replace = opts.replace ?? true;
+  const bare = opts.bare;
   const text = unpackMusicXml(xml);
   const doc = timewiseToPartwise(parseXml(text));
   // Document-order index of a sounding note's first <note> element -> that note.
@@ -44,6 +46,14 @@ export function injectFingerings(
     if (note === undefined) continue;
     const a = assignment[note.id]!;
     const el = noteEls[i]!;
+    if (bare?.has(note.id)) {
+      const notations = firstChild(el, 'notations');
+      const technical = notations && firstChild(notations, 'technical');
+      if (replace && technical) {
+        for (const f of childElements(technical, 'fingering')) technical.removeChild(f);
+      }
+      continue;
+    }
     const technical = ensureTechnical(doc, el);
     if (replace) {
       for (const f of childElements(technical, 'fingering')) technical.removeChild(f);

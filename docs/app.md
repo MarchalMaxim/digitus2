@@ -4,7 +4,7 @@ The app in `apps/web` (`@digitus2/web`): static files on GitHub Pages, no server
 
 ## What the app does
 
-A beginner opens one of the built-in pieces from the library, or a MusicXML or MIDI file of their own, and sees the score with a finger number on every note, chosen by the digitus2 engine for the selected hand size. Play sounds the piece on a sampled grand piano while a red cursor marks the notes being heard and an on-screen keyboard shows which finger plays which key. Tempo, one hand or both, metronome, count-in and a bar loop help practice. The fingered score can be exported as MusicXML or printed. An about page lists every licence and attribution.
+A beginner opens one of the built-in pieces from the library, or a MusicXML or MIDI file of their own, and sees the score with a finger number on every note, chosen by the digitus2 engine for the selected hand size; a chord struck again in its bar with the same fingers shows them only the first time. Play sounds the piece on a sampled grand piano while a red cursor marks the notes being heard and an on-screen keyboard shows which finger plays which key. Tempo, one hand or both, metronome, count-in and a bar loop help practice. The fingered score can be exported as MusicXML or printed. An about page lists every licence and attribution.
 
 Everything runs in the browser. The network carries the app's static files, the piano samples (served by the app's own site) and, only when the reader scans, the project's scan service on Google Cloud Run: one health request when the scan page opens, then one request per page on **Scan this score** (`docs/scan-service.md`). The app installs from the browser, and a service worker keeps the app and what the reader has opened, so a piece opened once opens and plays offline.
 
@@ -48,7 +48,7 @@ Everything runs in the browser. The network carries the app's static files, the 
 
 - `load` parses MusicXML (and `.mxl`, UTF-16 and Latin-1 files, decoded once). The decoded text's XML declaration is rewritten to say UTF-8, so the export, saved as UTF-8, declares what it is. A `.mid` or `.midi` file is imported with `importMidi` as generated two-staff MusicXML, titled from the file's own name when it names a piece and otherwise from the file name (see Score view, MIDI files); the import facts travel with the score as `midiInfo`.
 - `solve` runs `solveFingering(score, { profile, weightSet: RECOMMENDED_WEIGHT_SET })`: the hand-size profile with the shipped learned weight set (`learned-open`).
-- `fingeredXml` writes the fingering into the source MusicXML.
+- `fingeredXml` writes the fingering into the source MusicXML. For the engine's fingering on screen and on paper it leaves bare every chord (two or more notes of one hand at one onset) that repeats an earlier chord of the same hand in the same bar with the same pitches and fingers (`src/score/repeatedChords.ts`, [#253](https://github.com/MarchalMaxim/digitus2/issues/253)); the editor's fingering and the exported file keep every digit.
 - `embellish` runs `guardEmbellishment` on the plain MusicXML: the light embellisher, the independent check, a solve with `learned-open` and a beginner lint at each of the four hand sizes, the figures of offending bars dropped once, and at least three figures left. It returns the embellished score with a fingering for every hand size, or the reason it is not offered.
 
 ### Rendering with Verovio
@@ -67,7 +67,7 @@ Why Verovio (spike sections 1, 3 and 9): it keeps MusicXML note ids; it writes e
 `src/score/useScoreDocument.ts` runs load, solve, fingered XML with ids, then render, as a status machine: `loading`, `fingering`, `rendering`, `ready`, `error` (`idle` is reserved and never set).
 
 - The status line paints before the solve starts. An unreadable file ends in a readable error with a way back: one plain sentence, then the engine's message as the detail.
-- A hand-size change re-solves and patches only the digits that changed, with no new layout.
+- A hand-size change re-solves and patches only the digits that changed, with no new layout, unless a chord starts or stops repeating the one before it, which lays the score out again.
 - For a MIDI file, a change of the `Hand split` control opens the same bytes again with the chosen split (or none for `Automatic`) through the same statuses. The previous import stays on screen until the new one replaces it.
 - The fingered text is kept per fingering, so a new width, or switching back to a fingering shown before, only lays out again. Writing a fingering into the MusicXML takes about 0.1 s for K.545, and exporting pays it once.
 - A library piece's editor's fingering file is loaded when the reader first switches the editor's fingering on.

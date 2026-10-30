@@ -1211,16 +1211,25 @@ input[role='switch']:checked::before {
      (--dock-rest) and the tallest system with its margin (--system-room, set when the layout is
      made and when the panel opens, so the dock keeps its height while the reader reads); `dvh`
      follows the browser's toolbars. The panel opens at its top. A row that arrives while it is
-     capped never pushes the head out or the control the reader used out of the box
-     (usePanelEdges.ts keeps the scroll; the browser's own anchoring is off here, WebKit has
-     none). The padding and the equal negative margin keep the focus rings from being clipped. */
+     capped never moves the control the reader used (usePanelEdges.ts scrolls the panel by the
+     row; the browser's own anchoring is off here, WebKit has none). Scroll offsets are whole
+     pixels, so the cap is rounded down to one and the help line's lines are whole pixels high:
+     the content then scrolls to its end exactly, and that control keeps its place to the
+     pixel. The padding and the equal negative margin keep the focus rings from being clipped. */
   .dock > .practice-panel:not([hidden]) {
-    max-height: max(7.5rem, 100dvh - var(--dock-rest, 12.5rem) - var(--system-room, 15rem));
+    max-height: max(
+      7.5rem,
+      round(down, 100dvh - var(--dock-rest, 12.5rem) - var(--system-room, 15rem), 1px)
+    );
     overflow-y: auto;
     overflow-anchor: none;
     overscroll-behavior: contain;
     padding: 0.25rem;
     margin: -0.25rem;
+  }
+
+  .dock > .practice-panel .seek-help {
+    line-height: 1.25rem;
   }
 
   /* A cue at each edge that cuts off more controls (usePanelEdges.ts): a gray hairline with a soft

@@ -174,7 +174,7 @@ for (const [width, height] of [
 test.describe('a piece with tall systems (Op. 13) at 360 x 740', () => {
   test.use({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
 
-  test('the panel scrolls inside its cap, opens at its top and keeps its place when a row arrives', async ({
+  test('the panel scrolls inside its cap, opens at its top and keeps the used control in place when a row arrives', async ({
     page,
   }) => {
     await open(page, OP13, true, 'both');
@@ -206,26 +206,31 @@ test.describe('a piece with tall systems (Op. 13) at 360 x 740', () => {
     expect(await wholeInPanel(page, practiceMode)).toBe(true);
     expect(await wholeInPanel(page, tempo)).toBe(true);
 
-    // A row arrives above Hands while the panel is at its top: Practice mode and Tempo stay in the
-    // box and Hands, the control just used, stands whole in it.
-    /** The head's distance from the panel's top edge: the page may scroll, the panel's rows may not. */
-    const headAt = async () =>
-      (await practiceMode.boundingBox())!.y - (await panel.boundingBox())!.y;
-    const headBefore = await headAt();
+    // A row arrives above Hands while the panel is at its top: Hands, the control just used, keeps
+    // its place against the dock and stands whole in the box; Practice mode and Tempo may scroll
+    // above it, and the upper edge says they go on.
+    /** Hands' distance above the dock's bottom edge: the page may scroll, the dock moves with it. */
+    const handsFromDock = async () => {
+      await settle(page);
+      const dock = await page.evaluate(
+        () => document.querySelector('.dock')!.getBoundingClientRect().bottom,
+      );
+      const box = (await hands.boundingBox())!;
+      return dock - (box.y + box.height);
+    };
+    const handsBefore = await handsFromDock();
     await page.getByRole('radio', { name: 'Right hand' }).check();
     await expect(page.getByRole('switch', { name: 'Hear the left hand' })).toBeVisible();
-    await settle(page);
-    // Everything fits: nothing scrolls, the head stays where it was.
-    const headAfter = await headAt();
-    expect(headAfter, 'the head stays').toBeCloseTo(headBefore, 0);
-    expect(await wholeInPanel(page, practiceMode)).toBe(true);
-    expect(await wholeInPanel(page, tempo)).toBe(true);
+    expect(Math.abs((await handsFromDock()) - handsBefore), 'Hands keeps its place').toBeLessThan(
+      1,
+    );
     expect(await wholeInPanel(page, hands)).toBe(true);
-    // The row made the panel scroll, and the lower edge says the rows below it go on.
+    // The row made the panel scroll to its end: the upper edge says the rows above go on, and the
+    // lower one has nothing left to say.
     const grown = await state();
     expect(grown.overflow, JSON.stringify(grown)).toBeGreaterThan(0);
-    expect(grown.above, JSON.stringify(grown)).toBe(false);
-    expect(grown.below, JSON.stringify(grown)).toBe(true);
+    expect(grown.above, JSON.stringify(grown)).toBe(true);
+    expect(grown.below, JSON.stringify(grown)).toBe(false);
 
     const full = await geometry(page);
     expect(full.innerHeight - full.dockHeight).toBeGreaterThanOrEqual(full.tallest + MARGIN - 0.5);
@@ -266,22 +271,28 @@ test.describe('the tightest panel (Op. 13 at 360 x 640)', () => {
   test.use({ viewport: { width: 360, height: 640 }, isMobile: true, hasTouch: true });
 
   // The box holds three rows and a half: with the Hear row over Hands, Practice mode, Tempo, the
-  // row and Hands cannot all stand in it. The control the reader used wins: Hands stands whole and
-  // clear of the lower hairline, Tempo too, and Practice mode loses only the air above its switch.
+  // row and Hands cannot all stand in it. The control the reader used wins: Hands keeps its place
+  // against the dock, whole and clear of the lower hairline, and the rows above it may scroll out
+  // of the top, where the upper edge says they go on.
   for (const how of ['tap', 'key'] as const) {
-    test(`choosing a hand by ${how} leaves Hands whole and the head's switch in sight`, async ({
-      page,
-    }) => {
+    test(`choosing a hand by ${how} leaves Hands where it was and whole`, async ({ page }) => {
       await open(page, OP13, true, 'both');
       await openPractice(page);
       await settle(page);
       const panel = page.locator('.practice-panel');
       const hands = page.getByRole('group', { name: 'Hands' });
-      const tempo = panel.locator('.tempo');
-      const mode = panel.getByRole('switch', { name: 'Practice mode' });
       const modeRow = panel.locator('label', { hasText: 'Practice mode' });
       expect(await wholeInPanel(page, modeRow), 'Practice mode starts whole').toBe(true);
       expect(await wholeInPanel(page, hands), 'Hands starts whole').toBe(true);
+      const fromDock = async () => {
+        await settle(page);
+        const dock = await page.evaluate(
+          () => document.querySelector('.dock')!.getBoundingClientRect().bottom,
+        );
+        const box = (await hands.boundingBox())!;
+        return dock - (box.y + box.height);
+      };
+      const before = await fromDock();
 
       if (how === 'tap') {
         await page.getByRole('radio', { name: 'Right hand' }).locator('..').tap();
@@ -290,23 +301,18 @@ test.describe('the tightest panel (Op. 13 at 360 x 640)', () => {
         await page.keyboard.press('ArrowRight');
       }
       await expect(page.getByRole('switch', { name: 'Hear the left hand' })).toBeVisible();
-      await settle(page);
 
+      expect(Math.abs((await fromDock()) - before), 'Hands keeps its place').toBeLessThan(1);
       const box = (await panel.boundingBox())!;
       const handsBox = (await hands.boundingBox())!;
       const state = JSON.stringify({ box, handsBox });
       expect(handsBox.y, state).toBeGreaterThanOrEqual(box.y - 0.5);
       expect(handsBox.y + handsBox.height, state).toBeLessThanOrEqual(box.y + box.height - 0.5);
-      expect(await wholeInPanel(page, tempo), state).toBe(true);
-      expect(await wholeInPanel(page, mode), state).toBe(true);
-      // The row itself loses no more than the air around its switch.
-      const row = (await modeRow.boundingBox())!;
-      expect(row.y, state).toBeGreaterThanOrEqual(box.y - 8);
       const cue = await panel.evaluate((el) => ({
         above: el.hasAttribute('data-above'),
         below: el.hasAttribute('data-below'),
       }));
-      expect(cue.above, 'the upper edge says the head goes on above').toBe(true);
+      expect(cue.above, 'the upper edge says the rows above go on').toBe(true);
       expect(cue.below, 'the lower edge says more rows follow').toBe(true);
       await expectOneRed(page, 'Op. 13 at 360 x 640');
     });

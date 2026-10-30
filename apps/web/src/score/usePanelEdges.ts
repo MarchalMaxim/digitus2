@@ -25,11 +25,12 @@ export interface UsedControl {
 
 /**
  * Where the panel scrolls to when its content changed and moved or grew the control the reader
- * used (issue 244). Scrolled away from the top, that control stays where it was, so a row arriving
- * above it moves nothing under the reader's finger. At the top, the head stays: the control is
- * only brought back as far as it needs to stand whole in the box, clear of the lower hairline, and
- * never past its own top (a control taller than the box shows its start). When the head and the
- * control cannot both stand in the box, the control wins.
+ * used (issue 244). That control keeps its place in the box: the panel scrolls by as much as the
+ * control moved, so a row arriving above it moves nothing under the reader's finger, and the rows
+ * above it may scroll out of the top (the panel's top cue says they go on). Only when keeping it
+ * there would cut the control itself (it grew, or it already stood partly out of the box) is it
+ * brought back whole instead: as far as it needs to stand in the box, clear of the lower
+ * hairline, and never past its own top (a control taller than the box shows its start).
  */
 export function keepScroll(
   scrollTop: number,
@@ -37,12 +38,12 @@ export function keepScroll(
   clientHeight: number,
 ): number {
   if (!used) return scrollTop;
-  if (scrollTop > 1) {
-    const moved = used.after - used.before;
-    return Math.abs(moved) < 1 ? scrollTop : Math.max(0, scrollTop + moved);
-  }
-  const whole = used.after + used.height + EDGE_CLEARANCE - clientHeight;
-  return Math.max(0, scrollTop, Math.min(whole, used.after));
+  const moved = used.after - used.before;
+  const keep = Math.max(-scrollTop, Math.abs(moved) < 1 ? 0 : moved);
+  const least = used.after + used.height + EDGE_CLEARANCE - clientHeight;
+  const most = used.after;
+  const by = keep < least ? Math.min(least, most) : Math.min(keep, most);
+  return Math.max(0, scrollTop + by);
 }
 
 /**
@@ -57,7 +58,7 @@ const GROUP = 'fieldset';
  * each edge that cuts off more controls (`data-above`, `data-below`; `.practice-panel` in
  * `base.css`) with a cue, so the reader sees the list goes on whatever lies under the edge: the
  * panel's own inset shadow, a gray hairline, no control and no colour. And when its content
- * changes size it keeps the head and the control the reader just used where they are
+ * changes size it keeps the control the reader just used where it is
  * (`keepScroll`): the browser's own scroll anchoring is off for the panel (`overflow-anchor`,
  * base.css) and WebKit has none. That control is the target of the last gesture in the panel,
  * since WebKit does not focus a radio or a checkbox when it is tapped.

@@ -23,8 +23,8 @@ describe('the edges of a scroller that cut off content', () => {
   });
 });
 
-// The panel keeps its place when its content grows (issue 244): at its top the head stays and
-// the control the reader used stays whole in the box; scrolled, that control stays where it was.
+// The panel keeps its place when its content grows (issue 244): the control the reader used stays
+// where it was in the box, unless that would cut it, and then it is brought back whole.
 describe('the scroll the panel keeps when its content grows', () => {
   // The used control is 44 high; offsets run from the box's top edge, which is 360 high.
   const used = (before: number, after: number) => ({ before, after, height: 44 });
@@ -35,14 +35,17 @@ describe('the scroll the panel keeps when its content grows', () => {
     expect(keepScroll(80, used(120, 120), 360)).toBe(80);
   });
 
-  it('keeps the head at the top while the used control stays whole in the box', () => {
-    // A row arrives above Hands: it drops one row and the panel still shows Practice mode first.
-    expect(keepScroll(0, used(100, 152), 360)).toBe(0);
+  it('keeps the used control where it was at the top, the rows above it scrolling out', () => {
+    // A row arrives above Hands: it would drop one row, so the panel scrolls by that row.
+    expect(keepScroll(0, used(100, 152), 360)).toBe(52);
+    expect(keepScroll(0, used(284, 336), 360)).toBe(52);
   });
 
-  it('brings the used control back by as much as it has left the box at the top', () => {
-    // Dropped 52 px; its bottom is now 20 px below the box: scroll those 20 px and the hairline.
-    expect(keepScroll(0, used(284, 336), 360)).toBe(20 + EDGE_CLEARANCE);
+  it('brings the used control back whole when keeping its place would cut it', () => {
+    // It stood 20 px out of the bottom already: scroll those 20 px and the hairline.
+    expect(keepScroll(0, used(336, 336), 360)).toBe(20 + EDGE_CLEARANCE);
+    // It stood 10 px out of the top: scroll back up to its top.
+    expect(keepScroll(40, used(-10, -10), 360)).toBe(30);
   });
 
   it('keeps the used control clear of the lower hairline', () => {

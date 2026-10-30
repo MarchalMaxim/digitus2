@@ -67,7 +67,17 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export type PieceSource =
   | { kind: 'library'; slug: string }
-  | { kind: 'file'; name: string; bytes: Uint8Array; scan?: ScanSession }
+  | {
+      kind: 'file';
+      name: string;
+      bytes: Uint8Array;
+      scan?: ScanSession;
+      /**
+       * The id of the score's record in My scores (a bare uuid), when it has one: the address
+       * '#/mine/<id>' names it, so a reload reopens the saved score (issue 242).
+       */
+      localId?: string;
+    }
   /**
    * Another reader's score from the shared library (issue 132): opened by its id, never saved to
    * My scores. `origin` says whether it came from a scan, which the importer must read as one.
@@ -129,6 +139,12 @@ export interface AppState {
   libraryLength: LengthId;
   /** The library's Favourites shelf shows every favourite, not only the newest five. Not persisted. */
   libraryFavouritesOpen: boolean;
+  /**
+   * A score is on its way in and the library shows it: 'chosen' while a file the reader chose or
+   * dropped is read and checked, 'address' while a reload reopens the score the address names.
+   * Any change of view clears it. Not persisted.
+   */
+  opening: 'chosen' | 'address' | null;
   /** The dock's Practice panel is open; lasts for the visit, every page load starts closed. */
   practiceOpen: boolean;
   openLibrary(): void;
@@ -162,6 +178,7 @@ export interface AppState {
   /** Called on Play: the legend has been seen, and a library piece becomes the one to continue. */
   markPlayed(): void;
   setPracticeOpen(open: boolean): void;
+  setOpening(opening: 'chosen' | 'address' | null): void;
 }
 
 export const SETTINGS_STORAGE_KEY = 'digitus2.settings.v1';
@@ -364,6 +381,7 @@ export const useAppStore = create<AppState>()(
       libraryLength: 'any',
       libraryFavouritesOpen: false,
       practiceOpen: false,
+      opening: null,
       openLibrary: () => set({ view: { name: 'library' } }),
       openAbout: () => set({ view: { name: 'about' } }),
       openScan: (session) => set({ view: { name: 'scan', session } }),
@@ -402,6 +420,7 @@ export const useAppStore = create<AppState>()(
           return { settings: { ...s.settings, legendSeen: true, lastPlayed } };
         }),
       setPracticeOpen: (open) => set({ practiceOpen: open }),
+      setOpening: (opening) => set({ opening }),
     }),
     {
       name: SETTINGS_STORAGE_KEY,
@@ -426,3 +445,9 @@ export const useAppStore = create<AppState>()(
     },
   ),
 );
+
+// Whatever opens the score changes the view (openPiece, the address, a shared score), and that
+// ends the opening: the loader never outlives the library it stood in.
+useAppStore.subscribe((state, previous) => {
+  if (state.view !== previous.view && state.opening) useAppStore.setState({ opening: null });
+});

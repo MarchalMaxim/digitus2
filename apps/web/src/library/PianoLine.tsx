@@ -12,9 +12,10 @@ export function pianoName(raw: string): string {
 }
 
 /**
- * The home line for playing along on the reader's own piano (issue 182), the last row of the end
- * line: one quiet sentence that says where the connection stands, and one text button that is the
- * same element in every state, so the focus survives every change of its label. The press is the
+ * The home line for playing along on the reader's own piano (issue 182), the end line of the
+ * page: a once-per-device setup, not a way into a score (a later visit reconnects by itself). One
+ * quiet sentence that says where the connection stands, and one text button that is the same
+ * element in every state, so the focus survives every change of its label. The press is the
  * reader's consent: the browser is asked only then (a later visit connects silently, see
  * midi/piano.ts). While the browser has granted access but not answered (Windows looking for a
  * Bluetooth piano that is off) the line says it is looking, with Turn off as the way out; the

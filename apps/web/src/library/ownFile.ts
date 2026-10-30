@@ -62,6 +62,9 @@ export function useScoreFileRequests(
       const view = useAppStore.getState().view;
       if (!mounted.current || view.name !== 'library') return;
       const request = ++generation.current;
+      // The library shows the loader at once (issue 240): the read, or the check of a photo, can
+      // take seconds when the file still has to come from a phone's provider or a cloud folder.
+      useAppStore.getState().setOpening('chosen');
       const current = () =>
         mounted.current && generation.current === request && useAppStore.getState().view === view;
       acceptScoreFiles(
@@ -70,7 +73,9 @@ export function useScoreFileRequests(
           if (current()) onFile(name, bytes);
         },
         (message) => {
-          if (current()) onRefuse(message);
+          if (!current()) return;
+          useAppStore.getState().setOpening(null);
+          onRefuse(message);
         },
         onScan
           ? (pages) => {

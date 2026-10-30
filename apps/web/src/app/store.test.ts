@@ -595,4 +595,19 @@ describe('hearing the hand left out (issue 231)', () => {
       expect(S().settings.hearOtherHand, JSON.stringify(junk)).toBe(false);
     }
   });
+  it('clears the opening on any change of view, and keeps it otherwise', () => {
+    useAppStore.getState().setOpening('chosen');
+    useAppStore.getState().setNotice('x');
+    expect(useAppStore.getState().opening).toBe('chosen');
+    useAppStore.getState().openAbout();
+    expect(useAppStore.getState().opening).toBeNull();
+    useAppStore.getState().setOpening('address');
+    useAppStore.setState({ view: { name: 'library' } });
+    expect(useAppStore.getState().opening).toBeNull();
+    useAppStore.getState().setOpening('chosen');
+    useAppStore.getState().openPiece({ kind: 'library', slug: 'x' });
+    expect(useAppStore.getState().opening).toBeNull();
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state;
+    expect(stored.opening).toBeUndefined();
+  });
 });

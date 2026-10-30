@@ -12,6 +12,7 @@ import {
 import { useFocusOnArrival } from '../app/focus.js';
 import { hashToView } from '../app/routes.js';
 import { useAppStore, type PieceSource } from '../app/store.js';
+import { Opening } from '../app/Opening.js';
 import { Button } from '../design/Button.js';
 import { ThemeToggle } from '../design/ThemeToggle.js';
 import { LanguageLine } from '../i18n/LanguageLine.js';
@@ -35,6 +36,7 @@ import {
 } from './model.js';
 import { useScoreFileRequests, useWindowFileDrop } from './ownFile.js';
 import { DropFrame, OwnFileLine } from './OwnFileLine.js';
+import { PianoLine } from './PianoLine.js';
 import { PieceList } from './PieceList.js';
 import { SearchField } from './SearchField.js';
 import { MyScores } from './local/MyScores.js';
@@ -230,6 +232,7 @@ export function LibraryView() {
   const openPiece = useAppStore((s) => s.openPiece);
   const openAbout = useAppStore((s) => s.openAbout);
   const setNotice = useAppStore((s) => s.setNotice);
+  const opening = useAppStore((s) => s.opening);
   const lastPlayed = useAppStore((s) => s.settings.lastPlayed);
   const chosenLevel = useAppStore((s) => s.libraryLevel);
   const setLibraryLevel = useAppStore((s) => s.setLibraryLevel);
@@ -320,7 +323,7 @@ export function LibraryView() {
     (name: string, bytes: Uint8Array) => {
       rememberScroll();
       setNotice(null);
-      openPiece({ kind: 'file', name, bytes });
+      openPiece({ kind: 'file', name, bytes, localId: crypto.randomUUID() });
     },
     [rememberScroll, setNotice, openPiece],
   );
@@ -379,7 +382,15 @@ export function LibraryView() {
     .join(' ');
 
   return (
-    <main className={dragging ? 'page stack library is-dragging' : 'page stack library'}>
+    <main
+      className={[
+        'page stack library',
+        dragging ? 'is-dragging' : '',
+        opening === 'chosen' ? 'is-opening' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <header className="welcome">
         <ThemeToggle />
         <h1 ref={heading} tabIndex={-1}>
@@ -392,6 +403,7 @@ export function LibraryView() {
           </Button>
           {showsSearch(pieces.length) && <SearchField query={query} onChange={setLibraryQuery} />}
         </div>
+        <OwnFileLine onFiles={acceptFiles} />
       </header>
       {favouritesInView && (
         <Favourites
@@ -439,7 +451,7 @@ export function LibraryView() {
       <p className="visually-hidden" aria-live="polite" data-testid="library-announcement">
         {announcement}
       </p>
-      <OwnFileLine onFiles={acceptFiles} />
+      <PianoLine />
       <footer className="library-footer">
         <button type="button" className="text-button" onClick={about}>
           {t.library.aboutAndLicences}
@@ -447,6 +459,7 @@ export function LibraryView() {
         <LanguageLine />
       </footer>
       {dragging && <DropFrame />}
+      {opening === 'chosen' && <Opening />}
     </main>
   );
 }

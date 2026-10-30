@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import { en } from '../i18n/en/index.js';
 import { chooseLocale, resetLocaleForTests } from '../i18n/i18n.js';
+import { resetPianoForTests } from '../midi/piano.js';
 import { FINGER_LEGEND } from '../score/FingerLegend.js';
 import type * as ScoreDocumentModule from '../score/useScoreDocument.js';
 import type * as ManifestModule from './manifest.js';
@@ -150,6 +151,61 @@ describe('LibraryView: import request lifetime', () => {
     await finish(later);
     expect(useAppStore.getState().view.name).toBe('library');
   });
+  it('shows the loader at once when a file is chosen, and hides the rest of the page', async () => {
+    const { container } = render(<LibraryView />);
+    const pending = pendingFile();
+    choose(pending.file);
+    expect(useAppStore.getState().opening).toBe('chosen');
+    const loading = container.querySelector('main.library > .opening')!;
+    expect(loading).toHaveTextContent('Loading the score…');
+    // The status region is filled after it mounts, so that a screen reader says it.
+    await waitFor(() =>
+      expect(loading.querySelector('[role="status"]')).toHaveTextContent('Loading'),
+    );
+    // The page stays in place under the loader (it is hidden by the stylesheet, not removed).
+    expect(container.querySelector('main.library')).toHaveClass('is-opening');
+    expect(container.querySelectorAll('.loader-red')).toHaveLength(1);
+    await finish(pending);
+    expect(useAppStore.getState().view.name).toBe('score');
+    expect(useAppStore.getState().opening).toBeNull();
+  });
+  it('brings Start back with the notice when the read fails', async () => {
+    const { container } = render(<LibraryView />);
+    const pending = pendingFile();
+    choose(pending.file);
+    await finish(pending, true);
+    expect(useAppStore.getState().opening).toBeNull();
+    expect(useAppStore.getState().notice).not.toBeNull();
+    expect(container.querySelector('.opening')).toBeNull();
+    expect(container.querySelector('main.library')).not.toHaveClass('is-opening');
+    expect(screen.getByRole('button', { name: /^Start with / })).toBeInTheDocument();
+  });
+  it('shows no loader after About and back, and the late read has no effect', async () => {
+    const { container } = render(<LibraryView />);
+    const pending = pendingFile();
+    choose(pending.file);
+    fireEvent.click(screen.getByRole('button', { name: 'About and licences' }));
+    expect(useAppStore.getState().opening).toBeNull();
+    act(() => useAppStore.getState().openLibrary());
+    expect(container.querySelector('.opening')).toBeNull();
+    expect(screen.getByRole('button', { name: /^Start with / })).toBeInTheDocument();
+    await finish(pending);
+    expect(useAppStore.getState().view.name).toBe('library');
+    expect(useAppStore.getState().opening).toBeNull();
+  });
+  it('gives a file chosen a record id of its own, for the address to name', async () => {
+    render(<LibraryView />);
+    const pending = pendingFile();
+    choose(pending.file);
+    await finish(pending);
+    const view = useAppStore.getState().view;
+    expect(view).toMatchObject({
+      name: 'score',
+      source: { kind: 'file', name: 'delayed.musicxml' },
+    });
+    const source = (view as Extract<typeof view, { name: 'score' }>).source;
+    expect(source.kind === 'file' && source.localId).toMatch(/^[0-9a-f-]{36}$/);
+  });
   it.each([false, true])(
     'ignores delayed scan validation (rejected: %s) after navigation',
     async (invalid) => {
@@ -198,6 +254,44 @@ describe('LibraryView: the units (shelves spec 4.1, 5)', () => {
     expect(container.querySelectorAll('.is-red')).toHaveLength(1);
     expect(h2s()).toEqual(['Songs', 'Classical', 'Folk and carols', 'Baroque', 'Romantic']);
     expect(screen.queryByRole('heading', { level: 3 })).toBeNull();
+  });
+  it('puts the own-score line in the welcome, under Start, before the levels and the list', () => {
+    const { container } = render(<LibraryView />);
+    const welcome = container.querySelector('header.welcome')!;
+    const label = screen.getByText('Open your own score');
+    expect(welcome.contains(label)).toBe(true);
+    const follows = (a: Element, b: Element) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(welcome.querySelector('.start-row')!, label)).toBe(true);
+    expect(follows(label, container.querySelector('.level-choice')!)).toBe(true);
+    expect(follows(label, container.querySelector('.library-list')!)).toBe(true);
+    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(1);
+  });
+  it('ends the page with the piano line where the browser has Web MIDI', () => {
+    Object.defineProperty(navigator, 'requestMIDIAccess', {
+      value: () => Promise.resolve(),
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(navigator, 'permissions', {
+      value: { query: () => Promise.resolve({ state: 'prompt' }) },
+      configurable: true,
+      writable: true,
+    });
+    resetPianoForTests();
+    try {
+      const { container } = render(<LibraryView />);
+      const line = container.querySelector('.piano-line')!;
+      expect(line).not.toBeNull();
+      expect(container.querySelector('header.welcome')!.contains(line)).toBe(false);
+      expect(
+        Boolean(container.querySelector('.library-list')!.compareDocumentPosition(line) & 4),
+      ).toBe(true);
+    } finally {
+      delete (navigator as unknown as Record<string, unknown>).requestMIDIAccess;
+      delete (navigator as unknown as Record<string, unknown>).permissions;
+      resetPianoForTests();
+    }
   });
   it('shows a shelf as its name, count, line, at most 5 rows and an All button', () => {
     render(<LibraryView />);
@@ -837,7 +931,7 @@ describe('LibraryView in another language (issue #6)', () => {
     resetLocaleForTests();
     useLocalLibrary.setState({ items: [], failed: false });
   });
-  it('speaks French: sentence, button, levels, shelves, counts and the end line', async () => {
+  it('speaks French: sentence, button, levels, shelves, counts and the own-score line', async () => {
     await act(() => chooseLocale('fr'));
     render(<LibraryView />);
     expect(

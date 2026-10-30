@@ -108,7 +108,7 @@ export const library = {
     cannotReadFiles: 'Could not read these files.',
     cannotReadFile: 'Could not read this file.',
   },
-  /** Playing along on the reader's own piano over Web MIDI (issue 182): the line under the end line. */
+  /** Playing along on the reader's own piano over Web MIDI (issue 182): the end line of the library page. */
   piano: {
     /** The button while nothing is connected; the press is the reader's consent to the browser's prompt. */
     start: 'Play along on your piano',

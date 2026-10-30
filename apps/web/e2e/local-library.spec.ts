@@ -40,6 +40,29 @@ async function storedScores(page: Page, count: number) {
     .toBe(count);
 }
 
+/** The names of the scores committed to My scores' IndexedDB (empty before it exists). */
+function savedNames(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    if (!(await indexedDB.databases()).some((db) => db.name === 'digitus2.my-scores')) return [];
+    return new Promise<string[]>((resolve, reject) => {
+      const open = indexedDB.open('digitus2.my-scores');
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const read = db.transaction('scores', 'readonly').objectStore('scores').getAll();
+        read.onerror = () => {
+          db.close();
+          reject(read.error);
+        };
+        read.onsuccess = () => {
+          db.close();
+          resolve((read.result as { name?: string }[]).map((record) => record.name ?? ''));
+        };
+      };
+    });
+  });
+}
+
 for (const count of [1, 2]) {
   test(`local library: keyboard removal preserves focus for ${count} saved scores`, async ({
     page,
@@ -271,4 +294,96 @@ test('local library: orientation and unchanged original bytes survive refresh', 
     );
   }
   await expect.poll(readSource).toEqual([...original]);
+});
+
+// Issue 242: the address of an own score names its record in My scores, so a reload reopens it.
+test('local library: reloading an own score reopens the saved score, and a removed one gives the notice', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByLabel('Open your own score').setInputFiles({
+    name: 'twinkle.musicxml',
+    mimeType: 'application/xml',
+    buffer: libraryScore('twinkle-twinkle-little-star'),
+  });
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  await expect(page).toHaveURL(/#\/mine\/[0-9a-f-]{36}$/);
+  const saved = page.url();
+  // Persistence initializes through a lazy module: wait until the record is committed.
+  await expect.poll(() => savedNames(page)).toEqual(['twinkle.musicxml']);
+
+  // The reload never shows the library: it is the loader, then the score.
+  await page.addInitScript(() => {
+    Object.assign(window, { libraryShown: false });
+    new MutationObserver((records) => {
+      for (const record of records)
+        for (const node of record.addedNodes)
+          if (
+            node instanceof Element &&
+            (node.matches('main.library') || node.querySelector('main.library'))
+          )
+            Object.assign(window, { libraryShown: true });
+    }).observe(document, { childList: true, subtree: true });
+  });
+  await page.reload();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  expect(page.url()).toBe(saved);
+  await expect(page.locator('.notice')).toHaveCount(0);
+  expect(
+    await page.evaluate(() => (window as unknown as { libraryShown: boolean }).libraryShown),
+  ).toBe(false);
+  expect(await page.locator('.opening').count()).toBe(0);
+
+  // Once removed from My scores, the same address is not restorable.
+  await myScores(page);
+  await page.getByRole('button', { name: 'Remove saved twinkle.musicxml' }).click();
+  await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
+  // The delete commits asynchronously: the address is tried only once the record is gone.
+  await expect.poll(() => savedNames(page)).toEqual([]);
+  // A fresh load of the old address (a hash-only goto would not reload the page).
+  await page.goto('about:blank');
+  await page.goto(saved);
+  await expect(page.getByText('Open it from My scores, or choose the file again.')).toBeVisible();
+  await expect(page).toHaveURL(/#\/$/);
+  await expect(page.locator('.score-view')).toHaveCount(0);
+});
+
+// Issue 242: a scanned score is saved under its scan, and its addresses name it.
+test('local library: reloading a scanned score reopens it, and the review behind it', async ({
+  page,
+}) => {
+  const calls = recordService(page);
+  await mockService(page, libraryScore('twinkle-twinkle-little-star').toString('utf8'));
+  await page.goto('/');
+  await page
+    .locator('input[type=file]')
+    .setInputFiles({ name: 'reload.png', mimeType: 'image/png', buffer: png });
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await expect(page).toHaveURL(/#\/scan\/[0-9a-f-]{36}$/);
+  const review = page.url();
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Use for fingerings' }).click();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  await expect(page).toHaveURL(/#\/mine\/[0-9a-f-]{36}$/);
+  const score = page.url();
+  expect(score.split('/').pop()).toBe(review.split('/').pop());
+  await expect.poll(() => savedNames(page)).toHaveLength(1);
+  const scans = calls.length;
+
+  // The score reopens, from the saved scan, without scanning again.
+  await page.reload();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  expect(page.url()).toBe(score);
+  await expect(page.locator('.notice')).toHaveCount(0);
+  expect(calls).toHaveLength(scans);
+
+  // Back from it is the review, and the review reopens too.
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  expect(page.url()).toBe(review);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Use for fingerings' })).toBeEnabled();
+  expect(page.url()).toBe(review);
+  expect(calls).toHaveLength(scans);
 });

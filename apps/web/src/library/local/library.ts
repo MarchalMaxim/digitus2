@@ -1,4 +1,6 @@
+import { FILE_NOT_RESTORABLE_NOTICE } from '../../app/routes.js';
 import { useAppStore, type View } from '../../app/store.js';
+import type { ScanSession } from '../../scan/model.js';
 import type { Shareable } from '../shared/eligibility.js';
 import { LocalScoreDatabase } from './database.js';
 import { restoreSession, storeSession, type LocalScoreRecord } from './records.js';
@@ -11,6 +13,8 @@ const snapshots = new Map<string, object>();
 const fileIds = new WeakMap<Uint8Array, string>();
 let database: LocalScoreDatabase | undefined;
 let queue = Promise.resolve();
+/** The first read of the stored scores; an address that names one waits for it (`openLocalAt`). */
+let ready: Promise<void> = Promise.resolve();
 let failed = false;
 let installed = false;
 let openRequest = 0;
@@ -103,7 +107,9 @@ function capture(view: View) {
     };
   } else if (view.name === 'score' && view.source.kind === 'file') {
     const source = view.source;
-    let id = fileIds.get(source.bytes);
+    // A score opened with a record id of its own (a file chosen or dropped, or reopened by its
+    // address) is saved under it, so the address '#/mine/<id>' finds it after a reload.
+    let id = source.localId ? `file:${source.localId}` : fileIds.get(source.bytes);
     if (!id) {
       id = `file:${crypto.randomUUID()}`;
       fileIds.set(source.bytes, id);
@@ -136,7 +142,7 @@ export function installLocalLibrary() {
   installed = true;
   try {
     database = new LocalScoreDatabase();
-    queue = database
+    ready = database
       .read()
       .then((rows) => {
         for (const row of rows)
@@ -147,6 +153,7 @@ export function installLocalLibrary() {
         publish();
       })
       .catch(() => storageFailed());
+    queue = ready;
   } catch {
     storageFailed();
   }
@@ -169,17 +176,137 @@ export async function openLocalScore(id: string, expectedView = useAppStore.getS
       snapshots.set(id, session);
       useAppStore.getState().openScan(session);
     } else {
+      // The saved file is read before the score view can start: the loader shows meanwhile.
+      useAppStore.getState().setOpening('chosen');
       const bytes = new Uint8Array(await record.blob.arrayBuffer());
       if (!current() || records.get(id) !== record || removed.has(id)) return;
       fileIds.set(bytes, id);
       snapshots.set(id, bytes);
-      useAppStore.getState().openPiece({ kind: 'file', name: record.name, bytes });
+      useAppStore.getState().openPiece({
+        kind: 'file',
+        name: record.name,
+        bytes,
+        localId: id.slice('file:'.length),
+      });
     }
   } catch {
     if (!current() || records.get(id) !== record || removed.has(id)) return;
     useAppStore.getState().setNotice((t) => t.library.myScores.openFailed);
+  } finally {
+    // A read that ended without a score (a failure, or a newer request) takes the loader away.
+    if (request === openRequest && useAppStore.getState().opening === 'chosen')
+      useAppStore.getState().setOpening(null);
   }
 }
+
+/** How long an address waits for My scores to be read before it gives up (issue 242). */
+const READ_TIMEOUT_MS = 8000;
+
+/**
+ * From an address ('#/mine/<id>' or '#/scan/<id>', after a reload or followed): reopens the saved
+ * score (`as` 'score': a file, or the score of a scan) or the scan under review (`as` 'review')
+ * once My scores has been read, unless the address has changed meanwhile (issue 242). A score that
+ * is not there, cannot be read, or whose read does not finish puts the library on screen with the
+ * notice that it is opened from My scores, and the address back to the library's. Nothing is
+ * written: the record stays as it was.
+ */
+export async function openLocalAt(
+  store: typeof useAppStore,
+  uuid: string,
+  hash: string,
+  as: 'score' | 'review' = 'score',
+): Promise<void> {
+  installLocalLibrary();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  await Promise.race([
+    ready,
+    new Promise<void>((resolve) => {
+      timer = setTimeout(resolve, READ_TIMEOUT_MS);
+    }),
+  ]);
+  clearTimeout(timer);
+  const gone = () => {
+    const { view } = store.getState();
+    return (
+      location.hash !== hash ||
+      (as === 'review'
+        ? view.name === 'scan' && view.session.id === uuid
+        : view.name === 'score' &&
+          view.source.kind === 'file' &&
+          (view.source.localId === uuid || view.source.scan?.id === uuid))
+    );
+  };
+  if (gone()) return;
+  const fileId = `file:${uuid}`;
+  const scanId = `scan:${uuid}`;
+  const record =
+    as === 'review' ? records.get(scanId) : (records.get(fileId) ?? records.get(scanId));
+  const still = () => !!record && records.get(record.id) === record && !removed.has(record.id);
+  if (record?.kind === 'file' && still()) {
+    let bytes: Uint8Array | null = null;
+    try {
+      bytes = new Uint8Array(await record.blob.arrayBuffer());
+    } catch {
+      bytes = null;
+    }
+    if (gone()) return;
+    if (bytes && still()) {
+      fileIds.set(bytes, fileId);
+      snapshots.set(fileId, bytes);
+      store.setState({
+        notice: null,
+        view: { name: 'score', source: { kind: 'file', name: record.name, bytes, localId: uuid } },
+      });
+      return;
+    }
+  } else if (record?.kind === 'scan' && still()) {
+    let session: ScanSession | null = null;
+    try {
+      session = restoreSession(record.session);
+    } catch {
+      session = null;
+    }
+    if (session && as === 'review') {
+      snapshots.set(scanId, session);
+      store.setState({ notice: null, view: { name: 'scan', session } });
+      return;
+    }
+    if (session?.xml) {
+      // The score the scan's "Use" opened: the recognition with its corrections applied.
+      let xml = session.xml;
+      try {
+        const { applyCorrections } = await import('../../scan/corrections.js');
+        xml = applyCorrections(session.xml, session.corrections ?? []).xml;
+      } catch {
+        xml = session.xml;
+      }
+      if (gone()) return;
+      if (still()) {
+        snapshots.set(scanId, session);
+        store.setState({
+          notice: null,
+          view: {
+            name: 'score',
+            source: {
+              kind: 'file',
+              name: session.file.name.replace(/\.[^.]+$/, '') + '.musicxml',
+              bytes: new TextEncoder().encode(xml),
+              scan: session,
+            },
+          },
+        });
+        return;
+      }
+    }
+  }
+  history.replaceState(history.state, '', '#/');
+  store.setState({
+    notice: FILE_NOT_RESTORABLE_NOTICE,
+    opening: null,
+    view: { name: 'library' },
+  });
+}
+
 export function removeLocalScore(id: string) {
   removed.add(id);
   records.delete(id);

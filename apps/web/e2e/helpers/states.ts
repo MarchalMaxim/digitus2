@@ -637,3 +637,84 @@ async function scanReview(page: Page, xml: string): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
   await expect(page.locator('.scan-sheet svg').first()).toBeVisible();
 }
+
+/** Holds the browser's read of every stored or chosen file once `hold-reads` is set in the visit. */
+async function holdReads(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const read = Blob.prototype.arrayBuffer;
+    Blob.prototype.arrayBuffer = function () {
+      try {
+        if (sessionStorage.getItem('hold-reads')) return new Promise<ArrayBuffer>(() => undefined);
+      } catch {
+        // No session storage: nothing is held.
+      }
+      return read.call(this);
+    };
+  });
+}
+
+const holdFromNow = (page: Page) => page.evaluate(() => sessionStorage.setItem('hold-reads', '1'));
+
+/**
+ * The loader that says a score is on its way in (issue 240, 242), reached with the read held:
+ * the loader is the one red, the rest of the library is hidden. Checked in both colour schemes,
+ * with axe and for overflow, by `opening.spec.ts`.
+ */
+export const OPENING_STATES: AppState[] = [
+  {
+    name: 'file-opening',
+    go: async (page) => {
+      await holdReads(page);
+      await library(page);
+      await holdFromNow(page);
+      await page.getByLabel('Open your own score').setInputFiles({
+        name: 'held.musicxml',
+        mimeType: 'application/xml',
+        buffer: readFileSync(TWINKLE_XML),
+      });
+      await expect(page.locator('.opening')).toBeVisible();
+    },
+    expectTag: 'button',
+  },
+  {
+    name: 'address-reopening',
+    go: async (page) => {
+      await holdReads(page);
+      await library(page);
+      await page.getByLabel('Open your own score').setInputFiles({
+        name: 'saved.musicxml',
+        mimeType: 'application/xml',
+        buffer: readFileSync(TWINKLE_XML),
+      });
+      await expect(page.locator('.score-sheet svg').first()).toBeVisible({
+        timeout: SCORE_TIMEOUT,
+      });
+      // Persistence starts through a lazy module: the record is committed before the reload.
+      await expect
+        .poll(() =>
+          page.evaluate(async () => {
+            if (!(await indexedDB.databases()).some((db) => db.name === 'digitus2.my-scores'))
+              return 0;
+            return new Promise<number>((resolve, reject) => {
+              const open = indexedDB.open('digitus2.my-scores');
+              open.onerror = () => reject(open.error);
+              open.onsuccess = () => {
+                const db = open.result;
+                const count = db.transaction('scores', 'readonly').objectStore('scores').count();
+                count.onsuccess = () => {
+                  db.close();
+                  resolve(count.result);
+                };
+              };
+            });
+          }),
+        )
+        .toBe(1);
+      await holdFromNow(page);
+      await page.reload();
+      await expect(page.locator('.opening')).toBeVisible();
+      await expect(page.locator('main.library')).toHaveCount(0);
+    },
+    expectTag: 'button',
+  },
+];

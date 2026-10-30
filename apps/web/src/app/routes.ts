@@ -5,6 +5,8 @@ import type { useAppStore, View } from './store.js';
 const FILE_HASH = '#/piece/file';
 const PIECE_PREFIX = '#/piece/';
 const SHARED_PREFIX = '#/shared/';
+const MINE_PREFIX = '#/mine/';
+const SCAN_PREFIX = '#/scan/';
 
 /** Uploaded scores reopen explicitly from the local collection, without starting a scan. */
 export const FILE_NOT_RESTORABLE_NOTICE: Phrase = (t) => t.app.fileNotRestorable;
@@ -22,14 +24,36 @@ export function viewToHash(view: View): string {
     case 'about':
       return '#/about';
     case 'scan':
-      return '#/scan';
+      return `${SCAN_PREFIX}${view.session.id}`;
     case 'score':
       return view.source.kind === 'library'
         ? `${PIECE_PREFIX}${view.source.slug}`
         : view.source.kind === 'shared'
           ? `${SHARED_PREFIX}${view.source.id}`
-          : FILE_HASH;
+          : view.source.kind === 'file' && view.source.localId
+            ? `${MINE_PREFIX}${view.source.localId}`
+            : view.source.kind === 'file' && view.source.scan
+              ? `${MINE_PREFIX}${view.source.scan.id}`
+              : FILE_HASH;
   }
+}
+
+function uuidAfter(prefix: string, hash: string): string | null {
+  const id = hash.startsWith(prefix) ? hash.slice(prefix.length) : '';
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id) ? id : null;
+}
+
+/**
+ * The record id a '#/mine/<id>' address names (a uuid in My scores: a file's, or the scan a score
+ * came from), else null (issue 242).
+ */
+export function localIdFromHash(hash: string): string | null {
+  return uuidAfter(MINE_PREFIX, hash);
+}
+
+/** The scan session a '#/scan/<id>' address (a scan under review) names, else null (issue 242). */
+export function scanIdFromHash(hash: string): string | null {
+  return uuidAfter(SCAN_PREFIX, hash);
 }
 
 /** The id a '#/shared/<id>' address names: 32 lowercase hex characters, else null. */
@@ -39,8 +63,9 @@ export function sharedIdFromHash(hash: string): string | null {
 }
 
 /**
- * The view a hash names, or null for '#/piece/file' (not restorable), unknown hashes and a shared
- * score's address (its score has to be fetched first: `sharedIdFromHash`).
+ * The view a hash names, or null for '#/piece/file' (not restorable), unknown hashes, a shared
+ * score's address (its score has to be fetched first: `sharedIdFromHash`) and a saved own score's
+ * (My scores has to be read first: `localIdFromHash`).
  */
 export function hashToView(hash: string): View | null {
   if (hash === '' || hash === '#' || hash === '#/') return { name: 'library' };
@@ -67,22 +92,37 @@ export function installHashSync(store: typeof useAppStore): () => void {
   const applyHash = (): boolean => {
     const hash = location.hash;
     const { view } = store.getState();
+    const localId = localIdFromHash(hash);
+    const scanId = scanIdFromHash(hash);
+    // A step away from the address being reopened (Back during the restore, a malformed address)
+    // ends its loader.
+    if (store.getState().opening === 'address' && !localId && !scanId)
+      store.setState({ opening: null });
     if (viewToHash(view) === hash) return false;
+    // A scan-derived score retains its source: Back from it restores that review in place.
+    if (
+      view.name === 'score' &&
+      view.source.kind === 'file' &&
+      view.source.scan &&
+      hash === viewToHash({ name: 'scan', session: view.source.scan })
+    ) {
+      store.setState({ view: { name: 'scan', session: view.source.scan } });
+      return false;
+    }
+    const saved = localId ?? scanId;
+    if (saved) {
+      // A saved own score, or a scan under review: My scores reopens it, and the address stays
+      // meanwhile (issue 242).
+      if (view.name === 'library') store.setState({ opening: 'address' });
+      void import('../library/local/library.js').then((m) =>
+        m.openLocalAt(store, saved, hash, scanId ? 'review' : 'score'),
+      );
+      return true;
+    }
     const sharedId = sharedIdFromHash(hash);
     if (sharedId) {
       void import('../library/shared/open.js').then((m) => m.openSharedAt(store, sharedId, hash));
       return true;
-    }
-    // A scan-derived score retains its source. Back restores that review; after a reload
-    // the reader chooses the saved item explicitly from My scores.
-    if (
-      hash === '#/scan' &&
-      view.name === 'score' &&
-      view.source.kind === 'file' &&
-      view.source.scan
-    ) {
-      store.setState({ view: { name: 'scan', session: view.source.scan } });
-      return false;
     }
     const next = hashToView(hash);
     if (next) {
@@ -91,8 +131,13 @@ export function installHashSync(store: typeof useAppStore): () => void {
     }
     // Not restorable or unknown: fall back to the library. Correct the hash first so the view
     // change below finds it already in place and does not push a second history entry.
-    if (hash === FILE_HASH || hash === '#/scan')
-      store.setState({ notice: FILE_NOT_RESTORABLE_NOTICE });
+    if (
+      hash === FILE_HASH ||
+      hash === '#/scan' ||
+      hash.startsWith(SCAN_PREFIX) ||
+      hash.startsWith(MINE_PREFIX)
+    )
+      store.setState({ notice: FILE_NOT_RESTORABLE_NOTICE, opening: null });
     else if (hash.startsWith(PIECE_PREFIX)) store.setState({ notice: UNKNOWN_PIECE_NOTICE });
     else if (hash.startsWith(SHARED_PREFIX)) store.setState({ notice: SHARED_NOT_LOADED_NOTICE });
     replaceHash(viewToHash({ name: 'library' }));

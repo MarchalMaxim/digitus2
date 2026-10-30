@@ -115,9 +115,11 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
 });
 
 // UI batch review and design section 17: the words a first visit reads before the first piece.
-// With shelves they are 37: the name 1, the sentence 14, the red button 6, the four pills 4, the
-// first shelf's name 1, count 2 and line 9. The budget may not grow.
-test('library: at most 37 visible words before the first piece (design section 17)', async ({
+// With shelves they are 41: the name 1, the sentence 14, the red button 6, the own-score line 4
+// (issue 239: a visitor with a file in hand finds it on the first screen), the four pills 4, the
+// first shelf's name 1, count 2 and line 9. On a touch-only device the photo line adds 4 more.
+// Nothing else may grow.
+test('library: at most 41 visible words before the first piece (design section 17)', async ({
   page,
 }) => {
   await page.goto('/');
@@ -142,7 +144,9 @@ test('library: at most 37 visible words before the first piece (design section 1
   test
     .info()
     .annotations.push({ type: 'words before the first piece', description: `${words.length}` });
-  expect(words.length, words.join(' ')).toBeLessThanOrEqual(37);
+  const photoLine =
+    (await page.getByText('Photograph a printed score', { exact: true }).count()) > 0;
+  expect(words.length, words.join(' ')).toBeLessThanOrEqual(photoLine ? 45 : 41);
 });
 
 test('library: the arrow keys choose a level; the shelves follow and the pill keeps the focus', async ({
@@ -271,9 +275,6 @@ test("library: a level pick keeps an open shelf open and shows that level's piec
 
 test('library: an unsupported file shows a notice and keeps one red element', async ({ page }) => {
   await page.goto('/');
-  // The end line sits at the bottom of a long page; the notice (sticky at the top) must still
-  // land on screen there.
-  await page.getByText('Open your own score').scrollIntoViewIfNeeded();
   await page
     .getByLabel('Open your own score')
     .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
@@ -678,4 +679,113 @@ test('library: the filled heart on a Favourites row takes the piece off, the foc
   await page.reload();
   await libraryReady(page);
   await expect(page.getByRole('heading', { name: 'Favourites' })).toHaveCount(0);
+});
+
+// Issue 239: a visitor with a file in hand finds the way in without scrolling, at 1280 and 360.
+test('library: opening your own score is on the first screen, and the page keeps one red', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  await expect(page.getByText('Open your own score', { exact: true })).toBeInViewport();
+  const roots = await expectOneRed(page, 'library with the own-score line');
+  expect(roots[0]!.tag).toBe('button');
+  expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
+});
+
+// Issue 240: the browser's read of a chosen file is held, as a file from a phone's provider or a
+// cloud folder is while it downloads. The library shows the loader at once, never an unchanged page.
+test('library: a chosen file shows the loader at once, as the one red, while it is read', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const read = File.prototype.arrayBuffer;
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    File.prototype.arrayBuffer = async function () {
+      if (this.name.endsWith('.musicxml')) await held;
+      return read.call(this);
+    };
+    Object.assign(window, { releaseRead: release });
+  });
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByLabel('Open your own score').setInputFiles({
+    name: 'held.musicxml',
+    mimeType: 'application/xml',
+    buffer: libraryScore('twinkle-twinkle-little-star'),
+  });
+  const opening = page.locator('.opening');
+  await expect(opening).toBeVisible();
+  await expect(opening).toBeInViewport();
+  await expect(opening).toContainText('Loading the score…');
+  await expect(page.getByRole('button', { name: /^(Start|Continue) with / })).toBeHidden();
+  const roots = await expectOneRed(page, 'a chosen file being read');
+  expect(roots[0]!.className).toContain('loader-red');
+  await page.evaluate(() => (window as unknown as { releaseRead(): void }).releaseRead());
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  await expect(page.locator('.opening')).toHaveCount(0);
+});
+
+// The score view's chunk held on the network: the gap between the library leaving and the score
+// arriving shows the same loader, not a blank page.
+test('library: while the score view is still on its way the page shows the loader', async ({
+  page,
+}) => {
+  let release: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  await page.route('**/assets/ScoreView-*.js', async (route) => {
+    await gate;
+    await route.continue();
+  });
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByLabel('Open your own score').setInputFiles({
+    name: 'chunk.musicxml',
+    mimeType: 'application/xml',
+    buffer: libraryScore('twinkle-twinkle-little-star'),
+  });
+  const opening = page.locator('.opening');
+  await expect(opening).toBeVisible();
+  await expect(opening).toContainText('Loading the score…');
+  await expect(page.locator('.library')).toHaveCount(0);
+  const roots = await expectOneRed(page, 'the score view on its way');
+  expect(roots[0]!.className).toContain('loader-red');
+  release();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  await expect(page.locator('.opening')).toHaveCount(0);
+});
+
+// A file dropped anywhere on the page is read like a chosen one: the loader is in the window
+// however far the page is scrolled, not in the welcome far above it.
+test('library: a file dropped on a scrolled page shows the loader in the window', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const read = File.prototype.arrayBuffer;
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    File.prototype.arrayBuffer = async function () {
+      if (this.name.endsWith('.musicxml')) await held;
+      return read.call(this);
+    };
+    Object.assign(window, { releaseRead: release });
+  });
+  await page.goto('/');
+  await libraryReady(page);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+  const xml = libraryScore('twinkle-twinkle-little-star').toString('utf8');
+  await page.evaluate((text) => {
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([text], 'dropped.musicxml', { type: 'application/xml' }));
+    for (const type of ['dragenter', 'dragover', 'drop'])
+      window.dispatchEvent(new DragEvent(type, { dataTransfer: transfer, cancelable: true }));
+  }, xml);
+  const opening = page.locator('.opening');
+  await expect(opening).toBeVisible();
+  await expect(opening).toBeInViewport({ ratio: 1 });
+  await expectOneRed(page, 'a dropped file being read, the page scrolled');
+  await page.evaluate(() => (window as unknown as { releaseRead(): void }).releaseRead());
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
 });

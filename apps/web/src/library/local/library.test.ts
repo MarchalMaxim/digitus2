@@ -214,3 +214,171 @@ it.each([
   await vi.waitFor(() => expect(useLocalLibrary.getState().items).toHaveLength(3));
   expect(useLocalLibrary.getState().items.map((item) => item.id)).toEqual(['at-5', 'at-3', 'at-1']);
 });
+
+const UUID = '0b6f1c64-8a52-4d3e-9a7b-3f2c1d4e5a60';
+
+async function saved(hash = `#/mine/${UUID}`) {
+  fixture.rows = [
+    {
+      version: 1,
+      id: `file:${UUID}`,
+      updatedAt: 1,
+      kind: 'file',
+      name: 'mine.musicxml',
+      blob: new Blob(['my score']),
+    },
+  ];
+  location.hash = hash;
+  const library = await import('./library.js');
+  const { useAppStore } = await import('../../app/store.js');
+  useAppStore.setState({ view: { name: 'library' }, notice: null });
+  useAppStore.getState().setOpening('address');
+  return { library, store: useAppStore, hash };
+}
+
+it('an address reopens the saved score with its name, bytes and record id, and writes nothing', async () => {
+  const { library, store, hash } = await saved();
+  await library.openLocalAt(store, UUID, hash);
+  const view = store.getState().view;
+  expect(view).toMatchObject({
+    name: 'score',
+    source: { kind: 'file', name: 'mine.musicxml', localId: UUID },
+  });
+  const source = (view as { source: { bytes: Uint8Array } }).source;
+  expect(new TextDecoder().decode(source.bytes)).toBe('my score');
+  expect(store.getState().opening).toBeNull();
+  await Promise.resolve();
+  expect(fixture.started).toBe(0);
+});
+
+it('an address that names no saved score gives the library, the notice and the library address', async () => {
+  const { library, store } = await saved();
+  const other = '#/mine/11111111-2222-4333-8444-555555555555';
+  location.hash = other;
+  await library.openLocalAt(store, '11111111-2222-4333-8444-555555555555', other);
+  expect(store.getState().view).toEqual({ name: 'library' });
+  expect(noticeText(store.getState().notice)).toBe(
+    'Open it from My scores, or choose the file again.',
+  );
+  expect(store.getState().opening).toBeNull();
+  expect(location.hash).toBe('#/');
+});
+
+it('an address that changed meanwhile is left alone', async () => {
+  const { library, store, hash } = await saved();
+  location.hash = '#/about';
+  await library.openLocalAt(store, UUID, hash);
+  expect(store.getState().view).toEqual({ name: 'library' });
+  expect(store.getState().opening).toBe('address');
+});
+
+it('waits for the stored scores to be read before it looks', async () => {
+  let release!: () => void;
+  fixture.readGate = new Promise<void>((done) => {
+    release = done;
+  });
+  const { library, store, hash } = await saved();
+  const reopening = library.openLocalAt(store, UUID, hash);
+  await Promise.resolve();
+  expect(store.getState().view).toEqual({ name: 'library' });
+  release();
+  await reopening;
+  expect(store.getState().view.name).toBe('score');
+});
+
+it('a score opened with a record id is saved under it', async () => {
+  const { library, store } = await setup();
+  library.installLocalLibrary();
+  store.getState().openPiece({
+    kind: 'file',
+    name: 'new.musicxml',
+    bytes: new TextEncoder().encode('new'),
+    localId: UUID,
+  });
+  await vi.waitFor(() => expect(fixture.disk.has(`file:${UUID}`)).toBe(true));
+  expect(fixture.disk.get(`file:${UUID}`)).toMatchObject({ kind: 'file', name: 'new.musicxml' });
+});
+
+async function savedScan(
+  xml: string | null = '<score-partwise version="3.1"><part-list/></score-partwise>',
+) {
+  const { storeSession } = await import('./records.js');
+  const session = {
+    id: UUID,
+    file: new File(['png'], 'page.png', { type: 'image/png' }),
+    xml: xml ?? undefined,
+  };
+  fixture.rows = [
+    { version: 1, id: `scan:${UUID}`, updatedAt: 1, kind: 'scan', session: storeSession(session) },
+  ];
+  const library = await import('./library.js');
+  const { useAppStore } = await import('../../app/store.js');
+  useAppStore.setState({ view: { name: 'library' }, notice: null });
+  return { library, store: useAppStore };
+}
+
+it('a scan address reopens the scan under review, and writes nothing', async () => {
+  const { library, store } = await savedScan();
+  const hash = `#/scan/${UUID}`;
+  location.hash = hash;
+  await library.openLocalAt(store, UUID, hash, 'review');
+  expect(store.getState().view).toMatchObject({ name: 'scan', session: { id: UUID } });
+  await Promise.resolve();
+  expect(fixture.started).toBe(0);
+});
+
+it('the address of a scan-derived score reopens its score with the scan as its source', async () => {
+  const { library, store } = await savedScan();
+  const hash = `#/mine/${UUID}`;
+  location.hash = hash;
+  await library.openLocalAt(store, UUID, hash);
+  const view = store.getState().view;
+  expect(view).toMatchObject({
+    name: 'score',
+    source: { kind: 'file', name: 'page.musicxml', scan: { id: UUID } },
+  });
+  const source = (view as { source: { bytes: Uint8Array } }).source;
+  expect(new TextDecoder().decode(source.bytes)).toContain('score-partwise');
+  await Promise.resolve();
+  expect(fixture.started).toBe(0);
+});
+
+it('a scan with no recognition has no score to reopen: the notice and the library', async () => {
+  const { library, store } = await savedScan(null);
+  const hash = `#/mine/${UUID}`;
+  location.hash = hash;
+  await library.openLocalAt(store, UUID, hash);
+  expect(store.getState().view).toEqual({ name: 'library' });
+  expect(noticeText(store.getState().notice)).toBe(
+    'Open it from My scores, or choose the file again.',
+  );
+});
+
+it('an address gives up on a read of My scores that never finishes', async () => {
+  vi.useFakeTimers();
+  try {
+    fixture.readGate = new Promise<void>(() => undefined);
+    const { library, store, hash } = await saved();
+    const reopening = library.openLocalAt(store, UUID, hash);
+    await vi.advanceTimersByTimeAsync(8000);
+    await reopening;
+    expect(store.getState().view).toEqual({ name: 'library' });
+    expect(noticeText(store.getState().notice)).toBe(
+      'Open it from My scores, or choose the file again.',
+    );
+    expect(store.getState().opening).toBeNull();
+    expect(location.hash).toBe('#/');
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('a saved file shows the loader while it is read, and a failed read takes it away', async () => {
+  const { library, store, reject } = await setup();
+  const opening = library.openLocalScore('slow');
+  expect(store.getState().opening).toBe('chosen');
+  reject();
+  await opening;
+  expect(store.getState().opening).toBeNull();
+  expect(noticeText(store.getState().notice)).not.toBeNull();
+});

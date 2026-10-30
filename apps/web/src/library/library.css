@@ -69,6 +69,34 @@
   margin-top: 0.5rem;
 }
 
+/* A score on its way in (app/Opening.tsx, issue 240): the loader and its status line, in the
+   middle of the window wherever the page is scrolled. The loader is the screen's one accent, so the
+   rest of the library is hidden meanwhile (hidden, not removed: the page keeps its height and the
+   reader's place). */
+.opening {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+/* Over the library's reading column and its stack gap: the window's middle, not the column's. */
+.library > .opening {
+  max-width: none;
+  margin: 0;
+}
+
+.opening .loader {
+  width: 15rem;
+  max-width: 80vw;
+}
+
+.library.is-opening > :not(.opening) {
+  visibility: hidden;
+}
+
 /* A long "Continue with …" wraps inside the button rather than widening the page. */
 .start-row > .is-red {
   white-space: normal;
@@ -305,7 +333,7 @@ h2[tabindex='-1']:focus {
   gap: 0.25rem;
 }
 
-/* The end line: one quiet text button that opens the file chooser (spec 3, 11). */
+/* The own-score line: one quiet text button that opens the file chooser (spec 3, 11). */
 .own-file {
   display: inline-flex;
   align-items: center;
@@ -318,13 +346,14 @@ h2[tabindex='-1']:focus {
   outline-offset: 2px;
 }
 
-/* On a touch-only device the camera sits on its own line under the file chooser (issue 143). */
-.library-end {
+/* The welcome's own-score line (issue 239): the file chooser, and on a touch-only device the
+   camera on a line of its own under it (issue 143). */
+.own-file-line {
   display: grid;
   justify-items: start;
 }
 
-/* Playing along on the reader's own piano (issue 182): the last row of the end line, one gray
+/* Playing along on the reader's own piano (issue 182): the end line of the page, one gray
    sentence over one text button. The flag address is one long word; it wraps. */
 .piano-line {
   display: grid;

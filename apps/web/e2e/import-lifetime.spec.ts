@@ -32,6 +32,12 @@ async function choose(page: Page, name: string) {
     buffer: libraryScore('twinkle-twinkle-little-star'),
   });
 }
+// The loader covers the library while a file is read, so the way out is the address, as Back is.
+async function leaveForAbout(page: Page) {
+  await page.evaluate(() => {
+    location.hash = '#/about';
+  });
+}
 async function release(page: Page, name: string) {
   await page.evaluate(
     (file) =>
@@ -46,7 +52,7 @@ async function release(page: Page, name: string) {
 
 test('a delayed import cannot replace About', async ({ page }) => {
   await choose(page, 'delayed.musicxml');
-  await page.getByRole('button', { name: 'About and licences' }).click();
+  await leaveForAbout(page);
   await expect(page).toHaveURL(/#\/about$/);
   await expect(page.locator('.about')).toBeVisible();
   await release(page, 'delayed.musicxml');
@@ -56,7 +62,7 @@ test('a delayed import cannot replace About', async ({ page }) => {
 
 test('leaving and returning invalidates the old import', async ({ page }) => {
   await choose(page, 'delayed.musicxml');
-  await page.getByRole('button', { name: 'About and licences' }).click();
+  await leaveForAbout(page);
   await page.getByRole('button', { name: /^Back to (the )?library$/ }).click();
   await expect(page.getByLabel('Open your own score')).toBeAttached();
   await release(page, 'delayed.musicxml');
@@ -73,9 +79,9 @@ test('a newer dropped file wins when reads finish in reverse order', async ({ pa
     window.dispatchEvent(new DragEvent('drop', { dataTransfer: transfer, cancelable: true }));
   }, xml);
   await release(page, 'latest.musicxml');
-  await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+  await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 20_000 });
   await release(page, 'old.musicxml');
-  await expect(page).toHaveURL(/#\/piece\/file$/);
+  await expect(page).toHaveURL(/#\/mine\/[0-9a-f-]{36}$/);
   // Persistence initializes through a lazy module. Keep the imported view alive until its
   // record is committed, rather than letting a theme/keyboard SVG stand in for save readiness.
   await expect

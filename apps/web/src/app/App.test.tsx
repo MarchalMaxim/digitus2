@@ -20,6 +20,7 @@ beforeEach(() => {
     settings: { ...DEFAULT_SETTINGS },
     notice: null,
     libraryScrollY: 0,
+    opening: null,
   });
   window.scrollTo({ top: 0 });
 });
@@ -27,6 +28,26 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('App', () => {
+  it('shows the loader while the score view has not arrived, and while an address is reopened', () => {
+    // The score view is a chunk of its own, imported once the library has drawn; before it
+    // resolves the page says what is happening instead of staying blank (issue 240).
+    useAppStore.setState({
+      view: { name: 'score', source: { kind: 'library', slug: 'ode-to-joy' } },
+    });
+    const { container, unmount } = render(<App />);
+    const status = container.querySelector('.opening')!;
+    expect(status).toHaveTextContent('Loading the score…');
+    expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+    unmount();
+    useAppStore.setState({ view: { name: 'library' } });
+    useAppStore.getState().setOpening('address');
+    const reopened = render(<App />);
+    expect(reopened.container.querySelector('.opening')).not.toBeNull();
+    expect(screen.queryByRole('heading', { level: 1, name: 'digitus2' })).toBeNull();
+    act(() => useAppStore.getState().setOpening(null));
+    expect(screen.getByRole('heading', { level: 1, name: 'digitus2' })).toBeInTheDocument();
+  });
+
   it('renders the wordmark', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'digitus2' })).toBeInTheDocument();

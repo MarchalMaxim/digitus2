@@ -152,13 +152,40 @@ describe('the status line', () => {
       );
     });
 
-    it('is in every language, singular and plural, each its own', () => {
+    // A browser can list a piano whose port never receives (issue 252): until a note came from
+    // it the line says so, and on Windows Chrome or Edge with a Bluetooth port it names the cure.
+    it('says the piano is not heard yet until something came from it', () => {
+      // One sentence for any step, so choosing a hand never changes its length.
+      expect(scoreStatusLine({ ...ready, alongHint: { count: 1, unheard: true } })).toEqual(
+        info('Your piano is not heard yet.'),
+      );
+      expect(scoreStatusLine({ ...ready, alongHint: { count: 2, unheard: true } })).toEqual(
+        info('Your piano is not heard yet.'),
+      );
+      expect(
+        scoreStatusLine({ ...ready, alongHint: { count: 1, unheard: true, restart: 'Chrome' } }),
+      ).toEqual(
+        info(
+          'Your piano is not heard yet. If the red note does not move when you play it, turn the piano on, then close every Chrome window and open Chrome again.',
+        ),
+      );
+      expect(
+        scoreStatusLine({ ...ready, alongHint: { count: 1, unheard: true, restart: 'Edge' } })
+          ?.text,
+      ).toContain('close every Edge window and open Edge again.');
+    });
+
+    it('is in every language, singular and plural, heard or not, each its own', () => {
       const lines = [en, es, fr, nl, pt].flatMap((m) => [
         m.score.view.playAlongHint(1),
         m.score.view.playAlongHint(2),
+        m.score.view.playAlongUnheard,
+        m.score.view.playAlongRestart('Chrome'),
       ]);
       expect(lines.every((line) => line.trim() !== '')).toBe(true);
       expect(new Set(lines).size).toBe(lines.length);
+      for (const m of [en, es, fr, nl, pt])
+        expect(m.score.view.playAlongRestart('Edge').match(/Edge/g)).toHaveLength(2);
     });
 
     it('comes after what the score is busy with, why Play is unavailable, and the player', () => {

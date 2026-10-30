@@ -45,6 +45,11 @@ export const score = {
     /** The status line while the red waits for the reader's piano (issue 182); `count` is the notes of the step. */
     playAlongHint: (count: number): string =>
       count > 1 ? 'Play the red notes on your piano.' : 'Play the red note on your piano.',
+    /** The status line while nothing has come from the reader's piano yet (issue 252), in place of `playAlongHint`. */
+    playAlongUnheard: 'Your piano is not heard yet.',
+    /** After `playAlongUnheard`, for a Bluetooth piano on Windows Chrome or Edge: the one cure; `browser` is Chrome or Edge. */
+    playAlongRestart: (browser: string) =>
+      `If the red note does not move when you play it, turn the piano on, then close every ${browser} window and open ${browser} again.`,
     /** The status line while the browser waits for a click before digitus can sound the other hand (issue 184). */
     playAlongSound: {
       click: 'Click the page once to hear the other hand.',

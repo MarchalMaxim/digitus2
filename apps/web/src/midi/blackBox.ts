@@ -1,7 +1,7 @@
 /**
  * The piano connection's black box: a short log in the browser's own storage of what the
- * connection did and what the browser said about the piano's ports (opened, reconnected, the ports'
- * state and connection, the first note heard after each open, turned off). It holds no notes and
+ * connection did and what the browser said about the piano's ports (opened, the ports' state and
+ * connection, the first note heard after each open, turned off). It holds no notes and
  * nothing about the reader beyond that, and shows nowhere in the page. When playing along goes
  * deaf on a reader's machine, it says what happened. Storage that cannot be written loses the
  * entry and nothing else.

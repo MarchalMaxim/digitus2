@@ -95,6 +95,10 @@ export const library: Messages['library'] = {
     asking: 'Sta de browser toe je piano te gebruiken.',
     searching: 'Je piano wordt gezocht. Controleer of hij aanstaat.',
     connected: (name: string) => `${name} is verbonden. Open een stuk en speel de rode noot.`,
+    found: (name: string) =>
+      `${name} is gevonden, maar nog niet gehoord. Druk op een van de toetsen.`,
+    restart: (browser: string) =>
+      `Verandert er niets, zet de piano dan aan, sluit alle vensters van ${browser} en open ${browser} opnieuw.`,
     yourPiano: 'Je piano',
     none: 'Geen piano gevonden. Sluit hem aan met een USB-kabel, of koppel hem via Bluetooth en zet hem aan.',
     bluetoothFlag: (flag: string) =>

@@ -142,8 +142,8 @@ export interface StatusLine {
  * "4"; "1", "2" before a 3/4 pickup that enters on 3; "1" to "4" then "1" when a whole bar comes
  * before a pickup), then, lowest of all, what the play-along asks of the reader: one click for
  * the browser to let digitus sound the other hand (issue 184), then what to play on their piano
- * while the red waits (issue 182). The explanation of the timing rings (issue 192) comes before the
- * walk's play hint. Null when there is nothing to say (a ready score, stopped or playing the
+ * while the red waits (issue 182), or that the piano is not heard yet (issue 252). The
+ * explanation of the timing rings (issue 192) comes before the walk's play hint. Null when there is nothing to say (a ready score, stopped or playing the
  * music). Written in `t` (default: the language on screen).
  */
 export function scoreStatusLine(
@@ -169,7 +169,14 @@ export function scoreStatusLine(
   if (countIn) return { text: String(countIn.beatInBar), kind: 'count' };
   if (alongSound !== null) return info(t.score.view.playAlongSound[alongSound]);
   if (timingExplain) return info(t.score.view.timingExplain);
-  if (alongHint !== null) return info(t.score.view.playAlongHint(alongHint.count));
+  if (alongHint !== null) {
+    const view = t.score.view;
+    if (!alongHint.unheard) return info(view.playAlongHint(alongHint.count));
+    const unheard = view.playAlongUnheard;
+    return info(
+      alongHint.restart ? `${unheard} ${view.playAlongRestart(alongHint.restart)}` : unheard,
+    );
+  }
   return null;
 }
 

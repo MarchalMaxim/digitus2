@@ -156,18 +156,35 @@ describe('LibraryView: import request lifetime', () => {
     const pending = pendingFile();
     choose(pending.file);
     expect(useAppStore.getState().opening).toBe('chosen');
-    const loading = container.querySelector('main.library > .opening')!;
-    expect(loading).toHaveTextContent('Loading the score…');
-    // The status region is filled after it mounts, so that a screen reader says it.
-    await waitFor(() =>
-      expect(loading.querySelector('[role="status"]')).toHaveTextContent('Loading'),
-    );
+    expect(container.querySelector('main.library > .opening')).not.toBeNull();
     // The page stays in place under the loader (it is hidden by the stylesheet, not removed).
     expect(container.querySelector('main.library')).toHaveClass('is-opening');
     expect(container.querySelectorAll('.loader-red')).toHaveLength(1);
     await finish(pending);
     expect(useAppStore.getState().view.name).toBe('score');
     expect(useAppStore.getState().opening).toBeNull();
+  });
+  it('gives the library back with a notice when the read never finishes', async () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(<LibraryView />);
+      const pending = pendingFile();
+      choose(pending.file);
+      expect(container.querySelector('main.library')).toHaveClass('is-opening');
+      act(() => void vi.advanceTimersByTime(7999));
+      expect(useAppStore.getState().opening).toBe('chosen');
+      act(() => void vi.advanceTimersByTime(1));
+      expect(useAppStore.getState().opening).toBeNull();
+      expect(container.querySelector('.opening')).toBeNull();
+      expect(container.querySelector('main.library')).not.toHaveClass('is-opening');
+      const notice = useAppStore.getState().notice;
+      expect(typeof notice === 'function' ? notice(en) : notice).toBe('Could not read this file.');
+      // What the read delivers after the exit is ignored.
+      await finish(pending);
+      expect(useAppStore.getState().view.name).toBe('library');
+    } finally {
+      vi.useRealTimers();
+    }
   });
   it('brings Start back with the notice when the read fails', async () => {
     const { container } = render(<LibraryView />);

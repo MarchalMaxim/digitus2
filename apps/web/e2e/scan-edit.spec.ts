@@ -163,8 +163,12 @@ test('scan edit: the corrected copy plays, notes there still seek, and My scores
   await page.getByRole('button', { name: 'Scan source and recognition' }).click();
   await expect(page.getByText('1 correction', { exact: true })).toBeVisible();
 
-  // After a reload, My scores reopens the raw recognition with its corrections.
+  // After a reload the address reopens the scan's review with its corrections (issue 242); My scores
+  // then opens the raw recognition from the library.
   await page.reload();
+  await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
+  await expect(page.getByText('1 correction', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Back to library' }).click();
   await page.getByText('My scores', { exact: true }).click();
   await expect(page.getByText('Corrected recognition', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Open saved tie-page.png' }).click();

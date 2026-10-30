@@ -13,7 +13,7 @@ test('the library shows no piano line without Web MIDI', async ({ page, browserN
   expect(await page.evaluate(() => typeof navigator.requestMIDIAccess)).toBe('undefined');
   await expect(page.locator('.piano-line')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Play along on your piano' })).toHaveCount(0);
-  // The end line is there without it: the file chooser stays the last row.
+  // The own-score line is there without it: the file chooser stays in the welcome.
   await expect(page.getByLabel('Open your own score')).toBeAttached();
   const roots = await expectOneRed(page, 'the library without Web MIDI');
   expect(roots[0]!.tag).toBe('button');

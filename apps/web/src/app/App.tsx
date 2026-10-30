@@ -3,7 +3,7 @@ import { useT } from '../i18n/i18n.js';
 import { pieceKey, useAppStore, type View } from './store.js';
 import { NoteBurst } from './NoteBurst.js';
 import { Notice } from './Notice.js';
-import { Opening } from './Opening.js';
+import { Opening, OpeningAnnouncement } from './Opening.js';
 import { LibraryView } from '../library/LibraryView.js';
 
 // A lazy chunk: the About view reads ENGINE_VERSION from the engine's public API, and that import
@@ -72,6 +72,7 @@ export function App() {
   return (
     <>
       <Notice />
+      <OpeningAnnouncement />
       {/* A reload on an address that names a saved score (issue 242): the loader, never a flash of
           the library the score then replaces. */}
       {view.name === 'library' && (opening === 'address' ? <Opening /> : <LibraryView />)}

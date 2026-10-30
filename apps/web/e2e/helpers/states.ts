@@ -26,8 +26,9 @@ export interface AppState {
   /**
    * 'button': a single red button. 'cursor': the playback cursor's note groups in the sheet.
    * 'frame': the drop frame while a file is dragged. 'note': one selected note in the sheet.
+   * 'loader': the loader's red key while a score is on its way in.
    */
-  expectTag: 'button' | 'cursor' | 'frame' | 'note';
+  expectTag: 'button' | 'cursor' | 'frame' | 'note' | 'loader';
   /**
    * Skipped by the mobile (touch) project: the scan review is checked at a phone's width as a
    * narrow window in scan-edit.spec.ts, and a touch phone's scan in scan-phone.spec.ts.
@@ -638,8 +639,21 @@ async function scanReview(page: Page, xml: string): Promise<void> {
   await expect(page.locator('.scan-sheet svg').first()).toBeVisible();
 }
 
+/**
+ * Keeps the 8 s exit of a read that never finishes (`READ_TIMEOUT_MS`) from firing: a held read
+ * stays held for as long as a spec looks at its loader, however loaded the machine is.
+ */
+export async function holdReadTimeout(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const set = window.setTimeout.bind(window);
+    window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: unknown[]) =>
+      set(handler, delay === 8000 ? 2 ** 31 - 1 : delay, ...args)) as typeof window.setTimeout;
+  });
+}
+
 /** Holds the browser's read of every stored or chosen file once `hold-reads` is set in the visit. */
 async function holdReads(page: Page): Promise<void> {
+  await holdReadTimeout(page);
   await page.addInitScript(() => {
     const read = Blob.prototype.arrayBuffer;
     Blob.prototype.arrayBuffer = function () {
@@ -658,7 +672,7 @@ const holdFromNow = (page: Page) => page.evaluate(() => sessionStorage.setItem('
 /**
  * The loader that says a score is on its way in (issue 240, 242), reached with the read held:
  * the loader is the one red, the rest of the library is hidden. Checked in both colour schemes,
- * with axe and for overflow, by `opening.spec.ts`.
+ * with axe and for overflow, by `states.spec.ts` at both widths.
  */
 export const OPENING_STATES: AppState[] = [
   {
@@ -674,7 +688,7 @@ export const OPENING_STATES: AppState[] = [
       });
       await expect(page.locator('.opening')).toBeVisible();
     },
-    expectTag: 'button',
+    expectTag: 'loader',
   },
   {
     name: 'address-reopening',
@@ -715,6 +729,6 @@ export const OPENING_STATES: AppState[] = [
       await expect(page.locator('.opening')).toBeVisible();
       await expect(page.locator('main.library')).toHaveCount(0);
     },
-    expectTag: 'button',
+    expectTag: 'loader',
   },
 ];

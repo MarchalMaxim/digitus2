@@ -269,6 +269,22 @@ it('an address that changed meanwhile is left alone', async () => {
   location.hash = '#/about';
   await library.openLocalAt(store, UUID, hash);
   expect(store.getState().view).toEqual({ name: 'library' });
+  expect(store.getState().notice).toBeNull();
+});
+
+it('an address put back to the library by #keep-scans during the restore ends the loader', async () => {
+  const { library, store, hash } = await saved();
+  // The switch is applied without the hash handler: the address is the library's again.
+  location.hash = '#/';
+  await library.openLocalAt(store, UUID, hash);
+  expect(store.getState().view).toEqual({ name: 'library' });
+  expect(store.getState().opening).toBeNull();
+});
+
+it('an address that names another saved score keeps the loader for its own restore', async () => {
+  const { library, store, hash } = await saved();
+  location.hash = '#/mine/11111111-2222-4333-8444-555555555555';
+  await library.openLocalAt(store, UUID, hash);
   expect(store.getState().opening).toBe('address');
 });
 
@@ -381,4 +397,48 @@ it('a saved file shows the loader while it is read, and a failed read takes it a
   await opening;
   expect(store.getState().opening).toBeNull();
   expect(noticeText(store.getState().notice)).not.toBeNull();
+});
+
+it('a saved file whose read never finishes gives the library back with the notice', async () => {
+  const { library, store } = await setup();
+  vi.useFakeTimers();
+  try {
+    const opening = library.openLocalScore('slow');
+    expect(store.getState().opening).toBe('chosen');
+    await vi.advanceTimersByTimeAsync(8000);
+    await opening;
+    expect(store.getState().opening).toBeNull();
+    expect(store.getState().view).toEqual({ name: 'library' });
+    expect(noticeText(store.getState().notice)).not.toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('an address whose saved file never finishes reading gives the library back with the notice', async () => {
+  const blob = new Blob(['my score']);
+  Object.defineProperty(blob, 'arrayBuffer', { value: () => new Promise<ArrayBuffer>(() => {}) });
+  fixture.rows = [
+    { version: 1, id: `file:${UUID}`, updatedAt: 1, kind: 'file', name: 'mine.musicxml', blob },
+  ];
+  const hash = `#/mine/${UUID}`;
+  location.hash = hash;
+  const library = await import('./library.js');
+  const { useAppStore } = await import('../../app/store.js');
+  useAppStore.setState({ view: { name: 'library' }, notice: null });
+  useAppStore.getState().setOpening('address');
+  vi.useFakeTimers();
+  try {
+    const reopening = library.openLocalAt(useAppStore, UUID, hash);
+    await vi.advanceTimersByTimeAsync(8000);
+    await reopening;
+    expect(useAppStore.getState().view).toEqual({ name: 'library' });
+    expect(noticeText(useAppStore.getState().notice)).toBe(
+      'Open it from My scores, or choose the file again.',
+    );
+    expect(useAppStore.getState().opening).toBeNull();
+    expect(location.hash).toBe('#/');
+  } finally {
+    vi.useRealTimers();
+  }
 });

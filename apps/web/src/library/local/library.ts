@@ -1,9 +1,10 @@
-import { FILE_NOT_RESTORABLE_NOTICE } from '../../app/routes.js';
+import { FILE_NOT_RESTORABLE_NOTICE, localIdFromHash, scanIdFromHash } from '../../app/routes.js';
 import { useAppStore, type View } from '../../app/store.js';
 import type { ScanSession } from '../../scan/model.js';
 import type { Shareable } from '../shared/eligibility.js';
 import { LocalScoreDatabase } from './database.js';
 import { restoreSession, storeSession, type LocalScoreRecord } from './records.js';
+import { READ_TIMEOUT_MS, withinReadTimeout } from '../readTimeout.js';
 import { useLocalLibrary, type LocalScoreSummary } from './state.js';
 
 const records = new Map<string, LocalScoreRecord>();
@@ -178,7 +179,7 @@ export async function openLocalScore(id: string, expectedView = useAppStore.getS
     } else {
       // The saved file is read before the score view can start: the loader shows meanwhile.
       useAppStore.getState().setOpening('chosen');
-      const bytes = new Uint8Array(await record.blob.arrayBuffer());
+      const bytes = new Uint8Array(await withinReadTimeout(record.blob.arrayBuffer()));
       if (!current() || records.get(id) !== record || removed.has(id)) return;
       fileIds.set(bytes, id);
       snapshots.set(id, bytes);
@@ -198,9 +199,6 @@ export async function openLocalScore(id: string, expectedView = useAppStore.getS
       useAppStore.getState().setOpening(null);
   }
 }
-
-/** How long an address waits for My scores to be read before it gives up (issue 242). */
-const READ_TIMEOUT_MS = 8000;
 
 /**
  * From an address ('#/mine/<id>' or '#/scan/<id>', after a reload or followed): reopens the saved
@@ -227,14 +225,25 @@ export async function openLocalAt(
   clearTimeout(timer);
   const gone = () => {
     const { view } = store.getState();
-    return (
+    const away =
       location.hash !== hash ||
       (as === 'review'
         ? view.name === 'scan' && view.session.id === uuid
         : view.name === 'score' &&
           view.source.kind === 'file' &&
-          (view.source.localId === uuid || view.source.scan?.id === uuid))
-    );
+          (view.source.localId === uuid || view.source.scan?.id === uuid));
+    // An address that moved on without the hash handler hearing of it ('#keep-scans' puts the
+    // library's address back) leaves nothing to wait for: the library comes back. An address that
+    // names another saved score has its own restore under way, which keeps the loader.
+    if (
+      away &&
+      view.name === 'library' &&
+      store.getState().opening === 'address' &&
+      !localIdFromHash(location.hash) &&
+      !scanIdFromHash(location.hash)
+    )
+      store.setState({ opening: null });
+    return away;
   };
   if (gone()) return;
   const fileId = `file:${uuid}`;
@@ -245,7 +254,7 @@ export async function openLocalAt(
   if (record?.kind === 'file' && still()) {
     let bytes: Uint8Array | null = null;
     try {
-      bytes = new Uint8Array(await record.blob.arrayBuffer());
+      bytes = new Uint8Array(await withinReadTimeout(record.blob.arrayBuffer()));
     } catch {
       bytes = null;
     }

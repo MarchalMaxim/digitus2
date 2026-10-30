@@ -35,17 +35,28 @@ describe('App', () => {
       view: { name: 'score', source: { kind: 'library', slug: 'ode-to-joy' } },
     });
     const { container, unmount } = render(<App />);
-    const status = container.querySelector('.opening')!;
-    expect(status).toHaveTextContent('Loading the score…');
+    expect(container.querySelector('.opening')).not.toBeNull();
     expect(container.querySelectorAll('.is-red')).toHaveLength(1);
     unmount();
     useAppStore.setState({ view: { name: 'library' } });
     useAppStore.getState().setOpening('address');
     const reopened = render(<App />);
     expect(reopened.container.querySelector('.opening')).not.toBeNull();
+    expect(screen.getByTestId('opening-announcement')).toHaveTextContent('Loading the score…');
     expect(screen.queryByRole('heading', { level: 1, name: 'digitus2' })).toBeNull();
     act(() => useAppStore.getState().setOpening(null));
     expect(screen.getByRole('heading', { level: 1, name: 'digitus2' })).toBeInTheDocument();
+  });
+
+  it('keeps one live region in the page, which says the loading once a score is on its way in', () => {
+    render(<App />);
+    const region = screen.getByTestId('opening-announcement');
+    expect(region).toBeEmptyDOMElement();
+    act(() => useAppStore.getState().setOpening('chosen'));
+    expect(screen.getByTestId('opening-announcement')).toBe(region);
+    expect(region).toHaveTextContent('Loading the score…');
+    act(() => useAppStore.getState().setOpening(null));
+    expect(region).toBeEmptyDOMElement();
   });
 
   it('renders the wordmark', () => {

@@ -69,17 +69,16 @@
   margin-top: 0.5rem;
 }
 
-/* A score on its way in (app/Opening.tsx, issue 240): the loader and its status line, in the
-   middle of the window wherever the page is scrolled. The loader is the screen's one accent, so the
-   rest of the library is hidden meanwhile (hidden, not removed: the page keeps its height and the
-   reader's place). */
+/* A score on its way in (app/Opening.tsx, issues 240, 242): the loader alone, in the middle of the
+   window wherever the page is scrolled. The score view's own loader is drawn in the same place at
+   the same size, so the reader sees one loader from the choice until the score shows, and the key
+   that is down does not move. The loader is the screen's one accent, so the rest of the library is
+   hidden meanwhile (hidden, not removed: the page keeps its height and the reader's place). */
 .opening {
   position: fixed;
   inset: 0;
   display: grid;
   place-content: center;
-  justify-items: center;
-  gap: 0.25rem;
 }
 
 /* Over the library's reading column and its stack gap: the window's middle, not the column's. */
@@ -91,6 +90,26 @@
 .opening .loader {
   width: 15rem;
   max-width: 80vw;
+}
+
+/* The score view's loader stands where the opening loader stood (the window's centre) whenever
+   the header leaves room, and under the header when a long title pushes it lower: sticky, so it
+   starts at the foot of the header and is held no higher than the window's centre (the loader is
+   15rem wide and 141/289 as high; left and right hold it at the window's middle). The room under
+   the header is tall enough for the loader to be held there, so the dock stays below it. */
+.score-view .score-loader {
+  min-height: calc(50vh + 4rem);
+  align-items: start;
+}
+
+.score-view .score-loader .loader {
+  position: sticky;
+  top: calc(50% - 15rem * 141 / 578);
+  left: calc(50% - 7.5rem);
+  right: calc(50% - 7.5rem);
+  width: 15rem;
+  max-width: 80vw;
+  pointer-events: none;
 }
 
 .library.is-opening > :not(.opening) {

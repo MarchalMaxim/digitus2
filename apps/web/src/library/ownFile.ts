@@ -3,11 +3,16 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useAppStore } from '../app/store.js';
 import type { Phrase } from '../i18n/messages.js';
 import { PhraseError } from '../i18n/PhraseError.js';
+import { READ_TIMEOUT_MS } from './readTimeout.js';
 
 /** What a refusal tells the reader: a text, or a Phrase written in the language on screen. */
 export type Refusal = string | Phrase;
 
 export const NOT_A_SCORE_REFUSAL: Phrase = (t) => t.library.ownFile.notScore;
+
+/** A read of the chosen file, or of several, that never finished. */
+export const CANNOT_READ_REFUSAL: Phrase = (t) => t.library.ownFile.cannotReadFile;
+export const CANNOT_READ_ALL_REFUSAL: Phrase = (t) => t.library.ownFile.cannotReadFiles;
 
 /** The refusal for a failed validation: the error's own text, else `fallback`. */
 function refusalOf(cause: unknown, fallback: Phrase): Refusal {
@@ -44,15 +49,20 @@ export function useScoreFileRequests(
 ): (files: readonly File[]) => void {
   const generation = useRef(0);
   const mounted = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useLayoutEffect(() => {
     mounted.current = true;
     generation.current++;
     // Subscribe synchronously: leaving and returning in one React batch must cancel too.
     const unsubscribe = useAppStore.subscribe((state, previous) => {
-      if (state.view !== previous.view) generation.current++;
+      if (state.view !== previous.view) {
+        generation.current++;
+        clearTimeout(timer.current);
+      }
     });
     return () => {
       mounted.current = false;
+      clearTimeout(timer.current);
       unsubscribe();
     };
   }, []);
@@ -67,19 +77,34 @@ export function useScoreFileRequests(
       useAppStore.getState().setOpening('chosen');
       const current = () =>
         mounted.current && generation.current === request && useAppStore.getState().view === view;
+      const settle = () => clearTimeout(timer.current);
+      // A read that never finishes gives the library back with the notice, as one that fails does;
+      // whatever it delivers later is ignored.
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        if (!current()) return;
+        generation.current++;
+        useAppStore.getState().setOpening(null);
+        onRefuse(files.length > 1 ? CANNOT_READ_ALL_REFUSAL : CANNOT_READ_REFUSAL);
+      }, READ_TIMEOUT_MS);
       acceptScoreFiles(
         files,
         (name, bytes) => {
-          if (current()) onFile(name, bytes);
+          if (!current()) return;
+          settle();
+          onFile(name, bytes);
         },
         (message) => {
           if (!current()) return;
+          settle();
           useAppStore.getState().setOpening(null);
           onRefuse(message);
         },
         onScan
           ? (pages) => {
-              if (current()) onScan(pages);
+              if (!current()) return;
+              settle();
+              onScan(pages);
             }
           : undefined,
       );

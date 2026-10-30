@@ -4,7 +4,7 @@ import { embellishDecided, openPractice, setLoopBars } from './helpers/practice.
 import { expectOneRed } from './helpers/red.js';
 import { openLibraryPiece } from './helpers/library.js';
 import { holdPianoSamples } from './helpers/samples.js';
-import { STATES } from './helpers/states.js';
+import { OPENING_STATES, STATES } from './helpers/states.js';
 import { horizontalOverflow } from './helpers/overflow.js';
 import { expectDigits } from './helpers/sheet.js';
 
@@ -16,7 +16,7 @@ for (const scheme of ['light', 'dark'] as const) {
   test.describe(scheme === 'light' ? 'light' : 'dark', () => {
     test.use({ colorScheme: scheme });
 
-    for (const s of STATES) {
+    for (const s of [...STATES, ...OPENING_STATES]) {
       const name = scheme === 'light' ? s.name : `${s.name} (dark)`;
       test(`state ${name}: one red element and no serious a11y issues`, async ({
         page,
@@ -26,6 +26,7 @@ for (const scheme of ['light', 'dark'] as const) {
         const roots = await expectOneRed(page, name);
         if (s.expectTag === 'cursor') expect(roots.every((r) => r.inSheet)).toBe(true);
         else if (s.expectTag === 'frame') expect(roots[0]!.className).toContain('drop-frame');
+        else if (s.expectTag === 'loader') expect(roots[0]!.className).toContain('loader-red');
         else if (s.expectTag === 'note')
           expect(roots[0]!.inSheet && /\bnote\b/.test(roots[0]!.className)).toBe(true);
         else expect(roots[0]!.tag).toBe('button');

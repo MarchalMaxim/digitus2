@@ -13,7 +13,7 @@ import {
 } from './helpers/library.js';
 import { libraryScore } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
-import { dropFrameShown, pieceRows } from './helpers/states.js';
+import { dropFrameShown, holdReadTimeout, pieceRows } from './helpers/states.js';
 import { FINGER_LEGEND } from '../src/score/FingerLegend.js';
 import { TIERS } from '../src/library/levels.js';
 import { horizontalOverflow } from './helpers/overflow.js';
@@ -698,6 +698,7 @@ test('library: opening your own score is on the first screen, and the page keeps
 test('library: a chosen file shows the loader at once, as the one red, while it is read', async ({
   page,
 }) => {
+  await holdReadTimeout(page);
   await page.addInitScript(() => {
     const read = File.prototype.arrayBuffer;
     let release: () => void = () => undefined;
@@ -718,7 +719,7 @@ test('library: a chosen file shows the loader at once, as the one red, while it 
   const opening = page.locator('.opening');
   await expect(opening).toBeVisible();
   await expect(opening).toBeInViewport();
-  await expect(opening).toContainText('Loading the score…');
+  await expect(page.getByTestId('opening-announcement')).toHaveText('Loading the score…');
   await expect(page.getByRole('button', { name: /^(Start|Continue) with / })).toBeHidden();
   const roots = await expectOneRed(page, 'a chosen file being read');
   expect(roots[0]!.className).toContain('loader-red');
@@ -747,7 +748,6 @@ test('library: while the score view is still on its way the page shows the loade
   });
   const opening = page.locator('.opening');
   await expect(opening).toBeVisible();
-  await expect(opening).toContainText('Loading the score…');
   await expect(page.locator('.library')).toHaveCount(0);
   const roots = await expectOneRed(page, 'the score view on its way');
   expect(roots[0]!.className).toContain('loader-red');
@@ -761,6 +761,7 @@ test('library: while the score view is still on its way the page shows the loade
 test('library: a file dropped on a scrolled page shows the loader in the window', async ({
   page,
 }) => {
+  await holdReadTimeout(page);
   await page.addInitScript(() => {
     const read = File.prototype.arrayBuffer;
     let release: () => void = () => undefined;
@@ -788,4 +789,31 @@ test('library: a file dropped on a scrolled page shows the loader in the window'
   await expectOneRed(page, 'a dropped file being read, the page scrolled');
   await page.evaluate(() => (window as unknown as { releaseRead(): void }).releaseRead());
   await expect(page.locator('.score-sheet svg').first()).toBeVisible();
+});
+
+// A read that never finishes (a file whose provider does not answer) must not leave the reader
+// with no way out: after 8 s the library is back with the notice. The page's clock is faked, so
+// the 8 s are not waited for.
+test('library: a read that never finishes gives the library back with the notice', async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.addInitScript(() => {
+    File.prototype.arrayBuffer = () => new Promise<ArrayBuffer>(() => undefined);
+  });
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByLabel('Open your own score').setInputFiles({
+    name: 'never.musicxml',
+    mimeType: 'application/xml',
+    buffer: libraryScore('twinkle-twinkle-little-star'),
+  });
+  await expect(page.locator('.opening')).toBeVisible();
+  await page.clock.runFor(7_900);
+  await expect(page.locator('.opening')).toBeVisible();
+  await page.clock.runFor(200);
+  await expect(page.locator('.opening')).toHaveCount(0);
+  await expect(page.locator('.notice')).toContainText('Could not read this file.');
+  await expect(page.getByRole('button', { name: /^(Start|Continue) with / })).toBeVisible();
+  await expectOneRed(page, 'the library after a read that never finished');
 });

@@ -6,7 +6,7 @@ import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
 import { horizontalOverflow } from './helpers/overflow.js';
-import { redBars, redSettled, seekBar } from './helpers/seek.js';
+import { redBars, redSettled, scrollSettled, seekBar } from './helpers/seek.js';
 import { expectDigits } from './helpers/sheet.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
@@ -238,6 +238,24 @@ interface PlayFrame {
   position: number;
   /** The `sec` of the group the cursor marks (NaN when it marks none, or without the hook). */
   cursorSec: number;
+  /** The audio clock the transport reads (`audibleTime`), NaN unless `keepAudioContext` ran. */
+  audible: number;
+}
+
+/**
+ * Makes the page keep the audio context it opens (`window.__ac`), for frames to read the audio
+ * clock. Call before `goto`.
+ */
+async function keepAudioContext(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const Native = window.AudioContext;
+    (window as unknown as { AudioContext: typeof Native }).AudioContext = class extends Native {
+      constructor(...args: ConstructorParameters<typeof Native>) {
+        super(...args);
+        (window as unknown as { __ac?: AudioContext }).__ac = this;
+      }
+    };
+  });
 }
 
 /**
@@ -249,18 +267,34 @@ function sampleUntilFirstRedNote(page: Page, ms: number): Promise<PlayFrame[]> {
   return recordFrames(page, ms, true);
 }
 
-/** Records every animation frame inside the page for `ms`, as `sampleUntilFirstRedNote` does. */
-function sampleFrames(page: Page, ms: number): Promise<PlayFrame[]> {
-  return recordFrames(page, ms, false);
+/**
+ * Records every animation frame inside the page for `ms`, as `sampleUntilFirstRedNote` does. With
+ * `wraps` it stops earlier: once the clock has jumped back `count` times (a loop's wrap) and then
+ * reached `pastSec`, so a slow start of the audio output (the clock stands still) does not cut the
+ * passes short. `ms` is then only the guard.
+ */
+function sampleFrames(
+  page: Page,
+  ms: number,
+  wraps?: { count: number; pastSec: number },
+): Promise<PlayFrame[]> {
+  return recordFrames(page, ms, false, wraps);
 }
 
-function recordFrames(page: Page, ms: number, untilFirstRed: boolean): Promise<PlayFrame[]> {
+function recordFrames(
+  page: Page,
+  ms: number,
+  untilFirstRed: boolean,
+  wraps?: { count: number; pastSec: number },
+): Promise<PlayFrame[]> {
   return page.evaluate(
-    ({ duration, stopAtRed }) =>
+    ({ duration, stopAtRed, stopAtWraps }) =>
       new Promise<PlayFrame[]>((resolve) => {
         const frames: PlayFrame[] = [];
         const end = performance.now() + duration;
         let after = -1;
+        let wrapped = 0;
+        let lastPosition = Number.NaN;
         const frame = () => {
           const status = document.querySelector('[role="status"]');
           const button = document.querySelector('.dock .play-button');
@@ -286,8 +320,26 @@ function recordFrames(page: Page, ms: number, untilFirstRed: boolean): Promise<P
               .sort((a, b) => a - b),
             position: hook ? hook.positionSec() : Number.NaN,
             cursorSec: hook ? hook.cursorSec() : Number.NaN,
+            audible: (() => {
+              // As `audibleTime` (src/audio/clock.ts) reads the context.
+              const ctx = (window as unknown as { __ac?: AudioContext }).__ac;
+              if (!ctx) return Number.NaN;
+              const ts = ctx.getOutputTimestamp();
+              return ts.contextTime !== undefined && ts.performanceTime
+                ? Math.min(
+                    ctx.currentTime,
+                    ts.contextTime + (performance.now() - ts.performanceTime) / 1000,
+                  )
+                : ctx.currentTime;
+            })(),
           });
           if (stopAtRed && reds.length > 0 && after < 0) after = 3;
+          if (stopAtWraps) {
+            const here = frames[frames.length - 1]!.position;
+            if (lastPosition - here > 1) wrapped++;
+            lastPosition = here;
+            if (wrapped >= stopAtWraps.count && here >= stopAtWraps.pastSec) after = 0;
+          }
           if (after === 0 || performance.now() > end) {
             resolve(frames);
             return;
@@ -297,7 +349,7 @@ function recordFrames(page: Page, ms: number, untilFirstRed: boolean): Promise<P
         };
         requestAnimationFrame(frame);
       }),
-    { duration: ms, stopAtRed: untilFirstRed },
+    { duration: ms, stopAtRed: untilFirstRed, stopAtWraps: wraps ?? null },
   );
 }
 
@@ -989,6 +1041,7 @@ test.describe('playback with the silent instrument', () => {
     test(`the left hand alone after the right hand's pickup, count-in ${countIn ? 'on' : 'off'}: no note is red before it sounds`, async ({
       page,
     }) => {
+      await keepAudioContext(page);
       await page.goto(`/?audio=silent#/piece/${HAPPY_BIRTHDAY}`);
       await expect(page.locator('.score-sheet g.fing')).toHaveCount(HAPPY_BIRTHDAY_DIGITS, {
         timeout: 20_000,
@@ -1040,10 +1093,14 @@ test.describe('playback with the silent instrument', () => {
       );
       if (countIn) {
         // The pickup is heard (the clock leaves 0) two beats of 0.6 s after the count starts with
-        // Play (plus the 50 ms start delay), not three (1.85 s).
+        // Play (plus the 50 ms start delay, 1,250 ms), not three (1,850 ms). Measured on the audio
+        // clock: the count is announced inside the click, but a loaded machine starts the audio
+        // output late (the clock stands at 0 for up to a second), which stretches wall time and
+        // not the transport's schedule.
         const counted = frames.findIndex((f) => f.status === '1');
         const heard = frames.findIndex((f) => f.position > 0);
-        const entered = frames[heard]!.t - frames[counted]!.t;
+        const entered =
+          (frames[heard]!.audible - frames[heard]!.position - frames[counted]!.audible) * 1000;
         test.info().annotations.push({
           type: 'count-in "1" to the pickup heard (ms)',
           description: entered.toFixed(0),
@@ -1071,7 +1128,10 @@ test.describe('playback with the silent instrument', () => {
         type: 'first left-hand note heard before it turned red (ms)',
         description: (lag * 1000).toFixed(1),
       });
-      expect(lag, at).toBeLessThan(0.1);
+      // The red follows the note within two frames; in milliseconds that follows the frame gap,
+      // which a loaded machine stretches.
+      const heardFrame = frames.findIndex((f, k) => k >= start && f.position >= firstLeft);
+      expect(firstRed - heardFrame, `${at}, frames from heard to red`).toBeLessThanOrEqual(2);
       const roots = await expectOneRed(
         page,
         `the left hand playing, count-in ${countIn ? 'on' : 'off'}`,
@@ -1102,7 +1162,8 @@ test.describe('playback with the silent instrument', () => {
     await expect.poll(async () => (await groupSecs())[0]).toBeCloseTo(0.6, 3);
     const firstLeft = (await groupSecs())[0]!;
 
-    const sampled = sampleFrames(page, 6_500); // two wraps, at 2.4 s and 4.8 s
+    // Two wraps (2.4 s into the music, then 4.8 s), the second sampled past the chord at firstLeft.
+    const sampled = sampleFrames(page, 30_000, { count: 2, pastSec: firstLeft + 0.2 });
     await page.getByRole('button', { name: 'Play' }).click();
     const frames = await sampled;
     const start = frames.findIndex((f) => f.button === 'Pause');
@@ -1145,7 +1206,8 @@ test.describe('playback with the silent instrument', () => {
         expect(f.pressed, at).toBe(0);
         expect(f.buttonRed, at).toBe(true);
       }
-      expect(lead[held]!.position, 'cleared within 100 ms of the wrap').toBeLessThan(0.1);
+      // Frames, not milliseconds: a loaded machine stretches the gap between frames.
+      expect(held, 'the marks cleared within two frames of the wrap').toBeLessThanOrEqual(2);
       // The chord turns red again once it is heard, with its keys.
       const back = playing.findIndex((f, k) => k >= sounds && f.redNotes > 0);
       expect(back, 'the chord turned red again').toBeGreaterThanOrEqual(0);
@@ -1153,7 +1215,7 @@ test.describe('playback with the silent instrument', () => {
       expect(chord.cursorSec, JSON.stringify(chord)).toBeCloseTo(firstLeft, 6);
       expect(new Set(chord.pressedHands), JSON.stringify(chord)).toEqual(new Set(['L']));
       lags.push(chord.position - firstLeft);
-      expect(chord.position - firstLeft, JSON.stringify(chord)).toBeLessThan(0.1);
+      expect(back - sounds, 'frames from the chord heard to red').toBeLessThanOrEqual(2);
     }
     expect(holds.length, 'passes after a wrap sampled to the chord').toBeGreaterThanOrEqual(2);
     const notes = test.info().annotations;
@@ -1805,7 +1867,8 @@ test.describe('the dock on a phone', () => {
     // Pause, back to the loop's first bar, and Play again: a new count-in, deep in the score.
     await dock.getByRole('button', { name: 'Pause' }).click();
     await dock.getByRole('button', { name: 'Rewind' }).click();
-    const deep = await scrollY();
+    // The cursor's smooth page turn started at the end of the count-in and Pause does not stop it.
+    const deep = await scrollSettled(page);
     expect(deep).toBeGreaterThan(0);
     await dock.getByRole('button', { name: 'Play' }).click();
     const status = page.getByRole('status');

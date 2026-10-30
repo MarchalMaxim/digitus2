@@ -1912,9 +1912,12 @@ test.describe('the dock on a phone', () => {
     // action with a forced scroll-into-view, which scrolls the page and is not what is tested. A
     // lean DOM (issue 99) answers the locators before the panel's animation ends.
     await page.waitForFunction(() => document.getAnimations().length === 0);
+    // Below 480 px opening the panel brings the reader's system above the dock (issue 244), so
+    // the page may stand lower than the top; the controls must not move it any further.
+    const placed = await scrollY();
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('slider', { name: 'Tempo' }).fill('150');
-    expect(await scrollY()).toBe(0);
+    expect(await scrollY()).toBe(placed);
     await page.locator('.dock').getByRole('button', { name: 'Play' }).click();
     await expect(page.locator('.score-sheet .is-red').first()).toBeVisible({ timeout: 5_000 });
 

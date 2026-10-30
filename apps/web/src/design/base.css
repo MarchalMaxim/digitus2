@@ -1095,7 +1095,9 @@ input[role='switch']:checked::before {
    the score column: at the end of the column it sits in its own place below the last system, so
    it never hides the music or the side panel for good. The practice controls live in its
    Practice panel at every width (UI batch, spec 13), closed on every page load: when it opens,
-   the dock grows upward and the music keeps its place. */
+   the dock grows upward and the music keeps its place. Below 480 px the panel is capped so the
+   tallest system built so far still fits above the dock (issue 244), and opening it scrolls the
+   page to the reader's system. */
 .dock {
   position: sticky;
   bottom: 0;
@@ -1202,6 +1204,42 @@ input[role='switch']:checked::before {
 
   .dock > .keyboard {
     grid-column: 1 / -1;
+  }
+
+  /* The open panel keeps room above the dock for the tallest system built so far, and what does not
+     fit scrolls inside it (issue 244). ScoreView.tsx publishes the dock without the panel
+     (--dock-rest) and the tallest system with its margin (--system-room); `dvh` follows the
+     browser's toolbars. The panel is a column-reverse scroller, so its scroll origin is Play's
+     side: a row added at its top (the Hear switch over Hands, Practice mode when a piano
+     connects) grows upward and Hands keeps its place against the dock. It opens scrolled to its
+     top. The padding and the equal negative margin keep the focus rings from being clipped. The
+     `:not([hidden])` keeps `display: flex` from showing a closed panel. */
+  .dock > .practice-panel:not([hidden]) {
+    display: flex;
+    flex-direction: column-reverse;
+    max-height: max(7.5rem, 100dvh - var(--dock-rest, 12.5rem) - var(--system-room, 15rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.25rem;
+    margin: -0.25rem;
+  }
+
+  /* A cue at each edge that cuts off more controls (usePanelEdges.ts): a gray hairline with a soft
+     shadow inside the edge, whatever lies under it. An inset shadow stays with the panel's box
+     while the rows scroll, and the panel's padding keeps it clear of the controls. Gray only: no
+     colour and no control. */
+  .dock > .practice-panel[data-above] {
+    --cue-above: inset 0 1px 0 var(--gray-3), inset 0 0.75rem 0.5rem -0.5rem var(--gray-2);
+  }
+
+  .dock > .practice-panel[data-below] {
+    --cue-below: inset 0 -1px 0 var(--gray-3), inset 0 -0.75rem 0.5rem -0.5rem var(--gray-2);
+  }
+
+  .dock > .practice-panel[data-above],
+  .dock > .practice-panel[data-below] {
+    box-shadow:
+      var(--cue-above, inset 0 0 0 0 transparent), var(--cue-below, inset 0 0 0 0 transparent);
   }
 }
 

@@ -39,8 +39,9 @@ import { ScoreSheet } from './ScoreSheet.js';
 import { SidePanel } from './SidePanel.js';
 import { PracticeControls, startQpm, Transport } from './Transport.js';
 import { useAlongHalo } from './useAlongHalo.js';
-import { useCursor } from './useCursor.js';
+import { cursorScrollDelta, SYSTEM_TOP_MARGIN, useCursor, type Span } from './useCursor.js';
 import { useHoveredNote } from './useHoveredNote.js';
+import { usePanelEdges } from './usePanelEdges.js';
 import { usePlayAlong, type AlongHint } from './usePlayAlong.js';
 import { handsFor, mutedHandsFor, oneHanded, usePlayback, type CountIn } from './usePlayback.js';
 import { useScoreDocument, type DocStatus, type ScoreDocument } from './useScoreDocument.js';
@@ -201,24 +202,154 @@ function useElementWidth<T extends HTMLElement>(): [(el: T | null) => void, numb
  * scroll padding (base.css): what scrolling brings into view (the cursor's system, a focused
  * control) then stops above the dock instead of behind it. Measured before the first paint and
  * kept current with a ResizeObserver (the keyboard arrives with the score, and the dock rewraps
- * when the width changes); removed when the dock goes. Returns a callback ref for the dock.
+ * when the width changes); removed when the dock goes. Also publishes `--dock-rest`, the dock
+ * without the Practice panel (its footprint and the gap it brings taken out, open or closed),
+ * which the panel's height cap on a phone is measured from (base.css). Returns a callback ref for
+ * the dock.
  */
 function useDockHeight<T extends HTMLElement>(): (el: T | null) => void {
   const [el, setEl] = useState<T | null>(null);
   useLayoutEffect(() => {
     if (!el) return;
     const root = document.documentElement;
-    const measure = () =>
-      root.style.setProperty('--dock-h', `${el.getBoundingClientRect().height}px`);
+    const measure = () => {
+      const height = el.getBoundingClientRect().height;
+      root.style.setProperty('--dock-h', `${height}px`);
+      const panel = el.querySelector('.practice-panel');
+      if (!panel) return;
+      const gap = parseFloat(getComputedStyle(el).rowGap) || 0;
+      const shown = !panel.hasAttribute('hidden');
+      const style = getComputedStyle(panel);
+      const margins = (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
+      // The panel is out of the grid while closed, and brings a row gap with it while open.
+      const rest = shown ? height - panel.getBoundingClientRect().height - margins : height + gap;
+      root.style.setProperty('--dock-rest', `${Math.max(0, rest)}px`);
+    };
     measure();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
     observer?.observe(el);
     return () => {
       observer?.disconnect();
       root.style.removeProperty('--dock-h');
+      root.style.removeProperty('--dock-rest');
     };
   }, [el]);
   return setEl;
+}
+
+/**
+ * Which system the reader is at when the Practice panel opens (issue 244): the one the red notes
+ * are in (`marked`, its index, or negative for none), otherwise the first that starts at or below
+ * the top of the band, otherwise the first that is cut at the top of it; -1 when none is there.
+ */
+export function readerSystemIndex(
+  systems: readonly Span[],
+  marked: number,
+  bandTop: number,
+): number {
+  if (marked >= 0) return marked;
+  const below = systems.findIndex((s) => s.top >= bandTop);
+  if (below >= 0) return below;
+  return systems.findIndex((s) => s.bottom > bandTop);
+}
+
+/**
+ * How far the page scrolls (pixels, down is positive) so that `system` stands wholly in `band`,
+ * the part of the window above the dock, or null while it already does. The placement of a page
+ * turn: its top `SYSTEM_TOP_MARGIN` below the band's top, less when it only just fits.
+ */
+export function practiceOpenScroll(system: Span, band: Span): number | null {
+  return cursorScrollDelta(system, system, true, band);
+}
+
+/**
+ * The room the Practice panel leaves above the dock on a phone (pixels): the tallest system and
+ * its top margin, so a whole system always fits above it. Null while no system is built.
+ */
+export function systemRoom(heights: readonly number[]): number | null {
+  return heights.length > 0 ? Math.max(...heights) + SYSTEM_TOP_MARGIN : null;
+}
+
+/** Writes the tallest system's room on the root (`--system-room`), or takes it off. */
+function publishSystemRoom(heights: readonly number[]): void {
+  const room = systemRoom(heights);
+  const style = document.documentElement.style;
+  if (room === null) style.removeProperty('--system-room');
+  else style.setProperty('--system-room', `${room}px`);
+}
+
+/** The tallest system built since a layout (its `pages`), which only ever grows. */
+export type TallestSystem = { pages: string[]; height: number };
+
+/**
+ * Raises the layout's tallest system by `heights` and publishes the room it makes. The room never
+ * shrinks within a layout: a page built later has a smaller tallest system of its own, and the
+ * systems already in the DOM still need their room. Returns the heights the room is made of.
+ */
+export function raiseTallest(
+  tallest: TallestSystem,
+  pages: string[],
+  heights: readonly number[],
+): readonly number[] {
+  if (tallest.pages !== pages) {
+    tallest.pages = pages;
+    tallest.height = 0;
+  }
+  tallest.height = Math.max(tallest.height, ...heights);
+  const kept = tallest.height > 0 ? [tallest.height] : [];
+  publishSystemRoom(kept);
+  return kept;
+}
+
+/**
+ * Brings the reader's system above the dock (issue 244): the page scrolls at once, the way a page
+ * turn places a system, unless it already stands in the room the panel keeps for the tallest
+ * system. Read from the pages in the DOM; the tallest of their systems is published for the
+ * panel's height cap on the way. Returns false while no system is built, so the caller tries
+ * again when one is.
+ */
+function showReaderSystem(
+  host: Element,
+  dock: Element,
+  tallest: TallestSystem,
+  pages: string[],
+): boolean {
+  const systems = Array.from(host.querySelectorAll('g.system'));
+  if (systems.length === 0) return false;
+  const rects = systems.map((system) => system.getBoundingClientRect());
+  const heights = raiseTallest(
+    tallest,
+    pages,
+    rects.map((r) => r.height),
+  );
+  const root = document.documentElement;
+  const viewport = window.innerHeight || root.clientHeight;
+  // The dock only grows from here (the Add notes row arrives after the score is ready, a loop
+  // adds its fields) and the panel's cap stops its top at the room kept for the tallest system:
+  // a system placed within that room stays above the dock whatever the panel does next.
+  const band = {
+    top: parseFloat(getComputedStyle(root).scrollPaddingTop) || 0,
+    bottom: Math.min(
+      viewport - dock.getBoundingClientRect().height,
+      systemRoom(heights) ?? viewport,
+    ),
+  };
+  const markedSystem = host.querySelector('.is-red')?.closest('g.system') ?? null;
+  const index = readerSystemIndex(
+    rects,
+    markedSystem ? systems.indexOf(markedSystem) : -1,
+    band.top,
+  );
+  const rect = rects[index];
+  const delta = rect ? practiceOpenScroll(rect, band) : null;
+  if (delta !== null) {
+    const max = Math.max(0, root.scrollHeight - root.clientHeight);
+    window.scrollTo({
+      top: Math.min(max, Math.max(0, window.scrollY + delta)),
+      behavior: 'instant',
+    });
+  }
+  return true;
 }
 
 export function ScoreView({ source }: { source: PieceSource }) {
@@ -306,11 +437,29 @@ export function ScoreView({ source }: { source: PieceSource }) {
   // The timing rings (issue 192), for a page built later: a torn page is rebuilt from markup,
   // without them.
   const timingMarksRef = useRef<readonly TimingMark[] | null>(null);
+  // The tallest system built since the layout, for the Practice panel's height cap on a phone.
+  const tallestRef = useRef<TallestSystem>({ pages: doc.pages, height: 0 });
+  // A new layout (or a wider column, which scales the systems) is counted from the systems built
+  // with it: the sheet's own layout effect has put them in the DOM, and only pages built later
+  // reach `decorate`.
+  useLayoutEffect(() => {
+    if (!host) return;
+    raiseTallest(
+      tallestRef.current,
+      doc.pages,
+      Array.from(host.querySelectorAll('g.system'), (s) => s.getBoundingClientRect().height),
+    );
+  }, [host, doc.pages, width]);
   const decorate = useCallback((page: SVGSVGElement, i: number) => {
     const d = decorRef.current;
     const patches = patchesRef.current;
     const index = page.parentElement ? pageWindowOf(page.parentElement)?.index : undefined;
     if (!d) return;
+    raiseTallest(
+      tallestRef.current,
+      d.pages,
+      Array.from(page.querySelectorAll('g.system'), (s) => s.getBoundingClientRect().height),
+    );
     if (index && patches.pages === d.pages && patches.map.size > 0) {
       const own = new Map([...patches.map].filter(([id]) => index.pageOfNote.get(id) === i));
       if (own.size > 0) setDigits(page, own);
@@ -433,6 +582,33 @@ export function ScoreView({ source }: { source: PieceSource }) {
   const setPracticeOpen = useAppStore((s) => s.setPracticeOpen);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
+  // Below 480 px (issue 244): opening the panel, or opening a score with it open, brings the
+  // reader's system above the dock, and the panel opens at its top. Done once per score: after
+  // that the reader's own scroll and the cursor's page turns place the music. A system must be
+  // built to be placed; until one is, the next change of the score's pages or status tries again.
+  const placedRef = useRef<{ source: PieceSource | null; open: boolean }>({
+    source: null,
+    open: false,
+  });
+  useLayoutEffect(() => {
+    const placed = placedRef.current;
+    const opening = practiceOpen && !placed.open;
+    placed.open = practiceOpen;
+    if (!narrow || !practiceOpen || !host || !dock) return;
+    if (!opening && (placed.source === source || doc.status !== 'ready')) return;
+    const panel = dock.querySelector('.practice-panel');
+    // A column-reverse scroller starts at the bottom, by Play: the top is its most negative offset.
+    if (opening && panel) panel.scrollTop = -panel.scrollHeight;
+    if (showReaderSystem(host, dock, tallestRef.current, doc.pages)) placed.source = source;
+  }, [narrow, practiceOpen, host, dock, source, doc.status, doc.pages]);
+  // The capped panel fades at an edge that cuts off more controls.
+  usePanelEdges(dock, narrow && practiceOpen);
+  useEffect(
+    () => () => {
+      document.documentElement.style.removeProperty('--system-room');
+    },
+    [],
+  );
   // A selection with no notes (a one-hand piece, the other hand chosen) has nothing to hear and
   // nothing for the cursor to mark: Play stays the red element, unavailable, and a running
   // playback stops.

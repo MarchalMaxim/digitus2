@@ -171,17 +171,27 @@ for (const [width, height, firstSystemMax] of [
         dockBottom: document.querySelector('.dock')!.getBoundingClientRect().bottom,
         columnBottom: document.querySelector('.score-main')!.getBoundingClientRect().bottom,
         systemTop: document.querySelector('.score-sheet svg g.system')!.getBoundingClientRect().top,
+        systemBottom: document.querySelector('.score-sheet svg g.system')!.getBoundingClientRect()
+          .bottom,
+        dockTop: document.querySelector('.dock')!.getBoundingClientRect().top,
         height: window.innerHeight,
         overflow:
           document.documentElement.scrollWidth -
           Math.ceil(document.documentElement.getBoundingClientRect().width),
       }));
       expect(g.panelBottom).toBeLessThanOrEqual(g.playTop + 0.5);
-      // The dock grows upward and the music keeps its place. When the column runs past the
+      // From 480 px the dock grows upward and the music keeps its place; below, the page scrolls
+      // to the reader's system (issue 244) and the first system stands wholly above the dock.
+      // When the column runs past the
       // window, the dock is stuck to the window's bottom; when the whole column is shorter than
       // the window (Twinkle at 768 x 1024 with the legend seen), it sits in its own place at the
       // column's end, wholly on screen.
-      expect(g.systemTop).toBeCloseTo(top, 0);
+      if (width < 480) {
+        expect(g.systemTop, JSON.stringify(g)).toBeGreaterThanOrEqual(0);
+        expect(g.systemBottom, JSON.stringify(g)).toBeLessThanOrEqual(g.dockTop + 0.5);
+      } else {
+        expect(g.systemTop).toBeCloseTo(top, 0);
+      }
       expect(g.dockBottom).toBeLessThanOrEqual(g.height + 0.5);
       if (g.columnBottom > g.height + 0.5) {
         expect(Math.abs(g.dockBottom - g.height), JSON.stringify(g)).toBeLessThanOrEqual(0.5);

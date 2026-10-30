@@ -101,29 +101,29 @@ describe('the bar across a batch', () => {
 });
 
 describe('the time a scan is expected to take', () => {
-  it('is the deployed service’s warm figure by kind: a photo 35 s, a PDF page 35 s', () => {
+  it('is the deployed service’s warm figure by kind: a photo 35 s, a PDF page 30 s', () => {
     expect(EXPECTED_PHOTO_SECONDS).toBe(35);
-    expect(EXPECTED_PDF_SECONDS).toBe(35);
+    expect(EXPECTED_PDF_SECONDS).toBe(30);
     expect(expectedMs(photo)).toBe(35_000);
     expect(expectedMs({ file: new File([''], 'a.png', { type: 'image/png' }) })).toBe(35_000);
-    expect(expectedMs(pdf)).toBe(35_000);
+    expect(expectedMs(pdf)).toBe(30_000);
   });
-  it('errs long on a PDF page by the spread of the photo runs, since one two-page PDF is all there is', () => {
-    // docs/scan-service.md (Timings): the one two-page PDF in the service log took 24.8 s a page,
-    // and the photos' 90th percentile (34.2 s) is 1.36 times their median (25.1 s).
-    const margin = 34.2 / 25.1;
+  it('errs long on a PDF page: the slowest page rate times the spread of the PDF runs', () => {
+    // docs/scan-service.md (Timings): the two-page PDF in the service log took 24.8 s a page, and
+    // the one-page PDF's 90th percentile (19.6 s) is 1.11 times its median (17.7 s).
+    const margin = 19.6 / 17.7;
     expect(EXPECTED_PDF_SECONDS).toBeGreaterThanOrEqual(24.8 * margin);
     expect(expectedMs({ ...pdf, pdfPages: 2 })).toBeGreaterThanOrEqual(49_500 * margin);
-    expect(secondsLeft(0, expectedBatchMs([{ ...pdf, pdfPages: 2 }], false))).toBe(70);
+    expect(secondsLeft(0, expectedBatchMs([{ ...pdf, pdfPages: 2 }], false))).toBe(60);
     // Amazing Grace's single page needs 19.6 s at the 90th percentile.
     expect(expectedMs(pdf)).toBeGreaterThanOrEqual(19_600);
   });
-  it('charges a PDF 35 s for each of its pages, because one request reads them all', () => {
-    expect(expectedMs({ ...pdf, pdfPages: 6 })).toBe(210_000);
-    expect(expectedMs({ ...pdf, pdfPages: 0 })).toBe(35_000);
+  it('charges a PDF 30 s for each of its pages, because one request reads them all', () => {
+    expect(expectedMs({ ...pdf, pdfPages: 6 })).toBe(180_000);
+    expect(expectedMs({ ...pdf, pdfPages: 0 })).toBe(30_000);
     expect(expectedMs({ ...photo, pdfPages: 6 })).toBe(35_000);
-    expect(expectedBatchMs([{ ...pdf, pdfPages: 3 }, photo], false)).toBe(140_000);
-    expect(secondsLeft(0, expectedBatchMs([{ ...pdf, pdfPages: 6 }], false))).toBe(210);
+    expect(expectedBatchMs([{ ...pdf, pdfPages: 3 }, photo], false)).toBe(125_000);
+    expect(secondsLeft(0, expectedBatchMs([{ ...pdf, pdfPages: 6 }], false))).toBe(180);
   });
   it('counts the pages of a PDF from its page objects, and says one when it cannot see them', async () => {
     const bytes = (text: string) => new Blob([text]);
@@ -136,7 +136,7 @@ describe('the time a scan is expected to take', () => {
   it('adds up the pages still to scan, and six seconds while the warm-up has not answered', () => {
     expect(expectedBatchMs([], false)).toBe(0);
     expect(expectedBatchMs([photo, photo], false)).toBe(70_000);
-    expect(expectedBatchMs([pdf], false)).toBe(35_000);
+    expect(expectedBatchMs([pdf], false)).toBe(30_000);
     expect(expectedBatchMs([photo], true)).toBe((35 + WARMUP_SECONDS) * 1000);
     expect(WARMUP_SECONDS).toBe(6);
     // The slowest start in the service log took 6.3 s, the 90th percentile 5.4 s.

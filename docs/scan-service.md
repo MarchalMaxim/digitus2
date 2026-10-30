@@ -169,7 +169,7 @@ Prices as published for Tier 1 regions ([Cloud Run pricing](https://cloud.google
 | Free each month                                 | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests                    |
 | Beyond the free grant                           | $0.000024 per vCPU-second, $0.0000025 per GiB-second, $0.40 per million requests |
 | One second of the service, 4 vCPU and 8 GiB     | $0.000116                                                                        |
-| Free recognition time a month                   | 45,000 s: about 1,300 photos or PDF pages of 35 s                                |
+| Free recognition time a month                   | 45,000 s: about 1,300 photos of 35 s, or 1,500 PDF pages of 30 s                 |
 | What 10 US dollars' worth buys beyond the grant | about 86,000 s more, about 2,500 photos of 35 s                                  |
 | Worst case, one instance busy around the clock  | about $10 a day                                                                  |
 | A warm-up request                               | at least 100 ms of the instance, about $0.00001                                  |
@@ -202,15 +202,15 @@ The service logs one line per recognition (`kind`, `bytesIn`, `seconds`), and Cl
 | PDF, 2 pages (62,934 bytes, the Träumerei)                | 1        | 49.5 s, 24.8 s a page |                 |                |
 | Cold start: instance start to the container listening     | 34       | 4.4 s                 | 5.4 s           | 3.4 to 6.3 s   |
 
-The app's estimate (`apps/web/src/scan/progress.ts`) errs long: the countdown already says "overdue" when a page runs past it, and a bar that finishes early costs nothing. A photo and the warm-up count the 90th percentile of their runs. A PDF page counts the page time of the one measured multi-page PDF, times the spread of the photo runs. The figures are rounded up (a photo or a PDF page to 5 s, the warm-up to whole seconds).
+The app's estimate (`apps/web/src/scan/progress.ts`) errs long: the countdown already says "overdue" when a page runs past it, and a bar that finishes early costs nothing. A photo and the warm-up count the 90th percentile of their runs. A PDF page counts the slowest page rate measured, times the spread of the PDF runs. The figures are rounded up (a photo or a PDF page to 5 s, the warm-up to whole seconds).
 
-| Part                                                 | Counted | Because                                                                                                                              |
-| ---------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| A photo                                              | 35 s    | 90th percentile: 34.2 s over every revision, 31.9 s on the current ones                                                              |
-| A PDF page                                           | 35 s    | 24.8 s a page for the one multi-page PDF in the log, times 1.36, the photos' 90th percentile over their median (34.2 / 25.1): 33.8 s |
-| The warm-up, while the scanner may still be starting | 6 s     | 90th percentile of cold starts: 5.4 s, 6.3 s at most                                                                                 |
+| Part                                                 | Counted | Because                                                                                                                                                    |
+| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A photo                                              | 35 s    | 90th percentile: 34.2 s over every revision, 31.9 s on the current ones                                                                                    |
+| A PDF page                                           | 30 s    | 24.8 s a page for the two-page PDF, the slowest page rate in the log, times 1.11, the one-page PDF's 90th percentile over its median (19.6 / 17.7): 27.5 s |
+| The warm-up, while the scanner may still be starting | 6 s     | 90th percentile of cold starts: 5.4 s, 6.3 s at most                                                                                                       |
 
-The PDF page is no percentile: the log holds 18 runs of the one-page Amazing Grace (90th percentile 19.6 s, which 35 s covers) and a single run of a multi-page PDF, the two-page Träumerei (49.5 s on the service, so 70 s counted for it). A fixed part and a per-page part cannot be told apart from two pieces of different density, so the one run stands for the median page, and the photos' spread stands in for the spread of PDF runs. A second multi-page PDF in the log is a reason to run the same rule again, with its own percentile.
+The PDF page is no percentile: the log holds 18 runs of the one-page Amazing Grace (90th percentile 19.6 s, which 35 s covers) and a single run of a multi-page PDF, the two-page Träumerei (49.5 s on the service, so 60 s counted for it). A fixed part and a per-page part cannot be told apart from two pieces of different density, so the slower page rate stands for every page, and the one-page PDF's runs give the spread. The photos' wider spread (34.2 / 25.1, 1.36) is not used: a photo goes through homr, a PDF through Audiveris. A second multi-page PDF in the log is a reason to run the same rule again, with its own percentile.
 
 ## Sources
 

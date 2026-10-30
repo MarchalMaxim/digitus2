@@ -1096,8 +1096,8 @@ input[role='switch']:checked::before {
    it never hides the music or the side panel for good. The practice controls live in its
    Practice panel at every width (UI batch, spec 13), closed on every page load: when it opens,
    the dock grows upward and the music keeps its place. Below 480 px the panel is capped so the
-   tallest system built so far still fits above the dock (issue 244), and opening it scrolls the
-   page to the reader's system. */
+   layout's tallest system still fits above the dock (issue 244), and opening it scrolls the page
+   to the reader's system when the system would otherwise be covered. */
 .dock {
   position: sticky;
   bottom: 0;
@@ -1206,19 +1206,18 @@ input[role='switch']:checked::before {
     grid-column: 1 / -1;
   }
 
-  /* The open panel keeps room above the dock for the tallest system built so far, and what does not
+  /* The open panel keeps room above the dock for the layout's tallest system, and what does not
      fit scrolls inside it (issue 244). ScoreView.tsx publishes the dock without the panel
-     (--dock-rest) and the tallest system with its margin (--system-room); `dvh` follows the
-     browser's toolbars. The panel is a column-reverse scroller, so its scroll origin is Play's
-     side: a row added at its top (the Hear switch over Hands, Practice mode when a piano
-     connects) grows upward and Hands keeps its place against the dock. It opens scrolled to its
-     top. The padding and the equal negative margin keep the focus rings from being clipped. The
-     `:not([hidden])` keeps `display: flex` from showing a closed panel. */
+     (--dock-rest) and the tallest system with its margin (--system-room, set when the layout is
+     made and when the panel opens, so the dock keeps its height while the reader reads); `dvh`
+     follows the browser's toolbars. The panel opens at its top. A row that arrives while it is
+     capped never pushes the head out or the control the reader used out of the box
+     (usePanelEdges.ts keeps the scroll; the browser's own anchoring is off here, WebKit has
+     none). The padding and the equal negative margin keep the focus rings from being clipped. */
   .dock > .practice-panel:not([hidden]) {
-    display: flex;
-    flex-direction: column-reverse;
     max-height: max(7.5rem, 100dvh - var(--dock-rest, 12.5rem) - var(--system-room, 15rem));
     overflow-y: auto;
+    overflow-anchor: none;
     overscroll-behavior: contain;
     padding: 0.25rem;
     margin: -0.25rem;

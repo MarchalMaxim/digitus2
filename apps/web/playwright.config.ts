@@ -61,7 +61,8 @@ export default defineConfig({
     // The score camera on Safari's engine (issue 145): an iPhone has no other. Playwright's WebKit
     // for Windows has no video streams at all, so this project runs on Linux and macOS (CI, or
     // `node scripts/e2e-webkit.mjs`, in Docker, on a Windows host). It also holds the one test
-    // that needs a browser without Web MIDI (issue 182): the library shows no piano line.
+    // that needs a browser without Web MIDI (issue 182): the library shows no piano line. And the
+    // Practice panel on a phone (issue 244), whose scroll keeping WebKit does not do for itself.
     ...(process.platform === 'win32'
       ? []
       : [
@@ -69,7 +70,7 @@ export default defineConfig({
             name: 'iphone',
             use: { ...devices['iPhone 15'], launchOptions: { args: [] } },
             testMatch:
-              /(scan-camera(-real)?|scan-grand-staff|scan-linked|play-along-home)\.spec\.ts/,
+              /(scan-camera(-real)?|scan-grand-staff|scan-linked|play-along-home|phone-practice)\.spec\.ts/,
           },
         ]),
   ],

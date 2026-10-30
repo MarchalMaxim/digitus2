@@ -21,6 +21,12 @@ export interface MidiToScoreOptions {
   title?: string;
   composer?: string;
   source?: string;
+  /**
+   * Ticks of a short first measure (a pickup, numbered 0); the full measures follow it. Used
+   * only when it is shorter than the first measure's signature and the music is longer, and
+   * dropped when it would push a time signature change off its barline.
+   */
+  pickupTicks?: number;
 }
 
 interface Draft {
@@ -118,30 +124,13 @@ export function midiToScore(
     .filter(usable)
     .map((t) => ({ tick: Math.round(t.tick * scale), beats: t.beats, beatType: t.beatType }))
     .sort((a, b) => a.tick - b.tick);
-  const measures: MeasureInfo[] = [];
-  const timeSignatures: TimeSigEvent[] = [];
-  let current = { tick: 0, beats: 4, beatType: 4 };
-  let nextChange = 0;
-  let moved = 0;
-  let start = 0;
-  do {
-    while (nextChange < changes.length && changes[nextChange]!.tick <= start) {
-      current = changes[nextChange]!;
-      if (current.tick !== start) moved++;
-      nextChange++;
-    }
-    const length = measureTicks(current);
-    const last = timeSignatures[timeSignatures.length - 1];
-    if (!last || last.beats !== current.beats || last.beatType !== current.beatType)
-      timeSignatures.push({ tick: start, beats: current.beats, beatType: current.beatType });
-    measures.push({
-      index: measures.length,
-      startTick: start,
-      lengthTicks: length,
-      number: String(measures.length + 1),
-    });
-    start += length;
-  } while (start < endTick);
+  let built = buildMeasures(changes, endTick, 0, measureTicks);
+  if (opts.pickupTicks !== undefined && opts.pickupTicks > 0) {
+    const shifted = buildMeasures(changes, endTick, opts.pickupTicks, measureTicks);
+    // A time signature the file puts on its own barline beats the guess of a pickup.
+    if (shifted.pickup && shifted.moved <= built.moved) built = shifted;
+  }
+  const { measures, timeSignatures, moved } = built;
   if (moved > 0)
     warnings.push(
       `${count(moved, 'time signature change', 'time signature changes')} moved to the next barline`,
@@ -218,4 +207,54 @@ export function midiToScore(
   const problems = validateScore(score);
   if (problems.length > 0) throw new Error(`invalid score from MIDI: ${problems.join('; ')}`);
   return { score, warnings };
+}
+
+interface Change {
+  tick: number;
+  beats: number;
+  beatType: number;
+}
+
+/**
+ * Measures from tick 0 that follow the time signature changes until they cover `endTick`; a
+ * change inside a measure takes effect at the next barline (`moved` counts them). With a
+ * `pickup` shorter than the first measure and `endTick` beyond it, the first measure is that
+ * short one, numbered 0, and the full measures start after it.
+ */
+function buildMeasures(
+  changes: readonly Change[],
+  endTick: number,
+  pickup: number,
+  measureTicks: (t: Change) => number,
+): { measures: MeasureInfo[]; timeSignatures: TimeSigEvent[]; moved: number; pickup: boolean } {
+  const measures: MeasureInfo[] = [];
+  const timeSignatures: TimeSigEvent[] = [];
+  let current: Change = { tick: 0, beats: 4, beatType: 4 };
+  let nextChange = 0;
+  let moved = 0;
+  let start = 0;
+  let shortened = false;
+  do {
+    while (nextChange < changes.length && changes[nextChange]!.tick <= start) {
+      current = changes[nextChange]!;
+      if (current.tick !== start) moved++;
+      nextChange++;
+    }
+    let length = measureTicks(current);
+    if (start === 0 && pickup > 0 && pickup < length && endTick > pickup) {
+      length = pickup;
+      shortened = true;
+    }
+    const last = timeSignatures[timeSignatures.length - 1];
+    if (!last || last.beats !== current.beats || last.beatType !== current.beatType)
+      timeSignatures.push({ tick: start, beats: current.beats, beatType: current.beatType });
+    measures.push({
+      index: measures.length,
+      startTick: start,
+      lengthTicks: length,
+      number: String(shortened ? measures.length : measures.length + 1),
+    });
+    start += length;
+  } while (start < endTick);
+  return { measures, timeSignatures, moved, pickup: shortened };
 }

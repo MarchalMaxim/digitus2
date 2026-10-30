@@ -6,6 +6,9 @@ import { expectOneRed } from './helpers/red.js';
 import { libraryReady } from './helpers/library.js';
 
 const twinkle = fileURLToPath(new URL('../fixtures/twinkle.mid', import.meta.url));
+const traeumerei = fileURLToPath(
+  new URL('../../../packages/engine/src/io/midi/fixtures/SchumannOp15No07.mid', import.meta.url),
+);
 const counts = /^Right hand: \d+ notes · left hand: \d+ notes$/;
 
 async function openTwinkleMidi(page: Page) {
@@ -32,20 +35,37 @@ async function reimported(page: Page) {
   await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
 }
 
-test('a dropped MIDI file opens with a finger on every note, the import facts and one red element', async ({
+test('a dropped MIDI file opens with a finger on every note, the hand counts and one red element', async ({
   page,
 }) => {
   await openTwinkleMidi(page);
   await expect(page.getByRole('heading', { level: 1, name: 'twinkle' })).toBeVisible();
-  await expect(
-    page.getByText(
-      'Imported from MIDI: notes quantized to a 16th-note grid; 0 % moved more than a 64th note',
-    ),
-  ).toBeVisible();
+  await expect(page.getByText(/quantiz/i)).toHaveCount(0);
   await expect(page.getByText(counts)).toBeVisible();
   await expect(page.getByLabel('Hand split')).toHaveValue('auto');
   await expectOneRed(page, 'score from MIDI');
   await expectNoSeriousA11y(page, 'score from MIDI');
+});
+
+test('a MIDI file titles itself from its readable name and opens with its pickup bar', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByLabel('Open your own score').setInputFiles(traeumerei);
+  await expect(page.getByRole('heading', { level: 1, name: 'Schumann Op. 15 No. 7' })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('button', { name: 'Play' })).toBeEnabled();
+  await expectOneRed(page, 'Traeumerei from MIDI');
+  await expectNoSeriousA11y(page, 'Traeumerei from MIDI');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Export MusicXML' }).click(),
+  ]);
+  const text = await readFile((await download.path())!, 'utf8');
+  expect(text).toContain('<work-title>Schumann Op. 15 No. 7</work-title>');
+  expect(text).toContain('<measure number="0" implicit="yes">');
 });
 
 test('the hand split re-imports with a fixed split and Automatic restores the separation', async ({

@@ -1,6 +1,6 @@
 import type { MidiInfo } from '@digitus2/engine';
 import { useT } from '../i18n/i18n.js';
-import { handCountLine, importLine, noteName, SPLIT_KEYS } from './midiCopy.js';
+import { handCountLine, noteName, SPLIT_KEYS } from './midiCopy.js';
 
 export interface MidiImportPanelProps {
   info: MidiInfo;
@@ -11,20 +11,14 @@ export interface MidiImportPanelProps {
 }
 
 /**
- * What the MIDI import did (grid, moved notes, notes per hand) and the Hand split control, which
- * replaces the automatic hand separation with a fixed split key. Never red.
+ * What the MIDI import did (the notes per hand) and the Hand split control, which replaces the
+ * automatic hand separation with a fixed split key. The grid the notes were rounded to is not
+ * shown: a reader cannot act on it. Never red.
  */
-export function MidiImportPanel({
-  info,
-  right,
-  left,
-  splitMidi,
-  onSplitChange,
-}: MidiImportPanelProps) {
+export function MidiImportPanel({ right, left, splitMidi, onSplitChange }: MidiImportPanelProps) {
   const t = useT();
   return (
     <section className="midi-import" aria-label={t.score.midi.label}>
-      <p className="muted small">{importLine(info, t)}</p>
       <p className="small">{handCountLine(right, left, t)}</p>
       <label htmlFor="hand-split">{t.score.midi.splitLabel}</label>
       <select

@@ -8,8 +8,10 @@ import { useScoreDocument } from './useScoreDocument.js';
 // Under happy-dom, Vite's asset plugin rewrites a literal `new URL('…', import.meta.url)` into
 // an http URL; a path held in a variable is left alone and stays a file URL.
 const TWINKLE_MID = '../../fixtures/twinkle.mid';
+const TRAEUMEREI = '../../../../packages/engine/src/io/midi/fixtures/SchumannOp15No07.mid';
 const SHORT_PIANO = '../../fixtures/short-piano.musicxml';
 const twinkle = new Uint8Array(readFileSync(new URL(TWINKLE_MID, import.meta.url)));
+const traeumerei = new Uint8Array(readFileSync(new URL(TRAEUMEREI, import.meta.url)));
 const shortPiano = new Uint8Array(readFileSync(new URL(SHORT_PIANO, import.meta.url)));
 
 beforeEach(() =>
@@ -67,6 +69,24 @@ describe('useScoreDocument with a MIDI file', () => {
     await waitFor(() => expect(result.current.status).toBe('ready'));
     expect(result.current.score).not.toBe(before.score);
     expect(result.current.score!.notes.filter((n) => n.hand === 'R')).toHaveLength(42);
+  });
+  it('titles a MIDI file from its readable name and keeps its pickup bar through a hand split change', async () => {
+    const { result } = renderHook(() =>
+      useScoreDocument({ kind: 'file', name: 'SchumannOp15No07.mid', bytes: traeumerei }, 800, {
+        engine: inlineEngine(),
+        renderer: fakeRenderer(),
+      }),
+    );
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.title).toBe('Schumann Op. 15 No. 7');
+    const measures = result.current.score!.measures;
+    expect(measures).toHaveLength(25);
+    expect(measures[0]).toMatchObject({ lengthTicks: 480, number: '0' });
+    act(() => result.current.setSplitMidi(60));
+    await waitFor(() => expect(result.current.midiInfo?.splitMidi).toBe(60));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.score!.measures).toEqual(measures);
+    expect(result.current.title).toBe('Schumann Op. 15 No. 7');
   });
   it('keeps midiInfo null for a MusicXML file', async () => {
     const { result } = renderHook(() =>

@@ -13,7 +13,7 @@ import {
 } from '@digitus2/engine';
 import type { EngineRequest, EngineResponse } from './protocol.js';
 
-/** 'folder/Twinkle.mid' -> 'Twinkle': the title of a MIDI import. */
+/** 'folder/Twinkle.mid' -> 'Twinkle': the file name a MIDI import falls back to for its title. */
 function titleOf(source: string): string {
   return source.replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '');
 }
@@ -38,7 +38,7 @@ export function handle(req: EngineRequest): EngineResponse {
           // was read back from it, so its ids are the `id` attributes of the <note> elements.
           if (typeof req.input === 'string') throw new Error('a MIDI file must be passed as bytes');
           const { xml, score, info } = importMidi(req.input, {
-            title: titleOf(req.source),
+            fallbackTitle: titleOf(req.source),
             ...(req.splitMidi !== undefined ? { splitMidi: req.splitMidi } : {}),
           });
           return {

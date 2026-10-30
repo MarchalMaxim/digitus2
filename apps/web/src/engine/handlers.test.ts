@@ -156,7 +156,25 @@ describe('engine handlers', () => {
 
 const midi = new Uint8Array(readFileSync(new URL('../../fixtures/twinkle.mid', import.meta.url)));
 
+const TRAEUMEREI = '../../../../packages/engine/src/io/midi/fixtures/SchumannOp15No07.mid';
+const traeumerei = new Uint8Array(readFileSync(new URL(TRAEUMEREI, import.meta.url)));
+
 describe('engine handlers: MIDI', () => {
+  it('titles a MIDI import from its readable file name and keeps its pickup bar', () => {
+    const r = handle({
+      id: 10,
+      type: 'load',
+      kind: 'midi',
+      input: traeumerei,
+      source: 'folder/SchumannOp15No07.mid',
+    });
+    if (!r.ok || r.type !== 'load') throw new Error(r.ok ? 'wrong response type' : r.error);
+    expect(r.xml).toContain('<work-title>Schumann Op. 15 No. 7</work-title>');
+    expect(r.score.meta.title).toBe('Schumann Op. 15 No. 7');
+    expect(r.score.measures).toHaveLength(25);
+    expect(r.score.measures[0]!.lengthTicks).toBe(480);
+    expect(r.xml).toContain('<measure number="0" implicit="yes">');
+  });
   it('loads a MIDI file as generated MusicXML with two hands and 64 notes', () => {
     const r = handle({ id: 11, type: 'load', kind: 'midi', input: midi, source: 'twinkle.mid' });
     if (!r.ok || r.type !== 'load') throw new Error(r.ok ? 'wrong response type' : r.error);

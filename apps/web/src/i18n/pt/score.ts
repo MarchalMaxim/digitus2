@@ -1,4 +1,4 @@
-import { formatNumber, plural } from '../format.js';
+import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 const notes = (n: number) => plural('pt', n, { one: '# nota', other: '# notas' });
@@ -81,14 +81,6 @@ export const score: Messages['score'] = {
     splitLabel: 'Divisão das mãos',
     automatic: 'Automática',
     splitHelp: 'As teclas da nota escolhida para cima vão para a mão direita.',
-    grids: {
-      sixteenth: 'uma grade de semicolcheias',
-      sixteenthTriplets: 'uma grade de semicolcheias com tercinas',
-      thirtySecond: 'uma grade de fusas',
-      thirtySecondTriplets: 'uma grade de fusas com tercinas',
-    },
-    importLine: (grid: string, movedPercent: number) =>
-      `Importado de MIDI: notas quantizadas em ${grid}; ${formatNumber('pt', movedPercent)} % deslocadas em mais de uma semifusa`,
     handCounts: (right: number, left: number) =>
       `Mão direita: ${notes(right)} · mão esquerda: ${notes(left)}`,
   },

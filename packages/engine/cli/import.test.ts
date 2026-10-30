@@ -14,6 +14,9 @@ function capture(): { io: CliIo; out: string[]; err: string[] } {
   const err: string[] = [];
   return { io: { stdout: (t) => out.push(t), stderr: (t) => err.push(t) }, out, err };
 }
+const traumerei = fileURLToPath(
+  new URL('../src/io/midi/fixtures/SchumannOp15No07.mid', import.meta.url),
+);
 const outFile = () => join(mkdtempSync(join(tmpdir(), 'digitus2-import-')), 'twinkle.musicxml');
 
 describe('digitus2 import', () => {
@@ -35,6 +38,15 @@ describe('digitus2 import', () => {
     expect(c.out.join('')).toMatch(/^<\?xml/);
     expect(c.out.join('')).toContain('<work-title>Twinkle</work-title>');
     expect(c.err.join('')).toMatch(/^imported twinkle\.mid: 64 notes/);
+  });
+  it('titles a file without --title from its readable name and keeps its pickup bar', () => {
+    const out = outFile();
+    const c = capture();
+    expect(main(['import', traumerei, '--out', out], c.io)).toBe(0);
+    const { score } = parseMusicXml(readFileSync(out));
+    expect(score.meta.title).toBe('Schumann Op. 15 No. 7');
+    expect(score.measures).toHaveLength(25);
+    expect(score.measures[0]!.lengthTicks).toBe(score.divisions);
   });
   it('honours a fixed hand split', () => {
     const out = outFile();

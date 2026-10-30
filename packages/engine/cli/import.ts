@@ -13,9 +13,11 @@ export interface ImportOptions {
 
 export function importFile(o: ImportOptions): { xml: string; summary: string; warnings: string[] } {
   const bytes = new Uint8Array(readFileSync(o.file));
-  const title = o.title ?? basename(o.file, extname(o.file));
+  // --title wins; otherwise the file's own name when it names a piece, else the file name.
   const { xml, score, info } = importMidi(bytes, {
-    title,
+    ...(o.title !== undefined
+      ? { title: o.title }
+      : { fallbackTitle: basename(o.file, extname(o.file)) }),
     ...(o.split !== undefined ? { splitMidi: o.split } : {}),
   });
   if (o.out) writeFileSync(o.out, xml);

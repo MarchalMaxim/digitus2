@@ -1,18 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { en } from '../i18n/en/index.js';
-import { gridPhrase, handCountLine, importLine, noteName, SPLIT_KEYS } from './midiCopy.js';
+import { handCountLine, noteName, SPLIT_KEYS } from './midiCopy.js';
 
 describe('MIDI copy', () => {
-  it('names the grid the import used', () => {
-    expect(gridPhrase({ '16th': 3, '16th-triplet': 0, '32nd': 0 })).toBe('a 16th-note grid');
-    expect(gridPhrase({ '16th': 3, '16th-triplet': 1, '32nd': 0 })).toBe(
-      'a 16th-note grid with triplets',
-    );
-    expect(gridPhrase({ '16th': 3, '16th-triplet': 0, '32nd': 2 })).toBe('a 32nd-note grid');
-    expect(gridPhrase({ '16th': 0, '16th-triplet': 1, '32nd': 2 })).toBe(
-      'a 32nd-note grid with triplets',
-    );
-  });
   it('names all twelve pitch classes with sharps', () => {
     expect(Array.from({ length: 12 }, (_, i) => noteName(60 + i))).toEqual([
       'C4',
@@ -28,18 +18,6 @@ describe('MIDI copy', () => {
       'A#4',
       'B4',
     ]);
-  });
-  it('writes the import line with a rounded percentage', () => {
-    expect(
-      importLine({
-        quantizedMovedShare: 0.034,
-        grids: { '16th': 8, '16th-triplet': 0, '32nd': 0 },
-        splitMidi: null,
-        warnings: [],
-      }),
-    ).toBe(
-      'Imported from MIDI: notes quantized to a 16th-note grid; 3 % moved more than a 64th note',
-    );
   });
   it('counts notes per hand', () => {
     expect(handCountLine(42, 22)).toBe('Right hand: 42 notes · left hand: 22 notes');

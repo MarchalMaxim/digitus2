@@ -1,4 +1,4 @@
-import { formatNumber, plural } from '../format.js';
+import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 const notes = (n: number) => plural('nl', n, { one: '# noot', other: '# noten' });
@@ -86,14 +86,6 @@ export const score: Messages['score'] = {
     splitLabel: 'Handverdeling',
     automatic: 'Automatisch',
     splitHelp: 'Toetsen vanaf de gekozen noot omhoog gaan naar de rechterhand.',
-    grids: {
-      sixteenth: 'een raster van zestiende noten',
-      sixteenthTriplets: 'een raster van zestiende noten met triolen',
-      thirtySecond: 'een raster van tweeëndertigste noten',
-      thirtySecondTriplets: 'een raster van tweeëndertigste noten met triolen',
-    },
-    importLine: (grid: string, movedPercent: number) =>
-      `Geïmporteerd uit MIDI: noten gekwantiseerd naar ${grid}; ${formatNumber('nl', movedPercent)} % meer dan een vierenzestigste noot verschoven`,
     handCounts: (right: number, left: number) =>
       `Rechterhand: ${notes(right)} · linkerhand: ${notes(left)}`,
   },

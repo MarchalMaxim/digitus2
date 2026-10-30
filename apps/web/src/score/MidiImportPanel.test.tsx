@@ -12,15 +12,12 @@ const info = {
 };
 
 describe('MidiImportPanel', () => {
-  it('shows the import facts, the hand counts and the hand split control', () => {
+  it('shows the hand counts and the hand split control, and nothing about quantization', () => {
     render(
       <MidiImportPanel info={info} right={42} left={22} splitMidi={null} onSplitChange={vi.fn()} />,
     );
-    expect(
-      screen.getByText(
-        'Imported from MIDI: notes quantized to a 16th-note grid; 3 % moved more than a 64th note',
-      ),
-    ).toBeInTheDocument();
+    expect(screen.queryByText(/quantiz/i)).toBeNull();
+    expect(screen.queryByText(/grid/i)).toBeNull();
     expect(screen.getByText('Right hand: 42 notes · left hand: 22 notes')).toBeInTheDocument();
     expect(
       screen.getByText('Keys from the chosen note upward go to the right hand.'),

@@ -1,9 +1,7 @@
 /**
- * The words the score view shows for a MIDI import: the quantization grid, the share of notes
- * the grid moved, the notes per hand, and the keys of the Hand split control. Each takes the
- * texts to write in (default: the language on screen).
+ * The words the score view shows for a MIDI import: the notes per hand and the keys of the Hand
+ * split control. Each takes the texts to write in (default: the language on screen).
  */
-import type { GridKind, MidiInfo } from '@digitus2/engine';
 import { messages } from '../i18n/i18n.js';
 import type { Messages } from '../i18n/messages.js';
 
@@ -18,21 +16,6 @@ const SHARPS = new Set([1, 3, 6, 8, 10]);
 export function noteName(midi: number, t: Messages = messages()): string {
   const pc = ((midi % 12) + 12) % 12;
   return `${t.score.noteLetters[NATURAL_OF[pc]!]!}${SHARPS.has(pc) ? '#' : ''}${Math.floor(midi / 12) - 1}`;
-}
-
-/** 32nd notes when any beat used them, "with triplets" when any beat used triplets. */
-export function gridPhrase(grids: Record<GridKind, number>, t: Messages = messages()): string {
-  const g = t.score.midi.grids;
-  const triplets = grids['16th-triplet'] > 0;
-  if (grids['32nd'] > 0) return triplets ? g.thirtySecondTriplets : g.thirtySecond;
-  return triplets ? g.sixteenthTriplets : g.sixteenth;
-}
-
-export function importLine(info: MidiInfo, t: Messages = messages()): string {
-  return t.score.midi.importLine(
-    gridPhrase(info.grids, t),
-    Math.round(info.quantizedMovedShare * 100),
-  );
 }
 
 export function handCountLine(right: number, left: number, t: Messages = messages()): string {

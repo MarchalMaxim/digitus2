@@ -8,7 +8,7 @@ import { loadPiece } from '../library/manifest.js';
 import { handLetter } from './handLetters.js';
 import { Keyboard } from './Keyboard.js';
 import { MidiImportPanel } from './MidiImportPanel.js';
-import { importLine, noteName } from './midiCopy.js';
+import { noteName } from './midiCopy.js';
 import { keyName } from './keyName.js';
 import { ScoreHeader } from './ScoreHeader.js';
 import { ScoreSheet } from './ScoreSheet.js';
@@ -115,11 +115,6 @@ describe('the score view in another language', () => {
         onSplitChange={vi.fn()}
       />,
     );
-    expect(
-      screen.getByText(
-        'Importado de MIDI: notas quantizadas em uma grade de semicolcheias com tercinas; 3 % deslocadas em mais de uma semifusa',
-      ),
-    ).toBeInTheDocument();
     expect(screen.getByText('Mão direita: 1 nota · mão esquerda: 22 notas')).toBeInTheDocument();
     expect(screen.getByLabelText('Divisão das mãos')).toHaveValue('auto');
     expect(screen.getByRole('option', { name: 'Dó4' })).toBeInTheDocument();
@@ -176,22 +171,5 @@ describe('score texts in every language', () => {
     await speak('pt');
     expect(keyName('G minor', messages())).toBe('Sol menor');
     expect(keyName('odd', messages())).toBe('odd');
-  });
-
-  it('writes the import line with the number in the language', async () => {
-    await speak('fr');
-    expect(
-      importLine(
-        {
-          quantizedMovedShare: 0.034,
-          grids: { '16th': 8, '16th-triplet': 0, '32nd': 1 },
-          splitMidi: null,
-          warnings: [],
-        },
-        messages(),
-      ),
-    ).toBe(
-      'Importé depuis MIDI : notes quantifiées sur une grille de triples croches ; 3 % déplacées de plus d’une quadruple croche',
-    );
   });
 });

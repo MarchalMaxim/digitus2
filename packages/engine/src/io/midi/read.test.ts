@@ -182,4 +182,30 @@ describe('parseMidiFile', () => {
     );
     expect(data.tempos.map((t) => t.tick)).toEqual([0, 480, 960]);
   });
+  it('reads the sequence name from the first track only, decoded from its bytes', () => {
+    const name = (deltaTime: number, text: string): MidiEvent => ({
+      deltaTime,
+      meta: true,
+      type: 'trackName',
+      text,
+    });
+    const named = parseMidiFile(
+      smf([
+        [name(0, 'Etude'), name(0, 'second'), end()],
+        [name(0, 'up'), on(0, 60), off(480, 60), end()],
+      ]),
+    );
+    expect(named.sequenceName).toBe('Etude');
+    // the UTF-8 bytes of 'Träumerei', one character per byte as midi-file reads them
+    const utf8 = String.fromCharCode(...new TextEncoder().encode('Träumerei'));
+    expect(parseMidiFile(smf([[name(0, utf8), on(0, 60), off(480, 60), end()]])).sequenceName).toBe(
+      'Träumerei',
+    );
+    // a name only on a later track is an instrument or a hand, not the piece
+    const later = parseMidiFile(
+      smf([[end()], [name(0, 'Les etoiles'), on(0, 60), off(480, 60), end()]]),
+    );
+    expect(later.sequenceName).toBeUndefined();
+    expect(parseMidiFile(smf([[on(0, 60), off(480, 60), end()]])).sequenceName).toBeUndefined();
+  });
 });

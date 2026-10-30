@@ -269,3 +269,74 @@ describe('midiToScore', () => {
     expect(score.measures).toHaveLength((n * 120) / 1920);
   });
 });
+
+describe('midiToScore with a pickup', () => {
+  /** build() with the first bar cut to pickupTicks. */
+  function buildWith(d: MidiData, pickupTicks: number) {
+    const q = quantize(d);
+    return midiToScore(
+      d,
+      q,
+      q.notes.map((n) => (n.midi < 54 ? 'L' : 'R')),
+      { title: 'test', pickupTicks },
+    );
+  }
+  const quarters = (n: number): Array<[number, number, number]> =>
+    Array.from({ length: n }, (_, i) => [i * 480, i * 480 + 480, 60 + (i % 5)]);
+
+  it('starts with a short measure numbered 0, then full measures numbered from 1', () => {
+    const { score, warnings } = buildWith(data(quarters(10)), 480);
+    expect(score.measures.map((m) => [m.startTick, m.lengthTicks, m.number])).toEqual([
+      [0, 480, '0'],
+      [480, 1920, '1'],
+      [2400, 1920, '2'],
+      [4320, 1920, '3'],
+    ]);
+    expect(score.timeSignatures).toEqual([{ tick: 0, beats: 4, beatType: 4 }]);
+    expect(score.notes.map((n) => n.measureIndex)).toEqual([0, 1, 1, 1, 1, 2, 2, 2, 2, 3]);
+    expect(warnings).toEqual([]);
+  });
+  it('keeps a time signature change that falls on a shifted barline', () => {
+    const { score, warnings } = buildWith(
+      data([...quarters(8), [4320, 4800, 62]], {
+        timeSignatures: [
+          { tick: 0, beats: 4, beatType: 4 },
+          { tick: 2400, beats: 3, beatType: 4 },
+        ],
+      }),
+      480,
+    );
+    expect(score.measures.map((m) => [m.startTick, m.lengthTicks, m.number])).toEqual([
+      [0, 480, '0'],
+      [480, 1920, '1'],
+      [2400, 1440, '2'],
+      [3840, 1440, '3'],
+    ]);
+    expect(score.timeSignatures).toEqual([
+      { tick: 0, beats: 4, beatType: 4 },
+      { tick: 2400, beats: 3, beatType: 4 },
+    ]);
+    expect(warnings).toEqual([]);
+  });
+  it('drops the pickup when a time signature change sits on a barline of the unshifted bars only', () => {
+    const { score } = buildWith(
+      data(quarters(10), {
+        timeSignatures: [
+          { tick: 0, beats: 4, beatType: 4 },
+          { tick: 3840, beats: 3, beatType: 4 },
+        ],
+      }),
+      480,
+    );
+    expect(score.measures.map((m) => [m.startTick, m.lengthTicks, m.number])).toEqual([
+      [0, 1920, '1'],
+      [1920, 1920, '2'],
+      [3840, 1440, '3'],
+    ]);
+  });
+  it('ignores a pickup as long as the measure, or longer than the music', () => {
+    expect(buildWith(data(quarters(10)), 1920).score.measures[0]!.number).toBe('1');
+    expect(buildWith(data(quarters(1)), 480).score.measures).toHaveLength(1);
+    expect(buildWith(data(quarters(1)), 480).score.measures[0]!.number).toBe('1');
+  });
+});

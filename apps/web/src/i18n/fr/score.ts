@@ -1,4 +1,4 @@
-import { formatNumber, plural } from '../format.js';
+import { plural } from '../format.js';
 import type { Messages } from '../messages.js';
 
 const notes = (n: number) => plural('fr', n, { one: '# note', other: '# notes' });
@@ -84,14 +84,6 @@ export const score: Messages['score'] = {
     splitLabel: 'Séparation des mains',
     automatic: 'Automatique',
     splitHelp: 'À partir de la note choisie, les touches vers l’aigu vont à la main droite.',
-    grids: {
-      sixteenth: 'une grille de doubles croches',
-      sixteenthTriplets: 'une grille de doubles croches avec triolets',
-      thirtySecond: 'une grille de triples croches',
-      thirtySecondTriplets: 'une grille de triples croches avec triolets',
-    },
-    importLine: (grid: string, movedPercent: number) =>
-      `Importé depuis MIDI\u00a0: notes quantifiées sur ${grid}\u00a0; ${formatNumber('fr', movedPercent)}\u00a0% déplacées de plus d’une quadruple croche`,
     handCounts: (right: number, left: number) =>
       `Main droite\u00a0: ${notes(right)} · main gauche\u00a0: ${notes(left)}`,
   },

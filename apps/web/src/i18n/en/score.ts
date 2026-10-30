@@ -1,4 +1,4 @@
-import { formatNumber, plural } from '../format.js';
+import { plural } from '../format.js';
 
 const notes = (n: number) => plural('en', n, { one: '# note', other: '# notes' });
 
@@ -114,19 +114,6 @@ export const score = {
     splitLabel: 'Hand split',
     automatic: 'Automatic',
     splitHelp: 'Keys from the chosen note upward go to the right hand.',
-    /**
-     * How the import rounded note starts and lengths to a rhythmic grid. Each is a noun phrase
-     * that completes the sentence of `importLine`.
-     */
-    grids: {
-      sixteenth: 'a 16th-note grid',
-      sixteenthTriplets: 'a 16th-note grid with triplets',
-      thirtySecond: 'a 32nd-note grid',
-      thirtySecondTriplets: 'a 32nd-note grid with triplets',
-    },
-    /** `grid` is one of the `grids` phrases; `movedPercent` the share of notes moved a lot. */
-    importLine: (grid: string, movedPercent: number) =>
-      `Imported from MIDI: notes quantized to ${grid}; ${formatNumber('en', movedPercent)} % moved more than a 64th note`,
     handCounts: (right: number, left: number) =>
       `Right hand: ${notes(right)} · left hand: ${notes(left)}`,
   },

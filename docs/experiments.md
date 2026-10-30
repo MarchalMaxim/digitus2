@@ -426,6 +426,43 @@ The rule was to change the defaults only for a gain of at least 1.0 Mutopia-trai
 
 Speed. `importMidi` (read, quantize, separate, engrave, read back) on the 2000-note file of `import.test.ts`, built engine in Node 22: 133 to 135 ms on the first call, 88 ms median warm; `twinkle.mid` (64 notes) 3.9 ms warm. The target was 500 ms and the CI bound 2 s. `evalhands` quantizes and separates all 30 PIG test pieces (10,225 notes) in 82 ms and the 62 Mutopia test parts (56,937 notes) in 386 ms.
 
+### Pickup bar of MIDI input
+
+A MIDI file has no barlines, so `midiToScore` starts full bars at tick 0 unless a pickup is detected; without detection, a piece that opens with a pickup (anacrusis) gets a full first bar and every bar number differs from the printed sheet by one. `detectPickup` (`packages/engine/src/io/midi/pickup.ts`) looks at the first 8 bars (`PICKUP_OPENING_BARS`) of the notes after quantization, with the hands of the automatic separation (a fixed `Hand split` never moves a barline), and returns the pickup's length in ticks or 0. A false pickup is worse than a missed one, so the rules are strict, and a pickup is considered only when the first note starts at tick 0 and the time signature gives a whole number of ticks per bar. With `L` the bar length, a note `crosses` a grid whose bars start at `p` when it starts off a barline and sounds past the next one.
+
+The opening alone cannot settle it. A piece that opens on beat 1 looks like a pickup when its left hand rests on beat 1 (a waltz with the chords on beats 2 and 3, a backbeat), when its melody is tied over every barline (a rag, an anticipation), or when its accompaniment enters late. So each rule only proposes a length, and the proposal stands on the ending.
+
+- **Rule A, the melody plays alone and the left hand enters on a beat.** The first left-hand onset `e` lies in `(0, L)` on a beat. The grid at `e` must cross no more notes than the grid at 0, and either cross fewer, or carry a bass at least 1.5 times as long on its downbeats (the lowest left-hand note on each downbeat, summed); a grid at 0 with no bass on its downbeats gives nothing to gain from, so that comparison does not hold. The proposal is `e`.
+- **Rule B, the opening bars keep crossing the file's barlines.** At least 6 notes cross the grid at 0, and the grid shifted by a multiple of an eighth note (the first of the grids, in steps of a 16th, with the fewest crossings) cuts that to a sixth or less. The proposal is that shift.
+- **The ending.** A proposal `p` stands when `p` is shorter than half a bar and the last note ends within a sixteenth of a barline of the grid at `p`, as it does when the last bar is full. For Rule B the last note must also start within a 32nd of a downbeat of that grid. A pickup proposed by both rules stands without the ending: the two rules read different evidence, and agreeing they are as precise as the ending.
+- When both rules stand with different lengths, the answer is none. `midiToScore` also drops the pickup when it would move a time signature change off its own barline.
+- If engraving a score with the pickup fails, `importMidi` imports the file with full bars.
+
+Measured on the built-in library, whose MusicXML gives the truth for each piece: the first measure is short exactly when the piece starts on a pickup. The notes go to the detector as a MIDI file delivers them (a 480-tick quarter, hands from the automatic separation). 2,168 pieces start at tick 0 and have at least 8 notes: 1,856 open on a full bar and 312 on a pickup. `pickup.library.test.ts` repeats the measurement and gates it on no false pickup and no wrong length (it reads the pieces up to 15 KB to keep the run to about a minute; `DIGITUS2_PICKUP_FULL=1` reads all of them). Each row adds a condition to the one above:
+
+| Conditions                                                          | False pickup (of 1,856) | Wrong length | Right (of 312) | Missed  |
+| ------------------------------------------------------------------- | ----------------------- | ------------ | -------------- | ------- |
+| The opening rules alone                                             | 58                      | 3            | 139            | 170     |
+| + the last note ends where a full last bar of the shifted grid ends | 4                       | 0            | 76             | 236     |
+| + shorter than half a bar                                           | 1                       | 0            | 58             | 254     |
+| + Rule B: the last note starts on a downbeat                        | 0                       | 0            | 49             | 263     |
+| **+ both rules agree, no ending needed**                            | **0**                   | **0**        | **61**         | **251** |
+
+The first row is what the opening rules (constants chosen on 153 Mutopia files, below) give on a corpus they were never tuned on: a precision of 70%, so about one shifted piece in three was wrong; Rule B gave 44 of the 58, Rule A 13 and both together 1. The conditions below it were chosen on the library, so the zero is a figure on the corpus they were chosen on, not a held-out one; the check on other data is the Mutopia run below, whose MIDI files the conditions never saw. With the hands of the score's own staves in place of the automatic separation the detector also finds no false pickup and no wrong length. About one pickup in five is found: most of the others end on a bar that completes the pickup, which looks like a piece with full bars, or end on a held or ritardando note.
+
+Measured on the 153 Mutopia MIDI files in `research/data/mutopia_midi` (https://www.mutopiaproject.org/), against the first `partial` of the LilyPond source of each piece or, where the library holds the same piece, the first bar of its MusicXML: 7 of the 37 pickups found with the right length, 0 wrong lengths, 0 false pickups among the 116 full-bar pieces (Mutopia ids 504, 1590, 1955, 2147, 2149, 220, 757). The opening rules alone found 12 of the 37; the five lost end on the bar that completes the pickup or on a held final note. Träumerei (Schumann Op. 15 No. 7, Mutopia 504) gets 25 bars with a quarter-note first bar, which is its source's `partial 4` and 24 bars.
+
+Limits. A file that opens with silence is not shifted, so a pickup padded with leading silence is missed (Mutopia 653). A pickup of half a bar or more is not found. A repeat whose bar breaks the phase is not followed (Mutopia 1027). A fixed `Hand split` does not change the detection.
+
+Fixtures (`packages/engine/src/io/midi/fixtures/`):
+
+| File                 | Piece                                                         | Source                                                                      | Licence       |
+| -------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------- |
+| SchumannOp15No07.mid | Schumann, Kinderszenen Op. 15 No. 7, typeset by Ying-Chun Liu | https://www.mutopiaproject.org/ftp/SchumannR/O15/SchumannOp15No07/ (id 504) | Public Domain |
+| MozartK457-1.mid     | Mozart, Piano Sonata K. 457, first movement (`sonata1.mid`)   | https://www.mutopiaproject.org/ftp/MozartWA/KV457/sonata1/ (id 356)         | Public Domain |
+
+The second opens on the downbeat and guards against a detector that shifts a piece that starts on beat 1. `pickup.corpus.test.ts` repeats the Mutopia measurement and is skipped where the corpus is absent.
+
 ## Teacher-review hypotheses
 
 The weekly teacher review (`research/teacher_review/weekly.py`, method in `docs/research/teacher-review.md`) turns objections that two reviewers share, or any error-severity objection, into hypotheses for the quantitative loop. It is never a gate and never a tuning target (verification spec 3.12), and PIG passages appear only by opaque id. The job writes rows in this table's format (`research/teacher_review/hypotheses.py`), to be appended after the table's last row. Outcome "Open" means untested. A hypothesis is tested on PIG train, the textbook oracle and the library, never on the test split; its result then goes under the matching area above.

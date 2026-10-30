@@ -1,6 +1,7 @@
 import { parseMidi } from 'midi-file';
 import { PIANO_MAX, PIANO_MIN } from '../../score/pitch.js';
 import { count } from './plural.js';
+import { decodeMetaText } from './title.js';
 
 export interface MidiTempo {
   tick: number;
@@ -28,6 +29,8 @@ export interface MidiData {
   tempos: MidiTempo[];
   timeSignatures: MidiTimeSignature[];
   keySignature?: MidiKeySignature;
+  /** The first track name of the first track, decoded; it may still be a generic label. */
+  sequenceName?: string;
   notes: MidiNote[];
   warnings: string[];
 }
@@ -65,6 +68,7 @@ export function parseMidiFile(bytes: Uint8Array): MidiData {
   const tempos: MidiTempo[] = [];
   const timeSignatures: MidiTimeSignature[] = [];
   let keySignature: MidiKeySignature | undefined;
+  let sequenceName: string | undefined;
   const notes: MidiNote[] = [];
   let percussion = 0;
   let outside = 0;
@@ -88,6 +92,10 @@ export function parseMidiFile(bytes: Uint8Array): MidiData {
         case 'timeSignature':
           whole(e.numerator, e.denominator);
           timeSignatures.push({ tick, beats: e.numerator, beatType: e.denominator });
+          break;
+        case 'trackName':
+          if (track === 0 && sequenceName === undefined && typeof e.text === 'string')
+            sequenceName = decodeMetaText(e.text);
           break;
         case 'keySignature':
           whole(e.key, e.scale);
@@ -171,6 +179,7 @@ export function parseMidiFile(bytes: Uint8Array): MidiData {
     tempos,
     timeSignatures,
     ...(keySignature ? { keySignature } : {}),
+    ...(sequenceName !== undefined ? { sequenceName } : {}),
     notes,
     warnings,
   };

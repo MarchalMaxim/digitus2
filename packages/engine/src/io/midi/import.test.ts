@@ -1,14 +1,35 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { writeMidi, type MidiEvent } from 'midi-file';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ticksToSeconds } from '../../score/build.js';
 import type { Assignment } from '../../score/types.js';
 import { parseMusicXml } from '../musicxml/read.js';
 import { injectFingerings } from '../musicxml/write.js';
+import type * as Engrave from './engrave.js';
 import { importMidi } from './import.js';
 import { parseMidiFile } from './read.js';
 
+/** Lets one test make the engraver refuse a score that opens with a short measure. */
+const engraver = vi.hoisted(() => ({ refuseShortFirstMeasure: false }));
+vi.mock('./engrave.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof Engrave>();
+  return {
+    ...actual,
+    scoreToMusicXml: (...args: Parameters<typeof actual.scoreToMusicXml>) => {
+      const [first, second] = args[0].measures;
+      if (engraver.refuseShortFirstMeasure && second && first!.lengthTicks < second.lengthTicks)
+        throw new Error('test: the engraver refuses a short first measure');
+      return actual.scoreToMusicXml(...args);
+    },
+  };
+});
+afterEach(() => {
+  engraver.refuseShortFirstMeasure = false;
+});
+
+const midiFixture = (name: string) =>
+  new Uint8Array(readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url))));
 const fixture = (name: string) =>
   new Uint8Array(
     readFileSync(fileURLToPath(new URL(`../../../fixtures/${name}`, import.meta.url))),
@@ -138,5 +159,122 @@ describe('importMidi', () => {
     const ms = performance.now() - t0;
     expect(score.notes).toHaveLength(2000);
     expect(ms, `${ms.toFixed(0)} ms`).toBeLessThan(2000);
+  });
+});
+
+type NoteSpec = [onset: number, offset: number, midi: number, channel: number];
+const meta = (type: string, extra: object): MidiEvent =>
+  ({ deltaTime: 0, meta: true, type, ...extra }) as MidiEvent;
+/** One track of the notes of a channel, ordered, with offsets before onsets at one tick. */
+function channelTrack(specs: NoteSpec[], channel: number): MidiEvent[] {
+  const events: Array<{ tick: number; off: boolean; event: MidiEvent }> = [];
+  for (const [on, off, midi, ch] of specs)
+    if (ch === channel) {
+      events.push({
+        tick: on,
+        off: false,
+        event: { deltaTime: 0, type: 'noteOn', channel, noteNumber: midi, velocity: 80 },
+      });
+      events.push({
+        tick: off,
+        off: true,
+        event: { deltaTime: 0, type: 'noteOff', channel, noteNumber: midi, velocity: 0 },
+      });
+    }
+  events.sort((a, b) => a.tick - b.tick || Number(b.off) - Number(a.off));
+  let last = 0;
+  return events.map(({ tick, event }) => {
+    const out = { ...event, deltaTime: tick - last };
+    last = tick;
+    return out;
+  });
+}
+/** A format 1 file: a conductor track (optionally named), then one track per channel 0 and 1. */
+function smf(specs: NoteSpec[], sequenceName?: string): Uint8Array {
+  const end = meta('endOfTrack', {});
+  const conductor: MidiEvent[] = [
+    ...(sequenceName !== undefined ? [meta('trackName', { text: sequenceName })] : []),
+    meta('timeSignature', { numerator: 4, denominator: 4, metronome: 24, thirtyseconds: 8 }),
+    end,
+  ];
+  return new Uint8Array(
+    writeMidi({
+      header: { format: 1, numTracks: 3, ticksPerBeat: 480 },
+      tracks: [conductor, [...channelTrack(specs, 0), end], [...channelTrack(specs, 1), end]],
+    }),
+  );
+}
+
+describe('importMidi title', () => {
+  const notes: NoteSpec[] = [
+    [0, 480, 72, 0],
+    [480, 960, 74, 0],
+  ];
+  it('prefers an explicit title, then the name of the sequence, then the cleaned file name', () => {
+    const named = smf(notes, 'Kinderszenen: Traeumerei');
+    expect(importMidi(named, { title: 'Mine', fallbackTitle: 'file' }).score.meta.title).toBe(
+      'Mine',
+    );
+    expect(importMidi(named, { fallbackTitle: 'file' }).score.meta.title).toBe(
+      'Kinderszenen: Traeumerei',
+    );
+    expect(
+      importMidi(smf(notes, 'Piano'), { fallbackTitle: 'SchumannOp15No07' }).score.meta.title,
+    ).toBe('Schumann Op. 15 No. 7');
+    expect(importMidi(smf(notes), { fallbackTitle: 'twinkle' }).score.meta.title).toBe('twinkle');
+  });
+  it('has no title when there is neither a name nor a file name', () => {
+    expect(importMidi(smf(notes, 'Track 1')).score.meta.title).toBeUndefined();
+  });
+  it('reads the file name of Traeumerei as Schumann Op. 15 No. 7', () => {
+    const { score } = importMidi(midiFixture('SchumannOp15No07.mid'), {
+      fallbackTitle: 'SchumannOp15No07',
+    });
+    expect(score.meta.title).toBe('Schumann Op. 15 No. 7');
+  });
+});
+
+describe('importMidi pickup', () => {
+  it('gives Traeumerei (Mutopia 504) the 25 bars of the printed score, the first a quarter long', () => {
+    const { score, xml } = importMidi(midiFixture('SchumannOp15No07.mid'));
+    expect(score.measures).toHaveLength(25);
+    expect(score.measures[0]).toMatchObject({ startTick: 0, lengthTicks: 480, number: '0' });
+    expect(score.measures[1]).toMatchObject({ startTick: 480, lengthTicks: 1920, number: '1' });
+    expect(xml).toContain('<measure number="0" implicit="yes">');
+    expect(score.notes[0]!.measureIndex).toBe(0);
+  });
+  it('places the bars the same way whatever the hand split', () => {
+    const bytes = midiFixture('SchumannOp15No07.mid');
+    const automatic = importMidi(bytes).score.measures;
+    for (const splitMidi of [60, 67])
+      expect(importMidi(bytes, { splitMidi }).score.measures).toEqual(automatic);
+  });
+  it('keeps the full first bar of a piece that opens on the downbeat (Mozart K. 457)', () => {
+    const { score } = importMidi(midiFixture('MozartK457-1.mid'));
+    expect(score.measures[0]).toMatchObject({ lengthTicks: 1920, number: '1' });
+  });
+  it('keeps full bars for the existing fixtures', () => {
+    for (const name of ['twinkle.mid', 'tempo-map.mid'])
+      expect(importMidi(fixture(name)).score.measures[0]!.number).toBe('1');
+  });
+  it('keeps an eighth-note pickup under eighth triplets on the musical beats', () => {
+    const specs: NoteSpec[] = [[0, 240, 67, 0]];
+    for (let bar = 0; bar < 8; bar++) {
+      const s = 240 + bar * 1920;
+      specs.push([s, s + 1920, 48, 1]);
+      for (let k = 0; k < 12; k++) specs.push([s + k * 160, s + (k + 1) * 160, 72 + (k % 5), 0]);
+    }
+    const close = 240 + 8 * 1920; // a closing chord on the downbeat, as a piece ends
+    specs.push([close, close + 1920, 48, 1], [close, close + 1920, 72, 0]);
+    const { score } = importMidi(smf(specs));
+    expect(score.notes).toHaveLength(specs.length);
+    expect(score.measures[0]).toMatchObject({ startTick: 0, lengthTicks: 240, number: '0' });
+    expect(score.measures[1]).toMatchObject({ startTick: 240, lengthTicks: 1920 });
+  });
+  it('falls back to full bars when the engraver cannot take the pickup', () => {
+    engraver.refuseShortFirstMeasure = true;
+    const { score, xml } = importMidi(midiFixture('SchumannOp15No07.mid'));
+    expect(score.measures[0]).toMatchObject({ lengthTicks: 1920, number: '1' });
+    expect(xml).not.toContain('implicit="yes"');
   });
 });

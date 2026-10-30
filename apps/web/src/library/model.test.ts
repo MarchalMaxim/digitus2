@@ -382,9 +382,8 @@ describe('the samples (shelves spec 4.1)', () => {
       const songs = inTierShelf(allPieces, 'medium', 'songs');
       const last = songs[songs.length - 1]!.slug;
       expect(dealt(0, { lastPlayed: last })['songs']![0]).toBe(last);
-      expect(dealt(1, { lastPlayed: last })['songs']![0]).not.toBe(last);
-      // the piece pinned at deal 0 was on screen, so deal 1 leaves it out with the other samples
-      expect(dealt(1, { lastPlayed: last })['songs']).not.toContain(last);
+      // a played piece changes deal 0 only: Back from a dealt piece lands on the same rows
+      for (const deal of [1, 2, 3]) expect(dealt(deal, { lastPlayed: last })).toEqual(dealt(deal));
     });
     it('keeps the composer, collection and shortest-first rules', () => {
       for (const s of shelves(allPieces, 'medium', { deal: 1 }).shelves) {

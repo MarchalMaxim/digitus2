@@ -297,12 +297,13 @@ export function LibraryView() {
         : layout.kind;
   const listKey = layout.kind === 'shelves' || layout.kind === 'shelf' ? `${place}-${deal}` : place;
   const fade = useChanged(listKey);
-  // A press of the deal control announces itself, until the reader moves to another list.
+  // A press of the deal control announces itself, until the reader leaves the shelves (a shelf
+  // opened, a search, another level): the announcements of the next list must not be swallowed.
   const [dealtIn, setDealtIn] = useState<{ deal: number; place: string } | null>(null);
-  if (dealtIn !== null && dealtIn.place !== place) setDealtIn(null);
+  if (dealtIn !== null && (layout.kind !== 'shelves' || dealtIn.place !== place)) setDealtIn(null);
   const dealt = dealtIn !== null && dealtIn.deal === deal;
   const announcement = useAnnouncement(
-    dealt ? t.library.announce.dealt : announcementFor(layout, t),
+    dealt ? t.library.announce.shuffled : announcementFor(layout, t),
     deal,
   );
   const focusAfter = useRef<FocusTarget | null>(null);
@@ -442,7 +443,7 @@ export function LibraryView() {
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">
           <LevelPills tiers={layout.tiers} tier={layout.tier} onChange={chooseTier} />
-          <TuneButton deal={deal} onDeal={dealAgain} />
+          {layout.kind === 'shelves' && <TuneButton deal={deal} onDeal={dealAgain} />}
         </div>
       )}
       <div key={listKey} ref={list} className={listClass}>

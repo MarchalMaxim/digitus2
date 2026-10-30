@@ -122,7 +122,7 @@ test('library: the deal control draws other samples and keeps the pills on one r
 }) => {
   await page.goto('/');
   await libraryReady(page);
-  const deal = page.getByRole('button', { name: 'Show other pieces' });
+  const deal = page.getByRole('button', { name: 'Shuffle the shelves' });
   await expect(deal).toBeVisible();
   const names = () => pieceRows(page).evaluateAll((rows) => rows.map((r) => r.ariaLabel));
   const before = await names();

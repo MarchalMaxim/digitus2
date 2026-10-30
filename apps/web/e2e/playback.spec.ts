@@ -7,7 +7,7 @@ import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
 import { libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
 import { horizontalOverflow } from './helpers/overflow.js';
 import { redBars, redSettled, scrollSettled, seekBar } from './helpers/seek.js';
-import { expectDigits } from './helpers/sheet.js';
+import { expectDigits, K545_DIGITS } from './helpers/sheet.js';
 
 /** What the status line says while the first Play of a score loads the piano's samples. */
 const LOADING_THE_PIANO = 'Loading the piano…';
@@ -54,7 +54,7 @@ function melodyXml(): string {
  */
 async function expectDockKeepsPause(page: Page): Promise<void> {
   await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-  await expectDigits(page, 1288);
+  await expectDigits(page, K545_DIGITS);
   await openPractice(page);
   await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
   // A loop from bar 10 starts playback there: the cursor scrolls the page down to it.
@@ -366,7 +366,7 @@ function runs<T>(values: T[]): T[] {
 async function expectCursorAboveDock(page: Page): Promise<void> {
   test.setTimeout(90_000); // Includes score setup plus the sampler's 45 s hard deadline at either width.
   await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-  await expectDigits(page, 1288);
+  await expectDigits(page, K545_DIGITS);
   await openPractice(page);
   await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
   await page.getByRole('slider', { name: 'Tempo' }).fill('150');
@@ -507,7 +507,7 @@ function centringTurns(entries: SystemEntry[], band: { top: number; bottom: numb
 async function expectPageTurnsOncePerScreenful(page: Page): Promise<void> {
   test.setTimeout(110_000); // Score setup plus the sampler's 70 s hard deadline.
   await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-  await expectDigits(page, 1288);
+  await expectDigits(page, K545_DIGITS);
   await openPractice(page);
   await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
   await page.getByRole('slider', { name: 'Tempo' }).fill('150');
@@ -1780,7 +1780,7 @@ test.describe('the keyboard on a phone', () => {
     page,
   }) => {
     await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-    await expectDigits(page, 1288);
+    await expectDigits(page, K545_DIGITS);
     await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     await page.getByRole('button', { name: 'Play' }).click();
@@ -1821,7 +1821,7 @@ test.describe('the keyboard on a wide window', () => {
 
   test('a five-octave piece shows every key without scrolling', async ({ page }) => {
     await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-    await expectDigits(page, 1288);
+    await expectDigits(page, K545_DIGITS);
     const keyboard = page.locator('.keyboard-scroll');
     await expect(keyboard).not.toHaveAttribute('tabindex');
     const overflow = await keyboard.evaluate((el) => el.scrollWidth - el.clientWidth);
@@ -1853,7 +1853,7 @@ test.describe('the dock on a phone', () => {
   }) => {
     const scrollY = () => page.evaluate(() => window.scrollY);
     await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-    await expectDigits(page, 1288);
+    await expectDigits(page, K545_DIGITS);
     await openPractice(page);
     await expect(page.getByRole('checkbox', { name: 'Count-in' })).toBeChecked();
     // At 50 % K.545 counts in four beats of 0.91 s: time to check the count-in at leisure.
@@ -1901,7 +1901,7 @@ test.describe('the dock on a phone', () => {
     );
     expect(await scrollY()).toBeGreaterThan(100);
     await row.click();
-    await expectDigits(page, 1288);
+    await expectDigits(page, K545_DIGITS);
     expect(await scrollY(), 'the score opens at the top').toBe(0);
 
     // Count-in off and 150 %, so the cursor reaches the systems below the first screen within
@@ -2086,7 +2086,7 @@ test.describe('the cursor on a phone', () => {
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' }); // the cursor's page scroll lands at once
     await page.goto('/?audio=silent#/piece/mozart-sonata-k545-mvt1');
-    await expectDigits(page, 1288);
+    await expectDigits(page, K545_DIGITS);
     await openPractice(page);
     await page.getByRole('checkbox', { name: 'Count-in' }).uncheck();
     // The review's run of sixteenths, at half speed (each look holds the cursor still anyway).

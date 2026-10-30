@@ -3,7 +3,7 @@ import { expectNoSeriousA11y } from './helpers/axe.js';
 import { libraryScore, mxlOf, utf16leOf } from './helpers/files.js';
 import { expectOneRed } from './helpers/red.js';
 import { archiveSample, libraryReady, openLibraryPiece, showPiece } from './helpers/library.js';
-import { expectDigits } from './helpers/sheet.js';
+import { expectDigits, K545_DIGITS } from './helpers/sheet.js';
 
 test('opens Twinkle from the library: every note gets a digit, one red element, hash set', async ({
   page,
@@ -192,7 +192,7 @@ test('opens K.545: status appears first, score within 8 s', async ({ page }) => 
   await expect(page.getByRole('status')).toContainText(/Loading|Fingering|Preparing/);
   await expect(page.locator('.score-sheet svg').first()).toBeVisible({ timeout: 8_000 });
   expect(Date.now() - t0).toBeLessThan(8_000);
-  await expectDigits(page, 1288);
+  await expectDigits(page, K545_DIGITS);
 });
 
 test('shows an error state with a way back when the file is not a score', async ({ page }) => {

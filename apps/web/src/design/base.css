@@ -424,59 +424,84 @@ fieldset {
   cursor: pointer;
 }
 
-/* A switch (the Practice panel's Practice mode, issue 191): a real checkbox with role="switch"
-   drawn as a track and a thumb, in ink and grays only. Off: an empty track and a gray thumb at
-   the left. On: an ink track and a paper thumb at the right. The thumb slides over --dur-fast,
-   which is 0 under reduced motion. The row is the .check label, 44 px high; the focus ring is
-   the app's own. */
-input[role='switch'] {
-  appearance: none;
+/* A switch (Practice mode, Hear the left hand; design/Switch.tsx, issue 254): the real checkbox
+   with role="switch" lies invisible over its drawing, a track and a quarter note for the thumb.
+   Off: a paper track and a gray note at the left, stem down from the head's left side. On: a
+   gray-1 track and an ink note at the right, stem up from its right side; on the way the note
+   turns half a cartwheel about its head, on --dur-spring, which is 0 under reduced motion. A
+   switch drawn on or off does not move. The row is the .check label, 44 px high; the focus ring
+   is the app's own, round the track. */
+.switch-art {
   position: relative;
+  display: inline-block;
   flex: none;
-  width: 2.25rem;
-  height: 1.25rem;
-  border: 1px solid var(--ink);
-  border-radius: 0.625rem;
-  background: var(--paper);
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease);
+  width: 2.75rem;
+  height: 1.5rem;
 }
 
-input[role='switch']::before {
-  content: '';
+/* After the checkbox rules above, which size every checkbox at 1.125rem. */
+.switch-art input {
   position: absolute;
-  top: 50%;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  margin-top: -7px;
-  border-radius: 50%;
-  background: var(--gray-3);
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch-art svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.switch-art input:focus-visible + svg {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+.switch-track {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1;
+  transition: fill var(--dur) var(--ease);
+}
+
+.switch-note {
+  fill: var(--gray-3);
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  /* The same functions at both ends, so the turn and the slide interpolate one by one. */
+  transform: translateX(0) rotate(-180deg);
   transition:
-    transform var(--dur-fast) var(--ease),
-    background var(--dur-fast) var(--ease);
+    transform var(--dur-spring) var(--ease-spring),
+    fill var(--dur) var(--ease);
 }
 
-input[role='switch']:checked {
-  background: var(--ink);
+.switch-art input:checked + svg .switch-track {
+  fill: var(--gray-1);
 }
 
-input[role='switch']:checked::before {
-  background: var(--paper);
-  transform: translateX(16px);
+.switch-art input:checked + svg .switch-note {
+  fill: var(--ink);
+  transform: translateX(20px) rotate(0deg);
 }
 
+/* Forced colours: the track's outline and the note in the button text colour, on the canvas;
+   the note's place and its stem tell off from on. */
 @media (forced-colors: active) {
-  input[role='switch']::before {
-    background: ButtonText;
+  .switch-track,
+  .switch-art input:checked + svg .switch-track {
+    fill: Canvas;
+    stroke: ButtonText;
   }
 
-  input[role='switch']:checked {
-    background: ButtonText;
-  }
-
-  input[role='switch']:checked::before {
-    background: Canvas;
+  .switch-note,
+  .switch-art input:checked + svg .switch-note {
+    fill: ButtonText;
   }
 }
 

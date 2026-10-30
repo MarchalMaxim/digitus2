@@ -1825,7 +1825,17 @@ test.describe('the score with a piano', () => {
           const toggle = page.getByRole('switch', { name });
           await openPractice(page);
           await expect(toggle).toBeChecked();
-          const label = toggle.locator('xpath=..');
+          const label = toggle.locator('xpath=ancestor::label[1]');
+          /** The transitions running on the drawing (the note's cartwheel, the track's fill). */
+          const running = () =>
+            toggle.evaluate(
+              (input) => input.parentElement!.getAnimations({ subtree: true }).length,
+            );
+          /** Every animation in the panel: the drawing's, and the panel's own slide in as it opens. */
+          const panelMoving = () =>
+            toggle.evaluate(
+              (input) => input.closest('.practice-panel')!.getAnimations({ subtree: true }).length,
+            );
           const looks = () =>
             toggle.evaluate((input) => {
               const tokenColour = (token: string): string => {
@@ -1836,29 +1846,63 @@ test.describe('the score with a piano', () => {
                 probe.remove();
                 return colour;
               };
-              const track = getComputedStyle(input);
-              const thumb = getComputedStyle(input, '::before');
+              const svg = input.nextElementSibling!;
+              const part = (selector: string) => svg.querySelector(selector)!;
+              const rect = (selector: string) => part(selector).getBoundingClientRect();
+              const [over, art] = [input.getBoundingClientRect(), svg.getBoundingClientRect()];
+              const track = rect('.switch-track');
+              const head = rect('.switch-head');
+              const stem = rect('.switch-stem');
+              const centre = (r: DOMRect) => r.left + r.width / 2;
               return {
-                appearance: track.appearance,
-                track: track.backgroundColor,
-                border: track.borderTopColor,
-                thumb: thumb.backgroundColor,
+                opacity: getComputedStyle(input).opacity,
+                covers: (['left', 'top', 'width', 'height'] as const).every(
+                  (k) => Math.abs(over[k] - art[k]) < 0.5,
+                ),
+                trackFill: getComputedStyle(part('.switch-track')).fill,
+                trackStroke: getComputedStyle(part('.switch-track')).stroke,
+                note: getComputedStyle(part('.switch-note')).fill,
+                noteRight: centre(head) > centre(track),
+                stemUp: stem.top < head.top,
+                stemRight: centre(stem) > centre(head),
                 ink: tokenColour('--ink'),
                 paper: tokenColour('--paper'),
+                gray1: tokenColour('--gray-1'),
                 gray3: tokenColour('--gray-3'),
               };
             });
 
-          for (const on of [true, false, true]) {
-            if ((await toggle.isChecked()) !== on) await toggle.click();
-            // The thumb slides over --dur-fast (120 ms): read the colours once it has settled.
-            await page.waitForTimeout(250);
+          // On as it loads, off by a click on the drawing, on again by a click on its words.
+          for (const [on, how] of [
+            [true, 'as it loads'],
+            [false, 'clicked'],
+            [true, 'its words clicked'],
+          ] as const) {
+            const where = `${scheme}, ${width} px, ${locale}, switch ${on ? 'on' : 'off'} ${how}`;
+            if (how === 'as it loads') {
+              // A switch drawn on does not move: nothing runs on it as the panel opens.
+              expect(await running(), where).toBe(0);
+            } else if (how === 'clicked') {
+              await toggle.click();
+            } else {
+              const row = (await label.boundingBox())!;
+              await label.click({ position: { x: row.width - 4, y: row.height / 2 } });
+            }
+            await expect(toggle, where).toBeChecked({ checked: on });
+            // The note turns over --dur-spring and the panel slides in as it opens: read the boxes
+            // once every animation in the panel has ended.
+            await expect.poll(panelMoving, { message: where }).toBe(0);
             const seen = await looks();
-            const where = `${scheme}, ${width} px, ${locale}, switch ${on ? 'on' : 'off'}`;
-            expect(seen.appearance, where).toBe('none');
-            expect(seen.border, where).toBe(seen.ink);
-            expect(seen.track, where).toBe(on ? seen.ink : seen.paper);
-            expect(seen.thumb, where).toBe(on ? seen.paper : seen.gray3);
+            expect(seen.opacity, where).toBe('0');
+            expect(seen.covers, `${where}, the input covers the drawing`).toBe(true);
+            expect(seen.trackStroke, where).toBe(seen.ink);
+            expect(seen.trackFill, where).toBe(on ? seen.gray1 : seen.paper);
+            expect(seen.note, where).toBe(on ? seen.ink : seen.gray3);
+            // On: the note at the right, stem up from the head's right side. Off: at the left, stem
+            // down from its left side. Colours alone cannot see a wrong turn.
+            expect(seen.noteRight, where).toBe(on);
+            expect(seen.stemUp, where).toBe(on);
+            expect(seen.stemRight, where).toBe(on);
             const box = (await label.boundingBox())!;
             expect(box.height, where).toBeGreaterThanOrEqual(44);
             // The words stay on one row beside the switch (a wrapped label would still be 44 px
@@ -1877,6 +1921,19 @@ test.describe('the score with a piano', () => {
             await expectOneRed(page, where);
             await expectNoSeriousA11y(page, where);
           }
+
+          // The keyboard: Space turns it off and on, with the app's focus ring round the drawing.
+          await toggle.focus();
+          await page.keyboard.press('Space');
+          await expect(toggle).not.toBeChecked();
+          expect(
+            await toggle.evaluate(
+              (input) => getComputedStyle(input.nextElementSibling!).outlineStyle,
+            ),
+            `${scheme}, ${width} px, ${locale}, the focus ring`,
+          ).toBe('solid');
+          await page.keyboard.press('Space');
+          await expect(toggle).toBeChecked();
         });
       }
     });
@@ -2088,7 +2145,7 @@ test.describe('the score with a piano', () => {
         await page.getByRole('radio', { name: names.right }).check();
         await expect(hear).toBeVisible();
         const now = await boxes();
-        const row = await read(hear.locator('xpath=..'));
+        const row = await read(hear.locator('xpath=ancestor::label[1]'));
         await page.getByRole('radio', { name: names.both }).check();
         await expect(hear).toHaveCount(0);
         const without = await boxes();

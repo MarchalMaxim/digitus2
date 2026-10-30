@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import type { Assignment, Score } from '@digitus2/engine';
 import { SupersededError, type ScoreRenderer } from './render/renderer.js';
+import { repeatedChordIds } from './repeatedChords.js';
 import { fakeRenderer, inlineEngine } from './testing/services.js';
 import { bucket, diffDigits, rekeyByIndex, useScoreDocument } from './useScoreDocument.js';
 
@@ -74,6 +75,37 @@ describe('useScoreDocument', () => {
     );
     await waitFor(() => expect(result.current.status).toBe('ready'));
     expect(result.current.assignment).toEqual(result.current.editorial);
+  });
+  it("leaves a repeated chord bare in the engine's fingering and complete in the editor's", async () => {
+    // Three C-E-G chords in one bar, each fingered 1-3-5 by the file.
+    const chord = ['C', 'E', 'G']
+      .map(
+        (step, i) =>
+          `<note>${i > 0 ? '<chord/>' : ''}<pitch><step>${step}</step><octave>4</octave></pitch><duration>1</duration><voice>1</voice><type>quarter</type><notations><technical><fingering>${2 * i + 1}</fingering></technical></notations></note>`,
+      )
+      .join('');
+    const chords = new TextEncoder().encode(
+      `<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>1</divisions><time><beats>3</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>${chord.repeat(3)}</measure></part></score-partwise>`,
+    );
+    const engine = inlineEngine();
+    const renderer = fakeRenderer();
+    const { result } = renderHook(() =>
+      useScoreDocument({ kind: 'file', name: 'chords.musicxml', bytes: chords }, 800, {
+        engine,
+        renderer,
+      }),
+    );
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.embellish).toBe('none'));
+    const bare = repeatedChordIds(result.current.score!, result.current.assignment!);
+    expect(bare.size).toBeGreaterThan(0);
+    const enginePages = result.current.pages;
+    expect(enginePages[0]).toContain(`data-fings="${9 - bare.size}"`);
+    act(() => useAppStore.getState().setSettings({ showEditorial: true }));
+    await waitFor(() => expect(result.current.pages[0]).toContain('data-fings="9"'));
+    act(() => useAppStore.getState().setSettings({ showEditorial: false }));
+    expect(result.current.pages).toBe(enginePages);
+    expect(renderer.renders).toBe(2);
   });
   it('enters the error state with a message when the file is not a score', async () => {
     const engine = inlineEngine();

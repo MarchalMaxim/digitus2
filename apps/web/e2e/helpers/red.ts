@@ -66,8 +66,12 @@ export async function expectOneRed(page: Page, label = ''): Promise<RedRoot[]> {
 /** One animation frame as the in-page recorder saw it. */
 export interface RedFrame {
   t: number;
-  /** Red roots, by the definition of `redRoots`. */
+  /** Milliseconds since the first click recorded, or null on the frames before it. */
+  sinceClick: number | null;
+  /** Red roots, by the definition of `redRoots` (or of `reddish`, when recording that). */
   roots: number;
+  /** The red roots, by tag and class. */
+  found: { tag: string; className: string }[];
   /** Every root is a cursor note (`g.note` / `g.chord` in the sheet) with one `data-onset-tick`. */
   cursor: boolean;
   /** `.along-halo` elements in the page. */
@@ -76,75 +80,129 @@ export interface RedFrame {
   halosOutside: number;
 }
 
+export interface RecordOptions {
+  /**
+   * Count every reddish colour (a red channel leading the others by more than 40, alpha above 0)
+   * instead of the exact accent. The exact check misses a red that is fading in or out, which is
+   * what two reds on screen for a moment look like.
+   */
+  reddish?: boolean;
+}
+
 interface FrameRecorder {
   __redFrames?: RedFrame[];
   __redFramesStop?: boolean;
 }
 
 /** Starts recording every animation frame in the page (issue 204), until `redFrames` stops it. */
-export async function recordRedFrames(page: Page): Promise<void> {
-  await page.evaluate((accent) => {
-    const w = window as unknown as FrameRecorder;
-    w.__redFrames = [];
-    w.__redFramesStop = false;
-    const props = [
-      'color',
-      'background-color',
-      'border-top-color',
-      'border-right-color',
-      'border-bottom-color',
-      'border-left-color',
-      'outline-color',
-      'fill',
-      'stroke',
-    ];
-    const roots = () => {
-      const out: { tag: string; className: string; onsetTick: string | null; inSheet: boolean }[] =
-        [];
-      const walk = (el: Element) => {
-        const cs = getComputedStyle(el);
-        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return;
-        if (props.some((p) => cs.getPropertyValue(p) === accent)) {
-          out.push({
-            tag: el.tagName.toLowerCase(),
-            className:
-              typeof el.className === 'string' ? el.className : (el.getAttribute('class') ?? ''),
-            onsetTick: el.getAttribute('data-onset-tick'),
-            inSheet: el.closest('.score-sheet') !== null,
-          });
-          return;
-        }
-        for (const child of Array.from(el.children)) walk(child);
+export async function recordRedFrames(page: Page, options: RecordOptions = {}): Promise<void> {
+  await page.evaluate(
+    ({ accent, reddishColours }) => {
+      const w = window as unknown as FrameRecorder;
+      w.__redFrames = [];
+      w.__redFramesStop = false;
+      const props = [
+        'color',
+        'background-color',
+        'border-top-color',
+        'border-right-color',
+        'border-bottom-color',
+        'border-left-color',
+        'outline-color',
+        'fill',
+        'stroke',
+      ];
+      const isRed = (value: string): boolean => {
+        if (!reddishColours) return value === accent;
+        const m = /^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+))?/.exec(value);
+        if (!m) return false;
+        const alpha = m[4] === undefined ? 1 : Number(m[4]);
+        return alpha > 0 && Number(m[1]) - Math.max(Number(m[2]), Number(m[3])) > 40;
       };
-      walk(document.documentElement);
-      return out;
-    };
-    const frame = () => {
-      const found = roots();
-      const cursor =
-        found.length > 0 &&
-        found.every(
-          (r) =>
-            r.inSheet &&
-            r.tag === 'g' &&
-            /\b(note|chord)\b/.test(r.className) &&
-            r.onsetTick !== null,
-        ) &&
-        new Set(found.map((r) => r.onsetTick)).size === 1;
-      const halos = Array.from(document.querySelectorAll('.along-halo'));
-      w.__redFrames!.push({
-        t: performance.now(),
-        roots: found.length,
-        cursor,
-        halos: halos.length,
-        halosOutside: halos.filter(
-          (h) => h.closest('.is-red') === null && getComputedStyle(h).visibility !== 'hidden',
-        ).length,
-      });
-      if (!w.__redFramesStop) requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-  }, ACCENT_RGB);
+      const roots = () => {
+        const out: {
+          tag: string;
+          className: string;
+          onsetTick: string | null;
+          inSheet: boolean;
+        }[] = [];
+        const walk = (el: Element) => {
+          const cs = getComputedStyle(el);
+          if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return;
+          if (props.some((p) => isRed(cs.getPropertyValue(p)))) {
+            out.push({
+              tag: el.tagName.toLowerCase(),
+              className:
+                typeof el.className === 'string' ? el.className : (el.getAttribute('class') ?? ''),
+              onsetTick: el.getAttribute('data-onset-tick'),
+              inSheet: el.closest('.score-sheet') !== null,
+            });
+            return;
+          }
+          for (const child of Array.from(el.children)) walk(child);
+        };
+        walk(document.documentElement);
+        return out;
+      };
+      let click: number | null = null;
+      document.addEventListener(
+        'click',
+        () => {
+          click = performance.now();
+        },
+        { capture: true, once: true },
+      );
+      const frame = () => {
+        const found = roots();
+        const cursor =
+          found.length > 0 &&
+          found.every(
+            (r) =>
+              r.inSheet &&
+              r.tag === 'g' &&
+              /\b(note|chord)\b/.test(r.className) &&
+              r.onsetTick !== null,
+          ) &&
+          new Set(found.map((r) => r.onsetTick)).size === 1;
+        const halos = Array.from(document.querySelectorAll('.along-halo'));
+        const t = performance.now();
+        w.__redFrames!.push({
+          t,
+          sinceClick: click === null ? null : t - click,
+          roots: found.length,
+          found: found.map(({ tag, className }) => ({ tag, className })),
+          cursor,
+          halos: halos.length,
+          halosOutside: halos.filter(
+            (h) => h.closest('.is-red') === null && getComputedStyle(h).visibility !== 'hidden',
+          ).length,
+        });
+        if (!w.__redFramesStop) requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    },
+    { accent: ACCENT_RGB, reddishColours: options.reddish === true },
+  );
+}
+
+/**
+ * Waits until the recorder has seen `frames` frames since the first click and `late` of them at
+ * least `afterMs` after it. It counts frames, not wall time, so a loaded machine that draws few
+ * frames a second is waited for rather than failed.
+ */
+export async function waitForRedFrames(
+  page: Page,
+  { frames, late = 1, afterMs = 0 }: { frames: number; late?: number; afterMs?: number },
+): Promise<void> {
+  await page.waitForFunction(
+    ({ frames, late, afterMs }) => {
+      const seen = ((window as unknown as FrameRecorder).__redFrames ?? []).filter(
+        (f) => f.sinceClick !== null,
+      );
+      return seen.length >= frames && seen.filter((f) => f.sinceClick! >= afterMs).length >= late;
+    },
+    { frames, late, afterMs },
+  );
 }
 
 /** Stops the recorder and returns its frames. */

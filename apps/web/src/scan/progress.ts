@@ -12,11 +12,12 @@ export const CEILING = 0.97;
 /**
  * How long one request takes on the deployed service, warm, rounded up to 5 s so the guess errs
  * long rather than short (`docs/scan-service.md`, Timings; new measurements change both). A photo
- * counts the 90th percentile of the times in the service's own log; a PDF page counts the 24.8 s
- * the one multi-page PDF in the log took for each of its two pages.
+ * counts the 90th percentile of the times in the service's own log. A PDF page counts the 24.8 s
+ * the one multi-page PDF in the log took for each of its two pages, times 1.36, the photos' 90th
+ * percentile over their median: a single PDF is no percentile, so it takes the photos' spread.
  */
 export const EXPECTED_PHOTO_SECONDS = 35;
-export const EXPECTED_PDF_SECONDS = 25;
+export const EXPECTED_PDF_SECONDS = 35;
 /** Added while the warm-up request on arrival has not answered: the scanner may be starting. */
 export const WARMUP_SECONDS = 6;
 
@@ -27,7 +28,7 @@ export interface ToScan {
   pdfPages?: number;
 }
 
-/** The time one request is expected to take, in milliseconds: a photo, or 25 s per PDF page. */
+/** The time one request is expected to take, in milliseconds: a photo, or 35 s per PDF page. */
 export function expectedMs({ file, pdfPages = 1 }: ToScan): number {
   return file.type === 'application/pdf'
     ? EXPECTED_PDF_SECONDS * 1000 * Math.max(1, pdfPages)

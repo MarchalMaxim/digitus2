@@ -299,6 +299,7 @@ it('a page read as one staff puts the red on Scan again', async () => {
 function stubService(options: {
   health?: () => Promise<Response>;
   recognize?: (init: RequestInit) => Promise<Response>;
+  cancel?: () => Promise<Response>;
 }) {
   const fetcher = vi.fn((url: string, init?: RequestInit) => {
     if (url.endsWith('/v1/health'))
@@ -318,7 +319,9 @@ function stubService(options: {
         )
       );
     if (init?.method === 'DELETE')
-      return Promise.resolve(new Response(JSON.stringify({ state: 'cancelled' })));
+      return (
+        options.cancel?.() ?? Promise.resolve(new Response(JSON.stringify({ state: 'cancelled' })))
+      );
     return Promise.resolve(new Response('{}', { status: 404 }));
   });
   vi.stubGlobal('fetch', fetcher);
@@ -483,6 +486,33 @@ it('cancels the running job with a DELETE and returns to Scan this score', async
   expect(screen.queryByRole('heading', { name: 'Review the recognition' })).toBeNull();
 });
 
+it('puts the focus on Scan this score when Cancel scan is pressed, since nothing else confirms it', async () => {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  const service = stubService({
+    recognize: pending,
+    cancel: async () => {
+      await held;
+      return new Response(JSON.stringify({ state: 'cancelled' }));
+    },
+  });
+  render(<ScanView session={freshSession()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Scan this score' }));
+  await userEvent.click(await screen.findByRole('button', { name: 'Cancel scan' }));
+  await vi.waitFor(() => expect(service.calls('DELETE')).toHaveLength(1));
+  // A browser drops the focus from a button that turns disabled; jsdom keeps it there, so the
+  // focus is taken away here the way the browser takes it.
+  const cancelling = await screen.findByRole('button', { name: en.scan.view.cancelling });
+  expect(cancelling).toBeDisabled();
+  const stray = document.body.appendChild(document.createElement('div'));
+  stray.tabIndex = -1;
+  stray.focus();
+  stray.remove();
+  expect(document.activeElement).toBe(document.body);
+  release();
+  expect(await screen.findByRole('button', { name: 'Scan this score' })).toHaveFocus();
+});
+
 it('shows the bar while a page is recognised, and no bar before or after', async () => {
   const user = fakeClock();
   try {
@@ -517,7 +547,7 @@ it('shows the bar while a page is recognised, and no bar before or after', async
 it('allows six more seconds while the warm-up has not answered, and not once it has', async () => {
   const user = fakeClock();
   try {
-    // A PDF page is expected to take 25 s: 31 s, said as 35, while the warm-up is out.
+    // A PDF page is expected to take 35 s: 41 s, said as 45, while the warm-up is out.
     let answerHealth!: (response: Response) => void;
     stubService({
       health: () => new Promise((resolve) => (answerHealth = resolve)),
@@ -526,7 +556,7 @@ it('allows six more seconds while the warm-up has not answered, and not once it 
     const pdf = new File(['%PDF-1.7'], 'score.pdf', { type: 'application/pdf' });
     render(<ScanView session={{ id: 'pdf', file: pdf }} />);
     await user.click(screen.getByRole('button', { name: 'Scan this score' }));
-    expect(await screen.findByText(en.scan.view.secondsLeft(35))).toBeVisible();
+    expect(await screen.findByText(en.scan.view.secondsLeft(45))).toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Cancel scan' }));
     await screen.findByRole('button', { name: 'Scan this score' });
     answerHealth(new Response(JSON.stringify({ protocol: 'digitus2-scan-v2' })));
@@ -534,7 +564,7 @@ it('allows six more seconds while the warm-up has not answered, and not once it 
       await Promise.resolve();
     });
     await user.click(screen.getByRole('button', { name: 'Scan this score' }));
-    expect(await screen.findByText(en.scan.view.secondsLeft(25))).toBeVisible();
+    expect(await screen.findByText(en.scan.view.secondsLeft(35))).toBeVisible();
   } finally {
     vi.useRealTimers();
   }

@@ -496,6 +496,17 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
     const lost = !document.activeElement || document.activeElement === document.body;
     if (busy && lost) scanActions.current?.querySelector('button')?.focus();
   }, [busy]);
+  const cancelPressed = useRef(false);
+  useEffect(() => {
+    // Cancel scan is disabled while it cancels, which drops the focus to the page; Scan this
+    // score returns in its place and takes it, the one sign that the cancel went through.
+    if (phase === 'cancelling') cancelPressed.current = true;
+    else if (cancelPressed.current) {
+      cancelPressed.current = false;
+      const lost = !document.activeElement || document.activeElement === document.body;
+      if (lost) scanActions.current?.querySelector('button')?.focus();
+    }
+  }, [phase]);
   useEffect(() => {
     alive.current = true;
     return () => {

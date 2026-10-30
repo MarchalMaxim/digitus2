@@ -26,9 +26,9 @@ export interface AppState {
   /**
    * 'button': a single red button. 'cursor': the playback cursor's note groups in the sheet.
    * 'frame': the drop frame while a file is dragged. 'note': one selected note in the sheet.
-   * 'loader': the loader's red key while a score is on its way in.
+   * 'loader': the loader's red key: a score on its way in, or the scanning screen.
    */
-  expectTag: 'button' | 'cursor' | 'frame' | 'note' | 'loader';
+  expectTag: 'button' | 'cursor' | 'frame' | 'loader' | 'note';
   /**
    * Skipped by the mobile (touch) project: the scan review is checked at a phone's width as a
    * narrow window in scan-edit.spec.ts, and a touch phone's scan in scan-phone.spec.ts.
@@ -583,6 +583,21 @@ export const STATES: AppState[] = [
       await expect(page.locator('.scan-intro .is-red')).toBeVisible();
     },
     expectTag: 'button',
+  },
+  {
+    name: 'scanning',
+    go: async (page) => {
+      // The scanner never answers: the screen stays as it is while a page is recognised.
+      await mockService(page, '', { onRecognize: () => new Promise(() => {}) });
+      await scanSource(page);
+      await page.getByRole('button', { name: 'Scan this score' }).click();
+      await expect(page.getByRole('button', { name: 'Cancel scan' })).toBeEnabled();
+      await expect(page.locator('.scan-loader svg.loader.is-scale')).toBeVisible();
+      await expect(page.getByText(/^About \d+ seconds$/)).toBeVisible();
+      // Cancel scan is plain while the loader carries the red.
+      await expect(page.getByRole('button', { name: 'Cancel scan' })).not.toHaveClass(/is-red/);
+    },
+    expectTag: 'loader',
   },
   {
     name: 'scan-review',

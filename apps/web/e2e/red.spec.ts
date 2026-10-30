@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
 import { libraryReady } from './helpers/library.js';
-import { expectOneRed } from './helpers/red.js';
+import { expectOneRed, recordRedFrames, redFrames, waitForRedFrames } from './helpers/red.js';
 import { mockService } from './helpers/scan.js';
 
 test('the start page has exactly one red element', async ({ page }) => {
@@ -41,90 +41,13 @@ const TWINKLE_XML = fileURLToPath(
   new URL('../../../content/scores/twinkle-twinkle-little-star.musicxml', import.meta.url),
 );
 
-interface Frame {
-  t: number;
-  roots: Array<{ tag: string; className: string }>;
-}
-
-/**
- * Records, on every animation frame from now on, the elements that are reddish: any colour whose
- * red channel leads the others by more than 40. The exact-accent check of `redRoots` misses a red
- * that is fading in or out, which is what two reds on screen for a moment look like.
- */
-async function recordReddish(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const props = [
-      'color',
-      'background-color',
-      'border-top-color',
-      'border-right-color',
-      'border-bottom-color',
-      'border-left-color',
-      'outline-color',
-      'fill',
-      'stroke',
-    ];
-    const reddish = (value: string): boolean => {
-      const m = /^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+))?/.exec(value);
-      if (!m) return false;
-      const alpha = m[4] === undefined ? 1 : Number(m[4]);
-      return alpha > 0 && Number(m[1]) - Math.max(Number(m[2]), Number(m[3])) > 40;
-    };
-    const frames: Frame[] = [];
-    const start = performance.now();
-    const roots = (): Frame['roots'] => {
-      const out: Frame['roots'] = [];
-      const walk = (el: Element) => {
-        const cs = getComputedStyle(el);
-        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return;
-        if (props.some((p) => reddish(cs.getPropertyValue(p)))) {
-          out.push({
-            tag: el.tagName.toLowerCase(),
-            className:
-              typeof el.className === 'string' ? el.className : (el.getAttribute('class') ?? ''),
-          });
-          return;
-        }
-        for (const child of Array.from(el.children)) walk(child);
-      };
-      walk(document.documentElement);
-      return out;
-    };
-    const w = window as unknown as {
-      __reddish: Frame[];
-      __reddishStop: boolean;
-      __reddishClick: number;
-    };
-    w.__reddish = frames;
-    w.__reddishStop = false;
-    w.__reddishClick = Infinity;
-    // Frames before the click show Scan this score, the red then; only those from it on count.
-    document.addEventListener(
-      'click',
-      () => (w.__reddishClick = Math.round(performance.now() - start)),
-      { capture: true, once: true },
-    );
-    const tick = () => {
-      frames.push({ t: Math.round(performance.now() - start), roots: roots() });
-      if (!w.__reddishStop) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
-}
-
-/** The frames from the click on. */
-async function stopReddish(page: Page): Promise<Frame[]> {
-  return page.evaluate(() => {
-    const w = window as unknown as {
-      __reddish: Frame[];
-      __reddishStop: boolean;
-      __reddishClick: number;
-    };
-    w.__reddishStop = true;
-    return w.__reddish
-      .filter((f) => f.t >= w.__reddishClick)
-      .map((f) => ({ ...f, t: f.t - w.__reddishClick }));
-  });
+/** The scan page with the Twinkle page chosen, before Scan this score is pressed. */
+async function openScanPage(page: Page): Promise<void> {
+  await page.goto('/');
+  await libraryReady(page);
+  await page.getByLabel('Open your own score').setInputFiles(TWINKLE_PAGE);
+  await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
+  await expect(page.locator('.scan-original-image')).toHaveJSProperty('complete', true);
 }
 
 // The mobile project does not run this file, so the phone is set here.
@@ -152,31 +75,28 @@ for (const setup of SETUPS)
             await held;
           },
         });
-        await page.goto('/');
-        await libraryReady(page);
-        await page.getByLabel('Open your own score').setInputFiles(TWINKLE_PAGE);
-        await expect(page.getByRole('heading', { name: 'From paper to piano' })).toBeVisible();
-        await expect(page.locator('.scan-original-image')).toHaveJSProperty('complete', true);
+        await openScanPage(page);
         // Nothing is fading any more when the recording starts.
         await page.waitForTimeout(500);
         const scan = page.getByRole('button', { name: 'Scan this score' });
         await expect(scan).toHaveClass(/is-red/);
-        await recordReddish(page);
+        // Frames before the click show Scan this score, the red then; only those from it on count.
+        await recordRedFrames(page, { reddish: true });
         await scan.click();
         await expect(page.locator('.scan-loader svg.loader.is-scale')).toBeVisible();
-        await page.waitForTimeout(600);
-        const frames = await stopReddish(page);
+        // Counted in frames, not in time: a loaded machine draws few of them a second.
+        await waitForRedFrames(page, { frames: 11, late: 3, afterMs: 300 });
+        const frames = (await redFrames(page)).filter((f) => f.sinceClick !== null);
 
         expect(frames.length).toBeGreaterThan(10);
         // A button that is reddish (fading out of Scan this score, or Cancel scan) is a second red.
-        const bad = frames.filter(
-          (f) => f.roots.length > 1 || f.roots.some((r) => r.tag === 'button'),
-        );
+        const bad = frames.filter((f) => f.roots > 1 || f.found.some((r) => r.tag === 'button'));
         expect(bad.slice(0, 3), `${bad.length} frames with two reds or a red button`).toEqual([]);
-        const late = frames.filter((f) => f.t > 300);
+        const late = frames.filter((f) => f.sinceClick! > 300);
+        expect(late.length).toBeGreaterThan(0);
         for (const f of late) {
-          expect(f.roots).toHaveLength(1);
-          expect(f.roots[0]!.className).toContain('loader-red');
+          expect(f.found).toHaveLength(1);
+          expect(f.found[0]!.className).toContain('loader-red');
         }
 
         // The steady state.
@@ -188,3 +108,21 @@ for (const setup of SETUPS)
         await expect(page.getByRole('heading', { name: 'Review the recognition' })).toBeVisible();
       });
     });
+
+test('after Cancel scan the focus is on Scan this score, which returns in its place', async ({
+  page,
+}) => {
+  // The scanner holds the page until the cancel arrives, then answers it as cancelled.
+  await mockService(page, '', {
+    onRecognize: async () => {
+      await page.waitForRequest((request) => request.method() === 'DELETE');
+      return { status: 409, json: { state: 'cancelled' } };
+    },
+  });
+  await openScanPage(page);
+  await page.getByRole('button', { name: 'Scan this score' }).click();
+  await page.getByRole('button', { name: 'Cancel scan' }).click();
+  const scan = page.getByRole('button', { name: 'Scan this score' });
+  await expect(scan).toBeEnabled();
+  await expect(scan).toBeFocused();
+});

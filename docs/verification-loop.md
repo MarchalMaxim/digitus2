@@ -109,13 +109,13 @@ The e2e suite per spec file, measured on the dev machine under the verify lock (
 | `keyboard.spec.ts`                | 5 + 0                   | 22 s    | –     | 22 s  |
 | `hand-switch.spec.ts`             | 5 + 0                   | 22 s    | –     | 22 s  |
 | `about.spec.ts`                   | 2 + 0                   | 16 s    | –     | 16 s  |
+| `red.spec.ts`                     | 7 + 0                   | 16 s    | –     | 16 s  |
 | `midi.spec.ts`                    | 4 + 0                   | 12 s    | –     | 12 s  |
 | `play-along-heal.spec.ts`         | 1 + 0                   | 12 s    | –     | 12 s  |
 | `theme.spec.ts`                   | 8 + 0                   | 11 s    | –     | 11 s  |
 | `memory.spec.ts`                  | 1 + 0                   | 10 s    | –     | 10 s  |
 | `scan-rotation.spec.ts`           | 3 + 3                   | 5 s     | 3 s   | 8 s   |
 | `scan-camera-real-device.spec.ts` | 2 + 0                   | 8 s     | –     | 8 s   |
-| `red.spec.ts`                     | 2 + 0                   | 6 s     | –     | 6 s   |
 | `import-lifetime.spec.ts`         | 3 + 0                   | 6 s     | –     | 6 s   |
 | `ornaments.spec.ts`               | 1 + 0                   | 4 s     | –     | 4 s   |
 | `scan-phone.spec.ts`              | 1 + 1                   | 0 s     | 4 s   | 4 s   |

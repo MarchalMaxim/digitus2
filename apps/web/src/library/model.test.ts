@@ -340,6 +340,62 @@ describe('the samples (shelves spec 4.1)', () => {
     expect(rows(classical.slug).map((r) => r.slug)).not.toContain(classical.slug);
     expect(rows(null)).toHaveLength(5);
   });
+
+  describe('dealt again (issue 228)', () => {
+    const dealt = (deal: number, over: Partial<LibraryChoices> = {}) =>
+      Object.fromEntries(
+        shelves(allPieces, 'medium', { deal, ...over }).shelves.map((s) => [
+          s.id,
+          s.rows.map((r) => r.slug),
+        ]),
+      );
+    const sizes = Object.fromEntries(
+      shelves(allPieces, 'medium').shelves.map((s) => [s.id, s.count]),
+    );
+    it('keeps the day of the reader who never pressed it: deal 0 is the default', () => {
+      expect(dealt(0)).toEqual(sampleSlugs(allPieces, 'medium', DATE));
+    });
+    it('draws other samples for a deal, the same ones for the same deal, others for the next', () => {
+      expect(dealt(1)).toEqual(dealt(1));
+      expect(dealt(1)).not.toEqual(dealt(0));
+      expect(dealt(2)).not.toEqual(dealt(1));
+    });
+    it('never shows a piece of the previous deal again on a shelf of 10 or more', () => {
+      for (const deal of [1, 2, 3, 4]) {
+        const before = dealt(deal - 1);
+        const now = dealt(deal);
+        for (const [id, slugs] of Object.entries(now)) {
+          if (sizes[id]! < 10) continue;
+          expect(
+            slugs.filter((s) => before[id]!.includes(s)),
+            `${id} ${deal}`,
+          ).toEqual([]);
+        }
+      }
+    });
+    it('keeps a small shelf showing what it has', () => {
+      const jazz = shelves(allPieces, 'easy', { deal: 1 }).shelves.find((s) => s.id === 'jazz')!;
+      expect(jazz.rows).toHaveLength(jazz.count);
+      expect(jazz.count).toBeLessThanOrEqual(5);
+    });
+    it('pins the last piece played at deal 0 only', () => {
+      const songs = inTierShelf(allPieces, 'medium', 'songs');
+      const last = songs[songs.length - 1]!.slug;
+      expect(dealt(0, { lastPlayed: last })['songs']![0]).toBe(last);
+      expect(dealt(1, { lastPlayed: last })['songs']![0]).not.toBe(last);
+      // the piece pinned at deal 0 was on screen, so deal 1 leaves it out with the other samples
+      expect(dealt(1, { lastPlayed: last })['songs']).not.toContain(last);
+    });
+    it('keeps the composer, collection and shortest-first rules', () => {
+      for (const s of shelves(allPieces, 'medium', { deal: 1 }).shelves) {
+        const secs = s.rows.map((r) => {
+          const [m, sec] = r.duration.split(':').map(Number);
+          return m! * 60 + sec!;
+        });
+        expect(secs, s.id).toEqual([...secs].sort((a, b) => a - b));
+      }
+    });
+  });
 });
 
 describe('an opened shelf (shelves spec 4.2)', () => {
@@ -434,6 +490,66 @@ describe('an opened shelf (shelves spec 4.2)', () => {
     expect(libraryLayout(noBaroque, choose({ tier: 'medium', shelf: 'baroque' }), en).kind).toBe(
       'shelf',
     );
+  });
+});
+
+describe('the order of an opened shelf (issue 228)', () => {
+  const archive = (slug: string) =>
+    allPieces.find((p) => p.slug === slug)!.collectionId.startsWith('pdmx-');
+  const all = (over: Partial<LibraryChoices> = {}) =>
+    shelf(allPieces, 'medium', 'classical', { pages: 99, ...over });
+  const slugsOf = (groups: Group[]) => rowsOf(groups).map((r) => r.slug);
+  it('puts the hand-picked collections before the archive ones, Other pieces last', () => {
+    const groups = all().groups;
+    const kinds = groups
+      .filter((g) => g.heading !== 'Other pieces')
+      .map((g) => (archive(g.rows[0]!.slug) ? 'archive' : 'curated'));
+    expect(kinds).toContain('curated');
+    expect(kinds).toContain('archive');
+    expect(kinds).toEqual([...kinds].sort((a, b) => (a === b ? 0 : a === 'curated' ? -1 : 1)));
+    const other = groups.findIndex((g) => g.heading === 'Other pieces');
+    expect(other === -1 || other === groups.length - 1).toBe(true);
+  });
+  it('keeps a hand-picked collection in its editorial order', () => {
+    const groups = all().groups.filter(
+      (g) => !archive(g.rows[0]!.slug) && g.heading !== 'Other pieces',
+    );
+    for (const g of groups) {
+      const manifestOrder = allPieces
+        .filter((p) => g.rows.some((r) => r.slug === p.slug))
+        .map((p) => p.slug);
+      expect(
+        g.rows.map((r) => r.slug),
+        g.heading ?? '',
+      ).toEqual(manifestOrder);
+    }
+  });
+  it('shuffles an archive collection: not the manifest order, the same for a seed, another for a deal', () => {
+    const big = all().groups.filter((g) => archive(g.rows[0]!.slug) && g.rows.length > 20)[0]!;
+    const manifestOrder = allPieces
+      .filter((p) => big.rows.some((r) => r.slug === p.slug))
+      .map((p) => p.slug);
+    const order = (deal: number) =>
+      all({ deal })
+        .groups.find((g) => g.key === big.key)!
+        .rows.map((r) => r.slug);
+    expect(order(0)).not.toEqual(manifestOrder);
+    expect([...order(0)].sort()).toEqual([...manifestOrder].sort());
+    expect(order(0)).toEqual(order(0));
+    expect(order(1)).not.toEqual(order(0));
+  });
+  it('is the same list on every page: a page is the start of the whole order', () => {
+    const one = slugsOf(shelf(allPieces, 'medium', 'classical', { deal: 2 }).groups);
+    const full = slugsOf(all({ deal: 2 }).groups);
+    expect(full.slice(0, one.length)).toEqual(one);
+    expect(new Set(full).size).toBe(full.length);
+  });
+  it('leaves search results and the small library in the order they had', () => {
+    const found = search(allPieces, 'sonata', { section: 'medium', pages: 99 });
+    const again = search(allPieces, 'sonata', { section: 'medium', pages: 99, deal: 3 });
+    expect(again).toEqual(found);
+    const small = libraryLayout(allPieces.slice(0, 30), choose(), en);
+    expect(libraryLayout(allPieces.slice(0, 30), choose({ deal: 3 }), en)).toEqual(small);
   });
 });
 

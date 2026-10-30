@@ -140,6 +140,12 @@ export interface AppState {
   /** The library's Favourites shelf shows every favourite, not only the newest five. Not persisted. */
   libraryFavouritesOpen: boolean;
   /**
+   * How many times the reader has dealt the library again in this visit (issue 228). Each press
+   * draws new samples and a new shelf order from a seed that holds this number, so Back from a
+   * score lands on the same rows. Not persisted.
+   */
+  libraryDeal: number;
+  /**
    * A score is on its way in and the library shows it: 'chosen' while a file the reader chose or
    * dropped is read and checked, 'address' while a reload reopens the score the address names.
    * Any change of view clears it. Not persisted.
@@ -173,6 +179,8 @@ export interface AppState {
   /** Chooses a length; the list starts again at its first page. */
   setLibraryLength(length: LengthId): void;
   setLibraryFavouritesOpen(open: boolean): void;
+  /** Deals the library again: the next set of samples and shelf order, from the first page. */
+  dealLibrary(): void;
   /** The score page's heart: a library piece becomes the newest favourite, or stops being one. */
   toggleFavourite(slug: string): void;
   /** Called on Play: the legend has been seen, and a library piece becomes the one to continue. */
@@ -380,6 +388,7 @@ export const useAppStore = create<AppState>()(
       libraryPages: 1,
       libraryLength: 'any',
       libraryFavouritesOpen: false,
+      libraryDeal: 0,
       practiceOpen: false,
       opening: null,
       openLibrary: () => set({ view: { name: 'library' } }),
@@ -405,6 +414,7 @@ export const useAppStore = create<AppState>()(
       setLibraryPages: (pages) => set({ libraryPages: Math.max(1, Math.floor(pages)) }),
       setLibraryLength: (length) => set({ libraryLength: length, libraryPages: 1 }),
       setLibraryFavouritesOpen: (open) => set({ libraryFavouritesOpen: open }),
+      dealLibrary: () => set((s) => ({ libraryDeal: s.libraryDeal + 1, libraryPages: 1 })),
       toggleFavourite: (slug) =>
         set((s) => {
           const others = s.settings.favourites.filter((f) => f !== slug);

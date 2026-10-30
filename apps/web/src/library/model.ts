@@ -149,6 +149,12 @@ export interface LibraryChoices {
   /** The local date `YYYY-MM-DD`: the samples change once a day (`localDateKey`). */
   date: string;
   lastPlayed?: string | null;
+  /**
+   * How many times the reader has dealt the library again in this visit (issue 228), 0 or more:
+   * deal 0 is the day's own samples; each later deal draws other samples and, on an opened
+   * shelf, another order, from a seed that holds the number.
+   */
+  deal?: number;
 }
 
 /** 29 -> '0:29', 132.3 -> '2:12' (whole seconds, truncated). */
@@ -245,10 +251,21 @@ function lastNameWord(composer: string): string | undefined {
   return words(composerShort(composer)).at(-1);
 }
 
+/** Curated collections (hand-picked, ids not starting `pdmx-`) against the MuseScore archive's. */
+const isCurated = (p: LibraryEntry): boolean => !p.collectionId.startsWith('pdmx-');
+
 const plain = (piece: LibraryEntry): Draft => ({ piece, title: piece.title, composerSaid: false });
 
-/** One list's groups, in manifest order (UI batch spec 6.2). */
-function draftGroups(pieces: readonly LibraryEntry[], t: Messages): DraftGroup[] {
+/**
+ * One list's groups, in manifest order (UI batch spec 6.2). With `orderSeed` (an opened shelf,
+ * issue 228) the hand-picked collections come first in that order, then the archive's, whose
+ * rows are shuffled with the seed; "Other pieces" stays last.
+ */
+function draftGroups(
+  pieces: readonly LibraryEntry[],
+  t: Messages,
+  orderSeed?: string,
+): DraftGroup[] {
   const flat = (): DraftGroup[] => [{ key: 'flat', heading: null, drafts: pieces.map(plain) }];
   if (!showsHeadings(pieces.length)) return flat();
   const byCollection = new Map<string, LibraryEntry[]>();
@@ -269,13 +286,23 @@ function draftGroups(pieces: readonly LibraryEntry[], t: Messages): DraftGroup[]
     const only = composers.size === 1 ? members[0]!.composer : null;
     const last = only === null || isUnnamed(only) ? undefined : lastNameWord(only);
     const composerSaid = last !== undefined && words(heading).includes(last);
+    const ordered =
+      orderSeed !== undefined && !isCurated(members[0]!) ? shuffled(members, orderSeed) : members;
     groups.push({
       key: id,
       heading,
-      drafts: members.map((p) => ({ piece: p, title: shortTitle(p.title, heading), composerSaid })),
+      drafts: ordered.map((p) => ({ piece: p, title: shortTitle(p.title, heading), composerSaid })),
     });
   }
   if (groups.length === 0) return flat();
+  if (orderSeed !== undefined) {
+    // The archive's collections are alphabetical in the manifest: the hand-picked ones, the
+    // few the reader came for, would otherwise stand after hundreds of them.
+    const byId = new Map(byCollection);
+    groups.sort(
+      (a, b) => Number(!isCurated(byId.get(a.key)![0]!)) - Number(!isCurated(byId.get(b.key)![0]!)),
+    );
+  }
   if (other.length > 0) {
     groups.push({ key: 'other', heading: t.library.list.otherPieces, drafts: other.map(plain) });
   }
@@ -346,7 +373,7 @@ const pageRows = (pages: number | undefined): number =>
 // -- samples (shelves spec 4.1) -------------------------------------------------------------
 
 /** FNV-1a of the text: the seed of the day's shuffle. */
-function seedOf(text: string): number {
+export function seedOf(text: string): number {
   let h = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -356,7 +383,7 @@ function seedOf(text: string): number {
 }
 
 /** A small seeded generator (mulberry32): the same seed always draws the same sequence. */
-function randomFrom(seed: number): () => number {
+export function randomFrom(seed: number): () => number {
   let a = seed;
   return () => {
     a = (a + 0x6d2b79f5) | 0;
@@ -381,9 +408,6 @@ function namedComposer(composer: string): string | null {
   const name = composerShort(composer);
   return name === '' || name === 'Unknown' || isUnnamed(composer) ? null : foldText(name);
 }
-
-/** Curated collections (hand-picked, ids not starting `pdmx-`) against the MuseScore archive's. */
-const isCurated = (p: LibraryEntry): boolean => !p.collectionId.startsWith('pdmx-');
 
 /**
  * The shelf's sample rows (spec 4.1): at most 5 pieces drawn by a shuffle seeded with `seed`,
@@ -522,12 +546,33 @@ export function shelfHasPieces(
   return pieces.some((p) => tierOf(p.level) === tier && shelfOfGenre(p.genre) === shelf);
 }
 
+/**
+ * The samples after `deal` presses of the deal control (issue 228). Deal 0 is the day's draw, with
+ * the last piece played first; each later deal is a draw of its own seed that leaves out the
+ * previous deal's samples when the shelf still holds 5 other pieces, so a press never shows the
+ * same piece twice in a row on a shelf of 10 or more, and pins nothing: a fresh deal is fresh.
+ */
+function dealtSamples(
+  members: readonly LibraryEntry[],
+  seed: string,
+  deal: number,
+  first: LibraryEntry | null,
+): LibraryEntry[] {
+  let samples = sampleShelf(members, seed, first);
+  for (let d = 1; d <= deal; d++) {
+    const others = members.filter((p) => !samples.includes(p));
+    samples = sampleShelf(others.length >= SAMPLES ? others : members, `${seed}|${d}`);
+  }
+  return samples;
+}
+
 /** The arrival page's shelves of a tier, in the display order, the empty ones left out. */
 function shelvesOf(
   inTier: readonly LibraryEntry[],
   tier: Tier,
   date: string,
   lastPlayed: string | null,
+  deal: number,
   t: Messages,
 ): ShelfSummary[] {
   const byShelf = new Map<ShelfId, LibraryEntry[]>();
@@ -543,7 +588,7 @@ function shelvesOf(
     return {
       shelf: s,
       members,
-      samples: sampleShelf(members, `${date}|${tier}|${s.id}`, last ?? null),
+      samples: dealtSamples(members, `${date}|${tier}|${s.id}`, deal, last ?? null),
     };
   });
   const rows = finish(
@@ -616,7 +661,7 @@ export function libraryLayout(
     const members = inTier.filter((p) => shelfOfGenre(p.genre) === shelf);
     const { lengths, length } = lengthPills(members, wanted);
     const listed = withLength(members, length);
-    const full = draftGroups(listed, t);
+    const full = draftGroups(listed, t, `${date}|${chosen}|${shelf}|${choices.deal ?? 0}|order`);
     const visible = firstRows(full, pageRows(pages));
     const groups = finish([visible], t, [full])[0]!;
     const shown = rowCount(groups);
@@ -639,7 +684,7 @@ export function libraryLayout(
     tiers,
     tier: chosen,
     count: inTier.length,
-    shelves: shelvesOf(inTier, chosen, date, choices.lastPlayed ?? null, t),
+    shelves: shelvesOf(inTier, chosen, date, choices.lastPlayed ?? null, choices.deal ?? 0, t),
   };
 }
 

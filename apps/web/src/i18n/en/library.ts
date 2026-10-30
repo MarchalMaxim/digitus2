@@ -69,6 +69,8 @@ export const library = {
     allStyles: 'All styles',
     /** The heading over the pieces of small collections. */
     otherPieces: 'Other pieces',
+    /** The deal control's accessible name (its drawing is a staff of four notes): it shows other pieces. */
+    showOther: 'Show other pieces',
     /** The button that adds the next page of rows. */
     showMore: (n: number) => `Show ${formatNumber('en', n)} more`,
     /** The same button when the next page is the last one. */
@@ -90,6 +92,8 @@ export const library = {
   },
   /** What the polite live region says after the list changes. */
   announce: {
+    /** After the deal control: the list now holds other pieces. */
+    dealt: 'Other pieces dealt',
     /** A level or a shelf and how many pieces it holds: "Medium: 1,415 pieces". */
     counted: (name: string, n: number) => `${name}: ${pieces(n)}`,
     showing: (shown: number, total: number) =>

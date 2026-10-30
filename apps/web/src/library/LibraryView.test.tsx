@@ -16,15 +16,17 @@ import { useLocalLibrary } from './local/state.js';
 
 // These layout pins describe the 303 curated pieces unless a test asks for the whole library
 // (3,245 pieces with the MuseScore archive, collection ids pdmx-*, counted in model.test.ts).
-const library = vi.hoisted(() => ({ whole: false }));
+const library = vi.hoisted(() => ({ whole: false, limit: null as number | null }));
 vi.mock('./manifest.js', async (importOriginal) => {
   const actual = await importOriginal<typeof ManifestModule>();
   return {
     ...actual,
-    libraryPieces: () =>
-      library.whole
+    libraryPieces: () => {
+      const all = library.whole
         ? actual.libraryPieces()
-        : actual.libraryPieces().filter((p) => !p.collectionId.startsWith('pdmx-')),
+        : actual.libraryPieces().filter((p) => !p.collectionId.startsWith('pdmx-'));
+      return library.limit === null ? all : all.slice(0, library.limit);
+    },
   };
 });
 
@@ -41,6 +43,7 @@ vi.mock('../score/useScoreDocument.js', async (importOriginal) => {
 
 beforeEach(() => {
   library.whole = false;
+  library.limit = null;
   warmUp.calls = 0;
   useAppStore.setState({
     view: { name: 'library' },
@@ -54,6 +57,7 @@ beforeEach(() => {
     libraryPages: 1,
     libraryLength: 'any',
     libraryFavouritesOpen: false,
+    libraryDeal: 0,
   });
 });
 // Testing Library only cleans up automatically when vitest globals are on; they are off here.
@@ -436,7 +440,7 @@ describe('LibraryView: a shelf opened (shelves spec 4.2)', () => {
     await open('Show 40 more');
     await open('Show the last 10');
     expect(rows()).toHaveLength(250);
-    expect(screen.queryByRole('button', { name: /^Show / })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Show (\d+ more|the last \d+)$/ })).toBeNull();
   });
   it('goes back with All styles, focusing the shelf’s All button, and with Escape', async () => {
     render(<LibraryView />);
@@ -1052,5 +1056,99 @@ describe('LibraryView: the fade of a changed list (UI batch spec 6.4)', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
     expect(rows()).toHaveLength(80);
     expect(list(container)).not.toHaveClass('is-fresh');
+  });
+});
+
+describe('LibraryView: dealing the library again (issue 228)', () => {
+  afterEach(() => resetLocaleForTests());
+  const control = () => screen.getByRole('button', { name: 'Show other pieces' });
+  const sampleSlugs = () => rows().map((r) => r.getAttribute('aria-label') ?? r.textContent);
+  it('stands after the level pills, outside the list, and is drawn in ink', () => {
+    const { container } = render(<LibraryView />);
+    const choice = container.querySelector('.level-choice')!;
+    expect(choice.contains(control())).toBe(true);
+    expect(choice.querySelector('.pills')!.nextElementSibling).toBe(control());
+    expect(container.querySelector('.library-list')!.contains(control())).toBe(false);
+    expect(control().querySelectorAll('.is-red')).toHaveLength(0);
+    expect(control().querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+  });
+  it('is there on an open shelf too, and not in search or in a small library', async () => {
+    useAppStore.setState({ libraryShelf: 'songs' });
+    render(<LibraryView />);
+    expect(control()).toBeInTheDocument();
+    await userEvent.type(screen.getByRole('searchbox'), 'minuet');
+    expect(screen.queryByRole('button', { name: 'Show other pieces' })).toBeNull();
+    cleanup();
+    library.limit = 30;
+    render(<LibraryView />);
+    expect(screen.queryByRole('button', { name: 'Show other pieces' })).toBeNull();
+  });
+  it('draws the samples of every shelf again, keeps the focus and fades the rows in', async () => {
+    const { container } = render(<LibraryView />);
+    const before = sampleSlugs();
+    const list = container.querySelector('.library-list');
+    expect(list).not.toHaveClass('is-fresh');
+    await userEvent.click(control());
+    expect(useAppStore.getState().libraryDeal).toBe(1);
+    expect(control()).toHaveFocus();
+    expect(sampleSlugs()).not.toEqual(before);
+    expect(container.querySelector('.library-list')).toHaveClass('is-fresh');
+    expect(container.querySelectorAll('.is-red')).toHaveLength(1);
+  });
+  it('keeps the same samples for the same deal when the list is drawn again (Back from a score)', async () => {
+    const first = render(<LibraryView />);
+    await userEvent.click(control());
+    await userEvent.click(control());
+    const dealt = sampleSlugs();
+    first.unmount();
+    render(<LibraryView />);
+    expect(useAppStore.getState().libraryDeal).toBe(2);
+    expect(sampleSlugs()).toEqual(dealt);
+  });
+  it('goes back to the first page of an open shelf with another order', async () => {
+    library.whole = true;
+    useAppStore.setState({
+      libraryLevel: 'challenging',
+      libraryShelf: 'classical',
+      libraryPages: 3,
+    });
+    render(<LibraryView />);
+    expect(rows()).toHaveLength(120);
+    const before = sampleSlugs().slice(0, 40);
+    await userEvent.click(control());
+    expect(useAppStore.getState().libraryPages).toBe(1);
+    expect(rows()).toHaveLength(40);
+    expect(control()).toHaveFocus();
+    expect(sampleSlugs()).not.toEqual(before);
+    expect(useAppStore.getState().libraryShelf).toBe('classical');
+  });
+  it('says Other pieces dealt once per press, also the second time, and nothing on arrival', async () => {
+    render(<LibraryView />);
+    const region = screen.getByTestId('library-announcement');
+    await new Promise((r) => setTimeout(r, 700));
+    expect(region).toHaveTextContent('');
+    await userEvent.click(control());
+    await waitFor(() => expect(region).toHaveTextContent('Other pieces dealt'));
+    const changes: string[] = [];
+    const watch = new MutationObserver(() => changes.push(region.textContent ?? ''));
+    watch.observe(region, { childList: true, characterData: true, subtree: true });
+    await userEvent.click(control());
+    await waitFor(() => expect(changes).toContain('Other pieces dealt'));
+    expect(changes[0]).toBe('');
+    watch.disconnect();
+  });
+  it('goes back to counting when the reader moves to another level', async () => {
+    render(<LibraryView />);
+    await userEvent.click(control());
+    await userEvent.click(screen.getByRole('radio', { name: 'Medium' }));
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent('Medium: 95 pieces'),
+    );
+  });
+  it('is named in the language on screen', async () => {
+    await act(() => chooseLocale('fr'));
+    render(<LibraryView />);
+    expect(screen.getByRole('button', { name: 'Voir d’autres morceaux' })).toBeInTheDocument();
   });
 });

@@ -39,6 +39,7 @@ import { DropFrame, OwnFileLine } from './OwnFileLine.js';
 import { PianoLine } from './PianoLine.js';
 import { PieceList } from './PieceList.js';
 import { SearchField } from './SearchField.js';
+import { TuneButton } from './TuneButton.js';
 import { MyScores } from './local/MyScores.js';
 import './library.css';
 
@@ -66,15 +67,20 @@ function useChanged(key: string): boolean {
   return changed.current;
 }
 
-/** What the polite live region says: the text, once, a moment after the last change, never on arrival. */
-function useAnnouncement(text: string): string {
+/**
+ * What the polite live region says: the text, once, a moment after the last change, never on
+ * arrival. A new `stamp` with the same text (a second press of the deal control, issue 228) says
+ * it again: the region is emptied first, since a screen reader hears only a change.
+ */
+function useAnnouncement(text: string, stamp: number): string {
   const [said, setSaid] = useState('');
-  const changed = useChanged(text);
+  const changed = useChanged(`${stamp}|${text}`);
   useEffect(() => {
     if (!changed) return;
+    setSaid((now) => (now === text ? '' : now));
     const timer = setTimeout(() => setSaid(text), ANNOUNCE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [text, changed]);
+  }, [text, stamp, changed]);
   return said;
 }
 
@@ -250,6 +256,8 @@ export function LibraryView() {
   const favouritesOpen = useAppStore((s) => s.libraryFavouritesOpen);
   const setFavouritesOpen = useAppStore((s) => s.setLibraryFavouritesOpen);
   const toggleFavourite = useAppStore((s) => s.toggleFavourite);
+  const deal = useAppStore((s) => s.libraryDeal);
+  const dealLibrary = useAppStore((s) => s.dealLibrary);
   const heading = useRef<HTMLHeadingElement>(null);
   useFocusOnArrival(heading);
   const focusLibraryHeading = useCallback(() => heading.current?.focus(), []);
@@ -262,8 +270,12 @@ export function LibraryView() {
   const [date] = useState(() => localDateKey());
   const layout = useMemo(
     () =>
-      libraryLayout(pieces, { tier, query, shelf, section, pages, length, date, lastPlayed }, t),
-    [pieces, tier, query, shelf, section, pages, length, date, lastPlayed, t],
+      libraryLayout(
+        pieces,
+        { tier, query, shelf, section, pages, length, date, lastPlayed, deal },
+        t,
+      ),
+    [pieces, tier, query, shelf, section, pages, length, date, lastPlayed, deal, t],
   );
   // On the arrival page only: a search or an opened shelf replaces it, as it replaces the shelves.
   const favouritesInView = useMemo(
@@ -276,14 +288,23 @@ export function LibraryView() {
   const start = startTarget(pieces, lastPlayed);
   // Search results share the key 'search': keystrokes after the first swap the rows without a
   // fade (UI batch spec 6.4). A page appended fades its new rows only (`freshFrom`).
-  const listKey =
+  // A deal of the library is part of the key, so the rows it replaces fade in like any new list.
+  const place =
     layout.kind === 'shelves'
       ? `tier-${layout.tier}`
       : layout.kind === 'shelf'
         ? `shelf-${layout.tier}-${layout.shelf}`
         : layout.kind;
+  const listKey = layout.kind === 'shelves' || layout.kind === 'shelf' ? `${place}-${deal}` : place;
   const fade = useChanged(listKey);
-  const announcement = useAnnouncement(announcementFor(layout, t));
+  // A press of the deal control announces itself, until the reader moves to another list.
+  const [dealtIn, setDealtIn] = useState<{ deal: number; place: string } | null>(null);
+  if (dealtIn !== null && dealtIn.place !== place) setDealtIn(null);
+  const dealt = dealtIn !== null && dealtIn.deal === deal;
+  const announcement = useAnnouncement(
+    dealt ? t.library.announce.dealt : announcementFor(layout, t),
+    deal,
+  );
   const focusAfter = useRef<FocusTarget | null>(null);
   const [appended, setAppended] = useState<{ key: string; from: number } | null>(null);
   const freshFrom = appended?.key === listKey ? appended.from : null;
@@ -356,6 +377,10 @@ export function LibraryView() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [openShelf, closeShelf]);
+  const dealAgain = () => {
+    setDealtIn({ deal: deal + 1, place });
+    dealLibrary();
+  };
   const showMore = () => {
     if (layout.kind !== 'shelf') return;
     focusAfter.current = { from: listKey, kind: 'row', within: null, index: layout.shown };
@@ -417,6 +442,7 @@ export function LibraryView() {
       {(layout.kind === 'shelves' || layout.kind === 'shelf') && (
         <div className="level-choice">
           <LevelPills tiers={layout.tiers} tier={layout.tier} onChange={chooseTier} />
+          <TuneButton deal={deal} onDeal={dealAgain} />
         </div>
       )}
       <div key={listKey} ref={list} className={listClass}>

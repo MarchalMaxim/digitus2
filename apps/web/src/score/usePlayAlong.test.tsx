@@ -214,10 +214,19 @@ function connectWith(...names: string[]) {
 }
 const heldNow = () => [...down].sort((a, b) => a - b);
 
-/** The piano connects, as a press of the home line does. */
-async function connect(...names: string[]) {
+/** The piano connects, as a press of the home line does, and nothing has come from it yet. */
+async function connectUnheard(...names: string[]) {
   connectWith(...(names.length > 0 ? names : ['GO:PIANO']));
   await act(() => askForPiano());
+}
+
+/**
+ * The piano connects and is heard (issue 252): a note-off of a key far above any piece here, which
+ * holds nothing and plays nothing, as the first message from a piano whose port receives.
+ */
+async function connect(...names: string[]) {
+  await connectUnheard(...names);
+  act(() => link.events!.note({ on: false, midi: 127 }, heldNow()));
 }
 
 function setNavigator(name: string, value: unknown): void {
@@ -482,6 +491,32 @@ describe('the walk', () => {
     expect(s.cues()).toEqual([0]);
     s.press(60);
     expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it('says the piano is not heard until a note came from it, and the first press proves it', async () => {
+    // A browser can list a piano whose port never receives (issue 252): the walk waits as ever,
+    // and the hint says the piano is not heard yet until its first note.
+    await connectUnheard('GO:PIANO MIDI 1');
+    const s = setup();
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.hook.result.current.hint).toEqual({ count: 2, unheard: true });
+    s.press(48);
+    expect(s.hook.result.current.hint).toEqual({ count: 2 });
+    s.press(60);
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('names the browser to open again for a Bluetooth port on Windows Chrome, while not heard', async () => {
+    setNavigator('userAgentData', { platform: 'Windows', brands: [{ brand: 'Google Chrome' }] });
+    try {
+      await connectUnheard('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
+      const s = setup();
+      expect(s.hook.result.current.hint).toEqual({ count: 2, unheard: true, restart: 'Chrome' });
+      s.press(48);
+      expect(s.hook.result.current.hint).toEqual({ count: 2 });
+    } finally {
+      delete (navigator as unknown as Record<string, unknown>).userAgentData;
+    }
   });
 
   it('shows the hint until the first step is played, and not again', async () => {

@@ -31,6 +31,9 @@ export const score: Messages['score'] = {
     noNotes: 'Esta pieza no tiene notas para tocar.',
     playAlongHint: (count: number) =>
       count > 1 ? 'Toca las notas rojas en tu piano.' : 'Toca la nota roja en tu piano.',
+    playAlongUnheard: 'Aún no se oye tu piano.',
+    playAlongRestart: (browser: string) =>
+      `Si la nota roja no avanza cuando la tocas, enciende el piano, cierra todas las ventanas de ${browser} y vuelve a abrir ${browser}.`,
     playAlongSound: {
       click: 'Haz clic una vez para oír la otra mano.',
       tap: 'Toca una vez para oír la otra mano.',

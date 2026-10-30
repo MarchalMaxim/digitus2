@@ -1,6 +1,13 @@
 import { useId, useState } from 'react';
 import { useT } from '../i18n/i18n.js';
-import { askForPiano, bluetoothFlag, turnOffPiano, usePianoSnapshot } from '../midi/piano.js';
+import {
+  askForPiano,
+  bluetoothFlag,
+  restartBrowser,
+  turnOffPiano,
+  usePianoHeard,
+  usePianoSnapshot,
+} from '../midi/piano.js';
 
 /**
  * The piano's name as the reader knows it: Windows names a paired Bluetooth piano's port
@@ -19,24 +26,30 @@ export function pianoName(raw: string): string {
  * reader's consent: the browser is asked only then (a later visit connects silently, see
  * midi/piano.ts). While the browser has granted access but not answered (Windows looking for a
  * Bluetooth piano that is off) the line says it is looking, with Turn off as the way out; the
- * button is busy only while the browser's prompt is open. Nothing here is red. Where the browser
- * has no Web MIDI the line is absent. The button is described by the sentence while there is one,
- * so "Turn off" says what it turns off.
+ * button is busy only while the browser's prompt is open. A listed piano is only found until a
+ * note comes from it, and then connected (issue 252): a browser can list a piano whose port never
+ * receives, and the line then names the one cure for a Bluetooth piano on Windows. Nothing here
+ * is red. Where the browser has no Web MIDI the line is absent. The button is described by the
+ * sentence while there is one, so "Turn off" says what it turns off.
  */
 export function PianoLine() {
   const t = useT();
   const { status, names } = usePianoSnapshot();
+  const heard = usePianoHeard();
   const [flag] = useState(() => bluetoothFlag());
   const sentenceId = useId();
   if (status === 'unsupported') return null;
   const text = t.library.piano;
   const asking = status === 'asking';
   const on = status === 'connected' || status === 'none' || status === 'searching';
+  const name = pianoName(names[0] ?? '') || text.yourPiano;
+  const browser = restartBrowser(names);
+  const found = browser ? `${text.found(name)} ${text.restart(browser)}` : text.found(name);
   const sentence = {
     off: '',
     asking: text.asking,
     searching: text.searching,
-    connected: text.connected(pianoName(names[0] ?? '') || text.yourPiano),
+    connected: heard ? text.connected(name) : found,
     none: flag === null ? text.none : `${text.none} ${text.bluetoothFlag(flag)}`,
     denied: text.denied,
   }[status];

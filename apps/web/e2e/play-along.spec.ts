@@ -43,6 +43,8 @@ const START = 'Play along on your piano';
 const TURN_OFF = 'Turn off';
 const ASKING = 'Allow the browser to use your piano.';
 const CONNECTED = `${PIANO} is connected. Open a piece and play the red note.`;
+/** Listed and no note from it yet (issue 252): a browser can list a piano it cannot hear. */
+const FOUND = `${PIANO} is found but not heard yet. Press a key on it.`;
 const NONE =
   'No piano found. Connect it with a USB cable, or pair it over Bluetooth and turn it on.';
 const FLAG =
@@ -50,6 +52,7 @@ const FLAG =
 const DENIED =
   'The browser blocked MIDI for this site. Allow it in the site settings, then press again.';
 const HINT_MANY = 'Play the red notes on your piano.';
+const UNHEARD = 'Your piano is not heard yet.';
 const SEARCHING = 'Looking for your piano. Make sure it is turned on.';
 const LOADING_THE_PIANO = 'Loading the piano…';
 
@@ -97,6 +100,10 @@ test.describe('the home line', () => {
     await expectOneRed(page, 'asking');
 
     await midi.resolve('allow');
+    await expect(sentence(page)).toHaveText(FOUND);
+    // Connected once a note came from it: a key pressed and let go on the piano.
+    await midi.noteOn(60);
+    await midi.noteOff(60);
     await expect(sentence(page)).toHaveText(CONNECTED);
     await expect(button).toHaveText(TURN_OFF);
     await expect(button).not.toHaveAttribute('aria-busy');
@@ -123,16 +130,16 @@ test.describe('the home line', () => {
     // As in Chrome, the unplugged port stays in the list (disconnected) and comes back as the
     // same port; a browser that drops the port from the list is found again the same way.
     await midi.plug(PIANO);
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     await midi.unplug();
     await expect(sentence(page)).toHaveText(`${NONE} ${FLAG}`);
     await expectOneRed(page, 'unplugged');
     await midi.plug(PIANO);
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     await midi.remove();
     await expect(sentence(page)).toHaveText(`${NONE} ${FLAG}`);
     await midi.plug(PIANO);
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     await expectOneRed(page, 'plugged in again');
   });
 
@@ -177,7 +184,7 @@ test.describe('the home line', () => {
     await library(page, { permission: 'granted' });
     const midi = fakeMidi(page);
     await pianoButton(page).click();
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     expect(await storedSetting(page)).toBe(true);
     await pianoButton(page).click();
     await expect(pianoButton(page)).toHaveText(START);
@@ -198,7 +205,7 @@ test.describe('the home line', () => {
   }) => {
     await library(page, { permission: 'granted', playAlong: true });
     const midi = fakeMidi(page);
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     await expect(pianoButton(page)).toHaveText(TURN_OFF);
     expect(await midi.requests()).toBe(1);
     await expectOneRed(page, 'a later visit');
@@ -214,7 +221,7 @@ test.describe('the home line', () => {
     expect(await midi.requests()).toBe(0);
     // The setting is still on: the reader's press asks, and the answer connects.
     await pianoButton(page).click();
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     expect(await midi.requests()).toBe(1);
   });
 
@@ -241,7 +248,7 @@ test.describe('the home line', () => {
     await expectNoSeriousA11y(page, 'looking for the piano');
 
     await midi.resolve('allow');
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
     await expect(button).toHaveText(TURN_OFF);
     await expect(button).toBeFocused();
     await expectOneRed(page, 'found the piano');
@@ -300,7 +307,7 @@ test.describe('the home line', () => {
     }
     await expectOneRed(page, 'the prompt is open');
     await midi.resolve('allow');
-    await expect(sentence(page)).toHaveText(CONNECTED);
+    await expect(sentence(page)).toHaveText(FOUND);
   });
 
   test('without Web MIDI there is no line and no request', async ({ page }) => {
@@ -384,7 +391,8 @@ test.describe('the score with a piano', () => {
     expect(await cursorSec(page)).toBe(0);
     await expect(play(page)).not.toHaveClass(/is-red/);
     await expect(rewind(page)).toHaveAttribute('aria-disabled', 'true');
-    await expect(page.getByRole('status')).toHaveText(HINT_MANY);
+    // Nothing has come from the piano yet (issue 252): the hint says it is not heard.
+    await expect(page.getByRole('status')).toHaveText(UNHEARD);
     // The existing cue: the notes are red, their keys are pressed with their fingers.
     const roots = await expectOneRed(page, 'the first group waits');
     expect(roots.every((r) => r.inSheet)).toBe(true);
@@ -406,8 +414,9 @@ test.describe('the score with a piano', () => {
     expect(await midi.index()).toBe(0);
 
     // One of the two notes does not move it, however long it is held; both held do, at the press
-    // of the second (issue 204).
+    // of the second (issue 204). The first is heard: the hint is the plain one now.
     await midi.noteOn(60);
+    await expect(page.getByRole('status')).toHaveText(HINT_MANY);
     expect(await midi.index()).toBe(0);
     expect(await cursorSec(page)).toBe(0);
     await staysAt(page, midi, 0);
@@ -1338,7 +1347,7 @@ test.describe('the score with a piano', () => {
   }) => {
     const midi = await twinkle(page);
     await midi.waitForStep();
-    await expect(page.getByRole('status')).toHaveText(HINT_MANY);
+    await expect(page.getByRole('status')).toHaveText(UNHEARD);
 
     // Both keys go down in one task (all in the page, so a slow round trip cannot separate the
     // press from the look): the red is on the next step right after.

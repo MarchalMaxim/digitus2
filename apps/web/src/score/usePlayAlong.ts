@@ -44,7 +44,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { tempoFactorOf, useAppStore } from '../app/store.js';
 import type { PlayEvent } from '../audio/events.js';
 import { performanceFor, scoreEndSec } from '../audio/performance.js';
-import { heldPitches, subscribeNotes, usePianoHealer, usePianoSnapshot } from '../midi/piano.js';
+import {
+  heldPitches,
+  restartBrowser,
+  subscribeNotes,
+  usePianoHeard,
+  usePianoSnapshot,
+} from '../midi/piano.js';
 import type { NoteMessage } from '../midi/types.js';
 import { haloFor, type Halo } from './halo.js';
 import { createLevelStore, type LevelStore } from './keyLevels.js';
@@ -94,10 +100,14 @@ export interface PlayAlongOptions {
 
 /**
  * The status line's hint while the red waits (issue 182): shown until the first step is played.
- * `count` is the step's pitch count.
+ * `count` is the step's pitch count. `unheard`: no note has come from the piano yet, so the line
+ * says it is not heard (issue 252); `restart`, then, the browser whose restart cures a Bluetooth
+ * piano on Windows (`restartBrowser`).
  */
 export interface AlongHint {
   count: number;
+  unheard?: true;
+  restart?: 'Chrome' | 'Edge';
 }
 
 /**
@@ -230,13 +240,13 @@ export function usePlayAlong({
   const hearOtherHand = useAppStore((s) => s.settings.hearOtherHand);
   const factor = useAppStore(tempoFactorOf);
   const piano = usePianoSnapshot();
+  // Listed is not heard (issue 252): the walk waits as ever, and the hint says so until a note.
+  const heard = usePianoHeard();
+  const pianoNames = piano.names;
   const connected = setting && piano.status === 'connected';
   // The one gate (issue 191): with Practice mode off the walk is as with no piano, and nothing
   // else changes; the piano stays connected and its keys are still drawn.
   const walking = connected && practiceMode;
-  // A connection that stays silent while a score is open (and ready to play) is reopened until a
-  // note comes.
-  usePianoHealer(connected && ready);
   const { playing, loading, atStart, cue, loop } = playback;
   const marked = currentGroup >= 0;
 
@@ -668,8 +678,15 @@ export function usePlayAlong({
   const stretchNow = stretchKey(stretch);
   const first = stretch ? (loopSpan(steps, stretch)?.first ?? -1) : 0;
   return useMemo(() => {
+    const restart = heard ? null : restartBrowser(pianoNames);
     const hint: AlongHint | null =
-      cuedHere && step && played === 0 ? { count: step.pitches.length } : null;
+      cuedHere && step && played === 0
+        ? {
+            count: step.pitches.length,
+            ...(heard ? {} : { unheard: true as const }),
+            ...(restart ? { restart } : {}),
+          }
+        : null;
     const halo =
       cuedHere &&
       !flightShown &&
@@ -702,5 +719,7 @@ export function usePlayAlong({
     haloShown,
     steps,
     stretchNow,
+    heard,
+    pianoNames,
   ]);
 }

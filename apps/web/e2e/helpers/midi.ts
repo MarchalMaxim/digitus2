@@ -39,6 +39,14 @@ export interface FakeMidiOptions {
    * Chrome's WinRT backend while a Bluetooth piano is off (issue 182).
    */
   hang?: boolean;
+  /**
+   * The piano is listed, `connected` and `open`, and nothing it plays reaches the page, through
+   * every new `requestMIDIAccess` and every reload of the page, until `wake` (issue 252). This is
+   * Chrome's WinRT backend on Windows after a Bluetooth piano was turned off and on while the
+   * browser held its port: the browser keeps the port for the life of its process, Windows keeps
+   * it listed, and only a new browser process hears the piano again (`wake`).
+   */
+  deaf?: boolean;
 }
 
 type Answer = 'allow' | 'block' | 'dismiss';
@@ -56,6 +64,10 @@ interface FakeHost {
   remove(name?: string): void;
   /** `atMs`: the event's `timeStamp` (performance.now() ms), as a piano's message carries it. */
   send(bytes: number[], input?: string, atMs?: number): void;
+  /** Deaf (`FakeMidiOptions.deaf`): the piano plays and nothing reaches the page. */
+  deaf(): boolean;
+  /** The piano heard again, as a new browser process hears it. */
+  wake(): void;
 }
 
 interface FakeInput extends EventTarget {
@@ -222,6 +234,8 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
         configurable: true,
       });
 
+      // Kept for the tab, as the browser keeps the dead port across reloads of the page.
+      let deaf = (keep('deaf') ?? String(cfg.deaf)) === 'true';
       let seq = 0;
       const inputs = new Map<string, FakeInput>();
       // A port as Chrome keeps it: assigning `onmidimessage` opens it (`connection` 'open', and a
@@ -321,6 +335,7 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
             (i) => i.state === 'connected' && (name === undefined || i.name === name),
           );
           if (!input) throw new Error(`no input ${name ?? ''} to send to`);
+          if (deaf) return;
           const data = Uint8Array.from(bytes);
           const event =
             typeof MIDIMessageEvent === 'function'
@@ -330,6 +345,11 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
           if (atMs !== undefined) Object.defineProperty(event, 'timeStamp', { value: atMs });
           input.onmidimessage?.(event);
           input.dispatchEvent(event);
+        },
+        deaf: () => deaf,
+        wake() {
+          deaf = false;
+          keep('deaf', 'false');
         },
       };
       w.__fakeMidi = host;
@@ -382,6 +402,7 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
       settings: o.settings ?? null,
       tempo: o.tempo ?? null,
       hang: o.hang ?? false,
+      deaf: o.deaf ?? false,
     },
   );
 }

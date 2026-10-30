@@ -51,6 +51,13 @@ function promptOpen() {
 
 const button = () => screen.getByRole('button');
 const sentence = () => screen.getByRole('status');
+/** A key pressed and let go on the piano: the first note proves the piano is heard (issue 252). */
+function playKey(link: { events: AccessEvents | null }, midi = 60): void {
+  act(() => {
+    link.events!.note({ on: true, midi }, [midi]);
+    link.events!.note({ on: false, midi }, []);
+  });
+}
 
 beforeEach(() => {
   localStorage.clear();
@@ -119,9 +126,10 @@ describe('the piano line', () => {
   });
 
   it('names the connected piano, and Turn off takes the line back to the plain button', async () => {
-    answerWith('GO:PIANO MIDI 1');
+    const link = answerWith('GO:PIANO MIDI 1');
     render(<PianoLine />);
     await userEvent.click(button());
+    playKey(link);
     expect(sentence()).toHaveTextContent(
       'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
     );
@@ -136,9 +144,13 @@ describe('the piano line', () => {
   });
 
   it('calls a piano with no name Your piano', async () => {
-    answerWith('');
+    const link = answerWith('');
     render(<PianoLine />);
     await userEvent.click(button());
+    expect(sentence()).toHaveTextContent(
+      'Your piano is found but not heard yet. Press a key on it.',
+    );
+    playKey(link);
     expect(sentence()).toHaveTextContent(
       'Your piano is connected. Open a piece and play the red note.',
     );
@@ -146,9 +158,10 @@ describe('the piano line', () => {
 
   it("leaves out the port's own label that Windows adds to a Bluetooth piano's name", async () => {
     // The owner's Roland GO:PIANO paired with Windows 11 (issue 182).
-    answerWith('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
+    const link = answerWith('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
     render(<PianoLine />);
     await userEvent.click(button());
+    playKey(link);
     expect(sentence()).toHaveTextContent(
       'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
     );
@@ -174,6 +187,10 @@ describe('the piano line', () => {
     expect(sentence().textContent).not.toContain('flags');
     expect(button()).toHaveTextContent('Turn off');
     act(() => link.events!.inputs(['Yamaha P-45']));
+    expect(sentence()).toHaveTextContent(
+      'Yamaha P-45 is found but not heard yet. Press a key on it.',
+    );
+    playKey(link);
     expect(sentence()).toHaveTextContent(
       'Yamaha P-45 is connected. Open a piece and play the red note.',
     );
@@ -218,7 +235,7 @@ describe('the piano line', () => {
     expect(useAppStore.getState().settings.playAlong).toBe(false);
     answerWith('GO:PIANO MIDI 1');
     await userEvent.click(button());
-    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is connected.');
+    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is found but not heard yet.');
   });
 
   it('goes back to the plain line when the prompt is dismissed', async () => {
@@ -235,6 +252,10 @@ describe('the piano line', () => {
     // Nothing to say: nothing to describe it with.
     expect(button()).not.toHaveAttribute('aria-describedby');
     await userEvent.click(button());
+    expect(button()).toHaveAccessibleDescription(
+      'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it.',
+    );
+    playKey(link);
     expect(button()).toHaveAccessibleDescription(
       'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
     );
@@ -282,14 +303,75 @@ describe('the piano line', () => {
 
   it('speaks the language on screen', async () => {
     await chooseLocale('fr');
-    answerWith('GO:PIANO MIDI 1');
+    const link = answerWith('GO:PIANO MIDI 1');
     render(<PianoLine />);
     expect(button()).toHaveTextContent('Jouer avec votre piano');
     await userEvent.click(button());
     expect(sentence()).toHaveTextContent(
+      'GO:PIANO MIDI 1 est trouvé mais pas encore entendu. Appuyez sur une de ses touches.',
+    );
+    playKey(link);
+    expect(sentence()).toHaveTextContent(
       'GO:PIANO MIDI 1 est connecté. Ouvrez un morceau et jouez la note rouge.',
     );
     expect(button()).toHaveTextContent('Désactiver');
+  });
+
+  it('says the piano is found and not heard until a note comes from it, then connected', async () => {
+    const link = answerWith('GO:PIANO MIDI 1');
+    render(<PianoLine />);
+    await userEvent.click(button());
+    // Listed is not heard (issue 252): a browser can list a piano whose port never receives.
+    expect(sentence()).toHaveTextContent(
+      'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it.',
+    );
+    expect(sentence().textContent).not.toContain('connected');
+    expect(button()).toHaveTextContent('Turn off');
+    playKey(link);
+    expect(sentence()).toHaveTextContent(
+      'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
+    );
+    // Gone and back: found again, and connected only at its next note.
+    act(() => link.events!.inputs([]));
+    act(() => link.events!.inputs(['GO:PIANO MIDI 1']));
+    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is found but not heard yet.');
+    playKey(link, 62);
+    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is connected.');
+  });
+
+  it('names the cure for a Bluetooth piano on Windows Chrome and Edge while it is not heard', async () => {
+    const windows = (brand: string) =>
+      setNavigator('userAgentData', { platform: 'Windows', brands: [{ brand }] });
+    const found = async (name: string) => {
+      cleanup();
+      resetPianoForTests();
+      const link = answerWith(name);
+      render(<PianoLine />);
+      await userEvent.click(button());
+      return { text: sentence().textContent, link };
+    };
+    windows('Google Chrome');
+    const chrome = await found('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
+    expect(chrome.text).toBe(
+      'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it. If nothing changes, turn the piano on, then close every Chrome window and open Chrome again.',
+    );
+    playKey(chrome.link);
+    expect(sentence().textContent).toBe(
+      'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
+    );
+    windows('Microsoft Edge');
+    expect((await found('GO:PIANO MIDI 1 (Bluetooth MIDI IN)')).text).toBe(
+      'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it. If nothing changes, turn the piano on, then close every Edge window and open Edge again.',
+    );
+    // A USB piano on Windows, and a Bluetooth one elsewhere, get no cure: it is not theirs.
+    windows('Google Chrome');
+    expect((await found('Digital Piano')).text).toBe(
+      'Digital Piano is found but not heard yet. Press a key on it.',
+    );
+    setNavigator('userAgentData', { platform: 'Linux', brands: [{ brand: 'Google Chrome' }] });
+    expect((await found('GO:PIANO MIDI 1 Bluetooth')).text).toBe(
+      'GO:PIANO MIDI 1 Bluetooth is found but not heard yet. Press a key on it.',
+    );
   });
 
   it('is laid out as a left-aligned stack whose long flag address wraps', () => {
@@ -340,7 +422,7 @@ describe('the piano line while Windows looks for the piano', () => {
     // The browser answers at last.
     prompt.link.events!.inputs(['GO:PIANO MIDI 1']);
     await act(async () => prompt.answer());
-    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is connected.');
+    expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is found but not heard yet.');
     expect(button()).toHaveTextContent('Turn off');
   });
 

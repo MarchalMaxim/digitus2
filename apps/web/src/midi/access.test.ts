@@ -234,6 +234,31 @@ describe('openMidiAccess', () => {
     expect(events.notes[3]![1]).toEqual([]);
   });
 
+  it('reports every message from an input as heard, notes or not (issue 252)', async () => {
+    let heard = 0;
+    const events: AccessEvents = { ...recorder(), heard: () => heard++ };
+    const input = piano();
+    const other = new FakeInput('p2', 'Pedal Board');
+    await open(new FakeAccess(input, other), events);
+    expect(heard).toBe(0);
+    input.send(0xfe); // active sensing
+    input.send(0xb0, 64, 127); // the pedal
+    input.send(0x80, 60, 0); // a key let go that was never pressed here
+    other.send(0x90, 36, 80);
+    expect(heard).toBe(4);
+  });
+
+  it('reports nothing as heard after close, or for a message with no data', async () => {
+    let heard = 0;
+    const input = piano();
+    const { opened } = await open(new FakeAccess(input), { ...recorder(), heard: () => heard++ });
+    const handler = input.onmidimessage!;
+    handler({ data: null });
+    opened.close();
+    handler({ data: new Uint8Array([0x90, 60, 90]) });
+    expect(heard).toBe(0);
+  });
+
   it('ignores a message with no data', async () => {
     const events = recorder();
     const input = piano();

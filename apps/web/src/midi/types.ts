@@ -35,6 +35,11 @@ export interface AccessEvents {
   /** A merged note-on or note-off, after `held` was updated. */
   note(e: NoteMessage, held: readonly number[]): void;
   /**
+   * Any MIDI message from a connected input, notes or not (a pedal, active sensing), before it is
+   * read: proof that the port receives (issue 252).
+   */
+  heard?(): void;
+  /**
    * Every input the browser lists, with its state and connection, at the open and at each state
    * change (the black box, blackBox.ts).
    */

@@ -287,13 +287,32 @@ export const STATES: AppState[] = [
     expectTag: 'frame',
   },
   {
-    // The home line with a piano connected (issue 182): the sentence and Turn off; the start
-    // button stays the one red element.
+    // The home line with a piano connected (issue 182), heard at a key (issue 252): the sentence
+    // and Turn off; the start button stays the one red element.
     name: 'library-piano',
     go: async (page) => {
       await libraryWithPiano(page, {});
+      const midi = fakeMidi(page);
+      await midi.noteOn(60);
+      await midi.noteOff(60);
       await expect(page.locator('.piano-line [role="status"]')).toHaveText(
         'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
+      );
+      await expect(page.locator('.piano-line button')).toHaveText('Turn off');
+    },
+    expectTag: 'button',
+  },
+  {
+    // A Bluetooth piano listed on Windows Chrome that nothing has come from yet (issue 252): found,
+    // not heard, and the one cure, a long copy of the line at 360 px.
+    name: 'library-piano-found',
+    go: async (page) => {
+      await libraryWithPiano(page, {
+        platform: 'Windows',
+        inputs: ['GO:PIANO MIDI 1 (Bluetooth MIDI IN)'],
+      });
+      await expect(page.locator('.piano-line [role="status"]')).toHaveText(
+        'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it. If nothing changes, turn the piano on, then close every Chrome window and open Chrome again.',
       );
       await expect(page.locator('.piano-line button')).toHaveText('Turn off');
     },
@@ -448,8 +467,9 @@ export const STATES: AppState[] = [
     name: 'score-along',
     go: async (page) => {
       const midi = await twinkleAlong(page);
-      await expect(page.getByRole('status')).toHaveText('Play the red notes on your piano.');
+      await expect(page.getByRole('status')).toHaveText('Your piano is not heard yet.');
       await midi.noteOn(60); // half of the first step [48, 60]
+      await expect(page.getByRole('status')).toHaveText('Play the red notes on your piano.');
       await expect(page.locator('.keyboard .key[data-midi="60"] .key-held')).toHaveCount(1);
       await expect(page.locator('.keyboard .key[data-midi="60"]')).toHaveClass(/is-pressed/);
       await expect(page.getByRole('button', { name: 'Play' })).not.toHaveClass(/is-red/);

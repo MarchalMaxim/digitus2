@@ -33,6 +33,9 @@ export const score: Messages['score'] = {
       count > 1
         ? 'Jouez les notes rouges sur votre piano.'
         : 'Jouez la note rouge sur votre piano.',
+    playAlongUnheard: 'Votre piano n’est pas encore entendu.',
+    playAlongRestart: (browser: string) =>
+      `Si la note rouge ne bouge pas quand vous la jouez, allumez le piano, puis fermez toutes les fenêtres de ${browser} et rouvrez ${browser}.`,
     playAlongSound: {
       click: 'Cliquez une fois pour entendre l’autre main.',
       tap: 'Touchez une fois pour entendre l’autre main.',

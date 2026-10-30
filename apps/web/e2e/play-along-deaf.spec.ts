@@ -21,6 +21,9 @@ const CONNECTED = 'GO:PIANO MIDI 1 is connected. Open a piece and play the red n
 test.use({ viewport: { width: 1280, height: 900 } });
 
 const dockStatus = (page: Page) => page.locator('.score-status');
+/** The score is fingered and drawn: a cold build of Minuet in G can take longer than a poll. */
+const scoreShown = (page: Page) =>
+  expect(page.locator('.score-sheet g.fing').first()).toBeVisible({ timeout: 20_000 });
 const heldKeys = (page: Page) => page.locator('.keyboard .key-held');
 
 test('a listed piano that cannot be heard is never called connected, and the line names the cure', async ({
@@ -37,6 +40,7 @@ test('a listed piano that cannot be heard is never called connected, and the lin
   });
   await page.goto(`/?audio=silent#/piece/${MINUET}`);
   const midi = fakeMidi(page);
+  await scoreShown(page);
   const first = await midi.waitForStep();
   await expect(dockStatus(page)).toHaveText(CURE_SCORE);
   await expectOneRed(page, 'the piano is listed and not heard');
@@ -57,6 +61,7 @@ test('a listed piano that cannot be heard is never called connected, and the lin
 
   // A reload changes nothing either: the browser keeps the dead port.
   await page.reload();
+  await scoreShown(page);
   await midi.waitForStep();
   await expect(dockStatus(page)).toHaveText(CURE_SCORE);
   for (const pitch of first) await midi.noteOn(pitch);
@@ -81,6 +86,7 @@ test('a listed piano that cannot be heard is never called connected, and the lin
 
   // And in the score, the red moves at the press and the keys show it.
   await page.goto(`/?audio=silent#/piece/${MINUET}`);
+  await scoreShown(page);
   const step = await midi.waitForStep();
   await expect(dockStatus(page)).toHaveText(CURE_SCORE);
   for (const pitch of step) await midi.noteOn(pitch);

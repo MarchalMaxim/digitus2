@@ -56,7 +56,7 @@ export const library: Messages['library'] = {
   list: {
     allStyles: 'Alle stijlen',
     otherPieces: 'Overige stukken',
-    showOther: 'Toon andere stukken',
+    shuffle: 'Boekenplanken schudden',
     showMore: (n: number) => `Nog ${formatNumber('nl', n)} tonen`,
     showLast: (n: number) =>
       plural('nl', n, { one: 'Laatste stuk tonen', other: 'Laatste # tonen' }),
@@ -73,7 +73,7 @@ export const library: Messages['library'] = {
     noMatchHint: 'Zoeken werkt op titels, componisten en verzamelingen.',
   },
   announce: {
-    dealt: 'Andere stukken getoond',
+    shuffled: 'Boekenplanken geschud',
     counted: (name: string, n: number) => `${name}: ${pieces(n)}`,
     showing: (shown: number, total: number) =>
       `${formatNumber('nl', shown)} van ${formatNumber('nl', total)} getoond`,

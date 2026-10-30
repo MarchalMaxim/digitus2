@@ -558,7 +558,10 @@ function dealtSamples(
   deal: number,
   first: LibraryEntry | null,
 ): LibraryEntry[] {
-  let samples = sampleShelf(members, seed, first);
+  if (deal === 0) return sampleShelf(members, seed, first);
+  // The chain starts from the unpinned draw, so the last piece played changes what deal 0 shows
+  // and nothing after it: Back from a dealt piece lands on the same rows.
+  let samples = sampleShelf(members, seed);
   for (let d = 1; d <= deal; d++) {
     const others = members.filter((p) => !samples.includes(p));
     samples = sampleShelf(others.length >= SAMPLES ? others : members, `${seed}|${d}`);

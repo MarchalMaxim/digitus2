@@ -62,7 +62,7 @@ export const library: Messages['library'] = {
   list: {
     allStyles: 'Todos os estilos',
     otherPieces: 'Outras peças',
-    showOther: 'Mostrar outras peças',
+    shuffle: 'Embaralhar as estantes',
     showMore: (n: number) => `Mostrar mais ${formatNumber('pt', n)}`,
     showLast: (n: number) =>
       plural('pt', n, { one: 'Mostrar a última', other: 'Mostrar as # últimas' }),
@@ -79,7 +79,7 @@ export const library: Messages['library'] = {
     noMatchHint: 'A pesquisa procura em títulos, compositores e coleções.',
   },
   announce: {
-    dealt: 'Outras peças mostradas',
+    shuffled: 'Estantes embaralhadas',
     counted: (name: string, n: number) => `${name}: ${pieces(n)}`,
     showing: (shown: number, total: number) =>
       `Mostrando ${formatNumber('pt', shown)} de ${formatNumber('pt', total)}`,

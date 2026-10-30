@@ -124,12 +124,16 @@
 
 /* The level pills, then the deal control at the line's end. The pills share one row from 360 px
    (library.spec.ts); where the control does not fit beside them it wraps to a line of its own,
-   still at the end. */
+   still at the end. Only the columns have a gap: the wrapped control's own 44 px is the space
+   before the first shelf. The row keeps the control's height on an opened shelf, where it is not
+   shown, so the list does not move up when a shelf opens. */
 .level-choice {
+  min-height: 44px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  column-gap: 0.5rem;
+  row-gap: 0;
 }
 
 /* A round 44 px target and a staff drawn 44 by 26 px, like the theme switch's round hover fill

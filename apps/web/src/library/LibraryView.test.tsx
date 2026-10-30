@@ -1061,7 +1061,7 @@ describe('LibraryView: the fade of a changed list (UI batch spec 6.4)', () => {
 
 describe('LibraryView: dealing the library again (issue 228)', () => {
   afterEach(() => resetLocaleForTests());
-  const control = () => screen.getByRole('button', { name: 'Show other pieces' });
+  const control = () => screen.getByRole('button', { name: 'Shuffle the shelves' });
   const sampleSlugs = () => rows().map((r) => r.getAttribute('aria-label') ?? r.textContent);
   it('stands after the level pills, outside the list, and is drawn in ink', () => {
     const { container } = render(<LibraryView />);
@@ -1073,16 +1073,25 @@ describe('LibraryView: dealing the library again (issue 228)', () => {
     expect(control().querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
     expect(container.querySelectorAll('.is-red')).toHaveLength(1);
   });
-  it('is there on an open shelf too, and not in search or in a small library', async () => {
+  it('is named for a tooltip too', () => {
+    render(<LibraryView />);
+    expect(control()).toHaveAttribute('title', 'Shuffle the shelves');
+  });
+  it('stands on the arrival page only: not on an open shelf, in search or in a small library', async () => {
     useAppStore.setState({ libraryShelf: 'songs' });
+    render(<LibraryView />);
+    expect(screen.getByRole('radio', { name: 'Easy' })).toBeChecked();
+    expect(screen.queryByRole('button', { name: 'Shuffle the shelves' })).toBeNull();
+    cleanup();
+    useAppStore.setState({ libraryShelf: null });
     render(<LibraryView />);
     expect(control()).toBeInTheDocument();
     await userEvent.type(screen.getByRole('searchbox'), 'minuet');
-    expect(screen.queryByRole('button', { name: 'Show other pieces' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Shuffle the shelves' })).toBeNull();
     cleanup();
     library.limit = 30;
     render(<LibraryView />);
-    expect(screen.queryByRole('button', { name: 'Show other pieces' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Shuffle the shelves' })).toBeNull();
   });
   it('draws the samples of every shelf again, keeps the focus and fades the rows in', async () => {
     const { container } = render(<LibraryView />);
@@ -1102,39 +1111,48 @@ describe('LibraryView: dealing the library again (issue 228)', () => {
     await userEvent.click(control());
     const dealt = sampleSlugs();
     first.unmount();
+    // Playing one of the dealt pieces makes it the last one played; Back must not draw again.
+    const label = dealt[0]!;
+    const played = libraryPieces().find((p) => label.startsWith(`Open ${p.title}`))!;
+    useAppStore.setState({ settings: { ...DEFAULT_SETTINGS, lastPlayed: played.slug } });
     render(<LibraryView />);
     expect(useAppStore.getState().libraryDeal).toBe(2);
     expect(sampleSlugs()).toEqual(dealt);
   });
-  it('goes back to the first page of an open shelf with another order', async () => {
+  it('lists an opened shelf in the order the deal gave it, after shelves were dealt', async () => {
     library.whole = true;
-    useAppStore.setState({
-      libraryLevel: 'challenging',
-      libraryShelf: 'classical',
-      libraryPages: 3,
-    });
+    useAppStore.setState({ libraryLevel: 'challenging' });
     render(<LibraryView />);
-    expect(rows()).toHaveLength(120);
-    const before = sampleSlugs().slice(0, 40);
+    await userEvent.click(screen.getByRole('button', { name: /^All \d+ classical pieces$/ }));
+    const order = sampleSlugs();
+    await userEvent.click(screen.getByRole('button', { name: 'All styles' }));
     await userEvent.click(control());
-    expect(useAppStore.getState().libraryPages).toBe(1);
-    expect(rows()).toHaveLength(40);
-    expect(control()).toHaveFocus();
-    expect(sampleSlugs()).not.toEqual(before);
-    expect(useAppStore.getState().libraryShelf).toBe('classical');
+    await userEvent.click(screen.getByRole('button', { name: /^All \d+ classical pieces$/ }));
+    expect(sampleSlugs()).not.toEqual(order);
   });
-  it('says Other pieces dealt once per press, also the second time, and nothing on arrival', async () => {
+  it('does not swallow the announcements of a shelf opened after a press', async () => {
+    library.whole = true;
+    useAppStore.setState({ libraryLevel: 'challenging' });
+    render(<LibraryView />);
+    await userEvent.click(control());
+    await userEvent.click(screen.getByRole('button', { name: /^All 250 classical pieces$/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
+    await waitFor(() =>
+      expect(screen.getByTestId('library-announcement')).toHaveTextContent('Showing 80 of 250'),
+    );
+  });
+  it('says Shelves shuffled once per press, also the second time, and nothing on arrival', async () => {
     render(<LibraryView />);
     const region = screen.getByTestId('library-announcement');
     await new Promise((r) => setTimeout(r, 700));
     expect(region).toHaveTextContent('');
     await userEvent.click(control());
-    await waitFor(() => expect(region).toHaveTextContent('Other pieces dealt'));
+    await waitFor(() => expect(region).toHaveTextContent('Shelves shuffled'));
     const changes: string[] = [];
     const watch = new MutationObserver(() => changes.push(region.textContent ?? ''));
     watch.observe(region, { childList: true, characterData: true, subtree: true });
     await userEvent.click(control());
-    await waitFor(() => expect(changes).toContain('Other pieces dealt'));
+    await waitFor(() => expect(changes).toContain('Shelves shuffled'));
     expect(changes[0]).toBe('');
     watch.disconnect();
   });
@@ -1149,6 +1167,6 @@ describe('LibraryView: dealing the library again (issue 228)', () => {
   it('is named in the language on screen', async () => {
     await act(() => chooseLocale('fr'));
     render(<LibraryView />);
-    expect(screen.getByRole('button', { name: 'Voir d’autres morceaux' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mélanger les rayons' })).toBeInTheDocument();
   });
 });

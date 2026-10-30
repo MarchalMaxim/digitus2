@@ -41,12 +41,16 @@ test('both workers go after a long piece, and come back for a new width, a hand 
   await expect.poll(() => firstPage.getAttribute('viewBox'), { timeout: 20_000 }).not.toBe(wide);
   await expect.poll(() => workers(page, 'verovio'), { timeout: 10_000 }).toBe(0);
 
-  // A hand size change fingers it again in a fresh engine worker.
+  // A hand size change fingers it again in a fresh engine worker. On this piece the new fingering
+  // makes or breaks a chord repeated in its bar (issue 253), so the piece is laid out again, in a
+  // fresh layout worker that goes too.
   const before = (await digits.allTextContents()).join();
   await page.getByLabel('Hand size').selectOption('child');
   await expect
     .poll(async () => (await digits.allTextContents()).join(), { timeout: 20_000 })
     .not.toBe(before);
+  await expect.poll(() => layouts, { timeout: 20_000 }).toBe(3);
+  await expect.poll(() => workers(page, 'verovio'), { timeout: 10_000 }).toBe(0);
 
   // The library warms a layout worker up for the next piece, and a short piece keeps it.
   await page.evaluate(() => (location.hash = '#/'));
@@ -54,7 +58,7 @@ test('both workers go after a long piece, and come back for a new width, a hand 
   await page.evaluate((slug) => (location.hash = `#/piece/${slug}`), SHORT);
   await expect(page.locator('.score-sheet g.fing')).toHaveCount(64, { timeout: 20_000 });
   await expect.poll(() => workers(page, 'verovio'), { timeout: 10_000 }).toBe(1);
-  expect(layouts).toBe(3);
+  expect(layouts).toBe(4);
   expect(peakLayouts).toBe(1);
   expect(errors).toEqual([]);
 });

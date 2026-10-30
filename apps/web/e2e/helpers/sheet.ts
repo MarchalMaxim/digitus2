@@ -29,6 +29,12 @@ export function digitCount(page: Page): Promise<number> {
   });
 }
 
+/**
+ * The digits K.545 (1,288 notes) draws at the default hand size: a chord that repeats an earlier
+ * chord of its hand in its bar with the same fingers has none (issue 253).
+ */
+export const K545_DIGITS = 1231;
+
 /** The piece has `count` digits in all, whichever pages are in the DOM. */
 export async function expectDigits(page: Page, count: number, timeout = 20_000): Promise<void> {
   await expect.poll(() => digitCount(page), { timeout }).toBe(count);

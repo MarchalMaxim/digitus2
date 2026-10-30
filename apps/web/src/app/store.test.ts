@@ -450,6 +450,21 @@ describe('favourites (issue #78)', () => {
   });
 });
 
+describe('dealing the library again (issue 228)', () => {
+  const S = () => useAppStore.getState();
+  it('counts the presses of the visit, sends the list back to its first page and is not saved', () => {
+    expect(S().libraryDeal).toBe(0);
+    S().setLibraryPages(3);
+    S().dealLibrary();
+    S().dealLibrary();
+    expect(S().libraryDeal).toBe(2);
+    expect(S().libraryPages).toBe(1);
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{"state":{}}').state;
+    expect(saved.libraryDeal).toBeUndefined();
+    useAppStore.setState({ libraryDeal: 0 });
+  });
+});
+
 describe('the default settings', () => {
   it('start a beginner with a medium hand, both hands, a count-in and nothing else on', () => {
     expect(DEFAULT_SETTINGS).toEqual({

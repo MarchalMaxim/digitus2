@@ -122,9 +122,48 @@
   text-align: left;
 }
 
+/* The level pills, then the deal control at the line's end. The pills share one row from 360 px
+   (library.spec.ts); where the control does not fit beside them it wraps to a line of its own,
+   still at the end. */
 .level-choice {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
+}
+
+/* A round 44 px target and a staff drawn 44 by 26 px, like the theme switch's round hover fill
+   (base.css, .theme-toggle). The staff's lines are fainter than its notes. */
+.tune-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+}
+
+.tune-button svg {
+  width: 44px;
+  height: 26px;
+  max-width: none;
+  overflow: visible;
+}
+
+.tune-line {
+  opacity: 0.55;
+}
+
+/* The notes leap one after another (--note is the note's place in the tune), each overshooting a
+   little before it settles. The tokens are 0 under reduced motion: the tune simply changes. */
+.tune-note {
+  transition: transform var(--dur-spring) var(--ease-spring);
+  transition-delay: calc(var(--note) * var(--dur-spring-step));
 }
 
 /* Pills wrap onto a second row on a phone: every pill stays in view (spec 2, 4.1). */

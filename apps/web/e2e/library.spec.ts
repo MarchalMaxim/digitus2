@@ -114,6 +114,40 @@ test('library: the first screen at this width (spec 17)', async ({ page }) => {
   expect(g.overflow, at).toBeLessThanOrEqual(0);
 });
 
+// Issue 228: the control after the level pills deals the library again. The five samples of every
+// shelf change, the red stays single, and the four pills still share one row (from 360 px) beside
+// the control or above it.
+test('library: the deal control draws other samples and keeps the pills on one row', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await libraryReady(page);
+  const deal = page.getByRole('button', { name: 'Show other pieces' });
+  await expect(deal).toBeVisible();
+  const names = () => pieceRows(page).evaluateAll((rows) => rows.map((r) => r.ariaLabel));
+  const before = await names();
+  await deal.click();
+  await expect.poll(names).not.toEqual(before);
+  await expect(pieceRows(page)).toHaveCount(arrivalRows('easy'));
+  await expect(deal).toBeFocused();
+  await expectOneRed(page, 'library dealt again');
+  await expectNoSeriousA11y(page, 'library dealt again');
+  const g = await page.evaluate(() => ({
+    width: window.innerWidth,
+    pills: [...document.querySelectorAll('.pill')].map((p) => p.getBoundingClientRect().top),
+    control: document.querySelector('.tune-button')!.getBoundingClientRect().toJSON(),
+    overflow:
+      document.documentElement.scrollWidth -
+      Math.ceil(document.documentElement.getBoundingClientRect().width),
+  }));
+  expect(g.pills).toHaveLength(4);
+  for (const top of g.pills) expect(top, JSON.stringify(g)).toBe(g.pills[0]);
+  expect(g.control.right, JSON.stringify(g)).toBeLessThanOrEqual(g.width);
+  expect(g.control.width).toBe(44);
+  expect(g.control.height).toBe(44);
+  expect(g.overflow, JSON.stringify(g)).toBeLessThanOrEqual(0);
+});
+
 // UI batch review and design section 17: the words a first visit reads before the first piece.
 // With shelves they are 41: the name 1, the sentence 14, the red button 6, the own-score line 4
 // (issue 239: a visitor with a file in hand finds it on the first screen), the four pills 4, the

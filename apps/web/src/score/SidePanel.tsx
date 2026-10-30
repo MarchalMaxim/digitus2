@@ -96,8 +96,8 @@ export function SidePanel({
     ready && !exporting && xml !== null && plainScore !== null && plainAssignment !== null;
 
   // Exports the plain score with the fingering its pages show (the engine's, or the editor's when
-  // that is shown), never the added notes: the engine worker writes it into the source MusicXML,
-  // and the browser saves the text.
+  // that is shown), never the added notes, and every digit, a repeated chord's included: the
+  // engine worker writes it into the source MusicXML, and the browser saves the text.
   const onExport = async () => {
     if (!canExport) return;
     setExporting(true);

@@ -294,6 +294,33 @@ describe('paper preparation', () => {
     await vi.waitFor(() => expect(window.print).toHaveBeenCalledOnce());
   });
 
+  it("writes the engine's fingering with repeated chords bare and the editor's as published", async () => {
+    vi.spyOn(rendererModule, 'createRenderer').mockReturnValue({
+      render: vi.fn().mockResolvedValue({ pages: ['<svg/>'], ms: 1 }),
+      dispose: vi.fn(),
+      warmUp: vi.fn(),
+    });
+    const fingeredXml = vi.fn().mockResolvedValue('<score-partwise/>');
+    vi.spyOn(services, 'engine', 'get').mockReturnValue({ fingeredXml } as never);
+    window.print = vi.fn(() => window.dispatchEvent(new Event('afterprint')));
+    const editorial = { n0: { finger: 1 } } as never;
+    const doc = (assignment: never) =>
+      readyDoc({
+        xml: '<score-partwise/>',
+        score: { notes: [], measures: [] } as never,
+        assignment,
+        editorial,
+      });
+    const view = renderPanel(doc({ n0: { finger: 2 } } as never));
+    await userEvent.click(screen.getByRole('button', { name: /^Print$/ }));
+    await vi.waitFor(() => expect(window.print).toHaveBeenCalledTimes(1));
+    view.unmount();
+    renderPanel(doc(editorial));
+    await userEvent.click(screen.getByRole('button', { name: /^Print$/ }));
+    await vi.waitFor(() => expect(window.print).toHaveBeenCalledTimes(2));
+    expect(fingeredXml.mock.calls.map((c) => c[3])).toEqual([true, false]);
+  });
+
   it('disposes pending preparation and discards its late answer when the score is left', async () => {
     let finish: (value: { pages: string[]; ms: number }) => void = () => undefined;
     const engrave = vi.fn(

@@ -11,6 +11,7 @@ import {
   solveFingering,
   unpackMusicXml,
 } from '@digitus2/engine';
+import { repeatedChordIds } from '../score/repeatedChords.js';
 import type { EngineRequest, EngineResponse } from './protocol.js';
 
 /** 'folder/Twinkle.mid' -> 'Twinkle': the file name a MIDI import falls back to for its title. */
@@ -88,7 +89,12 @@ export function handle(req: EngineRequest): EngineResponse {
           id: req.id,
           ok: true,
           type: 'fingeredXml',
-          xml: injectFingerings(req.xml, req.score, req.assignment),
+          xml: injectFingerings(
+            req.xml,
+            req.score,
+            req.assignment,
+            req.bareRepeatedChords ? { bare: repeatedChordIds(req.score, req.assignment) } : {},
+          ),
         };
       case 'embellish': {
         // The guard solves and lints at every hand size with the app's weight set, so the

@@ -29,7 +29,15 @@ export type EngineRequest =
       tolerateScanTies?: boolean;
     }
   | { id: number; type: 'solve'; score: Score; profile: HandSize; pins?: Assignment }
-  | { id: number; type: 'fingeredXml'; xml: string; score: Score; assignment: Assignment }
+  | {
+      id: number;
+      type: 'fingeredXml';
+      xml: string;
+      score: Score;
+      assignment: Assignment;
+      /** The repeats of a chord in a bar get no digits (`repeatedChordIds`): the engine's fingering on the page. */
+      bareRepeatedChords?: true;
+    }
   /** "Add notes between": the guarded light embellishment of a plain MusicXML text. */
   | { id: number; type: 'embellish'; xml: string };
 

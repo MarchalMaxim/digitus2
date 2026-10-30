@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseMusicXml } from '../musicxml/read.js';
 import { separateHands } from './handSeparation.js';
+import { importMidi } from './import.js';
 import { detectPickup } from './pickup.js';
 import { quantize } from './quantize.js';
 import { parseMidiFile } from './read.js';
@@ -122,6 +123,32 @@ describe.skipIf(!existsSync(MIDI) || !existsSync(SRC))(
       expect(wrong).toEqual([]);
       expect(found.length).toBeGreaterThanOrEqual(7);
       expect(found).toContain('504');
+    });
+  },
+);
+
+/**
+ * Träumerei (Mutopia 504) is not in the library, so its truth is its LilyPond source: the
+ * `repeattr` voice spaces the bars of the piece, `\partial 4` and one `s4` for the pickup, then one
+ * `s1` per full 4/4 bar. The import must give the same bars: a quarter-note first bar and the
+ * source's full bars after it.
+ */
+describe.skipIf(!existsSync(SRC) || !existsSync(MIDI))(
+  'Traeumerei against its LilyPond source',
+  () => {
+    it('imports with the pickup and the bar count of the source', () => {
+      const ly = readFileSync(
+        join(SRC, 'ftp/SchumannR/O15/SchumannOp15No07/SchumannOp15No07.ly'),
+        'latin1',
+      ).replace(/%.*$/gm, '');
+      const block = ly.slice(ly.indexOf('repeattr ='), ly.indexOf('dynamictr ='));
+      expect(block).toMatch(/partial 4\s+s4/);
+      const fullBars = (block.match(/\bs1\b/g) ?? []).length;
+      expect(fullBars).toBe(24);
+      const midi = readFileSync(join(MIDI, '504/SchumannOp15No07.mid'));
+      const { score } = importMidi(new Uint8Array(midi));
+      expect(score.measures).toHaveLength(1 + fullBars);
+      expect(score.measures[0]!.lengthTicks).toBe(score.measures[1]!.lengthTicks / 4);
     });
   },
 );

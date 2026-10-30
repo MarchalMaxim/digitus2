@@ -101,20 +101,7 @@ describe('the score view in another language', () => {
 
   it('writes the MIDI import panel in Portuguese with solfège note names', async () => {
     await speak('pt');
-    render(
-      <MidiImportPanel
-        info={{
-          quantizedMovedShare: 0.03,
-          grids: { '16th': 10, '16th-triplet': 2, '32nd': 0 },
-          splitMidi: null,
-          warnings: [],
-        }}
-        right={1}
-        left={22}
-        splitMidi={null}
-        onSplitChange={vi.fn()}
-      />,
-    );
+    render(<MidiImportPanel right={1} left={22} splitMidi={null} onSplitChange={vi.fn()} />);
     expect(screen.getByText('Mão direita: 1 nota · mão esquerda: 22 notas')).toBeInTheDocument();
     expect(screen.getByLabelText('Divisão das mãos')).toHaveValue('auto');
     expect(screen.getByRole('option', { name: 'Dó4' })).toBeInTheDocument();

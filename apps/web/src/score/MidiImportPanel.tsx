@@ -1,9 +1,7 @@
-import type { MidiInfo } from '@digitus2/engine';
 import { useT } from '../i18n/i18n.js';
 import { handCountLine, noteName, SPLIT_KEYS } from './midiCopy.js';
 
 export interface MidiImportPanelProps {
-  info: MidiInfo;
   right: number;
   left: number;
   splitMidi: number | null;

@@ -15,15 +15,12 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { readLibraryScore } from '../../../cli/libraryScore.js';
 import { parseMusicXml } from '../musicxml/read.js';
-import { separateHands } from './handSeparation.js';
-import { detectPickup } from './pickup.js';
-import type { QuantizedNote } from './quantize.js';
+import { pickupTrial } from './pickup.truth.js';
 
 const repo = new URL('../../../../../', import.meta.url);
 const read = (path: string) => fileURLToPath(new URL(path, repo));
 const MAX_BYTES = process.env.DIGITUS2_PICKUP_FULL ? Infinity : 15 * 1024;
-const TICKS_PER_QUARTER = 480;
-/** A floor of right pickups, so a rule tightened to nothing fails (the library has 61, 35 of them under the size cap). */
+/** A floor of right pickups, so a rule tightened to nothing fails (the library has 60, 34 of them under the size cap). */
 const MIN_RIGHT = process.env.DIGITUS2_PICKUP_FULL ? 55 : 30;
 
 interface Entry {
@@ -43,28 +40,9 @@ describe('pickup detection over the built-in library', () => {
       await new Promise((resolve) => setImmediate(resolve));
       const path = read(`content/${entry.files.score}`);
       if (statSync(path).size > MAX_BYTES) continue;
-      const score = parseMusicXml(readLibraryScore(path)).score;
-      const time = score.timeSignatures[0];
-      if (!time) continue;
-      const k = TICKS_PER_QUARTER / score.divisions;
-      const notes = score.notes
-        .filter((n) => !n.isGrace && n.offsetTick > n.onsetTick)
-        .map((n) => ({ onset: n.onsetTick * k, offset: n.offsetTick * k, midi: n.midi }))
-        .filter((n) => Number.isInteger(n.onset) && Number.isInteger(n.offset))
-        .sort((a, b) => a.onset - b.onset || a.midi - b.midi);
-      if (notes.length < 8 || notes[0]!.onset !== 0) continue;
-      const nominal = (time.beats * 4 * score.divisions) / time.beatType;
-      const first = score.measures[0]!;
-      const truth = first.lengthTicks < nominal ? first.lengthTicks * k : 0;
-      const quantized: QuantizedNote[] = notes.map((n, i) => ({
-        ...n,
-        onsetSec: 0,
-        velocity: 80,
-        channel: 0,
-        track: 0,
-        sources: [i],
-      }));
-      const got = detectPickup(notes, separateHands(quantized), time, TICKS_PER_QUARTER);
+      const trial = pickupTrial(parseMusicXml(readLibraryScore(path)).score);
+      if (!trial) continue;
+      const { truth, got } = trial;
       if (truth === 0) {
         fullBars++;
         if (got !== 0) falsePickups.push(`${entry.slug}: ${got}`);

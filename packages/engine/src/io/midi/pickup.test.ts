@@ -130,6 +130,39 @@ describe('detectPickup on pieces that open on beat 1 with a bar-long pattern', (
     expect(detectBoth(specs, { beats: 4, beatType: 4 })).toEqual([0, 0]);
   });
 
+  it.each([1, 3, 5])(
+    'finds no pickup in the closing-chord waltz when %i of its opening bars have a bass on beat 1',
+    (bassBars) => {
+      const specs: Spec[] = [];
+      for (let bar = 0; bar < 16; bar++) {
+        const t = bar * 1440;
+        for (let k = 0; k < 3; k++)
+          specs.push([t + k * 480, t + (k + 1) * 480, 72 + ((bar + k) % 5)]);
+        if (bar >= 7 - bassBars && bar < 7) specs.push([t, t + 480, 45]);
+        specs.push([t + 480, t + 960, 52], [t + 480, t + 960, 55]);
+        specs.push([t + 960, t + 1440, 52], [t + 960, t + 1440, 55]);
+      }
+      const end = 16 * 1440;
+      specs.push([end, end + 480, 72], [end, end + 480, 76], [end, end + 480, 48]);
+      expect(detectBoth(specs, { beats: 3, beatType: 4 })).toEqual([0, 0]);
+    },
+  );
+
+  it('finds no pickup in the closing-chord backbeat piece with one short bass on beat 1 of its eighth bar', () => {
+    const specs: Spec[] = [];
+    for (let bar = 0; bar < 16; bar++) {
+      const t = bar * 1920;
+      for (let k = 0; k < 4; k++)
+        specs.push([t + k * 480, t + (k + 1) * 480, 72 + ((bar + k) % 5)]);
+      if (bar === 7) specs.push([t, t + 120, 43]);
+      specs.push([t + 480, t + 960, 48], [t + 480, t + 960, 55]);
+      specs.push([t + 1440, t + 1920, 48], [t + 1440, t + 1920, 55]);
+    }
+    const end = 16 * 1920;
+    specs.push([end, end + 480, 72], [end, end + 480, 76], [end, end + 480, 48]);
+    expect(detectBoth(specs, { beats: 4, beatType: 4 })).toEqual([0, 0]);
+  });
+
   it('finds no pickup in 4/4 whose left hand enters on beat 2 with no bass on the later downbeats and whose last note ends on beat 2', () => {
     const specs: Spec[] = [];
     specs.push([0, 480, 72]);
@@ -156,7 +189,18 @@ describe('detectPickup', () => {
       specs.push([s, s + (bar < 4 ? 1680 : 960), 48]);
       for (let k = 0; k < 4; k++) specs.push([s + k * 480, s + (k + 1) * 480, 72 + k]);
     }
+    specs.push([480 + 6 * 1920, 480 + 7 * 1920, 72]); // a closing bar-long note on the shifted downbeat
     expect(detect(specs)).toBe(480);
+  });
+
+  it('finds no pickup when the last note is a quarter on the last beat of the unshifted bar', () => {
+    const specs: Spec[] = [[0, 480, 67]];
+    for (let bar = 0; bar < 6; bar++) {
+      const s = 480 + bar * 1920;
+      specs.push([s, s + (bar < 4 ? 1680 : 960), 48]);
+      for (let k = 0; k < 4; k++) specs.push([s + k * 480, s + (k + 1) * 480, 72 + k]);
+    }
+    expect(detect(specs)).toBe(0);
   });
 
   it('keeps a waltz whose left hand rests on beat 1 of the first bar and plays on beats 2 and 3', () => {
@@ -187,8 +231,9 @@ describe('detectPickup', () => {
       specs.push([s, s + (bar < 4 ? 1680 : 960), 48]);
       for (let k = 0; k < 4; k++) specs.push([s + k * 480, s + (k + 1) * 480, 72 + k]);
     }
+    specs.push([480 + 6 * 1920, 480 + 7 * 1920, 72]);
     expect(detect(specs)).toBe(480);
-    expect(detect([...specs, [12000, 12720, 72]])).toBe(0);
+    expect(detect([...specs, [15600, 16320, 72]])).toBe(0);
   });
 
   it('needs no ending when both rules propose the same pickup', () => {

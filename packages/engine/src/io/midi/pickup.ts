@@ -122,7 +122,10 @@ export function detectPickup(
 
   if (proposalA !== 0 && proposalA === proposalB && proposalA < MAX_PICKUP_FRACTION * L)
     return proposalA;
-  const ruleA = proposalA !== 0 && endingAgrees(proposalA) ? proposalA : 0;
+  // A last note that starts on a barline of the unshifted grid and ends on the next shifted one is
+  // a closing chord of a beat or so: the unshifted reading explains it as well as the shifted one.
+  const ruleA =
+    proposalA !== 0 && endingAgrees(proposalA) && mod(lastOnset, L) !== 0 ? proposalA : 0;
   const ruleB =
     proposalB !== 0 &&
     endingAgrees(proposalB) &&

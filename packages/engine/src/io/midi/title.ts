@@ -39,8 +39,10 @@ const GENERIC_WORDS = new Set(
    grand acoustic bright electric honky tonk keyboard keys harpsichord organ strings string
    ensemble violin viola cello flute oboe clarinet bassoon horn trumpet guitar harp choir vocals
    vox drums percussion score partitur partition partitura klavier flügel flugel fluegel clavier
-   clavecin cembalo mano main mão mao rechte linke rechter linker direita esquerda
-   rechterhand linkerhand`.split(/\s+/),
+   clavecin cembalo mano main mão mao rechte linke rechter linker direita esquerda esquerdo
+   rechterhand linkerhand droit droits destra sinistra destro sinistro derecho izquierdo direito
+   pista piste spoor faixa spur traccia sin sans sem zonder senza ohne titulo título titre titel
+   titolo unbenannt unbenannte partituur`.split(/\s+/),
 );
 const SOFTWARE_OR_RIGHTS =
   /copyright|\(c\)|©|all rights|generated|lilypond|musescore|sibelius|\bfinale\s+(?:v?\d|\()|cakewalk|sonar|garageband|noteworthy|http|www\.|\b(?:sequenced|created|arranged|edited|transcribed|programmed|typeset|made)\s+(?:by|with)\b/;
@@ -61,18 +63,29 @@ export function isGenericName(name: string): boolean {
 const ABBREVIATIONS: Readonly<Record<string, string>> = { op: 'Op.', no: 'No.', nr: 'Nr.' };
 
 /**
- * "SchumannOp15No07" -> "Schumann Op. 15 No. 7": words split at case and digit changes, a stem
- * without spaces gets its hyphens and underscores read as spaces, and opus and number
- * abbreviations lose their zeros. A stem with spaces keeps its own spacing. Never capitalises.
+ * "SchumannOp15No07" -> "Schumann Op. 15 No. 7": in a stem without spaces, hyphens, underscores
+ * and dots read as spaces and words split where the case changes (but not after the lone first
+ * letter of a word: "dOr" stays; a dot after a capital is an initial or a catalogue letter and
+ * stays: "J.S.Bach", "K.545") and between a word and its number ("prelude23" reads
+ * "prelude 23"); opus and number abbreviations get a full stop and lose their zeros ("op11no1"
+ * reads "Op. 11 No. 1"). A stem with spaces keeps its own spacing. Never capitalises and never
+ * adds a word the file name does not have.
  */
 export function cleanFileTitle(stem: string): string {
   let s = stem.replace(/_/g, ' ');
   if (!/\s/.test(stem))
-    s = s.replace(/(?<=\S)-(?=\S)/g, ' ').replace(/(?<=[\p{Ll}\p{N}])(?=\p{Lu})/gu, ' ');
+    s = s
+      .replace(/(?<=\S)-(?=\S)|(?<=[\p{Ll}\p{N}])\.(?=\S)/gu, ' ')
+      .replace(/(?<![^\p{L}]\p{Ll}|^\p{Ll})(?<=[\p{Ll}\p{N}])(?=\p{Lu})/gu, ' ')
+      .replace(/(?<=\p{L}{3})(?=\p{N})/gu, ' ');
   s = s.replace(
-    /\b(op|no|nr)\s*0*(\d+)\b/gi,
+    /(?<!\p{L})(op|no|nr)\.?\s*0*(\d+)(?!\p{N})/giu,
     (_, word: string, n: string) => `${ABBREVIATIONS[word.toLowerCase()]!} ${n}`,
   );
-  s = s.replace(/\s+/g, ' ').trim();
+  s = s.replace(/(?<=Op\. \d+) n(?=\d)/giu, ' No. ');
+  s = s
+    .replace(/(?<=\S)(?=(?:Op|No|Nr)\. \d)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   return s === '' ? stem : s;
 }

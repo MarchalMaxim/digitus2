@@ -223,7 +223,6 @@ export function SidePanel({
       <FingerLegend className={legendAbove ? 'wide-only' : undefined} />
       {doc.midiInfo && plainScore && (
         <MidiImportPanel
-          info={doc.midiInfo}
           right={hands.right}
           left={hands.left}
           splitMidi={doc.splitMidi}

@@ -100,14 +100,14 @@ export interface PlayAlongOptions {
 
 /**
  * The status line's hint while the red waits (issue 182): shown until the first step is played.
- * `count` is the step's pitch count. `unheard`: no note has come from the piano yet, so the line
- * says it is not heard (issue 252); `restart`, then, the browser whose restart cures a Bluetooth
- * piano on Windows (`restartBrowser`).
+ * `count` is the step's pitch count. `unheard`: nothing has come from the piano yet, or for a
+ * minute, so the line says it is not heard (issue 252), also after the first pass; `restart`,
+ * then, the browser whose restart cures a Bluetooth piano on Windows (`restartBrowser`).
  */
 export interface AlongHint {
   count: number;
   unheard?: true;
-  restart?: 'Chrome' | 'Edge';
+  restart?: 'Chrome';
 }
 
 /**
@@ -679,8 +679,10 @@ export function usePlayAlong({
   const first = stretch ? (loopSpan(steps, stretch)?.first ?? -1) : 0;
   return useMemo(() => {
     const restart = heard ? null : restartBrowser(pianoNames);
+    // The hint goes after the first pass; the line that the piano is not heard stays while it is
+    // not, and comes back when it lapses (issue 252).
     const hint: AlongHint | null =
-      cuedHere && step && played === 0
+      cuedHere && step && (played === 0 || !heard)
         ? {
             count: step.pitches.length,
             ...(heard ? {} : { unheard: true as const }),

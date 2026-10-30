@@ -104,3 +104,73 @@ test('a listed piano that cannot be heard is never called connected, and the lin
   expect(log.filter((e) => e === 'reconnect')).toEqual([]);
   expect(log.filter((e) => e === 'first note').length).toBe(2);
 });
+
+test('a piano heard, then turned off and on with the page open, is not taken as heard once the page is shown again', async ({
+  page,
+}) => {
+  // The owner's evening: the score open and played, the piano turned off, the page left (a sleep,
+  // another tab), the piano on again. The browser keeps the port deaf; the page cannot know it
+  // until it is shown again, and then says it is not heard while the red waits.
+  await installFakeMidi(page, {
+    permission: 'granted',
+    playAlong: true,
+    platform: 'Windows',
+    inputs: [PORT],
+  });
+  await page.addInitScript(() => {
+    let hidden = false;
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => (hidden ? 'hidden' : 'visible'),
+    });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+    (window as unknown as { __visible(on: boolean): void }).__visible = (on) => {
+      hidden = !on;
+      document.dispatchEvent(new Event('visibilitychange'));
+    };
+  });
+  await page.goto(`/?audio=silent#/piece/${MINUET}`);
+  const midi = fakeMidi(page);
+  await scoreShown(page);
+  await midi.waitForStep();
+  await midi.playRed();
+  await expect.poll(() => midi.index()).toBe(1);
+  await expect(dockStatus(page)).toHaveText('');
+
+  // Away, the piano off and on: the port is deaf from now on.
+  await page.evaluate(() => {
+    const w = window as unknown as {
+      __fakeMidi: { deafen(): void };
+      __visible(on: boolean): void;
+    };
+    w.__visible(false);
+    w.__fakeMidi.deafen();
+  });
+  await expect(dockStatus(page)).toHaveText('');
+  await page.evaluate(() =>
+    (window as unknown as { __visible(on: boolean): void }).__visible(true),
+  );
+  await expect(dockStatus(page)).toHaveText(CURE_SCORE);
+  await expectOneRed(page, 'shown again, not heard');
+
+  // The reader plays the red note: nothing moves, and the line stays.
+  const step = await midi.waitForStep();
+  for (const pitch of step) await midi.noteOn(pitch);
+  await page.waitForTimeout(500);
+  expect(await midi.index()).toBe(1);
+  await expect(heldKeys(page)).toHaveCount(0);
+  await expect(dockStatus(page)).toHaveText(CURE_SCORE);
+  for (const pitch of step) await midi.noteOff(pitch);
+
+  // The home line says it too.
+  await page.goto('/');
+  await expect(page.locator('.piano-line [role="status"]')).toHaveText(CURE_HOME);
+
+  // Cured: heard at the first key, and the walk goes on.
+  await page.evaluate(() =>
+    (window as unknown as { __fakeMidi: { wake(): void } }).__fakeMidi.wake(),
+  );
+  await midi.noteOn(60);
+  await expect(page.locator('.piano-line [role="status"]')).toHaveText(CONNECTED);
+  await midi.noteOff(60);
+});

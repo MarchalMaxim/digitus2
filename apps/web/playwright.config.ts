@@ -68,7 +68,14 @@ export default defineConfig({
       : [
           {
             name: 'iphone',
-            use: { ...devices['iPhone 15'], launchOptions: { args: [] } },
+            // WebKit's trace takes a DOM snapshot around every action, and once a long score's
+            // pages are built each one costs seconds (K.545 ran past the test timeout): its traces
+            // keep the screenshots and the action log, without the DOM snapshots.
+            use: {
+              ...devices['iPhone 15'],
+              launchOptions: { args: [] },
+              trace: { mode: 'retain-on-failure' as const, snapshots: false },
+            },
             testMatch:
               /(scan-camera(-real)?|scan-grand-staff|scan-linked|play-along-home|phone-practice)\.spec\.ts/,
           },

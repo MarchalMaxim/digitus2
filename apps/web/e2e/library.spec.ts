@@ -831,12 +831,15 @@ test('library: a file dropped on a scrolled page shows the loader in the window'
 test('library: a read that never finishes gives the library back with the notice', async ({
   page,
 }) => {
-  await page.clock.install();
+  await page.clock.install({ time: new Date('2026-01-01T09:00:00Z') });
   await page.addInitScript(() => {
     File.prototype.arrayBuffer = () => new Promise<ArrayBuffer>(() => undefined);
   });
   await page.goto('/');
   await libraryReady(page);
+  // An installed clock runs with real time until it is paused: paused here, the 8 s are counted
+  // by runFor alone, however long a loaded machine takes between the steps.
+  await page.clock.pauseAt(new Date('2026-01-01T09:10:00Z'));
   await page.getByLabel('Open your own score').setInputFiles({
     name: 'never.musicxml',
     mimeType: 'application/xml',

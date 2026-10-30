@@ -15,6 +15,7 @@ import {
   resetPianoForTests,
   resumePiano,
   SEARCHING_AFTER_MS,
+  SILENT_AFTER_MS,
   subscribeNotes,
   turnOffPiano,
   useHeldPitches,
@@ -1001,6 +1002,88 @@ describe('heard: a piano is connected only once a note came', () => {
     act(() => link.events!.note({ on: false, midi: 60 }, []));
     act(() => link.events!.note({ on: true, midi: 64 }, [64]));
     expect(renders).toBe(before + 1);
+  });
+
+  // Heard once is not heard for good (issue 252): the piano turned off and on while the page holds
+  // the port leaves the port deaf and still listed, so the page tells it only by the silence.
+  describe('and lapses', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: ['setTimeout', 'clearTimeout', 'performance', 'Date'],
+      });
+    });
+    afterEach(() => {
+      resetPianoForTests();
+      vi.useRealTimers();
+    });
+    const elapse = (ms: number) =>
+      act(async () => {
+        await vi.advanceTimersByTimeAsync(ms);
+      });
+
+    it('waits a minute', () => {
+      expect(SILENT_AFTER_MS).toBe(60_000);
+    });
+
+    it('after a minute with nothing from the piano, and comes back at the next message', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      link.events!.heard!();
+      await elapse(SILENT_AFTER_MS - 1000);
+      expect(pianoHeard()).toBe(true);
+      await elapse(1500);
+      expect(pianoHeard()).toBe(false);
+      expect(status()).toBe('connected');
+      link.events!.heard!();
+      expect(pianoHeard()).toBe(true);
+    });
+
+    it('never while messages keep coming, however long', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      for (let i = 0; i < 8; i++) {
+        link.events!.heard!();
+        await elapse(SILENT_AFTER_MS / 2);
+        expect(pianoHeard()).toBe(true);
+      }
+      // One timer at most, however many messages came.
+      expect(vi.getTimerCount()).toBe(1);
+    });
+
+    it('when the page is shown again after being hidden', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      link.events!.heard!();
+      let hidden = true;
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => (hidden ? 'hidden' : 'visible'),
+      });
+      try {
+        document.dispatchEvent(new Event('visibilitychange'));
+        expect(pianoHeard()).toBe(true); // hidden: nothing is known yet
+        hidden = false;
+        document.dispatchEvent(new Event('visibilitychange'));
+        expect(pianoHeard()).toBe(false);
+        link.events!.heard!();
+        expect(pianoHeard()).toBe(true);
+      } finally {
+        delete (document as unknown as Record<string, unknown>).visibilityState;
+      }
+    });
+
+    it('leaves no timer and no listener after Turn off', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      link.events!.heard!();
+      expect(vi.getTimerCount()).toBe(1);
+      turnOffPiano();
+      expect(vi.getTimerCount()).toBe(0);
+      connectWith('A');
+      await askForPiano();
+      document.dispatchEvent(new Event('visibilitychange'));
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 
   it('leaves a silent connection as it is: reopening in the page never makes it hear', async () => {

@@ -169,10 +169,6 @@ describe('the status line', () => {
           'Your piano is not heard yet. If the red note does not move when you play it, turn the piano on, then close every Chrome window and open Chrome again.',
         ),
       );
-      expect(
-        scoreStatusLine({ ...ready, alongHint: { count: 1, unheard: true, restart: 'Edge' } })
-          ?.text,
-      ).toContain('close every Edge window and open Edge again.');
     });
 
     it('is in every language, singular and plural, heard or not, each its own', () => {

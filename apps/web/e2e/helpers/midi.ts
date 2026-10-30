@@ -68,6 +68,8 @@ interface FakeHost {
   deaf(): boolean;
   /** The piano heard again, as a new browser process hears it. */
   wake(): void;
+  /** The piano turned off and on while the browser holds its port: deaf from now on. */
+  deafen(): void;
 }
 
 interface FakeInput extends EventTarget {
@@ -350,6 +352,10 @@ export async function installFakeMidi(page: Page, o: FakeMidiOptions = {}): Prom
         wake() {
           deaf = false;
           keep('deaf', 'false');
+        },
+        deafen() {
+          deaf = true;
+          keep('deaf', 'true');
         },
       };
       w.__fakeMidi = host;

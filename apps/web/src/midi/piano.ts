@@ -64,22 +64,28 @@ export function bluetoothFlag(nav: Navigator | undefined = globalThis.navigator)
 
 /**
  * The browser to close and open again while a listed Bluetooth piano is not heard (issue 252):
- * Chrome and Edge on Windows keep the WinRT port they opened for the life of the browser process,
- * and a piano turned off and on (or off when the port was opened) leaves that port listed and
- * deaf. Windows keeps the port listed while the piano is off, so the browser never sees it go, and
- * no page can make the browser open it again; a new browser process does, with the piano on.
- * `names` are the connected inputs' names, one of them a Bluetooth port. Null otherwise, and on
- * any other system or browser.
+ * Chrome on Windows keeps the WinRT port it opened for the life of the browser process, and a
+ * piano turned off and on (or off when the port was opened) leaves that port listed and deaf.
+ * Windows keeps the port listed while the piano is off, so the browser never sees it go, and no
+ * page can make the browser open it again; a new browser process does, with the piano on.
+ * `names` are the connected inputs' names, one of them a Bluetooth port. Null otherwise, on any
+ * other system, and in Edge, which is not measured (its startup boost can keep it running with
+ * every window closed, and then the port stays deaf).
  */
 export function restartBrowser(
   names: readonly string[],
   nav: Navigator | undefined = globalThis.navigator,
-): 'Chrome' | 'Edge' | null {
+): 'Chrome' | null {
   if (!names.some((name) => /bluetooth/i.test(name))) return null;
-  const flag = bluetoothFlag(nav);
-  if (flag === null) return null;
-  return flag.startsWith('edge:') ? 'Edge' : 'Chrome';
+  return bluetoothFlag(nav)?.startsWith('chrome:') ? 'Chrome' : null;
 }
+
+/**
+ * With nothing from the piano for this long, it is no longer taken as heard (issue 252): a piano
+ * turned off and on while the page holds its port can leave the port deaf and still listed, and
+ * the page can tell that only by the silence. The next key makes it heard again.
+ */
+export const SILENT_AFTER_MS = 60_000;
 
 /** How long a granted request may stay pending before the line says it is looking for the piano. */
 export const SEARCHING_AFTER_MS = 2000;
@@ -94,6 +100,12 @@ let held: readonly number[] = NO_KEYS;
  * message proves it is heard.
  */
 let heardNow = false;
+/** When the piano was last heard, in performance.now() ms. */
+let lastHeardAtMs = 0;
+/** The one timer that lets `heardNow` lapse after `SILENT_AFTER_MS` (null when none runs). */
+let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+/** The page's visibility listener, while a connection is live: see `forgetWhenShown`. */
+let visibilityWatched = false;
 /** The lazy connection: null until access resolved, and again after Turn off. */
 let connection: OpenedAccess | null = null;
 /** The request in flight, shared by every press. */
@@ -182,6 +194,45 @@ function setHeard(next: boolean): void {
   notify(heardListeners);
 }
 
+/** A message came from the piano: heard, until `SILENT_AFTER_MS` passes with none. */
+function markHeard(): void {
+  lastHeardAtMs = performance.now();
+  setHeard(true);
+  if (silenceTimer === null) waitForSilence(SILENT_AFTER_MS);
+}
+
+/** One timer for any number of messages: at its end it waits on for the time still to go. */
+function waitForSilence(ms: number): void {
+  silenceTimer = setTimeout(() => {
+    silenceTimer = null;
+    const left = SILENT_AFTER_MS - (performance.now() - lastHeardAtMs);
+    if (left > 0) waitForSilence(left);
+    else setHeard(false);
+  }, ms);
+}
+
+/** Not heard any more, with nothing waiting to lapse. */
+function forgetHeard(): void {
+  if (silenceTimer !== null) clearTimeout(silenceTimer);
+  silenceTimer = null;
+  setHeard(false);
+}
+
+/**
+ * The page shown again after being hidden (a sleep, another tab): the piano may have been turned
+ * off and on meanwhile, so it is not taken as heard until it is heard again.
+ */
+function forgetWhenShown(): void {
+  if (document.visibilityState === 'visible') forgetHeard();
+}
+
+function watchVisibility(on: boolean): void {
+  if (on === visibilityWatched || typeof document === 'undefined') return;
+  visibilityWatched = on;
+  if (on) document.addEventListener('visibilitychange', forgetWhenShown);
+  else document.removeEventListener('visibilitychange', forgetWhenShown);
+}
+
 /**
  * Every merged note-on and note-off, synchronously as the messages arrive, with `heldPitches()`
  * already up to date. A listener that throws does not keep the others from hearing the note.
@@ -221,13 +272,13 @@ function releaseAll(): void {
 function applyInputs(names: readonly string[]): void {
   if (names.length === 0) {
     setSnapshot('none');
-    setHeard(false);
+    forgetHeard();
     releaseAll();
   } else setSnapshot('connected', names);
 }
 
 function applyNote(e: NoteMessage, keys: readonly number[]): void {
-  setHeard(true);
+  markHeard();
   setHeld(keys);
   emitNote(e);
 }
@@ -301,7 +352,7 @@ function connect(asking: boolean, reason: string): Promise<void> {
       if (live()) midiLog('ports', { ports });
     },
     heard: () => {
-      if (live()) setHeard(true);
+      if (live()) markHeard();
     },
   };
   pending = (async () => {
@@ -315,7 +366,8 @@ function connect(asking: boolean, reason: string): Promise<void> {
       }
       connection = opened;
       heard = 0;
-      setHeard(false);
+      forgetHeard();
+      watchVisibility(true);
       openedAtMs = performance.now();
       midiLog('opened', { reason });
       // Access without an input list yet is access without a piano.
@@ -373,7 +425,8 @@ export function turnOffPiano(): void {
     console.error(error);
   }
   releaseAll();
-  setHeard(false);
+  forgetHeard();
+  watchVisibility(false);
   setSnapshot('off');
   useAppStore.getState().setSettings({ playAlong: false });
 }
@@ -412,7 +465,11 @@ export function resetPianoForTests(): void {
   openedAtMs = 0;
   snapshot = null;
   held = NO_KEYS;
+  if (silenceTimer !== null) clearTimeout(silenceTimer);
+  silenceTimer = null;
+  watchVisibility(false);
   heardNow = false;
+  lastHeardAtMs = 0;
   noteListeners.clear();
   notify(snapshotListeners);
   notify(heldListeners);

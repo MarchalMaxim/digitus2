@@ -339,7 +339,7 @@ describe('the piano line', () => {
     expect(sentence()).toHaveTextContent('GO:PIANO MIDI 1 is connected.');
   });
 
-  it('names the cure for a Bluetooth piano on Windows Chrome and Edge while it is not heard', async () => {
+  it('names the cure for a Bluetooth piano on Windows Chrome while it is not heard', async () => {
     const windows = (brand: string) =>
       setNavigator('userAgentData', { platform: 'Windows', brands: [{ brand }] });
     const found = async (name: string) => {
@@ -359,11 +359,13 @@ describe('the piano line', () => {
     expect(sentence().textContent).toBe(
       'GO:PIANO MIDI 1 is connected. Open a piece and play the red note.',
     );
+    // Edge is not measured: its startup boost can keep it running with every window closed, and a
+    // browser that keeps running keeps the dead port. A USB piano on Windows, and a Bluetooth one
+    // elsewhere, get no cure: the failure is not theirs.
     windows('Microsoft Edge');
     expect((await found('GO:PIANO MIDI 1 (Bluetooth MIDI IN)')).text).toBe(
-      'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it. If nothing changes, turn the piano on, then close every Edge window and open Edge again.',
+      'GO:PIANO MIDI 1 is found but not heard yet. Press a key on it.',
     );
-    // A USB piano on Windows, and a Bluetooth one elsewhere, get no cure: it is not theirs.
     windows('Google Chrome');
     expect((await found('Digital Piano')).text).toBe(
       'Digital Piano is found but not heard yet. Press a key on it.',

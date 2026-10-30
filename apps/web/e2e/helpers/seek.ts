@@ -69,3 +69,22 @@ export function positionSec(page: Page): Promise<number> {
     (window as unknown as { __digitus2: { positionSec(): number } }).__digitus2.positionSec(),
   );
 }
+
+/** Waits until the page has stopped scrolling (ten frames at one `scrollY`) and returns it. */
+export function scrollSettled(page: Page): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let last = window.scrollY;
+        let still = 0;
+        const tick = () => {
+          const y = window.scrollY;
+          still = y === last ? still + 1 : 0;
+          last = y;
+          if (still >= 10) resolve(y);
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+}

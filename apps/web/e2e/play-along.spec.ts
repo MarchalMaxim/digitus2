@@ -16,7 +16,7 @@ import { closePractice, embellishDecided, openPractice, setLoopBars } from './he
 import { horizontalOverflow } from './helpers/overflow.js';
 import { expectOneRed } from './helpers/red.js';
 import { delayPianoSamples, PIANO_SAMPLES } from './helpers/samples.js';
-import { positionSec, redBars, redSettled, seekBar } from './helpers/seek.js';
+import { positionSec, redBars, redSettled, scrollSettled, seekBar } from './helpers/seek.js';
 
 // Playing along on the reader's own piano (issue 182): a digital piano over Web MIDI, here a
 // fake that the test drives (helpers/midi.ts). The home line asks the browser only when pressed;
@@ -1253,7 +1253,8 @@ test.describe('the score with a piano', () => {
     await expect(play(page)).not.toHaveAttribute('aria-busy');
     await expect(play(page)).not.toHaveClass(/is-red/);
     await expectOneRed(page, 'loading the piano for the other hand');
-    expect(requested.length).toBeGreaterThan(0);
+    // The samples are asked for after the player's chunk arrives, which can trail the status.
+    await expect.poll(() => requested.length).toBeGreaterThan(0);
 
     await midi.playRed(); // moves the red during the load
     expect(await midi.index()).toBe(1);
@@ -2410,23 +2411,4 @@ async function playToTheEnd(midi: ReturnType<typeof fakeMidi>): Promise<void> {
     if (now === -1 || now < played) return;
   }
   throw new Error('the piece did not finish');
-}
-
-/** Waits until the page has stopped scrolling (ten frames at one `scrollY`) and returns it. */
-function scrollSettled(page: Page): Promise<number> {
-  return page.evaluate(
-    () =>
-      new Promise<number>((resolve) => {
-        let last = window.scrollY;
-        let still = 0;
-        const tick = () => {
-          const y = window.scrollY;
-          still = y === last ? still + 1 : 0;
-          last = y;
-          if (still >= 10) resolve(y);
-          else requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }),
-  );
 }

@@ -14,6 +14,32 @@ async function myScores(page: Page) {
   await page.getByText('My scores', { exact: true }).click();
 }
 
+/** Waits until the saved-scores store itself holds `count` records, so a reload cannot beat a commit. */
+async function storedScores(page: Page, count: number) {
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const known = await indexedDB.databases();
+        if (!known.some((entry) => entry.name === 'digitus2.my-scores')) return 0;
+        const db = await new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open('digitus2.my-scores');
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+        try {
+          return await new Promise<number>((resolve, reject) => {
+            const counting = db.transaction('scores', 'readonly').objectStore('scores').count();
+            counting.onsuccess = () => resolve(counting.result);
+            counting.onerror = () => reject(counting.error);
+          });
+        } finally {
+          db.close();
+        }
+      }),
+    )
+    .toBe(count);
+}
+
 for (const count of [1, 2]) {
   test(`local library: keyboard removal preserves focus for ${count} saved scores`, async ({
     page,
@@ -46,6 +72,7 @@ for (const count of [1, 2]) {
     }
     await expect(page.getByRole('heading', { name: 'digitus2', exact: true })).toBeFocused();
     await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
+    await storedScores(page, 0);
     await page.reload();
     await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
   });
@@ -86,6 +113,7 @@ test('local library: draft bytes, reading order, explicit resume and deletion su
   await myScores(page);
   await page.getByRole('button', { name: 'Remove saved first.png' }).click();
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
+  await storedScores(page, 0);
   await page.reload();
   await expect(page.getByText('My scores', { exact: true })).toHaveCount(0);
 });
@@ -133,6 +161,7 @@ test('local library: recognized notation reopens without rescanning', async ({ p
   await page.getByRole('button', { name: 'Scan this score' }).click();
   await expect(page.locator('.scan-review svg').first()).toBeVisible();
   await myScores(page);
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   await page.reload();
   await page.getByText('My scores', { exact: true }).click();
   const before = calls.length;

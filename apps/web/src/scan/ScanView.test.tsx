@@ -514,10 +514,10 @@ it('shows the bar while a page is recognised, and no bar before or after', async
   }
 });
 
-it('allows five more seconds while the warm-up has not answered, and not once it has', async () => {
+it('allows six more seconds while the warm-up has not answered, and not once it has', async () => {
   const user = fakeClock();
   try {
-    // A PDF page is expected to take 16 s: 21 s, said as 25, while the warm-up is out.
+    // A PDF page is expected to take 25 s: 31 s, said as 35, while the warm-up is out.
     let answerHealth!: (response: Response) => void;
     stubService({
       health: () => new Promise((resolve) => (answerHealth = resolve)),
@@ -526,7 +526,7 @@ it('allows five more seconds while the warm-up has not answered, and not once it
     const pdf = new File(['%PDF-1.7'], 'score.pdf', { type: 'application/pdf' });
     render(<ScanView session={{ id: 'pdf', file: pdf }} />);
     await user.click(screen.getByRole('button', { name: 'Scan this score' }));
-    expect(await screen.findByText(en.scan.view.secondsLeft(25))).toBeVisible();
+    expect(await screen.findByText(en.scan.view.secondsLeft(35))).toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Cancel scan' }));
     await screen.findByRole('button', { name: 'Scan this score' });
     answerHealth(new Response(JSON.stringify({ protocol: 'digitus2-scan-v2' })));
@@ -534,7 +534,7 @@ it('allows five more seconds while the warm-up has not answered, and not once it
       await Promise.resolve();
     });
     await user.click(screen.getByRole('button', { name: 'Scan this score' }));
-    expect(await screen.findByText(en.scan.view.secondsLeft(20))).toBeVisible();
+    expect(await screen.findByText(en.scan.view.secondsLeft(25))).toBeVisible();
   } finally {
     vi.useRealTimers();
   }

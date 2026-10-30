@@ -1265,8 +1265,10 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
             <p className="small muted">{t.scan.view.where}</p>
             <div className="row" ref={scanActions}>
               {busy ? (
-                // Plain while the loader below carries the screen's one red.
+                // Plain while the loader below carries the screen's one red; the button changes at
+                // once from Scan this score, since a fade out of red would show two.
                 <Button
+                  className="scan-action"
                   disabled={phase === 'cancelling'}
                   onClick={() => {
                     void cancel();
@@ -1277,6 +1279,7 @@ export function ScanView({ session: initial }: { session: ScanSession }) {
               ) : (
                 // Plain while a new photo of a refused page carries the red.
                 <Button
+                  className="scan-action"
                   primary={refusedIndex < 0}
                   disabled={rotating}
                   onClick={() => {

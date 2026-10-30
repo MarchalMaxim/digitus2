@@ -169,7 +169,7 @@ Prices as published for Tier 1 regions ([Cloud Run pricing](https://cloud.google
 | Free each month                                 | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests                    |
 | Beyond the free grant                           | $0.000024 per vCPU-second, $0.0000025 per GiB-second, $0.40 per million requests |
 | One second of the service, 4 vCPU and 8 GiB     | $0.000116                                                                        |
-| Free recognition time a month                   | 45,000 s: about 1,300 photos of 35 s, or 2,800 PDF pages of 16 s                 |
+| Free recognition time a month                   | 45,000 s: about 1,300 photos of 35 s, or 1,800 PDF pages of 25 s                 |
 | What 10 US dollars' worth buys beyond the grant | about 86,000 s more, about 2,500 photos of 35 s                                  |
 | Worst case, one instance busy around the clock  | about $10 a day                                                                  |
 | A warm-up request                               | at least 100 ms of the instance, about $0.00001                                  |
@@ -187,7 +187,30 @@ The photo is the owner's flat phone photo of Boëllmann Op. 28 No. II, page 5 (`
 | The deployed service without the speed changes, first requests after a cold start | 4.5 s                                   | 34.0 s       | 15.8 s          |
 | The deployed service without the speed changes, warm                              | —                                       | 35.2 s       | 16.2 s          |
 
-The cold start is measured from outside: a health request after 40 idle minutes, with no instance left, answered in 4.5 s, and the next one in 0.06 s. Cloud Run's own system log agrees: 4 to 6 s from each instance start to the moment the container listens, across five starts. A reader whose warm-up finds no instance waits that long before the health answer. Cloud Run's front end can also answer a request itself, with 429 when no instance is available (during a rollout, or when the one instance is saturated) or with an error once billing is disabled; those answers carry no CORS headers, so the browser reports them as a failed request and the app shows that the scanner could not answer. The container is ready about 2 s after it starts. Each Audiveris job extracts its native libraries into its own cache, so cold and warm PDF times are alike. A Cloud Run vCPU is slower than a core of the owner's PC, and the photo path suffers most: with the same thread budget of 4, a photo takes about 3.5 times longer on the service than in the container at home and a PDF page about 1.9 times. Runs on the service also vary more than at home: the same warm photo took between 24 and 36 s across one day. A thread budget of 2 on the service was tried and is slower (31 to 32 s against 24 s with 4 on the same afternoon). The stage timings behind these numbers and the options they leave are in `docs/research/omr.md`.
+The cold start is measured from outside: a health request after 40 idle minutes, with no instance left, answered in 4.5 s, and the next one in 0.06 s. Cloud Run's own system log agrees: 3.4 to 6.3 s from each instance start to the moment the container listens, median 4.4 s, across 33 starts (below). A reader whose warm-up finds no instance waits that long before the health answer. Cloud Run's front end can also answer a request itself, with 429 when no instance is available (during a rollout, or when the one instance is saturated) or with an error once billing is disabled; those answers carry no CORS headers, so the browser reports them as a failed request and the app shows that the scanner could not answer. The container is ready about 2 s after it starts. Each Audiveris job extracts its native libraries into its own cache, so cold and warm PDF times are alike. A Cloud Run vCPU is slower than a core of the owner's PC, and the photo path suffers most: with the same thread budget of 4, a photo takes about 3.5 times longer on the service than in the container at home and a PDF page about 1.9 times. Runs on the service also vary more than at home: the same warm photo took between 24 and 36 s across one day. A thread budget of 2 on the service was tried and is slower (31 to 32 s against 24 s with 4 on the same afternoon). The stage timings behind these numbers and the options they leave are in `docs/research/omr.md`.
+
+### Measured on the deployed service
+
+The service logs one line per recognition (`kind`, `bytesIn`, `seconds`), and Cloud Run logs each instance start and the moment its container listens. The table is those two logs over the 60 days to the latest, read with `gcloud logging read 'resource.labels.service_name="digitus2-scan" AND jsonPayload.kind:*' --project digitus2-scan --freshness=60d --format=json` (the start lines: `textPayload:"Starting new instance"` and `textPayload:"STARTUP TCP probe succeeded"`, paired by `instanceId`). Percentiles interpolate linearly. "Current revisions" are the ones after the speed changes of issue 73 (revision 00008 on); the older ones are slower.
+
+| What                                                      | Requests | Median                | 90th percentile | Range          |
+| --------------------------------------------------------- | -------- | --------------------- | --------------- | -------------- |
+| Photo (JPEG or PNG), current revisions                    | 29       | 23.2 s                | 31.9 s          | 10.2 to 44.7 s |
+| Photo, every revision                                     | 88       | 25.1 s                | 34.2 s          | 8.8 to 44.7 s  |
+| PDF, Amazing Grace, 1 page (51,425 bytes), every revision | 18       | 17.7 s                | 19.6 s          | 14.1 to 19.7 s |
+| PDF, Amazing Grace, current revisions                     | 7        | 16.8 s                | 19.4 s          | 14.1 to 19.7 s |
+| PDF, 2 pages (62,934 bytes, the Träumerei)                | 1        | 49.5 s, 24.8 s a page |                 |                |
+| Cold start: instance start to the container listening     | 33       | 4.4 s                 | 5.2 s           | 3.4 to 6.3 s   |
+
+The app's estimate (`apps/web/src/scan/progress.ts`) counts the 90th percentile for a photo and for the warm-up, and the page time of the measured two-page PDF for a PDF page, each rounded up (a photo or a PDF page to 5 s, the warm-up to whole seconds), so it errs long: the countdown already says "overdue" when a page runs past it, and a bar that finishes early costs nothing.
+
+| Part                                                 | Counted | Because                                                                                       |
+| ---------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| A photo                                              | 35 s    | 31.9 s at the 90th percentile on the current revisions, 34.2 s over every revision            |
+| A PDF page                                           | 25 s    | 24.8 s a page for the one multi-page PDF in the log; Amazing Grace's single page needs 19.6 s |
+| The warm-up, while the scanner may still be starting | 6 s     | 5.2 s at the 90th percentile of cold starts, 6.3 s at most                                    |
+
+The 25 s a PDF page rests on that one two-page PDF: a fixed part and a per-page part cannot be told apart from two pieces of different density, so the figure is the slowest page time measured. Another multi-page PDF in the log is a reason to run the same rule again.
 
 ## Sources
 

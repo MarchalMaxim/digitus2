@@ -349,6 +349,11 @@
 .scan-use {
   transition: none;
 }
+
+/* Scan this score turns into Cancel scan as the loader takes the red: at once, since a fade would show two. */
+.scan-action {
+  transition: none;
+}
 .scan-problems button {
   transition: none;
 }

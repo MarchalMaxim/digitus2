@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { tempoFactorOf, useAppStore, type HandsMode } from '../app/store.js';
 import { Button } from '../design/Button.js';
 import { TOUCH_QUERY, useMediaQuery } from '../design/media.js';
+import { Switch } from '../design/Switch.js';
 import { en } from '../i18n/en/index.js';
 import { useT } from '../i18n/i18n.js';
 import type { Messages, Phrase } from '../i18n/messages.js';
@@ -459,16 +460,9 @@ export function PracticeControls({
   return (
     <div className="transport no-print">
       {practiceMode && (
-        <label className="check switch">
-          <input
-            ref={practiceRef}
-            type="checkbox"
-            role="switch"
-            checked={practiceMode.on}
-            onChange={(e) => practiceMode.set(e.currentTarget.checked)}
-          />{' '}
+        <Switch ref={practiceRef} checked={practiceMode.on} onChange={practiceMode.set}>
           {t.transport.practiceMode}
-        </label>
+        </Switch>
       )}
       <label className="tempo">
         {t.transport.tempo}
@@ -492,16 +486,9 @@ export function PracticeControls({
       {!oneHanded && (
         <div className="hands">
           {hearOtherHand && (
-            <label className="check switch">
-              <input
-                ref={hearRef}
-                type="checkbox"
-                role="switch"
-                checked={hearOtherHand.on}
-                onChange={(e) => hearOtherHand.set(e.currentTarget.checked)}
-              />{' '}
+            <Switch ref={hearRef} checked={hearOtherHand.on} onChange={hearOtherHand.set}>
               {hearOtherHand.hand === 'L' ? t.transport.hearLeft : t.transport.hearRight}
-            </label>
+            </Switch>
           )}
           <fieldset className="segmented" ref={handsRef}>
             <legend className="visually-hidden">{t.transport.hands}</legend>

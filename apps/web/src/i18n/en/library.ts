@@ -122,6 +122,11 @@ export const library = {
     searching: 'Looking for your piano. Make sure it is turned on.',
     /** The line once a piano is connected; `name` is the first input's name, or `yourPiano`. */
     connected: (name: string) => `${name} is connected. Open a piece and play the red note.`,
+    /** Access lists a piano and no note has come from it yet (issue 252); `name` as for `connected`. */
+    found: (name: string) => `${name} is found but not heard yet. Press a key on it.`,
+    /** After `found`, for a Bluetooth piano in Chrome on Windows: the one cure; `browser` is Chrome. */
+    restart: (browser: string) =>
+      `If nothing changes, turn the piano on, then close every ${browser} window and open ${browser} again.`,
     /** The name used when the connected input has none. */
     yourPiano: 'Your piano',
     /** Access was granted but no piano is connected. */

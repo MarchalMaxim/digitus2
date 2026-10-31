@@ -28,7 +28,7 @@ interface Attached {
  * follows `onstatechange`. Resolves the connection, or rejects with an `AccessRefusal` string.
  *
  * `events.inputs` is called once before the promise resolves, then whenever the connected
- * inputs' names change. `events.note` is called for every merged note, each after the held
+ * inputs' names change. `events.heard` is called for every message an attached input sends. `events.note` is called for every merged note, each after the held
  * pitches were updated; the offs of an input that goes away follow one by one, each with the
  * pitches still held at that point. `close()` stops all events and does not report offs: the
  * keys still down are the caller's to release.
@@ -75,6 +75,7 @@ export async function openMidiAccess(
     // By property assignment: assigning again would replace the handler, never add a second.
     input.onmidimessage = (e) => {
       if (closed || !e.data || attached.get(input.id) !== entry) return;
+      events.heard?.();
       // The key's time (issue 192): the event's, read once for every note in the message.
       const atMs = eventTimeMs(e.timeStamp, performance.now());
       for (const n of entry.parse(e.data)) {

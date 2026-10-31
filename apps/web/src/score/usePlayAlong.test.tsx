@@ -7,7 +7,13 @@ import { DEFAULT_SETTINGS, useAppStore } from '../app/store.js';
 import type * as InstrumentExports from '../audio/instrument.js';
 import { performanceFor } from '../audio/performance.js';
 import { DUR_SLOW_FALLBACK_MS } from '../design/motion.js';
-import { askForPiano, resetPianoForTests, turnOffPiano } from '../midi/piano.js';
+import {
+  askForPiano,
+  pianoHeard,
+  resetPianoForTests,
+  SILENT_AFTER_MS,
+  turnOffPiano,
+} from '../midi/piano.js';
 import type { AccessEvents, OpenedAccess } from '../midi/types.js';
 import { PianoKeyboard } from './PianoKeyboard.js';
 import type { Halo } from './halo.js';
@@ -214,10 +220,19 @@ function connectWith(...names: string[]) {
 }
 const heldNow = () => [...down].sort((a, b) => a - b);
 
-/** The piano connects, as a press of the home line does. */
-async function connect(...names: string[]) {
+/** The piano connects, as a press of the home line does, and nothing has come from it yet. */
+async function connectUnheard(...names: string[]) {
   connectWith(...(names.length > 0 ? names : ['GO:PIANO']));
   await act(() => askForPiano());
+}
+
+/**
+ * The piano connects and is heard (issue 252): a note-off of a key far above any piece here, which
+ * holds nothing and plays nothing, as the first message from a piano whose port receives.
+ */
+async function connect(...names: string[]) {
+  await connectUnheard(...names);
+  act(() => link.events!.note({ on: false, midi: 127 }, heldNow()));
 }
 
 function setNavigator(name: string, value: unknown): void {
@@ -280,6 +295,12 @@ function setup(over: Partial<PlayAlongOptions> = {}, prepare?: (f: Fake) => void
     cues: () => fake.cueAt.mock.calls.map(([sec]) => sec),
   };
 }
+
+/**
+ * The timers the walk has set: every pending timer but the piano store's one silence timer, which
+ * runs exactly while the piano is heard (issue 252).
+ */
+const walkTimers = () => vi.getTimerCount() - (pianoHeard() ? 1 : 0);
 
 /** The hook's result without its store: what the walk shows. */
 function seen(h: { active: boolean; atFirst: boolean; hint: unknown; soundWaits: boolean }) {
@@ -394,13 +415,13 @@ describe('the walk', () => {
     const s = setup();
     s.press(60);
     expect(s.cues()).toEqual([0]); // a chord of two: one key is not the step
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
     s.press(48);
     expect(s.cues()).toEqual([0, 0.5]);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
     s.press(62);
     expect(s.cues()).toEqual([0, 0.5, 1]);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
   });
 
   it('advances once for one note', async () => {
@@ -482,6 +503,45 @@ describe('the walk', () => {
     expect(s.cues()).toEqual([0]);
     s.press(60);
     expect(s.cues()).toEqual([0, 0.5]);
+  });
+
+  it('says the piano is not heard until a note came from it, and the first press proves it', async () => {
+    // A browser can list a piano whose port never receives (issue 252): the walk waits as ever,
+    // and the hint says the piano is not heard yet until its first note.
+    await connectUnheard('GO:PIANO MIDI 1');
+    const s = setup();
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.hook.result.current.hint).toEqual({ count: 2, unheard: true });
+    s.press(48);
+    expect(s.hook.result.current.hint).toEqual({ count: 2 });
+    s.press(60);
+    expect(s.hook.result.current.hint).toBeNull();
+  });
+
+  it('names the browser to open again for a Bluetooth port on Windows Chrome, while not heard', async () => {
+    setNavigator('userAgentData', { platform: 'Windows', brands: [{ brand: 'Google Chrome' }] });
+    try {
+      await connectUnheard('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
+      const s = setup();
+      expect(s.hook.result.current.hint).toEqual({ count: 2, unheard: true, restart: 'Chrome' });
+      s.press(48);
+      expect(s.hook.result.current.hint).toEqual({ count: 2 });
+    } finally {
+      delete (navigator as unknown as Record<string, unknown>).userAgentData;
+    }
+  });
+
+  it('says the piano is not heard again mid-walk after a minute of silence (issue 252)', async () => {
+    await connect('GO:PIANO MIDI 1');
+    const s = setup();
+    s.press(48, 60);
+    s.release(48, 60);
+    expect(s.hook.result.current.hint).toBeNull();
+    s.wait(SILENT_AFTER_MS + 1000);
+    expect(s.hook.result.current.active).toBe(true);
+    expect(s.hook.result.current.hint).toEqual({ count: 1, unheard: true }); // the step [62]
+    s.press(62);
+    expect(s.hook.result.current.hint).toBeNull();
   });
 
   it('shows the hint until the first step is played, and not again', async () => {
@@ -663,7 +723,7 @@ describe('the levels of the held keys', () => {
     s.wait(400); // four fifths of the 500 ms note
     s.release(60);
     expect(s.hook.result.current.levels.get().has(60)).toBe(false);
-    expect(vi.getTimerCount()).toBe(0); // no drain left to wait for
+    expect(walkTimers()).toBe(0); // no drain left to wait for
   });
 
   it('drains a release that came before four fifths of its note', async () => {
@@ -920,10 +980,10 @@ describe('when the walk does not move', () => {
     await connect();
     const s = setup();
     s.press(48);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
     act(() => turnOffPiano());
     s.refresh();
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
     s.wait(1000);
     expect(s.cues()).toEqual([0]);
     expect(s.hook.result.current.levels.get().size).toBe(0);
@@ -1539,7 +1599,7 @@ describe('lost keys, late levels and a faster tempo', () => {
       }),
     );
     s.refresh();
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
     s.wait(1000);
     expect(s.cues()).toEqual([0]);
   });
@@ -1608,7 +1668,7 @@ describe('Practice mode (issue 191)', () => {
     expect(s.fake.cue).toBe(0);
     expect(s.hook.result.current.levels.get().size).toBe(0);
     expect(s.hook.result.current.halo).toBeNull();
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
     s.wait(1000);
     expect(s.cues()).toEqual([0]); // time going by makes no cue
   });
@@ -1998,7 +2058,7 @@ describe('the halo (issue 204)', () => {
     tempo(2);
     s.refresh();
     expect(halo(s)).toBe(first);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(walkTimers()).toBe(0);
   });
 
   it('is ended by a hop to the step the red already waits on', async () => {

@@ -10,17 +10,16 @@ import {
   heldPitches,
   midiPermission,
   midiSupported,
-  HEAL_FIRST_MS,
-  HEAL_MAX_MS,
+  pianoHeard,
   pianoSnapshot,
-  reconnectPiano,
   resetPianoForTests,
   resumePiano,
   SEARCHING_AFTER_MS,
+  SILENT_AFTER_MS,
   subscribeNotes,
   turnOffPiano,
   useHeldPitches,
-  usePianoHealer,
+  usePianoHeard,
   usePianoSnapshot,
 } from './piano.js';
 import { MIDI_LOG_MAX, midiLog, readMidiLog } from './blackBox.js';
@@ -916,112 +915,194 @@ export * from './access.js';`),
   });
 });
 
-describe('the healer: a connection that stays silent is opened again', () => {
-  beforeEach(() => {
+describe('heard: a piano is connected only once a note came', () => {
+  // A browser can list a piano and hand the page a port that never receives (issue 252: Chrome
+  // on Windows keeps a Bluetooth piano's port after the piano was turned off and on, and no page
+  // can make it open the port again). Only a note proves the piano is heard.
+  it('is not heard when access lists the piano, and heard at its first note', async () => {
+    const link = connectWith('GO:PIANO MIDI 1');
+    await askForPiano();
+    expect(status()).toBe('connected');
+    expect(pianoHeard()).toBe(false);
+    link.events!.note({ on: true, midi: 60 }, [60]);
+    expect(pianoHeard()).toBe(true);
+    link.events!.note({ on: false, midi: 60 }, []);
+    expect(pianoHeard()).toBe(true);
+  });
+
+  it('is heard at a note-off too: any note proves the port receives', async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    link.events!.note({ on: false, midi: 60 }, []);
+    expect(pianoHeard()).toBe(true);
+  });
+
+  it('is heard at any message the access reports, a pedal or active sensing', async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    link.events!.heard!();
+    expect(pianoHeard()).toBe(true);
+    // The black box keeps the first note for the first note.
+    expect(readMidiLog().map((e) => e.event)).not.toContain('first note');
+  });
+
+  it('takes no message of an access that is no longer the live one', async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    const old = link.events!;
+    turnOffPiano();
+    connectWith('A');
+    await askForPiano();
+    old.heard!();
+    expect(pianoHeard()).toBe(false);
+  });
+
+  it('is not heard again after Turn off, nor on the next connection until its own note', async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    link.events!.note({ on: true, midi: 60 }, [60]);
+    turnOffPiano();
+    expect(pianoHeard()).toBe(false);
+    const next = connectWith('A');
+    await askForPiano();
+    expect(pianoHeard()).toBe(false);
+    // The old access is dropped: its note proves nothing about the new one.
+    link.events!.note({ on: true, midi: 62 }, [62]);
+    expect(pianoHeard()).toBe(false);
+    next.events!.note({ on: true, midi: 62 }, [62]);
+    expect(pianoHeard()).toBe(true);
+  });
+
+  it('is not heard once the piano left the list, and heard again only at a new note', async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    link.events!.note({ on: true, midi: 60 }, [60]);
+    link.events!.inputs([]);
+    expect(status()).toBe('none');
+    expect(pianoHeard()).toBe(false);
+    link.events!.inputs(['A']);
+    expect(pianoHeard()).toBe(false);
+    link.events!.note({ on: true, midi: 60 }, [60]);
+    expect(pianoHeard()).toBe(true);
+  });
+
+  it('re-renders a reader when it changes, and only then', async () => {
+    const link = connectWith('A');
+    await askForPiano();
+    let renders = 0;
+    const hook = renderHook(() => {
+      renders++;
+      return usePianoHeard();
+    });
+    expect(hook.result.current).toBe(false);
+    const before = renders;
+    act(() => link.events!.note({ on: true, midi: 60 }, [60]));
+    expect(hook.result.current).toBe(true);
+    expect(renders).toBe(before + 1);
+    act(() => link.events!.note({ on: false, midi: 60 }, []));
+    act(() => link.events!.note({ on: true, midi: 64 }, [64]));
+    expect(renders).toBe(before + 1);
+  });
+
+  // Heard once is not heard for good (issue 252): the piano turned off and on while the page holds
+  // the port leaves the port deaf and still listed, so the page tells it only by the silence.
+  describe('and lapses', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({
+        toFake: ['setTimeout', 'clearTimeout', 'performance', 'Date'],
+      });
+    });
+    afterEach(() => {
+      resetPianoForTests();
+      vi.useRealTimers();
+    });
+    const elapse = (ms: number) =>
+      act(async () => {
+        await vi.advanceTimersByTimeAsync(ms);
+      });
+
+    it('waits a minute', () => {
+      expect(SILENT_AFTER_MS).toBe(60_000);
+    });
+
+    it('after a minute with nothing from the piano, and comes back at the next message', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      link.events!.heard!();
+      await elapse(SILENT_AFTER_MS - 1000);
+      expect(pianoHeard()).toBe(true);
+      await elapse(1500);
+      expect(pianoHeard()).toBe(false);
+      expect(status()).toBe('connected');
+      link.events!.heard!();
+      expect(pianoHeard()).toBe(true);
+    });
+
+    it('never while messages keep coming, however long', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      for (let i = 0; i < 8; i++) {
+        link.events!.heard!();
+        await elapse(SILENT_AFTER_MS / 2);
+        expect(pianoHeard()).toBe(true);
+      }
+      // One timer at most, however many messages came.
+      expect(vi.getTimerCount()).toBe(1);
+    });
+
+    it('when the page is shown again after being hidden', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      link.events!.heard!();
+      let hidden = true;
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => (hidden ? 'hidden' : 'visible'),
+      });
+      try {
+        document.dispatchEvent(new Event('visibilitychange'));
+        expect(pianoHeard()).toBe(true); // hidden: nothing is known yet
+        hidden = false;
+        document.dispatchEvent(new Event('visibilitychange'));
+        expect(pianoHeard()).toBe(false);
+        link.events!.heard!();
+        expect(pianoHeard()).toBe(true);
+      } finally {
+        delete (document as unknown as Record<string, unknown>).visibilityState;
+      }
+    });
+
+    it('leaves no timer and no listener after Turn off', async () => {
+      const link = connectWith('A');
+      await askForPiano();
+      link.events!.heard!();
+      expect(vi.getTimerCount()).toBe(1);
+      turnOffPiano();
+      expect(vi.getTimerCount()).toBe(0);
+      connectWith('A');
+      await askForPiano();
+      document.dispatchEvent(new Event('visibilitychange'));
+      expect(vi.getTimerCount()).toBe(0);
+    });
+  });
+
+  it('leaves a silent connection as it is: reopening in the page never makes it hear', async () => {
     vi.useFakeTimers({
       toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout', 'performance', 'Date'],
     });
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  const events = () => readMidiLog().map((e) => e.event);
-
-  it('reopens a connection that heard nothing, silently, and keeps the piano connected', async () => {
-    const link = connectWith('GO:PIANO MIDI 1');
-    await askForPiano();
-    renderHook(() => usePianoHealer(true));
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEAL_FIRST_MS - 1000);
-    });
-    expect(access.open).toHaveBeenCalledTimes(1);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1500);
-    });
-    expect(access.open).toHaveBeenCalledTimes(2);
-    expect(link.closes).toBe(1);
-    expect(status()).toBe('connected');
-    expect(settings().playAlong).toBe(true);
-    // The new access is the one heard: a note on it reaches the listeners, one on the old does not.
-    const heard: number[] = [];
-    subscribeNotes((e) => heard.push(e.midi));
-    link.events!.note({ on: true, midi: 60 }, [60]);
-    expect(heard).toEqual([60]);
-    expect(events()).toEqual(['connect', 'opened', 'reconnect', 'connect', 'opened', 'first note']);
-  });
-
-  it('counts the silence from when the score is ready, not from the page load', async () => {
-    connectWith('GO:PIANO MIDI 1');
-    await askForPiano();
-    // The port opened at page load; the score takes longer than the healer's wait to be ready.
-    const hook = renderHook(({ on }) => usePianoHealer(on), { initialProps: { on: false } });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEAL_FIRST_MS * 2);
-    });
-    hook.rerender({ on: true });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEAL_FIRST_MS - 1000);
-    });
-    expect(access.open).toHaveBeenCalledTimes(1);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1500);
-    });
-    expect(access.open).toHaveBeenCalledTimes(2);
-  });
-
-  it('leaves a connection alone once a note came', async () => {
-    const link = connectWith('A');
-    await askForPiano();
-    renderHook(() => usePianoHealer(true));
-    link.events!.note({ on: true, midi: 60 }, [60]);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEAL_MAX_MS * 3);
-    });
-    expect(access.open).toHaveBeenCalledTimes(1);
-  });
-
-  it('waits twice as long after each reopen, up to the most', async () => {
-    connectWith('A');
-    await askForPiano();
-    renderHook(() => usePianoHealer(true));
-    const opensAfter = async (ms: number) => {
+    try {
+      const link = connectWith('GO:PIANO MIDI 1 (Bluetooth MIDI IN)');
+      await askForPiano();
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(ms);
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000);
       });
-      return access.open.mock.calls.length;
-    };
-    expect(await opensAfter(HEAL_FIRST_MS + 1000)).toBe(2);
-    expect(await opensAfter(HEAL_FIRST_MS * 2 - 1500)).toBe(2);
-    expect(await opensAfter(1500)).toBe(3);
-    expect(await opensAfter(HEAL_MAX_MS + 1000)).toBe(4);
-    expect(await opensAfter(HEAL_MAX_MS + 1000)).toBe(5);
-  });
-
-  it('does nothing while off, or without a connection', async () => {
-    connectWith('A');
-    renderHook(() => usePianoHealer(true));
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEAL_MAX_MS * 2);
-    });
-    expect(access.open).not.toHaveBeenCalled();
-    await askForPiano();
-    cleanup();
-    renderHook(() => usePianoHealer(false));
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEAL_MAX_MS * 2);
-    });
-    expect(access.open).toHaveBeenCalledTimes(1);
-  });
-
-  it('releases the keys held on the old connection, marked lost', async () => {
-    const link = connectWith('A');
-    await askForPiano();
-    link.events!.note({ on: true, midi: 60 }, [60]);
-    const offs: NoteMessage[] = [];
-    subscribeNotes((e) => offs.push(e));
-    reconnectPiano('test');
-    expect(offs).toEqual([{ on: false, midi: 60, lost: true }]);
-    expect(heldPitches()).toEqual([]);
+      expect(access.open).toHaveBeenCalledTimes(1);
+      expect(link.closes).toBe(0);
+      expect(status()).toBe('connected');
+      expect(pianoHeard()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

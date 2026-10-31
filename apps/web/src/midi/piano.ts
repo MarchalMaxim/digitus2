@@ -62,6 +62,31 @@ export function bluetoothFlag(nav: Navigator | undefined = globalThis.navigator)
   return null;
 }
 
+/**
+ * The browser to close and open again while a listed Bluetooth piano is not heard (issue 252):
+ * Chrome on Windows keeps the WinRT port it opened for the life of the browser process, and a
+ * piano turned off and on (or off when the port was opened) leaves that port listed and deaf.
+ * Windows keeps the port listed while the piano is off, so the browser never sees it go, and no
+ * page can make the browser open it again; a new browser process does, with the piano on.
+ * `names` are the connected inputs' names, one of them a Bluetooth port. Null otherwise, on any
+ * other system, and in Edge, which is not measured (its startup boost can keep it running with
+ * every window closed, and then the port stays deaf).
+ */
+export function restartBrowser(
+  names: readonly string[],
+  nav: Navigator | undefined = globalThis.navigator,
+): 'Chrome' | null {
+  if (!names.some((name) => /bluetooth/i.test(name))) return null;
+  return bluetoothFlag(nav)?.startsWith('chrome:') ? 'Chrome' : null;
+}
+
+/**
+ * With nothing from the piano for this long, it is no longer taken as heard (issue 252): a piano
+ * turned off and on while the page holds its port can leave the port deaf and still listed, and
+ * the page can tell that only by the silence. The next key makes it heard again.
+ */
+export const SILENT_AFTER_MS = 60_000;
+
 /** How long a granted request may stay pending before the line says it is looking for the piano. */
 export const SEARCHING_AFTER_MS = 2000;
 /** How often the watcher asks the permission again while the first answer was not `granted`. */
@@ -69,6 +94,18 @@ const SEARCHING_POLL_MS = 1000;
 
 let snapshot: PianoSnapshot | null = null;
 let held: readonly number[] = NO_KEYS;
+/**
+ * A message came from the piano on the live connection since it listed the piano (issue 252): a
+ * key, the pedal, active sensing. A browser can list a piano whose port never receives, so only a
+ * message proves it is heard.
+ */
+let heardNow = false;
+/** When the piano was last heard, in performance.now() ms. */
+let lastHeardAtMs = 0;
+/** The one timer that lets `heardNow` lapse after `SILENT_AFTER_MS` (null when none runs). */
+let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+/** The page's visibility listener, while a connection is live: see `forgetWhenShown`. */
+let visibilityWatched = false;
 /** The lazy connection: null until access resolved, and again after Turn off. */
 let connection: OpenedAccess | null = null;
 /** The request in flight, shared by every press. */
@@ -79,21 +116,16 @@ let pending: Promise<void> | null = null;
  */
 let generation = 0;
 let resumed = false;
-/** Notes heard on the live connection since it opened: none means it may be deaf. */
+/** Notes heard on the live connection since it opened, for the black box. */
 let heard = 0;
-/** When the live connection opened, or was last asked to prove itself, in performance.now() ms. */
+/** When the live connection opened, in performance.now() ms. */
 let openedAtMs = 0;
-/** How long the healer lets a silent connection be before it reopens it (`usePianoHealer`). */
-let healAfterMs = 0;
-
-/** A silent connection is reopened after this long, then after twice that, up to the most. */
-export const HEAL_FIRST_MS = 4000;
-export const HEAL_MAX_MS = 30000;
 /** The watcher's one timer (null when none runs): see `watchForSearching`. */
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const snapshotListeners = new Set<() => void>();
 const heldListeners = new Set<() => void>();
+const heardListeners = new Set<() => void>();
 const noteListeners = new Set<(e: NoteMessage) => void>();
 
 function notify(listeners: ReadonlySet<() => void>): void {
@@ -108,6 +140,7 @@ function subscribeTo(listeners: Set<() => void>) {
 }
 const subscribeSnapshot = subscribeTo(snapshotListeners);
 const subscribeHeld = subscribeTo(heldListeners);
+const subscribeHeard = subscribeTo(heardListeners);
 
 /** The first read decides between `unsupported` and `off`, so a test can set up the browser first. */
 export function pianoSnapshot(): PianoSnapshot {
@@ -140,6 +173,64 @@ export function heldPitches(): readonly number[] {
 /** The held pitches in a component: a MIDI message re-renders only the readers of this. */
 export function useHeldPitches(): readonly number[] {
   return useSyncExternalStore(subscribeHeld, heldPitches, heldPitches);
+}
+
+/**
+ * A message has come from the piano since the browser listed it (issue 252). `connected` says only
+ * that the browser lists an input; this says the input receives.
+ */
+export function pianoHeard(): boolean {
+  return heardNow;
+}
+
+/** Whether the piano is heard, in a component: it re-renders only when that changes. */
+export function usePianoHeard(): boolean {
+  return useSyncExternalStore(subscribeHeard, pianoHeard, pianoHeard);
+}
+
+function setHeard(next: boolean): void {
+  if (next === heardNow) return;
+  heardNow = next;
+  notify(heardListeners);
+}
+
+/** A message came from the piano: heard, until `SILENT_AFTER_MS` passes with none. */
+function markHeard(): void {
+  lastHeardAtMs = performance.now();
+  setHeard(true);
+  if (silenceTimer === null) waitForSilence(SILENT_AFTER_MS);
+}
+
+/** One timer for any number of messages: at its end it waits on for the time still to go. */
+function waitForSilence(ms: number): void {
+  silenceTimer = setTimeout(() => {
+    silenceTimer = null;
+    const left = SILENT_AFTER_MS - (performance.now() - lastHeardAtMs);
+    if (left > 0) waitForSilence(left);
+    else setHeard(false);
+  }, ms);
+}
+
+/** Not heard any more, with nothing waiting to lapse. */
+function forgetHeard(): void {
+  if (silenceTimer !== null) clearTimeout(silenceTimer);
+  silenceTimer = null;
+  setHeard(false);
+}
+
+/**
+ * The page shown again after being hidden (a sleep, another tab): the piano may have been turned
+ * off and on meanwhile, so it is not taken as heard until it is heard again.
+ */
+function forgetWhenShown(): void {
+  if (document.visibilityState === 'visible') forgetHeard();
+}
+
+function watchVisibility(on: boolean): void {
+  if (on === visibilityWatched || typeof document === 'undefined') return;
+  visibilityWatched = on;
+  if (on) document.addEventListener('visibilitychange', forgetWhenShown);
+  else document.removeEventListener('visibilitychange', forgetWhenShown);
 }
 
 /**
@@ -181,11 +272,13 @@ function releaseAll(): void {
 function applyInputs(names: readonly string[]): void {
   if (names.length === 0) {
     setSnapshot('none');
+    forgetHeard();
     releaseAll();
   } else setSnapshot('connected', names);
 }
 
 function applyNote(e: NoteMessage, keys: readonly number[]): void {
+  markHeard();
   setHeld(keys);
   emitNote(e);
 }
@@ -258,6 +351,9 @@ function connect(asking: boolean, reason: string): Promise<void> {
     ports: (ports: readonly PortReport[]) => {
       if (live()) midiLog('ports', { ports });
     },
+    heard: () => {
+      if (live()) markHeard();
+    },
   };
   pending = (async () => {
     try {
@@ -270,6 +366,8 @@ function connect(asking: boolean, reason: string): Promise<void> {
       }
       connection = opened;
       heard = 0;
+      forgetHeard();
+      watchVisibility(true);
       openedAtMs = performance.now();
       midiLog('opened', { reason });
       // Access without an input list yet is access without a piano.
@@ -327,6 +425,8 @@ export function turnOffPiano(): void {
     console.error(error);
   }
   releaseAll();
+  forgetHeard();
+  watchVisibility(false);
   setSnapshot('off');
   useAppStore.getState().setSettings({ playAlong: false });
 }
@@ -344,64 +444,6 @@ export async function resumePiano(): Promise<void> {
   // The reader may have pressed or turned it off while the permission was queried.
   if (!useAppStore.getState().settings.playAlong || pianoSnapshot().status !== 'off') return;
   await connect(false, 'page load');
-}
-
-/**
- * Opens the connection again, silently: the old access is closed (its held keys released, marked
- * `lost`) and a new one asked for, as a Turn off and a press would, with no prompt (the permission
- * is granted) and the setting left on. The status stays `connected` meanwhile unless the new access
- * lists no piano. A browser can hand a page an access whose piano port stays silent although the
- * piano plays (Chrome on Windows over Bluetooth MIDI): a new access hears it. Does nothing without a
- * live connection or while one is being opened.
- */
-export function reconnectPiano(reason: string): void {
-  if (!connection || pending) return;
-  midiLog('reconnect', { reason, heard });
-  generation++;
-  const closing = connection;
-  connection = null;
-  try {
-    closing.close();
-  } catch (error) {
-    console.error(error);
-  }
-  releaseAll();
-  void connect(false, reason);
-}
-
-/**
- * While `on` (a score is open and ready, and the piano connected), a connection that has heard no
- * note for `HEAL_FIRST_MS` since it opened, or since `on` if that came later, is reopened (`reconnectPiano`), then again after twice as long,
- * up to `HEAL_MAX_MS`, until a note comes. The page shown again after being hidden (a sleep, another
- * tab) asks the connection to prove itself the same way. Nothing shows: a reader who is not playing
- * loses nothing by a reopen, and one whose keys go unheard is heard after the next.
- */
-export function usePianoHealer(on: boolean): void {
-  useEffect(() => {
-    if (!on) return;
-    healAfterMs = HEAL_FIRST_MS;
-    // The reader can play only once the score is on screen: a port opened at page load, while the
-    // score was still loading, has been silent only since then.
-    const onAtMs = performance.now();
-    const tick = setInterval(() => {
-      if (!connection || pending || heard > 0 || document.hidden) return;
-      if (performance.now() - Math.max(openedAtMs, onAtMs) < healAfterMs) return;
-      healAfterMs = Math.min(healAfterMs * 2, HEAL_MAX_MS);
-      reconnectPiano('silent');
-    }, 1000);
-    const shown = () => {
-      if (document.hidden || !connection) return;
-      heard = 0;
-      openedAtMs = performance.now();
-      healAfterMs = HEAL_FIRST_MS;
-      midiLog('shown again');
-    };
-    document.addEventListener('visibilitychange', shown);
-    return () => {
-      clearInterval(tick);
-      document.removeEventListener('visibilitychange', shown);
-    };
-  }, [on]);
 }
 
 /**
@@ -423,7 +465,13 @@ export function resetPianoForTests(): void {
   openedAtMs = 0;
   snapshot = null;
   held = NO_KEYS;
+  if (silenceTimer !== null) clearTimeout(silenceTimer);
+  silenceTimer = null;
+  watchVisibility(false);
+  heardNow = false;
+  lastHeardAtMs = 0;
   noteListeners.clear();
   notify(snapshotListeners);
   notify(heldListeners);
+  notify(heardListeners);
 }
